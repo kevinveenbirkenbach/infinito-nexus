@@ -22,6 +22,7 @@ else:
     try:
         import numpy as np
         import simpleaudio as sa
+        import shutil, subprocess, tempfile, wave as wavmod
         class Sound:
             """
             Sound effects for the application with enhanced complexity.
@@ -64,9 +65,48 @@ else:
                 return np.concatenate([w1[:-fade_len], middle, w2[fade_len:]])
 
             @staticmethod
+            def _play_via_system(wave: np.ndarray):
+                # Write a temp WAV and play it via available system player
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+                    fname = f.name
+                try:
+                    with wavmod.open(fname, "wb") as w:
+                        w.setnchannels(1)
+                        w.setsampwidth(2)
+                        w.setframerate(Sound.fs)
+                        w.writeframes(wave.tobytes())
+                    def run(cmd):
+                        return subprocess.run(
+                            cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                        ).returncode == 0
+                    # Preferred order: PipeWire → PulseAudio → ALSA → ffplay
+                    if shutil.which("pw-play") and run(["pw-play", fname]): return
+                    if shutil.which("paplay")  and run(["paplay",  fname]): return
+                    if shutil.which("aplay")   and run(["aplay", "-q", fname]): return
+                    if shutil.which("ffplay")  and run(["ffplay", "-autoexit", "-nodisp", fname]): return
+                    # Last resort if no system player exists: simpleaudio
+                    play_obj = sa.play_buffer(wave, 1, 2, Sound.fs)
+                    play_obj.wait_done()
+                finally:
+                    try: os.unlink(fname)
+                    except Exception: pass
+
+            @staticmethod
             def _play(wave: np.ndarray):
-                play_obj = sa.play_buffer(wave, 1, 2, Sound.fs)
-                play_obj.wait_done()
+                # Switch via env: system | simpleaudio | auto (default)
+                backend = os.getenv("INFINITO_AUDIO_BACKEND", "auto").lower()
+                if backend == "system":
+                    return Sound._play_via_system(wave)
+                if backend == "simpleaudio":
+                    play_obj = sa.play_buffer(wave, 1, 2, Sound.fs)
+                    play_obj.wait_done()
+                    return
+                # auto: try simpleaudio first; if it fails, fall back to system
+                try:
+                    play_obj = sa.play_buffer(wave, 1, 2, Sound.fs)
+                    play_obj.wait_done()
+                except Exception:
+                    Sound._play_via_system(wave)
 
             @classmethod
             def play_infinito_intro_sound(cls):

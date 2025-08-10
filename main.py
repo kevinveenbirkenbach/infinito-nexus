@@ -96,30 +96,117 @@ def play_start_intro():
     Sound.play_infinito_intro_sound()
 
 
+from multiprocessing import Process, get_start_method, set_start_method
+import shutil, subprocess, tempfile, wave, math, struct
 import time
+
+def _call_sound(method_name: str):
+   # Re-import inside child to (re)init audio backend cleanly under 'spawn'
+    from module_utils.sounds import Sound as _Sound
+    getattr(_Sound, method_name)()
+
+def _play_in_child(method_name: str) -> bool:
+    p = Process(target=_call_sound, args=(method_name,))
+    p.start(); p.join()
+    if p.exitcode != 0:
+        try:
+            # Sichtbare Diagnose, wenn das Kind crasht/fehlschlägt
+            print(color_text(f"[sound] child '{method_name}' exitcode={p.exitcode}", Fore.YELLOW))
+        except Exception:
+            pass
+    return p.exitcode == 0
+
+def _beep_fallback(times: int = 1, pause: float = 0.2):
+    for _ in range(times):
+        print("\a", end="", flush=True)
+        time.sleep(pause)
+        
+_BEEP_WAV_PATH = None
+def _ensure_beep_wav(freq=880.0, dur=0.25, rate=44100):
+    """Erzeugt einmalig eine kleine WAV-Datei für den System-Fallback."""
+    global _BEEP_WAV_PATH
+    if _BEEP_WAV_PATH:
+        return _BEEP_WAV_PATH
+    n = int(dur * rate)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+        with wave.open(f, "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(rate)
+            for i in range(n):
+                s = int(32767 * math.sin(2*math.pi*freq*i/rate))
+                w.writeframes(struct.pack("<h", s))
+        _BEEP_WAV_PATH = f.name
+    return _BEEP_WAV_PATH
+
+def _system_beep():
+    """Spielt einen kurzen Systemton über vorhandene Tools; fällt auf \a zurück."""
+    # 1) libcanberra (PipeWire/PulseAudio): am zuverlässigsten
+    if shutil.which("canberra-gtk-play"):
+        subprocess.run(["canberra-gtk-play", "--id", "dialog-warning", "--volume", "1"],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return
+    # 2) paplay (PulseAudio/PipeWire)
+    if shutil.which("paplay"):
+        ogg = "/usr/share/sounds/freedesktop/stereo/dialog-warning.oga"
+        if os.path.exists(ogg):
+            subprocess.run(["paplay", ogg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return
+        wav = _ensure_beep_wav()
+        subprocess.run(["paplay", wav], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return
+    # 3) aplay (ALSA)
+    if shutil.which("aplay"):
+        wav = _ensure_beep_wav()
+        subprocess.run(["aplay", "-q", wav], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return
+    # 4) Fallback: Terminal-Bell
+    _beep_fallback(1, 0.1)
 
 def failure_with_warning_loop(no_signal, sound_enabled, alarm_timeout=60):
     """
-    On failure: Plays warning sound in a loop.
-    Aborts after alarm_timeout seconds and exits with code 1.
+    Plays a warning sound in a loop until timeout; Ctrl+C stops earlier.
+    Sound playback is isolated in a child process to avoid segfaulting the main process.
     """
+    use_beep = False
     if not no_signal:
-        Sound.play_finished_failed_sound()
+        if not _play_in_child("play_finished_failed_sound"):
+            use_beep = True
+            _system_beep()
+
     print(color_text("Warning: command failed. Press Ctrl+C to stop warnings.", Fore.RED))
     start = time.monotonic()
     try:
-        while True:
-            if not no_signal:
-                Sound.play_warning_sound()
-            if time.monotonic() - start > alarm_timeout:
-                print(color_text(f"Alarm aborted after {alarm_timeout} seconds.", Fore.RED))
-                sys.exit(1)
+        while time.monotonic() - start <= alarm_timeout:
+            if no_signal:
+                time.sleep(0.5)
+                continue
+
+            if use_beep:
+                _system_beep()
+                time.sleep(0.8)
+            else:
+                ok = _play_in_child("play_warning_sound")
+                if not ok:
+                    use_beep = True      # ab jetzt Beep nutzen
+                    _system_beep()
+                    time.sleep(0.8)
+        print(color_text(f"Alarm aborted after {alarm_timeout} seconds.", Fore.RED))
+        sys.exit(1)
     except KeyboardInterrupt:
         print(color_text("Warnings stopped by user.", Fore.YELLOW))
-
-
+        sys.exit(1)
 
 if __name__ == "__main__":
+    # IMPORTANT: use 'spawn' so the child re-initializes audio cleanly
+    try:
+        if get_start_method(allow_none=True) != "spawn":
+            set_start_method("spawn", force=True)
+    except RuntimeError:
+        pass
+
+    # Prefer system audio backend by default (prevents simpleaudio segfaults in child processes)
+    os.environ.setdefault("INFINITO_AUDIO_BACKEND", "system")
+
+    
     # Parse flags
     sound_enabled = '--sound' in sys.argv and (sys.argv.remove('--sound') or True)
     no_signal = '--no-signal' in sys.argv and (sys.argv.remove('--no-signal') or True)
@@ -138,19 +225,6 @@ if __name__ == "__main__":
         except Exception:
             print(color_text("Invalid --alarm-timeout value!", Fore.RED))
             sys.exit(1)
-            
-    # Segfault handler
-    def segv_handler(signum, frame):
-        if not no_signal:
-            Sound.play_finished_failed_sound()
-            try:
-                while True:
-                    Sound.play_warning_sound()
-            except KeyboardInterrupt:
-                pass
-        print(color_text("Segmentation fault detected. Exiting.", Fore.RED))
-        sys.exit(1)
-    signal.signal(signal.SIGSEGV, segv_handler)
 
     # Play intro melody if requested
     if sound_enabled:
@@ -185,6 +259,7 @@ if __name__ == "__main__":
         print(color_text("  --log             Log all proxied command output to logfile.log", Fore.YELLOW))
         print(color_text("  --git-clean       Remove all Git-ignored files before running", Fore.YELLOW))
         print(color_text("  --infinite        Run the proxied command in an infinite loop", Fore.YELLOW))
+        print(color_text("  --alarm-timeout   Stop warnings and exit after N seconds (default: 60)", Fore.YELLOW))
         print(color_text("  -h, --help        Show this help message and exit", Fore.YELLOW))
         print()
         print(color_text("Available commands:", Style.BRIGHT))
