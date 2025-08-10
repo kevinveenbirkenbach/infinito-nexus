@@ -97,7 +97,6 @@ def play_start_intro():
 
 
 from multiprocessing import Process, get_start_method, set_start_method
-import shutil, subprocess, tempfile, wave, math, struct
 import time
 
 def _call_sound(method_name: str):
@@ -116,61 +115,14 @@ def _play_in_child(method_name: str) -> bool:
             pass
     return p.exitcode == 0
 
-def _beep_fallback(times: int = 1, pause: float = 0.2):
-    for _ in range(times):
-        print("\a", end="", flush=True)
-        time.sleep(pause)
-        
-_BEEP_WAV_PATH = None
-def _ensure_beep_wav(freq=880.0, dur=0.25, rate=44100):
-    """Erzeugt einmalig eine kleine WAV-Datei für den System-Fallback."""
-    global _BEEP_WAV_PATH
-    if _BEEP_WAV_PATH:
-        return _BEEP_WAV_PATH
-    n = int(dur * rate)
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
-        with wave.open(f, "wb") as w:
-            w.setnchannels(1); w.setsampwidth(2); w.setframerate(rate)
-            for i in range(n):
-                s = int(32767 * math.sin(2*math.pi*freq*i/rate))
-                w.writeframes(struct.pack("<h", s))
-        _BEEP_WAV_PATH = f.name
-    return _BEEP_WAV_PATH
-
-def _system_beep():
-    """Spielt einen kurzen Systemton über vorhandene Tools; fällt auf \a zurück."""
-    # 1) libcanberra (PipeWire/PulseAudio): am zuverlässigsten
-    if shutil.which("canberra-gtk-play"):
-        subprocess.run(["canberra-gtk-play", "--id", "dialog-warning", "--volume", "1"],
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        return
-    # 2) paplay (PulseAudio/PipeWire)
-    if shutil.which("paplay"):
-        ogg = "/usr/share/sounds/freedesktop/stereo/dialog-warning.oga"
-        if os.path.exists(ogg):
-            subprocess.run(["paplay", ogg], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return
-        wav = _ensure_beep_wav()
-        subprocess.run(["paplay", wav], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        return
-    # 3) aplay (ALSA)
-    if shutil.which("aplay"):
-        wav = _ensure_beep_wav()
-        subprocess.run(["aplay", "-q", wav], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        return
-    # 4) Fallback: Terminal-Bell
-    _beep_fallback(1, 0.1)
-
 def failure_with_warning_loop(no_signal, sound_enabled, alarm_timeout=60):
     """
     Plays a warning sound in a loop until timeout; Ctrl+C stops earlier.
     Sound playback is isolated in a child process to avoid segfaulting the main process.
     """
-    use_beep = False
     if not no_signal:
-        if not _play_in_child("play_finished_failed_sound"):
-            use_beep = True
-            _system_beep()
+        # Try the failure jingle once; ignore failures
+        _play_in_child("play_finished_failed_sound")
 
     print(color_text("Warning: command failed. Press Ctrl+C to stop warnings.", Fore.RED))
     start = time.monotonic()
@@ -180,15 +132,10 @@ def failure_with_warning_loop(no_signal, sound_enabled, alarm_timeout=60):
                 time.sleep(0.5)
                 continue
 
-            if use_beep:
-                _system_beep()
+            ok = _play_in_child("play_warning_sound")
+            # If audio stack is broken, stay silent but avoid busy loop
+            if not ok:
                 time.sleep(0.8)
-            else:
-                ok = _play_in_child("play_warning_sound")
-                if not ok:
-                    use_beep = True      # ab jetzt Beep nutzen
-                    _system_beep()
-                    time.sleep(0.8)
         print(color_text(f"Alarm aborted after {alarm_timeout} seconds.", Fore.RED))
         sys.exit(1)
     except KeyboardInterrupt:
