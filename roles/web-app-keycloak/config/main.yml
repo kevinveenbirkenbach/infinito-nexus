@@ -1,4 +1,4 @@
-import_realm:         True                                # If True realm will be imported. If false skip.
+import_realm:         True     # If True realm will be imported. If false skip.
 features:
   matomo:             true
   css:                true
@@ -6,7 +6,12 @@ features:
   ldap:               true
   central_database:   true
   recaptcha:          true
-  logout:             true
+
+  # Doesn't make sense to activate logout page for keycloak, because the logout page 
+  # anyhow should be included via iframe in keycloak.
+  # The JS is also messing with the keycloak config fields
+  # @todo optimize the JS
+  logout:             false                             
 server:
   csp:
     flags:

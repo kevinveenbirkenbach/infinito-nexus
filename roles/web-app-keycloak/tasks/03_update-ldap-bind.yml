@@ -16,8 +16,8 @@
     {{ keycloak_kcadm_path }} config credentials \
       --server {{ keycloak_server_internal_url }} \
       --realm master \
-      --user {{ keycloak_administrator_username }} \
-      --password {{ keycloak_administrator_password }}
+      --user {{ keycloak_master_api_user_name }} \
+      --password {{ keycloak_master_api_user_password }}
 
 - name: Retrieve LDAP component ID
   shell: |
@@ -37,6 +37,6 @@
     {{ keycloak_kcadm_path }} update components/{{ ldap_component.stdout }} \
       -r {{ keycloak_realm }} \
       -s 'config.bindCredential=["{{ new_bind_password }}"]'
-  no_log: true
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   register: update_bind
   changed_when: update_bind.rc == 0

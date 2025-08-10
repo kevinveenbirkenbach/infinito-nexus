@@ -1,5 +1,10 @@
 INFINITO_ENVIRONMENT:     "production"  # Possible values: production, development
 
+# If true, sensitive credentials will be masked or hidden from all Ansible task logs
+# Recommendet to set to true
+# @todo needs to be implemented everywhere
+MASK_CREDENTIALS_IN_LOGS: true
+
 HOST_CURRENCY:            "EUR"
 HOST_TIMEZONE:            "UTC"
 

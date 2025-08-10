@@ -15,8 +15,8 @@
     {{ keycloak_kcadm_path }} config credentials \
       --server {{ keycloak_server_internal_url }} \
       --realm master \
-      --user {{ keycloak_administrator_username }} \
-      --password {{ keycloak_administrator_password }}
+      --user {{ keycloak_master_api_user_name }} \
+      --password {{ keycloak_master_api_user_password }}
 
 # LDAP Source
 - name: Get ID of LDAP storage provider
@@ -66,8 +66,8 @@
     {{ keycloak_kcadm_path }} config credentials \
       --server {{ keycloak_server_internal_url }} \
       --realm master \
-      --user {{ keycloak_administrator_username }} \
-      --password {{ keycloak_administrator_password }}
+      --user {{ keycloak_master_api_user_name }} \
+      --password {{ keycloak_master_api_user_password }}
 
 - name: Render user-profile JSON for SSH key
   template:

@@ -833,20 +833,8 @@
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "desktop-secret",
       "secret": "{{oidc.client.secret}}",
-      {%- set redirect_uris = [] %}
-      {%- for domain_application_id, domain in domains.items() %}
-        {%- if applications | get_app_conf(domain_application_id, 'features.oauth2', False) or applications | get_app_conf(domain_application_id, 'features.oidc', False) %}
-          {%- if domain is string %}
-            {%- set _ = redirect_uris.append(WEB_PROTOCOL ~ '://' ~ domain ~ '/*') %}
-          {%- else %}
-            {%- for d in domain %}
-              {%- set _ = redirect_uris.append(WEB_PROTOCOL ~ '://' ~ d ~ '/*') %}
-            {%- endfor %}
-          {%- endif %}
-        {%- endif %}
-      {%- endfor %}
-      
-      "redirectUris": {{ redirect_uris | tojson }},
+      {# The following line should be covered by 02_update_client_redirects.yml #}
+      "redirectUris": {{ domains | redirect_uris(applications, WEB_PROTOCOL) | tojson }},
       "webOrigins": [
         "{{ WEB_PROTOCOL }}://*.{{primary_domain}}"
       ],

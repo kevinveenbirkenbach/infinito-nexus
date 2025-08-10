@@ -1,11 +1,14 @@
 ---
-- name: "create import files for {{application_id}}"
-  include_tasks: 01_import.yml
+#- name: "create import files for {{application_id}}"
+#  include_tasks: 01_import.yml
+#
+#- name: "load docker, db and proxy for {{application_id}}"
+#  include_role: 
+#    name: cmp-db-docker-proxy
 
-- name: "load docker, db and proxy for {{application_id}}"
-  include_role: 
-    name: cmp-db-docker-proxy
+- name: "Apply client redirects without realm import"
+  include_tasks: 02_update_client_redirects.yml
 
 # Deactivated temporary. Import now via realm.yml
 #- name: Implement SSH Public Key Attribut
-#  include_tasks: attributes/ssh_public_key.yml
+#  include_tasks: 03_ssh_public_key.yml
