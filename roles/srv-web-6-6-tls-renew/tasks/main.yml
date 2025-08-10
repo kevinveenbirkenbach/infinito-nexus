@@ -1,31 +1,26 @@
-- name: install certbot
-  pacman:
-    name:
-      - certbot-nginx
-    state: present
-  when: run_once_srv_web_6_6_tls_renew is not defined
+- block:
+    - name: install certbot
+      pacman:
+        name:
+          - certbot-nginx
+        state: present
 
-- name: configure srv-web-6-6-tls-renew.infinito.service
-  template: 
-    src:  srv-web-6-6-tls-renew.service.j2
-    dest: /etc/systemd/system/srv-web-6-6-tls-renew.infinito.service
-  notify: reload certbot service
-  when: run_once_srv_web_6_6_tls_renew is not defined
+    - name: configure srv-web-6-6-tls-renew.infinito.service
+      template: 
+        src:  srv-web-6-6-tls-renew.service.j2
+        dest: /etc/systemd/system/srv-web-6-6-tls-renew.infinito.service
+      notify: reload certbot service
 
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-  when: run_once_srv_web_6_6_tls_renew is not defined
+    - name: "set 'service_name' to '{{ role_name }}'"
+      set_fact:
+        service_name: "{{ role_name }}"
 
-- name: "include role for sys-timer for {{service_name}}"
-  include_role:
-    name: sys-timer
-  vars:
-    on_calendar:  "{{on_calendar_renew_lets_encrypt_certificates}}"
-    persistent:   "true"
-  when: run_once_srv_web_6_6_tls_renew is not defined
-
-- name: run the nginx_certbot tasks once
-  set_fact:
-    run_once_srv_web_6_6_tls_renew: true
+    - name: "include role for sys-timer for {{service_name}}"
+      include_role:
+        name: sys-timer
+      vars:
+        on_calendar:  "{{on_calendar_renew_lets_encrypt_certificates}}"
+        persistent:   "true"
+    
+    - include_tasks: utils/run_once.yml
   when: run_once_srv_web_6_6_tls_renew is not defined
