@@ -1,13 +1,13 @@
 oidc:
-  email_by_username:      true                  # If true, then the mail is set by the username. If wrong then the OIDC user email is used
-  enable_user_creation:   true                  # Users will be created if not existing
-domain:                   "{{primary_domain}}"  # The main domain from which mails will be send \ email suffix behind @                              
+  email_by_username:      true                    # If true, then the mail is set by the username. If wrong then the OIDC user email is used
+  enable_user_creation:   true                    # Users will be created if not existing
+domain:                   "{{ primary_domain }}"  # The main domain from which mails will be send \ email suffix behind @                              
 features:
   matomo:                 true
   css:                    false
-  port-ui-desktop:        true                  # Deactivated mailu iframe loading until keycloak supports it
+  port-ui-desktop:        true                    # Deactivated mailu iframe loading until keycloak supports it
   oidc:                   true
-  central_database:       false                 # Deactivate central database for mailu, I don't know why the database deactivation is necessary
+  central_database:       false                   # Deactivate central database for mailu, I don't know why the database deactivation is necessary
   logout:                 true
 server:
   domains:

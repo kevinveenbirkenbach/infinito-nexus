@@ -2,11 +2,17 @@
 
 # The following env file will just be used from the dedicated mariadb container
 # and not the central one
-- name: "For '{{ application_id }}': Create {{database_env}}"
-  template: 
-    src: "env/{{database_type}}.env.j2"
-    dest: "{{database_env}}"
-  notify: docker compose up
+- block:
+  - name: "Ensure env dir exists: {{ docker_compose.directories.env }}"
+    ansible.builtin.file:
+      path: "{{ docker_compose.directories.env }}"
+      state: directory
+      mode: "0755"
+  - name: "For '{{ application_id }}': Create {{database_env}}"
+    template: 
+      src: "env/{{database_type}}.env.j2"
+      dest: "{{database_env}}"
+    notify: docker compose up
   when: not applications | get_app_conf(application_id, 'features.central_database', False)
 
 - name: "For '{{ application_id }}': Create central database"

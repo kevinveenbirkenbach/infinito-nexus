@@ -10,10 +10,10 @@
     - "{{ DOCKER_VARS_FILE }}"            # Important to load docker variables first so that database can use them
     - "{{ cmp_db_docker_vars_file_db }}"  # Important to load them before docker role so that backup can use them
 
-- name: "For '{{ application_id }}': Load cmp-docker-oauth2"
-  include_role: 
-    name: cmp-docker-oauth2
-
 - name: "For '{{ application_id }}': Load central RDBMS"
   include_role:
     name: cmp-rdbms
+
+- name: "For '{{ application_id }}': Load cmp-docker-oauth2"
+  include_role: 
+    name: cmp-docker-oauth2

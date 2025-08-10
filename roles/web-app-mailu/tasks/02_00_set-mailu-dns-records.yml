@@ -2,7 +2,7 @@
   include_vars: vars/mailu-dns.yml
 
 - name: Generate DKIM public key
-  include_tasks: generate-and-read-dkim.yml
+  include_tasks: 02_0A_generate-and-read-dkim.yml
 
 - name: "Set A record for mail server"
   community.general.cloudflare_dns:

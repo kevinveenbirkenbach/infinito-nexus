@@ -1,46 +1,41 @@
 ---
-- name: "load docker, db and proxy for {{application_id}}"
-  include_role: 
-    name: cmp-db-docker-proxy
-  when: run_once_web_app_mailu is not defined
+- block:
+    - name: "load docker, db and proxy for {{application_id}}"
+      include_role: 
+        name: cmp-db-docker-proxy
 
-- name: "Include the srv-proxy-6-6-tls-deploy role"
-  include_role:
-    name: srv-proxy-6-6-tls-deploy
-  when: run_once_web_app_mailu is not defined
+    - name: "Include the srv-proxy-6-6-tls-deploy role"
+      include_role:
+        name: srv-proxy-6-6-tls-deploy
 
-- name: Flush docker service handlers
-  meta: flush_handlers
-  when: run_once_web_app_mailu is not defined
+    - name: Flush docker service handlers
+      meta: flush_handlers
 
-- name: "Create Mailu accounts"
-  include_tasks: create-mailu-user.yml
-  vars:
-    mailu_compose_dir:        "{{ docker_compose.directories.instance }}"
-    mailu_domain:             "{{ primary_domain }}"
-    mailu_api_base_url:       "http://127.0.0.1:8080/api/v1"
-    mailu_global_api_token:   "{{ applications | get_app_conf(application_id, 'credentials.api_token') }}"
-    mailu_action: >-
-      {{
-        (
-          'administrator' in (item.value.get('roles', []))
-        )
-        | ternary('admin','user')
-      }}
-    mailu_user_key:           "{{ item.key }}"
-    mailu_user_name:          "{{ item.value.username }}"
-    mailu_password:           "{{ item.value.password }}"
-    mailu_token_ip:           "{{ item.value.ip | default('') }}"
-  loop:                       "{{ users | dict2items }}"
-  loop_control:
-    loop_var: item
-  when: run_once_web_app_mailu is not defined
-  
-- name: Set Mailu DNS records
-  include_tasks: set-mailu-dns-records.yml
-  when: dns_provider == 'cloudflare'
+    - name: "Create Mailu accounts"
+      include_tasks: 01_00_create-mailu-user.yml
+      vars:
+        mailu_compose_dir:        "{{ docker_compose.directories.instance }}"
+        mailu_domain:             "{{ primary_domain }}"
+        mailu_api_base_url:       "http://127.0.0.1:8080/api/v1"
+        mailu_global_api_token:   "{{ applications | get_app_conf(application_id, 'credentials.api_token') }}"
+        mailu_action: >-
+          {{
+            (
+              'administrator' in (item.value.get('roles', []))
+            )
+            | ternary('admin','user')
+          }}
+        mailu_user_key:           "{{ item.key }}"
+        mailu_user_name:          "{{ item.value.username }}"
+        mailu_password:           "{{ item.value.password }}"
+        mailu_token_ip:           "{{ item.value.ip | default('') }}"
+      loop:                       "{{ users | dict2items }}"
+      loop_control:
+        loop_var: item
 
-- name: Run the docker_mailu roles once
-  set_fact:
-    run_once_web_app_mailu: true
+    - name: Set Mailu DNS records
+      include_tasks: 02_00_set-mailu-dns-records.yml
+      when: dns_provider == 'cloudflare'
+
+    - include_tasks: utils/run_once.yml
   when: run_once_web_app_mailu is not defined
