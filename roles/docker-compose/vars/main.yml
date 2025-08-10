@@ -1,1 +1,1 @@
-docker_compose_variable_file: "{{ role_path }}/vars/docker-compose.yml"
+docker_compose_variable_file:             "{{ role_path }}/vars/docker-compose.yml"

@@ -3,12 +3,16 @@
   args:
     chdir:        "{{ docker_compose.directories.instance }}"
   register:       docker_ps
-  changed_when:   (docker_ps.stdout | trim) == ""
+  changed_when: >
+    (docker_ps.stdout | trim) == ""
   # The failed when catches the condition when an docker compose file will be dynamicly build after the file routine
+  # Also if an .env file isn't present
   failed_when: >
     docker_ps.rc != 0
-    and
-    'no configuration file provided: not found' not in (docker_ps.stderr | default(''))
+    and (
+      (docker_ps.stderr | default(''))
+      | regex_search('(no configuration file provided|no such file or directory|env file .* not found)') is none
+    )
   when: >
     not (
       docker_compose_template.changed | default(false)
