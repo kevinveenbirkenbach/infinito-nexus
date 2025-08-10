@@ -1,5 +1,3 @@
-bkp_docker_to_local_pkg: backup-docker-to-local
-
 # Mapping logic for backup-docker-to-local CLI arguments
 #
 # - bkp_docker_to_local_database_routine:    All service names where backup.database_routine is set (for --database-containers)
