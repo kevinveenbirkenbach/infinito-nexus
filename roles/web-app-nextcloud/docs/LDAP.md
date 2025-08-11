@@ -9,7 +9,7 @@ To make LDAP users available for sharing **without requiring initial login**, fo
 Check if the user exists in the configured LDAP directory:
 
 ```bash
-docker exec -u www-data nextcloud-application php occ ldap:search <username>
+docker exec -u www-data nextcloud php occ ldap:search <username>
 ```
 
 If the user is found, proceed to the next step.
@@ -19,13 +19,13 @@ If the user is found, proceed to the next step.
 Manually trigger a sync to register the user in the Nextcloud database:
 
 ```bash
-docker exec -u www-data nextcloud-application php occ ldap:check-user --update <username>
+docker exec -u www-data nextcloud php occ ldap:check-user --update <username>
 ```
 
 **Example:**
 
 ```bash
-docker exec -u www-data nextcloud-application php occ ldap:check-user --update viktoriakaffanke
+docker exec -u www-data nextcloud php occ ldap:check-user --update viktoriakaffanke
 ```
 
 Once executed, the user becomes fully available in the system—for sharing, group membership, and permissions—even without logging in.
@@ -35,7 +35,7 @@ Once executed, the user becomes fully available in the system—for sharing, gro
 To synchronize account data (display name, mail address, group memberships, etc.) for **all users** currently known to Nextcloud:
 
 ```bash
-docker exec -u www-data nextcloud-application php occ user:sync-account-data
+docker exec -u www-data nextcloud php occ user:sync-account-data
 ```
 
 This step is especially useful after modifying LDAP attributes or group memberships, ensuring up-to-date data in the Nextcloud UI and permission system.
