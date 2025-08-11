@@ -3,14 +3,17 @@
 application_id:                                 "web-app-nextcloud"                                           # Application identifier
 container_port:                                 80
 
+# Networking
+domain:                                         "{{ domains | get_domain(application_id) }}"                  # Public domain at which Nextcloud will be accessable
+http_port:                                      "{{ ports.localhost.http[application_id] }}"                  # Port at which nextcloud is reachable in the local network
+
 # Database
 database_password:                              "{{ applications | get_app_conf(application_id, 'credentials.database_password', True)}}"
 database_type:                                  "mariadb"                                                     # Database flavor
 nextcloud_plugins_enabled:                      "{{ applications | get_app_conf(application_id, 'plugins_enabled', True) }}"
 
-# Networking
-domain:                                         "{{ domains | get_domain(application_id) }}"                  # Public domain at which Nextcloud will be accessable
-http_port:                                      "{{ ports.localhost.http[application_id] }}"                  # Port at which nextcloud is reachable in the local network
+# Docker
+docker_compose_flush_handlers:                  false # Deactivate flushing because first some routines have to be done
 
 nextcloud_administrator_username:               "{{ applications | get_app_conf(application_id, 'users.administrator.username', True) }}"
 
