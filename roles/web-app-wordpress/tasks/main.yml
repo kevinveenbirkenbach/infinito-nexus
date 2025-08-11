@@ -25,13 +25,23 @@
     dest: "{{ host_msmtp_conf }}"
   notify: docker compose up
 
+- name: Check if wp-config.php exists in WordPress
+  command: docker exec -u {{ wordpress_user }} {{ wordpress_container }} test -f {{ wordpress_docker_html_path }}/wp-config.php
+  register: wp_config_file_exists
+  changed_when: false
+  failed_when: false
+
+- name: Patch WordPress wp-config.php with updated DB credentials
+  include_tasks: 01_patch_config.yml
+  when: wp_config_file_exists.rc == 0
+
 - name: "Install wordpress"
-  include_tasks: install.yml
+  include_tasks: 02_install.yml
 
 - name: "Install and activate WordPress plugins"
   block:
     - name: "Iterate through WordPress plugins"
-      include_tasks: plugin.yml
+      include_tasks: 03_enable_plugin.yml
       loop: "{{ wordpress_plugins }}"
       loop_control:
         label: "{{ item.key }}"

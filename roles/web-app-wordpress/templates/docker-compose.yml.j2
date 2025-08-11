@@ -2,7 +2,7 @@
   application:
     {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ wordpress_custom_image }}
-    container_name: {{ wordpress_name }}
+    container_name: {{ wordpress_container }}
     build:
       context: .
     ports:

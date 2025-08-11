@@ -2,23 +2,28 @@
   command: >
     docker exec --user root {{ moodle_container }}
     sed -i "s/^\$CFG->dbhost *= *.*/\$CFG->dbhost = '{{ database_host }}';/" {{ moodle_config }}
+  notify: docker compose restart
 
 - name: Update DB name
   command: >
     docker exec --user root {{ moodle_container }}
     sed -i "s/^\$CFG->dbname *= *.*/\$CFG->dbname = '{{ database_name }}';/" {{ moodle_config }}
+  notify: docker compose restart
 
 - name: Update DB user
   command: >
     docker exec --user root {{ moodle_container }}
     sed -i "s/^\$CFG->dbuser *= *.*/\$CFG->dbuser = '{{ database_username }}';/" {{ moodle_config }}
+  notify: docker compose restart
 
 - name: Update DB password
   command: >
     docker exec --user root {{ moodle_container }}
     sed -i "s/^\$CFG->dbpass *= *.*/\$CFG->dbpass = '{{ database_password }}';/" {{ moodle_config }}
+  notify: docker compose restart
 
 - name: Update CFG->wwwroot via sed in container
   command: >
     docker exec --user root {{ moodle_container }}
     sed -i -E "s|^(\$CFG->wwwroot[[:space:]]*=[[:space:]]*).*$|\1'{{ domains | get_url(application_id, WEB_PROTOCOL) }}';|" {{ moodle_config }}
+  notify: docker compose restart

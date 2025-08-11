@@ -13,7 +13,7 @@ features:
   port-ui-desktop:    true
   oidc:               true
   central_database:   true
-  logout:   true
+  logout:             true
 server:
   csp:
     flags:

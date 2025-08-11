@@ -1,6 +1,6 @@
 - name: "Run WordPress core install via WP CLI"
   command: >
-    docker-compose exec -T -u www-data application
+    docker exec -u {{ wordpress_user }} {{ wordpress_container }}
     wp core install
       --url="{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
       --title="{{ applications | get_app_conf(application_id, 'title', True) }}"
