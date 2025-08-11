@@ -6,6 +6,7 @@
   git:
     repo:       "{{ docker_repository_address }}"
     dest:       "{{ docker_repository_path }}"
+    version:    "{{ docker_repository_branch | default('main') }}"
     depth:      1
     update:     yes
     recursive:  yes

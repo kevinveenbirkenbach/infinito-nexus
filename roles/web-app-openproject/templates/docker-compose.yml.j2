@@ -2,7 +2,7 @@
 x-op-app: &app
   logging:
     driver: journald
-  image: {{custom_openproject_image}}
+  image: {{ openproject_custom_image }}
   build:
     context: .
     dockerfile: Dockerfile
@@ -16,7 +16,7 @@ x-op-app: &app
 
   proxy:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: {{custom_openproject_image}}
+    image: {{ openproject_custom_image }}
     container_name: {{ openproject_proxy_name }}
     command: "./docker/prod/proxy"
     ports:
@@ -27,7 +27,7 @@ x-op-app: &app
       - web
     volumes:
       - "data:/var/openproject/assets"
-      - "{{dummy_volume}}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
+      - "{{ openproject_dummy_volume }}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
 
   web:
     <<: *app
@@ -45,7 +45,7 @@ x-op-app: &app
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
     volumes:
       - "data:/var/openproject/assets"
-      - "{{dummy_volume}}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
+      - "{{ openproject_dummy_volume }}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
       
   worker:
     <<: *app
@@ -60,7 +60,7 @@ x-op-app: &app
         condition: service_started
     volumes:
       - "data:/var/openproject/assets"
-      - "{{dummy_volume}}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
+      - "{{ openproject_dummy_volume }}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
 
 
   cron:
@@ -76,7 +76,7 @@ x-op-app: &app
         condition: service_started
     volumes:
       - "data:/var/openproject/assets"
-      - "{{dummy_volume}}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
+      - "{{ openproject_dummy_volume }}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
 
   seeder:
     <<: *app
@@ -90,7 +90,7 @@ x-op-app: &app
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     volumes:
       - "data:/var/openproject/assets"
-      - "{{dummy_volume}}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
+      - "{{ openproject_dummy_volume }}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:

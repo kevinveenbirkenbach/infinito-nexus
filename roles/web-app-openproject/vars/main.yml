@@ -1,18 +1,22 @@
-application_id:               "web-app-openproject"
-docker_repository_address:    "https://github.com/opf/openproject-deploy"
-database_type:                "postgres"
-docker_pull_git_repository:            true
-openproject_version:          "{{ applications | get_app_conf(application_id, 'docker.services.web.version', True) }}"
-openproject_image:            "{{ applications | get_app_conf(application_id, 'docker.services.web.image', True) }}"
-openproject_volume:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-openproject_web_name:         "{{ applications | get_app_conf(application_id, 'docker.services.web.name', True) }}"
-openproject_seeder_name:      "{{ applications | get_app_conf(application_id, 'docker.services.seeder.name', True) }}"
-openproject_cron_name:        "{{ applications | get_app_conf(application_id, 'docker.services.cron.name', True) }}"
-openproject_proxy_name:       "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name', True) }}"
-openproject_worker_name:      "{{ applications | get_app_conf(application_id, 'docker.services.worker.name', True) }}"
+# General
+application_id:                 "web-app-openproject"
 
-openproject_cache_name: "{{ applications | get_app_conf(application_id, 'docker.services.cache.name', True) }}"
-openproject_cache_image: "{{ applications
+# Database
+database_type:                  "postgres"
+
+# Open Project Specific
+openproject_version:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version', True) }}"
+openproject_image:              "{{ applications | get_app_conf(application_id, 'docker.services.web.image', True) }}"
+openproject_volume:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
+openproject_web_name:           "{{ applications | get_app_conf(application_id, 'docker.services.web.name', True) }}"
+openproject_seeder_name:        "{{ applications | get_app_conf(application_id, 'docker.services.seeder.name', True) }}"
+openproject_cron_name:          "{{ applications | get_app_conf(application_id, 'docker.services.cron.name', True) }}"
+openproject_proxy_name:         "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name', True) }}"
+openproject_worker_name:        "{{ applications | get_app_conf(application_id, 'docker.services.worker.name', True) }}"
+
+# Open Project Cache
+openproject_cache_name:         "{{ applications | get_app_conf(application_id, 'docker.services.cache.name', True) }}"
+openproject_cache_image:        "{{ applications
      | get_app_conf(application_id, 'docker.services.cache.image')
      or applications
        | get_app_conf('svc-db-memcached', 'docker.services.memcached.image')
@@ -25,12 +29,12 @@ openproject_cache_version: "{{ applications
   }}"
 
       
-openproject_plugins_folder:  "{{docker_compose.directories.volumes}}plugins/"
+openproject_plugins_folder:   "{{docker_compose.directories.volumes}}plugins/"
 
-custom_openproject_image:     "custom_openproject"
+openproject_custom_image:     "custom_openproject"
 
 # The following volume doesn't have a practcical function. It just exist to prevent the creation of unnecessary anonymous volumes
-dummy_volume:                 "{{docker_compose.directories.volumes}}dummy_volume"
+openproject_dummy_volume:     "{{docker_compose.directories.volumes}}dummy_volume"
 
 openproject_rails_settings:
   email_delivery_method:      "smtp"
@@ -46,3 +50,9 @@ openproject_filters:
 
   users: "{{ '(memberOf=cn=openproject-users,' ~ ldap.dn.ou.roles ~ ')' 
        if applications | get_app_conf(application_id, 'ldap.filters.users', True) else '' }}"
+
+# Docker
+docker_repository_branch:       "stable/{{ openproject_version }}"
+docker_repository_address:      "https://github.com/opf/openproject-deploy"
+docker_pull_git_repository:     true
+docker_compose_flush_handlers:  false

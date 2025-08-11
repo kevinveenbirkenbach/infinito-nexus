@@ -11,3 +11,4 @@ openresty_container:            "{{ applications | get_app_conf(application_id, 
 
 # Docker
 docker_compose_flush_handlers:  true
+docker_pull_git_repository:     false # Deactivated here to don't inhire this

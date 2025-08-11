@@ -1,0 +1,2 @@
+# Docker
+docker_pull_git_repository: false # Deactivated here to don't inhire this
