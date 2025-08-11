@@ -7,6 +7,7 @@
     public: false
     # Explicit set to guaranty that application_id will not be overwritten.
     # Should be anyhow the default case
+  when: run_once_svc_prx_openresty is not defined
 
 - name: "reset (if enabled)"
   include_tasks: 02_reset.yml

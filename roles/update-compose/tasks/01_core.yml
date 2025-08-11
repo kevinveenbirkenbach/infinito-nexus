@@ -17,7 +17,9 @@
 - name: "Update Docker Images"
   include_role:
     name: update-docker
-  when: docker_compose_directory_stat.stat.exists
+  when:
+    - docker_compose_directory_stat.stat.exists
+    - run_once_update_docker is not defined
 
 - name: "Check if yay is installed"
   command: which yay
