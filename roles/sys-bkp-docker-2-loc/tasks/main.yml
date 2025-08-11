@@ -1,39 +1,11 @@
 - block:
-    - include_tasks: 01_pkgmgr_routines.yml
-      when: backup_docker_to_local_folder is not defined
-
-    - name: "reset (if enabled)"
-      include_tasks: 02_reset.yml
-      when: mode_reset | bool
-
-    - name: configure sys-bkp-docker-2-loc-everything.infinito.service
-      template: 
-        src: sys-bkp-docker-2-loc-everything.service.j2
-        dest: /etc/systemd/system/sys-bkp-docker-2-loc-everything.infinito.service
-      notify: reload sys-bkp-docker-2-loc-everything.infinito.service
-
-    - name: configure sys-bkp-docker-2-loc.infinito.service
-      template: 
-        src: sys-bkp-docker-2-loc.service.j2
-        dest: /etc/systemd/system/sys-bkp-docker-2-loc.infinito.service
-      notify: reload sys-bkp-docker-2-loc.infinito.service
-
-    - name: "set 'service_name' to '{{ role_name }}'"
-      set_fact:
-        service_name: "{{ role_name }}"
-
-    - name: "include role for sys-timer for {{service_name}}"
-      include_role:
-        name: sys-timer
-      vars:
-        on_calendar:  "{{on_calendar_backup_docker_to_local}}"
-
-    - include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: 
     - run_once_sys_bkp_docker_2_loc is not defined
     - database_enabled | bool
 
-- name: "include 03_seed-database-to-backup.yml"
-  include_tasks: 03_seed-database-to-backup.yml
+- name: "include 04_seed-database-to-backup.yml"
+  include_tasks: 04_seed-database-to-backup.yml
   when:
     - database_enabled | bool

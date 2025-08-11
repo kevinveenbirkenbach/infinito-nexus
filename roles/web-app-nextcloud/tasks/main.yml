@@ -52,7 +52,7 @@
   when: nextcloud_plugins_enabled
 
 - name: Load system configuration
-  include_tasks: 03_system.yml
+  include_tasks: 05_system.yml
 
 - name: Add missing database indices in Nextcloud
   command: >

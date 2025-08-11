@@ -1,60 +1,8 @@
-- name: Create Docker network for MariaDB
-  docker_network:
-    name: "{{ mariadb_network_name }}"
-    state: present
-    ipam_config:
-      - subnet: "{{ mariadb_subnet }}"
+- block:
+  - include_tasks: 01_core.yml
+  - include_tasks: utils/run_once.yml
   when: run_once_svc_db_mariadb is not defined
-
-- name: install MariaDB
-  docker_container:
-    name: "{{ mariadb_name }}"
-    image: "{{ mariadb_image }}:{{ mariadb_version}}"
-    detach: yes
-    env:
-      MARIADB_ROOT_PASSWORD:  "{{ mariadb_root_pwd }}"
-      MARIADB_AUTO_UPGRADE:   "1"
-    networks:
-      - name: "{{ mariadb_network_name }}"
-    volumes:
-      - "{{ mariadb_volume }}:/var/lib/mysql"
-    published_ports:
-      - "127.0.0.1:{{ mariadb_port }}:3306" # can be that this will be removed if all applications use sockets
-    command: "--transaction-isolation=READ-COMMITTED --binlog-format=ROW" #for nextcloud
-    restart_policy: "{{ DOCKER_RESTART_POLICY }}"
-    healthcheck:
-      test: "/usr/bin/mariadb --user=root --password={{ mariadb_root_pwd }} --execute \"SHOW DATABASES;\""
-      interval: 10s
-      timeout: 5s
-      retries: 18
-  when: run_once_svc_db_mariadb is not defined
-  register: setup_mariadb_container_result
-
-- name: install python-mysqlclient
-  pacman: 
-    name: python-mysqlclient
-    state: present
-  when: run_once_svc_db_mariadb is not defined
-
-- name: "Wait until the MariaDB container with hostname '{{ mariadb_name }}' is healthy"
-  community.docker.docker_container_info:
-    name: "{{ mariadb_name }}"
-  register: db_info
-  until:
-  - db_info.container is defined
-  - db_info.container.State.Health.Status == "healthy"
-  retries: 30
-  delay: 5
-  when:
-    - setup_mariadb_container_result is defined
-    - setup_mariadb_container_result.changed
-    - run_once_svc_db_mariadb is not defined
 
 - name: "Initialize database for '{{ database_name }}'"
-  include_tasks: init.yml
+  include_tasks: 02_init.yml
   when: "{{ mariadb_init }}"
-
-- name: run the docker_mariadb tasks once
-  set_fact:
-    run_once_svc_db_mariadb: true
-  when: run_once_svc_db_mariadb is not defined

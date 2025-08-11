@@ -3,8 +3,15 @@
   include_role: 
     name: cmp-db-docker-proxy
 
-- name: Update database credentials
-  include_tasks: database.yml
+- name: Check if config.php exists in EspoCRM
+  command: docker exec --user root {{ espocrm_name }} test -f {{ espocrm_config_file }}
+  register: config_file_exists
+  changed_when: false
+  failed_when: false
+
+- name: Patch EspoCRM config.php with updated DB credentials
+  include_tasks: 01_patch_config.yml
+  when: config_file_exists.rc == 0
 
 - name: Flush handlers to make DB available before password reset
   meta: flush_handlers

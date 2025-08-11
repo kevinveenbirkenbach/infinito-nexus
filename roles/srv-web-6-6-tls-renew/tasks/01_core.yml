@@ -1,0 +1,22 @@
+- name: install certbot
+  pacman:
+    name:
+      - certbot-nginx
+    state: present
+
+- name: configure srv-web-6-6-tls-renew.infinito.service
+  template: 
+    src:  srv-web-6-6-tls-renew.service.j2
+    dest: /etc/systemd/system/srv-web-6-6-tls-renew.infinito.service
+  notify: reload certbot service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{service_name}}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar:  "{{on_calendar_renew_lets_encrypt_certificates}}"
+    persistent:   "true"

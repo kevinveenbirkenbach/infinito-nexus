@@ -1,0 +1,49 @@
+- name: Include openresty
+  # Outside of run_once block is necessary for handler loading
+  # Otherwise the when: condition from the block is added to the handlers
+  # Inside openresty their is a validation that it doesn't run multiple times
+  include_role:
+    name: svc-prx-openresty
+    public: false
+    # Explicit set to guaranty that application_id will not be overwritten.
+    # Should be anyhow the default case
+
+- name: "reset (if enabled)"
+  include_tasks: 02_reset.yml
+  when: mode_reset | bool
+  
+- name: Ensure nginx configuration directories are present
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{nginx.user}}"
+    group: "{{nginx.user}}"
+    mode: '0755'
+    recurse: yes
+  loop: >
+    {{
+      [ nginx.directories.configuration ] +
+      ( nginx.directories.http.values() | list ) +
+      [ nginx.directories.streams ] 
+    }}
+
+- name: Ensure nginx data storage directories are present
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    owner: "{{nginx.user}}"
+    group: "{{nginx.user}}"
+    mode:  '0755'
+  loop: >
+    {{ nginx.directories.data.values() | list }}
+  
+- name: "Include tasks to create cache directories"
+  include_tasks: 03_cache_directories.yml
+
+- name: create nginx config file
+  template: 
+    src:  nginx.conf.j2 
+    dest: "{{ nginx.files.configuration }}"
+  notify: restart openresty
+  

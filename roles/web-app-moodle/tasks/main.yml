@@ -3,8 +3,21 @@
   include_role: 
     name: cmp-db-docker-proxy
 
+- name: Check if config.php exists
+  command: docker exec --user root {{ moodle_container }} test -f {{ moodle_config }}
+  register: config_file_exists
+  changed_when: false
+  failed_when: false
+
+- name: Check if config.php exists
+  command: docker exec --user root {{ moodle_container }} test -f {{ moodle_config }}
+  register: config_file_exists
+  changed_when: false
+  failed_when: false
+
 - name: "Update database credentials"
   include_tasks: 01_patch_config.yml
+  when: config_file_exists.rc == 0
 
 - name: flush docker service
   meta: flush_handlers

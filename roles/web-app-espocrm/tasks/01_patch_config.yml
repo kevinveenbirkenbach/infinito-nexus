@@ -1,0 +1,23 @@
+- name: Update DB host
+  command: >
+    docker exec --user root {{ espocrm_name }}
+    sed -i "s/'host' => .*/'host' => '{{ database_host }}',/" {{ espocrm_config_file }}
+  notify: docker compose up
+
+- name: Update DB name
+  command: >
+    docker exec --user root {{ espocrm_name }}
+    sed -i "s/'dbname' => .*/'dbname' => '{{ database_name }}',/" {{ espocrm_config_file }}
+  notify: docker compose up
+
+- name: Update DB user
+  command: >
+    docker exec --user root {{ espocrm_name }}
+    sed -i "s/'user' => .*/'user' => '{{ database_username }}',/" {{ espocrm_config_file }}
+  notify: docker compose up
+
+- name: Update DB password
+  command: >
+    docker exec --user root {{ espocrm_name }}
+    sed -i "s/'password' => .*/'password' => '{{ database_password }}',/" {{ espocrm_config_file }}
+  notify: docker compose up

@@ -1,0 +1,23 @@
+- name: Update DB host
+  command: >
+    docker exec --user {{ friendica_user }} {{ friendica_container }}
+    sed -ri "s/('hostname'\s*=>\s*')[^']*(',)/\1{{ database_host }}:{{ database_port }}\2/" {{ friendica_config_file }}
+  notify: docker compose up
+
+- name: Update DB name
+  command: >
+    docker exec --user {{ friendica_user }} {{ friendica_container }}
+    sed -ri "s/('database'\s*=>\s*')[^']*(',)/\1{{ database_name }}\2/" {{ friendica_config_file }}
+  notify: docker compose up
+
+- name: Update DB user
+  command: >
+    docker exec --user {{ friendica_user }} {{ friendica_container }}
+    sed -ri "s/('username'\s*=>\s*')[^']*(',)/\1{{ database_username }}\2/" {{ friendica_config_file }}
+  notify: docker compose up
+
+- name: Update DB password
+  command: >
+    docker exec --user {{ friendica_user }} {{ friendica_container }}
+    sed -ri "s/('password'\s*=>\s*')[^']*(',)/\1{{ database_password }}\2/" {{ friendica_config_file }}
+  notify: docker compose up

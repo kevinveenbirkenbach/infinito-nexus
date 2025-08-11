@@ -1,0 +1,26 @@
+- name: Load docker compose vars
+  include_vars:
+    file: roles/docker-compose/vars/docker-compose.yml
+    name: mig_docker_compose
+
+- name: Set roles volume variable
+  set_fact:
+    mig_roles_meta_volume:  "{{ mig_docker_compose.docker_compose.directories.volumes }}/roles/"
+  
+- name: Set roles list variable
+  set_fact:
+    mig_roles_meta_list:    "{{ mig_roles_meta_volume }}list.json"
+
+- name: "load docker, proxy for '{{application_id}}'"
+  include_role:
+    name: cmp-docker-proxy
+
+- name: Create tree
+  command: "infinito build tree --no-signal --alarm-timeout 0 -s {{  mig_roles_meta_volume }}"
+  when: 
+    - mig_build_data
+
+- name: Create roles list
+  command: "infinito build roles_list --no-signal --alarm-timeout 0 -o {{ mig_roles_meta_list }}"
+  when: 
+    - mig_build_data
