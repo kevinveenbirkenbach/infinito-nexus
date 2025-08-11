@@ -4,7 +4,7 @@
   register: ssh_key
 
 - name: Generate a SSH key for root if it does not exist
-  ansible.builtin.openssh_keypair:
+  community.crypto.openssh_keypair:
     path: "/root/.ssh/id_rsa"
     type: rsa
     size: 4096

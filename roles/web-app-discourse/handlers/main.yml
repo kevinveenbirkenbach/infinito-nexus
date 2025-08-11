@@ -1,6 +1,6 @@
 ---
 - name: "stop and remove discourse container if it exist"
-  docker_container:
+  community.docker.docker_container:
     name: "{{ discourse_container }}"
     state: absent
   register: container_action

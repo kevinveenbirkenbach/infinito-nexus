@@ -1,5 +1,5 @@
 - name: Create Docker network for PostgreSQL
-  docker_network:
+  community.docker.docker_network:
     name: "{{ postgres_network_name }}"
     state: present
     ipam_config:

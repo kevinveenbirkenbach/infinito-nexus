@@ -1,13 +1,13 @@
 
 - name: Create Docker network for MariaDB
-  docker_network:
+  community.docker.docker_network:
     name: "{{ mariadb_network_name }}"
     state: present
     ipam_config:
       - subnet: "{{ mariadb_subnet }}"
 
 - name: install MariaDB
-  docker_container:
+  community.docker.docker_container:
     name: "{{ mariadb_name }}"
     image: "{{ mariadb_image }}:{{ mariadb_version}}"
     detach: yes

@@ -9,7 +9,7 @@
     name: docker-compose
 
 - name: Create Docker network for Collabora
-  docker_network:
+  community.docker.docker_network:
     name: svc-db-mariadb
     state: present
     ipam_config:
