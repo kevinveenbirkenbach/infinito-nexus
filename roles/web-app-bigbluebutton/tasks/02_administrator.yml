@@ -1,8 +1,23 @@
+- name: "Wait until Greenlight is reachable via Nginx"
+  uri:
+    url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+    validate_certs: true
+    status_code: 200
+    return_content: true
+  register: greenlight_http
+  until:
+    - greenlight_http.status == 200
+    - "'Greenlight' in greenlight_http.content or 'Sign in' in greenlight_http.content"
+  retries: 30
+  delay: 5
+  changed_when: false
+
 - block:
     - name: "Create default admin"
       command:
-        cmd: docker compose exec greenlight \
-             bundle exec rake admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password }}']
+        cmd: >
+            docker compose exec greenlight
+            bundle exec rake admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password }}']
         chdir: "{{ docker_compose.directories.instance }}"
       register: admin_creation_result
       # Treat exit codes 0 (created) and 2 (already exists) as success

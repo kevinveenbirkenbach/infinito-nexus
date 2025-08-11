@@ -40,24 +40,6 @@
 - name: flush docker service
   meta: flush_handlers
 
-- name: "Get greenlight container name"
-  shell: |
-    docker compose ps -q greenlight
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  register: greenlight_id
-
-- name: "Wait until BigBlueButton (greenlight) is running"
-  shell: |
-    docker inspect --format='{{'{{'}}.State.Status{{'}}'}}' {{ greenlight_id.stdout }}
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  register: bbb_state
-  until: bbb_state.stdout.strip() == "running"
-  retries: 30
-  delay: 5
-  changed_when: false
-
 - name: "Setup administrator"
   include_tasks: "02_administrator.yml"
 
