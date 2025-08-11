@@ -38,14 +38,14 @@
       matomo:     "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
       port_ui:    "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"
 
-- name: "Activate Global CSS for {{domain}}"
+- name: "Activate Corporate CSS for {{domain}}"
   include_role:
     name: srv-web-7-7-inj-css
   when: 
     - inj_enabled.css
     - run_once_srv_web_7_7_inj_css is not defined
 
-- name: "Activate Global Matomo Tracking for {{domain}}"
+- name: "Activate Matomo Tracking for {{domain}}"
   include_role:
     name: srv-web-7-7-inj-matomo
   when: inj_enabled.matomo

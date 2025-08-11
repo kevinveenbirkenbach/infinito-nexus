@@ -22,7 +22,6 @@ galaxy_info:
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   documentation: "https://docs.infinito.nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-
 dependencies:
   - srv-web-7-4-core
   - sys-cln-domains

@@ -26,10 +26,3 @@ galaxy_info:
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/docker"
 
-dependencies:
-  - sys-bkp-docker-2-loc
-  - user-administrator
-  - sys-hlth-docker-container
-  - sys-hlth-docker-volumes
-  - sys-rpr-docker-soft
-  - sys-rpr-docker-hard

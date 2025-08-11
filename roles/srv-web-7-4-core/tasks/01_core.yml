@@ -1,3 +1,10 @@
+- name: Include health dependencies
+  include_role:
+    name: "{{ item }}"
+  loop:
+    - sys-hlth-webserver
+    - sys-hlth-csp
+
 - name: Include openresty
   # Outside of run_once block is necessary for handler loading
   # Otherwise the when: condition from the block is added to the handlers
