@@ -1,32 +1,31 @@
-- name: Install certbundle
-  include_role:
-    name: pkgmgr-install
-  vars:
-    package_name: certbundle
-  when: run_once_san_certs is not defined
+- block:
+    - name: Install certbundle
+      include_role:
+        name: pkgmgr-install
+      vars:
+        package_name: certbundle
 
-- name: Generate SAN certificate with certbundle
-  command: >-
-    certbundle
-    --domains "{{ current_play_domains_all | join(',') }}"
-    --certbot-email "{{ users.administrator.email }}"
-    --certbot-acme-challenge-method "{{ certbot_acme_challenge_method }}"
-    --chunk-size 100
-    {% if certbot_acme_challenge_method != 'webroot' %}
-    --certbot-credentials-file "{{ certbot_credentials_file }}"
-    --certbot-dns-propagation-seconds "{{ certbot_dns_propagation_wait_seconds }}"
-    {% else %}
-    --letsencrypt-webroot-path "{{ letsencrypt_webroot_path }}"
-    {% endif %}
-    {{ '--mode-test' if mode_test | bool else '' }}
-  register: certbundle_result
-  changed_when: "'Certificate not yet due for renewal' not in certbundle_result.stdout"
-  failed_when: >
-    certbundle_result.rc != 0
-    and 'too many certificates' not in certbundle_result.stderr
-  when: run_once_san_certs is not defined
+    - name: Generate SAN certificate with certbundle
+      command: >-
+        certbundle
+        --domains "{{ current_play_domains_all | join(',') }}"
+        --certbot-email "{{ users.administrator.email }}"
+        --certbot-acme-challenge-method "{{ certbot_acme_challenge_method }}"
+        --chunk-size 100
+        {% if certbot_acme_challenge_method != 'webroot' %}
+        --certbot-credentials-file "{{ certbot_credentials_file }}"
+        --certbot-dns-propagation-seconds "{{ certbot_dns_propagation_wait_seconds }}"
+        {% else %}
+        --letsencrypt-webroot-path "{{ letsencrypt_webroot_path }}"
+        {% endif %}
+        {{ '--mode-test' if mode_test | bool else '' }}
+      register: certbundle_result
+      changed_when: "'Certificate not yet due for renewal' not in certbundle_result.stdout"
+      failed_when: >
+        certbundle_result.rc != 0
+        and 'too many certificates' not in certbundle_result.stderr
 
-- name: run the san tasks once
-  set_fact:
-    run_once_san_certs: true
+    - name: run the san tasks once
+      set_fact:
+        run_once_san_certs: true
   when: run_once_san_certs is not defined
