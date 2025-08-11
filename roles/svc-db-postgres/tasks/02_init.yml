@@ -9,7 +9,7 @@
 
 # 1) Create the database
 - name: "Create database: {{ database_name }}"
-  postgresql_db:
+  community.postgresql.postgresql_db:
     name: "{{ database_name }}"
     state: present
     login_user: postgres
@@ -19,7 +19,7 @@
 
 # 2) Create the database user (with password)
 - name: "Create database user: {{ database_username }}"
-  postgresql_user:
+  community.postgresql.postgresql_user:
     name:           "{{ database_username }}"
     password:       "{{ database_password }}"
     db:             "{{ database_name }}"
@@ -31,7 +31,7 @@
 
 # 3) Enable LOGIN for the role (removes NOLOGIN)
 - name: "Enable login for role {{ database_username }}"
-  postgresql_query:
+  community.postgresql.postgresql_query:
     db: postgres
     login_user: postgres
     login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
@@ -43,7 +43,7 @@
 
 # 4) Grant ALL privileges on all tables in the public schema
 - name: "Grant ALL privileges on tables in public schema to {{ database_username }}"
-  postgresql_privs:
+  community.postgresql.postgresql_privs:
     db:     "{{ database_name }}"
     role:   "{{ database_username }}"
     objs:   ALL_IN_SCHEMA
@@ -58,7 +58,7 @@
 
 # 5) Grant ALL privileges at the database level
 - name: "Grant all privileges on database {{ database_name }} to {{ database_username }}"
-  postgresql_privs:
+  community.postgresql.postgresql_privs:
     db:    "{{ database_name }}"
     role:  "{{ database_username }}"
     type:  database
@@ -71,7 +71,7 @@
 
 # 6) Grant USAGE/CREATE on schema and set default privileges
 - name: "Set comprehensive schema privileges for {{ database_username }}"
-  postgresql_query:
+  community.postgresql.postgresql_query:
     db: "{{ database_name }}"
     login_user: postgres
     login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
