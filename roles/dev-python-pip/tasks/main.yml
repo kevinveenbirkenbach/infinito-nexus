@@ -1,6 +1,6 @@
 ---
 - name: python pip install
-  pacman:
+  community.general.pacman:
     name: python-pip
     state: present
   when: run_once_dev_python_pip is not defined

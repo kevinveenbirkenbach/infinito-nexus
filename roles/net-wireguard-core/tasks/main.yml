@@ -1,5 +1,5 @@
 - name: install wireguard for Arch
-  pacman: 
+  community.general.pacman: 
     name:   wireguard-tools
     state:  present
   when: ansible_os_family == "Archlinux"

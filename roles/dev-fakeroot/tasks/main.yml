@@ -1,6 +1,6 @@
 ---
 - name: Install fakeroot
-  pacman:
+  community.general.pacman:
     name: fakeroot
     state: present
   when: run_once_dev_fakeroot is not defined

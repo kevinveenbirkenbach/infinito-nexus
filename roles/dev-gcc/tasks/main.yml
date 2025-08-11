@@ -1,6 +1,6 @@
 ---
 - name: Install GCC
-  pacman:
+  community.general.pacman:
     name: gcc
     state: present
     update_cache: yes

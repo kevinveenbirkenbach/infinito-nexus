@@ -30,7 +30,7 @@
   register: setup_mariadb_container_result
 
 - name: install python-mysqlclient
-  pacman: 
+  community.general.pacman: 
     name: python-mysqlclient
     state: present
 

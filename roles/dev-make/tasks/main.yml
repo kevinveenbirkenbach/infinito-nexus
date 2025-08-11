@@ -1,4 +1,4 @@
 - name: install make
-  pacman:
+  community.general.pacman:
     name: make
     state: present

@@ -17,6 +17,6 @@
   delay: 5
 
 - name: install python-psycopg2
-  pacman: 
+  community.general.pacman: 
     name: python-psycopg2
     state: present

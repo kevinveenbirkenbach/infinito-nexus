@@ -1,6 +1,6 @@
 ---
 - name: python-yaml install
-  pacman:
+  community.general.pacman:
     name: python-yaml
     state: present
   when: run_once_dev_python_yaml is not defined

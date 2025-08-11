@@ -1,5 +1,5 @@
 - name: docker & docker compose install
-  pacman:
+  community.general.pacman:
     name: ['docker','docker-compose']
     state: present
   notify: docker restart

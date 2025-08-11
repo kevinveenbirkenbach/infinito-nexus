@@ -1,11 +1,11 @@
 - name: install certbot
-  pacman:
+  community.general.pacman:
     name: certbot
     state: present
   when: run_once_srv_web_7_7_certbot is not defined
 
 - name: install certbot DNS plugin
-  pacman:
+  community.general.pacman:
     name: "certbot-dns-{{ certbot_acme_challenge_method }}"
     state: present
   when:

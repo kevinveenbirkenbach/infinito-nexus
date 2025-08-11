@@ -1,4 +1,4 @@
 - name: install postfix
-  pacman:
+  community.general.pacman:
     name: postfix
     state: present

@@ -10,7 +10,7 @@
         - telegram_chat_id     # The Telegram chat ID to send messages to
 
 - name: install curl
-  pacman: 
+  community.general.pacman: 
     name: curl
     state: present
 
