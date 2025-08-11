@@ -14,7 +14,10 @@
     name: web-svc-cdn
     public: false
   # ATM just the Logout is using the CDN.
-  when: inj_enabled.logout and application_id != 'web-svc-cdn'
+  when: 
+    - inj_enabled.logout
+    - application_id != 'web-svc-cdn'
+    - run_once_web_svc_cdn is not defined
 
 - name: Overwritte CDN handlers with neutral handlers
   ansible.builtin.include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
@@ -25,7 +28,6 @@
     label: "{{ item }}"
   vars:
     handler_role_name: "{{ item }}"
-
 
 - name: Set inj_enabled dictionary
   set_fact:
@@ -39,7 +41,9 @@
 - name: "Activate Global CSS for {{domain}}"
   include_role:
     name: srv-web-7-7-inj-css
-  when: inj_enabled.css
+  when: 
+    - inj_enabled.css
+    - run_once_srv_web_7_7_inj_css is not defined
 
 - name: "Activate Global Matomo Tracking for {{domain}}"
   include_role:

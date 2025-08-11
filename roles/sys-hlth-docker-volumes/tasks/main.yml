@@ -1,36 +1,4 @@
-- name: "create {{health_docker_volumes_folder}}"
-  file:
-    path: "{{health_docker_volumes_folder}}"
-    state: directory
-    mode: 0755
-  when: run_once_sys_hlth_docker_volumes is not defined
-
-- name: create sys-hlth-docker-volumes.sh
-  copy:
-    src: sys-hlth-docker-volumes.sh
-    dest: "{{health_docker_volumes_folder}}sys-hlth-docker-volumes.sh"
-  when: run_once_sys_hlth_docker_volumes is not defined
-
-- name: create sys-hlth-docker-volumes.infinito.service
-  template:
-    src:  sys-hlth-docker-volumes.service.j2
-    dest: /etc/systemd/system/sys-hlth-docker-volumes.infinito.service
-  notify: reload sys-hlth-docker-volumes.infinito.service
-  when: run_once_sys_hlth_docker_volumes is not defined
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-  when: run_once_sys_hlth_docker_volumes is not defined
-
-- name: "include role for sys-timer for {{service_name}}"
-  include_role:
-    name: sys-timer
-  vars:
-    on_calendar:  "{{on_calendar_health_docker_volumes}}"
-  when: run_once_sys_hlth_docker_volumes is not defined
-
-- name: run the health_docker_volumes tasks once
-  set_fact:
-    run_once_sys_hlth_docker_volumes: true
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_sys_hlth_docker_volumes is not defined

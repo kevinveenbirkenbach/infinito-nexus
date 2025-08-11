@@ -10,7 +10,7 @@
   become: true
 
 - name: Configure systemd lid switch behavior to hibernate on lid close (battery), lock on AC and docked
-  become: yes
+  become: true
   lineinfile:
     path: /etc/systemd/logind.conf
     regexp: '^#?HandleLidSwitch='
@@ -20,7 +20,7 @@
   become: true
 
 - name: Configure systemd to lock session when lid is closed on external power
-  become: yes
+  become: true
   lineinfile:
     path: /etc/systemd/logind.conf
     regexp: '^#?HandleLidSwitchExternalPower='
@@ -30,7 +30,7 @@
   become: true
 
 - name: Configure systemd to lock session when lid is closed while docked
-  become: yes
+  become: true
   lineinfile:
     path: /etc/systemd/logind.conf
     regexp: '^#?HandleLidSwitchDocked='

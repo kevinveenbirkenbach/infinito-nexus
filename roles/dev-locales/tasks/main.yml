@@ -5,4 +5,4 @@
   template: src=locale.conf dest=/etc/locale.conf
 - name: Generate locales
   shell: locale-gen
-  become: yes
+  become: true

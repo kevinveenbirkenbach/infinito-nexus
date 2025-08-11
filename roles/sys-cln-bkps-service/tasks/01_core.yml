@@ -1,0 +1,23 @@
+- name: install lsof and python-psutil
+  community.general.pacman:
+    name:
+      - lsof
+      - python-psutil
+    state: present
+
+- name: "create {{cleanup_backups_directory}}"
+  file:
+    path: "{{cleanup_backups_directory}}"
+    state: directory
+    mode: 0755
+
+- name: create sys-cln-backups.py
+  copy: 
+    src:  "sys-cln-backups.py"
+    dest: "{{cleanup_backups_directory}}sys-cln-backups.py"
+
+- name: create sys-cln-backups.infinito.service
+  template: 
+    src:  "sys-cln-backups.service.j2"
+    dest: "/etc/systemd/system/sys-cln-backups.infinito.service"
+  notify: reload sys-cln-backups.infinito.service

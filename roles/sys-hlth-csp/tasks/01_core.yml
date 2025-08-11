@@ -1,0 +1,37 @@
+- name: "pkgmgr install"
+  include_role:
+    name: pkgmgr-install
+  vars:
+    package_name: checkcsp
+
+- name: rebuild checkcsp docker image
+  shell: checkcsp build
+  # Todo this could be optimized in the future
+
+- name: "create {{ health_csp_crawler_folder }}"
+  file:
+    path: "{{ health_csp_crawler_folder }}"
+    state: directory
+    mode: 0755
+
+- name: copy sys-hlth-csp.py
+  copy:
+    src: sys-hlth-csp.py
+    dest: "{{ health_csp_crawler_script }}"
+    mode: 0755
+
+- name: create sys-hlth-csp.infinito.service
+  template:
+    src: sys-hlth-csp.service.j2
+    dest: /etc/systemd/system/sys-hlth-csp.infinito.service
+  notify: reload sys-hlth-csp.infinito.service
+
+- name: set service_name to role_name
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: include systemd timer role
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{ on_calendar_health_csp_crawler }}"

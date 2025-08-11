@@ -1,0 +1,21 @@
+- name: "pkgmgr install"
+  include_role:
+    name: pkgmgr-install
+  vars:
+    package_name: btrfs-auto-balancer
+
+- name: configure sys-rpr-btrfs-blnc.infinito.service
+  template: 
+    src: sys-rpr-btrfs-blnc.service.j2
+    dest: /etc/systemd/system/sys-rpr-btrfs-blnc.infinito.service
+  notify: reload sys-rpr-btrfs-blnc.infinito.service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{service_name}}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar:  "{{on_calendar_btrfs_auto_balancer}}"

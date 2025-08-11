@@ -1,0 +1,16 @@
+- name: "create {{systemd_notifier_email_folder}}"
+  file:
+    path: "{{systemd_notifier_email_folder}}"
+    state: directory
+    mode: 0755
+
+- name: configure sys-alm-email.sh
+  template:
+    src:  sys-alm-email.sh.j2 
+    dest: "{{systemd_notifier_email_folder}}sys-alm-email.sh"
+
+- name: configure sys-alm-email.infinito.service
+  template: 
+    src:  sys-alm-email@.service.j2
+    dest: /etc/systemd/system/sys-alm-email.infinito@.service
+  notify: restart sys-alm-email service

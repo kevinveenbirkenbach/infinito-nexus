@@ -1,42 +1,4 @@
-- name: Fail if Telegram bot credentials are not set
-  assert:
-    that:
-      - telegram_bot_token != ""
-      - telegram_chat_id != ""
-    fail_msg: |
-      Telegram configuration is incomplete!
-      Please provide non‑empty values for:
-        - telegram_bot_token   # Your Telegram bot’s API token
-        - telegram_chat_id     # The Telegram chat ID to send messages to
-  when: run_once_sys_alm_telegram is not defined
-
-- name: install curl
-  pacman: 
-    name: curl
-    state: present
-  when: run_once_sys_alm_telegram is not defined
-
-- name: Create a directory with a subdirectory
-  ansible.builtin.file:
-    path: "{{systemd_telegram_folder}}"
-    state: directory
-    mode: '0755'
-  when: run_once_sys_alm_telegram is not defined
-
-- name: configure sys-alm-telegram.sh
-  template: 
-    src: sys-alm-telegram.sh.j2 
-    dest: "{{ systemd_telegram_script }}"
-  when: run_once_sys_alm_telegram is not defined  
-
-- name: configure sys-alm-telegram.infinito.service
-  template: 
-    src: sys-alm-telegram@.service.j2 
-    dest: "/etc/systemd/system/sys-alm-telegram.infinito@.service"
-  notify: "restart sys-alm-telegram service"
-  when: run_once_sys_alm_telegram is not defined
-
-- name: run the systemd_notifier_telegram tasks once
-  set_fact:
-    run_once_sys_alm_telegram: true
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_sys_alm_telegram is not defined

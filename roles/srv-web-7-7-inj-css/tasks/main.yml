@@ -1,34 +1,4 @@
-- name: Generate color palette with colorscheme-generator
-  set_fact:
-    color_palette: "{{ lookup('colorscheme', global_css_base_color, count=global_css_count, shades=global_css_shades) }}"
-  when: run_once_srv_web_7_7_inj_css is not defined
-
-- name: Generate inverted color palette with colorscheme-generator
-  set_fact:
-    inverted_color_palette: "{{ lookup('colorscheme', global_css_base_color, count=global_css_count, shades=global_css_shades, invert_lightness=True) }}"
-  when: run_once_srv_web_7_7_inj_css is not defined
-
-- name: Deploy global.css
-  template:
-    src: global.css.j2
-    dest: "{{ global_css_destination }}"
-    owner: "{{ nginx.user }}"
-    group: "{{ nginx.user }}"
-    mode: '0644'
-  when: run_once_srv_web_7_7_inj_css is not defined
-
-- name: Get stat for global.css
-  stat:
-    path: "{{ global_css_destination }}"
-  register: global_css_stat
-  when: run_once_srv_web_7_7_inj_css is not defined
-
-- name: Set global_css_version
-  set_fact:
-    global_css_version: "{{ global_css_stat.stat.mtime }}"
-  when: run_once_srv_web_7_7_inj_css is not defined
-
-- name: Mark css as done
-  set_fact:
-    run_once_srv_web_7_7_inj_css: true
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_srv_web_7_7_inj_css is not defined

@@ -1,43 +1,6 @@
-- name: Install required Python modules
-  pacman:
-    name: python-requests
-    state: present
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_sys_hlth_webserver is not defined
 
-- name: "create {{ health_nginx_folder }}"
-  file:
-    path: "{{ health_nginx_folder }}"
-    state: directory
-    mode: 0755
-  when: run_once_sys_hlth_webserver is not defined
-
-- name: create sys-hlth-webserver.py
-  template:
-    src: sys-hlth-webserver.py.j2
-    dest: "{{ health_nginx_folder }}sys-hlth-webserver.py"
-  when: run_once_sys_hlth_webserver is not defined
-
-- name: create sys-hlth-webserver.infinito.service
-  template: 
-    src: sys-hlth-webserver.service.j2
-    dest: /etc/systemd/system/sys-hlth-webserver.infinito.service
-  notify: reload sys-hlth-webserver.infinito.service
-  when: run_once_sys_hlth_webserver is not defined
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-  when: run_once_sys_hlth_webserver is not defined
-
-- name: "include role for sys-timer for {{service_name}}"
-  include_role:
-    name: sys-timer
-  vars:
-    on_calendar:  "{{on_calendar_health_nginx}}"
-  when: run_once_sys_hlth_webserver is not defined
-
-- name: run the health_nginx tasks once
-  set_fact:
-    run_once_sys_hlth_webserver: true
-  when: run_once_sys_hlth_webserver is not defined
 

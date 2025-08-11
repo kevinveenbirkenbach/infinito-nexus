@@ -1,30 +1,4 @@
-- name: "pkgmgr install"
-  include_role:
-    name: pkgmgr-install
-  vars:
-    package_name: btrfs-auto-balancer
-  when: run_once_sys_rpr_btrfs_blnc is not defined
-
-- name: configure sys-rpr-btrfs-blnc.infinito.service
-  template: 
-    src: sys-rpr-btrfs-blnc.service.j2
-    dest: /etc/systemd/system/sys-rpr-btrfs-blnc.infinito.service
-  notify: reload sys-rpr-btrfs-blnc.infinito.service
-  when: run_once_sys_rpr_btrfs_blnc is not defined
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-  when: run_once_sys_rpr_btrfs_blnc is not defined
-
-- name: "include role for sys-timer for {{service_name}}"
-  include_role:
-    name: sys-timer
-  vars:
-    on_calendar:  "{{on_calendar_btrfs_auto_balancer}}"
-  when: run_once_sys_rpr_btrfs_blnc is not defined
-
-- name: run the system_btrfs_auto_balancer tasks once
-  set_fact:
-    run_once_sys_rpr_btrfs_blnc: true
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_sys_rpr_btrfs_blnc is not defined

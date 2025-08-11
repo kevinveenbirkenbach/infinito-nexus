@@ -1,37 +1,4 @@
-- name: "create {{heal_docker}}"
-  file:
-    path: "{{heal_docker}}"
-    state: directory
-    mode: 0755
-  when: run_once_sys_rpr_docker_soft is not defined
-
-- name: create sys-rpr-docker-soft.py
-  copy:
-    src: sys-rpr-docker-soft.py
-    dest: "{{heal_docker}}sys-rpr-docker-soft.py"
-  notify: restart sys-rpr-docker-soft.infinito.service
-  when: run_once_sys_rpr_docker_soft is not defined
-
-- name: create sys-rpr-docker-soft.infinito.service
-  template: 
-    src: sys-rpr-docker-soft.service.j2 
-    dest: /etc/systemd/system/sys-rpr-docker-soft.infinito.service
-  notify: restart sys-rpr-docker-soft.infinito.service
-  when: run_once_sys_rpr_docker_soft is not defined
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-  when: run_once_sys_rpr_docker_soft is not defined
-
-- name: "include role for sys-timer for {{service_name}}"
-  include_role:
-    name: sys-timer
-  vars:
-    on_calendar:  "{{on_calendar_heal_docker}}"
-  when: run_once_sys_rpr_docker_soft is not defined
-
-- name: run the heal_docker tasks once
-  set_fact:
-    run_once_sys_rpr_docker_soft: true
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_sys_rpr_docker_soft is not defined

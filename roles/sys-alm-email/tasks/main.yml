@@ -1,24 +1,4 @@
-- name: "create {{systemd_notifier_email_folder}}"
-  file:
-    path: "{{systemd_notifier_email_folder}}"
-    state: directory
-    mode: 0755
-  when: run_once_sys_alm_email is not defined
-
-- name: configure sys-alm-email.sh
-  template:
-    src:  sys-alm-email.sh.j2 
-    dest: "{{systemd_notifier_email_folder}}sys-alm-email.sh"
-  when: run_once_sys_alm_email is not defined
-
-- name: configure sys-alm-email.infinito.service
-  template: 
-    src:  sys-alm-email@.service.j2
-    dest: /etc/systemd/system/sys-alm-email.infinito@.service
-  notify: restart sys-alm-email service
-  when: run_once_sys_alm_email is not defined
-
-- name: run the systemd_notifier_email tasks once
-  set_fact:
-    run_once_sys_alm_email: true
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_sys_alm_email is not defined

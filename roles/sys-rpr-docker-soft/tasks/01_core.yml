@@ -1,0 +1,27 @@
+- name: "create {{heal_docker}}"
+  file:
+    path: "{{heal_docker}}"
+    state: directory
+    mode: 0755
+
+- name: create sys-rpr-docker-soft.py
+  copy:
+    src: sys-rpr-docker-soft.py
+    dest: "{{heal_docker}}sys-rpr-docker-soft.py"
+  notify: restart sys-rpr-docker-soft.infinito.service
+
+- name: create sys-rpr-docker-soft.infinito.service
+  template: 
+    src: sys-rpr-docker-soft.service.j2 
+    dest: /etc/systemd/system/sys-rpr-docker-soft.infinito.service
+  notify: restart sys-rpr-docker-soft.infinito.service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{service_name}}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar:  "{{on_calendar_heal_docker}}"

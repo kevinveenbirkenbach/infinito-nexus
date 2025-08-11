@@ -1,0 +1,48 @@
+- name: create administrator
+  user:
+    name: administrator
+    update_password: on_create
+    password: "{{ users.administrator.password | password_hash('sha512') }}"
+    create_home: yes
+    generate_ssh_key: yes
+    ssh_key_type: rsa
+    ssh_key_bits: 8192
+
+- name: "set correct rights for {{path_administrator_home}}"
+  file:
+    path: "{{path_administrator_home}}"
+    state: directory
+    owner: administrator
+    group: administrator
+    mode: 0700
+
+- name: "create {{path_administrator_scripts}}"
+  file:
+    path: "{{path_administrator_home}}scripts"
+    state: directory
+    owner: administrator
+    group: administrator
+    mode: 0700
+    
+- name: create {{path_administrator_home}}.ssh/authorized_keys
+  copy:
+    src: "{{ inventory_dir }}/files/{{ inventory_hostname }}{{path_administrator_home}}.ssh/authorized_keys"
+    dest: "{{path_administrator_home}}.ssh/authorized_keys"
+    owner: administrator
+    group: administrator
+    mode: '0644'
+
+- name: grant administrator sudo rights with password
+  copy:
+    src: "administrator"
+    dest: /etc/sudoers.d/administrator
+    mode: '0644'
+    owner: root
+    group: root
+  notify: sshd restart  
+
+- name: "embed user routines for {{ role_path | basename }}"
+  include_role:
+    name: user
+  vars:
+    user_name:  "administrator"

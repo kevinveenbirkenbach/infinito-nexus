@@ -1,32 +1,5 @@
-- name: install lsof and python-psutil
-  community.general.pacman:
-    name:
-      - lsof
-      - python-psutil
-    state: present
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_sys_cln_bkps_service is not defined
 
-- name: "create {{cleanup_backups_directory}}"
-  file:
-    path: "{{cleanup_backups_directory}}"
-    state: directory
-    mode: 0755
-  when: run_once_sys_cln_bkps_service is not defined
-
-- name: create sys-cln-backups.py
-  copy: 
-    src:  "sys-cln-backups.py"
-    dest: "{{cleanup_backups_directory}}sys-cln-backups.py"
-  when: run_once_sys_cln_bkps_service is not defined
-
-- name: create sys-cln-backups.infinito.service
-  template: 
-    src:  "sys-cln-backups.service.j2"
-    dest: "/etc/systemd/system/sys-cln-backups.infinito.service"
-  notify: reload sys-cln-backups.infinito.service
-  when: run_once_sys_cln_bkps_service is not defined
-
-- name: run the cleanup_backups_service tasks once
-  set_fact:
-    run_once_sys_cln_bkps_service: true
-  when: run_once_sys_cln_bkps_service is not defined

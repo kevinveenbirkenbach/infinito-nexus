@@ -1,36 +1,4 @@
-- name: "create {{health_journalctl_folder}}"
-  file:
-    path: "{{health_journalctl_folder}}"
-    state: directory
-    mode: 0755
-  when: run_once_sys_hlth_journalctl is not defined
-
-- name: create sys-hlth-journalctl.sh
-  copy:
-    src: sys-hlth-journalctl.sh
-    dest: "{{health_journalctl_folder}}sys-hlth-journalctl.sh"
-  when: run_once_sys_hlth_journalctl is not defined
-
-- name: create sys-hlth-journalctl.infinito.service
-  template: 
-    src: sys-hlth-journalctl.service.j2
-    dest: /etc/systemd/system/sys-hlth-journalctl.infinito.service
-  notify: reload sys-hlth-journalctl.infinito.service
-  when: run_once_sys_hlth_journalctl is not defined
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-  when: run_once_sys_hlth_journalctl is not defined
-
-- name: "include role for sys-timer for {{service_name}}"
-  include_role:
-    name: sys-timer
-  vars:
-    on_calendar:  "{{on_calendar_health_journalctl}}"
-  when: run_once_sys_hlth_journalctl is not defined
-
-- name: run the health_journalctl tasks once
-  set_fact:
-    run_once_sys_hlth_journalctl: true
+- block:
+    - include_tasks: 01_core.yml
+    - include_tasks: utils/run_once.yml
   when: run_once_sys_hlth_journalctl is not defined

@@ -1,0 +1,51 @@
+---
+- name: "Check if {{ path_docker_compose_instances }} directory exists"
+  stat:
+    path: "{{ path_docker_compose_instances }}"
+  register: docker_compose_directory_stat
+
+- name: "Update with pacman"
+  include_role:
+    name: update-pacman
+  when: ansible_distribution == 'Archlinux'
+  
+- name: "Update with apt"
+  include_role:
+    name: update-apt
+  when: ansible_distribution == "Debian"
+
+- name: "Update Docker Images"
+  include_role:
+    name: update-docker
+  when: docker_compose_directory_stat.stat.exists
+
+- name: "Check if yay is installed"
+  command: which yay
+  register: yay_installed
+  changed_when: false
+  failed_when: false
+
+- name: "Update with yay"
+  include_role:
+    name: update-yay
+  when: yay_installed.rc == 0
+
+- name: "Check if pip is installed"
+  command: which pip
+  register: pip_installed
+  changed_when: false
+  failed_when: false
+
+- name: "Update with pip"
+  include_role:
+    name: update-pip
+
+- name: "Check if pkgmgr command is available"
+  command: "which pkgmgr"
+  register: pkgmgr_available
+  failed_when: false
+
+- name: "Update all repositories using pkgmgr"
+  include_role:
+    name: update-pkgmgr
+  when: pkgmgr_available.rc == 0
