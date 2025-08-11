@@ -154,6 +154,28 @@ class RedirectUrisTest(unittest.TestCase):
         result = self.plugin.redirect_uris(domains, applications)
         self.assertEqual(result, [])
 
+    def test_domain_value_dict_is_flattened_in_order(self):
+        # Dict with mixed value types and a duplicate to verify stable dedup
+        domains = {
+            "app1": {
+                "primary": "a.example.org",
+                "alt": ["b.example.org", "b.example.org"],
+                "nested": {"x": "c.example.org", "y": ["d.example.org"]},
+            }
+        }
+        applications = {"app1": {"features": {"oauth2": True}}}
+    
+        result = self.plugin.redirect_uris(domains, applications)
+    
+        self.assertEqual(
+            result,
+            [
+                "https://a.example.org/*",
+                "https://b.example.org/*",  # duplicate trimmed
+                "https://c.example.org/*",
+                "https://d.example.org/*",
+            ],
+        )
 
 if __name__ == "__main__":
     unittest.main()

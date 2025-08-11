@@ -1,10 +1,10 @@
 ---
-#- name: "create import files for {{application_id}}"
-#  include_tasks: 01_import.yml
-#
-#- name: "load docker, db and proxy for {{application_id}}"
-#  include_role: 
-#    name: cmp-db-docker-proxy
+- name: "create import files for {{application_id}}"
+  include_tasks: 01_import.yml
+
+- name: "load docker, db and proxy for {{application_id}}"
+  include_role: 
+    name: cmp-db-docker-proxy
 
 - name: "Apply client redirects without realm import"
   include_tasks: 02_update_client_redirects.yml

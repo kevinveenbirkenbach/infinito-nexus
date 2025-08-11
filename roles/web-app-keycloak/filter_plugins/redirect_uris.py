@@ -29,6 +29,23 @@ def _stable_dedup(items: Sequence[str]) -> list[str]:
             out.append(x)
     return out
 
+def _iter_domains(v) -> Iterable[str]:
+    """Yield domains from str | list/tuple[str] | dict[*, str|list|tuple]."""
+    if v is None:
+        return
+    if isinstance(v, str):
+        yield v
+    elif isinstance(v, dict):
+        for val in v.values():
+            yield from _iter_domains(val)
+    elif isinstance(v, (list, tuple)):
+        for val in v:
+            yield from _iter_domains(val)
+    else:
+        raise AnsibleFilterError(
+            "redirect_uris: domain_value must be str, list/tuple[str], or dict mapping to those"
+        )
+
 def redirect_uris(domains: dict,
                   applications: dict,
                   web_protocol: str = "https",
@@ -60,7 +77,7 @@ def redirect_uris(domains: dict,
             continue
 
         # Normalize to iterable of domains
-        doms = [domain_value] if isinstance(domain_value, str) else list(domain_value or [])
+        doms = list(_iter_domains(domain_value))
 
         for d in doms:
             # Use get_url() to produce "<proto>://<domain>"
