@@ -1,10 +1,9 @@
-- name: install sudo
-  package:
-    name:   sudo
-    state:  present
-  when: run_once_sys_sudo is not defined
-
-- name: run the sudo tasks once
-  set_fact:
-    run_once_sys_sudo: true
+- block:
+  - name: Install sudo (Arch/Manjaro)
+    community.general.pacman:
+      name:   sudo
+      state:  present
+  - name: run the sudo tasks once
+    set_fact:
+      run_once_sys_sudo: true
   when: run_once_sys_sudo is not defined
