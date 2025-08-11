@@ -2,4 +2,4 @@
 - block:
     - include_tasks: 01_core.yml
     - include_tasks: utils/run_once.yml
-  when: run_once_pkgmgr is not definedd
+  when: run_once_pkgmgr is not defined
