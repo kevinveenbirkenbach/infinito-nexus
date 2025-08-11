@@ -31,7 +31,7 @@ if [ "$force_freeing" = true ]; then
     echo "cleaning up docker" &&
     docker system prune -f || exit 3
 
-    nextcloud_application_container="{{ applications | get_app_conf(application_id, 'docker.services.nextcloud.name', True) }}"
+    nextcloud_application_container="{{ applications | get_app_conf('web-app-nextcloud', 'docker.services.nextcloud.name', True) }}"
     if [ "$(docker ps -a -q -f name=$nextcloud_application_container)" ] ; then
       echo "cleaning up docker nextcloud" &&
       docker exec -it -u www-data $nextcloud_application_container /var/www/html/occ files:cleanup || exit 4
