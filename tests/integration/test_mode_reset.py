@@ -1,4 +1,6 @@
+#!/usr/bin/env python3
 import os
+import re
 import unittest
 
 # Base directory for roles (adjust if needed)
@@ -6,9 +8,13 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../roles'
 
 class TestModeResetIntegration(unittest.TestCase):
     """
-    Integration test to verify that when 'mode_reset' is used in any task file,
-    the role provides a *_reset.yml (or reset.yml) and includes it correctly in main.yml,
-    and that the include_tasks for that file with the mode_reset condition appears only once.
+    Verify that a role either mentioning 'mode_reset' under tasks/ OR containing a reset file:
+      - provides a *_reset.yml (or reset.yml) in tasks/,
+      - includes it exactly once across tasks/*.yml,
+      - and the include is guarded in the SAME task block by a non-commented `when`
+        that contains `mode_reset | bool` (inline, list, or array).
+    Additional conditions (e.g., `and something`) are allowed.
+    Commented-out conditions (e.g., `#when: ...` or `# include_tasks: ...`) do NOT count.
     """
 
     def test_mode_reset_tasks(self):
@@ -20,77 +26,143 @@ class TestModeResetIntegration(unittest.TestCase):
                 if not os.path.isdir(tasks_dir):
                     self.skipTest(f"Role '{role_name}' has no tasks directory.")
 
-                # Look for 'mode_reset' in task files
-                mode_reset_found = False
+                # Gather all task files
+                task_files = []
                 for root, _, files in os.walk(tasks_dir):
                     for fname in files:
-                        if not fname.lower().endswith(('.yml', '.yaml')):
-                            continue
-                        file_path = os.path.join(root, fname)
-                        with open(file_path, 'r', encoding='utf-8') as f:
+                        if fname.lower().endswith(('.yml', '.yaml')):
+                            task_files.append(os.path.join(root, fname))
+
+                # Detect any 'mode_reset' usage
+                mode_reset_found = False
+                for fp in task_files:
+                    try:
+                        with open(fp, 'r', encoding='utf-8') as f:
                             if 'mode_reset' in f.read():
                                 mode_reset_found = True
                                 break
-                    if mode_reset_found:
-                        break
+                    except (UnicodeDecodeError, OSError):
+                        continue
 
-                if not mode_reset_found:
-                    self.skipTest(f"Role '{role_name}': no mode_reset usage detected.")
-
-                # Check *_reset.yml exists
+                # Detect reset files in tasks/ root
+                try:
+                    task_root_listing = os.listdir(tasks_dir)
+                except OSError:
+                    task_root_listing = []
                 reset_files = [
-                    fname for fname in os.listdir(tasks_dir)
+                    fname for fname in task_root_listing
                     if fname.endswith('_reset.yml') or fname == 'reset.yml'
                 ]
+
+                # Decide if this role must be validated:
+                # - if it mentions mode_reset anywhere under tasks/, OR
+                # - if it has a reset file in tasks/ root
+                should_check = mode_reset_found or bool(reset_files)
+                if not should_check:
+                    self.skipTest(f"Role '{role_name}': no mode_reset usage and no reset file found.")
+
+                # If we check, a reset file MUST exist
                 self.assertTrue(
                     reset_files,
-                    f"Role '{role_name}': 'mode_reset' used but no *_reset.yml or reset.yml found in tasks/."
+                    f"Role '{role_name}': expected a *_reset.yml or reset.yml in tasks/."
                 )
 
-                # Check main.yml exists
-                main_yml = os.path.join(tasks_dir, 'main.yml')
-                self.assertTrue(
-                    os.path.isfile(main_yml),
-                    f"Role '{role_name}': tasks/main.yml is missing."
+                # Patterns to find non-commented reset include occurrences
+                def include_patterns(rf: str):
+                    # Accept:
+                    #   - include_tasks: reset.yml (quoted or unquoted)
+                    #   - ansible.builtin.include_tasks: reset.yml
+                    #   - include_tasks:\n  file: reset.yml
+                    # All must be non-commented (no leading '#')
+                    q = r'(?:' + re.escape(rf) + r'|"' + re.escape(rf) + r'"|\'' + re.escape(rf) + r'\')'
+                    return [
+                        re.compile(
+                            rf'(?m)^(?<!#)\s*-?\s*(?:ansible\.builtin\.)?include_tasks:\s*{q}\s*$'
+                        ),
+                        re.compile(
+                            rf'(?ms)^(?<!#)\s*-?\s*(?:ansible\.builtin\.)?include_tasks:\s*\n[^-\S\r\n]*file:\s*{q}\s*$'
+                        ),
+                    ]
+
+                include_occurrences = []  # (file_path, reset_file, (span_start, span_end))
+
+                # Search every tasks/*.yml for exactly one include of any reset file
+                for fp in task_files:
+                    try:
+                        with open(fp, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                        for rf in reset_files:
+                            for patt in include_patterns(rf):
+                                for m in patt.finditer(content):
+                                    include_occurrences.append((fp, rf, m.span()))
+                    except (UnicodeDecodeError, OSError):
+                        continue
+
+                self.assertGreater(
+                    len(include_occurrences), 0,
+                    f"Role '{role_name}': must include one of {reset_files} in some non-commented tasks/*.yml."
+                )
+                self.assertEqual(
+                    len(include_occurrences), 1,
+                    f"Role '{role_name}': reset include must appear exactly once across tasks/*.yml, "
+                    f"found {len(include_occurrences)}."
                 )
 
-                with open(main_yml, 'r', encoding='utf-8') as f:
+                # Verify a proper 'when' containing 'mode_reset | bool' exists in the SAME task block
+                include_fp, included_rf, span = include_occurrences[0]
+
+                with open(include_fp, 'r', encoding='utf-8') as f:
                     content = f.read()
+                lines = content.splitlines()
 
-                # Match the actual reset file name used in include_tasks
-                found_include = None
-                for reset_file in reset_files:
-                    if f'include_tasks: {reset_file}' in content:
-                        found_include = reset_file
-                        break
+                # Compute the line index where the include occurs
+                include_line_idx = content.count('\n', 0, span[0])
 
-                self.assertIsNotNone(
-                    found_include,
-                    f"Role '{role_name}': tasks/main.yml must include one of {reset_files} with 'include_tasks'."
+                def is_task_start(line: str) -> bool:
+                    # new task begins with "- " at current indentation
+                    return re.match(r'^\s*-\s', line) is not None
+
+                # Expand upwards to task start
+                start_idx = include_line_idx
+                while start_idx > 0 and not is_task_start(lines[start_idx]):
+                    start_idx -= 1
+                # Expand downwards to next task start or EOF
+                end_idx = include_line_idx
+                while end_idx + 1 < len(lines) and not is_task_start(lines[end_idx + 1]):
+                    end_idx += 1
+
+                task_block = "\n".join(lines[start_idx:end_idx + 1])
+
+                # Build regexes that:
+                #  - DO NOT match commented lines (require ^\s*when: not preceded by '#')
+                #  - Allow additional conditions inline (and/or/parentheses/etc.)
+                #  - Support list form and yaml array form
+                when_inline = re.search(
+                    r'(?m)^(?<!#)\s*when:\s*(?!\[)(?:(?!\n).)*mode_reset\s*\|\s*bool',
+                    task_block
+                )
+                when_list = re.search(
+                    r'(?ms)^(?<!#)\s*when:\s*\n'                # non-commented when:
+                    r'(?:(?:\s*#.*\n)|(?:\s*-\s*.*\n))*'         # comments or other list items
+                    r'\s*-\s*[^#\n]*mode_reset\s*\|\s*bool[^#\n]*$',  # list item with mode_reset | bool (not commented)
+                    task_block
+                )
+                when_array = re.search(
+                    r'(?m)^(?<!#)\s*when:\s*\[[^\]\n]*mode_reset\s*\|\s*bool[^\]\n]*\]',
+                    task_block
                 )
 
-                # Check the inclusion has the correct when condition
-                include_line = f'include_tasks: {found_include}'
-                when_line = 'when: mode_reset | bool'
+                when_ok = bool(when_inline or when_list or when_array)
 
-                self.assertIn(
-                    include_line,
-                    content,
-                    f"Role '{role_name}': tasks/main.yml missing '{include_line}'."
+                self.assertTrue(
+                    when_ok,
+                    (
+                        f"Role '{role_name}': file '{include_fp}' must guard the reset include "
+                        f"with a non-commented 'when' containing 'mode_reset | bool'. "
+                        f"Commented-out conditions do not count."
+                    )
                 )
-                self.assertIn(
-                    when_line,
-                    content,
-                    f"Role '{role_name}': tasks/main.yml missing '{when_line}'."
-                )
-                self.assertEqual(
-                    content.count(include_line), 1,
-                    f"Role '{role_name}': '{include_line}' must appear exactly once."
-                )
-                self.assertEqual(
-                    content.count(when_line), 1,
-                    f"Role '{role_name}': '{when_line}' must appear exactly once."
-                )
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
