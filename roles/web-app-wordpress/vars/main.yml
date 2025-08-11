@@ -1,6 +1,9 @@
+# General
 application_id:             "web-app-wordpress"
 database_type:              "mariadb"
 host_msmtp_conf:            "{{docker_compose.directories.config}}msmtprc.conf"
+
+# Wordpress Specific
 wordpress_max_upload_size:  "{{ applications | get_app_conf(application_id, 'max_upload_size') }}"
 wordpress_custom_image:     "wordpress_custom"
 wordpress_docker_html_path: "/var/www/html"
@@ -8,3 +11,5 @@ wordpress_version:          "{{ applications | get_app_conf(application_id, 'doc
 wordpress_image:            "{{ applications | get_app_conf(application_id, 'docker.services.wordpress.image', True) }}"
 wordpress_name:             "{{ applications | get_app_conf(application_id, 'docker.services.wordpress.name', True) }}"
 wordpress_volume:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
+wordpress_domains:          "{{ applications | get_app_conf(application_id, 'server.domains.canonical', True) }}"
+wordpress_plugins:          "{{ applications | get_app_conf(application_id, 'plugins', True) | dict2items }}"

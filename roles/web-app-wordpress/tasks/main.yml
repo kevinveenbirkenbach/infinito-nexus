@@ -6,7 +6,7 @@
 - name: "Include role srv-proxy-6-6-domain for {{ application_id }}"
   include_role:
     name: srv-proxy-6-6-domain
-  loop: "{{ applications | get_app_conf(application_id, 'server.domains.canonical', True) }}"
+  loop: "{{ wordpress_domains }}"
   loop_control:
     loop_var: domain
   vars:
@@ -25,15 +25,14 @@
     dest: "{{ host_msmtp_conf }}"
   notify: docker compose up
 
-
 - name: "Install wordpress"
   include_tasks: install.yml
 
-- name: "Install and activate WordPress plugins from application config"
+- name: "Install and activate WordPress plugins"
   block:
     - name: "Iterate through WordPress plugins"
       include_tasks: plugin.yml
-      loop: "{{ applications | get_app_conf(application_id, 'plugins', True) | dict2items }}"
+      loop: "{{ wordpress_plugins }}"
       loop_control:
         label: "{{ item.key }}"
       vars:
