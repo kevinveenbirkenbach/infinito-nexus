@@ -32,6 +32,6 @@
     include_tasks: "04_ensure_up.yml"
   when: not docker_compose_skipp_file_creation | bool
 
-- name: "flush database, docker and proxy for '{{ application_id }}'"
+- name: "flush docker compose for '{{ application_id }}'"
   meta: flush_handlers
   when: docker_compose_flush_handlers | bool
