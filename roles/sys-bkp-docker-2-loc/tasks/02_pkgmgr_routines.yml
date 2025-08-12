@@ -1,12 +1,12 @@
 - block:
-    - name: "pkgmgr install {{ bkp_docker_to_local_pkg }}"
+    - name: "pkgmgr install {{ bkp_docker_2_loc_pkg }}"
       include_role:
         name: pkgmgr-install
       vars:
-        package_name: "{{ bkp_docker_to_local_pkg }}"
+        package_name: "{{ bkp_docker_2_loc_pkg }}"
 
-    - name: "Retrieve {{ bkp_docker_to_local_pkg }} path from pkgmgr"
-      command: "pkgmgr path {{ bkp_docker_to_local_pkg }}"
+    - name: "Retrieve {{ bkp_docker_2_loc_pkg }} path from pkgmgr"
+      command: "pkgmgr path {{ bkp_docker_2_loc_pkg }}"
       register: pkgmgr_output
       changed_when: false
 
@@ -16,4 +16,4 @@
       changed_when: false
   when: backup_docker_to_local_folder is not defined
   vars:
-    bkp_docker_to_local_pkg: backup-docker-to-local
+    bkp_docker_2_loc_pkg: backup-docker-to-local

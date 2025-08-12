@@ -1,43 +1,46 @@
 # Mapping logic for backup-docker-to-local CLI arguments
 #
-# - bkp_docker_to_local_database_routine:    All service names where backup.database_routine is set (for --database-containers)
-# - bkp_docker_to_local_no_stop_required:    All images where backup.no_stop_required is set (for --images-no-stop-required)
-# - bkp_docker_to_local_disabled:            All images where backup.disabled is set (for --images-no-backup-required)
+# - bkp_docker_2_loc_database_routine:    All service names where backup.database_routine is set (for --database-containers)
+# - bkp_docker_2_loc_no_stop_required:    All images where backup.no_stop_required is set (for --images-no-stop-required)
+# - bkp_docker_2_loc_disabled:            All images where backup.disabled is set (for --images-no-backup-required)
 # CLI-ready variables render these lists as argument strings.
 
+# Verify if DB is enabled
+bkp_docker_2_loc_db_enabled: "{{ database_type | default('') | bool }}"
+
 # Gather mapped values as lists
-bkp_docker_to_local_database_routine: >-
+bkp_docker_2_loc_database_routine: >-
   {{ applications | find_dock_val_by_bkp_entr('database_routine', 'name') | list }}
 
-bkp_docker_to_local_no_stop_required: >-
+bkp_docker_2_loc_no_stop_required: >-
   {{ applications | find_dock_val_by_bkp_entr('no_stop_required', 'image') | list }}
 
-bkp_docker_to_local_disabled: >-
+bkp_docker_2_loc_disabled: >-
   {{ applications | find_dock_val_by_bkp_entr('disabled', 'image') | list }}
 
 # CLI argument strings (only set if list not empty)
-bkp_docker_to_local_database_routine_cli: >-
-  {% if bkp_docker_to_local_database_routine | length > 0 -%}
-    --database-containers {{ bkp_docker_to_local_database_routine | join(' ') }}
+bkp_docker_2_loc_database_routine_cli: >-
+  {% if bkp_docker_2_loc_database_routine | length > 0 -%}
+    --database-containers {{ bkp_docker_2_loc_database_routine | join(' ') }}
   {%- endif %}
 
-bkp_docker_to_local_no_stop_required_cli: >-
-  {% if bkp_docker_to_local_no_stop_required | length > 0 -%}
-    --images-no-stop-required {{ bkp_docker_to_local_no_stop_required | join(' ') }}
+bkp_docker_2_loc_no_stop_required_cli: >-
+  {% if bkp_docker_2_loc_no_stop_required | length > 0 -%}
+    --images-no-stop-required {{ bkp_docker_2_loc_no_stop_required | join(' ') }}
   {%- endif %}
 
-bkp_docker_to_local_disabled_cli: >-
-  {% if bkp_docker_to_local_disabled | length > 0 -%}
-    --images-no-backup-required {{ bkp_docker_to_local_disabled | join(' ') }}
+bkp_docker_2_loc_disabled_cli: >-
+  {% if bkp_docker_2_loc_disabled | length > 0 -%}
+    --images-no-backup-required {{ bkp_docker_2_loc_disabled | join(' ') }}
   {%- endif %}
 
 # List of CLI args for convenience (e.g. for looping or joining)
-bkp_docker_to_local_cli_args_list:
-  - "{{ bkp_docker_to_local_database_routine_cli }}"
-  - "{{ bkp_docker_to_local_no_stop_required_cli }}"
-  - "{{ bkp_docker_to_local_disabled_cli }}"
+bkp_docker_2_loc_cli_args_list:
+  - "{{ bkp_docker_2_loc_database_routine_cli }}"
+  - "{{ bkp_docker_2_loc_no_stop_required_cli }}"
+  - "{{ bkp_docker_2_loc_disabled_cli }}"
 
-bkp_docker_to_local_exec: >-
+bkp_docker_2_loc_exec: >-
   /usr/bin/python {{ backup_docker_to_local_folder }}backup-docker-to-local.py
   --compose-dir {{ path_docker_compose_instances }}
-  {{ bkp_docker_to_local_cli_args_list | select('string') | join(' ') }}
+  {{ bkp_docker_2_loc_cli_args_list | select('string') | join(' ') }}

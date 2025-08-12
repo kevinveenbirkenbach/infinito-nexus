@@ -2,7 +2,7 @@
 application_id:                 "svc-prx-openresty"
 
 # Deactivate Database for openresty
-database_enabled:               false
+database_type:                  ""
 
 # Openresty
 openresty_image:                "openresty/openresty"

@@ -1,1 +1,0 @@
-database_enabled: "{{ database_type | default('') | bool }}" # Enables the database backup

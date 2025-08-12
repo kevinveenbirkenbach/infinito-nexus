@@ -3,9 +3,8 @@
     - include_tasks: utils/run_once.yml
   when: 
     - run_once_sys_bkp_docker_2_loc is not defined
-    - database_enabled | bool
 
 - name: "include 04_seed-database-to-backup.yml"
   include_tasks: 04_seed-database-to-backup.yml
   when:
-    - database_enabled | bool
+    - bkp_docker_2_loc_db_enabled | bool
