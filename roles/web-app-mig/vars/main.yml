@@ -1,12 +1,13 @@
 # General 
-application_id:                         web-app-mig          # ID of the application, should be the name of the role folder
+application_id:                 web-app-mig
 
 # Docker
-docker_compose_flush_handlers:          true
-docker_pull_git_repository:             true
-docker_repository_address:              "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
+docker_compose_flush_handlers:  true
+docker_pull_git_repository:     true
+docker_repository_address:      "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
 
 # Helper variables
-mig_image:                              "mig:latest"
-mig_container:                          "mig"
-mig_build_data:                         "{{ applications | get_app_conf(application_id, 'build_data') }}"
+mig_image:                      "mig:latest"
+mig_container:                  "mig"
+mig_build_data:                 "{{ applications | get_app_conf(application_id, 'build_data.enabled') }}"
+mig_wait_for_build:             "{{ applications | get_app_conf(application_id, 'build_data.wait_for') }}"
