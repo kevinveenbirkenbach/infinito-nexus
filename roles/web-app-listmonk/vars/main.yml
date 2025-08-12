@@ -2,6 +2,11 @@ application_id: "web-app-listmonk"
 database_type:  "postgres"
 
 container_port:   "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.port', True) }}"
+
+# Docker specific
+docker_compose_flush_handlers: false
+
+# Listmonk Specific
 listmonk_version: "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.version', True) }}"
 listmonk_image:   "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.image', True) }}"
 listmonk_name:    "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.name', True) }}"

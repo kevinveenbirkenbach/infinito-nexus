@@ -4,4 +4,6 @@
       name: dev-python-pip
     when: run_once_dev_python_pip is not defined
   - include_tasks: utils/run_once.yml
+    vars:
+      flush_handlers: false
   when: run_once_update_pip is not defined

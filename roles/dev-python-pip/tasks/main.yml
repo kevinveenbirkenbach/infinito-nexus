@@ -10,5 +10,6 @@
       state: present
 
   - include_tasks: utils/run_once.yml
-
+    vars:
+      flush_handlers: false
   when: run_once_dev_python_pip is not defined

@@ -10,6 +10,7 @@
     - (application_id | get_entity_name) == (docker_compose.directories.instance | basename)
 
 - meta: flush_handlers
+  when: flush_handlers | default(true) | bool
 
 - name: Set “run-once” fact for role {{ role_name }}
   set_fact:
