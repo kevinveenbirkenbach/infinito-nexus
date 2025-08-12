@@ -16,6 +16,10 @@
     login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
     login_host: "{{ postgres_local_host }}"
     login_port: "{{ postgres_port }}"
+  register: postgresql_result
+  until: postgresql_result is succeeded
+  retries: "{{ postgres_retry_retries }}"
+  delay: "{{ postgres_retry_delay }}"
 
 # 2) Create the database user (with password)
 - name: "Create database user: {{ database_username }}"
@@ -28,6 +32,10 @@
     login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
     login_host:     "{{ postgres_local_host }}"
     login_port:     "{{ postgres_port }}"
+  register: postgresql_result
+  until: postgresql_result is succeeded
+  retries: "{{ postgres_retry_retries }}"
+  delay: "{{ postgres_retry_delay }}"
 
 # 3) Enable LOGIN for the role (removes NOLOGIN)
 - name: "Enable login for role {{ database_username }}"
@@ -40,12 +48,16 @@
     query: |
       ALTER ROLE "{{ database_username }}"
         WITH LOGIN;
+  register: postgresql_result
+  until: postgresql_result is succeeded
+  retries: "{{ postgres_retry_retries }}"
+  delay: "{{ postgres_retry_delay }}"
 
 # 4) Grant ALL privileges on all tables in the public schema
 - name: "Grant ALL privileges on tables in public schema to {{ database_username }}"
   community.postgresql.postgresql_privs:
     db:     "{{ database_name }}"
-    role:   "{{ database_username }}"
+    roles:   "{{ database_username }}"
     objs:   ALL_IN_SCHEMA
     privs:  ALL
     type:   table
@@ -55,12 +67,16 @@
     login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
     login_host:     "{{ postgres_local_host }}"
     login_port:     "{{ postgres_port }}"
+  register: postgresql_result
+  until: postgresql_result is succeeded
+  retries: "{{ postgres_retry_retries }}"
+  delay: "{{ postgres_retry_delay }}"
 
 # 5) Grant ALL privileges at the database level
 - name: "Grant all privileges on database {{ database_name }} to {{ database_username }}"
   community.postgresql.postgresql_privs:
     db:    "{{ database_name }}"
-    role:  "{{ database_username }}"
+    roles:  "{{ database_username }}"
     type:  database
     privs: ALL
     state: present
@@ -68,6 +84,10 @@
     login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
     login_host:     "{{ postgres_local_host }}"
     login_port:     "{{ postgres_port }}"
+  register: postgresql_result
+  until: postgresql_result is succeeded
+  retries: "{{ postgres_retry_retries }}"
+  delay: "{{ postgres_retry_delay }}"
 
 # 6) Grant USAGE/CREATE on schema and set default privileges
 - name: "Set comprehensive schema privileges for {{ database_username }}"
@@ -82,6 +102,10 @@
       GRANT CREATE ON SCHEMA public TO "{{ database_username }}";
       ALTER DEFAULT PRIVILEGES IN SCHEMA public
         GRANT ALL PRIVILEGES ON TABLES TO "{{ database_username }}";
+  register: postgresql_result
+  until: postgresql_result is succeeded
+  retries: "{{ postgres_retry_retries }}"
+  delay: "{{ postgres_retry_delay }}"
 
 # 7) Ensure PostGIS and related extensions are installed (if enabled)
 - name: "Ensure PostGIS-related extensions are installed"
@@ -98,6 +122,10 @@
     - pg_trgm
     - unaccent
   when: postgres_gis_enabled | bool
+  register: postgresql_result
+  until: postgresql_result is succeeded
+  retries: "{{ postgres_retry_retries }}"
+  delay: "{{ postgres_retry_delay }}"
 
 # 8) Ensure pgvector (vector) extension is installed (for Discourse‑AI, pgvector, …)
 - name: "Ensure pgvector (vector) extension is installed"
@@ -109,3 +137,7 @@
     login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
     login_host:   "{{ postgres_local_host }}"
     login_port:   "{{ postgres_port }}"
+  register: postgresql_result
+  until: postgresql_result is succeeded
+  retries: "{{ postgres_retry_retries }}"
+  delay: "{{ postgres_retry_delay }}"

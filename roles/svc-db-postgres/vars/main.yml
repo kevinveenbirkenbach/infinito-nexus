@@ -21,3 +21,5 @@ postgres_expose_local:          True # Exposes the db to localhost, almost every
 postgres_custom_image_name:     "postgres_custom"
 postgres_local_host:            "127.0.0.1"
 postgres_pg_vector_enabled:     True # Required by discourse, propably in a later step it makes sense to define this as a configuration option in config/main.yml
+postgres_retry_retries:         5
+postgres_retry_delay:           2
