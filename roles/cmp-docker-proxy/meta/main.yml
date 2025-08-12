@@ -8,7 +8,7 @@ galaxy_info:
     Consulting & Coaching Solutions
     https://www.veen.world
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   galaxy_tags:
     - docker
     - compose

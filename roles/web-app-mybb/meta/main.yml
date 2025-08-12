@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Transform your community engagement with MyBB, a feature-rich forum solution that combines modern design with robust functionality. Enjoy dynamic discussions, intuitive moderation, and a vibrant user interface that brings your community together."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -13,8 +13,8 @@ galaxy_info:
   - forum
   - community
   - cms
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
   logo:
     class: "fa-solid fa-comments"

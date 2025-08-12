@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Installs and configures Postfix to provide a robust mail transfer agent setup with a preconfigured aliases file for local mail delivery."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -18,6 +18,6 @@ galaxy_info:
   - aliases
   - configuration
   - security
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"

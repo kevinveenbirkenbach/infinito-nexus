@@ -4,7 +4,7 @@ galaxy_info:
   description: >
     Role to provision an OpenResty container via Docker Compose.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen‑Birkenbach  
     Consulting & Coaching Solutions  
@@ -14,7 +14,7 @@ galaxy_info:
     - nginx
     - docker
     - reverse_proxy
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/svc-prx-openresty"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/svc-prx-openresty"
   min_ansible_version: "2.9"

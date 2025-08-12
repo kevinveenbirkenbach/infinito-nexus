@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Deploys Let’s Encrypt certificates into Docker Compose Nginx setups via systemd service and timer."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach
     Consulting & Coaching Solutions
@@ -12,9 +12,9 @@ galaxy_info:
   - letsencrypt
   - docker
   - systemd
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/srv-proxy-6-6-tls-deploy"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/srv-proxy-6-6-tls-deploy"
   min_ansible_version: "2.9"
   platforms:
   - name: Any

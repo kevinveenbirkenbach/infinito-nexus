@@ -25,5 +25,5 @@ This role deploys Mobilizon using Docker, automating the setup of your event man
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at [veen.world](https://www.veen.world).
 
-Part of the [Infinito.Nexus Project](https://github.com/kevinveenbirkenbach/infinito-nexus)  
-Licensed under [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl)
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
+Licensed under [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)

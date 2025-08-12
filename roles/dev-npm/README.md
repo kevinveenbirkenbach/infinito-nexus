@@ -26,7 +26,7 @@ vars:
 ## License
 
 Infinito.Nexus NonCommercial License (CNCL)
-[https://s.veen.world/cncl](https://s.veen.world/cncl)
+[https://s.infinito.nexus/license](https://s.infinito.nexus/license)
 
 ## Author
 

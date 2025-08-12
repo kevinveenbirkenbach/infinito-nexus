@@ -3,7 +3,7 @@ galaxy_info:
   description: |
     Configures an Nginx server to host static HTML websites with HTTPS support, automatic SSL certificate retrieval via Let's Encrypt, and secure default settings.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -22,8 +22,8 @@ galaxy_info:
   - ssl
   - homepage
   - automation
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
 #  This propably leads to problems at a point, @todo solve it
 #  run_after:

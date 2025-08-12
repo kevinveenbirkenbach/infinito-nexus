@@ -20,4 +20,4 @@ The `util-desk-office` role uses the `community.general.pacman` module to:
 * Easily extendable by adding or removing package names  
 
 ## Further Resources
-* [Infinito.Nexus GitHub repository](https://github.com/kevinveenbirkenbach/infinito-nexus)
+* [Infinito.Nexus GitHub repository](https://s.infinito.nexus/code)

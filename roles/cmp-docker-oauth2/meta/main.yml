@@ -6,7 +6,7 @@ galaxy_info:
     in the application's configuration. This ensures authentication via a
     centralized OIDC provider (e.g., Keycloak) with minimal configuration overhead.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: "Kevin Veen-Birkenbach Consulting & Coaching Solutions"
   min_ansible_version: "2.9"
   platforms:
@@ -20,6 +20,6 @@ galaxy_info:
     - oidc
     - authentication
     - proxy
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"

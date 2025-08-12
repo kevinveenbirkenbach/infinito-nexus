@@ -6,7 +6,7 @@ Sphinx is a powerful documentation generator originally created for Python proje
 
 ## Overview
 
-This Docker Compose deployment leverages Ansible to automatically pull your source repository, build the documentation using Sphinx, and serve the generated HTML through a lightweight HTTP server. The entire process is containerized, which guarantees a consistent and isolated environment regardless of the host system. By default it uses [Infinito.Nexus Sphinx](https://github.com/kevinveenbirkenbach/infinito-nexus-sphinx) to build the docs.
+This Docker Compose deployment leverages Ansible to automatically pull your source repository, build the documentation using Sphinx, and serve the generated HTML through a lightweight HTTP server. The entire process is containerized, which guarantees a consistent and isolated environment regardless of the host system. By default it uses [Infinito.Nexus Sphinx](https://s.infinito.nexus/code-sphinx) to build the docs.
 
 ## Purpose
 

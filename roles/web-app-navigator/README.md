@@ -19,7 +19,7 @@ The **Infinito.Nexus Presentation** role automates the setup of an environment u
 
 ## Further Resources
 
-For more information about the **Infinito.Nexus Presentation**, check out the GitHub repository: [Infinito.Nexus Presentation](https://github.com/kevinveenbirkenbach/infinito-nexus-presentation)
+For more information about the **Infinito.Nexus Presentation**, check out the GitHub repository: [Infinito.Nexus Presentation](https://s.infinito.nexus/code-presentation)
 
 For more about **Reveal.js**, visit: [Reveal.js](https://revealjs.com/)
 

@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Injects Matomo analytics tracking code and noscript image tracker into Nginx-served HTML pages."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach
     Consulting & Coaching Solutions
@@ -11,9 +11,9 @@ galaxy_info:
   - nginx
   - matomo
   - analytics
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/srv-web-7-7-inj-matomo"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/srv-web-7-7-inj-matomo"
   min_ansible_version: "2.9"
   platforms:
   - name: Any

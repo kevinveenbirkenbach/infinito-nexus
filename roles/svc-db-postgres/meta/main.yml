@@ -4,7 +4,7 @@ galaxy_info:
     The Docker PostgreSQL Role offers an easy and efficient way to run a PostgreSQL database inside a Docker container.
     Manage your data securely and effectively, making it ideal for production or local development.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -20,6 +20,6 @@ galaxy_info:
   - database
   - administration
   - central-database
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"

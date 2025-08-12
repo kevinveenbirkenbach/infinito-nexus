@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Deploy Collabora Online CODE in Docker with automated proxy, networking, and environment configuration."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -20,9 +20,9 @@ galaxy_info:
     - office
     - wopi
     - code
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/web-app-collabora"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/web-app-collabora"
   logo:
     class: "fa-solid fa-file-code"
   run_after: []

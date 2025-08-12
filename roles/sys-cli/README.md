@@ -26,4 +26,4 @@ to get a list of available commands and options.
 
 ## Further Resources
 
-- [Infinito.Nexus Documentation](https://github.com/kevinveenbirkenbach/infinito-nexus/)
+- [Infinito.Nexus Documentation](https://s.infinito.nexus/code/)

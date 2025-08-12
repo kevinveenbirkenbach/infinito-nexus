@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Installs Git and configures it using a custom git-configurator for personal computers."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions

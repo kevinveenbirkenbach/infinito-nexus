@@ -3,7 +3,7 @@ galaxy_info:
   description: >
     The Meta Infinite Graph offers you an interactive, visual map of all Infinito.Nexus roles and their dependencies—making it easy to explore, understand, and navigate the complete structure of your infrastructure.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions

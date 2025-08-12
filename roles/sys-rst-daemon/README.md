@@ -15,7 +15,7 @@ When enabled via the `mode_reset` flag, this role will:
 ## License
 
 This role is released under the Infinito.Nexus NonCommercial License (CNCL).
-See [license details](https://s.veen.world/cncl)
+See [license details](https://s.infinito.nexus/license)
 
 ## Author Information
 

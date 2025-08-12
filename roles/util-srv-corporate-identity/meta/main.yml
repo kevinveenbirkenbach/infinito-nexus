@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Deploys a corporate identity environment with web assets, legal pages, and a portfolio site on Linux."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach  
     Consulting & Coaching Solutions  
@@ -20,8 +20,8 @@ galaxy_info:
     - identity
     - archlinux
     - persona
-  repository: https://github.com/kevinveenbirkenbach/infinito-nexus
-  issue_tracker_url: https://github.com/kevinveenbirkenbach/infinito-nexus/issues
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
   documentation: "https://docs.infinito.nexus/"
 dependencies:
   - web-svc-legal

@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Installs the qBittorrent torrent client via AUR on Arch Linux."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach
     Consulting & Coaching Solutions
@@ -10,9 +10,9 @@ galaxy_info:
   galaxy_tags:
   - qbittorrent
   - torrent
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/desk-qbittorrent"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/desk-qbittorrent"
   min_ansible_version: "2.9"
   platforms:
   - name: Archlinux

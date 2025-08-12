@@ -4,7 +4,7 @@ galaxy_info:
   description: >
     This role installs the base-devel package group, providing all core development tools needed for building software on Arch Linux systems.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: | 
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -15,8 +15,8 @@ galaxy_info:
     - base-devel
     - build
     - tools
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://wiki.archlinux.org/title/Development_packages"
   logo:
     class: "fas fa-tools"

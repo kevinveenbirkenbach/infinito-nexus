@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Deploys a legal imprint (Impressum) page in Nginx from a Jinja2 template."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach
     Consulting & Coaching Solutions
@@ -12,9 +12,9 @@ galaxy_info:
     - nginx
     - legal
     - imprint
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/web-svc-legal"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/web-svc-legal"
   min_ansible_version: "2.9"
   platforms:
     - name: Any

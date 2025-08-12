@@ -34,4 +34,4 @@ Kevin Veen-Birkenbach
 ## License
 
 Infinito.Nexus NonCommercial License (CNCL)  
-<https://s.veen.world/cncl>
+<https://s.infinito.nexus/license>

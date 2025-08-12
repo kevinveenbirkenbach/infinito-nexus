@@ -25,5 +25,5 @@ This Ansible role deploys and configures [FusionDirectory](https://www.fusiondir
 
 - [FusionDirectory Official Website](https://www.fusiondirectory.org/)  
 - [FusionDirectory Docker Image (tiredofit/fusiondirectory)](https://hub.docker.com/r/tiredofit/fusiondirectory)  
-- [Role Source & Documentation (Infinito.Nexus)](https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/web-app-fusiondirectory)  
-- [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl)  
+- [Role Source & Documentation (Infinito.Nexus)](https://s.infinito.nexus/code/tree/main/roles/web-app-fusiondirectory)  
+- [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)  

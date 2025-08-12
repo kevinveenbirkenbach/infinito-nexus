@@ -22,6 +22,6 @@ The purpose of this role is to simplify system updates by using the `pkgmgr` pac
 ## License
 
 Infinito.Nexus NonCommercial License (CNCL)  
-[Learn More](https://s.veen.world/cncl)
+[Learn More](https://s.infinito.nexus/license)
 
 

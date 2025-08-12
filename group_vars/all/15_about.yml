@@ -29,5 +29,5 @@ defaults_service_provider:
 
   legal:
     editorial_responsible:  "Johannes Gutenberg"
-    source_code:            "https://github.com/kevinveenbirkenbach/infinito-nexus"
+    source_code:            "https://s.infinito.nexus/code"
     imprint:                "{{WEB_PROTOCOL}}://{{ domains | get_domain('web-svc-html') }}/imprint.html"

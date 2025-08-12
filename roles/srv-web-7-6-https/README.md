@@ -54,7 +54,7 @@ All tasks are idempotent—once your certificates are in place and your configur
 ## License
 
 This role is released under the **Infinito.Nexus NonCommercial License (CNCL)**.
-See [https://s.veen.world/cncl](https://s.veen.world/cncl) for details.
+See [https://s.infinito.nexus/license](https://s.infinito.nexus/license) for details.
 
 ---
 

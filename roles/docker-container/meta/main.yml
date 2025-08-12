@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Provides shared Jinja2 snippets for Docker Compose service definitions (base, networks, healthchecks, depends_on)."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach
     Consulting & Coaching Solutions
@@ -11,9 +11,9 @@ galaxy_info:
   - docker
   - compose
   - jinja2
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/docker-container"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/docker-container"
   min_ansible_version: "2.9"
   platforms:
   - name: Any

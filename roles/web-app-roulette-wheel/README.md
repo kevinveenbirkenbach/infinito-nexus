@@ -27,4 +27,4 @@ Roulette Wheel is a Node.js-based front-end application that is containerized us
 ## Credits
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at [veen.world](https://www.veen.world).  
-Licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl).
+Licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license).

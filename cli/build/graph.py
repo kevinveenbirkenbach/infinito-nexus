@@ -72,7 +72,7 @@ def build_single_graph(
             node = {'id': role}
             node.update(meta['galaxy_info'])
             node['doc_url'] = f"https://docs.infinito.nexus/roles/{role}/README.html"
-            node['source_url'] = f"https://github.com/kevinveenbirkenbach/infinito-nexus/tree/master/roles/{role}"
+            node['source_url'] = f"https://s.infinito.nexus/code/tree/master/roles/{role}"
             nodes[role] = node
 
         if max_depth > 0 and depth >= max_depth:

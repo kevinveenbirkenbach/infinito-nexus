@@ -3,7 +3,7 @@ galaxy_info:
   description: |
     Automates Let's Encrypt SSL/TLS certificate renewals for Nginx using Certbot and systemd services with automatic reloads after successful renewals.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -22,8 +22,8 @@ galaxy_info:
   - https
   - systemd
   - automation
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
 dependencies:
 - sys-cln-certs

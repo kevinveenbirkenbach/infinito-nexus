@@ -3,7 +3,7 @@ galaxy_info:
   description: |
     Automates the retrieval of Let's Encrypt SSL/TLS certificates for Nginx domains using Certbot, supporting both single-domain and wildcard certificates with DNS and webroot ACME challenges.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -23,6 +23,6 @@ galaxy_info:
   - https
   - wildcard
   - automation
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"

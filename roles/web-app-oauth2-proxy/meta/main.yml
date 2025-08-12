@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Configures OAuth2 Proxy with Keycloak integration for protecting web applications in Docker Compose."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach
     Consulting & Coaching Solutions
@@ -13,9 +13,9 @@ galaxy_info:
     - proxy
     - keycloak
     - docker
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/web-app-oauth2-proxy"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/web-app-oauth2-proxy"
   min_ansible_version: "2.9"
   platforms:
     - name: Any

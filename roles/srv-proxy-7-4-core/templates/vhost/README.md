@@ -74,5 +74,5 @@ Designed for services (e.g., chat servers, real-time dashboards) needing fast, p
 ## Author & Project
 
 By [Kevin Veen-Birkenbach](https://www.veen.world)  
-Part of the [Infinito.Nexus Project](https://github.com/kevinveenbirkenbach/infinito-nexus)  
-Licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl)
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
+Licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)

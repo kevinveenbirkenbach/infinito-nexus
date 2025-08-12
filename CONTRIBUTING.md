@@ -5,7 +5,7 @@ Thank you for your interest in contributing to Infinito.Nexus! We welcome contri
 ## How to Contribute
 
 There are several ways you can help:
-- **Reporting Issues:** Found a bug or have a feature request? Please open an issue on our [GitHub Issues page](https://github.com/kevinveenbirkenbach/infinito-nexus/issues) with a clear description and steps to reproduce the problem.
+- **Reporting Issues:** Found a bug or have a feature request? Please open an issue on our [GitHub Issues page](https://s.infinito.nexus/issues) with a clear description and steps to reproduce the problem.
 - **Code Contributions:** If you'd like to contribute code, fork the repository, create a new branch for your feature or bug fix, and submit a pull request. Ensure your code adheres to our coding style and includes tests where applicable.
 - **Documentation:** Improving the documentation is a great way to contribute. Whether it's clarifying an existing section or adding new guides, your contributions help others understand and use Infinito.Nexus effectively.
 - **Financial Contributions:** If you appreciate Infinito.Nexus and want to support its ongoing development, consider making a financial contribution. For more details, please see our [donate options](12_DONATE.md).

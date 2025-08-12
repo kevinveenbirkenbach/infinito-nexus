@@ -5,7 +5,7 @@ galaxy_info:
     Nginx `/logout` proxies for `*.infinito.nexus`, and the `conductor.html.j2`
     template for unified logout orchestration.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen‑Birkenbach
     Consulting & Coaching Solutions

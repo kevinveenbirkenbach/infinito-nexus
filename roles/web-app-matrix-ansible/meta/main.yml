@@ -5,7 +5,7 @@ galaxy_info:
     Benefit from a secure, federated, and scalable communication platform with integrated support
     for bridges and modern web clients.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -17,8 +17,8 @@ galaxy_info:
   - decentralized
   - real-time
   - encrypted
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
   logo:
     class: "fa-solid fa-satellite-dish"

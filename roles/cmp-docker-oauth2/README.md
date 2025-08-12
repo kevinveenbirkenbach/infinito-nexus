@@ -12,7 +12,7 @@ This Ansible role enhances a Docker Compose application by conditionally enablin
 ## License
 
 Infinito.Nexus NonCommercial License (CNCL)
-See: [https://s.veen.world/cncl](https://s.veen.world/cncl)
+See: [https://s.infinito.nexus/license](https://s.infinito.nexus/license)
 
 ## Author
 

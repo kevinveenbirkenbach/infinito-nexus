@@ -6,7 +6,7 @@ galaxy_info:
     It automates the process of pulling the latest source code from GitHub,
     building a Docker image, and deploying the application.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -16,8 +16,8 @@ galaxy_info:
     - nodejs
     - roulette
     - application
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
   logo:
     class: "fa-solid fa-dice"

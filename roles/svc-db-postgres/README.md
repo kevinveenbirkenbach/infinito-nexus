@@ -26,5 +26,5 @@ The purpose of this role is to provide an effortless way to deploy a PostgreSQL 
 
 Developed by **Kevin Veen-Birkenbach**.  
 Discover more at [www.veen.world](https://www.veen.world)  
-Part of the [Infinito.Nexus Project](https://github.com/kevinveenbirkenbach/infinito-nexus)  
-License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl)
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
+License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)

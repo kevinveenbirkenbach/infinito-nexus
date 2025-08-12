@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Empower your customer relationship management with EspoCRM. Tailored for businesses of all sizes, EspoCRM enables you to manage your sales, customer interactions, and business processes with ease, fostering productivity and streamlined communication across teams."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -11,8 +11,8 @@ galaxy_info:
     - espocrm
     - crm
     - sales
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
   logo:
     class: "fa-solid fa-phone"

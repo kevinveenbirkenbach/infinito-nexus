@@ -250,7 +250,7 @@ if __name__ == "__main__":
             "For commercial use, a license agreement with Kevin Veen-Birkenbach is required. \n",
             Style.DIM
         ))
-        print(color_text("License: https://s.veen.world/cncl", Style.DIM))
+        print(color_text("License: https://s.infinito.nexus/license", Style.DIM))
         print()
         print(color_text("🎉🌈 Happy IT Infrastructuring! 🚀🔧✨", Fore.MAGENTA + Style.BRIGHT))
         print()

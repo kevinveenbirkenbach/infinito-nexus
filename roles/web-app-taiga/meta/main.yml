@@ -5,7 +5,7 @@ galaxy_info:
     Supercharge your project management with Taiga—a dynamic, agile tool designed for teams that thrive on creativity and collaboration.
     Experience a vibrant interface, robust task tracking, and an energetic platform that drives your projects to success.
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -23,8 +23,8 @@ galaxy_info:
     - openid
     - archlinux
     - infinito
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
   logo:
     class: "fa-solid fa-tasks"

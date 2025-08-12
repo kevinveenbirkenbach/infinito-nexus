@@ -32,4 +32,4 @@ It solves the common challenge of logging a user out from all connected apps wit
 
 ---
 
-*This role is licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl).*
+*This role is licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license).*

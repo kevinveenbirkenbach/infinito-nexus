@@ -15,7 +15,7 @@ For further details on installation, configuration, and upgrades, please refer t
 - [User_Administration.md](./User_Administration.md)
 
 For more information about this role, visit the GitHub repositories:
-- [Mailu](https://github.com/kevinveenbirkenbach/infinito-nexus/tree/master/roles/web-app-mailu)
+- [Mailu](https://s.infinito.nexus/code/tree/master/roles/web-app-mailu)
 - [Mailu-OIDC](https://github.com/heviat/Mailu-OIDC)
 
 ## Features

@@ -28,4 +28,4 @@ The goal of this role is to deliver a **hassle-free, production-ready reverse pr
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 More at <https://www.veen.world>
 
-Part of the **Infinito.Nexus Project** — licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl)
+Part of the **Infinito.Nexus Project** — licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)

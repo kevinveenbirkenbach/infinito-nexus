@@ -22,4 +22,4 @@ The purpose of this role is to ensure that GNOME Terminal is installed and prope
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at [www.veen.world](https://www.veen.world)
 
-License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl)
+License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)

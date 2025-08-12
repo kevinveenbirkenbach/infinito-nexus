@@ -26,5 +26,5 @@ The role's purpose is to automate the provisioning and configuration of a centra
 
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at [www.veen.world](https://www.veen.world)  
-Part of the [Infinito.Nexus Project](https://github.com/kevinveenbirkenbach/infinito-nexus)  
-License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl)
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
+License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)

@@ -6,7 +6,7 @@ galaxy_info:
     Consulting & Coaching Solutions  
     https://www.veen.world
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   min_ansible_version: "2.9"
   platforms:
   - name: Archlinux
@@ -17,5 +17,5 @@ galaxy_info:
   - logs
   - health
   - systemd
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
+  repository: "https://s.infinito.nexus/code"
   documentation: "https://docs.infinito.nexus"

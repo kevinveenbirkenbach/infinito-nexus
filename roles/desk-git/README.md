@@ -21,4 +21,4 @@ Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [www.veen.world](https://www.veen.world)  
 For Git configuration details, see [git-configurator on GitHub](https://github.com/kevinveenbirkenbach/git-configurator).
 
-License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.veen.world/cncl)
+License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)

@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Provides a Docker Compose snippet for a Memcached service (`memcached`) with optional volume, healthcheck, and logging."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -11,7 +11,7 @@ galaxy_info:
     - memcached
     - docker
     - cache
-  repository:         "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url:  "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation:      "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/svc-db-memcached"
+  repository:         "https://s.infinito.nexus/code"
+  issue_tracker_url:  "https://s.infinito.nexus/issues"
+  documentation:      "https://s.infinito.nexus/code/tree/main/roles/svc-db-memcached"
 dependencies: []

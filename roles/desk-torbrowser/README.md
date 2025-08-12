@@ -20,4 +20,4 @@ The `desk-torbrowser` role uses the `community.general.pacman` module to:
 ## Further Resources
 
 * [Tor Project documentation](https://www.torproject.org/)
-* [Infinito.Nexus GitHub repository](https://github.com/kevinveenbirkenbach/infinito-nexus)
+* [Infinito.Nexus GitHub repository](https://s.infinito.nexus/code)

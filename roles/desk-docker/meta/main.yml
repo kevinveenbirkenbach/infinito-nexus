@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Installs Docker and Docker Compose, and adds a user to the Docker group for non-root usage on development machines."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
-  license_url: "https://s.veen.world/cncl"
+  license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach
     Consulting & Coaching Solutions
@@ -11,9 +11,9 @@ galaxy_info:
   galaxy_tags:
     - docker
     - development
-  repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
-  issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
-  documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/desk-docker"
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/desk-docker"
   min_ansible_version: "2.9"
   platforms:
     - name: Archlinux

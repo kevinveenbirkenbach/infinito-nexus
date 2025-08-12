@@ -29,4 +29,4 @@ The purpose of this role is to simplify the installation of Kevin's Package Mana
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at [www.veen.world](https://www.veen.world)
 
-Part of the [Infinito.Nexus Project](https://github.com/kevinveenbirkenbach/infinito-nexus)  
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
