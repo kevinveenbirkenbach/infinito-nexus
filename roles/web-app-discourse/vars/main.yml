@@ -15,4 +15,4 @@ discourse_redis_host:                   "{{ application_id |get_entity_name }}-r
 
 # General Docker Configuration
 docker_repository_directory :           "{{ docker_compose.directories.services}}{{applications | get_app_conf( application_id, 'repository') }}/"
-docker_compose_flush_handlers:          false
+docker_compose_flush_handlers:          true
