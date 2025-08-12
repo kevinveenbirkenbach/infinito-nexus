@@ -15,5 +15,5 @@
     name: cmp-rdbms
 
 - name: "For '{{ application_id }}': Load cmp-docker-oauth2"
-  include_role: 
+  include_role:
     name: cmp-docker-oauth2

@@ -5,7 +5,7 @@
     handler_role_name: "svc-prx-openresty"
 
 - name: "For '{{ application_id }}': load docker and db"
-  include_role: 
+  include_role:
     name: cmp-db-docker
 
 - name: "For '{{ application_id }}': include role srv-proxy-6-6-domain"
