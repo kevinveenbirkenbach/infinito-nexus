@@ -1,23 +1,24 @@
 
 - name: "reset (if enabled)"
-  include_tasks: reset.yml 
+  include_tasks: 01_reset.yml 
   when: mode_reset | bool and run_once_sys_timer is not defined
-
-- name: create {{service_name}}.infinito.timer
-  template:
-    src: dummy.timer.j2
-    dest: "/etc/systemd/system/{{service_name}}.infinito.timer"
-  register: dummy_timer
-
-- name: "restart timer"
-  systemd:
-    daemon_reload: yes
-    name: "{{service_name}}.infinito.timer"
-    state: restarted
-    enabled: yes
-  when: dummy_timer.changed or activate_all_timers | bool
 
 - name: run {{ role_name }} once
   set_fact:
     run_once_sys_timer: true
   when: run_once_sys_timer is not defined
+
+- name: create {{ sys_timer_file }}
+  template:
+    src: dummy.timer.j2
+    dest: "/etc/systemd/system/{{ sys_timer_file }}"
+  register: dummy_timer
+
+- name: "restart timer"
+  systemd:
+    daemon_reload: yes
+    name: "{{ sys_timer_file }}"
+    state: restarted
+    enabled: yes
+  when: dummy_timer.changed or activate_all_timers | bool
+
