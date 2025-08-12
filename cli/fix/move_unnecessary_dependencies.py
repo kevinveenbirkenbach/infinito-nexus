@@ -242,14 +242,14 @@ def build_include_block_yaml(consumer_role: str, moved_deps: List[str]) -> List[
     if len(moved_deps) == 1:
         inner_tasks = [
             {
-                "name": f"Include moved dependency '{moved_deps[0]}'",
+                "name": f"Include dependency '{moved_deps[0]}'",
                 "include_role": {"name": moved_deps[0]},
             }
         ]
     else:
         inner_tasks = [
             {
-                "name": "Include moved dependencies",
+                "name": "Include dependencies",
                 "include_role": {"name": "{{ item }}"},
                 "loop": moved_deps,
             }
