@@ -2,7 +2,7 @@
 application_id:                 "web-app-peertube"
 database_type:                  "postgres"
 
-# Docker Specific
+# Docker
 docker_compose_flush_handlers:  true
 
 # Role variables

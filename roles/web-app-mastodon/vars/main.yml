@@ -1,5 +1,8 @@
+# General
 application_id:               "web-app-mastodon"
 database_type:                "postgres"
+
+# Mastodon Specific
 mastodon_version:             "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.version', True) }}"
 mastodon_image:               "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.image', True) }}"
 mastodon_name:                "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.name', True) }}"

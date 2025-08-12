@@ -3,7 +3,7 @@ database_type:  "postgres"
 
 container_port:   "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.port', True) }}"
 
-# Docker specific
+# Docker
 docker_compose_flush_handlers: false
 
 # Listmonk Specific
