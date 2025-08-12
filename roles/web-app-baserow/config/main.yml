@@ -16,8 +16,8 @@ docker:
       image:              "baserow/baserow"
       version:            "latest"
       name:               "baserow"
-    volumes:
-      data:               "baserow_data"
+  volumes:
+    data:               "baserow_data"
 server:
   domains:
     canonical:
