@@ -1,0 +1,47 @@
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - dev-fakeroot
+  - dev-git
+  - dev-base-devel
+
+- name: install yay
+  community.general.pacman:
+    name:
+    - base-devel
+    - patch
+    state: present
+
+- name: Create the `aur_builder` user
+  become: true
+  ansible.builtin.user:
+    name: aur_builder
+    create_home: yes
+    group: wheel
+
+- name: Allow the `aur_builder` user to run `sudo pacman` without a password
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/11-install-aur_builder
+    line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+    create: yes
+    validate: 'visudo -cf %s'
+
+- name: Clone yay from AUR
+  become: true
+  become_user: aur_builder
+  git:
+    repo: https://aur.archlinux.org/yay.git
+    dest: /home/aur_builder/yay
+    clone: yes
+    update: yes
+
+- name: Build and install yay
+  become: true
+  become_user: aur_builder
+  shell: |
+    cd /home/aur_builder/yay
+    makepkg -si --noconfirm
+  args:
+    creates: /usr/bin/yay

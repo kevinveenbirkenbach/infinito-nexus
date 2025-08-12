@@ -1,11 +1,10 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'docker-container'
-    include_role:
+- block:
+  - include_role:
       name: docker-container
-  - set_fact:
-      run_once_docker_compose: true
+    when: run_once_docker_container is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_docker_compose is not defined
+
 - name: "Load variables from {{ docker_compose_variable_file }} for whole play"
   include_vars: "{{ docker_compose_variable_file }}"
 

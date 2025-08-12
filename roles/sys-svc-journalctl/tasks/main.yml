@@ -1,11 +1,11 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'sys-hlth-journalctl'
+- block:
+  - name: Include dependency 'sys-hlth-journalctl'
     include_role:
       name: sys-hlth-journalctl
-  - set_fact:
-      run_once_sys_svc_journalctl: true
+    when: run_once_sys_hlth_journalctl is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_sys_svc_journalctl is not defined
+
 - name: copy journald.conf
   template:
     src: templates/journald.conf.j2

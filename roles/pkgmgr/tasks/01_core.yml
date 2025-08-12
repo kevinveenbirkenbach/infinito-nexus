@@ -1,15 +1,11 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - dev-git
-    - dev-make
-    - dev-python-yaml
-  - set_fact:
-      run_once_pkgmgr: true
-  when: run_once_pkgmgr is not defined
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - dev-git
+  - dev-make
+  - dev-python-yaml
+
 - name: Ensure GitHub host key is in known_hosts
   known_hosts:
     path: "~/.ssh/known_hosts"

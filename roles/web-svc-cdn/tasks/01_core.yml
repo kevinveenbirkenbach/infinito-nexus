@@ -1,13 +1,10 @@
-- block:
-  - name: Include dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - srv-web-7-6-https
-    - dev-git
-  - include_tasks: utils/run_once.yml
-  when: run_once_web_svc_file is not defined
-
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - srv-web-7-6-https
+  - dev-git
+  
 - name: "include role for {{application_id}} to receive certs & do modification routines"
   include_role:
     name: srv-web-7-6-composer

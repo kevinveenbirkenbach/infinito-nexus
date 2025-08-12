@@ -1,6 +1,5 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
+- block:
+  - name: Include dependencies
     include_role:
       name: '{{ item }}'
     loop:
@@ -9,9 +8,9 @@
     - sys-lock
     - user-root
     - sys-rst-daemon
-  - set_fact:
-      run_once_svc_bkp_rmt_2_loc: true
+  - include_tasks: utils/run_once.yml
   when: run_once_svc_bkp_rmt_2_loc is not defined
+
 - name: "create {{docker_backup_remote_to_local_folder}}"
   file:
     path: "{{docker_backup_remote_to_local_folder}}"

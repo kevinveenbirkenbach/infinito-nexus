@@ -1,20 +1,14 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'dev-yay'
+- block:
+  - name: Include dependency 'dev-yay'
     include_role:
       name: dev-yay
-  - set_fact:
-      run_once_update_yay: true
-  when: run_once_update_yay is not defined
-- name: upgrade the system using yay, only act on AUR packages.
-  become: false
-  kewlfft.aur.aur:
-    upgrade: yes
-    use: yay
-    aur_only: yes
-  when: run_once_update_yay is not defined
+    when: run_once_dev_yay is not defined
 
-- name: run update yay once
-  set_fact:
-    run_once_update_yay: true
+  - name: upgrade the system using yay, only act on AUR packages.
+    become: false
+    kewlfft.aur.aur:
+      upgrade: yes
+      use: yay
+      aur_only: yes
+  - include_tasks: utils/run_once.yml
   when: run_once_update_yay is not defined

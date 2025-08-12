@@ -1,11 +1,9 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
+- block:
+  - name: Include dependencies
     include_role:
       name: '{{ item }}'
     loop:
     - sys-bkp-provider-user
     - sys-cln-bkps-timer
-  - set_fact:
-      run_once_sys_bkp_provider: true
+  - include_tasks: utils/run_once.yml
   when: run_once_sys_bkp_provider is not defined

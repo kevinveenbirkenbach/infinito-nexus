@@ -1,14 +1,13 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'dev-yay'
+- block:
+  - name: Include dependency 'dev-yay'
     include_role:
       name: dev-yay
-  - set_fact:
-      run_once_desk_zoom: true
+
+  - name: install video conference software
+    kewlfft.aur.aur:
+      use: yay
+      name:
+      - zoom
+    become: false
+  - include_tasks: utils/run_once.yml
   when: run_once_desk_zoom is not defined
-- name: install video conference software
-  kewlfft.aur.aur:
-    use: yay
-    name:
-    - zoom
-  become: false

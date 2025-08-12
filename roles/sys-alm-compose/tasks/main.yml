@@ -1,22 +1,14 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
+- block:
+  - name: Include dependencies
     include_role:
       name: '{{ item }}'
     loop:
     - sys-alm-telegram
     - sys-alm-email
-  - set_fact:
-      run_once_sys_alm_compose: true
-  when: run_once_sys_alm_compose is not defined
-- name: configure sys-alm-compose.infinito@.service
-  template:
-    src: sys-alm-compose@.service.j2
-    dest: "/etc/systemd/system/sys-alm-compose.infinito@.service"
-  notify: "restart sys-alm-compose service"
-  when: run_once_sys_alm_compose is not defined
-
-- name: run the systemd_notifier_service tasks once
-  set_fact:
-    run_once_sys_alm_compose: true
+  - name: configure sys-alm-compose.infinito@.service
+    template:
+      src: sys-alm-compose@.service.j2
+      dest: "/etc/systemd/system/sys-alm-compose.infinito@.service"
+    notify: "restart sys-alm-compose service"
+  - include_tasks: utils/run_once.yml
   when: run_once_sys_alm_compose is not defined

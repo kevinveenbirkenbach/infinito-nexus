@@ -1,21 +1,4 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'srv-web-6-6-tls-renew'
-    include_role:
-      name: srv-web-6-6-tls-renew
-  - set_fact:
-      run_once_srv_web_7_7_letsencrypt: true
-  when: run_once_srv_web_7_7_letsencrypt is not defined
 - block:
-  - name: create nginx letsencrypt config file
-    template:
-      src: "letsencrypt.conf.j2"
-      dest: "{{nginx.directories.http.global}}letsencrypt.conf"
-    notify: restart openresty
-
-  - name: "Set CAA records for all base domains"
-    include_tasks: 01_set-caa-records.yml
-    when: dns_provider == 'cloudflare'
-
+  - include_tasks: 01_core.yml
   - include_tasks: utils/run_once.yml
   when: run_once_srv_web_7_7_letsencrypt is not defined

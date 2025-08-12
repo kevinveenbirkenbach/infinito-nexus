@@ -1,11 +1,12 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'srv-web-7-4-core'
+- block:
+
+  - name: Include dependency 'srv-web-7-4-core'
     include_role:
       name: srv-web-7-4-core
-  - set_fact:
-      run_once_srv_web_7_7_inj_javascript: true
+    when: run_once_srv_web_7_4_core is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_srv_web_7_7_inj_javascript is not defined
+
 - name: "Load JavaScript code for '{{ application_id }}'"
   set_fact:
     javascript_code: "{{ lookup('template', modifier_javascript_template_file) }}"

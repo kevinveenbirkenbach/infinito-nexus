@@ -1,19 +1,18 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
+- block:
+  - name: Include dependencies
     include_role:
       name: '{{ item }}'
     loop:
     - dev-gcc
     - dev-yay
-  - set_fact:
-      run_once_util_dev_admin: true
+
+  - name: install administration tools
+    community.general.pacman:
+      name:
+      - base-devel
+      - cmake
+      - fdupes
+      - p7zip
+      state: present
+  - include_tasks: utils/run_once.yml
   when: run_once_util_dev_admin is not defined
-- name: install administration tools
-  community.general.pacman:
-    name:
-    - base-devel
-    - cmake
-    - fdupes
-    - p7zip
-    state: present

@@ -1,11 +1,8 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'sys-lock'
-    include_role:
-      name: sys-lock
-  - set_fact:
-      run_once_sys_rpr_docker_soft: true
-  when: run_once_sys_rpr_docker_soft is not defined
+- name: Include dependency 'sys-lock'
+  include_role:
+    name: sys-lock
+  when: run_once_sys_lock is not defined
+
 - name: "create {{heal_docker}}"
   file:
     path: "{{heal_docker}}"

@@ -1,14 +1,13 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
+- block:
+  - name: Include dependencies
     include_role:
       name: '{{ item }}'
     loop:
     - sys-cln-bkps-service
     - sys-lock
-  - set_fact:
-      run_once_svc_bkp_loc_2_usb: true
+  - include_tasks: utils/run_once.yml
   when: run_once_svc_bkp_loc_2_usb is not defined
+
 - name: Fail if any backup_to_usb variable is empty
   assert:
     that:
@@ -21,7 +20,7 @@
         - mount
         - target
         - source
-      to non‑empty values in your configuration file. 
+      to non‑empty values in your configuration file.
 
 - name: Copy backup script to the scripts directory
   copy:

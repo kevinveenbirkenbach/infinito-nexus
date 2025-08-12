@@ -1,16 +1,12 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - dev-python-pip
-    - sys-alm-compose
-    - sys-lock
-    - sys-rst-daemon
-  - set_fact:
-      run_once_sys_cln_bkps_service: true
-  when: run_once_sys_cln_bkps_service is not defined
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - dev-python-pip
+  - sys-alm-compose
+  - sys-lock
+  - sys-rst-daemon
+
 - name: install lsof and python-psutil
   community.general.pacman:
     name:

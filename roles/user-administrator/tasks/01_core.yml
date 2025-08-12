@@ -1,11 +1,8 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'sys-sudo'
-    include_role:
-      name: sys-sudo
-  - set_fact:
-      run_once_user_administrator: true
-  when: run_once_user_administrator is not defined
+- name: Include dependency 'sys-sudo'
+  include_role:
+    name: sys-sudo
+  when: run_once_sys_sudo is not defined
+
 - name: create administrator
   user:
     name: administrator

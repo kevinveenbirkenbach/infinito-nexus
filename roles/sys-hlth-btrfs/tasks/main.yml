@@ -1,11 +1,13 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'sys-alm-compose'
+- block:
+
+  - name: Include dependency 'sys-alm-compose'
     include_role:
       name: sys-alm-compose
-  - set_fact:
-      run_once_sys_hlth_btrfs: true
+    when: run_once_sys_alm_compose is not defined
+
+  - include_tasks: utils/run_once.yml
   when: run_once_sys_hlth_btrfs is not defined
+
 - name: "create {{docker_health_btrfs_folder}}"
   file:
     path: "{{docker_health_btrfs_folder}}"

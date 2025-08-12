@@ -1,11 +1,11 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'srv-web-7-4-core'
+- block:
+  - name: Include dependency 'srv-web-7-4-core'
     include_role:
       name: srv-web-7-4-core
-  - set_fact:
-      run_once_srv_web_7_7_inj_port_ui_desktop: true
+    when: run_once_srv_web_7_4_core is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_srv_web_7_7_inj_port_ui_desktop is not defined
+
 - name: "Load iFrame handler JS template for '{{ application_id }}'"
   set_fact:
     iframe_code: "{{ lookup('template','iframe-handler.js.j2') }}"

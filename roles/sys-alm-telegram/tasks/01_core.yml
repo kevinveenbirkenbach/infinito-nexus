@@ -1,11 +1,8 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'sys-rst-daemon'
-    include_role:
-      name: sys-rst-daemon
-  - set_fact:
-      run_once_sys_alm_telegram: true
-  when: run_once_sys_alm_telegram is not defined
+- name: Include dependency 'sys-rst-daemon'
+  include_role:
+    name: sys-rst-daemon
+  when: run_once_sys_rst_daemon is not defined
+
 - name: Fail if Telegram bot credentials are not set
   assert:
     that:

@@ -1,16 +1,12 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-bkp-provider
-    - sys-alm-compose
-    - sys-lock
-    - sys-bkp-directory-validator
-  - set_fact:
-      run_once_sys_bkp_docker_2_loc: true
-  when: run_once_sys_bkp_docker_2_loc is not defined
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - sys-bkp-provider
+  - sys-alm-compose
+  - sys-lock
+  - sys-bkp-directory-validator
+
 - include_tasks: 02_pkgmgr_routines.yml
   when: backup_docker_to_local_folder is not defined
 

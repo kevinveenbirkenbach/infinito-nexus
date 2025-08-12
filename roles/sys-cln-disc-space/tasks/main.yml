@@ -1,15 +1,14 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
+- block:
+  - name: Include dependencies
     include_role:
       name: '{{ item }}'
     loop:
     - sys-alm-compose
     - sys-lock
     - sys-rst-daemon
-  - set_fact:
-      run_once_sys_cln_disc_space: true
+  - include_tasks: utils/run_once.yml
   when: run_once_sys_cln_disc_space is not defined
+  
 - name: "create {{cleanup_disc_space_folder}}"
   file:
     path: "{{cleanup_disc_space_folder}}"

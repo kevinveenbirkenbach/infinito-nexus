@@ -1,27 +1,6 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-cln-bkps-service
-    - sys-rst-daemon
-  - set_fact:
+- block:
+  - include_tasks: 01_core.yml
+  - name: run the cleanup_backups_timer tasks once
+    set_fact:
       run_once_sys_cln_bkps_timer: true
-  when: run_once_sys_cln_bkps_timer is not defined
-- name: set service_name to sys-cln-backups
-  set_fact:
-    service_name: "sys-cln-backups"
-  when: run_once_sys_cln_bkps_timer is not defined
-
-- name: "include role for sys-timer for {{service_name}}"
-  include_role:
-    name: sys-timer
-  vars:
-    on_calendar: "{{on_calendar_cleanup_backups}}"
-  when: run_once_sys_cln_bkps_timer is not defined
-
-- name: run the cleanup_backups_timer tasks once
-  set_fact:
-    run_once_sys_cln_bkps_timer: true
   when: run_once_sys_cln_bkps_timer is not defined

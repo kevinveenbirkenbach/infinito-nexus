@@ -1,11 +1,11 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'sys-alm-telegram'
+- block:
+  - name: Include dependency 'sys-alm-telegram'
     include_role:
       name: sys-alm-telegram
-  - set_fact:
-      run_once_sys_hlth_msmtp: true
+    when: run_once_sys_alm_telegram is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_sys_hlth_msmtp is not defined
+
 - name: "create {{ health_msmtp_folder }}"
   file:
     path: "{{ health_msmtp_folder }}"

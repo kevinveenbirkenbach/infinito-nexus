@@ -1,14 +1,10 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-svc-msmtp
-    - sys-rst-daemon
-  - set_fact:
-      run_once_sys_alm_email: true
-  when: run_once_sys_alm_email is not defined
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - sys-svc-msmtp
+  - sys-rst-daemon
+
 - name: "create {{systemd_notifier_email_folder}}"
   file:
     path: "{{systemd_notifier_email_folder}}"

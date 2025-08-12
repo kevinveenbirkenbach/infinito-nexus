@@ -1,14 +1,10 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-alm-compose
-    - sys-rst-daemon
-  - set_fact:
-      run_once_sys_cln_certs: true
-  when: run_once_sys_cln_certs is not defined
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - sys-alm-compose
+  - sys-rst-daemon
+
 - name: "pkgmgr install"
   include_role:
     name: pkgmgr-install

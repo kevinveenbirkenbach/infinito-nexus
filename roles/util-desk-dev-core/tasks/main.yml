@@ -1,13 +1,13 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'pkgmgr'
+- block:
+  - name: Include dependency 'pkgmgr'
     include_role:
       name: pkgmgr
-  - set_fact:
-      run_once_util_desk_dev_core: true
+    when: run_once_pkgmgr is not defined
+
+  - name: install base developer tools
+    community.general.pacman:
+      name:
+      - code
+      state: present
+  - include_tasks: utils/run_once.yml
   when: run_once_util_desk_dev_core is not defined
-- name: install base developer tools
-  community.general.pacman:
-    name:
-    - code
-    state: present

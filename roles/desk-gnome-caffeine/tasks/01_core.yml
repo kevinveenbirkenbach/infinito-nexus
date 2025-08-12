@@ -1,0 +1,21 @@
+- name: Include dependency 'dev-yay'
+  include_role:
+    name: dev-yay
+  when: run_once_dev_yay is not defined
+
+- name: Install caffeine
+  kewlfft.aur.aur:
+    use: yay
+    name:
+    - caffeine-ng
+  become: false
+
+- name: Create autostart directory if it doesn't exist
+  file:
+    path: "{{auto_start_directory}}"
+    state: directory
+
+- name: Copy caffeine.desktop file to autostart directory
+  template:
+    src: caffeine.desktop.j2
+    dest: "{{auto_start_directory}}caffeine.desktop"

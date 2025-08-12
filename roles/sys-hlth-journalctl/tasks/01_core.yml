@@ -1,11 +1,8 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'sys-alm-compose'
-    include_role:
-      name: sys-alm-compose
-  - set_fact:
-      run_once_sys_hlth_journalctl: true
-  when: run_once_sys_hlth_journalctl is not defined
+- name: Include dependency 'sys-alm-compose'
+  include_role:
+    name: sys-alm-compose
+  when: run_once_sys_alm_compose is not defined
+
 - name: "create {{health_journalctl_folder}}"
   file:
     path: "{{health_journalctl_folder}}"

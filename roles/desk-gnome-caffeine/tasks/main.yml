@@ -1,24 +1,4 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'dev-yay'
-    include_role:
-      name: dev-yay
-  - set_fact:
-      run_once_desk_gnome_caffeine: true
+- block:
+  - include_tasks: 01_core.yml
+  - include_tasks: utils/run_once.yml
   when: run_once_desk_gnome_caffeine is not defined
-- name: Install caffeine
-  kewlfft.aur.aur:
-    use: yay
-    name:
-    - caffeine-ng
-  become: false
-
-- name: Create autostart directory if it doesn't exist
-  file:
-    path: "{{auto_start_directory}}"
-    state: directory
-
-- name: Copy caffeine.desktop file to autostart directory
-  template:
-    src: caffeine.desktop.j2
-    dest: "{{auto_start_directory}}caffeine.desktop"

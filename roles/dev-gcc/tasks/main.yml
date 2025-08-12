@@ -1,6 +1,10 @@
 ---
-- name: Install GCC
-  community.general.pacman:
-    name: gcc
-    state: present
-    update_cache: yes
+- block:
+  - name: Install GCC
+    community.general.pacman:
+      name: gcc
+      state: present
+      update_cache: yes
+  - set_fact:
+      run_once_dev_gcc: true
+  when: run_once_dev_gcc is not defined

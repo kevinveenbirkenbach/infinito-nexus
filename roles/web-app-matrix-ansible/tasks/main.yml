@@ -1,11 +1,12 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'srv-proxy-7-4-core'
+- block:
+  - name: Include dependency 'srv-proxy-7-4-core'
     include_role:
       name: srv-proxy-7-4-core
-  - set_fact:
-      run_once_web_app_matrix_ansible: true
+    when: run_once_srv_proxy_7_4_core is not defined
+
+  - include_tasks: utils/run_once.yml
   when: run_once_web_app_matrix_ansible is not defined
+
 - name: "include role srv-proxy-6-6-domain for {{application_id}}"
   include_role:
     name: srv-proxy-6-6-domain

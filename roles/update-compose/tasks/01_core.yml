@@ -30,7 +30,9 @@
 - name: "Update with yay"
   include_role:
     name: update-yay
-  when: yay_installed.rc == 0
+  when:
+    - yay_installed.rc == 0
+    - run_once_update_yay is not defined
 
 - name: "Check if pip is installed"
   command: which pip
@@ -41,6 +43,8 @@
 - name: "Update with pip"
   include_role:
     name: update-pip
+  when:
+    - run_once_update_pip is not defined
 
 - name: "Check if pkgmgr command is available"
   command: "which pkgmgr"

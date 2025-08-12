@@ -1,8 +1,6 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'docker-core'
-    include_role:
+- block:
+  - include_role:
       name: docker-core
-  - set_fact:
-      run_once_docker_container: true
+    when: run_once_docker_core is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_docker_container is not defined

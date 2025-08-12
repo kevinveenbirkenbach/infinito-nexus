@@ -1,16 +1,12 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-alm-compose
-    - sys-lock
-    - sys-bkp-directory-validator
-    - sys-rst-daemon
-  - set_fact:
-      run_once_sys_cln_faild_bkps: true
-  when: run_once_sys_cln_faild_bkps is not defined
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - sys-alm-compose
+  - sys-lock
+  - sys-bkp-directory-validator
+  - sys-rst-daemon
+
 - name: "pkgmgr install"
   include_role:
     name: pkgmgr-install

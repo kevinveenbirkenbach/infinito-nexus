@@ -1,12 +1,10 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependencies
+- block:
+  - name: Include dependencies
     include_role:
       name: '{{ item }}'
     loop:
     - srv-web-7-4-core
     - sys-cln-domains
     - srv-web-7-7-letsencrypt
-  - set_fact:
-      run_once_srv_web_7_6_https: true
+  - include_tasks: utils/run_once.yml
   when: run_once_srv_web_7_6_https is not defined

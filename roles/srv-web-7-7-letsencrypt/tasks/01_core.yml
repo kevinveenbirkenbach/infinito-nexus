@@ -1,0 +1,14 @@
+  - name: Include dependency 'srv-web-6-6-tls-renew'
+    include_role:
+      name: srv-web-6-6-tls-renew
+    when: run_once_srv_web_6_6_tls_renew is not defined
+
+  - name: create nginx letsencrypt config file
+    template:
+      src: "letsencrypt.conf.j2"
+      dest: "{{nginx.directories.http.global}}letsencrypt.conf"
+    notify: restart openresty
+
+  - name: "Set CAA records for all base domains"
+    include_tasks: 01_set-caa-records.yml
+    when: dns_provider == 'cloudflare'

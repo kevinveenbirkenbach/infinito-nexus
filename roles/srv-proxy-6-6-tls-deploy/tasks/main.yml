@@ -1,17 +1,8 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'sys-alm-compose'
-    include_role:
-      name: sys-alm-compose
+- block:
+  - include_tasks: 01_core.yml
   - set_fact:
       run_once_srv_proxy_6_6_tls_deploy: true
   when: run_once_srv_proxy_6_6_tls_deploy is not defined
-- name: add srv-proxy-6-6-tls-deploy.sh
-  template:
-    src: "srv-proxy-6-6-tls-deploy.sh.j2"
-    dest: "{{nginx_docker_cert_deploy_script}}"
-  when: run_once_srv_proxy_6_6_tls_deploy is not defined
-  notify: restart srv-proxy-6-6-tls-deploy.infinito.service
 
 - name: "create {{cert_mount_directory}}"
   file:
@@ -34,7 +25,3 @@
     service_name: "srv-proxy-6-6-tls-deploy.{{application_id}}"
     persistent: "true"
 
-- name: run the run_once_srv_proxy_6_6_tls_deploy tasks once
-  set_fact:
-    run_once_srv_proxy_6_6_tls_deploy: true
-  when: run_once_srv_proxy_6_6_tls_deploy is not defined

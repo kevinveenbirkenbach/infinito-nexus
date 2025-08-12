@@ -1,8 +1,7 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'dev-python-pip'
+- block:
+  - name: Include dependency 'dev-python-pip'
     include_role:
       name: dev-python-pip
-  - set_fact:
-      run_once_util_desk_dev_python: true
+    when: run_once_dev_python_pip is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_util_desk_dev_python is not defined

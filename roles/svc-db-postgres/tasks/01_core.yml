@@ -1,11 +1,11 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'docker-core'
+- block:
+  - name: Include dependency 'docker-core'
     include_role:
       name: docker-core
-  - set_fact:
-      run_once_svc_db_postgres: true
+    when: run_once_docker_core is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_svc_db_postgres is not defined
+
 - name: Create Docker network for PostgreSQL
   community.docker.docker_network:
     name: "{{ postgres_network_name }}"

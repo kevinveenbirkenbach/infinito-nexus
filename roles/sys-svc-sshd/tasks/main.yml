@@ -1,12 +1,8 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'user-administrator'
+- block:
+  - name: Include dependency 'user-administrator'
     include_role:
       name: user-administrator
-  - set_fact:
-      run_once_sys_svc_sshd: true
-  when: run_once_sys_svc_sshd is not defined
-- block:
+    when: run_once_user_administrator is not defined
   - name: create sshd_config
     template:
       src: "sshd_config.j2"
@@ -15,8 +11,5 @@
       group: root
       mode: '0644'
     notify: sshd restart
-
-  - name: run the sshd tasks once
-    set_fact:
-      run_once_sys_svc_sshd: true
+  - include_tasks: utils/run_once.yml
   when: run_once_sys_svc_sshd is not defined

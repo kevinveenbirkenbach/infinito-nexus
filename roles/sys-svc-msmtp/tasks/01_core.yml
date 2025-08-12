@@ -1,0 +1,17 @@
+- name: Include dependency 'sys-hlth-msmtp'
+  include_role:
+    name: sys-hlth-msmtp
+  when: run_once_sys_hlth_msmtp is not defined
+  
+- name: install msmtp msmtp-mta
+  community.general.pacman:
+    name:
+    - msmtp
+    - msmtp-mta
+    state: present
+
+- name: configure msmtprc.conf.j2
+  template:
+    src: "msmtprc.conf.j2"
+    dest: "/root/.msmtprc"
+    mode: 600

@@ -1,11 +1,11 @@
-- name: Load former meta dependencies once
-  block:
-  - name: Include moved dependency 'srv-web-7-4-core'
+- block:
+  - name: Include dependency 'srv-web-7-4-core'
     include_role:
       name: srv-web-7-4-core
-  - set_fact:
-      run_once_web_opt_rdr_www: true
+    when: run_once_srv_web_7_4_core is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_web_opt_rdr_www is not defined
+
 - name: Filter www-prefixed domains from current_play_domains_all
   set_fact:
     www_domains: "{{ current_play_domains_all | select('match', '^www\\.') | list }}"
