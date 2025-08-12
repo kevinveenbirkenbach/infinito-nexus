@@ -1,3 +1,14 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - dev-python-pip
+    - sys-alm-compose
+  - set_fact:
+      run_once_sys_hlth_webserver: true
+  when: run_once_sys_hlth_webserver is not defined
 - name: Install required Python modules
   community.general.pacman:
     name: python-requests
@@ -15,7 +26,7 @@
     dest: "{{ health_nginx_folder }}sys-hlth-webserver.py"
 
 - name: create sys-hlth-webserver.infinito.service
-  template: 
+  template:
     src: sys-hlth-webserver.service.j2
     dest: /etc/systemd/system/sys-hlth-webserver.infinito.service
   notify: reload sys-hlth-webserver.infinito.service
@@ -28,4 +39,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_health_nginx}}"
+    on_calendar: "{{on_calendar_health_nginx}}"

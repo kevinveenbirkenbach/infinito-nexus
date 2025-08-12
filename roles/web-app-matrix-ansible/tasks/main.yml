@@ -1,10 +1,17 @@
----
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'srv-proxy-7-4-core'
+    include_role:
+      name: srv-proxy-7-4-core
+  - set_fact:
+      run_once_web_app_matrix_ansible: true
+  when: run_once_web_app_matrix_ansible is not defined
 - name: "include role srv-proxy-6-6-domain for {{application_id}}"
-  include_role: 
+  include_role:
     name: srv-proxy-6-6-domain
   loop:
-    - "{{ domains[application_id].element }}"
-    - "{{ domains[application_id].synapse }}"
+  - "{{ domains[application_id].element }}"
+  - "{{ domains[application_id].synapse }}"
   loop_control:
     loop_var: domain
 
@@ -37,8 +44,8 @@
     hosts_path: "{{ matrix_inventory_tmp_dir.path }}/hosts.yml"
 
 - name: create hosts.yml
-  template: 
-    src:  "hosts.yml.j2" 
+  template:
+    src: "hosts.yml.j2"
     dest: "{{hosts_path}}"
   become: false
   delegate_to: localhost
@@ -62,8 +69,8 @@
     vars_file_path: "{{ vars_folder_path }}vars.yml"
 
 - name: create vars.yml
-  template: 
-    src:  "vars.yml.j2" 
+  template:
+    src: "vars.yml.j2"
     dest: "{{vars_file_path}}"
   become: false
   delegate_to: localhost
@@ -84,7 +91,7 @@
   become: false
 
 
-  
+
 #- name: delete inventory directory
 #  file:
 #    path: "{{ matrix_inventory_tmp_dir.path }}"

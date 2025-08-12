@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Installs a base development environment for software engineers on Linux."
@@ -10,19 +9,18 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - development
-    - software
-    - engineering
-    - archlinux
-    - persona
-    - tools
+  - development
+  - software
+  - engineering
+  - archlinux
+  - persona
+  - tools
   repository: https://github.com/kevinveenbirkenbach/infinito-nexus
   issue_tracker_url: https://github.com/kevinveenbirkenbach/infinito-nexus/issues
   documentation: "https://docs.infinito.nexus/"
 dependencies:
-  - util-dev-admin
-  - pkgmgr
+- util-dev-admin

@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'dev-shell'
+    include_role:
+      name: dev-shell
+  - set_fact:
+      run_once_desk_ssh: true
+  when: run_once_desk_ssh is not defined
 - name: pull ssh repository from {{desk_ssh_repository}}
   git:
     repo: "{{desk_ssh_repository}}"

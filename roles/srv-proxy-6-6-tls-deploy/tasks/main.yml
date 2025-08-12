@@ -1,20 +1,28 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-alm-compose'
+    include_role:
+      name: sys-alm-compose
+  - set_fact:
+      run_once_srv_proxy_6_6_tls_deploy: true
+  when: run_once_srv_proxy_6_6_tls_deploy is not defined
 - name: add srv-proxy-6-6-tls-deploy.sh
-  template: 
-    src: "srv-proxy-6-6-tls-deploy.sh.j2" 
+  template:
+    src: "srv-proxy-6-6-tls-deploy.sh.j2"
     dest: "{{nginx_docker_cert_deploy_script}}"
   when: run_once_srv_proxy_6_6_tls_deploy is not defined
   notify: restart srv-proxy-6-6-tls-deploy.infinito.service
 
 - name: "create {{cert_mount_directory}}"
   file:
-    path:     "{{cert_mount_directory}}"
-    state:    directory
-    mode:     0755
+    path: "{{cert_mount_directory}}"
+    state: directory
+    mode: 0755
   notify: restart srv-proxy-6-6-tls-deploy.infinito.service
 
 - name: configure srv-proxy-6-6-tls-deploy.infinito.service
-  template: 
-    src:  "srv-proxy-6-6-tls-deploy.service.j2"
+  template:
+    src: "srv-proxy-6-6-tls-deploy.service.j2"
     dest: "/etc/systemd/system/srv-proxy-6-6-tls-deploy.{{application_id}}.infinito.service"
   notify: restart srv-proxy-6-6-tls-deploy.infinito.service
 
@@ -22,9 +30,9 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_deploy_certificates}}"
+    on_calendar: "{{on_calendar_deploy_certificates}}"
     service_name: "srv-proxy-6-6-tls-deploy.{{application_id}}"
-    persistent:   "true"
+    persistent: "true"
 
 - name: run the run_once_srv_proxy_6_6_tls_deploy tasks once
   set_fact:

@@ -4,9 +4,6 @@ galaxy_info:
   description: "Ansible role to set up dynamic keyboard color change on MSI laptops"
   min_ansible_version: 2.9
   platforms:
-    - name: Linux
-      versions:
-        - all
-dependencies:
-  - dev-yay
-  - sys-alm-compose
+  - name: Linux
+    versions:
+    - all

@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Automates the cleanup of old backups by executing a Python script that deletes outdated backup versions when disk usage exceeds a specified threshold."
@@ -10,19 +9,14 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Linux
-      versions:
-        - all
+  - name: Linux
+    versions:
+    - all
   galaxy_tags:
-    - backup
-    - cleanup
-    - disk
-    - automation
+  - backup
+  - cleanup
+  - disk
+  - automation
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:  
-  - dev-python-pip
-  - sys-alm-compose
-  - sys-lock
-  - sys-rst-daemon

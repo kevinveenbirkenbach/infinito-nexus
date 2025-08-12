@@ -1,3 +1,16 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - sys-bkp-provider
+    - sys-alm-compose
+    - sys-lock
+    - sys-bkp-directory-validator
+  - set_fact:
+      run_once_sys_bkp_docker_2_loc: true
+  when: run_once_sys_bkp_docker_2_loc is not defined
 - include_tasks: 02_pkgmgr_routines.yml
   when: backup_docker_to_local_folder is not defined
 
@@ -6,13 +19,13 @@
   when: mode_reset | bool
 
 - name: configure sys-bkp-docker-2-loc-everything.infinito.service
-  template: 
+  template:
     src: sys-bkp-docker-2-loc-everything.service.j2
     dest: /etc/systemd/system/sys-bkp-docker-2-loc-everything.infinito.service
   notify: reload sys-bkp-docker-2-loc-everything.infinito.service
 
 - name: configure sys-bkp-docker-2-loc.infinito.service
-  template: 
+  template:
     src: sys-bkp-docker-2-loc.service.j2
     dest: /etc/systemd/system/sys-bkp-docker-2-loc.infinito.service
   notify: reload sys-bkp-docker-2-loc.infinito.service
@@ -25,4 +38,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_backup_docker_to_local}}"
+    on_calendar: "{{on_calendar_backup_docker_to_local}}"

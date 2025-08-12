@@ -9,19 +9,17 @@ galaxy_info:
   description: "Automatically updates all Python Pip packages to their latest available versions."
   min_ansible_version: "2.9"
   platforms:
-    - name: Ubuntu
-      versions:
-        - all
-    - name: Archlinux
-      versions:
-        - rolling
-    - name: Debian
-      versions:
-        - all
+  - name: Ubuntu
+    versions:
+    - all
+  - name: Archlinux
+    versions:
+    - rolling
+  - name: Debian
+    versions:
+    - all
   galaxy_tags:
-    - python
-    - pip
-    - update
-    - maintenance
-dependencies:
-  - dev-python-pip
+  - python
+  - pip
+  - update
+  - maintenance

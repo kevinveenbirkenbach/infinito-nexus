@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Periodic MTA health-check: sends test mail via msmtp and alerts on failure."
@@ -10,15 +9,13 @@ galaxy_info:
   license_url: "https://s.veen.world/cncl"
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions: ["rolling"]
+  - name: Archlinux
+    versions: ["rolling"]
   galaxy_tags:
-    - monitor
-    - msmtp
-    - email
-    - health
-    - systemd
+  - monitor
+  - msmtp
+  - email
+  - health
+  - systemd
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-alm-telegram

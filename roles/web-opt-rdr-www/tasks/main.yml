@@ -1,4 +1,11 @@
----
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'srv-web-7-4-core'
+    include_role:
+      name: srv-web-7-4-core
+  - set_fact:
+      run_once_web_opt_rdr_www: true
+  when: run_once_web_opt_rdr_www is not defined
 - name: Filter www-prefixed domains from current_play_domains_all
   set_fact:
     www_domains: "{{ current_play_domains_all | select('match', '^www\\.') | list }}"
@@ -7,20 +14,14 @@
   include_role:
     name: web-opt-rdr-domains
   vars:
-    domain_mappings: "{{ www_domains
-       | map('regex_replace',
-             '^www\\.(.+)$',
-             '{ source: \"www.\\1\", target: \"\\1\" }')
-       | map('from_yaml')
-       | list
-    }}"
+    domain_mappings: "{{ www_domains | map('regex_replace', '^www\\.(.+)$', '{ source: \"www.\\1\", target: \"\\1\" }') | map('from_yaml') | list }}"
 
 - name: Include DNS role to set redirects
   include_role:
     name: srv-web-7-7-dns-records
   vars:
-    cloudflare_api_token:     "{{ certbot_dns_api_token }}"
-    cloudflare_domains:       "{{ www_domains }}"
-    cloudflare_target_ip:     "{{ networks.internet.ip4 }}"
-    cloudflare_proxied:       false
+    cloudflare_api_token: "{{ certbot_dns_api_token }}"
+    cloudflare_domains: "{{ www_domains }}"
+    cloudflare_target_ip: "{{ networks.internet.ip4 }}"
+    cloudflare_proxied: false
   when: dns_provider == 'cloudflare'

@@ -1,8 +1,20 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - dev-fakeroot
+    - dev-git
+    - dev-base-devel
+  - set_fact:
+      run_once_dev_yay: true
+  when: run_once_dev_yay is not defined
 - name: install yay
   community.general.pacman:
     name:
-      - base-devel
-      - patch
+    - base-devel
+    - patch
     state: present
 
 - name: Create the `aur_builder` user

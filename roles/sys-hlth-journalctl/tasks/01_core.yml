@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-alm-compose'
+    include_role:
+      name: sys-alm-compose
+  - set_fact:
+      run_once_sys_hlth_journalctl: true
+  when: run_once_sys_hlth_journalctl is not defined
 - name: "create {{health_journalctl_folder}}"
   file:
     path: "{{health_journalctl_folder}}"
@@ -10,7 +18,7 @@
     dest: "{{health_journalctl_folder}}sys-hlth-journalctl.sh"
 
 - name: create sys-hlth-journalctl.infinito.service
-  template: 
+  template:
     src: sys-hlth-journalctl.service.j2
     dest: /etc/systemd/system/sys-hlth-journalctl.infinito.service
   notify: reload sys-hlth-journalctl.infinito.service
@@ -23,4 +31,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_health_journalctl}}"
+    on_calendar: "{{on_calendar_health_journalctl}}"

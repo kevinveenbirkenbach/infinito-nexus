@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Frees disk space on the target system by executing a cleanup script that removes temporary files, clears package caches, and optionally handles Docker and backup cleanup."
@@ -10,18 +9,14 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Linux
-      versions:
-        - all
+  - name: Linux
+    versions:
+    - all
   galaxy_tags:
-    - disk
-    - cleanup
-    - storage
-    - automation
+  - disk
+  - cleanup
+  - storage
+  - automation
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-alm-compose
-  - sys-lock
-  - sys-rst-daemon

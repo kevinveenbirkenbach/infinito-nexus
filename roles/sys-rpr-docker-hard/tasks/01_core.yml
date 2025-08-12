@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-lock'
+    include_role:
+      name: sys-lock
+  - set_fact:
+      run_once_sys_rpr_docker_hard: true
+  when: run_once_sys_rpr_docker_hard is not defined
 - name: "create {{restart_docker_folder}}"
   file:
     path: "{{restart_docker_folder}}"
@@ -10,7 +18,7 @@
     dest: "{{restart_docker_script}}"
 
 - name: configure sys-rpr-docker-hard.infinito.service
-  template: 
+  template:
     src: sys-rpr-docker-hard.service.j2
     dest: /etc/systemd/system/sys-rpr-docker-hard.infinito.service
   notify: "reload sys-rpr-docker-hard.infinito.service"
@@ -23,4 +31,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_restart_docker}}"
+    on_calendar: "{{on_calendar_restart_docker}}"

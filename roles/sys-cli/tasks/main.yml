@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'dev-yay'
+    include_role:
+      name: dev-yay
+  - set_fact:
+      run_once_sys_cli: true
+  when: run_once_sys_cli is not defined
 - name: "pkgmgr install infinito"
   include_role:
     name: pkgmgr-install

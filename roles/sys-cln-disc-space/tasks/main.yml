@@ -1,3 +1,15 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - sys-alm-compose
+    - sys-lock
+    - sys-rst-daemon
+  - set_fact:
+      run_once_sys_cln_disc_space: true
+  when: run_once_sys_cln_disc_space is not defined
 - name: "create {{cleanup_disc_space_folder}}"
   file:
     path: "{{cleanup_disc_space_folder}}"
@@ -10,7 +22,7 @@
     dest: "{{cleanup_disc_space_folder}}sys-cln-disc-space.sh"
 
 - name: create sys-cln-disc-space.infinito.service
-  template: 
+  template:
     src: sys-cln-disc-space.service.j2
     dest: /etc/systemd/system/sys-cln-disc-space.infinito.service
   notify: reload sys-cln-disc-space.infinito.service
@@ -23,4 +35,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_cleanup_disc_space}}"
+    on_calendar: "{{on_calendar_cleanup_disc_space}}"

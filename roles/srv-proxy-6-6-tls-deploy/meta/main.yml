@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Deploys Let’s Encrypt certificates into Docker Compose Nginx setups via systemd service and timer."
@@ -9,17 +8,14 @@ galaxy_info:
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - nginx
-    - letsencrypt
-    - docker
-    - systemd
+  - nginx
+  - letsencrypt
+  - docker
+  - systemd
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/srv-proxy-6-6-tls-deploy"
   min_ansible_version: "2.9"
   platforms:
-    - name: Any
-      versions: [ all ]
-dependencies:
-  - sys-alm-compose
-
+  - name: Any
+    versions: [all]

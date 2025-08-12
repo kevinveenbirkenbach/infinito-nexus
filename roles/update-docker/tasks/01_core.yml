@@ -1,9 +1,17 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-lock'
+    include_role:
+      name: sys-lock
+  - set_fact:
+      run_once_update_docker: true
+  when: run_once_update_docker is not defined
 - name: "start sys-bkp-docker-2-loc-everything.infinito.service"
   systemd:
     name: sys-bkp-docker-2-loc-everything.infinito.service
     state: started
-  when: 
-    - mode_backup | bool
+  when:
+  - mode_backup | bool
 
 - name: create {{update_docker_script}}
   template:
@@ -11,7 +19,7 @@
     dest: "{{update_docker_script}}"
 
 - name: configure update-docker.infinito.service
-  template: 
+  template:
     src: update-docker.service.j2
     dest: /etc/systemd/system/update-docker.infinito.service
 

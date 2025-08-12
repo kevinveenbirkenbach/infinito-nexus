@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Installs a unified systemd notification service that sends alerts via both Telegram and Email when a service fails."
@@ -10,18 +9,15 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - systemd
-    - notifier
-    - telegram
-    - email
-    - notifications
+  - systemd
+  - notifier
+  - telegram
+  - email
+  - notifications
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-alm-telegram
-  - sys-alm-email

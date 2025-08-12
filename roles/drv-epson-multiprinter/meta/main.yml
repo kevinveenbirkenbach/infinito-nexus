@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Installs Epson multifunction printer drivers and scanning utilities (escpr, imagescan) via Pacman and AUR on Arch Linux."
@@ -9,16 +8,13 @@ galaxy_info:
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - epson
-    - printer
-    - scanner
+  - epson
+  - printer
+  - scanner
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/drv-epson-multiprinter"
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions: [ all ]
-dependencies:
-  - dev-yay
-
+  - name: Archlinux
+    versions: [all]

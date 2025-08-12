@@ -1,0 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - sys-bkp-provider-user
+    - sys-cln-bkps-timer
+  - set_fact:
+      run_once_sys_bkp_provider: true
+  when: run_once_sys_bkp_provider is not defined

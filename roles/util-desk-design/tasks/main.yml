@@ -1,13 +1,21 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'dev-yay'
+    include_role:
+      name: dev-yay
+  - set_fact:
+      run_once_util_desk_design: true
+  when: run_once_util_desk_design is not defined
 - name: install designer tools
   community.general.pacman:
-    name: 
-      - gimp
-      - blender
+    name:
+    - gimp
+    - blender
     state: present
 
 - name: install drawio
   kewlfft.aur.aur:
     use: yay
     name:
-      - drawio-desktop
+    - drawio-desktop
   become: false

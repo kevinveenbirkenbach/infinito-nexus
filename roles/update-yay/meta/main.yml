@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Updates AUR packages on Arch Linux systems using yay. This role automates the upgrade process for AUR packages, ensuring that the system remains up-to-date with the latest versions available in the Arch User Repository."
@@ -10,18 +9,16 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - aur
-    - update
-    - archlinux
-    - yay
-    - system
-    - maintenance
+  - aur
+  - update
+  - archlinux
+  - yay
+  - system
+  - maintenance
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - dev-yay

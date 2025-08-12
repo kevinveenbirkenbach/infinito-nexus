@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Installs and configures Postfix to provide a robust mail transfer agent setup with a preconfigured aliases file for local mail delivery."
@@ -10,17 +9,15 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - postfix
-    - mail
-    - aliases
-    - configuration
-    - security
+  - postfix
+  - mail
+  - aliases
+  - configuration
+  - security
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - user-administrator

@@ -1,5 +1,11 @@
-# run_once_srv_web_7_7_inj_matomo: deactivated
-
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'srv-web-7-4-core'
+    include_role:
+      name: srv-web-7-4-core
+  - set_fact:
+      run_once_srv_web_7_7_inj_matomo: true
+  when: run_once_srv_web_7_7_inj_matomo is not defined
 - name: "Relevant variables for role: {{ role_path | basename }}"
   debug:
     msg:
@@ -10,16 +16,16 @@
 
 - name: "Check if site {{ domain }} is allready registered at Matomo"
   uri:
-    url:            "{{ matomo_verification_url }}"
-    method:         GET
+    url: "{{ matomo_verification_url }}"
+    method: GET
     return_content: yes
-    status_code:    200
+    status_code: 200
     validate_certs: yes
-  register:         site_check
+  register: site_check
 
 - name: Set matomo_site_id to Null
   set_fact:
-    matomo_site_id: Null
+    matomo_site_id:
 
 - name: Set fact for site ID if site already exists
   set_fact:

@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Updates Docker Compose instances by detecting changes in Docker image digests and rebuilding containers when necessary. This role automates Docker image pulls and container rebuilds."
@@ -10,21 +9,19 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
-    - name: Ubuntu
-      versions:
-        - all
+  - name: Archlinux
+    versions:
+    - rolling
+  - name: Ubuntu
+    versions:
+    - all
   galaxy_tags:
-    - docker
-    - update
-    - compose
-    - images
-    - systemd
-    - maintenance
+  - docker
+  - update
+  - compose
+  - images
+  - systemd
+  - maintenance
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-lock

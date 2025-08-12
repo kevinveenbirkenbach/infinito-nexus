@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'pkgmgr-install'
+    include_role:
+      name: pkgmgr-install
+  - set_fact:
+      run_once_svc_opt_swapfile: true
+  when: run_once_svc_opt_swapfile is not defined
 - name: "pkgmgr install"
   include_role:
     name: pkgmgr-install

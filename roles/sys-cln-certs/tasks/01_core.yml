@@ -1,3 +1,14 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - sys-alm-compose
+    - sys-rst-daemon
+  - set_fact:
+      run_once_sys_cln_certs: true
+  when: run_once_sys_cln_certs is not defined
 - name: "pkgmgr install"
   include_role:
     name: pkgmgr-install
@@ -18,4 +29,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{ on_calendar_cleanup_certs }}"
+    on_calendar: "{{ on_calendar_cleanup_certs }}"

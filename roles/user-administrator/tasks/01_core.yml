@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-sudo'
+    include_role:
+      name: sys-sudo
+  - set_fact:
+      run_once_user_administrator: true
+  when: run_once_user_administrator is not defined
 - name: create administrator
   user:
     name: administrator
@@ -23,7 +31,7 @@
     owner: administrator
     group: administrator
     mode: 0700
-    
+
 - name: create {{path_administrator_home}}.ssh/authorized_keys
   copy:
     src: "{{ inventory_dir }}/files/{{ inventory_hostname }}{{path_administrator_home}}.ssh/authorized_keys"
@@ -39,10 +47,10 @@
     mode: '0644'
     owner: root
     group: root
-  notify: sshd restart  
+  notify: sshd restart
 
 - name: "embed user routines for {{ role_path | basename }}"
   include_role:
     name: user
   vars:
-    user_name:  "administrator"
+    user_name: "administrator"

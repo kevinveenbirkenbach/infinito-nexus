@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: >-
@@ -12,17 +11,15 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Docker
-      versions:
-        - "latest"
+  - name: Docker
+    versions:
+    - "latest"
   galaxy_tags:
-    - postgresql
-    - docker
-    - database
-    - administration
-    - central-database
+  - postgresql
+  - docker
+  - database
+  - administration
+  - central-database
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - docker-core # Loading it here to avoid extra flush for network init

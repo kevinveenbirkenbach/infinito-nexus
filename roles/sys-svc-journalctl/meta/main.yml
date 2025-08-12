@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Configure and manage systemd-journald settings"
@@ -9,12 +8,10 @@ galaxy_info:
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - system
-    - logging
-    - journald
+  - system
+  - logging
+  - journald
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/roles/sys-svc-journalctl"
   run_after: []
-dependencies:
-  - sys-hlth-journalctl

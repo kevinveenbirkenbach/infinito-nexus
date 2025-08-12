@@ -1,9 +1,20 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - sys-cln-bkps-service
+    - sys-lock
+  - set_fact:
+      run_once_svc_bkp_loc_2_usb: true
+  when: run_once_svc_bkp_loc_2_usb is not defined
 - name: Fail if any backup_to_usb variable is empty
   assert:
     that:
-      - backup_to_usb_mount != ""
-      - backup_to_usb_target != ""
-      - backup_to_usb_source != ""
+    - backup_to_usb_mount != ""
+    - backup_to_usb_target != ""
+    - backup_to_usb_source != ""
     fail_msg: |
       One or more of the configuration variables are empty!
       Please set:

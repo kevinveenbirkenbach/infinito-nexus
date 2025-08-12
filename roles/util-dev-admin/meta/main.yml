@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Installs essential tools for Linux system administrators on Linux."
@@ -10,20 +9,18 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - system
-    - administration
-    - archlinux
-    - persona
-    - tools
+  - system
+  - administration
+  - archlinux
+  - persona
+  - tools
   repository: https://github.com/kevinveenbirkenbach/infinito-nexus
   issue_tracker_url: https://github.com/kevinveenbirkenbach/infinito-nexus/issues
   documentation: "https://docs.infinito.nexus/"
 dependencies:
-  - desk-git
-  - dev-make
-  - dev-gcc
-  - dev-yay
+- desk-git
+- dev-make

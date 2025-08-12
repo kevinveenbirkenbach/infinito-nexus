@@ -1,5 +1,11 @@
-# run_once_srv_web_6_6_tls_core: deactivated
-
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'srv-web-7-6-https'
+    include_role:
+      name: srv-web-7-6-https
+  - set_fact:
+      run_once_srv_web_6_6_tls_core: true
+  when: run_once_srv_web_6_6_tls_core is not defined
 - name: "Include flavor '{{ certbot_flavor }}' for '{{ domain }}'"
   include_tasks: "{{ role_path }}/tasks/flavors/{{ certbot_flavor }}.yml"
 

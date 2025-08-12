@@ -3,22 +3,20 @@ galaxy_info:
   description: "Installs and updates packages using pkgmgr."
   license: "Infinito.Nexus NonCommercial License (CNCL)"
   license_url: "https://s.veen.world/cncl"
-  company: | 
+  company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - package
-    - update
-    - archlinux
-    - infinito
+  - package
+  - update
+  - archlinux
+  - infinito
   repository: https://github.com/kevinveenbirkenbach/package-manager
   issue_tracker_url: https://github.com/kevinveenbirkenbach/package-manager/issues
   documentation: https://github.com/kevinveenbirkenbach/package-manager
-dependencies:
-  - pkgmgr

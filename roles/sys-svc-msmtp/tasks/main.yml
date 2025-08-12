@@ -1,14 +1,22 @@
-- name: install msmtp msmtp-mta 
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-hlth-msmtp'
+    include_role:
+      name: sys-hlth-msmtp
+  - set_fact:
+      run_once_sys_svc_msmtp: true
+  when: run_once_sys_svc_msmtp is not defined
+- name: install msmtp msmtp-mta
   community.general.pacman:
     name:
-      - msmtp
-      - msmtp-mta
-    state:  present
+    - msmtp
+    - msmtp-mta
+    state: present
   when: run_once_sys_svc_msmtp is not defined
 
 - name: configure msmtprc.conf.j2
   template:
-    src:  "msmtprc.conf.j2"
+    src: "msmtprc.conf.j2"
     dest: "/root/.msmtprc"
     mode: 600
   when: run_once_sys_svc_msmtp is not defined

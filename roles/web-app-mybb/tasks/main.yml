@@ -1,6 +1,13 @@
----
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'srv-proxy-7-4-core'
+    include_role:
+      name: srv-proxy-7-4-core
+  - set_fact:
+      run_once_web_app_mybb: true
+  when: run_once_web_app_mybb is not defined
 - name: "load docker and db for {{application_id}}"
-  include_role: 
+  include_role:
     name: cmp-db-docker
 
 - name: "include tasks setup-domain.yml with {{domains | get_domain(application_id)}}"
@@ -17,13 +24,13 @@
     recurse: yes
 
 - name: "create {{docker_compose_instance_confd_defaultconf_file}}"
-  template: 
-    src:  "default.conf"
+  template:
+    src: "default.conf"
     dest: "{{docker_compose_instance_confd_defaultconf_file}}"
   notify: docker compose up
 
 - name: add docker-compose.yml
-  template: 
-    src:  "docker-compose.yml.j2" 
+  template:
+    src: "docker-compose.yml.j2"
     dest: "{{docker_compose.directories.instance}}docker-compose.yml"
   notify: docker compose up

@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Installs and configures components for sending Telegram notifications through systemd. This role is part of the sys-alm-compose suite, providing automated alerts when services fail."
@@ -10,17 +9,15 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - telegram
-    - systemd
-    - notifications
-    - automation
-    - curl
+  - telegram
+  - systemd
+  - notifications
+  - automation
+  - curl
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-rst-daemon

@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'pkgmgr'
+    include_role:
+      name: pkgmgr
+  - set_fact:
+      run_once_pkgmgr_install: true
+  when: run_once_pkgmgr_install is not defined
 - name: update pkgmgr
   shell: |
     source ~/.venvs/pkgmgr/bin/activate

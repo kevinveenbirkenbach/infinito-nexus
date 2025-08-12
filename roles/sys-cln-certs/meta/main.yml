@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Automates the revocation and deletion of unused Let's Encrypt certificates"
@@ -10,19 +9,16 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - certbot
-    - ssl
-    - cleanup
-    - automation
-    - systemd
+  - certbot
+  - ssl
+  - cleanup
+  - automation
+  - systemd
   repository: "https://github.com/kevinveenbirkenbach/certreap"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/certreap/issues"
   documentation: "https://github.com/kevinveenbirkenbach/certreap#readme"
 
-dependencies:
-  - sys-alm-compose
-  - sys-rst-daemon

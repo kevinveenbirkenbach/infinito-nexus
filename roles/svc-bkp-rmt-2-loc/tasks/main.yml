@@ -1,3 +1,17 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - dev-git
+    - sys-alm-compose
+    - sys-lock
+    - user-root
+    - sys-rst-daemon
+  - set_fact:
+      run_once_svc_bkp_rmt_2_loc: true
+  when: run_once_svc_bkp_rmt_2_loc is not defined
 - name: "create {{docker_backup_remote_to_local_folder}}"
   file:
     path: "{{docker_backup_remote_to_local_folder}}"
@@ -11,14 +25,14 @@
     mode: 0755
 
 - name: create svc-bkp-rmt-2-loc.infinito.service
-  template: 
-    src:  svc-bkp-rmt-2-loc.service.j2 
+  template:
+    src: svc-bkp-rmt-2-loc.service.j2
     dest: /etc/systemd/system/svc-bkp-rmt-2-loc.infinito.service
   notify: reload svc-bkp-rmt-2-loc service
 
 - name: create sys-bkp-rmt-2-loc-multi-provider.sh
-  template: 
-    src: sys-bkp-rmt-2-loc-multi-provider.sh.j2 
+  template:
+    src: sys-bkp-rmt-2-loc-multi-provider.sh.j2
     dest: "{{docker_backup_remote_to_local_folder}}sys-bkp-rmt-2-loc-multi-provider.sh"
     mode: 0755
 
@@ -30,5 +44,5 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_backup_remote_to_local}}"
+    on_calendar: "{{on_calendar_backup_remote_to_local}}"
 

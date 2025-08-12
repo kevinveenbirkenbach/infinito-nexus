@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Automates the installation of Kevin's Package Manager — a tool for managing multiple repositories and automating Git operations."
@@ -10,29 +9,25 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Debian
-      versions:
-        - stretch
-        - buster
-        - bullseye
-    - name: Ubuntu
-      versions:
-        - bionic
-        - focal
-        - jammy
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Debian
+    versions:
+    - stretch
+    - buster
+    - bullseye
+  - name: Ubuntu
+    versions:
+    - bionic
+    - focal
+    - jammy
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - pkgmgr
-    - automation
-    - git
-    - repositories
-    - development
+  - pkgmgr
+  - automation
+  - git
+  - repositories
+  - development
   repository: https://github.com/kevinveenbirkenbach/package-manager
   issue_tracker_url: https://github.com/kevinveenbirkenbach/package-manager/issues
   documentation: https://github.com/kevinveenbirkenbach/package-manager
-dependencies:
-  - dev-git
-  - dev-make
-  - dev-python-yaml

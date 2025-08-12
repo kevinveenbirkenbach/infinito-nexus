@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Transform your community engagement with MyBB, a feature-rich forum solution that combines modern design with robust functionality. Enjoy dynamic discussions, intuitive moderation, and a vibrant user interface that brings your community together."
@@ -9,19 +8,17 @@ galaxy_info:
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - mybb
-    - docker
-    - forum
-    - community
-    - cms
+  - mybb
+  - docker
+  - forum
+  - community
+  - cms
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
   logo:
     class: "fa-solid fa-comments"
   run_after:
-    - web-app-matomo
-    - web-app-keycloak
-    - web-app-mailu
-dependencies:
-  - srv-proxy-7-4-core
+  - web-app-matomo
+  - web-app-keycloak
+  - web-app-mailu

@@ -1,12 +1,20 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'docker-core'
+    include_role:
+      name: docker-core
+  - set_fact:
+      run_once_svc_db_postgres: true
+  when: run_once_svc_db_postgres is not defined
 - name: Create Docker network for PostgreSQL
   community.docker.docker_network:
     name: "{{ postgres_network_name }}"
     state: present
     ipam_config:
-      - subnet: "{{ postgres_subnet }}"
+    - subnet: "{{ postgres_subnet }}"
 
 - name: "include docker-compose role"
-  include_role: 
+  include_role:
     name: docker-compose
 
 - name: Wait for Postgres inside the container
@@ -17,6 +25,6 @@
   delay: 5
 
 - name: install python-psycopg2
-  community.general.pacman: 
+  community.general.pacman:
     name: python-psycopg2
     state: present

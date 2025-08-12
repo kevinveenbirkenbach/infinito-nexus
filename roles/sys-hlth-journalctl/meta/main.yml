@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Searches the systemd journal for errors over the past day and alerts if any are found."
@@ -10,15 +9,13 @@ galaxy_info:
   license_url: "https://s.veen.world/cncl"
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions: ["rolling"]
+  - name: Archlinux
+    versions: ["rolling"]
   galaxy_tags:
-    - monitor
-    - journalctl
-    - logs
-    - health
-    - systemd
+  - monitor
+  - journalctl
+  - logs
+  - health
+  - systemd
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-alm-compose

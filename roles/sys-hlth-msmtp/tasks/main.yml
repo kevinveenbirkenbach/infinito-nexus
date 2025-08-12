@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-alm-telegram'
+    include_role:
+      name: sys-alm-telegram
+  - set_fact:
+      run_once_sys_hlth_msmtp: true
+  when: run_once_sys_hlth_msmtp is not defined
 - name: "create {{ health_msmtp_folder }}"
   file:
     path: "{{ health_msmtp_folder }}"
@@ -6,7 +14,7 @@
 
 - name: create sys-hlth-msmtp.sh
   template:
-    src:  sys-hlth-msmtp.sh.j2
+    src: sys-hlth-msmtp.sh.j2
     dest: "{{ health_msmtp_folder }}sys-hlth-msmtp.sh"
     mode: '0755'
 

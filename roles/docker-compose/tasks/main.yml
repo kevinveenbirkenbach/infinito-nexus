@@ -1,10 +1,16 @@
-# run_once_docker_compose: deactivate
-
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'docker-container'
+    include_role:
+      name: docker-container
+  - set_fact:
+      run_once_docker_compose: true
+  when: run_once_docker_compose is not defined
 - name: "Load variables from {{ docker_compose_variable_file }} for whole play"
   include_vars: "{{ docker_compose_variable_file }}"
 
 - name: "reset (if enabled)"
-  include_tasks: 01_reset.yml 
+  include_tasks: 01_reset.yml
   when: mode_reset | bool
 
 # This could lead to problems in docker-compose directories which are based on a git repository
@@ -21,12 +27,12 @@
   when: docker_pull_git_repository | bool
 
 - block:
-    - name: "Include file management routines for '{{application_id}}'."
-      include_tasks: "03_files.yml"
-    - name: "Ensure that {{ docker_compose.directories.instance }} is up"
-      include_tasks: "04_ensure_up.yml"
+  - name: "Include file management routines for '{{application_id}}'."
+    include_tasks: "03_files.yml"
+  - name: "Ensure that {{ docker_compose.directories.instance }} is up"
+    include_tasks: "04_ensure_up.yml"
   when: not docker_compose_skipp_file_creation | bool
 
-- name: "flush database, docker and proxy for '{{ application_id }}'" 
+- name: "flush database, docker and proxy for '{{ application_id }}'"
   meta: flush_handlers
   when: docker_compose_flush_handlers | bool

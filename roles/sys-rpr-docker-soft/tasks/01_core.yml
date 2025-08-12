@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-lock'
+    include_role:
+      name: sys-lock
+  - set_fact:
+      run_once_sys_rpr_docker_soft: true
+  when: run_once_sys_rpr_docker_soft is not defined
 - name: "create {{heal_docker}}"
   file:
     path: "{{heal_docker}}"
@@ -11,8 +19,8 @@
   notify: restart sys-rpr-docker-soft.infinito.service
 
 - name: create sys-rpr-docker-soft.infinito.service
-  template: 
-    src: sys-rpr-docker-soft.service.j2 
+  template:
+    src: sys-rpr-docker-soft.service.j2
     dest: /etc/systemd/system/sys-rpr-docker-soft.infinito.service
   notify: restart sys-rpr-docker-soft.infinito.service
 
@@ -24,4 +32,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_heal_docker}}"
+    on_calendar: "{{on_calendar_heal_docker}}"

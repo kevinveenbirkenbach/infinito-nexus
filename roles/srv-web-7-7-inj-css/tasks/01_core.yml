@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'srv-web-7-4-core'
+    include_role:
+      name: srv-web-7-4-core
+  - set_fact:
+      run_once_srv_web_7_7_inj_css: true
+  when: run_once_srv_web_7_7_inj_css is not defined
 - name: Generate color palette with colorscheme-generator
   set_fact:
     color_palette: "{{ lookup('colorscheme', global_css_base_color, count=global_css_count, shades=global_css_shades) }}"

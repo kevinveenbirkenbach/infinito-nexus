@@ -1,5 +1,11 @@
-# run_once_srv_proxy_6_6_domain: deactivated
-
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'srv-proxy-7-4-core'
+    include_role:
+      name: srv-proxy-7-4-core
+  - set_fact:
+      run_once_srv_proxy_6_6_domain: true
+  when: run_once_srv_proxy_6_6_domain is not defined
 - include_tasks: "01_cloudflare.yml"
   when: dns_provider == "cloudflare"
 
@@ -10,7 +16,7 @@
 - name: "include role for {{ domain }} to receive certificates and do the modification routines"
   include_role:
     name: srv-web-7-6-composer
-    
+
 - name: "Copy nginx config to {{ configuration_destination }}"
   template:
     src: "{{ vhost_template_src }}"
@@ -19,18 +25,18 @@
   notify: restart openresty
 
 - block:
-    - name: "Check if {{ domains | get_domain(application_id) }} is reachable (only if config unchanged)"
-      uri:
-        url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-      register: site_check
-      failed_when:  false
-      changed_when: false
+  - name: "Check if {{ domains | get_domain(application_id) }} is reachable (only if config unchanged)"
+    uri:
+      url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+    register: site_check
+    failed_when: false
+    changed_when: false
 
-    - name: Restart nginx if site is down
-      command:
-        cmd: "true"
-      notify: restart openresty
-      when:
-        - site_check.status is defined
-        - not site_check.status in [200,301,302]
+  - name: Restart nginx if site is down
+    command:
+      cmd: "true"
+    notify: restart openresty
+    when:
+    - site_check.status is defined
+    - not site_check.status in [200,301,302]
   when: not nginx_conf.changed

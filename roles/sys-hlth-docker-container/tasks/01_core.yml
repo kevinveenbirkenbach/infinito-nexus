@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-alm-compose'
+    include_role:
+      name: sys-alm-compose
+  - set_fact:
+      run_once_sys_hlth_docker_container: true
+  when: run_once_sys_hlth_docker_container is not defined
 - name: "create {{health_docker_container_folder}}"
   file:
     path: "{{health_docker_container_folder}}"
@@ -10,8 +18,8 @@
     dest: "{{health_docker_container_folder}}sys-hlth-docker-container.sh"
 
 - name: create sys-hlth-docker-container.infinito.service
-  template: 
-    src:  sys-hlth-docker-container.service.j2
+  template:
+    src: sys-hlth-docker-container.service.j2
     dest: /etc/systemd/system/sys-hlth-docker-container.infinito.service
   notify: reload sys-hlth-docker-container.infinito.service
 
@@ -23,4 +31,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_health_docker_container}}"
+    on_calendar: "{{on_calendar_health_docker_container}}"

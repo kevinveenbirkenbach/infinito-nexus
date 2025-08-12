@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Nginx reverse proxy front-end for local Docker applications."
@@ -10,19 +9,16 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - nginx
-    - docker
-    - reverse_proxy
-    - web
-    - automation
-    - archlinux
+  - nginx
+  - docker
+  - reverse_proxy
+  - web
+  - automation
+  - archlinux
   repository: https://github.com/kevinveenbirkenbach/infinito-nexus
   issue_tracker_url: https://github.com/kevinveenbirkenbach/infinito-nexus/issues
   documentation: "https://docs.infinito.nexus/"
-dependencies:
-  - srv-web-7-6-https
-  - srv-web-7-4-core

@@ -1,0 +1,8 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'dev-python-pip'
+    include_role:
+      name: dev-python-pip
+  - set_fact:
+      run_once_util_desk_dev_python: true
+  when: run_once_util_desk_dev_python is not defined

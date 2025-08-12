@@ -1,4 +1,14 @@
----
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - srv-web-7-4-core
+    - sys-rst-daemon
+  - set_fact:
+      run_once_sys_cln_domains: true
+  when: run_once_sys_cln_domains is not defined
 - name: Include task to remove deprecated nginx configs
   include_tasks: remove_deprecated_nginx_configs.yml
   loop: "{{ deprecated_domains }}"
@@ -7,8 +17,8 @@
   vars:
     domain: "{{ item }}"
   when:
-    - mode_cleanup | bool
-    - run_once_sys_cln_domains is not defined
+  - mode_cleanup | bool
+  - run_once_sys_cln_domains is not defined
 
 ## The revoking just works for the base domain
 #- name: "Revoke Certbot certificate for {{ item }}"

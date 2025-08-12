@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Core role for Nginx HTML injection of Matomo, theming, iFrame and JS snippets based on application feature flags."
@@ -9,19 +8,15 @@ galaxy_info:
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - nginx
-    - injector
-    - matomo
-    - theming
+  - nginx
+  - injector
+  - matomo
+  - theming
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/srv-web-7-7-inj-compose"
   min_ansible_version: "2.9"
   platforms:
-    - name: Any
-      versions:
-        - all
-dependencies:
-# The injections are called in the script. Keep the logic there.
-  - srv-web-7-4-core
-  
+  - name: Any
+    versions:
+    - all

@@ -1,8 +1,9 @@
-# run_once_update_pip: deactivated
-# Deactivated due to that it breaks the system
-# There is no alternative to do the python update
-# 
-#- name: Update all local pip packages
-#  shell: 'pip freeze --local | grep -v "^\-e" | cut -d = -f 1 | xargs -n1 pip install -U --break-system-packages'
-#  args:
-#    executable: /bin/bash
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'dev-python-pip'
+    include_role:
+      name: dev-python-pip
+  - set_fact:
+      run_once_update_pip: true
+  when: run_once_update_pip is not defined
+- {}

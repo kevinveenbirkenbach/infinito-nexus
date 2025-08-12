@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-alm-compose'
+    include_role:
+      name: sys-alm-compose
+  - set_fact:
+      run_once_sys_rpr_btrfs_blnc: true
+  when: run_once_sys_rpr_btrfs_blnc is not defined
 - name: "pkgmgr install"
   include_role:
     name: pkgmgr-install
@@ -5,7 +13,7 @@
     package_name: btrfs-auto-balancer
 
 - name: configure sys-rpr-btrfs-blnc.infinito.service
-  template: 
+  template:
     src: sys-rpr-btrfs-blnc.service.j2
     dest: /etc/systemd/system/sys-rpr-btrfs-blnc.infinito.service
   notify: reload sys-rpr-btrfs-blnc.infinito.service
@@ -18,4 +26,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_btrfs_auto_balancer}}"
+    on_calendar: "{{on_calendar_btrfs_auto_balancer}}"

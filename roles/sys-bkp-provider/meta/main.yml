@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Configures the host as a backup provider to facilitate secure backup operations."
@@ -10,18 +9,15 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Linux
-      versions:
-        - all
+  - name: Linux
+    versions:
+    - all
   galaxy_tags:
-    - backups
-    - provider
-    - backup
-    - automation
-    - security
+  - backups
+  - provider
+  - backup
+  - automation
+  - security
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-bkp-provider-user
-  - sys-cln-bkps-timer

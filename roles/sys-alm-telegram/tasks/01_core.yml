@@ -1,8 +1,16 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-rst-daemon'
+    include_role:
+      name: sys-rst-daemon
+  - set_fact:
+      run_once_sys_alm_telegram: true
+  when: run_once_sys_alm_telegram is not defined
 - name: Fail if Telegram bot credentials are not set
   assert:
     that:
-      - telegram_bot_token != ""
-      - telegram_chat_id != ""
+    - telegram_bot_token != ""
+    - telegram_chat_id != ""
     fail_msg: |
       Telegram configuration is incomplete!
       Please provide non‑empty values for:
@@ -10,7 +18,7 @@
         - telegram_chat_id     # The Telegram chat ID to send messages to
 
 - name: install curl
-  community.general.pacman: 
+  community.general.pacman:
     name: curl
     state: present
 
@@ -21,12 +29,12 @@
     mode: '0755'
 
 - name: configure sys-alm-telegram.sh
-  template: 
-    src: sys-alm-telegram.sh.j2 
+  template:
+    src: sys-alm-telegram.sh.j2
     dest: "{{ systemd_telegram_script }}"
 
 - name: configure sys-alm-telegram.infinito.service
-  template: 
-    src: sys-alm-telegram@.service.j2 
+  template:
+    src: sys-alm-telegram@.service.j2
     dest: "/etc/systemd/system/sys-alm-telegram.infinito@.service"
   notify: "restart sys-alm-telegram service"

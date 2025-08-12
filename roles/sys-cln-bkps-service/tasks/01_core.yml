@@ -1,8 +1,21 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - dev-python-pip
+    - sys-alm-compose
+    - sys-lock
+    - sys-rst-daemon
+  - set_fact:
+      run_once_sys_cln_bkps_service: true
+  when: run_once_sys_cln_bkps_service is not defined
 - name: install lsof and python-psutil
   community.general.pacman:
     name:
-      - lsof
-      - python-psutil
+    - lsof
+    - python-psutil
     state: present
 
 - name: "create {{cleanup_backups_directory}}"
@@ -12,12 +25,12 @@
     mode: 0755
 
 - name: create sys-cln-backups.py
-  copy: 
-    src:  "sys-cln-backups.py"
+  copy:
+    src: "sys-cln-backups.py"
     dest: "{{cleanup_backups_directory}}sys-cln-backups.py"
 
 - name: create sys-cln-backups.infinito.service
-  template: 
-    src:  "sys-cln-backups.service.j2"
+  template:
+    src: "sys-cln-backups.service.j2"
     dest: "/etc/systemd/system/sys-cln-backups.infinito.service"
   notify: reload sys-cln-backups.infinito.service

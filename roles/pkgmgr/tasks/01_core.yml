@@ -1,3 +1,15 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - dev-git
+    - dev-make
+    - dev-python-yaml
+  - set_fact:
+      run_once_pkgmgr: true
+  when: run_once_pkgmgr is not defined
 - name: Ensure GitHub host key is in known_hosts
   known_hosts:
     path: "~/.ssh/known_hosts"
@@ -27,10 +39,10 @@
   become: true
 
 - name: create config.yaml
-  template: 
+  template:
     src: config.yaml.j2
     dest: "{{pkgmgr_config_path}}"
-  become: true  
+  become: true
 
 - name: Run the Package Manager install command to create an alias for Kevins package manager
   shell: |

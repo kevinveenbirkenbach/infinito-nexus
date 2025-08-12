@@ -1,29 +1,35 @@
-# run_once_srv_web_7_7_inj_compose: deactivated
-
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'srv-web-7-4-core'
+    include_role:
+      name: srv-web-7-4-core
+  - set_fact:
+      run_once_srv_web_7_7_inj_compose: true
+  when: run_once_srv_web_7_7_inj_compose is not defined
 - name: Set inj_enabled dictionary
   set_fact:
     inj_enabled:
       javascript: "{{ applications | get_app_conf(application_id, 'features.javascript', False) }}"
-      logout:     "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == primary_domain) }}"
-      css:        "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
-      matomo:     "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
-      port_ui:    "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"
+      logout: "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == primary_domain) }}"
+      css: "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
+      matomo: "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
+      port_ui: "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"
 
 - name: "Load CDN for {{domain}}"
   include_role:
     name: web-svc-cdn
     public: false
   # ATM just the Logout is using the CDN.
-  when: 
-    - inj_enabled.logout
-    - application_id != 'web-svc-cdn'
-    - run_once_web_svc_cdn is not defined
+  when:
+  - inj_enabled.logout
+  - application_id != 'web-svc-cdn'
+  - run_once_web_svc_cdn is not defined
 
 - name: Overwritte CDN handlers with neutral handlers
   ansible.builtin.include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
   loop:
-    - svc-prx-openresty
-    - docker-compose
+  - svc-prx-openresty
+  - docker-compose
   loop_control:
     label: "{{ item }}"
   vars:
@@ -33,17 +39,17 @@
   set_fact:
     inj_enabled:
       javascript: "{{ applications | get_app_conf(application_id, 'features.javascript', False) }}"
-      logout:     "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == primary_domain) }}"
-      css:        "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
-      matomo:     "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
-      port_ui:    "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"
+      logout: "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == primary_domain) }}"
+      css: "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
+      matomo: "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
+      port_ui: "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"
 
 - name: "Activate Corporate CSS for {{domain}}"
   include_role:
     name: srv-web-7-7-inj-css
-  when: 
-    - inj_enabled.css
-    - run_once_srv_web_7_7_inj_css is not defined
+  when:
+  - inj_enabled.css
+  - run_once_srv_web_7_7_inj_css is not defined
 
 - name: "Activate Matomo Tracking for {{domain}}"
   include_role:

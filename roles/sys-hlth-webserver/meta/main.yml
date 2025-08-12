@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Checks that each Nginx domain returns its expected HTTP status and alerts on unexpected codes."
@@ -10,17 +9,14 @@ galaxy_info:
   license_url: "https://s.veen.world/cncl"
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions: ["rolling"]
+  - name: Archlinux
+    versions: ["rolling"]
   galaxy_tags:
-    - monitor
-    - webserver
-    - nginx
-    - http
-    - health
-    - systemd
+  - monitor
+  - webserver
+  - nginx
+  - http
+  - health
+  - systemd
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - dev-python-pip
-  - sys-alm-compose

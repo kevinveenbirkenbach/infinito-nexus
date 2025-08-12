@@ -9,19 +9,17 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - csp
-    - puppeteer
-    - health
-    - browser
-    - nodejs
-    - monitoring
-    - systemd
+  - csp
+  - puppeteer
+  - health
+  - browser
+  - nodejs
+  - monitoring
+  - systemd
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-alm-compose

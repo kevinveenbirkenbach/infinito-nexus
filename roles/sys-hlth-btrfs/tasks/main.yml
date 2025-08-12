@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-alm-compose'
+    include_role:
+      name: sys-alm-compose
+  - set_fact:
+      run_once_sys_hlth_btrfs: true
+  when: run_once_sys_hlth_btrfs is not defined
 - name: "create {{docker_health_btrfs_folder}}"
   file:
     path: "{{docker_health_btrfs_folder}}"
@@ -10,7 +18,7 @@
     dest: "{{docker_health_btrfs_folder}}sys-hlth-btrfs.sh"
 
 - name: create sys-hlth-btrfs.infinito.service
-  template: 
+  template:
     src: sys-hlth-btrfs.service.j2
     dest: /etc/systemd/system/sys-hlth-btrfs.infinito.service
   notify: reload sys-hlth-btrfs.infinito.service
@@ -23,4 +31,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_health_btrfs}}"
+    on_calendar: "{{on_calendar_health_btrfs}}"

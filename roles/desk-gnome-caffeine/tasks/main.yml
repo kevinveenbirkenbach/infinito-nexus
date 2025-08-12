@@ -1,9 +1,16 @@
----
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'dev-yay'
+    include_role:
+      name: dev-yay
+  - set_fact:
+      run_once_desk_gnome_caffeine: true
+  when: run_once_desk_gnome_caffeine is not defined
 - name: Install caffeine
   kewlfft.aur.aur:
     use: yay
     name:
-      - caffeine-ng
+    - caffeine-ng
   become: false
 
 - name: Create autostart directory if it doesn't exist

@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Configures Nginx to perform 301 redirects based on a list of source→target domain mappings."
@@ -9,16 +8,13 @@ galaxy_info:
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - nginx
-    - redirect
-    - domains
+  - nginx
+  - redirect
+  - domains
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://github.com/kevinveenbirkenbach/infinito-nexus/tree/main/roles/web-opt-rdr-domains"
   min_ansible_version: "2.9"
   platforms:
-    - name: Any
-      versions: [ all ]
-dependencies:
-  - srv-web-7-6-https
-
+  - name: Any
+    versions: [all]

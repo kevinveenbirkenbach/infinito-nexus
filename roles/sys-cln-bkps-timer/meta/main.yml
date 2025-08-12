@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Schedules periodic cleanup of old backups by configuring a systemd timer to trigger the sys-cln-bkps-service role."
@@ -10,17 +9,14 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Linux
-      versions:
-        - all
+  - name: Linux
+    versions:
+    - all
   galaxy_tags:
-    - timer
-    - backup
-    - cleanup
-    - automation
+  - timer
+  - backup
+  - cleanup
+  - automation
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
-dependencies:
-  - sys-cln-bkps-service
-  - sys-rst-daemon

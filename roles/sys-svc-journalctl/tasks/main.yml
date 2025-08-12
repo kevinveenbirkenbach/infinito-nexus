@@ -1,5 +1,13 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'sys-hlth-journalctl'
+    include_role:
+      name: sys-hlth-journalctl
+  - set_fact:
+      run_once_sys_svc_journalctl: true
+  when: run_once_sys_svc_journalctl is not defined
 - name: copy journald.conf
-  template: 
+  template:
     src: templates/journald.conf.j2
     dest: /etc/systemd/journald.conf
   notify: restart systemd-journald

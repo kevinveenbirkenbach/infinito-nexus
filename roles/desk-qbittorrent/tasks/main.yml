@@ -1,5 +1,13 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'dev-yay'
+    include_role:
+      name: dev-yay
+  - set_fact:
+      run_once_desk_qbittorrent: true
+  when: run_once_desk_qbittorrent is not defined
 - name: install torrent software
   kewlfft.aur.aur:
     use: yay
     name:
-      - qbittorrent
+    - qbittorrent

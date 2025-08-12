@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: |
@@ -11,23 +10,20 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - nginx
-    - certbot
-    - ssl
-    - tls
-    - letsencrypt
-    - https
-    - systemd
-    - automation
+  - nginx
+  - certbot
+  - ssl
+  - tls
+  - letsencrypt
+  - https
+  - systemd
+  - automation
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
 dependencies:
-  - srv-web-7-7-certbot
-  - srv-web-7-4-core
-  - sys-alm-compose
-  - sys-cln-certs
+- sys-cln-certs

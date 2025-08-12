@@ -1,4 +1,3 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Automates the backup of Docker volumes to a local folder"
@@ -10,21 +9,17 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - backup
-    - docker
-    - local
-    - systemd
-    - automation
+  - backup
+  - docker
+  - local
+  - systemd
+  - automation
   repository: "https://github.com/kevinveenbirkenbach/infinito-nexus"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/infinito-nexus/issues"
   documentation: "https://docs.infinito.nexus"
 dependencies:
-  - sys-bkp-provider
-  - sys-alm-compose
-  - sys-cln-faild-bkps
-  - sys-lock
-  - sys-bkp-directory-validator
+- sys-cln-faild-bkps

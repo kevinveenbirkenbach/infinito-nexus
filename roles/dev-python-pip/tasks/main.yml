@@ -1,4 +1,11 @@
----
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'dev-gcc'
+    include_role:
+      name: dev-gcc
+  - set_fact:
+      run_once_dev_python_pip: true
+  when: run_once_dev_python_pip is not defined
 - name: python pip install
   community.general.pacman:
     name: python-pip

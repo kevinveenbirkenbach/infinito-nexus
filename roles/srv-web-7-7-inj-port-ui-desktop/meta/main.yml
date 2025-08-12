@@ -1,5 +1,3 @@
-
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Injects a JS snippet into HTML to notify parent windows of iframe location changes and force external links to new tabs."
@@ -14,15 +12,13 @@ galaxy_info:
   license_url: "https://s.veen.world/cncl"
   min_ansible_version: "2.9"
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - nginx
-    - iframe
-    - javascript
-    - csp
-    - security
-    - postMessage
-dependencies:
-  - srv-web-7-4-core
+  - nginx
+  - iframe
+  - javascript
+  - csp
+  - security
+  - postMessage

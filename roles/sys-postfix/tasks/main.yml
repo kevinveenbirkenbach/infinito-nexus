@@ -1,3 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependency 'user-administrator'
+    include_role:
+      name: user-administrator
+  - set_fact:
+      run_once_sys_postfix: true
+  when: run_once_sys_postfix is not defined
 - name: install postfix
   community.general.pacman:
     name: postfix

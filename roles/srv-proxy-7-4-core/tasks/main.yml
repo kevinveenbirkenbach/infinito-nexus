@@ -1,0 +1,11 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - srv-web-7-6-https
+    - srv-web-7-4-core
+  - set_fact:
+      run_once_srv_proxy_7_4_core: true
+  when: run_once_srv_proxy_7_4_core is not defined

@@ -1,13 +1,23 @@
----
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - srv-web-7-6-https
+    - dev-git
+  - set_fact:
+      run_once_web_svc_html: true
+  when: run_once_web_svc_html is not defined
 - name: "include role for {{application_id}} to receive certs & do modification routines"
   include_role:
     name: srv-web-7-6-composer
   vars:
-    domain:     "{{domains | get_domain(application_id)}}"
-    http_port:  "{{ ports.localhost.http[application_id] }}"
+    domain: "{{domains | get_domain(application_id)}}"
+    http_port: "{{ ports.localhost.http[application_id] }}"
 
 - name: "generate {{domains | get_domain(application_id)}}.conf"
-  template: 
-    src:  "nginx.conf.j2" 
+  template:
+    src: "nginx.conf.j2"
     dest: "{{nginx.directories.http.servers}}{{domains | get_domain(application_id)}}.conf"
   notify: restart openresty

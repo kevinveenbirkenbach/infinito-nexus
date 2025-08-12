@@ -1,9 +1,19 @@
----
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - dev-yay
+    - sys-alm-compose
+  - set_fact:
+      run_once_drv_msi_keyboard_color: true
+  when: run_once_drv_msi_keyboard_color is not defined
 - name: Install MSI packages
   kewlfft.aur.aur:
     use: yay
     name:
-      - msi-perkeyrgb
+    - msi-perkeyrgb
 
 - name: Copy keyboard_color.sh script
   copy:
@@ -29,5 +39,5 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_msi_keyboard_color}}"
-    persistent:   "true"
+    on_calendar: "{{on_calendar_msi_keyboard_color}}"
+    persistent: "true"

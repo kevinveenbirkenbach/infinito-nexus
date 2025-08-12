@@ -1,3 +1,16 @@
+- name: Load former meta dependencies once
+  block:
+  - name: Include moved dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - sys-alm-compose
+    - sys-lock
+    - sys-bkp-directory-validator
+    - sys-rst-daemon
+  - set_fact:
+      run_once_sys_cln_faild_bkps: true
+  when: run_once_sys_cln_faild_bkps is not defined
 - name: "pkgmgr install"
   include_role:
     name: pkgmgr-install
@@ -28,4 +41,4 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar:  "{{on_calendar_cleanup_failed_docker}}"
+    on_calendar: "{{on_calendar_cleanup_failed_docker}}"
