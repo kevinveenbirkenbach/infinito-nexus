@@ -4,7 +4,7 @@ application_id:           "web-app-matrix"
 database_type:            "postgres"
 registration_file_folder: "/data/"
 
-# Matrix specific
+# Matrix
 matrix_synapse_version:   "{{ applications | get_app_conf(application_id, 'docker.services.synapse.version', True) }}"
 matrix_synapse_image:     "{{ applications | get_app_conf(application_id, 'docker.services.synapse.image', True) }}"
 matrix_synapse_name:      "{{ applications | get_app_conf(application_id, 'docker.services.synapse.name', True) }}"
@@ -18,3 +18,6 @@ matrix_project:           "{{ application_id | get_entity_name }}"
 well_known_directory:     "{{nginx.directories.data.well_known}}/matrix/"
 location_upload:          "~ ^/_matrix/media/v3/"
 client_max_body_size:     "{{ applications | get_app_conf(application_id, 'server.client_max_body_size') }}"
+
+# Docker
+docker_compose_flush_handlers:  false
