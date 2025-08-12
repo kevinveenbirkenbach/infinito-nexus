@@ -50,3 +50,18 @@
         plugin_enabled: "{{ item.value.enabled | bool }}"
         plugin_task_path: "{{ role_path }}/tasks/plugins/{{ plugin_name }}/install.yml"
       when: plugin_enabled
+
+- name: Detect if WordPress is Multisite
+  command: >
+    docker exec -u {{ wordpress_user }} {{ wordpress_container }}
+    wp eval 'echo (int) is_multisite();' --path={{ wordpress_docker_html_path }}
+  register: wp_is_multisite
+  changed_when: false
+
+- name: "Update Single Side Wordpress domain"
+  include_tasks: 04_update_domain.yml
+  when: (wp_is_multisite.stdout | trim) == '0'
+  vars:
+    # Target URL to switch to (uses your helper)
+    wp_new_url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+  
