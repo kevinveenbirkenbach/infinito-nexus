@@ -21,3 +21,23 @@
     docker exec --user root {{ espocrm_name }}
     sed -i "s/'password' => .*/'password' => '{{ database_password }}',/" {{ espocrm_config_file }}
   notify: docker compose restart
+
+- name: Ensure siteUrl matches canonical domain
+  ansible.builtin.shell: |
+    docker compose exec -T web php -r '
+      require "/var/www/html/bootstrap.php";
+      $app = new \Espo\Core\Application();
+      $c   = $app->getContainer();
+      $cfg = $c->get("config");
+      $writer = $c->get("injectableFactory")->create("\Espo\Core\Utils\Config\ConfigWriter");
+      $new = "{{ domains | get_url(application_id, WEB_PROTOCOL) }}";
+      if ($cfg->get("siteUrl") !== $new) {
+        $writer->set("siteUrl", $new);
+        $writer->save();
+        echo "CHANGED";
+      }
+    '
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: siteurl_set
+  changed_when: "'CHANGED' in siteurl_set.stdout"
