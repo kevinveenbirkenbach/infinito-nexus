@@ -1,6 +1,6 @@
 server
 {
-  server_name {{domains | get_domain(application_id)}};
+  server_name {{ domains | get_domain(application_id) }};
   
   {% include 'roles/srv-web-7-7-letsencrypt/templates/ssl_header.j2' %}
 

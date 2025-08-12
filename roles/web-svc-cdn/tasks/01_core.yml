@@ -9,11 +9,10 @@
   include_role:
     name: srv-web-7-6-composer
   vars:
-    domain: "{{ domains | get_domain(application_id) }}"
     http_port: "{{ ports.localhost.http[application_id] }}"
 
-- name: "generate {{domains | get_domain(application_id)}}.conf"
+- name: "generate '{{ CDN_NGINX_FILE }}'"
   template:
     src: "nginx.conf.j2"
-    dest: "{{ nginx.directories.http.servers }}{{ domains | get_domain(application_id) }}.conf"
+    dest: "{{ nginx.directories.http.servers }}{{ CDN_NGINX_FILE }}"
   notify: restart openresty
