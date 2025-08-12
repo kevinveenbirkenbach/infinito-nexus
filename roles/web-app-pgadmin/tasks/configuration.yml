@@ -1,5 +1,5 @@
-- name: "load variables from {{ cmp_db_docker_vars_file_db }}"
-  include_vars: "{{ cmp_db_docker_vars_file_db }}"
+- name: "load variables from {{ DATABASE_VARS_FILE }}"
+  include_vars: "{{ DATABASE_VARS_FILE }}"
 
 - name: "loading database configuration variables"
   include_vars:

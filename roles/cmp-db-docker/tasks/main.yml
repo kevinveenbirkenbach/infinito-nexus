@@ -7,8 +7,8 @@
 - name: "For '{{ application_id }}': Load database variables"
   include_vars: "{{ item }}"
   loop:
-    - "{{ DOCKER_VARS_FILE }}"            # Important to load docker variables first so that database can use them
-    - "{{ cmp_db_docker_vars_file_db }}"  # Important to load them before docker role so that backup can use them
+    - "{{ DOCKER_VARS_FILE }}"    # Important to load docker variables first so that database can use them
+    - "{{ DATABASE_VARS_FILE }}"  # Important to load them before docker role so that backup can use them
 
 - name: "For '{{ application_id }}': Load central RDBMS"
   include_role:

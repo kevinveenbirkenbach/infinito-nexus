@@ -1,1 +1,1 @@
-cmp_db_docker_vars_file_db: "{{ playbook_dir }}/roles/cmp-rdbms/vars/database.yml"
+DATABASE_VARS_FILE: "{{ playbook_dir }}/roles/cmp-rdbms/vars/database.yml"
