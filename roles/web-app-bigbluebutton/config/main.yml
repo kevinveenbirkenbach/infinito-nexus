@@ -23,6 +23,9 @@ credentials: {}
 
 docker:
   services:
+    bigbluebutton:
+      repository: "https://github.com/bigbluebutton/docker.git"
+      version:    "main"  
     database:
       # This is set to true to pass integration test, doesn't have any other function
       enabled: true

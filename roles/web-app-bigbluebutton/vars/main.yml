@@ -1,9 +1,10 @@
+# General
 application_id:                     "web-app-bigbluebutton"
 
 # Database configuration
 database_type:                      "postgres"
 database_instance:                  "{{ application_id | get_entity_name }}"
-database_password:                  "{{ applications | get_app_conf(application_id, 'credentials.postgresql_secret', True) }}"
+database_password:                  "{{ applications | get_app_conf(application_id, 'credentials.postgresql_secret') }}"
 database_username:                  "postgres"
 database_name:                      ""                              # Multiple databases
 
@@ -13,6 +14,7 @@ http_port:                          "{{ ports.localhost.http[application_id] }}"
 
 # Docker
 docker_compose_skipp_file_creation: true # Handled in this role
-docker_repository_address:          "https://github.com/bigbluebutton/docker.git"
+docker_repository_address:          "{{ applications | get_app_conf(application_id, 'docker.services.bigbluebutton.repository') }}"
+docker_repository_branch:           "{{ applications | get_app_conf(application_id, 'docker.services.bigbluebutton.version') }}"
 docker_pull_git_repository:         true
 docker_compose_flush_handlers:      false
