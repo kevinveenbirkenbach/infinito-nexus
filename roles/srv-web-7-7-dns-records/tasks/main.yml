@@ -13,3 +13,5 @@
   loop: "{{ cloudflare_domains }}"
   loop_control:
     label: "{{ item }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
