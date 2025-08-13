@@ -11,8 +11,6 @@ http_port:                                      "{{ ports.localhost.http[applica
 database_password:                              "{{ applications | get_app_conf(application_id, 'credentials.database_password', True)}}"
 database_type:                                  "mariadb"                                                                                   # Database flavor
 
-nextcloud_wait_for_async_enabled:               "{{applications | get_app_conf(application_id, 'performance.async.wait_for')}}"
-
 nextcloud_plugins_enabled:                      "{{ applications | get_app_conf(application_id, 'plugins_enabled', True) }}"
 nextcloud_administrator_username:               "{{ applications | get_app_conf(application_id, 'users.administrator.username', True) }}"
 

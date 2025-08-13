@@ -70,8 +70,6 @@ performance:
     memory_limit:               "{{ ((ansible_memtotal_mb | int) / 30)|int }}M" # Dynamic set memory limit
     upload_limit:               "5G"                                            # Set upload limit to 5GB for big media files
     opcache_memory_consumption: "{{ ((ansible_memtotal_mb | int) / 30)|int }}M" # Dynamic set memory consumption
-  async:
-    wait_for:                   "{{ enable_debug }}"                            # If debug is enabled wait_for async jobs
 
 plugins_enabled:                true                                            # Implemented for speeding up testing and debugging process. For productive environments keep it true and steer the apps via the plugins config
 
