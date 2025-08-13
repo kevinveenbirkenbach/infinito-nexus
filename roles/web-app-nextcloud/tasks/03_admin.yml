@@ -10,5 +10,5 @@
     ("is already a member of" not in (
       (add_admin_to_group.stderr | default('')) ~ (add_admin_to_group.stdout | default(''))
     ))
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

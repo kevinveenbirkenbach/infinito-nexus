@@ -5,7 +5,6 @@
     state: absent
   when:
     - MODE_CLEANUP | bool
-    - run_once_nginx_reverse_proxy is not defined
   loop: "{{ nginx.directories.cache | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -18,13 +17,12 @@
     owner: "{{ nginx.user }}"
     group: "{{ nginx.user }}"
     mode: '0700'
-      
-  when: run_once_nginx_reverse_proxy is not defined
   loop: "{{ nginx.directories.cache | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: run the nginx_reverse_proxy tasks once
   set_fact:
     run_once_nginx_reverse_proxy: true
-  when: run_once_nginx_reverse_proxy is not defined

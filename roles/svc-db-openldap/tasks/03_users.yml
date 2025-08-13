@@ -18,8 +18,8 @@
       uidNumber:     "{{ item.value.uid | int }}"
       gidNumber:     "{{ item.value.gid | int }}"
     state: present            # ↳ creates but never updates
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   loop: "{{ users | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -37,8 +37,8 @@
       objectClass: "{{ ldap.user.objects.structural }}"
       mail:        "{{ item.value.email }}"
     state: exact
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   loop: "{{ users | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

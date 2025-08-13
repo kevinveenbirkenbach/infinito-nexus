@@ -10,5 +10,5 @@
     ((disable_result.stdout | default('') ~ disable_result.stderr | default('')) is search('disabled'))
     and (((disable_result.stdout | default('') ~ disable_result.stderr | default('')) is not search('already disabled')))
   when: not (plugin_value.enabled | bool)
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

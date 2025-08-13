@@ -18,5 +18,5 @@
     ( ((syscfg_shell.stdout | default('')) ~ (syscfg_shell.stderr | default(''))) 
       is search(' set to ') )
   failed_when: not ASYNC_ENABLED and syscfg_shell.rc != 0
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

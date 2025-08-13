@@ -32,8 +32,8 @@
     not ASYNC_ENABLED and
     (config_set_shell.stdout | default('')) is search(' set to ')
   failed_when: not ASYNC_ENABLED and config_set_shell.rc != 0
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: Check if {{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml exists
   stat:

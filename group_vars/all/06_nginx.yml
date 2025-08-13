@@ -24,3 +24,4 @@ nginx:
       general:        "/tmp/cache_nginx_general/"           # Directory which nginx uses to cache general data
       image:          "/tmp/cache_nginx_image/"             # Directory which nginx uses to cache images
   user:               "http"                                # Default nginx user in ArchLinux
+  

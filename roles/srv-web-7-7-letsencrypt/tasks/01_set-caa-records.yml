@@ -20,3 +20,5 @@
   loop: "{{ base_sld_domains | product(caa_entries) | list }}"
   loop_control:
     label: "{{ item.0 }} → {{ item.1.tag }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

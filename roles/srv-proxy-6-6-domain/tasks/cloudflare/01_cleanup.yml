@@ -9,4 +9,5 @@
       purge_everything: true
     body_format: json
     return_content: yes
-  register: cf_purge
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

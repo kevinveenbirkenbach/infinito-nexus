@@ -14,6 +14,8 @@
     proxied: false
     ttl: 1
     state: present
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: "Set CNAME record for autoconfig"
   community.general.cloudflare_dns:
@@ -25,6 +27,8 @@
     proxied: false
     ttl: 1
     state: present
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: "Set MX record"
   community.general.cloudflare_dns:
@@ -36,6 +40,8 @@
     priority: 10
     ttl: 1
     state: present
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: "Set SRV records"
   community.general.cloudflare_dns:
@@ -55,6 +61,8 @@
   #register: srv_result
   #failed_when: srv_result.rc != 0 and ("An identical record already exists" not in srv_result.stdout)
   #changed_when: srv_result.rc == 0 and ("An identical record already exists" not in srv_result.stdout)
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: "Set SPF TXT record"
   community.general.cloudflare_dns:
@@ -65,6 +73,8 @@
     value: "v=spf1 mx a:{{ domain }} ~all"
     ttl: 1
     state: present
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: "Set DMARC TXT record"
   community.general.cloudflare_dns:
@@ -75,6 +85,8 @@
     value: "v=DMARC1; p=reject; ruf=mailto:{{ mailu_dmarc_ruf }}; adkim=s; aspf=s"
     ttl: 1
     state: present
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: "Set DKIM TXT record"
   community.general.cloudflare_dns:
@@ -85,3 +97,5 @@
     value: "{{ mailu_dkim_public_key }}"
     ttl: 1
     state: present
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
