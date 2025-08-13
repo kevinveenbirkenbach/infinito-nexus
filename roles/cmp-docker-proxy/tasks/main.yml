@@ -1,6 +1,6 @@
 # run_once_cmp_docker_proxy: deactivated
 
-# To load the proxy first is just implemented due to some issues with BBB
+# Load the proxy first, so that openresty handlers are flushed before the main docker compose
 - name: "For '{{ application_id }}': include role srv-proxy-6-6-domain"
   include_role:
     name: srv-proxy-6-6-domain

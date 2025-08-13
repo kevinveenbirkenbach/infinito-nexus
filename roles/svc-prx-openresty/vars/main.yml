@@ -8,7 +8,3 @@ database_type:                  ""
 openresty_image:                "openresty/openresty"
 openresty_version:              "alpine"
 openresty_container:            "{{ applications | get_app_conf(application_id, 'docker.services.openresty.name', True) }}"
-
-# Docker
-docker_compose_flush_handlers:  true
-docker_pull_git_repository:     false # Deactivated here to don't inhire this
