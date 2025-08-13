@@ -2,7 +2,7 @@
   file:
     path: "{{storage_optimizer_directory}}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: create svc-opt-ssd-hdd.infinito.service
   template: 
@@ -14,7 +14,7 @@
   copy: 
     src: svc-opt-ssd-hdd.py
     dest: "{{storage_optimizer_script}}"
-    mode: 0755
+    mode: "0755"
 
 - name: "optimize storage performance"
   systemd:

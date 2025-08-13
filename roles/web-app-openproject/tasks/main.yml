@@ -21,7 +21,7 @@
   file:
     path: "{{ openproject_dummy_volume }}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: flush docker service
   meta: flush_handlers

@@ -14,7 +14,7 @@
   copy:
     src: keyboard_color.py
     dest: /opt/keyboard_color.py
-    mode: 0755
+    mode: "0755"
 
 - name: Copy keyboard-color.infinito.service file
   template:

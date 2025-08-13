@@ -7,7 +7,7 @@
   file:
     path: "{{restart_docker_folder}}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: create {{restart_docker_script}}
   copy:

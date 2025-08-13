@@ -1,14 +1,3 @@
-- name: "Wait until Keycloak is reachable at {{ keycloak_server_host_url }}"
-  uri:
-    url: "{{ keycloak_server_host_url }}/realms/master"
-    method: GET
-    status_code: 200
-    validate_certs: false
-  register: keycloak_check
-  retries: 30
-  delay: 5
-  until: keycloak_check.status == 200
-
 # Configure Credentials
 - name: Ensure Keycloak CLI credentials are configured
   shell: |

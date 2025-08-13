@@ -17,13 +17,13 @@
   file:
     path: "{{ health_csp_crawler_folder }}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: copy sys-hlth-csp.py
   copy:
     src: sys-hlth-csp.py
     dest: "{{ health_csp_crawler_script }}"
-    mode: 0755
+    mode: "0755"
 
 - name: create sys-hlth-csp.infinito.service
   template:

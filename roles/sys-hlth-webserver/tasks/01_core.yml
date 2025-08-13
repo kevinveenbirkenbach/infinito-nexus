@@ -17,7 +17,7 @@
   file:
     path: "{{ health_nginx_folder }}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: create sys-hlth-webserver.py
   template:

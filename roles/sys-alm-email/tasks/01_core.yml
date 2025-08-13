@@ -9,7 +9,7 @@
   file:
     path: "{{systemd_notifier_email_folder}}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: configure sys-alm-email.sh
   template:

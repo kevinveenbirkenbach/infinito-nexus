@@ -1,24 +1,26 @@
 # General
-application_id:                   "web-app-keycloak"                                                                              # Internal Infinito.Nexus application id 
-database_type:                    "postgres"                                                                                      # Database which will be used
+application_id:                   "web-app-keycloak"                                                                          # Internal Infinito.Nexus application id 
+database_type:                    "postgres"                                                                                  # Database which will be used
 
-# Keycloak Specific
-keycloak_container:               "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name', True) }}"      # Name of the keycloack docker container
-keycloak_docker_import_directory: "/opt/keycloak/data/import/"                                                                    # Directory in which keycloack import files are placed in the running docker container
-keycloak_realm:                   "{{ primary_domain}}"                                                                           # This is the name of the default realm which is used by the applications
-keycloak_master_api_user:           "{{ applications | get_app_conf(application_id, 'users.administrator', True) }}"                # Master Administrator
-keycloak_master_api_user_name:  "{{ keycloak_master_api_user.username }}"                                                         # Master Administrator Username
-keycloak_master_api_user_password:  "{{ keycloak_master_api_user.password }}"                                                         # Master Administrator Password
-keycloak_kcadm_path:              "docker exec -i {{ keycloak_container }} /opt/keycloak/bin/kcadm.sh"                            # Init script for keycloak
-keycloak_server_internal_url:     "http://127.0.0.1:8080"
-keycloak_server_host:             "127.0.0.1:{{ ports.localhost.http[application_id] }}"
-keycloak_server_host_url:         "http://{{ keycloak_server_host }}"
-keycloak_image:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.image', True) }}"     # Keycloak docker image
-keycloak_version:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version', True) }}"   # Keyloak docker version
-keycloak_import_realm:            "{{ applications | get_app_conf(application_id, 'import_realm', True, True) }}"                 # Activate realm import
-keycloak_debug_enabled:           "{{ enable_debug }}"
-keycloak_redirect_features:       ["features.oauth2","features.oidc"]
-keycloak_client_id:               "{{ oidc.client.id }}"
+# Keycloak
+keycloak_container:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"      # Name of the keycloak docker container
+keycloak_docker_import_directory:   "/opt/keycloak/data/import/"                                                              # Directory in which keycloak import files are placed in the running docker container
+keycloak_realm:                     "{{ primary_domain}}"                                                                     # This is the name of the default realm which is used by the applications
+keycloak_master_api_user:           "{{ applications | get_app_conf(application_id, 'users.administrator') }}"                # Master Administrator
+keycloak_master_api_user_name:      "{{ keycloak_master_api_user.username }}"                                                 # Master Administrator Username
+keycloak_master_api_user_password:  "{{ keycloak_master_api_user.password }}"                                                 # Master Administrator Password
+keycloak_kcadm_path:                "docker exec -i {{ keycloak_container }} /opt/keycloak/bin/kcadm.sh"                      # Init script for keycloak
+keycloak_server_internal_url:       "http://127.0.0.1:8080"
+keycloak_server_host:               "127.0.0.1:{{ ports.localhost.http[application_id] }}"
+keycloak_server_host_url:           "http://{{ keycloak_server_host }}"
+keycloak_image:                     "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.image') }}"     # Keycloak docker image
+keycloak_version:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version') }}"   # Keycloak docker version
+keycloak_debug_enabled:             "{{ enable_debug }}"
+keycloak_redirect_features:         ["features.oauth2","features.oidc"]
+keycloak_client_id:                 "{{ oidc.client.id }}"
+keycloak_ldap_component_name:       "{{ ldap.server.domain }}"                                                                                    # Name of the LDAP User Federation component in Keycloak (as shown in UI)
+keycloak_import_realm:              "{{ applications | get_app_conf(application_id, 'actions.import_realm') }}"               # Activate realm import  
+keycloak_update_ldap_bind:          "{{ applications | get_app_conf(application_id, 'actions.update_ldap_bind') }}"           # Toggle the LDAP bind update step
 
 # Docker 
-docker_compose_flush_handlers:    true                                                                                            # Remember to copy realm import before flushg when set to true
+docker_compose_flush_handlers:      true                                                                                      # Remember to copy realm import before flush when set to true

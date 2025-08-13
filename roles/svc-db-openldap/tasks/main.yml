@@ -44,7 +44,7 @@
   file:
     path: "{{openldap_ldif_host_path}}{{item}}"
     state: directory
-    mode: 0755
+    mode: "0755"
   loop: "{{openldap_ldif_types}}"
 
 - name: "Import LDIF Configuration"

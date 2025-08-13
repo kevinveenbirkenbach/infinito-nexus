@@ -13,6 +13,6 @@
   template: 
     src:  "env.j2" 
     dest: "{{docker_compose.files.env}}"
-    mode: '770'
+    mode: "0770"
     force: yes
   notify: docker compose up

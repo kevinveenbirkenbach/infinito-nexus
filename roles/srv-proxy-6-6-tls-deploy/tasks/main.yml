@@ -8,7 +8,7 @@
   file:
     path: "{{cert_mount_directory}}"
     state: directory
-    mode: 0755
+    mode: "0755"
   notify: restart srv-proxy-6-6-tls-deploy.infinito.service
 
 - name: configure srv-proxy-6-6-tls-deploy.infinito.service

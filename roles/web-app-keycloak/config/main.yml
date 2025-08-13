@@ -1,4 +1,6 @@
-import_realm:         True     # If True realm will be imported. If false skip.
+actions:
+  import_realm:       True     # Import REALM
+  update_ldap_bind:   True     # Updates LDAP binds
 features:
   matomo:             true
   css:                true

@@ -7,7 +7,7 @@
   file:
     path: "{{health_journalctl_folder}}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: create sys-hlth-journalctl.sh
   copy:

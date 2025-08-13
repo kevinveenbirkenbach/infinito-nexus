@@ -20,7 +20,7 @@
   file:
     path: "{{docker_compose_instance_confd_directory}}"
     state: directory
-    mode: 0755
+    mode: "0755"
     recurse: yes
 
 - name: "create {{docker_compose_instance_confd_defaultconf_file}}"

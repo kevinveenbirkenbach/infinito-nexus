@@ -27,19 +27,7 @@
       - keycloak_redirect_features is defined
       - domains is defined
       - applications is defined
-    fail_msg: "Missing required variable(s). Provide all vars listed at the top of 10_update_client_redirects.yml."
-
-# 0) Wait & login
-- name: "Wait until Keycloak is reachable at {{ keycloak_server_host_url }}"
-  uri:
-    url: "{{ keycloak_server_host_url }}/realms/master"
-    method: GET
-    status_code: 200
-    validate_certs: false
-  register: kc_up
-  retries: 30
-  delay: 5
-  until: kc_up.status == 200
+    fail_msg: "Missing required variable(s). Provide all vars listed at the top of 02_update_client_redirects.yml."
 
 - name: "kcadm login"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

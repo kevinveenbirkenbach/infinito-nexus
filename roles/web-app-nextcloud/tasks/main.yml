@@ -7,7 +7,7 @@
   file:
     path: "{{ nextcloud_host_config_additives_directory }}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: "Create config files at {{ nextcloud_host_config_additives_directory }}"
   template:

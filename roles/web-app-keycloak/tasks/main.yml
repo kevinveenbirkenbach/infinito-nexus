@@ -6,8 +6,23 @@
   include_role: 
     name: cmp-db-docker-proxy
 
+- name: "Wait until Keycloak is reachable at {{ keycloak_server_host_url }}"
+  uri:
+    url: "{{ keycloak_server_host_url }}/realms/master"
+    method: GET
+    status_code: 200
+    validate_certs: false
+  register: kc_up
+  retries: 30
+  delay: 5
+  until: kc_up.status == 200
+
 - name: "Apply client redirects without realm import"
   include_tasks: 02_update_client_redirects.yml
+
+- name: "Update LDAP bind credentials from ldap.*"
+  when: keycloak_update_ldap_bind | bool
+  include_tasks: 03_update-ldap-bind.yml
 
 # Deactivated temporary. Import now via realm.yml
 #- name: Implement SSH Public Key Attribut

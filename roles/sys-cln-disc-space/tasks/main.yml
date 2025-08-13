@@ -13,7 +13,7 @@
   file:
     path: "{{cleanup_disc_space_folder}}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: create sys-cln-disc-space.sh
   template:

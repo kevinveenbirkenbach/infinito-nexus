@@ -7,7 +7,7 @@
   file:
     path: "{{health_docker_volumes_folder}}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: create sys-hlth-docker-volumes.sh
   copy:

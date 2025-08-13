@@ -108,13 +108,13 @@
 #  file:
 #    path: "{{docker_compose.directories.instance}}"
 #    state: directory
-#    mode: 0755
+#    mode: "0755"
 #
 #- name: "create {{docker_compose.directories.instance}}mautrix_whatsapp"
 #  file:
 #    path: "{{docker_compose.directories.instance}}mautrix_whatsapp"
 #    state: directory
-#    mode: 0755
+#    mode: "0755"
 #
 #- name: add whatsapp-bridge-config.yml
 #  template: 

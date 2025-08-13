@@ -10,7 +10,7 @@
   file:
     path: "{{ health_msmtp_folder }}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: create sys-hlth-msmtp.sh
   template:

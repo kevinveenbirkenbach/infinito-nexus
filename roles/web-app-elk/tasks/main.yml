@@ -22,7 +22,7 @@
   file:
     path: "{{docker_elk_compose_path}}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: git pull web-app-elk
   git:

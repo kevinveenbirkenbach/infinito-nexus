@@ -15,13 +15,13 @@
   file:
     path: "{{docker_backup_remote_to_local_folder}}"
     state: directory
-    mode: 0755
+    mode: "0755"
 
 - name: create svc-bkp-rmt-2-loc.sh
   copy:
     src: svc-bkp-rmt-2-loc.sh
     dest: "{{docker_backup_remote_to_local_folder}}svc-bkp-rmt-2-loc.sh"
-    mode: 0755
+    mode: "0755"
 
 - name: create svc-bkp-rmt-2-loc.infinito.service
   template:
@@ -33,7 +33,7 @@
   template:
     src: sys-bkp-rmt-2-loc-multi-provider.sh.j2
     dest: "{{docker_backup_remote_to_local_folder}}sys-bkp-rmt-2-loc-multi-provider.sh"
-    mode: 0755
+    mode: "0755"
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:
