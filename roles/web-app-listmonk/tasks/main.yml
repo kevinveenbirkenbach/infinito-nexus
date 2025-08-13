@@ -1,16 +1,14 @@
 ---
-- name: Set proxy_extra_configuration based on applications | get_app_conf(application_id, 'public_api_activated', True)
-  set_fact:
+- name: "load docker, db and proxy for {{application_id}}"
+  include_role: 
+    name: cmp-db-docker-proxy
+  vars:
     proxy_extra_configuration: >-
       {% if not applications | get_app_conf(application_id, 'public_api_activated', True) %}
       {{ lookup('file', '{{ role_path }}/files/deactivate-public-api.conf') }}
       {% else %}
       ""
       {% endif %}
-
-- name: "load docker, db and proxy for {{application_id}}"
-  include_role: 
-    name: cmp-db-docker-proxy
 
 - name: add config.toml
   template: 

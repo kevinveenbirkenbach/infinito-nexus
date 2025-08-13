@@ -19,7 +19,7 @@
 
 - name: "Unset 'proxy_extra_configuration'"
   set_fact:
-    proxy_extra_configuration: "{{ undef() }}"
+    proxy_extra_configuration: null
 
 - name: configure websocket_upgrade.conf
   copy: 
