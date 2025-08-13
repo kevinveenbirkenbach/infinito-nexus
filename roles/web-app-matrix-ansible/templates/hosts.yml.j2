@@ -1,8 +1,0 @@
-matrix_servers:
-  hosts:
-    {{inventory_hostname}}:
-      ansible_host: "{{networks.internet.ip4}}"
-      ansible_ssh_user: administrator
-      become: true
-      become_user: root
-      ansible_become_password: "{{ansible_become_password}}"

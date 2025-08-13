@@ -1,3 +1,0 @@
----
-local_repository_directory: "{{role_path}}/matrix-web-app-ansible-deploy"
-application_id:             "web-app-matrix-ansible"  # Just added to catch integration test exceptions. This role is anyhow deprecated.
