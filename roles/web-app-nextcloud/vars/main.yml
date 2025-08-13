@@ -9,12 +9,11 @@ http_port:                                      "{{ ports.localhost.http[applica
 
 # Database
 database_password:                              "{{ applications | get_app_conf(application_id, 'credentials.database_password', True)}}"
-database_type:                                  "mariadb"                                                     # Database flavor
+database_type:                                  "mariadb"                                                                                   # Database flavor
+
+nextcloud_wait_for_async_enabled:               "{{applications | get_app_conf(application_id, 'performance.async.wait_for')}}"
+
 nextcloud_plugins_enabled:                      "{{ applications | get_app_conf(application_id, 'plugins_enabled', True) }}"
-
-# Docker
-docker_compose_flush_handlers:                  false # Deactivate flushing because first some routines have to be done
-
 nextcloud_administrator_username:               "{{ applications | get_app_conf(application_id, 'users.administrator.username', True) }}"
 
 # Control Node
@@ -24,8 +23,9 @@ nextcloud_control_node_plugin_tasks_directory:  "{{role_path}}/tasks/plugins/"  
 # Host 
 
 ## Host Paths
-nextcloud_host_config_additives_directory:      "{{ docker_compose.directories.volumes }}infinito/"               # This folder is the path to which the additive configurations will be copied
+nextcloud_host_config_additives_directory:      "{{ docker_compose.directories.volumes }}infinito/"             # This folder is the path to which the additive configurations will be copied
 nextcloud_host_include_instructions_file:       "{{ docker_compose.directories.volumes }}includes.php"          # Path to the instruction file on the host. Responsible for loading the additional configurations
+nextcloud_host_nginx_path:                      "{{ nginx.directories.http.servers }}{{ domains | get_domain(application_id) }}.conf" # Nginx path for proxy conf
 
 # Docker
 

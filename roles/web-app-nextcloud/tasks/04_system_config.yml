@@ -1,0 +1,34 @@
+- name: Load System Nextcloud configuration variables
+  include_vars:
+    file: system.yml
+
+- name: "Launch async: apply Nextcloud system configs"
+  ansible.builtin.command: >
+    {{ nextcloud_docker_exec_occ }}
+    config:system:set {{ item.parameter }}
+    {% if item.type is defined %} --type {{ item.type }}{% endif %}
+    --value {{ item.value }}
+  loop: "{{ nextcloud_system_config }}"
+  loop_control:
+    label: "{{ item.parameter }}"
+  async: 300
+  poll: 0
+  register: syscfg_jobs
+
+- name: "Wait for system config jobs"
+  ansible.builtin.async_status:
+    jid: "{{ item.ansible_job_id }}"
+  loop: "{{ syscfg_jobs.results | default([]) }}"
+  loop_control:
+    label: "{{ item._ansible_item_label | default(item.item.parameter) }}"
+  register: syscfg_wait
+  until: syscfg_wait.finished
+  retries: 100
+  delay: 1
+  failed_when: >
+    (syscfg_wait.rc is defined and syscfg_wait.rc|int != 0)
+  changed_when: >
+    (syscfg_wait.stdout is defined) and
+    ("Value not changed" not in syscfg_wait.stdout)
+  when:
+    - nextcloud_wait_for_async_enabled | bool

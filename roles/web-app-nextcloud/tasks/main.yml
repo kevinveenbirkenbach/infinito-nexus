@@ -1,7 +1,19 @@
 ---
+- name: "include role for {{application_id}} to receive certs & do modification routines"
+  include_role:
+    name: srv-web-7-6-composer
+
+- name: create nextcloud proxy configuration file
+  template: 
+    src:  "nginx/host.conf.j2" 
+    dest: "{{ nextcloud_host_nginx_path }}"
+  notify: restart openresty
+
 - name: "load docker and db for {{application_id}}"
   include_role: 
     name: cmp-db-docker
+  vars:
+    docker_compose_flush_handlers: false
 
 - name: "create {{ nextcloud_host_config_additives_directory }}"
   file:
@@ -13,21 +25,11 @@
   template:
     src:    "{{ item }}"
     dest:   "{{ nextcloud_host_config_additives_directory }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
-    owner:  "{{nextcloud_docker_user_id}}"
-    group:  "{{nextcloud_docker_user_id}}"
+    owner:  "{{ nextcloud_docker_user_id }}"
+    group:  "{{ nextcloud_docker_user_id }}"
   loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
   # Not all type of changes take instantly place. Due to this reason a rebuild is required.
   notify: docker compose up
-
-- name: "include role for {{application_id}} to receive certs & do modification routines"
-  include_role:
-    name: srv-web-7-6-composer
-
-- name: create nextcloud proxy configuration file
-  template: 
-    src:  "nginx/host.conf.j2" 
-    dest: "{{nginx.directories.http.servers}}{{domains | get_domain(application_id)}}.conf"
-  notify: restart openresty
 
 - name: create internal nextcloud nginx configuration
   template: 
@@ -41,8 +43,15 @@
 - name: Flush all handlers immediately so that occ can be used
   meta: flush_handlers
 
+- name: Load system configuration steps
+  include_tasks: "{{ item }}"
+  loop:
+    - 02_add_missing_indices.yml
+    - 03_admin.yml
+    - 04_system_config.yml
+
 - name: Setup Nextcloud Plugins
-  include_tasks: 02_plugin.yml
+  include_tasks: 05_plugin.yml
   loop: "{{ applications | get_app_conf(application_id, 'plugins', True) | dict2items }}"
   loop_control:
     loop_var: plugin_item
@@ -51,23 +60,4 @@
     plugin_value: "{{ plugin_item.value }}"
   when: nextcloud_plugins_enabled
 
-- name: Load system configuration
-  include_tasks: 05_system.yml
 
-- name: Add missing database indices in Nextcloud
-  command: >
-    {{ nextcloud_docker_exec_occ }} db:add-missing-indices
-  register: db_indices_result
-  changed_when: >
-    'Adding additional' in db_indices_result.stdout or 
-    'Removing' in db_indices_result.stdout or 
-    'updated successfully' in db_indices_result.stdout
-  failed_when: db_indices_result.rc != 0
-
-- name: Ensure Nextcloud administrator is in the 'admin' group
-  command: >
-    docker exec -u {{ nextcloud_docker_user }} {{ nextcloud_container }}
-    php occ group:adduser admin {{ nextcloud_administrator_username }}
-  register: add_admin_to_group
-  changed_when: "'Added user' in add_admin_to_group.stdout"
-  failed_when: add_admin_to_group.rc != 0 and "'is already a member of' not in add_admin_to_group.stderr"

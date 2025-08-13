@@ -1,0 +1,19 @@
+- name: "Launch async: add missing DB indices in Nextcloud"
+  ansible.builtin.command: >
+    {{ nextcloud_docker_exec_occ }} db:add-missing-indices
+  async: 3600
+  poll: 0
+  register: db_indices_job
+
+- name: "Wait for DB indices job"
+  ansible.builtin.async_status:
+    jid: "{{ db_indices_job.ansible_job_id }}"
+  register: db_indices_result
+  until: db_indices_result.finished
+  retries: 600
+  delay: 1
+  failed_when: db_indices_result.rc != 0
+  changed_when: >
+    ('Adding additional' in (db_indices_result.stdout | default(''))) or
+    ('Removing' in (db_indices_result.stdout | default(''))) or
+    ('updated successfully' in (db_indices_result.stdout | default('')))

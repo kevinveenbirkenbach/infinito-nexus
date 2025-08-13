@@ -1,0 +1,63 @@
+- name: enable {{plugin_key}} nextcloud plugin
+  command: "{{nextcloud_docker_exec_occ}} app:enable {{plugin_key}}"
+  register: enable_result
+  changed_when: enable_result.rc == 0 and ("already enabled" not in enable_result.stdout)
+
+- name: Check if {{nextcloud_control_node_plugin_vars_directory}}{{ plugin_key }}.yml exists
+  stat:
+    path: "{{nextcloud_control_node_plugin_vars_directory}}{{ plugin_key }}.yml"
+  delegate_to: localhost
+  become: false
+  register: plugin_vars_file
+
+- name: "Load {{ plugin_key }} configuration variables"
+  include_vars:
+    file: "{{nextcloud_control_node_plugin_vars_directory}}{{ plugin_key }}.yml"
+  when: plugin_vars_file.stat.exists
+
+- name: "Launch async: set {{ item.configkey }} for {{ item.appid }}"
+  ansible.builtin.command: >
+    {{ nextcloud_docker_exec_occ }} config:app:set {{ item.appid }} {{ item.configkey }}
+    --value '{{ item.configvalue | to_json if item.configvalue is mapping else item.configvalue }}'
+  loop: "{{ plugin_configuration }}"
+  loop_control:
+    label: "{{ item.appid }}:{{ item.configkey }}"
+  when: plugin_vars_file.stat.exists
+  async: 300           # max runtime per call (seconds) — adjust as needed
+  poll: 0              # don't wait; run in background
+  register: config_set_jobs
+
+- name: "Wait for async jobs"
+  vars:
+    jobs_with_id: >-
+      {{ (config_set_jobs.results | default([]))
+         | selectattr('ansible_job_id','defined')
+         | list }}
+  ansible.builtin.async_status:
+    jid: "{{ item.ansible_job_id }}"
+  register: config_set_wait
+  until: config_set_wait.finished
+  retries: 100
+  delay: 1
+  loop: "{{ jobs_with_id }}"
+  loop_control:
+    label: "{{ item._ansible_item_label | default(item.item.appid ~ ':' ~ item.item.configkey) }}"
+  when: 
+    - jobs_with_id | length > 0
+    - nextcloud_wait_for_async_enabled | bool
+  failed_when: >
+    (config_set_wait.rc is defined and config_set_wait.rc|int != 0)
+  changed_when: >
+    (config_set_wait.stdout is defined) and
+    ("Config value were not updated" not in config_set_wait.stdout)
+
+- name: Check if {{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml exists
+  stat:
+    path: "{{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml"
+  delegate_to: localhost
+  become: false
+  register: plugin_tasks_file
+
+- name: "include {{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml"
+  include_tasks: "{{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml"
+  when: plugin_tasks_file.stat.exists
