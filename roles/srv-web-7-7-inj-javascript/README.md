@@ -16,7 +16,7 @@ This Ansible role injects a custom JavaScript snippet into all HTML responses se
   Activates only when you enable the `javascript` feature for a given application, keeping your server blocks clean and performant.
 
 - **Debug Mode**  
-  Supports an `enable_debug` flag that appends optional `console.log` statements for easier troubleshooting in staging or development.
+  Supports an `MODE_DEBUG` flag that appends optional `console.log` statements for easier troubleshooting in staging or development.
 
 ## Author
 

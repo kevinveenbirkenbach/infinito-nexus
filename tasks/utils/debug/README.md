@@ -24,7 +24,7 @@ Optionally, enable it conditionally:
 
 ```yaml
 - import_tasks: utils/debug/main.yml
-  when: enable_debug | default(false)
+  when: MODE_DEBUG | default(false)
 ```
 
 **Note:**

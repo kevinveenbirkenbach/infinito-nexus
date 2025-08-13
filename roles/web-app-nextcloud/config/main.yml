@@ -11,9 +11,9 @@ server:
         - "data:"
   domains:
     canonical:
-      - "cloud.{{ primary_domain }}"
-      # nextcloud:  "cloud.{{ primary_domain }}"
-      # talk:       "talk.{{ primary_domain }}" @todo needs to be activated
+      - "cloud.{{ PRIMARY_DOMAIN }}"
+      # nextcloud:  "cloud.{{ PRIMARY_DOMAIN }}"
+      # talk:       "talk.{{ PRIMARY_DOMAIN }}" @todo needs to be activated
 docker:
   volumes:
     data: nextcloud_data

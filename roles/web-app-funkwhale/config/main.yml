@@ -23,10 +23,10 @@ features:
 server:
   domains:
     canonical:
-      - "audio.{{ primary_domain }}"
+      - "audio.{{ PRIMARY_DOMAIN }}"
     aliases:
-      - "music.{{ primary_domain }}"
-      - "sound.{{ primary_domain }}"
+      - "music.{{ PRIMARY_DOMAIN }}"
+      - "sound.{{ PRIMARY_DOMAIN }}"
   csp:  
     flags:
       style-src:

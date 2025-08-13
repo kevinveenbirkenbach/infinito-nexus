@@ -3,10 +3,10 @@
 on_calendar_health_btrfs:                     "*-*-* 00:00:00"                        # Check once per day the btrfs for errors
 on_calendar_health_journalctl:                "*-*-* 00:00:00"                        # Check once per day the journalctl for errors
 on_calendar_health_disc_space:                "*-*-* 06,12,18,00:00:00"               # Check four times per day if there is sufficient disc space 
-on_calendar_health_docker_container:          "*-*-* {{ hours_server_awake }}:00:00"  # Check once per hour if the docker containers are healthy
-on_calendar_health_docker_volumes:            "*-*-* {{ hours_server_awake }}:15:00"  # Check once per hour if the docker volumes are healthy
-on_calendar_health_csp_crawler:               "*-*-* {{ hours_server_awake }}:30:00"  # Check once per hour if all CSP are fullfilled available
-on_calendar_health_nginx:                     "*-*-* {{ hours_server_awake }}:45:00"  # Check once per hour if all webservices are available
+on_calendar_health_docker_container:          "*-*-* {{ HOURS_SERVER_AWAKE }}:00:00"  # Check once per hour if the docker containers are healthy
+on_calendar_health_docker_volumes:            "*-*-* {{ HOURS_SERVER_AWAKE }}:15:00"  # Check once per hour if the docker volumes are healthy
+on_calendar_health_csp_crawler:               "*-*-* {{ HOURS_SERVER_AWAKE }}:30:00"  # Check once per hour if all CSP are fullfilled available
+on_calendar_health_nginx:                     "*-*-* {{ HOURS_SERVER_AWAKE }}:45:00"  # Check once per hour if all webservices are available
 on_calendar_health_msmtp:                     "*-*-* 00:00:00"                        # Check once per day SMTP Server              
 
 ## Schedule for Cleanup Tasks
@@ -19,7 +19,7 @@ on_calendar_backup_docker_to_local:           "*-*-* 03:30:00"
 on_calendar_backup_remote_to_local:           "*-*-* 21:30:00"
 
 ## Schedule for Maintenance Tasks
-on_calendar_heal_docker:                      "*-*-* {{ hours_server_awake }}:30:00"  # Heal unhealthy docker instances once per hour
+on_calendar_heal_docker:                      "*-*-* {{ HOURS_SERVER_AWAKE }}:30:00"  # Heal unhealthy docker instances once per hour
 on_calendar_renew_lets_encrypt_certificates:  "*-*-* 12,00:30:00"                     # Renew Mailu certificates twice per day
 on_calendar_deploy_certificates:              "*-*-* 13,01:30:00"                     # Deploy letsencrypt certificates twice per day to docker containers
 on_calendar_msi_keyboard_color:               "*-*-* *:*:00"                          # Change the keyboard color every minute

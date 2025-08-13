@@ -1,6 +1,6 @@
 - name: "reset (if enabled)"
   include_tasks: reset.yml 
-  when: mode_reset | bool and run_once_sys_rst_daemon is not defined
+  when: MODE_RESET | bool and run_once_sys_rst_daemon is not defined
 
 - name: run {{ role_name }} once
   set_fact:

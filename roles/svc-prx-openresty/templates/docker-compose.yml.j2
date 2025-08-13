@@ -10,6 +10,6 @@
       - {{ nginx.directories.configuration }}:{{ nginx.directories.configuration }}:ro
       - {{ nginx.directories.data.www }}:{{ nginx.directories.data.www }}:ro
       - {{ nginx.directories.data.well_known }}:{{ nginx.directories.data.well_known }}:ro
-      - {{ letsencrypt_webroot_path }}:{{ letsencrypt_webroot_path }}:ro
-      - {{ letsencrypt_base_path }}:{{ letsencrypt_base_path }}:ro
+      - {{ LETSENCRYPT_WEBROOT_PATH }}:{{ LETSENCRYPT_WEBROOT_PATH }}:ro
+      - {{ LETSENCRYPT_BASE_PATH }}:{{ LETSENCRYPT_BASE_PATH }}:ro
     command: ["openresty", "-g", "daemon off;"]

@@ -2,7 +2,7 @@
 - name: "Debug: allowed_applications"
   debug:
     msg: "{{ allowed_applications }}"
-  when: enable_debug | bool
+  when: MODE_DEBUG | bool
 
 - name: Merge variables
   block:
@@ -30,7 +30,7 @@
     set_fact:
       current_play_domains: >- 
         {{  current_play_applications |
-            canonical_domains_map(primary_domain) | 
+            canonical_domains_map(PRIMARY_DOMAIN) | 
             combine(domains | default({}, true), recursive=True) 
         }}
   
@@ -39,7 +39,7 @@
       domains: >-
         {{ 
           defaults_applications | 
-          canonical_domains_map(primary_domain) | 
+          canonical_domains_map(PRIMARY_DOMAIN) | 
           combine(current_play_domains, recursive=True) 
         }}
   - name: Merge redirect_domain_mappings
@@ -56,7 +56,7 @@
       redirect_domain_mappings: >-
         {{ 
           current_play_applications |
-          domain_mappings(primary_domain) | 
+          domain_mappings(PRIMARY_DOMAIN) | 
           merge_mapping(redirect_domain_mappings, 'source') 
         }}
 
@@ -99,7 +99,7 @@
 - name: update device
   include_role:
     name: update-compose
-  when: mode_update | bool
+  when: MODE_UPDATE | bool
 
 - name: "Load base roles"
   include_tasks: "./tasks/groups/{{ item }}-roles.yml"

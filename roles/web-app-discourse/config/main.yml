@@ -16,10 +16,10 @@ server:
         unsafe-inline: true
     whitelist:
       font-src:
-        - "http://*.{{primary_domain}}"
+        - "http://*.{{PRIMARY_DOMAIN}}"
   domains:
     canonical:
-      - "forum.{{ primary_domain }}"
+      - "forum.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     database:

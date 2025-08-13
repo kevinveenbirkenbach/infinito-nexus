@@ -12,7 +12,7 @@ features:
 server:
   domains:
     canonical:
-      - "social.{{ primary_domain }}"
+      - "social.{{ PRIMARY_DOMAIN }}"
   csp:
     flags:
       script-src-elem:

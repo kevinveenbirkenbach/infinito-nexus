@@ -27,9 +27,9 @@ server:
         unsafe-eval:   true
   domains:
     aliases:
-      - "analytics.{{ primary_domain }}"
+      - "analytics.{{ PRIMARY_DOMAIN }}"
     canonical:
-      - "matomo.{{ primary_domain }}"
+      - "matomo.{{ PRIMARY_DOMAIN }}"
 excluded_ips: "{{ networks.internet.values() | list }}"
 
 docker:

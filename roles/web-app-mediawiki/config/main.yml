@@ -1,7 +1,7 @@
 server:
   domains:
     canonical:
-      - "wiki.{{ primary_domain }}"
+      - "wiki.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     mediawiki: 

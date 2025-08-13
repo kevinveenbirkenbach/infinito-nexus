@@ -1,5 +1,5 @@
 (function() {
-  var primary = "{{ primary_domain }}";
+  var primary = "{{ PRIMARY_DOMAIN }}";
   var allowedOrigin = "https://{{ domains | get_domain('web-app-port-ui') }}";
 
   function notifyParent() {
@@ -43,6 +43,6 @@
   };
 })();
 
-{% if enable_debug | bool %}
+{% if MODE_DEBUG | bool %}
 console.log("[iframe-sync] Sender for iframe messages is active.");
 {% endif %}

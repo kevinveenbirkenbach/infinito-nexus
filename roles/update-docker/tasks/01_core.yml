@@ -8,7 +8,7 @@
     name: sys-bkp-docker-2-loc-everything.infinito.service
     state: started
   when:
-  - mode_backup | bool
+  - MODE_BACKUP | bool
 
 - name: create {{update_docker_script}}
   template:

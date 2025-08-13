@@ -16,4 +16,4 @@ docker:
 server:
   domains:
     canonical:
-      - "tickets.{{ primary_domain }}"
+      - "tickets.{{ PRIMARY_DOMAIN }}"

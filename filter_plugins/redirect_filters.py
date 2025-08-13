@@ -19,7 +19,7 @@ class FilterModule(object):
         Usage in Jinja:
           {{ redirect_list
                | add_redirect_if_group('lam',
-                                       'ldap.' ~ primary_domain,
+                                       'ldap.' ~ PRIMARY_DOMAIN,
                                        domains | get_domain('web-app-lam'),
                                        group_names) }}
         """

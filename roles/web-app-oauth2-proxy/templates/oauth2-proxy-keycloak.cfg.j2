@@ -3,7 +3,7 @@ cookie_secret           =   "{{ applications | get_app_conf(oauth2_proxy_applica
 cookie_secure           =   "true"                                                                                                                                                  # True is necessary to force the cookie set via https
 upstreams               =   "http://{{ applications | get_app_conf(oauth2_proxy_application_id, 'oauth2_proxy.application', True) }}:{{ applications | get_app_conf(oauth2_proxy_application_id, 'oauth2_proxy.port', True) }}"
 cookie_domains          =   ["{{ domains | get_domain(oauth2_proxy_application_id) }}", "{{ domains | get_domain('web-app-keycloak') }}"]                                                   # Required so cookie can be read on all subdomains.
-whitelist_domains       =   [".{{ primary_domain }}"]                                                                                                                               # Required to allow redirection back to original requested target.
+whitelist_domains       =   [".{{ PRIMARY_DOMAIN }}"]                                                                                                                               # Required to allow redirection back to original requested target.
 
 # keycloak provider
 client_secret           =   "{{ oidc.client.secret }}"
@@ -20,7 +20,7 @@ oidc_groups_claim       =   "{{ oidc.claims.groups }}"
 allowed_groups          =   {{ applications | get_app_conf(oauth2_proxy_application_id, 'oauth2_proxy.allowed_groups', True) | tojson }}
 email_domains           =   ["*"]
 {% else %}
-email_domains           =   "{{ primary_domain }}"
+email_domains           =   "{{ PRIMARY_DOMAIN }}"
 {% endif %}
 
 session_store_type       = "redis"

@@ -45,8 +45,8 @@ All tasks are idempotent—once your certificates are in place and your configur
 - A working `srv-web-7-4-core` setup.
 - DNS managed via Cloudflare (for CAA record tasks) or equivalent ACME DNS flow.
 - Variables:
-  - `letsencrypt_webroot_path`  
-  - `letsencrypt_live_path`  
+  - `LETSENCRYPT_WEBROOT_PATH`  
+  - `LETSENCRYPT_LIVE_PATH`  
   - `on_calendar_renew_lets_encrypt_certificates`
 
 ---

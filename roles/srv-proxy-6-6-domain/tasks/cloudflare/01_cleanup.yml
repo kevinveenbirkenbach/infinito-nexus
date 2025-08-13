@@ -3,7 +3,7 @@
     url: "https://api.cloudflare.com/client/v4/zones/{{ cf_zone_id }}/purge_cache"
     method: POST
     headers:
-      Authorization: "Bearer {{ certbot_dns_api_token }}"
+      Authorization: "Bearer {{ CERTBOT_DNS_API_TOKEN }}"
       Content-Type: "application/json"
     body:
       purge_everything: true

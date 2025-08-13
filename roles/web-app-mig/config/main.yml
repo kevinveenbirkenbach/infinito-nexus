@@ -33,9 +33,9 @@ server:
         unsafe-inline: true
   domains:
     canonical:
-      - "mig.{{ primary_domain }}"
+      - "mig.{{ PRIMARY_DOMAIN }}"
     aliases:
-      - "meta-infinite-graph.{{ primary_domain }}"
+      - "meta-infinite-graph.{{ PRIMARY_DOMAIN }}"
 
 build_data: 
   # This shouldn't be relevant anymore, because the data is anyhow build async in background

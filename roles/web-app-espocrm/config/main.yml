@@ -18,17 +18,17 @@ server:
         unsafe-eval:    true
     whitelist:
       connect-src:
-        - wss://espocrm.{{ primary_domain }}
+        - wss://espocrm.{{ PRIMARY_DOMAIN }}
         - "data:"
       frame-src:
         - https://s.espocrm.com/
   domains:
     aliases:
-      - "crm.{{ primary_domain }}"
+      - "crm.{{ PRIMARY_DOMAIN }}"
     canonical:
-      - espocrm.{{ primary_domain }}
+      - espocrm.{{ PRIMARY_DOMAIN }}
 email:
-  from_name: "Customer Relationship Management ({{ primary_domain }})"
+  from_name: "Customer Relationship Management ({{ PRIMARY_DOMAIN }})"
 docker:
   services:
     database:

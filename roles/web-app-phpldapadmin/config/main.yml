@@ -14,4 +14,4 @@ features:
 server:
   domains:
     canonical:
-      - phpldapadmin.{{ primary_domain }}
+      - phpldapadmin.{{ PRIMARY_DOMAIN }}

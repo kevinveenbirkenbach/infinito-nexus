@@ -27,7 +27,7 @@ server:
         unsafe-inline: true  
   domains:
     canonical:
-      - "project.{{ primary_domain }}"
+      - "project.{{ PRIMARY_DOMAIN }}"
 
 docker:
   services:

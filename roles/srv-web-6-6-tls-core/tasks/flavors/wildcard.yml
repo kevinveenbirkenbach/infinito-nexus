@@ -3,7 +3,7 @@
   vars:
     wildcard_domain: true
   when: 
-    - domain.split('.') | length == (primary_domain.split('.') | length + 1) and domain.endswith(primary_domain)
+    - domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN)
     - run_once_receive_certificate is not defined  
 
 - name: "Load dedicated certificate for domain"
@@ -11,7 +11,7 @@
   vars:
     wildcard_domain: false
   when: 
-    - not (domain.split('.') | length == (primary_domain.split('.') | length + 1) and domain.endswith(primary_domain))
+    - not (domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN))
 
 - name: run the receive_certificate tasks once
   set_fact:

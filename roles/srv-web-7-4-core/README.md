@@ -14,11 +14,11 @@ This Ansible role installs and configures **Nginx** as a core HTTP/stream server
 * **Configurable reset and cleanup** modes to purge and recreate directories.
 * **Custom `nginx.conf`** template with sensible defaults for performance and security.
 * **Stream proxy support**: includes `stream` block for TCP/UDP proxies.
-* **Cache directory management**: cleanup and recreation based on `mode_cleanup`.
+* **Cache directory management**: cleanup and recreation based on `MODE_CLEANUP`.
 
 
 ## Debugging Tips
 
 * **General logs**: `journalctl -f -u nginx`
 * **Filter by host**: `journalctl -u nginx -f | grep "{{ inventory_hostname }}"`
-* **Enable detailed format**: set `enable_debug: true` and reload Nginx.
+* **Enable detailed format**: set `MODE_DEBUG: true` and reload Nginx.

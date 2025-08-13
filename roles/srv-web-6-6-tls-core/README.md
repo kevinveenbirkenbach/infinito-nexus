@@ -24,7 +24,7 @@ The Nginx HTTPS Certificate Retrieval role ensures that your Nginx-served domain
 - **ACME Challenge Selection:** Supports DNS plugins or webroot method automatically.
 - **Wildcard Certificate Management:** Issues wildcard certificates when configured, saving effort for subdomain-heavy deployments.
 - **Safe Cleanup:** Ensures that no unused certificates are left behind.
-- **Flexible Control:** Supports `mode_test` for staging environment testing and `mode_cleanup` for cert cleanup operations.
+- **Flexible Control:** Supports `MODE_TEST` for staging environment testing and `MODE_CLEANUP` for cert cleanup operations.
 
 ## 🔗 Learn More
 

@@ -1,4 +1,4 @@
-titel:                "Pictures on {{primary_domain}}"
+titel:                "Pictures on {{PRIMARY_DOMAIN}}"
 features:
   matomo:             true
   css:                false # Needs to be reactivated
@@ -22,9 +22,9 @@ server:
         - "*"
   domains:
     canonical:
-      - "picture.{{ primary_domain }}"
+      - "picture.{{ PRIMARY_DOMAIN }}"
     aliases:
-      - "pictures.{{ primary_domain }}"
+      - "pictures.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     redis:

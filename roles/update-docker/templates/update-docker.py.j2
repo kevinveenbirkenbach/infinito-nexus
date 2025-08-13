@@ -149,7 +149,7 @@ def update_mastodon():
     Runs the database migration for Mastodon to ensure all required tables are up to date.
     """
     print("Starting Mastodon database migration.")
-    run_command("docker compose exec -T web bash -c 'RAILS_ENV={{ INFINITO_ENVIRONMENT | lower }} bin/rails db:migrate'")
+    run_command("docker compose exec -T web bash -c 'RAILS_ENV={{ ENVIRONMENT | lower }} bin/rails db:migrate'")
     print("Mastodon database migration complete.")
 
 def upgrade_listmonk():

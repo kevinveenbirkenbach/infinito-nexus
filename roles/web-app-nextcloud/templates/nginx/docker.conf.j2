@@ -5,7 +5,7 @@
 worker_processes auto;
 
 # @see https://chatgpt.com/share/67aa3ce9-eea0-800f-85e8-ac54a3810b13
-error_log   /proc/self/fd/2 {% if enable_debug | bool %}debug{% else %}warn{% endif %};
+error_log   /proc/self/fd/2 {% if MODE_DEBUG | bool %}debug{% else %}warn{% endif %};
 pid        /var/run/nginx.pid;
 
 

@@ -83,12 +83,12 @@
     login_port: "{{ database_port }}"
     query: "SELECT id, name FROM ldap_auth_sources"
   register: ldap_entries
-  when: enable_debug | bool
+  when: MODE_DEBUG | bool
 
 - name: Debug LDAP entries
   debug:
     var: ldap_entries
-  when: enable_debug | bool
+  when: MODE_DEBUG | bool
 
 # This works just after the first admin login
 # @todo Remove and replace trough LDAP RBAC group
@@ -96,7 +96,7 @@
   shell: >
     docker compose exec web bash -c "
       cd /app &&
-      RAILS_ENV={{ INFINITO_ENVIRONMENT | lower }} bundle exec rails runner \"
+      RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"
         user = User.find_by(mail: '{{ users.administrator.email }}');
         if user.nil?;
           puts 'User with email {{ users.administrator.email }} not found.';

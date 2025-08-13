@@ -18,7 +18,7 @@ server:
         unsafe-inline:  true
   domains:
     canonical:
-      - "meet.{{ primary_domain }}"
+      - "meet.{{ PRIMARY_DOMAIN }}"
 credentials: {}
 
 docker:

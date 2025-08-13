@@ -10,15 +10,15 @@
         certbundle
         --domains "{{ current_play_domains_all | join(',') }}"
         --certbot-email "{{ users.administrator.email }}"
-        --certbot-acme-challenge-method "{{ certbot_acme_challenge_method }}"
+        --certbot-acme-challenge-method "{{ CERTBOT_ACME_CHALLENGE_METHOD }}"
         --chunk-size 100
-        {% if certbot_acme_challenge_method != 'webroot' %}
-        --certbot-credentials-file "{{ certbot_credentials_file }}"
-        --certbot-dns-propagation-seconds "{{ certbot_dns_propagation_wait_seconds }}"
+        {% if CERTBOT_ACME_CHALLENGE_METHOD != 'webroot' %}
+        --certbot-credentials-file "{{ CERTBOT_CREDENTIALS_FILE }}"
+        --certbot-dns-propagation-seconds "{{ CERTBOT_DNS_PROPAGATION_WAIT_SECONDS }}"
         {% else %}
-        --letsencrypt-webroot-path "{{ letsencrypt_webroot_path }}"
+        --letsencrypt-webroot-path "{{ LETSENCRYPT_WEBROOT_PATH }}"
         {% endif %}
-        {{ '--mode-test' if mode_test | bool else '' }}
+        {{ '--mode-test' if MODE_TEST | bool else '' }}
       register: certbundle_result
       changed_when: "'Certificate not yet due for renewal' not in certbundle_result.stdout"
       failed_when: >

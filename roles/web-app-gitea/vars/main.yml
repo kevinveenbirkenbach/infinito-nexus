@@ -1,7 +1,7 @@
 application_id:       "web-app-gitea"
 database_type:        "mariadb"
 gitea_ldap_auth_args:
-  - '--name "LDAP ({{ primary_domain }})"'
+  - '--name "LDAP ({{ PRIMARY_DOMAIN }})"'
   - '--host "{{ ldap.server.domain }}"'
   - '--port {{ ldap.server.port }}'
   - '--security-protocol "{{ ldap.server.security | trim or "unencrypted" }}"'

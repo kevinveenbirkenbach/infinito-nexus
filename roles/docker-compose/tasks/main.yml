@@ -10,7 +10,7 @@
 
 - name: "reset (if enabled)"
   include_tasks: 01_reset.yml
-  when: mode_reset | bool
+  when: MODE_RESET | bool
 
 # This could lead to problems in docker-compose directories which are based on a git repository
 # @todo Verify that this isn't the case. E.g. in accounting

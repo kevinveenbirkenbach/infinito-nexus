@@ -7,7 +7,7 @@
   when: run_once_srv_proxy_6_6_domain is not defined
 
 - include_tasks: "01_cloudflare.yml"
-  when: dns_provider == "cloudflare"
+  when: DNS_PROVIDER == "cloudflare"
 
 - include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
   vars:

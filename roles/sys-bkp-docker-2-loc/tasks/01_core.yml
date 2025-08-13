@@ -12,7 +12,7 @@
 
 - name: "reset (if enabled)"
   include_tasks: 03_reset.yml
-  when: mode_reset | bool
+  when: MODE_RESET | bool
 
 - name: configure sys-bkp-docker-2-loc-everything.infinito.service
   template:

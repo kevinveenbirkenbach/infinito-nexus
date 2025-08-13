@@ -14,7 +14,7 @@
     vars:
       domain: "{{ item }}"
     when:
-    - mode_cleanup | bool
+    - MODE_CLEANUP | bool
 
 ## The revoking just works for the base domain
 #- name: "Revoke Certbot certificate for {{ item }}"
@@ -25,7 +25,7 @@
 #  loop_control:
 #    label: "{{ item }}"
 #  when:
-#    - mode_cleanup | bool
+#    - MODE_CLEANUP | bool
 #    - run_once_sys_cln_domains is not defined
 #  register: certbot_revoke_result
 #  failed_when: >
@@ -43,7 +43,7 @@
 #  loop_control:
 #    label: "{{ item }}"
 #  when:
-#    - mode_cleanup | bool
+#    - MODE_CLEANUP | bool
 #    - run_once_sys_cln_domains is not defined
 #  register: certbot_delete_result
 #  failed_when: >

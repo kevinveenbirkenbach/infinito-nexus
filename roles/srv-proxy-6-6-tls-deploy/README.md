@@ -49,7 +49,7 @@ This script:
 
 **Usage:**
 ```sh
-sh srv-proxy-6-6-tls-deploy.sh primary_domain /path/to/docker/compose
+sh srv-proxy-6-6-tls-deploy.sh PRIMARY_DOMAIN /path/to/docker/compose
 ```
 
 ---

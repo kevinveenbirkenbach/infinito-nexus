@@ -37,7 +37,7 @@
       portfolio_menu_categories:  "{{ portfolio_menu_categories}}"
       portfolio_menu_data:        "{{ portfolio_menu_data }}"
       service_provider:           "{{ service_provider }}"
-  when: enable_debug | bool
+  when: MODE_DEBUG | bool
 
 - name: Copy host-specific config.yaml if it exists
   template:

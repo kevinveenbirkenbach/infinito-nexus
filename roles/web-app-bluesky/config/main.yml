@@ -11,8 +11,8 @@ features:
 server:
   domains:
     canonical:
-      web:  "bskyweb.{{ primary_domain }}"
-      api:  "bluesky.{{ primary_domain }}"
+      web:  "bskyweb.{{ PRIMARY_DOMAIN }}"
+      api:  "bluesky.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     database:

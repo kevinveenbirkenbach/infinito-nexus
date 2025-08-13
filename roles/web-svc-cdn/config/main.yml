@@ -5,4 +5,4 @@ features:
 server:
   domains:
     canonical:
-      - "cdn.{{ primary_domain }}"
+      - "cdn.{{ PRIMARY_DOMAIN }}"

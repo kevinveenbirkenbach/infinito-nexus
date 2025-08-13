@@ -79,7 +79,7 @@
 - name: show variable information
   debug:
     msg: "hosts_path: {{hosts_path}}\nmatrix_inventory_tmp_dir:{{ matrix_inventory_tmp_dir }}"
-  when: enable_debug | bool
+  when: MODE_DEBUG | bool
 
 - name: install requirements
   local_action: command just roles

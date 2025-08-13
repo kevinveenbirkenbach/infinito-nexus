@@ -1,4 +1,4 @@
-INFINITO_ENVIRONMENT:     "production"  # Possible values: production, development
+ENVIRONMENT:              "production"  # Possible values: production, development
 
 # If true, sensitive credentials will be masked or hidden from all Ansible task logs
 # Recommendet to set to true
@@ -19,49 +19,46 @@ HOST_THOUSAND_SEPARATOR:  "."
 HOST_DECIMAL_MARK:        ","
 
 # Deployment mode
-deployment_mode:        "single"      # Use single, if you deploy on one server. Use cluster if you setup in cluster mode.
+DEPLOYMENT_MODE:        "single"      # Use single, if you deploy on one server. Use cluster if you setup in cluster mode.
 
+# Web
 WEB_PROTOCOL:           "https"       # Web protocol type. Use https or http. If you run local you need to change it to http
 WEB_PORT:               "{{ 443 if WEB_PROTOCOL == 'https' else 80 }}"  # Default port web applications will listen to
 
-## Domain
-primary_domain_tld:     "localhost"                                     # Top Level Domain of the server
-primary_domain_sld:     "infinito"                                        # Second Level Domain of the server
-primary_domain:         "{{primary_domain_sld}}.{{primary_domain_tld}}" # Primary Domain of the server
+# Domain
+PRIMARY_DOMAIN:         "localhost"                                                                                   # Primary Domain of the server
+PRIMARY_DOMAIN_tld:     "{{ (PRIMARY_DOMAIN == 'localhost') | ternary('localhost', PRIMARY_DOMAIN.split('.')[-1]) }}" # Top Level Domain of the server
+PRIMARY_DOMAIN_SLD:     "{{ (PRIMARY_DOMAIN == 'localhost') | ternary('localhost', PRIMARY_DOMAIN.split('.')[-2]) }}" # Second Level Domain of the server
 
 # Server Tact Variables 
 
 ## Ours in which the server is "awake" (100% working). Rest of the time is reserved for maintanance
-hours_server_awake:                       "0..23"
+HOURS_SERVER_AWAKE:                       "0..23"
 
 ## Random delay for systemd timers to avoid peak loads.
-randomized_delay_sec:                     "5min"
+RANDOMIZED_DELAY_SEC:                     "5min"
 
 # Runtime Variables for Process Control
-activate_all_timers:                       false   # Activates all timers, independend if the handlers had been triggered
+ACTIVATE_ALL_TIMERS:                      false   # Activates all timers, independend if the handlers had been triggered
 
-# This enables debugging in ansible and in the apps
-# You SHOULD NOT enable this on production servers
-enable_debug:                             false
-
-dns_provider:                             cloudflare              # The DNS Provider\Registrar for the domain
+DNS_PROVIDER:                             cloudflare              # The DNS Provider\Registrar for the domain
 
 # Which ACME method to use: webroot, cloudflare, or hetzner
-certbot_acme_challenge_method:            "cloudflare"
-certbot_credentials_dir:                  /etc/certbot
-certbot_credentials_file:                 "{{ certbot_credentials_dir }}/{{ certbot_acme_challenge_method }}.ini"
-certbot_dns_api_token:                    ""                      # Define in inventory file: More information here: group_vars/all/docs/CLOUDFLARE_API_TOKEN.md
-certbot_dns_propagation_wait_seconds:     300                     # How long should the script wait for DNS propagation before continuing
-certbot_flavor:                           san                     # Possible options: san (recommended, with a dns flavor like cloudflare, or hetzner), wildcard(doesn't function with www redirect), dedicated
+CERTBOT_ACME_CHALLENGE_METHOD:            "cloudflare"
+CERTBOT_CREDENTIALS_DIR:                  /etc/certbot
+CERTBOT_CREDENTIALS_FILE:                 "{{ CERTBOT_CREDENTIALS_DIR }}/{{ CERTBOT_ACME_CHALLENGE_METHOD }}.ini"
+CERTBOT_DNS_API_TOKEN:                    ""                      # Define in inventory file: More information here: group_vars/all/docs/CLOUDFLARE_API_TOKEN.md
+CERTBOT_DNS_PROPAGATION_WAIT_SECONDS:     300                     # How long should the script wait for DNS propagation before continuing
+CERTBOT_FLAVOR:                           san                     # Possible options: san (recommended, with a dns flavor like cloudflare, or hetzner), wildcard(doesn't function with www redirect), dedicated
 
 # Path where Certbot stores challenge webroot files
-letsencrypt_webroot_path:                 "/var/lib/letsencrypt/"
+LETSENCRYPT_WEBROOT_PATH:                 "/var/lib/letsencrypt/"
 
 # Base directory containing Certbot configuration, account data, and archives
-letsencrypt_base_path:                    "/etc/letsencrypt/"
+LETSENCRYPT_BASE_PATH:                    "/etc/letsencrypt/"
 
 # Symlink directory for the current active certificate and private key
-letsencrypt_live_path:                    "{{ letsencrypt_base_path }}live/"
+LETSENCRYPT_LIVE_PATH:                    "{{ LETSENCRYPT_BASE_PATH }}live/"
 
 ## Docker Role Specific Parameters
 DOCKER_RESTART_POLICY:                    "unless-stopped"

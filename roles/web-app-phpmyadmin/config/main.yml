@@ -21,10 +21,10 @@ server:
         unsafe-inline: true
   domains:
     aliases:
-      - "mysql.{{ primary_domain }}"
-      - "mariadb.{{ primary_domain }}"
+      - "mysql.{{ PRIMARY_DOMAIN }}"
+      - "mariadb.{{ PRIMARY_DOMAIN }}"
     canonical:
-      - phpmyadmin.{{ primary_domain }}
+      - phpmyadmin.{{ PRIMARY_DOMAIN }}
 docker:
   services:
     database:

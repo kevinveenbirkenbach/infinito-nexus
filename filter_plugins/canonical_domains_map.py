@@ -9,7 +9,7 @@ class FilterModule(object):
     def filters(self):
         return {'canonical_domains_map': self.canonical_domains_map}
 
-    def canonical_domains_map(self, apps, primary_domain):
+    def canonical_domains_map(self, apps, PRIMARY_DOMAIN):
         """
         Maps applications to their canonical domains, checking for conflicts 
         and ensuring all domains are valid and unique across applications.
@@ -30,7 +30,7 @@ class FilterModule(object):
                 
                 domains_cfg = cfg.get('server',{}).get('domains',{})
                 if not domains_cfg or 'canonical' not in domains_cfg:
-                    self._add_default_domain(app_id, primary_domain, seen_domains, result)
+                    self._add_default_domain(app_id, PRIMARY_DOMAIN, seen_domains, result)
                     continue
 
                 canonical_domains = domains_cfg['canonical']
@@ -38,13 +38,13 @@ class FilterModule(object):
 
         return result
 
-    def _add_default_domain(self, app_id, primary_domain, seen_domains, result):
+    def _add_default_domain(self, app_id, PRIMARY_DOMAIN, seen_domains, result):
         """
         Add the default domain for an application if no canonical domains are defined.
         Ensures the domain is unique across applications.
         """
         entity_name = get_entity_name(app_id)
-        default_domain = f"{entity_name}.{primary_domain}"
+        default_domain = f"{entity_name}.{PRIMARY_DOMAIN}"
         if default_domain in seen_domains:
             raise AnsibleFilterError(
                 f"Domain '{default_domain}' is already configured for "

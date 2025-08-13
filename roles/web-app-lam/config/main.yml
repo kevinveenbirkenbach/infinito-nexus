@@ -27,7 +27,7 @@ server:
         unsafe-inline:            true
   domains:
     aliases:
-      - "ldap.{{primary_domain}}"
+      - "ldap.{{PRIMARY_DOMAIN}}"
     canonical:
-      - lam.{{ primary_domain }}
+      - lam.{{ PRIMARY_DOMAIN }}
 

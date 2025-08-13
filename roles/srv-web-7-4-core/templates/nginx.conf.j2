@@ -24,7 +24,7 @@ http
   # --------------------------------------------------------------------------------
 
   {# logging and debugging #}
-{% if enable_debug | bool %}
+{% if MODE_DEBUG | bool %}
   {# individual log format for better debugging #}
   log_format debug '$host - $remote_addr [$time_local] '
                   '"$request" $status $body_bytes_sent '

@@ -4,7 +4,7 @@ class FilterModule(object):
     def filters(self):
         return {'alias_domains_map': self.alias_domains_map}
 
-    def alias_domains_map(self, apps, primary_domain):
+    def alias_domains_map(self, apps, PRIMARY_DOMAIN):
         """
         Build a map of application IDs to their alias domains.
 
@@ -42,7 +42,7 @@ class FilterModule(object):
             domains_cfg = cfg.get('server',{}).get('domains',{})
             entry = domains_cfg.get('canonical')
             if entry is None:
-                canonical_map[app_id] = [default_domain(app_id, primary_domain)]
+                canonical_map[app_id] = [default_domain(app_id, PRIMARY_DOMAIN)]
             elif isinstance(entry, dict):
                 canonical_map[app_id] = list(entry.values())
             elif isinstance(entry, list):
@@ -69,7 +69,7 @@ class FilterModule(object):
 
             # otherwise, compute aliases
             aliases = parse_entry(domains_cfg, 'aliases', app_id) or []
-            default = default_domain(app_id, primary_domain)
+            default = default_domain(app_id, PRIMARY_DOMAIN)
             has_aliases = 'aliases' in domains_cfg
             has_canon   = 'canonical' in domains_cfg
 

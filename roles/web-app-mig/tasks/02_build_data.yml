@@ -16,7 +16,7 @@
 - name: Debug MIG build job ID
   debug:
     msg: "MIG build job started with ID: {{ mig_build_job.ansible_job_id }}"
-  when: enable_debug | bool
+  when: MODE_DEBUG | bool
 
 - debug:
     msg: "Waiting for MIG build job to finish. Set 'build_data.wait_for=false' in the application config to skip waiting and improve performance."

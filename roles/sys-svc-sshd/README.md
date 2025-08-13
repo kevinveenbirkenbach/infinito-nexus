@@ -19,7 +19,7 @@ This Ansible role configures the OpenSSH daemon (`sshd`) by deploying a template
 - **Security Defaults**  
   - Disables password (`PasswordAuthentication no`) and root login (`PermitRootLogin no`)  
   - Enforces public-key authentication (`PubkeyAuthentication yes`)  
-  - Conditionally sets `LogLevel` to `DEBUG3` when `enable_debug` is true  
+  - Conditionally sets `LogLevel` to `DEBUG3` when `MODE_DEBUG` is true  
 
 - **Systemd Integration**  
   Handles daemon reload and service restart seamlessly on configuration changes.

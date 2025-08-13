@@ -1,4 +1,4 @@
-- name: "Delete {{nginx.directories.configuration}} directory, when mode_reset"
+- name: "Delete {{nginx.directories.configuration}} directory, when MODE_RESET"
   file:
     path: "{{ nginx.directories.configuration }}"
     state: absent

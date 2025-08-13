@@ -16,9 +16,9 @@ features:
 server:
   domains:
     canonical:
-      - "s.{{ primary_domain }}"
+      - "s.{{ PRIMARY_DOMAIN }}"
     aliases:
-      - "short.{{ primary_domain }}"
+      - "short.{{ PRIMARY_DOMAIN }}"
   csp:
     flags:
       style-src:

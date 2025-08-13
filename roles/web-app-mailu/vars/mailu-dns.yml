@@ -3,7 +3,7 @@
 mailu_dns_zone: "{{ applications | get_app_conf(application_id, 'domain', True) }}"
 mailu_dns_ip:   "{{ networks.internet.ip4 }}"
 
-cloudflare_record_api_token: "{{ certbot_dns_api_token }}"
+cloudflare_record_api_token: "{{ CERTBOT_DNS_API_TOKEN }}"
 
 mailu_dmarc_ruf:    "{{ applications | get_app_conf(application_id, 'users.administrator.email', True) }}"
 

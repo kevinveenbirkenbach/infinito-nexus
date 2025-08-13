@@ -4,4 +4,4 @@ features:
 server:
   domains:
     canonical:
-      - xmpp.{{ primary_domain }}
+      - xmpp.{{ PRIMARY_DOMAIN }}

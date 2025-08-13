@@ -1,4 +1,4 @@
-titel:              "Mobilizon on {{ primary_domain | upper }}"
+titel:              "Mobilizon on {{ PRIMARY_DOMAIN | upper }}"
 features:
   central_database: true
   oidc:             true
@@ -14,9 +14,9 @@ server:
         unsafe-eval:  true
   domains:
     canonical:
-      - "event.{{ primary_domain }}"
+      - "event.{{ PRIMARY_DOMAIN }}"
     aliases:
-      - "events.{{ primary_domain }}"
+      - "events.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     database:

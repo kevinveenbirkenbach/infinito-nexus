@@ -9,4 +9,4 @@ features:
 server:
   domains:
     canonical:
-      - oauth2-proxy.{{ primary_domain }}
+      - oauth2-proxy.{{ PRIMARY_DOMAIN }}

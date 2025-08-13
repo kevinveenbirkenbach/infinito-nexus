@@ -36,9 +36,9 @@ server:
         - "data:"
   domains:
     aliases:
-      - "git.{{ primary_domain }}"
+      - "git.{{ PRIMARY_DOMAIN }}"
     canonical:
-      - gitea.{{ primary_domain }}
+      - gitea.{{ PRIMARY_DOMAIN }}
 docker:
   services:
     database:

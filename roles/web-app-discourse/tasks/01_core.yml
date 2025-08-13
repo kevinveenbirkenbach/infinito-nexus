@@ -1,6 +1,6 @@
 - name: "reset (if enabled)"
   include_tasks: 02_reset.yml
-  when: mode_reset | bool
+  when: MODE_RESET | bool
 
 # Necessary for building: https://chat.openai.com/share/99d258cc-294b-4924-8eef-02fe419bb838
 - name: install which

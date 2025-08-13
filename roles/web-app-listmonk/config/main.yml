@@ -9,7 +9,7 @@ features:
 server:
   domains:
     canonical:
-      - "newsletter.{{ primary_domain }}"
+      - "newsletter.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     database:

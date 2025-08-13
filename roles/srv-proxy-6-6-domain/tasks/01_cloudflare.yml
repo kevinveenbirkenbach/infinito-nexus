@@ -16,7 +16,7 @@
     url: "{{ cf_api_url }}?name={{ domain | to_primary_domain }}"
     method: GET
     headers:
-      Authorization: "Bearer {{ certbot_dns_api_token }}"
+      Authorization: "Bearer {{ CERTBOT_DNS_API_TOKEN }}"
       Content-Type: "application/json"
     return_content: yes
   register: cf_zone_lookup_dev
@@ -43,8 +43,8 @@
 
 - name: activate cloudflare cache development mode
   include_tasks: "cloudflare/02_enable_cf_dev_mode.yml"
-  when: (INFINITO_ENVIRONMENT | lower) == 'development' 
+  when: (ENVIRONMENT | lower) == 'development' 
   
 - name: purge cloudflare domain cache
   include_tasks: "cloudflare/01_cleanup.yml"
-  when: mode_cleanup | bool
+  when: MODE_CLEANUP | bool

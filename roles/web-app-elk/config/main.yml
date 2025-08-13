@@ -3,4 +3,4 @@ features:
 server:
   domains:
     canonical:
-      - elk.{{ primary_domain }}
+      - elk.{{ PRIMARY_DOMAIN }}

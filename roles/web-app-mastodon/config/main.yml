@@ -10,7 +10,7 @@ features:
 server:
   domains:
     canonical:
-      - "microblog.{{ primary_domain }}"
+      - "microblog.{{ PRIMARY_DOMAIN }}"
   csp:
     whitelist:
       frame-src:

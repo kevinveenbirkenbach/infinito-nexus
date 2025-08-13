@@ -1,7 +1,7 @@
 # roles/srv-proxy-6-6-domain/tasks/02_enable_cf_dev_mode.yml
 ---
 # Enables Cloudflare Development Mode (bypasses cache for ~3 hours).
-# Uses the same auth token as in 01_cleanup.yml: certbot_dns_api_token
+# Uses the same auth token as in 01_cleanup.yml: CERTBOT_DNS_API_TOKEN
 # Assumes `domain` and (optionally) `cf_zone_id` are available.
 # Safe to run repeatedly; only changes when the mode is not already "on".
 
@@ -10,7 +10,7 @@
     url: "https://api.cloudflare.com/client/v4/zones/{{ cf_zone_id }}/settings/development_mode"
     method: GET
     headers:
-      Authorization: "Bearer {{ certbot_dns_api_token }}"
+      Authorization: "Bearer {{ CERTBOT_DNS_API_TOKEN }}"
       Content-Type: "application/json"
     return_content: yes
   register: cf_dev_mode_current
@@ -20,7 +20,7 @@
     url: "https://api.cloudflare.com/client/v4/zones/{{ cf_zone_id }}/settings/development_mode"
     method: PATCH
     headers:
-      Authorization: "Bearer {{ certbot_dns_api_token }}"
+      Authorization: "Bearer {{ CERTBOT_DNS_API_TOKEN }}"
       Content-Type: "application/json"
     body:
       value: "on"

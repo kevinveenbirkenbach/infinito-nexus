@@ -4,7 +4,7 @@ upstream mybb {
 
 server {
     listen 80;
-    error_log /proc/self/fd/2 {% if enable_debug | bool %}debug{% else %}warn{% endif %};
+    error_log /proc/self/fd/2 {% if MODE_DEBUG | bool %}debug{% else %}warn{% endif %};
     root /var/www/html;
     index index.html index.php;
 

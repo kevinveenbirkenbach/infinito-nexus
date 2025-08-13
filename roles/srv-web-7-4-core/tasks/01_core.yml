@@ -20,7 +20,7 @@
 
 - name: "reset (if enabled)"
   include_tasks: 02_reset.yml
-  when: mode_reset | bool
+  when: MODE_RESET | bool
   
 - name: Ensure nginx configuration directories are present
   file:

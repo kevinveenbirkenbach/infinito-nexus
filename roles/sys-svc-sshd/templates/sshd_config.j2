@@ -25,7 +25,7 @@
 
 # Logging
 #SyslogFacility AUTH
-LogLevel {% if enable_debug | bool %}DEBUG3{% else %}INFO{% endif %}
+LogLevel {% if MODE_DEBUG | bool %}DEBUG3{% else %}INFO{% endif %}
 
 # Authentication:
 

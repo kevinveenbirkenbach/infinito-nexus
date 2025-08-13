@@ -3,4 +3,4 @@ features:
 server:
   domains:
     canonical:
-      - jenkins.{{ primary_domain }}
+      - jenkins.{{ PRIMARY_DOMAIN }}

@@ -24,7 +24,7 @@ server:
     flags:            {}      # Flags which should be set
   domains:
     canonical:
-      - "libretranslate.{{ primary_domain }}"
+      - "libretranslate.{{ PRIMARY_DOMAIN }}"
     aliases:          []      # Alias redirections to the first element of the canonical domains
 rbac:
   roles: {}

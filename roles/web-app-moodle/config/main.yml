@@ -1,4 +1,4 @@
-site_titel:           "Academy on {{primary_domain}}"
+site_titel:           "Academy on {{PRIMARY_DOMAIN}}"
 features:
   matomo:             true
   css:                false
@@ -25,7 +25,7 @@ server:
         - "https://cdn.jsdelivr.net"
   domains:
     canonical:
-      - "academy.{{ primary_domain }}"
+      - "academy.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     database:

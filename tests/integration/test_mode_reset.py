@@ -8,11 +8,11 @@ BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../roles'
 
 class TestModeResetIntegration(unittest.TestCase):
     """
-    Verify that a role either mentioning 'mode_reset' under tasks/ OR containing a reset file:
+    Verify that a role either mentioning 'MODE_RESET' under tasks/ OR containing a reset file:
       - provides a *_reset.yml (or reset.yml) in tasks/,
       - includes it exactly once across tasks/*.yml,
       - and the include is guarded in the SAME task block by a non-commented `when`
-        that contains `mode_reset | bool` (inline, list, or array).
+        that contains `MODE_RESET | bool` (inline, list, or array).
     Additional conditions (e.g., `and something`) are allowed.
     Commented-out conditions (e.g., `#when: ...` or `# include_tasks: ...`) do NOT count.
     """
@@ -33,12 +33,12 @@ class TestModeResetIntegration(unittest.TestCase):
                         if fname.lower().endswith(('.yml', '.yaml')):
                             task_files.append(os.path.join(root, fname))
 
-                # Detect any 'mode_reset' usage
+                # Detect any 'MODE_RESET' usage
                 mode_reset_found = False
                 for fp in task_files:
                     try:
                         with open(fp, 'r', encoding='utf-8') as f:
-                            if 'mode_reset' in f.read():
+                            if 'MODE_RESET' in f.read():
                                 mode_reset_found = True
                                 break
                     except (UnicodeDecodeError, OSError):
@@ -55,11 +55,11 @@ class TestModeResetIntegration(unittest.TestCase):
                 ]
 
                 # Decide if this role must be validated:
-                # - if it mentions mode_reset anywhere under tasks/, OR
+                # - if it mentions MODE_RESET anywhere under tasks/, OR
                 # - if it has a reset file in tasks/ root
                 should_check = mode_reset_found or bool(reset_files)
                 if not should_check:
-                    self.skipTest(f"Role '{role_name}': no mode_reset usage and no reset file found.")
+                    self.skipTest(f"Role '{role_name}': no MODE_RESET usage and no reset file found.")
 
                 # If we check, a reset file MUST exist
                 self.assertTrue(
@@ -108,7 +108,7 @@ class TestModeResetIntegration(unittest.TestCase):
                     f"found {len(include_occurrences)}."
                 )
 
-                # Verify a proper 'when' containing 'mode_reset | bool' exists in the SAME task block
+                # Verify a proper 'when' containing 'MODE_RESET | bool' exists in the SAME task block
                 include_fp, included_rf, span = include_occurrences[0]
 
                 with open(include_fp, 'r', encoding='utf-8') as f:
@@ -138,17 +138,17 @@ class TestModeResetIntegration(unittest.TestCase):
                 #  - Allow additional conditions inline (and/or/parentheses/etc.)
                 #  - Support list form and yaml array form
                 when_inline = re.search(
-                    r'(?m)^(?<!#)\s*when:\s*(?!\[)(?:(?!\n).)*mode_reset\s*\|\s*bool',
+                    r'(?m)^(?<!#)\s*when:\s*(?!\[)(?:(?!\n).)*MODE_RESET\s*\|\s*bool',
                     task_block
                 )
                 when_list = re.search(
                     r'(?ms)^(?<!#)\s*when:\s*\n'                # non-commented when:
                     r'(?:(?:\s*#.*\n)|(?:\s*-\s*.*\n))*'         # comments or other list items
-                    r'\s*-\s*[^#\n]*mode_reset\s*\|\s*bool[^#\n]*$',  # list item with mode_reset | bool (not commented)
+                    r'\s*-\s*[^#\n]*MODE_RESET\s*\|\s*bool[^#\n]*$',  # list item with MODE_RESET | bool (not commented)
                     task_block
                 )
                 when_array = re.search(
-                    r'(?m)^(?<!#)\s*when:\s*\[[^\]\n]*mode_reset\s*\|\s*bool[^\]\n]*\]',
+                    r'(?m)^(?<!#)\s*when:\s*\[[^\]\n]*MODE_RESET\s*\|\s*bool[^\]\n]*\]',
                     task_block
                 )
 
@@ -158,7 +158,7 @@ class TestModeResetIntegration(unittest.TestCase):
                     when_ok,
                     (
                         f"Role '{role_name}': file '{include_fp}' must guard the reset include "
-                        f"with a non-commented 'when' containing 'mode_reset | bool'. "
+                        f"with a non-commented 'when' containing 'MODE_RESET | bool'. "
                         f"Commented-out conditions do not count."
                     )
                 )

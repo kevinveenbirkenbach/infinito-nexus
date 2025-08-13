@@ -12,7 +12,7 @@
       domain: "{{ domain }}"
       base_domain: "{{ base_domain }}"
       matomo_verification_url: "{{ matomo_verification_url }}"
-  when: enable_debug | bool
+  when: MODE_DEBUG | bool
 
 - name: "Check if site {{ domain }} is allready registered at Matomo"
   uri:

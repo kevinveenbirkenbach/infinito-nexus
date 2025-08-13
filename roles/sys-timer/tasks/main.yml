@@ -1,7 +1,7 @@
 
 - name: "reset (if enabled)"
   include_tasks: 01_reset.yml 
-  when: mode_reset | bool and run_once_sys_timer is not defined
+  when: MODE_RESET | bool and run_once_sys_timer is not defined
 
 - name: run {{ role_name }} once
   set_fact:
@@ -20,5 +20,5 @@
     name: "{{ sys_timer_file }}"
     state: restarted
     enabled: yes
-  when: dummy_timer.changed or activate_all_timers | bool
+  when: dummy_timer.changed or ACTIVATE_ALL_TIMERS | bool
 

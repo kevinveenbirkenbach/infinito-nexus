@@ -15,4 +15,4 @@ server:
         unsafe-inline:  true
   domains:
     canonical:
-      - "docs.{{ primary_domain }}"
+      - "docs.{{ PRIMARY_DOMAIN }}"

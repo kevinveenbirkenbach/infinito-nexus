@@ -3,7 +3,7 @@ Description=Timer to start {{service_name}}.infinito.service
 
 [Timer]
 OnCalendar={{on_calendar}}
-RandomizedDelaySec={{randomized_delay_sec}}
+RandomizedDelaySec={{RANDOMIZED_DELAY_SEC}}
 Persistent={{ persistent | default('false') }}
 
 [Install]

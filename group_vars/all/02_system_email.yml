@@ -1,7 +1,7 @@
 # Email Configuration
 default_system_email:
-  domain:    "{{primary_domain}}"
-  host:      "mail.{{primary_domain}}"
+  domain:    "{{PRIMARY_DOMAIN}}"
+  host:      "mail.{{PRIMARY_DOMAIN}}"
   port:      465
   tls:       true   # true for TLS and false for SSL
   start_tls: false

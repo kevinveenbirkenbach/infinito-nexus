@@ -4,7 +4,7 @@
     path: "{{ item.value }}"
     state: absent
   when:
-    - mode_cleanup | bool
+    - MODE_CLEANUP | bool
     - run_once_nginx_reverse_proxy is not defined
   loop: "{{ nginx.directories.cache | dict2items }}"
   loop_control:

@@ -191,13 +191,13 @@ def main():
     validate_application_ids(args.inventory, args.id)
 
     modes = {
-        "mode_reset": args.reset,
-        "mode_test": args.test,
-        "mode_update": args.update,
-        "mode_backup": args.backup,
-        "mode_cleanup": args.cleanup,
-        "mode_logs": args.logs,
-        "enable_debug": args.debug,
+        "MODE_RESET": args.reset,
+        "MODE_TEST": args.test,
+        "MODE_UPDATE": args.update,
+        "MODE_BACKUP": args.backup,
+        "MODE_CLEANUP": args.cleanup,
+        "MODE_LOGS": args.logs,
+        "MODE_DEBUG": args.debug,
         "host_type": args.host_type
     }
 

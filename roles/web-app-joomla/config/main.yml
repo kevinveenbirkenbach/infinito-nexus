@@ -9,7 +9,7 @@ features:
 server:
   domains:
     canonical:
-      - "cms.{{ primary_domain }}"
+      - "cms.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     database:

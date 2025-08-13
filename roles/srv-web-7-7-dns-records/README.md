@@ -10,7 +10,7 @@ Looping over a provided list of domains (`cloudflare_domains`), this role:
 - Determines the zone name by extracting the last two labels of each domain.
 - Ensures an A-record for each domain points to the specified IP (`cloudflare_target_ip`).
 - Honors the `proxied` flag to switch between DNS-only and Cloudflare-proxied modes.
-- Provides an optional debug task (`enable_debug`) to output the domain list before changes.
+- Provides an optional debug task (`MODE_DEBUG`) to output the domain list before changes.
 
 Ideal for environments where bulk or dynamic DNS updates are needed, this role abstracts away the complexity of Cloudflare’s zone and record API.
 
@@ -23,7 +23,7 @@ Cloudflare DNS Records delivers an idempotent, scalable solution for managing A-
 - **Automatic Zone Detection:** Parses each domain to derive its zone (`example.com`) without manual intervention.  
 - **Bulk Record Management:** Creates or updates A-records for all entries in `cloudflare_domains`.  
 - **Proxy Toggle:** Configure `proxied: true` or `false` per record to switch between DNS-only and proxied modes.  
-- **Debug Support:** Enable `enable_debug` to print the domain list for validation before execution.  
+- **Debug Support:** Enable `MODE_DEBUG` to print the domain list for validation before execution.  
 - **Flexible Authentication:** Supports both API token (`api_token`) and Global API key + email.  
 - **Low-TTL Option:** Use `ttl: 1` for rapid DNS propagation during dynamic updates.
 

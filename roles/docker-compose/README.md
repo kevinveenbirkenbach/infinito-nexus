@@ -8,7 +8,7 @@ Refer to the [Docker Compose documentation](https://docs.docker.com/compose/), t
 
 ## Overview
 
-This role creates a flexible directory layout for managing Docker Compose projects across environments. It ensures directories are initialized, optionally reset, and kept clean using internal flags like `mode_reset` or `mode_cleanup`.
+This role creates a flexible directory layout for managing Docker Compose projects across environments. It ensures directories are initialized, optionally reset, and kept clean using internal flags like `MODE_RESET` or `MODE_CLEANUP`.
 
 ## Purpose
 
@@ -17,7 +17,7 @@ To offer a centralized, extensible system for managing containerized application
 ## Features
 
 - **Dynamic Directory Structure:** Creates per-application instance folders for Compose setups.
-- **Reset Logic:** Cleans previous Compose project files and data when `mode_reset` is enabled.
+- **Reset Logic:** Cleans previous Compose project files and data when `MODE_RESET` is enabled.
 - **Handlers for Runtime Control:** Automatically builds, sets up, or restarts containers based on handlers.
 - **Template-ready Service Files:** Predefined service base and health check templates.
 - **Integration Support:** Compatible with `srv-proxy-7-4-core` and other Infinito.Nexus service roles.

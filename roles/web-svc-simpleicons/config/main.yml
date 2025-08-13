@@ -20,7 +20,7 @@ server:
   csp: {}      
   domains:
     canonical:
-      - "icons.{{ primary_domain }}"
+      - "icons.{{ PRIMARY_DOMAIN }}"
 rbac:
   roles:
     mail-bot:

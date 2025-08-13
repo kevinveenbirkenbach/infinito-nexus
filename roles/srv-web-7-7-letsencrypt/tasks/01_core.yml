@@ -11,4 +11,4 @@
 
   - name: "Set CAA records for all base domains"
     include_tasks: 01_set-caa-records.yml
-    when: dns_provider == 'cloudflare'
+    when: DNS_PROVIDER == 'cloudflare'

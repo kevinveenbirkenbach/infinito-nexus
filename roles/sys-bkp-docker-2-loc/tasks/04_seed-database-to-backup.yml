@@ -11,7 +11,7 @@
       database_host: "{{ database_host | default('undefined') }}"
       database_username: "{{ database_username | default('undefined') }}"
       database_password: "{{ database_password | default('undefined') }}"
-  when: enable_debug | bool
+  when: MODE_DEBUG | bool
 
 - name: "fail if not all required database variables are defined"
   fail:

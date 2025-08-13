@@ -54,14 +54,14 @@
 
 - name: Execute Cleanup Routines
   include_tasks: 03_cleanup.yml 
-  when: mode_cleanup
+  when: MODE_CLEANUP
 
 - name: Include DNS role to register Gitea domain(s)
   include_role:
     name: srv-web-7-7-dns-records
   vars:
-    cloudflare_api_token:   "{{ certbot_dns_api_token }}"
+    cloudflare_api_token:   "{{ CERTBOT_DNS_API_TOKEN }}"
     cloudflare_domains:     "{{ [ domains | get_domain(application_id) ] }}"
     cloudflare_target_ip:   "{{ networks.internet.ip4 }}"
     cloudflare_proxied:     false
-  when: dns_provider == 'cloudflare'
+  when: DNS_PROVIDER == 'cloudflare'

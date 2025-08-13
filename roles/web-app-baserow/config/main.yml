@@ -21,4 +21,4 @@ docker:
 server:
   domains:
     canonical:
-      - baserow.{{ primary_domain }}
+      - baserow.{{ PRIMARY_DOMAIN }}

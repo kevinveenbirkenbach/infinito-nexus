@@ -10,7 +10,7 @@
   set_fact:
     inj_enabled:
       javascript: "{{ applications | get_app_conf(application_id, 'features.javascript', False) }}"
-      logout: "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == primary_domain) }}"
+      logout: "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == PRIMARY_DOMAIN) }}"
       css: "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
       matomo: "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
       port_ui: "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"
@@ -39,7 +39,7 @@
   set_fact:
     inj_enabled:
       javascript: "{{ applications | get_app_conf(application_id, 'features.javascript', False) }}"
-      logout: "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == primary_domain) }}"
+      logout: "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == PRIMARY_DOMAIN) }}"
       css: "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
       matomo: "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
       port_ui: "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"

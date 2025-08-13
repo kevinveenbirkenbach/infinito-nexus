@@ -242,4 +242,4 @@ discourse_settings:
 #
   - name: discourse_logs
     key: logs-enabled
-    value: "{{ enable_debug }}"
+    value: "{{ MODE_DEBUG }}"

@@ -3,4 +3,4 @@ features:
 server:
   domains:
     canonical:
-      - "wheel.{{ primary_domain }}"
+      - "wheel.{{ PRIMARY_DOMAIN }}"

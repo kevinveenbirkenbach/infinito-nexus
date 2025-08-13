@@ -7,7 +7,7 @@ features:
 server:
   domains:
     canonical:
-      - "logout.{{ primary_domain }}"
+      - "logout.{{ PRIMARY_DOMAIN }}"
   csp:
     flags:
       style-src:
@@ -16,8 +16,8 @@ server:
         unsafe-inline: true
     whitelist:
       connect-src:
-        - "{{ WEB_PROTOCOL }}://*.{{ primary_domain }}"
-        - "{{ WEB_PROTOCOL }}://{{ primary_domain }}"
+        - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://{{ PRIMARY_DOMAIN }}"
       script-src-elem:
         - https://cdn.jsdelivr.net
       style-src:

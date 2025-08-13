@@ -9,7 +9,7 @@ This role configures a systemd timer to periodically start a corresponding servi
 Optimized for automated task scheduling in a [systemd](https://en.wikipedia.org/wiki/Systemd) environment, this role:
 - Generates a timer unit file for a given service (using the `service_name` variable).
 - Reloads and restarts the timer using systemd to ensure that changes take effect.
-- Supports dynamic configuration of scheduling parameters via variables like `on_calendar` and `randomized_delay_sec`.
+- Supports dynamic configuration of scheduling parameters via variables like `on_calendar` and `RANDOMIZED_DELAY_SEC`.
 
 ## Purpose
 

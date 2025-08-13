@@ -1,7 +1,7 @@
 - name: "Check if certificate already exists for {{ domain }}"
   cert_check_exists:
     domain: "{{ domain }}"
-    cert_base_path: "{{ letsencrypt_live_path }}"
+    cert_base_path: "{{ LETSENCRYPT_LIVE_PATH }}"
   register: cert_check
 
 - name: "receive certificate for {{ domain }}"
@@ -10,21 +10,21 @@
     --agree-tos 
     --email {{ users.administrator.email }}
     --non-interactive 
-    {% if certbot_acme_challenge_method != "webroot" %}
-    --dns-{{ certbot_acme_challenge_method }}
-    --dns-{{ certbot_acme_challenge_method }}-credentials {{ certbot_credentials_file }}
-    --dns-{{ certbot_acme_challenge_method }}-propagation-seconds {{ certbot_dns_propagation_wait_seconds }}
+    {% if CERTBOT_ACME_CHALLENGE_METHOD != "webroot" %}
+    --dns-{{ CERTBOT_ACME_CHALLENGE_METHOD }}
+    --dns-{{ CERTBOT_ACME_CHALLENGE_METHOD }}-credentials {{ CERTBOT_CREDENTIALS_FILE }}
+    --dns-{{ CERTBOT_ACME_CHALLENGE_METHOD }}-propagation-seconds {{ CERTBOT_DNS_PROPAGATION_WAIT_SECONDS }}
     {% else %}
     --webroot 
-    -w {{ letsencrypt_webroot_path }}
+    -w {{ LETSENCRYPT_WEBROOT_PATH }}
     {% endif %}
     {% if wildcard_domain is defined and ( wildcard_domain | bool ) %}
-    -d {{ primary_domain }} 
-    -d *.{{ primary_domain }}
+    -d {{ PRIMARY_DOMAIN }} 
+    -d *.{{ PRIMARY_DOMAIN }}
     {% else %}
     -d {{ domain }}
     {% endif %}
-    {{ '--test-cert' if mode_test | bool else '' }}
+    {{ '--test-cert' if MODE_TEST | bool else '' }}
   register: certbot_result
   changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
   when: not cert_check.exists

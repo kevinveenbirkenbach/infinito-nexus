@@ -2,10 +2,10 @@
 users:
   sld:
     description: "Auto Generated Account to reserve the SLD"
-    username: "{{ primary_domain.split('.')[0] }}"
+    username: "{{ PRIMARY_DOMAIN.split('.')[0] }}"
   tld:
     description: "Auto Generated Account to reserve the TLD"
-    username: "{{ primary_domain.split('.')[1] }}"
+    username: "{{ PRIMARY_DOMAIN.split('.')[1] }}"
   root:
     username: root
     uid: 0

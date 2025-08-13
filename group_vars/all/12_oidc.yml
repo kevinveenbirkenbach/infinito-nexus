@@ -8,7 +8,7 @@
 # @see https://en.wikipedia.org/wiki/OpenID_Connect
 
 ## Helper Variables:
-_oidc_client_realm:         "{{ oidc.client.realm if oidc.client is defined and oidc.client.realm is defined else primary_domain }}"
+_oidc_client_realm:         "{{ oidc.client.realm if oidc.client is defined and oidc.client.realm is defined else PRIMARY_DOMAIN }}"
 _oidc_url:                  "{{ 
                                 (oidc.url 
                                   if (oidc is defined and oidc.url is defined) 
@@ -16,7 +16,7 @@ _oidc_url:                  "{{
                                 ) 
                             }}"
 _oidc_client_issuer_url:    "{{ _oidc_url }}/realms/{{_oidc_client_realm}}"
-_oidc_client_id:            "{{ oidc.client.id if oidc.client is defined and oidc.client.id is defined else primary_domain }}"
+_oidc_client_id:            "{{ oidc.client.id if oidc.client is defined and oidc.client.id is defined else PRIMARY_DOMAIN }}"
 
 defaults_oidc:
   url:                    "{{ _oidc_url }}"
@@ -33,7 +33,7 @@ defaults_oidc:
     change_credentials:   "{{_oidc_client_issuer_url}}account/account-security/signing-in"  # URL for managing or changing user credentials
     certs:                "{{_oidc_client_issuer_url}}/protocol/openid-connect/certs"       # JSON Web Key Set (JWKS)
     reset_credentials:    "{{_oidc_client_issuer_url}}/login-actions/reset-credentials?client_id={{ _oidc_client_id }}" # Password reset url
-  button_text:            "SSO Login ({{primary_domain | upper}})"                           # Default button text
+  button_text:            "SSO Login ({{PRIMARY_DOMAIN | upper}})"                           # Default button text
   attributes:
     # Attribut to identify the user
     username:             "preferred_username"

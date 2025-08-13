@@ -9,7 +9,7 @@ features:
 server:
   domains:
     canonical:
-      - "inventory.{{ primary_domain }}"
+      - "inventory.{{ PRIMARY_DOMAIN }}"
   csp:
     flags:
       script-src:

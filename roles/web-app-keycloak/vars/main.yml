@@ -5,7 +5,7 @@ database_type:                    "postgres"                                    
 # Keycloak
 keycloak_container:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"      # Name of the keycloak docker container
 keycloak_docker_import_directory:   "/opt/keycloak/data/import/"                                                              # Directory in which keycloak import files are placed in the running docker container
-keycloak_realm:                     "{{ primary_domain}}"                                                                     # This is the name of the default realm which is used by the applications
+keycloak_realm:                     "{{ PRIMARY_DOMAIN}}"                                                                     # This is the name of the default realm which is used by the applications
 keycloak_master_api_user:           "{{ applications | get_app_conf(application_id, 'users.administrator') }}"                # Master Administrator
 keycloak_master_api_user_name:      "{{ keycloak_master_api_user.username }}"                                                 # Master Administrator Username
 keycloak_master_api_user_password:  "{{ keycloak_master_api_user.password }}"                                                 # Master Administrator Password
@@ -15,7 +15,7 @@ keycloak_server_host:               "127.0.0.1:{{ ports.localhost.http[applicati
 keycloak_server_host_url:           "http://{{ keycloak_server_host }}"
 keycloak_image:                     "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.image') }}"     # Keycloak docker image
 keycloak_version:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version') }}"   # Keycloak docker version
-keycloak_debug_enabled:             "{{ enable_debug }}"
+keycloak_debug_enabled:             "{{ MODE_DEBUG }}"
 keycloak_redirect_features:         ["features.oauth2","features.oidc"]
 keycloak_client_id:                 "{{ oidc.client.id }}"
 keycloak_ldap_component_name:       "{{ ldap.server.domain }}"                                                                                    # Name of the LDAP User Federation component in Keycloak (as shown in UI)
