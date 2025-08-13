@@ -39,6 +39,8 @@
         tls_certificate_string = '{{ openproject_ldap.tls_certificate_string }}'
       WHERE name = '{{ openproject_ldap.name }}';
   when: ldap_check.query_result | length > 0
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: Create new LDAP auth source
   community.postgresql.postgresql_query:
@@ -73,22 +75,8 @@
         '{{ openproject_ldap.tls_certificate_string }}'
       );
   when: ldap_check.query_result | length == 0
-
-- name: Show all LDAP sources (debug)
-  community.postgresql.postgresql_query:
-    db: "{{ database_name }}"
-    login_user: "{{ database_username }}"
-    login_password: "{{ database_password }}"
-    login_host: "127.0.0.1"
-    login_port: "{{ database_port }}"
-    query: "SELECT id, name FROM ldap_auth_sources"
-  register: ldap_entries
-  when: MODE_DEBUG | bool
-
-- name: Debug LDAP entries
-  debug:
-    var: ldap_entries
-  when: MODE_DEBUG | bool
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 # This works just after the first admin login
 # @todo Remove and replace trough LDAP RBAC group
@@ -109,3 +97,5 @@
     "
   args:
     chdir: "{{ docker_compose.directories.instance }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

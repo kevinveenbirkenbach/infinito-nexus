@@ -33,6 +33,8 @@
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   loop: "{{ openproject_rails_settings | dict2items }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: Setup LDAP
   include_tasks: 01_ldap.yml
