@@ -11,14 +11,23 @@
     - docker compose restart
     - docker compose just up
 
-- name: Build docker 
-  command:
-    cmd:   docker compose build
+- name: Build docker compose 
+  shell: |
+    set -euo pipefail
+    docker compose build || { 
+      echo "Retrying without cache and pulling bases...";
+      docker compose build --no-cache --pull; 
+    }
+  args:
     chdir: "{{ docker_compose.directories.instance }}"
+    executable: /bin/bash
   environment:
     COMPOSE_HTTP_TIMEOUT: 600
     DOCKER_CLIENT_TIMEOUT: 600
-  listen: 
+    # Faster build
+    DOCKER_BUILDKIT: "1"
+    COMPOSE_DOCKER_CLI_BUILD: "1"
+  listen:
     - docker compose build
 
 - name: docker compose up
