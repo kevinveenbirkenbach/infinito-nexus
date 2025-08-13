@@ -5,10 +5,10 @@
 - name: disable {{ plugin_key }} nextcloud plugin
   command: "{{ nextcloud_docker_exec_occ }} app:disable {{ plugin_key }}"
   register: disable_result
-  failed_when: >
-    (disable_result.rc | int != 0)
-    and ('No such app enabled' not in (disable_result.stdout | default('') ~ disable_result.stderr | default('')))
   changed_when: >
+    not ASYNC_ENABLED and
     ((disable_result.stdout | default('') ~ disable_result.stderr | default('')) is search('disabled'))
     and (((disable_result.stdout | default('') ~ disable_result.stderr | default('')) is not search('already disabled')))
   when: not (plugin_value.enabled | bool)
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"

@@ -21,8 +21,8 @@
     attributes:
       objectClass: "{{ missing_auxiliary }}"
     state: present
-  async: 60
-  poll: 0
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
   loop: "{{ ldap_users_with_classes.results }}"
   loop_control:
     label: "{{ item.dn }}"

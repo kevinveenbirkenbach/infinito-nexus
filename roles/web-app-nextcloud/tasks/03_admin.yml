@@ -3,9 +3,12 @@
     docker exec -u {{ nextcloud_docker_user }} {{ nextcloud_container }}
     php occ group:adduser admin {{ nextcloud_administrator_username }}
   register: add_admin_to_group
-  changed_when: "'Added user' in (add_admin_to_group.stdout | default(''))"
+  changed_when: "not ASYNC_ENABLED and 'Added user' in (add_admin_to_group.stdout | default(''))"
   failed_when: >
+    not ASYNC_ENABLED and
     (add_admin_to_group.rc != 0) and
     ("is already a member of" not in (
       (add_admin_to_group.stderr | default('')) ~ (add_admin_to_group.stdout | default(''))
     ))
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"

@@ -18,6 +18,8 @@
         is not search('already disabled'))
     )
   failed_when: false
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
 
 - name: install {{ plugin_key }} nextcloud plugin
   command: "{{ nextcloud_docker_exec_occ }} app:install {{ plugin_key }}"

@@ -3,8 +3,8 @@
     set -euo pipefail
     infinito build tree --no-signal --alarm-timeout 0 -s {{ mig_roles_meta_volume }}
     infinito build roles_list --no-signal --alarm-timeout 0 -o {{ mig_roles_meta_list }}
-  async: 3600
-  poll: 0
+  async: "{{ (3600 if ASYNC_ENABLED else omit) | default(omit) }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED else omit }}"
   register: mig_build_job
 
 - name: Fail if MIG build job did not start
