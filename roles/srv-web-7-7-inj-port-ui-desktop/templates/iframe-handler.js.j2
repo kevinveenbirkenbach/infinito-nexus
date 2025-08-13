@@ -1,48 +1,57 @@
-(function() {
-  var primary = "{{ PRIMARY_DOMAIN }}";
-  var allowedOrigin = "https://{{ domains | get_domain('web-app-port-ui') }}";
-
-  function notifyParent() {
-    if (window.self !== window.top) {
-      try {
-        window.parent.postMessage({
-          type: "iframeLocationChange",
-          href: window.location.href
-        }, allowedOrigin);
-      } catch (e) {}
+(function (global) {
+  /**
+   * Initializes the iframe sync & external link forcing logic.
+   * @param {string} primary_domain
+   * @param {string} current_domain
+   * @param {string} allowedOrigin - Parent origin for postMessage
+   */
+  function initIframeHandler(primary_domain, current_domain, allowedOrigin) {
+    function notifyParent() {
+      if (window.self !== window.top) {
+        try {
+          window.parent.postMessage(
+            { type: "iframeLocationChange", href: window.location.href },
+            allowedOrigin
+          );
+        } catch (e) {}
+      }
     }
-  }
 
-  function forceExternalLinks() {
-    Array.prototype.forEach.call(document.querySelectorAll("a[href]"), function(a) {
-      try {
-        var url = new URL(a.href, location);
-        if (!url.hostname.endsWith(primary)) {
-          a.target = "_blank";
-          a.rel = "noopener";
-        }
-      } catch (e) {}
+    function forceExternalLinks() {
+      Array.prototype.forEach.call(document.querySelectorAll("a[href]"), function (a) {
+        try {
+          var url = new URL(a.href, location);
+          // open new tab if link goes outside our primary OR current domain
+          if (!(url.hostname.endsWith(primary_domain) || url.hostname.endsWith(current_domain))) {
+            a.target = "_blank";
+            a.rel = "noopener";
+          }
+        } catch (e) {}
+      });
+    }
+
+    window.addEventListener("load", function () {
+      notifyParent();
+      forceExternalLinks();
     });
+    window.addEventListener("popstate", function () {
+      notifyParent();
+      forceExternalLinks();
+    });
+
+    // SPA support
+    var _pushState = history.pushState;
+    history.pushState = function () {
+      _pushState.apply(history, arguments);
+      notifyParent();
+      forceExternalLinks();
+    };
+
+    {% if MODE_DEBUG | bool %}
+    try { console.log("[iframe-sync] initIframeHandler installed."); } catch (e) {}
+    {% endif %}
   }
 
-  window.addEventListener("load", function() {
-    notifyParent();
-    forceExternalLinks();
-  });
-  window.addEventListener("popstate", function() {
-    notifyParent();
-    forceExternalLinks();
-  });
-
-  // SPA support
-  var _pushState = history.pushState;
-  history.pushState = function() {
-    _pushState.apply(history, arguments);
-    notifyParent();
-    forceExternalLinks();
-  };
-})();
-
-{% if MODE_DEBUG | bool %}
-console.log("[iframe-sync] Sender for iframe messages is active.");
-{% endif %}
+  // expose for inline bootstrap
+  global.initIframeHandler = initIframeHandler;
+})(window);

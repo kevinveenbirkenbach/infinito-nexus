@@ -1,0 +1,16 @@
+- name: Deploy iframe-handler.js
+  template:
+    src: iframe-handler.js.j2
+    dest: "{{ inj_port_ui_js_destination }}"
+    owner: "{{ nginx.user }}"
+    group: "{{ nginx.user }}"
+    mode: '0644'
+
+- name: Get stat for iframe-handler.js
+  stat:
+    path: "{{ inj_port_ui_js_destination }}"
+  register: inj_port_ui_js_stat
+
+- name: Set inj_port_ui_js_version
+  set_fact:
+    inj_port_ui_js_version: "{{ inj_port_ui_js_stat.stat.mtime }}"

@@ -1,0 +1,10 @@
+document.addEventListener('DOMContentLoaded', function () {
+  initIframeHandler(
+    '{{ PRIMARY_DOMAIN }}',
+    '{{ domain }}',
+    '{{ domains | get_url("web-app-port-ui", WEB_PROTOCOL) }}'
+  );
+});
+{% if MODE_DEBUG | bool %}
+try { console.log("[iframe-sync] Sender for iframe messages is active."); } catch(e) {}
+{% endif %}

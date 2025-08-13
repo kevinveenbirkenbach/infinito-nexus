@@ -58,7 +58,7 @@ body_filter_by_lua_block {
     -- build a list of body-injection snippets
     local body_snippets = {}
 
-    {% for body_feature in ['matomo', 'logout' ] %}
+    {% for body_feature in ['matomo', 'logout', 'port-ui-desktop'] %}
     {% if applications | get_app_conf(application_id, 'features.' ~ body_feature, false) | bool %}
     body_snippets[#body_snippets + 1] = [=[
         {%- include "roles/srv-web-7-7-inj-" ~ body_feature ~ "/templates/body_sub.j2" -%}
