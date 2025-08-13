@@ -1,10 +1,16 @@
+# General
 application_id:                 "web-app-espocrm"
+
+# Database
 database_type:                  "mariadb"
+
+# Webserver
 location_ws:                        "/ws"
 ws_port:                        "{{ ports.localhost.websocket[application_id] }}"
 client_max_body_size:           "100m"
 vhost_flavour:                  "ws_generic"
-docker_compose_flush_handlers:  true
+
+# Espocrm
 espocrm_version:                "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.version', True) }}"
 espocrm_image:                  "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.image', True) }}"
 espocrm_name:                   "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.name', True) }}"

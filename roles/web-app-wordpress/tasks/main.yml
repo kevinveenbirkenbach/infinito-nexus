@@ -2,6 +2,8 @@
 - name: "load docker and db for {{application_id}}"
   include_role: 
     name: cmp-db-docker
+  vars:
+    docker_compose_flush_handlers: false
   
 - name: "Include role srv-proxy-6-6-domain for {{ application_id }}"
   include_role:
@@ -25,13 +27,16 @@
     dest: "{{ host_msmtp_conf }}"
   notify: docker compose up
 
-- name: Check if wp-config.php exists in WordPress
-  command: docker exec -u {{ wordpress_user }} {{ wordpress_container }} test -f {{ wordpress_docker_html_path }}/wp-config.php
+- name: Flush handlers to make {{ wordpress_config_file }} available before patch
+  meta: flush_handlers
+
+- name: Check if {{ wordpress_config_file }} exists in WordPress
+  command: docker exec -u {{ wordpress_user }} {{ wordpress_container }} test -f {{ wordpress_config_path }}
   register: wp_config_file_exists
   changed_when: false
   failed_when: false
 
-- name: Patch WordPress wp-config.php with updated DB credentials
+- name: Patch WordPress {{ wordpress_config_file }} with updated DB credentials
   include_tasks: 01_patch_config.yml
   when: wp_config_file_exists.rc == 0
 

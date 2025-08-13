@@ -2,6 +2,8 @@
 - name: "load docker, db and proxy for {{application_id}}"
   include_role: 
     name: cmp-db-docker-proxy
+  vars:
+    docker_compose_flush_handlers:  true
 
 - name: Check if config.php exists in EspoCRM
   command: docker exec --user root {{ espocrm_name }} test -f {{ espocrm_config_file }}
@@ -15,7 +17,6 @@
 
 - name: Flush handlers to make DB available before password reset
   meta: flush_handlers
-  when: docker_compose_flush_handlers | bool
 
 - name: Set OIDC scopes in EspoCRM config (inside web container)
   ansible.builtin.shell: |
