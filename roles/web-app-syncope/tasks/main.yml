@@ -1,17 +1,11 @@
 ---
-- name: "load docker and db for {{application_id}}"
-  include_role: 
-    name: cmp-db-docker
-
 - name: "include role for {{application_id}} to receive certs & do modification routines"
   include_role:
     name: srv-web-7-6-composer
 
-- name: configure {{domain}}.conf
-  template: 
-    src:  "templates/proxy.conf.j2"
-    dest: "{{nginx.directories.http.servers}}{{domain}}.conf"
-  notify: restart openresty
+- name: "load docker and db for {{application_id}}"
+  include_role: 
+    name: cmp-db-docker
 
 - name: configure {{domain}}.conf
   template: 

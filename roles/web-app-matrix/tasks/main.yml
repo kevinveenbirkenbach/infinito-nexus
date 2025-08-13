@@ -8,16 +8,18 @@
     bridges: "{{ bridges_configuration | filter_enabled_bridges(applications | get_app_conf(application_id, 'plugins', True)) }}"
   changed_when: false
 
-- name: "load docker and db for {{application_id}}"
-  include_role: 
-    name: cmp-db-docker
-
 - name: "include role for {{application_id}} to receive certs & do modification routines"
   include_role:
     name: srv-web-7-6-composer
   vars:
     domain:     "{{domains[application_id].synapse}}"
     http_port:  "{{ports.localhost.http['web-app-matrix_synapse']}}"
+
+- name: "load docker and db for {{application_id}}"
+  include_role: 
+    name: cmp-db-docker
+  vars:
+    docker_compose_flush_handlers:  false
 
 - name: create {{well_known_directory}}
   file:

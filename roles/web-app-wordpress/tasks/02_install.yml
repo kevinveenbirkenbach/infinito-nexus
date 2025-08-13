@@ -1,4 +1,5 @@
 - name: "Run WordPress core install via WP CLI"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   command: >
     docker exec -u {{ wordpress_user }} {{ wordpress_container }}
     wp core install

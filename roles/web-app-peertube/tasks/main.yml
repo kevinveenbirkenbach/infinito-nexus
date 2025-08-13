@@ -1,8 +1,4 @@
 ---
-- name: "load docker and db for {{application_id}}"
-  include_role: 
-    name: cmp-db-docker
-  
 - name: "include create-domains.yml for peertube"
   include_tasks: create-domains.yml
   loop: "{{ domains['web-app-peertube'] }}"
@@ -12,6 +8,10 @@
     # Websockt and http listen to the same port
     http_port:  "{{ ports.localhost.http[application_id] }}"
     ws_port:    "{{ ports.localhost.http[application_id] }}"
+
+- name: "load docker and db for {{application_id}}"
+  include_role: 
+    name: cmp-db-docker
 
 - name: "Install and activate auth-openid-connect plugin if OIDC is enabled"
   include_tasks: enable-oidc.yml

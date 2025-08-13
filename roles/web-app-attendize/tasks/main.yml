@@ -1,8 +1,4 @@
 ---
-- name: "For '{{ application_id }}': load docker and db"
-  include_role: 
-    name: cmp-db-docker
-
 - name: "For '{{ application_id }}': include role to receive certs & do modification routines"
   include_role:
     name: srv-web-7-6-composer
@@ -12,6 +8,12 @@
   loop:
     - "{{ domains | get_domain('web-app-mailu') }}"
     - "{{ domain }}"
+
+- name: "For '{{ application_id }}': load docker and db"
+  include_role: 
+    name: cmp-db-docker
+  vars:
+    docker_compose_flush_handlers: true 
     
 - name: "For '{{ application_id }}': configure {{domains | get_domain(application_id)}}.conf"
   template: 

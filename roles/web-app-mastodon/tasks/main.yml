@@ -1,8 +1,4 @@
 ---
-- name: "load docker and db for {{application_id}}"
-  include_role: 
-    name: cmp-db-docker
-
 - name: "Include setup for domain '{{ domain }}'"
   include_role: 
     name: srv-proxy-6-6-domain
@@ -11,11 +7,17 @@
     loop_var: domain
   vars:
     http_port:            "{{ ports.localhost.http[application_id] }}"
-    location_ws:              "/api/v1/streaming"
+    location_ws:          "/api/v1/streaming"
     ws_port:              "{{ ports.localhost.websocket[application_id] }}"
     client_max_body_size: "80m"
     vhost_flavour:        "ws_generic"
 
+- name: "load docker and db for {{application_id}}"
+  include_role: 
+    name: cmp-db-docker
+  vars:
+    docker_compose_flush_handlers: true
+
 - name: "start setup procedures for mastodon"
   include_tasks: 01_setup.yml
-  when: mastodon_setup |bool 
+  when: mastodon_setup | bool 

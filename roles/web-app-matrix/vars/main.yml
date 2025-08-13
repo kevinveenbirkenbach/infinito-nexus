@@ -18,6 +18,3 @@ matrix_project:           "{{ application_id | get_entity_name }}"
 well_known_directory:     "{{nginx.directories.data.well_known}}/matrix/"
 location_upload:          "~ ^/_matrix/media/v3/"
 client_max_body_size:     "{{ applications | get_app_conf(application_id, 'server.client_max_body_size') }}"
-
-# Docker
-docker_compose_flush_handlers:  false

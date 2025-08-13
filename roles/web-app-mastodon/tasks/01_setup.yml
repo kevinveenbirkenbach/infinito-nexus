@@ -1,6 +1,3 @@
-- name: flush docker service
-  meta: flush_handlers
-
 - name: "Execute migration for '{{ application_id }}'"
   command:
     cmd: "docker-compose run --rm web bundle exec rails db:migrate"
