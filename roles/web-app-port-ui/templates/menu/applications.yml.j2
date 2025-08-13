@@ -24,27 +24,27 @@ applications:
             icon: {{ app.icon }}
             url: {{ app.url }}
             iframe: {{ app.iframe }}
-            
             {% if app.title == 'Keycloak' %}
-
+            {% set keycloak_url = domains | get_url(application_id, WEB_PROTOCOL) %}
+            {{ domains | get_url(application_id, WEB_PROTOCOL) }}
             children:
               - name: Administration
                 description: Access the central admin console
                 icon:
                   class: fa-solid fa-shield-halved
-                url: https://{{domains | get_domain('web-app-keycloak')}}/admin
+                url: {{ keycloak_url }}/admin
                 iframe: {{ applications | get_app_conf( 'web-app-keycloak', 'features.port-ui-desktop', False) }}
               - name: Profile
                 description: Update your personal admin settings
                 icon:
                   class: fa-solid fa-user-gear
-                url: https://{{ domains | get_domain('web-app-keycloak') }}/realms/{{oidc.client.id}}/account
+                url: {{ keycloak_url }}/realms/{{oidc.client.id}}/account
                 iframe: {{ applications | get_app_conf( 'web-app-keycloak', 'features.port-ui-desktop', False) }}
               - name: Logout
                 description: End your admin session securely
                 icon:
                   class: fa-solid fa-right-from-bracket
-                url: https://{{ domains | get_domain('web-app-keycloak') }}/realms/{{oidc.client.id}}/protocol/openid-connect/logout
+                url: {{ keycloak_url }}/realms/{{oidc.client.id}}/protocol/openid-connect/logout
                 iframe: false
 
             {% endif %}

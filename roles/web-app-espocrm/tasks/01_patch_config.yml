@@ -30,7 +30,7 @@
       $c   = $app->getContainer();
       $cfg = $c->get("config");
       $writer = $c->get("injectableFactory")->create("\Espo\Core\Utils\Config\ConfigWriter");
-      $new = "{{ domains | get_url(application_id, WEB_PROTOCOL) }}";
+      $new = "{{ espocrm_url }}";
       if ($cfg->get("siteUrl") !== $new) {
         $writer->set("siteUrl", $new);
         $writer->save();
