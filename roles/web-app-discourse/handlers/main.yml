@@ -21,4 +21,6 @@
   args:
     executable: /bin/bash  
     chdir: "{{docker_repository_directory }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   listen: recreate discourse
