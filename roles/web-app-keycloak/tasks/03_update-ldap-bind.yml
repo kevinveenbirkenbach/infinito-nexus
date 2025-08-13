@@ -1,41 +1,63 @@
 ---
-# Updates the LDAP provider's bind DN / password using kcadm.sh, idempotently.
-# Sources DN/password from group_vars/all/13_ldap.yml:
-#   - DN:        ldap.dn.administrator.data
-#   - Password:  ldap.bind_credential
+# Idempotent update of Keycloak LDAP provider:
+# - bindDn
+# - bindCredential
+# - connectionUrl
+#
+# STRICT: Uses ONLY values from ldap.* (no computed defaults)
+#   - ldap.dn.administrator.data
+#   - ldap.bind_credential
+#   - ldap.server.uri
 
-- name: "Assert required vars exist"
+- name: "Assert required vars exist (strict: use ldap.* only, no defaults)"
   assert:
     that:
       - keycloak_realm is defined
-      - keycloak_server_host_url is defined
+      - keycloak_container is defined
       - keycloak_server_internal_url is defined
-      - keycloak_kcadm_path is defined
       - keycloak_master_api_user_name is defined
       - keycloak_master_api_user_password is defined
       - keycloak_ldap_component_name is defined
       - ldap is defined
+      - ldap.dn.administrator is defined
       - ldap.dn.administrator.data is defined
       - ldap.bind_credential is defined
-    fail_msg: "Missing Keycloak/LDAP vars. Ensure 13_ldap.yml is loaded and credentials are set."
+      - ldap.server is defined
+      - ldap.server.uri is defined
+    fail_msg: >-
+      Missing required Keycloak/LDAP variables. Ensure ldap.dn.administrator.data,
+      ldap.bind_credential, and ldap.server.uri are defined.
+
+# Build a base argv for kcadm to avoid fragile shell quoting
+- name: "Build kcadm argv base"
+  set_fact:
+    kcadm_argv_base:
+      - docker
+      - exec
+      - -i
+      - "{{ keycloak_container }}"
+      - /opt/keycloak/bin/kcadm.sh
 
 - name: "kcadm login (master)"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  shell: >
-    {{ keycloak_kcadm_path }} config credentials
-    --server {{ keycloak_server_internal_url }}
-    --realm master
-    --user {{ keycloak_master_api_user_name }}
-    --password {{ keycloak_master_api_user_password }}
+  command:
+    argv: "{{ kcadm_argv_base
+              + ['config', 'credentials',
+                 '--server', keycloak_server_internal_url,
+                 '--realm', 'master',
+                 '--user', keycloak_master_api_user_name,
+                 '--password', keycloak_master_api_user_password] }}"
   changed_when: false
 
 # Resolve the LDAP component *by name* to avoid picking the wrong one.
 - name: "Resolve LDAP component id by name '{{ keycloak_ldap_component_name }}'"
-  shell: >
-    {{ keycloak_kcadm_path }} get components
-    -r {{ keycloak_realm }}
-    --query 'name={{ keycloak_ldap_component_name }}'
-    --fields id,name,providerId,config --format json
+  command:
+    argv: "{{ kcadm_argv_base
+              + ['get', 'components',
+                 '-r', keycloak_realm,
+                 '--query', 'name=' ~ keycloak_ldap_component_name,
+                 '--fields', 'id,name,providerId,config',
+                 '--format', 'json'] }}"
   register: kc_ldap_list
   changed_when: false
 
@@ -49,32 +71,48 @@
       Expected exactly one LDAP component named '{{ keycloak_ldap_component_name }}',
       found {{ (kc_ldap_list.stdout | from_json) | length }}.
 
-- name: "Extract LDAP component facts"
+- name: "Extract current LDAP component values"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   set_fact:
     kc_ldap_component_id: "{{ (kc_ldap_list.stdout | from_json)[0].id }}"
     kc_ldap_current_bind_dn: "{{ ((kc_ldap_list.stdout | from_json)[0].config['bindDn'] | default(['']))[0] }}"
     kc_ldap_current_bind_pw: "{{ ((kc_ldap_list.stdout | from_json)[0].config['bindCredential'] | default(['']))[0] }}"
+    kc_ldap_current_connection_url: "{{ ((kc_ldap_list.stdout | from_json)[0].config['connectionUrl'] | default(['']))[0] }}"
+
+# Desired values come STRICTLY from ldap.*
+- name: "Set desired LDAP values (strict from ldap.*)"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  set_fact:
+    kc_desired_bind_dn: "{{ ldap.dn.administrator.data }}"
+    kc_desired_bind_pw: "{{ ldap.bind_credential }}"
+    kc_desired_connection_url: "{{ ldap.server.uri }}"
 
 - name: "Determine if update is required"
   set_fact:
     kc_needs_update: >-
-      {{ (kc_ldap_current_bind_dn != ldap.dn.administrator.data)
-         or (kc_ldap_current_bind_pw != ldap.bind_credential) }}
+      {{
+        (kc_ldap_current_bind_dn != kc_desired_bind_dn)
+        or (kc_ldap_current_bind_pw != kc_desired_bind_pw)
+        or (kc_ldap_current_connection_url != kc_desired_connection_url)
+      }}
 
-- name: "Update LDAP bind DN / bind password"
+# Pass each -s as a single argv token with valid JSON (arrays), zero shell quoting issues.
+- name: "Update LDAP bindDn / bindCredential / connectionUrl (strict, argv)"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  shell: >
-    {{ keycloak_kcadm_path }} update components/{{ kc_ldap_component_id }}
-    -r {{ keycloak_realm }}
-    -s 'config.bindDn=["{{ ldap.dn.administrator.data | replace("'", "\\'") }}"]'
-    -s 'config.bindCredential=["{{ ldap.bind_credential | replace("'", "\\'") }}"]'
+  command:
+    argv: "{{ kcadm_argv_base
+              + ['update', 'components/' ~ kc_ldap_component_id,
+                 '-r', keycloak_realm,
+                 '-s', 'config.bindDn=' ~ ([kc_desired_bind_dn] | to_json),
+                 '-s', 'config.bindCredential=' ~ ([kc_desired_bind_pw] | to_json),
+                 '-s', 'config.connectionUrl=' ~ ([kc_desired_connection_url] | to_json)
+                ] }}"
   when: kc_needs_update | bool
   register: kc_bind_update
 
-- name: "LDAP bind credentials updated"
+- name: "LDAP provider updated"
   debug:
-    msg: "LDAP bind DN/password updated on component {{ keycloak_ldap_component_name }}."
-  when: 
+    msg: "LDAP bindDn/bindCredential/connectionUrl updated on component {{ keycloak_ldap_component_name }}."
+  when:
     - kc_bind_update is defined
     - kc_bind_update.rc == 0
