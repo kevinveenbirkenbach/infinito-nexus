@@ -1,6 +1,6 @@
 [Unit]
 Description=pull remote backups
-OnFailure=sys-alm-compose.infinito@%n.service sys-cln-faild-bkps.infinito.service
+OnFailure=sys-alm-compose.infinito@%n.service sys-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
 
 [Service]
 Type=oneshot

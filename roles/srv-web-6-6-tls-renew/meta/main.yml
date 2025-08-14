@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: |
     Automates Let's Encrypt SSL/TLS certificate renewals for Nginx using Certbot and systemd services with automatic reloads after successful renewals.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

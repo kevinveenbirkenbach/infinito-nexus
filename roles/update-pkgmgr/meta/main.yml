@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Checks if the pkgmgr command is available and runs 'pkgmgr update --all' to update all repositories."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

@@ -1,5 +1,5 @@
-- name: "reload sys-hlth-disc-space.infinito.service"
+- name: "reload sys-hlth-disc-space service"
   systemd:
-    name: sys-hlth-disc-space.infinito.service
+    name: sys-hlth-disc-space{{ SYS_SERVICE_SUFFIX }}
     enabled: yes
     daemon_reload: yes

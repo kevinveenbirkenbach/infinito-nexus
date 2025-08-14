@@ -14,11 +14,11 @@
     src: sys-rpr-docker-hard.py
     dest: "{{restart_docker_script}}"
 
-- name: configure sys-rpr-docker-hard.infinito.service
+- name: configure sys-rpr-docker-hard{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-rpr-docker-hard.service.j2
-    dest: /etc/systemd/system/sys-rpr-docker-hard.infinito.service
-  notify: "reload sys-rpr-docker-hard.infinito.service"
+    dest: /etc/systemd/system/sys-rpr-docker-hard{{ SYS_SERVICE_SUFFIX }}
+  notify: "reload sys-rpr-docker-hard service"
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

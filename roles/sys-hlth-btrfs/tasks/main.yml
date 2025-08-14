@@ -19,11 +19,11 @@
     src: sys-hlth-btrfs.sh
     dest: "{{docker_health_btrfs_folder}}sys-hlth-btrfs.sh"
 
-- name: create sys-hlth-btrfs.infinito.service
+- name: create sys-hlth-btrfs{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-hlth-btrfs.service.j2
-    dest: /etc/systemd/system/sys-hlth-btrfs.infinito.service
-  notify: reload sys-hlth-btrfs.infinito.service
+    dest: /etc/systemd/system/sys-hlth-btrfs{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-hlth-btrfs service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

@@ -6,7 +6,7 @@ OnFailure=sys-alm-compose.infinito@%n.service
 [Service]
 Type=oneshot
 ExecStart=/bin/python {{ backup_to_usb_script_path }} {{backup_to_usb_source}} {{backup_to_usb_destination}}
-ExecStartPost=/bin/systemctl start sys-cln-backups.infinito.service
+ExecStartPost=/bin/systemctl start sys-cln-backups{{ SYS_SERVICE_SUFFIX }}
 
 [Install]
 WantedBy=multi-user.target

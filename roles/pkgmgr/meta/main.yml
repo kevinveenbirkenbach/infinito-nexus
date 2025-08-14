@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Automates the installation of Kevin's Package Manager — a tool for managing multiple repositories and automating Git operations."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

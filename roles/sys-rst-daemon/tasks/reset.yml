@@ -1,7 +1,7 @@
 - name: Find all infinito.service units
   find:
     paths: /etc/systemd/system
-    patterns: '*.infinito.service'
+    patterns: '*{{ SYS_SERVICE_SUFFIX }}'
   register: infinito_services
 
 - name: Disable and stop each infinito service

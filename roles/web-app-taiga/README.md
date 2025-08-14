@@ -51,4 +51,4 @@ Email: [kevin@veen.world](mailto:kevin@veen.world)
 Website: [veen.world](https://www.veen.world)
 
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)
+License: [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)

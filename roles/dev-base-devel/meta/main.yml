@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: >
     This role installs the base-devel package group, providing all core development tools needed for building software on Arch Linux systems.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: | 
     Kevin Veen-Birkenbach

@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "An Ansible role to redirect www subdomains to non-www domains in Nginx"
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

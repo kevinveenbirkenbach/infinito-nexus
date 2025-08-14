@@ -17,12 +17,12 @@
 ### Activate Configuration
 ```bash
   cp /path/to/wg0.conf /etc/wireguard/wg0.conf
-  systemctl enable wg-quick@wg0.infinito.service --now
+  systemctl enable wg-quick@wg0{{ SYS_SERVICE_SUFFIX }} --now
 ```
 
 ### Check status
 ```bash
-  systemctl status wg-quick@wg0.infinito.service
+  systemctl status wg-quick@wg0{{ SYS_SERVICE_SUFFIX }}
 ```
 
 ## Other Resources

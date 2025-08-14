@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Installs a curated set of open source games for Arch Linux."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

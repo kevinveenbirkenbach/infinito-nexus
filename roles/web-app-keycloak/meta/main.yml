@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Step into a secure future with Keycloak! Our dynamic identity and access management solution offers streamlined SSO capabilities, robust security measures, and an intuitive user experience that propels your applications to unprecedented heights of performance and reliability."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

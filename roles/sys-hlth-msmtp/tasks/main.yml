@@ -18,11 +18,11 @@
     dest: "{{ health_msmtp_folder }}sys-hlth-msmtp.sh"
     mode: '0755'
 
-- name: create sys-hlth-msmtp.infinito.service
+- name: create sys-hlth-msmtp{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-hlth-msmtp.service.j2
-    dest: /etc/systemd/system/sys-hlth-msmtp.infinito.service
-  notify: reload sys-hlth-msmtp.infinito.service
+    dest: /etc/systemd/system/sys-hlth-msmtp{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-hlth-msmtp service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

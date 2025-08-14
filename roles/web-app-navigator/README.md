@@ -25,7 +25,7 @@ For more about **Reveal.js**, visit: [Reveal.js](https://revealjs.com/)
 
 ## License 📄
 
-This project is licensed under the **Infinito.Nexus NonCommercial License (CNCL)** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Infinito.Nexus NonCommercial License** - see the [LICENSE](LICENSE) file for details.
 
 ---
 

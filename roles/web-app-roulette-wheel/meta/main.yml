@@ -5,7 +5,7 @@ galaxy_info:
     This role deploys and configures the Roulette Wheel application using Docker Compose.
     It automates the process of pulling the latest source code from GitHub,
     building a Docker image, and deploying the application.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

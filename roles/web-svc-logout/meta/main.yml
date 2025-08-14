@@ -4,7 +4,7 @@ galaxy_info:
     Deploys the universal logout service: a Dockerized Python container,
     Nginx `/logout` proxies for `*.infinito.nexus`, and the `conductor.html.j2`
     template for unified logout orchestration.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen‑Birkenbach

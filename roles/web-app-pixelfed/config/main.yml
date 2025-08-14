@@ -1,4 +1,4 @@
-titel:                "Pictures on {{PRIMARY_DOMAIN}}"
+titel:                "Pictures on {{ PRIMARY_DOMAIN }}"
 features:
   matomo:             true
   css:                false # Needs to be reactivated

@@ -4,7 +4,7 @@ galaxy_info:
   description: >
     Injects a JavaScript snippet via Nginx sub_filter that intercepts all logout actions
     (links, buttons, forms) and redirects users to a centralized OIDC logout endpoint.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   min_ansible_version: "2.9"
   platforms:

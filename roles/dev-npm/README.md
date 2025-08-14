@@ -25,7 +25,7 @@ vars:
 
 ## License
 
-Infinito.Nexus NonCommercial License (CNCL)
+Infinito.Nexus NonCommercial License
 [https://s.infinito.nexus/license](https://s.infinito.nexus/license)
 
 ## Author

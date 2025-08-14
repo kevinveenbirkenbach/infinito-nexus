@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Stub role for deploying an XMPP server/container—implementation pending."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach

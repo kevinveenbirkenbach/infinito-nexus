@@ -20,11 +20,11 @@
     src: sys-cln-disc-space.sh.j2
     dest: "{{cleanup_disc_space_folder}}sys-cln-disc-space.sh"
 
-- name: create sys-cln-disc-space.infinito.service
+- name: create sys-cln-disc-space{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-cln-disc-space.service.j2
-    dest: /etc/systemd/system/sys-cln-disc-space.infinito.service
-  notify: reload sys-cln-disc-space.infinito.service
+    dest: /etc/systemd/system/sys-cln-disc-space{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-cln-disc-space service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

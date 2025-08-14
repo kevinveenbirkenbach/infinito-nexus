@@ -4,7 +4,7 @@ galaxy_info:
   description: >
     Transform your video hosting experience with Peertube, a decentralized platform built for scalability,
     innovation, and community collaboration.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

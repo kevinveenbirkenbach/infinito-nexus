@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Dive into a decentralized social experience with Mastodon, a federated platform designed for dynamic, community-driven networking. Enjoy real-time updates, robust moderation, and customizable user interfaces that empower communities to thrive."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

@@ -12,10 +12,10 @@
     - certbot-nginx
     state: present
 
-- name: configure srv-web-6-6-tls-renew.infinito.service
+- name: configure srv-web-6-6-tls-renew service
   template:
     src: srv-web-6-6-tls-renew.service.j2
-    dest: /etc/systemd/system/srv-web-6-6-tls-renew.infinito.service
+    dest: /etc/systemd/system/srv-web-6-6-tls-renew{{ SYS_SERVICE_SUFFIX }}
   notify: reload certbot service
 
 - name: "set 'service_name' to '{{ role_name }}'"

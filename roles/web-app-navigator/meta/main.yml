@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "An interactive presentation platform focused on guiding end-users through the practical use of the Infinito.Nexus software. Designed to demonstrate features, workflows, and real-world applications for Administrators, Developers, End-Users, Businesses, and Investors."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: >
     Streamline your online presence with YOURLS — a nimble, open‑source URL shortener that empowers you to create, track, and manage short links effortlessly.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

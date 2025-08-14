@@ -2,7 +2,7 @@ galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: |
     Configures an Nginx server to host static HTML websites with HTTPS support, automatic SSL certificate retrieval via Let's Encrypt, and secure default settings.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

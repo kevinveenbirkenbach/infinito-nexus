@@ -9,14 +9,17 @@
   - name: Merge users
     set_fact:
       users: "{{ default_users | combine(users| default({}), recursive=True) }}"
+    no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge system_email definitions
     set_fact:
       system_email: "{{ default_system_email | combine(system_email | default({}, true), recursive=True) }}"
+    no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge application definitions
     set_fact:
       applications: "{{ defaults_applications | merge_with_defaults(applications | default({}, true)) }}"
+    no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge current play applications
     set_fact:
@@ -25,6 +28,7 @@
           applications |
           applications_if_group_and_deps(group_names)
         }}
+    no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge current play domain definitions
     set_fact:
@@ -82,6 +86,7 @@
   - name: Merge oidc configuration
     set_fact:
       oidc: "{{ defaults_oidc | combine(oidc | default({}, true), recursive=True) }}"
+    no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge design configuration
     set_fact:

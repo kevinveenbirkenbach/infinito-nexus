@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Dive into a world of rhythm and sound with Funkwhale, an innovative self-hosted music sharing platform that celebrates creativity and community. Enjoy an energetic soundscape and seamless music streaming that amplifies your passion for tunes."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

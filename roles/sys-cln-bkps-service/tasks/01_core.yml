@@ -25,8 +25,8 @@
     src: "sys-cln-backups.py"
     dest: "{{cleanup_backups_directory}}sys-cln-backups.py"
 
-- name: create sys-cln-backups.infinito.service
+- name: create sys-cln-backups{{ SYS_SERVICE_SUFFIX }}
   template:
     src: "sys-cln-backups.service.j2"
-    dest: "/etc/systemd/system/sys-cln-backups.infinito.service"
-  notify: reload sys-cln-backups.infinito.service
+    dest: "/etc/systemd/system/sys-cln-backups{{ SYS_SERVICE_SUFFIX }}"
+  notify: reload sys-cln-backups service

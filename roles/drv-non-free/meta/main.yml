@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Installs proprietary GPU drivers (`mhwd -a pci nonfree 0300`) on Arch-based systems."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach

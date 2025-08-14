@@ -15,7 +15,7 @@ Optimized for Archlinux and Debian-based systems, this role ensures the presence
 
 ## License
 
-Infinito.Nexus NonCommercial License (CNCL)
+Infinito.Nexus NonCommercial License
 [https://s.infinito.nexus/license](https://s.infinito.nexus/license)
 
 ## Author

@@ -27,4 +27,4 @@ Developed and maintained by **Kevin Veen-Birkenbach**.
 Visit [veen.world](https://www.veen.world) for more information.
 
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)
-License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)
+License: [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)

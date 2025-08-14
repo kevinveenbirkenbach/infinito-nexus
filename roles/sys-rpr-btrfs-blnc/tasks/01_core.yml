@@ -9,11 +9,11 @@
   vars:
     package_name: btrfs-auto-balancer
 
-- name: configure sys-rpr-btrfs-blnc.infinito.service
+- name: configure sys-rpr-btrfs-blnc{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-rpr-btrfs-blnc.service.j2
-    dest: /etc/systemd/system/sys-rpr-btrfs-blnc.infinito.service
-  notify: reload sys-rpr-btrfs-blnc.infinito.service
+    dest: /etc/systemd/system/sys-rpr-btrfs-blnc{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-rpr-btrfs-blnc service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

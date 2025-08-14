@@ -1,6 +1,6 @@
-- name: "Reload and restart sys-cln-certs.infinito.service"
+- name: "Reload and restart sys-cln-certs service"
   systemd:
-    name: sys-cln-certs.infinito.service
+    name: sys-cln-certs{{ SYS_SERVICE_SUFFIX }}
     enabled: yes
     daemon_reload: yes
     state: restarted

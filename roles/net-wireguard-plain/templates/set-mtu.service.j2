@@ -1,10 +1,10 @@
 [Unit]
 Description=set MTU 
-Before=wg-quick@wg0.infinito.service
+Before=wg-quick@wg0{{ SYS_SERVICE_SUFFIX }}
 
 [Service]
 Type=oneshot
 ExecStart=bash /usr/local/bin/set-mtu.sh
 
 [Install]
-RequiredBy=wg-quick@wg0.infinito.service
+RequiredBy=wg-quick@wg0{{ SYS_SERVICE_SUFFIX }}

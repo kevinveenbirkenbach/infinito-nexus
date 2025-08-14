@@ -40,8 +40,8 @@ def main(base_directory):
     
     while blocker_running:
         try: 
-            bash("systemctl is-active --quiet sys-bkp-docker-2-loc.infinito.service")
-            bash("systemctl is-active --quiet update-docker.infinito.service")
+            bash("systemctl is-active --quiet sys-bkp-docker-2-loc{{ SYS_SERVICE_SUFFIX }}")
+            bash("systemctl is-active --quiet update-docker{{ SYS_SERVICE_SUFFIX }}")
             print("Backup is running.")
             print(f"Trying again in {waiting_time} seconds.")
             time.sleep(waiting_time)
@@ -49,8 +49,8 @@ def main(base_directory):
             blocker_running = False
             print("No blocking service is running.")
     
-    unhealthy_container_names = print_bash("docker ps --filter health=unhealthy --format '{{.Names}}'")
-    exited_container_names = print_bash("docker ps --filter status=exited --format '{{.Names}}'")
+    unhealthy_container_names = print_bash("docker ps --filter health=unhealthy --format '{% raw %}{{.Names}}{% endraw %}'")
+    exited_container_names = print_bash("docker ps --filter status=exited --format '{% raw %}{{.Names}}{% endraw %}'")
     failed_containers = unhealthy_container_names + exited_container_names
     
     unfiltered_failed_docker_compose_repositories = [container.split('-')[0] for container in failed_containers]

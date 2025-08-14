@@ -10,16 +10,16 @@
     mode: "0755"
 
 - name: create sys-rpr-docker-soft.py
-  copy:
-    src: sys-rpr-docker-soft.py
+  template:
+    src: sys-rpr-docker-soft.py.j2
     dest: "{{heal_docker}}sys-rpr-docker-soft.py"
-  notify: restart sys-rpr-docker-soft.infinito.service
+  notify: restart sys-rpr-docker-soft service
 
-- name: create sys-rpr-docker-soft.infinito.service
+- name: create sys-rpr-docker-soft{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-rpr-docker-soft.service.j2
-    dest: /etc/systemd/system/sys-rpr-docker-soft.infinito.service
-  notify: restart sys-rpr-docker-soft.infinito.service
+    dest: /etc/systemd/system/sys-rpr-docker-soft{{ SYS_SERVICE_SUFFIX }}
+  notify: restart sys-rpr-docker-soft service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

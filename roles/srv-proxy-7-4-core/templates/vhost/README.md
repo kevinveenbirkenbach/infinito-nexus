@@ -75,4 +75,4 @@ Designed for services (e.g., chat servers, real-time dashboards) needing fast, p
 
 By [Kevin Veen-Birkenbach](https://www.veen.world)  
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-Licensed under the [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)
+Licensed under the [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)

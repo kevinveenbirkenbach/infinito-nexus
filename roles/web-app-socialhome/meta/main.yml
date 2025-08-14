@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Deploys a SocialHome federated social network via Docker Compose with basic domain wiring."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach

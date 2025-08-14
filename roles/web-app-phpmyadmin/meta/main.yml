@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Manage your databases with confidence using PHPMyAdmin, a robust and dynamic tool designed to simplify administration and enhance productivity. Enjoy an intuitive interface, powerful features, and an energetic approach that makes database management a breeze."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

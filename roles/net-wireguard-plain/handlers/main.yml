@@ -1,6 +1,6 @@
-- name: "restart set-mtu.infinito.service"
+- name: "restart set-mtu service"
   systemd:
-    name: set-mtu.infinito.service
+    name: set-mtu{{ SYS_SERVICE_SUFFIX }}
     state: restarted
     enabled: yes
     daemon_reload: yes

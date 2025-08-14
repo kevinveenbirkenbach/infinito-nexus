@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Take control of your LDAP directory with phpldapadmin — a web‑based LDAP client offering an intuitive interface to manage your LDAP directories. This containerized deployment simplifies administration and provides secure, flexible configuration options."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

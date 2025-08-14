@@ -7,4 +7,4 @@
   template:
     src: "srv-proxy-6-6-tls-deploy.sh.j2"
     dest: "{{nginx_docker_cert_deploy_script}}"
-  notify: restart srv-proxy-6-6-tls-deploy.infinito.service
+  notify: restart srv-proxy-6-6-tls-deploy service

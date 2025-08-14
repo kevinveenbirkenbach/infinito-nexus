@@ -37,4 +37,4 @@ This Docker deployment uses Ansible automation to set up Snipe‑IT along with n
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at [veen.world](https://veen.world)  
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)
+License: [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)

@@ -1,5 +1,5 @@
-- name: restart sys-rpr-docker-soft.infinito.service
+- name: restart sys-rpr-docker-soft service
   systemd:
-    name: sys-rpr-docker-soft.infinito.service
+    name: sys-rpr-docker-soft{{ SYS_SERVICE_SUFFIX }}
     state: restarted
     daemon_reload: yes

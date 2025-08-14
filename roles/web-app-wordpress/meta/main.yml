@@ -4,7 +4,7 @@ galaxy_info:
   description: >
     Use the full power of WordPress—with its intuitive interface, customizable themes and plugins,
     responsive design, and advanced SEO tools—in a scalable and secure containerized environment.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

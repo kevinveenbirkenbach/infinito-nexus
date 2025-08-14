@@ -14,11 +14,11 @@
     src: sys-hlth-docker-container.sh
     dest: "{{health_docker_container_folder}}sys-hlth-docker-container.sh"
 
-- name: create sys-hlth-docker-container.infinito.service
+- name: create sys-hlth-docker-container{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-hlth-docker-container.service.j2
-    dest: /etc/systemd/system/sys-hlth-docker-container.infinito.service
-  notify: reload sys-hlth-docker-container.infinito.service
+    dest: /etc/systemd/system/sys-hlth-docker-container{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-hlth-docker-container service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

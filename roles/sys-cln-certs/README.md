@@ -7,7 +7,7 @@ This Ansible role automates the detection, revocation and deletion of unused Let
 ## Overview
 
 - Installs the `certreap` cleanup tool using the `pkgmgr-install` role
-- Deploys and configures a `sys-cln-certs.infinito.service` systemd unit
+- Deploys and configures a `sys-cln-certs{{ SYS_SERVICE_SUFFIX }}` systemd unit
 - (Optionally) Sets up a recurring cleanup via a systemd timer using the `sys-timer` role
 - Integrates with `sys-alm-compose` to send failure notifications
 - Ensures idempotent execution with a `run_once_sys_cln_certs` flag
@@ -18,7 +18,7 @@ This Ansible role automates the detection, revocation and deletion of unused Let
   Uses `pkgmgr-install` to install the `certreap` binary.
 
 - **Systemd Service Configuration**  
-  Deploys `sys-cln-certs.infinito.service` and reloads/restarts it on changes.
+  Deploys `sys-cln-certs{{ SYS_SERVICE_SUFFIX }}` and reloads/restarts it on changes.
 
 - **Systemd Timer Scheduling**  
   Optionally wires in a timer via the `sys-timer` role, controlled by the `on_calendar_cleanup_certs` variable.
@@ -27,11 +27,11 @@ This Ansible role automates the detection, revocation and deletion of unused Let
   Prevents multiple runs in one play by setting a `run_once_sys_cln_certs` fact.
 
 - **Failure Notification**  
-  Triggers `sys-alm-compose.infinito@sys-cln-certs.infinito.service` on failure.
+  Triggers `sys-alm-compose.infinito@sys-cln-certs{{ SYS_SERVICE_SUFFIX }}` on failure.
 
 ## Further Resources
 
 - [certreap on GitHub](https://github.com/kevinveenbirkenbach/certreap)  
 - [Ansible community.general.pacman module](https://docs.ansible.com/ansible/latest/collections/community/general/pacman_module.html)  
-- [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)  
+- [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)  
 - [systemd.unit(5) manual](https://www.freedesktop.org/software/systemd/man/systemd.unit.html)  

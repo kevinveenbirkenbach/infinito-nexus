@@ -4,11 +4,11 @@
     state: directory
     mode: "0755"
 
-- name: create svc-opt-ssd-hdd.infinito.service
+- name: create svc-opt-ssd-hdd{{ SYS_SERVICE_SUFFIX }}
   template: 
     src: svc-opt-ssd-hdd.service.j2
-    dest: /etc/systemd/system/svc-opt-ssd-hdd.infinito.service
-  notify: reload svc-opt-ssd-hdd.infinito.service
+    dest: /etc/systemd/system/svc-opt-ssd-hdd{{ SYS_SERVICE_SUFFIX }}
+  notify: reload svc-opt-ssd-hdd service
 
 - name: create svc-opt-ssd-hdd.py
   copy: 
@@ -18,5 +18,5 @@
 
 - name: "optimize storage performance"
   systemd:
-    name: svc-opt-ssd-hdd.infinito.service
+    name: svc-opt-ssd-hdd{{ SYS_SERVICE_SUFFIX }}
     state: started

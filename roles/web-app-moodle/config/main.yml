@@ -1,4 +1,4 @@
-site_titel:           "Academy on {{PRIMARY_DOMAIN}}"
+site_titel:           "Academy on {{ PRIMARY_DOMAIN }}"
 features:
   matomo:             true
   css:                false

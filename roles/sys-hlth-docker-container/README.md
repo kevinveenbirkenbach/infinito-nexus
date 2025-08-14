@@ -1,21 +1,26 @@
-# Health Check for Docker Containers
+# Docker Container Health Check
 
 ## Description
 
-This Ansible role is designed to ensure the health of Docker containers running on a system. It includes a script that checks for unhealthy or exited Docker containers and sets up a systemd service and timer to regularly execute this check.
+This role monitors the health status of Docker containers on the system. It detects containers that are either **unhealthy** or have **exited with a non-zero code**, and triggers alerts if issues are found.
 
-## Files
+## Overview
 
-- `vars/main.yml`: Variable definitions for the script's directory.
-- `handlers/main.yml`: Handlers to reload and restart the systemd service and timer.
-- `files/sys-hlth-docker-container.sh`: The script that checks the container health.
-- `tasks/main.yml`: Tasks to create necessary directories, copy scripts, and create systemd service and timer.
-- `templates/sys-hlth-docker-container.infinito.service.j2`: Systemd service template.
-- `templates/sys-hlth-docker-container.infinito.timer.j2`: Systemd timer template.
-- `meta/main.yml`: Meta information declaring dependencies for the role.
+The role installs a health check script along with a `systemd` service and timer to run these checks at scheduled intervals.  
+If unhealthy or failed containers are detected, the configured failure notifier (via `sys-alm-compose`) is triggered.
 
-## Usage
+## Purpose
 
-To use this role, include it in your playbook and set the `path_administrator_scripts` variable to the desired path for the health check scripts.
+The primary purpose of this role is to ensure that Docker-based services remain operational. By automatically monitoring container health, it enables administrators to react quickly to failures, reducing downtime and preventing unnoticed service degradation.
 
-Ensure that the `sys-alm-compose` dependency is satisfied for error notifications.
+## Features
+
+- **Automated Health Checks:** Detects containers in `unhealthy` state or exited with non-zero exit codes.
+- **Systemd Integration:** Installs a one-shot service and timer to run health checks on a schedule.
+- **Alerting Support:** Works with the [`sys-alm-compose`](../sys-alm-compose/README.md) role for failure notifications.
+- **Configurable Script Location:** Controlled via the `path_administrator_scripts` variable.
+
+## Further Resources
+
+- [Docker Health Checks Documentation](https://docs.docker.com/engine/reference/run/#healthcheck)
+- [Systemd Timers Documentation](https://www.freedesktop.org/software/systemd/man/systemd.timer.html)

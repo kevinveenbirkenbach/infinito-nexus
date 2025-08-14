@@ -30,7 +30,7 @@
     src: sys-alm-telegram.sh.j2
     dest: "{{ systemd_telegram_script }}"
 
-- name: configure sys-alm-telegram.infinito.service
+- name: configure sys-alm-telegram{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-alm-telegram@.service.j2
     dest: "/etc/systemd/system/sys-alm-telegram.infinito@.service"

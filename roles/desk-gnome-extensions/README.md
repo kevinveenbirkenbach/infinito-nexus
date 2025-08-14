@@ -22,4 +22,4 @@ The purpose of this role is to enhance and customize the GNOME desktop environme
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at [www.veen.world](https://www.veen.world)
 
-License: [Infinito.Nexus NonCommercial License (CNCL)](https://s.infinito.nexus/license)
+License: [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)

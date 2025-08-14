@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Configures Nginx to perform 301 redirects based on a list of source→target domain mappings."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach

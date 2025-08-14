@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Stub for a Jenkins CI server deployment via Docker Compose—role is currently deprecated and pending reimplementation."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach

@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
   description: "Installs Docker and Docker Compose, and adds a user to the Docker group for non-root usage on development machines."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birchenbach

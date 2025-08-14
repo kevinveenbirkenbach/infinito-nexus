@@ -2,7 +2,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Empower your knowledge base with MediaWiki, a versatile and collaborative platform designed for comprehensive, user-driven documentation. Benefit from an extensive extension ecosystem, robust content management, and customizable configurations tailored to your needs."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

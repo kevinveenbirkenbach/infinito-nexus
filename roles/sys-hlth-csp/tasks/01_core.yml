@@ -25,11 +25,11 @@
     dest: "{{ health_csp_crawler_script }}"
     mode: "0755"
 
-- name: create sys-hlth-csp.infinito.service
+- name: create sys-hlth-csp{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-hlth-csp.service.j2
-    dest: /etc/systemd/system/sys-hlth-csp.infinito.service
-  notify: reload sys-hlth-csp.infinito.service
+    dest: /etc/systemd/system/sys-hlth-csp{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-hlth-csp service
 
 - name: set service_name to role_name
   set_fact:

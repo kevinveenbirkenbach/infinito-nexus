@@ -1,7 +1,7 @@
-- name: Find all infinito.timer units
+- name: Find all {{ SYS_SERVICE_SUFFIX }} units
   find:
     paths: /etc/systemd/system
-    patterns: '*.infinito.timer'
+    patterns: '*.{{ SYS_SERVICE_SUFFIX }}'
   register: infinito_timers
 
 - name: Disable and stop each infinito timer
@@ -13,7 +13,7 @@
   loop_control:
     label: "{{ item.path | basename }}"
 
-- name: Remove all infinito.timer files
+- name: Remove all {{ SYS_SERVICE_SUFFIX }} files
   file:
     path: "{{ item.path }}"
     state: absent

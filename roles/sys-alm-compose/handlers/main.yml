@@ -1,5 +1,5 @@
 - name: "restart sys-alm-compose service"
   systemd:
-    name: sys-alm-compose.infinito.service
+    name: sys-alm-compose{{ SYS_SERVICE_SUFFIX }}
     daemon_reload: yes
   when: run_once_sys_alm_compose is not defined

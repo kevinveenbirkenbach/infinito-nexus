@@ -24,11 +24,11 @@
     src: sys-hlth-webserver.py.j2
     dest: "{{ health_nginx_folder }}sys-hlth-webserver.py"
 
-- name: create sys-hlth-webserver.infinito.service
+- name: create sys-hlth-webserver{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-hlth-webserver.service.j2
-    dest: /etc/systemd/system/sys-hlth-webserver.infinito.service
-  notify: reload sys-hlth-webserver.infinito.service
+    dest: /etc/systemd/system/sys-hlth-webserver{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-hlth-webserver service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

@@ -16,10 +16,10 @@
     dest: /opt/keyboard_color.py
     mode: "0755"
 
-- name: Copy keyboard-color.infinito.service file
+- name: Copy keyboard-color{{ SYS_SERVICE_SUFFIX }} file
   template:
     src: keyboard-color.service.j2
-    dest: /etc/systemd/system/keyboard-color.infinito.service
+    dest: /etc/systemd/system/keyboard-color{{ SYS_SERVICE_SUFFIX }}
     mode: 0644
 
 - name: Reload systemd daemon

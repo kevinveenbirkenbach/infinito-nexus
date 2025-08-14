@@ -7,7 +7,7 @@ This role manages WireGuard on a client system. It sets up essential services an
 ## Overview
 
 Optimized for client configurations, this role:
-- Deploys a systemd service (`set-mtu.infinito.service`) and its associated script to set the MTU on specified network interfaces.
+- Deploys a systemd service (`set-mtu{{ SYS_SERVICE_SUFFIX }}`) and its associated script to set the MTU on specified network interfaces.
 - Uses a Jinja2 template to generate the `set-mtu.sh` script.
 - Ensures that the MTU is configured correctly before starting WireGuard with [wg-quick](https://www.wireguard.com/quickstart/).
 

@@ -1,6 +1,6 @@
 # License Agreement 
 
-## Infinito.Nexus NonCommercial License (CNCL)
+## Infinito.Nexus NonCommercial License
 
 ### Definitions
 - **"Software":** Refers to *"[Infinito.Nexus](https://infinito.nexus/)"* and its associated source code.

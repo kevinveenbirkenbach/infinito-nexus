@@ -836,7 +836,7 @@
       {# The following line should be covered by 02_update_client_redirects.yml #}
       "redirectUris": {{ domains | redirect_uris(applications, WEB_PROTOCOL) | tojson }},
       "webOrigins": [
-        "{{ WEB_PROTOCOL }}://*.{{PRIMARY_DOMAIN}}"
+        "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -853,7 +853,7 @@
         "oidc.ciba.grant.enabled": "false",
         "client.secret.creation.time": "0",
         "backchannel.logout.session.required": "true",
-        "post.logout.redirect.uris": "{{ WEB_PROTOCOL }}://{{PRIMARY_DOMAIN}}/*##+",
+        "post.logout.redirect.uris": "{{ WEB_PROTOCOL }}://{{ PRIMARY_DOMAIN }}/*##+",
         "frontchannel.logout.session.required": "true",
         "oauth2.device.authorization.grant.enabled": "false",
         "display.on.consent.screen": "false",

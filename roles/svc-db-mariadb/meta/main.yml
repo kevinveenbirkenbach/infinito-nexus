@@ -4,7 +4,7 @@ galaxy_info:
   description: >-
     The Docker MariaDB Role offers an easy and efficient way to deploy a MariaDB server inside a Docker container.
     Manage your data securely and effectively, making it ideal for production or local development.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

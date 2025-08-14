@@ -88,3 +88,7 @@ _applications_nextcloud_oidc_flavor: >-
           else 'sociallogin'
         )
   }}
+
+# Systemctl 
+SYS_TIMER_SUFFIX:   ".{{ SOFTWARE_NAME | lower }}.timer"
+SYS_SERVICE_SUFFIX: ".{{ SOFTWARE_NAME | lower }}.service"

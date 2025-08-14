@@ -1,9 +1,9 @@
-- name: "reload sys-bkp-docker-2-loc-everything.infinito.service"
+- name: "reload sys-bkp-docker-2-loc-everything service"
   systemd:
-    name: sys-bkp-docker-2-loc-everything.infinito.service
+    name: sys-bkp-docker-2-loc-everything{{ SYS_SERVICE_SUFFIX }}
     daemon_reload: yes
 
-- name: "reload sys-bkp-docker-2-loc.infinito.service"
+- name: "reload sys-bkp-docker-2-loc service"
   systemd:
-    name: sys-bkp-docker-2-loc.infinito.service
+    name: sys-bkp-docker-2-loc{{ SYS_SERVICE_SUFFIX }}
     daemon_reload: yes

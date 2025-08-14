@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: "Creates a dedicated administrator user for local administrative tasks, ensuring secure privilege escalation and proper system management. This role configures the administrator account, sets up the home directory, SSH settings, and grants sudo privileges with password authentication."
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach

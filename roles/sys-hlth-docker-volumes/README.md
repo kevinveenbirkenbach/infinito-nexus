@@ -1,25 +1,31 @@
-# Health Check for Docker Volumes
+# Docker Volumes Health Check
 
 ## Description
 
-This role checks for anonymous Docker volumes that are not bound to a container and may be left over from previous operations. It provides a cleanup mechanism by identifying such volumes, excluding any that are whitelisted, and possibly taking action against them.
+This role detects unused **anonymous Docker volumes** that are not bound to any running container.  
+It can optionally exclude specific volumes from the check using a configurable whitelist.
 
-## Files
+## Overview
 
-- `vars/main.yml`: Variable definitions for the script's directory and whitelist.
-- `handlers/main.yml`: Handlers to reload and restart the systemd service and timer.
-- `files/sys-hlth-docker-volumes.sh`: The script that checks for anonymous Docker volumes and excludes whitelisted volumes.
-- `tasks/main.yml`: Tasks to create necessary directories, copy scripts, and create systemd service and timer.
-- `templates/sys-hlth-docker-volumes.infinito.service.j2`: Systemd service template, including the whitelisted volumes as a parameter.
-- `templates/sys-hlth-docker-volumes.infinito.timer.j2`: Systemd timer template.
-- `meta/main.yml`: Meta information declaring dependencies for the role.
+The role installs a script and a `systemd` service with a timer to periodically scan for leftover anonymous volumes.  
+This helps prevent wasted disk space and leftover resources from old deployments.
 
-## Usage
+## Purpose
 
-Include this role in your playbook and set the `path_administrator_scripts` variable to determine where the health check scripts should reside. Define `whitelisted_anonymous_volumes` in `vars/main.yml` with an array of volume IDs that should be ignored by the health check.
+The main purpose of this role is to keep Docker environments clean by identifying and reporting orphaned anonymous volumes.  
+It supports a whitelist mechanism to avoid alerting on known or intentional volumes.
 
-Ensure that the `sys-alm-compose` dependency is satisfied for error notifications.
+## Features
 
-## Created with AI
-This script was created with the help of AI. The full conversation you find [here](https://chat.openai.com/share/1fa829f1-f001-4111-b1d4-1b2e3d583da2).
+- **Anonymous Volume Detection:** Identifies volumes with 64-character IDs not attached to any container.
+- **Whitelist Support:** Skips volumes listed in `whitelisted_anonymous_docker_volumes`.
+- **Bootstrap Volume Exclusion:** Ignores known bootstrap volumes (e.g., `/var/www/bootstrap`).
+- **Systemd Integration:** Installs a one-shot service and timer to automate checks.
+- **Alerting Support:** Works with the [`sys-alm-compose`](../sys-alm-compose/README.md) role for failure notifications.
+
+## Further Resources
+
+- [Docker Volumes Documentation](https://docs.docker.com/storage/volumes/)
+- [Systemd Timers Documentation](https://www.freedesktop.org/software/systemd/man/systemd.timer.html)
+- [ChatGPT Create Conversation](https://chat.openai.com/share/1fa829f1-f001-4111-b1d4-1b2e3d583da2).
 

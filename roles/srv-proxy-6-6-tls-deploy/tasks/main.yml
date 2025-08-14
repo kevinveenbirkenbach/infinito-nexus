@@ -9,13 +9,13 @@
     path: "{{cert_mount_directory}}"
     state: directory
     mode: "0755"
-  notify: restart srv-proxy-6-6-tls-deploy.infinito.service
+  notify: restart srv-proxy-6-6-tls-deploy service
 
-- name: configure srv-proxy-6-6-tls-deploy.infinito.service
+- name: configure srv-proxy-6-6-tls-deploy service
   template:
     src: "srv-proxy-6-6-tls-deploy.service.j2"
-    dest: "/etc/systemd/system/srv-proxy-6-6-tls-deploy.{{application_id}}.infinito.service"
-  notify: restart srv-proxy-6-6-tls-deploy.infinito.service
+    dest: "/etc/systemd/system/srv-proxy-6-6-tls-deploy.{{application_id}}{{ SYS_SERVICE_SUFFIX }}"
+  notify: restart srv-proxy-6-6-tls-deploy service
 
 - name: "include role for sys-timer for {{service_name}}"
   include_role:

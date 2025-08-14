@@ -1,5 +1,5 @@
-- name: "Reload sys-cln-faild-bkps.infinito.service"
+- name: "Reload sys-cln-faild-bkps service"
   systemd:
-    name: sys-cln-faild-bkps.infinito.service
+    name: sys-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
     enabled: yes
     daemon_reload: yes

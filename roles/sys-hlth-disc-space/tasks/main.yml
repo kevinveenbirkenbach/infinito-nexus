@@ -17,11 +17,11 @@
     src: sys-hlth-disc-space.sh
     dest: "{{health_disc_space_folder}}sys-hlth-disc-space.sh"
 
-- name: create sys-hlth-disc-space.infinito.service
+- name: create sys-hlth-disc-space{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-hlth-disc-space.service.j2
-    dest: /etc/systemd/system/sys-hlth-disc-space.infinito.service
-  notify: reload sys-hlth-disc-space.infinito.service
+    dest: /etc/systemd/system/sys-hlth-disc-space{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-hlth-disc-space service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:

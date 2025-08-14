@@ -20,7 +20,7 @@ server:
       connect-src:
         - https://ka-f.fontawesome.com
       frame-src:
-        - "{{ WEB_PROTOCOL }}://*.{{PRIMARY_DOMAIN}}"
+        - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
     flags:
       style-src:
         unsafe-inline: true

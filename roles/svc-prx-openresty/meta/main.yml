@@ -3,7 +3,7 @@ galaxy_info:
   author: "Kevin Veen‑Birkenbach"
   description: >
     Role to provision an OpenResty container via Docker Compose.
-  license: "Infinito.Nexus NonCommercial License (CNCL)"
+  license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen‑Birkenbach  

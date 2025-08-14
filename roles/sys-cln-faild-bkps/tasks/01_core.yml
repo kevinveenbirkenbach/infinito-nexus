@@ -23,11 +23,11 @@
     backup_docker_to_local_cleanup_script: "{{ pkgmgr_output.stdout.rstrip('/') ~ '/cleanup-all.sh' }}"
   changed_when: false
 
-- name: configure sys-cln-faild-bkps.infinito.service
+- name: configure sys-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
   template:
     src: sys-cln-faild-bkps.service.j2
-    dest: /etc/systemd/system/sys-cln-faild-bkps.infinito.service
-  notify: Reload sys-cln-faild-bkps.infinito.service
+    dest: /etc/systemd/system/sys-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
+  notify: Reload sys-cln-faild-bkps service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:
