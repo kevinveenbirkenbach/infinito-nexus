@@ -4,7 +4,7 @@ allowed_roles:      "admin"                     # Restrict it default to admin r
 features:
   matomo: true
   css: true
-  port-ui-desktop: false
+  desktop: false
   logout: true
 server:
   domains:

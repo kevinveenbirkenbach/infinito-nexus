@@ -7,7 +7,7 @@ configuration:
 features:
   matomo:                         true
   css:                            false
-  port-ui-desktop:                true
+  desktop:                true
   central_database:               true
   ldap:                           true
   oauth2:                         true

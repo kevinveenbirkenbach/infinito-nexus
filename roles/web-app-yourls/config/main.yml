@@ -9,7 +9,7 @@ oauth2_proxy:
 features:
   matomo:             true
   css:                true
-  port-ui-desktop:    true
+  desktop:    true
   central_database:   true
   oauth2:             true
   logout:             true

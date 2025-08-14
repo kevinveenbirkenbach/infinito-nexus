@@ -7,7 +7,7 @@ docker:
 features:
   matomo:             true  # activate tracking
   css:                true  # use custom infinito stile 
-  port-ui-desktop:    true  # Enable in port-ui
+  desktop:    true  # Enable in port-ui
   logout:             false
 server:
   csp:

@@ -20,7 +20,7 @@ setup:                false                              # Set true in inventory
 features:
   matomo:             false                              # Deactivated, because in html CSP restricts use
   css:                true
-  port-ui-desktop:    true
+  desktop:    true
   oidc:               true                               # Deactivated OIDC due to this issue https://github.com/matrix-org/synapse/issues/10492
   central_database:   true
   logout:             true

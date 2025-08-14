@@ -2,7 +2,7 @@ titel:                "Pictures on {{PRIMARY_DOMAIN}}"
 features:
   matomo:             true
   css:                false # Needs to be reactivated
-  port-ui-desktop:    true
+  desktop:    true
   central_database:   true
   oidc:               true
   logout:             true

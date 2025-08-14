@@ -3,7 +3,7 @@ features:
   central_database: true
   oidc:             true
   matomo:           true
-  port-ui-desktop:  true
+  desktop:  true
   logout:           true
 server:
   csp:

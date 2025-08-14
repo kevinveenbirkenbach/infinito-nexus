@@ -1,7 +1,7 @@
 features:
   matomo:           true
   css:              true
-  port-ui-desktop:  true
+  desktop:  true
   logout:           false
 server:
   csp:

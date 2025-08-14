@@ -3,7 +3,7 @@ images:
 features:
   matomo:             true
   css:                false # Temporary deactivated
-  port-ui-desktop:    true
+  desktop:    true
   oidc:               false # Implementation doesn't work yet
   central_database:   true
   ldap:               true

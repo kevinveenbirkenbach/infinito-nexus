@@ -10,7 +10,7 @@ plugins:
 features:
   matomo:             true
   css:                false
-  port-ui-desktop:    true
+  desktop:    true
   oidc:               true
   central_database:   true
   logout:             true

@@ -5,7 +5,7 @@ features:
   # itself wouldn't be possible 
   matomo:             false 
   css:                false
-  port-ui-desktop:    false  # Didn't work in frame didn't have high priority @todo figure out pcause and solve it
+  desktop:    false  # Didn't work in frame didn't have high priority @todo figure out pcause and solve it
   central_database:   true
   oauth2:             false
   logout:             false  # Dependency conflict. It requires CDN and CDN requires matomo

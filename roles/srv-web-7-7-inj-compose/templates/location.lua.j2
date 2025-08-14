@@ -43,7 +43,7 @@ body_filter_by_lua_block {
     -- build a list of head-injection snippets
     local head_snippets = {}
 
-    {% for head_feature in ['css', 'matomo', 'port-ui-desktop', 'javascript', 'logout' ] %}
+    {% for head_feature in ['css', 'matomo', 'desktop', 'javascript', 'logout' ] %}
     {% if applications | get_app_conf(application_id, 'features.' ~ head_feature, false) | bool %}
     head_snippets[#head_snippets + 1] = [=[
         {%- include "roles/srv-web-7-7-inj-" ~ head_feature ~ "/templates/head_sub.j2" -%}
@@ -58,7 +58,7 @@ body_filter_by_lua_block {
     -- build a list of body-injection snippets
     local body_snippets = {}
 
-    {% for body_feature in ['matomo', 'logout', 'port-ui-desktop'] %}
+    {% for body_feature in ['matomo', 'logout', 'desktop'] %}
     {% if applications | get_app_conf(application_id, 'features.' ~ body_feature, false) | bool %}
     body_snippets[#body_snippets + 1] = [=[
         {%- include "roles/srv-web-7-7-inj-" ~ body_feature ~ "/templates/body_sub.j2" -%}

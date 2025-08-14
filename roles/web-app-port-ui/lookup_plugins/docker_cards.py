@@ -22,7 +22,7 @@ class LookupModule(LookupBase):
           - Retrieves the icon class from galaxy_info.logo.class
           - Retrieves the tags from galaxy_info.galaxy_tags
           - Builds the URL using the 'domains' variable
-          - Sets the iframe flag from applications | get_app_conf(application_id, 'features.port-ui-desktop', True)
+          - Sets the iframe flag from applications | get_app_conf(application_id, 'features.desktop', True)
 
         Only cards whose application_id is included in the variable group_names are returned.
         """
@@ -109,7 +109,7 @@ class LookupModule(LookupBase):
             url = "https://" + domain_url if domain_url else ""
 
             app_data = applications.get(application_id, {})
-            iframe = app_data.get("features", {}).get("port-ui-desktop", False)
+            iframe = app_data.get("features", {}).get("desktop", False)
 
             # Build card dictionary
             card = {

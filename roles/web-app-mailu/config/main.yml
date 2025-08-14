@@ -5,7 +5,7 @@ domain:                   "{{ PRIMARY_DOMAIN }}"  # The main domain from which m
 features:
   matomo:                 true
   css:                    false
-  port-ui-desktop:        true                    # Deactivated mailu iframe loading until keycloak supports it
+  desktop:        true                    # Deactivated mailu iframe loading until keycloak supports it
   oidc:                   true
   central_database:       false                   # Deactivate central database for mailu, I don't know why the database deactivation is necessary
   logout:                 true

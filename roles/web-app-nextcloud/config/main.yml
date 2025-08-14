@@ -56,7 +56,7 @@ oidc:
 features:
   matomo:                       true
   css:                          false
-  port-ui-desktop:              true
+  desktop:              true
   ldap:                         true
   oidc:                         true
   central_database:             true

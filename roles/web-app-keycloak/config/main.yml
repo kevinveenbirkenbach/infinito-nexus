@@ -4,7 +4,7 @@ actions:
 features:
   matomo:             true
   css:                true
-  port-ui-desktop:    true
+  desktop:    true
   ldap:               true
   central_database:   true
   recaptcha:          true

@@ -1,9 +1,9 @@
-- name: Assert that each web-app- or web-svc- port-ui-desktop app uses the correct domain suffix
+- name: Assert that each web-app- or web-svc- desktop app uses the correct domain suffix
   assert:
     that:
       - >
         (
-          not (item.value.features['port-ui-desktop'] | default(false) | bool)
+          not (item.value.features['desktop'] | default(false) | bool)
         )
         or (domains | get_domain(item.key)).endswith(domains | get_domain('web-app-port-ui'))
     fail_msg: >

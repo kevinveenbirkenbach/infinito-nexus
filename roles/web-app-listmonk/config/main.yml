@@ -2,7 +2,7 @@ public_api_activated:       False                                 # Security hol
 features:
   matomo:                   true
   css:                      false
-  port-ui-desktop:          true
+  desktop:          true
   central_database:         true
   oidc:                     true
   logout:                   true

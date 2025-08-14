@@ -13,11 +13,11 @@
       logout: "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == PRIMARY_DOMAIN) }}"
       css: "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
       matomo: "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
-      port_ui: "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"
+      port_ui: "{{ applications | get_app_conf(application_id, 'features.desktop', False) }}"
 
 - name: "Activate Portfolio iFrame notifier for {{ domain }}"
   include_role:
-    name:   srv-web-7-7-inj-port-ui-desktop
+    name:   srv-web-7-7-inj-desktop
     public: true # Expose variables so that they can be used in template
   when: inj_enabled.port_ui
 
@@ -48,7 +48,7 @@
       logout: "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == PRIMARY_DOMAIN) }}"
       css: "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
       matomo: "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
-      port_ui: "{{ applications | get_app_conf(application_id, 'features.port-ui-desktop', False) }}"
+      port_ui: "{{ applications | get_app_conf(application_id, 'features.desktop', False) }}"
 
 - name: "Activate Corporate CSS for {{domain}}"
   include_role:

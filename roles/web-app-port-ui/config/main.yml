@@ -1,7 +1,7 @@
 features:
   matomo:           true
   css:              true
-  port-ui-desktop:  false
+  desktop:  false
   simpleicons:      true  # Activate Brand Icons for your groups
   javascript:       true  # Necessary for URL sync
   logout:           false # Doesn't have own user data. Just a frame.

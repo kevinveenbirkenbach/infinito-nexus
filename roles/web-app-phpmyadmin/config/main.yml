@@ -7,7 +7,7 @@ oauth2_proxy:
 features:
   matomo:             true
   css:                false
-  port-ui-desktop:    false   # Opens itself in a new window, when it's loaded in an iframe.
+  desktop:    false   # Opens itself in a new window, when it's loaded in an iframe.
                               # it's anyhow not so enduser relevant, so it can be kept like this
   central_database:   true
   oauth2:             true

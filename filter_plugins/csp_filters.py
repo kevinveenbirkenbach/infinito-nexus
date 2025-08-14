@@ -148,13 +148,13 @@ class FilterModule(object):
 
                 # Allow the loading of js from the cdn
                 if directive == 'script-src-elem':
-                    if self.is_feature_enabled(applications, 'logout', application_id) or self.is_feature_enabled(applications, 'port-ui-desktop', application_id):
+                    if self.is_feature_enabled(applications, 'logout', application_id) or self.is_feature_enabled(applications, 'desktop', application_id):
                         domain = domains.get('web-svc-cdn')[0]
                         tokens.append(f"{domain}")
 
                 if directive == 'frame-ancestors':
                     # Enable loading via ancestors
-                    if self.is_feature_enabled(applications, 'port-ui-desktop', application_id):
+                    if self.is_feature_enabled(applications, 'desktop', application_id):
                         domain = domains.get('web-app-port-ui')[0]
                         sld_tld = ".".join(domain.split(".")[-2:])  # yields "example.com"
                         tokens.append(f"{sld_tld}")                 # yields "*.example.com"

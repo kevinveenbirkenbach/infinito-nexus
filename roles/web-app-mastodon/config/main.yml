@@ -3,7 +3,7 @@ setup:                true                                            # Set true
 features:
   matomo:             true
   css:                true
-  port-ui-desktop:    true
+  desktop:    true
   oidc:               true
   central_database:   true
   logout:             true

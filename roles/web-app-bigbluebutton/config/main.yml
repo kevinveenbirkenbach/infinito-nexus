@@ -3,7 +3,7 @@ api_suffix:           "/bigbluebutton/"
 features:
   matomo:             true
   css:                true
-  port-ui-desktop:    false # Videos can't open in frame due to iframe restrictions
+  desktop:    false # Videos can't open in frame due to iframe restrictions
                             # @todo fix this
   ldap:               false
   oidc:               true

@@ -2,7 +2,7 @@ repository:           "discourse_repository"  # Name of the repository folder
 features:
   matomo:             true
   css:                true
-  port-ui-desktop:    true
+  desktop:    true
   oidc:               true
   central_database:   true
   ldap:               false         # @todo implement and activate
