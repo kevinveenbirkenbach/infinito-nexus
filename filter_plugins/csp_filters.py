@@ -147,10 +147,11 @@ class FilterModule(object):
                         tokens.append('https://www.google.com')
 
                 # Allow the loading of js from the cdn
-                if directive == 'script-src-elem' and self.is_feature_enabled(applications, 'logout', application_id):
-                    domain = domains.get('web-svc-cdn')[0] 
-                    tokens.append(f"{domain}")
-                        
+                if directive == 'script-src-elem':
+                    if self.is_feature_enabled(applications, 'logout', application_id) or self.is_feature_enabled(applications, 'port-ui-desktop', application_id):
+                        domain = domains.get('web-svc-cdn')[0]
+                        tokens.append(f"{domain}")
+
                 if directive == 'frame-ancestors':
                     # Enable loading via ancestors
                     if self.is_feature_enabled(applications, 'port-ui-desktop', application_id):
