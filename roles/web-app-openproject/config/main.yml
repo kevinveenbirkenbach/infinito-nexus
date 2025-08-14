@@ -24,7 +24,10 @@ server:
       script-src-elem:
         unsafe-inline: true
       style-src:
-        unsafe-inline: true  
+        unsafe-inline: true
+    whitelist:
+      font-src:
+        - "data:"
   domains:
     canonical:
       - "project.{{ PRIMARY_DOMAIN }}"
