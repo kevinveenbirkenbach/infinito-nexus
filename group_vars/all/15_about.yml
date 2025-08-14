@@ -2,8 +2,8 @@
 defaults_service_provider:
   type:             "legal"                                                       # Accepted Values: natural, legal
   company:
-    titel:          "Infinito.Nexus by Kevin Veen-Birkenbach"
-    slogan:         "Infinito.Nexus — Empowering a Sovereign Digital Future."
+    titel:          "{{ SOFTWARE_NAME }} by Kevin Veen-Birkenbach"
+    slogan:         "{{ SOFTWARE_NAME }} — Empowering a Sovereign Digital Future."
     address:
       street:       "Binary Avenue 01"
       city:         "Cybertown"
@@ -11,7 +11,7 @@ defaults_service_provider:
       country:      "Nexusland"
     logo:           "{{ applications['web-svc-asset'].url ~ '/img/logo.png' }}"
   platform:    
-    titel:          "Infinito.Nexus"
+    titel:          "{{ SOFTWARE_NAME }}"
     subtitel:       "One login. Infinite applications."
     logo:           "{{ applications['web-svc-asset'].url ~ '/img/logo.png' }}"
     favicon:        "{{ applications['web-svc-asset'].url ~ '/img/favicon.ico' }}"
@@ -29,5 +29,5 @@ defaults_service_provider:
 
   legal:
     editorial_responsible:  "Johannes Gutenberg"
-    source_code:            "https://s.infinito.nexus/code"
+    source_code:            "https://s.{{ SOFTWARE_NAME | lower }}/code"
     imprint:                "{{WEB_PROTOCOL}}://{{ domains | get_domain('web-svc-html') }}/imprint.html"

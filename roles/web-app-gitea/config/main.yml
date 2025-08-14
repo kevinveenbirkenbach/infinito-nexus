@@ -1,4 +1,4 @@
-title:                            "Infinito.Nexus Code Hub" # @todo load automatic based on service_porvider infos
+title:                            "{{ SOFTWARE_NAME }} Code Hub" # @todo load automatic based on service_porvider infos
 configuration:
   repository:
     enable_push_create_user:      True      # Allow users to push local repositories to Gitea and have them automatically created for a user.

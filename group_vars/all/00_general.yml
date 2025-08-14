@@ -1,4 +1,6 @@
-ENVIRONMENT:              "production"  # Possible values: production, development
+SOFTWARE_NAME:            "Infinito.Nexus"  # Name of the software
+
+ENVIRONMENT:              "production"      # Possible values: production, development
 
 # If true, sensitive credentials will be masked or hidden from all Ansible task logs
 # Recommendet to set to true
