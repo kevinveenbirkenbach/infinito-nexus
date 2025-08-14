@@ -1,8 +1,8 @@
-# Infinito.Nexus Architecture Overview
+# Infinito.Nexus Architecture
 
 ## Introduction
 
-Infinito.Nexus (Cyber Master Infrastructure Solution) is a modular, open-source IT infrastructure automation platform designed to simplify the deployment, management, and security of self-hosted environments. 
+[Infinito.Nexus](https://infinito.nexus) is a modular, open-source IT infrastructure automation platform designed to simplify the deployment, management, and security of self-hosted environments. 
 
 It provides a flexible, scalable, and secure architecture based on modern [DevOps](https://en.wikipedia.org/wiki/DevOps) principles, leveraging technologies like [Ansible](https://en.wikipedia.org/wiki/Ansible_(software)), [Docker](https://en.wikipedia.org/wiki/Docker_(software)), and [Infrastructure as Code (IaC)](https://en.wikipedia.org/wiki/Infrastructure_as_code).
 

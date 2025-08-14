@@ -1,8 +1,6 @@
-# IT-Infrastructure Automation Framework 🚀
+# Infinito.Nexus 🚀
 
 **🔐 One login. ♾️ Infinite application** 
-
-*Automate the Provisioning of All Your Servers and Workstations with a Single Open‑Source Script!*
 
 ![Infinito.Nexus Logo](assets/img/logo.png)
 ---
@@ -15,7 +13,7 @@
 |---|---|
 | 🌐 Try It Live | [![Infinito.Nexus](https://img.shields.io/badge/Infinito.Nexus-%2ECloud-000000?labelColor=004B8D&style=flat&borderRadius=8)](https://infinito.nexus) |
 | 🔧 Request Your Setup       | [![CyberMaster.Space](https://img.shields.io/badge/CyberMaster-%2ESpace-000000?labelColor=004B8D&style=flat&borderRadius=8)](https://cybermaster.space) |
-| 📖 About This Project  | [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-blue?logo=github)](https://github.com/sponsors/kevinveenbirkenbach) [![Build Status](https://s.infinito.nexus/code/actions/workflows/test-cli.yml/badge.svg?branch=master)](https://s.infinito.nexus/code/actions/workflows/test-cli.yml?query=branch%3Amaster) [![View Source](https://img.shields.io/badge/View_Source-Repository-000000?logo=github&labelColor=004B8D&style=flat&borderRadius=8)](https://s.infinito.nexus/code) |
+| 📖 About This Project  | [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-blue?logo=github)](https://github.com/sponsors/kevinveenbirkenbach) [![Build & Test Infinito.Nexus CLI in Docker Container](https://github.com/kevinveenbirkenbach/infinito-nexus/actions/workflows/test-cli.yml/badge.svg)](https://github.com/kevinveenbirkenbach/infinito-nexus/actions/workflows/test-cli.yml) [![View Source](https://img.shields.io/badge/View_Source-Repository-000000?logo=github&labelColor=004B8D&style=flat&borderRadius=8)](https://s.infinito.nexus/code) |
 | ☕️ Support Us               |  [![Patreon](https://img.shields.io/badge/Support-Patreon-orange?logo=patreon)](https://www.patreon.com/c/kevinveenbirkenbach) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20Coffee-Funding-yellow?logo=buymeacoffee)](https://buymeacoffee.com/kevinveenbirkenbach) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://s.veen.world/paypaldonate) [![Sponsor Infinito.Nexus](https://img.shields.io/badge/Donate–Infinito.Nexus-000000?style=flat&labelColor=004B8D&logo=github-sponsors&logoColor=white&borderRadius=8)](https://github.com/sponsors/kevinveenbirkenbach) |
 
 ---
@@ -93,4 +91,4 @@ Infinito.Nexus is distributed under the **Infinito.Nexus NonCommercial License**
 
 ## Professional Setup & Support 💼
 
-For expert installation and configuration visit [cybermaster.space](https://cybermaster.space/) or write to us at **[contact@infinito.nexus](mailto:contact@infinito.nexus)**.
+For expert installation and configuration visit [cybermaster.space](https://cybermaster.space/) or write to us at **[contact@cymais.cloud](mailto:contact@cymais.cloud)**.

@@ -1,6 +1,6 @@
 # 🚀 Deployment Guide
 
-This section explains how to deploy and manage the **Cyber Master Infrastructure Solution (Infinito.Nexus)** using Ansible. Infinito.Nexus uses a collection of Ansible tasks, which are controlled via different **"modes"** — such as **updates**, **backups**, **resets**, and **cleanup** operations.
+This section explains how to deploy and manage **[Infinito.Nexus](https://infinito.nexus)** using Ansible. Infinito.Nexus uses a collection of Ansible tasks, which are controlled via different **"modes"** — such as **updates**, **backups**, **resets**, and **cleanup** operations.
 
 ---
 
