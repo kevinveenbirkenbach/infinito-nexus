@@ -5,7 +5,7 @@ domain:                   "{{ PRIMARY_DOMAIN }}"  # The main domain from which m
 features:
   matomo:                 true
   css:                    false
-  desktop:        true                    # Deactivated mailu iframe loading until keycloak supports it
+  desktop:                true
   oidc:                   true
   central_database:       false                   # Deactivate central database for mailu, I don't know why the database deactivation is necessary
   logout:                 true
@@ -30,7 +30,7 @@ docker:
   services:
     redis:
       enabled: true
-    database: 
+    database:
       enabled: true
     mailu:
       version:  "2024.06" # Docker Image Version

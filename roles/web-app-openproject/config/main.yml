@@ -13,7 +13,7 @@ ldap:
 features:
   matomo:             true
   css:                false   # Temporary deactivated. Needs to be optimized for production use.
-  desktop:    true
+  desktop:            true
   ldap:               true
   central_database:   true
   oauth2:             true
