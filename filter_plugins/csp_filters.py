@@ -1,6 +1,10 @@
 from ansible.errors import AnsibleFilterError
 import hashlib
 import base64
+import sys, os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from module_utils.config_utils import get_app_conf
 
 class FilterModule(object):
     """
@@ -17,13 +21,23 @@ class FilterModule(object):
         """
         Return True if applications[application_id].features[feature] is truthy.
         """
-        app = applications.get(application_id, {})
-        return bool(app.get('features', {}).get(feature, False))
+        return get_app_conf(
+            applications,
+            application_id,
+            'features.' + feature,
+            False,
+            False
+        )
 
     @staticmethod
     def get_csp_whitelist(applications, application_id, directive):
-        app = applications.get(application_id, {})
-        wl = app.get('server',{}).get('csp', {}).get('whitelist', {}).get(directive, [])
+        wl = get_app_conf(
+            applications,
+            application_id,
+            'server.csp.whitelist.' + directive,
+            False,
+            []
+        )
         if isinstance(wl, list):
             return wl
         if wl:
@@ -36,8 +50,13 @@ class FilterModule(object):
         Dynamically extract all CSP flags for a given directive and return them as tokens,
         e.g., "'unsafe-eval'", "'unsafe-inline'", etc.
         """
-        app = applications.get(application_id, {})
-        flags = app.get('server',{}).get('csp', {}).get('flags', {}).get(directive, {})
+        flags = get_app_conf(
+            applications,
+            application_id,
+            'server.csp.flags.' + directive,
+            False,
+            {}
+        )
         tokens = []
 
         for flag_name, enabled in flags.items():
@@ -51,8 +70,13 @@ class FilterModule(object):
         """
         Return inline script/style snippets to hash for a given CSP directive.
         """
-        app = applications.get(application_id, {})
-        snippets = app.get('server',{}).get('csp', {}).get('hashes', {}).get(directive, [])
+        snippets = get_app_conf(
+            applications,
+            application_id,
+            'server.csp.hashes.' + directive,
+            False,
+            []
+        )
         if isinstance(snippets, list):
             return snippets
         if snippets:
