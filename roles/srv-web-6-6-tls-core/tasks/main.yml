@@ -29,7 +29,7 @@
   cert_folder_find:
     domain: "{{ domain }}"
     cert_base_path: "{{ LETSENCRYPT_LIVE_PATH }}"
-    debug: "{{ MODE_DEBUG | default(false) }}"
+    debug: "{{ MODE_DEBUG | bool }}"
   register: cert_folder_result
   delegate_to: "{{ inventory_hostname }}"
   changed_when: false
