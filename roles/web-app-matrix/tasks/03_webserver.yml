@@ -28,6 +28,6 @@
     src:  "templates/nginx.conf.j2" 
     dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ MATRIX_SYNAPSE_DOMAIN }}.conf"
   vars:
-    domain:     "{{ MATRIX_SYNAPSE_DOMAIN }}" # Didn't work in the past. May it works now. This does not seem to work @todo Check how to solve without declaring set_fact, seems a bug at templates
+    domain:     "{{ MATRIX_SYNAPSE_DOMAIN }}"
     http_port:  "{{ MATRIX_SYNAPSE_PORT }}"
   notify: restart openresty

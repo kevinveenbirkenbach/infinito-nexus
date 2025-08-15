@@ -17,6 +17,7 @@ MATRIX_WELL_KNOWN_FILE:               "{{ MATRIX_WELL_KNOWN_DIRECTORY }}server"
 MATRIX_PROJECT:                       "{{ application_id | get_entity_name }}"
 MATRIX_REGISTRATION_FILE_FOLDER:      "/data/"
 MATRIX_REGISTRATION_SHARED_SECRET:    "{{ applications | get_app_conf(application_id, 'credentials.registration_shared_secret') }}"
+FEDERATION_PORT:                      "{{ ports.public.federation['web-app-matrix_synapse'] }}"
 
 ## Synapse
 MATRIX_SYNAPSE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.synapse.version') }}"
