@@ -1,11 +1,6 @@
-- name: Set inj_enabled dictionary
+- name: Build inj_enabled
   set_fact:
-    inj_enabled:
-      javascript: "{{ applications | get_app_conf(application_id, 'features.javascript', False) }}"
-      logout:     "{{ (applications | get_app_conf(application_id, 'features.logout', False) or domain == PRIMARY_DOMAIN) }}"
-      css:        "{{ applications | get_app_conf(application_id, 'features.css', False) }}"
-      matomo:     "{{ applications | get_app_conf(application_id, 'features.matomo', False) }}"
-      desktop:    "{{ applications | get_app_conf(application_id, 'features.desktop', False) }}"
+    inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
 
 - block:
   - name: Include dependency 'srv-web-7-4-core'
@@ -15,13 +10,13 @@
   - include_tasks: utils/run_once.yml
   when: run_once_srv_web_7_7_inj_compose is not defined
 
-- name: "Activate Portfolio iFrame notifier for {{ domain }}"
+- name: "Activate Portfolio iFrame notifier for '{{ domain }}'"
   include_role:
     name:   srv-web-7-7-inj-desktop
     public: true # Vars used in templates
   when: inj_enabled.desktop
 
-- name: "Load CDN for {{ domain }}"
+- name: "Load CDN for '{{ domain }}'"
   include_role:
     name: web-svc-cdn
     public: false
@@ -41,24 +36,28 @@
   vars:
     handler_role_name: "{{ item }}"
 
-- name: "Activate Corporate CSS for {{ domain }}"
+- name: Reinitialize 'inj_enabled' for '{{ domain }}', after modification by CDN
+  set_fact:
+    inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
+
+- name: "Activate Corporate CSS for '{{ domain }}'"
   include_role:
     name: srv-web-7-7-inj-css
   when:
   - inj_enabled.css
   - run_once_srv_web_7_7_inj_css is not defined
 
-- name: "Activate Matomo Tracking for {{ domain }}"
+- name: "Activate Matomo Tracking for '{{ domain }}'"
   include_role:
     name: srv-web-7-7-inj-matomo
   when: inj_enabled.matomo
 
-- name: "Activate Javascript for {{ domain }}"
+- name: "Activate Javascript for '{{ domain }}'"
   include_role:
     name: srv-web-7-7-inj-javascript
   when: inj_enabled.javascript
 
-- name: "Activate logout proxy for {{ domain }}"
+- name: "Activate logout proxy for '{{ domain }}'"
   include_role:
     name: srv-web-7-7-inj-logout
     public: true # Vars used in templates

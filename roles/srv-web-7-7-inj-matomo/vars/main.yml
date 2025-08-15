@@ -1,4 +1,4 @@
 base_domain:              "{{ domain | regex_replace('^(?:.*\\.)?(.+\\..+)$', '\\1') }}"
 matomo_index_php_url:     "{{ domains | get_url('web-app-matomo', WEB_PROTOCOL) }}/index.php"
 matomo_auth_token:        "{{ applications['web-app-matomo'].credentials.auth_token }}"
-matomo_verification_url:  "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url=https://{{ base_domain }}&format=json&token_auth={{ matomo_auth_token }}"
+matomo_verification_url:  "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ WEB_PROTOCOL }}://{{ base_domain }}&format=json&token_auth={{ matomo_auth_token }}"

@@ -1,3 +1,17 @@
+{% macro push_snippets(list_name, features) -%}
+{% for f in features -%}
+{% if inj_enabled.get(f) -%}
+{{ list_name }}[#{{ list_name }} + 1] = [=[
+  {%- include
+     'roles/srv-web-7-7-inj-' ~ f ~
+     '/templates/' ~
+     ('head' if list_name == 'head_snippets' else 'body') ~
+     '_sub.j2'
+  -%}
+]=]
+{% endif -%}
+{% endfor -%}
+{%- endmacro %}
 
 lua_need_request_body on;
 
@@ -43,13 +57,7 @@ body_filter_by_lua_block {
     -- build a list of head-injection snippets
     local head_snippets = {}
 
-    {% for head_feature in ['css', 'matomo', 'desktop', 'javascript', 'logout' ] %}
-    {% if applications | get_app_conf(application_id, 'features.' ~ head_feature, false) %}
-    head_snippets[#head_snippets + 1] = [=[
-        {%- include "roles/srv-web-7-7-inj-" ~ head_feature ~ "/templates/head_sub.j2" -%}
-    ]=]
-    {% endif %}
-    {% endfor %}
+    {{ push_snippets('head_snippets', ['css','matomo','desktop','javascript','logout']) }}
 
     -- inject all collected snippets right before </head>
     local head_payload = table.concat(head_snippets, "\n") .. "</head>"
@@ -58,13 +66,7 @@ body_filter_by_lua_block {
     -- build a list of body-injection snippets
     local body_snippets = {}
 
-    {% for body_feature in ['matomo', 'logout', 'desktop'] %}
-    {% if applications | get_app_conf(application_id, 'features.' ~ body_feature, false) %}
-    body_snippets[#body_snippets + 1] = [=[
-        {%- include "roles/srv-web-7-7-inj-" ~ body_feature ~ "/templates/body_sub.j2" -%}
-    ]=]
-    {% endif %}
-    {% endfor %}
+    {{ push_snippets('body_snippets', ['matomo','logout','desktop']) }}
 
     -- inject all collected snippets right before </body>
     local body_payload = table.concat(body_snippets, "\n") .. "</body>"

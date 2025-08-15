@@ -9,7 +9,7 @@
 - name: "Include flavor '{{ CERTBOT_FLAVOR }}' for '{{ domain }}'"
   include_tasks: "{{ role_path }}/tasks/flavors/{{ CERTBOT_FLAVOR }}.yml"
 
-#- name: "Cleanup dedicated cert for {{ domain }}"
+#- name: "Cleanup dedicated cert for '{{ domain }}'"
 #  command: >-
 #    certbot delete --cert-name {{ domain }} --non-interactive
 #  when: 

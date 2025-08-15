@@ -9,7 +9,7 @@
     cf_zone_id: "{{ (cf_zone_ids | default({})).get(domain | to_primary_domain, false) }}"
 
 # Only look up from Cloudflare if we still don't have it
-- name: "Ensure Cloudflare Zone ID is known for {{ domain }}"
+- name: "Ensure Cloudflare Zone ID is known for '{{ domain }}'"
   vars:
     cf_api_url: "https://api.cloudflare.com/client/v4/zones"
   ansible.builtin.uri:

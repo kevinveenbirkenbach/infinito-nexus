@@ -22,3 +22,4 @@
     executable: /bin/bash  
     chdir: "{{ DISCOURSE_REPOSITORY_DIR }}"
   listen: recreate discourse
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

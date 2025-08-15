@@ -37,7 +37,7 @@
   uri:
     url: "{{ matomo_index_php_url }}"
     method: POST
-    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls=https://{{ base_domain }}&token_auth={{ matomo_auth_token }}&format=json"
+    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ WEB_PROTOCOL }}://{{ base_domain }}&token_auth={{ matomo_auth_token }}&format=json"
     body_format: form-urlencoded
     status_code: 200
     return_content: yes

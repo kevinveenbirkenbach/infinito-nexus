@@ -33,11 +33,20 @@
   notify: recreate discourse
 
 - name: "Verify that '{{ DISCOURSE_CONTAINER }}' is running"
-  command:      docker compose ps --filter status=running --format '{{"{{"}}.Name{{"}}"}}' | grep -x {{ DISCOURSE_CONTAINER }}
-  register:     docker_ps
-  changed_when: docker_ps.rc == 1
-  failed_when:  docker_ps.rc not in [0, 1]
-  notify:       recreate discourse
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name=^{{ DISCOURSE_CONTAINER }}$"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{.Names}}' }}"
+  register: docker_ps
+  changed_when: docker_ps.stdout.strip() == ""
+  failed_when: docker_ps.rc != 0
+  notify: recreate discourse
 
 - name: flush, to recreate discourse app
   meta: flush_handlers
