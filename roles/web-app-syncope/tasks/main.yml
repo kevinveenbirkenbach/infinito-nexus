@@ -13,10 +13,10 @@
     dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domain }}.conf"
   notify: restart openresty
 
-- name: "create {{docker_compose.files.env}}"
+- name: "create {{ docker_compose.files.env }}"
   template: 
     src:  "database.j2" 
-    dest: "{{docker_compose.files.env}}"
+    dest: "{{ docker_compose.files.env }}"
     mode: "0770"
     force: yes
   notify: docker compose up

@@ -83,7 +83,7 @@ x-op-app: &app
     command: "./docker/prod/seeder"
     container_name: {{ openproject_seeder_name }}
     env_file:
-      - "{{docker_compose.files.env}}"
+      - "{{ docker_compose.files.env }}"
     logging:
       driver: journald
     restart: on-failure

@@ -9,10 +9,10 @@
     detached_files: 
       - "docker-compose.yml"
 
-- name: "For '{{ application_id }}': create {{docker_compose.files.env}}"
+- name: "For '{{ application_id }}': create {{ docker_compose.files.env }}"
   template: 
     src:  "env.j2" 
-    dest: "{{docker_compose.files.env}}"
+    dest: "{{ docker_compose.files.env }}"
     mode: "0770"
     force: yes
   notify: docker compose up

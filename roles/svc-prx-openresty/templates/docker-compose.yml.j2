@@ -1,5 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   openresty:
+    {% include 'roles/docker-container/templates/base.yml.j2' %}
     container_name: {{ OPENRESTY_CONTAINER }}
     image: {{ OPENRESTY_IMAGE }}:{{ OPENRESTY_VERSION }}
     network_mode: "host"
@@ -13,3 +14,8 @@
       - {{ LETSENCRYPT_WEBROOT_PATH }}:{{ LETSENCRYPT_WEBROOT_PATH }}:ro
       - {{ LETSENCRYPT_BASE_PATH }}:{{ LETSENCRYPT_BASE_PATH }}:ro
     command: ["openresty", "-g", "daemon off;"]
+    healthcheck:
+      test: ["CMD", "openresty", "-t", "-q"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

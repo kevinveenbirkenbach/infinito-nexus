@@ -3,7 +3,7 @@
     restart: {{ DOCKER_RESTART_POLICY }}
 {% if application_id | has_env  %}
     env_file:
-      - "{{docker_compose.files.env}}"
+      - "{{ docker_compose.files.env }}"
 {% endif %}
     logging:
       driver: journald
