@@ -5,6 +5,7 @@
   until: pg_ready.rc == 0
   retries: 30
   delay: 5
+  changed_when: false
 
 # 1) Create the database
 - name: "Create database: {{ database_name }}"
