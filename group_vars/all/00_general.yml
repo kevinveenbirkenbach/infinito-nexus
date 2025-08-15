@@ -28,9 +28,7 @@ WEB_PROTOCOL:           "https"       # Web protocol type. Use https or http. If
 WEB_PORT:               "{{ 443 if WEB_PROTOCOL == 'https' else 80 }}"  # Default port web applications will listen to
 
 # Domain
-PRIMARY_DOMAIN:         "localhost"                                                                                   # Primary Domain of the server
-PRIMARY_DOMAIN_TLD:     "{{ (PRIMARY_DOMAIN == 'localhost') | ternary('localhost', PRIMARY_DOMAIN.split('.')[-1]) }}" # Top Level Domain of the server
-PRIMARY_DOMAIN_SLD:     "{{ (PRIMARY_DOMAIN == 'localhost') | ternary('localhost', PRIMARY_DOMAIN.split('.')[-2]) }}" # Second Level Domain of the server
+PRIMARY_DOMAIN:         "localhost" # Primary Domain of the server
 
 # Server Tact Variables 
 
