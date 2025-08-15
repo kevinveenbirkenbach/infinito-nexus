@@ -13,6 +13,7 @@
       base_domain: "{{ base_domain }}"
       matomo_verification_url: "{{ matomo_verification_url }}"
   when: MODE_DEBUG | bool
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Check if site {{ domain }} is allready registered at Matomo"
   uri:
@@ -22,6 +23,7 @@
     status_code: 200
     validate_certs: yes
   register: site_check
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Set matomo_site_id to Null
   set_fact:
@@ -44,6 +46,7 @@
     validate_certs: yes
   register: add_site
   when: "matomo_site_id is not defined or matomo_site_id is none"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Set fact for site ID if site was added
   set_fact:

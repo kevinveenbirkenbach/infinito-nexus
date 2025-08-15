@@ -8,6 +8,7 @@
     chdir: "{{ mailu_compose_dir }}"
   register: mailu_tokens_cli
   changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Extract existing token info for '{{ mailu_user_key }};{{ mailu_user_name }}'"
   set_fact:
@@ -33,6 +34,7 @@
     - mailu_user_existing_token.id is defined
   register: mailu_token_delete
   changed_when: mailu_token_delete.rc == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Create API token for '{{ mailu_user_key }};{{ mailu_user_name }}' if no local token defined"
   command: >-
@@ -50,6 +52,7 @@
   when: users[mailu_user_key].mailu_token is not defined
   register: mailu_token_creation
   changed_when: mailu_token_creation.rc == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Set mailu_token for '{{ mailu_user_key }};{{ mailu_user_name }}' in users dict if newly created"
   set_fact:
@@ -65,3 +68,4 @@
            }, recursive=True)
       }}
   when: users[mailu_user_key].mailu_token is not defined
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
