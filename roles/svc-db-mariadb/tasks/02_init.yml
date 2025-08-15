@@ -11,10 +11,10 @@
 
 - name: "Create database user: {{ database_username }}"
   community.mysql.mysql_user:
-    name:     "{{database_username}}"
-    password: "{{database_password}}"
+    name:     "{{ database_username }}"
+    password: "{{ database_password }}"
     host: "%"
-    priv: '{{database_name}}.*:ALL'
+    priv: '{{ database_name }}.*:ALL'
     state: present
     login_user: root
     login_password: "{{mariadb_root_pwd}}"
@@ -25,6 +25,6 @@
 # @todo Remove if this works fine in the future. 
 #- name: Grant database privileges
 #  ansible.builtin.shell:
-#    cmd: "docker exec {{mariadb_name }} mariadb -u root -p{{ mariadb_root_pwd }} -e \"GRANT ALL PRIVILEGES ON `{{database_name}}`.* TO '{{database_username}}'@'%';\""
+#    cmd: "docker exec {{mariadb_name }} mariadb -u root -p{{ mariadb_root_pwd }} -e \"GRANT ALL PRIVILEGES ON `{{ database_name }}`.* TO '{{ database_username }}'@'%';\""
 #  args:
 #    executable: /bin/bash

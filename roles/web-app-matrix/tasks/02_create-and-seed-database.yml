@@ -4,7 +4,7 @@
 # - database_name
 # - database_username
 # - database_password
-- name: "create {{database_name}} database"
+- name: "create {{ database_name }} database"
   include_role:
     name: "svc-db-{{ database_type }}"
   when: applications | get_app_conf(application_id, 'features.central_database', False)

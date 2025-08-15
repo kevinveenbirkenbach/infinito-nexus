@@ -15,5 +15,5 @@ database_password:  "{{ applications | get_app_conf(database_application_id, 'cr
 database_port:      "{{ (ports.localhost.database[_database_id] | d('')) if _dbtype else '' }}"
 database_env:       "{{docker_compose.directories.env}}{{ database_type }}.env"
 database_url_jdbc:  "jdbc:{{ database_type if database_type == 'mariadb' else 'postgresql' }}://{{ database_host }}:{{ database_port }}/{{ database_name }}"
-database_url_full:  "{{ database_type }}://{{database_username}}:{{database_password}}@{{database_host}}:{{database_port}}/{{ database_name }}"
+database_url_full:  "{{ database_type }}://{{ database_username }}:{{ database_password }}@{{ database_host }}:{{database_port}}/{{ database_name }}"
 database_volume:    "{{ _database_consumer_entity_name ~ '_' if not _database_central_enabled }}{{ database_host }}"

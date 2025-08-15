@@ -7,13 +7,13 @@ address = "0.0.0.0:{{ container_port }}"
 
 # Database.
 [db]
-host = "{{database_host}}"
+host = "{{ database_host }}"
 port = {{database_port}}
-user = "{{database_username}}"
-password = "{{database_password}}"
+user = "{{ database_username }}"
+password = "{{ database_password }}"
 
 # Ensure that this database has been created in Postgres.
-database = "{{database_name}}"
+database = "{{ database_name }}"
 
 ssl_mode = "disable"
 max_open = 25

@@ -12,18 +12,18 @@ listeners:
 database:
   name: psycopg2
   args:
-    user: "{{database_username}}"
-    password: "{{database_password}}"
-    database: "{{database_name}}"
-    host: "{{database_host}}"
+    user: "{{ database_username }}"
+    password: "{{ database_password }}"
+    database: "{{ database_name }}"
+    host: "{{ database_host }}"
     cp_min: 5
     cp_max: 10
 log_config:                     "{{ MATRIX_SYNAPSE_LOG_PATH_CONTAINER }}"
 media_store_path:               "/data/media_store"
 registration_shared_secret:     "{{ MATRIX_REGISTRATION_SHARED_SECRET }}"
 report_stats:                   true
-macaroon_secret_key:            "{{applications | get_app_conf(application_id, 'credentials.macaroon_secret_key', True)}}"
-form_secret:                    "{{applications | get_app_conf(application_id, 'credentials.form_secret', True)}}"
+macaroon_secret_key:            "{{ applications | get_app_conf(application_id, 'credentials.macaroon_secret_key') }}"
+form_secret:                    "{{ applications | get_app_conf(application_id, 'credentials.form_secret') }}"
 signing_key_path:               "/data/{{ MATRIX_SYNAPSE_DOMAIN }}.signing.key"
 web_client_location:            "{{ WEB_PROTOCOL }}://{{domains[application_id].element}}"
 public_baseurl:                 "{{ MATRIX_SYNAPSE_URL }}"
@@ -32,8 +32,8 @@ trusted_key_servers:
 admin_contact: 'mailto:{{ users.administrator.email }}'
 
 email:
-  smtp_host:                    "{{system_email.host}}"
-  smtp_port:                    "{{system_email.port}}"
+  smtp_host:                    "{{ system_email.host }}"
+  smtp_port:                    "{{ system_email.port }}"
   smtp_user:                    "{{ users['no-reply'].email }}"
   smtp_pass:                    "{{ users['no-reply'].mailu_token }}"
   #force_tls:                    true
@@ -49,7 +49,7 @@ email:
 {% if applications | get_app_conf(application_id, 'features.oidc', False) %}
 # @See https://matrix-org.github.io/synapse/latest/openid.html
 oidc_providers:
-  - idp_id: keycloak
+  - idp_id:         keycloak
     idp_name:       "{{ oidc.button_text }}"
     issuer:         "{{ oidc.client.issuer_url }}"
     client_id:      "{{ oidc.client.id }}"
