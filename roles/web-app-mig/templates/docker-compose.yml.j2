@@ -3,8 +3,8 @@
   {{ application_id | get_entity_name }}:
 {% set container_port = 80 %}
     {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ mig_image }}"
-    container_name: "{{ mig_container }}"
+    image: "{{ MIG_IMAGE }}"
+    container_name: "{{ MIG_CONTAINER }}"
     ports:
       - 127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}
     build:

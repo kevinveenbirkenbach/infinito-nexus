@@ -7,7 +7,6 @@ docker_pull_git_repository:     true
 docker_repository_address:      "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
 
 # Helper variables
-mig_image:                      "mig:latest"
-mig_container:                  "mig"
-mig_build_data:                 "{{ applications | get_app_conf(application_id, 'build_data.enabled') }}"
-mig_wait_for_build:             "{{ applications | get_app_conf(application_id, 'build_data.wait_for') }}"
+MIG_IMAGE:                      "mig:latest"
+MIG_CONTAINER:                  "mig"
+MIG_BUILD_DATA:                 "{{ applications | get_app_conf(application_id, 'build_data.enabled') }}"

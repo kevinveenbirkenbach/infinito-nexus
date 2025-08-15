@@ -22,4 +22,4 @@
 
 - name: Build data (single async task)
   include_tasks: 02_build_data.yml
-  when: mig_build_data | bool
+  when: MIG_BUILD_DATA | bool

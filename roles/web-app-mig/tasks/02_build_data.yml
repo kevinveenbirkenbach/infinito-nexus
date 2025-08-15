@@ -12,27 +12,3 @@
     msg: >
       MIG build job failed to start. No job ID returned.
   when: mig_build_job.ansible_job_id is not defined
-
-- name: Debug MIG build job ID
-  debug:
-    msg: "MIG build job started with ID: {{ mig_build_job.ansible_job_id }}"
-  when: MODE_DEBUG | bool
-
-- debug:
-    msg: "Waiting for MIG build job to finish. Set 'build_data.wait_for=false' in the application config to skip waiting and improve performance."
-  when: mig_wait_for_build | bool
-
-- name: Wait for MIG build job to finish (enforce failure)
-  async_status:
-    jid: "{{ mig_build_job.ansible_job_id }}"
-  register: mig_build_result
-  until: mig_build_result.finished
-  retries: 360
-  delay: 10
-  when:
-    - mig_wait_for_build | bool
-  failed_when:
-    - mig_build_result.result is defined
-    - mig_build_result.result.rc is defined
-    - mig_build_result.result.rc != 0
-

@@ -42,5 +42,3 @@ build_data:
   # Enables the building of the meta data which the graph requiers
   enabled:  true
 
-  # Recommended to set this to false in inventory to optimize speed
-  wait_for: true
