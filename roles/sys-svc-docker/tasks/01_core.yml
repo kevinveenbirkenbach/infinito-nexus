@@ -6,13 +6,13 @@
     state: present
   notify: docker restart
 
-- name: "Load cleanup tasks when MODE_CLEANUP or MODE_RESET is enabled"
-  include_tasks: "03_cleanup.yml"
-  when: MODE_CLEANUP | bool or MODE_RESET | bool
-
 - name: "Load reset tasks when MODE_RESET is enabled"
   include_tasks: "02_reset.yml"
   when: MODE_RESET | bool
+
+- name: "Load cleanup tasks when MODE_CLEANUP or MODE_RESET is enabled"
+  include_tasks: "03_cleanup.yml"
+  when: MODE_CLEANUP | bool or MODE_RESET | bool
 
 - name: Include backup, repair and health services for docker
   include_role:

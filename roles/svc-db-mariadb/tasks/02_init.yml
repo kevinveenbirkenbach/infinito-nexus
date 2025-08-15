@@ -19,7 +19,7 @@
     login_user: root
     login_password: "{{mariadb_root_pwd}}"
     login_host: 127.0.0.1
-    login_port: "{{database_port}}"
+    login_port: "{{ database_port }}"
 
 # Deactivated due to https://chatgpt.com/share/683ba14b-0e74-800f-9ad1-a8979bc77093
 # @todo Remove if this works fine in the future. 

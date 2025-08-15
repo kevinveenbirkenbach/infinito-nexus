@@ -8,7 +8,6 @@
     name: "{{ (item.Names | default([item.Name]))[0] | regex_replace('^/','') }}"
     state: absent
     force_kill: true
-    remove_volumes: false # NEVER SET TO TRUE - PREVENTS DELETION OF VOLUMES
   loop: "{{ docker_info.containers }}"
   loop_control:
     label: "{{ (item.Names | default([item.Name]))[0] }}"
