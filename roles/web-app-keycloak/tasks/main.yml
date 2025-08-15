@@ -2,6 +2,11 @@
 - name: "create import files for {{ application_id }}"
   include_tasks: 01_import.yml
 
+- name: "load required 'web-svc-logout' for {{ application_id }}"
+  include_role: 
+    name: web-svc-logout
+  when: run_once_web_svc_logout is not defined
+
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
     name: cmp-db-docker-proxy
