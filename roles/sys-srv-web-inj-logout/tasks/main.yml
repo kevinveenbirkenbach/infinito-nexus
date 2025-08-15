@@ -1,8 +1,8 @@
 - block:
   - include_tasks: 01_core.yml
   - set_fact:
-      run_once_srv_web_7_7_inj_logout: true
-  when: run_once_srv_web_7_7_inj_logout is not defined
+      run_once_sys_srv_web_inj_logout: true
+  when: run_once_sys_srv_web_inj_logout is not defined
 
 - name: "Load logout code for '{{ application_id }}'"
   set_fact:

@@ -6,7 +6,7 @@ server {
     listen {{ FEDERATION_PORT }} ssl default_server;
     listen [::]:{{ FEDERATION_PORT }} ssl default_server;
 
-    {% include 'roles/srv-web-7-7-inj-compose/templates/server.conf.j2'%}
+    {% include 'roles/sys-srv-web-inj-compose/templates/server.conf.j2'%}
 
     {% include 'roles/srv-proxy-7-4-core/templates/location/html.conf.j2' %}
 

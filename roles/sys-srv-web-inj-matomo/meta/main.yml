@@ -13,7 +13,7 @@ galaxy_info:
   - analytics
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/tree/main/roles/srv-web-7-7-inj-matomo"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/sys-srv-web-inj-matomo"
   min_ansible_version: "2.9"
   platforms:
   - name: Any

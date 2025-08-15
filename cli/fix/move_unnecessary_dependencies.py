@@ -228,7 +228,7 @@ def parse_meta_dependencies(role_dir: str) -> List[str]:
 def sanitize_run_once_var(role_name: str) -> str:
     """
     Generate run_once variable name from role name.
-    Example: 'srv-web-7-7-inj-logout' -> 'run_once_srv_web_7_7_inj_logout'
+    Example: 'sys-srv-web-inj-logout' -> 'run_once_sys_srv_web_inj_logout'
     """
     return "run_once_" + role_name.replace("-", "_")
 

@@ -8,7 +8,7 @@ import unittest
 THIS_FILE = Path(__file__)
 
 def find_repo_root(start: Path) -> Path:
-    target_rel = Path("roles") / "srv-web-7-7-inj-compose" / "filter_plugins" / "inj_enabled.py"
+    target_rel = Path("roles") / "sys-srv-web-inj-compose" / "filter_plugins" / "inj_enabled.py"
     cur = start
     for _ in range(12):
         if (cur / target_rel).is_file():
@@ -17,7 +17,7 @@ def find_repo_root(start: Path) -> Path:
     return start.parents[6]
 
 REPO_ROOT = find_repo_root(THIS_FILE)
-PLUGIN_PATH = REPO_ROOT / "roles" / "srv-web-7-7-inj-compose" / "filter_plugins" / "inj_enabled.py"
+PLUGIN_PATH = REPO_ROOT / "roles" / "sys-srv-web-inj-compose" / "filter_plugins" / "inj_enabled.py"
 
 # Ensure 'module_utils' is importable under its canonical package name
 if str(REPO_ROOT) not in sys.path:

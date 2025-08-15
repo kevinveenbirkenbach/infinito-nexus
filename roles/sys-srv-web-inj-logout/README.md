@@ -1,10 +1,10 @@
-# srv-web-7-7-inj-logout
+# sys-srv-web-inj-logout
 
 This role injects a catcher that intercepts all logout elements in HTML pages served by Nginx and redirects them to a centralized logout endpoint via JavaScript.
 
 ## Description
 
-The `srv-web-7-7-inj-logout` Ansible role automatically embeds a lightweight JavaScript snippet into your web application's HTML responses. This script identifies logout links, buttons, forms, and other elements, overrides their target URLs, and ensures users are redirected to a central OIDC logout endpoint, providing a consistent single sign‑out experience.
+The `sys-srv-web-inj-logout` Ansible role automatically embeds a lightweight JavaScript snippet into your web application's HTML responses. This script identifies logout links, buttons, forms, and other elements, overrides their target URLs, and ensures users are redirected to a central OIDC logout endpoint, providing a consistent single sign‑out experience.
 
 ## Overview
 

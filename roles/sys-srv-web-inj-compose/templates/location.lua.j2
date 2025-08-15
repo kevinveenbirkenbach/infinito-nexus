@@ -3,7 +3,7 @@
 {% if inj_enabled.get(f) -%}
 {{ list_name }}[#{{ list_name }} + 1] = [=[
   {%- include
-     'roles/srv-web-7-7-inj-' ~ f ~
+     'roles/sys-srv-web-inj-' ~ f ~
      '/templates/' ~
      ('head' if list_name == 'head_snippets' else 'body') ~
      '_sub.j2'

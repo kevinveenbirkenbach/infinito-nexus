@@ -1,8 +1,8 @@
 # run_once_srv_web_7_6_composer: deactivated
 
-- name: "include role srv-web-7-7-inj-compose for '{{ domain }}'"
+- name: "include role sys-srv-web-inj-compose for '{{ domain }}'"
   include_role: 
-    name: srv-web-7-7-inj-compose
+    name: sys-srv-web-inj-compose
 
 - name: "include role srv-web-6-6-tls-core for '{{ domain }}'"
   include_role: 

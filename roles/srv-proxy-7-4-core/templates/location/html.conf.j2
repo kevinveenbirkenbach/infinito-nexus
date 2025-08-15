@@ -36,6 +36,6 @@ location {{location}}
 
   {% if proxy_lua_enabled %}
   proxy_set_header Accept-Encoding "";
-  {% include 'roles/srv-web-7-7-inj-compose/templates/location.lua.j2'%}
+  {% include 'roles/sys-srv-web-inj-compose/templates/location.lua.j2'%}
   {% endif %}
 }

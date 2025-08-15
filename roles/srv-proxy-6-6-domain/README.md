@@ -8,7 +8,7 @@ This role bootstraps **per-domain Nginx configuration**: it requests TLS certifi
 
 A higher-level orchestration wrapper, *srv-proxy-6-6-domain* ties together several lower-level roles:
 
-1. **`srv-web-7-7-inj-compose`** – applies global tweaks and includes.  
+1. **`sys-srv-web-inj-compose`** – applies global tweaks and includes.  
 2. **`srv-web-6-6-tls-core`** – obtains Let’s Encrypt certificates.  
 3. **Domain template deployment** – copies a Jinja2 vHost from *srv-proxy-7-4-core*.  
 4. **`web-app-oauth2-proxy`** *(optional)* – protects the site with OAuth2.

@@ -4,7 +4,7 @@
       name: srv-web-7-4-core
     when: run_once_srv_web_7_4_core is not defined
   - include_tasks: utils/run_once.yml
-  when: run_once_srv_web_7_7_inj_matomo is not defined
+  when: run_once_sys_srv_web_inj_matomo is not defined
 
 - name: "Relevant variables for role: {{ role_path | basename }}"
   debug:
