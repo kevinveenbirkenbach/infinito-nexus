@@ -10,7 +10,7 @@ homeserver:
     # How often should the websocket be pinged? Pinging will be disabled if this is zero.
     ping_interval_seconds: 0
     # The domain of the homeserver (also known as server_name, used for MXIDs, etc).
-    domain: {{applications | get_app_conf(application_id, 'server_name', True)}}
+    domain: {{ MATRIX_SERVER_NAME }}
 
     # What software is the homeserver running?
     # Standard Matrix homeservers like Synapse, Dendrite and Conduit should just use "standard" here.

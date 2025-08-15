@@ -10,10 +10,13 @@ client_max_body_size:                 "{{ applications | get_app_conf(applicatio
 # Matrix
 
 ## General
+MATRIX_SERVER_NAME:                   "{{ applications | get_app_conf(application_id, 'server_name') }}"
+MATRIX_ADMINISTRATOR_USERNAME:        "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
 MATRIX_WELL_KNOWN_DIRECTORY:          "{{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }}/matrix/"
 MATRIX_WELL_KNOWN_FILE:               "{{ MATRIX_WELL_KNOWN_DIRECTORY }}server"
 MATRIX_PROJECT:                       "{{ application_id | get_entity_name }}"
 MATRIX_REGISTRATION_FILE_FOLDER:      "/data/"
+MATRIX_REGISTRATION_SHARED_SECRET:    "{{ applications | get_app_conf(application_id, 'credentials.registration_shared_secret') }}"
 
 ## Synapse
 MATRIX_SYNAPSE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.synapse.version') }}"

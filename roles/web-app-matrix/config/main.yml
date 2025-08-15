@@ -15,7 +15,7 @@ docker:
   volumes: 
     synapse:          "matrix_synapse_data"
 playbook_tags:        "setup-all,start"                  # For the initial update use: install-all,ensure-matrix-users-created,start
-server_name:          "{{ PRIMARY_DOMAIN }}"               # Adress for the account names etc.
+server_name:          "{{ PRIMARY_DOMAIN }}"             # Adress for the account names etc.
 setup:                false                              # Set true in inventory file to execute the setup and initializing procedures
 features:
   matomo:             false                              # Deactivated, because in html CSP restricts use

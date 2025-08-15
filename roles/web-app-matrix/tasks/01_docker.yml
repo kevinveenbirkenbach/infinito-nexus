@@ -103,7 +103,7 @@
 
 - name: create admin account
   command:
-    cmd: docker compose exec -it synapse register_new_matrix_user -u {{applications | get_app_conf(application_id, 'users.administrator.username', True)}} -p {{applications | get_app_conf(application_id, 'credentials.administrator_password', True)}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008
+    cmd: docker compose exec -it synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME }} -p {{applications | get_app_conf(application_id, 'credentials.administrator_password', True)}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008
     chdir: "{{ docker_compose.directories.instance }}"
   ignore_errors: true
   when: applications | get_app_conf(application_id, 'setup', True) | bool
