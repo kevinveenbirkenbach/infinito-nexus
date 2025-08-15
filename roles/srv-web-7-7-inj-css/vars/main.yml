@@ -1,4 +1,4 @@
-global_css_destination: "{{NGINX.DIRECTORIES.DATA.CDN}}global.css" 
+global_css_destination: "{{ NGINX.DIRECTORIES.DATA.CDN }}global.css" 
 global_css_base_color:  "{{ design.css.colors.base }}"
 global_css_count:       7                  
 global_css_shades:      100
