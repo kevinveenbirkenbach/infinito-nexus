@@ -21,6 +21,7 @@
     docker exec --user root {{ moodle_container }}
     sed -i "s/^\$CFG->dbpass *= *.*/\$CFG->dbpass = '{{ database_password }}';/" {{ moodle_config }}
   notify: docker compose restart
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Update CFG->wwwroot via sed in container
   command: >

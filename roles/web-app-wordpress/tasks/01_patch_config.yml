@@ -23,6 +23,7 @@
     docker exec --user root {{ wordpress_container }}
     sed -i "s/define(\s*'DB_PASSWORD'\s*,\s*'[^']*'\s*);/define( 'DB_PASSWORD', '{{ database_password }}' );/i" {{ wordpress_docker_conf_path }}
   notify: docker compose restart
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Flush handlers to reinitialize new database credentials"
   meta: flush_handlers

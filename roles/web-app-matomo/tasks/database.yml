@@ -2,15 +2,19 @@
   command: >
     docker exec --user root {{ matomo_name }}
     sed -i "s/^host *=.*/host = {{ database_host }}/" {{ matomo_config }}
+
 - name: Update DB name
   command: >
     docker exec --user root {{ matomo_name }}
     sed -i "s/^dbname *=.*/dbname = {{ database_name }}/" {{ matomo_config }}
+
 - name: Update DB user
   command: >
     docker exec --user root {{ matomo_name }}
     sed -i "s/^username *=.*/username = {{ database_username }}/" {{ matomo_config }}
+
 - name: Update DB password
   command: >
     docker exec --user root {{ matomo_name }}
     sed -i "s/^password *=.*/password = {{ database_password }}/" {{ matomo_config }}
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

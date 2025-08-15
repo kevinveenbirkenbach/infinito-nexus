@@ -21,6 +21,7 @@
     docker exec --user root {{ espocrm_name }}
     sed -i "s/'password' => .*/'password' => '{{ database_password }}',/" {{ espocrm_config_file }}
   notify: docker compose restart
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Ensure siteUrl matches canonical domain
   ansible.builtin.shell: |
