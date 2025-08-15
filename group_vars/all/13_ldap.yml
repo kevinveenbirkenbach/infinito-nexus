@@ -5,7 +5,7 @@
 
 # Helper Variables:
 # Keep in mind to mapp this variables if there is ever the possibility for the user to define them in the inventory
-_ldap_dn_base:                  "dc={{PRIMARY_DOMAIN_SLD}},dc={{PRIMARY_DOMAIN_tld}}"
+LDAP_DN_BASE:                   "dc={{ PRIMARY_DOMAIN_SLD }},dc={{ PRIMARY_DOMAIN_TLD }}"
 _ldap_docker_network_enabled:   "{{ applications | get_app_conf('svc-db-openldap', 'network.docker') }}"
 _ldap_protocol:                 "{{ 'ldap' if _ldap_docker_network_enabled else 'ldaps' }}"
 _ldap_server_port:              "{{ ports.localhost[_ldap_protocol]['svc-db-openldap'] }}"
@@ -22,14 +22,14 @@ ldap:
     # This is the top-level naming context for your directory, used as the
     # default search base for most operations (e.g. adding users, groups).
     # Example: “dc=example,dc=com”
-    root:               "{{_ldap_dn_base}}"
+    root:               "{{ LDAP_DN_BASE }}"
     administrator:
       # -------------------------------------------------------------------------
       # Data-Tree Administrator Bind DN
       # The DN used to authenticate for regular directory operations under
       # the data tree (adding users, modifying attributes, creating OUs, etc.).
       # Typically: “cn=admin,dc=example,dc=com”
-      data: "cn={{ applications['svc-db-openldap'].users.administrator.username }},{{ _ldap_dn_base }}"
+      data: "cn={{ applications['svc-db-openldap'].users.administrator.username }},{{ LDAP_DN_BASE }}"
 
       # -------------------------------------------------------------------------
       # Config-Tree Administrator Bind DN
@@ -47,9 +47,9 @@ ldap:
       # – groups: Contains organizational or business groups (e.g., departments, teams).
       # – roles:  Contains application-specific RBAC roles 
       #           (e.g., "cn=app1-user", "cn=yourls-admin").
-      users:   "ou=users,{{ _ldap_dn_base }}"
-      groups:  "ou=groups,{{ _ldap_dn_base }}"
-      roles:   "ou=roles,{{ _ldap_dn_base }}"
+      users:   "ou=users,{{ LDAP_DN_BASE }}"
+      groups:  "ou=groups,{{ LDAP_DN_BASE }}"
+      roles:   "ou=roles,{{ LDAP_DN_BASE }}"
 
     # -------------------------------------------------------------------------
     # Additional Notes

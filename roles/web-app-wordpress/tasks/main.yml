@@ -9,7 +9,7 @@
     proxy_extra_configuration: "client_max_body_size {{ wordpress_max_upload_size }};"
     http_port: "{{ ports.localhost.http[application_id] }}"
 
-- name: "load docker and db for {{application_id}}"
+- name: "load docker and db for {{ application_id }}"
   include_role: 
     name: cmp-db-docker
   vars:

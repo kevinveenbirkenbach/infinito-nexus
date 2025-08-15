@@ -1,8 +1,8 @@
 ---
-- name: create {{path_system_lock_script}}
+- name: create {{ PATH_SYSTEM_LOCK_SCRIPT }}
   copy:
     src: sys-lock.py
-    dest: "{{path_system_lock_script}}"
+    dest: "{{ PATH_SYSTEM_LOCK_SCRIPT }}"
   when: run_once_sys_lock is not defined
 
 ## Runtime Variable Setting

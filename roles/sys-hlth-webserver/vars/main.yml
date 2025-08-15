@@ -1,1 +1,1 @@
-health_nginx_folder: '{{ path_administrator_scripts }}sys-hlth-webserver/'
+health_nginx_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-hlth-webserver/'

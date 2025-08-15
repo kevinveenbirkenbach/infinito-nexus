@@ -13,7 +13,7 @@
 
   daemon:
     image: "{{ espocrm_image }}:{{ espocrm_version }}"
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     logging:
       driver: journald
     entrypoint: docker-daemon.sh
@@ -23,7 +23,7 @@
 
   websocket:
     image: "{{ espocrm_image }}:{{ espocrm_version }}"
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     logging:
       driver: journald
     environment:

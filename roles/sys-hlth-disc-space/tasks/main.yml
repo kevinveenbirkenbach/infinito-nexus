@@ -27,7 +27,7 @@
   set_fact:
     service_name: "{{ role_name }}"
 
-- name: "include role for sys-timer for {{service_name}}"
+- name: "include role for sys-timer for {{ service_name }}"
   include_role:
     name: sys-timer
   vars:

@@ -82,7 +82,7 @@
     container_name: {{mailu_name}}_oletools
     image: {{docker_source}}/oletools:{{ mailu_version }}
     hostname: oletools
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     depends_on:
       - resolver
     dns:

@@ -1,0 +1,9 @@
+- name: Delete NGINX config paths
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ NGINX.DIRECTORIES.CONFIGURATION }}"
+    - "{{ NGINX.FILES.CONFIGURATION }}"
+  loop_control:
+    label: "{{ item }}"

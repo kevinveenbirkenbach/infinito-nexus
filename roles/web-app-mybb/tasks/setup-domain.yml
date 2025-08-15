@@ -2,12 +2,12 @@
   include_role: 
     name: srv-web-6-6-tls-core
   vars:
-    domain: "{{domains | get_domain(application_id)}}"
+    domain: "{{ domains | get_domain(application_id) }}"
 
-- name: configure {{domains | get_domain(application_id)}}.conf
+- name: configure {{ domains | get_domain(application_id) }}.conf
   template: 
     src:  "roles/srv-proxy-7-4-core/templates/vhost/basic.conf.j2" 
-    dest: "{{nginx.directories.http.servers}}{{domains | get_domain(application_id)}}.conf"
+    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty
   vars: 
-    proxy_extra_configuration: "sub_filter '{{source_domain}}' '{{domains | get_domain(application_id)}}';"
+    proxy_extra_configuration: "sub_filter '{{source_domain}}' '{{ domains | get_domain(application_id) }}';"

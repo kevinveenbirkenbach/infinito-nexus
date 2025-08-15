@@ -118,7 +118,7 @@ bridge:
 
     # Servers to always allow double puppeting from
     double_puppet_server_map:
-        {{applications | get_app_conf(application_id, 'server_name', True)}}: {{ WEB_PROTOCOL }}://{{ domains[application_id].synapse }}
+        {{applications | get_app_conf(application_id, 'server_name', True)}}: {{ MATRIX_SYNAPSE_URL }}
     # Allow using double puppeting from any server with a valid client .well-known file.
     double_puppet_allow_discovery: false
     # Shared secrets for https://github.com/devture/matrix-synapse-shared-secret-auth

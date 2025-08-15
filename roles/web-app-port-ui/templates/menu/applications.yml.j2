@@ -38,13 +38,13 @@ applications:
                 description: Update your personal admin settings
                 icon:
                   class: fa-solid fa-user-gear
-                url: {{ keycloak_url }}/realms/{{oidc.client.id}}/account
+                url: {{ keycloak_url }}/realms/{{ oidc.client.id }}/account
                 iframe: {{ applications | get_app_conf( 'web-app-keycloak', 'features.desktop', False) }}
               - name: Logout
                 description: End your admin session securely
                 icon:
                   class: fa-solid fa-right-from-bracket
-                url: {{ keycloak_url }}/realms/{{oidc.client.id}}/protocol/openid-connect/logout
+                url: {{ keycloak_url }}/realms/{{ oidc.client.id }}/protocol/openid-connect/logout
                 iframe: false
 
             {% endif %}

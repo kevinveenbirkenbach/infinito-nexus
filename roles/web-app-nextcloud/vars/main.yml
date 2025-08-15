@@ -23,7 +23,7 @@ nextcloud_control_node_plugin_tasks_directory:  "{{role_path}}/tasks/plugins/"  
 ## Host Paths
 nextcloud_host_config_additives_directory:      "{{ docker_compose.directories.volumes }}infinito/"             # This folder is the path to which the additive configurations will be copied
 nextcloud_host_include_instructions_file:       "{{ docker_compose.directories.volumes }}includes.php"          # Path to the instruction file on the host. Responsible for loading the additional configurations
-nextcloud_host_nginx_path:                      "{{ nginx.directories.http.servers }}{{ domains | get_domain(application_id) }}.conf" # Nginx path for proxy conf
+nextcloud_host_nginx_path:                      "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf" # Nginx path for proxy conf
 
 # Docker
 

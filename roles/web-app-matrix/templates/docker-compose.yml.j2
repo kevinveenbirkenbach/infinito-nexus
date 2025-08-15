@@ -1,27 +1,27 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   synapse:
 {% set container_port = 8008 %}
-    image: "{{ matrix_synapse_image }}:{{ matrix_synapse_version }}"
-    container_name: {{ matrix_synapse_name }}
-    restart: {{DOCKER_RESTART_POLICY}}
+    image: "{{ MATRIX_SYNAPSE_IMAGE }}:{{ MATRIX_SYNAPSE_VERSION }}"
+    container_name: {{ MATRIX_SYNAPSE_NAME }}
+    restart: {{ DOCKER_RESTART_POLICY }}
     logging:
       driver: journald
     volumes:
       - synapse_data:/data
-      - ./homeserver.yaml:/data/homeserver.yaml:ro
-      - ./{{domains[application_id].synapse}}.log.config:/data/{{domains[application_id].synapse}}.log.config:ro
-{% for item in bridges %}
-      - {{docker_compose.directories.instance}}mautrix/{{item.bridge_name}}/registration.yaml:{{registration_file_folder}}{{item.bridge_name}}.registration.yaml:ro
+      - {{ MATRIX_SYNAPSE_CONFIG_PATH_HOST }}:{{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }}:ro
+      - {{ MATRIX_SYNAPSE_LOG_PATH_HOST }}:{{ MATRIX_SYNAPSE_LOG_PATH_CONTAINER }}:ro
+{% for item in MATRIX_BRIDGES %}
+      - {{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/registration.yaml:{{ MATRIX_REGISTRATION_FILE_FOLDER }}{{ item.bridge_name }}.registration.yaml:ro
 {% endfor %}
     environment:
-      - SYNAPSE_SERVER_NAME={{domains[application_id].synapse}}
+      - SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }}
       - SYNAPSE_REPORT_STATS=no
     ports:
       - "127.0.0.1:{{ports.localhost.http['web-app-matrix_synapse']}}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-{% if bridges | length > 0 %}
-{% for item in bridges %}
-      mautrix-{{item.bridge_name}}:
+{% if MATRIX_BRIDGES | length > 0 %}
+{% for item in MATRIX_BRIDGES %}
+      mautrix-{{ item.bridge_name }}:
         condition: service_healthy
 {% endfor %}
 {% else %}
@@ -30,25 +30,25 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
   element:
 {% set container_port = 80 %}
-    image: "{{ matrix_element_image }}:{{ matrix_element_version }}"
-    container_name: {{ matrix_element_name }}
-    restart: {{DOCKER_RESTART_POLICY}}
+    image: "{{ MATRIX_ELEMENT_IMAGE }}:{{ MATRIX_ELEMENT_VERSION }}"
+    container_name: {{ MATRIX_ELEMENT_NAME }}
+    restart: {{ DOCKER_RESTART_POLICY }}
     volumes:
-      - ./element-config.json:/app/config.json
+      - {{ MATRIX_ELEMENT_CONFIG_PATH_HOST }}:/app/config.json
     ports:
-      - "127.0.0.1:{{ports.localhost.http['web-app-matrix_element']}}:{{ container_port }}"
+      - "127.0.0.1:{{ MATRIX_ELEMENT_PORT }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/wget.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-{% for item in bridges %}
-  mautrix-{{item.bridge_name}}:
-    container_name: matrix-{{item.bridge_name}}
+{% for item in MATRIX_BRIDGES %}
+  mautrix-{{ item.bridge_name }}:
+    container_name: matrix-{{ item.bridge_name }}
     image: dock.mau.dev/mautrix/{{ item.bridge_name }}:latest
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     volumes:
-      - ./mautrix/{{item.bridge_name}}:/data
+      - ./mautrix/{{ item.bridge_name }}:/data
     healthcheck:
-      test: ["CMD-SHELL", "test -f {{registration_file_folder}}registration.yaml || exit 1"]
+      test: ["CMD-SHELL", "test -f {{ MATRIX_REGISTRATION_FILE_FOLDER }}registration.yaml || exit 1"]
       interval: 1m
       timeout: 10s
       retries: 3
@@ -56,7 +56,7 @@
 {% endfor %}
 {% if applications | get_app_conf(application_id, 'plugins.chatgpt', True) | bool %}
   matrix-chatgpt-bot:
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     container_name: matrix-chatgpt
     image: ghcr.io/matrixgpt/matrix-chatgpt-bot:latest
     volumes:
@@ -81,10 +81,10 @@
       KEYV_URL: ''
       KEYV_BOT_ENCRYPTION: 'false'
       KEYV_BOT_STORAGE: 'true'
-      MATRIX_HOMESERVER_URL: '{{ WEB_PROTOCOL }}://{{ domains[application_id].synapse }}'
+      MATRIX_HOMESERVER_URL: '{{ MATRIX_SYNAPSE_URL }}'
       MATRIX_BOT_USERNAME: '@chatgptbot:{{applications | get_app_conf(application_id, 'server_name', True)}}'
       MATRIX_ACCESS_TOKEN: '{{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_access_token', True) | default('') }}'
-      MATRIX_BOT_PASSWORD: '{{applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password', True)}}'
+      MATRIX_BOT_PASSWORD: '{{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password', True) }}'
       MATRIX_DEFAULT_PREFIX: '!chatgpt'
       MATRIX_DEFAULT_PREFIX_REPLY: 'false'
       #MATRIX_BLACKLIST: ''
@@ -98,7 +98,7 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   synapse_data:
-    name: {{ matrix_synapse_data }}
+    name: {{ MATRIX_SYNAPSE_VOLUME }}
 {% if applications | get_app_conf(application_id, 'plugins.chatgpt', True) | bool %}
   chatgpt_data:
 {% endif %}

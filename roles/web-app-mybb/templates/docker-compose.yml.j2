@@ -6,7 +6,7 @@
         tag: "mybb_application"
     image: {{ mybb_image }}:{{ mybb_version }}
     container_name: {{ mybb_name }}
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     volumes:
       - data:/var/www/html
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
@@ -18,7 +18,7 @@
       options:
         tag: "mybb_server"
     image: nginx:mainline
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     ports:
       - "127.0.0.1:{{ports.localhost.http[application_id]}}:80"
     volumes:

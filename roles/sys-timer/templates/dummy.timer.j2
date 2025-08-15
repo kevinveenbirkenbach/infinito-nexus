@@ -1,9 +1,9 @@
 [Unit]
-Description=Timer to start {{service_name}}{{ SYS_SERVICE_SUFFIX }}
+Description=Timer to start {{ service_name }}{{ SYS_SERVICE_SUFFIX }}
 
 [Timer]
-OnCalendar={{on_calendar}}
-RandomizedDelaySec={{RANDOMIZED_DELAY_SEC}}
+OnCalendar={{ on_calendar }}
+RandomizedDelaySec={{ RANDOMIZED_DELAY_SEC }}
 Persistent={{ persistent | default('false') }}
 
 [Install]

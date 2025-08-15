@@ -1,7 +1,7 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
     application:
       image: jenkins/jenkins:lts
-      restart: "{{DOCKER_RESTART_POLICY}}"
+      restart: "{{ DOCKER_RESTART_POLICY }}"
       ports:
         - "127.0.0.1:{{ports.localhost.http[application_id]}}:8080"
       volumes:

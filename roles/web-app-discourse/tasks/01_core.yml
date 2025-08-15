@@ -8,7 +8,7 @@
     name: which
     state: present
 
-- name: "load docker, db and proxy for {{application_id}}"
+- name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
     name: cmp-db-docker-proxy
 

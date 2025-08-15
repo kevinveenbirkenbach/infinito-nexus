@@ -12,7 +12,7 @@
     client_max_body_size: "80m"
     vhost_flavour:        "ws_generic"
 
-- name: "load docker and db for {{application_id}}"
+- name: "load docker and db for {{ application_id }}"
   include_role: 
     name: cmp-db-docker
   vars:

@@ -9,7 +9,7 @@ This document provides commands and tips to validate and inspect the OpenResty (
 * **Quick syntax check (quiet):**
 
   ```bash
-  docker exec {{ openresty_container }} openresty -t -q
+  docker exec {{ OPENRESTY_CONTAINER }} openresty -t -q
   ```
 
   *Returns only errors.*
@@ -17,13 +17,13 @@ This document provides commands and tips to validate and inspect the OpenResty (
 * **Detailed syntax check (show warnings):**
 
   ```bash
-  docker exec {{ openresty_container }} openresty -t
+  docker exec {{ OPENRESTY_CONTAINER }} openresty -t
   ```
 
   or:
 
   ```bash
-  docker exec {{ openresty_container }} nginx -t
+  docker exec {{ OPENRESTY_CONTAINER }} nginx -t
   ```
 
 ---
@@ -34,9 +34,9 @@ To see the full configuration after all `include` directives are processed:
 
 ```bash
 # Within the running container
-docker exec {{ openresty_container }} openresty -T
+docker exec {{ OPENRESTY_CONTAINER }} openresty -T
 # or equivalently
-docker exec {{ openresty_container }} nginx -T
+docker exec {{ OPENRESTY_CONTAINER }} nginx -T
 ```
 
 This outputs every directive from `nginx.conf` and all files in `conf.d` in the order Nginx will use them.
@@ -103,5 +103,5 @@ That way you’ll see exactly which domains your server is serving and which nam
 * After fixing issues, reload without downtime:
 
   ```bash
-  docker exec {{ openresty_container }} openresty -s reload
+  docker exec {{ OPENRESTY_CONTAINER }} openresty -s reload
   ```

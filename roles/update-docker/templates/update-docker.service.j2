@@ -4,5 +4,5 @@ OnFailure=sys-alm-compose.infinito@%n.service
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ path_system_lock_script }} {{ system_maintenance_services | join(' ')  }} --ignore {{system_maintenance_cleanup_services | join(' ') }} update-docker --timeout "{{system_maintenance_lock_timeout_heal_docker}}"'
-ExecStart=/bin/sh -c '/usr/bin/python {{update_docker_script}} {{path_docker_compose_instances}}'
+ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore {{system_maintenance_cleanup_services | join(' ') }} update-docker --timeout "{{system_maintenance_lock_timeout_heal_docker}}"'
+ExecStart=/bin/sh -c '/usr/bin/python {{update_docker_script}} {{ PATH_DOCKER_COMPOSE_INSTANCES }}'

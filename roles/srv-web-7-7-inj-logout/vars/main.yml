@@ -1,2 +1,2 @@
-inj_logout_file_name:       "logout.js"
-inj_logout_js_destination:  "{{ [ nginx.directories.data.cdn, inj_logout_file_name ] | path_join }}"
+INJ_LOGOUT_JS_FILE_NAME:    "logout.js"
+INJ_LOGOUT_JS_DESTINATION:  "{{ [ NGINX.DIRECTORIES.DATA.CDN, INJ_LOGOUT_JS_FILE_NAME ] | path_join }}"

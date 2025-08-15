@@ -3,5 +3,5 @@
   ansible.builtin.copy:
     src: "{{ source_directory }}"
     dest: "{{ target_directory }}"
-    owner: "{{ nginx.user }}"
-    group: "{{ nginx.user }}"
+    owner: "{{ NGINX.USER }}"
+    group: "{{ NGINX.USER }}"

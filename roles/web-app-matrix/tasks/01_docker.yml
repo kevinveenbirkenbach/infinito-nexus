@@ -1,0 +1,120 @@
+- name: "load docker and db for {{ application_id }}"
+  include_role: 
+    name: cmp-db-docker
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: include 02_create-and-seed-database.yml for multiple bridges
+  include_tasks: 02_create-and-seed-database.yml
+  vars:
+    database_password:  "{{ item.database_password }}"
+    database_username:  "{{ item.database_username }}"
+    database_name:      "{{ item.database_name }}"
+  loop: "{{ MATRIX_BRIDGES }}"
+
+# The following taks are necessary because a clean setup is necessary
+- name: shut down docker compose project 
+  command:
+    cmd: docker-compose -p "{{ MATRIX_PROJECT }}" down
+    chdir: "{{ docker_compose.directories.instance }}"
+
+- name: "cleanup project folder"
+  file:
+    path: "{{ docker_compose.directories.instance }}mautrix/"
+    state: absent
+
+- name: "create bridge folders"
+  file:
+    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ MATRIX_BRIDGES }}"
+
+- name: add multiple mautrix bridge configuration
+  template: 
+    src:  "mautrix/{{ item.bridge_name }}.config.yml.j2" 
+    dest: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/config.yaml"
+  loop: "{{ MATRIX_BRIDGES }}"
+  notify: docker compose up
+
+- name: add element configuration
+  template: 
+    src:  "element.config.json.j2" 
+    dest: "{{ MATRIX_ELEMENT_CONFIG_PATH_HOST }}"
+  notify: docker compose up
+
+- name: add synapse homeserver configuration
+  template: 
+    src:  "synapse/homeserver.yaml.j2" 
+    dest: "{{ MATRIX_SYNAPSE_CONFIG_PATH_HOST }}"
+  notify: docker compose up
+
+- name: add synapse log configuration
+  template: 
+    src:  "synapse/log.config.j2" 
+    dest: "{{ MATRIX_SYNAPSE_LOG_PATH_HOST }}"
+  notify: docker compose up
+
+# https://github.com/matrix-org/synapse/issues/6303
+- name: set correct folder permissions
+  command:
+    cmd: "docker run --rm --mount type=volume,src={{ MATRIX_SYNAPSE_VOLUME }},dst=/data -e SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }} -e SYNAPSE_REPORT_STATS=no --entrypoint /bin/sh matrixdotorg/synapse:latest -c 'chown -vR 991:991 /data'"
+
+- name: add docker-compose.yml
+  template: 
+    src:  "docker-compose.yml.j2" 
+    dest: "{{ docker_compose.directories.instance }}docker-compose.yml"
+  notify: docker compose up
+
+# Pull image when update is wished. 
+# @todo This should be moved to update-docker
+- name: docker compose pull
+  command:
+    cmd: docker-compose -p "{{ MATRIX_PROJECT }}" pull
+    chdir: "{{ docker_compose.directories.instance }}"
+  when: MODE_UPDATE | bool
+
+- name: docker compose up
+  command:
+    cmd: "docker-compose -p {{ MATRIX_PROJECT }} up -d --remove-orphans"
+    chdir: "{{ docker_compose.directories.instance }}"
+  environment:
+    COMPOSE_HTTP_TIMEOUT:   600
+    DOCKER_CLIENT_TIMEOUT:  600
+  register: result
+  until:    result is succeeded
+  retries:  12
+  delay:    30
+
+- name: wait for registration files
+  wait_for:
+    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/registration.yaml"
+    state: present  
+    timeout: 120
+  loop: "{{ MATRIX_BRIDGES }}"
+
+- name: "change file permissions"
+  file:
+    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/registration.yaml"
+    mode: "0755"
+  loop: "{{ MATRIX_BRIDGES }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- name: create admin account
+  command:
+    cmd: docker compose exec -it synapse register_new_matrix_user -u {{applications | get_app_conf(application_id, 'users.administrator.username', True)}} -p {{applications | get_app_conf(application_id, 'credentials.administrator_password', True)}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008
+    chdir: "{{ docker_compose.directories.instance }}"
+  ignore_errors: true
+  when: applications | get_app_conf(application_id, 'setup', True) | bool
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- name: create chatgpt bot
+  command:
+    cmd: docker compose exec -it synapse register_new_matrix_user -u chatgptbot -p {{applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password', True)}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008
+    chdir: "{{ docker_compose.directories.instance }}"
+  ignore_errors: true
+  when: applications | get_app_conf(application_id, 'setup', True) | bool
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

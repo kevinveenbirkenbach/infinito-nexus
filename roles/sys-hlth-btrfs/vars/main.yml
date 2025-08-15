@@ -1,1 +1,1 @@
-docker_health_btrfs_folder: '{{path_administrator_scripts}}sys-hlth-btrfs/'
+docker_health_btrfs_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-hlth-btrfs/'

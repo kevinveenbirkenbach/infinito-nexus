@@ -1,11 +1,9 @@
-
-- name: "reset (if enabled)"
-  include_tasks: 01_reset.yml 
-  when: MODE_RESET | bool and run_once_sys_timer is not defined
-
-- name: run {{ role_name }} once
-  set_fact:
-    run_once_sys_timer: true
+- block:
+  - name: "Include sys-systemctl"
+    include_role:
+      name: sys-systemctl
+    when: run_once_sys_systemctl is not defined
+  - include_tasks: utils/run_once.yml
   when: run_once_sys_timer is not defined
 
 - name: create {{ sys_timer_file }}

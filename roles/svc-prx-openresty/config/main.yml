@@ -2,3 +2,6 @@ docker:
   services:
     openresty:
       name: "openresty"
+  volumes:
+    www:    "/var/www/"
+    nginx:  "/etc/nginx/"

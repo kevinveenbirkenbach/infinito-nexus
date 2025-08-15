@@ -8,18 +8,18 @@ docker_compose_flush_handlers:  true
 database_type:                  "{{ application_id | get_entity_name }}"
 
 ## Postgres
-postgres_volume:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-postgres_name:                  "{{ applications | get_app_conf(application_id, 'docker.services.postgres.name', True) }}"
-postgres_image:                 "{{ applications | get_app_conf(application_id, 'docker.services.postgres.image', True) }}"
-postgres_subnet:                "{{ networks.local['svc-db-postgres'].subnet }}"
-postgres_network_name:          "{{ applications | get_app_conf(application_id, 'docker.network', True) }}"
-postgres_version:               "{{ applications | get_app_conf(application_id, 'docker.services.postgres.version', True) }}"
-postgres_password:              "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-postgres_port:                  "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
-postgres_init:                  "{{ database_username is defined and database_password is defined and database_name is defined }}"
-postgres_expose_local:          True # Exposes the db to localhost, almost everytime neccessary
-postgres_custom_image_name:     "postgres_custom"
-postgres_local_host:            "127.0.0.1"
-postgres_pg_vector_enabled:     True # Required by discourse, propably in a later step it makes sense to define this as a configuration option in config/main.yml
-postgres_retry_retries:         5
-postgres_retry_delay:           2
+POSTGRES_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
+POSTGRES_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.postgres.name', True) }}"
+POSTGRES_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.postgres.image', True) }}"
+POSTGRES_SUBNET:                "{{ networks.local['svc-db-postgres'].subnet }}"
+POSTGRES_NETWORK_NAME:          "{{ applications | get_app_conf(application_id, 'docker.network', True) }}"
+POSTGRES_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.postgres.version', True) }}"
+POSTGRES_PASSWORD:              "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+POSTGRES_PORT:                  "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
+POSTGRES_INIT:                  "{{ database_username is defined and database_password is defined and database_name is defined }}"
+POSTGRES_EXPOSE_LOCAL:          True # Exposes the db to localhost, almost everytime neccessary
+POSTGRES_CUSTOM_IMAGE_NAME:     "postgres_custom"
+POSTGRES_LOCAL_HOST:            "127.0.0.1"
+POSTGRES_VECTOR_ENABLED:        True # Required by discourse, propably in a later step it makes sense to define this as a configuration option in config/main.yml
+POSTGRES_RETRIES:               5
+POSTGRES_DELAY:                 2

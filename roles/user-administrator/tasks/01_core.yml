@@ -13,26 +13,26 @@
     ssh_key_type: rsa
     ssh_key_bits: 8192
 
-- name: "set correct rights for {{path_administrator_home}}"
+- name: "set correct rights for {{ PATH_ADMINISTRATOR_HOME }}"
   file:
-    path: "{{path_administrator_home}}"
+    path: "{{ PATH_ADMINISTRATOR_HOME }}"
     state: directory
     owner: administrator
     group: administrator
     mode: 0700
 
-- name: "create {{path_administrator_scripts}}"
+- name: "create {{ PATH_ADMINISTRATOR_SCRIPTS }}"
   file:
-    path: "{{path_administrator_home}}scripts"
+    path: "{{ PATH_ADMINISTRATOR_HOME }}scripts"
     state: directory
     owner: administrator
     group: administrator
     mode: 0700
 
-- name: create {{path_administrator_home}}.ssh/authorized_keys
+- name: create {{ PATH_ADMINISTRATOR_HOME }}.ssh/authorized_keys
   copy:
-    src: "{{ inventory_dir }}/files/{{ inventory_hostname }}{{path_administrator_home}}.ssh/authorized_keys"
-    dest: "{{path_administrator_home}}.ssh/authorized_keys"
+    src: "{{ inventory_dir }}/files/{{ inventory_hostname }}{{ PATH_ADMINISTRATOR_HOME }}.ssh/authorized_keys"
+    dest: "{{ PATH_ADMINISTRATOR_HOME }}.ssh/authorized_keys"
     owner: administrator
     group: administrator
     mode: '0644'

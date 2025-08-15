@@ -1,1 +1,1 @@
-health_docker_container_folder: '{{path_administrator_scripts}}sys-hlth-docker-container/'
+health_docker_container_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-hlth-docker-container/'

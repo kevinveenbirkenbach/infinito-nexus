@@ -24,7 +24,7 @@ def get_expected_statuses(domain: str, parts: list[str], redirected_domains: set
     return [200, 302, 301]
 
 # file in which fqdn server configs are deposit
-config_path = '{{nginx.directories.http.servers}}'
+config_path = '{{ NGINX.DIRECTORIES.HTTP.SERVERS }}'
 
 # Initialize the error counter
 error_counter = 0

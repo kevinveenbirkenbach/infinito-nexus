@@ -24,7 +24,7 @@ if [ "$force_freeing" = true ]; then
   
   {% if backups_folder_path is defined and size_percent_maximum_backup is defined %}
   echo "cleaning up backups" &&
-  python {{path_administrator_scripts}}sys-cln-backups/sys-cln-backups.py --backups-folder-path {{backups_folder_path}} --maximum-backup-size-percent {{size_percent_maximum_backup}} || exit 2
+  python {{ PATH_ADMINISTRATOR_SCRIPTS }}sys-cln-backups/sys-cln-backups.py --backups-folder-path {{backups_folder_path}} --maximum-backup-size-percent {{size_percent_maximum_backup}} || exit 2
   {% endif %}
 
   if pacman -Qs $package > /dev/null ; then

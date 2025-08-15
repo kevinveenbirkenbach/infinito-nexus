@@ -44,7 +44,7 @@ body_filter_by_lua_block {
     local head_snippets = {}
 
     {% for head_feature in ['css', 'matomo', 'desktop', 'javascript', 'logout' ] %}
-    {% if applications | get_app_conf(application_id, 'features.' ~ head_feature, false) | bool %}
+    {% if applications | get_app_conf(application_id, 'features.' ~ head_feature, false) %}
     head_snippets[#head_snippets + 1] = [=[
         {%- include "roles/srv-web-7-7-inj-" ~ head_feature ~ "/templates/head_sub.j2" -%}
     ]=]
@@ -59,7 +59,7 @@ body_filter_by_lua_block {
     local body_snippets = {}
 
     {% for body_feature in ['matomo', 'logout', 'desktop'] %}
-    {% if applications | get_app_conf(application_id, 'features.' ~ body_feature, false) | bool %}
+    {% if applications | get_app_conf(application_id, 'features.' ~ body_feature, false) %}
     body_snippets[#body_snippets + 1] = [=[
         {%- include "roles/srv-web-7-7-inj-" ~ body_feature ~ "/templates/body_sub.j2" -%}
     ]=]

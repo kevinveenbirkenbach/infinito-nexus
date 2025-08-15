@@ -1,2 +1,2 @@
-inj_port_ui_file_name:       "iframe-handler.js"
-inj_port_ui_js_destination:  "{{ [ nginx.directories.data.cdn, inj_port_ui_file_name ] | path_join }}"
+INJ_DESKTOP_JS_FILE_NAME:       "iframe-handler.js"
+INJ_DESKTOP_JS_FILE_DESTINATION:  "{{ [ NGINX.DIRECTORIES.DATA.CDN, INJ_DESKTOP_JS_FILE_NAME ] | path_join }}"

@@ -1,1 +1,1 @@
-systemd_notifier_email_folder: '{{path_administrator_scripts}}sys-alm-email/'
+systemd_notifier_email_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-alm-email/'

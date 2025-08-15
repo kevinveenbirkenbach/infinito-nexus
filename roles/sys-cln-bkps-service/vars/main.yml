@@ -1,2 +1,2 @@
-cleanup_backups_directory: '{{path_administrator_scripts}}sys-cln-backups/'
+cleanup_backups_directory: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-cln-backups/'
 

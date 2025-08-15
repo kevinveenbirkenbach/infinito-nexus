@@ -41,10 +41,10 @@ and disable any non-functioning apps.
 ## Recover Latest Backup 💾
 
 ```bash
-cd {{path_docker_compose_instances}}nextcloud &&
+cd {{ PATH_DOCKER_COMPOSE_INSTANCES }}nextcloud &&
 docker-compose down &&
 docker-compose exec -i database mysql -u nextcloud -pPASSWORT nextcloud < "/Backups/$(sha256sum /etc/machine-id | head -c 64)/sys-bkp-docker-2-loc/latest/nextcloud_database/sql/backup.sql" &&
-cd {{path_administrator_scripts}}sys-bkp-docker-2-loc &&
+cd {{ PATH_ADMINISTRATOR_SCRIPTS }}sys-bkp-docker-2-loc &&
 bash ./recover-web-app-from-local.sh "nextcloud_data" "$(sha256sum /etc/machine-id | head -c 64)"
 ```
 

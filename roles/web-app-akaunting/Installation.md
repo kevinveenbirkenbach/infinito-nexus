@@ -3,7 +3,7 @@
 1. **Navigate to the Docker Compose Directory**  
    Change into the directory where the Docker Compose files reside.
    ```bash
-   cd {{path_docker_compose_instances}}akaunting/
+   cd {{ PATH_DOCKER_COMPOSE_INSTANCES }}akaunting/
    ```
 
 2. **Set Environment Variables**  

@@ -1,0 +1,8 @@
+- name: install certbot
+  community.general.pacman:
+    name: certbot
+    state: present
+
+- name: "Include tasks for 'No-Webroot-ACME-CHALLENGE-METHOD'"
+  include_tasks: 02_no_webroot.yml
+  when: CERTBOT_ACME_CHALLENGE_METHOD != 'webroot'

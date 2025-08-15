@@ -1,7 +1,7 @@
 - name: create collabora proxy configuration file
   template: 
     src:  "nginx.conf.j2" 
-    dest: "{{nginx.directories.http.servers}}{{domains | get_domain(application_id)}}.conf"
+    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty
 
 - name: "Include docker-compose role"

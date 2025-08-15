@@ -1,15 +1,15 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   postgres:
-    container_name:   "{{ postgres_name }}"
-    image:            "{{ postgres_custom_image_name }}"
+    container_name:   "{{ POSTGRES_CONTAINER }}"
+    image:            "{{ POSTGRES_CUSTOM_IMAGE_NAME }}"
     build:
       context: .
       dockerfile: Dockerfile
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-{% if postgres_expose_local %}
+{% if POSTGRES_EXPOSE_LOCAL %}
     ports: 
-      - "{{ postgres_local_host }}:{{ postgres_port }}:5432"
+      - "{{ POSTGRES_LOCAL_HOST }}:{{ POSTGRES_PORT }}:5432"
 {% endif %}
     volumes:
       - "data:/var/lib/postgresql/data"
@@ -17,6 +17,6 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: "{{ postgres_volume }}"
+    name: "{{ POSTGRES_VOLUME }}"
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

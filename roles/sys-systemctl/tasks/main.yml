@@ -1,0 +1,6 @@
+- block:
+  - name: "reset (if enabled)"
+    include_tasks: 01_reset.yml
+    when: MODE_RESET | bool
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_systemctl is not defined

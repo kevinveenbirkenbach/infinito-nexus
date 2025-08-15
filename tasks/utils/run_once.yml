@@ -4,7 +4,7 @@
 - name: "Ensure that {{ docker_compose.directories.instance }} is up"
   # This is a little hack to guaranty that the docker containers are allways up
   # It isn't the cleanest solution to have it here but it should fullfill their purpose
-  include_tasks: "{{ playbook_dir }}/roles/docker-compose/tasks/04_ensure_up.yml"
+  include_tasks: "{{ playbook_dir }}/roles/docker-compose/tasks/05_ensure_up.yml"
   when:
     - docker_compose is defined
     - (application_id | get_entity_name) == (docker_compose.directories.instance | basename)

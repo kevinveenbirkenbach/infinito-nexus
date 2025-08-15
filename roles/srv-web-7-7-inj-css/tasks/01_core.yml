@@ -15,8 +15,8 @@
   template:
     src: global.css.j2
     dest: "{{ global_css_destination }}"
-    owner: "{{ nginx.user }}"
-    group: "{{ nginx.user }}"
+    owner: "{{ NGINX.USER }}"
+    group: "{{ NGINX.USER }}"
     mode: '0644'
 
 - name: Get stat for global.css

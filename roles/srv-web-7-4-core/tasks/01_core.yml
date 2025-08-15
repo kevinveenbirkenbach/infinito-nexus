@@ -1,3 +1,27 @@
+- name: "cleanup (if enabled)"
+  include_tasks: 02_cleanup.yml
+  when: >
+    MODE_CLEANUP | bool or
+    MODE_RESET | bool
+
+- name: "reset (if enabled)"
+  include_tasks: 03_reset.yml
+  when: MODE_RESET | bool
+
+- name: "Load docker compose handlers"
+  include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
+  vars:
+    handler_role_name: "docker-compose"
+
+- name: "Include tasks to create directories"
+  include_tasks: 04_directories.yml
+
+- name: create nginx config file
+  template: 
+    src:  nginx.conf.j2
+    dest: "{{ NGINX.FILES.CONFIGURATION }}"
+  notify: docker compose up
+
 - name: Include health dependencies
   include_role:
     name: "{{ item }}"
@@ -5,6 +29,7 @@
     - sys-hlth-webserver
     - sys-hlth-csp
   vars:
+    # Extra flush is for performance reasons not necessary
     flush_handlers: false
 
 - name: Include openresty
@@ -13,50 +38,12 @@
   # Inside openresty their is a validation that it doesn't run multiple times
   include_role:
     name: svc-prx-openresty
-    public: false
+
     # Explicit set to guaranty that application_id will not be overwritten.
     # Should be anyhow the default case
+    public: false
+
+  vars:
+    # Flush openresty handler on first run, so that openresty is up, before openresty related handlers are triggered
+    flush_handlers: true
   when: run_once_svc_prx_openresty is not defined
-
-- name: "reset (if enabled)"
-  include_tasks: 02_reset.yml
-  when: MODE_RESET | bool
-  
-- name: Ensure nginx configuration directories are present
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{nginx.user}}"
-    group: "{{nginx.user}}"
-    mode: '0755'
-    recurse: yes
-  loop: >
-    {{
-      [ nginx.directories.configuration ] +
-      ( nginx.directories.http.values() | list ) +
-      [ nginx.directories.streams ] 
-    }}
-
-- name: Ensure nginx data storage directories are present
-  file:
-    path: "{{ item }}"
-    state: directory
-    recurse: yes
-    owner: "{{nginx.user}}"
-    group: "{{nginx.user}}"
-    mode:  '0755'
-  loop: >
-    {{ nginx.directories.data.values() | list }}
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  
-- name: "Include tasks to create cache directories"
-  include_tasks: 03_cache_directories.yml
-  when: run_once_nginx_reverse_proxy is not defined
-
-- name: create nginx config file
-  template: 
-    src:  nginx.conf.j2 
-    dest: "{{ nginx.files.configuration }}"
-  notify: restart openresty
-  

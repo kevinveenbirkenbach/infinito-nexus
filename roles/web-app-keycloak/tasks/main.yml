@@ -1,8 +1,8 @@
 ---
-- name: "create import files for {{application_id}}"
+- name: "create import files for {{ application_id }}"
   include_tasks: 01_import.yml
 
-- name: "load docker, db and proxy for {{application_id}}"
+- name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
     name: cmp-db-docker-proxy
 

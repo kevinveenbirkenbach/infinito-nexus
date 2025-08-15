@@ -5,4 +5,4 @@ OnFailure=sys-alm-compose.infinito@%n.service
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/python3 {{ health_csp_crawler_script }} \
-  --nginx-config-dir={{ nginx.directories.http.servers }}
+  --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}

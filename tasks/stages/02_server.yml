@@ -3,6 +3,8 @@
   include_role:
     name: "{{ item }}"
   loop:
+    - user-administrator
+    - user-root
     - sys-svc-sshd
     - sys-svc-journalctl
     - sys-hlth-disc-space

@@ -2,11 +2,11 @@
 
 ## 🗑️ Cleanup (Remove Instance & Volumes)
 ```bash
-cd {{path_docker_compose_instances}}mastodon/
+cd {{ PATH_DOCKER_COMPOSE_INSTANCES }}mastodon/
 docker-compose down
 docker volume rm mastodon_data mastodon_database mastodon_redis
-cd {{path_docker_compose_instances}} &&
-rm -vR {{path_docker_compose_instances}}mastodon
+cd {{ PATH_DOCKER_COMPOSE_INSTANCES }} &&
+rm -vR {{ PATH_DOCKER_COMPOSE_INSTANCES }}mastodon
 ```
 
 ## 🔍 Access Mastodon Terminal

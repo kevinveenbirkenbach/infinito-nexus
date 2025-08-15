@@ -1,11 +1,10 @@
 ---
-- name: "Wait until Postgres is listening on port {{ postgres_port }}"
-  wait_for:
-    host: "{{ postgres_local_host }}"
-    port: "{{ postgres_port }}"
-    delay: 5
-    timeout: 300
-    state: started
+- name: Wait for Postgres inside the container
+  shell: "docker exec {{ POSTGRES_CONTAINER }} pg_isready -U postgres"
+  register: pg_ready
+  until: pg_ready.rc == 0
+  retries: 30
+  delay: 5
 
 # 1) Create the database
 - name: "Create database: {{ database_name }}"
@@ -13,13 +12,13 @@
     name: "{{ database_name }}"
     state: present
     login_user: postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-    login_host: "{{ postgres_local_host }}"
-    login_port: "{{ postgres_port }}"
+    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_host: "{{ POSTGRES_LOCAL_HOST }}"
+    login_port: "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
-  retries: "{{ postgres_retry_retries }}"
-  delay: "{{ postgres_retry_delay }}"
+  retries: "{{ POSTGRES_RETRIES }}"
+  delay: "{{ POSTGRES_DELAY }}"
 
 # 2) Create the database user (with password)
 - name: "Create database user: {{ database_username }}"
@@ -29,29 +28,29 @@
     db:             "{{ database_name }}"
     state:          present
     login_user:     postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-    login_host:     "{{ postgres_local_host }}"
-    login_port:     "{{ postgres_port }}"
+    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_host:     "{{ POSTGRES_LOCAL_HOST }}"
+    login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
-  retries: "{{ postgres_retry_retries }}"
-  delay: "{{ postgres_retry_delay }}"
+  retries: "{{ POSTGRES_RETRIES }}"
+  delay: "{{ POSTGRES_DELAY }}"
 
 # 3) Enable LOGIN for the role (removes NOLOGIN)
 - name: "Enable login for role {{ database_username }}"
   community.postgresql.postgresql_query:
     db: postgres
     login_user: postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-    login_host: "{{ postgres_local_host }}"
-    login_port: "{{ postgres_port }}"
+    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_host: "{{ POSTGRES_LOCAL_HOST }}"
+    login_port: "{{ POSTGRES_PORT }}"
     query: |
       ALTER ROLE "{{ database_username }}"
         WITH LOGIN;
   register: postgresql_result
   until: postgresql_result is succeeded
-  retries: "{{ postgres_retry_retries }}"
-  delay: "{{ postgres_retry_delay }}"
+  retries: "{{ POSTGRES_RETRIES }}"
+  delay: "{{ POSTGRES_DELAY }}"
 
 # 4) Grant ALL privileges on all tables in the public schema
 - name: "Grant ALL privileges on tables in public schema to {{ database_username }}"
@@ -64,13 +63,13 @@
     schema: public
     state:  present
     login_user:     postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-    login_host:     "{{ postgres_local_host }}"
-    login_port:     "{{ postgres_port }}"
+    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_host:     "{{ POSTGRES_LOCAL_HOST }}"
+    login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
-  retries: "{{ postgres_retry_retries }}"
-  delay: "{{ postgres_retry_delay }}"
+  retries: "{{ POSTGRES_RETRIES }}"
+  delay: "{{ POSTGRES_DELAY }}"
 
 # 5) Grant ALL privileges at the database level
 - name: "Grant all privileges on database {{ database_name }} to {{ database_username }}"
@@ -81,22 +80,22 @@
     privs: ALL
     state: present
     login_user:     postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-    login_host:     "{{ postgres_local_host }}"
-    login_port:     "{{ postgres_port }}"
+    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_host:     "{{ POSTGRES_LOCAL_HOST }}"
+    login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
-  retries: "{{ postgres_retry_retries }}"
-  delay: "{{ postgres_retry_delay }}"
+  retries: "{{ POSTGRES_RETRIES }}"
+  delay: "{{ POSTGRES_DELAY }}"
 
 # 6) Grant USAGE/CREATE on schema and set default privileges
 - name: "Set comprehensive schema privileges for {{ database_username }}"
   community.postgresql.postgresql_query:
     db: "{{ database_name }}"
     login_user: postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-    login_host: "{{ postgres_local_host }}"
-    login_port: "{{ postgres_port }}"
+    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_host: "{{ POSTGRES_LOCAL_HOST }}"
+    login_port: "{{ POSTGRES_PORT }}"
     query: |
       GRANT USAGE ON SCHEMA public TO "{{ database_username }}";
       GRANT CREATE ON SCHEMA public TO "{{ database_username }}";
@@ -104,8 +103,8 @@
         GRANT ALL PRIVILEGES ON TABLES TO "{{ database_username }}";
   register: postgresql_result
   until: postgresql_result is succeeded
-  retries: "{{ postgres_retry_retries }}"
-  delay: "{{ postgres_retry_delay }}"
+  retries: "{{ POSTGRES_RETRIES }}"
+  delay: "{{ POSTGRES_DELAY }}"
 
 # 7) Ensure PostGIS and related extensions are installed (if enabled)
 - name: "Ensure PostGIS-related extensions are installed"
@@ -114,9 +113,9 @@
     ext:        "{{ item }}"
     state:      present
     login_user:     postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-    login_host:     "{{ postgres_local_host }}"
-    login_port:     "{{ postgres_port }}"
+    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_host:     "{{ POSTGRES_LOCAL_HOST }}"
+    login_port:     "{{ POSTGRES_PORT }}"
   loop:
     - postgis
     - pg_trgm
@@ -124,8 +123,8 @@
   when: postgres_gis_enabled | bool
   register: postgresql_result
   until: postgresql_result is succeeded
-  retries: "{{ postgres_retry_retries }}"
-  delay: "{{ postgres_retry_delay }}"
+  retries: "{{ POSTGRES_RETRIES }}"
+  delay: "{{ POSTGRES_DELAY }}"
 
 # 8) Ensure pgvector (vector) extension is installed (for Discourse‑AI, pgvector, …)
 - name: "Ensure pgvector (vector) extension is installed"
@@ -134,10 +133,10 @@
     ext:          vector
     state:        present
     login_user:   postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.postgres_password', True) }}"
-    login_host:   "{{ postgres_local_host }}"
-    login_port:   "{{ postgres_port }}"
+    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_host:   "{{ POSTGRES_LOCAL_HOST }}"
+    login_port:   "{{ POSTGRES_PORT }}"
   register: postgresql_result
   until: postgresql_result is succeeded
-  retries: "{{ postgres_retry_retries }}"
-  delay: "{{ postgres_retry_delay }}"
+  retries: "{{ POSTGRES_RETRIES }}"
+  delay: "{{ POSTGRES_DELAY }}"

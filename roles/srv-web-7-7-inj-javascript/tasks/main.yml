@@ -11,11 +11,11 @@
   set_fact:
     javascript_code: "{{ lookup('template', modifier_javascript_template_file) }}"
 
-- name: "Collapse Javascript code into one-liner for '{{application_id}}'"
+- name: "Collapse Javascript code into one-liner for '{{ application_id }}'"
   set_fact:
     javascript_code_one_liner: "{{ javascript_code | to_one_liner }}"
 
-- name: "Append Javascript CSP hash for '{{application_id}}'"
+- name: "Append Javascript CSP hash for '{{ application_id }}'"
   set_fact:
     applications: "{{ applications | append_csp_hash(application_id, javascript_code_one_liner) }}"
   changed_when: false

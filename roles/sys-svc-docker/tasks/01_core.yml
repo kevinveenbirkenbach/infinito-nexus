@@ -1,0 +1,25 @@
+- name: docker & docker compose install
+  community.general.pacman:
+    name: 
+      - 'docker'
+      - 'docker-compose'
+    state: present
+  notify: docker restart
+
+- name: "Load cleanup tasks when MODE_CLEANUP or MODE_RESET is enabled"
+  include_tasks: "02_cleanup.yml"
+  when: MODE_CLEANUP | bool or MODE_RESET | bool
+
+- name: "Load reset tasks when MODE_RESET is enabled"
+  include_tasks: "03_reset.yml"
+  when: MODE_RESET | bool
+
+- name: Include backup, repair and health services for docker
+  include_role:
+    name: "{{ item }}"
+  loop:
+    - sys-bkp-docker-2-loc
+    - sys-hlth-docker-container
+    - sys-hlth-docker-volumes
+    - sys-rpr-docker-soft
+    - sys-rpr-docker-hard

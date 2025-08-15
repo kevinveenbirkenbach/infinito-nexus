@@ -1,6 +1,6 @@
-FROM {{ postgres_image }}:{{ postgres_version }}
+FROM {{ POSTGRES_IMAGE }}:{{ POSTGRES_VERSION }}
 
-{% if postgres_pg_vector_enabled %}
+{% if POSTGRES_VECTOR_ENABLED %}
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       build-essential \

@@ -1,15 +1,15 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   openresty:
-    container_name: {{ openresty_container }}
-    image: {{ openresty_image }}:{{ openresty_version }}
+    container_name: {{ OPENRESTY_CONTAINER }}
+    image: {{ OPENRESTY_IMAGE }}:{{ OPENRESTY_VERSION }}
     network_mode: "host"
     volumes:
-      - {{ nginx.files.configuration }}:/usr/local/openresty/nginx/conf/nginx.conf:ro
-      - {{ nginx.directories.configuration }}:/usr/local/openresty/nginx/conf/conf.d:ro
-      - {{ nginx.files.configuration }}:{{ nginx.files.configuration }}:ro
-      - {{ nginx.directories.configuration }}:{{ nginx.directories.configuration }}:ro
-      - {{ nginx.directories.data.www }}:{{ nginx.directories.data.www }}:ro
-      - {{ nginx.directories.data.well_known }}:{{ nginx.directories.data.well_known }}:ro
+      - {{ NGINX.FILES.CONFIGURATION }}:/usr/local/openresty/nginx/conf/nginx.conf:ro
+      - {{ NGINX.DIRECTORIES.CONFIGURATION }}:/usr/local/openresty/nginx/conf/conf.d:ro
+      - {{ NGINX.FILES.CONFIGURATION }}:{{ NGINX.FILES.CONFIGURATION }}:ro
+      - {{ NGINX.DIRECTORIES.CONFIGURATION }}:{{ NGINX.DIRECTORIES.CONFIGURATION }}:ro
+      - {{ NGINX.DIRECTORIES.DATA.WWW }}:{{ NGINX.DIRECTORIES.DATA.WWW }}:ro
+      - {{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }}:{{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }}:ro
       - {{ LETSENCRYPT_WEBROOT_PATH }}:{{ LETSENCRYPT_WEBROOT_PATH }}:ro
       - {{ LETSENCRYPT_BASE_PATH }}:{{ LETSENCRYPT_BASE_PATH }}:ro
     command: ["openresty", "-g", "daemon off;"]

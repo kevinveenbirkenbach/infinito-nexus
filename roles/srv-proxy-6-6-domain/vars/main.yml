@@ -1,1 +1,1 @@
-configuration_destination:  "{{nginx.directories.http.servers}}{{domain}}.conf"
+configuration_destination:  "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domain }}.conf"

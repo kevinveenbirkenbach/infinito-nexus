@@ -1,7 +1,7 @@
 - name: "Load database variables for reset function"
   include_vars: "{{playbook_dir}}/roles/cmp-rdbms/vars/main.yml"
 
-- name: "cleanup central database from {{application_id}}_default network"
+- name: "cleanup central database from {{ application_id }}_default network"
   command:
     cmd: "docker network disconnect {{applications | get_app_conf(application_id, 'network', True)}} {{ database_host }}"
   ignore_errors: true

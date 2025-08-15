@@ -1,0 +1,44 @@
+# Docker Server
+
+## Description
+
+This role installs and maintains the Docker service, including Docker Compose, on Linux systems.  
+It is part of the [Infinito.Nexus Project](https://s.infinito.nexus/code), maintained and developed by [Kevin Veen-Birkenbach](https://www.veen.world/).
+
+## Overview
+
+The role ensures that Docker and Docker Compose are present, integrates essential backup, repair, and health check roles, and supports cleanup or full reset modes for a fresh Docker environment.  
+When enabled via `MODE_CLEANUP` or `MODE_RESET`, it will automatically prune unused Docker resources.  
+`MODE_RESET` additionally restarts the Docker service after cleanup.
+
+## Features
+
+- **Automated Installation**  
+  Installs Docker and Docker Compose via the system package manager.
+
+- **Integrated Dependencies**  
+  Includes backup, repair, and health check sub-roles:
+  - `sys-bkp-docker-2-loc`
+  - `user-administrator`
+  - `sys-hlth-docker-container`
+  - `sys-hlth-docker-volumes`
+  - `sys-rpr-docker-soft`
+  - `sys-rpr-docker-hard`
+
+- **Cleanup & Reset Modes**  
+  - `MODE_CLEANUP`: Removes unused Docker containers, networks, images, and volumes.  
+  - `MODE_RESET`: Performs cleanup and restarts the Docker service.
+
+- **Handler Integration**  
+  Restart handler ensures the Docker daemon is reloaded when necessary.
+
+## License
+
+This role is released under the Infinito.Nexus NonCommercial License (CNCL).  
+See [license details](https://s.infinito.nexus/license).
+
+## Author Information
+
+Kevin Veen-Birkenbach  
+Consulting & Coaching Solutions  
+[https://www.veen.world](https://www.veen.world)

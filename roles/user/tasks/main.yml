@@ -1,14 +1,14 @@
 # run_once_user: deactivated
-- name: create .bashrc
-  template:
-    src: "bashrc.j2"
-    dest: "{{ '/root/.bashrc' if user_name == 'root' else '/home/' ~ user_name ~ '/.bashrc' }}"
-    owner: "{{user_name}}"
-    group: "{{user_name}}"
 
-- name: create .bash_profile
-  template:
-    src: "bash_profile.j2"
-    dest: "{{ '/root/.bash_profile' if user_name == 'root' else '/home/' ~ user_name ~ '/.bash_profile' }}"
-    owner: "{{user_name}}"
-    group: "{{user_name}}"
+- name: Deploy shell dotfiles
+  ansible.builtin.template:
+    src:  "{{ item }}.j2"
+    dest: "{{ user_home }}/.{{ item }}"
+    owner: "{{ user_name }}"
+    group: "{{ user_group }}"
+    mode: "0644"
+  loop: 
+    - bashrc
+    - bash_profile
+  loop_control:
+    label: ".{{ item }}"

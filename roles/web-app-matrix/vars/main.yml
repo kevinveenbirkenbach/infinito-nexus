@@ -1,20 +1,37 @@
 ---
 # General 
-application_id:           "web-app-matrix"
-database_type:            "postgres"
-registration_file_folder: "/data/"
-
-# Matrix
-matrix_synapse_version:   "{{ applications | get_app_conf(application_id, 'docker.services.synapse.version', True) }}"
-matrix_synapse_image:     "{{ applications | get_app_conf(application_id, 'docker.services.synapse.image', True) }}"
-matrix_synapse_name:      "{{ applications | get_app_conf(application_id, 'docker.services.synapse.name', True) }}"
-matrix_synapse_data:      "{{ applications | get_app_conf(application_id, 'docker.volumes.synapse', True) }}"
-matrix_element_version:   "{{ applications | get_app_conf(application_id, 'docker.services.element.version', True) }}"
-matrix_element_image:     "{{ applications | get_app_conf(application_id, 'docker.services.element.image', True) }}"
-matrix_element_name:      "{{ applications | get_app_conf(application_id, 'docker.services.element.name', True) }}"
-matrix_project:           "{{ application_id | get_entity_name }}"
+application_id:                       "web-app-matrix"
+database_type:                        "postgres"
 
 # Webserver
-well_known_directory:     "{{nginx.directories.data.well_known}}/matrix/"
-location_upload:          "~ ^/_matrix/media/v3/"
-client_max_body_size:     "{{ applications | get_app_conf(application_id, 'server.client_max_body_size') }}"
+location_upload:                      "~ ^/_matrix/media/v3/"
+client_max_body_size:                 "{{ applications | get_app_conf(application_id, 'server.client_max_body_size') }}"
+
+# Matrix
+
+## General
+MATRIX_WELL_KNOWN_DIRECTORY:          "{{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }}/matrix/"
+MATRIX_WELL_KNOWN_FILE:               "{{ MATRIX_WELL_KNOWN_DIRECTORY }}server"
+MATRIX_PROJECT:                       "{{ application_id | get_entity_name }}"
+MATRIX_REGISTRATION_FILE_FOLDER:      "/data/"
+
+## Synapse
+MATRIX_SYNAPSE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.synapse.version') }}"
+MATRIX_SYNAPSE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.synapse.image') }}"
+MATRIX_SYNAPSE_NAME:                  "{{ applications | get_app_conf(application_id, 'docker.services.synapse.name') }}"
+MATRIX_SYNAPSE_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.synapse') }}"
+MATRIX_SYNAPSE_DOMAIN:                "{{ domains[application_id].synapse }}"
+MATRIX_SYNAPSE_PORT:                  "{{ ports.localhost.http['web-app-matrix_synapse'] }}"
+MATRIX_SYNAPSE_CONFIG_PATH_HOST:      "{{ docker_compose.directories.config }}homeserver.yaml"   
+MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER: "/data/homeserver.yaml"
+MATRIX_SYNAPSE_LOG_PATH_HOST:         "{{ docker_compose.directories.config }}{{ MATRIX_SYNAPSE_DOMAIN }}.log.config"    
+MATRIX_SYNAPSE_LOG_PATH_CONTAINER:    "/data/{{ MATRIX_SYNAPSE_DOMAIN }}.log.config"
+MATRIX_SYNAPSE_URL:                   "{{ WEB_PROTOCOL }}://{{ MATRIX_SYNAPSE_DOMAIN }}"
+
+## Element
+MATRIX_ELEMENT_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.element.version') }}"
+MATRIX_ELEMENT_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.element.image') }}"
+MATRIX_ELEMENT_NAME:                  "{{ applications | get_app_conf(application_id, 'docker.services.element.name') }}"
+MATRIX_ELEMENT_DOMAIN:                "{{ domains[application_id].element }}"
+MATRIX_ELEMENT_PORT:                  "{{ ports.localhost.http['web-app-matrix_element'] }}"
+MATRIX_ELEMENT_CONFIG_PATH_HOST:      "{{ docker_compose.directories.config }}element-config.json"

@@ -14,7 +14,7 @@
   command: pkgmgr path infinito
   register: path_infinito_output
 
-- name: "load docker, proxy for '{{application_id}}'"
+- name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: cmp-docker-proxy
 

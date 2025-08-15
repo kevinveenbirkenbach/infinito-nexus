@@ -1,16 +1,10 @@
 - block:
-  - include_role:
-      name: docker-container
-    when: run_once_docker_container is not defined
+  - include_tasks: 01_core.yml
   - include_tasks: utils/run_once.yml
   when: run_once_docker_compose is not defined
 
-- name: "Load variables from {{ docker_compose_variable_file }} for whole play"
-  include_vars: "{{ docker_compose_variable_file }}"
-
-- name: "reset (if enabled)"
-  include_tasks: 01_reset.yml
-  when: MODE_RESET | bool
+- name: "Load variables from {{ DOCKER_COMPOSE_VARIABLE_FILE }} for whole play"
+  include_vars: "{{ DOCKER_COMPOSE_VARIABLE_FILE }}"
 
 # This could lead to problems in docker-compose directories which are based on a git repository
 # @todo Verify that this isn't the case. E.g. in accounting
@@ -21,15 +15,15 @@
     mode: '0755'
   with_dict: "{{ docker_compose.directories }}"
 
-- name: "Include routines to set up a git repository based installation for '{{application_id}}'."
-  include_tasks: "02_repository.yml"
+- name: "Include routines to set up a git repository based installation for '{{ application_id }}'."
+  include_tasks: "03_repository.yml"
   when: docker_pull_git_repository | bool
 
 - block:
-  - name: "Include file management routines for '{{application_id}}'."
-    include_tasks: "03_files.yml"
+  - name: "Include file management routines for '{{ application_id }}'."
+    include_tasks: "04_files.yml"
   - name: "Ensure that {{ docker_compose.directories.instance }} is up"
-    include_tasks: "04_ensure_up.yml"
+    include_tasks: "05_ensure_up.yml"
   when: not docker_compose_skipp_file_creation | bool
 
 - name: "flush docker compose for '{{ application_id }}'"

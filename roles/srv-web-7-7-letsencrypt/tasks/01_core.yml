@@ -6,7 +6,7 @@
   - name: create nginx letsencrypt config file
     template:
       src: "letsencrypt.conf.j2"
-      dest: "{{nginx.directories.http.global}}letsencrypt.conf"
+      dest: "{{NGINX.DIRECTORIES.HTTP.GLOBAL}}letsencrypt.conf"
     notify: restart openresty
 
   - name: "Set CAA records for all base domains"

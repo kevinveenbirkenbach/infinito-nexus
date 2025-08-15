@@ -1,12 +1,15 @@
 ---
 - name: Validate OpenResty configuration
   command: >
-    docker exec {{ openresty_container }} openresty -t -q
+    docker exec {{ OPENRESTY_CONTAINER }} openresty -t -q
   register: openresty_test
   changed_when: false
-  failed_when: openresty_test.rc != 0
+  failed_when: >
+    openresty_test.rc != 0 and
+    ('is not running' not in ((openresty_test.stderr | default('')) | lower)) and
+    ('no such container' not in ((openresty_test.stderr | default('')) | lower))
   listen: restart openresty
 
 - name: Restart OpenResty container
-  command: docker restart {{ openresty_container }}
+  command: docker restart {{ OPENRESTY_CONTAINER }}
   listen: restart openresty

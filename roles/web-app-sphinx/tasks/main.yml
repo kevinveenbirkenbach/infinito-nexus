@@ -13,7 +13,7 @@
   command: pkgmgr path infinito-sphinx
   register: path_infinito_sphinx_output
 
-- name: "load docker, proxy for '{{application_id}}'"
+- name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: cmp-docker-proxy
 

@@ -1,2 +1,2 @@
-heal_docker: '{{path_administrator_scripts}}sys-rpr-docker-soft/'
+heal_docker: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-rpr-docker-soft/'
 

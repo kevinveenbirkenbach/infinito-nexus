@@ -134,7 +134,7 @@ bridge:
     double_puppet_allow_discovery: false
     # Servers to allow double puppeting from, even if double_puppet_allow_discovery is false.
     double_puppet_server_map:
-        {{applications | get_app_conf(application_id, 'server_name', True)}}: {{ WEB_PROTOCOL }}://{{ domains[application_id].synapse }}
+        {{applications | get_app_conf(application_id, 'server_name', True)}}: {{ MATRIX_SYNAPSE_URL }}
     # Shared secret for https://github.com/devture/matrix-synapse-shared-secret-auth
     #
     # If set, custom puppets will be enabled automatically for local users

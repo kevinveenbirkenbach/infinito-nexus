@@ -1,6 +1,6 @@
 server
 {
-  server_name {{domains | get_domain(application_id)}};
+  server_name {{ domains | get_domain(application_id) }};
   
   {% include 'roles/srv-web-7-7-letsencrypt/templates/ssl_header.j2' %}
 
@@ -12,13 +12,13 @@ server
   
   location /
   {
-    root {{nginx.directories.data.html}};
+    root {{NGINX.DIRECTORIES.DATA.HTML}};
     index index.html index.htm;
     {% include 'roles/srv-web-7-7-inj-compose/templates/location.lua.j2' %}
   }
 
   location /.well-known/ {
-    alias {{nginx.directories.data.well_known}};
+    alias {{NGINX.DIRECTORIES.DATA.WELL_KNOWN}};
     allow all;
     default_type "text/plain";
     autoindex on;

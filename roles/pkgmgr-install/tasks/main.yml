@@ -5,11 +5,25 @@
   when: run_once_pkgmgr_install is not defined
 
 - name: update {{ package_name }}
-  shell: |
+  ansible.builtin.shell: |
     source ~/.venvs/pkgmgr/bin/activate
     pkgmgr update {{ package_name }} --dependencies --clone-mode https
+  args:
+    executable: /bin/bash
   notify: "{{ package_notify | default(omit,true) }}"
   register: pkgmgr_update_result
-  changed_when: "'No command defined and neither main.sh nor main.py found' not in pkgmgr_update_result.stdout"
-  failed_when: pkgmgr_update_result.rc != 0 and 'No command defined and neither main.sh nor main.py found' not in pkgmgr_update_result.stdout
+  # Mark changed only if it's not "already up to date" and not "no command defined..."
+  changed_when: >
+    ('already up to date' not in ((pkgmgr_update_result.stdout | default('') | lower)
+      ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
+    and
+    ('no command defined' not in ((pkgmgr_update_result.stdout | default('') | lower)
+      ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
+
+  # Fail only on real errors; allow the "no command defined..." case
+  failed_when: >
+    (pkgmgr_update_result.rc != 0)
+    and
+    ('no command defined' not in ((pkgmgr_update_result.stdout | default('') | lower)
+      ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
 

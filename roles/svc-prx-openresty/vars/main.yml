@@ -5,6 +5,7 @@ application_id:                 "svc-prx-openresty"
 database_type:                  ""
 
 # Openresty
-openresty_image:                "openresty/openresty"
-openresty_version:              "alpine"
-openresty_container:            "{{ applications | get_app_conf(application_id, 'docker.services.openresty.name', True) }}"
+OPENRESTY_IMAGE:                "openresty/openresty"
+OPENRESTY_VERSION:              "alpine"
+OPENRESTY_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.openresty.name', True) }}"
+

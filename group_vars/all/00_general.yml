@@ -29,7 +29,7 @@ WEB_PORT:               "{{ 443 if WEB_PROTOCOL == 'https' else 80 }}"  # Defaul
 
 # Domain
 PRIMARY_DOMAIN:         "localhost"                                                                                   # Primary Domain of the server
-PRIMARY_DOMAIN_tld:     "{{ (PRIMARY_DOMAIN == 'localhost') | ternary('localhost', PRIMARY_DOMAIN.split('.')[-1]) }}" # Top Level Domain of the server
+PRIMARY_DOMAIN_TLD:     "{{ (PRIMARY_DOMAIN == 'localhost') | ternary('localhost', PRIMARY_DOMAIN.split('.')[-1]) }}" # Top Level Domain of the server
 PRIMARY_DOMAIN_SLD:     "{{ (PRIMARY_DOMAIN == 'localhost') | ternary('localhost', PRIMARY_DOMAIN.split('.')[-2]) }}" # Second Level Domain of the server
 
 # Server Tact Variables 

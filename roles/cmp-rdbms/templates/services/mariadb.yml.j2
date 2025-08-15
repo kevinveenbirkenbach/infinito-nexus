@@ -6,7 +6,7 @@
     logging:
       driver: journald
     image: mariadb
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     env_file:
       - {{database_env}}
     command: "--transaction-isolation=READ-COMMITTED --binlog-format=ROW"

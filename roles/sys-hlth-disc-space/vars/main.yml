@@ -1,1 +1,1 @@
-health_disc_space_folder: '{{path_administrator_scripts}}sys-hlth-disc-space/'
+health_disc_space_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-hlth-disc-space/'

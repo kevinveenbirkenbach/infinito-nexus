@@ -5,5 +5,5 @@
 - name: "Deploying NGINX redirect configuration for {{ domain }}"
   template:
     src:  redirect.domain.nginx.conf.j2
-    dest: "{{ nginx.directories.http.servers }}{{ domain }}.conf"
+    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domain }}.conf"
   notify: restart openresty

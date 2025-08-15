@@ -1,2 +1,2 @@
 # @See https://chatgpt.com/share/67a23d18-fb54-800f-983c-d6d00752b0b4
-docker_compose: "{{ application_id | get_docker_paths(path_docker_compose_instances) }}"
+docker_compose: "{{ application_id | get_docker_paths(PATH_DOCKER_COMPOSE_INSTANCES) }}"

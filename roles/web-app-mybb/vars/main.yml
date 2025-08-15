@@ -2,7 +2,7 @@
 application_id:                                 "web-app-mybb"
 docker_compose_instance_confd_directory:        "{{docker_compose.directories.instance}}conf.d/"
 docker_compose_instance_confd_defaultconf_file: "{{docker_compose_instance_confd_directory}}default.conf"
-target_mount_conf_d_directory:                  "{{nginx.directories.http.servers}}"
+target_mount_conf_d_directory:                  "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}"
 source_domain:                                  "mybb.{{ PRIMARY_DOMAIN }}"
 database_type:                                  "mariadb"
 mybb_version:                                   "{{ applications | get_app_conf(application_id, 'docker.services.mybb.version', True) }}"

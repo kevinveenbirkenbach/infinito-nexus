@@ -6,7 +6,7 @@
 # - database_password
 - name: "create {{database_name}} database"
   include_role:
-    name: svc-db-postgres
+    name: "svc-db-{{ database_type }}"
   when: applications | get_app_conf(application_id, 'features.central_database', False)
 
 - name: "include 04_seed-database-to-backup.yml"

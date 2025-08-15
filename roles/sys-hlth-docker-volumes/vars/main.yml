@@ -1,1 +1,1 @@
-health_docker_volumes_folder: '{{path_administrator_scripts}}sys-hlth-docker-volumes/'
+health_docker_volumes_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-hlth-docker-volumes/'

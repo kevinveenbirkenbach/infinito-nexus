@@ -8,15 +8,15 @@
   - include_tasks: utils/run_once.yml
   when: run_once_web_svc_html is not defined
 
-- name: "include role for {{application_id}} to receive certs & do modification routines"
+- name: "include role for {{ application_id }} to receive certs & do modification routines"
   include_role:
     name: srv-web-7-6-composer
   vars:
-    domain: "{{domains | get_domain(application_id)}}"
+    domain: "{{ domains | get_domain(application_id) }}"
     http_port: "{{ ports.localhost.http[application_id] }}"
 
-- name: "generate {{domains | get_domain(application_id)}}.conf"
+- name: "generate {{ domains | get_domain(application_id) }}.conf"
   template:
     src: "nginx.conf.j2"
-    dest: "{{nginx.directories.http.servers}}{{domains | get_domain(application_id)}}.conf"
+    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty

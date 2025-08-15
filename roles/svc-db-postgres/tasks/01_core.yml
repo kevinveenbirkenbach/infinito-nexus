@@ -1,26 +1,21 @@
 
-- name: Include dependency 'docker-core'
+- name: Include dependency 'sys-svc-docker'
   include_role:
-    name: docker-core
-  when: run_once_docker_core is not defined
+    name: sys-svc-docker
+  when: run_once_sys_svc_docker is not defined
 
 - name: Create Docker network for PostgreSQL
   community.docker.docker_network:
-    name: "{{ postgres_network_name }}"
+    name: "{{ POSTGRES_NETWORK_NAME }}"
     state: present
     ipam_config:
-    - subnet: "{{ postgres_subnet }}"
+    - subnet: "{{ POSTGRES_SUBNET }}"
 
 - name: "include docker-compose role"
   include_role:
     name: docker-compose
-
-- name: Wait for Postgres inside the container
-  shell: "docker exec {{ postgres_name }} pg_isready -U postgres"
-  register: pg_ready
-  until: pg_ready.rc == 0
-  retries: 30
-  delay: 5
+  vars:
+    docker_compose_flush_handlers: true
 
 - name: install python-psycopg2
   community.general.pacman:

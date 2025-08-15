@@ -1,0 +1,3 @@
+- name: Prune Docker resources
+  become: true
+  ansible.builtin.command: docker system prune -f

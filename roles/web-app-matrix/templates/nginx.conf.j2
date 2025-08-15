@@ -1,16 +1,16 @@
 server {
     {# Somehow .j2 doesn't interpretate the passed variable right. For this reasons this redeclaration is necessary #}
     {# Could be that this is related to the set_fact use #}
-    {% set domain = domains[application_id].synapse %}
-    {% set http_port = ports.localhost.http['web-app-matrix_synapse'] %}
-    {% set federation_port = ports.public.federation['web-app-matrix_synapse'] %}
+    {% set domain = MATRIX_SYNAPSE_DOMAIN | mandatory("MATRIX_SYNAPSE_DOMAIN is required") %}
+    {% set http_port = MATRIX_SYNAPSE_PORT | mandatory("MATRIX_PORT is required") %}
+    {% set FEDERATION_PORT = http_port %}
 
-    server_name {{domains[application_id].synapse}};
+    server_name {{ domain }};
     {% include 'roles/srv-web-7-7-letsencrypt/templates/ssl_header.j2' %}
     
     # For the federation port
-    listen {{ federation_port }} ssl default_server;
-    listen [::]:{{ federation_port }} ssl default_server;
+    listen {{ FEDERATION_PORT }} ssl default_server;
+    listen [::]:{{ FEDERATION_PORT }} ssl default_server;
 
     {% include 'roles/srv-web-7-7-inj-compose/templates/server.conf.j2'%}
 

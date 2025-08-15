@@ -37,7 +37,7 @@
     container_name: "{{ nextcloud_proxy_name }}"
     logging:
       driver: journald
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     ports:
       - "127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}"
     volumes:
@@ -53,7 +53,7 @@
   cron:
     container_name: "{{ nextcloud_cron_name }}"
     image: "{{ nextcloud_image }}:{{ nextcloud_version }}"
-    restart: {{DOCKER_RESTART_POLICY}}
+    restart: {{ DOCKER_RESTART_POLICY }}
     logging:
       driver: journald
     volumes:

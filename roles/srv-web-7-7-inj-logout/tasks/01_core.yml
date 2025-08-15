@@ -5,4 +5,4 @@
     - run_once_srv_web_7_4_core is not defined
   
 - name: "deploy the logout.js"
-  include_tasks: "deploy.yml"
+  include_tasks: "02_deploy.yml"

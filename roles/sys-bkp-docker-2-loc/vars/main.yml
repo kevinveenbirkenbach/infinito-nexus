@@ -42,5 +42,5 @@ bkp_docker_2_loc_cli_args_list:
 
 bkp_docker_2_loc_exec: >-
   /usr/bin/python {{ backup_docker_to_local_folder }}backup-docker-to-local.py
-  --compose-dir {{ path_docker_compose_instances }}
+  --compose-dir {{ PATH_DOCKER_COMPOSE_INSTANCES }}
   {{ bkp_docker_2_loc_cli_args_list | select('string') | join(' ') }}

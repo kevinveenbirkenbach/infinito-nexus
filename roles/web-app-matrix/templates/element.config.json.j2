@@ -1,8 +1,8 @@
 {
     "default_server_config": {
         "m.homeserver": {
-            "base_url": "{{ WEB_PROTOCOL }}://{{domains[application_id].synapse}}",
-            "server_name": "{{domains[application_id].synapse}}"
+            "base_url": "{{ MATRIX_SYNAPSE_URL }}",
+            "server_name": "{{ MATRIX_SYNAPSE_DOMAIN }}"
         },
         "m.identity_server": {
             "base_url": "{{ WEB_PROTOCOL }}://{{ PRIMARY_DOMAIN }}"

@@ -1,2 +1,2 @@
-health_journalctl_folder: '{{path_administrator_scripts}}sys-hlth-journalctl/'
+health_journalctl_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-hlth-journalctl/'
 

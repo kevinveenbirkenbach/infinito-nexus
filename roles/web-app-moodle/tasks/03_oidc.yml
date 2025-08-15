@@ -25,7 +25,7 @@
     - { name: "clientauthmethod",     value: 1 }  
     - { name: "clientid",             value: "{{ oidc.client.id }}" }
     - { name: "clientsecret",         value: "{{ oidc.client.secret }}" }
-    - { name: "opname",               value: "{{oidc.button_text}}" }
+    - { name: "opname",               value: "{{ oidc.button_text }}" }
     - { name: "oidcscope",            value: "openid profile email" }
     - { name: "authendpoint",         value: "{{ oidc.client.authorize_url }}" }
     - { name: "tokenendpoint",        value: "{{ oidc.client.token_url }}" }

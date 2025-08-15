@@ -4,16 +4,16 @@
   include_role: 
     name: docker-compose
 
-- name: Create {{domains | get_domain(application_id)}}.conf if LDAP is exposed to internet
+- name: Create {{ domains | get_domain(application_id) }}.conf if LDAP is exposed to internet
   template: 
     src:  "nginx.stream.conf.j2" 
-    dest: "{{nginx.directories.streams}}{{domains | get_domain(application_id)}}.conf"
+    dest: "{{NGINX.DIRECTORIES.STREAMS}}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty
   when: applications | get_app_conf(application_id, 'network.public', True) | bool
 
-- name: Remove {{domains | get_domain(application_id)}}.conf if LDAP is not exposed to internet
+- name: Remove {{ domains | get_domain(application_id) }}.conf if LDAP is not exposed to internet
   file:
-    path: "{{ nginx.directories.streams }}{{ domains | get_domain(application_id) }}.conf"
+    path: "{{ NGINX.DIRECTORIES.STREAMS }}{{ domains | get_domain(application_id) }}.conf"
     state: absent
   when: not applications | get_app_conf(application_id, 'network.public', True) | bool
 

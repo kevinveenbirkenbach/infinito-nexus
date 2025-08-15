@@ -9,6 +9,6 @@ pgadmin_servers:
     port:           "{{ database_port }}"
     username:       "postgres"
     maintenance_db: "postgres"
-    password:       "{{ applications['svc-db-postgres'].credentials.postgres_password }}"
+    password:       "{{ applications['svc-db-postgres'].credentials.POSTGRES_PASSWORD }}"
 
 # Here you can add more databases 

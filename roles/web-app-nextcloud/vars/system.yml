@@ -15,7 +15,7 @@ nextcloud_system_config:
     value: "{{ HOST_LL | upper }}"
 
   - parameter: "trusted_domains 0"
-    value: "{{domains | get_domain(application_id)}}"
+    value: "{{ domains | get_domain(application_id) }}"
 
   - parameter: "overwrite.cli.url"
     value: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"

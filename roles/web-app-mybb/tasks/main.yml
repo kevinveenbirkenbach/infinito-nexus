@@ -6,13 +6,13 @@
   - include_tasks: utils/run_once.yml
   when: run_once_web_app_mybb is not defined
 
-- name: "include tasks setup-domain.yml with {{domains | get_domain(application_id)}}"
+- name: "include tasks setup-domain.yml with {{ domains | get_domain(application_id) }}"
   include_tasks: setup-domain.yml
   loop: "{{ mybb_domains + [source_domain] }}"
   loop_control:
     loop_var: domain
 
-- name: "load docker and db for {{application_id}}"
+- name: "load docker and db for {{ application_id }}"
   include_role:
     name: cmp-db-docker
 

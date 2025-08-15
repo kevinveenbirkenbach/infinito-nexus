@@ -1,6 +1,9 @@
 - block:
   - include_tasks: 01_core.yml
   - include_tasks: utils/run_once.yml
+    vars:
+      # Force the flush of the pg handler on the first run
+      flush_handlers: true
   when: run_once_svc_db_postgres is not defined
 
 - include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
@@ -10,4 +13,4 @@
 
 - name: "Initialize database for '{{ database_name }}'"
   include_tasks: 02_init.yml
-  when: postgres_init | bool
+  when: POSTGRES_INIT | bool

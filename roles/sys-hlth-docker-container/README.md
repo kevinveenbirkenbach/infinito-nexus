@@ -18,7 +18,7 @@ The primary purpose of this role is to ensure that Docker-based services remain 
 - **Automated Health Checks:** Detects containers in `unhealthy` state or exited with non-zero exit codes.
 - **Systemd Integration:** Installs a one-shot service and timer to run health checks on a schedule.
 - **Alerting Support:** Works with the [`sys-alm-compose`](../sys-alm-compose/README.md) role for failure notifications.
-- **Configurable Script Location:** Controlled via the `path_administrator_scripts` variable.
+- **Configurable Script Location:** Controlled via the `PATH_ADMINISTRATOR_SCRIPTS` variable.
 
 ## Further Resources
 
