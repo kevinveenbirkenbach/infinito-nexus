@@ -13,6 +13,7 @@
     )
   changed_when: mailu_user_result.rc == 0
   when: "'mail-bot' in item.value.roles or 'administrator' in item.value.roles"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Change password for user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ mailu_domain }}'"
   command: >
@@ -21,6 +22,7 @@
   args:
     chdir: "{{ mailu_compose_dir }}"
   when: "'mail-bot' in item.value.roles or 'administrator' in item.value.roles"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Create Mailu API Token for {{ mailu_user_name }}"
   include_tasks: 03_create-mailu-token.yml
