@@ -1,15 +1,10 @@
+{# roles/sys-srv-web-inj-compose/templates/location.lua.j2 #}
 {% macro push_snippets(list_name, features) -%}
-{% for f in features -%}
-{% if inj_enabled.get(f) -%}
+{% set kind = list_name | regex_replace('_snippets$','') %}
+{% for f in features if inj_enabled.get(f) -%}
 {{ list_name }}[#{{ list_name }} + 1] = [=[
-  {%- include
-     'roles/sys-srv-web-inj-' ~ f ~
-     '/templates/' ~
-     ('head' if list_name == 'head_snippets' else 'body') ~
-     '_sub.j2'
-  -%}
+  {%- include 'roles/sys-srv-web-inj-' ~ f ~ '/templates/' ~ kind ~ '_sub.j2' -%}
 ]=]
-{% endif -%}
 {% endfor -%}
 {%- endmacro %}
 
@@ -48,7 +43,7 @@ body_filter_by_lua_block {
     local whole = table.concat(ngx.ctx.buf)
     ngx.ctx.buf = nil  -- clear buffer
 
-    -- remove html CSP, due to management via infinito nexus policies
+    -- remove html CSP, due to management via Infinito.Nexus policies
     whole = whole:gsub(
         '<meta[^>]-http%-equiv=["\']Content%-Security%-Policy["\'][^>]->%s*',
         ''
@@ -57,20 +52,20 @@ body_filter_by_lua_block {
     -- build a list of head-injection snippets
     local head_snippets = {}
 
-    {{ push_snippets('head_snippets', ['css','matomo','desktop','javascript','logout']) }}
+    {{ push_snippets('head_snippets', inj_head_features) }}
 
     -- inject all collected snippets right before </head>
     local head_payload = table.concat(head_snippets, "\n") .. "</head>"
-    whole = string.gsub(whole, "</head>", head_payload)
+    whole = ngx.re.gsub(whole, "</head>", head_payload, "ijo", nil, 1)
 
     -- build a list of body-injection snippets
     local body_snippets = {}
 
-    {{ push_snippets('body_snippets', ['matomo','logout','desktop']) }}
+    {{ push_snippets('body_snippets', inj_body_features) }}
 
     -- inject all collected snippets right before </body>
     local body_payload = table.concat(body_snippets, "\n") .. "</body>"
-    whole = string.gsub(whole, "</body>", body_payload)
+    whole = ngx.re.gsub(whole, "</body>", body_payload, "ijo", nil, 1)
 
     -- finally send the modified HTML out
     ngx.arg[1] = whole

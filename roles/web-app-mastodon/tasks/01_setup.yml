@@ -1,7 +1,7 @@
 - name: "Execute migration for '{{ application_id }}'"
   command:
     cmd: "docker-compose run --rm web bundle exec rails db:migrate"
-    chdir: "{{docker_compose.directories.instance}}"  
+    chdir: "{{ docker_compose.directories.instance }}"  
 
 - name: "Include administrator routines for '{{ application_id }}'"
   include_tasks: 02_administrator.yml

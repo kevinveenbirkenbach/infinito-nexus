@@ -27,7 +27,7 @@
 - name: Run Listmonk setup only if DB is empty
   command:
     cmd: docker compose run -T --rm application sh -c "yes | ./listmonk --install"
-    chdir: "{{docker_compose.directories.instance}}"
+    chdir: "{{ docker_compose.directories.instance }}"
   when: "'No relations found.' in db_tables.stdout"
 
 - name: Build OIDC settings JSON

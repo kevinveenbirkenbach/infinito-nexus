@@ -39,6 +39,8 @@
 - name: Reinitialize 'inj_enabled' for '{{ domain }}', after modification by CDN
   set_fact:
     inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
+    inj_head_features: "{{ SRV_WEB_INJ_COMP_FEATURES_ALL | inj_features('head') }}"
+    inj_body_features: "{{ SRV_WEB_INJ_COMP_FEATURES_ALL | inj_features('body') }}"
 
 - name: "Activate Corporate CSS for '{{ domain }}'"
   include_role:

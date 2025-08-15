@@ -50,5 +50,5 @@
 - name: docker compose restart
   command:
     cmd: 'docker compose restart'
-    chdir: "{{docker_compose.directories.instance}}"
+    chdir: "{{ docker_compose.directories.instance }}"
   listen: docker compose restart

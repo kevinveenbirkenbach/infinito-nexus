@@ -2,7 +2,7 @@ application_id:             "web-app-taiga"
 database_type:              "postgres"
 docker_repository_address:  "https://github.com/taigaio/taiga-docker"
 email_backend:              "smtp"                                      ## use an SMTP server or display the emails in the console (either "smtp" or "console")
-docker_compose_init:        "{{docker_compose.directories.instance}}docker-compose-inits.yml.j2"
+docker_compose_init:        "{{ docker_compose.directories.instance }}docker-compose-inits.yml.j2"
 taiga_image_backend: >-
   {{ 'robrotheram/taiga-back-openid' if applications | get_app_conf(application_id, 'features.oidc', True) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'robrotheram'
      else 'taigaio/taiga-back' }}

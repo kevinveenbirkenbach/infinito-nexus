@@ -32,5 +32,5 @@
 - name: add docker-compose.yml
   template:
     src: "docker-compose.yml.j2"
-    dest: "{{docker_compose.directories.instance}}docker-compose.yml"
+    dest: "{{ docker_compose.directories.instance }}docker-compose.yml"
   notify: docker compose up

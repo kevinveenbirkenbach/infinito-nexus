@@ -1,7 +1,7 @@
 # Routines to create the administrator account
 # @see https://chatgpt.com/share/67b9b12c-064c-800f-9354-8e42e6459764
 
-- name: Check health status of {{ item }} container
+- name: Check health status of '{{ item }}' container
   shell: |
     cid=$(docker compose ps -q {{ item }})
     docker inspect \
@@ -19,25 +19,29 @@
     - sidekiq
   loop_control:
     label: "{{ item }}"
+  changed_when: false
 
 - name: Remove line containing "- administrator" from config/settings.yml to allow creating administrator account
   command: 
     cmd:  "docker compose exec -u root web sed -i '/- administrator/d' config/settings.yml"
-    chdir: "{{docker_compose.directories.instance}}"
+    chdir: "{{ docker_compose.directories.instance }}"
   when: users.administrator.username == "administrator"
 
 - name: Create admin account via tootctl
-  command: 
+  command:
     cmd: 'docker compose exec -u root web bash -c "RAILS_ENV=production bin/tootctl accounts create {{users.administrator.username}} --email {{ users.administrator.email }} --confirmed --role Owner"'
-    chdir: "{{docker_compose.directories.instance}}"
+    chdir: "{{ docker_compose.directories.instance }}"
   register: tootctl_create
   changed_when: tootctl_create.rc == 0
   failed_when: >
     tootctl_create.rc != 0
     and
     ("taken" not in tootctl_create.stderr | lower)
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
     
 - name: Approve the administrator account in Mastodon
   command: 
     cmd: docker compose exec -u root web bash -c "RAILS_ENV=production bin/tootctl accounts modify {{users.administrator.username}} --approve"
-    chdir: "{{docker_compose.directories.instance}}"
+    chdir: "{{ docker_compose.directories.instance }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

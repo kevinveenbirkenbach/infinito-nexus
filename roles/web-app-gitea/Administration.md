@@ -2,7 +2,7 @@
 
 ## update
 ```bash 
-cd {{docker_compose.directories.instance}}
+cd {{ docker_compose.directories.instance }}
 docker-compose down
 docker-compose pull
 docker-compose up -d
@@ -17,7 +17,7 @@ Keep in mind to track and to don't interrupt the update process until the migrat
 
 ## recreate
 ```bash
-cd {{docker_compose.directories.instance}} && docker-compose -p gitea up -d --force-recreate
+cd {{ docker_compose.directories.instance }} && docker-compose -p gitea up -d --force-recreate
 ```
 
 ## database access
