@@ -1,0 +1,21 @@
+- name: "Connect '{{ DISCOURSE_CONTAINER }}' to network '{{ DISCOURSE_PG_NETWORK }}'"
+  command: >
+    docker network connect {{ DISCOURSE_PG_NETWORK }} {{ DISCOURSE_CONTAINER }}
+  register: network_connect
+  failed_when: >
+    network_connect.rc != 0 and
+    DISCOURSE_ERROR_ALREADY_IN_NET not in network_connect.stderr
+  changed_when: network_connect.rc == 0
+  when:
+    - applications | get_app_conf(application_id, 'features.central_database', False)
+
+- name: "Remove {{ DISCOURSE_NETWORK }} from {{ database_host }}"
+  command: >
+    docker network disconnect {{ DISCOURSE_NETWORK }} {{ database_host }}
+  register: network_disconnect
+  failed_when: >
+    network_disconnect.rc != 0 and
+    DISCOURSE_ERROR_NOT_CONNECTED not in network_disconnect.stderr
+  changed_when: network_disconnect.rc == 0
+  when:
+    - applications | get_app_conf(application_id, 'features.central_database', False)

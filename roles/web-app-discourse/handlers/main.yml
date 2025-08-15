@@ -1,14 +1,14 @@
 ---
 - name: "stop and remove discourse container if it exist"
   community.docker.docker_container:
-    name: "{{ discourse_container }}"
+    name: "{{ DISCOURSE_CONTAINER }}"
     state: absent
   register: container_action
   failed_when: container_action.failed and 'No such container' not in container_action.msg
   listen: recreate discourse
   
 - name: "add central database temporary to discourse network"
-  command: "docker network connect {{ discourse_network }} {{ database_host }}"
+  command: "docker network connect {{ DISCOURSE_NETWORK }} {{ database_host }}"
   failed_when: >
     result.rc != 0 and
     'already exists in network' not in result.stderr
@@ -17,10 +17,8 @@
   listen: recreate discourse
 
 - name: rebuild discourse
-  shell: ./launcher rebuild {{ discourse_container }}
+  shell: ./launcher rebuild {{ DISCOURSE_CONTAINER }}
   args:
     executable: /bin/bash  
-    chdir: "{{docker_repository_directory }}"
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+    chdir: "{{ DISCOURSE_REPOSITORY_DIR }}"
   listen: recreate discourse

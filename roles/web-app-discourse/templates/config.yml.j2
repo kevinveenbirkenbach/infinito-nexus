@@ -74,7 +74,7 @@ env:
   DISCOURSE_DB_NAME:     {{ database_name }}
 
   # Redis Configuration
-  DISCOURSE_REDIS_HOST: {{ discourse_redis_host }}
+  DISCOURSE_REDIS_HOST: {{ DISCOURSE_REDIS_HOST }}
 
   ## If you added the Lets Encrypt template, uncomment below to get a free SSL certificate
   #LETSENCRYPT_ACCOUNT_EMAIL: administrator@veen.world
@@ -90,7 +90,7 @@ env:
 ## The Docker container is stateless; all data is stored in /shared
 volumes:
   - volume:
-      host: {{ discourse_volume }}
+      host: {{ DISCOURSE_VOLUME }}
       guest: /shared
   - volume:
       host: /var/discourse/shared/standalone/log/var-log
@@ -103,7 +103,7 @@ hooks:
     - exec:
         cd: $home/plugins
         cmd:
-{% for plugin_name, plugin_config in discourse_plugins.items() %}
+{% for plugin_name, plugin_config in DISCOURSE_PLUGINS.items() %}
 {% if plugin_config.enabled %}
           - git clone --depth=1 https://github.com/discourse/{{ plugin_name }}.git
 {% endif %}
@@ -132,7 +132,7 @@ run:
   #- exec: rails r "User.find_by_email('{{ users.administrator.email }}').update(username: '{{users.administrator.username}}')"
 
   # The following code is just an inspiration, how to connect with the oidc account. as long as this is not set the admini account needs to be manually connected with oidc 
-  # docker exec -it {{ discourse_container }} rails runner "user = User.find_by_email('test@infinito.nexus'); UserAuth.create(user_id: user.id, provider: 'oidc', uid: 'eindeutige_oidc_id', info: { name: user.username, email: user.email })"
+  # docker exec -it {{ DISCOURSE_CONTAINER }} rails runner "user = User.find_by_email('test@infinito.nexus'); UserAuth.create(user_id: user.id, provider: 'oidc', uid: 'eindeutige_oidc_id', info: { name: user.username, email: user.email })"
 
   # OIDC Activation
   - exec: rails r "SiteSetting.openid_connect_enabled = true"
@@ -170,5 +170,5 @@ run:
   - exec: echo "End of custom commands"
 
 docker_args:
-  - --network={{ discourse_network }}
-  - --name={{ discourse_container }}
+  - --network={{ DISCOURSE_NETWORK }}
+  - --name={{ DISCOURSE_CONTAINER }}

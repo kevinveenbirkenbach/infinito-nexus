@@ -1,12 +1,12 @@
-repository:           "discourse_repository"  # Name of the repository folder                 
+repository:           "repository"  # Name of the repository folder                 
 features:
   matomo:             true
   css:                true
-  desktop:    true
+  desktop:            true
   oidc:               true
   central_database:   true
   ldap:               false         # @todo implement and activate
-  logout:   true
+  logout:             true
 server:
   csp:
     flags:
@@ -27,10 +27,11 @@ docker:
     redis:
       enabled: true
     discourse:
-      name:             "discourse"
-      image:            "local_discourse/<< defaults_applications[web-app-discourse].docker.services.discourse.name >>" # Necessary to define this for the docker 2 loc backup
+      name:               "discourse"
+      image:              "local_discourse/<< defaults_applications[web-app-discourse].docker.services.discourse.name >>" # Necessary to define this for the docker 2 loc backup
       backup:
         no_stop_required: true
+      repository:         "https://github.com/discourse/discourse_docker.git"
   volumes: 
     data:   discourse_data
   network:  discourse

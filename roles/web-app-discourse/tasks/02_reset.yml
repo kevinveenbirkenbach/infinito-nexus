@@ -6,9 +6,9 @@
     cmd: "docker network disconnect {{applications | get_app_conf(application_id, 'network', True)}} {{ database_host }}"
   ignore_errors: true
 
-- name: "destroy container {{ discourse_container }}"
+- name: "destroy container {{ DISCOURSE_CONTAINER }}"
   command:
-    cmd: "./launcher destroy {{ discourse_container }}"
-    chdir: "{{ docker_repository_directory }}"
+    cmd: "./launcher destroy {{ DISCOURSE_CONTAINER }}"
+    chdir: "{{ DISCOURSE_REPOSITORY_DIR }}"
   ignore_errors: true
   notify: recreate discourse
