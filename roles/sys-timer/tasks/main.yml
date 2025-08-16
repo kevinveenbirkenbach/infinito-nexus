@@ -19,4 +19,6 @@
     state: restarted
     enabled: yes
   when: dummy_timer.changed or ACTIVATE_ALL_TIMERS | bool
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 

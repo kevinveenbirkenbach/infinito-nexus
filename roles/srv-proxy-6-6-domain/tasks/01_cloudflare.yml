@@ -23,6 +23,7 @@
   changed_when: false
   when:
     - not cf_zone_id
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Set fact cf_zone_id and update cache dict"
   set_fact:
