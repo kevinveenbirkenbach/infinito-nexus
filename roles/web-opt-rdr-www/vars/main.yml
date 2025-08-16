@@ -1,2 +1,6 @@
+# General
 application_id:       "web-opt-rdr-www"
-REDIRECT_WWW_FLAVOR:  "edge"
+
+# Redirect WWW
+REDIRECT_WWW_FLAVOR:  "{{ applications | get_app_conf(application_id, 'prefered_flavor') if DNS_PROVIDER == 'cloudflare' else 'origin' }}"
+REDIRECT_WWW_DOMAINS: "{{ current_play_domains_all | select('match', '^www\\.') | list }}"

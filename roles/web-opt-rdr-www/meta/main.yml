@@ -1,6 +1,6 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
-  description: "An Ansible role to redirect www subdomains to non-www domains in Nginx"
+  description: "An Ansible role to redirect www subdomains to bare domains (apex). Supports Cloudflare edge redirects or local Nginx redirects."
   license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
@@ -9,15 +9,15 @@ galaxy_info:
     https://www.veen.world
   min_ansible_version: "2.9"
   platforms:
-  - name: Archlinux
-    versions:
-    - rolling
+    - name: "Archlinux"
+      versions:
+        - "rolling"
   galaxy_tags:
-  - nginx
-  - redirect
-  - www
-  - wildcard
-  - seo
+    - nginx
+    - redirect
+    - www
+    - cloudflare
+    - seo
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"

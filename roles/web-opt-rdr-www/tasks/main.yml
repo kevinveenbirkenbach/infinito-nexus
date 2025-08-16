@@ -6,22 +6,19 @@
   - include_tasks: utils/run_once.yml
   when: run_once_web_opt_rdr_www is not defined
 
-- name: Filter www-prefixed domains from current_play_domains_all
-  set_fact:
-    www_domains: "{{ current_play_domains_all | select('match', '^www\\.') | list }}"
-
 - name: Include web-opt-rdr-domains role for www-to-bare redirects
   include_role:
     name: web-opt-rdr-domains
   vars:
-    domain_mappings: "{{ www_domains | map('regex_replace', '^www\\.(.+)$', '{ source: \"www.\\1\", target: \"\\1\" }') | map('from_yaml') | list }}"
+    domain_mappings: "{{ REDIRECT_WWW_DOMAINS | map('regex_replace', '^www\\.(.+)$', '{ source: \"www.\\1\", target: \"\\1\" }') | map('from_yaml') | list }}"
+  when: REDIRECT_WWW_FLAVOR == 'origin'
 
 - name: Include DNS role to set redirects
   include_role:
     name: sys-dns-cloudflare-records
   vars:
     cloudflare_records: |
-      {%- set bare = www_domains | map('regex_replace', '^www\\.(.+)$', '\\1') | list -%}
+      {%- set bare = REDIRECT_WWW_DOMAINS | map('regex_replace', '^www\\.(.+)$', '\\1') | list -%}
       [
       {%- for d in bare -%}
         {
@@ -29,10 +26,22 @@
           "zone": "{{ d | to_zone }}",
           "name": "{{ d }}",
           "content": "{{ networks.internet.ip4 }}",
-          "proxied": false,
+          "proxied": {{ REDIRECT_WWW_FLAVOR == 'edge' }},
           "ttl": 1
         }{{ "," if not loop.last else "" }}
       {%- endfor -%}
       ]
-  when: DNS_PROVIDER == 'cloudflare'
+  when: 
+    - DNS_PROVIDER == 'cloudflare'
+    - REDIRECT_WWW_FLAVOR == 'origin'
 
+- name: Include Cloudflare redirect rule to enforce www → apex
+  include_tasks: cloudflare_redirect_rule.yml
+  vars:
+    domain: "{{ item | regex_replace('^www\\.', '') }}"
+    www_fqdn: "{{ item }}"
+    apex_url: "{{ WEB_PROTOCOL }}://{{ item | regex_replace('^www\\.', '') }}"
+  loop: "{{ REDIRECT_WWW_DOMAINS }}"
+  when: REDIRECT_WWW_FLAVOR == 'edge'
+    
+  
