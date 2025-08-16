@@ -58,10 +58,12 @@
 
 - name: Include DNS role to register Gitea domain(s)
   include_role:
-    name: srv-web-7-7-dns-records
+    name: sys-dns-cloudflare-records
   vars:
-    CLOUDFLARE_API_TOKEN:   "{{ CLOUDFLARE_API_TOKEN }}"
-    cloudflare_domains:     "{{ [ domains | get_domain(application_id) ] }}"
-    cloudflare_target_ip:   "{{ networks.internet.ip4 }}"
-    cloudflare_proxied:     false
+    cloudflare_records:
+      - zone:     "{{ domains | get_domain(application_id) | to_zone }}"
+        type:     A
+        name:    "{{ domains | get_domain(application_id) }}"
+        content: "{{ networks.internet.ip4 }}"
+        proxied: false  # Necessary for SSH port
   when: DNS_PROVIDER == 'cloudflare'

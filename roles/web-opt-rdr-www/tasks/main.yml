@@ -18,10 +18,21 @@
 
 - name: Include DNS role to set redirects
   include_role:
-    name: srv-web-7-7-dns-records
+    name: sys-dns-cloudflare-records
   vars:
-    CLOUDFLARE_API_TOKEN: "{{ CLOUDFLARE_API_TOKEN }}"
-    cloudflare_domains: "{{ www_domains }}"
-    cloudflare_target_ip: "{{ networks.internet.ip4 }}"
-    cloudflare_proxied: false
+    cloudflare_records: |
+      {%- set bare = www_domains | map('regex_replace', '^www\\.(.+)$', '\\1') | list -%}
+      [
+      {%- for d in bare -%}
+        {
+          "type": "A",
+          "zone": "{{ d | to_zone }}",
+          "name": "{{ d }}",
+          "content": "{{ networks.internet.ip4 }}",
+          "proxied": false,
+          "ttl": 1
+        }{{ "," if not loop.last else "" }}
+      {%- endfor -%}
+      ]
   when: DNS_PROVIDER == 'cloudflare'
+
