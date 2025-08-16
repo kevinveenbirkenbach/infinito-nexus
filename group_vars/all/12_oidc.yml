@@ -8,14 +8,14 @@
 # @see https://en.wikipedia.org/wiki/OpenID_Connect
 
 ## Helper Variables:
-_oidc_client_realm:         "{{ OIDC.CLIENT.ISSUER_URL if OIDC.CLIENT is defined and OIDC.CLIENT.ISSUER_URL is defined else SOFTWARE_NAME | lower }}"
+_oidc_client_realm:         "{{ OIDC.CLIENT.REALM if OIDC.CLIENT is defined and OIDC.CLIENT.REALM is defined else SOFTWARE_NAME | lower }}"
 _oidc_url:                  "{{ 
                                 (OIDC.URL 
                                   if (oidc is defined and OIDC.URL is defined) 
                                   else WEB_PROTOCOL ~ '://' ~ (domains | get_domain('web-app-keycloak'))
                                 ) 
                             }}"
-_oidc_client_issuer_url:    "{{ _oidc_url }}/realms/{{_oidc_client_realm}}"
+_oidc_client_issuer_url:    "{{ _oidc_url }}/realms/{{_oidc_client_realm}}/"
 _oidc_client_id:            "{{ OIDC.CLIENT.ID if OIDC.CLIENT is defined and OIDC.CLIENT.ID is defined else SOFTWARE_NAME | lower }}"
 
 defaults_oidc:
