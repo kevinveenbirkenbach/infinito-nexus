@@ -832,7 +832,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "desktop-secret",
-      "secret": "{{ oidc.client.secret }}",
+      "secret": "{{ OIDC.CLIENT.SECRET }}",
       {# The following line should be covered by 02_update_client_redirects.yml #}
       "redirectUris": {{ domains | redirect_uris(applications, WEB_PROTOCOL) | tojson }},
       "webOrigins": [
@@ -1261,7 +1261,7 @@
             "id.token.claim": "true",
             "lightweight.claim": "false",
             "access.token.claim": "true",
-            "claim.name": "{{ oidc.claims.groups }}"
+            "claim.name": "{{ OIDC.CLAIMS.GROUPS }}"
           }
         }
       ]
@@ -1520,7 +1520,7 @@
             "user.attribute": "username",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "{{oidc.attributes.username}}",
+            "claim.name": "{{OIDC.ATTRIBUTES.USERNAME}}",
             "jsonType.label": "String"
           }
         },

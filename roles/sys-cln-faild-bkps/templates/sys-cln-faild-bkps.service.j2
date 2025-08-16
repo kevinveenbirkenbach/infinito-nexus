@@ -1,6 +1,6 @@
 [Unit]
 Description=Cleaning up failed docker volume backups
-OnFailure=sys-alm-compose.infinito@%n.service
+OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
 
 [Service]
 Type=oneshot

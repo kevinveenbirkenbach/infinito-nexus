@@ -6,17 +6,17 @@ cookie_domains          =   ["{{ domains | get_domain(oauth2_proxy_application_i
 whitelist_domains       =   [".{{ PRIMARY_DOMAIN }}"]                                                                                                                               # Required to allow redirection back to original requested target.
 
 # keycloak provider
-client_secret           =   "{{ oidc.client.secret }}"
-client_id               =   "{{ oidc.client.id }}"
+client_secret           =   "{{ OIDC.CLIENT.SECRET }}"
+client_id               =   "{{ OIDC.CLIENT.ID }}"
 redirect_url            =   "{{ WEB_PROTOCOL }}://{{ domains | get_domain(oauth2_proxy_application_id) }}/oauth2/callback"
-oidc_issuer_url         =   "{{ oidc.client.issuer_url }}"
+oidc_issuer_url         =   "{{ OIDC.CLIENT.ISSUER_URL }}"
 provider                =   "oidc"
-provider_display_name   =   "{{ oidc.button_text }}"
+provider_display_name   =   "{{ OIDC.BUTTON_TEXT }}"
 
 {% if applications | get_app_conf(oauth2_proxy_application_id, 'oauth2_proxy.allowed_groups', False) %}
 {# role based restrictions #}
-scope                   =   "openid email profile {{ oidc.claims.groups }}"
-oidc_groups_claim       =   "{{ oidc.claims.groups }}"
+scope                   =   "openid email profile {{ OIDC.CLAIMS.GROUPS }}"
+oidc_groups_claim       =   "{{ OIDC.CLAIMS.GROUPS }}"
 allowed_groups          =   {{ applications | get_app_conf(oauth2_proxy_application_id, 'oauth2_proxy.allowed_groups', True) | tojson }}
 email_domains           =   ["*"]
 {% else %}

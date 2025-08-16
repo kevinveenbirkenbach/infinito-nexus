@@ -36,7 +36,7 @@
     $s->ad_domain                = "";
     $s->ldap_default_group       = "";
     $s->ldap_email               = "{{ ldap.user.attributes.mail }}";
-    $s->custom_forgot_pass_url   = "{{ oidc.client.reset_credentials }}";
+    $s->custom_forgot_pass_url   = "{{ OIDC.CLIENT.RESET_CREDENTIALS }}";
     $s->save();
     EOF'
   args:

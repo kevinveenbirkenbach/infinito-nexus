@@ -3,7 +3,7 @@
   shell: |
     docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
       gitea admin auth list \
-      | awk -v name="{{ oidc.button_text }}" '$0 ~ name {print $1; exit}'
+      | awk -v name="{{ OIDC.BUTTON_TEXT }}" '$0 ~ name {print $1; exit}'
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   register: oidc_source_id_raw

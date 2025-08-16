@@ -3,9 +3,9 @@
   command: >-
     docker compose exec -T admin \
       curl -s -X GET {{ mailu_api_base_url }}/token \
-        -H "Authorization: Bearer {{ mailu_global_api_token }}"
+        -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
   args:
-    chdir: "{{ mailu_compose_dir }}"
+    chdir: "{{ MAILU_DOCKER_DIR }}"
   register: mailu_tokens_cli
   changed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
@@ -25,9 +25,9 @@
   command: >-
     docker compose exec -T admin \
       curl -s -X DELETE {{ mailu_api_base_url }}/token/{{ mailu_user_existing_token.id }} \
-        -H "Authorization: Bearer {{ mailu_global_api_token }}"
+        -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
   args:
-    chdir: "{{ mailu_compose_dir }}"
+    chdir: "{{ MAILU_DOCKER_DIR }}"
   when:
     - users[mailu_user_key].mailu_token is not defined
     - mailu_user_existing_token is not none
@@ -40,7 +40,7 @@
   command: >-
     docker compose exec -T admin \
       curl -s -X POST {{ mailu_api_base_url }}/token \
-        -H "Authorization: Bearer {{ mailu_global_api_token }}" \
+        -H "Authorization: Bearer {{ MAILU_API_TOKEN }}" \
         -H "Content-Type: application/json" \
         -d '{{ {
               "comment": mailu_user_key ~ " - ansible.infinito",
@@ -48,7 +48,7 @@
               "ip": mailu_token_ip
             } | to_json }}'
   args:
-    chdir: "{{ mailu_compose_dir }}"
+    chdir: "{{ MAILU_DOCKER_DIR }}"
   when: users[mailu_user_key].mailu_token is not defined
   register: mailu_token_creation
   changed_when: mailu_token_creation.rc == 0

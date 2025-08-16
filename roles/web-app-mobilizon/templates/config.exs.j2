@@ -264,15 +264,15 @@ config :ueberauth,
 
 config :mobilizon, :auth,
   oauth_consumer_strategies: [
-    {:keycloak, "{{ oidc.button_text }}"}
+    {:keycloak, "{{ OIDC.BUTTON_TEXT }}"}
   ]
 
 config :ueberauth, Ueberauth.Strategy.Keycloak.OAuth,
-  client_id: "{{ oidc.client.id }}",
-  client_secret: "{{ oidc.client.secret }}",
-  site: "{{ oidc.url }}",
-  authorize_url: "{{ oidc.client.authorize_url }}",
-  token_url: "{{ oidc.client.token_url }}",
-  userinfo_url: "{{ oidc.client.user_info_url }}",
+  client_id: "{{ OIDC.CLIENT.ID }}",
+  client_secret: "{{ OIDC.CLIENT.SECRET }}",
+  site: "{{ OIDC.URL }}",
+  authorize_url: "{{ OIDC.CLIENT.AUTHORIZE_URL }}",
+  token_url: "{{ OIDC.CLIENT.TOKEN_URL }}",
+  userinfo_url: "{{ OIDC.CLIENT.USER_INFO_URL }}",
   token_method: :post
 {% endif %}

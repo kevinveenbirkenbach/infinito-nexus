@@ -1,1 +1,0 @@
-nginx_docker_cert_deploy_script:  "{{ PATH_ADMINISTRATOR_SCRIPTS }}srv-proxy-6-6-tls-deploy.sh"

@@ -1,10 +1,23 @@
-- name: "load docker, db and proxy for {{ application_id }}"
-  include_role: 
-    name: cmp-db-docker-proxy
+- name: Ensure MAILU_HOSTNAMES is a list with max 1 entry
+  ansible.builtin.assert:
+    that:
+      - MAILU_HOSTNAMES is iterable
+      - MAILU_HOSTNAMES is sequence
+      - MAILU_HOSTNAMES | length <= 1
+    fail_msg: "MAILU_HOSTNAMES must be a list with at most one entry (only one host is supported). You can set the other ones as alias."
+    success_msg: "MAILU_HOSTNAMES is valid."
 
-- name: "Include the srv-proxy-6-6-tls-deploy role"
-  include_role:
-    name: srv-proxy-6-6-tls-deploy
+- name: "Mailu Docker and Webserver Setup"
+  block:
+  - name: "load docker, db and proxy for {{ application_id }}"
+    include_role: 
+      name: cmp-db-docker-proxy
+
+  - name: "Include the sys-svc-cert-sync-docker role"
+    include_role:
+      name: sys-svc-cert-sync-docker
+  vars:
+    domain: "{{ MAILU_HOSTNAME }}"
 
 - name: Flush docker service handlers
   meta: flush_handlers
@@ -12,10 +25,8 @@
 - name: "Create Mailu accounts"
   include_tasks: 02_create-mailu-user.yml
   vars:
-    mailu_compose_dir:        "{{ docker_compose.directories.instance }}"
-    mailu_domain:             "{{ PRIMARY_DOMAIN }}"
+    MAILU_DOCKER_DIR:        "{{ docker_compose.directories.instance }}"
     mailu_api_base_url:       "http://127.0.0.1:8080/api/v1"
-    mailu_global_api_token:   "{{ applications | get_app_conf(application_id, 'credentials.api_token') }}"
     mailu_action: >-
       {{
         (

@@ -1,26 +1,70 @@
 # General
-application_id:             "web-app-mailu"
-domain:                     "{{ domains | get_domain(application_id) }}"
-http_port:                  "{{ ports.localhost.http[application_id] }}"
-proxy_extra_configuration:  "client_max_body_size 31M;"
+application_id:                       "web-app-mailu"
+http_port:                            "{{ ports.localhost.http[application_id] }}"
+proxy_extra_configuration:            "client_max_body_size 31M;"
 
 # Database Configuration
-database_password:          "{{ applications | get_app_conf(application_id, ' credentials.database_password') }}"
-database_type:              "mariadb"
+database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
+database_type:                        "mariadb"
 
-cert_mount_directory:       "{{ docker_compose.directories.volumes }}certs/"
+# Cert Mount
+cert_mount_directory:                 "{{ docker_compose.directories.volumes }}certs/"
+
+# Mailu
+
+## Meta 
+MAILU_WEBSITE:                        "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+
+## Domains
+MAILU_DOMAIN:                         "{{ applications | get_app_conf(application_id, 'domain') }}"
+MAILU_DOMAIN_DNS_ZONE:                "{{ MAILU_DOMAIN | to_zone }}"
+MAILU_HOSTNAMES:                      "{{ domains[application_id] }}"
+MAILU_HOSTNAME:                       "{{ domains | get_domain(application_id) }}"
+MAILU_HOSTNAME_DNS_ZONE:              "{{ MAILU_HOSTNAME | to_zone }}"
+
+## Docker
+MAILU_VERSION:                        "{{ applications | get_app_conf(application_id, 'docker.services.mailu.version') }}"
+MAILU_CONTAINER:                      "{{ applications | get_app_conf(application_id, 'docker.services.mailu.name') }}"
+
+## Volumes
+MAILU_SMTP_QUEUE_VOLUME:              "mailu_smtp_queue"
+MAILU_ADMIN_DATA_VOLUME:              "mailu_admin_data"
+MAILU_WEBDAV_DATA:                    "mailu_webdav_data"
+MAILU_WEBMAIL_DATA:                   "mailu_webmail_data"
+MAILU_FILTER_VOLUME:                  "mailu_filter"
+MAILU_DKIM_VOLUME:                    "mailu_dkim"
+MAILU_DOVECOT_MAIL_VOLUME:            "mailu_dovecot_mail"
+
+## Network
+MAILU_DNS_RESOLVER:                   "{{ networks.local['web-app-mailu'].dns_resolver }}"
+MAILU_IP4_PUBLIC:                     "{{ networks.internet.ip4 }}"
+MAILU_IP6_PUBLIC:                     false #Deactivated atm. but cloudflare logic present
+MAILU_SUBNET:                         "{{ networks.local['web-app-mailu'].subnet }}"
+
+## Credentials
+MAILU_SECRET_KEY:                     "{{ applications | get_app_conf(application_id,'credentials.secret_key') }}"
+MAILU_CLOUDFLARE_API_TOKEN:           "{{ CERTBOT_DNS_API_TOKEN }}"
+MAILU_API_TOKEN:                      "{{ applications | get_app_conf(application_id, 'credentials.api_token') }}"
+
+## OIDC
+MAILU_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.oidc', False) }}"
+MAILU_OIDC_EMAIL_BY_USERNAME_ENABLED: "{{ applications | get_app_conf(application_id, 'oidc.email_by_username') }}"
+MAILU_OIDC_ENABLE_USER_CREATION:      "{{ applications | get_app_conf(application_id, 'oidc.enable_user_creation') | string | capitalize }}"
 
 # Use dedicated source for oidc if activated  
 # @see https://github.com/heviat/Mailu-OIDC/tree/2024.06
-docker_source:                  "{{ 'ghcr.io/heviat' if applications | get_app_conf(application_id, 'features.oidc', False) else 'ghcr.io/mailu' }}"
+MAILU_DOCKER_FLAVOR:                  "{{ 'ghcr.io/heviat' if MAILU_OIDC_ENABLED | bool else 'ghcr.io/mailu' }}"
 
-# Mailu Specific
-mailu_version:             "{{ applications | get_app_conf(application_id, 'docker.services.mailu.version', True) }}"
-mailu_name:                "{{ applications | get_app_conf(application_id, 'docker.services.mailu.name', True) }}"
-mailu_smtp_queue:          "mailu_smtp_queue"
-mailu_admin_data:          "mailu_admin_data"
-mailu_webdav_data:         "mailu_webdav_data"
-mailu_webmail_data:        "mailu_webmail_data"
-mailu_filter:              "mailu_filter"
-mailu_dkim:                "mailu_dkim"
-mailu_dovecot_mail:        "mailu_dovecot_mail"
+MAILU_DMARC_RUF:     "{{ applications | get_app_conf(application_id, 'users.administrator.email') }}"
+
+MAILU_DKIM_KEY_FILE: "{{ MAILU_DOMAIN }}.dkim.key"
+MAILU_DKIM_KEY_PATH: "/dkim/{{ MAILU_DKIM_KEY_FILE }}"
+
+MAILU_DNS_SRV_RECORDS:
+  submission:   { port: 587, priority: 20, weight: 1 }
+  submissions:  { port: 465, priority: 20, weight: 1 }
+  imaps:        { port: 993, priority: 20, weight: 1 }
+  imap:         { port: 143, priority: 20, weight: 1 }
+  pop3s:        { port: 995, priority: 20, weight: 1 }
+  pop3:         { port: 110, priority: 20, weight: 1 }
+  autodiscover: { port: 443, priority: 20, weight: 1 }

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     initLogoutPatch(
-        '{{ oidc.client.logout_url }}',
+        '{{ OIDC.CLIENT.LOGOUT_URL }}',
         '{{ WEB_PROTOCOL }}',
         '{{ PRIMARY_DOMAIN }}'
     );

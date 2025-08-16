@@ -5,7 +5,7 @@ database_type:                    "postgres"                                    
 # Keycloak
 keycloak_container:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"      # Name of the keycloak docker container
 keycloak_docker_import_directory:   "/opt/keycloak/data/import/"                                                              # Directory in which keycloak import files are placed in the running docker container
-keycloak_realm:                     "{{ oidc.client.realm }}"                                                                     # This is the name of the default realm which is used by the applications
+keycloak_realm:                     "{{ OIDC.CLIENT.ISSUER_URL }}"                                                                     # This is the name of the default realm which is used by the applications
 keycloak_master_api_user:           "{{ applications | get_app_conf(application_id, 'users.administrator') }}"                # Master Administrator
 keycloak_master_api_user_name:      "{{ keycloak_master_api_user.username }}"                                                 # Master Administrator Username
 keycloak_master_api_user_password:  "{{ keycloak_master_api_user.password }}"                                                 # Master Administrator Password
@@ -17,7 +17,7 @@ keycloak_image:                     "{{ applications | get_app_conf(application_
 keycloak_version:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version') }}"   # Keycloak docker version
 keycloak_debug_enabled:             "{{ MODE_DEBUG }}"
 keycloak_redirect_features:         ["features.oauth2","features.oidc"]
-keycloak_client_id:                 "{{ oidc.client.id }}"
+keycloak_client_id:                 "{{ OIDC.CLIENT.ID }}"
 keycloak_ldap_component_name:       "{{ ldap.server.domain }}"                                                                                    # Name of the LDAP User Federation component in Keycloak (as shown in UI)
 keycloak_import_realm:              "{{ applications | get_app_conf(application_id, 'actions.import_realm') }}"               # Activate realm import  
 keycloak_update_ldap_bind:          "{{ applications | get_app_conf(application_id, 'actions.update_ldap_bind') }}"           # Toggle the LDAP bind update step

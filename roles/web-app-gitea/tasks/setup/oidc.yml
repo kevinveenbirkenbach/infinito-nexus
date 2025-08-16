@@ -3,10 +3,10 @@
     docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
       gitea admin auth add-oauth \
         --provider openidConnect \
-        --name     "{{ oidc.button_text }}" \
-        --key      "{{ oidc.client.id }}" \
-        --secret   "{{ oidc.client.secret }}" \
-        --auto-discover-url "{{ oidc.client.discovery_document }}" \
+        --name     "{{ OIDC.BUTTON_TEXT }}" \
+        --key      "{{ OIDC.CLIENT.ID }}" \
+        --secret   "{{ OIDC.CLIENT.SECRET }}" \
+        --auto-discover-url "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}" \
         --scopes   "openid profile email"
   args:
     chdir: "{{ docker_compose.directories.instance }}"
@@ -18,7 +18,7 @@
     docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
       /app/gitea/gitea admin auth list \
       | tail -n +2 \
-      | grep -F "{{ oidc.button_text }}" \
+      | grep -F "{{ OIDC.BUTTON_TEXT }}" \
       | awk '{print $1; exit}'
   args:
     chdir: "{{ docker_compose.directories.instance }}"
@@ -38,10 +38,10 @@
       gitea admin auth update-oauth \
         --id {{ oidc_source_id }}\
         --provider openidConnect \
-        --name     "{{ oidc.button_text }}" \
-        --key      "{{ oidc.client.id }}" \
-        --secret   "{{ oidc.client.secret }}" \
-        --auto-discover-url "{{ oidc.client.discovery_document }}" \
+        --name     "{{ OIDC.BUTTON_TEXT }}" \
+        --key      "{{ OIDC.CLIENT.ID }}" \
+        --secret   "{{ OIDC.CLIENT.SECRET }}" \
+        --auto-discover-url "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}" \
         --scopes   "openid profile email"
   args:
     chdir: "{{ docker_compose.directories.instance }}"

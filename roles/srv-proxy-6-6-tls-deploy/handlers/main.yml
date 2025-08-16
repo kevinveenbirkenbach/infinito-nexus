@@ -1,7 +1,0 @@
----
-- name: "restart srv-proxy-6-6-tls-deploy service"
-  systemd:
-    name:           srv-proxy-6-6-tls-deploy.{{ application_id }}{{ SYS_SERVICE_SUFFIX }}
-    state:          restarted
-    enabled:        yes
-    daemon_reload:  yes

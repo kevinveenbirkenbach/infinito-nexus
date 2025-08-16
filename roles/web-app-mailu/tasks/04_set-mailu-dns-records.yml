@@ -1,108 +1,125 @@
-- name: "Load Mailu DNS variables"
-  include_vars: vars/mailu-dns.yml
-
 - name: Generate DKIM public key
   include_tasks: 05_generate-and-read-dkim.yml
 
-- name: "Set A record for mail server"
+# A/AAAA record for the mail host in the **Hostname Zone**
+- name: "Set A record for Mailu host"
   community.general.cloudflare_dns:
-    api_token: "{{ cloudflare_record_api_token }}"
-    zone: "{{ mailu_dns_zone }}"
+    api_token: "{{ MAILU_CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ MAILU_HOSTNAME_DNS_ZONE }}"
     type: A
-    name: "{{ domain }}"
-    content: "{{ mailu_dns_ip }}"
+    name: "{{ MAILU_HOSTNAME }}"        # Fully Qualified Domain Name of the mail host
+    content: "{{ MAILU_IP4_PUBLIC }}"
     proxied: false
     ttl: 1
     state: present
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+- name: "Set AAAA record for Mailu host"
+  community.general.cloudflare_dns:
+    api_token: "{{ MAILU_CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ MAILU_HOSTNAME_DNS_ZONE }}"
+    type: AAAA
+    name: "{{ MAILU_HOSTNAME }}"
+    content: "{{ MAILU_IP6_PUBLIC }}"
+    proxied: false
+    ttl: 1
+    state: present
+  when: MAILU_IP6_PUBLIC is defined and MAILU_IP6_PUBLIC | length > 0
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+# Autoconfig CNAME record in the **Mail Domain Zone**
 - name: "Set CNAME record for autoconfig"
   community.general.cloudflare_dns:
-    api_token: "{{ cloudflare_record_api_token }}"
-    zone: "{{ mailu_dns_zone }}"
+    api_token: "{{ MAILU_CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ MAILU_DOMAIN_DNS_ZONE }}"
     type: CNAME
-    name: "autoconfig.{{ mailu_dns_zone }}"
-    value: "{{ domain }}"
+    name: "autoconfig.{{ MAILU_DOMAIN_DNS_ZONE }}"
+    value: "{{ MAILU_HOSTNAME }}"       # Points to the Mailu host FQDN
     proxied: false
     ttl: 1
     state: present
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+# MX record in the **Mail Domain Zone**
 - name: "Set MX record"
   community.general.cloudflare_dns:
-    api_token: "{{ cloudflare_record_api_token }}"
-    zone: "{{ mailu_dns_zone }}"
+    api_token: "{{ MAILU_CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ MAILU_DOMAIN_DNS_ZONE }}"
     type: MX
-    name: "{{ mailu_dns_zone }}"
-    value: "{{ domain }}"
+    name: "{{ MAILU_DOMAIN }}"          # Root mail domain
+    value: "{{ MAILU_HOSTNAME }}"       # Points to the Mailu host
     priority: 10
     ttl: 1
     state: present
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+# SRV records in the **Mail Domain Zone**
 - name: "Set SRV records"
   community.general.cloudflare_dns:
-    api_token: "{{ cloudflare_record_api_token }}"
-    zone: "{{ mailu_dns_zone }}"
+    api_token: "{{ MAILU_CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ MAILU_DOMAIN_DNS_ZONE }}"
     type: SRV
     service: "_{{ item.key }}"
     proto: "_tcp"
     priority: "{{ item.value.priority }}"
     weight: "{{ item.value.weight }}"
     port: "{{ item.value.port }}"
-    value: "{{ domain }}"
+    value: "{{ MAILU_HOSTNAME }}"       # Target = Mailu host FQDN
     ttl: 1
     state: present
-  loop: "{{ mailu_dns_srv_records | dict2items }}"
+    name: "{{ MAILU_DOMAIN }}"
+  loop: "{{ MAILU_DNS_SRV_RECORDS | dict2items }}"
   ignore_errors: true
-  #register: srv_result
-  #failed_when: srv_result.rc != 0 and ("An identical record already exists" not in srv_result.stdout)
-  #changed_when: srv_result.rc == 0 and ("An identical record already exists" not in srv_result.stdout)
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+# SPF TXT record in the **Mail Domain Zone**
 - name: "Set SPF TXT record"
   community.general.cloudflare_dns:
-    api_token: "{{ cloudflare_record_api_token }}"
-    zone: "{{ mailu_dns_zone }}"
+    api_token: "{{ MAILU_CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ MAILU_DOMAIN_DNS_ZONE }}"
     type: TXT
-    name: "{{ mailu_dns_zone }}"
-    value: "v=spf1 mx a:{{ domain }} ~all"
+    name: "{{ MAILU_DOMAIN }}"
+    value: "v=spf1 mx a:{{ MAILU_HOSTNAME }} ~all"
     ttl: 1
     state: present
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+# DMARC TXT record in the **Mail Domain Zone**
 - name: "Set DMARC TXT record"
   community.general.cloudflare_dns:
-    api_token: "{{ cloudflare_record_api_token }}"
-    zone: "{{ mailu_dns_zone }}"
+    api_token: "{{ MAILU_CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ MAILU_DOMAIN_DNS_ZONE }}"
     type: TXT
-    name: "_dmarc.{{ mailu_dns_zone }}"
-    value: "v=DMARC1; p=reject; ruf=mailto:{{ mailu_dmarc_ruf }}; adkim=s; aspf=s"
+    name: "_dmarc.{{ MAILU_DOMAIN_DNS_ZONE }}"
+    value: "v=DMARC1; p=reject; ruf=mailto:{{ MAILU_DMARC_RUF }}; adkim=s; aspf=s"
     ttl: 1
     state: present
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+# DKIM TXT record in the **Mail Domain Zone**
 - name: "Set DKIM TXT record"
   community.general.cloudflare_dns:
-    api_token: "{{ cloudflare_record_api_token }}"
-    zone: "{{ mailu_dns_zone }}"
+    api_token: "{{ MAILU_CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ MAILU_DOMAIN_DNS_ZONE }}"
     type: TXT
-    name: "dkim._domainkey.{{ mailu_dns_zone }}"
+    name: "dkim._domainkey.{{ MAILU_DOMAIN_DNS_ZONE }}"
     value: "{{ mailu_dkim_public_key }}"
     ttl: 1
     state: present
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

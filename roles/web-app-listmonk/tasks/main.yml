@@ -35,9 +35,9 @@
     oidc_settings_json: >-
       {{ {
          "enabled":       True,
-         "client_id":     oidc.client.id,
-         "provider_url":  oidc.client.issuer_url,
-         "client_secret": oidc.client.secret
+         "client_id":     OIDC.CLIENT.ID,
+         "provider_url":  OIDC.CLIENT.ISSUER_URL,
+         "client_secret": OIDC.CLIENT.SECRET
       } | to_json }}
 
 - name: Update administrator email and password login in Listmonk

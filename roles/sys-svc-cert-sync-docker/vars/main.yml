@@ -1,0 +1,3 @@
+CERT_SYNC_DOCKER_SCRIPT_FILE:   "sys-svc-cert-sync-docker.sh"
+CERT_SYNC_DOCKER_SCRIPT_PATH:   "{{ PATH_ADMINISTRATOR_SCRIPTS }}{{ CERT_SYNC_DOCKER_SCRIPT_FILE }}"
+CERT_SYNC_DOCKER_SERVICE_NAME:  "sys-svc-cert-sync-docker.{{ application_id }}{{ SYS_SERVICE_SUFFIX }}"

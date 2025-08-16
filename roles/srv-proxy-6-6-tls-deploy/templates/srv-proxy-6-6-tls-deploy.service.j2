@@ -1,7 +1,0 @@
-[Unit]
-Description=Let's Encrypt deploy to {{ docker_compose.directories.instance }}
-OnFailure=sys-alm-compose.infinito@%n.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/bash {{ PATH_ADMINISTRATOR_SCRIPTS }}/srv-proxy-6-6-tls-deploy.sh {{ssl_cert_folder}} {{ docker_compose.directories.instance }}

@@ -30,4 +30,4 @@ defaults_service_provider:
   legal:
     editorial_responsible:  "Johannes Gutenberg"
     source_code:            "https://s.{{ SOFTWARE_NAME | lower }}/code"
-    imprint:                "{{WEB_PROTOCOL}}://{{ domains | get_domain('web-svc-html') }}/imprint.html"
+    imprint:                "{{ domains | get_url('web-svc-html', WEB_PROTOCOL) }}/imprint.html"

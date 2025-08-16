@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Check if the necessary parameters are provided
-if [ "$#" -ne 2 ]; then
+if [ "$#" -ne 3 ]; then
     echo "Usage: $0 <ssl_cert_folder> <docker_compose_instance_directory>"
     exit 1
 fi
@@ -9,14 +9,15 @@ fi
 # Assign parameters
 ssl_cert_folder="$1"
 docker_compose_instance_directory="$2"
+letsencrypt_live_path="$3"
 docker_compose_cert_directory="$docker_compose_instance_directory/volumes/certs"
 
 # Copy certificates
-cp -RvL "{{ LETSENCRYPT_LIVE_PATH }}/$ssl_cert_folder/"* "$docker_compose_cert_directory" || exit 1
+cp -RvL "$letsencrypt_live_path/$ssl_cert_folder/"* "$docker_compose_cert_directory" || exit 1
 
 # This code is optimized for mailu
-cp -v "{{ LETSENCRYPT_LIVE_PATH }}/$ssl_cert_folder/privkey.pem" "$docker_compose_cert_directory/key.pem" || exit 1
-cp -v "{{ LETSENCRYPT_LIVE_PATH }}/$ssl_cert_folder/fullchain.pem" "$docker_compose_cert_directory/cert.pem" || exit 1
+cp -v "$letsencrypt_live_path/$ssl_cert_folder/privkey.pem" "$docker_compose_cert_directory/key.pem" || exit 1
+cp -v "$letsencrypt_live_path/$ssl_cert_folder/fullchain.pem" "$docker_compose_cert_directory/cert.pem" || exit 1
 
 # Set correct reading rights
 chmod a+r -v "$docker_compose_cert_directory/"*

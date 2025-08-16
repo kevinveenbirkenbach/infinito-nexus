@@ -50,14 +50,14 @@ email:
 # @See https://matrix-org.github.io/synapse/latest/openid.html
 oidc_providers:
   - idp_id:         keycloak
-    idp_name:       "{{ oidc.button_text }}"
-    issuer:         "{{ oidc.client.issuer_url }}"
-    client_id:      "{{ oidc.client.id }}"
-    client_secret:  "{{ oidc.client.secret }}"
+    idp_name:       "{{ OIDC.BUTTON_TEXT }}"
+    issuer:         "{{ OIDC.CLIENT.ISSUER_URL }}"
+    client_id:      "{{ OIDC.CLIENT.ID }}"
+    client_secret:  "{{ OIDC.CLIENT.SECRET }}"
     scopes: ["openid", "profile"]
     user_mapping_provider:
       config:
-        localpart_template: "{% raw %}{{ user.{% endraw %}{{oidc.attributes.username}}{% raw %}}}{% endraw %}"
+        localpart_template: "{% raw %}{{ user.{% endraw %}{{OIDC.ATTRIBUTES.USERNAME}}{% raw %}}}{% endraw %}"
         display_name_template: "{% raw %}{{ user.name }}{% endraw %}"
     backchannel_logout_enabled: true
 {% endif %}

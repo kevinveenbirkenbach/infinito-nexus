@@ -24,9 +24,9 @@ LISTMONK_SETTINGS:
     value: >-
       {{ {
          "enabled": True,
-         "client_id": oidc.client.id,
-         "provider_url": oidc.client.issuer_url,
-         "client_secret": oidc.client.secret
+         "client_id": OIDC.CLIENT.ID,
+         "provider_url": OIDC.CLIENT.ISSUER_URL,
+         "client_secret": OIDC.CLIENT.SECRET
       } | to_json }}
     when: applications | get_app_conf(application_id, 'features.oidc', False)
 

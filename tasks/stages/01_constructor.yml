@@ -83,9 +83,9 @@
     set_fact:
       networks: "{{ defaults_networks | combine(networks | default({}, true), recursive=True) }}"
   
-  - name: Merge oidc configuration
+  - name: Merge OIDC configuration
     set_fact:
-      oidc: "{{ defaults_oidc | combine(oidc | default({}, true), recursive=True) }}"
+      OIDC: "{{ defaults_oidc | combine(OIDC | default({}, true), recursive=True) }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge design configuration

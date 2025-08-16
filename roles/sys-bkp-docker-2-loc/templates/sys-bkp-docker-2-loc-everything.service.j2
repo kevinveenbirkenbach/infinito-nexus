@@ -1,6 +1,6 @@
 [Unit]
 Description=backup all docker volumes to local folder
-OnFailure=sys-alm-compose.infinito@%n.service sys-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
+OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service sys-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
 
 [Service]
 Type=oneshot

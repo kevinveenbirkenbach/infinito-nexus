@@ -23,19 +23,19 @@
   loop:
     - { name: "idptype",              value: 3 }
     - { name: "clientauthmethod",     value: 1 }  
-    - { name: "clientid",             value: "{{ oidc.client.id }}" }
-    - { name: "clientsecret",         value: "{{ oidc.client.secret }}" }
-    - { name: "opname",               value: "{{ oidc.button_text }}" }
+    - { name: "clientid",             value: "{{ OIDC.CLIENT.ID }}" }
+    - { name: "clientsecret",         value: "{{ OIDC.CLIENT.SECRET }}" }
+    - { name: "opname",               value: "{{ OIDC.BUTTON_TEXT }}" }
     - { name: "oidcscope",            value: "openid profile email" }
-    - { name: "authendpoint",         value: "{{ oidc.client.authorize_url }}" }
-    - { name: "tokenendpoint",        value: "{{ oidc.client.token_url }}" }
-    - { name: "bindingusernameclaim", value: "{{ oidc.attributes.username }}" }
+    - { name: "authendpoint",         value: "{{ OIDC.CLIENT.AUTHORIZE_URL }}" }
+    - { name: "tokenendpoint",        value: "{{ OIDC.CLIENT.TOKEN_URL }}" }
+    - { name: "bindingusernameclaim", value: "{{ OIDC.ATTRIBUTES.USERNAME }}" }
     - { name: "single_sign_off",      value: 1 }  # Logs the user out from the IDP
-    - { name: "logouturi",            value: "{{ oidc.client.logout_url }}" }
+    - { name: "logouturi",            value: "{{ OIDC.CLIENT.LOGOUT_URL }}" }
     - { name: "icon",                 value: "moodle:t/lock" }
-    - { name: "field_map_firstname",  value: "{{ oidc.attributes.given_name }}" }
+    - { name: "field_map_firstname",  value: "{{ OIDC.ATTRIBUTES.GIVEN_NAME }}" }
     - { name: "field_lock_firstname", value: "locked" }
-    - { name: "field_map_lastname",   value: "{{ oidc.attributes.family_name }}" }
+    - { name: "field_map_lastname",   value: "{{ OIDC.ATTRIBUTES.FAMILY_NAME }}" }
     - { name: "field_lock_lastname",  value: "locked" }
     - { name: "field_map_email",      value: "locked" }
     #- { name: "showloginform",        value: 0 }  # Deactivate if OIDC is active

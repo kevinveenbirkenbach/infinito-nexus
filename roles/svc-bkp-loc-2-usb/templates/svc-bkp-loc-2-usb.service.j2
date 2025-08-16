@@ -1,7 +1,7 @@
 [Unit]
 Description=Backup to USB when mounted to {{ backup_to_usb_mount }}
 Wants={{systemctl_mount_service_name}}
-OnFailure=sys-alm-compose.infinito@%n.service
+OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
 
 [Service]
 Type=oneshot
