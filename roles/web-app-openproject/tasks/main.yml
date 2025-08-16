@@ -32,9 +32,10 @@
     RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"Setting[:{{ item.key }}] = '{{ item.value }}'\""
   args:
     chdir: "{{ docker_compose.directories.instance }}"
-  loop: "{{ openproject_rails_settings | dict2items }}"
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  loop:   "{{ openproject_rails_settings | dict2items }}"
+  async:  "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:   "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Setup LDAP
   include_tasks: 01_ldap.yml

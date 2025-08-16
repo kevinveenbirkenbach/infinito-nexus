@@ -1,17 +1,18 @@
+# General 
 application_id: "web-app-listmonk"
 database_type:  "postgres"
 
-container_port:   "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.port', True) }}"
+container_port:   "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.port') }}"
 
 # Docker
 docker_compose_flush_handlers: false
 
-# Listmonk Specific
-listmonk_version: "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.version', True) }}"
-listmonk_image:   "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.image', True) }}"
-listmonk_name:    "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.name', True) }}"
+# Listmonk
+LISTMONK_VERSION: "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.version') }}"
+LISTMONK_IMAGE:   "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.image') }}"
+LISTMONK_NAME:    "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.name') }}"
 
-listmonk_settings:
+LISTMONK_SETTINGS:
   - key: "app.root_url"
     value: '"{{ domains | get_url(application_id, WEB_PROTOCOL) }}"'
 
@@ -34,10 +35,10 @@ listmonk_settings:
     value: 'true'
 
   - key: "security.captcha_key"
-    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha_site_key", True) }}"'
+    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha_site_key") }}"'
 
   - key: "security.captcha_secret"
-    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha_secret", True) }}"'
+    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha_secret") }}"'
 
   # SMTP servers
   - key: "smtp"
