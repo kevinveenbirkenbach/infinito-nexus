@@ -41,24 +41,28 @@ class TestVariableDefinitions(unittest.TestCase):
         # Simple {{ var }} usage with optional Jinja filters after a pipe
         self.simple_var_pattern = re.compile(r"{{\s*([a-zA-Z_]\w*)\s*(?:\|[^}]*)?}}")
 
-        # {% set var = ... %}
+        # {% set var = ... %}   (allow trimmed variants)
         self.jinja_set_def = re.compile(r'{%\s*-?\s*set\s+([a-zA-Z_]\w*)\s*=')
 
-        # {% for x in ... %}  or  {% for k, v in ... %}
+        # {% for x in ... %}  or  {% for k, v in ... %}   (allow trimmed variants)
         self.jinja_for_def = re.compile(
             r'{%\s*-?\s*for\s+([a-zA-Z_]\w*)(?:\s*,\s*([a-zA-Z_]\w*))?\s+in'
         )
 
-        # {% macro name(param1, param2=..., *varargs, **kwargs) %}
+        # {% macro name(param1, param2=..., *varargs, **kwargs) %}   (allow trimmed variants)
         self.jinja_macro_def = re.compile(
             r'{%\s*-?\s*macro\s+[a-zA-Z_]\w*\s*\((.*?)\)\s*-?%}'
         )
 
         # Ansible YAML anchors for inline var declarations
-        self.ansible_set_fact = re.compile(r'^(?:\s*[-]\s*)?set_fact\s*:\s*$')
+        # Support short and FQCN forms, plus inline dict after colon
+        self.ansible_set_fact = re.compile(
+            r'^(?:\s*-\s*)?(?:ansible\.builtin\.)?set_fact\s*:\s*(\{[^}]*\})?\s*$'
+        )
         self.ansible_vars_block = re.compile(r'^(?:\s*[-]\s*)?vars\s*:\s*$')
         self.ansible_loop_var = re.compile(r'^\s*loop_var\s*:\s*([a-zA-Z_]\w*)')
         self.mapping_key = re.compile(r'^\s*([a-zA-Z_]\w*)\s*:\s*')
+        self.register_pat = re.compile(r'^\s*register\s*:\s*([a-zA-Z_]\w*)')
 
         # -----------------------
         # Collect "defined" names
@@ -85,6 +89,7 @@ class TestVariableDefinitions(unittest.TestCase):
 
                 path = os.path.join(root, fn)
 
+                # Track when we're inside set_fact:/vars: blocks to also extract mapping keys.
                 in_set_fact = False
                 set_fact_indent = 0
                 in_vars_block = False
@@ -96,63 +101,75 @@ class TestVariableDefinitions(unittest.TestCase):
                             stripped = line.lstrip()
                             indent = len(line) - len(stripped)
 
-                            # --- set_fact block keys
-                            if self.ansible_set_fact.match(stripped):
-                                in_set_fact = True
-                                set_fact_indent = indent
-                                continue
+                            # --- set_fact (short and FQCN), supports inline and block forms
+                            m_sf = self.ansible_set_fact.match(stripped)
+                            if m_sf:
+                                inline_map = m_sf.group(1)
+                                if inline_map:
+                                    # Inline mapping: set_fact: { a: 1, b: 2 }
+                                    try:
+                                        data = yaml.safe_load(inline_map)
+                                        if isinstance(data, dict):
+                                            self.defined.update(
+                                                k for k in data.keys() if isinstance(k, str)
+                                            )
+                                    except Exception:
+                                        pass
+                                    # do not enter block mode if inline present
+                                    in_set_fact = False
+                                else:
+                                    # Block mapping: keys on subsequent indented lines
+                                    in_set_fact = True
+                                    set_fact_indent = indent
+                                    # continue to next iteration to avoid double-processing this line
+                                    continue
+
                             if in_set_fact:
                                 # Still inside set_fact child mapping?
                                 if indent > set_fact_indent and stripped.strip():
                                     m = self.mapping_key.match(stripped)
                                     if m:
                                         self.defined.add(m.group(1))
-                                    continue
+                                    # do not continue; still scan for Jinja defs below
                                 else:
-                                    in_set_fact = False
+                                    # Leaving the block when indentation decreases or a new key at same level appears
+                                    if indent <= set_fact_indent and stripped:
+                                        in_set_fact = False
 
-                            # --- vars: block keys
+                            # --- vars: block (collect mapping keys)
                             if self.ansible_vars_block.match(stripped):
                                 in_vars_block = True
                                 vars_block_indent = indent
+                                # continue to next line to avoid double-processing this line
                                 continue
+
                             if in_vars_block:
-                                # Ignore blank lines inside vars block
-                                if not stripped.strip():
-                                    continue
-                                # Still inside vars child mapping?
-                                if indent > vars_block_indent:
+                                # Inside vars: collect top-level mapping keys
+                                if indent > vars_block_indent and stripped.strip():
                                     m = self.mapping_key.match(stripped)
                                     if m:
                                         self.defined.add(m.group(1))
-                                    continue
+                                    # do not continue; still scan for Jinja defs below
                                 else:
-                                    in_vars_block = False
+                                    # Leaving vars block
+                                    if indent <= vars_block_indent and stripped:
+                                        in_vars_block = False
 
-                            # --- loop_var
-                            m_loop = self.ansible_loop_var.match(stripped)
-                            if m_loop:
-                                self.defined.add(m_loop.group(1))
+                            # --- Always scan every line (including inside blocks) for Jinja definitions
 
-                            # --- register: name
-                            m_reg = re.match(r'^\s*register\s*:\s*([a-zA-Z_]\w*)', stripped)
-                            if m_reg:
-                                self.defined.add(m_reg.group(1))
-
-                            # --- {% set var = ... %}
+                            # {% set var = ... %}
                             for m in self.jinja_set_def.finditer(line):
                                 self.defined.add(m.group(1))
 
-                            # --- {% for x [ , y ] in ... %}
+                            # {% for x [, y] in ... %}
                             for m in self.jinja_for_def.finditer(line):
                                 self.defined.add(m.group(1))
                                 if m.group(2):
                                     self.defined.add(m.group(2))
 
-                            # --- {% macro name(params...) %}  -> collect parameter names
+                            # {% macro name(params...) %}
                             for m in self.jinja_macro_def.finditer(line):
                                 params_blob = m.group(1)
-                                # Split by comma at top level (macros don't support nested tuples in params)
                                 params = [p.strip() for p in params_blob.split(',')]
                                 for p in params:
                                     if not p:
@@ -163,6 +180,16 @@ class TestVariableDefinitions(unittest.TestCase):
                                     name = p.split('=', 1)[0].strip()
                                     if re.match(r'^[a-zA-Z_]\w*$', name):
                                         self.defined.add(name)
+
+                            # --- loop_var and register names
+                            m_loop = self.ansible_loop_var.match(stripped)
+                            if m_loop:
+                                self.defined.add(m_loop.group(1))
+
+                            m_reg = self.register_pat.match(stripped)
+                            if m_reg:
+                                self.defined.add(m_reg.group(1))
+
                 except Exception:
                     # Ignore unreadable files
                     pass
