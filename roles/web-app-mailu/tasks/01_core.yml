@@ -12,8 +12,10 @@
   - name: "load docker, db and proxy for {{ application_id }}"
     include_role: 
       name: cmp-db-docker-proxy
+    vars:
+      docker_compose_flush_handlers: true
 
-  - name: "Include the sys-svc-cert-sync-docker role"
+  - name: "Include Cert deploy service for '{{ role_name }}'"
     include_role:
       name: sys-svc-cert-sync-docker
   vars:
