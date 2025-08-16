@@ -43,11 +43,12 @@ ACTIVATE_ALL_TIMERS:                      false   # Activates all timers, indepe
 
 DNS_PROVIDER:                             cloudflare              # The DNS Provider\Registrar for the domain
 
+HOSTING_PROVIDER:                         hetzner                 # Provider which hosts the server
+
 # Which ACME method to use: webroot, cloudflare, or hetzner
 CERTBOT_ACME_CHALLENGE_METHOD:            "cloudflare"
 CERTBOT_CREDENTIALS_DIR:                  /etc/certbot
 CERTBOT_CREDENTIALS_FILE:                 "{{ CERTBOT_CREDENTIALS_DIR }}/{{ CERTBOT_ACME_CHALLENGE_METHOD }}.ini"
-CERTBOT_DNS_API_TOKEN:                    ""                      # Define in inventory file: More information here: group_vars/all/docs/CLOUDFLARE_API_TOKEN.md
 CERTBOT_DNS_PROPAGATION_WAIT_SECONDS:     300                     # How long should the script wait for DNS propagation before continuing
 CERTBOT_FLAVOR:                           san                     # Possible options: san (recommended, with a dns flavor like cloudflare, or hetzner), wildcard(doesn't function with www redirect), dedicated
 

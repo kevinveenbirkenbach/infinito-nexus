@@ -1,5 +1,6 @@
 collections:
   - name: kewlfft.aur
   - name: community.general
+  - name: hetzner.hcloud
 yay:
   - python-simpleaudio

@@ -16,7 +16,7 @@
     url: "{{ cf_api_url }}?name={{ domain | to_primary_domain }}"
     method: GET
     headers:
-      Authorization: "Bearer {{ CERTBOT_DNS_API_TOKEN }}"
+      Authorization: "Bearer {{ CLOUDFLARE_API_TOKEN }}"
       Content-Type: "application/json"
     return_content: yes
   register: cf_zone_lookup_dev

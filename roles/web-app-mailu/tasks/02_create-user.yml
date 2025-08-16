@@ -25,5 +25,5 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Create Mailu API Token for {{ mailu_user_name }}"
-  include_tasks: 03_create-mailu-token.yml
+  include_tasks: 03_create-token.yml
   when: "{{ 'mail-bot' in item.value.roles }}"

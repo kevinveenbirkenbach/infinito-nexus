@@ -1,0 +1,33 @@
+# run_once_sys_dns_hetzner_rdns
+
+# Decide flavor
+- name: Decide which Hetzner flavor to use
+  set_fact:
+    _use_cloud: "{{ (HETZNER_API_TOKEN | length) > 0 }}"
+    _use_robot: >-
+      {{
+        (HETZNER_ROBOT_USER | length) > 0
+        and (HETZNER_ROBOT_PASSWORD | length) > 0
+      }}
+  no_log: "{{ hetzner_no_log | bool }}"
+
+- name: "Note: both Cloud token and Robot creds provided; using Cloud flavor"
+  debug:
+    msg: "Both HETZNER_API_TOKEN and Robot credentials present → proceeding with Cloud (hcloud) flavor."
+  when: _use_cloud and _use_robot
+
+- name: Include Cloud flavor (hcloud)
+  include_tasks: flavors/cloud.yml
+  when: _use_cloud
+
+- name: Include Robot flavor (Robot Webservice)
+  include_tasks: flavors/robot.yml
+  when: (not _use_cloud) and _use_robot
+
+- name: Fail if no credentials provided
+  fail:
+    msg: >-
+      Neither Cloud nor Robot credentials provided.
+      Set either HETZNER_API_TOKEN for Cloud (hcloud) or
+      HETZNER_ROBOT_USER/HETZNER_ROBOT_PASSWORD for Robot.
+  when: (not _use_cloud) and (not _use_robot)

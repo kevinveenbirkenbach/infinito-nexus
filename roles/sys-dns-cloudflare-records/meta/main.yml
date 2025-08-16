@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: "Kevin Veen-Birkenbach"
+  description: "Generic role to manage Cloudflare DNS records (A/AAAA, CNAME, MX, TXT, SRV) in a data-driven way."
+  license: "Infinito.Nexus NonCommercial License"
+  license_url: "https://s.infinito.nexus/license"
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
+  galaxy_tags:
+    - cloudflare
+    - dns
+    - records
+    - mail
+    - automation
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://docs.infinito.nexus"
+  logo:
+    class: "fa-solid fa-cloud"
+  run_after: []
+dependencies: []

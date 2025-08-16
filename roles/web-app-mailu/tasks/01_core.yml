@@ -25,7 +25,7 @@
   meta: flush_handlers
 
 - name: "Create Mailu accounts"
-  include_tasks: 02_create-mailu-user.yml
+  include_tasks: 02_create-user.yml
   vars:
     MAILU_DOCKER_DIR:        "{{ docker_compose.directories.instance }}"
     mailu_api_base_url:       "http://127.0.0.1:8080/api/v1"
@@ -45,6 +45,8 @@
     loop_var: item
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+- name: Generate DKIM public key
+  include_tasks: 04_generate-and-read-dkim.yml
+
 - name: Set Mailu DNS records
-  include_tasks: 04_set-mailu-dns-records.yml
-  when: DNS_PROVIDER == 'cloudflare'
+  include_tasks: 05_dns-records.yml

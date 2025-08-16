@@ -20,7 +20,7 @@
   include_role:
     name: srv-web-7-7-dns-records
   vars:
-    cloudflare_api_token: "{{ CERTBOT_DNS_API_TOKEN }}"
+    CLOUDFLARE_API_TOKEN: "{{ CLOUDFLARE_API_TOKEN }}"
     cloudflare_domains: "{{ www_domains }}"
     cloudflare_target_ip: "{{ networks.internet.ip4 }}"
     cloudflare_proxied: false

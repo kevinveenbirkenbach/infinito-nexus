@@ -1,0 +1,105 @@
+---
+# run_once_sys_dns_cloudflare_records: deactivated
+
+- name: Assert token
+  ansible.builtin.assert:
+    that: [ "CLOUDFLARE_API_TOKEN | length > 0" ]
+  no_log: "{{ cloudflare_no_log | bool }}"
+
+- name: Apply A/AAAA
+  community.general.cloudflare_dns:
+    api_token: "{{ CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ item.zone }}"
+    type: "{{ item.type }}"
+    name: "{{ item.name }}"
+    content: "{{ item.content }}"
+    proxied: "{{ item.proxied | default(false) }}"
+    ttl: "{{ item.ttl | default(1) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ cloudflare_records | selectattr('type','in',['A','AAAA']) | list }}"
+  loop_control: { label: "{{ item.type }} {{ item.name }} -> {{ item.content }}" }
+  async: "{{ cloudflare_async_enabled | ternary(cloudflare_async_time, omit) }}"
+  poll: "{{ cloudflare_async_enabled | ternary(cloudflare_async_poll, omit) }}"
+  no_log: "{{ cloudflare_no_log | bool }}"
+  register: _cf_call
+  failed_when: >
+    _cf_call is failed and
+    (
+      ('An identical record already exists' not in (_cf_call.msg | default('') | string))
+      and
+      ('81058' not in (_cf_call.msg | default('') | string))
+    )
+  changed_when: >
+    (_cf_call.changed | default(false)) and
+    (
+      ('An identical record already exists' not in (_cf_call.msg | default('') | string))
+      and
+      ('81058' not in (_cf_call.msg | default('') | string))
+    )
+
+- name: Apply CNAME/MX/TXT
+  community.general.cloudflare_dns:
+    api_token: "{{ CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ item.zone }}"
+    type: "{{ item.type }}"
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    ttl: "{{ item.ttl | default(1) }}"
+    priority: "{{ (item.type == 'MX') | ternary(item.priority | default(10), omit) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ cloudflare_records | selectattr('type','in',['CNAME','MX','TXT']) | list }}"
+  loop_control: { label: "{{ item.type }} {{ item.name }} -> {{ item.value }}" }
+  async: "{{ cloudflare_async_enabled | ternary(cloudflare_async_time, omit) }}"
+  poll: "{{ cloudflare_async_enabled | ternary(cloudflare_async_poll, omit) }}"
+  no_log: "{{ cloudflare_no_log | bool }}"
+  register: _cf_call
+  failed_when: >
+    _cf_call is failed and
+    (
+      ('An identical record already exists' not in (_cf_call.msg | default('') | string))
+      and
+      ('81058' not in (_cf_call.msg | default('') | string))
+    )
+  changed_when: >
+    (_cf_call.changed | default(false)) and
+    (
+      ('An identical record already exists' not in (_cf_call.msg | default('') | string))
+      and
+      ('81058' not in (_cf_call.msg | default('') | string))
+    )
+
+- name: Apply SRV
+  community.general.cloudflare_dns:
+    api_token: "{{ CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ item.zone }}"
+    type: SRV
+    service: "{{ item.service }}"
+    proto: "{{ item.proto }}"
+    name: "{{ item.name }}"
+    priority: "{{ item.priority }}"
+    weight: "{{ item.weight }}"
+    port: "{{ item.port }}"
+    value: "{{ item.value }}"
+    ttl: "{{ item.ttl | default(1) }}"
+    state: "{{ item.state | default('present') }}"
+  loop: "{{ cloudflare_records | selectattr('type','equalto','SRV') | list }}"
+  loop_control: { label: "SRV {{ item.service }}.{{ item.proto }} {{ item.name }} -> {{ item.value }}:{{ item.port }}" }
+  ignore_errors: "{{ item.ignore_errors | default(true) }}"
+  async: "{{ cloudflare_async_enabled | ternary(cloudflare_async_time, omit) }}"
+  poll: "{{ cloudflare_async_enabled | ternary(cloudflare_async_poll, omit) }}"
+  no_log: "{{ cloudflare_no_log | bool }}"
+  register: _cf_call
+  failed_when: >
+    _cf_call is failed and
+    (
+      ('An identical record already exists' not in (_cf_call.msg | default('') | string))
+      and
+      ('81058' not in (_cf_call.msg | default('') | string))
+    )
+  changed_when: >
+    (_cf_call.changed | default(false)) and
+    (
+      ('An identical record already exists' not in (_cf_call.msg | default('') | string))
+      and
+      ('81058' not in (_cf_call.msg | default('') | string))
+    )
