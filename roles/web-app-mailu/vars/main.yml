@@ -38,7 +38,7 @@ MAILU_DOVECOT_MAIL_VOLUME:            "mailu_dovecot_mail"
 ## Network
 MAILU_DNS_RESOLVER:                   "{{ networks.local['web-app-mailu'].dns_resolver }}"
 MAILU_IP4_PUBLIC:                     "{{ networks.internet.ip4 }}"
-MAILU_IP6_PUBLIC:                     false #Deactivated atm. but cloudflare logic present
+MAILU_IP6_PUBLIC:                     "" #Deactivated atm. but cloudflare logic present @todo activate it when it's configured for docker. See https://chatgpt.com/share/68a0acb8-db20-800f-9d2c-b34e38b5cdee
 MAILU_SUBNET:                         "{{ networks.local['web-app-mailu'].subnet }}"
 
 ## Credentials
