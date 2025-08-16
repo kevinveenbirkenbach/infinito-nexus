@@ -8,10 +8,7 @@
     name: pkgmgr-install
   vars:
     package_name: checkcsp
-
-- name: rebuild checkcsp docker image
-  shell: checkcsp build
-  # Todo this could be optimized in the future
+    package_notify: rebuild checkcsp docker image
 
 - name: "create {{ health_csp_crawler_folder }}"
   file:
