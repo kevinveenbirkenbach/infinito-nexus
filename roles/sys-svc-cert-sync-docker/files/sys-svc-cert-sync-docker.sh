@@ -2,7 +2,7 @@
 
 # Check if the necessary parameters are provided
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <ssl_cert_folder> <docker_compose_instance_directory>"
+    echo "Usage: $0 <ssl_cert_folder> <docker_compose_instance_directory> <letsencrypt_live_path>"
     exit 1
 fi
 

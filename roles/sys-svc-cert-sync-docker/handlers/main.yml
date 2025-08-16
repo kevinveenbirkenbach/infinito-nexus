@@ -1,7 +1,7 @@
 ---
 - name: "restart tls deploy to docker service"
   systemd:
-    name:           "{{ CERT_SYNC_DOCKER_SERVICE_NAME }}"
+    name:           "{{ CERT_SYNC_DOCKER_SERVICE_NAME_FULL }}"
     state:          restarted
     enabled:        yes
     daemon_reload:  yes

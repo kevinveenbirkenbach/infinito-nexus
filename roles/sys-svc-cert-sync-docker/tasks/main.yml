@@ -11,17 +11,17 @@
     mode: "0755"
   notify: restart tls deploy to docker service
 
-- name: configure sys-svc-cert-sync-docker service
+- name: Copy {{ CERT_SYNC_DOCKER_SERVICE_NAME_FULL }}
   template:
-    src: "sys-svc-cert-sync-docker.service.j2"
-    dest: "/etc/systemd/system/{{ CERT_SYNC_DOCKER_SERVICE_NAME }}"
+    src: "{{ CERT_SYNC_DOCKER_BASE }}.service.j2"
+    dest: "/etc/systemd/system/{{ CERT_SYNC_DOCKER_SERVICE_NAME_FULL }}"
   notify: restart tls deploy to docker service
 
-- name: "include role for sys-timer for {{ service_name }}"
+- name: "include role for sys-timer for {{ CERT_SYNC_DOCKER_SERVICE_NAME_FULL }}"
   include_role:
     name: sys-timer
   vars:
     on_calendar: "{{ on_calendar_deploy_certificates }}"
-    service_name: "{{ CERT_SYNC_DOCKER_SERVICE_NAME }}"
+    service_name: "{{ CERT_SYNC_DOCKER_SERVICE_NAME_BASE }}"
     persistent: "true"
 
