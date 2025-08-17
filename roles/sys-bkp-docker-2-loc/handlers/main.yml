@@ -1,9 +1,9 @@
 - name: "reload backup docker to local (all) service"
   systemd:
-    name: {{ BKP_DOCKER_2_LOC_SERVICE_ALL }}
+    name: "{{ BKP_DOCKER_2_LOC_SERVICE_ALL }}"
     daemon_reload: yes
 
 - name: "reload backup docker to local service"
   systemd:
-    name: {{ BKP_DOCKER_2_LOC_SERVICE }}
+    name: "{{ BKP_DOCKER_2_LOC_SERVICE }}"
     daemon_reload: yes

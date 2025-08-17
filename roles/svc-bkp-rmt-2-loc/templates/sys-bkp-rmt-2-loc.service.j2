@@ -4,5 +4,5 @@ OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service sys-cln-faild-bkps{{ SY
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore {{system_maintenance_backup_services| join(' ') }} --timeout "{{system_maintenance_lock_timeout_backup_services}}"'
+ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore {{system_maintenance_backup_services| join(' ') }} --timeout "{{ system_maintenance_lock_timeout_backup_services }}"'
 ExecStart=/bin/sh -c '/usr/bin/bash {{docker_backup_remote_to_local_folder}}sys-bkp-rmt-2-loc-multi-provider.sh'
