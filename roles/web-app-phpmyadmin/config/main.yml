@@ -3,7 +3,7 @@ oauth2_proxy:
   port:               "80"
   application:        "application"
   allowed_groups:
-    - "/roles/web-app-phpmyadmin-administrator"
+    - "{{ [RBAC.GROUP.NAME, 'web-app-phpmyadmin-administrator'] | path_join }}"
 features:
   matomo:             true
   css:                false

@@ -13,7 +13,7 @@
   include_role:
     name: cmp-docker-proxy
   vars:
-    docker_compose_flush_handlers:      false
+    docker_compose_flush_handlers: false
 - name: "include 04_seed-database-to-backup.yml"
   include_tasks: "{{ playbook_dir }}/roles/sys-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"
 

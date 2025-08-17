@@ -2,7 +2,7 @@ oauth2_proxy:
   application:        "application"
   port:               "80"
   allowed_groups:
-    - "/roles/web-app-yourls-administrator"
+    - "{{ [RBAC.GROUP.NAME, 'web-app-yourls-administrator'] | path_join }}"
   acl:
     blacklist:
       - "<< defaults_applications[web-app-yourls].server.locations.admin >>" # Protects the admin area

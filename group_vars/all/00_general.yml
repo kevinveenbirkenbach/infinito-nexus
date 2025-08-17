@@ -91,3 +91,10 @@ _applications_nextcloud_oidc_flavor: >-
 # Systemctl 
 SYS_TIMER_SUFFIX:   ".{{ SOFTWARE_NAME | lower }}.timer"
 SYS_SERVICE_SUFFIX: ".{{ SOFTWARE_NAME | lower }}.service"
+
+# Role-based access control
+# @See https://en.wikipedia.org/wiki/Role-based_access_control
+RBAC:
+  GROUP:
+    NAME:   "/roles"  # Name of the group which holds the RBAC roles
+    CLAIM:  "groups"  # Name of the claim containing the RBAC groups

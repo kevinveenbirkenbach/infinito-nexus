@@ -32,7 +32,6 @@ server:
 scopes:
   nextcloud:  nextcloud
 
-rbac_groups:  "/rbac"
 docker:
   services:
     keycloak:
@@ -44,5 +43,5 @@ docker:
 
 credentials:
   recaptcha:
-    website_key:    "YOUR_RECAPTCHA_WEBSITE_KEY" # Required if you enabled recaptcha:
-    secret_key:     "YOUR_RECAPTCHA_SECRET_KEY" # Required if you enabled recaptcha:
+    website_key:    "" # Required if you enabled recaptcha:
+    secret_key:     ""  # Required if you enabled recaptcha:

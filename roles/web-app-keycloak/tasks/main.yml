@@ -1,12 +1,18 @@
 ---
+- name: "Load meta"
+  include_tasks: 01_meta.yml
+  when: not KEYCLOAK_LOAD_DEPENDENCIES | bool
+
+
 - name: "Load cleanup routine for '{{ application_id }}'"
-  include_tasks: 01_cleanup.yml
+  include_tasks: 02_cleanup.yml
 
 - name: "Load init routine for '{{ application_id }}'"
-  include_tasks: 02_initialize.yml
+  include_tasks: 03_init.yml
 
 - name: "Load the depdendencies required by '{{ application_id }}'"
-  include_tasks: 03_load_dependencies.yml
+  include_tasks: 04_dependencies.yml
+  when: KEYCLOAK_LOAD_DEPENDENCIES | bool
 
 - name: "Wait until '{{ KEYCLOAK_CONTAINER }}' container is healthy"
   community.docker.docker_container_info:
@@ -50,9 +56,9 @@
               | list | first | default({}) ).attributes | default({}) )
           | combine({'frontchannel.logout.url': KEYCLOAK_FRONTCHANNEL_LOGOUT_URL}, recursive=True)
         }}
-  include_tasks: 03_update.yml
+  include_tasks: _update.yml
 
-- include_tasks: 04_rbac_client_scope.yml
+- include_tasks: 05_rbac_client_scope.yml
 
-- include_tasks: 05_ldap.yml
+- include_tasks: 06_ldap.yml
   when: KEYCLOAK_LDAP_ENABLED | bool

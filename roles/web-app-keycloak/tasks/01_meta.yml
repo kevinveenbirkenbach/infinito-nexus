@@ -1,0 +1,8 @@
+- include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
+  vars:
+    handler_role_name: "docker-compose"
+- ansible.builtin.include_vars:
+    file: "{{ item }}"
+  loop:
+    - "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"
+    - "{{ playbook_dir }}/roles/cmp-rdbms/vars/database.yml"

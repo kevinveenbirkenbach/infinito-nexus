@@ -5,7 +5,7 @@
     {{
       (
         KEYCLOAK_DICTIONARY_REALM.clientScopes
-        | selectattr('name','equalto', KEYCLOAK_OIDC_RBAC_SCOPE_NAME)
+        | selectattr('name','equalto', KEYCLOAK_RBAC_GROUP_CLAIME)
         | list | first
       ) | to_json
     }}
@@ -27,7 +27,7 @@
     scope_id_rbac: >-
       {{ (
           all_scopes.stdout | from_json
-          | selectattr('name','equalto', KEYCLOAK_OIDC_RBAC_SCOPE_NAME)
+          | selectattr('name','equalto', KEYCLOAK_RBAC_GROUP_CLAIME)
           | list | first | default({})
         ).id | default('') }}
 

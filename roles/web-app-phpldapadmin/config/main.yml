@@ -3,7 +3,7 @@ oauth2_proxy:
   application:        application  # Needs to be the same as webinterface
   port:               8080         # application port
   allowed_groups:
-    - "/roles/web-app-phpldapadmin-administrator"
+    - "{{ [RBAC.GROUP.NAME, 'web-app-phpldapadmin-administrator'] | path_join }}"
 features:
   matomo:             true
   css:                true

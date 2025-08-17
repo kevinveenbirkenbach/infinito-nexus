@@ -7,7 +7,7 @@ oauth2_proxy:
   application:                  application
   port:                         80
   allowed_groups:
-    - "/roles/web-app-lam-administrator"
+    - "{{ [RBAC.GROUP.NAME, 'web-app-lam-administrator'] | path_join }}"
 features:
   matomo:                       true
   css:                          true

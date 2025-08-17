@@ -1,5 +1,5 @@
 - name: "Update REALM settings (merge LDAP component .config)"
-  include_tasks: 03_update.yml
+  include_tasks: _update.yml
   vars:
     kc_object_kind:  "component"
     kc_lookup_value: "{{ KEYCLOAK_LDAP_CMP_NAME }}"
@@ -141,4 +141,4 @@
           }, recursive=True)
       }}
     kc_merge_path:   "config"
-  include_tasks: 03_update.yml
+  include_tasks: _update.yml

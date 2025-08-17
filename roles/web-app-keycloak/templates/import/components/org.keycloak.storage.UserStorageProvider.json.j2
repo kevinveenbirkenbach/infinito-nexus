@@ -156,7 +156,7 @@
           "group.object.classes": [ "groupOfNames" ],
           "memberof.ldap.attribute": [ "memberOf" ],
           "drop.non.existing.groups.during.sync": [ "false" ],
-          "groups.path": [ "{{ applications | get_app_conf(application_id, 'rbac_groups', True) }}" ]
+          "groups.path": [ "{{ KEYCLOAK_RBAC_GROUP_NAME }}" ]
         }
       },
       {

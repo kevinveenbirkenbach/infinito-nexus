@@ -5,14 +5,14 @@ oauth2_proxy:
   application:            "application"
   port:                   "80"
   allowed_groups:
-    - "/roles/web-app-pgadmin-administrator"
+    - "{{ [RBAC.GROUP.NAME, 'web-app-pgadmin-administrator'] | path_join }}"
 features:
   matomo:                 true
   css:                    true
-  desktop:        true
+  desktop:                true
   central_database:       true
   oauth2:                 true
-  logout:       true
+  logout:                 true
 server:
   csp:
     flags:
