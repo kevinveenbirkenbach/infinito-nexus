@@ -54,11 +54,6 @@
          | select('string')
          | list | unique }}
 
-#- name: "Build post.logout.redirect.uris value ('+' plus explicit URIs without /*)"
-#  set_fact:
-#    kc_desired_post_logout_uris: >-
-#      {{ (['+'] + (kc_redirect_uris | map('regex_replace','/\\*$','') | list)) | join('\n') }}
-
 # 2) Resolve client id (strictly by provided clientId, no fallback)
 - name: "Resolve client internal id for {{ keycloak_client_id }}"
   shell: >
@@ -104,15 +99,28 @@
     kc_desired_post_logout_uris_list: >-
       {{ "+" | split('\n') | reject('equalto','') | list | sort }}
 
+# after "Read current client configuration"
+- name: "Extract current frontchannel logout url"
+  set_fact:
+    kc_current_frontchannel_logout_url: >-
+      {{
+        (
+          (kc_client_obj.stdout | from_json).attributes['frontchannel.logout.url']
+          if 'frontchannel.logout.url' in (kc_client_obj.stdout | from_json).attributes
+          else ''
+        )
+      }}
+
 # 4) Update only when changed
-- name: "Update redirectUris, webOrigins, post.logout.redirect.uris"
+- name: "Update client with redirectUris, webOrigins, frontchannelLogout"
   shell: >
     {{ keycloak_kcadm_path }} update clients/{{ kc_client.stdout }}
     -r {{ keycloak_realm }}
     -s 'redirectUris={{ kc_redirect_uris | to_json }}'
     -s 'webOrigins={{ kc_web_origins | to_json }}'
-    -s 'attributes."post.logout.redirect.uris"={{ kc_desired_post_logout_uris | to_json }}'
+    -s 'frontchannelLogout=true'
+    -s 'attributes."frontchannel.logout.url"={{ kc_desired_frontchannel_logout_url | to_json }}'
   when: kc_current_redirect_uris != kc_desired_redirect_uris
         or kc_current_web_origins  != kc_desired_web_origins
-        or kc_current_logout_uris  != kc_desired_post_logout_uris_list
+        or kc_current_frontchannel_logout_url != kc_desired_frontchannel_logout_url
 

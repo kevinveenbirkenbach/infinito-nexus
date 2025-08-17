@@ -21,6 +21,7 @@ keycloak_client_id:                 "{{ OIDC.CLIENT.ID }}"
 keycloak_ldap_component_name:       "{{ ldap.server.domain }}"                                                                                    # Name of the LDAP User Federation component in Keycloak (as shown in UI)
 keycloak_import_realm:              "{{ applications | get_app_conf(application_id, 'actions.import_realm') }}"               # Activate realm import  
 keycloak_update_ldap_bind:          "{{ applications | get_app_conf(application_id, 'actions.update_ldap_bind') }}"           # Toggle the LDAP bind update step
+kc_desired_frontchannel_logout_url: "{{ domains | get_url('web-svc-logout', WEB_PROTOCOL) }}/"
 
 # Docker 
 docker_compose_flush_handlers:      true                                                                                      # Remember to copy realm import before flush when set to true
