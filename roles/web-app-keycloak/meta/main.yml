@@ -21,5 +21,3 @@ galaxy_info:
     class: "fa-solid fa-lock"
   run_after:
     - web-app-matomo
-dependencies:
-  - web-svc-logout

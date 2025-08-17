@@ -1,0 +1,61 @@
+{% set user_profile = {
+  "attributes": [
+    {
+      "name": "username",
+      "displayName": "${username}",
+      "validations": {"length": {"min": 3, "max": 255}, "pattern": {"pattern": "^[a-z0-9]+$", "error-message": ""}},
+      "annotations": {},
+      "permissions": {"view": ["admin","user"], "edit": ["admin","user"]},
+      "multivalued": false
+    },
+    {
+      "name": "email",
+      "displayName": "${email}",
+      "validations": {"email": {}, "length": {"max": 255}},
+      "required": {"roles": ["user"]},
+      "permissions": {"view": ["admin","user"], "edit": ["admin","user"]},
+      "multivalued": false
+    },
+    {
+      "name": "firstName",
+      "displayName": "${firstName}",
+      "validations": {"length": {"max": 255}, "person-name-prohibited-characters": {}},
+      "required": {"roles": ["user"]},
+      "permissions": {"view": ["admin","user"], "edit": ["admin","user"]},
+      "multivalued": false
+    },
+    {
+      "name": "lastName",
+      "displayName": "${lastName}",
+      "validations": {"length": {"max": 255}, "person-name-prohibited-characters": {}},
+      "required": {"roles": ["user"]},
+      "permissions": {"view": ["admin","user"], "edit": ["admin","user"]},
+      "multivalued": false
+    },
+    {
+      "name": ldap.user.attributes.ssh_public_key,
+      "displayName": "SSH Public Key",
+      "validations": {},
+      "annotations": {},
+      "permissions": {"view": ["admin","user"], "edit": ["admin","user"]},
+      "group": "user-metadata",
+      "multivalued": true
+    }
+  ],
+  "groups": [
+    {
+      "name": "user-metadata",
+      "displayHeader": "User metadata",
+      "displayDescription": "Attributes, which refer to user metadata"
+    }
+  ]
+} %}
+"org.keycloak.userprofile.UserProfileProvider": [
+  {
+    "providerId": "declarative-user-profile",
+    "subComponents": {},
+    "config": {
+      "kc.user.profile.config": [{{ (user_profile | tojson) | tojson }}]
+    }
+  }
+]

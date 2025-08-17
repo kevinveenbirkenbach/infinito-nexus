@@ -1,0 +1,72 @@
+# --- Ensure RBAC client scope exists (idempotent) ---
+- name: Ensure RBAC client scope exists
+  shell: |
+    cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} create client-scopes -r {{ KEYCLOAK_REALM }} -f -
+    {{
+      (
+        KEYCLOAK_DICTIONARY_REALM.clientScopes
+        | selectattr('name','equalto', KEYCLOAK_OIDC_RBAC_SCOPE_NAME)
+        | list | first
+      ) | to_json
+    }}
+    JSON
+  register: create_rbac_scope
+  changed_when: create_rbac_scope.rc == 0
+  failed_when: create_rbac_scope.rc != 0 and
+               ('already exists' not in (create_rbac_scope.stderr | lower))
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+# --- Get the scope id we will attach to the client ---
+- name: Get all client scopes
+  shell: "{{ KEYCLOAK_EXEC_KCADM }} get client-scopes -r {{ KEYCLOAK_REALM }} --format json"
+  register: all_scopes
+  changed_when: false
+
+- name: Extract RBAC scope id
+  set_fact:
+    scope_id_rbac: >-
+      {{ (
+          all_scopes.stdout | from_json
+          | selectattr('name','equalto', KEYCLOAK_OIDC_RBAC_SCOPE_NAME)
+          | list | first | default({})
+        ).id | default('') }}
+
+- name: Resolve application client id
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get clients
+    -r {{ KEYCLOAK_REALM }}
+    --query 'clientId={{ KEYCLOAK_CLIENT_ID }}'
+    --fields id --format json | jq -r '.[0].id'
+  register: app_client_id_cmd
+  changed_when: false
+
+- name: Sanity check IDs
+  assert:
+    that:
+      - scope_id_rbac | length > 0
+      - (app_client_id_cmd.stdout | trim) is match('^[0-9a-f-]+$')
+    fail_msg: "Could not determine client or scope ID."
+
+- name: Get current optional client scopes
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get
+    clients/{{ app_client_id_cmd.stdout | trim }}/optional-client-scopes
+    -r {{ KEYCLOAK_REALM }} --format json
+  register: opt_scopes
+  changed_when: false
+
+- name: Decide if RBAC scope already assigned
+  set_fact:
+    has_rbac_optional: >-
+      {{ (opt_scopes.stdout | from_json
+          | selectattr('id','equalto', scope_id_rbac) | list | length) > 0 }}
+
+- name: Ensure RBAC scope assigned as optional (only if missing)
+  when: not has_rbac_optional
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} update
+    clients/{{ app_client_id_cmd.stdout | trim }}/optional-client-scopes/{{ scope_id_rbac }}
+    -r {{ KEYCLOAK_REALM }}
+  register: add_opt
+  changed_when: true
+  failed_when: add_opt.rc != 0

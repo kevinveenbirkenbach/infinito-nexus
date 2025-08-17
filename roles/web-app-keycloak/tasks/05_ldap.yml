@@ -1,0 +1,144 @@
+- name: "Update REALM settings (merge LDAP component .config)"
+  include_tasks: 03_update.yml
+  vars:
+    kc_object_kind:  "component"
+    kc_lookup_value: "{{ KEYCLOAK_LDAP_CMP_NAME }}"
+    kc_desired: >-
+      {{
+        (
+          KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.storage.UserStorageProvider']
+          | selectattr('name','equalto', KEYCLOAK_LDAP_CMP_NAME)
+          | list | first
+        )
+      }}
+    kc_merge_path: "config"
+
+- name: Resolve LDAP component id
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get components
+    -r {{ KEYCLOAK_REALM }}
+    --query 'name={{ KEYCLOAK_LDAP_CMP_NAME }}'
+    --fields id --format json | jq -r '.[0].id'
+  register: ldap_cmp_id
+  changed_when: false
+
+- name: Assert LDAP component id resolved
+  assert:
+    that: [ "(ldap_cmp_id.stdout | trim) not in ['', 'null']" ]
+    fail_msg: "LDAP component '{{ KEYCLOAK_LDAP_CMP_NAME }}' not found in Keycloak."
+
+- name: Pull LDAP component from dictionary (by name)
+  set_fact:
+    ldap_component_tpl: >-
+      {{
+        KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.storage.UserStorageProvider']
+        | selectattr('name','equalto', KEYCLOAK_LDAP_CMP_NAME)
+        | list | first | default({})
+      }}
+
+- name: Sanity check dictionary LDAP component
+  assert:
+    that:
+      - ldap_component_tpl | length > 0
+      - (ldap_component_tpl.subComponents | default({})) | length > 0
+    fail_msg: "LDAP component '{{ KEYCLOAK_LDAP_CMP_NAME }}' not found in KEYCLOAK_DICTIONARY_REALM."
+
+- name: Extract mapper 'ldap-roles' from template (raw)
+  set_fact:
+    desired_group_mapper_raw: >-
+      {{
+        (
+          ldap_component_tpl.subComponents['org.keycloak.storage.ldap.mappers.LDAPStorageMapper']
+          | default([])
+        )
+        | selectattr('name','equalto','ldap-roles')
+        | list | first | default({})
+      }}
+
+- name: Ensure mapper exists in dictionary
+  assert:
+    that: [ "desired_group_mapper_raw | length > 0" ]
+    fail_msg: "'ldap-roles' mapper not found in dictionary under LDAP component."
+
+- name: Build clean mapper payload
+  set_fact:
+    desired_group_mapper: >-
+      {{
+        desired_group_mapper_raw
+        | dict2items
+        | rejectattr('key','in',['subComponents','id'])
+        | list | items2dict
+      }}
+
+- name: Extract desired groups.path (if any)
+  set_fact:
+    desired_groups_path: "{{ (desired_group_mapper.config['groups.path'] | default([])) | first | default('') | trim }}"
+    desired_groups_top: "{{ ( (desired_group_mapper.config['groups.path'] | default([])) | first | default('') | trim ).lstrip('/') | split('/') | first | default('') }}"
+  changed_when: false
+
+- name: Resolve existing top-level group id for groups.path
+  when: desired_groups_top | length > 0
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get groups -r {{ KEYCLOAK_REALM }} --format json
+    | jq -r '.[] | select(.name=="{{ desired_groups_top }}") | .id' | head -n1
+  register: groups_top_id
+  changed_when: false
+
+- name: Create top-level group for groups.path if missing
+  when:
+    - desired_groups_top | length > 0
+    - (groups_top_id.stdout | trim) in ["", "null"]
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} create groups -r {{ KEYCLOAK_REALM }} -s name={{ desired_groups_top }}
+  register: create_groups_top
+  changed_when: create_groups_top.rc == 0
+  failed_when: create_groups_top.rc != 0 and ('already exists' not in (create_groups_top.stderr | lower))
+
+- name: Find existing 'ldap-roles' mapper under LDAP component
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get components
+    -r {{ KEYCLOAK_REALM }}
+    --query "parent={{ ldap_cmp_id.stdout | trim }}&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper&name=ldap-roles"
+    --format json
+    | jq -r '.[] | select(.parentId=="{{ ldap_cmp_id.stdout | trim }}" and .name=="ldap-roles") | .id' | head -n1
+  register: grp_mapper_id
+  changed_when: false
+
+- name: Create 'ldap-roles' mapper if missing
+  when: (grp_mapper_id.stdout | trim) in ["", "null"]
+  shell: |
+    cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} create components -r {{ KEYCLOAK_REALM }} -f -
+    {{
+      desired_group_mapper
+      | combine({
+          'name':         'ldap-roles',
+          'parentId':     ldap_cmp_id.stdout | trim,
+          'providerType': 'org.keycloak.storage.ldap.mappers.LDAPStorageMapper',
+          'providerId':   'group-ldap-mapper'
+        }, recursive=True)
+      | to_json
+    }}
+    JSON
+  register: create_mapper
+  changed_when: create_mapper.rc == 0
+  failed_when: create_mapper.rc != 0 and ('already exists' not in (create_mapper.stderr | lower))
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: Update 'ldap-roles' mapper config (merge only .config)
+  when: (grp_mapper_id.stdout | trim) not in ["", "null"]
+  vars:
+    kc_object_kind:  "component"
+    kc_lookup_field: "id"
+    kc_lookup_value: "{{ grp_mapper_id.stdout | trim }}"
+    kc_desired: >-
+      {{
+        desired_group_mapper
+        | combine({
+            'name':         'ldap-roles',
+            'parentId':     ldap_cmp_id.stdout | trim,
+            'providerType': 'org.keycloak.storage.ldap.mappers.LDAPStorageMapper',
+            'providerId':   'group-ldap-mapper'
+          }, recursive=True)
+      }}
+    kc_merge_path:   "config"
+  include_tasks: 03_update.yml

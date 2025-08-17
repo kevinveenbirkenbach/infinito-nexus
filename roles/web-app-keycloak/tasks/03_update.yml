@@ -14,58 +14,100 @@
 - name: Assert required vars
   assert:
     that:
-      - kc_object_kind in ['client','component']
+      - kc_object_kind in ['client','component','client-scope']
       - kc_lookup_value is defined
       - kc_desired is defined
     fail_msg: "kc_object_kind, kc_lookup_value, kc_desired are required."
 
 - name: Derive API endpoint and lookup field
   set_fact:
-    kc_api: "{{ 'clients' if kc_object_kind == 'client' else 'components' }}"
-    kc_lookup_field_eff: "{{ 'clientId' if kc_object_kind == 'client' else (kc_lookup_field | default('name')) }}"
+    kc_api: >-
+      {{ 'clients' if kc_object_kind == 'client'
+         else 'components' if kc_object_kind == 'component'
+         else 'client-scopes' if kc_object_kind == 'client-scope'
+         else '' }}
+    kc_lookup_field_eff: >-
+      {{ 'clientId' if kc_object_kind == 'client'
+         else (kc_lookup_field | default('name')) if kc_object_kind == 'component'
+         else 'name' if kc_object_kind == 'client-scope'
+         else '' }}
 
-- name: Resolve object id
+- name: Resolve object id (direct when lookup_field is id)
+  when: kc_lookup_field_eff == 'id'
+  set_fact:
+    kc_obj_id: "{{ kc_lookup_value | string }}"
+
+- name: Resolve object id via query
+  when: kc_lookup_field_eff != 'id'
   shell: >
+    {% if kc_object_kind == 'client-scope' -%}
+    {{ KEYCLOAK_EXEC_KCADM }} get client-scopes -r {{ KEYCLOAK_REALM }} --format json
+    | jq -r '.[] | select(.{{ kc_lookup_field_eff }}=="{{ kc_lookup_value }}") | .id' | head -n1
+    {%- else -%}
     {{ KEYCLOAK_EXEC_KCADM }} get {{ kc_api }}
     -r {{ KEYCLOAK_REALM }}
     --query '{{ kc_lookup_field_eff }}={{ kc_lookup_value }}'
     --fields id --format json | jq -r '.[0].id'
-  register: kc_obj_id
+    {%- endif %}
+  register: kc_obj_id_cmd
   changed_when: false
+
+- name: Normalize resolved id to a plain string
+  set_fact:
+    kc_obj_id: >-
+      {{
+        kc_obj_id
+        if kc_lookup_field_eff == 'id'
+        else (kc_obj_id_cmd.stdout | default('') | trim)
+      }}
 
 - name: Fail if object not found
   assert:
     that:
-      - (kc_obj_id.stdout | trim) != ''
-      - (kc_obj_id.stdout | trim) != 'null'
+      - (kc_obj_id | trim) != ''
+      - (kc_obj_id | trim) != 'null'
     fail_msg: "{{ kc_object_kind | capitalize }} '{{ kc_lookup_value }}' not found."
 
 - name: Read current object
   shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} get {{ kc_api }}/{{ kc_obj_id.stdout }}
+    {{ KEYCLOAK_EXEC_KCADM }} get {{ kc_api }}/{{ kc_obj_id }}
     -r {{ KEYCLOAK_REALM }} --format json
   register: kc_cur
   changed_when: false
-
-# ── Build merge payload safely (avoid evaluating kc_desired[kc_merge_path] when undefined) ─────────
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Parse current object
   set_fact:
     cur_obj: "{{ kc_cur.stdout | from_json }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Safety check: providerId must match when updating a component"
+  when:
+    - kc_object_kind == 'component'
+    - (kc_desired.providerId is defined)
+  assert:
+    that:
+      - cur_obj.providerId == kc_desired.providerId
+    fail_msg: >
+      Refusing to update component '{{ cur_obj.name }}' (providerId={{ cur_obj.providerId }})
+      because desired providerId={{ kc_desired.providerId }}. Check your lookup/ID.
 
 - name: Prepare merge payload (subpath)
   when: kc_merge_path is defined and (kc_merge_path | length) > 0
   set_fact:
     merge_payload: "{{ { (kc_merge_path): (kc_desired[kc_merge_path] | default({}, true)) } }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Prepare merge payload (full object)
   when: kc_merge_path is not defined or (kc_merge_path | length) == 0
   set_fact:
     merge_payload: "{{ kc_desired }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Build desired object (base merge)
   set_fact:
     desired_obj: "{{ cur_obj | combine(merge_payload, recursive=True) }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 # Preserve immutable fields
 - name: Preserve immutable fields for client
@@ -79,6 +121,7 @@
             'clientId': cur_obj.clientId
           }, recursive=True)
       }}
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Preserve immutable fields for component
   when: kc_object_kind == 'component'
@@ -93,6 +136,14 @@
             'parentId': cur_obj.parentId
           }, recursive=True)
       }}
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+# Preserve immutables for client-scope
+- name: Preserve immutable fields for client-scope
+  when: kc_object_kind == 'client-scope'
+  set_fact:
+    desired_obj: "{{ desired_obj | combine({'id': cur_obj.id, 'name': cur_obj.name}, recursive=True) }}"
+
 
 # Optional forced attributes (e.g., frontchannelLogout)
 - name: Apply forced attributes (optional)
@@ -102,6 +153,8 @@
 
 - name: Update object via stdin
   shell: |
-    cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} update {{ kc_api }}/{{ kc_obj_id.stdout }} -r {{ KEYCLOAK_REALM }} -f -
+    cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} update {{ kc_api }}/{{ kc_obj_id }} -r {{ KEYCLOAK_REALM }} -f -
     {{ desired_obj | to_json }}
     JSON
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

@@ -1,3 +1,4 @@
+load_dependencies:    True  # When set to false the dependencies aren't loaded. Helpful for developing
 actions:
   import_realm:       True     # Import REALM
 features:
@@ -29,7 +30,6 @@ server:
     canonical:
       - "auth.{{ PRIMARY_DOMAIN }}"
 scopes:
-  rbac_roles: rbac_roles
   nextcloud:  nextcloud
 
 rbac_groups:  "/rbac"
