@@ -1,7 +1,7 @@
 # Configure Credentials
 - name: Ensure Keycloak CLI credentials are configured
   shell: |
-    {{ KEYCLOAK_KCADM_PATH }} config credentials \
+    {{ KEYCLOAK_EXEC_KCADM }} config credentials \
       --server {{ KEYCLOAK_SERVER_INTERNAL_URL }} \
       --realm master \
       --user {{ KEYCLOAK_MASTER_API_USER_NAME }} \
@@ -10,7 +10,7 @@
 # LDAP Source
 - name: Get ID of LDAP storage provider
   shell: |
-    {{ KEYCLOAK_KCADM_PATH }} get components \
+    {{ KEYCLOAK_EXEC_KCADM }} get components \
       -r {{ KEYCLOAK_REALM }} \
       --query 'providerId=ldap' \
       --fields id,name \
@@ -47,12 +47,12 @@
 
 - name: Enable user profile in realm
   shell: >
-    {{ KEYCLOAK_KCADM_PATH }} update realms/{{ KEYCLOAK_REALM }}
+    {{ KEYCLOAK_EXEC_KCADM }} update realms/{{ KEYCLOAK_REALM }}
     -s 'attributes.userProfileEnabled=true'
 
 - name: Re-authenticate to Keycloak after enabling user profile
   shell: |
-    {{ KEYCLOAK_KCADM_PATH }} config credentials \
+    {{ KEYCLOAK_EXEC_KCADM }} config credentials \
       --server {{ KEYCLOAK_SERVER_INTERNAL_URL }} \
       --realm master \
       --user {{ KEYCLOAK_MASTER_API_USER_NAME }} \
@@ -69,3 +69,5 @@
   shell: |
     docker exec -i {{ KEYCLOAK_CONTAINER }} \
       /opt/keycloak/bin/kcadm.sh update realms/{{ KEYCLOAK_REALM }} -f {{ KEYCLOAK_DOCKER_IMPORT_DIR }}user-profile.json
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

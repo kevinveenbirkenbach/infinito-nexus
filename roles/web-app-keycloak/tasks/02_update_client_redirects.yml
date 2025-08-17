@@ -6,7 +6,7 @@
 # - KEYCLOAK_REALM                      target realm name
 # - KEYCLOAK_SERVER_HOST_URL            e.g. "http://127.0.0.1:8080"
 # - KEYCLOAK_SERVER_INTERNAL_URL        e.g. "http://127.0.0.1:8080"
-# - KEYCLOAK_KCADM_PATH                 e.g. "docker exec -i keycloak /opt/keycloak/bin/kcadm.sh"
+# - KEYCLOAK_EXEC_KCADM                 e.g. "docker exec -i keycloak /opt/keycloak/bin/kcadm.sh"
 # - KEYCLOAK_MASTER_API_USER_NAME
 # - KEYCLOAK_MASTER_API_USER_PASSWORD
 # - KEYCLOAK_CLIENT_ID                 clientId to update (e.g. same as realm or an app client)
@@ -20,7 +20,7 @@
       - KEYCLOAK_REALM is defined
       - KEYCLOAK_SERVER_HOST_URL is defined
       - KEYCLOAK_SERVER_INTERNAL_URL is defined
-      - KEYCLOAK_KCADM_PATH is defined
+      - KEYCLOAK_EXEC_KCADM is defined
       - KEYCLOAK_MASTER_API_USER_NAME is defined
       - KEYCLOAK_MASTER_API_USER_PASSWORD is defined
       - KEYCLOAK_CLIENT_ID is defined
@@ -32,32 +32,16 @@
 - name: "kcadm login"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   shell: >
-    {{ KEYCLOAK_KCADM_PATH }} config credentials
+    {{ KEYCLOAK_EXEC_KCADM }} config credentials
     --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
     --realm master
     --user {{ KEYCLOAK_MASTER_API_USER_NAME }}
     --password {{ KEYCLOAK_MASTER_API_USER_PASSWORD }}
   changed_when: false
 
-# 1) Build desired sets (NO defaults)
-- name: "Build desired redirect URIs from config via filter"
-  set_fact:
-    kc_redirect_uris: >-
-      {{ domains | redirect_uris(applications, WEB_PROTOCOL, '/*', KEYCLOAK_REDIRECT_FEATURES, True) }}
-
-- name: Build desired web origins (scheme://host[:port])
-  set_fact:
-    kc_web_origins: >-
-      {{ kc_redirect_uris
-         | map('regex_replace','/\\*$','')
-         | map('regex_search','^(https?://[^/]+)')
-         | select('string')
-         | list | unique }}
-
-# 2) Resolve client id (strictly by provided clientId, no fallback)
 - name: "Resolve client internal id for {{ KEYCLOAK_CLIENT_ID }}"
   shell: >
-    {{ KEYCLOAK_KCADM_PATH }} get clients
+    {{ KEYCLOAK_EXEC_KCADM }} get clients
     -r {{ KEYCLOAK_REALM }}
     --query 'clientId={{ KEYCLOAK_CLIENT_ID }}'
     --fields id --format json | jq -r '.[0].id'
@@ -69,10 +53,9 @@
     that: kc_client.stdout is match('^[0-9a-f-]+$')
     fail_msg: "Client '{{ KEYCLOAK_CLIENT_ID }}' not found in realm '{{ KEYCLOAK_REALM }}'."
 
-# 3) Read current config (assume keys exist; we don't use defaults)
 - name: "Read current client configuration"
   shell: >
-    {{ KEYCLOAK_KCADM_PATH }} get clients/{{ kc_client.stdout }}
+    {{ KEYCLOAK_EXEC_KCADM }} get clients/{{ kc_client.stdout }}
     -r {{ KEYCLOAK_REALM }} --format json
   register: kc_client_obj
   changed_when: false
@@ -93,13 +76,11 @@
         | reject('equalto','')
         | list | sort
       }}
-    kc_desired_redirect_uris:     "{{ kc_redirect_uris | sort }}"
-    kc_desired_web_origins:       "{{ kc_web_origins  | sort }}"
-    kc_desired_post_logout_uris:  "+"
-    kc_desired_post_logout_uris_list: >-
+    kc_desired_redirect_uris:     "{{ KEYCLOAK_REDIRECT_URIS | sort }}"
+    kc_desired_web_origins:       "{{ KEYCLOAK_WEB_ORIGINS  | sort }}"
+    KEYCLOAK_POST_LOGOUT_URIS_list: >-
       {{ "+" | split('\n') | reject('equalto','') | list | sort }}
 
-# after "Read current client configuration"
 - name: "Extract current frontchannel logout url"
   set_fact:
     kc_current_frontchannel_logout_url: >-
@@ -111,16 +92,17 @@
         )
       }}
 
-# 4) Update only when changed
 - name: "Update client with redirectUris, webOrigins, frontchannelLogout"
   shell: >
-    {{ KEYCLOAK_KCADM_PATH }} update clients/{{ kc_client.stdout }}
+    {{ KEYCLOAK_EXEC_KCADM }} update clients/{{ kc_client.stdout }}
     -r {{ KEYCLOAK_REALM }}
-    -s 'redirectUris={{ kc_redirect_uris | to_json }}'
-    -s 'webOrigins={{ kc_web_origins | to_json }}'
+    -s 'redirectUris={{ KEYCLOAK_REDIRECT_URIS | to_json }}'
+    -s 'webOrigins={{ KEYCLOAK_WEB_ORIGINS | to_json }}'
     -s 'frontchannelLogout=true'
     -s 'attributes."frontchannel.logout.url"={{ KEYCLOAK_FRONTCHANNEL_LOGOUT_URL | to_json }}'
   when: kc_current_redirect_uris != kc_desired_redirect_uris
         or kc_current_web_origins  != kc_desired_web_origins
         or kc_current_frontchannel_logout_url != KEYCLOAK_FRONTCHANNEL_LOGOUT_URL
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 

@@ -3,22 +3,46 @@ application_id:                   "web-app-keycloak"                            
 database_type:                    "postgres"                                                                                  # Database which will be used
 
 # Keycloak
+
+## General
+KEYCLOAK_REALM:                     "{{ OIDC.CLIENT.REALM }}" # This is the name of the default realm which is used by the applications
+KEYCLOAK_REALM_URL:                 "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}"
+KEYCLOAK_DEBUG_ENABLED:             "{{ MODE_DEBUG }}"
+KEYCLOAK_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
+
+## Docker
 KEYCLOAK_CONTAINER:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"      # Name of the keycloak docker container
 KEYCLOAK_DOCKER_IMPORT_DIR:         "/opt/keycloak/data/import/"                                                              # Directory in which keycloak import files are placed in the running docker container
-KEYCLOAK_REALM:                     "{{ OIDC.CLIENT.REALM }}"                                                                     # This is the name of the default realm which is used by the applications
-KEYCLOAK_MASTER_API_USER:           "{{ applications | get_app_conf(application_id, 'users.administrator') }}"                # Master Administrator
-KEYCLOAK_MASTER_API_USER_NAME:      "{{ KEYCLOAK_MASTER_API_USER.username }}"                                                 # Master Administrator Username
-KEYCLOAK_MASTER_API_USER_PASSWORD:  "{{ KEYCLOAK_MASTER_API_USER.password }}"                                                 # Master Administrator Password
-KEYCLOAK_KCADM_PATH:                "docker exec -i {{ KEYCLOAK_CONTAINER }} /opt/keycloak/bin/kcadm.sh"                      # Init script for keycloak
+KEYCLOAK_EXEC_KCADM:                "docker exec -i {{ KEYCLOAK_CONTAINER }} /opt/keycloak/bin/kcadm.sh"                      # Init script for keycloak
+KEYCLOAK_IMAGE:                     "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.image') }}"     # Keycloak docker image
+KEYCLOAK_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version') }}"   # Keycloak docker version
+
+## Server
 KEYCLOAK_SERVER_INTERNAL_URL:       "http://127.0.0.1:8080"
 KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[application_id] }}"
 KEYCLOAK_SERVER_HOST_URL:           "http://{{ KEYCLOAK_SERVER_HOST }}"
-KEYCLOAK_IMAGE:                     "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.image') }}"     # Keycloak docker image
-KEYCLOAK_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version') }}"   # Keycloak docker version
-KEYCLOAK_DEBUG_ENABLED:             "{{ MODE_DEBUG }}"
+  
+## Update
 KEYCLOAK_REDIRECT_FEATURES:         ["features.oauth2","features.oidc"]
-KEYCLOAK_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
-KEYCLOAK_LDAP_CMP_NAME:             "{{ ldap.server.domain }}"                                                                                    # Name of the LDAP User Federation component in Keycloak (as shown in UI)
 KEYCLOAK_IMPORT_REALM_ENABLED:      "{{ applications | get_app_conf(application_id, 'actions.import_realm') }}"               # Activate realm import  
 KEYCLOAK_UPDATE_LDAP_BIND:          "{{ applications | get_app_conf(application_id, 'actions.update_ldap_bind') }}"           # Toggle the LDAP bind update step
 KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ domains | get_url('web-svc-logout', WEB_PROTOCOL) }}/"
+KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(applications, WEB_PROTOCOL, '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
+KEYCLOAK_WEB_ORIGINS: >-
+  {{ KEYCLOAK_REDIRECT_URIS
+      | map('regex_replace','/\\*$','')
+      | map('regex_search','^(https?://[^/]+)')
+      | select('string')
+      | list | unique }}
+KEYCLOAK_POST_LOGOUT_URIS:           "+"
+
+## LDAP
+KEYCLOAK_LDAP_CMP_NAME:             "{{ ldap.server.domain }}"          # Name of the LDAP User Federation component in Keycloak (as shown in UI)
+KEYCLOAK_LDAP_BIND_DN:              "{{ ldap.dn.administrator.data }}"
+KEYCLOAK_LDAP_BIND_PW:              "{{ ldap.bind_credential }}"
+KEYCLOAK_LDAP_URL:                  "{{ ldap.server.uri }}"
+
+## API
+KEYCLOAK_MASTER_API_USER:           "{{ applications | get_app_conf(application_id, 'users.administrator') }}" # Master Administrator
+KEYCLOAK_MASTER_API_USER_NAME:      "{{ KEYCLOAK_MASTER_API_USER.username }}"                                  # Master Administrator Username
+KEYCLOAK_MASTER_API_USER_PASSWORD:  "{{ KEYCLOAK_MASTER_API_USER.password }}"                                  # Master Administrator Password

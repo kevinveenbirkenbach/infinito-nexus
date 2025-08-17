@@ -79,21 +79,13 @@
     kc_ldap_current_bind_pw: "{{ ((kc_ldap_list.stdout | from_json)[0].config['bindCredential'] | default(['']))[0] }}"
     kc_ldap_current_connection_url: "{{ ((kc_ldap_list.stdout | from_json)[0].config['connectionUrl'] | default(['']))[0] }}"
 
-# Desired values come STRICTLY from ldap.*
-- name: "Set desired LDAP values (strict from ldap.*)"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  set_fact:
-    kc_desired_bind_dn: "{{ ldap.dn.administrator.data }}"
-    kc_desired_bind_pw: "{{ ldap.bind_credential }}"
-    kc_desired_connection_url: "{{ ldap.server.uri }}"
-
 - name: "Determine if update is required"
   set_fact:
     kc_needs_update: >-
       {{
-        (kc_ldap_current_bind_dn != kc_desired_bind_dn)
-        or (kc_ldap_current_bind_pw != kc_desired_bind_pw)
-        or (kc_ldap_current_connection_url != kc_desired_connection_url)
+        (kc_ldap_current_bind_dn != KEYCLOAK_LDAP_BIND_DN)
+        or (kc_ldap_current_bind_pw != KEYCLOAK_LDAP_BIND_PW)
+        or (kc_ldap_current_connection_url != KEYCLOAK_LDAP_URL)
       }}
 
 # Pass each -s as a single argv token with valid JSON (arrays), zero shell quoting issues.
@@ -103,16 +95,11 @@
     argv: "{{ kcadm_argv_base
               + ['update', 'components/' ~ kc_ldap_component_id,
                  '-r', KEYCLOAK_REALM,
-                 '-s', 'config.bindDn=' ~ ([kc_desired_bind_dn] | to_json),
-                 '-s', 'config.bindCredential=' ~ ([kc_desired_bind_pw] | to_json),
-                 '-s', 'config.connectionUrl=' ~ ([kc_desired_connection_url] | to_json)
+                 '-s', 'config.bindDn=' ~ ([KEYCLOAK_LDAP_BIND_DN] | to_json),
+                 '-s', 'config.bindCredential=' ~ ([KEYCLOAK_LDAP_BIND_PW] | to_json),
+                 '-s', 'config.connectionUrl=' ~ ([KEYCLOAK_LDAP_URL] | to_json)
                 ] }}"
   when: kc_needs_update | bool
   register: kc_bind_update
-
-- name: "LDAP provider updated"
-  debug:
-    msg: "LDAP bindDn/bindCredential/connectionUrl updated on component {{ KEYCLOAK_LDAP_CMP_NAME }}."
-  when:
-    - kc_bind_update is defined
-    - kc_bind_update.rc == 0
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

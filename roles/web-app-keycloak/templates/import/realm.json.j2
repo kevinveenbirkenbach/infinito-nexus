@@ -527,10 +527,9 @@
       "directAccessGrantsEnabled": false,
       "serviceAccountsEnabled": false,
       "publicClient": true,
-      "frontchannelLogout": true,
+      "frontchannelLogout": false,
       "protocol": "openid-connect",
       "attributes": {
-        "frontchannel.logout.url": "{{ KEYCLOAK_FRONTCHANNEL_LOGOUT_URL }}",
         "realm_client": "false",
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
@@ -821,69 +820,7 @@
         "microprofile-jwt"
       ]
     },
-    {
-      "id": "7b5f97e3-7fa8-4d86-b1e9-80aac996da26",
-      "clientId": "{{ KEYCLOAK_REALM }}",
-      "name": "",
-      "description": "",
-      "rootUrl":  "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}/",
-      "adminUrl": "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}/",
-      "baseUrl":  "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}/",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "desktop-secret",
-      "secret": "{{ OIDC.CLIENT.SECRET }}",
-      {# The following line should be covered by 02_update_client_redirects.yml #}
-      "redirectUris": {{ domains | redirect_uris(applications, WEB_PROTOCOL) | tojson }},
-      "webOrigins": [
-        "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
-      ],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": true,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": true,
-      "publicClient": false,
-      "frontchannelLogout": false,
-      "protocol": "openid-connect",
-      "attributes": {
-        "realm_client": "false",
-        "oidc.ciba.grant.enabled": "false",
-        "client.secret.creation.time": "0",
-        "backchannel.logout.session.required": "true",
-        "post.logout.redirect.uris": "{{ WEB_PROTOCOL }}://{{ PRIMARY_DOMAIN }}/*##+",
-        "frontchannel.logout.session.required": "true",
-        "oauth2.device.authorization.grant.enabled": "false",
-        "display.on.consent.screen": "false",
-        "use.jwks.url": "false",
-        "backchannel.logout.revoke.offline.tokens": "false"
-      },
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": true,
-      "nodeReRegistrationTimeout": -1,
-      "defaultClientScopes": [
-        "web-app-origins",
-        "service_account",
-        "acr",
-        "roles",
-        "profile",
-        "basic",
-        "email"
-      ],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "organization",
-        "offline_access",
-        "microprofile-jwt",
-        "{{ applications | get_app_conf(application_id, 'scopes.rbac_roles', True) }}",
-        "{{ applications | get_app_conf(application_id, 'scopes.nextcloud', True) }}"
-
-      ]
-    }
+    {% include "client.json.j2" %}
   ],
   "clientScopes": [
     {
