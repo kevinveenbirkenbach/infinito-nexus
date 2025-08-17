@@ -1,6 +1,6 @@
 ---
 - name: "create import files for {{ application_id }}"
-  include_tasks: 01_import.yml
+  include_tasks: 01_initialize.yml
 
 - name: "load required 'web-svc-logout' for {{ application_id }}"
   include_role: 
@@ -15,7 +15,7 @@
 
 - name: "Wait until Keycloak is reachable at {{ KEYCLOAK_SERVER_HOST_URL }}"
   uri:
-    url: "{{ KEYCLOAK_SERVER_HOST_URL }}/realms/master"
+    url: "{{ KEYCLOAK_MASTER_REALM_URL }}"
     method: GET
     status_code: 200
     validate_certs: false
@@ -24,13 +24,41 @@
   delay: 5
   until: kc_up.status == 200
 
-- name: "Apply client redirects without realm import"
-  include_tasks: 02_update_client_redirects.yml
+- name: kcadm login (master)
+  no_log: true
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} config credentials
+    --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
+    --realm master
+    --user {{ KEYCLOAK_MASTER_API_USER_NAME }}
+    --password {{ KEYCLOAK_MASTER_API_USER_PASSWORD }}
+  changed_when: false
 
-- name: "Update LDAP bind credentials from ldap.*"
-  when: KEYCLOAK_UPDATE_LDAP_BIND | bool
-  include_tasks: 03_update-ldap-bind.yml
+- name: "Update REALM settings"
+  include_tasks: 02_update.yml
+  vars:
+    kc_object_kind:  "component"
+    kc_lookup_value: "{{ KEYCLOAK_LDAP_CMP_NAME }}"
+    kc_desired: >-
+      {{
+        KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.storage.UserStorageProvider']
+          | selectattr('providerId','equalto','ldap')
+          | list | first }}
+    kc_merge_path:   "config"
+  when: KEYCLOAK_LDAP_ENABLED | bool
 
-# Deactivated temporary. Import now via realm.yml
-#- name: Implement SSH Public Key Attribut
-#  include_tasks: 03_ssh_public_key.yml
+- name: "Update Client settings"
+  vars:
+    kc_object_kind:  "client"
+    kc_lookup_value: "{{ KEYCLOAK_CLIENT_ID }}"
+    kc_desired: >-
+      {{
+        KEYCLOAK_DICTIONARY_REALM.clients
+          | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+          | list | first
+      }}
+    kc_force_attrs:
+      frontchannelLogout: true
+      attributes: "{{ (KEYCLOAK_DICTIONARY_CLIENT.attributes | default({}))
+                      | combine({'frontchannel.logout.url': KEYCLOAK_FRONTCHANNEL_LOGOUT_URL}, recursive=True) }}"
+  include_tasks: 02_update.yml

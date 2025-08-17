@@ -1,10 +1,9 @@
 actions:
   import_realm:       True     # Import REALM
-  update_ldap_bind:   True     # Updates LDAP binds
 features:
   matomo:             true
   css:                true
-  desktop:    true
+  desktop:            true
   ldap:               true
   central_database:   true
   recaptcha:          true

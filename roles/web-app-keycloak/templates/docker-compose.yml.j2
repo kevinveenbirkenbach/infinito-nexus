@@ -8,7 +8,7 @@
     ports:
       - "{{ KEYCLOAK_SERVER_HOST }}:8080"
     volumes:
-      - "{{ keycloak_host_import_directory }}:{{KEYCLOAK_DOCKER_IMPORT_DIR}}"
+      - "{{ KEYCLOAK_HOST_IMPORT_DIR }}:{{KEYCLOAK_DOCKER_IMPORT_DIR}}"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% set container_port = 9000 %}

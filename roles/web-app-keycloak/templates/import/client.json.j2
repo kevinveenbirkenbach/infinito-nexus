@@ -10,7 +10,6 @@
   "alwaysDisplayInConsole": false,
   "clientAuthenticatorType": "client-secret",
   "secret": "{{ OIDC.CLIENT.SECRET }}",
-  {# The following line should be covered by 02_update_client_redirects.yml #}
   "redirectUris": {{ KEYCLOAK_REDIRECT_URIS | to_json }},
   "webOrigins": {{ KEYCLOAK_WEB_ORIGINS | to_json }},
   "notBefore": 0,
