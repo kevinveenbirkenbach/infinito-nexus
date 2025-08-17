@@ -25,7 +25,7 @@ applications:
             url: {{ app.url }}
             iframe: {{ app.iframe }}
             {% if app.title == 'Keycloak' %}
-            {% set keycloak_url = domains | get_url(application_id, WEB_PROTOCOL) %}
+            {% set keycloak_url = domains | get_url('web-app-keycloak', WEB_PROTOCOL) %}
             {{ domains | get_url(application_id, WEB_PROTOCOL) }}
             children:
               - name: Administration
