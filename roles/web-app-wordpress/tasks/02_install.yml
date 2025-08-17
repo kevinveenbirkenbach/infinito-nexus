@@ -5,7 +5,7 @@
     wp core install
       --url="{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
       --title="{{ applications | get_app_conf(application_id, 'title', True) }}"
-      --admin_user="{{ applications | get_app_conf(application_id, 'users.administrator.username', True) }}"
+      --admin_user="{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
       --admin_password="{{ applications | get_app_conf(application_id, 'credentials.administrator_password', True) }}"
       --admin_email="{{ applications | get_app_conf(application_id, 'users.administrator.email', True) }}"
       --path="{{ wordpress_docker_html_path }}"

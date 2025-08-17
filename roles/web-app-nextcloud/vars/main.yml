@@ -12,7 +12,7 @@ database_password:                              "{{ applications | get_app_conf(
 database_type:                                  "mariadb"                                                                                   # Database flavor
 
 nextcloud_plugins_enabled:                      "{{ applications | get_app_conf(application_id, 'plugins_enabled', True) }}"
-nextcloud_administrator_username:               "{{ applications | get_app_conf(application_id, 'users.administrator.username', True) }}"
+nextcloud_administrator_username:               "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
 
 # Control Node
 nextcloud_control_node_plugin_vars_directory:   "{{role_path}}/vars/plugins/"                                 # Folder in which the files for the plugin configuration are stored

@@ -3,7 +3,7 @@ application_id:                 "web-app-yourls"
 database_type:                  "mariadb"
 
 # Yourls Specific
-yourls_user:                    "{{ applications | get_app_conf(application_id, 'users.administrator.username', True) }}"
+yourls_user:                    "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
 yourls_password:                "{{ applications | get_app_conf(application_id, 'credentials.administrator_password', True) }}"
 yourls_version:                 "{{ applications | get_app_conf(application_id, 'docker.services.yourls.version', True) }}"
 yourls_image:                   "{{ applications | get_app_conf(application_id, 'docker.services.yourls.image', True) }}"

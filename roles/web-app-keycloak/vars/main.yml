@@ -5,10 +5,15 @@ database_type:                    "postgres"                                    
 # Keycloak
 
 ## General
+KEYCLOAK_URL:                       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 KEYCLOAK_REALM:                     "{{ OIDC.CLIENT.REALM }}" # This is the name of the default realm which is used by the applications
 KEYCLOAK_REALM_URL:                 "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}"
 KEYCLOAK_DEBUG_ENABLED:             "{{ MODE_DEBUG }}"
 KEYCLOAK_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
+
+# Credentials
+KEYCLOAK_ADMIN:                     "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
+KEYCLOAK_ADMIN_PASSWORD:            "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
 
 ## Docker
 KEYCLOAK_CONTAINER:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"      # Name of the keycloak docker container
