@@ -3,13 +3,13 @@
 
 # ── REQUIRED VARS (must be provided by caller) ───────────────────────────────
 # - WEB_PROTOCOL                        e.g. "https"
-# - keycloak_realm                      target realm name
-# - keycloak_server_host_url            e.g. "http://127.0.0.1:8080"
-# - keycloak_server_internal_url        e.g. "http://127.0.0.1:8080"
-# - keycloak_kcadm_path                 e.g. "docker exec -i keycloak /opt/keycloak/bin/kcadm.sh"
-# - keycloak_master_api_user_name
-# - keycloak_master_api_user_password
-# - keycloak_client_id                 clientId to update (e.g. same as realm or an app client)
+# - KEYCLOAK_REALM                      target realm name
+# - KEYCLOAK_SERVER_HOST_URL            e.g. "http://127.0.0.1:8080"
+# - KEYCLOAK_SERVER_INTERNAL_URL        e.g. "http://127.0.0.1:8080"
+# - KEYCLOAK_KCADM_PATH                 e.g. "docker exec -i keycloak /opt/keycloak/bin/kcadm.sh"
+# - KEYCLOAK_MASTER_API_USER_NAME
+# - KEYCLOAK_MASTER_API_USER_PASSWORD
+# - KEYCLOAK_CLIENT_ID                 clientId to update (e.g. same as realm or an app client)
 # - domains                             your domain map
 # - applications                        your applications map
 
@@ -17,14 +17,14 @@
   assert:
     that:
       - WEB_PROTOCOL is defined
-      - keycloak_realm is defined
-      - keycloak_server_host_url is defined
-      - keycloak_server_internal_url is defined
-      - keycloak_kcadm_path is defined
-      - keycloak_master_api_user_name is defined
-      - keycloak_master_api_user_password is defined
-      - keycloak_client_id is defined
-      - keycloak_redirect_features is defined
+      - KEYCLOAK_REALM is defined
+      - KEYCLOAK_SERVER_HOST_URL is defined
+      - KEYCLOAK_SERVER_INTERNAL_URL is defined
+      - KEYCLOAK_KCADM_PATH is defined
+      - KEYCLOAK_MASTER_API_USER_NAME is defined
+      - KEYCLOAK_MASTER_API_USER_PASSWORD is defined
+      - KEYCLOAK_CLIENT_ID is defined
+      - KEYCLOAK_REDIRECT_FEATURES is defined
       - domains is defined
       - applications is defined
     fail_msg: "Missing required variable(s). Provide all vars listed at the top of 02_update_client_redirects.yml."
@@ -32,18 +32,18 @@
 - name: "kcadm login"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   shell: >
-    {{ keycloak_kcadm_path }} config credentials
-    --server {{ keycloak_server_internal_url }}
+    {{ KEYCLOAK_KCADM_PATH }} config credentials
+    --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
     --realm master
-    --user {{ keycloak_master_api_user_name }}
-    --password {{ keycloak_master_api_user_password }}
+    --user {{ KEYCLOAK_MASTER_API_USER_NAME }}
+    --password {{ KEYCLOAK_MASTER_API_USER_PASSWORD }}
   changed_when: false
 
 # 1) Build desired sets (NO defaults)
 - name: "Build desired redirect URIs from config via filter"
   set_fact:
     kc_redirect_uris: >-
-      {{ domains | redirect_uris(applications, WEB_PROTOCOL, '/*', keycloak_redirect_features, True) }}
+      {{ domains | redirect_uris(applications, WEB_PROTOCOL, '/*', KEYCLOAK_REDIRECT_FEATURES, True) }}
 
 - name: Build desired web origins (scheme://host[:port])
   set_fact:
@@ -55,11 +55,11 @@
          | list | unique }}
 
 # 2) Resolve client id (strictly by provided clientId, no fallback)
-- name: "Resolve client internal id for {{ keycloak_client_id }}"
+- name: "Resolve client internal id for {{ KEYCLOAK_CLIENT_ID }}"
   shell: >
-    {{ keycloak_kcadm_path }} get clients
-    -r {{ keycloak_realm }}
-    --query 'clientId={{ keycloak_client_id }}'
+    {{ KEYCLOAK_KCADM_PATH }} get clients
+    -r {{ KEYCLOAK_REALM }}
+    --query 'clientId={{ KEYCLOAK_CLIENT_ID }}'
     --fields id --format json | jq -r '.[0].id'
   register: kc_client
   changed_when: false
@@ -67,13 +67,13 @@
 - name: "Fail if client not found"
   assert:
     that: kc_client.stdout is match('^[0-9a-f-]+$')
-    fail_msg: "Client '{{ keycloak_client_id }}' not found in realm '{{ keycloak_realm }}'."
+    fail_msg: "Client '{{ KEYCLOAK_CLIENT_ID }}' not found in realm '{{ KEYCLOAK_REALM }}'."
 
 # 3) Read current config (assume keys exist; we don't use defaults)
 - name: "Read current client configuration"
   shell: >
-    {{ keycloak_kcadm_path }} get clients/{{ kc_client.stdout }}
-    -r {{ keycloak_realm }} --format json
+    {{ KEYCLOAK_KCADM_PATH }} get clients/{{ kc_client.stdout }}
+    -r {{ KEYCLOAK_REALM }} --format json
   register: kc_client_obj
   changed_when: false
 
@@ -114,13 +114,13 @@
 # 4) Update only when changed
 - name: "Update client with redirectUris, webOrigins, frontchannelLogout"
   shell: >
-    {{ keycloak_kcadm_path }} update clients/{{ kc_client.stdout }}
-    -r {{ keycloak_realm }}
+    {{ KEYCLOAK_KCADM_PATH }} update clients/{{ kc_client.stdout }}
+    -r {{ KEYCLOAK_REALM }}
     -s 'redirectUris={{ kc_redirect_uris | to_json }}'
     -s 'webOrigins={{ kc_web_origins | to_json }}'
     -s 'frontchannelLogout=true'
-    -s 'attributes."frontchannel.logout.url"={{ kc_desired_frontchannel_logout_url | to_json }}'
+    -s 'attributes."frontchannel.logout.url"={{ KEYCLOAK_FRONTCHANNEL_LOGOUT_URL | to_json }}'
   when: kc_current_redirect_uris != kc_desired_redirect_uris
         or kc_current_web_origins  != kc_desired_web_origins
-        or kc_current_frontchannel_logout_url != kc_desired_frontchannel_logout_url
+        or kc_current_frontchannel_logout_url != KEYCLOAK_FRONTCHANNEL_LOGOUT_URL
 

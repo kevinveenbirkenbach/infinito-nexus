@@ -1,14 +1,14 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-    image: "{{ keycloak_image }}:{{ keycloak_version }}"
-    container_name: {{ keycloak_container }}
-    command: start{% if keycloak_import_realm %} --import-realm{% endif %}{% if keycloak_debug_enabled %} --verbose{% endif %}
+    image: "{{ KEYCLOAK_IMAGE }}:{{ KEYCLOAK_VERSION }}"
+    container_name: {{ KEYCLOAK_CONTAINER }}
+    command: start{% if KEYCLOAK_IMPORT_REALM_ENABLED %} --import-realm{% endif %}{% if KEYCLOAK_DEBUG_ENABLED %} --verbose{% endif %}
     {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
-      - "{{ keycloak_server_host }}:8080"
+      - "{{ KEYCLOAK_SERVER_HOST }}:8080"
     volumes:
-      - "{{ keycloak_host_import_directory }}:{{keycloak_docker_import_directory}}"
+      - "{{ keycloak_host_import_directory }}:{{KEYCLOAK_DOCKER_IMPORT_DIR}}"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% set container_port = 9000 %}

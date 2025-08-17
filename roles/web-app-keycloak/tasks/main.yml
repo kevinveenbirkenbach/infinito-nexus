@@ -10,10 +10,12 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
     name: cmp-db-docker-proxy
+  vars:
+    docker_compose_flush_handlers: true
 
-- name: "Wait until Keycloak is reachable at {{ keycloak_server_host_url }}"
+- name: "Wait until Keycloak is reachable at {{ KEYCLOAK_SERVER_HOST_URL }}"
   uri:
-    url: "{{ keycloak_server_host_url }}/realms/master"
+    url: "{{ KEYCLOAK_SERVER_HOST_URL }}/realms/master"
     method: GET
     status_code: 200
     validate_certs: false
@@ -26,7 +28,7 @@
   include_tasks: 02_update_client_redirects.yml
 
 - name: "Update LDAP bind credentials from ldap.*"
-  when: keycloak_update_ldap_bind | bool
+  when: KEYCLOAK_UPDATE_LDAP_BIND | bool
   include_tasks: 03_update-ldap-bind.yml
 
 # Deactivated temporary. Import now via realm.yml

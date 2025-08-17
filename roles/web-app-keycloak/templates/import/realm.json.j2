@@ -1,6 +1,6 @@
 {
   "id": "3b03105b-5fe6-4b53-ba24-c8796525be0e",
-  "realm": "{{ keycloak_realm }}",
+  "realm": "{{ KEYCLOAK_REALM }}",
   "displayName": "",
   "displayNameHtml": "",
   "notBefore": 0,
@@ -60,7 +60,7 @@
       },
       {
         "id": "01d9dd2a-75b2-47a2-af36-b14251f1b956",
-        "name": "default-roles-{{ keycloak_realm }}",
+        "name": "default-roles-{{ KEYCLOAK_REALM }}",
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
@@ -302,7 +302,7 @@
           "attributes": {}
         }
       ],
-      "{{ keycloak_realm }}": [],
+      "{{ KEYCLOAK_REALM }}": [],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
@@ -410,7 +410,7 @@
   "groups": [],
   "defaultRole": {
     "id": "01d9dd2a-75b2-47a2-af36-b14251f1b956",
-    "name": "default-roles-{{ keycloak_realm }}",
+    "name": "default-roles-{{ KEYCLOAK_REALM }}",
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false,
@@ -464,18 +464,18 @@
   "users": [
     {
       "id": "19ecedfd-acf2-49e8-9f66-91ab71d54fc3",
-      "username": "service-account-{{ keycloak_realm }}",
+      "username": "service-account-{{ KEYCLOAK_REALM }}",
       "emailVerified": false,
       "createdTimestamp": 1737925519602,
       "enabled": true,
       "totp": false,
-      "serviceAccountClientId": "{{ keycloak_realm }}",
+      "serviceAccountClientId": "{{ KEYCLOAK_REALM }}",
       "disableableCredentialTypes": [],
       "requiredActions": [
         "CONFIGURE_TOTP"
       ],
       "realmRoles": [
-        "default-roles-{{ keycloak_realm }}"
+        "default-roles-{{ KEYCLOAK_REALM }}"
       ],
       "notBefore": 0,
       "groups": []
@@ -508,13 +508,13 @@
       "description": "",
       "rootUrl": "${authBaseUrl}",
       "adminUrl": "",
-      "baseUrl": "/realms/{{ keycloak_realm }}/account/",
+      "baseUrl": "/realms/{{ KEYCLOAK_REALM }}/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "desktop-secret",
       "redirectUris": [
-        "/realms/{{ keycloak_realm }}/account/*"
+        "/realms/{{ KEYCLOAK_REALM }}/account/*"
       ],
       "webOrigins": [
         "{{ domains | get_url('web-app-keycloak', WEB_PROTOCOL) }}"
@@ -530,7 +530,7 @@
       "frontchannelLogout": true,
       "protocol": "openid-connect",
       "attributes": {
-        "frontchannel.logout.url": "{{ kc_desired_frontchannel_logout_url }}",
+        "frontchannel.logout.url": "{{ KEYCLOAK_FRONTCHANNEL_LOGOUT_URL }}",
         "realm_client": "false",
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
@@ -565,13 +565,13 @@
       "description": "",
       "rootUrl": "${authBaseUrl}",
       "adminUrl": "",
-      "baseUrl": "/realms/{{ keycloak_realm }}/account/",
+      "baseUrl": "/realms/{{ KEYCLOAK_REALM }}/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "desktop-secret",
       "redirectUris": [
-        "/realms/{{ keycloak_realm }}/account/*"
+        "/realms/{{ KEYCLOAK_REALM }}/account/*"
       ],
       "webOrigins": [
         "*"
@@ -757,13 +757,13 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/{{ keycloak_realm }}/console/",
+      "baseUrl": "/admin/{{ KEYCLOAK_REALM }}/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "desktop-secret",
       "redirectUris": [
-        "/admin/{{ keycloak_realm }}/console/*"
+        "/admin/{{ KEYCLOAK_REALM }}/console/*"
       ],
       "webOrigins": [
         "+"
@@ -823,12 +823,12 @@
     },
     {
       "id": "7b5f97e3-7fa8-4d86-b1e9-80aac996da26",
-      "clientId": "{{ keycloak_realm }}",
+      "clientId": "{{ KEYCLOAK_REALM }}",
       "name": "",
       "description": "",
-      "rootUrl":  "{{ WEB_PROTOCOL }}://{{ keycloak_realm }}/",
-      "adminUrl": "{{ WEB_PROTOCOL }}://{{ keycloak_realm }}/",
-      "baseUrl":  "{{ WEB_PROTOCOL }}://{{ keycloak_realm }}/",
+      "rootUrl":  "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}/",
+      "adminUrl": "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}/",
+      "baseUrl":  "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
@@ -1823,7 +1823,7 @@
     "org.keycloak.storage.UserStorageProvider": [
       {
         "id": "bBD2l6kVRMaSABbfOJVRaw",
-        "name": "{{ keycloak_ldap_component_name }}",
+        "name": "{{ KEYCLOAK_LDAP_CMP_NAME }}",
         "providerId": "ldap",
         "subComponents": {
           "org.keycloak.storage.ldap.mappers.LDAPStorageMapper": [
