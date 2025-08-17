@@ -8,7 +8,7 @@ openldap_bind_dn:               "{{ ldap.dn.administrator.configuration }}"
 openldap_bind_pw:               "{{ applications | get_app_conf(application_id, 'credentials.administrator_password', True) }}"
 
 # LDIF Variables
-openldap_ldif_host_path:        "{{docker_compose.directories.volumes}}ldif/"
+openldap_ldif_host_path:        "{{ docker_compose.directories.volumes }}ldif/"
 openldap_ldif_docker_path:      "/tmp/ldif/"
 openldap_ldif_types:
   - configuration

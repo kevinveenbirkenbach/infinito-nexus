@@ -29,12 +29,12 @@ openproject_cache_version: "{{ applications
   }}"
 
       
-openproject_plugins_folder:   "{{docker_compose.directories.volumes}}plugins/"
+openproject_plugins_folder:   "{{ docker_compose.directories.volumes }}plugins/"
 
 openproject_custom_image:     "custom_openproject"
 
 # The following volume doesn't have a practcical function. It just exist to prevent the creation of unnecessary anonymous volumes
-openproject_dummy_volume:     "{{docker_compose.directories.volumes}}dummy_volume"
+openproject_dummy_volume:     "{{ docker_compose.directories.volumes }}dummy_volume"
 
 openproject_rails_settings:
   email_delivery_method:      "smtp"

@@ -43,6 +43,8 @@
     - database_username is defined
     - database_password is defined
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: Set file permissions for databases.csv to be readable, writable, and executable by root only
   ansible.builtin.file:
@@ -57,6 +59,8 @@
     database_password is defined) and
     run_once_sys_bkp_docker_2_loc_file_permission is not defined
   register: file_permission_result
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: run the backup_docker_to_local_file_permission tasks once
   set_fact:

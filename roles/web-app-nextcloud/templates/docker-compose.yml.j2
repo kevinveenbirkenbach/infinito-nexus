@@ -41,7 +41,7 @@
     ports:
       - "127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}"
     volumes:
-        - "{{docker_compose.directories.volumes}}nginx.conf:/etc/nginx/nginx.conf:ro"
+        - "{{ docker_compose.directories.volumes }}nginx.conf:/etc/nginx/nginx.conf:ro"
     volumes_from:
       - application
 
