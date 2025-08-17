@@ -1,405 +1,227 @@
 {
-    "id": "bBD2l6kVRMaSABbfOJVRaw",
-    "name": "{{ KEYCLOAK_LDAP_CMP_NAME }}",
-    "providerId": "ldap",
-    "subComponents": {
-        "org.keycloak.storage.ldap.mappers.LDAPStorageMapper": [
-        {
-            "id": "2205e7fd-b8e6-4262-95b6-4cdf02729fec",
-            "name": "first name",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "givenName"
-            ],
-            "attribute.force.default": [
-                "true"
-            ],
-            "is.mandatory.in.ldap": [
-                "true"
-            ],
-            "is.binary.attribute": [
-                "false"
-            ],
-            "always.read.value.from.ldap": [
-                "true"
-            ],
-            "read.only": [
-                "false"
-            ],
-            "user.model.attribute": [
-                "firstName"
-            ]
-            }
-        },
-        {
-            "id": "3db7787f-6eec-48dd-bf6d-f3c73e28e891",
-            "name": "creation date",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "createTimestamp"
-            ],
-            "is.mandatory.in.ldap": [
-                "false"
-            ],
-            "always.read.value.from.ldap": [
-                "true"
-            ],
-            "read.only": [
-                "true"
-            ],
-            "user.model.attribute": [
-                "createTimestamp"
-            ]
-            }
-        },
-        {
-            "id": "12b99578-e0bf-4eeb-b0fb-8e400c0cd73e",
-            "name": "{{ ldap.user.attributes.nextcloud_quota }}",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "{{ ldap.user.attributes.nextcloud_quota }}"
-            ],
-            "is.mandatory.in.ldap": [
-                "false"
-            ],
-            "attribute.force.default": [
-                "false"
-            ],
-            "is.binary.attribute": [
-                "false"
-            ],
-            "always.read.value.from.ldap": [
-                "false"
-            ],
-            "read.only": [
-                "false"
-            ],
-            "user.model.attribute": [
-                "{{ ldap.user.attributes.nextcloud_quota }}"
-            ]
-            }
-        },
-        {
-            "id": "24cd9c3b-e22d-4540-bddf-ae7faac0196c",
-            "name": "SSH Public Key",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "{{ ldap.user.attributes.ssh_public_key }}"
-            ],
-            "is.mandatory.in.ldap": [
-                "false"
-            ],
-            "attribute.force.default": [
-                "false"
-            ],
-            "is.binary.attribute": [
-                "false"
-            ],
-            "read.only": [
-                "false"
-            ],
-            "always.read.value.from.ldap": [
-                "true"
-            ],
-            "user.model.attribute": [
-                "{{ ldap.user.attributes.ssh_public_key }}"
-            ]
-            }
-        },
-        {
-            "id": "f56e4551-c5b5-4596-b567-bc8309a74e72",
-            "name": "ldap-roles",
-            "providerId": "group-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "membership.attribute.type": [
-                "DN"
-            ],
-            "group.name.ldap.attribute": [
-                "{{ ldap.user.attributes.fullname }}"
-            ],
-            "membership.user.ldap.attribute": [
-                "{{ ldap.user.attributes.id }}"
-            ],
-            "preserve.group.inheritance": [
-                "false"
-            ],
-            "groups.dn": [
-                "{{ ldap.dn.ou.roles }}"
-            ],
-            "mode": [
-                "LDAP_ONLY"
-            ],
-            "user.roles.retrieve.strategy": [
-                "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE"
-            ],
-            "groups.ldap.filter": [
-                "(objectClass=groupOfNames)"
-            ],
-            "membership.ldap.attribute": [
-                "member"
-            ],
-            "ignore.missing.groups": [
-                "true"
-            ],
-            "group.object.classes": [
-                "groupOfNames"
-            ],
-            "memberof.ldap.attribute": [
-                "memberOf"
-            ],
-            "drop.non.existing.groups.during.sync": [
-                "false"
-            ],
-            "groups.path": [
-                "{{ applications | get_app_conf(application_id, 'rbac_groups', True) }}"
-            ]
-            }
-        },
-        {
-            "id": "1ffab19c-4aeb-4038-a3e4-6444254fdd53",
-            "name": "modify date",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "modifyTimestamp"
-            ],
-            "is.mandatory.in.ldap": [
-                "false"
-            ],
-            "always.read.value.from.ldap": [
-                "true"
-            ],
-            "read.only": [
-                "true"
-            ],
-            "user.model.attribute": [
-                "modifyTimestamp"
-            ]
-            }
-        },
-        {
-            "id": "ca91c874-b92e-4b54-994d-db4b43a3e096",
-            "name": "last name",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "sn"
-            ],
-            "is.mandatory.in.ldap": [
-                "true"
-            ],
-            "always.read.value.from.ldap": [
-                "true"
-            ],
-            "read.only": [
-                "false"
-            ],
-            "user.model.attribute": [
-                "lastName"
-            ]
-            }
-        },
-        {
-            "id": "785b89a9-48db-4bf2-aded-37ee1d2d9025",
-            "name": "full name",
-            "providerId": "full-name-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "read.only": [
-                "false"
-            ],
-            "write.only": [
-                "true"
-            ],
-            "ldap.full.name.attribute": [
-                "{{ ldap.user.attributes.fullname }}"
-            ]
-            }
-        },
-        {
-            "id": "cc3b4018-81ac-47d5-818d-bdd22b6aa5e3",
-            "name": "username",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "{{ldap.user.attributes.id}}"
-            ],
-            "is.mandatory.in.ldap": [
-                "true"
-            ],
-            "attribute.force.default": [
-                "false"
-            ],
-            "is.binary.attribute": [
-                "false"
-            ],
-            "always.read.value.from.ldap": [
-                "false"
-            ],
-            "read.only": [
-                "false"
-            ],
-            "user.model.attribute": [
-                "username"
-            ]
-            }
-        },
-        {
-            "id": "24cd9c3b-e22d-4540-bddf-ae7faac0196c",
-            "name": "SSH Public Key",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "{{ ldap.user.attributes.ssh_public_key }}"
-            ],
-            "is.mandatory.in.ldap": [
-                "false"
-            ],
-            "attribute.force.default": [
-                "false"
-            ],
-            "is.binary.attribute": [
-                "false"
-            ],
-            "read.only": [
-                "false"
-            ],
-            "always.read.value.from.ldap": [
-                "true"
-            ],
-            "user.model.attribute": [
-                "{{ ldap.user.attributes.ssh_public_key }}"
-            ]
-            }
-        },
-        {
-            "id": "85cd9847-4063-4d8b-be03-fa16377cde56",
-            "name": "email",
-            "providerId": "user-attribute-ldap-mapper",
-            "subComponents": {},
-            "config": {
-            "ldap.attribute": [
-                "mail"
-            ],
-            "is.mandatory.in.ldap": [
-                "false"
-            ],
-            "read.only": [
-                "false"
-            ],
-            "always.read.value.from.ldap": [
-                "false"
-            ],
-            "user.model.attribute": [
-                "email"
-            ]
-            }
+  "name": "{{ KEYCLOAK_LDAP_CMP_NAME }}",
+  "providerId": "ldap",
+  "subComponents": {
+    "org.keycloak.storage.ldap.mappers.LDAPStorageMapper": [
+
+      {# ---------------------- First Name ---------------------- #}
+      {
+        "name": "first name",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "{{ ldap.user.attributes.firstname }}" ],
+          "attribute.force.default": [ "true" ],
+          "is.mandatory.in.ldap": [ "true" ],
+          "is.binary.attribute": [ "false" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "read.only": [ "false" ],
+          "user.model.attribute": [ "firstName" ]
         }
-        ]
-    },
-    "config": {
-        "fullSyncPeriod": [
-        "-1"
-        ],
-        "pagination": [
-        "true"
-        ],
-        "connectionTrace": [
-        "false"
-        ],
-        "startTls": [
-        "false"
-        ],
-        "usersDn": [
-        "{{ldap.dn.ou.users}}"
-        ],
-        "connectionPooling": [
-        "true"
-        ],
-        "cachePolicy": [
-        "DEFAULT"
-        ],
-        "useKerberosForPasswordAuthentication": [
-        "false"
-        ],
-        "importEnabled": [
-        "true"
-        ],
-        "enabled": [
-        "true"
-        ],
-        "bindCredential": [
-        "{{ldap.bind_credential}}"
-        ],
-        "changedSyncPeriod": [
-        "-1"
-        ],
-        "usernameLDAPAttribute": [
-        "{{ldap.user.attributes.id}}"
-        ],
-        "bindDn": [
-        "{{ldap.dn.administrator.data}}"
-        ],
-        "lastSync": [
-        "1737578007"
-        ],
-        "vendor": [
-        "other"
-        ],
-        "uuidLDAPAttribute": [
-        "{{ldap.user.attributes.id}}"
-        ],
-        "allowKerberosAuthentication": [
-        "false"
-        ],
-        "connectionUrl": [
-        "{{ldap.server.uri}}"
-        ],
-        "syncRegistrations": [
-        "true"
-        ],
-        "authType": [
-        "simple"
-        ],
-        "krbPrincipalAttribute": [
-        "krb5PrincipalName"
-        ],
-        "searchScope": [
-        "1"
-        ],
-        "useTruststoreSpi": [
-        "always"
-        ],
-        "usePasswordModifyExtendedOp": [
-        "true"
-        ],
-        "trustEmail": [
-        "false"
-        ],
-        "userObjectClasses": [
-        "{{ ldap.user.objects | join(', ') }}"
-        ],
-        "rdnLDAPAttribute": [
-        "{{ldap.user.attributes.id}}"
-        ],
-        "editMode": [
-        "WRITABLE"
-        ],
-        "validatePasswordPolicy": [
-        "false"
-        ]
-    }
+      },
+
+      {# ---------------------- Last Name ----------------------- #}
+      {
+        "name": "last name",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "{{ ldap.user.attributes.surname }}" ],
+          "is.mandatory.in.ldap": [ "true" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "read.only": [ "false" ],
+          "user.model.attribute": [ "lastName" ]
+        }
+      },
+
+      {# ---------------------- Full Name (cn) ------------------ #}
+      {
+        "name": "full name",
+        "providerId": "full-name-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "read.only": [ "false" ],
+          "write.only": [ "true" ],
+          "ldap.full.name.attribute": [ "{{ ldap.user.attributes.fullname }}" ]
+        }
+      },
+
+      {# ---------------------- Username ------------------------ #}
+      {
+        "name": "username",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "{{ ldap.user.attributes.id }}" ],
+          "is.mandatory.in.ldap": [ "true" ],
+          "attribute.force.default": [ "false" ],
+          "is.binary.attribute": [ "false" ],
+          "always.read.value.from.ldap": [ "false" ],
+          "read.only": [ "false" ],
+          "user.model.attribute": [ "username" ]
+        }
+      },
+
+      {# ---------------------- Email --------------------------- #}
+      {
+        "name": "email",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "{{ ldap.user.attributes.mail }}" ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "read.only": [ "false" ],
+          "always.read.value.from.ldap": [ "false" ],
+          "user.model.attribute": [ "email" ]
+        }
+      },
+
+      {# ---------------------- SSH Public Key ------------------ #}
+      {
+        "name": "SSH Public Key",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "{{ ldap.user.attributes.ssh_public_key }}" ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "attribute.force.default": [ "false" ],
+          "is.binary.attribute": [ "false" ],
+          "read.only": [ "false" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "user.model.attribute": [ "{{ ldap.user.attributes.ssh_public_key }}" ]
+        }
+      },
+
+      {# ---------------------- Nextcloud Quota ----------------- #}
+      {
+        "name": "{{ ldap.user.attributes.nextcloud_quota }}",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "{{ ldap.user.attributes.nextcloud_quota }}" ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "attribute.force.default": [ "false" ],
+          "is.binary.attribute": [ "false" ],
+          "always.read.value.from.ldap": [ "false" ],
+          "read.only": [ "false" ],
+          "user.model.attribute": [ "{{ ldap.user.attributes.nextcloud_quota }}" ]
+        }
+      },
+
+      {# ---------------------- Creation Date ------------------- #}
+      {
+        "name": "creation date",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "createTimestamp" ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "read.only": [ "true" ],
+          "user.model.attribute": [ "createTimestamp" ]
+        }
+      },
+
+      {# ---------------------- Modify Date --------------------- #}
+      {
+        "name": "modify date",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "modifyTimestamp" ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "read.only": [ "true" ],
+          "user.model.attribute": [ "modifyTimestamp" ]
+        }
+      },
+
+      {# ---------------------- LDAP Groups -> KC Groups -------- #}
+      {
+        "name": "ldap-roles",
+        "providerId": "group-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "membership.attribute.type": [ "DN" ],
+          "group.name.ldap.attribute": [ "cn" ],
+          "membership.user.ldap.attribute": [ "{{ ldap.user.attributes.id }}" ],
+          "preserve.group.inheritance": [ "true" ],
+          "groups.dn": [ "{{ ldap.dn.ou.roles }}" ],
+          "mode": [ "LDAP_ONLY" ],
+          "user.roles.retrieve.strategy": [ "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE" ],
+          "groups.ldap.filter": [
+            "{% set flavors = ldap.rbac.flavors | default([]) %}\
+{% if 'groupOfNames' in flavors and 'organizationalUnit' in flavors %}(|(objectClass=groupOfNames)(objectClass=organizationalUnit))\
+{% elif 'groupOfNames' in flavors %}(objectClass=groupOfNames)\
+{% elif 'organizationalUnit' in flavors %}(objectClass=organizationalUnit)\
+{% else %}(objectClass=groupOfNames){% endif %}"
+          ],
+          "membership.ldap.attribute": [ "member" ],
+          "ignore.missing.groups": [ "true" ],
+          "group.object.classes": [ "groupOfNames" ],
+          "memberof.ldap.attribute": [ "memberOf" ],
+          "drop.non.existing.groups.during.sync": [ "false" ],
+          "groups.path": [ "{{ applications | get_app_conf(application_id, 'rbac_groups', True) }}" ]
+        }
+      }{% if keycloak_map_ldap_realm_roles | default(false) %},
+      {# ---------------------- LDAP -> Realm Roles (optional) -- #}
+      {
+        "name": "ldap-realm-roles",
+        "providerId": "role-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "mode": [ "LDAP_ONLY" ],
+          "membership.attribute.type": [ "DN" ],
+          "user.roles.retrieve.strategy": [ "LOAD_ROLES_BY_MEMBER_ATTRIBUTE" ],
+          "roles.dn": [ "{{ ldap.dn.ou.roles }}" ],
+          "membership.ldap.attribute": [ "member" ],
+          "membership.user.ldap.attribute": [ "{{ ldap.user.attributes.id }}" ],
+          "memberof.ldap.attribute": [ "memberOf" ],
+          "role.name.ldap.attribute": [ "cn" ],
+          "use.realm.roles.mapping": [ "true" ],
+          "role.object.classes": [ "groupOfNames" ]
+        }
+      }{% endif %}
+
+    ]
+  },
+  "config": {
+    "fullSyncPeriod": [ "-1" ],
+    "pagination": [ "true" ],
+    "connectionTrace": [ "false" ],
+    "startTls": [ "false" ],
+    "usersDn": [ "{{ ldap.dn.ou.users }}" ],
+    "connectionPooling": [ "true" ],
+    "cachePolicy": [ "DEFAULT" ],
+    "useKerberosForPasswordAuthentication": [ "false" ],
+    "importEnabled": [ "true" ],
+    "enabled": [ "true" ],
+    "bindCredential": [ "{{ ldap.bind_credential }}" ],
+    "changedSyncPeriod": [ "-1" ],
+    "usernameLDAPAttribute": [ "{{ ldap.user.attributes.id }}" ],
+    "bindDn": [ "{{ ldap.dn.administrator.data }}" ],
+    "vendor": [ "other" ],
+    "uuidLDAPAttribute": [ "{{ ldap.user.attributes.id }}" ],
+    "allowKerberosAuthentication": [ "false" ],
+    "connectionUrl": [ "{{ ldap.server.uri }}" ],
+    "syncRegistrations": [ "true" ],
+    "authType": [ "simple" ],
+    "krbPrincipalAttribute": [ "krb5PrincipalName" ],
+    "searchScope": [ "1" ],
+    "useTruststoreSpi": [ "always" ],
+    "usePasswordModifyExtendedOp": [ "true" ],
+    "trustEmail": [ "false" ],
+
+    {# Build objectClasses from structural + auxiliary definitions #}
+    "userObjectClasses": [
+      "{{ (ldap.user.objects.structural + (ldap.user.objects.auxiliary | dict2items | map(attribute='value') | list)) | join(', ') }}"
+    ],
+
+    "rdnLDAPAttribute": [ "{{ ldap.user.attributes.id }}" ],
+    "editMode": [ "WRITABLE" ],
+    "validatePasswordPolicy": [ "false" ],
+
+    {# Recommended: prune Keycloak shadow users not in LDAP anymore #}
+    "removeInvalidUsersEnabled": [ "true" ]
+  }
 }
