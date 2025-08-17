@@ -14,7 +14,7 @@ KEYCLOAK_SERVER_INTERNAL_URL:       "http://127.0.0.1:8080"
 KEYCLOAK_LOAD_DEPENDENCIES:         "{{ applications | get_app_conf(application_id, 'load_dependencies') }}"
 
 # RBAC
-KEYCLOAK_RBAC_GROUP_CLAIME:         "{{ RBAC.GROUP.CLAIM }}"
+KEYCLOAK_RBAC_GROUP_CLAIM:         "{{ RBAC.GROUP.CLAIM }}"
 KEYCLOAK_RBAC_GROUP_NAME:           "{{ RBAC.GROUP.NAME }}"
 
 ## Health

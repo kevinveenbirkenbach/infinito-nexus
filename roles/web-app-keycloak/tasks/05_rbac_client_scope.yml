@@ -5,7 +5,7 @@
     {{
       (
         KEYCLOAK_DICTIONARY_REALM.clientScopes
-        | selectattr('name','equalto', KEYCLOAK_RBAC_GROUP_CLAIME)
+        | selectattr('name','equalto', KEYCLOAK_RBAC_GROUP_CLAIM)
         | list | first
       ) | to_json
     }}
@@ -27,7 +27,7 @@
     scope_id_rbac: >-
       {{ (
           all_scopes.stdout | from_json
-          | selectattr('name','equalto', KEYCLOAK_RBAC_GROUP_CLAIME)
+          | selectattr('name','equalto', KEYCLOAK_RBAC_GROUP_CLAIM)
           | list | first | default({})
         ).id | default('') }}
 
@@ -70,3 +70,5 @@
   register: add_opt
   changed_when: true
   failed_when: add_opt.rc != 0
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
