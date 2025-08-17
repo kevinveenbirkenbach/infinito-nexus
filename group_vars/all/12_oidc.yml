@@ -10,30 +10,30 @@
 ## Helper Variables:
 _oidc_client_realm:         "{{ OIDC.CLIENT.REALM if OIDC.CLIENT is defined and OIDC.CLIENT.REALM is defined else SOFTWARE_NAME | lower }}"
 _oidc_url:                  "{{ 
-                                (OIDC.URL 
-                                  if (oidc is defined and OIDC.URL is defined) 
+                                ( OIDC.URL
+                                  if (OIDC is defined and OIDC.URL is defined) 
                                   else WEB_PROTOCOL ~ '://' ~ (domains | get_domain('web-app-keycloak'))
-                                ) 
+                                ).rstrip('/') 
                             }}"
-_oidc_client_issuer_url:    "{{ _oidc_url }}/realms/{{_oidc_client_realm}}/"
+_oidc_client_issuer_url:    "{{ _oidc_url ~ '/realms/' ~ _oidc_client_realm }}"
 _oidc_client_id:            "{{ OIDC.CLIENT.ID if OIDC.CLIENT is defined and OIDC.CLIENT.ID is defined else SOFTWARE_NAME | lower }}"
 
 defaults_oidc:
   URL:                    "{{ _oidc_url }}"
   CLIENT:
-    ID:                   "{{ _oidc_client_id }}"                                           # Client identifier, typically matching your primary domain
-#   secret:                                                                                 # Client secret for authenticating with the OIDC provider (set in the inventory file). Recommend greater then 32 characters
-    REALM:                "{{_oidc_client_realm}}"                                          # The realm to which the client belongs in the OIDC provider
-    ISSUER_URL:           "{{_oidc_client_issuer_url}}"                                     # Base URL of the OIDC provider (issuer)
-    DISCOVERY_DOCUMENT:   "{{_oidc_client_issuer_url}}/.well-known/openid-configuration"    # URL for fetching the provider's configuration details
-    AUTHORIZE_URL:        "{{_oidc_client_issuer_url}}/protocol/openid-connect/auth"        # Endpoint to start the authorization process
-    TOKEN_URL:            "{{_oidc_client_issuer_url}}/protocol/openid-connect/token"       # Endpoint to exchange authorization codes for tokens (note: 'token_url' may be a typo for 'token_url')
-    USER_INFO_URL:        "{{_oidc_client_issuer_url}}/protocol/openid-connect/userinfo"    # Endpoint to retrieve user information
-    LOGOUT_URL:           "{{_oidc_client_issuer_url}}/protocol/openid-connect/logout"      # Endpoint to log out the user
-    CHANGE_CREDENTIALS:   "{{_oidc_client_issuer_url}}account/account-security/signing-in"  # URL for managing or changing user credentials
-    CERTS:                "{{_oidc_client_issuer_url}}/protocol/openid-connect/certs"       # JSON Web Key Set (JWKS)
-    RESET_CREDENTIALS:    "{{_oidc_client_issuer_url}}/login-actions/reset-credentials?client_id={{ _oidc_client_id }}" # Password reset url
-  BUTTON_TEXT:            "SSO Login ({{ PRIMARY_DOMAIN | upper }})"                           # Default button text
+    ID:                   "{{ _oidc_client_id }}"                                                  # Client identifier, typically matching your primary domain
+#   secret:                                                                                        # Client secret for authenticating with the OIDC provider (set in the inventory file). Recommend greater then 32 characters
+    REALM:                "{{ _oidc_client_realm }}"                                               # The realm to which the client belongs in the OIDC provider
+    ISSUER_URL:           "{{ _oidc_client_issuer_url }}"                                          # Base URL of the OIDC provider (issuer)
+    DISCOVERY_DOCUMENT:   "{{ _oidc_client_issuer_url ~ '/.well-known/openid-configuration' }}"    # URL for fetching the provider's configuration details
+    AUTHORIZE_URL:        "{{ _oidc_client_issuer_url ~ '/protocol/openid-connect/auth' }}"        # Endpoint to start the authorization process
+    TOKEN_URL:            "{{ _oidc_client_issuer_url ~ '/protocol/openid-connect/token' }}"       # Endpoint to exchange authorization codes for tokens (note: 'token_url' may be a typo for 'token_url')
+    USER_INFO_URL:        "{{ _oidc_client_issuer_url ~ '/protocol/openid-connect/userinfo' }}"    # Endpoint to retrieve user information
+    LOGOUT_URL:           "{{ _oidc_client_issuer_url ~ '/protocol/openid-connect/logout' }}"      # Endpoint to log out the user
+    CHANGE_CREDENTIALS:   "{{ _oidc_client_issuer_url ~ '/account/account-security/signing-in' }}" # URL for managing or changing user credentials
+    CERTS:                "{{ _oidc_client_issuer_url ~ '/protocol/openid-connect/certs' }}"       # JSON Web Key Set (JWKS)
+    RESET_CREDENTIALS:    "{{ _oidc_client_issuer_url ~ '/login-actions/reset-credentials?client_id=' ~ _oidc_client_id }}" # Password reset url
+  BUTTON_TEXT:            "SSO Login ({{ PRIMARY_DOMAIN | upper }})"                               # Default button text
   ATTRIBUTES:
     # Attribut to identify the user
     USERNAME:             "preferred_username"
