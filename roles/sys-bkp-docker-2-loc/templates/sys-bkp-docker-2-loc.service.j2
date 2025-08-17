@@ -4,6 +4,6 @@ OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service sys-cln-faild-bkps{{ SY
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore {{ system_maintenance_backup_services | reject('equalto', 'sys-bkp-docker-2-loc-everything') | join(' ') }} --timeout "{{system_maintenance_lock_timeout_backup_services}}"'
-ExecStart=/bin/sh -c '{{ bkp_docker_2_loc_exec }}'
+ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore {{ system_maintenance_backup_services | reject('equalto', role_name ~ '-everything') | join(' ') }} --timeout "{{system_maintenance_lock_timeout_backup_services}}"'
+ExecStart=/bin/sh -c '{{ BKP_DOCKER_2_LOC_EXEC }}'
 ExecStartPost=/bin/sh -c '/bin/systemctl start sys-rpr-docker-soft{{ SYS_SERVICE_SUFFIX }} &'

@@ -7,4 +7,4 @@
 - name: "include 04_seed-database-to-backup.yml"
   include_tasks: 04_seed-database-to-backup.yml
   when:
-    - bkp_docker_2_loc_db_enabled | bool
+    - BKP_DOCKER_2_LOC_DB_ENABLED | bool

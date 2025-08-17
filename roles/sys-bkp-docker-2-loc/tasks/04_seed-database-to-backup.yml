@@ -55,10 +55,10 @@
     database_name is defined and
     database_username is defined and
     database_password is defined) and
-    run_once_bkp_docker_2_loc_file_permission is not defined
+    run_once_sys_bkp_docker_2_loc_file_permission is not defined
   register: file_permission_result
 
 - name: run the backup_docker_to_local_file_permission tasks once
   set_fact:
-    run_once_bkp_docker_2_loc_file_permission: true
-  when: run_once_bkp_docker_2_loc_file_permission is not defined and file_permission_result is defined and file_permission_result.changed
+    run_once_sys_bkp_docker_2_loc_file_permission: true
+  when: run_once_sys_bkp_docker_2_loc_file_permission is not defined and file_permission_result is defined and file_permission_result.changed

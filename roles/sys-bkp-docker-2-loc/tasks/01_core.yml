@@ -14,17 +14,17 @@
   include_tasks: 03_reset.yml
   when: MODE_RESET | bool
 
-- name: configure sys-bkp-docker-2-loc-everything service
+- name: "setup '{{ BKP_DOCKER_2_LOC_SERVICE_ALL }}'"
   template:
-    src: sys-bkp-docker-2-loc-everything.service.j2
-    dest: /etc/systemd/system/sys-bkp-docker-2-loc-everything{{ SYS_SERVICE_SUFFIX }}
-  notify: reload sys-bkp-docker-2-loc-everything service
+    src: "{{ role_name }}-everything.service.j2"
+    dest: /etc/systemd/system/{{ BKP_DOCKER_2_LOC_SERVICE_ALL }}
+  notify: reload backup docker to local (all) service
 
-- name: configure sys-bkp-docker-2-loc{{ SYS_SERVICE_SUFFIX }}
+- name: "setup '{{ BKP_DOCKER_2_LOC_SERVICE }}'"
   template:
-    src: sys-bkp-docker-2-loc.service.j2
-    dest: /etc/systemd/system/sys-bkp-docker-2-loc{{ SYS_SERVICE_SUFFIX }}
-  notify: reload sys-bkp-docker-2-loc service
+    src: "{{ role_name }}.service.j2"
+    dest: /etc/systemd/system/{{ BKP_DOCKER_2_LOC_SERVICE }}
+  notify: reload backup docker to local service
 
 - name: "set 'service_name' to '{{ role_name }}'"
   set_fact:
