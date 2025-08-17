@@ -23,7 +23,7 @@
       - "{{ MAILU_IP4_PUBLIC }}:993:993"
       - "{{ MAILU_IP4_PUBLIC }}:4190:4190"
     volumes:
-      - "{{docker_compose.directories.volumes}}overrides/nginx:/overrides:ro"
+      - "{{ docker_compose.directories.volumes }}overrides/nginx:/overrides:ro"
       - "{{ cert_mount_directory }}:/certs:ro"
 {% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
       resolver:
@@ -56,7 +56,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - "dovecot_mail:/mail"
-      - "{{docker_compose.directories.volumes}}overrides:/overrides:ro"
+      - "{{ docker_compose.directories.volumes }}overrides:/overrides:ro"
     depends_on:
       - front
       - resolver
@@ -69,7 +69,7 @@
     image: {{ MAILU_DOCKER_FLAVOR }}/postfix:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
-      - "{{docker_compose.directories.volumes}}overrides:/overrides:ro"
+      - "{{ docker_compose.directories.volumes }}overrides:/overrides:ro"
       - "smtp_queue:/queue"
     depends_on:
       - front
@@ -97,7 +97,7 @@
     volumes:
       - "filter:/var/lib/rspamd"
       - "dkim:/dkim"
-      - "{{docker_compose.directories.volumes}}overrides/rspamd:/overrides:ro"
+      - "{{ docker_compose.directories.volumes }}overrides/rspamd:/overrides:ro"
     depends_on:
       - front
       - redis
@@ -156,7 +156,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - "webmail_data:/data"
-      - "{{docker_compose.directories.volumes}}overrides:/overrides:ro"
+      - "{{ docker_compose.directories.volumes }}overrides:/overrides:ro"
     depends_on:
       - imap
       - front

@@ -38,20 +38,28 @@
 
 - name: "Create API token for '{{ mailu_user_key }};{{ mailu_user_name }}' if no local token defined"
   command: >-
-    docker compose exec -T admin \
-      curl -s -X POST {{ mailu_api_base_url }}/token \
-        -H "Authorization: Bearer {{ MAILU_API_TOKEN }}" \
-        -H "Content-Type: application/json" \
-        -d '{{ {
-              "comment": mailu_user_key ~ " - ansible.infinito",
-              "email": users[mailu_user_key].email,
-              "ip": mailu_token_ip
-            } | to_json }}'
+    docker compose exec -T admin
+    curl -sS -f -X POST {{ mailu_api_base_url }}/token
+      -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
+      -H "Content-Type: application/json"
+      -d '{{ {
+            "comment": mailu_user_key ~ " - ansible.infinito",
+            "email": users[mailu_user_key].email,
+            "ip": mailu_token_ip
+          } | to_json }}'
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
   when: users[mailu_user_key].mailu_token is not defined
   register: mailu_token_creation
-  changed_when: mailu_token_creation.rc == 0
+  # If curl sees 4xx/5xx it returns non-zero due to -f → fail the task.
+  failed_when:
+    - mailu_token_creation.rc != 0
+    # Fallback: if some gateway returns 200 but embeds an error JSON.
+    - mailu_token_creation.rc == 0 and
+      (mailu_token_creation.stdout is search('"code"\\s*:\\s*4\\d\\d') or
+       mailu_token_creation.stdout is search('cannot be found'))
+  # Only mark changed when a token is actually present in the JSON.
+  changed_when: mailu_token_creation.stdout is search('"token"\\s*:')
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Set mailu_token for '{{ mailu_user_key }};{{ mailu_user_name }}' in users dict if newly created"

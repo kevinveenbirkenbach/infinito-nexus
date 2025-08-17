@@ -7,7 +7,7 @@ features:
   css:                    false
   desktop:                true
   oidc:                   true
-  central_database:       false                   # Deactivate central database for mailu, I don't know why the database deactivation is necessary
+  central_database:       true
   logout:                 true
 server:
   domains:
