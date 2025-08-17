@@ -1,0 +1,29 @@
+{
+  "name": "{{ KEYCLOAK_OIDC_RBAC_SCOPE_NAME }}",
+  "description": "RBAC Groups",
+  "protocol": "openid-connect",
+  "attributes": {
+    "include.in.token.scope": "false",
+    "display.on.consent.screen": "true",
+    "gui.order": "",
+    "consent.screen.text": ""
+  },
+  "protocolMappers": [
+    {
+      "name": "groups",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-group-membership-mapper",
+      "consentRequired": false,
+      "config": {
+        "full.path": "true",
+        "introspection.token.claim": "true",
+        "userinfo.token.claim": "true",
+        "multivalued": "true",
+        "id.token.claim": "true",
+        "lightweight.claim": "false",
+        "access.token.claim": "true",
+        "claim.name": "{{ OIDC.CLAIMS.GROUPS }}"
+      }
+    }
+  ]
+}

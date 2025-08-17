@@ -1,0 +1,15 @@
+- name: "load variables from {{ DOCKER_VARS_FILE }}"
+  include_vars: "{{ DOCKER_VARS_FILE }}"
+
+- name: "create directory {{ KEYCLOAK_REALM_IMPORT_DIR_HOST }}"
+  file:
+    path: "{{ KEYCLOAK_REALM_IMPORT_DIR_HOST }}"
+    state: directory
+    mode: "0755"
+
+- name: "Copy REALM import file '{{ KEYCLOAK_REALM_IMPORT_FILE_SRC }}' to '{{ KEYCLOAK_REALM_IMPORT_FILE_DST }}'"
+  template:
+    src: "{{ KEYCLOAK_REALM_IMPORT_FILE_SRC }}"
+    dest: "{{ KEYCLOAK_REALM_IMPORT_FILE_DST }}"
+    mode: "0770"
+  when: KEYCLOAK_REALM_IMPORT_ENABLED | bool

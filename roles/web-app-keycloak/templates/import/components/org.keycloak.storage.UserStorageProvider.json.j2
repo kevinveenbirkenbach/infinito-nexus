@@ -1,9 +1,10 @@
-{
+"org.keycloak.storage.UserStorageProvider": [
+  {
   "name": "{{ KEYCLOAK_LDAP_CMP_NAME }}",
   "providerId": "ldap",
   "subComponents": {
     "org.keycloak.storage.ldap.mappers.LDAPStorageMapper": [
-
+    
       {# ---------------------- First Name ---------------------- #}
       {
         "name": "first name",
@@ -149,13 +150,7 @@
           "groups.dn": [ "{{ ldap.dn.ou.roles }}" ],
           "mode": [ "LDAP_ONLY" ],
           "user.roles.retrieve.strategy": [ "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE" ],
-          "groups.ldap.filter": [
-            "{% set flavors = ldap.rbac.flavors | default([]) %}\
-{% if 'groupOfNames' in flavors and 'organizationalUnit' in flavors %}(|(objectClass=groupOfNames)(objectClass=organizationalUnit))\
-{% elif 'groupOfNames' in flavors %}(objectClass=groupOfNames)\
-{% elif 'organizationalUnit' in flavors %}(objectClass=organizationalUnit)\
-{% else %}(objectClass=groupOfNames){% endif %}"
-          ],
+          "groups.ldap.filter": ["{{ ldap.rbac.flavors | ldap_groups_filter }}"],
           "membership.ldap.attribute": [ "member" ],
           "ignore.missing.groups": [ "true" ],
           "group.object.classes": [ "groupOfNames" ],
@@ -163,7 +158,44 @@
           "drop.non.existing.groups.during.sync": [ "false" ],
           "groups.path": [ "{{ applications | get_app_conf(application_id, 'rbac_groups', True) }}" ]
         }
-      }{% if keycloak_map_ldap_realm_roles | default(false) %},
+      },
+      {
+        "name": "phone number",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "telephoneNumber" ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "read.only": [ "false" ],
+          "user.model.attribute": [ "phoneNumber" ]
+        }
+      },
+      {
+        "name": "locale",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "preferredLanguage" ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "read.only": [ "false" ],
+          "user.model.attribute": [ "locale" ]
+        }
+      },
+      {
+        "name": "uidNumber",
+        "providerId": "user-attribute-ldap-mapper",
+        "subComponents": {},
+        "config": {
+          "ldap.attribute": [ "uidNumber" ],
+          "is.mandatory.in.ldap": [ "false" ],
+          "always.read.value.from.ldap": [ "true" ],
+          "read.only": [ "false" ],
+          "user.model.attribute": [ "uidNumber" ]
+        }
+      }
+      {% if keycloak_map_ldap_realm_roles | default(false) %},
       {# ---------------------- LDAP -> Realm Roles (optional) -- #}
       {
         "name": "ldap-realm-roles",
@@ -182,7 +214,6 @@
           "role.object.classes": [ "groupOfNames" ]
         }
       }{% endif %}
-
     ]
   },
   "config": {
@@ -225,3 +256,4 @@
     "removeInvalidUsersEnabled": [ "true" ]
   }
 }
+]

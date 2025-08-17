@@ -28,6 +28,7 @@
     "oidc.ciba.grant.enabled": "false",
     "client.secret.creation.time": "0",
     "backchannel.logout.session.required": "true",
+    "standard.token.exchange.enabled": "false",
     "post.logout.redirect.uris": {{ KEYCLOAK_POST_LOGOUT_URIS | to_json }},
     "frontchannel.logout.session.required": "true",
     "oauth2.device.authorization.grant.enabled": "false",
@@ -53,7 +54,7 @@
     "organization",
     "offline_access",
     "microprofile-jwt",
-    "{{ applications | get_app_conf(application_id, 'scopes.rbac_roles', True) }}",
+    "{{ KEYCLOAK_OIDC_RBAC_SCOPE_NAME }}",
     "{{ applications | get_app_conf(application_id, 'scopes.nextcloud', True) }}"
   ]
 }

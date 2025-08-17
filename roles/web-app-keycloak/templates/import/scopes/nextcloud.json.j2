@@ -1,0 +1,49 @@
+ {
+  "name": "{{ applications | get_app_conf(application_id, 'scopes.nextcloud') }}",
+  "description": "Optimized mappers for nextcloud oidc_login with ldap.",
+  "protocol": "openid-connect",
+  "attributes": {
+    "include.in.token.scope": "false",
+    "display.on.consent.screen": "true",
+    "gui.order": "",
+    "consent.screen.text": ""
+  },
+  "protocolMappers": [
+    {
+      "name": "{{ ldap.user.attributes.nextcloud_quota }}",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "introspection.token.claim": "true",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": "{{ ldap.user.attributes.nextcloud_quota }}",
+        "id.token.claim": "true",
+        "lightweight.claim": "false",
+        "access.token.claim": "true",
+        "claim.name": "{{ ldap.user.attributes.nextcloud_quota }}",
+        "jsonType.label": "int"
+      }
+    },
+    {
+      "name": "UID Mapper",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "consentRequired": false,
+      "config": {
+        "aggregate.attrs": "false",
+        "introspection.token.claim": "true",
+        "multivalued": "false",
+        "userinfo.token.claim": "true",
+        "user.attribute": "username",
+        "id.token.claim": "true",
+        "lightweight.claim": "false",
+        "access.token.claim": "true",
+        "claim.name": "{{ldap.user.attributes.id}}",
+        "jsonType.label": "String"
+      }
+    }
+  ]
+}

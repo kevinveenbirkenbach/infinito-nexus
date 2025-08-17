@@ -507,7 +507,7 @@
       "fullScopeAllowed": false,
       "nodeReRegistrationTimeout": 0,
       "defaultClientScopes": [
-        "web-app-origins",
+        "web-origins",
         "acr",
         "roles",
         "profile",
@@ -572,7 +572,7 @@
         }
       ],
       "defaultClientScopes": [
-        "web-app-origins",
+        "web-origins",
         "acr",
         "roles",
         "profile",
@@ -614,7 +614,7 @@
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": 0,
       "defaultClientScopes": [
-        "web-app-origins",
+        "web-origins",
         "acr",
         "roles",
         "profile",
@@ -655,7 +655,7 @@
       "fullScopeAllowed": false,
       "nodeReRegistrationTimeout": 0,
       "defaultClientScopes": [
-        "web-app-origins",
+        "web-origins",
         "acr",
         "roles",
         "profile",
@@ -696,7 +696,7 @@
       "fullScopeAllowed": false,
       "nodeReRegistrationTimeout": 0,
       "defaultClientScopes": [
-        "web-app-origins",
+        "web-origins",
         "acr",
         "roles",
         "profile",
@@ -763,7 +763,7 @@
         }
       ],
       "defaultClientScopes": [
-        "web-app-origins",
+        "web-origins",
         "acr",
         "roles",
         "profile",
@@ -778,7 +778,7 @@
         "microprofile-jwt"
       ]
     },
-    {% include "client.json.j2" %}
+    {% include "clients/default.json.j2" %}
   ],
   "clientScopes": [
     {
@@ -1057,86 +1057,10 @@
         }
       ]
     },
+    {% include "scopes/rbac.json.j2" %},
+    {% include "scopes/nextcloud.json.j2" %},
     {
-      "name": "{{ applications | get_app_conf(application_id, 'scopes.nextcloud', True) }}",
-      "description": "Optimized mappers for nextcloud oidc_login with ldap.",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "false",
-        "display.on.consent.screen": "true",
-        "gui.order": "",
-        "consent.screen.text": ""
-      },
-      "protocolMappers": [
-        {
-          "name": "{{ ldap.user.attributes.nextcloud_quota }}",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "consentRequired": false,
-          "config": {
-            "aggregate.attrs": "false",
-            "introspection.token.claim": "true",
-            "multivalued": "false",
-            "userinfo.token.claim": "true",
-            "user.attribute": "{{ ldap.user.attributes.nextcloud_quota }}",
-            "id.token.claim": "true",
-            "lightweight.claim": "false",
-            "access.token.claim": "true",
-            "claim.name": "{{ ldap.user.attributes.nextcloud_quota }}",
-            "jsonType.label": "int"
-          }
-        },
-        {
-          "name": "UID Mapper",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-attribute-mapper",
-          "consentRequired": false,
-          "config": {
-            "aggregate.attrs": "false",
-            "introspection.token.claim": "true",
-            "multivalued": "false",
-            "userinfo.token.claim": "true",
-            "user.attribute": "username",
-            "id.token.claim": "true",
-            "lightweight.claim": "false",
-            "access.token.claim": "true",
-            "claim.name": "{{ldap.user.attributes.id}}",
-            "jsonType.label": "String"
-          }
-        }
-      ]
-    },
-    {
-      "name": "{{ applications | get_app_conf(application_id, 'scopes.rbac_roles', True) }}",
-      "description": "RBAC Groups",
-      "protocol": "openid-connect",
-      "attributes": {
-        "include.in.token.scope": "false",
-        "display.on.consent.screen": "true",
-        "gui.order": "",
-        "consent.screen.text": ""
-      },
-      "protocolMappers": [
-        {
-          "name": "groups",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-group-membership-mapper",
-          "consentRequired": false,
-          "config": {
-            "full.path": "true",
-            "introspection.token.claim": "true",
-            "userinfo.token.claim": "true",
-            "multivalued": "true",
-            "id.token.claim": "true",
-            "lightweight.claim": "false",
-            "access.token.claim": "true",
-            "claim.name": "{{ OIDC.CLAIMS.GROUPS }}"
-          }
-        }
-      ]
-    },
-    {
-      "name": "web-app-origins",
+      "name": "web-origins",
       "description": "OpenID Connect scope for add allowed web origins to the access token",
       "protocol": "openid-connect",
       "attributes": {
@@ -1496,7 +1420,7 @@
     "profile",
     "email",
     "roles",
-    "web-app-origins",
+    "web-origins",
     "acr",
     "basic"
   ],
@@ -1506,7 +1430,7 @@
     "phone",
     "microprofile-jwt",
     "organization",
-    "{{ applications | get_app_conf(application_id, 'scopes.rbac_roles', True) }}",
+    "{{ KEYCLOAK_OIDC_RBAC_SCOPE_NAME }}",
     "{{ applications | get_app_conf(application_id, 'scopes.nextcloud', True) }}"
   ],
   "browserSecurityHeaders": {
@@ -1642,20 +1566,8 @@
         "config": {}
       }
     ],
-    "org.keycloak.userprofile.UserProfileProvider": [
-      {
-        "providerId": "declarative-user-profile",
-        "subComponents": {},
-        "config": {
-          "kc.user.profile.config": [
-            "{\"attributes\":[{\"name\":\"username\",\"displayName\":\"${username}\",\"validations\":{\"length\":{\"min\":3,\"max\":255},\"pattern\":{\"pattern\":\"^[a-z0-9]+$\",\"error-message\":\"\"}},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"email\",\"displayName\":\"${email}\",\"validations\":{\"email\":{},\"length\":{\"max\":255}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"firstName\",\"displayName\":\"${firstName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"lastName\",\"displayName\":\"${lastName}\",\"validations\":{\"length\":{\"max\":255},\"person-name-prohibited-characters\":{}},\"required\":{\"roles\":[\"user\"]},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"multivalued\":false},{\"name\":\"{{ ldap.user.attributes.ssh_public_key }}\",\"displayName\":\"SSH Public Key\",\"validations\":{},\"annotations\":{},\"permissions\":{\"view\":[\"admin\",\"user\"],\"edit\":[\"admin\",\"user\"]},\"group\":\"user-metadata\",\"multivalued\":true}],\"groups\":[{\"name\":\"user-metadata\",\"displayHeader\":\"User metadata\",\"displayDescription\":\"Attributes, which refer to user metadata\"}]}"
-          ]
-        }
-      }
-    ],
-    "org.keycloak.storage.UserStorageProvider": [
-      {% include "ldap.json.j2" %}
-    ],
+    {%- include "components/org.keycloak.userprofile.UserProfileProvider.json.j2" -%},
+    {%- include "components/org.keycloak.storage.UserStorageProvider.json.j2" -%},
     "org.keycloak.keys.KeyProvider": [
       {
         "name": "rsa-enc-generated",

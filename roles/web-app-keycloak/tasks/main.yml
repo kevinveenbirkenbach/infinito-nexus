@@ -1,31 +1,28 @@
 ---
-- name: "create import files for {{ application_id }}"
-  include_tasks: 01_initialize.yml
+- name: "Load cleanup routine for '{{ application_id }}'"
+  include_tasks: 01_cleanup.yml
 
-- name: "load required 'web-svc-logout' for {{ application_id }}"
-  include_role: 
-    name: web-svc-logout
-  when: run_once_web_svc_logout is not defined
+- name: "Load init routine for '{{ application_id }}'"
+  include_tasks: 02_initialize.yml
 
-- name: "load docker, db and proxy for {{ application_id }}"
-  include_role: 
-    name: cmp-db-docker-proxy
-  vars:
-    docker_compose_flush_handlers: true
+- name: "Load the depdendencies required by '{{ application_id }}'"
+  include_tasks: 03_load_dependencies.yml
 
-- name: "Wait until Keycloak is reachable at {{ KEYCLOAK_SERVER_HOST_URL }}"
-  uri:
-    url: "{{ KEYCLOAK_MASTER_REALM_URL }}"
-    method: GET
-    status_code: 200
-    validate_certs: false
-  register: kc_up
-  retries: 30
+- name: "Wait until '{{ KEYCLOAK_CONTAINER }}' container is healthy"
+  community.docker.docker_container_info:
+    name: "{{ KEYCLOAK_CONTAINER }}"
+  register: kc_info
+  retries: 60
   delay: 5
-  until: kc_up.status == 200
+  until: >
+    kc_info is succeeded and
+    (kc_info.container | default({})) != {} and
+    (kc_info.container.State | default({})) != {} and
+    (kc_info.container.State.Health | default({})) != {} and
+    (kc_info.container.State.Health.Status | default('')) == 'healthy'
 
 - name: kcadm login (master)
-  no_log: true
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   shell: >
     {{ KEYCLOAK_EXEC_KCADM }} config credentials
     --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
@@ -33,19 +30,6 @@
     --user {{ KEYCLOAK_MASTER_API_USER_NAME }}
     --password {{ KEYCLOAK_MASTER_API_USER_PASSWORD }}
   changed_when: false
-
-- name: "Update REALM settings"
-  include_tasks: 02_update.yml
-  vars:
-    kc_object_kind:  "component"
-    kc_lookup_value: "{{ KEYCLOAK_LDAP_CMP_NAME }}"
-    kc_desired: >-
-      {{
-        KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.storage.UserStorageProvider']
-          | selectattr('providerId','equalto','ldap')
-          | list | first }}
-    kc_merge_path:   "config"
-  when: KEYCLOAK_LDAP_ENABLED | bool
 
 - name: "Update Client settings"
   vars:
@@ -59,6 +43,16 @@
       }}
     kc_force_attrs:
       frontchannelLogout: true
-      attributes: "{{ (KEYCLOAK_DICTIONARY_CLIENT.attributes | default({}))
-                      | combine({'frontchannel.logout.url': KEYCLOAK_FRONTCHANNEL_LOGOUT_URL}, recursive=True) }}"
-  include_tasks: 02_update.yml
+      attributes: >-
+        {{
+          ( (KEYCLOAK_DICTIONARY_REALM.clients
+              | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+              | list | first | default({}) ).attributes | default({}) )
+          | combine({'frontchannel.logout.url': KEYCLOAK_FRONTCHANNEL_LOGOUT_URL}, recursive=True)
+        }}
+  include_tasks: 03_update.yml
+
+- include_tasks: 04_rbac_client_scope.yml
+
+- include_tasks: 05_ldap.yml
+  when: KEYCLOAK_LDAP_ENABLED | bool
