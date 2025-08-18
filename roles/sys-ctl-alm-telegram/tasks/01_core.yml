@@ -11,6 +11,8 @@
 
 - include_role:
     name: sys-systemctl
+  vars:
+    systemctl_copy_files: true
 
 - name: install curl
   community.general.pacman:
