@@ -1,8 +1,8 @@
 #!/bin/bash
 # Pulls the remote backups from multiple hosts
-hosts="{{ rmt2loc_backup_providers | join(' ') }}";
+hosts="{{ DOCKER_BACKUP_REMOTE_2_LOCAL_BACKUP_PROVIDERS | join(' ') }}";
 errors=0
 for host in $hosts; do
-  bash {{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}svc-bkp-rmt-2-loc.sh $host || ((errors+=1));
+  bash {{ DOCKER_BACKUP_REMOTE_2_LOCAL_SCRIPT }} $host || ((errors+=1));
 done;
 exit $errors;

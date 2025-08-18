@@ -19,7 +19,7 @@
 - name: create svc-bkp-rmt-2-loc.sh
   copy:
     src: svc-bkp-rmt-2-loc.sh
-    dest: "{{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}svc-bkp-rmt-2-loc.sh"
+    dest: "{{ DOCKER_BACKUP_REMOTE_2_LOCAL_SCRIPT }}"
     mode: "0755"
 
 - include_role:
