@@ -1,2 +1,0 @@
-health_msmtp_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-hlth-msmtp/'
-

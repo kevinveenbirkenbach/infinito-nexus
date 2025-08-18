@@ -1,0 +1,40 @@
+
+# Services
+
+## Meta
+SYS_SERVICE_SUFFIX:         ".{{ SOFTWARE_NAME | lower }}.service"
+
+## Names
+SYS_SERVICE_ALARM_CMP:      "sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@.service"
+
+## Groups
+SYS_SERVICE_GROUP_BACKUPS: >
+  {{ (('sys-ctl-bkp-' | get_category_entries) + ('svc-bkp-' | get_category_entries))
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+
+SYS_SERVICE_GROUP_CLEANUP: >
+  {{ ('sys-ctl-cln-' | get_category_entries)
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+
+SYS_SERVICE_GROUP_REPAIR: >
+  {{ ('sys-ctl-rpr-' | get_category_entries)
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+
+SYS_SERVICE_GROUP_OPTIMIZATION: >
+  {{ ('svc-opt-' | get_category_entries)
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+
+SYS_SERVICE_GROUP_MAINTANANCE: >
+  {{ ('svc-mtn-' | get_category_entries)
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+ 
+## Collection of services to manipulate the system
+SYS_SERVICE_GROUP_MANIPULATION: >
+  {{ 
+    SYS_SERVICE_GROUP_BACKUPS + 
+    SYS_SERVICE_GROUP_CLEANUP + 
+    SYS_SERVICE_GROUP_REPAIR + 
+    SYS_SERVICE_GROUP_OPTIMIZATION + 
+    SYS_SERVICE_GROUP_MAINTANANCE +
+    [ 'update-docker' ]
+  }}

@@ -1,6 +1,0 @@
-- block:
-  - include_tasks: 01_core.yml
-  - name: run the cleanup_backups_timer tasks once
-    set_fact:
-      run_once_sys_cln_bkps_timer: true
-  when: run_once_sys_cln_bkps_timer is not defined

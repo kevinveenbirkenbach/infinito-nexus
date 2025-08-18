@@ -1,7 +1,0 @@
-[Unit]
-Description=Check nginx configuration status
-OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/python3 {{ health_nginx_folder }}sys-hlth-webserver.py

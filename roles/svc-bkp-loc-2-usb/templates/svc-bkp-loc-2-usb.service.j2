@@ -1,12 +1,12 @@
 [Unit]
 Description=Backup to USB when mounted to {{ backup_to_usb_mount }}
 Wants={{systemctl_mount_service_name}}
-OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
+OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
 
 [Service]
 Type=oneshot
 ExecStart=/bin/python {{ backup_to_usb_script_path }} {{backup_to_usb_source}} {{backup_to_usb_destination}}
-ExecStartPost=/bin/systemctl start sys-cln-backups{{ SYS_SERVICE_SUFFIX }}
+ExecStartPost=/bin/systemctl start sys-ctl-cln-backups{{ SYS_SERVICE_SUFFIX }}
 
 [Install]
 WantedBy=multi-user.target

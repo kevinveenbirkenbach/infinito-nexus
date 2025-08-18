@@ -22,7 +22,7 @@ This Ansible role manages the configuration of `systemd-journald` on target host
 
 - Customizable retention and runtime limits  
 - Seamless restarts on config update  
-- Integration with `sys-hlth-journalctl` for downstream monitoring
+- Integration with `sys-ctl-hlth-journalctl` for downstream monitoring
 
 ## Usage
 

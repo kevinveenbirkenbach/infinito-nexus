@@ -1,8 +1,0 @@
-[Unit]
-Description=Check for CSP-blocked resources via Puppeteer
-OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/python3 {{ health_csp_crawler_script }} \
-  --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}

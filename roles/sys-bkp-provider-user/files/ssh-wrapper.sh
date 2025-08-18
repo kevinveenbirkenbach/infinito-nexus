@@ -12,8 +12,8 @@ hashed_machine_id="$($get_hashed_machine_id | head -c 64)"
 get_backup_types="find /Backups/$hashed_machine_id/ -maxdepth 1 -type d -execdir basename {} ;";
 
 
-# @todo This configuration is not scalable yet. If other backup services then sys-bkp-docker-2-loc are integrated, this logic needs to be optimized
-get_version_directories="ls -d /Backups/$hashed_machine_id/sys-bkp-docker-2-loc/*"
+# @todo This configuration is not scalable yet. If other backup services then sys-ctl-bkp-docker-2-loc are integrated, this logic needs to be optimized
+get_version_directories="ls -d /Backups/$hashed_machine_id/sys-ctl-bkp-docker-2-loc/*"
 last_version_directory="$($get_version_directories | tail -1)"
 rsync_command="sudo rsync --server --sender -blogDtpre.iLsfxCIvu . $last_version_directory/"
 

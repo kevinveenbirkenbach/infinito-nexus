@@ -17,32 +17,24 @@ class TestGetEntityNameFilter(unittest.TestCase):
         categories = {
             'roles': {
                 'web': {
-                    'app': {
-                        'title': "Applications",
-                        'invokable': True
-                    },
-                    'svc': {
-                        'title': "Services",
-                        'invokable': True
-                    }
+                'app': {'title': "Applications", 'invokable': True},
+                'svc': {'title': "Services",     'invokable': True},
                 },
                 'util': {
-                    'desk': {
-                        'dev': {
-                            'title': "Dev Utilities",
-                            'invokable': True
-                        }
-                    }
+                'desk': {
+                    'dev': {'title': "Dev Utilities", 'invokable': True}
+                }
                 },
                 'sys': {
-                    'bkp': {
-                        'title': "Backup",
-                        'invokable': True
-                    },
-                    'hlth': {
-                        'title': "Health",
-                        'invokable': True
-                    }
+                'ctl': {
+                    'bkp':  {'title': "Backup",  'invokable': True},
+                    'hlth': {'title': "Health",  'invokable': True},
+                },
+                # falls du 'core' o. ä. brauchst, hier ergänzen
+                },
+                # 'svc' ist in deinem echten Baum top-level, nicht unter 'sys'
+                'svc': {
+                'db': {'title': "Databases", 'invokable': True}
                 }
             }
         }
@@ -77,10 +69,10 @@ class TestGetEntityNameFilter(unittest.TestCase):
         self.assertEqual(self.get_entity_name("util-desk-dev-shell"), "shell")
 
     def test_entity_name_sys_bkp(self):
-        self.assertEqual(self.get_entity_name("sys-bkp-directory-validator"), "directory-validator")
+        self.assertEqual(self.get_entity_name("sys-ctl-bkp-directory-validator"), "directory-validator")
 
     def test_entity_name_sys_hlth(self):
-        self.assertEqual(self.get_entity_name("sys-hlth-btrfs"), "btrfs")
+        self.assertEqual(self.get_entity_name("sys-ctl-hlth-btrfs"), "btrfs")
 
     def test_no_category_match(self):
         # Unknown category, should return input

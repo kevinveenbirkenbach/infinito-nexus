@@ -1,0 +1,1 @@
+health_nginx_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-ctl-hlth-webserver/'

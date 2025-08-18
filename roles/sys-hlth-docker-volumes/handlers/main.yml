@@ -1,5 +1,0 @@
-- name: "reload sys-hlth-docker-volumes service"
-  systemd:
-    name: sys-hlth-docker-volumes{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

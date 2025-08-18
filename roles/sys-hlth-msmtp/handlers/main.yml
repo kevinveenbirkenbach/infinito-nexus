@@ -1,5 +1,0 @@
-- name: reload sys-hlth-msmtp service
-  systemd:
-    name: sys-hlth-msmtp{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

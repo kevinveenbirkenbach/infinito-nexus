@@ -1,0 +1,34 @@
+- block:
+  - name: Include dependency 'sys-ctl-alm-compose'
+    include_role:
+      name: sys-ctl-alm-compose
+    when: run_once_sys_ctl_alm_compose is not defined
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_ctl_hlth_disc_space is not defined
+
+- name: "create {{health_disc_space_folder}}"
+  file:
+    path: "{{health_disc_space_folder}}"
+    state: directory
+    mode: "0755"
+
+- name: create sys-ctl-hlth-disc-space.sh
+  copy:
+    src: sys-ctl-hlth-disc-space.sh
+    dest: "{{health_disc_space_folder}}sys-ctl-hlth-disc-space.sh"
+
+- name: create sys-ctl-hlth-disc-space{{ SYS_SERVICE_SUFFIX }}
+  template:
+    src: sys-ctl-hlth-disc-space.service.j2
+    dest: /etc/systemd/system/sys-ctl-hlth-disc-space{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-ctl-hlth-disc-space service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{ service_name }}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{SYS_SCHEDULE_HEALTH_DISC_SPACE}}"

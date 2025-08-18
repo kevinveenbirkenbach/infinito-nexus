@@ -1,0 +1,4 @@
+- name: "restart sys-ctl-alm-email service"
+  systemd:
+    name: sys-ctl-alm-email{{ SYS_SERVICE_SUFFIX }}
+    daemon_reload: yes

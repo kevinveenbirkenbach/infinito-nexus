@@ -1,0 +1,30 @@
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - sys-svc-certbot
+  - srv-web-7-4-core
+  - sys-ctl-alm-compose
+
+- name: install certbot
+  community.general.pacman:
+    name:
+    - certbot-nginx
+    state: present
+
+- name: configure sys-ctl-mtn-cert-renew service
+  template:
+    src: sys-ctl-mtn-cert-renew.service.j2
+    dest: /etc/systemd/system/sys-ctl-mtn-cert-renew{{ SYS_SERVICE_SUFFIX }}
+  notify: reload certbot service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{ service_name }}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_RENEW }}"
+    persistent: "true"

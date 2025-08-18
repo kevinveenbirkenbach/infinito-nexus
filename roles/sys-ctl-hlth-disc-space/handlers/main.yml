@@ -1,0 +1,5 @@
+- name: "reload sys-ctl-hlth-disc-space service"
+  systemd:
+    name: sys-ctl-hlth-disc-space{{ SYS_SERVICE_SUFFIX }}
+    enabled: yes
+    daemon_reload: yes

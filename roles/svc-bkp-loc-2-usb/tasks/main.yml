@@ -3,7 +3,7 @@
     include_role:
       name: '{{ item }}'
     loop:
-    - sys-cln-bkps-service
+    - sys-ctl-cln-bkps
     - sys-lock
   - include_tasks: utils/run_once.yml
   when: run_once_svc_bkp_loc_2_usb is not defined

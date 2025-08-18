@@ -1,3 +1,0 @@
-health_csp_crawler_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-hlth-csp/'
-health_csp_crawler_script: '{{ health_csp_crawler_folder }}sys-hlth-csp.py'
-

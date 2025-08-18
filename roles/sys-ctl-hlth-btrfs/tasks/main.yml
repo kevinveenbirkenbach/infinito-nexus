@@ -1,0 +1,36 @@
+- block:
+
+  - name: Include dependency 'sys-ctl-alm-compose'
+    include_role:
+      name: sys-ctl-alm-compose
+    when: run_once_sys_ctl_alm_compose is not defined
+
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_ctl_hlth_btrfs is not defined
+
+- name: "create {{docker_health_btrfs_folder}}"
+  file:
+    path: "{{docker_health_btrfs_folder}}"
+    state: directory
+    mode: "0755"
+
+- name: create sys-ctl-hlth-btrfs.sh
+  copy:
+    src: sys-ctl-hlth-btrfs.sh
+    dest: "{{docker_health_btrfs_folder}}sys-ctl-hlth-btrfs.sh"
+
+- name: create sys-ctl-hlth-btrfs{{ SYS_SERVICE_SUFFIX }}
+  template:
+    src: sys-ctl-hlth-btrfs.service.j2
+    dest: /etc/systemd/system/sys-ctl-hlth-btrfs{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-ctl-hlth-btrfs service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{ service_name }}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{SYS_SCHEDULE_HEALTH_BTRFS}}"

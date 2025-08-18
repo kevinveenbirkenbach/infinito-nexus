@@ -1,0 +1,37 @@
+- block:
+  - name: Include dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - sys-ctl-alm-compose
+    - sys-lock
+    - sys-rst-daemon
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_ctl_cln_disc_space is not defined
+  
+- name: "create {{cleanup_disc_space_folder}}"
+  file:
+    path: "{{cleanup_disc_space_folder}}"
+    state: directory
+    mode: "0755"
+
+- name: create sys-ctl-cln-disc-space.sh
+  template:
+    src: sys-ctl-cln-disc-space.sh.j2
+    dest: "{{cleanup_disc_space_folder}}sys-ctl-cln-disc-space.sh"
+
+- name: create sys-ctl-cln-disc-space{{ SYS_SERVICE_SUFFIX }}
+  template:
+    src: sys-ctl-cln-disc-space.service.j2
+    dest: /etc/systemd/system/sys-ctl-cln-disc-space{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-ctl-cln-disc-space service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{ service_name }}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{SYS_SCHEDULE_CLEANUP_DISC_SPACE}}"

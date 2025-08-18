@@ -26,8 +26,8 @@
   include_role:
     name: "{{ item }}"
   loop:
-    - sys-hlth-webserver
-    - sys-hlth-csp
+    - sys-ctl-hlth-webserver
+    - sys-ctl-hlth-csp
   vars:
     # Extra flush is for performance reasons not necessary
     flush_handlers: false

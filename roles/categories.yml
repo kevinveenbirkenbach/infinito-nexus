@@ -1,4 +1,14 @@
 roles:
+  cmp:
+    title: "Compositions"
+    description: "Composition of other roles."
+    icon: "fas fa-sitemap"
+    invokable: false
+  docker:
+    title: "Docker Toolkit"
+    description: "Generic Docker helpers and utilities (compose wrappers, container tooling)."
+    icon: "fas fa-docker"
+    invokable: false
   dev:
     title:  "Software Development Utilties"
     invokable: false
@@ -6,41 +16,61 @@ roles:
     title: "System"
     description: "System near components. Will be automaticly called if necessary from other roles."
     invokable: false
-    alm:
-      title: "Alerting"
-      description: "Notification handlers for system events"
-      icon: "fas fa-bell"
+    ctl:
+      title: "Control"
+      description: "Control layer for system lifecycle management—handling cleanup, monitoring, backups, alerting, maintenance, and repair tasks."
+      icon: "fas fa-cogs"
       invokable: false
-    cln:
-      title: "Cleanup"
-      description: "Roles for cleaning up various system resources—old backups, unused certificates, temporary files, Docker volumes, disk caches, deprecated domains, and more."
-      icon: "fas fa-trash-alt"
-      invokable: false
-    hlth:
-      title: "Monitoring"
-      description: "Roles for system monitoring and health checks—encompassing bot-style automated checks and core low-level monitors for logs, containers, disk usage, and more."
-      icon: "fas fa-chart-area"
-      invokable: false
-    bkp:
-      title: "Backup & Restore"
-      description: "Backup strategies & restore procedures"
-      icon: "fas fa-hdd"
+      cln:
+        title: "Cleanup"
+        description: "Roles for cleaning up various system resources—old backups, unused certificates, temporary files, Docker volumes, disk caches, deprecated domains, and more."
+        icon: "fas fa-trash-alt"
+        invokable: false
+      hlth:
+        title: "Monitoring"
+        description: "Roles for system monitoring and health checks—encompassing bot-style automated checks and core low-level monitors for logs, containers, disk usage, and more."
+        icon: "fas fa-chart-area"
+        invokable: false
+      bkp:
+        title: "Backup & Restore"
+        description: "Backup strategies & restore procedures"
+        icon: "fas fa-hdd"
+        invokable: false
+      alm:
+        title: "Alerting"
+        description: "Notification handlers for system events"
+        icon: "fas fa-bell"
+        invokable: false
+      mtn:
+        title: "Maintenance"
+        description: "Maintenance roles for certificates, system upkeep, and recurring operational tasks."
+        icon: "fas fa-tools"
+        invokable: false
+      rpr:
+        title: "Repair"
+        description: "Repair and recovery roles—handling hard/soft recovery of Docker, Btrfs balancers, and other low-level system fixes."
+        icon: "fas fa-wrench"
+        invokable: false
+    dns:
+      title: "DNS Automation"
+      description: "DNS providers, records, and rDNS management (Cloudflare, Hetzner, etc.)."
+      icon: "fas fa-network-wired"
       invokable: false
   update:
     title: "Updates & Package Management"
     description: "OS & package updates"
     icon: "fas fa-sync"
     invokable: true
+    pkgmgr:
+      title: "Package Manager Helpers"
+      description: "Helpers for package managers and unified install flows."
+      icon: "fas fa-box-open"
+      invokable: false
   drv:
     title: "Drivers"
     description: "Roles for installing and configuring hardware drivers—covering printers, graphics, input devices, and other peripheral support."
     icon: "fas fa-microchip"
     invokable: true
-#  core:
-#    title: "Core & System"
-#    description: "Fundamental system configuration"
-#    icon: "fas fa-cogs"
-#    invokable: true
   gen:
     title: "Generic"
     description: "Helper roles & installers (git, locales, timer, etc.)"
@@ -66,6 +96,11 @@ roles:
       description: "Utility roles for server-side configuration and management—covering corporate identity provisioning, network helpers, and other service-oriented toolkits."
       icon: "fas fa-cogs"
       invokable: true
+    dev:
+      title: "Developer Utilities"
+      description: "Developer-centric server utilities and admin toolkits."
+      icon: "fas fa-code"
+      invokable: false
   srv:
     title: "Server"
     description: "General server roles for provisioning and managing server infrastructure—covering web servers, proxy servers, network services, and other backend components."

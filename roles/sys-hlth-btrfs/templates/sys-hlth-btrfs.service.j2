@@ -1,7 +1,0 @@
-[Unit]
-Description=Check btrfs status
-OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash {{docker_health_btrfs_folder}}sys-hlth-btrfs.sh

@@ -9,7 +9,7 @@ nextcloud_system_config:
 
   - parameter: "maintenance_window_start"
     type: "integer"
-    value: "{{ on_calendar_nextcloud }}"
+    value: "{{ SYS_SCHEDULE_MAINTANANCE_NEXTCLOUD }}"
 
   - parameter: "default_phone_region"
     value: "{{ HOST_LL | upper }}"

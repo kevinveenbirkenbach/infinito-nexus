@@ -4,6 +4,6 @@
       name: '{{ item }}'
     loop:
     - sys-bkp-provider-user
-    - sys-cln-bkps-timer
+    - sys-timer-cln-bkps
   - include_tasks: utils/run_once.yml
   when: run_once_sys_bkp_provider is not defined

@@ -19,7 +19,7 @@ class TestCreateDockerRoleCLI(unittest.TestCase):
         # Temporary directory for YAML files and templates
         self.tmpdir = tempfile.mkdtemp()
         self.ports_file = os.path.join(self.tmpdir, '09_ports.yml')
-        self.networks_file = os.path.join(self.tmpdir, '10_networks.yml')
+        self.networks_file = os.path.join(self.tmpdir, '09_networks.yml')
 
     def tearDown(self):
         shutil.rmtree(self.tmpdir)

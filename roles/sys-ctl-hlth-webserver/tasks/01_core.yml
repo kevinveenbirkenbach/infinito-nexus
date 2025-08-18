@@ -1,0 +1,41 @@
+- block:
+  - name: Include dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - dev-python-pip
+    - sys-ctl-alm-compose
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_ctl_hlth_webserver is not defined
+
+- name: Install required Python modules
+  community.general.pacman:
+    name: python-requests
+    state: present
+
+- name: "create {{ health_nginx_folder }}"
+  file:
+    path: "{{ health_nginx_folder }}"
+    state: directory
+    mode: "0755"
+
+- name: create sys-ctl-hlth-webserver.py
+  template:
+    src: sys-ctl-hlth-webserver.py.j2
+    dest: "{{ health_nginx_folder }}sys-ctl-hlth-webserver.py"
+
+- name: create sys-ctl-hlth-webserver{{ SYS_SERVICE_SUFFIX }}
+  template:
+    src: sys-ctl-hlth-webserver.service.j2
+    dest: /etc/systemd/system/sys-ctl-hlth-webserver{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-ctl-hlth-webserver service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{ service_name }}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{SYS_SCHEDULE_HEALTH_NGINX}}"

@@ -18,12 +18,12 @@ When enabled via `MODE_CLEANUP` or `MODE_RESET`, it will automatically prune unu
 
 - **Integrated Dependencies**  
   Includes backup, repair, and health check sub-roles:
-  - `sys-bkp-docker-2-loc`
+  - `sys-ctl-bkp-docker-2-loc`
   - `user-administrator`
-  - `sys-hlth-docker-container`
-  - `sys-hlth-docker-volumes`
-  - `sys-rpr-docker-soft`
-  - `sys-rpr-docker-hard`
+  - `sys-ctl-hlth-docker-container`
+  - `sys-ctl-hlth-docker-volumes`
+  - `sys-ctl-rpr-docker-soft`
+  - `sys-ctl-rpr-docker-hard`
 
 - **Cleanup & Reset Modes**  
   - `MODE_CLEANUP`: Removes unused Docker containers, networks, images, and volumes.  

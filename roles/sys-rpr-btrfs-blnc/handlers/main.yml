@@ -1,4 +1,0 @@
-- name: "reload sys-rpr-btrfs-blnc service"
-  systemd:
-    name: sys-rpr-btrfs-blnc{{ SYS_SERVICE_SUFFIX }}
-    daemon_reload: yes

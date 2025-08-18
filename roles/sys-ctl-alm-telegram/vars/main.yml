@@ -1,0 +1,2 @@
+systemd_telegram_folder: /opt/ansible-roles/sys-ctl-alm-telegram/
+systemd_telegram_script: '{{systemd_telegram_folder}}sys-ctl-alm-telegram.sh'

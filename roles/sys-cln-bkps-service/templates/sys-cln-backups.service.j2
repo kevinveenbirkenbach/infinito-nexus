@@ -1,8 +1,0 @@
-[Unit]
-Description=delete old backups
-OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore {{system_maintenance_cleanup_services| join(' ') }} --timeout "{{ system_maintenance_lock_timeout_backup_services }}"'
-ExecStart=/bin/sh -c '/usr/bin/python {{cleanup_backups_directory}}sys-cln-backups.py --backups-folder-path {{backups_folder_path}} --maximum-backup-size-percent {{size_percent_maximum_backup}}'

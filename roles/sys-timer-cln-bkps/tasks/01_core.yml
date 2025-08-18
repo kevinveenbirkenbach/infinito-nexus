@@ -1,0 +1,16 @@
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - sys-ctl-cln-bkps
+  - sys-rst-daemon
+
+- name: set service_name to sys-ctl-cln-backups
+  set_fact:
+    service_name: "sys-ctl-cln-backups"
+
+- name: "include role for sys-timer for {{ service_name }}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{SYS_SCHEDULE_CLEANUP_BACKUPS}}"

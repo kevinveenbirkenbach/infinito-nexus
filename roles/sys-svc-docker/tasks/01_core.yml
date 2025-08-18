@@ -18,8 +18,8 @@
   include_role:
     name: "{{ item }}"
   loop:
-    - sys-bkp-docker-2-loc
-    - sys-hlth-docker-container
-    - sys-hlth-docker-volumes
-    - sys-rpr-docker-soft
-    - sys-rpr-docker-hard
+    - sys-ctl-bkp-docker-2-loc
+    - sys-ctl-hlth-docker-container
+    - sys-ctl-hlth-docker-volumes
+    - sys-ctl-rpr-docker-soft
+    - sys-ctl-rpr-docker-hard

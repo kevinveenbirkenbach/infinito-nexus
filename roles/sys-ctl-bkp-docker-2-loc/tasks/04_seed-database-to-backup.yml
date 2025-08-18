@@ -1,0 +1,68 @@
+- include_tasks: 02_pkgmgr_routines.yml
+  when: backup_docker_to_local_folder is not defined
+
+- name: "Display all database variables"
+  debug:
+    msg: |
+      database_application_id: "{{ database_application_id | default('undefined') }}"
+      database_instance: "{{ database_instance | default('undefined') }}"
+      database_name: "{{ database_name | default('undefined') }}"
+      database_type: "{{ database_type | default('undefined') }}"
+      database_host: "{{ database_host | default('undefined') }}"
+      database_username: "{{ database_username | default('undefined') }}"
+      database_password: "{{ database_password | default('undefined') }}"
+  when: MODE_DEBUG | bool
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "fail if not all required database variables are defined"
+  fail:
+    msg: "You must define all of the following variables: database_instance, database_name, database_username, database_password"
+  when: >
+    (database_instance is defined or
+     database_name is defined or
+     database_username is defined or
+     database_password is defined) and not
+    (database_instance is defined and
+     database_name is defined and
+     database_username is defined and
+     database_password is defined)
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "seed database values in directory {{ backup_docker_to_local_folder }}"
+  command: >
+    python database_entry_seeder.py databases.csv
+    "{{ database_instance }}"
+    "{{ database_name }}"
+    "{{ database_username }}"
+    "{{ database_password }}"
+  args:
+    chdir: "{{ backup_docker_to_local_folder }}"
+  when:
+    - database_instance is defined
+    - database_name is defined
+    - database_username is defined
+    - database_password is defined
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- name: Set file permissions for databases.csv to be readable, writable, and executable by root only
+  ansible.builtin.file:
+    path: "{{ backup_docker_to_local_folder }}databases.csv"
+    mode: '0700'
+    owner: root
+    group: root
+  when: >
+    (database_instance is defined and
+    database_name is defined and
+    database_username is defined and
+    database_password is defined) and
+    run_once_sys_ctl_bkp_docker_2_loc_file_permission is not defined
+  register: file_permission_result
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- name: run the backup_docker_to_local_file_permission tasks once
+  set_fact:
+    run_once_sys_ctl_bkp_docker_2_loc_file_permission: true
+  when: run_once_sys_ctl_bkp_docker_2_loc_file_permission is not defined and file_permission_result is defined and file_permission_result.changed

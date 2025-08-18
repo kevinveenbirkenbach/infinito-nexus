@@ -1,7 +1,0 @@
-[Unit]
-Description=Check msmtp liveliness
-OnFailure=sys-alm-telegram.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash {{ health_msmtp_folder }}sys-hlth-msmtp.sh

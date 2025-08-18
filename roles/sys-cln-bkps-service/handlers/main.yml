@@ -1,5 +1,0 @@
-- name: "reload sys-cln-backups service"
-  systemd:
-    name: sys-cln-backups{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

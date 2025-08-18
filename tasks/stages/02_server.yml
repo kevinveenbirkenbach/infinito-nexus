@@ -7,10 +7,10 @@
     - user-root
     - sys-svc-sshd
     - sys-svc-journalctl
-    - sys-hlth-disc-space
-    - sys-cln-disc-space
-    - sys-hlth-btrfs
-    - sys-rpr-btrfs-blnc
+    - sys-ctl-hlth-disc-space
+    - sys-ctl-cln-disc-space
+    - sys-ctl-hlth-btrfs
+    - sys-ctl-rpr-btrfs-balancer
 
 # It is necessary to setup Matomo first, because all other web apps need it if matomo is activated
 - name: setup web-app-matomo

@@ -10,4 +10,4 @@
   when: applications | get_app_conf(application_id, 'features.central_database', False)
 
 - name: "include 04_seed-database-to-backup.yml"
-  include_tasks: "{{ playbook_dir }}/roles/sys-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"
+  include_tasks: "{{ playbook_dir }}/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"

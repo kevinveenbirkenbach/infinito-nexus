@@ -1,5 +1,0 @@
-- name: "reload sys-hlth-webserver service"
-  systemd:
-    name: sys-hlth-webserver{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

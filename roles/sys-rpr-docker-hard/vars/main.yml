@@ -1,3 +1,0 @@
-restart_docker_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-rpr-docker-hard/'
-restart_docker_script: '{{restart_docker_folder}}sys-rpr-docker-hard.py'
-

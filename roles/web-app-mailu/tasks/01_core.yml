@@ -17,7 +17,7 @@
 
   - name: "Include Cert deploy service for '{{ role_name }}'"
     include_role:
-      name: sys-svc-cert-sync-docker
+      name: sys-ctl-mtn-cert-deploy
   vars:
     domain: "{{ MAILU_HOSTNAME }}"
 

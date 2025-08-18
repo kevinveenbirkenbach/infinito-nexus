@@ -1,8 +1,8 @@
 - block:
-  - name: Include dependency 'sys-hlth-journalctl'
+  - name: Include dependency 'sys-ctl-hlth-journalctl'
     include_role:
-      name: sys-hlth-journalctl
-    when: run_once_sys_hlth_journalctl is not defined
+      name: sys-ctl-hlth-journalctl
+    when: run_once_sys_ctl_hlth_journalctl is not defined
   - include_tasks: utils/run_once.yml
   when: run_once_sys_svc_journalctl is not defined
 

@@ -1,0 +1,7 @@
+[Unit]
+Description=Let's Encrypt deploy to {{ docker_compose.directories.instance }}
+OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
+
+[Service]
+Type=oneshot
+ExecStart={{ PATH_ADMINISTRATOR_SCRIPTS }}/{{ CERT_SYNC_DOCKER_SCRIPT_FILE }} {{ ssl_cert_folder }} {{ docker_compose.directories.instance }} {{ LETSENCRYPT_LIVE_PATH }}

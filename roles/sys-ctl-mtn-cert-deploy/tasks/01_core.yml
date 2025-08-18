@@ -1,0 +1,13 @@
+- name: Include dependency 'sys-ctl-alm-compose'
+  include_role:
+    name: sys-ctl-alm-compose
+  when: run_once_sys_ctl_alm_compose is not defined
+
+- name: "Install '{{ CERT_SYNC_DOCKER_SCRIPT_FILE }}'"
+  ansible.builtin.copy:
+    src:  "{{ CERT_SYNC_DOCKER_SCRIPT_FILE }}"
+    dest: "{{ CERT_SYNC_DOCKER_SCRIPT_PATH }}"
+    mode: "0755"
+    owner: root
+    group: root
+  notify: restart tls deploy to docker service

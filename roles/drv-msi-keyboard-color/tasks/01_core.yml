@@ -2,7 +2,7 @@
     name: '{{ item }}'
   loop:
   - dev-yay
-  - sys-alm-compose
+  - sys-ctl-alm-compose
 
 - name: Install MSI packages
   kewlfft.aur.aur:
@@ -34,5 +34,5 @@
   include_role:
     name: sys-timer
   vars:
-    on_calendar: "{{on_calendar_msi_keyboard_color}}"
+    on_calendar: "{{SYS_SCHEDULE_ANIMATION_KEYBOARD_COLOR}}"
     persistent: "true"

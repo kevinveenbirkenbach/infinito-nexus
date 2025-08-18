@@ -1,0 +1,4 @@
+- name: "reload sys-ctl-rpr-btrfs-balancer service"
+  systemd:
+    name: sys-ctl-rpr-btrfs-balancer{{ SYS_SERVICE_SUFFIX }}
+    daemon_reload: yes

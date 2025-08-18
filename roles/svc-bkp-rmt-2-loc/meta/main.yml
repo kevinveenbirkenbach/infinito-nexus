@@ -23,5 +23,5 @@ galaxy_info:
   issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
 dependencies:
-- sys-cln-bkps-timer
-- sys-cln-faild-bkps
+- sys-timer-cln-bkps
+- sys-ctl-cln-faild-bkps

@@ -1,0 +1,7 @@
+[Unit]
+Description=Checking docker health
+OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash {{ health_docker_volumes_folder }}sys-ctl-hlth-docker-volumes.sh "{{ DOCKER_WHITELISTET_ANON_VOLUMES | join(' ') }}"

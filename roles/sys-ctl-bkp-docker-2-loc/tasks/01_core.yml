@@ -1,0 +1,37 @@
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - sys-bkp-provider
+  - sys-ctl-alm-compose
+  - sys-lock
+  - sys-svc-directory-validator
+
+- include_tasks: 02_pkgmgr_routines.yml
+  when: backup_docker_to_local_folder is not defined
+
+- name: "reset (if enabled)"
+  include_tasks: 03_reset.yml
+  when: MODE_RESET | bool
+
+- name: "setup '{{ BKP_DOCKER_2_LOC_SERVICE_ALL }}'"
+  template:
+    src: "{{ role_name }}-everything.service.j2"
+    dest: /etc/systemd/system/{{ BKP_DOCKER_2_LOC_SERVICE_ALL }}
+  notify: reload backup docker to local (all) service
+
+- name: "setup '{{ BKP_DOCKER_2_LOC_SERVICE }}'"
+  template:
+    src: "{{ role_name }}.service.j2"
+    dest: /etc/systemd/system/{{ BKP_DOCKER_2_LOC_SERVICE }}
+  notify: reload backup docker to local service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{ service_name }}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL}}"

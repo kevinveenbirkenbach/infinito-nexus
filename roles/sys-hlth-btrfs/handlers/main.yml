@@ -1,5 +1,0 @@
-- name: "reload sys-hlth-btrfs service"
-  systemd:
-    name: sys-hlth-btrfs{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

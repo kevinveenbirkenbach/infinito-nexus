@@ -1,0 +1,32 @@
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - dev-python-pip
+  - sys-ctl-alm-compose
+  - sys-lock
+  - sys-rst-daemon
+
+- name: install lsof and python-psutil
+  community.general.pacman:
+    name:
+    - lsof
+    - python-psutil
+    state: present
+
+- name: "create {{cleanup_backups_directory}}"
+  file:
+    path: "{{cleanup_backups_directory}}"
+    state: directory
+    mode: "0755"
+
+- name: create sys-ctl-cln-backups.py
+  copy:
+    src: "sys-ctl-cln-backups.py"
+    dest: "{{cleanup_backups_directory}}sys-ctl-cln-backups.py"
+
+- name: create sys-ctl-cln-backups{{ SYS_SERVICE_SUFFIX }}
+  template:
+    src: "sys-ctl-cln-backups.service.j2"
+    dest: "/etc/systemd/system/sys-ctl-cln-backups{{ SYS_SERVICE_SUFFIX }}"
+  notify: reload sys-ctl-cln-backups service

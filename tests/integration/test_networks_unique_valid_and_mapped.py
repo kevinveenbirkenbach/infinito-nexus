@@ -7,10 +7,10 @@ import ipaddress
 class TestNetworksUniqueValidAndMapped(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # locate group_vars/all/10_networks.yml
+        # locate group_vars/all/09_networks.yml
         base_dir = os.path.dirname(__file__)
         cls.networks_file = os.path.abspath(
-            os.path.join(base_dir, '..', '..', 'group_vars', 'all', '10_networks.yml')
+            os.path.join(base_dir, '..', '..', 'group_vars', 'all', '09_networks.yml')
         )
         if os.path.isfile(cls.networks_file):
             with open(cls.networks_file, 'r', encoding='utf-8') as f:
@@ -28,7 +28,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
     def test_unique_and_non_overlapping_subnets(self):
         """Ensure that all subnets are valid, unique and do not overlap."""
         if self.networks_data is None:
-            self.skipTest("10_networks.yml not found, skipping subnet validation.")
+            self.skipTest("09_networks.yml not found, skipping subnet validation.")
 
         # extract all named subnets under defaults_networks.local
         local = self.networks_data.get('defaults_networks', {}).get('local', {})
@@ -73,7 +73,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
         matches an application_id in some roles/*/vars/main.yml.
         """
         if self.networks_data is None:
-            self.skipTest("10_networks.yml not found, skipping application_id mapping check.")
+            self.skipTest("09_networks.yml not found, skipping application_id mapping check.")
 
         # collect network names
         local = self.networks_data.get('defaults_networks', {}).get('local', {})

@@ -1,0 +1,7 @@
+[Unit]
+Description=checking journalctl health
+OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash {{health_journalctl_folder}}sys-ctl-hlth-journalctl.sh

@@ -1,8 +1,8 @@
 [Unit]
 Description=Updates Docker Instances
-OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
+OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore {{system_maintenance_cleanup_services | join(' ') }} update-docker --timeout "{{system_maintenance_lock_timeout_heal_docker}}"'
+ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{SYS_SERVICE_GROUP_CLEANUP | join(' ') }} update-docker --timeout "{{SYS_TIMEOUT_HEAL_DOCKER}}"'
 ExecStart=/bin/sh -c '/usr/bin/python {{update_docker_script}} {{ PATH_DOCKER_COMPOSE_INSTANCES }}'

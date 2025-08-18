@@ -1,0 +1,7 @@
+[Unit]
+Description=auto balance btrfs
+OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'btrfs-auto-balancer 90 10'

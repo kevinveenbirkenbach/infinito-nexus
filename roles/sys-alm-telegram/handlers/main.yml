@@ -1,4 +1,0 @@
-- name: "restart sys-alm-telegram service"
-  systemd:
-    name: sys-alm-telegram{{ SYS_SERVICE_SUFFIX }}
-    daemon_reload: yes

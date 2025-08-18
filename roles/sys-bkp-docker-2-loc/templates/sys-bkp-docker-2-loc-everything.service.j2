@@ -1,9 +1,0 @@
-[Unit]
-Description=backup all docker volumes to local folder
-OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service sys-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
-
-[Service]
-Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore {{ system_maintenance_backup_services | reject('equalto', role_name ) | join(' ') }} --timeout "{{ system_maintenance_lock_timeout_backup_services }}"'
-ExecStart=/bin/sh -c '{{ BKP_DOCKER_2_LOC_EXEC }} --everything'
-ExecStartPost=/bin/sh -c '/bin/systemctl start sys-rpr-docker-soft{{ SYS_SERVICE_SUFFIX }} &'

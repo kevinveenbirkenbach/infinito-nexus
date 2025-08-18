@@ -1,5 +1,0 @@
-- name: "reload sys-hlth-journalctl service"
-  systemd:
-    name: sys-hlth-journalctl{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

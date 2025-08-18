@@ -1,0 +1,7 @@
+[Unit]
+Description=Checking docker health
+OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash {{health_docker_container_folder}}sys-ctl-hlth-docker-container.sh

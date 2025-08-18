@@ -4,7 +4,7 @@
       name: '{{ item }}'
     loop:
     - srv-web-7-4-core
-    - sys-cln-domains
+    - sys-ctl-cln-domains
     - srv-web-7-7-letsencrypt
   - include_tasks: utils/run_once.yml
   when: run_once_srv_web_7_6_https is not defined

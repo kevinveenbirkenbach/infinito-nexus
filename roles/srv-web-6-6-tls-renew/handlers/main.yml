@@ -1,6 +1,0 @@
-- name: "reload certbot service"
-  systemd:
-    name: srv-web-6-6-tls-renew{{ SYS_SERVICE_SUFFIX }}
-    state: reloaded
-    enabled: yes
-    daemon_reload: yes

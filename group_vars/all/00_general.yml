@@ -1,6 +1,8 @@
 SOFTWARE_NAME:            "Infinito.Nexus"  # Name of the software
 
+# Deployment
 ENVIRONMENT:              "production"      # Possible values: production, development
+DEPLOYMENT_MODE:          "single"          # Use single, if you deploy on one server. Use cluster if you setup in cluster mode.
 
 # If true, sensitive credentials will be masked or hidden from all Ansible task logs
 # Recommendet to set to true
@@ -20,26 +22,12 @@ HOST_TIME_FORMAT:         "HH:mm"
 HOST_THOUSAND_SEPARATOR:  "."
 HOST_DECIMAL_MARK:        ","
 
-# Deployment mode
-DEPLOYMENT_MODE:        "single"      # Use single, if you deploy on one server. Use cluster if you setup in cluster mode.
-
 # Web
 WEB_PROTOCOL:           "https"       # Web protocol type. Use https or http. If you run local you need to change it to http
 WEB_PORT:               "{{ 443 if WEB_PROTOCOL == 'https' else 80 }}"  # Default port web applications will listen to
 
 # Domain
 PRIMARY_DOMAIN:         "localhost" # Primary Domain of the server
-
-# Server Tact Variables 
-
-## Ours in which the server is "awake" (100% working). Rest of the time is reserved for maintanance
-HOURS_SERVER_AWAKE:                       "0..23"
-
-## Random delay for systemd timers to avoid peak loads.
-RANDOMIZED_DELAY_SEC:                     "5min"
-
-# Runtime Variables for Process Control
-ACTIVATE_ALL_TIMERS:                      false   # Activates all timers, independend if the handlers had been triggered
 
 DNS_PROVIDER:                             cloudflare              # The DNS Provider\Registrar for the domain
 
@@ -52,18 +40,15 @@ CERTBOT_CREDENTIALS_FILE:                 "{{ CERTBOT_CREDENTIALS_DIR }}/{{ CERT
 CERTBOT_DNS_PROPAGATION_WAIT_SECONDS:     300                     # How long should the script wait for DNS propagation before continuing
 CERTBOT_FLAVOR:                           san                     # Possible options: san (recommended, with a dns flavor like cloudflare, or hetzner), wildcard(doesn't function with www redirect), dedicated
 
-# Path where Certbot stores challenge webroot files
-LETSENCRYPT_WEBROOT_PATH:                 "/var/lib/letsencrypt/"
+# Letsencrypt
+LETSENCRYPT_WEBROOT_PATH: "/var/lib/letsencrypt/"             # Path where Certbot stores challenge webroot files
+LETSENCRYPT_BASE_PATH:    "/etc/letsencrypt/"                 # Base directory containing Certbot configuration, account data, and archives
+LETSENCRYPT_LIVE_PATH:    "{{ LETSENCRYPT_BASE_PATH }}live/"  # Symlink directory for the current active certificate and private key
 
-# Base directory containing Certbot configuration, account data, and archives
-LETSENCRYPT_BASE_PATH:                    "/etc/letsencrypt/"
-
-# Symlink directory for the current active certificate and private key
-LETSENCRYPT_LIVE_PATH:                    "{{ LETSENCRYPT_BASE_PATH }}live/"
-
-## Docker Role Specific Parameters
-DOCKER_RESTART_POLICY:                    "unless-stopped"
-DOCKER_VARS_FILE:                         "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"
+## Docker
+DOCKER_RESTART_POLICY:           "unless-stopped"                                                   # Default restart parameter for docker containers
+DOCKER_VARS_FILE:                "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"  # File containing docker compose variables used by other services
+DOCKER_WHITELISTET_ANON_VOLUMES: []                                                                 # Volumes which should be ignored during docker anonymous health check
 
 # Asyn Confitguration
 ASYNC_ENABLED:  "{{ not MODE_DEBUG | bool }}"                  # Activate async, deactivated for debugging
@@ -87,10 +72,6 @@ _applications_nextcloud_oidc_flavor: >-
           else 'sociallogin'
         )
   }}
-
-# Systemctl 
-SYS_TIMER_SUFFIX:   ".{{ SOFTWARE_NAME | lower }}.timer"
-SYS_SERVICE_SUFFIX: ".{{ SOFTWARE_NAME | lower }}.service"
 
 # Role-based access control
 # @See https://en.wikipedia.org/wiki/Role-based_access_control

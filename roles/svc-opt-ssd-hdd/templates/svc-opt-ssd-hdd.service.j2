@@ -1,8 +1,8 @@
 [Unit]
 Description=Optimize storage paths
-OnFailure=sys-alm-compose.{{ SOFTWARE_NAME }}@%n.service
+OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ system_maintenance_services | join(' ')  }} --ignore svc-opt-ssd-hdd svc-bkp-rmt-2-loc --timeout "{{system_maintenance_lock_timeout_storage_optimizer}}"'
+ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore svc-opt-ssd-hdd svc-bkp-rmt-2-loc --timeout "{{SYS_TIMEOUT_STORAGE_OPTIMIZER}}"'
 ExecStart=/bin/sh -c '/usr/bin/python {{storage_optimizer_script}} --rapid-storage-path {{path_rapid_storage}} --mass-storage-path {{path_mass_storage}}'

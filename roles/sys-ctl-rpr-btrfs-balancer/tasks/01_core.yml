@@ -1,0 +1,26 @@
+- name: Include dependency 'sys-ctl-alm-compose'
+  include_role:
+    name: sys-ctl-alm-compose
+  when: run_once_sys_ctl_alm_compose is not defined
+
+- name: "pkgmgr install"
+  include_role:
+    name: pkgmgr-install
+  vars:
+    package_name: btrfs-auto-balancer
+
+- name: configure sys-ctl-rpr-btrfs-balancer{{ SYS_SERVICE_SUFFIX }}
+  template:
+    src: sys-ctl-rpr-btrfs-balancer.service.j2
+    dest: /etc/systemd/system/sys-ctl-rpr-btrfs-balancer{{ SYS_SERVICE_SUFFIX }}
+  notify: reload sys-ctl-rpr-btrfs-balancer service
+
+- name: "set 'service_name' to '{{ role_name }}'"
+  set_fact:
+    service_name: "{{ role_name }}"
+
+- name: "include role for sys-timer for {{ service_name }}"
+  include_role:
+    name: sys-timer
+  vars:
+    on_calendar: "{{SYS_SCHEDULE_REPAIR_BTRFS_AUTO_BALANCER}}"

@@ -1,0 +1,1 @@
+systemd_notifier_email_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-ctl-alm-email/'
