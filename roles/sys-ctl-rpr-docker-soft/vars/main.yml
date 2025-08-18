@@ -1,2 +1,1 @@
-heal_docker: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-ctl-rpr-docker-soft/'
-
+systemctl_id: sys-ctl-rpr-docker-soft

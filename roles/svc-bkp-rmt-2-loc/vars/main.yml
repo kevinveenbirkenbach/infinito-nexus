@@ -1,3 +1,4 @@
-application_id: svc-bkp-rmt-2-loc
-docker_backup_remote_to_local_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}{{ application_id }}/'
-rmt2loc_backup_providers: "{{ applications | get_app_conf(application_id, 'backup_providers')  }}"
+application_id:                   svc-bkp-rmt-2-loc
+systemctl_id:                     "{{ application_id }}"  
+DOCKER_BACKUP_REMOTE_2_LOCAL_DIR: '{{ PATH_ADMINISTRATOR_SCRIPTS }}{{ application_id }}/'
+rmt2loc_backup_providers:         "{{ applications | get_app_conf(application_id, 'backup_providers')  }}"

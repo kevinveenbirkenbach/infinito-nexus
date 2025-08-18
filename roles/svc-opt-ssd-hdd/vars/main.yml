@@ -1,5 +1,4 @@
 application_id:               svc-opt-ssd-hdd
-storage_optimizer_directory:  '{{ PATH_ADMINISTRATOR_SCRIPTS }}{{ application_id }}/'
-storage_optimizer_script:     '{{ storage_optimizer_directory }}{{ application_id }}.py'
-path_rapid_storage:           "{{ applications | get_app_conf(application_id, 'volumes.rapid_storage') }}"
-path_mass_storage:            "{{ applications | get_app_conf(application_id, 'volumes.mass_storage') }}"
+systemctl_id:                 "{{ application_id }}"
+OPT_DRIVE_RAPID_STORAGE_PATH: "{{ applications | get_app_conf(application_id, 'volumes.rapid_storage') }}"
+OPT_DRIVE_MASS_STORAGE_PATH:  "{{ applications | get_app_conf(application_id, 'volumes.mass_storage') }}"

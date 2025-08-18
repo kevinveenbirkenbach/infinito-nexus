@@ -1,8 +1,0 @@
-[Unit]
-Description=restart unhealthy docker containers
-OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{SYS_SERVICE_GROUP_CLEANUP| join(' ') }} sys-ctl-rpr-docker-soft --timeout "{{SYS_TIMEOUT_HEAL_DOCKER}}"'
-ExecStart=/bin/sh -c '/bin/python {{heal_docker}}sys-ctl-rpr-docker-soft.py {{ PATH_DOCKER_COMPOSE_INSTANCES }}'

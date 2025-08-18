@@ -1,0 +1,23 @@
+
+- name: "create {{ systemctl_script_dir }}"
+  file:
+    path: "{{ systemctl_script_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: "template or copy script"
+  block:
+    - name: "render template"
+      template:
+        src:  "{{ service_src }}"
+        dest: "{{ [systemctl_script_dir, (service_src | basename | regex_replace('\\.j2$', ''))] | path_join }}"
+        mode: "0755"
+      when: service_src.endswith('.j2')
+
+    - name: "copy raw file"
+      copy:
+        src:  "{{ service_src }}"
+        dest: "{{ [systemctl_script_dir, (service_src | basename)] | path_join }}"
+        mode: "0755"
+      when: not service_src.endswith('.j2')
+  when: systemctl_copy_files | bool

@@ -111,7 +111,7 @@
   loop:
     - drv         # 1. Load driver roles
     - gen         # 2. Load generic roles
-    - net         # 3. Load network roles
+    - svc-net     # 3. Load network roles
     - svc-db      # 4. Load database roles
     - svc-prx     # 5. Load proxy roles
   loop_control:

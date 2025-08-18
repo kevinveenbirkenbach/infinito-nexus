@@ -1,15 +1,9 @@
-- block:
-  - name: "Include sys-systemctl"
-    include_role:
-      name: sys-systemctl
-    when: run_once_sys_systemctl is not defined
-  - include_tasks: utils/run_once.yml
-  when: run_once_sys_timer is not defined
+# run_once_sys_timer: deactivated
 
 - name: create {{ sys_timer_file }}
   template:
     src: dummy.timer.j2
-    dest: "/etc/systemd/system/{{ sys_timer_file }}"
+    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, sys_timer_file ] | path_join }}"
   register: dummy_timer
 
 - name: "restart timer"
@@ -21,4 +15,3 @@
   when: dummy_timer.changed or ACTIVATE_ALL_TIMERS | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-

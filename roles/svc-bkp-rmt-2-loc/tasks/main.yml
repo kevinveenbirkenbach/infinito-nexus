@@ -6,41 +6,25 @@
     - dev-git
     - sys-ctl-alm-compose
     - sys-lock
-    - sys-rst-daemon
+    - sys-timer-cln-bkps
   - include_tasks: utils/run_once.yml
   when: run_once_svc_bkp_rmt_2_loc is not defined
 
-- name: "create {{docker_backup_remote_to_local_folder}}"
+- name: "create {{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}"
   file:
-    path: "{{docker_backup_remote_to_local_folder}}"
+    path: "{{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}"
     state: directory
     mode: "0755"
 
 - name: create svc-bkp-rmt-2-loc.sh
   copy:
     src: svc-bkp-rmt-2-loc.sh
-    dest: "{{docker_backup_remote_to_local_folder}}svc-bkp-rmt-2-loc.sh"
+    dest: "{{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}svc-bkp-rmt-2-loc.sh"
     mode: "0755"
 
-- name: create svc-bkp-rmt-2-loc{{ SYS_SERVICE_SUFFIX }}
-  template:
-    src: svc-bkp-rmt-2-loc.service.j2
-    dest: /etc/systemd/system/svc-bkp-rmt-2-loc{{ SYS_SERVICE_SUFFIX }}
-  notify: reload svc-bkp-rmt-2-loc service
-
-- name: create sys-bkp-rmt-2-loc-multi-provider.sh
-  template:
-    src: sys-bkp-rmt-2-loc-multi-provider.sh.j2
-    dest: "{{docker_backup_remote_to_local_folder}}sys-bkp-rmt-2-loc-multi-provider.sh"
-    mode: "0755"
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-
-- name: "include role for sys-timer for {{ service_name }}"
-  include_role:
-    name: sys-timer
+- include_role:
+    name: sys-systemctl
   vars:
-    on_calendar: "{{SYS_SCHEDULE_BACKUP_REMOTE_TO_LOCAL}}"
+    systemctl_timer_enabled:  true
+    systemctl_on_calendar:    "{{ SYS_SCHEDULE_BACKUP_REMOTE_TO_LOCAL }}"
 

@@ -1,0 +1,7 @@
+[Unit]
+Description=Let's Encrypt deploy to {{ docker_compose.directories.instance }}
+OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
+
+[Service]
+Type=oneshot
+ExecStart={{ systemctl_id | get_service_script_path('sh') }} {{ ssl_cert_folder }} {{ docker_compose.directories.instance }} {{ LETSENCRYPT_LIVE_PATH }}

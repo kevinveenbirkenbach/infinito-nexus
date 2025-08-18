@@ -3,14 +3,14 @@
     name: '{{ item }}'
   loop:
   - sys-ctl-cln-bkps
-  - sys-rst-daemon
+  - sys-daemon
 
-- name: set service_name to sys-ctl-cln-backups
+- name: set systemctl_timer_service to sys-ctl-cln-backups
   set_fact:
-    service_name: "sys-ctl-cln-backups"
+    systemctl_timer_service: "sys-ctl-cln-backups"
 
-- name: "include role for sys-timer for {{ service_name }}"
+- name: "include role for sys-timer for {{ systemctl_timer_service }}"
   include_role:
     name: sys-timer
   vars:
-    on_calendar: "{{SYS_SCHEDULE_CLEANUP_BACKUPS}}"
+    systemctl_on_calendar: "{{ SYS_SCHEDULE_CLEANUP_BACKUPS }}"

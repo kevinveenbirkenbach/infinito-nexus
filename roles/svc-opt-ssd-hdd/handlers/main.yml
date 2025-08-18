@@ -1,5 +1,0 @@
-- name: "reload svc-opt-ssd-hdd service"
-  systemd:
-    name: svc-opt-ssd-hdd{{ SYS_SERVICE_SUFFIX }}
-    state: reloaded
-    daemon_reload: yes

@@ -3,21 +3,8 @@
     name: '{{ item }}'
   loop:
   - sys-svc-msmtp
-  - sys-rst-daemon
 
-- name: "create {{systemd_notifier_email_folder}}"
-  file:
-    path: "{{systemd_notifier_email_folder}}"
-    state: directory
-    mode: "0755"
+- include_role:
+    name: sys-systemctl
 
-- name: configure sys-ctl-alm-email.sh
-  template:
-    src: sys-ctl-alm-email.sh.j2
-    dest: "{{systemd_notifier_email_folder}}sys-ctl-alm-email.sh"
 
-- name: configure sys-ctl-alm-email{{ SYS_SERVICE_SUFFIX }}
-  template:
-    src: sys-ctl-alm-email@.service.j2
-    dest: /etc/systemd/system/sys-ctl-alm-email.infinito@.service
-  notify: restart sys-ctl-alm-email service

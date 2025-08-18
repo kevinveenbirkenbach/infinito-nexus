@@ -1,0 +1,7 @@
+[Unit]
+Description=Check for CSP-blocked resources via Puppeteer
+OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 {{ systemctl_id | get_service_script_path('py') }} --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}

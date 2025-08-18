@@ -1,8 +1,0 @@
-[Unit]
-Description=Notifier for %i
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/systemctl start sys-ctl-alm-telegram.infinito@%i.service sys-ctl-alm-email.infinito@%i.service
-User=root
-Group=systemd-journal

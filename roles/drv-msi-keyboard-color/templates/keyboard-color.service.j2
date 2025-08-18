@@ -1,7 +1,0 @@
-[Unit]
-Description=Keyboard Color Service
-OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStart=/bin/python /opt/keyboard_color.py {{ vendor_and_product_id }}

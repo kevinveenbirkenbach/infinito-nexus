@@ -1,0 +1,8 @@
+[Unit]
+Description=Notifier for %i
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl start {{ SYS_SERVICE_ON_FAILURE_EMAIL }} {{ SYS_SERVICE_ON_FAILURE_TELEGRAM }}
+User=root
+Group=systemd-journal

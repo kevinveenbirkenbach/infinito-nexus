@@ -8,7 +8,7 @@ import sys
 def load_optimizer_module():
     module_path = os.path.abspath(os.path.join(
         os.path.dirname(__file__),
-        '..', "..", "..","..",'roles', 'svc-opt-ssd-hdd', 'files', 'svc-opt-ssd-hdd.py'
+        '..', "..", "..","..",'roles', 'svc-opt-ssd-hdd', 'files', 'script.py'
     ))
     spec = importlib.util.spec_from_file_location('storage_optimizer', module_path)
     optimizer = importlib.util.module_from_spec(spec)

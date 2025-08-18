@@ -1,0 +1,8 @@
+[Unit]
+Description=Let's Encrypt renewal
+OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/certbot renew --quiet --agree-tos
+ExecStartPost=/usr/bin/docker restart {{ applications | get_app_conf('svc-prx-openresty', 'docker.services.openresty.name', True) }}

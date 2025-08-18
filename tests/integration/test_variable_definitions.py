@@ -218,7 +218,7 @@ class TestVariableDefinitions(unittest.TestCase):
                                 if var in (
                                     'lookup', 'role_name', 'domains', 'item', 'host_type',
                                     'inventory_hostname', 'role_path', 'playbook_dir',
-                                    'ansible_become_password', 'inventory_dir', 'ansible_memtotal_mb'
+                                    'ansible_become_password', 'inventory_dir', 'ansible_memtotal_mb', 'omit'
                                 ):
                                     continue
 

@@ -10,30 +10,8 @@
     package_name: checkcsp
     package_notify: rebuild checkcsp docker image
 
-- name: "create {{ health_csp_crawler_folder }}"
-  file:
-    path: "{{ health_csp_crawler_folder }}"
-    state: directory
-    mode: "0755"
-
-- name: copy sys-ctl-hlth-csp.py
-  copy:
-    src: sys-ctl-hlth-csp.py
-    dest: "{{ health_csp_crawler_script }}"
-    mode: "0755"
-
-- name: create sys-ctl-hlth-csp{{ SYS_SERVICE_SUFFIX }}
-  template:
-    src: sys-ctl-hlth-csp.service.j2
-    dest: /etc/systemd/system/sys-ctl-hlth-csp{{ SYS_SERVICE_SUFFIX }}
-  notify: reload sys-ctl-hlth-csp service
-
-- name: set service_name to role_name
-  set_fact:
-    service_name: "{{ role_name }}"
-
-- name: include systemd timer role
-  include_role:
-    name: sys-timer
+- include_role:
+    name: sys-systemctl
   vars:
-    on_calendar: "{{ SYS_SCHEDULE_HEALTH_CSP_CRAWLER }}"
+    systemctl_on_calendar: "{{ SYS_SCHEDULE_HEALTH_CSP_CRAWLER }}"
+    systemctl_timer_enabled: true

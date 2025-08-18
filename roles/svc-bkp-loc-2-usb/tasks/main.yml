@@ -11,9 +11,9 @@
 - name: Fail if any backup_to_usb variable is empty
   assert:
     that:
-    - backup_to_usb_mount != ""
-    - backup_to_usb_target != ""
-    - backup_to_usb_source != ""
+    - BACKUP_TO_USB_MOUNT != ""
+    - BACKUP_TO_USB_target != ""
+    - BACKUP_TO_USB_SOURCE != ""
     fail_msg: |
       One or more of the configuration variables are empty!
       Please set:
@@ -22,19 +22,5 @@
         - source
       to non‑empty values in your configuration file.
 
-- name: Copy backup script to the scripts directory
-  copy:
-    src: svc-bkp-loc-2-usb.py
-    dest: "{{ backup_to_usb_script_path }}"
-    owner: root
-    group: root
-    mode: '0755'
-
-- name: Copy systemd service to systemd directory
-  template:
-    src: svc-bkp-loc-2-usb.service.j2
-    dest: /etc/systemd/system/svc-bkp-loc-2-usb{{ SYS_SERVICE_SUFFIX }}
-    owner: root
-    group: root
-    mode: '0644'
-  notify: reload svc-bkp-loc-2-usb service
+- include_role:
+    name: sys-systemctl

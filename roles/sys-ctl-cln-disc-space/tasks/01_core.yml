@@ -1,0 +1,14 @@
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - sys-ctl-alm-compose
+  - sys-lock
+  - sys-daemon
+  - 
+
+- include_role:
+    name: sys-systemctl
+  vars:
+    systemctl_timer_enabled:  true
+    systemctl_on_calendar: "{{SYS_SCHEDULE_CLEANUP_DISC_SPACE}}"

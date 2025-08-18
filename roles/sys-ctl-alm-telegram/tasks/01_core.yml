@@ -1,8 +1,3 @@
-- name: Include dependency 'sys-rst-daemon'
-  include_role:
-    name: sys-rst-daemon
-  when: run_once_sys_rst_daemon is not defined
-
 - name: Fail if Telegram bot credentials are not set
   assert:
     that:
@@ -14,24 +9,10 @@
         - telegram_bot_token   # Your Telegram bot’s API token
         - telegram_chat_id     # The Telegram chat ID to send messages to
 
+- include_role:
+    name: sys-systemctl
+
 - name: install curl
   community.general.pacman:
     name: curl
     state: present
-
-- name: Create a directory with a subdirectory
-  ansible.builtin.file:
-    path: "{{systemd_telegram_folder}}"
-    state: directory
-    mode: '0755'
-
-- name: configure sys-ctl-alm-telegram.sh
-  template:
-    src: sys-ctl-alm-telegram.sh.j2
-    dest: "{{ systemd_telegram_script }}"
-
-- name: configure sys-ctl-alm-telegram{{ SYS_SERVICE_SUFFIX }}
-  template:
-    src: sys-ctl-alm-telegram@.service.j2
-    dest: "/etc/systemd/system/sys-ctl-alm-telegram.infinito@.service"
-  notify: "restart sys-ctl-alm-telegram service"

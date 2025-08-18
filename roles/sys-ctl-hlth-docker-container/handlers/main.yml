@@ -1,5 +1,0 @@
-- name: "reload sys-ctl-hlth-docker-container service"
-  systemd:
-    name: sys-ctl-hlth-docker-container{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

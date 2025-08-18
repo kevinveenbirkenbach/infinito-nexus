@@ -1,35 +1,5 @@
 - block:
-  - name: Include dependency 'sys-ctl-alm-telegram'
-    include_role:
-      name: sys-ctl-alm-telegram
-    when: run_once_sys_ctl_alm_telegram is not defined
+  - include_tasks: 01_core.yml
   - include_tasks: utils/run_once.yml
   when: run_once_sys_ctl_hlth_msmtp is not defined
 
-- name: "create {{ health_msmtp_folder }}"
-  file:
-    path: "{{ health_msmtp_folder }}"
-    state: directory
-    mode: "0755"
-
-- name: create sys-ctl-hlth-msmtp.sh
-  template:
-    src: sys-ctl-hlth-msmtp.sh.j2
-    dest: "{{ health_msmtp_folder }}sys-ctl-hlth-msmtp.sh"
-    mode: '0755'
-
-- name: create sys-ctl-hlth-msmtp{{ SYS_SERVICE_SUFFIX }}
-  template:
-    src: sys-ctl-hlth-msmtp.service.j2
-    dest: /etc/systemd/system/sys-ctl-hlth-msmtp{{ SYS_SERVICE_SUFFIX }}
-  notify: reload sys-ctl-hlth-msmtp service
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-
-- name: include role for sys-timer for {{ service_name }}
-  include_role:
-    name: sys-timer
-  vars:
-    on_calendar: "{{ SYS_SCHEDULE_HEALTH_MSMTP }}"

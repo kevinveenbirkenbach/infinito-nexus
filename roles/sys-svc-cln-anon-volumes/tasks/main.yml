@@ -1,0 +1,24 @@
+- name: Check if docker is installed
+  ansible.builtin.stat:
+    path: /usr/bin/docker
+  register: docker_bin
+
+- block:
+  - name: "pkgmgr install"
+    include_role:
+      name: pkgmgr-install
+    vars:
+      package_name: dockreap
+  
+  - name: run dockreap with --no-confirmation
+    command:
+      cmd: "dockreap --no-confirmation"
+    async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+    poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+  - name: mark dockreap as run
+    set_fact:
+      run_once_sys_svc_cln_anon_volumes: true
+  when:
+    - run_once_sys_svc_cln_anon_volumes is not defined
+    - docker_bin.stat.exists

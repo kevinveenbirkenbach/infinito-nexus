@@ -16,7 +16,7 @@ This role is built on top of your existing `srv-web-7-4-core` role, and it autom
 When you apply **srv-web-7-6-https**, it will:
 
 1. **Include** the `srv-web-7-4-core` role to install and configure Nginx.  
-2. **Clean up** any stale vHost files under `sys-ctl-cln-domains`.  
+2. **Clean up** any stale vHost files under `sys-svc-cln-domains`.  
 3. **Deploy** the Let’s Encrypt challenge-and-redirect snippet from `srv-web-7-7-letsencrypt`.  
 4. **Reload** Nginx automatically when any template changes.
 

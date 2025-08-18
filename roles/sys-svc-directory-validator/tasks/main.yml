@@ -1,11 +1,8 @@
-- name: "pkgmgr install"
-  include_role:
-    name: pkgmgr-install
-  vars:
-    package_name: directory-validator
-  when: run_once_sys_bkp_directory_validator is not defined
-
-- name: run the backup_directory_validator tasks once
-  set_fact:
-    run_once_sys_bkp_directory_validator: true
-  when: run_once_sys_bkp_directory_validator is not defined
+- block:
+  - name: "pkgmgr install"
+    include_role:
+      name: pkgmgr-install
+    vars:
+      package_name: directory-validator  
+  - include_tasks:  utils/run_once.yml
+  when: run_once_sys_svc_directory_validator is not defined

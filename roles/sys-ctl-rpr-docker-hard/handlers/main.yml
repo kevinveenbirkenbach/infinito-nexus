@@ -1,5 +1,0 @@
-- name: "reload sys-ctl-rpr-docker-hard service"
-  systemd:
-    name: sys-ctl-rpr-docker-hard{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

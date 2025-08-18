@@ -1,3 +1,2 @@
-restart_docker_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-ctl-rpr-docker-hard/'
-restart_docker_script: '{{restart_docker_folder}}sys-ctl-rpr-docker-hard.py'
+systemctl_id: sys-ctl-rpr-docker-hard
 

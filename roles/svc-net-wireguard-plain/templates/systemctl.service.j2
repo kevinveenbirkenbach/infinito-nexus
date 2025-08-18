@@ -1,0 +1,10 @@
+[Unit]
+Description=set MTU 
+Before=wg-quick@wg0{{ SYS_SERVICE_SUFFIX }}
+
+[Service]
+Type=oneshot
+ExecStart=bash {{ systemctl_id | get_service_script_path('sh') }}
+
+[Install]
+RequiredBy=wg-quick@wg0{{ SYS_SERVICE_SUFFIX }}

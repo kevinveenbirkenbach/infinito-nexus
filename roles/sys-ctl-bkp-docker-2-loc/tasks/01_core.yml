@@ -14,24 +14,9 @@
   include_tasks: 03_reset.yml
   when: MODE_RESET | bool
 
-- name: "setup '{{ BKP_DOCKER_2_LOC_SERVICE_ALL }}'"
-  template:
-    src: "{{ role_name }}-everything.service.j2"
-    dest: /etc/systemd/system/{{ BKP_DOCKER_2_LOC_SERVICE_ALL }}
-  notify: reload backup docker to local (all) service
-
-- name: "setup '{{ BKP_DOCKER_2_LOC_SERVICE }}'"
-  template:
-    src: "{{ role_name }}.service.j2"
-    dest: /etc/systemd/system/{{ BKP_DOCKER_2_LOC_SERVICE }}
-  notify: reload backup docker to local service
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-
-- name: "include role for sys-timer for {{ service_name }}"
-  include_role:
-    name: sys-timer
+- include_role:
+    name: sys-systemctl
   vars:
-    on_calendar: "{{SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL}}"
+    systemctl_copy_files:     false
+    systemctl_timer_enabled:  false
+    systemctl_on_calendar:    "{{ SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL }}"

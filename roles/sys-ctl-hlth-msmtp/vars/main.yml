@@ -1,2 +1,2 @@
-health_msmtp_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-ctl-hlth-msmtp/'
+systemctl_id: sys-ctl-hlth-msmtp
 

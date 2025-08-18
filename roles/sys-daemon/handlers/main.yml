@@ -1,0 +1,4 @@
+- name: "reload system daemon"
+  command: systemctl daemon-reload
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

@@ -5,36 +5,26 @@
   - sys-ctl-alm-compose
   - sys-lock
   - sys-svc-directory-validator
-  - sys-rst-daemon
+  - sys-daemon
 
 - name: "pkgmgr install"
   include_role:
     name: pkgmgr-install
   vars:
-    package_name: "{{ cln_failed_docker_backups_pkg }}"
+    package_name: "{{ CLN_FAILED_DOCKER_BACKUPS_PKG }}"
 
-- name: "Retrieve {{ cln_failed_docker_backups_pkg }} path from pkgmgr"
-  command: "pkgmgr path {{ cln_failed_docker_backups_pkg }}"
+- name: "Retrieve {{ CLN_FAILED_DOCKER_BACKUPS_PKG }} path from pkgmgr"
+  command: "pkgmgr path {{ CLN_FAILED_DOCKER_BACKUPS_PKG }}"
   register: pkgmgr_output
   changed_when: false
 
-- name: Set fact for backup_docker_to_local_cleanup_script
+- name: Set fact for BACKUP_CLEANUP_SCRIPT
   set_fact:
-    backup_docker_to_local_cleanup_script: "{{ pkgmgr_output.stdout.rstrip('/') ~ '/cleanup-all.sh' }}"
+    BACKUP_CLEANUP_SCRIPT: "{{ pkgmgr_output.stdout.rstrip('/') ~ '/cleanup-all.sh' }}"
   changed_when: false
 
-- name: configure sys-ctl-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
-  template:
-    src: sys-ctl-cln-faild-bkps.service.j2
-    dest: /etc/systemd/system/sys-ctl-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
-  notify: Reload sys-ctl-cln-faild-bkps service
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-
-- name: "include role for sys-timer for {{ service_name }}"
-  include_role:
-    name: sys-timer
+- include_role:
+    name: sys-systemctl
   vars:
-    on_calendar: "{{SYS_SCHEDULE_CLEANUP_FAILED_BACKUPS}}"
+    systemctl_timer_enabled:  true
+    systemctl_on_calendar: "{{SYS_SCHEDULE_CLEANUP_FAILED_BACKUPS}}"

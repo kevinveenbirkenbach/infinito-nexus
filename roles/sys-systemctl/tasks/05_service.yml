@@ -1,0 +1,19 @@
+- name: "setup systemctl {{ item }} '{{ systemctl_id }}'"
+  template:
+    src: "{{ lookup(
+            'first_found',
+            {
+              'files': ['templates/systemctl' ~ item ~ '.service.j2'],
+              'paths': [systemctl_role_dir, role_path]
+            },
+            errors='strict'
+          ) }}"
+    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, systemctl_id ~ item ~ SYS_SERVICE_SUFFIX ] | path_join }}"
+  notify: "{{ 'reload system daemon' if item == '@' else 'refresh systemctl service' }}"
+  register: services_template
+  failed_when:
+    - services_template is failed
+    - "'Could not find or access' not in services_template.msg"
+  loop:
+    - ""
+    - "@"

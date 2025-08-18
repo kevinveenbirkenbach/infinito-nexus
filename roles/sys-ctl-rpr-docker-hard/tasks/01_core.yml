@@ -3,29 +3,8 @@
     name: sys-lock
   when: run_once_sys_lock is not defined
 
-- name: "create {{restart_docker_folder}}"
-  file:
-    path: "{{restart_docker_folder}}"
-    state: directory
-    mode: "0755"
-
-- name: create {{restart_docker_script}}
-  copy:
-    src: sys-ctl-rpr-docker-hard.py
-    dest: "{{restart_docker_script}}"
-
-- name: configure sys-ctl-rpr-docker-hard{{ SYS_SERVICE_SUFFIX }}
-  template:
-    src: sys-ctl-rpr-docker-hard.service.j2
-    dest: /etc/systemd/system/sys-ctl-rpr-docker-hard{{ SYS_SERVICE_SUFFIX }}
-  notify: "reload sys-ctl-rpr-docker-hard service"
-
-- name: "set 'service_name' to '{{ role_name }}'"
-  set_fact:
-    service_name: "{{ role_name }}"
-
-- name: "include role for sys-timer for {{ service_name }}"
-  include_role:
-    name: sys-timer
+- include_role:
+    name: sys-systemctl
   vars:
-    on_calendar: "{{SYS_SCHEDULE_REPAIR_DOCKER_HARD}}"
+    systemctl_on_calendar: "{{SYS_SCHEDULE_REPAIR_DOCKER_HARD}}"
+    systemctl_timer_enabled:  true

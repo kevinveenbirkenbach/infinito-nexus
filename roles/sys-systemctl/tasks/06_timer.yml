@@ -1,0 +1,6 @@
+- set_fact:
+    systemctl_timer_service: "{{ systemctl_id }}"
+
+- name: "include role for sys-timer for {{ systemctl_timer_service }}"
+  include_role:
+    name: sys-timer

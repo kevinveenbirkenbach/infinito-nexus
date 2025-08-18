@@ -1,1 +1,1 @@
-sys_timer_file: "{{ service_name }}{{ SYS_TIMER_SUFFIX }}"
+sys_timer_file: "{{ systemctl_timer_service }}{{ SYS_TIMER_SUFFIX }}"

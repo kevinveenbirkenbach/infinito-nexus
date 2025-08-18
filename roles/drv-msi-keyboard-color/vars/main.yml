@@ -1,2 +1,0 @@
-application_id:         drv-msi-keyboard-color
-vendor_and_product_id:  "{{ applications | get_app_conf(application_id, 'vendor_and_product_id') }}"

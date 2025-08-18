@@ -3,12 +3,11 @@
     include_role:
       name: '{{ item }}'
     loop:
-    - sys-ctl-alm-telegram
-    - sys-ctl-alm-email
-  - name: "setup '{{ SYS_SERVICE_ALARM_CMP }}'"
-    template:
-      src: sys-ctl-alm-compose@.service.j2
-      dest: "/etc/systemd/system/{{ SYS_SERVICE_ALARM_CMP }}"
-    notify: "restart sys-ctl-alm-compose service"
+      - sys-ctl-alm-telegram
+      - sys-ctl-alm-email
+      - sys-systemctl
+    vars:
+      flush_handlers: true
+      systemctl_timer_enabled: false 
   - include_tasks: utils/run_once.yml
   when: run_once_sys_ctl_alm_compose is not defined

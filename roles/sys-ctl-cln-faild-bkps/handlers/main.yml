@@ -1,5 +1,0 @@
-- name: "Reload sys-ctl-cln-faild-bkps service"
-  systemd:
-    name: sys-ctl-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

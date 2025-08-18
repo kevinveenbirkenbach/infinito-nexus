@@ -1,8 +1,0 @@
-[Unit]
-Description=pull remote backups
-OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service sys-ctl-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}
-
-[Service]
-Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{SYS_SERVICE_GROUP_BACKUPS| join(' ') }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
-ExecStart=/bin/sh -c '/usr/bin/bash {{docker_backup_remote_to_local_folder}}sys-bkp-rmt-2-loc-multi-provider.sh'

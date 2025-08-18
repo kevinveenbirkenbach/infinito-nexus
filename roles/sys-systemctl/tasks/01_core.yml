@@ -1,0 +1,8 @@
+- name: Include dependency 'sys-daemon'
+  include_role:
+    name: sys-daemon
+  when: run_once_sys_daemon is not defined
+  
+- name: "reset (if enabled)"
+  include_tasks: 02_reset.yml
+  when: MODE_RESET | bool

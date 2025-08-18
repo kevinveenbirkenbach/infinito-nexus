@@ -1,4 +1,0 @@
-- name: "reload svc-bkp-rmt-2-loc service"
-  systemd:
-    name: svc-bkp-rmt-2-loc{{ SYS_SERVICE_SUFFIX }}
-    daemon_reload: yes

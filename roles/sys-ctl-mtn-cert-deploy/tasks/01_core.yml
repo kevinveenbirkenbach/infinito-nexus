@@ -3,11 +3,10 @@
     name: sys-ctl-alm-compose
   when: run_once_sys_ctl_alm_compose is not defined
 
-- name: "Install '{{ CERT_SYNC_DOCKER_SCRIPT_FILE }}'"
-  ansible.builtin.copy:
-    src:  "{{ CERT_SYNC_DOCKER_SCRIPT_FILE }}"
-    dest: "{{ CERT_SYNC_DOCKER_SCRIPT_PATH }}"
-    mode: "0755"
-    owner: root
-    group: root
-  notify: restart tls deploy to docker service
+- include_role:
+    name: sys-systemctl
+  vars:
+    systemctl_state: restarted
+    systemctl_on_calendar:  "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_DEPLOY }}"
+    persistent:   "true"
+    systemctl_timer_enabled:  true

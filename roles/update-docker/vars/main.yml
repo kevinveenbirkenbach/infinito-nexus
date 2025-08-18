@@ -1,2 +1,2 @@
-update_docker_script: '{{ PATH_ADMINISTRATOR_SCRIPTS }}update-docker.py'
 application_id: update-docker
+systemctl_id: "{{ application_id }}"

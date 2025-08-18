@@ -1,5 +1,0 @@
-- name: "restart sys-ctl-alm-compose service"
-  systemd:
-    name: "{{ SYS_SERVICE_ALARM_CMP }}"
-    daemon_reload: yes
-  when: run_once_sys_ctl_alm_compose is not defined

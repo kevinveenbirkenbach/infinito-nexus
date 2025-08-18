@@ -1,0 +1,10 @@
+- name: Include dependency 'sys-ctl-alm-compose'
+  include_role:
+    name: sys-ctl-alm-compose
+  when: run_once_sys_ctl_alm_compose is not defined
+
+- include_role:
+    name: sys-systemctl
+  vars:
+    systemctl_on_calendar: "{{SYS_SCHEDULE_HEALTH_BTRFS}}"
+    systemctl_timer_enabled:  true

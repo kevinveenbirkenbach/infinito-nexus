@@ -1,0 +1,8 @@
+- name: "refresh systemctl service"
+  systemd:
+    name: "{{ systemctl_id }}{{ SYS_SERVICE_SUFFIX }}"
+    daemon_reload: yes
+    enabled: yes
+    state: "{{ systemctl_state }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

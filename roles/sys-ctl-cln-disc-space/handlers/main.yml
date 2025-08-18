@@ -1,5 +1,0 @@
-- name: "reload sys-ctl-cln-disc-space service"
-  systemd:
-    name: sys-ctl-cln-disc-space{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes

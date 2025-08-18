@@ -1,0 +1,28 @@
+- name: "find best matching source for service script"
+  set_fact:
+    service_src: >-
+      {{
+        lookup('first_found', {
+          'files': [
+            'templates/script.sh.j2', 
+            'templates/script.py.j2',
+            'files/script.sh',     
+            'files/script.py'
+          ]
+        }, errors='strict')
+      }}
+  when:
+    - systemctl_copy_files | bool
+
+- name: "Load file logic for '{{ systemctl_id }}'"
+  include_tasks: 04_files.yml
+  when:
+    - systemctl_copy_files | bool
+    - service_src
+
+- name: "Load systemctl logic for '{{ systemctl_id }}'"
+  include_tasks: 05_service.yml
+
+- name: "Load timer logic for '{{ systemctl_id }}'"
+  include_tasks: 06_timer.yml
+  when: systemctl_timer_enabled | bool

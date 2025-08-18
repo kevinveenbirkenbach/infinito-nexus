@@ -10,19 +10,7 @@
   when:
   - MODE_BACKUP | bool
 
-- name: create {{update_docker_script}}
-  template:
-    src: update-docker.py.j2
-    dest: "{{update_docker_script}}"
-
-- name: configure update-docker{{ SYS_SERVICE_SUFFIX }}
-  template:
-    src: update-docker.service.j2
-    dest: /etc/systemd/system/update-docker{{ SYS_SERVICE_SUFFIX }}
-
-- name: "restart update-docker{{ SYS_SERVICE_SUFFIX }}"
-  systemd:
-    name: update-docker{{ SYS_SERVICE_SUFFIX }}
-    state: restarted
-    enabled: yes
-    daemon_reload: yes
+- include_role:
+    name: sys-systemctl
+  vars:
+    systemctl_restarted: true

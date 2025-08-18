@@ -1,11 +1,3 @@
-- name: "reload sys-ctl-hlth-csp service"
-  systemd:
-    name: sys-ctl-hlth-csp{{ SYS_SERVICE_SUFFIX }}
-    enabled: yes
-    daemon_reload: yes
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-
 - name: rebuild checkcsp docker image
   shell: checkcsp build
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"

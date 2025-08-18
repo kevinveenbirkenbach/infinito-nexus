@@ -1,5 +1,0 @@
-- block:
-  - include_tasks: 01_core.yml
-  - set_fact:
-      run_once_drv_msi_keyboard_color: true
-  when: run_once_drv_msi_keyboard_color is not defined

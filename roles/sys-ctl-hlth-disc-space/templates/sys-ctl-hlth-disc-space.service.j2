@@ -1,7 +1,0 @@
-[Unit]
-Description=checking disc space
-OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash {{health_disc_space_folder}}sys-ctl-hlth-disc-space.sh {{size_percent_disc_space_warning}}

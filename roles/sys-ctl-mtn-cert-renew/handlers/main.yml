@@ -1,6 +1,0 @@
-- name: "reload certbot service"
-  systemd:
-    name: sys-ctl-mtn-cert-renew{{ SYS_SERVICE_SUFFIX }}
-    state: reloaded
-    enabled: yes
-    daemon_reload: yes

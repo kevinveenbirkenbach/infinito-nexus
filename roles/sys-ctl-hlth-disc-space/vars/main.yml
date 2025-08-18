@@ -1,1 +1,1 @@
-health_disc_space_folder: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-ctl-hlth-disc-space/'
+systemctl_id: sys-ctl-hlth-disc-space

@@ -1,0 +1,18 @@
+- include_role:
+    name: '{{ item }}'
+  loop:
+  - dev-yay
+  - sys-ctl-alm-compose
+
+- name: Install MSI packages
+  kewlfft.aur.aur:
+    use: yay
+    name:
+    - msi-perkeyrgb
+
+- include_role:
+    name: sys-systemctl
+  vars:
+    systemctl_on_calendar:    "{{ SYS_SCHEDULE_ANIMATION_KEYBOARD_COLOR }}"
+    systemctl_timer_enabled:  true
+    persistent:               true

@@ -1,2 +1,1 @@
-cleanup_backups_directory: '{{ PATH_ADMINISTRATOR_SCRIPTS }}sys-ctl-cln-backups/'
-
+systemctl_id: "sys-ctl-cln-bkps"

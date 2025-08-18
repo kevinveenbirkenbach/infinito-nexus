@@ -1,0 +1,7 @@
+[Unit]
+Description=Keyboard Color Service
+OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
+
+[Service]
+Type=oneshot
+ExecStart=/bin/python {{ systemctl_id | get_service_script_path('py') }} {{ vendor_and_product_id }}

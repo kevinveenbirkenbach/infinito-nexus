@@ -1,8 +1,0 @@
-[Unit]
-Description=status email for %i to user
-
-[Service]
-Type=oneshot
-ExecStart=/bin/bash {{systemd_notifier_email_folder}}sys-ctl-alm-email.sh %i
-User=root
-Group=systemd-journal

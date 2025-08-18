@@ -1,7 +1,0 @@
-[Unit]
-Description=Detect, revoke, and delete unused Let's Encrypt certificates based on active NGINX configuration files.
-OnFailure=sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%n.service
-
-[Service]
-Type=oneshot
-ExecStart=/bin/sh -c 'certreap --force'

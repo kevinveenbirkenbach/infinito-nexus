@@ -1,0 +1,8 @@
+[Unit]
+Description=freeing disc space
+OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP| join(' ') }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
+ExecStart=/bin/sh -c '/bin/bash {{ systemctl_id | get_service_script_path('sh') }} {{SIZE_PERCENT_CLEANUP_DISC_SPACE}}'
