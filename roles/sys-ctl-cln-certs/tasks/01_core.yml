@@ -13,6 +13,7 @@
 
 - include_role:
     name: sys-systemctl
+  vars:
     systemctl_timer_enabled:  true
     systemctl_on_calendar:    "{{ SYS_SCHEDULE_CLEANUP_CERTS }}"
     systemctl_copy_files:     false

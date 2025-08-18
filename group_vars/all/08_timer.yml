@@ -8,6 +8,7 @@ SYS_TIMER_SUFFIX:   ".{{ SOFTWARE_NAME | lower }}.timer"
 
 HOURS_SERVER_AWAKE:   "0..23" # Ours in which the server is "awake" (100% working). Rest of the time is reserved for maintanance
 RANDOMIZED_DELAY_SEC: "5min"  # Random delay for systemd timers to avoid peak loads.
+
 ACTIVATE_ALL_TIMERS:  false   # Runtime Variables for Process Control - Activates all timers, independend if the handlers had been triggered
 
 ## Timeouts for all services

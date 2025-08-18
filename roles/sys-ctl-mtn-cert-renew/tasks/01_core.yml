@@ -17,5 +17,5 @@
   vars:
     systemctl_copy_files: false
     systemctl_on_calendar: "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_RENEW }}"
-    persistent: "true"
+    persistent: true
     systemctl_timer_enabled:  true
