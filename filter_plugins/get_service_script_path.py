@@ -12,7 +12,7 @@ def get_service_script_path(systemctl_id, script_type):
     if not systemctl_id or not script_type:
         raise ValueError("Both systemctl_id and script_type are required")
 
-    return f"/opt/scripts/{systemctl_id}/script.{script_type}"
+    return f"/opt/scripts/systemctl/{systemctl_id}/script.{script_type}"
 
 
 class FilterModule(object):
