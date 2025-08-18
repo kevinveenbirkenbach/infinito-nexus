@@ -1,19 +1,38 @@
-- name: "setup systemctl {{ item }} '{{ systemctl_id }}'"
+# 1) Find the template (prefer target role, then fall back to this role)
+- name: Resolve systemctl template source
+  set_fact:
+    systemctl_template_src: >-
+      {{ lookup(
+           'first_found',
+           {
+             'files': [
+               'templates/systemctl@.service.j2',
+               'templates/systemctl.service.j2'
+             ],
+             'paths': [
+               systemctl_role_dir,
+               role_path
+             ]
+           },
+           errors='strict'
+         ) }}
+
+# Optional: sanity check with a clear error if truly nothing found
+- name: Ensure a systemctl template was found
+  assert:
+    that: systemctl_template_src | length > 0
+    fail_msg: >-
+      Could not resolve any systemctl template. Looked in:
+      {{ systemctl_role_dir }}/templates/ and {{ role_path }}/templates/.
+
+# 2) Now we may safely derive whether it’s the “@” variant
+- name: Flag whether @-template is used
+  set_fact:
+    systemctl_uses_at: "{{ (systemctl_template_src | basename) is search('@\\.service\\.j2$') }}"
+
+# 3) Use it
+- name: "setup systemctl '{{ systemctl_id }}'"
   template:
-    src: "{{ lookup(
-            'first_found',
-            {
-              'files': ['templates/systemctl' ~ item ~ '.service.j2'],
-              'paths': [systemctl_role_dir, role_path]
-            },
-            errors='strict'
-          ) }}"
-    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, systemctl_id ~ item ~ SYS_SERVICE_SUFFIX ] | path_join }}"
-  notify: "{{ 'reload system daemon' if item == '@' else 'refresh systemctl service' }}"
-  register: services_template
-  failed_when:
-    - services_template is failed
-    - "'Could not find or access' not in services_template.msg"
-  loop:
-    - ""
-    - "@"
+    src:  "{{ systemctl_template_src }}"
+    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, systemctl_id | get_service_name(SOFTWARE_NAME) ] | path_join }}"
+  notify: "{{ 'reload system daemon' if systemctl_uses_at else 'refresh systemctl service' }}"

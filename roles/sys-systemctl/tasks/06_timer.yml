@@ -1,4 +1,11 @@
-- set_fact:
+- name: Fail if systemctl_id contains "@"
+  assert:
+    that:
+      - "'@' not in systemctl_id"
+    fail_msg: "Invalid systemctl_id '{{ systemctl_id }}' → must not contain '@'."
+
+- name: "Make '{{ systemctl_id }}' available for sys-timer"
+  set_fact:
     systemctl_timer_service: "{{ systemctl_id }}"
 
 - name: "include role for sys-timer for {{ systemctl_timer_service }}"

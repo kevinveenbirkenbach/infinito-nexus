@@ -1,6 +1,11 @@
 UNIT_SUFFIX_REMOVER_PACKAGE:  "unsure"
-systemctl_script_dir:         "{{ [ PATH_SYSTEMCTL_SCRIPTS, systemctl_id ] | path_join }}"
-systemctl_role_dir:           "{{ playbook_dir }}/roles/{{ systemctl_id }}"
-systemctl_copy_files:         true  # When set to false file copying will be skipped
-systemctl_timer_enabled:      false # When set to true timmer will be loaded
-systemctl_state:              "{{ omit }}"
+
+## Paths
+systemctl_role_name:      "{{ systemctl_id | regex_replace('@','') }}"
+systemctl_role_dir:       "{{ [ playbook_dir, 'roles', systemctl_role_name ] | path_join }}"
+systemctl_script_dir:     "{{ [ PATH_SYSTEMCTL_SCRIPTS, systemctl_id ] | path_join }}"
+
+## Settings
+systemctl_copy_files:     true  # When set to false file copying will be skipped
+systemctl_timer_enabled:  false # When set to true timmer will be loaded
+systemctl_state:          "{{ omit }}"
