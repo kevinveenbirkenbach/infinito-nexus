@@ -8,4 +8,4 @@ systemctl_script_dir:     "{{ [ PATH_SYSTEMCTL_SCRIPTS, systemctl_id ] | path_jo
 ## Settings
 systemctl_copy_files:     true  # When set to false file copying will be skipped
 systemctl_timer_enabled:  false # When set to true timmer will be loaded
-systemctl_state:          "{{ omit }}"
+systemctl_state:          "{{ SYS_SERVICE_DEFAULT_STATE }}"

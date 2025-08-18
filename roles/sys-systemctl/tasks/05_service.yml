@@ -36,3 +36,10 @@
     src:  "{{ systemctl_template_src }}"
     dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, systemctl_id | get_service_name(SOFTWARE_NAME) ] | path_join }}"
   notify: "{{ 'reload system daemon' if systemctl_uses_at else 'refresh systemctl service' }}"
+
+- name:   refresh systemctl service when SYS_SERVICE_ALL_ENABLED
+  command: /bin/true
+  notify: "refresh systemctl service"
+  when: 
+    - SYS_SERVICE_ALL_ENABLED | bool
+    - not systemctl_uses_at

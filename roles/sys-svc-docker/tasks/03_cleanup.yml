@@ -1,3 +1,7 @@
+- name: Load role to delete anonymous volumes
+  include_role:
+    name: sys-svc-cln-anon-volumes
+
 - name: Prune Docker resources
   become: true
   ansible.builtin.command: docker system prune -f

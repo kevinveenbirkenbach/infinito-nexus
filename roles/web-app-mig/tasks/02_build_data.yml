@@ -6,9 +6,3 @@
   async: "{{ (3600 if ASYNC_ENABLED | bool else omit) | default(omit) }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   register: mig_build_job
-
-- name: Fail if MIG build job did not start
-  fail:
-    msg: >
-      MIG build job failed to start. No job ID returned.
-  when: mig_build_job.ansible_job_id is not defined
