@@ -1,6 +1,6 @@
 - name: "refresh systemctl service"
   systemd:
-    name: "{{ systemctl_id }}{{ SYS_SERVICE_SUFFIX }}"
+    name: "{{ systemctl_id | get_service_name(SOFTWARE_NAME) }}"
     daemon_reload: yes
     enabled: yes
     state: "{{ systemctl_state }}"
