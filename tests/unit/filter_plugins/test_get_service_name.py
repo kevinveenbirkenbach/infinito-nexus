@@ -8,10 +8,10 @@ class TestGetServiceName(unittest.TestCase):
             "sys-ctl-cln-backups.nginx.service"
         )
 
-    def test_default_suffix_timer(self):
+    def test_default_suffix(self):
         self.assertEqual(
             get_service_name.get_service_name("sys-ctl-bkp@", "postgres"),
-            "sys-ctl-bkp.postgres@.timer"
+            "sys-ctl-bkp.postgres@.service"
         )
 
     def test_explicit_custom_suffix(self):

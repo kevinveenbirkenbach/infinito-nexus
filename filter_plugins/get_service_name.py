@@ -22,7 +22,7 @@ def get_service_name(systemctl_id, software_name, suffix=""):
     if suffix is False:
         sfx = ""  # no suffix at all
     elif suffix == "" or suffix is None:
-        sfx = ".timer" if sid.endswith("@") else ".service"
+        sfx = ".service"
     else:
         sfx = "." + str(suffix).strip().lower()
 
