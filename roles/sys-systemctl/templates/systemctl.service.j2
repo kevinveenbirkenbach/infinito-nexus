@@ -4,4 +4,4 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash {{ systemctl_id | get_service_script_path( service_src | filetype ) }}
+ExecStart=/bin/bash {{ systemctl_id | get_service_script_path( service_src | basename | regex_replace('\\.j2$', '') | filetype ) }}
