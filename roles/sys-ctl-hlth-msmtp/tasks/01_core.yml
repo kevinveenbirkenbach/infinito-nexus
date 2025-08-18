@@ -6,5 +6,5 @@
 - include_role:
     name: sys-systemctl
   vars:
-    systemctl_on_calendar: "{{ SYS_SCHEDULE_HEALTH_MSMTP }}"
+    systemctl_on_calendar:    "{{ SYS_SCHEDULE_HEALTH_MSMTP }}"
     systemctl_timer_enabled:  true

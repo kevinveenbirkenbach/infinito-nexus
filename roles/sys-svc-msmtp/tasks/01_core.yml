@@ -1,5 +1,4 @@
-- name: Include dependency 'sys-ctl-hlth-msmtp'
-  include_role:
+- include_role:
     name: sys-ctl-hlth-msmtp
   when: run_once_sys_ctl_hlth_msmtp is not defined
   
