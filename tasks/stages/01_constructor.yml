@@ -21,6 +21,14 @@
       applications: "{{ defaults_applications | merge_with_defaults(applications | default({}, true)) }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+  - name: "Sanity check: all group_names must exist in applications"
+    assert:
+      that:
+        - item in applications
+      fail_msg: "Group '{{ item }}' has no entry in 'applications'"
+      success_msg: "Group '{{ item }}' is defined in 'applications'"
+    loop: "{{ group_names }}"
+
   - name: Merge current play applications
     set_fact:
       current_play_applications: >-
