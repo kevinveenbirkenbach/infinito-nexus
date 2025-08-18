@@ -4,8 +4,6 @@
   loop:
   - sys-ctl-alm-compose
   - sys-lock
-  - sys-daemon
-  - 
 
 - include_role:
     name: sys-systemctl

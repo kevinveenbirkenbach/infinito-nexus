@@ -5,9 +5,7 @@
     dest: "{{ PATH_SYSTEM_LOCK_SCRIPT }}"
   when: run_once_sys_lock is not defined
 
-## Runtime Variable Setting
-
-- name: run the system_maintenance_service_freezer tasks once
+- name: execute the script copying once
   set_fact:
     run_once_sys_lock: true
   when: run_once_sys_lock is not defined
