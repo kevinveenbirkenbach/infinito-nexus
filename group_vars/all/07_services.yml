@@ -5,12 +5,12 @@
 SYS_SERVICE_SUFFIX:               ".{{ SOFTWARE_NAME | lower }}.service"
 
 ## Names
-SYS_SERVICE_CLEANUP_BACKUPS_OLD:      "sys-ctl-cln-backups{{ SYS_SERVICE_SUFFIX }}"
-SYS_SERVICE_CLEANUP_BACKUPS_FAILED:   "sys-ctl-cln-faild-bkps{{ SYS_SERVICE_SUFFIX }}"
-SYS_SERVICE_OPTIMIZE_DRIVE:           "svc-opt-ssd-hdd{{ SYS_SERVICE_SUFFIX }}"
-SYS_SERVICE_BACKUP_RMT_2_LOC:         "svc-bkp-rmt-2-loc{{ SYS_SERVICE_SUFFIX }}"
-SYS_SERVICE_REPAIR_DOCKER_HARD:       "sys-ctl-rpr-docker-hard{{ SYS_SERVICE_SUFFIX }}"
-SYS_SERVICE_UPDATE_DOCKER:            "update-docker{{ SYS_SERVICE_SUFFIX }}"
+SYS_SERVICE_CLEANUP_BACKUPS_OLD:      "{{ 'sys-ctl-cln-backups' | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_CLEANUP_BACKUPS_FAILED:   "{{ 'sys-ctl-cln-faild-bkps' | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_OPTIMIZE_DRIVE:           "{{ 'svc-opt-ssd-hdd' | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_BACKUP_RMT_2_LOC:         "{{ 'svc-bkp-rmt-2-loc' | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_REPAIR_DOCKER_HARD:       "{{ 'sys-ctl-rpr-docker-hard' | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_UPDATE_DOCKER:            "{{ 'update-docker' | get_service_name(SOFTWARE_NAME) }}"
 
 ## On Failure
 SYS_SERVICE_ON_FAILURE_COMPOSE:   "sys-ctl-alm-compose.{{ SOFTWARE_NAME }}@%i.service"

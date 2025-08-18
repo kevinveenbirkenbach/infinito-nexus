@@ -1,6 +1,6 @@
 - name: "restart wireguard"
   systemd:
-    name: wg-quick@wg0{{ SYS_SERVICE_SUFFIX }}
+    name: wg-quick@wg0.service
     state: restarted
     enabled: yes
     daemon_reload: yes

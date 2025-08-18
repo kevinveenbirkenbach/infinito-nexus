@@ -3,9 +3,9 @@
     name: sys-lock
   when: run_once_sys_lock is not defined
 
-- name: "start sys-ctl-bkp-docker-2-loc-everything{{ SYS_SERVICE_SUFFIX }}"
+- name: "start {{ 'sys-ctl-bkp-docker-2-loc-everything' | get_service_name(SOFTWARE_NAME) }}"
   systemd:
-    name: sys-ctl-bkp-docker-2-loc-everything{{ SYS_SERVICE_SUFFIX }}
+    name: "{{ 'sys-ctl-bkp-docker-2-loc-everything' | get_service_name(SOFTWARE_NAME) }}"
     state: started
   when:
   - MODE_BACKUP | bool

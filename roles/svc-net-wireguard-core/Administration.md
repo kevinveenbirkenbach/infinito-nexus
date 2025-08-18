@@ -17,12 +17,12 @@
 ### Activate Configuration
 ```bash
   cp /path/to/wg0.conf /etc/wireguard/wg0.conf
-  systemctl enable wg-quick@wg0{{ SYS_SERVICE_SUFFIX }} --now
+  systemctl enable wg-quick@wg0.service --now
 ```
 
 ### Check status
 ```bash
-  systemctl status wg-quick@wg0{{ SYS_SERVICE_SUFFIX }}
+  systemctl status wg-quick@wg0.service
 ```
 
 ## Other Resources

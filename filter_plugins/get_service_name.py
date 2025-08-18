@@ -17,7 +17,7 @@ def get_service_name(systemctl_id, software_name, suffix="service"):
         base = sid[:-1]  # drop the trailing '@'
         return f"{base}.{sw}@.{sfx}"
     else:
-        return f"{sid}{sw}.{sfx}"
+        return f"{sid}.{sw}.{sfx}"
 
 
 class FilterModule(object):
