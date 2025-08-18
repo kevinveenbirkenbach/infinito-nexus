@@ -11,6 +11,6 @@ Checks the health of all mounted Btrfs filesystems by inspecting device error co
 
 ## Usage
 Just include this role in your playbook; it will:
-1. Deploy a small shell script under `{{ PATH_ADMINISTRATOR_SCRIPTS }}/sys-ctl-hlth-btrfs/`.
+1. Deploy a small shell script 
 2. Install a `.service` and `.timer` unit.
 3. Send alerts via `sys-ctl-alm-compose` if any filesystem shows errors.
