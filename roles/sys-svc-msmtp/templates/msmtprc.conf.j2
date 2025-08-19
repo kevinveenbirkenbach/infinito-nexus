@@ -2,8 +2,8 @@
 defaults
 auth           on
 logfile        ~/.msmtp.log
-tls_starttls   {{ 'on' if system_email.start_tls else 'off' }}
-{% if system_email.tls %}
+tls_starttls   {{ 'on' if SYSTEM_EMAIL.START_TLS else 'off' }}
+{% if SYSTEM_EMAIL.TLS %}
 tls            on
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
 {% else %}
@@ -11,8 +11,8 @@ tls            off
 {% endif %}
 
 account        system_email
-host           {{ system_email.host }}
-port           {{ system_email.port }}
+host           {{ SYSTEM_EMAIL.HOST }}
+port           {{ SYSTEM_EMAIL.PORT }}
 from           {{ users['no-reply'].email }}
 user           {{ users['no-reply'].email }}
 password       {{ users['no-reply'].mailu_token }}

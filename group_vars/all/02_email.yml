@@ -1,0 +1,8 @@
+# Email Configuration
+DEFAULT_SYSTEM_EMAIL:
+  DOMAIN:    "{{ PRIMARY_DOMAIN }}"
+  HOST:      "mail.{{ PRIMARY_DOMAIN }}"
+  PORT:      465
+  TLS:       true   # true for TLS and false for SSL
+  START_TLS: false
+  SMTP:      true  

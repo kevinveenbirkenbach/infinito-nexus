@@ -45,15 +45,15 @@ LISTMONK_SETTINGS:
     value: >-
       {{ [
         {
-          "host":            system_email.host,
-          "port":            system_email.port,
-          "enabled":         system_email.smtp,
+          "host":            SYSTEM_EMAIL.HOST,
+          "port":            SYSTEM_EMAIL.PORT,
+          "enabled":         SYSTEM_EMAIL.SMTP,
           "username":        "no-reply",
           "password":        users['no-reply'].email,
           "tls_type":        (
-                                system_email.tls
+                                SYSTEM_EMAIL.TLS
                                 | ternary("TLS",
-                                    system_email.start_tls
+                                    SYSTEM_EMAIL.START_TLS
                                       | ternary("STARTTLS","NONE")
                                   )
                               ),
@@ -67,7 +67,7 @@ LISTMONK_SETTINGS:
           "tls_skip_verify": false
         }
       ] | to_json }}
-    when: system_email.smtp | bool
+    when: SYSTEM_EMAIL.SMTP | bool
 
 
   - key: "app.lang"
@@ -92,15 +92,15 @@ LISTMONK_SETTINGS:
     value: >-
       {{ [
         {
-          "host":            system_email.host,
-          "port":            system_email.port,
+          "host":            SYSTEM_EMAIL.HOST,
+          "port":            SYSTEM_EMAIL.PORT,
           "type":            "pop",
           "uuid":            "471fd0e9-8c33-4e4a-9183-c4679699faca",
           "enabled":         true,
           "username":        users.bounce.email,
           "password":        users.bounce.mailu_token,
           "return_path":     users.bounce.email,
-          "tls_enabled":     system_email.tls,
+          "tls_enabled":     SYSTEM_EMAIL.TLS,
           "auth_protocol":   "userpass",
           "scan_interval":   "15m",
           "tls_skip_verify": false

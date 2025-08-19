@@ -32,13 +32,13 @@ trusted_key_servers:
 admin_contact: 'mailto:{{ users.administrator.email }}'
 
 email:
-  smtp_host:                    "{{ system_email.host }}"
-  smtp_port:                    "{{ system_email.port }}"
+  smtp_host:                    "{{ SYSTEM_EMAIL.HOST }}"
+  smtp_port:                    "{{ SYSTEM_EMAIL.PORT }}"
   smtp_user:                    "{{ users['no-reply'].email }}"
   smtp_pass:                    "{{ users['no-reply'].mailu_token }}"
   #force_tls:                    true
   #require_transport_security:   true
-  enable_tls:                   "{{ system_email.tls | upper }}"
+  enable_tls:                   "{{ SYSTEM_EMAIL.TLS | upper }}"
   notif_from:                   "Your Friendly %(app)s homeserver <{{ users['no-reply'].email }}>"
   app_name:                     "Matrix on {{ MATRIX_SYNAPSE_DOMAIN }}"
   enable_notifs:                true

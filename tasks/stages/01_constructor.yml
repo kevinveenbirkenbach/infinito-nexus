@@ -13,7 +13,7 @@
 
   - name: Merge system_email definitions
     set_fact:
-      system_email: "{{ default_system_email | combine(system_email | default({}, true), recursive=True) }}"
+      SYSTEM_EMAIL: "{{ DEFAULT_SYSTEM_EMAIL | combine(system_email | default({}, true), recursive=True) }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge application definitions

@@ -38,8 +38,8 @@ openproject_dummy_volume:     "{{ docker_compose.directories.volumes }}dummy_vol
 
 openproject_rails_settings:
   email_delivery_method:      "smtp"
-  smtp_address:               "{{ system_email.host }}"
-  smtp_domain:                "{{ system_email.domain }}"
+  smtp_address:               "{{ SYSTEM_EMAIL.HOST }}"
+  smtp_domain:                "{{ SYSTEM_EMAIL.DOMAIN }}"
   smtp_user_name:             "{{ users['no-reply'].email }}"
   smtp_password:              "{{ users['no-reply'].mailu_token }}"
   smtp_ssl:                   false
