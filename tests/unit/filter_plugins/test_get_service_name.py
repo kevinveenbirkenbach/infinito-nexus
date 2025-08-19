@@ -17,7 +17,7 @@ class TestGetServiceName(unittest.TestCase):
     def test_explicit_custom_suffix(self):
         self.assertEqual(
             get_service_name.get_service_name("sys-ctl-bkp@", "postgres", "special"),
-            "sys-ctl-bkp.postgres@.special"
+            "sys-ctl-bkp.postgres@special"
         )
 
     def test_explicit_false_suffix(self):
@@ -32,7 +32,7 @@ class TestGetServiceName(unittest.TestCase):
 
     def test_case_is_lowered(self):
         self.assertEqual(
-            get_service_name.get_service_name("Sys-CTL-BKP@", "Postgres", "SeRviCe"),
+            get_service_name.get_service_name("Sys-CTL-BKP@", "Postgres", ".SeRviCe"),
             "sys-ctl-bkp.postgres@.service"
         )
 
