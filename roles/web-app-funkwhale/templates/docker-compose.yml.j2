@@ -49,7 +49,7 @@
       - "data:{{funkwhale_media_root}}:ro"
       #- "{{funkwhale_static_root}}:{{funkwhale_static_root}}:ro"
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
   
   typesense:
 {% include 'roles/docker-container/templates/base.yml.j2' %}

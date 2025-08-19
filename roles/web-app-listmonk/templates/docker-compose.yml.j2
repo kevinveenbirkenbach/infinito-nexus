@@ -5,7 +5,7 @@
     image: "{{ LISTMONK_IMAGE }}:{{ LISTMONK_VERSION }}"
     container_name: "{{ LISTMONK_NAME }}"
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - {{docker_compose.directories.config}}config.toml:/listmonk/config.toml
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

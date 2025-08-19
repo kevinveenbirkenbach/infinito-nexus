@@ -20,7 +20,7 @@ x-op-app: &app
     container_name: {{ openproject_proxy_name }}
     command: "./docker/prod/proxy"
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
     environment:
       APP_HOST: web
     depends_on:

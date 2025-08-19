@@ -7,7 +7,7 @@
     image: application-portfolio
     container_name: portfolio
     ports:
-      - 127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}
+      - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
     volumes:
       - {{docker_repository_path}}app:/app
     restart: unless-stopped

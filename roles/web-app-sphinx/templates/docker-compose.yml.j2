@@ -5,7 +5,7 @@
       context: {{ path_infinito_sphinx_output.stdout }}
       dockerfile: {{ path_infinito_sphinx_output.stdout }}/Dockerfile
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

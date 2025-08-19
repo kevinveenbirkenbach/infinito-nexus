@@ -3,7 +3,7 @@
   web:
     image: "{{ applications | get_app_conf(application_id, 'images.web', True) }}"
     ports:
-    - "{{ports.localhost.http[application_id]}}:80"
+    - "{{ ports.localhost.http[application_id] }}:80"
     volumes:
       - .:/usr/share/nginx/html
       - .:/var/www

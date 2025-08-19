@@ -6,7 +6,7 @@
     build:
       context: .
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
     volumes:
       - data:{{ wordpress_docker_html_path }}
 

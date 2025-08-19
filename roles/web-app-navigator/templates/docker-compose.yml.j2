@@ -4,7 +4,7 @@
       context:    {{ path_infinito_presentation_output.stdout }}
       dockerfile: {{ path_infinito_presentation_output.stdout }}/Dockerfile
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:5000"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:5000"
     volumes:
       - {{ path_infinito_presentation_output.stdout }}:/app
       - {{ path_infinito_output.stdout }}:/source

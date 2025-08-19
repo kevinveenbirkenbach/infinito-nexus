@@ -20,7 +20,7 @@
     image: nginx:mainline
     restart: {{ DOCKER_RESTART_POLICY }}
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
     volumes:
     - "{{docker_compose_instance_confd_directory}}:{{target_mount_conf_d_directory}}:ro"
     - "data:/var/www/html:ro"

@@ -8,7 +8,7 @@
       dockerfile: Dockerfile
     image: moodle_custom
     ports:
-      - 127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}
+      - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - 'code:{{ bitnami_code_link }}'

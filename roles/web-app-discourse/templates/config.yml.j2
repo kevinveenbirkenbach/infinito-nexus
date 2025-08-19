@@ -15,7 +15,7 @@ templates:
 ## If you want Discourse to share a port with another webserver like Apache or nginx,
 ## see https://meta.discourse.org/t/17247 for details
 expose:
-  - "127.0.0.1:{{ports.localhost.http[application_id]}}:80"   # http
+  - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"   # http
 
 params:
   db_default_text_search_config: "pg_catalog.english"

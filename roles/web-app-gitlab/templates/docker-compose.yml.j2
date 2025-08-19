@@ -5,7 +5,7 @@
     hostname: '{{ domains | get_domain(application_id) }}'
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
       - "{{ports.public.ssh[application_id]}}:22"
     volumes:
       - 'config:/etc/gitlab'

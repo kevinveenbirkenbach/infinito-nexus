@@ -5,7 +5,7 @@
     image: "{{ gitea_image }}:{{ gitea_version }}"
     container_name:  "{{ gitea_container }}"
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
       - "{{ports.public.ssh[application_id]}}:22"
     volumes:
       - data:/data

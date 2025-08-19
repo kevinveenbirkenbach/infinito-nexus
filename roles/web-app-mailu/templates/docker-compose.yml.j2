@@ -13,7 +13,7 @@
     image: {{ MAILU_DOCKER_FLAVOR }}/nginx:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
       - "{{ MAILU_IP4_PUBLIC }}:25:25"
       - "{{ MAILU_IP4_PUBLIC }}:465:465"
       - "{{ MAILU_IP4_PUBLIC }}:587:587"
