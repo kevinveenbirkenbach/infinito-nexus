@@ -4,6 +4,6 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }} {{ SYS_SERVICE_CLEANUP_BACKUPS_FA
 
 [Service]
 Type=oneshot
-ExecStartPre=/bin/sh -c '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_BACKUPS | reject('equalto', role_name ~ '-everything') | join(' ') }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
+ExecStartPre=/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_BACKUPS | reject('equalto', role_name ~ '-everything') | join(' ') }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"
 ExecStart=/bin/sh -c '{{ BKP_DOCKER_2_LOC_EXEC }}'
-ExecStartPost=/bin/sh -c '/bin/systemctl start {{ 'sys-ctl-rpr-docker-soft' | get_service_name(SOFTWARE_NAME) }} &'
+ExecStartPost=/bin/systemctl start {{ SYS_SERVICE_REPAIR_DOCKER_SOFT }}
