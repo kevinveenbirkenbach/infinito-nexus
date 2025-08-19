@@ -5,4 +5,4 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 [Service]
 Type=oneshot
 ExecStartPre=/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_OPTIMIZE_DRIVE }} {{ SYS_SERVICE_BACKUP_RMT_2_LOC }} --timeout "{{ SYS_TIMEOUT_STORAGE_OPTIMIZER }}"
-ExecStart={{ systemctl_script_exec }} --mass-storage-path {{ OPT_DRIVE_MASS_STORAGE_PATH }}
+ExecStart={{ system_service_script_exec }} --mass-storage-path {{ OPT_DRIVE_MASS_STORAGE_PATH }}

@@ -4,4 +4,4 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 
 [Service]
 Type=oneshot
-ExecStart={{ systemctl_script_exec }} --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}
+ExecStart={{ system_service_script_exec }} --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}

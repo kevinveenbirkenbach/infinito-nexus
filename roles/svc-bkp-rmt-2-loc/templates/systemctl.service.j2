@@ -5,5 +5,5 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }} {{ SYS_SERVICE_CLEANUP_BACKUPS_FA
 [Service]
 Type=oneshot
 ExecStartPre=/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_BACKUPS| join(' ') }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"
-ExecStart={{ systemctl_script_exec }}
+ExecStart={{ system_service_script_exec }}
 ExecStartPost=/bin/systemctl start {{ SYS_SERVICE_CLEANUP_BACKUPS_OLD }}

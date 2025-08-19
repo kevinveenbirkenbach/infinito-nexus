@@ -1,0 +1,14 @@
+- block:
+  - include_tasks: 01_core.yml
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_service is not defined
+
+- name: "Execute service routines for '{{ system_service_id }}'"
+  block:
+  - name: "Load base routine for '{{ system_service_id }}'"
+    include_tasks: 03_base.yml
+  - include_tasks: utils/run_once.yml
+    vars:
+      # Necessary to flush after every service which uses an 'system_service_id' otherwise wrong one will be used
+      flush_handlers: true
+  when: system_service_id is defined

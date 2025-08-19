@@ -4,7 +4,7 @@
   when: run_once_sys_ctl_alm_telegram is not defined
   
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_on_calendar:    "{{ SYS_SCHEDULE_HEALTH_MSMTP }}"
-    systemctl_timer_enabled:  true
+    system_service_on_calendar:    "{{ SYS_SCHEDULE_HEALTH_MSMTP }}"
+    system_service_timer_enabled:  true

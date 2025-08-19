@@ -7,8 +7,8 @@ SYS_TIMER_ALL_ENABLED:  "{{ not MODE_DEBUG }}"   # Runtime Variables for Process
 
 ## Server Tact Variables 
 
-HOURS_SERVER_AWAKE:   "0..23" # Ours in which the server is "awake" (100% working). Rest of the time is reserved for maintanance
-RANDOMIZED_DELAY_SEC: "5min"  # Random delay for systemd timers to avoid peak loads.
+HOURS_SERVER_AWAKE:            "0..23" # Ours in which the server is "awake" (100% working). Rest of the time is reserved for maintanance
+RANDOMIZED_DELAY_SEC:          "5min"  # Random delay for systemd timers to avoid peak loads.
 
 ## Timeouts for all services
 SYS_TIMEOUT_CLEANUP_SERVICES:  "15min"

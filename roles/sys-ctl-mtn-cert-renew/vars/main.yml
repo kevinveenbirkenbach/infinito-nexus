@@ -1,1 +1,1 @@
-systemctl_id: sys-ctl-mtn-cert-renew
+system_service_id: sys-ctl-mtn-cert-renew

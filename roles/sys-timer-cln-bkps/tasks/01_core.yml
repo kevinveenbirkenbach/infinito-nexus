@@ -6,12 +6,12 @@
   vars:
     flush_handlers: true
 
-- name: set systemctl_timer_service to sys-ctl-cln-bkps
+- name: set system_service_timer_service to sys-ctl-cln-bkps
   set_fact:
-    systemctl_timer_service: "sys-ctl-cln-bkps"
+    system_service_timer_service: "sys-ctl-cln-bkps"
 
-- name: "include role for sys-timer for {{ systemctl_timer_service }}"
+- name: "include role for sys-timer for {{ system_service_timer_service }}"
   include_role:
     name: sys-timer
   vars:
-    systemctl_on_calendar: "{{ SYS_SCHEDULE_CLEANUP_BACKUPS }}"
+    system_service_on_calendar: "{{ SYS_SCHEDULE_CLEANUP_BACKUPS }}"

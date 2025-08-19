@@ -14,7 +14,7 @@
     state: present
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_on_calendar: "{{SYS_SCHEDULE_HEALTH_NGINX}}"
-    systemctl_timer_enabled:  true
+    system_service_on_calendar: "{{SYS_SCHEDULE_HEALTH_NGINX}}"
+    system_service_timer_enabled:  true

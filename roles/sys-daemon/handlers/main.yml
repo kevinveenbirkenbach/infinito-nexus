@@ -1,4 +1,49 @@
-- name: "reload system daemon"
+- name: collect systemd unit files
+  shell: |
+    shopt -s nullglob
+    files=({{ PATH_SYSTEM_SERVICE_DIR }}*.service {{ PATH_SYSTEM_SERVICE_DIR }}*.timer)
+    printf "%s\n" "${files[@]}"
+  args:
+    executable: /bin/bash
+  register: _unit_files
+  changed_when: false
+  failed_when: false
+  become: true
+  listen:
+    - reload system daemon
+    - reexec systemd manager
+
+- name: validate systemd units
+  shell: |
+    systemd-analyze verify {{ _unit_files.stdout_lines | join(' ') }}
+  register: _verify_units
+  changed_when: false
+  failed_when: _unit_files.stdout | length > 0 and _verify_units.rc != 0
+  become: true
+  when: _unit_files.stdout | length > 0
+  listen:
+    - reload system daemon
+    - reexec systemd manager
+
+- name: show merged manager config
+  command: systemd-analyze cat-config systemd/system.conf
+  register: _catcfg
+  changed_when: false
+  become: true
+  listen:
+    - reload system daemon
+    - reexec systemd manager
+
+- name: reload system daemon
   command: systemctl daemon-reload
+  become: true
+  listen: reload system daemon
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- name: reexec systemd manager
+  command: systemctl daemon-reexec
+  become: true
+  listen: reexec systemd manager
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

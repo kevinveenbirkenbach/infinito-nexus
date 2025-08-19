@@ -13,9 +13,9 @@
     state: present
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_copy_files: false
-    systemctl_on_calendar: "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_RENEW }}"
+    system_service_copy_files: false
+    system_service_on_calendar: "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_RENEW }}"
     persistent: true
-    systemctl_timer_enabled:  true
+    system_service_timer_enabled:  true

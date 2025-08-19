@@ -5,4 +5,4 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 [Service]
 Type=oneshot
 ExecStartPre=/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP | join(' ') }} {{ 'update-docker' | get_service_name(SOFTWARE_NAME) }} --timeout "{{ SYS_TIMEOUT_HEAL_DOCKER }}"
-ExecStart={{ systemctl_script_exec }}
+ExecStart={{ system_service_script_exec }}

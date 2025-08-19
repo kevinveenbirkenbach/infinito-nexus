@@ -10,9 +10,9 @@
         - telegram_chat_id     # The Telegram chat ID to send messages to
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_copy_files: true
+    system_service_copy_files: true
 
 - name: install curl
   community.general.pacman:

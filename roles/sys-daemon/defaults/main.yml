@@ -1,0 +1,8 @@
+# General
+SYSTEMD_MANAGER_CONF_DIR:       "/etc/systemd/system.conf.d"
+
+# Defaults
+SYSTEMD_DEFAULT_TIMEOUT_START:  "90s"      # Maximum time a service is allowed to reach the 'active' state during startup
+SYSTEMD_DEFAULT_TIMEOUT_STOP:   "90s"      # Maximum time a service is allowed to stop gracefully before being killed
+SYSTEMD_DEFAULT_TIMEOUT_ABORT:  "90s"      # Additional grace period after Stop timeout before systemd sends SIGKILL
+

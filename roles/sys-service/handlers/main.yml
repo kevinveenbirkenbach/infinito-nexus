@@ -1,8 +1,8 @@
 - name: "refresh systemctl service"
   systemd:
-    name: "{{ systemctl_id | get_service_name(SOFTWARE_NAME) }}"
+    name: "{{ system_service_id | get_service_name(SOFTWARE_NAME) }}"
     daemon_reload: yes
     enabled: yes
-    state: "{{ systemctl_state }}"
+    state: "{{ system_service_state }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

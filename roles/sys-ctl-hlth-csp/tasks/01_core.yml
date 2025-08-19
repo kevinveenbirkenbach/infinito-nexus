@@ -11,7 +11,7 @@
     package_notify: rebuild checkcsp docker image
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_on_calendar: "{{ SYS_SCHEDULE_HEALTH_CSP_CRAWLER }}"
-    systemctl_timer_enabled: true
+    system_service_on_calendar: "{{ SYS_SCHEDULE_HEALTH_CSP_CRAWLER }}"
+    system_service_timer_enabled: true

@@ -1,4 +1,4 @@
-systemctl_id: sys-ctl-alm-compose@
+system_service_id: sys-ctl-alm-compose@
 
 SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES:
   - 'sys-ctl-alm-email'

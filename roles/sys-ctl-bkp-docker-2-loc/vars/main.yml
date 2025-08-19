@@ -5,7 +5,7 @@
 # - BKP_DOCKER_2_LOC_DISABLED:         All images where backup.disabled is set (for --images-no-backup-required)
 # CLI-ready variables render these lists as argument strings.
 
-systemctl_id: sys-ctl-bkp-docker-2-loc
+system_service_id: sys-ctl-bkp-docker-2-loc
 
 # Verify if DB is enabled
 BKP_DOCKER_2_LOC_DB_ENABLED: "{{ database_type | default('') | bool }}"

@@ -6,7 +6,7 @@
   - sys-lock
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_timer_enabled:  true
-    systemctl_on_calendar: "{{SYS_SCHEDULE_CLEANUP_DISC_SPACE}}"
+    system_service_timer_enabled:  true
+    system_service_on_calendar: "{{SYS_SCHEDULE_CLEANUP_DISC_SPACE}}"

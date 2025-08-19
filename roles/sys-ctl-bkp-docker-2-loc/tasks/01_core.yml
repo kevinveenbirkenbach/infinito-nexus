@@ -15,8 +15,8 @@
   when: MODE_RESET | bool
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_copy_files:     false
-    systemctl_timer_enabled:  false
-    systemctl_on_calendar:    "{{ SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL }}"
+    system_service_copy_files:     false
+    system_service_timer_enabled:  false
+    system_service_on_calendar:    "{{ SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL }}"

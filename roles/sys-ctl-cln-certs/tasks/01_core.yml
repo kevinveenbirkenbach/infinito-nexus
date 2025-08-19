@@ -12,8 +12,8 @@
     package_name: certreap
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_timer_enabled:  true
-    systemctl_on_calendar:    "{{ SYS_SCHEDULE_CLEANUP_CERTS }}"
-    systemctl_copy_files:     false
+    system_service_timer_enabled:  true
+    system_service_on_calendar:    "{{ SYS_SCHEDULE_CLEANUP_CERTS }}"
+    system_service_copy_files:     false

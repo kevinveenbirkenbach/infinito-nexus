@@ -1,2 +1,2 @@
-systemctl_id: sys-ctl-hlth-msmtp
+system_service_id: sys-ctl-hlth-msmtp
 

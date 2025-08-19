@@ -1,2 +1,2 @@
 application_id: update-docker
-systemctl_id: "{{ application_id }}"
+system_service_id: "{{ application_id }}"

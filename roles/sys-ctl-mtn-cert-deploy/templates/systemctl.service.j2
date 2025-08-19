@@ -4,4 +4,4 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 
 [Service]
 Type=oneshot
-ExecStart={{ systemctl_script_exec }} {{ ssl_cert_folder }} {{ docker_compose.directories.instance }} {{ LETSENCRYPT_LIVE_PATH }}
+ExecStart={{ system_service_script_exec }} {{ ssl_cert_folder }} {{ docker_compose.directories.instance }} {{ LETSENCRYPT_LIVE_PATH }}

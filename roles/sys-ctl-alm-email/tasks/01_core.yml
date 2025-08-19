@@ -5,8 +5,8 @@
   - sys-svc-msmtp
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_copy_files: true
+    system_service_copy_files: true
 
 

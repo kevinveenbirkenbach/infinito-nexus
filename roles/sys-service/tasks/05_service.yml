@@ -1,7 +1,7 @@
 # 1) Find the template (prefer target role, then fall back to this role)
 - name: Resolve systemctl template source
   set_fact:
-    systemctl_template_src: >-
+    system_service_template_src: >-
       {{ lookup(
            'first_found',
            {
@@ -10,7 +10,7 @@
                'templates/systemctl.service.j2'
              ],
              'paths': [
-               systemctl_role_dir,
+               system_service_role_dir,
                role_path
              ]
            },
@@ -20,22 +20,22 @@
 # Optional: sanity check with a clear error if truly nothing found
 - name: Ensure a systemctl template was found
   assert:
-    that: systemctl_template_src | length > 0
+    that: system_service_template_src | length > 0
     fail_msg: >-
       Could not resolve any systemctl template. Looked in:
-      {{ systemctl_role_dir }}/templates/ and {{ role_path }}/templates/.
+      {{ system_service_role_dir }}/templates/ and {{ role_path }}/templates/.
 
 # 2) Now we may safely derive whether it’s the “@” variant
 - name: Flag whether @-template is used
   set_fact:
-    systemctl_uses_at: "{{ (systemctl_template_src | basename) is search('@\\.service\\.j2$') }}"
+    system_service_uses_at: "{{ (system_service_template_src | basename) is search('@\\.service\\.j2$') }}"
 
 # 3) Use it
-- name: "setup systemctl '{{ systemctl_id }}'"
+- name: "setup systemctl '{{ system_service_id }}'"
   template:
-    src:  "{{ systemctl_template_src }}"
-    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, systemctl_id | get_service_name(SOFTWARE_NAME) ] | path_join }}"
-  notify: "{{ 'reload system daemon' if systemctl_uses_at else 'refresh systemctl service' }}"
+    src:  "{{ system_service_template_src }}"
+    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, system_service_id | get_service_name(SOFTWARE_NAME) ] | path_join }}"
+  notify: "{{ 'reload system daemon' if system_service_uses_at else 'refresh systemctl service' }}"
 
 - name:   refresh systemctl service when SYS_SERVICE_ALL_ENABLED
   command: /bin/true
@@ -44,4 +44,4 @@
     - refresh systemctl service
   when: 
     - SYS_SERVICE_ALL_ENABLED | bool
-    - not systemctl_uses_at
+    - not system_service_uses_at

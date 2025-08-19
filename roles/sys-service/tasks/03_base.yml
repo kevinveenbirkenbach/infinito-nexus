@@ -1,7 +1,6 @@
-# roles/sys-systemctl/tasks/03_base.yml
 - name: "find best matching source for service script"
   set_fact:
-    systemctl_script_src: >-
+    system_service_script_src: >-
       {{ lookup('first_found',
         {
           'files': [
@@ -10,21 +9,21 @@
             'files/script.sh',
             'files/script.py'
           ],
-          'paths': [ systemctl_role_dir ]
+          'paths': [ system_service_role_dir ]
         },
         errors='strict'
       ) }}
-  when: systemctl_copy_files | bool
+  when: system_service_copy_files | bool
 
-- name: "Load file logic for '{{ systemctl_id }}'"
+- name: "Load file logic for '{{ system_service_id }}'"
   include_tasks: 04_files.yml
   when:
-    - systemctl_copy_files | bool
-    - systemctl_script_src
+    - system_service_copy_files | bool
+    - system_service_script_src
 
-- name: "Load systemctl logic for '{{ systemctl_id }}'"
+- name: "Load systemctl logic for '{{ system_service_id }}'"
   include_tasks: 05_service.yml
 
-- name: "Load timer logic for '{{ systemctl_id }}'"
+- name: "Load timer logic for '{{ system_service_id }}'"
   include_tasks: 06_timer.yml
-  when: systemctl_timer_enabled | bool
+  when: system_service_timer_enabled | bool

@@ -23,4 +23,4 @@
       to non‑empty values in your configuration file.
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service

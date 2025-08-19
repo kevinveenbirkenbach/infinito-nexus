@@ -10,8 +10,8 @@
     package_name: btrfs-auto-balancer
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_copy_files: false
-    systemctl_on_calendar: "{{SYS_SCHEDULE_REPAIR_BTRFS_AUTO_BALANCER}}"
-    systemctl_timer_enabled:  true
+    system_service_copy_files: false
+    system_service_on_calendar: "{{SYS_SCHEDULE_REPAIR_BTRFS_AUTO_BALANCER}}"
+    system_service_timer_enabled:  true

@@ -1,2 +1,2 @@
 - include_role:
-    name: sys-systemctl
+    name: sys-service

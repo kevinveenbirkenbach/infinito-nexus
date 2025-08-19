@@ -4,7 +4,7 @@
   when: run_once_sys_lock is not defined
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_on_calendar: "{{SYS_SCHEDULE_REPAIR_DOCKER_SOFT}}"
-    systemctl_timer_enabled:  true
+    system_service_on_calendar: "{{SYS_SCHEDULE_REPAIR_DOCKER_SOFT}}"
+    system_service_timer_enabled:  true

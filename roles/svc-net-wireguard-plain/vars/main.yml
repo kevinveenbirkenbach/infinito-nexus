@@ -1,2 +1,2 @@
 application_id: svc-net-wireguard-plain
-systemctl_id:   "{{ application_id }}"
+system_service_id:   "{{ application_id }}"

@@ -1,0 +1,10 @@
+[Unit]
+Description={{ SOFTWARE_NAME }} - Service for role '{{ system_service_id }}'
+OnFailure={{ system_service_tpl_on_failure }}
+
+[Service]
+Type={{ system_service_tpl_type }}
+ExecStart={{ system_service_tpl_exec_start }}
+{% if system_service_tpl_runtime |length > 0 %}
+RuntimeMaxSec={{ system_service_tpl_runtime }}
+{% endif %}

@@ -4,4 +4,4 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 
 [Service]
 Type=oneshot
-ExecStart={{ systemctl_script_exec }} {{ vendor_and_product_id }}
+ExecStart={{ system_service_script_exec }} {{ vendor_and_product_id }}

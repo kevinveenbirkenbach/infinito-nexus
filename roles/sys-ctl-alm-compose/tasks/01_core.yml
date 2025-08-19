@@ -1,4 +1,4 @@
-- name: "Include dependent services for '{{ systemctl_id }}'"
+- name: "Include dependent services for '{{ system_service_id  }}'"
   include_role:
     name: '{{ item }}'
   loop:
@@ -9,14 +9,14 @@
     systemctl_timer_enabled: false
     systemctl_copy_files: true
 
-- name: "Include core service for '{{ systemctl_id }}'"
+- name: "Include core service for '{{ system_service_id  }}'"
   include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
     flush_handlers: true
     systemctl_timer_enabled: false
     systemctl_copy_files: true
-    systemctl_tpl_exec_start: "{{ systemctl_script_exec }} %i"
+    systemctl_tpl_exec_start: "{{ system_service_script_exec }} %i"
     systemctl_tpl_on_failure: "" # No on failure needed, because it's anyhow the default on failure procedure
 
 - name: "Send message to test service."

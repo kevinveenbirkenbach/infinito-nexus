@@ -11,6 +11,6 @@
   - MODE_BACKUP | bool
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_restarted: true
+    system_service_restarted: true

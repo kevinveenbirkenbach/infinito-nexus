@@ -2,7 +2,7 @@
 
 ## Description
 
-This role installs and configures the necessary components for sending email notifications via systemd when a service fails. It sets up the `{{ systemctl_id }}` service and configures email parameters and templates using msmtp.
+This role installs and configures the necessary components for sending email notifications via systemd when a service fails. It sets up the `{{ system_service_id }}` service and configures email parameters and templates using msmtp.
 
 ## Overview
 

@@ -4,9 +4,9 @@
   when: run_once_sys_ctl_alm_compose is not defined
 
 - include_role:
-    name: sys-systemctl
+    name: sys-service
   vars:
-    systemctl_state: restarted
-    systemctl_on_calendar:  "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_DEPLOY }}"
+    system_service_state: restarted
+    system_service_on_calendar:  "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_DEPLOY }}"
     persistent:   "true"
-    systemctl_timer_enabled:  true
+    system_service_timer_enabled:  true
