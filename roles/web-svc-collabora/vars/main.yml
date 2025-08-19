@@ -1,0 +1,11 @@
+---
+# General 
+application_id:         web-svc-collabora
+# Container
+container_port:         9980
+container_healthcheck:  "/hosting/discovery"
+
+# Collabora
+COLLABORA_CONTAINER:  "{{ applications | get_app_conf(application_id, 'docker.services.collabora.name') }}"
+COLLABORA_IMAGE:      "{{ applications | get_app_conf(application_id, 'docker.services.collabora.image') }}"
+COLLABORA_VERSION:    "{{ applications | get_app_conf(application_id, 'docker.services.collabora.version') }}"

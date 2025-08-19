@@ -29,6 +29,5 @@ galaxy_info:
   logo:
     class: "fa-solid fa-cloud"
   run_after:
-    - web-app-collabora
     - web-app-keycloak
     - web-app-mastodon

@@ -1,4 +1,11 @@
 ---
+#- name: "Install Collabora Dependency"
+#  include_role:
+#    name: web-svc-collabora
+#  vars:
+#    flush_handlers: true
+#  when: NEXTCLOUD_COLLABORA_ENABLED
+
 - name: "include role for {{ application_id }} to receive certs & do modification routines"
   include_role:
     name: srv-web-7-6-composer

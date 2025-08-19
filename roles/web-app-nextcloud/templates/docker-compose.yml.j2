@@ -4,10 +4,10 @@
     image: "{{ nextcloud_image }}:{{ nextcloud_version }}"
     container_name: {{ nextcloud_container }}
     volumes:
-      - data:{{nextcloud_docker_work_directory}}
+      - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
       - {{nextcloud_host_config_additives_directory}}:{{nextcloud_docker_config_additives_directory}}:ro
     healthcheck:
-      test: ["CMD", "su", "www-data", "-s", "/bin/sh", "-c", "php {{nextcloud_docker_work_directory}}occ status"]
+      test: ["CMD", "su", "www-data", "-s", "/bin/sh", "-c", "php {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}occ status"]
       interval: 1m
       timeout: 10s
       retries: 3
@@ -39,7 +39,7 @@
       driver: journald
     restart: {{ DOCKER_RESTART_POLICY }}
     ports:
-      - "127.0.0.1:{{ports.localhost.http[application_id]}}:{{ container_port }}"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
         - "{{ docker_compose.directories.volumes }}nginx.conf:/etc/nginx/nginx.conf:ro"
     volumes_from:
@@ -57,10 +57,10 @@
     logging:
       driver: journald
     volumes:
-      - data:{{nextcloud_docker_work_directory}}
+      - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
     entrypoint: /cron.sh
     healthcheck:
-      test: ["CMD", "su", "www-data", "-s", "/bin/sh", "-c", "php {{nextcloud_docker_work_directory}}occ status"]
+      test: ["CMD", "su", "www-data", "-s", "/bin/sh", "-c", "php {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}occ status"]
       interval: 1m
       timeout: 10s
       retries: 3

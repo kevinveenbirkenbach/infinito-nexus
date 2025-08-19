@@ -1,0 +1,16 @@
+server:
+  domains:
+    canonical:
+      - "collabora.{{ PRIMARY_DOMAIN }}"
+docker:
+  services:
+    redis:
+      enabled: true
+    database: 
+      enabled: false # May this is wrong. Just set during refactoring
+    collabora:
+      image: collabora/code
+      version: latest 
+      name: collabora
+features:
+  logout: false # I think collabora is more a service then a app. So no login neccessary  Propably it makes sense to rename it ;)

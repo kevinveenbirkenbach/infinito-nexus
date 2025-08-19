@@ -1,0 +1,6 @@
+- block:
+  - name: "load docker, proxy for '{{ application_id }}'"
+    include_role:
+      name: cmp-docker-proxy
+  - include_tasks: utils/run_once.yml
+  when: run_once_web_svc_collabora is not defined

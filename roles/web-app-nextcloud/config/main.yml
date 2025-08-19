@@ -9,11 +9,14 @@ server:
     whitelist:
       font-src:
         - "data:"
+      #frame-src:
+      #  - ""
   domains:
     canonical:
       - "cloud.{{ PRIMARY_DOMAIN }}"
-      # nextcloud:  "cloud.{{ PRIMARY_DOMAIN }}"
       # talk:       "talk.{{ PRIMARY_DOMAIN }}" @todo needs to be activated
+    helpers:
+      collabora: "{{ WEB_PROTOCOL ~ '://' ~ applications | get_app_conf('web-svc-collabora','server.domains.canonical[0]',False,'<< defaults_applications[web-svc-collabora].server.domains.canonical[0]>>') }}"
 docker:
   volumes:
     data: nextcloud_data
@@ -41,13 +44,8 @@ docker:
       image:    "nextcloud/aio-talk"
       version:  "latest"
       enabled:  false # Not enabled yet, because just implemented during refactoring and not tested yet. if tested activate
-    # Its in a own role. @todo remove it if it gets implemented via the other role
-    #collabora:
-    #  name:     "nextcloud-collabora"
-    #  image:    "nextcloud-collabora"
-    #  version:  "latest"
 oidc:
-  enabled:  " {{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True) }}"   # Activate OIDC for Nextcloud
+  enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin
   # @see https://apps.nextcloud.com/apps/oidc_login
@@ -149,7 +147,7 @@ plugins:
     enabled: false
   fileslibreofficeedit:
     # Nextcloud LibreOffice integration: allows online editing of documents with LibreOffice (https://apps.nextcloud.com/apps/fileslibreofficeedit)
-    enabled: true
+    enabled: "{{ not (applications | get_app_conf('web-app-nextcloud', 'plugins.richdocuments.enabled', False, True)) }}"
   forms:
     # Nextcloud forms: facilitates creation of forms and surveys (https://apps.nextcloud.com/apps/forms)
     enabled: true
@@ -225,7 +223,7 @@ plugins:
     enabled: false # Deactivated because it let to bugs
   richdocuments:
     # Nextcloud Rich Documents: provides collaborative document editing capabilities (https://apps.nextcloud.com/apps/richdocuments)
-    enabled: false # @todo To set it default to true activate https://hub.docker.com/r/collabora/code before
+    enabled: true # @todo To set it default to true activate https://hub.docker.com/r/collabora/code before
   sociallogin:
     # Nextcloud social login: allows authentication using social networks (https://apps.nextcloud.com/apps/sociallogin)
     enabled:    "{{ _applications_nextcloud_oidc_flavor=='sociallogin' | lower }}"

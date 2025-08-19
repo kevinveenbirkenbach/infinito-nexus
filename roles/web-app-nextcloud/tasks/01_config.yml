@@ -9,10 +9,10 @@
     - name: Flush handlers so Nextcloud container is restarted and ready
       meta: flush_handlers
 
-    - name: "Wait until Nextcloud is reachable on port {{ports.localhost.http[application_id]}}"
+    - name: "Wait until Nextcloud is reachable on port {{ ports.localhost.http[application_id] }}"
       wait_for:
         host: 127.0.0.1
-        port: "{{ports.localhost.http[application_id]}}"
+        port: "{{ ports.localhost.http[application_id] }}"
         timeout: 120
         delay: 2
         state: started
