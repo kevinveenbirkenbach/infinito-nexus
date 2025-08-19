@@ -1,8 +1,10 @@
 [Unit]
-Description=Notifier for %i
+Description={{ SOFTWARE_NAME }} - Alarm Notifier for %i
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/systemctl start {{ SYS_SERVICE_ON_FAILURE_EMAIL }} {{ SYS_SERVICE_ON_FAILURE_TELEGRAM }}
+{% for alarm_service in [ SYS_SERVICE_ON_FAILURE_EMAIL, SYS_SERVICE_ON_FAILURE_TELEGRAM ] %}
+ExecStart=/usr/bin/systemctl start {{ alarm_service }}
+{% endfor %}
 User=root
 Group=systemd-journal
