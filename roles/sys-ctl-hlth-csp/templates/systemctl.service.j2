@@ -4,4 +4,4 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/python3 {{ systemctl_id | get_service_script_path('py') }} --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}
+ExecStart={{ systemctl_script_exec }} --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}

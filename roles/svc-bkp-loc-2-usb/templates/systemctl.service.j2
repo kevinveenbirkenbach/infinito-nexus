@@ -5,7 +5,7 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 
 [Service]
 Type=oneshot
-ExecStart=/bin/python {{ systemctl_id | get_service_script_path('py') }} {{ BACKUP_TO_USB_SOURCE }} {{ BACKUP_TO_USB_DESTINATION }}
+ExecStart={{ systemctl_script_exec }} {{ BACKUP_TO_USB_SOURCE }} {{ BACKUP_TO_USB_DESTINATION }}
 ExecStartPost=/bin/systemctl start {{ SYS_SERVICE_CLEANUP_BACKUPS_OLD }}
 
 [Install]

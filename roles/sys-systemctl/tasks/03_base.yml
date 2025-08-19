@@ -1,7 +1,7 @@
 # roles/sys-systemctl/tasks/03_base.yml
 - name: "find best matching source for service script"
   set_fact:
-    service_src: >-
+    systemctl_script_src: >-
       {{ lookup('first_found',
         {
           'files': [
@@ -20,7 +20,7 @@
   include_tasks: 04_files.yml
   when:
     - systemctl_copy_files | bool
-    - service_src
+    - systemctl_script_src
 
 - name: "Load systemctl logic for '{{ systemctl_id }}'"
   include_tasks: 05_service.yml

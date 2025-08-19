@@ -9,3 +9,9 @@ systemctl_script_dir:     "{{ [ PATH_SYSTEMCTL_SCRIPTS, systemctl_id ] | path_jo
 systemctl_copy_files:     true  # When set to false file copying will be skipped
 systemctl_timer_enabled:  false # When set to true timmer will be loaded
 systemctl_state:          "{{ SYS_SERVICE_DEFAULT_STATE }}"
+
+# Dynamic Loaded ( Just available when dependencies are loaded )
+systemctl_script_base:    "{{ systemctl_script_src | basename | regex_replace('\\.j2$', '') }}"
+systemctl_script_type:    "{{ systemctl_script_base | filetype }}"
+systemctl_script_inter:   "/bin/{{ 'bash' if systemctl_script_type == 'sh' else 'python3'}}"
+systemctl_script_exec:    "{{ systemctl_script_inter }} {{ systemctl_id | get_service_script_path( systemctl_script_type ) }}"
