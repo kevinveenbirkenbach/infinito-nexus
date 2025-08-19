@@ -7,17 +7,17 @@ SYS_SERVICE_ALL_ENABLED:              false # Flush all services
 SYS_SERVICE_DEFAULT_STATE:            "{{ omit }}"
 
 ## Names
-SYS_SERVICE_CLEANUP_BACKUPS_OLD:      "{{ 'sys-ctl-cln-backups' | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_CLEANUP_BACKUPS_FAILED:   "{{ 'sys-ctl-cln-faild-bkps' | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_OPTIMIZE_DRIVE:           "{{ 'svc-opt-ssd-hdd' | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_BACKUP_RMT_2_LOC:         "{{ 'svc-bkp-rmt-2-loc' | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_CLEANUP_BACKUPS_OLD:      "{{ 'sys-ctl-cln-backups'     | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_CLEANUP_BACKUPS_FAILED:   "{{ 'sys-ctl-cln-faild-bkps'  | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_OPTIMIZE_DRIVE:           "{{ 'svc-opt-ssd-hdd'         | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_BACKUP_RMT_2_LOC:         "{{ 'svc-bkp-rmt-2-loc'       | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_REPAIR_DOCKER_HARD:       "{{ 'sys-ctl-rpr-docker-hard' | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_UPDATE_DOCKER:            "{{ 'update-docker' | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_UPDATE_DOCKER:            "{{ 'update-docker'           | get_service_name(SOFTWARE_NAME) }}"
 
 ## On Failure
-SYS_SERVICE_ON_FAILURE_COMPOSE:   "sys-ctl-alm-compose.{{ SOFTWARE_NAME | lower }}@%i.service"
-SYS_SERVICE_ON_FAILURE_EMAIL:     "sys-ctl-alm-email.{{ SOFTWARE_NAME | lower }}@%i.service"
-SYS_SERVICE_ON_FAILURE_TELEGRAM:  "sys-ctl-alm-telegram.{{ SOFTWARE_NAME | lower }}@%i.service"
+SYS_SERVICE_ON_FAILURE_COMPOSE:   "{{ 'sys-ctl-alm-compose'   | get_service_name(SOFTWARE_NAME,'%i.service') }}"
+SYS_SERVICE_ON_FAILURE_EMAIL:     "{{ 'sys-ctl-alm-email'     | get_service_name(SOFTWARE_NAME,'%i.service') }}"
+SYS_SERVICE_ON_FAILURE_TELEGRAM:  "{{ 'sys-ctl-alm-telegram'  | get_service_name(SOFTWARE_NAME,'%i.service') }}"
 
 ## Groups
 SYS_SERVICE_GROUP_BACKUPS: >
