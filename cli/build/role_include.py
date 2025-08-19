@@ -102,8 +102,10 @@ def find_cycle(roles):
 def topological_sort(graph, in_degree, roles=None):
     """
     Perform topological sort on the dependency graph.
-    If `roles` is provided, on error it will include detailed debug info.
+    If a cycle is detected, raise an Exception with detailed debug info.
     """
+    from collections import deque
+
     queue = deque([r for r, d in in_degree.items() if d == 0])
     sorted_roles = []
     local_in = dict(in_degree)
@@ -117,28 +119,26 @@ def topological_sort(graph, in_degree, roles=None):
                 queue.append(nbr)
 
     if len(sorted_roles) != len(in_degree):
+        # Something went wrong: likely a cycle
         cycle = find_cycle(roles or {})
-        if roles is not None:
-            if cycle:
-                header = f"Circular dependency detected: {' -> '.join(cycle)}"
-            else:
-                header = "Circular dependency detected among the roles!"
+        unsorted = [r for r in in_degree if r not in sorted_roles]
 
-            unsorted = [r for r in in_degree if r not in sorted_roles]
-            detail_lines = ["Unsorted roles and their dependencies:"]
+        header = "❌ Dependency resolution failed"
+        if cycle:
+            reason = f"Circular dependency detected: {' -> '.join(cycle)}"
+        else:
+            reason = "Unresolved dependencies among roles (possible cycle or missing role)."
+
+        details = []
+        if unsorted:
+            details.append("Unsorted roles and their declared run_after dependencies:")
             for r in unsorted:
                 deps = roles.get(r, {}).get('run_after', [])
-                detail_lines.append(f" - {r} depends on {deps!r}")
+                details.append(f"  - {r} depends on {deps!r}")
 
-            detail_lines.append("Full dependency graph:")
-            detail_lines.append(f" {dict(graph)!r}")
+        graph_repr = f"Full dependency graph: {dict(graph)!r}"
 
-            raise Exception("\n".join([header] + detail_lines))
-        else:
-            if cycle:
-                raise Exception(f"Circular dependency detected: {' -> '.join(cycle)}")
-            else:
-                raise Exception("Circular dependency detected among the roles!")
+        raise Exception("\n".join([header, reason] + details + [graph_repr]))
 
     return sorted_roles
 
