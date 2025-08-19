@@ -10,11 +10,11 @@ tls_trust_file /etc/ssl/certs/ca-certificates.crt
 tls            off
 {% endif %}
 
-account        {{ DEFAULT_EMAIL_ACCOUNT }}
+account        system_email_no_reply
 host           {{ SYSTEM_EMAIL.HOST }}
 port           {{ SYSTEM_EMAIL.PORT }}
 from           {{ users['no-reply'].email }}
 user           {{ users['no-reply'].email }}
 password       {{ users['no-reply'].mailu_token }}
 
-account default : {{ DEFAULT_EMAIL_ACCOUNT }}
+account default : system_email_no_reply

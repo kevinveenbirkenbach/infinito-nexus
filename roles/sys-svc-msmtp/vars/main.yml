@@ -1,1 +1,0 @@
-DEFAULT_EMAIL_ACCOUNT: "{{ SOFTWARE_NAME | replace('.', '_') | lower }}__default_email_account"
