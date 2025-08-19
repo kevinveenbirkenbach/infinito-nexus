@@ -6,9 +6,9 @@
   vars:
     flush_handlers: true
 
-- name: set systemctl_timer_service to sys-ctl-cln-backups
+- name: set systemctl_timer_service to sys-ctl-cln-bkps
   set_fact:
-    systemctl_timer_service: "sys-ctl-cln-backups"
+    systemctl_timer_service: "sys-ctl-cln-bkps"
 
 - name: "include role for sys-timer for {{ systemctl_timer_service }}"
   include_role:

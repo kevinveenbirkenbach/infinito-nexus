@@ -4,8 +4,8 @@ from filter_plugins import get_service_name
 class TestGetServiceName(unittest.TestCase):
     def test_default_suffix_service(self):
         self.assertEqual(
-            get_service_name.get_service_name("sys-ctl-cln-backups", "nginx"),
-            "sys-ctl-cln-backups.nginx.service"
+            get_service_name.get_service_name("sys-ctl-cln-bkps", "nginx"),
+            "sys-ctl-cln-bkps.nginx.service"
         )
 
     def test_default_suffix(self):
@@ -26,8 +26,8 @@ class TestGetServiceName(unittest.TestCase):
             "sys-ctl-bkp.postgres@"
         )
         self.assertEqual(
-            get_service_name.get_service_name("sys-ctl-cln-backups", "nginx", False),
-            "sys-ctl-cln-backups.nginx"
+            get_service_name.get_service_name("sys-ctl-cln-bkps", "nginx", False),
+            "sys-ctl-cln-bkps.nginx"
         )
 
     def test_case_is_lowered(self):
