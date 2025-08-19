@@ -6,7 +6,6 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 [Service]
 Type=oneshot
 ExecStart={{ system_service_script_exec }} {{ BACKUP_TO_USB_SOURCE }} {{ BACKUP_TO_USB_DESTINATION }}
-ExecStartPost=/bin/systemctl start {{ SYS_SERVICE_CLEANUP_BACKUPS_OLD }}
 
 [Install]
 WantedBy=multi-user.target
