@@ -189,7 +189,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    primary_domain = '{{ PRIMARY_DOMAIN }}'
+    primary_domain = '{{ SYSTEM_EMAIL.DOMAIN }}'
     become_pwd = '{{ lookup("password", "/dev/null length=42 chars=ascii_letters,digits") }}'
 
     try:
