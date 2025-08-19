@@ -17,8 +17,6 @@ SYS_SERVICE_UPDATE_DOCKER:            "{{ 'update-docker'           | get_servic
 
 ## On Failure
 SYS_SERVICE_ON_FAILURE_COMPOSE:       "{{ 'sys-ctl-alm-compose'   | get_service_name(SOFTWARE_NAME,'%i.service') }}"
-SYS_SERVICE_ON_FAILURE_EMAIL:         "{{ 'sys-ctl-alm-email'     | get_service_name(SOFTWARE_NAME,'%i.service') }}"
-SYS_SERVICE_ON_FAILURE_TELEGRAM:      "{{ 'sys-ctl-alm-telegram'  | get_service_name(SOFTWARE_NAME,'%i.service') }}"
 
 ## Groups
 SYS_SERVICE_GROUP_BACKUPS: >

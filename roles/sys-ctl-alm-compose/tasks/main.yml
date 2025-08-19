@@ -1,14 +1,4 @@
 - block:
-  - name: "Include '{{ systemctl_id }}'"
-    include_role:
-      name: '{{ item }}'
-    loop:
-      - sys-ctl-alm-telegram
-      - sys-ctl-alm-email
-      - sys-systemctl
-    vars:
-      flush_handlers: true
-      systemctl_timer_enabled: false
-      systemctl_copy_files: false
+  - include_tasks: 01_core.yml
   - include_tasks: utils/run_once.yml
   when: run_once_sys_ctl_alm_compose is not defined
