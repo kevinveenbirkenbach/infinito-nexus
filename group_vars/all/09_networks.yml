@@ -84,7 +84,7 @@ defaults_networks:
       subnet: 192.168.103.64/28
     web-app-syncope:
       subnet: 192.168.103.80/28
-    web-app-collabora:
+    web-svc-collabora:
       subnet: 192.168.103.96/28
     web-svc-simpleicons:
       subnet: 192.168.103.112/28
