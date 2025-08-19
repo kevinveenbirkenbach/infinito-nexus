@@ -6,7 +6,5 @@
 
 - include_role:
     name: sys-service
-  vars:
-    system_service_copy_files: true
 
 
