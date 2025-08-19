@@ -1,14 +1,14 @@
 docker:
   services:
     redis:
-      enabled:        false # No redis needed
+      enabled:  false # No redis needed
     database:
-      enabled:        false # No database needed
+      enabled:  false # No database needed
 features:
-  matomo:             true  # activate tracking
-  css:                true  # use custom infinito stile 
-  desktop:    true  # Enable in port-ui
-  logout:             false
+  matomo:       true  # activate tracking
+  css:          true  # use custom infinito stile 
+  desktop:      true  # Enable in port-ui
+  logout:       false
 server:
   csp:
     whitelist:

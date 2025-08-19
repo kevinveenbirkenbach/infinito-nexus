@@ -4,8 +4,8 @@ credentials:
     algorithm: "bcrypt"
     validation: "^\\$2[aby]\\$.{56}$"
 
-OPT_DRIVE_RAPID_STORAGE_PATH:
+rapid_storage:
   description: "Mount path of the servers SSD"
 
-OPT_DRIVE_MASS_STORAGE_PATH:
+mass_storage:
   description: "Mount path of the servers HDD"
