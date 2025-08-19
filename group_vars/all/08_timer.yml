@@ -3,7 +3,7 @@
 
 ## Meta
 SYS_TIMER_SUFFIX:       ".{{ SOFTWARE_NAME | lower }}.timer"
-SYS_TIMER_ALL_ENABLED:  false   # Runtime Variables for Process Control - Activates all timers, independend if the handlers had been triggered
+SYS_TIMER_ALL_ENABLED:  "{{ not MODE_DEBUG }}"   # Runtime Variables for Process Control - Activates all timers, independend if the handlers had been triggered
 
 ## Server Tact Variables 
 

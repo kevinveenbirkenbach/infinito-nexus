@@ -3,11 +3,11 @@
 
 ## Meta
 SYS_SERVICE_SUFFIX:                   ".{{ SOFTWARE_NAME | lower }}.service"
-SYS_SERVICE_ALL_ENABLED:              false # Flush all services
-SYS_SERVICE_DEFAULT_STATE:            "{{ omit }}"
+SYS_SERVICE_ALL_ENABLED:              "{{ not MODE_DEBUG }}" # Flush all services
+SYS_SERVICE_DEFAULT_STATE:            "{{ 'restarted' if MODE_DEBUG else omit }}"
 
 ## Names
-SYS_SERVICE_CLEANUP_BACKUPS_OLD:      "{{ 'sys-ctl-cln-bkps'     | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_CLEANUP_BACKUPS_OLD:      "{{ 'sys-ctl-cln-bkps'        | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_CLEANUP_BACKUPS_FAILED:   "{{ 'sys-ctl-cln-faild-bkps'  | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_OPTIMIZE_DRIVE:           "{{ 'svc-opt-ssd-hdd'         | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_BACKUP_RMT_2_LOC:         "{{ 'svc-bkp-rmt-2-loc'       | get_service_name(SOFTWARE_NAME) }}"
