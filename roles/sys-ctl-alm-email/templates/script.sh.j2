@@ -1,19 +1,23 @@
 #!/bin/bash
 set -u
+# Reverse systemd escaping for human-readable mail subject/body
+friendly="$(systemd-escape --unescape "$1")"
 
+# Try status with given arg; if empty, also try the escaped version
 STATUS_OUT="$(systemctl status --full "$1" 2>/dev/null | head -n 30)"
 if [ -z "$STATUS_OUT" ]; then
-  STATUS_OUT="(no matching systemd unit found for: $1)"
+  esc="$(systemd-escape "$1")"
+  STATUS_OUT="$(systemctl status --full "$esc" 2>/dev/null | head -n 30)"
 fi
 
 /usr/bin/sendmail -t <<ERRMAIL
 To: {{ users.administrator.email }}
 From: systemd <{{ users['no-reply'].email }}>
-Subject: $1
+Subject: ${friendly}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain; charset=UTF-8
 
-A problem with the service $1 occurred:
+A problem with the service ${friendly} occurred:
 
 $STATUS_OUT
 

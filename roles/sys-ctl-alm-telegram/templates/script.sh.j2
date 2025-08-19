@@ -1,4 +1,8 @@
 #!/bin/bash
+set -u
+
+# Make the instance text human readable again (reverse systemd escaping)
+friendly="$(systemd-escape --unescape "$1")"
 
 # determine host name: try hostname command, otherwise use $HOSTNAME
 if command -v hostname &>/dev/null; then
@@ -11,4 +15,4 @@ fi
 /usr/bin/curl -s -X POST \
   "https://api.telegram.org/bot{{ telegram_bot_token }}/sendMessage" \
   -d chat_id="{{ telegram_chat_id }}" \
-  -d text="service $1 on ${host} failed"
+  --data-urlencode text="service ${friendly} on ${host} failed"
