@@ -1,7 +1,4 @@
-- include_role:
-    name: sys-ctl-hlth-msmtp
-  when: run_once_sys_ctl_hlth_msmtp is not defined
-  
+
 - name: install msmtp msmtp-mta
   community.general.pacman:
     name:
@@ -14,3 +11,7 @@
     src: "msmtprc.conf.j2"
     dest: "/root/.msmtprc"
     mode: 600
+
+- include_role:
+    name: sys-ctl-hlth-msmtp
+  when: run_once_sys_ctl_hlth_msmtp is not defined
