@@ -28,6 +28,7 @@
       fail_msg: "Group '{{ item }}' has no entry in 'applications'"
       success_msg: "Group '{{ item }}' is defined in 'applications'"
     loop: "{{ group_names }}"
+    when: MODE_ASSERT | bool
 
   - name: Merge current play applications
     set_fact:

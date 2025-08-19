@@ -1,5 +1,6 @@
 - name: "Validate configuration"
   include_tasks: "02_validate.yml"
+  when: MODE_ASSERT | bool
 
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:

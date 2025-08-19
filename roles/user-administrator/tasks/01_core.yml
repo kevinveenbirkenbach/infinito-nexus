@@ -12,6 +12,7 @@
     generate_ssh_key: yes
     ssh_key_type: rsa
     ssh_key_bits: 8192
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"  
 
 - name: "set correct rights for {{ PATH_ADMINISTRATOR_HOME }}"
   file:

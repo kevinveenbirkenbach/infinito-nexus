@@ -6,6 +6,7 @@
       - MAILU_HOSTNAMES | length <= 1
     fail_msg: "MAILU_HOSTNAMES must be a list with at most one entry (only one host is supported). You can set the other ones as alias."
     success_msg: "MAILU_HOSTNAMES is valid."
+  when: MODE_ASSERT | bool
 
 - name: "Mailu Docker and Webserver Setup"
   block:

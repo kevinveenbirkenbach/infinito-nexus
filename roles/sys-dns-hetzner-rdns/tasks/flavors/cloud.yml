@@ -14,6 +14,7 @@
     that: [ "_hz_token | length > 0" ]
     fail_msg: "HETZNER_API_TOKEN is required for the Cloud flavor."
   no_log: "{{ hetzner_no_log | bool }}"
+  when: MODE_ASSERT | bool
 
 - name: Collect hcloud servers if needed (server records without identifier)
   hetzner.hcloud.server_info:
@@ -61,6 +62,7 @@
         )
     fail_msg: "Could not resolve hcloud server by IPv4 for one or more records."
   no_log: "{{ hetzner_no_log | bool }}"
+  when: MODE_ASSERT | bool
 
 - name: Validate records (cloud)
   ansible.builtin.assert:
@@ -74,6 +76,7 @@
           + ((_rdns_records | default(rdns_records)) | rejectattr('resource','equalto','server') | list | length)
         ) == ((_rdns_records | default(rdns_records)) | length)
   no_log: "{{ hetzner_no_log | bool }}"
+  when: MODE_ASSERT | bool
 
 - name: Apply rDNS via hcloud
   hetzner.hcloud.hcloud_rdns:

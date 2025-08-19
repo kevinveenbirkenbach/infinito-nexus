@@ -7,3 +7,4 @@ MODE_BACKUP:  true  # Activates the backup before the update procedure
 MODE_CLEANUP: true  # Cleanup unused files and configurations
 MODE_DEBUG:   false # This enables debugging in ansible and in the apps, You SHOULD NOT enable this on production servers
 MODE_RESET:   false # Cleans up all Infinito.Nexus files. It's necessary to run to whole playbook and not particial roles when using this function.
+MODE_ASSERT:  false # Executes validation tasks during the run.

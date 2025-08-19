@@ -16,6 +16,7 @@
       - docker_compose is defined
       - ports is defined
     fail_msg: "Load roles/docker-compose/vars/docker-compose.yml and set `database_type` first."
+  when: MODE_ASSERT | bool
 
 - name: "Disconnect DB container from Discourse networks"
   ansible.builtin.command:

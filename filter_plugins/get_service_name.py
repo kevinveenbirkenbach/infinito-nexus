@@ -15,8 +15,8 @@ Suffix handling:
 """
 
 def get_service_name(systemctl_id, software_name, suffix=""):
-    sid = str(systemctl_id).strip().lower()
-    sw  = str(software_name).strip().lower()
+    sid           = str(systemctl_id).strip().lower()
+    software_name = str(software_name).strip().lower()
 
     # Determine suffix
     if suffix is False:
@@ -24,14 +24,13 @@ def get_service_name(systemctl_id, software_name, suffix=""):
     elif suffix == "" or suffix is None:
         sfx = ".service"
     else:
-        sfx = "." + str(suffix).strip().lower()
+        sfx = str(suffix).strip().lower()
 
     if sid.endswith("@"):
         base = sid[:-1]  # drop the trailing '@'
-        return f"{base}.{sw}@{sfx}"
+        return f"{base}.{software_name}@{sfx}"
     else:
-        return f"{sid}.{sw}{sfx}"
-
+        return f"{sid}.{software_name}{sfx}"
 
 class FilterModule(object):
     def filters(self):

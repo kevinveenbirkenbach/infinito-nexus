@@ -18,6 +18,7 @@
       - kc_lookup_value is defined
       - kc_desired is defined
     fail_msg: "kc_object_kind, kc_lookup_value, kc_desired are required."
+  when: MODE_ASSERT | bool
 
 - name: Derive API endpoint and lookup field
   set_fact:
@@ -67,6 +68,7 @@
       - (kc_obj_id | trim) != ''
       - (kc_obj_id | trim) != 'null'
     fail_msg: "{{ kc_object_kind | capitalize }} '{{ kc_lookup_value }}' not found."
+  when: MODE_ASSERT | bool
 
 - name: Read current object
   shell: >
@@ -85,6 +87,7 @@
   when:
     - kc_object_kind == 'component'
     - (kc_desired.providerId is defined)
+    - MODE_ASSERT | bool
   assert:
     that:
       - cur_obj.providerId == kc_desired.providerId

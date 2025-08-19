@@ -36,8 +36,6 @@ http
                   '"X-Forwarded-For: $http_x_forwarded_for" '
                   '"Scheme: $scheme" "Protocol: $server_protocol" "ServerName: $server_name"';
   access_log  /dev/stdout  debug;
-{% else %}
-  access_log  /dev/stdout  debug;
 {% endif %}
   error_log  /dev/stderr  info;
 

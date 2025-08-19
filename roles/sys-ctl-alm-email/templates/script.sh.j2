@@ -1,4 +1,10 @@
 #!/bin/bash
+set -u
+
+STATUS_OUT="$(systemctl status --full "$1" 2>/dev/null | head -n 30)"
+if [ -z "$STATUS_OUT" ]; then
+  STATUS_OUT="(no matching systemd unit found for: $1)"
+fi
 
 /usr/bin/sendmail -t <<ERRMAIL
 To: {{ users.administrator.email }}
@@ -7,9 +13,8 @@ Subject: $1
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain; charset=UTF-8
 
-A problem with the service $1 occured:
+A problem with the service $1 occurred:
 
-$(systemctl status --full "$1" | head -n 30)
-
+$STATUS_OUT
 
 ERRMAIL

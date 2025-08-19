@@ -1,13 +1,4 @@
 ---
-- name: Wait until OpenResty container is running
-  command: docker inspect -f '{{.State.Running}}' {{ OPENRESTY_CONTAINER }}
-  register: openresty_status
-  retries: 10
-  delay: 3
-  until: openresty_status.stdout.strip() == "true"
-  changed_when: false
-  listen: restart openresty
-
 - name: Validate OpenResty configuration
   command: >
     docker exec {{ OPENRESTY_CONTAINER }} openresty -t -q

@@ -12,6 +12,7 @@
     name: github.com
     key: "{{ lookup('pipe', 'ssh-keyscan -t ed25519 github.com | grep -v \"^#\"') }}"
   become: true
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Create installation directory for Kevin's Package Manager
   file:
@@ -37,7 +38,7 @@
 - name: create config.yaml
   template:
     src: config.yaml.j2
-    dest: "{{pkgmgr_config_path}}"
+    dest: "{{ pkgmgr_config_path }}"
   become: true
 
 - name: Run the Package Manager install command to create an alias for Kevins package manager

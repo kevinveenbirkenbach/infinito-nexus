@@ -1,10 +1,11 @@
 #!/bin/bash
 err=0
 set -u
-{% for alarm_service in SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES %}
-{% set alarm_service_full_name = alarm_service | get_service_name(SOFTWARE_NAME, '"$1".service') %}
-if ! /usr/bin/systemctl start {{ alarm_service_full_name }}; then
-  echo "ERROR: Failed to start {{ alarm_service_full_name }}" >&2
+{% for alarm in SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES %}
+# sys-ctl-alm-email.infinito.nexus@<escaped>.service (no extra dot!)
+unit="{{ (alarm ~ '@') | get_service_name(SOFTWARE_NAME, False) }}$(systemd-escape "$1").service"
+if ! /usr/bin/systemctl start -- "$unit"; then
+  echo "ERROR: Failed to start $unit" >&2
   err=1
 fi
 {% endfor %}

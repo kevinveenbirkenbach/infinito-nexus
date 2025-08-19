@@ -21,6 +21,7 @@
         - target
         - source
       to non‑empty values in your configuration file.
+  when: MODE_ASSERT | bool
 
 - include_role:
     name: sys-service

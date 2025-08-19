@@ -1,6 +1,8 @@
 [Unit]
 Description={{ SOFTWARE_NAME }} - Service for role '{{ system_service_id }}'
+{% if system_service_tpl_on_failure |length > 0 %}
 OnFailure={{ system_service_tpl_on_failure }}
+{% endif %}
 
 [Service]
 Type={{ system_service_tpl_type }}

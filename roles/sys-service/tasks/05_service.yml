@@ -1,4 +1,3 @@
-# 1) Find the template (prefer target role, then fall back to this role)
 - name: Resolve systemctl template source
   set_fact:
     system_service_template_src: >-
@@ -17,31 +16,29 @@
            errors='strict'
          ) }}
 
-# Optional: sanity check with a clear error if truly nothing found
 - name: Ensure a systemctl template was found
   assert:
     that: system_service_template_src | length > 0
     fail_msg: >-
       Could not resolve any systemctl template. Looked in:
       {{ system_service_role_dir }}/templates/ and {{ role_path }}/templates/.
+  when: MODE_ASSERT | bool
 
-# 2) Now we may safely derive whether it’s the “@” variant
 - name: Flag whether @-template is used
   set_fact:
-    system_service_uses_at: "{{ (system_service_template_src | basename) is search('@\\.service\\.j2$') }}"
+    system_service_uses_at: "{{ system_service_id.endswith('@') }}"
 
-# 3) Use it
 - name: "setup systemctl '{{ system_service_id }}'"
   template:
     src:  "{{ system_service_template_src }}"
     dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, system_service_id | get_service_name(SOFTWARE_NAME) ] | path_join }}"
   notify: "{{ 'reload system daemon' if system_service_uses_at else 'refresh systemctl service' }}"
 
-- name:   refresh systemctl service when SYS_SERVICE_ALL_ENABLED
-  command: /bin/true
-  notify:
-    - reload system daemon
-    - refresh systemctl service
-  when: 
-    - SYS_SERVICE_ALL_ENABLED | bool
-    - not system_service_uses_at
+- name: refresh systemctl service when SYS_SERVICE_ALL_ENABLE
+  block:
+  - command: /bin/true
+    notify: reload system daemon
+  - command: /bin/true
+    notify: refresh systemctl service
+    when: not system_service_uses_at
+  when: SYS_SERVICE_ALL_ENABLED | bool

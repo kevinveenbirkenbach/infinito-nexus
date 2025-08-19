@@ -8,6 +8,7 @@
       Please provide non‑empty values for:
         - telegram_bot_token   # Your Telegram bot’s API token
         - telegram_chat_id     # The Telegram chat ID to send messages to
+  when: MODE_ASSERT | bool
 
 - include_role:
     name: sys-service
