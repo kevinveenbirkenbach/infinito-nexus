@@ -1452,7 +1452,7 @@
     "replyTo": "",
     "host": "{{ SYSTEM_EMAIL.HOST }}",
     "from": "{{ users['no-reply'].email }}",
-    "fromDisplayName": "Keycloak Authentification System - {{domains | get_domain('web-app-keycloak')}}",
+    "fromDisplayName": "Keycloak Authentification System - {{ KEYCLOAK_DOMAIN | upper }}",
     "envelopeFrom": "",
     "ssl": "true",
     "user": "{{ users['no-reply'].email }}"
