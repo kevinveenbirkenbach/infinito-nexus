@@ -97,7 +97,7 @@
     volumes:
       - "filter:/var/lib/rspamd"
       - "dkim:/dkim"
-      - "{{ docker_compose.directories.volumes }}overrides/rspamd:/overrides:ro"
+      - "{{ MAILU_RSPAMD_HOST_DIR }}:/overrides:ro"
     depends_on:
       - front
       - redis

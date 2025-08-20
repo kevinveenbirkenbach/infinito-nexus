@@ -10,6 +10,7 @@
     - docker compose up
     - docker compose restart
     - docker compose just up
+  when: MODE_ASSERT | bool
 
 - name: docker compose pull
   shell: |

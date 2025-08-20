@@ -58,3 +58,10 @@ MAILU_DMARC_RUF:                      "{{ applications | get_app_conf(applicatio
 
 MAILU_DKIM_KEY_FILE:                  "{{ MAILU_DOMAIN }}.dkim.key"
 MAILU_DKIM_KEY_PATH:                  "/dkim/{{ MAILU_DKIM_KEY_FILE }}"
+
+## Rspamd
+MAILU_RSPAMD_HOST_DIR:                "{{ [ docker_compose.directories.volumes, 'overrides/rspamd' ] | path_join }}"
+MAILU_RSPAMD_HOST_FILE:               "{{ [ MAILU_RSPAMD_HOST_DIR,'ratelimit.conf' ] | path_join }}"
+MAILU_RSPAMD_LIMITS_DEFAULTS:
+  RATE:   "30 / 1min"
+  BURST:  50        

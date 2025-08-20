@@ -5,3 +5,6 @@ users:
     email: "demo@{{ PRIMARY_DOMAIN }}"
     roles: []
     description: Demo User
+    limits:
+      rate:  "60 / 1min"   # token fill rate (N per window)
+      burst: 3600          # max immediate tokens

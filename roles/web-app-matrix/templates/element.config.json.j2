@@ -5,9 +5,10 @@
             "server_name": "{{ MATRIX_SYNAPSE_DOMAIN }}"
         },
         "m.identity_server": {
-            "base_url": "{{ WEB_PROTOCOL }}://{{ PRIMARY_DOMAIN }}"
+            "base_url": "{{ MATRIX_BASE_URL }}"
         }
     },
+    "logout_redirect_url": "{{ OIDC.CLIENT.LOGOUT_URL if MATRIX_OIDC_ENABLED else MATRIX_BASE_URL }}",
     "brand": "Element",
     "integrations_ui_url": "https://scalar.vector.im/",
     "integrations_rest_url": "https://scalar.vector.im/api",

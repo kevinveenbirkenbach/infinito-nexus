@@ -3,8 +3,8 @@ server {
     {% include 'roles/srv-letsencrypt/templates/ssl_header.j2' %}
     
     # For the federation port
-    listen {{ FEDERATION_PORT }} ssl default_server;
-    listen [::]:{{ FEDERATION_PORT }} ssl default_server;
+    listen {{ MATRIX_FEDERATION_PORT }} ssl default_server;
+    listen [::]:{{ MATRIX_FEDERATION_PORT }} ssl default_server;
 
     {% include 'roles/sys-srv-web-inj-compose/templates/server.conf.j2'%}
 

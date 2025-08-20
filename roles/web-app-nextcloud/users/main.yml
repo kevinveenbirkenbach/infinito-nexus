@@ -1,7 +1,17 @@
 users:      
   administrator:
-    username:               "administrator"
+    username:     "administrator"
   no-reply:
-    username:               "no-reply"
+    username:     "no-reply"
     roles:
       - mail-bot
+    limits:
+      rate:  "60 / 1min"
+      burst: 3600
+  test12345:
+    username:     "treset12345"
+    roles:
+      - mail-bot
+    limits:
+      rate:  "60 / 1min"
+      burst: 3600
