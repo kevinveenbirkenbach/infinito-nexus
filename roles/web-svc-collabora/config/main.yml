@@ -2,6 +2,10 @@ server:
   domains:
     canonical:
       - "collabora.{{ PRIMARY_DOMAIN }}"
+  csp:
+    whitelist:
+      frame-ancestors:
+        - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
     redis:
@@ -9,9 +13,9 @@ docker:
     database: 
       enabled: false # May this is wrong. Just set during refactoring
     collabora:
-      image: collabora/code
-      version: latest 
-      name: collabora
+      image:    collabora/code
+      version:  latest 
+      name:     collabora
 features:
   logout:   false 
   desktop:  true # Just set to allow the iframe to load it

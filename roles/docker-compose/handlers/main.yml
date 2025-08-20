@@ -11,6 +11,30 @@
     - docker compose restart
     - docker compose just up
 
+- name: docker compose pull
+  shell: |
+    set -euo pipefail
+    lock="/run/ansible/compose-pull/{{ docker_compose.directories.instance | hash('sha1') }}"
+    if [ ! -e "$lock" ]; then
+      mkdir -p "$(dirname "$lock")"
+      docker compose pull
+      : > "$lock"
+      echo "pulled"
+    fi
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+    executable: /bin/bash
+  register: compose_pull
+  changed_when: "'pulled' in compose_pull.stdout"
+  environment:
+    COMPOSE_HTTP_TIMEOUT: 600
+    DOCKER_CLIENT_TIMEOUT: 600
+  when: (MODE_UPDATE | bool
+  listen:
+    - docker compose up
+    - docker compose restart
+    - docker compose just up
+
 - name: Build docker compose 
   shell: |
     set -euo pipefail
