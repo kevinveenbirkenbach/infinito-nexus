@@ -4,16 +4,16 @@
     msg: "{{ allowed_applications }}"
   when: MODE_DEBUG | bool
 
+- name: Merge system_email definitions
+  set_fact:
+    SYSTEM_EMAIL: "{{ DEFAULT_SYSTEM_EMAIL | combine(system_email | default({}, true), recursive=True) }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
 - name: Merge variables
   block:
   - name: Merge users
     set_fact:
       users: "{{ default_users | combine(users| default({}), recursive=True) }}"
-    no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
-  - name: Merge system_email definitions
-    set_fact:
-      SYSTEM_EMAIL: "{{ DEFAULT_SYSTEM_EMAIL | combine(system_email | default({}, true), recursive=True) }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge application definitions
