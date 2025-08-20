@@ -2,5 +2,9 @@
   - name: "load docker, proxy for '{{ application_id }}'"
     include_role:
       name: cmp-docker-proxy
+    vars:
+      docker_compose_flush_handlers: true
+  - name: "Load core functions for '{{ application_id }}'"
+    include_tasks: 01_core.yml
   - include_tasks: utils/run_once.yml
   when: run_once_web_svc_collabora is not defined

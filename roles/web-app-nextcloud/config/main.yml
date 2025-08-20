@@ -10,6 +10,7 @@ server:
       font-src:
         - "data:"
       connect-src:
+        - "wss://collabora.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
       frame-src:
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"

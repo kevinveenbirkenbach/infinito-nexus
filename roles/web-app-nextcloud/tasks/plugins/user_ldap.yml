@@ -4,3 +4,6 @@
 - name: Set Nextcloud LDAP bind password
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:set-config s01 ldapAgentPassword "{{ ldap.bind_credential }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

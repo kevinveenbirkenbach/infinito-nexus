@@ -69,3 +69,4 @@ nextcloud_docker_include_instructions_file:     "/tmp/includes.php"             
 ## Execution
 NEXTCLOUD_DOCKER_EXEC:                          "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}" # General execute composition
 NEXTCLOUD_DOCKER_EXEC_OCC:                      "{{NEXTCLOUD_DOCKER_EXEC}} {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}occ"   # Execute docker occ command
+# NEXTCLOUD_COLLOBORA_CONF_EXEC:                  "docker exec {{ applications | get_app_conf('web-svc-collabora', 'docker.services.collabora.name') }} coolconfig"

@@ -5,8 +5,9 @@
   vars:
     flush_handlers: true
   when:    
-  - run_once_web_svc_collabora is not defined
-  - NEXTCLOUD_COLLABORA_ENABLED
+    - run_once_web_svc_collabora is not defined
+    - NEXTCLOUD_COLLABORA_ENABLED | bool
+
 
 - name: "include role for {{ application_id }} to receive certs & do modification routines"
   include_role:
@@ -59,7 +60,6 @@
 - name: Load system configuration steps
   include_tasks: "{{ item }}"
   loop:
-    - 02_upgrade.yml
     - 03_admin.yml
     - 04_system_config.yml
 

@@ -6,6 +6,9 @@ container_port:         9980
 container_healthcheck:  "/hosting/discovery"
 
 # Collabora
-COLLABORA_CONTAINER:  "{{ applications | get_app_conf(application_id, 'docker.services.collabora.name') }}"
-COLLABORA_IMAGE:      "{{ applications | get_app_conf(application_id, 'docker.services.collabora.image') }}"
-COLLABORA_VERSION:    "{{ applications | get_app_conf(application_id, 'docker.services.collabora.version') }}"
+COLLABORA_CONTAINER:        "{{ applications | get_app_conf(application_id, 'docker.services.collabora.name') }}"
+COLLABORA_IMAGE:            "{{ applications | get_app_conf(application_id, 'docker.services.collabora.image') }}"
+COLLABORA_VERSION:          "{{ applications | get_app_conf(application_id, 'docker.services.collabora.version') }}"
+COLLABORA_DOCKER_CONF_EXEC: "docker exec {{ COLLABORA_CONTAINER }} coolconfig"
+COLLABORA_ALLOWED_DOMAINS:  "(.*\\.|){{ PRIMARY_DOMAIN | regex_replace('\\.', '\\\\.') }}"
+COLLABORA_ALLOWED_HOSTS:    "{{ domains | get_domain('web-app-nextcloud') }}"
