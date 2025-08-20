@@ -18,3 +18,8 @@
     docker exec --user root {{ matomo_name }}
     sed -i "s/^password *=.*/password = {{ database_password }}/" {{ matomo_config }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: Update trusted host
+  command: >
+    docker exec --user root {{ matomo_name }}
+    sed -i "s|^trusted_hosts\[\].*|trusted_hosts[] = \"{{ domain }}\"|" {{ matomo_config }}
