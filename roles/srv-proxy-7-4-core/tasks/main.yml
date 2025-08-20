@@ -1,9 +1,0 @@
-- block:
-  - name: Include dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - srv-web-7-6-https
-    - srv-web-7-4-core
-  - include_tasks: utils/run_once.yml
-  when: run_once_srv_proxy_7_4_core is not defined

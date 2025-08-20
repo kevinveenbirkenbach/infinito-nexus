@@ -1,0 +1,10 @@
+- block:
+  - name: Include dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - srv-core
+    - sys-svc-cln-domains
+    - srv-letsencrypt
+  - include_tasks: utils/run_once.yml
+  when: run_once_srv_https_stack is not defined

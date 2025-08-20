@@ -1,7 +1,7 @@
 ---
 - name: "include role for {{ application_id }} to receive certs & do modification routines"
   include_role:
-    name: srv-web-7-6-composer
+    name: srv-composer
 
 - name: "load docker and db for {{ application_id }}"
   include_role: 

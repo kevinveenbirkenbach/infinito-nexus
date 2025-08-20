@@ -8,9 +8,9 @@
   include_role:
     name: cmp-db-docker
 
-- name: "For '{{ application_id }}': include role srv-proxy-6-6-domain"
+- name: "For '{{ application_id }}': include role srv-domain-provision"
   include_role:
-    name: srv-proxy-6-6-domain
+    name: srv-domain-provision
   vars:
     domain:     "{{ domains | get_domain(application_id) }}"
     http_port:  "{{ ports.localhost.http[application_id] }}"

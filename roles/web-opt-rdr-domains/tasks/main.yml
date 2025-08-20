@@ -1,8 +1,8 @@
 - block:
-  - name: Include dependency 'srv-web-7-6-https'
+  - name: Include dependency 'srv-https-stack'
     include_role:
-      name: srv-web-7-6-https
-    when: run_once_srv_web_7_6_https is not defined
+      name: srv-https-stack
+    when: run_once_srv_https_stack is not defined
   - include_tasks: utils/run_once.yml
   when: run_once_web_opt_rdr_domains is not defined
 

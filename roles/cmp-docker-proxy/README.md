@@ -8,4 +8,4 @@ This role combines the standard Docker Compose setup with a reverse-proxy for an
   Brings up containers, networks, and volumes via the `docker-compose` role.
 
 - **Reverse Proxy**  
-  Uses the `srv-proxy-6-6-domain` role to expose your application under a custom domain and port.
+  Uses the `srv-domain-provision` role to expose your application under a custom domain and port.

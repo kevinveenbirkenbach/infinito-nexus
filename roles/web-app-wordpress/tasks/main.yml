@@ -1,7 +1,7 @@
 ---
-- name: "Include role srv-proxy-6-6-domain for {{ application_id }}"
+- name: "Include role srv-domain-provision for {{ application_id }}"
   include_role:
-    name: srv-proxy-6-6-domain
+    name: srv-domain-provision
   loop: "{{ wordpress_domains }}"
   loop_control:
     loop_var: domain

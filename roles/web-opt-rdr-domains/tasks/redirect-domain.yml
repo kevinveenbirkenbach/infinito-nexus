@@ -1,6 +1,6 @@
 - name: "include task receive certbot certificate"
   include_role: 
-    name: srv-web-6-6-tls-core
+    name: srv-tls-core
 
 - name: "Deploying NGINX redirect configuration for '{{ domain }}'"
   template:

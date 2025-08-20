@@ -2,12 +2,12 @@
   include_role:
     name: '{{ item }}'
   loop:
-  - srv-web-7-6-https
+  - srv-https-stack
   - dev-git
   
 - name: "include role for {{ application_id }} to receive certs & do modification routines"
   include_role:
-    name: srv-web-7-6-composer
+    name: srv-composer
   vars:
     http_port: "{{ ports.localhost.http[application_id] }}"
 

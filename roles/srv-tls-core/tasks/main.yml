@@ -1,0 +1,45 @@
+- block:
+  - name: Include dependency 'srv-https-stack'
+    include_role:
+      name: srv-https-stack
+    when: run_once_srv_https_stack is not defined
+  - include_tasks: utils/run_once.yml
+  when: run_once_srv_tls_core is not defined
+
+- name: "Include flavor '{{ CERTBOT_FLAVOR }}' for '{{ domain }}'"
+  include_tasks: "{{ role_path }}/tasks/flavors/{{ CERTBOT_FLAVOR }}.yml"
+
+#- name: "Cleanup dedicated cert for '{{ domain }}'"
+#  command: >-
+#    certbot delete --cert-name {{ domain }} --non-interactive
+#  when: 
+#    - MODE_CLEANUP | bool
+#      # Cleanup mode is enabled
+#    - CERTBOT_FLAVOR != 'dedicated'
+#      # Wildcard certificate is enabled
+#    - domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN)
+#      # AND: The domain is a direct first-level subdomain of the primary domain
+#    - domain != PRIMARY_DOMAIN  
+#      # The domain is not the primary domain
+#  register: certbot_result
+#  failed_when: certbot_result.rc != 0 and ("No certificate found with name" not in certbot_result.stderr)
+#  changed_when: certbot_result.rc == 0 and ("No certificate found with name" not in certbot_result.stderr)
+
+- name: "Find SSL cert folder for '{{ domain }}'"
+  cert_folder_find:
+    domain: "{{ domain }}"
+    cert_base_path: "{{ LETSENCRYPT_LIVE_PATH }}"
+    debug: "{{ MODE_DEBUG | bool }}"
+  register: cert_folder_result
+  delegate_to: "{{ inventory_hostname }}"
+  changed_when: false
+
+- name: "Set ssl_cert_folder fact to '{{ cert_folder_result.folder }}'"
+  set_fact:
+    ssl_cert_folder: "{{ cert_folder_result.folder }}"
+  changed_when: false
+
+- name: "Ensure ssl_cert_folder is set for domain {{ domain }}"
+  fail:
+    msg: "No certificate folder found for domain {{ domain }}"
+  when: ssl_cert_folder is undefined or ssl_cert_folder is none

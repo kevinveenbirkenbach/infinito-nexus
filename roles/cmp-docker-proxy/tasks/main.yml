@@ -1,9 +1,9 @@
 # run_once_cmp_docker_proxy: deactivated
 
 # Load the proxy first, so that openresty handlers are flushed before the main docker compose
-- name: "For '{{ application_id }}': include role srv-proxy-6-6-domain"
+- name: "For '{{ application_id }}': include role srv-domain-provision"
   include_role:
-    name: srv-proxy-6-6-domain
+    name: srv-domain-provision
   vars:
     domain:   "{{ domains | get_domain(application_id) }}"
     http_port:   "{{ ports.localhost.http[application_id] }}"

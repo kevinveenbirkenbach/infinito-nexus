@@ -1,0 +1,9 @@
+# run_once_srv_composer: deactivated
+
+- name: "include role sys-srv-web-inj-compose for '{{ domain }}'"
+  include_role: 
+    name: sys-srv-web-inj-compose
+
+- name: "include role srv-tls-core for '{{ domain }}'"
+  include_role: 
+    name: srv-tls-core

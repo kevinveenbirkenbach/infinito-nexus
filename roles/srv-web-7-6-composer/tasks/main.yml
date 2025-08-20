@@ -1,9 +1,0 @@
-# run_once_srv_web_7_6_composer: deactivated
-
-- name: "include role sys-srv-web-inj-compose for '{{ domain }}'"
-  include_role: 
-    name: sys-srv-web-inj-compose
-
-- name: "include role srv-web-6-6-tls-core for '{{ domain }}'"
-  include_role: 
-    name: srv-web-6-6-tls-core

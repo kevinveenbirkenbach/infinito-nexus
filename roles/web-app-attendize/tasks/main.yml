@@ -1,7 +1,7 @@
 ---
 - name: "For '{{ application_id }}': include role to receive certs & do modification routines"
   include_role:
-    name: srv-web-7-6-composer
+    name: srv-composer
   vars:
     domain: "{{ item }}"
     http_port:   "{{ ports.localhost.http[application_id] }}"
@@ -17,7 +17,7 @@
     
 - name: "For '{{ application_id }}': configure {{ domains | get_domain(application_id) }}.conf"
   template: 
-    src: roles/srv-proxy-7-4-core/templates/vhost/basic.conf.j2 
+    src: roles/srv-proxy-core/templates/vhost/basic.conf.j2 
     dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty
 

@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: >
-    Extends cmp-db-docker by adding an HTTP reverse proxy via srv-proxy-6-6-domain.
+    Extends cmp-db-docker by adding an HTTP reverse proxy via srv-domain-provision.
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions

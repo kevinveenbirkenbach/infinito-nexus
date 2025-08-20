@@ -9,7 +9,7 @@ This Ansible role configures Nginx to perform 301 redirects from one domain to a
 
 ## Dependencies
 
-- `srv-web-7-6-https`: A role for setting up HTTPS for Nginx
+- `srv-https-stack`: A role for setting up HTTPS for Nginx
 - `letsencrypt`: A role for managing SSL certificates with Let's Encrypt
 
 ## Author Information

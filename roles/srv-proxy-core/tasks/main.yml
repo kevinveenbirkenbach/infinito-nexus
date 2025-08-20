@@ -1,0 +1,9 @@
+- block:
+  - name: Include dependencies
+    include_role:
+      name: '{{ item }}'
+    loop:
+    - srv-https-stack
+    - srv-core
+  - include_tasks: utils/run_once.yml
+  when: run_once_srv_proxy_core is not defined

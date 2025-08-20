@@ -9,16 +9,16 @@
     src:  "well-known.j2" 
     dest: "{{ MATRIX_WELL_KNOWN_FILE }}"
         
-- name: "include role srv-proxy-6-6-domain for {{ MATRIX_ELEMENT_DOMAIN }}"
+- name: "include role srv-domain-provision for {{ MATRIX_ELEMENT_DOMAIN }}"
   include_role: 
-    name: srv-proxy-6-6-domain
+    name: srv-domain-provision
   vars:        
     domain:     "{{ MATRIX_ELEMENT_DOMAIN }}"
     http_port:  "{{ MATRIX_ELEMENT_PORT }}"
 
 - name: "include role for {{ application_id }} to receive certs & do modification routines for {{ MATRIX_SYNAPSE_DOMAIN }}"
   include_role:
-    name: srv-web-7-6-composer
+    name: srv-composer
   vars:
     domain:     "{{ MATRIX_SYNAPSE_DOMAIN }}"
     http_port:  "{{ MATRIX_SYNAPSE_PORT }}"

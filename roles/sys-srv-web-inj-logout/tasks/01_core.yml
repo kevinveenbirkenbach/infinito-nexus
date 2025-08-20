@@ -1,8 +1,8 @@
-- name: Include dependency 'srv-web-7-4-core'
+- name: Include dependency 'srv-core'
   include_role:
-    name: srv-web-7-4-core
+    name: srv-core
   when: 
-    - run_once_srv_web_7_4_core is not defined
+    - run_once_srv_core is not defined
   
 - name: "deploy the logout.js"
   include_tasks: "02_deploy.yml"

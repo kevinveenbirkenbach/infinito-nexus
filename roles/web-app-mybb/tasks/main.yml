@@ -1,8 +1,8 @@
 - block:
-  - name: Include dependency 'srv-proxy-7-4-core'
+  - name: Include dependency 'srv-proxy-core'
     include_role:
-      name: srv-proxy-7-4-core
-    when: run_once_srv_proxy_7_4_core is not defined
+      name: srv-proxy-core
+    when: run_once_srv_proxy_core is not defined
   - include_tasks: utils/run_once.yml
   when: run_once_web_app_mybb is not defined
 

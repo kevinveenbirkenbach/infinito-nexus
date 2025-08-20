@@ -1,18 +1,18 @@
 server {
   server_name {{ domain }};
 
-  {% include 'roles/srv-web-7-7-letsencrypt/templates/ssl_header.j2' %}
+  {% include 'roles/srv-letsencrypt/templates/ssl_header.j2' %}
 
   {% include 'roles/sys-srv-web-inj-compose/templates/server.conf.j2'%}
   
-  {% include 'roles/srv-proxy-7-4-core/templates/headers/content_security_policy.conf.j2' %}
+  {% include 'roles/srv-proxy-core/templates/headers/content_security_policy.conf.j2' %}
   
   ##
   # Application
   ##
 
   {% set location = "@html" %}
-  {% include 'roles/srv-proxy-7-4-core/templates/location/html.conf.j2' %}
+  {% include 'roles/srv-proxy-core/templates/location/html.conf.j2' %}
 
   location / {
     try_files /dev/null {{ location }};
@@ -45,7 +45,7 @@ server {
   ##
 
   {% set location_ws = "@websocket" %}
-  {% include 'roles/srv-proxy-7-4-core/templates/location/ws.conf.j2' %}
+  {% include 'roles/srv-proxy-core/templates/location/ws.conf.j2' %}
 
   location /socket.io {
     try_files /dev/null {{ location_ws }};

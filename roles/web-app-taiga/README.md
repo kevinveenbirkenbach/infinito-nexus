@@ -39,7 +39,7 @@ By using this role, teams can set up Taiga in minutes on Arch Linux systems — 
     - [taiga-contrib-oidc-auth (official)](https://github.com/taigaio/taiga-contrib-oidc-auth)
 - 📨 **Email Backend:** Supports SMTP and console backends for development.
 - 🔁 **Async & Realtime Events:** Includes RabbitMQ and support for Taiga’s event system.
-- 🌐 **Reverse Proxy Ready:** Integrates with Nginx using the `srv-proxy-6-6-domain` role.
+- 🌐 **Reverse Proxy Ready:** Integrates with Nginx using the `srv-domain-provision` role.
 - 🧩 **Composable Design:** Integrates cleanly with other Infinito.Nexus infrastructure roles.
 
 ---

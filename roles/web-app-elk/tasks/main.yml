@@ -1,8 +1,8 @@
 ---
 
-- name: "include role srv-proxy-6-6-domain for {{ application_id }}"
+- name: "include role srv-domain-provision for {{ application_id }}"
   include_role:
-    name: srv-proxy-6-6-domain
+    name: srv-domain-provision
   vars:
     domain:   "{{ domains | get_domain(application_id) }}"
     http_port:   "{{ ports.localhost.http[application_id] }}"

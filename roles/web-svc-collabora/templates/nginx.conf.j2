@@ -1,22 +1,22 @@
 server {
   server_name {{ domain }};
 
-  {% include 'roles/srv-web-7-7-letsencrypt/templates/ssl_header.j2' %}
+  {% include 'roles/srv-letsencrypt/templates/ssl_header.j2' %}
   {% include 'roles/sys-srv-web-inj-compose/templates/server.conf.j2'%}
 
-  {% include 'roles/srv-proxy-7-4-core/templates/headers/content_security_policy.conf.j2' %}
+  {% include 'roles/srv-proxy-core/templates/headers/content_security_policy.conf.j2' %}
 
   {# Normal HTTP routes (discovery, browser, assets) – no Lua injection #}
   {% set proxy_lua_enabled = false %}
   {% set location = "/" %}
-  {% include 'roles/srv-proxy-7-4-core/templates/location/html.conf.j2' %}
+  {% include 'roles/srv-proxy-core/templates/location/html.conf.j2' %}
 
   {# Optional explicit fast path for discovery #}
   {% set location = "= " ~ container_healthcheck %}
-  {% include 'roles/srv-proxy-7-4-core/templates/location/html.conf.j2' %}
+  {% include 'roles/srv-proxy-core/templates/location/html.conf.j2' %}
 
   {# WebSocket handling for Collabora #}
   {% set location_ws = '^~ /cool/' %}
   {% set ws_port = http_port %}
-  {% include 'roles/srv-proxy-7-4-core/templates/location/ws.conf.j2' %}
+  {% include 'roles/srv-proxy-core/templates/location/ws.conf.j2' %}
 }

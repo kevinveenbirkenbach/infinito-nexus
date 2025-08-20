@@ -1,7 +1,7 @@
 ---
 - name: "Include setup for domain '{{ domain }}'"
   include_role: 
-    name: srv-proxy-6-6-domain
+    name: srv-domain-provision
   loop: "{{ domains['web-app-mastodon'] }}"
   loop_control:
     loop_var: domain

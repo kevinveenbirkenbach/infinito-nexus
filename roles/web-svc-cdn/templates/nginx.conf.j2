@@ -2,11 +2,11 @@ server
 {
   server_name {{ domains | get_domain(application_id) }};
   
-  {% include 'roles/srv-web-7-7-letsencrypt/templates/ssl_header.j2' %}
+  {% include 'roles/srv-letsencrypt/templates/ssl_header.j2' %}
 
   {% include 'roles/sys-srv-web-inj-compose/templates/server.conf.j2'%}
 
-  {% include 'roles/srv-proxy-7-4-core/templates/headers/content_security_policy.conf.j2' %}
+  {% include 'roles/srv-proxy-core/templates/headers/content_security_policy.conf.j2' %}
   
   charset utf-8;
   
