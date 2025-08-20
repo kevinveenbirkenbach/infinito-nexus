@@ -9,14 +9,14 @@ server:
     whitelist:
       font-src:
         - "data:"
-      #frame-src:
-      #  - ""
+      frame-src:
+        - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "wss://collabora.{{ PRIMARY_DOMAIN }}"
   domains:
     canonical:
       - "cloud.{{ PRIMARY_DOMAIN }}"
       # talk:       "talk.{{ PRIMARY_DOMAIN }}" @todo needs to be activated
-    helpers:
-      collabora: "{{ WEB_PROTOCOL ~ '://' ~ applications | get_app_conf('web-svc-collabora','server.domains.canonical[0]',False,'<< defaults_applications[web-svc-collabora].server.domains.canonical[0]>>') }}"
 docker:
   volumes:
     data: nextcloud_data
@@ -54,11 +54,11 @@ oidc:
 features:
   matomo:                       true
   css:                          false
-  desktop:              true
+  desktop:                      true
   ldap:                         true
   oidc:                         true
   central_database:             true
-  logout:             true
+  logout:                       true
 default_quota:                 '1000000000'                                     # Quota to assign if no quota is specified in the OIDC response (bytes)
 legacy_login_mask:   
   enabled:                      False                                           # If true, then legacy  login mask is shown. Otherwise just SSO

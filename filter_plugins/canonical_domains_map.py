@@ -4,45 +4,78 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from module_utils.entity_name_utils import get_entity_name
+from module_utils.role_dependency_resolver import RoleDependencyResolver
+
 
 class FilterModule(object):
     def filters(self):
         return {'canonical_domains_map': self.canonical_domains_map}
 
-    def canonical_domains_map(self, apps, PRIMARY_DOMAIN):
+    def canonical_domains_map(
+        self,
+        apps,
+        PRIMARY_DOMAIN,
+        *,
+        recursive: bool = False,
+        roles_base_dir: str | None = None,
+    ):
         """
-        Maps applications to their canonical domains, checking for conflicts 
-        and ensuring all domains are valid and unique across applications.
+        Build { app_id: [canonical domains...] }.
+
+        Rekursiv werden nur include_role, import_role und meta/main.yml:dependencies verfolgt.
+        'run_after' wird hier absichtlich ignoriert.
         """
+        if not isinstance(apps, dict):
+            raise AnsibleFilterError(f"'apps' must be a dict, got {type(apps).__name__}")
+
+        app_keys = set(apps.keys())
+
+        if recursive:
+            roles_base_dir = roles_base_dir or os.path.join(os.getcwd(), "roles")
+            if not os.path.isdir(roles_base_dir):
+                raise AnsibleFilterError(
+                    f"roles_base_dir '{roles_base_dir}' not found or not a directory."
+                )
+
+            resolver = RoleDependencyResolver(roles_base_dir)
+            # WICHTIG: resolve_run_after=False (hart)
+            discovered_roles = resolver.resolve_transitively(
+                start_roles=app_keys,
+                resolve_include_role=True,
+                resolve_import_role=True,
+                resolve_dependencies=True,
+                resolve_run_after=False,
+                max_depth=None,
+            )
+            target_apps = discovered_roles & app_keys
+        else:
+            target_apps = app_keys
+
         result = {}
         seen_domains = {}
 
-        for app_id, cfg in apps.items():
-            if app_id.startswith((
-                    "web-",
-                    "svc-db-"   # Database services can also be exposed to the internet. It is just listening to the port, but the domain is used for port mapping
-                    )):
-                if not isinstance(cfg, dict):
-                    raise AnsibleFilterError(
-                    f"Invalid configuration for application '{app_id}': "
-                    f"expected a dict, got {cfg!r}"
+        for app_id in sorted(target_apps):
+            cfg = apps.get(app_id)
+            if cfg is None:
+                continue
+            if not str(app_id).startswith(("web-", "svc-db-")):
+                continue
+            if not isinstance(cfg, dict):
+                raise AnsibleFilterError(
+                    f"Invalid configuration for application '{app_id}': expected dict, got {cfg!r}"
                 )
-                
-                domains_cfg = cfg.get('server',{}).get('domains',{})
-                if not domains_cfg or 'canonical' not in domains_cfg:
-                    self._add_default_domain(app_id, PRIMARY_DOMAIN, seen_domains, result)
-                    continue
 
-                canonical_domains = domains_cfg['canonical']
-                self._process_canonical_domains(app_id, canonical_domains, seen_domains, result)
+            domains_cfg = cfg.get('server', {}).get('domains', {})
+            if not domains_cfg or 'canonical' not in domains_cfg:
+                self._add_default_domain(app_id, PRIMARY_DOMAIN, seen_domains, result)
+                continue
+
+            canonical_domains = domains_cfg['canonical']
+            self._process_canonical_domains(app_id, canonical_domains, seen_domains, result)
 
         return result
 
     def _add_default_domain(self, app_id, PRIMARY_DOMAIN, seen_domains, result):
-        """
-        Add the default domain for an application if no canonical domains are defined.
-        Ensures the domain is unique across applications.
-        """
         entity_name = get_entity_name(app_id)
         default_domain = f"{entity_name}.{PRIMARY_DOMAIN}"
         if default_domain in seen_domains:
@@ -54,40 +87,21 @@ class FilterModule(object):
         result[app_id] = [default_domain]
 
     def _process_canonical_domains(self, app_id, canonical_domains, seen_domains, result):
-        """
-        Process the canonical domains for an application, handling both lists and dicts,
-        and ensuring each domain is unique.
-        """
         if isinstance(canonical_domains, dict):
-            self._process_canonical_domains_dict(app_id, canonical_domains, seen_domains, result)
+            for _, domain in canonical_domains.items():
+                self._validate_and_check_domain(app_id, domain, seen_domains)
+            result[app_id] = canonical_domains.copy()
         elif isinstance(canonical_domains, list):
-            self._process_canonical_domains_list(app_id, canonical_domains, seen_domains, result)
+            for domain in canonical_domains:
+                self._validate_and_check_domain(app_id, domain, seen_domains)
+            result[app_id] = list(canonical_domains)
         else:
             raise AnsibleFilterError(
                 f"Unexpected type for 'server.domains.canonical' in application '{app_id}': "
                 f"{type(canonical_domains).__name__}"
             )
 
-    def _process_canonical_domains_dict(self, app_id, domains_dict, seen_domains, result):
-        """
-        Process a dictionary of canonical domains for an application.
-        """
-        for name, domain in domains_dict.items():
-            self._validate_and_check_domain(app_id, domain, seen_domains)
-        result[app_id] = domains_dict.copy()
-
-    def _process_canonical_domains_list(self, app_id, domains_list, seen_domains, result):
-        """
-        Process a list of canonical domains for an application.
-        """
-        for domain in domains_list:
-            self._validate_and_check_domain(app_id, domain, seen_domains)
-        result[app_id] = list(domains_list)
-
     def _validate_and_check_domain(self, app_id, domain, seen_domains):
-        """
-        Validate the domain and check if it has already been assigned to another application.
-        """
         if not isinstance(domain, str) or not domain.strip():
             raise AnsibleFilterError(
                 f"Invalid domain entry in 'canonical' for application '{app_id}': {domain!r}"
