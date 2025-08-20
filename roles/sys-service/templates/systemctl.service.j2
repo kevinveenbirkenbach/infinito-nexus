@@ -1,14 +1,17 @@
 [Unit]
 Description={{ SOFTWARE_NAME }} - Service for role '{{ system_service_id }}'
 {{- system_service_tpl_on_failure | systemd_directive('OnFailure') }}
+StartLimitIntervalSec=60
+StartLimitBurst=3
+OnFailureJobMode=replace-irreversibly
 
 [Service]
 Type={{ system_service_tpl_type }}
-{%- for key, val in [
+{% for key, val in [
   ('TimeoutStartSec', system_service_tpl_timeout_start_sec),
   ('ExecStartPre',    system_service_tpl_exec_start_pre),
   ('ExecStart',       system_service_tpl_exec_start),
   ('RuntimeMaxSec',   system_service_tpl_runtime)
-] -%}
-{{- val | systemd_directive(key) }}
-{%- endfor %}
+] %}
+{{ val | systemd_directive(key) }}
+{% endfor %}

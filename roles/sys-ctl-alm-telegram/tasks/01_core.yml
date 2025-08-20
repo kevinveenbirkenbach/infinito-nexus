@@ -12,6 +12,10 @@
 
 - include_role:
     name: sys-service
+  vars:
+    # If the Telegram notifier fails, trigger the Email notifier,
+    # passing the failing unit's name as the instance text.
+    system_service_tpl_on_failure: "{{ ('sys-ctl-alm-email@') | get_service_name(SOFTWARE_NAME, False) }}%n.service"
 
 - name: install curl
   community.general.pacman:
