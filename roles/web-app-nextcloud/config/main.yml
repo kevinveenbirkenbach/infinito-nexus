@@ -9,8 +9,9 @@ server:
     whitelist:
       font-src:
         - "data:"
-      frame-src:
+      connect-src:
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+      frame-src:
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "wss://collabora.{{ PRIMARY_DOMAIN }}"
   domains:
