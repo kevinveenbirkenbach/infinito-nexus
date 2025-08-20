@@ -5,7 +5,7 @@ server:
 docker:
   services:
     redis:
-      enabled: true
+      enabled: false
     database: 
       enabled: false # May this is wrong. Just set during refactoring
     collabora:

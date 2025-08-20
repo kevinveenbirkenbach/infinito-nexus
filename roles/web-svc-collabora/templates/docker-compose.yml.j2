@@ -2,17 +2,11 @@
 
   collabora:
     {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: {{ COLLABORA_IMAGE }}
-    version: {{ COLLABORA_VERSION }}
+    image: "{{ COLLABORA_IMAGE }}:{{ COLLABORA_VERSION }}"
     container_name: {{ COLLABORA_CONTAINER }}
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:9980/hosting/discovery"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

@@ -12,7 +12,7 @@ server {
   {% include 'roles/srv-proxy-7-4-core/templates/location/html.conf.j2' %}
 
   {# Optional explicit fast path for discovery #}
-  {% set location = "= /hosting/discovery" %}
+  {% set location = "= " ~ container_healthcheck %}
   {% include 'roles/srv-proxy-7-4-core/templates/location/html.conf.j2' %}
 
   {# WebSocket handling for Collabora #}
