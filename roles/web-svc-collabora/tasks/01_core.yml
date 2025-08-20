@@ -1,3 +1,9 @@
+- name: "generate {{ domains | get_domain(application_id) }}.conf"
+  template:
+    src: "nginx.conf.j2"
+    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf"
+  notify: restart openresty
+
 - name: Update Collabora systemplate to include new fonts
   command: "{{ COLLABORA_DOCKER_CONF_EXEC }} update-system-template"
   register: collabora_fonts
