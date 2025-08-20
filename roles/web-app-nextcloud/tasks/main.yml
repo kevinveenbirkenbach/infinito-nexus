@@ -53,13 +53,13 @@
   meta: flush_handlers
 
 - name: Update\Upgrade Nextcloud
-  include_tasks: 02_upgrade
+  include_tasks: 02_upgrade.yml
   when: MODE_UPDATE | bool
 
 - name: Load system configuration steps
   include_tasks: "{{ item }}"
   loop:
-    - 02_upgrade
+    - 02_upgrade.yml
     - 03_admin.yml
     - 04_system_config.yml
 
