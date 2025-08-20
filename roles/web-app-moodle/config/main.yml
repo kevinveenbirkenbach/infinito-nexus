@@ -2,7 +2,7 @@ site_titel:           "Academy on {{ PRIMARY_DOMAIN }}"
 features:
   matomo:             true
   css:                false
-  desktop:    true
+  desktop:            true
   central_database:   true
   oidc:               true
   logout:             true

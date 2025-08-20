@@ -5,7 +5,7 @@ setup_admin_email:  "{{ users.administrator.email }}"
 features:
   matomo:           true
   css:              true
-  desktop:  true
+  desktop:          true
   central_database: true
   logout:           true 
 server:

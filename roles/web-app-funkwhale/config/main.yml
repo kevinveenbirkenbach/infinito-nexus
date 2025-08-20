@@ -15,11 +15,11 @@ docker:
 features:
   matomo:             true
   css:                false
-  desktop:    true
+  desktop:            true
   ldap:               true
   central_database:   true
   oauth2:             false # Doesn't make sense to activate it atm, because login is possible on homepage
-  logout:   true
+  logout:             true
 server:
   domains:
     canonical:

@@ -3,12 +3,12 @@ images:
 features:
   matomo:             true
   css:                false # Temporary deactivated
-  desktop:    true
+  desktop:            true
   oidc:               false # Implementation doesn't work yet
   central_database:   true
   ldap:               true
   oauth2:             false # No special login side which could be protected, use 2FA of Friendica instead
-  logout:   true
+  logout:             true
 server:
   domains:
     canonical:

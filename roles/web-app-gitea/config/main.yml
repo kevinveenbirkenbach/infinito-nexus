@@ -7,12 +7,12 @@ configuration:
 features:
   matomo:                         true
   css:                            false
-  desktop:                true
+  desktop:                        true
   central_database:               true
   ldap:                           true
   oauth2:                         true
   oidc:                           false     # Deactivated because users aren't auto-created. 
-  logout:               true
+  logout:                         true
 oauth2_proxy:
   application:                    "application"
   port:                           "<< defaults_applications[web-app-gitea].docker.services.gitea.port >>"

@@ -1,9 +1,9 @@
 features:
-  matomo:             true
-  css:                true
-  desktop:    true
-  central_database:   true
-  logout:   true
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
+  logout:           true
 docker:
   services:
     redis:

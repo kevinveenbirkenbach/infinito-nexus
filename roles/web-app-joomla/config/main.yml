@@ -3,9 +3,9 @@ images:
 features:
   matomo:             true
   css:                true
-  desktop:    true
+  desktop:            true
   central_database:   true
-  logout:   true
+  logout:             true
 server:
   domains:
     canonical:
