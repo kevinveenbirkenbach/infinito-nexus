@@ -1,3 +1,8 @@
+- name: Remove all docker compose pull locks
+  file:
+    path: "{{ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR }}"
+    state: absent
+
 - name: "Load docker container role"
   include_role:
     name: docker-container
