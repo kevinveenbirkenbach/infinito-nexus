@@ -4,10 +4,12 @@
       name: sys-ctl-alm-compose
     when: run_once_sys_ctl_alm_compose is not defined
   - include_tasks: utils/run_once.yml
+  - include_role:
+      name: sys-service
+      vars:
+        system_service_on_calendar:    "{{ SYS_SCHEDULE_HEALTH_DISC_SPACE }}"
+        system_service_timer_enabled:  true
+        system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+  - name: "Flush handlers a second time"
+    include_tasks: utils/run_once.yml
   when: run_once_sys_ctl_hlth_disc_space is not defined
-
-- include_role:
-    name: sys-service
-  vars:
-    system_service_on_calendar:    "{{ SYS_SCHEDULE_HEALTH_DISC_SPACE }}"
-    system_service_timer_enabled:  true

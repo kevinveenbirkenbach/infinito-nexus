@@ -1,20 +1,20 @@
-- block:
-  - name: Include dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - dev-python-pip
-    - sys-ctl-alm-compose
-  - include_tasks: utils/run_once.yml
-  when: run_once_sys_ctl_hlth_webserver is not defined
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+  - dev-python-pip
+  - sys-ctl-alm-compose
 
 - name: Install required Python modules
   community.general.pacman:
     name: python-requests
     state: present
 
+- meta: flush_handlers
+
 - include_role:
     name: sys-service
   vars:
-    system_service_on_calendar: "{{SYS_SCHEDULE_HEALTH_NGINX}}"
+    system_service_on_calendar: "{{ SYS_SCHEDULE_HEALTH_NGINX }}"
     system_service_timer_enabled:  true
+    system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"

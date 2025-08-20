@@ -1,12 +1,15 @@
 - name: Include dependency 'sys-ctl-alm-compose'
   include_role:
     name: sys-ctl-alm-compose
+    vars:
+      flush_handlers: true
   when: run_once_sys_ctl_alm_compose is not defined
 
 - include_role:
     name: sys-service
   vars:
-    system_service_state: restarted
-    system_service_on_calendar:  "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_DEPLOY }}"
-    persistent:   "true"
+    system_service_state:         restarted
+    system_service_on_calendar:   "{{ SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_DEPLOY }}"
+    persistent:                    "true"
     system_service_timer_enabled:  true
+    system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
