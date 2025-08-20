@@ -13,4 +13,5 @@ docker:
       version: latest 
       name: collabora
 features:
-  logout: false # I think collabora is more a service then a app. So no login neccessary  Propably it makes sense to rename it ;)
+  logout:   false 
+  desktop:  true # Just set to allow the iframe to load it
