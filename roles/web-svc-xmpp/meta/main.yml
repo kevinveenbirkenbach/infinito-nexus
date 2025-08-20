@@ -14,7 +14,7 @@ galaxy_info:
     - stub
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/tree/main/roles/web-app-xmpp"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/web-svc-xmpp"
   min_ansible_version: "2.9"
   platforms:
     - name: Any

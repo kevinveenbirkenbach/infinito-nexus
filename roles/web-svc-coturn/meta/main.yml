@@ -15,7 +15,7 @@ galaxy_info:
     - docker
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/tree/main/roles/web-app-coturn"
+  documentation: "https://s.infinito.nexus/code/tree/main/roles/web-svc-coturn"
   min_ansible_version: "2.9"
   platforms:
     - name: Any

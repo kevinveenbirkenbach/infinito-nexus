@@ -232,7 +232,7 @@ plugins:
       - oidc_login  # Will be disabled
   spreed:
     # Nextcloud Spreed: offers video conferencing and chat functionalities (https://apps.nextcloud.com/apps/spreed)
-    enabled: false # @todo to activate it first implement web-app-coturn and activate it
+    enabled: false # @todo to activate it first implement web-svc-coturn and activate it
   tables:
     # Nextcloud tables: allows creation and editing of tables within the interface (https://apps.nextcloud.com/apps/tables)
     enabled: true

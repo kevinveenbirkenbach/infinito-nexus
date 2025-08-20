@@ -88,7 +88,7 @@ defaults_networks:
       subnet: 192.168.103.96/28
     web-svc-simpleicons:
       subnet: 192.168.103.112/28
-    web-app-libretranslate:
+    web-svc-libretranslate:
       subnet: 192.168.103.128/28
     web-app-pretix:
       subnet: 192.168.103.144/28

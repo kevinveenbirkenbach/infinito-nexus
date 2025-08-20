@@ -66,7 +66,7 @@ ports:
       web-svc-collabora: 8042
       web-app-mobilizon: 8043
       web-svc-simpleicons: 8044
-      web-app-libretranslate: 8045
+      web-svc-libretranslate: 8045
       web-app-pretix: 8046
       web-app-mig: 8047
       web-svc-logout: 8048
