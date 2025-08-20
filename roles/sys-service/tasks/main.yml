@@ -5,10 +5,8 @@
 
 - name: "Execute service routines for '{{ system_service_id }}'"
   block:
-  - name: "Load base routine for '{{ system_service_id }}'"
-    include_tasks: 03_base.yml
-  - include_tasks: utils/run_once.yml
-    vars:
-      # Necessary to flush after every service which uses an 'system_service_id' otherwise wrong one will be used
-      flush_handlers: true
+    - name: "Load base routine for '{{ system_service_id }}'"
+      include_tasks: 03_base.yml
+    - name: "Flush system handlers for '{{ system_service_id }}'"
+      meta: flush_handlers
   when: system_service_id is defined
