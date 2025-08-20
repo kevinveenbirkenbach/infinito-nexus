@@ -1,15 +1,14 @@
 [Unit]
 Description={{ SOFTWARE_NAME }} - Service for role '{{ system_service_id }}'
-{% if system_service_tpl_on_failure |length > 0 %}
-OnFailure={{ system_service_tpl_on_failure }}
-{% endif %}
+{{- system_service_tpl_on_failure | systemd_directive('OnFailure') }}
 
 [Service]
 Type={{ system_service_tpl_type }}
-{% if system_service_tpl_exec_start_pre |length > 0 %}
-ExecStartPre={{ system_service_tpl_exec_start_pre }}
-{% endif %}
-ExecStart={{ system_service_tpl_exec_start }}
-{% if system_service_tpl_runtime |length > 0 %}
-RuntimeMaxSec={{ system_service_tpl_runtime }}
-{% endif %}
+{%- for key, val in [
+  ('TimeoutStartSec', system_service_tpl_timeout_start_sec),
+  ('ExecStartPre',    system_service_tpl_exec_start_pre),
+  ('ExecStart',       system_service_tpl_exec_start),
+  ('RuntimeMaxSec',   system_service_tpl_runtime)
+] -%}
+{{- val | systemd_directive(key) }}
+{%- endfor %}

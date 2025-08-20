@@ -17,8 +17,9 @@ system_service_script_inter:   "/bin/{{ 'bash' if system_service_script_type == 
 system_service_script_exec:    "{{ system_service_script_inter }} {{ system_service_id | get_service_script_path( system_service_script_type ) }}"
 
 # Service template
-system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
-system_service_tpl_type:            "oneshot"
-system_service_tpl_exec_start:      "{{ system_service_script_exec }}"
-system_service_tpl_runtime:         "{{ SYS_SERVICE_DEFAULT_RUNTIME }}"
-system_service_tpl_exec_start_pre:  ""
+system_service_tpl_on_failure:        "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+system_service_tpl_type:              "oneshot"
+system_service_tpl_exec_start:        "{{ system_service_script_exec }}"
+system_service_tpl_runtime:           "{{ '' if system_service_tpl_type == 'oneshot' else SYS_SERVICE_DEFAULT_RUNTIME }}"
+system_service_tpl_exec_start_pre:    ""
+system_service_tpl_timeout_start_sec: "60s"
