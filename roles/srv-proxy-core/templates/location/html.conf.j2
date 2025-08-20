@@ -1,5 +1,4 @@
 {% set location = location | default("/")%}
-
 location {{location}}
 {
   {% if oauth2_proxy_enabled | default(false) | bool %}

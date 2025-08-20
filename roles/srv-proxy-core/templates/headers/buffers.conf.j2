@@ -1,0 +1,6 @@
+# Raise the maximal header size to allow huge headers Keycloak for authentification
+proxy_buffer_size 16k;
+proxy_buffers 8 16k;
+proxy_busy_buffers_size 16k;
+client_header_buffer_size 8k;
+large_client_header_buffers 8 32k;
