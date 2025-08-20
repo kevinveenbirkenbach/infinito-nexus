@@ -34,8 +34,8 @@
   template:
     src:    "{{ item }}"
     dest:   "{{ nextcloud_host_config_additives_directory }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
-    owner:  "{{ nextcloud_docker_user_id }}"
-    group:  "{{ nextcloud_docker_user_id }}"
+    owner:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
+    group:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
   loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
   # Not all type of changes take instantly place. Due to this reason a rebuild is required.
   notify: docker compose up
@@ -52,10 +52,14 @@
 - name: Flush all handlers immediately so that occ can be used
   meta: flush_handlers
 
+- name: Update\Upgrade Nextcloud
+  include_tasks: 02_upgrade
+  when: MODE_UPDATE | bool
+
 - name: Load system configuration steps
   include_tasks: "{{ item }}"
   loop:
-    - 02_add_missing_indices.yml
+    - 02_upgrade
     - 03_admin.yml
     - 04_system_config.yml
 

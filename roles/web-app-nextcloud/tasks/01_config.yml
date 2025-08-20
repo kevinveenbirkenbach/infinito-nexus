@@ -19,11 +19,11 @@
 
     - name: Copy include instructions to the container
       command: >
-        docker cp {{ nextcloud_host_include_instructions_file }} {{ nextcloud_container }}:{{ nextcloud_docker_include_instructions_file }}
+        docker cp {{ nextcloud_host_include_instructions_file }} {{ NEXTCLOUD_CONTAINER }}:{{ nextcloud_docker_include_instructions_file }}
 
     - name: Append generated config to config.php only if not present
       command: >
-        docker exec -u {{ nextcloud_docker_user }} {{ nextcloud_container }} sh -c "
+        docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }} sh -c "
           grep -q '{{ nextcloud_docker_config_additives_directory }}' {{ nextcloud_docker_config_file }} || 
           cat {{ nextcloud_docker_include_instructions_file }} >> {{ nextcloud_docker_config_file }}"
       notify: docker compose restart

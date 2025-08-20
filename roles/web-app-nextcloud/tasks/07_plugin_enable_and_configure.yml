@@ -1,5 +1,5 @@
 - name: enable {{plugin_key}} nextcloud plugin
-  command: "{{nextcloud_docker_exec_occ}} app:enable {{plugin_key}}"
+  command: "{{NEXTCLOUD_DOCKER_EXEC_OCC}} app:enable {{plugin_key}}"
   register: enable_result
   changed_when: enable_result.rc == 0 and ("already enabled" not in enable_result.stdout)
 
@@ -19,7 +19,7 @@
   ansible.builtin.shell: |
     set -euo pipefail
     {% for item in (plugin_configuration | default([])) %}
-    {{ nextcloud_docker_exec_occ }} \
+    {{ NEXTCLOUD_DOCKER_EXEC_OCC }} \
       config:app:set {{ item.appid }} {{ item.configkey }} \
       --value '{{ ( (item.configvalue | to_json) if (item.configvalue is mapping) else (item.configvalue | string) ) 
             | regex_replace("'", "'" ~ '"' ~ "'" ~ '"' ~ "'") }}'

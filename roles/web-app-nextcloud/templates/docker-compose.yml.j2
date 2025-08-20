@@ -2,7 +2,7 @@
 
   application:
     image: "{{ nextcloud_image }}:{{ nextcloud_version }}"
-    container_name: {{ nextcloud_container }}
+    container_name: {{ NEXTCLOUD_CONTAINER }}
     volumes:
       - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
       - {{nextcloud_host_config_additives_directory}}:{{nextcloud_docker_config_additives_directory}}:ro

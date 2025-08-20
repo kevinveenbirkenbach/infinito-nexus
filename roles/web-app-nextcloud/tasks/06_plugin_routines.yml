@@ -2,7 +2,7 @@
   ansible.builtin.shell: |
     # do not set -e here; allow per-line fallbacks
     {% for incompatible_plugin in (plugin_value.incompatible_plugins | default([])) %}
-    {{ nextcloud_docker_exec_occ }} app:disable {{ incompatible_plugin }} || true
+    {{ NEXTCLOUD_DOCKER_EXEC_OCC }} app:disable {{ incompatible_plugin }} || true
     {% endfor %}
   args:
     executable: /bin/bash
@@ -22,7 +22,7 @@
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: install {{ plugin_key }} nextcloud plugin
-  command: "{{ nextcloud_docker_exec_occ }} app:install {{ plugin_key }}"
+  command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} app:install {{ plugin_key }}"
   register: install_result
   failed_when: >
     install_result.rc != 0

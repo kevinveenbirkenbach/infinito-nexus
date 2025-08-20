@@ -31,7 +31,7 @@ nextcloud_volume:                               "{{ applications | get_app_conf(
 
 nextcloud_version:                              "{{ applications | get_app_conf(application_id, 'docker.services.nextcloud.version') }}"
 nextcloud_image:                                "{{ applications | get_app_conf(application_id, 'docker.services.nextcloud.image') }}"
-nextcloud_container:                            "{{ applications | get_app_conf(application_id, 'docker.services.nextcloud.name') }}"
+NEXTCLOUD_CONTAINER:                            "{{ applications | get_app_conf(application_id, 'docker.services.nextcloud.name') }}"
 
 nextcloud_proxy_name:                           "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name') }}"
 nextcloud_proxy_image:                          "{{ applications | get_app_conf(application_id, 'docker.services.proxy.image') }}"
@@ -56,8 +56,8 @@ NEXTCLOUD_COLLABORA_URL:                        "{{ domains | get_url('web-svc-c
 NEXTCLOUD_COLLABORA_ENABLED:                    "{{ applications | get_app_conf(application_id, 'plugins.richdocuments.enabled') }}"
 
 ## User Configuration
-nextcloud_docker_user_id:                       82                                                            # UID of the www-data user
-nextcloud_docker_user:                          "www-data"                                                    # Name of the www-data user (Set here to easy change it in the future)
+NEXTCLOUD_DOCKER_USER_id:                       82                                                            # UID of the www-data user
+NEXTCLOUD_DOCKER_USER:                          "www-data"                                                    # Name of the www-data user (Set here to easy change it in the future)
 
 ## Internal Paths
 NEXTCLOUD_DOCKER_WORK_DIRECTORY:                "/var/www/html/"                                              # Name of the workdir in which the application is stored
@@ -67,5 +67,5 @@ nextcloud_docker_config_additives_directory:    "{{ NEXTCLOUD_DOCKER_CONFIG_DIRE
 nextcloud_docker_include_instructions_file:     "/tmp/includes.php"                                           # Path to the temporary file which will be included to the config.php to load the additional configurations
 
 ## Execution
-nextcloud_docker_exec:                          "docker exec -u {{ nextcloud_docker_user }} {{ nextcloud_container }}" # General execute composition
-nextcloud_docker_exec_occ:                      "{{nextcloud_docker_exec}} {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}occ"   # Execute docker occ command
+NEXTCLOUD_DOCKER_EXEC:                          "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}" # General execute composition
+NEXTCLOUD_DOCKER_EXEC_OCC:                      "{{NEXTCLOUD_DOCKER_EXEC}} {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}occ"   # Execute docker occ command

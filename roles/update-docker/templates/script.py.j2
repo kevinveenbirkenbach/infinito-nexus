@@ -160,23 +160,6 @@ def upgrade_listmonk():
     run_command('echo "y" | docker compose run -T application ./listmonk --upgrade')
     print("Upgrade complete.")
 
-def update_nextcloud():
-    """
-    Performs the necessary Nextcloud update procedures, including maintenance and app updates.
-    """
-    print("Start Nextcloud upgrade procedure.")
-    update_procedure("docker-compose exec -T -u www-data application /var/www/html/occ upgrade")
-    print("Start Nextcloud repairing procedure.")
-    update_procedure("docker-compose exec -T -u www-data application /var/www/html/occ maintenance:repair --include-expensive")
-    print("Start Nextcloud update procedure.")
-    update_procedure("docker-compose exec -T -u www-data application /var/www/html/occ app:update --all")
-    print("Start Nextcloud add-missing procedure.")
-    update_procedure("docker-compose exec -T -u www-data application /var/www/html/occ db:add-missing-columns")
-    update_procedure("docker-compose exec -T -u www-data application /var/www/html/occ db:add-missing-indices")
-    update_procedure("docker-compose exec -T -u www-data application /var/www/html/occ db:add-missing-primary-keys")
-    print("Deactivate Maintanance Mode")
-    update_procedure("docker-compose exec -T -u www-data application /var/www/html/occ maintenance:mode --off")
-
 def update_procedure(command):
     """
     Attempts to execute a command up to a maximum number of retries.
@@ -239,8 +222,6 @@ if __name__ == "__main__":
                     upgrade_listmonk()
                 elif os.path.basename(dir_path) == "mastodon":
                     update_mastodon()
-                elif os.path.basename(dir_path) == "nextcloud":
-                    update_nextcloud()
                     
                 # @todo implement dedicated procedure for bluesky
                 # @todo implement dedicated procedure for taiga

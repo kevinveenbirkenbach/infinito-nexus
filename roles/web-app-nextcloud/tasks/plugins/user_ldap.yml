@@ -3,4 +3,4 @@
 
 - name: Set Nextcloud LDAP bind password
   command: >
-    {{ nextcloud_docker_exec_occ }} ldap:set-config s01 ldapAgentPassword "{{ ldap.bind_credential }}"
+    {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:set-config s01 ldapAgentPassword "{{ ldap.bind_credential }}"
