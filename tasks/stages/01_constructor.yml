@@ -41,10 +41,16 @@
 
   - name: Merge current play domain definitions
     set_fact:
-      current_play_domains: >- 
-        {{  current_play_applications |
-            canonical_domains_map(PRIMARY_DOMAIN) | 
-            combine(domains | default({}, true), recursive=True) 
+      current_play_domains: >-
+        {{
+          applications
+          | canonical_domains_map(
+              PRIMARY_DOMAIN,
+              recursive=True,
+              roles_base_dir=([ playbook_dir, 'roles' ] | path_join),
+              seed=(current_play_applications | dict2items | map(attribute='key') | list)
+            )
+          | combine(domains | default({}, true), recursive=True)
         }}
   
   - name: Merge domain definitions for all domains

@@ -5,6 +5,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from module_utils.entity_name_utils import get_entity_name
 from module_utils.role_dependency_resolver import RoleDependencyResolver
+from typing import Iterable
 
 
 class FilterModule(object):
@@ -18,6 +19,7 @@ class FilterModule(object):
         *,
         recursive: bool = False,
         roles_base_dir: str | None = None,
+        seed: Iterable[str] | None = None,
     ):
         """
         Build { app_id: [canonical domains...] }.
@@ -28,7 +30,8 @@ class FilterModule(object):
         if not isinstance(apps, dict):
             raise AnsibleFilterError(f"'apps' must be a dict, got {type(apps).__name__}")
 
-        app_keys = set(apps.keys())
+        app_keys  = set(apps.keys())
+        seed_keys = set(seed) if seed is not None else app_keys
 
         if recursive:
             roles_base_dir = roles_base_dir or os.path.join(os.getcwd(), "roles")
@@ -38,18 +41,18 @@ class FilterModule(object):
                 )
 
             resolver = RoleDependencyResolver(roles_base_dir)
-            # WICHTIG: resolve_run_after=False (hart)
             discovered_roles = resolver.resolve_transitively(
-                start_roles=app_keys,
+                start_roles=seed_keys,
                 resolve_include_role=True,
                 resolve_import_role=True,
                 resolve_dependencies=True,
                 resolve_run_after=False,
                 max_depth=None,
             )
+            # all discovered roles that actually have config entries in `apps`
             target_apps = discovered_roles & app_keys
         else:
-            target_apps = app_keys
+            target_apps = seed_keys
 
         result = {}
         seen_domains = {}
