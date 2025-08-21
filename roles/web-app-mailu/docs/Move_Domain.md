@@ -47,8 +47,9 @@ rsync -aHAX --numeric-ids \
 Ensure that Dovecot rebuilds indices cleanly:
 
 ```bash
-find /var/lib/docker/volumes/mailu_dovecot_mail/_data/kevinveenbirkenbach@infinito.nexus -type f -name '.dovecot*' -delete
-find /var/lib/docker/volumes/mailu_dovecot_mail/_data/kevinveenbirkenbach@infinito.nexus -type f -name 'dovecot-uidlist*' -delete
+find /var/lib/docker/volumes/mailu_dovecot_mail/_data/ -type f -name '.dovecot*' -print -delete
+find /var/lib/docker/volumes/mailu_dovecot_mail/_data/ -type f -name 'dovecot-uidlist*' -print -delete
+
 ```
 
 ---
@@ -74,7 +75,7 @@ After copying, restart Mailu services (or at least `imap` and `smtp`) and confir
 To ensure incoming mail for the old domain is still accepted:
 
 ```bash
-docker compose exec admin flask mailu domain alias cymais.cloud infinito.nexus
+docker compose exec admin flask mailu domain alias add cymais.cloud infinito.nexus
 ```
 
 This maps all `@cymais.cloud` addresses to their equivalents under `@infinito.nexus`.
