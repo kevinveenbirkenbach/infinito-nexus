@@ -57,7 +57,7 @@ oidc_providers:
     scopes: ["openid", "profile"]
     user_mapping_provider:
       config:
-        localpart_template: "{% raw %}{{ user.{% endraw %}{{OIDC.ATTRIBUTES.USERNAME}}{% raw %}}}{% endraw %}"
+        localpart_template: "{% raw %}{{ user.{% endraw %}{{ OIDC.ATTRIBUTES.USERNAME }}{% raw %}}}{% endraw %}"
         display_name_template: "{% raw %}{{ user.name }}{% endraw %}"
     backchannel_logout_enabled: true
 {% endif %}
