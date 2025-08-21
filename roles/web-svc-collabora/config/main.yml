@@ -6,6 +6,9 @@ server:
     whitelist:
       frame-ancestors:
         - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
+    flags:
+      style-src:
+        unsafe-inline:  true
 docker:
   services:
     redis:

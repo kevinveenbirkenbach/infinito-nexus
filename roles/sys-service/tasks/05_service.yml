@@ -32,6 +32,9 @@
   template:
     src:  "{{ system_service_template_src }}"
     dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, system_service_id | get_service_name(SOFTWARE_NAME) ] | path_join }}"
+    owner: root
+    group: root
+    mode: '0644'
   notify: "{{ 'reload system daemon' if system_service_uses_at else 'refresh systemctl service' }}"
 
 - name: refresh systemctl service when SYS_SERVICE_ALL_ENABLE

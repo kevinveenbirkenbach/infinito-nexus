@@ -1,9 +1,14 @@
 ---
 # General 
-application_id:         web-svc-collabora
+application_id:             web-svc-collabora
+
+# @todo in a later step it makes sense to refactor the use of them, but they are used atm in the role
+domain:                     "{{ domains | get_domain(application_id) }}"
+http_port:                  "{{ ports.localhost.http[application_id] }}"
+
 # Container
-container_port:         9980
-container_healthcheck:  "/hosting/discovery"
+container_port:             9980
+container_healthcheck:      "/hosting/discovery"
 
 # Collabora
 COLLABORA_CONTAINER:        "{{ applications | get_app_conf(application_id, 'docker.services.collabora.name') }}"

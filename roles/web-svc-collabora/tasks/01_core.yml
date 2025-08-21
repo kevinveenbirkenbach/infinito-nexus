@@ -1,7 +1,14 @@
-- name: "generate {{ domains | get_domain(application_id) }}.conf"
+- name: "load docker, proxy for '{{ application_id }}'"
+  include_role:
+    name: cmp-docker-proxy
+    public: true
+  vars:
+    docker_compose_flush_handlers: true
+    
+- name: "generate {{ domain }}.conf"
   template:
     src: "nginx.conf.j2"
-    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf"
+    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domain }}.conf"
   notify: restart openresty
 
 - name: Update Collabora systemplate to include new fonts
