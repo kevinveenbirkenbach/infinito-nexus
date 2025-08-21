@@ -38,4 +38,4 @@ docker:
       version:  "latest"
       name:     "espocrm"
   volumes:
-    data: espocrm_data
+    data: ESPOCRM_data

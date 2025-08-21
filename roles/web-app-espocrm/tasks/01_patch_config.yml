@@ -1,25 +1,25 @@
 - name: Update DB host
   command: >
-    docker exec --user root {{ espocrm_name }}
-    sed -i "s/'host' => .*/'host' => '{{ database_host }}',/" {{ espocrm_config_file }}
+    docker exec --user root {{ ESPOCRM_NAME }}
+    sed -i "s/'host' => .*/'host' => '{{ database_host }}',/" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
   notify: docker compose restart
 
 - name: Update DB name
   command: >
-    docker exec --user root {{ espocrm_name }}
-    sed -i "s/'dbname' => .*/'dbname' => '{{ database_name }}',/" {{ espocrm_config_file }}
+    docker exec --user root {{ ESPOCRM_NAME }}
+    sed -i "s/'dbname' => .*/'dbname' => '{{ database_name }}',/" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
   notify: docker compose restart
 
 - name: Update DB user
   command: >
-    docker exec --user root {{ espocrm_name }}
-    sed -i "s/'user' => .*/'user' => '{{ database_username }}',/" {{ espocrm_config_file }}
+    docker exec --user root {{ ESPOCRM_NAME }}
+    sed -i "s/'user' => .*/'user' => '{{ database_username }}',/" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
   notify: docker compose restart
 
 - name: Update DB password
   command: >
-    docker exec --user root {{ espocrm_name }}
-    sed -i "s/'password' => .*/'password' => '{{ database_password }}',/" {{ espocrm_config_file }}
+    docker exec --user root {{ ESPOCRM_NAME }}
+    sed -i "s/'password' => .*/'password' => '{{ database_password }}',/" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
   notify: docker compose restart
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
@@ -31,7 +31,7 @@
       $c   = $app->getContainer();
       $cfg = $c->get("config");
       $writer = $c->get("injectableFactory")->create("\Espo\Core\Utils\Config\ConfigWriter");
-      $new = "{{ espocrm_url }}";
+      $new = "{{ ESPOCRM_URL }}";
       if ($cfg->get("siteUrl") !== $new) {
         $writer->set("siteUrl", $new);
         $writer->save();
@@ -42,3 +42,27 @@
     chdir: "{{ docker_compose.directories.instance }}"
   register: siteurl_set
   changed_when: "'CHANGED' in siteurl_set.stdout"
+
+- name: Disable EspoCRM maintenance mode
+  ansible.builtin.shell: |
+    docker exec -u root {{ ESPOCRM_NAME }} \
+      sed -i "s/'maintenanceMode' => true/'maintenanceMode' => false/" {{ ESPOCRM_CONFIG_FILE_PUBLIC }}
+  register: disable_maintenance
+  changed_when: disable_maintenance.rc == 0
+  failed_when: disable_maintenance.rc != 0
+
+- name: Enable EspoCRM cache
+  ansible.builtin.shell: |
+    docker exec -u root {{ ESPOCRM_NAME }} \
+      sed -i "s/'useCache' => false/'useCache' => true/" {{ ESPOCRM_CONFIG_FILE_PUBLIC }}
+  register: enable_cache
+  changed_when: enable_cache.rc == 0
+  failed_when: enable_cache.rc != 0
+
+- name: Enable EspoCRM cron
+  ansible.builtin.shell: |
+    docker exec -u root {{ ESPOCRM_NAME }} \
+      sed -i "s/'cronDisabled' => true/'cronDisabled' => false/" {{ ESPOCRM_CONFIG_FILE_PUBLIC }}
+  register: enable_cron
+  changed_when: enable_cron.rc == 0
+  failed_when: enable_cron.rc != 0

@@ -6,7 +6,7 @@
     docker_compose_flush_handlers:  true
 
 - name: Check if config.php exists in EspoCRM
-  command: docker exec --user root {{ espocrm_name }} test -f {{ espocrm_config_file }}
+  command: docker exec --user root {{ ESPOCRM_NAME }} test -f {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
   register: config_file_exists
   changed_when: false
   failed_when: false
@@ -31,3 +31,4 @@
     '
   args:
     chdir: "{{ docker_compose.directories.instance }}"
+  when: ESPOCRM_OIDC_ENABLED | bool

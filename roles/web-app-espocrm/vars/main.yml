@@ -1,19 +1,21 @@
 # General
-application_id:                 "web-app-espocrm"
+application_id:               "web-app-espocrm"
 
 # Database
-database_type:                  "mariadb"
+database_type:                "mariadb"
 
 # Webserver
-location_ws:                    "/ws"
-ws_port:                        "{{ ports.localhost.websocket[application_id] }}"
-client_max_body_size:           "100m"
-vhost_flavour:                  "ws_generic"
+location_ws:                  "/ws"
+ws_port:                      "{{ ports.localhost.websocket[application_id] }}"
+client_max_body_size:         "100m"
+vhost_flavour:                "ws_generic"
 
 # Espocrm
-espocrm_version:                "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.version', True) }}"
-espocrm_image:                  "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.image', True) }}"
-espocrm_name:                   "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.name', True) }}"
-espocrm_volume:                 "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-espocrm_config_file:            "/var/www/html/data/config-internal.php"
-espocrm_url:                    "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+ESPOCRM_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.version', True) }}"
+ESPOCRM_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.image', True) }}"
+ESPOCRM_NAME:                 "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.name', True) }}"
+ESPOCRM_VOLUME:               "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
+ESPOCRM_CONFIG_FILE_PRIVATE:  "/var/www/html/data/config-internal.php"
+ESPOCRM_CONFIG_FILE_PUBLIC:   "/var/www/html/data/config.php"
+ESPOCRM_URL:                  "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+ESPOCRM_OIDC_ENABLED:         "{{ applications | get_app_conf(application_id, 'features.central_database', False) }}"

@@ -1,7 +1,7 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   web:
-    container_name: {{ espocrm_name }}
-    image: "{{ espocrm_image }}:{{ espocrm_version }}"
+    container_name: {{ ESPOCRM_NAME }}
+    image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
     ports:
@@ -12,7 +12,7 @@
       - data:/var/www/html
 
   daemon:
-    image: "{{ espocrm_image }}:{{ espocrm_version }}"
+    image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
     restart: {{ DOCKER_RESTART_POLICY }}
     logging:
       driver: journald
@@ -22,7 +22,7 @@
       - data:/var/www/html
 
   websocket:
-    image: "{{ espocrm_image }}:{{ espocrm_version }}"
+    image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
     restart: {{ DOCKER_RESTART_POLICY }}
     logging:
       driver: journald
@@ -41,6 +41,6 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ espocrm_volume }}
+    name: {{ ESPOCRM_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
