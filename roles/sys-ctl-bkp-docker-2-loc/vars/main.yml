@@ -12,13 +12,13 @@ BKP_DOCKER_2_LOC_DB_ENABLED: "{{ database_type | default('') | bool }}"
 
 # Gather mapped values as lists
 BKP_DOCKER_2_LOC_DB_ROUTINE: >-
-  {{ applications | find_dock_val_by_bkp_entr('database_routine', 'name') | list }}
+  {{ applications | find_dock_val_by_bkp_entr('database_routine', 'name') | list | sort }}
 
 BKP_DOCKER_2_LOC_NO_STOP_REQUIRED: >-
-  {{ applications | find_dock_val_by_bkp_entr('no_stop_required', 'image') | list }}
+  {{ applications | find_dock_val_by_bkp_entr('no_stop_required', 'image') | list | sort }}
 
 BKP_DOCKER_2_LOC_DISABLED: >-
-  {{ applications | find_dock_val_by_bkp_entr('disabled', 'image') | list }}
+  {{ applications | find_dock_val_by_bkp_entr('disabled', 'image') | list | sort }}
 
 # CLI argument strings (only set if list not empty)
 BKP_DOCKER_2_LOC_DB_ROUTINE_CLI: >-
@@ -45,4 +45,4 @@ BKP_DOCKER_2_LOC_CLI_ARGS_LIST:
 BKP_DOCKER_2_LOC_EXEC: >-
   /usr/bin/python {{ backup_docker_to_local_folder }}backup-docker-to-local.py
   --compose-dir {{ PATH_DOCKER_COMPOSE_INSTANCES }}
-  {{ BKP_DOCKER_2_LOC_CLI_ARGS_LIST | select('string') | join(' ') }}
+  {{  BKP_DOCKER_2_LOC_CLI_ARGS_LIST | select('string') | join(' ') }}

@@ -18,32 +18,34 @@ SYS_SERVICE_ON_FAILURE_COMPOSE:       "{{ ('sys-ctl-alm-compose@') | get_service
 ## Groups
 SYS_SERVICE_GROUP_BACKUPS: >
   {{ (('sys-ctl-bkp-' | get_category_entries) + ('svc-bkp-' | get_category_entries))
-     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list | sort }}
 
 SYS_SERVICE_GROUP_CLEANUP: >
   {{ ('sys-ctl-cln-' | get_category_entries)
-     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list | sort }}
 
 SYS_SERVICE_GROUP_REPAIR: >
   {{ ('sys-ctl-rpr-' | get_category_entries)
-     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list | sort }}
 
 SYS_SERVICE_GROUP_OPTIMIZATION: >
   {{ ('svc-opt-' | get_category_entries)
-     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list | sort }}
 
 SYS_SERVICE_GROUP_MAINTANANCE: >
   {{ ('svc-mtn-' | get_category_entries)
-     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list }}
+     | map('regex_replace', '$', SYS_SERVICE_SUFFIX) | list | sort }}
  
 ## Collection of services to manipulate the system
 SYS_SERVICE_GROUP_MANIPULATION: >
   {{ 
-    SYS_SERVICE_GROUP_BACKUPS + 
-    SYS_SERVICE_GROUP_CLEANUP + 
-    SYS_SERVICE_GROUP_REPAIR + 
-    SYS_SERVICE_GROUP_OPTIMIZATION + 
-    SYS_SERVICE_GROUP_MAINTANANCE +
-    [ SYS_SERVICE_UPDATE_DOCKER ]
+    (
+      SYS_SERVICE_GROUP_BACKUPS + 
+      SYS_SERVICE_GROUP_CLEANUP + 
+      SYS_SERVICE_GROUP_REPAIR + 
+      SYS_SERVICE_GROUP_OPTIMIZATION + 
+      SYS_SERVICE_GROUP_MAINTANANCE +
+      [ SYS_SERVICE_UPDATE_DOCKER ] 
+    ) | sort
   }}
 
