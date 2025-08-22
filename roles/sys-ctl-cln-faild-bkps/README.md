@@ -2,7 +2,7 @@
 
 ## Description
 
-This role cleans up failed Docker backups by pulling a [Git repository](https://github.com/kevinveenbirkenbach/sys-ctl-cln-faild-bkps) that contains cleanup scripts and configuring a systemd service to execute them. It ensures that failed or incomplete backups are removed to free up disk space and maintain a healthy backup environment.
+This role cleans up failed Docker backups by pulling a [Git repository](https://github.com/kevinveenbirkenbach/cleanup-failed-docker-backups) that contains cleanup scripts and configuring a systemd service to execute them. It ensures that failed or incomplete backups are removed to free up disk space and maintain a healthy backup environment.
 
 ## Overview
 
