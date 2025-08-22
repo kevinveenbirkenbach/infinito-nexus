@@ -1,6 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   web:
-    container_name: {{ ESPOCRM_NAME }}
+    container_name: {{ ESPOCRM_CONTAINER }}
     image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}

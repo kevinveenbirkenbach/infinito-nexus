@@ -6,29 +6,14 @@
     docker_compose_flush_handlers:  true
 
 - name: Check if config.php exists in EspoCRM
-  command: docker exec --user root {{ ESPOCRM_NAME }} test -f {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
+  command: docker exec --user root {{ ESPOCRM_CONTAINER }} test -f {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
   register: config_file_exists
   changed_when: false
   failed_when: false
 
-- name: Patch EspoCRM config.php with updated DB credentials
+- name: Patch EspoCRM config.php
   include_tasks: 01_patch_config.yml
   when: config_file_exists.rc == 0
 
 - name: Flush handlers to make DB available before password reset
   meta: flush_handlers
-
-- name: Set OIDC scopes in EspoCRM config (inside web container)
-  ansible.builtin.shell: |
-    docker compose exec -T web php -r '
-      require "/var/www/html/bootstrap.php";
-      $writer = (new \Espo\Core\Application())
-        ->getContainer()
-        ->get("injectableFactory")
-        ->create("\Espo\Core\Utils\Config\ConfigWriter");
-      $writer->set("oidcScopes", ["openid", "profile", "email"]);
-      $writer->save();
-    '
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  when: ESPOCRM_OIDC_ENABLED | bool

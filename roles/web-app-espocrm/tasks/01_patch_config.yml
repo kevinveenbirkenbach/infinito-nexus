@@ -1,25 +1,37 @@
-- name: Update DB host
+- name: Update DB host (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_NAME }}
-    sed -i "s/'host' => .*/'host' => '{{ database_host }}',/" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
+    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    "grep -q \"'host' *=> *'{{ database_host }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
+     { sed -i \"s/'host'\\s*=>\\s*[^,]*,/'host' => '{{ database_host }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+  register: db_host_set
+  changed_when: "'CHANGED' in db_host_set.stdout"
   notify: docker compose restart
 
-- name: Update DB name
+- name: Update DB name (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_NAME }}
-    sed -i "s/'dbname' => .*/'dbname' => '{{ database_name }}',/" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
+    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    "grep -q \"'dbname' *=> *'{{ database_name }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
+     { sed -i \"s/'dbname'\\s*=>\\s*[^,]*,/'dbname' => '{{ database_name }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+  register: db_name_set
+  changed_when: "'CHANGED' in db_name_set.stdout"
   notify: docker compose restart
 
-- name: Update DB user
+- name: Update DB user (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_NAME }}
-    sed -i "s/'user' => .*/'user' => '{{ database_username }}',/" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
+    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    "grep -q \"'user' *=> *'{{ database_username }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
+     { sed -i \"s/'user'\\s*=>\\s*[^,]*,/'user' => '{{ database_username }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+  register: db_user_set
+  changed_when: "'CHANGED' in db_user_set.stdout"
   notify: docker compose restart
 
-- name: Update DB password
+- name: Update DB password (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_NAME }}
-    sed -i "s/'password' => .*/'password' => '{{ database_password }}',/" {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
+    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    "grep -q \"'password' *=> *'{{ database_password }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
+     { sed -i \"s/'password'\\s*=>\\s*[^,]*,/'password' => '{{ database_password }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+  register: db_pass_set
+  changed_when: "'CHANGED' in db_pass_set.stdout"
   notify: docker compose restart
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
@@ -43,26 +55,56 @@
   register: siteurl_set
   changed_when: "'CHANGED' in siteurl_set.stdout"
 
-- name: Disable EspoCRM maintenance mode
-  ansible.builtin.shell: |
-    docker exec -u root {{ ESPOCRM_NAME }} \
-      sed -i "s/'maintenanceMode' => true/'maintenanceMode' => false/" {{ ESPOCRM_CONFIG_FILE_PUBLIC }}
-  register: disable_maintenance
-  changed_when: disable_maintenance.rc == 0
-  failed_when: disable_maintenance.rc != 0
+- name: Ensure maintenance off, cron on, cache on (idempotent via ConfigWriter)
+  block:
+    - name: Apply config via ConfigWriter as app user
+      command: >
+        docker exec --user {{ ESPOCRM_USER }} {{ ESPOCRM_CONTAINER }}
+        php -r '
+          require "/var/www/html/bootstrap.php";
+          $app = new \Espo\Core\Application();
+          $c = $app->getContainer();
+          $cfg = $c->get("config");
+          $w = $c->get("injectableFactory")->create("\Espo\Core\Utils\Config\ConfigWriter");
+          $pairs = [
+            "maintenanceMode" => false,
+            "cronDisabled"    => false,
+            "useCache"        => true
+          ];
+          $changed = false;
+          foreach ($pairs as $k => $v) {
+            if ($cfg->get($k) !== $v) { $w->set($k, $v); $changed = true; }
+          }
+          if ($changed) { $w->save(); echo "CHANGED"; }
+        '
+      register: cfg_set
+      changed_when: "'CHANGED' in cfg_set.stdout"
 
-- name: Enable EspoCRM cache
-  ansible.builtin.shell: |
-    docker exec -u root {{ ESPOCRM_NAME }} \
-      sed -i "s/'useCache' => false/'useCache' => true/" {{ ESPOCRM_CONFIG_FILE_PUBLIC }}
-  register: enable_cache
-  changed_when: enable_cache.rc == 0
-  failed_when: enable_cache.rc != 0
+  rescue:
+    - name: Apply config via ConfigWriter as root (fallback)
+      command: >
+        docker exec --user root {{ ESPOCRM_CONTAINER }}
+        php -r '
+          require "/var/www/html/bootstrap.php";
+          $app = new \Espo\Core\Application();
+          $c = $app->getContainer();
+          $cfg = $c->get("config");
+          $w = $c->get("injectableFactory")->create("\Espo\Core\Utils\Config\ConfigWriter");
+          $pairs = [
+            "maintenanceMode" => false,
+            "cronDisabled"    => false,
+            "useCache"        => true
+          ];
+          $changed = false;
+          foreach ($pairs as $k => $v) {
+            if ($cfg->get($k) !== $v) { $w->set($k, $v); $changed = true; }
+          }
+          if ($changed) { $w->save(); echo "CHANGED"; }
+        '
+      register: cfg_set
+      changed_when: "'CHANGED' in cfg_set.stdout"
 
-- name: Enable EspoCRM cron
-  ansible.builtin.shell: |
-    docker exec -u root {{ ESPOCRM_NAME }} \
-      sed -i "s/'cronDisabled' => true/'cronDisabled' => false/" {{ ESPOCRM_CONFIG_FILE_PUBLIC }}
-  register: enable_cron
-  changed_when: enable_cron.rc == 0
-  failed_when: enable_cron.rc != 0
+- name: Clear EspoCRM cache (only when config changed and we are updating)
+  command: >
+    docker exec --user {{ ESPOCRM_USER }} {{ ESPOCRM_CONTAINER }} php clear_cache.php
+  when: "'CHANGED' in cfg_set.stdout and MODE_UPDATE | bool"
