@@ -1,6 +1,11 @@
-- name: Load role to delete anonymous volumes
-  include_role:
-    name: sys-svc-cln-anon-volumes
+- block:
+    - name: Load role to delete anonymous volumes
+      include_role:
+        name: sys-ctl-cln-anon-volumes
+      vars: 
+        system_force_flush: true
+    - include_tasks: utils/run_once.yml
+  when: run_once_sys_ctl_cln_anon_volumes is not defined
 
 - name: Prune Docker resources
   become: true

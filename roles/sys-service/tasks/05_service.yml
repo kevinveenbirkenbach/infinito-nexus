@@ -39,10 +39,12 @@
 
 - name: refresh systemctl service when SYS_SERVICE_ALL_ENABLE
   block:
-  - command: /bin/true
+  - name: reload system daemon
+    command: /bin/true
     notify: reload system daemon
-  - command: /bin/true
+  - name: refresh systemctl service
+    command: /bin/true
     notify: refresh systemctl service
     when: not system_service_uses_at
-  when: SYS_SERVICE_ALL_ENABLED | bool
+  when: SYS_SERVICE_ALL_ENABLED | bool or system_force_flush | bool
 

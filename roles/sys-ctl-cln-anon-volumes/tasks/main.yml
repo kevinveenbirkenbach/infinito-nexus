@@ -1,0 +1,18 @@
+- block:
+  - name: "pkgmgr install"
+    include_role:
+      name: pkgmgr-install
+    vars:
+      package_name: dockreap
+  
+  - include_role:
+      name: sys-service
+    vars:
+      system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+      system_service_tpl_exec_start:      dockreap --no-confirmation
+      system_service_tpl_exec_start_pre:  /usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES }} --timeout "{{ SYS_TIMEOUT_CLEANUP_SERVICES }}"
+      system_service_copy_files:          false
+
+  - include_tasks: utils/run_once.yml
+  when:
+    - run_once_sys_ctl_cln_anon_volumes is not defined
