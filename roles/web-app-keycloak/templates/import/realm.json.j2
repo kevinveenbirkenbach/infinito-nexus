@@ -1446,7 +1446,7 @@
   "smtpServer": {
     "password": "{{ users['no-reply'].mailu_token }}",
     "replyToDisplayName": "",
-    "starttls": "{{SYSTEM_EMAIL.START_TLS | lower}}",
+    "starttls": "{{ SYSTEM_EMAIL.START_TLS | lower }}",
     "auth": "true",
     "port": "{{ SYSTEM_EMAIL.PORT }}",
     "replyTo": "",
