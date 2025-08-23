@@ -245,7 +245,7 @@
 
     {# Build objectClasses from structural + auxiliary definitions #}
     "userObjectClasses": [
-      "{{ (ldap.user.objects.structural + (ldap.user.objects.auxiliary | dict2items | map(attribute='value') | list)) | join(', ') }}"
+      {{ KEYCLOAK_LDAP_USER_OBJECT_CLASSES | trim | tojson }}
     ],
 
     "rdnLDAPAttribute": [ "{{ ldap.user.attributes.id }}" ],

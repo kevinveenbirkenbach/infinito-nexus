@@ -60,6 +60,15 @@ KEYCLOAK_LDAP_BIND_DN:              "{{ ldap.dn.administrator.data }}"
 KEYCLOAK_LDAP_BIND_PW:              "{{ ldap.bind_credential }}"
 KEYCLOAK_LDAP_URL:                  "{{ ldap.server.uri }}"
 
+# It's important to filter the posixAccount class out, because it is just used by ansible
+KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >  
+  {{ 
+    (
+        (ldap.user.objects.structural | reject('equalto','posixAccount') | list)
+        + (ldap.user.objects.auxiliary | dict2items | map(attribute='value') | list)
+      ) | join(', ') 
+  }}
+
 ## API
 KEYCLOAK_MASTER_API_USER:           "{{ applications | get_app_conf(application_id, 'users.administrator') }}" # Master Administrator
 KEYCLOAK_MASTER_API_USER_NAME:      "{{ KEYCLOAK_MASTER_API_USER.username }}"                                  # Master Administrator Username
