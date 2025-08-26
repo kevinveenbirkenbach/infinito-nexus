@@ -47,7 +47,27 @@
           | list | first
       }}
     kc_force_attrs:
-      frontchannelLogout: true
+      publicClient: >-
+        {{
+          (KEYCLOAK_DICTIONARY_REALM.clients
+            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+            | map(attribute='publicClient')
+            | first)
+        }}
+      serviceAccountsEnabled: >-
+        {{
+          (KEYCLOAK_DICTIONARY_REALM.clients
+            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+            | map(attribute='serviceAccountsEnabled')
+            | first )
+        }}
+      frontchannelLogout:  >-
+        {{
+          (KEYCLOAK_DICTIONARY_REALM.clients
+            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+            | map(attribute='frontchannelLogout')
+            | first)
+        }}
       attributes: >-
         {{
           ( (KEYCLOAK_DICTIONARY_REALM.clients
