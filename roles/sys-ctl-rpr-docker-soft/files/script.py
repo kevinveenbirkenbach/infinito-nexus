@@ -124,10 +124,10 @@ def main(base_directory: str, manipulation_services: List[str], timeout: int | N
     wait_while_manipulation_running(manipulation_services, waiting_time=600, timeout=timeout)
 
     unhealthy_container_names = print_bash(
-        "docker ps --filter health=unhealthy --format '{{{{.Names}}}}'"
+        "docker ps --filter health=unhealthy --format '{{.Names}}'"
     )
     exited_container_names = print_bash(
-        "docker ps --filter status=exited --format '{{{{.Names}}}}'"
+        "docker ps --filter status=exited --format '{{.Names}}'"
     )
     failed_containers = unhealthy_container_names + exited_container_names
 
