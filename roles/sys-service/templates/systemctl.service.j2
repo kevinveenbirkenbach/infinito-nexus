@@ -1,6 +1,6 @@
 [Unit]
 Description={{ SOFTWARE_NAME }} - Service for role '{{ system_service_id }}'
-{{- system_service_tpl_on_failure | systemd_directive('OnFailure') }}
+{{ system_service_tpl_on_failure | systemd_directive('OnFailure') }}
 StartLimitIntervalSec=60
 StartLimitBurst=3
 OnFailureJobMode=replace-irreversibly
