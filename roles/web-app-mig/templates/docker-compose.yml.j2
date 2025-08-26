@@ -8,7 +8,7 @@
     ports:
       - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
     build:
-      context:    "{{docker_repository_path}}"
+      context:    "{{ docker_repository_path }}"
       dockerfile: Dockerfile
     volumes:
       - "{{ mig_roles_meta_volume }}:/usr/share/nginx/html/roles:ro"

@@ -1,6 +1,6 @@
 followus:
   name: Follow Us
-  description: Follow us to stay up to recieve the newest {{ SOFTWARE_NAME }} updates 
+  description: Follow us to stay up to receive the newest {{ SOFTWARE_NAME }} updates 
   icon:
     class: fas fa-newspaper
 {% if ["web-app-mastodon", "web-app-bluesky"] | any_in(group_names) %}
@@ -43,7 +43,7 @@ followus:
       iframe: {{ applications | get_app_conf('web-app-peertube','features.desktop',True) }}
 {% endif %}
 {% if service_provider.contact.wordpress is defined and service_provider.contact.wordpress != "" %}
-    - name: Wordpress
+    - name: WordPress
       description: Read {{ 'our' if service_provider.type == 'legal' else 'my' }} articles and stories.
       icon:
         class: fa-solid fa-blog
@@ -55,7 +55,7 @@ followus:
     - name: Friendica
       description: Visit {{ 'our' if service_provider.type == 'legal' else 'my' }} friendica profile
       icon:
-        class: fas fa-net-wired
+        class: fa-solid fa-network-wired
       identifier: "{{service_provider.contact.friendica}}"
       url: "{{ WEB_PROTOCOL }}://{{ service_provider.contact.friendica.split('@')[2] }}/@{{ service_provider.contact.friendica.split('@')[1] }}"
       iframe: {{ applications | get_app_conf('web-app-friendica','features.desktop',True) }}

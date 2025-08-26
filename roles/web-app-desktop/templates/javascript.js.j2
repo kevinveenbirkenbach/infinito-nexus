@@ -1,30 +1,46 @@
-window.addEventListener("message", function(event) {
-  const allowedSuffix = ".{{ PRIMARY_DOMAIN }}";
-  const origin = event.origin;
+// ===== Runtime loader for external JS files (no Jinja includes) =====
+(function () {
+  // 1) Values injected by Ansible/Jinja
+  //    Base URL where your files were deployed (e.g. CDN), made safe w/o trailing slash
+  const BASE_URL = ("{{ DESKTOP_JS_BASE_URL }}").replace(/\/+$/, "");
+  //    List of files to load, in order
+  const FILES = [
+    {% for f in DESKTOP_JS_FILES -%}
+      "{{ f }}"{% if not loop.last %},{% endif %}
+    {%- endfor %}
+  ];
+  //    Cache buster (highest mtime computed during deploy)
+  const VERSION = "{{ javascript_file_version }}";
 
-  // 1. Only allow messages from *.{{ PRIMARY_DOMAIN }}
-  if (!origin.endsWith(allowedSuffix)) return;
+  // 2) Helper to load a <script> with proper query param
+  function loadScriptSequential(url) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      // Append ?v=... (or &v=... if there are already params)
+      s.src = url + (url.includes("?") ? "&" : "?") + "v=" + encodeURIComponent(VERSION);
+      // Keep execution order: do not set async/defer
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("Failed to load " + url));
+      document.head.appendChild(s);
+    });
+  }
 
-  const data = event.data;
-
-  // 2. Only process valid iframeLocationChange messages
-  if (data && data.type === "iframeLocationChange" && typeof data.href === "string") {
-    try {
-      const hrefUrl = new URL(data.href);
-
-      // 3. Only allow redirects to *.{{ PRIMARY_DOMAIN }}
-      if (!hrefUrl.hostname.endsWith(allowedSuffix)) return;
-
-      // 4. Update the ?iframe= parameter in the browser URL
-      const newUrl = new URL(window.location);
-      newUrl.searchParams.set("iframe", hrefUrl.href);
-      window.history.replaceState({}, "", newUrl);
-    } catch (e) {
-      // Invalid or malformed URL – ignore
+  // 3) Load all files in order
+  async function loadAll() {
+    for (const name of FILES) {
+      const fullUrl = BASE_URL + "/" + name.replace(/^\/+/, "");
+      await loadScriptSequential(fullUrl);
+    }
+    // Optional: hook after everything is ready
+    if (typeof window.onDesktopJsLoaded === "function") {
+      try { window.onDesktopJsLoaded(); } catch {}
     }
   }
-});
 
-{% if MODE_DEBUG | bool %}
-console.log("[iframe-sync] Listener for iframe messages is active.");
-{% endif %}
+  // 4) Start after DOM is ready (safe point to inject <script> tags)
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadAll);
+  } else {
+    loadAll();
+  }
+})();

@@ -1,4 +1,39 @@
-application_id:               "web-app-desktop"
-docker_repository_address:    "https://github.com/kevinveenbirkenbach/port-ui"
-config_inventory_path:        "{{ inventory_dir }}/files/{{ inventory_hostname }}/docker/web-app-desktop/config.yaml.j2"
-docker_pull_git_repository:   true
+# General
+application_id:                   "web-app-desktop"
+
+## Webserver
+proxy_extra_configuration:        "{{ lookup('template', 'nginx/sso.html.conf.j2') }}"
+
+## Docker
+docker_repository_address:        "https://github.com/kevinveenbirkenbach/port-ui"
+docker_pull_git_repository:       true
+
+# Desktop
+
+## Javascript
+DESKTOP_JS_CDN_URL:               "{{ domains | get_url('web-svc-cdn', WEB_PROTOCOL) }}"
+DESKTOP_JS_FILES:                 ['iframe.js','oidc.js']
+DESKTOP_JS_BASE_PATH:             "{{ application_id | get_entity_name }}/js"
+DESKTOP_JS_SERVER_DIR:            "{{ [ NGINX.DIRECTORIES.DATA.CDN, DESKTOP_JS_BASE_PATH ] | path_join }}"
+DESKTOP_JS_BASE_URL:              "{{ (DESKTOP_JS_CDN_URL | trim('/')) ~ '/' ~ (DESKTOP_JS_BASE_PATH | trim('/')) }}"
+
+## Webserver
+DESKTOP_LOCATION_SILENT_CHECK:    "/silent-check-sso.html"
+
+
+## Configuration
+DESKTOP_INVENTORY_CONFIG_PATH:    "{{ inventory_dir }}/files/{{ inventory_hostname }}/docker/web-app-desktop/config.yaml.j2"
+
+## OIDC
+DESKTOP_KEYCLOAK_LOGIN_URL: >-
+  {{ OIDC.CLIENT.AUTHORIZE_URL
+     ~ '?client_id=' ~ OIDC.CLIENT.ID
+     ~ '&response_type=code'
+     ~ '&scope=openid%20profile%20email'
+     ~ '&redirect_uri=' ~ (domains | get_url(application_id, WEB_PROTOCOL)) | urlencode }}
+DESKTOP_KEYCLOAK_IFRAME_ENABLED:  "{{ applications | get_app_conf( 'web-app-keycloak', 'features.desktop') }}"
+DESKTOP_OIDC_ENABLED:             "{{ applications | get_app_conf( application_id, 'features.oidc') }}"
+
+## Docker
+DESKTOP_CONTAINER:                "{{ applications | get_app_conf( application_id, 'docker.services.desktop.name') }}"
+DESKTOP_IMAGE:                    "{{ applications | get_app_conf( application_id, 'docker.services.desktop.image') }}"

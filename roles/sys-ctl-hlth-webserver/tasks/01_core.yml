@@ -10,11 +10,12 @@
     name: python-requests
     state: present
 
-- meta: flush_handlers
+- name: "Flush webserver handlers"
+  meta: flush_handlers
 
 - include_role:
     name: sys-service
   vars:
-    system_service_on_calendar: "{{ SYS_SCHEDULE_HEALTH_NGINX }}"
-    system_service_timer_enabled:  true
-    system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+    system_service_on_calendar:     "{{ SYS_SCHEDULE_HEALTH_NGINX }}"
+    system_service_timer_enabled:   true
+    system_service_tpl_on_failure:  "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"

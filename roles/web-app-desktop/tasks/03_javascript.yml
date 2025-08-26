@@ -1,0 +1,19 @@
+- name: "load required 'web-svc-cdn' for {{ application_id }}"
+  include_role:
+    name: web-svc-cdn
+    public: false
+  when: run_once_web_svc_cdn is not defined
+
+- name: Ensure {{ DESKTOP_JS_SERVER_DIR }} exists
+  file:
+    path: "{{ DESKTOP_JS_SERVER_DIR }}"
+    state: directory
+    owner: "{{ NGINX.USER }}"
+    group: "{{ NGINX.USER }}"
+    mode: '0755'
+
+- name: "Include file specific JS Routines"
+  include_tasks: "_javascript_file.yml"
+  loop: "{{ DESKTOP_JS_FILES }}"
+  loop_control:
+    loop_var: js_file_name

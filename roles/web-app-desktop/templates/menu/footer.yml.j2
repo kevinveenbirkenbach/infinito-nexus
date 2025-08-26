@@ -9,8 +9,8 @@
       description: Access our comprehensive documentation and support resources to help you get the most out of the software.
       icon:
         class: fas fa-book
-      url: https://{{domains | get_domain('web-app-sphinx')}}
-      iframe: {{ applications | get_app_conf('web-app-sphinx','features.desktop',True) }}
+      url: {{ domains | get_url('web-app-sphinx', WEB_PROTOCOL) }}
+      iframe: {{ applications | get_app_conf('web-app-sphinx','features.desktop') }}
 
 {% endif %}
 
@@ -20,8 +20,8 @@
       description: Checkout the presentation
       icon:
         class: "fas fa-chalkboard-teacher"
-      url: https://{{domains | get_domain('web-app-navigator')}}
-      iframe: {{ applications | get_app_conf('web-app-navigator','features.desktop',True) }}
+      url: {{ domains | get_url('web-app-navigator', WEB_PROTOCOL) }}
+      iframe: {{ applications | get_app_conf('web-app-navigator','features.desktop') }}
 
 {% endif %}
     - name: Solutions

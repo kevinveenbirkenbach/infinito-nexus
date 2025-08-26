@@ -63,7 +63,7 @@
   register: wp_is_multisite
   changed_when: false
 
-- name: "Update Single Side Wordpress domain"
+- name: "Update Single Side WordPress domain"
   include_tasks: 04_update_domain.yml
   when: (wp_is_multisite.stdout | trim) == '0'
   vars:

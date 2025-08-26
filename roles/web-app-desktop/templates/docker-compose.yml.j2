@@ -2,15 +2,15 @@
   portfolio:
 {% set container_port = 5000 %}
     build:
-      context: {{docker_repository_path}}
+      context: {{ docker_repository_path }}
       dockerfile: Dockerfile
-    image: application-portfolio
-    container_name: portfolio
+    image: {{ DESKTOP_IMAGE }}
+    container_name: {{ DESKTOP_CONTAINER }}
     ports:
       - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
     volumes:
-      - {{docker_repository_path}}app:/app
-    restart: unless-stopped
+      - {{ docker_repository_path }}app:/app
+    restart: {{ DOCKER_RESTART_POLICY }}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 

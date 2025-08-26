@@ -9,4 +9,4 @@
   community.general.pacman:
     name: "libreoffice-{{ applications['desk-libreoffice'].flavor }}-{{ item }}"
     state: present
-  loop: "{{libreoffice_languages}}"
+  loop: "{{ libreoffice_languages }}"

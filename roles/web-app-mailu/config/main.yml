@@ -27,7 +27,7 @@ server:
 rbac:
   roles:
     mail-bot:
-      description: "Has an token to send and recieve emails"
+      description: "Has an token to send and receive emails"
 docker:
   services:
     redis:

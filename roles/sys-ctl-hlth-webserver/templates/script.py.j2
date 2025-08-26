@@ -15,12 +15,12 @@ def get_expected_statuses(domain: str, parts: list[str], redirected_domains: set
     Returns:
         A list of expected HTTP status codes.
     """
-    if domain == '{{domains | get_domain('web-app-listmonk')}}':
+    if domain == '{{ domains | get_domain('web-app-listmonk') }}':
         return [404]
     if (parts and parts[0] == 'www') or (domain in redirected_domains):
         return [301]
-    if domain == '{{domains | get_domain('web-app-yourls')}}':
-        return [{{ applications | get_app_conf('web-app-yourls', 'server.status_codes.landingpage', True) }}]
+    if domain == '{{ domains | get_domain('web-app-yourls') }}':
+        return [{{ applications | get_app_conf('web-app-yourls', 'server.status_codes.landingpage') }}]
     return [200, 302, 301]
 
 # file in which fqdn server configs are deposit

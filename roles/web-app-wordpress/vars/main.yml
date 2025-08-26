@@ -3,7 +3,7 @@ application_id:             "web-app-wordpress"
 database_type:              "mariadb"
 host_msmtp_conf:            "{{docker_compose.directories.config}}msmtprc.conf"
 
-# Wordpress Specific
+# WordPress Specific
 wordpress_max_upload_size:  "{{ applications | get_app_conf(application_id, 'max_upload_size') }}"
 wordpress_custom_image:     "wordpress_custom"
 wordpress_docker_html_path: "/var/www/html"

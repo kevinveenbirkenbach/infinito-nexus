@@ -1,4 +1,4 @@
 users:                                                            # Credentials
-  administrator:                                                  # Wordpress administrator
+  administrator:                                                  # WordPress administrator
     username:         "administrator"
     email:            "administrator@{{ PRIMARY_DOMAIN }}"

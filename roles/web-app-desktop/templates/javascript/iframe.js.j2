@@ -1,0 +1,30 @@
+window.addEventListener("message", function(event) {
+  const allowedSuffix = ".{{ PRIMARY_DOMAIN }}";
+  const origin = event.origin;
+
+  // 1. Only allow messages from *.{{ PRIMARY_DOMAIN }}
+  if (!origin.endsWith(allowedSuffix)) return;
+
+  const data = event.data;
+
+  // 2. Only process valid iframeLocationChange messages
+  if (data && data.type === "iframeLocationChange" && typeof data.href === "string") {
+    try {
+      const hrefUrl = new URL(data.href);
+
+      // 3. Only allow redirects to *.{{ PRIMARY_DOMAIN }}
+      if (!hrefUrl.hostname.endsWith(allowedSuffix)) return;
+
+      // 4. Update the ?iframe= parameter in the browser URL
+      const newUrl = new URL(window.location);
+      newUrl.searchParams.set("iframe", hrefUrl.href);
+      window.history.replaceState({}, "", newUrl);
+    } catch (e) {
+      // Invalid or malformed URL – ignore
+    }
+  }
+});
+
+{% if MODE_DEBUG | bool %}
+console.log("[iframe-sync] Listener for iframe messages is active.");
+{% endif %}

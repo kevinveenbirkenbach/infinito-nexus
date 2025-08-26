@@ -1,4 +1,3 @@
-# roles/sys-srv-web-inj-compose/filter_plugins/inj_snippets.py
 """
 Jinja filter: `inj_features(kind)` filters a list of features to only those
 that actually provide the corresponding snippet template file.

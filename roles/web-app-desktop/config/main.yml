@@ -2,9 +2,10 @@ features:
   matomo:       true
   css:          true
   desktop:      false
-  simpleicons:  true  # Activate Brand Icons for your groups
-  javascript:   true  # Necessary for URL sync
-  logout:       false # Doesn't have own user data. Just a frame.
+  oidc:         true      # Needs to be activated so that the login url is working
+  simpleicons:  true      # Activate Brand Icons for your groups
+  javascript:   true      # Necessary for URL sync
+  logout:       true
 server:
   csp:
     whitelist:
@@ -19,6 +20,7 @@ server:
         - https://cdn.jsdelivr.net
       connect-src:
         - https://ka-f.fontawesome.com
+        - "{{ WEB_PROTOCOL }}://auth.{{ PRIMARY_DOMAIN }}" 
       frame-src:
         - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
     flags:
@@ -31,4 +33,8 @@ server:
   domains:
     canonical:
       - "{{ PRIMARY_DOMAIN }}"
-
+docker: 
+  services:
+    desktop:
+      name:   "desktop"
+      image:  "application-portfolio"

@@ -17,4 +17,39 @@
       description: Reload the application
       icon:
         class: fa-solid fa-rotate-right
-      url:   "{{ WEB_PROTOCOL }}://{{ domains | get_domain('web-app-desktop') }}"
+      url:   "{{ domains | get_url('web-app-desktop', WEB_PROTOCOL) }}"
+
+{% if DESKTOP_OIDC_ENABLED | bool %}
+
+    - name: Account
+      description: Manage your Account
+      icon:
+        class: fa-solid fa-user
+      children:
+        - name: Profile
+          description: Manage your profile
+          icon:
+            class: fa-solid fa-id-card
+          url: {{ OIDC.CLIENT.ACCOUNT.PROFILE_URL }}
+          iframe: {{ DESKTOP_KEYCLOAK_IFRAME_ENABLED }}
+        - name: Security
+          description: Manage your security settings
+          icon:
+            class: fa-solid fa-user-gear
+          url: {{ OIDC.CLIENT.ACCOUNT.SECURITY_URL }}
+          iframe: {{ DESKTOP_KEYCLOAK_IFRAME_ENABLED }}
+        - name: Logout
+          description: "Logout from {{ SOFTWARE_NAME }} on {{ PRIMARY_DOMAIN }}"
+          target: "_top"  
+          icon:
+            class: fa-solid fa-right-from-bracket
+          url: {{ OIDC.CLIENT.LOGOUT_URL }}
+          iframe: false # Neccesary to refresh desktop page after logout
+    - name: Login
+      description: "Login to {{ SOFTWARE_NAME }} on {{ PRIMARY_DOMAIN }}"
+      target: "_top"
+      icon:
+        class: fa-solid fa-right-to-bracket
+      url: {{ DESKTOP_KEYCLOAK_LOGIN_URL }}
+      iframe: false # Neccesary to refresh desktop page after login
+{% endif %}

@@ -3,7 +3,6 @@
   include_tasks: 01_meta.yml
   when: not KEYCLOAK_LOAD_DEPENDENCIES | bool
 
-
 - name: "Load cleanup routine for '{{ application_id }}'"
   include_tasks: 02_cleanup.yml
 

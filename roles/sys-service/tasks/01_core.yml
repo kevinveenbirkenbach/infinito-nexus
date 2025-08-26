@@ -1,7 +1,6 @@
 - name: Include dependency 'sys-daemon'
   include_role:
     name: sys-daemon
-    public: true
   when: run_once_sys_daemon is not defined
   
 - name: "reset (if enabled)"

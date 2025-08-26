@@ -1,0 +1,220 @@
+/* ==========================================================================================
+   roles/web-app-desktop/templates/javascript/oidc.js.j2
+   Purpose: Hide "Login" and show "Account" when a Keycloak SSO session exists,
+            wire login/logout clicks to the Keycloak adapter, and keep state fresh.
+   NOTE: Ensure CSP allows {{ OIDC.URL }} for script-src-elem, connect-src, and frame-src.
+   ========================================================================================== */
+
+/* =======================
+   1) Configuration (filled by Jinja/Ansible)
+   ======================= */
+const KC_CONFIG = {
+  url: "{{ OIDC.URL }}",                 // e.g. https://auth.infinito.nexus
+  realm: "{{ OIDC.CLIENT.REALM }}",      // e.g. cymais.cloud
+  clientId: "{{ OIDC.CLIENT.ID }}",      // e.g. cymais.cloud
+  redirectUri: window.location.origin,   // where to return after login/logout
+  silentCheckSsoRedirectUri: window.location.origin + "{{ DESKTOP_LOCATION_SILENT_CHECK }}"
+};
+
+const DEBUG = {{ 'true' if MODE_DEBUG | default(false) else 'false' }};
+
+/* ==============================================
+   2) Helpers for menu manipulation
+   ============================================== */
+function normalizedLabel(el) {
+  return (el?.getAttribute?.("data-label") || el?.ariaLabel || el?.title || el?.textContent || "")
+    .replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function findMenuItemByText(label) {
+  const wanted = (label || "").trim().toLowerCase();
+  if (!wanted) return null;
+
+  const nodes = document.querySelectorAll(
+    "nav a, nav button, nav .nav-link, nav .dropdown-toggle, nav .dropdown-item, .navbar a, .navbar button"
+  );
+
+  for (const el of nodes) {
+    const text = (el.getAttribute?.("data-label") || el.ariaLabel || el.title || el.textContent || "")
+      .replace(/\s+/g, " ").trim().toLowerCase();
+    if (text !== wanted) continue;
+
+    const container =
+      el.closest("li, .nav-item, .dropdown, .btn-group, .menu-item") ||
+      el.closest(".navbar-nav > *") ||
+      el.parentElement ||
+      el;
+    return container;
+  }
+  return null;
+}
+
+
+function setItemVisible(el, visible) {
+  if (!el) return;
+  el.style.display = visible ? "" : "none";
+  if (el.toggleAttribute) el.toggleAttribute("hidden", !visible);
+  el.setAttribute?.("aria-hidden", visible ? "false" : "true");
+}
+
+/* ==============================================
+   3) Dynamically load the Keycloak.js adapter
+   ============================================== */
+function loadKeycloakAdapter(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("Failed to load keycloak.js from " + src));
+    document.head.appendChild(s);
+  });
+}
+
+/* ==============================================
+   4) UI logic: toggle Account/Login visibility
+   ============================================== */
+let keycloak = null;
+
+function applyAuthMenuVisibility(authenticated) {
+  try {
+    const accountItem = findMenuItemByText("Account");
+    const loginItem   = findMenuItemByText("Login");
+    setItemVisible(accountItem, !!authenticated);
+    setItemVisible(loginItem,   !authenticated);
+    if (DEBUG) console.log("[oidc] applyAuthMenuVisibility:", { authenticated, accountItem, loginItem });
+  } catch (e) {
+    console.warn("[oidc] applyAuthMenuVisibility failed:", e);
+  }
+}
+
+function wireLoginLogoutClicks() {
+  const loginItem  = findMenuItemByText("Login");
+  const logoutItem = findMenuItemByText("Logout"); // child under "Account"
+  const loginA     = loginItem?.querySelector("a,button");
+  const logoutA    = logoutItem?.querySelector("a,button");
+
+  // Intercept login click to use the adapter (gracefully falls back to href if adapter failed)
+  loginA?.addEventListener("click", (ev) => {
+    try {
+      if (keycloak) {
+        ev.preventDefault();
+        keycloak.login({ redirectUri: KC_CONFIG.redirectUri });
+        if (DEBUG) console.log("[oidc] login clicked → keycloak.login()");
+      }
+    } catch (e) {
+      console.warn("[oidc] login handler error:", e);
+    }
+  }, { capture: true });
+
+  // Intercept logout click
+  logoutA?.addEventListener("click", (ev) => {
+    try {
+      if (keycloak) {
+        ev.preventDefault();
+        keycloak.logout({ redirectUri: KC_CONFIG.redirectUri });
+        if (DEBUG) console.log("[oidc] logout clicked → keycloak.logout()");
+      }
+    } catch (e) {
+      console.warn("[oidc] logout handler error:", e);
+    }
+  }, { capture: true });
+}
+
+/* ==============================================
+   5) Initialize Keycloak with silent SSO check
+   ============================================== */
+async function initAuthUI() {
+  // Default UI state until we know better
+  applyAuthMenuVisibility(false);
+
+  // Load keycloak.js
+  const kcJsUrl = "https://cdn.jsdelivr.net/npm/keycloak-js@latest/dist/keycloak.min.js";
+  try {
+    await loadKeycloakAdapter(kcJsUrl);
+  } catch (e) {
+    console.error("[oidc] Failed to load adapter:", e);
+    return; // nothing else to do
+  }
+
+  if (typeof window.Keycloak !== "function") {
+    console.error("[oidc] window.Keycloak is not available after loading:", kcJsUrl);
+    return;
+  }
+
+  // Initialize the Keycloak instance
+  let authenticated = false;
+  try {
+    keycloak = new Keycloak({ url: KC_CONFIG.url, realm: KC_CONFIG.realm, clientId: KC_CONFIG.clientId });
+
+    const hasAuthCode = /\bcode=/.test(window.location.search);
+    const onLoadMode = hasAuthCode ? "login-required" : "check-sso";
+
+    authenticated = await keycloak.init({
+      onLoad: onLoadMode,
+      pkceMethod: "S256",
+      silentCheckSsoRedirectUri: KC_CONFIG.silentCheckSsoRedirectUri,
+      checkLoginIframe: true,
+      tokenMinValid: 30
+    });
+  } catch (e) {
+    console.error("[oidc] Keycloak init failed:", e);
+  }
+
+  applyAuthMenuVisibility(!!authenticated);
+  wireLoginLogoutClicks();
+
+  // Schedule token refresh only if we are authenticated
+  async function scheduleRefresh() {
+    if (!keycloak?.tokenParsed?.exp) return;
+    const now = Math.floor(Date.now() / 1000);
+    const exp = keycloak.tokenParsed.exp;
+    const refreshInMs = Math.max((exp - now - 30), 1) * 1000;
+
+    setTimeout(async () => {
+      try {
+        const ok = await keycloak.updateToken(60); // refresh if <60s valid
+        applyAuthMenuVisibility(!!ok || !!keycloak?.authenticated);
+        if (DEBUG) console.log("[oidc] token refresh → ok:", ok);
+      } catch (e) {
+        console.warn("[oidc] token refresh failed:", e);
+        applyAuthMenuVisibility(false);
+      }
+      scheduleRefresh();
+    }, refreshInMs);
+  }
+  if (authenticated) scheduleRefresh();
+
+  // Re-apply if the navbar is re-rendered dynamically
+  const navbar = document.querySelector("nav.navbar") || document.querySelector(".navbar") || document.querySelector("nav");
+  if (navbar && "MutationObserver" in window) {
+    new MutationObserver(() => applyAuthMenuVisibility(!!keycloak?.authenticated || !!authenticated))
+      .observe(navbar, { childList: true, subtree: true });
+  }
+
+  if (DEBUG) {
+    console.log("[oidc] init done", {
+      authenticated,
+      kcJsUrl,
+      silentCheckSsoRedirectUri: KC_CONFIG.silentCheckSsoRedirectUri
+    });
+  }
+}
+
+/* ==============================================
+   6) Start when DOM is ready
+   ============================================== */
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initAuthUI, { once: true });
+} else {
+  // If script is injected after DOMContentLoaded (e.g., via runtime loader), run immediately
+  initAuthUI();
+}
+
+/* ==========================================================================================
+   NOTE: You must provide a file {{ DESKTOP_LOCATION_SILENT_CHECK }} at your web root, e.g.:
+
+   <!DOCTYPE html><html><body>Silent SSO</body></html>
+
+   This file is loaded in an invisible iframe by Keycloak to check login state.
+   Also ensure CSP allows {{ OIDC.URL }} in script-src-elem, connect-src, and frame-src.
+   ========================================================================================== */
