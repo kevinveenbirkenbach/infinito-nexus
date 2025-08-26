@@ -43,6 +43,32 @@ def find_docker_compose_file(directory: str) -> str | None:
     return None
 
 
+def detect_env_file(project_path: str) -> str | None:
+    """
+    Return the path to a Compose env file if present (.env preferred, fallback to env).
+    """
+    candidates = [os.path.join(project_path, ".env"), os.path.join(project_path, ".env", "env")]
+    for candidate in candidates:
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
+def compose_cmd(subcmd: str, project_path: str, project_name: str | None = None) -> str:
+    """
+    Build a docker-compose command string with optional -p and --env-file if present.
+    Example: compose_cmd("restart", "/opt/docker/foo", "foo")
+    """
+    parts: List[str] = [f'cd "{project_path}" && docker-compose']
+    if project_name:
+        parts += ['-p', f'"{project_name}"']
+    env_file = detect_env_file(project_path)
+    if env_file:
+        parts += ['--env-file', f'"{env_file}"']
+    parts += subcmd.split()
+    return " ".join(parts)
+
+
 def normalize_services_arg(raw: List[str] | None, raw_str: str | None) -> List[str]:
     """
     Accept either:
@@ -56,6 +82,7 @@ def normalize_services_arg(raw: List[str] | None, raw_str: str | None) -> List[s
         parts = [p.strip() for chunk in raw_str.split(",") for p in chunk.split()]
         return [p for p in parts if p]
     return []
+
 
 def wait_while_manipulation_running(
     services: List[str],
@@ -91,6 +118,7 @@ def wait_while_manipulation_running(
             print("No blocking service is running.")
             break
 
+
 def main(base_directory: str, manipulation_services: List[str], timeout: int | None) -> int:
     errors = 0
     wait_while_manipulation_running(manipulation_services, waiting_time=600, timeout=timeout)
@@ -117,13 +145,15 @@ def main(base_directory: str, manipulation_services: List[str], timeout: int | N
             print("Restarting unhealthy container in:", compose_file_path)
             project_path = os.path.dirname(compose_file_path)
             try:
-                print_bash(f'cd "{project_path}" && docker-compose -p "{repo}" restart')
+                # restart with optional --env-file and -p
+                print_bash(compose_cmd("restart", project_path, repo))
             except Exception as e:
                 if "port is already allocated" in str(e):
                     print("Detected port allocation problem. Executing recovery steps...")
-                    print_bash(f'cd "{project_path}" && docker-compose down')
+                    # down (no -p needed), then engine restart, then up -d with -p
+                    print_bash(compose_cmd("down", project_path))
                     print_bash("systemctl restart docker")
-                    print_bash(f'cd "{project_path}" && docker-compose -p "{repo}" up -d')
+                    print_bash(compose_cmd("up -d", project_path, repo))
                 else:
                     print("Unhandled exception during restart:", e)
                     errors += 1

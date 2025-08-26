@@ -3,15 +3,41 @@ import sys
 import subprocess
 import argparse
 
+
+def detect_env_file(dir_path: str) -> str | None:
+    """
+    Return the path to a Compose env file if present (.env preferred, fallback to env).
+    """
+    candidates = [os.path.join(dir_path, ".env"), os.path.join(dir_path, ".env", "env")]
+    for candidate in candidates:
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+
 def hard_restart_docker_services(dir_path):
     """
     Perform a hard restart of docker-compose services in the given directory
-    using docker-compose down and docker-compose up -d.
+    using docker-compose down and docker-compose up -d, adding --env-file if present.
     """
     try:
         print(f"Performing hard restart for docker-compose services in: {dir_path}")
-        subprocess.run(["docker-compose", "down"], cwd=dir_path, check=True)
-        subprocess.run(["docker-compose", "up", "-d"], cwd=dir_path, check=True)
+
+        env_file = detect_env_file(dir_path)
+        base = ["docker-compose"]
+        down_cmd = base.copy()
+        up_cmd = base.copy()
+
+        if env_file:
+            down_cmd += ["--env-file", env_file]
+            up_cmd += ["--env-file", env_file]
+
+        down_cmd += ["down"]
+        up_cmd += ["up", "-d"]
+
+        subprocess.run(down_cmd, cwd=dir_path, check=True)
+        subprocess.run(up_cmd, cwd=dir_path, check=True)
+
         print(f"Hard restart completed successfully in: {dir_path}")
     except subprocess.CalledProcessError as e:
         print(f"Error during hard restart in {dir_path}: {e}")
