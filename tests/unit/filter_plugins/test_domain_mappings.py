@@ -22,27 +22,27 @@ class TestDomainMappings(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_app_without_domains(self):
-        apps = {'web-app-port-ui': {}}
+        apps = {'web-app-desktop': {}}
         # no domains key → no mappings
         result = self.filter.domain_mappings(apps, self.primary)
         self.assertEqual(result, [])
 
     def test_empty_domains_cfg(self):
-        apps = {'web-app-port-ui': {'domains': {}}}
-        default = 'port-ui.example.com'
+        apps = {'web-app-desktop': {'domains': {}}}
+        default = 'desktop.example.com'
         expected = []
         result = self.filter.domain_mappings(apps, self.primary)
         self.assertEqual(result, expected)
 
     def test_explicit_aliases(self):
         apps = {
-            'web-app-port-ui': {
+            'web-app-desktop': {
                 'server':{
                     'domains': {'aliases': ['alias.com']}
                 }
             }
         }
-        default = 'port-ui.example.com'
+        default = 'desktop.example.com'
         expected = [
             {'source': 'alias.com',    'target': default},
         ]
@@ -52,21 +52,21 @@ class TestDomainMappings(unittest.TestCase):
 
     def test_canonical_not_default(self):
         apps = {
-            'web-app-port-ui': {
+            'web-app-desktop': {
                 'server':{
                     'domains': {'canonical': ['foo.com']}
                 }
             }
         }
         expected = [
-            {'source': 'port-ui.example.com', 'target': 'foo.com'}
+            {'source': 'desktop.example.com', 'target': 'foo.com'}
         ]
         result = self.filter.domain_mappings(apps, self.primary)
         self.assertEqual(result, expected)
 
     def test_canonical_dict(self):
         apps = {
-            'web-app-port-ui': {
+            'web-app-desktop': {
                 'server':{
                     'domains': {
                         'canonical': {'one': 'one.com', 'two': 'two.com'}
@@ -76,14 +76,14 @@ class TestDomainMappings(unittest.TestCase):
         }
         # first canonical key 'one' → one.com
         expected = [
-            {'source': 'port-ui.example.com', 'target': 'one.com'}
+            {'source': 'desktop.example.com', 'target': 'one.com'}
         ]
         result = self.filter.domain_mappings(apps, self.primary)
         self.assertEqual(result, expected)
 
     def test_multiple_apps(self):
         apps = {
-            'web-app-port-ui': {
+            'web-app-desktop': {
                 'server':{'domains': {'aliases': ['a1.com']}}
             },
             'web-app-mastodon': {
@@ -91,7 +91,7 @@ class TestDomainMappings(unittest.TestCase):
             },
         }
         expected = [
-            {'source': 'a1.com',              'target': 'port-ui.example.com'},
+            {'source': 'a1.com',              'target': 'desktop.example.com'},
             {'source': 'mastodon.example.com',    'target': 'c2.com'},
         ]
         result = self.filter.domain_mappings(apps, self.primary)
@@ -99,21 +99,21 @@ class TestDomainMappings(unittest.TestCase):
         
     def test_multiple_aliases(self):
         apps = {
-            'web-app-port-ui': {
+            'web-app-desktop': {
                 'server':{'domains': {'aliases': ['a1.com','a2.com']}
                 }
             }
         }
         expected = [
-            {'source': 'a1.com', 'target': 'port-ui.example.com'},
-            {'source': 'a2.com', 'target': 'port-ui.example.com'}
+            {'source': 'a1.com', 'target': 'desktop.example.com'},
+            {'source': 'a2.com', 'target': 'desktop.example.com'}
         ]
         result = self.filter.domain_mappings(apps, self.primary)
         self.assertCountEqual(result, expected)
 
     def test_invalid_aliases_type(self):
         apps = {
-            'web-app-port-ui': {'server':{'domains': {'aliases': 123}}}
+            'web-app-desktop': {'server':{'domains': {'aliases': 123}}}
         }
         with self.assertRaises(AnsibleFilterError):
             self.filter.domain_mappings(apps, self.primary)

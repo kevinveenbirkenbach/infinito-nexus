@@ -5,11 +5,11 @@
         (
           not (item.value.features['desktop'] | default(false) | bool)
         )
-        or (domains | get_domain(item.key)).endswith(domains | get_domain('web-app-port-ui'))
+        or (domains | get_domain(item.key)).endswith(domains | get_domain('web-app-desktop'))
     fail_msg: >
       Application {{ item.key }}
       has domain {{ domains | get_domain(item.key) }}
-      but it does not end with {{ domains | get_domain('web-app-port-ui') }}!
+      but it does not end with {{ domains | get_domain('web-app-desktop') }}!
   loop: "{{ applications 
              | dict2items 
              | selectattr('key', 'match', '^(web-app-|web-svc-)')

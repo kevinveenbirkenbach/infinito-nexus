@@ -26,4 +26,4 @@ galaxy_info:
 dependencies:
   - web-svc-legal
   - web-svc-asset
-  - web-app-port-ui
+  - web-app-desktop

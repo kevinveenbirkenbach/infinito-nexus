@@ -155,7 +155,7 @@ class FilterModule(object):
                 if directive == 'frame-ancestors':
                     # Enable loading via ancestors
                     if self.is_feature_enabled(applications, 'desktop', application_id):
-                        domain = domains.get('web-app-port-ui')[0]
+                        domain = domains.get('web-app-desktop')[0]
                         sld_tld = ".".join(domain.split(".")[-2:])  # yields "example.com"
                         tokens.append(f"{sld_tld}")                 # yields "*.example.com"
                 

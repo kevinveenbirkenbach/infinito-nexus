@@ -50,7 +50,7 @@ ports:
       web-app-moodle: 8026
       web-app-taiga: 8027
       web-app-friendica: 8028
-      web-app-port-ui: 8029
+      web-app-desktop: 8029
       web-app-bluesky_api: 8030
       web-app-bluesky_web: 8031
       web-app-keycloak: 8032

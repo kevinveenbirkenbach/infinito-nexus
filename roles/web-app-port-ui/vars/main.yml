@@ -1,4 +1,0 @@
-application_id:               "web-app-port-ui"
-docker_repository_address:    "https://github.com/kevinveenbirkenbach/port-ui"
-config_inventory_path:        "{{ inventory_dir }}/files/{{ inventory_hostname }}/docker/web-app-port-ui/config.yaml.j2"
-docker_pull_git_repository:   true

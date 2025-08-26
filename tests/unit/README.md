@@ -1,6 +1,6 @@
 # Unit Tests
 
-This directory contains unit tests for various custom components in the project, such as the custom lookup plugin `docker_cards` used in the `web-app-port-ui` role.
+This directory contains unit tests for various custom components in the project, such as the custom lookup plugin `docker_cards` used in the `web-app-desktop` role.
 
 ## Overview
 
@@ -31,7 +31,7 @@ You can run the tests using one of the following methods:
 ## How It Works
 
 - **Setup:**  
-  The test script creates a temporary directory to simulate your roles folder. It then creates a sample role (`web-app-port-ui`) with a `README.md` file (containing a header for the title) and a `meta/main.yml` file (with the required metadata).
+  The test script creates a temporary directory to simulate your roles folder. It then creates a sample role (`web-app-desktop`) with a `README.md` file (containing a header for the title) and a `meta/main.yml` file (with the required metadata).
 
 - **Execution:**  
   Dummy variable values for `domains` and `applications` are provided (these are the variables the lookup plugin expects). The lookup plugin is then run, which processes the sample role and returns the card information.

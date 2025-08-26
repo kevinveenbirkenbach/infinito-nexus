@@ -2,4 +2,4 @@
 - block:
     - include_tasks: 01_core.yml
     - include_tasks: utils/run_once.yml
-  when: run_once_web_app_port_ui is not defined
+  when: run_once_web_app_desktop is not defined

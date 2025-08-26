@@ -6,8 +6,8 @@ import tempfile
 import shutil
 import unittest
 
-# Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-port-ui role.
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../roles/web-app-port-ui/lookup_plugins'))
+# Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-desktop role.
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../roles/web-app-desktop/lookup_plugins'))
 
 from docker_cards import LookupModule
 
@@ -17,8 +17,8 @@ class TestDockerCardsLookup(unittest.TestCase):
         # Create a temporary directory to simulate the roles directory.
         self.test_roles_dir = tempfile.mkdtemp(prefix="test_roles_")
 
-        # Create a sample role "web-app-port-ui" under that directory.
-        self.role_name = "web-app-port-ui"
+        # Create a sample role "web-app-desktop" under that directory.
+        self.role_name = "web-app-desktop"
         self.role_dir = os.path.join(self.test_roles_dir, self.role_name)
         os.makedirs(os.path.join(self.role_dir, "meta"))
         os.makedirs(os.path.join(self.role_dir, "vars"))
