@@ -1,8 +1,0 @@
-[Unit]
-Description=Restart Docker Instances
-OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
-
-[Service]
-Type=oneshot
-ExecStartPre=/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_REPAIR_DOCKER_HARD }} --timeout "{{ SYS_TIMEOUT_RESTART_DOCKER }}"
-ExecStart={{ system_service_script_exec }} {{ PATH_DOCKER_COMPOSE_INSTANCES }}

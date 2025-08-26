@@ -11,7 +11,8 @@ Type={{ system_service_tpl_type }}
   ('TimeoutStartSec', system_service_tpl_timeout_start_sec),
   ('ExecStartPre',    system_service_tpl_exec_start_pre),
   ('ExecStart',       system_service_tpl_exec_start),
-  ('RuntimeMaxSec',   system_service_tpl_runtime)
+  ('ExecStartPost',   system_service_tpl_exec_start_post),
+  ('RuntimeMaxSec',   system_service_tpl_runtime),
 ] %}
 {{ val | systemd_directive(key) }}
 {% endfor %}

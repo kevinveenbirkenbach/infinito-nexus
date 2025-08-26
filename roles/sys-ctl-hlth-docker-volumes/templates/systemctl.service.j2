@@ -1,7 +1,0 @@
-[Unit]
-Description=Checking docker health
-OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
-
-[Service]
-Type=oneshot
-ExecStart={{ system_service_script_exec }} "{{ DOCKER_WHITELISTET_ANON_VOLUMES | join(' ') }}"
