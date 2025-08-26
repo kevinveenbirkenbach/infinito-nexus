@@ -10,7 +10,7 @@
     vars:
       system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
       system_service_tpl_exec_start:      dockreap --no-confirmation
-      system_service_tpl_exec_start_pre:  /usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES }} --timeout "{{ SYS_TIMEOUT_CLEANUP_SERVICES }}"
+      system_service_tpl_exec_start_pre:  "" # Anonymous volumes can allways be removed. It isn't necessary to wait for any service to stop.
       system_service_copy_files:          false
 
   - include_tasks: utils/run_once.yml
