@@ -2,8 +2,8 @@
 
   application:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ baserow_image }}:{{ baserow_version }}"
-    container_name: {{ baserow_name }}
+    image: "{{ BASEROW_IMAGE }}:{{ BASEROW_VERSION }}"
+    container_name: {{ BASEROW_CONTAINER }}
     volumes:
       - data:/baserow/data
     ports:
@@ -13,6 +13,6 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ baserow_volume }}
+    name: {{ BASEROW_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

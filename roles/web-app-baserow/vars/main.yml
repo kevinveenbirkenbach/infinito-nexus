@@ -1,7 +1,11 @@
+# General
 application_id:     "web-app-baserow"
-database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password', True) }}"
+database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
 database_type:      "postgres"
-baserow_version:    "{{ applications | get_app_conf(application_id, 'docker.services.baserow.version', True) }}"
-baserow_image:      "{{ applications | get_app_conf(application_id, 'docker.services.baserow.image', True) }}"
-baserow_name:       "{{ applications | get_app_conf(application_id, 'docker.services.baserow.name', True) }}"
-baserow_volume:     "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
+
+# Baserow
+BASEROW_PUBLIC_URL: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+BASEROW_VERSION:    "{{ applications | get_app_conf(application_id, 'docker.services.baserow.version') }}"
+BASEROW_IMAGE:      "{{ applications | get_app_conf(application_id, 'docker.services.baserow.image') }}"
+BASEROW_CONTAINER:  "{{ applications | get_app_conf(application_id, 'docker.services.baserow.name') }}"
+BASEROW_VOLUME:     "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"

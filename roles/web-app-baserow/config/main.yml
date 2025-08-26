@@ -7,9 +7,9 @@ features:
 docker:
   services:
     redis:
-      enabled:          true
+      enabled:            true
     database:
-      enabled:          true
+      enabled:            true
     baserow:  
       backup:
         no_stop_required: true
@@ -17,8 +17,19 @@ docker:
       version:            "latest"
       name:               "baserow"
   volumes:
-    data:               "baserow_data"
+    data:                 "baserow_data"
 server:
   domains:
     canonical:
       - baserow.{{ PRIMARY_DOMAIN }}
+  csp:
+    whitelist:
+      worker-src:
+        - "blob:"
+      connect-src:
+        - "https://sentry.com/"
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
+      style-src:
+        unsafe-inline:  true
