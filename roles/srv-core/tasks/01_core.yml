@@ -8,6 +8,9 @@
   include_tasks: 03_reset.yml
   when: MODE_RESET | bool
 
+- name: "Load variables from {{ DOCKER_VARS_FILE }} for {{ role_name }}/{{ application_id }}"
+  include_vars: "{{ DOCKER_VARS_FILE }}"
+
 - name: "Load docker compose handlers"
   include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
   vars:
