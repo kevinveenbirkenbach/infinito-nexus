@@ -10,6 +10,5 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
 
-# Copy msmtp configuration and PHP upload settings
-COPY config/msmtprc.conf /etc/msmtprc
+# Copy PHP upload settings
 COPY upload.ini $PHP_INI_DIR/conf.d/
