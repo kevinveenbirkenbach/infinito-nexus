@@ -3,17 +3,17 @@
   include_role: 
     name: cmp-db-docker-proxy
 
-- name: "copy templates {{ settings_files }} for taiga-contrib-oidc-auth"
+- name: "copy templates {{ TAIGA_SETTING_FILES }} for taiga-contrib-oidc-auth"
   template:
     src:  "taiga/{{item}}.py.j2"
     dest: "{{ docker_compose.directories.config }}taiga-{{item}}.py"
   when:   applications | get_app_conf(application_id, 'features.oidc', True) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'taigaio'
   notify: docker compose up
-  loop:   "{{ settings_files }}"
+  loop:   "{{ TAIGA_SETTING_FILES }}"
 
-- name: "create {{docker_compose_init}}"
+- name: "create {{ TAIGA_DOCKER_COMPOSE_INIT }}"
   template:
     src:  "docker-compose-inits.yml.j2"
-    dest:  "{{docker_compose_init}}"
+    dest:  "{{ TAIGA_DOCKER_COMPOSE_INIT }}"
   notify: docker compose up
 

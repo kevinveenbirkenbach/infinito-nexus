@@ -1,18 +1,22 @@
+# General
 application_id:             "web-app-taiga"
 database_type:              "postgres"
+
+# Docker
 docker_repository_address:  "https://github.com/taigaio/taiga-docker"
-email_backend:              "smtp"                                      ## use an SMTP server or display the emails in the console (either "smtp" or "console")
-docker_compose_init:        "{{ docker_compose.directories.instance }}docker-compose-inits.yml.j2"
-taiga_image_backend: >-
-  {{ 'robrotheram/taiga-back-openid' if applications | get_app_conf(application_id, 'features.oidc', True) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'robrotheram'
-     else 'taigaio/taiga-back' }}
-taiga_image_frontend: >-
-  {{ 'robrotheram/taiga-front-openid' if applications | get_app_conf(application_id, 'features.oidc', True) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'robrotheram'
-     else 'taigaio/taiga-front' }}
-taiga_frontend_conf_path:   "{{docker_compose.directories.config}}conf.json"
-docker_pull_git_repository:          true
-settings_files:
+docker_pull_git_repository: true
+
+# Taiga
+TAIGA_OIDC_ENABLED:           "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+TAIGA_FLAVOR_ROBROTHERAM:     "{{ applications | get_app_conf(application_id, 'oidc.flavor') == 'robrotheram' }}"
+TAIGA_ROBROTHERAM_ENABLED:    "{{ TAIGA_OIDC_ENABLED and TAIGA_FLAVOR_ROBROTHERAM }}"
+TAIGA_EMAIL_BACKEND:          "{{ 'smtp' if SYSTEM_EMAIL.SMTP else 'console' }}"  ## use an SMTP server or display the emails in the console (either "smtp" or "console")
+TAIGA_DOCKER_COMPOSE_INIT:    "{{ [ docker_compose.directories.instance,'docker-compose-inits.yml.j2' ] | path_join }}"
+TAIGA_DOCKER_IMAGE_BACKEND:   "{{ 'robrotheram/taiga-back-openid' if TAIGA_ROBROTHERAM_ENABLED else 'taigaio/taiga-back' }}"
+TAIGA_DOCKER_IMAGE_FRONTEND:  "{{ 'robrotheram/taiga-front-openid' if TAIGA_ROBROTHERAM_ENABLED else 'taigaio/taiga-front' }}"
+TAIGA_FRONTEND_CONF_PATH:     "{{ [ docker_compose.directories.config,'conf.json' ] | path_join }}"
+TAIGA_SETTING_FILES:
 - urls
 - local
 
-taiga_version:   "{{ applications | get_app_conf(application_id, 'docker.services.taiga.version', True) }}"
+TAIGA_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.taiga.version') }}"

@@ -2,7 +2,7 @@
 
   taiga-back:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{taiga_image_backend}}:{{ taiga_version }}"
+    image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     volumes:
       # These volumens will be used by taiga-back and taiga-async.
       - static-data:/taiga-back/static
@@ -34,7 +34,7 @@
 
   taiga-async:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{taiga_image_backend}}:{{ taiga_version }}"
+    image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
     volumes:
       # These volumens will be used by taiga-back and taiga-async.
@@ -44,7 +44,7 @@
 
 {% if applications | get_app_conf(application_id, 'features.oidc', False) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'taigaio' %}
 
-{% for item in settings_files %}
+{% for item in TAIGA_SETTING_FILES %}
       - {{ docker_compose.directories.config }}taiga-{{ item }}.py:/taiga-back/settings/{{ item }}.py:ro
 {% endfor %}
 
@@ -76,12 +76,12 @@
       taiga:
 
   taiga-front:
-    image: "{{taiga_image_frontend}}:{{ taiga_version }}"
+    image: "{{TAIGA_DOCKER_IMAGE_FRONTEND}}:{{ TAIGA_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 #    volumes:
-#      - {{ taiga_frontend_conf_path }}:/usr/share/nginx/html/conf.json:ro
+#      - {{ TAIGA_FRONTEND_CONF_PATH }}:/usr/share/nginx/html/conf.json:ro
 
   taiga-events:
     image: taigaio/taiga-events:latest

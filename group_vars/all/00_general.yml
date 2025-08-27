@@ -26,6 +26,9 @@ HOST_DECIMAL_MARK:        ","
 WEB_PROTOCOL:           "https"       # Web protocol type. Use https or http. If you run local you need to change it to http
 WEB_PORT:               "{{ 443 if WEB_PROTOCOL == 'https' else 80 }}"  # Default port web applications will listen to
 
+# Websocket
+WEBSOCKET_PROTOCOL:     "{{ 'wss' if WEB_PROTOCOL == 'https' else 'ws' }}"
+
 # Domain
 PRIMARY_DOMAIN:         "localhost" # Primary Domain of the server
 

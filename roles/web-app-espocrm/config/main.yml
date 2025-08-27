@@ -18,7 +18,7 @@ server:
         unsafe-eval:    true
     whitelist:
       connect-src:
-        - wss://espocrm.{{ PRIMARY_DOMAIN }}
+        - {{ WEBSOCKET_PROTOCOL }}://espocrm.{{ PRIMARY_DOMAIN }}
         - "data:"
       frame-src:
         - https://s.espocrm.com/
