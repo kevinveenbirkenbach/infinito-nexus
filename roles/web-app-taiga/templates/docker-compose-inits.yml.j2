@@ -1,5 +1,6 @@
-services:
+{% include 'roles/docker-compose/templates/base.yml.j2' %}
   taiga-manage:
+{% include 'roles/docker-container/templates/base.yml.j2' %}
     image: taigaio/taiga-back:latest
     environment:
       CELERY_ENABLED: "False"

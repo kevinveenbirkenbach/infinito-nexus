@@ -2,18 +2,46 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
     name: cmp-db-docker-proxy
+  vars:
+    docker_compose_flush_handlers: false
 
 - name: "copy templates {{ TAIGA_SETTING_FILES }} for taiga-contrib-oidc-auth"
   template:
     src:  "taiga/{{item}}.py.j2"
-    dest: "{{ docker_compose.directories.config }}taiga-{{item}}.py"
+    dest: "{{ [ docker_compose.directories.config, 'taiga-' ~ item ~ '.py'] | path_join }}"
   when:   TAIGA_TAIGAIO_ENABLED | bool
   notify: docker compose up
   loop:   "{{ TAIGA_SETTING_FILES }}"
 
-- name: "create {{ TAIGA_DOCKER_COMPOSE_INIT }}"
+- name: "create {{ TAIGA_DOCKER_COMPOSE_INIT_PATH }}"
   template:
     src:  "docker-compose-inits.yml.j2"
-    dest:  "{{ TAIGA_DOCKER_COMPOSE_INIT }}"
+    dest:  "{{ TAIGA_DOCKER_COMPOSE_INIT_PATH }}"
   notify: docker compose up
 
+- name: "Flush Taiga handlers"
+  meta: flush_handlers
+
+- name: "Create Taiga admin user (idempotent)"
+  command: >
+    docker compose
+    -f {{ TAIGA_DOCKER_COMPOSE_PATH }}
+    -f {{ TAIGA_DOCKER_COMPOSE_INIT_PATH }}
+    run --rm taiga-manage
+    createsuperuser --noinput
+    --username {{ TAIGA_SUPERUSER_NAME }}
+    --email {{ TAIGA_SUPERUSER_EMAIL }}
+  environment:
+    DJANGO_SUPERUSER_PASSWORD: "{{ TAIGA_SUPERUSER_PASSWORD }}"
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: taiga_create_admin
+  changed_when: taiga_create_admin.rc == 0
+  failed_when: >
+    taiga_create_admin.rc != 0 and
+    ('already taken' not in (taiga_create_admin.stdout + taiga_create_admin.stderr) | lower) and
+    ('already exists' not in (taiga_create_admin.stdout + taiga_create_admin.stderr) | lower) and
+    ('integrityerror' not in (taiga_create_admin.stdout + taiga_create_admin.stderr) | lower)
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

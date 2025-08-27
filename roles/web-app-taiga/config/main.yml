@@ -1,10 +1,10 @@
-oidc: {}
+oidc:
     # Taiga doesn't have a functioning oidc support at the moment
     # See
     # - https://community.taiga.io/t/taiga-and-oidc-plugin/4866
     #
     # Due to this reason this plutin is deactivated atm
-flavor:               'taigaio' # Potential flavors: robrotheram, taigaio
+  flavor:             'taigaio' # Potential flavors: robrotheram, taigaio
 features:
   matomo:             true
   css:                true
@@ -12,6 +12,7 @@ features:
   oidc:               false
   central_database:   true
   logout:             true
+  javascript:         true
 docker:
   services:
     database:
