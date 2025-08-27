@@ -15,7 +15,7 @@
 - name: docker compose pull
   shell: |
     set -euo pipefail
-    lock="{{ [ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR | docker_compose.directories.instance ] path_join | hash('sha1') }}"
+    lock="{{ [ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR | docker_compose.directories.instance ] | path_join | hash('sha1') }}"
     if [ ! -e "$lock" ]; then
       mkdir -p "$(dirname "$lock")"
       docker compose pull

@@ -23,10 +23,10 @@ KEYCLOAK_HEALTH_ENABLED:            true
 
 ## Import
 KEYCLOAK_REALM_IMPORT_ENABLED:      "{{ applications | get_app_conf(application_id, 'actions.import_realm') }}"
-KEYCLOAK_REALM_IMPORT_DIR_HOST:     "{{ docker_compose.directories.volumes }}import/"
+KEYCLOAK_REALM_IMPORT_DIR_HOST:     "{{ [docker_compose.directories.volumes,'import'] | path_join }}"
 KEYCLOAK_REALM_IMPORT_DIR_DOCKER:   "/opt/keycloak/data/import/"
 KEYCLOAK_REALM_IMPORT_FILE_SRC:     "import/realm.json.j2"
-KEYCLOAK_REALM_IMPORT_FILE_DST:     "{{ KEYCLOAK_REALM_IMPORT_DIR_HOST }}/realm.json"
+KEYCLOAK_REALM_IMPORT_FILE_DST:     "{{ [KEYCLOAK_REALM_IMPORT_DIR_HOST,'realm.json'] | path_join }}"
 
 ## Credentials
 KEYCLOAK_ADMIN:                     "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"

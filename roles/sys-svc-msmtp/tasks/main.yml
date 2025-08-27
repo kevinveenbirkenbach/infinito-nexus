@@ -2,4 +2,6 @@
   - include_tasks: 01_core.yml
   - set_fact:
       run_once_sys_svc_msmtp: true
-  when: run_once_sys_svc_msmtp is not defined
+  when:
+    - run_once_sys_svc_msmtp is not defined
+    - (users['no-reply'].mailu_token | default(false)) | bool # Don't setup the service if no-reply mailu token doesn't exist

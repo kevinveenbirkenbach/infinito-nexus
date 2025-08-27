@@ -20,4 +20,4 @@ galaxy_info:
   logo:
     class: "fa-solid fa-envelope"
   run_after:  
-    - web-app-keycloak
+    - web-app-matomo

@@ -21,3 +21,4 @@ galaxy_info:
     class: "fa-solid fa-lock"
   run_after:
     - web-app-matomo
+    - web-app-mailu # Token must be generated
