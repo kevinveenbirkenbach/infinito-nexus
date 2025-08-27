@@ -1,6 +1,6 @@
 - name: "Add Keycloak OIDC Provider"
   shell: |
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth add-oauth \
         --provider openidConnect \
         --name     "{{ OIDC.BUTTON_TEXT }}" \
@@ -15,7 +15,7 @@
 
 - name: "Lookup existing Keycloak auth source ID"
   shell: |
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea admin auth list \
       | tail -n +2 \
       | grep -F "{{ OIDC.BUTTON_TEXT }}" \
@@ -34,7 +34,7 @@
 
 - name: "Update Keycloak OIDC Provider"
   shell: |
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth update-oauth \
         --id {{ oidc_source_id }}\
         --provider openidConnect \

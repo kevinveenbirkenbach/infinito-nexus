@@ -4,26 +4,26 @@
 
 - name: Patch Gitea DB host in app.ini
   command: >
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }}
-    sed -ri "s|^(HOST\s*=\s*).*$|\1{{ database_host }}:{{ database_port }}|" {{ gitea_config }}
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }}
+    sed -ri "s|^(HOST\s*=\s*).*$|\1{{ database_host }}:{{ database_port }}|" {{ GITEA_CONFIG }}
   notify: docker compose up
 
 - name: Patch Gitea DB name in app.ini
   command: >
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }}
-    sed -ri "s|^(NAME\s*=\s*).*$|\1{{ database_name }}|" {{ gitea_config }}
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }}
+    sed -ri "s|^(NAME\s*=\s*).*$|\1{{ database_name }}|" {{ GITEA_CONFIG }}
   notify: docker compose up
 
 - name: Patch Gitea DB user in app.ini
   command: >
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }}
-    sed -ri "s|^(USER\s*=\s*).*$|\1{{ database_username }}|" {{ gitea_config }}
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }}
+    sed -ri "s|^(USER\s*=\s*).*$|\1{{ database_username }}|" {{ GITEA_CONFIG }}
   notify: docker compose up
 
 - name: Patch Gitea DB password in app.ini
   command: >
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }}
-    sed -ri "s|^(PASSWD\s*=\s*).*$|\1{{ database_password }}|" {{ gitea_config }}
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }}
+    sed -ri "s|^(PASSWD\s*=\s*).*$|\1{{ database_password }}|" {{ GITEA_CONFIG }}
   notify: docker compose up
 
 - name: "Flush database patches"

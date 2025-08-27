@@ -1,6 +1,13 @@
-application_id:       "web-app-gitea"
-database_type:        "mariadb"
-gitea_ldap_auth_args:
+# General
+application_id:                 "web-app-gitea"
+database_type:                  "mariadb"
+
+# Docker
+container_port:                 "{{ applications | get_app_conf(application_id, 'docker.services.gitea.port') }}"
+docker_compose_flush_handlers:  true
+
+# Gitea
+GITEA_LDAP_AUTH_ARGS:
   - '--name "LDAP ({{ PRIMARY_DOMAIN }})"'
   - '--host "{{ ldap.server.domain }}"'
   - '--port {{ ldap.server.port }}'
@@ -15,13 +22,9 @@ gitea_ldap_auth_args:
   - '--email-attribute "{{ ldap.user.attributes.mail }}"'
   - '--public-ssh-key-attribute "{{ ldap.user.attributes.ssh_public_key }}"'
   - '--synchronize-users'
-gitea_version:    "{{ applications | get_app_conf(application_id, 'docker.services.gitea.version', True) }}"
-gitea_image:      "{{ applications | get_app_conf(application_id, 'docker.services.gitea.image', True) }}"
-gitea_container:  "{{ applications | get_app_conf(application_id, 'docker.services.gitea.name', True) }}"
-gitea_volume:     "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-gitea_user:       "git"
-gitea_config:     "/data/gitea/conf/app.ini"
-
-container_port:  "{{ applications | get_app_conf(application_id, 'docker.services.gitea.port', True) }}"
-
-docker_compose_flush_handlers:          true
+GITEA_VERSION:    "{{ applications | get_app_conf(application_id, 'docker.services.gitea.version') }}"
+GITEA_IMAGE:      "{{ applications | get_app_conf(application_id, 'docker.services.gitea.image') }}"
+GITEA_CONTAINER:  "{{ applications | get_app_conf(application_id, 'docker.services.gitea.name') }}"
+GITEA_VOLUME:     "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+GITEA_USER:       "git"
+GITEA_CONFIG:     "/data/gitea/conf/app.ini"

@@ -1,8 +1,8 @@
 - name: "Add LDAP Authentication Source"
   shell: |
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth add-ldap \
-      {{ gitea_ldap_auth_args | join(' ') }}
+      {{ GITEA_LDAP_AUTH_ARGS | join(' ') }}
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   register: ldap_manage
@@ -10,7 +10,7 @@
 
 - name: "Lookup existing LDAP auth source ID"
   shell: |
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth list \
       | tail -n +2 \
       | grep -F "LDAP ({{ PRIMARY_DOMAIN }})" \
@@ -29,10 +29,10 @@
 
 - name: "Update LDAP Authentication Source"
   shell: |
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth update-ldap \
       --id {{ ldap_source_id }} \
-      {{ gitea_ldap_auth_args | join(' ') }}
+      {{ GITEA_LDAP_AUTH_ARGS | join(' ') }}
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   register: ldap_manage

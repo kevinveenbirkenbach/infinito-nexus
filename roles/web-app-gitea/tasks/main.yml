@@ -15,7 +15,7 @@
 
 - name: "Run DB migrations inside Gitea container"
   shell: |
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea migrate
   args:
     chdir: "{{ docker_compose.directories.instance }}"
@@ -24,13 +24,13 @@
 
 - name: "Create initial admin user"
   shell: |
-    docker exec -i --user {{ gitea_user }} {{ gitea_container }} \
+    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea admin user create \
         --admin \
         --username "{{ users.administrator.username }}" \
         --password "{{ users.administrator.password }}" \
         --email    "{{ users.administrator.email }}" \
-        -c {{ gitea_config }}
+        -c {{ GITEA_CONFIG }}
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   register: create_admin
