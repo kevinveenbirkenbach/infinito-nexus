@@ -1,9 +1,12 @@
+# General
 application_id:             "web-app-pixelfed"
 proxy_extra_configuration:  "client_max_body_size 512M;"
 database_type:              "mariadb"
-pixelfed_version:           "{{ applications | get_app_conf(application_id, 'docker.services.pixelfed.version', True) }}"
-pixelfed_image:             "{{ applications | get_app_conf(application_id, 'docker.services.pixelfed.image', True) }}"
-pixelfed_name:              "{{ applications | get_app_conf(application_id, 'docker.services.pixelfed.name', True) }}"
-pixelfed_worker_name:       "{{ applications | get_app_conf(application_id, 'docker.services.worker.name', True) }}"
-pixelfed_volume:            "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-pixelfed_titel:             "{{ applications | get_app_conf(application_id, 'titel', True) }}"
+
+# Pixelfed
+PIXELFED_VERSION:           "{{ applications | get_app_conf(application_id, 'docker.services.pixelfed.version') }}"
+PIXELFED_IMAGE:             "{{ applications | get_app_conf(application_id, 'docker.services.pixelfed.image') }}"
+PIXELFED_CONTAINER:         "{{ applications | get_app_conf(application_id, 'docker.services.pixelfed.name') }}"
+PIXELFED_WORKER_CONTAINER:  "{{ applications | get_app_conf(application_id, 'docker.services.worker.name') }}"
+PIXELFED_VOLUME:            "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+PIXELFED_TITEL:             "{{ applications | get_app_conf(application_id, 'titel') }}"
