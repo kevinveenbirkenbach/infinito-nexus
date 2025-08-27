@@ -4,6 +4,7 @@ features:
   desktop:          true
   central_database: true
   logout:           true
+  javascript:       true
 docker:
   services:
     redis:

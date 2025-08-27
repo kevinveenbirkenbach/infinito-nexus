@@ -1,11 +1,12 @@
 # General
-application_id:     "web-app-baserow"
-database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
-database_type:      "postgres"
+application_id:       "web-app-baserow"
+database_password:    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
+database_type:        "postgres"
+js_application_name:  "Baserow"
 
 # Baserow
-BASEROW_PUBLIC_URL: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-BASEROW_VERSION:    "{{ applications | get_app_conf(application_id, 'docker.services.baserow.version') }}"
-BASEROW_IMAGE:      "{{ applications | get_app_conf(application_id, 'docker.services.baserow.image') }}"
-BASEROW_CONTAINER:  "{{ applications | get_app_conf(application_id, 'docker.services.baserow.name') }}"
-BASEROW_VOLUME:     "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+BASEROW_PUBLIC_URL:   "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+BASEROW_VERSION:      "{{ applications | get_app_conf(application_id, 'docker.services.baserow.version') }}"
+BASEROW_IMAGE:        "{{ applications | get_app_conf(application_id, 'docker.services.baserow.image') }}"
+BASEROW_CONTAINER:    "{{ applications | get_app_conf(application_id, 'docker.services.baserow.name') }}"
+BASEROW_VOLUME:       "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
