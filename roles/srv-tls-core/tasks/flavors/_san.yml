@@ -1,0 +1,38 @@
+# Necessary to have this seperat file to pass performance tests
+- name: Install certbundle
+  include_role:
+    name: pkgmgr-install
+  vars:
+    package_name: certbundle
+
+- name: Generate SAN certificate with certbundle
+  command: >-
+    certbundle
+    --domains "{{ current_play_domains_all | join(',') }}"
+    --certbot-email "{{ users.administrator.email }}"
+    --certbot-acme-challenge-method "{{ CERTBOT_ACME_CHALLENGE_METHOD }}"
+    --chunk-size 100
+    {% if CERTBOT_ACME_CHALLENGE_METHOD != 'webroot' %}
+    --certbot-credentials-file "{{ CERTBOT_CREDENTIALS_FILE }}"
+    --certbot-dns-propagation-seconds "{{ CERTBOT_DNS_PROPAGATION_WAIT_SECONDS }}"
+    {% else %}
+    --letsencrypt-webroot-path "{{ LETSENCRYPT_WEBROOT_PATH }}"
+    {% endif %}
+    {{ '--mode-test' if MODE_TEST | bool else '' }}
+  register: certbundle_result
+  changed_when: "'Certificate not yet due for renewal' not in certbundle_result.stdout"
+  failed_when: >
+    certbundle_result.rc != 0
+    and 'too many certificates' not in (certbundle_result.stderr | lower | default(''))
+    and 'the service is down for maintenance or had an internal error' not in (certbundle_result.stderr | lower | default(''))
+
+- name: Warn if LetsEncrypt was down
+  when: "'the service is down for maintenance or had an internal error' in (certbundle_result.stderr | lower | default(''))"
+  debug:
+    msg: >
+      WARNING: Let's Encrypt responded with "service down for maintenance / internal error".
+      Certificate request skipped; please retry later.
+
+- name: run the san tasks once
+  set_fact:
+    run_once_san_certs: true
