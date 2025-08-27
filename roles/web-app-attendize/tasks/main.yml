@@ -20,9 +20,3 @@
     src: roles/srv-proxy-core/templates/vhost/basic.conf.j2 
     dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty
-
-- name: "For '{{ application_id }}': include tasks update-repository-with-files.yml"
-  include_tasks: utils/update-repository-with-files.yml
-  vars:
-    detached_files: 
-      - "docker-compose.yml"

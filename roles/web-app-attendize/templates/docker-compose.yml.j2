@@ -1,7 +1,7 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   web:
-    image: "{{ applications | get_app_conf(application_id, 'images.web', True) }}"
+    image: "{{ ATTENDIZE_WEB_IMAGE }}:{{ ATTENDIZE_WEB_VERSION }}"
     ports:
     - "{{ ports.localhost.http[application_id] }}:80"
     volumes:
@@ -15,7 +15,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   worker:
-    image: "{{ applications | get_app_conf(application_id, 'images.worker', True) }}"
+    image: "{{ ATTENDIZE_WORKER_IMAGE }}:{{ ATTENDIZE_WORKER_VERSION }}"
 {% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
       maildev:
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

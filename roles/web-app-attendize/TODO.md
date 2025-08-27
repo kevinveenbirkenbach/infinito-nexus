@@ -1,3 +1,2 @@
 # Todo
-- Implement this role
-- refactore main.yml
+- Remove as soon as pretix app is included

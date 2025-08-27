@@ -1,6 +1,3 @@
-image:              
-  web:              "attendize_web:latest"
-  worker:           "attendize_worker:latest"
 features:
   matomo:           true
   css:              true
@@ -13,6 +10,12 @@ docker:
       enabled: true
     database: 
       enabled: true
+    web:              
+      image:    "attendize_web"
+      version:  "latest"
+    worker:           
+      image:    "attendize_worker"
+      version:  "latest"
 server:
   domains:
     canonical:

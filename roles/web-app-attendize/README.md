@@ -1,8 +1,9 @@
-# Attendize
+# Attendize (Deprecated)
 
 ## Warning
 
 > **Note:** This role is a work in progress. Use with caution and check for updates.
+> The role wasn't updated since over 3 years. propably it makes sense to focus on the **web-app-pretix** app instead
 
 ## Description
 
