@@ -9,7 +9,7 @@
       - media-data:/taiga-back/media
       # - ./config.py:/taiga-back/settings/config.py
 
-{% if applications | get_app_conf(application_id, 'features.oidc', False) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'taigaio' %}
+{% if TAIGA_TAIGAIO_ENABLED %}
 
       - {{ docker_compose.directories.config }}taiga-local.py:/taiga-back/settings/local.py:ro
 
@@ -22,7 +22,7 @@
         condition: service_started
       taiga-async-rabbitmq:
         condition: service_started
-{% if applications | get_app_conf(application_id, 'features.oidc', False) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'taigaio' %}
+{% if TAIGA_TAIGAIO_ENABLED %}
     
     command: >
       /bin/sh -c "
@@ -42,7 +42,7 @@
       - media-data:/taiga-back/media
       # - ./config.py:/taiga-back/settings/config.py
 
-{% if applications | get_app_conf(application_id, 'features.oidc', False) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'taigaio' %}
+{% if TAIGA_TAIGAIO_ENABLED %}
 
 {% for item in TAIGA_SETTING_FILES %}
       - {{ docker_compose.directories.config }}taiga-{{ item }}.py:/taiga-back/settings/{{ item }}.py:ro
@@ -57,7 +57,7 @@
         condition: service_started
       taiga-async-rabbitmq:
         condition: service_started
-{% if applications | get_app_conf(application_id, 'features.oidc', False) and applications | get_app_conf(application_id, 'oidc.flavor', True) == 'taigaio' %}
+{% if TAIGA_TAIGAIO_ENABLED %}
     
     command: >
       /bin/sh -c "

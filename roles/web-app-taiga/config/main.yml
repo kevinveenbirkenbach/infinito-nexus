@@ -7,17 +7,17 @@ oidc: {}
 flavor:               'taigaio' # Potential flavors: robrotheram, taigaio
 features:
   matomo:             true
-  css:                false
-  desktop:    true
+  css:                true
+  desktop:            true
   oidc:               false
   central_database:   true
   logout:             true
 docker:
   services:
     database:
-      enabled: true
+      enabled:        true
     taiga: 
-      version: "latest"
+      version:        "latest"
 server:
   csp:
     flags:
