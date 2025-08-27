@@ -1,15 +1,18 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-    image: "{{ applications | get_app_conf(application_id, 'images.joomla', True) }}"
+    image: "{{ JOOMLA_IMAGE }}:{{ JOOMLA_VERSION }}"
+    container_name:  "{{ JOOMLA_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - data:/var/www/html
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
+    name: {{ JOOMLA_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

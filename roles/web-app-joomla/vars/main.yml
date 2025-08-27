@@ -1,2 +1,10 @@
+# General
 application_id:     "web-app-joomla"
 database_type:      "postgres"
+container_port:     80
+
+# Joomla
+JOOMLA_VERSION:    "{{ applications | get_app_conf(application_id, 'docker.services.joomla.version') }}"
+JOOMLA_IMAGE:      "{{ applications | get_app_conf(application_id, 'docker.services.joomla.image') }}"
+JOOMLA_CONTAINER:  "{{ applications | get_app_conf(application_id, 'docker.services.joomla.name') }}"
+JOOMLA_VOLUME:     "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"

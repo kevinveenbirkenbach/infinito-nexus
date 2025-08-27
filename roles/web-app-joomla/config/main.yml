@@ -1,5 +1,3 @@
-images:
-  joomla:             "joomla:latest"
 features:
   matomo:             true
   css:                true
@@ -14,3 +12,9 @@ docker:
   services:
     database:
       enabled: true
+    joomla: 
+      image:    joomla
+      version:  latest
+      name:     joomla
+  volumes:
+    data:             "joomla_data"
