@@ -131,26 +131,24 @@ class FilterModule(object):
                 flags = self.get_csp_flags(applications, application_id, directive)
                 tokens += flags
 
-                # Matomo integration
-                if (
-                    self.is_feature_enabled(applications, matomo_feature_name, application_id)
-                    and directive in ['script-src-elem', 'connect-src']
-                ):
-                    matomo_domain = domains.get('web-app-matomo')[0]
-                    if matomo_domain:
-                        tokens.append(f"{web_protocol}://{matomo_domain}")
+                
+                if directive in ['script-src-elem', 'connect-src']:
+                    # Matomo integration
+                    if self.is_feature_enabled(applications, matomo_feature_name, application_id):
+                        matomo_domain = domains.get('web-app-matomo')[0]
+                        if matomo_domain:
+                            tokens.append(f"{web_protocol}://{matomo_domain}")
+                    
+                    # Allow the loading of js from the cdn        
+                    if self.is_feature_enabled(applications, 'logout', application_id) or self.is_feature_enabled(applications, 'desktop', application_id):
+                        domain = domains.get('web-svc-cdn')[0]
+                        tokens.append(f"{web_protocol}://{domain}")
 
                 # ReCaptcha integration: allow loading scripts from Google if feature enabled
                 if self.is_feature_enabled(applications, 'recaptcha', application_id):
                     if directive in ['script-src-elem',"frame-src"]:
                         tokens.append('https://www.gstatic.com')
                         tokens.append('https://www.google.com')
-
-                # Allow the loading of js from the cdn
-                if directive == 'script-src-elem':
-                    if self.is_feature_enabled(applications, 'logout', application_id) or self.is_feature_enabled(applications, 'desktop', application_id):
-                        domain = domains.get('web-svc-cdn')[0]
-                        tokens.append(f"{domain}")
 
                 if directive == 'frame-ancestors':
                     # Enable loading via ancestors
@@ -163,11 +161,11 @@ class FilterModule(object):
                         
                         # Allow logout via infinito logout proxy
                         domain = domains.get('web-svc-logout')[0] 
-                        tokens.append(f"{domain}") 
+                        tokens.append(f"{web_protocol}://{domain}")
                         
                         # Allow logout via keycloak app
                         domain = domains.get('web-app-keycloak')[0]
-                        tokens.append(f"{domain}") 
+                        tokens.append(f"{web_protocol}://{domain}")
                         
                 # whitelist
                 tokens += self.get_csp_whitelist(applications, application_id, directive)

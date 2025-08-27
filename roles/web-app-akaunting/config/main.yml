@@ -7,11 +7,26 @@ features:
   css:              true
   desktop:          true
   central_database: true
-  logout:           true 
+  logout:           true
+  javascript:       true
 server:
   domains:
     canonical:
       - "accounting.{{ PRIMARY_DOMAIN }}"
+  csp:
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
+      script-src:
+        unsafe-inline:  true
+        unsafe-eval:    true
+      style-src:
+        unsafe-inline:  true
+    whitelist:
+      font-src:
+        - "data:"
+      connect-src:
+        - https://akaunting.com
 docker:
   services:
     database:
@@ -22,6 +37,8 @@ docker:
       image:   docker.io/akaunting/akaunting 
       version: latest
       name:    akaunting
+    redis:
+      enabled: false # Set to true to activate redis for akaunting
   volumes: 
     data: akaunting_data
 credentials: {}

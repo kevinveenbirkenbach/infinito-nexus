@@ -2,22 +2,26 @@
   application:
 
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    container_name: {{ akaunting_name }}
-    image: "{{ akaunting_image }}:{{ akaunting_version }}"
+{% set container_port = 80 %}
+    container_name: {{ AKAUNTING_CONTAINER }}
+    image: "{{ AKAUNTING_IMAGE }}:{{ AKAUNTING_VERSION }}"
     build:
-      context: .
+      context:    {{ docker_repository_path }}
+      dockerfile: Dockerfile
     ports:
-      - 127.0.0.1:{{ ports.localhost.http[application_id] }}:80
+      - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
     volumes:
       - data:/var/www/html
+{% if akaunting_setup_enabled | bool %}
     environment:
-      - AKAUNTING_SETUP
+      - AKAUNTING_SETUP=true
+{% endif %}
+{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ akaunting_volume }}
-
+    name: {{ AKAUNTING_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
