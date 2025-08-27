@@ -23,7 +23,15 @@
       changed_when: "'Certificate not yet due for renewal' not in certbundle_result.stdout"
       failed_when: >
         certbundle_result.rc != 0
-        and 'too many certificates' not in certbundle_result.stderr
+        and 'too many certificates' not in (certbundle_result.stderr | lower | default(''))
+        and 'the service is down for maintenance or had an internal error' not in (certbundle_result.stderr | lower | default(''))
+
+    - name: Warn if LetsEncrypt was down
+      when: "'the service is down for maintenance or had an internal error' in (certbundle_result.stderr | lower | default(''))"
+      debug:
+        msg: >
+          WARNING: Let's Encrypt responded with "service down for maintenance / internal error".
+          Certificate request skipped; please retry later.
 
     - name: run the san tasks once
       set_fact:
