@@ -6,9 +6,10 @@ system_service_role_dir:       "{{ [ playbook_dir, 'roles', system_service_role_
 system_service_script_dir:     "{{ [ PATH_SYSTEMCTL_SCRIPTS, system_service_id ] | path_join }}"
 
 ## Settings
-system_force_flush:            false # When set to true it activates the flushing of services :)
-system_service_copy_files:     true  # When set to false file copying will be skipped
-system_service_timer_enabled:  false # When set to true timer will be loaded
+system_force_flush:            false                                                            # When set to true it activates the flushing of services :)
+system_service_suppress_flush: "{{ (system_service_id in SYS_SERVICE_SUPPRESS_FLUSH) | bool }}" # When set to true it suppresses the flushing of services
+system_service_copy_files:     true                                                             # When set to false file copying will be skipped
+system_service_timer_enabled:  false                                                            # When set to true timer will be loaded
 system_service_state:          "{{ SYS_SERVICE_DEFAULT_STATE }}"
 
 # Dynamic Loaded ( Just available when dependencies are loaded )
