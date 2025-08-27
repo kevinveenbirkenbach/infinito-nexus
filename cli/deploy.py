@@ -198,6 +198,7 @@ def main():
         "MODE_CLEANUP": args.cleanup,
         "MODE_LOGS": args.logs,
         "MODE_DEBUG": args.debug,
+        "MODE_ASSERT": not args.skip_validation,
         "host_type": args.host_type
     }
 
