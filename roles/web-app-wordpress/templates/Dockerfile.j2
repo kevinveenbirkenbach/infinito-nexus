@@ -1,4 +1,4 @@
-FROM {{ wordpress_image }}:{{ wordpress_version }}
+FROM {{ WORDPRESS_IMAGE }}:{{ WORDPRESS_VERSION }}
 
 # Install msmtp and update system
 RUN apt-get update && \

@@ -1,14 +1,14 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
     {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: {{ wordpress_custom_image }}
-    container_name: {{ wordpress_container }}
+    image: {{ WORDPRESS_CUSTOM_IMAGE }}
+    container_name: {{ WORDPRESS_CONTAINER }}
     build:
       context: .
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
     volumes:
-      - data:{{ wordpress_docker_html_path }}
+      - data:{{ WORDPRESS_DOCKER_HTML_PATH }}
 
 {% include 'roles/docker-container/templates/healthcheck/msmtp_curl.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
@@ -18,4 +18,4 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name:   "{{ wordpress_volume }}"
+    name:   "{{ WORDPRESS_VOLUME }}"

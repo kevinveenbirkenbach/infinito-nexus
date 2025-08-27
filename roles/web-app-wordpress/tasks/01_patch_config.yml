@@ -1,27 +1,27 @@
 # The seeds need to be executed as root, because www-data isn't allowed to create files in the wordpress directory
 
-- name: Update DB host in {{ wordpress_config_file }}
+- name: Update DB host in {{ WORDPRESS_CONFIG_FILE }}
   command: >
-    docker exec --user root {{ wordpress_container }}
-    sed -i "s/define(\s*'DB_HOST'\s*,\s*'[^']*'\s*);/define( 'DB_HOST', '{{ database_host }}:{{ database_port }}' );/i" {{ wordpress_docker_conf_path }}
+    docker exec --user root {{ WORDPRESS_CONTAINER }}
+    sed -i "s/define(\s*'DB_HOST'\s*,\s*'[^']*'\s*);/define( 'DB_HOST', '{{ database_host }}:{{ database_port }}' );/i" {{ WORDPRESS_DOCKER_CONF_PATH }}
   notify: docker compose restart
 
-- name: Update DB name in {{ wordpress_config_file }}
+- name: Update DB name in {{ WORDPRESS_CONFIG_FILE }}
   command: >
-    docker exec --user root {{ wordpress_container }}
-    sed -i "s/define(\s*'DB_NAME'\s*,\s*'[^']*'\s*);/define( 'DB_NAME', '{{ database_name }}' );/i" {{ wordpress_docker_conf_path }}
+    docker exec --user root {{ WORDPRESS_CONTAINER }}
+    sed -i "s/define(\s*'DB_NAME'\s*,\s*'[^']*'\s*);/define( 'DB_NAME', '{{ database_name }}' );/i" {{ WORDPRESS_DOCKER_CONF_PATH }}
   notify: docker compose restart
 
-- name: Update DB user in {{ wordpress_config_file }}
+- name: Update DB user in {{ WORDPRESS_CONFIG_FILE }}
   command: >
-    docker exec --user root {{ wordpress_container }}
-    sed -i "s/define(\s*'DB_USER'\s*,\s*'[^']*'\s*);/define( 'DB_USER', '{{ database_username }}' );/i" {{ wordpress_docker_conf_path }}
+    docker exec --user root {{ WORDPRESS_CONTAINER }}
+    sed -i "s/define(\s*'DB_USER'\s*,\s*'[^']*'\s*);/define( 'DB_USER', '{{ database_username }}' );/i" {{ WORDPRESS_DOCKER_CONF_PATH }}
   notify: docker compose restart
 
-- name: Update DB password in {{ wordpress_config_file }}
+- name: Update DB password in {{ WORDPRESS_CONFIG_FILE }}
   command: >
-    docker exec --user root {{ wordpress_container }}
-    sed -i "s/define(\s*'DB_PASSWORD'\s*,\s*'[^']*'\s*);/define( 'DB_PASSWORD', '{{ database_password }}' );/i" {{ wordpress_docker_conf_path }}
+    docker exec --user root {{ WORDPRESS_CONTAINER }}
+    sed -i "s/define(\s*'DB_PASSWORD'\s*,\s*'[^']*'\s*);/define( 'DB_PASSWORD', '{{ database_password }}' );/i" {{ WORDPRESS_DOCKER_CONF_PATH }}
   notify: docker compose restart
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 

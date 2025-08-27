@@ -12,7 +12,7 @@
   command: >
     docker-compose exec -u www-data -T application
       wp plugin install {{ plugin_name }} --activate
-      --path={{ wordpress_docker_html_path }}
+      --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   when: not plugin_task_file.stat.exists

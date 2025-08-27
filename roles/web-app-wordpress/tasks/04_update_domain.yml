@@ -1,19 +1,19 @@
 ---
 # Updates WordPress single-site URLs and normalizes DB references.
-# Expects: wp_new_url (passed from main.yml), wordpress_user/container/docker_html_path.
+# Expects: wp_new_url (passed from main.yml), WORDPRESS_USER/container/docker_html_path.
 
 - name: Get current 'home' URL
   command: >
-    docker exec -u {{ wordpress_user }} {{ wordpress_container }}
-    wp option get home --path={{ wordpress_docker_html_path }}
+    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    wp option get home --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_home
   changed_when: false
   failed_when: false
 
 - name: Get current 'siteurl'
   command: >
-    docker exec -u {{ wordpress_user }} {{ wordpress_container }}
-    wp option get siteurl --path={{ wordpress_docker_html_path }}
+    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    wp option get siteurl --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_siteurl
   changed_when: false
   failed_when: false
@@ -23,8 +23,8 @@
     wp_new_url_norm: "{{ wp_new_url | regex_replace('/+$','') }}"
     wp_home_norm:    "{{ wp_home.stdout | regex_replace('/+$','') }}"
   command: >
-    docker exec -u {{ wordpress_user }} {{ wordpress_container }}
-    wp option update home "{{ wp_new_url_norm }}" --path={{ wordpress_docker_html_path }}
+    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    wp option update home "{{ wp_new_url_norm }}" --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   when: wp_home_norm != wp_new_url_norm
 
 - name: Update 'siteurl' (if needed)
@@ -32,8 +32,8 @@
     wp_new_url_norm:   "{{ wp_new_url | regex_replace('/+$','') }}"
     wp_siteurl_norm:   "{{ wp_siteurl.stdout | regex_replace('/+$','') }}"
   command: >
-    docker exec -u {{ wordpress_user }} {{ wordpress_container }}
-    wp option update siteurl "{{ wp_new_url_norm }}" --path={{ wordpress_docker_html_path }}
+    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    wp option update siteurl "{{ wp_new_url_norm }}" --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   when: wp_siteurl_norm != wp_new_url_norm
 
 - name: Search-replace old → new URLs in DB (single site)
@@ -41,10 +41,10 @@
     wp_old_url_norm: "{{ wp_home.stdout | regex_replace('/+$','') }}"
     wp_new_url_norm: "{{ wp_new_url | regex_replace('/+$','') }}"
   command: >
-    docker exec -u {{ wordpress_user }} {{ wordpress_container }}
+    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp search-replace "{{ wp_old_url_norm }}" "{{ wp_new_url_norm }}"
     --skip-columns=guid --all-tables-with-prefix --precise
-    --path={{ wordpress_docker_html_path }}
+    --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_sr_domain
   changed_when: "{{ ('Success: Made 0 replacements.' not in wp_sr_domain.stdout) | bool }}"
 
@@ -54,15 +54,15 @@
     http_url:    "http://{{ domain_only }}"
     https_url:   "https://{{ domain_only }}"
   command: >
-    docker exec -u {{ wordpress_user }} {{ wordpress_container }}
+    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp search-replace "{{ http_url }}" "{{ https_url }}"
     --skip-columns=guid --all-tables-with-prefix --precise
-    --path={{ wordpress_docker_html_path }}
+    --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_sr_scheme
   changed_when: "{{ ('Success: Made 0 replacements.' not in wp_sr_scheme.stdout) | bool }}"
 
 - name: Flush caches and rewrite rules
   command: >
-    docker exec -u {{ wordpress_user }} {{ wordpress_container }} bash -lc
-    "wp cache flush --path={{ wordpress_docker_html_path }} &&
-     wp rewrite flush --hard --path={{ wordpress_docker_html_path }}"
+    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }} bash -lc
+    "wp cache flush --path={{ WORDPRESS_DOCKER_HTML_PATH }} &&
+     wp rewrite flush --hard --path={{ WORDPRESS_DOCKER_HTML_PATH }}"

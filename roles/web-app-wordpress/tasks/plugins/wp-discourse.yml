@@ -56,7 +56,7 @@
   command: >
     docker-compose exec -u www-data -T application
       wp plugin install wp-discourse --activate
-      --path={{ wordpress_docker_html_path }}
+      --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   args:
     chdir: "{{ docker_compose.directories.instance }}"
 
@@ -89,6 +89,6 @@
            base64_decode('{{ option_json_b64 }}'),
            true
          )
-       );\" --path={{ wordpress_docker_html_path }}"
+       );\" --path={{ WORDPRESS_DOCKER_HTML_PATH }}"
   args:
     chdir: "{{ docker_compose.directories.instance }}"
