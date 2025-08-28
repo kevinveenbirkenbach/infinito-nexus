@@ -1,20 +1,20 @@
-# Generic updater for Keycloak client/component via kcadm.
+# Generic updater for Keycloak client/component/realm via kcadm.
 # Flow: resolve ID → read current object → merge with desired → preserve immutable fields → update via stdin.
 #
 # Required vars (pass via include):
-# - kc_object_kind:   "client" | "component"
-# - kc_lookup_value:  e.g., KEYCLOAK_CLIENT_ID or KEYCLOAK_LDAP_CMP_NAME
+# - kc_object_kind:   "client" | "component" | "client-scope" | "realm"
+# - kc_lookup_value:  e.g., KEYCLOAK_CLIENT_ID or KEYCLOAK_LDAP_CMP_NAME or KEYCLOAK_REALM
 # - kc_desired:       dict, e.g., KEYCLOAK_DICTIONARY_CLIENT or KEYCLOAK_DICTIONARY_LDAP
 #
 # Optional:
-# - kc_lookup_field:  override lookup field (defaults: clientId for client, name for component)
+# - kc_lookup_field:  override lookup field (defaults: clientId for client, name for component, id for realm)
 # - kc_merge_path:    if set (e.g. "config"), only that subkey is merged
 # - kc_force_attrs:   dict to force on the final payload (merged last)
 
 - name: Assert required vars
   assert:
     that:
-      - kc_object_kind in ['client','component','client-scope']
+      - kc_object_kind in ['client','component','client-scope','realm']
       - kc_lookup_value is defined
       - kc_desired is defined
     fail_msg: "kc_object_kind, kc_lookup_value, kc_desired are required."
@@ -26,11 +26,13 @@
       {{ 'clients' if kc_object_kind == 'client'
          else 'components' if kc_object_kind == 'component'
          else 'client-scopes' if kc_object_kind == 'client-scope'
+         else 'realms' if kc_object_kind == 'realm'
          else '' }}
     kc_lookup_field_eff: >-
       {{ 'clientId' if kc_object_kind == 'client'
          else (kc_lookup_field | default('name')) if kc_object_kind == 'component'
          else 'name' if kc_object_kind == 'client-scope'
+         else 'id' if kc_object_kind == 'realm'
          else '' }}
 
 - name: Resolve object id (direct when lookup_field is id)
@@ -39,7 +41,7 @@
     kc_obj_id: "{{ kc_lookup_value | string }}"
 
 - name: Resolve object id via query
-  when: kc_lookup_field_eff != 'id'
+  when: kc_lookup_field_eff != 'id' and kc_object_kind != 'realm'
   shell: >
     {% if kc_object_kind == 'client-scope' -%}
     {{ KEYCLOAK_EXEC_KCADM }} get client-scopes -r {{ KEYCLOAK_REALM }} --format json
@@ -72,8 +74,11 @@
 
 - name: Read current object
   shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} get {{ kc_api }}/{{ kc_obj_id }}
-    -r {{ KEYCLOAK_REALM }} --format json
+    {% if kc_object_kind == 'realm' -%}
+    {{ KEYCLOAK_EXEC_KCADM }} get {{ kc_api }}/{{ kc_obj_id }} --format json
+    {%- else -%}
+    {{ KEYCLOAK_EXEC_KCADM }} get {{ kc_api }}/{{ kc_obj_id }} -r {{ KEYCLOAK_REALM }} --format json
+    {%- endif %}
   register: kc_cur
   changed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
@@ -141,12 +146,23 @@
       }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-# Preserve immutables for client-scope
 - name: Preserve immutable fields for client-scope
   when: kc_object_kind == 'client-scope'
   set_fact:
     desired_obj: "{{ desired_obj | combine({'id': cur_obj.id, 'name': cur_obj.name}, recursive=True) }}"
 
+- name: Preserve immutable fields for realm
+  when: kc_object_kind == 'realm'
+  set_fact:
+    desired_obj: >-
+      {{
+        desired_obj
+        | combine({
+            'id': cur_obj.id,
+            'realm': cur_obj.realm
+          }, recursive=True)
+      }}
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 # Optional forced attributes (e.g., frontchannelLogout)
 - name: Apply forced attributes (optional)
@@ -156,8 +172,14 @@
 
 - name: Update object via stdin
   shell: |
+    {% if kc_object_kind == 'realm' -%}
+    cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} update {{ kc_api }}/{{ kc_obj_id }} -f -
+    {{ desired_obj | to_json }}
+    JSON
+    {%- else -%}
     cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} update {{ kc_api }}/{{ kc_obj_id }} -r {{ KEYCLOAK_REALM }} -f -
     {{ desired_obj | to_json }}
     JSON
+    {%- endif %}
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
