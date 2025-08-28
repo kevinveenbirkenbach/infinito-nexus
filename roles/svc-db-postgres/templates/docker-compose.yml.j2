@@ -6,6 +6,7 @@
     build:
       context: .
       dockerfile: Dockerfile
+    pull_policy: never
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% if POSTGRES_EXPOSE_LOCAL %}
     ports: 

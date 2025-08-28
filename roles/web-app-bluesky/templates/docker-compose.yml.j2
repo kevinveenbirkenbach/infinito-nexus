@@ -26,6 +26,7 @@
         REACT_APP_API_URL: "{{ WEB_PROTOCOL }}://{{domains[application_id].api}}" # API-URL des PDS
         REACT_APP_SITE_NAME: "{{ PRIMARY_DOMAIN | upper }} - Bluesky"
         REACT_APP_SITE_DESCRIPTION: "Decentral Social "
+    pull_policy: never
     ports:
       - "127.0.0.1:{{ports.localhost.http['web-app-bluesky_web']}}:8100"
     healthcheck:

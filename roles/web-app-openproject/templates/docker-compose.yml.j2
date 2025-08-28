@@ -6,6 +6,7 @@ x-op-app: &app
   build:
     context: .
     dockerfile: Dockerfile
+  pull_policy: never
 
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 

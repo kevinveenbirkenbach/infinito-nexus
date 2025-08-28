@@ -3,6 +3,7 @@
     build:
       context:    {{ path_infinito_presentation_output.stdout }}
       dockerfile: {{ path_infinito_presentation_output.stdout }}/Dockerfile
+    pull_policy: never
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:5000"
     volumes:

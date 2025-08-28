@@ -3,6 +3,7 @@
         container_name: roulette_application
         build:
             context: .
+        pull_policy: never
         ports:
         - 127.0.0.1:{{ ports.localhost.http[application_id] }}:8080
         restart: {{ DOCKER_RESTART_POLICY }}

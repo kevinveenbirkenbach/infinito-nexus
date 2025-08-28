@@ -5,6 +5,7 @@
     container_name: {{ WORDPRESS_CONTAINER }}
     build:
       context: .
+    pull_policy: never
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
     volumes:

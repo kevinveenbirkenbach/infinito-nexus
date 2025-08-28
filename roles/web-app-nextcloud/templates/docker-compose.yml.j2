@@ -5,7 +5,7 @@
     container_name: {{ NEXTCLOUD_CONTAINER }}
     volumes:
       - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
-      - {{nextcloud_host_config_additives_directory}}:{{nextcloud_docker_config_additives_directory}}:ro
+      - {{ nextcloud_host_config_additives_directory }}:{{ nextcloud_docker_config_additives_directory }}:ro
     healthcheck:
       test: ["CMD", "su", "www-data", "-s", "/bin/sh", "-c", "php {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}occ status"]
       interval: 1m

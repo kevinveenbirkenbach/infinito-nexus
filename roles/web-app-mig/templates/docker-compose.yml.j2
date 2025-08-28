@@ -10,6 +10,7 @@
     build:
       context:    "{{ docker_repository_path }}"
       dockerfile: Dockerfile
+    pull_policy: never
     volumes:
       - "{{ mig_roles_meta_volume }}:/usr/share/nginx/html/roles:ro"
       - "{{ docker_repository_path }}:/usr/share/nginx/html"

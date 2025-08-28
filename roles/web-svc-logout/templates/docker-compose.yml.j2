@@ -4,6 +4,7 @@
     build:
       context: {{ docker_repository_path }}
       dockerfile: Dockerfile
+    pull_policy: never
     image: logout
     container_name: logout
     ports:

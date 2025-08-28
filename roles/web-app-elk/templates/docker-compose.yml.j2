@@ -4,6 +4,7 @@
       context: elasticsearch/
       args:
         ELK_VERSION: $ELK_VERSION
+    pull_policy: never
     volumes:
       - type: bind
         source: ./elasticsearch/config/elasticsearch.yml
@@ -27,6 +28,7 @@
       context: logstash/
       args:
         ELK_VERSION: $ELK_VERSION
+    pull_policy: never
     volumes:
       - type: bind
         source: ./logstash/config/logstash.yml
@@ -51,6 +53,7 @@
       context: kibana/
       args:
         ELK_VERSION: $ELK_VERSION
+    pull_policy: never
     volumes:
       - type: bind
         source: ./kibana/config/kibana.yml

@@ -8,6 +8,7 @@
     build:
       context:    {{ docker_repository_path }}
       dockerfile: Dockerfile
+    pull_policy: never
     ports:
       - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
     volumes:

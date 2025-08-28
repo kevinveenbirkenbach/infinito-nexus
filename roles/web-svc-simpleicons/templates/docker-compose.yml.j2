@@ -3,6 +3,7 @@
     build:
       context: .
       dockerfile: Dockerfile
+    pull_policy: never
     image: simpleicons-server:latest
     container_name: simpleicons-server
     ports:

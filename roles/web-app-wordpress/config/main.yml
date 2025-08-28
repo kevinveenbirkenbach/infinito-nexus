@@ -10,7 +10,7 @@ plugins:
 features:
   matomo:             true
   css:                false
-  desktop:    true
+  desktop:            true
   oidc:               true
   central_database:   true
   logout:             true
