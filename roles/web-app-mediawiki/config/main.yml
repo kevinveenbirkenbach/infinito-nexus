@@ -17,5 +17,7 @@ docker:
   volumes:
     data:     mediawiki_data
 features:
-  logout: true
+  logout:           true
   central_database: true
+  css:              true
+  desktop:          true
