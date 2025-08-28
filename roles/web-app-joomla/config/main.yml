@@ -25,5 +25,7 @@ docker:
       image:    joomla
       version:  latest
       name:     joomla
+      backup:
+        no_stop_required: true
   volumes:
     data:       "joomla_data"
