@@ -19,30 +19,3 @@ JOOMLA_USER_NAME:                 "{{ users.administrator.username }}"
 JOOMLA_USER:                      "{{ JOOMLA_USER_NAME | capitalize }}"     
 JOOMLA_USER_PASSWORD:             "{{ users.administrator.password }}"
 JOOMLA_USER_EMAIL:                "{{ users.administrator.email }}"
-
-# LDAP
-JOOMLA_LDAP_CONF_FILE:            "{{ [ docker_compose.directories.volumes, 'cli-ldap.php' ] | path_join }}"
-JOOMLA_LDAP_ENABLED:              "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
-JOOMLA_LDAP_AUTO_CREATE_ENABLED:  "{{ applications | get_app_conf(application_id, 'autocreate_users') }}"
-JOOMLA_LDAP_HOST:                 "{{ LDAP.SERVER.DOMAIN }}"
-JOOMLA_LDAP_PORT:                 "{{ LDAP.SERVER.PORT }}"
-JOOMLA_LDAP_BASE_DN:              "{{ LDAP.DN.ROOT }}"
-JOOMLA_LDAP_USER_TREE_DN:         "{{ LDAP.DN.OU.USERS }}"
-JOOMLA_LDAP_GROUP_TREE_DN:        "{{ LDAP.DN.OU.GROUPS }}"
-JOOMLA_LDAP_UID_ATTR:             "{{ LDAP.USER.ATTRIBUTES.ID }}"        # e.g. uid
-JOOMLA_LDAP_EMAIL_ATTR:           "{{ LDAP.USER.ATTRIBUTES.MAIL }}"
-JOOMLA_LDAP_NAME_ATTR:            "{{ LDAP.USER.ATTRIBUTES.FULLNAME }}"
-JOOMLA_LDAP_BIND_DN:              "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
-JOOMLA_LDAP_BIND_PASSWORD:        "{{ LDAP.BIND_CREDENTIAL }}"
-JOOMLA_LDAP_USE_STARTTLS:         false
-JOOMLA_LDAP_IGNORE_CERT:          true
-JOOMLA_LDAP_MAP_FULLNAME:         true
-JOOMLA_LDAP_MAP_EMAIL:            true
-JOOMLA_LDAP_AUTH_METHOD:          "search"     # "bind" or "search"
-JOOMLA_LDAP_USER_SEARCH_STRING:   "{{ JOOMLA_LDAP_UID_ATTR }}=[username]"
-JOOMLA_LDAP_AUT_CRT_HOST_DIR:     "{{ [ docker_compose.directories.volumes, 'ldapautocreate' ] | path_join }}"
-JOOMLA_LDAP_AUT_CRT_DOCK_DIR:     "/var/www/html/plugins/system/ldapautocreate"
-
-# Diagnose
-JOOMLA_LDAP_DIAG_HOST_FILE:       "{{ [ docker_compose.directories.volumes, 'cli-ldap-diagnose.php' ] | path_join }}"
-JOOMLA_LDAP_DIAG_DOCK_FILE:       "/var/www/html/cli/ldap-diagnose.php"

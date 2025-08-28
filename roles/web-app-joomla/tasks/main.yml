@@ -1,40 +1,26 @@
 ---
-#- name: "Include role srv-domain-provision for {{ application_id }}"
-#  include_role:
-#    name: srv-domain-provision
-#  loop: "{{ JOOMLA_DOMAINS }}"
-#  loop_control:
-#    loop_var: domain
-#  vars:
-#    http_port: "{{ ports.localhost.http[application_id] }}"
+- name: "Include role srv-domain-provision for {{ application_id }}"
+  include_role:
+    name: srv-domain-provision
+  loop: "{{ JOOMLA_DOMAINS }}"
+  loop_control:
+    loop_var: domain
+  vars:
+    http_port: "{{ ports.localhost.http[application_id] }}"
 
 - name: "load docker and db for {{ application_id }}"
   include_role: 
     name: cmp-db-docker
   vars:
-    docker_compose_flush_handlers: false
-
-- name: Include install routines
-  include_tasks: "01_ldap_files.yml"
-
-- name: "flush docker compose handlers"
-  meta: flush_handlers
+    docker_compose_flush_handlers: true
 
 - name: Include install routines
   include_tasks: "{{ item }}"
   loop:
-    - 02_install.yml
-    - 03_debug.yml
-    - 04_patch.yml
-
-- name: Include LDAP routines
-  include_tasks: "05_ldap.yml"
-  when: JOOMLA_LDAP_ENABLED | bool
+    - 01_install.yml
+    - 02_debug.yml
+    - 03_patch.yml
 
 - name: Include assert routines
-  include_tasks: "06_assert.yml"
+  include_tasks: "04_assert.yml"
   when: MODE_ASSERT | bool
-
-- name: Include LDAP diagnose routines
-  include_tasks: "07_diagnose.yml"
-  when: MODE_DEBUG | bool and JOOMLA_LDAP_ENABLED | bool
