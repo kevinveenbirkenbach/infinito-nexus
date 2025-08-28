@@ -2,7 +2,32 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
     name: cmp-db-docker-proxy
+  vars:
+    docker_compose_flush_handlers: false
 
-- name: add docker-compose.yml
-  template: src=docker-compose.yml.j2 dest={{ docker_compose.directories.instance }}docker-compose.yml
-  notify: docker compose up
+- name: "Deploy MediaWiki LocalSettings.php"
+  template:
+    src: "LocalSettings.php.j2"
+    dest: "{{ MEDIAWIKI_SETTINGS_HOST_PATH }}"
+    mode: '0644'
+
+- name: "Flush docker compose handlers"
+  meta: flush_handlers
+
+- name: "Create MediaWiki admin user"
+  command: >
+    docker exec
+    -u {{ MEDIAWIKI_USER }}
+    {{ MEDIAWIKI_CONTAINER }}
+    php /var/www/html/maintenance/createAndPromote.php
+    --bureaucrat --sysop
+    {{ MEDIAWIKI_ADMINISTRATOR_NAME }}
+    {{ MEDIAWIKI_ADMINISTRATOR_PASSWORD }}
+    {{ MEDIAWIKI_ADMINISTRATOR_EMAIL }}
+  register: create_admin
+  changed_when: >
+    'created' in (create_admin.stdout | default('')) or
+    'Created' in (create_admin.stdout | default(''))
+  failed_when: >
+    create_admin.rc != 0 and
+    ('already exists' not in (create_admin.stdout | default('') ~ create_admin.stderr | default('')))

@@ -1,16 +1,21 @@
+sitename:       "Wiki on {{ PRIMARY_DOMAIN | upper }}"
+meta_namespace: "Meta"
 server:
   domains:
     canonical:
       - "wiki.{{ PRIMARY_DOMAIN }}"
 docker:
   services:
+    database:
+      enabled:  true
     mediawiki: 
       image:    mediawiki
       version:  latest
       backup:
         no_stop_required: true
       name:     mediawiki
-    volumes:
-      data:     mediawiki_data
+  volumes:
+    data:     mediawiki_data
 features:
   logout: true
+  central_database: true

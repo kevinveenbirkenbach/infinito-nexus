@@ -1,16 +1,19 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-      container_name: "{{ mediawiki_name }}"
-      image: "{{ mediawiki_image }}:{{ mediawiki_version }}"
-      volumes:
-        - "data:/var/www/html/"
-      ports:
-        - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+    container_name: "{{ MEDIAWIKI_CONTAINER }}"
+    image: "{{ MEDIAWIKI_IMAGE }}:{{ MEDIAWIKI_VERSION }}"
+    volumes:
+      - "data:/var/www/html/"
+      - "{{ MEDIAWIKI_SETTINGS_HOST_PATH }}:{{ MEDIAWIKI_SETTINGS_DOCK_PATH }}:ro"
+    ports:
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ mediawiki_volume }}
+    name: {{ MEDIAWIKI_VOLUME }}
+
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
