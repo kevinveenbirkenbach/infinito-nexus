@@ -1,11 +1,25 @@
 ---
-application_id:                                 "web-app-mybb"
-docker_compose_instance_confd_directory:        "{{ docker_compose.directories.instance }}conf.d/"
-docker_compose_instance_confd_defaultconf_file: "{{docker_compose_instance_confd_directory}}default.conf"
-target_mount_conf_d_directory:                  "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}"
-source_domain:                                  "mybb.{{ PRIMARY_DOMAIN }}"
-database_type:                                  "mariadb"
-mybb_version:                                   "{{ applications | get_app_conf(application_id, 'docker.services.mybb.version', True) }}"
-mybb_image:                                     "{{ applications | get_app_conf(application_id, 'docker.services.mybb.image', True) }}"
-mybb_name:                                      "{{ applications | get_app_conf(application_id, 'docker.services.mybb.name', True) }}"
-mybb_volume:                                    "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
+# General
+application_id:                 "web-app-mybb"
+database_type:                  "mariadb"
+container_port:                 80
+
+# MyBB
+
+## Credentials 
+MYBB_SECRET_PIN:                "{{ applications | get_app_conf(application_id, 'credentials.secret_pin') }}"
+
+## Server
+MYBB_NGINX_CONF_DIR_HOST:       "{{ docker_compose.directories.instance }}conf.d/"
+MYBB_NGINX_CONF_DIR_DOCK:       "{{ NGINX.DIRECTORIES.CONFIGURATION }}"
+MYBB_NGINX_DEFAULT_CONF_HOST:   "{{ MYBB_NGINX_CONF_DIR_HOST }}default.conf"
+
+## Application
+MYBB_ADMIN_USER_ID:             1
+MYBB_DOMAIN:                    "{{ domains | get_domain(application_id) }}"
+MYBB_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.mybb.version') }}"
+MYBB_IMAGE:                     "{{ applications | get_app_conf(application_id, 'docker.services.mybb.image') }}"
+MYBB_CONTAINER:                 "{{ applications | get_app_conf(application_id, 'docker.services.mybb.name') }}"
+MYBB_VOLUME:                    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+MYBB_CONFIG_HOST_PATH:          "{{ [docker_compose.directories.instance, 'config.php'] | path_join }}"
+MYBB_CONFIG_DOCK_PATH:          "/var/www/html/inc/config.php"

@@ -1,11 +1,8 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-    logging:
-      driver: journald
-      options:
-        tag: "mybb_application"
-    image: {{ mybb_image }}:{{ mybb_version }}
-    container_name: {{ mybb_name }}
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+    image: {{ MYBB_IMAGE }}:{{ MYBB_VERSION }}
+    container_name: {{ MYBB_CONTAINER }}
     restart: {{ DOCKER_RESTART_POLICY }}
     volumes:
       - data:/var/www/html
@@ -13,21 +10,20 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   server:
-    logging:
-      driver: journald
-      options:
-        tag: "mybb_server"
+{% include 'roles/docker-container/templates/base.yml.j2' %}
     image: nginx:mainline
     restart: {{ DOCKER_RESTART_POLICY }}
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
-    - "{{docker_compose_instance_confd_directory}}:{{target_mount_conf_d_directory}}:ro"
+    - "{{ MYBB_NGINX_CONF_DIR_HOST }}:{{ MYBB_NGINX_CONF_DIR_DOCK }}:ro"
+    - "{{ MYBB_CONFIG_HOST_PATH }}:{{ MYBB_CONFIG_DOCK_PATH }}:ro"
     - "data:/var/www/html:ro"
+{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ mybb_volume }}
+    name: {{ MYBB_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

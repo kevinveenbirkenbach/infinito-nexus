@@ -1,36 +1,25 @@
-- block:
-  - name: Include dependency 'srv-proxy-core'
-    include_role:
-      name: srv-proxy-core
-    when: run_once_srv_proxy_core is not defined
-  - include_tasks: utils/run_once.yml
-  when: run_once_web_app_mybb is not defined
+- name: "load docker, db and proxy for {{ application_id }}"
+  include_role: 
+    name: cmp-db-docker-proxy
+  vars:
+    docker_compose_flush_handlers: false
+    proxy_extra_configuration: "sub_filter '{{MYBB_DOMAIN}}' '{{ MYBB_DOMAIN }}';"
 
-- name: "include tasks setup-domain.yml with {{ domains | get_domain(application_id) }}"
-  include_tasks: setup-domain.yml
-  loop: "{{ mybb_domains + [source_domain] }}"
-  loop_control:
-    loop_var: domain
-
-- name: "load docker and db for {{ application_id }}"
-  include_role:
-    name: cmp-db-docker
-
-- name: "create {{docker_compose_instance_confd_directory}} and parent directories"
+- name: "create {{ MYBB_NGINX_CONF_DIR_HOST }} and parent directories"
   file:
-    path: "{{docker_compose_instance_confd_directory}}"
+    path: "{{ MYBB_NGINX_CONF_DIR_HOST }}"
     state: directory
     mode: "0755"
     recurse: yes
 
-- name: "create {{docker_compose_instance_confd_defaultconf_file}}"
+- name: "Deploy {{ MYBB_NGINX_DEFAULT_CONF_HOST }}"
   template:
     src: "default.conf.j2"
-    dest: "{{docker_compose_instance_confd_defaultconf_file}}"
+    dest: "{{ MYBB_NGINX_DEFAULT_CONF_HOST }}"
   notify: docker compose up
 
-- name: add docker-compose.yml
+- name: "Deploy {{ MYBB_CONFIG_HOST_PATH }}"
   template:
-    src: "docker-compose.yml.j2"
-    dest: "{{ docker_compose.directories.instance }}docker-compose.yml"
-  notify: docker compose up
+    src: "config.php.j2"
+    dest: "{{ MYBB_CONFIG_HOST_PATH }}"
+    mode: '0644'
