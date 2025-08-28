@@ -25,16 +25,6 @@
     dest: "{{ NGINX.FILES.CONFIGURATION }}"
   notify: docker compose up
 
-- name: Include health dependencies
-  include_role:
-    name: "{{ item }}"
-  loop:
-    - sys-ctl-hlth-webserver
-    - sys-ctl-hlth-csp
-  vars:
-    # Extra flush is for performance reasons not necessary
-    flush_handlers: false
-
 - name: Include openresty
   # Outside of run_once block is necessary for handler loading
   # Otherwise the when: condition from the block is added to the handlers
@@ -50,3 +40,12 @@
     # Flush openresty handler on first run, so that openresty is up, before openresty related handlers are triggered
     flush_handlers: true
   when: run_once_svc_prx_openresty is not defined
+
+- name: Include health dependencies
+  include_role:
+    name: "{{ item }}"
+  loop:
+    - sys-ctl-hlth-webserver
+    - sys-ctl-hlth-csp
+  vars:
+    flush_handlers: false
