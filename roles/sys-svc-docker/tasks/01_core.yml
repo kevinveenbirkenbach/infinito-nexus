@@ -23,3 +23,4 @@
     - sys-ctl-hlth-docker-volumes
     - sys-ctl-rpr-docker-soft
     - sys-ctl-rpr-docker-hard
+  when: SYS_SVC_DOCKER_LOAD_SERVICES | bool
