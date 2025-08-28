@@ -55,17 +55,17 @@ KEYCLOAK_POST_LOGOUT_URIS:           "+"
 
 ## LDAP
 KEYCLOAK_LDAP_ENABLED:              "{{ applications | get_app_conf(application_id, 'features.ldap', False) }}"
-KEYCLOAK_LDAP_CMP_NAME:             "{{ ldap.server.domain }}"          # Name of the LDAP User Federation component in Keycloak (as shown in UI)
-KEYCLOAK_LDAP_BIND_DN:              "{{ ldap.dn.administrator.data }}"
-KEYCLOAK_LDAP_BIND_PW:              "{{ ldap.bind_credential }}"
-KEYCLOAK_LDAP_URL:                  "{{ ldap.server.uri }}"
+KEYCLOAK_LDAP_CMP_NAME:             "{{ LDAP.SERVER.DOMAIN }}"          # Name of the LDAP User Federation component in Keycloak (as shown in UI)
+KEYCLOAK_LDAP_BIND_DN:              "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+KEYCLOAK_LDAP_BIND_PW:              "{{ LDAP.BIND_CREDENTIAL }}"
+KEYCLOAK_LDAP_URL:                  "{{ LDAP.SERVER.URI }}"
 
 # It's important to filter the posixAccount class out, because it is just used by ansible
 KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >  
   {{ 
     (
-        (ldap.user.objects.structural | reject('equalto','posixAccount') | list)
-        + (ldap.user.objects.auxiliary | dict2items | map(attribute='value') | list)
+        (LDAP.USER.OBJECTS.STRUCTURAL | reject('equalto','posixAccount') | list)
+        + (LDAP.USER.OBJECTS.AUXILIARY | dict2items | map(attribute='value') | list)
       ) | join(', ') 
   }}
 

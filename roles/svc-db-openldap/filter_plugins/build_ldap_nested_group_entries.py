@@ -8,12 +8,12 @@ def build_ldap_nested_group_entries(applications, users, ldap):
     result = {}
 
     # Base DN components
-    role_dn_base = ldap["dn"]["ou"]["roles"]
-    user_dn_base = ldap["dn"]["ou"]["users"]
-    ldap_user_attr = ldap["user"]["attributes"]["id"]
+    role_dn_base = ldap["DN"]["OU"]["ROLES"]
+    user_dn_base = ldap["DN"]["OU"]["USERS"]
+    ldap_user_attr = ldap["USER"]["ATTRIBUTES"]["ID"]
 
     # Supported objectClass flavors
-    flavors = ldap.get("rbac", {}).get("flavors", [])
+    flavors = ldap.get("RBAC").get("FLAVORS")
 
     for application_id, app_config in applications.items():
         # Compute the DN for the application-level OU

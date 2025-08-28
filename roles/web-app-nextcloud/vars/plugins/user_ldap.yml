@@ -32,17 +32,17 @@ plugin_configuration:
   -
     appid: "user_ldap"
     configkey: "s01ldap_base"
-    configvalue: "{{ldap.dn.root}}"
+    configvalue: "{{ LDAP.DN.ROOT }}"
 
   -
     appid: "user_ldap"
     configkey: "s01ldap_base_groups"
-    configvalue: "{{ldap.dn.root}}"
+    configvalue: "{{ LDAP.DN.ROOT }}"
 
   -
     appid: "user_ldap"
     configkey: "s01ldap_base_users"
-    configvalue: "{{ldap.dn.ou.users}}"
+    configvalue: "{{LDAP.DN.OU.USERS}}"
 
   -
     appid: "user_ldap"
@@ -67,7 +67,7 @@ plugin_configuration:
   -
     appid: "user_ldap"
     configkey: "s01ldap_dn"
-    configvalue: "{{ldap.dn.administrator.data}}"
+    configvalue: "{{LDAP.DN.ADMINISTRATOR.DATA}}"
   -
     appid: "user_ldap"
     configkey: "s01ldap_email_attr"
@@ -103,11 +103,11 @@ plugin_configuration:
   -
     appid: "user_ldap"
     configkey: "s01ldap_host"
-    configvalue: "{{ldap.server.domain}}"
+    configvalue: "{{ LDAP.SERVER.DOMAIN }}"
   -
     appid: "user_ldap"
     configkey: "s01ldap_login_filter"
-    configvalue: "{{ ldap.filters.users.login }}"
+    configvalue: "{{ LDAP.FILTERS.USERS.LOGIN }}"
   -
     appid: "user_ldap"
     configkey: "s01ldap_login_filter_mode"
@@ -165,7 +165,7 @@ plugin_configuration:
     configkey: "s01ldap_userlist_filter"
     configvalue: |-
       {% if applications | get_app_conf(application_id, 'plugins.user_ldap.user_directory.enabled', True) %}
-      {{ ldap.filters.users.all }}
+      {{ LDAP.FILTERS.USERS.ALL }}
       {% else %}
       ()
       {% endif %}
@@ -181,4 +181,4 @@ plugin_configuration:
   -
     appid: "user_ldap"
     configkey: "s01ldap_expert_username_attr"
-    configvalue: "{{ldap.user.attributes.id}}"
+    configvalue: "{{LDAP.USER.ATTRIBUTES.ID}}"

@@ -97,10 +97,10 @@ return array (
     // note: on Keycloak, OIDC name claim = "${given_name} ${family_name}" or one of them if any is missing
     //
     'oidc_login_attributes' => array (
-        'id' => '{{ldap.user.attributes.id}}',
+        'id' => '{{LDAP.USER.ATTRIBUTES.ID}}',
         'name' => 'name',
         'mail' => 'email',
-        'quota' => '{{ ldap.user.attributes.nextcloud_quota }}',
+        'quota' => '{{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }}',
         # 'home' => 'homeDirectory',    # Not implemented yet
         'ldap_uid' => '{{ OIDC.ATTRIBUTES.USERNAME }}',
         # 'groups' => 'ownCloudGroups', # Not implemented yet

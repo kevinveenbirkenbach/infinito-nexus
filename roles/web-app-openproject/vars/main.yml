@@ -5,17 +5,17 @@ application_id:                 "web-app-openproject"
 database_type:                  "postgres"
 
 # Open Project Specific
-openproject_version:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version', True) }}"
-openproject_image:              "{{ applications | get_app_conf(application_id, 'docker.services.web.image', True) }}"
-openproject_volume:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-openproject_web_name:           "{{ applications | get_app_conf(application_id, 'docker.services.web.name', True) }}"
-openproject_seeder_name:        "{{ applications | get_app_conf(application_id, 'docker.services.seeder.name', True) }}"
-openproject_cron_name:          "{{ applications | get_app_conf(application_id, 'docker.services.cron.name', True) }}"
-openproject_proxy_name:         "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name', True) }}"
-openproject_worker_name:        "{{ applications | get_app_conf(application_id, 'docker.services.worker.name', True) }}"
+openproject_version:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version') }}"
+openproject_image:              "{{ applications | get_app_conf(application_id, 'docker.services.web.image') }}"
+openproject_volume:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+openproject_web_name:           "{{ applications | get_app_conf(application_id, 'docker.services.web.name') }}"
+openproject_seeder_name:        "{{ applications | get_app_conf(application_id, 'docker.services.seeder.name') }}"
+openproject_cron_name:          "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
+openproject_proxy_name:         "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name') }}"
+openproject_worker_name:        "{{ applications | get_app_conf(application_id, 'docker.services.worker.name') }}"
 
 # Open Project Cache
-openproject_cache_name:         "{{ applications | get_app_conf(application_id, 'docker.services.cache.name', True) }}"
+openproject_cache_name:         "{{ applications | get_app_conf(application_id, 'docker.services.cache.name') }}"
 openproject_cache_image:        "{{ applications
      | get_app_conf(application_id, 'docker.services.cache.image')
      or applications
@@ -45,11 +45,11 @@ openproject_rails_settings:
   smtp_ssl:                   false
 
 openproject_filters:
-  administrators: "{{ '(memberOf=cn=openproject-admins,' ~ ldap.dn.ou.roles ~ ')' 
-       if applications | get_app_conf(application_id, 'ldap.filters.administrators', True) else '' }}"
+  administrators: "{{ '(memberOf=cn=openproject-admins,' ~ LDAP.DN.OU.ROLES ~ ')' 
+       if applications | get_app_conf(application_id, 'ldap.filters.administrators') else '' }}"
 
-  users: "{{ '(memberOf=cn=openproject-users,' ~ ldap.dn.ou.roles ~ ')' 
-       if applications | get_app_conf(application_id, 'ldap.filters.users', True) else '' }}"
+  users: "{{ '(memberOf=cn=openproject-users,' ~ LDAP.DN.OU.ROLES ~ ')' 
+       if applications | get_app_conf(application_id, 'ldap.filters.users') else '' }}"
 
 # Docker
 docker_repository_branch:       "stable/{{ openproject_version }}"

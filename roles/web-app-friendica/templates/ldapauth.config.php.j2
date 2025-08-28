@@ -9,26 +9,26 @@ return [
 		// ldap_server (String)
 		// ldap hostname server - required
 		// Example: ldap_server = host.example.com
-		'ldap_server' => '{{ ldap.server.uri }}',
+		'ldap_server' => '{{ LDAP.SERVER.URI }}',
 
 		// ldap_binddn (String)
 		// admin dn - optional - only if ldap server dont have anonymous access
 		// Example: ldap_binddn = cn=admin,dc=example,dc=com
-		'ldap_binddn' => '{{ ldap.dn.administrator.data }}',
+		'ldap_binddn' => '{{ LDAP.DN.ADMINISTRATOR.DATA }}',
 
 		// ldap_bindpw (String)
 		// admin password - optional - only if ldap server dont have anonymous access
-		'ldap_bindpw' => '{{ ldap.bind_credential }}',
+		'ldap_bindpw' => '{{ LDAP.BIND_CREDENTIAL }}',
 
 		// ldap_searchdn (String)
 		// dn to search users - required
 		// Example: ldap_searchdn = ou=users,dc=example,dc=com
-		'ldap_searchdn' => '{{ ldap.dn.ou.users }}',
+		'ldap_searchdn' => '{{ LDAP.DN.OU.USERS }}',
 
 		// ldap_userattr (String)
 		// attribute to find username - required
 		// Example: ldap_userattr = uid
-		'ldap_userattr' => '{{ ldap.user.attributes.id }}',
+		'ldap_userattr' => '{{ LDAP.USER.ATTRIBUTES.ID }}',
 
 		// ldap_group (String)
 		// DN of the group whose member can auth on Friendica - optional
@@ -42,10 +42,10 @@ return [
 
 		// ldap_autocreateaccount_emailattribute (String)
 		// attribute to get email - optional - default : 'mail'
-		'ldap_autocreateaccount_emailattribute' => '{{ ldap.user.attributes.mail }}',
+		'ldap_autocreateaccount_emailattribute' => '{{ LDAP.USER.ATTRIBUTES.MAIL }}',
 
 		// ldap_autocreateaccount_nameattribute (String)
 		// attribute to get nickname - optional - default : 'givenName'
-		'ldap_autocreateaccount_nameattribute' => '{{ ldap.user.attributes.firstname }}',
+		'ldap_autocreateaccount_nameattribute' => '{{ LDAP.USER.ATTRIBUTES.FIRSTNAME }}',
 	],
 ];

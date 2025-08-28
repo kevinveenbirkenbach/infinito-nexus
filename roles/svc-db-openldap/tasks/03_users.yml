@@ -3,11 +3,11 @@
 ###############################################################################
 - name: Ensure LDAP users exist
   community.general.ldap_entry:
-    dn:           "{{ ldap.user.attributes.id }}={{ item.key }},{{ ldap.dn.ou.users }}"
+    dn:           "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
     server_uri:   "{{ openldap_server_uri }}"
-    bind_dn:      "{{ ldap.dn.administrator.data }}"
-    bind_pw:      "{{ ldap.bind_credential }}"
-    objectClass:  "{{ ldap.user.objects.structural }}"
+    bind_dn:      "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+    bind_pw:      "{{ LDAP.BIND_CREDENTIAL }}"
+    objectClass:  "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
     attributes:
       uid:           "{{ item.value.username }}"
       sn:            "{{ item.value.sn  | default(item.key) }}"
@@ -29,12 +29,12 @@
 ###############################################################################
 - name: Ensure required objectClass values and mail address are present
   community.general.ldap_attrs:
-    dn: "{{ ldap.user.attributes.id }}={{ item.key }},{{ ldap.dn.ou.users }}"
+    dn: "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
     server_uri: "{{ openldap_server_uri }}"
-    bind_dn: "{{ ldap.dn.administrator.data }}"
-    bind_pw: "{{ ldap.bind_credential }}"
+    bind_dn: "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+    bind_pw: "{{ LDAP.BIND_CREDENTIAL }}"
     attributes:
-      objectClass: "{{ ldap.user.objects.structural }}"
+      objectClass: "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
       mail:        "{{ item.value.email }}"
     state: exact
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
@@ -45,10 +45,10 @@
 
 - name: "Ensure container for application roles exists"
   community.general.ldap_entry:
-    dn: "{{ ldap.dn.ou.roles }}"
+    dn: "{{ LDAP.DN.OU.ROLES }}"
     server_uri: "{{ openldap_server_uri }}"
-    bind_dn:  "{{ ldap.dn.administrator.data }}"
-    bind_pw:  "{{ ldap.bind_credential }}"
+    bind_dn:  "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+    bind_pw:  "{{ LDAP.BIND_CREDENTIAL }}"
     objectClass: organizationalUnit
     attributes:
       ou: roles

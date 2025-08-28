@@ -10,7 +10,7 @@
   },
   "protocolMappers": [
     {
-      "name": "{{ ldap.user.attributes.nextcloud_quota }}",
+      "name": "{{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }}",
       "protocol": "openid-connect",
       "protocolMapper": "oidc-usermodel-attribute-mapper",
       "consentRequired": false,
@@ -19,11 +19,11 @@
         "introspection.token.claim": "true",
         "multivalued": "false",
         "userinfo.token.claim": "true",
-        "user.attribute": "{{ ldap.user.attributes.nextcloud_quota }}",
+        "user.attribute": "{{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }}",
         "id.token.claim": "true",
         "lightweight.claim": "false",
         "access.token.claim": "true",
-        "claim.name": "{{ ldap.user.attributes.nextcloud_quota }}",
+        "claim.name": "{{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }}",
         "jsonType.label": "int"
       }
     },
@@ -41,7 +41,7 @@
         "id.token.claim": "true",
         "lightweight.claim": "false",
         "access.token.claim": "true",
-        "claim.name": "{{ldap.user.attributes.id}}",
+        "claim.name": "{{LDAP.USER.ATTRIBUTES.ID}}",
         "jsonType.label": "String"
       }
     }

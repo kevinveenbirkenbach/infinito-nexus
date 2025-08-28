@@ -10,12 +10,12 @@
 {% endif %}
     volumes:
       - 'data:/bitnami/openldap'
-      - '{{openldap_ldif_host_path}}:{{openldap_ldif_docker_path}}:ro'
+      - '{{openldap_ldif_host_path}}:{{ openldap_ldif_docker_path }}:ro'
     healthcheck:
       test: >
         bash -c '
         ldapsearch -x -H ldap://localhost:{{ openldap_docker_port_open }} \
-          -D "{{ ldap.dn.administrator.data }}" -w "{{ ldap.bind_credential }}" -b "{{ ldap.dn.root }}" > /dev/null \
+          -D "{{ LDAP.DN.ADMINISTRATOR.DATA }}" -w "{{ LDAP.BIND_CREDENTIAL }}" -b "{{ LDAP.DN.ROOT }}" > /dev/null \
         && ldapsearch -Y EXTERNAL -H ldapi:/// \
           -b cn=config "(&(objectClass=olcOverlayConfig)(olcOverlay=memberof))" \
         | grep "olcOverlay:" | grep -q "memberof"

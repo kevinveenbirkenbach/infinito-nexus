@@ -1,22 +1,22 @@
 - name: Gather all users with their current objectClass list
   community.general.ldap_search:
     server_uri: "{{ openldap_server_uri }}"
-    bind_dn:    "{{ ldap.dn.administrator.data }}"
-    bind_pw:    "{{ ldap.bind_credential }}"
-    dn:         "{{ ldap.dn.ou.users }}"
+    bind_dn:    "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+    bind_pw:    "{{ LDAP.BIND_CREDENTIAL }}"
+    dn:         "{{ LDAP.DN.OU.USERS }}"
     scope:      subordinate
-    filter:     "{{ ldap.filters.users.all }}"
+    filter:     "{{ LDAP.FILTERS.USERS.ALL }}"
     attrs:
       - dn
       - objectClass
-      - "{{ ldap.user.attributes.id }}"
+      - "{{ LDAP.USER.ATTRIBUTES.ID }}"
   register: ldap_users_with_classes
 
 - name: Add only missing auxiliary classes
   community.general.ldap_attrs:
     server_uri: "{{ openldap_server_uri }}"
-    bind_dn:    "{{ ldap.dn.administrator.data }}"
-    bind_pw:    "{{ ldap.bind_credential }}"
+    bind_dn:    "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+    bind_pw:    "{{ LDAP.BIND_CREDENTIAL }}"
     dn:         "{{ item.dn }}"
     attributes:
       objectClass: "{{ missing_auxiliary }}"
@@ -28,7 +28,7 @@
     label: "{{ item.dn }}"
   vars:
     missing_auxiliary: >-
-      {{ (ldap.user.objects.auxiliary.values() | list) 
+      {{ (LDAP.USER.OBJECTS.AUXILIARY.values() | list) 
          | difference(item.objectClass | default([]))
       }}
   when: missing_auxiliary | length > 0

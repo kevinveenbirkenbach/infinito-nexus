@@ -42,19 +42,19 @@ class TestBuildLdapRoleEntries(unittest.TestCase):
         }
 
         self.ldap = {
-            "dn": {
-                "ou": {
-                    "users": "ou=users,dc=example,dc=org",
-                    "roles": "ou=roles,dc=example,dc=org"
+            "DN": {
+                "OU": {
+                    "USERS": "ou=users,dc=example,dc=org",
+                    "ROLES": "ou=roles,dc=example,dc=org"
                 }
             },
-            "user":{
-                "attributes": {
-                    "id": "uid"
+            "USER":{
+                "ATTRIBUTES": {
+                    "ID": "uid"
                 }
             },
-            "rbac": {
-                "flavors": ["posixGroup", "groupOfNames"]
+            "RBAC": {
+                "FLAVORS": ["posixGroup", "groupOfNames"]
             }
         }
 

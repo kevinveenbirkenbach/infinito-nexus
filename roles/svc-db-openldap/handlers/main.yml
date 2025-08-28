@@ -1,6 +1,6 @@
 - name: Load memberof module from file in OpenLDAP container
   shell: >
-    docker exec -i {{ openldap_name }} ldapmodify -Y EXTERNAL -H ldapi:/// -f {{openldap_ldif_docker_path}}configuration/01_member_of_configuration.ldif
+    docker exec -i {{ openldap_name }} ldapmodify -Y EXTERNAL -H ldapi:/// -f {{ openldap_ldif_docker_path }}configuration/01_member_of_configuration.ldif
   listen: 
     - "Import configuration LDIF files"
     - "Import all LDIF files"
@@ -10,7 +10,7 @@
 
 - name: Refint Module Activation for OpenLDAP
   shell: >
-    docker exec -i {{ openldap_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f {{openldap_ldif_docker_path}}configuration/02_member_of_configuration.ldif
+    docker exec -i {{ openldap_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f {{ openldap_ldif_docker_path }}configuration/02_member_of_configuration.ldif
   listen: 
     - "Import configuration LDIF files"
     - "Import all LDIF files"
@@ -22,7 +22,7 @@
 
 - name: "Import schemas"
   shell: >
-    docker exec -i {{ openldap_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f "{{openldap_ldif_docker_path}}schema/{{ item | basename | regex_replace('\.j2$', '') }}"
+    docker exec -i {{ openldap_name }} ldapadd -Y EXTERNAL -H ldapi:/// -f "{{ openldap_ldif_docker_path }}schema/{{ item | basename | regex_replace('\.j2$', '') }}"
   register: ldapadd_result
   changed_when: "'adding new entry' in ldapadd_result.stdout"
   failed_when: ldapadd_result.rc not in [0, 80]
@@ -33,7 +33,7 @@
 
 - name: Refint Overlay Configuration for OpenLDAP
   shell: >
-    docker exec -i {{ openldap_name }} ldapmodify -Y EXTERNAL -H ldapi:/// -f {{openldap_ldif_docker_path}}configuration/03_member_of_configuration.ldif
+    docker exec -i {{ openldap_name }} ldapmodify -Y EXTERNAL -H ldapi:/// -f {{ openldap_ldif_docker_path }}configuration/03_member_of_configuration.ldif
   listen:
     - "Import configuration LDIF files"
     - "Import all LDIF files"
@@ -45,7 +45,7 @@
 
 - name: "Import users, groups, etc. to LDAP"
   shell: >
-    docker exec -i {{ openldap_name }} ldapadd -x -D "{{ldap.dn.administrator.data}}" -w "{{ldap.bind_credential}}" -c -f "{{openldap_ldif_docker_path}}groups/{{ item | basename | regex_replace('\.j2$', '') }}"
+    docker exec -i {{ openldap_name }} ldapadd -x -D "{{LDAP.DN.ADMINISTRATOR.DATA}}" -w "{{ LDAP.BIND_CREDENTIAL }}" -c -f "{{ openldap_ldif_docker_path }}groups/{{ item | basename | regex_replace('\.j2$', '') }}"
   register: ldapadd_result
   changed_when: "'adding new entry' in ldapadd_result.stdout"
   failed_when: ldapadd_result.rc not in [0, 20, 68, 65]

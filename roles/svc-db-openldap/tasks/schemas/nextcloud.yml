@@ -8,9 +8,9 @@
   vars:
     schema_name: "nextcloud"
     attribute_defs:
-      - "( 1.3.6.1.4.1.99999.1 NAME '{{ ldap.user.attributes.nextcloud_quota }}' DESC 'Quota for Nextcloud' EQUALITY integerMatch ORDERING integerOrderingMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE )"
+      - "( 1.3.6.1.4.1.99999.1 NAME '{{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }}' DESC 'Quota for Nextcloud' EQUALITY integerMatch ORDERING integerOrderingMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE )"
     objectclass_defs:
-      - "( 1.3.6.1.4.1.99999.2 NAME 'nextcloudUser' DESC 'Auxiliary class for Nextcloud attributes' AUXILIARY MAY ( {{ ldap.user.attributes.nextcloud_quota }} ) )"
+      - "( 1.3.6.1.4.1.99999.2 NAME '{{ LDAP.USER.OBJECTS.AUXILIARY.NEXTCLOUD_USER }}' DESC 'Auxiliary class for Nextcloud attributes' AUXILIARY MAY ( {{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }} ) )"
   command: >
     ldapsm
       -s {{ openldap_server_uri }}

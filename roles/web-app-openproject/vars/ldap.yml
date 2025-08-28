@@ -1,14 +1,14 @@
 openproject_ldap:
   name:                   "{{ PRIMARY_DOMAIN }}"                      # Display name for the LDAP connection in OpenProject
-  host:                   "{{ ldap.server.domain }}"                  # LDAP server address
-  port:                   "{{ ldap.server.port }}"                    # LDAP server port (typically 389 or 636)
-  account:                "{{ ldap.dn.administrator.data }}"          # Bind DN (used for authentication)
-  account_password:       "{{ ldap.bind_credential }}"                # Bind password
-  base_dn:                "{{ ldap.dn.ou.users }}"                       # Base DN for user search
-  attr_login:             "{{ ldap.user.attributes.id }}"             # LDAP attribute used for login
+  host:                   "{{ LDAP.SERVER.DOMAIN }}"                  # LDAP server address
+  port:                   "{{ LDAP.SERVER.PORT }}"                    # LDAP server port (typically 389 or 636)
+  account:                "{{ LDAP.DN.ADMINISTRATOR.DATA }}"          # Bind DN (used for authentication)
+  account_password:       "{{ LDAP.BIND_CREDENTIAL }}"                # Bind password
+  base_dn:                "{{ LDAP.DN.OU.USERS }}"                       # Base DN for user search
+  attr_login:             "{{ LDAP.USER.ATTRIBUTES.ID }}"             # LDAP attribute used for login
   attr_firstname:         "givenName"                                 # LDAP attribute for first name
-  attr_lastname:          "{{ ldap.user.attributes.surname }}"             # LDAP attribute for last name
-  attr_mail:              "{{ ldap.user.attributes.mail }}"                # LDAP attribute for email
+  attr_lastname:          "{{ LDAP.USER.ATTRIBUTES.SURNAME }}"             # LDAP attribute for last name
+  attr_mail:              "{{ LDAP.USER.ATTRIBUTES.MAIL }}"                # LDAP attribute for email
   attr_admin:             "{{ openproject_filters.administrators }}"  # Optional: LDAP attribute for admin group (leave empty if unused)
   onthefly_register:      true                                        # Automatically create users on first login
   tls_mode:               0                                           # 0 = No TLS, 1 = TLS, 2 = STARTTLS

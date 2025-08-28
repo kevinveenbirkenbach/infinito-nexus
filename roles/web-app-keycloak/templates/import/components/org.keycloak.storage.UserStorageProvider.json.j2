@@ -11,7 +11,7 @@
         "providerId": "user-attribute-ldap-mapper",
         "subComponents": {},
         "config": {
-          "ldap.attribute": [ "{{ ldap.user.attributes.firstname }}" ],
+          "ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.FIRSTNAME }}" ],
           "attribute.force.default": [ "true" ],
           "is.mandatory.in.ldap": [ "true" ],
           "is.binary.attribute": [ "false" ],
@@ -27,7 +27,7 @@
         "providerId": "user-attribute-ldap-mapper",
         "subComponents": {},
         "config": {
-          "ldap.attribute": [ "{{ ldap.user.attributes.surname }}" ],
+          "ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.SURNAME }}" ],
           "is.mandatory.in.ldap": [ "true" ],
           "always.read.value.from.ldap": [ "true" ],
           "read.only": [ "false" ],
@@ -43,7 +43,7 @@
         "config": {
           "read.only": [ "false" ],
           "write.only": [ "true" ],
-          "ldap.full.name.attribute": [ "{{ ldap.user.attributes.fullname }}" ]
+          "ldap.full.name.attribute": [ "{{ LDAP.USER.ATTRIBUTES.FULLNAME }}" ]
         }
       },
 
@@ -53,7 +53,7 @@
         "providerId": "user-attribute-ldap-mapper",
         "subComponents": {},
         "config": {
-          "ldap.attribute": [ "{{ ldap.user.attributes.id }}" ],
+          "ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
           "is.mandatory.in.ldap": [ "true" ],
           "attribute.force.default": [ "false" ],
           "is.binary.attribute": [ "false" ],
@@ -69,7 +69,7 @@
         "providerId": "user-attribute-ldap-mapper",
         "subComponents": {},
         "config": {
-          "ldap.attribute": [ "{{ ldap.user.attributes.mail }}" ],
+          "ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.MAIL }}" ],
           "is.mandatory.in.ldap": [ "false" ],
           "read.only": [ "false" ],
           "always.read.value.from.ldap": [ "false" ],
@@ -83,29 +83,29 @@
         "providerId": "user-attribute-ldap-mapper",
         "subComponents": {},
         "config": {
-          "ldap.attribute": [ "{{ ldap.user.attributes.ssh_public_key }}" ],
+          "ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.SSH_PUBLIC_KEY }}" ],
           "is.mandatory.in.ldap": [ "false" ],
           "attribute.force.default": [ "false" ],
           "is.binary.attribute": [ "false" ],
           "read.only": [ "false" ],
           "always.read.value.from.ldap": [ "true" ],
-          "user.model.attribute": [ "{{ ldap.user.attributes.ssh_public_key }}" ]
+          "user.model.attribute": [ "{{ LDAP.USER.ATTRIBUTES.SSH_PUBLIC_KEY }}" ]
         }
       },
 
       {# ---------------------- Nextcloud Quota ----------------- #}
       {
-        "name": "{{ ldap.user.attributes.nextcloud_quota }}",
+        "name": "{{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }}",
         "providerId": "user-attribute-ldap-mapper",
         "subComponents": {},
         "config": {
-          "ldap.attribute": [ "{{ ldap.user.attributes.nextcloud_quota }}" ],
+          "ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }}" ],
           "is.mandatory.in.ldap": [ "false" ],
           "attribute.force.default": [ "false" ],
           "is.binary.attribute": [ "false" ],
           "always.read.value.from.ldap": [ "false" ],
           "read.only": [ "false" ],
-          "user.model.attribute": [ "{{ ldap.user.attributes.nextcloud_quota }}" ]
+          "user.model.attribute": [ "{{ LDAP.USER.ATTRIBUTES.NEXTCLOUD_QUOTA }}" ]
         }
       },
 
@@ -145,12 +145,12 @@
         "config": {
           "membership.attribute.type": [ "DN" ],
           "group.name.ldap.attribute": [ "cn" ],
-          "membership.user.ldap.attribute": [ "{{ ldap.user.attributes.id }}" ],
+          "membership.user.ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
           "preserve.group.inheritance": [ "true" ],
-          "groups.dn": [ "{{ ldap.dn.ou.roles }}" ],
+          "groups.dn": [ "{{ LDAP.DN.OU.ROLES }}" ],
           "mode": [ "LDAP_ONLY" ],
           "user.roles.retrieve.strategy": [ "LOAD_GROUPS_BY_MEMBER_ATTRIBUTE" ],
-          "groups.ldap.filter": ["{{ ldap.rbac.flavors | ldap_groups_filter }}"],
+          "groups.ldap.filter": ["{{ LDAP.RBAC.FLAVORS | ldap_groups_filter }}"],
           "membership.ldap.attribute": [ "member" ],
           "ignore.missing.groups": [ "true" ],
           "group.object.classes": [ "groupOfNames" ],
@@ -205,9 +205,9 @@
           "mode": [ "LDAP_ONLY" ],
           "membership.attribute.type": [ "DN" ],
           "user.roles.retrieve.strategy": [ "LOAD_ROLES_BY_MEMBER_ATTRIBUTE" ],
-          "roles.dn": [ "{{ ldap.dn.ou.roles }}" ],
+          "roles.dn": [ "{{ LDAP.DN.OU.ROLES }}" ],
           "membership.ldap.attribute": [ "member" ],
-          "membership.user.ldap.attribute": [ "{{ ldap.user.attributes.id }}" ],
+          "membership.user.ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
           "memberof.ldap.attribute": [ "memberOf" ],
           "role.name.ldap.attribute": [ "cn" ],
           "use.realm.roles.mapping": [ "true" ],
@@ -221,7 +221,7 @@
     "pagination": [ "true" ],
     "connectionTrace": [ "false" ],
     "startTls": [ "false" ],
-    "usersDn": [ "{{ ldap.dn.ou.users }}" ],
+    "usersDn": [ "{{ LDAP.DN.OU.USERS }}" ],
     "connectionPooling": [ "true" ],
     "cachePolicy": [ "DEFAULT" ],
     "useKerberosForPasswordAuthentication": [ "false" ],
@@ -229,10 +229,10 @@
     "enabled": [ "true" ],
     "bindCredential": [ "{{ KEYCLOAK_LDAP_BIND_PW }}" ],
     "changedSyncPeriod": [ "-1" ],
-    "usernameLDAPAttribute": [ "{{ ldap.user.attributes.id }}" ],
+    "usernameLDAPAttribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
     "bindDn": [ "{{ KEYCLOAK_LDAP_BIND_DN }}" ],
     "vendor": [ "other" ],
-    "uuidLDAPAttribute": [ "{{ ldap.user.attributes.id }}" ],
+    "uuidLDAPAttribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
     "allowKerberosAuthentication": [ "false" ],
     "connectionUrl": [ "{{ KEYCLOAK_LDAP_URL }}" ],
     "syncRegistrations": [ "true" ],
@@ -248,7 +248,7 @@
       {{ KEYCLOAK_LDAP_USER_OBJECT_CLASSES | trim | tojson }}
     ],
 
-    "rdnLDAPAttribute": [ "{{ ldap.user.attributes.id }}" ],
+    "rdnLDAPAttribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
     "editMode": [ "WRITABLE" ],
     "validatePasswordPolicy": [ "false" ],
 
