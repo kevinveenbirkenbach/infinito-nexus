@@ -14,6 +14,11 @@
 {% if JOOMLA_LDAP_AUTO_CREATE_ENABLED | bool %}
       - {{ JOOMLA_LDAP_AUT_CRT_HOST_DIR }}:{{ JOOMLA_LDAP_AUT_CRT_DOCK_DIR }}:ro
 {% endif %}
+{% if MODE_DEBUG  | bool %}
+      - {{ JOOMLA_LDAP_DIAG_HOST_FILE }}:{{ JOOMLA_LDAP_DIAG_DOCK_FILE }}:ro
+      - {{ docker_compose.directories.volumes }}/cli-plugins.php:/var/www/html/cli/cli-plugins.php:ro
+      - {{ docker_compose.directories.volumes }}/cli-ldap-auth-trace.php:/var/www/html/cli/ldap-auth-trace.php:ro
+{% endif %}
 {% endif %}
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"

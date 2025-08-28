@@ -1,0 +1,59 @@
+<?php
+/**
+ * Joomla CLI: List plugin states from #__extensions
+ *
+ * Usage:
+ *   php /var/www/html/cli/cli-plugins.php [filter]
+ *
+ * Example:
+ *   php cli-plugins.php ldap
+ *   php cli-plugins.php authentication
+ */
+
+define('_JEXEC', 1);
+define('JPATH_BASE', __DIR__ . '/..');
+
+require JPATH_BASE . '/includes/defines.php';
+require JPATH_BASE . '/includes/framework.php';
+
+use Joomla\CMS\Factory;
+
+$dbo = Factory::getDbo();
+
+// Optional filter argument
+$filter = $argv[1] ?? null;
+
+// Build query
+$query = $dbo->getQuery(true)
+    ->select('*')
+    ->from($dbo->quoteName('#__extensions'))
+    ->where($dbo->quoteName('type') . ' = ' . $dbo->quote('plugin'));
+
+if ($filter) {
+    $query->where(
+        '(' .
+        $dbo->quoteName('element') . ' LIKE ' . $dbo->quote("%$filter%") . ' OR ' .
+        $dbo->quoteName('folder')  . ' LIKE ' . $dbo->quote("%$filter%") .
+        ')'
+    );
+}
+
+$dbo->setQuery($query);
+$rows = $dbo->loadObjectList();
+
+if (!$rows) {
+    echo "No plugins found.\n";
+    exit(0);
+}
+
+foreach ($rows as $row) {
+    printf(
+        "[%s/%s] enabled=%d ordering=%d access=%d\n  params=%s\n\n",
+        $row->folder,
+        $row->element,
+        $row->enabled,
+        $row->ordering,
+        $row->access,
+        $row->params ?: '{}'
+    );
+}

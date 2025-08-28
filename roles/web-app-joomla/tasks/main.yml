@@ -26,5 +26,15 @@
     - 02_install.yml
     - 03_debug.yml
     - 04_patch.yml
-    - 05_ldap.yml
-    - 06_assert.yml
+
+- name: Include LDAP routines
+  include_tasks: "05_ldap.yml"
+  when: JOOMLA_LDAP_ENABLED | bool
+
+- name: Include assert routines
+  include_tasks: "06_assert.yml"
+  when: MODE_ASSERT | bool
+
+- name: Include LDAP diagnose routines
+  include_tasks: "07_diagnose.yml"
+  when: MODE_DEBUG | bool and JOOMLA_LDAP_ENABLED | bool

@@ -1,0 +1,14 @@
+- name: "Run LDAP diagnose"
+  command:
+    argv:
+      - docker
+      - exec
+      - "{{ JOOMLA_CONTAINER }}"
+      - php
+      - /var/www/html/cli/ldap-diagnose.php
+      - "--username={{ users.administrator.username }}"
+  register: ldap_diag
+  changed_when: false
+
+- debug:
+    var: ldap_diag.stdout_lines

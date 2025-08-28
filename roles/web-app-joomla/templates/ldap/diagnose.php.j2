@@ -1,0 +1,194 @@
+<?php
+/**
+ * Joomla LDAP Diagnostic CLI
+ *
+ * Usage inside the container:
+ *   php /var/www/html/cli/ldap-diagnose.php --username <uid> [--verbose]
+ *
+ * Behavior:
+ * - Loads the "Authentication - LDAP" plugin parameters from #__extensions.
+ * - Allows ENV overrides for any LDAP setting (see list below).
+ * - Checks step-by-step: PHP-LDAP → connect → (optional) StartTLS → bind → search → read attributes.
+ * - Optionally previews the candidate DN for user-bind when auth_method=bind (no password tested).
+ *
+ * Supported ENV overrides (optional):
+ *   JOOMLA_LDAP_HOST
+ *   JOOMLA_LDAP_PORT
+ *   JOOMLA_LDAP_BASE_DN
+ *   JOOMLA_LDAP_USER_TREE_DN
+ *   JOOMLA_LDAP_BIND_DN
+ *   JOOMLA_LDAP_BIND_PASSWORD
+ *   JOOMLA_LDAP_USE_STARTTLS   (true/false)
+ *   JOOMLA_LDAP_AUTH_METHOD    ("search" or "bind")
+ *   JOOMLA_LDAP_USER_SEARCH_STRING   (e.g., "uid=[username]")
+ *   JOOMLA_LDAP_UID_ATTR       (e.g., "uid")
+ *   JOOMLA_LDAP_EMAIL_ATTR     (e.g., "mail")
+ *   JOOMLA_LDAP_NAME_ATTR      (e.g., "cn")
+ *   TEST_USERNAME              (fallback if --username is not passed)
+ */
+
+define('_JEXEC', 1);
+define('JPATH_BASE', __DIR__ . '/..');
+
+require JPATH_BASE . '/includes/defines.php';
+require JPATH_BASE . '/includes/framework.php';
+
+use Joomla\CMS\Factory;
+
+function println($msg, ?bool $ok = null, int $indent = 0): void {
+    $pad = str_repeat('  ', $indent);
+    if ($ok === true) {
+        echo $pad . "[OK]  $msg\n";
+    } elseif ($ok === false) {
+        echo $pad . "[ERR] $msg\n";
+    } else {
+        echo $pad . "$msg\n";
+    }
+}
+
+function getenv_clean(string $key, $default = null) {
+    $v = getenv($key);
+    if ($v === false || $v === '') return $default;
+    // Strip surrounding single/double quotes if present
+    return preg_replace('/^(["\'])(.*)\1$/', '$2', $v);
+}
+
+function env_bool($key, $default = false): bool {
+    $v = getenv_clean($key, null);
+    if ($v === null) return (bool)$default;
+    return filter_var($v, FILTER_VALIDATE_BOOL);
+}
+
+// ---- CLI args
+$args = getopt('', ['username:', 'verbose']);
+$username = $args['username'] ?? getenv_clean('TEST_USERNAME', null);
+$verbose  = array_key_exists('verbose', $args);
+
+// ---- Preflight: php-ldap
+if (!extension_loaded('ldap')) {
+    println('PHP LDAP extension not loaded (php-ldap missing in the image).', false);
+    exit(1);
+}
+println('PHP LDAP extension: loaded', true);
+
+// ---- Load LDAP plugin params from DB
+$dbo = Factory::getDbo();
+$q = $dbo->getQuery(true)
+    ->select('*')
+    ->from($dbo->quoteName('#__extensions'))
+    ->where($dbo->quoteName('type') . ' = ' . $dbo->quote('plugin'))
+    ->where($dbo->quoteName('folder') . ' = ' . $dbo->quote('authentication'))
+    ->where($dbo->quoteName('element') . ' = ' . $dbo->quote('ldap'));
+$dbo->setQuery($q);
+$ext = $dbo->loadObject();
+if (!$ext) {
+    println('LDAP plugin row not found in #__extensions (authentication/ldap).', false);
+    exit(2);
+}
+$params = json_decode($ext->params ?: "{}", true) ?: [];
+
+// ---- Effective config (DB params with ENV overrides)
+$cfg = [
+    'host'          => getenv_clean('JOOMLA_LDAP_HOST',           $params['host']          ?? 'openldap'),
+    'port'          => (int) getenv_clean('JOOMLA_LDAP_PORT',     (string)($params['port'] ?? 389)),
+    'base_dn'       => getenv_clean('JOOMLA_LDAP_BASE_DN',        $params['base_dn']       ?? ''),
+    'users_dn'      => getenv_clean('JOOMLA_LDAP_USER_TREE_DN',   $params['users_dn']      ?? ''),
+    'bind_dn'       => getenv_clean('JOOMLA_LDAP_BIND_DN',        $params['username']      ?? ''),
+    'bind_pw'       => getenv_clean('JOOMLA_LDAP_BIND_PASSWORD',  $params['password']      ?? ''),
+    'use_tls'       => env_bool('JOOMLA_LDAP_USE_STARTTLS',       $params['negotiate_tls'] ?? false),
+    'auth_method'   => getenv_clean('JOOMLA_LDAP_AUTH_METHOD',    $params['auth_method']   ?? 'search'),
+    'search_string' => getenv_clean('JOOMLA_LDAP_USER_SEARCH_STRING', $params['search_string'] ?? 'uid=[username]'),
+    'uid_attr'      => getenv_clean('JOOMLA_LDAP_UID_ATTR',       $params['ldap_uid']      ?? 'uid'),
+    'mail_attr'     => getenv_clean('JOOMLA_LDAP_EMAIL_ATTR',     $params['ldap_email']    ?? 'mail'),
+    'name_attr'     => getenv_clean('JOOMLA_LDAP_NAME_ATTR',      $params['ldap_fullname'] ?? 'cn'),
+];
+
+if (!$username) {
+    println('Missing username. Provide --username <uid> or set TEST_USERNAME.', false);
+    exit(3);
+}
+
+// ---- Print effective config (mask password)
+$cfg_to_show = $cfg;
+$cfg_to_show['bind_pw'] = ($cfg['bind_pw'] !== '') ? '***' : '';
+println('Effective LDAP configuration:');
+foreach ($cfg_to_show as $k => $v) {
+    println("$k: $v", null, 1);
+}
+
+// ---- Connect
+$ds = @ldap_connect($cfg['host'], $cfg['port']);
+if (!$ds) {
+    println("ldap_connect to {$cfg['host']}:{$cfg['port']} failed.", false);
+    exit(4);
+}
+ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
+ldap_set_option($ds, LDAP_OPT_NETWORK_TIMEOUT, 5);
+println("ldap_connect to {$cfg['host']}:{$cfg['port']}", true);
+
+// ---- Optional StartTLS
+if ($cfg['use_tls']) {
+    if (@ldap_start_tls($ds)) {
+        println('StartTLS negotiated', true);
+    } else {
+        println('StartTLS failed: ' . ldap_error($ds), false);
+        exit(5);
+    }
+} else {
+    println('StartTLS: disabled');
+}
+
+// ---- Service/Admin bind
+if ($cfg['bind_dn'] !== '') {
+    if (@ldap_bind($ds, $cfg['bind_dn'], $cfg['bind_pw'])) {
+        println("Bind as {$cfg['bind_dn']}", true);
+    } else {
+        println("Bind failed for {$cfg['bind_dn']}: " . ldap_error($ds), false);
+        exit(6);
+    }
+} else {
+    // Anonymous bind
+    if (@ldap_bind($ds)) {
+        println('Anonymous bind', true);
+    } else {
+        println('Anonymous bind failed: ' . ldap_error($ds), false);
+        exit(6);
+    }
+}
+
+// ---- Search user entry
+$filter = sprintf('(%s=%s)', $cfg['uid_attr'], ldap_escape($username, '', LDAP_ESCAPE_FILTER));
+$attrs  = [$cfg['uid_attr'], $cfg['mail_attr'], $cfg['name_attr']];
+$sr = @ldap_search($ds, $cfg['base_dn'], $filter, $attrs);
+if (!$sr) {
+    println("Search failed under base_dn={$cfg['base_dn']} filter={$filter}: " . ldap_error($ds), false);
+    exit(7);
+}
+$entries = @ldap_get_entries($ds, $sr);
+$count = (int)($entries['count'] ?? 0);
+println("Search entries returned: $count", $count > 0);
+
+if ($count < 1) {
+    println('No entry found. Check base_dn, uid_attr, filter, and where the user actually lives.', false, 1);
+    @ldap_unbind($ds);
+    exit(8);
+}
+
+// ---- Print first entry summary
+$dn   = $entries[0]['dn'] ?? '(unknown DN)';
+$name = $entries[0][strtolower($cfg['name_attr'])][0] ?? '(missing name attribute)';
+$mail = $entries[0][strtolower($cfg['mail_attr'])][0] ?? '(missing mail attribute)';
+println("Found DN: $dn", true, 1);
+println("Name: $name", null, 1);
+println("Mail: $mail", null, 1);
+
+// ---- If auth_method=bind, preview candidate DN (no password test here)
+if (strtolower($cfg['auth_method']) === 'bind') {
+    $candidate = str_replace(['[username]', '[USER]', '[uid]'], $username, $cfg['users_dn']);
+    println("auth_method=bind → candidate DN for user-bind: $candidate");
+    println("Note: This script does not attempt the real user password bind.", null, 1);
+}
+
+@ldap_unbind($ds);
+println('Diagnosis finished: basic LDAP connectivity and search are OK.', true);
+exit(0);

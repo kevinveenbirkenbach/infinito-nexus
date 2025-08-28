@@ -1,8 +1,7 @@
 <?php
 /**
  * System plugin that auto-creates a Joomla user after successful LDAP authentication.
- * It reads the LDAP Auth plugin params from #__extensions (folder=authentication, element=ldap),
- * looks up cn/mail for the authenticated uid, and creates a local Joomla user if missing.
+ * Now with structured logging (enable via JOOMLA_LDAP_AUTOCREATE_LOG=1).
  */
 
 defined('_JEXEC') || die;
@@ -10,99 +9,150 @@ defined('_JEXEC') || die;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\User\User;
-use Joomla\Database\DatabaseDriver;
 use Joomla\Authentication\Authentication;
+use Joomla\CMS\Log\Log;
 
 class PlgSystemLdapautocreate extends CMSPlugin
 {
     protected $app;
+    private bool $logEnabled = false;
+
+    public function __construct(&$subject, $config)
+    {
+        parent::__construct($subject, $config);
+
+        // Enable logger only when explicitly requested
+        $this->logEnabled = (bool) filter_var(getenv('JOOMLA_LDAP_AUTOCREATE_LOG') ?: '0', FILTER_VALIDATE_BOOL);
+
+        if ($this->logEnabled) {
+            // Register a dedicated channel and file
+            Log::addLogger(
+                ['text_file' => 'ldapauth.log', 'extension' => 'plg_system_ldapautocreate'],
+                Log::ALL,
+                ['ldapautocreate']
+            );
+            $this->log('logger-initialized', ['version' => '1.0.0']);
+        }
+    }
+
+    private function log(string $event, array $ctx = []): void
+    {
+        if (!$this->logEnabled) {
+            return;
+        }
+        $payload = json_encode(['event' => $event, 'ctx' => $ctx], JSON_UNESCAPED_SLASHES);
+        Log::add($payload, Log::INFO, 'ldapautocreate');
+    }
 
     /**
-     * Runs after authentication handlers; fires for both frontend and backend.
-     * @param array $options Contains 'username' and more after auth
-     * @return void
+     * Fires after authentication handlers; frontend and backend.
+     * @param array $options
+     * @param object $response  ->status, ->type, ->error_message, ->username, etc.
      */
     public function onUserAfterAuthenticate($options, $response)
     {
-        // Only proceed on success
-        if (($response->status ?? null) !== Authentication::STATUS_SUCCESS) {
+        // Defensive: normalize shape
+        $status = $response->status ?? null;
+        $type   = $response->type ?? '(unknown)';
+        $user   = $response->username ?? ($options['username'] ?? null);
+
+        $this->log('after-auth-enter', [
+            'username' => $user,
+            'status'   => $status,
+            'type'     => $type,
+            'error'    => $response->error_message ?? null,
+        ]);
+
+        // Only proceed when LDAP (or any plugin) actually succeeded
+        if ($status !== Authentication::STATUS_SUCCESS) {
+            $this->log('skip-non-success', ['reason' => 'status!=' . Authentication::STATUS_SUCCESS]);
             return;
         }
 
-        $username = $response->username ?? $options['username'] ?? null;
-        if (!$username) {
+        if (!$user) {
+            $this->log('skip-missing-username');
             return;
         }
 
-        /** @var DatabaseDriver $dbo */
+        // If user exists locally, nothing to do
         $dbo = Factory::getDbo();
-
-        // If user already exists locally, nothing to do
-        $exists = (int) $dbo->setQuery(
+        $count = (int) $dbo->setQuery(
             $dbo->getQuery(true)
                 ->select('COUNT(*)')
                 ->from($dbo->quoteName('#__users'))
-                ->where($dbo->quoteName('username') . ' = ' . $dbo->quote($username))
+                ->where($dbo->quoteName('username') . ' = ' . $dbo->quote($user))
         )->loadResult();
 
-        if ($exists) {
+        if ($count > 0) {
+            $this->log('user-exists', ['username' => $user]);
             return;
         }
 
-        // Read LDAP Auth plugin params to connect (the ones we configured via cli-ldap.php)
+        // Read LDAP plugin params (host/port/base_dn/attrs) and fetch cn/mail
         $ldapExt = $dbo->setQuery(
             $dbo->getQuery(true)
                 ->select('*')
                 ->from($dbo->quoteName('#__extensions'))
-                ->where($dbo->quoteName('type') . " = 'plugin'")
-                ->where($dbo->quoteName('folder') . " = 'authentication'")
-                ->where($dbo->quoteName('element') . " = 'ldap'")
+                ->where("type='plugin' AND folder='authentication' AND element='ldap'")
         )->loadObject();
 
         if (!$ldapExt) {
-            return; // LDAP plugin not found; bail out silently
+            $this->log('ldap-plugin-missing');
+            return;
         }
 
         $p = json_decode($ldapExt->params ?: "{}", true) ?: [];
-        $host   = $p['host'] ?? 'openldap';
-        $port   = (int) ($p['port'] ?? 389);
-        $baseDn = $p['base_dn'] ?? '';
-        $bindDn = $p['username'] ?? '';
-        $bindPw = $p['password'] ?? '';
-        $attrUid = $p['ldap_uid'] ?? 'uid';
+        $host     = $p['host'] ?? 'openldap';
+        $port     = (int) ($p['port'] ?? 389);
+        $baseDn   = $p['base_dn'] ?? '';
+        $bindDn   = $p['username'] ?? '';
+        $bindPw   = $p['password'] ?? '';
+        $attrUid  = $p['ldap_uid'] ?? 'uid';
         $attrMail = $p['ldap_email'] ?? 'mail';
         $attrName = $p['ldap_fullname'] ?? 'cn';
 
-        // Look up user in LDAP to fetch name/email
+        $this->log('ldap-params', [
+            'host' => $host, 'port' => $port, 'base_dn' => $baseDn,
+            'attrUid' => $attrUid, 'attrMail' => $attrMail, 'attrName' => $attrName,
+        ]);
+
         $ds = @ldap_connect($host, $port);
-        if (!$ds) { return; }
+        if (!$ds) { $this->log('ldap-connect-failed'); return; }
         ldap_set_option($ds, LDAP_OPT_PROTOCOL_VERSION, 3);
         @ldap_bind($ds, $bindDn, $bindPw);
 
-        $filter = sprintf('(%s=%s)', $attrUid, ldap_escape($username, '', LDAP_ESCAPE_FILTER));
+        $filter = sprintf('(%s=%s)', $attrUid, ldap_escape($user, '', LDAP_ESCAPE_FILTER));
         $sr = @ldap_search($ds, $baseDn, $filter, [$attrName, $attrMail]);
         $entry = $sr ? @ldap_first_entry($ds, $sr) : null;
 
-        $name  = $entry ? (@ldap_get_values($ds, $entry, $attrName)[0] ?? $username) : $username;
-        $email = $entry ? (@ldap_get_values($ds, $entry, $attrMail)[0] ?? ($username.'@example.invalid')) : ($username.'@example.invalid');
+        $name  = $entry ? (@ldap_get_values($ds, $entry, $attrName)[0] ?? $user) : $user;
+        $email = $entry ? (@ldap_get_values($ds, $entry, $attrMail)[0] ?? ($user.'@example.invalid')) : ($user.'@example.invalid');
 
         if ($ds) { @ldap_unbind($ds); }
 
-        // Create Joomla user (Registered group id=2)
+        $this->log('creating-user', ['username' => $user, 'name' => $name, 'email' => $email]);
+
+        // Create Joomla user in Registered (id=2)
         $data = [
             'name'     => $name,
-            'username' => $username,
+            'username' => $user,
             'email'    => $email,
-            // Password is irrelevant for LDAP; set a random one
             'password' => bin2hex(random_bytes(12)),
             'block'    => 0,
             'groups'   => [2],
         ];
 
-        $user = new User;
-        if (!$user->bind($data)) {
+        $joomUser = new User;
+        if (!$joomUser->bind($data)) {
+            $this->log('user-bind-failed', ['error' => 'bind() returned false']);
             return;
         }
-        $user->save();
+
+        if (!$joomUser->save()) {
+            $this->log('user-save-failed', ['error' => 'save() returned false']);
+            return;
+        }
+
+        $this->log('user-created', ['id' => $joomUser->id, 'username' => $user]);
     }
 }

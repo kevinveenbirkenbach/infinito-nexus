@@ -42,3 +42,7 @@ JOOMLA_LDAP_AUTH_METHOD:          "search"     # "bind" or "search"
 JOOMLA_LDAP_USER_SEARCH_STRING:   "{{ JOOMLA_LDAP_UID_ATTR }}=[username]"
 JOOMLA_LDAP_AUT_CRT_HOST_DIR:     "{{ [ docker_compose.directories.volumes, 'ldapautocreate' ] | path_join }}"
 JOOMLA_LDAP_AUT_CRT_DOCK_DIR:     "/var/www/html/plugins/system/ldapautocreate"
+
+# Diagnose
+JOOMLA_LDAP_DIAG_HOST_FILE:       "{{ [ docker_compose.directories.volumes, 'cli-ldap-diagnose.php' ] | path_join }}"
+JOOMLA_LDAP_DIAG_DOCK_FILE:       "/var/www/html/cli/ldap-diagnose.php"

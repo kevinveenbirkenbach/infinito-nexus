@@ -6,7 +6,6 @@
   changed_when: "'configured' in ldap_conf.stdout | lower"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  when: JOOMLA_LDAP_ENABLED | bool
 
 - name: "Register & enable ldapautocreate Joomla system plugin"
   command: >
