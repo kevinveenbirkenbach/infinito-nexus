@@ -4,5 +4,6 @@
     daemon_reload: yes
     enabled: yes
     state: "{{ system_service_state }}"
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  async:  "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:   "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  when:   not (system_service_suppress_flush | bool)
