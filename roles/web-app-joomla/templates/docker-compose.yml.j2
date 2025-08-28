@@ -11,6 +11,9 @@
       - data:/var/www/html
 {% if JOOMLA_LDAP_ENABLED %}
       - {{ JOOMLA_LDAP_CONF_FILE }}:/var/www/html/cli/cli-ldap.php:ro
+{% if JOOMLA_LDAP_AUTO_CREATE_ENABLED | bool %}
+      - {{ JOOMLA_LDAP_AUT_CRT_HOST_DIR }}:{{ JOOMLA_LDAP_AUT_CRT_DOCK_DIR }}:ro
+{% endif %}
 {% endif %}
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"

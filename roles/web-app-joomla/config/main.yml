@@ -1,3 +1,4 @@
+autocreate_users:     true # Autocreate LDAP users on Login
 features:
   matomo:             true
   css:                true
@@ -24,4 +25,4 @@ docker:
       version:  latest
       name:     joomla
   volumes:
-    data:             "joomla_data"
+    data:       "joomla_data"

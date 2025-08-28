@@ -1,0 +1,25 @@
+- name: "Render LDAP CLI helper"
+  template:
+    src: cli-ldap.php.j2
+    dest: "{{ JOOMLA_LDAP_CONF_FILE }}"
+    mode: "0644"
+  when: JOOMLA_LDAP_ENABLED | bool
+  notify: docker compose restart
+
+- block:
+  - name: "Ensure ldapautocreate plugin hostdir exists"
+    file:
+      path: "{{ JOOMLA_LDAP_AUT_CRT_HOST_DIR }}"
+      state: directory
+      mode: "0755"
+
+  - name: "Deploy ldapautocreate plugin files"
+    copy:
+      src: "ldapautocreate.{{ item }}"
+      dest: "{{ [ JOOMLA_LDAP_AUT_CRT_HOST_DIR, 'ldapautocreate.' ~ item ] | path_join }}"
+      mode: "0644"
+    notify: docker compose restart
+    loop:
+      - php
+      - xml
+  when: JOOMLA_LDAP_AUTO_CREATE_ENABLED | bool

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="system" method="upgrade" version="4.0">
+  <name>plg_system_ldapautocreate</name>
+  <author>Infinito.Nexus</author>
+  <version>1.0.0</version>
+  <description>Auto-create Joomla users after successful LDAP authentication.</description>
+  <files>
+    <filename plugin="ldapautocreate">ldapautocreate.php</filename>
+  </files>
+</extension>
