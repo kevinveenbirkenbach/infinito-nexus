@@ -1,7 +1,34 @@
 ---
-- name: "load docker, db and proxy for {{ application_id }}"
-  include_role: 
-    name: cmp-db-docker-proxy
-  loop: "{{ domains }}"
+- name: "Include role srv-domain-provision for {{ application_id }}"
+  include_role:
+    name: srv-domain-provision
+  loop: "{{ JOOMLA_DOMAINS }}"
   loop_control:
     loop_var: domain
+  vars:
+    http_port: "{{ ports.localhost.http[application_id] }}"
+
+- name: "load docker and db for {{ application_id }}"
+  include_role: 
+    name: cmp-db-docker
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: "Render LDAP CLI helper"
+  template:
+    src: cli-ldap.php.j2
+    dest: "{{ JOOMLA_LDAP_CONF_FILE }}"
+    mode: "0644"
+  when: JOOMLA_LDAP_ENABLED | bool
+
+- name: "flush docker compose handlers"
+  meta: flush_handlers
+
+- name: Include install routines
+  include_tasks: "{{ item }}"
+  loop:
+    - 01_install.yml
+    - 02_debug.yml
+    - 03_patch.yml
+    - 04_ldap.yml
+    - 05_assert.yml

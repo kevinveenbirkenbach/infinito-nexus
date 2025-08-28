@@ -1,0 +1,15 @@
+FROM {{ JOOMLA_IMAGE }}:{{ JOOMLA_VERSION }}
+{% if JOOMLA_LDAP_ENABLED %}
+ENV DEBIAN_FRONTEND=noninteractive
+RUN set -eux; \
+    apt-get update; \
+    PHPV="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')" || PHPV=""; \
+    apt-get install -y --no-install-recommends "php${PHPV}-ldap" \
+    || ( \
+      apt-get install -y --no-install-recommends libldap2-dev libsasl2-dev pkg-config; \
+      docker-php-ext-configure ldap --with-ldap=/usr --with-ldap-sasl=/usr \
+        || docker-php-ext-configure ldap --with-ldap=/usr; \
+      docker-php-ext-install -j"$(nproc)" ldap \
+    ); \
+    rm -rf /var/lib/apt/lists/*
+{% endif %}

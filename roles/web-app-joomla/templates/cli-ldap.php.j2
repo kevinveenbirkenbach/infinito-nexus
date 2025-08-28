@@ -1,0 +1,54 @@
+<?php
+// Tiny Joomla CLI to enable + configure Authentication - LDAP plugin.
+// Safe to run multiple times.
+define('_JEXEC', 1);
+if (PHP_SAPI !== 'cli') { fwrite(STDERR, "CLI only\n"); exit(1); }
+
+$root = __DIR__ . '/..';
+require $root . '/includes/defines.php';
+require $root . '/includes/framework.php';
+
+$app = \Joomla\CMS\Factory::getApplication('administrator');
+$dbo = \Joomla\CMS\Factory::getDbo();
+
+// Locate the LDAP plugin row in #__extensions
+$query = $dbo->getQuery(true)
+  ->select('*')
+  ->from($dbo->quoteName('#__extensions'))
+  ->where($dbo->quoteName('type') . ' = ' . $dbo->quote('plugin'))
+  ->where($dbo->quoteName('folder') . ' = ' . $dbo->quote('authentication'))
+  ->where($dbo->quoteName('element') . ' = ' . $dbo->quote('ldap'));
+$dbo->setQuery($query);
+$ext = $dbo->loadObject();
+
+if (!$ext) { fwrite(STDERR, "LDAP plugin not found.\n"); exit(2); }
+
+// Merge desired params
+$desired = [
+  "host"                => getenv('JOOMLA_LDAP_HOST'),
+  "port"                => (int) getenv('JOOMLA_LDAP_PORT'),
+  "basedn"              => getenv('JOOMLA_LDAP_BASE_DN'),
+  "userbasedn"          => getenv('JOOMLA_LDAP_USER_TREE_DN'),
+  "groupbasedn"         => getenv('JOOMLA_LDAP_GROUP_TREE_DN'),
+  "authmethod"          => getenv('JOOMLA_LDAP_AUTH_METHOD'),        // "bind" or "search"
+  "searchstring"        => getenv('JOOMLA_LDAP_USER_SEARCH_STRING'),
+  "username"            => getenv('JOOMLA_LDAP_BIND_DN'),
+  "password"            => getenv('JOOMLA_LDAP_BIND_PASSWORD'),
+  "uid"                 => getenv('JOOMLA_LDAP_UID_ATTR'),
+  "email"               => getenv('JOOMLA_LDAP_EMAIL_ATTR'),
+  "fullname"            => getenv('JOOMLA_LDAP_NAME_ATTR'),
+  "starttls"            => (bool) getenv('JOOMLA_LDAP_USE_STARTTLS'),
+  "ignore_reqcert"      => (bool) getenv('JOOMLA_LDAP_IGNORE_CERT'),
+  "mapfullname"         => (bool) getenv('JOOMLA_LDAP_MAP_FULLNAME'),
+  "mapemail"            => (bool) getenv('JOOMLA_LDAP_MAP_EMAIL'),
+];
+
+$current = json_decode($ext->params ?: "{}", true) ?: [];
+$merged  = array_replace($current, array_filter($desired, fn($v) => $v !== null && $v !== ''));
+
+$ext->params  = json_encode($merged, JSON_UNESCAPED_SLASHES);
+$ext->enabled = {{ JOOMLA_LDAP_ENABLED | ternary(1, 0) }};
+
+$dbo->updateObject('#__extensions', $ext, 'extension_id');
+
+echo "LDAP plugin enabled=". $ext->enabled . " and configured.\n";

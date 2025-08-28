@@ -1,10 +1,17 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-    image: "{{ JOOMLA_IMAGE }}:{{ JOOMLA_VERSION }}"
-    container_name:  "{{ JOOMLA_CONTAINER }}"
+    build:
+      context: {{ docker_compose.directories.instance }}
+      dockerfile: Dockerfile
+    image: "{{ JOOMLA_CUSTOM_IMAGE }}"
+    container_name: {{ JOOMLA_CONTAINER }}
+    pull_policy: never
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - data:/var/www/html
+{% if JOOMLA_LDAP_ENABLED %}
+      - {{ JOOMLA_LDAP_CONF_FILE }}:/var/www/html/cli/cli-ldap.php:ro
+{% endif %}
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}

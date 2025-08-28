@@ -1,0 +1,53 @@
+# Wait until the Joomla core is copied into the volume
+- name: "Wait for Joomla files to exist"
+  command:
+    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", test, -f, /var/www/html/index.php ]
+  register: joomla_files
+  changed_when: false
+  retries: 60
+  delay: 2
+  until: joomla_files.rc == 0
+
+# (Optional) specifically wait for the CLI installer script
+- name: "Check for CLI installer"
+  command:
+    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", test, -f, /var/www/html/installation/joomla.php ]
+  register: has_installer
+  changed_when: false
+  failed_when: false
+
+# Only if not already installed (no configuration.php)
+- name: "Check if Joomla is already installed"
+  command:
+    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", test, -f, "{{ JOOMLA_CONFIG_FILE }}" ]
+  register: joomla_installed
+  changed_when: false
+  failed_when: false
+
+# Install (uses absolute path + argv)
+- name: "Joomla CLI install (first run only)"
+  command:
+    argv:
+      - docker
+      - exec
+      - "{{ JOOMLA_CONTAINER }}"
+      - php
+      - /var/www/html/installation/joomla.php
+      - install
+      - "--db-type={{ JOOMLA_DB_CONNECTOR }}"
+      - "--db-host={{ database_host }}"
+      - "--db-user={{ database_username }}"
+      - "--db-pass={{ database_password }}"
+      - "--db-name={{ database_name }}"
+      - "--admin-user={{ JOOMLA_USER }}"
+      - "--admin-username={{ JOOMLA_USER_NAME }}"
+      - "--admin-password={{ JOOMLA_USER_PASSWORD }}"
+      - "--admin-email={{ JOOMLA_USER_EMAIL }}"
+      - "--no-interaction"
+      - "--site-name={{ JOOMLA_SITE_NAME }}"
+  register: j_install
+  changed_when: j_install.rc == 0
+  failed_when: j_install.rc != 0
+  when:
+    - joomla_installed.rc != 0
+    - has_installer.rc == 0

@@ -4,14 +4,21 @@ features:
   desktop:            true
   central_database:   true
   logout:             true
+  ldap:               true
 server:
   domains:
     canonical:
       - "cms.{{ PRIMARY_DOMAIN }}"
+  csp:
+    flags:
+      style-src:
+        unsafe-inline: true
+      script-src-elem:
+        unsafe-inline: true
 docker:
   services:
     database:
-      enabled: true
+      enabled:  true
     joomla: 
       image:    joomla
       version:  latest
