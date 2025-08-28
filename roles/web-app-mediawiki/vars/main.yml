@@ -5,7 +5,6 @@ container_port:                   80
 
 # Mediawiki
 MEDIAWIKI_SITENAME:               "{{ applications | get_app_conf(application_id, 'sitename') }}"
-MEDIAWIKI_META_NAMESPACE:         "{{ applications | get_app_conf(application_id, 'meta_namespace') }}"
 MEDIAWIKI_URL:                    "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 
 ## Docker
@@ -13,8 +12,6 @@ MEDIAWIKI_VERSION:                "{{ applications | get_app_conf(application_id
 MEDIAWIKI_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.mediawiki.image') }}"
 MEDIAWIKI_CONTAINER:              "{{ applications | get_app_conf(application_id, 'docker.services.mediawiki.name') }}"
 MEDIAWIKI_VOLUME:                 "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-MEDIAWIKI_SETTINGS_HOST_PATH:     "{{ [docker_compose.directories.volumes, 'LocalSettings.php'] | path_join }}"
-MEDIAWIKI_SETTINGS_DOCK_PATH:     "/var/www/html/LocalSettings.php"
 MEDIAWIKI_USER:                   "www-data"
 
 # User

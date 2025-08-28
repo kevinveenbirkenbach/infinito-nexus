@@ -5,7 +5,6 @@
     image: "{{ MEDIAWIKI_IMAGE }}:{{ MEDIAWIKI_VERSION }}"
     volumes:
       - "data:/var/www/html/"
-      - "{{ MEDIAWIKI_SETTINGS_HOST_PATH }}:{{ MEDIAWIKI_SETTINGS_DOCK_PATH }}:ro"
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
