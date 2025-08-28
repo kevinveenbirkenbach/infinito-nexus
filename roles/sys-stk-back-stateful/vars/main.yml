@@ -1,0 +1,1 @@
+DATABASE_VARS_FILE: "{{ playbook_dir }}/roles/sys-svc-rdbms/vars/database.yml"

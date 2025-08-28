@@ -1,7 +1,7 @@
 ---
-- name: "Include role srv-domain-provision for {{ application_id }}"
+- name: "Include role sys-stk-front for {{ application_id }}"
   include_role:
-    name: srv-domain-provision
+    name: sys-stk-front
   loop: "{{ JOOMLA_DOMAINS }}"
   loop_control:
     loop_var: domain
@@ -10,7 +10,7 @@
 
 - name: "load docker and db for {{ application_id }}"
   include_role: 
-    name: cmp-db-docker
+    name: sys-stk-back-stateful
   vars:
     docker_compose_flush_handlers: true
 

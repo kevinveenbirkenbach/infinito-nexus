@@ -16,7 +16,7 @@
 
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
-    name: cmp-docker-proxy
+    name: sys-stk-full-stateless
 
 # Hack because it wasn't possible to fix an handler bug in pkgmgr install
 - name: „Trigger“ docker compose up

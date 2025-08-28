@@ -1,7 +1,7 @@
 ---
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
-    name: cmp-db-docker-proxy
+    name: sys-stk-full-stateful
 
 - name: Check if config.php exists
   command: docker exec --user root {{ moodle_container }} test -f {{ moodle_config }}

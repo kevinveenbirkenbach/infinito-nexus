@@ -2,6 +2,6 @@
 - block:
   - name: "load docker and db for {{ application_id }}"
     include_role: 
-      name: cmp-db-docker
+      name: sys-stk-back-stateful
   - include_tasks: utils/run_once.yml
   when: run_once_web_app_pretix is not defined

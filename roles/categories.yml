@@ -1,9 +1,4 @@
 roles:
-  cmp:
-    title: "Compositions"
-    description: "Composition of other roles."
-    icon: "fas fa-sitemap"
-    invokable: false
   docker:
     title: "Docker Toolkit"
     description: "Generic Docker helpers and utilities (compose wrappers, container tooling)."
@@ -55,6 +50,11 @@ roles:
       title: "DNS Automation"
       description: "DNS providers, records, and rDNS management (Cloudflare, Hetzner, etc.)."
       icon: "fas fa-network-wired"
+      invokable: false
+    stk:
+      title: "Stack"
+      description: "Stack levels to setup the server"
+      icon: "fas fa-bars-staggered"
       invokable: false
   update:
     title: "Updates & Package Management"

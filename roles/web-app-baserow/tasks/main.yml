@@ -1,4 +1,4 @@
 ---
 - name: "For '{{ application_id }}': load docker, db and proxy"
   include_role: 
-    name: cmp-db-docker-proxy
+    name: sys-stk-full-stateful

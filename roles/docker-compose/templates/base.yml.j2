@@ -2,7 +2,7 @@
 services:
 {# Load Database #}
 {% if applications | is_docker_service_enabled(application_id, 'database') %}
-{% include 'roles/cmp-rdbms/templates/services/main.yml.j2' %}
+{% include 'roles/sys-svc-rdbms/templates/services/main.yml.j2' %}
 {% endif %}
 {# Load Redis #}
 {% if applications | is_docker_service_enabled(application_id, 'redis') or applications | get_app_conf(application_id, 'features.oauth2', False) %}

@@ -5,7 +5,7 @@
 
 - name: "load docker and db for {{ application_id }}"
   include_role: 
-    name: cmp-db-docker
+    name: sys-stk-back-stateful
 
 - name: configure {{ domain }}.conf
   template: 

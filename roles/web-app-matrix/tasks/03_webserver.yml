@@ -9,9 +9,9 @@
     src:  "well-known.j2" 
     dest: "{{ MATRIX_WELL_KNOWN_FILE }}"
         
-- name: "include role srv-domain-provision for {{ MATRIX_ELEMENT_DOMAIN }}"
+- name: "include role sys-stk-front for {{ MATRIX_ELEMENT_DOMAIN }}"
   include_role: 
-    name: srv-domain-provision
+    name: sys-stk-front
   vars:        
     domain:     "{{ MATRIX_ELEMENT_DOMAIN }}"
     http_port:  "{{ MATRIX_ELEMENT_PORT }}"

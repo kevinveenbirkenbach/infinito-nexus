@@ -2,7 +2,7 @@
 - block:
   - name: "load docker, proxy for '{{ application_id }}'"
     include_role:
-      name: cmp-docker-proxy
+      name: sys-stk-full-stateless
 
   - name: Create symbolic link from .env file to repository
     file:

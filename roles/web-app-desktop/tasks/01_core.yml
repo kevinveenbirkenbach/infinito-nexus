@@ -7,7 +7,7 @@
 
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
-    name: cmp-docker-proxy
+    name: sys-stk-full-stateless
 
 - name: "Check if host-specific config.yaml exists in {{ DESKTOP_INVENTORY_CONFIG_PATH }}"
   stat:

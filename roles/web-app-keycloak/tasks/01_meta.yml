@@ -5,4 +5,4 @@
     file: "{{ item }}"
   loop:
     - "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"
-    - "{{ playbook_dir }}/roles/cmp-rdbms/vars/database.yml"
+    - "{{ playbook_dir }}/roles/sys-svc-rdbms/vars/database.yml"

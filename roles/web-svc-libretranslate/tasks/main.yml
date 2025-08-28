@@ -1,6 +1,6 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
-    name: cmp-db-docker-proxy
+    name: sys-stk-full-stateful
   when: run_once_web_app_libretranslate is not defined
 
 - name: run the libretranslate tasks once

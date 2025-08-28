@@ -1,4 +1,4 @@
-# Joomla CMS
+# Joomla
 
 ## Description
 

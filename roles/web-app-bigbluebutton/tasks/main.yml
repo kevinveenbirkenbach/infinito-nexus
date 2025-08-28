@@ -11,7 +11,7 @@
 
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
-    name: cmp-docker-proxy
+    name: sys-stk-full-stateless
   vars:
     docker_compose_flush_handlers: false
 - name: "include 04_seed-database-to-backup.yml"

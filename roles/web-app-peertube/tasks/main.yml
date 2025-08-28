@@ -11,7 +11,7 @@
 
 - name: "load docker and db for {{ application_id }}"
   include_role: 
-    name: cmp-db-docker
+    name: sys-stk-back-stateful
 
 - name: "Install and activate auth-openid-connect plugin if OIDC is enabled"
   include_tasks: enable-oidc.yml

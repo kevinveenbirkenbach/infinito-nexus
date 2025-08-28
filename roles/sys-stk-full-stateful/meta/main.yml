@@ -1,0 +1,15 @@
+galaxy_info:
+  author: "Kevin Veen-Birkenbach"
+  description: >
+    Extends sys-stk-back-stateful by adding an HTTP reverse proxy via sys-stk-front.
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
+  license: "Infinito.Nexus NonCommercial License"
+  license_url: "https://s.infinito.nexus/license"
+  galaxy_tags:
+    - docker
+    - database
+    - proxy
+    - compose

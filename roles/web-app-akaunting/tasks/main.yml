@@ -10,7 +10,7 @@
 
 - name: "For '{{ application_id }}': load docker, db and proxy"
   include_role:
-    name: cmp-db-docker-proxy
+    name: sys-stk-full-stateful
   vars:
     # Forward flag into compose templating
     cmp_extra_facts:

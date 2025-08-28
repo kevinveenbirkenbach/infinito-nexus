@@ -2,7 +2,7 @@
 - block:
   - name: "load docker, proxy for '{{ application_id }}'"
     include_role:
-      name: cmp-docker-proxy
+      name: sys-stk-full-stateless
 
   - name: "Copy '{{ application_id }}' files"
     template:

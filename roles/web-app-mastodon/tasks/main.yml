@@ -1,7 +1,7 @@
 ---
 - name: "Include setup for domain '{{ domain }}'"
   include_role: 
-    name: srv-domain-provision
+    name: sys-stk-front
   loop: "{{ domains['web-app-mastodon'] }}"
   loop_control:
     loop_var: domain
@@ -14,7 +14,7 @@
 
 - name: "load docker and db for {{ application_id }}"
   include_role: 
-    name: cmp-db-docker
+    name: sys-stk-back-stateful
   vars:
     docker_compose_flush_handlers: true
 

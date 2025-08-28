@@ -9,7 +9,7 @@ This Ansible role deploys and configures [FusionDirectory](https://www.fusiondir
 - Loads and templating of FusionDirectory-specific variables  
 - Generates a `.env` file for the container environment  
 - Deploys the FusionDirectory container via Docker Compose  
-- Configures NGINX (via the `srv-domain-provision` role) to expose the service  
+- Configures NGINX (via the `sys-stk-front` role) to expose the service  
 - Integrates with your central LDAP server for authentication  
 
 ## Features

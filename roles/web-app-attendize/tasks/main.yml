@@ -11,7 +11,7 @@
 
 - name: "For '{{ application_id }}': load docker and db"
   include_role: 
-    name: cmp-db-docker
+    name: sys-stk-back-stateful
   vars:
     docker_compose_flush_handlers: true 
     

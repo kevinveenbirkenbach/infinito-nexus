@@ -1,6 +1,6 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
-    name: cmp-db-docker-proxy
+    name: sys-stk-full-stateful
 
 - name: "Patch Matomo config.ini.php"
   include_tasks: 02_configuration.yml
