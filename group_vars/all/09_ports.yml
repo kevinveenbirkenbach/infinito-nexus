@@ -26,7 +26,7 @@ ports:
       web-app-gitea: 8002
       web-app-wordpress: 8003
       web-app-mediawiki: 8004
-      web-app-mybb: 8005
+      # Free: 8005
       web-app-yourls: 8006
       web-app-mailu: 8007
       web-app-elk: 8008

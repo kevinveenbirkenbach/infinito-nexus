@@ -1,8 +1,0 @@
-credentials:  
-  secret_pin:
-    description: >
-      Optional secret PIN required for accessing the MyBB Admin Control Panel.
-      If set, administrators must enter this PIN in addition to their username
-      and password when logging into the ACP.
-    algorithm: "sha256"
-    validation: "^[a-f0-9]{64}$"

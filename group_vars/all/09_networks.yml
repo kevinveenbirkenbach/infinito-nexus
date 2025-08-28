@@ -48,8 +48,8 @@ defaults_networks:
       subnet:       192.168.102.16/28
     web-app-moodle:
       subnet: 192.168.102.32/28
-    web-app-mybb:
-      subnet: 192.168.102.48/28
+    # Free:
+    #  subnet: 192.168.102.48/28
     web-app-nextcloud:
       subnet: 192.168.102.64/28
     web-app-openproject:
