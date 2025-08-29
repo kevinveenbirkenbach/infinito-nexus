@@ -1,0 +1,27 @@
+- name: "Remove require_once line from LocalSettings.php (if present)"
+  shell: |
+    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
+      LSP={{ MEDIAWIKI_HTML_DIR }}/LocalSettings.php
+      if [ -f "$LSP" ]; then
+        if grep -Fqx -- "require_once __DIR__ . '\''/debug.php'\'';" "$LSP"; then
+          sed -i "\#require_once __DIR__ . '/debug.php';#d" "$LSP"
+          echo REMOVED_REQUIRE
+        fi
+      fi
+    '
+  args: { executable: /bin/bash }
+  register: _dbg_rm_req
+  changed_when: "'REMOVED_REQUIRE' in (_dbg_rm_req.stdout | default(''))"
+
+- name: "Remove debug.php from container (if present)"
+  shell: >
+    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc
+    "if [ -f {{ MEDIAWIKI_HTML_DIR }}/debug.php ]; then rm -f {{ MEDIAWIKI_HTML_DIR }}/debug.php; echo REMOVED_FILE; fi"
+  args: { executable: /bin/bash }
+  register: _dbg_rm_file
+  changed_when: "'REMOVED_FILE' in (_dbg_rm_file.stdout | default(''))"
+
+- name: "Remove local debug.php (if present)"
+  file:
+    path: "{{ MEDIAWIKI_CONFIG_DIR }}/debug.php"
+    state: absent

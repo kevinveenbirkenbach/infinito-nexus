@@ -3,9 +3,9 @@
 wfLoadExtension( 'PluggableAuth' );
 wfLoadExtension( 'OpenIDConnect' );
 
-$wgPluggableAuth_EnableAutoLogin = false;   // don’t auto-redirect to IdP
-$wgPluggableAuth_EnableLocalLogin = true;   // keep local user/pass login
-$wgPluggableAuth_ButtonLabelMessage = '{{ MEDIAWIKI_OIDC_BUTTON_TEXT }}';
+$wgPluggableAuth_EnableAutoLogin = true;   // don’t auto-redirect to IdP
+$wgPluggableAuth_EnableLocalLogin = false;   // keep local user/pass login
+$wgPluggableAuth_ButtonLabel = '{{ MEDIAWIKI_OIDC_BUTTON_TEXT }}';
 
 // PluggableAuth expects a list of providers (numeric array) on REL1_44
 $wgPluggableAuth_Config = [
