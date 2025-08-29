@@ -18,10 +18,10 @@
     group: root
   notify: reload sysctl configuration
 
-- name: create /etc/wireguard/wg0.{{ SOFTWARE_NAME | lower }}.conf
+- name: "deploy {{ WG0_CONF_DEST }}"
   copy:
-    src: "{{ inventory_dir }}/files/{{ inventory_hostname }}/etc/wireguard/wg0.conf"
-    dest: /etc/wireguard/wg0.{{ SOFTWARE_NAME | lower }}.conf
-    owner: root
-    group: root
+    src:    "{{ [inventory_dir, 'files', inventory_hostname, 'etc/wireguard/wg0.conf' ] | path_join }}"
+    dest:   "{{ WG0_CONF_DEST }}"
+    owner:  root
+    group:  root
   notify: restart wireguard
