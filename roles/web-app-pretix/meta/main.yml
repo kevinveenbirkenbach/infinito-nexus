@@ -2,7 +2,7 @@
 ---
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
-  description: "Deploys Pretix ticketing system via Docker Compose with basic service orchestration."
+  description: "Pretix is an open-source ticketing system for events, enabling online sales, registration management, custom ticket layouts, and secure payment integration. It is self-hosted to ensure full control and data protection."
   license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: | 
@@ -14,7 +14,7 @@ galaxy_info:
   issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://s.infinito.nexus/code/"
   logo:
-    class: ""
+    class: "fas fa-ticket"
   run_after:
     - web-app-matomo
     - web-app-keycloak
