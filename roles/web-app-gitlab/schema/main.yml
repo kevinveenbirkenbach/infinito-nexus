@@ -1,5 +1,0 @@
-credentials:
-  initial_root_password:
-    description: "Initial password for the GitLab root user"
-    algorithm: "sha256"
-    validation: "^[a-f0-9]{64}$"

@@ -1,5 +1,69 @@
+# General
 application_id:               "web-app-gitlab"
 database_type:                "postgres"
-gitlab_initial_root_password: "{{ applications | get_app_conf(application_id, 'credentials.initial_root_password') }}"
-gitlab_version:               "{{ applications | get_app_conf(application_id, 'docker.services.gitlab.version', True) }}"
-gitlab_image:                 "{{ applications | get_app_conf(application_id, 'docker.services.gitlab.image', True) }}"
+
+# GitLab
+GITLAB_URL:                 "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+GITLAB_HOSTNAME:            "{{ domains | get_domain(application_id) }}"
+
+## OIDC
+GITLAB_OIDC_ENABLED:        "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+GITLAB_OIDC_LABEL:          "{{ OIDC.BUTTON_TEXT }}"
+GITLAB_OIDC_UID_FIELD:      "{{ OIDC.ATTRIBUTES.USERNAME }}"
+GITLAB_OIDC_CLIENT_ID:      "{{ OIDC.CLIENT.ID }}"
+GITLAB_OIDC_CLIENT_SECRET:  "{{ OIDC.CLIENT.SECRET }}"
+GITLAB_OIDC_ISSUER:         "{{ OIDC.CLIENT.ISSUER_URL }}"
+GITLAB_OIDC_REDIRECT_URI:   "{{ GITLAB_URL }}/users/auth/openid_connect/callback"
+
+## Docker
+GITLAB_INIT_ROOT_PASSWORD:  "{{ users.administrator.password }}"
+GITLAB_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.gitlab.version') }}"
+GITLAB_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.gitlab.image') }}"
+GITLAB_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.gitlab.name') }}"
+GITLAB_CONF_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"
+GITLAB_LOGS_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.logs') }}"
+GITLAB_DATA_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+
+## Configuration
+GITLAB_OMNIBUS_BASE:
+  - "external_url '{{ GITLAB_URL }}'"
+  - "postgresql['enable']=false"
+  - "gitlab_rails['gitlab_shell_ssh_port']={{ ports.public.ssh[application_id] }}"
+  - "gitlab_rails['db_adapter']='postgresql'"
+  - "gitlab_rails['db_encoding']='utf8'"
+  - "gitlab_rails['db_host']='{{ database_host }}'"
+  - "gitlab_rails['db_port']='{{ database_port }}'"
+  - "gitlab_rails['db_username']='{{ database_username }}'"
+  - "gitlab_rails['db_password']='{{ database_password }}'"
+  - "gitlab_rails['db_database']='{{ database_name }}'"
+  - "nginx['listen_port']=80"
+  - "nginx['listen_https']=false"
+  - ""
+  - "gitlab_rails['initial_root_password']='{{ GITLAB_INIT_ROOT_PASSWORD }}'"
+  - ""
+  - "redis['enable']=false"
+  - "gitlab_rails['redis_host']='redis'"
+  - "gitlab_rails['redis_port']='6379'"
+
+GITLAB_OMNIBUS_OIDC:
+  - ""
+  - "gitlab_rails['omniauth_enabled']=true"
+  - "gitlab_rails['omniauth_allow_single_sign_on']=['openid_connect']"
+  - "gitlab_rails['omniauth_block_auto_created_users']=false"
+  - "gitlab_rails['omniauth_auto_link_user']=['openid_connect']"
+  - "gitlab_rails['omniauth_providers']=[{ name: 'openid_connect', label: '{{ GITLAB_OIDC_LABEL | replace(\"'\",\"\\\\'\") }}', args: {"
+  - "  name: 'openid_connect',"
+  - "  scope: ['openid','profile','email'],"
+  - "  response_type: 'code',"
+  - "  issuer: '{{ GITLAB_OIDC_ISSUER | replace(\"'\",\"\\\\'\") }}',"
+  - "  discovery: true,"
+  - "  uid_field: '{{ GITLAB_OIDC_UID_FIELD | replace(\"'\",\"\\\\'\") }}',"
+  - "  pkce: true,"
+  - "  client_options: {"
+  - "    identifier: '{{ GITLAB_OIDC_CLIENT_ID | replace(\"'\",\"\\\\'\") }}',"
+  - "    secret: '{{ GITLAB_OIDC_CLIENT_SECRET | replace(\"'\",\"\\\\'\") }}',"
+  - "    redirect_uri: '{{ GITLAB_OIDC_REDIRECT_URI | replace(\"'\",\"\\\\'\") }}'"
+  - "  }"
+  - "} }]"
+
+GITLAB_OMNIBUS_ALL: "{{ GITLAB_OMNIBUS_BASE + (GITLAB_OMNIBUS_OIDC if GITLAB_OIDC_ENABLED else []) }}"

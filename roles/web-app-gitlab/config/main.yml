@@ -1,20 +1,24 @@
 features:
-  matomo:             true
-  css:                true
-  desktop:            true
-  central_database:   true
-  logout:             true
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
+  logout:           true
+  oidc:             true 
 docker:
   services:
     redis:
-      enabled: true
+      enabled:      true
     database: 
-      enabled: true
-    gitlab: 
-      image:    "gitlab/gitlab-ee"
-      version:  "latest"
-credentials:
-  initial_root_password: "{{ users.administrator.password }}"
+      enabled:      true
+    gitlab:
+      image:        "gitlab/gitlab-ee"
+      version:      "latest"
+      name:         "gitlab"
+  volumes:
+    data:           "gitlab_data"
+    logs:           "gitlab_logs"
+    config:         "gitlab_config"
 server:
   domains:
     canonical:

@@ -1,8 +1,9 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   web:
-    image: "{{ gitlab_image }}:{{ gitlab_version }}"
-    hostname: '{{ domains | get_domain(application_id) }}'
+    image: "{{ GITLAB_IMAGE }}:{{ GITLAB_VERSION }}"
+    hostname: '{{ GITLAB_HOSTNAME }}'
+    container_name:  "{{ GITLAB_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
@@ -17,7 +18,10 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   config:
+    name: {{ GITLAB_CONF_VOLUME }}
   logs:
+    name: {{ GITLAB_LOGS_VOLUME }}
   data:
+    name: {{ GITLAB_DATA_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
