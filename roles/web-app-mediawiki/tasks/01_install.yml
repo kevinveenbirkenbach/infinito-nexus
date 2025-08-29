@@ -1,0 +1,44 @@
+- name: "Wait for DB to be reachable"
+  command: >
+    docker exec {{ MEDIAWIKI_CONTAINER }}
+    php /var/www/html/maintenance/sql.php --query "SELECT 1;"
+  register: mw_db_ready
+  retries: 15
+  delay: 2
+  until: mw_db_ready.rc == 0
+  changed_when: false
+  failed_when: false
+
+- name: "Install MediaWiki if no schema exists"
+  command: >
+    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }}
+    php /var/www/html/maintenance/install.php
+    --dbname="{{ database_name }}"
+    --dbuser="{{ database_username }}"
+    --dbpass="{{ database_password }}"
+    --dbserver="{{ database_host }}:{{ database_port }}"
+    --installdbuser="{{ database_username }}"
+    --installdbpass="{{ database_password }}"
+    --server="{{ MEDIAWIKI_URL }}"
+    --scriptpath=""
+    --lang={{ HOST_LL }}
+    --pass="{{ MEDIAWIKI_ADMINISTRATOR_PASSWORD }}"
+    "{{ MEDIAWIKI_SITENAME }}"
+    "{{ MEDIAWIKI_ADMINISTRATOR_NAME }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  register: mw_install
+  changed_when: mw_install.rc == 0
+  failed_when: >
+    mw_install.rc != 0 and
+    ('LocalSettings.php file has been detected' not in (((mw_install.stdout | default('')) ~ (mw_install.stderr | default(''))))) and
+    ('run update.php instead' not in (((mw_install.stdout | default('')) ~ (mw_install.stderr | default('')))))
+
+- name: "Initialize / migrate MediaWiki database schema"
+  command: >
+    docker exec
+    -u {{ MEDIAWIKI_USER }}
+    {{ MEDIAWIKI_CONTAINER }}
+    php /var/www/html/maintenance/update.php --quick
+  register: mw_update
+  changed_when: "'...done.' in (mw_update.stdout | default(''))"
+  failed_when: mw_update.rc != 0

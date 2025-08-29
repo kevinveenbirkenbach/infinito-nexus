@@ -1,0 +1,61 @@
+---
+# All operations remain INSIDE the running container.
+# Template is rendered into docker_compose.directories.config on the host.
+# Change detection is based on checksum comparison vs. container file.
+
+- name: "OIDC | Ensure local config directory exists"
+  file:
+    path: "{{ MEDIAWIKI_CONFIG_DIR }}"
+    state: directory
+    mode: "0755"
+
+- name: "OIDC | Render oidc.php locally (template into config dir)"
+  template:
+    src: "oidc.php.j2"
+    dest: "{{ MEDIAWIKI_OIDC_FILE }}"
+    mode: "0644"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "OIDC | Compute local checksum"
+  stat:
+    path: "{{ MEDIAWIKI_OIDC_FILE }}"
+    checksum_algorithm: sha256
+  register: _local_oidc
+
+- name: "OIDC | Compute container checksum (if exists)"
+  shell: >
+    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc
+    "test -f {{ MEDIAWIKI_HTML_DIR }}/oidc.php &&
+     sha256sum {{ MEDIAWIKI_HTML_DIR }}/oidc.php | awk '{print $1}' || echo MISSING"
+  args:
+    executable: /bin/bash
+  register: _remote_oidc
+  changed_when: false
+
+- name: "OIDC | Copy oidc.php into container docroot only if different"
+  shell: >
+    if [ "{{ (_remote_oidc.stdout | default('') | trim) }}" != "{{ _local_oidc.stat.checksum }}" ]; then
+      docker cp "{{ MEDIAWIKI_OIDC_FILE }}" "{{ MEDIAWIKI_CONTAINER }}:{{ MEDIAWIKI_HTML_DIR }}/oidc.php" &&
+      docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc "chown {{ MEDIAWIKI_USER }}:{{ MEDIAWIKI_USER }} {{ MEDIAWIKI_HTML_DIR }}/oidc.php && chmod 0644 {{ MEDIAWIKI_HTML_DIR }}/oidc.php" &&
+      echo COPIED;
+    fi
+  args:
+    executable: /bin/bash
+  register: _cp_oidc
+  changed_when: "'COPIED' in (_cp_oidc.stdout | default(''))"
+
+- name: "OIDC | Require oidc.php once inside LocalSettings.php"
+  shell: |
+    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
+      LSP={{ MEDIAWIKI_HTML_DIR }}/LocalSettings.php
+      LINE="require_once __DIR__ . '\''/oidc.php'\'';"
+      if ! grep -Fqx -- "$LINE" "$LSP"; then
+        printf "%s\n" "$LINE" >> "$LSP"
+        echo ADDED_REQUIRE
+      fi
+    '
+  args:
+    executable: /bin/bash
+  register: _mw_oidc_req
+  changed_when: "'ADDED_REQUIRE' in (_mw_oidc_req.stdout | default(''))"
+

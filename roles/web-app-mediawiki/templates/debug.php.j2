@@ -1,0 +1,21 @@
+<?php
+
+$wgShowExceptionDetails   = true;
+$wgShowDBErrorBacktrace   = true;
+$wgShowSQLErrors          = true;
+$wgDevelopmentWarnings    = true;
+
+@ini_set('display_errors', '1');
+@ini_set('display_startup_errors', '1');
+@ini_set('log_errors', '1');
+@ini_set('error_log', '/proc/self/fd/2');
+
+$wgDebugLogGroups = array_merge($wgDebugLogGroups ?? [], [
+    'exception'       => 'php://stderr',
+    'error'           => 'php://stderr',
+    'authentication'  => 'php://stderr',
+    'session'         => 'php://stderr',
+    'resourceloader'  => 'php://stderr',
+    'PluggableAuth'   => 'php://stderr',
+    'OpenIDConnect'   => 'php://stderr',
+]);

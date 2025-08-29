@@ -1,0 +1,147 @@
+---
+# Install PluggableAuth + OpenIDConnect INTO the running container (idempotent)
+# Downloads on host (config dir), copy+extract inside container.
+
+- name: "EXT | Ensure local download dir exists"
+  file:
+    path: "{{ MEDIAWIKI_EXT_CFG_BASE }}"
+    state: directory
+    mode: "0755"
+
+- name: "EXT | Download extension tarballs ({{ MEDIAWIKI_EXT_BRANCH }})"
+  get_url:
+    url: "{{ ext.url }}"
+    dest: "{{ MEDIAWIKI_EXT_CFG_BASE }}/{{ ext.name }}.tar.gz"
+    mode: "0644"
+  loop: "{{ MEDIAWIKI_EXT_LIST }}"
+  loop_control:
+    loop_var: ext
+    label: "{{ ext.name }}"
+
+- name: "EXT | Copy & extract into container if not installed"
+  shell: >
+    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
+      set -e
+      dst="{{ MEDIAWIKI_HTML_DIR }}/extensions/{{ ext.name }}"
+      if [ ! -f "$dst/extension.json" ]; then
+        rm -rf "$dst" && mkdir -p "$dst"
+      fi
+    '
+    && docker cp "{{ MEDIAWIKI_EXT_CFG_BASE }}/{{ ext.name }}.tar.gz" "{{ MEDIAWIKI_CONTAINER }}:/tmp/{{ ext.name }}.tar.gz"
+    && docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
+      set -e
+      dst="{{ MEDIAWIKI_HTML_DIR }}/extensions/{{ ext.name }}"
+      if [ ! -f "$dst/extension.json" ]; then
+        tar -xzf /tmp/{{ ext.name }}.tar.gz -C "$dst" --strip-components=1
+        chown -R {{ MEDIAWIKI_USER }}:{{ MEDIAWIKI_USER }} "$dst"
+        rm -f /tmp/{{ ext.name }}.tar.gz
+        echo INSTALLED:{{ ext.name }}
+      else
+        rm -f /tmp/{{ ext.name }}.tar.gz
+        echo PRESENT:{{ ext.name }}
+      fi
+    '
+  args:
+    executable: /bin/bash
+  loop: "{{ MEDIAWIKI_EXT_LIST }}"
+  loop_control:
+    loop_var: ext
+    label: "{{ ext.name }}"
+  register: _install_results
+  changed_when: "'INSTALLED:' in (stdout | default(''))"
+
+- name: "EXT | Determine if any extension was installed"
+  set_fact:
+    _any_installed: >-
+      {{ _install_results.results
+         | map(attribute='stdout')
+         | select('search', 'INSTALLED:')
+         | list | length > 0 }}
+
+# Ensure unzip + git are available in the container (idempotent)
+- name: "EXT | Ensure unzip+git available in container"
+  shell: |
+    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
+      set -e
+      need=0
+      command -v unzip >/dev/null 2>&1 || need=1
+      command -v git   >/dev/null 2>&1 || need=1
+      if [ "$need" -eq 1 ]; then
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -y
+        apt-get install -y --no-install-recommends unzip git ca-certificates
+        rm -rf /var/lib/apt/lists/*
+        echo INSTALLED_TOOLS
+      fi
+    '
+  args:
+    executable: /bin/bash
+  register: _tools
+  changed_when: "'INSTALLED_TOOLS' in (_tools.stdout | default(''))"
+
+# Ensure Composer is available inside the container (idempotent)
+- name: "EXT | Ensure Composer available in container"
+  shell: |
+    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
+      if ! command -v composer >/dev/null 2>&1; then
+        php -r "copy(\"https://getcomposer.org/installer\", \"composer-setup.php\");"
+        php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+        rm -f composer-setup.php
+        echo INSTALLED_COMPOSER
+      fi
+    '
+  args:
+    executable: /bin/bash
+  register: _composer
+  changed_when: "'INSTALLED_COMPOSER' in (_composer.stdout | default(''))"
+
+# Install dependencies per extension (only if vendor is missing)
+# Use /tmp/composer for HOME/CACHE to avoid /var/www permission issues.
+- name: "EXT | composer install in each extension when needed"
+  shell: |
+    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
+      set -e
+      d="{{ MEDIAWIKI_HTML_DIR }}/extensions/{{ ext.name }}"
+      if [ -f "$d/composer.json" ] && [ ! -f "$d/vendor/autoload.php" ]; then
+        install -d -m 0775 /tmp/composer/cache
+        export COMPOSER_HOME=/tmp/composer
+        export COMPOSER_CACHE_DIR=/tmp/composer/cache
+        cd "$d"
+        composer install --no-dev -n --prefer-dist
+        echo COMPOSER_INSTALLED:{{ ext.name }}
+      fi
+    '
+  args:
+    executable: /bin/bash
+  loop: "{{ MEDIAWIKI_EXT_LIST }}"
+  loop_control:
+    loop_var: ext
+    label: "{{ ext.name }}"
+  register: _ext_composer
+  changed_when: "'COMPOSER_INSTALLED:' in (stdout | default(''))"
+
+# Sanity check: Jumbojett OIDC client must be loadable
+- name: "EXT | Sanity check: Jumbojett OpenIDConnect client present"
+  shell: >
+    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc
+    'php -r "(@require \"{{ MEDIAWIKI_HTML_DIR }}/vendor/autoload.php\"); @require \"{{ MEDIAWIKI_HTML_DIR }}/extensions/OpenIDConnect/vendor/autoload.php\"; exit(class_exists(\"Jumbojett\\\\OpenIDConnectClient\")?0:1);"'
+  args:
+    executable: /bin/bash
+  register: _oidc_class
+  changed_when: false
+  failed_when: _oidc_class.rc != 0
+
+# Run MediaWiki updates (changed if something installed)
+- name: "EXT | Run update.php (safe to run repeatedly)"
+  shell: >
+    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }}
+    php {{ MEDIAWIKI_HTML_DIR }}/maintenance/update.php --quick
+  args:
+    executable: /bin/bash
+  register: _mw_upd
+  changed_when: >
+    (_any_installed) or
+    (_ext_composer is defined and
+     (_ext_composer.results | map(attribute='stdout')
+                            | select('search','COMPOSER_INSTALLED:')
+                            | list | length > 0))

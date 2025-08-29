@@ -1,0 +1,45 @@
+- name: "Render debug.php locally"
+  template:
+    src: "debug.php.j2"
+    dest: "{{ MEDIAWIKI_CONFIG_DIR }}/debug.php"
+    mode: "0644"
+
+- name: "Compute local checksum"
+  stat:
+    path: "{{ MEDIAWIKI_CONFIG_DIR }}/debug.php"
+    checksum_algorithm: sha256
+  register: _dbg_local
+
+- name: "Compute container checksum (if exists)"
+  shell: >
+    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc
+    "test -f {{ MEDIAWIKI_HTML_DIR }}/debug.php &&
+      sha256sum {{ MEDIAWIKI_HTML_DIR }}/debug.php | awk '{print $1}' || echo MISSING"
+  args: { executable: /bin/bash }
+  register: _dbg_remote
+  changed_when: false
+
+- name: "Copy debug.php into container only if different"
+  shell: >
+    if [ "{{ (_dbg_remote.stdout | default('') | trim) }}" != "{{ _dbg_local.stat.checksum }}" ]; then
+      docker cp "{{ MEDIAWIKI_CONFIG_DIR }}/debug.php" "{{ MEDIAWIKI_CONTAINER }}:{{ MEDIAWIKI_HTML_DIR }}/debug.php" &&
+      docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc "chown {{ MEDIAWIKI_USER }}:{{ MEDIAWIKI_USER }} {{ MEDIAWIKI_HTML_DIR }}/debug.php && chmod 0644 {{ MEDIAWIKI_HTML_DIR }}/debug.php" &&
+      echo COPIED;
+    fi
+  args: { executable: /bin/bash }
+  register: _dbg_cp
+  changed_when: "'COPIED' in (_dbg_cp.stdout | default(''))"
+
+- name: "require_once debug.php in LocalSettings.php"
+  shell: |
+    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
+      LSP={{ MEDIAWIKI_HTML_DIR }}/LocalSettings.php
+      LINE="require_once __DIR__ . '\''/debug.php'\'';"
+      if ! grep -Fqx -- "$LINE" "$LSP"; then
+        printf "%s\n" "$LINE" >> "$LSP"
+        echo ADDED_DEBUG_REQUIRE
+      fi
+    '
+  args: { executable: /bin/bash }
+  register: _dbg_req
+  changed_when: "'ADDED_DEBUG_REQUIRE' in (_dbg_req.stdout | default(''))"

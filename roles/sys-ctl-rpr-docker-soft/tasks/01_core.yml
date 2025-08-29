@@ -12,4 +12,3 @@
     system_service_tpl_exec_start_pre:  "/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP| join(' ') }} {{ SYS_SERVICE_REPAIR_DOCKER_SOFT }} --timeout '{{ SYS_TIMEOUT_HEAL_DOCKER }}'"
     system_service_tpl_exec_start: >
       /bin/sh -c '{{ system_service_script_exec }} --manipulation-string "{{ SYS_SERVICE_GROUP_MANIPULATION | join(" ") }}" {{ PATH_DOCKER_COMPOSE_INSTANCES }}'
-

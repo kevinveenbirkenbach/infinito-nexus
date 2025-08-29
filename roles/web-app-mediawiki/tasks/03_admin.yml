@@ -1,0 +1,19 @@
+- name: "Create MediaWiki admin user"
+  command: >
+    docker exec
+    -u {{ MEDIAWIKI_USER }}
+    {{ MEDIAWIKI_CONTAINER }}
+    php /var/www/html/maintenance/createAndPromote.php
+    --bureaucrat --sysop
+    {{ MEDIAWIKI_ADMINISTRATOR_NAME }}
+    {{ MEDIAWIKI_ADMINISTRATOR_PASSWORD }}
+    {{ MEDIAWIKI_ADMINISTRATOR_EMAIL }}
+  register: create_admin
+  changed_when: >
+    ('created' in ((create_admin.stdout | default('')) ~ (create_admin.stderr | default('')))) or
+    ('Created' in ((create_admin.stdout | default('')) ~ (create_admin.stderr | default(''))))
+  failed_when: >
+    create_admin.rc != 0 and
+    ('already exists' not in ((create_admin.stdout | default('')) ~ (create_admin.stderr | default('')))) and
+    ('Account exists' not in ((create_admin.stdout | default('')) ~ (create_admin.stderr | default(''))))
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

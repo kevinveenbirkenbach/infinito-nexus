@@ -16,7 +16,7 @@ const KC_CONFIG = {
   silentCheckSsoRedirectUri: window.location.origin + "{{ DESKTOP_LOCATION_SILENT_CHECK }}"
 };
 
-const DEBUG = {{ 'true' if MODE_DEBUG | default(false) else 'false' }};
+const DEBUG = {{ 'true' if MODE_DEBUG else 'false' }};
 
 /* ==============================================
    2) Helpers for menu manipulation

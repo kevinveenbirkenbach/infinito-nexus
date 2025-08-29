@@ -7,6 +7,11 @@ container_port:                   80
 MEDIAWIKI_SITENAME:               "{{ applications | get_app_conf(application_id, 'sitename') }}"
 MEDIAWIKI_URL:                    "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 
+## Folders
+MEDIAWIKI_HTML_DIR:               "/var/www/html"
+MEDIAWIKI_CONFIG_DIR:             "{{ docker_compose.directories.config }}"
+MEDIAWIKI_OIDC_FILE:              "{{ docker_compose.directories.config }}/oidc.php"
+
 ## Docker
 MEDIAWIKI_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.mediawiki.version') }}"
 MEDIAWIKI_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.mediawiki.image') }}"
@@ -18,3 +23,19 @@ MEDIAWIKI_USER:                   "www-data"
 MEDIAWIKI_ADMINISTRATOR_NAME:     "{{ users.administrator.username }}"
 MEDIAWIKI_ADMINISTRATOR_PASSWORD: "{{ users.administrator.password }}"
 MEDIAWIKI_ADMINISTRATOR_EMAIL:    "{{ users.administrator.email }}"
+
+# OIDC
+MEDIAWIKI_OIDC_ENABLED:           "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+MEDIAWIKI_OIDC_CLIENT_ID:         "{{ OIDC.CLIENT.ID }}"
+MEDIAWIKI_OIDC_CLIENT_SECRET:     "{{ OIDC.CLIENT.SECRET }}"
+MEDIAWIKI_OIDC_ISSUER:            "{{ OIDC.CLIENT.ISSUER_URL }}"
+MEDIAWIKI_OIDC_BUTTON_TEXT:       "{{ OIDC.BUTTON_TEXT }}"
+
+# Extensions
+MEDIAWIKI_EXT_BRANCH:   "REL1_44"                                   # passend zu MediaWiki 1.44
+MEDIAWIKI_EXT_CFG_BASE: "{{ MEDIAWIKI_CONFIG_DIR }}/mwext/{{ MEDIAWIKI_EXT_BRANCH }}"
+MEDIAWIKI_EXT_LIST:
+  - name: "PluggableAuth"
+    url: "https://codeload.github.com/wikimedia/mediawiki-extensions-PluggableAuth/tar.gz/refs/heads/{{ MEDIAWIKI_EXT_BRANCH }}"
+  - name: "OpenIDConnect"
+    url: "https://codeload.github.com/wikimedia/mediawiki-extensions-OpenIDConnect/tar.gz/refs/heads/{{ MEDIAWIKI_EXT_BRANCH }}"

@@ -1,5 +1,4 @@
 sitename:       "Wiki on {{ PRIMARY_DOMAIN | upper }}"
-meta_namespace: "Meta"
 server:
   domains:
     canonical:
@@ -21,3 +20,4 @@ features:
   central_database: true
   css:              true
   desktop:          true
+  oidc:             true

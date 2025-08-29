@@ -4,9 +4,9 @@
       - docker
       - exec
       - -e
-      - "J_MODE_DEBUG={{ MODE_DEBUG | default(false) | bool | ternary('1','0') }}"
+      - "J_MODE_DEBUG={{ MODE_DEBUG | bool | ternary('1','0') }}"
       - -e
-      - "J_ERR_LEVEL={{ MODE_DEBUG | default(false) | bool | ternary('maximum','default') }}"
+      - "J_ERR_LEVEL={{ MODE_DEBUG | bool | ternary('maximum','default') }}"
       - "{{ JOOMLA_CONTAINER }}"
       - php
       - -r
