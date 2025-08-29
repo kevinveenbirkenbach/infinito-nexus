@@ -15,5 +15,8 @@ galaxy_info:
   documentation: "https://s.infinito.nexus/code/"
   logo:
     class: ""
-  run_after: []
+  run_after:
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
 dependencies: []
