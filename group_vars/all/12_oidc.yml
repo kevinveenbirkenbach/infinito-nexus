@@ -25,7 +25,7 @@ defaults_oidc:
   URL:                    "{{ _oidc_url }}"
   CLIENT:
     ID:                   "{{ _oidc_client_id }}"                                                 # Client identifier, typically matching your primary domain
-#   secret:                                                                                       # Client secret for authenticating with the OIDC provider (set in the inventory file). Recommend greater then 32 characters
+#   SECRET:                                                                                       # Client secret for authenticating with the OIDC provider (set in the inventory file). Recommend greater then 32 characters
     REALM:                "{{ _oidc_client_realm }}"                                              # The realm to which the client belongs in the OIDC provider
     ISSUER_URL:           "{{ _oidc_client_issuer_url }}"                                         # Base URL of the OIDC provider (issuer)
     DISCOVERY_DOCUMENT:   "{{ _oidc_client_issuer_url ~ '/.well-known/openid-configuration' }}"   # URL for fetching the provider's configuration details
