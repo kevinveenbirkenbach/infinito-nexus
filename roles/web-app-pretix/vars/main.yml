@@ -1,2 +1,30 @@
-application_id: web-app-pretix # ID of the application
-database_type:  0                    # Database type [postgres, mariadb]
+application_id:                 "web-app-pretix"
+database_type:                  "postgres"
+container_port:                 80
+
+# URLs
+PRETIX_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+PRETIX_HOSTNAME:                "{{ domains | get_domain(application_id) }}"
+
+# OIDC (mirrors GitLab’s pattern)
+PRETIX_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+PRETIX_OIDC_LABEL:              "{{ OIDC.BUTTON_TEXT }}"
+PRETIX_OIDC_CLIENT_ID:          "{{ OIDC.CLIENT.ID }}"
+PRETIX_OIDC_CLIENT_SECRET:      "{{ OIDC.CLIENT.SECRET }}"
+PRETIX_OIDC_ISSUER:             "{{ OIDC.CLIENT.ISSUER_URL }}"
+PRETIX_OIDC_AUTH_URL:           "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+PRETIX_OIDC_TOKEN_URL:          "{{ OIDC.CLIENT.TOKEN_URL }}"
+PRETIX_OIDC_USERINFO_URL:       "{{ OIDC.CLIENT.USER_INFO_URL }}"
+PRETIX_OIDC_LOGOUT_URL:         "{{ OIDC.CLIENT.LOGOUT_URL }}"
+PRETIX_OIDC_JWKS_URL:           "{{ OIDC.CLIENT.CERTS }}"
+PRETIX_OIDC_SCOPES:             "openid,email,profile"
+# Use Keycloak username claim by default (plugin default is 'sub')
+PRETIX_OIDC_UNIQUE_ATTRIBUTE:   "{{ OIDC.ATTRIBUTES.USERNAME }}"
+
+# Docker
+PRETIX_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
+PRETIX_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
+PRETIX_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
+PRETIX_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+PRETIX_CONF_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"
+PRETIX_OIDC_PLUGIN_VERSION:     "{{ applications | get_app_conf(application_id, 'plugins.oidc.version') }}"

@@ -1,31 +1,36 @@
-
 credentials: {}
 docker:
-  images: {}                # @todo Move under services
-  versions: {}              # @todo Move under services
   services:
     redis:
-      enabled:      false   # Enable Redis 
+      enabled:  true
     database:
-      enabled:      false   # Enable the database 
+      enabled:  true
+    application:
+      image:    pretix/standalone
+      version:  stable
+      name:     pretix
+  volumes:
+    data:       "pretix_data"
+    config:     "pretix_config"
 features:
-  matomo:           true    # Enable Matomo Tracking
-  css:              true    # Enable Global CSS Styling
-  desktop:  true    # Enable loading of app in iframe
-  ldap:             false   # Enable LDAP Network
-  central_database: false   # Enable Central Database Network
-  recaptcha:        false   # Enable ReCaptcha
-  oauth2:           false   # Enable the OAuth2-Proy
-  javascript:       false   # Enables the custom JS in the javascript.js.j2 file   
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
   logout:           true
+  oidc:             true
 server:
   csp:
-    whitelist:        {}      # URL's which should be whitelisted
-    flags:            {}      # Flags which should be set
+    whitelist:      {}
+    flags:          {}
   domains:
     canonical:
+      - "ticket.{{ PRIMARY_DOMAIN }}"
+    aliases:
       - "pretix.{{ PRIMARY_DOMAIN }}"
-    aliases:          []      # Alias redirections to the first element of the canonical domains
 rbac:
   roles: {}
+plugins:
+  oidc:
+    version: "2.3.1"
 
