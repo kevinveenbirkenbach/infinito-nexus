@@ -1,0 +1,27 @@
+credentials: {}
+docker:
+  services:
+    database:
+      enabled:  true
+    application:
+      image:    atlassian/confluence
+      version:  latest
+      name:     confluence
+  volumes:
+    data:       "confluence_data"
+features:
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
+  logout:           true
+  oidc:             true
+server:
+  csp:
+    whitelist:      {}
+    flags:          {}
+  domains:
+    canonical:
+      - "confluence.{{ PRIMARY_DOMAIN }}"
+rbac:
+  roles: {}
