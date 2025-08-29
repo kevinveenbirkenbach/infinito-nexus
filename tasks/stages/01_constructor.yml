@@ -6,7 +6,7 @@
 
 - name: Merge system_email definitions
   set_fact:
-    SYSTEM_EMAIL: "{{ DEFAULT_SYSTEM_EMAIL | combine(system_email | default({}, true), recursive=True) }}"
+    SYSTEM_EMAIL: "{{ DEFAULT_SYSTEM_EMAIL | combine(SYSTEM_EMAIL | default({}, true), recursive=True) }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Merge variables
@@ -32,7 +32,7 @@
 
   - name: Merge current play applications
     set_fact:
-      current_play_applications: >-
+      CURRENT_PLAY_APPLICATIONS: >-
         {{ 
           applications |
           applications_if_group_and_deps(group_names)
@@ -41,14 +41,14 @@
 
   - name: Merge current play domain definitions
     set_fact:
-      current_play_domains: >-
+      CURRENT_PLAY_DOMAINS: >-
         {{
           applications
           | canonical_domains_map(
               PRIMARY_DOMAIN,
               recursive=True,
               roles_base_dir=([ playbook_dir, 'roles' ] | path_join),
-              seed=(current_play_applications | dict2items | map(attribute='key') | list)
+              seed=(CURRENT_PLAY_APPLICATIONS | dict2items | map(attribute='key') | list)
             )
           | combine(domains | default({}, true), recursive=True)
         }}
@@ -59,7 +59,7 @@
         {{ 
           defaults_applications | 
           canonical_domains_map(PRIMARY_DOMAIN) | 
-          combine(current_play_domains, recursive=True) 
+          combine(CURRENT_PLAY_DOMAINS, recursive=True) 
         }}
   - name: Merge redirect_domain_mappings
     set_fact:
@@ -74,16 +74,16 @@
     set_fact:
       redirect_domain_mappings: >-
         {{ 
-          current_play_applications |
+          CURRENT_PLAY_APPLICATIONS |
           domain_mappings(PRIMARY_DOMAIN) | 
           merge_mapping(redirect_domain_mappings, 'source') 
         }}
 
   - name: Set current play all domains incl. www redirect if enabled
     set_fact:
-      current_play_domains_all: >-
+      CURRENT_PLAY_DOMAINS_ALL: >-
         {{
-          (current_play_domains |
+          (CURRENT_PLAY_DOMAINS |
           combine(
             redirect_domain_mappings | default([]) | 
             items2dict(key_name='source', value_name='source'),

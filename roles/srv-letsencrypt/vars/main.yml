@@ -1,4 +1,4 @@
 caa_entries:
 - tag: issue
   value: letsencrypt.org
-base_sld_domains: '{{ current_play_domains_all | generate_base_sld_domains }}'
+base_sld_domains: '{{ CURRENT_PLAY_DOMAINS_ALL | generate_base_sld_domains }}'

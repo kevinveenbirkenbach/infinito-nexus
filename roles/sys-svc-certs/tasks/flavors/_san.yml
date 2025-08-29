@@ -8,7 +8,7 @@
 - name: Generate SAN certificate with certbundle
   command: >-
     certbundle
-    --domains "{{ current_play_domains_all | join(',') }}"
+    --domains "{{ CURRENT_PLAY_DOMAINS_ALL | join(',') }}"
     --certbot-email "{{ users.administrator.email }}"
     --certbot-acme-challenge-method "{{ CERTBOT_ACME_CHALLENGE_METHOD }}"
     --chunk-size 100
