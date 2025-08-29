@@ -78,10 +78,28 @@ class TestTimeoutStartSecForDomains(unittest.TestCase):
         # raw = 30 + 25*4 = 130
         self.assertEqual(result, 130)
 
-    def test_raises_on_non_dict_input(self):
+    def test_raises_on_invalid_type_int(self):
         with self.assertRaises(AnsibleFilterError):
-            _f()(["not-a-dict"])
+            _f()(123)
 
+    def test_raises_on_invalid_type_none(self):
+        with self.assertRaises(AnsibleFilterError):
+            _f()(None)
+
+    def test_accepts_list_input(self):
+        domains_list = ["a.com", "www.a.com", "b.com"]
+        result = _f()(domains_list, include_www=True,
+                    per_domain_seconds=25, overhead_seconds=30,
+                    min_seconds=1, max_seconds=10000)
+        # unique + www for b.com -> {"a.com","www.a.com","b.com","www.b.com"} = 4
+        self.assertEqual(result, 30 + 25*4)
+
+    def test_accepts_str_input(self):
+        result = _f()("a.com", include_www=True,
+                    per_domain_seconds=25, overhead_seconds=30,
+                    min_seconds=1, max_seconds=10000)
+        # {"a.com","www.a.com"} = 2
+        self.assertEqual(result, 30 + 25*2)
 
 if __name__ == "__main__":
     unittest.main()

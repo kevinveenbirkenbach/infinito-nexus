@@ -1,12 +1,7 @@
+# filter_plugins/timeout_start_sec_for_domains.py (nur Kern geändert)
 from ansible.errors import AnsibleFilterError
 
 class FilterModule(object):
-    """
-    Compute a max TimeoutStartSec for systemd services that iterate over many domains.
-    The timeout scales with the number of unique domains (optionally including www.* clones)
-    and is clamped between configurable min/max bounds.
-    """
-
     def filters(self):
         return {
             "timeout_start_sec_for_domains": self.timeout_start_sec_for_domains,
@@ -23,28 +18,17 @@ class FilterModule(object):
     ):
         """
         Args:
-            domains_dict (dict): Same structure you pass to generate_all_domains
-                                 (values can be str | list[str] | dict[str,str]).
-            include_www (bool):   If true, also count "www.<domain>" variants.
-            per_domain_seconds (int): Budget per domain (default 25s).
-            overhead_seconds (int):  Fixed overhead on top (default 30s).
-            min_seconds (int):       Lower clamp (default 120s).
-            max_seconds (int):       Upper clamp (default 3600s).
-
-        Returns:
-            int: TimeoutStartSec in seconds (integer).
-
-        Raises:
-            AnsibleFilterError: On invalid input types or unexpected failures.
+            domains_dict (dict | list[str] | str): Either the domain mapping dict
+                (values can be str | list[str] | dict[str,str]) or an already
+                flattened list of domains, or a single domain string.
+            include_www (bool): If true, add 'www.<domain>' for non-www entries.
+            ...
         """
         try:
-            if not isinstance(domains_dict, dict):
-                raise AnsibleFilterError("Expected 'domains_dict' to be a dict.")
-
-            # Local flatten similar to your generate_all_domains
-            def _flatten(domains):
+            # Local flattener for dict inputs (like your generate_all_domains source)
+            def _flatten_from_dict(domains_map):
                 flat = []
-                for v in (domains or {}).values():
+                for v in (domains_map or {}).values():
                     if isinstance(v, str):
                         flat.append(v)
                     elif isinstance(v, list):
@@ -53,18 +37,26 @@ class FilterModule(object):
                         flat.extend(v.values())
                 return flat
 
-            flat = _flatten(domains_dict)
+            # Accept dict | list | str
+            if isinstance(domains_dict, dict):
+                flat = _flatten_from_dict(domains_dict)
+            elif isinstance(domains_dict, list):
+                flat = list(domains_dict)
+            elif isinstance(domains_dict, str):
+                flat = [domains_dict]
+            else:
+                raise AnsibleFilterError(
+                    "Expected 'domains_dict' to be dict | list | str."
+                )
 
             if include_www:
-                # dedupe first so we don't generate duplicate www-variants
                 base_unique = sorted(set(flat))
-                www_variants = [f"www.{d}" for d in base_unique if not str(d).startswith("www.")]
+                www_variants = [f"www.{d}" for d in base_unique if not str(d).lower().startswith("www.")]
                 flat.extend(www_variants)
 
             unique_domains = sorted(set(flat))
             count = len(unique_domains)
 
-            # Compute and clamp
             raw = overhead_seconds + per_domain_seconds * count
             clamped = max(min_seconds, min(max_seconds, int(raw)))
             return clamped
