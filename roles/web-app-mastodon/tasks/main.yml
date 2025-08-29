@@ -1,7 +1,7 @@
 ---
 - name: "Include setup for domain '{{ domain }}'"
   include_role: 
-    name: sys-stk-front
+    name: sys-stk-front-proxy
   loop: "{{ domains['web-app-mastodon'] }}"
   loop_control:
     loop_var: domain

@@ -4,7 +4,7 @@ This Ansible role composes and orchestrates all necessary HTTPS-layer tasks and 
 
 1. **`sys-srv-web-inj-compose`**
    Injects global HTML snippets (CSS, Matomo tracking, iFrame notifier, custom JavaScript) into responses using Nginx `sub_filter`.
-2. **`srv-tls-core`**
+2. **`sys-svc-certs`**
    Handles issuing, renewing, and managing TLS certificates via ACME/Certbot.
 
 By combining encryption setup with content enhancements, this role streamlines domain provisioning for secure, fully-featured HTTP/HTTPS delivery.
@@ -16,7 +16,7 @@ By combining encryption setup with content enhancements, this role streamlines d
 * **Content Injection**
   Adds global theming, analytics, and custom scripts before `</head>` and tracking noscript tags before `</body>`.
 * **Certificate Management**
-  Automates cert issuance and renewal via `srv-tls-core`.
+  Automates cert issuance and renewal via `sys-svc-certs`.
 * **Idempotent Workflow**
   Ensures each component runs only once per domain.
 * **Simplified Playbooks**

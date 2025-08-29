@@ -1,7 +1,7 @@
 # Webserver HTTPS Provisioning 🚀
 
 ## Description
-The **srv-https-stack** role extends a basic Nginx installation by wiring in everything you need to serve content over HTTPS:
+The **sys-stk-front-pure** role extends a basic Nginx installation by wiring in everything you need to serve content over HTTPS:
 
 1. Ensures your Nginx server is configured for SSL/TLS.
 2. Pulls in Let’s Encrypt ACME challenge handling.
@@ -13,7 +13,7 @@ This role is built on top of your existing `srv-core` role, and it automates the
 
 ## Overview
 
-When you apply **srv-https-stack**, it will:
+When you apply **sys-stk-front-pure**, it will:
 
 1. **Include** the `srv-core` role to install and configure Nginx.  
 2. **Clean up** any stale vHost files under `sys-svc-cln-domains`.  

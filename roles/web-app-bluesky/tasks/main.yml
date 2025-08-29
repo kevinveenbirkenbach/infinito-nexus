@@ -2,9 +2,9 @@
   include_role: 
     name: docker-compose
 
-- name: "include role sys-stk-front for {{ application_id }}"
+- name: "include role sys-stk-front-proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-front
+    name: sys-stk-front-proxy
   vars:
     domain: "{{ item.domain }}"
     http_port: "{{ item.http_port }}"

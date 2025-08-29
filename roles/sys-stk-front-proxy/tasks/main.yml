@@ -4,7 +4,7 @@
       name: srv-proxy-core
     when: run_once_srv_proxy_core is not defined
   - include_tasks: utils/run_once.yml
-  when: run_once_sys_stk_front is not defined
+  when: run_once_sys_stk_front_proxy is not defined
 
 - include_tasks: "01_cloudflare.yml"
   when: DNS_PROVIDER == "cloudflare"

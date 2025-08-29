@@ -1,8 +1,8 @@
 ---
 
-- name: "include role sys-stk-front for {{ application_id }}"
+- name: "include role sys-stk-front-proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-front
+    name: sys-stk-front-proxy
   vars:
     domain:   "{{ domains | get_domain(application_id) }}"
     http_port:   "{{ ports.localhost.http[application_id] }}"

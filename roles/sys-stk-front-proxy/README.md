@@ -6,10 +6,10 @@ This role bootstraps **per-domain Nginx configuration**: it requests TLS certifi
 
 ## Overview
 
-A higher-level orchestration wrapper, *sys-stk-front* ties together several lower-level roles:
+A higher-level orchestration wrapper, *sys-stk-front-proxy* ties together several lower-level roles:
 
 1. **`sys-srv-web-inj-compose`** – applies global tweaks and includes.  
-2. **`srv-tls-core`** – obtains Let’s Encrypt certificates.  
+2. **`sys-svc-certs`** – obtains Let’s Encrypt certificates.  
 3. **Domain template deployment** – copies a Jinja2 vHost from *srv-proxy-core*.  
 4. **`web-app-oauth2-proxy`** *(optional)* – protects the site with OAuth2.
 

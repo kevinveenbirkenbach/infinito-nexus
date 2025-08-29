@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: >
-    Combines the docker-compose role with sys-stk-front to
+    Combines the docker-compose role with sys-stk-front-proxy to
     deploy applications behind a reverse proxy.
   company: |
     Kevin Veen-Birkenbach

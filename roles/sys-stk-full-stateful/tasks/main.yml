@@ -4,9 +4,9 @@
   vars:
     handler_role_name: "svc-prx-openresty"
 
-- name: "For '{{ application_id }}': include role sys-stk-front"
+- name: "For '{{ application_id }}': include role sys-stk-front-proxy"
   include_role:
-    name: sys-stk-front
+    name: sys-stk-front-proxy
   vars:
     domain:     "{{ domains | get_domain(application_id) }}"
     http_port:  "{{ ports.localhost.http[application_id] }}"

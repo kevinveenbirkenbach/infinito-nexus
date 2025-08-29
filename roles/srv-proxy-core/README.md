@@ -16,7 +16,7 @@ The goal of this role is to deliver a **hassle-free, production-ready reverse pr
 
 ## Features
 
-- **Automatic TLS & HSTS** — integrates with the *srv-https-stack* role for certificate management.  
+- **Automatic TLS & HSTS** — integrates with the *sys-stk-front-pure* role for certificate management.  
 - **Flexible vHost templates** — *basic* and *ws_generic* flavours cover standard HTTP and WebSocket applications.  
 - **Security headers** — sensible defaults plus optional X-Frame-Options / CSP based on application settings.  
 - **WebSocket & HTTP/2 aware** — upgrades, keep-alive tuning, and gzip already configured.  

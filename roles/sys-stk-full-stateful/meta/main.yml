@@ -1,7 +1,7 @@
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: >
-    Extends sys-stk-back-stateful by adding an HTTP reverse proxy via sys-stk-front.
+    Extends sys-stk-back-stateful by adding an HTTP reverse proxy via sys-stk-front-proxy.
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
