@@ -22,7 +22,9 @@ DESKTOP_LOCATION_SILENT_CHECK:    "/silent-check-sso.html"
 
 
 ## Configuration
-DESKTOP_INVENTORY_CONFIG_PATH:    "{{ inventory_dir }}/files/{{ inventory_hostname }}/docker/web-app-desktop/config.yaml.j2"
+DESKTOP_CONFIG_YML_SRC_FILE:      "config.yaml.j2"
+DESKTOP_CONFIG_INV_PATH:          "{{ [ inventory_dir, 'files', inventory_hostname ,'docker',application_id,DESKTOP_CONFIG_YML_SRC_FILE] | path_join }}"
+DESKTOP_CONFIG_YML_DEST:          "{{ [ docker_repository_path, 'app/config.yaml'] | path_join }}"
 
 ## OIDC
 DESKTOP_KEYCLOAK_LOGIN_URL: >-

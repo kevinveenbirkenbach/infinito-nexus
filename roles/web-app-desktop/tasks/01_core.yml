@@ -9,9 +9,9 @@
   include_role:
     name: sys-stk-full-stateless
 
-- name: "Check if host-specific config.yaml exists in {{ DESKTOP_INVENTORY_CONFIG_PATH }}"
+- name: "Check if host-specific config.yaml exists in {{ DESKTOP_CONFIG_INV_PATH }}"
   stat:
-    path: "{{ DESKTOP_INVENTORY_CONFIG_PATH }}"
+    path: "{{ DESKTOP_CONFIG_INV_PATH }}"
   delegate_to: localhost
   become: false
   register: config_file
@@ -45,15 +45,15 @@
 
 - name: Copy host-specific config.yaml if it exists
   template:
-    src: "{{ DESKTOP_INVENTORY_CONFIG_PATH }}"
-    dest: "{{ docker_repository_path }}/app/config.yaml"
+    src: "{{ DESKTOP_CONFIG_INV_PATH }}"
+    dest: "{{ DESKTOP_CONFIG_YML_DEST }}"
   notify: docker compose up
   when: config_file.stat.exists
 
 - name: Copy default config.yaml from the role template if host-specific file does not exist
   template:
-    src: "config.yaml.j2"
-    dest: "{{ docker_repository_path }}/app/config.yaml"
+    src: "{{ DESKTOP_CONFIG_YML_SRC_FILE }}"
+    dest: "{{ DESKTOP_CONFIG_YML_DEST }}"
   notify: docker compose up
   when: not config_file.stat.exists
 
