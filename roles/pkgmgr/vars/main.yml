@@ -2,16 +2,16 @@
 # Variables for Kevin's Package Manager installation
 
 # The Git repository URL for Kevin's Package Manager
-pkgmgr_repo_url:        "https://github.com/kevinveenbirkenbach/package-manager.git"
-
-# Directory which contains all Repositories managed by Kevin's Package Manager
-repositories_directory: "/opt/Repositories/"
-
-# The directory where the repository will be cloned
-pkgmgr_install_path:    "{{repositories_directory}}github.com/kevinveenbirkenbach/package-manager"
-
-# File containing the configuration
-pkgmgr_config_path:     "{{pkgmgr_install_path}}/config/config.yaml"
+PKGMGR_REPO_URL:        "https://github.com/kevinveenbirkenbach/package-manager.git"
 
 # The directory where executable aliases will be installed (ensure it's in your PATH)
-binaries_directory:     "/usr/local/bin" 
+PKGMGR_BINARIES_DIR:     "/usr/local/bin" 
+
+# Directory which contains all Repositories managed by Kevin's Package Manager
+PKGMGR_REPOSITORIES_DIR: "/opt/Repositories/"
+
+# The directory where the repository will be cloned
+PKGMGR_INSTALL_PATH:    "{{ [ PKGMGR_REPOSITORIES_DIR, 'github.com/kevinveenbirkenbach/package-manager' ] | path_join }}"
+
+# File containing the configuration
+PKGMGR_CONFIG_PATH:     "{{ [ PKGMGR_INSTALL_PATH, 'config/config.yaml' ] | path_join }}"

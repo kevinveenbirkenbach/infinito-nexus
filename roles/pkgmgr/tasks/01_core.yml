@@ -16,29 +16,23 @@
 
 - name: Create installation directory for Kevin's Package Manager
   file:
-    path: "{{ pkgmgr_install_path }}"
+    path: "{{ PKGMGR_INSTALL_PATH }}"
     state: directory
     mode: '0755'
   become: true
 
 - name: Clone Kevin's Package Manager repository
   git:
-    repo: "{{ pkgmgr_repo_url }}"
-    dest: "{{ pkgmgr_install_path }}"
+    repo: "{{ PKGMGR_REPO_URL }}"
+    dest: "{{ PKGMGR_INSTALL_PATH }}"
     version: "HEAD"
     force: yes
-  become: true
-
-- name: Ensure main.py is executable
-  file:
-    path: "{{ pkgmgr_install_path }}/main.py"
-    mode: '0755'
   become: true
 
 - name: create config.yaml
   template:
     src: config.yaml.j2
-    dest: "{{ pkgmgr_config_path }}"
+    dest: "{{ PKGMGR_CONFIG_PATH }}"
   become: true
 
 - name: Run the Package Manager install command to create an alias for Kevins package manager
@@ -46,6 +40,6 @@
     source ~/.venvs/pkgmgr/bin/activate
     make setup
   args:
-    chdir: "{{ pkgmgr_install_path }}"
+    chdir: "{{ PKGMGR_INSTALL_PATH }}"
     executable: /bin/bash
   become: true
