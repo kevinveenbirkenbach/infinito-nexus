@@ -17,7 +17,7 @@ oidc_settings:
   redirect_on_logout:       true                                                                  # Redirect users after logout to the login screen or homepage.
   redirect_user_back:       true                                                                  # Return users to their original URL after successful login.
   #acr_values:               "{{ OIDC.CLIENT.acr_values | default('') }}"                         # ACR values defining required authentication context (e.g., MFA level).
-  enable_logging:           "{{ MODE_DEBUG }}"                                                  # Enable detailed plugin logging for debugging and auditing.
+  enable_logging:           "{{ MODE_DEBUG }}"                                                    # Enable detailed plugin logging for debugging and auditing.
 #  log_limit:                "{{ OIDC.CLIENT.log_limit | default('') }}"                          # Maximum number of log entries to retain before pruning.
   no_sslverify:             false                                                                 # The flag to enable/disable SSL verification during authorization.
   http_request_timeout:     5                                                                     # The timeout for requests made to the IDP. Default value is 5.

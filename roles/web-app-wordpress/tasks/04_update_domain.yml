@@ -60,6 +60,7 @@
     --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_sr_scheme
   changed_when: "{{ ('Success: Made 0 replacements.' not in wp_sr_scheme.stdout) | bool }}"
+  when: WEB_PORT == 443
 
 - name: Flush caches and rewrite rules
   command: >

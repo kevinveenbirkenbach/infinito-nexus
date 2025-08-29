@@ -2,20 +2,20 @@
 # Service Timers
 
 ## Meta
-SYS_TIMER_ALL_ENABLED:         "{{ MODE_DEBUG }}"   # Runtime Variables for Process Control - Activates all timers, independend if the handlers had been triggered
+SYS_TIMER_ALL_ENABLED:                        "{{ MODE_DEBUG }}"   # Runtime Variables for Process Control - Activates all timers, independend if the handlers had been triggered
 
 ## Server Tact Variables 
 
-HOURS_SERVER_AWAKE:            "0..23" # Ours in which the server is "awake" (100% working). Rest of the time is reserved for maintanance
-RANDOMIZED_DELAY_SEC:          "5min"  # Random delay for systemd timers to avoid peak loads.
+HOURS_SERVER_AWAKE:                           "0..23" # Ours in which the server is "awake" (100% working). Rest of the time is reserved for maintanance
+RANDOMIZED_DELAY_SEC:                         "5min"  # Random delay for systemd timers to avoid peak loads.
 
 ## Timeouts for all services
-SYS_TIMEOUT_CLEANUP_SERVICES:  "15min"
-SYS_TIMEOUT_STORAGE_OPTIMIZER: "10min"
-SYS_TIMEOUT_BACKUP_SERVICES:   "1h"
-SYS_TIMEOUT_HEAL_DOCKER:       "30min"
-SYS_TIMEOUT_UPDATE_DOCKER:     "2min"
-SYS_TIMEOUT_RESTART_DOCKER:    "{{ SYS_TIMEOUT_UPDATE_DOCKER }}"
+SYS_TIMEOUT_DOCKER_RPR_HARD:                  "10min"
+SYS_TIMEOUT_DOCKER_RPR_SOFT:                 "{{ SYS_TIMEOUT_DOCKER_RPR_HARD }}"
+SYS_TIMEOUT_CLEANUP_SERVICES:                 "15min"
+SYS_TIMEOUT_DOCKER_UPDATE:                    "20min"
+SYS_TIMEOUT_STORAGE_OPTIMIZER:                "{{ SYS_TIMEOUT_DOCKER_UPDATE }}"
+SYS_TIMEOUT_BACKUP_SERVICES:                  "60min"
 
 ## On Calendar
 
