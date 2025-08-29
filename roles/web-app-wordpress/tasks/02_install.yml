@@ -3,7 +3,7 @@
   command: >
     docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp core install
-      --url="{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+      --url="{{ WORDPRESS_URL }}"
       --title="{{ applications | get_app_conf(application_id, 'title', True) }}"
       --admin_user="{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
       --admin_password="{{ applications | get_app_conf(application_id, 'credentials.administrator_password', True) }}"

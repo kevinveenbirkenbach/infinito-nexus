@@ -1,4 +1,3 @@
-# vars/oidc.yml
 # Defines OIDC settings for the OpenID Connect Generic plugin, with explanatory comments.
 # @see https://github.com/oidc-wp/openid-connect-generic/blob/develop/includes/openid-connect-dev-option-settings.php
 

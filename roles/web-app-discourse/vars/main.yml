@@ -17,10 +17,10 @@ DISCOURSE_REPOSITORY_URL:       "{{ applications | get_app_conf(application_id, 
 
 ## Directories
 DISCOURSE_REPOSITORY_DIR:       "{{ docker_compose.directories.services }}{{ applications | get_app_conf( application_id, 'repository') }}/"
-DISCOURSE_CONTAINERS_DIR:       "{{ DISCOURSE_REPOSITORY_DIR }}/containers/"
+DISCOURSE_CONTAINERS_DIR:       "{{ [ DISCOURSE_REPOSITORY_DIR, 'containers' ] | path_join }}"
 
 ## Files
-DISCOURSE_APPLICATION_YML_DEST: "{{ DISCOURSE_CONTAINERS_DIR }}{{ DISCOURSE_CONTAINER }}.yml"
+DISCOURSE_APPLICATION_YML_DEST: "{{ [ DISCOURSE_CONTAINERS_DIR, DISCOURSE_CONTAINER ~ '.yml' ] | path_join }}"
 
 ## Error Strings
 DISCOURSE_ERROR_ALREADY_IN_NET: "Error response from daemon: endpoint with name {{ DISCOURSE_CONTAINER }} already exists in network {{ DISCOURSE_PG_NETWORK }}"

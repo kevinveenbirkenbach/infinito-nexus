@@ -11,4 +11,4 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     mv wp-cli.phar /usr/local/bin/wp
 
 # Copy PHP upload settings
-COPY upload.ini $PHP_INI_DIR/conf.d/
+COPY {{ WORDPRESS_CONFIG_UPLD_REL }} $PHP_INI_DIR/conf.d/

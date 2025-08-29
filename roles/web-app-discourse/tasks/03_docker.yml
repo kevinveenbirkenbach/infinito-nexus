@@ -19,7 +19,7 @@
   become: true
   ignore_errors: true
 
-- name: set chmod 700 for '{{ DISCOURSE_CONTAINERS_DIR}}'
+- name: set chmod 700 for '{{ DISCOURSE_CONTAINERS_DIR }}'
   ansible.builtin.file:
     path: "{{ DISCOURSE_CONTAINERS_DIR }}"
     mode: '700'

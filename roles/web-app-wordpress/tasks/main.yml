@@ -15,16 +15,18 @@
   vars:
     docker_compose_flush_handlers: false
 
-- name: "Transfering upload.ini to {{ docker_compose.directories.instance }}"
+- name: "Transfering upload.ini to {{ WORDPRESS_CONFIG_UPLD_ABS }}"
   template:
     src: upload.ini.j2
-    dest: "{{ docker_compose.directories.instance }}upload.ini"
-  notify: docker compose up
+    dest: "{{ WORDPRESS_CONFIG_UPLD_ABS }}"
+  notify: 
+    - docker compose up
+    - docker compose build
 
-- name: "Transfering msmtprc to {{ WORDPRESS_HOST_MSMTP_CONF }}"
+- name: "Transfering msmtprc to {{ WORDPRESS_MSMTP_ABS }}"
   template:
-    src: "{{ playbook_dir }}/roles/sys-svc-msmtp/templates/msmtprc.conf.j2"
-    dest: "{{ WORDPRESS_HOST_MSMTP_CONF }}"
+    src:  "{{ WORDPRESS_MSMTP_SRC }}"
+    dest: "{{ WORDPRESS_MSMTP_ABS }}"
   notify: docker compose up
 
 - name: Flush handlers to make {{ WORDPRESS_CONFIG_FILE }} available before patch
@@ -53,7 +55,7 @@
       vars:
         plugin_name: "{{ item.key }}"
         plugin_enabled: "{{ item.value.enabled | bool }}"
-        plugin_task_path: "{{ role_path }}/tasks/plugins/{{ plugin_name }}/install.yml"
+        plugin_task_path: "{{ [role_path, 'tasks/plugins', plugin_name  ~ '.yml' ] | path_join }}"
       when: plugin_enabled
 
 - name: Detect if WordPress is Multisite
@@ -68,5 +70,5 @@
   when: (wp_is_multisite.stdout | trim) == '0'
   vars:
     # Target URL to switch to (uses your helper)
-    wp_new_url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+    wp_new_url: "{{ WORDPRESS_URL }}"
   

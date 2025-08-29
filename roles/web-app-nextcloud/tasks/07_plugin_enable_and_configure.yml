@@ -1,18 +1,18 @@
-- name: enable {{plugin_key}} nextcloud plugin
-  command: "{{NEXTCLOUD_DOCKER_EXEC_OCC}} app:enable {{plugin_key}}"
+- name: enable {{ plugin_key }} nextcloud plugin
+  command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} app:enable {{ plugin_key }}"
   register: enable_result
   changed_when: enable_result.rc == 0 and ("already enabled" not in enable_result.stdout)
 
-- name: Check if {{nextcloud_control_node_plugin_vars_directory}}{{ plugin_key }}.yml exists
+- name: Check if {{ nextcloud_control_node_plugin_vars_directory }}{{ plugin_key }}.yml exists
   stat:
-    path: "{{nextcloud_control_node_plugin_vars_directory}}{{ plugin_key }}.yml"
+    path: "{{ nextcloud_control_node_plugin_vars_directory }}{{ plugin_key }}.yml"
   delegate_to: localhost
   become: false
   register: plugin_vars_file
 
 - name: "Load {{ plugin_key }} configuration variables"
   include_vars:
-    file: "{{nextcloud_control_node_plugin_vars_directory}}{{ plugin_key }}.yml"
+    file: "{{ nextcloud_control_node_plugin_vars_directory }}{{ plugin_key }}.yml"
   when: plugin_vars_file.stat.exists
 
 - name: "Set plugin configuration (batched shell, no async)"
@@ -35,13 +35,13 @@
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
-- name: Check if {{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml exists
+- name: Check if {{ nextcloud_control_node_plugin_tasks_directory }}{{ plugin_key }}.yml exists
   stat:
-    path: "{{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml"
+    path: "{{ nextcloud_control_node_plugin_tasks_directory }}{{ plugin_key }}.yml"
   delegate_to: localhost
   become: false
   register: plugin_tasks_file
 
-- name: "include {{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml"
-  include_tasks: "{{nextcloud_control_node_plugin_tasks_directory}}{{ plugin_key }}.yml"
+- name: "include {{ nextcloud_control_node_plugin_tasks_directory }}{{ plugin_key }}.yml"
+  include_tasks: "{{ nextcloud_control_node_plugin_tasks_directory }}{{ plugin_key }}.yml"
   when: plugin_tasks_file.stat.exists
