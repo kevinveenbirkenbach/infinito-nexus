@@ -1,4 +1,3 @@
-ARG PRETIX_BASE_IMAGE={{ PRETIX_IMAGE }}:{{ PRETIX_VERSION }}
-FROM ${PRETIX_BASE_IMAGE}
+FROM {{ PRETIX_IMAGE }}:{{ PRETIX_VERSION }}
 # Install OIDC auth plugin for Pretix
 RUN python -m pip install --no-cache-dir "pretix-oidc=={{ PRETIX_OIDC_PLUGIN_VERSION }}"

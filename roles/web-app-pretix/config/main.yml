@@ -2,16 +2,15 @@ credentials: {}
 docker:
   services:
     redis:
-      enabled:  true
+      enabled:      true
     database:
-      enabled:  true
-    application:
-      image:    pretix/standalone
-      version:  stable
-      name:     pretix
+      enabled:      true
+    pretix:
+      image:        pretix/standalone
+      version:      stable
+      name:         pretix
   volumes:
-    data:       "pretix_data"
-    config:     "pretix_config"
+    data:           "pretix_data"
 features:
   matomo:           true
   css:              true

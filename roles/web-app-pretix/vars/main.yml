@@ -1,3 +1,4 @@
+# General
 application_id:                 "web-app-pretix"
 database_type:                  "postgres"
 container_port:                 80
@@ -22,9 +23,9 @@ PRETIX_OIDC_SCOPES:             "openid,email,profile"
 PRETIX_OIDC_UNIQUE_ATTRIBUTE:   "{{ OIDC.ATTRIBUTES.USERNAME }}"
 
 # Docker
-PRETIX_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
-PRETIX_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
-PRETIX_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
+PRETIX_IMAGE_CUSTOM:            "pretix_custom"
+PRETIX_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.pretix.image') }}"
+PRETIX_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.pretix.version') }}"
+PRETIX_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.pretix.name') }}"
 PRETIX_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-PRETIX_CONF_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"
 PRETIX_OIDC_PLUGIN_VERSION:     "{{ applications | get_app_conf(application_id, 'plugins.oidc.version') }}"

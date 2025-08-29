@@ -1,31 +1,22 @@
-services:
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-
   application:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        PRETIX_BASE_IMAGE: "{{ PRETIX_IMAGE }}:{{ PRETIX_VERSION }}"
-    image: "{{ PRETIX_IMAGE }}:{{ PRETIX_VERSION }}-oidc"
+    image: "{{ PRETIX_IMAGE_CUSTOM }}"
     container_name: "{{ PRETIX_CONTAINER }}"
     hostname: '{{ PRETIX_HOSTNAME}}'
     command: ["all"]
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - 'data:/data'
-      - 'config:/etc/pretix'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    depends_on:
-      - database
-      - redis
+{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  config:
-    name: {{ PRETIX_CONF_VOLUME }}
   data:
     name: {{ PRETIX_DATA_VOLUME }}
 
