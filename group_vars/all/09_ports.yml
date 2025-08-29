@@ -36,7 +36,7 @@ ports:
       web-app-funkwhale: 8012
       web-app-roulette-wheel: 8013
       web-app-joomla: 8014
-      web-app-attendize: 8015
+      # Free: 8015
       web-app-pgadmin: 8016
       web-app-baserow: 8017
       web-app-matomo: 8018
