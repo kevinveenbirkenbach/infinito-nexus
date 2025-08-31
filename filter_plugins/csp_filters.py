@@ -5,6 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from module_utils.config_utils import get_app_conf
+from module_utils.get_url import get_url
 
 class FilterModule(object):
     """
@@ -131,17 +132,14 @@ class FilterModule(object):
                 flags = self.get_csp_flags(applications, application_id, directive)
                 tokens += flags
 
+                if directive in [ 'script-src-elem', 'connect-src', 'style-src-elem' ]:
+                    # Allow fetching from internal CDN as default for all applications
+                    tokens.append(get_url(domains,'web-svc-cdn',web_protocol))
                 
                 if directive in ['script-src-elem', 'connect-src']:
                     # Matomo integration
                     if self.is_feature_enabled(applications, matomo_feature_name, application_id):
-                        matomo_domain = domains.get('web-app-matomo')[0]
-                        if matomo_domain:
-                            tokens.append(f"{web_protocol}://{matomo_domain}")
-                    
-                    # Allow fetching from internal CDN as default for all applications
-                    domain = domains.get('web-svc-cdn')[0]
-                    tokens.append(f"{web_protocol}://{domain}")
+                        tokens.append(get_url(domains,'web-app-matomo',web_protocol))
 
                 # ReCaptcha integration: allow loading scripts from Google if feature enabled
                 if self.is_feature_enabled(applications, 'recaptcha', application_id):
@@ -159,13 +157,11 @@ class FilterModule(object):
                     if self.is_feature_enabled(applications, 'logout', application_id):
                         
                         # Allow logout via infinito logout proxy
-                        domain = domains.get('web-svc-logout')[0] 
-                        tokens.append(f"{web_protocol}://{domain}")
+                        tokens.append(get_url(domains,'web-svc-logout',web_protocol))
                         
                         # Allow logout via keycloak app
-                        domain = domains.get('web-app-keycloak')[0]
-                        tokens.append(f"{web_protocol}://{domain}")
-                        
+                        tokens.append(get_url(domains,'web-app-keycloak',web_protocol))
+
                 # whitelist
                 tokens += self.get_csp_whitelist(applications, application_id, directive)
 

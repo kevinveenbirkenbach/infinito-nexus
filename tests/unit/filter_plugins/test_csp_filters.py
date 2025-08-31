@@ -55,6 +55,28 @@ class TestCspFilters(unittest.TestCase):
             'web-svc-cdn': ['cdn.example.org'],
         }
 
+    # --- Helpers -------------------------------------------------------------
+
+    def _get_directive_tokens(self, header: str, directive: str):
+        """
+        Extract tokens (as a list of strings) for a given directive from a CSP header.
+        Example: for "connect-src 'self' https://a https://b;" -> ["'self'", "https://a", "https://b"]
+        Returns [] if not found.
+        """
+        for part in header.split(';'):
+            part = part.strip()
+            if not part:
+                continue
+            if part.startswith(directive + ' '):
+                # remove directive name, split remainder by spaces
+                remainder = part[len(directive):].strip()
+                return [tok for tok in remainder.split(' ') if tok]
+            if part == directive:  # unlikely, but guard
+                return []
+        return []
+
+    # --- Tests ---------------------------------------------------------------
+
     def test_get_csp_whitelist_list(self):
         result = self.filter.get_csp_whitelist(self.apps, 'app1', 'script-src-elem')
         self.assertEqual(result, ['https://cdn.example.com'])
@@ -85,18 +107,23 @@ class TestCspFilters(unittest.TestCase):
         header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
         # Ensure core directives are present
         self.assertIn("default-src 'self';", header)
+
         # script-src-elem should include 'self', Matomo, internes CDN und explizite Whitelist-CDN
         self.assertIn("script-src-elem 'self'", header)
         self.assertIn("https://matomo.example.org", header)
         self.assertIn("https://cdn.example.org", header)   # internes CDN
         self.assertIn("https://cdn.example.com", header)   # Whitelist
+
         # script-src directive should include unsafe-eval
         self.assertIn("script-src 'self' 'unsafe-eval'", header)
-        # connect-src directive
-        self.assertIn(
-            "connect-src 'self' https://matomo.example.org https://cdn.example.org https://api.example.com;",
-            header
-        )
+
+        # connect-src directive (reihenfolgeunabhängig prüfen)
+        tokens = self._get_directive_tokens(header, "connect-src")
+        self.assertIn("'self'", tokens)
+        self.assertIn("https://matomo.example.org", tokens)
+        self.assertIn("https://cdn.example.org", tokens)
+        self.assertIn("https://api.example.com", tokens)
+
         # ends with img-src
         self.assertTrue(header.strip().endswith('img-src * data: blob:;'))
 
