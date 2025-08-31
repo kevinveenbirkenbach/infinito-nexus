@@ -14,3 +14,6 @@ YOURLS_CONTAINER:               "{{ applications | get_app_conf(application_id, 
 YOURLS_ADMIN_LOCATION:          "{{ applications | get_app_conf(application_id, 'server.locations.admin') }}"
 YOURLS_LANDINGPAGE_STATUS_CODE: "{{ applications | get_app_conf(application_id, 'server.status_codes.landingpage') }}"
 
+# Container
+container_port:                 8080
+container_healthcheck:          "{{ '' | safe_join(YOURLS_ADMIN_LOCATION) }}/"

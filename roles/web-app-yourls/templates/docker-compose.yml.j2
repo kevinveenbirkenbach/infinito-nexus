@@ -1,8 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-{% set container_port = 80 %}
-{% set container_healthcheck = YOURLS_ADMIN_LOCATION %}
     image: "{{ YOURLS_IMAGE }}:{{ YOURLS_VERSION }}"
     container_name: "{{ YOURLS_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
