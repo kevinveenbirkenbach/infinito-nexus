@@ -139,10 +139,9 @@ class FilterModule(object):
                         if matomo_domain:
                             tokens.append(f"{web_protocol}://{matomo_domain}")
                     
-                    # Allow the loading of js from the cdn        
-                    if self.is_feature_enabled(applications, 'logout', application_id) or self.is_feature_enabled(applications, 'desktop', application_id):
-                        domain = domains.get('web-svc-cdn')[0]
-                        tokens.append(f"{web_protocol}://{domain}")
+                    # Allow fetching from internal CDN as default for all applications
+                    domain = domains.get('web-svc-cdn')[0]
+                    tokens.append(f"{web_protocol}://{domain}")
 
                 # ReCaptcha integration: allow loading scripts from Google if feature enabled
                 if self.is_feature_enabled(applications, 'recaptcha', application_id):

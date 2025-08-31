@@ -45,7 +45,7 @@ class TestCspFilters(unittest.TestCase):
                                 "body { background: #fff; }",
                             ]
                         }
-                        }
+                    }
                 },
             },
             'app2': {}
@@ -85,18 +85,16 @@ class TestCspFilters(unittest.TestCase):
         header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
         # Ensure core directives are present
         self.assertIn("default-src 'self';", header)
-        # script-src directive should include unsafe-eval, Matomo domain and CDN (hash may follow)
+        # script-src-elem should include 'self', Matomo, internes CDN und explizite Whitelist-CDN
+        self.assertIn("script-src-elem 'self'", header)
+        self.assertIn("https://matomo.example.org", header)
+        self.assertIn("https://cdn.example.org", header)   # internes CDN
+        self.assertIn("https://cdn.example.com", header)   # Whitelist
+        # script-src directive should include unsafe-eval
+        self.assertIn("script-src 'self' 'unsafe-eval'", header)
+        # connect-src directive
         self.assertIn(
-            "script-src-elem 'self' https://matomo.example.org https://cdn.example.com",
-            header
-        )
-        self.assertIn(
-            "script-src 'self' 'unsafe-eval'",
-            header
-        )
-        # connect-src directive unchanged (no inline hash)
-        self.assertIn(
-            "connect-src 'self' https://matomo.example.org https://api.example.com;",
+            "connect-src 'self' https://matomo.example.org https://cdn.example.org https://api.example.com;",
             header
         )
         # ends with img-src
@@ -106,8 +104,9 @@ class TestCspFilters(unittest.TestCase):
         header = self.filter.build_csp_header(self.apps, 'app2', self.domains)
         # default-src only contains 'self'
         self.assertIn("default-src 'self';", header)
-        # no external URLs
-        self.assertNotIn('http', header)
+        self.assertIn('https://cdn.example.org', header)
+        self.assertNotIn('matomo.example.org', header)
+        self.assertNotIn('www.google.com', header)
         # ends with img-src
         self.assertTrue(header.strip().endswith('img-src * data: blob:;'))
         
@@ -154,7 +153,6 @@ class TestCspFilters(unittest.TestCase):
         style_hash = self.filter.get_csp_hash("body { background: #fff; }")
         self.assertNotIn(style_hash, header)
 
-
     def test_build_csp_header_recaptcha_toggle(self):
         """
         When the 'recaptcha' feature is enabled, 'https://www.google.com'
@@ -185,7 +183,7 @@ class TestCspFilters(unittest.TestCase):
         self.domains['web-app-desktop'] = ['domain-example.com']
         
         header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
-        # Expect '*.domain-example.com' in the frame-ancestors directive
+        # Expect 'domain-example.com' in the frame-ancestors directive
         self.assertRegex(
             header,
             r"frame-ancestors\s+'self'\s+domain-example\.com;"
@@ -194,8 +192,8 @@ class TestCspFilters(unittest.TestCase):
         # Now disable the feature and rebuild
         self.apps['app1']['features']['desktop'] = False
         header_no = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
-        # Should no longer contain the wildcarded sld.tld
-        self.assertNotIn("*.domain-example.com", header_no)
+        # Should no longer contain the SLD+TLD
+        self.assertNotIn("domain-example.com", header_no)
 
 
 if __name__ == '__main__':
