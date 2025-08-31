@@ -17,7 +17,7 @@ database:
     database: "{{ database_name }}"
     host: "{{ database_host }}"
     cp_min: 5
-    cp_max: 10
+    cp_max: {{ POSTGRES_ALLOWED_AVG_CONNECTIONS }}
 log_config:                     "{{ MATRIX_SYNAPSE_LOG_PATH_CONTAINER }}"
 media_store_path:               "/data/media_store"
 registration_shared_secret:     "{{ MATRIX_REGISTRATION_SHARED_SECRET }}"

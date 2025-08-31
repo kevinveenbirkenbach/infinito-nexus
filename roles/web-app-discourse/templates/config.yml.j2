@@ -31,10 +31,15 @@ params:
   #version: tests-passed
 
 env:
-  LC_ALL: en_US.UTF-8
-  LANG: en_US.UTF-8
-  LANGUAGE: en_US.UTF-8
+  LC_ALL:   "{{ HOST_LL_CC }}.UTF-8"
+  LANG:     "{{ HOST_LL_CC }}.UTF-8"
+  LANGUAGE: "{{ HOST_LL_CC }}.UTF-8"
   #DISCOURSE_DEFAULT_LOCALE: {{ HOST_LL }} # Deactivated because not right format was selected @todo find right format
+
+  DB_POOL:            "{{ POSTGRES_ALLOWED_AVG_CONNECTIONS }}"
+  RAILS_MAX_THREADS:  "{{ [ (POSTGRES_ALLOWED_AVG_CONNECTIONS | int), 5 ] | min }}"
+  UNICORN_WORKERS:    "{{ [ (POSTGRES_ALLOWED_AVG_CONNECTIONS | int) // 2, 1 ] | max }}"
+
 
   ## How many concurrent web requests are supported? Depends on memory and CPU cores.
   ## will be set automatically by bootstrap based on detected CPUs, or you can override

@@ -40,7 +40,7 @@
          "client_secret": OIDC.CLIENT.SECRET
       } | to_json }}
 
-- name: Update administrator email and password login in Listmonk
+- name: Update administrator email and password login in Listmonk (as superuser)
   shell: |
     docker exec -i {{ database_host }} psql \
       -U {{ database_username }} \

@@ -1,3 +1,7 @@
+- name: Compute average allowed connections per Postgres app (once)
+  set_fact:
+    POSTGRES_ALLOWED_AVG_CONNECTIONS: "{{ (POSTGRES_MAX_CONNECTIONS | split_postgres_connections(playbook_dir ~ '/roles')) | int }}"
+  run_once: true
 
 - name: Include dependency 'sys-svc-docker'
   include_role:

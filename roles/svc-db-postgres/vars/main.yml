@@ -1,25 +1,37 @@
 # General
-application_id:                 svc-db-postgres
+application_id:                           svc-db-postgres
 
 # Docker
-docker_compose_flush_handlers:  true
+docker_compose_flush_handlers:            true
 
 # Docker Compose
-database_type:                  "{{ application_id | get_entity_name }}"
+database_type:                            "{{ application_id | get_entity_name }}"
 
 ## Postgres
-POSTGRES_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-POSTGRES_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.postgres.name', True) }}"
-POSTGRES_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.postgres.image', True) }}"
-POSTGRES_SUBNET:                "{{ networks.local['svc-db-postgres'].subnet }}"
-POSTGRES_NETWORK_NAME:          "{{ applications | get_app_conf(application_id, 'docker.network', True) }}"
-POSTGRES_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.postgres.version', True) }}"
-POSTGRES_PASSWORD:              "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
-POSTGRES_PORT:                  "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
-POSTGRES_INIT:                  "{{ database_username is defined and database_password is defined and database_name is defined }}"
-POSTGRES_EXPOSE_LOCAL:          True # Exposes the db to localhost, almost everytime neccessary
-POSTGRES_CUSTOM_IMAGE_NAME:     "postgres_custom"
-POSTGRES_LOCAL_HOST:            "127.0.0.1"
-POSTGRES_VECTOR_ENABLED:        True # Required by discourse, propably in a later step it makes sense to define this as a configuration option in config/main.yml
-POSTGRES_RETRIES:               5
-POSTGRES_DELAY:                 2
+POSTGRES_VOLUME:                          "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+POSTGRES_CONTAINER:                       "{{ applications | get_app_conf(application_id, 'docker.services.postgres.name') }}"
+POSTGRES_IMAGE:                           "{{ applications | get_app_conf(application_id, 'docker.services.postgres.image') }}"
+POSTGRES_SUBNET:                          "{{ networks.local['svc-db-postgres'].subnet }}"
+POSTGRES_NETWORK_NAME:                    "{{ applications | get_app_conf(application_id, 'docker.network') }}"
+POSTGRES_VERSION:                         "{{ applications | get_app_conf(application_id, 'docker.services.postgres.version') }}"
+POSTGRES_PASSWORD:                        "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD') }}"
+POSTGRES_PORT:                            "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
+POSTGRES_INIT:                            "{{ database_username is defined and database_password is defined and database_name is defined }}"
+POSTGRES_EXPOSE_LOCAL:                    True # Exposes the db to localhost, almost everytime neccessary
+POSTGRES_CUSTOM_IMAGE_NAME:               "postgres_custom"
+POSTGRES_LOCAL_HOST:                      "127.0.0.1"
+POSTGRES_VECTOR_ENABLED:                  True # Required by discourse, propably in a later step it makes sense to define this as a configuration option in config/main.yml
+POSTGRES_RETRIES:                         5
+
+## Performance
+POSTGRES_TOTAL_RAM_MB:                    "{{ ansible_memtotal_mb | int }}"
+POSTGRES_VCPUS:                           "{{ ansible_processor_vcpus | int }}"
+POSTGRES_MAX_CONNECTIONS:                 "{{ [ ((POSTGRES_VCPUS | int) * 30 + 50), 400 ] | min }}"
+POSTGRES_SUPERUSER_RESERVED_CONNECTIONS:  3
+POSTGRES_SHARED_BUFFERS_MB:               "{{ ((POSTGRES_TOTAL_RAM_MB | int) * 25) // 100 }}"
+POSTGRES_SHARED_BUFFERS:                  "{{ POSTGRES_SHARED_BUFFERS_MB ~ 'MB' }}"
+POSTGRES_WORK_MEM_MB:                     "{{ [ ( (POSTGRES_TOTAL_RAM_MB | int) // ( [ (POSTGRES_MAX_CONNECTIONS | int), 1 ] | max ) // 2 ), 1 ] | max }}"
+POSTGRES_WORK_MEM:                        "{{ POSTGRES_WORK_MEM_MB ~ 'MB' }}"
+POSTGRES_MAINTENANCE_WORK_MEM_MB:         "{{ [ (((POSTGRES_TOTAL_RAM_MB | int) * 5) // 100), 64 ] | max }}"
+POSTGRES_MAINTENANCE_WORK_MEM:            "{{ POSTGRES_MAINTENANCE_WORK_MEM_MB ~ 'MB' }}"
+POSTGRES_DELAY:                           2
