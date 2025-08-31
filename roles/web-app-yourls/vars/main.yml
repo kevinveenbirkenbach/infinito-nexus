@@ -2,14 +2,15 @@
 application_id:                 "web-app-yourls"
 database_type:                  "mariadb"
 
-# Yourls Specific
-yourls_user:                    "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
-yourls_password:                "{{ applications | get_app_conf(application_id, 'credentials.administrator_password', True) }}"
-yourls_version:                 "{{ applications | get_app_conf(application_id, 'docker.services.yourls.version', True) }}"
-yourls_image:                   "{{ applications | get_app_conf(application_id, 'docker.services.yourls.image', True) }}"
-yourls_container:               "{{ applications | get_app_conf(application_id, 'docker.services.yourls.name', True) }}"
-yourls_admin_location:          "{{ applications | get_app_conf(application_id, 'server.locations.admin', True) }}"
-yourls_landingpage_status_code: "{{ applications | get_app_conf(application_id, 'server.status_codes.landingpage', True) }}"
-
-# Nginx Specific
+# Webserver
 proxy_extra_configuration:      "{{ lookup('template', 'redirect.conf.j2') }}"
+
+# Yourls
+YOURLS_USER:                    "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
+YOURLS_PASSWORD:                "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
+YOURLS_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.yourls.version') }}"
+YOURLS_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.yourls.image') }}"
+YOURLS_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.yourls.name') }}"
+YOURLS_ADMIN_LOCATION:          "{{ applications | get_app_conf(application_id, 'server.locations.admin') }}"
+YOURLS_LANDINGPAGE_STATUS_CODE: "{{ applications | get_app_conf(application_id, 'server.status_codes.landingpage') }}"
+

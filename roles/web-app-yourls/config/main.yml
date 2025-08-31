@@ -9,7 +9,7 @@ oauth2_proxy:
 features:
   matomo:             true
   css:                true
-  desktop:    true
+  desktop:            true
   central_database:   true
   oauth2:             true
   logout:             true
@@ -34,7 +34,7 @@ server:
 docker:
   services:
     database:
-      enabled: true
+      enabled:    true
     yourls: 
       version:    "latest"
       name:       "yourls"
