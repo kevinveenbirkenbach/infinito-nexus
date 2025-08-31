@@ -111,17 +111,18 @@ class FilterModule(object):
         """
         try:
             directives = [
-                'default-src',
-                'connect-src',
-                'frame-ancestors',
-                'frame-src',
-                'script-src',
-                'script-src-elem',
-                'style-src',
-                'font-src',
-                'worker-src',
-                'manifest-src',
-                'media-src',
+                'default-src',      # Fallback source list for all content types not explicitly listed
+                'connect-src',      # Controls allowed URLs for XHR, WebSockets, EventSource, and fetch()
+                'frame-ancestors',  # Restricts which parent frames can embed this page via <iframe>, <object>, <embed>, <applet>
+                'frame-src',        # Controls allowed sources for nested browsing contexts like <iframe>
+                'script-src',       # Controls allowed sources for inline scripts and <script> elements (general script execution)
+                'script-src-elem',  # Controls allowed sources specifically for <script> elements (separate from inline/event handlers)
+                'style-src',        # Controls allowed sources for inline styles and <style>/<link> elements (general styles)
+                'style-src-elem',   # Controls allowed sources specifically for <style> and <link rel="stylesheet"> elements
+                'font-src',         # Controls allowed sources for fonts loaded via @font-face
+                'worker-src',       # Controls allowed sources for web workers, shared workers, and service workers
+                'manifest-src',     # Controls allowed sources for web app manifests
+                'media-src',        # Controls allowed sources for media files like <audio> and <video>
             ]
             parts = []
 
