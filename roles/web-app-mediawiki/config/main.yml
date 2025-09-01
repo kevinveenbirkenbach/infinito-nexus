@@ -18,6 +18,6 @@ docker:
 features:
   logout:           true
   central_database: true
-  css:              true
+  css:              false
   desktop:          true
   oidc:             true
