@@ -10,7 +10,7 @@ server:
         - https://cdnjs.cloudflare.com
         - https://code.jquery.com
         - https://cdn.jsdelivr.net
-      style-src:
+      style-src-elem:
         - https://cdnjs.cloudflare.com
         - https://cdn.jsdelivr.net
       font-src:

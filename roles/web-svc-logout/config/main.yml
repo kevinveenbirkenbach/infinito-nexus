@@ -20,7 +20,7 @@ server:
         - "{{ WEB_PROTOCOL }}://{{ PRIMARY_DOMAIN }}"
       script-src-elem:
         - https://cdn.jsdelivr.net
-      style-src:
+      style-src-elem:
         - https://cdn.jsdelivr.net
       frame-ancestors:
         - "{{ WEB_PROTOCOL }}://<< defaults_applications[web-app-keycloak].server.domains.canonical[0] >>"

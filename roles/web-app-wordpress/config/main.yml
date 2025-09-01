@@ -33,7 +33,7 @@ server:
         - "https://cdn.gtranslate.net"    # Necessary for translation plugins
         - "https://translate.google.com"  # Necessary for translation plugins
         - "blog.{{ PRIMARY_DOMAIN }}"
-      style-src:
+      style-src-elem:
         - "https://fonts.bunny.net"
       frame-src:
         - "blob:"

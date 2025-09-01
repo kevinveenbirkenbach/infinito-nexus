@@ -14,7 +14,7 @@ server:
     whitelist:
       script-src-elem:
         - https://cdn.matomo.cloud
-      style-src:
+      style-src-elem:
         - https://fonts.googleapis.com
     flags:
       script-src:

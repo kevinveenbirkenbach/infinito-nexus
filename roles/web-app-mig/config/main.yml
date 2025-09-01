@@ -17,7 +17,7 @@ server:
         - https://kit.fontawesome.com
         - https://code.jquery.com/
         - https://unpkg.com/
-      style-src:
+      style-src-elem:
         - https://cdn.jsdelivr.net
         - https://cdnjs.cloudflare.com
       font-src:
