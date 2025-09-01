@@ -13,7 +13,7 @@ from url_join import url_join
 
 
 class TestUrlJoinFilter(unittest.TestCase):
-    # --- success cases ---
+    # --- success cases (path only) ---
     def test_http_basic(self):
         self.assertEqual(
             url_join(['http://example.com', 'foo', 'bar']),
@@ -32,31 +32,41 @@ class TestUrlJoinFilter(unittest.TestCase):
             'myapp+v1://host/section/item'
         )
 
-    def test_scheme_with_path_in_first(self):
+    def test_only_scheme(self):
+        self.assertEqual(url_join(['https://']), 'https://')
+
+    # --- success cases with query ---
+    def test_query_normalization_first_q_then_amp(self):
         self.assertEqual(
-            url_join(['https://example.com/base/', '/deep/', 'leaf']),
-            'https://example.com/base/deep/leaf'
+            url_join(['https://example.com', 'api', '?a=1', '&b=2']),
+            'https://example.com/api?a=1&b=2'
+        )
+
+    def test_query_ignores_given_prefix_order(self):
+        self.assertEqual(
+            url_join(['https://example.com', '?a=1', '?b=2', '&c=3']),
+            'https://example.com?a=1&b=2&c=3'
+        )
+
+    def test_query_after_path_with_slashes(self):
+        self.assertEqual(
+            url_join(['https://example.com/', '/x/', 'y/', '?q=ok']),
+            'https://example.com/x/y?q=ok'
+        )
+
+    def test_query_with_numeric_value(self):
+        self.assertEqual(
+            url_join(['https://example.com', '?n=123']),
+            'https://example.com?n=123'
         )
 
     def test_none_in_list(self):
         self.assertEqual(
-            url_join(['https://example.com', None, 'foo']),
-            'https://example.com/foo'
+            url_join(['https://example.com', None, 'foo', None, '?a=1', None]),
+            'https://example.com/foo?a=1'
         )
 
-    def test_numeric_parts(self):
-        self.assertEqual(
-            url_join(['https://example.com', 123, '456']),
-            'https://example.com/123/456'
-        )
-
-    def test_only_scheme_returns_scheme(self):
-        self.assertEqual(
-            url_join(['https://']),
-            'https://'
-        )
-
-    # --- error cases with specific messages ---
+    # --- error cases ---
     def test_none_input_raises(self):
         with self.assertRaisesRegex(AnsibleFilterError, r"parts must be a non-empty list; got None"):
             url_join(None)
@@ -81,6 +91,26 @@ class TestUrlJoinFilter(unittest.TestCase):
         with self.assertRaisesRegex(AnsibleFilterError, r"only the first element may contain a scheme"):
             url_join(['https://example.com', 'https://elsewhere'])
 
+    def test_path_after_query_raises(self):
+        with self.assertRaisesRegex(AnsibleFilterError, r"path element .* after query parameters started"):
+            url_join(['https://example.com', '?a=1', 'still/path'])
+
+    def test_query_element_empty_raises(self):
+        with self.assertRaisesRegex(AnsibleFilterError, r"query element .* is empty"):
+            url_join(['https://example.com', '?'])
+
+    def test_query_element_multiple_pairs_raises(self):
+        with self.assertRaisesRegex(AnsibleFilterError, r"must contain exactly one 'key=value' pair"):
+            url_join(['https://example.com', '?a=1&b=2'])
+
+    def test_query_element_missing_equal_raises(self):
+        with self.assertRaisesRegex(AnsibleFilterError, r"must match 'key=value'"):
+            url_join(['https://example.com', '&a'])
+
+    def test_query_element_bad_chars_raises(self):
+        with self.assertRaisesRegex(AnsibleFilterError, r"must match 'key=value'"):
+            url_join(['https://example.com', '?a#=1'])
+
     def test_unstringifiable_first_part_raises(self):
         class Bad:
             def __str__(self):
@@ -92,8 +122,8 @@ class TestUrlJoinFilter(unittest.TestCase):
         class Bad:
             def __str__(self):
                 raise ValueError("boom")
-        with self.assertRaisesRegex(AnsibleFilterError, r"unable to convert part at index 2"):
-            url_join(['https://example.com', 'ok', Bad()])
+        with self.assertRaisesRegex(AnsibleFilterError, r"unable to convert part at index 3"):
+            url_join(['https://example.com', 'ok', '?a=1', Bad()])
 
 
 if __name__ == '__main__':

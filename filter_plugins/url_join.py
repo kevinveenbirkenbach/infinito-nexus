@@ -2,6 +2,10 @@
 Ansible filter plugin that safely joins URL components from a list.
 - Requires a valid '<scheme>://' in the first element (any RFC-3986-ish scheme)
 - Preserves the double slash after the scheme, collapses other duplicate slashes
+- Supports query parts introduced by elements starting with '?' or '&'
+  * first query element uses '?', subsequent use '&' (regardless of given prefix)
+  * each query element must be exactly one 'key=value' pair
+  * query elements may only appear after path elements; once query starts, no more path parts
 - Raises specific AnsibleFilterError messages for common misuse
 """
 
@@ -9,6 +13,7 @@ import re
 from ansible.errors import AnsibleFilterError
 
 _SCHEME_RE = re.compile(r'^([a-zA-Z][a-zA-Z0-9+.\-]*://)(.*)$')
+_QUERY_PAIR_RE = re.compile(r'^[^&=?#]+=[^&?#]*$')  # key=value (no '&', no extra '?' or '#')
 
 def _to_str_or_error(obj, index):
     """Cast to str, raising a specific AnsibleFilterError with index context."""
@@ -21,22 +26,20 @@ def _to_str_or_error(obj, index):
 
 def url_join(parts):
     """
-    Join a list of URL parts, URL-aware.
+    Join a list of URL parts, URL-aware (scheme, path, query).
 
     Args:
-        parts (list): List/tuple of URL segments. First element MUST include '<scheme>://'.
+        parts (list|tuple): URL segments. First element MUST include '<scheme>://'.
+            Path elements are plain strings.
+            Query elements must start with '?' or '&' and contain exactly one 'key=value'.
 
     Returns:
         str: Joined URL.
 
-    Raises (all via AnsibleFilterError with specific messages):
-        - Input is None/empty
-        - Input is not a list/tuple
-        - First element missing/invalid scheme
-        - Part cannot be converted to string (includes index)
-        - Additional scheme found in a later element
+    Raises:
+        AnsibleFilterError: with specific, descriptive messages.
     """
-    # Basic input validation
+    # --- basic input validation ---
     if parts is None:
         raise AnsibleFilterError("url_join: parts must be a non-empty list; got None")
     if not isinstance(parts, (list, tuple)):
@@ -46,7 +49,7 @@ def url_join(parts):
     if len(parts) == 0:
         raise AnsibleFilterError("url_join: parts must be a non-empty list")
 
-    # First element must carry the scheme
+    # --- first element must carry a scheme ---
     first_raw = parts[0]
     if first_raw is None:
         raise AnsibleFilterError(
@@ -64,36 +67,76 @@ def url_join(parts):
     scheme = m.group(1)                    # e.g., 'https://', 'ftp://', 'myapp+v1://'
     after_scheme = m.group(2).lstrip('/')  # strip only leading slashes right after scheme
 
-    # Normalize all parts to strings (with index-aware errors)
-    normalized = []
+    # --- iterate parts: collect path parts until first query part; then only query parts allowed ---
+    path_parts = []
+    query_pairs = []
+    in_query = False
+
     for i, p in enumerate(parts):
         if p is None:
-            # Skip None parts silently (like path_join behavior)
+            # skip None silently (consistent with path_join-ish behavior)
             continue
+
         s = _to_str_or_error(p, i)
+
+        # disallow additional scheme in later parts
         if i > 0 and "://" in s:
             raise AnsibleFilterError(
                 f"url_join: only the first element may contain a scheme; part at index {i} "
                 f"looks like a URL with scheme ('{s}')."
             )
-        normalized.append(s)
 
-    # Replace first element with remainder after scheme
-    if normalized:
-        normalized[0] = after_scheme
+        # first element: replace with remainder after scheme and continue
+        if i == 0:
+            s = after_scheme
+
+        # check if this is a query element (starts with ? or &)
+        if s.startswith('?') or s.startswith('&'):
+            in_query = True
+            raw_pair = s[1:]  # strip the leading ? or &
+            if raw_pair == '':
+                raise AnsibleFilterError(
+                    f"url_join: query element at index {i} is empty; expected '?key=value' or '&key=value'"
+                )
+            # Disallow multiple pairs in a single element; enforce exactly one key=value
+            if '&' in raw_pair:
+                raise AnsibleFilterError(
+                    f"url_join: query element at index {i} must contain exactly one 'key=value' pair "
+                    f"without '&'; got '{s}'"
+                )
+            if not _QUERY_PAIR_RE.match(raw_pair):
+                raise AnsibleFilterError(
+                    f"url_join: query element at index {i} must match 'key=value' (no extra '?', '&', '#'); got '{s}'"
+                )
+            query_pairs.append(raw_pair)
+        else:
+            # non-query element
+            if in_query:
+                # once query started, no more path parts allowed
+                raise AnsibleFilterError(
+                    f"url_join: path element found at index {i} after query parameters started; "
+                    f"query parts must come last"
+                )
+            # normal path part: strip slashes to avoid duplicate '/'
+            path_parts.append(s.strip('/'))
+
+    # normalize path: remove empty chunks
+    path_parts = [p for p in path_parts if p != '']
+
+    # --- build result ---
+    # path portion
+    if path_parts:
+        joined_path = "/".join(path_parts)
+        base = scheme + joined_path
     else:
-        # This can only happen if all parts were None, but we gated that earlier
-        return scheme
+        # no path beyond scheme
+        base = scheme
 
-    # Strip slashes at both ends of each part, then filter out empties
-    stripped = [p.strip('/') for p in normalized]
-    stripped = [p for p in stripped if p != '']
+    # query portion
+    if query_pairs:
+        base = base + "?" + "&".join(query_pairs)
 
-    # If everything is empty after stripping, return just the scheme
-    if not stripped:
-        return scheme
-
-    return scheme + "/".join(stripped)
+    return base
 
 
 class FilterModule(object):
