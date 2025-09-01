@@ -23,7 +23,6 @@ class TestDockerCardsLookup(unittest.TestCase):
         os.makedirs(os.path.join(self.role_dir, "meta"))
         os.makedirs(os.path.join(self.role_dir, "vars"))
 
-        # Create vars/main.yml so get_application_id() can find the application_id.
         vars_main = os.path.join(self.role_dir, "vars", "main.yml")
         with open(vars_main, "w", encoding="utf-8") as f:
             f.write("application_id: portfolio\n")

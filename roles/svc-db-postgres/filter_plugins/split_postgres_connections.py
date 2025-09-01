@@ -37,22 +37,8 @@ def split_postgres_connections(total_connections, roles_dir="roles"):
     denom = max(count, 1)
     return max(1, total // denom)
 
-def list_postgres_roles(roles_dir="roles"):
-    """
-    Helper: return a list of role names that declare database_type: postgres in vars/main.yml.
-    """
-    names = []
-    if not os.path.isdir(roles_dir):
-        return names
-    for name in os.listdir(roles_dir):
-        vars_main = os.path.join(roles_dir, name, "vars", "main.yml")
-        if os.path.isfile(vars_main) and _is_postgres_role(vars_main):
-            names.append(name)
-    return names
-
 class FilterModule(object):
     def filters(self):
         return {
-            "split_postgres_connections": split_postgres_connections,
-            "list_postgres_roles": list_postgres_roles,
+            "split_postgres_connections": split_postgres_connections
         }

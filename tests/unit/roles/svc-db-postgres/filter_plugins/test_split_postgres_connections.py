@@ -77,12 +77,6 @@ class SplitPostgresConnectionsTests(unittest.TestCase):
     def test_registry_contains_filters(self):
         registry = self.mod.FilterModule().filters()
         self.assertIn("split_postgres_connections", registry)
-        self.assertIn("list_postgres_roles", registry)
-
-    def test_list_postgres_roles(self):
-        roles = self.mod.list_postgres_roles(self.roles_dir)
-        self.assertIsInstance(roles, list)
-        self.assertSetEqual(set(roles), {"app_a", "app_b"})
 
     def test_split_postgres_connections_division(self):
         # There are 2 postgres roles -> 200 / 2 = 100
