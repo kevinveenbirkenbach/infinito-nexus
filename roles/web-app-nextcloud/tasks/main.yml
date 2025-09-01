@@ -11,7 +11,7 @@
 
 - name: "include role for {{ application_id }} to receive certs & do modification routines"
   include_role:
-    name: srv-composer
+    name: sys-util-csp-cert
 
 - name: create nextcloud proxy configuration file
   template: 

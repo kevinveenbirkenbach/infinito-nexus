@@ -3,7 +3,7 @@
   set_fact:
     proxy_extra_configuration: >-
       {{ lookup('ansible.builtin.template',
-                playbook_dir ~ '/roles/srv-proxy-core/templates/location/html.conf.j2') | trim }}
+                playbook_dir ~ '/roles/sys-svc-proxy/templates/location/html.conf.j2') | trim }}
   vars:
     location: '^~ /html5client'
     oauth2_proxy_enabled: false

@@ -1,8 +1,8 @@
-- name: Include dependency 'srv-core'
+- name: Include dependency 'sys-svc-webserver'
   include_role:
-    name: srv-core
+    name: sys-svc-webserver
   when: 
-    - run_once_srv_core is not defined
+    - run_once_sys_svc_webserver is not defined
   
 - name: "deploy the logout.js"
   include_tasks: "02_deploy.yml"

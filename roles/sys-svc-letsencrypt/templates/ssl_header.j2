@@ -12,4 +12,4 @@ ssl_session_tickets on;
 add_header Strict-Transport-Security max-age=15768000;
 ssl_stapling on;
 ssl_stapling_verify on;
-{% include 'roles/srv-letsencrypt/templates/ssl_credentials.j2' %}
+{% include 'roles/sys-svc-letsencrypt/templates/ssl_credentials.j2' %}

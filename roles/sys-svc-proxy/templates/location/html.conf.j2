@@ -15,7 +15,7 @@ location {{location}}
   proxy_set_header X-Forwarded-Proto $scheme;
   proxy_set_header X-Forwarded-Port {{ WEB_PORT }};
 
-  {% include 'roles/srv-proxy-core/templates/headers/content_security_policy.conf.j2' %}
+  {% include 'roles/sys-svc-proxy/templates/headers/content_security_policy.conf.j2' %}
 
   # WebSocket specific header
   proxy_http_version 1.1;

@@ -8,7 +8,7 @@
 - name: "generate {{ domain }}.conf"
   template:
     src: "nginx.conf.j2"
-    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domain }}.conf"
+    dest: "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
   notify: restart openresty
 
 - name: Update Collabora systemplate to include new fonts

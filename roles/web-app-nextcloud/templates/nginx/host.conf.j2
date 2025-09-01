@@ -2,7 +2,7 @@ server
 {
   server_name {{ domain }};
 
-  {% include 'roles/srv-letsencrypt/templates/ssl_header.j2' %}
+  {% include 'roles/sys-svc-letsencrypt/templates/ssl_header.j2' %}
 
   {% include 'roles/sys-front-inj-all/templates/server.conf.j2'%}
 
@@ -17,7 +17,7 @@ server
   client_body_buffer_size 400M;
   fastcgi_buffers 64 4K;
 
-  {% include 'roles/srv-proxy-core/templates/location/html.conf.j2' %}
+  {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
 
   location ^~ /.well-known {
     rewrite ^/\.well-known/host-meta\.json  /public.php?service=host-meta-json  last;

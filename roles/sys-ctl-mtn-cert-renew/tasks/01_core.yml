@@ -3,7 +3,7 @@
     name: '{{ item }}'
   loop:
   - sys-svc-certbot
-  - srv-core
+  - sys-svc-webserver
   - sys-ctl-alm-compose
 
 - name: install certbot

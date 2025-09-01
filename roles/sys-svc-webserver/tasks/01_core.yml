@@ -49,3 +49,5 @@
     - sys-ctl-hlth-csp
   vars:
     flush_handlers: false
+
+- include_tasks: utils/run_once.yml

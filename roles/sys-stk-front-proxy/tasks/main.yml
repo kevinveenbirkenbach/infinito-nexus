@@ -1,8 +1,8 @@
 - block:
-  - name: Include dependency 'srv-proxy-core'
+  - name: Include dependency 'sys-svc-proxy'
     include_role:
-      name: srv-proxy-core
-    when: run_once_srv_proxy_core is not defined
+      name: sys-svc-proxy
+    when: run_once_sys_svc_proxy is not defined
   - include_tasks: utils/run_once.yml
   when: run_once_sys_stk_front_proxy is not defined
 
@@ -15,7 +15,7 @@
 
 - name: "include role for {{ domain }} to receive certificates and do the modification routines"
   include_role:
-    name: srv-composer
+    name: sys-util-csp-cert
 
 - name: "Copy nginx config to {{ configuration_destination }}"
   template:

@@ -1,4 +1,4 @@
 - block:
   - include_tasks: 01_core.yml
   - include_tasks: utils/run_once.yml
-  when: run_once_srv_letsencrypt is not defined
+  when: run_once_sys_svc_letsencrypt is not defined

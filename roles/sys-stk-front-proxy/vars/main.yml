@@ -1,1 +1,1 @@
-configuration_destination:  "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domain }}.conf"
+configuration_destination:  "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"

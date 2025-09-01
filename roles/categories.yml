@@ -111,16 +111,6 @@ roles:
       description: "Developer-centric server utilities and admin toolkits."
       icon: "fas fa-code"
       invokable: false
-  srv:
-    title: "Server"
-    description: "General server roles for provisioning and managing server infrastructure—covering web servers, proxy servers, network services, and other backend components."
-    icon: "fas fa-server"
-    invokable: false
-    proxy:
-      title: "Proxy Server"
-      description: "Proxy-server roles for virtual-host orchestration and reverse-proxy setups."
-      icon: "fas fa-project-diagram"
-      invokable: false
   web:
     title: "Web Infrastructure"
     description: "Roles for managing web infrastructure—covering static content services and deployable web applications."

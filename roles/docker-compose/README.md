@@ -20,7 +20,7 @@ To offer a centralized, extensible system for managing containerized application
 - **Reset Logic:** Cleans previous Compose project files and data when `MODE_RESET` is enabled.
 - **Handlers for Runtime Control:** Automatically builds, sets up, or restarts containers based on handlers.
 - **Template-ready Service Files:** Predefined service base and health check templates.
-- **Integration Support:** Compatible with `srv-proxy-core` and other Infinito.Nexus service roles.
+- **Integration Support:** Compatible with `sys-svc-proxy` and other Infinito.Nexus service roles.
 
 ## Administration Tips
 

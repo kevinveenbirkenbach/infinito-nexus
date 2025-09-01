@@ -2,4 +2,4 @@
 vhost_flavour:        "basic"               # valid: basic, ws_generic
 
 # build the full template path from the flavour
-vhost_template_src:   "roles/srv-proxy-core/templates/vhost/{{ vhost_flavour }}.conf.j2"
+vhost_template_src:   "roles/sys-svc-proxy/templates/vhost/{{ vhost_flavour }}.conf.j2"

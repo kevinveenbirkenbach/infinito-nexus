@@ -4,6 +4,6 @@
       name: '{{ item }}'
     loop:
     - sys-stk-front-pure
-    - srv-core
+    - sys-svc-webserver
   - include_tasks: utils/run_once.yml
-  when: run_once_srv_proxy_core is not defined
+  when: run_once_sys_svc_proxy is not defined

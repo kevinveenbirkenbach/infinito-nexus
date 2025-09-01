@@ -1,6 +1,6 @@
 server {
     server_name {{ domain }};
-    {% include 'roles/srv-letsencrypt/templates/ssl_header.j2' %}
+    {% include 'roles/sys-svc-letsencrypt/templates/ssl_header.j2' %}
     
     # For the federation port
     listen {{ MATRIX_FEDERATION_PORT }} ssl default_server;
@@ -8,7 +8,7 @@ server {
 
     {% include 'roles/sys-front-inj-all/templates/server.conf.j2'%}
 
-    {% include 'roles/srv-proxy-core/templates/location/html.conf.j2' %}
+    {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
 
-    {% include 'roles/srv-proxy-core/templates/location/upload.conf.j2' %}
+    {% include 'roles/sys-svc-proxy/templates/location/upload.conf.j2' %}
 }

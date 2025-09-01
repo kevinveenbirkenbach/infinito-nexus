@@ -27,4 +27,4 @@ galaxy_info:
     - orchestration
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/roles/srv-composer"
+  documentation: "https://s.infinito.nexus/code/roles/sys-util-csp-cert"

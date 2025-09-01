@@ -1,4 +1,4 @@
-# Role: srv-composer
+# Role: sys-util-csp-cert
 
 This Ansible role composes and orchestrates all necessary HTTPS-layer tasks and HTML-content injections for your webserver domains. It integrates two key sub-roles into a unified workflow:
 

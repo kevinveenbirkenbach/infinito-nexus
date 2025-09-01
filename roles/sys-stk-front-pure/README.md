@@ -7,7 +7,7 @@ The **sys-stk-front-pure** role extends a basic Nginx installation by wiring in 
 2. Pulls in Let’s Encrypt ACME challenge handling.
 3. Applies global cleanup of unused domain configs.
 
-This role is built on top of your existing `srv-core` role, and it automates the end-to-end process of turning HTTP sites into secure HTTPS sites.
+This role is built on top of your existing `sys-svc-webserver` role, and it automates the end-to-end process of turning HTTP sites into secure HTTPS sites.
 
 ---
 
@@ -15,9 +15,9 @@ This role is built on top of your existing `srv-core` role, and it automates the
 
 When you apply **sys-stk-front-pure**, it will:
 
-1. **Include** the `srv-core` role to install and configure Nginx.  
+1. **Include** the `sys-svc-webserver` role to install and configure Nginx.  
 2. **Clean up** any stale vHost files under `sys-svc-cln-domains`.  
-3. **Deploy** the Let’s Encrypt challenge-and-redirect snippet from `srv-letsencrypt`.  
+3. **Deploy** the Let’s Encrypt challenge-and-redirect snippet from `sys-svc-letsencrypt`.  
 4. **Reload** Nginx automatically when any template changes.
 
 All tasks are idempotent—once your certificates are in place and your configuration is set, Ansible will skip unchanged steps on subsequent runs.
@@ -42,7 +42,7 @@ All tasks are idempotent—once your certificates are in place and your configur
 
 ## Requirements
 
-- A working `srv-core` setup.
+- A working `sys-svc-webserver` setup.
 - DNS managed via Cloudflare (for CAA record tasks) or equivalent ACME DNS flow.
 - Variables:
   - `LETSENCRYPT_WEBROOT_PATH`  

@@ -15,6 +15,6 @@
 
 - name: Remove exact nginx config for {{ domain }}
   ansible.builtin.file:
-    path: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domain }}.conf"
+    path: "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
     state: absent
   notify: restart openresty

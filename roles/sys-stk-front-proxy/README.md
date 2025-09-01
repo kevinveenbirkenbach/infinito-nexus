@@ -10,7 +10,7 @@ A higher-level orchestration wrapper, *sys-stk-front-proxy* ties together severa
 
 1. **`sys-front-inj-all`** – applies global tweaks and includes.  
 2. **`sys-svc-certs`** – obtains Let’s Encrypt certificates.  
-3. **Domain template deployment** – copies a Jinja2 vHost from *srv-proxy-core*.  
+3. **Domain template deployment** – copies a Jinja2 vHost from *sys-svc-proxy*.  
 4. **`web-app-oauth2-proxy`** *(optional)* – protects the site with OAuth2.
 
 The result is a complete, reproducible domain rollout in a single playbook task.

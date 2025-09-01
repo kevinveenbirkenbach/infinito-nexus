@@ -1,6 +1,6 @@
 # Nginx Location Templates
 
-This directory contains Jinja2 templates for different Nginx `location` blocks, each designed to proxy and optimize different types of web traffic. These templates are used by the `srv-proxy-core` role to modularize and standardize reverse proxy configuration across a wide variety of applications.
+This directory contains Jinja2 templates for different Nginx `location` blocks, each designed to proxy and optimize different types of web traffic. These templates are used by the `sys-svc-proxy` role to modularize and standardize reverse proxy configuration across a wide variety of applications.
 
 ---
 
