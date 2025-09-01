@@ -3,6 +3,10 @@
         - "CMD"
         - "curl"
         - "-f"
+{% if container_hostname %}
+        - "-H"
+        - "Host: {{ container_hostname }}"
+{% endif %}
         - "http://127.0.0.1{{ (":" ~ container_port) if container_port is defined else '' }}/{{ container_healthcheck | default('') }}"
       interval: 1m
       timeout: 10s
