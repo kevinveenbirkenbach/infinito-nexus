@@ -1,5 +1,23 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
+  proxy:
+    image: "{{ NEXTCLOUD_PROXY_IMAGE }}:{{ NEXTCLOUD_PROXY_VERSION }}"
+    container_name: "{{ NEXTCLOUD_PROXY_CONTAINER }}"
+    logging:
+      driver: journald
+    restart: {{ DOCKER_RESTART_POLICY }}
+    ports:
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    volumes:
+        - "{{ docker_compose.directories.volumes }}nginx.conf:/etc/nginx/nginx.conf:ro"
+    volumes_from:
+      - application
+
+{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
+    networks:
+      default:
+        ipv4_address: 192.168.102.67
+
   application:
     image: "{{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}"
     container_name: {{ NEXTCLOUD_CONTAINER }}
@@ -18,14 +36,17 @@
 
 {% if NEXTCLOUD_TALK_ENABLED %}
   talk:
-    {% include 'roles/docker-container/templates/base.yml.j2' %}
+{% set container_port = NEXTCLOUD_TALK_INTERNAL_PORT %}
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
     image: "{{ NEXTCLOUD_TALK_IMAGE }}:{{ NEXTCLOUD_TALK_VERSION }}"
     container_name: {{ NEXTCLOUD_TALK_CONTAINER }}
     init: true
     ports:
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:3478/tcp #TURN TCP
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:3478/udp #TURN UDP
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_WS_PORT }}:8081/tcp
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:{{ NEXTCLOUD_TALK_INT_TURN_PORT }}/tcp #TURN TCP
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:{{ NEXTCLOUD_TALK_INT_TURN_PORT }}/udp #TURN UDP
+    expose:
+      - "{{ container_port }}"
     networks:
       default:
         ipv4_address: 192.168.102.68
@@ -33,33 +54,17 @@
 
 {% if NEXTCLOUD_WHITEBOARD_ENABLED %}
   whiteboard:
-    {% include 'roles/docker-container/templates/base.yml.j2' %}
+{% set container_port = NEXTCLOUD_WHITEBOARD_INTERNAL_PORT %}
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/docker-container/templates/healthcheck/nc.yml.j2' %}
     image: "{{ NEXTCLOUD_WHITEBOARD_IMAGE }}:{{ NEXTCLOUD_WHITEBOARD_VERSION }}"
     container_name: {{ NEXTCLOUD_WHITEBOARD_CONTAINER }}
     expose:
-      - "{{ NEXTCLOUD_WHITEBOARD_INTERNAL_PORT }}"
+      - "{{ container_port }}"
     networks:
       default:
         ipv4_address: 192.168.102.71
 {% endif %}
-
-  proxy:
-    image: "{{ NEXTCLOUD_PROXY_IMAGE }}:{{ NEXTCLOUD_PROXY_VERSION }}"
-    container_name: "{{ NEXTCLOUD_PROXY_CONTAINER }}"
-    logging:
-      driver: journald
-    restart: {{ DOCKER_RESTART_POLICY }}
-    ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
-    volumes:
-        - "{{ docker_compose.directories.volumes }}nginx.conf:/etc/nginx/nginx.conf:ro"
-    volumes_from:
-      - application
-
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-    networks:
-      default:
-        ipv4_address: 192.168.102.67
 
   cron:
     container_name: "{{ NEXTCLOUD_CRON_CONTAINER }}"

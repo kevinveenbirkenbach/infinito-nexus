@@ -17,9 +17,7 @@ server:
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
   domains:
     canonical:
-      nextcloud:    "cloud.{{ PRIMARY_DOMAIN }}"
-      talk:         "talk.{{ PRIMARY_DOMAIN }}"
-      whiteboard:   "whiteboard.{{ PRIMARY_DOMAIN }}"
+      - "cloud.{{ PRIMARY_DOMAIN }}"
 docker:
   volumes:
     data: nextcloud_data
@@ -242,7 +240,7 @@ plugins:
       - oidc_login  # Will be disabled
   spreed:
     # Nextcloud Spreed: offers video conferencing and chat functionalities (https://apps.nextcloud.com/apps/spreed)
-    enabled: false # @todo to activate it first implement web-svc-coturn and activate it
+    enabled: true
   tables:
     # Nextcloud tables: allows creation and editing of tables within the interface (https://apps.nextcloud.com/apps/tables)
     enabled: true

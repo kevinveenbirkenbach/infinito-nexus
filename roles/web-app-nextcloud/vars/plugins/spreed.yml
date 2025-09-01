@@ -1,0 +1,23 @@
+plugin_configuration:
+  - appid: "spreed"
+    configkey: "signaling_servers"
+    configvalue:
+      - server: "{{ NEXTCLOUD_TALK_URL }}"
+        verify: true
+        # optional:
+        alias: "primary"
+
+  # STUN
+  - appid: "spreed"
+    configkey: "stun_servers"
+    configvalue:
+      - "stun:{{ NEXTCLOUD_TALK_DOMAIN }}:{{ NEXTCLOUD_TALK_STUN_PORT }}"
+
+  # TURN with REST-Secret (used by Talk/Coturn)
+  - appid: "spreed"
+    configkey: "turn_servers"
+    configvalue:
+      - server: "turn:{{ NEXTCLOUD_TALK_DOMAIN }}:{{ NEXTCLOUD_TALK_STUN_PORT }}?transport=udp"
+        secret: "{{ applications | get_app_conf(application_id, 'credentials.talk_turn_secret') }}"
+        ttl: 86400
+        protocols: "udp,tcp"

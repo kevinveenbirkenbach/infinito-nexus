@@ -1,9 +1,0 @@
-- name: Set Whiteboard Configuration
-  ansible.builtin.shell: >
-    {{ NEXTCLOUD_DOCKER_EXEC_OCC }} config:app:set whiteboard collabBackendUrl --value='{{ NEXTCLOUD_WHITEBOARD_URL }}'
-    && {{ NEXTCLOUD_DOCKER_EXEC_OCC }} config:app:set whiteboard jwt_secret_key --value='{{ NEXTCLOUD_WHITEBOARD_JWT }}'
-  args:
-    executable: /bin/bash
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

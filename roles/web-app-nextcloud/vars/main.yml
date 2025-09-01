@@ -63,9 +63,13 @@ NEXTCLOUD_TALK_IMAGE:               "{{ applications | get_app_conf(application_
 NEXTCLOUD_TALK_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.talk.version') }}"
 NEXTCLOUD_TALK_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
 NEXTCLOUD_TALK_STUN_PORT:           "{{ ports.public.stun[application_id] }}"
-NEXTCLOUD_TALK_WS_PORT:             "{{ ports.localhost.websocket[application_id] }}"
-NEXTCLOUD_TALK_DOMAIN:              "{{ domains[application_id].talk }}"
+NEXTCLOUD_TALK_DOMAIN:              "{{ NEXTCLOUD_DOMAIN }}"
+NEXTCLOUD_TALK_LOCATION:            "/standalone-signaling/"
+NEXTCLOUD_TALK_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_LOCATION ] | url_join }}"
+NEXTCLOUD_TALK_INTERNAL_PORT:       "8081"
+NEXTCLOUD_TALK_INT_TURN_PORT:       "3478"
 
+### Whiteboard
 NEXTCLOUD_WHITEBOARD_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.name') }}"
 NEXTCLOUD_WHITEBOARD_IMAGE:         "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.image') }}"
 NEXTCLOUD_WHITEBOARD_VERSION:       "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.version') }}"
@@ -77,7 +81,6 @@ NEXTCLOUD_WHITEBOARD_URL:           "{{ [ NEXTCLOUD_URL, NEXTCLOUD_WHITEBOARD_LO
 
 ### Collabora
 NEXTCLOUD_COLLABORA_URL:            "{{ domains | get_url('web-svc-collabora', WEB_PROTOCOL) }}"
-# NEXTCLOUD_COLLABORA_ENABLED:        "{{ applications | get_app_conf(application_id, 'plugins.richdocuments.enabled') }}"
 
 ## User Configuration
 NEXTCLOUD_DOCKER_USER_id:           82                                                            # UID of the www-data user
