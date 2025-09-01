@@ -1,0 +1,31 @@
+- name: "Add logout domains to CSP connect-src"
+  set_fact:
+    applications: >-
+      {{
+        applications | combine(
+          {
+            application_id: {
+              'server': {
+                'csp': {
+                  'whitelist': {
+                    'connect-src': LOGOUT_CONNECT_SRC_NEW
+                  }
+                }
+              }
+            }
+          },
+          recursive=True
+        )
+      }}
+
+- name: "load docker, proxy for '{{ application_id }}'"
+  include_role:
+    name: sys-stk-full-stateless
+
+- name: Create symbolic link from .env file to repository
+  file:
+    src:    "{{ docker_compose.files.env }}"
+    dest:   "{{ [ docker_repository_path, '.env' ] | path_join  }}"
+    state:  link
+
+- include_tasks: utils/run_once.yml

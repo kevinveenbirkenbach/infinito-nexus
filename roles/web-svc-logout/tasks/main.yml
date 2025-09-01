@@ -1,14 +1,4 @@
 ---
 - block:
-  - name: "load docker, proxy for '{{ application_id }}'"
-    include_role:
-      name: sys-stk-full-stateless
-
-  - name: Create symbolic link from .env file to repository
-    file:
-      src:    "{{ docker_compose.files.env }}"
-      dest:   "{{ [ docker_repository_path, '.env' ] | path_join  }}"
-      state:  link
-
-  - include_tasks: utils/run_once.yml
+    - include_tasks: 01_core.yml
   when: run_once_web_svc_logout is not defined
