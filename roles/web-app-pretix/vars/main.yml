@@ -5,6 +5,7 @@ container_port:                 80
 container_hostname:             "{{ domains | get_domain(application_id) }}"
 
 # Pretix
+
 ## URLs
 PRETIX_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 PRETIX_HOSTNAME:                "{{ container_hostname }}"
@@ -23,6 +24,7 @@ PRETIX_OIDC_JWKS_URL:           "{{ OIDC.CLIENT.CERTS }}"
 PRETIX_OIDC_SCOPES:             "openid,email,profile"
 # Use Keycloak username claim by default (plugin default is 'sub')
 PRETIX_OIDC_UNIQUE_ATTRIBUTE:   "{{ OIDC.ATTRIBUTES.USERNAME }}"
+PRETIX_OIDC_PLUGIN_VERSION:     "{{ applications | get_app_conf(application_id, 'plugins.oidc.version') }}"
 
 ## Redis
 PRETIX_REDIS_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.redis.enabled') }}"
@@ -36,4 +38,4 @@ PRETIX_IMAGE:                   "{{ applications | get_app_conf(application_id, 
 PRETIX_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.pretix.version') }}"
 PRETIX_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.pretix.name') }}"
 PRETIX_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-PRETIX_OIDC_PLUGIN_VERSION:     "{{ applications | get_app_conf(application_id, 'plugins.oidc.version') }}"
+PRETIX_CONFIG_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"

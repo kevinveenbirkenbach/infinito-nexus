@@ -11,6 +11,7 @@
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - 'data:/data'
+      - 'config:/etc/pretix'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
@@ -19,5 +20,7 @@
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
     name: {{ PRETIX_DATA_VOLUME }}
+  config:
+    name: {{ PRETIX_CONFIG_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

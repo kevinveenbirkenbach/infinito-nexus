@@ -9,8 +9,11 @@ docker:
       image:        pretix/standalone
       version:      stable
       name:         pretix
+      backup:
+        no_stop_required: true
   volumes:
     data:           "pretix_data"
+    config:         "pretix_config"
 features:
   matomo:           true
   css:              true
