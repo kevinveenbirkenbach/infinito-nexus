@@ -8,7 +8,6 @@
     - run_once_web_svc_collabora is not defined
     - NEXTCLOUD_COLLABORA_ENABLED | bool
 
-
 - name: "include role for {{ application_id }} to receive certs & do modification routines"
   include_role:
     name: sys-util-csp-cert

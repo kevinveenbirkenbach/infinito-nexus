@@ -40,3 +40,4 @@ docker:
         no_stop_required: true
   volumes:
     data: peertube_data
+    config: peertube_config

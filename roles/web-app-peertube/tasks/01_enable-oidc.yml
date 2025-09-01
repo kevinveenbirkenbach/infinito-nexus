@@ -4,15 +4,15 @@
 
 - name: Check if OIDC plugin is already installed
   command: >
-    docker exec {{ peertube_name }} test -d /data/plugins/data/peertube-plugin-auth-openid-connect
+    docker exec {{ PEERTUBE_CONTAINER }} test -d /data/plugins/data/peertube-plugin-auth-openid-connect
   register: peertube_oidc_plugin_check
   failed_when:  false
   changed_when: false
 
 - name: "Install auth-openid-connect plugin for Peertube"
   command: >
-    docker exec {{ peertube_name }} \
-    npm run plugin:install -- --npm-name {{oidc_plugin}}
+    docker exec {{ PEERTUBE_CONTAINER }} \
+    npm run plugin:install -- --npm-name {{ PEERTUBE_OIDC_PLUGIN }}
   when: peertube_oidc_plugin_check.rc != 0
   notify: docker compose up
 

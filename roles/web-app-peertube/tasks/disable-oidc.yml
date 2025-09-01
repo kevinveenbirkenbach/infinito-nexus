@@ -1,5 +1,0 @@
-- name: "Uninstall auth-openid-connect plugin for Peertube"
-  command: >
-    docker exec {{ peertube_name }} \
-    npm run plugin:uninstall -- --npm-name {{oidc_plugin}}
-  ignore_errors: true

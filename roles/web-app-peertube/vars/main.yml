@@ -6,10 +6,12 @@ database_type:                  "postgres"
 docker_compose_flush_handlers:  true
 
 # Role variables
-peertube_version:               "{{ applications | get_app_conf(application_id, 'docker.services.peertube.version', True) }}"
-peertube_image:                 "{{ applications | get_app_conf(application_id, 'docker.services.peertube.image', True) }}"
-peertube_name:                  "{{ applications | get_app_conf(application_id, 'docker.services.peertube.name', True) }}"
-peertube_volume:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
+PEERTUBE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.peertube.version') }}"
+PEERTUBE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.peertube.image') }}"
+PEERTUBE_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.peertube.name') }}"
+PEERTUBE_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+PEERTUBE_CONFIG_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"
 
 # OIDC
-oidc_plugin:                    "peertube-plugin-auth-openid-connect"
+PEERTUBE_OIDC_PLUGIN:           "peertube-plugin-auth-openid-connect"
+PEERTUBE_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'features.oidc', False) }}"

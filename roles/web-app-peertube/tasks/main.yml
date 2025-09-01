@@ -1,7 +1,7 @@
 ---
-- name: "include create-domains.yml for peertube"
-  include_tasks: create-domains.yml
-  loop: "{{ domains['web-app-peertube'] }}"
+- name: "include _create-domains.yml for peertube"
+  include_tasks: _create-domains.yml
+  loop: "{{ domains[application_id] }}"
   loop_control:
     loop_var: domain
   vars:
@@ -14,9 +14,9 @@
     name: sys-stk-back-stateful
 
 - name: "Install and activate auth-openid-connect plugin if OIDC is enabled"
-  include_tasks: enable-oidc.yml
-  when: applications | get_app_conf(application_id, 'features.oidc', False)
+  include_tasks: 01_enable-oidc.yml
+  when: PEERTUBE_OIDC_ENABLED
 
 - name: "Deinstall and disable auth-openid-connect plugin if OIDC is enabled"
-  include_tasks: disable-oidc.yml
-  when: applications | get_app_conf(application_id, 'features.oidc', False)
+  include_tasks: 02_disable-oidc.yml
+  when: PEERTUBE_OIDC_ENABLED
