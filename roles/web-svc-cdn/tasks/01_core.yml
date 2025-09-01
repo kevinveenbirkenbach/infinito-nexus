@@ -11,8 +11,8 @@
   vars:
     http_port: "{{ ports.localhost.http[application_id] }}"
 
-- name: "generate '{{ CDN_NGINX_FILE }}'"
+- name: "deploy '{{ CDN_NGINX_PATH }}'"
   template:
     src: "nginx.conf.j2"
-    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ CDN_NGINX_FILE }}"
+    dest: "{{ CDN_NGINX_PATH }}"
   notify: restart openresty

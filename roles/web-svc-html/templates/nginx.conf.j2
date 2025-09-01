@@ -4,7 +4,7 @@ server
   
   {% include 'roles/srv-letsencrypt/templates/ssl_header.j2' %}
 
-  {% include 'roles/sys-srv-web-inj-compose/templates/server.conf.j2'%}
+  {% include 'roles/sys-front-inj-all/templates/server.conf.j2'%}
 
   {% include 'roles/srv-proxy-core/templates/headers/content_security_policy.conf.j2' %}
   
@@ -14,11 +14,11 @@ server
   {
     root {{NGINX.DIRECTORIES.DATA.HTML}};
     index index.html index.htm;
-    {% include 'roles/sys-srv-web-inj-compose/templates/location.lua.j2' %}
+    {% include 'roles/sys-front-inj-all/templates/location.lua.j2' %}
   }
 
   location /.well-known/ {
-    alias {{NGINX.DIRECTORIES.DATA.WELL_KNOWN}};
+    alias {{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }};
     allow all;
     default_type "text/plain";
     autoindex on;

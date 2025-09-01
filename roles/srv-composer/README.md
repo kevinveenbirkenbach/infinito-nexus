@@ -2,7 +2,7 @@
 
 This Ansible role composes and orchestrates all necessary HTTPS-layer tasks and HTML-content injections for your webserver domains. It integrates two key sub-roles into a unified workflow:
 
-1. **`sys-srv-web-inj-compose`**
+1. **`sys-front-inj-all`**
    Injects global HTML snippets (CSS, Matomo tracking, iFrame notifier, custom JavaScript) into responses using Nginx `sub_filter`.
 2. **`sys-svc-certs`**
    Handles issuing, renewing, and managing TLS certificates via ACME/Certbot.

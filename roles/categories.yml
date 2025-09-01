@@ -56,6 +56,16 @@ roles:
       description: "Stack levels to setup the server"
       icon: "fas fa-bars-staggered"
       invokable: false
+    front:
+      title: "System Frontend Helpers"
+      description: "Frontend helpers for reverse-proxied apps (injection, shared assets, CDN plumbing)."
+      icon: "fas fa-wand-magic-sparkles"
+      invokable: false
+      inj:
+        title: "Injection"
+        description: "Composable HTML injection roles (CSS, JS, logout interceptor, analytics, desktop iframe) for Nginx/OpenResty via sub_filter/Lua with CDN-backed assets."
+        icon: "fas fa-filter"
+        invokable: false
   update:
     title: "Updates & Package Management"
     description: "OS & package updates"
@@ -106,11 +116,6 @@ roles:
     description: "General server roles for provisioning and managing server infrastructure—covering web servers, proxy servers, network services, and other backend components."
     icon: "fas fa-server"
     invokable: false
-    web:
-      title: "Webserver"
-      description: "Web-server roles for installing and configuring Nginx (core, TLS, injection filters, composer modules)."
-      icon: "fas fa-server"
-      invokable: false
     proxy:
       title: "Proxy Server"
       description: "Proxy-server roles for virtual-host orchestration and reverse-proxy setups."

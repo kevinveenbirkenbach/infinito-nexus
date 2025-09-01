@@ -1,0 +1,24 @@
+- block:
+  - name: Include dependency 'srv-core'
+    include_role:
+      name: srv-core
+    when: run_once_srv_core is not defined
+  - include_tasks: 01_deploy.yml
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_front_inj_desktop is not defined
+
+# --- Build tiny inline initializer (CSP-hashed) ---
+- name: "Load iFrame init code for '{{ application_id }}'"
+  set_fact:
+    iframe_init_code: "{{ lookup('template','iframe-init_one_liner.js.j2') }}"
+
+- name: "Collapse iFrame init code into one-liner for '{{ application_id }}'"
+  set_fact:
+    iframe_init_code_one_liner: "{{ iframe_init_code | to_one_liner }}"
+
+- name: "Append iFrame init CSP hash for '{{ application_id }}'"
+  set_fact:
+    applications: "{{ applications | append_csp_hash(application_id, iframe_init_code_one_liner) }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  changed_when: false
+

@@ -12,6 +12,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
         'script-src',
         'script-src-elem',
         'style-src',
+        'style-src-elem',
         'font-src',
         'worker-src',
         'manifest-src',

@@ -1,0 +1,69 @@
+- block:
+  - name: Include dependency 'srv-core'
+    include_role:
+      name: srv-core
+    when: run_once_srv_core is not defined
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_front_inj_matomo is not defined
+
+- name: "Relevant variables for role: {{ role_path | basename }}"
+  debug:
+    msg:
+      domain: "{{ domain }}"
+      base_domain: "{{ base_domain }}"
+      matomo_verification_url: "{{ matomo_verification_url }}"
+  when: MODE_DEBUG | bool
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Check if site {{ domain }} is allready registered at Matomo"
+  uri:
+    url: "{{ matomo_verification_url }}"
+    method: GET
+    return_content: yes
+    status_code: 200
+    validate_certs: yes
+  register: site_check
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: Set matomo_site_id to Null
+  set_fact:
+    matomo_site_id:
+
+- name: Set fact for site ID if site already exists
+  set_fact:
+    matomo_site_id: "{{ site_check.json[0].idsite }}"
+  when: "(site_check.json | length) > 0"
+  changed_when: false
+
+- name: Add site to Matomo and get ID if not exists
+  uri:
+    url: "{{ matomo_index_php_url }}"
+    method: POST
+    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ WEB_PROTOCOL }}://{{ base_domain }}&token_auth={{ matomo_auth_token }}&format=json"
+    body_format: form-urlencoded
+    status_code: 200
+    return_content: yes
+    validate_certs: yes
+  register: add_site
+  when: "matomo_site_id is not defined or matomo_site_id is none"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: Set fact for site ID if site was added
+  set_fact:
+    matomo_site_id: "{{ add_site.json.value }}"
+  when: "matomo_site_id is not defined or matomo_site_id is none"
+  changed_when: false
+
+- name: Load Matomo tracking JS template
+  set_fact:
+    matomo_tracking_code: "{{ lookup('template','matomo-tracking.js.j2') }}"
+
+- name: Collapse Matomo code into one-liner
+  set_fact:
+    matomo_tracking_code_one_liner: "{{ matomo_tracking_code | to_one_liner }}"
+
+- name: Append Matomo CSP hash
+  set_fact:
+    applications: "{{ applications | append_csp_hash(application_id, matomo_tracking_code_one_liner) }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  changed_when: false

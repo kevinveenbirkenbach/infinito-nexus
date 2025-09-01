@@ -1,0 +1,7 @@
+- name: Deploy {{ INJ_DESKTOP_JS_FILE_NAME }}
+  template:
+    src:    "{{ INJ_DESKTOP_JS_FILE_NAME }}.j2"
+    dest:   "{{ INJ_DESKTOP_JS_FILE_DESTINATION }}"
+    owner:  "{{ NGINX.USER }}"
+    group:  "{{ NGINX.USER }}"
+    mode:   '0644'

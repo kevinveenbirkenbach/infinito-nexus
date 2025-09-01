@@ -46,5 +46,5 @@
     command: /bin/true
     notify: refresh systemctl service
     when: not system_service_uses_at
-  when: (SYS_SERVICE_ALL_ENABLED | bool or system_force_flush | bool)
+  when: system_force_flush | bool
 

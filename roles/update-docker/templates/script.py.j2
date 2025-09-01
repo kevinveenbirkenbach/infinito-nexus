@@ -144,14 +144,6 @@ def update_discourse(directory):
     else:
         print("Discourse update skipped. No changes in git repository.")
 
-def update_mastodon():
-    """
-    Runs the database migration for Mastodon to ensure all required tables are up to date.
-    """
-    print("Starting Mastodon database migration.")
-    run_command("docker compose exec -T web bash -c 'RAILS_ENV={{ ENVIRONMENT | lower }} bin/rails db:migrate'")
-    print("Mastodon database migration complete.")
-
 def upgrade_listmonk():
     """
     Runs the upgrade for Listmonk
@@ -220,8 +212,6 @@ if __name__ == "__main__":
                     update_discourse(dir_path)
                 elif os.path.basename(dir_path) == "listmonk":
                     upgrade_listmonk()
-                elif os.path.basename(dir_path) == "mastodon":
-                    update_mastodon()
                     
                 # @todo implement dedicated procedure for bluesky
                 # @todo implement dedicated procedure for taiga

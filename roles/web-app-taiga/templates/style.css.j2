@@ -1,0 +1,67 @@
+:host, :root {
+  --color-01-solid-primary: var(--color-01-83);
+  --color-01-link-primary: var(--color-01-44);
+  --color-01-link-tertiary: var(--color-01-45);
+  --color-01-gray100: var(--color-01-97);
+  --color-01-gray200: var(--color-01-93);
+  --color-01-gray300: var(--color-01-90);
+  --color-01-gray400: var(--color-01-86);
+  --color-01-black600: var(--color-01-34);
+  --color-01-black700: var(--color-01-30);
+  --color-01-black800: var(--color-01-26);
+  --color-01-black900: var(--color-01-21);
+  --color-01-black: var(--color-01-01);
+  --color-01-white: var(--color-01-99);
+}
+
+section.main.kanban{
+    background-color: transparent;
+}
+
+div.master, div.kanban-header, div.kanban-table-inner, section.kanban button,a.dropdown-project-list-projects{
+    background-color: var(--color-01-92);
+    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-87), var(--color-01-92), var(--color-01-93), var(--color-01-97));
+    color: var(--color-01-40);
+}
+
+section.kanban h1, section.kanban h2{
+    color: var(--color-01-40);
+}
+
+.home-project {
+    background: var(--color-01-88);
+    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-83), var(--color-01-88), var(--color-01-89), var(--color-01-93));
+    border-color: var(--color-01-60);
+    color: var(--color-01-12);
+}
+
+.home-wrapper .title-bar {
+    background: var(--color-01-75);
+    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-70), var(--color-01-75), var(--color-01-76), var(--color-01-80));
+}
+
+.kanban.swimlane .kanban-header {
+    background: none;
+}
+
+.kanban-table-header .task-colum-name {
+    background-color: var(--color-01-70);
+    color: var(--color-01-10);
+}
+
+input.ng-empty::placeholder,.ng-empty::placeholder  {
+  color: rgba(var(--color-01-rgb-03),0.6);
+}
+
+.lightbox {
+    background: rgba(var(--color-01-rgb-97), .93);
+    color: var(--color-01-03);
+}
+
+.kanban-filter tg-filter {
+    border-color: var(--color-01-70);
+}
+
+.discover-header {
+    background: none;
+}

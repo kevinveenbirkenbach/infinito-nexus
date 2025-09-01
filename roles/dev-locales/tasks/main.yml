@@ -1,8 +1,14 @@
 ---
 - name: Setup locale.gen
-  template: src=locale.gen dest=/etc/locale.gen
+  template: 
+    src:  locale.gen.j2
+    dest: /etc/locale.gen
+
 - name: Setup locale.conf
-  template: src=locale.conf dest=/etc/locale.conf
+  template: 
+    src:  locale.conf.j2
+    dest: /etc/locale.conf
+
 - name: Generate locales
   shell: locale-gen
   become: true
