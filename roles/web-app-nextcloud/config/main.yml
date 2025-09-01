@@ -17,8 +17,9 @@ server:
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
   domains:
     canonical:
-      - "cloud.{{ PRIMARY_DOMAIN }}"
-      # talk:       "talk.{{ PRIMARY_DOMAIN }}" @todo needs to be activated
+      nextcloud:    "cloud.{{ PRIMARY_DOMAIN }}"
+      talk:         "talk.{{ PRIMARY_DOMAIN }}"
+      whiteboard:   "whiteboard.{{ PRIMARY_DOMAIN }}"
 docker:
   volumes:
     data: nextcloud_data
@@ -45,8 +46,14 @@ docker:
       name:     "nextcloud-talk"
       image:    "nextcloud/aio-talk"
       version:  "latest"
-      enabled:  false # Not enabled yet, because just implemented during refactoring and not tested yet. if tested activate
-oidc:
+      backup:
+        no_stop_required: false
+    whiteboard:
+      name:     "nextcloud-whiteboard"
+      image:    "ghcr.io/nextcloud-releases/whiteboard"
+      version:  "latest"
+      backup:
+        no_stop_required: true
   enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin
@@ -72,7 +79,8 @@ performance:
     opcache_memory_consumption: "{{ ((ansible_memtotal_mb | int) / 30)|int }}M" # Dynamic set memory consumption
 
 plugins_enabled:                true                                            # Implemented for speeding up testing and debugging process. For productive environments keep it true and steer the apps via the plugins config
-
+oidc:
+  flavor:                       "{{ _applications_nextcloud_oidc_flavor }}" 
 plugins:                                                  
 # List for Nextcloud Plugin Routine
 # Decides if plugins should be activated or deactivated

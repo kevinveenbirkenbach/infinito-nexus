@@ -1,6 +1,6 @@
 ---
 - name: restart nextcloud nginx service
   command:
-    cmd: "docker exec {{ nextcloud_proxy_name }} nginx -s reload"
+    cmd: "docker exec {{ NEXTCLOUD_PROXY_CONTAINER }} nginx -s reload"
   listen: restart nextcloud nginx service
   ignore_errors: true # Ignoring if container is restarting

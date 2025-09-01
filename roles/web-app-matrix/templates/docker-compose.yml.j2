@@ -62,7 +62,7 @@
     volumes:
       - chatgpt_data:/storage
     environment:
-      OPENAI_API_KEY: '{{applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_openai_api_key', True)}}'
+      OPENAI_API_KEY: '{{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_openai_api_key', True)}}'
       # Uncomment the next two lines if you are using Azure OpenAI API
       # OPENAI_AZURE: 'false'
       # CHATGPT_REVERSE_PROXY: 'your-completion-endpoint-here'

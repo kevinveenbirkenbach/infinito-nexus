@@ -3,7 +3,7 @@
     - name: Add dynamic config merging from Jinja template
       template:
         src: include.php.j2
-        dest: "{{ nextcloud_host_include_instructions_file }}"
+        dest: "{{ NEXTCLOUD_HOST_INCL_PATH }}"
       notify: docker compose restart
 
     - name: Flush handlers so Nextcloud container is restarted and ready
@@ -19,11 +19,11 @@
 
     - name: Copy include instructions to the container
       command: >
-        docker cp {{ nextcloud_host_include_instructions_file }} {{ NEXTCLOUD_CONTAINER }}:{{ nextcloud_docker_include_instructions_file }}
+        docker cp {{ NEXTCLOUD_HOST_INCL_PATH }} {{ NEXTCLOUD_CONTAINER }}:{{ NEXTCLOUD_DOCKER_INCL_PATH }}
 
     - name: Append generated config to config.php only if not present
       command: >
         docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }} sh -c "
-          grep -q '{{ nextcloud_docker_config_additives_directory }}' {{ nextcloud_docker_config_file }} || 
-          cat {{ nextcloud_docker_include_instructions_file }} >> {{ nextcloud_docker_config_file }}"
+          grep -q '{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}' {{ NEXTCLOUD_DOCKER_CONFIG_FILE }} || 
+          cat {{ NEXTCLOUD_DOCKER_INCL_PATH }} >> {{ NEXTCLOUD_DOCKER_CONFIG_FILE }}"
       notify: docker compose restart

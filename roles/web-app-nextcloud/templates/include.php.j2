@@ -3,7 +3,7 @@
 
 $CONFIG_EXTRA = [];
 
-foreach (glob("{% endraw %}{{ nextcloud_docker_config_additives_directory }}{% raw %}*.php") as $file) {
+foreach (glob("{% endraw %}{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}{% raw %}*.php") as $file) {
     $CONFIG_EXTRA = array_merge($CONFIG_EXTRA, include $file);
 }
 

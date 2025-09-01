@@ -3,16 +3,16 @@
   register: enable_result
   changed_when: enable_result.rc == 0 and ("already enabled" not in enable_result.stdout)
 
-- name: Check if {{ nextcloud_control_node_plugin_vars_directory }}{{ plugin_key }}.yml exists
+- name: Check if {{ plugin_vars_path }} exists
   stat:
-    path: "{{ nextcloud_control_node_plugin_vars_directory }}{{ plugin_key }}.yml"
+    path: "{{ plugin_vars_path }}"
   delegate_to: localhost
   become: false
   register: plugin_vars_file
 
 - name: "Load {{ plugin_key }} configuration variables"
   include_vars:
-    file: "{{ nextcloud_control_node_plugin_vars_directory }}{{ plugin_key }}.yml"
+    file: "{{ plugin_vars_path }}"
   when: plugin_vars_file.stat.exists
 
 - name: "Set plugin configuration (batched shell, no async)"
@@ -35,13 +35,13 @@
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
-- name: Check if {{ nextcloud_control_node_plugin_tasks_directory }}{{ plugin_key }}.yml exists
+- name: Check if {{ plugin_task_path }} exists
   stat:
-    path: "{{ nextcloud_control_node_plugin_tasks_directory }}{{ plugin_key }}.yml"
+    path: "{{ plugin_task_path }}"
   delegate_to: localhost
   become: false
   register: plugin_tasks_file
 
-- name: "include {{ nextcloud_control_node_plugin_tasks_directory }}{{ plugin_key }}.yml"
-  include_tasks: "{{ nextcloud_control_node_plugin_tasks_directory }}{{ plugin_key }}.yml"
+- name: "include {{ plugin_task_path }}"
+  include_tasks: "{{ plugin_task_path }}"
   when: plugin_tasks_file.stat.exists

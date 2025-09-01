@@ -2,7 +2,7 @@
 
   application:
 {% set container_port = 80 %}
-    image: dpage/pgadmin4:{{applications | get_app_conf(application_id, 'version', True)}}
+    image: dpage/pgadmin4:{{ applications | get_app_conf(application_id, 'version', True)}}
     container_name: pgadmin
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:

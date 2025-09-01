@@ -2,12 +2,13 @@ ports:
   # Ports which are exposed to localhost
   localhost:
     database:
-      svc-db-postgres: 5432
-      svc-db-mariadb: 3306
+      svc-db-postgres:    5432
+      svc-db-mariadb:     3306
     # https://developer.mozilla.org/de/docs/Web/API/WebSockets_API
     websocket:
-      web-app-mastodon: 4001
-      web-app-espocrm: 4002
+      web-app-mastodon:   4001
+      web-app-espocrm:    4002
+      web-app-nextcloud:  4003
     oauth2_proxy:
       web-app-phpmyadmin: 4181
       web-app-lam: 4182
@@ -23,10 +24,11 @@ ports:
     http:
       # Ports which are exposed to the World Wide Web
       web-app-nextcloud: 8001
+      # web-app-nextcloud_talk: 8005
+      # web-app-nextcloud_whiteboard: 8015
       web-app-gitea: 8002
       web-app-wordpress: 8003
       web-app-mediawiki: 8004
-      # Free: 8005
       web-app-yourls: 8006
       web-app-mailu: 8007
       web-app-elk: 8008
@@ -36,7 +38,6 @@ ports:
       web-app-funkwhale: 8012
       web-app-roulette-wheel: 8013
       web-app-joomla: 8014
-      # Free: 8015
       web-app-pgadmin: 8016
       web-app-baserow: 8017
       web-app-matomo: 8018

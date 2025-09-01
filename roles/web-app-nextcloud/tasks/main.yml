@@ -1,75 +1,39 @@
 ---
-- name: "Install Collabora Dependency"
-  include_role:
-    name: web-svc-collabora
-  vars:
-    flush_handlers: true
-  when:    
-    - run_once_web_svc_collabora is not defined
-    - NEXTCLOUD_COLLABORA_ENABLED | bool
-
-- name: "include role for {{ application_id }} to receive certs & do modification routines"
-  include_role:
-    name: sys-util-csp-cert
-
-- name: create nextcloud proxy configuration file
-  template: 
-    src:  "nginx/host.conf.j2" 
-    dest: "{{ nextcloud_host_nginx_path }}"
-  notify: restart openresty
-
-- name: "load docker and db for {{ application_id }}"
+- name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
-    name: sys-stk-back-stateful
+    name: sys-stk-full-stateful
   vars:
-    docker_compose_flush_handlers: false
 
-- name: "create {{ nextcloud_host_config_additives_directory }}"
-  file:
-    path: "{{ nextcloud_host_config_additives_directory }}"
-    state: directory
-    mode: "0755"
-
-- name: "Create config files at {{ nextcloud_host_config_additives_directory }}"
-  template:
-    src:    "{{ item }}"
-    dest:   "{{ nextcloud_host_config_additives_directory }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
-    owner:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
-    group:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
-  loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
-  # Not all type of changes take instantly place. Due to this reason a rebuild is required.
-  notify: docker compose up
-
-- name: create internal nextcloud nginx configuration
-  template: 
-    src:  "nginx/docker.conf.j2" 
-    dest: "{{ docker_compose.directories.volumes }}nginx.conf"
-  notify: restart nextcloud nginx service
+- name: Setup the full docker stack
+  include_tasks: 01_fullstack.yml
+  vars:
+    domain:     "{{ NEXTCLOUD_DOMAIN }}"
+    http_port:  "{{ NEXTCLOUD_PORT }}"
 
 - name: Setup config.php 
-  include_tasks: 01_config.yml
+  include_tasks: 02_config.yml
 
 - name: Flush all handlers immediately so that occ can be used
   meta: flush_handlers
 
 - name: Update\Upgrade Nextcloud
-  include_tasks: 02_upgrade.yml
+  include_tasks: 03_upgrade.yml
   when: MODE_UPDATE | bool
 
 - name: Load system configuration steps
   include_tasks: "{{ item }}"
   loop:
-    - 03_admin.yml
-    - 04_system_config.yml
+    - 04_admin.yml
+    - 05_system_config.yml
 
 - name: Setup Nextcloud Plugins
-  include_tasks: 05_plugin.yml
-  loop: "{{ applications | get_app_conf(application_id, 'plugins', True) | dict2items }}"
+  include_tasks: 06_setup_plugin.yml
+  loop: "{{ NEXTCLOUD_PLUGIN_ITEMS }}"
   loop_control:
     loop_var: plugin_item
   vars:
     plugin_key:   "{{ plugin_item.key }}"
     plugin_value: "{{ plugin_item.value }}"
-  when: nextcloud_plugins_enabled
+  when: NEXTCLOUD_PLUGINS_ENABLED
 
 

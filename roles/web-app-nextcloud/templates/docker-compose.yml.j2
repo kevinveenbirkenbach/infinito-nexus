@@ -1,11 +1,11 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-    image: "{{ nextcloud_image }}:{{ nextcloud_version }}"
+    image: "{{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}"
     container_name: {{ NEXTCLOUD_CONTAINER }}
     volumes:
       - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
-      - {{ nextcloud_host_config_additives_directory }}:{{ nextcloud_docker_config_additives_directory }}:ro
+      - {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}:{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}:ro
     healthcheck:
       test: ["CMD", "su", "www-data", "-s", "/bin/sh", "-c", "php {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}occ status"]
       interval: 1m
@@ -16,25 +16,36 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
         ipv4_address: 192.168.102.69
 
-{% if nextcloud_talk_enabled %}
+{% if NEXTCLOUD_TALK_ENABLED %}
   talk:
     {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ nextcloud_talk_image }}:{{ nextcloud_talk_version }}"
-    container_name: {{ nextcloud_talk_name }}
-    hostname: hpb_yt
+    image: "{{ NEXTCLOUD_TALK_IMAGE }}:{{ NEXTCLOUD_TALK_VERSION }}"
+    container_name: {{ NEXTCLOUD_TALK_CONTAINER }}
     init: true
     ports:
-      - {{ networks.internet.ip4 }}:{{ nextcloud_talk_stun_port }}:3478/tcp #TURN TCP
-      - {{ networks.internet.ip4 }}:{{ nextcloud_talk_stun_port }}:3478/udp #TURN UDP
-      - {{ networks.internet.ip4 }}:8181:8081/tcp                           #Signaling @todo needs to be optimized
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:3478/tcp #TURN TCP
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:3478/udp #TURN UDP
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_WS_PORT }}:8081/tcp
     networks:
       default:
         ipv4_address: 192.168.102.68
 {% endif %}
 
+{% if NEXTCLOUD_WHITEBOARD_ENABLED %}
+  whiteboard:
+    {% include 'roles/docker-container/templates/base.yml.j2' %}
+    image: "{{ NEXTCLOUD_WHITEBOARD_IMAGE }}:{{ NEXTCLOUD_WHITEBOARD_VERSION }}"
+    container_name: {{ NEXTCLOUD_WHITEBOARD_CONTAINER }}
+    expose:
+      - "{{ NEXTCLOUD_WHITEBOARD_INTERNAL_PORT }}"
+    networks:
+      default:
+        ipv4_address: 192.168.102.71
+{% endif %}
+
   proxy:
-    image: "{{ nextcloud_proxy_image }}:{{ nextcloud_proxy_version }}"
-    container_name: "{{ nextcloud_proxy_name }}"
+    image: "{{ NEXTCLOUD_PROXY_IMAGE }}:{{ NEXTCLOUD_PROXY_VERSION }}"
+    container_name: "{{ NEXTCLOUD_PROXY_CONTAINER }}"
     logging:
       driver: journald
     restart: {{ DOCKER_RESTART_POLICY }}
@@ -51,8 +62,8 @@
         ipv4_address: 192.168.102.67
 
   cron:
-    container_name: "{{ nextcloud_cron_name }}"
-    image: "{{ nextcloud_image }}:{{ nextcloud_version }}"
+    container_name: "{{ NEXTCLOUD_CRON_CONTAINER }}"
+    image: "{{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}"
     restart: {{ DOCKER_RESTART_POLICY }}
     logging:
       driver: journald
@@ -70,6 +81,6 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ nextcloud_volume }}
+    name: {{ NEXTCLOUD_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

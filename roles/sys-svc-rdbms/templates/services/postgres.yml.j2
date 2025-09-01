@@ -2,7 +2,7 @@
 
 {% if not applications | get_app_conf(application_id, 'features.central_database', False) %}  
   {{ database_host }}:
-    image: postgres:{{applications['svc-db-postgres'].version}}-alpine
+    image: postgres:{{ applications['svc-db-postgres'].version}}-alpine
     container_name: {{ application_id | get_entity_name }}-database
     env_file:
       - {{database_env}}

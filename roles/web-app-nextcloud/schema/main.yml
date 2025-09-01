@@ -1,5 +1,8 @@
 credentials:
-
+  whiteboard_jwt_secret:
+    description: "Secret used for JWT signing"
+    algorithm: "base64_prefixed_32"
+    validation: "^base64:[A-Za-z0-9+/]{43}=$"
   administrator_password:
     description: "Initial password for the Nextcloud administrator (change immediately and enable 2FA)"
     algorithm: "sha256"

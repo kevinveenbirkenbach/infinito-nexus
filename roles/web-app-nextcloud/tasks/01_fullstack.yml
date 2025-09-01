@@ -1,0 +1,37 @@
+- name: "include role for {{ application_id }} to receive certs & do modification routines for '{{ domain }}:{{ port }}'"
+  include_role:
+    name: sys-util-csp-cert
+
+- name: create nextcloud proxy configuration file
+  template: 
+    src:    "nginx/host.conf.j2" 
+    dest:   "{{ NEXTCLOUD_HOST_NGINX_PATH }}"
+  notify: restart openresty
+
+- name: "load docker and db for {{ application_id }}"
+  include_role: 
+    name: sys-stk-back-stateful
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: "create {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
+  file:
+    path: "{{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
+    state: directory
+    mode: "0755"
+
+- name: "Create config files at {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
+  template:
+    src:    "{{ item }}"
+    dest:   "{{ NEXTCLOUD_HOST_CONF_ADD_PATH }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    owner:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
+    group:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
+  loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
+  # Not all type of changes take instantly place. Due to this reason a rebuild is required.
+  notify: docker compose up
+
+- name: create internal nextcloud nginx configuration
+  template: 
+    src:  "nginx/docker.conf.j2" 
+    dest: "{{ [docker_compose.directories.volumes, 'nginx.conf'] | path_join }}"
+  notify: restart nextcloud nginx service

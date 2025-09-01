@@ -43,7 +43,7 @@ for filename in os.listdir(config_path):
         url = f"{{ WEB_PROTOCOL }}://{domain}"
         
         redirected_domains = [domain['source'] for domain in {{ redirect_domain_mappings }}]
-        redirected_domains.append("{{domains | get_domain('web-app-mailu')}}")
+        redirected_domains.append("{{domains | get_domain('web-app-mailu') }}")
 
         expected_statuses = get_expected_statuses(domain, parts, redirected_domains)
 

@@ -35,9 +35,12 @@
     and
     ("already installed" not in install_result.stdout)
 
-- include_tasks: 07_plugin_enable_and_configure.yml
+- include_tasks: _plugin_b_enable_and_configure.yml
   when:
     - install_result is defined 
     - >
       install_result.rc == 0
       or "already installed" in install_result.stdout
+  vars:
+    plugin_task_path: "{{ NEXTCLOUD_CNODE_PLUGIN_TASKS_PATH }}{{ plugin_key }}.yml"
+    plugin_vars_path: "{{ NEXTCLOUD_CNODE_PLUGIN_VARS_PATH }}{{ plugin_key }}.yml"

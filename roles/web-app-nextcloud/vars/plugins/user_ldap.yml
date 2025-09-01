@@ -181,4 +181,4 @@ plugin_configuration:
   -
     appid: "user_ldap"
     configkey: "s01ldap_expert_username_attr"
-    configvalue: "{{LDAP.USER.ATTRIBUTES.ID}}"
+    configvalue: "{{ LDAP.USER.ATTRIBUTES.ID }}"
