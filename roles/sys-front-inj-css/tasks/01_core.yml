@@ -14,7 +14,7 @@
 - name: Deploy default CSS files
   template:
     src:    "{{ ['css', item ~ '.j2'] | path_join }}"
-    dest:   "{{ [cdn.shared.css, item] | path_join }}"
+    dest:   "{{ [cdn_paths_all.shared.css, item] | path_join }}"
     owner:  "{{ NGINX.USER }}"
     group:  "{{ NGINX.USER }}"
     mode:   '0644'

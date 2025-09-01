@@ -1,2 +1,2 @@
 INJ_LOGOUT_JS_FILE_NAME:   "logout.js"
-INJ_LOGOUT_JS_DESTINATION: "{{ [cdn.shared.js, INJ_LOGOUT_JS_FILE_NAME] | path_join }}"
+INJ_LOGOUT_JS_DESTINATION: "{{ [cdn_paths_all.shared.js, INJ_LOGOUT_JS_FILE_NAME] | path_join }}"

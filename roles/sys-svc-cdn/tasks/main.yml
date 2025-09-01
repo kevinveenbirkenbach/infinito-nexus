@@ -1,25 +1,6 @@
 ---
 - block:
-  - name: "Load CDN for '{{ domain }}'"
-    include_role:
-      name: web-svc-cdn
-      public: false
-    when:
-    #- inj_enabled.logout
-    #- inj_enabled.desktop
-    - application_id != 'web-svc-cdn'
-    - run_once_web_svc_cdn is not defined
-
-  - name: Overwritte CDN handlers with neutral handlers
-    ansible.builtin.include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml'] | path_join }}"
-    loop:
-    - svc-prx-openresty
-    - docker-compose
-    loop_control:
-      label: "{{ item }}"
-    vars:
-      handler_role_name: "{{ item }}"
-  - include_tasks: utils/run_once.yml
+    - include_tasks: 01_core.yml
   when:
     - run_once_sys_svc_cdn is not defined
 
@@ -30,12 +11,12 @@
     owner: "{{ NGINX.USER }}"
     group: "{{ NGINX.USER }}"
     mode:  "0755"
-  loop: "{{ cdn_dirs }}"
+  loop: "{{ cdn_dirs_role }}"
 
 - name: Ensure 'latest' symlink points to current release
   file:
-    src:   "{{ cdn.role.release.root }}"
-    dest:  "{{ [cdn.role.root, 'latest'] | path_join }}"
+    src:   "{{ cdn_paths_all.role.release.root }}"
+    dest:  "{{ [cdn_paths_all.role.root, 'latest'] | path_join }}"
     state: link
     force: true
   when: CDN_VERSION != 'latest'

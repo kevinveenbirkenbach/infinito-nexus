@@ -5,4 +5,4 @@ CSS_COUNT:                  7
 CSS_SHADES:                 100
 
 # Variables
-css_app_dst:                "{{ [cdn.role.release.css, 'style.css'] | path_join }}"
+css_app_dst:                "{{ [cdn_paths_all.role.release.css, 'style.css'] | path_join }}"

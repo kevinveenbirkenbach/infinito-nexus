@@ -1,19 +1,22 @@
 # Base CDN root (shared across all roles)
-CDN_ROOT:     "{{ NGINX.DIRECTORIES.DATA.CDN }}"
+CDN_ROOT:         "{{ NGINX.DIRECTORIES.DATA.CDN }}"
 
 # Default version identifier: UTC timestamp
-CDN_VERSION:  "latest" # Latest is used atm because timestamp based would just lead to an unneccessary overhead
+CDN_VERSION:      "latest" # Latest is used atm because timestamp based would just lead to an unneccessary overhead
 
 # Base Url to deliver the files
-CDN_BASE_URL: "{{ domains | get_url('web-svc-cdn', WEB_PROTOCOL) }}"
+CDN_BASE_URL:     "{{ domains | get_url('web-svc-cdn', WEB_PROTOCOL) }}"
 
 # Role specific CDN paths
 
 ## Build CDN path structure (via filter)
-cdn:          "{{ CDN_ROOT | cdn_paths(application_id, CDN_VERSION) }}"
+cdn_paths_all:    "{{ CDN_ROOT | cdn_paths(application_id, CDN_VERSION) }}"
+
+## Global CDN dirs
+CDN_DIRS_GLOBAL:  "{{ (cdn_paths_all.shared | cdn_dirs) + [cdn_paths_all.vendor] }}"
 
 ## Flatten CDN dict to list of all string paths
-cdn_dirs:     "{{ cdn | cdn_dirs }}"
+cdn_dirs_role:    "{{ cdn_paths_all.role | cdn_dirs }}"
 
 # Dictionary with all urls
-cdn_urls:     "{{ cdn | cdn_urls(CDN_BASE_URL) }}"
+cdn_urls:         "{{ cdn_paths_all | cdn_urls(CDN_BASE_URL) }}"
