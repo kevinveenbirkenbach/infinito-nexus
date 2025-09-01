@@ -3,7 +3,7 @@
         - "CMD"
         - "curl"
         - "-f"
-{% if container_hostname %}
+{% if container_hostname is defined %}
         - "-H"
         - "Host: {{ container_hostname }}"
 {% endif %}
