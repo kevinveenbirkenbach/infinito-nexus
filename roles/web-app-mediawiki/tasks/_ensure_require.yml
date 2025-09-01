@@ -1,0 +1,29 @@
+---
+# Inputs (per include übergeben):
+# - ensure_present: bool (true => sicherstellen, dass Zeile existiert; false => entfernen)
+# - require_path:   string (z. B. "{{ MEDIAWIKI_LOCAL_PATH }}/debug.php")
+
+- name: "Ensure require_once('{{ require_path }}') present/absent in LocalSettings.php"
+  shell: |
+    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER}} bash -lc '
+      set -e
+      LSP={{ MEDIAWIKI_HTML_DIR }}/LocalSettings.php
+      LINE="require_once '\''{{ require_path }}'\'';"
+      test -f "$LSP" || exit 0
+      if {{ (ensure_present | bool) | ternary("true","false") }}; then
+        if ! grep -Fqx -- "$LINE" "$LSP"; then
+          printf "%s\n" "$LINE" >> "$LSP"
+          echo ADDED_REQUIRE
+        fi
+      else
+        if grep -Fqx -- "$LINE" "$LSP"; then
+          sed -i "\#require_once '{{ require_path }}';#d" "$LSP"
+          echo REMOVED_REQUIRE
+        fi
+      fi
+    '
+  args: { executable: /bin/bash }
+  register: _req_mut
+  changed_when: >
+    'ADDED_REQUIRE' in (_req_mut.stdout | default('')) or
+    'REMOVED_REQUIRE' in (_req_mut.stdout | default(''))

@@ -10,7 +10,9 @@ MEDIAWIKI_URL:                    "{{ domains | get_url(application_id, WEB_PROT
 ## Folders
 MEDIAWIKI_HTML_DIR:               "/var/www/html"
 MEDIAWIKI_CONFIG_DIR:             "{{ docker_compose.directories.config }}"
-MEDIAWIKI_OIDC_FILE:              "{{ docker_compose.directories.config }}/oidc.php"
+MEDIAWIKI_VOLUMES_DIR:            "{{ docker_compose.directories.volumes }}"
+MEDIAWIKI_LOCAL_MOUNT_DIR:        "{{ MEDIAWIKI_VOLUMES_DIR }}/mw-local"
+MEDIAWIKI_LOCAL_PATH:             "/opt/mw-local"
 
 ## Docker
 MEDIAWIKI_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.mediawiki.version') }}"
@@ -32,7 +34,7 @@ MEDIAWIKI_OIDC_ISSUER:            "{{ OIDC.CLIENT.ISSUER_URL }}"
 MEDIAWIKI_OIDC_BUTTON_TEXT:       "{{ OIDC.BUTTON_TEXT }}"
 
 # Extensions
-MEDIAWIKI_EXT_BRANCH:   "REL1_44"                                   # passend zu MediaWiki 1.44
+MEDIAWIKI_EXT_BRANCH:   "REL1_44"
 MEDIAWIKI_EXT_CFG_BASE: "{{ MEDIAWIKI_CONFIG_DIR }}/mwext/{{ MEDIAWIKI_EXT_BRANCH }}"
 MEDIAWIKI_EXT_LIST:
   - name: "PluggableAuth"

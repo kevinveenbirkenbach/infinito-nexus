@@ -1,9 +1,22 @@
 <?php
+/**
+ * File: debug.php
+ * Note: This file is always present via bind mount.
+ *       Its effect is controlled by MODE_DEBUG at template-render time.
+ */
+if ( !defined( 'MEDIAWIKI' ) ) {
+    exit;
+}
 
-$wgShowExceptionDetails   = true;
-$wgShowDBErrorBacktrace   = true;
-$wgShowSQLErrors          = true;
-$wgDevelopmentWarnings    = true;
+{% if MODE_DEBUG | bool %}
+/**
+ * DEBUG ENABLED (MODE_DEBUG=true)
+ * Verbose error display & debug logs for MediaWiki and OIDC/PluggableAuth.
+ */
+$wgShowExceptionDetails = true;
+$wgShowDBErrorBacktrace = true;
+$wgShowSQLErrors        = true;
+$wgDevelopmentWarnings  = true;
 
 @ini_set('display_errors', '1');
 @ini_set('display_startup_errors', '1');
@@ -19,3 +32,9 @@ $wgDebugLogGroups = array_merge($wgDebugLogGroups ?? [], [
     'PluggableAuth'   => 'php://stderr',
     'OpenIDConnect'   => 'php://stderr',
 ]);
+{% else %}
+/**
+ * DEBUG DISABLED (MODE_DEBUG=false)
+ * Intentionally a no-op. File stays present to keep require_once stable.
+ */
+{% endif %}

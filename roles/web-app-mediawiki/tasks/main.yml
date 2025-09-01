@@ -3,20 +3,35 @@
   include_role: 
     name: sys-stk-full-stateful
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers: false
+
+- name: "Prepare host files for '{{ application_id }}'"
+  include_tasks: 01_prep.yml
+
+- name: "flush handlers for '{{ application_id }}' after preparation finished"
+  meta: flush_handlers
 
 - name: "Load install procedures for '{{ application_id }}''"
-  include_tasks: 01_install.yml
+  include_tasks: 02_install.yml
 
-- name: "Load debug procedures for '{{ application_id }}''"
-  include_tasks: 02_debug.yml
+
+- name: "DEBUG | Ensure require_once(debug.php) matches MODE_DEBUG"
+  include_tasks: _ensure_require.yml
+  vars:
+    ensure_present: "{{ MODE_DEBUG | bool }}"
+    require_path: "{{ MEDIAWIKI_LOCAL_PATH }}/debug.php"
+  when: MODE_DEBUG | bool
 
 - name: "Load admin setup procedures for '{{ application_id }}''"
   include_tasks: 03_admin.yml
 
-- name: "Load OIDC procedures for '{{ application_id }}''"
-  include_tasks: "{{ item }}"
-  loop:
-    - 04_extensions.yml
-    - 05_oidc.yml
+- name: "Load extensions procedures for '{{ application_id }}''"
+  include_tasks: "04_extensions.yml"
+  when: MEDIAWIKI_OIDC_ENABLED | bool
+
+- name: "OIDC | Ensure require_once(oidc.php) present"
+  include_tasks: _ensure_require.yml
+  vars:
+    ensure_present: true
+    require_path: "{{ MEDIAWIKI_LOCAL_PATH }}/oidc.php"
   when: MEDIAWIKI_OIDC_ENABLED | bool

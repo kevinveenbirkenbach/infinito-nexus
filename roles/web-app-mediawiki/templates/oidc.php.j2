@@ -1,18 +1,19 @@
 <?php
 // ### OIDC (PluggableAuth) – BEGIN (managed by Ansible)
+
+{% if MEDIAWIKI_OIDC_ENABLED | bool %}
+
 wfLoadExtension( 'PluggableAuth' );
 wfLoadExtension( 'OpenIDConnect' );
 
-$wgPluggableAuth_EnableAutoLogin = true;   // don’t auto-redirect to IdP
-$wgPluggableAuth_EnableLocalLogin = false;   // keep local user/pass login
+$wgPluggableAuth_EnableAutoLogin = true;
+$wgPluggableAuth_EnableLocalLogin = false;
 $wgPluggableAuth_ButtonLabel = '{{ MEDIAWIKI_OIDC_BUTTON_TEXT }}';
 
-// PluggableAuth expects a list of providers (numeric array) on REL1_44
 $wgPluggableAuth_Config = [
     [
         'plugin' => 'OpenIDConnect',
         'data' => [
-            // For Keycloak, use the REALM URL, e.g. https://auth.example/realms/<realm>
             'providerURL'  => '{{ MEDIAWIKI_OIDC_ISSUER }}',
             'clientID'     => '{{ MEDIAWIKI_OIDC_CLIENT_ID }}',
             'clientsecret' => '{{ MEDIAWIKI_OIDC_CLIENT_SECRET }}',
@@ -21,7 +22,8 @@ $wgPluggableAuth_Config = [
     ],
 ];
 
-// Helpful defaults
 $wgOpenIDConnect_UseEmailNameAsUserName = true;
 $wgOpenIDConnect_MigrateUsers = true;
 // ### OIDC (PluggableAuth) – END
+
+{% endif %}

@@ -1,0 +1,20 @@
+---
+- name: "PREP | Ensure mw-local mount directory exists on host"
+  file:
+    path: "{{ MEDIAWIKI_LOCAL_MOUNT_DIR }}"
+    state: directory
+    mode: "0755"
+
+- name: "PREP | Render oidc.php (host side)"
+  when: MEDIAWIKI_OIDC_ENABLED | bool
+  template:
+    src: "oidc.php.j2"
+    dest: "{{ MEDIAWIKI_LOCAL_MOUNT_DIR }}/oidc.php"
+    mode: "0644"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "PREP | Render debug.php (host side, always; content gated by MODE_DEBUG)"
+  template:
+    src: "debug.php.j2"
+    dest: "{{ MEDIAWIKI_LOCAL_MOUNT_DIR }}/debug.php"
+    mode: "0644"
