@@ -24,10 +24,15 @@ class TestSafeJoinFilter(unittest.TestCase):
         )
 
     def test_base_none(self):
-        self.assertEqual(safe_join(None, 'path'), '')
+        with self.assertRaises(ValueError):
+            safe_join(None, 'path')
+
+    def test_tail_none(self):
+        with self.assertRaises(ValueError):
+            safe_join('http://example.com', None)
 
     def test_base_empty(self):
-        self.assertEqual(safe_join('', 'path'), '')
+        self.assertEqual(safe_join('', 'path'), '/path')
 
     def test_tail_empty(self):
         # joining with empty tail should yield base with trailing slash
