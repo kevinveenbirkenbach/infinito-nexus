@@ -222,6 +222,106 @@ class TestCspFilters(unittest.TestCase):
         # Should no longer contain the SLD+TLD
         self.assertNotIn("domain-example.com", header_no)
 
+    def test_flags_default_unsafe_inline_for_styles(self):
+        """
+        get_csp_flags should default to include 'unsafe-inline' for style-src and style-src-elem,
+        even when no explicit flags are configured.
+        """
+        # No explicit flags for app2
+        self.assertIn("'unsafe-inline'", self.filter.get_csp_flags(self.apps, 'app2', 'style-src'))
+        self.assertIn("'unsafe-inline'", self.filter.get_csp_flags(self.apps, 'app2', 'style-src-elem'))
+
+        # Non-style directive should NOT get unsafe-inline by default
+        self.assertNotIn("'unsafe-inline'", self.filter.get_csp_flags(self.apps, 'app2', 'script-src'))
+
+
+    def test_style_src_hashes_suppressed_by_default(self):
+        """
+        Because 'unsafe-inline' is defaulted for style-src, hashes for style-src should NOT be included.
+        """
+        header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
+        style_hash = self.filter.get_csp_hash("body { background: #fff; }")
+        self.assertNotIn(style_hash, header)
+
+        # Ensure 'unsafe-inline' actually present in style-src directive
+        tokens = self._get_directive_tokens(header, 'style-src')
+        self.assertIn("'unsafe-inline'", tokens)
+
+
+    def test_style_src_override_disables_inline_and_enables_hashes(self):
+        """
+        If an app explicitly disables 'unsafe-inline' for style-src, then hashes MUST appear.
+        """
+        # Configure override: disable unsafe-inline for style-src
+        self.apps.setdefault('app1', {}).setdefault('server', {}).setdefault('csp', {}).setdefault('flags', {}).setdefault('style-src', {})
+        self.apps['app1']['server']['csp']['flags']['style-src']['unsafe-inline'] = False
+
+        # Also ensure there is a style-src hash to include
+        self.apps['app1']['server']['csp']['hashes']['style-src'] = "body { background: #fff; }"
+
+        header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
+
+        # Then the style hash SHOULD be present
+        style_hash = self.filter.get_csp_hash("body { background: #fff; }")
+        self.assertIn(style_hash, header)
+
+        # And 'unsafe-inline' should NOT be present in style-src tokens
+        tokens = self._get_directive_tokens(header, 'style-src')
+        self.assertNotIn("'unsafe-inline'", tokens)
+
+
+    def test_style_src_elem_default_unsafe_inline(self):
+        """
+        style-src-elem should include 'unsafe-inline' by default (from get_csp_flags defaults).
+        """
+        header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
+        tokens = self._get_directive_tokens(header, 'style-src-elem')
+        self.assertIn("'unsafe-inline'", tokens)
+
+
+    def test_script_src_hash_behavior_depends_on_unsafe_inline_flag(self):
+        """
+        For script-src:
+        - When unsafe-inline=False (as in app1), hashes SHOULD be included.
+        - If we flip unsafe-inline=True, hashes should NOT be included.
+        """
+        # Baseline (from setUp): app1 script-src has unsafe-inline=False and one hash
+        header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
+        script_hash = self.filter.get_csp_hash("console.log('hello');")
+        self.assertIn(script_hash, header)
+
+        # Now toggle unsafe-inline=True and ensure hash disappears
+        self.apps['app1']['server']['csp']['flags']['script-src']['unsafe-inline'] = True
+        header_inline = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
+        self.assertNotIn(script_hash, header_inline)
+
+        # And 'unsafe-inline' should be present in the script-src tokens now
+        tokens = self._get_directive_tokens(header_inline, 'script-src')
+        self.assertIn("'unsafe-inline'", tokens)
+
+
+    def test_hashes_guard_checks_final_tokens_not_only_flags(self):
+        """
+        Ensure the 'no-hash-when-unsafe-inline' rule is driven by FINAL tokens,
+        not just raw flags: simulate default-provided 'unsafe-inline' (style-src)
+        without explicitly setting it in flags and verify hashes are still suppressed.
+        """
+        # Remove explicit style-src flags entirely to rely solely on defaults
+        self.apps['app1']['server']['csp']['flags'].pop('style-src', None)
+
+        # Provide a style-src hash
+        self.apps['app1']['server']['csp']['hashes']['style-src'] = "body { color: blue; }"
+        style_hash = self.filter.get_csp_hash("body { color: blue; }")
+
+        header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
+
+        # Because defaults include 'unsafe-inline' for style-src, the hash MUST NOT appear
+        self.assertNotIn(style_hash, header)
+
+        # And 'unsafe-inline' must appear in final tokens
+        tokens = self._get_directive_tokens(header, 'style-src')
+        self.assertIn("'unsafe-inline'", tokens)
+
 
 if __name__ == '__main__':
     unittest.main()
