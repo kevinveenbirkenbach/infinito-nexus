@@ -8,10 +8,13 @@
   register: occ_repair
   changed_when: "'No repairs needed' not in occ_repair.stdout"
 
-- name: Nextcloud | App update
+- name: Nextcloud | App update (retry once)
   command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} app:update --all"
   register: occ_app_update
   changed_when: "'No apps found for update' not in occ_app_update.stdout"
+  retries: 2
+  delay: 3
+  until: occ_app_update.rc == 0
 
 - name: Nextcloud | Add missing columns
   command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} db:add-missing-columns"
