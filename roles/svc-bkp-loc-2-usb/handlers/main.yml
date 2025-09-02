@@ -1,6 +1,0 @@
-
-- name: "reload svc-bkp-loc-2-usb service"
-  systemd:
-    name: "{{ 'svc-bkp-loc-2-usb' | get_service_name(SOFTWARE_NAME) }}"
-    state: reloaded
-    daemon_reload: yes
