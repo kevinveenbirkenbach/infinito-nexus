@@ -45,3 +45,13 @@ BOOKWYRM_REDIS_HOST:            "redis"
 BOOKWYRM_REDIS_PORT:            6379
 BOOKWYRM_REDIS_BASE_URL:        "redis://{{ BOOKWYRM_REDIS_HOST }}:{{ BOOKWYRM_REDIS_PORT }}"
 BOOKWYRM_REDIS_BROKER_URL:      "{{ BOOKWYRM_REDIS_BASE_URL }}/0"
+
+# Email
+EMAIL_HOST:                     "{{ SYSTEM_EMAIL.HOST }}"
+EMAIL_PORT:                     "{{ SYSTEM_EMAIL.PORT }}"
+EMAIL_HOST_USER:                "{{ users['no-reply'].email }}"
+EMAIL_HOST_PASSWORD:            "{{ users['no-reply'].mailu_token }}"
+# TLS/SSL: If TLS is true → TLS; else → SSL
+EMAIL_USE_TLS:                  "{{ SYSTEM_EMAIL.TLS | ternary('true','false') }}"
+EMAIL_USE_SSL:                  "{{ not SYSTEM_EMAIL.TLS | ternary('true','false') }}"
+EMAIL_DEFAULT_FROM:             "BookWyrm <{{ users['no-reply'].email }}>"

@@ -1,5 +1,4 @@
 # Build BookWyrm from source (no upstream image available)
-ARG BOOKWYRM_VERSION={{ BOOKWYRM_VERSION | default('v0.7.5') }}
 FROM python:3.11-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -9,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /src
 # Shallow clone the chosen tag/branch
-RUN git clone --depth=1 --branch "${BOOKWYRM_VERSION}" https://github.com/bookwyrm-social/bookwyrm.git .
+RUN git clone --depth=1 --branch "{{ BOOKWYRM_VERSION }}" https://github.com/bookwyrm-social/bookwyrm.git .
 
 # Pre-install Python deps to a wheelhouse for faster final image
 RUN pip install --upgrade pip \
