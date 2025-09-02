@@ -26,7 +26,7 @@ ports:
       web-app-gitea: 8002
       web-app-wordpress: 8003
       web-app-mediawiki: 8004
-      # Free : 8005
+      web-app-confluence: 8005
       web-app-yourls: 8006
       web-app-mailu: 8007
       web-app-elk: 8008
@@ -36,7 +36,7 @@ ports:
       web-app-funkwhale: 8012
       web-app-roulette-wheel: 8013
       web-app-joomla: 8014
-      # Free: 8015
+      web-app-jira: 8015
       web-app-pgadmin: 8016
       web-app-baserow: 8017
       web-app-matomo: 8018
@@ -70,6 +70,7 @@ ports:
       web-app-pretix: 8046
       web-app-mig: 8047
       web-svc-logout: 8048
+      web-app-bookwyrm: 8049
       web-app-bigbluebutton: 48087    # This port is predefined by bbb. @todo Try to change this to a 8XXX port
   public:
     # The following ports should be changed to 22 on the subdomain via stream mapping

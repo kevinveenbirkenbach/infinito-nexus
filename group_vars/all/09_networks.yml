@@ -10,8 +10,8 @@ defaults_networks:
     # /28 Networks, 14 Usable Ip Addresses
     web-app-akaunting:
       subnet: 192.168.101.0/28
-    # Free:
-    #  subnet: 192.168.101.16/28
+    web-app-confluence:
+      subnet: 192.168.101.16/28
     web-app-baserow:
       subnet: 192.168.101.32/28
     web-app-mobilizon:
@@ -34,8 +34,8 @@ defaults_networks:
       subnet: 192.168.101.176/28
     web-app-listmonk:
       subnet: 192.168.101.192/28
-    # Free:
-    #  subnet: 192.168.101.208/28
+    web-app-jira:
+      subnet: 192.168.101.208/28
     web-app-matomo:
       subnet: 192.168.101.224/28
     web-app-mastodon:
@@ -48,8 +48,8 @@ defaults_networks:
       subnet:       192.168.102.16/28
     web-app-moodle:
       subnet: 192.168.102.32/28
-    # Free:
-    #  subnet: 192.168.102.48/28
+    web-app-bookwyrm:
+      subnet: 192.168.102.48/28
     web-app-nextcloud:
       subnet: 192.168.102.64/28
     web-app-openproject:
