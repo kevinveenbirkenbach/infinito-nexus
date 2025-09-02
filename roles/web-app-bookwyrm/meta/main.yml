@@ -15,8 +15,10 @@ galaxy_info:
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://s.infinito.nexus/code/tree/main/roles/web-app-bookwyrm"
-  min_ansible_version: "2.9"
-  platforms:
-    - name: Any
-      versions:
-        - all
+  logo:
+    class: "fas fa-book"
+  run_after:
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
+dependencies: []

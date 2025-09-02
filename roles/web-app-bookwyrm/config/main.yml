@@ -1,0 +1,37 @@
+credentials: {}
+docker:
+  services:
+    database:
+      enabled:  true
+    redis:
+      enabled:  true
+    application:
+      image:    bookwyrm/bookwyrm
+      version:  latest
+      name:     bookwyrm
+    worker:
+      enabled:  true
+  volumes:
+    data:       "bookwyrm_data"
+    media:      "bookwyrm_media"
+features:
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
+  logout:           true
+  oidc:             false
+  ldap:             false
+server:
+  csp:
+    whitelist: {}
+    flags: {}
+  domains:
+    canonical:
+      - "book.{{ PRIMARY_DOMAIN }}"
+    aliases:
+      - "bookwyrm.{{ PRIMARY_DOMAIN }}"
+rbac:
+  roles: {}
+registration_open: false
+allow_invite_request: false

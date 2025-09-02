@@ -1,1 +1,45 @@
-application_id: web-app-bookwyrm
+# General
+application_id:                 "web-app-bookwyrm"
+database_type:                  "postgres"
+
+# Container
+container_port:                 8000
+container_hostname:             "{{ domains | get_domain(application_id) }}"
+
+# BookWyrm 
+
+BOOKWYRM_REGISTRATION_OPEN:     "{{ applications | get_app_conf(application_id, 'registration_open') | string | lower }}"
+BOOKWYRM_ALLOW_INVITE_REQUESTS: "{{ applications | get_app_conf(application_id, 'allow_invite_request') | string | lower }}"
+
+## Credentrials
+BOOKWYRM_SECRET_KEY:            "{{ applications | get_app_conf(application_id, 'credentials.secret_key') }}"
+
+## URLs
+BOOKWYRM_URL:                   "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+BOOKWYRM_HOSTNAME:              "{{ container_hostname }}"
+
+## OIDC (optional; can be fronted by oauth2-proxy or native if you wire it)
+BOOKWYRM_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+BOOKWYRM_OIDC_LABEL:            "{{ OIDC.BUTTON_TEXT }}"
+BOOKWYRM_OIDC_CLIENT_ID:        "{{ OIDC.CLIENT.ID }}"
+BOOKWYRM_OIDC_CLIENT_SECRET:    "{{ OIDC.CLIENT.SECRET }}"
+BOOKWYRM_OIDC_ISSUER:           "{{ OIDC.CLIENT.ISSUER_URL }}"
+BOOKWYRM_OIDC_AUTH_URL:         "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+BOOKWYRM_OIDC_TOKEN_URL:        "{{ OIDC.CLIENT.TOKEN_URL }}"
+BOOKWYRM_OIDC_USERINFO_URL:     "{{ OIDC.CLIENT.USER_INFO_URL }}"
+BOOKWYRM_OIDC_LOGOUT_URL:       "{{ OIDC.CLIENT.LOGOUT_URL }}"
+BOOKWYRM_OIDC_JWKS_URL:         "{{ OIDC.CLIENT.CERTS }}"
+BOOKWYRM_OIDC_SCOPES:           "openid,email,profile"
+BOOKWYRM_OIDC_UNIQUE_ATTRIBUTE: "{{ OIDC.ATTRIBUTES.USERNAME }}"
+
+## Docker
+BOOKWYRM_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
+BOOKWYRM_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.application.image') | default('bookwyrm/bookwyrm') }}"
+BOOKWYRM_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.application.name') | default('bookwyrm') }}"
+BOOKWYRM_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') | default('bookwyrm_data') }}"
+BOOKWYRM_MEDIA_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.media') | default('bookwyrm_media') }}"
+BOOKWYRM_CUSTOM_IMAGE:          "{{ BOOKWYRM_IMAGE }}_custom"
+
+## Redis
+BOOKWYRM_REDIS_HOST:            "redis"
+BOOKWYRM_REDIS_PORT:            6379

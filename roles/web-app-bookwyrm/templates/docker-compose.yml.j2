@@ -1,0 +1,40 @@
+{% include 'roles/docker-compose/templates/base.yml.j2' %}
+
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
+    container_name: "{{ BOOKWYRM_CONTAINER }}"
+    hostname: "{{ BOOKWYRM_HOSTNAME }}"
+    ports:
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    environment:
+{% include 'roles/web-app-bookwyrm/templates/env.j2' %}
+    volumes:
+      - 'data:/app/data'
+      - 'media:/app/media'
+{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/docker-container/templates/networks.yml.j2' %}
+
+  worker:
+    image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
+    container_name: "{{ BOOKWYRM_CONTAINER }}-worker"
+    command: "bash -lc 'celery -A celerywyrm worker -l INFO'"
+    environment:
+{% include 'roles/web-app-bookwyrm/templates/env.j2' %}
+    volumes:
+      - 'data:/app/data'
+      - 'media:/app/media'
+{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/docker-container/templates/networks.yml.j2' %}
+
+{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
+  data:
+    name: {{ BOOKWYRM_DATA_VOLUME }}
+  media:
+    name: {{ BOOKWYRM_MEDIA_VOLUME }}
+
+{% include 'roles/docker-compose/templates/networks.yml.j2' %}

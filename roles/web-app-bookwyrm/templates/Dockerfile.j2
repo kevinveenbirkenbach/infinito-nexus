@@ -1,0 +1,7 @@
+FROM "{{ BOOKWYRM_IMAGE }}:{{ BOOKWYRM_VERSION }}"
+
+# Place for optional plugins/patches
+# COPY ./patches/ /app/patches/
+
+# Ensure media/data exist (UID/GID depend on upstream; keep generic)
+RUN mkdir -p /app/data /app/media && chown -R 1000:1000 /app/data /app/media
