@@ -12,7 +12,8 @@ RUN git clone --depth=1 --branch "{{ BOOKWYRM_VERSION }}" https://github.com/boo
 
 # Pre-install Python deps to a wheelhouse for faster final image
 RUN pip install --upgrade pip \
- && pip wheel --wheel-dir /wheels -r requirements.txt
+ && pip wheel --wheel-dir /wheels -r requirements.txt \
+ && pip wheel --wheel-dir /wheels gunicorn
 
 FROM python:3.11-bookworm
 ENV PYTHONUNBUFFERED=1
@@ -28,6 +29,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libjpeg62-turbo zlib1g libxml2 libxslt1.1 libffi8 libmagic1 \
   && rm -rf /var/lib/apt/lists/* \
   && pip install --no-cache-dir --no-index --find-links=/wheels -r /app/requirements.txt \
+  && pip install --no-cache-dir --no-index --find-links=/wheels gunicorn \
   && adduser --disabled-password --gecos '' bookwyrm \
   && mkdir -p /app/data /app/media \
   && chown -R bookwyrm:bookwyrm /app

@@ -6,7 +6,8 @@
       bash -lc '
         python manage.py migrate --noinput &&
         python manage.py collectstatic --noinput &&
-        gunicorn bookwyrm.wsgi:application --bind 0.0.0.0:{{ container_port }}
+        (python manage.py initdb || true) &&
+        python -m gunicorn bookwyrm.wsgi:application --bind 0.0.0.0:{{ container_port }}
       '
     build:
       context: .
