@@ -24,7 +24,11 @@ features:
 server:
   csp:
     whitelist: {}
-    flags: {}
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
+      script-src:
+        unsafe-inline:  true
   domains:
     canonical:
       - "book.{{ PRIMARY_DOMAIN }}"

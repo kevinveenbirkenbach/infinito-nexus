@@ -9,7 +9,7 @@
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:8090"
     volumes:
-      - 'data:/var/atlassian/application-data/confluence'
+      - 'data:{{ CONFLUENCE_HOME }}'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}

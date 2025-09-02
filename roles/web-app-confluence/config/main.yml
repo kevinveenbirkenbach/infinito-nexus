@@ -20,7 +20,11 @@ features:
 server:
   csp:
     whitelist:      {}
-    flags:          {}
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
+      script-src:
+        unsafe-inline:  true
   domains:
     canonical:
       - "confluence.{{ PRIMARY_DOMAIN }}"

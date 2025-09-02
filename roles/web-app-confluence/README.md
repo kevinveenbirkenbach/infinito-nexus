@@ -17,7 +17,7 @@ The role builds a minimal custom image on top of the official Confluence image, 
 * **JVM Auto-Tuning:** `JVM_MINIMUM_MEMORY` / `JVM_MAXIMUM_MEMORY` computed from host memory with upper bounds.
 * **Health Checks:** Curl-based container healthcheck for early failure detection.
 * **CSP & Canonical Domains:** Hooks into platform CSP/SSL/domain management to keep policies strict and URLs stable.
-* **Backup Friendly:** Data isolated under `/var/atlassian/application-data/confluence`.
+* **Backup Friendly:** Data isolated under `{{ CONFLUENCE_HOME }}`.
 
 ## Further Resources
 

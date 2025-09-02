@@ -4,5 +4,7 @@ FROM "{{ CONFLUENCE_IMAGE }}:{{ CONFLUENCE_VERSION }}"
 # COPY ./plugins/atlassian-sso-dc-latest.obr /opt/atlassian/confluence/confluence/WEB-INF/atlassian-bundled-plugins/
 
 # Ensure proper permissions for app data
-RUN mkdir -p /var/atlassian/application-data/confluence && \
-    chown -R 2001:2001 /var/atlassian/application-data/confluence
+RUN mkdir -p {{ CONFLUENCE_HOME }} && \
+    chown -R 2001:2001 {{ CONFLUENCE_HOME }}
+RUN printf "confluence.home={{ CONFLUENCE_HOME }}\n" \
+  > /opt/atlassian/confluence/confluence/WEB-INF/classes/confluence-init.properties

@@ -5,7 +5,9 @@
   loop:
     - "{{ application_id | abs_role_path_by_application_id }}/templates/Dockerfile.j2"
     - "{{ application_id | abs_role_path_by_application_id }}/files/Dockerfile"
-  notify: docker compose up
+  notify: 
+    - docker compose up
+    - docker compose build
   register: create_dockerfile_result
   failed_when:
     - create_dockerfile_result is failed
