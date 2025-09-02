@@ -71,6 +71,7 @@ ports:
       web-app-mig: 8047
       web-svc-logout: 8048
       web-app-bookwyrm: 8049
+      web-app-chess: 8050
       web-app-bigbluebutton: 48087    # This port is predefined by bbb. @todo Try to change this to a 8XXX port
   public:
     # The following ports should be changed to 22 on the subdomain via stream mapping

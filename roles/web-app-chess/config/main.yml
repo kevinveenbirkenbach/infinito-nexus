@@ -1,0 +1,34 @@
+# roles/web-app-chess/config/main.yml
+credentials: {}
+docker:
+  services:
+    database:
+      enabled:      true            # Use central DB role (recommended)
+    application:
+      image:        "node"          # Base image family; final image is custom
+      version:      "20-bullseye"   # >=16 as required upstream
+      name:         "web-app-chess"
+      backup:
+        no_stop_required: true
+  volumes:
+    data:           "chess_data"
+features:
+  matomo:           false
+  css:              false
+  desktop:          false
+  central_database: true
+  logout:           false
+  oidc:             false
+server:
+  csp:
+    whitelist:      {}
+    flags:          {}
+  domains:
+    canonical:
+      - "chess.{{ PRIMARY_DOMAIN }}"
+    aliases: []
+rbac:
+  roles: {}
+source:
+  repo: "https://github.com/stephank/castling.club.git"
+  ref:  "main"

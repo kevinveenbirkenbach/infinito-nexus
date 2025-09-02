@@ -1,0 +1,47 @@
+# Multi-stage build for castling.club
+# Stage 1: build
+FROM node:{{ CHESS_VERSION }} AS build
+
+ARG CHESS_REPO_URL={{ CHESS_REPO_URL }}
+ARG CHESS_REPO_REF={{ CHESS_REPO_REF }}
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git ca-certificates openssl dumb-init python3 build-essential \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+RUN git clone --depth 1 --branch "${CHESS_REPO_REF}" "${CHESS_REPO_URL}" ./
+
+# Yarn is preinstalled in Node images via corepack; enable it.
+RUN corepack enable
+
+# Install deps and build TS
+RUN yarn install --frozen-lockfile && yarn build
+
+# Stage 2: runtime
+FROM node:{{ CHESS_VERSION }}
+
+ENV NODE_ENV=production
+ENV PORT={{ container_port }}
+WORKDIR /app
+
+# Minimal runtime packages + dumb-init
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl dumb-init postgresql-client \
+ && rm -rf /var/lib/apt/lists/*
+
+# Copy built app
+COPY --from=build /src /app
+
+# Create data dir for signing keys & cache
+RUN mkdir -p /app/data && chown -R node:node /app
+VOLUME ["/app/data"]
+
+# Entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER node
+EXPOSE {{ container_port }}
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["docker-entrypoint.sh"]

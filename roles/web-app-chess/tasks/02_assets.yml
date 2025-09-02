@@ -1,0 +1,10 @@
+- block:
+  - name: "load docker, db and proxy for {{ application_id }}"
+    include_role:
+      name: sys-stk-full-stateful
+
+  - name: "Place entrypoint and other assets"
+    include_tasks: 02_assets.yml
+
+  - include_tasks: utils/run_once.yml
+  when: run_once_web_app_chess is not defined

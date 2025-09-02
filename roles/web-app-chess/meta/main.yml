@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: "Kevin Veen-Birchenbach"
-  description: "Stub role for deploying a Chess web application via Docker Compose (implementation pending)."
+  description: "Federated chess server based on ActivityPub. Play and follow games across the Fediverse with verified rules and open identities."
   license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
@@ -10,13 +10,16 @@ galaxy_info:
     https://www.veen.world
   galaxy_tags:
     - chess
-    - docker
+    - federation
+    - activitypub
+    - social
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/tree/main/roles/web-app-chess"
+  documentation: "https://github.com/stephank/castling.club"
+  logo:
+    class: "fas fa-chess-king"
   min_ansible_version: "2.9"
   platforms:
     - name: Any
       versions: [ all ]
 dependencies: []
-

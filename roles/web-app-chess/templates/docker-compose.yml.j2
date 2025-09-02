@@ -1,0 +1,29 @@
+{% include 'roles/docker-compose/templates/base.yml.j2' %}
+  application:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        CHESS_REPO_URL: "{{ CHESS_REPO_URL }}"
+        CHESS_REPO_REF: "{{ CHESS_REPO_REF }}"
+    image: "castling_custom"
+    container_name: "{{ CHESS_CONTAINER }}"
+    hostname: "{{ CHESS_HOSTNAME }}"
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    volumes:
+      - 'data:/app/data'
+    env_file:
+      - .env
+{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/docker-container/templates/networks.yml.j2' %}
+
+{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
+  data:
+    name: {{ CHESS_DATA_VOLUME }}
+
+{% include 'roles/docker-compose/templates/networks.yml.j2' %}
