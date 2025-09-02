@@ -35,7 +35,7 @@ JIRA_CUSTOM_IMAGE:            "{{ JIRA_IMAGE }}_custom"
 
 ## Performance (auto-derive from host memory)
 JIRA_TOTAL_MB:                "{{ ansible_memtotal_mb | int }}"
-JIRA_JVM_MAX_MB:              "{{ [ (JIRA_TOTAL_MB // 2), 12288 ] | min }}"
-JIRA_JVM_MIN_MB:              "{{ [ (JIRA_TOTAL_MB // 4), JIRA_JVM_MAX_MB ] | min }}"
+JIRA_JVM_MAX_MB:              "{{ [ (JIRA_TOTAL_MB | int // 2), 12288 ] | min }}"
+JIRA_JVM_MIN_MB:              "{{ [ (JIRA_TOTAL_MB | int // 4), (JIRA_JVM_MAX_MB | int) ] | min }}"
 JIRA_JVM_MIN:                 "{{ JIRA_JVM_MIN_MB }}m"
 JIRA_JVM_MAX:                 "{{ JIRA_JVM_MAX_MB }}m"
