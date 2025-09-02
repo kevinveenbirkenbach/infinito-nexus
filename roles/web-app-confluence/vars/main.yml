@@ -1,27 +1,41 @@
-application_id:                 "web-app-confluence"
-database_type:                  "postgres"
-container_port:                 8090   # Standardport Confluence
+# General
+application_id:                   "web-app-confluence"
+database_type:                    "postgres"
 
-# URLs
-CONFLUENCE_URL:                 "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-CONFLUENCE_HOSTNAME:            "{{ domains | get_domain(application_id) }}"
+# Container
+container_port:                   8090
+container_hostname:               "{{ domains | get_domain(application_id) }}"
 
-# OIDC
-CONFLUENCE_OIDC_ENABLED:        "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
-CONFLUENCE_OIDC_LABEL:          "{{ OIDC.BUTTON_TEXT }}"
-CONFLUENCE_OIDC_CLIENT_ID:      "{{ OIDC.CLIENT.ID }}"
-CONFLUENCE_OIDC_CLIENT_SECRET:  "{{ OIDC.CLIENT.SECRET }}"
-CONFLUENCE_OIDC_ISSUER:         "{{ OIDC.CLIENT.ISSUER_URL }}"
-CONFLUENCE_OIDC_AUTH_URL:       "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
-CONFLUENCE_OIDC_TOKEN_URL:      "{{ OIDC.CLIENT.TOKEN_URL }}"
-CONFLUENCE_OIDC_USERINFO_URL:   "{{ OIDC.CLIENT.USER_INFO_URL }}"
-CONFLUENCE_OIDC_LOGOUT_URL:     "{{ OIDC.CLIENT.LOGOUT_URL }}"
-CONFLUENCE_OIDC_JWKS_URL:       "{{ OIDC.CLIENT.CERTS }}"
-CONFLUENCE_OIDC_SCOPES:         "openid,email,profile"
+# Confluence 
+
+## URLs
+CONFLUENCE_URL:                   "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+CONFLUENCE_HOSTNAME:              "{{ container_hostname }}"
+
+## OIDC
+CONFLUENCE_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+CONFLUENCE_OIDC_LABEL:            "{{ OIDC.BUTTON_TEXT }}"
+CONFLUENCE_OIDC_CLIENT_ID:        "{{ OIDC.CLIENT.ID }}"
+CONFLUENCE_OIDC_CLIENT_SECRET:    "{{ OIDC.CLIENT.SECRET }}"
+CONFLUENCE_OIDC_ISSUER:           "{{ OIDC.CLIENT.ISSUER_URL }}"
+CONFLUENCE_OIDC_AUTH_URL:         "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+CONFLUENCE_OIDC_TOKEN_URL:        "{{ OIDC.CLIENT.TOKEN_URL }}"
+CONFLUENCE_OIDC_USERINFO_URL:     "{{ OIDC.CLIENT.USER_INFO_URL }}"
+CONFLUENCE_OIDC_LOGOUT_URL:       "{{ OIDC.CLIENT.LOGOUT_URL }}"
+CONFLUENCE_OIDC_JWKS_URL:         "{{ OIDC.CLIENT.CERTS }}"
+CONFLUENCE_OIDC_SCOPES:           "openid,email,profile"
 CONFLUENCE_OIDC_UNIQUE_ATTRIBUTE: "{{ OIDC.ATTRIBUTES.USERNAME }}"
 
-# Docker
-CONFLUENCE_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
-CONFLUENCE_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
-CONFLUENCE_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
-CONFLUENCE_DATA_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+## Docker
+CONFLUENCE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
+CONFLUENCE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
+CONFLUENCE_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
+CONFLUENCE_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+CONFLUENCE_CUSTOM_IMAGE:          "{{ CONFLUENCE_IMAGE }}_custom"
+
+## Performance
+CONFLUENCE_TOTAL_MB:              "{{ ansible_memtotal_mb | int }}"
+CONFLUENCE_JVM_MAX_MB:            "{{ [ (CONFLUENCE_TOTAL_MB // 2), 12288 ] | min }}"
+CONFLUENCE_JVM_MIN_MB:            "{{ [ (CONFLUENCE_TOTAL_MB // 4), CONFLUENCE_JVM_MAX_MB ] | min }}"
+CONFLUENCE_JVM_MIN:               "{{ CONFLUENCE_JVM_MIN_MB }}m"
+CONFLUENCE_JVM_MAX:               "{{ CONFLUENCE_JVM_MAX_MB }}m"

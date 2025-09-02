@@ -1,0 +1,41 @@
+# General
+application_id:               "web-app-jira"
+database_type:                "postgres"
+
+# Container
+container_port:               8080   # Standardport Jira
+container_hostname:           "{{ domains | get_domain(application_id) }}"
+
+# Jira
+
+## URLs
+JIRA_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+JIRA_HOSTNAME:                "{{ container_hostname }}"
+
+## OIDC
+JIRA_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+JIRA_OIDC_LABEL:              "{{ OIDC.BUTTON_TEXT }}"
+JIRA_OIDC_CLIENT_ID:          "{{ OIDC.CLIENT.ID }}"
+JIRA_OIDC_CLIENT_SECRET:      "{{ OIDC.CLIENT.SECRET }}"
+JIRA_OIDC_ISSUER:             "{{ OIDC.CLIENT.ISSUER_URL }}"
+JIRA_OIDC_AUTH_URL:           "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+JIRA_OIDC_TOKEN_URL:          "{{ OIDC.CLIENT.TOKEN_URL }}"
+JIRA_OIDC_USERINFO_URL:       "{{ OIDC.CLIENT.USER_INFO_URL }}"
+JIRA_OIDC_LOGOUT_URL:         "{{ OIDC.CLIENT.LOGOUT_URL }}"
+JIRA_OIDC_JWKS_URL:           "{{ OIDC.CLIENT.CERTS }}"
+JIRA_OIDC_SCOPES:             "openid,email,profile"
+JIRA_OIDC_UNIQUE_ATTRIBUTE:   "{{ OIDC.ATTRIBUTES.USERNAME }}"
+
+## Docker
+JIRA_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
+JIRA_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
+JIRA_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
+JIRA_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+JIRA_CUSTOM_IMAGE:            "{{ JIRA_IMAGE }}_custom"
+
+## Performance (auto-derive from host memory)
+JIRA_TOTAL_MB:                "{{ ansible_memtotal_mb | int }}"
+JIRA_JVM_MAX_MB:              "{{ [ (JIRA_TOTAL_MB // 2), 12288 ] | min }}"
+JIRA_JVM_MIN_MB:              "{{ [ (JIRA_TOTAL_MB // 4), JIRA_JVM_MAX_MB ] | min }}"
+JIRA_JVM_MIN:                 "{{ JIRA_JVM_MIN_MB }}m"
+JIRA_JVM_MAX:                 "{{ JIRA_JVM_MAX_MB }}m"

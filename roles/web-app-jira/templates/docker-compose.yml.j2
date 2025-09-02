@@ -1,15 +1,16 @@
+
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
     build:
       context: .
       dockerfile: Dockerfile
-    image: "{{ CONFLUENCE_CUSTOM_IMAGE }}"
-    container_name: "{{ CONFLUENCE_CONTAINER }}"
-    hostname: '{{ CONFLUENCE_HOSTNAME}}'
+    image: "{{ JIRA_CUSTOM_IMAGE }}"
+    container_name: "{{ JIRA_CONTAINER }}"
+    hostname: '{{ JIRA_HOSTNAME }}'
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:8090"
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:8080"
     volumes:
-      - 'data:/var/atlassian/application-data/confluence'
+      - 'data:/var/atlassian/application-data/jira'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
@@ -17,6 +18,6 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ CONFLUENCE_DATA_VOLUME }}
+    name: {{ JIRA_DATA_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

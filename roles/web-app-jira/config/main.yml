@@ -1,28 +1,29 @@
+
 credentials: {}
 docker:
   services:
     database:
       enabled:  true
     application:
-      image:    atlassian/confluence
+      image:    atlassian/jira-software
       version:  latest
-      name:     confluence
+      name:     jira
   volumes:
-    data:       "confluence_data"
+    data:       "jira_data"
 features:
   matomo:           true
   css:              true
   desktop:          true
   central_database: true
   logout:           true
-  oidc:             false # Not enabled for demo version
-  ldap:             false # Not enabled for demo version
+  oidc:             false  # Not enabled for demo version
+  ldap:             false  # Not enabled for demo version
 server:
   csp:
     whitelist:      {}
     flags:          {}
   domains:
     canonical:
-      - "confluence.{{ PRIMARY_DOMAIN }}"
+      - "jira.{{ PRIMARY_DOMAIN }}"
 rbac:
   roles: {}
