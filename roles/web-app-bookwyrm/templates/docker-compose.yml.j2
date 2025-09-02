@@ -1,6 +1,13 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+    command: >-
+      bash -lc '
+        python manage.py migrate --noinput &&
+        python manage.py collectstatic --noinput &&
+        gunicorn bookwyrm.wsgi:application --bind 0.0.0.0:{{ container_port }}
+      '
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,22 +16,18 @@
     hostname: "{{ BOOKWYRM_HOSTNAME }}"
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
-    environment:
-{% include 'roles/web-app-bookwyrm/templates/env.j2' %}
     volumes:
       - 'data:/app/data'
       - 'media:/app/media'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   worker:
+{% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
-    container_name: "{{ BOOKWYRM_CONTAINER }}-worker"
+    container_name: "{{ BOOKWYRM_WORKER_CONTAINER }}"
     command: "bash -lc 'celery -A celerywyrm worker -l INFO'"
-    environment:
-{% include 'roles/web-app-bookwyrm/templates/env.j2' %}
     volumes:
       - 'data:/app/data'
       - 'media:/app/media'

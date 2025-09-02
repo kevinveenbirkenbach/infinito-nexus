@@ -6,8 +6,7 @@ docker:
     redis:
       enabled:  true
     application:
-      image:    bookwyrm/bookwyrm
-      version:  latest
+      version:  'v0.7.5'
       name:     bookwyrm
     worker:
       enabled:  true

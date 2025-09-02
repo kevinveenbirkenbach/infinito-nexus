@@ -2,24 +2,25 @@
 
 ## Description
 
-Host your own social reading platform with **BookWyrm**. This role deploys BookWyrm via Docker Compose, wires domains and ports, and offers optional OIDC integration so your readers can sign in through your central identity provider.
+**BookWyrm** is a self-hosted social reading platform where users can share books, post reviews, follow each other, and join federated conversations across the Fediverse. It is a community-driven alternative to proprietary platforms like Goodreads. Readers can catalog their library, track reading progress, and discover new books through friends and federated timelines.
 
 ## Overview
 
-This role provisions a BookWyrm application stack with Docker. It supports PostgreSQL and Redis, sets sensible environment defaults, and exposes an application container plus a dedicated Celery worker. A reverse proxy (provided elsewhere in your stack) fronts the service for public access.
+BookWyrm provides a federated social network for books built on ActivityPub. Each instance can be private, invitation-only, or open for public registration. Users can import/export book lists, interact with others across the Fediverse, and maintain their own curated reading environment. As an admin, you can configure moderation tools, content rules, and federation policies to suit your community.
 
 ## Features
 
-- **Fully Dockerized Deployment:** Builds and runs BookWyrm containers (app + worker) using Docker Compose.
-- **Production-friendly Settings:** Environment templating for database, Redis, and security-relevant settings (e.g., `SECRET_KEY`).
-- **Optional OIDC:** Can integrate with your OIDC provider (e.g., Keycloak) directly or behind oauth2-proxy (depending on your flavor).
-- **Volumes for Data & Media:** Persistent volumes for BookWyrm data and media assets.
-- **Redis & Celery Worker:** Background tasks processed by Celery; Redis used for broker and cache.
-- **Desktop Integration Hooks:** Compatible with your Web App Desktop listing when the role includes this README.
-- **Matomo/CSS/Desktop Flags:** Standard feature flags are available for consistent theming/analytics across apps in your ecosystem.
+- **Federated Social Network:** Connects with other BookWyrm instances and ActivityPub platforms.
+- **Book Cataloging:** Add, search, and organize books; import/export libraries.
+- **Reading Status & Reviews:** Mark books as “to read,” “reading,” or “finished,” and publish reviews or quotes.
+- **Timelines & Interaction:** Follow other readers, comment on reviews, and engage in federated discussions.
+- **Privacy & Moderation:** Fine-grained controls for content visibility, moderation, and federation settings.
+- **Community Building:** Host a private club, classroom library, or large public community for readers.
+- **Optional SSO Integration:** Can work with OIDC for unified login across platforms.
 
 ## Further Resources
 
-- [BookWyrm (GitHub)](https://github.com/bookwyrm-social/bookwyrm)
+- [BookWyrm GitHub](https://github.com/bookwyrm-social/bookwyrm)
 - [BookWyrm Documentation](https://docs.joinbookwyrm.com/)
-- [OpenID Connect (Wikipedia)](https://en.wikipedia.org/wiki/OpenID_Connect)
+- [ActivityPub (Wikipedia)](https://en.wikipedia.org/wiki/ActivityPub)
+- [Fediverse (Wikipedia)](https://en.wikipedia.org/wiki/Fediverse)

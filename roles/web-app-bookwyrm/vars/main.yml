@@ -33,13 +33,15 @@ BOOKWYRM_OIDC_SCOPES:           "openid,email,profile"
 BOOKWYRM_OIDC_UNIQUE_ATTRIBUTE: "{{ OIDC.ATTRIBUTES.USERNAME }}"
 
 ## Docker
+BOOKWYRM_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
+BOOKWYRM_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+BOOKWYRM_MEDIA_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.media') }}"
 BOOKWYRM_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
-BOOKWYRM_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.application.image') | default('bookwyrm/bookwyrm') }}"
-BOOKWYRM_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.application.name') | default('bookwyrm') }}"
-BOOKWYRM_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') | default('bookwyrm_data') }}"
-BOOKWYRM_MEDIA_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.media') | default('bookwyrm_media') }}"
-BOOKWYRM_CUSTOM_IMAGE:          "{{ BOOKWYRM_IMAGE }}_custom"
+BOOKWYRM_CUSTOM_IMAGE:          "bookwyrm_custom"
+BOOKWYRM_WORKER_CONTAINER:      "{{ BOOKWYRM_CONTAINER }}-worker"
 
 ## Redis
 BOOKWYRM_REDIS_HOST:            "redis"
 BOOKWYRM_REDIS_PORT:            6379
+BOOKWYRM_REDIS_BASE_URL:        "redis://{{ BOOKWYRM_REDIS_HOST }}:{{ BOOKWYRM_REDIS_PORT }}"
+BOOKWYRM_REDIS_BROKER_URL:      "{{ BOOKWYRM_REDIS_BASE_URL }}/0"

@@ -1,7 +1,39 @@
-FROM "{{ BOOKWYRM_IMAGE }}:{{ BOOKWYRM_VERSION }}"
+# Build BookWyrm from source (no upstream image available)
+ARG BOOKWYRM_VERSION={{ BOOKWYRM_VERSION | default('v0.7.5') }}
+FROM python:3.11-bookworm AS builder
 
-# Place for optional plugins/patches
-# COPY ./patches/ /app/patches/
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git build-essential libpq-dev \
+    libjpeg-dev zlib1g-dev libxml2-dev libxslt1-dev libffi-dev libmagic-dev \
+  && rm -rf /var/lib/apt/lists/*
 
-# Ensure media/data exist (UID/GID depend on upstream; keep generic)
-RUN mkdir -p /app/data /app/media && chown -R 1000:1000 /app/data /app/media
+WORKDIR /src
+# Shallow clone the chosen tag/branch
+RUN git clone --depth=1 --branch "${BOOKWYRM_VERSION}" https://github.com/bookwyrm-social/bookwyrm.git .
+
+# Pre-install Python deps to a wheelhouse for faster final image
+RUN pip install --upgrade pip \
+ && pip wheel --wheel-dir /wheels -r requirements.txt
+
+FROM python:3.11-bookworm
+ENV PYTHONUNBUFFERED=1
+WORKDIR /app
+
+# Copy app source and wheels
+COPY --from=builder /src /app
+COPY --from=builder /wheels /wheels
+
+# System deps for runtime
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 curl \
+    libjpeg62-turbo zlib1g libxml2 libxslt1.1 libffi8 libmagic1 \
+  && rm -rf /var/lib/apt/lists/* \
+  && pip install --no-cache-dir --no-index --find-links=/wheels -r /app/requirements.txt \
+  && adduser --disabled-password --gecos '' bookwyrm \
+  && mkdir -p /app/data /app/media \
+  && chown -R bookwyrm:bookwyrm /app
+
+USER bookwyrm
+
+# Gunicorn/Celery are configured by upstream files in repo
+# Ports/healthcheck handled by compose template
