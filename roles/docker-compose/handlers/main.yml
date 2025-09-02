@@ -15,10 +15,17 @@
 - name: docker compose pull
   shell: |
     set -euo pipefail
-    lock="{{ [ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR, docker_compose.directories.instance ] | path_join | hash('sha1') }}"
+    lock="{{ [ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR, (docker_compose.directories.instance | hash('sha1')) ~ '.lock' ] | path_join }}"
     if [ ! -e "$lock" ]; then
       mkdir -p "$(dirname "$lock")"
-      docker compose pull
+      if docker compose config | grep -qE '^[[:space:]]+build:'; then
+        docker compose build --pull
+      fi
+      if docker compose pull --help 2>/dev/null | grep -q -- '--ignore-buildable'; then
+        docker compose pull --ignore-buildable
+      else
+        docker compose pull || true
+      fi
       : > "$lock"
       echo "pulled"
     fi
