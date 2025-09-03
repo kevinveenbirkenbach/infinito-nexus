@@ -24,6 +24,7 @@ server:
     flags:
       script-src-elem:
         unsafe-inline:  true
+        unsafe-eval:    true
       script-src:
         unsafe-inline:  true
         unsafe-eval:    true
