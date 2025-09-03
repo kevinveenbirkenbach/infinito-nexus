@@ -1,48 +1,39 @@
 - name: "include docker-compose role"
   include_role: 
     name: docker-compose
+  vars:
+    docker_compose_flush_handlers: false
 
-- name: "include role sys-stk-front-proxy for {{ application_id }}"
+- name: "Include front proxy for {{ BLUESKY_API_DOMAIN }}:{{ BLUESKY_API_PORT }}"
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain: "{{ item.domain }}"
-    http_port: "{{ item.http_port }}"
-  loop:
-    - { domain: "{{domains[application_id].api", http_port: "{{ports.localhost.http['web-app-bluesky_api']}}" }
-    - { domain: "{{domains[application_id].web}}", http_port: "{{ports.localhost.http['web-app-bluesky_web']}}" }
+    domain: "{{ BLUESKY_API_DOMAIN }}"
+    http_port: "{{ BLUESKY_API_PORT }}"
 
-# The following lines should be removed when the following issue is closed:
-# https://github.com/bluesky-social/pds/issues/52
+- name: "Include front proxy for {{ BLUESKY_WEB_DOMAIN }}:{{ BLUESKY_WEB_PORT }}"
+  include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain: "{{ BLUESKY_WEB_DOMAIN }}"
+    http_port: "{{ BLUESKY_WEB_PORT }}"
+  when: BLUESKY_WEB_ENABLED | bool
 
-- name: Download pdsadmin tarball
-  get_url:
-    url: "https://github.com/lhaig/pdsadmin/releases/download/v1.0.0-dev/pdsadmin_Linux_x86_64.tar.gz"
-    dest: "{{pdsadmin_temporary_tar_path}}"
-    mode: '0644'
+- name: "Include front proxy for {{ BLUESKY_VIEW_DOMAIN }}:{{ BLUESKY_VIEW_PORT }}"
+  include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain: "{{ BLUESKY_VIEW_DOMAIN }}"
+    http_port: "{{ BLUESKY_VIEW_PORT }}"
+  when: BLUESKY_VIEW_ENABLED | bool
 
-- name: Create {{pdsadmin_folder_path}}
-  file:
-    path: "{{pdsadmin_folder_path}}"
-    state: directory
-    mode: '0755'
-    
-- name: Extract pdsadmin tarball
-  unarchive:
-    src: "{{pdsadmin_temporary_tar_path}}"
-    dest: "{{pdsadmin_folder_path}}"
-    remote_src: yes
-    mode: '0755'
+- name: "Execute PDS routines"
+  ansible.builtin.include_tasks: "01_pds.yml"
 
-- name: Ensure pdsadmin is executable
-  file:
-    path: "{{pdsadmin_file_path}}"
-    mode: '0755'
-    state: file
+- name: "Execute Social App routines"
+  ansible.builtin.include_tasks: "02_social_app.yml"
+  when: BLUESKY_WEB_ENABLED | bool
 
-- name: clone social app repository
-  git:
-    repo: "https://github.com/bluesky-social/social-app.git"
-    dest: "{{social_app_path}}"
-    version: "main"
-  notify: docker compose up 
+- name: "DNS for Bluesky"
+  include_tasks: "03_dns.yml"
+  when: DNS_PROVIDER | lower == 'cloudflare'

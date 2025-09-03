@@ -1,0 +1,8 @@
+- name: clone social app repository
+  git:
+    repo: "https://github.com/bluesky-social/social-app.git"
+    dest: "{{ BLUESKY_SOCIAL_APP_DIR }}"
+    version: "main"
+  notify:
+    - docker compose up
+    - docker compose build

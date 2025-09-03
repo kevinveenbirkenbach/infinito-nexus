@@ -1,19 +1,38 @@
-images:
-  pds:              "ghcr.io/bluesky-social/pds:latest"
-pds:
-  version:          "latest"
 features:
   matomo:           true
   css:              true
   desktop:          true
-  central_database: true
+  central_database: false
   logout:           true
 server:
   domains:
     canonical:
       web:  "bskyweb.{{ PRIMARY_DOMAIN }}"
       api:  "bluesky.{{ PRIMARY_DOMAIN }}"
+      view: "view.bluesky.{{ PRIMARY_DOMAIN }}"
+  csp:
+    whitelist:
+      connect-src:
+        - "{{ WEB_PROTOCOL }}://{{ BLUESKY_API_DOMAIN }}"
+        - https://plc.directory
+        - https://bsky.social
+        - https://api.bsky.app
+        - https://public.api.bsky.app
+        - https://events.bsky.app
+        - https://statsigapi.net
+        - https://ip.bsky.app
+        - wss://bsky.network
+        - wss://*.bsky.app
 docker:
   services:
     database:
-      enabled: true
+      enabled: false
+    web:
+      enabled: true # @see https://github.com/bluesky-social/social-app
+    view:
+      enabled: false
+    pds:
+      image:    "ghcr.io/bluesky-social/pds"
+      version:  "latest"
+  volumes:
+    pds_data:   "pds_data"

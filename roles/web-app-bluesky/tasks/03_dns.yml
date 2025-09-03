@@ -1,0 +1,73 @@
+---
+# Creates Cloudflare DNS records for Bluesky:
+# - PDS/API host (A/AAAA)
+# - Handle TXT verification (_atproto)
+# - Optional Web UI host (A/AAAA)
+# - Optional custom AppView host (A/AAAA)
+#
+# Requirements:
+#   DNS_PROVIDER == 'cloudflare'
+#   CLOUDFLARE_API_TOKEN set
+#
+# Inputs (inventory/vars):
+#   BLUESKY_API_DOMAIN, BLUESKY_WEB_DOMAIN, BLUESKY_VIEW_DOMAIN
+#   BLUESKY_WEB_ENABLED (bool), BLUESKY_VIEW_ENABLED (bool)
+#   PRIMARY_DOMAIN
+#   networks.internet.ip4 (and optionally networks.internet.ip6)
+
+- name: "DNS (Cloudflare) for Bluesky – base records"
+  include_role:
+    name: sys-dns-cloudflare-records
+  when: DNS_PROVIDER | lower == 'cloudflare'
+  vars:
+    cloudflare_records:
+      # 1) PDS / API host
+      - type: A
+        zone: "{{ BLUESKY_API_DOMAIN | to_zone }}"
+        name: "{{ BLUESKY_API_DOMAIN }}"
+        content: "{{ networks.internet.ip4 }}"
+        proxied: false
+
+      - type: AAAA
+        zone: "{{ BLUESKY_API_DOMAIN | to_zone }}"
+        name: "{{ BLUESKY_API_DOMAIN }}"
+        content: "{{ networks.internet.ip6 | default('') }}"
+        proxied: false
+        state: "{{ (networks.internet.ip6 is defined and (networks.internet.ip6 | string) | length > 0) | ternary('present','absent') }}"
+
+      # 2) Handle verification for primary handle (Apex)
+      - type: TXT
+        zone: "{{ PRIMARY_DOMAIN | to_zone }}"
+        name: "_atproto.{{ PRIMARY_DOMAIN }}"
+        value: "did=did:web:{{ BLUESKY_API_DOMAIN }}"
+
+      # 3) Web UI host (only if enabled)
+      - type: A
+        zone: "{{ BLUESKY_WEB_DOMAIN | to_zone }}"
+        name: "{{ BLUESKY_WEB_DOMAIN }}"
+        content: "{{ networks.internet.ip4 }}"
+        proxied: true
+        state: "{{ (BLUESKY_WEB_ENABLED | bool) | ternary('present','absent') }}"
+
+      - type: AAAA
+        zone: "{{ BLUESKY_WEB_DOMAIN | to_zone }}"
+        name: "{{ BLUESKY_WEB_DOMAIN }}"
+        content: "{{ networks.internet.ip6 | default('') }}"
+        proxied: true
+        state: "{{ (BLUESKY_WEB_ENABLED | bool) and (networks.internet.ip6 is defined) and ((networks.internet.ip6 | string) | length > 0) | ternary('present','absent') }}"
+
+      # 4) Custom AppView host (only if you actually run one and it's not api.bsky.app)
+      - type: A
+        zone: "{{ BLUESKY_VIEW_DOMAIN | to_zone }}"
+        name: "{{ BLUESKY_VIEW_DOMAIN }}"
+        content: "{{ networks.internet.ip4 }}"
+        proxied: false
+        state: "{{ (BLUESKY_VIEW_ENABLED | bool) and (BLUESKY_VIEW_DOMAIN != 'api.bsky.app') | ternary('present','absent') }}"
+
+      - type: AAAA
+        zone: "{{ BLUESKY_VIEW_DOMAIN | to_zone }}"
+        name: "{{ BLUESKY_VIEW_DOMAIN }}"
+        content: "{{ networks.internet.ip6 | default('') }}"
+        proxied: false
+        state: "{{ (BLUESKY_VIEW_ENABLED | bool) and (BLUESKY_VIEW_DOMAIN != 'api.bsky.app') and (networks.internet.ip6 is defined) and ((networks.internet.ip6 | string) | length > 0) | ternary('present','absent') }}"
+

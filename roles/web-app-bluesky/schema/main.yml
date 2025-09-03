@@ -7,7 +7,3 @@ credentials:
     description: "PLC rotation key in hex format (32 bytes)"
     algorithm: "sha256"
     validation: "^[a-f0-9]{64}$"
-  admin_password:
-    description: "Initial admin password for Bluesky PDS"
-    algorithm: "plain"
-    validation: "^.{12,}$"
