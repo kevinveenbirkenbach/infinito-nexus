@@ -26,6 +26,7 @@ server:
         unsafe-inline:  true
       script-src:
         unsafe-inline:  true
+        unsafe-eval:    true
   domains:
     canonical:
       - "jira.{{ PRIMARY_DOMAIN }}"
