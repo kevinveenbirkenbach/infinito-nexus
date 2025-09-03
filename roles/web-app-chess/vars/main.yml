@@ -10,7 +10,7 @@ container_hostname:             "{{ domains | get_domain(application_id) }}"
 # CHESS_URL:                      "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 CHESS_HOSTNAME:                 "{{ container_hostname }}"
 CHESS_ADMIN_URL:                ""
-CHESS_ADMIN_EMAIL:              "{{ users.users.administrator.email }}"
+CHESS_ADMIN_EMAIL:              "{{ users.administrator.email }}"
 
 # Docker image
 #CHESS_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
