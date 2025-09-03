@@ -3,6 +3,11 @@
     name: sys-ctl-alm-compose
   when: run_once_sys_ctl_alm_compose is not defined
   
+- name: Include dependency 'sys-ctl-rpr-docker-soft'
+  include_role:
+    name: sys-ctl-rpr-docker-soft
+  when: run_once_sys_ctl_rpr_docker_soft is not defined
+
 - include_role:
     name: sys-service
   vars:

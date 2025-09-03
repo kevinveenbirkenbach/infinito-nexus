@@ -17,14 +17,8 @@ When enabled via `MODE_CLEANUP` or `MODE_RESET`, it will automatically prune unu
   Installs Docker and Docker Compose via the system package manager.
 
 - **Integrated Dependencies**  
-  Includes backup, repair, and health check sub-roles:
-  - `sys-ctl-bkp-docker-2-loc`
-  - `user-administrator`
-  - `sys-ctl-hlth-docker-container`
-  - `sys-ctl-hlth-docker-volumes`
-  - `sys-ctl-rpr-docker-soft`
-  - `sys-ctl-rpr-docker-hard`
-
+  Includes backup, repair, and health check sub-roles
+  
 - **Cleanup & Reset Modes**  
   - `MODE_CLEANUP`: Removes unused Docker containers, networks, images, and volumes.  
   - `MODE_RESET`: Performs cleanup and restarts the Docker service.

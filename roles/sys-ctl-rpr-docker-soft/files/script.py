@@ -1,14 +1,25 @@
 #!/usr/bin/env python3
 """
 Restart Docker-Compose configurations with exited or unhealthy containers.
-This version receives the *manipulation services* via argparse (no Jinja).
+
+STRICT mode: Resolve the Compose project exclusively via Docker labels
+(com.docker.compose.project and com.docker.compose.project.working_dir).
+No container-name fallback. If labels are missing or Docker is unavailable,
+the script records an error for that container.
+
+All shell interactions that matter for tests go through print_bash()
+so they can be monkeypatched in unit tests.
 """
 import subprocess
 import time
 import os
 import argparse
-from typing import List
+from typing import List, Optional, Tuple
 
+
+# ---------------------------
+# Shell helpers
+# ---------------------------
 
 def bash(command: str) -> List[str]:
     print(command)
@@ -30,31 +41,45 @@ def list_to_string(lst: List[str]) -> str:
 
 
 def print_bash(command: str) -> List[str]:
+    """
+    Wrapper around bash() that echoes combined output for easier debugging
+    and can be monkeypatched in tests.
+    """
     output = bash(command)
     if output:
         print(list_to_string(output))
     return output
 
 
-def find_docker_compose_file(directory: str) -> str | None:
+# ---------------------------
+# Filesystem / compose helpers
+# ---------------------------
+
+def find_docker_compose_file(directory: str) -> Optional[str]:
+    """
+    Search for docker-compose.yml beneath a directory.
+    """
     for root, _, files in os.walk(directory):
         if "docker-compose.yml" in files:
             return os.path.join(root, "docker-compose.yml")
     return None
 
 
-def detect_env_file(project_path: str) -> str | None:
+def detect_env_file(project_path: str) -> Optional[str]:
     """
-    Return the path to a Compose env file if present (.env preferred, fallback to env).
+    Return the path to a Compose env file if present (.env preferred, fallback to .env/env).
     """
-    candidates = [os.path.join(project_path, ".env"), os.path.join(project_path, ".env", "env")]
+    candidates = [
+        os.path.join(project_path, ".env"),
+        os.path.join(project_path, ".env", "env"),
+    ]
     for candidate in candidates:
         if os.path.isfile(candidate):
             return candidate
     return None
 
 
-def compose_cmd(subcmd: str, project_path: str, project_name: str | None = None) -> str:
+def compose_cmd(subcmd: str, project_path: str, project_name: Optional[str] = None) -> str:
     """
     Build a docker-compose command string with optional -p and --env-file if present.
     Example: compose_cmd("restart", "/opt/docker/foo", "foo")
@@ -69,6 +94,10 @@ def compose_cmd(subcmd: str, project_path: str, project_name: str | None = None)
     return " ".join(parts)
 
 
+# ---------------------------
+# Business logic
+# ---------------------------
+
 def normalize_services_arg(raw: List[str] | None, raw_str: str | None) -> List[str]:
     """
     Accept either:
@@ -78,7 +107,6 @@ def normalize_services_arg(raw: List[str] | None, raw_str: str | None) -> List[s
     if raw:
         return [s for s in raw if s.strip()]
     if raw_str:
-        # split on comma or whitespace
         parts = [p.strip() for chunk in raw_str.split(",") for p in chunk.split()]
         return [p for p in parts if p]
     return []
@@ -87,7 +115,7 @@ def normalize_services_arg(raw: List[str] | None, raw_str: str | None) -> List[s
 def wait_while_manipulation_running(
     services: List[str],
     waiting_time: int = 600,
-    timeout: int | None = None,
+    timeout: Optional[int] = None,
 ) -> None:
     """
     Wait until none of the given services are active anymore.
@@ -107,7 +135,6 @@ def wait_while_manipulation_running(
                 break
 
         if any_active:
-            # Check timeout
             elapsed = time.time() - start
             if timeout and elapsed >= timeout:
                 print(f"Timeout ({timeout}s) reached while waiting for services. Continuing anyway.")
@@ -119,7 +146,30 @@ def wait_while_manipulation_running(
             break
 
 
-def main(base_directory: str, manipulation_services: List[str], timeout: int | None) -> int:
+def get_compose_project_info(container: str) -> Tuple[str, str]:
+    """
+    Resolve project name and working dir from Docker labels.
+    STRICT: Raises RuntimeError if labels are missing/unreadable.
+    """
+    out_project = print_bash(
+        f"docker inspect -f '{{{{ index .Config.Labels \"com.docker.compose.project\" }}}}' {container}"
+    )
+    out_workdir = print_bash(
+        f"docker inspect -f '{{{{ index .Config.Labels \"com.docker.compose.project.working_dir\" }}}}' {container}"
+    )
+
+    project = out_project[0].strip() if out_project else ""
+    workdir = out_workdir[0].strip() if out_workdir else ""
+
+    if not project:
+        raise RuntimeError(f"No compose project label found for container {container}")
+    if not workdir:
+        raise RuntimeError(f"No compose working_dir label found for container {container}")
+
+    return project, workdir
+
+
+def main(base_directory: str, manipulation_services: List[str], timeout: Optional[int]) -> int:
     errors = 0
     wait_while_manipulation_running(manipulation_services, waiting_time=600, timeout=timeout)
 
@@ -131,43 +181,50 @@ def main(base_directory: str, manipulation_services: List[str], timeout: int | N
     )
     failed_containers = unhealthy_container_names + exited_container_names
 
-    unfiltered_failed_docker_compose_repositories = [
-        container.split("-")[0] for container in failed_containers
-    ]
-    filtered_failed_docker_compose_repositories = list(
-        dict.fromkeys(unfiltered_failed_docker_compose_repositories)
-    )
+    for container in failed_containers:
+        try:
+            project, workdir = get_compose_project_info(container)
+        except Exception as e:
+            print(f"Error reading compose labels for {container}: {e}")
+            errors += 1
+            continue
 
-    for repo in filtered_failed_docker_compose_repositories:
-        compose_file_path = find_docker_compose_file(os.path.join(base_directory, repo))
+        compose_file_path = os.path.join(workdir, "docker-compose.yml")
+        if not os.path.isfile(compose_file_path):
+            # As STRICT: we only trust labels; if file not there, error out.
+            print(f"Error: docker-compose.yml not found at {compose_file_path} for container {container}")
+            errors += 1
+            continue
 
-        if compose_file_path:
+        project_path = os.path.dirname(compose_file_path)
+        try:
             print("Restarting unhealthy container in:", compose_file_path)
-            project_path = os.path.dirname(compose_file_path)
-            try:
-                # restart with optional --env-file and -p
-                print_bash(compose_cmd("restart", project_path, repo))
-            except Exception as e:
-                if "port is already allocated" in str(e):
-                    print("Detected port allocation problem. Executing recovery steps...")
-                    # down (no -p needed), then engine restart, then up -d with -p
+            print_bash(compose_cmd("restart", project_path, project))
+        except Exception as e:
+            if "port is already allocated" in str(e):
+                print("Detected port allocation problem. Executing recovery steps...")
+                try:
                     print_bash(compose_cmd("down", project_path))
                     print_bash("systemctl restart docker")
-                    print_bash(compose_cmd("up -d", project_path, repo))
-                else:
-                    print("Unhandled exception during restart:", e)
+                    print_bash(compose_cmd("up -d", project_path, project))
+                except Exception as e2:
+                    print("Unhandled exception during recovery:", e2)
                     errors += 1
-        else:
-            print("Error: Docker Compose file not found for:", repo)
-            errors += 1
+            else:
+                print("Unhandled exception during restart:", e)
+                errors += 1
 
     print("Finished restart procedure.")
     return errors
 
 
+# ---------------------------
+# CLI
+# ---------------------------
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Restart Docker-Compose configurations with exited or unhealthy containers."
+        description="Restart Docker-Compose configurations with exited or unhealthy containers (STRICT label mode)."
     )
     parser.add_argument(
         "--manipulation",
@@ -184,12 +241,12 @@ if __name__ == "__main__":
         "--timeout",
         type=int,
         default=60,
-        help="Maximum time in seconds to wait for manipulation services before continuing.(Default 1min)",
+        help="Maximum time in seconds to wait for manipulation services before continuing. (Default 1min)",
     )
     parser.add_argument(
         "base_directory",
         type=str,
-        help="Base directory where Docker Compose configurations are located.",
+        help="(Unused in STRICT mode) Base directory where Docker Compose configurations are located.",
     )
     args = parser.parse_args()
     services = normalize_services_arg(args.manipulation, args.manipulation_string)

@@ -115,29 +115,48 @@ class TestRepairDockerSoft(unittest.TestCase):
 
         def fake_print_bash(cmd):
             cmd_log.append(cmd)
+
+            # 1) docker ps Mocks (deine bisherigen)
             if cmd.startswith("docker ps --filter health=unhealthy"):
                 return ["app1-web-1", "db-1"]
             if cmd.startswith("docker ps --filter status=exited"):
                 return ["app1-worker-1", "other-2"]
+
+            # 2) docker inspect Labels (NEU)
+            # project label
+            if cmd.startswith("docker inspect -f '{{ index .Config.Labels \"com.docker.compose.project\" }}'"):
+                container = cmd.split()[-1]
+                if container in ("app1-web-1", "app1-worker-1"):
+                    return ["app1"]
+                if container == "db-1":
+                    return ["db"]
+                return [""]  # other-2 hat keine Labels -> soll fehlschlagen
+
+            # working_dir label
+            if cmd.startswith("docker inspect -f '{{ index .Config.Labels \"com.docker.compose.project.working_dir\" }}'"):
+                container = cmd.split()[-1]
+                if container in ("app1-web-1", "app1-worker-1"):
+                    return ["/BASE/app1"]
+                if container == "db-1":
+                    return ["/BASE/db"]
+                return [""]  # other-2 -> keine Angabe
+
+            # 3) docker-compose Aufrufe (unverändert okay)
             if "docker-compose" in cmd:
                 return []
+
             return []
 
+        # find_docker_compose_file wird in STRICT nicht benutzt, kann aber bleiben
         def fake_find_docker_compose(path):
-            # Compose-Projekte: app1, db -> vorhanden; "other" -> nicht vorhanden
             if path.endswith("/app1") or path.endswith("/db"):
                 return str(Path(path) / "docker-compose.yml")
             return None
 
-        # Steuere die detect_env_file-Antwort:
-        # - Für app1 existiert nur .env/env
-        # - Für db existiert .env
-        def fake_detect_env_file(project_path: str):
-            if project_path.endswith("/app1"):
-                return f"{project_path}/.env/env"
-            if project_path.endswith("/db"):
-                return f"{project_path}/.env"
-            return None
+        # 4) os.path.isfile für STRICT mode (NEU)
+        old_isfile = s.os.path.isfile
+        def fake_isfile(path):
+            return path in ("/BASE/app1/docker-compose.yml", "/BASE/db/docker-compose.yml")
 
         old_print_bash = s.print_bash
         old_find = s.find_docker_compose_file
@@ -145,14 +164,18 @@ class TestRepairDockerSoft(unittest.TestCase):
         try:
             s.print_bash = fake_print_bash
             s.find_docker_compose_file = fake_find_docker_compose
-            s.detect_env_file = fake_detect_env_file
+            s.detect_env_file = lambda project_path: (
+                f"{project_path}/.env/env" if project_path.endswith("/app1")
+                else (f"{project_path}/.env" if project_path.endswith("/db") else None)
+            )
+            s.os.path.isfile = fake_isfile  # <— wichtig für STRICT
 
             errors = s.main("/BASE", manipulation_services=[], timeout=None)
-            # one error expected for "other" (no compose file)
+
+            # Erwartung: nur "other-2" scheitert -> 1 Fehler
             self.assertEqual(errors, 1)
 
             restart_cmds = [c for c in cmd_log if ' docker-compose' in c and " restart" in c]
-            # app1: --env-file "/BASE/app1/.env/env" + -p "app1"
             self.assertTrue(any(
                 'cd "/BASE/app1"' in c and
                 '--env-file "/BASE/app1/.env/env"' in c and
@@ -160,7 +183,6 @@ class TestRepairDockerSoft(unittest.TestCase):
                 ' restart' in c
                 for c in restart_cmds
             ))
-            # db: --env-file "/BASE/db/.env" + -p "db"
             self.assertTrue(any(
                 'cd "/BASE/db"' in c and
                 '--env-file "/BASE/db/.env"' in c and
@@ -172,6 +194,8 @@ class TestRepairDockerSoft(unittest.TestCase):
             s.print_bash = old_print_bash
             s.find_docker_compose_file = old_find
             s.detect_env_file = old_detect
+            s.os.path.isfile = old_isfile
+
 
 
 if __name__ == "__main__":
