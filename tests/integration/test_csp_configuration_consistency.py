@@ -25,7 +25,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
         Accept entries that are:
           - Jinja expressions (contain '{{' and '}}')
           - Data or Blob URIs (start with 'data:' or 'blob:')
-          - HTTP/HTTPS URLs
+          - HTTP/HTTPS/WS/WSS URLs
         """
         if '{{' in entry and '}}' in entry:
             return True
@@ -34,7 +34,7 @@ class TestCspConfigurationConsistency(unittest.TestCase):
         if entry == '*':
             return True
         parsed = urlparse(entry)
-        return parsed.scheme in ('http', 'https') and bool(parsed.netloc)
+        return parsed.scheme in ('http', 'https','ws', 'wss') and bool(parsed.netloc)
 
     def test_csp_configuration_structure(self):
         """

@@ -13,16 +13,16 @@ server:
   csp:
     whitelist:
       connect-src:
-        - "{{ WEB_PROTOCOL }}://{{ BLUESKY_API_DOMAIN }}"
-        - https://plc.directory
-        - https://bsky.social
-        - https://api.bsky.app
-        - https://public.api.bsky.app
-        - https://events.bsky.app
-        - https://statsigapi.net
-        - https://ip.bsky.app
-        - wss://bsky.network
-        - wss://*.bsky.app
+        - "{{ WEB_PROTOCOL }}://<< defaults_applications[web-app-bluesky].server.domains.canonical.api >>"
+        - "https://plc.directory"
+        - "https://bsky.social"
+        - "https://api.bsky.app"
+        - "https://public.api.bsky.app"
+        - "https://events.bsky.app"
+        - "https://statsigapi.net"
+        - "https://ip.bsky.app"
+        - "wss://bsky.network"
+        - "wss://*.bsky.app"
 docker:
   services:
     database:
