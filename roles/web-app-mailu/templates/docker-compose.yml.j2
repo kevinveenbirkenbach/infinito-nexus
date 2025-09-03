@@ -79,10 +79,10 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   oletools:
+{% include 'roles/docker-container/templates/base.yml.j2' %}
     container_name: {{ MAILU_CONTAINER }}_oletools
     image: {{ MAILU_DOCKER_FLAVOR }}/oletools:{{ MAILU_VERSION }}
     hostname: oletools
-    restart: {{ DOCKER_RESTART_POLICY }}
     depends_on:
       - resolver
     dns:
