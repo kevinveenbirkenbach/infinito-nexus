@@ -13,8 +13,6 @@
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - 'data:{{ CHESS_APP_DATA_DIR }}'
-    env_file:
-      - .env
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
