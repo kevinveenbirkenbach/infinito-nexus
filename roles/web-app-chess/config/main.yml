@@ -12,9 +12,9 @@ docker:
   volumes:
     data:           "chess_data"
 features:
-  matomo:           false
-  css:              false
-  desktop:          false
+  matomo:           true
+  css:              true
+  desktop:          true
   central_database: true
   logout:           false
   oidc:             false

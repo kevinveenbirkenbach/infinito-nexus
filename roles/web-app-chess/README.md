@@ -1,4 +1,4 @@
-# web-app-chess
+# Chess
 
 ## Description
 

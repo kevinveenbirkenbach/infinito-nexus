@@ -6,5 +6,7 @@
   copy:
     src:    "{{ CHESS_ENTRYPOINT_FILE }}"
     dest:   "{{ CHESS_ENTRYPOINT_ABS }}"
+  notify: 
+    - docker compose build
 
 - include_tasks: utils/run_once.yml

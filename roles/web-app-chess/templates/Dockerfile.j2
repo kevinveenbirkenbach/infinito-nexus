@@ -12,34 +12,41 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /src
 RUN git clone --depth 1 --branch "${CHESS_REPO_REF}" "${CHESS_REPO_URL}" ./
 
-# Yarn is preinstalled in Node images via corepack; enable it.
-RUN corepack enable
-
-# Install deps and build TS
-RUN yarn install --frozen-lockfile && yarn build
+# Use Yarn 4 for the build
+RUN corepack enable && corepack prepare yarn@4.9.1 --activate && yarn -v
+RUN yarn install --immutable --inline-builds
+RUN yarn build
 
 # Stage 2: runtime
 FROM node:{{ CHESS_VERSION }}
 
 WORKDIR /app
 
-# Minimal runtime packages + dumb-init
+# Minimal runtime packages + dumb-init (+ curl for healthcheck)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    openssl dumb-init postgresql-client \
+    bash openssl dumb-init postgresql-client ca-certificates curl \
  && rm -rf /var/lib/apt/lists/*
 
-# Copy built app
+# Copy built app from builder
 COPY --from=build /src /app
 
-# Create data dir for signing keys & cache
-RUN mkdir -p {{ CHESS_APP_DATA_DIR }} && chown -R node:node /app
-VOLUME ["{{ CHESS_APP_DATA_DIR }}"]
-
-# Entrypoint script
+# Entrypoint script (root so chmod works in /usr/local/bin)
 COPY {{ CHESS_ENTRYPOINT_REL }} {{ CHESS_ENTRYPOINT_INT }}
 RUN chmod +x {{ CHESS_ENTRYPOINT_INT }}
 
+# Create data dir for signing keys and Yarn cache; fix ownership
+RUN mkdir -p {{ CHESS_APP_DATA_DIR }} /app/.yarn/cache /home/node \
+ && chown -R node:node /app /home/node
+
+# Use project-local yarn cache (avoid /root/.yarn)
+ENV YARN_ENABLE_GLOBAL_CACHE=false
+ENV YARN_CACHE_FOLDER=/app/.yarn/cache
+
+# Switch to non-root and prep yarn 4
 USER node
+ENV HOME=/home/node
+RUN corepack enable && corepack prepare yarn@4.9.1 --activate && yarn -v
+
 EXPOSE {{ container_port }}
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["{{ CHESS_ENTRYPOINT_INT }}"]
