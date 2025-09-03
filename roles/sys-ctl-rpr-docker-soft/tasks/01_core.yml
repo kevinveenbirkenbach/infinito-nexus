@@ -6,8 +6,6 @@
 - include_role:
     name: sys-service
   vars:
-    system_service_on_calendar:         "{{ SYS_SCHEDULE_REPAIR_DOCKER_SOFT }}"
-    system_service_timer_enabled:       true
     system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     system_service_tpl_exec_start_pre:  "/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP| join(' ') }} {{ SYS_SERVICE_REPAIR_DOCKER_SOFT }} --timeout '{{ SYS_TIMEOUT_DOCKER_RPR_SOFT }}'"
     system_service_tpl_exec_start: >

@@ -37,7 +37,6 @@ SYS_SCHEDULE_CLEANUP_FAILED_BACKUPS:          "*-*-* 12:00:00"                  
 
 ### Schedule for repair services
 SYS_SCHEDULE_REPAIR_BTRFS_AUTO_BALANCER:      "Sat *-*-01..07 00:00:00"               # Execute btrfs auto balancer every first Saturday of a month
-SYS_SCHEDULE_REPAIR_DOCKER_SOFT:              "*-*-* {{ HOURS_SERVER_AWAKE }}:30:00"  # Heal unhealthy docker instances once per hour
 SYS_SCHEDULE_REPAIR_DOCKER_HARD:              "Sun *-*-* 08:00:00"                    # Restart docker instances every Sunday at 8:00 AM
 
 ### Schedule for backup tasks
