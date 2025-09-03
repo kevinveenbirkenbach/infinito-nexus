@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from module_utils.entity_name_utils import get_entity_name
 
 # Paths to the group-vars files
-PORTS_FILE = './group_vars/all/09_ports.yml'
+PORTS_FILE = './group_vars/all/10_ports.yml'
 NETWORKS_FILE = './group_vars/all/09_networks.yml'
 ROLE_TEMPLATE_DIR = './templates/roles/web-app'
 ROLES_DIR = './roles'

@@ -11,7 +11,7 @@ class TestApplicationIDsInPorts(unittest.TestCase):
         # Path to the ports definition file
         ports_file = os.path.abspath(
             os.path.join(
-                os.path.dirname(__file__), '..', '..', 'group_vars', 'all', '09_ports.yml'
+                os.path.dirname(__file__), '..', '..', 'group_vars', 'all', '10_ports.yml'
             )
         )
         with open(ports_file, 'r', encoding='utf-8') as f:

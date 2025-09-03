@@ -9,7 +9,7 @@ class TestPortReferencesValidity(unittest.TestCase):
         # locate and load the ports definition
         base = os.path.dirname(__file__)
         cls.ports_file = os.path.abspath(
-            os.path.join(base, '..', '..', 'group_vars', 'all', '09_ports.yml')
+            os.path.join(base, '..', '..', 'group_vars', 'all', '10_ports.yml')
         )
         if not os.path.isfile(cls.ports_file):
             raise FileNotFoundError(f"{cls.ports_file} does not exist.")
@@ -42,7 +42,7 @@ class TestPortReferencesValidity(unittest.TestCase):
         """
         Scan all .j2, .yml, .yaml files under roles/, group_vars/, host_vars/, tasks/,
         templates/, and playbooks/ for any ports.<host>.<category>.<service> references
-        (dot, [''], or .get('')) and verify each triple is defined in 09_ports.yml.
+        (dot, [''], or .get('')) and verify each triple is defined in 10_ports.yml.
         """
         project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         dirs_to_scan = ['roles', 'group_vars', 'host_vars', 'tasks', 'templates', 'playbooks']
