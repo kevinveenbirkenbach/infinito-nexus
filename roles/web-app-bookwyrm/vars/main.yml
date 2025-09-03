@@ -59,5 +59,5 @@ EMAIL_HOST_USER:                "{{ users['no-reply'].email }}"
 EMAIL_HOST_PASSWORD:            "{{ users['no-reply'].mailu_token }}"
 # TLS/SSL: If TLS is true → TLS; else → SSL
 EMAIL_USE_TLS:                  "{{ SYSTEM_EMAIL.TLS | ternary('true','false') }}"
-EMAIL_USE_SSL:                  "{{ not SYSTEM_EMAIL.TLS | ternary('true','false') }}"
+EMAIL_USE_SSL:                  "{{ SYSTEM_EMAIL.TLS | ternary('false','true') }}"
 EMAIL_DEFAULT_FROM:             "BookWyrm <{{ users['no-reply'].email }}>"

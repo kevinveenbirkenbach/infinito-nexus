@@ -40,3 +40,7 @@ CONFLUENCE_JVM_MAX_MB:            "{{ [ (CONFLUENCE_TOTAL_MB | int // 2), 12288 
 CONFLUENCE_JVM_MIN_MB:            "{{ [ (CONFLUENCE_TOTAL_MB | int // 4), (CONFLUENCE_JVM_MAX_MB | int) ] | min }}"
 CONFLUENCE_JVM_MIN:               "{{ CONFLUENCE_JVM_MIN_MB }}m"
 CONFLUENCE_JVM_MAX:               "{{ CONFLUENCE_JVM_MAX_MB }}m"
+
+
+## Options 
+CONFLUENCE_TRUST_STORE_ENABLED:   "{{ applications | get_app_conf(application_id, 'truststore_enabled') }}"

@@ -30,3 +30,4 @@ server:
       - "confluence.{{ PRIMARY_DOMAIN }}"
 rbac:
   roles: {}
+truststore_enabled: false
