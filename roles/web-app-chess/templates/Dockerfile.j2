@@ -21,8 +21,6 @@ RUN yarn install --frozen-lockfile && yarn build
 # Stage 2: runtime
 FROM node:{{ CHESS_VERSION }}
 
-ENV NODE_ENV=production
-ENV PORT={{ container_port }}
 WORKDIR /app
 
 # Minimal runtime packages + dumb-init
@@ -34,14 +32,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=build /src /app
 
 # Create data dir for signing keys & cache
-RUN mkdir -p /app/data && chown -R node:node /app
-VOLUME ["/app/data"]
+RUN mkdir -p {{ CHESS_APP_DATA_DIR }} && chown -R node:node /app
+VOLUME ["{{ CHESS_APP_DATA_DIR }}"]
 
 # Entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY {{ CHESS_ENTRYPOINT_REL }} {{ CHESS_ENTRYPOINT_INT }}
+RUN chmod +x {{ CHESS_ENTRYPOINT_INT }}
 
 USER node
 EXPOSE {{ container_port }}
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["docker-entrypoint.sh"]
+CMD ["{{ CHESS_ENTRYPOINT_INT }}"]

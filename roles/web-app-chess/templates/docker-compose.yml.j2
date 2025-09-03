@@ -6,15 +6,13 @@
       args:
         CHESS_REPO_URL: "{{ CHESS_REPO_URL }}"
         CHESS_REPO_REF: "{{ CHESS_REPO_REF }}"
-    image: "castling_custom"
+    image: "{{ CHESS_CUSTOM_IMAGE }}"
     container_name: "{{ CHESS_CONTAINER }}"
     hostname: "{{ CHESS_HOSTNAME }}"
-    environment:
-      - NODE_ENV=production
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
-      - 'data:/app/data'
+      - 'data:{{ CHESS_APP_DATA_DIR }}'
     env_file:
       - .env
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
