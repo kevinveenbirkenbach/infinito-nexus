@@ -20,4 +20,3 @@
 
 - name: "start setup procedures for mastodon"
   include_tasks: 01_setup.yml
-  when: mastodon_setup | bool 

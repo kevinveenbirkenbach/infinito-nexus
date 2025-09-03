@@ -1,5 +1,4 @@
 single_user_mode:     false                                           # Set true for initial setup
-setup:                true                                            # Set true in inventory file to execute the setup and initializing procedures, don't know if this is still necessary @todo test it                        
 features:
   matomo:             true
   css:                true

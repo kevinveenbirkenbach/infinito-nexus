@@ -37,7 +37,7 @@
 - name: "Reset LDAP Credentials"
   include_tasks: 01_credentials.yml
   when:
-    - applications | get_app_conf(application_id, 'network.local', True)
+    - applications | get_app_conf(application_id, 'network.local')
     - applications | get_app_conf(application_id, 'provisioning.credentials', True)
 
 - name: "create directory {{openldap_ldif_host_path}}{{item}}"
