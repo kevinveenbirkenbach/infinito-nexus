@@ -1,0 +1,6 @@
+credentials:
+  admin_password:
+    description: "Password for the initial Magento admin account"
+    algorithm: "alphanumeric"
+    validation:
+      min_length: 12

@@ -73,6 +73,7 @@ ports:
       web-app-bookwyrm: 8049
       web-app-chess: 8050
       web-app-bluesky_view: 8051
+      web-app-magento: 8052
       web-app-bigbluebutton: 48087    # This port is predefined by bbb. @todo Try to change this to a 8XXX port
   public:
     # The following ports should be changed to 22 on the subdomain via stream mapping

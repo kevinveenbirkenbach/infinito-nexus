@@ -1,0 +1,17 @@
+# General
+application_id:                 "web-app-magento"
+database_type:                  "mariadb"
+
+# Magento (application container)
+magento_version:                "{{ applications | get_app_conf(application_id, 'docker.services.application.version', True) | default('latest') }}"
+magento_image:                  "{{ applications | get_app_conf(application_id, 'docker.services.application.image', True)   | default('bitnami/magento') }}"
+magento_name:                   "{{ applications | get_app_conf(application_id, 'docker.services.application.name', True)    | default('magento') }}"
+magento_data:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True)                | default('magento_data') }}"
+
+# Search (OpenSearch)
+magento_search_version:         "{{ applications | get_app_conf(application_id, 'docker.services.search.version', True) | default('latest') }}"
+magento_search_image:           "{{ applications | get_app_conf(application_id, 'docker.services.search.image', True)   | default('opensearchproject/opensearch') }}"
+magento_search_name:            "{{ applications | get_app_conf(application_id, 'docker.services.search.name', True)    | default('magento-opensearch') }}"
+
+# Docker helpers
+docker_compose_flush_handlers:  true

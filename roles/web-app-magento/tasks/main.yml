@@ -1,0 +1,9 @@
+---
+- name: "construct {{ role_name }}"
+  include_tasks: 01_core.yml
+  when: run_once_web_app_magento is not defined
+
+- name: run the docker magento tasks once
+  set_fact:
+    run_once_web_app_magento: true
+  when: run_once_web_app_magento is not defined

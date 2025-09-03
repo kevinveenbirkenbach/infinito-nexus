@@ -1,0 +1,37 @@
+features:
+  matomo:             true
+  css:                true
+  desktop:            true
+  central_database:   true        # Use platform DB (recommended). If false, app-local DB container is enabled.
+  oidc:               false       # Magento SSO via OIDC requires extensions; not wired by default
+  logout:             true
+  ldap:               false
+
+server:
+  csp:
+    whitelist: {}
+  domains:
+    canonical:
+      - "shop.{{ PRIMARY_DOMAIN }}"
+    aliases:
+      - "magento.{{ PRIMARY_DOMAIN }}"
+
+docker:
+  services:
+    application:
+      image:            "bitnami/magento"
+      version:          "latest"
+      name:             "magento"
+      backup:
+        no_stop_required: true
+    database:
+      enabled:          true      # Central DB recommended; if disabled, app-local DB is created
+    redis:
+      enabled:          true
+    search:
+      enabled:          true
+      image:            "opensearchproject/opensearch"
+      version:          "latest"
+      name:             "magento-opensearch"
+  volumes:
+    data:               "magento_data"
