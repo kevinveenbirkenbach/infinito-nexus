@@ -21,7 +21,9 @@ features:
 server:
   csp:
     whitelist:      {}
-    flags:          {}
+    flags:
+      script-src-elem:
+        unsafe-inline: true
   domains:
     canonical:
       - "chess.{{ PRIMARY_DOMAIN }}"

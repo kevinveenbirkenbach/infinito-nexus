@@ -4,8 +4,13 @@
       context: .
       dockerfile: Dockerfile
       args:
+        CHESS_VERSION: "{{ CHESS_VERSION }}"
         CHESS_REPO_URL: "{{ CHESS_REPO_URL }}"
         CHESS_REPO_REF: "{{ CHESS_REPO_REF }}"
+        CHESS_ENTRYPOINT_REL: "{{ CHESS_ENTRYPOINT_REL }}"
+        CHESS_ENTRYPOINT_INT: "{{ CHESS_ENTRYPOINT_INT }}"
+        CHESS_APP_DATA_DIR: "{{ CHESS_APP_DATA_DIR }}"
+        CONTAINER_PORT: "{{ container_port | string }}"
     image: "{{ CHESS_CUSTOM_IMAGE }}"
     container_name: "{{ CHESS_CONTAINER }}"
     hostname: "{{ CHESS_HOSTNAME }}"
