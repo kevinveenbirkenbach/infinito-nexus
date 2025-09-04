@@ -23,6 +23,7 @@ server:
         - https://statsigapi.net
         - https://ip.bsky.app
         - https://video.bsky.app
+        - https://bsky.app
         - wss://bsky.network
         - wss://*.bsky.app
       media-src:
