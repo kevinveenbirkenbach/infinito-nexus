@@ -5,10 +5,10 @@
     container_name: {{ application_id | get_entity_name }}-database
     logging:
       driver: journald
-    image: mariadb
+    image: {{ database_image }}:{{ database_version }}
     restart: {{ DOCKER_RESTART_POLICY }}
     env_file:
-      - {{database_env}}
+      - {{ database_env }}
     command: "--transaction-isolation=READ-COMMITTED --binlog-format=ROW"
     volumes:
       - database:/var/lib/mysql

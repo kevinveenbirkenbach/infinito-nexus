@@ -8,10 +8,10 @@
       path: "{{ docker_compose.directories.env }}"
       state: directory
       mode: "0755"
-  - name: "For '{{ application_id }}': Create {{database_env}}"
+  - name: "For '{{ application_id }}': Create {{ database_env }}"
     template: 
-      src: "env/{{database_type}}.env.j2"
-      dest: "{{database_env}}"
+      src: "env/{{ database_type }}.env.j2"
+      dest: "{{ database_env }}"
     notify: docker compose up
   when: not applications | get_app_conf(application_id, 'features.central_database', False)
 
@@ -19,7 +19,7 @@
   # I don't know why this includes leads to that the application_id in vars/main.yml of the database role isn't used
   # This is the behaviour which I want, but I'm still wondering why ;)
   include_role:
-    name: "svc-db-{{database_type}}"
+    name: "svc-db-{{ database_type }}"
   when: applications | get_app_conf(application_id, 'features.central_database', False)
 
 - name: "For '{{ application_id }}': Add Entry for Backup Procedure"
