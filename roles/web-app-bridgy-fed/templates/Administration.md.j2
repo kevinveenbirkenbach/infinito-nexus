@@ -1,0 +1,20 @@
+# Administration
+
+## Local dev shell (inside container)
+```bash
+docker compose exec application bash
+```
+
+## Logs
+```bash
+docker compose logs -f application
+docker compose logs -f emulator   # if enabled
+```
+
+## Notes
+- Upstream dev run example:
+  ```bash
+  export APPVIEW_HOST=api.bsky.app PLC_HOST=plc.directory BGS_HOST=bsky.network PDS_HOST=atproto.brid.gy
+  flask --debug run -p 8080
+  ```
+  (We run via gunicorn in this role.)

@@ -1,0 +1,21 @@
+- name: "Load docker and front proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full-stateless
+
+- name: "Include front proxy for {{ container_hostname }}:{{ ports.localhost.http[application_id] }}"
+  include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain:    "{{ container_hostname }}"
+    http_port: "{{ ports.localhost.http[application_id] }}"
+
+- name: "Provide Dockerfile"
+  copy:
+    src: "Dockerfile"
+    dest: "{{ docker_compose.directories.instance }}/Dockerfile"
+  notify:
+    - docker compose build
+
+- name: "Run once marker"
+  set_fact:
+    run_once_web_app_bridgy_fed: true

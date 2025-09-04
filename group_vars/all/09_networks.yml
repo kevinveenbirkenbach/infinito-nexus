@@ -100,6 +100,8 @@ defaults_networks:
       subnet: 192.168.103.192/28
     web-app-magento:
       subnet: 192.168.103.208/28
+    web-app-bridgy-fed:
+      subnet: 192.168.103.224/28
 
     # /24 Networks / 254 Usable Clients
     web-app-bigbluebutton:

@@ -1,0 +1,27 @@
+# General
+application_id:                       "web-app-bridgy-fed"
+
+# App container
+BRIDGY_CONTAINER:                     "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
+BRIDGY_IMAGE:                         "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
+#BRIDGY_VERSION:                       "{{ applications | get_app_conf(application_id, 'docker.services.application.version')}}"
+container_port:                       8080
+container_hostname:                   "{{ domains | get_domain(application_id) }}"
+BRIDGY_ADMIN_EMAIL:                   "{{ users.administrator.email }}"
+
+# Source
+BRIDGY_REPO_URL:                      "{{ applications | get_app_conf(application_id, 'source.repo') }}"
+BRIDGY_REPO_REF:                      "{{ applications | get_app_conf(application_id, 'source.ref') }}"
+
+# Emulator sidecar (Datastore-mode Firestore)
+EMULATOR_ENABLED:                     "{{ applications | get_app_conf(application_id, 'docker.services.emulator.enabled') }}"
+EMULATOR_IMAGE:                       "{{ applications | get_app_conf(application_id, 'docker.services.emulator.image') }}"
+EMULATOR_PORT:                        8089
+EMULATOR_HOST_INTERNAL:               "emulator:8089"
+EMULATOR_PROJECT_ID:                  "bridgy-federated-local"
+
+# Runtime env defaults for Bridgy Fed (see upstream README)
+APPVIEW_HOST:                         "api.bsky.app"
+PLC_HOST:                             "plc.directory"
+BGS_HOST:                             "bsky.network"
+PDS_HOST:                             "atproto.brid.gy"

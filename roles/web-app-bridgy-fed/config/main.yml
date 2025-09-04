@@ -1,0 +1,34 @@
+features:
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: false
+  logout:           false
+  oidc:             false
+
+server:
+  domains:
+    canonical:
+      - "bridgyfed.{{ PRIMARY_DOMAIN }}"
+  csp:
+    whitelist: {}
+    flags: {}
+
+docker:
+  services:
+    database:
+      enabled: false
+    emulator:
+      enabled: true
+      image:    'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
+    application:
+      image:   "python"
+      version: "3.12-bookworm"
+      name:    "web-app-bridgy-fed"
+
+rbac:
+  roles: {}
+
+source:
+  repo: "https://github.com/snarfed/bridgy-fed.git"
+  ref:  "main"
