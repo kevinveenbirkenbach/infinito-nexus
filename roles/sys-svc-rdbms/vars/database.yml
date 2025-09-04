@@ -20,4 +20,4 @@ database_url_jdbc:      "jdbc:{{ database_type if database_type == 'mariadb' els
 database_url_full:      "{{ database_type }}://{{ database_username }}:{{ database_password }}@{{ database_host }}:{{ database_port }}/{{ database_name }}"
 database_volume:        "{{ _database_consumer_entity_name ~ '_' if not _database_central_enabled }}{{ database_host }}"
 database_image:         "{{ _dbtype }}"
-database_version:       "{{ applications | get_app_conf( _database_consumer_id, 'docker.services.' ~ _dbtype ~ '.version', False, _database_default_version) }}"
+database_version:       "{{ applications | get_app_conf( _database_consumer_id, 'docker.services.database.version', False, _database_default_version) }}"
