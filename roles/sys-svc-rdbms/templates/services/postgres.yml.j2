@@ -8,7 +8,7 @@
       - {{ database_env }}
     restart: {{ DOCKER_RESTART_POLICY }}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {{ database_user }}"]
+      test: ["CMD-SHELL", "pg_isready -U {{ database_username }}"]
       interval: 10s
       timeout: 5s
       retries: 6
