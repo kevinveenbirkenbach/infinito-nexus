@@ -17,18 +17,13 @@ server:
 docker:
   services:
     database:
-      enabled: false
-    emulator:
-      enabled: true
-      image:    'gcr.io/google.com/cloudsdktool/google-cloud-cli:latest'
+      enabled:    false
     application:
-      image:   "python"
-      version: "3.12-bookworm"
-      name:    "web-app-bridgy-fed"
-
+      image:      "python"
+      version:    "3.12-bookworm"
+      name:       "web-app-bridgy-fed"
+      repository: "https://github.com/snarfed/bridgy-fed.git"
+      branch:     "main"
 rbac:
   roles: {}
-
-source:
-  repo: "https://github.com/snarfed/bridgy-fed.git"
-  ref:  "main"
+ 

@@ -9,7 +9,7 @@ This role builds and runs Bridgy Fed as a Docker container and (optionally) star
 Upstream docs & dev notes:
 - User & developer docs: https://fed.brid.gy and https://bridgy-fed.readthedocs.io/
 - Source: https://github.com/snarfed/bridgy-fed
-- Local run (reference): `flask run -p 8080` with APPVIEW_HOST/PLC_HOST/BGS_HOST/PDS_HOST set, and Datastore emulator envs
+- Local run (reference): `flask run -p 8080` with BRIDGY_APPVIEW_HOST/BRIDGY_PLC_HOST/BRIDGY_BGS_HOST/BRIDGY_PDS_HOST set, and Datastore emulator envs
 
 ## Features
 - Dockerized Flask app (gunicorn)

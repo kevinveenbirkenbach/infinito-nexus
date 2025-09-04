@@ -6,38 +6,15 @@
       dockerfile: Dockerfile
       args:
         BRIDGY_REPO_URL: "{{ BRIDGY_REPO_URL }}"
-        BRIDGY_REPO_REF: "{{ BRIDGY_REPO_REF }}"
+        BRIDGY_REPO_BRANCH: "{{ BRIDGY_REPO_BRANCH }}"
         CONTAINER_PORT:  "{{ container_port | string }}"
-    image: "{{ BRIDGY_IMAGE }}"
+    image: "{{ BRIDGY_IMAGE }}:{{ BRIDGY_VERSION }}"
     container_name: "{{ BRIDGY_CONTAINER }}"
     hostname: "{{ container_hostname }}"
-    env_file:
-      - "{{ docker_compose.files.env }}"
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+      - "127.0.0.1:{{ http_port }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    depends_on:
-{% if EMULATOR_ENABLED | bool %}
-      - emulator
-{% endif %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
-
-{% if EMULATOR_ENABLED | bool %}
-  emulator:
-    image: "{{ EMULATOR_IMAGE }}"
-    container_name: "{{ BRIDGY_CONTAINER }}_emulator"
-    command: >
-      gcloud emulators firestore start
-      --host-port=0.0.0.0:{{ EMULATOR_PORT }}
-      --database-mode=datastore-mode
-      --quiet
-    ports:
-      - "127.0.0.1:{{ EMULATOR_PORT }}:{{ EMULATOR_PORT }}"
-    environment:
-      - CLOUDSDK_CORE_DISABLE_PROMPTS=1
-    restart: unless-stopped
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-{% endif %}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

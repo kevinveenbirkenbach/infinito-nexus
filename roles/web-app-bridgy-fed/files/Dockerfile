@@ -3,7 +3,7 @@ ARG PY_BASE="python:3.12-bookworm"
 FROM ${PY_BASE} AS build
 
 ARG BRIDGY_REPO_URL
-ARG BRIDGY_REPO_REF
+ARG BRIDGY_REPO_BRANCH
 
 # System deps: git, build tools, curl for healthchecks, and gunicorn
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-RUN git clone --depth=1 --branch "${BRIDGY_REPO_REF}" "${BRIDGY_REPO_URL}" ./
+RUN git clone --depth=1 --branch "${BRIDGY_REPO_BRANCH}" "${BRIDGY_REPO_URL}" ./
 
 # Python deps
 RUN pip install --upgrade pip && \
@@ -35,7 +35,7 @@ PY
 FROM ${PY_BASE}
 
 ARG CONTAINER_PORT
-ENV PORT=${CONTAINER_PORT:-8080}
+ENV PORT=${CONTAINER_PORT}
 
 WORKDIR /app
 COPY --from=build /app /app
