@@ -15,8 +15,9 @@
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain: "{{ BLUESKY_WEB_DOMAIN }}"
-    http_port: "{{ BLUESKY_WEB_PORT }}"
+    domain:                     "{{ BLUESKY_WEB_DOMAIN }}"
+    http_port:                  "{{ BLUESKY_WEB_PORT }}"
+    proxy_extra_configuration:  "{{ BLUESKY_FRONT_PROXY_CONTENT }}"
   when: BLUESKY_WEB_ENABLED | bool
 
 - name: "Include front proxy for {{ BLUESKY_VIEW_DOMAIN }}:{{ BLUESKY_VIEW_PORT }}"

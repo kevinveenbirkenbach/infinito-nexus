@@ -1,0 +1,16 @@
+# Injected by web-app-bluesky (same pattern as web-app-yourls)
+# Exposes a same-origin /config to avoid CORS when the social-app fetches config.
+location = /config {
+    proxy_pass {{ BLUESKY_CONFIG_UPSTREAM_URL }};
+    # Nur Hostname extrahieren:
+    set $up_host "{{ BLUESKY_CONFIG_UPSTREAM_URL | regex_replace('^https?://', '') | regex_replace('/.*$', '') }}";
+    proxy_set_header Host $up_host;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";
+    proxy_ssl_server_name on;
+
+    # Make response clearly same-origin for browsers
+    proxy_hide_header Access-Control-Allow-Origin;
+    add_header Access-Control-Allow-Origin $scheme://$host always;
+    add_header Vary Origin always;
+}

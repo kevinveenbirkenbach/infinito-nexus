@@ -43,3 +43,6 @@ BLUESKY_ROTATION_KEY:           "{{ applications | get_app_conf(application_id, 
 BLUESKY_ADMIN_EMAIL:            "{{ users.administrator.email }}"
 BLUESKY_ADMIN_PASSWORD:         "{{ users.administrator.password }}"
 
+# Front proxy
+BLUESKY_FRONT_PROXY_CONTENT:    "{{ lookup('template', 'extra_locations.conf.j2') }}"
+BLUESKY_CONFIG_UPSTREAM_URL:    "{{ applications | get_app_conf(application_id, 'server.config_upstream_url') }}"

@@ -5,6 +5,7 @@ features:
   central_database: false
   logout:           true
 server:
+  config_upstream_url: "https://ip.bsky.app/config"
   domains:
     canonical:
       web:  "bskyweb.{{ PRIMARY_DOMAIN }}"
@@ -33,7 +34,7 @@ docker:
     database:
       enabled: false
     web:
-      enabled: true # @see https://github.com/bluesky-social/social-app
+      enabled: true  # @see https://github.com/bluesky-social/social-app
     view:
       enabled: false
     pds:
