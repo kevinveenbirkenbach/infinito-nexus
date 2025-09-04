@@ -28,8 +28,8 @@ class TestTreeIncludeRoleDependencies(unittest.TestCase):
             "sys-ctl-hlth-csp",
             "svc-db-postgres",
             "svc-db-mysql",
-            "axb",          # für a{{database_type}}b → a*b
-            "ayyb",         # für a{{database_type}}b → a*b
+            "axb",          # für a{{ database_type }}b → a*b
+            "ayyb",         # für a{{ database_type }}b → a*b
             "literal-role", # für reinen Literalnamen
         ]
         for r in self.roles_to_create:
@@ -46,15 +46,15 @@ class TestTreeIncludeRoleDependencies(unittest.TestCase):
 
 - name: Pattern with literal + var suffix
   include_role:
-    name: "svc-db-{{database_type}}"
+    name: "svc-db-{{ database_type }}"
 
 - name: Pattern with literal prefix/suffix around var
   include_role:
-    name: "a{{database_type}}b"
+    name: "a{{ database_type }}b"
 
 - name: Pure variable only (should be ignored)
   include_role:
-    name: "{{database_type}}"
+    name: "{{ database_type }}"
 
 - name: Pure literal include
   include_role:
@@ -115,10 +115,10 @@ class TestTreeIncludeRoleDependencies(unittest.TestCase):
         expected = sorted([
             "sys-ctl-hlth-webserver", # aus loop
             "sys-ctl-hlth-csp",       # aus loop
-            "svc-db-postgres",        # aus svc-db-{{database_type}}
-            "svc-db-mysql",           # aus svc-db-{{database_type}}
-            "axb",                    # aus a{{database_type}}b
-            "ayyb",                   # aus a{{database_type}}b
+            "svc-db-postgres",        # aus svc-db-{{ database_type }}
+            "svc-db-mysql",           # aus svc-db-{{ database_type }}
+            "axb",                    # aus a{{ database_type }}b
+            "ayyb",                   # aus a{{ database_type }}b
             "literal-role",           # reiner Literalname
         ])
 
@@ -129,8 +129,8 @@ class TestTreeIncludeRoleDependencies(unittest.TestCase):
         )
         self.assertEqual(deps, expected, "include_role dependencies mismatch")
 
-        # Sicherstellen, dass der pure Variable-Name "{{database_type}}" NICHT aufgenommen wurde
-        self.assertNotIn("{{database_type}}", deps, "pure variable include should be ignored")
+        # Sicherstellen, dass der pure Variable-Name "{{ database_type }}" NICHT aufgenommen wurde
+        self.assertNotIn("{{ database_type }}", deps, "pure variable include should be ignored")
 
         # Sicherstellen, dass im Original-meta der Producer-Role nichts geschrieben wurde
         original_tree_path = os.path.join(self.producer_path, "meta", "tree.json")
