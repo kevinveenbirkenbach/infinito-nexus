@@ -16,3 +16,12 @@
   notify:
     - docker compose build
     - docker compose up
+
+- name: Force IPCC_URL to same-origin /ipcc
+  ansible.builtin.replace:
+    path: "{{ BLUESKY_SOCIAL_APP_DIR }}/src/state/geolocation.tsx"
+    regexp: '^\s*const\s+IPCC_URL\s*=\s*.*$'
+    replace: "const IPCC_URL = '/ipcc'"
+  notify:
+    - docker compose build
+    - docker compose up
