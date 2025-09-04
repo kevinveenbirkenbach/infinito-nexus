@@ -4,7 +4,7 @@
 ```bash
 cd {{ PATH_DOCKER_COMPOSE_INSTANCES }}magento/
 docker compose down
-docker volume rm magento_data
+docker volume rm MAGENTO_VOLUME
 cd {{ PATH_DOCKER_COMPOSE_INSTANCES }} && rm -vR {{ PATH_DOCKER_COMPOSE_INSTANCES }}magento
 ```
 

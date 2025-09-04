@@ -1,6 +1,6 @@
 # 🔼 Upgrade
 
-> Always back up the database and the `magento_data` volume before upgrades.
+> Always back up the database and the `MAGENTO_VOLUME` volume before upgrades.
 
 1. Update images/versions in the application config (`roles/web-app-magento/config/main.yml` or inventory overrides).
 2. Recreate containers:

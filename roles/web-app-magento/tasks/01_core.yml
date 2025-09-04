@@ -1,6 +1,32 @@
 - name: "load docker, db/redis/proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full-stateful
+  vars:
+    docker_compose_flush_handlers:  true
 
-- name: flush docker service
-  meta: flush_handlers
+- name: "Run Magento setup:install (in container)"
+  command: >
+    docker compose exec -T application bash -lc "
+    cd /var/www/html && bin/magento setup:install \
+      --base-url='{{ MAGENTO_URL }}/' \
+      --db-host=\"$MYSQL_HOST\" \
+      --db-name=\"$MYSQL_DATABASE\" \
+      --db-user=\"$MYSQL_USER\" \
+      --db-password=\"$MYSQL_PASSWORD\" \
+      --search-engine='opensearch' \
+      --opensearch-host=\"$OPENSEARCH_HOST\" \
+      --opensearch-port=\"$OPENSEARCH_PORT_NUMBER\" \
+      --admin-firstname=\"$MAGENTO_ADMIN_FIRSTNAME\" \
+      --admin-lastname=\"$MAGENTO_ADMIN_LASTNAME\" \
+      --admin-email=\"$MAGENTO_ADMIN_EMAIL\" \
+      --admin-user=\"$MAGENTO_ADMIN_USERNAME\" \
+      --admin-password=\"$MAGENTO_ADMIN_PASSWORD\""
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: magento_install
+  changed_when: >
+    (magento_install.stdout is defined and
+     ('Magento installation complete' in magento_install.stdout
+      or 'successfully installed' in magento_install.stdout))
+
+- include_tasks: utils/run_once.yml

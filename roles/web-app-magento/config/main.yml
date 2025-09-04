@@ -19,19 +19,19 @@ server:
 docker:
   services:
     application:
-      image:            "bitnami/magento"
-      version:          "latest"
-      name:             "magento"
+      image:              "ghcr.io/alexcheng1982/docker-magento2"
+      version:            "2.4.6-p3"
+      name:               "magento"
       backup:
         no_stop_required: true
     database:
-      enabled:          true      # Central DB recommended; if disabled, app-local DB is created
+      enabled:            true      # Central DB recommended; if disabled, app-local DB is created
     redis:
-      enabled:          true
+      enabled:            true
     search:
-      enabled:          true
-      image:            "opensearchproject/opensearch"
-      version:          "latest"
-      name:             "magento-opensearch"
+      enabled:            true
+      image:              "opensearchproject/opensearch"
+      version:            "latest"
+      name:               "magento-opensearch"
   volumes:
-    data:               "magento_data"
+    data:                 "magento_data"

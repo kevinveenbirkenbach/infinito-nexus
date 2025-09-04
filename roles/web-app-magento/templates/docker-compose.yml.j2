@@ -1,34 +1,33 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-{% set container_port = 8080 %}
+{% set container_port = 80 %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ magento_image }}:{{ magento_version }}"
-    container_name: "{{ magento_name }}"
+    image: "{{ MAGENTO_IMAGE }}:{{ MAGENTO_VERSION }}"
+    container_name: "{{ MAGENTO_CONTAINER }}"
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
-      - "data:/bitnami/magento"
+      - "data:/var/www/html"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-    depends_on:
-      - search
+#      search:
+#        condition: service_healthy
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   search:
 {% set container_port = 9200 %}
-    image: "{{ magento_search_image }}:{{ magento_search_version }}"
-    container_name: "{{ magento_search_name }}"
+    image: "{{ MAGENTO_SEARCH_IMAGE }}:{{ MAGENTO_SEARCH_VERSION }}"
+    container_name: "{{ MAGENTO_SEARCH_NAME }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     environment:
       - discovery.type=single-node
-      - plugins.security.disabled=true
       - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ magento_data }}
+    name: {{ MAGENTO_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
