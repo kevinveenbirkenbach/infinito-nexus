@@ -1,1 +1,7 @@
-
+credentials:
+  adobe_public_key:
+      description: "Adobe/Magento Marketplace Public Key"
+      algorithm: "plain"
+  adobe_private_key:
+      description: "Adobe/Magento Marketplace Private Key"
+      algorithm: "plain"

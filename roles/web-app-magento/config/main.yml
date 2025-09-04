@@ -2,7 +2,7 @@ features:
   matomo:             true
   css:                true
   desktop:            true
-  central_database:   true        # Use platform DB (recommended). If false, app-local DB container is enabled.
+  central_database:   false       # Impossible to use central database due to strict database checking
   oidc:               false       # Magento SSO via OIDC requires extensions; not wired by default
   logout:             true
   ldap:               false
@@ -15,17 +15,23 @@ server:
       - "shop.{{ PRIMARY_DOMAIN }}"
     aliases:
       - "magento.{{ PRIMARY_DOMAIN }}"
-
 docker:
   services:
-    application:
-      image:              "ghcr.io/alexcheng1982/docker-magento2"
-      version:            "2.4.6-p3"
-      name:               "magento"
+    php:
+      image:              "markoshust/magento-php"
+      version:            "8.2-fpm"
+      name:               "magento-php"
+      backup:
+        no_stop_required: true
+    nginx:
+      image:              "markoshust/magento-nginx"
+      version:            "latest"
+      name:               "magento-nginx"
       backup:
         no_stop_required: true
     database:
-      enabled:            true      # Central DB recommended; if disabled, app-local DB is created
+      enabled:            true
+      version:            "11.4"
     redis:
       enabled:            true
     search:
