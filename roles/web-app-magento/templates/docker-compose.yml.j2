@@ -1,8 +1,11 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   nginx:
-{% set container_port = 80 %}
+{% set container_port = 8000 %}
     image: "{{ MAGENTO_NGINX_IMAGE }}:{{ MAGENTO_NGINX_VERSION }}"
     container_name: "{{ MAGENTO_NGINX_CONTAINER }}"
+    environment:
+      PHP_HOST: "php"
+      PHP_PORT: "9000"
     depends_on:
       - php
       - search
@@ -10,7 +13,11 @@
       - "data:/var/www/html"
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
-{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t >/dev/null 2>&1 && { grep -q ':1F40' /proc/net/tcp || grep -q ':1F40' /proc/net/tcp6; }"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   php:
