@@ -23,6 +23,6 @@ AKAUNTING_COMPANY_NAME:             "{{ applications | get_app_conf(application_
 AKAUNTING_COMPANY_EMAIL:            "{{ applications | get_app_conf(application_id, 'company.email') }}"
 AKAUNTING_ADMIN_EMAIL:              "{{ applications | get_app_conf(application_id, 'setup_admin_email') }}"
 AKAUNTING_ADMIN_PASSWORD:           "{{ applications | get_app_conf(application_id, 'credentials.setup_admin_password') }}"
-AKAUNTING_SETUP_MARKER:             "/var/lib/docker/volumes/{{ AKAUNTING_VOLUME }}/_data/.akaunting_installed"
+AKAUNTING_SETUP_MARKER:             "{{ [ (AKAUNTING_VOLUME | docker_volume_path), '.akaunting_installed' ] | path_join }}"
 AKAUNTING_APP_KEY:                  "{{ applications | get_app_conf(application_id, 'credentials.app_key') }}"
 AKAUNTING_CACHE_DRIVER:             "{{ 'redis' if applications | get_app_conf(application_id, 'docker.services.redis.enabled') else 'file' }}"
