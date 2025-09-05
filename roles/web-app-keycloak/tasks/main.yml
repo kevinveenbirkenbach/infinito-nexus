@@ -77,23 +77,16 @@
         }}
   include_tasks: _update.yml
 
-- name: "Update REALM mail settings"
+- name: "Update REALM mail settings from realm dictionary (SPOT)"
   include_tasks: _update.yml
   vars:
-    kc_object_kind: "realm"
+    kc_object_kind:  "realm"
     kc_lookup_field: "id"
     kc_lookup_value: "{{ KEYCLOAK_REALM }}"
     kc_desired:
-      smtpServer:
-        from: "no-reply@{{ DEFAULT_SYSTEM_EMAIL.DOMAIN }}"
-        fromDisplayName: "{{ SOFTWARE_NAME | default('Infinito.Nexus') }}"
-        host: "{{ DEFAULT_SYSTEM_EMAIL.HOST }}"
-        port: "{{ DEFAULT_SYSTEM_EMAIL.PORT }}"
-        # Keycloak expects strings "true"/"false"
-        ssl: "{{ 'true' if not DEFAULT_SYSTEM_EMAIL.START_TLS and DEFAULT_SYSTEM_EMAIL.TLS else 'false' }}"
-        starttls: "{{ 'true' if DEFAULT_SYSTEM_EMAIL.START_TLS else 'false' }}"
-        user: "{{ DEFAULT_SYSTEM_EMAIL.USER | default('') }}"
-        password: "{{ DEFAULT_SYSTEM_EMAIL.PASSWORD | default('') }}"
+      smtpServer: "{{ KEYCLOAK_DICTIONARY_REALM.smtpServer | default({}, true) }}"
+    kc_merge_path:  "smtpServer"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - include_tasks: 05_rbac_client_scope.yml
 

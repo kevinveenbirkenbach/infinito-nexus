@@ -1,0 +1,14 @@
+"smtpServer": {
+    "password": "{{ users['no-reply'].mailu_token }}",
+    "replyToDisplayName": "",
+    "starttls": "{{ SYSTEM_EMAIL.START_TLS | lower }}",
+    "auth": "true",
+    "port": "{{ SYSTEM_EMAIL.PORT }}",
+    "replyTo": "",
+    "host": "{{ SYSTEM_EMAIL.HOST }}",
+    "from": "{{ users['no-reply'].email }}",
+    "fromDisplayName": "Keycloak Authentication System - {{ KEYCLOAK_DOMAIN | upper }}",
+    "envelopeFrom": "",
+    "ssl": "{{ (SYSTEM_EMAIL.TLS and not SYSTEM_EMAIL.START_TLS) | ternary('true','false') }}",
+    "user": "{{ users['no-reply'].email }}"
+}

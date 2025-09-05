@@ -1443,20 +1443,7 @@
     "xXSSProtection": "1; mode=block",
     "strictTransportSecurity": "max-age=31536000; includeSubDomains"
   },
-  "smtpServer": {
-    "password": "{{ users['no-reply'].mailu_token }}",
-    "replyToDisplayName": "",
-    "starttls": "{{ SYSTEM_EMAIL.START_TLS | lower }}",
-    "auth": "true",
-    "port": "{{ SYSTEM_EMAIL.PORT }}",
-    "replyTo": "",
-    "host": "{{ SYSTEM_EMAIL.HOST }}",
-    "from": "{{ users['no-reply'].email }}",
-    "fromDisplayName": "Keycloak Authentification System - {{ KEYCLOAK_DOMAIN | upper }}",
-    "envelopeFrom": "",
-    "ssl": "true",
-    "user": "{{ users['no-reply'].email }}"
-  },
+  {%- include "smtp_server.json.j2" -%},
   "eventsEnabled": false,
   "eventsListeners": [
     "jboss-logging"
