@@ -1,4 +1,4 @@
-- name: "include role for {{ application_id }} to receive certs & do modification routines for '{{ domain }}:{{ port }}'"
+- name: "include role for {{ application_id }} to receive certs & do modification routines for '{{ NEXTCLOUD_DOMAIN }}:{{ NEXTCLOUD_PORT }}'"
   include_role:
     name: sys-util-csp-cert
 
