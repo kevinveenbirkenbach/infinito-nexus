@@ -12,6 +12,19 @@ MAGENTO_USER:                   "app"
 MAGENTO_DOMAIN:                 "{{ domains | get_domain(application_id) }}"
 MAGENTO_URL:                    "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 
+## Runtime config paths (used by 02_runtime_conf.yml)
+# Root config directory comes from the docker_compose subsystem (already asserted)
+MAGENTO_NGINX_DIR:              "{{ [ docker_compose.directories.config, 'nginx' ] | path_join }}"
+MAGENTO_PHP_DIR:                "{{ [ docker_compose.directories.config, 'php' ]   | path_join }}"
+MAGENTO_NGINX_CONF_PATH:        "{{ [ MAGENTO_NGINX_DIR, 'nginx.conf' ] | path_join }}"
+MAGENTO_PHP_ZZ_CONF_PATH:       "{{ [ MAGENTO_PHP_DIR, 'php-fpm-zz-docker.conf' ] | path_join }}"
+
+## Intra-container wiring (nginx -> php-fpm) and listen port
+# These values mirror the docker-compose template (environment variables and exposed port)
+MAGENTO_PHP_HOST:               "php"
+MAGENTO_PHP_PORT:               9000
+MAGENTO_NGINX_PORT:             8000
+
 ## Search (OpenSearch)
 MAGENTO_SEARCH_VERSION:         "{{ applications | get_app_conf(application_id, 'docker.services.search.version') }}"
 MAGENTO_SEARCH_IMAGE:           "{{ applications | get_app_conf(application_id, 'docker.services.search.image') }}"
