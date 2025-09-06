@@ -44,7 +44,3 @@
   register: pkgmgr_available
   failed_when: false
 
-- name: "Update all repositories using pkgmgr"
-  include_role:
-    name: update-pkgmgr
-  when: pkgmgr_available.rc == 0

@@ -43,3 +43,7 @@
     chdir: "{{ PKGMGR_INSTALL_PATH }}"
     executable: /bin/bash
   become: true
+
+- name: "Update all repositories with pkgmgr"
+  command: "pkgmgr pull --all"
+  when: MODE_UPDATE | bool
