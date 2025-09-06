@@ -144,14 +144,6 @@ def update_discourse(directory):
     else:
         print("Discourse update skipped. No changes in git repository.")
 
-def upgrade_listmonk():
-    """
-    Runs the upgrade for Listmonk
-    """
-    print("Starting Listmonk upgrade.")
-    run_command('echo "y" | docker compose run -T application ./listmonk --upgrade')
-    print("Upgrade complete.")
-
 def update_procedure(command):
     """
     Attempts to execute a command up to a maximum number of retries.
@@ -210,8 +202,6 @@ if __name__ == "__main__":
                 # The following instances need additional update and upgrade procedures
                 if os.path.basename(dir_path) == "discourse":
                     update_discourse(dir_path)
-                elif os.path.basename(dir_path) == "listmonk":
-                    upgrade_listmonk()
-                    
+
                 # @todo implement dedicated procedure for bluesky
                 # @todo implement dedicated procedure for taiga
