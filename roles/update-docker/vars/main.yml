@@ -1,2 +1,0 @@
-application_id: update-docker
-system_service_id: "{{ application_id }}"

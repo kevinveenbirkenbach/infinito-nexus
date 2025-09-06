@@ -12,7 +12,6 @@ SYS_SERVICE_BACKUP_RMT_2_LOC:           "{{ 'svc-bkp-rmt-2-loc'         | get_se
 SYS_SERVICE_BACKUP_DOCKER_2_LOC:        "{{ 'sys-ctl-bkp-docker-2-loc'  | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_REPAIR_DOCKER_SOFT:         "{{ 'sys-ctl-rpr-docker-soft'   | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_REPAIR_DOCKER_HARD:         "{{ 'sys-ctl-rpr-docker-hard'   | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_UPDATE_DOCKER:              "{{ 'update-docker'             | get_service_name(SOFTWARE_NAME) }}"
 
 ## On Failure
 SYS_SERVICE_ON_FAILURE_COMPOSE:         "{{ ('sys-ctl-alm-compose@') | get_service_name(SOFTWARE_NAME, False) }}%n.service"
@@ -46,8 +45,7 @@ SYS_SERVICE_GROUP_MANIPULATION: >
       SYS_SERVICE_GROUP_CLEANUP +
       SYS_SERVICE_GROUP_REPAIR +
       SYS_SERVICE_GROUP_OPTIMIZATION +
-      SYS_SERVICE_GROUP_MAINTANANCE +
-      [ SYS_SERVICE_UPDATE_DOCKER ]
+      SYS_SERVICE_GROUP_MAINTANANCE
     ) | sort
   }}
 
