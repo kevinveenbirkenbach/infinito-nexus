@@ -1,0 +1,31 @@
+credentials: {}
+docker:
+  services:
+    redis:
+      enabled:      false
+    database:
+      enabled:      true
+    xwiki:
+      image:        xwiki
+      version:      stable-mariadb-tomcat
+      name:         xwiki
+      backup:
+        no_stop_required: true
+  volumes:
+    data:           "xwiki_data"
+features:
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
+  logout:           true
+  oidc:             true
+server:
+  csp:
+    whitelist:      {}
+    flags:          {}
+  domains:
+    canonical:
+      - "x.wiki.{{ PRIMARY_DOMAIN }}"
+rbac:
+  roles: {}

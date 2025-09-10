@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: "Kevin Veen-Birkenbach"
+  description: "XWiki is an open-source enterprise wiki and knowledge management platform, offering collaboration tools, structured content, and extensibility through apps and plugins."
+  license: "Infinito.Nexus NonCommercial License"
+  license_url: "https://s.infinito.nexus/license"
+  company: | 
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
+  galaxy_tags: [wiki, collaboration, knowledge, documentation, cms]
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://s.infinito.nexus/code/"
+  logo:
+    class: "fas fa-book"
+  run_after:
+    - web-app-matomo
+    - web-app-keycloak
+    - web-app-mailu
+dependencies: []

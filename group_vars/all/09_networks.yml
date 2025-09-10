@@ -102,6 +102,8 @@ defaults_networks:
       subnet: 192.168.103.208/28
     web-app-bridgy-fed:
       subnet: 192.168.103.224/28
+    web-app-xwiki:
+      subnet: 192.168.103.240/28
 
     # /24 Networks / 254 Usable Clients
     web-app-bigbluebutton:

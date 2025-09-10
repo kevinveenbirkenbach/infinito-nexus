@@ -1,0 +1,33 @@
+# General
+application_id:                 "web-app-xwiki"
+database_type:                  "postgres"
+container_port:                 8080
+container_hostname:             "{{ domains | get_domain(application_id) }}"
+
+# Pretix
+
+## URLs
+XWIKI_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+XWIKI_HOSTNAME:                "{{ container_hostname }}"
+
+## OIDC (mirrors GitLab’s pattern)
+XWIKI_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+XWIKI_OIDC_LABEL:              "{{ OIDC.BUTTON_TEXT }}"
+XWIKI_OIDC_CLIENT_ID:          "{{ OIDC.CLIENT.ID }}"
+XWIKI_OIDC_CLIENT_SECRET:      "{{ OIDC.CLIENT.SECRET }}"
+XWIKI_OIDC_ISSUER:             "{{ OIDC.CLIENT.ISSUER_URL }}"
+XWIKI_OIDC_AUTH_URL:           "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+XWIKI_OIDC_TOKEN_URL:          "{{ OIDC.CLIENT.TOKEN_URL }}"
+XWIKI_OIDC_USERINFO_URL:       "{{ OIDC.CLIENT.USER_INFO_URL }}"
+XWIKI_OIDC_LOGOUT_URL:         "{{ OIDC.CLIENT.LOGOUT_URL }}"
+XWIKI_OIDC_JWKS_URL:           "{{ OIDC.CLIENT.CERTS }}"
+XWIKI_OIDC_SCOPES:             "openid,email,profile"
+# Use Keycloak username claim by default (plugin default is 'sub')
+XWIKI_OIDC_UNIQUE_ATTRIBUTE:   "{{ OIDC.ATTRIBUTES.USERNAME }}"
+
+## Docker
+XWIKI_IMAGE_CUSTOM:            "xwiki_custom"
+XWIKI_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.image') }}"
+XWIKI_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.version') }}"
+XWIKI_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.name') }}"
+XWIKI_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
