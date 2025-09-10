@@ -1,8 +1,0 @@
-[Unit]
-Description=backup docker volumes to local folder
-OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }} {{ SYS_SERVICE_CLEANUP_BACKUPS_FAILED }}
-
-[Service]
-Type=oneshot
-ExecStartPre=/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_BACKUP_DOCKER_2_LOC }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"
-ExecStart=/bin/sh -c '{{ BKP_DOCKER_2_LOC_EXEC }}'

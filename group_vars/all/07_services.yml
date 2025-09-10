@@ -5,8 +5,10 @@
 SYS_SERVICE_SUFFIX:                     ".{{ SOFTWARE_NAME | lower }}.service"
 
 ## Names
+SYS_SERVICE_CLEANUP_BACKUPS:            "{{ 'sys-ctl-cln-bkps'          | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_CLEANUP_BACKUPS_FAILED:     "{{ 'sys-ctl-cln-faild-bkps'    | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES:  "{{ 'sys-ctl-cln-anon-volumes'  | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_CLEANUP_DISC_SPACE:         "{{ 'sys-ctl-cln-disc-space'    | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_OPTIMIZE_DRIVE:             "{{ 'svc-opt-ssd-hdd'           | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_BACKUP_RMT_2_LOC:           "{{ 'svc-bkp-rmt-2-loc'         | get_service_name(SOFTWARE_NAME) }}"
 SYS_SERVICE_BACKUP_DOCKER_2_LOC:        "{{ 'sys-ctl-bkp-docker-2-loc'  | get_service_name(SOFTWARE_NAME) }}"

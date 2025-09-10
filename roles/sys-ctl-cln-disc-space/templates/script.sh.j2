@@ -6,7 +6,7 @@ minimum_percent_cleanup_disc_space="$1"
 force_freeing=false
 echo "Checking free disc space..."
 df
-if [ $# -gt 0 ] && [ "$2" == "--force" ]; then
+if [ $# -gt 0 ] && [ "$2" = "--force" ]; then
   echo "Forcing disc space freeing."
   force_freeing=true 
 fi 
@@ -14,7 +14,7 @@ for disc_use_percent in $(df --output=pcent | sed 1d)
 do
     disc_use_percent_number=$(echo "$disc_use_percent" | sed "s/%//")
     if [ "$disc_use_percent_number" -gt "$minimum_percent_cleanup_disc_space" ]; then
-      echo "WARNING: $disc_use_percent_number exceeds the limit of {{SIZE_PERCENT_DISC_SPACE_WARNING}}%."
+      echo "WARNING: ${disc_use_percent_number}% exceeds the limit of ${minimum_percent_cleanup_disc_space}%."
       force_freeing=true 
     fi
 done
@@ -24,29 +24,31 @@ if [ "$force_freeing" = true ]; then
   
   {% if BACKUPS_FOLDER_PATH is defined and SIZE_PERCENT_MAXIMUM_BACKUP is defined %}
   echo "cleaning up backups" &&
-  python {{ 'sys-ctl-cln-bkps' | get_service_script_path('sh') }} --backups-folder-path {{ BACKUPS_FOLDER_PATH }} --maximum-backup-size-percent {{ SIZE_PERCENT_MAXIMUM_BACKUP }} || exit 2
+  systemctl start {{ SYS_SERVICE_CLEANUP_BACKUPS }} || exit 2
   {% endif %}
 
-  if pacman -Qs $package > /dev/null ; then
+  if command -v docker >/dev/null 2>&1 ; then
     echo "cleaning up docker" &&
     docker system prune -f || exit 3
 
-    nextcloud_application_container="{{ applications | get_app_conf('web-app-nextcloud', 'docker.services.nextcloud.name', True) }}"
-    if [ "$(docker ps -a -q -f name=$nextcloud_application_container)" ] ; then
+    nextcloud_application_container="{{ applications | get_app_conf('web-app-nextcloud', 'docker.services.nextcloud.name') }}"
+    if [ -n "$nextcloud_application_container" ] && [ "$(docker ps -a -q -f name=$nextcloud_application_container)" ] ; then
       echo "cleaning up docker nextcloud" &&
-      docker exec -it -u www-data $nextcloud_application_container /var/www/html/occ files:cleanup || exit 4
-      docker exec -it -u www-data $nextcloud_application_container /var/www/html/occ trashbin:cleanup --all-users || exit 5
-      docker exec -it -u www-data $nextcloud_application_container /var/www/html/occ versions:cleanup || exit 6
+      docker exec -u www-data $nextcloud_application_container /var/www/html/occ files:cleanup || exit 4
+      docker exec -u www-data $nextcloud_application_container /var/www/html/occ trashbin:cleanup --all-users || exit 5
+      docker exec -u www-data $nextcloud_application_container /var/www/html/occ versions:cleanup || exit 6
     fi
 
   fi
 
-  echo "cleaning pacman cache" &&
-  yes | pacman -Sc || exit 7
+  if command -v pacman >/dev/null 2>&1 ; then
+    echo "cleaning pacman cache" &&
+    yes | pacman -Sc || exit 7
+  fi
 
   echo "cleanup finished."
 else
-  echo "Sufficiend disc space available."
+  echo "Sufficient disc space available."
   echo "To force the freeing of disc space pass the parameter --force."
 fi
 exit 0
