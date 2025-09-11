@@ -20,6 +20,7 @@ features:
   central_database: true
   logout:           true
   oidc:             true
+  ldap:             true
 server:
   csp:
     whitelist:      {}
