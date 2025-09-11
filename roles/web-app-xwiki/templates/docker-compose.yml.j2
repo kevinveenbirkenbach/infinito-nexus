@@ -12,6 +12,7 @@
       - "{{ XWIKI_HOST_CONF_PATH }}:/usr/local/xwiki/xwiki.cfg"
       - "{{ XWIKI_HOST_PROPERTIES_PATH }}:/usr/local/xwiki/xwiki.properties"
       - "{{ XWIKI_HOST_HIBERNATE_PATH }}:/usr/local/xwiki/hibernate.cfg.xml"
+      - "{{ XWIKI_HOST_HIBERNATE_PATH }}:/usr/local/tomcat/webapps/ROOT/WEB-INF/hibernate.cfg.xml"
       - 'data:/usr/local/xwiki'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
