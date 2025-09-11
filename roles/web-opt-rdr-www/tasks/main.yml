@@ -13,35 +13,29 @@
     redirect_domain_mappings: "{{ REDIRECT_WWW_DOMAINS | map('regex_replace', '^www\\.(.+)$', '{ source: \"www.\\1\", target: \"\\1\" }') | map('from_yaml') | list }}"
   when: REDIRECT_WWW_FLAVOR == 'origin'
 
-- name: Include DNS role to set redirects
-  include_role:
-    name: sys-dns-cloudflare-records
-  vars:
-    cloudflare_records: |
-      {%- set bare = REDIRECT_WWW_DOMAINS | map('regex_replace', '^www\\.(.+)$', '\\1') | list -%}
-      [
-      {%- for d in bare -%}
-        {
-          "type": "A",
-          "zone": "{{ d | to_zone }}",
-          "name": "{{ d }}",
-          "content": "{{ networks.internet.ip4 }}",
-          "proxied": {{ REDIRECT_WWW_FLAVOR == 'edge' }},
-          "ttl": 1
-        }{{ "," if not loop.last else "" }}
-      {%- endfor -%}
-      ]
-  when: 
-    - DNS_PROVIDER == 'cloudflare'
-    - REDIRECT_WWW_FLAVOR == 'origin'
+- name: Cloudflare WWW Routines
+  when: DNS_PROVIDER == 'cloudflare'
+  block:
+    - name: Include DNS role to set redirects
+      include_role:
+        name: sys-dns-cloudflare-records
+      vars:
+        cloudflare_records: |
+          {%- set bare = REDIRECT_WWW_DOMAINS | map('regex_replace', '^www\\.(.+)$', '\\1') | list -%}
+          [
+          {%- for d in bare -%}
+            {
+              "type": "A",
+              "zone": "{{ d | to_zone }}",
+              "name": "{{ d }}",
+              "content": "{{ networks.internet.ip4 }}",
+              "proxied": {{ REDIRECT_WWW_FLAVOR == 'edge' }},
+              "ttl": 1
+            }{{ "," if not loop.last else "" }}
+          {%- endfor -%}
+          ]
+      when: REDIRECT_WWW_FLAVOR == 'origin'
 
-- name: Include Cloudflare redirect rule to enforce www → apex
-  include_tasks: cloudflare_redirect_rule.yml
-  vars:
-    domain: "{{ item | regex_replace('^www\\.', '') }}"
-    www_fqdn: "{{ item }}"
-    apex_url: "{{ WEB_PROTOCOL }}://{{ item | regex_replace('^www\\.', '') }}"
-  loop: "{{ REDIRECT_WWW_DOMAINS }}"
-  when: REDIRECT_WWW_FLAVOR == 'edge'
-    
-  
+    - name: Include Cloudflare edge redirect
+      include_tasks: _01_cloudflare_edge_redirect.yml
+      when: REDIRECT_WWW_FLAVOR == 'edge'
