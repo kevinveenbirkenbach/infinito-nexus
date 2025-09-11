@@ -23,14 +23,13 @@ portfolio_menu_categories:
       - kanban
       - openproject
       - taiga
-      - espocrm
+      - jira
   
   Social Media:
     description: "Social Media Tools"
     icon: "fa-solid fa-share-nodes"
     tags:
       - microblog
-      - blog
       - video platform
       - streaming platform
       - music platform
@@ -41,6 +40,15 @@ portfolio_menu_categories:
       - peertube
       - pixelfed
       - friendica
+      - bookwyrm
+
+  Games:
+    description: "Gaming platforms and entertainment applications."
+    icon: "fa-solid fa-gamepad"
+    tags:
+      - games
+      - chess
+      - boardgame
 
   Communication:
     description: "Tools for communication"
@@ -65,7 +73,7 @@ portfolio_menu_categories:
       - owncloud
       - cloud
 
-  IAM:
+  User Management:
     description: "Tools for Identity and Access Management, including authentication, user provisioning, and secure access control."
     icon: "fa-solid fa-user-shield"
     tags:
@@ -80,6 +88,18 @@ portfolio_menu_categories:
       - fusiondirectory
       - user-management
 
+  Customer Relationship Management:
+    description: "Tools for managing customer relationships, sales pipelines, marketing, and support activities."
+    icon: "fa-solid fa-address-book"
+    tags:
+      - crm
+      - customer
+      - relationship
+      - sales
+      - marketing
+      - support
+      - espocrm
+
   Server Administration:
     description: "Administration Tools für servers"
     icon: "fas fa-building"
@@ -90,6 +110,19 @@ portfolio_menu_categories:
       - phpldapadmin
       - phpmyadmin
       - postgres
+      - mig
+
+  Sales:
+    description: "Applications for e-commerce, ticketing, and sales management."
+    icon: "fa-solid fa-shopping-cart"
+    tags:
+      - sales
+      - ecommerce
+      - shop
+      - store
+      - ticketing
+      - pretix
+      - magento
 
   Tools:
     description: "Helpful Tools"
@@ -127,6 +160,7 @@ portfolio_menu_categories:
       - accounting
       - invoices
       - akaunting
+      - snipe-it
       
   Events:
     description: "Event and ticket management tools"
@@ -183,3 +217,4 @@ portfolio_menu_categories:
       - website
       - joomla
       - wordpress
+      - blog
