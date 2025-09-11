@@ -2,30 +2,23 @@
   include_role:
     name: '{{ item }}'
   loop:
-  - sys-ctl-alm-compose
-  - sys-lock
-  - sys-svc-directory-validator
-  - sys-daemon
+    - sys-ctl-alm-compose
+    - sys-lock
+    - sys-svc-directory-validator
+    - sys-daemon
 
-- name: "pkgmgr install"
+- name: "pkgmgr install '{{ CLN_FAILED_DOCKER_BACKUPS_PKG }}'"
   include_role:
     name: pkgmgr-install
   vars:
-    package_name: "{{ CLN_FAILED_DOCKER_BACKUPS_PKG }}"
-
-- name: "Retrieve {{ CLN_FAILED_DOCKER_BACKUPS_PKG }} path from pkgmgr"
-  command: "pkgmgr path {{ CLN_FAILED_DOCKER_BACKUPS_PKG }}"
-  register: pkgmgr_output
-  changed_when: false
-
-- name: Set fact for BACKUP_CLEANUP_SCRIPT
-  set_fact:
-    BACKUP_CLEANUP_SCRIPT: "{{ pkgmgr_output.stdout.rstrip('/') ~ '/cleanup-all.sh' }}"
-  changed_when: false
+    package_name: "{{ CLEANUP_FAILED_BACKUPS_PKG }}"
 
 - include_role:
     name: sys-service
   vars:
-    system_service_timer_enabled:  true
-    system_service_on_calendar: "{{SYS_SCHEDULE_CLEANUP_FAILED_BACKUPS}}"
-    system_service_copy_files: false
+    system_service_timer_enabled:       true
+    system_service_on_calendar:         "{{ SYS_SCHEDULE_CLEANUP_FAILED_BACKUPS }}"
+    system_service_copy_files:          false
+    system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+    system_service_tpl_exec_start:      '/bin/sh -c "{{ CLEANUP_FAILED_BACKUPS_PKG }} --all --dirval-cmd dirval --workers {{ CLEANUP_FAILED_BACKUPS_WORKERS }} --timeout {{ CLEANBACK_TIMEOUT_SECONDS }} --yes"'
+    system_service_tpl_exec_start_pre:  '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP| join(" ") }} --timeout "{{ SYS_TIMEOUT_CLEANUP_SERVICES }}"'

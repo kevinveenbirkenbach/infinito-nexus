@@ -1,8 +1,0 @@
-[Unit]
-Description=Cleaning up failed docker volume backups
-OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
-
-[Service]
-Type=oneshot
-ExecStartPre=/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP| join(' ') }} --timeout "{{ SYS_TIMEOUT_CLEANUP_SERVICES }}"
-ExecStart=/bin/sh -c '/usr/bin/yes | /usr/bin/bash {{ BACKUP_CLEANUP_SCRIPT | quote }}'

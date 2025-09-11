@@ -1,2 +1,4 @@
 system_service_id:              sys-ctl-cln-faild-bkps
-CLN_FAILED_DOCKER_BACKUPS_PKG:  cleanup-failed-docker-backups
+
+CLEANUP_FAILED_BACKUPS_PKG:     cleanback
+CLEANUP_FAILED_BACKUPS_WORKERS: "{{ ansible_facts.processor_vcpus if ASYNC_ENABLED else 1 }}"
