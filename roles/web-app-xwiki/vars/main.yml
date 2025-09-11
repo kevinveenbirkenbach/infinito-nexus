@@ -14,6 +14,7 @@ XWIKI_HOSTNAME:                       "{{ container_hostname }}"
 ## Paths
 XWIKI_HOST_CONF_PATH:                 "{{ [docker_compose.directories.config, 'xwiki.cfg'] | path_join }}"
 XWIKI_HOST_PROPERTIES_PATH:           "{{ [docker_compose.directories.config, 'xwiki.properties'] | path_join }}"
+XWIKI_HOST_HIBERNATE_PATH:            "{{ [docker_compose.directories.config, 'hibernate.cfg.xml'] | path_join }}"
 
 ## Docker
 XWIKI_IMAGE_CUSTOM:                   "xwiki_custom"
