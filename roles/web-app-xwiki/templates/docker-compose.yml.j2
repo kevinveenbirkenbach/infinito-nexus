@@ -7,8 +7,10 @@
     container_name: "{{ XWIKI_CONTAINER }}"
     hostname: '{{ XWIKI_HOSTNAME}}'
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+      - "127.0.0.1:{{ XWIKI_HOST_PORT }}:{{ container_port }}"
     volumes:
+      - "{{ XWIKI_HOST_CONF_PATH }}:/usr/local/xwiki/xwiki.cfg"
+      - "{{ XWIKI_HOST_PROPERTIES_PATH }}:/usr/local/xwiki/xwiki.properties"
       - 'data:/usr/local/xwiki'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}

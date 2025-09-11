@@ -6,7 +6,7 @@ Empower your organization with **XWiki**, an open-source enterprise wiki and kno
 
 ## Overview
 
-This role deploys XWiki using Docker, automating the installation, configuration, and management of your XWiki server. It integrates with an external PostgreSQL database, Redis for caching and sessions, and an Nginx reverse proxy. The role supports advanced features such as global CSS injection, Matomo analytics, OIDC authentication, and centralized logout, making it a powerful and customizable solution within the Infinito.Nexus ecosystem.
+This role deploys XWiki using Docker, automating the installation, configuration, and management of your XWiki server. It integrates with an MariaDB database and an Nginx reverse proxy. The role supports advanced features such as global CSS injection, Matomo analytics, OIDC authentication, and centralized logout, making it a powerful and customizable solution within the Infinito.Nexus ecosystem.
 
 ## Features
 
@@ -17,7 +17,6 @@ This role deploys XWiki using Docker, automating the installation, configuration
 - **Office Integration:** Import, export, and collaborate on Office documents (Word, Excel, PDF).  
 - **Customization & Theming:** Adapt the look and feel of your wiki with skins, CSS, and scripting.  
 - **Integration Ready:** Connect with external systems such as Keycloak (OIDC), LDAP, or analytics tools like Matomo.  
-- **Scalability:** Backend support with PostgreSQL and Redis for performance and session handling.  
 
 ## Further Resources
 

@@ -1,0 +1,16 @@
+############################################
+# OIDC
+{% if XWIKI_OIDC_ENABLED | bool %}
+oidc.provider={{ XWIKI_OIDC_PROVIDER }}
+oidc.endpoint.authorization={{ XWIKI_OIDC_AUTHORIZATION }}
+oidc.endpoint.token={{ XWIKI_OIDC_TOKEN }}
+oidc.endpoint.userinfo={{ XWIKI_OIDC_USERINFO }}
+oidc.endpoint.logout={{ XWIKI_OIDC_LOGOUT }}
+oidc.clientid={{ XWIKI_OIDC_CLIENT_ID }}
+oidc.secret={{ XWIKI_OIDC_CLIENT_SECRET }}
+oidc.scope={{ XWIKI_OIDC_SCOPES }}
+oidc.enableUser=true
+oidc.userinfoclaims={{ XWIKI_OIDC_GROUPS_CLAIM }}
+oidc.groups.claim={{ XWIKI_OIDC_GROUPS_CLAIM }}
+oidc.groups.mapping=XWiki.XWikiAdminGroup={{ XWIKI_OIDC_ADMIN_PROVIDER_GROUP }}
+{% endif %}

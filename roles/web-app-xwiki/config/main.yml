@@ -29,3 +29,5 @@ server:
       - "x.wiki.{{ PRIMARY_DOMAIN }}"
 rbac:
   roles: {}
+ldap:
+  local_enabled: true # Allows local login if LDAP is down

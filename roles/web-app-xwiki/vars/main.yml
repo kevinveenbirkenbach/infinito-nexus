@@ -1,33 +1,63 @@
 # General
-application_id:                 "web-app-xwiki"
-database_type:                  "mariadb"
-container_port:                 8080
-container_hostname:             "{{ domains | get_domain(application_id) }}"
+application_id:                       "web-app-xwiki"
+database_type:                        "mariadb"
+container_port:                       8080
+container_hostname:                   "{{ domains | get_domain(application_id) }}"
 
-# Pretix
+# XWiki
+
+XWIKI_HOST_PORT:                      "{{ ports.localhost.http[application_id] }}"
 
 ## URLs
-XWIKI_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-XWIKI_HOSTNAME:                "{{ container_hostname }}"
+XWIKI_HOSTNAME:                       "{{ container_hostname }}"
 
-## OIDC (mirrors GitLab’s pattern)
-XWIKI_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
-XWIKI_OIDC_LABEL:              "{{ OIDC.BUTTON_TEXT }}"
-XWIKI_OIDC_CLIENT_ID:          "{{ OIDC.CLIENT.ID }}"
-XWIKI_OIDC_CLIENT_SECRET:      "{{ OIDC.CLIENT.SECRET }}"
-XWIKI_OIDC_ISSUER:             "{{ OIDC.CLIENT.ISSUER_URL }}"
-XWIKI_OIDC_AUTH_URL:           "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
-XWIKI_OIDC_TOKEN_URL:          "{{ OIDC.CLIENT.TOKEN_URL }}"
-XWIKI_OIDC_USERINFO_URL:       "{{ OIDC.CLIENT.USER_INFO_URL }}"
-XWIKI_OIDC_LOGOUT_URL:         "{{ OIDC.CLIENT.LOGOUT_URL }}"
-XWIKI_OIDC_JWKS_URL:           "{{ OIDC.CLIENT.CERTS }}"
-XWIKI_OIDC_SCOPES:             "openid,email,profile"
-# Use Keycloak username claim by default (plugin default is 'sub')
-XWIKI_OIDC_UNIQUE_ATTRIBUTE:   "{{ OIDC.ATTRIBUTES.USERNAME }}"
+## Paths
+XWIKI_HOST_CONF_PATH:                 "{{ [docker_compose.directories.config, 'xwiki.cfg'] | path_join }}"
+XWIKI_HOST_PROPERTIES_PATH:           "{{ [docker_compose.directories.config, 'xwiki.properties'] | path_join }}"
 
 ## Docker
-XWIKI_IMAGE_CUSTOM:            "xwiki_custom"
-XWIKI_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.image') }}"
-XWIKI_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.version') }}"
-XWIKI_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.name') }}"
-XWIKI_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+XWIKI_IMAGE_CUSTOM:                   "xwiki_custom"
+XWIKI_IMAGE:                          "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.image') }}"
+XWIKI_VERSION:                        "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.version') }}"
+XWIKI_CONTAINER:                      "{{ applications | get_app_conf(application_id, 'docker.services.xwiki.name') }}"
+XWIKI_DATA_VOLUME:                    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+
+# Feature toggles (must be set in config/main.yml -> features)
+XWIKI_LDAP_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
+XWIKI_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+
+# Admin credentials (must be provided via inventory/vault)
+XWIKI_ADMIN_USER:                     "{{ users.administrator.username }}"
+XWIKI_ADMIN_PASS:                     "{{ users.administrator.password }}"
+XWIKI_ADMIN_GROUP:                    "{{ application_id }}-administrator"
+
+# REST endpoint (local inside container)
+XWIKI_REST_BASE:                      "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/jobs?jobType=install&async=false"
+
+# Extension IDs + Versions (pin versions explicitly)
+XWIKI_EXT_LDAP_ID:                    "org.xwiki.contrib.ldap:ldap-authenticator"
+XWIKI_EXT_LDAP_VERSION:               "9.15.7"
+XWIKI_EXT_OIDC_ID:                    "org.xwiki.contrib.oidc:oidc-authenticator"
+XWIKI_EXT_OIDC_VERSION:               "2.19.2"
+
+# LDAP configuration (mapped to LDAP.* context)
+XWIKI_LDAP_SERVER:                    "{{ LDAP.SERVER.DOMAIN }}"
+XWIKI_LDAP_PORT:                      "{{ LDAP.SERVER.PORT }}"
+XWIKI_LDAP_BASE_DN:                   "{{ LDAP.DN.ROOT }}"
+XWIKI_LDAP_BIND_DN:                   "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+XWIKI_LDAP_BIND_PASS:                 "{{ LDAP.BIND_CREDENTIAL }}"
+XWIKI_LDAP_TRYLOCAL:                  "{{ applications | get_app_conf(application_id, 'ldap.local_enabled') }}"
+XWIKI_LDAP_FIELDS_MAPPING:            "last_name={{ LDAP.USER.ATTRIBUTES.SURNAME }},first_name={{ LDAP.USER.ATTRIBUTES.FIRSTNAME }},email={{ LDAP.USER.ATTRIBUTES.MAIL }}"
+XWIKI_LDAP_ADMIN_GROUP_DN:            "cn={{ XWIKI_ADMIN_GROUP ~ ',' ~ LDAP.DN.OU.GROUPS }}"
+
+# OIDC configuration (must exist in OIDC.* context)
+XWIKI_OIDC_PROVIDER:                  "{{ OIDC.CLIENT.ISSUER_URL }}"
+XWIKI_OIDC_AUTHORIZATION:             "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+XWIKI_OIDC_TOKEN:                     "{{ OIDC.CLIENT.TOKEN_URL }}"
+XWIKI_OIDC_USERINFO:                  "{{ OIDC.CLIENT.USER_INFO_URL }}"
+XWIKI_OIDC_LOGOUT:                    "{{ OIDC.CLIENT.LOGOUT_URL }}"
+XWIKI_OIDC_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
+XWIKI_OIDC_CLIENT_SECRET:             "{{ OIDC.CLIENT.SECRET }}"
+XWIKI_OIDC_SCOPES:                    "openid email profile {{ RBAC.GROUP.CLAIM }}"
+XWIKI_OIDC_GROUPS_CLAIM:              "{{ RBAC.GROUP.CLAIM }}"
+XWIKI_OIDC_ADMIN_PROVIDER_GROUP:      "{{ [RBAC.GROUP.NAME, XWIKI_ADMIN_GROUP] | path_join }}"

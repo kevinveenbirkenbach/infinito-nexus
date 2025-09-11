@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jobRequest xmlns="http://www.xwiki.org">
+  <id>install-extensions</id>
+  <jobType>install</jobType>
+  <request>
+    <namespace>wiki:xwiki</namespace>
+    <interactive>false</interactive>
+    <verbose>true</verbose>
+    <installDependencies>true</installDependencies>
+    <extensions>
+      {% if XWIKI_LDAP_ENABLED | bool %}
+      <extension>
+        <id>{{ XWIKI_EXT_LDAP_ID }}</id>
+        <version>{{ XWIKI_EXT_LDAP_VERSION }}</version>
+        <namespace>wiki:xwiki</namespace>
+      </extension>
+      {% endif %}
+      {% if XWIKI_OIDC_ENABLED | bool %}
+      <extension>
+        <id>{{ XWIKI_EXT_OIDC_ID }}</id>
+        <version>{{ XWIKI_EXT_OIDC_VERSION }}</version>
+        <namespace>wiki:xwiki</namespace>
+      </extension>
+      {% endif %}
+    </extensions>
+  </request>
+</jobRequest>
