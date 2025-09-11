@@ -67,7 +67,7 @@
       redirect_domain_mappings: "{{
         []  | 
         add_redirect_if_group('web-svc-asset', domains | get_domain('web-svc-asset'), domains | get_domain('web-svc-file'),  group_names) | 
-        merge_mapping(redirect_domain_mappings, 'source')
+        merge_mapping(redirect_domain_mappings| default([]), 'source')
         }}"
 
   - name: Set current play redirect domain mappings 
@@ -85,7 +85,7 @@
         {{
           (CURRENT_PLAY_DOMAINS |
           combine(
-            redirect_domain_mappings | 
+            redirect_domain_mappings | default([]) | 
             items2dict(key_name='source', value_name='source'),
             recursive=True
           )) |
