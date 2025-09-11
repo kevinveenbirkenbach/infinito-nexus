@@ -13,3 +13,4 @@
     system_service_tpl_exec_start_post: "/usr/bin/systemctl start {{ SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES }}"
     system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
 
+- include_tasks: utils/run_once.yml
