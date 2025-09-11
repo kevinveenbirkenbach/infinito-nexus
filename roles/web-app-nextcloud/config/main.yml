@@ -270,3 +270,8 @@ plugins:
   whiteboard:
     # Nextcloud Whiteboard: provides a collaborative drawing and brainstorming tool (https://apps.nextcloud.com/apps/whiteboard)
     enabled: true
+
+  xwiki:
+    # XWiki Integration: search & display XWiki content from Nextcloud
+    # https://apps.nextcloud.com/apps/xwiki
+    enabled: "{{ 'web-app-xwiki' in group_names | lower }}"
