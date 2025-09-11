@@ -1,5 +1,5 @@
 SYN_DNS_PARENT_HOSTS_RECORDS: >-
-  {{ CURRENT_PLAY_DOMAINS
+  {{ CURRENT_PLAY_DOMAINS_ALL
       | parent_build_records(
           PRIMARY_DOMAIN,
           defaults_networks.internet.ip4,
