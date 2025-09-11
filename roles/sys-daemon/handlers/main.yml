@@ -38,9 +38,7 @@
   ansible.builtin.systemd:
     daemon_reload: true
   become: true
-  listen:
-    - reload system daemon
-    - refresh systemctl service
+  listen: reload system daemon
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
