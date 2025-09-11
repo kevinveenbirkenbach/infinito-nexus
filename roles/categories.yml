@@ -71,11 +71,6 @@ roles:
     description: "OS & package updates"
     icon: "fas fa-sync"
     invokable: true
-    pkgmgr:
-      title: "Package Manager Helpers"
-      description: "Helpers for package managers and unified install flows."
-      icon: "fas fa-box-open"
-      invokable: false
   drv:
     title: "Drivers"
     description: "Roles for installing and configuring hardware drivers—covering printers, graphics, input devices, and other peripheral support."
