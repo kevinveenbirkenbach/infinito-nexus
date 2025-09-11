@@ -3,7 +3,7 @@
   include_role:
     name: sys-dns-cloudflare-records
   vars:
-    cloudflare_records: "{{ SYN_DNS_PARENT_HOSTS_RECORDS }}"
+    cloudflare_records: "{{ SYN_DNS_WILDCARD_RECORDS }}"
   when: DNS_PROVIDER == 'cloudflare'
 
 - include_tasks: utils/run_once.yml

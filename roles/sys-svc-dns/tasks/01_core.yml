@@ -22,11 +22,11 @@
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
-- name: "Ensure parent DNS (apex + parent FQDNs) exists"
+- name: "Ensure wildcard parent DNS (*.parent) exists"
   include_role:
-    name: sys-dns-parent-hosts
+    name: sys-dns-wildcards
   vars:
     parent_dns_proxied: false
-  when: run_once_sys_dns_parent_hosts is not defined
+  when: run_once_sys_dns_wildcards is not defined
 
 - include_tasks: utils/run_once.yml

@@ -1,12 +1,12 @@
-SYN_DNS_PARENT_HOSTS_RECORDS: >-
+SYN_DNS_WILDCARD_RECORDS: >-
   {{ CURRENT_PLAY_DOMAINS_ALL
-      | parent_build_records(
+      | wildcard_records(
           PRIMARY_DOMAIN,
           defaults_networks.internet.ip4,
           (defaults_networks.internet.ip6 | default('')),
           parent_dns_proxied,
           (parent_dns_domains | default([])),
-          True,
-          2
+          2,
+          parent_dns_ipv6_enabled
         )
   }}

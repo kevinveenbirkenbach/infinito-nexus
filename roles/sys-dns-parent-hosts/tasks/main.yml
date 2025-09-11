@@ -1,3 +1,0 @@
-- block:
-  - include_tasks: 01_core.yml
-  when: run_once_sys_dns_parent_hosts is not defined
