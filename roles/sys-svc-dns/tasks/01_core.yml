@@ -1,5 +1,4 @@
 ---
-
 - name: "Validate CLOUDFLARE_API_TOKEN"
   fail:
     msg: >
@@ -22,3 +21,12 @@
     label: "{{ item.0 }} → {{ item.1.tag }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- name: "Ensure parent DNS (apex + parent FQDNs) exists"
+  include_role:
+    name: sys-dns-parent-hosts
+  vars:
+    parent_dns_proxied: false
+  when: run_once_sys_dns_parent_hosts is not defined
+
+- include_tasks: utils/run_once.yml

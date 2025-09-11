@@ -1,0 +1,4 @@
+- block:
+  - include_tasks: 01_core.yml
+    when: DNS_PROVIDER == 'cloudflare'
+  when: run_once_sys_svc_dns is not defined

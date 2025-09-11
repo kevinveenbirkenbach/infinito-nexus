@@ -1,14 +1,12 @@
-  - name: Include dependency 'sys-ctl-mtn-cert-renew'
-    include_role:
-      name: sys-ctl-mtn-cert-renew
-    when: run_once_sys_ctl_mtn_cert_renew is not defined
+- name: Include dependency 'sys-ctl-mtn-cert-renew'
+  include_role:
+    name: sys-ctl-mtn-cert-renew
+  when: run_once_sys_ctl_mtn_cert_renew is not defined
 
-  - name: create nginx letsencrypt config file
-    template:
-      src: "letsencrypt.conf.j2"
-      dest: "{{NGINX.DIRECTORIES.HTTP.GLOBAL}}letsencrypt.conf"
-    notify: restart openresty
+- name: create nginx letsencrypt config file
+  template:
+    src: "letsencrypt.conf.j2"
+    dest: "{{ [ NGINX.DIRECTORIES.HTTP.GLOBAL, 'letsencrypt.conf' ] | path_join }}"
+  notify: restart openresty
 
-  - name: "Set CAA records for all base domains"
-    include_tasks: 01_set-caa-records.yml
-    when: DNS_PROVIDER == 'cloudflare'
+- include_tasks: utils/run_once.yml
