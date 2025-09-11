@@ -1,4 +1,4 @@
 application_id:                 web-svc-simpleicons
 container_port:                 3000
-simpleicons_host_server_file:   "{{docker_compose.directories.config}}server.js"
-simpleicons_host_package_file:  "{{docker_compose.directories.config}}package.json"
+simpleicons_host_server_file:   "{{ docker_compose.directories.config }}server.js"
+simpleicons_host_package_file:  "{{ docker_compose.directories.config }}package.json"

@@ -14,11 +14,9 @@ galaxy_info:
       versions:
         - latest
   galaxy_tags:
-    - docker
+    - homepage
     - portfolio
-    - ansible
-    - flask
-    - web
+    - landingpage
   repository: "https://github.com/kevinveenbirkenbach/portfolio"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/portfolio/issues"
   documentation: "https://github.com/kevinveenbirkenbach/portfolio#readme"

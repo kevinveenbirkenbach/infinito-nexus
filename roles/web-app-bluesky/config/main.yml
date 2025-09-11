@@ -6,11 +6,13 @@ features:
   logout:           true
 server:
   config_upstream_url: "https://ip.bsky.app/config"
+  status_codes:
+    web: 405
   domains:
     canonical:
       web:  "bskyweb.{{ PRIMARY_DOMAIN }}"
       api:  "bluesky.{{ PRIMARY_DOMAIN }}"
-      view: "view.bluesky.{{ PRIMARY_DOMAIN }}"
+#      view: "view.bluesky.{{ PRIMARY_DOMAIN }}"
   csp:
     whitelist:
       connect-src:

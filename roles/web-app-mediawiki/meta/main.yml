@@ -10,8 +10,6 @@ galaxy_info:
     https://www.veen.world
   galaxy_tags:
     - mediawiki
-    - docker
-    - cms
     - wiki
     - documentation
   repository: "https://s.infinito.nexus/code"

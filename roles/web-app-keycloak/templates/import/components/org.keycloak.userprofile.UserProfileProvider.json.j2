@@ -55,7 +55,7 @@
     "providerId": "declarative-user-profile",
     "subComponents": {},
     "config": {
-      "kc.user.profile.config": [{{ (user_profile | tojson) | tojson }}]
+      "kc.user.profile.config": [{{ (user_profile | to_json) | to_json }}]
     }
   }
 ]

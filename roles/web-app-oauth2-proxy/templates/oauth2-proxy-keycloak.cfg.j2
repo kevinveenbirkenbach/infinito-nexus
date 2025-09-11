@@ -17,7 +17,7 @@ provider_display_name   =   "{{ OIDC.BUTTON_TEXT }}"
 {# role based restrictions #}
 scope                   =   "openid email profile {{ RBAC.GROUP.CLAIM }}"
 oidc_groups_claim       =   "{{ RBAC.GROUP.CLAIM }}"
-allowed_groups          =   {{ applications | get_app_conf(oauth2_proxy_application_id, 'oauth2_proxy.allowed_groups', True) | tojson }}
+allowed_groups          =   {{ applications | get_app_conf(oauth2_proxy_application_id, 'oauth2_proxy.allowed_groups', True) | to_json }}
 email_domains           =   ["*"]
 {% else %}
 email_domains           =   "{{ PRIMARY_DOMAIN }}"

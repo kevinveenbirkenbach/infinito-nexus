@@ -13,7 +13,7 @@
 - name: add config.toml
   template: 
     src:  "config.toml.j2" 
-    dest: "{{docker_compose.directories.config}}config.toml"
+    dest: "{{ docker_compose.directories.config }}config.toml"
   notify: docker compose up
 
 - meta: flush_handlers

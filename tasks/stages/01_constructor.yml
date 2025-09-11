@@ -89,9 +89,7 @@
             items2dict(key_name='source', value_name='source'),
             recursive=True
           )) |
-          generate_all_domains(
-            ('web-opt-rdr-www' in group_names)
-          )
+          generate_all_domains(WWW_REDIRECT_ENABLED)
         }}
 
   - name: Merge networks definitions

@@ -12,7 +12,7 @@ YOURLS_VERSION:                 "{{ applications | get_app_conf(application_id, 
 YOURLS_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.yourls.image') }}"
 YOURLS_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.yourls.name') }}"
 YOURLS_ADMIN_LOCATION:          "{{ applications | get_app_conf(application_id, 'server.locations.admin') }}"
-YOURLS_LANDINGPAGE_STATUS_CODE: "{{ applications | get_app_conf(application_id, 'server.status_codes.landingpage') }}"
+YOURLS_LANDINGPAGE_STATUS_CODE: "{{ applications | get_app_conf(application_id, 'server.status_codes.default') }}"
 
 # Container
 container_port:                 8080

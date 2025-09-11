@@ -29,6 +29,9 @@ WEB_PORT:               "{{ 443 if WEB_PROTOCOL == 'https' else 80 }}"  # Defaul
 # Websocket
 WEBSOCKET_PROTOCOL:     "{{ 'wss' if WEB_PROTOCOL == 'https' else 'ws' }}"
 
+# WWW-Redirect to None WWW-Domains enabled
+WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"
+
 # Domain
 PRIMARY_DOMAIN:         "localhost" # Primary Domain of the server
 

@@ -2,6 +2,8 @@ sitename:       "Wiki on {{ PRIMARY_DOMAIN | upper }}"
 server:
   domains:
     canonical:
+      - "m.wiki.{{ PRIMARY_DOMAIN }}"
+    aliases:
       - "media.wiki.{{ PRIMARY_DOMAIN }}"
 docker:
   services:

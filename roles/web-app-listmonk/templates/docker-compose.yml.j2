@@ -7,7 +7,7 @@
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
-      - {{docker_compose.directories.config}}config.toml:/listmonk/config.toml
+      - {{ docker_compose.directories.config }}config.toml:/listmonk/config.toml
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/wget.yml.j2' %}

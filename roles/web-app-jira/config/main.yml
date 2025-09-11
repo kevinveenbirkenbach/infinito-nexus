@@ -3,13 +3,13 @@ credentials: {}
 docker:
   services:
     database:
-      enabled:  true
+      enabled:      true
     application:
-      image:    atlassian/jira-software
-      version:  latest
-      name:     jira
+      image:        atlassian/jira-software
+      version:      latest
+      name:         jira
   volumes:
-    data:       "jira_data"
+    data:           "jira_data"
 features:
   matomo:           true
   css:              true
@@ -31,5 +31,7 @@ server:
   domains:
     canonical:
       - "jira.{{ PRIMARY_DOMAIN }}"
+  status_codes:
+    default: 405
 rbac:
   roles: {}

@@ -104,12 +104,20 @@ portfolio_menu_categories:
       - yourls
 
   Presentation:
-    description: "Presentation and Documentation Tools"
+    description: "Presentation Tools"
     icon: "fas fa-tools"
     tags:
       - presentation
       - sphinx
       - portfolio
+  
+  Documentation:
+    description: "Documentation and Wiki Applications"
+    icon: "fa fa-book"
+    tags:
+      - confluence
+      - xwiki
+      - mediawiki
 
   Finance & Accounting:
     description: "Financial and accounting software"
@@ -174,5 +182,4 @@ portfolio_menu_categories:
       - publishing
       - website
       - joomla
-      - mediawiki
       - wordpress

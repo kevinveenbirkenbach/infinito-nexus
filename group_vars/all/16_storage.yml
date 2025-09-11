@@ -3,4 +3,3 @@ BACKUPS_FOLDER_PATH:              "/Backups/"   # Path to the backups folder
 # Storage Space-Related Configurations          
 SIZE_PERCENT_MAXIMUM_BACKUP:      75  # Maximum storage space in percent for backups
 SIZE_PERCENT_CLEANUP_DISC_SPACE:  85  # Threshold for triggering cleanup actions
-SIZE_PERCENT_DISC_SPACE_WARNING:  90  # Warning threshold in percent for free disk space

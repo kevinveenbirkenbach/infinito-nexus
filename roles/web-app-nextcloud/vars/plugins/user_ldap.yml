@@ -42,7 +42,7 @@ plugin_configuration:
   -
     appid: "user_ldap"
     configkey: "s01ldap_base_users"
-    configvalue: "{{LDAP.DN.OU.USERS}}"
+    configvalue: "{{ LDAP.DN.OU.USERS }}"
 
   -
     appid: "user_ldap"
@@ -67,7 +67,7 @@ plugin_configuration:
   -
     appid: "user_ldap"
     configkey: "s01ldap_dn"
-    configvalue: "{{LDAP.DN.ADMINISTRATOR.DATA}}"
+    configvalue: "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
   -
     appid: "user_ldap"
     configkey: "s01ldap_email_attr"

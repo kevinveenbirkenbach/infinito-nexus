@@ -30,7 +30,7 @@ server:
   locations:
     admin:  "/admin/"
   status_codes:
-    landingpage: 301
+    default: 301
 docker:
   services:
     database:

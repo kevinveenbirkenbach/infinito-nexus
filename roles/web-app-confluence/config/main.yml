@@ -2,13 +2,13 @@ credentials: {}
 docker:
   services:
     database:
-      enabled:  true
+      enabled:      true
     application:
-      image:    atlassian/confluence
-      version:  latest
-      name:     confluence
+      image:        atlassian/confluence
+      version:      latest
+      name:         confluence
   volumes:
-    data:       "confluence_data"
+    data:           "confluence_data"
 features:
   matomo:           true
   css:              true
@@ -18,6 +18,8 @@ features:
   oidc:             false # Not enabled for demo version
   ldap:             false # Not enabled for demo version
 server:
+  status_codes:
+    default: 302
   csp:
     whitelist:      {}
     flags:
@@ -27,7 +29,10 @@ server:
         unsafe-inline:  true
   domains:
     canonical:
+      - "c.wiki.{{ PRIMARY_DOMAIN }}"
+    aliases:
       - "confluence.{{ PRIMARY_DOMAIN }}"
+      - "confluence.wiki.{{ PRIMARY_DOMAIN }}"
 rbac:
   roles: {}
 truststore_enabled: false
