@@ -5,7 +5,6 @@
   - sys-bkp-provider
   - sys-ctl-alm-compose
   - sys-lock
-  - sys-svc-directory-validator
 
 - include_tasks: 02_pkgmgr_routines.yml
   when: backup_docker_to_local_folder is not defined

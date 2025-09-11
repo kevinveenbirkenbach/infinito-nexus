@@ -4,7 +4,6 @@
   loop:
     - sys-ctl-alm-compose
     - sys-lock
-    - sys-svc-directory-validator
     - sys-daemon
 
 - name: "pkgmgr install '{{ CLEANUP_FAILED_BACKUPS_PKG }}'"
