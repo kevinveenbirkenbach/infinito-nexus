@@ -1,3 +1,0 @@
-# run_once_update_pkgmgr: deactivated
-#- name: "Update all repositories with pkgmgr"
-#  command: "pkgmgr update --all"

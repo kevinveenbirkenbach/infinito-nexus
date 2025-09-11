@@ -15,7 +15,7 @@ Follow these guides to install and configure Infinito.Nexus:
 - **Networking & VPN** - Configure `WireGuard`, `OpenVPN`, and `Nginx Reverse Proxy`.
 
 ## Managing & Updating Infinito.Nexus 🔄
-- Regularly update services using `update-docker`, `update-pacman`, or `update-apt`.
+- Regularly update services using `update-pacman`, or `update-apt`.
 - Monitor system health with `sys-ctl-hlth-btrfs`, `sys-ctl-hlth-webserver`, and `sys-ctl-hlth-docker-container`.
 - Automate system maintenance with `sys-lock`, `sys-ctl-cln-bkps`, and `sys-ctl-rpr-docker-hard`.
 

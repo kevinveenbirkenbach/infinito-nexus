@@ -14,13 +14,6 @@
     name: update-apt
   when: ansible_distribution == "Debian"
 
-- name: "Update Docker Images"
-  include_role:
-    name: update-docker
-  when:
-    - docker_compose_directory_stat.stat.exists
-    - run_once_update_docker is not defined
-
 - name: "Check if yay is installed"
   command: which yay
   register: yay_installed
@@ -51,7 +44,3 @@
   register: pkgmgr_available
   failed_when: false
 
-- name: "Update all repositories using pkgmgr"
-  include_role:
-    name: update-pkgmgr
-  when: pkgmgr_available.rc == 0

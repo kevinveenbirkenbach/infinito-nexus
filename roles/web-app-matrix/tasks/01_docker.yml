@@ -67,7 +67,6 @@
   notify: docker compose up
 
 # Pull image when update is wished. 
-# @todo This should be moved to update-docker
 - name: docker compose pull
   command:
     cmd: docker-compose -p "{{ MATRIX_PROJECT }}" pull

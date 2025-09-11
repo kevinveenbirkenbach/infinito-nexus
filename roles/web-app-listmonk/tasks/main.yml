@@ -30,6 +30,14 @@
     chdir: "{{ docker_compose.directories.instance }}"
   when: "'No relations found.' in db_tables.stdout"
 
+- name: "Listmonk | run DB/schema upgrade (non-interactive)"
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo "y" | docker compose run -T application ./listmonk --upgrade
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  when: MODE_UPDATE | bool
+
 - name: Build OIDC settings JSON
   set_fact:
     oidc_settings_json: >-
@@ -73,3 +81,4 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
