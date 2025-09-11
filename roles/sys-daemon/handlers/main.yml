@@ -35,14 +35,19 @@
     - reexec systemd manager
 
 - name: reload system daemon
-  command: systemctl daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: true
   become: true
-  listen: reload system daemon
+  listen:
+    - reload system daemon
+    - refresh systemctl service
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: reexec systemd manager
-  command: systemctl daemon-reexec
+  # Just execute this during reset, it has potential dangerous side effects
+  ansible.builtin.systemd:
+    daemon_reexec: true
   become: true
   listen: reexec systemd manager
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
