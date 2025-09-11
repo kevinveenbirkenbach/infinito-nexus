@@ -11,10 +11,6 @@
 - name: "For '{{ application_id }}': load docker, db and proxy"
   include_role:
     name: sys-stk-full-stateful
-  vars:
-    # Forward flag into compose templating
-    cmp_extra_facts:
-      akaunting_setup_enabled: "{{ akaunting_setup_enabled }}"
 
 - name: "Akaunting | Create first-run marker to disable future setup"
   ansible.builtin.file:

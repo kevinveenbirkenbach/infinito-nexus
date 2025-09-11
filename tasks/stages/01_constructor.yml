@@ -61,6 +61,7 @@
           canonical_domains_map(PRIMARY_DOMAIN) | 
           combine(CURRENT_PLAY_DOMAINS, recursive=True) 
         }}
+
   - name: Merge redirect_domain_mappings
     set_fact:
       # The following mapping is necessary to define the exceptions for domains which are created, but which aren't used
