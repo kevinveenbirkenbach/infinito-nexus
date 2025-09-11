@@ -6,7 +6,6 @@
     image: "{{ XWIKI_IMAGE_CUSTOM }}"
     container_name: "{{ XWIKI_CONTAINER }}"
     hostname: '{{ XWIKI_HOSTNAME}}'
-    command: ["all"]
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:

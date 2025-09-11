@@ -1,6 +1,6 @@
 # General
 application_id:                 "web-app-xwiki"
-database_type:                  "postgres"
+database_type:                  "mariadb"
 container_port:                 8080
 container_hostname:             "{{ domains | get_domain(application_id) }}"
 
