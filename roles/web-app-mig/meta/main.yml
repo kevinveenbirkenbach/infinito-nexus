@@ -14,6 +14,7 @@ galaxy_info:
   - visualization
   - dependencies
   - graph
+  - mig
   repository: "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
   issue_tracker_url: "https://github.com/kevinveenbirkenbach/meta-infinite-graph/issues"
   documentation: "https://github.com/kevinveenbirkenbach/meta-infinite-graph/"

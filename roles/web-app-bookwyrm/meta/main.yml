@@ -14,6 +14,7 @@ galaxy_info:
     - fediverse
     - activitypub
     - reading
+    - bookwyrm
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://s.infinito.nexus/code/tree/main/roles/web-app-bookwyrm"
