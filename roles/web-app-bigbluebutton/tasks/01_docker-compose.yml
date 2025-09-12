@@ -16,4 +16,4 @@
     content: "{{ compose_slurp.content | b64decode | compose_mods(docker_repository_path, docker_compose.files.env) }}"
     dest: "{{ docker_compose_file_final }}"
   notify:
-    - docker compose just up
+    - docker compose up

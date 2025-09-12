@@ -9,7 +9,6 @@
   listen:
     - docker compose up
     - docker compose restart
-    - docker compose just up
   when: MODE_ASSERT | bool
 
 - name: docker compose pull
@@ -41,7 +40,6 @@
   listen:
     - docker compose up
     - docker compose restart
-    - docker compose just up
 
 - name: Build docker compose 
   shell: |
@@ -77,7 +75,6 @@
     DOCKER_CLIENT_TIMEOUT: 600
   listen:
     - docker compose up
-    - docker compose just up # @todo replace later just up by up when code is refactored, build atm is also listening to up
 
 - name: docker compose restart
   command:
