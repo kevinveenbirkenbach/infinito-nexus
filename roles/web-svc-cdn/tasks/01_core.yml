@@ -16,3 +16,5 @@
     src: "nginx.conf.j2"
     dest: "{{ CDN_NGINX_PATH }}"
   notify: restart openresty
+
+- include_tasks: utils/run_once.yml

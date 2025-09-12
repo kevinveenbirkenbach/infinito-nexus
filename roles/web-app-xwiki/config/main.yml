@@ -5,9 +5,10 @@ docker:
       enabled:      false
     database:
       enabled:      true
+      type:         postgres
     xwiki:
       image:        xwiki
-      version:      stable-mariadb-tomcat
+      version:      lts-<< defaults_applications[web-app-xwiki].docker.services.database.type >>-tomcat
       name:         xwiki
       backup:
         no_stop_required: true

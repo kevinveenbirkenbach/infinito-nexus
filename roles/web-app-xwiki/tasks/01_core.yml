@@ -16,12 +16,6 @@
     dest: "{{ XWIKI_HOST_PROPERTIES_PATH }}"
   notify: docker compose up
 
-- name: "Render hibernate.cfg.xml"
-  template:
-    src: "hibernate.cfg.xml.j2"
-    dest: "{{ XWIKI_HOST_HIBERNATE_PATH }}"
-  notify: docker compose up
-
 - name: "flush docker compose for '{{ application_id }}'"
   meta: flush_handlers
 

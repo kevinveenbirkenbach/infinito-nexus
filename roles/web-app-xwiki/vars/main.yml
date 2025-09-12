@@ -1,6 +1,7 @@
 # General
 application_id:                       "web-app-xwiki"
-database_type:                        "mariadb"
+database_type:                        "{{ applications | get_app_conf(application_id, 'docker.services.database.type') }}"
+
 container_port:                       8080
 container_hostname:                   "{{ domains | get_domain(application_id) }}"
 
@@ -14,7 +15,6 @@ XWIKI_HOSTNAME:                       "{{ container_hostname }}"
 ## Paths
 XWIKI_HOST_CONF_PATH:                 "{{ [docker_compose.directories.config, 'xwiki.cfg'] | path_join }}"
 XWIKI_HOST_PROPERTIES_PATH:           "{{ [docker_compose.directories.config, 'xwiki.properties'] | path_join }}"
-XWIKI_HOST_HIBERNATE_PATH:            "{{ [docker_compose.directories.config, 'hibernate.cfg.xml'] | path_join }}"
 
 ## Docker
 XWIKI_IMAGE_CUSTOM:                   "xwiki_custom"
