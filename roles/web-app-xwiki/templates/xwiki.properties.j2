@@ -14,4 +14,9 @@ oidc.userinfoclaims={{ XWIKI_OIDC_GROUPS_CLAIM }}
 oidc.groups.claim={{ XWIKI_OIDC_GROUPS_CLAIM }}
 oidc.groups.mapping=XWiki.XWikiAdminGroup={{ XWIKI_OIDC_ADMIN_PROVIDER_GROUP }}
 {% endif %}
-xwiki.superadminpassword={{ XWIKI_SUPERADMIN_PASSWORD }}
+
+############################################
+# Distribution Wizard
+# Disable automatic start so REST is reachable during automation
+distribution.automaticStartOnMainWiki=false
+distribution.automaticStartOnWiki=false

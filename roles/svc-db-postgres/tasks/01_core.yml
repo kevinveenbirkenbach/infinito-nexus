@@ -25,3 +25,5 @@
   community.general.pacman:
     name: python-psycopg2
     state: present
+
+- include_tasks: utils/run_once.yml

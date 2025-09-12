@@ -1,6 +1,5 @@
 - block:
   - include_tasks: 01_core.yml
-  - include_tasks: utils/run_once.yml
     vars:
       # Force the flush of the pg handler on the first run
       flush_handlers: true

@@ -22,7 +22,7 @@
 - name: "Wait until XWiki REST is ready"
   uri:
     url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/"
-    status_code: [200, 401]
+    status_code: [200, 401, 302]
     return_content: no
   register: xwiki_rest_up
   retries: 60
@@ -38,7 +38,7 @@
     user: "{{ XWIKI_ADMIN_USER }}"
     password: "{{ XWIKI_ADMIN_PASS }}"
     force_basic_auth: yes
-    status_code: [200,404]
+    status_code: [200, 404, 302]
   register: xwiki_oidc_ext
   when: XWIKI_OIDC_ENABLED | bool
 
@@ -49,7 +49,7 @@
     user: "{{ XWIKI_ADMIN_USER }}"
     password: "{{ XWIKI_ADMIN_PASS }}"
     force_basic_auth: yes
-    status_code: [200,404]
+    status_code: [200, 404, 302]
   register: xwiki_ldap_ext
   when: XWIKI_LDAP_ENABLED | bool
 
