@@ -1,0 +1,22 @@
+- name: "XWIKI | Probe extension {{ ext_id }}"
+  when: ext_enabled | bool
+  uri:
+    url: "{{ XWIKI_REST_XWIKI }}/extensions/{{ ext_id | urlencode }}"
+    method: GET
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    follow_redirects: none
+    return_content: no
+    headers:
+      Accept: "application/xml"
+    status_code: [200, 401, 404, 302]
+  register: _probe
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  changed_when: false
+
+- name: "XWIKI | Save probe result for {{ ext_id }}"
+  when: ext_enabled | bool
+  set_fact:
+    "{{ result_var }}": "{{ _probe }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

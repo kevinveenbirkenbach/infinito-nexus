@@ -1,55 +1,60 @@
-- name: "Check if OIDC extension installed"
-  uri:
-    url: "{{ XWIKI_REST_XWIKI }}/extensions/{{ XWIKI_EXT_OIDC_ID | urlencode }}"
-    method: GET
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
-    force_basic_auth: yes
-    status_code: [200, 404, 302]
-  register: xwiki_oidc_ext
-  when: XWIKI_OIDC_ENABLED | bool
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+- name: "Probe OIDC extension"
+  include_tasks: _probe_extension.yml
+  vars:
+    ext_id: "{{ XWIKI_EXT_OIDC_ID }}"
+    ext_enabled: "{{ XWIKI_OIDC_ENABLED }}"
+    result_var: "xwiki_oidc_ext"
 
-- name: "Check if LDAP extension installed"
-  uri:
-    url: "{{ XWIKI_REST_XWIKI }}/extensions/{{ XWIKI_EXT_LDAP_ID | urlencode }}"
-    method: GET
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
-    force_basic_auth: yes
-    status_code: [200, 404, 302]
-  register: xwiki_ldap_ext
-  when: XWIKI_LDAP_ENABLED | bool
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+- name: "Probe LDAP extension"
+  include_tasks: _probe_extension.yml
+  vars:
+    ext_id: "{{ XWIKI_EXT_LDAP_ID }}"
+    ext_enabled: "{{ XWIKI_LDAP_ENABLED }}"
+    result_var: "xwiki_ldap_ext"
 
 - name: "Install LDAP and/or OIDC extensions"
   uri:
-    url: "{{ XWIKI_REST_EXTENSION_INSTALL }}?jobType=install&async=false"
+    url: "{{ XWIKI_REST_EXTENSION_INSTALL }}?jobType=install&async=false&media=json"
     method: PUT
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
-    force_basic_auth: yes
+    force_basic_auth: true
     headers:
       Content-Type: "text/xml"
-      Accept: "application/xml"
+      Accept: "application/json"
       X-Requested-With: "XMLHttpRequest"
     body: "{{ lookup('template', 'installjobrequest.xml.j2') }}"
     status_code: [200, 202]
+    return_content: yes
   when:
-    - (XWIKI_OIDC_ENABLED | bool and xwiki_oidc_ext.status == 404) or
-      (XWIKI_LDAP_ENABLED | bool and (xwiki_ldap_ext is not skipped) and xwiki_ldap_ext.status == 404)
+    - (XWIKI_OIDC_ENABLED | bool and (xwiki_oidc_ext.status | default(404)) != 200)
+      or
+      (XWIKI_LDAP_ENABLED | bool and (xwiki_ldap_ext is not skipped) and (xwiki_ldap_ext.status | default(404)) != 200)
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  register: xwiki_install_job
+
+- name: "Extract install job id"
+  set_fact:
+    xwiki_install_job_id: "{{ xwiki_install_job | xwiki_job_id(default='') }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: "Verify OIDC extension is installed"
-  when: XWIKI_OIDC_ENABLED | bool
+- name: "Poll install job status until FINISHED without errors"
+  when: xwiki_install_job_id is defined and xwiki_install_job_id|length > 0
   uri:
-    url: "{{ XWIKI_REST_XWIKI }}/extensions/{{ XWIKI_EXT_OIDC_ID | urlencode }}"
+    url: "{{ XWIKI_REST_BASE }}jobstatus/{{ xwiki_install_job_id }}?media=json"
     method: GET
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
-    force_basic_auth: yes
+    force_basic_auth: true
+    headers:
+      Accept: "application/json"
     status_code: 200
-  register: _oidc_ok
-  retries: 12
-  delay: 5
-  until: _oidc_ok is succeeded
+    return_content: yes
+  register: _install_status
+  changed_when: false
+  retries: 20
+  delay: 3
+  until:
+    - _install_status is succeeded
+    - _install_status.json.state == 'FINISHED'
+    - (_install_status.json.errors | default([]) | length) == 0
