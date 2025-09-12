@@ -1,7 +1,7 @@
 # ---- Authentication selection
-{% if XWIKI_OIDC_ENABLED | bool %}
+{% if xwiki_oidc_enabled_switch | bool %}
 xwiki.authentication.authclass=org.xwiki.contrib.oidc.auth.OIDCAuthServiceImpl
-{% elif XWIKI_LDAP_ENABLED | bool %}
+{% elif xwiki_ldap_enabled_switch | bool %}
 xwiki.authentication.authclass=org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl
 xwiki.authentication.ldap=1
 xwiki.authentication.ldap.trylocal={{ (XWIKI_LDAP_TRYLOCAL | bool) | ternary(1, 0) }}
@@ -15,9 +15,9 @@ xwiki.authentication.ldap.bind_pass={{ XWIKI_LDAP_BIND_PASS }}
 xwiki.authentication.ldap.fields_mapping={{ XWIKI_LDAP_FIELDS_MAPPING }}
 xwiki.authentication.ldap.update_user=1
 {% else %}
-# Fallback: Native XWiki Auth
-# xwiki.authentication.authclass=com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl
+xwiki.authentication.authclass=com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl
 {% endif %}
-
+{% if xwiki_superadmin_enabled_switch | bool %}
 # ---- Superadmin must live in xwiki.cfg (not in xwiki.properties)
 xwiki.superadminpassword={{ XWIKI_SUPERADMIN_PASSWORD }}
+{% endif %}

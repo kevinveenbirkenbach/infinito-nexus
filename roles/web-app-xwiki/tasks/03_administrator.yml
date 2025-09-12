@@ -2,7 +2,7 @@
 # Wait until REST endpoint is available (01_core usually ensures this, but add safety)
 - name: "XWIKI | Wait until REST answers"
   uri:
-    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/"
+    url: "{{ XWIKI_REST_BASE }}"
     status_code: [200, 401]
   register: _rest_ping
   retries: 60
@@ -13,7 +13,7 @@
 # 404 => missing, 302 => DW redirect (treat as missing for bootstrap)
 - name: "XWIKI | Check if target admin user exists"
   uri:
-    url: "{{ XWIKI_REST_GENERAL }}/users/{{ XWIKI_ADMIN_USER | urlencode }}"
+    url: "{{ XWIKI_REST_XWIKI }}/users/{{ XWIKI_ADMIN_USER | urlencode }}"
     method: GET
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
@@ -24,7 +24,7 @@
 # Create admin user if not existing (or DW still redirecting)
 - name: "XWIKI | Create admin user via REST"
   uri:
-    url: "{{ XWIKI_REST_GENERAL }}/users"
+    url: "{{ XWIKI_REST_XWIKI }}/users"
     method: POST
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"

@@ -1,70 +1,30 @@
+- name: Validate XWiki variables
+  include_tasks: 02_validation.yml
+
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role: 
     name: sys-stk-full-stateful
   vars:
     docker_compose_flush_handlers: false
 
-- name: "Render xwiki.cfg"
-  template:
-    src: "xwiki.cfg.j2"
-    dest: "{{ XWIKI_HOST_CONF_PATH }}"
-  notify: docker compose up
+- name: Deploy Bootstrap Config
+  include_tasks: _flush_config.yml
+  vars:
+    xwiki_oidc_enabled_switch:        false
+    xwiki_ldap_enabled_switch:        false
+    xwiki_superadmin_enabled_switch:  true
 
-- name: "Render xwiki.properties"
-  template:
-    src: "xwiki.properties.j2"
-    dest: "{{ XWIKI_HOST_PROPERTIES_PATH }}"
-  notify: docker compose up
+- name: Load setup procedures for admin
+  include_tasks: 03_administrator.yml
 
-- name: "flush docker compose for '{{ application_id }}'"
-  meta: flush_handlers
+- name: Load setup procedures for extensions
+  include_tasks: 04_extensions.yml
 
-- name: "Wait until XWiki REST is ready"
-  uri:
-    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/"
-    status_code: [200, 401, 302]
-    return_content: no
-  register: xwiki_rest_up
-  retries: 60
-  delay: 5
-  until: xwiki_rest_up is succeeded
-
-- include_tasks: 02_bootstrap_admin.yml
-
-- name: "Check if OIDC extension installed"
-  uri:
-    url: "{{ XWIKI_REST_GENERAL }}/extensions/{{ XWIKI_EXT_OIDC_ID | urlencode }}"
-    method: GET
-    user: "{{ XWIKI_ADMIN_USER }}"
-    password: "{{ XWIKI_ADMIN_PASS }}"
-    force_basic_auth: yes
-    status_code: [200, 404, 302]
-  register: xwiki_oidc_ext
-  when: XWIKI_OIDC_ENABLED | bool
-
-- name: "Check if LDAP extension installed"
-  uri:
-    url: "{{ XWIKI_REST_GENERAL }}/extensions/{{ XWIKI_EXT_LDAP_ID | urlencode }}"
-    method: GET
-    user: "{{ XWIKI_ADMIN_USER }}"
-    password: "{{ XWIKI_ADMIN_PASS }}"
-    force_basic_auth: yes
-    status_code: [200, 404, 302]
-  register: xwiki_ldap_ext
-  when: XWIKI_LDAP_ENABLED | bool
-
-- name: "Install LDAP and/or OIDC extensions"
-  uri:
-    url: "{{ XWIKI_REST_BASE }}"
-    method: PUT
-    user: "{{ XWIKI_ADMIN_USER }}"
-    password: "{{ XWIKI_ADMIN_PASS }}"
-    force_basic_auth: yes
-    headers: { Content-Type: "text/xml" }
-    body: "{{ lookup('template', 'installjobrequest.xml.j2') }}"
-    status_code: 200
-  when:
-    - (XWIKI_OIDC_ENABLED | bool and xwiki_oidc_ext.status == 404) or
-      (XWIKI_LDAP_ENABLED | bool and (xwiki_ldap_ext is not skipped) and xwiki_ldap_ext.status == 404)
+- name: Deploy Final Config
+  include_tasks: _flush_config.yml
+  vars:
+    xwiki_oidc_enabled_switch:        "{{ XWIKI_OIDC_ENABLED | bool }}"
+    xwiki_ldap_enabled_switch:        "{{ XWIKI_LDAP_ENABLED | bool }}"
+    xwiki_superadmin_enabled_switch:  false
 
 - include_tasks: utils/run_once.yml

@@ -1,0 +1,38 @@
+- name: "Check if OIDC extension installed"
+  uri:
+    url: "{{ XWIKI_REST_XWIKI }}/extensions/{{ XWIKI_EXT_OIDC_ID | urlencode }}"
+    method: GET
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: yes
+    status_code: [200, 404, 302]
+  register: xwiki_oidc_ext
+  when: XWIKI_OIDC_ENABLED | bool
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Check if LDAP extension installed"
+  uri:
+    url: "{{ XWIKI_REST_XWIKI }}/extensions/{{ XWIKI_EXT_LDAP_ID | urlencode }}"
+    method: GET
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: yes
+    status_code: [200, 404, 302]
+  register: xwiki_ldap_ext
+  when: XWIKI_LDAP_ENABLED | bool
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Install LDAP and/or OIDC extensions"
+  uri:
+    url: "{{ XWIKI_REST_EXTENSION_INSTALL }}"
+    method: PUT
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: yes
+    headers: { Content-Type: "text/xml" }
+    body: "{{ lookup('template', 'installjobrequest.xml.j2') }}"
+    status_code: 200
+  when:
+    - (XWIKI_OIDC_ENABLED | bool and xwiki_oidc_ext.status == 404) or
+      (XWIKI_LDAP_ENABLED | bool and (xwiki_ldap_ext is not skipped) and xwiki_ldap_ext.status == 404)
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

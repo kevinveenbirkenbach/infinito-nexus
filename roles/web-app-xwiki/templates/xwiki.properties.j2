@@ -1,6 +1,6 @@
 ############################################
 # OIDC
-{% if XWIKI_OIDC_ENABLED | bool %}
+{% if xwiki_oidc_enabled_switch | bool %}
 oidc.provider={{ XWIKI_OIDC_PROVIDER }}
 oidc.endpoint.authorization={{ XWIKI_OIDC_AUTHORIZATION }}
 oidc.endpoint.token={{ XWIKI_OIDC_TOKEN }}
