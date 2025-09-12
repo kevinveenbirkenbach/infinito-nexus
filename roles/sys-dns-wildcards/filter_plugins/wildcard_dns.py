@@ -1,3 +1,4 @@
+# roles/sys-dns-wildcards/filter_plugins/wildcard_dns.py
 from ansible.errors import AnsibleFilterError
 import ipaddress
 
@@ -15,7 +16,9 @@ def _depth(domain: str, apex: str) -> int:
 
 
 def _parent_of_child(domain: str, apex: str) -> str | None:
-    """For a child like a.b.example.com return b.example.com; else None (needs depth >= 2)."""
+    """
+    For a child like a.b.example.com return b.example.com; else None (needs depth >= 2).
+    """
     if not domain.endswith(apex):
         return None
     parts = domain.split(".")
@@ -27,7 +30,7 @@ def _parent_of_child(domain: str, apex: str) -> str | None:
 
 def _flatten_domains_any_structure(domains_like) -> list[str]:
     """
-    Accepts CURRENT_PLAY_DOMAINS_ALL-like structures:
+    Accept CURRENT_PLAY_DOMAINS*_like structures:
       - dict values: str | list/tuple/set[str] | dict (one level deeper)
     Returns unique, sorted host list.
     """
@@ -100,18 +103,24 @@ def _build_wildcard_records(
         records.append({
             "zone": apex,
             "type": rtype,
-            "name": name,
+            "name": name,     # For apex wildcard, name "*" means "*.apex" in Cloudflare
             "content": content,
             "proxied": bool(proxied),
             "ttl": 1,
         })
 
     for p in sorted(set(parents)):
-        rel = p[:-len(apex)-1] if p != apex else ""  # relative part; apex shouldn't produce wildcard
-        if not rel:
-            # Do NOT create *.apex here (explicitly excluded by requirement)
-            continue
-        wc = f"*.{rel}"
+        # Create wildcard at apex as well (name="*")
+        if p == apex:
+            wc = "*"
+        else:
+            # relative part (drop ".apex")
+            rel = p[:-len(apex)-1]
+            if not rel:
+                # Safety guard; should not happen because p==apex handled above
+                wc = "*"
+            else:
+                wc = f"*.{rel}"
         _add(wc, "A", str(ip4))
         if ipv6_enabled and ip6 and _is_global(str(ip6)):
             _add(wc, "AAAA", str(ip6))
@@ -119,7 +128,7 @@ def _build_wildcard_records(
 
 
 def wildcard_records(
-    current_play_domains_all: dict,
+    current_play_domains_all,  # dict expected when explicit_domains is None
     apex: str,
     ip4: str,
     ip6: str | None = None,
@@ -129,17 +138,25 @@ def wildcard_records(
     ipv6_enabled: bool = True,
 ) -> list[dict]:
     """
-    Build only wildcard records for parents:
-      for each parent 'parent.apex' -> create '*.parent' A/AAAA.
-      No base parent records and no '*.apex' are created.
+    Build wildcard records:
+      - for each parent 'parent.apex' -> create '*.parent' A/AAAA
+      - ALWAYS also create '*.apex' (apex wildcard), modeled as name="*"
+    Sources:
+      - If 'explicit_domains' is provided and non-empty, use it (expects list[str]).
+      - Else flatten 'current_play_domains_all' (expects dict).
     """
     # Source domains
     if explicit_domains and len(explicit_domains) > 0:
+        if not isinstance(explicit_domains, list) or not all(isinstance(x, str) for x in explicit_domains):
+            raise AnsibleFilterError("explicit_domains must be list[str]")
         domains = sorted(set(explicit_domains))
     else:
         domains = _flatten_domains_any_structure(current_play_domains_all)
 
+    # Determine parents and ALWAYS include apex for apex wildcard
     parents = _parents_from(domains, apex, min_child_depth=min_child_depth)
+    parents = list(set(parents) | {apex})
+
     return _build_wildcard_records(
         parents,
         apex,
