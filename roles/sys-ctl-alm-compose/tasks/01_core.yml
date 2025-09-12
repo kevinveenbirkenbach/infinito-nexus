@@ -21,7 +21,9 @@
     system_service_tpl_exec_start: "{{ system_service_script_exec }} %I"
     system_service_tpl_on_failure: "" # No on failure needed, because it's anyhow the default on failure procedure
 
-- block:
+- name: Assert '{{ system_service_id }}'
+  block:
+  
   - name: Escape instance name for systemctl call
     ansible.builtin.command:
       argv:
@@ -30,8 +32,8 @@
     register: escaped_name
     changed_when: false
 
-  - name: Start sys-ctl-alm-compose instance
+  - name: Start '{{ system_service_id }}' instance
     ansible.builtin.systemd:
-      name: "{{ ('sys-ctl-alm-compose@') | get_service_name(SOFTWARE_NAME, False) ~ escaped_name.stdout ~ '.service' }}"
+      name: "{{ system_service_id | get_service_name(SOFTWARE_NAME, False) ~ escaped_name.stdout }}.service"
       state: started
   when: MODE_ASSERT | bool
