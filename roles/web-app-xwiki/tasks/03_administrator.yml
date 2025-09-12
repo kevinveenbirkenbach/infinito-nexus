@@ -1,43 +1,73 @@
----
-# Wait until REST endpoint is available (01_core usually ensures this, but add safety)
-- name: "XWIKI | Wait until REST answers"
+# 1) Create page XWiki.<userid> (PUT is idempotent)
+- name: "XWIKI | Ensure user page exists: XWiki.{{ XWIKI_ADMIN_USER }}"
   uri:
-    url: "{{ XWIKI_REST_BASE }}"
-    status_code: [200, 401]
-  register: _rest_ping
-  retries: 60
-  delay: 5
-  until: _rest_ping is succeeded
+    url: "{{ XWIKI_REST_BASE }}wikis/xwiki/spaces/XWiki/pages/{{ XWIKI_ADMIN_USER | urlencode }}"
+    method: PUT
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [201, 202, 204, 200]
+    headers:
+      Content-Type: "application/xml"
+      Accept: "application/xml"
+    body: |
+      <page xmlns="http://www.xwiki.org">
+        <title>{{ XWIKI_ADMIN_USER }}</title>
+      </page>
+  register: _user_page
 
-# Check if the target admin already exists
-# 404 => missing, 302 => DW redirect (treat as missing for bootstrap)
-- name: "XWIKI | Check if target admin user exists"
+# 2) Add XWiki.XWikiUsers object (only if it does not already exist)
+- name: "XWIKI | Check if XWikiUsers object exists"
   uri:
-    url: "{{ XWIKI_REST_XWIKI }}/users/{{ XWIKI_ADMIN_USER | urlencode }}"
+    url: "{{ XWIKI_REST_BASE }}wikis/xwiki/spaces/XWiki/pages/{{ XWIKI_ADMIN_USER | urlencode }}/objects?classname=XWiki.XWikiUsers"
     method: GET
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
-    status_code: [200, 404, 302]
-  register: _admin_exists
+    status_code: [200, 404]
+  register: _users_obj_list
 
-# Create admin user if not existing (or DW still redirecting)
-- name: "XWIKI | Create admin user via REST"
+- name: "XWIKI | Add XWiki.XWikiUsers object"
   uri:
-    url: "{{ XWIKI_REST_XWIKI }}/users"
+    url: "{{ XWIKI_REST_BASE }}wikis/xwiki/spaces/XWiki/pages/{{ XWIKI_ADMIN_USER | urlencode }}/objects"
     method: POST
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
-    status_code: 201
+    status_code: [201, 200]
     headers:
       Content-Type: "application/xml"
+      Accept: "application/xml"
     body: |
-      <user>
-        <firstName>{{ users.administrator.firstname | default('Admin') }}</firstName>
-        <lastName>{{ users.administrator.lastname  | default('User') }}</lastName>
-        <email>{{ users.administrator.email }}</email>
-        <username>{{ XWIKI_ADMIN_USER }}</username>
-        <password>{{ XWIKI_ADMIN_PASS }}</password>
-      </user>
-  when: _admin_exists.status in [404, 302]
+      <object xmlns="http://www.xwiki.org">
+        <className>XWiki.XWikiUsers</className>
+        <properties>
+          <property name="first_name">{{ users.administrator.firstname | default('Admin') }}</property>
+          <property name="last_name">{{ users.administrator.lastname  | default('User') }}</property>
+          <property name="email">{{ users.administrator.email }}</property>
+          <property name="active">1</property>
+        </properties>
+      </object>
+  when: _users_obj_list.status == 404 or ('<object' not in (_users_obj_list.content | default('')))
+  register: _user_obj_created
+
+# 3) (Optional) Assign admin rights by adding the user to XWikiAdminGroup
+- name: "XWIKI | Ensure user is in XWikiAdminGroup"
+  uri:
+    url: "{{ XWIKI_REST_BASE }}wikis/xwiki/spaces/XWiki/pages/XWikiAdminGroup/objects"
+    method: POST
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [201, 200]
+    headers:
+      Content-Type: "application/xml"
+      Accept: "application/xml"
+    body: |
+      <object xmlns="http://www.xwiki.org">
+        <className>XWiki.XWikiGroups</className>
+        <properties>
+          <property name="member">XWiki.{{ XWIKI_ADMIN_USER }}</property>
+        </properties>
+      </object>
+  when: XWIKI_LDAP_ENABLED | bool == false and XWIKI_OIDC_ENABLED | bool == false

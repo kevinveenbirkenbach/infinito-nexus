@@ -26,6 +26,7 @@ XWIKI_DATA_VOLUME:                    "{{ applications | get_app_conf(applicatio
 # Feature toggles (must be set in config/main.yml -> features)
 XWIKI_LDAP_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
 XWIKI_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+XWIKI_SSO_ENABLED:                    "{{ (XWIKI_OIDC_ENABLED | bool) or (XWIKI_LDAP_ENABLED | bool) }}"
 
 # Admin credentials (must be provided via inventory/vault)
 XWIKI_ADMIN_USER:                     "{{ users.administrator.username }}"
@@ -37,9 +38,9 @@ XWIKI_SUPERADMIN_PASSWORD:            "{{ applications | get_app_conf(applicatio
 XWIKI_SUPERADMIN_USERNAME:            "superadmin"
 
 # REST endpoint (local inside container)
-XWIKI_REST_BASE:                      "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/"
-XWIKI_REST_EXTENSION_INSTALL:         "{{ XWIKI_REST_BASE }}jobs?jobType=install&async=false"
-XWIKI_REST_XWIKI:                     "{{ XWIKI_REST_BASE }}wikis/xwiki"
+XWIKI_REST_BASE:                      "{{ ['http://127.0.0.1:'~ XWIKI_HOST_PORT, '/rest/'] | url_join  }}"
+XWIKI_REST_EXTENSION_INSTALL:         "{{ [XWIKI_REST_BASE, 'jobs'] | url_join  }}"
+XWIKI_REST_XWIKI:                     "{{ [XWIKI_REST_BASE, 'wikis/xwiki'] | url_join  }}"
 
 # Extension IDs + Versions (pin versions explicitly)
 XWIKI_EXT_LDAP_ID:                    "org.xwiki.contrib.ldap:ldap-authenticator"

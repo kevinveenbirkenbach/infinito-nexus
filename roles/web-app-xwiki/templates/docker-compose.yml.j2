@@ -9,6 +9,8 @@
     ports:
       - "127.0.0.1:{{ XWIKI_HOST_PORT }}:{{ container_port }}"
     volumes:
+      - "{{ XWIKI_HOST_CONF_PATH }}:/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg"
+      - "{{ XWIKI_HOST_PROPERTIES_PATH }}:/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties"
       - "{{ XWIKI_HOST_CONF_PATH }}:/usr/local/xwiki/xwiki.cfg"
       - "{{ XWIKI_HOST_PROPERTIES_PATH }}:/usr/local/xwiki/xwiki.properties"
       - 'data:/usr/local/xwiki'

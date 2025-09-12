@@ -16,7 +16,19 @@ oidc.groups.mapping=XWiki.XWikiAdminGroup={{ XWIKI_OIDC_ADMIN_PROVIDER_GROUP }}
 {% endif %}
 
 ############################################
-# Distribution Wizard
-# Disable automatic start so REST is reachable during automation
-distribution.automaticStartOnMainWiki=false
-distribution.automaticStartOnWiki=false
+# Distribution Wizard (bootstrap)
+{% if xwiki_superadmin_enabled_switch | bool %}
+# Start DW automatisch und ohne Interaktion
+distribution.automaticStartOnMainWiki=true
+distribution.automaticStartOnWiki=true
+distribution.job.interactive=false
+# Standard-Flavor für Main Wiki (XWiki Standard)
+distribution.defaultUI=org.xwiki.platform:xwiki-platform-distribution-flavor-mainwiki
+{% endif %}
+
+# Keep data in the Docker volume
+environment.permanentDirectory=/usr/local/xwiki/data
+
+# Make sure Extension Manager can fetch artifacts
+extension.repositories=maven:xwiki-public https://nexus.xwiki.org/nexus/content/groups/public/,\
+maven:central https://repo1.maven.org/maven2/

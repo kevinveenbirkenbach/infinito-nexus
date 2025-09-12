@@ -13,13 +13,16 @@
 - name: "flush docker compose for '{{ application_id }}'"
   meta: flush_handlers
 
-- name: "Wait until XWiki REST is ready"
+- name: "Wait until XWiki REST is ready (no DW redirect)"
   uri:
     url: "{{ XWIKI_REST_BASE }}"
-    status_code: [200, 401, 302]
+    status_code: [200, 401]
     return_content: no
-  changed_when: false
+    follow_redirects: none
   register: xwiki_rest_up
+  changed_when: false
   retries: 60
   delay: 5
-  until: xwiki_rest_up is succeeded
+  until:
+    - xwiki_rest_up is succeeded
+    - (xwiki_rest_up.redirected is not defined) or (not xwiki_rest_up.redirected)
