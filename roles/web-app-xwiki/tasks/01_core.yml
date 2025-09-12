@@ -29,9 +29,11 @@
   delay: 5
   until: xwiki_rest_up is succeeded
 
+- include_tasks: 02_bootstrap_admin.yml
+
 - name: "Check if OIDC extension installed"
   uri:
-    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/wikis/xwiki/extensions/{{ XWIKI_EXT_OIDC_ID | urlencode }}"
+    url: "{{ XWIKI_REST_GENERAL }}/extensions/{{ XWIKI_EXT_OIDC_ID | urlencode }}"
     method: GET
     user: "{{ XWIKI_ADMIN_USER }}"
     password: "{{ XWIKI_ADMIN_PASS }}"
@@ -42,7 +44,7 @@
 
 - name: "Check if LDAP extension installed"
   uri:
-    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/wikis/xwiki/extensions/{{ XWIKI_EXT_LDAP_ID | urlencode }}"
+    url: "{{ XWIKI_REST_GENERAL }}/extensions/{{ XWIKI_EXT_LDAP_ID | urlencode }}"
     method: GET
     user: "{{ XWIKI_ADMIN_USER }}"
     password: "{{ XWIKI_ADMIN_PASS }}"

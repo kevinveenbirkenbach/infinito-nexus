@@ -32,8 +32,13 @@ XWIKI_ADMIN_USER:                     "{{ users.administrator.username }}"
 XWIKI_ADMIN_PASS:                     "{{ users.administrator.password }}"
 XWIKI_ADMIN_GROUP:                    "{{ application_id }}-administrator"
 
+# Superadministrator
+XWIKI_SUPERADMIN_PASSWORD:            "{{ applications | get_app_conf(application_id, 'credentials.superadminpassword') }}"
+XWIKI_SUPERADMIN_USERNAME:            "superadmin"
+
 # REST endpoint (local inside container)
 XWIKI_REST_BASE:                      "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/jobs?jobType=install&async=false"
+XWIKI_REST_GENERAL:                   "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/xwiki/rest/wikis/xwiki"
 
 # Extension IDs + Versions (pin versions explicitly)
 XWIKI_EXT_LDAP_ID:                    "org.xwiki.contrib.ldap:ldap-authenticator"

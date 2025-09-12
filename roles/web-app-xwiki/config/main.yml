@@ -25,7 +25,9 @@ features:
 server:
   csp:
     whitelist:      {}
-    flags:          {}
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
   domains:
     canonical:
       - "x.wiki.{{ PRIMARY_DOMAIN }}"
