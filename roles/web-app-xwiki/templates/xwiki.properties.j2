@@ -1,5 +1,7 @@
 ############################################
 # OIDC
+# Render this block only while the OIDC switch is ON in _flush_config.yml.
+# During bootstrap we keep it OFF to avoid ClassNotFoundException before the extension is installed.
 {% if xwiki_oidc_enabled_switch | bool %}
 oidc.provider={{ XWIKI_OIDC_PROVIDER }}
 oidc.endpoint.authorization={{ XWIKI_OIDC_AUTHORIZATION }}
@@ -17,18 +19,22 @@ oidc.groups.mapping=XWiki.XWikiAdminGroup={{ XWIKI_OIDC_ADMIN_PROVIDER_GROUP }}
 
 ############################################
 # Distribution Wizard (bootstrap)
+# Render this block only during bootstrap when we temporarily enable the superadmin.
 {% if xwiki_superadmin_enabled_switch | bool %}
-# Start DW automatisch und ohne Interaktion
+# Start DW automatically and non-interactively
 distribution.automaticStartOnMainWiki=true
 distribution.automaticStartOnWiki=true
 distribution.job.interactive=false
-# Standard-Flavor für Main Wiki (XWiki Standard)
+# Default flavor for main wiki
 distribution.defaultUI=org.xwiki.platform:xwiki-platform-distribution-flavor-mainwiki
 {% endif %}
 
-# Keep data in the Docker volume
+# Persist data in the Docker volume
 environment.permanentDirectory=/usr/local/xwiki/data
 
-# Make sure Extension Manager can fetch artifacts
-extension.repositories=xwiki-public:maven:https://nexus.xwiki.org/nexus/content/groups/public/
-extension.repositories=central:maven:https://repo1.maven.org/maven2/
+# Make sure Extension Manager can fetch artifacts.
+# IMPORTANT:
+# - Java .properties does NOT support "+=" append. Only the LAST assignment wins.
+# - Use a SINGLE line with comma-separated repositories.
+# - The OIDC authenticator lives in xwiki-public. Without it, resolution fails.
+extension.repositories=xwiki-public:maven:https://nexus.xwiki.org/nexus/content/groups/public/,central:maven:https://repo1.maven.org/maven2/
