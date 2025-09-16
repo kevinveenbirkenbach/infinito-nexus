@@ -15,6 +15,7 @@ XWIKI_HOSTNAME:                       "{{ container_hostname }}"
 ## Paths
 XWIKI_HOST_CONF_PATH:                 "{{ [docker_compose.directories.config, 'xwiki.cfg'] | path_join }}"
 XWIKI_HOST_PROPERTIES_PATH:           "{{ [docker_compose.directories.config, 'xwiki.properties'] | path_join }}"
+XWIKI_DOCK_DATA_DIR:                  "/usr/local/xwiki"
 
 ## Docker
 XWIKI_IMAGE_CUSTOM:                   "xwiki_custom"
@@ -39,8 +40,8 @@ XWIKI_SUPERADMIN_USERNAME:            "superadmin"
 
 # REST endpoint (local inside container)
 XWIKI_REST_BASE:                      "{{ ['http://127.0.0.1:'~ XWIKI_HOST_PORT, '/rest/'] | url_join  }}"
-XWIKI_REST_EXTENSION_INSTALL:         "{{ [XWIKI_REST_BASE, 'jobs'] | url_join  }}"
 XWIKI_REST_XWIKI:                     "{{ [XWIKI_REST_BASE, 'wikis/xwiki'] | url_join  }}"
+XWIKI_REST_EXTENSION_INSTALL:         "{{ [XWIKI_REST_BASE, 'jobs'] | url_join }}"
 
 # Extension IDs + Versions (pin versions explicitly)
 XWIKI_EXT_LDAP_ID:                    "org.xwiki.contrib.ldap:ldap-authenticator"

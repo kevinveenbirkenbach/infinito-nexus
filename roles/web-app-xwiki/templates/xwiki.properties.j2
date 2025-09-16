@@ -30,7 +30,7 @@ distribution.defaultUI=org.xwiki.platform:xwiki-platform-distribution-flavor-mai
 {% endif %}
 
 # Persist data in the Docker volume
-environment.permanentDirectory=/usr/local/xwiki/data
+environment.permanentDirectory={{ XWIKI_DOCK_DATA_DIR }}
 
 # Make sure Extension Manager can fetch artifacts.
 # IMPORTANT:
