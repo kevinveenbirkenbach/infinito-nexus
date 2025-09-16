@@ -3,3 +3,6 @@ vhost_flavour:        "basic"               # valid: basic, ws_generic
 
 # build the full template path from the flavour
 vhost_template_src:   "roles/sys-svc-proxy/templates/vhost/{{ vhost_flavour }}.conf.j2"
+
+# Enable / Disable Proxy during development, for faster Debugging
+SYS_STK_FRONT_PROXY_ENABLED: true
