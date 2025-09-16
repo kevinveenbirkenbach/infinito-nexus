@@ -11,8 +11,6 @@
     volumes:
       - "{{ XWIKI_HOST_CONF_PATH }}:/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg"
       - "{{ XWIKI_HOST_PROPERTIES_PATH }}:/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties"
-      - "{{ XWIKI_HOST_CONF_PATH }}:{{ [XWIKI_DOCK_DATA_DIR, 'xwiki.cfg'] | path_join }}"
-      - "{{ XWIKI_HOST_PROPERTIES_PATH }}:{{ [XWIKI_DOCK_DATA_DIR, 'xwiki.properties'] | path_join }}"
       - 'data:{{ XWIKI_DOCK_DATA_DIR }}'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
