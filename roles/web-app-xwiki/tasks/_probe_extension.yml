@@ -1,7 +1,11 @@
-- name: "XWIKI | Probe extension {{ ext_id }}"
+# roles/web-app-xwiki/tasks/_probe_extension.yml
+# Probes the 'installed' extension repository to check if a given extension is present.
+# Uses the wiki-namespaced REST base (/rest/wikis/xwiki) and falls back to /{id}/{version} if needed.
+
+- name: "XWIKI | Probe extension {{ ext_id }} (installed repo)"
   when: ext_enabled | bool
   uri:
-    url: "{{ XWIKI_REST_XWIKI }}/extensions/{{ ext_id | urlencode }}"
+    url: "{{ [XWIKI_REST_XWIKI, 'repositories/installed/extensions', ext_id | urlencode] | url_join }}?namespace={{ 'wiki:xwiki' | urlencode }}"
     method: GET
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
@@ -10,13 +14,31 @@
     return_content: no
     headers:
       Accept: "application/xml"
-    status_code: [200, 401, 404, 302]
+    status_code: [200, 401, 404]
   register: _probe
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  changed_when: false
+
+# Some XWiki builds/versions answer on /{id}/{version}. Try that if plain /{id} returned 404.
+- name: "XWIKI | Probe extension {{ ext_id }} with version (fallback)"
+  when:
+    - ext_enabled | bool
+    - (_probe.status | default(404)) | int == 404
+    - ext_version is defined
+  uri:
+    url: "{{ [XWIKI_REST_XWIKI, 'repositories/installed/extensions', ext_id | urlencode, ext_version] | url_join }}?namespace={{ 'wiki:xwiki' | urlencode }}"
+    method: GET
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    follow_redirects: none
+    return_content: no
+    headers:
+      Accept: "application/xml"
+    status_code: [200, 401, 404]
+  register: _probe_v
   changed_when: false
 
 - name: "XWIKI | Save probe result for {{ ext_id }}"
   when: ext_enabled | bool
   set_fact:
-    "{{ result_var }}": "{{ _probe }}"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+    "{{ result_var }}": "{{ (_probe_v if (_probe_v is defined) else _probe) }}"

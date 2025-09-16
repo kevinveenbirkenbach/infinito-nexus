@@ -1,7 +1,20 @@
+# roles/web-app-xwiki/tasks/04_extensions.yml
+#
+# Canonical install flow for XWiki 16.10.x in this setup:
+# - PUT /rest/jobs with query params (install, async=false, media=json, namespaces, extensions)
+# - Pass lists via <rest><list>…</list></rest> in query parameters
+# - Minimal XML body (<jobRequest/>) just to satisfy the REST layer
+# - Restart once (handler: docker compose restart), then verify via the 'installed' repository
+#
+# Requires in xwiki.properties:
+# extension.repositories=xwiki-public:maven:https://nexus.xwiki.org/nexus/content/groups/public/,central:maven:https://repo1.maven.org/maven2/
+
+# 1) Probe what is already installed
 - name: "Probe OIDC extension"
   include_tasks: _probe_extension.yml
   vars:
     ext_id: "{{ XWIKI_EXT_OIDC_ID }}"
+    ext_version: "{{ XWIKI_EXT_OIDC_VERSION }}"
     ext_enabled: "{{ XWIKI_OIDC_ENABLED }}"
     result_var: "xwiki_oidc_ext"
 
@@ -9,10 +22,43 @@
   include_tasks: _probe_extension.yml
   vars:
     ext_id: "{{ XWIKI_EXT_LDAP_ID }}"
+    ext_version: "{{ XWIKI_EXT_LDAP_VERSION }}"
     ext_enabled: "{{ XWIKI_LDAP_ENABLED }}"
     result_var: "xwiki_ldap_ext"
 
-- name: "Install LDAP and/or OIDC extensions"
+# 2) Build the list of extensions to install (enabled + missing)
+- name: "Initialize extension install list"
+  set_fact:
+    extensions_to_install: []
+
+- name: "Queue OIDC extension for install"
+  when:
+    - XWIKI_OIDC_ENABLED | bool
+    - xwiki_oidc_ext.status | int != 200
+  set_fact:
+    extensions_to_install: "{{ extensions_to_install + [ {'id': XWIKI_EXT_OIDC_ID, 'version': XWIKI_EXT_OIDC_VERSION} ] }}"
+
+- name: "Queue LDAP extension for install"
+  when:
+    - XWIKI_LDAP_ENABLED | bool
+    - xwiki_ldap_ext is defined
+    - xwiki_ldap_ext.status | int != 200
+  set_fact:
+    extensions_to_install: "{{ extensions_to_install + [ {'id': XWIKI_EXT_LDAP_ID, 'version': XWIKI_EXT_LDAP_VERSION} ] }}"
+
+# 3) Build XML payloads for the request BODY (not query params)
+- name: "Build XML payloads for job body"
+  when: extensions_to_install | length > 0
+  set_fact:
+    namespaces_xml_rest: "<rest><list><string>wiki:xwiki</string></list></rest>"
+    extensions_xml_rest: >-
+      <rest><list>{% for ext in extensions_to_install -%}
+      <extension><id>{{ ext.id }}</id><version>{{ ext.version }}</version><namespace>wiki:xwiki</namespace></extension>
+      {%- endfor %}</list></rest>
+
+# 4) Install extensions synchronously using BODY properties
+- name: "Install extensions via PUT (body properties, sync)"
+  when: extensions_to_install | length > 0
   uri:
     url: "{{ XWIKI_REST_EXTENSION_INSTALL }}?jobType=install&async=false&media=json"
     method: PUT
@@ -20,41 +66,87 @@
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     headers:
-      Content-Type: "text/xml"
       Accept: "application/json"
-      X-Requested-With: "XMLHttpRequest"
-    body: "{{ lookup('template', 'installjobrequest.xml.j2') }}"
-    status_code: [200, 202]
+      Content-Type: "application/xml"
+    body: |
+      <jobRequest xmlns="http://www.xwiki.org">
+        <request>
+          <properties>
+            <property>
+              <key>namespaces</key>
+              <value><![CDATA[{{ namespaces_xml_rest }}]]></value>
+            </property>
+            <property>
+              <key>extensions</key>
+              <value><![CDATA[{{ extensions_xml_rest }}]]></value>
+            </property>
+            <property>
+              <key>interactive</key>
+              <value><rest><boolean>false</boolean></rest></value>
+            </property>
+          </properties>
+        </request>
+      </jobRequest>
+    status_code: [200, 201, 202]
     return_content: yes
-  when:
-    - (XWIKI_OIDC_ENABLED | bool and (xwiki_oidc_ext.status | default(404)) != 200)
-      or
-      (XWIKI_LDAP_ENABLED | bool and (xwiki_ldap_ext is not skipped) and (xwiki_ldap_ext.status | default(404)) != 200)
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   register: xwiki_install_job
+  notify: docker compose restart
+  changed_when: xwiki_install_job.json.state == 'FINISHED'
 
-- name: "Extract install job id"
-  set_fact:
-    xwiki_install_job_id: "{{ xwiki_install_job | xwiki_job_id(default='') }}"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+# 5) Restart once so new classes are loaded
+- name: "Restart XWiki after install"
+  when: extensions_to_install | length > 0
+  meta: flush_handlers
 
-- name: "Poll install job status until FINISHED without errors"
-  when: xwiki_install_job_id is defined and xwiki_install_job_id|length > 0
+# 6) Wait for REST to be ready again
+- name: "Wait until XWiki REST is ready after restart"
   uri:
-    url: "{{ XWIKI_REST_BASE }}jobstatus/{{ xwiki_install_job_id }}?media=json"
-    method: GET
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
-    force_basic_auth: true
-    headers:
-      Accept: "application/json"
-    status_code: 200
-    return_content: yes
-  register: _install_status
+    url: "{{ XWIKI_REST_BASE }}"
+    status_code: [200, 401]
+    follow_redirects: none
+    return_content: no
+  register: xwiki_rest_up_after
   changed_when: false
-  retries: 20
-  delay: 3
+  retries: 60
+  delay: 5
   until:
-    - _install_status is succeeded
-    - _install_status.json.state == 'FINISHED'
-    - (_install_status.json.errors | default([]) | length) == 0
+    - xwiki_rest_up_after is succeeded
+    - (xwiki_rest_up_after.redirected is not defined) or (not xwiki_rest_up_after.redirected)
+
+# 7) Re-probe from 'installed' repository
+- name: "Re-probe OIDC extension (installed repo)"
+  include_tasks: _probe_extension.yml
+  vars:
+    ext_id: "{{ XWIKI_EXT_OIDC_ID }}"
+    ext_version: "{{ XWIKI_EXT_OIDC_VERSION }}"
+    ext_enabled: "{{ XWIKI_OIDC_ENABLED }}"
+    result_var: "xwiki_oidc_ext_after"
+
+- name: "Re-probe LDAP extension (installed repo)"
+  include_tasks: _probe_extension.yml
+  vars:
+    ext_id: "{{ XWIKI_EXT_LDAP_ID }}"
+    ext_version: "{{ XWIKI_EXT_LDAP_VERSION }}"
+    ext_enabled: "{{ XWIKI_LDAP_ENABLED }}"
+    result_var: "xwiki_ldap_ext_after"
+
+# 8) Fail fast if something requested is still missing
+- name: "FAIL: OIDC missing after install"
+  fail:
+    msg: >-
+      OIDC extension ({{ XWIKI_EXT_OIDC_ID }} {{ XWIKI_EXT_OIDC_VERSION }}) is NOT detected
+      after install (HTTP {{ xwiki_oidc_ext_after.status | default('n/a') }}).
+      Check 'extension.repositories' in xwiki.properties and network/DNS.
+  when:
+    - XWIKI_OIDC_ENABLED | bool
+    - xwiki_oidc_ext_after.status | int != 200
+
+- name: "FAIL: LDAP missing after install"
+  fail:
+    msg: >-
+      LDAP extension ({{ XWIKI_EXT_LDAP_ID }} {{ XWIKI_EXT_LDAP_VERSION }}) is NOT detected
+      after install (HTTP {{ xwiki_ldap_ext_after.status | default('n/a') }}).
+      Check 'extension.repositories' in xwiki.properties and network/DNS.
+  when:
+    - XWIKI_LDAP_ENABLED | bool
+    - xwiki_ldap_ext_after.status | int != 200
