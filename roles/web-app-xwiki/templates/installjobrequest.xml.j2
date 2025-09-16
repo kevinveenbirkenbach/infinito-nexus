@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  InstallRequest for the XWiki Extension Manager.
+
+  We MUST render from the computed `extensions_to_install` list
+  (not from raw feature flags), otherwise an empty <list/> is sent
+  and nothing is installed.
+-->
 <jobRequest xmlns="http://www.xwiki.org">
-  <id>install-extensions</id>
-  <jobType>install</jobType>
-  <request>
-    <namespace>wiki:xwiki</namespace>
+  <request class="org.xwiki.extension.job.InstallRequest">
+    <extensions>
+      {% for ext in extensions_to_install %}
+      <extensionId>
+        <id>{{ ext.id }}</id>
+        <version>{{ ext.version }}</version>
+      </extensionId>
+      {% endfor %}
+    </extensions>
+    <namespaces>
+      <!-- Install on the main wiki -->
+      <string>wiki:xwiki</string>
+    </namespaces>
+    <installDependencies>true</installDependencies>
     <interactive>false</interactive>
     <verbose>true</verbose>
-    <installDependencies>true</installDependencies>
-    <extensions>
-      {% if XWIKI_LDAP_ENABLED | bool %}
-      <extension>
-        <id>{{ XWIKI_EXT_LDAP_ID }}</id>
-        <version>{{ XWIKI_EXT_LDAP_VERSION }}</version>
-        <namespace>wiki:xwiki</namespace>
-      </extension>
-      {% endif %}
-      {% if XWIKI_OIDC_ENABLED | bool %}
-      <extension>
-        <id>{{ XWIKI_EXT_OIDC_ID }}</id>
-        <version>{{ XWIKI_EXT_OIDC_VERSION }}</version>
-        <namespace>wiki:xwiki</namespace>
-      </extension>
-      {% endif %}
-    </extensions>
   </request>
 </jobRequest>
