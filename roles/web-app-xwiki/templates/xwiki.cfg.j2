@@ -17,7 +17,9 @@ xwiki.authentication.ldap.update_user=1
 {% else %}
 xwiki.authentication.authclass=com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl
 {% endif %}
+
 {% if xwiki_superadmin_enabled_switch | bool %}
 # ---- Superadmin must live in xwiki.cfg (not in xwiki.properties)
 xwiki.superadminpassword={{ XWIKI_SUPERADMIN_PASSWORD }}
+xwiki.superadmin=1
 {% endif %}

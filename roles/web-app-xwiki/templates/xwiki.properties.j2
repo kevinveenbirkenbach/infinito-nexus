@@ -17,17 +17,14 @@ oidc.groups.claim={{ XWIKI_OIDC_GROUPS_CLAIM }}
 oidc.groups.mapping=XWiki.XWikiAdminGroup={{ XWIKI_OIDC_ADMIN_PROVIDER_GROUP }}
 {% endif %}
 
-############################################
-# Distribution Wizard (bootstrap)
-# Render this block only during bootstrap when we temporarily enable the superadmin.
-{% if xwiki_superadmin_enabled_switch | bool %}
 # Start DW automatically and non-interactively
 distribution.automaticStartOnMainWiki=true
 distribution.automaticStartOnWiki=true
 distribution.job.interactive=false
 # Default flavor for main wiki
 distribution.defaultUI=org.xwiki.platform:xwiki-platform-distribution-flavor-mainwiki
-{% endif %}
+distribution.skip=false
+distribution.wizard.enabled=true
 
 # Persist data in the Docker volume
 environment.permanentDirectory={{ XWIKI_DOCK_DATA_DIR }}
