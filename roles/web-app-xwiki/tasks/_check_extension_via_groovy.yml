@@ -1,0 +1,63 @@
+# PUT a temporary Groovy page that checks installed extensions
+- name: "XWIKI | PUT checker page XWiki.CheckExtension"
+  uri:
+    url: "{{ [XWIKI_REST_XWIKI_PAGES, 'CheckExtension'] | url_join }}"
+    method: PUT
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [200, 201, 202, 204]
+    headers:
+      Content-Type: "application/xml"
+      Accept: "application/xml"
+    body: |
+      <page xmlns="http://www.xwiki.org">
+        <title>CheckExtension</title>
+        <content><![CDATA[
+        {% raw %}{{groovy}}{% endraw %}
+        def ns = "wiki:xwiki"
+        def id = (request.getParameter("id") ?: "").toString()
+        if (!id) { print "ERROR::missing-id"; return }
+        def ext = services.extension.getInstalledExtension(id, ns)
+        if (ext) {
+          print "INSTALLED::${ext.id?.id}::${ext.id?.version}"
+        } else {
+          print "MISSING::${id}"
+        }
+        {% raw %}{{/groovy}}{% endraw %}
+        ]]></content>
+        <syntax>xwiki/2.1</syntax>
+      </page>
+  register: _put_checker
+  changed_when: false
+
+# Call the page to check a single extension
+- name: "XWIKI | Check installed via Groovy for {{ ext_id }}"
+  uri:
+    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/CheckExtension?xpage=plain&id={{ ext_id | urlencode }}"
+    method: GET
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [200]
+    return_content: yes
+  register: _check_output
+  changed_when: false
+
+- name: "XWIKI | Save Groovy check result for {{ ext_id }}"
+  set_fact:
+    "{{ result_var }}":
+      status: "{{ _check_output.content | xwiki_extension_status }}"
+      raw: "{{ _check_output.content }}"
+
+# Cleanup (optional; you can leave the page, but we remove it to keep things tidy)
+- name: "XWIKI | Delete checker page"
+  uri:
+    url: "{{ [XWIKI_REST_XWIKI_PAGES, 'CheckExtension'] | url_join }}"
+    method: DELETE
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [204, 200, 202, 404]
+  register: _delete_checker
+  changed_when: _delete_checker.status != 404

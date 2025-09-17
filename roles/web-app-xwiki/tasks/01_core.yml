@@ -15,6 +15,21 @@
     xwiki_ldap_enabled_switch:        false
     xwiki_superadmin_enabled_switch:  true
 
+- name: "ASSERT | superadmin can authenticate (needed for installer)"
+  uri:
+    url: "{{ [XWIKI_REST_XWIKI, 'spaces'] | url_join }}"
+    method: GET
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [200]
+  register: _super_check_ext
+
+- name: "FAIL | superadmin authentication failed (extensions phase)"
+  fail:
+    msg: "superadmin authentication failed (check xwiki.cfg in image / password / Dockerfile build)"
+  when: _super_check_ext.status != 200
+
 - name: Load setup procedures for admin
   include_tasks: 03_administrator.yml
   when: not (XWIKI_SSO_ENABLED | bool)

@@ -45,8 +45,8 @@ plugins:
     enabled: true
     items:
       - id: "org.xwiki.contrib.oidc:oidc-authenticator"
-        version: "2.19.2"
-        
+        version: ""
+
   ldap:
     enabled: false
     items:

@@ -57,6 +57,39 @@
   delay: 15
   until: _exec_page is succeeded
 
+- name: "XWIKI | Verify requested extensions via Groovy checker"
+  include_tasks: _check_extension_via_groovy.yml
+  loop: "{{ XWIKI_PLUGINS }}"
+  loop_control:
+    loop_var: plugin
+    label: "{{ plugin.id }}"
+  vars:
+    ext_id: "{{ plugin.id }}"
+    result_var: "probe_{{ plugin.id | regex_replace('[^A-Za-z0-9_]', '_') }}"
+
+- name: "XWIKI | Collect probe results"
+  set_fact:
+    _xwiki_probe_results: "{{ _xwiki_probe_results | default([]) + [ {
+      'id': plugin.id,
+      'status': (
+        (hostvars[inventory_hostname]['probe_' ~ (plugin.id | regex_replace('[^A-Za-z0-9_]', '_'))]
+         | default({})).status
+        | default(404) | int
+      )
+      } ] }}"
+  loop: "{{ XWIKI_PLUGINS }}"
+  loop_control:
+    loop_var: plugin
+  changed_when: false
+
+# Fail if any extension is missing
+- name: "XWIKI | Assert all requested extensions are installed"
+  vars:
+    missing: "{{ _xwiki_probe_results | selectattr('status','equalto',404) | map(attribute='id') | list }}"
+  fail:
+    msg: "Missing extensions: {{ missing | join(', ') }}"
+  when: missing | length > 0
+
 - name: "XWIKI | Delete installer page"
   uri:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'InstallExtensions'] | url_join }}"
