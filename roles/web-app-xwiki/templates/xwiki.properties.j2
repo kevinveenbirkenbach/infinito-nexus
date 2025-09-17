@@ -7,6 +7,7 @@ xwiki.url.port={{ WEB_PORT }}
 # OIDC
 # Render this block only while the OIDC switch is ON in _flush_config.yml.
 # During bootstrap we keep it OFF to avoid ClassNotFoundException before the extension is installed.
+# @see https://extensions.xwiki.org/xwiki/bin/view/Extension/OpenID%20Connect/OpenID%20Connect%20Authenticator/
 {% if xwiki_oidc_enabled_switch | bool %}
 oidc.showLoginButton=true
 oidc.provider={{ XWIKI_OIDC_PROVIDER }}
@@ -18,9 +19,9 @@ oidc.clientid={{ XWIKI_OIDC_CLIENT_ID }}
 oidc.secret={{ XWIKI_OIDC_CLIENT_SECRET }}
 oidc.scope={{ XWIKI_OIDC_SCOPES }}
 oidc.enableUser=true
-oidc.userinfoclaims={{ XWIKI_OIDC_GROUPS_CLAIM }}
-oidc.groups.claim={{ XWIKI_OIDC_GROUPS_CLAIM }}
-oidc.groups.mapping=XWiki.XWikiAdminGroup={{ XWIKI_OIDC_ADMIN_PROVIDER_GROUP }}
+#oidc.userinfoclaims={{ XWIKI_OIDC_GROUPS_CLAIM }}
+#oidc.groups.claim={{ XWIKI_OIDC_GROUPS_CLAIM }}
+#oidc.groups.mapping=XWiki.XWikiAdminGroup={{ XWIKI_OIDC_ADMIN_PROVIDER_GROUP }}
 {% endif %}
 
 # Start DW automatically and non-interactively
