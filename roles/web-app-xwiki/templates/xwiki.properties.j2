@@ -1,8 +1,14 @@
+# Proxy
+xwiki.url.protocol={{ WEB_PROTOCOL }}
+xwiki.url.host={{ domain }}
+xwiki.url.port={{ WEB_PORT }}
+
 ############################################
 # OIDC
 # Render this block only while the OIDC switch is ON in _flush_config.yml.
 # During bootstrap we keep it OFF to avoid ClassNotFoundException before the extension is installed.
 {% if xwiki_oidc_enabled_switch | bool %}
+oidc.showLoginButton=true
 oidc.provider={{ XWIKI_OIDC_PROVIDER }}
 oidc.endpoint.authorization={{ XWIKI_OIDC_AUTHORIZATION }}
 oidc.endpoint.token={{ XWIKI_OIDC_TOKEN }}
