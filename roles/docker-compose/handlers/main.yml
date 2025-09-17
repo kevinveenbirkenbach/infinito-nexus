@@ -41,7 +41,7 @@
     - docker compose up
     - docker compose restart
 
-- name: Build docker compose 
+- name: Build docker compose
   shell: |
     set -euo pipefail
     docker compose build || { 

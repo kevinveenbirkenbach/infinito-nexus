@@ -90,14 +90,18 @@
 
 - name: "XWIKI | Execute installer page"
   uri:
-    url: "{{ 'http://127.0.0.1:' ~ XWIKI_HOST_PORT ~ '/bin/view/XWiki/InstallExtensions?xpage=plain' }}"
+    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/InstallExtensions?xpage=plain"
     method: GET
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [200]
     return_content: yes
+    timeout: 300        # allow up to 5 minutes per attempt
   register: _exec_page
+  retries: 20           # retry up to 20 times
+  delay: 15             # wait 15 seconds between retries
+  until: _exec_page is succeeded
 
 # Assert success:
 # - If nothing was requested, allow "SKIP: no extensions requested".

@@ -1,1 +1,5 @@
 FROM {{ XWIKI_IMAGE }}:{{ XWIKI_VERSION }}
+RUN cat >> /usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg <<EOF
+xwiki.superadmin=1
+xwiki.superadminpassword={{ XWIKI_SUPERADMIN_PASSWORD }}
+EOF

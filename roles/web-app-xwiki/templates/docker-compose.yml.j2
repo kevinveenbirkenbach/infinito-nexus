@@ -8,8 +8,27 @@
     hostname: '{{ XWIKI_HOSTNAME}}'
     ports:
       - "127.0.0.1:{{ XWIKI_HOST_PORT }}:{{ container_port }}"
+    environment:
+      JAVA_OPTS: >-
+{% if xwiki_oidc_enabled_switch| bool %}
+        -Dxwiki.authentication.authclass=org.xwiki.contrib.oidc.auth.OIDCAuthServiceImpl
+{% elif xwiki_ldap_enabled_switch | bool %}
+        -Dxwiki.authentication.authclass=org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl
+        -Dxwiki.authentication.ldap=1
+        -Dxwiki.authentication.ldap.trylocal={{ (XWIKI_LDAP_TRYLOCAL | bool) | ternary(1, 0) }}
+        -Dxwiki.authentication.ldap.group_mapping=XWiki.XWikiAdminGroup={{ XWIKI_LDAP_ADMIN_GROUP_DN }}
+        -Dxwiki.authentication.ldap.mode_group_sync=always
+        -Dxwiki.authentication.ldap.server={{ XWIKI_LDAP_SERVER }}
+        -Dxwiki.authentication.ldap.port={{ XWIKI_LDAP_PORT }}
+        -Dxwiki.authentication.ldap.base_DN={{ XWIKI_LDAP_BASE_DN }}
+        -Dxwiki.authentication.ldap.bind_DN={{ XWIKI_LDAP_BIND_DN }}
+        -Dxwiki.authentication.ldap.bind_pass={{ XWIKI_LDAP_BIND_PASS }}
+        -Dxwiki.authentication.ldap.fields_mapping={{ XWIKI_LDAP_FIELDS_MAPPING }}
+        -Dxwiki.authentication.ldap.update_user=1
+{% else %}
+        -Dxwiki.authentication.authclass=com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl
+{% endif %}
     volumes:
-      - "{{ XWIKI_HOST_CONF_PATH }}:/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg"
       - "{{ XWIKI_HOST_PROPERTIES_PATH }}:/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties"
       - 'data:{{ XWIKI_DOCK_DATA_DIR }}'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}

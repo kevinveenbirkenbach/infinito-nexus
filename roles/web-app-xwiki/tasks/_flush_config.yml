@@ -1,9 +1,3 @@
-- name: "Render xwiki.cfg"
-  template:
-    src: "xwiki.cfg.j2"
-    dest: "{{ XWIKI_HOST_CONF_PATH }}"
-  notify: docker compose up
-
 - name: "Deploy xwiki.properties"
   template:
     src: "xwiki.properties.j2"
