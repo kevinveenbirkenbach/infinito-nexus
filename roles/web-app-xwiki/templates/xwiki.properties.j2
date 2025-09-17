@@ -32,7 +32,41 @@ distribution.defaultUI=org.xwiki.platform:xwiki-platform-distribution-flavor-mai
 distribution.skip=false
 distribution.wizard.enabled=true
 
+{% if MODE_DEBUG | bool %}
+# Root logger
 logging.rootLogger=DEBUG, console
+
+# XWiki OIDC extension
+logging.logger.org.xwiki.contrib.oidc=TRACE
+logging.logger.org.xwiki.contrib.oidc.internal=TRACE
+logging.logger.org.xwiki.contrib.oidc.provider=TRACE
+
+# OIDC extra (sometimes split in other packages)
+logging.logger.org.xwiki.contrib.oidc.auth=TRACE
+logging.logger.org.xwiki.contrib.oidc.client=TRACE
+
+# Tomcat internals (servlet and HTTP handling)
+logging.logger.org.apache.catalina.core=DEBUG
+logging.logger.org.apache.coyote.http11=DEBUG
+
+# Request/Resource handling
+logging.logger.org.xwiki.resource=TRACE
+logging.logger.org.xwiki.resource.internal=TRACE
+logging.logger.org.xwiki.container.servlet=DEBUG
+
+# Nimbus OIDC/OAuth + JOSE libraries
+logging.logger.com.nimbusds=DEBUG
+logging.logger.com.nimbusds.oauth2.sdk=DEBUG
+logging.logger.com.nimbusds.openid.connect.sdk=DEBUG
+logging.logger.com.nimbusds.jose=DEBUG
+
+# Apache HttpClient (used under the hood by Nimbus)
+logging.logger.org.apache.http=DEBUG
+logging.logger.org.apache.http.wire=DEBUG   # very verbose, raw request/response wire logs
+
+# Pac4j (if your build uses it)
+logging.logger.org.pac4j=DEBUG
+{% endif %}
 
 # Persist data in the Docker volume
 environment.permanentDirectory={{ XWIKI_DOCK_DATA_DIR }}
