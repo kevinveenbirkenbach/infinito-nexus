@@ -5,6 +5,8 @@
   application_id in ['svc-db-mariadb','svc-db-postgres']
 %}
       {{ applications | get_app_conf('svc-db-' ~ database_type, 'docker.network') }}:
+          aliases:
+            - {{ database_host }}
 {% endif %}
 {% if applications | get_app_conf(application_id, 'features.ldap', False) and applications | get_app_conf('svc-db-openldap', 'network.docker') %}
       {{ applications | get_app_conf('svc-db-openldap', 'docker.network') }}:
