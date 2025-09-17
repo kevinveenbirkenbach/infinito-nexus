@@ -3,11 +3,16 @@
 
 {% if MEDIAWIKI_OIDC_ENABLED | bool %}
 
+{% if 'web-svc-logout' in CURRENT_PLAY_APPLICATIONS %}
+# The cookie deletion of the logout app leads to a login bug if this isn't set
+$wgPasswordAttemptThrottle = [];
+{% endif %}
+
 wfLoadExtension( 'PluggableAuth' );
 wfLoadExtension( 'OpenIDConnect' );
 
-$wgPluggableAuth_EnableAutoLogin = true;
-$wgPluggableAuth_EnableLocalLogin = false;
+$wgPluggableAuth_EnableAutoLogin = {{ MEDIAWIKI_OIDC_AUTOLOGIN | bool | ternary('true','false') }};
+$wgPluggableAuth_EnableLocalLogin = {{ MEDIAWIKI_OIDC_LOCALLOGIN | bool | ternary('true','false') }};
 $wgPluggableAuth_ButtonLabel = '{{ MEDIAWIKI_OIDC_BUTTON_TEXT }}';
 
 $wgPluggableAuth_Config = [

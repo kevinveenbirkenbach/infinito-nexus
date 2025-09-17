@@ -1,5 +1,5 @@
 # roles/web-app-mediawiki/tasks/03_patch_settings.yml
-- name: "MEDIAWIKI | Ensure LocalSettings.php has correct base settings"
+- name: "MEDIAWIKI | Normalize base settings in LocalSettings.php (clean + append once)"
   vars:
     _lsp_path: "{{ MEDIAWIKI_HTML_DIR }}/LocalSettings.php"
     _server_url: "{{ MEDIAWIKI_URL | regex_replace('/+$', '') }}"
@@ -14,46 +14,34 @@
     docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
       set -euo pipefail
       LSP="{{ _lsp_path }}"
+      [ -f "$LSP" ] || { echo "ERROR: LocalSettings.php not found."; exit 1; }
+
       SERVER='\''{{ _server_url_sq }}'\''
       DBNAME='\''{{ _db_name_sq }}'\''
       DBUSER='\''{{ _db_user_sq }}'\''
       DBPASS='\''{{ _db_pass_sq }}'\''
       DBHOST='\''{{ _db_host_sq }}'\''
       LANG='\''{{ _lang_sq }}'\''
-      [ -f "$LSP" ] || { echo "LocalSettings.php not found, skipping."; exit 0; }
+      
+      tmp="$(mktemp)"; trap "rm -f \"$tmp\"" EXIT
 
-      need=0
+      # 1) Copy existing file, but drop ALL prior assignments of our managed keys
+      grep -Ev "^[[:space:]]*\$(wgServer|wgCanonicalServer|wgDBname|wgDBuser|wgDBpassword|wgDBserver|wgLanguageCode)[[:space:]]*=" "$LSP" > "$tmp" || true
 
-      check_line() {
-        local key="$1" val="$2"
-        grep -Eq "^[[:space:]]*\$${key}[[:space:]]*=[[:space:]]*'\''${val}'\'';" "$LSP" || need=1
-      }
+      # 2) Append ONE clean, authoritative block
+      {
+        printf "\n\$wgServer = '\''%s'\'';\n"           "$SERVER"
+        printf "\$wgCanonicalServer = '\''%s'\'';\n"    "$SERVER"
+        printf "\$wgDBname = '\''%s'\'';\n"             "$DBNAME"
+        printf "\$wgDBuser = '\''%s'\'';\n"             "$DBUSER"
+        printf "\$wgDBpassword = '\''%s'\'';\n"         "$DBPASS"
+        printf "\$wgDBserver = '\''%s'\'';\n"           "$DBHOST"
+        printf "\$wgLanguageCode = '\''%s'\'';\n"       "$LANG"
+      } >> "$tmp"
 
-      check_line wgServer "$SERVER"
-      check_line wgCanonicalServer "$SERVER"
-      check_line wgDBname "$DBNAME"
-      check_line wgDBuser "$DBUSER"
-      check_line wgDBpassword "$DBPASS"
-      check_line wgDBserver "$DBHOST"
-      check_line wgLanguageCode "$LANG"
-
-      if [ "$need" -eq 1 ]; then
-        tmp="$(mktemp)"
-        # Remove any existing definitions for these keys
-        grep -Ev "^[[:space:]]*\$(wgServer|wgCanonicalServer|wgDBname|wgDBuser|wgDBpassword|wgDBserver|wgLanguageCode)[[:space:]]*=" "$LSP" > "$tmp" || true
-
-        {
-          printf "\n\$wgServer = '\''%s'\'';\n"           "$SERVER"
-          printf "\$wgCanonicalServer = '\''%s'\'';\n"    "$SERVER"
-          printf "\$wgDBname = '\''%s'\'';\n"             "$DBNAME"
-          printf "\$wgDBuser = '\''%s'\'';\n"             "$DBUSER"
-          printf "\$wgDBpassword = '\''%s'\'';\n"         "$DBPASS"
-          printf "\$wgDBserver = '\''%s'\'';\n"           "$DBHOST"
-          printf "\$wgLanguageCode = '\''%s'\'';\n"       "$LANG"
-        } >> "$tmp"
-
+      # 3) Idempotent write: only replace if content actually changed
+      if ! cmp -s "$LSP" "$tmp"; then
         cat "$tmp" > "$LSP"
-        rm -f "$tmp"
         echo CHANGED
       fi
     '
