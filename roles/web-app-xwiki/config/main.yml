@@ -46,9 +46,7 @@ plugins:
     items:
       - id: "org.xwiki.contrib.oidc:oidc-authenticator"
         version: "2.19.2"
-#      - id: "org.xwiki.contrib.oidc:oidc-authenticator-ui"
-#        version: ""          # let EM choose a compatible version
-
+        
   ldap:
     enabled: false
     items:
