@@ -24,7 +24,9 @@ features:
   ldap:             false # Just OIDC or LDAP can be enabled
 server:
   csp:
-    whitelist:      {}
+    whitelist:
+      worker-src:
+        - "blob:"
     flags:
       script-src:
         unsafe-eval:    true
