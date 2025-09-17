@@ -39,3 +39,25 @@ rbac:
   roles: {}
 ldap:
   local_enabled: true # Allows local login if LDAP is down
+
+plugins:
+  oidc:
+    enabled: true
+    items:
+      - id: "org.xwiki.contrib.oidc:oidc-authenticator"
+        version: "2.19.2"
+#      - id: "org.xwiki.contrib.oidc:oidc-authenticator-ui"
+#        version: ""          # let EM choose a compatible version
+
+  ldap:
+    enabled: false
+    items:
+      - id: "org.xwiki.contrib.ldap:ldap-authenticator"
+        version: "9.15.7"
+
+  # Example for Matomo
+  matomo:
+    enabled: false
+    items:
+      - id: "org.xwiki.contrib:matomo"
+        version: "1.0"

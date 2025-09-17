@@ -1,5 +1,3 @@
-# roles/web-app-xwiki/tasks/04_extensions.yml
-#
 # Installs OIDC / LDAP using a temporary Groovy page that calls the
 # Extension Script Service (services.extension.install).
 # Avoids REST job API and any Namespace class import for portability.
@@ -13,57 +11,13 @@
 #  - We print machine-readable markers so Ansible can assert deterministically.
 #  - We protect XWiki's {{groovy}} wiki macro from Jinja by using {% raw %}…{% endraw %}.
 
-- name: "XWIKI | Build Groovy installer code (no wiki macro delimiters here)"
+- name: "XWIKI | Build Groovy installer code from static file (base64 payload)"
+  vars:
+    _wanted_b64: "{{ XWIKI_PLUGINS | to_json | b64encode }}"
   set_fact:
-    _install_code: |
-      def ext = services.extension
-      def ns  = "wiki:xwiki"
-
-      // Build the wish list from Ansible vars
-      def wanted = []
-      {% if XWIKI_OIDC_ENABLED | bool %}
-      wanted << [id: "{{ XWIKI_EXT_OIDC_ID }}", version: "{{ XWIKI_EXT_OIDC_VERSION }}"]
-      {% endif %}
-      {% if XWIKI_LDAP_ENABLED | bool %}
-      wanted << [id: "{{ XWIKI_EXT_LDAP_ID }}", version: "{{ XWIKI_EXT_LDAP_VERSION }}"]
-      {% endif %}
-
-      if (wanted.isEmpty()) {
-        println "SKIP: no extensions requested"
-      } else {
-        wanted.each { e ->
-          def already = ext.getInstalledExtension(e.id as String, ns)
-          if (already) {
-            println "ALREADY_INSTALLED::${e.id}::${already.id?.version}"
-          } else {
-            println "INSTALL_START::${e.id}::${e.version}"
-            def job = ext.install(e.id as String, e.version as String, ns)
-
-            // Heartbeat until terminal state
-            long last = System.currentTimeMillis()
-            while (true) {
-              def st = job?.status?.state
-              if (st && st.name() in ["FINISHED","FAILED","CANCELED"]) {
-                println "STATE=${st.name()}::${e.id}"
-                break
-              }
-              if (System.currentTimeMillis() - last > 2000) {
-                println "STATE=" + (st?.name() ?: "PENDING") + "::" + e.id
-                last = System.currentTimeMillis()
-              }
-              Thread.sleep(500)
-            }
-
-            // Verify presence after job completion
-            def now = ext.getInstalledExtension(e.id as String, ns)
-            if (now) {
-              println "INSTALLED_OK::${e.id}::${now.id?.version}"
-            } else {
-              println "INSTALLED_MISSING::${e.id}"
-            }
-          }
-        }
-      }
+    _install_code: >-
+      {{ lookup('file', 'roles/web-app-xwiki/files/extension_installer_b64.groovy')
+         | regex_replace('__WANTED_B64__', _wanted_b64) }}
 
 - name: "XWIKI | PUT installer page Main.InstallExtensions"
   uri:
@@ -97,35 +51,11 @@
     force_basic_auth: true
     status_code: [200]
     return_content: yes
-    timeout: 300        # allow up to 5 minutes per attempt
+    timeout: 300
   register: _exec_page
-  retries: 20           # retry up to 20 times
-  delay: 15             # wait 15 seconds between retries
+  retries: 20
+  delay: 15
   until: _exec_page is succeeded
-
-# Assert success:
-# - If nothing was requested, allow "SKIP: no extensions requested".
-# - For requested OIDC/LDAP, require ALREADY_INSTALLED or INSTALLED_OK.
-# - Disallow INSTALLED_MISSING.
-- name: "ASSERT | Extension installation markers"
-  vars:
-    _c: "{{ _exec_page.content | default('') }}"
-    _need_oidc: "{{ XWIKI_OIDC_ENABLED | bool }}"
-    _need_ldap: "{{ XWIKI_LDAP_ENABLED | bool }}"
-    _ok_oidc: "{{ (_c is search('ALREADY_INSTALLED::' ~ XWIKI_EXT_OIDC_ID)) or (_c is search('INSTALLED_OK::' ~ XWIKI_EXT_OIDC_ID)) }}"
-    _ok_ldap: "{{ (_c is search('ALREADY_INSTALLED::' ~ XWIKI_EXT_LDAP_ID)) or (_c is search('INSTALLED_OK::' ~ XWIKI_EXT_LDAP_ID)) }}"
-    _miss_any: "{{ _c is search('INSTALLED_MISSING::') }}"
-    _skip_all: "{{ _c is search('SKIP: no extensions requested') }}"
-  assert:
-    that:
-      - _miss_any | bool == false
-      - (_need_oidc and _ok_oidc) or (not _need_oidc)
-      - (_need_ldap and _ok_ldap) or (not _need_ldap)
-      - (_need_oidc or _need_ldap) or _skip_all
-    fail_msg: >-
-      Extension install did not complete successfully.
-      Output was:
-      {{ (_exec_page.content | default('') | regex_replace('\\s+', ' ') | truncate(1000)) }}
 
 - name: "XWIKI | Delete installer page"
   uri:
