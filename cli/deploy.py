@@ -17,6 +17,7 @@ def run_ansible_playbook(
     password_file=None,
     verbose=0,
     skip_build=False,
+    skip_tests=False,
     logs=False
 ):
     start_time = datetime.datetime.now()
@@ -56,9 +57,8 @@ def run_ansible_playbook(
         except subprocess.CalledProcessError:
             print("\n❌ Inventory validation failed. Deployment aborted.\n", file=sys.stderr)
             sys.exit(1)
-
-    # Tests are controlled via MODE_TEST
-    if modes.get("MODE_TEST", False):
+            
+    if not skip_tests:
         print("\n🧪 Running tests (make messy-test)...\n")
         subprocess.run(["make", "messy-test"], check=True)
 
@@ -256,6 +256,12 @@ def main():
         help="Skip running 'make build' before deployment.",
     )
     parser.add_argument(
+        "-t",
+        "--skip-tests",
+        action="store_true",
+        help="Skip running 'make messy-tests' before deployment.",
+    )
+    parser.add_argument(
         "-i",
         "--id",
         nargs="+",
@@ -301,6 +307,7 @@ def main():
         password_file=args.password_file,
         verbose=args.verbose,
         skip_build=args.skip_build,
+        skip_tests=args.skip_tests,
         logs=args.logs,
     )
 

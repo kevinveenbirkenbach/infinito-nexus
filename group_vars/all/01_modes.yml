@@ -1,7 +1,7 @@
 # Mode
 
 # The following modes can be combined with each other
-MODE_TEST:    false                       # Executes test routines instead of productive routines
+MODE_DUMMY:   false                       # Executes dummy/test routines instead of productive routines
 MODE_UPDATE:  true                        # Executes updates
 MODE_DEBUG:   false                       # This enables debugging in ansible and in the apps, You SHOULD NOT enable this on production servers
 MODE_RESET:   false                       # Cleans up all Infinito.Nexus files. It's necessary to run to whole playbook and not particial roles when using this function.
