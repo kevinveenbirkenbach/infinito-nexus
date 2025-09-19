@@ -1,9 +1,7 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-    build:
-      context: .
-      dockerfile: Dockerfile
+{% include 'roles/docker-container/templates/build.yml.j2' %}
       args:
         BRIDGY_REPO_URL: "{{ BRIDGY_REPO_URL }}"
         BRIDGY_REPO_BRANCH: "{{ BRIDGY_REPO_BRANCH }}"

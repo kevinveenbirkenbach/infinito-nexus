@@ -3,10 +3,7 @@
   postgres:
     container_name:   "{{ POSTGRES_CONTAINER }}"
     image:            "{{ POSTGRES_CUSTOM_IMAGE_NAME }}"
-    build:
-      context: .
-      dockerfile: Dockerfile
-    pull_policy: never
+{% include 'roles/docker-container/templates/build.yml.j2' %}
     command:
       - "postgres"
       - "-c"

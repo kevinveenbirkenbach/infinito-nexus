@@ -1,8 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-    build:
-      context: .
-      dockerfile: Dockerfile
+{% include 'roles/docker-container/templates/build.yml.j2' %}
       args:
         CHESS_VERSION: "{{ CHESS_VERSION }}"
         CHESS_REPO_URL: "{{ CHESS_REPO_URL }}"

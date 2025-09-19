@@ -1,9 +1,7 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
     application:
         container_name: roulette_application
-        build:
-            context: .
-        pull_policy: never
+{% include 'roles/docker-container/templates/build.yml.j2' %}
         ports:
         - 127.0.0.1:{{ ports.localhost.http[application_id] }}:8080
         restart: {{ DOCKER_RESTART_POLICY }}

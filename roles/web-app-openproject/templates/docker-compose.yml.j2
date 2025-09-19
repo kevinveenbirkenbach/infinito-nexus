@@ -3,10 +3,7 @@ x-op-app: &app
   logging:
     driver: journald
   image: {{ openproject_custom_image }}
-  build:
-    context: .
-    dockerfile: Dockerfile
-  pull_policy: never
+{% include 'roles/docker-container/templates/build.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
@@ -19,6 +16,7 @@ x-op-app: &app
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ openproject_custom_image }}
     container_name: {{ openproject_proxy_name }}
+    pull_policy: never
     command: "./docker/prod/proxy"
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
