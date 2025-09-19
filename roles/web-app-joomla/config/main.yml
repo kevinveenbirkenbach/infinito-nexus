@@ -10,7 +10,8 @@ features:
 server:
   domains:
     canonical:
-      - "cms.{{ PRIMARY_DOMAIN }}"
+      - "joomla.cms.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     flags:
       style-src:

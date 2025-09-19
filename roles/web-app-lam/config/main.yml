@@ -26,8 +26,7 @@ server:
       script-src:
         unsafe-inline:            true
   domains:
-    aliases:
-      - "ldap.{{ PRIMARY_DOMAIN }}"
+    aliases: []
     canonical:
       - lam.{{ PRIMARY_DOMAIN }}
 

@@ -6,3 +6,4 @@ server:
   domains:
     canonical:
       - "cdn.{{ PRIMARY_DOMAIN }}"
+    aliases: []

@@ -18,6 +18,7 @@ server:
   domains:
     canonical:
       - "cloud.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 docker:
   volumes:
     data: nextcloud_data

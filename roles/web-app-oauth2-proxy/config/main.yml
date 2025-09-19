@@ -10,3 +10,4 @@ server:
   domains:
     canonical:
       - oauth2-proxy.{{ PRIMARY_DOMAIN }}
+    aliases: []

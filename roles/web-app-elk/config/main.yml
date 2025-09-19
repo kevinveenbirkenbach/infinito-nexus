@@ -4,3 +4,4 @@ server:
   domains:
     canonical:
       - elk.{{ PRIMARY_DOMAIN }}
+    aliases: []

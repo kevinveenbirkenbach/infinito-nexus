@@ -41,6 +41,7 @@ server:
   domains:
     canonical:
       - "blog.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 docker:
   services:
     database:

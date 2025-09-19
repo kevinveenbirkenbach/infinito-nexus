@@ -26,6 +26,7 @@ server:
   domains:
     canonical:
       - "academy.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 docker:
   services:
     database:

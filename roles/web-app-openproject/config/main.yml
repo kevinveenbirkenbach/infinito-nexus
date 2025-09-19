@@ -30,8 +30,8 @@ server:
         - "data:"
   domains:
     canonical:
-      - "project.{{ PRIMARY_DOMAIN }}"
-
+      - "open.project.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 docker:
   services:
     database:

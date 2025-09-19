@@ -26,6 +26,7 @@ server:
   domains:
     canonical:
       - pgadmin.{{ PRIMARY_DOMAIN }}
+    aliases: []
 docker:
   services:
     database:

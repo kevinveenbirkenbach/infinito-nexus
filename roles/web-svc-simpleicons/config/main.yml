@@ -21,6 +21,7 @@ server:
   domains:
     canonical:
       - "icons.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 rbac:
   roles:
     mail-bot:

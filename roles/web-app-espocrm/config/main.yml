@@ -23,10 +23,9 @@ server:
       frame-src:
         - https://s.espocrm.com/
   domains:
-    aliases:
-      - "crm.{{ PRIMARY_DOMAIN }}"
+    aliases: []
     canonical:
-      - espocrm.{{ PRIMARY_DOMAIN }}
+      - espo.crm.{{ PRIMARY_DOMAIN }}
 email:
   from_name: "Customer Relationship Management ({{ PRIMARY_DOMAIN }})"
 docker:

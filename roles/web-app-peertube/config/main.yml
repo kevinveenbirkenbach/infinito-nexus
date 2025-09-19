@@ -24,8 +24,8 @@ server:
   domains:
     canonical:
       - "video.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "videos.{{ PRIMARY_DOMAIN }}"
+    aliases: []
+    
 docker:
   services:
     redis:

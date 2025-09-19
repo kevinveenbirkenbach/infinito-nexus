@@ -12,9 +12,8 @@ server:
     whitelist: {}
   domains:
     canonical:
-      - "shop.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "magento.{{ PRIMARY_DOMAIN }}"
+      - "magento.shop.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 docker:
   services:
     php:

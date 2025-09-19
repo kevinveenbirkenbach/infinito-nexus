@@ -24,9 +24,7 @@ server:
   domains:
     canonical:
       - "audio.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "music.{{ PRIMARY_DOMAIN }}"
-      - "sound.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:  
     flags:
       style-src:

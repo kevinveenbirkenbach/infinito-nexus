@@ -9,9 +9,10 @@ server:
   status_codes:
     web: 405
   domains:
+    aliases: []
     canonical:
-      web:  "bskyweb.{{ PRIMARY_DOMAIN }}"
-      api:  "bluesky.{{ PRIMARY_DOMAIN }}"
+      web:  "web.bluesky.{{ PRIMARY_DOMAIN }}"
+      api:  "api.bluesky.{{ PRIMARY_DOMAIN }}"
 #      view: "view.bluesky.{{ PRIMARY_DOMAIN }}"
   csp:
     whitelist:

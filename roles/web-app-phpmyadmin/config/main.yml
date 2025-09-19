@@ -20,9 +20,7 @@ server:
       script-src-elem:
         unsafe-inline: true
   domains:
-    aliases:
-      - "mysql.{{ PRIMARY_DOMAIN }}"
-      - "mariadb.{{ PRIMARY_DOMAIN }}"
+    aliases: []
     canonical:
       - phpmyadmin.{{ PRIMARY_DOMAIN }}
 docker:

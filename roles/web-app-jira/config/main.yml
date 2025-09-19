@@ -31,6 +31,7 @@ server:
   domains:
     canonical:
       - "jira.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   status_codes:
     default: 405
 rbac:

@@ -23,8 +23,7 @@ server:
   domains:
     canonical:
       - "picture.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "pictures.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 docker:
   services:
     redis:

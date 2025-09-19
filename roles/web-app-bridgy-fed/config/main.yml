@@ -10,6 +10,7 @@ server:
   domains:
     canonical:
       - "bridgyfed.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     whitelist: {}
     flags: {}

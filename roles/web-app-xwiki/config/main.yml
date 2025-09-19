@@ -35,6 +35,7 @@ server:
   domains:
     canonical:
       - "x.wiki.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 rbac:
   roles: {}
 ldap:

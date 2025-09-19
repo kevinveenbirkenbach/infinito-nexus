@@ -23,6 +23,7 @@ server:
   domains:
     canonical:
       - baserow.{{ PRIMARY_DOMAIN }}
+    aliases: []
   csp:
     whitelist:
       worker-src:

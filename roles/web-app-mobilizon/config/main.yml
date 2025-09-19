@@ -15,8 +15,8 @@ server:
   domains:
     canonical:
       - "event.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "events.{{ PRIMARY_DOMAIN }}"
+    aliases: []
+    
 docker:
   services:
     database:

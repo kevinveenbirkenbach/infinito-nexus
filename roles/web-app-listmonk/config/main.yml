@@ -10,6 +10,7 @@ server:
   domains:
     canonical:
       - "newsletter.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   status_codes:
     default: 404
 docker:

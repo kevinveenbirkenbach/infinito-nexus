@@ -4,3 +4,4 @@ server:
   domains:
     canonical:
       - jenkins.{{ PRIMARY_DOMAIN }}
+    aliases: []

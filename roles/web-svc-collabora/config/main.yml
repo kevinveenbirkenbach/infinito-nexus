@@ -2,6 +2,7 @@ server:
   domains:
     canonical:
       - "collabora.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     whitelist:
       frame-ancestors:

@@ -30,9 +30,7 @@ server:
   domains:
     canonical:
       - "c.wiki.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "confluence.{{ PRIMARY_DOMAIN }}"
-      - "confluence.wiki.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 rbac:
   roles: {}
 truststore_enabled: false

@@ -4,3 +4,4 @@ server:
   domains:
     canonical:
       - asset.{{ PRIMARY_DOMAIN }}
+    aliases: []

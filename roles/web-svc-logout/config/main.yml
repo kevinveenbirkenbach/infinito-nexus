@@ -8,6 +8,7 @@ server:
   domains:
     canonical:
       - "logout.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     flags:
       style-src:

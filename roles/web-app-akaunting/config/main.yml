@@ -13,6 +13,7 @@ server:
   domains:
     canonical:
       - "accounting.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     flags:
       script-src-elem:

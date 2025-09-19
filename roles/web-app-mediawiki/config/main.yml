@@ -3,8 +3,7 @@ server:
   domains:
     canonical:
       - "m.wiki.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "media.wiki.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 docker:
   services:
     database:

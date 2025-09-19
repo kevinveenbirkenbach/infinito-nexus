@@ -27,3 +27,4 @@ server:
   domains:
     canonical:
       - "slides.{{ PRIMARY_DOMAIN }}"
+    aliases: []

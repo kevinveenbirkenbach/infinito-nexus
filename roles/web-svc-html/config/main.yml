@@ -6,3 +6,4 @@ server:
   domains:
     canonical:
       - "html.{{ PRIMARY_DOMAIN }}"
+    aliases: []

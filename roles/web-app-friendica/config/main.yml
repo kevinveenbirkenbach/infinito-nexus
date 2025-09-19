@@ -13,6 +13,7 @@ server:
   domains:
     canonical:
       - "social.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     flags:
       script-src-elem:

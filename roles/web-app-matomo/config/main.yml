@@ -26,10 +26,9 @@ server:
         unsafe-inline: true
         unsafe-eval:   true
   domains:
-    aliases:
-      - "analytics.{{ PRIMARY_DOMAIN }}"
     canonical:
       - "matomo.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 excluded_ips: "{{ networks.internet.values() | list }}"
 
 docker:

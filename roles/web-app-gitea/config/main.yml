@@ -35,10 +35,9 @@ server:
       manifest-src:
         - "data:"
   domains:
-    aliases:
-      - "git.{{ PRIMARY_DOMAIN }}"
+    aliases: []
     canonical:
-      - gitea.{{ PRIMARY_DOMAIN }}
+      - tea.git.{{ PRIMARY_DOMAIN }}
 docker:
   services:
     database:

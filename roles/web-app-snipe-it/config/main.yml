@@ -10,6 +10,7 @@ server:
   domains:
     canonical:
       - "inventory.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     flags:
       script-src:

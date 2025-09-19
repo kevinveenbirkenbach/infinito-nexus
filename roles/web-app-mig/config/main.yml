@@ -34,8 +34,7 @@ server:
   domains:
     canonical:
       - "mig.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "meta-infinite-graph.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 
 build_data: 
   # This shouldn't be relevant anymore, because the data is anyhow build async in background

@@ -27,9 +27,8 @@ server:
     flags:          {}
   domains:
     canonical:
-      - "ticket.{{ PRIMARY_DOMAIN }}"
-    aliases:
-      - "pretix.{{ PRIMARY_DOMAIN }}"
+      - "ticket.shop.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 rbac:
   roles: {}
 plugins:

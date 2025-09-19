@@ -10,6 +10,7 @@ server:
   domains:
     canonical:
       - "microblog.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     whitelist:
       frame-src:

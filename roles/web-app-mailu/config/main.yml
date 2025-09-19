@@ -13,8 +13,7 @@ server:
   domains:
     canonical:
       - "{{ SYSTEM_EMAIL.HOST }}"
-    alias:
-      - "mailu.{{ PRIMARY_DOMAIN }}"
+    aliases: []
   csp:
     flags:
       style-src:

@@ -31,4 +31,4 @@ server:
         unsafe-eval:   true
   domains:
     canonical:
-      - "kanban.{{ PRIMARY_DOMAIN }}"
+      - "kanban.project.{{ PRIMARY_DOMAIN }}"

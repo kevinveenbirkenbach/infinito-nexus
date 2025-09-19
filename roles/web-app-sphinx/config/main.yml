@@ -16,3 +16,4 @@ server:
   domains:
     canonical:
       - "docs.{{ PRIMARY_DOMAIN }}"
+    aliases: []

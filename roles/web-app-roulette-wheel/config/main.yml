@@ -4,3 +4,4 @@ server:
   domains:
     canonical:
       - "wheel.{{ PRIMARY_DOMAIN }}"
+    aliases: []

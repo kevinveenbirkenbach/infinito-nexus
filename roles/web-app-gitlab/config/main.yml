@@ -22,4 +22,4 @@ docker:
 server:
   domains:
     canonical:
-      - gitlab.{{ PRIMARY_DOMAIN }}
+      - lab.git.{{ PRIMARY_DOMAIN }}

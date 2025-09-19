@@ -20,6 +20,7 @@ server:
   domains:
     canonical:
       - "forum.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 docker:
   services:
     database:

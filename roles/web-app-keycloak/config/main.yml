@@ -29,6 +29,7 @@ server:
   domains:
     canonical:
       - "auth.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 scopes:
   nextcloud:  nextcloud
 

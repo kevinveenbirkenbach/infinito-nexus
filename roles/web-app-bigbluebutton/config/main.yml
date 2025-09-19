@@ -19,6 +19,7 @@ server:
   domains:
     canonical:
       - "meet.{{ PRIMARY_DOMAIN }}"
+    aliases: []
 credentials: {}
 
 docker:
