@@ -9,7 +9,6 @@
 #
 # Notes:
 #  - We print machine-readable markers so Ansible can assert deterministically.
-#  - We protect XWiki's {{groovy}} wiki macro from Jinja by using {% raw %}…{% endraw %}.
 
 - name: "XWIKI | Build Groovy installer code from static file (base64 payload)"
   vars:
