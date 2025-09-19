@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  infinito:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    pull_policy: never
+    container_name: infinito_nexus
+    restart: unless-stopped
+    command: tail -f /dev/null
+    volumes:
+      - data:/var/lib/docker/volumes/
+      - backups:/Backups/
+      - letsencrypt:/etc/letsencrypt/
+    ports:
+      # --- Mail services (classic + secure) ---
+      - "${BIND_IP:-127.0.0.1}:25:25"                     # SMTP
+      - "${BIND_IP:-127.0.0.1}:110:110"                   # POP3
+      - "${BIND_IP:-127.0.0.1}:143:143"                   # IMAP
+      - "${BIND_IP:-127.0.0.1}:465:465"                   # SMTPS
+      - "${BIND_IP:-127.0.0.1}:587:587"                   # Submission (SMTP)
+      - "${BIND_IP:-127.0.0.1}:993:993"                   # IMAPS (bound to public IP)
+      - "${BIND_IP:-127.0.0.1}:995:995"                   # POP3S
+      - "${BIND_IP:-127.0.0.1}:4190:4190"                 # Sieve (ManageSieve)
+
+      # --- Web / API services ---
+      - "${BIND_IP:-127.0.0.1}:80:80"                     # HTTP
+      - "${BIND_IP:-127.0.0.1}:443:443"                   # HTTPS
+      - "${BIND_IP:-127.0.0.1}:8448:8448"                 # Matrix federation port
+
+      # --- TURN / STUN (UDP + TCP) ---
+      - "${BIND_IP:-127.0.0.1}:3478-3480:3478-3480/udp"   # TURN/STUN UDP
+      - "${BIND_IP:-127.0.0.1}:3478-3480:3478-3480"       # TURN/STUN TCP
+
+      # --- Streaming / RTMP ---
+      - "${BIND_IP:-127.0.0.1}:1935:1935"                 # Peertube
+
+      # --- Custom / application ports ---
+      - "${BIND_IP:-127.0.0.1}:2201:2201"                 # Gitea
+      - "${BIND_IP:-127.0.0.1}:2202:2202"                 # Gitlab
+      - "${BIND_IP:-127.0.0.1}:2203:22"                   # SSH
+      - "${BIND_IP:-127.0.0.1}:33552:33552"
+
+      # --- Consecutive ranges ---
+      - "${BIND_IP:-127.0.0.1}:48081-48083:48081-48083"
+      - "${BIND_IP:-127.0.0.1}:48087:48087"
+volumes:
+  data:
+  backups:
+  letsencrypt:
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet:  ${SUBNET:-172.30.0.0/24}
+          gateway: ${GATEWAY:-172.30.0.1}

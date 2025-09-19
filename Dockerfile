@@ -64,6 +64,4 @@ RUN INFINITO_PATH=$(pkgmgr path infinito) && \
 #RUN INFINITO_PATH=$(pkgmgr path infinito) && \
 #    cd "$INFINITO_PATH" && \
 #    make test
-
-ENTRYPOINT ["infinito"]
-CMD ["--help"]
+CMD ["infinito --help"]
