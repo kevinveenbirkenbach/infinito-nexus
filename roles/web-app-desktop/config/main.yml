@@ -29,6 +29,8 @@ server:
   domains:
     canonical:
       - "{{ PRIMARY_DOMAIN }}"
+    aliases:
+      - "www.{{ PRIMARY_DOMAIN }}"   
 docker: 
   services:
     desktop:
