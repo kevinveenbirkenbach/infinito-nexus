@@ -7,7 +7,7 @@ class FilterModule(object):
     def filters(self):
         return {'domain_mappings': self.domain_mappings}
 
-    def domain_mappings(self, apps, PRIMARY_DOMAIN):
+    def domain_mappings(self, apps, primary_domain, auto_build_alias):
         """
         Build a flat list of redirect mappings for all apps:
           - source: each alias domain
@@ -43,7 +43,7 @@ class FilterModule(object):
             domains_cfg = cfg.get('server',{}).get('domains',{})
             entry = domains_cfg.get('canonical')
             if entry is None:
-                canonical_map[app_id] = [default_domain(app_id, PRIMARY_DOMAIN)]
+                canonical_map[app_id] = [default_domain(app_id, primary_domain)]
             elif isinstance(entry, dict):
                 canonical_map[app_id] = list(entry.values())
             elif isinstance(entry, list):
@@ -61,11 +61,11 @@ class FilterModule(object):
                 alias_map[app_id] = []
                 continue
             if isinstance(domains_cfg, dict) and not domains_cfg:
-                alias_map[app_id] = [default_domain(app_id, PRIMARY_DOMAIN)]
+                alias_map[app_id] = [default_domain(app_id, primary_domain)]
                 continue
 
             aliases = parse_entry(domains_cfg, 'aliases', app_id) or []
-            default = default_domain(app_id, PRIMARY_DOMAIN)
+            default = default_domain(app_id, primary_domain)
             has_aliases = 'aliases' in domains_cfg
             has_canonical = 'canonical' in domains_cfg
 
@@ -74,7 +74,7 @@ class FilterModule(object):
                     aliases.append(default)
             elif has_canonical:
                 canon = canonical_map.get(app_id, [])
-                if default not in canon and default not in aliases:
+                if default not in canon and default not in aliases and auto_build_alias:
                     aliases.append(default)
 
             alias_map[app_id] = aliases
@@ -84,7 +84,7 @@ class FilterModule(object):
         mappings = []
         for app_id, sources in alias_map.items():
             canon_list = canonical_map.get(app_id, [])
-            target = canon_list[0] if canon_list else default_domain(app_id, PRIMARY_DOMAIN)
+            target = canon_list[0] if canon_list else default_domain(app_id, primary_domain)
             for src in sources:
                 if src == target:
                     # skip self-redirects
