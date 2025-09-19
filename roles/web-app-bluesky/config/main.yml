@@ -13,7 +13,7 @@ server:
     canonical:
       web:  "web.bluesky.{{ PRIMARY_DOMAIN }}"
       api:  "api.bluesky.{{ PRIMARY_DOMAIN }}"
-#      view: "view.bluesky.{{ PRIMARY_DOMAIN }}"
+      view: "view.bluesky.{{ PRIMARY_DOMAIN }}"
   csp:
     whitelist:
       connect-src:
