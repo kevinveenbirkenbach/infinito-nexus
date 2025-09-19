@@ -17,6 +17,7 @@
     proxied: "{{ item.proxied | default(false) }}"
     ttl: "{{ item.ttl | default(1) }}"
     state: "{{ item.state | default('present') }}"
+    solo: "{{ item.solo | default(false) }}"
   loop: "{{ cloudflare_records | selectattr('type','in',['A','AAAA']) | list }}"
   loop_control: { label: "{{ item.type }} {{ item.name }} -> {{ item.content }}" }
   async: "{{ cloudflare_async_enabled | ternary(cloudflare_async_time, omit) }}"
@@ -48,6 +49,7 @@
     ttl: "{{ item.ttl | default(1) }}"
     priority: "{{ (item.type == 'MX') | ternary(item.priority | default(10), omit) }}"
     state: "{{ item.state | default('present') }}"
+    solo: "{{ item.solo | default(false) }}"
   loop: "{{ cloudflare_records | selectattr('type','in',['CNAME','MX','TXT']) | list }}"
   loop_control: { label: "{{ item.type }} {{ item.name }} -> {{ item.value }}" }
   async: "{{ cloudflare_async_enabled | ternary(cloudflare_async_time, omit) }}"
@@ -83,6 +85,7 @@
     value: "{{ item.value }}"
     ttl: "{{ item.ttl | default(1) }}"
     state: "{{ item.state | default('present') }}"
+    solo: "{{ item.solo | default(false) }}"
   loop: "{{ cloudflare_records | selectattr('type','equalto','SRV') | list }}"
   loop_control: { label: "SRV {{ item.service }}.{{ item.proto }} {{ item.name }} -> {{ item.value }}:{{ item.port }}" }
   ignore_errors: "{{ item.ignore_errors | default(true) }}"

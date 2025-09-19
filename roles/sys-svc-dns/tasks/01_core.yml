@@ -5,15 +5,8 @@
       The variable "CLOUDFLARE_API_TOKEN" must be defined and cannot be empty!
   when: (CLOUDFLARE_API_TOKEN | default('') | trim) == ''
 
-- name: "Setup Nameservers"
-  include_tasks: 02_nameservers.yml
-  loop: "{{ SYS_SVC_DNS_BASE_DOMAINS | list }}"
-  loop_control:
-    loop_var: base_domain
-    label: "{{ base_domain }}"
-
 - name: "Apply apex A/AAAA for base domains"
-  include_tasks: 03_apex.yml
+  include_tasks: 02_apex.yml
   loop: "{{ SYS_SVC_DNS_BASE_DOMAINS | list }}"
   loop_control:
     loop_var: base_domain

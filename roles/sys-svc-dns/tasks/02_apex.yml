@@ -12,7 +12,7 @@
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
-- name: "Ensure AAAA @ for {{ base_domain }} (if IPv6 is global)"
+- name: "Ensure AAAA @ for {{ base_domain }} with '{{ networks.internet.ip6 | default('None') }}"
   community.general.cloudflare_dns:
     api_token:  "{{ CLOUDFLARE_API_TOKEN }}"
     zone:       "{{ base_domain }}"

@@ -76,7 +76,7 @@
       redirect_domain_mappings: >-
         {{ 
           CURRENT_PLAY_APPLICATIONS |
-          domain_mappings(PRIMARY_DOMAIN) | 
+          domain_mappings(PRIMARY_DOMAIN, AUTO_BUILD_ALIASES) |
           merge_mapping(redirect_domain_mappings, 'source') 
         }}
 
