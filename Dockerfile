@@ -59,9 +59,4 @@ RUN INFINITO_PATH=$(pkgmgr path infinito) && \
     ln -sf "$INFINITO_PATH"/main.py /usr/local/bin/infinito && \
     chmod +x /usr/local/bin/infinito
 
-# 10) Run integration tests
-# This needed to be deactivated becaus it doesn't work with gitthub workflow
-#RUN INFINITO_PATH=$(pkgmgr path infinito) && \
-#    cd "$INFINITO_PATH" && \
-#    make test
-CMD ["infinito --help"]
+CMD sh -c "infinito --help && exec tail -f /dev/null"

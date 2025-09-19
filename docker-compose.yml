@@ -8,8 +8,8 @@ services:
       network: host
     pull_policy: never
     container_name: infinito_nexus
+    image: infinito_nexus
     restart: unless-stopped
-    command: tail -f /dev/null
     volumes:
       - data:/var/lib/docker/volumes/
       - backups:/Backups/

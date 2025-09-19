@@ -21,12 +21,12 @@ jobs:
 
       - name: Clean build artifacts
         run: |
-          docker run --rm infinito:latest make clean
+          docker run --rm infinito:latest infinito make clean
 
       - name: Generate project outputs
         run: |
-          docker run --rm infinito:latest make build
+          docker run --rm infinito:latest infinito make build
 
       - name: Run tests
         run: |
-          docker run --rm infinito:latest make test
+          docker run --rm infinito:latest infinito make test
