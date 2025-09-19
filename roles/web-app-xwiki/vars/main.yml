@@ -14,7 +14,6 @@ XWIKI_HOST_PORT:                      "{{ ports.localhost.http[application_id] }
 XWIKI_HOSTNAME:                       "{{ container_hostname }}"
 
 ## Paths
-XWIKI_HOST_CONF_PATH:                 "{{ [docker_compose.directories.config, 'xwiki.cfg'] | path_join }}"
 XWIKI_HOST_PROPERTIES_PATH:           "{{ [docker_compose.directories.config, 'xwiki.properties'] | path_join }}"
 XWIKI_DOCK_DATA_DIR:                  "/usr/local/xwiki"
 
@@ -32,7 +31,6 @@ XWIKI_SSO_ENABLED:                    "{{ (XWIKI_OIDC_ENABLED | bool) or (XWIKI_
 
 # Admin credentials (must be provided via inventory/vault)
 XWIKI_ADMIN_USER:                     "{{ users.administrator.username }}"
-XWIKI_ADMIN_PASS:                     "{{ users.administrator.password }}"
 XWIKI_ADMIN_GROUP:                    "{{ application_id }}-administrator"
 
 # Superadministrator
@@ -43,7 +41,6 @@ XWIKI_SUPERADMIN_USERNAME:            "superadmin"
 XWIKI_REST_BASE:                      "{{ ['http://127.0.0.1:'~ XWIKI_HOST_PORT, '/rest/'] | url_join  }}"
 XWIKI_REST_XWIKI:                     "{{ [XWIKI_REST_BASE, 'wikis/xwiki'] | url_join  }}"
 XWIKI_REST_XWIKI_PAGES:               "{{ [XWIKI_REST_BASE, 'wikis/xwiki/spaces/XWiki/pages'] | url_join }}"
-XWIKI_REST_EXTENSION_INSTALL:         "{{ [XWIKI_REST_BASE, 'jobs'] | url_join }}"
 
 # LDAP configuration (mapped to LDAP.* context)
 XWIKI_LDAP_SERVER:                    "{{ LDAP.SERVER.DOMAIN }}"

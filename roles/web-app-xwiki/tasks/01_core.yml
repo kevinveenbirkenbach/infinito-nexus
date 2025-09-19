@@ -13,7 +13,6 @@
   vars:
     xwiki_oidc_enabled_switch:        false
     xwiki_ldap_enabled_switch:        false
-    xwiki_superadmin_enabled_switch:  true
 
 - name: "ASSERT | superadmin can authenticate (needed for installer)"
   uri:
@@ -49,6 +48,5 @@
   vars:
     xwiki_oidc_enabled_switch:        "{{ XWIKI_OIDC_ENABLED | bool }}"
     xwiki_ldap_enabled_switch:        "{{ XWIKI_LDAP_ENABLED | bool }}"
-    xwiki_superadmin_enabled_switch:  false
 
 - include_tasks: utils/run_once.yml

@@ -1,6 +1,6 @@
 # General
-application_id:               "web-app-mastodon"
-database_type:                "postgres"
+application_id:                       "web-app-mastodon"
+database_type:                        "postgres"
 
 # Mastodon Specific
 MASTODON_VERSION:                     "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.version') }}"
