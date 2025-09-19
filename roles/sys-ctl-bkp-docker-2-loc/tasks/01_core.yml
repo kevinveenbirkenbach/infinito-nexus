@@ -22,7 +22,7 @@
     system_service_on_calendar:         "{{ SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL }}"
     system_service_tpl_exec_start_pre:  '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_BACKUP_DOCKER_2_LOC }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
     system_service_tpl_exec_start:      "/bin/sh -c '{{ BKP_DOCKER_2_LOC_EXEC }}'"
-    system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }} {{ SYS_SERVICE_CLEANUP_BACKUPS_FAILED }}"
+    system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     # system_service_tpl_exec_start_post: "/usr/bin/systemctl start {{ SYS_SERVICE_CLEANUP_BACKUPS }}" # Not possible to use it because it's a deathlock. Keep this line for documentation purposes
 
 - include_tasks: utils/run_once.yml
