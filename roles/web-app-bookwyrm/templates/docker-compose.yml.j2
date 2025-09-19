@@ -27,6 +27,7 @@
     image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
     container_name: "{{ BOOKWYRM_WORKER_CONTAINER }}"
     command: "bash -lc 'celery -A celerywyrm worker -l INFO'"
+    pull_policy: never
     volumes:
       - 'data:/app/data'
       - 'media:/app/media'
