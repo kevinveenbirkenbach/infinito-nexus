@@ -4,7 +4,7 @@
     image: simpleicons-server:latest
     container_name: simpleicons-server
     ports:
-      - "{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+      - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}

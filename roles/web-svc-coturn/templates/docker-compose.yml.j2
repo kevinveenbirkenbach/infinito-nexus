@@ -4,7 +4,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: coturn/coturn
     restart: always
-    network_mode: "host"  # Nutzt die Host-IP für externe Erreichbarkeit (optional)
+    network_mode: "host"
     ports:
       - "3478:3478/udp"
       - "3478:3478/tcp"
