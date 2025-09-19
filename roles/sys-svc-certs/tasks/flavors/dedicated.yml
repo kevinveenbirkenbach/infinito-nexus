@@ -24,7 +24,7 @@
     {% else %}
     -d {{ domain }}
     {% endif %}
-    {{ '--test-cert' if MODE_TEST | bool else '' }}
+    {{ '--test-cert' if MODE_DUMMY | bool else '' }}
   register: certbot_result
   changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
   when: not cert_check.exists

@@ -18,8 +18,8 @@
     (not ASYNC_ENABLED | bool )
     and
     ('updated' in (collabora_fonts.stdout | default('')))
-  async: "{{ ASYNC_TIME  if (ASYNC_ENABLED | default(false) | bool) else omit }}"
-  poll:  "{{ ASYNC_POLL if (ASYNC_ENABLED | default(false) | bool) else omit }}"
+  async: "{{ ASYNC_TIME  if (ASYNC_ENABLED |  bool) else omit }}"
+  poll:  "{{ ASYNC_POLL if (ASYNC_ENABLED |  bool) else omit }}"
   when: MODE_UPDATE | bool
 
 - name: Allow Nextcloud host IP for Collabora preview conversion

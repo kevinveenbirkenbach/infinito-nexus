@@ -1,0 +1,60 @@
+# Ensure CLOUDFLARE_NAMESERVERS is provided
+- name: "Assert CLOUDFLARE_NAMESERVERS is not empty"
+  ansible.builtin.fail:
+    msg: >
+      CLOUDFLARE_NAMESERVERS must be a non-empty list of nameserver hostnames,
+      e.g. ['bob.ns.cloudflare.com', 'dina.ns.cloudflare.com'].
+  when: (CLOUDFLARE_NAMESERVERS | length) == 0
+
+- block: 
+    # Gather current NS records for this base domain
+    - name: "NS | Fetch existing NS records for {{ base_domain }}"
+      community.general.cloudflare_dns_info:
+        api_token: "{{ CLOUDFLARE_API_TOKEN }}"
+        zone: "{{ base_domain }}"
+      register: _cf_ns_info
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS  | bool }}"
+
+    # Build a list with ONLY the NS records (Cloudflare returns a mixed list)
+    - name: "NS | Build deletion list (all NS at apex and subdomains)"
+      set_fact:
+        _cf_ns_to_delete: >-
+          {{
+            _cf_ns_info.records
+            | selectattr('type', 'equalto', 'NS')
+            | list
+          }}
+
+    # Delete all existing NS records (exact matches)
+    - name: "NS | Delete existing NS records"
+      community.general.cloudflare_dns:
+        api_token: "{{ CLOUDFLARE_API_TOKEN }}"
+        zone: "{{ base_domain }}"
+        type: NS
+        name: "{{ item.name }}"
+        value: "{{ item.value | default(item.content) }}"
+        state: absent
+        ttl: 1
+      loop: "{{ _cf_ns_to_delete }}"
+      loop_control:
+        label: "NS {{ item.name }} -> {{ item.value | default(item.content) }}"
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS  | bool }}"
+      async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+      poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  when: MODE_CLEANUP | bool
+
+# Create enforced NS set at the zone apex (@)
+- name: "NS | Create NS apex set for {{ base_domain }}"
+  community.general.cloudflare_dns:
+    api_token: "{{ CLOUDFLARE_API_TOKEN }}"
+    zone: "{{ base_domain }}"
+    type: NS
+    name: "@"
+    value: "{{ item }}"
+    ttl: 1
+    state: present
+  loop: "{{ CLOUDFLARE_NAMESERVERS }}"
+  loop_control:
+    label: "@ -> {{ item }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

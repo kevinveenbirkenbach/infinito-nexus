@@ -39,7 +39,7 @@
       - type: TXT
         zone: "{{ PRIMARY_DOMAIN | to_zone }}"
         name: "_atproto.{{ PRIMARY_DOMAIN }}"
-        value: "did=did:web:{{ BLUESKY_API_DOMAIN }}"
+        value: '"did=did:web:{{ BLUESKY_API_DOMAIN }}"'
 
       # 3) Web UI host (only if enabled)
       - type: A
