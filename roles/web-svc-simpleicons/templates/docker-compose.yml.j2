@@ -1,6 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-{% include 'roles/docker-container/templates/build.yml.j2' %}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: simpleicons-server:latest
     container_name: simpleicons-server
     ports:

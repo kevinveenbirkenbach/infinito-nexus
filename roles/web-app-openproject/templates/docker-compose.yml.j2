@@ -3,7 +3,7 @@ x-op-app: &app
   logging:
     driver: journald
   image: {{ openproject_custom_image }}
-{% include 'roles/docker-container/templates/build.yml.j2' %}
+  {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(2) }}
 
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 

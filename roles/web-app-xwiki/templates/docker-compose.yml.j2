@@ -1,6 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-{% include 'roles/docker-container/templates/build.yml.j2' %}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ XWIKI_IMAGE_CUSTOM }}"
     container_name: "{{ XWIKI_CONTAINER }}"
     hostname: '{{ XWIKI_HOSTNAME}}'

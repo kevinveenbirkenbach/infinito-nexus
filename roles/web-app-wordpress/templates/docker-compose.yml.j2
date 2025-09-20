@@ -3,7 +3,7 @@
     {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ WORDPRESS_CUSTOM_IMAGE }}
     container_name: {{ WORDPRESS_CONTAINER }}
-{% include 'roles/docker-container/templates/build.yml.j2' %}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
     volumes:

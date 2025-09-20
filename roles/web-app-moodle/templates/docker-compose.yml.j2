@@ -3,7 +3,7 @@
   moodle:
 {% set container_port = 8080 %}
     container_name: {{ moodle_container }}
-{% include 'roles/docker-container/templates/build.yml.j2' %}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: moodle_custom
     ports:
       - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}

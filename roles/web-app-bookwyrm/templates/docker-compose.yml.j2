@@ -9,7 +9,7 @@
         (python manage.py initdb || true) &&
         python -m gunicorn bookwyrm.wsgi:application --bind 0.0.0.0:{{ container_port }}
       '
-{% include 'roles/docker-container/templates/build.yml.j2' %}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
     container_name: "{{ BOOKWYRM_CONTAINER }}"
     hostname: "{{ BOOKWYRM_HOSTNAME }}"

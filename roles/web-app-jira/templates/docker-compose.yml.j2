@@ -1,7 +1,7 @@
 
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-{% include 'roles/docker-container/templates/build.yml.j2' %}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ JIRA_CUSTOM_IMAGE }}"
     container_name: "{{ JIRA_CONTAINER }}"
     hostname: '{{ JIRA_HOSTNAME }}'

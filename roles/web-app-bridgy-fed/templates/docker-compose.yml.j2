@@ -1,7 +1,7 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-{% include 'roles/docker-container/templates/build.yml.j2' %}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
       args:
         BRIDGY_REPO_URL: "{{ BRIDGY_REPO_URL }}"
         BRIDGY_REPO_BRANCH: "{{ BRIDGY_REPO_BRANCH }}"
