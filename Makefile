@@ -73,7 +73,7 @@ messy-test:
 	@echo "🧪 Running Python tests…"
 	PYTHONPATH=. python -m unittest discover -s tests
 	@echo "📑 Checking Ansible syntax…"
-	ansible-playbook playbook.yml --syntax-check
+	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
 install: build
 	@echo "⚙️  Install complete."
