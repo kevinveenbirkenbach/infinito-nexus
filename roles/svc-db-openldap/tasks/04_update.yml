@@ -21,9 +21,9 @@
     attributes:
       objectClass: "{{ missing_auxiliary }}"
     state: present
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  loop: "{{ ldap_users_with_classes.results }}"
+  async:  "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:   "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  loop:   "{{ ldap_users_with_classes.results }}"
   loop_control:
     label: "{{ item.dn }}"
   vars:
