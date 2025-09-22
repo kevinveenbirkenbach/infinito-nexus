@@ -87,5 +87,6 @@ NEXTCLOUD_DOCKER_USER_id:           82                                          
 NEXTCLOUD_DOCKER_USER:              "www-data"                                                    # Name of the www-data user (Set here to easy change it in the future)
 
 ## Execution
-NEXTCLOUD_DOCKER_EXEC:              "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}"                    # General execute composition
-NEXTCLOUD_DOCKER_EXEC_OCC:          "{{ NEXTCLOUD_DOCKER_EXEC }} {{ [ NEXTCLOUD_DOCKER_WORK_DIRECTORY, 'occ'] | path_join }}" # Execute docker occ command
+NEXTCLOUD_INTERNAL_OCC_COMMAND:     "{{ [ NEXTCLOUD_DOCKER_WORK_DIRECTORY, 'occ'] | path_join }}"
+NEXTCLOUD_DOCKER_EXEC:              "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}"  # General execute composition
+NEXTCLOUD_DOCKER_EXEC_OCC:          "{{ NEXTCLOUD_DOCKER_EXEC }} {{ NEXTCLOUD_INTERNAL_OCC_COMMAND }}"      # Execute docker occ command
