@@ -7,7 +7,7 @@
 
 - name: "copy templates {{ TAIGA_SETTING_FILES }} for taiga-contrib-oidc-auth"
   template:
-    src:  "taiga/{{item}}.py.j2"
+    src:  "taiga/{{ item }}.py.j2"
     dest: "{{ [ docker_compose.directories.config, 'taiga-' ~ item ~ '.py'] | path_join }}"
   when:   TAIGA_TAIGAIO_ENABLED | bool
   notify: docker compose up

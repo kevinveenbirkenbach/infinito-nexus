@@ -5,8 +5,8 @@
 
 - name: Link homefolders to cloud
   ansible.builtin.file:
-    src: "{{nextcloud_cloud_directory}}{{item}}"
-    dest: "{{nextcloud_user_home_directory}}{{item}}"
+    src: "{{nextcloud_cloud_directory}}{{ item }}"
+    dest: "{{nextcloud_user_home_directory}}{{ item }}"
     owner: "{{ users[desktop_username].username }}"
     group: "{{ users[desktop_username].username }}"
     state: link
