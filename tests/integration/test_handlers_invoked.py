@@ -3,7 +3,7 @@ import glob
 import re
 import unittest
 import yaml
-from typing import Any, Dict, Iterable, List, Set
+from typing import Any, Dict, Iterable, List, Set, Tuple, Optional
 
 
 # ---------- YAML helpers ----------
@@ -31,14 +31,12 @@ def _iter_task_like_entries(node: Any) -> Iterable[Dict[str, Any]]:
         for item in node:
             yield from _iter_task_like_entries(item)
     elif isinstance(node, dict):
-        # If this dict looks like a task (has common task keys), yield it.
-        # We are liberal and treat any dict as a potential task entry.
+        # Consider any dict as a potential task/handler entry.
         yield node
-        # Recurse into any list-of-dicts values (blocks, etc.)
+        # Recurse into list-of-dicts values (blocks, etc.)
         for v in node.values():
-            if isinstance(v, list):
-                if any(isinstance(x, dict) for x in v):
-                    yield from _iter_task_like_entries(v)
+            if isinstance(v, list) and any(isinstance(x, dict) for x in v):
+                yield from _iter_task_like_entries(v)
 
 
 def iter_task_like_entries(docs: List[Any]) -> Iterable[Dict[str, Any]]:
@@ -61,13 +59,32 @@ def as_str_list(val: Any) -> List[str]:
 
 # Extract quoted literals inside a string (e.g. from Jinja conditionals)
 _QUOTED_RE = re.compile(r"""(['"])(.+?)\1""")
+_JINJA_TOKEN_RE = re.compile(r"\{\{.*?\}\}")
+
+
+def _jinja_mixed_to_regex(value: str) -> Optional[re.Pattern]:
+    """
+    Turn a string that mixes plain text with Jinja placeholders into a ^...$ regex.
+    Example: 'Import {{ folder }} LDIF files' -> r'^Import .+ LDIF files$'
+    Returns None if there is no Jinja placeholder.
+    """
+    s = value.strip()
+    if "{{" not in s or "}}" not in s:
+        return None
+    parts = re.split(r"(\{\{.*?\}\})", s)
+    regex_str = "^" + "".join(
+        (".+" if p.startswith("{{") and p.endswith("}}") else re.escape(p))
+        for p in parts
+    ) + "$"
+    return re.compile(regex_str)
+
 
 def _expand_dynamic_notify(value: str) -> List[str]:
     """
     If 'value' is a Jinja expression like:
         "{{ 'reload system daemon' if cond else 'refresh systemctl service' }}"
     then extract all quoted literals as potential targets.
-    Always include the raw value too (just in case it is a plain name).
+    Always include the raw value too (in case it is already a plain name).
     """
     results = []
     s = value.strip()
@@ -114,24 +131,47 @@ def collect_handler_groups(handler_file: str) -> List[Set[str]]:
     return groups
 
 
-def collect_notify_calls_from_tasks(task_file: str) -> Set[str]:
+def collect_notify_calls_from_tasks(task_file: str) -> Tuple[Set[str], List[re.Pattern]]:
     """
     From a task file, collect all notification targets via:
       - 'notify:' (string or list), including dynamic Jinja expressions with literals,
       - any occurrence of 'package_notify:' (string or list), anywhere in the task dict.
     Also traverses tasks nested inside 'block', 'rescue', 'always', etc.
+
+    Returns:
+      (exact_names, regex_patterns)
     """
-    notified: Set[str] = set()
+    notified_exact: Set[str] = set()
+    notified_patterns: List[re.Pattern] = []
     docs = load_yaml_documents(task_file)
 
     for entry in iter_task_like_entries(docs):
         # Standard notify:
         if "notify" in entry:
             for item in as_str_list(entry["notify"]):
-                for expanded in _expand_dynamic_notify(item):
-                    expanded = expanded.strip()
-                    if expanded:
-                        notified.add(expanded)
+                item_str = item.strip()
+
+                # Case 1: whole string is just a Jinja expression -> ignore
+                if item_str.startswith("{{") and item_str.endswith("}}"):
+                    continue
+
+                has_jinja = ("{{" in item_str and "}}" in item_str)
+
+                # Case 2: expand quoted literals inside Jinja expressions (as exacts)
+                if has_jinja:
+                    # Only take the quoted literals; do NOT add the raw mixed string as exact.
+                    for m in _QUOTED_RE.finditer(item_str):
+                        lit = m.group(2).strip()
+                        if lit:
+                            notified_exact.add(lit)
+                else:
+                    # No Jinja -> the whole string is an exact name.
+                    notified_exact.add(item_str)
+
+                # Case 3: mixed string with Jinja placeholder -> treat as regex
+                rx = _jinja_mixed_to_regex(item_str)
+                if rx is not None:
+                    notified_patterns.append(rx)
 
         # package_notify anywhere in the task (top-level or nested)
         def walk_for_package_notify(node: Any):
@@ -139,10 +179,27 @@ def collect_notify_calls_from_tasks(task_file: str) -> Set[str]:
                 for k, v in node.items():
                     if k == "package_notify":
                         for item in as_str_list(v):
-                            for expanded in _expand_dynamic_notify(item):
-                                expanded = expanded.strip()
-                                if expanded:
-                                    notified.add(expanded)
+                            item_str = item.strip()
+
+                            # Ignore pure Jinja
+                            if item_str.startswith("{{") and item_str.endswith("}}"):
+                                continue
+
+                            has_jinja = ("{{" in item_str and "}}" in item_str)
+
+                            if has_jinja:
+                                # Only quoted literals as exacts
+                                for m in _QUOTED_RE.finditer(item_str):
+                                    lit = m.group(2).strip()
+                                    if lit:
+                                        notified_exact.add(lit)
+                            else:
+                                notified_exact.add(item_str)
+
+                            # mixed -> regex
+                            rx = _jinja_mixed_to_regex(item_str)
+                            if rx is not None:
+                                notified_patterns.append(rx)
                     else:
                         walk_for_package_notify(v)
             elif isinstance(node, list):
@@ -151,19 +208,17 @@ def collect_notify_calls_from_tasks(task_file: str) -> Set[str]:
 
         walk_for_package_notify(entry)
 
-    return notified
+    return notified_exact, notified_patterns
 
 
 # ---------- Test case ----------
 
 class TestHandlersInvoked(unittest.TestCase):
     """
-    Ensures that every handler defined in roles/*/handlers/*.yml(.yaml)
-    is referenced at least once via either:
-      - tasks' 'notify:' fields (supports Jinja conditionals with quoted literals), or
-      - any 'package_notify:' usage (e.g., include_role: vars: package_notify: "...").
-
-    A handler is considered covered if ANY of its {name + listen} aliases is notified.
+    Ensures:
+      (A) Every handler defined in roles/*/handlers/*.yml(.yaml) is referenced at least once
+          via tasks' 'notify:' or any 'package_notify:' (exact or regex match from Jinja-mixed strings).
+      (B) Every notified target in tasks points to an existing handler alias (name or listen).
     """
 
     def setUp(self):
@@ -182,19 +237,36 @@ class TestHandlersInvoked(unittest.TestCase):
             + glob.glob(os.path.join(self.roles_dir, "*", "tasks", "**", "*.yaml"), recursive=True)
         )
 
-    def test_all_handlers_have_a_notifier(self):
+    def test_all_handlers_have_a_notifier_and_all_notifies_have_a_handler(self):
         # 1) Collect handler groups (name + listen) for each handler task
         handler_groups: List[Set[str]] = []
         for hf in self.handler_files:
             handler_groups.extend(collect_handler_groups(hf))
 
-        # 2) Collect all notified targets (notify + package_notify) from tasks
-        all_notified: Set[str] = set()
-        for tf in self.task_files:
-            all_notified |= collect_notify_calls_from_tasks(tf)
+        # Flatten all handler aliases for reverse checks
+        all_aliases: Set[str] = set().union(*handler_groups) if handler_groups else set()
 
-        # 3) A handler group is covered if any alias is notified
-        missing_groups: List[Set[str]] = [grp for grp in handler_groups if not (grp & all_notified)]
+        # 2) Collect all notified targets (notify + package_notify) from tasks
+        notified_exact: Set[str] = set()
+        notified_patterns: List[re.Pattern] = []
+        for tf in self.task_files:
+            ex, pats = collect_notify_calls_from_tasks(tf)
+            notified_exact |= ex
+            notified_patterns.extend(pats)
+
+        def group_is_covered(grp: Set[str]) -> bool:
+            # exact hit?
+            if grp & notified_exact:
+                return True
+            # regex hit?
+            for alias in grp:
+                for rx in notified_patterns:
+                    if rx.match(alias):
+                        return True
+            return False
+
+        # 3A) Every handler group is covered if any alias is notified (exact or regex)
+        missing_groups: List[Set[str]] = [grp for grp in handler_groups if not group_is_covered(grp)]
 
         if missing_groups:
             representatives: List[str] = []
@@ -206,11 +278,42 @@ class TestHandlersInvoked(unittest.TestCase):
                 "The following handlers are defined but never notified (via 'notify:' or 'package_notify:'):",
                 *[f"  - {m}" for m in representatives],
                 "",
-                "Note:",
+                "Notes:",
                 "  • A handler is considered covered if *any* of its {name + listen} aliases is notified.",
-                "  • Dynamic Jinja notify expressions are supported by extracting quoted literals.",
-                "  • Ensure 'notify:' uses the exact handler name or one of its 'listen' aliases.",
+                "  • We support dynamic Jinja notify expressions by extracting quoted literals",
+                "    and by interpreting mixed strings with Jinja placeholders as wildcard regex.",
+                "  • Ensure 'notify:' uses the exact handler name, one of its 'listen' aliases,",
+                "    or a compatible wildcard string that matches the handler via regex.",
                 "  • If you trigger builds via roles/vars, set 'package_notify:' to the handler name.",
+            ]
+            self.fail("\n".join(msg))
+
+        # 3B) Reverse validation:
+        #     Every notified target must resolve to an existing handler alias.
+        #     - Exact notified strings must match an alias exactly.
+        #     - Jinja-mixed strings (patterns) must match at least one alias via regex.
+        missing_exacts = sorted([s for s in notified_exact if s not in all_aliases])
+
+        orphan_patterns = sorted({
+            rx.pattern for rx in notified_patterns
+            if not any(rx.match(alias) for alias in all_aliases)
+        })
+
+        if missing_exacts or orphan_patterns:
+            msg = ["Some notify targets do not map to any existing handler:"]
+            if missing_exacts:
+                msg.append("  • Missing exact handler aliases:")
+                msg.extend([f"    - {s}" for s in missing_exacts])
+            if orphan_patterns:
+                msg.append("  • Pattern notifications with no matching handler alias (regex):")
+                msg.extend([f"    - {pat}" for pat in orphan_patterns])
+            msg += [
+                "",
+                "Hints:",
+                "  - Make sure a handler with matching 'name' or 'listen' exists.",
+                "  - Pure Jinja expressions like '{{ some_var }}' are ignored in this check.",
+                "  - Mixed strings like 'Import {{ folder }} LDIF files' are treated as regex (e.g., '^Import .+ LDIF files$').",
+                "  - Consider adding a 'listen:' alias to the handler if you want to keep a flexible notify pattern.",
             ]
             self.fail("\n".join(msg))
 
