@@ -13,10 +13,9 @@ OPENLDAP_LDIF_PATH_DOCKER:      "/tmp/ldif/"
 OPENLDAP_LDIF_TYPES:
   - configuration
   - groups
-  - schema                      # Don't know if this is still needed, it's now setup via tasks
 
 # Container
-OPENLDAP_NAME:                  "{{ applications | get_app_conf(application_id, 'docker.services.openldap.name') }}"
+OPENLDAP_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.openldap.name') }}"
 OPENLDAP_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.openldap.image') }}"
 OPENLDAP_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.openldap.version') }}"
 OPENLDAP_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"

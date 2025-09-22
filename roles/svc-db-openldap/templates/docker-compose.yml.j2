@@ -2,15 +2,15 @@
 
   application:
     image: "{{ OPENLDAP_IMAGE }}:{{ OPENLDAP_VERSION }}"
-    container_name: "{{ OPENLDAP_NAME }}"
+    container_name: "{{ OPENLDAP_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-{% if OPENLDAP_NETWORK_EXPOSE_LOCAL %}
+{% if OPENLDAP_NETWORK_EXPOSE_LOCAL | bool %}
     ports:
-      - 127.0.0.1:{{ports.localhost.ldap['svc-db-openldap']}}:{{OPENLDAP_DOCKER_PORT_OPEN}}
+      - 127.0.0.1:{{ports.localhost.ldap['svc-db-openldap']}}:{{ OPENLDAP_DOCKER_PORT_OPEN }}
 {% endif %}
     volumes:
       - 'data:/bitnami/openldap'
-      - '{{OPENLDAP_LDIF_PATH_HOST}}:{{ OPENLDAP_LDIF_PATH_DOCKER }}:ro'
+      - '{{ OPENLDAP_LDIF_PATH_HOST }}:{{ OPENLDAP_LDIF_PATH_DOCKER }}:ro'
     healthcheck:
       test: >
         bash -c '

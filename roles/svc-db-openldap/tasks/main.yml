@@ -38,22 +38,22 @@
   include_tasks: 01_credentials.yml
   when:
     - OPENLDAP_NETWORK_SWITCH_LOCAL | bool
-    - applications | get_app_conf(application_id, 'provisioning.credentials', True)
+    - applications | get_app_conf(application_id, 'provisioning.credentials')
 
-- name: "create directory {{OPENLDAP_LDIF_PATH_HOST}}{{item}}"
+- name: "create directory {{ OPENLDAP_LDIF_PATH_HOST }}{{ item }}"
   file:
-    path: "{{OPENLDAP_LDIF_PATH_HOST}}{{item}}"
+    path: "{{ OPENLDAP_LDIF_PATH_HOST }}{{ item }}"
     state: directory
     mode: "0755"
-  loop: "{{OPENLDAP_LDIF_TYPES}}"
+  loop: "{{ OPENLDAP_LDIF_TYPES }}"
 
 - name: "Import LDIF Configuration"
-  include_tasks: ldifs_creation.yml
+  include_tasks: _ldifs_creation.yml
   loop:
     - configuration
   loop_control:
     loop_var: folder
-  when: applications | get_app_conf(application_id, 'provisioning.configuration', True)
+  when: applications | get_app_conf(application_id, 'provisioning.configuration')
 
 - name: flush LDIF handlers
   meta: flush_handlers
@@ -66,20 +66,22 @@
 
 - name: "Include Schemas (if enabled)"
   include_tasks: 02_schemas.yml
-  when: applications | get_app_conf(application_id, 'provisioning.schemas', True)
+  when: applications | get_app_conf(application_id, 'provisioning.schemas')
 
 - name: "Import LDAP Entries (if enabled)"
   include_tasks: 03_users.yml
-  when: applications | get_app_conf(application_id, 'provisioning.users', True)
+  when: applications | get_app_conf(application_id, 'provisioning.users')
 
 - name: "Import LDIF Data (if enabled)"
-  include_tasks: ldifs_creation.yml
+  include_tasks: _ldifs_creation.yml
   loop:
     - groups
   loop_control:
     loop_var: folder
-  when: applications | get_app_conf(application_id, 'provisioning.groups', True)
+  when: applications | get_app_conf(application_id, 'provisioning.groups')
+
+- meta: flush_handlers
 
 - name: "Add Objects to all users"
   include_tasks: 04_update.yml
-  when: applications | get_app_conf(application_id, 'provisioning.update', True)
+  when: applications | get_app_conf(application_id, 'provisioning.update')
