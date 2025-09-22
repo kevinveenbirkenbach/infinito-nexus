@@ -60,7 +60,7 @@ DOCKER_WHITELISTET_ANON_VOLUMES: []                                             
 
 # Asyn Confitguration
 ASYNC_ENABLED:  "{{ not MODE_DEBUG | bool }}"                  # Activate async, deactivated for debugging
-ASYNC_TIME:     "{{ 300 if ASYNC_ENABLED | bool else omit }}"  # Run for mnax 5min
+ASYNC_TIME:     "{{ 300 if ASYNC_ENABLED | bool else omit }}"  # Run for max 5min
 ASYNC_POLL:     "{{ 0 if ASYNC_ENABLED | bool else 10 }}"      # Don't wait for task
 
 # default value if not set via CLI (-e) or in playbook vars
