@@ -12,6 +12,8 @@ AI_OPENWEBUI_URL:               "{{ domains | get_url(application_id, WEB_PROTOC
 AI_OPENWEBUI_VERSION:           "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.version') }}"
 AI_OPENWEBUI_IMAGE:             "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.image') }}"
 AI_OPENWEBUI_CONTAINER:         "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.name') }}"
+AI_OPENWEBUI_OFFLINE_MODE:      "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.offline_mode') }}"
+AI_OPENWEBUI_HF_HUB_OFFLINE:    "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.hf_hub_offline') }}"
 AI_OPENWEBUI_VOLUME:            "{{ applications | get_app_conf(application_id, 'docker.volumes.openwebui') }}"
 AI_OPENWEBUI_PORT:              "{{ ports.localhost.http[application_id ~ '_openwebui'] }}"
 
@@ -34,6 +36,8 @@ AI_LITELLM_CONTAINER:           "{{ applications | get_app_conf(application_id, 
 AI_LITELLM_VOLUME:              "{{ applications | get_app_conf(application_id, 'docker.volumes.litellm') }}"
 AI_LITELLM_PORT:                4000
 AI_LITELLM_INTERNAL_URL:        "http://litellm:{{ AI_LITELLM_PORT }}"
+AI_LITELLM_CONFIG_PATH_HOST:    "{{ docker_compose.directories.config }}litellm.config.yaml" 
+AI_LITELLM_CONFIG_PATH_DOCKER:  "/etc/litellm/config.yaml" 
 
 # Qdrant
 # https://qdrant.tech/
@@ -66,3 +70,17 @@ AI_MINIO_VOLUME:                "{{ applications | get_app_conf(application_id, 
 AI_MINIO_API_PUBLIC_PORT:       "{{ ports.localhost.http[application_id ~ '_minio_api'] }}"
 AI_MINIO_CONSOLE_INTERNAL_PORT: "9001"
 AI_MINIO_CONSOLE_PUBLIC_PORT:   "{{ ports.localhost.http[application_id ~ '_minio_console'] }}"
+
+
+AI_FRONT_PROXY_MATRIX: >-
+  {{
+    [
+      { 'domain': server.domains.canonical.openwebui, 'http_port': AI_OPENWEBUI_PORT },
+      { 'domain': server.domains.canonical.flowise,   'http_port': AI_FLOWISE_PUBLIC_PORT },
+      { 'domain': server.domains.canonical.minio,     'http_port': AI_MINIO_CONSOLE_PUBLIC_PORT }
+    ]
+    + (
+      [ { 'domain': server.domains.canonical.minio_api, 'http_port': AI_MINIO_API_PUBLIC_PORT } ]
+      if (server.domains.canonical.minio_api is defined) else []
+    )
+  }}

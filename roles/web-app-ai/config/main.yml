@@ -9,6 +9,8 @@ server:
   domains:
     canonical:
       openwebui:  "chat.ai.{{ PRIMARY_DOMAIN }}"
+      flowise:    "flowise.ai.{{ PRIMARY_DOMAIN }}"
+      minio:      "minio.ai.{{ PRIMARY_DOMAIN }}"
     aliases: []
   csp:
     flags: []
@@ -33,9 +35,11 @@ docker:
     open-webui:
       backup:
         no_stop_required: true
-      image:   ghcr.io/open-webui/open-webui
-      version: main
-      name:    open-webui
+      image:              ghcr.io/open-webui/open-webui
+      version:            main
+      name:               open-webui
+      offline_mode:       false
+      hf_hub_offline:     false
     litellm:
       backup:
         no_stop_required: true

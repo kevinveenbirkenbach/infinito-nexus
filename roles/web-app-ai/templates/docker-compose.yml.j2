@@ -13,7 +13,8 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ AI_OPENWEBUI_IMAGE }}:{{ AI_OPENWEBUI_VERSION }}
     container_name: {{ AI_OPENWEBUI_CONTAINER }}
-    depends_on: [ollama]
+    depends_on:
+      - ollama
     ports:
       - "127.0.0.1:{{ AI_OPENWEBUI_PORT }}:8080"
     volumes:
@@ -24,15 +25,16 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ AI_LITELLM_IMAGE }}:{{ AI_LITELLM_VERSION }}
     container_name: {{ AI_LITELLM_CONTAINER }}
-    depends_on: [ollama]
+    depends_on:
+      - ollama
     expose:
       - {{ AI_LITELLM_PORT }}
     volumes:
-      - ./litellm.config.yaml:/etc/litellm/config.yaml:ro
+      - {{ AI_LITELLM_CONFIG_PATH_HOST }}:{{ AI_LITELLM_CONFIG_PATH_DOCKER }}:ro
     command: >
       --host 0.0.0.0
       --port {{ AI_LITELLM_PORT }}
-      --config /etc/litellm/config.yaml
+      --config {{ AI_LITELLM_CONFIG_PATH_DOCKER }}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   qdrant:
@@ -50,7 +52,9 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ AI_FLOWISE_IMAGE }}:{{ AI_FLOWISE_VERSION }}
     container_name: {{ AI_FLOWISE_CONTAINER }}
-    depends_on: [qdrant, litellm]
+    depends_on: 
+      - qdrant
+      - litellm
     ports:
       - "127.0.0.1:{{ AI_FLOWISE_PUBLIC_PORT }}:{{ AI_FLOWISE_INTERNAL_PORT }}"
     volumes:
@@ -61,7 +65,6 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ AI_MINIO_IMAGE }}:{{ AI_MINIO_VERSION }}
     container_name: {{ AI_MINIO_CONTAINER }}
-    networks: [ai]
     ports:
       - "127.0.0.1:{{ AI_MINIO_API_PUBLIC_PORT }}:9000"
       - "127.0.0.1:{{ AI_MINIO_CONSOLE_PUBLIC_PORT }}:{{ AI_MINIO_CONSOLE_INTERNAL_PORT }}"

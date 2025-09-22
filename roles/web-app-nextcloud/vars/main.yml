@@ -31,11 +31,11 @@ NEXTCLOUD_CNODE_PLUGIN_VARS_PATH:   "{{ [role_path, 'vars/plugins/'] | path_join
 NEXTCLOUD_CNODE_PLUGIN_TASKS_PATH:  "{{ [role_path, 'tasks/plugins/'] | path_join }}"                                # Folder which contains the files for extra plugin configuration tasks 
 
 ## Internal Paths
-NEXTCLOUD_DOCKER_WORK_DIRECTORY:    "/var/www/html/"                                              # Name of the workdir in which the application is stored
-NEXTCLOUD_DOCKER_CONF_DIRECTORY:    "{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}config/"                # Folder in which the Nextcloud configurations are stored     
-NEXTCLOUD_DOCKER_CONFIG_FILE:       "{{ NEXTCLOUD_DOCKER_CONF_DIRECTORY }}config.php"             # Path to the Nextcloud configuration file
-NEXTCLOUD_DOCKER_CONF_ADD_PATH:     "{{ NEXTCLOUD_DOCKER_CONF_DIRECTORY }}infinito/"              # Path to the folder which contains additional configurations
-NEXTCLOUD_DOCKER_INCL_PATH:         "/tmp/includes.php"                                           # Path to the temporary file which will be included to the config.php to load the additional configurations
+NEXTCLOUD_DOCKER_WORK_DIRECTORY:    "/var/www/html/"                                                      # Name of the workdir in which the application is stored
+NEXTCLOUD_DOCKER_CONF_DIRECTORY:    "{{ [ NEXTCLOUD_DOCKER_WORK_DIRECTORY, 'config/'] | path_join }}"     # Folder in which the Nextcloud configurations are stored     
+NEXTCLOUD_DOCKER_CONFIG_FILE:       "{{ [ NEXTCLOUD_DOCKER_CONF_DIRECTORY, 'config.php'] | path_join }}"  # Path to the Nextcloud configuration file
+NEXTCLOUD_DOCKER_CONF_ADD_PATH:     "{{ [ NEXTCLOUD_DOCKER_CONF_DIRECTORY, 'infinito/'] | path_join }}"   # Path to the folder which contains additional configurations
+NEXTCLOUD_DOCKER_INCL_PATH:         "/tmp/includes.php"                                                   # Path to the temporary file which will be included to the config.php to load the additional configurations
 
 ## Administrator
 NEXTCLOUD_ADMINISTRATOR_USER:       "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
@@ -87,5 +87,5 @@ NEXTCLOUD_DOCKER_USER_id:           82                                          
 NEXTCLOUD_DOCKER_USER:              "www-data"                                                    # Name of the www-data user (Set here to easy change it in the future)
 
 ## Execution
-NEXTCLOUD_DOCKER_EXEC:              "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}" # General execute composition
-NEXTCLOUD_DOCKER_EXEC_OCC:          "{{NEXTCLOUD_DOCKER_EXEC}} {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}occ"   # Execute docker occ command
+NEXTCLOUD_DOCKER_EXEC:              "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}"                    # General execute composition
+NEXTCLOUD_DOCKER_EXEC_OCC:          "{{ NEXTCLOUD_DOCKER_EXEC }} {{ [ NEXTCLOUD_DOCKER_WORK_DIRECTORY, 'occ'] | path_join }}" # Execute docker occ command
