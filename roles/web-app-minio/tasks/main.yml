@@ -23,3 +23,18 @@
   loop: "{{ MINIO_FRONT_PROXY_MATRIX }}"
   loop_control:
     label: "{{ item.domain }} -> {{ item.http_port }}"
+
+- block:
+    - name: "Render MinIO policy into variable"
+      set_fact:
+        minio_policy_content: "{{ lookup('template', 'policy.json.j2') }}"
+
+    - name: "Apply MinIO policy {{ MINIO_OIDC_POLICY_NAME }}"
+      shell: |
+        set -euo pipefail
+        mc alias set minio {{ MINIO_API_URL }} {{ users.administrator.username }} {{ users.administrator.password }}
+        mc admin policy create minio {{ MINIO_OIDC_POLICY_NAME }} /dev/stdin || true
+      args:
+        executable: /bin/bash
+        stdin: "{{ minio_policy_content }}"
+  when: MINIO_OIDC_ENABLED | bool

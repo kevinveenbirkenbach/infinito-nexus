@@ -6,6 +6,8 @@ features:
   logout:           true
   javascript:       false
   local_ai:         true
+  oidc:             true
+  ldap:             false # OIDC is already activated so LDAP isn't necessary
 server:
   domains:
     canonical:
@@ -22,7 +24,7 @@ server:
       #style-src:
       #  unsafe-inline:  true
     whitelist:
-      font-src: [] 
+      font-src: []
       connect-src: [] 
 docker:
   services:
