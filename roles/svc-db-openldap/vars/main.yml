@@ -23,4 +23,6 @@ OPENLDAP_VOLUME:                "{{ applications | get_app_conf(application_id, 
 OPENLDAP_NETWORK:               "{{ applications | get_app_conf(application_id, 'docker.network') }}"
 
 # Network
-OPENLDAP_NETWORK_EXPOSE_LOCAL:  "{{ applications | get_app_conf(application_id, 'network.public') | bool or applications | get_app_conf(application_id, 'network.local') | bool }}"
+OPENLDAP_NETWORK_SWITCH_PUBLIC: "{{ applications | get_app_conf(application_id, 'network.public') }}"
+OPENLDAP_NETWORK_SWITCH_LOCAL:  "{{ applications | get_app_conf(application_id, 'network.local') }}"
+OPENLDAP_NETWORK_EXPOSE_LOCAL:  "{{ OPENLDAP_NETWORK_SWITCH_PUBLIC | bool or OPENLDAP_NETWORK_SWITCH_LOCAL | bool }}"

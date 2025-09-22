@@ -9,13 +9,13 @@
     src:  "nginx.stream.conf.j2" 
     dest: "{{ NGINX.DIRECTORIES.STREAMS }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty
-  when: applications | get_app_conf(application_id, 'network.public', True) | bool
+  when: OPENLDAP_NETWORK_SWITCH_PUBLIC | bool
 
 - name: Remove {{ domains | get_domain(application_id) }}.conf if LDAP is not exposed to internet
   file:
     path: "{{ NGINX.DIRECTORIES.STREAMS }}{{ domains | get_domain(application_id) }}.conf"
     state: absent
-  when: not applications | get_app_conf(application_id, 'network.public', True) | bool
+  when: not OPENLDAP_NETWORK_SWITCH_PUBLIC | bool
 
 - name: create docker network for LDAP, so that other applications can access it
   community.docker.docker_network:
@@ -37,7 +37,7 @@
 - name: "Reset LDAP Credentials"
   include_tasks: 01_credentials.yml
   when:
-    - applications | get_app_conf(application_id, 'network.local')
+    - OPENLDAP_NETWORK_SWITCH_LOCAL | bool
     - applications | get_app_conf(application_id, 'provisioning.credentials', True)
 
 - name: "create directory {{OPENLDAP_LDIF_PATH_HOST}}{{item}}"
