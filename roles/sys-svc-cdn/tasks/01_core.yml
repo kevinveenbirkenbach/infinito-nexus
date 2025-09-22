@@ -6,16 +6,6 @@
   - application_id != 'web-svc-cdn'
   - run_once_web_svc_cdn is not defined
 
-- name: Overwritte CDN handlers with neutral handlers
-  ansible.builtin.include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml'] | path_join }}"
-  loop:
-  - svc-prx-openresty
-  - docker-compose
-  loop_control:
-    label: "{{ item }}"
-  vars:
-    handler_role_name: "{{ item }}"
-
 # ------------------------------------------------------------------
 # Only-once creations (shared root and vendor)
 # ------------------------------------------------------------------

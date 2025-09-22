@@ -4,6 +4,16 @@
   when:
     - run_once_sys_svc_cdn is not defined
 
+- name: Overwritte CDN handlers with neutral handlers
+  ansible.builtin.include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml'] | path_join }}"
+  loop:
+  - svc-prx-openresty
+  - docker-compose
+  loop_control:
+    label: "{{ item }}"
+  vars:
+    handler_role_name: "{{ item }}"
+
 - name: Ensure CDN directories exist
   file:
     path:  "{{ item }}"

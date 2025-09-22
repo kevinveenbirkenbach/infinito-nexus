@@ -1,4 +1,4 @@
-# sys-svc-cdn
+# Content Delivery Network
 
 CDN helper role for building a consistent asset tree, URLs, and on-disk layout.
 
