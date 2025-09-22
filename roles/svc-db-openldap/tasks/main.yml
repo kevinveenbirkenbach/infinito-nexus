@@ -19,7 +19,7 @@
 
 - name: create docker network for LDAP, so that other applications can access it
   community.docker.docker_network:
-    name: "{{ openldap_network }}"
+    name: "{{ OPENLDAP_NETWORK }}"
     state: present
     ipam_config:
       - subnet: "{{ networks.local[application_id].subnet }}"
@@ -40,12 +40,12 @@
     - applications | get_app_conf(application_id, 'network.local')
     - applications | get_app_conf(application_id, 'provisioning.credentials', True)
 
-- name: "create directory {{openldap_ldif_host_path}}{{item}}"
+- name: "create directory {{OPENLDAP_LDIF_PATH_HOST}}{{item}}"
   file:
-    path: "{{openldap_ldif_host_path}}{{item}}"
+    path: "{{OPENLDAP_LDIF_PATH_HOST}}{{item}}"
     state: directory
     mode: "0755"
-  loop: "{{openldap_ldif_types}}"
+  loop: "{{OPENLDAP_LDIF_TYPES}}"
 
 - name: "Import LDIF Configuration"
   include_tasks: ldifs_creation.yml

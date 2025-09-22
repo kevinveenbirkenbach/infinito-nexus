@@ -1,24 +1,26 @@
 application_id:                 "svc-db-openldap"
 
 # LDAP Variables
-openldap_docker_port_secure:    636
-openldap_docker_port_open:      389
-openldap_server_uri:            "ldap://127.0.0.1:{{ ports.localhost.ldap[application_id] }}"
-openldap_bind_dn:               "{{ LDAP.DN.ADMINISTRATOR.CONFIGURATION }}"
-openldap_bind_pw:               "{{ applications | get_app_conf(application_id, 'credentials.administrator_password', True) }}"
+OPENLDAP_DOCKER_PORT_SECURE:    636
+OPENLDAP_DOCKER_PORT_OPEN:      389
+OPENLDAP_SERVER_URI:            "ldap://127.0.0.1:{{ ports.localhost.ldap[application_id] }}"
+OPENLDAP_BIND_DN:               "{{ LDAP.DN.ADMINISTRATOR.CONFIGURATION }}"
+OPENLDAP_BIND_PW:               "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
 
 # LDIF Variables
-openldap_ldif_host_path:        "{{ docker_compose.directories.volumes }}ldif/"
-openldap_ldif_docker_path:      "/tmp/ldif/"
-openldap_ldif_types:
+OPENLDAP_LDIF_PATH_HOST:        "{{ docker_compose.directories.volumes }}ldif/"
+OPENLDAP_LDIF_PATH_DOCKER:      "/tmp/ldif/"
+OPENLDAP_LDIF_TYPES:
   - configuration
   - groups
   - schema                      # Don't know if this is still needed, it's now setup via tasks
 
-openldap_name:                  "{{ applications | get_app_conf(application_id, 'docker.services.openldap.name', True) }}"
-openldap_image:                 "{{ applications | get_app_conf(application_id, 'docker.services.openldap.image', True) }}"
-openldap_version:               "{{ applications | get_app_conf(application_id, 'docker.services.openldap.version', True) }}"
-openldap_volume:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-openldap_network:               "{{ applications | get_app_conf(application_id, 'docker.network', True) }}"
+# Container
+OPENLDAP_NAME:                  "{{ applications | get_app_conf(application_id, 'docker.services.openldap.name') }}"
+OPENLDAP_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.openldap.image') }}"
+OPENLDAP_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.openldap.version') }}"
+OPENLDAP_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+OPENLDAP_NETWORK:               "{{ applications | get_app_conf(application_id, 'docker.network') }}"
 
-openldap_network_expose_local:  "{{ applications | get_app_conf(application_id, 'network.public', True) | bool or applications | get_app_conf(application_id, 'network.local') | bool }}"
+# Network
+OPENLDAP_NETWORK_EXPOSE_LOCAL:  "{{ applications | get_app_conf(application_id, 'network.public') | bool or applications | get_app_conf(application_id, 'network.local') | bool }}"

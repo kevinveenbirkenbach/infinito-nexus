@@ -4,7 +4,7 @@
 - name: Ensure LDAP users exist
   community.general.ldap_entry:
     dn:           "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
-    server_uri:   "{{ openldap_server_uri }}"
+    server_uri:   "{{ OPENLDAP_SERVER_URI }}"
     bind_dn:      "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
     bind_pw:      "{{ LDAP.BIND_CREDENTIAL }}"
     objectClass:  "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
@@ -30,7 +30,7 @@
 - name: Ensure required objectClass values and mail address are present
   community.general.ldap_attrs:
     dn: "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
-    server_uri: "{{ openldap_server_uri }}"
+    server_uri: "{{ OPENLDAP_SERVER_URI }}"
     bind_dn: "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
     bind_pw: "{{ LDAP.BIND_CREDENTIAL }}"
     attributes:
@@ -46,7 +46,7 @@
 - name: "Ensure container for application roles exists"
   community.general.ldap_entry:
     dn: "{{ LDAP.DN.OU.ROLES }}"
-    server_uri: "{{ openldap_server_uri }}"
+    server_uri: "{{ OPENLDAP_SERVER_URI }}"
     bind_dn:  "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
     bind_pw:  "{{ LDAP.BIND_CREDENTIAL }}"
     objectClass: organizationalUnit

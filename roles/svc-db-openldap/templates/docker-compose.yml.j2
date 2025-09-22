@@ -1,20 +1,20 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-    image: "{{ openldap_image }}:{{ openldap_version }}"
-    container_name: "{{ openldap_name }}"
+    image: "{{ OPENLDAP_IMAGE }}:{{ OPENLDAP_VERSION }}"
+    container_name: "{{ OPENLDAP_NAME }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-{% if openldap_network_expose_local %}
+{% if OPENLDAP_NETWORK_EXPOSE_LOCAL %}
     ports:
-      - 127.0.0.1:{{ports.localhost.ldap['svc-db-openldap']}}:{{openldap_docker_port_open}}
+      - 127.0.0.1:{{ports.localhost.ldap['svc-db-openldap']}}:{{OPENLDAP_DOCKER_PORT_OPEN}}
 {% endif %}
     volumes:
       - 'data:/bitnami/openldap'
-      - '{{openldap_ldif_host_path}}:{{ openldap_ldif_docker_path }}:ro'
+      - '{{OPENLDAP_LDIF_PATH_HOST}}:{{ OPENLDAP_LDIF_PATH_DOCKER }}:ro'
     healthcheck:
       test: >
         bash -c '
-        ldapsearch -x -H ldap://localhost:{{ openldap_docker_port_open }} \
+        ldapsearch -x -H ldap://localhost:{{ OPENLDAP_DOCKER_PORT_OPEN }} \
           -D "{{ LDAP.DN.ADMINISTRATOR.DATA }}" -w "{{ LDAP.BIND_CREDENTIAL }}" -b "{{ LDAP.DN.ROOT }}" > /dev/null \
         && ldapsearch -Y EXTERNAL -H ldapi:/// \
           -b cn=config "(&(objectClass=olcOverlayConfig)(olcOverlay=memberof))" \
@@ -24,6 +24,6 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: "{{ openldap_volume }}"
+    name: "{{ OPENLDAP_VOLUME }}"
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
