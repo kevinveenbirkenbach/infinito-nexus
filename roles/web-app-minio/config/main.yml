@@ -29,7 +29,7 @@ docker:
     minio:
       backup:
         no_stop_required: true
-      image:   quay.io/minio/minio:latest
+      image:   quay.io/minio/minio
       version: latest
       name:    minio
     redis:
