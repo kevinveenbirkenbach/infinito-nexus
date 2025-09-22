@@ -1,0 +1,42 @@
+features:
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
+  logout:           true
+  javascript:       true
+server:
+  domains:
+    canonical:
+      - "ai.{{ PRIMARY_DOMAIN }}"
+    aliases: []
+  csp:
+    flags: []
+      #script-src-elem:
+      #  unsafe-inline:  true
+      #script-src:
+      #  unsafe-inline:  true
+      #  unsafe-eval:    true
+      #style-src:
+      #  unsafe-inline:  true
+    whitelist:
+      font-src: [] 
+      connect-src: [] 
+docker:
+  services:
+    akaunting:
+      backup:
+        no_stop_required: true
+      image:   docker.io/akaunting/akaunting 
+      version: latest
+      name:    akaunting
+    redis:
+      enabled: false
+  volumes: 
+    ollama_models: ai_ollama_models
+    openwebui_data: ai_openwebui_data
+    qdrant_data: ai_qdrant_data
+    flowise_data: ai_flowise_data
+    minio_data: ai_minio_data
+credentials: {}
+
