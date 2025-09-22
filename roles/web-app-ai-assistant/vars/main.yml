@@ -1,0 +1,28 @@
+
+# General
+application_id:                     "web-app-akaunting"
+js_application_name:                "Akaunting"
+
+# Database
+database_type:                      "mariadb"
+database_password:                  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
+
+# Docker
+docker_repository_address:          "https://github.com/akaunting/docker.git"
+docker_pull_git_repository:         true
+docker_repository_branch:           "master"
+docker_compose_skipp_file_creation: false
+
+# Akaunting
+AKAUNTING_URL:                      "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+AKAUNTING_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.akaunting.version') }}"
+AKAUNTING_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.akaunting.image') }}"
+AKAUNTING_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.akaunting.name') }}"
+AKAUNTING_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+AKAUNTING_COMPANY_NAME:             "{{ applications | get_app_conf(application_id, 'company.name') }}"
+AKAUNTING_COMPANY_EMAIL:            "{{ applications | get_app_conf(application_id, 'company.email') }}"
+AKAUNTING_ADMIN_EMAIL:              "{{ applications | get_app_conf(application_id, 'setup_admin_email') }}"
+AKAUNTING_ADMIN_PASSWORD:           "{{ applications | get_app_conf(application_id, 'credentials.setup_admin_password') }}"
+AKAUNTING_SETUP_MARKER:             "{{ [ (AKAUNTING_VOLUME | docker_volume_path), '.akaunting_installed' ] | path_join }}"
+AKAUNTING_APP_KEY:                  "{{ applications | get_app_conf(application_id, 'credentials.app_key') }}"
+AKAUNTING_CACHE_DRIVER:             "{{ 'redis' if applications | get_app_conf(application_id, 'docker.services.redis.enabled') else 'file' }}"

@@ -1,0 +1,15 @@
+model_list:
+  - model_name: ollama/llama3
+    litellm_params:
+      model: ollama/llama3
+      api_base: http://ollama:11434
+      rpm: 1000
+  - model_name: ollama/nomic-embed-text
+    litellm_params:
+      model: ollama/nomic-embed-text
+      api_base: http://ollama:11434
+      rpm: 1000
+
+litellm_settings:
+  drop_params: true
+  set_verbose: true
