@@ -15,6 +15,20 @@ portfolio_menu_categories:
       - mobilizon
       - friendica
 
+  Artificial Intelligence:
+    description: "AI tools and frameworks for running, managing, and experimenting with models."
+    icon: "fa-solid fa-robot"
+    tags:
+      - ai
+      - artificial-intelligence
+      - machine-learning
+      - ollama
+      - openwebui
+      - flowise
+      - minio
+      - qdrant
+      - litellm
+
   Project Management:
     description: "Project Management Tools"
     icon: "fa-solid fa-chart-line"
