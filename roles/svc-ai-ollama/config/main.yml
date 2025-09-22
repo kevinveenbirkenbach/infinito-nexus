@@ -1,3 +1,5 @@
+features: 
+  local_ai: true # Needs to be set so that network is loaded
 docker:
   services:
     ollama:
