@@ -16,7 +16,7 @@
     depends_on:
       - ollama
     ports:
-      - "127.0.0.1:{{ AI_OPENWEBUI_PORT }}:8080"
+      - "127.0.0.1:{{ AI_OPENWEBUI_PORT_PUBLIC }}:8080"
     volumes:
       - openwebui_data:/app/backend/data
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
@@ -56,21 +56,9 @@
       - qdrant
       - litellm
     ports:
-      - "127.0.0.1:{{ AI_FLOWISE_PUBLIC_PORT }}:{{ AI_FLOWISE_INTERNAL_PORT }}"
+      - "127.0.0.1:{{ AI_FLOWISE_PORT_PUBLIC }}:{{ AI_FLOWISE_PORT_INTERNAL }}"
     volumes:
       - flowise_data:/root/.flowise
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-
-  minio:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: {{ AI_MINIO_IMAGE }}:{{ AI_MINIO_VERSION }}
-    container_name: {{ AI_MINIO_CONTAINER }}
-    ports:
-      - "127.0.0.1:{{ AI_MINIO_API_PUBLIC_PORT }}:9000"
-      - "127.0.0.1:{{ AI_MINIO_CONSOLE_PUBLIC_PORT }}:{{ AI_MINIO_CONSOLE_INTERNAL_PORT }}"
-    command: server /data --console-address ":{{ AI_MINIO_CONSOLE_INTERNAL_PORT }}"
-    volumes:
-      - minio_data:/data
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
@@ -84,5 +72,3 @@
     name: {{ AI_QDRANT_VOLUME }}
   flowise_data:
     name: {{ AI_FLOWISE_VOLUME }}
-  minio_data:
-    name: {{ AI_MINIO_VOLUME }}

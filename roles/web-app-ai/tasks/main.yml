@@ -1,0 +1,24 @@
+---
+- name: "load docker and db for {{ application_id }}"
+  include_role:
+    name: sys-stk-back-stateless
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: "create {{ AI_LITELLM_CONFIG_PATH_HOST }}"
+  template:    src:  "litellm.config.yaml.j2" 
+    dest: "{{ AI_LITELLM_CONFIG_PATH_HOST }}"
+  notify: docker compose up
+
+- name: "flush handlers of docker compose"
+  meta: flush_handlers
+
+- name: "Include role sys-stk-front-proxy for each UI domain"
+  include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain:    "{{ item.domain }}"
+    http_port: "{{ item.http_port }}"
+  loop: "{{ AI_FRONT_PROXY_MATRIX }}"
+  loop_control:
+    label: "{{ item.domain }} -> {{ item.http_port }}"

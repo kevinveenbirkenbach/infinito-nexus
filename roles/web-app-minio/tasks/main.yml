@@ -1,0 +1,16 @@
+---
+- name: "load docker and db for {{ application_id }}"
+  include_role:
+    name: sys-stk-back-stateless
+  vars:
+    docker_compose_flush_handlers: true
+
+- name: "Include role sys-stk-front-proxy for each UI domain"
+  include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain:    "{{ item.domain }}"
+    http_port: "{{ item.http_port }}"
+  loop: "{{ MINIO_FRONT_PROXY_MATRIX }}"
+  loop_control:
+    label: "{{ item.domain }} -> {{ item.http_port }}"

@@ -1,0 +1,31 @@
+# General
+application_id:                       "web-app-minio"
+
+# Docker
+docker_pull_git_repository:           false
+docker_compose_file_creation_enabled: true
+
+# MINIO
+# https://www.min.io/
+MINIO_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.minio.version') }}"
+MINIO_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.minio.image') }}"
+MINIO_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.minio.name') }}"
+MINIO_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.minio') }}"
+
+## Api
+MINIO_API_DOMAIN:               "{{ applications | get_app_conf(application_id, 'server.domains.canonical.api') }}"
+MINIO_API_PORT_INTERNAL:        9000
+MINIO_API_PORT_PUBLIC:          "{{ ports.localhost.http[application_id ~ '_api'] }}"
+
+## Console
+MINIO_CONSOLE_DOMAIN:           "{{ applications | get_app_conf(application_id, 'server.domains.canonical.console') }}"
+MINIO_CONSOLE_PORT_INTERNAL:    9001
+MINIO_CONSOLE_PORT_PUBLIC:      "{{ ports.localhost.http[application_id ~ '_console'] }}"
+
+MINIO_FRONT_PROXY_MATRIX: >-
+  {{
+    [
+      { 'domain': MINIO_CONSOLE_DOMAIN:, 'http_port': MINIO_CONSOLE_PORT_PUBLIC },
+      { 'domain': MINIO_API_DOMAIN,   'http_port': MINIO_API_PORT_PUBLIC }
+    ]
+  }}

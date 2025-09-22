@@ -1,0 +1,40 @@
+features:
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
+  logout:           true
+  javascript:       false
+server:
+  domains:
+    canonical:
+      console:  "console.s3.{{ PRIMARY_DOMAIN }}"
+      api:      "api.s3.{{ PRIMARY_DOMAIN }}"
+    aliases: []
+  csp:
+    flags: []
+      #script-src-elem:
+      #  unsafe-inline:  true
+      #script-src:
+      #  unsafe-inline:  true
+      #  unsafe-eval:    true
+      #style-src:
+      #  unsafe-inline:  true
+    whitelist:
+      font-src: [] 
+      connect-src: [] 
+docker:
+  services:
+    minio:
+      backup:
+        no_stop_required: true
+      image:   quay.io/minio/minio:latest
+      version: latest
+      name:    minio
+    redis:
+      enabled: false
+    database:
+      enabled: false
+  volumes: 
+    data:      minio_data
+credentials: {}

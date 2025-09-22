@@ -10,7 +10,6 @@ server:
     canonical:
       openwebui:  "chat.ai.{{ PRIMARY_DOMAIN }}"
       flowise:    "flowise.ai.{{ PRIMARY_DOMAIN }}"
-      minio:      "minio.ai.{{ PRIMARY_DOMAIN }}"
     aliases: []
   csp:
     flags: []
@@ -58,12 +57,6 @@ docker:
       image:   flowiseai/flowise:latest
       version: latest
       name:    flowise
-    minio:
-      backup:
-        no_stop_required: true
-      image:   quay.io/minio/minio:latest
-      version: latest
-      name:    minio
     redis:
       enabled: false
     database:
@@ -73,6 +66,5 @@ docker:
     ollama:     ai_ollama_models
     qdrant:     ai_qdrant_data
     flowise:    ai_flowise_data
-    minio:      ai_minio_data
 credentials: {}
 
