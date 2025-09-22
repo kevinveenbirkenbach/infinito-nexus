@@ -6,6 +6,7 @@ features:
   logout:           true
   javascript:       false
   local_ai:         true
+  oidc:             true
 server:
   domains:
     canonical:
