@@ -1,6 +1,6 @@
 ---
 - name: "Include setup for domain '{{ domain }}'"
-  include_role: 
+  include_role:
     name: sys-stk-front-proxy
   loop: "{{ domains['web-app-mastodon'] }}"
   loop_control:
@@ -13,7 +13,7 @@
     vhost_flavour:        "ws_generic"
 
 - name: "load docker and db for {{ application_id }}"
-  include_role: 
+  include_role:
     name: sys-stk-back-stateful
   vars:
     docker_compose_flush_handlers: true

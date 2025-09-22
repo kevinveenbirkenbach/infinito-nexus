@@ -10,7 +10,7 @@
     ws_port:    "{{ ports.localhost.http[application_id] }}"
 
 - name: "load docker and db for {{ application_id }}"
-  include_role: 
+  include_role:
     name: sys-stk-back-stateful
 
 - name: "Install and activate auth-openid-connect plugin if OIDC is enabled"

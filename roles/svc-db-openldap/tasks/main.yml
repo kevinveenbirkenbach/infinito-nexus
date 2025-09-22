@@ -1,7 +1,7 @@
 ---
 
 - name: "include docker-compose role"
-  include_role: 
+  include_role:
     name: docker-compose
 
 - name: Create {{ domains | get_domain(application_id) }}.conf if LDAP is exposed to internet

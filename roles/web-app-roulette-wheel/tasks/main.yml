@@ -1,6 +1,6 @@
 ---
 - name: "include docker-compose role"
-  include_role: 
+  include_role:
     name: docker-compose
 
 - name: pull app repository

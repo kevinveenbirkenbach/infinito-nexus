@@ -1,7 +1,7 @@
 # run_once_sys_stk_back_stateless: disabled
 
 - name: "For '{{ application_id }}': Load docker-compose"
-  include_role: 
+  include_role:
     name: docker-compose
   vars:
     docker_compose_flush_handlers: false

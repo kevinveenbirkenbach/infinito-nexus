@@ -1,9 +1,9 @@
 # run_once_sys_util_csp_cert: deactivated
 
 - name: "include role sys-front-inj-all for '{{ domain }}'"
-  include_role: 
+  include_role:
     name: sys-front-inj-all
 
 - name: "include role sys-svc-certs for '{{ domain }}'"
-  include_role: 
+  include_role:
     name: sys-svc-certs

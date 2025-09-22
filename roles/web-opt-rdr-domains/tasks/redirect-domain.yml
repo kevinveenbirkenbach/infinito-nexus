@@ -1,5 +1,5 @@
 - name: "include task receive certbot certificate"
-  include_role: 
+  include_role:
     name: sys-svc-certs
 
 - name: "Deploying NGINX redirect configuration for '{{ domain }}'"

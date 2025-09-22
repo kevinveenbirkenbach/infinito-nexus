@@ -1,6 +1,6 @@
 ---
 - name: "load docker, db and proxy for {{ application_id }}"
-  include_role: 
+  include_role:
     name: sys-stk-full-stateful
   vars:
     docker_compose_flush_handlers: false
@@ -14,7 +14,7 @@
 - name: add config.toml
   template: 
     src:  "config.toml.j2" 
-    dest: "{{ docker_compose.directories.config }}config.toml"
+    dest: "{{ LISTMONK_CONFIG_HOST }}"
   notify: docker compose up
 
 - meta: flush_handlers

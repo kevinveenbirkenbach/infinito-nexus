@@ -9,5 +9,5 @@
     http_port:   "{{ ports.localhost.http[application_id] }}"
 
 - name: "For '{{ application_id }}': Load sys-stk-back-stateless"
-  include_role: 
+  include_role:
     name: sys-stk-back-stateless

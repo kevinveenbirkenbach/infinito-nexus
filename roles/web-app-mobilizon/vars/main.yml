@@ -10,7 +10,7 @@ postgres_gis_enabled:           true
 docker_compose_flush_handlers:  false
 
 # Mobilizon
-mobilizon_host_conf_exs_file:   "{{ docker_compose.directories.config }}config.exs"
-mobilizon_version:              "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.version', True) }}"
-mobilizon_image:                "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.image', True) }}"
-mobilizon_container:            "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.name', True) }}"
+mobilizon_host_conf_exs_file:   "{{ [ docker_compose.directories.config, 'config.exs' ] | path_join }}"
+mobilizon_version:              "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.version') }}"
+mobilizon_image:                "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.image') }}"
+mobilizon_container:            "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.name') }}"

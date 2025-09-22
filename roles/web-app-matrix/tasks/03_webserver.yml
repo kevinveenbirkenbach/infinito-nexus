@@ -10,7 +10,7 @@
     dest: "{{ MATRIX_WELL_KNOWN_FILE }}"
         
 - name: "include role sys-stk-front-proxy for {{ MATRIX_ELEMENT_DOMAIN }}"
-  include_role: 
+  include_role:
     name: sys-stk-front-proxy
   vars:        
     domain:     "{{ MATRIX_ELEMENT_DOMAIN }}"

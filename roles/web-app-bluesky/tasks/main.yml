@@ -1,5 +1,5 @@
 - name: "include docker-compose role"
-  include_role: 
+  include_role:
     name: docker-compose
   vars:
     docker_compose_flush_handlers: false

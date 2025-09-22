@@ -1,5 +1,5 @@
 - name: "load docker, db and proxy for {{ application_id }}"
-  include_role: 
+  include_role:
     name: sys-stk-full-stateful
 
 - name: "Patch Matomo config.ini.php"
