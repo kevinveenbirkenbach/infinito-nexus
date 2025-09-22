@@ -14,9 +14,9 @@ server:
       openwebui:  "chat.ai.{{ PRIMARY_DOMAIN }}"
     aliases: []
   csp:
-    flags: {}
-      #script-src-elem:
-      #  unsafe-inline:  true
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
       #script-src:
       #  unsafe-inline:  true
       #  unsafe-eval:    true
