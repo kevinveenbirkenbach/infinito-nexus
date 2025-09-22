@@ -3,8 +3,6 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ OPENWEBUI_IMAGE }}:{{ OPENWEBUI_VERSION }}
     container_name: {{ OPENWEBUI_CONTAINER }}
-    depends_on:
-      - ollama
     ports:
       - "127.0.0.1:{{ OPENWEBUI_PORT_PUBLIC }}:8080"
     volumes:
