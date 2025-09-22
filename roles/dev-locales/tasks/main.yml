@@ -1,11 +1,11 @@
 ---
 - name: Setup locale.gen
-  template: 
+  template:
     src:  locale.gen.j2
     dest: /etc/locale.gen
 
 - name: Setup locale.conf
-  template: 
+  template:
     src:  locale.conf.j2
     dest: /etc/locale.conf
 

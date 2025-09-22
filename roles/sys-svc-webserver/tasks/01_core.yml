@@ -20,7 +20,7 @@
   include_tasks: 04_directories.yml
 
 - name: create nginx config file
-  template: 
+  template:
     src:  nginx.conf.j2
     dest: "{{ NGINX.FILES.CONFIGURATION }}"
   notify: docker compose up

@@ -1,5 +1,5 @@
 - name: "create {{ friendica_host_ldap_config }}"
-  template: 
+  template:
     src:  "ldapauth.config.php.j2" 
     dest: "{{ friendica_host_ldap_config }}"
     mode: '644'

@@ -9,7 +9,7 @@
       state: directory
       mode: "0755"
   - name: "For '{{ application_id }}': Create {{ database_env }}"
-    template: 
+    template:
       src: "env/{{ database_type }}.env.j2"
       dest: "{{ database_env }}"
     notify: docker compose up

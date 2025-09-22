@@ -36,7 +36,7 @@
 
 - name: deploy .env
   # This seems redundant @todo Checkout if this is true and if so, delete it
-  template: 
+  template:
     src:  env.j2
     dest: "{{ bbb_env_file_origine }}"
 

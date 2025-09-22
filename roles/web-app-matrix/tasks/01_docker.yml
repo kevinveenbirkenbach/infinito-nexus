@@ -31,26 +31,26 @@
   loop: "{{ MATRIX_BRIDGES }}"
 
 - name: add multiple mautrix bridge configuration
-  template: 
+  template:
     src:  "mautrix/{{ item.bridge_name }}.config.yml.j2" 
     dest: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/config.yaml"
   loop: "{{ MATRIX_BRIDGES }}"
   notify: docker compose up
 
 - name: add element configuration
-  template: 
+  template:
     src:  "element.config.json.j2" 
     dest: "{{ MATRIX_ELEMENT_CONFIG_PATH_HOST }}"
   notify: docker compose up
 
 - name: add synapse homeserver configuration
-  template: 
+  template:
     src:  "synapse/homeserver.yaml.j2" 
     dest: "{{ MATRIX_SYNAPSE_CONFIG_PATH_HOST }}"
   notify: docker compose up
 
 - name: add synapse log configuration
-  template: 
+  template:
     src:  "synapse/log.config.j2" 
     dest: "{{ MATRIX_SYNAPSE_LOG_PATH_HOST }}"
   notify: docker compose up
@@ -61,7 +61,7 @@
     cmd: "docker run --rm --mount type=volume,src={{ MATRIX_SYNAPSE_VOLUME }},dst=/data -e SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }} -e SYNAPSE_REPORT_STATS=no --entrypoint /bin/sh matrixdotorg/synapse:latest -c 'chown -vR 991:991 /data'"
 
 - name: add docker-compose.yml
-  template: 
+  template:
     src:  "docker-compose.yml.j2" 
     dest: "{{ docker_compose.directories.instance }}docker-compose.yml"
   notify: docker compose up

@@ -5,7 +5,7 @@
     mode: '0755'
 
 - name: create {{ MATRIX_WELL_KNOWN_FILE }}
-  template: 
+  template:
     src:  "well-known.j2" 
     dest: "{{ MATRIX_WELL_KNOWN_FILE }}"
         
@@ -24,7 +24,7 @@
     http_port:  "{{ MATRIX_SYNAPSE_PORT }}"
 
 - name: create {{ MATRIX_SYNAPSE_DOMAIN }}.conf
-  template: 
+  template:
     src:  "templates/nginx.conf.j2" 
     dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ MATRIX_SYNAPSE_DOMAIN }}.conf"
   vars:

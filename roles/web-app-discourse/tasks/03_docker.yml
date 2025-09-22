@@ -26,7 +26,7 @@
     state: directory
 
 - name: "copy configuration to '{{ DISCOURSE_APPLICATION_YML_DEST }}'"
-  template: 
+  template:
     src: config.yml.j2
     dest: "{{ DISCOURSE_APPLICATION_YML_DEST }}"
     mode: '0640'

@@ -12,7 +12,7 @@
       {% endif %}
 
 - name: add config.toml
-  template: 
+  template:
     src:  "config.toml.j2" 
     dest: "{{ LISTMONK_CONFIG_HOST }}"
   notify: docker compose up

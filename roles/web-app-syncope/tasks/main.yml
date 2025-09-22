@@ -4,13 +4,13 @@
     name: sys-stk-back-stateful
 
 - name: configure {{ domain }}.conf
-  template: 
+  template:
     src:  "templates/proxy.conf.j2"
     dest: "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
   notify: restart openresty
 
 - name: "create {{ docker_compose.files.env }}"
-  template: 
+  template:
     src:  "database.j2" 
     dest: "{{ docker_compose.files.env }}"
     mode: "0770"

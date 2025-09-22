@@ -3,7 +3,7 @@
     name: sys-util-csp-cert
 
 - name: create nextcloud proxy configuration file
-  template: 
+  template:
     src:    "nginx/host.conf.j2" 
     dest:   "{{ NEXTCLOUD_HOST_NGINX_PATH }}"
   notify: restart openresty
@@ -31,7 +31,7 @@
   notify: docker compose up
 
 - name: create internal nextcloud nginx configuration
-  template: 
+  template:
     src:  "nginx/docker.conf.j2" 
     dest: "{{ [docker_compose.directories.volumes, 'nginx.conf'] | path_join }}"
   notify: restart nextcloud nginx service

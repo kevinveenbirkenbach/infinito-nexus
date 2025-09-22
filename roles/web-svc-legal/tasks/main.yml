@@ -1,6 +1,6 @@
 ---
 - name:         copy imprint.html
-  template: 
+  template:
     src:        "imprint.html.j2" 
     dest:       "{{NGINX.DIRECTORIES.DATA.HTML}}imprint.html"
     owner:      "{{ NGINX.USER }}"

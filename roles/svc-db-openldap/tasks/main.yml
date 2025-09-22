@@ -5,7 +5,7 @@
     name: docker-compose
 
 - name: Create {{ domains | get_domain(application_id) }}.conf if LDAP is exposed to internet
-  template: 
+  template:
     src:  "nginx.stream.conf.j2" 
     dest: "{{ NGINX.DIRECTORIES.STREAMS }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty

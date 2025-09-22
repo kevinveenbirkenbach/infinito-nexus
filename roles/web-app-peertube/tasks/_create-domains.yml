@@ -3,7 +3,7 @@
     name: sys-util-csp-cert
 
 - name: configure {{ domain }}.conf
-  template: 
+  template:
     src:  "templates/peertube.conf.j2"
     dest: "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
   notify: restart openresty
