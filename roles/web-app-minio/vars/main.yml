@@ -25,7 +25,7 @@ MINIO_CONSOLE_PORT_PUBLIC:      "{{ ports.localhost.http[application_id ~ '_cons
 MINIO_FRONT_PROXY_MATRIX: >-
   {{
     [
-      { 'domain': MINIO_CONSOLE_DOMAIN:, 'http_port': MINIO_CONSOLE_PORT_PUBLIC },
+      { 'domain': MINIO_CONSOLE_DOMAIN, 'http_port': MINIO_CONSOLE_PORT_PUBLIC },
       { 'domain': MINIO_API_DOMAIN,   'http_port': MINIO_API_PORT_PUBLIC }
     ]
   }}
