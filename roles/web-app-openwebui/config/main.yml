@@ -7,6 +7,7 @@ features:
   javascript:       false
   local_ai:         true
   oidc:             true
+  ldap:             false # default deactivated because OIDC is sufficient
 server:
   domains:
     canonical:
