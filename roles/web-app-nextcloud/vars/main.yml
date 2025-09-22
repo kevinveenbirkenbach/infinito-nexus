@@ -66,7 +66,7 @@ NEXTCLOUD_TALK_STUN_PORT:           "{{ ports.public.stun[application_id] }}"
 NEXTCLOUD_TALK_DOMAIN:              "{{ NEXTCLOUD_DOMAIN }}"
 NEXTCLOUD_TALK_LOCATION:            "/standalone-signaling/"
 NEXTCLOUD_TALK_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_LOCATION ] | url_join }}"
-NEXTCLOUD_TALK_INTERNAL_PORT:       "8081"
+NEXTCLOUD_TALK_PORT_INTERNAL:       "8081"
 NEXTCLOUD_TALK_INT_TURN_PORT:       "3478"
 
 ### Whiteboard
@@ -74,7 +74,7 @@ NEXTCLOUD_WHITEBOARD_CONTAINER:     "{{ applications | get_app_conf(application_
 NEXTCLOUD_WHITEBOARD_IMAGE:         "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.image') }}"
 NEXTCLOUD_WHITEBOARD_VERSION:       "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.version') }}"
 NEXTCLOUD_WHITEBOARD_ENABLED:       "{{ applications | get_app_conf(application_id, 'plugins.whiteboard.enabled') }}"
-NEXTCLOUD_WHITEBOARD_INTERNAL_PORT: "3002"
+NEXTCLOUD_WHITEBOARD_PORT_INTERNAL: "3002"
 NEXTCLOUD_WHITEBOARD_JWT:           "{{ applications | get_app_conf(application_id, 'credentials.whiteboard_jwt_secret') }}"
 NEXTCLOUD_WHITEBOARD_LOCATION:      "/whiteboard/"
 NEXTCLOUD_WHITEBOARD_URL:           "{{ [ NEXTCLOUD_URL, NEXTCLOUD_WHITEBOARD_LOCATION ] | url_join }}"

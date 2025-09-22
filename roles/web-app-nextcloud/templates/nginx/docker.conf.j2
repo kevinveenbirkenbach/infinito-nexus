@@ -181,7 +181,7 @@ http {
         }
 
         location {{ NEXTCLOUD_WHITEBOARD_LOCATION }} {
-            proxy_pass         http://whiteboard:{{ NEXTCLOUD_WHITEBOARD_INTERNAL_PORT }}/;
+            proxy_pass         http://whiteboard:{{ NEXTCLOUD_WHITEBOARD_PORT_INTERNAL }}/;
             proxy_http_version 1.1;
             proxy_set_header   Host              $host;
             proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
@@ -191,7 +191,7 @@ http {
         }
 
         location {{ NEXTCLOUD_TALK_LOCATION }} {
-            proxy_pass         http://talk:{{ NEXTCLOUD_TALK_INTERNAL_PORT }}/;
+            proxy_pass         http://talk:{{ NEXTCLOUD_TALK_PORT_INTERNAL }}/;
             proxy_http_version 1.1;
             proxy_set_header   Host              $host;
             proxy_set_header   Upgrade           $http_upgrade;

@@ -36,7 +36,7 @@
 
 {% if NEXTCLOUD_TALK_ENABLED %}
   talk:
-{% set container_port = NEXTCLOUD_TALK_INTERNAL_PORT %}
+{% set container_port = NEXTCLOUD_TALK_PORT_INTERNAL %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
     image: "{{ NEXTCLOUD_TALK_IMAGE }}:{{ NEXTCLOUD_TALK_VERSION }}"
@@ -54,7 +54,7 @@
 
 {% if NEXTCLOUD_WHITEBOARD_ENABLED %}
   whiteboard:
-{% set container_port = NEXTCLOUD_WHITEBOARD_INTERNAL_PORT %}
+{% set container_port = NEXTCLOUD_WHITEBOARD_PORT_INTERNAL %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/nc.yml.j2' %}
     image: "{{ NEXTCLOUD_WHITEBOARD_IMAGE }}:{{ NEXTCLOUD_WHITEBOARD_VERSION }}"
