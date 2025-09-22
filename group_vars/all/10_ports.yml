@@ -76,8 +76,8 @@ ports:
       web-app-magento: 8052
       web-app-bridgy-fed: 8053
       web-app-xwiki: 8054
-      web-app-ai_openwebui: 8055
-      web-app-ai_flowise: 8056
+      web-app-openwebui: 8055
+      web-app-flowise: 8056
       web-app-minio_api: 8057
       web-app-minio_console: 8058
       web-app-bigbluebutton: 48087    # This port is predefined by bbb. @todo Try to change this to a 8XXX port

@@ -1,0 +1,12 @@
+- name: Include dependency 'sys-svc-docker'
+  include_role:
+    name: sys-svc-docker
+  when: run_once_sys_svc_docker is not defined
+
+- name: "include docker-compose role"
+  include_role:
+    name: docker-compose
+  vars:
+    docker_compose_flush_handlers: true
+
+- include_tasks: utils/run_once.yml

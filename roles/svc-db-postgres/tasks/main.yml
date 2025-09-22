@@ -5,7 +5,7 @@
       flush_handlers: true
   when: run_once_svc_db_postgres is not defined
 
-- include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
+- include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
   # Necessary because docker handlers are overwritten by condition
   vars:
     handler_role_name: "docker-compose"

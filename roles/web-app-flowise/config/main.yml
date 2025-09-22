@@ -8,8 +8,7 @@ features:
 server:
   domains:
     canonical:
-      console:  "console.s3.{{ PRIMARY_DOMAIN }}"
-      api:      "api.s3.{{ PRIMARY_DOMAIN }}"
+      flowise:    "flowise.ai.{{ PRIMARY_DOMAIN }}"
     aliases: []
   csp:
     flags: {}
@@ -25,16 +24,32 @@ server:
       connect-src: [] 
 docker:
   services:
-    minio:
+    litellm:
       backup:
         no_stop_required: true
-      image:   quay.io/minio/minio:latest
+      image:   ghcr.io/berriai/litellm
+      version: main-v1.77.3.dynamic_rates
+      name:    litellm
+    qdrant:
+      backup:
+        no_stop_required: true
+      image:   qdrant/qdrant
       version: latest
-      name:    minio
+      name:    qdrant
+    flowise:
+      backup:
+        no_stop_required: true
+      image:   flowiseai/flowise:latest
+      version: latest
+      name:    flowise
     redis:
       enabled: false
     database:
       enabled: false
+    ollama: 
+      enabled: true
   volumes: 
-    data:      minio_data
+    qdrant:     qdrant_data
+    flowise:    flowise_data
 credentials: {}
+

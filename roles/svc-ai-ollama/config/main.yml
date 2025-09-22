@@ -1,0 +1,12 @@
+docker:
+  services:
+    ollama:
+      backup:
+        no_stop_required: true
+      image:    ollama/ollama
+      version:  latest
+      name:     ollama
+      port:     11434
+  volumes:
+    models:     "ollama_models"
+  network:      "ollama"

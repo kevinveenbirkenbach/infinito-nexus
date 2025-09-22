@@ -9,7 +9,7 @@
 - include_tasks: "02_cloudflare.yml"
   when: DNS_PROVIDER == "cloudflare"
 
-- include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
+- include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
   vars:
     handler_role_name: "svc-prx-openresty"
 

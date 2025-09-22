@@ -10,7 +10,7 @@ docker_compose_file_creation_enabled: true
 MINIO_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.minio.version') }}"
 MINIO_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.minio.image') }}"
 MINIO_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.minio.name') }}"
-MINIO_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.minio') }}"
+MINIO_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 
 ## Api
 MINIO_API_DOMAIN:               "{{ applications | get_app_conf(application_id, 'server.domains.canonical.api') }}"

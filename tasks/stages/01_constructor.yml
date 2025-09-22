@@ -128,5 +128,6 @@
     - svc-net     # 3. Load network roles
     - svc-db      # 4. Load database roles
     - svc-prx     # 5. Load proxy roles
+    - svc-ai      # 6. Load ai roles
   loop_control:
     label: "{{ item }}-roles.yml"

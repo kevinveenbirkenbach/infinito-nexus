@@ -104,6 +104,12 @@ defaults_networks:
       subnet: 192.168.103.224/28
     web-app-xwiki:
       subnet: 192.168.103.240/28
+    web-app-openwebui:
+      subnet: 192.168.104.0/28
+    web-app-flowise:
+      subnet: 192.168.104.16/28
+    web-app-minio:
+      subnet: 192.168.104.32/28
 
     # /24 Networks / 254 Usable Clients
     web-app-bigbluebutton:
@@ -116,5 +122,5 @@ defaults_networks:
       subnet: 192.168.201.0/24
     svc-db-openldap:
       subnet: 192.168.202.0/24
-    web-app-ai:
+    svc-ai-ollama:
       subnet: 192.168.203.0/24 # Big network to bridge applications into ai

@@ -2,17 +2,16 @@ features:
   matomo:           true
   css:              true
   desktop:          true
-  central_database: true
+  central_database: false
   logout:           true
   javascript:       false
 server:
   domains:
     canonical:
       openwebui:  "chat.ai.{{ PRIMARY_DOMAIN }}"
-      flowise:    "flowise.ai.{{ PRIMARY_DOMAIN }}"
     aliases: []
   csp:
-    flags: []
+    flags: {}
       #script-src-elem:
       #  unsafe-inline:  true
       #script-src:
@@ -25,13 +24,7 @@ server:
       connect-src: [] 
 docker:
   services:
-    ollama:
-      backup:
-        no_stop_required: true
-      image:   ollama/ollama
-      version: latest
-      name:    ollama
-    open-webui:
+    openwebui:
       backup:
         no_stop_required: true
       image:              ghcr.io/open-webui/open-webui
@@ -39,32 +32,10 @@ docker:
       name:               open-webui
       offline_mode:       false
       hf_hub_offline:     false
-    litellm:
-      backup:
-        no_stop_required: true
-      image:   ghcr.io/berriai/litellm
-      version: main-v1.77.3.dynamic_rates
-      name:    litellm
-    qdrant:
-      backup:
-        no_stop_required: true
-      image:   qdrant/qdrant
-      version: latest
-      name:    qdrant
-    flowise:
-      backup:
-        no_stop_required: true
-      image:   flowiseai/flowise:latest
-      version: latest
-      name:    flowise
     redis:
       enabled: false
     database:
       enabled: false
   volumes: 
     openwebui:  ai_openwebui_data
-    ollama:     ai_ollama_models
-    qdrant:     ai_qdrant_data
-    flowise:    ai_flowise_data
 credentials: {}
-

@@ -1,0 +1,13 @@
+# General
+application_id:                 "svc-ai-ollama"
+
+# Docker
+docker_compose_flush_handlers:  true
+
+# Ollama
+# https://ollama.com/
+OLLAMA_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.ollama.version') }}"
+OLLAMA_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.ollama.image') }}"
+OLLAMA_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.ollama.name') }}"
+OLLAMA_PORT:                    "{{ applications | get_app_conf(application_id, 'docker.services.ollama.port') }}"
+OLLAMA_VOLUME:                  "{{ applications | get_app_conf(application_id, 'docker.volumes.models') }}"

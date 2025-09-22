@@ -1,0 +1,17 @@
+
+# General
+application_id:                       "web-app-openwebui"
+
+# Docker
+docker_pull_git_repository:           false
+docker_compose_file_creation_enabled: true
+
+# Open WebUI
+# https://openwebui.com/
+OPENWEBUI_VERSION:                    "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.version') }}"
+OPENWEBUI_IMAGE:                      "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.image') }}"
+OPENWEBUI_CONTAINER:                  "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.name') }}"
+OPENWEBUI_OFFLINE_MODE:               "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.offline_mode') }}"
+OPENWEBUI_HF_HUB_OFFLINE:             "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.hf_hub_offline') }}"
+OPENWEBUI_VOLUME:                     "{{ applications | get_app_conf(application_id, 'docker.volumes.openwebui') }}"
+OPENWEBUI_PORT_PUBLIC:                "{{ ports.localhost.http[application_id] }}"

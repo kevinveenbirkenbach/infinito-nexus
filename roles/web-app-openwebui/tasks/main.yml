@@ -1,0 +1,13 @@
+---
+- name: "Install Ollama Dependency"
+  include_role:
+    name: svc-ai-ollama
+  vars:
+    flush_handlers: true
+  when:    
+    - run_once_svc_ai_ollama is not defined
+    - OLLAMA_LOCAL_ENABLED | bool
+
+- name: "load docker, proxy for '{{ application_id }}'"
+  include_role:
+    name: sys-stk-full-stateless

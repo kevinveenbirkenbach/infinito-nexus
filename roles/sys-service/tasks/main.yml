@@ -1,5 +1,5 @@
 - name: "Reload sys-daemon handlers"
-  include_tasks: "{{ playbook_dir }}/tasks/utils/load_handlers.yml"
+  include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
   vars:
     handler_role_name: "sys-daemon"
   when: run_once_sys_service is defined

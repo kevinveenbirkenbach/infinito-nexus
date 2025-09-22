@@ -148,6 +148,11 @@ roles:
       description: "Network setup (DNS, Let's Encrypt HTTP, WireGuard, etc.)"
       icon: "fas fa-globe"
       invokable: true 
+    ai:
+      title: "AI Services"
+      description: "Core AI building blocks—model serving, OpenAI-compatible gateways, vector databases, orchestration, and chat UIs."
+      icon: "fas fa-brain"
+      invokable: true
   user:
     title: "Users & Access"
     description: "User accounts & access control"
