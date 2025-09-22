@@ -5,6 +5,7 @@ features:
   central_database: false
   logout:           true
   javascript:       false
+  local_ai:         true
 server:
   domains:
     canonical:
