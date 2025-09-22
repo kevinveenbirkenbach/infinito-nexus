@@ -1,0 +1,74 @@
+features:
+  matomo:           true
+  css:              true
+  desktop:          true
+  central_database: true
+  logout:           true
+  javascript:       false
+server:
+  domains:
+    canonical:
+      openwebui:  "chat.ai.{{ PRIMARY_DOMAIN }}"
+    aliases: []
+  csp:
+    flags: []
+      #script-src-elem:
+      #  unsafe-inline:  true
+      #script-src:
+      #  unsafe-inline:  true
+      #  unsafe-eval:    true
+      #style-src:
+      #  unsafe-inline:  true
+    whitelist:
+      font-src: [] 
+      connect-src: [] 
+docker:
+  services:
+    ollama:
+      backup:
+        no_stop_required: true
+      image:   ollama/ollama
+      version: latest
+      name:    ollama
+    open-webui:
+      backup:
+        no_stop_required: true
+      image:   ghcr.io/open-webui/open-webui
+      version: main
+      name:    open-webui
+    litellm:
+      backup:
+        no_stop_required: true
+      image:   ghcr.io/berriai/litellm
+      version: main-v1.77.3.dynamic_rates
+      name:    litellm
+    qdrant:
+      backup:
+        no_stop_required: true
+      image:   qdrant/qdrant
+      version: latest
+      name:    qdrant
+    flowise:
+      backup:
+        no_stop_required: true
+      image:   flowiseai/flowise:latest
+      version: latest
+      name:    flowise
+    minio:
+      backup:
+        no_stop_required: true
+      image:   quay.io/minio/minio:latest
+      version: latest
+      name:    minio
+    redis:
+      enabled: false
+    database:
+      enabled: false
+  volumes: 
+    openwebui:  ai_openwebui_data
+    ollama:     ai_ollama_models
+    qdrant:     ai_qdrant_data
+    flowise:    ai_flowise_data
+    minio:      ai_minio_data
+credentials: {}
+

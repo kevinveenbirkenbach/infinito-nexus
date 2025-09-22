@@ -1,0 +1,68 @@
+
+# General
+application_id:                     "web-app-ai"
+
+# Docker
+docker_pull_git_repository:           false
+docker_compose_file_creation_enabled: true
+
+# Open WebUI
+# https://openwebui.com/
+AI_OPENWEBUI_URL:               "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+AI_OPENWEBUI_VERSION:           "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.version') }}"
+AI_OPENWEBUI_IMAGE:             "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.image') }}"
+AI_OPENWEBUI_CONTAINER:         "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.name') }}"
+AI_OPENWEBUI_VOLUME:            "{{ applications | get_app_conf(application_id, 'docker.volumes.openwebui') }}"
+AI_OPENWEBUI_PORT:              "{{ ports.localhost.http[application_id ~ '_openwebui'] }}"
+
+# Ollama
+# https://ollama.com/
+AI_OLLAMA_URL:                  "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+AI_OLLAMA_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.ollama.version') }}"
+AI_OLLAMA_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.ollama.image') }}"
+AI_OLLAMA_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.ollama.name') }}"
+AI_OLLAMA_VOLUME:               "{{ applications | get_app_conf(application_id, 'docker.volumes.ollama') }}"
+AI_OLLAMA_PORT:                 11434
+AI_OLLAMA_BASE_URL:             "http://ollama:{{ AI_OLLAMA_PORT }}"
+
+# LiteLLM
+# https://www.litellm.ai/
+AI_LITELLM_URL:                 "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+AI_LITELLM_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.litellm.version') }}"
+AI_LITELLM_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.litellm.image') }}"
+AI_LITELLM_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.litellm.name') }}"
+AI_LITELLM_VOLUME:              "{{ applications | get_app_conf(application_id, 'docker.volumes.litellm') }}"
+AI_LITELLM_PORT:                4000
+AI_LITELLM_INTERNAL_URL:        "http://litellm:{{ AI_LITELLM_PORT }}"
+
+# Qdrant
+# https://qdrant.tech/
+AI_QDRANT_URL:                  "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+AI_QDRANT_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.qdrant.version') }}"
+AI_QDRANT_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.qdrant.image') }}"
+AI_QDRANT_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.qdrant.name') }}"
+AI_QDRANT_VOLUME:               "{{ applications | get_app_conf(application_id, 'docker.volumes.qdrant') }}"
+AI_QDRANT_HTTP_PORT:            6333
+AI_QDRANT_GRPC_PORT:            6334
+AI_QDRANT_INTERNAL_URL:         "http://qdrant:{{ AI_QDRANT_HTTP_PORT }}"
+
+# Flowise
+# https://flowiseai.com/ 
+AI_FLOWISE_URL:                 "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+AI_FLOWISE_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.flowise.version') }}"
+AI_FLOWISE_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.flowise.image') }}"
+AI_FLOWISE_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.flowise.name') }}"
+AI_FLOWISE_VOLUME:              "{{ applications | get_app_conf(application_id, 'docker.volumes.flowise') }}"
+AI_FLOWISE_PUBLIC_PORT:         "{{ ports.localhost.http[application_id ~ '_flowise'] }}"
+AI_FLOWISE_INTERNAL_PORT:       3000
+
+# MINIO
+# https://www.min.io/
+AI_MINIO_URL:                   "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+AI_MINIO_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.minio.version') }}"
+AI_MINIO_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.minio.image') }}"
+AI_MINIO_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.minio.name') }}"
+AI_MINIO_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.minio') }}"
+AI_MINIO_API_PUBLIC_PORT:       "{{ ports.localhost.http[application_id ~ '_minio_api'] }}"
+AI_MINIO_CONSOLE_INTERNAL_PORT: "9001"
+AI_MINIO_CONSOLE_PUBLIC_PORT:   "{{ ports.localhost.http[application_id ~ '_minio_console'] }}"

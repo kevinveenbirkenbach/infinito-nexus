@@ -116,3 +116,5 @@ defaults_networks:
       subnet: 192.168.201.0/24
     svc-db-openldap:
       subnet: 192.168.202.0/24
+    web-app-ai:
+      subnet: 192.168.203.0/24 # Big network to bridge applications into ai
