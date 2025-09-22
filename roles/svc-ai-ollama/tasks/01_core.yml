@@ -1,3 +1,10 @@
+- name: create docker network for Ollama, so that other applications can access it
+  community.docker.docker_network:
+    name: "{{ OLLAMA_NETWORK }}"
+    state: present
+    ipam_config:
+      - subnet: "{{ networks.local[application_id].subnet }}"
+
 - name: Include dependency 'sys-svc-docker'
   include_role:
     name: sys-svc-docker

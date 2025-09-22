@@ -1,5 +1,6 @@
 {# This template needs to be included in docker-compose.yml #}
 networks:
+{# Central RDMS-Database Network #}
 {% if 
   (applications | get_app_conf(application_id, 'features.central_database', False) and database_type is defined) or
   application_id in ['svc-db-mariadb','svc-db-postgres']
@@ -7,6 +8,7 @@ networks:
   {{ applications | get_app_conf('svc-db-' ~ database_type, 'docker.network') }}:
     external: true
 {% endif %}
+{# Central LDAP Network #}
 {% if 
   applications | get_app_conf(application_id, 'features.ldap', False) and 
   applications | get_app_conf('svc-db-openldap', 'network.docker', False)
@@ -14,7 +16,13 @@ networks:
   {{ applications | get_app_conf('svc-db-openldap', 'docker.network') }}:
     external: true
 {% endif %}
-{% if not application_id.startswith('svc-db-') %}
+{# Central AI Network #}
+{% if applications | get_app_conf(application_id, 'features.local_ai', False) %}
+  {{ applications | get_app_conf('svc-ai-ollama', 'docker.network') }}:
+    external: true
+{% endif %}
+{# Default Network #}
+{% if not application_id.startswith('svc-db-') and not application_id.startswith('svc-ai-') %}
   default:
 {% if
   application_id in networks.local and 
