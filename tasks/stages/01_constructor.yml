@@ -90,7 +90,7 @@
             items2dict(key_name='source', value_name='source'),
             recursive=True
           )) |
-          generate_all_domains(WWW_REDIRECT_ENABLED)
+          generate_all_domains(WWW_REDIRECT_ENABLED | bool)
         }}
 
   - name: Merge networks definitions
