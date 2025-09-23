@@ -1,9 +1,10 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-  web:
+  mastodon:
+{% set service_name = 'mastodon' %}
 {% set container_port = 3000 %}
 {% set container_healthcheck = 'health' %}
-    container_name: {{ MASTODON_NAME }}
+    container_name: {{ MASTODON_CONTAINER }}
     image: "{{ MASTODON_IMAGE }}:{{ MASTODON_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p {{ container_port }}"
@@ -16,9 +17,10 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   streaming:
+{% set service_name = 'streaming' %}
 {% set container_port = 4000 %}
 {% set container_healthcheck = 'api/v1/streaming/health' %}
-    container_name: {{ MASTODON_STREAMING_NAME }}
+    container_name: {{ MASTODON_STREAMING_CONTAINER }}
     image: "{{ MASTODON_STREAMING_IMAGE }}:{{ MASTODON_STREAMING_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     command: node ./streaming
@@ -29,7 +31,8 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   sidekiq:
-    container_name: {{ MASTODON_SIDEKIQ_NAME }}
+{% set service_name = 'sidekiq' %}
+    container_name: {{ MASTODON_SIDEKIQ_CONTAINER }}
     image: "{{ MASTODON_IMAGE }}:{{ MASTODON_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     command: bundle exec sidekiq

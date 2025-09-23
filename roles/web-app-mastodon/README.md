@@ -8,12 +8,6 @@ Dive into a decentralized social experience with Mastodon, a vibrant platform th
 
 This role deploys Mastodon using Docker, streamlining the installation and configuration of a full-featured social networking platform. Mastodon is built to support federation across multiple instances, offering robust content moderation, real-time updates, and flexible API integrations. Its advanced architecture—including separate services for the web frontend, streaming API, and background job processing—ensures high performance and scalability for large communities.
 
-For detailed configuration and operational instructions, please refer to the following files in this directory:
-- [Installation.md](./Installation.md)
-- [Administration.md](./Administration.md)
-- [Upgrade.md](./Upgrade.md)
-- [User_Administration.md](./User_Administration.md)
-
 ## Features
 
 - **Decentralized Network:** Connect with users across multiple instances in a federated social media ecosystem.
