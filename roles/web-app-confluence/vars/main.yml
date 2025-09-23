@@ -28,9 +28,9 @@ CONFLUENCE_OIDC_SCOPES:           "openid,email,profile"
 CONFLUENCE_OIDC_UNIQUE_ATTRIBUTE: "{{ OIDC.ATTRIBUTES.USERNAME }}"
 
 ## Docker
-CONFLUENCE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
-CONFLUENCE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
-CONFLUENCE_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
+CONFLUENCE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.confluence.version') }}"
+CONFLUENCE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.confluence.image') }}"
+CONFLUENCE_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.confluence.name') }}"
 CONFLUENCE_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 CONFLUENCE_CUSTOM_IMAGE:          "{{ CONFLUENCE_IMAGE }}_custom"
 

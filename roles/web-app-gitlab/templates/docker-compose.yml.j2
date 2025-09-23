@@ -1,6 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-  web:
+  gitlab:
     image: "{{ GITLAB_IMAGE }}:{{ GITLAB_VERSION }}"
     hostname: '{{ GITLAB_HOSTNAME }}'
     container_name:  "{{ GITLAB_CONTAINER }}"

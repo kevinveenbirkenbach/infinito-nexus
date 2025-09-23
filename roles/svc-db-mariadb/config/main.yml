@@ -1,11 +1,16 @@
 docker:
   services:
     mariadb:
-      version:          "latest"
-      image:            "mariadb"
-      name:             "mariadb"
+      version:            "latest"
+      image:              "mariadb"
+      name:               "mariadb"
       backup:
         database_routine: true
+      # Performance Variables aren't used yet, but will be in the future as soon as an docker file is implemented
+      cpus:               "2.0"
+      mem_reservation:    "2g"
+      mem_limit:          "4g"
+      pids_limit:         1024
   network:              "mariadb"
   volumes:
     data:               "mariadb_data"

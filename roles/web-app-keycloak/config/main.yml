@@ -36,9 +36,13 @@ scopes:
 docker:
   services:
     keycloak:
-      image:    "quay.io/keycloak/keycloak"
-      version:  "latest"
-      name:     "keycloak"
+      image:            "quay.io/keycloak/keycloak"
+      version:          "latest"
+      name:             "keycloak"
+      cpus:             "2.0"
+      mem_reservation:  "2g"
+      mem_limit:        "4g"
+      pids_limit:       1024
     database:
       enabled: true
 

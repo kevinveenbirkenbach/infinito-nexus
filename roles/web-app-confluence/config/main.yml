@@ -3,10 +3,14 @@ docker:
   services:
     database:
       enabled:      true
-    application:
-      image:        atlassian/confluence
-      version:      latest
-      name:         confluence
+    confluence:
+      image:            atlassian/confluence
+      version:          latest
+      name:             confluence
+      cpus:             "3.0"
+      mem_reservation:  "6g"
+      mem_limit:        "8g"
+      pids_limit:       2048
   volumes:
     data:           "confluence_data"
 features:

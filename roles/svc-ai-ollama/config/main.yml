@@ -5,10 +5,14 @@ docker:
     ollama:
       backup:
         no_stop_required: true
-      image:    ollama/ollama
-      version:  latest
-      name:     ollama
-      port:     11434
+      image:              ollama/ollama
+      version:            latest
+      name:               ollama
+      port:               11434
+      cpus:               "4.0"
+      mem_reservation:    "6g"
+      mem_limit:          "8g"
+      pids_limit:         2048
   volumes:
     models:     "ollama_models"
   network:      "ollama"

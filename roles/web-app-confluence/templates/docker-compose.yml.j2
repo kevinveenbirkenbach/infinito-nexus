@@ -1,5 +1,5 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-  application:
+  confluence:
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ CONFLUENCE_CUSTOM_IMAGE }}"
     container_name: "{{ CONFLUENCE_CONTAINER }}"

@@ -17,7 +17,7 @@ The role builds a lean custom image on top of the official Jira Software image, 
 * **JVM Auto-Tuning:** Safe calculation of `JVM_MINIMUM_MEMORY` / `JVM_MAXIMUM_MEMORY` with caps to avoid VM init errors.
 * **Health Checks:** Container healthcheck for quicker failure detection and stable automation.
 * **CSP & Canonical Domains:** Integrates with platform CSP and domain management.
-* **Backup Ready:** Persistent data under `/var/atlassian/application-data/jira`.
+* **Backup Ready:** Persistent data under `{{ JIRA_STORAGE_PATH }}`.
 
 ## Further Resources
 

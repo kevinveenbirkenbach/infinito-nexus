@@ -1,6 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-  application:
+  keycloak:
     image: "{{ KEYCLOAK_IMAGE }}:{{ KEYCLOAK_VERSION }}"
     container_name: {{ KEYCLOAK_CONTAINER }}
     command: start{% if KEYCLOAK_REALM_IMPORT_ENABLED %} --import-realm{% endif %}{% if KEYCLOAK_DEBUG_ENABLED %} --verbose{% endif %}

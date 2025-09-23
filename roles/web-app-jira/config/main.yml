@@ -4,10 +4,14 @@ docker:
   services:
     database:
       enabled:      true
-    application:
-      image:        atlassian/jira-software
-      version:      latest
-      name:         jira
+    jira:
+      image:            atlassian/jira-software
+      version:          latest
+      name:             jira
+      cpus:             "2.0"
+      mem_reservation:  "4g"
+      mem_limit:        "6g"
+      pids_limit:       2048
   volumes:
     data:           "jira_data"
 features:

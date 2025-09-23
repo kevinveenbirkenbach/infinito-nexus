@@ -1,6 +1,6 @@
 
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-  application:
+  jira:
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ JIRA_CUSTOM_IMAGE }}"
     container_name: "{{ JIRA_CONTAINER }}"
@@ -8,7 +8,7 @@
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:8080"
     volumes:
-      - 'data:/var/atlassian/application-data/jira'
+      - 'data:{{ JIRA_STORAGE_PATH }}'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}

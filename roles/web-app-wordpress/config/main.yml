@@ -45,11 +45,11 @@ server:
 docker:
   services:
     database:
-      enabled:          true
+      enabled:            true
     wordpress:
-      version:          latest 
-      image:            wordpress
-      name:             wordpress 
+      version:            latest 
+      image:              wordpress
+      name:               wordpress 
       backup:
         no_stop_required: true
   volumes: 

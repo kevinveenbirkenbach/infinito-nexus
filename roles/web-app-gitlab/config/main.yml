@@ -12,9 +12,13 @@ docker:
     database: 
       enabled:      true
     gitlab:
-      image:        "gitlab/gitlab-ee"
-      version:      "latest"
-      name:         "gitlab"
+      image:            "gitlab/gitlab-ee"
+      version:          "latest"
+      name:             "gitlab"
+      cpus:             "4.0"
+      mem_reservation:  "8g"
+      mem_limit:        "12g"
+      pids_limit:        4096
   volumes:
     data:           "gitlab_data"
     logs:           "gitlab_logs"

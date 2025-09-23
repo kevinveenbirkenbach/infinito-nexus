@@ -2,13 +2,17 @@ docker:
   services:
     postgres:
       # Postgis is necessary for mobilizon
-      image:    postgis/postgis
-      name:     postgres
+      image:              postgis/postgis
+      name:               postgres
       # Please set an version in your inventory file! 
       # Rolling release isn't recommended
-      version:  "latest"
+      version:            "latest"
       backup:
         database_routine: true
+      cpus:               "2.0"
+      mem_reservation:    "4g"
+      mem_limit:          "6g"
+      pids_limit:         1024
   volumes:
     data:     "postgres_data"
   network:    "postgres"
