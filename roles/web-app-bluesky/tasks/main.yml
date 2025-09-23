@@ -38,3 +38,13 @@
 - name: "DNS for Bluesky"
   include_tasks: "03_dns.yml"
   when: DNS_PROVIDER | lower == 'cloudflare'
+
+- name: "Redirect deactivated BlueSky Services to {{ BLUESKY_API_DOMAIN }}"
+  include_role:
+    name: web-opt-rdr-domains
+  vars:
+    redirect_domain_mappings: >-
+      {{
+        ( (BLUESKY_WEB_ENABLED  | bool) | ternary([], [ {'source': BLUESKY_WEB_DOMAIN,  'target': BLUESKY_API_DOMAIN } ]) )
+        + ( (BLUESKY_VIEW_ENABLED | bool) | ternary([], [ {'source': BLUESKY_VIEW_DOMAIN, 'target': BLUESKY_API_DOMAIN } ]) )
+      }}
