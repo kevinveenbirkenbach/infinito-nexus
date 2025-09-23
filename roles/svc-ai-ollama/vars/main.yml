@@ -12,3 +12,5 @@ OLLAMA_CONTAINER:               "{{ applications | get_app_conf(application_id, 
 OLLAMA_PORT:                    "{{ applications | get_app_conf(application_id, 'docker.services.ollama.port') }}"
 OLLAMA_VOLUME:                  "{{ applications | get_app_conf(application_id, 'docker.volumes.models') }}"
 OLLAMA_NETWORK:                 "{{ applications | get_app_conf(application_id, 'docker.network') }}"
+OLLAMA_PRELOAD_MODELS:          "{{ applications | get_app_conf(application_id, 'preload_models') }}"
+

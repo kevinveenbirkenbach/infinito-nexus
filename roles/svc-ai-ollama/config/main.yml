@@ -12,3 +12,7 @@ docker:
   volumes:
     models:     "ollama_models"
   network:      "ollama"
+preload_models:
+  - "llama3:latest"
+  - "mistral:latest"
+  - "nomic-embed-text:latest"
