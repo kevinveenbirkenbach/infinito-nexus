@@ -33,7 +33,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: {{networks.local[application_id].subnet}}
+        - subnet: {{ networks.local[application_id].subnet }}
 {% endif %}
 {% endif %}
 {{ "\n" }}
