@@ -24,9 +24,21 @@ MINIO_CONSOLE_URL:              "{{ domains | get_url(application_id, WEB_PROTOC
 MINIO_CONSOLE_PORT_INTERNAL:    9001
 MINIO_CONSOLE_PORT_PUBLIC:      "{{ ports.localhost.http[application_id ~ '_console'] }}"
 
+## MC
+MINIO_MC_IMAGE:                 "quay.io/minio/mc:latest"
+MINIO_MC_INSECURE:              false   # set to true if you use self-signed TLS
+MINIO_MC_SCHEME:                "{{ 'https' if (MINIO_API_URL is match('^https://')) else 'http' }}"
+MINIO_MC_HOST_ONLY:             "{{ MINIO_API_URL | regex_replace('^https?://', '') }}"
+MINIO_MC_USER:                  "{{ users.administrator.username | urlencode }}"
+MINIO_MC_PASS:                  "{{ users.administrator.password | urlencode }}"
+MINIO_MC_INSECURE_SUFFIX:       "{{ '?insecure=true' if (MINIO_MC_INSECURE | bool) else '' }}"
+MINIO_MC_HOST_ENV:              "{{ MINIO_MC_SCHEME }}://{{ MINIO_MC_USER }}:{{ MINIO_MC_PASS }}@{{ MINIO_MC_HOST_ONLY }}{{ MINIO_MC_INSECURE_SUFFIX }}"
+
 ## OIDC
 MINIO_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
 MINIO_OIDC_POLICY_NAME:         "{{ [ RBAC.GROUP.NAME, application_id ~ '-administrator' ] | path_join }}"
+MINIO_OIDC_POLICY_CONTENT:      "{{ lookup('template', 'policy.json.j2') }}"
+MINIO_OIDC_POLICY_NAME_SAFE:    "{{ (MINIO_OIDC_POLICY_NAME | regex_replace('^/+','')) | regex_replace('/','-') }}"
 
 MINIO_FRONT_PROXY_MATRIX: >-
   {{

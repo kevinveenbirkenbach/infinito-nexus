@@ -1,13 +1,4 @@
 ---
-- name: "Install Ollama Dependency"
-  include_role:
-    name: svc-ai-ollama
-  vars:
-    flush_handlers: true
-  when:    
-    - run_once_svc_ai_ollama is not defined
-    - OLLAMA_LOCAL_ENABLED | bool
-
 - name: "load docker and db for {{ application_id }}"
   include_role:
     name: sys-stk-back-stateless
@@ -25,16 +16,32 @@
     label: "{{ item.domain }} -> {{ item.http_port }}"
 
 - block:
-    - name: "Render MinIO policy into variable"
-      set_fact:
-        minio_policy_content: "{{ lookup('template', 'policy.json.j2') }}"
+    - name: "Check policy (RAW with slash) exists"
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+      shell: >
+        docker run --rm
+        -e MC_HOST_minio={{ MINIO_MC_HOST_ENV | quote }}
+        {{ MINIO_MC_IMAGE }}
+        admin policy info minio {{ MINIO_OIDC_POLICY_NAME | quote }}
+      register: mc_policy_info_raw
+      failed_when: false
+      changed_when: false
 
-    - name: "Apply MinIO policy {{ MINIO_OIDC_POLICY_NAME }}"
+    - name: "Create policy (RAW with slash) if missing"
       shell: |
         set -euo pipefail
-        mc alias set minio {{ MINIO_API_URL }} {{ users.administrator.username }} {{ users.administrator.password }}
-        mc admin policy create minio {{ MINIO_OIDC_POLICY_NAME }} /dev/stdin || true
-      args:
-        executable: /bin/bash
-        stdin: "{{ minio_policy_content }}"
+        printf '%s' '{{ (MINIO_OIDC_POLICY_CONTENT | from_yaml | to_json) | b64encode }}' \
+          | base64 -d \
+          | docker run --rm -i \
+              -e MC_HOST_minio={{ MINIO_MC_HOST_ENV | quote }} \
+              {{ MINIO_MC_IMAGE }} \
+              admin policy create minio {{ MINIO_OIDC_POLICY_NAME | quote }} /dev/stdin
+      args: { executable: /bin/bash }
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+      async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+      poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+      when:
+        - mc_policy_info_raw.rc != 0
+
   when: MINIO_OIDC_ENABLED | bool
+

@@ -3,14 +3,16 @@
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": [
-        "s3:*",
-        "admin:*"
-      ],
+      "Action": ["s3:*"],
       "Resource": [
         "arn:aws:s3:::*",
-        "arn:minio:admin:::*"
+        "arn:aws:s3:::*/*"
       ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["admin:*"],
+      "Resource": ["*"]
     }
   ]
 }
