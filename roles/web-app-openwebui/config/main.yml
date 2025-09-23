@@ -1,6 +1,6 @@
 features:
   matomo:           true
-  css:              true
+  css:              false
   desktop:          true
   central_database: false
   logout:           true
