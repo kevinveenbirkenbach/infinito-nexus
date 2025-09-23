@@ -3,8 +3,6 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ FLOWISE_LITELLM_IMAGE }}:{{ FLOWISE_LITELLM_VERSION }}
     container_name: {{ FLOWISE_LITELLM_CONTAINER }}
-    depends_on:
-      - ollama
     expose:
       - {{ FLOWISE_LITELLM_PORT }}
     volumes:

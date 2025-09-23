@@ -23,9 +23,6 @@
 - name: "flush handlers of docker compose"
   meta: flush_handlers
 
-- name: "Include role sys-stk-front-proxy for each UI domain"
+- name: "Include role sys-stk-front-proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-front-proxy
-  vars:
-    domain:    "{{ item.domain }}"
-    http_port: "{{ item.http_port }}"

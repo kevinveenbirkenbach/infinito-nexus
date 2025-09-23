@@ -8,8 +8,8 @@ features:
   local_ai:         true
 server:
   domains:
-    canonical:
-      flowise:    "flowise.ai.{{ PRIMARY_DOMAIN }}"
+    canonical: 
+      - "flow.ai.{{ PRIMARY_DOMAIN }}"
     aliases: []
   csp:
     flags: {}
@@ -40,7 +40,7 @@ docker:
     flowise:
       backup:
         no_stop_required: true
-      image:   flowiseai/flowise:latest
+      image:   flowiseai/flowise
       version: latest
       name:    flowise
     redis:
