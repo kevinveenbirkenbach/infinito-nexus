@@ -1,5 +1,3 @@
-Here are user-focused **README.md** drafts for the four roles, following your template structure and describing the **role** (what the installed software does for users), not the folder.
-
 # Open WebUI
 
 ## Description
