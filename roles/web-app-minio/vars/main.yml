@@ -38,7 +38,6 @@ MINIO_MC_HOST_ENV:              "{{ MINIO_MC_SCHEME }}://{{ MINIO_MC_USER }}:{{ 
 MINIO_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
 MINIO_OIDC_POLICY_NAME:         "{{ [ RBAC.GROUP.NAME, application_id ~ '-administrator' ] | path_join }}"
 MINIO_OIDC_POLICY_CONTENT:      "{{ lookup('template', 'policy.json.j2') }}"
-MINIO_OIDC_POLICY_NAME_SAFE:    "{{ (MINIO_OIDC_POLICY_NAME | regex_replace('^/+','')) | regex_replace('/','-') }}"
 
 MINIO_FRONT_PROXY_MATRIX: >-
   {{
