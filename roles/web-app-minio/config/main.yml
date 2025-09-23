@@ -9,6 +9,8 @@ features:
   oidc:             true
   ldap:             false # OIDC is already activated so LDAP isn't necessary
 server:
+  status_codes:
+    api: 400
   domains:
     canonical:
       console:  "console.s3.{{ PRIMARY_DOMAIN }}"
@@ -16,13 +18,6 @@ server:
     aliases: []
   csp:
     flags: {}
-      #script-src-elem:
-      #  unsafe-inline:  true
-      #script-src:
-      #  unsafe-inline:  true
-      #  unsafe-eval:    true
-      #style-src:
-      #  unsafe-inline:  true
     whitelist:
       font-src: []
       connect-src: [] 
