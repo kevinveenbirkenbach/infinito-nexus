@@ -1,0 +1,4 @@
+cpus:               {{ applications | get_app_conf( application_id,  [ 'docker', 'services', service_name|default(application_id | get_entity_name ), 'cpus'            ] |join('.'), False, RESOURCE_CPUS) }}
+mem_reservation:    {{ applications | get_app_conf( application_id,  [ 'docker', 'services', service_name|default(application_id | get_entity_name ), 'mem_reservation' ] |join('.'), False, RESOURCE_MEM_RESERVATION) }}
+mem_limit:          {{ applications | get_app_conf( application_id,  [ 'docker', 'services', service_name|default(application_id | get_entity_name ), 'mem_limit'       ] |join('.'), False, RESOURCE_MEM_LIMIT) }}
+pids_limit:         {{ applications | get_app_conf( application_id,  [ 'docker', 'services', service_name|default(application_id | get_entity_name ), 'pids_limit'      ] |join('.'), False, RESOURCE_PIDS_LIMIT) }}

@@ -1,0 +1,41 @@
+# Host resources
+RESOURCE_HOST_CPUS:  "{{ ansible_processor_vcpus | int }}"
+RESOURCE_HOST_MEM:   "{{ (ansible_memtotal_mb | int) // 1024 }}"
+
+# Reserve for OS
+RESOURCE_HOST_RESERVE_CPU: 2
+RESOURCE_HOST_RESERVE_MEM: 4
+
+# Available for apps
+RESOURCE_AVAIL_CPUS: "{{ (RESOURCE_HOST_CPUS | int) - (RESOURCE_HOST_RESERVE_CPU | int) }}"
+RESOURCE_AVAIL_MEM:  "{{ (RESOURCE_HOST_MEM  | int) - (RESOURCE_HOST_RESERVE_MEM | int) }}"
+
+# Count active docker services (only roles starting with web- or svc-; service counts if enabled==true OR enabled is undefined)
+RESOURCE_ACTIVE_DOCKER_CONTAINER_COUNT: >-
+  {{
+    applications
+    | active_docker_container_count(group_names, '^(web-|svc-).*', ensure_min_one=True)
+  }}
+
+# Per-container fair share (numbers!), later we append 'g' only for the string fields in compose
+RESOURCE_CPUS_NUM: >-
+  {{
+    ((RESOURCE_AVAIL_CPUS | float) / (RESOURCE_ACTIVE_DOCKER_CONTAINER_COUNT | float))
+    | round(2)
+  }}
+RESOURCE_MEM_RESERVATION_NUM: >-
+  {{
+    (((RESOURCE_AVAIL_MEM  | float) / (RESOURCE_ACTIVE_DOCKER_CONTAINER_COUNT | float)) * 0.7)
+    | round(1)
+  }}
+RESOURCE_MEM_LIMIT_NUM: >-
+  {{
+    (((RESOURCE_AVAIL_MEM  | float) / (RESOURCE_ACTIVE_DOCKER_CONTAINER_COUNT | float)) * 1.0)
+    | round(1)
+  }}
+
+# Final strings with units for compose defaults (keep numbers above for math elsewhere if needed)
+RESOURCE_CPUS:            "{{ RESOURCE_CPUS_NUM }}"
+RESOURCE_MEM_RESERVATION: "{{ RESOURCE_MEM_RESERVATION_NUM }}g"
+RESOURCE_MEM_LIMIT:       "{{ RESOURCE_MEM_LIMIT_NUM }}g"
+RESOURCE_PIDS_LIMIT: 512
