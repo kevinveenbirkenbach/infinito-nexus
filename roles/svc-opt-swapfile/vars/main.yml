@@ -1,2 +1,3 @@
 application_id: "svc-opt-swapfile"
-swapfile_size:  "{{ applications | get_app_conf(application_id, 'swapfile_size') }}"
+
+SWAPFILE_SIZE:  "{{ applications | get_app_conf(application_id, 'swapfile_size') }}"
