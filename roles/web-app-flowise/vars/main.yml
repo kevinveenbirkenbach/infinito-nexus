@@ -23,6 +23,8 @@ FLOWISE_LITELLM_PORT:                 4000
 FLOWISE_LITELLM_INTERNAL_URL:         "http://litellm:{{ FLOWISE_LITELLM_PORT }}"
 FLOWISE_LITELLM_CONFIG_PATH_HOST:     "{{ [ docker_compose.directories.config, 'litellm.config.yaml' ] | path_join }}" 
 FLOWISE_LITELLM_CONFIG_PATH_DOCKER:   "/etc/litellm/config.yaml"
+FLOWISE_LITELLM_MASTER_KEY:           "{{ applications | get_app_conf(application_id, 'credentials.llm_master_key') }}"
+
 
 ## Qdrant
 # https://qdrant.tech/
