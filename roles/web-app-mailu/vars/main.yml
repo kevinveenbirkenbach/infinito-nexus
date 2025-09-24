@@ -34,6 +34,7 @@ MAILU_WEBMAIL_DATA:                   "mailu_webmail_data"
 MAILU_FILTER_VOLUME:                  "mailu_filter"
 MAILU_DKIM_VOLUME:                    "mailu_dkim"
 MAILU_DOVECOT_MAIL_VOLUME:            "mailu_dovecot_mail"
+MAILU_CLAMAV_VOLUME:                  "mailu_clamav_data"
 
 ## Network
 MAILU_DNS_RESOLVER:                   "{{ networks.local['web-app-mailu'].dns_resolver }}"

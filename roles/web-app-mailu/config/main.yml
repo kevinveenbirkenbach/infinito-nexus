@@ -29,10 +29,73 @@ rbac:
       description: "Has an token to send and receive emails"
 docker:
   services:
-    redis:
-      enabled: true
-    database:
-      enabled: true
     mailu:
-      version:  "2024.06" # Docker Image Version
-      name:     mailu
+      version:            "2024.06"
+      name:               mailu
+    redis:
+      enabled:            true
+      cpus:               "0.2"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
+    database:
+      enabled:            true
+      cpus:               "0.8"
+      mem_reservation:    "1g"
+      mem_limit:          "2g"
+      pids_limit:         512
+    admin:
+      cpus:               "0.3"
+      mem_reservation:    "512m"
+      mem_limit:          "1g"
+      pids_limit:         512
+    imap:
+      cpus:               "0.5"
+      mem_reservation:    "1g"
+      mem_limit:          "1.5g"
+      pids_limit:         512
+    smtp:
+      cpus:               "0.5"
+      mem_reservation:    "1g"
+      mem_limit:          "1.5g"
+      pids_limit:         512
+    antispam:
+      cpus:               "0.6"
+      mem_reservation:    "1g"
+      mem_limit:          "1.5g"
+      pids_limit:         512
+    antivirus:
+      cpus:               "0.6"
+      mem_reservation:    "2g"
+      mem_limit:          "3g"
+      pids_limit:         512
+    oletools:
+      cpus:               "0.2"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
+    webdav:
+      cpus:               "0.2"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
+    fetchmail:
+      cpus:               "0.2"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
+    webmail:
+      cpus:               "0.3"
+      mem_reservation:    "512m"
+      mem_limit:          "1g"
+      pids_limit:         512
+    resolver:
+      cpus:               "0.2"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
+    front:
+      cpus:               "0.3"
+      mem_reservation:    "512m"
+      mem_limit:          "1g"
+      pids_limit:         512

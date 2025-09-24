@@ -16,4 +16,5 @@
       retries: 30
     networks:
       - default
+    {{ lookup('template', 'roles/docker-container/templates/resource.yml.j2',vars={'service_name':'redis'}) | indent(4) }}
 {{ "\n" }}

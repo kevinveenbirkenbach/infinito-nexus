@@ -2,6 +2,7 @@
 
   # Core services
   resolver:
+{% set service_name = 'resolver' %}
     image: {{ MAILU_DOCKER_FLAVOR }}/unbound:{{ MAILU_VERSION }}
     container_name: {{ MAILU_CONTAINER }}_resolver
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -9,6 +10,7 @@
         ipv4_address: {{ MAILU_DNS_RESOLVER }}
 
   front:
+{% set service_name = 'front' %}
     container_name: {{ MAILU_CONTAINER }}_front
     image: {{ MAILU_DOCKER_FLAVOR }}/nginx:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -35,6 +37,7 @@
       - {{ MAILU_DNS_RESOLVER }}
       
   admin:
+{% set service_name = 'admin' %}
     container_name: {{ MAILU_CONTAINER }}_admin
     image: {{ MAILU_DOCKER_FLAVOR }}/admin:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -51,6 +54,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   imap:
+{% set service_name = 'imap' %}
     container_name: {{ MAILU_CONTAINER }}_imap
     image: {{ MAILU_DOCKER_FLAVOR }}/dovecot:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -65,6 +69,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   smtp:
+{% set service_name = 'smtp' %}
     container_name: {{ MAILU_CONTAINER }}_smtp
     image: {{ MAILU_DOCKER_FLAVOR }}/postfix:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -79,6 +84,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   oletools:
+{% set service_name = 'oletools' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     container_name: {{ MAILU_CONTAINER }}_oletools
     image: {{ MAILU_DOCKER_FLAVOR }}/oletools:{{ MAILU_VERSION }}
@@ -91,6 +97,7 @@
       noinet:
 
   antispam:
+{% set service_name = 'antispam' %}
     container_name: {{ MAILU_CONTAINER }}_antispam
     image: {{ MAILU_DOCKER_FLAVOR }}/rspamd:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -108,14 +115,13 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       noinet:  
 
-
-  # Optional services
   antivirus:
+{% set service_name = 'antivirus' %}
     container_name: {{ MAILU_CONTAINER }}_antivirus
     image: clamav/clamav-debian:latest
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
-      - "filter:/data"
+      - "clamav_db:/var/lib/clamav"
     depends_on:
       - resolver
     dns:
@@ -123,6 +129,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   webdav:
+{% set service_name = 'webdav' %}
     container_name: {{ MAILU_CONTAINER }}_webdav
     image: {{ MAILU_DOCKER_FLAVOR }}/radicale:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -136,6 +143,7 @@
       radicale:
 
   fetchmail:
+{% set service_name = 'fetchmail' %}
     container_name: {{ MAILU_CONTAINER }}_fetchmail
     image: {{ MAILU_DOCKER_FLAVOR }}/fetchmail:{{ MAILU_VERSION }}
     volumes:
@@ -151,6 +159,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   webmail:
+{% set service_name = 'webmail' %}
     container_name: {{ MAILU_CONTAINER }}_webmail
     image: {{ MAILU_DOCKER_FLAVOR }}/webmail:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -177,6 +186,8 @@
     name: {{ MAILU_WEBMAIL_DATA }}
   filter:
     name: {{ MAILU_FILTER_VOLUME }}
+  clamav_db:
+    name: {{ MAILU_CLAMAV_VOLUME }}
   dkim:
     name: {{ MAILU_DKIM_VOLUME }}
   dovecot_mail:
