@@ -43,8 +43,8 @@ WEBSERVER_CPUS_EFFECTIVE: >-
 # - else → floor to int
 WEBSERVER_WORKER_PROCESSES: >-
   {{
-    1 if WEBSERVER_CPUS_EFFECTIVE < 1
-    else (WEBSERVER_CPUS_EFFECTIVE | int)
+    1 if (WEBSERVER_CPUS_EFFECTIVE | float) < 1
+    else (WEBSERVER_CPUS_EFFECTIVE | float | int)
   }}
 
 # worker_connections from pids_limit (use the smaller one), with correct key/defaults
@@ -52,7 +52,7 @@ WEBSERVER_WORKER_CONNECTIONS: >-
   {{
     [
       (applications | resource_filter('svc-prx-openresty', 'pids_limit', service_name | default(''), RESOURCE_PIDS_LIMIT)) | int,
-      (applications | resource_filter(application_id,           'pids_limit', service_name | default(''), RESOURCE_PIDS_LIMIT)) | int
+      (applications | resource_filter(application_id,      'pids_limit', service_name | default(''), RESOURCE_PIDS_LIMIT)) | int
     ] | min
   }}
 
