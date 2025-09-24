@@ -1,6 +1,6 @@
-worker_processes auto;
+worker_processes {{ WEBSERVER_WORKER_PROCESSES }};
 
-events { worker_connections 1024; }
+events { worker_connections {{ WEBSERVER_WORKER_CONNECTIONS }}; }
 
 http {
   include       /etc/nginx/mime.types;

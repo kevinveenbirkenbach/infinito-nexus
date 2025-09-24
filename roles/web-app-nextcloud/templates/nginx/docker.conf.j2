@@ -2,7 +2,7 @@
 # Verify time by time, that this rules are valid:
 # https://docs.nextcloud.com/server/latest/admin_manual/installation/nginx.html
 
-worker_processes auto;
+worker_processes {{ WEBSERVER_WORKER_PROCESSES }};
 
 # @see https://chatgpt.com/share/67aa3ce9-eea0-800f-85e8-ac54a3810b13
 error_log   /proc/self/fd/2 {% if MODE_DEBUG | bool %}debug{% else %}warn{% endif %};
@@ -10,7 +10,7 @@ pid        /var/run/nginx.pid;
 
 
 events {
-    worker_connections  1024;
+    worker_connections {{ WEBSERVER_WORKER_CONNECTIONS }};
 }
 
 
