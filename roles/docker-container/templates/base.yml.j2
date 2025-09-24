@@ -7,5 +7,7 @@
 {% endif %}
     logging:
       driver: journald
-    {{ lookup('template', 'roles/docker-container/templates/resource.yml.j2') | indent(4) }}
+{% filter indent(4) %}
+    {% include 'roles/docker-container/templates/resource.yml.j2' %}
+{% endfilter %}
 {{ "\n" }}
