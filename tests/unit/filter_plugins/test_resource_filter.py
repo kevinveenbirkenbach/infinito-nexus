@@ -1,32 +1,34 @@
 # tests/unit/filter_plugins/test_resource_filter.py
 import unittest
 from unittest.mock import patch
-
 import importlib
+
+# Import the plugin module under test
 plugin_module = importlib.import_module("filter_plugins.resource_filter")
 
 
 class TestResourceFilter(unittest.TestCase):
     def setUp(self):
+        # Reload to ensure a clean module state for each test
         importlib.reload(plugin_module)
 
         self.applications = {"some": "dict"}
         self.application_id = "web-app-foo"
         self.key = "cpus"
 
-        # Patch get_app_conf und get_entity_name im Plugin
+        # Patch get_app_conf and get_entity_name inside the plugin module
         self.patcher_conf = patch.object(plugin_module, "get_app_conf")
         self.patcher_entity = patch.object(plugin_module, "get_entity_name")
         self.mock_get_app_conf = self.patcher_conf.start()
         self.mock_get_entity_name = self.patcher_entity.start()
-        self.mock_get_entity_name.return_value = "foo"  # abgeleiteter Service-Name
+        self.mock_get_entity_name.return_value = "foo"  # derived service name
 
     def tearDown(self):
         self.patcher_conf.stop()
         self.patcher_entity.stop()
 
     def test_primary_service_value_found(self):
-        # Primary liefert direkt einen Wert
+        """Returns the value when get_app_conf finds it for an explicit service."""
         self.mock_get_app_conf.return_value = "0.75"
 
         result = plugin_module.resource_filter(
@@ -39,11 +41,15 @@ class TestResourceFilter(unittest.TestCase):
 
         self.assertEqual(result, "0.75")
         self.mock_get_app_conf.assert_called_once_with(
-            self.applications, "docker.services.openresty.cpus", False, None
+            self.applications,
+            self.application_id,
+            "docker.services.openresty.cpus",
+            False,
+            "0.5",
         )
 
     def test_service_name_empty_uses_get_entity_name(self):
-        # service_name == "" → get_entity_name(application_id) -> "foo"
+        """When service_name is empty, it resolves via get_entity_name(application_id)."""
         self.mock_get_app_conf.return_value = "1.0"
 
         result = plugin_module.resource_filter(
@@ -57,12 +63,19 @@ class TestResourceFilter(unittest.TestCase):
         self.assertEqual(result, "1.0")
         self.mock_get_entity_name.assert_called_once_with(self.application_id)
         self.mock_get_app_conf.assert_called_once_with(
-            self.applications, "docker.services.foo.cpus", False, None
+            self.applications,
+            self.application_id,
+            "docker.services.foo.cpus",
+            False,
+            "0.5",
         )
 
     def test_returns_hard_default_when_missing(self):
-        # Kein Wert im primary → verwende hard_default
-        self.mock_get_app_conf.return_value = None
+        """
+        If the primary value is missing, get_app_conf (strict=False) should return the provided
+        default. We simulate that by returning the default value directly from the mock.
+        """
+        self.mock_get_app_conf.return_value = "2g"
 
         result = plugin_module.resource_filter(
             self.applications,
@@ -74,10 +87,36 @@ class TestResourceFilter(unittest.TestCase):
 
         self.assertEqual(result, "2g")
         self.mock_get_app_conf.assert_called_once_with(
-            self.applications, "docker.services.openresty.mem_limit", False, None
+            self.applications,
+            self.application_id,
+            "docker.services.openresty.mem_limit",
+            False,
+            "2g",
+        )
+
+    def test_hard_default_passthrough_type(self):
+        """Ensure the hard_default (including non-string types) is passed through correctly."""
+        self.mock_get_app_conf.return_value = 2048  # simulate get_app_conf returning the default
+
+        result = plugin_module.resource_filter(
+            self.applications,
+            self.application_id,
+            key="pids_limit",
+            service_name="openresty",
+            hard_default=2048,
+        )
+
+        self.assertEqual(result, 2048)
+        self.mock_get_app_conf.assert_called_once_with(
+            self.applications,
+            self.application_id,
+            "docker.services.openresty.pids_limit",
+            False,
+            2048,
         )
 
     def test_raises_ansible_filter_error_on_config_errors(self):
+        """Underlying config errors must be wrapped as AnsibleFilterError."""
         self.mock_get_app_conf.side_effect = plugin_module.AppConfigKeyError("bad path")
 
         with self.assertRaises(plugin_module.AnsibleFilterError):

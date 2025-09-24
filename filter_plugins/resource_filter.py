@@ -28,12 +28,7 @@ def resource_filter(
     """
     try:
         primary_service = service_name if service_name != "" else get_entity_name(application_id)
-
-        val = get_app_conf(applications, f"docker.services.{primary_service}.{key}", False, None)
-        if val is not None:
-            return val
-
-        return hard_default
+        return get_app_conf(applications, application_id, f"docker.services.{primary_service}.{key}", False, hard_default)
     except (AppConfigKeyError, ConfigEntryNotSetError) as e:
         raise AnsibleFilterError(str(e))
 
