@@ -20,9 +20,15 @@ RESOURCE_ACTIVE_DOCKER_CONTAINER_COUNT: >-
 # Per-container fair share (numbers!), later we append 'g' only for the string fields in compose
 RESOURCE_CPUS_NUM: >-
   {{
-    ((RESOURCE_AVAIL_CPUS | float) / (RESOURCE_ACTIVE_DOCKER_CONTAINER_COUNT | float))
-    | round(2)
+    [
+      (
+        ((RESOURCE_AVAIL_CPUS | float) / (RESOURCE_ACTIVE_DOCKER_CONTAINER_COUNT | float))
+        | round(2)
+      ),
+      0.5
+    ] | max
   }}
+
 RESOURCE_MEM_RESERVATION_NUM: >-
   {{
     (((RESOURCE_AVAIL_MEM  | float) / (RESOURCE_ACTIVE_DOCKER_CONTAINER_COUNT | float)) * 0.7)
@@ -38,4 +44,4 @@ RESOURCE_MEM_LIMIT_NUM: >-
 RESOURCE_CPUS:            "{{ RESOURCE_CPUS_NUM }}"
 RESOURCE_MEM_RESERVATION: "{{ RESOURCE_MEM_RESERVATION_NUM }}g"
 RESOURCE_MEM_LIMIT:       "{{ RESOURCE_MEM_LIMIT_NUM }}g"
-RESOURCE_PIDS_LIMIT: 512
+RESOURCE_PIDS_LIMIT:      512
