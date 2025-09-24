@@ -1,6 +1,7 @@
 # General
 application_id:               "web-app-jira"
 database_type:                "postgres"
+entity_name:                  "{{ application_id | get_entity_name }}"
 
 # Container
 container_port:               8080   # Standardport Jira
@@ -28,15 +29,12 @@ JIRA_OIDC_SCOPES:             "openid,email,profile"
 JIRA_OIDC_UNIQUE_ATTRIBUTE:   "{{ OIDC.ATTRIBUTES.USERNAME }}"
 
 ## Docker
-JIRA_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.jira.version') }}"
-JIRA_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.jira.image') }}"
-JIRA_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.jira.name') }}"
+JIRA_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+JIRA_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+JIRA_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
 JIRA_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 JIRA_CUSTOM_IMAGE:            "{{ JIRA_IMAGE }}_custom"
 
-## Performance (auto-derive from host memory)
-JIRA_TOTAL_MB:                "{{ ansible_memtotal_mb | int }}"
-JIRA_JVM_MAX_MB:              "{{ [ (JIRA_TOTAL_MB | int // 2), 12288 ] | min }}"
-JIRA_JVM_MIN_MB:              "{{ [ (JIRA_TOTAL_MB | int // 4), (JIRA_JVM_MAX_MB | int) ] | min }}"
-JIRA_JVM_MIN:                 "{{ JIRA_JVM_MIN_MB }}m"
-JIRA_JVM_MAX:                 "{{ JIRA_JVM_MAX_MB }}m"
+## Performance (derive from container limits in config/main.yml)
+JIRA_JVM_MAX:                 "{{ applications | jvm_max_mb(application_id) }}m"
+JIRA_JVM_MIN:                 "{{ applications | jvm_min_mb(application_id) }}m"
