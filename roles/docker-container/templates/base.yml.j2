@@ -1,6 +1,6 @@
 {# Base for docker services #}
 
-    restart: {{ DOCKER_RESTART_POLICY }}
+    restart: {{ docker_restart_policy | default(DOCKER_RESTART_POLICY) }}
 {% if application_id | has_env  %}
     env_file:
       - "{{ docker_compose.files.env }}"

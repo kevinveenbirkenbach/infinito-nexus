@@ -77,25 +77,3 @@
   when: ldap_check.query_result | length == 0
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-
-# This works just after the first admin login
-# @todo Remove and replace trough LDAP RBAC group
-- name: Set LDAP user as admin via OpenProject Rails runner
-  shell: >
-    docker compose exec web bash -c "
-      cd /app &&
-      RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"
-        user = User.find_by(mail: '{{ users.administrator.email }}');
-        if user.nil?;
-          puts 'User with email {{ users.administrator.email }} not found.';
-        else;
-          user.admin = true;
-          user.save!;
-          puts 'User \#{user.login} is now an admin.';
-        end
-      \"
-    "
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

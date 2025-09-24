@@ -42,18 +42,44 @@ docker:
       version:  "13"    # Update when available. No rolling release implemented
       backup:
         no_stop_required: true
+      cpus:               "1.0"
+      mem_reservation:    "1.5g"
+      mem_limit:          "2g"
+      pids_limit:         512
     seeder:
       name:     openproject-seeder
+      cpus:               "0.3"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
     cron:
-      name:     openproject-cron
+      name:               openproject-cron
+      cpus:               "0.3"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
     worker:
-      name:     openproject-worker
+      name:             openproject-worker
+      cpus:             "0.8"
+      mem_reservation:  "1g"
+      mem_limit:        "1.5g"
+      pids_limit:       512
     proxy:
       name:     openproject-proxy
+      cpus:               "0.3"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
     cache:
-      name:     openproject-cache
-      image:    "" # If need a specific memcached image you have to define it here, otherwise the version from svc-db-memcached will be used
-      version:  "" # If need a specific memcached version you have to define it here, otherwise the version from svc-db-memcached will be used
+      name:               openproject-cache
+      image:              "" # If need a specific memcached image you have to define it here, otherwise the version from svc-db-memcached will be used
+      version:            "" # If need a specific memcached version you have to define it here, otherwise the version from svc-db-memcached will be used
+      cpus:               "0.3"
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
     
   volumes:
     data: "openproject_data"
+
+

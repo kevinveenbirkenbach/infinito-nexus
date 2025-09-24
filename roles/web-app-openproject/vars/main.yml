@@ -4,39 +4,50 @@ application_id:                 "web-app-openproject"
 # Database
 database_type:                  "postgres"
 
+# Docker
+docker_repository_branch:       "stable/{{ OPENPROJECT_VERSION }}"
+docker_repository_address:      "https://github.com/opf/openproject-deploy"
+docker_pull_git_repository:     true
+docker_compose_flush_handlers:  false
+
 # Open Project Specific
-openproject_version:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version') }}"
-openproject_image:              "{{ applications | get_app_conf(application_id, 'docker.services.web.image') }}"
-openproject_volume:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-openproject_web_name:           "{{ applications | get_app_conf(application_id, 'docker.services.web.name') }}"
-openproject_seeder_name:        "{{ applications | get_app_conf(application_id, 'docker.services.seeder.name') }}"
-openproject_cron_name:          "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
-openproject_proxy_name:         "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name') }}"
-openproject_worker_name:        "{{ applications | get_app_conf(application_id, 'docker.services.worker.name') }}"
+OPENPROJECT_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version') }}"
+OPENPROJECT_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.web.image') }}"
+OPENPROJECT_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+OPENPROJECT_WEB_CONTAINER:      "{{ applications | get_app_conf(application_id, 'docker.services.web.name') }}"
+OPENPROJECT_SEEDER_CONTAINER:   "{{ applications | get_app_conf(application_id, 'docker.services.seeder.name') }}"
+OPENPROJECT_CRON_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
+OPENPROJECT_PROXY_CONTAINER:    "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name') }}"
+OPENPROJECT_WORKER_CONTAINER:   "{{ applications | get_app_conf(application_id, 'docker.services.worker.name') }}"
+
+## Admin
+OPENPROJECT_ADMINISTRATOR_USERNAME: "{{ users.administrator.username }}"
+OPENPROJECT_ADMINISTRATOR_PASSWORD: "{{ users.administrator.password }}"
+OPENPROJECT_ADMINISTRATOR_EMAIL:    "{{ users.administrator.email }}"
 
 # Open Project Cache
-openproject_cache_name:         "{{ applications | get_app_conf(application_id, 'docker.services.cache.name') }}"
-openproject_cache_image:        "{{ applications
+OPENPROJECT_CACHE_CONTAINER:    "{{ applications | get_app_conf(application_id, 'docker.services.cache.name') }}"
+OPENPROJECT_CACHE_IMAGE:        "{{ applications
      | get_app_conf(application_id, 'docker.services.cache.image')
      or applications
        | get_app_conf('svc-db-memcached', 'docker.services.memcached.image')
   }}"
 
-openproject_cache_version: "{{ applications
+OPENPROJECT_CACHE_VERSION: "{{ applications
      | get_app_conf(application_id, 'docker.services.cache.version')
      or applications
        | get_app_conf('svc-db-memcached', 'docker.services.memcached.version')
   }}"
 
       
-openproject_plugins_folder:   "{{ docker_compose.directories.volumes }}plugins/"
+OPENPROJECT_PLUGINS_FOLDER:   "{{ docker_compose.directories.volumes }}plugins/"
 
-openproject_custom_image:     "custom_openproject"
+OPENPROJECT_CUSTOM_IMAGE:     "custom_openproject"
 
 # The following volume doesn't have a practcical function. It just exist to prevent the creation of unnecessary anonymous volumes
-openproject_dummy_volume:     "{{ docker_compose.directories.volumes }}dummy_volume"
+OPENPROJECT_DUMMY_VOLUME:     "{{ docker_compose.directories.volumes }}dummy_volume"
 
-openproject_rails_settings:
+OPENPROJECT_RAILS_SETTINGS:
   email_delivery_method:      "smtp"
   smtp_address:               "{{ SYSTEM_EMAIL.HOST }}"
   smtp_domain:                "{{ SYSTEM_EMAIL.DOMAIN }}"
@@ -44,15 +55,11 @@ openproject_rails_settings:
   smtp_password:              "{{ users['no-reply'].mailu_token }}"
   smtp_ssl:                   false
 
-openproject_filters:
-  administrators: "{{ '(memberOf=cn=openproject-admins,' ~ LDAP.DN.OU.ROLES ~ ')' 
+## LDAP
+OPENPROJECT_LDAP_ENABLED:     "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
+OPENPROJECT_LDAP_FILTERS:
+  # The administrator filter just works in the Enterprise edition
+  ADMINISTRATORS: "{{ '(memberOf=cn=openproject-admins,' ~ LDAP.DN.OU.ROLES ~ ')' 
        if applications | get_app_conf(application_id, 'ldap.filters.administrators') else '' }}"
-
-  users: "{{ '(memberOf=cn=openproject-users,' ~ LDAP.DN.OU.ROLES ~ ')' 
+  USERS: "{{ '(memberOf=cn=openproject-users,' ~ LDAP.DN.OU.ROLES ~ ')' 
        if applications | get_app_conf(application_id, 'ldap.filters.users') else '' }}"
-
-# Docker
-docker_repository_branch:       "stable/{{ openproject_version }}"
-docker_repository_address:      "https://github.com/opf/openproject-deploy"
-docker_pull_git_repository:     true
-docker_compose_flush_handlers:  false

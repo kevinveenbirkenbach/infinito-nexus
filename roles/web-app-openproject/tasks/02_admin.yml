@@ -1,0 +1,30 @@
+- name: Ensure administrator user exists and is admin
+  shell: >
+    docker compose exec web bash -c "
+      cd /app &&
+      RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"
+        u = User.find_by(login: '{{ OPENPROJECT_ADMINISTRATOR_USERNAME }}')
+        if u.nil?
+          u = User.new(
+            login: '{{ OPENPROJECT_ADMINISTRATOR_USERNAME }}',
+            mail: '{{ OPENPROJECT_ADMINISTRATOR_EMAIL }}',
+            firstname: 'Admin',
+            lastname: 'User',
+            password: '{{ OPENPROJECT_ADMINISTRATOR_PASSWORD }}',
+            password_confirmation: '{{ OPENPROJECT_ADMINISTRATOR_PASSWORD }}'
+          )
+          u.admin = true
+          u.save!
+          puts 'Administrator {{ OPENPROJECT_ADMINISTRATOR_USERNAME }} created and set as admin.'
+        else
+          u.admin = true
+          u.save!
+          puts 'User {{ OPENPROJECT_ADMINISTRATOR_USERNAME }} updated to admin.'
+        end
+      \"
+    "
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
