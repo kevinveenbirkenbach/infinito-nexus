@@ -20,6 +20,7 @@ server:
         - https://cdn.jsdelivr.net
       connect-src:
         - https://ka-f.fontawesome.com
+        - https://cdn.jsdelivr.net
         - "{{ WEB_PROTOCOL }}://auth.{{ PRIMARY_DOMAIN }}" 
       frame-src:
         - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
