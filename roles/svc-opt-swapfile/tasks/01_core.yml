@@ -1,0 +1,18 @@
+- name: Include dependency 'pkgmgr-install'
+  include_role:
+    name: pkgmgr-install
+  when: run_once_pkgmgr_install is not defined
+
+- name: "pkgmgr install"
+  include_role:
+    name: pkgmgr-install
+  vars:
+    package_name: swap-forge
+
+- name: Execute create swapfile script
+  shell: swap-forge "{{ SWAPFILE_SIZE }}"
+  become: true
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- include_tasks: utils/run_once.yml

@@ -6,6 +6,12 @@
     state: present
   notify: docker restart
 
+- name: Setup Swapfile to prevent OOM Failures
+  # @ See https://en.wikipedia.org/wiki/Out_of_memory
+  include_role:
+    name: "svc-opt-swapfile"
+  when: run_once_svc_opt_swapfile is not defined
+
 - name: "Load reset tasks when MODE_RESET is enabled"
   include_tasks: "02_reset.yml"
   when: MODE_RESET | bool
