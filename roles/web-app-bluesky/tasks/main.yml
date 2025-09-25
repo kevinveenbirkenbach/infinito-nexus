@@ -20,11 +20,11 @@
     proxy_extra_configuration:  "{{ BLUESKY_FRONT_PROXY_CONTENT }}"
   when: BLUESKY_WEB_ENABLED | bool
 
-- name: "Include front proxy for {{ BLUESKY_VIEW_DOMAIN }}:{{ BLUESKY_VIEW_PORT }}"
+- name: "Include front proxy for {{ BLUESKY_VIEW_DOMAIN_FINAL }}:{{ BLUESKY_VIEW_PORT }}"
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain: "{{ BLUESKY_VIEW_DOMAIN }}"
+    domain: "{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
     http_port: "{{ BLUESKY_VIEW_PORT }}"
   when: BLUESKY_VIEW_ENABLED | bool
 
@@ -44,7 +44,7 @@
     BLUESKY_REDIRECT_DOMAIN_MAPPINGS: >-
       {{
         ( (BLUESKY_WEB_ENABLED  | bool) | ternary([], [ {'source': BLUESKY_WEB_DOMAIN,  'target': BLUESKY_API_DOMAIN } ]) )
-        + ( (BLUESKY_VIEW_ENABLED | bool) | ternary([], [ {'source': BLUESKY_VIEW_DOMAIN, 'target': BLUESKY_API_DOMAIN } ]) )
+        + ( (BLUESKY_VIEW_ENABLED | bool) | ternary([], [ {'source': BLUESKY_VIEW_DOMAIN_LOCAL, 'target': BLUESKY_API_DOMAIN } ]) )
       }}
 
 - name: "Redirect deactivated BlueSky Services to {{ BLUESKY_API_DOMAIN }}"

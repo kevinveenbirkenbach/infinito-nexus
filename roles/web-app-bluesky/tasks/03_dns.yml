@@ -60,13 +60,13 @@
         ]
         +
         (
-          (BLUESKY_VIEW_DOMAIN != 'api.bsky.app')
+          (BLUESKY_VIEW_DOMAIN_FINAL != 'api.bsky.app')
           | ternary([
               {
                 'type': 'A',
                 'solo': True,
-                'zone': (BLUESKY_VIEW_DOMAIN | to_zone),
-                'name': BLUESKY_VIEW_DOMAIN,
+                'zone': (BLUESKY_VIEW_DOMAIN_FINAL | to_zone),
+                'name': BLUESKY_VIEW_DOMAIN_FINAL,
                 'content': networks.internet.ip4,
                 'proxied': False,
                 'state': (
@@ -77,8 +77,8 @@
               {
                 'type': 'AAAA',
                 'solo': True,
-                'zone': (BLUESKY_VIEW_DOMAIN | to_zone),
-                'name': BLUESKY_VIEW_DOMAIN,
+                'zone': (BLUESKY_VIEW_DOMAIN_FINAL | to_zone),
+                'name': BLUESKY_VIEW_DOMAIN_FINAL,
                 'content': (networks.internet.ip6 | default('')),
                 'proxied': False,
                 'state': (
