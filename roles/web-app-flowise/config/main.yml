@@ -21,7 +21,8 @@ server:
       #style-src:
       #  unsafe-inline:  true
     whitelist:
-      font-src: [] 
+      font-src:
+        - https://fonts.googleapis.com
       connect-src: [] 
 docker:
   services:

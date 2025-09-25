@@ -61,5 +61,5 @@ OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED: "{{ applications | get_app_conf(
 OPENPROJECT_LDAP_FILTER_USERS_ENABLED:          "{{ applications | get_app_conf(application_id, 'ldap.filters.users') }}"
 OPENPROJECT_LDAP_FILTERS:
   # The administrator filter just works in the Enterprise edition
-  ADMINISTRATORS: "{{ '(memberOf=cn=openproject-admins,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED else '' }}"
-  USERS: "{{ '(memberOf=cn=openproject-users,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_USERS_ENABLED else '' }}"
+  ADMINISTRATORS: "{{ '(memberOf=cn=openproject-admins,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED | bool else '' }}"
+  USERS:          "{{ '(memberOf=cn=openproject-users,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_USERS_ENABLED | bool else '' }}"
