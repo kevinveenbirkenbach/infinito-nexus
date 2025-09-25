@@ -40,7 +40,7 @@
             'zone': (BLUESKY_WEB_DOMAIN | to_zone),
             'name': BLUESKY_WEB_DOMAIN,
             'content': networks.internet.ip4,
-            'proxied': True,
+            'proxied': False,
             'state': ((BLUESKY_WEB_ENABLED | bool) | ternary('present','absent')),
           },
           {
@@ -49,7 +49,7 @@
             'zone': (BLUESKY_WEB_DOMAIN | to_zone),
             'name': BLUESKY_WEB_DOMAIN,
             'content': (networks.internet.ip6 | default('')),
-            'proxied': True,
+            'proxied': False,
             'state': (
               ((BLUESKY_WEB_ENABLED | bool)
                and (networks.internet.ip6 is defined)
