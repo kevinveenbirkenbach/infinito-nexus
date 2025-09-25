@@ -26,15 +26,12 @@
 - name: flush docker service
   meta: flush_handlers
 
-- name: Execute Migrations
-  include_tasks: 01_migration.yml
-
 - name: Deploy Settings
-  include_tasks: 02_settings.yml
+  include_tasks: 01_settings.yml
 
 - name: Setup LDAP
-  include_tasks: 03_ldap.yml
+  include_tasks: 02_ldap.yml
   when: OPENPROJECT_LDAP_ENABLED | bool
 
 - name: Create OpenProject Administrator
-  include_tasks: 04_admin.yml
+  include_tasks: 03_admin.yml
