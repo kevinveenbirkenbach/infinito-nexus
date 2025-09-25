@@ -8,7 +8,7 @@ oauth2_proxy:
       - "/oauth/token"        # Necessary for Nextcloud Plugin to work
 ldap:
   filters:
-    administrators:   True    # Set true to filter administrators
+    administrators:   False   # Set true to filter administrators
     users:            False   # Set true to filter users
 features:
   matomo:             true
@@ -37,9 +37,9 @@ docker:
     database:
       enabled: true
     web:
-      name:     openproject-web
-      image:    openproject/community
-      version:  "13"    # Update when available. No rolling release implemented
+      name:               openproject-web
+      image:              openproject/community
+      version:            "13"    # Update when available. No rolling release implemented
       backup:
         no_stop_required: true
       cpus:               "1.0"
@@ -47,7 +47,7 @@ docker:
       mem_limit:          "2g"
       pids_limit:         512
     seeder:
-      name:     openproject-seeder
+      name:               openproject-seeder
       cpus:               "0.3"
       mem_reservation:    "256m"
       mem_limit:          "512m"
@@ -80,6 +80,4 @@ docker:
       pids_limit:         256
     
   volumes:
-    data: "openproject_data"
-
-
+    data:                 "openproject_data"
