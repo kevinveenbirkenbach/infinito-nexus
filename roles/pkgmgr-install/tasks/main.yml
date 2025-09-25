@@ -4,7 +4,7 @@
       run_once_pkgmgr_install: true
   when: run_once_pkgmgr_install is not defined
 
-- name: update {{ package_name }}
+- name: "update {{ package_name }}"
   ansible.builtin.shell: |
     source ~/.venvs/pkgmgr/bin/activate
     pkgmgr update {{ package_name }} --dependencies --clone-mode https
