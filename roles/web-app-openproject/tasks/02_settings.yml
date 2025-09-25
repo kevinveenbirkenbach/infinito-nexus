@@ -1,0 +1,10 @@
+- name: Set settings in OpenProject
+  shell: >
+    docker compose exec {{ OPENPROJECT_WEB_SERVICE }} bash -c "cd /app &&
+    RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"Setting[:{{ item.key }}] = '{{ item.value }}'\""
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  loop:   "{{ OPENPROJECT_RAILS_SETTINGS | dict2items }}"
+  async:  "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:   "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

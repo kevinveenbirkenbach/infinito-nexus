@@ -12,7 +12,7 @@
 - name: "Transfering Gemfile.plugins to {{ OPENPROJECT_PLUGINS_FOLDER }}"
   copy:
     src: Gemfile.plugins
-    dest: "{{ OPENPROJECT_PLUGINS_FOLDER }}Gemfile.plugins"
+    dest: "{{ [OPENPROJECT_PLUGINS_FOLDER,'Gemfile.plugins'] | path_join }}"
   notify:
     - docker compose up
     - docker compose build
@@ -26,20 +26,15 @@
 - name: flush docker service
   meta: flush_handlers
 
-- name: Set settings in OpenProject
-  shell: >
-    docker compose exec web bash -c "cd /app &&
-    RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"Setting[:{{ item.key }}] = '{{ item.value }}'\""
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  loop:   "{{ OPENPROJECT_RAILS_SETTINGS | dict2items }}"
-  async:  "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:   "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+- name: Execute Migrations
+  include_tasks: 01_migration.yml
+
+- name: Deploy Settings
+  include_tasks: 02_settings.yml
 
 - name: Setup LDAP
-  include_tasks: 01_ldap.yml
+  include_tasks: 03_ldap.yml
   when: OPENPROJECT_LDAP_ENABLED | bool
 
 - name: Create OpenProject Administrator
-  include_tasks: 02_admin.yml
+  include_tasks: 04_admin.yml

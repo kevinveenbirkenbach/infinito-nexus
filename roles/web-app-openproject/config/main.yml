@@ -38,8 +38,8 @@ docker:
       enabled: true
     web:
       name:               openproject-web
-      image:              openproject/community
-      version:            "13"    # Update when available. No rolling release implemented
+      image:              openproject/openproject
+      version:            "14"    # Update when available. No rolling release implemented
       backup:
         no_stop_required: true
       cpus:               "3.0"

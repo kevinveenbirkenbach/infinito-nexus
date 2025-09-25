@@ -23,16 +23,16 @@ x-op-app: &app
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
     environment:
-      APP_HOST: web
+      APP_HOST: {{ OPENPROJECT_WEB_SERVICE }}
     depends_on:
-      - web
+      - {{ OPENPROJECT_WEB_SERVICE }}
     volumes:
       - "data:/var/openproject/assets"
       - "{{ OPENPROJECT_DUMMY_VOLUME }}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
 
-  web:
+  {{ OPENPROJECT_WEB_SERVICE }}:
     <<: *app
-{% set service_name = 'web' %}
+{% set service_name = OPENPROJECT_WEB_SERVICE %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     command: "./docker/prod/web"
     container_name: {{ OPENPROJECT_WEB_CONTAINER }}
@@ -40,7 +40,7 @@ x-op-app: &app
 {% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
       cache:
         condition: service_started
-      seeder:
+      {{ OPENPROJECT_SEEDER_SERVICE }}:
         condition: service_started
 {% set container_port = 8080 %}
 {% set container_healthcheck = 'health_checks/default' %}
@@ -59,7 +59,7 @@ x-op-app: &app
 {% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
       cache:
         condition: service_started
-      seeder:
+      {{ OPENPROJECT_SEEDER_SERVICE }}:
         condition: service_started
     volumes:
       - "data:/var/openproject/assets"
@@ -75,15 +75,15 @@ x-op-app: &app
 {% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
       cache:
         condition: service_started
-      seeder:
+      {{ OPENPROJECT_SEEDER_SERVICE }}:
         condition: service_started
     volumes:
       - "data:/var/openproject/assets"
       - "{{ OPENPROJECT_DUMMY_VOLUME }}:/var/openproject/pgdata" # This mount is unnecessary and just done to prevent anonymous volumes
 
-  seeder:
+  {{ OPENPROJECT_SEEDER_SERVICE }}:
     <<: *app
-{% set service_name = 'seeder' %}
+{% set service_name = OPENPROJECT_SEEDER_SERVICE %}
 {% set docker_restart_policy = 'on-failure' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     command: "./docker/prod/seeder"

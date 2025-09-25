@@ -11,4 +11,4 @@ COPY volumes/plugins/Gemfile.plugins /app/
 # RUN npm add npm <package-name>*
 
 RUN bundle config unset deployment && bundle install && bundle config set deployment 'true'
-RUN ./docker/prod/setup/postinstall.sh
+RUN ./docker/prod/setup/precompile-assets.sh
