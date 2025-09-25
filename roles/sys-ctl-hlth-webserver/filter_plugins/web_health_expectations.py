@@ -1,4 +1,3 @@
-# roles/sys-ctl-hlth-webserver/filter_plugins/web_health_expectations.py
 import os
 import sys
 from collections.abc import Mapping
@@ -94,6 +93,26 @@ def _normalize_selection(group_names):
         raise ValueError("web_health_expectations: 'group_names' must be provided and non-empty")
     return sel
 
+def _normalize_codes(x):
+    """
+    Accepts:
+      - single code (int or str)
+      - list/tuple/set of codes
+    Returns a de-duplicated list of valid ints (100..599) in original order.
+    """
+    if x is None:
+        return []
+    if isinstance(x, (list, tuple, set)):
+        out = []
+        seen = set()
+        for v in x:
+            c = _valid_http_code(v)
+            if c is not None and c not in seen:
+                seen.add(c)
+                out.append(c)
+        return out
+    c = _valid_http_code(x)
+    return [c] if c is not None else []
 
 def web_health_expectations(applications, www_enabled: bool = False, group_names=None, redirect_maps=None):
     """Produce a **flat mapping**: domain -> [expected_status_codes].
@@ -138,17 +157,15 @@ def web_health_expectations(applications, www_enabled: bool = False, group_names
         sc_map = {}
         if isinstance(sc_raw, Mapping):
             for k, v in sc_raw.items():
-                code = _valid_http_code(v)
-                if code is not None:
-                    sc_map[str(k)] = code
+                codes = _normalize_codes(v)
+                if codes:
+                    sc_map[str(k)] = codes
 
         if isinstance(canonical_raw, Mapping) and canonical_raw:
             for key, domains in canonical_raw.items():
                 domains_list = _to_list(domains, allow_mapping=False)
-                code = _valid_http_code(sc_map.get(key))
-                if code is None:
-                    code = _valid_http_code(sc_map.get("default"))
-                expected = [code] if code is not None else list(DEFAULT_OK)
+                codes = sc_map.get(key) or sc_map.get("default")
+                expected = list(codes) if codes else list(DEFAULT_OK)
                 for d in domains_list:
                     if d:
                         expectations[d] = expected
@@ -156,8 +173,8 @@ def web_health_expectations(applications, www_enabled: bool = False, group_names
             for d in _to_list(canonical_raw, allow_mapping=True):
                 if not d:
                     continue
-                code = _valid_http_code(sc_map.get("default"))
-                expectations[d] = [code] if code is not None else list(DEFAULT_OK)
+                codes = sc_map.get("default")
+                expectations[d] = list(codes) if codes else list(DEFAULT_OK)
 
         for d in aliases:
             if d:

@@ -1,5 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   litellm:
+{% set service_name = 'litellm' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ FLOWISE_LITELLM_IMAGE }}:{{ FLOWISE_LITELLM_VERSION }}
     container_name: {{ FLOWISE_LITELLM_CONTAINER }}
@@ -14,6 +15,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   qdrant:
+{% set service_name = 'qdrant' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ FLOWISE_QDRANT_IMAGE }}:{{ FLOWISE_QDRANT_VERSION }}
     container_name: {{ FLOWISE_QDRANT_CONTAINER }}
@@ -25,6 +27,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   flowise:
+{% set service_name = 'flowise' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ FLOWISE_IMAGE }}:{{ FLOWISE_VERSION }}
     container_name: {{ FLOWISE_CONTAINER }}

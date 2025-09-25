@@ -12,38 +12,51 @@ server:
       - "flow.ai.{{ PRIMARY_DOMAIN }}"
     aliases: []
   csp:
-    flags: {}
-      #script-src-elem:
-      #  unsafe-inline:  true
-      #script-src:
-      #  unsafe-inline:  true
-      #  unsafe-eval:    true
-      #style-src:
-      #  unsafe-inline:  true
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
     whitelist:
       font-src:
+        - https://fonts.gstatic.com
+      style-src-elem:
         - https://fonts.googleapis.com
-      connect-src: [] 
+      script-src-elem:
+        - https://fonts.googleapis.com
+        - https://fonts.gstatic.com
+        - https://r.wdfl.co
+      connect-src: []
 docker:
   services:
     litellm:
       backup:
         no_stop_required: true
-      image:   ghcr.io/berriai/litellm
-      version: main-v1.77.3.dynamic_rates
-      name:    litellm
+      image:              ghcr.io/berriai/litellm
+      version:            main-v1.77.3.dynamic_rates
+      name:               litellm
+      cpus:               "1.0"
+      mem_reservation:    "0.5g"
+      mem_limit:          "1g"
+      pids_limit:         1024
     qdrant:
       backup:
         no_stop_required: true
-      image:   qdrant/qdrant
-      version: latest
-      name:    qdrant
+      image:              qdrant/qdrant
+      version:            latest
+      name:               qdrant
+      cpus:               "2.0"
+      mem_reservation:    "2g"
+      mem_limit:          "4g"
+      pids_limit:         2048
     flowise:
       backup:
-        no_stop_required: true
-      image:   flowiseai/flowise
-      version: latest
-      name:    flowise
+        no_stop_required: false # As long as SQLite is used
+      image:              flowiseai/flowise
+      version:            latest
+      name:               flowise
+      cpus:               "1.0"
+      mem_reservation:    "1g"
+      mem_limit:          "2g"
+      pids_limit:         1024
     redis:
       enabled: false
     database:

@@ -1,4 +1,3 @@
-# tests/unit/roles/sys-ctl-hlth-webserver/filter_plugins/test_web_health_expectations.py
 import os
 import unittest
 import importlib.util
@@ -272,7 +271,131 @@ class TestWebHealthExpectationsFilter(unittest.TestCase):
         )
         self.assertNotIn("ignored.example.org", out)
         self.assertEqual(out["manual.example.org"], [301])
+        
+    # --------- NEW: status_codes list support ---------
 
+    def test_flat_canonical_with_default_list(self):
+        apps = {"app-l1": {}}
+        self._configure_returns({
+            ("app-l1", "server.domains.canonical"): ["l1.example.org"],
+            ("app-l1", "server.domains.aliases"):   [],
+            ("app-l1", "server.status_codes"):      {"default": [204, "302", 301]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l1"])
+        self.assertEqual(out["l1.example.org"], [204, 302, 301])
+
+    def test_keyed_canonical_with_list_and_default_list(self):
+        apps = {"app-l2": {}}
+        self._configure_returns({
+            ("app-l2", "server.domains.canonical"): {
+                "api":  ["api1.l2.example.org", "api2.l2.example.org"],
+                "web":  "web.l2.example.org",
+            },
+            ("app-l2", "server.domains.aliases"):   [],
+            ("app-l2", "server.status_codes"):      {"api": [301, 403], "default": [200, 204]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l2"])
+        self.assertEqual(out["api1.l2.example.org"], [301, 403])  # per-key list wins
+        self.assertEqual(out["api2.l2.example.org"], [301, 403])
+        self.assertEqual(out["web.l2.example.org"],  [200, 204])  # default list
+
+    def test_status_codes_strings_and_ints_and_out_of_range_ignored(self):
+        apps = {"app-l3": {}}
+        # 99 (<100) and 700 (>599) are ignored, "301" string is converted
+        self._configure_returns({
+            ("app-l3", "server.domains.canonical"): ["l3.example.org"],
+            ("app-l3", "server.domains.aliases"):   [],
+            ("app-l3", "server.status_codes"):      {"default": ["301", 200, 99, 700]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l3"])
+        self.assertEqual(out["l3.example.org"], [301, 200])
+
+    def test_status_codes_deduplicate_preserve_order(self):
+        apps = {"app-l4": {}}
+        self._configure_returns({
+            ("app-l4", "server.domains.canonical"): ["l4.example.org"],
+            ("app-l4", "server.domains.aliases"):   [],
+            ("app-l4", "server.status_codes"):      {"default": [301, 302, 301, 302, 200]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l4"])
+        self.assertEqual(out["l4.example.org"], [301, 302, 200])  # dedup but keep order
+
+    def test_key_specific_int_overrides_default_list(self):
+        apps = {"app-l5": {}}
+        self._configure_returns({
+            ("app-l5", "server.domains.canonical"): {"console": ["c1.l5.example.org"]},
+            ("app-l5", "server.domains.aliases"):   [],
+            ("app-l5", "server.status_codes"):      {"console": 301, "default": [200, 204]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l5"])
+        self.assertEqual(out["c1.l5.example.org"], [301])  # per-key int beats default list
+
+    def test_key_specific_list_overrides_default_int(self):
+        apps = {"app-l6": {}}
+        self._configure_returns({
+            ("app-l6", "server.domains.canonical"): {"api": "api.l6.example.org"},
+            ("app-l6", "server.domains.aliases"):   [],
+            ("app-l6", "server.status_codes"):      {"api": [301, 403], "default": 200},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l6"])
+        self.assertEqual(out["api.l6.example.org"], [301, 403])
+
+    def test_invalid_default_list_falls_back_to_DEFAULT_OK(self):
+        apps = {"app-l7": {}}
+        # everything invalid → fall back to DEFAULT_OK
+        self._configure_returns({
+            ("app-l7", "server.domains.canonical"): ["l7.example.org"],
+            ("app-l7", "server.domains.aliases"):   [],
+            ("app-l7", "server.status_codes"):      {"default": ["x", 42.42, {}, 700, 99]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l7"])
+        self.assertEqual(out["l7.example.org"], [200, 302, 301])
+
+    def test_key_with_invalid_list_uses_default_list(self):
+        apps = {"app-l8": {}}
+        self._configure_returns({
+            ("app-l8", "server.domains.canonical"): {"web": "web.l8.example.org"},
+            ("app-l8", "server.domains.aliases"):   [],
+            ("app-l8", "server.status_codes"):      {"web": ["foo", None], "default": [204, 206]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l8"])
+        self.assertEqual(out["web.l8.example.org"], [204, 206])
+
+    def test_key_and_default_both_invalid_falls_back_to_DEFAULT_OK(self):
+        apps = {"app-l9": {}}
+        self._configure_returns({
+            ("app-l9", "server.domains.canonical"): {"api": "api.l9.example.org"},
+            ("app-l9", "server.domains.aliases"):   [],
+            ("app-l9", "server.status_codes"):      {"api": ["bad"], "default": ["also", "bad"]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l9"])
+        self.assertEqual(out["api.l9.example.org"], [200, 302, 301])
+
+    def test_aliases_still_forced_to_301_even_with_default_list(self):
+        apps = {"app-l10": {}}
+        self._configure_returns({
+            ("app-l10", "server.domains.canonical"): ["l10.example.org"],
+            ("app-l10", "server.domains.aliases"):   ["alias.l10.example.org"],
+            ("app-l10", "server.status_codes"):      {"default": [204, 206]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l10"])
+        self.assertEqual(out["l10.example.org"], [204, 206])
+        self.assertEqual(out["alias.l10.example.org"], [301])
+
+    def test_keyed_canonical_with_mixed_scalar_and_list_domains(self):
+        apps = {"app-l11": {}}
+        self._configure_returns({
+            ("app-l11", "server.domains.canonical"): {
+                "api":  "api.l11.example.org",
+                "view": ["v1.l11.example.org", "v2.l11.example.org"],
+            },
+            ("app-l11", "server.domains.aliases"):   [],
+            ("app-l11", "server.status_codes"):      {"view": [301, 307], "default": [200, 204]},
+        })
+        out = self.mod.web_health_expectations(apps, group_names=["app-l11"])
+        self.assertEqual(out["api.l11.example.org"], [200, 204])   # default
+        self.assertEqual(out["v1.l11.example.org"], [301, 307])    # per-key list
+        self.assertEqual(out["v2.l11.example.org"], [301, 307])
 
 if __name__ == "__main__":
     unittest.main()

@@ -10,7 +10,8 @@ features:
   ldap:             false # OIDC is already activated so LDAP isn't necessary
 server:
   status_codes:
-    api: 400
+    api:      301
+    console:  301
   domains:
     canonical:
       console:  "console.s3.{{ PRIMARY_DOMAIN }}"
@@ -25,10 +26,14 @@ docker:
   services:
     minio:
       backup:
-        no_stop_required: true
-      image:   quay.io/minio/minio
-      version: latest
-      name:    minio
+        no_stop_required: false
+      image:              quay.io/minio/minio
+      version:            latest
+      name:               minio
+      cpus:               "2.0"
+      mem_reservation:    "2g"
+      mem_limit:          "4g"
+      pids_limit:         2048
     redis:
       enabled: false
     database:

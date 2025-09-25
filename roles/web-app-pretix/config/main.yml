@@ -11,6 +11,10 @@ docker:
       name:         pretix
       backup:
         no_stop_required: true
+      cpus:               "2.0"
+      mem_reservation:    "1.5g"
+      mem_limit:          "2g"
+      pids_limit:         1024
   volumes:
     data:           "pretix_data"
     config:         "pretix_config"
