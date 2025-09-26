@@ -1,2 +1,4 @@
 # @See https://chatgpt.com/share/67a23d18-fb54-800f-983c-d6d00752b0b4
-docker_compose: "{{ application_id | get_docker_paths(PATH_DOCKER_COMPOSE_INSTANCES) }}"
+docker_compose:               "{{ application_id | get_docker_paths(PATH_DOCKER_COMPOSE_INSTANCES) }}"
+docker_compose_command_base:  "docker compose --env-file {{ docker_compose.files.env }}"
+docker_compose_command_exec:  "{{ docker_compose_command_base }} exec"

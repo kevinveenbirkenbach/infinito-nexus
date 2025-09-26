@@ -1,6 +1,6 @@
 - name: "Ensure Mailu user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ MAILU_DOMAIN }}'' exists"
   command: >
-    docker compose exec admin flask mailu {{ mailu_action }}
+    {{ docker_compose_command_exec }} admin flask mailu {{ mailu_action }}
       {{ mailu_user_name }} {{ MAILU_DOMAIN }} '{{ mailu_password }}'
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
@@ -17,7 +17,7 @@
 
 - name: "Change password for user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ MAILU_DOMAIN }}'"
   command: >
-    docker compose exec admin flask mailu password
+    {{ docker_compose_command_exec }} admin flask mailu password
       {{ mailu_user_name }} {{ MAILU_DOMAIN }} '{{ mailu_password }}'
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"

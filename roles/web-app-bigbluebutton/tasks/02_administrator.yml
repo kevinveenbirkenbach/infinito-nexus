@@ -16,7 +16,7 @@
     - name: "Create default admin"
       command:
         cmd: >
-            docker compose exec greenlight
+            {{ docker_compose_command_exec }} greenlight
             bundle exec rake admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password }}']
         chdir: "{{ docker_compose.directories.instance }}"
       register: admin_creation_result
@@ -26,6 +26,6 @@
     - name: "Make existing user administrator"
       command:
         cmd: >
-          docker compose exec greenlight
+          {{ docker_compose_command_exec }} greenlight
           bundle exec rake user:set_admin_role['{{ users.administrator.email }}']
         chdir: "{{ docker_compose.directories.instance }}"

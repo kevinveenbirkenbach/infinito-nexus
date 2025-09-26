@@ -1,6 +1,6 @@
 - name: Set settings in OpenProject
   shell: >
-    docker compose exec {{ OPENPROJECT_WEB_SERVICE }} bash -c "cd /app &&
+    {{ docker_compose_command_exec }} {{ OPENPROJECT_WEB_SERVICE }} bash -c "cd /app &&
     RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"Setting[:{{ item.key }}] = '{{ item.value }}'\""
   args:
     chdir: "{{ docker_compose.directories.instance }}"

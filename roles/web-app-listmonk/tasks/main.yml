@@ -20,7 +20,7 @@
 - meta: flush_handlers
 
 - name: Check if listmonk database is already initialized
-  command: docker compose exec -T {{ database_host }} psql -U {{ database_username }} -d {{ database_name }} -c "\dt"
+  command: '{{ docker_compose_command_exec }} -T {{ database_host }} psql -U {{ database_username }} -d {{ database_name }} -c "\dt"'
   register: db_tables
   changed_when: false
   failed_when: false

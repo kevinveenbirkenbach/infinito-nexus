@@ -1,6 +1,6 @@
 - name: Ensure administrator user exists and is admin
   shell: >
-    docker compose exec web bash -c "
+    {{ docker_compose_command_exec }} web bash -c "
       cd /app &&
       RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"
         u = User.find_by(login: '{{ OPENPROJECT_ADMINISTRATOR_USERNAME }}')
