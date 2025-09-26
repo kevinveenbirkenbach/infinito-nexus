@@ -15,7 +15,7 @@ docker:
     redis:
       enabled: false
     database: 
-      enabled: false # May this is wrong. Just set during refactoring
+      enabled: false
     collabora:
       image:    collabora/code
       version:  latest 
