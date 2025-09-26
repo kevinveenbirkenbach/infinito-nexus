@@ -1,0 +1,14 @@
+- block:
+  - name: Include dependency 'sys-svc-webserver-https'
+    include_role:
+      name: sys-svc-webserver-https
+    when: run_once_sys_svc_webserver_https is not defined
+  - include_tasks: utils/run_once.yml
+  when: run_once_sys_stk_front_base is not defined
+
+- include_tasks: "01_cloudflare.yml"
+  when: DNS_PROVIDER == "cloudflare"
+
+- include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
+  vars:
+    handler_role_name: "svc-prx-openresty"

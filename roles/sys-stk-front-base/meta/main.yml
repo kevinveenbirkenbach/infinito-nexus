@@ -1,24 +1,24 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
-  description: "Deploys Coturn, a free and open-source TURN/STUN server"
+  description: "Front bootstrap for web apps: HTTPS base, optional Cloudflare setup, and handler wiring."
   license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Archlinux
+      versions:
+        - rolling
   galaxy_tags:
-    - coturn
-    - turn
-    - stun
-    - webrtc
-    - docker
-    - stateless
-    - realtime
+    - nginx
+    - https
+    - cloudflare
+    - automation
+    - web
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://github.com/coturn/coturn/wiki"
-  logo:
-    class: "webrtc"
-  run_after: []
+  documentation: "https://docs.infinito.nexus/"
+dependencies: []

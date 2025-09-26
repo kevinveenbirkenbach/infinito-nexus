@@ -3,7 +3,7 @@
     include_role:
       name: '{{ item }}'
     loop:
-    - sys-svc-webserver-https
+    - sys-stk-front-base
     - dev-git
   - include_tasks: utils/run_once.yml
   when: run_once_web_svc_file is not defined

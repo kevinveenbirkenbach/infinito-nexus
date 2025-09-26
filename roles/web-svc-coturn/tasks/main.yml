@@ -1,4 +1,4 @@
 ---
-- name: "For '{{ application_id }}': Load sys-stk-back-stateless"
+- name: "Load 'sys-stk-semi-stateless' for '{{ application_id }}'"
   include_role:
-    name: sys-stk-back-stateless
+    name: sys-stk-semi-stateless

@@ -2,7 +2,7 @@
   include_role:
     name: '{{ item }}'
   loop:
-  - sys-svc-webserver-https
+  - sys-stk-front-base
   - dev-git
   
 - name: "include role for {{ application_id }} to receive certs & do modification routines"
