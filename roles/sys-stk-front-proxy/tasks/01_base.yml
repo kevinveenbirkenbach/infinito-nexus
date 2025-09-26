@@ -13,14 +13,14 @@
   vars:
     handler_role_name: "svc-prx-openresty"
 
-- name: "include role for {{ domain }} to receive certificates and do the modification routines"
+- name: "include role for '{{ domain }}' to receive certificates and do the modification routines"
   include_role:
     name: sys-util-csp-cert
 
-- name: "Copy nginx config to {{ configuration_destination }}"
+- name: "Copy nginx config to '{{ FRONT_PROXY_DOMAIN_CONF_DST }}'"
   template:
-    src: "{{ vhost_template_src }}"
-    dest: "{{ configuration_destination }}"
+    src:  "{{ FRONT_PROXY_DOMAIN_CONF_SRC }}"
+    dest: "{{ FRONT_PROXY_DOMAIN_CONF_DST }}"
   register: nginx_conf
   notify: restart openresty
 

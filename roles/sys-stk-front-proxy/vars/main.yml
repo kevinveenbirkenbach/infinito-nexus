@@ -1,1 +1,2 @@
-configuration_destination:  "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
+FRONT_PROXY_DOMAIN_CONF_DST:  "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
+FRONT_PROXY_DOMAIN_CONF_SRC:  "roles/sys-svc-proxy/templates/vhost/{{ vhost_flavour }}.conf.j2"
