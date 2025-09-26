@@ -1,0 +1,6 @@
+plugin_configuration:
+  - appid: "xwiki"
+    configkey: "instances"
+    configvalue:
+      - name:  "XWiki"
+        url:   "{{ domains | get_url('web-app-xwiki', WEB_PROTOCOL) }}"
