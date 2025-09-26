@@ -1,3 +1,4 @@
+---
 - name: "Wait until Greenlight is reachable via Nginx"
   uri:
     url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
@@ -13,19 +14,35 @@
   changed_when: false
 
 - block:
-    - name: "Create default admin"
+    - name: "Create admin with primary password"
       command:
         cmd: >
-            {{ docker_compose_command_exec }} greenlight
-            bundle exec rake admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password }}']
+          {{ docker_compose_command_exec }}
+          greenlight
+          bundle exec rake
+          admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password }}']
         chdir: "{{ docker_compose.directories.instance }}"
-      register: admin_creation_result
-      # Treat exit codes 0 (created) and 2 (already exists) as success
-      failed_when: admin_creation_result.rc not in [0,2]
-  rescue:
-    - name: "Make existing user administrator"
+      register: admin_create_primary
+      when: not BBB_OIDC_ENABLED | bool
+
+    - name: "Retry with starred password when invalid and OIDC enabled"
+      when: BBB_OIDC_ENABLED | bool
       command:
         cmd: >
-          {{ docker_compose_command_exec }} greenlight
-          bundle exec rake user:set_admin_role['{{ users.administrator.email }}']
+          {{ docker_compose_command_exec }}
+          greenlight
+          bundle exec rake
+          admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password ~ '*' }}']
+        chdir: "{{ docker_compose.directories.instance }}"
+      register: admin_create_retry
+      failed_when: admin_create_retry.rc not in [0, 2]
+
+  rescue:
+    - name: "Make existing user administrator (fallback)"
+      command:
+        cmd: >
+          {{ docker_compose_command_exec }}
+          greenlight
+          bundle exec rake
+          user:set_admin_role['{{ users.administrator.email }}']
         chdir: "{{ docker_compose.directories.instance }}"
