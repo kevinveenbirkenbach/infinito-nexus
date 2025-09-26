@@ -100,9 +100,9 @@ ports:
     federation:
       web-app-matrix_synapse: 8448
     relay_port_ranges:
+      web-svc-coturn_start:         20000
+      web-svc-coturn_end:           39999
       web-app-bigbluebutton_start:  40000
-      web-app-bigbluebutton_end:    59999
-      web-app-nextcloud_start:      60000
-      web-app-nextcloud_end:        79999
-      web-svc-coturn_start:         80000
-      web-svc-coturn_end:           99999
+      web-app-bigbluebutton_end:    49999
+      web-app-nextcloud_start:      50000
+      web-app-nextcloud_end:        59999
