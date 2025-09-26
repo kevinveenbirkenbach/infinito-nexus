@@ -2,44 +2,38 @@
   
   coturn:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: coturn/coturn
-    restart: always
-    network_mode: "host"
+    image: {{ COTURN_IMAGE }}:{{ COTURN_VERSION }}
+    container_name: {{ COTURN_VOLUME }}
+    {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
-      - "3478:3478/udp"
-      - "3478:3478/tcp"
-      - "5349:5349/tcp"
-      - "5349:5349/udp"
-      - "49152-65535:49152-65535/udp"  # TURN-Relay-Ports (wichtig!)
-    #volumes:                         # In case customized config is required
-    #   - coturn-config:/etc/coturn
-    environment:
-      - TURN_PORT=3478
-      - TURN_PORT_TLS=5349
-      - TURN_SECRET=my-secret-key
-      - TURN_USER=turnuser
-      - TURN_PASSWORD=turnpassword
+      - "{{ COTURN_TURN_PORT }}:{{ COTURN_TURN_PORT }}/udp"
+      - "{{ COTURN_TURN_PORT }}:{{ COTURN_TURN_PORT }}/tcp"
+      - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/tcp"
+      - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/udp"
+      - "{{ COTURN_RELAY_PORT_RANGE }}/udp"
     command: >
-      --log-file=stdout
-      --external-ip=$(detect-external-ip)
+      --use-auth-secret
+      --static-auth-secret={{ COTURN_STATIC_AUTH_SECRET }}
       --lt-cred-mech
-      --user=turnuser:turnpassword
-      --realm=nextcloud
+      --user={{ COTURN_USER_NAME }}:{{ COTURN_USER_PASSWORD }}
+      --log-file=stdout
+      --external-ip={{ networks.internet.ip4 }}
+{% if networks.internet.ip6|default('') %}
+      --external-ip={{ networks.internet.ip6 }}
+{% endif %}
+      --realm={{ COTURN_REALM }}
+      --fingerprint
       --total-quota=100
       --stale-nonce
       --no-multicast-peers
-      --denied-peer-ip=0.0.0.0-0.255.255.255
-      --denied-peer-ip=10.0.0.0-10.255.255.255
-      --denied-peer-ip=100.64.0.0-100.127.255.255
-      --denied-peer-ip=169.254.0.0-169.254.255.255
-      --denied-peer-ip=172.16.0.0-172.31.255.255
-      --denied-peer-ip=192.0.0.0-192.0.0.255
-      --denied-peer-ip=192.88.99.0-192.88.99.255
-      --denied-peer-ip=192.168.0.0-192.168.255.255
-      --denied-peer-ip=198.18.0.0-198.19.255.255
-      --denied-peer-ip=198.51.100.0-198.51.100.255
-      --denied-peer-ip=203.0.113.0-203.0.113.255
-      --denied-peer-ip=240.0.0.0-255.255.255.255
+      --no-cli
+      --no-tcp-relay
+      --min-port={{ COTURN_RELAY_PORT_START }}
+      --max-port={{ COTURN_RELAY_PORT_END }}
+      --cert={{ COTURN_TLS_CERT_PATH }}
+      --pkey={{ COTURN_TLS_KEY_PATH }}
+      --cipher-list=DEFAULT
+      --dh2066
+{% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  coturn-config:
+{% include 'roles/docker-compose/templates/networks.yml.j2' %}

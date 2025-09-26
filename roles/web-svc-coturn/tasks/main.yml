@@ -1,4 +1,4 @@
 ---
-- name: "load docker, db and proxy for {{ application_id }}"
+- name: "For '{{ application_id }}': Load sys-stk-back-stateless"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-back-stateless

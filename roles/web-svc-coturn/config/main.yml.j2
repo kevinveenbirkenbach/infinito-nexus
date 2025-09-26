@@ -1,2 +1,13 @@
-user:         turnuser
-credentials:  
+server:
+  domains:
+    canonical:
+      - "coturn.{{ PRIMARY_DOMAIN }}"
+docker:
+  services:
+    coturn:
+      image:    "coturn/coturn"
+      version:  "latest"
+    redis:
+      enabled:  false
+    database: 
+      enabled:  false

@@ -1,2 +1,28 @@
-application_id:     "web-svc-coturn"
-container_port:     3000
+# General
+application_id:             "web-svc-coturn"
+entity_name:                "{{ application_id | get_entity_name }}"
+domain:                     "{{ domains | get_domain(application_id) }}"
+
+# Coturn 
+
+## Docker 
+COTURN_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+COTURN_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+COTURN_VOLUME:              "{{ entity_name }}"
+COTURN_REALM:               "{{ domain }}"
+
+## Ports
+COTURN_TURN_PORT:           "{{ ports.public.turn[application_id] }}"
+COTURN_STUN_PORT:           "{{ ports.public.stun[application_id] }}"
+COTURN_RELAY_PORT_START:    "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
+COTURN_RELAY_PORT_END:      "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
+COTURN_RELAY_PORT_RANGE:    "{{ COTURN_RELAY_PORT_START }}-{{ COTURN_RELAY_PORT_END }}"
+
+## Credentials 
+COTURN_USER_NAME:           "{{ applications | get_app_conf(application_id, 'credentials.user_name') }}"
+COTURN_USER_PASSWORD:       "{{ applications | get_app_conf(application_id, 'credentials.user_password') }}"
+COTURN_STATIC_AUTH_SECRET:  "{{ applications | get_app_conf(application_id, 'credentials.auth_secret') }}"
+
+## Certificates
+COTURN_TLS_CERT_PATH:       "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder, 'fullchain.pem' ] | path_join }}"
+COTURN_TLS_KEY_PATH:        "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder, 'privkey.pem'   ] | path_join }}"

@@ -110,6 +110,8 @@ defaults_networks:
       subnet: 192.168.104.16/28
     web-app-minio:
       subnet: 192.168.104.32/28
+    web-svc-coturn:
+      subnet: 192.168.104.48/28
 
     # /24 Networks / 254 Usable Clients
     web-app-bigbluebutton:

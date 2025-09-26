@@ -84,16 +84,22 @@ ports:
   public:
     # The following ports should be changed to 22 on the subdomain via stream mapping
     ssh:
-      web-app-gitea: 2201
-      web-app-gitlab: 2202
+      web-app-gitea:          2201
+      web-app-gitlab:         2202
     ldaps:
-      svc-db-openldap: 636
+      svc-db-openldap:        636
     stun:
-      web-app-bigbluebutton: 3478    # Not sure if it's right placed here or if it should be moved to localhost section
-      # Occupied by BBB:     3479
-      web-app-nextcloud:     3480
+      web-app-bigbluebutton:  3478  # Not sure if it's right placed here or if it should be moved to localhost section
+      # Occupied by BBB:      3479
+      web-app-nextcloud:      3480
+      web-app-coturn:         3481
     turn:
-      web-app-bigbluebutton: 5349    # Not sure if it's right placed here or if it should be moved to localhost section
-      web-app-nextcloud:     5350        # Not used yet
+      web-app-bigbluebutton:  5349  # Not sure if it's right placed here or if it should be moved to localhost section
+      web-app-nextcloud:      5350  # Not used yet
+      web-app-coturn:         5351
     federation:
       web-app-matrix_synapse: 8448
+    relay_port_ranges:
+      web-app-coturn_start:   49152
+      web-app-coturn_end:     65535
+
