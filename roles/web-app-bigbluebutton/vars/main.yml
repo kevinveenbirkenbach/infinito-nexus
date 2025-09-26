@@ -1,5 +1,6 @@
 # General
 application_id:                       "web-app-bigbluebutton"
+entity_name:                          "{{ application_id | get_entity_name }}"
 
 # Database configuration
 database_type:                        "postgres"
@@ -14,8 +15,8 @@ http_port:                            "{{ ports.localhost.http[application_id] }
 
 # Docker
 docker_compose_file_creation_enabled: false # Handled in this role
-docker_repository_address:            "{{ applications | get_app_conf(application_id, 'docker.services.bigbluebutton.repository') }}"
-docker_repository_branch:             "{{ applications | get_app_conf(application_id, 'docker.services.bigbluebutton.version') }}"
+docker_repository_address:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
+docker_repository_branch:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 docker_pull_git_repository:           true
 
 # BigBlueButton
@@ -28,8 +29,14 @@ BBB_POSTGRESQL_SECRET:                "{{ applications | get_app_conf(applicatio
 BBB_FSESL_PASSWORD:                   "{{ applications | get_app_conf(application_id, 'credentials.fsesl_password') }}"
 BBB_TURN_SECRET:                      "{{ applications | get_app_conf(application_id, 'credentials.turn_secret') }}"
 
+## TLS
 BBB_COTURN_TLS_CERT_PATH:             "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder,   'fullchain.pem'] | path_join }}"
 BBB_COTURN_TLS_KEY_PATH:              "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder,   'privkey.pem'] | path_join }}"
+
+## Turn
+BBB_TURN_DOMAIN:                    "{{ networks.internet.ip4 if BBB_COTURN_ENABLED else domains | get_domain('web-svc-coturn') }}"
+BBB_TURN_PORT:                      "{{ ports.public.turn[application_id] if BBB_COTURN_ENABLED else ports.public.turn['web-svc-coturn'] }}"
+BBB_STUN_PORT:                      "{{ ports.public.turn[application_id] if BBB_COTURN_ENABLED else ports.public.stun['web-svc-coturn'] }}"
 
 ## Switchs
 
