@@ -6,7 +6,7 @@ database_type:                        "postgres"
 database_instance:                    "{{ application_id | get_entity_name }}"
 database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.postgresql_secret') }}"
 database_username:                    "postgres"
-database_name:                        ""                              # Multiple databases
+database_name:                        "" # Multiple databases
 
 # Proxy
 domain:                               "{{ domains | get_domain(application_id) }}"
@@ -19,9 +19,27 @@ docker_repository_branch:             "{{ applications | get_app_conf(applicatio
 docker_pull_git_repository:           true
 
 # BigBlueButton
+
+## Credentials
 BBB_SHARED_SECRET:                    "{{ applications | get_app_conf(application_id, 'credentials.shared_secret') }}"
 BBB_ETHERPAD_API_KEY:                 "{{ applications | get_app_conf(application_id, 'credentials.etherpad_api_key') }}"
 BBB_RAILS_SECRET:                     "{{ applications | get_app_conf(application_id, 'credentials.rails_secret') }}"
 BBB_POSTGRESQL_SECRET:                "{{ applications | get_app_conf(application_id, 'credentials.postgresql_secret') }}"
 BBB_FSESL_PASSWORD:                   "{{ applications | get_app_conf(application_id, 'credentials.fsesl_password') }}"
 BBB_TURN_SECRET:                      "{{ applications | get_app_conf(application_id, 'credentials.turn_secret') }}"
+
+BBB_COTURN_TLS_CERT_PATH:             "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder,   'fullchain.pem'] | path_join }}"
+BBB_COTURN_TLS_KEY_PATH:              "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder,   'privkey.pem'] | path_join }}"
+
+## Switchs
+
+### Network
+BBB_IP6_ENABLED:                      "{{ applications | get_app_conf(application_id, 'server.ip6_enabled') }}"
+
+### Container
+BBB_GREENLIGHT_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.greenlight.enabled') }}"
+BBB_COTURN_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.coturn.enabled') }}"
+
+### SSO
+BBB_LDAP_ENABLED:                     "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
+BBB_OIDC_ENABLED:                     "{{ applications | get_app_conf(application_id, 'features.oidc') }}"

@@ -15,7 +15,7 @@
   vars:
     docker_compose_flush_handlers: false
 - name: "include 04_seed-database-to-backup.yml"
-  include_tasks: "{{ playbook_dir }}/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"
+  include_tasks: "{{ [ playbook_dir, 'roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml' ] | path_join }}"
 
 - name: "Unset 'proxy_extra_configuration'"
   set_fact:
@@ -24,33 +24,42 @@
 - name: configure websocket_upgrade.conf
   copy: 
     src:  "websocket_upgrade.conf"
-    dest: "{{NGINX.DIRECTORIES.HTTP.MAPS}}websocket_upgrade.conf"
+    dest: "{{ [ NGINX.DIRECTORIES.HTTP.MAPS, 'websocket_upgrade.conf' ] | path_join }}"
   notify: restart openresty
 
 - name: "Set BBB Facts"
   set_fact:
-    bbb_env_file_link:            "{{ docker_repository_path }}.env"
-    bbb_env_file_origine:         "{{ docker_compose.files.env }}"
-    docker_compose_file_origine:  "{{ docker_repository_path }}docker-compose.yml"
-    docker_compose_file_final:    "{{ docker_compose.directories.instance }}docker-compose.yml"
+    BBB_ENV_FILE_LINK:                "{{ [ docker_repository_path, '.env' ] | path_join }}"
+    BBB_ENV_FILE_ORIGINE:             "{{ docker_compose.files.env }}"
+    BBB_DOCKER_COMPOSE_FILE_ORIGINE:  "{{ [ docker_repository_path, 'docker-compose.yml' ] | path_join }}"
+    BBB_DOCKER_COMPOSE_FILE_FINAL:    "{{ [ docker_compose.directories.instance, 'docker-compose.yml' ] | path_join }}"
+
+- name: Write docker-compose.override.yml for BigBlueButton
+  template:
+    src:  docker-compose.override.yml.j2
+    dest: "{{ [ docker_compose.directories.instance, 'docker-compose.override.yml' ] | path_join }}"
+  notify:
+    - docker compose up
 
 - name: deploy .env
   # This seems redundant @todo Checkout if this is true and if so, delete it
   template:
     src:  env.j2
-    dest: "{{ bbb_env_file_origine }}"
+    dest: "{{ BBB_ENV_FILE_ORIGINE }}"
+  notify:
+    - docker compose up
 
 - name: Create symbolic link from .env file to target location
   file:
-    src:    "{{ bbb_env_file_origine }}"
-    dest:   "{{ bbb_env_file_link }}"
+    src:    "{{ BBB_ENV_FILE_ORIGINE }}"
+    dest:   "{{ BBB_ENV_FILE_LINK }}"
     state:  link
 
 - name: "Setup docker-compose.yml file"
   include_tasks: "01_docker-compose.yml"
 
 - name: Ensure all containers in instance are running
-  include_tasks: "{{ playbook_dir }}/roles/docker-compose/tasks/05_ensure_up.yml"
+  include_tasks: "{{ [ playbook_dir , 'roles/docker-compose/tasks/05_ensure_up.yml' ] | path_join }}"
 
 - name: flush docker service
   meta: flush_handlers

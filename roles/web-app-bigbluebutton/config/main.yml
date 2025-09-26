@@ -1,15 +1,14 @@
-enable_greenlight:    "true"
-api_suffix:           "/bigbluebutton/"
+api_suffix:             "/bigbluebutton/"
 features:
-  matomo:             true
-  css:                true
-  desktop:            false # Videos can't open in frame due to iframe restrictions
-                            # @todo fix this
-  ldap:               false
-  oidc:               true
-  central_database:   false # Propably required for backup routines
-  logout:             true
+  matomo:               true
+  css:                  true
+  desktop:              false # Videos can't open in frame due to iframe restrictions
+  ldap:                 false
+  oidc:                 true
+  central_database:     false # Propably required for backup routines
+  logout:               true
 server:
+  ip6_enabled:          false
   csp:
     flags:
       script-src-elem:
@@ -29,4 +28,8 @@ docker:
       version:    "main"  
     database:
       # This is set to true to pass integration test, doesn't have any other function
-      enabled: true
+      enabled:    true
+    greenlight:
+      enabled:    true
+    coturn:
+      enabled:    true

@@ -8,12 +8,12 @@
 
 - name: Slurp docker-compose.yml from remote host
   slurp:
-    src: "{{ docker_compose_file_origine }}"
+    src: "{{ BBB_DOCKER_COMPOSE_FILE_ORIGINE }}"
   register: compose_slurp
 
 - name: Transform docker-compose.yml with compose_mods
   copy:
     content: "{{ compose_slurp.content | b64decode | compose_mods(docker_repository_path, docker_compose.files.env) }}"
-    dest: "{{ docker_compose_file_final }}"
+    dest: "{{ BBB_DOCKER_COMPOSE_FILE_FINAL }}"
   notify:
     - docker compose up
