@@ -3,9 +3,9 @@
     include_role:
       name: '{{ item }}'
     loop:
-    - sys-svc-webserver
+    - sys-svc-webserver-core
     - sys-svc-cln-domains
     - sys-svc-letsencrypt
     - sys-svc-dns
   - include_tasks: utils/run_once.yml
-  when: run_once_sys_stk_front_pure is not defined
+  when: run_once_sys_svc_webserver_https is not defined

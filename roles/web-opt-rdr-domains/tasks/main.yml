@@ -1,8 +1,8 @@
 - block:
-  - name: Include dependency 'sys-stk-front-pure'
+  - name: Include dependency 'sys-svc-webserver-https'
     include_role:
-      name: sys-stk-front-pure
-    when: run_once_sys_stk_front_pure is not defined
+      name: sys-svc-webserver-https
+    when: run_once_sys_svc_webserver_https is not defined
   - include_tasks: utils/run_once.yml
   when: run_once_web_opt_rdr_domains is not defined
 

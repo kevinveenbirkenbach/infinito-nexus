@@ -1,7 +1,7 @@
-- name: Include dependency 'sys-svc-webserver'
+- name: Include dependency 'sys-svc-webserver-core'
   include_role:
-    name: sys-svc-webserver
-  when: run_once_sys_svc_webserver is not defined
+    name: sys-svc-webserver-core
+  when: run_once_sys_svc_webserver_core is not defined
 
 - name: Generate color palette with colorscheme-generator
   set_fact:

@@ -3,7 +3,7 @@
     include_role:
       name: '{{ item }}'
     loop:
-    - sys-svc-webserver
+    - sys-svc-webserver-core
 
   - name: Include task to remove deprecated nginx configs
     include_tasks: remove_deprecated_nginx_configs.yml
