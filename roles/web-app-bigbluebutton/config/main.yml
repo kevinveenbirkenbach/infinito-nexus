@@ -25,7 +25,7 @@ docker:
   services:
     bigbluebutton:
       repository: "https://github.com/bigbluebutton/docker.git"
-      version:    "main"  
+      version:    "bbb3.0"
     database:
       # This is set to true to pass integration test, doesn't have any other function
       enabled:    true

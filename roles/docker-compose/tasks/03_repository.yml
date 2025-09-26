@@ -1,15 +1,18 @@
 - name: Set default docker_repository_path
   set_fact:
-    docker_repository_path: "{{docker_compose.directories.services}}repository/"
+    docker_repository_path: "{{ [ docker_compose.directories.services, 'repository/' ] | path_join }}"
 
 - name: pull docker repository
   git:
-    repo:       "{{ docker_repository_address }}"
-    dest:       "{{ docker_repository_path }}"
-    version:    "{{ docker_repository_branch | default('main') }}"
-    depth:      1
-    update:     yes
-    recursive:  yes
+    repo:           "{{ docker_repository_address }}"
+    dest:           "{{ docker_repository_path }}"
+    version:        "{{ docker_repository_branch | default('main') }}"
+    single_branch:  yes
+    depth:          1
+    update:         yes
+    recursive:      yes
+    force:          yes
+    accept_hostkey: yes
   notify:
     - docker compose build
     - docker compose up
