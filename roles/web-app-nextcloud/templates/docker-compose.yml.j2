@@ -34,7 +34,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
         ipv4_address: 192.168.102.69
 
-{% if NEXTCLOUD_TALK_ENABLED %}
+{% if NEXTCLOUD_TALK_INTERNAL_ENABLED %}
   talk:
 {% set container_port = NEXTCLOUD_TALK_PORT_INTERNAL %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -43,8 +43,9 @@
     container_name: {{ NEXTCLOUD_TALK_CONTAINER }}
     init: true
     ports:
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:{{ NEXTCLOUD_TALK_INT_TURN_PORT }}/tcp #TURN TCP
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:{{ NEXTCLOUD_TALK_INT_TURN_PORT }}/udp #TURN UDP
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:{{ NEXTCLOUD_TALK_INT_TURN_PORT }}/tcp
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:{{ NEXTCLOUD_TALK_INT_TURN_PORT }}/udp
+      - {{ NEXTCLOUD_TALK_RELAY_PORT_RANGE }}:{{ NEXTCLOUD_TALK_RELAY_PORT_RANGE }}/udp
     expose:
       - "{{ container_port }}"
     networks:

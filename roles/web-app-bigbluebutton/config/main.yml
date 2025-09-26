@@ -32,4 +32,4 @@ docker:
     greenlight:
       enabled:    true
     coturn:
-      enabled:    true
+      internal:   "{{ not 'web-svc-coturn' in group_names | lower }}"

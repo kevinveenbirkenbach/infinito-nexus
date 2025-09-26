@@ -92,14 +92,17 @@ ports:
       web-app-bigbluebutton:  3478  # Not sure if it's right placed here or if it should be moved to localhost section
       # Occupied by BBB:      3479
       web-app-nextcloud:      3480
-      web-app-coturn:         3481
+      web-svc-coturn:         3481
     turn:
       web-app-bigbluebutton:  5349  # Not sure if it's right placed here or if it should be moved to localhost section
       web-app-nextcloud:      5350  # Not used yet
-      web-app-coturn:         5351
+      web-svc-coturn:         5351
     federation:
       web-app-matrix_synapse: 8448
     relay_port_ranges:
-      web-app-coturn_start:   49152
-      web-app-coturn_end:     65535
-
+      web-app-bigbluebutton_start:  40000
+      web-app-bigbluebutton_end:    59999
+      web-app-nextcloud_start:      60000
+      web-app-nextcloud_end:        79999
+      web-svc-coturn_start:         80000
+      web-svc-coturn_end:           99999

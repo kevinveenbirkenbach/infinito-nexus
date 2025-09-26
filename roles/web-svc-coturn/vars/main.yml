@@ -19,7 +19,7 @@ COTURN_RELAY_PORT_END:      "{{ ports.public.relay_port_ranges[application_id ~ 
 COTURN_RELAY_PORT_RANGE:    "{{ COTURN_RELAY_PORT_START }}-{{ COTURN_RELAY_PORT_END }}"
 
 ## Credentials 
-COTURN_USER_NAME:           "{{ applications | get_app_conf(application_id, 'credentials.user_name') }}"
+COTURN_USER_NAME:           "{{ applications | get_app_conf(application_id, 'username') }}"
 COTURN_USER_PASSWORD:       "{{ applications | get_app_conf(application_id, 'credentials.user_password') }}"
 COTURN_STATIC_AUTH_SECRET:  "{{ applications | get_app_conf(application_id, 'credentials.auth_secret') }}"
 

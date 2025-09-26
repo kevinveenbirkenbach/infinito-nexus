@@ -34,9 +34,12 @@ BBB_COTURN_TLS_CERT_PATH:             "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_fold
 BBB_COTURN_TLS_KEY_PATH:              "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder,   'privkey.pem'] | path_join }}"
 
 ## Turn
-BBB_TURN_DOMAIN:                    "{{ networks.internet.ip4 if BBB_COTURN_ENABLED else domains | get_domain('web-svc-coturn') }}"
-BBB_TURN_PORT:                      "{{ ports.public.turn[application_id] if BBB_COTURN_ENABLED else ports.public.turn['web-svc-coturn'] }}"
-BBB_STUN_PORT:                      "{{ ports.public.turn[application_id] if BBB_COTURN_ENABLED else ports.public.stun['web-svc-coturn'] }}"
+BBB_TURN_DOMAIN:                    "{{ networks.internet.ip4 if BBB_INTERNAL_COTURN_ENABLED else domains | get_domain('web-svc-coturn') }}"
+BBB_TURN_PORT:                      "{{ ports.public.turn[application_id] if BBB_INTERNAL_COTURN_ENABLED else ports.public.turn['web-svc-coturn'] }}"
+BBB_STUN_PORT:                      "{{ ports.public.turn[application_id] if BBB_INTERNAL_COTURN_ENABLED else ports.public.stun['web-svc-coturn'] }}"
+BBB_RELAY_PORT_START:               "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
+BBB_RELAY_PORT_END:                 "{{ ports.public.relay_port_ranges[application_id ~ '_end'] }}"
+BBB_RELAY_PORT_RANGE:               "{{ BBB_RELAY_PORT_START }}-{{ BBB_RELAY_PORT_END }}"
 
 ## Switchs
 
@@ -45,7 +48,7 @@ BBB_IP6_ENABLED:                      "{{ applications | get_app_conf(applicatio
 
 ### Container
 BBB_GREENLIGHT_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.greenlight.enabled') }}"
-BBB_COTURN_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.coturn.enabled') }}"
+BBB_INTERNAL_COTURN_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.coturn.internal') }}"
 
 ### SSO
 BBB_LDAP_ENABLED:                     "{{ applications | get_app_conf(application_id, 'features.ldap') }}"

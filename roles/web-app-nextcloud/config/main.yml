@@ -51,6 +51,7 @@ docker:
       version:  "latest"
       backup:
         no_stop_required: false
+      internal: "{{ not 'web-svc-coturn' in group_names | lower }}"
     whiteboard:
       name:     "nextcloud-whiteboard"
       image:    "ghcr.io/nextcloud-releases/whiteboard"

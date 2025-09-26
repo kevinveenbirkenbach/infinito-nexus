@@ -1,4 +1,6 @@
 ---
-- name: "Load 'sys-stk-semi-stateless' for '{{ application_id }}'"
-  include_role:
-    name: sys-stk-semi-stateless
+- block:
+  - name: "Load core functions for '{{ application_id }}'"
+    include_tasks: 01_core.yml
+  - include_tasks: utils/run_once.yml
+  when: run_once_web_svc_coturn is not defined

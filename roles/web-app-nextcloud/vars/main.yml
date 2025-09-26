@@ -58,16 +58,23 @@ NEXTCLOUD_PROXY_VERSION:            "{{ applications | get_app_conf(application_
 NEXTCLOUD_CRON_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
 
 ### Talk 
+#### Service
 NEXTCLOUD_TALK_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.talk.name') }}"
 NEXTCLOUD_TALK_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.talk.image') }}"
 NEXTCLOUD_TALK_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.talk.version') }}"
-NEXTCLOUD_TALK_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
-NEXTCLOUD_TALK_STUN_PORT:           "{{ ports.public.stun[application_id] }}"
-NEXTCLOUD_TALK_DOMAIN:              "{{ NEXTCLOUD_DOMAIN }}"
+NEXTCLOUD_TALK_ENABLED:             "{{ applications | get_app_conf(application_id, 'docker.services.talk.internal') }}"
+NEXTCLOUD_TALK_INTERNAL_ENABLED:    "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
 NEXTCLOUD_TALK_LOCATION:            "/standalone-signaling/"
-NEXTCLOUD_TALK_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_LOCATION ] | url_join }}"
 NEXTCLOUD_TALK_PORT_INTERNAL:       "8081"
 NEXTCLOUD_TALK_INT_TURN_PORT:       "3478"
+NEXTCLOUD_TALK_RELAY_PORT_START:    "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
+NEXTCLOUD_TALK_RELAY_PORT_END:      "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
+NEXTCLOUD_TALK_RELAY_PORT_RANGE:    "{{ NEXTCLOUD_TALK_RELAY_PORT_START }}-{{ NEXTCLOUD_TALK_RELAY_PORT_END }}"
+
+# Connection
+NEXTCLOUD_TALK_STUN_PORT:           "{{ ports.public.stun[application_id] }}"
+NEXTCLOUD_TALK_DOMAIN:              "{{ NEXTCLOUD_DOMAIN }}"
+NEXTCLOUD_TALK_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_LOCATION ] | url_join }}"
 
 ### Whiteboard
 NEXTCLOUD_WHITEBOARD_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.name') }}"

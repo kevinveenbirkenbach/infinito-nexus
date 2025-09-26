@@ -1,0 +1,3 @@
+- name: "Load 'sys-stk-semi-stateless' for '{{ application_id }}'"
+  include_role:
+    name: sys-stk-semi-stateless
