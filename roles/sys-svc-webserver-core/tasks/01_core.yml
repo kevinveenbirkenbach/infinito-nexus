@@ -11,10 +11,13 @@
 - name: "Load variables from {{ DOCKER_VARS_FILE }} for {{ role_name }}/{{ application_id }}"
   include_vars: "{{ DOCKER_VARS_FILE }}"
 
-- name: "Load docker compose handlers"
+- name: "Load docker compose & openresty handlers"
   include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
-  vars:
-    handler_role_name: "docker-compose"
+  loop:
+    - docker-compose
+    - svc-prx-openresty
+  loop_control:
+    loop_var: handler_role_name
 
 - name: "Include tasks to create directories"
   include_tasks: 04_directories.yml
@@ -23,7 +26,7 @@
   template:
     src:  nginx.conf.j2
     dest: "{{ NGINX.FILES.CONFIGURATION }}"
-  notify: docker compose up
+  notify: restart openresty
 
 - name: Include openresty
   # Outside of run_once block is necessary for handler loading

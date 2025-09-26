@@ -1,4 +1,4 @@
-# run_once_sys_stk_full_stateless: deactivated
+# run_once_sys_stk_semi_stateless: deactivated
 
 - name: "sys-stk-front-base"
   include_role:
