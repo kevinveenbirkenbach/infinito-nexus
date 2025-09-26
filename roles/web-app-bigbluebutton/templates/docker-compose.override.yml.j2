@@ -1,1 +1,7 @@
-{# Overrides for Big Blue Button #}
+services:
+  webrtc-sfu:
+    environment:
+      MS_WORKERS: "1"
+      MS_ENABLE_IPV6: "false"
+      MS_WEBRTC_LISTEN_IPS: >-
+        [{"ip":"0.0.0.0","announcedIp":"${EXTERNAL_IPv4}"}]
