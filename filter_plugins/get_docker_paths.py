@@ -20,9 +20,10 @@ def get_docker_paths(application_id: str, path_docker_compose_instances: str) ->
             'config':   f"{base}config/",
         },
         'files': {
-            'env':            f"{base}.env/env",
-            'docker_compose': f"{base}docker-compose.yml",
-            'dockerfile':     f"{base}Dockerfile",
+            'env':                      f"{base}.env/env",
+            'docker_compose':           f"{base}docker-compose.yml",
+            'docker_compose_override':  f"{base}docker-compose.override.yml",
+            'dockerfile':               f"{base}Dockerfile",
         }
     }
 
