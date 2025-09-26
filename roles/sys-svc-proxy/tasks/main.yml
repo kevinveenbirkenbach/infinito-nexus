@@ -1,9 +1,6 @@
 - block:
   - name: Include dependencies
     include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-stk-front-pure
-    - sys-svc-webserver
+      name: 'sys-stk-front-pure'
   - include_tasks: utils/run_once.yml
-  when: run_once_sys_svc_proxy is not defined
+  when: run_once_sys_svc_proxy is not defined and run_once_sys_stk_front_pure is not defined
