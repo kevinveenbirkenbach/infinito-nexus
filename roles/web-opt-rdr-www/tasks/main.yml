@@ -1,5 +1,3 @@
-- block:
-
 - name: Include web-opt-rdr-domains role for www-to-bare redirects
   include_role:
     name: web-opt-rdr-domains
