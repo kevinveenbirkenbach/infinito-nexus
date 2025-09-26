@@ -142,7 +142,8 @@ class InventoryManager:
         """
         if algorithm == "random_hex":
             return secrets.token_hex(64)
-        
+        if algorithm == "random_hex_32":
+            return secrets.token_hex(32)
         if algorithm == "sha256":
             return hashlib.sha256(secrets.token_bytes(32)).hexdigest()
         if algorithm == "sha1":

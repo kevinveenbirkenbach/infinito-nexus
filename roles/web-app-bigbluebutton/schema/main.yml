@@ -5,7 +5,7 @@ credentials:
     validation: "^[a-f0-9]{64}$"
   etherpad_api_key:
     description: "API key for Etherpad integration"
-    algorithm: "plain"
+    algorithm: "random_hex_32"
     validation: "^[a-zA-Z0-9]{32}$"
   rails_secret:
     description: "Secret key for Rails backend"
@@ -17,7 +17,7 @@ credentials:
     validation: "^\\$2[aby]\\$.{56}$"
   fsesl_password:
     description: "Password for FreeSWITCH ESL connection"
-    algorithm: "plain"
+    algorithm: "alphanumeric_32"
     validation: "^.{8,}$"
   turn_secret:
     description: "TURN server shared secret"
