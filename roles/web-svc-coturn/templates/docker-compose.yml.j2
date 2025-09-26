@@ -4,26 +4,26 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ COTURN_IMAGE }}:{{ COTURN_VERSION }}
     container_name: {{ COTURN_VOLUME }}
-    {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
       - "{{ COTURN_TURN_PORT }}:{{ COTURN_TURN_PORT }}/udp"
       - "{{ COTURN_TURN_PORT }}:{{ COTURN_TURN_PORT }}/tcp"
       - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/tcp"
       - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/udp"
       - "{{ COTURN_RELAY_PORT_RANGE }}/udp"
+    volumes:
       - "{{ COTURN_TLS_CERT_PATH }}:{{ COTURN_TLS_CERT_PATH }}:ro"
       - "{{ COTURN_TLS_KEY_PATH }}:{{ COTURN_TLS_KEY_PATH }}:ro"
     command: >
       --use-auth-secret
-      --static-auth-secret=${ COTURN_STATIC_AUTH_SECRET }
+      --static-auth-secret="${COTURN_STATIC_AUTH_SECRET}"
       --lt-cred-mech
-      --user=${ COTURN_USER_NAME }:${ COTURN_USER_PASSWORD }
+      --user="${COTURN_USER_NAME}:${COTURN_USER_PASSWORD}"
       --log-file=stdout
       --external-ip={{ networks.internet.ip4 }}
 {% if networks.internet.ip6|default('') %}
       --external-ip={{ networks.internet.ip6 }}
 {% endif %}
-      --realm=${ COTURN_REALM }
+      --realm="${COTURN_REALM}"
       --fingerprint
       --total-quota=100
       --stale-nonce

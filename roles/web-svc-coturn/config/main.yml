@@ -6,8 +6,12 @@ server:
 docker:
   services:
     coturn:
-      image:    "coturn/coturn"
-      version:  "latest"
+      image:            "coturn/coturn"
+      version:          "latest"
+      cpus:             1.0
+      mem_reservation:  512m
+      mem_limit:        1g
+      pids_limit:       256
     redis:
       enabled:  false
     database: 

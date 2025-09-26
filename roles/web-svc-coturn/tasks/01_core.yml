@@ -1,3 +1,6 @@
 - name: "Load 'sys-stk-semi-stateless' for '{{ application_id }}'"
   include_role:
     name: sys-stk-semi-stateless
+  vars:
+    docker_compose_file_creation_enabled: true
+    docker_pull_git_repository:           false
