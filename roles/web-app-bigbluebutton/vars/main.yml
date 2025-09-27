@@ -43,11 +43,16 @@ BBB_RELAY_PORT_START:                 "{{ ports.public.relay_port_ranges[applica
 BBB_RELAY_PORT_END:                   "{{ ports.public.relay_port_ranges[application_id ~ '_end'] }}"
 BBB_RELAY_PORT_RANGE:                 "{{ BBB_RELAY_PORT_START }}-{{ BBB_RELAY_PORT_END }}"
 
-# Collabora
+## Collabora
 BBB_COLLABORA_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.collabora.internal') }}"
 BBB_COLLABORA_URL:                    "{{ 'https://collabora:9980/cool' if BBB_COLLABORA_ENABLED else (domains | get_url('web-svc-collabora', WEB_PROTOCOL)) }}"
 
-## Switchs
+### Recording
+BBB_RECORDING_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.'~ entity_name ~'.recording.enabled') }}"
+BBB_RECORDING_CLEANUP_ENABLED:        "{{ applications | get_app_conf(application_id, 'docker.services.'~ entity_name ~'.recording.cleanup') }}"
+BBB_RECORDING_MAX_AGE_DAYS:           "{{ applications | get_app_conf(application_id, 'docker.services.'~ entity_name ~'.recording.max_age_days') }}"
+
+## Additional Switchs
 
 ### Network
 BBB_IP6_ENABLED:                      "{{ applications | get_app_conf(application_id, 'server.ip6_enabled') }}"

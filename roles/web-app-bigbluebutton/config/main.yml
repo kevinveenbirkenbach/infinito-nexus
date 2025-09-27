@@ -24,8 +24,12 @@ credentials: {}
 docker:
   services:
     bigbluebutton:
-      repository: "https://github.com/kevinveenbirkenbach/bigbluebutton-docker.git"
-      version:    "bbb3.0"
+      repository:     "https://github.com/kevinveenbirkenbach/bigbluebutton-docker.git"
+      version:        "bbb3.0"
+      recording:
+        enabled:      true  # Enable recordings of sessions
+        cleanup:      true  # Auto-Cleanup Recordings
+        max_age_days: 30    # Cleanup recording after this amount of days
     database:
       # This is set to true to pass integration test, doesn't have any other function
       enabled:    true
