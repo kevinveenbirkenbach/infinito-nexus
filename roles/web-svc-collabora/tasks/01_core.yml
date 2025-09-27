@@ -3,7 +3,9 @@
     name: sys-stk-full-stateless
     public: true
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers:        true
+    docker_compose_file_creation_enabled: true
+    docker_pull_git_repository:           false
     
 - name: "generate {{ domain }}.conf"
   template:
