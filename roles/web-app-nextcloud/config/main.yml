@@ -51,7 +51,7 @@ docker:
       version:            "latest"
       backup:
         no_stop_required: false
-      internal:           false
+      internal:           true
       network_mode:       host
     whiteboard:
       name:               "nextcloud-whiteboard"
