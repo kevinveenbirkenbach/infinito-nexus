@@ -7,10 +7,10 @@
     network_mode: {{ COTURN_NETWORK_MODE }}
 {% if COTURN_NETWORK_MODE == 'bridge' %}
     ports:
-      - "{{ COTURN_TURN_PORT }}:{{ COTURN_TURN_PORT }}/udp"
-      - "{{ COTURN_TURN_PORT }}:{{ COTURN_TURN_PORT }}/tcp"
-      - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/tcp"
-      - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/udp"
+      - "{{ COTURN_STUN_TURN_PORT }}:{{ COTURN_STUN_TURN_PORT }}/udp"
+      - "{{ COTURN_STUN_TURN_PORT }}:{{ COTURN_STUN_TURN_PORT }}/tcp"
+      - "{{ COTURN_STUN_TURN_PORT_TLS }}:{{ COTURN_STUN_TURN_PORT_TLS }}/tcp"
+      - "{{ COTURN_STUN_TURN_PORT_TLS }}:{{ COTURN_STUN_TURN_PORT_TLS }}/udp"
       - "{{ COTURN_RELAY_PORT_RANGE }}/udp"
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% endif %}
@@ -34,12 +34,18 @@
       --no-multicast-peers
       --no-cli
       --no-tcp-relay
+      --listening-port={{ COTURN_STUN_TURN_PORT }}
+      --tls-listening-port={{ COTURN_STUN_TURN_PORT_TLS }}
       --min-port={{ COTURN_RELAY_PORT_START }}
       --max-port={{ COTURN_RELAY_PORT_END }}
       --cert={{ COTURN_TLS_CERT_PATH }}
       --pkey={{ COTURN_TLS_KEY_PATH }}
       --cipher-list=DEFAULT
-      --dh2066
-
+    healthcheck:
+      test: ["CMD", "sh", "-c", "command -v turnutils_stunclient >/dev/null && turnutils_stunclient -p {{ COTURN_STUN_TURN_PORT }} 127.0.0.1 || nc -z 127.0.0.1 {{ COTURN_STUN_TURN_PORT }}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
 

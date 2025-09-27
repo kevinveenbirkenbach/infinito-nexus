@@ -13,8 +13,8 @@ COTURN_REALM:               "{{ domain }}"
 COTURN_NETWORK_MODE:        "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.network_mode') }}"
 
 ## Ports
-COTURN_TURN_PORT:           "{{ ports.public.turn[application_id] }}"
-COTURN_STUN_PORT:           "{{ ports.public.stun[application_id] }}"
+COTURN_STUN_TURN_PORT:      "{{ ports.public.stun_turn[application_id] }}"
+COTURN_STUN_TURN_PORT_TLS:  "{{ ports.public.stun_turn_tls[application_id] }}"
 COTURN_RELAY_PORT_START:    "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
 COTURN_RELAY_PORT_END:      "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
 COTURN_RELAY_PORT_RANGE:    "{{ COTURN_RELAY_PORT_START }}-{{ COTURN_RELAY_PORT_END }}"

@@ -88,12 +88,12 @@ ports:
       web-app-gitlab:         2202
     ldaps:
       svc-db-openldap:        636
-    stun:
+    stun_turn:
       web-app-bigbluebutton:  3478  # Not sure if it's right placed here or if it should be moved to localhost section
       # Occupied by BBB:      3479
       web-app-nextcloud:      3480
       web-svc-coturn:         3481
-    turn:
+    stun_turn_tls:
       web-app-bigbluebutton:  5349  # Not sure if it's right placed here or if it should be moved to localhost section
       web-app-nextcloud:      5350  # Not used yet
       web-svc-coturn:         5351
