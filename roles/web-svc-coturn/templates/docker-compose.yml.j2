@@ -12,6 +12,7 @@
       - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/tcp"
       - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/udp"
       - "{{ COTURN_RELAY_PORT_RANGE }}/udp"
+{% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% endif %}
     volumes:
       - "{{ COTURN_TLS_CERT_PATH }}:{{ COTURN_TLS_CERT_PATH }}:ro"
@@ -39,6 +40,6 @@
       --pkey={{ COTURN_TLS_KEY_PATH }}
       --cipher-list=DEFAULT
       --dh2066
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
+
