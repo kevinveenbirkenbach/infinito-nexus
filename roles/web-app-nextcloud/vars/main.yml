@@ -8,16 +8,15 @@ database_password:                  "{{ applications | get_app_conf(application_
 database_type:                      "mariadb"                                                                                   # Database flavor
 
 # Nextcloud 
+
 ## General 
 NEXTCLOUD_DOMAIN:                   "{{ domains | get_domain(application_id) }}"
 NEXTCLOUD_PORT:                     "{{ ports.localhost.http[application_id] }}"
 NEXTCLOUD_URL:                      "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 
-NEXTCLOUD_PLUGINS_ENABLED:          "{{ applications | get_app_conf(application_id, 'plugins_enabled') }}"
-NEXTCLOUD_ADMINISTRATOR_USERNAME:   "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
-
 ## Plugins
 NEXTCLOUD_PLUGIN_ITEMS:             "{{ applications | get_app_conf(application_id, 'plugins') | dict2items }}"
+NEXTCLOUD_PLUGINS_ENABLED:          "{{ applications | get_app_conf(application_id, 'plugins_enabled') }}"
 
 ## Paths
 
@@ -25,6 +24,7 @@ NEXTCLOUD_PLUGIN_ITEMS:             "{{ applications | get_app_conf(application_
 NEXTCLOUD_HOST_CONF_ADD_PATH:       "{{ [ docker_compose.directories.volumes, 'infinito' ] | path_join }}"              # This folder is the path to which the additive configurations will be copied
 NEXTCLOUD_HOST_INCL_PATH:           "{{ [ docker_compose.directories.volumes, 'includes.php' ] | path_join }}"          # Path to the instruction file on the host. Responsible for loading the additional configurations
 NEXTCLOUD_HOST_NGINX_PATH:          "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, NEXTCLOUD_DOMAIN ~ '.conf' ] | path_join }}"  # Nginx path for proxy conf
+NEXTCLOUD_HOST_NGINX_SRC:           "{{ [ docker_compose.directories.volumes, 'nginx.conf' ] | path_join }}" 
 
 ## Control Node
 NEXTCLOUD_CNODE_PLUGIN_VARS_PATH:   "{{ [role_path, 'vars/plugins/'] | path_join }}"                                 # Folder in which the files for the plugin configuration are stored
@@ -38,8 +38,8 @@ NEXTCLOUD_DOCKER_CONF_ADD_PATH:     "{{ [ NEXTCLOUD_DOCKER_CONF_DIRECTORY, 'infi
 NEXTCLOUD_DOCKER_INCL_PATH:         "/tmp/includes.php"                                                   # Path to the temporary file which will be included to the config.php to load the additional configurations
 
 ## Administrator
-NEXTCLOUD_ADMINISTRATOR_USER:       "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
 NEXTCLOUD_ADMINISTRATOR_PASSWORD:   "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
+NEXTCLOUD_ADMINISTRATOR_USERNAME:   "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
 
 ## Docker
 
@@ -57,29 +57,37 @@ NEXTCLOUD_PROXY_VERSION:            "{{ applications | get_app_conf(application_
 ### Cron
 NEXTCLOUD_CRON_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
 
-### Talk 
-#### Service
-_NEXTCLOUD_COTURN_STANDALONE_ROLE: 'web-svc-coturn'
-NEXTCLOUD_TALK_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.talk.name') }}"
-NEXTCLOUD_TALK_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.talk.image') }}"
-NEXTCLOUD_TALK_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.talk.version') }}"
-NEXTCLOUD_TALK_PLUGIN_ENABLED:      "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
-NEXTCLOUD_TALK_SERVICE_ENABLED:     "{{ applications | get_app_conf(application_id, 'docker.services.talk.internal')  if NEXTCLOUD_TALK_PLUGIN_ENABLED  else false }}"
-NEXTCLOUD_TALK_TURN_SECRET:         "{{ applications | get_app_conf(application_id, 'credentials.talk_turn_secret')   if NEXTCLOUD_TALK_SERVICE_ENABLED else applications | get_app_conf(_NEXTCLOUD_COTURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
-NEXTCLOUD_TALK_SIGNALING_SECRET:    "{{ applications | get_app_conf(application_id, 'credentials.talk_signaling_secret') }}"
-NEXTCLOUD_TALK_INTERNAL_SECRET:     "{{ applications | get_app_conf(application_id, 'credentials.talk_internal_secret') }}"
-NEXTCLOUD_TALK_LOCATION:            "/standalone-signaling/"
-NEXTCLOUD_TALK_PORT_INTERNAL:       "8081"
-NEXTCLOUD_TALK_INT_TURN_PORT:       "3478"
-NEXTCLOUD_TALK_RELAY_PORT_START:    "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
-NEXTCLOUD_TALK_RELAY_PORT_END:      "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
-NEXTCLOUD_TALK_RELAY_PORT_RANGE:    "{{ NEXTCLOUD_TALK_RELAY_PORT_START }}-{{ NEXTCLOUD_TALK_RELAY_PORT_END }}"
-NEXTCLOUD_TALK_NETWORK_MODE:        "{{ applications | get_app_conf(application_id, 'docker.services.talk.network_mode') }}"
+### Talk
 
-# Connection
-NEXTCLOUD_TALK_STUN_PORT:           "{{ ports.public.stun_turn[application_id] if NEXTCLOUD_TALK_SERVICE_ENABLED else ports.public.stun_turn[_NEXTCLOUD_COTURN_STANDALONE_ROLE] }}"
-NEXTCLOUD_TALK_DOMAIN:              "{{ NEXTCLOUD_DOMAIN if NEXTCLOUD_TALK_SERVICE_ENABLED else (domains | get_domain(_NEXTCLOUD_COTURN_STANDALONE_ROLE)) }}"
-NEXTCLOUD_TALK_SIGNALING_URL:       "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_LOCATION ] | url_join }}"
+#### General
+NEXTCLOUD_TALK_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.talk.name') }}"
+NEXTCLOUD_TALK_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.talk.image') }}"
+NEXTCLOUD_TALK_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.talk.version') }}"
+NEXTCLOUD_TALK_PLUGIN_ENABLED:        "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
+NEXTCLOUD_TALK_NETWORK_MODE:          "{{ applications | get_app_conf(application_id, 'docker.services.talk.network_mode') }}"
+NEXTCLOUD_TALK_INTERNAL_SECRET:       "{{ applications | get_app_conf(application_id, 'credentials.talk_internal_secret') }}"
+NEXTCLOUD_TALK_DOMAIN:                "{{ NEXTCLOUD_DOMAIN if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED else (domains | get_domain(NEXTCLOUD_TALK_TURN_STANDALONE_ROLE)) }}"
+
+#### Signaling
+NEXTCLOUD_TALK_SIGNALING_SECRET:      "{{ applications | get_app_conf(application_id, 'credentials.talk_signaling_secret') }}"
+NEXTCLOUD_TALK_SIGNALING_LOCATION:    "/standalone-signaling/"
+NEXTCLOUD_TALK_SIGNALING_PORT:        "8081"
+NEXTCLOUD_TALK_SIGNALING_URL:         "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_SIGNALING_LOCATION ] | url_join }}"
+
+#### Turn (Onboard)
+NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.onboard_enabled') if NEXTCLOUD_TALK_PLUGIN_ENABLED  else false }}"
+NEXTCLOUD_TALK_TURN_ONBOARD_SECRET:           "{{ applications | get_app_conf(application_id, 'credentials.talk_turn_secret') if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED else applications | get_app_conf(NEXTCLOUD_TALK_TURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
+NEXTCLOUD_TALK_TURN_ONBOARD_STUN_PORT:        "{{ ports.public.stun_turn[application_id] }}"
+NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_START: "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
+NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_END:   "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
+NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_RANGE: "{{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_START }}-{{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_END }}"
+
+#### Stun
+NEXTCLOUD_TALK_STUN_PORT:                     "{{ ports.public.stun_turn[application_id] if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED else ports.public.stun_turn[NEXTCLOUD_TALK_TURN_STANDALONE_ROLE] }}"
+
+#### Coturn (Standalone)
+NEXTCLOUD_TALK_TURN_STANDALONE_ROLE:          'web-svc-coturn'
+NEXTCLOUD_TALK_TURN_STANDALONE_ENABLED:       "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.standalone_enabled') if NEXTCLOUD_TALK_PLUGIN_ENABLED  else false }}"
 
 ### Whiteboard
 NEXTCLOUD_WHITEBOARD_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.name') }}"

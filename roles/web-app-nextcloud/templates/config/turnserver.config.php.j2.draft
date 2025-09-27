@@ -5,7 +5,7 @@
 return 'turn_servers' => [
     [
         'host' => 'coturn',
-        'port' => 3478,
+        'port' => {{ NEXTCLOUD_TALK_TURN_ONBOARD_STUN_PORT }},
         'secret' => 'my-secret-key',
         'protocols' => 'udp,tcp'
     ]

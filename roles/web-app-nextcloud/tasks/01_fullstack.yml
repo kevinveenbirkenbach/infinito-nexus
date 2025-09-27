@@ -33,5 +33,5 @@
 - name: create internal nextcloud nginx configuration
   template:
     src:  "nginx/docker.conf.j2" 
-    dest: "{{ [docker_compose.directories.volumes, 'nginx.conf'] | path_join }}"
+    dest: "{{ NEXTCLOUD_HOST_NGINX_SRC }}"
   notify: restart nextcloud nginx service

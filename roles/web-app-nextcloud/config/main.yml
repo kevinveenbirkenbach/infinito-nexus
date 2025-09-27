@@ -51,8 +51,10 @@ docker:
       version:            "latest"
       backup:
         no_stop_required: false
-      internal:           true
-      network_mode:       host
+      turn_server:
+        onboard_enabled:    true
+        standalone_enabled: true
+      network_mode:         host
     whiteboard:
       name:               "nextcloud-whiteboard"
       image:              "ghcr.io/nextcloud-releases/whiteboard"

@@ -35,5 +35,3 @@
     plugin_key:   "{{ plugin_item.key }}"
     plugin_value: "{{ plugin_item.value }}"
   when: NEXTCLOUD_PLUGINS_ENABLED
-
-
