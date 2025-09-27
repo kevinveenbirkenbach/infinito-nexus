@@ -1,7 +1,7 @@
 credentials:
   user_password:
     description:  "Long-Term Credential password for clients"
-    algorithm:    "alphanumeric_32"
+    algorithm:    "random_hex"
     validation:   "^[A-Za-z0-9]{32}$"
   auth_secret:
     description:  "TURN-REST static auth secret"

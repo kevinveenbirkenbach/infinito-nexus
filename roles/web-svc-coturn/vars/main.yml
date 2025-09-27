@@ -10,6 +10,7 @@ COTURN_VERSION:             "{{ applications | get_app_conf(application_id, 'doc
 COTURN_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
 COTURN_VOLUME:              "{{ entity_name }}"
 COTURN_REALM:               "{{ domain }}"
+COTURN_NETWORK_MODE:        "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.network_mode') }}"
 
 ## Ports
 COTURN_TURN_PORT:           "{{ ports.public.turn[application_id] }}"

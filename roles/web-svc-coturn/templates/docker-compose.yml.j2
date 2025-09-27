@@ -4,12 +4,15 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ COTURN_IMAGE }}:{{ COTURN_VERSION }}
     container_name: {{ COTURN_VOLUME }}
+    network_mode: {{ COTURN_NETWORK_MODE }}
+{% if COTURN_NETWORK_MODE == 'bridge' %}
     ports:
       - "{{ COTURN_TURN_PORT }}:{{ COTURN_TURN_PORT }}/udp"
       - "{{ COTURN_TURN_PORT }}:{{ COTURN_TURN_PORT }}/tcp"
       - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/tcp"
       - "{{ COTURN_STUN_PORT }}:{{ COTURN_STUN_PORT }}/udp"
       - "{{ COTURN_RELAY_PORT_RANGE }}/udp"
+{% endif %}
     volumes:
       - "{{ COTURN_TLS_CERT_PATH }}:{{ COTURN_TLS_CERT_PATH }}:ro"
       - "{{ COTURN_TLS_KEY_PATH }}:{{ COTURN_TLS_KEY_PATH }}:ro"
