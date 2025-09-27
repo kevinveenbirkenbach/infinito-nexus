@@ -23,6 +23,7 @@ COTURN_RELAY_PORT_RANGE:    "{{ COTURN_RELAY_PORT_START }}-{{ COTURN_RELAY_PORT_
 COTURN_USER_NAME:           "{{ applications | get_app_conf(application_id, 'username') }}"
 COTURN_USER_PASSWORD:       "{{ applications | get_app_conf(application_id, 'credentials.user_password') }}"
 COTURN_STATIC_AUTH_SECRET:  "{{ applications | get_app_conf(application_id, 'credentials.auth_secret') }}"
+COTURN_USER_AUTH_ENABLED:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.user_auth_enabled') }}"
 
 ## Certificates
 COTURN_TLS_CERT_PATH:       "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder, 'fullchain.pem' ] | path_join }}"

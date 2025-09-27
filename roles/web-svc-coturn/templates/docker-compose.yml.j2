@@ -10,7 +10,6 @@
       - "{{ COTURN_STUN_TURN_PORT }}:{{ COTURN_STUN_TURN_PORT }}/udp"
       - "{{ COTURN_STUN_TURN_PORT }}:{{ COTURN_STUN_TURN_PORT }}/tcp"
       - "{{ COTURN_STUN_TURN_PORT_TLS }}:{{ COTURN_STUN_TURN_PORT_TLS }}/tcp"
-      - "{{ COTURN_STUN_TURN_PORT_TLS }}:{{ COTURN_STUN_TURN_PORT_TLS }}/udp"
       - "{{ COTURN_RELAY_PORT_RANGE }}/udp"
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% endif %}
@@ -18,10 +17,13 @@
       - "{{ COTURN_TLS_CERT_PATH }}:{{ COTURN_TLS_CERT_PATH }}:ro"
       - "{{ COTURN_TLS_KEY_PATH }}:{{ COTURN_TLS_KEY_PATH }}:ro"
     command: >
-      --use-auth-secret
-      --static-auth-secret="${COTURN_STATIC_AUTH_SECRET}"
+{% if COTURN_USER_AUTH_ENABLED | bool %}
       --lt-cred-mech
       --user="${COTURN_USER_NAME}:${COTURN_USER_PASSWORD}"
+{% else %}
+      --use-auth-secret
+      --static-auth-secret="${COTURN_STATIC_AUTH_SECRET}"
+{% endif %}
       --log-file=stdout
       --external-ip={{ networks.internet.ip4 }}
 {% if networks.internet.ip6|default('') %}
@@ -33,7 +35,6 @@
       --stale-nonce
       --no-multicast-peers
       --no-cli
-      --no-tcp-relay
       --listening-port={{ COTURN_STUN_TURN_PORT }}
       --tls-listening-port={{ COTURN_STUN_TURN_PORT_TLS }}
       --min-port={{ COTURN_RELAY_PORT_START }}

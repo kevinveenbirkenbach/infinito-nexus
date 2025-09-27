@@ -6,14 +6,15 @@ server:
 docker:
   services:
     coturn:
-      image:            "coturn/coturn"
-      version:          "latest"
-      cpus:             1.0
-      mem_reservation:  512m
-      mem_limit:        1g
-      pids_limit:       256
-      network_mode:     host
+      image:              "coturn/coturn"
+      version:            "latest"
+      user_auth_enabled:  false
+      cpus:               1.0
+      mem_reservation:    512m
+      mem_limit:          1g
+      pids_limit:         256
+      network_mode:       host
     redis:
-      enabled:  false
+      enabled:            false
     database: 
-      enabled:  false
+      enabled:            false
