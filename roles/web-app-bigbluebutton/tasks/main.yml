@@ -67,14 +67,5 @@
 - name: "Setup administrator"
   include_tasks: "02_administrator.yml"
 
-
-- name: "Load Coturn Role for '{{ application_id }}'"
-  include_role:
-    name: web-svc-coturn
-  vars:
-    flush_handlers: true
-  when:    
-    - run_once_web_svc_coturn is not defined
-    - not BBB_INTERNAL_COTURN_ENABLED
-
-
+- name: "Load '{{ application_id }}' dependencies"
+  include_tasks: "03_dependencies.yml"

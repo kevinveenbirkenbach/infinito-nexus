@@ -28,9 +28,9 @@ docker:
     database:
       enabled: true
     nextcloud:
-      name:     "nextcloud"
-      image:    "nextcloud"
-      version:  "production-fpm-alpine"
+      name:               "nextcloud"
+      image:              "nextcloud"
+      version:            "production-fpm-alpine"
       backup:
         no_stop_required: true
       cpus:               "2.0"
@@ -38,27 +38,28 @@ docker:
       mem_limit:          "3g"
       pids_limit:         512
     proxy: 
-      name:     "nextcloud-proxy"
-      image:    "nginx"
-      version:  "alpine"
+      name:               "nextcloud-proxy"
+      image:              "nginx"
+      version:            "alpine"
       backup:
         no_stop_required: true
     cron:
-      name:     "nextcloud-cron"
+      name:               "nextcloud-cron"
     talk:
-      name:     "nextcloud-talk"
-      image:    "nextcloud/aio-talk"
-      version:  "latest"
+      name:               "nextcloud-talk"
+      image:              "nextcloud/aio-talk"
+      version:            "latest"
       backup:
         no_stop_required: false
-      internal: "{{ not 'web-svc-coturn' in group_names | lower }}"
+      internal:           false
+      network_mode:       host
     whiteboard:
-      name:     "nextcloud-whiteboard"
-      image:    "ghcr.io/nextcloud-releases/whiteboard"
-      version:  "latest"
+      name:               "nextcloud-whiteboard"
+      image:              "ghcr.io/nextcloud-releases/whiteboard"
+      version:            "latest"
       backup:
         no_stop_required: true
-  enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True) }}"   # Activate OIDC for Nextcloud
+  enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin
   # @see https://apps.nextcloud.com/apps/oidc_login

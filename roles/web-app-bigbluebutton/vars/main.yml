@@ -14,12 +14,13 @@ domain:                               "{{ domains | get_domain(application_id) }
 http_port:                            "{{ ports.localhost.http[application_id] }}"
 
 # Docker
-docker_compose_file_creation_enabled: false # Handled in this role
+docker_compose_file_creation_enabled: false
+docker_pull_git_repository:           true
 docker_repository_address:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
 docker_repository_branch:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
-docker_pull_git_repository:           true
 
 # BigBlueButton
+_BBB_COTURN_ROLE:                     'web-svc-coturn'
 
 ## Credentials
 BBB_SHARED_SECRET:                    "{{ applications | get_app_conf(application_id, 'credentials.shared_secret') }}"
@@ -27,19 +28,24 @@ BBB_ETHERPAD_API_KEY:                 "{{ applications | get_app_conf(applicatio
 BBB_RAILS_SECRET:                     "{{ applications | get_app_conf(application_id, 'credentials.rails_secret') }}"
 BBB_POSTGRESQL_SECRET:                "{{ applications | get_app_conf(application_id, 'credentials.postgresql_secret') }}"
 BBB_FSESL_PASSWORD:                   "{{ applications | get_app_conf(application_id, 'credentials.fsesl_password') }}"
-BBB_TURN_SECRET:                      "{{ applications | get_app_conf(application_id, 'credentials.turn_secret') }}"
+BBB_TURN_SECRET:                      "{{ applications | get_app_conf(application_id, 'credentials.turn_secret') if BBB_COTURN_ENABLED else applications | get_app_conf(_BBB_COTURN_ROLE, 'credentials.auth_secret') }}"
 
 ## TLS
 BBB_COTURN_TLS_CERT_PATH:             "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder,   'fullchain.pem'] | path_join }}"
 BBB_COTURN_TLS_KEY_PATH:              "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder,   'privkey.pem'] | path_join }}"
 
 ## Turn
-BBB_TURN_DOMAIN:                    "{{ networks.internet.ip4 if BBB_INTERNAL_COTURN_ENABLED else domains | get_domain('web-svc-coturn') }}"
-BBB_TURN_PORT:                      "{{ ports.public.turn[application_id] if BBB_INTERNAL_COTURN_ENABLED else ports.public.turn['web-svc-coturn'] }}"
-BBB_STUN_PORT:                      "{{ ports.public.turn[application_id] if BBB_INTERNAL_COTURN_ENABLED else ports.public.stun['web-svc-coturn'] }}"
-BBB_RELAY_PORT_START:               "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
-BBB_RELAY_PORT_END:                 "{{ ports.public.relay_port_ranges[application_id ~ '_end'] }}"
-BBB_RELAY_PORT_RANGE:               "{{ BBB_RELAY_PORT_START }}-{{ BBB_RELAY_PORT_END }}"
+BBB_COTURN_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.coturn.internal') }}"
+BBB_TURN_DOMAIN:                      "{{ networks.internet.ip4             if BBB_COTURN_ENABLED else domains | get_domain(_BBB_COTURN_ROLE) }}"
+BBB_TURN_PORT:                        "{{ ports.public.stun_turn[application_id] if BBB_COTURN_ENABLED else ports.public.stun_turn[_BBB_COTURN_ROLE] }}"
+BBB_STUN_PORT:                        "{{ ports.public.stun_turn[application_id] if BBB_COTURN_ENABLED else ports.public.stun_turn_tls[_BBB_COTURN_ROLE] }}"
+BBB_RELAY_PORT_START:                 "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
+BBB_RELAY_PORT_END:                   "{{ ports.public.relay_port_ranges[application_id ~ '_end'] }}"
+BBB_RELAY_PORT_RANGE:                 "{{ BBB_RELAY_PORT_START }}-{{ BBB_RELAY_PORT_END }}"
+
+# Collabora
+BBB_COLLABORA_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.collabora.internal') }}"
+BBB_COLLABORA_URL:                    "{{ 'https://collabora:9980/cool' if BBB_COLLABORA_ENABLED else (domains | get_url('web-svc-collabora', WEB_PROTOCOL)) }}"
 
 ## Switchs
 
@@ -48,7 +54,6 @@ BBB_IP6_ENABLED:                      "{{ applications | get_app_conf(applicatio
 
 ### Container
 BBB_GREENLIGHT_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.greenlight.enabled') }}"
-BBB_INTERNAL_COTURN_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.coturn.internal') }}"
 
 ### SSO
 BBB_LDAP_ENABLED:                     "{{ applications | get_app_conf(application_id, 'features.ldap') }}"

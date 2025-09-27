@@ -1,0 +1,17 @@
+- name: "Load Coturn Role for '{{ application_id }}'"
+  include_role:
+    name: web-svc-coturn
+  vars:
+    flush_handlers: true
+  when:    
+    - run_once_web_svc_coturn is not defined
+    - not BBB_COTURN_ENABLED
+
+- name: "Install Collabora Dependency"
+  include_role:
+    name: web-svc-collabora
+  vars:
+    flush_handlers: true
+  when:    
+    - run_once_web_svc_collabora is not defined
+    - not BBB_COLLABORA_ENABLED

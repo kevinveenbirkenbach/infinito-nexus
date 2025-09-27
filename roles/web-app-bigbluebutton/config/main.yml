@@ -24,7 +24,7 @@ credentials: {}
 docker:
   services:
     bigbluebutton:
-      repository: "https://github.com/bigbluebutton/docker.git"
+      repository: "https://github.com/kevinveenbirkenbach/bigbluebutton-docker.git"
       version:    "bbb3.0"
     database:
       # This is set to true to pass integration test, doesn't have any other function
@@ -32,4 +32,6 @@ docker:
     greenlight:
       enabled:    true
     coturn:
-      internal:   "{{ not 'web-svc-coturn' in group_names | lower }}"
+      internal:   false
+    collabora:
+      internal:   false

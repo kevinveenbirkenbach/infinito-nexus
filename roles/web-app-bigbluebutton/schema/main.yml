@@ -17,7 +17,7 @@ credentials:
     validation:   "^[a-zA-Z0-9]{32}$"
   fsesl_password:
     description:  "Password for FreeSWITCH ESL connection"
-    algorithm:    "alphanumeric_32"
+    algorithm:    "random_hex"
     validation:   "^.{8,}$"
   turn_secret:
     description:  "TURN server shared secret"

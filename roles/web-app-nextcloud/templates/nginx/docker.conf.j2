@@ -190,6 +190,7 @@ http {
             proxy_read_timeout 3600;
         }
 
+{% if NEXTCLOUD_TALK_SERVICE_ENABLED %}
         location {{ NEXTCLOUD_TALK_LOCATION }} {
             proxy_pass         http://talk:{{ NEXTCLOUD_TALK_PORT_INTERNAL }}/;
             proxy_http_version 1.1;
@@ -198,5 +199,7 @@ http {
             proxy_set_header   Connection        "upgrade";
             proxy_read_timeout 3600;
         }
+{% endif %}
+
     }
 }

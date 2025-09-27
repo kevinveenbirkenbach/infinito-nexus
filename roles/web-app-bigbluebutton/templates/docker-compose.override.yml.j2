@@ -5,6 +5,7 @@ services:
       MS_ENABLE_IPV6: "false"
       MS_WEBRTC_LISTEN_IPS: >-
         [{"ip":"0.0.0.0","announcedIp":"${EXTERNAL_IPv4}"}]
+{% if BBB_COTURN_ENABLED | bool %}
   coturn:
     ports:
       - "{{ BBB_TURN_PORT }}:{{ BBB_TURN_PORT }}/udp"
@@ -27,3 +28,19 @@ services:
       {% if BBB_IP6_ENABLED %}--external-ip=${EXTERNAL_IPv6}{% endif %}
       --cert=${COTURN_TLS_CERT_PATH}
       --pkey=${COTURN_TLS_KEY_PATH}
+{% endif %}
+{% if BBB_GREENLIGHT_ENABLED | bool %}
+  greenlight:
+{% set container_port = 3000 %}
+{% include 'roles/docker-container/templates/healthcheck/nc.yml.j2' %}
+{% endif %}
+{% if BBB_COLLABORA_ENABLED | bool %}
+  bbb-web:
+    depends_on:
+      - redis
+      - etherpad
+      - bbb-pads
+  etherpad:
+    depends_on:
+      - redis
+{% endif %}
