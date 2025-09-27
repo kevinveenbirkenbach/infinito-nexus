@@ -48,8 +48,8 @@
     network_mode: {{ NEXTCLOUD_TALK_NETWORK_MODE }}
 {% if NEXTCLOUD_TALK_NETWORK_MODE == 'bridge' %}
     ports:
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_STUN_PORT }}/tcp
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_STUN_PORT }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_STUN_PORT }}/udp
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}/tcp
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}/udp
       - {{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_RANGE }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_RANGE }}/udp
     expose:
       - "{{ container_port }}"

@@ -66,7 +66,7 @@ NEXTCLOUD_TALK_VERSION:               "{{ applications | get_app_conf(applicatio
 NEXTCLOUD_TALK_PLUGIN_ENABLED:        "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
 NEXTCLOUD_TALK_NETWORK_MODE:          "{{ applications | get_app_conf(application_id, 'docker.services.talk.network_mode') }}"
 NEXTCLOUD_TALK_INTERNAL_SECRET:       "{{ applications | get_app_conf(application_id, 'credentials.talk_internal_secret') }}"
-NEXTCLOUD_TALK_DOMAIN:                "{{ NEXTCLOUD_DOMAIN if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED else (domains | get_domain(NEXTCLOUD_TALK_TURN_STANDALONE_ROLE)) }}"
+NEXTCLOUD_TALK_DOMAIN:                "{{ NEXTCLOUD_DOMAIN }}"
 
 #### Signaling
 NEXTCLOUD_TALK_SIGNALING_SECRET:      "{{ applications | get_app_conf(application_id, 'credentials.talk_signaling_secret') }}"
@@ -74,20 +74,40 @@ NEXTCLOUD_TALK_SIGNALING_LOCATION:    "/standalone-signaling/"
 NEXTCLOUD_TALK_SIGNALING_PORT:        "8081"
 NEXTCLOUD_TALK_SIGNALING_URL:         "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_SIGNALING_LOCATION ] | url_join }}"
 
-#### Turn (Onboard)
-NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.onboard_enabled') if NEXTCLOUD_TALK_PLUGIN_ENABLED  else false }}"
-NEXTCLOUD_TALK_TURN_ONBOARD_SECRET:           "{{ applications | get_app_conf(application_id, 'credentials.talk_turn_secret') if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED else applications | get_app_conf(NEXTCLOUD_TALK_TURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
-NEXTCLOUD_TALK_TURN_ONBOARD_STUN_PORT:        "{{ ports.public.stun_turn[application_id] }}"
+#### Talk Turn (Onboard)
+NEXTCLOUD_TALK_TURN_ONBOARD_PORT:             "{{ ports.public.stun_turn[application_id] }}"
+NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.onboard_enabled') if NEXTCLOUD_TALK_PLUGIN_ENABLED else false }}"
+NEXTCLOUD_TALK_TURN_ONBOARD_SECRET:           "{{ applications | get_app_conf(application_id, 'credentials.talk_turn_secret') }}"
 NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_START: "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
 NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_END:   "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
 NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_RANGE: "{{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_START }}-{{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_END }}"
-
-#### Stun
-NEXTCLOUD_TALK_STUN_PORT:                     "{{ ports.public.stun_turn[application_id] if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED else ports.public.stun_turn[NEXTCLOUD_TALK_TURN_STANDALONE_ROLE] }}"
+NEXTCLOUD_TALK_STUN_ONBOARD_CONFIG:           "stun:{{ NEXTCLOUD_TALK_DOMAIN }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}"
+NEXTCLOUD_TALK_TURN_ONBOARD_CONFIG: >-
+  {{
+    {
+      'server': 'turn:' ~ NEXTCLOUD_TALK_DOMAIN ~ ':' ~ NEXTCLOUD_TALK_TURN_ONBOARD_PORT ~ '?transport=udp',
+      'secret': NEXTCLOUD_TALK_TURN_ONBOARD_SECRET,
+      'ttl': 86400,
+      'protocols': 'udp,tcp'
+    }
+  }}
 
 #### Coturn (Standalone)
 NEXTCLOUD_TALK_TURN_STANDALONE_ROLE:          'web-svc-coturn'
-NEXTCLOUD_TALK_TURN_STANDALONE_ENABLED:       "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.standalone_enabled') if NEXTCLOUD_TALK_PLUGIN_ENABLED  else false }}"
+NEXTCLOUD_TALK_TURN_STANDALONE_PORT:          "{{ ports.public.stun_turn[NEXTCLOUD_TALK_TURN_STANDALONE_ROLE] }}"
+NEXTCLOUD_TALK_TURN_STANDALONE_SECRET:        "{{ applications | get_app_conf(NEXTCLOUD_TALK_TURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
+NEXTCLOUD_TALK_TURN_STANDALONE_ENABLED:       "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.standalone_enabled') if NEXTCLOUD_TALK_PLUGIN_ENABLED else false }}"
+NEXTCLOUD_TALK_TURN_STANDALONE_DOMAIN:        "{{ domains | get_domain(NEXTCLOUD_TALK_TURN_STANDALONE_ROLE) }}"
+NEXTCLOUD_TALK_STUN_STANDALONE_CONFIG:        "stun:{{ NEXTCLOUD_TALK_TURN_STANDALONE_DOMAIN }}:{{ NEXTCLOUD_TALK_TURN_STANDALONE_PORT }}"
+NEXTCLOUD_TALK_TURN_STANDALONE_CONFIG: >-
+  {{
+    {
+      'server': 'turn:' ~ NEXTCLOUD_TALK_TURN_STANDALONE_DOMAIN ~ ':' ~ NEXTCLOUD_TALK_TURN_STANDALONE_PORT ~ '?transport=udp',
+      'secret': NEXTCLOUD_TALK_TURN_STANDALONE_SECRET,
+      'ttl': 86400,
+      'protocols': 'udp,tcp'
+    }
+  }}
 
 ### Whiteboard
 NEXTCLOUD_WHITEBOARD_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.name') }}"

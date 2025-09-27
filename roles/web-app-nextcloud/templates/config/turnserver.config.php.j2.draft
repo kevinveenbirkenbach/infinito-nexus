@@ -2,11 +2,13 @@
 # Activates the turn server
 # @see https://nextcloud-talk.readthedocs.io/en/latest/TURN/
 
-return 'turn_servers' => [
+return [
+  'turn_servers' => [
     [
         'host' => 'coturn',
-        'port' => {{ NEXTCLOUD_TALK_TURN_ONBOARD_STUN_PORT }},
+        'port' => {{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }},
         'secret' => 'my-secret-key',
         'protocols' => 'udp,tcp'
-    ]
+    ],
+  ],
 ];

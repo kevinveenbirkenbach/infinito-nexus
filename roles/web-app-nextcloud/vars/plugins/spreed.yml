@@ -10,21 +10,30 @@ plugin_configuration:
   # stun_servers: JSON array of strings
   - appid: "spreed"
     configkey: "stun_servers"
-    configvalue: "{{ [
-        NEXTCLOUD_TALK_DOMAIN ~ ':' ~ NEXTCLOUD_TALK_STUN_PORT
-      ] | to_json }}"
+    configvalue: >-
+      {{
+        [
+          NEXTCLOUD_TALK_STUN_ONBOARD_CONFIG     if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED    else none,
+          NEXTCLOUD_TALK_STUN_STANDALONE_CONFIG  if NEXTCLOUD_TALK_TURN_STANDALONE_ENABLED else none
+        ]
+        | select
+        | list
+        | to_json
+      }}
 
   # turn_servers: JSON array of objects
   - appid: "spreed"
     configkey: "turn_servers"
-    configvalue: "{{ [
-        {
-          'server': NEXTCLOUD_TALK_DOMAIN ~ ':' ~ NEXTCLOUD_TALK_STUN_PORT ~ '?transport=udp',
-          'secret': NEXTCLOUD_TALK_TURN_ONBOARD_SECRET,
-          'ttl': 86400,
-          'protocols': 'udp,tcp'
-        }
-      ] | to_json }}"
+    configvalue: >-
+      {{
+        [
+          NEXTCLOUD_TALK_TURN_ONBOARD_CONFIG     if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED    else none,
+          NEXTCLOUD_TALK_TURN_STANDALONE_CONFIG  if NEXTCLOUD_TALK_TURN_STANDALONE_ENABLED else none
+        ]
+        | select
+        | list
+        | to_json
+      }}
 
   # internal secret (plain string)
   - appid: "spreed"

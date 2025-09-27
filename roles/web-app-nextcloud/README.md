@@ -26,7 +26,6 @@ A detailled documentation for the use and administration of Nextcloud on Infinit
 - [Nextcloud Official Website](https://nextcloud.com/)
 - [Nextcloud Docker Documentation](https://github.com/nextcloud/docker)
 - [Nextcloud Admin Manual](https://docs.nextcloud.com/server/latest/admin_manual/)
-- [Nextcloud Admin Manual](https://docs.nextcloud.com/server/latest/admin_manual/)
 - [LDAP Integration Guide](https://docs.nextcloud.com/server/latest/admin_manual/configuration_user/user_auth_ldap.html)
 - [OIDC Login Plugin (pulsejet)](https://github.com/pulsejet/nextcloud-oidc-login)
 - [Sociallogin Plugin (Official)](https://apps.nextcloud.com/apps/sociallogin)
