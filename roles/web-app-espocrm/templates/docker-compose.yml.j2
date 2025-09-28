@@ -1,7 +1,12 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-  web:
+
+{% set service_name = ESPOCRM_SERVICE %}
+  {{ service_name }}:
     container_name: {{ ESPOCRM_CONTAINER }}
     image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
+    init: true
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
     ports:
@@ -11,21 +16,27 @@
     volumes:
       - data:/var/www/html
 
-  daemon:
+{% set service_name = 'daemon' %}
+  {{ service_name }}:
     image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
-    restart: {{ DOCKER_RESTART_POLICY }}
-    logging:
-      driver: journald
+    container_name: {{ ESPOCRM_CONTAINER }}_{{ service_name }}
+    init: true
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+{% include 'roles/docker-container/templates/base.yml.j2' %}
     entrypoint: docker-daemon.sh
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     volumes:
       - data:/var/www/html
 
-  websocket:
+{% set service_name = 'websocket' %}
+  {{ service_name }}:
     image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
-    restart: {{ DOCKER_RESTART_POLICY }}
-    logging:
-      driver: journald
+    container_name: {{ ESPOCRM_CONTAINER }}_{{ service_name }}
+    init: true
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+{% include 'roles/docker-container/templates/base.yml.j2' %}
     environment:
       - ESPOCRM_CONFIG_USE_WEB_SOCKET=true
       - ESPOCRM_CONFIG_WEB_SOCKET_URL={{ WEBSOCKET_PROTOCOL }}://{{ domains | get_domain(application_id) }}/ws

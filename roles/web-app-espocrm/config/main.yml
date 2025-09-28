@@ -33,8 +33,22 @@ docker:
     database:
       enabled: true              
     espocrm:
-      image:    "espocrm/espocrm"
-      version:  "latest"
-      name:     "espocrm"
+      image:            "espocrm/espocrm"
+      version:          "latest"
+      name:             "espocrm"
+      cpus:             1.5
+      mem_reservation:  1.2g
+      mem_limit:        2g
+      pids_limit:       768
+    daemon:
+      cpus:             0.5
+      mem_reservation:  0.25g
+      mem_limit:        0.5g
+      pids_limit:       384
+    websocket:
+      cpus:             0.5
+      mem_reservation:  0.25g
+      mem_limit:        0.5g
+      pids_limit:       384
   volumes:
     data: espocrm_data
