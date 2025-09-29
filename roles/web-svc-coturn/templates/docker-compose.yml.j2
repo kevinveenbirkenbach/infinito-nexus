@@ -3,7 +3,7 @@
   coturn:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ COTURN_IMAGE }}:{{ COTURN_VERSION }}
-    container_name: {{ COTURN_VOLUME }}
+    container_name: {{ COTURN_CONTAINER }}
     network_mode: {{ COTURN_NETWORK_MODE }}
 {% if COTURN_NETWORK_MODE == 'bridge' %}
     ports:
@@ -16,6 +16,7 @@
     volumes:
       - "{{ COTURN_TLS_CERT_PATH }}:{{ COTURN_TLS_CERT_PATH }}:ro"
       - "{{ COTURN_TLS_KEY_PATH }}:{{ COTURN_TLS_KEY_PATH }}:ro"
+      - "{{ COTURN_VOLUME }}:/var/lib/coturn"
     command: >
 {% if COTURN_USER_AUTH_ENABLED | bool %}
       --lt-cred-mech

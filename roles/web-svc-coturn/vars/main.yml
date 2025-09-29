@@ -8,7 +8,8 @@ domain:                     "{{ domains | get_domain(application_id) }}"
 ## Docker 
 COTURN_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 COTURN_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
-COTURN_VOLUME:              "{{ entity_name }}"
+COTURN_VOLUME:              "{{ entity_name }}_data"
+COTURN_CONTAINER:           "{{ entity_name }}"
 COTURN_REALM:               "{{ domain }}"
 COTURN_NETWORK_MODE:        "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.network_mode') }}"
 
