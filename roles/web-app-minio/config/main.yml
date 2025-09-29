@@ -10,8 +10,8 @@ features:
   ldap:             false # OIDC is already activated so LDAP isn't necessary
 server:
   status_codes:
-    api:      301
-    console:  301
+    api:      400
+    console:  200
   domains:
     canonical:
       console:  "console.s3.{{ PRIMARY_DOMAIN }}"
