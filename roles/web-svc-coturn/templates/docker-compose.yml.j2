@@ -16,7 +16,7 @@
     volumes:
       - "{{ COTURN_TLS_CERT_PATH }}:{{ COTURN_TLS_CERT_PATH }}:ro"
       - "{{ COTURN_TLS_KEY_PATH }}:{{ COTURN_TLS_KEY_PATH }}:ro"
-      - "{{ COTURN_VOLUME }}:/var/lib/coturn"
+      - "data:/var/lib/coturn"
     command: >
 {% if COTURN_USER_AUTH_ENABLED | bool %}
       --lt-cred-mech
@@ -51,3 +51,6 @@
       start_period: 10s
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
 
+{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
+  data:
+    name: {{ COTURN_VOLUME }}
