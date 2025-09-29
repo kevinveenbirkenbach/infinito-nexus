@@ -54,8 +54,8 @@ docker:
       backup:
         no_stop_required:   false
       turn_server:
-        onboard_enabled:    true
-        standalone_enabled: true
+        onboard_enabled:    true # Deactivated because standalone turnserver works with  Big Blue Button, so I assume that the nextcloud internal turnserver has it's isssues
+        standalone_enabled: false
       network_mode:         host
     whiteboard:
       name:                 "nextcloud-whiteboard"

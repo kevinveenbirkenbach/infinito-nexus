@@ -192,18 +192,20 @@ http {
             proxy_read_timeout 3600;
         }
 
-{% if NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED | bool %}
+{% if NEXTCLOUD_TALK_SIGNALING_ENABLED | bool %}
         location {{ NEXTCLOUD_TALK_SIGNALING_LOCATION }} {
 {% if NEXTCLOUD_TALK_NETWORK_MODE == 'host' %}
-            proxy_pass http://host.docker.internal:{{ NEXTCLOUD_TALK_SIGNALING_PORT }}/;
+            proxy_pass          http://host.docker.internal:{{ NEXTCLOUD_TALK_SIGNALING_PORT }}/;
 {% else %}
-            proxy_pass http://talk:{{ NEXTCLOUD_TALK_SIGNALING_PORT }}/;
+            proxy_pass          http://talk:{{ NEXTCLOUD_TALK_SIGNALING_PORT }}/;
 {% endif %}
-            proxy_http_version 1.1;
-            proxy_set_header   Host              $host;
-            proxy_set_header   Upgrade           $http_upgrade;
-            proxy_set_header   Connection        "upgrade";
-            proxy_read_timeout 3600;
+            proxy_http_version  1.1;
+            proxy_set_header    Host              $host;
+            proxy_set_header    Upgrade           $http_upgrade;
+            proxy_set_header    Connection        "upgrade";
+            proxy_read_timeout  3600;
+            proxy_buffering     off;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 {% endif %}
 

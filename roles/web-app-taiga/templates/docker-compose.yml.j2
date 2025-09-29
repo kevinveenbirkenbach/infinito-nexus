@@ -3,7 +3,14 @@
 {% set service_name = TAIGA_SERVICE %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}
+    hostname:       {{ TAIGA_HOSTNAME }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1',8000),5).close()"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     volumes:
       # These volumens will be used by taiga-back and taiga-async.
@@ -31,6 +38,12 @@
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
+    healthcheck:
+      test: ["CMD-SHELL", "tr '\\0' ' ' </proc/1/cmdline | grep -qi celery"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
     volumes:
@@ -65,6 +78,12 @@
     volumes:
       - async-rabbitmq-data:/var/lib/rabbitmq
 {% include 'roles/docker-container/templates/base.yml.j2' %}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 
@@ -73,6 +92,12 @@
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: "{{TAIGA_DOCKER_IMAGE_FRONTEND}}:{{ TAIGA_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || curl -fsS http://127.0.0.1/ >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 #    volumes:
@@ -83,6 +108,12 @@
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: taigaio/taiga-events:latest
 {% include 'roles/docker-container/templates/base.yml.j2' %}
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8888"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
     depends_on:
@@ -97,7 +128,12 @@
     volumes:
       - events-rabbitmq-data:/var/lib/rabbitmq
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 
@@ -106,7 +142,12 @@
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: taigaio/taiga-protected:latest
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1',8003),5).close()"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 
@@ -121,7 +162,12 @@
       - static-data:/taiga/static
       - media-data:/taiga/media
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || curl -fsS http://127.0.0.1/ >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
     depends_on:

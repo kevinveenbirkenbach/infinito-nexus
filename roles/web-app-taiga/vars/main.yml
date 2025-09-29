@@ -36,6 +36,7 @@ TAIGA_VERSION:                  "{{ applications | get_app_conf(application_id, 
 
 ### Backend
 TAIGA_SERVICE:                  "{{ entity_name }}"
+TAIGA_HOSTNAME:                 "taiga-back"
 TAIGA_CONTAINER:                "{{ entity_name }}"
 TAIGA_VOLUME_MEDIA:             "/taiga-back/media"
 TAIGA_VOLUME_STATIC:            "/taiga-back/static"

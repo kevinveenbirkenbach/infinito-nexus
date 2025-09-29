@@ -73,6 +73,7 @@ NEXTCLOUD_TALK_SIGNALING_SECRET:      "{{ applications | get_app_conf(applicatio
 NEXTCLOUD_TALK_SIGNALING_LOCATION:    "/standalone-signaling/"
 NEXTCLOUD_TALK_SIGNALING_PORT:        "8081"
 NEXTCLOUD_TALK_SIGNALING_URL:         "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_SIGNALING_LOCATION ] | url_join }}"
+NEXTCLOUD_TALK_SIGNALING_ENABLED:     "{{ NEXTCLOUD_TALK_PLUGIN_ENABLED }}"
 
 #### Talk Turn (Onboard)
 NEXTCLOUD_TALK_TURN_ONBOARD_PORT:             "{{ ports.public.stun_turn[application_id] }}"
