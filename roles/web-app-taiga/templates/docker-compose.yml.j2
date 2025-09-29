@@ -1,81 +1,76 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-  taiga-back:
+{% set service_name = TAIGA_SERVICE %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     volumes:
       # These volumens will be used by taiga-back and taiga-async.
-      - static-data:/taiga-back/static
-      - media-data:/taiga-back/media
+      - static-data:{{ TAIGA_VOLUME_STATIC }}
+      - media-data:{{ TAIGA_VOLUME_MEDIA }}
       # - ./config.py:/taiga-back/settings/config.py
-
-{% if TAIGA_TAIGAIO_ENABLED %}
-
+{% if TAIGA_TAIGAIO_ENABLED | bool %}
       - {{ docker_compose.directories.config }}taiga-local.py:/taiga-back/settings/local.py:ro
-
 {% endif %}
-
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 {% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
-      taiga-events-rabbitmq:
+      {{ TAIGA_EVENTS_RABBITMQ_SERVICE }}:
         condition: service_started
-      taiga-async-rabbitmq:
+      {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
         condition: service_started
-{% if TAIGA_TAIGAIO_ENABLED %}
-    
+{% if TAIGA_TAIGAIO_ENABLED | bool %}
     command: >
       /bin/sh -c "
         pip install taiga-contrib-oidc-auth &&
         /taiga-back/docker/entrypoint.sh"
-
 {% endif %}
 
-
-  taiga-async:
+{% set service_name = TAIGA_ASYNC_SERVICE %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
     volumes:
-      # These volumens will be used by taiga-back and taiga-async.
-      - static-data:/taiga-back/static
-      - media-data:/taiga-back/media
+      # These volumens will be used by backend and async service
+      - static-data:{{ TAIGA_VOLUME_STATIC }}
+      - media-data:{{ TAIGA_VOLUME_MEDIA }}
       # - ./config.py:/taiga-back/settings/config.py
-
-{% if TAIGA_TAIGAIO_ENABLED %}
-
+{% if TAIGA_TAIGAIO_ENABLED | bool %}
 {% for item in TAIGA_SETTING_FILES %}
       - {{ docker_compose.directories.config }}taiga-{{ item }}.py:/taiga-back/settings/{{ item }}.py:ro
 {% endfor %}
-
 {% endif %}
-
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 {% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
-      taiga-events-rabbitmq:
+      {{ TAIGA_EVENTS_RABBITMQ_SERVICE }}:
         condition: service_started
-      taiga-async-rabbitmq:
+      {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
         condition: service_started
-{% if TAIGA_TAIGAIO_ENABLED %}
-    
+{% if TAIGA_TAIGAIO_ENABLED | bool %}
     command: >
       /bin/sh -c "
         pip install taiga-contrib-oidc-auth &&
         /taiga-back/docker/entrypoint.sh"
-        
 {% endif %}
 
-  taiga-async-rabbitmq:
+{% set service_name = TAIGA_ASYNC_RABBITMQ_SERVICE %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: rabbitmq:3.8-management-alpine
-    hostname: "taiga-async-rabbitmq"
+    hostname: "{{ TAIGA_ASYNC_RABBITMQ_SERVICE }}"
     volumes:
       - async-rabbitmq-data:/var/lib/rabbitmq
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 
-  taiga-front:
+{% set service_name = TAIGA_FRONT_SERVICE %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: "{{TAIGA_DOCKER_IMAGE_FRONTEND}}:{{ TAIGA_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
@@ -83,18 +78,22 @@
 #    volumes:
 #      - {{ TAIGA_FRONTEND_CONF_PATH }}:/usr/share/nginx/html/conf.json:ro
 
-  taiga-events:
+{% set service_name = TAIGA_EVENTS_SERVICE %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: taigaio/taiga-events:latest
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
     depends_on:
-      taiga-events-rabbitmq:
+      {{ TAIGA_EVENTS_RABBITMQ_SERVICE }}:
         condition: service_started
 
-  taiga-events-rabbitmq:
+{% set service_name = TAIGA_EVENTS_RABBITMQ_SERVICE %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: rabbitmq:3.8-management-alpine
-    hostname: "events-rabbitmq"
+    hostname: {{ service_name }}
     volumes:
       - events-rabbitmq-data:/var/lib/rabbitmq
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -102,14 +101,18 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 
-  taiga-protected:
+{% set service_name = 'protected' %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: taigaio/taiga-protected:latest
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
 
-  taiga-gateway:
+{% set service_name = 'gateway' %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: nginx:alpine
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
@@ -122,10 +125,9 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
     depends_on:
-      - taiga-front
-      - taiga-back
-      - taiga-events
-
+      - {{ TAIGA_FRONT_SERVICE }}
+      - {{ TAIGA_SERVICE }}
+      - {{ TAIGA_EVENTS_SERVICE }}
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   static-data:
   media-data:

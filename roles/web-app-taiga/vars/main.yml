@@ -1,27 +1,51 @@
-# General
-application_id:             "web-app-taiga"
-database_type:              "postgres"
-js_application_name:        "Taiga"
+# General 
+application_id:                 "web-app-taiga"
+database_type:                  "postgres"
+js_application_name:            "Taiga"
+entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Docker
-docker_repository_address:  "https://github.com/taigaio/taiga-docker"
-docker_pull_git_repository: true
+docker_repository_address:      "https://github.com/taigaio/taiga-docker"
+docker_pull_git_repository:     true
 
 # Taiga      
+
+## General
+TAIGA_EMAIL_BACKEND:            "{{ 'smtp' if SYSTEM_EMAIL.SMTP else 'console' }}"  ## use an SMTP server or display the emails in the console (either "smtp" or "console")
+
+## User
+TAIGA_SUPERUSER_NAME:           "{{ users.administrator.username }}"
+TAIGA_SUPERUSER_PASSWORD:       "{{ users.administrator.password }}"
+TAIGA_SUPERUSER_EMAIL:          "{{ users.administrator.email }}"
+
+## OIDC
 TAIGA_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
 TAIGA_OIDC_FLAVOR:              "{{ applications | get_app_conf(application_id, 'oidc.flavor') }}"
 TAIGA_FLAVOR_ROBROTHERAM:       "{{ TAIGA_OIDC_FLAVOR == 'robrotheram' }}"
 TAIGA_ROBROTHERAM_ENABLED:      "{{ TAIGA_OIDC_ENABLED and TAIGA_FLAVOR_ROBROTHERAM }}"
 TAIGA_FLAVOR_TAIGAIO:           "{{ TAIGA_OIDC_FLAVOR == 'taigaio' }}"
 TAIGA_TAIGAIO_ENABLED:          "{{ TAIGA_OIDC_ENABLED and TAIGA_FLAVOR_TAIGAIO }}"
-TAIGA_EMAIL_BACKEND:            "{{ 'smtp' if SYSTEM_EMAIL.SMTP else 'console' }}"  ## use an SMTP server or display the emails in the console (either "smtp" or "console")
+
+## Docker
 TAIGA_DOCKER_COMPOSE_INIT_PATH: "{{ [ docker_compose.directories.instance,'docker-compose-inits.yml' ] | path_join }}"
 TAIGA_DOCKER_COMPOSE_PATH:      "{{ [ docker_compose.directories.instance,'docker-compose.yml' ] | path_join }}"
 TAIGA_DOCKER_IMAGE_BACKEND:     "{{ 'robrotheram/taiga-back-openid' if TAIGA_ROBROTHERAM_ENABLED else 'taigaio/taiga-back' }}"
 TAIGA_DOCKER_IMAGE_FRONTEND:    "{{ 'robrotheram/taiga-front-openid' if TAIGA_ROBROTHERAM_ENABLED else 'taigaio/taiga-front' }}"
 TAIGA_FRONTEND_CONF_PATH:       "{{ [ docker_compose.directories.config,'conf.json' ] | path_join }}"
 TAIGA_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.taiga.version') }}"
-TAIGA_SUPERUSER_NAME:           "{{ users.administrator.username }}"
-TAIGA_SUPERUSER_PASSWORD:       "{{ users.administrator.password }}"
-TAIGA_SUPERUSER_EMAIL:          "{{ users.administrator.email }}"
+
+### Backend
+TAIGA_SERVICE:                  "{{ entity_name }}"
+TAIGA_CONTAINER:                "{{ entity_name }}"
+TAIGA_VOLUME_MEDIA:             "/taiga-back/media"
+TAIGA_VOLUME_STATIC:            "/taiga-back/static"
+
+## Services 
+TAIGA_MANAGER_SERVICE:          "manager"
+TAIGA_ASYNC_SERVICE:            "async"
+TAIGA_ASYNC_RABBITMQ_SERVICE:   "async-rabbitmq"
+TAIGA_EVENTS_RABBITMQ_SERVICE:  "events-rabbitmq"
+TAIGA_FRONT_SERVICE:            "front"
+TAIGA_EVENTS_SERVICE:           "events"
+
 TAIGA_SETTING_FILES:            ['urls','local']

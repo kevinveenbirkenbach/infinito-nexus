@@ -1,5 +1,7 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-  taiga-manage:
+{% set service_name = TAIGA_MANAGER_SERVICE %}
+  {{ service_name }}:
+    container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: taigaio/taiga-back:latest
     environment:
@@ -8,8 +10,8 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     entrypoint: "python manage.py"
     volumes:
-      - static-data:/taiga-back/static
-      - media-data:/taiga-back/media
+      - static-data:{{ TAIGA_VOLUME_STATIC }}
+      - media-data:{{ TAIGA_VOLUME_MEDIA }}
       # - ./config.py:/taiga-back/settings/config.py
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
   taiga:

@@ -3,7 +3,7 @@
     docker compose
     -f {{ TAIGA_DOCKER_COMPOSE_PATH }}
     -f {{ TAIGA_DOCKER_COMPOSE_INIT_PATH }}
-    run --rm taiga-manage
+    run --rm {{ TAIGA_MANAGER_SERVICE }}
     createsuperuser --noinput
     --username {{ TAIGA_SUPERUSER_NAME }}
     --email {{ TAIGA_SUPERUSER_EMAIL }}
@@ -25,7 +25,7 @@
     -f {{ TAIGA_DOCKER_COMPOSE_INIT_PATH }}
     run --rm
     -e DJANGO_SUPERUSER_PASSWORD={{ TAIGA_SUPERUSER_PASSWORD | quote }}
-    taiga-manage
+    {{ TAIGA_MANAGER_SERVICE }}
     shell -c
     "from django.contrib.auth import get_user_model; import os; U=get_user_model(); u,created=U.objects.get_or_create(username='{{ TAIGA_SUPERUSER_NAME }}'); changed=bool(created); old=(u.email,u.is_staff,u.is_superuser,u.is_active); u.email='{{ TAIGA_SUPERUSER_EMAIL }}'; u.is_staff=True; u.is_superuser=True; u.is_active=True; changed = changed or old!=(u.email,u.is_staff,u.is_superuser,u.is_active); pwd=os.environ.get('DJANGO_SUPERUSER_PASSWORD'); assert pwd, 'Missing DJANGO_SUPERUSER_PASSWORD'; need_pwd = not u.check_password(pwd); changed = changed or need_pwd; need_pwd and u.set_password(pwd); u.save(); print('CHANGED=1' if changed else 'CHANGED=0')"
   args:
