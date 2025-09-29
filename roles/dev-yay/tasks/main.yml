@@ -1,5 +1,3 @@
 - block:
   - include_tasks: 01_core.yml
-  - set_fact:
-      run_once_dev_yay: true
   when: run_once_dev_yay is not defined

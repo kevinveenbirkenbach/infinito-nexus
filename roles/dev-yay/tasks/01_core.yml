@@ -6,42 +6,53 @@
   - dev-git
   - dev-base-devel
 
-- name: install yay
+- name: Install yay build prerequisites
   community.general.pacman:
     name:
     - base-devel
     - patch
     state: present
 
-- name: Create the `aur_builder` user
+- name: Create the AUR builder user
   become: true
   ansible.builtin.user:
-    name: aur_builder
+    name: "{{ AUR_BUILDER_USER }}"
     create_home: yes
-    group: wheel
+    group: "{{ AUR_BUILDER_GROUP }}"
 
-- name: Allow the `aur_builder` user to run `sudo pacman` without a password
+- name: Allow AUR builder to run pacman without password
   become: true
   ansible.builtin.lineinfile:
-    path: /etc/sudoers.d/11-install-aur_builder
-    line: 'aur_builder ALL=(ALL) NOPASSWD: /usr/bin/pacman'
+    path: "{{ AUR_BUILDER_SUDOERS_PATH }}"
+    line: '{{ AUR_BUILDER_USER }} ALL=(ALL) NOPASSWD: /usr/bin/pacman'
     create: yes
     validate: 'visudo -cf %s'
 
 - name: Clone yay from AUR
   become: true
-  become_user: aur_builder
+  become_user: "{{ AUR_BUILDER_USER }}"
   git:
     repo: https://aur.archlinux.org/yay.git
-    dest: /home/aur_builder/yay
+    dest: "/home/{{ AUR_BUILDER_USER }}/yay"
     clone: yes
     update: yes
 
 - name: Build and install yay
   become: true
-  become_user: aur_builder
+  become_user: "{{ AUR_BUILDER_USER }}"
   shell: |
-    cd /home/aur_builder/yay
+    cd /home/{{ AUR_BUILDER_USER }}/yay
     makepkg -si --noconfirm
   args:
     creates: /usr/bin/yay
+
+- name: upgrade the system using yay, only act on AUR packages.
+  become: true
+  become_user: "{{ AUR_BUILDER_USER }}"
+  kewlfft.aur.aur:
+    upgrade: yes
+    use: "{{ AUR_HELPER }}"
+    aur_only: yes
+  when: MODE_UPDATE | bool
+
+- include_tasks: utils/run_once.yml
