@@ -27,7 +27,7 @@ docker:
       repository:     "https://github.com/kevinveenbirkenbach/bigbluebutton-docker.git"
       version:        "bbb3.0"
       recording:
-        enabled:      true  # Enable recordings of sessions
+        enabled:      false  # Enable recordings of sessions (deactivated by  default because it crashed, also check GDPR comnpliance)
         cleanup:      true  # Auto-Cleanup Recordings
         max_age_days: 30    # Cleanup recording after this amount of days
     database:
