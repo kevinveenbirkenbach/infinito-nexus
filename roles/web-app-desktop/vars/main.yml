@@ -10,6 +10,9 @@ docker_pull_git_repository:       true
 
 # Desktop
 
+## Simpleicons
+DESKTOP_SIMPLEICONS_ENABLED:      "{{ applications | get_app_conf(application_id, 'features.simpleicons') }}"
+
 ## Javascript
 DESKTOP_JS_CDN_URL:               "{{ domains | get_url('web-svc-cdn', WEB_PROTOCOL) }}"
 DESKTOP_JS_FILES:                 ['iframe.js','oidc.js']

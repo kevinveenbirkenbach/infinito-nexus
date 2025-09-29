@@ -1,3 +1,12 @@
+- name: "Load brand logos role for '{{ application_id }}'"
+  include_role:
+    name: web-svc-simpleicons
+  vars:
+    flush_handlers: true
+  when:
+    - run_once_web_svc_simpleicons is not defined
+    - DESKTOP_SIMPLEICONS_ENABLED | bool
+
 - name: "Validate configuration"
   include_tasks: "02_validate.yml"
   when: MODE_ASSERT | bool
@@ -24,24 +33,15 @@
   set_fact:
     portfolio_cards: "{{ lookup('docker_cards', 'roles') }}"
 
-- name: "Load images for applications feature simpleicons is enabled "
+- name: "Load Desktop Brand logos"
   set_fact:
     portfolio_cards: "{{ portfolio_cards | add_simpleicon_source(domains, WEB_PROTOCOL) }}"
-  when:
-    - (applications | get_app_conf(application_id, 'features.simpleicons', False))
+  when: DESKTOP_SIMPLEICONS_ENABLED | bool
+  changed_when: false
 
 - name: Group docker cards
   set_fact:
     portfolio_menu_data: "{{ lookup('docker_cards_grouped', portfolio_cards, portfolio_menu_categories) }}"
-
-- name: Debug portfolio data
-  debug:
-    msg:
-      portfolio_cards:            "{{ portfolio_cards }}"
-      portfolio_menu_categories:  "{{ portfolio_menu_categories}}"
-      portfolio_menu_data:        "{{ portfolio_menu_data }}"
-      service_provider:           "{{ service_provider }}"
-  when: MODE_DEBUG | bool
 
 - name: Copy host-specific config.yaml if it exists
   template:

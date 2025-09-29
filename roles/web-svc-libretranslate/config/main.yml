@@ -1,8 +1,6 @@
 
 credentials: {}
 docker:
-  images: {}                # @todo Move under services
-  versions: {}              # @todo Move under services
   services:
     redis:
       enabled:      false   # Enable Redis

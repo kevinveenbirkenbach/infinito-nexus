@@ -3,6 +3,10 @@
   - name: "load docker, proxy for '{{ application_id }}'"
     include_role:
       name: sys-stk-full-stateless
+    vars:
+      aca_origin:   "* always"
+      aca_methods:  "'GET, OPTIONS' always"
+      aca_headers:  "'Accept, Authorization, Content-Type' always"
 
   - name: "Copy '{{ application_id }}' files"
     template:

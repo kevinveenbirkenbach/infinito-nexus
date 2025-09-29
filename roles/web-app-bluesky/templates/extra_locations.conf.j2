@@ -2,17 +2,17 @@
 # Exposes a same-origin /config to avoid CORS when the social-app fetches config.
 location = /config {
     proxy_pass {{ BLUESKY_CONFIG_UPSTREAM_URL }};
-    # Nur Hostname extrahieren:
+    
+    {# Just extract hostname #}
     set $up_host "{{ BLUESKY_CONFIG_UPSTREAM_URL | regex_replace('^https?://', '') | regex_replace('/.*$', '') }}";
     proxy_set_header Host $up_host;
     proxy_http_version 1.1;
     proxy_set_header Connection "";
     proxy_ssl_server_name on;
 
-    # Make response clearly same-origin for browsers
+    {# Access Control Allow Configurations #}
     proxy_hide_header Access-Control-Allow-Origin;
-    add_header Access-Control-Allow-Origin $scheme://$host always;
-    add_header Vary Origin always;
+    {% include 'roles/sys-svc-proxy/templates/headers/access_control_allow.conf.j2' %}
 }
 
 location = /ipcc {
@@ -23,7 +23,7 @@ location = /ipcc {
     proxy_set_header Connection "";
     proxy_ssl_server_name on;
 
+    {# Access Control Allow Configurations #}
     proxy_hide_header Access-Control-Allow-Origin;
-    add_header Access-Control-Allow-Origin $scheme://$host always;
-    add_header Vary Origin always;
+    {% include 'roles/sys-svc-proxy/templates/headers/access_control_allow.conf.j2' %}
 }

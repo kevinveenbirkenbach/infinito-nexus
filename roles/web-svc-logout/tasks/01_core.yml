@@ -21,6 +21,11 @@
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-full-stateless
+  vars:
+      aca_origin:       "'{{ domains | get_url('web-svc-logout', WEB_PROTOCOL) }}' always"
+      aca_credentials:  "'true' always"
+      aca_methods:      "'GET, OPTIONS' always"
+      aca_headers:      "'Accept, Authorization' always"
 
 - name: Create symbolic link from .env file to repository
   file:

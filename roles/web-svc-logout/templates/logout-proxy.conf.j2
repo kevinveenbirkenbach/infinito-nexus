@@ -1,5 +1,5 @@
 location = /logout {
-    # Proxy to the logout service
+    {# Proxy to the logout service #}
     proxy_pass         http://127.0.0.1:{{ ports.localhost.http['web-svc-logout'] }}/logout;
     proxy_set_header   Host              $host;
     proxy_set_header   X-Real-IP         $remote_addr;
@@ -7,18 +7,15 @@ location = /logout {
     proxy_set_header   X-Forwarded-Proto $scheme;
     proxy_http_version 1.1;
 
-    # CORS headers – allow your central page to call this
-    add_header 'Access-Control-Allow-Origin'  '{{ domains | get_url('web-svc-logout', WEB_PROTOCOL) }}' always;
-    add_header 'Access-Control-Allow-Credentials' 'true'                                                always;
-    add_header 'Access-Control-Allow-Methods' 'GET, OPTIONS'                                            always;
-    add_header 'Access-Control-Allow-Headers' 'Accept, Authorization'                                   always;
+    {# CORS headers – allow your central page to call this #}
+    {% include 'roles/sys-svc-proxy/templates/headers/access_control_allow.conf.j2' %}
 
-    # Disable caching absolutely
+    {# Disable caching absolutely #}
     add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;
     add_header Pragma "no-cache" always;
     add_header Expires "0" always;
 
-    # Handle preflight
+    {# Handle preflight #}
     if ($request_method = OPTIONS) {
       return 204;
     }

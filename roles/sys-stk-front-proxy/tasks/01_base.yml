@@ -6,10 +6,10 @@
   include_role:
     name: sys-util-csp-cert
 
-- name: "Copy nginx config to '{{ FRONT_PROXY_DOMAIN_CONF_DST }}'"
+- name: "Copy nginx config to '{{ front_proxy_domain_conf_dst }}'"
   template:
-    src:  "{{ FRONT_PROXY_DOMAIN_CONF_SRC }}"
-    dest: "{{ FRONT_PROXY_DOMAIN_CONF_DST }}"
+    src:  "{{ front_proxy_domain_conf_src }}"
+    dest: "{{ front_proxy_domain_conf_dst }}"
   register: nginx_conf
   notify: restart openresty
 
@@ -29,3 +29,6 @@
     - site_check.status is defined
     - not site_check.status in [200,301,302]
   when: not nginx_conf.changed
+
+- name: "Restart Webserver for '{{ front_proxy_domain_conf_dst }}'"
+  meta: flush_handlers

@@ -158,26 +158,31 @@ class FilterModule(object):
             for directive in directives:
                 tokens = ["'self'"]
 
-                # 1) Load flags (includes defaults from get_csp_flags)
+                # Load flags (includes defaults from get_csp_flags)
                 flags = self.get_csp_flags(applications, application_id, directive)
                 tokens += flags
 
-                # 2) Allow fetching from internal CDN by default for selected directives
+                # Allow fetching from internal CDN by default for selected directives
                 if directive in ['script-src-elem', 'connect-src', 'style-src-elem']:
                     tokens.append(get_url(domains, 'web-svc-cdn', web_protocol))
 
-                # 3) Matomo integration if feature is enabled
+                # Matomo integration if feature is enabled
                 if directive in ['script-src-elem', 'connect-src']:
                     if self.is_feature_enabled(applications, matomo_feature_name, application_id):
                         tokens.append(get_url(domains, 'web-app-matomo', web_protocol))
 
-                # 4) ReCaptcha integration (scripts + frames) if feature is enabled
+                # Simpleicons integration if feature is enabled
+                if directive in ['connect-src']:
+                    if self.is_feature_enabled(applications, 'simpleicons', application_id):
+                        tokens.append(get_url(domains, 'web-svc-simpleicons', web_protocol))
+
+                # ReCaptcha integration (scripts + frames) if feature is enabled
                 if self.is_feature_enabled(applications, 'recaptcha', application_id):
                     if directive in ['script-src-elem', 'frame-src']:
                         tokens.append('https://www.gstatic.com')
                         tokens.append('https://www.google.com')
 
-                # 5) Frame ancestors handling (desktop + logout support)
+                # Frame ancestors handling (desktop + logout support)
                 if directive == 'frame-ancestors':
                     if self.is_feature_enabled(applications, 'desktop', application_id):
                         # Allow being embedded by the desktop app domain (and potentially its parent)
@@ -189,10 +194,10 @@ class FilterModule(object):
                         tokens.append(get_url(domains, 'web-svc-logout', web_protocol))
                         tokens.append(get_url(domains, 'web-app-keycloak', web_protocol))
 
-                # 6) Custom whitelist entries
+                # Custom whitelist entries
                 tokens += self.get_csp_whitelist(applications, application_id, directive)
 
-                # 7) Add inline content hashes ONLY if final tokens do NOT include 'unsafe-inline'
+                # Add inline content hashes ONLY if final tokens do NOT include 'unsafe-inline'
                 #    (Check tokens, not flags, to include defaults and later modifications.)
                 if "'unsafe-inline'" not in tokens:
                     for snippet in self.get_csp_inline_content(applications, application_id, directive):
@@ -201,7 +206,7 @@ class FilterModule(object):
                 # Append directive
                 parts.append(f"{directive} {' '.join(tokens)};")
 
-            # 8) Static img-src directive (kept permissive for data/blob and any host)
+            # Static img-src directive (kept permissive for data/blob and any host)
             parts.append("img-src * data: blob:;")
 
             return ' '.join(parts)

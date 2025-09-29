@@ -13,6 +13,11 @@ http
 
   default_type text/html;
 
+  {# Ensure caches (browsers, proxies, CDNs) treat responses as dependent on the Origin header
+  to prevent cross-domain cache poisoning issues.
+  Discussion: https://chat.openai.com/share/2671b961-c1b0-472d-bae2-2804d0455e8a #}
+  add_header 'Vary' 'Origin' always;
+
   {# caching #}
   proxy_cache_path {{ NGINX.DIRECTORIES.CACHE.GENERAL }} levels=1:2 keys_zone=cache:20m max_size=20g inactive=14d use_temp_path=off;
   proxy_cache_path {{ NGINX.DIRECTORIES.CACHE.IMAGE }} levels=1:2 keys_zone=imgcache:10m inactive=60m use_temp_path=off;
