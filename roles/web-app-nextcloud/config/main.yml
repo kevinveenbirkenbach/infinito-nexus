@@ -13,10 +13,14 @@ server:
         - "data:"
       connect-src:
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEBSOCKET_PROTOCOL }}://cloud.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://cloud.{{ PRIMARY_DOMAIN }}"
       frame-src:
-        - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+      worker-src:
+        - "blob:"
   domains:
     canonical:
       - "cloud.{{ PRIMARY_DOMAIN }}"
@@ -209,7 +213,8 @@ plugins:
   #  enabled: false
   keeporsweep:
     # Nextcloud keep or sweep: helps manage and clean up files and data (https://apps.nextcloud.com/apps/keeporsweep)
-    enabled: true
+    # Deactivated because installation isn't possible anymore
+    enabled: false
   mail:
     # Nextcloud mail: integrated email client for managing mail accounts (https://apps.nextcloud.com/apps/mail)
     enabled: true
