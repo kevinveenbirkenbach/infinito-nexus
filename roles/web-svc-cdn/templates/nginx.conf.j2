@@ -7,6 +7,8 @@ server
   {% include 'roles/sys-front-inj-all/templates/server.conf.j2'%}
 
   {% include 'roles/sys-svc-proxy/templates/headers/content_security_policy.conf.j2' %}
+
+  {% include 'roles/sys-svc-proxy/templates/headers/access_control_allow.conf.j2' %}
   
   charset utf-8;
   
