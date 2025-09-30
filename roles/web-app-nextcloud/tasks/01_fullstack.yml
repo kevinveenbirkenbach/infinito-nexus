@@ -27,11 +27,10 @@
     owner:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
     group:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
   loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
-  # Not all type of changes take instantly place. Due to this reason a rebuild is required.
   notify: docker compose up
 
 - name: create internal nextcloud nginx configuration
   template:
     src:  "nginx/docker.conf.j2" 
     dest: "{{ NEXTCLOUD_HOST_NGINX_SRC }}"
-  notify: restart nextcloud nginx service
+  notify: docker compose up

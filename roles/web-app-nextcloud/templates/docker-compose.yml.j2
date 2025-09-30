@@ -1,6 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-{% set service_name = 'proxy' %}
+{% set service_name = NEXTCLOUD_PROXY_SERVICE %}
   {{ service_name }}:
     image: "{{ NEXTCLOUD_PROXY_IMAGE }}:{{ NEXTCLOUD_PROXY_VERSION }}"
     container_name: "{{ NEXTCLOUD_PROXY_CONTAINER }}"
@@ -17,7 +17,7 @@
     networks:
       default:
         ipv4_address: 192.168.102.67
-{% if NEXTCLOUD_TALK_NETWORK_MODE == 'host' %}
+{% if NEXTCLOUD_HPB_NETWORK_MODE == 'host' %}
     extra_hosts:
       - "host.docker.internal:host-gateway"
 {% endif %}
@@ -39,33 +39,31 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
         ipv4_address: 192.168.102.69
 
-{% if NEXTCLOUD_TALK_SIGNALING_ENABLED | bool %}
-{% set service_name = 'talk' %}
+{% if NEXTCLOUD_HPB_SIGNALING_ENABLED | bool %}
+{% set service_name = NEXTCLOUD_HPB_SERVICE %}
   {{ service_name }}:
-{% set container_port = NEXTCLOUD_TALK_SIGNALING_PORT %}
+{% set container_port = NEXTCLOUD_HPB_SIGNALING_PORT %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
-    image: "{{ NEXTCLOUD_TALK_IMAGE }}:{{ NEXTCLOUD_TALK_VERSION }}"
-    container_name: {{ NEXTCLOUD_TALK_CONTAINER }}
+    image: "{{ NEXTCLOUD_HPB_IMAGE }}:{{ NEXTCLOUD_HPB_VERSION }}"
+    container_name: {{ NEXTCLOUD_HPB_CONTAINER }}
     init: true
-    network_mode: {{ NEXTCLOUD_TALK_NETWORK_MODE }}
-    volumes:
-      - {{ NEXTCLOUD_HOST_JANUS_CONF_PATH }}:/usr/local/etc/janus/janus.jcfg:ro
-{% if NEXTCLOUD_TALK_NETWORK_MODE == 'bridge' and NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED | bool %}
+{% if NEXTCLOUD_HPB_NETWORK_MODE == 'bridge' and NEXTCLOUD_HPB_TURN_ONBOARD_ENABLED | bool %}
     ports:
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}/tcp
-      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}/udp
-      - {{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_RANGE }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_RANGE }}/udp
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_HPB_TURN_ONBOARD_PORT }}:{{ NEXTCLOUD_HPB_TURN_ONBOARD_PORT }}/tcp
+      - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_HPB_TURN_ONBOARD_PORT }}:{{ NEXTCLOUD_HPB_TURN_ONBOARD_PORT }}/udp
     expose:
       - "{{ container_port }}"
     networks:
       default:
         ipv4_address: 192.168.102.68
+{% else %}
+  network_mode: {{ NEXTCLOUD_HPB_NETWORK_MODE }}
 {% endif %}
 {% endif %}
 
 {% if NEXTCLOUD_WHITEBOARD_ENABLED %}
-{% set service_name = 'whiteboard' %}
+{% set service_name = NEXTCLOUD_WHITEBOARD_SERVICE %}
   {{ service_name }}:
 {% set container_port = NEXTCLOUD_WHITEBOARD_PORT_INTERNAL %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -79,7 +77,7 @@
         ipv4_address: 192.168.102.71
 {% endif %}
 
-{% set service_name = 'cron' %}
+{% set service_name = NEXTCLOUD_CRON_SERVICE %}
   {{ service_name }}:
     container_name: "{{ NEXTCLOUD_CRON_CONTAINER }}"
     image: "{{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}"

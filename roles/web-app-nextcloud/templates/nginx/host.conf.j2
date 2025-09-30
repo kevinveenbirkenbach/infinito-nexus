@@ -17,8 +17,8 @@ server
   client_body_buffer_size 400M;
   fastcgi_buffers 64 4K;
 
-  {% if NEXTCLOUD_TALK_SIGNALING_ENABLED | bool %}
-    {% set location_ws = '^~ ' ~ NEXTCLOUD_TALK_SIGNALING_LOCATION %}
+  {% if NEXTCLOUD_HPB_SIGNALING_ENABLED | bool %}
+    {% set location_ws = '^~ ' ~ NEXTCLOUD_HPB_SIGNALING_LOCATION %}
     {% set ws_port     = NEXTCLOUD_PORT %}
     {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
   {% endif %}

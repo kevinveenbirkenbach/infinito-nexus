@@ -1,7 +1,8 @@
 ---
 # General
-application_id:                     "web-app-nextcloud"                                           # Application identifier
+application_id:                     "web-app-nextcloud"
 container_port:                     80
+entity_name:                        "{{ application_id | get_entity_name }}"
 
 # Database
 database_password:                  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
@@ -45,78 +46,83 @@ NEXTCLOUD_ADMINISTRATOR_USERNAME:   "{{ applications | get_app_conf(application_
 
 ### Base
 NEXTCLOUD_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-NEXTCLOUD_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.nextcloud.version') }}"
-NEXTCLOUD_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.nextcloud.image') }}"
-NEXTCLOUD_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.nextcloud.name') }}"
+NEXTCLOUD_SERVICE:                  "{{ entity_name }}"
+NEXTCLOUD_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.version') }}"
+NEXTCLOUD_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.image') }}"
+NEXTCLOUD_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.name') }}"
 
 ### Proxy
-NEXTCLOUD_PROXY_CONTAINER:          "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name') }}"
-NEXTCLOUD_PROXY_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.proxy.image') }}"
-NEXTCLOUD_PROXY_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.proxy.version') }}"
+NEXTCLOUD_PROXY_SERVICE:              "proxy"
+NEXTCLOUD_PROXY_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.name') }}"
+NEXTCLOUD_PROXY_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.image') }}"
+NEXTCLOUD_PROXY_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.version') }}"
 
 ### Cron
-NEXTCLOUD_CRON_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
+NEXTCLOUD_CRON_SERVICE:               "cron"
+NEXTCLOUD_CRON_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_CRON_SERVICE ~ '.name') }}"
 
-### Talk
+### High Performance Backend for Talk
+# https://github.com/nextcloud-snap/nextcloud-snap/wiki/How-to-configure-talk-HPB-with-Docker
 
 #### General
-NEXTCLOUD_TALK_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.talk.name') }}"
-NEXTCLOUD_TALK_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.talk.image') }}"
-NEXTCLOUD_TALK_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.talk.version') }}"
-NEXTCLOUD_TALK_PLUGIN_ENABLED:        "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
-NEXTCLOUD_TALK_NETWORK_MODE:          "{{ applications | get_app_conf(application_id, 'docker.services.talk.network_mode') }}"
-NEXTCLOUD_TALK_INTERNAL_SECRET:       "{{ applications | get_app_conf(application_id, 'credentials.talk_internal_secret') }}"
-NEXTCLOUD_TALK_DOMAIN:                "{{ NEXTCLOUD_DOMAIN }}"
+NEXTCLOUD_HPB_SERVICE:                      "talk"
+NEXTCLOUD_HPB_CONTAINER:                    "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.name') }}"
+NEXTCLOUD_HPB_IMAGE:                        "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.image') }}"
+NEXTCLOUD_HPB_VERSION:                      "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.version') }}"
+NEXTCLOUD_HPB_NETWORK_MODE:                 "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.network_mode') }}"
+NEXTCLOUD_HPB_PLUGIN_ENABLED:               "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
+NEXTCLOUD_HPB_INTERNAL_SECRET:              "{{ applications | get_app_conf(application_id, 'credentials.talk_internal_secret') }}"
+NEXTCLOUD_HPB_DOMAIN:                       "{{ NEXTCLOUD_DOMAIN }}"
 
 #### Signaling
-NEXTCLOUD_TALK_SIGNALING_SECRET:      "{{ applications | get_app_conf(application_id, 'credentials.talk_signaling_secret') }}"
-NEXTCLOUD_TALK_SIGNALING_LOCATION:    "/standalone-signaling/"
-NEXTCLOUD_TALK_SIGNALING_PORT:        "8081"
-NEXTCLOUD_TALK_SIGNALING_URL:         "{{ [ NEXTCLOUD_URL, NEXTCLOUD_TALK_SIGNALING_LOCATION ] | url_join }}"
-NEXTCLOUD_TALK_SIGNALING_ENABLED:     "{{ NEXTCLOUD_TALK_PLUGIN_ENABLED }}"
+NEXTCLOUD_HPB_SIGNALING_SECRET:              "{{ applications | get_app_conf(application_id, 'credentials.talk_signaling_secret') }}"
+NEXTCLOUD_HPB_SIGNALING_LOCATION:            "/standalone-signaling/"
+NEXTCLOUD_HPB_SIGNALING_PORT:                "8081"
+NEXTCLOUD_HPB_SIGNALING_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_HPB_SIGNALING_LOCATION ] | url_join }}"
+NEXTCLOUD_HPB_SIGNALING_ENABLED:             "{{ NEXTCLOUD_HPB_PLUGIN_ENABLED }}"
 
 #### Talk Turn (Onboard)
-NEXTCLOUD_TALK_TURN_ONBOARD_PORT:             "{{ ports.public.stun_turn[application_id] }}"
-NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.onboard_enabled') if NEXTCLOUD_TALK_PLUGIN_ENABLED else false }}"
-NEXTCLOUD_TALK_TURN_ONBOARD_SECRET:           "{{ applications | get_app_conf(application_id, 'credentials.talk_turn_secret') }}"
-NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_START: "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
-NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_END:   "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
-NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_RANGE: "{{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_START }}-{{ NEXTCLOUD_TALK_TURN_ONBOARD_RELAY_PORT_END }}"
-NEXTCLOUD_TALK_STUN_ONBOARD_CONFIG:           "{{ NEXTCLOUD_TALK_DOMAIN }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}"
-NEXTCLOUD_TALK_TURN_ONBOARD_CONFIG: >-
+NEXTCLOUD_HPB_TURN_ONBOARD_PORT:             "{{ ports.public.stun_turn[application_id] }}"
+NEXTCLOUD_HPB_TURN_ONBOARD_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.turn_server.onboard_enabled') if NEXTCLOUD_HPB_PLUGIN_ENABLED else false }}"
+NEXTCLOUD_HPB_TURN_ONBOARD_SECRET:           "{{ applications | get_app_conf(application_id, 'credentials.talk_turn_secret') }}"
+NEXTCLOUD_HPB_TURN_ONBOARD_RELAY_PORT_START: "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
+NEXTCLOUD_HPB_TURN_ONBOARD_RELAY_PORT_END:   "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
+NEXTCLOUD_HPB_STUN_ONBOARD_CONFIG:           "{{ NEXTCLOUD_HPB_DOMAIN }}:{{ NEXTCLOUD_HPB_TURN_ONBOARD_PORT }}"
+NEXTCLOUD_HPB_TURN_ONBOARD_CONFIG: >-
   {{
     {
-      'server': NEXTCLOUD_TALK_DOMAIN ~ ':' ~ NEXTCLOUD_TALK_TURN_ONBOARD_PORT,
-      'secret': NEXTCLOUD_TALK_TURN_ONBOARD_SECRET,
-      'ttl': 86400,
-      'protocols': 'udp,tcp'
+      'server':     NEXTCLOUD_HPB_DOMAIN ~ ':' ~ NEXTCLOUD_HPB_TURN_ONBOARD_PORT,
+      'secret':     NEXTCLOUD_HPB_TURN_ONBOARD_SECRET,
+      'ttl':        86400,
+      'protocols':  'udp,tcp'
     }
   }}
 
 #### Coturn (Standalone)
-NEXTCLOUD_TALK_TURN_STANDALONE_ROLE:          'web-svc-coturn'
-NEXTCLOUD_TALK_TURN_STANDALONE_PORT:          "{{ ports.public.stun_turn[NEXTCLOUD_TALK_TURN_STANDALONE_ROLE] }}"
-NEXTCLOUD_TALK_TURN_STANDALONE_SECRET:        "{{ applications | get_app_conf(NEXTCLOUD_TALK_TURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
-NEXTCLOUD_TALK_TURN_STANDALONE_ENABLED:       "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.standalone_enabled') if NEXTCLOUD_TALK_PLUGIN_ENABLED else false }}"
-NEXTCLOUD_TALK_TURN_STANDALONE_DOMAIN:        "{{ domains | get_domain(NEXTCLOUD_TALK_TURN_STANDALONE_ROLE) }}"
-NEXTCLOUD_TALK_STUN_STANDALONE_CONFIG:        "{{ NEXTCLOUD_TALK_TURN_STANDALONE_DOMAIN }}:{{ NEXTCLOUD_TALK_TURN_STANDALONE_PORT }}"
-NEXTCLOUD_TALK_TURN_STANDALONE_CONFIG: >-
+NEXTCLOUD_HPB_TURN_STANDALONE_ROLE:          'web-svc-coturn'
+NEXTCLOUD_HPB_TURN_STANDALONE_PORT:          "{{ ports.public.stun_turn[NEXTCLOUD_HPB_TURN_STANDALONE_ROLE] }}"
+NEXTCLOUD_HPB_TURN_STANDALONE_SECRET:        "{{ applications | get_app_conf(NEXTCLOUD_HPB_TURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
+NEXTCLOUD_HPB_TURN_STANDALONE_ENABLED:       "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.standalone_enabled') if NEXTCLOUD_HPB_PLUGIN_ENABLED else false }}"
+NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN:        "{{ domains | get_domain(NEXTCLOUD_HPB_TURN_STANDALONE_ROLE) }}"
+NEXTCLOUD_HPB_STUN_STANDALONE_CONFIG:        "{{ NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN }}:{{ NEXTCLOUD_HPB_TURN_STANDALONE_PORT }}"
+NEXTCLOUD_HPB_TURN_STANDALONE_CONFIG: >-
   {{
     {
-      'server': NEXTCLOUD_TALK_TURN_STANDALONE_DOMAIN ~ ':' ~ NEXTCLOUD_TALK_TURN_STANDALONE_PORT,
-      'secret': NEXTCLOUD_TALK_TURN_STANDALONE_SECRET,
-      'ttl': 86400,
-      'protocols': 'udp,tcp'
+      'server':     NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN ~ ':' ~ NEXTCLOUD_HPB_TURN_STANDALONE_PORT,
+      'secret':     NEXTCLOUD_HPB_TURN_STANDALONE_SECRET,
+      'ttl':        86400,
+      'protocols':  'udp,tcp'
     }
   }}
 
 ### Whiteboard
-NEXTCLOUD_WHITEBOARD_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.name') }}"
-NEXTCLOUD_WHITEBOARD_IMAGE:         "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.image') }}"
-NEXTCLOUD_WHITEBOARD_VERSION:       "{{ applications | get_app_conf(application_id, 'docker.services.whiteboard.version') }}"
-NEXTCLOUD_WHITEBOARD_ENABLED:       "{{ applications | get_app_conf(application_id, 'plugins.whiteboard.enabled') }}"
+NEXTCLOUD_WHITEBOARD_SERVICE:      "whiteboard"
+NEXTCLOUD_WHITEBOARD_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.name') }}"
+NEXTCLOUD_WHITEBOARD_IMAGE:         "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.image') }}"
+NEXTCLOUD_WHITEBOARD_VERSION:       "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.version') }}"
+NEXTCLOUD_WHITEBOARD_ENABLED:       "{{ applications | get_app_conf(application_id, 'plugins.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.enabled') }}"
 NEXTCLOUD_WHITEBOARD_PORT_INTERNAL: "3002"
-NEXTCLOUD_WHITEBOARD_JWT:           "{{ applications | get_app_conf(application_id, 'credentials.whiteboard_jwt_secret') }}"
+NEXTCLOUD_WHITEBOARD_JWT:           "{{ applications | get_app_conf(application_id, 'credentials.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'_jwt_secret') }}"
 NEXTCLOUD_WHITEBOARD_LOCATION:      "/whiteboard/"
 NEXTCLOUD_WHITEBOARD_URL:           "{{ [ NEXTCLOUD_URL, NEXTCLOUD_WHITEBOARD_LOCATION ] | url_join }}"
 
