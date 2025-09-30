@@ -31,8 +31,16 @@ docker:
   services:
     redis:
       enabled:              true
+      cpus:                 "0.25"
+      mem_reservation:      "64m"
+      mem_limit:            "256m"
+      pids_limit:           256
     database:
       enabled:              true
+      cpus:                 "0.75"
+      mem_reservation:      "512m"
+      mem_limit:            "1.5g"
+      pids_limit:           512
     nextcloud:
       name:                 "nextcloud"
       image:                "nextcloud"
@@ -49,8 +57,16 @@ docker:
       version:              "alpine"
       backup:
         no_stop_required:   true
+      cpus:                 "0.5"
+      mem_reservation:      "64m"
+      mem_limit:            "256m"
+      pids_limit:           512
     cron:
       name:                 "nextcloud-cron"
+      cpus:                 "0.25"
+      mem_reservation:      "128m"
+      mem_limit:            "512m"
+      pids_limit:           256
     talk:
       name:                 "nextcloud-talk"
       image:                "nextcloud/aio-talk"
@@ -61,12 +77,20 @@ docker:
         onboard_enabled:    true # Deactivated because standalone turnserver works with  Big Blue Button, so I assume that the nextcloud internal turnserver has it's isssues
         standalone_enabled: false
       network_mode:         host
+      cpus:                 "1.0"
+      mem_reservation:      "256m"
+      mem_limit:            "1g"
+      pids_limit:           512
     whiteboard:
       name:                 "nextcloud-whiteboard"
       image:                "ghcr.io/nextcloud-releases/whiteboard"
       version:              "latest"
       backup:
-        no_stop_required: true
+        no_stop_required:   true
+      cpus:                 "0.25"
+      mem_reservation:      "128m"
+      mem_limit:            "512m"
+      pids_limit:           256
   enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin

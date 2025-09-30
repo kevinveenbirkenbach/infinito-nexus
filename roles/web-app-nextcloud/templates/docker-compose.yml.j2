@@ -1,6 +1,7 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-  proxy:
+{% set service_name = 'proxy' %}
+  {{ service_name }}:
     image: "{{ NEXTCLOUD_PROXY_IMAGE }}:{{ NEXTCLOUD_PROXY_VERSION }}"
     container_name: "{{ NEXTCLOUD_PROXY_CONTAINER }}"
     logging:
@@ -9,9 +10,9 @@
     ports:
       - "127.0.0.1:{{ NEXTCLOUD_PORT }}:{{ container_port }}"
     volumes:
-        - "{{ NEXTCLOUD_HOST_NGINX_SRC }}:/etc/nginx/nginx.conf:ro"
+      - "{{ NEXTCLOUD_HOST_NGINX_SRC }}:/etc/nginx/nginx.conf:ro"
     volumes_from:
-      - application
+      - {{ NEXTCLOUD_SERVICE }}
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2'  %}
     networks:
       default:
@@ -21,7 +22,8 @@
       - "host.docker.internal:host-gateway"
 {% endif %}
 
-  application:
+{% set service_name = NEXTCLOUD_SERVICE %}
+  {{ service_name }}:
     image: "{{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}"
     container_name: {{ NEXTCLOUD_CONTAINER }}
     volumes:
@@ -38,7 +40,8 @@
         ipv4_address: 192.168.102.69
 
 {% if NEXTCLOUD_TALK_SIGNALING_ENABLED | bool %}
-  talk:
+{% set service_name = 'talk' %}
+  {{ service_name }}:
 {% set container_port = NEXTCLOUD_TALK_SIGNALING_PORT %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
@@ -46,6 +49,8 @@
     container_name: {{ NEXTCLOUD_TALK_CONTAINER }}
     init: true
     network_mode: {{ NEXTCLOUD_TALK_NETWORK_MODE }}
+    volumes:
+      - {{ NEXTCLOUD_HOST_JANUS_CONF_PATH }}:/usr/local/etc/janus/janus.jcfg:ro
 {% if NEXTCLOUD_TALK_NETWORK_MODE == 'bridge' and NEXTCLOUD_TALK_TURN_ONBOARD_ENABLED | bool %}
     ports:
       - {{ networks.internet.ip4 }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}:{{ NEXTCLOUD_TALK_TURN_ONBOARD_PORT }}/tcp
@@ -60,7 +65,8 @@
 {% endif %}
 
 {% if NEXTCLOUD_WHITEBOARD_ENABLED %}
-  whiteboard:
+{% set service_name = 'whiteboard' %}
+  {{ service_name }}:
 {% set container_port = NEXTCLOUD_WHITEBOARD_PORT_INTERNAL %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/nc.yml.j2' %}
@@ -73,7 +79,8 @@
         ipv4_address: 192.168.102.71
 {% endif %}
 
-  cron:
+{% set service_name = 'cron' %}
+  {{ service_name }}:
     container_name: "{{ NEXTCLOUD_CRON_CONTAINER }}"
     image: "{{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}"
     restart: {{ DOCKER_RESTART_POLICY }}
