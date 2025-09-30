@@ -2,6 +2,6 @@
 - name:         copy imprint.html
   template:
     src:        "imprint.html.j2" 
-    dest:       "{{NGINX.DIRECTORIES.DATA.HTML}}imprint.html"
+    dest:       "{{ [ NGINX.DIRECTORIES.DATA.HTML, 'imprint.html' ] | path_join }}"
     owner:      "{{ NGINX.USER }}"
     group:      "{{ NGINX.USER }}"
