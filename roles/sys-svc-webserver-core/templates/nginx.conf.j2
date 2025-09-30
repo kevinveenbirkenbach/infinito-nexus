@@ -7,6 +7,15 @@ events
 
 http
 {
+  {#
+    Map the client's Upgrade header to the proper Connection value for WebSocket proxying:
+    use "upgrade" when an Upgrade is requested, otherwise "close". Define once in http{} and use $connection_upgrade.
+  #}
+  map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+  }
+
   include mime.types;
 
   {# default_type  application/octet-stream; If html filter does not work, this one needs to be used#}
