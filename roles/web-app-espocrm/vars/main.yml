@@ -1,24 +1,47 @@
 # General
-application_id:               "web-app-espocrm"
-entity_name:                  "{{ application_id | get_entity_name }}"
+application_id:                   "web-app-espocrm"
+entity_name:                      "{{ application_id | get_entity_name }}"
 
 # Database
-database_type:                "mariadb"
+database_type:                    "mariadb"
 
 # Webserver
-location_ws:                  "/ws"
-ws_port:                      "{{ ports.localhost.websocket[application_id] }}"
-client_max_body_size:         "100m"
-vhost_flavour:                "ws_generic"
+location_ws:                      "/ws"
+ws_port:                          "{{ ports.localhost.websocket[application_id] }}"
+client_max_body_size:             "100m"
+vhost_flavour:                    "ws_generic"
 
 # Espocrm
-ESPOCRM_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.version') }}"
-ESPOCRM_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.image') }}"
-ESPOCRM_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.espocrm.name') }}"
-ESPOCRM_VOLUME:               "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-ESPOCRM_SERVICE:              "{{ entity_name }}"
 
-ESPOCRM_CONFIG_FILE_PRIVATE:  "/var/www/html/data/config-internal.php"
-ESPOCRM_URL:                  "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-ESPOCRM_OIDC_ENABLED:         "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
-ESPOCRM_USER:                 "www-data"
+## Container
+ESPOCRM_VERSION:                    "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~'.version') }}"
+ESPOCRM_IMAGE:                      "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~'.image') }}"
+ESPOCRM_CUSTOM_IMAGE:               "custom_espocrm"
+ESPOCRM_CONTAINER:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~'.name') }}"
+ESPOCRM_SERVICE:                    "{{ entity_name }}"
+
+## Volumes
+ESPOCRM_DATA_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+
+## Scripts
+
+### Entrypoint
+ESPOCRM_ENTRYPOINT_SCRIPT_FILE:     "docker-entrypoint-custom.sh"
+ESPOCRM_ENTRYPOINT_SCRIPT_HOST_ABS: "{{ [ docker_compose.directories.volumes, ESPOCRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
+ESPOCRM_ENTRYPOINT_SCRIPT_HOST_REL: "volumes/{{ ESPOCRM_ENTRYPOINT_SCRIPT_FILE }}"
+ESPOCRM_ENTRYPOINT_SCRIPT_DOCKER:   "{{ [ '/usr/local/bin/', ESPOCRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
+
+### Set Flag
+ESPOCRM_SET_FLAG_SCRIPT_FILE:       "set_flags.php"
+ESPOCRM_SET_FLAG_SCRIPT_HOST_ABS:   "{{ [ docker_compose.directories.volumes, ESPOCRM_SET_FLAG_SCRIPT_FILE ] | path_join }}"
+ESPOCRM_SET_FLAG_SCRIPT_HOST_REL:   "volumes/{{ ESPOCRM_SET_FLAG_SCRIPT_FILE }}"
+ESPOCRM_SET_FLAG_SCRIPT_DOCKER:     "{{ [ '/usr/local/bin/', ESPOCRM_SET_FLAG_SCRIPT_FILE ] | path_join }}"
+
+ESPOCRM_CONFIG_FILE_PRIVATE:        "/var/www/html/data/config-internal.php"
+ESPOCRM_URL:                        "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+ESPOCRM_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+ESPOCRM_USER:                       "www-data"
+
+ESPO_INIT_MAINTENANCE_MODE: "{{ applications | get_app_conf(application_id, 'maintenance_mode') | default(false) }}"
+ESPO_INIT_CRON_DISABLED:    "{{ ESPO_INIT_MAINTENANCE_MODE }}"        # disable cron only when in maintenance
+ESPO_INIT_USE_CACHE:        "{{ not ESPO_INIT_MAINTENANCE_MODE }}"    # enable cache when NOT in maintenance

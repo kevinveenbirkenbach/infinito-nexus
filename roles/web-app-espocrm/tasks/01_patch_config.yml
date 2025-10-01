@@ -37,7 +37,7 @@
 
 - name: Ensure siteUrl matches canonical domain
   ansible.builtin.shell: |
-    {{ docker_compose_command_exec }} -T {{ ESPOCRM_SERVICE }} php -r '
+    {{ docker_compose_command_exec }} -T --user {{ ESPOCRM_USER }} {{ ESPOCRM_SERVICE }} php -r '
       require "/var/www/html/bootstrap.php";
       $app = new \Espo\Core\Application();
       $c   = $app->getContainer();
@@ -54,57 +54,3 @@
     chdir: "{{ docker_compose.directories.instance }}"
   register: siteurl_set
   changed_when: "'CHANGED' in siteurl_set.stdout"
-
-- name: Ensure maintenance off, cron on, cache on (idempotent via ConfigWriter)
-  block:
-    - name: Apply config via ConfigWriter as app user
-      command: >
-        docker exec --user {{ ESPOCRM_USER }} {{ ESPOCRM_CONTAINER }}
-        php -r '
-          require "/var/www/html/bootstrap.php";
-          $app = new \Espo\Core\Application();
-          $c = $app->getContainer();
-          $cfg = $c->get("config");
-          $w = $c->get("injectableFactory")->create("\Espo\Core\Utils\Config\ConfigWriter");
-          $pairs = [
-            "maintenanceMode" => false,
-            "cronDisabled"    => false,
-            "useCache"        => true
-          ];
-          $changed = false;
-          foreach ($pairs as $k => $v) {
-            if ($cfg->get($k) !== $v) { $w->set($k, $v); $changed = true; }
-          }
-          if ($changed) { $w->save(); echo "CHANGED"; }
-        '
-      register: cfg_set
-      changed_when: "'CHANGED' in cfg_set.stdout"
-
-  rescue:
-    - name: Apply config via ConfigWriter as root (fallback)
-      command: >
-        docker exec --user root {{ ESPOCRM_CONTAINER }}
-        php -r '
-          require "/var/www/html/bootstrap.php";
-          $app = new \Espo\Core\Application();
-          $c = $app->getContainer();
-          $cfg = $c->get("config");
-          $w = $c->get("injectableFactory")->create("\Espo\Core\Utils\Config\ConfigWriter");
-          $pairs = [
-            "maintenanceMode" => false,
-            "cronDisabled"    => false,
-            "useCache"        => true
-          ];
-          $changed = false;
-          foreach ($pairs as $k => $v) {
-            if ($cfg->get($k) !== $v) { $w->set($k, $v); $changed = true; }
-          }
-          if ($changed) { $w->save(); echo "CHANGED"; }
-        '
-      register: cfg_set
-      changed_when: "'CHANGED' in cfg_set.stdout"
-
-- name: Clear EspoCRM cache (only when config changed and we are updating)
-  command: >
-    docker exec --user {{ ESPOCRM_USER }} {{ ESPOCRM_CONTAINER }} php clear_cache.php
-  when: "'CHANGED' in cfg_set.stdout and MODE_UPDATE | bool"

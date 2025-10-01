@@ -51,4 +51,5 @@ docker:
       mem_limit:        0.5g
       pids_limit:       384
   volumes:
-    data: espocrm_data
+    data:       espocrm_data
+maintenance_mode: false

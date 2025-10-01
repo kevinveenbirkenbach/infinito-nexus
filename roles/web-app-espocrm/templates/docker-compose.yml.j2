@@ -2,8 +2,9 @@
 
 {% set service_name = ESPOCRM_SERVICE %}
   {{ service_name }}:
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     container_name: {{ ESPOCRM_CONTAINER }}
-    image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
+    image: "{{ ESPOCRM_CUSTOM_IMAGE }}"
     init: true
     stop_signal: SIGTERM
     stop_grace_period: 30s
@@ -14,12 +15,13 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     volumes:
-      - data:/var/www/html
+      - data:/var/www/html/
 
 {% set service_name = 'daemon' %}
   {{ service_name }}:
-    image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
+    image: "{{ ESPOCRM_CUSTOM_IMAGE }}"
     container_name: {{ ESPOCRM_CONTAINER }}_{{ service_name }}
+    pull_policy: never
     init: true
     stop_signal: SIGTERM
     stop_grace_period: 30s
@@ -27,12 +29,22 @@
     entrypoint: docker-daemon.sh
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     volumes:
-      - data:/var/www/html
+      - data:/var/www/html/
+    depends_on:
+      {{ ESPOCRM_SERVICE }}:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "require '/var/www/html/bootstrap.php'; echo 'OK';"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
 {% set service_name = 'websocket' %}
   {{ service_name }}:
-    image: "{{ ESPOCRM_IMAGE }}:{{ ESPOCRM_VERSION }}"
+    image: "{{ ESPOCRM_CUSTOM_IMAGE }}"
     container_name: {{ ESPOCRM_CONTAINER }}_{{ service_name }}
+    pull_policy: never
     init: true
     stop_signal: SIGTERM
     stop_grace_period: 30s
@@ -46,12 +58,21 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     volumes:
-      - data:/var/www/html
+      - data:/var/www/html/
     ports:
       - "127.0.0.1:{{ ports.localhost.websocket[application_id] }}:8080"
+    depends_on:
+      {{ ESPOCRM_SERVICE }}:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "sh", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && echo 'OK' && exec 3<&- 3>&-"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ ESPOCRM_VOLUME }}
+    name: {{ ESPOCRM_DATA_VOLUME }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
