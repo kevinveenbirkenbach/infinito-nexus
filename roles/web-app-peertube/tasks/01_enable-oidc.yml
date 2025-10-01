@@ -1,4 +1,5 @@
-- name: "Load OIDC Settings vor Peertube"
+---
+- name: "Load OIDC Settings for Peertube"
   include_vars: vars/oidc-settings.yml
   changed_when: false
 
@@ -6,13 +7,12 @@
   command: >
     docker exec {{ PEERTUBE_CONTAINER }} test -d /data/plugins/data/peertube-plugin-auth-openid-connect
   register: peertube_oidc_plugin_check
-  failed_when:  false
+  failed_when: false
   changed_when: false
 
 - name: "Install auth-openid-connect plugin for Peertube"
   command: >
-    docker exec {{ PEERTUBE_CONTAINER }} \
-    npm run plugin:install -- --npm-name {{ PEERTUBE_OIDC_PLUGIN }}
+    docker exec {{ PEERTUBE_CONTAINER }} npm run plugin:install -- --npm-name {{ PEERTUBE_OIDC_PLUGIN }}
   when: peertube_oidc_plugin_check.rc != 0
   notify: docker compose up
 
@@ -25,9 +25,26 @@
     login_port: "{{ database_port }}"
     query: |
       UPDATE public.plugin
-      SET settings = '{{ oidc_settings | to_json }}',
-      enabled = TRUE,
-      uninstalled = FALSE
-      WHERE name = 'auth-openid-connect';
+      SET settings    = '{{ oidc_settings | to_json }}'::jsonb,
+          enabled     = TRUE,
+          uninstalled = FALSE
+      WHERE name = 'auth-openid-connect'
+        AND (
+          settings IS DISTINCT FROM '{{ oidc_settings | to_json }}'::jsonb
+          OR enabled IS DISTINCT FROM TRUE
+          OR uninstalled IS DISTINCT FROM FALSE
+        );
+  register: _peertube_oidc_update
+  retries: 5
+  delay: 3
+  until: _peertube_oidc_update is succeeded
   notify: docker compose up
-  when: peertube_oidc_plugin_check.rc != 0
+
+- name: "Ensure plugin is enabled in PeerTube (CLI)"
+  command: >
+    docker exec {{ PEERTUBE_CONTAINER }} npm run plugin:enable -- --npm-name {{ PEERTUBE_OIDC_PLUGIN }}
+  register: _peertube_enable
+  failed_when: false
+  changed_when: >
+    _peertube_enable.stdout is defined and
+    ('already enabled' not in _peertube_enable.stdout)

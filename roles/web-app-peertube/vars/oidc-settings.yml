@@ -1,12 +1,10 @@
-oidc_settings: |
-  {
-    "scope": "openid email profile",
-    "desk-id": "{{ OIDC.CLIENT.ID }}",
-    "discover-url": "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}",
-    "desk-secret": "{{ OIDC.CLIENT.SECRET }}",
-    "mail-property": "email",
-    "auth-display-name": "{{ OIDC.BUTTON_TEXT }}",
-    "username-property": "{{ OIDC.ATTRIBUTES.USERNAME }}",
-    "signature-algorithm": "RS256",
-    "display-name-property": "{{ OIDC.ATTRIBUTES.USERNAME }}"
-  }
+oidc_settings:
+  discover-url: "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}"
+  client-id: "{{ OIDC.CLIENT.ID }}"
+  client-secret: "{{ OIDC.CLIENT.SECRET }}"
+  scope: "openid email profile"
+  username-property: "{{ OIDC.ATTRIBUTES.USERNAME }}"
+  display-name-property: "{{ OIDC.ATTRIBUTES.USERNAME }}"
+  mail-property: "email"
+  auth-display-name: "{{ OIDC.BUTTON_TEXT }}"
+  signature-algorithm: "RS256"

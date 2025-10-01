@@ -15,8 +15,8 @@
 
 - name: "Install and activate auth-openid-connect plugin if OIDC is enabled"
   include_tasks: 01_enable-oidc.yml
-  when: PEERTUBE_OIDC_ENABLED
+  when: PEERTUBE_OIDC_ENABLED | bool
 
 - name: "Deinstall and disable auth-openid-connect plugin if OIDC is enabled"
   include_tasks: 02_disable-oidc.yml
-  when: PEERTUBE_OIDC_ENABLED
+  when: not PEERTUBE_OIDC_ENABLED | bool
