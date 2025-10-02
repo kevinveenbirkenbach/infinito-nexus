@@ -64,12 +64,6 @@
     depends_on:
       {{ ESPOCRM_SERVICE }}:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "php", "-r", "($s=@fsockopen('127.0.0.1',8080,$e,$E,2))?fclose($s):exit(1);"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
