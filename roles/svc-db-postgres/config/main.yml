@@ -6,7 +6,7 @@ docker:
       name:               postgres
       # Please set an version in your inventory file! 
       # Rolling release isn't recommended
-      version:            "latest"
+      version:            "17-3.5"
       backup:
         database_routine: true
       cpus:               "2.0"
@@ -14,5 +14,5 @@ docker:
       mem_limit:          "6g"
       pids_limit:         1024
   volumes:
-    data:     "postgres_data"
-  network:    "postgres"
+    data:                 "postgres_data"
+  network:                "postgres"

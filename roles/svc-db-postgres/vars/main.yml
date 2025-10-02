@@ -1,5 +1,6 @@
 # General
 application_id:                           svc-db-postgres
+entity_name:                              "{{ application_id | get_entity_name }}"
 
 # Docker
 docker_compose_flush_handlers:            true
@@ -9,11 +10,12 @@ database_type:                            "{{ application_id | get_entity_name }
 
 ## Postgres
 POSTGRES_VOLUME:                          "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-POSTGRES_CONTAINER:                       "{{ applications | get_app_conf(application_id, 'docker.services.postgres.name') }}"
-POSTGRES_IMAGE:                           "{{ applications | get_app_conf(application_id, 'docker.services.postgres.image') }}"
-POSTGRES_SUBNET:                          "{{ networks.local['svc-db-postgres'].subnet }}"
+POSTGRES_CONTAINER:                       "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
+POSTGRES_IMAGE:                           "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+POSTGRES_VERSION:                         "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+POSTGRES_VERSION_MAJOR:                   "{{ POSTGRES_VERSION | regex_replace('^([0-9]+).*', '\\1') }}"
 POSTGRES_NETWORK_NAME:                    "{{ applications | get_app_conf(application_id, 'docker.network') }}"
-POSTGRES_VERSION:                         "{{ applications | get_app_conf(application_id, 'docker.services.postgres.version') }}"
+POSTGRES_SUBNET:                          "{{ networks.local['svc-db-postgres'].subnet }}"
 POSTGRES_PASSWORD:                        "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD') }}"
 POSTGRES_PORT:                            "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
 POSTGRES_INIT:                            "{{ database_username is defined and database_password is defined and database_name is defined }}"
