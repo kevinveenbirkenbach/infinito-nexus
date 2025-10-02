@@ -1,12 +1,10 @@
-# Configure CORS headers dynamically based on role variables.
-# If no variable is defined, defaults are applied (e.g. same-origin).
-# Discussion: https://chat.openai.com/share/2671b961-c1b0-472d-bae2-2804d0455e8a
+{#  Configure CORS headers dynamically based on role variables.
+    If no variable is defined, defaults are applied (e.g. same-origin).
+    Discussion: https://chat.openai.com/share/2671b961-c1b0-472d-bae2-2804d0455e8a #}
 
 {# Access-Control-Allow-Origin #}
 {% if aca_origin is defined %}
 add_header 'Access-Control-Allow-Origin' {{ aca_origin }};
-{% else %}
-add_header 'Access-Control-Allow-Origin' $scheme://$host always;
 {% endif %}
 
 {# Access-Control-Allow-Credentials #}
