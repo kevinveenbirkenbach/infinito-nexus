@@ -14,3 +14,4 @@
     system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     system_service_tpl_exec_start:      "{{ system_service_script_exec }} {{ SIZE_PERCENT_CLEANUP_DISC_SPACE }}"
     system_service_tpl_exec_start_pre:  '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP | join(" ") }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
+    system_service_force_linear_sync:   false

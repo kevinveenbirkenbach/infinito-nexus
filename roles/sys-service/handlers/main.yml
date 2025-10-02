@@ -1,19 +1,19 @@
 - name: "Enable systemctl service"
   systemd:
-    name: "{{ system_service_id | get_service_name(SOFTWARE_NAME) }}"
+    name: "{{ system_service_name }}"
     enabled: yes
     daemon_reload: true
   become: true
-  async:  "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:   "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  async:  "{{ system_service_async }}"
+  poll:   "{{ system_service_poll }}"
   listen: refresh systemctl service
 
 - name: "Set systemctl service state"
   systemd:
-    name: "{{ system_service_id | get_service_name(SOFTWARE_NAME) }}"
+    name: "{{ system_service_name }}"
     state: "{{ system_service_state }}"
   become: true
-  async:  "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:   "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  async:  "{{ system_service_async }}"
+  poll:   "{{ system_service_poll }}"
   when:   not (system_service_suppress_flush | bool)
   listen: refresh systemctl service

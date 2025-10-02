@@ -14,6 +14,7 @@
 - include_role:
     name: sys-service
   vars:
-    system_service_timer_enabled:  true
-    system_service_on_calendar:    "{{ SYS_SCHEDULE_CLEANUP_CERTS }}"
-    system_service_copy_files:     false
+    system_service_timer_enabled:     true
+    system_service_on_calendar:       "{{ SYS_SCHEDULE_CLEANUP_CERTS }}"
+    system_service_copy_files:        false
+    system_service_force_linear_sync: false

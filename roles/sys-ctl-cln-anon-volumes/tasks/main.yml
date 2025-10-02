@@ -12,6 +12,7 @@
       system_service_tpl_exec_start:      dockreap --no-confirmation
       system_service_tpl_exec_start_pre:  "" # Anonymous volumes can allways be removed. It isn't necessary to wait for any service to stop.
       system_service_copy_files:          false
+      system_service_force_linear_sync:   false
 
   - include_tasks: utils/run_once.yml
   when:

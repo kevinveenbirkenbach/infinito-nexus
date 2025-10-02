@@ -31,7 +31,7 @@
 - name: "setup systemctl '{{ system_service_id }}'"
   template:
     src:  "{{ system_service_template_src }}"
-    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, system_service_id | get_service_name(SOFTWARE_NAME) ] | path_join }}"
+    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, system_service_name ] | path_join }}"
     owner: root
     group: root
     mode: '0644'
@@ -46,5 +46,5 @@
     command: /bin/true
     notify: refresh systemctl service
     when: not system_service_uses_at
-  when: system_force_flush | bool
+  when: system_service_force_flush | bool
 

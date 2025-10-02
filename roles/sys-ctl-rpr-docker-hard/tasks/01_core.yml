@@ -12,5 +12,6 @@
     system_service_tpl_exec_start:      '{{ system_service_script_exec }} {{ PATH_DOCKER_COMPOSE_INSTANCES }}'
     system_service_tpl_exec_start_post: "/usr/bin/systemctl start {{ SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES }}"
     system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+    system_service_force_linear_sync:   true
 
 - include_tasks: utils/run_once.yml
