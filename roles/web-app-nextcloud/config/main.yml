@@ -23,7 +23,7 @@ server:
         - "blob:"
   domains:
     canonical:
-      - "cloud.{{ PRIMARY_DOMAIN }}"
+      - "next.cloud.{{ PRIMARY_DOMAIN }}"
     aliases: []
 docker:
   volumes:
