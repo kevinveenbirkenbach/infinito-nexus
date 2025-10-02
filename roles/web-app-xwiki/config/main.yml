@@ -2,16 +2,20 @@ credentials: {}
 docker:
   services:
     redis:
-      enabled:      false
+      enabled:            false
     database:
-      enabled:      true
-      type:         postgres
+      enabled:            true
+      type:               postgres
     xwiki:
-      image:        xwiki
-      version:      lts-<< defaults_applications[web-app-xwiki].docker.services.database.type >>-tomcat
-      name:         xwiki
+      image:              xwiki
+      version:            lts-<< defaults_applications[web-app-xwiki].docker.services.database.type >>-tomcat
+      name:               xwiki
       backup:
         no_stop_required: true
+      cpus:               1.0
+      mem_reservation:    1g
+      mem_limit:          2g
+      pids_limit:         1024
   volumes:
     data:           "xwiki_data"
 features:
