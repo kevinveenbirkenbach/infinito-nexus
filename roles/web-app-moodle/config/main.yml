@@ -33,7 +33,7 @@ docker:
       enabled:        true
     moodle:
       version:        "4.5" # Latest LTS - Necessary for OIDC
-      image:          bitnami/moodle
+      image:          bitnamilegacy/moodle
       name:           moodle
   volumes:
     data:             moodle_data

@@ -5,7 +5,7 @@ network:
 docker: 
   services:
     openldap:     
-      image:      "bitnami/openldap"
+      image:      "bitnamilegacy/openldap"
       name:       "openldap"
       version:    "latest"
   network:        "openldap"
