@@ -21,6 +21,7 @@
   shell: "{{ KEYCLOAK_EXEC_KCADM }} get client-scopes -r {{ KEYCLOAK_REALM }} --format json"
   register: all_scopes
   changed_when: false
+  failed_when: "'HTTP 401' in (all_scopes.stderr | default(''))"
 
 - name: Extract RBAC scope id
   set_fact:

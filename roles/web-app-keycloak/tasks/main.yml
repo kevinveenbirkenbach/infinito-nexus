@@ -36,6 +36,42 @@
     --password {{ KEYCLOAK_MASTER_API_USER_PASSWORD }}
   changed_when: false
 
+- name: Verify kcadm session works (quick read)
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get realms --format json | jq -r '.[0].realm' | head -n1
+  register: kcadm_verify
+  changed_when: false
+  failed_when: >
+    (kcadm_verify.rc != 0)
+    or ('HTTP 401' in (kcadm_verify.stderr | default('')))
+    or ((kcadm_verify.stdout | trim) == '')
+ 
+# --- Create & grant automation service account (Option A) ---
+- name: "Ensure automation service account client (Option A)"
+  include_tasks: 05a_service_account.yml
+  when: applications | get_app_conf(application_id, 'actions.create_automation_client', True)
+
+# --- Switch session to the service account for all subsequent API work ---
+- name: kcadm login (realm) using service account
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} config credentials
+    --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
+    --realm {{ KEYCLOAK_REALM }}
+    --client {{ KEYCLOAK_AUTOMATION_CLIENT_ID }}
+    --client-secret {{ KEYCLOAK_AUTOMATION_CLIENT_SECRET }}
+  changed_when: false
+
+- name: Verify kcadm session works (exact realm via service account)
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get realms/{{ KEYCLOAK_REALM }} --format json | jq -r '.realm'
+  register: kcadm_verify_sa
+  changed_when: false
+  failed_when: >
+    (kcadm_verify_sa.rc != 0)
+    or ('HTTP 401' in (kcadm_verify_sa.stderr | default('')))
+    or ((kcadm_verify_sa.stdout | trim) != (KEYCLOAK_REALM | trim))
+
 - name: "Update Client settings"
   vars:
     kc_object_kind:  "client"

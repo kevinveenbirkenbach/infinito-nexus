@@ -1,6 +1,7 @@
-load_dependencies:    True  # When set to false the dependencies aren't loaded. Helpful for developing
+load_dependencies:            True  # When set to false the dependencies aren't loaded. Helpful for developing
 actions:
-  import_realm:       True     # Import REALM
+  import_realm:               True  # Import REALM
+  create_automation_client:   True
 features:
   matomo:             true
   css:                true

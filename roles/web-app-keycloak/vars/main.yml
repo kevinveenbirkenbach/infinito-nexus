@@ -1,6 +1,6 @@
 # General
-application_id:                   "web-app-keycloak"                                                                          # Internal Infinito.Nexus application id 
-database_type:                    "postgres"                                                                                  # Database which will be used
+application_id:                     "web-app-keycloak"                                                                          # Internal Infinito.Nexus application id 
+database_type:                      "postgres"                                                                                  # Database which will be used
 
 # Keycloak
 
@@ -34,9 +34,16 @@ KEYCLOAK_ADMIN_PASSWORD:            "{{ applications | get_app_conf(application_
 
 ## Docker
 KEYCLOAK_CONTAINER:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"      # Name of the keycloak docker container
-KEYCLOAK_EXEC_KCADM:                "docker exec -i {{ KEYCLOAK_CONTAINER }} /opt/keycloak/bin/kcadm.sh"                      # Init script for keycloak
 KEYCLOAK_IMAGE:                     "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.image') }}"     # Keycloak docker image
 KEYCLOAK_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version') }}"   # Keycloak docker version
+KEYCLOAK_KCADM_CONFIG:              "/opt/keycloak/data/kcadm.config"
+KEYCLOAK_EXEC_KCADM:                "docker exec -i {{ KEYCLOAK_CONTAINER }} /opt/keycloak/bin/kcadm.sh --config {{ KEYCLOAK_KCADM_CONFIG }}"
+
+## Automation Service Account (Option A)
+KEYCLOAK_AUTOMATION_CLIENT_ID:      "infinito-automation"
+KEYCLOAK_AUTOMATION_GRANT_ROLE:     "realm-admin"   # or granular roles if you prefer
+# Will be discovered dynamically and set as a fact during the run:
+# KEYCLOAK_AUTOMATION_CLIENT_SECRET
 
 ## Server
 KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[application_id] }}"
