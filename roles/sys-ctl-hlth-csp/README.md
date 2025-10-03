@@ -34,7 +34,7 @@ HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM:
 This will run the CSP checker with:
 
 ```bash
-checkcsp start --short --ignore-network-blocks-from pxscdn.com cdn.example.org <domains...>
+checkcsp start --short --ignore-network-blocks-from pxscdn.com -- cdn.example.org <domains...>
 ```
 
 ### Systemd Integration
