@@ -14,6 +14,32 @@ Designed for Archlinux systems, this role periodically checks whether web resour
 - **Domain Extraction:** Parses all `.conf` files in the NGINX config folder to determine the list of domains to check.
 - **Automated Execution:** Registers a systemd service and timer for recurring health checks.
 - **Error Notification:** Integrates with `sys-ctl-alm-compose` for alerting on failure.
+- **Ignore List Support:** Optional variable to suppress network block reports from specific external domains.
+
+## Configuration
+
+### Variables
+
+- **`HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM`** (list, default: `[]`)  
+  Optional list of domains whose network block failures (e.g., ORB) should be ignored during CSP checks.
+
+Example:
+
+```yaml
+HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM:
+  - pxscdn.com
+  - cdn.example.org
+```
+
+This will run the CSP checker with:
+
+```bash
+checkcsp start --short --ignore-network-blocks-from pxscdn.com cdn.example.org <domains...>
+```
+
+### Systemd Integration
+
+The role configures a systemd service and timer which executes the CSP crawler periodically against all NGINX domains.
 
 ## License
 

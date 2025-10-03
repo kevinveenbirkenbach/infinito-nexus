@@ -21,11 +21,19 @@ def extract_domains(config_path):
         print(f"Directory {config_path} not found.", file=sys.stderr)
         return None
 
-def run_checkcsp(domains):
+def run_checkcsp(domains, ignore_network_blocks_from):
     """
-    Executes the 'checkcsp' command with the given domains.
+    Executes the 'checkcsp' command with the given domains and optional ignores.
     """
-    cmd = ["checkcsp", "start", "--short"] + domains
+    cmd = ["checkcsp", "start", "--short"]
+
+    # pass through ignore list only if not empty
+    if ignore_network_blocks_from:
+        cmd.append("--ignore-network-blocks-from")
+        cmd.extend(ignore_network_blocks_from)
+
+    cmd += domains
+
     try:
         result = subprocess.run(cmd, check=True)
         return result.returncode
@@ -45,6 +53,12 @@ def main():
         required=True,
         help="Directory containing NGINX .conf files"
     )
+    parser.add_argument(
+        "--ignore-network-blocks-from",
+        nargs="*",
+        default=[],
+        help="Optional: one or more domains whose network block failures should be ignored"
+    )
     args = parser.parse_args()
 
     domains = extract_domains(args.nginx_config_dir)
@@ -55,7 +69,7 @@ def main():
         print("No domains found to check.")
         sys.exit(0)
 
-    rc = run_checkcsp(domains)
+    rc = run_checkcsp(domains, args.ignore_network_blocks_from)
     sys.exit(rc)
 
 if __name__ == "__main__":
