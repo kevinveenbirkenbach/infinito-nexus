@@ -35,7 +35,10 @@ BUILTIN_FILTERS: Set[str] = {
     "from_yaml", "to_yaml", "combine", "difference", "intersect",
     "flatten", "zip", "regex_search", "regex_replace", "bool",
     "type_debug", "json_query", "mandatory", "hash", "checksum",
-    "lower", "upper", "capitalize", "unique", "dict2items", "items2dict", "password_hash", "path_join", "product", "quote", "split", "ternary", "to_nice_yaml", "tojson",
+    "lower", "upper", "capitalize", "unique", "dict2items", "items2dict", 
+    "password_hash", "path_join", "product", "quote", "split", "ternary", "to_nice_yaml", 
+    "tojson", "to_nice_json",
+
 
     # Date/time-ish
     "strftime",
