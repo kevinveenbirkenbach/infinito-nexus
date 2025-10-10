@@ -29,8 +29,14 @@ KEYCLOAK_REALM_IMPORT_FILE_SRC:     "import/realm.json.j2"
 KEYCLOAK_REALM_IMPORT_FILE_DST:     "{{ [KEYCLOAK_REALM_IMPORT_DIR_HOST,'realm.json'] | path_join }}"
 
 ## Credentials
-KEYCLOAK_ADMIN:                     "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
-KEYCLOAK_ADMIN_PASSWORD:            "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
+
+### Bootstrap
+KEYCLOAK_BOOTSTRAP_ADMIN_USERNAME:  "{{ applications | get_app_conf(application_id, 'accounts.bootstrap.username') }}"
+KEYCLOAK_BOOTSTRAP_ADMIN_PASSWORD:  "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
+
+### Permanent
+KEYCLOAK_PERMANENT_ADMIN_USERNAME:  "{{ applications | get_app_conf(application_id, 'accounts.system.username') }}"
+KEYCLOAK_PERMANENT_ADMIN_PASSWORD:  "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
 
 ## Docker
 KEYCLOAK_CONTAINER:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"      # Name of the keycloak docker container
@@ -68,11 +74,6 @@ KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >
         + (LDAP.USER.OBJECTS.AUXILIARY | dict2items | map(attribute='value') | list)
       ) | join(', ') 
   }}
-
-## API
-KEYCLOAK_MASTER_API_USER:           "{{ applications | get_app_conf(application_id, 'users.administrator') }}" # Master Administrator
-KEYCLOAK_MASTER_API_USER_NAME:      "{{ KEYCLOAK_MASTER_API_USER.username }}"                                  # Master Administrator Username
-KEYCLOAK_MASTER_API_USER_PASSWORD:  "{{ KEYCLOAK_MASTER_API_USER.password }}"                                  # Master Administrator Password
 
 # Dictionaries
 KEYCLOAK_DICTIONARY_REALM_RAW: "{{ lookup('template', 'import/realm.json.j2') }}"

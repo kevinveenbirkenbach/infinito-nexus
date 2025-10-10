@@ -1,6 +1,6 @@
 load_dependencies:    True  # When set to false the dependencies aren't loaded. Helpful for developing
 actions:
-  import_realm:       True     # Import REALM
+  import_realm:       True  # Import REALM
 features:
   matomo:             true
   css:                true
@@ -50,3 +50,9 @@ credentials:
   recaptcha:
     website_key:    "" # Required if you enabled recaptcha:
     secret_key:     ""  # Required if you enabled recaptcha:
+
+accounts:
+  bootstrap:
+    username: "administrator"
+  system:
+    username: "{{ SOFTWARE_NAME | replace('.', '_') | lower }}"

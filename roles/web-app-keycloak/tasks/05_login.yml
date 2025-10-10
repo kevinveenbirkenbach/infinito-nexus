@@ -17,6 +17,6 @@
     {{ KEYCLOAK_EXEC_KCADM }} config credentials
     --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
     --realm master
-    --user {{ KEYCLOAK_MASTER_API_USER_NAME }}
-    --password {{ KEYCLOAK_MASTER_API_USER_PASSWORD }}
+    --user {{ KEYCLOAK_PERMANENT_ADMIN_USERNAME }}
+    --password {{ KEYCLOAK_PERMANENT_ADMIN_PASSWORD }}
   changed_when: false
