@@ -28,7 +28,7 @@ BUILTIN_FILTERS: Set[str] = {
     "int", "join", "last", "length", "list", "lower", "map", "min", "max", "random",
     "reject", "rejectattr", "replace", "reverse", "round", "safe", "select",
     "selectattr", "slice", "sort", "string", "striptags", "sum", "title", "trim",
-    "truncate", "unique", "upper", "urlencode", "urlize", "wordcount", "xmlattr",
+    "truncate", "unique", "upper", "urlencode", "urlize", "wordcount", "xmlattr","contains",
 
     # Common Ansible filters (subset, extend as needed)
     "b64decode", "b64encode", "basename", "dirname", "from_json", "to_json",
