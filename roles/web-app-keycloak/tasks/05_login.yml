@@ -14,7 +14,7 @@
       changed_when: false
 
   rescue:
-  
+
     - name: Login with bootstrap admin (uses container ENV)
       shell: |
         {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
@@ -36,16 +36,20 @@
             -s "enabled=true"
         '
       register: kc_create_perm_admin
+      failed_when: >
+        not (
+          kc_create_perm_admin.rc == 0 or
+          (kc_create_perm_admin.stderr is defined and
+          ('User exists with same username' in kc_create_perm_admin.stderr))
+        )
       changed_when: kc_create_perm_admin.rc == 0
-      failed_when: kc_create_perm_admin.rc not in [0, 409]
 
     - name: Set permanent admin password (by username, no ID needed)
       shell: |
         {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
           {{ KEYCLOAK_KCADM }} set-password -r master \
             --username "$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
-            --new-password "$KEYCLOAK_PERMANENT_ADMIN_PASSWORD" \
-            --temporary false
+            --new-password "$KEYCLOAK_PERMANENT_ADMIN_PASSWORD"
         '
       changed_when: true
 
@@ -60,7 +64,7 @@
       register: kc_grant_admin
       changed_when: (kc_grant_admin.stderr is defined and kc_grant_admin.stderr | length > 0) or
                     (kc_grant_admin.stdout is defined and kc_grant_admin.stdout | length > 0)
-      failed_when: false  # idempotent: falls Rolle schon existiert
+      failed_when: false
 
     - name: Verify login with permanent admin (after creation)
       shell: |
