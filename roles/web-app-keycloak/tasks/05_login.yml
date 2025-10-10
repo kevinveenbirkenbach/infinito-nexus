@@ -1,0 +1,22 @@
+- name: "Wait until '{{ KEYCLOAK_CONTAINER }}' container is healthy"
+  community.docker.docker_container_info:
+    name: "{{ KEYCLOAK_CONTAINER }}"
+  register: kc_info
+  retries: 60
+  delay: 5
+  until: >
+    kc_info is succeeded and
+    (kc_info.container | default({})) != {} and
+    (kc_info.container.State | default({})) != {} and
+    (kc_info.container.State.Health | default({})) != {} and
+    (kc_info.container.State.Health.Status | default('')) == 'healthy'
+
+- name: kcadm login (master)
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} config credentials
+    --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
+    --realm master
+    --user {{ KEYCLOAK_MASTER_API_USER_NAME }}
+    --password {{ KEYCLOAK_MASTER_API_USER_PASSWORD }}
+  changed_when: false

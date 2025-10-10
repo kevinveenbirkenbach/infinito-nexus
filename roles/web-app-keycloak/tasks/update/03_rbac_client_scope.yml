@@ -1,4 +1,3 @@
-# --- Ensure RBAC client scope exists (idempotent) ---
 - name: Ensure RBAC client scope exists
   shell: |
     cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} create client-scopes -r {{ KEYCLOAK_REALM }} -f -
@@ -16,7 +15,6 @@
                ('already exists' not in (create_rbac_scope.stderr | lower))
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-# --- Get the scope id we will attach to the client ---
 - name: Get all client scopes
   shell: "{{ KEYCLOAK_EXEC_KCADM }} get client-scopes -r {{ KEYCLOAK_REALM }} --format json"
   register: all_scopes

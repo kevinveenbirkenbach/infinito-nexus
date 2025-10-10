@@ -13,82 +13,18 @@
   include_tasks: 04_dependencies.yml
   when: KEYCLOAK_LOAD_DEPENDENCIES | bool
 
-- name: "Wait until '{{ KEYCLOAK_CONTAINER }}' container is healthy"
-  community.docker.docker_container_info:
-    name: "{{ KEYCLOAK_CONTAINER }}"
-  register: kc_info
-  retries: 60
-  delay: 5
-  until: >
-    kc_info is succeeded and
-    (kc_info.container | default({})) != {} and
-    (kc_info.container.State | default({})) != {} and
-    (kc_info.container.State.Health | default({})) != {} and
-    (kc_info.container.State.Health.Status | default('')) == 'healthy'
+- name: "Load Login routines for '{{ application_id }}'"
+  include_tasks: 05_login.yml
 
-- name: kcadm login (master)
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} config credentials
-    --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
-    --realm master
-    --user {{ KEYCLOAK_MASTER_API_USER_NAME }}
-    --password {{ KEYCLOAK_MASTER_API_USER_PASSWORD }}
-  changed_when: false
+- name: "Load Client Update routines for '{{ application_id }}'"
+  include_tasks: update/01_client.yml
 
-- name: "Update Client settings"
-  vars:
-    kc_object_kind:  "client"
-    kc_lookup_value: "{{ KEYCLOAK_CLIENT_ID }}"
-    kc_desired: >-
-      {{
-        KEYCLOAK_DICTIONARY_REALM.clients
-          | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
-          | list | first
-      }}
-    kc_force_attrs:
-      publicClient: >-
-        {{
-          (KEYCLOAK_DICTIONARY_REALM.clients
-            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
-            | map(attribute='publicClient')
-            | first)
-        }}
-      serviceAccountsEnabled: >-
-        {{
-          (KEYCLOAK_DICTIONARY_REALM.clients
-            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
-            | map(attribute='serviceAccountsEnabled')
-            | first )
-        }}
-      frontchannelLogout:  >-
-        {{
-          (KEYCLOAK_DICTIONARY_REALM.clients
-            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
-            | map(attribute='frontchannelLogout')
-            | first)
-        }}
-      attributes: >-
-        {{
-          ( (KEYCLOAK_DICTIONARY_REALM.clients
-              | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
-              | list | first | default({}) ).attributes | default({}) )
-          | combine({'frontchannel.logout.url': KEYCLOAK_FRONTCHANNEL_LOGOUT_URL}, recursive=True)
-        }}
-  include_tasks: _update.yml
+- name: "Load Mail Update routines for '{{ application_id }}'"
+  include_tasks: update/02_mail.yml
 
-- name: "Update REALM mail settings from realm dictionary (SPOT)"
-  include_tasks: _update.yml
-  vars:
-    kc_object_kind:  "realm"
-    kc_lookup_field: "id"
-    kc_lookup_value: "{{ KEYCLOAK_REALM }}"
-    kc_desired:
-      smtpServer: "{{ KEYCLOAK_DICTIONARY_REALM.smtpServer | default({}, true) }}"
-    kc_merge_path:  "smtpServer"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+- name: "Load RBAC Update routines for '{{ application_id }}'"
+  include_tasks: update/03_rbac_client_scope.yml
 
-- include_tasks: 05_rbac_client_scope.yml
-
-- include_tasks: 06_ldap.yml
+- name: "Load LDAP Update routines for '{{ application_id }}'"
+  include_tasks: update/04_ldap.yml
   when: KEYCLOAK_LDAP_ENABLED | bool

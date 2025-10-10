@@ -1,0 +1,40 @@
+- name: "Update Client settings"
+  vars:
+    kc_object_kind:  "client"
+    kc_lookup_value: "{{ KEYCLOAK_CLIENT_ID }}"
+    kc_desired: >-
+      {{
+        KEYCLOAK_DICTIONARY_REALM.clients
+          | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+          | list | first
+      }}
+    kc_force_attrs:
+      publicClient: >-
+        {{
+          (KEYCLOAK_DICTIONARY_REALM.clients
+            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+            | map(attribute='publicClient')
+            | first)
+        }}
+      serviceAccountsEnabled: >-
+        {{
+          (KEYCLOAK_DICTIONARY_REALM.clients
+            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+            | map(attribute='serviceAccountsEnabled')
+            | first )
+        }}
+      frontchannelLogout:  >-
+        {{
+          (KEYCLOAK_DICTIONARY_REALM.clients
+            | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+            | map(attribute='frontchannelLogout')
+            | first)
+        }}
+      attributes: >-
+        {{
+          ( (KEYCLOAK_DICTIONARY_REALM.clients
+              | selectattr('clientId','equalto', KEYCLOAK_CLIENT_ID)
+              | list | first | default({}) ).attributes | default({}) )
+          | combine({'frontchannel.logout.url': KEYCLOAK_FRONTCHANNEL_LOGOUT_URL}, recursive=True)
+        }}
+  include_tasks: _update.yml
