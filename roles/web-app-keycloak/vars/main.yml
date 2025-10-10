@@ -39,10 +39,12 @@ KEYCLOAK_PERMANENT_ADMIN_USERNAME:  "{{ applications | get_app_conf(application_
 KEYCLOAK_PERMANENT_ADMIN_PASSWORD:  "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
 
 ## Docker
-KEYCLOAK_CONTAINER:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"      # Name of the keycloak docker container
-KEYCLOAK_EXEC_KCADM:                "docker exec -i {{ KEYCLOAK_CONTAINER }} /opt/keycloak/bin/kcadm.sh"                      # Init script for keycloak
-KEYCLOAK_IMAGE:                     "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.image') }}"     # Keycloak docker image
-KEYCLOAK_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version') }}"   # Keycloak docker version
+KEYCLOAK_CONTAINER:                 "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.name') }}"
+KEYCLOAK_EXEC_CONTAINER:            "docker exec -i {{ KEYCLOAK_CONTAINER }}"
+KEYCLOAK_KCADM:                     "/opt/keycloak/bin/kcadm.sh"
+KEYCLOAK_EXEC_KCADM:                "{{ KEYCLOAK_EXEC_CONTAINER }} {{ KEYCLOAK_KCADM }}"
+KEYCLOAK_IMAGE:                     "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.image') }}"
+KEYCLOAK_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.version') }}"
 
 ## Server
 KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[application_id] }}"

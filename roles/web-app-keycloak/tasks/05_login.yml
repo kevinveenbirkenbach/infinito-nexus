@@ -1,22 +1,95 @@
-- name: "Wait until '{{ KEYCLOAK_CONTAINER }}' container is healthy"
-  community.docker.docker_container_info:
-    name: "{{ KEYCLOAK_CONTAINER }}"
-  register: kc_info
-  retries: 60
-  delay: 5
-  until: >
-    kc_info is succeeded and
-    (kc_info.container | default({})) != {} and
-    (kc_info.container.State | default({})) != {} and
-    (kc_info.container.State.Health | default({})) != {} and
-    (kc_info.container.State.Health.Status | default('')) == 'healthy'
+- name: Ensure permanent Keycloak admin exists and can log in (container env only)
+  block:
 
-- name: kcadm login (master)
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} config credentials
-    --server {{ KEYCLOAK_SERVER_INTERNAL_URL }}
-    --realm master
-    --user {{ KEYCLOAK_PERMANENT_ADMIN_USERNAME }}
-    --password {{ KEYCLOAK_PERMANENT_ADMIN_PASSWORD }}
-  changed_when: false
+    - name: Try login with permanent admin (uses container ENV)
+      shell: |
+        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+          {{ KEYCLOAK_KCADM }} config credentials \
+            --server {{ KEYCLOAK_SERVER_INTERNAL_URL }} \
+            --realm master \
+            --user "$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
+            --password "$KEYCLOAK_PERMANENT_ADMIN_PASSWORD"
+        '
+      register: kc_login_perm
+      changed_when: false
+
+  rescue:
+
+    - name: Login with bootstrap admin (uses container ENV)
+      shell: |
+        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+          {{ KEYCLOAK_KCADM }} config credentials \
+            --server {{ KEYCLOAK_SERVER_INTERNAL_URL }} \
+            --realm master \
+            --user "$KC_BOOTSTRAP_ADMIN_USERNAME" \
+            --password "$KC_BOOTSTRAP_ADMIN_PASSWORD"
+        '
+      register: kc_login_bootstrap
+      changed_when: false
+
+    - name: Lookup permanent admin user id (master)
+      shell: |
+        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+          {{ KEYCLOAK_KCADM }} get users -r master \
+            --query "username=$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
+            --fields id --format json | jq -r ".[0].id // empty"
+        '
+      register: kc_perm_admin_id
+      changed_when: false
+
+    - name: Create permanent admin user if missing (master)
+      when: kc_perm_admin_id.stdout | length == 0
+      shell: |
+        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+          cat << "JSON" | {{ KEYCLOAK_KCADM }} create users -r master -f -
+          {
+            "username": "'"$KEYCLOAK_PERMANENT_ADMIN_USERNAME"'",
+            "enabled": true
+          }
+          JSON
+        '
+      register: kc_create_perm_admin
+      changed_when: "'Created new' in kc_create_perm_admin.stdout or kc_create_perm_admin.rc == 0"
+
+    - name: Refresh permanent admin user id after creation
+      when: kc_perm_admin_id.stdout | length == 0
+      shell: |
+        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+          {{ KEYCLOAK_KCADM }} get users -r master \
+            --query "username=$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
+            --fields id --format json | jq -r ".[0].id"
+        '
+      register: kc_perm_admin_id_refreshed
+      changed_when: false
+
+    - name: Set permanent admin password (uses container ENV)
+      shell: |
+        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+          {{ KEYCLOAK_KCADM }} set-password -r master \
+            --userid {{ (kc_perm_admin_id_refreshed.stdout | default(kc_perm_admin_id.stdout)) | trim }} \
+            --new-password "$KEYCLOAK_PERMANENT_ADMIN_PASSWORD" \
+            --temporary false
+        '
+      changed_when: true
+
+    - name: Grant realm-admin role to permanent admin
+      shell: |
+        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+          {{ KEYCLOAK_KCADM }} add-roles -r master \
+            --uusername "$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
+            --cclientid realm-management \
+            --rolename realm-admin
+        '
+      register: kc_grant_admin
+      changed_when: kc_grant_admin.stderr is defined and kc_grant_admin.stderr | length > 0
+
+    - name: Verify login with permanent admin (after creation)
+      shell: |
+        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+          {{ KEYCLOAK_KCADM }} config credentials \
+            --server {{ KEYCLOAK_SERVER_INTERNAL_URL }} \
+            --realm master \
+            --user "$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
+            --password "$KEYCLOAK_PERMANENT_ADMIN_PASSWORD"
+        '
+      changed_when: false
