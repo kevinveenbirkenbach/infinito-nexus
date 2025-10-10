@@ -14,7 +14,7 @@
       changed_when: false
 
   rescue:
-
+  
     - name: Login with bootstrap admin (uses container ENV)
       shell: |
         {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
@@ -27,52 +27,29 @@
       register: kc_login_bootstrap
       changed_when: false
 
-    - name: Lookup permanent admin user id (master)
+    - name: Ensure permanent admin user exists (create if missing)
       shell: |
         {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
-          {{ KEYCLOAK_KCADM }} get users -r master \
-            --query "username=$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
-            --fields id --format json | jq -r ".[0].id // empty"
-        '
-      register: kc_perm_admin_id
-      changed_when: false
-
-    - name: Create permanent admin user if missing (master)
-      when: kc_perm_admin_id.stdout | length == 0
-      shell: |
-        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
-          cat << "JSON" | {{ KEYCLOAK_KCADM }} create users -r master -f -
-          {
-            "username": "'"$KEYCLOAK_PERMANENT_ADMIN_USERNAME"'",
-            "enabled": true
-          }
-          JSON
+          # Try to create; if it already exists, Keycloak returns 409
+          {{ KEYCLOAK_KCADM }} create users -r master \
+            -s "username=$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
+            -s "enabled=true"
         '
       register: kc_create_perm_admin
-      changed_when: "'Created new' in kc_create_perm_admin.stdout or kc_create_perm_admin.rc == 0"
+      changed_when: kc_create_perm_admin.rc == 0
+      failed_when: kc_create_perm_admin.rc not in [0, 409]
 
-    - name: Refresh permanent admin user id after creation
-      when: kc_perm_admin_id.stdout | length == 0
-      shell: |
-        {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
-          {{ KEYCLOAK_KCADM }} get users -r master \
-            --query "username=$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
-            --fields id --format json | jq -r ".[0].id"
-        '
-      register: kc_perm_admin_id_refreshed
-      changed_when: false
-
-    - name: Set permanent admin password (uses container ENV)
+    - name: Set permanent admin password (by username, no ID needed)
       shell: |
         {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
           {{ KEYCLOAK_KCADM }} set-password -r master \
-            --userid {{ (kc_perm_admin_id_refreshed.stdout | default(kc_perm_admin_id.stdout)) | trim }} \
+            --username "$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
             --new-password "$KEYCLOAK_PERMANENT_ADMIN_PASSWORD" \
             --temporary false
         '
       changed_when: true
 
-    - name: Grant realm-admin role to permanent admin
+    - name: Grant realm-admin role to permanent admin (by username)
       shell: |
         {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
           {{ KEYCLOAK_KCADM }} add-roles -r master \
@@ -81,7 +58,9 @@
             --rolename realm-admin
         '
       register: kc_grant_admin
-      changed_when: kc_grant_admin.stderr is defined and kc_grant_admin.stderr | length > 0
+      changed_when: (kc_grant_admin.stderr is defined and kc_grant_admin.stderr | length > 0) or
+                    (kc_grant_admin.stdout is defined and kc_grant_admin.stdout | length > 0)
+      failed_when: false  # idempotent: falls Rolle schon existiert
 
     - name: Verify login with permanent admin (after creation)
       shell: |
