@@ -1,3 +1,16 @@
+- name: "Wait until '{{ KEYCLOAK_CONTAINER }}' container is healthy"
+  community.docker.docker_container_info:
+    name: "{{ KEYCLOAK_CONTAINER }}"
+  register: kc_info
+  retries: 60
+  delay: 5
+  until: >
+    kc_info is succeeded and
+    (kc_info.container | default({})) != {} and
+    (kc_info.container.State | default({})) != {} and
+    (kc_info.container.State.Health | default({})) != {} and
+    (kc_info.container.State.Health.Status | default('')) == 'healthy'
+
 - name: Ensure permanent Keycloak admin exists and can log in (container env only)
   block:
 
@@ -30,7 +43,6 @@
     - name: Ensure permanent admin user exists (create if missing)
       shell: |
         {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
-          # Try to create; if it already exists, Keycloak returns 409
           {{ KEYCLOAK_KCADM }} create users -r master \
             -s "username=$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
             -s "enabled=true"
@@ -53,17 +65,16 @@
         '
       changed_when: true
 
-    - name: Grant realm-admin role to permanent admin (by username)
+    - name: Grant global admin via master realm role 'admin'
       shell: |
         {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
           {{ KEYCLOAK_KCADM }} add-roles -r master \
             --uusername "$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
-            --cclientid realm-management \
-            --rolename realm-admin
+            --rolename admin
         '
-      register: kc_grant_admin
-      changed_when: (kc_grant_admin.stderr is defined and kc_grant_admin.stderr | length > 0) or
-                    (kc_grant_admin.stdout is defined and kc_grant_admin.stdout | length > 0)
+      register: kc_grant_master_admin
+      changed_when: (kc_grant_master_admin.stderr is defined and kc_grant_master_admin.stderr | length > 0) or
+                    (kc_grant_master_admin.stdout is defined and kc_grant_master_admin.stdout | length > 0)
       failed_when: false
 
     - name: Verify login with permanent admin (after creation)
