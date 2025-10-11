@@ -1,11 +1,13 @@
 #!/bin/sh
-set -euo pipefail
+# POSIX-safe entrypoint for EspoCRM container
+# Compatible with /bin/sh (dash/busybox). Avoids 'pipefail' and non-portable features.
+set -eu
 
 log() { printf '%s %s\n' "[entrypoint]" "$*" >&2; }
 
 # --- Simple boolean normalization --------------------------------------------
 bool_norm () {
-  v="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
+  v="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]' 2>/dev/null || true)"
   case "$v" in
     1|true|yes|on)  echo "true" ;;
     0|false|no|off|"") echo "false" ;;
@@ -13,30 +15,45 @@ bool_norm () {
   esac
 }
 
-# Expected ENV (from env.j2)
+# --- Environment initialization ----------------------------------------------
 MAINTENANCE="$(bool_norm "${ESPO_INIT_MAINTENANCE_MODE:-false}")"
 CRON_DISABLED="$(bool_norm "${ESPO_INIT_CRON_DISABLED:-false}")"
 USE_CACHE="$(bool_norm "${ESPO_INIT_USE_CACHE:-true}")"
 
 APP_DIR="/var/www/html"
-SET_FLAGS_SCRIPT="${ESPOCRM_SET_FLAGS_SCRIPT}"
+
+# Provided by env.j2 (fallback ensures robustness)
+SET_FLAGS_SCRIPT="${ESPOCRM_SET_FLAGS_SCRIPT:-/usr/local/bin/set_flags.php}"
+if [ ! -f "$SET_FLAGS_SCRIPT" ]; then
+  log "WARN: SET_FLAGS_SCRIPT '$SET_FLAGS_SCRIPT' not found; falling back to /usr/local/bin/set_flags.php"
+  SET_FLAGS_SCRIPT="/usr/local/bin/set_flags.php"
+fi
 
 # --- Wait for bootstrap.php (max 60s, e.g. fresh volume) ----------------------
 log "Waiting for ${APP_DIR}/bootstrap.php..."
-for i in $(seq 1 60); do
-  [ -f "${APP_DIR}/bootstrap.php" ] && break
+count=0
+while [ $count -lt 60 ] && [ ! -f "${APP_DIR}/bootstrap.php" ]; do
   sleep 1
+  count=$((count + 1))
 done
 if [ ! -f "${APP_DIR}/bootstrap.php" ]; then
-  log "ERROR: bootstrap.php missing after 60s"; exit 1
+  log "ERROR: bootstrap.php missing after 60s"
+  exit 1
 fi
 
 # --- Apply config flags via set_flags.php ------------------------------------
 log "Applying runtime flags via set_flags.php..."
-php "${SET_FLAGS_SCRIPT}"
+if ! php "${SET_FLAGS_SCRIPT}"; then
+  log "ERROR: set_flags.php execution failed"
+  exit 1
+fi
 
 # --- Clear cache (safe) -------------------------------------------------------
-php "${APP_DIR}/clear_cache.php" || true
+if php "${APP_DIR}/clear_cache.php" 2>/dev/null; then
+  log "Cache cleared successfully."
+else
+  log "WARN: Cache clearing skipped or failed (non-critical)."
+fi
 
 # --- Hand off to CMD ----------------------------------------------------------
 if [ "$#" -gt 0 ]; then
@@ -56,5 +73,6 @@ for cmd in apache2-foreground httpd-foreground php-fpm php-fpm8.3 php-fpm8.2 sup
   fi
 done
 
+# --- Fallback ---------------------------------------------------------------
 log "No known server command found; tailing to keep container alive."
 exec tail -f /dev/null
