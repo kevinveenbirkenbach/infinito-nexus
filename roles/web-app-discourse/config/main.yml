@@ -43,9 +43,10 @@ plugins:
     enabled:  true
   discourse-akismet:
     enabled:  true
-  discourse-cakeday:
-    enabled:  true
-#  discourse-solved: Seems like this plugin is now also part of the default setup
+# The following plugins moved to the default setup
+#  discourse-cakeday:
+#    enabled:  true
+#  discourse-solved:
 #    enabled:  true 
 #  discourse-voting:
 #    enabled:  true
