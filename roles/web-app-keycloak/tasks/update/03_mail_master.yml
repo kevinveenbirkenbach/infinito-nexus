@@ -1,0 +1,10 @@
+- name: "Update REALM mail settings from realm dictionary (SPOT)"
+  include_tasks: _update.yml
+  vars:
+    kc_object_kind:  "realm"
+    kc_lookup_field: "id"
+    kc_lookup_value: "{{ KEYCLOAK_REALM }}"
+    kc_desired:
+      smtpServer: "{{ KEYCLOAK_DICTIONARY_REALM.smtpServer | default({}, true) }}"
+    kc_merge_path:  "smtpServer"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

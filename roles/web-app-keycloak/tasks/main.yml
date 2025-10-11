@@ -19,12 +19,15 @@
 - name: "Load Client Update routines for '{{ application_id }}'"
   include_tasks: update/01_client.yml
 
-- name: "Load Mail Update routines for '{{ application_id }}'"
-  include_tasks: update/02_mail.yml
+- name: "Load Mail Update routines for '{{ application_id }} - {{ KEYCLOAK_REALM }}'"
+  include_tasks: update/02_mail_realm.yml
+
+- name: "Load Mail Update routines for '{{ application_id }} - master'"
+  include_tasks: update/03_mail_master.yml
 
 - name: "Load RBAC Update routines for '{{ application_id }}'"
-  include_tasks: update/03_rbac_client_scope.yml
+  include_tasks: update/04_rbac_client_scope.yml
 
 - name: "Load LDAP Update routines for '{{ application_id }}'"
-  include_tasks: update/04_ldap.yml
+  include_tasks: update/05_ldap.yml
   when: KEYCLOAK_LDAP_ENABLED | bool
