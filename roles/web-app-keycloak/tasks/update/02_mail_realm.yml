@@ -1,4 +1,4 @@
-- name: "Update REALM mail settings from realm dictionary (SPOT)"
+- name: "Update {{ KEYCLOAK_REALM }} REALM mail settings from realm dictionary"
   include_tasks: _update.yml
   vars:
     kc_object_kind:  "realm"
