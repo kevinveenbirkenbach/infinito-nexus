@@ -5,7 +5,7 @@ users:
     username: "{{ PRIMARY_DOMAIN.split('.')[0] }}"
   tld:
     description: "Auto Generated Account to reserve the TLD"
-    username: "{{ PRIMARY_DOMAIN.split('.')[1] }}"
+    username: "{{ PRIMARY_DOMAIN.split('.')[1] if (PRIMARY_DOMAIN is defined and (PRIMARY_DOMAIN.split('.') | length) > 1) else (PRIMARY_DOMAIN ~ '_tld ') }}"
   root:
     username: root
     uid: 0

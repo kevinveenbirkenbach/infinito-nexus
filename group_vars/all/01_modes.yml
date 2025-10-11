@@ -5,6 +5,6 @@ MODE_DUMMY:   false                       # Executes dummy/test routines instead
 MODE_UPDATE:  true                        # Executes updates
 MODE_DEBUG:   false                       # This enables debugging in ansible and in the apps, You SHOULD NOT enable this on production servers
 MODE_RESET:   false                       # Cleans up all Infinito.Nexus files. It's necessary to run to whole playbook and not particial roles when using this function.
-MODE_CLEANUP: "{{ MODE_DEBUG  | bool }}"  # Cleanup unused files and configurations
+MODE_CLEANUP: true                        # Cleanup unused files and configurations
 MODE_ASSERT:  "{{ MODE_DEBUG  | bool }}"  # Executes validation tasks during the run.
 MODE_BACKUP:  true                        # Executes the Backup before the deployment
