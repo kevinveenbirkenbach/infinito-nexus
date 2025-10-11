@@ -1,8 +1,8 @@
 features:
-  matomo:           true
-  css:              true
+  matomo:   true
+  css:      true
   desktop:  true
-  logout:           false
+  logout:   false
 server:
   csp:
     whitelist:
@@ -16,14 +16,15 @@ server:
       font-src:
         - https://cdnjs.cloudflare.com
       frame-src:
-        - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}" # Makes sense that all of the website content is available in the navigator
+         # Makes sense that all of the website content is available in the navigator
+        - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
     flags:
       style-src:
-        unsafe-inline: true
+        unsafe-inline:  true
       script-src:
-        unsafe-eval:  true
+        unsafe-eval:    true
       script-src-elem:
-        unsafe-inline: true
+        unsafe-inline:  true
   domains:
     canonical:
       - "slides.{{ PRIMARY_DOMAIN }}"
