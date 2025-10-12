@@ -15,3 +15,6 @@
 - include_role:
     name: sys-ctl-hlth-msmtp
   when: run_once_sys_ctl_hlth_msmtp is not defined
+
+- set_fact:
+    run_once_sys_svc_msmtp: true

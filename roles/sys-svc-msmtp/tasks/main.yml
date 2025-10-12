@@ -1,5 +1,6 @@
-- block:
-  - include_tasks: 01_core.yml
-  - set_fact:
-      run_once_sys_svc_msmtp: true
-  when: run_once_sys_svc_msmtp is not defined
+- name: "Load MSMTP Core Once"
+  include_tasks: 01_core.yml
+  when:
+  - run_once_sys_svc_msmtp is not defined or run_once_sys_svc_msmtp is false
+  # Just execute when mailu_token is defined
+  - users['no-reply'].mailu_token is defined

@@ -1,0 +1,26 @@
+
+- name: "Fetch existing API tokens via curl inside admin container"
+  command: >-
+    {{ docker_compose_command_exec }} -T admin \
+      curl -s -X GET {{ mailu_api_base_url }}/token \
+        -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
+  args:
+    chdir: "{{ MAILU_DOCKER_DIR }}"
+  register: mailu_tokens_cli
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Extract existing token info for '{{ mailu_user_key }};{{ mailu_user_name }}'"
+  set_fact:
+    mailu_user_existing_token: >-
+      {{ (
+           mailu_tokens_cli.stdout
+           | default('[]')
+           | from_json
+           | selectattr('comment','equalto', SOFTWARE_NAME)
+           | list
+         ).0 | default(None) }}
+
+- name:           "Start Mailu token procedures for undefined tokens"
+  when:           users[mailu_user_key].mailu_token is not defined
+  include_tasks:  03b_create_user_token.yml

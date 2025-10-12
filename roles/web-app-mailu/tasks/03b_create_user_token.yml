@@ -1,26 +1,3 @@
-
-- name: "Fetch existing API tokens via curl inside admin container"
-  command: >-
-    {{ docker_compose_command_exec }} -T admin \
-      curl -s -X GET {{ mailu_api_base_url }}/token \
-        -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
-  args:
-    chdir: "{{ MAILU_DOCKER_DIR }}"
-  register: mailu_tokens_cli
-  changed_when: false
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
-- name: "Extract existing token info for '{{ mailu_user_key }};{{ mailu_user_name }}'"
-  set_fact:
-    mailu_user_existing_token: >-
-      {{ (
-           mailu_tokens_cli.stdout
-           | default('[]')
-           | from_json
-           | selectattr('comment','equalto', SOFTWARE_NAME)
-           | list
-         ).0 | default(None) }}
-
 - name: "Delete existing API token for '{{ mailu_user_key }};{{ mailu_user_name }}' if local token missing but remote exists"
   command: >-
     {{ docker_compose_command_exec }} -T admin \
@@ -29,7 +6,6 @@
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
   when:
-    - users[mailu_user_key].mailu_token is not defined
     - mailu_user_existing_token is not none
     - mailu_user_existing_token.id is defined
   register: mailu_token_delete
@@ -49,7 +25,6 @@
           } | to_json }}'
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
-  when: users[mailu_user_key].mailu_token is not defined
   register: mailu_token_creation
   # If curl sees 4xx/5xx it returns non-zero due to -f → fail the task.
   failed_when:
@@ -57,7 +32,7 @@
     # Fallback: if some gateway returns 200 but embeds an error JSON.
     - mailu_token_creation.rc == 0 and
       (mailu_token_creation.stdout is search('"code"\\s*:\\s*4\\d\\d') or
-       mailu_token_creation.stdout is search('cannot be found'))
+      mailu_token_creation.stdout is search('cannot be found'))
   # Only mark changed when a token is actually present in the JSON.
   changed_when: mailu_token_creation.stdout is search('"token"\\s*:')
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
@@ -66,14 +41,25 @@
   set_fact:
     users: >-
       {{ users
-         | combine({
-             mailu_user_key: (
-               users[mailu_user_key]
-               | combine({
-                   'mailu_token': (mailu_token_creation.stdout | from_json).token
-                 })
-             )
-           }, recursive=True)
+        | combine({
+            mailu_user_key: (
+              users[mailu_user_key]
+              | combine({
+                  'mailu_token': (mailu_token_creation.stdout | from_json).token
+                })
+            )
+          }, recursive=True)
       }}
-  when: users[mailu_user_key].mailu_token is not defined
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Reset MSMTP Configuration if No-Reply User Token changed"
+  when: users['no-reply'].username == mailu_user_name
+  block:
+    - name: "Set MSMTP run-once fact false"
+      set_fact:
+        run_once_sys_svc_msmtp: false
+      changed_when: false
+
+    - name: Reload MSMTP role
+      include_role:
+        name: "sys-svc-msmtp"
