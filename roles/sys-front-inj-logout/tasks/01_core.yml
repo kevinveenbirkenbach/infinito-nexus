@@ -1,8 +1,12 @@
-- name: Include dependency 'sys-svc-webserver-core'
+- name: Include dependency 'web-svc-logout'
   include_role:
-    name: sys-svc-webserver-core
+    name: web-svc-logout
   when: 
-    - run_once_sys_svc_webserver_core is not defined
+    - run_once_web_svc_logout is not defined
   
 - name: "deploy the logout.js"
   include_tasks: "02_deploy.yml"
+
+- set_fact:
+    run_once_sys_front_inj_logout: true
+  changed_when: false

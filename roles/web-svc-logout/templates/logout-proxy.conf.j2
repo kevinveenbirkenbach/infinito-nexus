@@ -8,7 +8,11 @@ location = /logout {
     proxy_http_version 1.1;
 
     {# CORS headers – allow your central page to call this #}
-    {% include 'roles/sys-svc-proxy/templates/headers/access_control_allow.conf.j2' %}
+    {%- set aca_origin = "'{{ domains | get_url('web-svc-logout', WEB_PROTOCOL) }}' always" -%}
+    {%- set aca_credentials = "'true' always" -%}
+    {%- set aca_methods = "'GET, OPTIONS' always" -%}
+    {%- set aca_headers = "'Accept, Authorization' always" -%}
+    {%- include 'roles/sys-svc-proxy/templates/headers/access_control_allow.conf.j2' -%}
 
     {# Disable caching absolutely #}
     add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0" always;

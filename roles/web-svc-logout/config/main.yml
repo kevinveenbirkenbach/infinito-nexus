@@ -1,9 +1,9 @@
 features:
-  matomo:           true
-  css:              true
-  desktop:  true
-  javascript:       false
-  logout:           false
+  matomo:     true
+  css:        true
+  desktop:    true
+  javascript: false
+  logout:     false
 server:
   domains:
     canonical:
@@ -19,10 +19,11 @@ server:
       connect-src:
         - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://{{ PRIMARY_DOMAIN }}"
+        - "https://cdn.jsdelivr.net"
       script-src-elem:
-        - https://cdn.jsdelivr.net
+        - "https://cdn.jsdelivr.net"
       style-src-elem:
-        - https://cdn.jsdelivr.net
+        - "https://cdn.jsdelivr.net"
       frame-ancestors:
         - "{{ WEB_PROTOCOL }}://<< defaults_applications[web-app-keycloak].server.domains.canonical[0] >>"
 

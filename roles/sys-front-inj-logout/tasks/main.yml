@@ -1,7 +1,5 @@
-- block:
-  - include_tasks: 01_core.yml
-  - set_fact:
-      run_once_sys_front_inj_logout: true
+- name: "Load base for '{{ application_id }}'"
+  include_tasks: 01_core.yml
   when: run_once_sys_front_inj_logout is not defined
 
 - name: "Load logout code for '{{ application_id }}'"
