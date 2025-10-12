@@ -1,26 +1,5 @@
 # Routines to create the administrator account
 # @see https://chatgpt.com/share/67b9b12c-064c-800f-9354-8e42e6459764
-
-- name: Check health status of '{{ item }}' container
-  shell: |
-    cid=$(docker compose ps -q {{ item }})
-    docker inspect \
-      --format '{{ "{{.State.Health.Status}}" }}' \
-      $cid
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  register: healthcheck
-  retries: 60
-  delay: 5
-  until: healthcheck.stdout == "healthy"
-  loop:
-    - mastodon
-    - streaming
-    - sidekiq
-  loop_control:
-    label: "{{ item }}"
-  changed_when: false
-
 - name: Remove line containing "- administrator" from config/settings.yml to allow creating administrator account
   command: 
     cmd:  "docker exec -u root {{ MASTODON_CONTAINER }} sed -i '/- administrator/d' config/settings.yml"

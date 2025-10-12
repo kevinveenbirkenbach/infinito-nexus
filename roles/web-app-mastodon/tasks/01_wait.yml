@@ -1,0 +1,19 @@
+- name: Check health status of '{{ item }}' container
+  shell: |
+    cid=$(docker compose ps -q {{ item }})
+    docker inspect \
+      --format '{{ "{{.State.Health.Status}}" }}' \
+      $cid
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: healthcheck
+  retries: 60
+  delay: 5
+  until: healthcheck.stdout == "healthy"
+  loop:
+    - mastodon
+    - streaming
+    - sidekiq
+  loop_control:
+    label: "{{ item }}"
+  changed_when: false
