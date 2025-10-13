@@ -17,7 +17,7 @@
            mailu_tokens_cli.stdout
            | default('[]')
            | from_json
-           | selectattr('comment','equalto', SOFTWARE_NAME)
+           | selectattr('comment','equalto', mailu_token_name)
            | list
          ).0 | default(None) }}
 

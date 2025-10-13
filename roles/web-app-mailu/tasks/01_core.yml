@@ -55,7 +55,8 @@
     mailu_user_key:           "{{ item.key }}"
     mailu_user_name:          "{{ item.value.username }}"
     mailu_password:           "{{ item.value.password }}"
-    mailu_token_ip:           "{{ item.value.ip | default('') }}"
+    mailu_token_ip:           "{{ item.value.ip | default(networks.internet.ip4) }}"
+    mailu_token_name:         "{{ SOFTWARE_NAME ~ ' Token for ' ~ item.value.username }}"
   loop:                       "{{ users | dict2items }}"
   loop_control:
     loop_var: item
@@ -66,3 +67,5 @@
 
 - name: Set Mailu DNS records
   include_tasks: 05_dns-records.yml
+
+- include_tasks: utils/run_once.yml

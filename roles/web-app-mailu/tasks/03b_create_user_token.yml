@@ -19,7 +19,7 @@
       -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
       -H "Content-Type: application/json"
       -d '{{ {
-            "comment": SOFTWARE_NAME,
+            "comment": mailu_token_name,
             "email": users[mailu_user_key].email,
             "ip": mailu_token_ip
           } | to_json }}'

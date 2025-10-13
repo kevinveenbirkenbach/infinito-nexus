@@ -17,12 +17,12 @@ server:
   csp:
     flags:
       style-src:
-        unsafe-inline:        true
+        unsafe-inline:    true
       script-src-elem:
-        unsafe-inline:        true
+        unsafe-inline:    true
       script-src:
-        unsafe-inline:        true
-        unsafe-eval:          true
+        unsafe-inline:    true
+        unsafe-eval:      true
 rbac:
   roles:
     mail-bot:
