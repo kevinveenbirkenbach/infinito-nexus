@@ -1,6 +1,4 @@
 ---
 - name: "Setup {{ application_id }}"
+- include_tasks: 01_core.yml
   when: run_once_web_app_discourse is not defined
-  block:
-  - include_tasks: 01_core.yml
-  - include_tasks: utils/run_once.yml

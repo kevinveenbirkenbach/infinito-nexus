@@ -17,6 +17,8 @@
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-full-stateless
+  vars:
+    docker_compose_flush_handlers: false
 
 - name: "Check if host-specific config.yaml exists in {{ DESKTOP_CONFIG_INV_PATH }}"
   stat:
@@ -57,8 +59,16 @@
   notify: docker compose up
   when: not config_file.stat.exists
 
-- name: add docker-compose.yml
-  template:
-    src:  docker-compose.yml.j2 
-    dest: "{{ docker_compose.directories.instance }}docker-compose.yml"
-  notify: docker compose up
+- name: "Flush docker compose handlers"
+  meta: flush_handlers
+
+- name: Wait for Desktop HTTP endpoint (required so all logos can be downloaded during initialization)
+  uri:
+    url: "http://127.0.0.1:{{ http_port }}/"
+    status_code: 200
+  register: desktop_http
+  retries: 60
+  delay: 5
+  until: desktop_http.status == 200
+
+- include_tasks: utils/run_once.yml
