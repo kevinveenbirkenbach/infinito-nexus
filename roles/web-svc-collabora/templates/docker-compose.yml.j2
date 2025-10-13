@@ -4,6 +4,15 @@
     {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ COLLABORA_IMAGE }}:{{ COLLABORA_VERSION }}"
     container_name: {{ COLLABORA_CONTAINER }}
+    security_opt:
+      - seccomp=unconfined
+      - apparmor=unconfined
+    cap_add:
+      - MKNOD
+      - SYS_CHROOT
+      - SETUID
+      - SETGID
+      - FOWNER
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}

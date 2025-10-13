@@ -17,9 +17,13 @@ docker:
     database: 
       enabled: false
     collabora:
-      image:    collabora/code
-      version:  latest 
-      name:     collabora
+      image:            collabora/code
+      version:          latest
+      name:             collabora
+      cpus:             2
+      mem_reservation:  1g
+      mem_limit:        2g
+      pids_limit:       2048
 features:
   logout:   false 
   desktop:  true # Just set to allow the iframe to load it
