@@ -1,10 +1,10 @@
 - name: Deploy logout.js
-  template:
-    src: logout.js.j2
-    dest: "{{ INJ_LOGOUT_JS_DESTINATION }}"
-    owner: "{{ NGINX.USER }}"
-    group: "{{ NGINX.USER }}"
-    mode: '0644'
+  copy:
+    src:    logout.js
+    dest:   "{{ INJ_LOGOUT_JS_DESTINATION }}"
+    owner:  "{{ NGINX.USER }}"
+    group:  "{{ NGINX.USER }}"
+    mode:   '0644'
 
 - name: Get stat for logout.js
   stat:

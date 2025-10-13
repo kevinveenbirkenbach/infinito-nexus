@@ -1,11 +1,4 @@
-- block:
-
-  - name: Include dependency 'sys-svc-webserver-core'
-    include_role:
-      name: sys-svc-webserver-core
-    when: run_once_sys_svc_webserver_core is not defined
-  - include_tasks: utils/run_once.yml
-  when: run_once_sys_front_inj_javascript is not defined
+# run_once_sys_front_inj_javascript: deactivated
 
 - name: "Load JavaScript code for '{{ application_id }}'"
   set_fact:

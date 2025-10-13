@@ -1,6 +1,14 @@
 ---
 - block:
-    - include_tasks: 01_core.yml
+    - name: Ensure shared root and vendor exist (run once)
+      ansible.builtin.file:
+        path:  "{{ item }}"
+        state: directory
+        owner: "{{ NGINX.USER }}"
+        group: "{{ NGINX.USER }}"
+        mode:  "0755"
+      loop: "{{ CDN_DIRS_GLOBAL }}"
+    - include_tasks: utils/run_once.yml
   when:
     - run_once_sys_svc_cdn is not defined
 

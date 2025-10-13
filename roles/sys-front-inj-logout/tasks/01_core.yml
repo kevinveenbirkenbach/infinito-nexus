@@ -1,9 +1,3 @@
-- name: Include dependency 'web-svc-logout'
-  include_role:
-    name: web-svc-logout
-  when: 
-    - run_once_web_svc_logout is not defined
-  
 - name: "deploy the logout.js"
   include_tasks: "02_deploy.yml"
 

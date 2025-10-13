@@ -5,10 +5,12 @@
 - name: "Load logout code for '{{ application_id }}'"
   set_fact:
     logout_code: "{{ lookup('template', 'logout_one_liner.js.j2') }}"
+  changed_when: false
 
 - name: "Collapse logout code into one-liner for '{{ application_id }}'"
   set_fact:
     logout_code_one_liner: "{{ logout_code | to_one_liner }}"
+  changed_when: false
 
 - name: "Append logout CSP hash for '{{ application_id }}'"
   set_fact:

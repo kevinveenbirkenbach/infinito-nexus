@@ -1,8 +1,3 @@
-- name: Include dependency 'sys-svc-webserver-core'
-  include_role:
-    name: sys-svc-webserver-core
-  when: run_once_sys_svc_webserver_core is not defined
-
 - name: Generate color palette with colorscheme-generator
   set_fact:
     color_palette: "{{ lookup('colorscheme', CSS_BASE_COLOR, count=CSS_COUNT, shades=CSS_SHADES) }}"
@@ -19,3 +14,5 @@
     group:  "{{ NGINX.USER }}"
     mode:   '0644'
   loop: "{{ CSS_FILES }}"
+
+- include_tasks: utils/run_once.yml

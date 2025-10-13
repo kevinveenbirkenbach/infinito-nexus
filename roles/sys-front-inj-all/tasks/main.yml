@@ -1,22 +1,53 @@
+- block:
+    - name: Include dependency 'sys-svc-webserver-core'
+      include_role:
+        name: sys-svc-webserver-core
+      when: run_once_sys_svc_webserver_core is not defined
+    - include_tasks: utils/run_once.yml
+  when: run_once_sys_front_inj_all is not defined
+
 - name: Build inj_enabled
   set_fact:
     inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
 
-- name: "Load CDN Service for '{{ domain }}'"
+- name: "Load CDN for '{{ domain }}'"
   include_role:
-    name: sys-svc-cdn
-    public: true # Expose variables so that they can be used in all injection roles
+    name: web-svc-cdn
+    public: false
+  when:
+    - application_id != 'web-svc-cdn'
+    - run_once_web_svc_cdn is not defined
 
-- name: Reinitialize 'inj_enabled' for '{{ domain }}', after modification by CDN
+- name: Load Logout for '{{ domain }}'
+  include_role:
+    name: web-svc-logout
+    public: false
+  when: 
+    - run_once_web_svc_logout is not defined
+    - application_id != 'web-svc-logout'
+    - inj_enabled.logout
+
+- name: Reinitialize 'inj_enabled' for '{{ domain }}', after loading the required webservices
   set_fact:
     inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
     inj_head_features: "{{ SRV_WEB_INJ_COMP_FEATURES_ALL | inj_features('head') }}"
     inj_body_features: "{{ SRV_WEB_INJ_COMP_FEATURES_ALL | inj_features('body') }}"
 
+- name: "Load CDN Service for '{{ domain }}'"
+  include_role:
+    name: sys-svc-cdn
+    public: true
+
+- name: "Activate logout proxy for '{{ domain }}'"
+  include_role:
+    name: sys-front-inj-logout
+    public: true
+  when: inj_enabled.logout
+
 - name: "Activate Desktop iFrame notifier for '{{ domain }}'"
   include_role:
     name:   sys-front-inj-desktop
-    public: true # Vars used in templates
+    public: true
   when: inj_enabled.desktop
 
 - name: "Activate Corporate CSS for '{{ domain }}'"
@@ -33,17 +64,3 @@
   include_role:
     name: sys-front-inj-javascript
   when: inj_enabled.javascript
-
-- name: "Activate logout proxy for '{{ domain }}'"
-  include_role:
-    name: sys-front-inj-logout
-    public: true # Vars used in templates
-  when: inj_enabled.logout
-
-- block:
-  - name: Include dependency 'sys-svc-webserver-core'
-    include_role:
-      name: sys-svc-webserver-core
-    when: run_once_sys_svc_webserver_core is not defined
-  - include_tasks: utils/run_once.yml
-  when: run_once_sys_front_inj_all is not defined
