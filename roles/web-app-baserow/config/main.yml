@@ -19,7 +19,7 @@ docker:
       name:               "baserow"
       cpus:               1.0
       mem_reservation:    0.5g
-      mem_limit:          1g
+      mem_limit:          2g
       pids_limit:         512
   volumes:
     data:                 "baserow_data"
