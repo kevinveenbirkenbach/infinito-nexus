@@ -91,7 +91,7 @@ docker:
       mem_reservation:      "128m"
       mem_limit:            "512m"
       pids_limit:           256
-  enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False) }}"   # Activate OIDC for Nextcloud
+  enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin
   # @see https://apps.nextcloud.com/apps/oidc_login
@@ -194,7 +194,7 @@ plugins:
     enabled: false
   fileslibreofficeedit:
     # Nextcloud LibreOffice integration: allows online editing of documents with LibreOffice (https://apps.nextcloud.com/apps/fileslibreofficeedit)
-    enabled: "{{ not (applications | get_app_conf('web-app-nextcloud', 'plugins.richdocuments.enabled', False, True)) }}"
+    enabled: "{{ not (applications | get_app_conf('web-app-nextcloud', 'plugins.richdocuments.enabled', False, True, True)) }}"
   forms:
     # Nextcloud forms: facilitates creation of forms and surveys (https://apps.nextcloud.com/apps/forms)
     enabled: true
@@ -292,13 +292,13 @@ plugins:
   #  enabled: false
   twofactor_nextcloud_notification:
     # Nextcloud two-factor notification: sends notifications for two-factor authentication events (https://apps.nextcloud.com/apps/twofactor_nextcloud_notification)
-    enabled: "{{ not applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}" # Deactivate 2FA if oidc is active
   twofactor_totp:
     # Nextcloud two-factor TOTP: provides time-based one-time password authentication (https://apps.nextcloud.com/apps/twofactor_totp)
-    enabled: "{{ not applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}" # Deactivate 2FA if oidc is active
   user_ldap:
     # Nextcloud user LDAP: integrates LDAP for user management and authentication (https://apps.nextcloud.com/apps/user_ldap)
-    enabled: "{{ applications | get_app_conf('web-app-nextcloud', 'features.ldap', False, True) }}"
+    enabled: "{{ applications | get_app_conf('web-app-nextcloud', 'features.ldap', False, True, True) }}"
     user_directory:
       enabled:  true # Enables the LDAP User Directory Search
   user_oidc:

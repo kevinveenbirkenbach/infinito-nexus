@@ -24,7 +24,7 @@ class ConfigEntryNotSetError(AppConfigKeyError):
     pass
 
 
-def get_app_conf(applications, application_id, config_path, strict=True, default=None):
+def get_app_conf(applications, application_id, config_path, strict=True, default=None, skip_missing_app=False):
     # Path to the schema file for this application
     schema_path = os.path.join('roles', application_id, 'schema', 'main.yml')
 
@@ -133,6 +133,9 @@ def get_app_conf(applications, application_id, config_path, strict=True, default
     try:
         obj = applications[application_id]
     except KeyError:
+        if skip_missing_app:
+            # Simply return default instead of failing
+            return default if default is not None else False
         raise AppConfigKeyError(
             f"Application ID '{application_id}' not found in applications dict.\n"
             f"path_trace: {path_trace}\n"
