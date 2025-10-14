@@ -10,15 +10,15 @@
   - include_tasks: utils/run_once.yml
   when: run_once_svc_bkp_rmt_2_loc is not defined
 
-- name: "create {{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}"
+- name: "Create Directory '{{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}'"
   file:
     path: "{{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}"
     state: directory
     mode: "0755"
 
-- name: create svc-bkp-rmt-2-loc.sh
+- name: "Deploy '{{ DOCKER_BACKUP_REMOTE_2_LOCAL_SCRIPT }}'"
   copy:
-    src: svc-bkp-rmt-2-loc.sh
+    src:  "{{ DOCKER_BACKUP_REMOTE_2_LOCAL_FILE }}"
     dest: "{{ DOCKER_BACKUP_REMOTE_2_LOCAL_SCRIPT }}"
     mode: "0755"
 

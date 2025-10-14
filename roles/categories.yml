@@ -153,6 +153,11 @@ roles:
       description: "Core AI building blocks—model serving, OpenAI-compatible gateways, vector databases, orchestration, and chat UIs."
       icon: "fas fa-brain"
       invokable: true
+    bkp:
+      title: "Backup Services"
+      description: "Service-level backup and recovery components—handling automated data snapshots, remote backups, synchronization services, and backup orchestration across databases, files, and containers."
+      icon: "fas fa-database"
+      invokable: true
   user:
     title: "Users & Access"
     description: "User accounts & access control"
