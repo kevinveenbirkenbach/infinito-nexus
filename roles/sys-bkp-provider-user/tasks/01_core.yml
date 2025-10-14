@@ -3,30 +3,6 @@
     name: backup
     create_home: yes
 
-- name: create .ssh directory
-  file:
-    path: /home/backup/.ssh
-    state: directory
-    owner: backup
-    group: backup
-    mode: '0700'
-
-- name: create /home/backup/.ssh/authorized_keys
-  template:
-    src: "authorized_keys.j2"
-    dest: /home/backup/.ssh/authorized_keys
-    owner: backup
-    group: backup
-    mode: '0644'
-
-- name: create /home/backup/ssh-wrapper.sh
-  copy:
-    src: "ssh-wrapper.sh"
-    dest: /home/backup/ssh-wrapper.sh
-    owner: backup
-    group: backup
-    mode: '0700'
-
 - name: grant backup sudo rights
   copy:
     src: "backup"
@@ -35,3 +11,9 @@
     owner: root
     group: root
   notify: sshd restart
+
+- include_tasks: 02_permissions_ssh.yml
+
+- include_tasks: 03_permissions_folders.yml
+
+- include_tasks: utils/run_once.yml

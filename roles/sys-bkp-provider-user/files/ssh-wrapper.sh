@@ -13,7 +13,7 @@ get_backup_types="find /Backups/$hashed_machine_id/ -maxdepth 1 -type d -execdir
 
 
 # @todo This configuration is not scalable yet. If other backup services then sys-ctl-bkp-docker-2-loc are integrated, this logic needs to be optimized
-get_version_directories="ls -d /Backups/$hashed_machine_id/sys-ctl-bkp-docker-2-loc/*"
+get_version_directories="ls -d /Backups/$hashed_machine_id/backup-docker-to-local/*"
 last_version_directory="$($get_version_directories | tail -1)"
 rsync_command="sudo rsync --server --sender -blogDtpre.iLsfxCIvu . $last_version_directory/"
 
