@@ -16,6 +16,10 @@
       users: "{{ default_users | combine(users| default({}), recursive=True) }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+  - name: Merge networks definitions
+    set_fact:
+      networks: "{{ defaults_networks | combine(networks | default({}, true), recursive=True) }}"
+
   - name: Merge application definitions
     set_fact:
       applications: "{{ defaults_applications | merge_with_defaults(applications | default({}, true)) }}"
@@ -92,10 +96,6 @@
           )) |
           generate_all_domains(WWW_REDIRECT_ENABLED | bool)
         }}
-
-  - name: Merge networks definitions
-    set_fact:
-      networks: "{{ defaults_networks | combine(networks | default({}, true), recursive=True) }}"
   
   - name: Merge OIDC configuration
     set_fact:
