@@ -10,22 +10,10 @@
   set_fact:
     inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
 
-- name: "Load CDN for '{{ domain }}'"
-  include_role:
-    name: web-svc-cdn
-    public: false
-  when:
-    - application_id != 'web-svc-cdn'
-    - run_once_web_svc_cdn is not defined
-
-- name: Load Logout for '{{ domain }}'
-  include_role:
-    name: web-svc-logout
-    public: false
-  when: 
-    - run_once_web_svc_logout is not defined
-    - application_id != 'web-svc-logout'
-    - inj_enabled.logout
+- name: "Included dependent services"
+  include_tasks: 01_dependencies.yml
+  vars:
+    proxy_extra_configuration: ""
 
 - name: Reinitialize 'inj_enabled' for '{{ domain }}', after loading the required webservices
   set_fact:

@@ -1,0 +1,16 @@
+- name: "Load CDN for '{{ domain }}'"
+  include_role:
+    name: web-svc-cdn
+    public: false
+  when:
+    - application_id != 'web-svc-cdn'
+    - run_once_web_svc_cdn is not defined
+
+- name: Load Logout for '{{ domain }}'
+  include_role:
+    name: web-svc-logout
+    public: false
+  when: 
+    - run_once_web_svc_logout is not defined
+    - application_id != 'web-svc-logout'
+    - inj_enabled.logout
