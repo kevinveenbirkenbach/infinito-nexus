@@ -8,6 +8,11 @@ docker:
       image:      "bitnamilegacy/openldap"
       name:       "openldap"
       version:    "latest"
+      cpus: 1.25
+      # Optimized up to 5k user
+      mem_reservation: 1g
+      mem_limit: 1.5g
+      pids_limit: 1024
   network:        "openldap"
   volumes:
     data:         "openldap_data"
