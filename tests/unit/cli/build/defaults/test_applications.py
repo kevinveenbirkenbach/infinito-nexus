@@ -108,6 +108,89 @@ class TestGenerateDefaultApplications(unittest.TestCase):
         self.assertIn("nocfgdirapp", apps)
         self.assertEqual(apps["nocfgdirapp"], {})
 
+    def test_applications_sorted_by_key(self):
+        """
+        Ensure that defaults_applications keys are written in alphabetical order.
+        """
+        # Create several roles in non-sorted order
+        for name, cfg in [
+            ("web-app-zeta",  {"vars_id": "zeta",  "cfg": "z: 1\n"}),
+            ("web-app-alpha", {"vars_id": "alpha", "cfg": "a: 1\n"}),
+            ("web-app-mu",    {"vars_id": "mu",    "cfg": "m: 1\n"}),
+        ]:
+            role = self.roles_dir / name
+            (role / "vars").mkdir(parents=True, exist_ok=True)
+            (role / "config").mkdir(parents=True, exist_ok=True)
+            (role / "vars" / "main.yml").write_text(f"application_id: {cfg['vars_id']}\n")
+            (role / "config" / "main.yml").write_text(cfg["cfg"])
+
+        # Run generator
+        result = subprocess.run(
+            ["python3", str(self.script_path),
+            "--roles-dir", str(self.roles_dir),
+            "--output-file", str(self.output_file)],
+            capture_output=True, text=True
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        # Validate order of keys in YAML
+        data = yaml.safe_load(self.output_file.read_text())
+        apps = data.get("defaults_applications", {})
+        # dict preserves insertion order in Python 3.7+, PyYAML keeps document order
+        keys_in_file = list(apps.keys())
+
+        self.assertEqual(
+            keys_in_file,
+            sorted(keys_in_file),
+            msg=f"Applications are not sorted: {keys_in_file}"
+        )
+        # Sanity: all expected apps present
+        for app in ("alpha", "mu", "zeta", "testapp"):
+            self.assertIn(app, apps)
+
+
+    def test_sorting_is_stable_across_runs(self):
+        """
+        Running the generator multiple times yields identical content (stable sort).
+        """
+        # Create a couple more roles (unsorted)
+        for name, appid in [
+            ("web-app-beta", "beta"),
+            ("web-app-delta", "delta"),
+        ]:
+            role = self.roles_dir / name
+            (role / "vars").mkdir(parents=True, exist_ok=True)
+            (role / "config").mkdir(parents=True, exist_ok=True)
+            (role / "vars" / "main.yml").write_text(f"application_id: {appid}\n")
+            (role / "config" / "main.yml").write_text("key: value\n")
+
+        # First run
+        result1 = subprocess.run(
+            ["python3", str(self.script_path),
+            "--roles-dir", str(self.roles_dir),
+            "--output-file", str(self.output_file)],
+            capture_output=True, text=True
+        )
+        self.assertEqual(result1.returncode, 0, msg=result1.stderr)
+        content_run1 = self.output_file.read_text()
+
+        # Second run (simulate potential filesystem order differences by touching dirs)
+        for p in self.roles_dir.iterdir():
+            os.utime(p, None)
+
+        result2 = subprocess.run(
+            ["python3", str(self.script_path),
+            "--roles-dir", str(self.roles_dir),
+            "--output-file", str(self.output_file)],
+            capture_output=True, text=True
+        )
+        self.assertEqual(result2.returncode, 0, msg=result2.stderr)
+        content_run2 = self.output_file.read_text()
+
+        self.assertEqual(
+            content_run1, content_run2,
+            msg="Output differs between runs; sorting should be stable."
+        )
 
 if __name__ == "__main__":
     unittest.main()

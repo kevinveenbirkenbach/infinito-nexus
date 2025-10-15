@@ -132,5 +132,122 @@ class TestGenerateUsers(unittest.TestCase):
         finally:
             shutil.rmtree(tmp)
 
+    def test_cli_users_sorted_by_key(self):
+        """
+        Ensure that default_users keys are written in alphabetical order.
+        """
+        import tempfile
+        import subprocess
+        from pathlib import Path
+
+        tmpdir = Path(tempfile.mkdtemp())
+        try:
+            roles_dir = tmpdir / "roles"
+            roles_dir.mkdir()
+
+            # Create multiple roles with users in unsorted order
+            for role, users_map in [
+                ("role-zeta",  {"zeta":  {"email": "z@ex"}}),
+                ("role-alpha", {"alpha": {"email": "a@ex"}}),
+                ("role-mu",    {"mu":    {"email": "m@ex"}}),
+                ("role-beta",  {"beta":  {"email": "b@ex"}}),
+            ]:
+                (roles_dir / role / "users").mkdir(parents=True, exist_ok=True)
+                with open(roles_dir / role / "users" / "main.yml", "w") as f:
+                    yaml.safe_dump({"users": users_map}, f)
+
+            out_file = tmpdir / "users.yml"
+
+            # Resolve script path like in other tests (relative to repo root)
+            script_path = Path(__file__).resolve().parents[5] / "cli" / "build" / "defaults" / "users.py"
+
+            # Run generator
+            result = subprocess.run(
+                ["python3", str(script_path),
+                "--roles-dir", str(roles_dir),
+                "--output", str(out_file)],
+                capture_output=True, text=True
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            self.assertTrue(out_file.exists(), "Output file was not created.")
+
+            data = yaml.safe_load(out_file.read_text())
+            self.assertIn("default_users", data)
+            users_map = data["default_users"]
+            keys_in_file = list(users_map.keys())
+
+            # Expect alphabetical order
+            self.assertEqual(
+                keys_in_file, sorted(keys_in_file),
+                msg=f"Users are not sorted alphabetically: {keys_in_file}"
+            )
+            # Sanity: all expected keys present
+            for k in ["alpha", "beta", "mu", "zeta"]:
+                self.assertIn(k, users_map)
+
+        finally:
+            shutil.rmtree(tmpdir)
+
+
+    def test_cli_users_sorting_stable_across_runs(self):
+        """
+        Running the generator multiple times yields identical content (stable sort).
+        """
+        import tempfile
+        import subprocess
+        from pathlib import Path
+
+        tmpdir = Path(tempfile.mkdtemp())
+        try:
+            roles_dir = tmpdir / "roles"
+            roles_dir.mkdir()
+
+            # Unsorted creation order on purpose
+            cases = [
+                ("role-d", {"duser": {"email": "d@ex"}}),
+                ("role-a", {"auser": {"email": "a@ex"}}),
+                ("role-c", {"cuser": {"email": "c@ex"}}),
+                ("role-b", {"buser": {"email": "b@ex"}}),
+            ]
+            for role, users_map in cases:
+                (roles_dir / role / "users").mkdir(parents=True, exist_ok=True)
+                with open(roles_dir / role / "users" / "main.yml", "w") as f:
+                    yaml.safe_dump({"users": users_map}, f)
+
+            out_file = tmpdir / "users.yml"
+            script_path = Path(__file__).resolve().parents[5] / "cli" / "build" / "defaults" / "users.py"
+
+            # First run
+            r1 = subprocess.run(
+                ["python3", str(script_path),
+                "--roles-dir", str(roles_dir),
+                "--output", str(out_file)],
+                capture_output=True, text=True
+            )
+            self.assertEqual(r1.returncode, 0, msg=r1.stderr)
+            content1 = out_file.read_text()
+
+            # Touch dirs to shuffle filesystem mtimes
+            for p in roles_dir.iterdir():
+                os.utime(p, None)
+
+            # Second run
+            r2 = subprocess.run(
+                ["python3", str(script_path),
+                "--roles-dir", str(roles_dir),
+                "--output", str(out_file)],
+                capture_output=True, text=True
+            )
+            self.assertEqual(r2.returncode, 0, msg=r2.stderr)
+            content2 = out_file.read_text()
+
+            self.assertEqual(
+                content1, content2,
+                msg="Output differs between runs; user sorting should be stable."
+            )
+        finally:
+            shutil.rmtree(tmpdir)
+
+
 if __name__ == '__main__':
     unittest.main()

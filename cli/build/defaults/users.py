@@ -220,6 +220,10 @@ def main():
         print(f"Error building user entries: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # Sort users by key for deterministic output
+    if isinstance(users, dict) and users:
+        users = OrderedDict(sorted(users.items()))
+
     # Convert OrderedDict into plain dict for YAML
     default_users = {'default_users': users}
     plain_data = dictify(default_users)

@@ -83,6 +83,13 @@ class DefaultsGenerator:
             print(f"Error during rendering: {e}", file=sys.stderr)
             sys.exit(1)
 
+        # Sort applications by application key for stable output
+        apps = result.get("defaults_applications", {})
+        if isinstance(apps, dict) and apps:
+            result["defaults_applications"] = {
+                k: apps[k] for k in sorted(apps.keys())
+            }
+
         # Write output
         self.output_file.parent.mkdir(parents=True, exist_ok=True)
         with self.output_file.open("w", encoding="utf-8") as f:
