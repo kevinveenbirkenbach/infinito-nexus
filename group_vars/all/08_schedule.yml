@@ -1,4 +1,3 @@
-
 # Service Timers
 
 ## Meta
@@ -30,22 +29,22 @@ SYS_SCHEDULE_HEALTH_NGINX:                    "*-*-* {{ HOURS_SERVER_AWAKE }}:00
 SYS_SCHEDULE_HEALTH_MSMTP:                    "*-*-* 00:00:00"                        # Check once per day SMTP Server              
 
 ### Schedule for cleanup tasks
-SYS_SCHEDULE_CLEANUP_CERTS:                   "*-*-* 11,23:00:00"                     # Deletes and revokes unused certs
-SYS_SCHEDULE_CLEANUP_FAILED_BACKUPS:          "*-*-* 12:00:00"                        # Clean up failed docker backups every noon
-SYS_SCHEDULE_CLEANUP_BACKUPS:                 "*-*-* 00,06,12,18:15:00"               # Cleanup backups every 6 hours, MUST be called before disc space cleanup
-SYS_SCHEDULE_CLEANUP_DISC_SPACE:              "*-*-* 00,06,12,18:30:00"               # Cleanup disc space every 6 hours
+SYS_SCHEDULE_CLEANUP_CERTS:                   "*-*-* 20:00"                           # Deletes and revokes unused certs once per day
+SYS_SCHEDULE_CLEANUP_FAILED_BACKUPS:          "*-*-* 21:00"                           # Clean up failed docker backups once per day
+SYS_SCHEDULE_CLEANUP_BACKUPS:                 "*-*-* 22:00"                           # Cleanup backups once per day, MUST be called before disc space cleanup
+SYS_SCHEDULE_CLEANUP_DISC_SPACE:              "*-*-* 23:00"                           # Cleanup disc space once per day
 
 ### Schedule for repair services
 SYS_SCHEDULE_REPAIR_BTRFS_AUTO_BALANCER:      "Sat *-*-01..07 00:00:00"               # Execute btrfs auto balancer every first Saturday of a month
-SYS_SCHEDULE_REPAIR_DOCKER_HARD:              "Sun *-*-* 05:30:00"                    # Restart docker instances every Sunday at 8:00 AM
+SYS_SCHEDULE_REPAIR_DOCKER_HARD:              "Sun *-*-* 00:00:00"                    # Restart docker instances every Sunday
 
 ### Schedule for backup tasks
-SYS_SCHEDULE_BACKUP_REMOTE_TO_LOCAL:          "*-*-* 00:15:00"                        # Pull Backup of the previous day
-SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL:          "*-*-* 00:30:00"                        # Backup the current day
+SYS_SCHEDULE_BACKUP_REMOTE_TO_LOCAL:          "*-*-* 00:30:00"                        # Pull Backup of the previous day
+SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL:          "*-*-* 01:00:00"                        # Backup the current day
 
 ### Schedule for Maintenance Tasks
-SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_RENEW:   "*-*-* 12,00:15:00"                     # Renew Mailu certificates twice per day
-SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_DEPLOY:  "*-*-* 12,00:30:00"                     # Deploy letsencrypt certificates twice per day to docker containers
+SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_RENEW:   "*-*-* 10,22:00:00"                     # Renew Mailu certificates twice per day
+SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_DEPLOY:  "*-*-* 11,23:00:00"                     # Deploy letsencrypt certificates twice per day to docker containers
 SYS_SCHEDULE_MAINTANANCE_NEXTCLOUD:           "21"                                    # Do nextcloud maintanace between 21:00 and 01:00
 
 ### Animation
