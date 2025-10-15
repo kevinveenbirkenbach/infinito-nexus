@@ -15,12 +15,12 @@
   vars:
     docker_compose_flush_handlers: false
 
-- name: "Include Seed routines for '{{ application_id }}' database backup"
-  include_tasks: "{{ [ playbook_dir, 'roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml' ] | path_join }}"
-
 - name: "Unset 'proxy_extra_configuration'"
   set_fact:
     proxy_extra_configuration: null
+
+- name: "Include Seed routines for '{{ application_id }}' database backup"
+  include_tasks: "{{ [ playbook_dir, 'roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml' ] | path_join }}"
 
 - name: configure websocket_upgrade.conf
   copy: 
