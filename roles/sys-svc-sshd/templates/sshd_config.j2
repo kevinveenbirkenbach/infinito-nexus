@@ -68,7 +68,12 @@ ChallengeResponseAuthentication no
 #KerberosGetAFSToken no
 
 # GSSAPI options
-#GSSAPIAuthentication no
+# Disable GSSAPI (Kerberos) authentication to avoid unnecessary negotiation delays.
+# This setting is useful for non-domain environments where GSSAPI is not used,
+# improving SSH connection startup time and reducing overhead.
+# See: https://chatgpt.com/share/68efc179-1a10-800f-9656-1e8731b40546
+GSSAPIAuthentication no
+
 #GSSAPICleanupCredentials yes
 
 # Set this to 'yes' to enable PAM authentication, account processing,
@@ -97,7 +102,13 @@ PrintMotd no # pam does that
 #Compression delayed
 #ClientAliveInterval 0
 #ClientAliveCountMax 3
-#UseDNS no
+
+# Disable reverse DNS lookups to speed up SSH logins.
+# When UseDNS is enabled, sshd performs a reverse DNS lookup for each connecting client,
+# which can significantly delay authentication if DNS resolution is slow or misconfigured.
+# See: https://chatgpt.com/share/68efc179-1a10-800f-9656-1e8731b40546
+UseDNS no
+
 #PidFile /run/sshd.pid
 #MaxStartups 10:30:100
 #PermitTunnel no
