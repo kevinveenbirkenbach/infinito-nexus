@@ -121,7 +121,7 @@
   when: MODE_UPDATE | bool
 
 - name: "Ensure correct timezone is '{{ HOST_TIMEZONE }}'"
-  ansible.builtin.timezone:
+  community.general.timezone:
     name: "{{ HOST_TIMEZONE }}"
 
 - name: "Load base roles"
