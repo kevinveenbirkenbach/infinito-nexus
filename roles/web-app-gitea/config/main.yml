@@ -47,7 +47,17 @@ docker:
       version:          "latest"
       backup:
         no_stop_required: true
-      port:             3000
-      name:             "gitea"
+      port:               3000
+      name:               "gitea"
+      cpus:               1.0
+      mem_reservation:    1g
+      mem_limit:          2g
+      pids_limit:         1024
+    redis:
+      enabled:            false
+      cpus:               0.25
+      mem_reservation:    0.2g
+      mem_limit:          0.3g
+      pids_limit:         512
   volumes:
     data:             "gitea_data"
