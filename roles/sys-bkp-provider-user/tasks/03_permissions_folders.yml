@@ -57,8 +57,10 @@
 - name: Fix ownership level 0..2 directories to backup:backup
   ansible.builtin.shell: >
     find "{{ BACKUPS_FOLDER_PATH }}" -mindepth 0 -maxdepth 2 -xdev -type d -exec chown backup:backup {} +
+  changed_when: false
 
 - name: Fix perms level 0..2 directories to 0700
   ansible.builtin.shell: >
     find "{{ BACKUPS_FOLDER_PATH }}" -mindepth 0 -maxdepth 2 -xdev -type d -exec chmod 700 {} +
+  changed_when: false
 
