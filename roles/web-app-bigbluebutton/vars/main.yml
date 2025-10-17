@@ -2,13 +2,6 @@
 application_id:                       "web-app-bigbluebutton"
 entity_name:                          "{{ application_id | get_entity_name }}"
 
-# Database configuration
-database_type:                        "postgres"
-database_instance:                    "{{ application_id | get_entity_name }}"
-database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.postgresql_secret') }}"
-database_username:                    "postgres"
-database_name:                        "" # Multiple databases
-
 # Proxy
 domain:                               "{{ domains | get_domain(application_id) }}"
 http_port:                            "{{ ports.localhost.http[application_id] }}"
