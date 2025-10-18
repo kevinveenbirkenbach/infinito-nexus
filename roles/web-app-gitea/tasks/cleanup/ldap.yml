@@ -2,7 +2,7 @@
   shell: |
     docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth list \
-      | awk -v name="LDAP ({{ PRIMARY_DOMAIN }})" '$0 ~ name {print $1; exit}'
+      | awk -v name="LDAP ({{ SOFTWARE_NAME }})" '$0 ~ name {print $1; exit}'
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   register: ldap_source_id_raw
