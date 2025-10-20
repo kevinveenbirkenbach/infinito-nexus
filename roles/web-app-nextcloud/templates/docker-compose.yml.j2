@@ -70,12 +70,17 @@
 {% include 'roles/docker-container/templates/healthcheck/nc.yml.j2' %}
     image: "{{ NEXTCLOUD_WHITEBOARD_IMAGE }}:{{ NEXTCLOUD_WHITEBOARD_VERSION }}"
     container_name: {{ NEXTCLOUD_WHITEBOARD_CONTAINER }}
+    volumes:
+      - whiteboard_tmp:/tmp
+      - whiteboard_fontcache:/var/cache/fontconfig
+
     expose:
       - "{{ container_port }}"
     networks:
       default:
         ipv4_address: 192.168.102.71
 {% endif %}
+
 
 {% set service_name = NEXTCLOUD_CRON_SERVICE %}
   {{ service_name }}:
@@ -99,5 +104,11 @@
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
     name: {{ NEXTCLOUD_VOLUME }}
+{% if NEXTCLOUD_WHITEBOARD_ENABLED %}
+  whiteboard_tmp:
+    name: {{ NEXTCLOUD_WHITEBOARD_TMP_VOLUME }}
+  whiteboard_fontcache:
+    name: {{ NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME }}
+{% endif %}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

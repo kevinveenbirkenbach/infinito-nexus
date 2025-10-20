@@ -23,6 +23,12 @@ server
     {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
   {% endif %}
 
+  {% if NEXTCLOUD_WHITEBOARD_ENABLED | bool %}
+    {% set location_ws = '^~ ' ~ NEXTCLOUD_WHITEBOARD_LOCATION %}
+    {% set ws_port     = NEXTCLOUD_PORT %}
+    {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
+  {% endif %}
+
   {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
 
   location ^~ /.well-known {

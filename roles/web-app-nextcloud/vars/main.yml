@@ -116,24 +116,26 @@ NEXTCLOUD_HPB_TURN_STANDALONE_CONFIG: >-
   }}
 
 ### Whiteboard
-NEXTCLOUD_WHITEBOARD_SERVICE:      "whiteboard"
-NEXTCLOUD_WHITEBOARD_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.name') }}"
-NEXTCLOUD_WHITEBOARD_IMAGE:         "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.image') }}"
-NEXTCLOUD_WHITEBOARD_VERSION:       "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.version') }}"
-NEXTCLOUD_WHITEBOARD_ENABLED:       "{{ applications | get_app_conf(application_id, 'plugins.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.enabled') }}"
-NEXTCLOUD_WHITEBOARD_PORT_INTERNAL: "3002"
-NEXTCLOUD_WHITEBOARD_JWT:           "{{ applications | get_app_conf(application_id, 'credentials.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'_jwt_secret') }}"
-NEXTCLOUD_WHITEBOARD_LOCATION:      "/whiteboard/"
-NEXTCLOUD_WHITEBOARD_URL:           "{{ [ NEXTCLOUD_URL, NEXTCLOUD_WHITEBOARD_LOCATION ] | url_join }}"
+NEXTCLOUD_WHITEBOARD_SERVICE:             "whiteboard"
+NEXTCLOUD_WHITEBOARD_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.name') }}"
+NEXTCLOUD_WHITEBOARD_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.image') }}"
+NEXTCLOUD_WHITEBOARD_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.version') }}"
+NEXTCLOUD_WHITEBOARD_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.enabled') }}"
+NEXTCLOUD_WHITEBOARD_PORT_INTERNAL:       "3002"
+NEXTCLOUD_WHITEBOARD_JWT:                 "{{ applications | get_app_conf(application_id, 'credentials.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'_jwt_secret') }}"
+NEXTCLOUD_WHITEBOARD_LOCATION:            "/whiteboard/"
+NEXTCLOUD_WHITEBOARD_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_WHITEBOARD_LOCATION ] | url_join }}"
+NEXTCLOUD_WHITEBOARD_TMP_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.whiteboard_tmp') }}"
+NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME:   "{{ applications | get_app_conf(application_id, 'docker.volumes.whiteboard_fontcache') }}"
 
 ### Collabora
-NEXTCLOUD_COLLABORA_URL:            "{{ domains | get_url('web-svc-collabora', WEB_PROTOCOL) }}"
+NEXTCLOUD_COLLABORA_URL:                  "{{ domains | get_url('web-svc-collabora', WEB_PROTOCOL) }}"
 
 ## User Configuration
-NEXTCLOUD_DOCKER_USER_id:           82                                                            # UID of the www-data user
-NEXTCLOUD_DOCKER_USER:              "www-data"                                                    # Name of the www-data user (Set here to easy change it in the future)
+NEXTCLOUD_DOCKER_USER_id:                 82         # UID of the www-data user
+NEXTCLOUD_DOCKER_USER:                    "www-data" # Name of the www-data user (Set here to easy change it in the future)
 
 ## Execution
-NEXTCLOUD_INTERNAL_OCC_COMMAND:     "{{ [ NEXTCLOUD_DOCKER_WORK_DIRECTORY, 'occ'] | path_join }}"
-NEXTCLOUD_DOCKER_EXEC:              "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}"  # General execute composition
-NEXTCLOUD_DOCKER_EXEC_OCC:          "{{ NEXTCLOUD_DOCKER_EXEC }} {{ NEXTCLOUD_INTERNAL_OCC_COMMAND }}"      # Execute docker occ command
+NEXTCLOUD_INTERNAL_OCC_COMMAND:           "{{ [ NEXTCLOUD_DOCKER_WORK_DIRECTORY, 'occ'] | path_join }}"
+NEXTCLOUD_DOCKER_EXEC:                    "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}"  # General execute composition
+NEXTCLOUD_DOCKER_EXEC_OCC:                "{{ NEXTCLOUD_DOCKER_EXEC }} {{ NEXTCLOUD_INTERNAL_OCC_COMMAND }}"      # Execute docker occ command
