@@ -79,6 +79,9 @@
     networks:
       default:
         ipv4_address: 192.168.102.71
+    depends_on:
+      redis:
+        condition: service_healthy
 {% endif %}
 
 
