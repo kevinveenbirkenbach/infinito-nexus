@@ -16,5 +16,12 @@
       retries: 30
     networks:
       - default
-    {{ lookup('template', 'roles/docker-container/templates/resource.yml.j2',vars={'service_name':'redis'}) | indent(4) }}
+{% macro include_resource_for(svc, indent=4) -%}
+  {% set service_name = svc -%}
+  {%- set _snippet -%}
+{% include 'roles/docker-container/templates/resource.yml.j2' %}
+  {%- endset -%}
+{{ _snippet | indent(indent, true) }}
+{%- endmacro %}
+{{ include_resource_for('redis') }}
 {{ "\n" }}

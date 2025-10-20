@@ -33,10 +33,10 @@ docker:
   services:
     redis:
       enabled:              true
-      cpus:                 "0.25"
-      mem_reservation:      "64m"
-      mem_limit:            "256m"
-      pids_limit:           256
+      cpus:                 "1"
+      mem_reservation:      "1g"
+      mem_limit:            "8g"
+      pids_limit:           512
     database:
       enabled:              true
       cpus:                 "0.75"
