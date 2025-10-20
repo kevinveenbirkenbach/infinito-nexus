@@ -51,6 +51,9 @@ class TestVariableDefinitions(unittest.TestCase):
 
         # {% set var = ... %}   (allow trimmed variants)
         self.jinja_set_def = re.compile(r'{%\s*-?\s*set\s+([a-zA-Z_]\w*)\s*=')
+        
+        # {% set var %} ... {% endset %}  (block-style set)
+        self.jinja_set_block_def = re.compile(r'{%\s*-?\s*set\s+([a-zA-Z_]\w*)\s*-?%}')
 
         # {% for x in ... %}  or  {% for k, v in ... %}   (allow trimmed variants)
         self.jinja_for_def = re.compile(
@@ -157,6 +160,10 @@ class TestVariableDefinitions(unittest.TestCase):
 
                             # --- Always scan every line (including inside blocks) for Jinja definitions
                             for m in self.jinja_set_def.finditer(line):
+                                self.defined.add(m.group(1))
+
+                            # Count block-style set as a definition, too
+                            for m in self.jinja_set_block_def.finditer(line):
                                 self.defined.add(m.group(1))
 
                             for m in self.jinja_for_def.finditer(line):
