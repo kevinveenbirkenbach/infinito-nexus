@@ -4,5 +4,6 @@ collections:
   - name: hetzner.hcloud
 yay:
   - python-simpleaudio
+  - python-numpy
 pacman:
   - ansible
