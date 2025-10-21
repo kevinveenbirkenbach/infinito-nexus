@@ -14,6 +14,21 @@
   vars:
     docker_compose_flush_handlers: false
 
+- block:
+    - name: "Create '{{ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY }}' Directory"
+      file:
+        path: "{{ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY }}"
+        state: directory
+        mode: "0755"
+    
+    - name: "Deploy Whiteboard Dockerfile to '{{ NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE }}'"
+      template:
+        src:    "Dockerfiles/Whiteboard.j2"
+        dest:   "{{ NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE }}"
+      notify: docker compose build
+      
+  when: NEXTCLOUD_WHITEBOARD_ENABLED | bool
+
 - name: "create {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
   file:
     path: "{{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
@@ -24,8 +39,8 @@
   template:
     src:    "{{ item }}"
     dest:   "{{ NEXTCLOUD_HOST_CONF_ADD_PATH }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
-    owner:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
-    group:  "{{ NEXTCLOUD_DOCKER_USER_id }}"
+    owner:  "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+    group:  "{{ NEXTCLOUD_DOCKER_USER_ID }}"
   loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
   notify: docker compose up
 
