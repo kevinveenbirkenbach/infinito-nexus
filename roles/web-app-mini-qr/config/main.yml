@@ -21,16 +21,17 @@ server:
       connect-src:
         - https://q.clarity.ms
         - https://n.clarity.ms
+        - "data:"
       style-src-elem: []
       font-src: [] 
       frame-ancestors: [] 
     flags:
       style-src:
-        unsafe-inline: true
+        unsafe-inline:  true
       script-src-elem:
-        unsafe-inline: true
+        unsafe-inline:  true
       script-src:
-        unsafe-eval: true
+        unsafe-eval:    true
   domains:
     canonical:
       - "qr.{{ PRIMARY_DOMAIN }}"
