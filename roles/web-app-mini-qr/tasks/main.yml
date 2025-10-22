@@ -1,0 +1,4 @@
+---
+- include_tasks: 01_core.yml
+  when: run_once_web_app_mini_qr is not defined
+  

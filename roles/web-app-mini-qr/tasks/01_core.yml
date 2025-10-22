@@ -1,0 +1,7 @@
+- name: "load docker, proxy for '{{ application_id }}'"
+  include_role:
+    name: sys-stk-full-stateless
+  vars: 
+    docker_compose_flush_handlers: false
+
+- include_tasks: utils/run_once.yml

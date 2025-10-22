@@ -1,0 +1,37 @@
+docker:
+  services:
+    redis:
+      enabled:  false
+    database:
+      enabled:  false
+features:
+  matomo:       true
+  css:          true
+  desktop:      true
+  logout:       false
+server:
+  csp:
+    whitelist:
+      script-src-elem:
+        # Propably some tracking code
+        # Anyhow implemented to pass CSP checks
+        # @todo Remove
+        - https://www.clarity.ms/
+        - https://scripts.clarity.ms/
+      connect-src:
+        - https://q.clarity.ms
+        - https://n.clarity.ms
+      style-src-elem: []
+      font-src: [] 
+      frame-ancestors: [] 
+    flags:
+      style-src:
+        unsafe-inline: true
+      script-src-elem:
+        unsafe-inline: true
+      script-src:
+        unsafe-eval: true
+  domains:
+    canonical:
+      - "qr.{{ PRIMARY_DOMAIN }}"
+    aliases: []

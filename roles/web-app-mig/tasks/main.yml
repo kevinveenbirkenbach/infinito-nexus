@@ -1,7 +1,4 @@
 ---
-- block: 
-  - include_tasks: 01_core.yml
-  - include_tasks: utils/run_once.yml
-  name: "Setup Meta Infinite Graph"
+- include_tasks: 01_core.yml
   when: run_once_web_app_mig is not defined
   
