@@ -12,9 +12,7 @@ server:
       script-src-elem:
         unsafe-inline:  true
         unsafe-eval:    true
-      style-src:
-        unsafe-inline:  true
-      script-src:
+      script-src-attr:
         unsafe-eval:    true
     whitelist:
       connect-src:

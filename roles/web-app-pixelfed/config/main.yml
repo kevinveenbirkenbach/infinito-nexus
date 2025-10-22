@@ -9,13 +9,13 @@ features:
 server:
   csp:
     flags:
-      script-src:
+      script-src-attr:
         unsafe-eval:   true
         unsafe-inline: true
       script-src-elem:
         unsafe-inline: true
         unsafe-eval:   true
-      style-src:
+      style-src-attr:
         unsafe-inline: true
     whitelist:
       frame-ancestors:

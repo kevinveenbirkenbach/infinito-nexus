@@ -1,2 +1,33 @@
-add_header Content-Security-Policy "{{ applications | build_csp_header(application_id, domains) }}" always;
-proxy_hide_header Content-Security-Policy; # Todo: Make this optional
+# ===== Content Security Policy: only for documents and workers (no locations needed) =====
+
+# 1) Define your CSP once (Jinja: escape double quotes to be safe)
+set $csp "{{ applications | build_csp_header(application_id, domains) | replace('\"','\\\"') }}";
+
+# 2) Send CSP ONLY for document responses; also for workers via Sec-Fetch-Dest
+header_filter_by_lua_block {
+    local ct   = ngx.header.content_type or ngx.header["Content-Type"] or ""
+    local dest = ngx.var.http_sec_fetch_dest or ""
+
+    local lct = ct:lower()
+    local is_html   = lct:find("^text/html") or lct:find("^application/xhtml+xml")
+    local is_worker = (dest == "worker") or (dest == "serviceworker")
+
+    if is_html or is_worker then
+        ngx.header["Content-Security-Policy"] = ngx.var.csp
+    else
+        ngx.header["Content-Security-Policy"] = nil
+        ngx.header["Content-Security-Policy-Report-Only"] = nil
+    end
+
+    -- If you'll modify the body later, drop Content-Length on HTML
+    if is_html then
+        ngx.ctx.is_html = true
+        ngx.header.content_length = nil
+    else
+        ngx.ctx.is_html = false
+    end
+}
+
+# 3) Prevent upstream/app CSP (duplicates)
+proxy_hide_header Content-Security-Policy;
+proxy_hide_header Content-Security-Policy-Report-Only;

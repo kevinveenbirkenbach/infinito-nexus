@@ -17,11 +17,6 @@ server:
     flags:
       script-src-elem:
         unsafe-inline:  true
-      #script-src:
-      #  unsafe-inline:  true
-      #  unsafe-eval:    true
-      #style-src:
-      #  unsafe-inline:  true
     whitelist:
       font-src: [] 
       connect-src: [] 

@@ -8,7 +8,7 @@ server:
       frame-ancestors:
         - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
     flags:
-      style-src:
+      style-src-attr:
         unsafe-inline:  true
 docker:
   services:

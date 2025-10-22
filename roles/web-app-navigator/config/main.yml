@@ -19,9 +19,9 @@ server:
          # Makes sense that all of the website content is available in the navigator
         - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
     flags:
-      style-src:
+      style-src-attr:
         unsafe-inline:  true
-      script-src:
+      script-src-attr:
         unsafe-eval:    true
       script-src-elem:
         unsafe-inline:  true

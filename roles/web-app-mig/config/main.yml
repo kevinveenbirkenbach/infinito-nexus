@@ -29,7 +29,7 @@ server:
       frame-ancestors:
         - "*" # No damage if it's used somewhere on other websites, it anyhow looks like art
     flags:
-      style-src:
+      style-src-attr:
         unsafe-inline: true
   domains:
     canonical:

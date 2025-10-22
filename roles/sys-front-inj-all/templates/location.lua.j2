@@ -10,17 +10,6 @@
 
 lua_need_request_body on;
 
-header_filter_by_lua_block {
-    local ct = ngx.header.content_type or ""
-    if ct:lower():find("^text/html") then
-        ngx.ctx.is_html = true
-        -- IMPORTANT: body will be modified → drop Content-Length to avoid mismatches
-        ngx.header.content_length = nil
-    else
-        ngx.ctx.is_html = false
-    end
-}
-
 body_filter_by_lua_block {
     -- Only process HTML responses
     if not ngx.ctx.is_html then

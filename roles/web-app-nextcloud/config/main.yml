@@ -2,11 +2,11 @@ version:                      "production" # @see https://nextcloud.com/blog/nex
 server:
   csp:
     flags:
-      style-src:
+      style-src-attr:
         unsafe-inline:  true
       script-src-elem:
         unsafe-inline:  true
-      script-src:
+      script-src-attr:
         unsafe-eval:    true
     whitelist:
       font-src:

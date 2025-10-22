@@ -32,7 +32,7 @@ server:
       worker-src:
         - "blob:"
     flags:
-      script-src:
+      script-src-attr:
         unsafe-eval:    true
       script-src-elem:
         unsafe-inline:  true

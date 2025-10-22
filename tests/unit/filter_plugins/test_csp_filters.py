@@ -3,6 +3,7 @@ import hashlib
 import base64
 import sys
 import os
+import copy
 
 sys.path.insert(
     0,
@@ -321,6 +322,155 @@ class TestCspFilters(unittest.TestCase):
         # And 'unsafe-inline' must appear in final tokens
         tokens = self._get_directive_tokens(header, 'style-src')
         self.assertIn("'unsafe-inline'", tokens)
+
+    def test_style_family_union_flows_into_base_only_no_mirror_back(self):
+        """
+        Sources allowed only in style-src-elem/attr must appear in style-src (CSP2/Safari fallback),
+        but we do NOT mirror back base→elem/attr.
+        """
+        apps = copy.deepcopy(self.apps)
+
+        # Add distinct sources to elem and attr only
+        apps['app1']['server']['csp'].setdefault('whitelist', {})
+        apps['app1']['server']['csp']['whitelist']['style-src-elem'] = [
+            'https://elem-only.example.com'
+        ]
+        apps['app1']['server']['csp']['whitelist']['style-src-attr'] = [
+            'https://attr-only.example.com'
+        ]
+
+        header = self.filter.build_csp_header(apps, 'app1', self.domains, web_protocol='https')
+
+        base_tokens = self._get_directive_tokens(header, 'style-src')
+        elem_tokens = self._get_directive_tokens(header, 'style-src-elem')
+        attr_tokens = self._get_directive_tokens(header, 'style-src-attr')
+
+        # Base must include both elem/attr sources
+        self.assertIn('https://elem-only.example.com', base_tokens)
+        self.assertIn('https://attr-only.example.com', base_tokens)
+
+        # elem keeps its own sources; we did not force-copy base back into elem/attr
+        # (No strict negative assertion here; just verify elem retains its own source)
+        self.assertIn('https://elem-only.example.com', elem_tokens)
+        self.assertIn('https://attr-only.example.com', attr_tokens)
+
+    def test_style_explicit_disable_inline_on_base_survives_union(self):
+        """
+        If style-src.unsafe-inline is explicitly set to False on the base,
+        it must be removed from the merged base even if elem/attr include it by default.
+        """
+        apps = copy.deepcopy(self.apps)
+        # Explicitly disable unsafe-inline for the base
+        apps['app1'].setdefault('server', {}).setdefault('csp', {}).setdefault('flags', {}).setdefault('style-src', {})
+        apps['app1']['server']['csp']['flags']['style-src']['unsafe-inline'] = False
+
+        header = self.filter.build_csp_header(apps, 'app1', self.domains, web_protocol='https')
+
+        base_tokens = self._get_directive_tokens(header, 'style-src')
+        elem_tokens = self._get_directive_tokens(header, 'style-src-elem')
+        attr_tokens = self._get_directive_tokens(header, 'style-src-attr')
+
+        # Base must NOT have 'unsafe-inline'
+        self.assertNotIn("'unsafe-inline'", base_tokens)
+
+        # elem/attr may still have 'unsafe-inline' by default (granularity preserved)
+        self.assertIn("'unsafe-inline'", elem_tokens)
+        self.assertIn("'unsafe-inline'", attr_tokens)
+
+    def test_script_explicit_disable_inline_on_base_survives_union(self):
+        """
+        If script-src.unsafe-inline is explicitly set to False (default anyway),
+        ensure the base remains without 'unsafe-inline' even if elem/attr enable it.
+        """
+        apps = copy.deepcopy(self.apps)
+
+        # Force elem/attr to allow unsafe-inline explicitly
+        apps['app1'].setdefault('server', {}).setdefault('csp', {}).setdefault('flags', {})
+        apps['app1']['server']['csp']['flags']['script-src-elem'] = {'unsafe-inline': True}
+        apps['app1']['server']['csp']['flags']['script-src-attr'] = {'unsafe-inline': True}
+
+        # Explicitly disable on base (redundant but makes intent clear)
+        apps['app1']['server']['csp']['flags']['script-src'] = {
+            'unsafe-inline': False,
+            'unsafe-eval': True
+        }
+
+        header = self.filter.build_csp_header(apps, 'app1', self.domains, web_protocol='https')
+
+        base_tokens = self._get_directive_tokens(header, 'script-src')
+        elem_tokens = self._get_directive_tokens(header, 'script-src-elem')
+        attr_tokens = self._get_directive_tokens(header, 'script-src-attr')
+
+        # Base: no 'unsafe-inline'
+        self.assertNotIn("'unsafe-inline'", base_tokens)
+        # But elem/attr: yes
+        self.assertIn("'unsafe-inline'", elem_tokens)
+        self.assertIn("'unsafe-inline'", attr_tokens)
+
+        # Also ensure 'unsafe-eval' remains present on the base
+        self.assertIn("'unsafe-eval'", base_tokens)
+
+    def test_script_family_union_includes_elem_attr_hosts_in_base(self):
+        """
+        Hosts present only under script-src-elem/attr must appear in script-src (base).
+        """
+        apps = copy.deepcopy(self.apps)
+        apps['app1']['server']['csp'].setdefault('whitelist', {})
+        apps['app1']['server']['csp']['whitelist']['script-src-elem'] = [
+            'https://elem-scripts.example.com'
+        ]
+        apps['app1']['server']['csp']['whitelist']['script-src-attr'] = [
+            'https://attr-scripts.example.com'
+        ]
+
+        header = self.filter.build_csp_header(apps, 'app1', self.domains, web_protocol='https')
+
+        base_tokens = self._get_directive_tokens(header, 'script-src')
+        self.assertIn('https://elem-scripts.example.com', base_tokens)
+        self.assertIn('https://attr-scripts.example.com', base_tokens)
+
+    def test_hash_inclusion_uses_final_base_tokens_after_union(self):
+        """
+        Ensure hash inclusion for style-src is evaluated after family union & explicit-disable logic.
+        If base ends up WITHOUT 'unsafe-inline' after union, hashes must be present.
+        """
+        apps = copy.deepcopy(self.apps)
+
+        # Explicitly disable 'unsafe-inline' on base 'style-src' so hashes can be included
+        apps['app1'].setdefault('server', {}).setdefault('csp', {}).setdefault('flags', {}).setdefault('style-src', {})
+        apps['app1']['server']['csp']['flags']['style-src']['unsafe-inline'] = False
+
+        # Provide a style-src hash
+        content = "body { background: #abc; }"
+        apps['app1']['server']['csp'].setdefault('hashes', {})['style-src'] = content
+        expected_hash = self.filter.get_csp_hash(content)
+
+        header = self.filter.build_csp_header(apps, 'app1', self.domains, web_protocol='https')
+        base_tokens = self._get_directive_tokens(header, 'style-src')
+
+        self.assertNotIn("'unsafe-inline'", base_tokens)   # confirm no unsafe-inline
+        self.assertIn(expected_hash, header)               # hash must be present
+
+    def test_no_unintended_mirroring_back_to_elem_attr(self):
+        """
+        Verify that we do not mirror base tokens back into elem/attr:
+        add a base-only host and ensure elem/attr don't automatically get it.
+        """
+        apps = copy.deepcopy(self.apps)
+        apps['app1']['server']['csp'].setdefault('whitelist', {})
+        # Add a base-only host
+        apps['app1']['server']['csp']['whitelist']['style-src'] = ['https://base-only.example.com']
+
+        header = self.filter.build_csp_header(apps, 'app1', self.domains, web_protocol='https')
+
+        base_tokens = self._get_directive_tokens(header, 'style-src')
+        elem_tokens = self._get_directive_tokens(header, 'style-src-elem')
+        attr_tokens = self._get_directive_tokens(header, 'style-src-attr')
+
+        self.assertIn('https://base-only.example.com', base_tokens)
+        # Not strictly required to assert negatives, but this ensures "no mirror back":
+        self.assertNotIn('https://base-only.example.com', elem_tokens)
+        self.assertNotIn('https://base-only.example.com', attr_tokens)
 
 
 if __name__ == '__main__':

@@ -17,12 +17,12 @@ server:
       style-src-elem:
         - https://fonts.googleapis.com
     flags:
-      script-src:
+      script-src-attr:
         unsafe-eval:   true
       script-src-elem:
         unsafe-inline: true
         unsafe-eval:   true
-      style-src:
+      style-src-attr:
         unsafe-inline: true
         unsafe-eval:   true
   domains:

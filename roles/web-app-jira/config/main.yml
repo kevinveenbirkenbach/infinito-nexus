@@ -29,7 +29,7 @@ server:
       script-src-elem:
         unsafe-inline:  true
         unsafe-eval:    true
-      script-src:
+      script-src-attr:
         unsafe-inline:  true
         unsafe-eval:    true
   domains:

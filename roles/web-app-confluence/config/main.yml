@@ -29,7 +29,7 @@ server:
     flags:
       script-src-elem:
         unsafe-inline:  true
-      script-src:
+      script-src-attr:
         unsafe-inline:  true
   domains:
     canonical:

@@ -27,7 +27,7 @@ server:
     aliases: []
   csp:  
     flags:
-      style-src:
+      style-src-attr:
         unsafe-inline:  true
     whitelist:
       font-src:
