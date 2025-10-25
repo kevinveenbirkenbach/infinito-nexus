@@ -31,6 +31,8 @@ class TestCspConfigurationConsistency(unittest.TestCase):
         "worker-src",
         "manifest-src",
         "media-src",
+        "style-src-attr",
+        "script-src-attr",
     }
 
     SUPPORTED_FLAGS = {"unsafe-eval", "unsafe-inline"}
