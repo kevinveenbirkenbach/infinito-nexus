@@ -33,3 +33,5 @@
     ('already present' not in (collabora_preview.stdout | default('')))
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- include_tasks: utils/run_once.yml
