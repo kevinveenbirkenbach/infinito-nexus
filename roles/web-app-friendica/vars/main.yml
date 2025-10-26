@@ -7,10 +7,10 @@ docker_compose_flush_handlers:  false
 
 # Friendica
 friendica_container:            "friendica"
-friendica_no_validation:        "{{ applications | get_app_conf(application_id, 'features.oidc', True) }}" # Email validation is not neccessary if OIDC is active
+friendica_no_validation:        "{{ applications | get_app_conf(application_id, 'features.oidc') }}" # Email validation is not neccessary if OIDC is active
 friendica_application_base:     "/var/www/html"
-friendica_docker_ldap_config:   "{{ friendica_application_base }}/config/ldapauth.config.php"
-friendica_host_ldap_config:     "{{ docker_compose.directories.volumes }}ldapauth.config.php"
-friendica_config_dir:           "{{ friendica_application_base }}/config"
-friendica_config_file:          "{{ friendica_config_dir }}/local.config.php"
+friendica_docker_ldap_config:   "{{ [ friendica_application_base,         'config/ldapauth.config.php' ] | path_join }}"
+friendica_host_ldap_config:     "{{ [ docker_compose.directories.volumes, 'ldapauth.config.php' ] | path_join }}"
+friendica_config_dir:           "{{ [ friendica_application_base,         'config' ] | path_join }}"
+friendica_config_file:          "{{ [ friendica_config_dir,               'local.config.php' ] | path_join }}"
 friendica_user:                 "www-data"
