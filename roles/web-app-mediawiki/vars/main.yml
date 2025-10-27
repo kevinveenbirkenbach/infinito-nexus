@@ -11,7 +11,7 @@ MEDIAWIKI_URL:                    "{{ domains | get_url(application_id, WEB_PROT
 MEDIAWIKI_HTML_DIR:               "/var/www/html"
 MEDIAWIKI_CONFIG_DIR:             "{{ docker_compose.directories.config }}"
 MEDIAWIKI_VOLUMES_DIR:            "{{ docker_compose.directories.volumes }}"
-MEDIAWIKI_LOCAL_MOUNT_DIR:        "{{ MEDIAWIKI_VOLUMES_DIR }}/mw-local"
+MEDIAWIKI_LOCAL_MOUNT_DIR:        "{{ [ MEDIAWIKI_VOLUMES_DIR, 'mw-local' ] | path_join }}"
 MEDIAWIKI_LOCAL_PATH:             "/opt/mw-local"
 
 ## Docker

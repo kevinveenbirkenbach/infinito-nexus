@@ -4,6 +4,11 @@ server:
     canonical:
       - "m.wiki.{{ PRIMARY_DOMAIN }}"
     aliases: []
+  csp:
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
+
 docker:
   services:
     database:
