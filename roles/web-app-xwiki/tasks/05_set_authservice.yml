@@ -1,0 +1,73 @@
+---
+# Sets XWikiPreferences.authenticationService to modern component hint (standard, oidc, ldap)
+
+- name: "XWIKI | Compute target authservice hint"
+  set_fact:
+    _target_authservice: >-
+      {{
+        'oidc' if (XWIKI_OIDC_ENABLED | bool)
+        else ('ldap' if (XWIKI_LDAP_ENABLED | bool)
+        else 'standard')
+      }}
+
+- name: "XWIKI | PUT Groovy page SetAuthService"
+  uri:
+    url: "{{ [XWIKI_REST_XWIKI_PAGES, 'SetAuthService'] | url_join }}"
+    method: PUT
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [200,201,202,204]
+    headers:
+      Content-Type: "application/xml"
+      Accept: "application/xml"
+    body: |
+      <page xmlns="http://www.xwiki.org">
+        <title>SetAuthService</title>
+        <content><![CDATA[
+        {% raw %}{{groovy}}{% endraw %}
+        try {
+          def doc = xwiki.getDocument('XWiki.XWikiPreferences')
+          def obj = doc.getObject('XWiki.XWikiPreferences', true)
+          obj.set('authenticationService', '{{ _target_authservice }}')
+          def engine = xcontext.context.getWiki()
+          engine.saveDocument(doc.getDocument(), "Set authentication service to {{ _target_authservice }}", true, xcontext.context)
+          print "OK::{{ _target_authservice }}"
+        } catch (Throwable t) {
+          print "ERROR::" + (t?.message ?: t?.toString())
+        }
+        {% raw %}{{/groovy}}{% endraw %}
+        ]]></content>
+        <syntax>xwiki/2.1</syntax>
+      </page>
+  register: _put_auth_page
+
+- name: "XWIKI | Execute SetAuthService"
+  uri:
+    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/SetAuthService?xpage=plain"
+    method: GET
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [200]
+    return_content: yes
+  register: _exec_auth_page
+  retries: 10
+  delay: 3
+  until: _exec_auth_page is succeeded
+
+- name: "ASSERT | Auth service set"
+  assert:
+    that:
+      - _exec_auth_page.content is search("OK::")
+    fail_msg: "Failed to set XWikiPreferences.authenticationService: {{ _exec_auth_page.content | default('no content') }}"
+
+- name: "XWIKI | Delete SetAuthService page"
+  uri:
+    url: "{{ [XWIKI_REST_XWIKI_PAGES, 'SetAuthService'] | url_join }}"
+    method: DELETE
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [204,200,202,404]
+  changed_when: false

@@ -1,0 +1,68 @@
+# roles/web-app-xwiki/tasks/_auth_diag.yml
+- name: "XWIKI | PUT page XWiki.AuthDiag (Groovy)"
+  uri:
+    url: "{{ [XWIKI_REST_XWIKI_PAGES, 'AuthDiag'] | url_join }}"
+    method: PUT
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [200,201,202,204]
+    headers:
+      Content-Type: "application/xml"
+      Accept: "application/xml"
+    body: |
+      <page xmlns="http://www.xwiki.org">
+        <title>AuthDiag</title>
+        <content><![CDATA[
+        {% raw %}{{groovy}}{% endraw %}
+        import org.xwiki.security.authservice.AuthService
+        try {
+          def cm = services.component.componentManager
+          def hints = cm.getComponentDescriptorList(AuthService).collect{ it.roleHint }.sort()
+
+          def doc = xwiki.getDocument('XWiki.XWikiPreferences')
+          def obj = doc.getObject('XWiki.XWikiPreferences', true)
+          def pref = (obj.get('authenticationService') ?: 'unset')
+
+          println "HINTS::" + hints
+          println "PREF::" + pref
+
+          def chosenHint = (pref ?: 'standard')
+          def hasChosen = hints.contains(chosenHint)
+          println "HAS_CHOSEN::" + hasChosen + "::" + chosenHint
+        } catch (Throwable t) {
+          println "ERROR::" + (t?.message ?: t?.toString())
+        }
+        {% raw %}{{/groovy}}{% endraw %}
+        ]]></content>
+        <syntax>xwiki/2.1</syntax>
+      </page>
+  register: _put_authdiag
+  changed_when: false
+
+- name: "XWIKI | Run AuthDiag"
+  uri:
+    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/AuthDiag?xpage=plain"
+    method: GET
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [200]
+    return_content: yes
+  register: _authdiag_run
+  changed_when: false
+
+- name: "DEBUG | AuthDiag output"
+  debug:
+    msg: "{{ _authdiag_run.content | regex_replace('<[^>]+>', '') | trim }}"
+
+# Optional sauber machen:
+- name: "XWIKI | DELETE AuthDiag page"
+  uri:
+    url: "{{ [XWIKI_REST_XWIKI_PAGES, 'AuthDiag'] | url_join }}"
+    method: DELETE
+    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    force_basic_auth: true
+    status_code: [204,200,202,404]
+  changed_when: false

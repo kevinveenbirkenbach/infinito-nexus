@@ -36,6 +36,12 @@
 - name: Load setup procedures for extensions
   include_tasks: 04_extensions.yml
 
+- name: "Set authentication service according to feature toggles"
+  include_tasks: 05_set_authservice.yml
+
+- name: "Run AuthDiag (temporary)"
+  include_tasks: _auth_diag.yml
+
 - block:
     - name:           "Create Final Docker Compose File"
       template:
