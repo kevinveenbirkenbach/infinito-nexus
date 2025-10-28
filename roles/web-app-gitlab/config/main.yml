@@ -27,3 +27,7 @@ server:
   domains:
     canonical:
       - lab.git.{{ PRIMARY_DOMAIN }}
+  csp:
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
