@@ -9,9 +9,11 @@
     environment:
       JAVA_OPTS: >-
 {% if xwiki_oidc_enabled_switch| bool %}
+        -Dxwiki.authentication.authservice=oidc
         -Dxwiki.authentication.authclass=org.xwiki.contrib.oidc.auth.OIDCAuthServiceImpl
 {% elif xwiki_ldap_enabled_switch | bool %}
         -Dxwiki.authentication.authclass=org.xwiki.contrib.ldap.XWikiLDAPAuthServiceImpl
+        -Dxwiki.authentication.authservice=ldap
         -Dxwiki.authentication.ldap=1
         -Dxwiki.authentication.ldap.trylocal={{ (XWIKI_LDAP_TRYLOCAL | bool) | ternary(1, 0) }}
         -Dxwiki.authentication.ldap.group_mapping=XWiki.XWikiAdminGroup={{ XWIKI_LDAP_ADMIN_GROUP_DN }}
@@ -24,6 +26,7 @@
         -Dxwiki.authentication.ldap.fields_mapping={{ XWIKI_LDAP_FIELDS_MAPPING }}
         -Dxwiki.authentication.ldap.update_user=1
 {% else %}
+        -Dxwiki.authentication.authservice=standard
         -Dxwiki.authentication.authclass=com.xpn.xwiki.user.impl.xwiki.XWikiAuthServiceImpl
 {% endif %}
     volumes:
