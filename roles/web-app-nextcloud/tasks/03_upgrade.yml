@@ -7,6 +7,9 @@
   command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} maintenance:repair --include-expensive"
   register: occ_repair
   changed_when: "'No repairs needed' not in occ_repair.stdout"
+  retries: 3
+  delay: 10
+  until: occ_repair.rc == 0
 
 - name: Nextcloud | App update (retry once)
   command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} app:update --all"

@@ -16,6 +16,13 @@
 - name: Flush all handlers immediately so that occ can be used
   meta: flush_handlers
 
+- name: Wait until Redis is ready (PONG)
+  command: "docker exec {{ NEXTCLOUD_REDIS_CONTAINER }} redis-cli ping"
+  register: redis_ping
+  retries: 60
+  delay: 2
+  until: (redis_ping.stdout | default('')) is search('PONG')
+
 - name: Update\Upgrade Nextcloud
   include_tasks: 03_upgrade.yml
   when: MODE_UPDATE | bool
