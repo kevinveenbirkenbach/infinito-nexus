@@ -11,7 +11,7 @@
 # (Optional) specifically wait for the CLI installer script
 - name: "Check for CLI installer"
   command:
-    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", test, -f, /var/www/html/installation/joomla.php ]
+    argv: [ docker, exec, "{{ JOOMLA_CONTAINER }}", test, -f, "{{ JOOMLA_INSTALLER_CLI_FILE }}" ]
   register: has_installer
   changed_when: false
   failed_when: false
@@ -32,7 +32,7 @@
       - exec
       - "{{ JOOMLA_CONTAINER }}"
       - php
-      - /var/www/html/installation/joomla.php
+      - "{{ JOOMLA_INSTALLER_CLI_FILE }}"
       - install
       - "--db-type={{ JOOMLA_DB_CONNECTOR }}"
       - "--db-host={{ database_host }}"

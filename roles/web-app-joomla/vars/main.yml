@@ -13,6 +13,8 @@ JOOMLA_DOMAINS:                   "{{ applications | get_app_conf(application_id
 JOOMLA_SITE_NAME:                 "{{ SOFTWARE_NAME }} Joomla - CMS"
 JOOMLA_DB_CONNECTOR:              "{{ 'pgsql' if database_type == 'postgres' else 'mysqli' }}"
 JOOMLA_CONFIG_FILE:               "/var/www/html/configuration.php"
+JOOMLA_INSTALLER_CLI_FILE:        "/var/www/html/installation/joomla.php"
+JOOMLA_CLI_FILE:                  "/var/www/html/cli/joomla.php"
 
 # User
 JOOMLA_USER_NAME:                 "{{ users.administrator.username }}"
