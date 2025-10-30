@@ -9,6 +9,9 @@ server:
       script-src-attr:
         unsafe-eval:    true
     whitelist:
+      script-src-elem:
+        - "https://www.hcaptcha.com"
+        - "https://js.hcaptcha.com"
       font-src:
         - "data:"
       connect-src:
@@ -19,6 +22,7 @@ server:
       frame-src:
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "https://newassets.hcaptcha.com/"
       worker-src:
         - "blob:"
   domains:

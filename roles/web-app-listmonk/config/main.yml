@@ -13,6 +13,16 @@ server:
     aliases: []
   status_codes:
     default: 404
+  csp:
+    flags:
+      script-src-elem:
+        unsafe-inline:  true
+    whitelist:
+      script-src-elem:
+        - "https://www.hcaptcha.com"
+        - "https://js.hcaptcha.com"
+      frame-src:
+        - "https://newassets.hcaptcha.com/"
 docker:
   services:
     database:
