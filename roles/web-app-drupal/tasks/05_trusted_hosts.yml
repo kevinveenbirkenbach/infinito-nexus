@@ -1,0 +1,19 @@
+- name: "Set trusted_host_patterns for canonical domains"
+  vars:
+    patterns: "{{ DRUPAL_DOMAINS
+                  | map('regex_replace','\\\\.','\\\\\\\\.')
+                  | map('regex_replace','^','^')
+                  | map('regex_replace','$','$')
+                  | list }}"
+    php_array: "{{ patterns | to_json }}"
+  command: >
+    docker exec -u root {{ DRUPAL_CONTAINER }} bash -lc
+    "php -r '
+    $f="{{ DRUPAL_DOCKER_CONF_PATH }}/settings.local.php";
+    $c=file_exists($f)?file_get_contents($f):"<?php\n";
+    // Remove existing assignment of $settings[\"trusted_host_patterns\"] (if any)
+    $c=preg_replace(\"/(\\\\$settings\\['trusted_host_patterns'\\]\\s*=).*?;/s\", \"\", $c);
+    $c.="\n\$settings[\'trusted_host_patterns\'] = ".var_export(json_decode("{{ php_array|e }}", true), true).";\n";
+    file_put_contents($f,$c);
+    '"
+  changed_when: true

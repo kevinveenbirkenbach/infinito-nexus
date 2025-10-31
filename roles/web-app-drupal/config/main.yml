@@ -1,0 +1,37 @@
+title:                "Site"
+max_upload_size:      "256M"
+features:
+  matomo:             true
+  css:                false
+  desktop:            true
+  oidc:               true
+  central_database:   true
+  logout:             true
+server:
+  csp:
+    flags: {}
+    whitelist: {}
+  domains:
+    canonical:
+      - "drupal.{{ PRIMARY_DOMAIN }}"
+    aliases: []
+docker:
+  services:
+    database:
+      enabled:            true
+    drupal:
+      version:            latest
+      image:              drupal
+      name:               drupal
+      backup:
+        no_stop_required: true
+  volumes:
+    data:                 drupal_data
+rbac:
+  roles:
+    authenticated:
+      description: "Logged-in user"
+    content_editor:
+      description: "Can create and edit content"
+    site_admin:
+      description: "Full site administration"

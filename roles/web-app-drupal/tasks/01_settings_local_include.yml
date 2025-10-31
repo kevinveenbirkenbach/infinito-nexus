@@ -1,0 +1,25 @@
+- name: "Ensure settings.php exists and includes settings.local.php"
+  command: >
+    docker exec -u root {{ DRUPAL_CONTAINER }} bash -lc
+    "set -e;
+     f='{{ DRUPAL_DOCKER_CONF_PATH }}/settings.php';
+     df='{{ DRUPAL_DOCKER_CONF_PATH }}/default.settings.php';
+     if [ ! -f \"$f\" ] && [ -f \"$df\" ]; then
+       cp \"$df\" \"$f\";
+       chown www-data:www-data \"$f\";
+       chmod 644 \"$f\";
+     fi;
+     php -r '
+       $f=\"{{ DRUPAL_DOCKER_CONF_PATH }}/settings.php\";
+       if (!file_exists($f)) { exit(0); }
+       $c=file_get_contents($f);
+       $inc=\"\\nif (file_exists(\\\"\$app_root/\$site_path/settings.local.php\\\")) { include \$app_root/\$site_path/settings.local.php; }\\n\";
+       if (strpos($c, \"settings.local.php\") === false) {
+         file_put_contents($f, $c.$inc);
+         echo \"patched\";
+       } else {
+         echo \"exists\";
+       }
+     '"
+  register: settings_local_include
+  changed_when: "'patched' in settings_local_include.stdout"

@@ -1,0 +1,9 @@
+credentials:
+  administrator_password:
+    description: "Initial password for the Drupal admin account"
+    algorithm: "sha256"
+    validation: "^[a-f0-9]{64}$"
+  hash_salt:
+    description: "Drupal hash_salt value used for one-time logins, CSRF tokens, etc."
+    algorithm: "sha256"
+    validation: "^[a-f0-9]{64}$"

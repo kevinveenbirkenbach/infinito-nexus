@@ -1,0 +1,8 @@
+file_uploads        = On
+memory_limit        = {{ DRUPAL_MAX_UPLOAD_SIZE }}
+upload_max_filesize = {{ DRUPAL_MAX_UPLOAD_SIZE }}
+post_max_size       = {{ DRUPAL_MAX_UPLOAD_SIZE }}
+max_execution_time  = 300
+
+; Use msmtp as the Mail Transfer Agent
+sendmail_path = "/usr/bin/msmtp -t"

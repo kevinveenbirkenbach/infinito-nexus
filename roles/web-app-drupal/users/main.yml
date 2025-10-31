@@ -1,0 +1,4 @@
+users:
+  administrator:
+    username:         "administrator"
+    email:            "administrator@{{ PRIMARY_DOMAIN }}"

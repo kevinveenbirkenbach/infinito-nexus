@@ -1,0 +1,28 @@
+# General
+
+application_id:               "web-app-drupal"
+database_type:                "mariadb"
+
+# Drupal
+
+DRUPAL_URL:                   "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+DRUPAL_CUSTOM_IMAGE:          "drupal_custom"
+DRUPAL_DOCKER_HTML_PATH:      "/var/www/html"
+DRUPAL_DOCKER_CONF_PATH:      "/var/www/html/sites/default"
+DRUPAL_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.drupal.version') }}"
+DRUPAL_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.drupal.image') }}"
+DRUPAL_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.drupal.name') }}"
+DRUPAL_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+DRUPAL_DOMAINS:               "{{ applications | get_app_conf(application_id, 'server.domains.canonical') }}"
+DRUPAL_USER:                  "www-data"
+
+DRUPAL_CONFIG_UPLOAD_REL:     "config/upload.ini"
+DRUPAL_CONFIG_UPLOAD_ABS:     "{{ [docker_compose.directories.instance, DRUPAL_CONFIG_UPLOAD_REL] | path_join }}"
+
+DRUPAL_SETTINGS_LOCAL_REL:    "config/settings.local.php"
+DRUPAL_SETTINGS_LOCAL_ABS:    "{{ [docker_compose.directories.instance, DRUPAL_SETTINGS_LOCAL_REL] | path_join }}"
+
+DRUPAL_MSMTP_SRC:             "{{ [ playbook_dir, 'roles/sys-svc-msmtp/templates/msmtprc.conf.j2' ] | path_join }}"
+DRUPAL_MSMTP_ABS:             "{{ [ docker_compose.directories.config, 'msmtprc.conf'] | path_join }}"
+
+DRUPAL_MAX_UPLOAD_SIZE:       "{{ applications | get_app_conf(application_id, 'max_upload_size') }}"

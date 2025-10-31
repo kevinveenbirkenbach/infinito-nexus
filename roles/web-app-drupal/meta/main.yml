@@ -1,0 +1,23 @@
+galaxy_info:
+  author: "Kevin Veen-Birkenbach"
+  description: >
+    Drupal CMS in Docker with Drush, msmtp, and OpenID Connect (OIDC) SSO.
+  license: "Infinito.Nexus NonCommercial License"
+  license_url: "https://s.infinito.nexus/license"
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
+  galaxy_tags:
+  - drupal
+  - docker
+  - cms
+  - oidc
+  - sso
+  repository: "https://s.infinito.nexus/code"
+  issue_tracker_url: "https://s.infinito.nexus/issues"
+  documentation: "https://docs.infinito.nexus"
+  logo:
+    class: "fa-solid fa-droplet"
+  run_after:
+  - web-app-keycloak

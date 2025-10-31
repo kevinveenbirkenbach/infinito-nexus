@@ -1,0 +1,55 @@
+- name: "Include role sys-stk-front-proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-front-proxy
+  loop: "{{ DRUPAL_DOMAINS }}"
+  loop_control:
+    loop_var: domain
+  vars:
+    proxy_extra_configuration: "client_max_body_size {{ DRUPAL_MAX_UPLOAD_SIZE }};"
+    http_port: "{{ ports.localhost.http[application_id] }}"
+
+- name: "Load docker and DB for {{ application_id }}"
+  include_role:
+    name: sys-stk-back-stateful
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: "Transfer upload.ini to {{ DRUPAL_CONFIG_UPLOAD_ABS }}"
+  template:
+    src: upload.ini.j2
+    dest: "{{ DRUPAL_CONFIG_UPLOAD_ABS }}"
+  notify:
+  - docker compose up
+  - docker compose build
+
+- name: "Transfer msmtprc to {{ DRUPAL_MSMTP_ABS }}"
+  template:
+    src:  "{{ DRUPAL_MSMTP_SRC }}"
+    dest: "{{ DRUPAL_MSMTP_ABS }}"
+  notify: docker compose up
+
+- name: "Transfer settings.local.php overrides"
+  template:
+    src:  settings.local.php.j2
+    dest: "{{ DRUPAL_SETTINGS_LOCAL_ABS }}"
+  notify: docker compose up
+
+- name: Flush handlers to make container ready
+  meta: flush_handlers
+
+- name: "Ensure settings.php includes settings.local.php"
+  include_tasks: 01_settings_local_include.yml
+
+- name: "Install Drupal (site:install)"
+  include_tasks: 02_install.yml
+
+- name: "Enable OIDC modules"
+  include_tasks: 03_enable_modules.yml
+  when: applications | get_app_conf(application_id, 'features.oidc')
+
+- name: "Configure OIDC (global + client)"
+  include_tasks: 04_configure_oidc.yml
+  when: applications | get_app_conf(application_id, 'features.oidc')
+
+- name: "Harden trusted host patterns"
+  include_tasks: 05_trusted_hosts.yml

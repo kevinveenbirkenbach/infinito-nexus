@@ -1,0 +1,22 @@
+{% include 'roles/docker-compose/templates/base.yml.j2' %}
+  application:
+    {% include 'roles/docker-container/templates/base.yml.j2' %}
+    image: {{ DRUPAL_CUSTOM_IMAGE }}
+    container_name: {{ DRUPAL_CONTAINER }}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    ports:
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+    volumes:
+      - data:/var/www/html/web/sites/default/files
+      - {{ DRUPAL_MSMTP_ABS }}:/etc/msmtprc
+      - {{ DRUPAL_SETTINGS_LOCAL_ABS }}:{{ DRUPAL_DOCKER_CONF_PATH }}/settings.local.php
+
+{% include 'roles/docker-container/templates/healthcheck/msmtp_curl.yml.j2' %}
+{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/docker-container/templates/networks.yml.j2' %}
+
+{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+
+{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
+  data:
+    name:   "{{ DRUPAL_VOLUME }}"

@@ -1,0 +1,12 @@
+- name: "Enable OpenID Connect core module"
+  command: >
+    docker exec {{ DRUPAL_CONTAINER }} bash -lc
+    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} en openid_connect -y"
+  changed_when: true
+
+- name: "Enable OpenID Connect Keycloak preset (submodule of openid_connect)"
+  command: >
+    docker exec {{ DRUPAL_CONTAINER }} bash -lc
+    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} en openid_connect_client_keycloak -y"
+  changed_when: true
+  failed_when: false

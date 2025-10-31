@@ -1,0 +1,59 @@
+- name: "Load OIDC vars"
+  include_vars:
+    file: "{{ role_path }}/vars/oidc.yml"
+    name: oidc_vars
+
+- name: "Apply openid_connect.settings (global)"
+  loop: "{{ oidc_vars.oidc_settings | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  command: >
+    docker exec {{ DRUPAL_CONTAINER }} bash -lc
+    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} cset -y
+    openid_connect.settings {{ item.key }}
+    {{ (item.value | to_json) if item.value is mapping or item.value is sequence else item.value }}"
+
+- name: "Ensure OIDC client entity exists"
+  vars:
+    client_id: "{{ oidc_vars.oidc_client.id }}"
+    client_label: "{{ oidc_vars.oidc_client.label }}"
+  command: >
+    docker exec {{ DRUPAL_CONTAINER }} bash -lc
+    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} eval '
+    $id=\"{{ client_id }}\"; $label=\"{{ client_label }}\";
+    $storage=\Drupal::entityTypeManager()->getStorage(\"openid_connect_client\");
+    if (!$storage->load($id)) {
+      $client=$storage->create([\"id\"=>$id,\"label\"=>$label]);
+      $client->save();
+      print \"created\";
+    } else { print \"exists\"; }'"
+  register: client_exists
+  changed_when: "'created' in client_exists.stdout"
+
+- name: "Apply OIDC client settings"
+  vars:
+    client_id: "{{ oidc_vars.oidc_client.id }}"
+    settings_map: "{{ oidc_vars.oidc_client.settings }}"
+    kv: "{{ settings_map | dict2items }}"
+  loop: "{{ kv }}"
+  loop_control:
+    label: "{{ item.key }}"
+  command: >
+    docker exec {{ DRUPAL_CONTAINER }} bash -lc
+    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} eval '
+    $id=\"{{ client_id }}\";
+    $key=\"{{ item.key }}\";
+    $val=json_decode(base64_decode(\"{{ (item.value | to_json | b64encode) }}\"), true);
+    $storage=\Drupal::entityTypeManager()->getStorage(\"openid_connect_client\");
+    $c=$storage->load($id);
+    $s=$c->get(\"settings\");
+    $s[$key]=$val;
+    $c->set(\"settings\", $s);
+    $c->save();'"
+  changed_when: true
+
+- name: "Clear caches after OIDC config"
+  command: >
+    docker exec {{ DRUPAL_CONTAINER }} bash -lc
+    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} cr"
+  changed_when: false

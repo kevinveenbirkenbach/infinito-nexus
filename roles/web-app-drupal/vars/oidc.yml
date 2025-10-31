@@ -1,0 +1,33 @@
+# OIDC configuration for Drupal's OpenID Connect module.
+
+# Global settings for openid_connect.settings
+
+oidc_settings:
+  automatic_account_creation:        true        # Auto-create users on first login
+  always_save_userinfo:              true        # Store latest userinfo on each login
+  link_existing_users:               true        # Match existing users by email
+  login_display:                     "button"    # 'button' or 'form'
+  enforced:                          false       # If true, require login for the whole site
+
+# OIDC client entity (e.g., 'keycloak')
+
+oidc_client:
+  id:                                "keycloak"
+  label:                             "Keycloak"
+  settings:
+    client_id:                       "{{ OIDC.CLIENT.ID }}"
+    client_secret:                   "{{ OIDC.CLIENT.SECRET }}"
+    authorization_endpoint:          "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+    token_endpoint:                  "{{ OIDC.CLIENT.TOKEN_URL }}"
+    userinfo_endpoint:               "{{ OIDC.CLIENT.USER_INFO_URL }}"
+    end_session_endpoint:            "{{ OIDC.CLIENT.LOGOUT_URL }}"
+    scopes:
+      - "openid"
+      - "email"
+      - "profile"
+    use_standard_claims:             true
+# Optional claim mapping examples:
+# username_claim:                "{{ OIDC.ATTRIBUTES.USERNAME }}"
+# email_claim:                   "{{ OIDC.ATTRIBUTES.EMAIL }}"
+# given_name_claim:              "{{ OIDC.ATTRIBUTES.GIVEN_NAME }}"
+# family_name_claim:             "{{ OIDC.ATTRIBUTES.FAMILY_NAME }}"

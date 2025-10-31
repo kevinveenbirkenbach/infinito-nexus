@@ -1,0 +1,15 @@
+- name: "Run Drupal site:install via Drush"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  command: >
+    docker exec {{ DRUPAL_CONTAINER }} bash -lc
+    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} si standard -y
+    --site-name='{{ applications | get_app_conf(application_id, 'title', True) }}'
+    --account-name='{{ applications | get_app_conf(application_id, 'users.administrator.username') }}'
+    --account-mail='{{ applications | get_app_conf(application_id, 'users.administrator.email', True) }}'
+    --account-pass='{{ applications | get_app_conf(application_id, 'credentials.administrator_password', True) }}'
+    --uri='{{ DRUPAL_URL }}'"
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: drupal_install
+  changed_when: "'Installation complete' in drupal_install.stdout"
+  failed_when: false
