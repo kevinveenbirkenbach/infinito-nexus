@@ -1,10 +1,10 @@
 FROM {{ DRUPAL_IMAGE }}:{{ DRUPAL_VERSION }}
 
 # -------------------------------------------------------------------
-# System dependencies (mail support + basic tools)
+# System dependencies (mail support + MySQL client + basic tools)
 # -------------------------------------------------------------------
 RUN apt-get update && \
-    apt-get install -y msmtp msmtp-mta git unzip zip less nano curl vim && \
+    apt-get install -y msmtp msmtp-mta git unzip zip less nano curl vim mariadb-client && \
     rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
@@ -30,7 +30,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN set -eux; \
     builddir="$(mktemp -d)"; \
     composer create-project --no-interaction --no-ansi --no-progress drupal/recommended-project:^10 "$builddir"; \
-    composer --working-dir="$builddir" require -n drush/drush:^13 drupal/openid_connect:^1; \
+    composer --working-dir="$builddir" require -n drush/drush:^13 drupal/openid_connect:^2@beta; \
     rm -rf /opt/drupal/* /opt/drupal/.[!.]* /opt/drupal/..?* 2>/dev/null || true; \
     mkdir -p /opt/drupal; \
     cp -a "$builddir"/. /opt/drupal/; \
@@ -39,7 +39,6 @@ RUN set -eux; \
 # -------------------------------------------------------------------
 # Make vendor binaries available in PATH
 # -------------------------------------------------------------------
-# Make drush unconditionally available on PATH (also if PATH is overridden)
 RUN ln -sf /opt/drupal/vendor/bin/drush /usr/local/bin/drush
 
 # -------------------------------------------------------------------
@@ -75,7 +74,10 @@ RUN set -eux; \
 USER www-data
 WORKDIR /var/www/html  # symlink pointing to {{ DRUPAL_DOCKER_HTML_PATH }}
 
+# Ensure PATH for non-login shells includes /usr/local/bin
+ENV PATH="/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 # -------------------------------------------------------------------
 # Build-time check (optional)
 # -------------------------------------------------------------------
-RUN drush --version
+RUN /usr/local/bin/drush --version

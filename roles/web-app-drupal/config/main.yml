@@ -7,6 +7,7 @@ features:
   oidc:               true
   central_database:   true
   logout:             true
+
 server:
   csp:
     flags: {}
@@ -15,18 +16,21 @@ server:
     canonical:
       - "drupal.{{ PRIMARY_DOMAIN }}"
     aliases: []
+
 docker:
   services:
     database:
       enabled:            true
     drupal:
-      version:            latest
+      # Use a PHP 8.2+ base image to ensure compatibility with OIDC 2.x syntax
+      version:            "10-php8.2-apache"
       image:              drupal
       name:               drupal
       backup:
         no_stop_required: true
   volumes:
     data:                 drupal_data
+
 rbac:
   roles:
     authenticated:

@@ -14,6 +14,7 @@ oidc_settings:
 oidc_client:
   id:                                "keycloak"
   label:                             "Keycloak"
+  plugin:                            "generic"   # use the built-in generic OIDC client plugin
   settings:
     client_id:                       "{{ OIDC.CLIENT.ID }}"
     client_secret:                   "{{ OIDC.CLIENT.SECRET }}"

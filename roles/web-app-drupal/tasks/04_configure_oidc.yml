@@ -13,22 +13,42 @@
     openid_connect.settings {{ item.key }}
     {{ (item.value | to_json) if item.value is mapping or item.value is sequence else item.value }}"
 
-- name: "Ensure OIDC client entity exists"
+- name: "Ensure/Update OIDC client entity (generic)"
   vars:
-    client_id: "{{ oidc_vars.oidc_client.id }}"
+    client_id:    "{{ oidc_vars.oidc_client.id }}"
     client_label: "{{ oidc_vars.oidc_client.label }}"
+    plugin_id:    "{{ oidc_vars.oidc_client.plugin }}"
+    settings_b64: "{{ oidc_vars.oidc_client.settings | to_json | b64encode }}"
   command: >
     docker exec {{ DRUPAL_CONTAINER }} bash -lc
     "drush -r {{ DRUPAL_DOCKER_HTML_PATH }} eval '
-    $id=\"{{ client_id }}\"; $label=\"{{ client_label }}\";
-    $storage=\Drupal::entityTypeManager()->getStorage(\"openid_connect_client\");
-    if (!$storage->load($id)) {
-      $client=$storage->create([\"id\"=>$id,\"label\"=>$label]);
-      $client->save();
-      print \"created\";
-    } else { print \"exists\"; }'"
-  register: client_exists
-  changed_when: "'created' in client_exists.stdout"
+      $id=\"{{ client_id }}\";
+      $label=\"{{ client_label }}\";
+      $plugin=\"{{ plugin_id }}\";
+      $settings=json_decode(base64_decode(\"{{ settings_b64 }}\"), TRUE);
+      $storage=\\Drupal::entityTypeManager()->getStorage(\"openid_connect_client\");
+      $e=$storage->load($id);
+      if (!$e) {
+        $e=$storage->create([
+          \"id\"=> $id,
+          \"label\"=> $label,
+          \"status\"=> TRUE,
+          \"plugin\"=> $plugin,
+          \"settings\"=> $settings,
+        ]);
+        $e->save();
+        print \"created\";
+      } else {
+        $e->set(\"label\", $label);
+        $e->set(\"plugin\", $plugin);
+        $e->set(\"settings\", $settings);
+        $e->set(\"status\", TRUE);
+        $e->save();
+        print \"updated\";
+      }
+    '"
+  register: client_apply
+  changed_when: "'created' in client_apply.stdout or 'updated' in client_apply.stdout"
 
 - name: "Apply OIDC client settings"
   vars:
