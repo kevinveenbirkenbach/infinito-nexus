@@ -8,6 +8,11 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # -------------------------------------------------------------------
+# PHP extensions required by Drupal/Drush bootstrap
+# -------------------------------------------------------------------
+RUN docker-php-ext-install -j"$(nproc)" pdo_mysql
+
+# -------------------------------------------------------------------
 # Install Composer
 # -------------------------------------------------------------------
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
@@ -19,7 +24,7 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 # -------------------------------------------------------------------
 # Build Drupal project with Drush + OpenID Connect
 # IMPORTANT:
-# - The Drupal base image uses /var/www/html as a symlink to /opt/drupal/web
+# - The Drupal base image uses /var/www/html as a symlink to {{ DRUPAL_DOCKER_HTML_PATH }}
 # - Therefore, the actual project root must be placed in /opt/drupal
 # -------------------------------------------------------------------
 RUN set -eux; \
@@ -34,7 +39,8 @@ RUN set -eux; \
 # -------------------------------------------------------------------
 # Make vendor binaries available in PATH
 # -------------------------------------------------------------------
-ENV PATH="/opt/drupal/vendor/bin:${PATH}"
+# Make drush unconditionally available on PATH (also if PATH is overridden)
+RUN ln -sf /opt/drupal/vendor/bin/drush /usr/local/bin/drush
 
 # -------------------------------------------------------------------
 # PHP upload configuration
@@ -55,19 +61,19 @@ RUN set -eux; \
   # Ensure vendor binaries are executable
   if [ -d /opt/drupal/vendor/bin ]; then chmod a+rx /opt/drupal/vendor/bin/*; fi; \
   if [ -f /opt/drupal/vendor/drush/drush/drush ]; then chmod a+rx /opt/drupal/vendor/drush/drush/drush; fi; \
-  # Ensure the docroot (/opt/drupal/web) is accessible
-  if [ -d /opt/drupal/web ]; then \
-    chmod 755 /opt/drupal/web; \
-    find /opt/drupal/web -type d -exec chmod 755 {} +; \
+  # Ensure the docroot ({{ DRUPAL_DOCKER_HTML_PATH }}) is accessible
+  if [ -d {{ DRUPAL_DOCKER_HTML_PATH }} ]; then \
+    chmod 755 {{ DRUPAL_DOCKER_HTML_PATH }}; \
+    find {{ DRUPAL_DOCKER_HTML_PATH }} -type d -exec chmod 755 {} +; \
   fi; \
   # Ensure settings.local.php exists and is owned by www-data
-  install -o www-data -g www-data -m 640 /dev/null /opt/drupal/web/sites/default/settings.local.php
+  install -o www-data -g www-data -m 640 /dev/null {{ DRUPAL_DOCKER_HTML_PATH }}/sites/default/settings.local.php
 
 # -------------------------------------------------------------------
 # Runtime defaults
 # -------------------------------------------------------------------
 USER www-data
-WORKDIR /var/www/html  # symlink pointing to /opt/drupal/web
+WORKDIR /var/www/html  # symlink pointing to {{ DRUPAL_DOCKER_HTML_PATH }}
 
 # -------------------------------------------------------------------
 # Build-time check (optional)

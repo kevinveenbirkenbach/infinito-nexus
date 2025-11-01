@@ -9,7 +9,7 @@
     label: "{{ item.key }}"
   command: >
     docker exec {{ DRUPAL_CONTAINER }} bash -lc
-    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} cset -y
+    "drush -r {{ DRUPAL_DOCKER_HTML_PATH }} cset -y
     openid_connect.settings {{ item.key }}
     {{ (item.value | to_json) if item.value is mapping or item.value is sequence else item.value }}"
 
@@ -19,7 +19,7 @@
     client_label: "{{ oidc_vars.oidc_client.label }}"
   command: >
     docker exec {{ DRUPAL_CONTAINER }} bash -lc
-    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} eval '
+    "drush -r {{ DRUPAL_DOCKER_HTML_PATH }} eval '
     $id=\"{{ client_id }}\"; $label=\"{{ client_label }}\";
     $storage=\Drupal::entityTypeManager()->getStorage(\"openid_connect_client\");
     if (!$storage->load($id)) {
@@ -40,7 +40,7 @@
     label: "{{ item.key }}"
   command: >
     docker exec {{ DRUPAL_CONTAINER }} bash -lc
-    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} eval '
+    "drush -r {{ DRUPAL_DOCKER_HTML_PATH }} eval '
     $id=\"{{ client_id }}\";
     $key=\"{{ item.key }}\";
     $val=json_decode(base64_decode(\"{{ (item.value | to_json | b64encode) }}\"), true);
@@ -55,5 +55,5 @@
 - name: "Clear caches after OIDC config"
   command: >
     docker exec {{ DRUPAL_CONTAINER }} bash -lc
-    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} cr"
+    "drush -r {{ DRUPAL_DOCKER_HTML_PATH }} cr"
   changed_when: false

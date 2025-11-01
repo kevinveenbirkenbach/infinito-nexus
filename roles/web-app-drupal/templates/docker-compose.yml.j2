@@ -7,7 +7,7 @@
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
     volumes:
-      - data:/var/www/html/web/sites/default/files
+      - data:{{ DRUPAL_DOCKER_HTML_PATH }}/sites/default/files
       - {{ DRUPAL_MSMTP_ABS }}:/etc/msmtprc
       - {{ DRUPAL_SETTINGS_LOCAL_ABS }}:{{ DRUPAL_DOCKER_CONF_PATH }}/settings.local.php
 

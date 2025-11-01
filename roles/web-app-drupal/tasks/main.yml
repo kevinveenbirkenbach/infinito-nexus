@@ -37,6 +37,9 @@
 - name: Flush handlers to make container ready
   meta: flush_handlers
 
+- name: "Fix permissions for sites/default/files"
+  include_tasks: 00_permissions.yml
+
 - name: "Ensure settings.php includes settings.local.php"
   include_tasks: 01_settings_local_include.yml
 

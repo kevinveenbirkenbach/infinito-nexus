@@ -1,8 +1,25 @@
+- name: "Wait for database readiness"
+  command: >
+    docker exec {{ DRUPAL_CONTAINER }} bash -lc
+    "php -r '
+      $h=\"{{ database_host }}\"; $p={{ database_port }};
+      $d=\"{{ database_name }}\"; $u=\"{{ database_username }}\"; $pw=\"{{ database_password }}\";
+      $t=microtime(true)+60; $ok=false;
+      while (microtime(true)<$t) {
+        try { new PDO(\"mysql:host=$h;port=$p;dbname=$d;charset=utf8mb4\", $u, $pw,[PDO::ATTR_TIMEOUT=>2]); $ok=true; break; }
+        catch (Exception $e) { usleep(300000); }
+      }
+      if (!$ok) { fwrite(STDERR, \"DB not ready\\n\"); exit(1); }'"
+  register: db_wait
+  retries: 1
+  failed_when: db_wait.rc != 0
+
 - name: "Run Drupal site:install via Drush"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   command: >
     docker exec {{ DRUPAL_CONTAINER }} bash -lc
-    "/var/www/html/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} si standard -y
+    "/opt/drupal/vendor/bin/drush -r {{ DRUPAL_DOCKER_HTML_PATH }} site:install standard -y
+    --db-url='mysql://{{ database_username }}:{{ database_password }}@{{ database_host }}:{{ database_port }}/{{ database_name }}'
     --site-name='{{ applications | get_app_conf(application_id, 'title', True) }}'
     --account-name='{{ applications | get_app_conf(application_id, 'users.administrator.username') }}'
     --account-mail='{{ applications | get_app_conf(application_id, 'users.administrator.email', True) }}'

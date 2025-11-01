@@ -1,0 +1,11 @@
+- name: "Ensure sites/default/files exists and is writable"
+  command: >
+    docker exec -u root {{ DRUPAL_CONTAINER }} bash -lc
+    "set -e;
+     d='{{ DRUPAL_DOCKER_HTML_PATH }}/sites/default';
+     f=\"$d/files\";
+     mkdir -p \"$f\";
+     chown -R {{ DRUPAL_USER }}:{{ DRUPAL_USER }} \"$d\";
+     find \"$d\" -type d -exec chmod 775 {} +;
+     find \"$d\" -type f -exec chmod 664 {} +;"
+  changed_when: true
