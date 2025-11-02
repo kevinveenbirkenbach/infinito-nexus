@@ -1,0 +1,71 @@
+---
+- name: "Load docker, DB and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full-stateful
+
+- name: Wait for Shopware HTTP endpoint
+  wait_for:
+    host: "127.0.0.1"
+    port: "{{ ports.localhost.http[application_id] }}"
+    delay: 5
+    timeout: 300
+
+- name: Render environment and DB settings
+  include_tasks: 01_database.yml
+
+- name: "Run Shopware install / migrations"
+  shell: |
+    docker exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_PHP_CONTAINER }} bash -lc '
+      set -e
+      cd {{ SHOPWARE_ROOT }}
+      php bin/console system:install --basic-setup --create-database --force
+      php bin/console database:migrate --all
+      php bin/console database:migrate-destructive --all
+      php bin/console cache:clear
+    '
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: migrate
+  changed_when: migrate.rc == 0
+
+- name: "Create initial admin user (idempotent)"
+  shell: |
+    docker exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_PHP_CONTAINER }} bash -lc '
+      set -e
+      cd {{ SHOPWARE_ROOT }}
+      php bin/console user:create "{{ users.administrator.username }}" \
+        --admin --password="{{ users.administrator.password }}" \
+        --firstName="Admin" --lastName="User" --email="{{ users.administrator.email }}" || true
+    '
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+
+- name: "Warm up caches and index"
+  shell: |
+    docker exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_PHP_CONTAINER }} bash -lc '
+      cd {{ SHOPWARE_ROOT }}
+      php bin/console messenger:consume --time-limit=60 --limit=100 || true
+      php bin/console dal:refresh:index || true
+      php bin/console cache:clear
+    '
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+
+- name: Execute setup routines (OIDC/LDAP)
+  include_tasks: 02_setup.yml
+
+- name: Execute cleanup routines
+  include_tasks: 03_cleanup.yml
+  when: MODE_CLEANUP
+
+- name: Register DNS records for Shopware domain(s)
+  include_role:
+    name: sys-dns-cloudflare-records
+  vars:
+    cloudflare_records:
+      - zone:     "{{ domains | get_domain(application_id) | to_zone }}"
+        type:     A
+        name:     "{{ domains | get_domain(application_id) }}"
+        content:  "{{ networks.internet.ip4 }}"
+        proxied:  true
+  when: DNS_PROVIDER == 'cloudflare'

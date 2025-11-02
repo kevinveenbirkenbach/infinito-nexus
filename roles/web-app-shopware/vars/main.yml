@@ -1,0 +1,27 @@
+# General
+application_id:                 "web-app-shopware"
+database_type:                  "mariadb"
+
+# Docker
+container_port:                 "{{ applications | get_app_conf(application_id, 'docker.services.nginx.port') }}"
+docker_compose_flush_handlers:  true
+
+# Shopware container/image vars
+SHOPWARE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.php.version') }}"
+SHOPWARE_PHP_IMAGE:             "{{ applications | get_app_conf(application_id, 'docker.services.php.image') }}"
+SHOPWARE_PHP_CONTAINER:         "{{ applications | get_app_conf(application_id, 'docker.services.php.name') }}"
+SHOPWARE_NGINX_IMAGE:           "{{ applications | get_app_conf(application_id, 'docker.services.nginx.image') }}"
+SHOPWARE_NGINX_VERSION:         "{{ applications | get_app_conf(application_id, 'docker.services.nginx.version') }}"
+SHOPWARE_NGINX_CONTAINER:       "{{ applications | get_app_conf(application_id, 'docker.services.nginx.name') }}"
+SHOPWARE_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+SHOPWARE_USER:                  "www-data"
+SHOPWARE_ROOT:                  "/var/www/html"
+
+# Search/Cache
+SHOPWARE_REDIS_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.redis.enabled') }}"
+SHOPWARE_REDIS_ADDRESS:  "redis:6379"
+SHOPWARE_SEARCH_ENABLED: "{{ applications | get_app_conf(application_id, 'docker.services.search.enabled') }}"
+SHOPWARE_SEARCH_ENGINE:  "{{ applications | get_app_conf(application_id, 'docker.services.search.engine') }}"
+
+# IAM (true if either OIDC or LDAP is enabled)
+SHOPWARE_IAM_ENABLED:    "{{ applications | get_app_conf(application_id, 'features.oidc') or applications | get_app_conf(application_id, 'features.ldap') }}"

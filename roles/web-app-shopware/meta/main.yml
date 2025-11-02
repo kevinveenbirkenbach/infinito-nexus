@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  author: "Kevin Veen-Birkenbach"
+  description: "Open-Source Commerce (PHP/Symfony) with optional OIDC/LDAP, Redis & OpenSearch — containerized & automated."
+  license: "Infinito.Nexus NonCommercial License"
+  license_url: "https://s.infinito.nexus/license"
+  company: |
+    Kevin Veen-Birkenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world
+  galaxy_tags:
+    - shopware
+    - ecommerce
+    - docker
+    - symfony
+    - oidc
+    - ldap
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: "https://docs.infinito.nexus/"
+  logo:
+    class: "fa-solid fa-cart-shopping"
+  run_after:
+    - web-app-keycloak
+    - web-app-mailu
+dependencies: []
