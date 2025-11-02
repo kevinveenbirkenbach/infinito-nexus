@@ -41,6 +41,10 @@ docker:
       cpus:               0.25
       mem_reservation:    256m
       mem_limit:          512m
+    elasticsearch:
+      mem_limit:          2gb
+    opensearch:
+      mem_limit:          2gb
     search:
       enabled:            "{{ SHOPWARE_SEARCH_ENABLED }}"
       engine:             "{{ SHOPWARE_SEARCH_ENGINE }}"
