@@ -14,6 +14,7 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
 {% set service_name = 'nginx' %}
+{% set container_port = 80 %}
   {{ service_name }}:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ SHOPWARE_NGINX_IMAGE }}:{{ SHOPWARE_NGINX_VERSION }}"
@@ -24,7 +25,10 @@
       - data:/var/www/html:ro
     depends_on:
       - php
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
+{% filter indent(4) %}
+    {% include 'roles/docker-container/templates/healthcheck/http.yml.j2' %}
+{% endfilter %}
+
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% if SHOPWARE_OPENSEARCH_ENABLED %}
