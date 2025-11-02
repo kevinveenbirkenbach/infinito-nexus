@@ -1,7 +1,4 @@
 title:                            "{{ SOFTWARE_NAME }} Shop"
-configuration:
-  search:
-    engine:                      "{{ SHOPWARE_SEARCH_ENGINE }}"
 features:
   central_database:               true
   redis:                          true
@@ -21,32 +18,35 @@ docker:
     database:
       enabled: true
     php:
-      image:            "{{ SHOPWARE_PHP_IMAGE }}"
-      version:          "{{ SHOPWARE_VERSION }}"
-      name:             "{{ SHOPWARE_PHP_CONTAINER }}"
-      cpus:             2.0
-      mem_reservation:  2g
-      mem_limit:        4g
-      pids_limit:       2048
+      image: "ghcr.io/shopware/development"
+      version: "latest"
+      name: "shopware-php"
+      cpus: 2.0
+      mem_reservation: 2g
+      mem_limit: 4g
+      pids_limit: 2048
     nginx:
-      image:            "{{ SHOPWARE_NGINX_IMAGE }}"
-      version:          "{{ SHOPWARE_NGINX_VERSION }}"
-      name:             "{{ SHOPWARE_NGINX_CONTAINER }}"
-      port:             8080
-      cpus:             0.5
-      mem_reservation:  256m
-      mem_limit:        512m
+      image: "nginx"
+      version: "alpine"
+      name: "shopware-nginx"
+      port: 8080
+      cpus: 0.5
+      mem_reservation: 256m
+      mem_limit: 512m
     redis:
-      enabled:            "{{ SHOPWARE_REDIS_ENABLED }}"
-      cpus:               0.25
-      mem_reservation:    256m
-      mem_limit:          512m
-    elasticsearch:
-      mem_limit:          2gb
+      enabled: true
+      image: "redis"
+      version: "7-alpine"
+      cpus: 0.25
+      mem_reservation: 256m
+      mem_limit: 512m
     opensearch:
-      mem_limit:          2gb
-    search:
-      enabled:            "{{ SHOPWARE_SEARCH_ENABLED }}"
-      engine:             "{{ SHOPWARE_SEARCH_ENGINE }}"
+      enabled: true
+      image: "opensearchproject/opensearch"
+      version: "2.12.0"
+      name: "shopware-opensearch"
+      cpus: 1.0
+      mem_reservation: 2g
+      mem_limit: 4g
   volumes:
-    data:                   "{{ SHOPWARE_VOLUME }}"
+    data: "shopware_data"

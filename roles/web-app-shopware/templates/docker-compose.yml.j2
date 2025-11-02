@@ -27,29 +27,20 @@
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-{% if SHOPWARE_SEARCH_ENABLED %}
-  {% if SHOPWARE_SEARCH_ENGINE == 'opensearch' %}
+{% if SHOPWARE_OPENSEARCH_ENABLED %}
 {% set service_name = 'opensearch' %}
   {{ service_name }}:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: opensearchproject/opensearch:2
+    image: "{{ SHOPWARE_OPENSEARCH_IMAGE }}:{{ SHOPWARE_OPENSEARCH_VERSION }}"
+    container_name: "{{ SHOPWARE_OPENSEARCH_CONTAINER }}"
     environment:
       - discovery.type=single-node
       - plugins.security.disabled=true
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms{{ SHOPWARE_OPENSEARCH_MEM_RESERVATION }} -Xmx{{ SHOPWARE_OPENSEARCH_MEM_RESERVATION }}
     ulimits:
       memlock: { soft: -1, hard: -1 }
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
-  {% else %}
-{% set service_name = 'elasticsearch' %}
-  {{ service_name }}:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.22
-    environment:
-      - discovery.type=single-node
-    ulimits:
-      memlock: { soft: -1, hard: -1 }
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-  {% endif %}
 {% endif %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
