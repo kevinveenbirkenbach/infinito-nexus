@@ -2,8 +2,8 @@ title:                            "{{ SOFTWARE_NAME }} Shop"
 features:
   central_database:               true
   redis:                          true
-  ldap:                           true         # via plugin
-  oidc:                           false        # via plugin (Keycloak)
+  ldap:                           false # Not implemented yet
+  oidc:                           false # Not implemented yet
   logout:                         true
 server:
   csp:
@@ -18,8 +18,8 @@ docker:
     database:
       enabled: true
     php:
-      image: "ghcr.io/shopware/development"
-      version: "latest"
+      image: "ghcr.io/shopware/docker-base"
+      version: "8.3"
       name: "shopware-php"
       cpus: 2.0
       mem_reservation: 2g
