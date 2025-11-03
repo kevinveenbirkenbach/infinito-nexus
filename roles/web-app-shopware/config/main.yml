@@ -5,6 +5,8 @@ features:
   ldap:                           false # Not implemented yet
   oidc:                           false # Not implemented yet
   logout:                         true
+  desktop:                        true
+  css:                            true
 server:
   csp:
     flags:
