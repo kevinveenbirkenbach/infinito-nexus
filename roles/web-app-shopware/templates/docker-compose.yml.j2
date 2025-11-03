@@ -7,6 +7,7 @@ x-environment: &shopware
     - thumbnail:/var/www/html/public/thumbnail
     - sitemap:/var/www/html/public/sitemap
     - "{{ SHOPWARE_INIT_HOST }}:{{ SHOPWARE_INIT_DOCKER }}:ro"
+    - bundles:/var/www/html/public/bundles
   working_dir: {{ SHOPWARE_ROOT }}
 
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
@@ -22,6 +23,7 @@ x-environment: &shopware
     <<: *shopware
     container_name: "{{ SHOPWARE_INIT_CONTAINER }}"
     entrypoint: [ "sh", "{{ SHOPWARE_INIT_DOCKER }}" ]
+    user: "0:0"
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
@@ -113,5 +115,7 @@ x-environment: &shopware
     name: {{ entity_name }}_thumbnail
   sitemap:
     name: {{ entity_name }}_sitemap
+  bundles:
+    name: {{ entity_name }}_bundles
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

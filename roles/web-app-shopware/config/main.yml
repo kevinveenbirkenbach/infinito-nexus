@@ -10,7 +10,10 @@ server:
     flags:
       script-src-elem:
         unsafe-inline:  true
-    whitelist: {}
+        unsafe-eval:    true
+    whitelist:
+      font-src:
+        - "data:"
   domains:
     aliases: []
     canonical:
