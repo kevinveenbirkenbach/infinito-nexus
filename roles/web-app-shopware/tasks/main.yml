@@ -1,0 +1,35 @@
+---
+- name: "Load docker, DB and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full-stateful
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: "Deploy {{ SHOPWARE_INIT_HOST }}"
+  copy:
+    src:  init.sh
+    dest: "{{ SHOPWARE_INIT_HOST }}"
+    mode: "0755"
+  notify:
+    - docker compose up
+    - docker compose build
+
+- name: "Flush docker compose handlers"
+  meta: flush_handlers
+
+- name: Wait for Shopware HTTP endpoint
+  wait_for:
+    host: "127.0.0.1"
+    port: "{{ ports.localhost.http[application_id] }}"
+    delay: 5
+    timeout: 300
+
+- name: "Ensure admin user exists with correct password"
+  include_tasks: 01_admin.yml
+
+#- name: Execute setup routines (OIDC/LDAP)
+#  include_tasks: 02_setup.yml
+#
+#- name: Execute cleanup routines
+#  include_tasks: 03_cleanup.yml
+#  when: MODE_CLEANUP

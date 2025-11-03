@@ -1,0 +1,7 @@
+- name: Install & configure OIDC plugin (if enabled)
+  include_tasks: setup/oidc.yml
+  when: applications | get_app_conf(application_id, 'features.oidc')
+
+- name: Install & configure LDAP plugin (if enabled)
+  include_tasks: setup/ldap.yml
+  when: applications | get_app_conf(application_id, 'features.ldap')

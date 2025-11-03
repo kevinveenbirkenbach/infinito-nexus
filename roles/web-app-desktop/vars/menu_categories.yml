@@ -25,7 +25,6 @@ portfolio_menu_categories:
       - ollama
       - openwebui
       - flowise
-      - minio
       - qdrant
       - litellm
 
@@ -102,14 +101,12 @@ portfolio_menu_categories:
       - fusiondirectory
       - user-management
 
-  Customer Relationship Management:
-    description: "Tools for managing customer relationships, sales pipelines, marketing, and support activities."
+  Customer Relationship:
+    description: "Customer Relationship Management (CRM) software for managing customer relationships, sales pipelines, marketing, and support activities."
     icon: "fa-solid fa-address-book"
     tags:
       - crm
       - customer
-      - relationship
-      - sales
       - marketing
       - support
       - espocrm
@@ -222,7 +219,7 @@ portfolio_menu_categories:
       - snipe-it
 
   Content Management:
-    description: "CMS and web publishing platforms"
+    description: "Content Management Systems (CMS) and web publishing platforms"
     icon: "fa-solid fa-file-alt"
     tags:
       - cms
@@ -232,3 +229,26 @@ portfolio_menu_categories:
       - joomla
       - wordpress
       - blog
+
+  Commerce:
+    description: "Platforms for building and managing online shops, product catalogs, and digital sales channels — including payment, inventory, and customer features."
+    icon: "fa-solid fa-cart-shopping"
+    tags:
+      - commerce
+      - ecommerce
+      - shopware
+      - shop
+      - sales
+      - store
+      - magento
+      - pretix
+
+  Storage:
+    description: "High-performance, self-hosted storage solutions for managing, scaling, and accessing unstructured data — including object storage compatible with Amazon S3 APIs."
+    icon: "fa-solid fa-database"
+    tags:
+      - storage
+      - object-storage
+      - s3
+      - minio
+      - datasets

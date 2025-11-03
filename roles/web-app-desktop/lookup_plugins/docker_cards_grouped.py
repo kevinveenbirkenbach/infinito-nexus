@@ -4,11 +4,13 @@ __metaclass__ = type
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 
+
 class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
         """
         Group the given cards into categorized and uncategorized lists
         based on the tags from menu_categories.
+        Categories are sorted alphabetically before returning.
         """
         if len(terms) < 2:
             raise AnsibleError("Missing required arguments")
@@ -19,6 +21,7 @@ class LookupModule(LookupBase):
         categorized = {}
         uncategorized = []
 
+        # Categorize cards
         for card in cards:
             found = False
             for category, data in menu_categories.items():
@@ -29,10 +32,14 @@ class LookupModule(LookupBase):
             if not found:
                 uncategorized.append(card)
 
+        # Sort categories alphabetically
+        sorted_categorized = {
+            k: categorized[k] for k in sorted(categorized.keys(), key=str.lower)
+        }
+
         return [
             {
-                'categorized': categorized,
+                'categorized': sorted_categorized,
                 'uncategorized': uncategorized,
             }
         ]
-

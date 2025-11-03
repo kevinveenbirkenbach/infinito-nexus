@@ -1,0 +1,7 @@
+- name: Remove OIDC plugin if disabled
+  include_tasks: cleanup/oidc.yml
+  when: not (applications | get_app_conf(application_id, 'features.oidc'))
+
+- name: Remove LDAP plugin if disabled
+  include_tasks: cleanup/ldap.yml
+  when: not (applications | get_app_conf(application_id, 'features.ldap'))

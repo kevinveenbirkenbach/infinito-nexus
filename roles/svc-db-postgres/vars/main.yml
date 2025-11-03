@@ -6,7 +6,7 @@ entity_name:                              "{{ application_id | get_entity_name }
 docker_compose_flush_handlers:            true
 
 # Docker Compose
-database_type:                            "{{ application_id | get_entity_name }}"
+database_type:                            "{{ entity_name }}"
 
 ## Postgres
 POSTGRES_VOLUME:                          "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
