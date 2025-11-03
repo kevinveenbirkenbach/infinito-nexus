@@ -12,6 +12,17 @@
       - assets:/app/client/dist
       - data:/data
       - config:/config
+    environment:
+      - NODE_OPTIONS=--max-old-space-size={{ PEERTUBE_MAX_OLD_SPACE_SIZE }}
+      - PEERTUBE_TRANSCODING_CONCURRENCY={{ PEERTUBE_TRANSCODING_CONCURRENCY }}
+    shm_size: "512m"
+    tmpfs:
+      - /tmp:size=1g,exec
+    ulimits:
+      nofile:
+        soft: 131072
+        hard: 131072
+      nproc:  8192
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}

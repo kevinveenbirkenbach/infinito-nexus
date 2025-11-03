@@ -32,12 +32,7 @@ SHOPWARE_WORKER_REPLICAS:       "{{ applications | get_app_conf(application_id, 
 SHOPWARE_REDIS_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.redis.enabled') }}"
 SHOPWARE_REDIS_ADDRESS:               "redis:6379"
 SHOPWARE_OPENSEARCH_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.enabled') }}"
-SHOPWARE_OPENSEARCH_ENGINE:           "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.engine') }}"
 SHOPWARE_OPENSEARCH_IMAGE:            "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.image') }}"
 SHOPWARE_OPENSEARCH_VERSION:          "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.version') }}"
 SHOPWARE_OPENSEARCH_CONTAINER:        "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.name') }}"
 SHOPWARE_OPENSEARCH_MEM_RESERVATION:  "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.mem_reservation') }}"
-SHOPWARE_OPENSEARCH_MEM_LIMIT:        "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.mem_limit') }}"
-
-# IAM (true if either OIDC or LDAP is enabled)
-SHOPWARE_IAM_ENABLED: "{{ applications | get_app_conf(application_id, 'features.oidc') or applications | get_app_conf(application_id, 'features.ldap') }}"

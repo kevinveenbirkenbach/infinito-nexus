@@ -37,7 +37,7 @@ BUILTIN_FILTERS: Set[str] = {
     "type_debug", "json_query", "mandatory", "hash", "checksum",
     "lower", "upper", "capitalize", "unique", "dict2items", "items2dict", 
     "password_hash", "path_join", "product", "quote", "split", "ternary", "to_nice_yaml", 
-    "tojson", "to_nice_json",
+    "tojson", "to_nice_json", "human_to_bytes",
 
 
     # Date/time-ish

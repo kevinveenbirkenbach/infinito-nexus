@@ -30,6 +30,10 @@ docker:
   services:
     redis:
       enabled: true
+      cpus: "0.5"
+      mem_reservation: "256m"
+      mem_limit: "512m"
+      pids_limit: 512
     database: 
       enabled: true
     peertube: 
@@ -38,6 +42,10 @@ docker:
       image:            "chocobozzz/peertube"
       backup:
         no_stop_required: true
+      cpus: 4
+      mem_reservation:  "4g"
+      mem_limit:        "8g"
+      pids_limit:       2048  # ffmpeg spawnt Threads/Prozesse
   volumes:
     data: peertube_data
     config: peertube_config

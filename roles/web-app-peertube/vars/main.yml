@@ -1,17 +1,47 @@
 # General
-application_id:                 "web-app-peertube"
-database_type:                  "postgres"
+application_id:                   "web-app-peertube"
+database_type:                    "postgres"
 
 # Docker
-docker_compose_flush_handlers:  true
+docker_compose_flush_handlers:    true
 
 # Role variables
-PEERTUBE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.peertube.version') }}"
-PEERTUBE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.peertube.image') }}"
-PEERTUBE_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.peertube.name') }}"
-PEERTUBE_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-PEERTUBE_CONFIG_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"
+PEERTUBE_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.peertube.version') }}"
+PEERTUBE_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.peertube.image') }}"
+PEERTUBE_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.peertube.name') }}"
+PEERTUBE_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+PEERTUBE_CONFIG_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"
 
 # OIDC
-PEERTUBE_OIDC_PLUGIN:           "peertube-plugin-auth-openid-connect"
-PEERTUBE_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'features.oidc', False) }}"
+PEERTUBE_OIDC_PLUGIN:             "peertube-plugin-auth-openid-connect"
+PEERTUBE_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+
+# === Dynamic performance defaults ==========================================
+
+# Raw Docker configuration values (with sane fallbacks)
+peertube_cpus:          "{{ applications | get_app_conf(application_id, 'docker.services.peertube.cpus') | float }}"
+peertube_mem_limit_raw: "{{ applications | get_app_conf(application_id, 'docker.services.peertube.mem_limit') }}"
+peertube_mem_bytes:     "{{ peertube_mem_limit_raw | human_to_bytes }}"
+peertube_mem_mb:        "{{ ((peertube_mem_bytes | int) // (1024 * 1024)) | int }}"
+
+# ---------------------------------------------------------------------------
+# Node heap size:
+# ~35% of total RAM, but at least 768 MB, at most 3072 MB,
+# and never more than 60% of total memory (safety cap for small containers)
+# ---------------------------------------------------------------------------
+
+_peertube_heap_candidate_mb: "{{ ((peertube_mem_mb | float) * 0.35) | round(0, 'floor') | int }}"
+_peertube_heap_cap_mb:       "{{ ((peertube_mem_mb | float) * 0.60) | round(0, 'floor') | int }}"
+
+# Step 1: enforce minimum (≥768 MB)
+_peertube_heap_min_applied:  "{{ [ (_peertube_heap_candidate_mb | int), 768 ] | max }}"
+
+# Step 2: determine hard cap (min of 3072 MB and 60% of total memory)
+_peertube_heap_hardcap:      "{{ [ 3072, (_peertube_heap_cap_mb | int) ] | min }}"
+
+# Step 3: final heap = min(min-applied, hardcap)
+PEERTUBE_MAX_OLD_SPACE_SIZE: "{{ [ (_peertube_heap_min_applied | int), (_peertube_heap_hardcap | int) ] | min }}"
+
+# Transcoding concurrency: half the vCPUs; min 1, max 8
+_peertube_concurrency_candidate:  "{{ ((peertube_cpus | float) * 0.5) | round(0, 'floor') | int }}"
+PEERTUBE_TRANSCODING_CONCURRENCY: "{{ [ ( [ (_peertube_concurrency_candidate | int), 1 ] | max ), 8 ] | min }}"
