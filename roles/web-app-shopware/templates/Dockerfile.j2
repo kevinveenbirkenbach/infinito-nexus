@@ -17,11 +17,11 @@ ENV COMPOSER_ALLOW_SUPERUSER=1 \
 WORKDIR /app
 ARG SHOPWARE_PROD_VERSION=shopware/production:6.7.3.1
 
-# 1) Scaffold without installing
+# 1) Scaffold project without installing dependencies
 RUN set -eux; \
     composer create-project "${SHOPWARE_PROD_VERSION}" /app --no-install
 
-# 2) Install deps WITHOUT running scripts and ignoring build-time ext reqs
+# 2) Install dependencies (ignoring build-time extension checks) + add Redis transport
 RUN set -eux; \
     composer install \
       --no-dev \
@@ -30,7 +30,17 @@ RUN set -eux; \
       --no-scripts \
       --ignore-platform-req=ext-gd \
       --ignore-platform-req=ext-intl \
-      --ignore-platform-req=ext-pdo_mysql
+      --ignore-platform-req=ext-pdo_mysql; \
+    composer require symfony/redis-messenger:^6.4 \
+      -W \
+      --no-scripts \
+      --no-progress \
+      --update-no-dev \
+      --ignore-platform-req=ext-gd \
+      --ignore-platform-req=ext-intl \
+      --ignore-platform-req=ext-pdo_mysql \
+      --ignore-platform-req=ext-redis
+
 
 ############################
 # Stage 2: Runtime
@@ -44,7 +54,8 @@ USER root
 RUN set -eux; \
     apk add --no-cache php83-gd         || apk add --no-cache php82-gd         || apk add --no-cache php-gd || true; \
     apk add --no-cache php83-intl       || apk add --no-cache php82-intl       || apk add --no-cache php-intl || true; \
-    apk add --no-cache php83-pdo_mysql  || apk add --no-cache php82-pdo_mysql  || apk add --no-cache php-pdo_mysql || true
+    apk add --no-cache php83-pdo_mysql  || apk add --no-cache php82-pdo_mysql  || apk add --no-cache php-pdo_mysql || true; \
+    apk add --no-cache php83-redis      || apk add --no-cache php82-redis      || apk add --no-cache php-redis || true
 
 # Copy built application from the builder
 COPY --chown=www-data:www-data --from=builder /app /var/www/html
