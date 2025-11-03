@@ -1,0 +1,90 @@
+# ------------------------------------------------------------------------------
+# Shopware Application Image (Alpine-compatible)
+# ------------------------------------------------------------------------------
+# - Stage 1 (builder): use Composer to fetch Shopware while ignoring build-time
+#   PHP extensions (we'll install them in the runtime image).
+# - Stage 2 (runtime): install required PHP extensions and copy the app + init.sh
+# ------------------------------------------------------------------------------
+
+############################
+# Stage 1: Builder
+############################
+FROM composer:2.7 AS builder
+ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    COMPOSER_NO_INTERACTION=1 \
+    COMPOSER_PROCESS_TIMEOUT=900
+
+WORKDIR /app
+ARG SHOPWARE_PROD_VERSION=shopware/production:6.7.3.1
+
+# 1) Scaffold without installing
+RUN set -eux; \
+    composer create-project "${SHOPWARE_PROD_VERSION}" /app --no-install
+
+# 2) Install deps WITHOUT running scripts and ignoring build-time ext reqs
+RUN set -eux; \
+    composer install \
+      --no-dev \
+      --optimize-autoloader \
+      --no-progress \
+      --no-scripts \
+      --ignore-platform-req=ext-gd \
+      --ignore-platform-req=ext-intl \
+      --ignore-platform-req=ext-pdo_mysql
+
+############################
+# Stage 2: Runtime
+############################
+FROM ghcr.io/shopware/docker-base:8.3
+WORKDIR /var/www/html
+
+# Install required PHP extensions in the Alpine-based runtime
+# (try php83-*, fall back to php82-*, then to generic)
+USER root
+RUN set -eux; \
+    apk add --no-cache php83-gd         || apk add --no-cache php82-gd         || apk add --no-cache php-gd || true; \
+    apk add --no-cache php83-intl       || apk add --no-cache php82-intl       || apk add --no-cache php-intl || true; \
+    apk add --no-cache php83-pdo_mysql  || apk add --no-cache php82-pdo_mysql  || apk add --no-cache php-pdo_mysql || true
+
+# Copy built application from the builder
+COPY --chown=www-data:www-data --from=builder /app /var/www/html
+
+# Optional: snapshot of pristine app to seed an empty volume (used by init container)
+RUN mkdir -p /usr/src/shopware \
+ && cp -a /var/www/html/. /usr/src/shopware/. \
+ && chown -R www-data:www-data /var/www/html /usr/src/shopware
+
+# Ensure writable directories exist with correct ownership
+RUN set -eux; \
+    mkdir -p \
+      /var/www/html/files \
+      /var/www/html/var \
+      /var/www/html/public/media \
+      /var/www/html/public/thumbnail \
+      /var/www/html/public/sitemap \
+      /var/www/html/public/theme; \
+    chown -R www-data:www-data /var/www/html
+
+# Add trusted proxies wiring (Symfony reads env TRUSTED_PROXIES)
+RUN set -eux; \
+    mkdir -p /var/www/html/config/packages; \
+    if [ ! -f /var/www/html/config/packages/framework.yaml ]; then \
+      printf "framework:\n  trusted_proxies: '%%env(TRUSTED_PROXIES)%%'\n" > /var/www/html/config/packages/framework.yaml; \
+    fi
+
+# Copy the init script that your Compose mounts as volumes/init.sh in the build context
+COPY --chown=www-data:www-data volumes/init.sh /usr/local/bin/init.sh
+RUN chmod +x /usr/local/bin/init.sh
+
+# Drop back to the app user
+USER www-data
+
+# Default envs (override via .env / compose env_file)
+ENV APP_ENV=prod \
+    APP_URL=http://localhost:8000 \
+    TRUSTED_PROXIES=127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+
+# Expose internal port & add a lightweight healthcheck
+EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=5s --retries=5 --start-period=20s \
+  CMD php -r '$s=@fsockopen("127.0.0.1", 8000, $e, $t, 3); if(!$s) exit(1); fclose($s);'

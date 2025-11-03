@@ -1,0 +1,49 @@
+#!/bin/sh
+set -eu
+
+cd {{ SHOPWARE_ROOT }}
+
+mkdir -p {{ SHOPWARE_ROOT }}/.infinito
+MARKER="{{ SHOPWARE_ROOT }}/.infinito/installed"
+
+echo "[INIT] Checking database via PDO..."
+php -r '
+$url = getenv("DATABASE_URL");
+if (!$url) { fwrite(STDERR, "DATABASE_URL not set\n"); exit(1); }
+$p = parse_url($url);
+if (!$p || !isset($p["scheme"])) { fwrite(STDERR, "Invalid DATABASE_URL\n"); exit(1); }
+$scheme = $p["scheme"];
+if ($scheme === "mysql" || $scheme === "mariadb") {
+  $host = $p["host"] ?? "localhost";
+  $port = $p["port"] ?? 3306;
+  $db   = ltrim($p["path"] ?? "", "/");
+  $user = $p["user"] ?? "";
+  $pass = $p["pass"] ?? "";
+  $dsn  = "mysql:host=".$host.";port=".$port.";dbname=".$db.";charset=utf8mb4";
+} else {
+  fwrite(STDERR, "Unsupported DB scheme: ".$scheme."\n"); exit(1);
+}
+$retries = 60;
+while ($retries-- > 0) {
+  try { $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_TIMEOUT => 3]); exit(0); }
+  catch (Exception $e) { sleep(2); }
+}
+fwrite(STDERR, "DB not reachable\n"); exit(1);
+'
+
+if [ ! -f "$MARKER" ]; then
+  echo "[INIT] Installing Shopware..."
+  php -d memory_limit=1024M bin/console system:install --basic-setup --create-database --force
+  php -d memory_limit=1024M bin/console database:migrate --all
+  php -d memory_limit=1024M bin/console database:migrate-destructive --all
+  php bin/console user:create "{{ users.administrator.username }}" \
+    --admin --password="{{ users.administrator.password }}" \
+    --firstName="Admin" --lastName="User" --email="{{ users.administrator.email }}" || true
+  php bin/console cache:clear || true
+  php bin/console dal:refresh:index || true
+  touch "$MARKER"
+  chown -R {{ SHOPWARE_USER }}:{{ SHOPWARE_USER }} {{ SHOPWARE_ROOT }}
+  echo "[INIT] Done."
+else
+  echo "[INIT] Marker found, skipping install."
+fi
