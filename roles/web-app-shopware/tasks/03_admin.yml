@@ -1,0 +1,19 @@
+# Ensures that the admin user exists and always has the desired password
+- name: "Ensure Shopware admin exists and has the desired password"
+  shell: |
+    docker exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
+      set -e
+      cd {{ SHOPWARE_ROOT }}
+      php bin/console user:create "{{ users.administrator.username }}" \
+        --admin \
+        --password="{{ users.administrator.password }}" \
+        --firstName="{{ users.administrator.username }}" \
+        --lastName="{{ PRIMARY_DOMAIN | lower }}" \
+        --email="{{ users.administrator.email }}" || true
+      php bin/console user:change-password "{{ users.administrator.username }}" \
+        --password="{{ users.administrator.password }}" || true
+      php bin/console user:update "{{ users.administrator.username }}" \
+        --email="{{ users.administrator.email }}" 2>/dev/null || true
+    '
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"

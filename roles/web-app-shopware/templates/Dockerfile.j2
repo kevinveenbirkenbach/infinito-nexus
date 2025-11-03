@@ -83,17 +83,8 @@ RUN set -eux; \
       printf "framework:\n  trusted_proxies: '%%env(TRUSTED_PROXIES)%%'\n" > /var/www/html/config/packages/framework.yaml; \
     fi
 
-# Copy the init script that your Compose mounts as volumes/init.sh in the build context
-COPY --chown=www-data:www-data volumes/init.sh /usr/local/bin/init.sh
-RUN chmod +x /usr/local/bin/init.sh
-
 # Drop back to the app user
 USER www-data
-
-# Default envs (override via .env / compose env_file)
-ENV APP_ENV=prod \
-    APP_URL=http://localhost:8000 \
-    TRUSTED_PROXIES=127.0.0.1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
 
 # Expose internal port & add a lightweight healthcheck
 EXPOSE 8000

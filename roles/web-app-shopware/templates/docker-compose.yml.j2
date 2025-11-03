@@ -6,6 +6,7 @@ x-environment: &shopware
     - media:/var/www/html/public/media
     - thumbnail:/var/www/html/public/thumbnail
     - sitemap:/var/www/html/public/sitemap
+    - "{{ SHOPWARE_INIT_HOST }}:{{ SHOPWARE_INIT_DOCKER }}:ro"
   working_dir: {{ SHOPWARE_ROOT }}
 
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
@@ -20,7 +21,7 @@ x-environment: &shopware
 {% set docker_restart_policy = DOCKER_RESTART_POLICY %}
     <<: *shopware
     container_name: "{{ SHOPWARE_INIT_CONTAINER }}"
-    entrypoint: [ "sh", "/usr/local/bin/init.sh" ]
+    entrypoint: [ "sh", "{{ SHOPWARE_INIT_DOCKER }}" ]
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 

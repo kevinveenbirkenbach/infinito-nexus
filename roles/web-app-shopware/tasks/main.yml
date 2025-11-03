@@ -6,9 +6,10 @@
     docker_compose_flush_handlers: false
 
 - name: "Deploy {{ SHOPWARE_INIT_HOST }}"
-  template:
-    src:  init.sh.j2
+  copy:
+    src:  init.sh
     dest: "{{ SHOPWARE_INIT_HOST }}"
+    mode: "0755"
   notify:
     - docker compose up
     - docker compose build
@@ -22,6 +23,9 @@
     port: "{{ ports.localhost.http[application_id] }}"
     delay: 5
     timeout: 300
+
+- name: "Ensure admin user exists with correct password"
+  include_tasks: 03_admin.yml
 
 - name: "Warm up caches and index"
   shell: |
