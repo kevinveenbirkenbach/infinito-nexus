@@ -30,6 +30,8 @@
     argv:
       - docker
       - exec
+      - --user
+      - "{{ JOOMLA_WEB_USER }}"
       - "{{ JOOMLA_CONTAINER }}"
       - php
       - "{{ JOOMLA_INSTALLER_CLI_FILE }}"
