@@ -8,6 +8,8 @@ x-environment: &shopware
     - sitemap:/var/www/html/public/sitemap
   working_dir: {{ SHOPWARE_ROOT }}
 
+{% include 'roles/docker-container/templates/networks.yml.j2' %}
+
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
 # -------------------------
@@ -41,8 +43,6 @@ x-environment: &shopware
     {% include 'roles/docker-container/templates/healthcheck/http.yml.j2' %}
 {% endfilter %}
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-
 {# -------------------------
    WORKER (async queues)
    ------------------------- #}
@@ -59,7 +59,6 @@ x-environment: &shopware
 # @todo Activate for swarm deploy
 #    deploy:
 #      replicas: {{ SHOPWARE_WORKER_REPLICAS }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {# -------------------------
    SCHEDULER (cron-like)
@@ -74,7 +73,6 @@ x-environment: &shopware
     depends_on:
       init:
         condition: service_completed_successfully
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% if SHOPWARE_OPENSEARCH_ENABLED %}
 {% set service_name = 'opensearch' %}
