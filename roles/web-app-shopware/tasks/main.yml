@@ -25,22 +25,11 @@
     timeout: 300
 
 - name: "Ensure admin user exists with correct password"
-  include_tasks: 03_admin.yml
+  include_tasks: 01_admin.yml
 
-- name: "Warm up caches and index"
-  shell: |
-    docker exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} bash -lc '
-      cd {{ SHOPWARE_ROOT }}
-      php bin/console messenger:consume --time-limit=60 --limit=100 || true
-      php bin/console dal:refresh:index || true
-      php bin/console cache:clear
-    '
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-
-- name: Execute setup routines (OIDC/LDAP)
-  include_tasks: 01_setup.yml
-
-- name: Execute cleanup routines
-  include_tasks: 02_cleanup.yml
-  when: MODE_CLEANUP
+#- name: Execute setup routines (OIDC/LDAP)
+#  include_tasks: 02_setup.yml
+#
+#- name: Execute cleanup routines
+#  include_tasks: 03_cleanup.yml
+#  when: MODE_CLEANUP

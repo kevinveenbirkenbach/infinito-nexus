@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
-  description: "Open-Source Commerce (PHP/Symfony) with optional OIDC/LDAP, Redis & OpenSearch — containerized & automated."
+  description: "Shopware is a modern open-source eCommerce platform built on PHP and Symfony. It enables businesses to create scalable online stores with flexible product management, intuitive administration, customizable storefronts, and powerful APIs for headless and omnichannel commerce."
   license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
@@ -11,10 +11,6 @@ galaxy_info:
   galaxy_tags:
     - shopware
     - ecommerce
-    - docker
-    - symfony
-    - oidc
-    - ldap
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
   documentation: "https://docs.infinito.nexus/"
