@@ -11,8 +11,8 @@ contact:
       description: Send {{ 'us' if service_provider.type == 'legal' else 'me' }} an email
       icon:
         class: fa-solid fa-envelope
-      url: mailto:{{service_provider.contact.email}}
-      identifier: {{service_provider.contact.email}}
+      url: mailto:{{ service_provider.contact.email }}
+      identifier: {{ service_provider.contact.email }}
 
 {% endif %}
 {% if service_provider.contact.phone is defined %}
@@ -32,6 +32,6 @@ contact:
       description: Chat with {{ 'us' if service_provider.type == 'legal' else 'me' }} on Matrix
       icon:
         class: fa-solid fa-cubes
-      identifier: "{{service_provider.contact.matrix}}"
+      identifier: "{{ service_provider.contact.matrix }}"
 
 {% endif %}
