@@ -21,6 +21,7 @@ server:
       connect-src:
         - https://q.clarity.ms
         - https://n.clarity.ms
+        - https://z.clarity.ms
         - "data:"
       style-src-elem: []
       font-src: [] 
