@@ -24,7 +24,7 @@ server:
         - https://z.clarity.ms
         - "data:"
       style-src-elem: []
-      font-src: [] 
+      font-src: []
       frame-ancestors: [] 
     flags:
       style-src-attr:
