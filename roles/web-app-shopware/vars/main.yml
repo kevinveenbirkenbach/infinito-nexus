@@ -28,9 +28,12 @@ SHOPWARE_WORKER_ENTRYPOINT:     "{{ applications | get_app_conf(application_id, 
 SHOPWARE_SCHED_ENTRYPOINT:      "{{ applications | get_app_conf(application_id, 'docker.services.scheduler.entrypoint') }}"
 SHOPWARE_WORKER_REPLICAS:       "{{ applications | get_app_conf(application_id, 'docker.services.worker.replicas') }}"
 
-# Search/Cache
+# Redis Cache
 SHOPWARE_REDIS_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.redis.enabled') }}"
 SHOPWARE_REDIS_ADDRESS:               "redis:6379"
+
+# Opensearch
+SHOPWARE_OPENSEARCH_PORT:             "9200"
 SHOPWARE_OPENSEARCH_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.enabled') }}"
 SHOPWARE_OPENSEARCH_IMAGE:            "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.image') }}"
 SHOPWARE_OPENSEARCH_VERSION:          "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.version') }}"

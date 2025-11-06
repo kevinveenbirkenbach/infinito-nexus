@@ -85,8 +85,3 @@ RUN set -eux; \
 
 # Drop back to the app user
 USER www-data
-
-# Expose internal port & add a lightweight healthcheck
-EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s --retries=5 --start-period=20s \
-  CMD php -r '$s=@fsockopen("127.0.0.1", 8000, $e, $t, 3); if(!$s) exit(1); fclose($s);'

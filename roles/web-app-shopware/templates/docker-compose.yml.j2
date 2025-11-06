@@ -42,9 +42,13 @@ x-environment: &shopware
     depends_on:
       init:
         condition: service_completed_successfully
-{% filter indent(4) %}
-    {% include 'roles/docker-container/templates/healthcheck/http.yml.j2' %}
-{% endfilter %}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:{{ container_port }}/robots.txt || wget -q --spider http://127.0.0.1:{{ container_port }}/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
@@ -64,6 +68,12 @@ x-environment: &shopware
 # @todo Activate for swarm deploy
 #    deploy:
 #      replicas: {{ SHOPWARE_WORKER_REPLICAS }}
+    healthcheck:
+      test: ["CMD", "php", "-v"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
@@ -80,6 +90,13 @@ x-environment: &shopware
     depends_on:
       init:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "php", "-v"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
@@ -99,6 +116,12 @@ x-environment: &shopware
     depends_on:
       init:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://127.0.0.1:{{ SHOPWARE_OPENSEARCH_PORT }}/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% endif %}
 
