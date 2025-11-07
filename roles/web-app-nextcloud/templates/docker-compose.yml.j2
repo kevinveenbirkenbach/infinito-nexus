@@ -77,7 +77,8 @@
     volumes:
       - whiteboard_tmp:/tmp
       - whiteboard_fontcache:/var/cache/fontconfig
-
+    environment:
+      - NODE_OPTIONS=--max-old-space-size={{ NEXTCLOUD_WHITEBOARD_MAX_OLD_SPACE_SIZE }}
     expose:
       - "{{ container_port }}"
     shm_size: 1g
