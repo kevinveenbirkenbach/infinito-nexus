@@ -76,12 +76,5 @@ RUN set -eux; \
       /var/www/html/public/theme; \
     chown -R www-data:www-data /var/www/html
 
-# Add trusted proxies wiring (Symfony reads env TRUSTED_PROXIES)
-RUN set -eux; \
-    mkdir -p /var/www/html/config/packages; \
-    if [ ! -f /var/www/html/config/packages/framework.yaml ]; then \
-      printf "framework:\n  trusted_proxies: '%%env(TRUSTED_PROXIES)%%'\n" > /var/www/html/config/packages/framework.yaml; \
-    fi
-
 # Drop back to the app user
 USER www-data

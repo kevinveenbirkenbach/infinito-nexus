@@ -29,8 +29,14 @@ if [ "$(id -u)" -eq 0 ]; then
            "$APP_ROOT/var"
 
   log "Fixing permissions on shared volumes..."
-  chown -R www-data:www-data "$APP_ROOT/public" "$APP_ROOT/var" || true
-  chmod -R 775 "$APP_ROOT/public" "$APP_ROOT/var" || true
+  chown -R www-data:www-data \
+    "$APP_ROOT/public" \
+    "$APP_ROOT/var" \
+    "$APP_ROOT/.infinito" || true
+  chmod -R 775 \
+    "$APP_ROOT/public" \
+    "$APP_ROOT/var" \
+    "$APP_ROOT/.infinito" || true
 
   # Switch to www-data for all subsequent operations
   exec su -s /bin/sh www-data "$0" "$@"

@@ -7,6 +7,8 @@ entity_name:                    "{{ application_id | get_entity_name }}"
 container_port:                 "{{ applications | get_app_conf(application_id, 'docker.services.web.port') }}"
 docker_compose_flush_handlers:  true
 
+SHOPWARE_DOMAIN:                "{{ domains | get_domain(application_id) }}"
+
 # Shopware container/image vars
 SHOPWARE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.shopware.version') }}"
 SHOPWARE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.shopware.image') }}"
@@ -22,6 +24,8 @@ SHOPWARE_WORKER_CONTAINER:      "{{ applications | get_app_conf(application_id, 
 SHOPWARE_SCHED_CONTAINER:       "{{ applications | get_app_conf(application_id, 'docker.services.scheduler.name') }}"
 SHOPWARE_INIT_HOST:             "{{ [ docker_compose.directories.volumes, 'init.sh' ] | path_join }}"
 SHOPWARE_INIT_DOCKER:           "/usr/local/bin/init.sh"
+SHOPWARE_FRAMEWORK_HOST:        "{{ [ docker_compose.directories.config, 'framework.yaml' ] | path_join }}"
+SHOPWARE_FRAMEWORK_DOCKER:      "/var/www/html/config/packages/framework.yaml"
 
 # Entrypoints & replicas
 SHOPWARE_WORKER_ENTRYPOINT:     "{{ applications | get_app_conf(application_id, 'docker.services.worker.entrypoint') }}"

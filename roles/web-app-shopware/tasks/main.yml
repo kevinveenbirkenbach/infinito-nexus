@@ -14,6 +14,14 @@
     - docker compose up
     - docker compose build
 
+- name: "Render framework.yaml (trusted proxies/headers/hosts)"
+  copy:
+    src:  "framework.yaml"
+    dest: "{{ SHOPWARE_FRAMEWORK_HOST }}"
+    mode: "0644"
+  notify:
+    - docker compose up
+
 - name: "Flush docker compose handlers"
   meta: flush_handlers
 
