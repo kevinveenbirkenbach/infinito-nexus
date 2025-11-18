@@ -52,6 +52,10 @@ docker:
       name:               wordpress 
       backup:
         no_stop_required: true
+      cpus:               1
+      mem_reservation:    0.5g
+      mem_limit:          1.5g
+      pids_limit:         512
   volumes: 
     data:                 wordpress_data
 rbac:
