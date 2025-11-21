@@ -7,6 +7,12 @@ server:
     whitelist:
       frame-ancestors:
         - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
+      script-src-elem:
+        - "https://fonts.googleapis.com"
+      style-src-elem:
+        - "https://fonts.googleapis.com"
+      font-src:
+        - "https://fonts.gstatic.com"
     flags:
       script-src-attr:
         unsafe-inline:  true
