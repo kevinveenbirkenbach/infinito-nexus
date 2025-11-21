@@ -24,8 +24,10 @@
 
 {% set service_name = NEXTCLOUD_SERVICE %}
   {{ service_name }}:
-    image: "{{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}"
+    image: "{{ NEXTCLOUD_CUSTOM_IMAGE }}"
     container_name: {{ NEXTCLOUD_CONTAINER }}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+
     volumes:
       - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
       - {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}:{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}:ro

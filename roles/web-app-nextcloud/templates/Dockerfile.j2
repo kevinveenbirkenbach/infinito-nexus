@@ -1,0 +1,5 @@
+FROM {{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}
+{% if NEXTCLOUD_ONLYOFFICE_ENABLED | bool %}
+# Required for ONLYOFFICE
+RUN apk add --no-cache ca-certificates && update-ca-certificates
+{% endif %}

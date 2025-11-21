@@ -1,0 +1,9 @@
+- name: "Load core functions for '{{ application_id }}'"
+  include_role:
+    name: sys-stk-full-stateless
+  vars:
+    docker_compose_flush_handlers:        true
+    docker_compose_file_creation_enabled: true
+    docker_pull_git_repository:           false
+
+- include_tasks: utils/run_once.yml

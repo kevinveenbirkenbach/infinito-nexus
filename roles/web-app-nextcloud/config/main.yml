@@ -8,20 +8,24 @@ server:
         unsafe-inline:  true
       script-src-attr:
         unsafe-eval:    true
+        unsafe-inline:  true  # Required for ONLYOFFICE
     whitelist:
       script-src-elem:
         - "https://www.hcaptcha.com"
         - "https://js.hcaptcha.com"
+        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ PRIMARY_DOMAIN }}"
       font-src:
         - "data:"
       connect-src:
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "{{ WEBSOCKET_PROTOCOL }}://cloud.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://cloud.{{ PRIMARY_DOMAIN }}"
         - "*" # Required to load all external websites in Whiteboard
       frame-src:
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "https://newassets.hcaptcha.com/"
         - "*" # Required to load all external websites in Whiteboard
@@ -204,7 +208,7 @@ plugins:
     enabled: false
   fileslibreofficeedit:
     # Nextcloud LibreOffice integration: allows online editing of documents with LibreOffice (https://apps.nextcloud.com/apps/fileslibreofficeedit)
-    enabled: "{{ not (applications | get_app_conf('web-app-nextcloud', 'plugins.richdocuments.enabled', False, True, True)) }}"
+    enabled: false
   forms:
     # Nextcloud forms: facilitates creation of forms and surveys (https://apps.nextcloud.com/apps/forms)
     enabled: true
@@ -281,7 +285,13 @@ plugins:
     enabled: false # Deactivated because it let to bugs
   richdocuments:
     # Nextcloud Rich Documents: provides collaborative document editing capabilities (https://apps.nextcloud.com/apps/richdocuments)
-    enabled: true # @todo To set it default to true activate https://hub.docker.com/r/collabora/code before
+    enabled: false
+  onlyoffice:
+    # ONLYOFFICE Document Server integration (https://apps.nextcloud.com/apps/onlyoffice)
+    enabled: true
+    incompatible_plugins:
+      - richdocuments
+      - fileslibreofficeedit
   sociallogin:
     # Nextcloud social login: allows authentication using social networks (https://apps.nextcloud.com/apps/sociallogin)
     enabled:    "{{ _applications_nextcloud_oidc_flavor=='sociallogin' | lower }}"

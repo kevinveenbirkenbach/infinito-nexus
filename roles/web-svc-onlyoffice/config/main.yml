@@ -1,0 +1,32 @@
+server:
+  domains:
+    canonical:
+      - "onlyoffice.{{ PRIMARY_DOMAIN }}"
+    aliases: []
+  csp:
+    whitelist:
+      frame-ancestors:
+        - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
+    flags:
+      script-src-attr:
+        unsafe-inline:  true
+      script-src-elem:
+        unsafe-inline:  true
+        unsafe-eval:    true
+docker:
+  services:
+    redis:
+      enabled: false
+    database:
+      enabled: false
+    onlyoffice:
+      image:            "onlyoffice/documentserver"
+      version:          "latest"
+      name:             "onlyoffice"
+      cpus:             2
+      mem_reservation:  "1g"
+      mem_limit:        "2g"
+      pids_limit:       2048
+features:
+  logout:  false
+  desktop: true

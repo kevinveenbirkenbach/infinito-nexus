@@ -1,0 +1,7 @@
+- name: "Install OnlyOffice dependency (Document Server)"
+  include_role:
+    name: web-svc-onlyoffice
+  vars:
+    flush_handlers: true
+  when:
+    - run_once_web_svc_onlyoffice is not defined

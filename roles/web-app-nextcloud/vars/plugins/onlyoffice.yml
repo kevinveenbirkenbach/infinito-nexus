@@ -1,0 +1,24 @@
+plugin_configuration:
+  - appid: "onlyoffice"
+    configkey: "DocumentServerUrl"
+    configvalue: "{{ NEXTCLOUD_ONLYOFFICE_URL }}/"
+
+  - appid: "onlyoffice"
+    configkey: "DocumentServerInternalUrl"
+    configvalue: "{{ NEXTCLOUD_ONLYOFFICE_URL }}/"
+
+  - appid: "onlyoffice"
+    configkey: "StorageUrl"
+    configvalue: "{{ NEXTCLOUD_URL }}/"
+
+  - appid: "onlyoffice"
+    configkey: "jwt_secret"
+    configvalue: "{{ applications | get_app_conf('web-svc-onlyoffice', 'credentials.onlyoffice_jwt_secret', False, '') }}"
+
+  - appid: "onlyoffice"
+    configkey: "jwt_header"
+    configvalue: "Authorization"
+
+  - appid: "onlyoffice"
+    configkey: "verify_peer_off"
+    configvalue: "false"

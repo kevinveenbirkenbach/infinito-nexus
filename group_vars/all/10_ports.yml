@@ -82,6 +82,7 @@ ports:
       web-app-minio_console: 8058
       web-app-mini-qr: 8059
       web-app-shopware: 8060
+      web-svc-onlyoffice: 8061
       web-app-bigbluebutton: 48087    # This port is predefined by bbb. @todo Try to change this to a 8XXX port
   public:
     # The following ports should be changed to 22 on the subdomain via stream mapping

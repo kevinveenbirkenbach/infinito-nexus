@@ -1,0 +1,12 @@
+---
+application_id:             web-svc-onlyoffice
+
+domain:                     "{{ domains | get_domain(application_id) }}"
+http_port:                  "{{ ports.localhost.http[application_id] }}"
+
+container_port:             80   # OnlyOffice DocumentServer Standardport
+
+ONLYOFFICE_CONTAINER:       "{{ applications | get_app_conf(application_id, 'docker.services.onlyoffice.name') }}"
+ONLYOFFICE_IMAGE:           "{{ applications | get_app_conf(application_id, 'docker.services.onlyoffice.image') }}"
+ONLYOFFICE_VERSION:         "{{ applications | get_app_conf(application_id, 'docker.services.onlyoffice.version') }}"
+ONLYOFFICE_JWT_SECRET:      "{{ applications | get_app_conf(application_id, 'credentials.onlyoffice_jwt_secret') }}"

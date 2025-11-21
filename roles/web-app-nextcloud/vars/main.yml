@@ -50,6 +50,7 @@ NEXTCLOUD_SERVICE:                  "{{ entity_name }}"
 NEXTCLOUD_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.version') }}"
 NEXTCLOUD_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.image') }}"
 NEXTCLOUD_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.name') }}"
+NEXTCLOUD_CUSTOM_IMAGE:             "nextcloud_custom"
 
 ### Proxy
 NEXTCLOUD_PROXY_SERVICE:              "proxy"
@@ -134,6 +135,10 @@ NEXTCLOUD_WHITEBOARD_MAX_OLD_SPACE_SIZE:  "{{ applications | node_max_old_space_
 
 ### Collabora
 NEXTCLOUD_COLLABORA_URL:                  "{{ domains | get_url('web-svc-collabora', WEB_PROTOCOL) }}"
+
+### OnlyOffice
+NEXTCLOUD_ONLYOFFICE_URL:                 "{{ domains | get_url('web-svc-onlyoffice', WEB_PROTOCOL) }}"
+NEXTCLOUD_ONLYOFFICE_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.onlyoffice.enabled') }}"
 
 ## User Configuration
 NEXTCLOUD_DOCKER_USER_ID:                 82         # UID of the www-data user
