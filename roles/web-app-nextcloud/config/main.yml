@@ -19,12 +19,16 @@ server:
         - "{{ WEBSOCKET_PROTOCOL }}://cloud.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://cloud.{{ PRIMARY_DOMAIN }}"
+        - "*" # Required to load all external websites in Whiteboard
       frame-src:
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "https://newassets.hcaptcha.com/"
+        - "*" # Required to load all external websites in Whiteboard
       worker-src:
         - "blob:"
+      media-src:
+        - "*" # Required to load all external websites in Whiteboard
   domains:
     canonical:
       - "next.cloud.{{ PRIMARY_DOMAIN }}"
