@@ -39,3 +39,19 @@ plugin_configuration:
   - appid: "spreed"
     configkey: "internal_secret"
     configvalue: "{{ NEXTCLOUD_HPB_INTERNAL_SECRET }}"
+
+  - appid: "spreed"
+    configkey: "recording_servers"
+    configvalue: >-
+      {{
+        {
+          'servers': [
+            {
+              'server': 'http://' ~ NEXTCLOUD_RECORDING_SERVICE ~ ':' ~ NEXTCLOUD_RECORDING_PORT ~ '/',
+              'verify': false
+            }
+          ],
+          'secret': NEXTCLOUD_RECORDING_SECRET
+        }
+        | to_json
+      }}

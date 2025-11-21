@@ -133,6 +133,15 @@ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY:   "{{ [ docker_compose.directories.servi
 NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE:  "{{ [ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY, 'Dockerfile' ] | path_join }}"
 NEXTCLOUD_WHITEBOARD_MAX_OLD_SPACE_SIZE:  "{{ applications | node_max_old_space_size(application_id, NEXTCLOUD_WHITEBOARD_SERVICE) }}"
 
+### Talk Recording backend
+NEXTCLOUD_RECORDING_SERVICE:              "talk_recording"
+NEXTCLOUD_RECORDING_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.name') }}"
+NEXTCLOUD_RECORDING_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.image') }}"
+NEXTCLOUD_RECORDING_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.version') }}"
+NEXTCLOUD_RECORDING_ENABLED:              "{{ NEXTCLOUD_HPB_PLUGIN_ENABLED }}"
+NEXTCLOUD_RECORDING_PORT:                 1234
+NEXTCLOUD_RECORDING_SECRET:               "{{ applications | get_app_conf(application_id, 'credentials.talk_recording_secret') }}"
+
 ### Collabora
 NEXTCLOUD_COLLABORA_URL:                  "{{ domains | get_url('web-svc-collabora', WEB_PROTOCOL) }}"
 

@@ -1,4 +1,8 @@
 credentials:
+  talk_recording_secret:
+    description: "Shared secret between Nextcloud Talk and the recording backend"
+    algorithm: "random_hex_32"
+    validation: "^[a-f0-9]{64}$"
   whiteboard_jwt_secret:
     description: "Secret used for JWT signing"
     algorithm: "base64_prefixed_32"

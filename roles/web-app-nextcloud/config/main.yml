@@ -105,6 +105,16 @@ docker:
       mem_reservation:      "128m"
       mem_limit:            "1g"
       pids_limit:           1024
+    talk_recording:
+      name:                "nextcloud-talk-recording"
+      image:               "nextcloud/aio-talk-recording"
+      version:             "latest"
+      backup:
+        no_stop_required:  true
+      cpus:                "2.0"
+      mem_reservation:     "2g"
+      mem_limit:           "4g"
+      pids_limit:          1024
   enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin
