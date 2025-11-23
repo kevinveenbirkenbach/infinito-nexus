@@ -22,9 +22,9 @@ server:
 docker:
   services:
     redis:
-      enabled: false
+      enabled: true
     database:
-      enabled: false
+      enabled: true
     onlyoffice:
       image:            "onlyoffice/documentserver"
       version:          "latest"
@@ -33,6 +33,19 @@ docker:
       mem_reservation:  "1g"
       mem_limit:        "2g"
       pids_limit:       2048
+  volumes:
+    data:         onlyoffice_data          # /var/www/onlyoffice/Data
+    logs:         onlyoffice_logs          # /var/log/onlyoffice
+    fonts:        onlyoffice_fonts         # /usr/share/fonts/truetype/custom
+    lib:          onlyoffice_lib           # /var/lib/onlyoffice
+    rabbitmqdata: onlyoffice_rabbitmqdata  # /var/lib/rabbitmq
+    
+    # The redis and db volume are just dummy volumes and aren't used 
+    pgdata:       onlyoffice_pgdata        # /var/lib/postgresql
+    redisdata:    onlyoffice_redisdata     # /var/lib/redis
 features:
-  logout:  false
-  desktop: true
+  logout:           false
+  desktop:          true
+  matomo:           true
+  css:              true
+  central_database: true

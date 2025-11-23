@@ -129,8 +129,9 @@
     networks:
       default:
         ipv4_address: 192.168.102.72
+    volumes:
+      - talk_recording_tmp:/tmp
 {% endif %}
-
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
@@ -140,6 +141,10 @@
     name: {{ NEXTCLOUD_WHITEBOARD_TMP_VOLUME }}
   whiteboard_fontcache:
     name: {{ NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME }}
+{% endif %}
+{% if NEXTCLOUD_RECORDING_ENABLED | bool %}
+  talk_recording_tmp:
+    name: {{ NEXTCLOUD_RECORDING_TMP_VOLUME }}
 {% endif %}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

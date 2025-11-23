@@ -141,6 +141,7 @@ NEXTCLOUD_RECORDING_VERSION:              "{{ applications | get_app_conf(applic
 NEXTCLOUD_RECORDING_ENABLED:              "{{ NEXTCLOUD_HPB_PLUGIN_ENABLED }}"
 NEXTCLOUD_RECORDING_PORT:                 1234
 NEXTCLOUD_RECORDING_SECRET:               "{{ applications | get_app_conf(application_id, 'credentials.talk_recording_secret') }}"
+NEXTCLOUD_RECORDING_TMP_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.talk_recording_tmp') }}"
 
 ### Collabora
 NEXTCLOUD_COLLABORA_URL:                  "{{ domains | get_url('web-svc-collabora', WEB_PROTOCOL) }}"
