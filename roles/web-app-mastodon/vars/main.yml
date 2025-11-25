@@ -2,13 +2,24 @@
 application_id:                       "web-app-mastodon"
 database_type:                        "postgres"
 
-# Mastodon Specific
+# Mastodon
+
+## Main
 MASTODON_VERSION:                     "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.version') }}"
 MASTODON_IMAGE:                       "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.image') }}"
 MASTODON_CONTAINER:                   "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.name') }}"
 MASTODON_VOLUME:                      "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+MASTODON_SERVICE_NAME:                "mastodon"
+
+## Streaming
 MASTODON_STREAMING_VERSION:           "{{ applications | get_app_conf(application_id, 'docker.services.streaming.version') }}"
 MASTODON_STREAMING_IMAGE:             "{{ applications | get_app_conf(application_id, 'docker.services.streaming.image') }}"
 MASTODON_STREAMING_CONTAINER:         "{{ applications | get_app_conf(application_id, 'docker.services.streaming.name') }}"
-MASTODON_SIDEKIQ_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.name') }}_sidekiq"
+MASTODON_STREAMING_SERVICE_NAME:      "streaming" 
+
+## Sidekiq
+MASTODON_SIDEKIQ_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.mastodon.name') }}-sidekiq"
+MASTODON_SIDEKIQ_SERVICE_NAME:        "sidekiq"
+
+## General
 MASTODON_ALLOWED_PRIVATE_ADDRESSES:   "{{ networks.local['svc-db-postgres'].subnet if 'web-app-chess' in group_names else ''}}"

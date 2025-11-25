@@ -1,9 +1,9 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-  mastodon:
-{% set service_name = 'mastodon' %}
+{% set service_name = MASTODON_SERVICE_NAME %}
 {% set container_port = 3000 %}
 {% set container_healthcheck = 'health' %}
+  {{ service_name }}:
     container_name: {{ MASTODON_CONTAINER }}
     image: "{{ MASTODON_IMAGE }}:{{ MASTODON_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -16,10 +16,10 @@
       - data:/mastodon/public/system
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-  streaming:
-{% set service_name = 'streaming' %}
+{% set service_name = MASTODON_STREAMING_SERVICE_NAME %}
 {% set container_port = 4000 %}
 {% set container_healthcheck = 'api/v1/streaming/health' %}
+  {{ service_name }}:
     container_name: {{ MASTODON_STREAMING_CONTAINER }}
     image: "{{ MASTODON_STREAMING_IMAGE }}:{{ MASTODON_STREAMING_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -30,8 +30,8 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-  sidekiq:
-{% set service_name = 'sidekiq' %}
+{% set service_name = MASTODON_SIDEKIQ_SERVICE_NAME %}
+  {{ service_name }}:
     container_name: {{ MASTODON_SIDEKIQ_CONTAINER }}
     image: "{{ MASTODON_IMAGE }}:{{ MASTODON_VERSION }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}

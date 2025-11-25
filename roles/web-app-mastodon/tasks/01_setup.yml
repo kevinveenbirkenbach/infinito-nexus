@@ -1,0 +1,4 @@
+- name: "Execute migration for '{{ application_id }}'"
+  command:
+    chdir: "{{ docker_compose.directories.instance }}"
+    cmd: "docker compose run --rm {{ MASTODON_SERVICE_NAME }} bundle exec rails db:migrate"

@@ -18,15 +18,15 @@
   vars:
     docker_compose_flush_handlers: true
 
+- name: "start setup procedures for mastodon"
+  include_tasks: 01_setup.yml
+
 - name: "Wait for Mastodon"
-  include_tasks: 01_wait.yml
+  include_tasks: 02_wait.yml
 
 - name: "Cleanup Mastodon caches when MODE_CLEANUP is true"
-  include_tasks: 02_cleanup.yml
+  include_tasks: 03_cleanup.yml
   when: MODE_CLEANUP | bool
-
-- name: "start setup procedures for mastodon"
-  include_tasks: 03_setup.yml
 
 - name: "Include administrator routines for '{{ application_id }}'"
   include_tasks: 04_administrator.yml

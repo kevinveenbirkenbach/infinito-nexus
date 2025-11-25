@@ -11,9 +11,9 @@
   delay: 5
   until: healthcheck.stdout == "healthy"
   loop:
-    - mastodon
-    - streaming
-    - sidekiq
+    - "{{ MASTODON_SERVICE_NAME }}"
+    - "{{ MASTODON_STREAMING_SERVICE_NAME }}"
+    - "{{ MASTODON_SIDEKIQ_SERVICE_NAME }}"
   loop_control:
     label: "{{ item }}"
   changed_when: false
