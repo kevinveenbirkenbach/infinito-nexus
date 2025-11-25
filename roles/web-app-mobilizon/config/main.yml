@@ -22,6 +22,6 @@ docker:
     database:
       enabled: true
     mobilizon:
-      image:    "docker.io/framasoft/mobilizon"
+      image:    "docker.io/kaihuri/mobilizon"
       name:     "mobilizon"
-      version:  ""
+      version:  "5.2.0"
