@@ -9,6 +9,16 @@
       driver: journald
     volumes:
       - redis:/data
+    # Just save in memory and prevent huge redis_volumes
+    command:
+      - redis-server
+      - --appendonly
+      - "no"
+      - --save
+      - ""
+      - --maxmemory {{ applications | redis_maxmemory_mb(application_id, 0.8, RESOURCE_MEM_LIMIT | int ) }}mb
+      - --maxmemory-policy
+      - "allkeys-lru"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 1s

@@ -28,8 +28,8 @@ if [ "$force_freeing" = true ]; then
   {% endif %}
 
   if command -v docker >/dev/null 2>&1 ; then
-    echo "cleaning up docker" &&
-    docker system prune -f || exit 3
+    echo "cleaning up docker (prune + anonymous volumes) via systemd service" &&
+    systemctl start {{ SYS_SERVICE_CLEANUP_DOCKER }} || exit 3
 
     nextcloud_application_container="{{ applications | get_app_conf('web-app-nextcloud', 'docker.services.nextcloud.name') }}"
     if [ -n "$nextcloud_application_container" ] && [ "$(docker ps -a -q -f name=$nextcloud_application_container)" ] ; then

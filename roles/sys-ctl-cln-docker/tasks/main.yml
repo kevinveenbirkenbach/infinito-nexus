@@ -1,0 +1,23 @@
+- block:
+    - name: Load role to delete anonymous volumes
+      include_role:
+        name: sys-ctl-cln-anon-volumes
+      vars: 
+        system_service_force_flush: true
+      when: run_once_sys_ctl_cln_anon_volumes is not defined
+    
+    - name: "Register Docker prune system service"
+      include_role:
+        name: sys-service
+      vars:
+        system_service_timer_enabled:       true
+        system_service_on_calendar:         "{{ SYS_SCHEDULE_CLEANUP_DOCKER }}"
+        system_service_copy_files:          true
+        system_service_tpl_exec_start:      "{{ system_service_script_exec }}"
+        system_service_tpl_exec_start_pre:  ""
+        system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+        system_service_force_linear_sync:   false
+        system_service_force_flush:         "{{ MODE_CLEANUP }}"
+
+    - include_tasks: utils/run_once.yml
+  when: run_once_sys_ctl_cln_docker is not defined

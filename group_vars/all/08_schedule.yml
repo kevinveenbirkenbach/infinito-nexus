@@ -32,7 +32,8 @@ SYS_SCHEDULE_HEALTH_MSMTP:                    "*-*-* 00:00:00"                  
 SYS_SCHEDULE_CLEANUP_CERTS:                   "*-*-* 20:00"                           # Deletes and revokes unused certs once per day
 SYS_SCHEDULE_CLEANUP_FAILED_BACKUPS:          "*-*-* 21:00"                           # Clean up failed docker backups once per day
 SYS_SCHEDULE_CLEANUP_BACKUPS:                 "*-*-* 22:00"                           # Cleanup backups once per day, MUST be called before disc space cleanup
-SYS_SCHEDULE_CLEANUP_DISC_SPACE:              "*-*-* 23:00"                           # Cleanup disc space once per day
+SYS_SCHEDULE_CLEANUP_DOCKER:                  "*-*-* 23:00"                           # Cleanup docker anonymous volumes and prune ones per day
+SYS_SCHEDULE_CLEANUP_DISC_SPACE:              "*-*-* 23:30"                           # Cleanup disc space once per day
 
 ### Schedule for repair services
 SYS_SCHEDULE_REPAIR_BTRFS_AUTO_BALANCER:      "Sat *-*-01..07 00:00:00"               # Execute btrfs auto balancer every first Saturday of a month
