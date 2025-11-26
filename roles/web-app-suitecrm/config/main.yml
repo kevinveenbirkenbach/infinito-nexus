@@ -1,0 +1,40 @@
+features:
+  matomo:             true
+  css:                true
+  desktop:            true
+  ldap:               true
+  oidc:               true          # OIDC via Keycloak + reverse proxy / plugin
+  central_database:   true
+  logout:             true
+
+server:
+  csp:
+    flags: {}
+    whitelist:
+      # Allow data URIs for icons etc.
+      connect-src:
+        - "data:"
+  domains:
+    aliases: []
+    canonical:
+      - suite.crm.{{ PRIMARY_DOMAIN }}
+
+email:
+  from_name: "Customer Relationship Management (SuiteCRM, {{ PRIMARY_DOMAIN }})"
+
+docker:
+  services:
+    database:
+      enabled: true
+    suitecrm:
+      image:            "bitnami/suitecrm"
+      version:          "8"
+      name:             "suitecrm"
+      cpus:             1.5
+      mem_reservation:  1.2g
+      mem_limit:        2g
+      pids_limit:       768
+  volumes:
+    data:       suitecrm_data
+
+maintenance_mode: false

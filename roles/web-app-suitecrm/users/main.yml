@@ -1,0 +1,7 @@
+users:
+  administrator:
+    username: "administrator"
+  contact:
+    username: "contact"
+    roles:
+      - mail-bot

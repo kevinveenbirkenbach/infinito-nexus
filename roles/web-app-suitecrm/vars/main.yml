@@ -1,0 +1,24 @@
+# General
+application_id:                   "web-app-suitecrm"
+entity_name:                      "{{ application_id | get_entity_name }}"
+
+# Database
+database_type:                    "mariadb"
+
+# Webserver
+client_max_body_size:             "100m"
+vhost_flavour:                    "generic"
+
+# SuiteCRM container settings
+SUITECRM_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+SUITECRM_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+SUITECRM_CUSTOM_IMAGE:            "custom_suitecrm"
+SUITECRM_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
+SUITECRM_SERVICE:                 "{{ entity_name }}"
+
+# Volumes
+SUITECRM_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+
+# URLs & features
+SUITECRM_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+SUITECRM_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"

@@ -1,0 +1,24 @@
+{% include 'roles/docker-compose/templates/base.yml.j2' %}
+
+{% set service_name = SUITECRM_SERVICE %}
+  {{ service_name }}:
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    container_name: {{ SUITECRM_CONTAINER }}
+    image: "{{ SUITECRM_CUSTOM_IMAGE }}"
+    init: true
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
+    ports:
+      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/docker-container/templates/networks.yml.j2' %}
+    volumes:
+      - data:/bitnami/suitecrm
+
+{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
+  data:
+    name: {{ SUITECRM_DATA_VOLUME }}
+
+{% include 'roles/docker-compose/templates/networks.yml.j2' %}

@@ -118,6 +118,8 @@ defaults_networks:
       subnet: 192.168.104.80/28
     web-svc-onlyoffice:
       subnet: 192.168.104.96/28
+    web-app-suitecrm:
+      subnet: 192.168.104.112/28
 
     # /24 Networks / 254 Usable Clients
     web-app-bigbluebutton:
