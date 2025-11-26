@@ -10,6 +10,7 @@ x-environment: &shopware
     - bundles:/var/www/html/public/bundles
     - "{{ SHOPWARE_FRAMEWORK_HOST }}:{{ SHOPWARE_FRAMEWORK_DOCKER }}:ro"
   working_dir: {{ SHOPWARE_ROOT }}
+  pull_policy: never
 
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
@@ -61,7 +62,6 @@ x-environment: &shopware
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     <<: *shopware
     container_name: "{{ SHOPWARE_WORKER_CONTAINER }}"
-    pull_policy: never
     entrypoint: {{ SHOPWARE_WORKER_ENTRYPOINT }}
     depends_on:
       init:
@@ -86,7 +86,6 @@ x-environment: &shopware
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     <<: *shopware
     container_name: "{{ SHOPWARE_SCHED_CONTAINER }}"
-    pull_policy: never
     entrypoint: {{ SHOPWARE_SCHED_ENTRYPOINT }}
     depends_on:
       init:

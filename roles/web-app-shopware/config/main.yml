@@ -26,17 +26,19 @@ docker:
       enabled: true
 
     init:
-      name: software-init
+      name: "shopware-init"
       cpus: 1.0
       mem_reservation: 1g
       mem_limit: 2g
 
-
-    # Base PHP image used by all app services
     shopware:
+      image: "shopware/production"
+      version: "6.7.3.1"
+    
+    php:
       image: "ghcr.io/shopware/docker-base"
       version: "8.3"
-
+    
     web:
       name: "shopware-web"
       port: 8000
