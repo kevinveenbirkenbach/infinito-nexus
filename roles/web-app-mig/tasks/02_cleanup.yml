@@ -1,0 +1,5 @@
+- name: "Cleanup MIG roles directory (remove all contents safely)"
+  file:
+    path: "{{ MIG_ROLES_DIRECTORY }}"
+    state: directory
+    mode: "0755"
