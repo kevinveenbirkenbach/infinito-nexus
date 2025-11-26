@@ -28,5 +28,8 @@ docker:
       name:     joomla
       backup:
         no_stop_required: true
+      upload:
+        # MB Integer for upload size
+        size_mb: 100
   volumes:
     data:       "joomla_data"

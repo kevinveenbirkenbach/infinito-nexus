@@ -21,6 +21,9 @@
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-full-stateless
+  vars:
+    # Necessary to overwrite parent values
+    client_max_body_size: "10M"
 
 - name: Create symbolic link from .env file to repository
   file:

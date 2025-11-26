@@ -1,0 +1,5 @@
+- name: "Render php-upload.ini for Joomla"
+  template:
+    src: php-upload.ini.j2
+    dest: "{{ JOOMLA_UPLOAD_CONFIG }}"
+    mode: "0644"

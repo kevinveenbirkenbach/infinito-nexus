@@ -1,14 +1,12 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-    build:
-      context: {{ docker_compose.directories.instance }}
-      dockerfile: Dockerfile
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ JOOMLA_CUSTOM_IMAGE }}"
     container_name: {{ JOOMLA_CONTAINER }}
-    pull_policy: never
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - data:/var/www/html
+      - {{ JOOMLA_UPLOAD_CONFIG }}:/usr/local/etc/php/conf.d/uploads.ini:ro
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}

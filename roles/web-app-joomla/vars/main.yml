@@ -2,6 +2,7 @@
 application_id:                   "web-app-joomla"
 database_type:                    "mariadb"
 container_port:                   80
+client_max_body_size:             "{{ JOOMLA_POST_MAX_SIZE }}"
 
 # Joomla
 JOOMLA_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.joomla.version') }}"
@@ -15,6 +16,12 @@ JOOMLA_DB_CONNECTOR:              "{{ 'pgsql' if database_type == 'postgres' els
 JOOMLA_CONFIG_FILE:               "/var/www/html/configuration.php"
 JOOMLA_INSTALLER_CLI_FILE:        "/var/www/html/installation/joomla.php"
 JOOMLA_CLI_FILE:                  "/var/www/html/cli/joomla.php"
+
+## Upload
+JOOMLA_UPLOAD_CONFIG:             "{{ [ docker_compose.directories.instance, 'php-upload.ini' ] | path_join }}"
+JOOMLA_UPLOAD_SIZE:               "{{ applications | get_app_conf(application_id, 'docker.services.joomla.upload.size_mb') }}"
+JOOMLA_UPLOAD_MAX_FILESIZE:       "{{ (JOOMLA_UPLOAD_SIZE | int) }}M"
+JOOMLA_POST_MAX_SIZE:             "{{ ((JOOMLA_UPLOAD_SIZE | int) * 12 // 10) }}M"
 
 # User
 JOOMLA_USER_NAME:                 "{{ users.administrator.username }}"

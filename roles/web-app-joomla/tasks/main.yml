@@ -12,19 +12,25 @@
   include_role:
     name: sys-stk-back-stateful
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers: false
+
+- name: Include PHP Config tasks
+  include_tasks: 01_config.yml
+
+- name: flush docker service
+  meta: flush_handlers
 
 - name: Include install routines
   include_tasks: "{{ item }}"
   loop:
-    - 01_install.yml
-    - 02_debug.yml
-    - 03_patch.yml
+    - 02_install.yml
+    - 03_debug.yml
+    - 04_patch.yml
 
 - name: Include assert routines
-  include_tasks: "04_assert.yml"
+  include_tasks: "05_assert.yml"
   when: MODE_ASSERT | bool
 
 - name: Reset Admin Password
-  include_tasks: 05_reset_admin_password.yml
+  include_tasks: 06_reset_admin_password.yml
 
