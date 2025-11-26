@@ -92,7 +92,7 @@ LISTMONK_SETTINGS:
       {{ [
         {
           "host":            SYSTEM_EMAIL.HOST,
-          "port":            SYSTEM_EMAIL.PORT,
+          "port":            995,
           "type":            "pop",
           "uuid":            "471fd0e9-8c33-4e4a-9183-c4679699faca",
           "enabled":         true,
