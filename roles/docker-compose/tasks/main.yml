@@ -1,6 +1,4 @@
-- block:
-  - include_tasks: 01_core.yml
-  - include_tasks: utils/run_once.yml
+- include_tasks: 01_core.yml
   when: run_once_docker_compose is not defined
 
 - name: "Load variables from {{ DOCKER_COMPOSE_VARIABLE_FILE }} for whole play"

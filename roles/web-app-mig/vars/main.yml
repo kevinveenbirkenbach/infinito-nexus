@@ -2,11 +2,11 @@
 application_id:                 web-app-mig
 
 # Docker
-docker_compose_flush_handlers:  true
-docker_pull_git_repository:     true
 docker_repository_address:      "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
 
 # Helper variables
 MIG_IMAGE:                      "mig:latest"
 MIG_CONTAINER:                  "mig"
 MIG_BUILD_DATA:                 "{{ applications | get_app_conf(application_id, 'build_data.enabled') }}"
+MIG_ROLES_DIRECTORY:            "{{ [ docker_compose.directories.volumes, 'roles' ] | path_join }}"
+MIG_ROLES_LIST:                 "{{ [ MIG_ROLES_DIRECTORY, 'list.json' ] | path_join }}"

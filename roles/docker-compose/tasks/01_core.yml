@@ -14,8 +14,10 @@
 
 - name: "create {{ PATH_DOCKER_COMPOSE_INSTANCES }}"
   file:
-    path: "{{ PATH_DOCKER_COMPOSE_INSTANCES }}"
-    state: directory
-    mode: 0700
-    owner: root
-    group: root
+    path:   "{{ PATH_DOCKER_COMPOSE_INSTANCES }}"
+    state:  directory
+    mode:   0700
+    owner:  root
+    group:  root
+
+- include_tasks: utils/run_once.yml

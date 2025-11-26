@@ -12,11 +12,9 @@
       dockerfile: Dockerfile
     pull_policy: never
     volumes:
-      - "{{ mig_roles_meta_volume }}:/usr/share/nginx/html/roles:ro"
+      - "{{ MIG_ROLES_DIRECTORY }}:/usr/share/nginx/html/roles:ro"
       - "{{ docker_repository_path }}:/usr/share/nginx/html"
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
-
-

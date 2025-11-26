@@ -3,22 +3,12 @@
     name: sys-cli
   when: run_once_sys_cli is not defined
 
-- name: Load docker compose vars
-  include_vars:
-    file: roles/docker-compose/vars/docker-compose.yml
-    name: mig_docker_compose
-
-- name: Set roles volume variable
-  set_fact:
-    mig_roles_meta_volume: "{{ mig_docker_compose.docker_compose.directories.volumes }}/roles/"
-
-- name: Set roles list variable
-  set_fact:
-    mig_roles_meta_list: "{{ mig_roles_meta_volume }}list.json"
-
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-full-stateless
+  vars:
+    docker_compose_flush_handlers:  true
+    docker_pull_git_repository:     true
 
 - name: Build data (single async task)
   include_tasks: 02_build_data.yml

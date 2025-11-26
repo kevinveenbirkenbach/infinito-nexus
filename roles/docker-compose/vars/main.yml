@@ -1,2 +1,2 @@
-DOCKER_COMPOSE_VARIABLE_FILE:     "{{ role_path }}/vars/docker-compose.yml"
+DOCKER_COMPOSE_VARIABLE_FILE:     "{{ [ role_path, 'vars/docker-compose.yml' ] | path_join }}"
 DOCKER_COMPOSE_DOWN_ALL_PACKAGE:  "docodol"

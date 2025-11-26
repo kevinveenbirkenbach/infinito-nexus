@@ -26,6 +26,7 @@ server:
         - https://cdn.jsdelivr.net
       connect-src:
         - https://ka-f.fontawesome.com
+        - https://cdn.jsdelivr.net
       frame-ancestors:
         - "*" # No damage if it's used somewhere on other websites, it anyhow looks like art
     flags:
