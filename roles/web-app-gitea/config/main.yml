@@ -13,12 +13,7 @@ features:
   oauth2:                         true
   oidc:                           false     # Deactivated because users aren't auto-created. 
   logout:                         true
-oauth2_proxy:
-  application:                    "application"
-  port:                           "<< defaults_applications[web-app-gitea].docker.services.gitea.port >>"
-  acl:
-    blacklist:
-      - "/user/login"
+
 server:
   csp:
     flags:
@@ -59,5 +54,12 @@ docker:
       mem_reservation:    0.2g
       mem_limit:          0.3g
       pids_limit:         512
+    oauth2_proxy:
+      origin:
+        host:             "application"
+        port:             "<< defaults_applications[web-app-gitea].docker.services.gitea.port >>"
+      acl:
+        blacklist:
+          - "/user/login"
   volumes:
     data:             "gitea_data"

@@ -1,13 +1,14 @@
 docker:
   services:
     lam:
-      image:   ghcr.io/ldapaccountmanager/lam
-      version: latest
-oauth2_proxy:
-  application:                  application
-  port:                         80
-  allowed_groups:
-    - "{{ [RBAC.GROUP.NAME, 'web-app-lam-administrator'] | path_join }}"
+      image:        ghcr.io/ldapaccountmanager/lam
+      version:      latest
+    oauth2_proxy:
+      origin:
+        host:       application
+        port:       80
+      allowed_groups:
+        - "{{ [RBAC.GROUP.NAME, 'web-app-lam-administrator'] | path_join }}"
 features:
   matomo:                       true
   css:                          true

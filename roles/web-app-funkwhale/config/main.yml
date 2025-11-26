@@ -12,6 +12,13 @@ docker:
       enabled: true
     database:
       enabled: true
+    oauth2_proxy:
+      origin:
+        host: "front"
+        port: "80"
+      acl:
+        blacklist:
+          - "/login"
 features:
   matomo:             true
   css:                false
@@ -32,9 +39,3 @@ server:
     whitelist:
       font-src:
         -  "data:"
-oauth2_proxy:  
-  application:        "front"
-  port:               "80"
-  acl:
-    blacklist:
-      - "/login"

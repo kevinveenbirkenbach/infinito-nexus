@@ -1,18 +1,23 @@
-version:              "2.0.0-dev"
-oauth2_proxy:
-  application:        application  # Needs to be the same as webinterface
-  port:               8080         # application port
-  allowed_groups:
-    - "{{ [RBAC.GROUP.NAME, 'web-app-phpldapadmin-administrator'] | path_join }}"
 features:
-  matomo:             true
-  css:                true
-  desktop:    true
-  ldap:               true
-  oauth2:             true
+  matomo:   true
+  css:      true
+  desktop:  true
+  ldap:     true
+  oauth2:   true
   logout:   true
 server:
   domains:
     canonical:
       - phpldapadmin.{{ PRIMARY_DOMAIN }}
     aliases: []
+docker:
+  services:
+    phpldapadmin:
+      image:    leenooks/phpldapadmin
+      version:  "2.0.0-dev"
+    oauth2_proxy:
+      origin:
+        host: application  # Needs to be the same as webinterface
+        port: 8080         # application port
+      allowed_groups:
+        - "{{ [RBAC.GROUP.NAME, 'web-app-phpldapadmin-administrator'] | path_join }}"

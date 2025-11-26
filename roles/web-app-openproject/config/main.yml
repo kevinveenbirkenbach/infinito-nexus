@@ -1,11 +1,3 @@
-oauth2_proxy:  
-  application:        "proxy"
-  port:               "80"
-  acl:
-    whitelist:
-      - "/users/me"           # Necessary for Nextcloud Plugin to work
-      - "/api/"               # Necessary for Nextcloud Plugin to work
-      - "/oauth/token"        # Necessary for Nextcloud Plugin to work
 ldap:
   filters:
     administrators:   False   # Set true to filter administrators
@@ -78,6 +70,14 @@ docker:
       mem_reservation:    "512m"
       mem_limit:          "512m"
       pids_limit:         256
-    
+    oauth2_proxy:
+      origin:
+        host:             "proxy"
+        port:             "80"
+      acl:
+        whitelist:
+          - "/users/me"           # Necessary for Nextcloud Plugin to work
+          - "/api/"               # Necessary for Nextcloud Plugin to work
+          - "/oauth/token"        # Necessary for Nextcloud Plugin to work
   volumes:
     data:                 "openproject_data"

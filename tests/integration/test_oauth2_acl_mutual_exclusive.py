@@ -22,7 +22,8 @@ class TestOauth2AclMutualExclusion(unittest.TestCase):
                 failures.append(f"{role_path.name}: failed to parse YAML ({e})")
                 continue
 
-            oauth2 = data.get("oauth2_proxy", {})
+            services = data.get("services", {})
+            oauth2 = services.get("oauth2_proxy", {})
             acl = oauth2.get("acl", None)
             if acl is None:
                 continue
@@ -37,7 +38,7 @@ class TestOauth2AclMutualExclusion(unittest.TestCase):
 
         if failures:
             self.fail(
-                "The following roles define both whitelist and blacklist under oauth2_proxy.acl:\n"
+                "The following roles define both whitelist and blacklist under docker.services.oauth2_proxy.acl:\n"
                 + "\n".join(failures)
             )
 

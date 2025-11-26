@@ -2,7 +2,7 @@
 
   application:
     container_name: {{ application_id }}
-    image: leenooks/phpldapadmin:{{ applications | get_app_conf(application_id, 'version', True)}}
+    image: {{ PHPLDAPADMIN_IMAGE }}:{{ PHPLDAPADMIN_VERSION }}
     ports:
       - 127.0.0.1:{{ ports.localhost.http[application_id] }}:8080
 {% include 'roles/docker-container/templates/base.yml.j2' %}

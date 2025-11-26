@@ -1,13 +1,8 @@
 autologin:            false         # This is a high security risk. Just activate this option if you know what you're doing
-oauth2_proxy:  
-  port:               "80"
-  application:        "application"
-  allowed_groups:
-    - "{{ [RBAC.GROUP.NAME, 'web-app-phpmyadmin-administrator'] | path_join }}"
 features:
   matomo:             true
   css:                false
-  desktop:    false   # Opens itself in a new window, when it's loaded in an iframe.
+  desktop:            false   # Opens itself in a new window, when it's loaded in an iframe.
                               # it's anyhow not so enduser relevant, so it can be kept like this
   central_database:   true
   oauth2:             true
@@ -30,4 +25,9 @@ docker:
     phpmyadmin:
       version:  "latest"      # Use the latest phpmyadmin version
       name:     "phpmyadmin"
-      image:    phpmyadmin/phpmyadmin
+      image:    "phpmyadmin/phpmyadmin"
+    oauth2_proxy:
+      port:               "80"
+      application:        "application"
+      allowed_groups:
+        - "{{ [RBAC.GROUP.NAME, 'web-app-phpmyadmin-administrator'] | path_join }}"

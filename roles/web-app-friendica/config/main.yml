@@ -23,13 +23,14 @@ server:
         unsafe-eval:    true
       style-src-attr:
         unsafe-inline:  true
-oauth2_proxy:  
-  application:        "application"
-  port:               "80"
 addons:
   keycloakpassword: {}
   ldapauth: {}
 docker:
   services:
     database:
-      enabled: true
+      enabled:      true
+    oauth2_proxy:
+      origin:
+        host: "application"
+        port: "80"

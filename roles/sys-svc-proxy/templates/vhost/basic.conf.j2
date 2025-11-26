@@ -17,7 +17,7 @@ server
   {% include 'roles/sys-svc-letsencrypt/templates/ssl_header.j2' %}
 
   {% if applications | get_app_conf(application_id, 'features.oauth2', False) %}
-    {% set acl = applications | get_app_conf(application_id, 'oauth2_proxy.acl', False, {}) %}
+    {% set acl = applications | get_app_conf(application_id, 'docker.services.oauth2_proxy.acl', False, {}) %}
 
     {% if acl.blacklist is defined %}
       {# 1. Expose everything by default, then protect blacklisted paths #}

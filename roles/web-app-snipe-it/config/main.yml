@@ -1,11 +1,11 @@
 features:
-  matomo:             true
-  css:                false
-  desktop:    true
-  central_database:   true
-  ldap:               true
-  oauth2:             true
-  logout:             true
+  matomo:           true
+  css:              false
+  desktop:          true
+  central_database: true
+  ldap:             true
+  oauth2:           true
+  logout:           true
 server:
   domains:
     canonical:
@@ -23,12 +23,6 @@ server:
     whitelist:
       font-src:
         - "data:"
-oauth2_proxy:
-  application:  "application"
-  port:         "80"
-  acl:
-    blacklist:
-      - "/login"
 docker:
   services:
     redis:
@@ -39,6 +33,12 @@ docker:
       version:  "latest"
       name:     "snipe-it"
       image:    "grokability/snipe-it"
+    oauth2_proxy:
+      application:  "application"
+      port:         "80"
+      acl:
+        blacklist:
+          - "/login"
   volumes:
     data:       "snipe-it_data"
     
