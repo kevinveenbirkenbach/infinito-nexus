@@ -5,6 +5,7 @@ features:
   matomo:           true
   desktop:          true
   logout:           true
+  css:              true
 server:
   csp:
     flags:
