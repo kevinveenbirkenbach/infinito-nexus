@@ -472,6 +472,98 @@ class TestCspFilters(unittest.TestCase):
         self.assertNotIn('https://base-only.example.com', elem_tokens)
         self.assertNotIn('https://base-only.example.com', attr_tokens)
 
+    def test_logout_does_not_add_unsafe_inline_when_disabled(self):
+        """
+        When the logout feature is NOT enabled, the filter must NOT
+        inject 'unsafe-inline' into script-src-attr or script-src-elem.
+        """
+        header = self.filter.build_csp_header(self.apps, 'app1', self.domains, web_protocol='https')
+
+        attr_tokens = self._get_directive_tokens(header, 'script-src-attr')
+        elem_tokens = self._get_directive_tokens(header, 'script-src-elem')
+
+        self.assertNotIn("'unsafe-inline'", attr_tokens)
+        self.assertNotIn("'unsafe-inline'", elem_tokens)
+
+    def test_logout_adds_unsafe_inline_to_script_attr_and_elem(self):
+        """
+        When the logout feature IS enabled, script-src-attr and script-src-elem
+        must automatically include 'unsafe-inline' to support inline event handlers.
+        """
+        apps = copy.deepcopy(self.apps)
+        domains = copy.deepcopy(self.domains)
+
+        apps['app1'].setdefault('features', {})['logout'] = True
+        domains['web-svc-logout'] = ['logout.example.org']
+        domains['web-app-keycloak'] = ['keycloak.example.org']
+
+        header = self.filter.build_csp_header(apps, 'app1', domains, web_protocol='https')
+
+        attr_tokens = self._get_directive_tokens(header, 'script-src-attr')
+        elem_tokens = self._get_directive_tokens(header, 'script-src-elem')
+
+        self.assertIn("'unsafe-inline'", attr_tokens)
+        self.assertIn("'unsafe-inline'", elem_tokens)
+
+    def test_logout_respects_explicit_disable_on_base_script_src(self):
+        """
+        Even if logout adds 'unsafe-inline' to attr/elem, an explicit 
+        unsafe-inline=False on script-src MUST be respected and must not be overridden.
+        """
+        apps = copy.deepcopy(self.apps)
+        domains = copy.deepcopy(self.domains)
+
+        apps['app1'].setdefault('server', {}).setdefault('csp', {}).setdefault('flags', {})
+        apps['app1']['server']['csp']['flags']['script-src'] = {
+            'unsafe-inline': False,
+            'unsafe-eval': True,
+        }
+
+        apps['app1'].setdefault('features', {})['logout'] = True
+        domains['web-svc-logout'] = ['logout.example.org']
+        domains['web-app-keycloak'] = ['keycloak.example.org']
+
+        header = self.filter.build_csp_header(apps, 'app1', domains, web_protocol='https')
+
+        base_tokens = self._get_directive_tokens(header, 'script-src')
+        attr_tokens = self._get_directive_tokens(header, 'script-src-attr')
+        elem_tokens = self._get_directive_tokens(header, 'script-src-elem')
+
+        # Base MUST remain strict
+        self.assertNotIn("'unsafe-inline'", base_tokens)
+        # Attr/elem MUST stay relaxed
+        self.assertIn("'unsafe-inline'", attr_tokens)
+        self.assertIn("'unsafe-inline'", elem_tokens)
+
+    def test_logout_propagates_unsafe_inline_into_base_when_not_explicitly_disabled(self):
+        """
+        When logout enables unsafe-inline for script-src-attr/-elem
+        AND script-src does NOT explicitly disable unsafe-inline,
+        then family union must inject 'unsafe-inline' into script-src.
+        """
+        apps = copy.deepcopy(self.apps)
+        domains = copy.deepcopy(self.domains)
+
+        # Base does NOT explicitly disable unsafe-inline
+        apps['app1'].setdefault('server', {}).setdefault('csp', {}).setdefault('flags', {})
+        apps['app1']['server']['csp']['flags']['script-src'] = {
+            'unsafe-eval': True
+        }
+
+        apps['app1']['features']['logout'] = True
+        domains['web-svc-logout'] = ['logout.example.org']
+        domains['web-app-keycloak'] = ['keycloak.example.org']
+
+        header = self.filter.build_csp_header(apps, 'app1', domains, web_protocol='https')
+
+        base_tokens = self._get_directive_tokens(header, 'script-src')
+        attr_tokens = self._get_directive_tokens(header, 'script-src-attr')
+        elem_tokens = self._get_directive_tokens(header, 'script-src-elem')
+
+        # All three must contain 'unsafe-inline'
+        self.assertIn("'unsafe-inline'", base_tokens)
+        self.assertIn("'unsafe-inline'", attr_tokens)
+        self.assertIn("'unsafe-inline'", elem_tokens)
 
 if __name__ == '__main__':
     unittest.main()

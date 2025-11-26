@@ -236,6 +236,12 @@ class FilterModule(object):
                     if self.is_feature_enabled(applications, 'logout', application_id):
                         tokens.append(get_url(domains, 'web-svc-logout', web_protocol))
                         tokens.append(get_url(domains, 'web-app-keycloak', web_protocol))
+                        
+                # 6b) Logout support requires inline handlers (script-src-attr)
+                if directive in ('script-src-attr','script-src-elem'):
+                    if self.is_feature_enabled(applications, 'logout', application_id):
+                        tokens.append("'unsafe-inline'")
+
 
                 # 7) Custom whitelist
                 tokens += self.get_csp_whitelist(applications, application_id, directive)
