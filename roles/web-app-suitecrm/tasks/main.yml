@@ -1,6 +1,16 @@
----
 - name: "Load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full-stateful
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers: false
+
+- name: "Deploy '{{ SUITECRM_ENTRYPOINT_SCRIPT_HOST_ABS }}'"
+  copy:
+    src:  "{{ SUITECRM_ENTRYPOINT_SCRIPT_FILE }}"
+    dest: "{{ SUITECRM_ENTRYPOINT_SCRIPT_HOST_ABS }}"
+  notify:
+    - docker compose up
+    - docker compose build
+
+- name: "Docker Compose Up for '{{ application_id }}'"
+  meta: flush_handlers

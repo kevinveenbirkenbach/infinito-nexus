@@ -27,8 +27,10 @@ docker:
     database:
       enabled: true
     suitecrm:
-      image:            "bitnami/suitecrm"
-      version:          "8"
+      image:            "php"
+      version:          "8.2-apache"
+      # Git tag from https://github.com/SuiteCRM/SuiteCRM
+      app_version:      "7.14.8"
       name:             "suitecrm"
       cpus:             1.5
       mem_reservation:  1.2g

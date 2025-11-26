@@ -1,1 +1,51 @@
-FROM "{{ SUITECRM_IMAGE }}:{{ SUITECRM_VERSION }}"
+FROM "{{ SUITECRM_BASE_IMAGE }}:{{ SUITECRM_BASE_VERSION }}"
+
+# Install required system packages and PHP extensions
+RUN apt-get update && apt-get install -y \
+      git \
+      wget \
+      unzip \
+      libpng-dev \
+      libzip-dev \
+      libicu-dev \
+      libonig-dev \
+      libxml2-dev \
+  && docker-php-ext-install \
+      mysqli \
+      gd \
+      zip \
+      intl \
+      mbstring \
+      soap \
+      opcache \
+  && rm -rf /var/lib/apt/lists/*
+
+# Install Apache modules
+RUN a2enmod rewrite headers
+
+WORKDIR /var/www/html
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Download SuiteCRM source
+RUN set -eux; \
+    SUITECRM_TAG="v{{ SUITECRM_APP_VERSION }}"; \
+    wget -qO /tmp/suitecrm.tar.gz "https://github.com/SuiteCRM/SuiteCRM/archive/refs/tags/${SUITECRM_TAG}.tar.gz"; \
+    tar --strip-components=1 -xzf /tmp/suitecrm.tar.gz -C /var/www/html; \
+    rm /tmp/suitecrm.tar.gz
+
+# Install PHP dependencies via Composer (critical!)
+RUN set -eux; \
+    composer install \
+      --no-dev \
+      --prefer-dist \
+      --no-interaction \
+      --optimize-autoloader
+
+# Copy entrypoint
+COPY {{ SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL }} {{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}
+RUN chmod +x {{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}
+
+ENTRYPOINT ["{{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}"]
+CMD ["apache2-foreground"]
