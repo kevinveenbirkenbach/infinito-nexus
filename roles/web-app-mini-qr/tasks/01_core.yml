@@ -2,6 +2,6 @@
   include_role:
     name: sys-stk-full-stateless
   vars: 
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers: true
 
 - include_tasks: utils/run_once.yml
