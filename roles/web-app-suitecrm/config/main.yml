@@ -6,7 +6,7 @@ features:
   oidc:               false # OIDC isn't available, just SAML for SSO
   central_database:   true
   logout:             true
-  oauth2:             false # Deactivated for API
+  oauth2:             true # Deactivated for API
 
 server:
   csp:
