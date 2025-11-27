@@ -16,6 +16,7 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     volumes:
       - data:/var/www/html/
+      - "{{ SUITECRM_PHP_CONFIG_HOST }}:/usr/local/etc/php/conf.d/{{ SUITECRM_WELL_SOFTWARE_NAME }}.ini:ro"
 
 {% if SUITECRM_LDAP_ENABLED | bool %}
       # Readonly isn't possible for LDAP config, because otherwise file permission script will fail
