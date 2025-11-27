@@ -76,11 +76,15 @@ WORKDIR /var/www/html
 RUN apt-get update && apt-get install -y nodejs npm \
  && corepack enable && corepack prepare yarn@4.5.1 --activate
 
-WORKDIR /var/www/html
-
 RUN yarn install --immutable \
  && yarn merge-angular-json \
  && yarn build
+
+# Legacy theme SCSS -> CSS
+RUN set -eux; \
+    php ./vendor/bin/pscss -s compressed \
+      public/legacy/themes/suite8/css/Dawn/style.scss \
+      > public/legacy/themes/suite8/css/Dawn/style.css
 
 # Copy entrypoint
 COPY {{ SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL }} {{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}
