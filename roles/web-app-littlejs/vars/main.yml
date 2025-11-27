@@ -1,7 +1,7 @@
 # General
-application_id: "web-app-littlejs"
-entity_name:    "{{ application_id | get_entity_name }}"
-domain:         "{{ domains | get_domain(application_id) }}"
+application_id:             "web-app-littlejs"
+entity_name:                "{{ application_id | get_entity_name }}"
+domain:                     "{{ domains | get_domain(application_id) }}"
 
 LITTLEJS_HEADLINE:          "LittleJS Playground"
 
@@ -23,3 +23,9 @@ LITTLEJS_INDEX_HOST_REL:    "volumes/index.html"
 # Helper variables
 LITTLEJS_CONTAINER:         "{{ entity_name }}"
 LITTLEJS_SERVICE:           "{{ entity_name }}"
+
+
+# Runner HTML for non-full examples
+LITTLEJS_RUN_HOST_ABS:      "{{ [ docker_compose.directories.volumes, 'run.html' ] | path_join }}"
+LITTLEJS_RUN_HOST_REL:      "volumes/run.html"
+

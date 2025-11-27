@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>LittleJS Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+    <!-- LittleJS engine bundle -->
+    <script src="../../dist/littlejs.js"></script>
+
+    <script>
+      (function () {
+        // Read ?file=... from query string
+        const params = new URLSearchParams(window.location.search);
+        let file = params.get("file") || "helloWorld.js";
+
+        // Basic safety: keep file in current directory and avoid traversal
+        if (file.includes("/") || file.includes("\\")) {
+          console.warn("Invalid file parameter, falling back to default");
+          file = "helloWorld.js";
+        }
+
+        if (!file.endsWith(".js")) {
+          file = file + ".js";
+        }
+
+        // Dynamically load the selected example script from /examples/shorts/
+        const script = document.createElement("script");
+        script.src = file;
+
+        script.onload = () => {
+          console.log("Loaded LittleJS example:", file);
+
+          if (typeof window.engineInit !== "function") {
+            console.error("LittleJS engineInit not found");
+            return;
+          }
+
+          // Fallbacks if some callbacks are not defined by the example
+          const gameInit       = window.gameInit       || function(){};
+          const gameUpdate     = window.gameUpdate     || function(){};
+          const gameUpdatePost = window.gameUpdatePost || function(){};
+          const gameRender     = window.gameRender     || function(){};
+          const gameRenderPost = window.gameRenderPost || function(){};
+
+          // Start LittleJS engine similar to the Example Browser
+          Promise.resolve(
+            window.engineInit(
+              gameInit,
+              gameUpdate,
+              gameUpdatePost,
+              gameRender,
+              gameRenderPost,
+              ['tiles.png?' + Date.now()]
+            )
+          ).catch((error) => {
+            console.error("Error starting LittleJS engine:", error);
+          });
+        };
+
+        script.onerror = () => {
+          console.error("Failed to load LittleJS example:", file);
+        };
+
+        document.body.appendChild(script);
+      })();
+    </script>
+  </body>

@@ -17,6 +17,15 @@
     - docker compose build
     - docker compose up
 
+- name: "Render LittleJS run.html for shorts"
+  template:
+    src:  "html/run.html.j2"
+    dest: "{{ LITTLEJS_RUN_HOST_ABS }}"
+    mode: "0644"
+  notify:
+    - docker compose build
+    - docker compose up
+
 - name: "flush docker compose for '{{ application_id }}'"
   meta: flush_handlers
 

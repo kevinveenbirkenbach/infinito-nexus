@@ -19,9 +19,8 @@ def littlejs_href(example, protocol, domain):
     if is_project:
         return f"{protocol}://{domain}/examples/{file}/"
 
-    # Short examples: internal wrapper
-    return f"{protocol}://{domain}/examples/shorts/base.html?file={file}"
-
+    # Non-full shorts: use custom runner without example browser overhead
+    return f"{protocol}://{domain}/examples/shorts/run.html?file={file}"
 
 class FilterModule(object):
     def filters(self):
