@@ -1,0 +1,7 @@
+{# WARNING: Don't mess with the formatation SuiteCRM is very strict! #}
+parameters:
+  ldap.extra_fields: ['{{ LDAP.USER.ATTRIBUTES.MAIL }}', '{{ LDAP.USER.ATTRIBUTES.FIRSTNAME }}', '{{ LDAP.USER.ATTRIBUTES.SURNAME }}']
+  ldap.autocreate.extra_fields_map:
+    {{ LDAP.USER.ATTRIBUTES.MAIL }}: email1
+    {{ LDAP.USER.ATTRIBUTES.FIRSTNAME }}: first_name
+    {{ LDAP.USER.ATTRIBUTES.SURNAME }}: last_name

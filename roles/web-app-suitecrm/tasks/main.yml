@@ -4,6 +4,14 @@
   vars:
     docker_compose_flush_handlers: false
 
+- name: "Render SuiteCRM LDAP mapping"
+  template:
+    src:  ldap.yaml.j2
+    dest: "{{ SUITECRM_LDAP_CONFIG_HOST }}"
+  notify:
+    - docker compose up
+  when: SUITECRM_LDAP_ENABLED | bool
+
 - name: "Deploy '{{ SUITECRM_ENTRYPOINT_SCRIPT_HOST_ABS }}'"
   copy:
     src:  "{{ SUITECRM_ENTRYPOINT_SCRIPT_FILE }}"

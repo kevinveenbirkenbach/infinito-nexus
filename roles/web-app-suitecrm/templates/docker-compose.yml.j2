@@ -17,6 +17,11 @@
     volumes:
       - data:/var/www/html/
 
+{% if SUITECRM_LDAP_ENABLED | bool %}
+      # Readonly isn't possible for LDAP config, because otherwise file permission script will fail
+      - "{{ SUITECRM_LDAP_CONFIG_HOST }}:{{ SUITECRM_LDAP_EXTENSION_DIR }}/ldap.yaml"
+{% endif %}
+
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
     name: {{ SUITECRM_DATA_VOLUME }}

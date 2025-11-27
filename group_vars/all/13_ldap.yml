@@ -87,7 +87,7 @@ LDAP:
       ID:                 "{{ _ldap_user_id }}"
       MAIL:               "mail"
       FULLNAME:           "cn"
-      FIRSTNAME:          "givenname"
+      FIRSTNAME:          "givenName"
       SURNAME:            "sn"
       SSH_PUBLIC_KEY:     "sshPublicKey"
       NEXTCLOUD_QUOTA:    "nextcloudQuota"
