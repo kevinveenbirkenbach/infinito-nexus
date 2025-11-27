@@ -13,6 +13,8 @@ RUN apt-get update && apt-get install -y \
       libldap2-dev \
   && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu \
   && docker-php-ext-install \
+      pdo \
+      pdo_mysql \
       mysqli \
       gd \
       zip \
@@ -22,6 +24,13 @@ RUN apt-get update && apt-get install -y \
       opcache \
       ldap \
   && rm -rf /var/lib/apt/lists/*
+
+RUN { \
+      echo 'file_uploads = On'; \
+      echo 'upload_max_filesize = 32M'; \
+      echo 'post_max_size = 32M'; \
+      echo 'memory_limit = 512M'; \
+   } > /usr/local/etc/php/conf.d/suitecrm-upload.ini
 
 # Install Apache modules
 RUN a2enmod rewrite headers
@@ -48,11 +57,30 @@ RUN set -eux; \
 # Install PHP dependencies via Composer (critical!)
 RUN set -eux; \
     composer install \
-      --no-dev \
       --prefer-dist \
       --no-interaction \
       --optimize-autoloader \
       --no-scripts
+
+# Legacy (SugarCRM) dependencies – Tinymce etc.
+WORKDIR /var/www/html/public/legacy
+
+RUN set -eux; \
+    if [ -f composer.json ]; then \
+      composer install --prefer-dist --no-interaction --optimize-autoloader --no-scripts; \
+    fi
+
+WORKDIR /var/www/html
+
+# Install Node + Corepack
+RUN apt-get update && apt-get install -y nodejs npm \
+ && corepack enable && corepack prepare yarn@4.5.1 --activate
+
+WORKDIR /var/www/html
+
+RUN yarn install --immutable \
+ && yarn merge-angular-json \
+ && yarn build
 
 # Copy entrypoint
 COPY {{ SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL }} {{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}

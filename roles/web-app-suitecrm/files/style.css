@@ -1,0 +1,12 @@
+.admin-card-link-box .admin-card-link .admin-card-link-wrapper {
+    color: var(--color-01-22);
+}
+
+.admin-view {
+    background-color: var(--color-01-77);
+}
+
+div.widget-panel .panel-card .card-header {
+    background-color: var(--color-01-23);
+    color: var(--color-01-92);
+}

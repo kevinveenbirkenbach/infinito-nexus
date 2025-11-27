@@ -1,25 +1,24 @@
 features:
   matomo:             true
-  css:                true
+  css:                false # Temporary deactivated
   desktop:            true
   ldap:               true
   oidc:               false # OIDC isn't available, just SAML for SSO
   central_database:   true
   logout:             true
-  oauth2:             true
+  oauth2:             false # Deactivated for API
 
 server:
   csp:
-    flags: {}
-    whitelist:
-      # Allow data URIs for icons etc.
-      connect-src:
-        - "data:"
+    flags:
+      script-src-attr:
+        unsafe-eval: true
+    whitelist:  
+      manifest-src: "{{ WEB_PROTOCOL }}://auth.{{ PRIMARY_DOMAIN }}"
   domains:
     aliases: []
     canonical:
       - suite.crm.{{ PRIMARY_DOMAIN }}
-
 email:
   from_name: "Customer Relationship Management (SuiteCRM, {{ PRIMARY_DOMAIN }})"
 

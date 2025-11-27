@@ -1,36 +1,39 @@
 # General
-application_id:                   "web-app-suitecrm"
-entity_name:                      "{{ application_id | get_entity_name }}"
+application_id:                       "web-app-suitecrm"
+entity_name:                          "{{ application_id | get_entity_name }}"
 
 # Database
-database_type:                    "mariadb"
+database_type:                        "mariadb"
 
 # Webserver
-client_max_body_size:             "100m"
+client_max_body_size:                 "100m"
 
 # Container images
 # Base PHP image used to run SuiteCRM
-SUITECRM_BASE_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
-SUITECRM_BASE_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+SUITECRM_BASE_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+SUITECRM_BASE_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 # Upstream SuiteCRM application version (Git tag, e.g. 8.6.0)
-SUITECRM_APP_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.app_version') }}"
+SUITECRM_APP_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.app_version') }}"
 
-SUITECRM_CUSTOM_IMAGE:            "custom_suitecrm"
-SUITECRM_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
-SUITECRM_SERVICE:                 "{{ entity_name }}"
+SUITECRM_CUSTOM_IMAGE:                "custom_suitecrm"
+SUITECRM_CONTAINER:                   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
+SUITECRM_SERVICE:                     "{{ entity_name }}"
 
 # Volumes
-SUITECRM_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+SUITECRM_DATA_VOLUME:                 "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 
 # URLs & feature flags
-SUITECRM_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-SUITECRM_LDAP_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
+SUITECRM_URL:                         "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+SUITECRM_LDAP_ENABLED:                "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
 
 # Simple maintenance toggle (for later extensions)
-SUITECRM_INIT_MAINTENANCE_MODE:   "{{ applications | get_app_conf(application_id, 'maintenance_mode') }}"
+SUITECRM_INIT_MAINTENANCE_MODE:       "{{ applications | get_app_conf(application_id, 'maintenance_mode') }}"
 
 # Entrypoint script (host <-> container mapping)
 SUITECRM_ENTRYPOINT_SCRIPT_FILE:      "docker-entrypoint-suitecrm.sh"
 SUITECRM_ENTRYPOINT_SCRIPT_HOST_ABS:  "{{ [ docker_compose.directories.volumes, SUITECRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
 SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL:  "volumes/{{ SUITECRM_ENTRYPOINT_SCRIPT_FILE }}"
 SUITECRM_ENTRYPOINT_SCRIPT_DOCKER:    "{{ [ '/usr/local/bin/', SUITECRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
+
+# Node
+SUITECRM_MAX_OLD_SPACE_SIZE:          "{{ applications | node_max_old_space_size(application_id, entity_name) }}"

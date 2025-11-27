@@ -31,6 +31,12 @@ for d in cache public/upload public/legacy/upload public/legacy/cache; do
   fi
 done
 
+TMPDIR="${APP_DIR}/tmp"
+export TMPDIR
+mkdir -p "$TMPDIR"
+chown -R "$WEB_USER:$WEB_GROUP" "$TMPDIR"
+chmod 775 "$TMPDIR"
+
 ############################################
 # 3) Auto-Install SuiteCRM (only if not yet installed)
 ############################################
