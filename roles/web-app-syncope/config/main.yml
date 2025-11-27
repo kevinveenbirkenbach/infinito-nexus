@@ -1,6 +1,7 @@
 
 features:
   logout: false # Role is not enabled until then keep it false
+  matomo: true
 #  syncope:
 #    version:         "latest"
 #    credentials:

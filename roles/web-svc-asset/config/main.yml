@@ -5,3 +5,6 @@ server:
     canonical:
       - asset.{{ PRIMARY_DOMAIN }}
     aliases: []
+features:
+  matomo: true
+  css:    true

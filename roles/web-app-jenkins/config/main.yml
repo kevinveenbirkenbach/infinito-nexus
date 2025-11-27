@@ -1,5 +1,6 @@
 features:
   logout: true # Same like with elk, anyhow not active atm
+  matomo: true
 server:
   domains:
     canonical:

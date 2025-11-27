@@ -1,6 +1,6 @@
 features:
-  matomo:           true
-  css:              true
+  matomo:   true
+  css:      true
   desktop:  true
 server:
   domains:

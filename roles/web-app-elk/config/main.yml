@@ -1,5 +1,6 @@
 features:
   logout: false # Just deactivated to oppress warnings, elk is anyhow not running
+  matomo: true
 server:
   domains:
     canonical:

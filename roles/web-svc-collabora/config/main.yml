@@ -27,3 +27,4 @@ docker:
 features:
   logout:   false 
   desktop:  true # Just set to allow the iframe to load it
+  matomo:   true

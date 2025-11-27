@@ -12,7 +12,7 @@ docker:
 features:
   matomo:                       true
   css:                          true
-  desktop:              true
+  desktop:                      true
   ldap:                         true
   oauth2:                       true
   logout:                       true

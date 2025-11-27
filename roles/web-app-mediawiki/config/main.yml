@@ -27,3 +27,4 @@ features:
   css:              false
   desktop:          true
   oidc:             true
+  matomo:           true

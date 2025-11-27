@@ -1,12 +1,13 @@
 title:                            "{{ SOFTWARE_NAME }} Shop"
 features:
-  central_database:               true
-  redis:                          true
-  ldap:                           false # Not implemented yet
-  oidc:                           false # Not implemented yet
-  logout:                         true
-  desktop:                        true
-  css:                            true
+  central_database: true
+  redis:            true
+  ldap:             false # Not implemented yet
+  oidc:             false # Not implemented yet
+  logout:           true
+  desktop:          true
+  css:              true
+  matomo:           true
 server:
   csp:
     flags:
