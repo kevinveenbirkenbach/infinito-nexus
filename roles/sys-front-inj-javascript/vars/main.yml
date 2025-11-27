@@ -1,1 +1,0 @@
-modifier_javascript_template_file: "{{ application_id | abs_role_path_by_application_id }}/templates/javascript.js.j2"

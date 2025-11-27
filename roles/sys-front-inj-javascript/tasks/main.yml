@@ -1,8 +1,19 @@
 # run_once_sys_front_inj_javascript: deactivated
 
+- name: "Select JavaScript file path for '{{ application_id }}'"
+  set_fact:
+    javascript_file_custom: >-
+      {{ (application_id | abs_role_path_by_application_id ~ '/templates/javascript.js.j2')
+         if lookup('fileglob', application_id | abs_role_path_by_application_id ~ '/templates/javascript.js.j2')
+         else application_id | abs_role_path_by_application_id ~ '/files/javascript.js' }}
+
 - name: "Load JavaScript code for '{{ application_id }}'"
   set_fact:
-    javascript_code: "{{ lookup('template', modifier_javascript_template_file) }}"
+    javascript_code: >-
+      {{ lookup(
+           javascript_file_custom.endswith('.j2') | ternary('template', 'file'),
+           javascript_file_custom
+         ) }}
 
 - name: "Collapse Javascript code into one-liner for '{{ application_id }}'"
   set_fact:
