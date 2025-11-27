@@ -28,7 +28,7 @@ docker:
       image:    "phpmyadmin/phpmyadmin"
     oauth2_proxy:
       origin:
-        port:               "80"
-        application:        "application"
+        port:   "80"
+        host:   "application"
       allowed_groups:
         - "{{ [RBAC.GROUP.NAME, 'web-app-phpmyadmin-administrator'] | path_join }}"
