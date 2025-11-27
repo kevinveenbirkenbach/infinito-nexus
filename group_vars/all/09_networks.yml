@@ -120,6 +120,8 @@ defaults_networks:
       subnet: 192.168.104.96/28
     web-app-suitecrm:
       subnet: 192.168.104.112/28
+    web-app-littlejs:
+      subnet: 192.168.104.128/28
 
     # /24 Networks / 254 Usable Clients
     web-app-bigbluebutton:

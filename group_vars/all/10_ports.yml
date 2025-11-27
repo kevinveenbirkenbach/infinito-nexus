@@ -85,6 +85,7 @@ ports:
       web-app-shopware: 8060
       web-svc-onlyoffice: 8061
       web-app-suitecrm: 8062
+      web-app-littlejs: 8063
       web-app-bigbluebutton: 48087    # This port is predefined by bbb. @todo Try to change this to a 8XXX port
   public:
     # The following ports should be changed to 22 on the subdomain via stream mapping

@@ -1,0 +1,401 @@
+# roles/web-app-littlejs/vars/examples.yml
+# LittleJS examples for launcher UI (used to generate example tiles and menu)
+
+littlejs_examples:
+  basic:
+    label: "--- BASIC ---"
+    icon: "fa-solid fa-shapes"
+    items:
+      - name: "Hello World"
+        file: "helloWorld.js"
+        description: "Simple starter example"
+        is_project: false
+        tags: "beginner, gradient, text, tiles"
+        icon: "fa-solid fa-seedling"
+
+      - name: "Empty"
+        file: "empty.js"
+        description: "Empty example template"
+        is_project: false
+        tags: "beginner, text"
+        icon: "fa-regular fa-file"
+
+      - name: "Texture"
+        file: "texture.js"
+        description: "Texture display and manipulation"
+        is_project: false
+        tags: "sprites, loading, tiles"
+        icon: "fa-regular fa-image"
+
+      - name: "Animation"
+        file: "animation.js"
+        description: "Sprite animation system"
+        is_project: false
+        tags: "frames, loop, tiles, sprites"
+        icon: "fa-solid fa-film"
+
+      - name: "Shapes"
+        file: "shapes.js"
+        description: "Draw geometric shapes and primitives"
+        is_project: false
+        tags: "circle, ellipse, rectangle, polygon, lines"
+        icon: "fa-solid fa-draw-polygon"
+
+      - name: "Colors"
+        file: "colors.js"
+        description: "Color manipulation and HSL"
+        is_project: false
+        tags: "hue, saturation, blending, rectangle"
+        icon: "fa-solid fa-palette"
+
+      - name: "Sprite Atlas"
+        file: "spriteAtlas.js"
+        description: "Sprite atlas and tile rendering"
+        is_project: false
+        tags: "sheet, frames, tiles"
+        icon: "fa-solid fa-table-cells-large"
+
+      - name: "Blending"
+        file: "blending.js"
+        description: "Additive blending and transparency"
+        is_project: false
+        tags: "alpha, color, tiles, smooth"
+        icon: "fa-solid fa-droplet"
+
+      - name: "Tile Layer"
+        file: "tileLayer.js"
+        description: "Tile layer rendering system"
+        is_project: false
+        tags: "level, map, grid, particles"
+        icon: "fa-solid fa-border-all"
+
+      - name: "Particles"
+        file: "particles.js"
+        description: "Particle system"
+        is_project: false
+        tags: "effects, emitter, physics, fire, smoke"
+        icon: "fa-solid fa-burst"
+
+      - name: "Input"
+        file: "input.js"
+        description: "Input system demo for keyboard, mouse, touch, and gamepad."
+        is_project: false
+        tags: "input, control"
+        icon: "fa-regular fa-keyboard"
+
+      - name: "Timers"
+        file: "timers.js"
+        description: "Timer objects and UI"
+        is_project: false
+        tags: "delay, interval, slider"
+        icon: "fa-regular fa-clock"
+
+      - name: "Sound Effects"
+        file: "sound.js"
+        description: "ZzFX sound effect generator"
+        is_project: false
+        tags: "audio, volume, ui"
+        icon: "fa-solid fa-bell"
+
+      - name: "Music"
+        file: "music.js"
+        description: "Basic load, play, pause, and stop"
+        is_project: false
+        tags: "music, sound, audio, streaming, volume, ui"
+        icon: "fa-solid fa-headphones-simple"
+
+      - name: "Video"
+        file: "videoPlayer.js"
+        description: "Basic video play, pause, and stop"
+        is_project: false
+        tags: "movie, sound, audio, streaming, volume, ui"
+        icon: "fa-solid fa-video"
+
+      - name: "Font Image"
+        file: "fontImage.js"
+        description: "Bitmap font system with built-in system font"
+        is_project: false
+        tags: "text, characters"
+        icon: "fa-solid fa-font"
+
+      - name: "Medals"
+        file: "medals.js"
+        description: "Achievement system"
+        is_project: false
+        tags: "unlock, progress, newgrounds"
+        icon: "fa-solid fa-medal"
+
+      - name: "Tile Raycast"
+        file: "tileRaycast.js"
+        description: "Example of the tile layer raycast collision"
+        is_project: false
+        tags: "level, map, grid"
+        icon: "fa-solid fa-crosshairs"
+
+      - name: "Camera Mouse Drag"
+        file: "cameraDrag.js"
+        description: "Example of how to control camera with mouse"
+        is_project: false
+        tags: "ui, input, control"
+        icon: "fa-solid fa-arrows-up-down-left-right"
+
+      - name: "Debug Drawing"
+        file: "debugDraw.js"
+        description: "Debug drawing system"
+        is_project: false
+        tags: "debug, circle, line, rectangle"
+        icon: "fa-solid fa-bug"
+
+  advanced:
+    label: "--- ADVANCED ---"
+    icon: "fa-solid fa-rocket"
+    items:
+      - name: "Clock"
+        file: "clock.js"
+        description: "Animated analog clock"
+        is_project: false
+        tags: "time, rotation, lines, rectangle"
+        icon: "fa-regular fa-clock"
+
+      - name: "Starfield"
+        file: "starfield.js"
+        description: "Animated parallax starfield"
+        is_project: false
+        tags: "space, movement, depth, rectangle"
+        icon: "fa-solid fa-star"
+
+      - name: "Parallax"
+        file: "parallax.js"
+        description: "Parallax scrolling mountains"
+        is_project: false
+        tags: "generative, canvas, background"
+        icon: "fa-solid fa-mountain-sun"
+
+      - name: "Maze Generator"
+        file: "maze.js"
+        description: "Procedural maze generation"
+        is_project: false
+        tags: "generative, level, tiles, map, grid"
+        icon: "fa-solid fa-border-style"
+
+      - name: "Piano"
+        file: "piano.js"
+        description: "Interactive piano keyboard"
+        is_project: false
+        tags: "music, sound, audio, notes, ui, instrument"
+        icon: "fa-solid fa-music"
+
+      - name: "Step Sequencer"
+        file: "sequencer.js"
+        description: "Simple music loop creation tool"
+        is_project: false
+        tags: "music, sound, audio, notes, ui, instrument"
+        icon: "fa-solid fa-sliders"
+
+      - name: "Music Player"
+        file: "musicPlayer.js"
+        description: "Music player with audio seeking and drag and drop"
+        is_project: false
+        tags: "sound, loading, audio, ui"
+        icon: "fa-solid fa-compact-disc"
+
+  games:
+    label: "--- GAMES ---"
+    icon: "fa-solid fa-gamepad"
+    items:
+      - name: "Pong Game"
+        file: "pongGame.js"
+        description: "Classic paddle ball bouncing"
+        is_project: false
+        tags: "objects, collision"
+        icon: "fa-solid fa-table-tennis-paddle-ball"
+
+      - name: "Platformer Game"
+        file: "platformer.js"
+        description: "Jump and run side view"
+        is_project: false
+        tags: "objects, gravity, level, tiles, camera"
+        icon: "fa-solid fa-person-running"
+
+      - name: "Top Down Game"
+        file: "topDown.js"
+        description: "Top-down style camera"
+        is_project: false
+        tags: "objects, movement, exploration"
+        icon: "fa-solid fa-up-down-left-right"
+
+      - name: "Tilted View Game"
+        file: "tiltedView.js"
+        description: "Pseudo-3D oblique view"
+        is_project: false
+        tags: "isometric, depth"
+        icon: "fa-solid fa-cube"
+
+      - name: "Flappy Game"
+        file: "flappyGame.js"
+        description: "Flappy bird style game"
+        is_project: false
+        tags: "objects, obstacles"
+        icon: "fa-solid fa-dove"
+
+      - name: "Lander Game"
+        file: "landerGame.js"
+        description: "Lunar lander style game"
+        is_project: false
+        tags: "objects, physics"
+        icon: "fa-solid fa-rocket"
+
+      - name: "Hill Glide Game"
+        file: "hillGlideGame.js"
+        description: "Tiny wings style sliding game"
+        is_project: false
+        tags: "objects, physics, speed"
+        icon: "fa-solid fa-mountain"
+
+      - name: "Sliding Puzzle"
+        file: "slidingPuzzle.js"
+        description: "15 tile sliding puzzle"
+        is_project: false
+        tags: "objects, numbers, ui"
+        icon: "fa-solid fa-grip"
+
+      - name: "Space Game"
+        file: "spaceGame.js"
+        description: "Spaceship shooter with parallax"
+        is_project: false
+        tags: "objects, weapons, stars, camera, rotation"
+        icon: "fa-solid fa-meteor"
+
+      - name: "3D FPS Game"
+        file: "fps.js"
+        description: "Pseudo 3D raycasting demo"
+        is_project: false
+        tags: "3D, FPS, maze, camera"
+        icon: "fa-solid fa-bullseye"
+
+  plugins:
+    label: "--- PLUGINS ---"
+    icon: "fa-solid fa-puzzle-piece"
+    items:
+      - name: "Box2d Demo"
+        file: "box2d.js"
+        description: "Box2D physics plugin"
+        is_project: false
+        tags: "objects, mouse"
+        icon: "fa-solid fa-cubes"
+
+      - name: "Box2d Car"
+        file: "box2dCar.js"
+        description: "Drivable car with Box2D physics"
+        is_project: false
+        tags: "objects, vehicle, suspension, wheels"
+        icon: "fa-solid fa-car"
+
+      - name: "Box2d Pool"
+        file: "box2dPool.js"
+        description: "Billiard table pool game with Box2d physics"
+        is_project: false
+        tags: "objects, game"
+        icon: "fa-solid fa-pool-8-ball"
+
+      - name: "Box2d Tile Layer"
+        file: "box2dTileLayer.js"
+        description: "Tile layer with Box2d physics"
+        is_project: false
+        tags: "objects, level, map, grid"
+        icon: "fa-solid fa-border-all"
+
+      - name: "WebGL Shader"
+        file: "shader.js"
+        description: "Full canvas webgl shader"
+        is_project: false
+        tags: "webgl, visual, effect"
+        icon: "fa-solid fa-wand-magic-sparkles"
+
+      - name: "Post Processing"
+        file: "postProcess.js"
+        description: "Shader effects and filters"
+        is_project: false
+        tags: "webgl, visual, effect"
+        icon: "fa-solid fa-sparkles"
+
+      - name: "UI System"
+        file: "uiSystem.js"
+        description: "Buttons, sliders, and checkboxes"
+        is_project: false
+        tags: "objects, widgets, interactive"
+        icon: "fa-solid fa-sliders"
+
+      - name: "Nine Slice"
+        file: "nineSlice.js"
+        description: "Scalable UI panels"
+        is_project: false
+        tags: "three slice, stretch, corners, text, tiles"
+        icon: "fa-solid fa-vector-square"
+
+  full_examples:
+    label: "--- FULL EXAMPLES ---"
+    icon: "fa-solid fa-box-open"
+    items:
+      - name: "Starter"
+        file: "starter"
+        description: "Clean project template"
+        is_project: true
+        tags: "base, empty, particles"
+        icon: "fa-solid fa-seedling"
+
+      - name: "Breakout Tutorial"
+        file: "breakoutTutorial"
+        description: "Step-by-step breakout game tutorial"
+        is_project: true
+        tags: "objects, physics, score"
+        icon: "fa-solid fa-graduation-cap"
+
+      - name: "Breakout Game"
+        file: "breakout"
+        description: "Complete breakout game"
+        is_project: true
+        tags: "objects, physics, score"
+        icon: "fa-solid fa-table-tennis-paddle-ball"
+
+      - name: "Platforming Game"
+        file: "platformer"
+        description: "Platformer with level loading"
+        is_project: true
+        tags: "jump, world, tiles, pixel art, sprites"
+        icon: "fa-solid fa-person-running"
+
+      - name: "Puzzle Game"
+        file: "puzzle"
+        description: "Match 3 style puzzle game"
+        is_project: true
+        tags: "match, swap, sprites"
+        icon: "fa-solid fa-puzzle-piece"
+
+      - name: "Stress Test"
+        file: "stress"
+        description: "Performance and music test"
+        is_project: true
+        tags: "optimization, tiles, sprites"
+        icon: "fa-solid fa-gauge-high"
+
+      - name: "Box2D Plugin"
+        file: "box2d"
+        description: "Full Box2D physics demo"
+        is_project: true
+        tags: "objects, bodies, joints"
+        icon: "fa-solid fa-cubes"
+
+      - name: "HTML Menus"
+        file: "htmlMenu"
+        description: "HTML UI integration"
+        is_project: true
+        tags: "web, browser, overlay, button, slider, textbox"
+        icon: "fa-solid fa-code"
+
+      - name: "UI System Plugin Demo"
+        file: "uiSystem"
+        description: "Complete UI system demo"
+        is_project: true
+        tags: "menu, overlay, button, slider, checkbox"
+        icon: "fa-solid fa-sliders"

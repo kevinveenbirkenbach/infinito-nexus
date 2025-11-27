@@ -1,0 +1,30 @@
+# General
+application_id: "web-app-littlejs"
+entity_name:    "{{ application_id | get_entity_name }}"
+
+# Features
+features:
+  css:      true
+  matomo:   true
+  desktop:  true
+
+LITTLEJS_HEADLINE:          ""
+
+LITTLEJS_TITLE:             "LittleJS Playground – {{ PRIMARY_DOMAIN | upper }}"
+
+# Base repository URL for LittleJS
+LITTLEJS_REPOSITORY_BASE:   "https://github.com/KilledByAPixel/LittleJS"
+
+# Git repository for LittleJS engine + examples
+docker_repository_address:  "{{ LITTLEJS_REPOSITORY_BASE }}.git"
+docker_pull_git_repository: true
+docker_repository_branch:   "main"
+
+# Relative path where sys-stk-full-stateless checks out the repo
+LITTLEJS_APP_REL:           "services/repository"
+LITTLEJS_INDEX_HOST_ABS:    "{{ [ docker_compose.directories.volumes, 'index.html' ] | path_join }}"
+LITTLEJS_INDEX_HOST_REL:    "volumes/index.html"
+
+# Helper variables
+LITTLEJS_CONTAINER:         "{{ entity_name }}"
+LITTLEJS_SERVICE:           "{{ entity_name }}"

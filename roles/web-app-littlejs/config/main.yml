@@ -1,0 +1,33 @@
+features:
+  matomo:       true
+  css:          true
+  desktop:      true
+  logout:       false
+
+server:
+  csp:
+    whitelist:
+      script-src-elem:
+        - "https://cdnjs.cloudflare.com"
+        - "https://cdn.jsdelivr.net"
+      style-src-elem:
+        - "https://cdn.jsdelivr.net"
+        - "https://cdnjs.cloudflare.com"
+      font-src:
+        - "https://cdnjs.cloudflare.com"
+        - "data:"
+      connect-src:
+        - "https://cdn.jsdelivr.net"
+      frame-src:
+        - "https://littlejs.{{ PRIMARY_DOMAIN }}"
+    flags:
+      style-src-attr:
+        unsafe-inline:  true
+      script-src-elem:
+        unsafe-inline:  true
+      script-src-attr:
+        unsafe-inline:  true
+  domains:
+    canonical:
+      - "littlejs.{{ PRIMARY_DOMAIN }}"
+    aliases: []

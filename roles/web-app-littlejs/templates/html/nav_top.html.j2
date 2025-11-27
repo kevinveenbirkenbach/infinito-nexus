@@ -1,0 +1,68 @@
+<!-- Top Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="/">
+      <i class="fa-solid fa-gamepad me-2"></i>
+      <span>{{ LITTLEJS_HEADLINE }}</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+        <!-- Apps Dropdown (nested categories) -->
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="fa-solid fa-grid-2 me-1"></i>Apps
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+
+            {% for key, cat in littlejs_examples|dictsort %}
+
+              <li class="dropdown-submenu dropstart">
+                <a class="dropdown-item dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+                  <i class="{{ cat.icon }} me-2"></i>
+                  {{ cat.label|replace('---','')|trim }}
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-dark">
+
+                  {# FIXED: cat['items'] #}
+                  {% for ex in cat['items'] %}
+                    {% if ex.is_project %}
+                      {% set href = "/examples/" ~ ex.file ~ "/" %}
+                    {% else %}
+                      {% set href = "/examples/shorts/base.html?file=" ~ ex.file %}
+                    {% endif %}
+
+                    <li>
+                      <a class="dropdown-item d-flex align-items-center" href="{{ href }}">
+                        <i class="{{ ex.icon }} me-2"></i>{{ ex.name }}
+                      </a>
+                    </li>
+                  {% endfor %}
+
+                </ul>
+              </li>
+
+              {% if not loop.last %}
+                <li><hr class="dropdown-divider"></li>
+              {% endif %}
+
+            {% endfor %}
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/examples/">
+            <i class="fa-regular fa-folder-open me-1"></i>Browser
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
