@@ -18,7 +18,7 @@ galaxy_info:
   issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
   logo:
-    class: "fa-solid fa-list"
+    class: "fa-solid fa-envelope"
   run_after:
     - web-app-matomo
     - web-app-keycloak
