@@ -3,7 +3,7 @@
    Now using a button background that is only slightly darker than the overall background */
 html[native-dark-active] .btn, .btn {
     background-color: var(--color-01-87);
-    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-70), var(--color-01-91), var(--color-01-95), var(--color-01-95));
+    background: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-70), var(--color-01-91), var(--color-01-95), var(--color-01-95));
     color: var(--color-01-50);
     border-color: var(--color-01-80);
     cursor: pointer;
@@ -13,7 +13,7 @@ html[native-dark-active] .btn, .btn {
 .navbar, .navbar-light, .navbar-dark, .navbar.bg-light {
     background-color: var(--color-01-90);
     /* New Gradient based on original background (90 -5, 90, 90 +1, 90 +5) */
-    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-85), var(--color-01-90), var(--color-01-91), var(--color-01-95));
+    background: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-85), var(--color-01-90), var(--color-01-91), var(--color-01-95));
     color: var(--color-01-50);
     border-color: var(--color-01-85);
 }
@@ -31,7 +31,7 @@ html[native-dark-active] .btn, .btn {
 .card {
     background-color: var(--color-01-90);
     /* New Gradient based on original background (90 -5, 90, 90 +1, 90 +5) */
-    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-85), var(--color-01-90), var(--color-01-91), var(--color-01-95));
+    background: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-85), var(--color-01-90), var(--color-01-91), var(--color-01-95));
     border-color: var(--color-01-85);
     color: var(--color-01-12);
 }
@@ -45,7 +45,7 @@ html[native-dark-active] .btn, .btn {
 .nav-item .dropdown-menu {
     background-color: var(--color-01-80);
     /* New Gradient based on original background (80 -5, 80, 80 +1, 80 +5) */
-    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-75), var(--color-01-80), var(--color-01-81), var(--color-01-85));
+    background: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-75), var(--color-01-80), var(--color-01-81), var(--color-01-85));
     color: var(--color-01-40);
 }
 
@@ -57,13 +57,13 @@ html[native-dark-active] .btn, .btn {
     color: var(--color-01-40);
     background-color: var(--color-01-80);
     /* New Gradient based on original background (80 -5, 80, 80 +1, 80 +5) */
-    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-75), var(--color-01-80), var(--color-01-81), var(--color-01-85));
+    background: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-75), var(--color-01-80), var(--color-01-81), var(--color-01-85));
 }
 
 .dropdown-item:hover,
 .dropdown-item:focus {
     background-color: var(--color-01-65);
     /* New Gradient based on original background (65 -5, 65, 65 +1, 65 +5) */
-    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-60), var(--color-01-65), var(--color-01-66), var(--color-01-70));
+    background: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-60), var(--color-01-65), var(--color-01-66), var(--color-01-70));
     color: var(--color-01-40);
 }

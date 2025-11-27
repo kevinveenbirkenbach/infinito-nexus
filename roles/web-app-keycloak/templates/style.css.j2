@@ -104,6 +104,6 @@ a.pf-v5-c-nav__link{
 div#app header{
     background-color: var(--color-01-60);
     /* New Gradient based on original background (60 -5, 60, 60 +1, 60 +5) */
-    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-55), var(--color-01-60), var(--color-01-61), var(--color-01-65));
+    background: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-55), var(--color-01-60), var(--color-01-61), var(--color-01-65));
     color: var(--color-01-98);
 }

@@ -40,7 +40,7 @@
 body.skin-vector,
 .skin-vector .mw-page-container {
   background-color: var(--mw-surface);
-  background-image: linear-gradient({{ range(0, 361) | random }}deg,
+  background-image: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg,
     var(--mw-surface),
     var(--mw-surface-variant),
     var(--mw-surface-muted),
@@ -54,7 +54,7 @@ body.skin-vector,
 .skin-vector .vector-header-container,
 .skin-vector .mw-header {
   background-color: var(--color-01-80);
-  background-image: linear-gradient({{ range(0, 361) | random }}deg,
+  background-image: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg,
     var(--color-01-75), var(--color-01-80), var(--color-01-81), var(--color-01-85)
   );
   color: var(--color-01-17);
@@ -211,7 +211,7 @@ table.wikitable > * > tr > td {
 
 table.wikitable > * > tr > th {
   background-color: var(--color-01-80);
-  background-image: linear-gradient({{ range(0, 361) | random }}deg,
+  background-image: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg,
     var(--color-01-75), var(--color-01-80), var(--color-01-81), var(--color-01-85)
   );
   color: var(--mw-heading);

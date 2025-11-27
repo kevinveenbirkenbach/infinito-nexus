@@ -37,7 +37,7 @@ ul.lam-tab-navigation {
 .titleBar {
     background-image: linear-gradient(var(--color-01-83), var(--color-01-92));
     /* New Gradient based on original background (83 -5, 83, 83 +1, 83 +5) */
-    background-image: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-78), var(--color-01-83), var(--color-01-84), var(--color-01-88));
+    background-image: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-78), var(--color-01-83), var(--color-01-84), var(--color-01-88));
     border-top-color: var(--color-01-78);
     border-left-color: var(--color-01-87);
     border-right-color: var(--color-01-87);
@@ -46,6 +46,6 @@ ul.lam-tab-navigation {
 div.statusInfo {
     background-color: var(--color-01-81);
     /* New Gradient based on original background (81 -5, 81, 81 +1, 81 +5) */
-    background: linear-gradient({{ range(0, 361) | random }}deg, var(--color-01-76), var(--color-01-81), var(--color-01-82), var(--color-01-86));
+    background: linear-gradient({{ CSS_GRADIENT_ANGLE }}deg, var(--color-01-76), var(--color-01-81), var(--color-01-82), var(--color-01-86));
     color: var(--color-01-23);
 }
