@@ -20,17 +20,16 @@
           </a>
 
           <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
-
             {% for key, cat in littlejs_examples|dictsort %}
 
-              <li class="dropdown-submenu dropstart">
-                <a class="dropdown-item dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
+              <li class="dropdown-submenu">
+                <a class="dropdown-item dropdown-toggle d-flex align-items-center"
+                  href="#">
                   <i class="{{ cat.icon }} me-2"></i>
                   {{ cat.label|replace('---','')|trim }}
                 </a>
 
                 <ul class="dropdown-menu dropdown-menu-dark">
-                
                   {% for ex in cat['items'] %}
                     {% set href = ex | littlejs_href(WEB_PROTOCOL, domain) %}
                     <li>
@@ -39,14 +38,12 @@
                       </a>
                     </li>
                   {% endfor %}
-
                 </ul>
               </li>
 
               {% if not loop.last %}
                 <li><hr class="dropdown-divider"></li>
               {% endif %}
-
             {% endfor %}
           </ul>
         </li>

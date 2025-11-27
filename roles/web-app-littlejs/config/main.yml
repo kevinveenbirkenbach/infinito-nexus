@@ -1,8 +1,9 @@
 features:
-  css:      true
-  matomo:   true
-  desktop:  true
-  logout:   false
+  css:        true
+  matomo:     true
+  desktop:    true
+  logout:     false
+  javascript: true
 
 server:
   csp:
@@ -25,8 +26,10 @@ server:
         unsafe-inline:  true
       script-src-elem:
         unsafe-inline:  true
+        unsafe-eval:    true
       script-src-attr:
         unsafe-inline:  true
+        unsafe-eval:    true
   domains:
     canonical:
       - "littlejs.{{ PRIMARY_DOMAIN }}"

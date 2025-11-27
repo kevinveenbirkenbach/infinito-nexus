@@ -1,8 +1,8 @@
 <main class="container py-4">
   <header class="mb-4">
-    <h1 class="h3 mb-2">LittleJS Examples &amp; Games</h1>
+    <h1 class="h3 mb-2">{{ LITTLEJS_HEADLINE }}</h1>
     <p class="text-secondary small mb-0">
-      Browse and launch LittleJS demos rendered dynamically through Infinito.Nexus.
+      Browse and launch LittleJS demos rendered dynamically through {{ SOFTWARE_NAME }}.
     </p>
   </header>
 
@@ -37,7 +37,7 @@
 
                 <div class="mt-auto">
                   <a href="{{ href }}" class="btn btn-primary app-footer-btn">
-                    <i class="{{ ex.icon }} me-2"></i>Play {{ ex.name }}
+                    <i class="{{ ex.icon }} me-2"></i>Start {{ ex.name }}
                   </a>
                 </div>
 

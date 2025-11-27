@@ -6,26 +6,26 @@ littlejs_examples:
     label: "--- BASIC ---"
     icon: "fa-solid fa-shapes"
     items:
-      - name: "Hello World"
-        file: "helloWorld.js"
-        description: "Simple starter example"
-        is_project: false
-        tags: "beginner, gradient, text, tiles"
-        icon: "fa-solid fa-seedling"
+      # - name: "Hello World"
+      #   file: "helloWorld.js"
+      #   description: "Simple starter example"
+      #   is_project: false
+      #   tags: "beginner, gradient, text, tiles"
+      #   icon: "fa-solid fa-seedling"
 
-      - name: "Empty"
-        file: "empty.js"
-        description: "Empty example template"
-        is_project: false
-        tags: "beginner, text"
-        icon: "fa-regular fa-file"
+      # - name: "Empty"
+      #   file: "empty.js"
+      #   description: "Empty example template"
+      #   is_project: false
+      #   tags: "beginner, text"
+      #   icon: "fa-regular fa-file"
 
-      - name: "Texture"
-        file: "texture.js"
-        description: "Texture display and manipulation"
-        is_project: false
-        tags: "sprites, loading, tiles"
-        icon: "fa-regular fa-image"
+      # - name: "Texture"
+      #   file: "texture.js"
+      #   description: "Texture display and manipulation"
+      #   is_project: false
+      #   tags: "sprites, loading, tiles"
+      #   icon: "fa-regular fa-image"
 
       - name: "Animation"
         file: "animation.js"
@@ -48,12 +48,12 @@ littlejs_examples:
         tags: "hue, saturation, blending, rectangle"
         icon: "fa-solid fa-palette"
 
-      - name: "Sprite Atlas"
-        file: "spriteAtlas.js"
-        description: "Sprite atlas and tile rendering"
-        is_project: false
-        tags: "sheet, frames, tiles"
-        icon: "fa-solid fa-table-cells-large"
+      # - name: "Sprite Atlas"
+      #   file: "spriteAtlas.js"
+      #   description: "Sprite atlas and tile rendering"
+      #   is_project: false
+      #   tags: "sheet, frames, tiles"
+      #   icon: "fa-solid fa-table-cells-large"
 
       - name: "Blending"
         file: "blending.js"
@@ -76,19 +76,19 @@ littlejs_examples:
         tags: "effects, emitter, physics, fire, smoke"
         icon: "fa-solid fa-burst"
 
-      - name: "Input"
-        file: "input.js"
-        description: "Input system demo for keyboard, mouse, touch, and gamepad."
-        is_project: false
-        tags: "input, control"
-        icon: "fa-regular fa-keyboard"
+      # - name: "Input"
+      #   file: "input.js"
+      #   description: "Input system demo for keyboard, mouse, touch, and gamepad."
+      #   is_project: false
+      #   tags: "input, control"
+      #   icon: "fa-regular fa-keyboard"
 
-      - name: "Timers"
-        file: "timers.js"
-        description: "Timer objects and UI"
-        is_project: false
-        tags: "delay, interval, slider"
-        icon: "fa-regular fa-clock"
+      # - name: "Timers"
+      #   file: "timers.js"
+      #   description: "Timer objects and UI"
+      #   is_project: false
+      #   tags: "delay, interval, slider"
+      #   icon: "fa-regular fa-clock"
 
       - name: "Sound Effects"
         file: "sound.js"
@@ -104,33 +104,33 @@ littlejs_examples:
         tags: "music, sound, audio, streaming, volume, ui"
         icon: "fa-solid fa-headphones-simple"
 
-      - name: "Video"
-        file: "videoPlayer.js"
-        description: "Basic video play, pause, and stop"
-        is_project: false
-        tags: "movie, sound, audio, streaming, volume, ui"
-        icon: "fa-solid fa-video"
+      # - name: "Video"
+      #   file: "videoPlayer.js"
+      #   description: "Basic video play, pause, and stop"
+      #   is_project: false
+      #   tags: "movie, sound, audio, streaming, volume, ui"
+      #   icon: "fa-solid fa-video"
 
-      - name: "Font Image"
-        file: "fontImage.js"
-        description: "Bitmap font system with built-in system font"
-        is_project: false
-        tags: "text, characters"
-        icon: "fa-solid fa-font"
+      # - name: "Font Image"
+      #   file: "fontImage.js"
+      #   description: "Bitmap font system with built-in system font"
+      #   is_project: false
+      #   tags: "text, characters"
+      #   icon: "fa-solid fa-font"
 
-      - name: "Medals"
-        file: "medals.js"
-        description: "Achievement system"
-        is_project: false
-        tags: "unlock, progress, newgrounds"
-        icon: "fa-solid fa-medal"
+      # - name: "Medals"
+      #   file: "medals.js"
+      #   description: "Achievement system"
+      #   is_project: false
+      #   tags: "unlock, progress, newgrounds"
+      #   icon: "fa-solid fa-medal"
 
-      - name: "Tile Raycast"
-        file: "tileRaycast.js"
-        description: "Example of the tile layer raycast collision"
-        is_project: false
-        tags: "level, map, grid"
-        icon: "fa-solid fa-crosshairs"
+      # - name: "Tile Raycast"
+      #   file: "tileRaycast.js"
+      #   description: "Example of the tile layer raycast collision"
+      #   is_project: false
+      #   tags: "level, map, grid"
+      #   icon: "fa-solid fa-crosshairs"
 
       - name: "Camera Mouse Drag"
         file: "cameraDrag.js"
@@ -139,12 +139,12 @@ littlejs_examples:
         tags: "ui, input, control"
         icon: "fa-solid fa-arrows-up-down-left-right"
 
-      - name: "Debug Drawing"
-        file: "debugDraw.js"
-        description: "Debug drawing system"
-        is_project: false
-        tags: "debug, circle, line, rectangle"
-        icon: "fa-solid fa-bug"
+      # - name: "Debug Drawing"
+      #   file: "debugDraw.js"
+      #   description: "Debug drawing system"
+      #   is_project: false
+      #   tags: "debug, circle, line, rectangle"
+      #   icon: "fa-solid fa-bug"
 
   advanced:
     label: "--- ADVANCED ---"
@@ -192,12 +192,12 @@ littlejs_examples:
         tags: "music, sound, audio, notes, ui, instrument"
         icon: "fa-solid fa-sliders"
 
-      - name: "Music Player"
-        file: "musicPlayer.js"
-        description: "Music player with audio seeking and drag and drop"
-        is_project: false
-        tags: "sound, loading, audio, ui"
-        icon: "fa-solid fa-compact-disc"
+      # - name: "Music Player"
+      #   file: "musicPlayer.js"
+      #   description: "Music player with audio seeking and drag and drop"
+      #   is_project: false
+      #   tags: "sound, loading, audio, ui"
+      #   icon: "fa-solid fa-compact-disc"
 
   games:
     label: "--- GAMES ---"
@@ -277,33 +277,33 @@ littlejs_examples:
     label: "--- PLUGINS ---"
     icon: "fa-solid fa-puzzle-piece"
     items:
-      - name: "Box2d Demo"
-        file: "box2d.js"
-        description: "Box2D physics plugin"
-        is_project: false
-        tags: "objects, mouse"
-        icon: "fa-solid fa-cubes"
+      # - name: "Box2d Demo"
+      #   file: "box2d.js"
+      #   description: "Box2D physics plugin"
+      #   is_project: false
+      #   tags: "objects, mouse"
+      #   icon: "fa-solid fa-cubes"
 
-      - name: "Box2d Car"
-        file: "box2dCar.js"
-        description: "Drivable car with Box2D physics"
-        is_project: false
-        tags: "objects, vehicle, suspension, wheels"
-        icon: "fa-solid fa-car"
+      # - name: "Box2d Car"
+      #   file: "box2dCar.js"
+      #   description: "Drivable car with Box2D physics"
+      #   is_project: false
+      #   tags: "objects, vehicle, suspension, wheels"
+      #   icon: "fa-solid fa-car"
 
-      - name: "Box2d Pool"
-        file: "box2dPool.js"
-        description: "Billiard table pool game with Box2d physics"
-        is_project: false
-        tags: "objects, game"
-        icon: "fa-solid fa-pool-8-ball"
+      # - name: "Box2d Pool"
+      #   file: "box2dPool.js"
+      #   description: "Billiard table pool game with Box2d physics"
+      #   is_project: false
+      #   tags: "objects, game"
+      #   icon: "fa-solid fa-pool-8-ball"
 
-      - name: "Box2d Tile Layer"
-        file: "box2dTileLayer.js"
-        description: "Tile layer with Box2d physics"
-        is_project: false
-        tags: "objects, level, map, grid"
-        icon: "fa-solid fa-border-all"
+      # - name: "Box2d Tile Layer"
+      #   file: "box2dTileLayer.js"
+      #   description: "Tile layer with Box2d physics"
+      #   is_project: false
+      #   tags: "objects, level, map, grid"
+      #   icon: "fa-solid fa-border-all"
 
       - name: "WebGL Shader"
         file: "shader.js"
@@ -319,30 +319,30 @@ littlejs_examples:
         tags: "webgl, visual, effect"
         icon: "fa-solid fa-sparkles"
 
-      - name: "UI System"
-        file: "uiSystem.js"
-        description: "Buttons, sliders, and checkboxes"
-        is_project: false
-        tags: "objects, widgets, interactive"
-        icon: "fa-solid fa-sliders"
+      # - name: "UI System"
+      #   file: "uiSystem.js"
+      #   description: "Buttons, sliders, and checkboxes"
+      #   is_project: false
+      #   tags: "objects, widgets, interactive"
+      #   icon: "fa-solid fa-sliders"
 
-      - name: "Nine Slice"
-        file: "nineSlice.js"
-        description: "Scalable UI panels"
-        is_project: false
-        tags: "three slice, stretch, corners, text, tiles"
-        icon: "fa-solid fa-vector-square"
+      # - name: "Nine Slice"
+      #   file: "nineSlice.js"
+      #   description: "Scalable UI panels"
+      #   is_project: false
+      #   tags: "three slice, stretch, corners, text, tiles"
+      #   icon: "fa-solid fa-vector-square"
 
   full_examples:
     label: "--- FULL EXAMPLES ---"
     icon: "fa-solid fa-box-open"
     items:
-      - name: "Starter"
-        file: "starter"
-        description: "Clean project template"
-        is_project: true
-        tags: "base, empty, particles"
-        icon: "fa-solid fa-seedling"
+      # - name: "Starter"
+      #   file: "starter"
+      #   description: "Clean project template"
+      #   is_project: true
+      #   tags: "base, empty, particles"
+      #   icon: "fa-solid fa-seedling"
 
       - name: "Breakout Tutorial"
         file: "breakoutTutorial"
@@ -379,23 +379,16 @@ littlejs_examples:
         tags: "optimization, tiles, sprites"
         icon: "fa-solid fa-gauge-high"
 
-      - name: "Box2D Plugin"
-        file: "box2d"
-        description: "Full Box2D physics demo"
-        is_project: true
-        tags: "objects, bodies, joints"
-        icon: "fa-solid fa-cubes"
+      # - name: "HTML Menus"
+      #   file: "htmlMenu"
+      #   description: "HTML UI integration"
+      #   is_project: true
+      #   tags: "web, browser, overlay, button, slider, textbox"
+      #   icon: "fa-solid fa-code"
 
-      - name: "HTML Menus"
-        file: "htmlMenu"
-        description: "HTML UI integration"
-        is_project: true
-        tags: "web, browser, overlay, button, slider, textbox"
-        icon: "fa-solid fa-code"
-
-      - name: "UI System Plugin Demo"
-        file: "uiSystem"
-        description: "Complete UI system demo"
-        is_project: true
-        tags: "menu, overlay, button, slider, checkbox"
-        icon: "fa-solid fa-sliders"
+      # - name: "UI System Plugin Demo"
+      #   file: "uiSystem"
+      #   description: "Complete UI system demo"
+      #   is_project: true
+      #   tags: "menu, overlay, button, slider, checkbox"
+      #   icon: "fa-solid fa-sliders"
