@@ -1,10 +1,6 @@
 application_id: "web-app-roulette-wheel"
 entity_name:    "{{ application_id | get_entity_name }}"
 
-features:
-  css:    true
-  matomo: true
-
 docker_repository_address:  "https://github.com/kevinveenbirkenbach/roulette-wheel.git"
 docker_pull_git_repository: true
 docker_repository_branch:   "master"

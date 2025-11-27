@@ -2,6 +2,7 @@ features:
   logout:   false
   matomo:   true
   desktop:  true
+  css:      true
 server:
   domains:
     canonical:
