@@ -16,12 +16,9 @@ server:
         # Propably some tracking code
         # Anyhow implemented to pass CSP checks
         # @todo Remove
-        - https://www.clarity.ms/
-        - https://scripts.clarity.ms/
+        - https://*.clarity.ms/
       connect-src:
-        - https://q.clarity.ms
-        - https://n.clarity.ms
-        - https://z.clarity.ms
+        - https://*.clarity.ms
         - "data:"
       style-src-elem: []
       font-src: []
