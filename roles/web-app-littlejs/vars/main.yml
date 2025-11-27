@@ -1,16 +1,11 @@
 # General
 application_id: "web-app-littlejs"
 entity_name:    "{{ application_id | get_entity_name }}"
+domain:         "{{ domains | get_domain(application_id) }}"
 
-# Features
-features:
-  css:      true
-  matomo:   true
-  desktop:  true
+LITTLEJS_HEADLINE:          "LittleJS Playground"
 
-LITTLEJS_HEADLINE:          ""
-
-LITTLEJS_TITLE:             "LittleJS Playground – {{ PRIMARY_DOMAIN | upper }}"
+LITTLEJS_TITLE:             "{{ LITTLEJS_HEADLINE }} – {{ PRIMARY_DOMAIN | upper }}"
 
 # Base repository URL for LittleJS
 LITTLEJS_REPOSITORY_BASE:   "https://github.com/KilledByAPixel/LittleJS"

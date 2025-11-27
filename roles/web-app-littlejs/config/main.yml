@@ -1,8 +1,8 @@
 features:
-  matomo:       true
-  css:          true
-  desktop:      true
-  logout:       false
+  css:      true
+  matomo:   true
+  desktop:  true
+  logout:   false
 
 server:
   csp:

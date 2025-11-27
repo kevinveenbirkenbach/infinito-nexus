@@ -30,15 +30,9 @@
                 </a>
 
                 <ul class="dropdown-menu dropdown-menu-dark">
-
-                  {# FIXED: cat['items'] #}
+                
                   {% for ex in cat['items'] %}
-                    {% if ex.is_project %}
-                      {% set href = "/examples/" ~ ex.file ~ "/" %}
-                    {% else %}
-                      {% set href = "/examples/shorts/base.html?file=" ~ ex.file %}
-                    {% endif %}
-
+                    {% set href = ex | littlejs_href(WEB_PROTOCOL, domain) %}
                     <li>
                       <a class="dropdown-item d-flex align-items-center" href="{{ href }}">
                         <i class="{{ ex.icon }} me-2"></i>{{ ex.name }}
