@@ -62,6 +62,8 @@ portfolio_menu_categories:
       - games
       - chess
       - boardgame
+      - game
+      - roulette
 
   Communication:
     description: "Tools for communication"

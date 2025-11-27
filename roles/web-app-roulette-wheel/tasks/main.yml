@@ -1,13 +1,5 @@
----
-- name: "include docker-compose role"
+- name: "load docker, proxy for '{{ application_id }}'"
   include_role:
-    name: docker-compose
-
-- name: pull app repository
-  git:
-    repo: "https://github.com/kevinveenbirkenbach/roulette-wheel.git"
-    dest: "{{app_path}}"
-    update: yes
-  notify: docker compose up
-  become: true
-  ignore_errors: true
+    name: sys-stk-full-stateless
+  vars: 
+    docker_compose_flush_handlers: true

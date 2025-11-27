@@ -1,5 +1,7 @@
 features:
-  logout: false
+  logout:   false
+  matomo:   true
+  desktop:  true
 server:
   domains:
     canonical:

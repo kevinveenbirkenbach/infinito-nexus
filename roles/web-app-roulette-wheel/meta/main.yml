@@ -1,10 +1,8 @@
----
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
   description: >
-    This role deploys and configures the Roulette Wheel application using Docker Compose.
-    It automates the process of pulling the latest source code from GitHub,
-    building a Docker image, and deploying the application.
+    The Roulette Wheel is an interactive browser-based spinning wheel for decision
+    making, random selection, team activities, workshops, and gamification.
   license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |
@@ -15,12 +13,12 @@ galaxy_info:
     - docker
     - nodejs
     - roulette
-    - application
+    - webapp
+    - game
   repository: "https://s.infinito.nexus/code"
   issue_tracker_url: "https://s.infinito.nexus/issues"
   documentation: "https://docs.infinito.nexus"
   logo:
-    class: "fa-solid fa-dice"
+    class: "fa-solid fa-fan"
   run_after:
     - web-app-matomo
-

@@ -1,8 +1,5 @@
 # Roulette Wheel
 
-## Warning
-This role isn't actively maintained. Use it with caution in production environments.
-
 ## Overview
 This role deploys and configures the Roulette Wheel application using Docker Compose. It pulls the latest source code from a Git repository, builds a Docker image from a Node.js base, and starts the application on a user-defined local HTTP port.
 
