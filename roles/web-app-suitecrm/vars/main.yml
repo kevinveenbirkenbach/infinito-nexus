@@ -1,6 +1,7 @@
 # General
 application_id:                       "web-app-suitecrm"
 entity_name:                          "{{ application_id | get_entity_name }}"
+domain:                               "{{ domains | get_domain(application_id) }}"
 
 # Database
 database_type:                        "mariadb"

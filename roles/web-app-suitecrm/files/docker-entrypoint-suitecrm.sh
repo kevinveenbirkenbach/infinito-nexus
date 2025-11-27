@@ -9,7 +9,7 @@ INSTALL_FLAG="${APP_DIR}/public/installed.flag"
 log() { printf '%s %s\n' "[suitecrm-entrypoint]" "$*" >&2; }
 
 ############################################
-# 1) Sanity Checks
+# Sanity Checks
 ############################################
 if [ ! -d "$APP_DIR" ]; then
   log "ERROR: Application directory '$APP_DIR' does not exist."
@@ -17,7 +17,7 @@ if [ ! -d "$APP_DIR" ]; then
 fi
 
 ############################################
-# 2) Permissions
+# Permissions
 ############################################
 log "Adjusting file permissions..."
 chown -R "$WEB_USER:$WEB_GROUP" "$APP_DIR"
@@ -38,7 +38,7 @@ chown -R "$WEB_USER:$WEB_GROUP" "$TMPDIR"
 chmod 775 "$TMPDIR"
 
 ############################################
-# 3) Auto-Install SuiteCRM (only if not yet installed)
+# Auto-Install SuiteCRM (only if not yet installed)
 ############################################
 if [ ! -f "$INSTALL_FLAG" ]; then
   log "SuiteCRM 8 is not installed — performing automated installation..."
@@ -65,35 +65,20 @@ else
 fi
 
 ############################################
-# 4) LDAP Auto-Configuration (legacy backend)
+# Clear Symfony Cache
 ############################################
-if [ "${AUTH_TYPE:-disabled}" = "ldap" ]; then
-  log "Writing LDAP configuration to config_override.php"
-
-  cat > "${APP_DIR}/public/legacy/config_override.php" <<PHP
-<?php
-\$sugar_config['authenticationClass'] = 'LdapAuthenticate';
-\$sugar_config['ldap_hostname']       = '${LDAP_HOST}';
-\$sugar_config['ldap_port']           = '${LDAP_PORT}';
-\$sugar_config['ldap_encrypt']        = '${LDAP_ENCRYPTION}';
-\$sugar_config['ldap_base_dn']        = '${LDAP_BASE_DN}';
-\$sugar_config['ldap_bind_attr']      = '${LDAP_UID_KEY}';
-\$sugar_config['ldap_login_filter']   = "(${LDAP_UID_KEY}=%s)";
-\$sugar_config['ldap_bind_dn']        = '${LDAP_BIND_DN}';
-\$sugar_config['ldap_bind_password']  = '${LDAP_BIND_PASSWORD}';
-PHP
-
-  chown "$WEB_USER:$WEB_GROUP" "${APP_DIR}/public/legacy/config_override.php"
-fi
+log "Clearing Symfony cache..."
+php bin/console cache:clear --no-warmup || true
+php bin/console cache:warmup || true
 
 ############################################
-# 5) Healthcheck file
+# Healthcheck file
 ############################################
 echo "OK" > "${APP_DIR}/public/healthcheck.html"
 chown "$WEB_USER:$WEB_GROUP" "${APP_DIR}/public/healthcheck.html"
 
 ############################################
-# 6) Start Apache
+# Start Apache
 ############################################
 log "Starting apache2-foreground..."
 exec apache2-foreground
