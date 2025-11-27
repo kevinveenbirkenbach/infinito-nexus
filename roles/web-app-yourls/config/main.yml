@@ -31,8 +31,9 @@ docker:
       name:       "yourls"
       image:      "yourls"
     oauth2_proxy:
-      application:        "application"
-      port:               "80"
+      origin:
+        application:        "application"
+        port:               "80"
       allowed_groups:
         - "{{ [RBAC.GROUP.NAME, 'web-app-yourls-administrator'] | path_join }}"
       acl:

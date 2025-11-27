@@ -34,8 +34,9 @@ docker:
       name:     "snipe-it"
       image:    "grokability/snipe-it"
     oauth2_proxy:
-      application:  "application"
-      port:         "80"
+      origin:
+        application:  "application"
+        port:         "80"
       acl:
         blacklist:
           - "/login"
