@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
       libicu-dev \
       libonig-dev \
       libxml2-dev \
+      libldap2-dev \
+  && docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu \
   && docker-php-ext-install \
       mysqli \
       gd \
@@ -18,6 +20,7 @@ RUN apt-get update && apt-get install -y \
       mbstring \
       soap \
       opcache \
+      ldap \
   && rm -rf /var/lib/apt/lists/*
 
 # Install Apache modules
@@ -25,15 +28,22 @@ RUN a2enmod rewrite headers
 
 WORKDIR /var/www/html
 
+# Adjust Apache DocumentRoot for SuiteCRM 8 (Symfony public/ dir)
+RUN sed -ri 's!/var/www/html!/var/www/html/public!g' \
+      /etc/apache2/sites-available/000-default.conf \
+      /etc/apache2/apache2.conf
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Download SuiteCRM source
+# Download SuiteCRM 8 source from GitHub
 RUN set -eux; \
     SUITECRM_TAG="v{{ SUITECRM_APP_VERSION }}"; \
-    wget -qO /tmp/suitecrm.tar.gz "https://github.com/SuiteCRM/SuiteCRM/archive/refs/tags/${SUITECRM_TAG}.tar.gz"; \
+    wget -qO /tmp/suitecrm.tar.gz \
+      "https://github.com/SuiteCRM/SuiteCRM-Core/archive/refs/tags/${SUITECRM_TAG}.tar.gz"; \
     tar --strip-components=1 -xzf /tmp/suitecrm.tar.gz -C /var/www/html; \
-    rm /tmp/suitecrm.tar.gz
+    rm /tmp/suitecrm.tar.gz; \
+    chmod +x bin/console
 
 # Install PHP dependencies via Composer (critical!)
 RUN set -eux; \
@@ -41,7 +51,8 @@ RUN set -eux; \
       --no-dev \
       --prefer-dist \
       --no-interaction \
-      --optimize-autoloader
+      --optimize-autoloader \
+      --no-scripts
 
 # Copy entrypoint
 COPY {{ SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL }} {{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}

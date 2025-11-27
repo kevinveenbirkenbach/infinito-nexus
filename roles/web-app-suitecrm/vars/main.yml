@@ -24,7 +24,6 @@ SUITECRM_DATA_VOLUME:             "{{ applications | get_app_conf(application_id
 
 # URLs & feature flags
 SUITECRM_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-SUITECRM_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
 SUITECRM_LDAP_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
 
 # Simple maintenance toggle (for later extensions)

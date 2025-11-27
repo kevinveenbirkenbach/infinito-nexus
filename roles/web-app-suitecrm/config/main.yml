@@ -3,9 +3,10 @@ features:
   css:                true
   desktop:            true
   ldap:               true
-  oidc:               true          # OIDC via Keycloak + reverse proxy / plugin
+  oidc:               false # OIDC isn't available, just SAML for SSO
   central_database:   true
   logout:             true
+  oauth2:             true
 
 server:
   csp:
@@ -29,13 +30,17 @@ docker:
     suitecrm:
       image:            "php"
       version:          "8.2-apache"
-      # Git tag from https://github.com/SuiteCRM/SuiteCRM
-      app_version:      "7.14.8"
+      # Git tag from https://github.com/SuiteCRM/SuiteCRM-Core/releases
+      app_version:      "8.9.1"
       name:             "suitecrm"
       cpus:             1.5
       mem_reservation:  1.2g
       mem_limit:        2g
       pids_limit:       768
+    oauth2_proxy:
+      origin:
+        host:           "suitecrm"
+        port:           "80"
   volumes:
     data:       suitecrm_data
 

@@ -2,7 +2,7 @@
 
 ## Description
 
-Manage your customer relationships with SuiteCRM, a powerful open-source CRM platform extending SugarCRM with advanced modules, workflows, and integrations. This role integrates SuiteCRM into the Infinito.Nexus ecosystem with centralized database, mail, LDAP and OIDC-ready SSO support. 🚀💼
+Manage your customer relationships with SuiteCRM, a powerful open-source CRM platform extending SugarCRM with advanced modules, workflows, and integrations. This role integrates SuiteCRM into the Infinito.Nexus ecosystem with centralized database, mail and LDAP-ready single sign-on integration. 🚀💼
 
 ## Overview
 
@@ -13,7 +13,7 @@ This Ansible role deploys SuiteCRM using Docker and the Infinito.Nexus shared st
 - Environment variable management through Jinja2 templates  
 - Docker Compose orchestration for the **SuiteCRM** application container  
 - Native **LDAP** authentication via Symfony’s LDAP configuration  
-- OIDC-ready wiring for integration with Keycloak or other OIDC providers (via reverse proxy or plugin)
+- SSO integration via SAML / OAuth2 configured inside SuiteCRM’s Administration Panel
 
 With this role, you get a production-ready CRM environment that plugs into your existing IAM stack.
 
@@ -22,10 +22,11 @@ With this role, you get a production-ready CRM environment that plugs into your 
 - **Sales & Service CRM:** Accounts, Contacts, Leads, Opportunities, Cases, Campaigns and more 📊  
 - **Workflow Engine:** Automate business processes and notifications 🛠️  
 - **LDAP Authentication:** Centralize user authentication against OpenLDAP 🔐  
-- **OIDC-Ready SSO:** Preconfigured OIDC environment variables for use with plugins or an OIDC reverse proxy 🌐  
+- **SSO-Ready:** Integrates with SAML / OAuth2 providers (e.g. Keycloak as IdP) via SuiteCRM’s admin UI 🌐  
 - **Config via Templates:** Fully customizable `.env` and `docker-compose.yml` rendered via Jinja2 ⚙️  
 - **Health Checks & Logging:** Integrates with Infinito.Nexus health checking and journald logging 📈  
 - **Modular Role Composition:** Uses shared roles for DB, proxy and monitoring to keep your stack consistent 🔄  
+
 
 ## Further Resources
 
@@ -33,12 +34,15 @@ With this role, you get a production-ready CRM environment that plugs into your 
 - [SuiteCRM Documentation](https://docs.suitecrm.com/) 📖  
 - [Infinito.Nexus Project Repository](https://s.infinito.nexus/code) 🔗  
 
-## OIDC & LDAP Notes
+## LDAP & SSO Notes
 
-- **LDAP** is configured using Symfony’s environment variables (`AUTH_TYPE=ldap`, `LDAP_*`) so SuiteCRM 8+ can authenticate directly against your OpenLDAP service.  
-- **OIDC** is provided at the platform level (e.g. Keycloak + oauth2-proxy or a SuiteCRM OIDC plugin).  
-  This role exposes OIDC client, issuer and endpoint settings as environment variables, so plugins or
-  sidecar components can consume them without duplicating configuration.
+- **LDAP** is configured via environment variables (`AUTH_TYPE=ldap`, `LDAP_*`).  
+  The role writes a `config_override.php` so SuiteCRM’s legacy backend
+  uses LDAP for authentication against your OpenLDAP service.
+
+- **SSO** in SuiteCRM 8 is handled via **SAML** (e.g. with Keycloak as IdP) and
+  **OAuth providers** configured in the Administration panel (for outbound email and API access).
+  This role does not implement full OIDC login flows; instead, you configure SAML/OAuth inside SuiteCRM’s admin UI.
 
 ## Credits
 

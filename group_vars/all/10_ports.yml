@@ -18,6 +18,7 @@ ports:
       web-app-fusiondirectory: 4187
       web-app-gitea: 4188
       web-app-snipe-it: 4189
+      web-app-suitecrm: 4190
     ldap:
       svc-db-openldap: 389
     http:
