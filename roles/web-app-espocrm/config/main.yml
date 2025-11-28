@@ -1,6 +1,6 @@
 features:
   matomo:             true
-  css:                false
+  css:                true
   desktop:            false # @todo Solve https://chatgpt.com/c/687a50b4-8d78-800f-a202-1631aa05fd4f before setting it to true
   ldap:               false
   oidc:               true
@@ -20,6 +20,9 @@ server:
         - "data:"
       frame-src:
         - https://s.espocrm.com/
+      frame-ancestors:
+        - "{{ PRIMARY_DOMAIN }}"
+        - "*.{{ PRIMARY_DOMAIN }}"
   domains:
     aliases: []
     canonical:
