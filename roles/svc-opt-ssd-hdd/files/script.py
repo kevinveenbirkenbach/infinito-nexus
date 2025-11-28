@@ -130,7 +130,7 @@ if __name__ == "__main__":
             if has_healthcheck(container):
                 status = get_health_status(container)
                 while status != 'healthy':
-                    print(f"Warte auf Container {container}, Status '{status}'...")
+                    print(f"Wait for Container {container}, Status '{status}'...")
                     time.sleep(1)
                     status = get_health_status(container)
 
