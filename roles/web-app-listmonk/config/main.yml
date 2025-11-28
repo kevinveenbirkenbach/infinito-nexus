@@ -31,5 +31,5 @@ docker:
       port:               9000
 credentials:
   hcaptcha:
-    key:    "{{ CAPTCHA.HCAPTCHA.KEY }}"
-    secret: "{{ CAPTCHA.HCAPTCHA.SECRET }}"
+    key:    "{{ CAPTCHA.HCAPTCHA.KEY | default('') }}"
+    secret: "{{ CAPTCHA.HCAPTCHA.SECRET | default('') }}"

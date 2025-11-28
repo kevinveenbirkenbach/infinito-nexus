@@ -47,8 +47,8 @@ docker:
       enabled: true
 credentials:
   recaptcha:
-    key:  "{{ CAPTCHA.RECAPTCHA.KEY }}"
-    secret:   "{{ CAPTCHA.RECAPTCHA.SECRET }}"
+    key:      "{{ CAPTCHA.RECAPTCHA.KEY | default('') }}"
+    secret:   "{{ CAPTCHA.RECAPTCHA.SECRET | default('') }}"
 accounts:
   bootstrap:
     username: "administrator"

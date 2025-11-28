@@ -32,8 +32,8 @@ email:
   from_name: "Customer Relationship Management ({{ PRIMARY_DOMAIN }})"
 credentials:
   recaptcha:
-    key:  "{{ CAPTCHA.RECAPTCHA.KEY }}"
-    secret:   "{{ CAPTCHA.RECAPTCHA.SECRET }}"
+    key:      "{{ CAPTCHA.RECAPTCHA.KEY | default('') }}"
+    secret:   "{{ CAPTCHA.RECAPTCHA.SECRET | default('') }}"
 docker:
   services:
     database:
