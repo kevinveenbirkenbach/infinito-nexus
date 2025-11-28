@@ -1,70 +1,87 @@
 followus:
   name: Follow Us
-  description: Follow us to stay up to receive the newest {{ SOFTWARE_NAME }} updates 
+  description: Follow us to stay up to date with the latest {{ SOFTWARE_NAME }} updates.
   icon:
     class: fas fa-newspaper
-{% if ["web-app-mastodon", "web-app-bluesky"] | any_in(group_names) %}
+
+{% if [
+  'web-app-mastodon',
+  'web-app-bluesky',
+  'web-app-pixelfed',
+  'web-app-peertube',
+  'web-app-wordpress',
+  'web-app-friendica',
+  'web-app-listmonk'
+] | any_in(group_names) %}
   children:
 {% if service_provider.contact.mastodon is defined and service_provider.contact.mastodon != "" %}
     - name: Mastodon
       description: Follow {{ 'our' if service_provider.type == 'legal' else 'my' }} updates on Mastodon.
       icon:
         class: fa-brands fa-mastodon
-      url: "{{ WEB_PROTOCOL }}://{{ service_provider.contact.mastodon.split('@')[2] }}/@{{ service_provider.contact.mastodon.split('@')[1] }}"
-      identifier: "{{service_provider.contact.mastodon}}"
+      url: "{{ service_provider.contact.mastodon | fediverse_url(WEB_PROTOCOL) }}"
+      identifier: "{{ service_provider.contact.mastodon }}"
       iframe: {{ applications | get_app_conf('web-app-mastodon','features.desktop') }}
 {% endif %}
+
 {% if service_provider.contact.bluesky is defined and service_provider.contact.bluesky != "" %}
     - name: Bluesky
-      description: Follow {{ 'our' if service_provider.type == 'legal' else 'my' }} on Bluesky.
+      description: Follow {{ 'our' if service_provider.type == 'legal' else 'my' }} updates on Bluesky.
       icon:
         class: fa-brands fa-bluesky
       alternatives:
-      - link: followus.microblogs.mastodon
-      identifier: "{{service_provider.contact.bluesky}}"
+        - link: followus.microblogs.mastodon
+      identifier: "{{ service_provider.contact.bluesky }}"
 {% endif %}
-{% endif %}
-{% if service_provider.contact.pixelfed  is defined and service_provider.contact.pixelfed  != "" %}
-    - name: Pixelfed    
+
+{% if service_provider.contact.pixelfed is defined and service_provider.contact.pixelfed != "" %}
+    - name: Pixelfed
       description: Explore {{ 'our' if service_provider.type == 'legal' else 'my' }} photo gallery on Pixelfed.
       icon:
-          class: fa-solid fa-camera
-      identifier: "{{service_provider.contact.pixelfed}}"
-      url: "{{ WEB_PROTOCOL }}://{{ service_provider.contact.pixelfed.split('@')[2] }}/@{{ service_provider.contact.pixelfed.split('@')[1] }}"
+        class: fa-solid fa-camera
+      identifier: "{{ service_provider.contact.pixelfed }}"
+      url: "{{ service_provider.contact.pixelfed | fediverse_url(WEB_PROTOCOL) }}"
       iframe: {{ applications | get_app_conf('web-app-pixelfed','features.desktop') }}
 {% endif %}
-{% if service_provider.contact.peertube  is defined and service_provider.contact.peertube  != "" %}
+
+{% if service_provider.contact.peertube is defined and service_provider.contact.peertube != "" %}
     - name: Peertube
       description: Discover {{ 'our' if service_provider.type == 'legal' else 'my' }} videos on Peertube.
       icon:
         class: fa-solid fa-video
-      identifier: "{{service_provider.contact.peertube}}"
-      url: "{{ WEB_PROTOCOL }}://{{ service_provider.contact.peertube.split('@')[2] }}/@{{ service_provider.contact.peertube.split('@')[1] }}"
+      identifier: "{{ service_provider.contact.peertube }}"
+      url: "{{ service_provider.contact.peertube | fediverse_url(WEB_PROTOCOL) }}"
       iframe: {{ applications | get_app_conf('web-app-peertube','features.desktop') }}
 {% endif %}
+
 {% if service_provider.contact.wordpress is defined and service_provider.contact.wordpress != "" %}
     - name: WordPress
       description: Read {{ 'our' if service_provider.type == 'legal' else 'my' }} articles and stories.
       icon:
         class: fa-solid fa-blog
-      identifier: "{{service_provider.contact.wordpress}}"
-      url: "{{ WEB_PROTOCOL }}://{{ service_provider.contact.wordpress.split('@')[2] }}/@{{ service_provider.contact.wordpress.split('@')[1] }}"
+      identifier: "{{ service_provider.contact.wordpress }}"
+      url: "{{ service_provider.contact.wordpress | fediverse_url(WEB_PROTOCOL) }}"
       iframe: {{ applications | get_app_conf('web-app-wordpress','features.desktop') }}
 {% endif %}
+
 {% if service_provider.contact.friendica is defined and service_provider.contact.friendica != "" %}
     - name: Friendica
-      description: Visit {{ 'our' if service_provider.type == 'legal' else 'my' }} friendica profile
+      description: Visit {{ 'our' if service_provider.type == 'legal' else 'my' }} Friendica profile.
       icon:
         class: fa-solid fa-network-wired
-      identifier: "{{service_provider.contact.friendica}}"
-      url: "{{ WEB_PROTOCOL }}://{{ service_provider.contact.friendica.split('@')[2] }}/@{{ service_provider.contact.friendica.split('@')[1] }}"
+      identifier: "{{ service_provider.contact.friendica }}"
+      url: "{{ service_provider.contact.friendica | fediverse_url(WEB_PROTOCOL) }}"
       iframe: {{ applications | get_app_conf('web-app-friendica','features.desktop') }}
 {% endif %}
-{% if 'web-app-listmonk' in group_names %}
+
+{% if service_provider.contact.newsletter is defined
+      and service_provider.contact.newsletter != ""
+      and 'web-app-listmonk' in group_names %}
     - name: Newsletter
-      description: Subscribe {{ 'our' if service_provider.type == 'legal' else 'my' }} our newsletter
+      description: Subscribe to {{ 'our' if service_provider.type == 'legal' else 'my' }} newsletter.
       icon:
         class: fa-solid fa-envelope
-      url: "{{ domains | get_url("web-app-listmonk", WEB_PROTOCOL) }}"
+      url: "{{ service_provider.contact.newsletter }}"
       iframe: {{ applications | get_app_conf('web-app-listmonk','features.desktop') }}
+{% endif %}
 {% endif %}

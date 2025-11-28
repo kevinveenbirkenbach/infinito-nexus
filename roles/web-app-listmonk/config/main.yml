@@ -1,7 +1,7 @@
 public_api_activated:       False                                 # Security hole. Can be used for spaming                          # Docker Image version
 features:
   matomo:                   true
-  css:                      false
+  css:                      true
   desktop:                  true
   central_database:         true
   oidc:                     true

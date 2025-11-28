@@ -26,6 +26,7 @@ defaults_service_provider:
     pixelfed:       "{{ '@' ~ users.contact.username ~ '@' ~ domains | get_domain('web-app-pixelfed') if 'web-app-pixelfed' in group_names else '' }}"
     phone:          "+0 000 000 404"
     wordpress:      "{{ '@' ~ users.contact.username ~ '@' ~ domains | get_domain('web-app-wordpress') if 'web-app-wordpress' in group_names else '' }}"
+    newsletter:     "{{ [ domains | get_url('web-app-listmonk', WEB_PROTOCOL), '/subscription/form' ] | url_join  if 'web-app-listmonk' in group_names else '' }}"
 
   legal:
     editorial_responsible:  "Johannes Gutenberg"
