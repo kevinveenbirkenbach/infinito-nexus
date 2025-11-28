@@ -31,3 +31,8 @@
 - name: "Load LDAP Update routines for '{{ application_id }}'"
   include_tasks: update/05_ldap.yml
   when: KEYCLOAK_LDAP_ENABLED | bool
+
+- name: "Load reCAPTCHA Update routines for '{{ application_id }}'"
+  include_tasks: update/06_recaptcha.yml
+  when: applications | get_app_conf(application_id, 'features.recaptcha', False)
+
