@@ -6,7 +6,7 @@ features:
   central_database:         true
   oidc:                     true
   logout:                   true
-  hcaptcha:                 true
+  hcaptcha:                 "{{ HCAPTCHA_ENABLED | bool }}"
 server:
   domains:
     canonical:
@@ -23,9 +23,13 @@ docker:
     database:
       enabled: true
     listmonk:
-      image:            listmonk/listmonk
-      version:          latest
+      image:              listmonk/listmonk
+      version:            latest
       backup:
         no_stop_required: true
-      name:             listmonk
-      port:             9000
+      name:               listmonk
+      port:               9000
+credentials:
+  hcaptcha:
+    key:    "{{ CAPTCHA.HCAPTCHA.KEY }}"
+    secret: "{{ CAPTCHA.HCAPTCHA.SECRET }}"

@@ -2114,7 +2114,7 @@
           "autheticatorFlow": false,
           "userSetupAllowed": false
         },
-{%- if applications | get_app_conf(application_id, 'features.recaptcha', False) %}
+{%- if KEYCLOAK_RECAPTCHA_ENABLED | bool %}
         {
           "authenticatorConfig": "Google reCaptcha",
           "authenticator": "registration-recaptcha-action",
@@ -2204,15 +2204,15 @@
     }
   ],
   "authenticatorConfig": [
-{%- if applications | get_app_conf(application_id, 'features.recaptcha', False) %}
+{%- if KEYCLOAK_RECAPTCHA_ENABLED | bool %}
     {
       "alias": "Google reCaptcha",
       "config": {
         "action": "register",
         "useRecaptchaNet": "false",
         "recaptcha.v3": "true",
-        "secret.key": "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.secret_key', True) }}",
-        "site.key": "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.website_key', True) }}"
+        "secret.key": "{{ KEYCLOAK_RECAPTCHA_SECRET }}",
+        "site.key": "{{ KEYCLOAK_RECAPTCHA_KEY }}"
       }
     },
 {%- endif %}

@@ -2,6 +2,7 @@
 application_id:                   "web-app-espocrm"
 entity_name:                      "{{ application_id | get_entity_name }}"
 
+
 # Database
 database_type:                    "mariadb"
 
@@ -31,17 +32,28 @@ ESPOCRM_ENTRYPOINT_SCRIPT_HOST_ABS: "{{ [ docker_compose.directories.volumes, ES
 ESPOCRM_ENTRYPOINT_SCRIPT_HOST_REL: "volumes/{{ ESPOCRM_ENTRYPOINT_SCRIPT_FILE }}"
 ESPOCRM_ENTRYPOINT_SCRIPT_DOCKER:   "{{ [ '/usr/local/bin/', ESPOCRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
 
-### Set Flag
-ESPOCRM_SET_FLAG_SCRIPT_FILE:       "set_flags.php"
-ESPOCRM_SET_FLAG_SCRIPT_HOST_ABS:   "{{ [ docker_compose.directories.volumes, ESPOCRM_SET_FLAG_SCRIPT_FILE ] | path_join }}"
-ESPOCRM_SET_FLAG_SCRIPT_HOST_REL:   "volumes/{{ ESPOCRM_SET_FLAG_SCRIPT_FILE }}"
-ESPOCRM_SET_FLAG_SCRIPT_DOCKER:     "{{ [ '/usr/local/bin/', ESPOCRM_SET_FLAG_SCRIPT_FILE ] | path_join }}"
-
 ESPOCRM_CONFIG_FILE_PRIVATE:        "/var/www/html/data/config-internal.php"
 ESPOCRM_URL:                        "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 ESPOCRM_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
 ESPOCRM_USER:                       "www-data"
 
-ESPO_INIT_MAINTENANCE_MODE: "{{ applications | get_app_conf(application_id, 'maintenance_mode') | default(false) }}"
-ESPO_INIT_CRON_DISABLED:    "{{ ESPO_INIT_MAINTENANCE_MODE }}"        # disable cron only when in maintenance
-ESPO_INIT_USE_CACHE:        "{{ not ESPO_INIT_MAINTENANCE_MODE }}"    # enable cache when NOT in maintenance
+
+## Seeding
+
+### Seeding Script Parameter
+ESPOCRM_SCRIPT_SEED_FILE:           "seed_config.php"
+ESPOCRM_SCRIPT_SEED_HOST_ABS:       "{{ [ docker_compose.directories.volumes, ESPOCRM_SCRIPT_SEED_FILE ] | path_join }}"
+ESPOCRM_SCRIPT_SEED_HOST_REL:       "volumes/{{ ESPOCRM_SCRIPT_SEED_FILE }}"  
+ESPOCRM_SCRIPT_SEED_DOCKER:         "{{ [ '/usr/local/bin/', ESPOCRM_SCRIPT_SEED_FILE ] | path_join }}"
+
+### Seeding Values
+
+#### Maintanance
+ESPOCRM_MAINTENANCE_MODE:      "{{ applications | get_app_conf(application_id, 'maintenance_mode') }}"
+ESPOCRM_CRON_DISABLED:         "{{ ESPOCRM_MAINTENANCE_MODE }}"        # disable cron only when in maintenance
+ESPOCRM_USE_CACHE:             "{{ not ESPOCRM_MAINTENANCE_MODE }}"    # enable cache when NOT in maintenance
+
+#### reCAPTCHA
+ESPOCRM_RECAPTCHA_ENABLED:     "{{ applications | get_app_conf(application_id, 'features.recaptcha') }}"
+ESPOCRM_RECAPTCHA_KEY:         "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.key') }}"
+ESPOCRM_RECAPTCHA_SECRET:      "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.secret') }}"

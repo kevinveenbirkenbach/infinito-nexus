@@ -3,13 +3,3 @@ credentials:
     description: "Initial password for the Listmonk administrator account"
     algorithm: "sha256"
     validation: "^[a-f0-9]{64}$"
-
-  hcaptcha_site_key:
-    description: "Public site key used by Listmonk to render hCaptcha"
-    algorithm: "plain"
-    validation: "^[0-9a-zA-Z_-]{32,}$"
-
-  hcaptcha_secret:
-    description: "Private hCaptcha secret key for server-side verification"
-    algorithm: "plain"
-    validation: "^[0-9a-zA-Z_-]{32,}$"

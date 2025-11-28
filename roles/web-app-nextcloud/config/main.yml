@@ -127,7 +127,7 @@ features:
   oidc:             true
   central_database: true
   logout:           true
-  hcaptcha:         true
+  hcaptcha:         "{{ HCAPTCHA_ENABLED | bool }}"
 default_quota:                 '1000000000'                                     # Quota to assign if no quota is specified in the OIDC response (bytes)
 legacy_login_mask:   
   enabled:                      False                                           # If true, then legacy  login mask is shown. Otherwise just SSO

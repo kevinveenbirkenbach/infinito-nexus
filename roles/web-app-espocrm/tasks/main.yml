@@ -13,10 +13,10 @@
     - docker compose up
     - docker compose build
 
-- name: "Deploy '{{ ESPOCRM_SET_FLAG_SCRIPT_HOST_ABS }}'"
+- name: "Deploy '{{ ESPOCRM_SCRIPT_SEED_HOST_ABS }}'"
   copy:
-    src:  "{{ ESPOCRM_SET_FLAG_SCRIPT_FILE }}" 
-    dest: "{{ ESPOCRM_SET_FLAG_SCRIPT_HOST_ABS }}"
+    src:  "{{ ESPOCRM_SCRIPT_SEED_FILE }}" 
+    dest: "{{ ESPOCRM_SCRIPT_SEED_HOST_ABS }}"
   notify: 
     - docker compose up
     - docker compose build
@@ -47,7 +47,7 @@
 - name: Run flag setter as root (fallback)
   command: >
     docker exec --user root {{ ESPOCRM_CONTAINER }}
-    php {{ ESPOCRM_SET_FLAG_SCRIPT_DOCKER }}
+    php {{ ESPOCRM_SCRIPT_SEED_DOCKER }}
   register: flags_result_root
   changed_when: "'CHANGED' in flags_result_root.stdout"
 

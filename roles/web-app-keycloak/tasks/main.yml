@@ -34,5 +34,4 @@
 
 - name: "Load reCAPTCHA Update routines for '{{ application_id }}'"
   include_tasks: update/06_recaptcha.yml
-  when: applications | get_app_conf(application_id, 'features.recaptcha', False)
-
+  when: KEYCLOAK_RECAPTCHA_ENABLED | bool

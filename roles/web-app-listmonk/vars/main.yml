@@ -38,10 +38,10 @@ LISTMONK_SETTINGS:
     value: 'true'
 
   - key: "security.captcha_key"
-    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha_site_key") }}"'
+    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha.key") }}"'
 
   - key: "security.captcha_secret"
-    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha_secret") }}"'
+    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha.secret") }}"'
 
   # SMTP servers
   - key: "smtp"

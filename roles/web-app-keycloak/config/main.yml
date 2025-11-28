@@ -7,7 +7,7 @@ features:
   desktop:            true
   ldap:               true
   central_database:   true
-  recaptcha:          true
+  recaptcha:          "{{ RECAPTCHA_ENABLED | bool }}"
 
   # Doesn't make sense to activate logout page for keycloak, because the logout page 
   # anyhow should be included via iframe in keycloak.
@@ -45,12 +45,10 @@ docker:
       pids_limit:       1024
     database:
       enabled: true
-
 credentials:
   recaptcha:
-    website_key:    "" # Required if you enabled recaptcha:
-    secret_key:     ""  # Required if you enabled recaptcha:
-
+    key:  "{{ CAPTCHA.RECAPTCHA.KEY }}"
+    secret:   "{{ CAPTCHA.RECAPTCHA.SECRET }}"
 accounts:
   bootstrap:
     username: "administrator"

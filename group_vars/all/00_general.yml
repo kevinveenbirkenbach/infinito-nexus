@@ -88,3 +88,15 @@ RBAC:
   GROUP:
     NAME:   "/roles"  # Name of the group which holds the RBAC roles
     CLAIM:  "groups"  # Name of the claim containing the RBAC groups
+
+# You need to set both keys to enable them
+CAPTCHA:
+  RECAPTCHA:
+    KEY:    "" 
+    SECRET: ""
+  HCAPTCHA:
+    KEY:    "" 
+    SECRET: ""
+
+RECAPTCHA_ENABLED: "{{ (CAPTCHA.RECAPTCHA.KEY | length > 0) and (CAPTCHA.RECAPTCHA.SECRET | length > 0) }}"
+HCAPTCHA_ENABLED:  "{{ (CAPTCHA.HCAPTCHA.KEY | length > 0) and (CAPTCHA.HCAPTCHA.SECRET | length > 0) }}"

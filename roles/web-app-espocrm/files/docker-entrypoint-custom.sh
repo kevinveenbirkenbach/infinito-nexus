@@ -16,18 +16,14 @@ bool_norm () {
 }
 
 # --- Environment initialization ----------------------------------------------
-MAINTENANCE="$(bool_norm "${ESPO_INIT_MAINTENANCE_MODE:-false}")"
-CRON_DISABLED="$(bool_norm "${ESPO_INIT_CRON_DISABLED:-false}")"
-USE_CACHE="$(bool_norm "${ESPO_INIT_USE_CACHE:-true}")"
+MAINTENANCE="$(bool_norm "${ESPOCRM_SEED_MAINTENANCE_MODE}")"
+CRON_DISABLED="$(bool_norm "${ESPOCRM_SEED_CRON_DISABLED}")"
+USE_CACHE="$(bool_norm "${ESPOCRM_SEED_USE_CACHE}")"
 
 APP_DIR="/var/www/html"
 
 # Provided by env.j2 (fallback ensures robustness)
-SET_FLAGS_SCRIPT="${ESPOCRM_SET_FLAGS_SCRIPT:-/usr/local/bin/set_flags.php}"
-if [ ! -f "$SET_FLAGS_SCRIPT" ]; then
-  log "WARN: SET_FLAGS_SCRIPT '$SET_FLAGS_SCRIPT' not found; falling back to /usr/local/bin/set_flags.php"
-  SET_FLAGS_SCRIPT="/usr/local/bin/set_flags.php"
-fi
+SEED_CONFIG_SCRIPT="${ESPOCRM_SCRIPT_SEED}"
 
 # --- Wait for bootstrap.php (max 60s, e.g. fresh volume) ----------------------
 log "Waiting for ${APP_DIR}/bootstrap.php..."
@@ -41,10 +37,10 @@ if [ ! -f "${APP_DIR}/bootstrap.php" ]; then
   exit 1
 fi
 
-# --- Apply config flags via set_flags.php ------------------------------------
-log "Applying runtime flags via set_flags.php..."
-if ! php "${SET_FLAGS_SCRIPT}"; then
-  log "ERROR: set_flags.php execution failed"
+# --- Apply config flags via seed_config.php ------------------------------------
+log "Applying runtime flags via seed_config.php..."
+if ! php "${SEED_CONFIG_SCRIPT}"; then
+  log "ERROR: seed_config.php execution failed"
   exit 1
 fi
 

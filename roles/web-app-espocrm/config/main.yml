@@ -6,7 +6,7 @@ features:
   oidc:               true
   central_database:   true
   logout:             true
-  recaptcha:          true  # Required for leads formulars
+  recaptcha:          "{{ RECAPTCHA_ENABLED | bool }}"  # Required for leads formulars
 server:
   csp:
     flags:
@@ -30,6 +30,10 @@ server:
       - espo.crm.{{ PRIMARY_DOMAIN }}
 email:
   from_name: "Customer Relationship Management ({{ PRIMARY_DOMAIN }})"
+credentials:
+  recaptcha:
+    key:  "{{ CAPTCHA.RECAPTCHA.KEY }}"
+    secret:   "{{ CAPTCHA.RECAPTCHA.SECRET }}"
 docker:
   services:
     database:

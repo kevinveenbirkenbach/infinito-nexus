@@ -77,6 +77,11 @@ KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >
       ) | join(', ') 
   }}
 
+# reCAPTCHA
+KEYCLOAK_RECAPTCHA_ENABLED: "{{ applications | get_app_conf(application_id, 'features.recaptcha') }}"
+KEYCLOAK_RECAPTCHA_KEY:     "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.key') }}"
+KEYCLOAK_RECAPTCHA_SECRET:  "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.secret') }}"
+
 # Dictionaries
 KEYCLOAK_DICTIONARY_REALM_RAW: "{{ lookup('template', 'import/realm.json.j2') }}"
 KEYCLOAK_DICTIONARY_REALM: >-
