@@ -11,6 +11,10 @@ LISTMONK_CONFIG_HOST:         "{{ [ docker_compose.directories.config,'config.to
 
 LISTMONK_PUBLIC_API_ENABLED:  "{{ applications | get_app_conf(application_id, 'public_api_activated') }}"
 
+# User Configuration
+LISTMONK_USER_SEND:           "newsletter"
+LISTMONK_USER_BOUNCE:         "bounce"
+
 LISTMONK_SETTINGS:
   - key: "app.root_url"
     value: '"{{ domains | get_url(application_id, WEB_PROTOCOL) }}"'
@@ -47,8 +51,8 @@ LISTMONK_SETTINGS:
           "host":            SYSTEM_EMAIL.HOST,
           "port":            SYSTEM_EMAIL.PORT,
           "enabled":         SYSTEM_EMAIL.SMTP,
-          "username":        "no-reply",
-          "password":        users['no-reply'].email,
+          "username":        users[LISTMONK_USER_SEND].email,
+          "password":        users[LISTMONK_USER_SEND].password,
           "tls_type":        (
                                 SYSTEM_EMAIL.TLS
                                 | ternary("TLS",
@@ -96,9 +100,9 @@ LISTMONK_SETTINGS:
           "type":            "pop",
           "uuid":            "471fd0e9-8c33-4e4a-9183-c4679699faca",
           "enabled":         true,
-          "username":        users.bounce.email,
-          "password":        users.bounce.mailu_token,
-          "return_path":     users.bounce.email,
+          "username":        users[LISTMONK_USER_BOUNCE].email,
+          "password":        users[LISTMONK_USER_BOUNCE].mailu_token,
+          "return_path":     users[LISTMONK_USER_BOUNCE].email,
           "tls_enabled":     SYSTEM_EMAIL.TLS,
           "auth_protocol":   "userpass",
           "scan_interval":   "15m",
@@ -117,7 +121,7 @@ LISTMONK_SETTINGS:
 #    value: '1000'
 
   - key: "app.from_email"
-    value: '"{{ service_provider.company.titel }} Newsletter <{{ users["no-reply"].email }}>"'
+    value: '"{{ service_provider.company.titel }} Newsletter <{{ users[LISTMONK_USER_SEND].email }}>"'
 
 #  - key: "bounce.actions"
 #    value: >-

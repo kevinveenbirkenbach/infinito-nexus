@@ -12,7 +12,7 @@ defaults_service_provider:
     logo:           "{{ applications['web-svc-asset'].url ~ '/img/logo.png' }}"
   platform:    
     titel:          "{{ SOFTWARE_NAME }}"
-    subtitel:       "One login. Infinite applications."
+    subtitel:       "One login. Infinite Solutions."
     logo:           "{{ applications['web-svc-asset'].url ~ '/img/logo.png' }}"
     favicon:        "{{ applications['web-svc-asset'].url ~ '/img/favicon.ico' }}"
   contact:
