@@ -9,3 +9,5 @@
     system_service_on_calendar:   "{{SYS_SCHEDULE_HEALTH_BTRFS}}"
     system_service_timer_enabled:  true
     system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+
+- include_tasks: utils/run_once.yml

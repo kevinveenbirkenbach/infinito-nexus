@@ -52,3 +52,5 @@
     name: user
   vars:
     user_name: "administrator"
+
+- include_tasks: utils/run_once.yml

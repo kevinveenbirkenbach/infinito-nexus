@@ -4,9 +4,7 @@
     handler_role_name: "sys-daemon"
   when: run_once_sys_service is defined
 
-- block:
-  - include_tasks: 01_core.yml
-  - include_tasks: utils/run_once.yml
+- include_tasks: 01_core.yml
   when: run_once_sys_service is not defined
 
 - name: "Execute service routines for '{{ system_service_id }}'"

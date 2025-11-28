@@ -18,3 +18,5 @@
     system_service_on_calendar:       "{{ SYS_SCHEDULE_CLEANUP_CERTS }}"
     system_service_copy_files:        false
     system_service_force_linear_sync: false
+
+- include_tasks: utils/run_once.yml

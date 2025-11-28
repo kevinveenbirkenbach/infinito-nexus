@@ -1,4 +1,2 @@
-- block:
-    - include_tasks: 01_core.yml
-    - include_tasks: utils/run_once.yml
+- include_tasks: 01_core.yml
   when: run_once_user_administrator is not defined

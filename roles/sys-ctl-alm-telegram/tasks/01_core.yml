@@ -21,3 +21,5 @@
   community.general.pacman:
     name: curl
     state: present
+
+- include_tasks: utils/run_once.yml

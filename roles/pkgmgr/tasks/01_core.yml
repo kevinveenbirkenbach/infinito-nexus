@@ -47,3 +47,5 @@
 - name: "Update all repositories with pkgmgr"
   command: "pkgmgr pull --all"
   when: MODE_UPDATE | bool
+
+- include_tasks: utils/run_once.yml

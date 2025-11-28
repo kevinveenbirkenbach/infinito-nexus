@@ -5,3 +5,5 @@
     owner:  "{{ NGINX.USER }}"
     group:  "{{ NGINX.USER }}"
     mode:   '0644'
+
+- include_tasks: utils/run_once.yml

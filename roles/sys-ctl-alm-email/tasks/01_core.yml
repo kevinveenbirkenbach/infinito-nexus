@@ -9,3 +9,5 @@
     # If the email notifier fails, trigger the Telegram notifier,
     # passing the failing unit's name as the instance text.
     system_service_tpl_on_failure: "{{ ('sys-ctl-alm-telegram@') | get_service_name(SOFTWARE_NAME, False) }}%n.service"
+
+- include_tasks: utils/run_once.yml
