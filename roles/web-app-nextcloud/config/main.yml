@@ -11,8 +11,6 @@ server:
         unsafe-inline:  true  # Required for ONLYOFFICE
     whitelist:
       script-src-elem:
-        - "https://www.hcaptcha.com"
-        - "https://js.hcaptcha.com"
         - "{{ WEB_PROTOCOL }}://onlyoffice.{{ PRIMARY_DOMAIN }}"
       font-src:
         - "data:"
@@ -27,7 +25,6 @@ server:
         - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://onlyoffice.{{ PRIMARY_DOMAIN }}"
         - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
-        - "https://newassets.hcaptcha.com/"
         - "*" # Required to load all external websites in Whiteboard
       worker-src:
         - "blob:"
@@ -123,13 +120,14 @@ docker:
   # @see https://apps.nextcloud.com/apps/sociallogin
   flavor:                       "oidc_login"                                    # Keeping on sociallogin because the other option is not implemented yet                                             
 features:
-  matomo:                       true
-  css:                          false
-  desktop:                      true
-  ldap:                         true
-  oidc:                         true
-  central_database:             true
-  logout:                       true
+  matomo:           true
+  css:              false
+  desktop:          true
+  ldap:             true
+  oidc:             true
+  central_database: true
+  logout:           true
+  hcaptcha:         true
 default_quota:                 '1000000000'                                     # Quota to assign if no quota is specified in the OIDC response (bytes)
 legacy_login_mask:   
   enabled:                      False                                           # If true, then legacy  login mask is shown. Otherwise just SSO

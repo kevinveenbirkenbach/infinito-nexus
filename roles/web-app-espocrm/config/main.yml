@@ -6,6 +6,7 @@ features:
   oidc:               true
   central_database:   true
   logout:             true
+  recaptcha:          true  # Required for leads formulars
 server:
   csp:
     flags:
@@ -16,7 +17,7 @@ server:
         unsafe-eval:    true
     whitelist:
       connect-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://espocrm.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEBSOCKET_PROTOCOL }}://espo.crm.{{ PRIMARY_DOMAIN }}"
         - "data:"
       frame-src:
         - https://s.espocrm.com/

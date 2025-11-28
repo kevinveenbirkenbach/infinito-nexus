@@ -6,6 +6,7 @@ features:
   central_database:         true
   oidc:                     true
   logout:                   true
+  hcaptcha:                 true
 server:
   domains:
     canonical:
@@ -17,12 +18,6 @@ server:
     flags:
       script-src-elem:
         unsafe-inline:  true
-    whitelist:
-      script-src-elem:
-        - "https://www.hcaptcha.com"
-        - "https://js.hcaptcha.com"
-      frame-src:
-        - "https://newassets.hcaptcha.com/"
 docker:
   services:
     database:

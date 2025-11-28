@@ -24,6 +24,7 @@
   vars:
     # Necessary to overwrite parent values
     client_max_body_size: "10M"
+    location_ws:          ""
 
 - name: Create symbolic link from .env file to repository
   file:

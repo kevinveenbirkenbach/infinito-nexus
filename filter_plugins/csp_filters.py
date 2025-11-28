@@ -202,31 +202,39 @@ class FilterModule(object):
 
                 tokens = ["'self'"]
 
-                # 1) Flags (with sane defaults)
+                # Flags (with sane defaults)
                 flags = self.get_csp_flags(applications, application_id, directive)
                 tokens += flags
 
-                # 2) Internal CDN defaults for selected directives
+                # Internal CDN defaults for selected directives
                 if directive in ('script-src-elem', 'connect-src', 'style-src-elem', 'style-src'):
                     tokens.append(get_url(domains, 'web-svc-cdn', web_protocol))
 
-                # 3) Matomo (if enabled)
+                # Matomo (if enabled)
                 if directive in ('script-src-elem', 'connect-src'):
                     if self.is_feature_enabled(applications, matomo_feature_name, application_id):
                         tokens.append(get_url(domains, 'web-app-matomo', web_protocol))
 
-                # 4) Simpleicons (if enabled) – typically used via connect-src (fetch)
+                # Simpleicons (if enabled) – typically used via connect-src (fetch)
                 if directive == 'connect-src':
                     if self.is_feature_enabled(applications, 'simpleicons', application_id):
                         tokens.append(get_url(domains, 'web-svc-simpleicons', web_protocol))
 
-                # 5) reCAPTCHA (if enabled) – scripts + frames
+                # reCAPTCHA (if enabled) – scripts + frames
                 if self.is_feature_enabled(applications, 'recaptcha', application_id):
                     if directive in ('script-src-elem', 'frame-src'):
                         tokens.append('https://www.gstatic.com')
                         tokens.append('https://www.google.com')
+                        
+                # hCaptcha (if enabled) – scripts + frames
+                if self.is_feature_enabled(applications, 'hcaptcha', application_id):
+                    if directive in ('script-src-elem'):
+                        tokens.append('https://www.hcaptcha.com')
+                        tokens.append('https://js.hcaptcha.com')
+                    if directive in ('frame-src'):
+                        tokens.append('https://newassets.hcaptcha.com/')
 
-                # 6) Frame ancestors (desktop + logout)
+                # Frame ancestors (desktop + logout)
                 if directive == 'frame-ancestors':
                     if self.is_feature_enabled(applications, 'desktop', application_id):
                         # Allow being embedded by the desktop app domain's site
@@ -237,16 +245,16 @@ class FilterModule(object):
                         tokens.append(get_url(domains, 'web-svc-logout', web_protocol))
                         tokens.append(get_url(domains, 'web-app-keycloak', web_protocol))
                         
-                # 6b) Logout support requires inline handlers (script-src-attr)
+                # Logout support requires inline handlers (script-src-attr)
                 if directive in ('script-src-attr','script-src-elem'):
                     if self.is_feature_enabled(applications, 'logout', application_id):
                         tokens.append("'unsafe-inline'")
 
 
-                # 7) Custom whitelist
+                # Custom whitelist
                 tokens += self.get_csp_whitelist(applications, application_id, directive)
 
-                # 8) Inline hashes (only if this directive does NOT include 'unsafe-inline')
+                # Inline hashes (only if this directive does NOT include 'unsafe-inline')
                 if "'unsafe-inline'" not in tokens:
                     for snippet in self.get_csp_inline_content(applications, application_id, directive):
                         tokens.append(self.get_csp_hash(snippet))

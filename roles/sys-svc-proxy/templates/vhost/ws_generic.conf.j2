@@ -22,7 +22,7 @@ server {
 
   {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
 
-  {% if location_ws is defined %}
+  {% if location_ws | default(false) %}
     {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
   {% endif %}
 

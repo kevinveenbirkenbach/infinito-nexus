@@ -564,6 +564,45 @@ class TestCspFilters(unittest.TestCase):
         self.assertIn("'unsafe-inline'", base_tokens)
         self.assertIn("'unsafe-inline'", attr_tokens)
         self.assertIn("'unsafe-inline'", elem_tokens)
+        
+    def test_build_csp_header_hcaptcha_toggle(self):
+        """
+        When the 'hcaptcha' feature is enabled, the CSP must include
+        the hCaptcha script and frame hosts. When disabled, they must
+        not appear in any directive.
+        """
+        # enabled case
+        self.apps['app1'].setdefault('features', {})['hcaptcha'] = True
+        header_enabled = self.filter.build_csp_header(
+            self.apps, 'app1', self.domains, web_protocol='https'
+        )
+
+        # script-src-elem must contain hCaptcha hosts
+        script_elem_tokens = self._get_directive_tokens(header_enabled, 'script-src-elem')
+        self.assertIn("https://www.hcaptcha.com", script_elem_tokens)
+        self.assertIn("https://js.hcaptcha.com", script_elem_tokens)
+
+        # base script-src must also include them (family union)
+        script_base_tokens = self._get_directive_tokens(header_enabled, 'script-src')
+        self.assertIn("https://www.hcaptcha.com", script_base_tokens)
+        self.assertIn("https://js.hcaptcha.com", script_base_tokens)
+
+        # frame-src must contain the hCaptcha assets host
+        frame_tokens = self._get_directive_tokens(header_enabled, 'frame-src')
+        self.assertIn("https://newassets.hcaptcha.com/", frame_tokens)
+
+        # disabled case
+        self.apps['app1']['features']['hcaptcha'] = False
+        header_disabled = self.filter.build_csp_header(
+            self.apps, 'app1', self.domains, web_protocol='https'
+        )
+
+        for directive in ('script-src', 'script-src-elem', 'frame-src'):
+            tokens = self._get_directive_tokens(header_disabled, directive)
+            self.assertNotIn("https://www.hcaptcha.com", tokens)
+            self.assertNotIn("https://js.hcaptcha.com", tokens)
+            self.assertNotIn("https://newassets.hcaptcha.com/", tokens)
+
 
 if __name__ == '__main__':
     unittest.main()
