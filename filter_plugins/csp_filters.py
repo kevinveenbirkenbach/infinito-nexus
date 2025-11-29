@@ -20,6 +20,26 @@ def _dedup_preserve(seq):
             out.append(x)
     return out
 
+def _sort_tokens(tokens):
+    """
+    Return a deterministically ordered list of CSP tokens.
+    - de-duplicates while preserving relative order
+    - then sorts lexicographically
+    - keeps 'self' as the first token if present
+    """
+    uniq = _dedup_preserve(tokens)
+    if not uniq:
+        return uniq
+
+    # Lexicographically sort all tokens
+    uniq = sorted(uniq)
+
+    # Ensure "'self'" is always first if present
+    if "'self'" in uniq:
+        uniq.remove("'self'")
+        uniq.insert(0, "'self'")
+
+    return uniq
 
 class FilterModule(object):
     """
@@ -297,6 +317,10 @@ class FilterModule(object):
             # ----------------------------------------------------------
             # Assemble header
             # ----------------------------------------------------------
+            # Sort tokens per directive for deterministic output
+            for directive, toks in list(tokens_by_dir.items()):
+                tokens_by_dir[directive] = _sort_tokens(toks)
+
             parts = []
             for directive in directives:
                 if directive in tokens_by_dir:

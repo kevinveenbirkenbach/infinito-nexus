@@ -115,8 +115,12 @@ class TestCspFilters(unittest.TestCase):
         self.assertIn("https://cdn.example.org", header)   # internes CDN
         self.assertIn("https://cdn.example.com", header)   # Whitelist
 
-        # script-src directive should include unsafe-eval
-        self.assertIn("script-src 'self' 'unsafe-eval'", header)
+        # script-src directive should include unsafe-eval (order-independent)
+        script_tokens = self._get_directive_tokens(header, "script-src")
+        self.assertIn("'unsafe-eval'", script_tokens)
+        # 'self' should still be the first token
+        self.assertGreater(len(script_tokens), 0)
+        self.assertEqual(script_tokens[0], "'self'")
 
         # connect-src directive (reihenfolgeunabhängig prüfen)
         tokens = self._get_directive_tokens(header, "connect-src")
@@ -603,6 +607,61 @@ class TestCspFilters(unittest.TestCase):
             self.assertNotIn("https://js.hcaptcha.com", tokens)
             self.assertNotIn("https://newassets.hcaptcha.com/", tokens)
 
+    def test_connect_src_tokens_are_sorted_and_self_first(self):
+        """
+        Tokens inside connect-src must be deterministically sorted with 'self' first.
+        This ensures stable CSP output and avoids fake Ansible changes.
+        """
+        apps = copy.deepcopy(self.apps)
+
+        # Provide an unsorted whitelist for connect-src
+        apps['app1']['server']['csp'].setdefault('whitelist', {})
+        apps['app1']['server']['csp']['whitelist']['connect-src'] = [
+            'https://zzz.example.com',
+            'https://aaa.example.com',
+            'https://mmm.example.com',
+        ]
+
+        header = self.filter.build_csp_header(apps, 'app1', self.domains, web_protocol='https')
+        tokens = self._get_directive_tokens(header, 'connect-src')
+
+        # Ensure we actually have tokens
+        self.assertGreater(len(tokens), 0)
+
+        # 'self' must be first if present
+        self.assertEqual(tokens[0], "'self'")
+
+        # All remaining tokens must be sorted lexicographically
+        tail = tokens[1:]
+        self.assertEqual(tail, sorted(tail))
+
+    def test_connect_src_header_deterministic_for_unsorted_whitelist(self):
+        """
+        Two apps with the same connect-src whitelist in different orders must
+        produce identical CSP headers. This verifies deterministic sorting.
+        """
+        apps1 = copy.deepcopy(self.apps)
+        apps2 = copy.deepcopy(self.apps)
+
+        apps1['app1']['server']['csp'].setdefault('whitelist', {})
+        apps2['app1']['server']['csp'].setdefault('whitelist', {})
+
+        # Same items, different order
+        apps1['app1']['server']['csp']['whitelist']['connect-src'] = [
+            'https://c.example.com',
+            'https://b.example.com',
+            'https://a.example.com',
+        ]
+        apps2['app1']['server']['csp']['whitelist']['connect-src'] = [
+            'https://a.example.com',
+            'https://c.example.com',
+            'https://b.example.com',
+        ]
+
+        header1 = self.filter.build_csp_header(apps1, 'app1', self.domains, web_protocol='https')
+        header2 = self.filter.build_csp_header(apps2, 'app1', self.domains, web_protocol='https')
+
+        self.assertEqual(header1, header2)
 
 if __name__ == '__main__':
     unittest.main()
