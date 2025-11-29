@@ -193,7 +193,8 @@ def web_health_expectations(applications, www_enabled: bool = False, group_names
             if d.startswith("www."):
                 expectations[d] = [301]
 
-    return expectations
+    ordered = {k: expectations[k] for k in sorted(expectations.keys())}
+    return ordered
 
 
 class FilterModule(object):

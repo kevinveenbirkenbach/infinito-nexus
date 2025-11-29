@@ -397,5 +397,30 @@ class TestWebHealthExpectationsFilter(unittest.TestCase):
         self.assertEqual(out["v1.l11.example.org"], [301, 307])    # per-key list
         self.assertEqual(out["v2.l11.example.org"], [301, 307])
 
+    def test_expectations_keys_are_sorted_alphabetically (self ):
+        apps ={"app-sort":{}}
+        self ._configure_returns ({
+        ("app-sort","server.domains.canonical"):["b.example.org","a.example.org","c.example.org"],
+        ("app-sort","server.domains.aliases"):["alias.example.org"],
+        ("app-sort","server.status_codes"):{"default":200 },
+        })
+        out =self .mod .web_health_expectations (apps ,group_names =["app-sort"])
+
+        keys =list (out .keys ())
+        self .assertEqual (keys ,sorted (keys ))
+
+
+    def test_expectations_keys_sorted_with_redirects_and_www (self ):
+        apps ={}
+        out =self .mod .web_health_expectations (
+        apps ,
+        group_names =["dummy-app"],
+        www_enabled =True ,
+        redirect_maps =[{"source":"redir-b.example.org"},{"source":"redir-a.example.org"}],
+        )
+
+        keys =list (out .keys ())
+        self .assertEqual (keys ,sorted (keys ))
+
 if __name__ == "__main__":
     unittest.main()
