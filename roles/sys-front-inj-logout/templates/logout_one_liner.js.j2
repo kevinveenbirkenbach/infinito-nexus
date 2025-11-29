@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initLogoutPatch(
         '{{ OIDC.CLIENT.LOGOUT_URL }}',
         '{{ WEB_PROTOCOL }}',
-        '{{ PRIMARY_DOMAIN }}'
+        '{{ PRIMARY_DOMAIN }}',
+        {{ MODE_DEBUG | lower }}
     );
 });
