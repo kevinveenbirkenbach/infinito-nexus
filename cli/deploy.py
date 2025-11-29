@@ -18,7 +18,8 @@ def run_ansible_playbook(
     verbose=0,
     skip_build=False,
     skip_tests=False,
-    logs=False
+    logs=False,
+    diff=False,
 ):
     start_time = datetime.datetime.now()
     print(f"\n▶️ Script started at: {start_time.isoformat()}\n")
@@ -80,6 +81,9 @@ def run_ansible_playbook(
         cmd.extend(["--vault-password-file", password_file])
     else:
         cmd.extend(["--ask-vault-pass"])
+
+    if diff:
+        cmd.append("--diff") 
 
     if verbose:
         cmd.append("-" + "v" * verbose)
@@ -281,6 +285,12 @@ def main():
         action="store_true",
         help="Keep the CLI logs during cleanup command",
     )
+    
+    parser.add_argument(
+        "--diff",
+        action="store_true",
+        help="Pass --diff to ansible-playbook to show configuration changes.",
+    )
 
     # ---- Dynamically add mode flags from group_vars/all/01_modes.yml ----
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -309,6 +319,7 @@ def main():
         skip_build=args.skip_build,
         skip_tests=args.skip_tests,
         logs=args.logs,
+        diff=args.diff,
     )
 
 
