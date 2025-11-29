@@ -89,16 +89,15 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Safety check: providerId must match when updating a component"
-  when:
-    - kc_object_kind == 'component'
-    - (kc_desired.providerId is defined)
-    - MODE_ASSERT | bool
   assert:
     that:
-      - cur_obj.providerId == kc_desired.providerId
-    fail_msg: >
-      Refusing to update component '{{ cur_obj.name }}' (providerId={{ cur_obj.providerId }})
-      because desired providerId={{ kc_desired.providerId }}. Check your lookup/ID.
+      - (cur_obj.providerId | default('') ) == (kc_desired.providerId | default('') )
+    fail_msg: >-
+      Refusing to update component '{{ kc_obj_id | default("<unknown>") }}'
+      because providerId mismatch:
+      current='{{ cur_obj.providerId | default("<undefined>") }}'
+      desired='{{ kc_desired.providerId | default("<undefined>") }}'.
+  when: MODE_ASSERT | default(true) | bool
 
 - name: Prepare merge payload (subpath)
   when: kc_merge_path is defined and (kc_merge_path | length) > 0

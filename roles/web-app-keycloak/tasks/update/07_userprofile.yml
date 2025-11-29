@@ -1,0 +1,43 @@
+---
+# Update the Declarative User Profile provider using the configuration
+# from KEYCLOAK_DICTIONARY_REALM.components (same pattern as LDAP).
+
+- name: "Extract UserProfileProvider component from realm dictionary"
+  set_fact:
+    kc_userprofile_tpl: >-
+      {{
+        KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.userprofile.UserProfileProvider']
+        | list | first | default({})
+      }}
+
+- name: "Sanity check: UserProfileProvider exists in dictionary"
+  assert:
+    that:
+      - kc_userprofile_tpl | length > 0
+    fail_msg: "UserProfileProvider component not found in KEYCLOAK_DICTIONARY_REALM."
+  when: MODE_ASSERT | bool
+
+- name: "Resolve UserProfileProvider component ID"
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get components
+    -r {{ KEYCLOAK_REALM }} --format json
+    | jq -r '
+        map(
+          select(
+            .providerType == "org.keycloak.userprofile.UserProfileProvider"
+            and .providerId  == "declarative-user-profile"
+          )
+        )
+        | .[0].id // ""
+      '
+  register: kc_userprofile_id
+  changed_when: false
+
+- name: "Update UserProfileProvider component (merge kc.user.profile.config)"
+  vars:
+    kc_object_kind:  "component"
+    kc_lookup_field: "id"
+    kc_lookup_value: "{{ kc_userprofile_id.stdout | trim }}"
+    kc_desired:      "{{ kc_userprofile_tpl }}"
+    kc_merge_path:   "config"
+  include_tasks: _update.yml
