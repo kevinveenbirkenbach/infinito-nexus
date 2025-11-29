@@ -34,10 +34,15 @@
   changed_when: false
 
 - name: "Update UserProfileProvider component (merge kc.user.profile.config)"
-  vars:
-    kc_object_kind:  "component"
-    kc_lookup_field: "id"
-    kc_lookup_value: "{{ kc_userprofile_id.stdout | trim }}"
-    kc_desired:      "{{ kc_userprofile_tpl }}"
-    kc_merge_path:   "config"
-  include_tasks: _update.yml
+  keycloak_kcadm_update:
+    object_kind: "component"
+    lookup_field: "id"
+    lookup_value: "{{ kc_userprofile_id.stdout | trim }}"
+    desired: "{{ kc_userprofile_tpl }}"
+    merge_path: "config"
+    kcadm_exec: "{{ KEYCLOAK_EXEC_KCADM }}"
+    realm: "{{ KEYCLOAK_REALM }}"
+    assert_mode: "{{ MODE_ASSERT }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

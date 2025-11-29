@@ -37,4 +37,14 @@
               | list | first | default({}) ).attributes | default({}) )
           | combine({'frontchannel.logout.url': KEYCLOAK_FRONTCHANNEL_LOGOUT_URL}, recursive=True)
         }}
-  include_tasks: _update.yml
+  keycloak_kcadm_update:
+    object_kind: "{{ kc_object_kind }}"
+    lookup_value: "{{ kc_lookup_value }}"
+    desired: "{{ kc_desired }}"
+    force_attrs: "{{ kc_force_attrs }}"
+    kcadm_exec: "{{ KEYCLOAK_EXEC_KCADM }}"
+    realm: "{{ KEYCLOAK_REALM }}"
+    assert_mode: "{{ MODE_ASSERT }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

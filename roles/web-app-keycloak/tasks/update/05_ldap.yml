@@ -1,9 +1,8 @@
 - name: "Update REALM settings (merge LDAP component .config)"
-  include_tasks: _update.yml
-  vars:
-    kc_object_kind:  "component"
-    kc_lookup_value: "{{ KEYCLOAK_LDAP_CMP_NAME }}"
-    kc_desired: >-
+  keycloak_kcadm_update:
+    object_kind: "component"
+    lookup_value: "{{ KEYCLOAK_LDAP_CMP_NAME }}"
+    desired: >-
       {{
         (
           KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.storage.UserStorageProvider']
@@ -11,7 +10,11 @@
           | list | first
         )
       }}
-    kc_merge_path: "config"
+    merge_path: "config"
+    kcadm_exec: "{{ KEYCLOAK_EXEC_KCADM }}"
+    realm: "{{ KEYCLOAK_REALM }}"
+    assert_mode: "{{ MODE_ASSERT }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Resolve LDAP component id
   shell: >
@@ -129,11 +132,11 @@
 
 - name: Update 'ldap-roles' mapper config (merge only .config)
   when: (grp_mapper_id.stdout | trim) not in ["", "null"]
-  vars:
-    kc_object_kind:  "component"
-    kc_lookup_field: "id"
-    kc_lookup_value: "{{ grp_mapper_id.stdout | trim }}"
-    kc_desired: >-
+  keycloak_kcadm_update:
+    object_kind: "component"
+    lookup_field: "id"
+    lookup_value: "{{ grp_mapper_id.stdout | trim }}"
+    desired: >-
       {{
         desired_group_mapper
         | combine({
@@ -143,5 +146,10 @@
             'providerId':   'group-ldap-mapper'
           }, recursive=True)
       }}
-    kc_merge_path:   "config"
-  include_tasks: _update.yml
+    merge_path: "config"
+    kcadm_exec: "{{ KEYCLOAK_EXEC_KCADM }}"
+    realm: "{{ KEYCLOAK_REALM }}"
+    assert_mode: "{{ MODE_ASSERT }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
