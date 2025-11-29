@@ -18,6 +18,10 @@ KEYCLOAK_DOMAIN:                    "{{ domains | get_domain('web-app-keycloak')
 KEYCLOAK_RBAC_GROUP_CLAIM:          "{{ RBAC.GROUP.CLAIM }}"
 KEYCLOAK_RBAC_GROUP_NAME:           "{{ RBAC.GROUP.NAME }}"
 
+# Users
+KEYCLOAK_RESERVED_USERNAMES_LIST:   "{{ users | reserved_usernames }}"
+KEYCLOAK_RESERVED_USERNAMES_REGEX:  "{{ KEYCLOAK_RESERVED_USERNAMES_LIST | join('|') }}"
+
 ## Health
 KEYCLOAK_HEALTH_ENABLED:            true
 

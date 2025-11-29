@@ -38,7 +38,7 @@
   include_tasks: 01_credentials.yml
   when:
     - OPENLDAP_NETWORK_SWITCH_LOCAL | bool
-    - applications | get_app_conf(application_id, 'provisioning.credentials')
+    - OPENLDAP_PROVISION_CREDENTIALS | bool
 
 - name: "create directory {{ OPENLDAP_LDIF_PATH_HOST }}{{ item }}"
   file:
@@ -53,7 +53,7 @@
     - configuration
   loop_control:
     loop_var: folder
-  when: applications | get_app_conf(application_id, 'provisioning.configuration')
+  when: OPENLDAP_PROVISION_CONFIGURATION | bool
 
 - name: flush LDIF handlers
   meta: flush_handlers
@@ -66,11 +66,11 @@
 
 - name: "Include Schemas (if enabled)"
   include_tasks: 02_schemas.yml
-  when: applications | get_app_conf(application_id, 'provisioning.schemas')
+  when: OPENLDAP_PROVISION_SCHEMAS | bool
 
 - name: "Import LDAP Entries (if enabled)"
   include_tasks: 03_users.yml
-  when: applications | get_app_conf(application_id, 'provisioning.users')
+  when: OPENLDAP_PROVISION_USERS | bool
 
 - name: "Import LDIF Data (if enabled)"
   include_tasks: _ldifs_creation.yml
@@ -78,10 +78,10 @@
     - groups
   loop_control:
     loop_var: folder
-  when: applications | get_app_conf(application_id, 'provisioning.groups')
+  when: OPENLDAP_PROVISION_GROUPS | bool
 
 - meta: flush_handlers
 
 - name: "Add Objects to all users"
   include_tasks: 04_update.yml
-  when: applications | get_app_conf(application_id, 'provisioning.update')
+  when: OPENLDAP_PROVISION_UPDATE | bool

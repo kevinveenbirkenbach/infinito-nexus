@@ -146,6 +146,19 @@
       }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+- name: Drop unsupported fields for components (e.g. subComponents)
+  when: kc_object_kind == 'component'
+  set_fact:
+    desired_obj: >-
+      {{
+        desired_obj
+        | dict2items
+        | rejectattr('key', 'equalto', 'subComponents')
+        | list
+        | items2dict
+      }}
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
 - name: Preserve immutable fields for client-scope
   when: kc_object_kind == 'client-scope'
   set_fact:
@@ -181,5 +194,5 @@
     {{ desired_obj | to_json }}
     JSON
     {%- endif %}
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  #async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  #poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

@@ -5,6 +5,7 @@
 
 - name: "Load cleanup routine for '{{ application_id }}'"
   include_tasks: 02_cleanup.yml
+  when: MODE_CLEANUP | bool
 
 - name: "Load init routine for '{{ application_id }}'"
   include_tasks: 03_init.yml
@@ -35,3 +36,4 @@
 - name: "Load reCAPTCHA Update routines for '{{ application_id }}'"
   include_tasks: update/06_recaptcha.yml
   when: KEYCLOAK_RECAPTCHA_ENABLED | bool
+

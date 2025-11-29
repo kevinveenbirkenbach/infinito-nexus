@@ -25,3 +25,15 @@ OPENLDAP_NETWORK:               "{{ applications | get_app_conf(application_id, 
 OPENLDAP_NETWORK_SWITCH_PUBLIC: "{{ applications | get_app_conf(application_id, 'network.public') }}"
 OPENLDAP_NETWORK_SWITCH_LOCAL:  "{{ applications | get_app_conf(application_id, 'network.local') }}"
 OPENLDAP_NETWORK_EXPOSE_LOCAL:  "{{ OPENLDAP_NETWORK_SWITCH_PUBLIC | bool or OPENLDAP_NETWORK_SWITCH_LOCAL | bool }}"
+
+# Provision
+OPENLDAP_PROVISION_CONFIGURATION: "{{ applications | get_app_conf(application_id, 'provision.configuration') }}"
+OPENLDAP_PROVISION_CREDENTIALS:   "{{ applications | get_app_conf(application_id, 'provision.credentials') }}"
+OPENLDAP_PROVISION_SCHEMAS:       "{{ applications | get_app_conf(application_id, 'provision.schemas') }}"
+OPENLDAP_PROVISION_USERS:         "{{ applications | get_app_conf(application_id, 'provision.users') }}"
+OPENLDAP_PROVISION_GROUPS:        "{{ applications | get_app_conf(application_id, 'provision.groups') }}"
+OPENLDAP_PROVISION_UPDATE:        "{{ applications | get_app_conf(application_id, 'provision.update') }}"
+OPENLDAP_PROVISION_RESERVED:      "{{ applications | get_app_conf(application_id, 'provision.reserved') }}"
+
+# Users to be processed by LDAP
+OPERNLDAP_USERS:                  "{{ users if OPENLDAP_PROVISION_RESERVED else users | non_reserved_users }}"

@@ -20,7 +20,7 @@
     state: present            # ↳ creates but never updates
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  loop: "{{ users | dict2items }}"
+  loop: "{{ OPERNLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
@@ -39,7 +39,7 @@
     state: exact
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  loop: "{{ users | dict2items }}"
+  loop: "{{ OPERNLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 

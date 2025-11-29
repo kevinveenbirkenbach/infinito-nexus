@@ -11,7 +11,7 @@ INCLUDE_GROUPS := $(shell python3 main.py meta categories invokable -s "-" --no-
 INCLUDES_OUT_DIR    := ./tasks/groups
 
 # Compute extra users as before
-EXTRA_USERS := $(shell \
+RESERVED_USERNAMES := $(shell \
   find $(ROLES_DIR) -maxdepth 1 -type d -printf '%f\n' \
     | sed -E 's/.*-//' \
     | grep -E -x '[a-z0-9]+' \
@@ -50,7 +50,7 @@ messy-build: dockerignore
 	python3 $(USERS_SCRIPT) \
 	  --roles-dir $(ROLES_DIR) \
 	  --output $(USERS_OUT) \
-	  --extra-users "$(EXTRA_USERS)"
+	  --reserved-usernames "$(RESERVED_USERNAMES)"
 	@echo "✅ Users defaults written to $(USERS_OUT)\n"
 
 	@echo "🔧 Generating applications defaults → $(APPLICATIONS_OUT)…"

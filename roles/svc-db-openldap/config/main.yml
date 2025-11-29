@@ -18,12 +18,13 @@ docker:
     data:         "openldap_data"
 features:
   ldap:           true
-provisioning:           
+provision:           
 # Here it's possible to define what should be imported and updated.
 # It doesn't make sense to let  the import run everytime because its very time consuming
-  configuration:  true # E.g. MemberOf and Hashed Password Configuration
-  credentials:    true # Administrator Password
-  schemas:        true # E.g. Nextcloud, Openssl
-  users:          true # E.g. User, group and role entries
-  groups:         true # Roles and Groups import
-  update:         true # User Class updates
+  configuration:  true    # E.g. MemberOf and Hashed Password Configuration
+  credentials:    true    # Administrator Password
+  schemas:        true    # E.g. Nextcloud, Openssl
+  users:          true    # E.g. User, group and role entries
+  groups:         true    # Roles and Groups import
+  update:         true    # User Class updates
+  reserved:       false   # Reserved Users aren't provisioned

@@ -3,7 +3,13 @@
     {
       "name": "username",
       "displayName": "${username}",
-      "validations": {"length": {"min": 3, "max": 255}, "pattern": {"pattern": "^[a-z0-9]+$", "error-message": ""}},
+      "validations": {
+        "length": { "min": 3, "max": 255 },
+        "pattern": {
+          "pattern": "^(?!(?:" ~ KEYCLOAK_RESERVED_USERNAMES_REGEX | replace('\\', '\\\\') ~ ")$)[a-z0-9]+$",
+          "error-message": "Username is reserved or contains invalid characters. Only lowercase letters (a–z) and digits (0–9) are allowed."
+        }
+      },
       "annotations": {},
       "permissions": {"view": ["admin","user"], "edit": ["admin","user"]},
       "multivalued": false
@@ -33,7 +39,7 @@
       "multivalued": false
     },
     {
-      "name": "{{ LDAP.USER.ATTRIBUTES.SSH_PUBLIC_KEY }}",
+      "name": LDAP.USER.ATTRIBUTES.SSH_PUBLIC_KEY,
       "displayName": "SSH Public Key",
       "validations": {},
       "annotations": {},
@@ -53,6 +59,7 @@
 "org.keycloak.userprofile.UserProfileProvider": [
   {
     "providerId": "declarative-user-profile",
+    "name": "declarative-user-profile",
     "subComponents": {},
     "config": {
       "kc.user.profile.config": [{{ (user_profile | to_json) | to_json }}]

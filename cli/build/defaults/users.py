@@ -70,6 +70,7 @@ def build_users(defs, primary_domain, start_id, become_pwd):
         description = overrides.get('description')
         roles = overrides.get('roles', [])
         password = overrides.get('password', become_pwd)
+        reserved = overrides.get('reserved', False) 
 
         # Determine UID and GID
         if 'uid' in overrides:
@@ -88,6 +89,9 @@ def build_users(defs, primary_domain, start_id, become_pwd):
         }
         if description is not None:
             entry['description'] = description
+
+        if reserved:
+            entry['reserved'] = reserved
 
         users[key] = entry
 
@@ -180,8 +184,8 @@ def parse_args():
         help='Starting UID/GID number (default: 1001).'
     )
     parser.add_argument(
-        '--extra-users', '-e',
-        help='Comma-separated list of additional usernames to include.',
+        '--reserved-usernames', '-e',
+        help='Comma-separated list of usernames to reserve.',
         default=None
     )
     return parser.parse_args()
@@ -198,17 +202,21 @@ def main():
         print(f"Error merging user definitions: {e}", file=sys.stderr)
         sys.exit(1)
 
-    # Add extra users if specified
-    if args.extra_users:
-        for name in args.extra_users.split(','):
+    # Add reserved/ users if specified
+    if args.reserved_usernames:
+        for name in args.reserved_usernames.split(','):
             user_key = name.strip()
             if not user_key:
                 continue
             if user_key in definitions:
-                print(f"Warning: extra user '{user_key}' already defined; skipping.", file=sys.stderr)
+                print(
+                    f"Warning: reserved user '{user_key}' already defined; skipping (not changing existing definition).",
+                    file=sys.stderr
+                )
             else:
                 definitions[user_key] = {}
-
+            # Mark user as reserved
+            definitions[user_key]["reserved"] = True
     try:
         users = build_users(
             definitions,

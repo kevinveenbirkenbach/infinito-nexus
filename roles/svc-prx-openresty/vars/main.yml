@@ -7,4 +7,4 @@ database_type:                  ""
 # Openresty
 OPENRESTY_IMAGE:                "openresty/openresty"
 OPENRESTY_VERSION:              "alpine"
-OPENRESTY_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.openresty.name', True) }}"
+OPENRESTY_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.openresty.name') }}"

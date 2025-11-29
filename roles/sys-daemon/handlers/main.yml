@@ -34,7 +34,7 @@
     - reload system daemon
     - reexec systemd manager
 
-- name: reload system daemon
+- name: "reload system daemon"
   ansible.builtin.systemd:
     daemon_reload: true
   become: true

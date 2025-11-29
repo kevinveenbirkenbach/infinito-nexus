@@ -248,6 +248,97 @@ class TestGenerateUsers(unittest.TestCase):
         finally:
             shutil.rmtree(tmpdir)
 
+    def test_build_users_reserved_flag_propagated(self):
+        """
+        Ensure that the 'reserved' flag from the definitions is copied
+        into the final user entries, and is not added for non-reserved users.
+        """
+        defs = {
+            "admin": {"reserved": True},
+            "bob": {},
+        }
+
+        build = users.build_users(
+            defs=defs,
+            primary_domain="example.com",
+            start_id=1001,
+            become_pwd="pw",
+        )
+
+        # Reserved user should carry the flag
+        self.assertIn("reserved", build["admin"])
+        self.assertTrue(build["admin"]["reserved"])
+
+        # Non-reserved user should not have the flag at all
+        self.assertNotIn("reserved", build["bob"])
+
+    def test_cli_reserved_usernames_flag_sets_reserved_field(self):
+        """
+        Verify that --reserved-usernames marks given usernames as reserved
+        in the generated YAML, and that existing definitions are preserved
+        (only 'reserved' is added).
+        """
+        import tempfile
+        import subprocess
+        from pathlib import Path
+
+        tmpdir = Path(tempfile.mkdtemp())
+        try:
+            roles_dir = tmpdir / "roles"
+            roles_dir.mkdir()
+
+            # Role with an existing user definition "admin"
+            (roles_dir / "role-base" / "users").mkdir(parents=True, exist_ok=True)
+            with open(roles_dir / "role-base" / "users" / "main.yml", "w") as f:
+                yaml.safe_dump(
+                    {
+                        "users": {
+                            "admin": {
+                                "email": "admin@ex",
+                                "description": "Admin from role",
+                            }
+                        }
+                    },
+                    f,
+                )
+
+            out_file = tmpdir / "users.yml"
+            script_path = Path(__file__).resolve().parents[5] / "cli" / "build" / "defaults" / "users.py"
+
+            result = subprocess.run(
+                [
+                    "python3",
+                    str(script_path),
+                    "--roles-dir",
+                    str(roles_dir),
+                    "--output",
+                    str(out_file),
+                    "--reserved-usernames",
+                    "admin,service",
+                ],
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stderr)
+            self.assertTrue(out_file.exists(), "Output file was not created.")
+
+            data = yaml.safe_load(out_file.read_text())
+            self.assertIn("default_users", data)
+            users_map = data["default_users"]
+
+            # "service" was created from the reserved list and must be reserved
+            self.assertIn("service", users_map)
+            self.assertTrue(users_map["service"].get("reserved", False))
+
+            # "admin" existed before; its fields must remain unchanged,
+            # but it must now be marked as reserved
+            self.assertIn("admin", users_map)
+            self.assertEqual(users_map["admin"]["email"], "admin@ex")
+            self.assertEqual(users_map["admin"]["description"], "Admin from role")
+            self.assertTrue(users_map["admin"].get("reserved", False))
+
+        finally:
+            shutil.rmtree(tmpdir)
 
 if __name__ == '__main__':
     unittest.main()
