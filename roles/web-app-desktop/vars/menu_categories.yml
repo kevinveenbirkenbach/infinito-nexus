@@ -177,7 +177,6 @@ portfolio_menu_categories:
       - baserow
       - compose
       - repository-setup
-      - roulette-wheel
       - yourls
   
   Documentation:

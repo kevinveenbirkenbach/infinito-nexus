@@ -15,7 +15,6 @@ galaxy_info:
     - webapp
     - privacy
     - utility
-    - education
     - lightweight
   repository: "https://github.com/lyqht/mini-qr"
   issue_tracker_url: "https://github.com/lyqht/mini-qr/issues"

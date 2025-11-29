@@ -1,8 +1,8 @@
-# LittleJS Playground
+# LittleJS
 
 ## Description
 
-**LittleJS Playground** is a self-hosted web application that bundles the LittleJS engine, its official examples, and a minimal Infinito.Nexus launcher UI.  
+**LittleJS** is a self-hosted web application that bundles the LittleJS engine, its official examples, and a minimal Infinito.Nexus launcher UI.  
 It provides a simple, tile-based overview of demos and games, allowing you to quickly explore LittleJS examples directly in your browser.
 
 ## Overview

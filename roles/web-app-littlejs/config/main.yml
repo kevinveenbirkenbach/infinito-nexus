@@ -32,5 +32,5 @@ server:
         unsafe-eval:    true
   domains:
     canonical:
-      - "littlejs.{{ PRIMARY_DOMAIN }}"
+      - "littlejs.game.{{ PRIMARY_DOMAIN }}"
     aliases: []

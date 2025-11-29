@@ -26,7 +26,7 @@ server:
         unsafe-inline: true
   domains:
     canonical:
-      - "chess.{{ PRIMARY_DOMAIN }}"
+      - "chess.game.{{ PRIMARY_DOMAIN }}"
     aliases: []
 rbac:
   roles: {}
