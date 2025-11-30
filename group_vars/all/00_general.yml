@@ -105,3 +105,8 @@ RECAPTCHA_ENABLED: "{{ (CAPTCHA.RECAPTCHA.KEY   | default('') | length > 0)
 HCAPTCHA_ENABLED:  "{{ (CAPTCHA.HCAPTCHA.KEY   | default('') | length > 0) 
                        and 
                        (CAPTCHA.HCAPTCHA.SECRET | default('') | length > 0) }}"
+
+# Applications which are allways required
+WEBSERVER_CORE_APPLICATIONS: 
+  - web-svc-logout
+  - web-svc-cdn

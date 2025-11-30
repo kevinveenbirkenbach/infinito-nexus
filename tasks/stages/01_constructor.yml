@@ -37,9 +37,15 @@
   - name: Merge current play applications
     set_fact:
       CURRENT_PLAY_APPLICATIONS: >-
-        {{ 
-          applications |
-          applications_if_group_and_deps(group_names)
+        {{
+          applications
+          | applications_if_group_and_deps(group_names)
+          | combine(
+              applications
+              | dict2items
+              | selectattr('key', 'in', WEBSERVER_CORE_APPLICATIONS)
+              | items2dict
+            )
         }}
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
