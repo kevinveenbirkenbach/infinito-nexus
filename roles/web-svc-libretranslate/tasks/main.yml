@@ -1,9 +1,6 @@
-- name: "load docker, db and proxy for {{ application_id }}"
-  include_role:
-    name: sys-stk-full-stateful
-  when: run_once_web_app_libretranslate is not defined
-
-- name: run the libretranslate tasks once
-  set_fact:
-    run_once_web_app_libretranslate: true
-  when: run_once_web_app_libretranslate is not defined
+- block:
+    - name: "load docker, db and proxy for {{ application_id }}"
+      include_role:
+        name: sys-stk-full-stateful
+    - include_tasks: utils/run_once.yml
+  when: run_once_web_svc_libretranslate is not defined

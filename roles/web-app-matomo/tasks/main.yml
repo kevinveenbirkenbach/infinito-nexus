@@ -1,9 +1,4 @@
 ---
-- name: "construct {{ role_name }}"
+- name: "Execute Role (once)"
   include_tasks: 01_core.yml 
-  when: run_once_web_app_matomo is not defined
-
-- name: run the docker matomo tasks once
-  set_fact:
-    run_once_web_app_matomo: true
   when: run_once_web_app_matomo is not defined

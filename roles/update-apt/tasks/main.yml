@@ -1,11 +1,11 @@
-- name: apt update all packages to their latest version
-  apt:
-    update_cache: yes
-    upgrade: dist
-    force_apt_get: yes
-  when: run_once_update_apt
+- block:
+    - name: apt update all packages to their latest version
+      apt:
+        update_cache: yes
+        upgrade: dist
+        force_apt_get: yes
 
-- name: run the {{ role_name }} logic just once
-  set_fact:
-    run_once_update_apt: true
+    - include_tasks: utils/run_once.yml
+      vars:
+        flush_handlers: false
   when: run_once_update_apt is not defined

@@ -1,10 +1,10 @@
-- name: update pacman
-  community.general.pacman:
-    update_cache: yes
-    upgrade: yes
-  when: run_once_update_pacman is not defined
+- block:
+    - name: update pacman
+      community.general.pacman:
+        update_cache: yes
+        upgrade: yes
 
-- name: run update pacman once
-  set_fact:
-    run_once_update_pacman: true
+    - include_tasks: utils/run_once.yml
+      vars:
+        flush_handlers: false
   when: run_once_update_pacman is not defined

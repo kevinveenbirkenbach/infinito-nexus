@@ -1,10 +1,14 @@
-- name: "Load wildcard certificate for domain"
-  include_tasks: "dedicated.yml"
-  vars:
-    wildcard_domain: true
-  when: 
-    - domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN)
-    - run_once_receive_certificate is not defined  
+- block:
+    - name: "Load wildcard certificate for domain"
+      include_tasks: "dedicated.yml"
+      vars:
+        wildcard_domain: true
+      when: 
+        - domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN)
+    - name: run the receive_certificate tasks once
+      set_fact:
+        run_once_receive_certificate: true
+  when: run_once_receive_certificate is not defined
 
 - name: "Load dedicated certificate for domain"
   include_tasks: "dedicated.yml"
@@ -12,8 +16,4 @@
     wildcard_domain: false
   when: 
     - not (domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN))
-
-- name: run the receive_certificate tasks once
-  set_fact:
-    run_once_receive_certificate: true
-  when: run_once_receive_certificate is not defined
+  

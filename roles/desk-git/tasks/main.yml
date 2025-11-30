@@ -10,12 +10,12 @@
   vars:
     package_name: gitconfig
 
-- name: setup git
-  command: gitconfig --merge-option rebase --name "{{users.client.full_name}}" --email "{{users.client.email}}" --website "{{users.client.website}}" --signing gpg --gpg-key "{{users.client.gpg}}"
-  when: run_once_desk_git is not defined
-  become: false
+- when: run_once_desk_git is not defined
+  block:
+    - name: setup git
+      command: gitconfig --merge-option rebase --name "{{users.client.full_name}}" --email "{{users.client.email}}" --website "{{users.client.website}}" --signing gpg --gpg-key "{{users.client.gpg}}"
+      become: false
   
-- name: run the gitconfig tasks once
-  set_fact:
-    run_once_desk_git: true
-  when: run_once_desk_git is not defined
+    - include_tasks: utils/run_once.yml
+      vars:
+        flush_handlers: false

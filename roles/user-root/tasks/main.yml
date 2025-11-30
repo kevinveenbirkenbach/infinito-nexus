@@ -1,33 +1,3 @@
-- name: Check if the SSH key for root already exists
-  ansible.builtin.stat:
-    path: "/root/.ssh/id_rsa.pub"
-  register: ssh_key
-
-- name: Generate a SSH key for root if it does not exist
-  community.crypto.openssh_keypair:
-    path: "/root/.ssh/id_rsa"
-    type: rsa
-    size: 4096
-  when: not ssh_key.stat.exists and run_once_user_root is not defined
-
-- name: Display the public SSH key
-  command: cat /root/.ssh/id_rsa.pub
-  register: public_key
-  when: not ssh_key.stat.exists and run_once_user_root is not defined
-
-- name: Output the public SSH key
-  debug:
-    msg: "{{ public_key.stdout }}"
-  when: not ssh_key.stat.exists and run_once_user_root is not defined
-
-- name: "embed user routines for {{ role_path | basename }}"
-  include_role:
-    name: user
-  vars:
-    user_name:  "root"
-  when: run_once_user_root is not defined
-
-- name: run the user_root tasks once
-  set_fact:
-    run_once_user_root: true
+- name: "Execute Role (once)"
+  include_tasks: 01_core.yml 
   when: run_once_user_root is not defined

@@ -1,11 +1,11 @@
 ---
-- name: python-yaml install
-  community.general.pacman:
-    name: python-yaml
-    state: present
-  when: run_once_dev_python_yaml is not defined
-
-- name: run the python_yaml tasks once
-  set_fact:
-    run_once_dev_python_yaml: true
-  when: run_once_dev_python_yaml is not defined
+- when: run_once_dev_python_yaml is not defined
+  block:
+    - name: python-yaml install
+      community.general.pacman:
+        name: python-yaml
+        state: present
+      
+    - include_tasks: utils/run_once.yml
+      vars:
+        flush_handlers: false

@@ -1,10 +1,10 @@
-- name: install git
-  community.general.pacman:
-    name: git
-    state:  present
-  when: run_once_dev_git is not defined
+- block:
+    - name: install git
+      community.general.pacman:
+        name: git
+        state:  present
 
-- name: run the git tasks once
-  set_fact:
-    run_once_dev_git: true
+    - include_tasks: utils/run_once.yml
+      vars:
+        flush_handlers: false
   when: run_once_dev_git is not defined

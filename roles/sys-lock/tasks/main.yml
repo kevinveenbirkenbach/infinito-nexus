@@ -1,11 +1,11 @@
 ---
-- name: create {{ PATH_SYSTEM_LOCK_SCRIPT }}
-  copy:
-    src: sys-lock.py
-    dest: "{{ PATH_SYSTEM_LOCK_SCRIPT }}"
-  when: run_once_sys_lock is not defined
+- block:
+    - name: create {{ PATH_SYSTEM_LOCK_SCRIPT }}
+      copy:
+        src: sys-lock.py
+        dest: "{{ PATH_SYSTEM_LOCK_SCRIPT }}"
 
-- name: execute the script copying once
-  set_fact:
-    run_once_sys_lock: true
+    - include_tasks: utils/run_once.yml
+      vars:
+        flush_handlers: false
   when: run_once_sys_lock is not defined

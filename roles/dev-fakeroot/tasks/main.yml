@@ -1,11 +1,11 @@
 ---
-- name: Install fakeroot
-  community.general.pacman:
-    name: fakeroot
-    state: present
-  when: run_once_dev_fakeroot is not defined
+- when: run_once_dev_fakeroot is not defined
+  block:
+    - name: Install fakeroot
+      community.general.pacman:
+        name: fakeroot
+        state: present
 
-- name: run the fakeroot tasks once
-  set_fact:
-    run_once_dev_fakeroot: true
-  when: run_once_dev_fakeroot is not defined
+    - include_tasks: utils/run_once.yml
+      vars:
+        flush_handlers: false
