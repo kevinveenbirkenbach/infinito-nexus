@@ -9,5 +9,8 @@
     system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     system_service_on_calendar:    "{{ SYS_SCHEDULE_HEALTH_MSMTP }}"
     system_service_timer_enabled:  true
+  when:
+    - not MODE_RESET | bool
+    - users['no-reply'].mailu_token | default(false)
 
 - include_tasks: utils/run_once.yml

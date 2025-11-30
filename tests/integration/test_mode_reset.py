@@ -33,14 +33,20 @@ class TestModeResetIntegration(unittest.TestCase):
                         if fname.lower().endswith(('.yml', '.yaml')):
                             task_files.append(os.path.join(root, fname))
 
-                # Detect any 'MODE_RESET' usage
+                # Detect any *positive* 'MODE_RESET | bool' usage.
+                # Purely negated conditions like `not MODE_RESET | bool`
+                # should NOT force a reset.yml, because the role only
+                # disables behaviour during reset but has no reset logic.
                 mode_reset_found = False
+                mode_reset_pat = re.compile(r'(?<!not\s)MODE_RESET\s*\|\s*bool')
+
                 for fp in task_files:
                     try:
                         with open(fp, 'r', encoding='utf-8') as f:
-                            if 'MODE_RESET' in f.read():
-                                mode_reset_found = True
-                                break
+                            content = f.read()
+                        if mode_reset_pat.search(content):
+                            mode_reset_found = True
+                            break
                     except (UnicodeDecodeError, OSError):
                         continue
 

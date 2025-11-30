@@ -4,3 +4,4 @@
   - run_once_sys_svc_msmtp is not defined or run_once_sys_svc_msmtp is false
   # Just execute when mailu_token is defined
   - users['no-reply'].mailu_token is defined
+  - not MODE_RESET | bool 
