@@ -6,7 +6,7 @@
     - include_tasks: utils/run_once.yml
   when: run_once_sys_front_inj_all is not defined
 
-- name: Build inj_enabled
+- name: Build inj_enabled for '{{ domain }}'"
   set_fact:
     inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
 

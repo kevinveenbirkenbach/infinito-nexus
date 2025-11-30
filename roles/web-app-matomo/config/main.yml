@@ -1,14 +1,12 @@
 features:
-  # If you want to use Matomo on the Matomo page, you 
-  # have to set it here manual to true. 
-  # It's deactivated, because the proxy setup for Matomo
-  # itself wouldn't be possible 
-  matomo:             false 
-  css:                false
-  desktop:            false  # Didn't work in frame didn't have high priority @todo figure out pcause and solve it
   central_database:   true
   oauth2:             false
-  logout:             false  # Dependency conflict. It requires CDN and CDN requires matomo
+
+  # Matomo can't use the following settings - At least not on the initial setup run
+  desktop:            false  # Didn't work in frame didn't have high priority @todo figure out why and solve it
+  css:                false
+  logout:             false
+  matomo:             false 
 server:
   csp:
     whitelist:

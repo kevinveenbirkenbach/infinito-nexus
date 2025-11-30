@@ -1,16 +1,42 @@
-- name: "Load CDN for '{{ domain }}'"
-  include_role:
-    name: web-svc-cdn
-    public: false
+- name: "Check if Matomo endpoint is reachable"
+  uri:
+    url: "{{ domains | get_url('web-app-matomo', WEB_PROTOCOL) }}"
+    method: HEAD
+    validate_certs: yes
+    status_code: [200, 301, 302]
+  register: matomo_reachability
+  failed_when: false
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   when:
-    - application_id != 'web-svc-cdn'
-    - run_once_web_svc_cdn is not defined
+    - application_id != 'web-app-matomo'
+    - run_once_web_app_matomo is not defined
+    - inj_enabled.matomo
 
-- name: Load Logout for '{{ domain }}'
+- name: "Setup web-app-matomo because endpoint was not reachable"
   include_role:
-    name: web-svc-logout
-    public: false
-  when: 
-    - run_once_web_svc_logout is not defined
-    - application_id != 'web-svc-logout'
-    - inj_enabled.logout
+    name: web-app-matomo
+  when:
+    - matomo_reachability is defined
+    - matomo_reachability.status | default(0) not in [200, 301, 302]
+
+# Matomo can't use this dependencies - At least not on the initial setup run
+- when:
+    - application_id != 'web-app-matomo'
+  block:
+    - name: "Load CDN for '{{ domain }}'"
+      include_role:
+        name: web-svc-cdn
+        public: false
+      when:
+        - application_id != 'web-svc-cdn'
+        - run_once_web_svc_cdn is not defined
+
+    - name: Load Logout for '{{ domain }}'
+      include_role:
+        name: web-svc-logout
+        public: false
+      when: 
+        - run_once_web_svc_logout is not defined
+        - application_id != 'web-svc-logout'
+        - inj_enabled.logout

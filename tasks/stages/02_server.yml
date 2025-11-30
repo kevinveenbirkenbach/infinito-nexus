@@ -12,12 +12,6 @@
     - sys-ctl-hlth-btrfs
     - sys-ctl-rpr-btrfs-balancer
 
-# It is necessary to setup Matomo first, because all other web apps need it if matomo is activated
-- name: setup web-app-matomo
-  when: ('web-app-matomo' | application_allowed(group_names, allowed_applications))
-  include_role:
-    name: web-app-matomo
-
 - name: "Include server roles"
   include_tasks: "./tasks/groups/{{ item }}-roles.yml"
   loop:
