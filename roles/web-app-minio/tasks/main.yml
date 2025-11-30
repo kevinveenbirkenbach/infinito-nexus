@@ -9,11 +9,12 @@
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain:    "{{ item.domain }}"
-    http_port: "{{ item.http_port }}"
+    domain:    "{{ minio_proxy.domain }}"
+    http_port: "{{ minio_proxy.http_port }}"
   loop: "{{ MINIO_FRONT_PROXY_MATRIX }}"
   loop_control:
-    label: "{{ item.domain }} -> {{ item.http_port }}"
+    loop_var: minio_proxy
+    label: "{{ minio_proxy.domain }} -> {{ minio_proxy.http_port }}"
 
 - block:
     - name: "Check policy (RAW with slash) exists"
