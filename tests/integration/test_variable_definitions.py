@@ -74,6 +74,11 @@ class TestVariableDefinitions(unittest.TestCase):
         self.ansible_loop_var = re.compile(r'^\s*loop_var\s*:\s*([a-zA-Z_]\w*)')
         self.mapping_key = re.compile(r'^\s*([a-zA-Z_]\w*)\s*:\s*')
         self.register_pat = re.compile(r'^\s*register\s*:\s*([a-zA-Z_]\w*)')
+        
+        # Bare vars in YAML list expressions wie:
+        #   - SOME_VAR | bool
+        #   - OTHER_VAR | length > 0
+        self.bare_list_expr_var = re.compile(r'^\s*-\s*([a-zA-Z_]\w*)\b')
 
         # -----------------------
         # Collect "defined" names
@@ -239,6 +244,32 @@ class TestVariableDefinitions(unittest.TestCase):
                                 undefined_uses.append(
                                     f"{path}:{lineno}: '{{{{ {var} }}}}' used but not defined"
                                 )
+                        # Handle bare vars in list expressions, e.g.:
+                        #   - SYSTEMD_MANAGER_RESET_PURGE | bool
+                        stripped = line.lstrip()
+
+                        # Heuristic: "- VAR | ..." but not a mapping ("key: value")
+                        if stripped.startswith('- ') and '|' in stripped and ':' not in stripped:
+                            m_expr = self.bare_list_expr_var.match(stripped)
+                            if m_expr:
+                                var = m_expr.group(1)
+
+                                if var not in (
+                                    'lookup', 'role_name', 'domains', 'item', 'host_type',
+                                    'inventory_hostname', 'role_path', 'playbook_dir',
+                                    'ansible_become_password', 'inventory_dir',
+                                    'ansible_memtotal_mb', 'omit', 'group_names',
+                                    'ansible_processor_vcpus', 'not', 'and', 'or',
+                                ):
+                                    if (
+                                        var not in self.defined
+                                        and f"default_{var}" not in self.defined
+                                        and f"defaults_{var}" not in self.defined
+                                    ):
+                                        undefined_uses.append(
+                                            f"{path}:{lineno}: bare var '{var}' used but not defined"
+                                        )
+
                 except Exception:
                     pass
 
