@@ -94,3 +94,25 @@ KEYCLOAK_DICTIONARY_REALM: >-
       if (KEYCLOAK_DICTIONARY_REALM_RAW is mapping)
       else (KEYCLOAK_DICTIONARY_REALM_RAW | from_json)
   }}
+
+# Parsed user profile object from the realm template
+KEYCLOAK_USER_PROFILE_OBJECT: >-
+  {{
+    (
+      KEYCLOAK_DICTIONARY_REALM.components['org.keycloak.userprofile.UserProfileProvider']
+      | first
+    )['config']['kc.user.profile.config'][0]
+    | from_json
+  }}
+
+# Payload we actually want to merge into the component's config
+KEYCLOAK_USER_PROFILE_CONFIG_PAYLOAD: >-
+  {{
+    {
+      'config': {
+        'kc.user.profile.config': [
+          KEYCLOAK_USER_PROFILE_OBJECT | to_json
+        ]
+      }
+    }
+  }}
