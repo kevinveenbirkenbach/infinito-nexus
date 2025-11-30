@@ -13,3 +13,8 @@
 - name: Restart OpenResty container
   command: docker restart {{ OPENRESTY_CONTAINER }}
   listen: restart openresty
+  register: openresty_restart
+  failed_when: >
+    openresty_restart.rc != 0 and
+    ('is not running' not in ((openresty_restart.stderr | default('')) | lower)) and
+    ('no such container' not in ((openresty_restart.stderr | default('')) | lower))
