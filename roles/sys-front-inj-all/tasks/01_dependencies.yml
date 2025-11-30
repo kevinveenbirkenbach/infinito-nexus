@@ -1,3 +1,5 @@
+# Keep in mind to don't use inj_enabled. 
+
 - name: "Check if Matomo endpoint is reachable"
   uri:
     url: "{{ domains | get_url('web-app-matomo', WEB_PROTOCOL) }}"
@@ -11,11 +13,11 @@
   when:
     - application_id != 'web-app-matomo'
     - run_once_web_app_matomo is not defined
-    - inj_enabled.matomo
 
 - name: "Setup web-app-matomo because endpoint was not reachable"
   include_role:
     name: web-app-matomo
+    public: false
   when:
     - matomo_reachability is defined
     - matomo_reachability.status | default(0) not in [200, 301, 302]
@@ -39,4 +41,3 @@
       when: 
         - run_once_web_svc_logout is not defined
         - application_id != 'web-svc-logout'
-        - inj_enabled.logout
