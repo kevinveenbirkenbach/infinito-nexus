@@ -12,7 +12,6 @@ KEYCLOAK_DEBUG_ENABLED:             "{{ MODE_DEBUG }}"
 KEYCLOAK_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
 KEYCLOAK_SERVER_INTERNAL_URL:       "http://127.0.0.1:8080"
 KEYCLOAK_LOAD_DEPENDENCIES:         "{{ applications | get_app_conf(application_id, 'load_dependencies') }}"
-KEYCLOAK_DOMAIN:                    "{{ domains | get_domain('web-app-keycloak') }}"
 
 # RBAC
 KEYCLOAK_RBAC_GROUP_CLAIM:          "{{ RBAC.GROUP.CLAIM }}"

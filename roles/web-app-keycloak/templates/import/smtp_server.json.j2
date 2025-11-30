@@ -7,7 +7,7 @@
     "replyTo": "",
     "host": "{{ SYSTEM_EMAIL.HOST }}",
     "from": "{{ users['no-reply'].email }}",
-    "fromDisplayName": "Keycloak Authentication System - {{ KEYCLOAK_DOMAIN | upper }}",
+    "fromDisplayName": "Authentication System ({{ PRIMARY_DOMAIN | lower }})",
     "envelopeFrom": "",
     "ssl": "{{ (SYSTEM_EMAIL.TLS and not SYSTEM_EMAIL.START_TLS) | ternary('true','false') }}",
     "user": "{{ users['no-reply'].email }}"
