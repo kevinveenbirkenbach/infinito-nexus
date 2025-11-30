@@ -24,10 +24,6 @@
       {{ system_service_role_dir }}/templates/ and {{ role_path }}/templates/.
   when: MODE_ASSERT | bool
 
-- name: Flag whether @-template is used
-  set_fact:
-    system_service_uses_at: "{{ system_service_id.endswith('@') }}"
-
 - name: "setup systemctl '{{ system_service_id }}'"
   template:
     src:  "{{ system_service_template_src }}"
@@ -35,7 +31,7 @@
     owner: root
     group: root
     mode: '0644'
-  notify: "{{ 'reload system daemon' if system_service_uses_at else 'refresh systemctl service' }}"
+  notify: "{{ 'reload system daemon' if system_service_is_template | bool else 'refresh systemctl service' }}"
 
 - name: refresh systemctl service when SYS_SERVICE_ALL_ENABLE
   block:
@@ -45,6 +41,6 @@
   - name: refresh systemctl service
     command: /bin/true
     notify: refresh systemctl service
-    when: not system_service_uses_at
+    when: not system_service_is_template | bool
   when: system_service_force_flush | bool
 

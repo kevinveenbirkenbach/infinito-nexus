@@ -1,5 +1,8 @@
 UNIT_SUFFIX_REMOVER_PACKAGE:          "unsure"
+
+# meta
 system_service_name:                  "{{ system_service_id | get_service_name(SOFTWARE_NAME) }}"
+system_service_is_template:           "{{ system_service_id.endswith('@') }}"
 
 ## Paths
 system_service_role_name:             "{{ system_service_id | regex_replace('@','') }}"

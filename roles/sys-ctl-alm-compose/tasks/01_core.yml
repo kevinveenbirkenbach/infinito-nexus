@@ -1,9 +1,7 @@
 - name: "Include dependent services for '{{ system_service_id  }}'"
   include_role:
     name: '{{ item }}'
-  loop:
-    - sys-ctl-alm-telegram
-    - sys-ctl-alm-email
+  loop:   '{{ SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES }}'
   vars:
     flush_handlers:                   true
     system_service_timer_enabled:     false
