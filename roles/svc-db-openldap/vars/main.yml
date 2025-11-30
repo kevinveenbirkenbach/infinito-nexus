@@ -36,4 +36,4 @@ OPENLDAP_PROVISION_UPDATE:        "{{ applications | get_app_conf(application_id
 OPENLDAP_PROVISION_RESERVED:      "{{ applications | get_app_conf(application_id, 'provision.reserved') }}"
 
 # Users to be processed by LDAP
-OPERNLDAP_USERS:                  "{{ users if OPENLDAP_PROVISION_RESERVED else users | non_reserved_users }}"
+OPENLDAP_USERS:                   "{{ users if OPENLDAP_PROVISION_RESERVED else users | non_reserved_users }}"

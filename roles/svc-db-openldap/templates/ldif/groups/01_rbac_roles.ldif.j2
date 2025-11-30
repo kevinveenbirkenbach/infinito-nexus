@@ -1,4 +1,4 @@
-{% for dn, entry in (applications | build_ldap_role_entries(OPERNLDAP_USERS, LDAP)).items() %}
+{% for dn, entry in (applications | build_ldap_role_entries(OPENLDAP_USERS, LDAP)).items() %}
 
 dn: {{ dn }}
 {% for oc in entry.objectClass %}

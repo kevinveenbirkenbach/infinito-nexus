@@ -20,7 +20,7 @@
     state: present            # ↳ creates but never updates
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  loop: "{{ OPERNLDAP_USERS | dict2items }}"
+  loop: "{{ OPENLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
@@ -36,10 +36,10 @@
     attributes:
       objectClass: "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
       mail:        "{{ item.value.email }}"
-    state: exact
+    state: "{{ 'exact' if MODE_CLEANUP else 'present' }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  loop: "{{ OPERNLDAP_USERS | dict2items }}"
+  loop: "{{ OPENLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
