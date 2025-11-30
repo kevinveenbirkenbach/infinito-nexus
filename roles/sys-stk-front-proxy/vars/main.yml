@@ -1,2 +1,1 @@
 front_proxy_domain_conf_dst:  "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
-front_proxy_domain_conf_src:  "roles/sys-svc-proxy/templates/vhost/{{ vhost_flavour }}.conf.j2"

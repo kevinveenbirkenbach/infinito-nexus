@@ -13,35 +13,31 @@
     - create_dockerfile_result is failed
     - "'Could not find or access' not in create_dockerfile_result.msg"
 
-- name:           "Create (optional) '{{ docker_compose.files.env }}'"
+- name: "Create (optional) '{{ docker_compose.files.env }}'"
   template:
-    src:          "{{ item }}"
-    dest:         "{{ docker_compose.files.env }}"
-    mode:         '770'
-    force:        yes
-  notify:         docker compose up
-  register:       env_template
-  loop:
-    - "{{ application_id | abs_role_path_by_application_id }}/templates/env.j2"
-    - "{{ application_id | abs_role_path_by_application_id }}/files/env"
-  failed_when:
-    - env_template is failed
-    - "'Could not find or access' not in env_template.msg"
+    src: "{{ item }}"
+    dest: "{{ docker_compose.files.env }}"
+    mode: '770'
+    force: yes
+  notify: docker compose up
+  with_first_found:
+    - files:
+        - "{{ application_id | abs_role_path_by_application_id }}/templates/env.j2"
+        - "{{ application_id | abs_role_path_by_application_id }}/files/env"
+      skip: true
 
-- name:           "Create (optional) '{{ docker_compose.files.docker_compose_override }}'"
+- name: "Create (optional) '{{ docker_compose.files.docker_compose_override }}'"
   template:
-    src:          "{{ item }}"
-    dest:         "{{ docker_compose.files.docker_compose_override }}"
-    mode:         '770'
-    force:        yes
-  notify:         docker compose up
-  register:       docker_compose_override_template
-  loop:
-    - "{{ application_id | abs_role_path_by_application_id }}/templates/docker-compose.override.yml.j2"
-    - "{{ application_id | abs_role_path_by_application_id }}/files/docker-compose.override.yml"
-  failed_when:
-    - docker_compose_override_template is failed
-    - "'Could not find or access' not in docker_compose_override_template.msg"
+    src: "{{ item }}"
+    dest: "{{ docker_compose.files.docker_compose_override }}"
+    mode: '770'
+    force: yes
+  notify: docker compose up
+  with_first_found:
+    - files:
+        - "{{ application_id | abs_role_path_by_application_id }}/templates/docker-compose.override.yml.j2"
+        - "{{ application_id | abs_role_path_by_application_id }}/files/docker-compose.override.yml"
+      skip: true
 
 - name:           "Create (obligatoric) '{{ docker_compose.files.docker_compose }}'"
   template:

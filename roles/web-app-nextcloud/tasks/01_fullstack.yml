@@ -1,20 +1,11 @@
-- name: "include role for {{ application_id }} to receive certs & do modification routines for '{{ NEXTCLOUD_DOMAIN }}:{{ NEXTCLOUD_PORT }}'"
-  include_role:
-    name: sys-util-csp-cert
-
-- name: create nextcloud proxy configuration file
-  template:
-    src:    "nginx/host.conf.j2" 
-    dest:   "{{ NEXTCLOUD_HOST_NGINX_PATH }}"
-  notify: restart openresty
-
 - name: "load docker and db for {{ application_id }}"
   include_role:
-    name: sys-stk-back-stateful
+    name: sys-stk-full-stateful
   vars:
     docker_compose_flush_handlers: false
 
-- block:
+- when: NEXTCLOUD_WHITEBOARD_ENABLED | bool
+  block:
     - name: "Create '{{ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY }}' Directory"
       file:
         path: "{{ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY }}"
@@ -26,8 +17,6 @@
         src:    "Dockerfiles/Whiteboard.j2"
         dest:   "{{ NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE }}"
       notify: docker compose build
-      
-  when: NEXTCLOUD_WHITEBOARD_ENABLED | bool
 
 - name: "create {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
   file:
@@ -46,6 +35,6 @@
 
 - name: create internal nextcloud nginx configuration
   template:
-    src:  "nginx/docker.conf.j2" 
-    dest: "{{ NEXTCLOUD_HOST_NGINX_SRC }}"
+    src:  "docker.conf.j2" 
+    dest: "{{ NEXTCLOUD_HOST_NGINX_PATH }}"
   notify: docker compose up

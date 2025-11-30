@@ -25,7 +25,7 @@
 
 - name: create {{ MATRIX_SYNAPSE_DOMAIN }}.conf
   template:
-    src:  "templates/nginx.conf.j2" 
+    src:  "templates/synapse.conf.j2" 
     dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ MATRIX_SYNAPSE_DOMAIN }}.conf"
   vars:
     domain:     "{{ MATRIX_SYNAPSE_DOMAIN }}"

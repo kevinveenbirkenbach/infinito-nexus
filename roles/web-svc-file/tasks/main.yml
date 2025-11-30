@@ -3,20 +3,7 @@
     include_role:
       name: '{{ item }}'
     loop:
-    - sys-stk-front-base
+    - sys-stk-front-proxy
     - dev-git
   - include_tasks: utils/run_once.yml
   when: run_once_web_svc_file is not defined
-
-- name: "include role for {{ application_id }} to receive certs & do modification routines"
-  include_role:
-    name: sys-util-csp-cert
-  vars:
-    domain: "{{ domains | get_domain(application_id) }}"
-    http_port: "{{ ports.localhost.http[application_id] }}"
-
-- name: "generate {{ domains | get_domain(application_id) }}.conf"
-  template:
-    src: "nginx.conf.j2"
-    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ domains | get_domain(application_id) }}.conf"
-  notify: restart openresty

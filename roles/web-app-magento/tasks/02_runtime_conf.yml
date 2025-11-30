@@ -20,7 +20,7 @@
 
 - name: Render nginx main config (no TLS; single source of truth)
   template:
-    src: "nginx.conf.j2"
+    src: "docker.conf.j2"
     dest: "{{ MAGENTO_NGINX_CONF_PATH }}"
     mode: '0644'
     force: true

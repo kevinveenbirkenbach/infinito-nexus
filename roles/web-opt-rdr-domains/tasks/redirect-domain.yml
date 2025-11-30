@@ -4,6 +4,6 @@
 
 - name: "Deploying NGINX redirect configuration for '{{ domain }}'"
   template:
-    src:  redirect.domain.nginx.conf.j2
+    src:  redirect-domain.conf.j2
     dest: "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
   notify: restart openresty

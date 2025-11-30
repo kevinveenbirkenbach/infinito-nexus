@@ -1,7 +1,3 @@
 # General
 application_id: "web-svc-cdn"
 domain:         "{{ domains | get_domain(application_id) }}"
-
-# CDN
-CDN_NGINX_FILE: "{{ domain }}.conf"
-CDN_NGINX_PATH: "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, CDN_NGINX_FILE ] | path_join }}"

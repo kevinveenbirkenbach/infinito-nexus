@@ -5,5 +5,8 @@
 - name: "Include front proxy for {{ container_hostname}}:{{ ports.localhost.http[application_id] }}"
   include_role:
     name: sys-stk-front-proxy
+  vars:
+    domain:     "{{ domains | get_domain(application_id) }}"
+    http_port:  "{{ ports.localhost.http[application_id] }}"
 
 - include_tasks: utils/run_once.yml

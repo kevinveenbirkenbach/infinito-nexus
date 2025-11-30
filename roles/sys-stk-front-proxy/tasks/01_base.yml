@@ -8,10 +8,15 @@
 
 - name: "Copy nginx config to '{{ front_proxy_domain_conf_dst }}'"
   template:
-    src:  "{{ front_proxy_domain_conf_src }}"
+    src: "{{ item }}"
     dest: "{{ front_proxy_domain_conf_dst }}"
   register: nginx_conf
   notify: restart openresty
+  vars:
+    nginx_template_candidates:
+      - "{{ application_id | abs_role_path_by_application_id }}/templates/proxy.conf.j2"
+      - "roles/sys-svc-proxy/templates/vhost/{{ vhost_flavour }}.conf.j2"
+  with_first_found: "{{ nginx_template_candidates }}"
 
 - block:
   - name: "Check if {{ domains | get_domain(application_id) }} is reachable (only if config unchanged)"
