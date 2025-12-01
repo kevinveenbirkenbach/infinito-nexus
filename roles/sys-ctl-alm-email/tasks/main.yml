@@ -1,2 +1,2 @@
 - include_tasks: 01_core.yml
-  when: run_once_sys_ctl_alm_email is not defined
+  when: not run_once_sys_ctl_alm_email | default(false)

@@ -1,0 +1,5 @@
+- include_role:
+    name: sys-svc-docker
+  when: run_once_sys_svc_docker is not defined
+
+- include_tasks: utils/run_once.yml

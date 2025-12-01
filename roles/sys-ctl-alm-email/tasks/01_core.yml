@@ -1,7 +1,9 @@
+- include_tasks: utils/run_once.yml
+
 - name: Include dependencies
   include_role:
     name: "sys-svc-msmtp"
-  when: run_once_sys_svc_msmtp is not defined or run_once_sys_svc_msmtp is false
+  when: not run_once_sys_svc_msmtp | default(false)
 
 - include_role:
     name: sys-service
@@ -9,5 +11,3 @@
     # If the email notifier fails, trigger the Telegram notifier,
     # passing the failing unit's name as the instance text.
     system_service_tpl_on_failure: "{{ ('sys-ctl-alm-telegram@') | get_service_name(SOFTWARE_NAME, False) }}%n.service"
-
-- include_tasks: utils/run_once.yml

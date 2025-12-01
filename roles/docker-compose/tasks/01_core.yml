@@ -6,8 +6,8 @@
 - name: "Load docker container role"
   include_role:
     name: docker-container
-
   when: run_once_docker_container is not defined
+  
 - name: "reset (if enabled)"
   include_tasks: 02_reset.yml
   when: MODE_RESET | bool
