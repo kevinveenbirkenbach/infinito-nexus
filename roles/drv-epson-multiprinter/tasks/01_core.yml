@@ -17,3 +17,5 @@
   community.general.pacman:
     name: imagescan
     state: present
+
+- include_tasks: utils/once_flag.yml

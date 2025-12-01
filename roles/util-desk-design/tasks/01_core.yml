@@ -16,3 +16,5 @@
     name:
     - drawio-desktop
   become: false
+
+- include_tasks: utils/once_flag.yml

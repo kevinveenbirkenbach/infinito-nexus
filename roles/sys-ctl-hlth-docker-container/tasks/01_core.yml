@@ -15,4 +15,4 @@
     system_service_on_calendar:     "{{ SYS_SCHEDULE_HEALTH_DOCKER_CONTAINER }}"
     system_service_tpl_on_failure:  "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }} {{ SYS_SERVICE_REPAIR_DOCKER_SOFT }}"
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

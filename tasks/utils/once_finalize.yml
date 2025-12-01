@@ -1,0 +1,6 @@
+---
+# This is necessary to flush the handlers before the when is set, because otherwise the when will be attached to the handlers
+
+- include_tasks: utils/compose_up.yml
+
+- include_tasks: utils/once_flag.yml

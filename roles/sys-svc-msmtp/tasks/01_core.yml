@@ -1,3 +1,25 @@
+- include_tasks: utils/once_flag.yml
+
+- name: "Check if Mail Host is reachable"
+  uri:
+    url: "{{ WEB_PROTOCOL ~ '://' ~ SYSTEM_EMAIL.HOST }}"
+    method: HEAD
+    validate_certs: yes
+    status_code: [200, 301, 302]
+  register: mail_host_reachability
+  failed_when: false
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  when: 
+    - run_once_web_app_mailu is not defined
+    - "{{ 'web-app-mailu' in group_names }}"
+    - SYSTEM_EMAIL.HOST == domains | get_domain('web-app-mailu')
+
+- name: "Load Mailu Routines for '{{ role_name }}'"
+  include_tasks: 02_mailu.yml
+  when: 
+    - mail_host_reachability is defined
+    - mail_host_reachability.status | default(0) not in [200, 301, 302]
 
 - name: install msmtp msmtp-mta
   community.general.pacman:
@@ -16,5 +38,4 @@
     name: sys-ctl-hlth-msmtp
   when: run_once_sys_ctl_hlth_msmtp is not defined
 
-- set_fact:
-    run_once_sys_svc_msmtp: true
+- include_tasks: utils/compose_up.yml

@@ -10,7 +10,7 @@ What it enforces:
       - That exact suffix must be defined EITHER
           A) globally via any `set_fact:` assigning `run_once_<suffix>: ...`, OR
           B) inside that role's tasks:
-               - include_tasks|import_tasks: utils/run_once.yml (any style), OR
+               - include_tasks|import_tasks: utils/once_finalize.yml (any style), OR
                - set_fact: { run_once_<suffix>: ... }
   * If <suffix> does NOT match any role (an unknown suffix):
       - It MUST be defined globally via `set_fact` somewhere in a valid YAML file.
@@ -42,6 +42,13 @@ EXCLUDE_DIRS = {
 # ---------- Regexes (compiled once) ----------
 # Any usage like "run_once_<suffix>"
 RUN_ONCE_USAGE_RE = re.compile(r'\brun_once_([A-Za-z0-9_]+)\b')
+
+# Task files that "define" a run-once flag for a role
+RUN_ONCE_TASK_FILES = (
+    'utils/once_finalize.yml',
+    'utils/once_flag.yml',
+)
+
 
 def project_root():
     return os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -139,7 +146,7 @@ def file_role_by_prefix(path: str, role_tasks_roots: dict[str, str]) -> str | No
 def role_defines_suffix_in_doc(doc, role_suffix: str) -> bool:
     """
     Return True if this YAML doc (already parsed) defines run-once for the given role suffix via:
-      A) include/import utils/run_once.yml (string or mapping style), OR
+      A) include/import utils/once_finalize.yml or utils/once_flag.yml (string or mapping style), OR
       B) set_fact: { run_once_<role_suffix>: ... }
     """
     if doc is None:
@@ -149,15 +156,15 @@ def role_defines_suffix_in_doc(doc, role_suffix: str) -> bool:
     while queue:
         node = queue.pop()
         if isinstance(node, dict):
-            # A) include/import utils/run_once.yml
+            # A) include/import utils/once_finalize.yml or utils/once_flag.yml
             for key in ('include_tasks', 'import_tasks'):
                 if key in node:
                     val = node[key]
-                    if isinstance(val, str) and 'utils/run_once.yml' in val:
+                    if isinstance(val, str) and any(p in val for p in RUN_ONCE_TASK_FILES):
                         return True
                     if isinstance(val, dict):
                         for subval in val.values():
-                            if isinstance(subval, str) and 'utils/run_once.yml' in subval:
+                            if isinstance(subval, str) and any(p in subval for p in RUN_ONCE_TASK_FILES):
                                 return True
             # B) set_fact exact var
             sf = node.get('set_fact')
@@ -203,8 +210,15 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
             if not text:
                 continue
             # Quick prefilter to avoid parsing a ton of irrelevant YAML
-            if not any(tok in text for tok in ('run_once_', 'set_fact', 'include_tasks', 'import_tasks', 'utils/run_once.yml')):
+            if not any(tok in text for tok in (
+                'run_once_',
+                'set_fact',
+                'include_tasks',
+                'import_tasks',
+                *RUN_ONCE_TASK_FILES,
+            )):
                 continue
+
 
             docs = parse_yaml_documents(text)
             if docs is None:
@@ -227,7 +241,7 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
             role = file_role_by_prefix(yml, role_tasks_roots)
             if role:
                 role_suffix = suffix_for_role[role]
-                # utils/run_once.yml inside role tasks defines that role's own suffix
+                # utils/once_finalize.yml inside role tasks defines that role's own suffix
                 # OR a direct set_fact with exact run_once_<role_suffix>
                 for doc in docs:
                     if role_defines_suffix_in_doc(doc, role_suffix):
@@ -262,7 +276,7 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
                 "Some run_once_<suffix> usages in valid YAML files are missing exact definitions.",
                 "Rules:",
                 "  • Unknown suffixes must be defined globally via set_fact.",
-                "  • Known role suffixes must be defined globally OR in that role (include/import utils/run_once.yml or set_fact).",
+                "  • Known role suffixes must be defined globally OR in that role (include/import utils/once_finalize.yml or set_fact).",
                 "",
                 "Offenders:"
             ]

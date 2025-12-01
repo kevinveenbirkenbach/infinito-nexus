@@ -1,3 +1,5 @@
+- include_tasks: utils/once_flag.yml
+
 - name: "Add logout domains to CSP connect-src"
   set_fact:
     applications: >-
@@ -32,4 +34,4 @@
     dest:   "{{ [ docker_repository_path, '.env' ] | path_join  }}"
     state:  link
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/compose_up.yml

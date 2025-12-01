@@ -1,7 +1,4 @@
-- block:
-  - include_tasks: 01_core.yml
-  - set_fact:
-      run_once_pkgmgr_install: true
+- include_tasks: 01_core.yml
   when: run_once_pkgmgr_install is not defined
 
 - name: "update {{ package_name }}"

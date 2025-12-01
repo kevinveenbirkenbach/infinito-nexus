@@ -19,5 +19,5 @@
         system_service_force_linear_sync:   false
         system_service_force_flush:         "{{ MODE_CLEANUP }}"
 
-    - include_tasks: utils/run_once.yml
+    - include_tasks: utils/once_finalize.yml
   when: run_once_sys_ctl_cln_docker is not defined

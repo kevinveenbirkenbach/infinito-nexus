@@ -4,7 +4,7 @@
         name: git
         state:  present
 
-    - include_tasks: utils/run_once.yml
+    - include_tasks: utils/once_finalize.yml
       vars:
         flush_handlers: false
   when: run_once_dev_git is not defined

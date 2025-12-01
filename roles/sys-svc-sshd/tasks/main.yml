@@ -11,5 +11,5 @@
       group: root
       mode: '0644'
     notify: sshd restart
-  - include_tasks: utils/run_once.yml
+  - include_tasks: utils/once_finalize.yml
   when: run_once_sys_svc_sshd is not defined

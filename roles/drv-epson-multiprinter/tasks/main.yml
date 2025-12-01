@@ -1,5 +1,2 @@
-- block:
-  - include_tasks: 01_core.yml
-  - set_fact:
-      run_once_drv_epson_multiprinter: true
+- include_tasks: 01_core.yml
   when: run_once_drv_epson_multiprinter is not defined

@@ -1,0 +1,11 @@
+- name: "Load Mailu before MSMTP config, to guaranty that server is up"
+  include_role:
+    name: web-app-mailu
+    public: false
+  vars:
+    flush_handlers: true
+
+- name: "Reset compose handlers after Mailu include for MSMTP"
+  include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
+  vars:
+    handler_role_name: "docker-compose"

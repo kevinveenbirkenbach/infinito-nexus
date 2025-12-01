@@ -48,4 +48,4 @@
   command: "pkgmgr pull --all"
   when: MODE_UPDATE | bool
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

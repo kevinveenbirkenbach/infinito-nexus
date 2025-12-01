@@ -9,3 +9,5 @@
     pkgmgr update pkgmgr
   register: pkgmgr_update
   changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
+
+- include_tasks: utils/once_flag.yml

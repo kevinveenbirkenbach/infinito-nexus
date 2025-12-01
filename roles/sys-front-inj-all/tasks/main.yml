@@ -3,7 +3,7 @@
       include_role:
         name: sys-svc-webserver-core
       when: run_once_sys_svc_webserver_core is not defined
-    - include_tasks: utils/run_once.yml
+    - include_tasks: utils/once_finalize.yml
   when: run_once_sys_front_inj_all is not defined
 
 - name: Build inj_enabled for '{{ domain }}'"
@@ -13,7 +13,8 @@
 - name: "Included dependent services"
   include_tasks: 01_dependencies.yml
   vars:
-    proxy_extra_configuration: ""
+    proxy_extra_configuration:     ""
+    docker_compose_flush_handlers: true
 
 - name: Reinitialize 'inj_enabled' for '{{ domain }}', after loading the required webservices
   set_fact:

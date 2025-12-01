@@ -1,3 +1,5 @@
+- include_tasks: utils/once_flag.yml
+
 - name: Ensure MAILU_HOSTNAMES is a list with max 1 entry
   ansible.builtin.assert:
     that:
@@ -23,21 +25,18 @@
     dest: "{{ MAILU_RSPAMD_HOST_FILE }}"
     mode: "0644"
 
-- name: "Mailu Docker and Webserver Setup"
-  block:
-  - name: "load docker, db and proxy for {{ application_id }}"
-    include_role:
-      name: sys-stk-full-stateful
-    vars:
-      docker_compose_flush_handlers: true
-
-  - name: "Include Cert deploy service for '{{ role_name }}'"
-    include_role:
-      name: sys-ctl-mtn-cert-deploy
+- name: "load docker, db and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full-stateful
   vars:
+    docker_compose_flush_handlers: true
     domain: "{{ MAILU_HOSTNAME }}"
 
-- name: Flush docker service handlers
+- name: "Include Cert deploy service for '{{ role_name }}'"
+  include_role:
+    name: sys-ctl-mtn-cert-deploy
+
+- name: "Flush Docker Compose handlers"
   meta: flush_handlers
 
 - name: "Create Mailu accounts"
@@ -67,5 +66,3 @@
 
 - name: Set Mailu DNS records
   include_tasks: 05_dns-records.yml
-
-- include_tasks: utils/run_once.yml

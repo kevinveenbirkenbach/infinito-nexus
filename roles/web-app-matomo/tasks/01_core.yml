@@ -1,5 +1,5 @@
 # Required to be set on the top to prevent infinite recursions appearing in roles/sys-front-inj-all/tasks/01_dependencies.yml
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_flag.yml
 
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
@@ -43,3 +43,5 @@
       token_auth: "{{ matomo_auth_token }}"
     return_content: yes
     status_code: 200
+
+- include_tasks: utils/compose_up.yml

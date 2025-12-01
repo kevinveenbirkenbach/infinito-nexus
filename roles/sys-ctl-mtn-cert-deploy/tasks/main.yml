@@ -1,7 +1,4 @@
-- block:
-  - include_tasks: 01_core.yml
-  - set_fact:
-      run_once_sys_ctl_mtn_cert_deploy: true
+- include_tasks: 01_core.yml
   when: run_once_sys_ctl_mtn_cert_deploy is not defined
 
 

@@ -23,4 +23,4 @@
       --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}
       --ignore-network-blocks-from {{ HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | join(' ') }}
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

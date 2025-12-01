@@ -35,4 +35,4 @@
     (pull_result.rc | default(0)) != 0 and
     ('up to date' not in (pull_result.stdout | default('')))
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

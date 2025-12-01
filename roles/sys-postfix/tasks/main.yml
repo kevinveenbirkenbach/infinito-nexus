@@ -3,7 +3,7 @@
     include_role:
       name: user-administrator
     when: run_once_user_administrator is not defined
-  - include_tasks: utils/run_once.yml
+  - include_tasks: utils/once_finalize.yml
   when: run_once_sys_postfix is not defined
 
 - name: install postfix

@@ -5,5 +5,5 @@
     loop:
     - sys-stk-front-proxy
     - dev-git
-  - include_tasks: utils/run_once.yml
+  - include_tasks: utils/once_finalize.yml
   when: run_once_web_svc_file is not defined

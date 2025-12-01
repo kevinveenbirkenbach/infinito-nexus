@@ -1,5 +1,4 @@
-- block:
-  - include_tasks: 01_core.yml
-    vars:
-      flush_handlers: true
+- include_tasks: 01_core.yml
+  vars:
+    flush_handlers: true
   when: run_once_svc_ai_ollama is not defined

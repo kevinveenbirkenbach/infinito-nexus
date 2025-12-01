@@ -1,3 +1,5 @@
+- include_tasks: utils/once_flag.yml
+
 - name: Include dependencies
   include_role:
     name: '{{ item }}'
@@ -5,4 +7,4 @@
   - sys-stk-front-proxy
   - dev-git
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/compose_up.yml

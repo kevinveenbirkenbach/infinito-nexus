@@ -7,4 +7,4 @@
   include_tasks: 02_reset.yml
   when: MODE_RESET | bool
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

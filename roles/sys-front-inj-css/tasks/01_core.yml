@@ -29,4 +29,4 @@
     mode:   '0644'
   loop: "{{ CSS_FILES }}"
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

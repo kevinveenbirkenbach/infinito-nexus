@@ -47,4 +47,4 @@
     - setup_mariadb_container_result is defined
     - setup_mariadb_container_result.changed
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

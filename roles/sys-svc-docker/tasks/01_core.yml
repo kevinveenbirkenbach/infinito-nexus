@@ -1,3 +1,5 @@
+- include_tasks: utils/once_flag.yml
+
 - name: docker & docker compose install
   community.general.pacman:
     name: 
@@ -26,5 +28,3 @@
     - sys-ctl-hlth-docker-volumes
     - sys-ctl-rpr-docker-hard
   when: SYS_SVC_DOCKER_LOAD_SERVICES | bool
-
-- include_tasks: utils/run_once.yml

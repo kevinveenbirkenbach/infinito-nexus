@@ -14,7 +14,7 @@
     - application_id != 'web-app-matomo'
     - run_once_web_app_matomo is not defined
 
-- name: "Setup web-app-matomo because endpoint was not reachable"
+- name: "Setup web-app-matomo"
   include_role:
     name: web-app-matomo
     public: false

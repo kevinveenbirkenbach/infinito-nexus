@@ -4,7 +4,7 @@
         update_cache: yes
         upgrade: yes
 
-    - include_tasks: utils/run_once.yml
+    - include_tasks: utils/once_finalize.yml
       vars:
         flush_handlers: false
   when: run_once_update_pacman is not defined

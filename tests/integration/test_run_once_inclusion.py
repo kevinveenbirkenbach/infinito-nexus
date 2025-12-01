@@ -19,7 +19,7 @@ class RunOnceInclusionTest(unittest.TestCase):
     Ensure that every Ansible block in roles/*/tasks with a when condition matching
     either the dynamic Jinja scheme or a literal run_once_<role_name> is not defined,
     and containing an include_role/import_role also ends with
-    include_tasks: utils/run_once.yml as its last task.
+    include_tasks: utils/once_finalize.yml as its last task.
     """
     WHEN_PATTERN = re.compile(
         r"(?:run_once_\+\s*\(role_name\s*\|\s*lower\s*\|\s*replace\('\-','\_'\)\)\s*is\s*(?:not\s+)?defined"
@@ -64,16 +64,16 @@ class RunOnceInclusionTest(unittest.TestCase):
                         isinstance(t, dict) and ('include_role' in t or 'import_role' in t)
                         for t in block
                     )
-                    # Check that last task is include_tasks: utils/run_once.yml
+                    # Check that last task is include_tasks: utils/once_finalize.yml
                     last_task = block[-1] if block else None
                     has_run_once_include = (
                         isinstance(last_task, dict)
-                        and last_task.get('include_tasks') == 'utils/run_once.yml'
+                        and last_task.get('include_tasks') == 'utils/once_finalize.yml'
                     )
 
                     if has_role_include and not has_run_once_include:
                         violations.append(
-                            f"{filepath}: block with when='{when}' missing final include_tasks: utils/run_once.yml"
+                            f"{filepath}: block with when='{when}' missing final include_tasks: utils/once_finalize.yml"
                         )
 
         if violations:

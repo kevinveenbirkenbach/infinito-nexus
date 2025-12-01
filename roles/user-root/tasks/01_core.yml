@@ -25,6 +25,4 @@
   vars:
     user_name:  "root"
 
-- include_tasks: utils/run_once.yml
-  vars:
-    flush_handlers: false
+- include_tasks: utils/once_flag.yml

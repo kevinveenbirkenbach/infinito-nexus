@@ -29,4 +29,4 @@
 - name: "flush docker compose for '{{ application_id }}'"
   meta: flush_handlers
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

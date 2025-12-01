@@ -71,4 +71,4 @@
   delay: 5
   until: desktop_http.status == 200
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

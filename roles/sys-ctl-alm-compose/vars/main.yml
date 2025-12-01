@@ -1,16 +1,7 @@
 system_service_id: sys-ctl-alm-compose@
 
-SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES_BASE:
+SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES:
   - 'sys-ctl-alm-email'
   - 'sys-ctl-alm-telegram'
-
-SYSTEMCTL_ALARM_EMAIL_ENABLED: "{{ users['no-reply'].mailu_token | default(false) and not MODE_RESET }}"  
-
-SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES: >-
-  {{
-    SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES_BASE 
-    if SYSTEMCTL_ALARM_EMAIL_ENABLED else
-    SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES_BASE | reject('equalto', 'sys-ctl-alm-email') | list
-  }}
 
 SYSTEMCTL_ALARM_COMPOSER_DUMMY_MESSAGE: "[Info] Dummy Message: No Failure; Ansible is initializing {{ SOFTWARE_NAME }} on {{ inventory_hostname }}."

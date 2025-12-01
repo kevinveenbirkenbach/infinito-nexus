@@ -28,4 +28,4 @@
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

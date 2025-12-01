@@ -50,4 +50,4 @@
     mode: "0644"
   become: false
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

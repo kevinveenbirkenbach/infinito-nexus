@@ -1,9 +1,2 @@
-- block:
-  - name: Include dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-bkp-provider-user
-    - sys-timer-cln-bkps
-  - include_tasks: utils/run_once.yml
+- include_tasks: 01_core.yml
   when: run_once_sys_bkp_provider is not defined

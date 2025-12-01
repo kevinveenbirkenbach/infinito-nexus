@@ -50,5 +50,5 @@
 #    'No certificate found with name' not in certbot_delete_result.stderr
 #  changed_when: >
 #    certbot_delete_result.rc == 0
-  - include_tasks: utils/run_once.yml
+  - include_tasks: utils/once_finalize.yml
   when: run_once_sys_svc_cln_domains is not defined

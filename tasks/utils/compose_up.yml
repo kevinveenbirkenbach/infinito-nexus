@@ -1,6 +1,3 @@
----
-# This is necessary to flush the handlers before the when is set, because otherwise the when will be attached to the handlers
-
 - name: "Ensure that {{ docker_compose.directories.instance }} is up"
   # This is a little hack to guaranty that the docker containers are allways up
   # It isn't the cleanest solution to have it here but it should fullfill their purpose
@@ -11,7 +8,3 @@
 
 - meta: flush_handlers
   when: flush_handlers | default(true) | bool
-
-- name: Set “run-once” fact for role {{ role_name }}
-  set_fact:
-    "{{ 'run_once_' + (role_name | lower | replace('-', '_')) }}": true

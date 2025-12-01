@@ -22,4 +22,4 @@
     system_service_tpl_on_failure:    "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     system_service_force_linear_sync: false
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

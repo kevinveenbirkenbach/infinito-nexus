@@ -5,6 +5,12 @@
     flush_handlers: true
   when: run_once_sys_ctl_alm_compose is not defined
 
+- name: "Ensure cert deploy target directory exists"
+  file:
+    path: "{{ docker_compose.directories.volumes }}certs"
+    state: directory
+    mode: "0755"
+
 - include_role:
     name: sys-service
   vars:
@@ -14,3 +20,5 @@
     system_service_timer_enabled:     true
     system_service_tpl_on_failure:    "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     system_service_force_linear_sync: false
+
+- include_tasks: utils/once_flag.yml

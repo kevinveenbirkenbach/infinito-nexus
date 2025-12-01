@@ -1,5 +1,2 @@
-- block:
-  - include_tasks: 01_core.yml
-  - set_fact:
-      run_once_svc_opt_keyboard_color: true
+- include_tasks: 01_core.yml
   when: run_once_svc_opt_keyboard_color is not defined

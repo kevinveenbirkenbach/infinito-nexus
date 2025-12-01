@@ -53,4 +53,4 @@
   vars:
     flush_handlers: false
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

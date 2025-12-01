@@ -26,4 +26,4 @@
       --expectations '{{ applications | web_health_expectations(www_enabled=WWW_REDIRECT_ENABLED | bool, group_names=group_names) | to_json }}'
     system_service_suppress_flush:        true # The healthcheck will just work after all routines passed
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

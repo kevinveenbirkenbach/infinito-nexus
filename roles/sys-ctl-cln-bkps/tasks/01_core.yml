@@ -22,6 +22,6 @@
     system_service_copy_files:          true
     system_service_force_linear_sync:   false
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml
   vars:
     flush_handlers: true

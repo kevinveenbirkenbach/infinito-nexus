@@ -51,15 +51,3 @@
           }, recursive=True)
       }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
-- name: "Reset MSMTP Configuration if No-Reply User Token changed"
-  when: users['no-reply'].username == mailu_user_name
-  block:
-    - name: "Set MSMTP run-once fact false"
-      set_fact:
-        run_once_sys_svc_msmtp: false
-      changed_when: false
-
-    - name: Reload MSMTP role
-      include_role:
-        name: "sys-svc-msmtp"

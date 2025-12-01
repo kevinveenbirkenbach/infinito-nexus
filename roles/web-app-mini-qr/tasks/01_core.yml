@@ -4,4 +4,4 @@
   vars: 
     docker_compose_flush_handlers: true
 
-- include_tasks: utils/run_once.yml
+- include_tasks: utils/once_finalize.yml

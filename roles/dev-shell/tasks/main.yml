@@ -1,25 +1,2 @@
----
-- block:
-  - name: Ensure ~/.bash_profile sources ~/.profile
-    lineinfile:
-      path: "$HOME/.bash_profile"
-      line: '[ -f ~/.profile ] && . ~/.profile'
-      insertafter: EOF
-      state: present
-      create: yes
-      mode: "0644"
-    become: false
-
-  - name: Ensure ~/.zprofile sources ~/.profile
-    lineinfile:
-      path: "$HOME/.zprofile"
-      line: '[ -f ~/.profile ] && . ~/.profile'
-      insertafter: EOF
-      state: present
-      create: yes
-      mode: "0644"
-    become: false
-
-  - set_fact:
-      run_once_dev_shell: true
+- include_tasks: 01_core.yml
   when: run_once_dev_shell is not defined
