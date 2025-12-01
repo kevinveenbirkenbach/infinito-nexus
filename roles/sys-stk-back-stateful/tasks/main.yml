@@ -13,6 +13,8 @@
 - name: "For '{{ application_id }}': Load central RDBMS"
   include_role:
     name: sys-svc-rdbms
+  vars:
+    database_init: true # Initialize a custom database for the application
 
 - name: "For '{{ application_id }}': Load sys-stk-back-stateless"
   include_role:

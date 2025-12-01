@@ -3,4 +3,4 @@
 
 - name: "Initialize database for '{{ database_name }}'"
   include_tasks: 02_init.yml
-  when: "{{ mariadb_init }}"
+  when: database_init | bool

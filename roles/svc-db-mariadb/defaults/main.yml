@@ -1,3 +1,4 @@
 # Check out the README.md file for more information, why this encodings and collations are used
 database_encoding:  "utf8mb4"
 database_collation: "utf8mb4_unicode_ci"
+database_init:      false # When true a database is initialized

@@ -11,4 +11,4 @@
 
 - name: "Initialize database for '{{ database_name }}'"
   include_tasks: 02_init.yml
-  when: POSTGRES_INIT | bool
+  when: database_init | bool

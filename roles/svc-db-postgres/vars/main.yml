@@ -18,7 +18,6 @@ POSTGRES_NETWORK_NAME:                    "{{ applications | get_app_conf(applic
 POSTGRES_SUBNET:                          "{{ networks.local['svc-db-postgres'].subnet }}"
 POSTGRES_PASSWORD:                        "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD') }}"
 POSTGRES_PORT:                            "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
-POSTGRES_INIT:                            "{{ database_username is defined and database_password is defined and database_name is defined }}"
 POSTGRES_EXPOSE_LOCAL:                    True # Exposes the db to localhost, almost everytime neccessary
 POSTGRES_CUSTOM_IMAGE_NAME:               "postgres_custom"
 POSTGRES_LOCAL_HOST:                      "127.0.0.1"

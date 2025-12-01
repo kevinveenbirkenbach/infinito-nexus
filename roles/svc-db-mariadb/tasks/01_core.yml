@@ -1,7 +1,7 @@
 
 - name: Create Docker network for MariaDB
   community.docker.docker_network:
-    name: "{{ mariadb_network_name }}"
+    name: "{{ mariadb_network }}"
     state: present
     ipam_config:
       - subnet: "{{ mariadb_subnet }}"
@@ -15,7 +15,7 @@
       MARIADB_ROOT_PASSWORD:  "{{ mariadb_root_pwd }}"
       MARIADB_AUTO_UPGRADE:   "1"
     networks:
-      - name: "{{ mariadb_network_name }}"
+      - name: "{{ mariadb_network }}"
     volumes:
       - "{{ mariadb_volume }}:/var/lib/mysql"
     published_ports:
