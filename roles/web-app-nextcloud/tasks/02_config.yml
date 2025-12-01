@@ -1,29 +1,29 @@
-- name: Merge all files in infinito directory (container)
-  block:
-    - name: Add dynamic config merging from Jinja template
-      template:
-        src: include.php.j2
-        dest: "{{ NEXTCLOUD_HOST_INCL_PATH }}"
-      notify: docker compose restart
+# Merge all (config) files in infinito directory (container)
 
-    - name: Flush handlers so Nextcloud container is restarted and ready
-      meta: flush_handlers
+- name: Add dynamic config merging from Jinja template
+  template:
+    src: include.php.j2
+    dest: "{{ NEXTCLOUD_HOST_INCL_PATH }}"
+  notify: docker compose restart
 
-    - name: "Wait until Nextcloud is reachable on port {{ ports.localhost.http[application_id] }}"
-      wait_for:
-        host: 127.0.0.1
-        port: "{{ ports.localhost.http[application_id] }}"
-        timeout: 120
-        delay: 2
-        state: started
+- name: Flush handlers so Nextcloud container is restarted and ready
+  meta: flush_handlers
 
-    - name: Copy include instructions to the container
-      command: >
-        docker cp {{ NEXTCLOUD_HOST_INCL_PATH }} {{ NEXTCLOUD_CONTAINER }}:{{ NEXTCLOUD_DOCKER_INCL_PATH }}
+- name: "Wait until Nextcloud is reachable on port {{ ports.localhost.http[application_id] }}"
+  wait_for:
+    host: 127.0.0.1
+    port: "{{ ports.localhost.http[application_id] }}"
+    timeout: 120
+    delay: 2
+    state: started
 
-    - name: Append generated config to config.php only if not present
-      command: >
-        docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }} sh -c "
-          grep -q '{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}' {{ NEXTCLOUD_DOCKER_CONFIG_FILE }} || 
-          cat {{ NEXTCLOUD_DOCKER_INCL_PATH }} >> {{ NEXTCLOUD_DOCKER_CONFIG_FILE }}"
-      notify: docker compose restart
+- name: Copy include instructions to the container
+  command: >
+    docker cp {{ NEXTCLOUD_HOST_INCL_PATH }} {{ NEXTCLOUD_CONTAINER }}:{{ NEXTCLOUD_DOCKER_INCL_PATH }}
+
+- name: Append generated config to config.php only if not present
+  command: >
+    docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }} sh -c "
+      grep -q '{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}' {{ NEXTCLOUD_DOCKER_CONFIG_FILE }} || 
+      cat {{ NEXTCLOUD_DOCKER_INCL_PATH }} >> {{ NEXTCLOUD_DOCKER_CONFIG_FILE }}"
+  notify: docker compose restart
