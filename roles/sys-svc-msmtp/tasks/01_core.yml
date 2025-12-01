@@ -17,9 +17,13 @@
 
 - name: "Load Mailu Routines for '{{ role_name }}'"
   include_tasks: 02_mailu.yml
-  when: 
-    - mail_host_reachability is defined
-    - mail_host_reachability.status | default(0) not in [200, 301, 302]
+  when:
+    - "'web-app-mailu' in group_names"
+    - >
+        (mail_host_reachability is defined and
+         (mail_host_reachability.status | default(0)) not in [200, 301, 302])
+        or
+        not (users['no-reply'].mailu_token | default(false) | bool)
 
 - name: install msmtp msmtp-mta
   community.general.pacman:

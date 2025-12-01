@@ -5,14 +5,14 @@
     path: "{{ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR }}"
     state: absent
 
+- name: "reset (if enabled) for {{ role_name}}"
+  include_tasks: 02_reset.yml
+  when: MODE_RESET | bool
+
 - name: "Load docker container role"
   include_role:
     name: docker-container
   when: run_once_docker_container is not defined
-  
-- name: "reset (if enabled)"
-  include_tasks: 02_reset.yml
-  when: MODE_RESET | bool
 
 - name: "create {{ PATH_DOCKER_COMPOSE_INSTANCES }}"
   file:

@@ -9,7 +9,7 @@
 - include_tasks: 02_pkgmgr_routines.yml
   when: backup_docker_to_local_folder is not defined
 
-- name: "reset (if enabled)"
+- name: "reset (if enabled) for {{ role_name}}"
   include_tasks: 03_reset.yml
   when: MODE_RESET | bool
 

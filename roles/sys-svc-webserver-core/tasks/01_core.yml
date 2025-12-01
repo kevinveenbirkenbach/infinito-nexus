@@ -4,7 +4,7 @@
     MODE_CLEANUP | bool or
     MODE_RESET | bool
 
-- name: "reset (if enabled)"
+- name: "reset (if enabled) for {{ role_name}}"
   include_tasks: 03_reset.yml
   when: MODE_RESET | bool
 
