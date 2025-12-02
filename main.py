@@ -16,10 +16,31 @@ try:
     from colorama import init as colorama_init, Fore, Back, Style
     colorama_init(autoreset=True)
 except ImportError:
-    class Dummy:
-        def __getattr__(self, name): return ''
-    Fore = Back = Style = Dummy()
+    # Minimal ANSI fallback if colorama is not available
+    class Style:
+        RESET_ALL = "\033[0m"
+        BRIGHT    = "\033[1m"
+        DIM       = "\033[2m"
 
+    class Fore:
+        BLACK   = "\033[30m"
+        RED     = "\033[31m"
+        GREEN   = "\033[32m"
+        YELLOW  = "\033[33m"
+        BLUE    = "\033[34m"
+        MAGENTA = "\033[35m"
+        CYAN    = "\033[36m"
+        WHITE   = "\033[37m"
+
+    class Back:
+        BLACK   = "\033[40m"
+        RED     = "\033[41m"
+        GREEN   = "\033[42m"
+        YELLOW  = "\033[43m"
+        BLUE    = "\033[44m"
+        MAGENTA = "\033[45m"
+        CYAN    = "\033[46m"
+        WHITE   = "\033[47m"
 
 def color_text(text, color):
     return f"{color}{text}{Style.RESET_ALL}"
@@ -86,10 +107,128 @@ def extract_description_via_help(cli_script_path):
     except Exception:
         return "-"
 
+def show_full_help_for_all(cli_dir, available):
+    """
+    Print the full --help output for all discovered CLI commands.
+    """
+    print(color_text("Infinito.Nexus CLI – Full Help Overview", Fore.CYAN + Style.BRIGHT))
+    print()
+
+    for folder, cmd in available:
+        # Build file path (e.g. "meta/j2/compiler.py")
+        file_path = f"{folder + '/' if folder else ''}{cmd}.py"
+
+        # Build subcommand (spaces instead of slashes, no .py)
+        if folder:
+            subcommand = f"{folder.replace('/', ' ')} {cmd}"
+        else:
+            subcommand = cmd
+
+        # Colorful header
+        print(color_text("=" * 80, Fore.BLUE + Style.BRIGHT))
+        print(color_text(f"Subcommand: {subcommand}", Fore.YELLOW + Style.BRIGHT))
+        print(color_text(f"File: {file_path}", Fore.CYAN))
+        print(color_text("-" * 80, Fore.BLUE))
+        
+        try:
+            module = "cli." + file_path[:-3].replace(os.sep, ".")
+            result = subprocess.run(
+                [sys.executable, "-m", module, "--help"],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            if result.stdout:
+                print(result.stdout.rstrip())
+            if result.stderr:
+                print(color_text(result.stderr.rstrip(), Fore.RED))
+        except Exception as e:
+            print(color_text(f"Failed to get help for {file_path}: {e}", Fore.RED))
+
+        print()  # extra spacer between commands
 
 def git_clean_repo():
     subprocess.run(['git', 'clean', '-Xfd'], check=True)
 
+def print_global_help(available, cli_dir):
+    """
+    Print the standard global help screen for the Infinito.Nexus CLI.
+    This is used by both --help and --help-all.
+    """
+    print(color_text("Infinito.Nexus CLI 🦫🌐🖥️", Fore.CYAN + Style.BRIGHT))
+    print()
+    print(color_text("Your Gateway to Automated IT Infrastructure Setup", Style.DIM))
+    print()
+    print(color_text(
+        "Usage: infinito "
+        "[--sound] "
+        "[--no-signal] "
+        "[--log] "
+        "[--git-clean] "
+        "[--infinite] "
+        "[--help-all] "
+        "[--alarm-timeout <seconds>] "
+        "[-h|--help] "
+        "<command> [options]",
+        Fore.GREEN
+    ))
+    print()
+    # Use bright style for headings
+    print(color_text("Options:", Style.BRIGHT))
+    print(color_text("  --sound           Play startup melody and warning sounds", Fore.YELLOW))
+    print(color_text("  --no-signal       Suppress success/failure signals", Fore.YELLOW))
+    print(color_text("  --log             Log all proxied command output to logfile.log", Fore.YELLOW))
+    print(color_text("  --git-clean       Remove all Git-ignored files before running", Fore.YELLOW))
+    print(color_text("  --infinite        Run the proxied command in an infinite loop", Fore.YELLOW))
+    print(color_text("  --help-all        Show full --help for all CLI commands", Fore.YELLOW))
+    print(color_text("  --alarm-timeout   Stop warnings and exit after N seconds (default: 60)", Fore.YELLOW))
+    print(color_text("  -h, --help        Show this help message and exit", Fore.YELLOW))
+    print()
+    print(color_text("Available commands:", Style.BRIGHT))
+    print()
+
+    current_folder = None
+    for folder, cmd in available:
+        if folder != current_folder:
+            if folder:
+                print(color_text(f"{folder}/", Fore.MAGENTA))
+                print()
+            current_folder = folder
+        desc = extract_description_via_help(
+            os.path.join(cli_dir, *(folder.split('/') if folder else []), f"{cmd}.py")
+        )
+        print(color_text(format_command_help(cmd, desc, indent=2), ''), "\n")
+
+    print()
+    print(color_text(
+        "🔗  You can chain subcommands by specifying nested directories,",
+        Fore.CYAN
+    ))
+    print(color_text(
+        "    e.g. `infinito build defaults users` →",
+        Fore.CYAN
+    ))
+    print(color_text(
+        "    corresponds to `cli/build/defaults/users.py`.",
+        Fore.CYAN
+    ))
+    print()
+    print(color_text(
+        "Infinito.Nexus is a product of Kevin Veen-Birkenbach, https://cybermaster.space .\n",
+        Style.DIM
+    ))
+    print(color_text(
+        "Test and use productively on https://infinito.nexus .\n",
+        Style.DIM
+    ))
+    print(color_text(
+        "For commercial use, a license agreement with Kevin Veen-Birkenbach is required. \n",
+        Style.DIM
+    ))
+    print(color_text("License: https://s.infinito.nexus/license", Style.DIM))
+    print()
+    print(color_text("🎉🌈 Happy IT Infrastructuring! 🚀🔧✨", Fore.MAGENTA + Style.BRIGHT))
+    print()
 
 def play_start_intro():
     Sound.play_start_sound()
@@ -163,6 +302,7 @@ if __name__ == "__main__":
         sys.argv.remove('--log')
     git_clean = '--git-clean' in sys.argv and (sys.argv.remove('--git-clean') or True)
     infinite = '--infinite' in sys.argv and (sys.argv.remove('--infinite') or True)
+    help_all = '--help-all' in sys.argv and (sys.argv.remove('--help-all') or True)
     alarm_timeout = 60
     if '--alarm-timeout' in sys.argv:
         i = sys.argv.index('--alarm-timeout')
@@ -188,72 +328,20 @@ if __name__ == "__main__":
     available = list_cli_commands(cli_dir)
     args = sys.argv[1:]
 
+    # Global "show help for all commands" mode
+    if help_all:
+        # 1) Print the normal global help (same as --help)
+        print_global_help(available, cli_dir)
+
+        # 2) Then print detailed --help for all subcommands
+        print(color_text("Full detailed help for all subcommands:", Style.BRIGHT))
+        print()
+        show_full_help_for_all(cli_dir, available)
+        sys.exit(0)
+
     # Global help
     if not args or args[0] in ('-h', '--help'):
-        print(color_text("Infinito.Nexus CLI 🦫🌐🖥️", Fore.CYAN + Style.BRIGHT))
-        print()
-        print(color_text("Your Gateway to Automated IT Infrastructure Setup", Style.DIM))
-        print()
-        print(color_text(
-            "Usage: infinito [--sound] [--no-signal] [--log] [--git-clean] [--infinite] <command> [options]",
-            Fore.GREEN
-        ))
-        print()
-        # Use bright style for headings
-        print(color_text("Options:", Style.BRIGHT))
-        print(color_text("  --sound           Play startup melody and warning sounds", Fore.YELLOW))
-        print(color_text("  --no-signal       Suppress success/failure signals", Fore.YELLOW))
-        print(color_text("  --log             Log all proxied command output to logfile.log", Fore.YELLOW))
-        print(color_text("  --git-clean       Remove all Git-ignored files before running", Fore.YELLOW))
-        print(color_text("  --infinite        Run the proxied command in an infinite loop", Fore.YELLOW))
-        print(color_text("  --alarm-timeout   Stop warnings and exit after N seconds (default: 60)", Fore.YELLOW))
-        print(color_text("  -h, --help        Show this help message and exit", Fore.YELLOW))
-        print()
-        print(color_text("Available commands:", Style.BRIGHT))
-        print()
-
-        current_folder = None
-        for folder, cmd in available:
-            if folder != current_folder:
-                if folder:
-                    print(color_text(f"{folder}/", Fore.MAGENTA))
-                    print()
-                current_folder = folder
-            desc = extract_description_via_help(
-                os.path.join(cli_dir, *(folder.split('/') if folder else []), f"{cmd}.py")
-            )
-            print(color_text(format_command_help(cmd, desc, indent=2), ''), "\n")
-
-        print()
-        print(color_text(
-            "🔗  You can chain subcommands by specifying nested directories,",
-            Fore.CYAN
-        ))
-        print(color_text(
-            "    e.g. `infinito build defaults users` →",
-            Fore.CYAN
-        ))
-        print(color_text(
-            "    corresponds to `cli/build/defaults/users.py`.",
-            Fore.CYAN
-        ))
-        print()
-        print(color_text(
-            "Infinito.Nexus is a product of Kevin Veen-Birkenbach, https://cybermaster.space .\n",
-            Style.DIM
-        ))
-        print(color_text(
-            "Test and use productively on https://infinito.nexus .\n",
-            Style.DIM
-        ))
-        print(color_text(
-            "For commercial use, a license agreement with Kevin Veen-Birkenbach is required. \n",
-            Style.DIM
-        ))
-        print(color_text("License: https://s.infinito.nexus/license", Style.DIM))
-        print()
-        print(color_text("🎉🌈 Happy IT Infrastructuring! 🚀🔧✨", Fore.MAGENTA + Style.BRIGHT))
-        print()
+        print_global_help(available, cli_dir)
         sys.exit(0)
 
     # Directory-specific help
