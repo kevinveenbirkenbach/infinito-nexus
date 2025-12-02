@@ -1,6 +1,6 @@
 features:
   matomo:             true
-  css:                true
+  css:                false
   desktop:            false # @todo Solve https://chatgpt.com/c/687a50b4-8d78-800f-a202-1631aa05fd4f before setting it to true
   ldap:               false
   oidc:               true
