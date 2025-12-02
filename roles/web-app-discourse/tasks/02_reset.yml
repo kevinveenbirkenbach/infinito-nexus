@@ -33,7 +33,8 @@
     disc_net_disconnect.rc != 0 and
     ('is not connected' not in (disc_net_disconnect.stderr | default('') | lower)) and
     ('no such network' not in (disc_net_disconnect.stderr | default('') | lower)) and
-    ('no such container' not in (disc_net_disconnect.stderr | default('') | lower))
+    ('no such container' not in (disc_net_disconnect.stderr | default('') | lower)) and
+    ('not found' not in (disc_net_disconnect.stderr | default('') | lower))
 
 - name: "destroy container '{{ DISCOURSE_CONTAINER }}'"
   ansible.builtin.command:
@@ -43,4 +44,7 @@
   changed_when: discourse_destroy.rc == 0
   failed_when: >
     discourse_destroy.rc != 0 and
-    ('unable to change directory before execution' not in (discourse_destroy.msg | default('') | lower))
+    ('unable to change directory before execution' not in (discourse_destroy.msg    | default('') | lower)) and
+    ('no such file or directory'                 not in (discourse_destroy.msg    | default('') | lower)) and
+    ('no such file or directory'                 not in (discourse_destroy.stderr | default('') | lower)) and
+    ('not found'                                 not in (discourse_destroy.stderr | default('') | lower))

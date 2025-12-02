@@ -9,11 +9,6 @@
   include_tasks: 02_reset.yml
   when: MODE_RESET | bool
 
-- name: "Load docker container role"
-  include_role:
-    name: docker-container
-  when: run_once_docker_container is not defined
-
 - name: "create {{ PATH_DOCKER_COMPOSE_INSTANCES }}"
   file:
     path:   "{{ PATH_DOCKER_COMPOSE_INSTANCES }}"
@@ -21,3 +16,8 @@
     mode:   0700
     owner:  root
     group:  root
+
+- name: "Load docker container role"
+  include_role:
+    name: docker-container
+  when: run_once_docker_container is not defined
