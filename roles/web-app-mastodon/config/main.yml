@@ -15,6 +15,8 @@ server:
     whitelist:
       frame-src:
         - "*"
+      worker-src:
+        - "blob:"
 docker:
   services:
     redis:
