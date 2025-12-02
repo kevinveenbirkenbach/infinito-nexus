@@ -14,6 +14,85 @@ import main  # assumes main.py lives at the project root
 
 
 class TestMainHelpers(unittest.TestCase):
+
+    # ----------------------
+    # Existing tests …
+    # ----------------------
+
+    @mock.patch.object(main, 'Style')
+    def test_color_text_wraps_text_with_color_and_reset(self, mock_style):
+        """
+        color_text() should wrap text with the given color prefix and Style.RESET_ALL.
+        We patch Style.RESET_ALL to produce deterministic output.
+        """
+        mock_style.RESET_ALL = '<RESET>'
+        result = main.color_text("Hello", "<C>")
+        self.assertEqual(result, "<C>Hello<RESET>")
+
+    def test_list_cli_commands_with_nested_directories(self):
+        """
+        list_cli_commands() should correctly identify CLI commands inside
+        nested directories and return folder paths using '/' separators.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # File in root directory
+            root_cmd = os.path.join(tmpdir, "rootcmd.py")
+            with open(root_cmd, "w") as f:
+                f.write("import argparse\n")
+
+            # File in nested directory: sub/innercmd.py
+            sub = os.path.join(tmpdir, "sub")
+            os.makedirs(sub, exist_ok=True)
+            nested_cmd = os.path.join(sub, "innercmd.py")
+            with open(nested_cmd, "w") as f:
+                f.write("import argparse\n")
+
+            commands = main.list_cli_commands(tmpdir)
+
+            self.assertIn((None, "rootcmd"), commands)
+            self.assertIn(("sub", "innercmd"), commands)
+
+    @mock.patch('main.subprocess.run', side_effect=Exception("mocked error"))
+    def test_extract_description_via_help_returns_dash_on_exception(self, mock_run):
+        """
+        extract_description_via_help() should return '-' if subprocess.run
+        raises any exception.
+        """
+        result = main.extract_description_via_help("/fake/path/script.py")
+        self.assertEqual(result, "-")
+
+    @mock.patch('main.subprocess.run')
+    def test_show_full_help_for_all_invokes_help_for_each_command(self, mock_run):
+        """
+        show_full_help_for_all() should execute a help subprocess call for each
+        discovered CLI command. The module path must be correct.
+        """
+        available = [
+            (None, "deploy"),
+            ("build/defaults", "users"),
+        ]
+
+        main.show_full_help_for_all("/fake/cli", available)
+
+        expected_modules = {"cli.deploy", "cli.build.defaults.users"}
+        invoked_modules = set()
+
+        for call in mock_run.call_args_list:
+            args, kwargs = call
+            cmd = args[0]
+
+            # Validate invocation structure
+            self.assertGreaterEqual(len(cmd), 3)
+            self.assertEqual(cmd[1], "-m")       # Second argument must be '-m'
+            invoked_modules.add(cmd[2])          # Module name
+
+            # Validate flags
+            self.assertEqual(kwargs.get("capture_output"), True)
+            self.assertEqual(kwargs.get("text"), True)
+            self.assertEqual(kwargs.get("check"), False)
+
+        self.assertEqual(expected_modules, invoked_modules)
+
     def test_format_command_help_basic(self):
         name = "cmd"
         description = "A basic description"

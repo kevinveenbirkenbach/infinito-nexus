@@ -86,6 +86,42 @@ def extract_description_via_help(cli_script_path):
     except Exception:
         return "-"
 
+def show_full_help_for_all(cli_dir, available):
+    """
+    Print the full --help output for all discovered CLI commands.
+    """
+    print(color_text("Infinito.Nexus CLI – Full Help Overview", Fore.CYAN + Style.BRIGHT))
+    print()
+
+    for folder, cmd in available:
+        # Build module path (cli.<folder>.<cmd>)
+        if folder:
+            rel = os.path.join(folder, f"{cmd}.py")
+        else:
+            rel = f"{cmd}.py"
+
+        module = "cli." + rel[:-3].replace(os.sep, ".")
+
+        header_path = f"{folder + '/' if folder else ''}{cmd}.py"
+        print(color_text("=" * 80, Fore.MAGENTA))
+        print(color_text(f"Command: {header_path}", Fore.MAGENTA + Style.BRIGHT))
+        print(color_text("-" * 80, Fore.MAGENTA))
+
+        try:
+            result = subprocess.run(
+                [sys.executable, "-m", module, "--help"],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            if result.stdout:
+                print(result.stdout.rstrip())
+            if result.stderr:
+                print(color_text(result.stderr.rstrip(), Fore.RED))
+        except Exception as e:
+            print(color_text(f"Failed to get help for {header_path}: {e}", Fore.RED))
+
+        print()  # extra spacer between commands
 
 def git_clean_repo():
     subprocess.run(['git', 'clean', '-Xfd'], check=True)
@@ -163,6 +199,7 @@ if __name__ == "__main__":
         sys.argv.remove('--log')
     git_clean = '--git-clean' in sys.argv and (sys.argv.remove('--git-clean') or True)
     infinite = '--infinite' in sys.argv and (sys.argv.remove('--infinite') or True)
+    help_all = '--help-all' in sys.argv and (sys.argv.remove('--help-all') or True)
     alarm_timeout = 60
     if '--alarm-timeout' in sys.argv:
         i = sys.argv.index('--alarm-timeout')
@@ -188,6 +225,12 @@ if __name__ == "__main__":
     available = list_cli_commands(cli_dir)
     args = sys.argv[1:]
 
+    # Global "show help for all commands" mode
+    if help_all:
+        show_full_help_for_all(cli_dir, available)
+        sys.exit(0)
+
+
     # Global help
     if not args or args[0] in ('-h', '--help'):
         print(color_text("Infinito.Nexus CLI 🦫🌐🖥️", Fore.CYAN + Style.BRIGHT))
@@ -195,7 +238,16 @@ if __name__ == "__main__":
         print(color_text("Your Gateway to Automated IT Infrastructure Setup", Style.DIM))
         print()
         print(color_text(
-            "Usage: infinito [--sound] [--no-signal] [--log] [--git-clean] [--infinite] <command> [options]",
+            "Usage: infinito "
+            "[--sound] "
+            "[--no-signal] "
+            "[--log] "
+            "[--git-clean] "
+            "[--infinite] "
+            "[--help-all] "
+            "[--alarm-timeout <seconds>] "
+            "[-h|--help] "
+            "<command> [options]",
             Fore.GREEN
         ))
         print()
@@ -206,6 +258,7 @@ if __name__ == "__main__":
         print(color_text("  --log             Log all proxied command output to logfile.log", Fore.YELLOW))
         print(color_text("  --git-clean       Remove all Git-ignored files before running", Fore.YELLOW))
         print(color_text("  --infinite        Run the proxied command in an infinite loop", Fore.YELLOW))
+        print(color_text("  --help-all        Show full --help for all CLI commands", Fore.YELLOW))
         print(color_text("  --alarm-timeout   Stop warnings and exit after N seconds (default: 60)", Fore.YELLOW))
         print(color_text("  -h, --help        Show this help message and exit", Fore.YELLOW))
         print()
