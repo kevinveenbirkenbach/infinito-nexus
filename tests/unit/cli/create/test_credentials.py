@@ -98,5 +98,66 @@ class TestCreateCredentials(unittest.TestCase):
                 self.assertIsInstance(creds['api_key'], str)
                 self.assertTrue(creds['api_key'].lstrip().startswith('$ANSIBLE_VAULT'))
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_main_plain_algorithm_allow_empty_plain_sets_empty_string_without_vault(self):
+        """
+        When --allow-empty-plain is used, a 'plain' credential without override
+        should be set to "" and *not* encrypted (no ansible-vault calls).
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            role_path = os.path.join(tmpdir, 'role')
+            os.makedirs(os.path.join(role_path, 'config'))
+            os.makedirs(os.path.join(role_path, 'schema'))
+            os.makedirs(os.path.join(role_path, 'vars'))
+
+            # vars/main.yml with application_id
+            main_vars = {'application_id': 'app_empty_plain'}
+            with open(os.path.join(role_path, 'vars', 'main.yml'), 'w') as f:
+                yaml.dump(main_vars, f)
+
+            # config/main.yml
+            config = {'features': {'central_database': False}}
+            with open(os.path.join(role_path, "config", "main.yml"), 'w') as f:
+                yaml.dump(config, f)
+
+            # schema/main.yml: plain credential *without* overrides
+            schema = {
+                'credentials': {
+                    'api_key': {
+                        'description': 'API key',
+                        'algorithm': 'plain',
+                        'validation': {}
+                    }
+                }
+            }
+            with open(os.path.join(role_path, 'schema', 'main.yml'), 'w') as f:
+                yaml.dump(schema, f)
+
+            # Empty inventory file
+            inventory_file = os.path.join(tmpdir, 'inventory.yml')
+            with open(inventory_file, 'w') as f:
+                yaml.dump({}, f)
+
+            # Vault password file
+            vault_pw_file = os.path.join(tmpdir, 'pw.txt')
+            with open(vault_pw_file, 'w') as f:
+                f.write('pw')
+
+            # Ensure ansible-vault is *not* called at all in this scenario
+            def fail_run(*_args, **_kwargs):
+                raise AssertionError("ansible-vault must not be called for allow_empty_plain + empty plain")
+
+            with mock.patch('subprocess.run', side_effect=fail_run):
+                sys.argv = [
+                    'create/credentials.py',
+                    '--role-path', role_path,
+                    '--inventory-file', inventory_file,
+                    '--vault-password-file', vault_pw_file,
+                    '--allow-empty-plain',
+                ]
+                main()
+
+            data = yaml.safe_load(open(inventory_file))
+            creds = data['applications']['app_empty_plain']['credentials']
+            # api_key should exist and be an empty string, not a vault block
+            self.assertIn('api_key', creds)
+            self.assertEqual(creds['api_key'], "")

@@ -58,22 +58,28 @@ class DefaultsGenerator:
                 continue
 
             config_data = load_yaml_file(config_file)
-            if config_data:
-                try:
-                    gid_number = self.gid_lookup.run([application_id], roles_dir=str(self.roles_dir))[0]
-                except Exception as e:
-                    print(f"Warning: failed to determine gid for '{application_id}': {e}", file=sys.stderr)
-                    sys.exit(1)
+            if not config_data:
+                # Empty or null config → still register the application with empty defaults
+                self.log(f"Empty config for {role_name}, adding empty defaults for '{application_id}'")
+                result["defaults_applications"][application_id] = {}
+                continue
 
-                config_data["group_id"] = gid_number
-                result["defaults_applications"][application_id] = config_data
+            # Existing non-empty config: keep current behavior
+            try:
+                gid_number = self.gid_lookup.run([application_id], roles_dir=str(self.roles_dir))[0]
+            except Exception as e:
+                print(f"Warning: failed to determine gid for '{application_id}': {e}", file=sys.stderr)
+                sys.exit(1)
 
-                # Inject users mapping as Jinja2 references
-                users_meta = load_yaml_file(role_dir / "users" / "main.yml")
-                users_data = users_meta.get("users", {})
-                transformed = {user: f"{{{{ users[\"{user}\"] }}}}" for user in users_data}
-                if transformed:
-                    result["defaults_applications"][application_id]["users"] = transformed
+            config_data["group_id"] = gid_number
+            result["defaults_applications"][application_id] = config_data
+
+            # Inject users mapping as Jinja2 references (unchanged)
+            users_meta = load_yaml_file(role_dir / "users" / "main.yml")
+            users_data = users_meta.get("users", {})
+            transformed = {user: f"{{{{ users[\"{user}\"] }}}}" for user in users_data}
+            if transformed:
+                result["defaults_applications"][application_id]["users"] = transformed
 
         # Render placeholders in entire result context
         self.log("Starting placeholder rendering...")
@@ -101,6 +107,95 @@ class DefaultsGenerator:
         except ValueError:
             rel = self.output_file
         print(f"✅ Generated: {rel}")
+
+    def test_empty_config_mapping_adds_empty_defaults(self):
+        """
+        If a role has vars/main.yml and config/main.yml exists but contains an
+        empty mapping ({}), the generator must still emit an empty-dict entry
+        for that application_id.
+        """
+        role_empty_cfg = self.roles_dir / "role-empty-config"
+        (role_empty_cfg / "vars").mkdir(parents=True, exist_ok=True)
+        (role_empty_cfg / "config").mkdir(parents=True, exist_ok=True)
+
+        # application_id is defined…
+        (role_empty_cfg / "vars" / "main.yml").write_text(
+            "application_id: emptycfg\n",
+            encoding="utf-8",
+        )
+        # …but config is an explicit empty mapping
+        (role_empty_cfg / "config" / "main.yml").write_text(
+            "{}\n",
+            encoding="utf-8",
+        )
+
+        result = subprocess.run(
+            [
+                "python3",
+                str(self.script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        data = yaml.safe_load(self.output_file.read_text())
+        apps = data.get("defaults_applications", {})
+
+        self.assertIn("emptycfg", apps)
+        self.assertEqual(
+            apps["emptycfg"],
+            {},
+            msg="Role with {} config should produce an empty defaults mapping",
+        )
+
+    def test_empty_config_file_adds_empty_defaults(self):
+        """
+        If a role has vars/main.yml and config/main.yml exists but is an empty
+        file (or only whitespace), the generator must still emit an empty-dict
+        entry for that application_id.
+        """
+        role_empty_file = self.roles_dir / "role-empty-config-file"
+        (role_empty_file / "vars").mkdir(parents=True, exist_ok=True)
+        (role_empty_file / "config").mkdir(parents=True, exist_ok=True)
+
+        (role_empty_file / "vars" / "main.yml").write_text(
+            "application_id: emptyfileapp\n",
+            encoding="utf-8",
+        )
+        # Create an empty file (no YAML content at all)
+        (role_empty_file / "config" / "main.yml").write_text(
+            "",
+            encoding="utf-8",
+        )
+
+        result = subprocess.run(
+            [
+                "python3",
+                str(self.script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
+            ],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
+        data = yaml.safe_load(self.output_file.read_text())
+        apps = data.get("defaults_applications", {})
+
+        self.assertIn("emptyfileapp", apps)
+        self.assertEqual(
+            apps["emptyfileapp"],
+            {},
+            msg="Role with empty config file should produce an empty defaults mapping",
+        )
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate defaults_applications YAML...")

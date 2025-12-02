@@ -9,6 +9,14 @@ Usage example:
     --inventory-file host_vars/echoserver.yml \
     --vault-password-file .pass/echoserver.txt \
     --set credentials.database_password=mysecret
+
+With snippet mode (no file changes, just YAML output):
+
+  infinito create credentials \
+    --role-path roles/web-app-akaunting \
+    --inventory-file host_vars/echoserver.yml \
+    --vault-password-file .pass/echoserver.txt \
+    --snippet
 """
 
 import argparse
@@ -92,7 +100,14 @@ def to_vault_block(vault_handler: VaultHandler, value: Union[str, Any], label: s
     Return a ruamel scalar tagged as !vault. If the input value is already
     vault-encrypted (string contains $ANSIBLE_VAULT or is a !vault scalar), reuse/wrap.
     Otherwise, encrypt plaintext via ansible-vault.
+
+    Special rule:
+    - Empty strings ("") are NOT encrypted and are returned as plain "".
     """
+    # Empty strings should not be encrypted
+    if isinstance(value, str) and value == "":
+        return ""
+
     # Already a ruamel !vault scalar → reuse
     if _is_ruamel_vault(value):
         return value
@@ -104,7 +119,6 @@ def to_vault_block(vault_handler: VaultHandler, value: Union[str, Any], label: s
     # Plaintext → encrypt now
     snippet = vault_handler.encrypt_string(str(value), label)
     return _make_vault_scalar_from_text(snippet)
-
 
 def parse_overrides(pairs: list[str]) -> Dict[str, str]:
     """
@@ -139,6 +153,23 @@ def main() -> int:
         "-y", "--yes", action="store_true",
         help="Non-interactive: assume 'yes' for all overwrite confirmations when --force is used"
     )
+    parser.add_argument(
+        "--snippet",
+        action="store_true",
+        help=(
+            "Do not modify the inventory file. Instead, print a YAML snippet with "
+            "the generated credentials to stdout. The snippet contains only the "
+            "application's credentials (and ansible_become_password if provided)."
+        ),
+    )
+    parser.add_argument(
+        "--allow-empty-plain",
+        action="store_true",
+        help=(
+            "Allow 'plain' credentials in the schema without an explicit --set override. "
+            "Missing plain values will be set to an empty string before encryption."
+        ),
+    )
     args = parser.parse_args()
 
     overrides = parse_overrides(args.set)
@@ -148,36 +179,82 @@ def main() -> int:
         role_path=Path(args.role_path),
         inventory_path=Path(args.inventory_file),
         vault_pw=args.vault_password_file,
-        overrides=overrides
+        overrides=overrides,
+        allow_empty_plain=args.allow_empty_plain,
     )
 
-    # 1) Load existing inventory with ruamel (round-trip)
     yaml_rt = YAML(typ="rt")
     yaml_rt.preserve_quotes = True
 
+    # Get schema-applied structure (defaults etc.) for *non-destructive* merge
+    schema_inventory: Dict[str, Any] = manager.apply_schema()
+    schema_apps = schema_inventory.get("applications", {})
+    schema_app_block = schema_apps.get(manager.app_id, {})
+    schema_creds = schema_app_block.get("credentials", {}) if isinstance(schema_app_block, dict) else {}
+
+    # -------------------------------------------------------------------------
+    # SNIPPET MODE: only build a YAML fragment and print to stdout, no file I/O
+    # -------------------------------------------------------------------------
+    if args.snippet:
+        # Build a minimal structure:
+        # applications:
+        #   <app_id>:
+        #     credentials:
+        #       key: !vault |
+        #         ...
+        # ansible_become_password: !vault | ...
+        snippet_data = CommentedMap()
+        apps_snip = ensure_map(snippet_data, "applications")
+        app_block_snip = ensure_map(apps_snip, manager.app_id)
+        creds_snip = ensure_map(app_block_snip, "credentials")
+
+        for key, default_val in schema_creds.items():
+            # Priority: --set exact key → default from schema → empty string
+            ov = overrides.get(f"credentials.{key}", None)
+            if ov is None:
+                ov = overrides.get(key, None)
+
+            if ov is not None:
+                value_for_key: Union[str, Any] = ov
+            else:
+                if _is_vault_encrypted(default_val):
+                    creds_snip[key] = to_vault_block(manager.vault_handler, default_val, key)
+                    continue
+                value_for_key = "" if default_val is None else str(default_val)
+
+            creds_snip[key] = to_vault_block(manager.vault_handler, value_for_key, key)
+
+        # Optional ansible_become_password only if provided via overrides
+        if "ansible_become_password" in overrides:
+            snippet_data["ansible_become_password"] = to_vault_block(
+                manager.vault_handler,
+                overrides["ansible_become_password"],
+                "ansible_become_password",
+            )
+
+        yaml_rt.dump(snippet_data, sys.stdout)
+        return 0
+
+    # -------------------------------------------------------------------------
+    # DEFAULT MODE: modify the inventory file on disk (previous behavior)
+    # -------------------------------------------------------------------------
+
+    # 1) Load existing inventory with ruamel (round-trip)
     with open(args.inventory_file, "r", encoding="utf-8") as f:
         data = yaml_rt.load(f)  # CommentedMap or None
     if data is None:
         data = CommentedMap()
 
-    # 2) Get schema-applied structure (defaults etc.) for *non-destructive* merge
-    schema_inventory: Dict[str, Any] = manager.apply_schema()
-
-    # 3) Ensure structural path exists
+    # 2) Ensure structural path exists
     apps = ensure_map(data, "applications")
     app_block = ensure_map(apps, manager.app_id)
     creds = ensure_map(app_block, "credentials")
 
-    # 4) Determine defaults we could add
-    schema_apps = schema_inventory.get("applications", {})
-    schema_app_block = schema_apps.get(manager.app_id, {})
-    schema_creds = schema_app_block.get("credentials", {}) if isinstance(schema_app_block, dict) else {}
-
-    # 5) Add ONLY missing credential keys
+    # 3) Add ONLY missing credential keys (respect existing values)
     newly_added_keys = set()
     for key, default_val in schema_creds.items():
         if key in creds:
-            # existing → do not touch (preserve plaintext/vault/formatting/comments)
+            # Existing → do not touch (preserve plaintext/vault/formatting/comments)
             continue
 
         # Value to use for the new key
@@ -200,7 +277,7 @@ def main() -> int:
         creds[key] = to_vault_block(manager.vault_handler, value_for_new_key, key)
         newly_added_keys.add(key)
 
-    # 6) ansible_become_password: only add if missing;
+    # 4) ansible_become_password: only add if missing;
     #    never rewrite an existing one unless --force (+ confirm/--yes) and override provided.
     if "ansible_become_password" not in data:
         val = overrides.get("ansible_become_password", None)
@@ -216,7 +293,7 @@ def main() -> int:
                     manager.vault_handler, overrides["ansible_become_password"], "ansible_become_password"
                 )
 
-    # 7) Overrides for existing credential keys (only with --force)
+    # 5) Overrides for existing credential keys (only with --force)
     if args.force:
         for ov_key, ov_val in overrides.items():
             # Accept both 'credentials.key' and bare 'key'
@@ -228,7 +305,7 @@ def main() -> int:
                 if args.yes or ask_for_confirmation(key):
                     creds[key] = to_vault_block(manager.vault_handler, ov_val, key)
 
-    # 8) Write back with ruamel (preserve formatting & comments)
+    # 6) Write back with ruamel (preserve formatting & comments)
     with open(args.inventory_file, "w", encoding="utf-8") as f:
         yaml_rt.dump(data, f)
 

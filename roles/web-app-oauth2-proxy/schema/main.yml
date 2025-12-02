@@ -1,7 +1,6 @@
 # This file was created during refactoring to pass integration tests 
-# @todo add correct type
 credentials:
   oauth2_proxy_cookie_secret:
     description: "Cookie secret for OAuth2 Proxy (hex string, 32 characters, generated via `openssl rand -hex 16`)"
-    type: string
-    validation: "^[0-9A-Fa-f]{32}$"
+    algorithm:  "plain"
+    validation: "^.*$"

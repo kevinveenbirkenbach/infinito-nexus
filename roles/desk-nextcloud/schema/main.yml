@@ -1,1 +1,5 @@
-cloud_fqdn: # @todo Add detailled scheme for this entry 
+credentials:
+  cloud_fqdn:
+    description: "Cloud fqdn"
+    algorithm:  "plain"
+    validation: "^.*$"
