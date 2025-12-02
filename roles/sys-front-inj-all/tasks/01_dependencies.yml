@@ -5,11 +5,10 @@
     url: "{{ domains | get_url('web-app-matomo', WEB_PROTOCOL) }}"
     method: HEAD
     validate_certs: yes
-    status_code: [200, 301, 302]
+    status_code: 200
   register: matomo_reachability
   failed_when: false
   changed_when: false
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   when:
     - application_id != 'web-app-matomo'
     - run_once_web_app_matomo is not defined
@@ -20,7 +19,7 @@
     public: false
   when:
     - matomo_reachability is defined
-    - matomo_reachability.status | default(0) not in [200, 301, 302]
+    - (matomo_reachability.status | default(0) | int) != 200
 
 # Matomo can't use this dependencies - At least not on the initial setup run
 - when:
