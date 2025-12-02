@@ -309,6 +309,17 @@ def ensure_host_vars_file(
         for k, v in dict(data).items():
             tmp[k] = v
         data = tmp
+        
+
+    # Ensure local Ansible connection settings for local hosts.
+    # This avoids SSH in CI containers (e.g. GitHub Actions) where no ssh client exists
+    # and we want Ansible to execute tasks directly on the controller.
+    local_hosts = {"localhost", "127.0.0.1", "::1"}
+
+    if host in local_hosts:
+        # Only set if not already defined, to avoid overwriting manual settings.
+        if "ansible_connection" not in data:
+            data["ansible_connection"] = "local"
 
     # Only set defaults; do NOT override existing values
     if primary_domain is not None and "PRIMARY_DOMAIN" not in data:
