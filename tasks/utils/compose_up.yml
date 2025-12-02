@@ -1,4 +1,4 @@
-- name: "Ensure that {{ docker_compose.directories.instance }} is up"
+- name: "Ensure that docker compose is up"
   # This is a little hack to guaranty that the docker containers are allways up
   # It isn't the cleanest solution to have it here but it should fullfill their purpose
   include_tasks: "{{ playbook_dir }}/roles/docker-compose/tasks/05_ensure_up.yml"
