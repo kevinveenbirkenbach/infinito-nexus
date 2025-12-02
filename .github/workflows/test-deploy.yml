@@ -15,40 +15,58 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate vault password automatically
-        run: |
-          python3 - << 'EOF' > .vault_pass
-          import secrets
-          import string
-
-          alphabet = string.ascii_letters + string.digits
-          pw = ''.join(secrets.choice(alphabet) for _ in range(64))
-          print(pw, end="")
-          EOF
-
-          chmod 600 .vault_pass
-
-          # Export password as environment variable
-          echo "VAULT_PASSWORD=$(cat .vault_pass)" >> "$GITHUB_ENV"
-        shell: bash
-
       - name: Build Docker image
         run: |
           docker build --network=host --no-cache --pull -t infinito:latest .
 
-      # ----------------------------------------------------------------------
-      # 1) First deploy: NORMAL DEPLOY + DEBUG enabled
-      # ----------------------------------------------------------------------
+      # 1) First deploy: normal + debug
       - name: First deploy (normal + debug)
         run: |
           docker run --network=host --rm \
-            -e VAULT_PASSWORD="${VAULT_PASSWORD}" \
             infinito:latest \
             /bin/sh -lc '
-              echo "$VAULT_PASSWORD" > /tmp/.vault_pass
-              chmod 600 /tmp/.vault_pass
-              export ANSIBLE_VAULT_PASSWORD_FILE=/tmp/.vault_pass
+              set -e
+              cd /opt/infinito-src
 
+              # Create inventory (also creates inventories/github-ci/.password if missing)
+              infinito create inventory inventories/github-ci \
+                --host localhost \
+                --ssl-disabled
+
+              INVENTORY_PATH="inventories/github-ci/servers.yml"
+              VAULT_FILE="inventories/github-ci/.password"
+
+              # First deploy with debug
+              infinito deploy "$INVENTORY_PATH" -T server -p "$VAULT_FILE" --debug
+            '
+
+      # 2) Second deploy: reset + debug
+      - name: Second deploy (--reset --debug)
+        run: |
+          docker run --network=host --rm \
+            infinito:latest \
+            /bin/sh -lc '
+              set -e
+              cd /opt/infinito-src
+
+              # Rebuild inventory; .password will be reused if present
+              infinito create inventory inventories/github-ci \
+                --host localhost \
+                --ssl-disabled
+
+              INVENTORY_PATH="inventories/github-ci/servers.yml"
+              VAULT_FILE="inventories/github-ci/.password"
+
+              infinito deploy "$INVENTORY_PATH" -T server -p "$VAULT_FILE" --skip-tests --reset --debug
+            '
+
+      # 3) Third deploy: async (no debug)
+      - name: Third deploy (async deploy – no debug)
+        run: |
+          docker run --network=host --rm \
+            infinito:latest \
+            /bin/sh -lc '
+              set -e
               cd /opt/infinito-src
 
               infinito create inventory inventories/github-ci \
@@ -56,44 +74,8 @@ jobs:
                 --ssl-disabled
 
               INVENTORY_PATH="inventories/github-ci/servers.yml"
-              infinito deploy "$INVENTORY_PATH" -T server --debug
-            '
+              VAULT_FILE="inventories/github-ci/.password"
 
-      # ----------------------------------------------------------------------
-      # 2) Second deploy: RESET + DEBUG
-      # ----------------------------------------------------------------------
-      - name: Second deploy (--reset --debug)
-        run: |
-          docker run --network=host --rm \
-            -e VAULT_PASSWORD="${VAULT_PASSWORD}" \
-            infinito:latest \
-            /bin/sh -lc '
-              echo "$VAULT_PASSWORD" > /tmp/.vault_pass
-              chmod 600 /tmp/.vault_pass
-              export ANSIBLE_VAULT_PASSWORD_FILE=/tmp/.vault_pass
-
-              cd /opt/infinito-src
-              INVENTORY_PATH="inventories/github-ci/servers.yml"
-
-              infinito deploy "$INVENTORY_PATH" -T server --reset --debug
-            '
-
-      # ----------------------------------------------------------------------
-      # 3) Third deploy: ASYNC DEPLOY (no debug flag)
-      # ----------------------------------------------------------------------
-      - name: Third deploy (async deploy – no debug)
-        run: |
-          docker run --network=host --rm \
-            -e VAULT_PASSWORD="${VAULT_PASSWORD}" \
-            infinito:latest \
-            /bin/sh -lc '
-              echo "$VAULT_PASSWORD" > /tmp/.vault_pass
-              chmod 600 /tmp/.vault_pass
-              export ANSIBLE_VAULT_PASSWORD_FILE=/tmp/.vault_pass
-
-              cd /opt/infinito-src
-              INVENTORY_PATH="inventories/github-ci/servers.yml"
-
-              # Without --debug the deploy is asynchronous in several roles
-              infinito deploy "$INVENTORY_PATH" -T server
+              # Async-style deploy: no --debug, so some processes run in parallel
+              infinito deploy "$INVENTORY_PATH" -T server -p "$VAULT_FILE" --skip-tests
             '
