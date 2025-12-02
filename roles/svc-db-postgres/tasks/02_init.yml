@@ -13,7 +13,7 @@
     name: "{{ database_name }}"
     state: present
     login_user: postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_password: "{{ POSTGRES_PASSWORD }}"
     login_host: "{{ POSTGRES_LOCAL_HOST }}"
     login_port: "{{ POSTGRES_PORT }}"
   register: postgresql_result
@@ -29,7 +29,7 @@
     db:             "{{ database_name }}"
     state:          present
     login_user:     postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_password: "{{ POSTGRES_PASSWORD }}"
     login_host:     "{{ POSTGRES_LOCAL_HOST }}"
     login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
@@ -42,7 +42,7 @@
   community.postgresql.postgresql_query:
     db: postgres
     login_user: postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_password: "{{ POSTGRES_PASSWORD }}"
     login_host: "{{ POSTGRES_LOCAL_HOST }}"
     login_port: "{{ POSTGRES_PORT }}"
     query: |
@@ -64,7 +64,7 @@
     schema: public
     state:  present
     login_user:     postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_password: "{{ POSTGRES_PASSWORD }}"
     login_host:     "{{ POSTGRES_LOCAL_HOST }}"
     login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
@@ -81,7 +81,7 @@
     privs: ALL
     state: present
     login_user:     postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_password: "{{ POSTGRES_PASSWORD }}"
     login_host:     "{{ POSTGRES_LOCAL_HOST }}"
     login_port:     "{{ POSTGRES_PORT }}"
   register: postgresql_result
@@ -94,7 +94,7 @@
   community.postgresql.postgresql_query:
     db: "{{ database_name }}"
     login_user: postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_password: "{{ POSTGRES_PASSWORD }}"
     login_host: "{{ POSTGRES_LOCAL_HOST }}"
     login_port: "{{ POSTGRES_PORT }}"
     query: |
@@ -114,7 +114,7 @@
     ext:        "{{ item }}"
     state:      present
     login_user:     postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_password: "{{ POSTGRES_PASSWORD }}"
     login_host:     "{{ POSTGRES_LOCAL_HOST }}"
     login_port:     "{{ POSTGRES_PORT }}"
   loop:
@@ -134,7 +134,7 @@
     ext:          vector
     state:        present
     login_user:   postgres
-    login_password: "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD', True) }}"
+    login_password: "{{ POSTGRES_PASSWORD }}"
     login_host:   "{{ POSTGRES_LOCAL_HOST }}"
     login_port:   "{{ POSTGRES_PORT }}"
   register: postgresql_result

@@ -13,14 +13,16 @@
       src: "env/{{ database_type }}.env.j2"
       dest: "{{ database_env }}"
     notify: docker compose up
-  when: not applications | get_app_conf(application_id, 'features.central_database', False)
+  when: not (SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool)
 
 - name: "For '{{ application_id }}': Create central database"
   # I don't know why this includes leads to that the application_id in vars/main.yml of the database role isn't used
   # This is the behaviour which I want, but I'm still wondering why ;)
   include_role:
     name: "svc-db-{{ database_type }}"
-  when: applications | get_app_conf(application_id, 'features.central_database', False)
+  when: SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool
+  vars:
+    database_init: true # Initialize a custom database for the application
 
 - name: "For '{{ application_id }}': Add Entry for Backup Procedure"
   include_tasks: "{{ playbook_dir }}/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"
