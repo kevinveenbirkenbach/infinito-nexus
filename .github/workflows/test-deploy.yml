@@ -1,0 +1,57 @@
+name: Build & Test Infinito.Nexus CLI in Docker Container
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      ANSIBLE_VAULT_PASSWORD_FILE: /opt/infinito-src/.vault_pass
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate vault password automatically
+        run: |
+          tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 64 > .vault_pass
+          chmod 600 .vault_pass
+        shell: bash
+
+      - name: Build Docker image
+        run: |
+          docker build -t infinito:latest .
+
+      - name: Copy vault password into container workspace
+        run: |
+          docker run --rm \
+            -v "${PWD}:/opt/infinito-src" \
+            infinito:latest \
+            /bin/sh -lc "cp /opt/infinito-src/.vault_pass /opt/infinito-src/.vault_pass && chmod 600 /opt/infinito-src/.vault_pass"
+
+      - name: Clean build artifacts
+        run: |
+          docker run --rm \
+            -e ANSIBLE_VAULT_PASSWORD_FILE=/opt/infinito-src/.vault_pass \
+            infinito:latest \
+            /bin/sh -lc "cd /opt/infinito-src && infinito make clean"
+
+      - name: Generate outputs
+        run: |
+          docker run --rm \
+            -e ANSIBLE_VAULT_PASSWORD_FILE=/opt/infinito-src/.vault_pass \
+            infinito:latest \
+            /bin/sh -lc "cd /opt/infinito-src && infinito make build"
+
+      - name: Run tests
+        run: |
+          docker run --rm \
+            -e ANSIBLE_VAULT_PASSWORD_FILE=/opt/infinito-src/.vault_pass \
+            infinito:latest \
+            /bin/sh -lc "cd /opt/infinito-src && infinito make test"
