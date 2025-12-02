@@ -184,5 +184,64 @@ existing_key: foo
             self.assertEqual(internet2["ip6"], "::1")
 
 
+    def test_ensure_host_vars_file_sets_local_connection_for_localhost(self):
+        """
+        When the host is a local address (localhost / 127.0.0.1 / ::1),
+        ensure_host_vars_file should automatically set:
+          - ansible_connection: local
+
+        It must also preserve existing keys and be idempotent on re-run.
+        """
+
+        yaml_rt = YAML(typ="rt")
+        yaml_rt.preserve_quotes = True
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            host = "localhost"
+            host_vars_dir = Path(tmpdir)
+            host_vars_file = host_vars_dir / f"{host}.yml"
+
+            # Start with an empty file (no ansible_* keys defined).
+            host_vars_dir.mkdir(parents=True, exist_ok=True)
+            host_vars_file.write_text("", encoding="utf-8")
+
+            ensure_host_vars_file(
+                host_vars_file=host_vars_file,
+                host=host,
+                primary_domain="example.org",
+                ssl_disabled=False,
+                ip4="127.0.0.1",
+                ip6="::1",
+            )
+
+            with host_vars_file.open("r", encoding="utf-8") as f:
+                data = yaml_rt.load(f)
+
+            self.assertIsInstance(data, CommentedMap)
+
+            # Local connection settings must be present
+            self.assertIn("ansible_connection", data)
+            self.assertEqual(data["ansible_connection"], "local")
+
+            # Basic keys from previous test behaviour should still be set
+            self.assertIn("SSL_ENABLED", data)
+            self.assertTrue(data["SSL_ENABLED"])
+            self.assertIn("networks", data)
+
+            # Re-run to verify idempotency (should not change values)
+            ensure_host_vars_file(
+                host_vars_file=host_vars_file,
+                host=host,
+                primary_domain="other.example.org",
+                ssl_disabled=True,
+                ip4="10.0.0.1",
+                ip6="::2",
+            )
+
+            with host_vars_file.open("r", encoding="utf-8") as f:
+                data2 = yaml_rt.load(f)
+
+            self.assertEqual(data2["ansible_connection"], "local")
+
 if __name__ == "__main__":
     unittest.main()
