@@ -19,7 +19,7 @@
   include_tasks: 04_files.yml
   when:
     - system_service_copy_files | bool
-    - system_service_script_src
+    - system_service_script_src | default('') | length > 0
 
 - name: "Load systemctl logic for '{{ system_service_id }}'"
   include_tasks: 05_service.yml
