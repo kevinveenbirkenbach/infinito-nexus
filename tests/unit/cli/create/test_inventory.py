@@ -101,7 +101,7 @@ class TestCreateInventory(unittest.TestCase):
         - load existing YAML containing a !vault tag without crashing,
         - preserve the !vault node including its tag,
         - keep existing keys untouched,
-        - add PRIMARY_DOMAIN, and WEB_PROTOCOL only when missing,
+        - add PRIMARY_DOMAIN, SSL_ENABLED and networks.internet.ip4/ip6 only when missing,
         - not overwrite them on subsequent calls.
         """
         yaml_rt = YAML(typ="rt")
@@ -123,12 +123,14 @@ existing_key: foo
             host_vars_dir.mkdir(parents=True, exist_ok=True)
             host_vars_file.write_text(initial_yaml, encoding="utf-8")
 
-            # Run ensure_host_vars_file
+            # Run ensure_host_vars_file (first time)
             ensure_host_vars_file(
                 host_vars_file=host_vars_file,
                 host=host,
                 primary_domain="example.org",
-                web_protocol="https",
+                ssl_disabled=False,
+                ip4="127.0.0.1",
+                ip6="::1",
             )
 
             # Reload with ruamel.yaml to verify structure and tags
@@ -148,14 +150,26 @@ existing_key: foo
 
             # Default values must be added
             self.assertEqual(data["PRIMARY_DOMAIN"], "example.org")
-            self.assertEqual(data["WEB_PROTOCOL"], "https")
+            self.assertIn("SSL_ENABLED", data)
+            self.assertTrue(data["SSL_ENABLED"])
+
+            self.assertIn("networks", data)
+            self.assertIsInstance(data["networks"], CommentedMap)
+            self.assertIn("internet", data["networks"])
+            self.assertIsInstance(data["networks"]["internet"], CommentedMap)
+
+            internet = data["networks"]["internet"]
+            self.assertEqual(internet["ip4"], "127.0.0.1")
+            self.assertEqual(internet["ip6"], "::1")
 
             # A second call must NOT overwrite existing defaults
             ensure_host_vars_file(
                 host_vars_file=host_vars_file,
                 host="other-host",
                 primary_domain="other.example",
-                web_protocol="http",
+                ssl_disabled=True,   # would switch to false if it overwrote
+                ip4="10.0.0.1",
+                ip6="::2",
             )
 
             with host_vars_file.open("r", encoding="utf-8") as f:
@@ -163,7 +177,11 @@ existing_key: foo
 
             # Values remain unchanged
             self.assertEqual(data2["PRIMARY_DOMAIN"], "example.org")
-            self.assertEqual(data2["WEB_PROTOCOL"], "https")
+            self.assertTrue(data2["SSL_ENABLED"])
+
+            internet2 = data2["networks"]["internet"]
+            self.assertEqual(internet2["ip4"], "127.0.0.1")
+            self.assertEqual(internet2["ip6"], "::1")
 
 
 if __name__ == "__main__":
