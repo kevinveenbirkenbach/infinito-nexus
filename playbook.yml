@@ -1,4 +1,4 @@
-- name: "Execute {{ SOFTWARE_NAME }} Play"
+- name: "Execute Infinito.Nexus Play"
   hosts: all
   tasks:
   - name: "Load 'constructor' tasks"

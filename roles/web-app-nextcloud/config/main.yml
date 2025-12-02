@@ -134,9 +134,9 @@ legacy_login_mask:
                            
 performance:
   php:
-    memory_limit:               "{{ ((ansible_memtotal_mb | int) / 30)|int }}M" # Dynamic set memory limit
+    memory_limit:               "{{ ((ansible_facts['memtotal_mb'] | int) / 30)|int }}M" # Dynamic set memory limit
     upload_limit:               "5G"                                            # Set upload limit to 5GB for big media files
-    opcache_memory_consumption: "{{ ((ansible_memtotal_mb | int) / 30)|int }}M" # Dynamic set memory consumption
+    opcache_memory_consumption: "{{ ((ansible_facts['memtotal_mb'] | int) / 30)|int }}M" # Dynamic set memory consumption
 
 plugins_enabled:                true                                            # Implemented for speeding up testing and debugging process. For productive environments keep it true and steer the apps via the plugins config
 oidc:

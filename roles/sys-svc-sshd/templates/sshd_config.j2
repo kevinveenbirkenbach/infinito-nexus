@@ -119,7 +119,7 @@ UseDNS no
 #Banner none
 
 # override default of no subsystems
-{% if ansible_os_family == "Archlinux" %}
+{% if ansible_facts['os_family'] == "Archlinux" %}
 Subsystem	sftp /usr/lib/ssh/sftp-server
 {% else%}
 Subsystem	sftp /usr/lib/openssh/sftp-server

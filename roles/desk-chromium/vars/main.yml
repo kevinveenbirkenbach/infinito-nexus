@@ -2,4 +2,4 @@
 
 application_id:   "desk-chromium"
 
-chromium_package: "{{ 'chromium-browser' if ansible_os_family == 'Debian' else 'chromium' }}"
+chromium_package: "{{ 'chromium-browser' if ansible_facts['os_family'] == 'Debian' else 'chromium' }}"

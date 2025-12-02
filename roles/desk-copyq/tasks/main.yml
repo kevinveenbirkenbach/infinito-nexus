@@ -5,14 +5,14 @@
 
 - name: Ensure autostart directory exists
   file:
-    path: "{{ ansible_env.HOME }}/.config/autostart"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/autostart"
     state: directory
     mode: '0755'
   become: false
 
 - name: Add CopyQ to user autostart
   copy:
-    dest: "{{ ansible_env.HOME }}/.config/autostart/copyq.desktop"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/autostart/copyq.desktop"
     content: |
       [Desktop Entry]
       Type=Application

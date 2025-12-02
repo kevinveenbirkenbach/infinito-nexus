@@ -1,1 +1,1 @@
-swapfile_size:  "{{ ansible_memtotal_mb | int }}M"
+swapfile_size:  "{{ ansible_facts['memtotal_mb'] | int }}M"

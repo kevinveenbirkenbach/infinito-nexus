@@ -25,8 +25,8 @@ POSTGRES_VECTOR_ENABLED:                  True # Required by discourse, propably
 POSTGRES_RETRIES:                         5
 
 ## Performance
-POSTGRES_TOTAL_RAM_MB:                    "{{ ansible_memtotal_mb | int }}"
-POSTGRES_VCPUS:                           "{{ ansible_processor_vcpus | int }}"
+POSTGRES_TOTAL_RAM_MB:                    "{{ ansible_facts['memtotal_mb'] | int }}"
+POSTGRES_VCPUS:                           "{{ ansible_facts['processor_vcpus'] | int }}"
 POSTGRES_MAX_CONNECTIONS:                 "{{ [ ((POSTGRES_VCPUS | int) * 30 + 50), 400 ] | min }}"
 POSTGRES_SUPERUSER_RESERVED_CONNECTIONS:  3
 POSTGRES_SHARED_BUFFERS_MB:               "{{ ((POSTGRES_TOTAL_RAM_MB | int) * 25) // 100 }}"

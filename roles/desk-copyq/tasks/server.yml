@@ -1,13 +1,13 @@
 - name: Ensure systemd user unit directory exists
   file:
-    path: "{{ ansible_env.HOME }}/.config/systemd/user"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user"
     state: directory
     mode: '0755'
   become: false
 
 - name: Install CopyQ user service unit
   copy:
-    dest: "{{ ansible_env.HOME }}/.config/systemd/user/copyq.service"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user/copyq.service"
     content: |
       [Unit]
       Description=CopyQ Clipboard Manager Server
