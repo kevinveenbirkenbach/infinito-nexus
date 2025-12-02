@@ -1,5 +1,4 @@
 import os
-import warnings
 
 class DummySound:
     @staticmethod
@@ -16,7 +15,6 @@ class DummySound:
 _IN_DOCKER = os.path.exists('/.dockerenv')
 
 if _IN_DOCKER:
-    warnings.warn("Sound support disabled: running inside Docker.", RuntimeWarning)
     Sound = DummySound
 else:
     try:
