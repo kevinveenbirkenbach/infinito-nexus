@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
+  execute-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -17,16 +17,16 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t infinito:latest .
+          docker build --network=host -t infinito:latest .
 
       - name: Clean build artifacts
         run: |
-          docker run --rm infinito:latest infinito make clean
+          docker run --network=host --rm infinito:latest infinito make clean
 
       - name: Generate project outputs
         run: |
-          docker run --rm infinito:latest infinito make build
+          docker run --network=host --rm infinito:latest infinito make build
 
       - name: Run tests
         run: |
-          docker run --rm infinito:latest infinito make test
+          docker run --network=host --rm infinito:latest infinito make test
