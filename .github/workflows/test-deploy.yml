@@ -29,6 +29,7 @@ jobs:
       - name: First deploy (normal + debug)
         run: |
           docker run --network=host --rm \
+            -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '
               set -e
@@ -51,6 +52,7 @@ jobs:
       - name: Second deploy (--reset --debug)
         run: |
           docker run --network=host --rm \
+            -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '
               set -e
@@ -72,6 +74,7 @@ jobs:
       - name: Third deploy (async deploy – no debug)
         run: |
           docker run --network=host --rm \
+            -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '
               set -e
