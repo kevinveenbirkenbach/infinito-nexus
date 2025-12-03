@@ -1,2 +1,4 @@
 - include_tasks: 01_core.yml
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
   when: run_once_dev_yay is not defined
