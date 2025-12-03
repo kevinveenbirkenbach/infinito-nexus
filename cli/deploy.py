@@ -120,12 +120,7 @@ def run_ansible_playbook(
 
     print("\n🚀 Launching Ansible Playbook...\n")
     # Capture output so the real Ansible error is visible before exit
-    result = subprocess.run(cmd, text=True, capture_output=True)
-
-    if result.stdout:
-        print(result.stdout, end="")
-    if result.stderr:
-        print(result.stderr, file=sys.stderr, end="")
+    result = subprocess.run(cmd)
 
     if result.returncode != 0:
         print(
