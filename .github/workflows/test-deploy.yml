@@ -4,12 +4,18 @@ on:
   push:
     branches:
       - master
+      - main
   pull_request:
 
 jobs:
   test-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 240
+
+    env:
+      # The following roles will be ignored in the tests
+      EXCLUDED_ROLES: >
+        drv-lid-switch
 
     steps:
       - name: Checkout repository
@@ -31,6 +37,7 @@ jobs:
               # Create inventory (also creates inventories/github-ci/.password if missing)
               infinito create inventory inventories/github-ci \
                 --host localhost \
+                --exclude "$EXCLUDED_ROLES" \
                 --ssl-disabled
 
               INVENTORY_PATH="inventories/github-ci/servers.yml"
@@ -52,6 +59,7 @@ jobs:
               # Rebuild inventory; .password will be reused if present
               infinito create inventory inventories/github-ci \
                 --host localhost \
+                --exclude "$EXCLUDED_ROLES" \
                 --ssl-disabled
 
               INVENTORY_PATH="inventories/github-ci/servers.yml"
@@ -71,6 +79,7 @@ jobs:
 
               infinito create inventory inventories/github-ci \
                 --host localhost \
+                --exclude "$EXCLUDED_ROLES" \
                 --ssl-disabled
 
               INVENTORY_PATH="inventories/github-ci/servers.yml"
