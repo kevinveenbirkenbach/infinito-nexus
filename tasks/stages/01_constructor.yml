@@ -129,6 +129,8 @@
 - name: "Ensure correct timezone is '{{ HOST_TIMEZONE }}'"
   community.general.timezone:
     name: "{{ HOST_TIMEZONE }}"
+  when: ansible_facts.virtualization_type | default('') not in ['docker', 'containerd', 'podman']
+
 
 - name: "Load base roles"
   include_tasks: "./tasks/groups/{{ item }}-roles.yml"

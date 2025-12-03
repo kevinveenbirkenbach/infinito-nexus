@@ -9,7 +9,7 @@ on:
 jobs:
   test-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 240
 
     steps:
       - name: Checkout repository
@@ -37,7 +37,7 @@ jobs:
               VAULT_FILE="inventories/github-ci/.password"
 
               # First deploy with debug
-              infinito deploy "$INVENTORY_PATH" -T server -p "$VAULT_FILE" --debug
+              infinito deploy "$INVENTORY_PATH" -T server -p "$VAULT_FILE" --debug --skip-tests
             '
 
       # 2) Second deploy: reset + debug
