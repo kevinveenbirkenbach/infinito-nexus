@@ -1,27 +1,27 @@
 - name: "Setup docker network for {{ application_id }}"
   include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
-    docker_network_name:    "{{ mariadb_network }}"
-    docker_network_subnet:  "{{ mariadb_subnet }}"
+    docker_network_name:    "{{ MARIADB_NETWORK }}"
+    docker_network_subnet:  "{{ MARIADB_SUBNET }}"
 
 - name: install MariaDB
   community.docker.docker_container:
-    name: "{{ mariadb_name }}"
-    image: "{{ mariadb_image }}:{{ mariadb_version}}"
+    name: "{{ MARIADB_NAME }}"
+    image: "{{ MARIADB_IMAGE }}:{{ MARIADB_VERSION}}"
     detach: yes
     env:
-      MARIADB_ROOT_PASSWORD:  "{{ mariadb_root_pwd }}"
+      MARIADB_ROOT_PASSWORD:  "{{ MARIADB_ROOT_PWD }}"
       MARIADB_AUTO_UPGRADE:   "1"
     networks:
-      - name: "{{ mariadb_network }}"
+      - name: "{{ MARIADB_NETWORK }}"
     volumes:
-      - "{{ mariadb_volume }}:/var/lib/mysql"
+      - "{{ MARIADB_VOLUME }}:/var/lib/mysql"
     published_ports:
-      - "127.0.0.1:{{ mariadb_port }}:3306" # can be that this will be removed if all applications use sockets
+      - "127.0.0.1:{{ MARIADB_PORT }}:3306" # can be that this will be removed if all applications use sockets
     command: "--transaction-isolation=READ-COMMITTED --binlog-format=ROW" #for nextcloud
     restart_policy: "{{ DOCKER_RESTART_POLICY }}"
     healthcheck:
-      test: "/usr/bin/mariadb --user=root --password={{ mariadb_root_pwd }} --execute \"SHOW DATABASES;\""
+      test: "/usr/bin/mariadb --user=root --password={{ MARIADB_ROOT_PWD }} --execute \"SHOW DATABASES;\""
       interval: 10s
       timeout: 5s
       retries: 18
@@ -32,9 +32,9 @@
     name: python-mysqlclient
     state: present
 
-- name: "Wait until the MariaDB container with hostname '{{ mariadb_name }}' is healthy"
+- name: "Wait until the MariaDB container with hostname '{{ MARIADB_NAME }}' is healthy"
   community.docker.docker_container_info:
-    name: "{{ mariadb_name }}"
+    name: "{{ MARIADB_NAME }}"
   register: db_info
   until:
   - db_info.container is defined
