@@ -47,7 +47,7 @@ ENV PATH="$PKGMGR_VENV/bin:/root/.local/bin:${PATH}"
 COPY . /opt/infinito-src
 
 # 7) Install Infinito.Nexus via pkgmgr (clone-mode https)
-RUN pkgmgr install infinito --clone-mode https
+RUN pkgmgr install infinito --clone-mode shallow
 
 # 8) Override installed Infinito.Nexus with local source and clean ignored files
 RUN INFINITO_PATH=$(pkgmgr path infinito) && \
