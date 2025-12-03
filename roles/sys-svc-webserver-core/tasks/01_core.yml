@@ -31,14 +31,9 @@
   notify: restart openresty
 
 - name: Include OpenResty (Once)
-  # Outside of run_once block is necessary for handler loading
-  # Otherwise the when: condition from the block is added to the handlers
-  # Inside openresty their is a validation that it doesn't run multiple times
-  include_role:
-    name: svc-prx-openresty
-    # Explicit set to guaranty that application_id will not be overwritten.
-    # Should be anyhow the default case
-    public: false
+  include_tasks: "utils/load_app.yml"
+  vars:
+    load_app_id: svc-prx-openresty
   when: run_once_svc_prx_openresty is not defined
 
 - name: Include health dependencies

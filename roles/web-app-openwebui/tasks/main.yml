@@ -1,7 +1,8 @@
 ---
 - name: "Install Ollama Dependency"
-  include_role:
-    name: svc-ai-ollama
+  include_tasks: "utils/load_app.yml"
+  vars:
+    load_app_id: svc-ai-ollama
   when:    
     - run_once_svc_ai_ollama is not defined
     - OLLAMA_LOCAL_ENABLED | bool

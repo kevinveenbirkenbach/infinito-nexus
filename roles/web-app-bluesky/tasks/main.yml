@@ -48,7 +48,7 @@
       }}
 
 - name: "Redirect deactivated BlueSky Services to {{ BLUESKY_API_DOMAIN }}"
-  include_role:
-    name: web-opt-rdr-domains
+  include_tasks: "utils/load_app.yml"
   vars:
+    load_app_id: web-opt-rdr-domains
     redirect_domain_mappings: "{{ BLUESKY_REDIRECT_DOMAIN_MAPPINGS }}"

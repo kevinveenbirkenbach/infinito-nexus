@@ -1,7 +1,7 @@
 - name: "load required 'web-svc-cdn' for {{ application_id }}"
-  include_role:
-    name: web-svc-cdn
-    public: false
+  include_tasks: "utils/load_app.yml"
+  vars:
+    load_app_id: web-svc-cdn
   when: run_once_web_svc_cdn is not defined
 
 - name: Ensure {{ DESKTOP_JS_SERVER_DIR }} exists
