@@ -1,9 +1,6 @@
 # General 
 application_id:                 web-app-mig
 
-# Docker
-docker_repository_address:      "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
-
 # Helper variables
 MIG_IMAGE:                      "mig:latest"
 MIG_CONTAINER:                  "mig"

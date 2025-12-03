@@ -9,4 +9,4 @@
     dest: "{{ [ NGINX.DIRECTORIES.HTTP.GLOBAL, 'letsencrypt.conf' ] | path_join }}"
   notify: restart openresty
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

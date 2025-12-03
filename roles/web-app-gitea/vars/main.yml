@@ -4,7 +4,6 @@ database_type:                  "mariadb"
 
 # Docker
 container_port:                 "{{ applications | get_app_conf(application_id, 'docker.services.gitea.port') }}"
-docker_compose_flush_handlers:  true
 
 # Gitea
 GITEA_LDAP_AUTH_ARGS:

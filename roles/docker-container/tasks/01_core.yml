@@ -2,4 +2,4 @@
     name: sys-svc-docker
   when: run_once_sys_svc_docker is not defined
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

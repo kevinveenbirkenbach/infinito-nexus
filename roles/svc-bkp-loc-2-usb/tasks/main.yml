@@ -5,7 +5,7 @@
     loop:
     - sys-ctl-cln-bkps
     - sys-lock
-  - include_tasks: utils/once_finalize.yml
+  - include_tasks: utils/once/finalize.yml
   when: run_once_svc_bkp_loc_2_usb is not defined
 
 - name: Fail if any backup_to_usb variable is empty

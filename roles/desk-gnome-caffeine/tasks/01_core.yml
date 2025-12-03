@@ -20,4 +20,4 @@
     src: caffeine.desktop.j2
     dest: "{{auto_start_directory}}caffeine.desktop"
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

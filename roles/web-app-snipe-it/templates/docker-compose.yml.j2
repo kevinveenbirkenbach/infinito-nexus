@@ -4,8 +4,8 @@
 
   application:
 {% set container_port = 80 %}
-    image: "{{ snipe_it_image }}:{{ snipe_it_version }}"
-    container_name: "{{ snipe_it_container }}"
+    image: "{{ SNIPE_IT_IMAGE }}:{{ SNIPE_IT_VERSION }}"
+    container_name: "{{ SNIPE_IT_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - data:/var/lib/snipeit
@@ -19,6 +19,6 @@
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: "{{ snipe_it_volume }}"
+    name: "{{ SNIPE_IT_VOLUME }}"
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

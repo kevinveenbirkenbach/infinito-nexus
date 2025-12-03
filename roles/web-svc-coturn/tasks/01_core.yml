@@ -5,4 +5,4 @@
     docker_compose_file_creation_enabled: true
     docker_pull_git_repository:           false
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

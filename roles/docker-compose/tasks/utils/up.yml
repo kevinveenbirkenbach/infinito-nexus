@@ -13,10 +13,16 @@
       (docker_ps.stderr | default(''))
       | regex_search('(no configuration file provided|no such file or directory|env file .* not found)') is none
     )
-  when: >
-    not (
-      docker_compose_template.changed | default(false)
-      or
-      env_template.changed          | default(false)
-    )
-  notify:         docker compose up
+  when: 
+    - >
+      not (
+        docker_compose_template.changed | default(false)
+        or
+        env_template.changed          | default(false)
+      )
+    - docker_compose is defined # @todo remove in the future, non docker roles shouldn't include this file
+    - (application_id | get_entity_name) == (docker_compose.directories.instance | basename)
+  notify: docker compose up
+
+- meta: flush_handlers
+  when: flush_handlers | default(true) | bool

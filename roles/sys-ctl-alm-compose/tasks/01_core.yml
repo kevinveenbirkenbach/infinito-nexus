@@ -1,4 +1,4 @@
-- include_tasks: utils/once_flag.yml
+- include_tasks: utils/once/flag.yml
 
 - name: "Include dependent services for '{{ system_service_id  }}'"
   include_role:

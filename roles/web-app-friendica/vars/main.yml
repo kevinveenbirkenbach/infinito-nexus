@@ -2,9 +2,6 @@
 application_id:                 "web-app-friendica"
 database_type:                  "mariadb"
 
-# Docker
-docker_compose_flush_handlers:  false
-
 # Friendica
 friendica_container:            "friendica"
 friendica_no_validation:        "{{ applications | get_app_conf(application_id, 'features.oidc') }}" # Email validation is not neccessary if OIDC is active

@@ -9,7 +9,7 @@
       name: python-pip
       state: present
 
-  - include_tasks: utils/once_finalize.yml
+  - include_tasks: utils/once/finalize.yml
     vars:
       flush_handlers: false
   when: run_once_dev_python_pip is not defined

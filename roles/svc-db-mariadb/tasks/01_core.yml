@@ -1,10 +1,8 @@
-
-- name: Create Docker network for MariaDB
-  community.docker.docker_network:
-    name: "{{ mariadb_network }}"
-    state: present
-    ipam_config:
-      - subnet: "{{ mariadb_subnet }}"
+- name: "Setup docker network for {{ application_id }}"
+  include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
+  vars:
+    docker_network_name:    "{{ mariadb_network }}"
+    docker_network_subnet:  "{{ mariadb_subnet }}"
 
 - name: install MariaDB
   community.docker.docker_container:
@@ -47,4 +45,4 @@
     - setup_mariadb_container_result is defined
     - setup_mariadb_container_result.changed
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

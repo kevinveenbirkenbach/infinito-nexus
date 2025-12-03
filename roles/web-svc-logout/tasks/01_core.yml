@@ -1,4 +1,4 @@
-- include_tasks: utils/once_flag.yml
+- include_tasks: utils/once/flag.yml
 
 - name: "Add logout domains to CSP connect-src"
   set_fact:
@@ -24,9 +24,10 @@
   include_role:
     name: sys-stk-full-stateless
   vars:
-    # Necessary to overwrite parent values
-    client_max_body_size: "10M"
-    location_ws:          ""
+    client_max_body_size:         "10M" # Necessary to overwrite parent values
+    location_ws:                  ""
+    docker_repository_address:    "https://github.com/kevinveenbirkenbach/universal-logout"
+    docker_pull_git_repository:   true
 
 - name: Create symbolic link from .env file to repository
   file:
@@ -34,4 +35,4 @@
     dest:   "{{ [ docker_repository_path, '.env' ] | path_join  }}"
     state:  link
 
-- include_tasks: utils/compose_up.yml
+- include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/up.yml' ] | path_join }}"

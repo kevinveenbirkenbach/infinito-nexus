@@ -7,12 +7,6 @@ js_application_name:                  "Akaunting"
 database_type:                        "mariadb"
 database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
 
-# Docker
-docker_repository_address:            "https://github.com/akaunting/docker.git"
-docker_pull_git_repository:           true
-docker_repository_branch:             "master"
-docker_compose_file_creation_enabled: true
-
 # Akaunting
 AKAUNTING_URL:                        "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 AKAUNTING_VERSION:                    "{{ applications | get_app_conf(application_id, 'docker.services.akaunting.version') }}"

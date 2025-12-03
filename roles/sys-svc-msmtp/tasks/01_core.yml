@@ -1,4 +1,4 @@
-- include_tasks: utils/once_flag.yml
+- include_tasks: utils/once/flag.yml
 
 - name: "Check if Mail Host is reachable"
   uri:
@@ -45,4 +45,4 @@
     name: sys-ctl-hlth-msmtp
   when: run_once_sys_ctl_hlth_msmtp is not defined
 
-- include_tasks: utils/compose_up.yml
+- include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/up.yml' ] | path_join }}"

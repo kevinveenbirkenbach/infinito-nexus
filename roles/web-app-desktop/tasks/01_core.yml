@@ -18,7 +18,9 @@
   include_role:
     name: sys-stk-full-stateless
   vars:
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers:  false
+    docker_repository_address:      "https://github.com/kevinveenbirkenbach/port-ui"
+    docker_pull_git_repository:     true
 
 - name: "Check if host-specific config.yaml exists in {{ DESKTOP_CONFIG_INV_PATH }}"
   stat:
@@ -71,4 +73,4 @@
   delay: 5
   until: desktop_http.status == 200
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

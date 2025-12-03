@@ -1,9 +1,11 @@
 # Required to be set on the top to prevent infinite recursions appearing in roles/sys-front-inj-all/tasks/01_dependencies.yml
-- include_tasks: utils/once_flag.yml
+- include_tasks: utils/once/flag.yml
 
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full-stateful
+  vars:
+    docker_compose_flush_handlers: false
 
 - name: "Patch Matomo config.ini.php"
   include_tasks: 02_configuration.yml
@@ -20,7 +22,7 @@
     body:
       module: API
       method: SitesManager.setGlobalExcludedIps
-      excludedIps: "{{ matomo_excluded_ips | join(',') }}"
+      excludedIps: "{{ MATOMO_EXCLUDED_IPS | join(',') }}"
       format: json
       token_auth: "{{ matomo_auth_token }}"
     return_content: yes
@@ -44,4 +46,4 @@
     return_content: yes
     status_code: 200
 
-- include_tasks: utils/compose_up.yml
+- include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/up.yml' ] | path_join }}"

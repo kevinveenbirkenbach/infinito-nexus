@@ -2,7 +2,10 @@
   include_role:
     name: sys-stk-full-stateless
   vars:
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers:  false
+    docker_repository_address:      "{{ LITTLEJS_REPOSITORY_BASE }}.git"
+    docker_pull_git_repository:     true
+    docker_repository_branch:       "main"
 
 - name: "Load LittleJS example metadata"
   include_vars:
@@ -29,4 +32,4 @@
 - name: "flush docker compose for '{{ application_id }}'"
   meta: flush_handlers
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

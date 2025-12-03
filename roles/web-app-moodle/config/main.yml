@@ -36,6 +36,6 @@ docker:
       image:          bitnamilegacy/moodle
       name:           moodle
   volumes:
-    data:             moodle_data
-    code:             moodle_code
+    data:             MOODLE_DATA
+    code:             MOODLE_CODE
   

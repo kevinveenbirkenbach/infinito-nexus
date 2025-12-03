@@ -4,4 +4,4 @@
   loop:
   - sys-bkp-provider-user
   - sys-timer-cln-bkps
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

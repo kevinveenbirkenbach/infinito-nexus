@@ -6,12 +6,6 @@ entity_name:                          "{{ application_id | get_entity_name }}"
 domain:                               "{{ domains | get_domain(application_id) }}"
 http_port:                            "{{ ports.localhost.http[application_id] }}"
 
-# Docker
-docker_compose_file_creation_enabled: false
-docker_pull_git_repository:           true
-docker_repository_address:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
-docker_repository_branch:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
-
 # BigBlueButton
 _BBB_COTURN_ROLE:                     'web-svc-coturn'
 

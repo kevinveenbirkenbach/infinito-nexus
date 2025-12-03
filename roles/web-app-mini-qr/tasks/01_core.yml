@@ -2,6 +2,7 @@
   include_role:
     name: sys-stk-full-stateless
   vars: 
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers:  true
+    docker_pull_git_repository:     false
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

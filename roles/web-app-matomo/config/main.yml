@@ -42,4 +42,4 @@ docker:
     redis:
       enabled: false
   volumes: 
-    data: matomo_data 
+    data: MATOMO_DATA 

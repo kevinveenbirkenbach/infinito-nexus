@@ -1,9 +1,9 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-    container_name:  {{ matomo_name }}
+    container_name:  {{ MATOMO_NAME }}
 {% set container_port = 80 %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ matomo_image }}:{{ matomo_version }}"
+    image: "{{ MATOMO_IMAGE }}:{{ MATOMO_VERSION }}"
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
@@ -13,6 +13,6 @@
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
-    name: {{ matomo_data }}
+    name: {{ MATOMO_DATA }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

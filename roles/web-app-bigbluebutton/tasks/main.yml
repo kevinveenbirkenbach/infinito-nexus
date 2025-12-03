@@ -13,7 +13,11 @@
   include_role:
     name: sys-stk-full-stateless
   vars:
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers:        false
+    docker_compose_file_creation_enabled: false
+    docker_pull_git_repository:           true
+    docker_repository_address:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
+    docker_repository_branch:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 
 - name: "Unset 'proxy_extra_configuration'"
   set_fact:

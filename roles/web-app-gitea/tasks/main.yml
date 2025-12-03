@@ -2,6 +2,8 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full-stateful
+  vars:
+    docker_compose_flush_handlers: true
 
 - name: Wait for Gitea HTTP endpoint
   wait_for:

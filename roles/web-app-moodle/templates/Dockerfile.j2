@@ -1,16 +1,16 @@
-FROM {{ moodle_image }}:{{ moodle_version }}
+FROM {{ MOODLE_IMAGE }}:{{ MOODLE_VERSION }}
 
 {% if applications | get_app_conf(application_id, 'features.oidc', False) %}
 RUN install_packages unzip curl jq \
  && VERSION=$(curl -s https://api.github.com/repos/microsoft/moodle-auth_oidc/tags \
       | jq -r '.[].name' \
-      | grep v{{ moodle_version }} \
+      | grep v{{ MOODLE_VERSION }} \
       | sort -Vr \
       | head -n1) \
  && echo "Using version $VERSION" \
  && curl -L -o /tmp/oidc.zip https://github.com/microsoft/moodle-auth_oidc/archive/refs/tags/${VERSION}.zip \
  && unzip /tmp/oidc.zip -d /tmp \
- && mv /tmp/moodle-auth_oidc-* {{ bitnami_oidc_plugin_dir }} \
- && chown -R {{ bitnami_user_group }} {{ bitnami_oidc_plugin_dir }} \
+ && mv /tmp/moodle-auth_oidc-* {{ BITNAMI_OIDC_PLUGIN_DIR }} \
+ && chown -R {{ BITNAMI_USER_GROUP }} {{ BITNAMI_OIDC_PLUGIN_DIR }} \
  && rm -rf /tmp/oidc.zip
 {% endif %}

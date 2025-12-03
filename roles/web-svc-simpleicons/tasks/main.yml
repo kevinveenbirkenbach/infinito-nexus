@@ -17,5 +17,5 @@
       - { source: "package.json.j2",  target: "{{ simpleicons_host_package_file }}" }
     notify:
       - docker compose up
-  - include_tasks: utils/once_finalize.yml
+  - include_tasks: utils/once/finalize.yml
   when: run_once_web_svc_simpleicons is not defined

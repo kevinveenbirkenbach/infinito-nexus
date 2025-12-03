@@ -36,4 +36,4 @@
     parent_dns_proxied: false
   when: run_once_sys_dns_wildcards is not defined
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

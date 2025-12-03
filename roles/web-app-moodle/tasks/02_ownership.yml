@@ -2,18 +2,18 @@
 
 - name: Set ownership and permissions on Moodle directories
   vars:
-    moodle_dirs:
-      - "{{ bitnami_code_dir }}"
-      - "{{ bitnami_data_dir }}"
+    MOODLE_DIRS:
+      - "{{ BITNAMI_CODE_DIR }}"
+      - "{{ BITNAMI_DATA_DIR }}"
   block:
     - name: Ensure ownership is correct
-      command: "docker exec --user root {{ moodle_container }} chown -R {{ bitnami_user_group }} {{ item }}"
-      loop: "{{ moodle_dirs }}"
+      command: "docker exec --user root {{ MOODLE_CONTAINER }} chown -R {{ BITNAMI_USER_GROUP }} {{ item }}"
+      loop: "{{ MOODLE_DIRS }}"
 
     - name: Set directory permissions (770)
-      command: "docker exec --user root {{ moodle_container }} find {{ item }} -type d -exec chmod 770 {} \\;"
-      loop: "{{ moodle_dirs }}"
+      command: "docker exec --user root {{ MOODLE_CONTAINER }} find {{ item }} -type d -exec chmod 770 {} \\;"
+      loop: "{{ MOODLE_DIRS }}"
 
     - name: Set file permissions (660)
-      command: "docker exec --user root {{ moodle_container }} find {{ item }} -type f -exec chmod 660 {} \\;"
-      loop: "{{ moodle_dirs }}"
+      command: "docker exec --user root {{ MOODLE_CONTAINER }} find {{ item }} -type f -exec chmod 660 {} \\;"
+      loop: "{{ MOODLE_DIRS }}"

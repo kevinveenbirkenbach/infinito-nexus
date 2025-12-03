@@ -11,4 +11,4 @@
     system_service_tpl_on_failure:  "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     system_service_suppress_flush:  true # There are almost allways errors in the journalctl logs so suppression is neccessary to let playbook run
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

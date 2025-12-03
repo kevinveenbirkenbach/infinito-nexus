@@ -1,3 +1,2 @@
 # Docker
-docker_pull_git_repository:       false # Deactivated here to don't inhire this
 SYS_SVC_RDBMS_CENTRAL_DB_ENABLED: "{{ applications | get_app_conf(application_id, 'features.central_database', False) }}"

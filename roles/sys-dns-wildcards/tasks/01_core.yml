@@ -9,4 +9,4 @@
     cloudflare_async_poll:    "{{ ASYNC_POLL }}"
   when: DNS_PROVIDER == 'cloudflare'
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

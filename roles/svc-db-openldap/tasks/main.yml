@@ -1,8 +1,9 @@
 ---
-
-- name: "include docker-compose role"
-  include_role:
-    name: docker-compose
+- name: "Setup docker network for {{ application_id }}"
+  include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
+  vars:
+    docker_network_name:    "{{ OPENLDAP_NETWORK }}"
+    docker_network_subnet:  "{{ networks.local[application_id].subnet }}"
 
 - name: Create {{ domains | get_domain(application_id) }}.conf if LDAP is exposed to internet
   template:
@@ -16,15 +17,6 @@
     path: "{{ NGINX.DIRECTORIES.STREAMS }}{{ domains | get_domain(application_id) }}.conf"
     state: absent
   when: not OPENLDAP_NETWORK_SWITCH_PUBLIC | bool
-
-- name: create docker network for LDAP, so that other applications can access it
-  community.docker.docker_network:
-    name: "{{ OPENLDAP_NETWORK }}"
-    state: present
-    ipam_config:
-      - subnet: "{{ networks.local[application_id].subnet }}"
-
-- meta: flush_handlers
 
 - name: "Wait for LDAP to be available"
   wait_for:

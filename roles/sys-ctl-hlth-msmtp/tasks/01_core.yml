@@ -13,4 +13,4 @@
     - not MODE_RESET | bool
     - users['no-reply'].mailu_token is defined
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

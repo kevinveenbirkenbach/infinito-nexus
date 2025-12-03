@@ -1,4 +1,4 @@
-- include_tasks: utils/once_flag.yml
+- include_tasks: utils/once/flag.yml
 
 - name: Remove all docker compose pull locks
   file:

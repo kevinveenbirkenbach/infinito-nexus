@@ -12,4 +12,4 @@
       /bin/sh -c '{{ system_service_script_exec }} --manipulation-string "{{ SYS_SERVICE_GROUP_MANIPULATION | join(" ") }}" {{ PATH_DOCKER_COMPOSE_INSTANCES }}'
     system_service_force_linear_sync:   true
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

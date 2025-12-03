@@ -14,5 +14,5 @@
       - fdupes
       - p7zip
       state: present
-  - include_tasks: utils/once_finalize.yml
+  - include_tasks: utils/once/finalize.yml
   when: run_once_util_dev_admin is not defined

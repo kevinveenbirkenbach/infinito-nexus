@@ -6,4 +6,4 @@
     group:  "{{ NGINX.USER }}"
     mode:   '0644'
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

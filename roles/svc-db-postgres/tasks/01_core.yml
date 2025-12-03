@@ -3,27 +3,15 @@
     POSTGRES_ALLOWED_AVG_CONNECTIONS: "{{ (POSTGRES_MAX_CONNECTIONS | split_postgres_connections(playbook_dir ~ '/roles')) | int }}"
   run_once: true
 
-- name: Include dependency 'sys-svc-docker'
-  include_role:
-    name: sys-svc-docker
-  when: run_once_sys_svc_docker is not defined
-
-- name: Create Docker network for PostgreSQL
-  community.docker.docker_network:
-    name: "{{ POSTGRES_NETWORK_NAME }}"
-    state: present
-    ipam_config:
-    - subnet: "{{ POSTGRES_SUBNET }}"
-
-- name: "include docker-compose role"
-  include_role:
-    name: docker-compose
+- name: "Setup docker network for {{ application_id }}"
+  include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
-    docker_compose_flush_handlers: true
+    docker_network_name:    "{{ POSTGRES_NETWORK_NAME }}"
+    docker_network_subnet:  "{{ POSTGRES_SUBNET }}"
 
 - name: install python-psycopg2
   community.general.pacman:
     name: python-psycopg2
     state: present
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

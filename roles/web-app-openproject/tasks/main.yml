@@ -3,7 +3,11 @@
   include_role:
     name: sys-stk-full-stateful
   vars:
-    client_max_body_size: "30m"
+    client_max_body_size:           "30m"
+    docker_repository_branch:       "stable/{{ OPENPROJECT_VERSION }}"
+    docker_repository_address:      "https://github.com/opf/openproject-deploy"
+    docker_pull_git_repository:     true
+    docker_compose_flush_handlers:  false
 
 - name: "Create {{ OPENPROJECT_PLUGINS_FOLDER }}"
   file:

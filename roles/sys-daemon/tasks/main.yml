@@ -4,5 +4,5 @@
     when: MODE_RESET | bool and run_once_sys_daemon is not defined
   - name: Apply systemd manager defaults
     include_tasks: 02_defaults.yml
-  - include_tasks: utils/once_finalize.yml
+  - include_tasks: utils/once/finalize.yml
   when: run_once_sys_daemon is not defined

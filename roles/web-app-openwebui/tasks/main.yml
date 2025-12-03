@@ -11,3 +11,6 @@
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-full-stateless
+  vars:
+    docker_pull_git_repository:           false
+    docker_compose_file_creation_enabled: true

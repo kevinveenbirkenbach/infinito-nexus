@@ -2,24 +2,24 @@
 
   moodle:
 {% set container_port = 8080 %}
-    container_name: {{ moodle_container }}
+    container_name: {{ MOODLE_CONTAINER }}
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
-    image: moodle_custom
+    image: MOODLE_CUSTOM
     ports:
       - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
-      - 'code:{{ bitnami_code_link }}'
-      - 'data:{{ bitnami_data_dir }}'
+      - 'code:{{ BITNAMI_CODE_LINK }}'
+      - 'data:{{ BITNAMI_DATA_DIR }}'
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   code:
-    name: {{ moodle_volume_code }}
+    name: {{ MOODLE_VOLUME_CODE }}
   data:
-    name: {{ moodle_volume_data }}
+    name: {{ MOODLE_VOLUME_DATA }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
   

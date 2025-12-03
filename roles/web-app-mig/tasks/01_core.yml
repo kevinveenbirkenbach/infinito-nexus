@@ -9,6 +9,7 @@
   vars:
     docker_compose_flush_handlers:  true
     docker_pull_git_repository:     true
+    docker_repository_address:      "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
 
 - include_tasks: 02_cleanup.yml
   when: MODE_CLEANUP | bool
@@ -16,4 +17,4 @@
 - include_tasks: 03_build_data.yml
   when: MIG_BUILD_DATA | bool
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

@@ -4,10 +4,6 @@ database_type:                  "postgres"
 js_application_name:            "Taiga"
 entity_name:                    "{{ application_id | get_entity_name }}"
 
-# Docker
-docker_repository_address:      "https://github.com/taigaio/taiga-docker"
-docker_pull_git_repository:     true
-
 # Taiga      
 
 ## General

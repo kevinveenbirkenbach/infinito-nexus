@@ -53,4 +53,4 @@
   vars:
     user_name: "administrator"
 
-- include_tasks: utils/once_flag.yml
+- include_tasks: utils/once/flag.yml

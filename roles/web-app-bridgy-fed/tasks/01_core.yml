@@ -9,4 +9,4 @@
     domain:     "{{ domains | get_domain(application_id) }}"
     http_port:  "{{ ports.localhost.http[application_id] }}"
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

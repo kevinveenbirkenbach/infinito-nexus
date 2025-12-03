@@ -49,9 +49,9 @@
         - "{{ application_id | abs_role_path_by_application_id }}/files/docker-compose.override.yml"
       skip: true
 
-- name:           "Create (obligatoric) '{{ docker_compose.files.docker_compose }}'"
+- name:      "Create (obligatoric) '{{ docker_compose.files.docker_compose }}'"
   template:
-    src:          "docker-compose.yml.j2"
-    dest:         "{{ docker_compose.files.docker_compose }}"
-  notify:         docker compose up
-  register:       docker_compose_template
+    src:    "docker-compose.yml.j2"
+    dest:   "{{ docker_compose.files.docker_compose }}"
+  notify:   docker compose up
+  register: docker_compose_template

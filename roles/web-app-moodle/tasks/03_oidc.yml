@@ -2,7 +2,7 @@
 
 - name: Check if OIDC plugin is present in container
   command: >
-    docker exec --user root {{ moodle_container }} test -d {{ bitnami_oidc_plugin_dir }}
+    docker exec --user root {{ MOODLE_CONTAINER }} test -d {{ BITNAMI_OIDC_PLUGIN_DIR }}
   register: oidc_plugin_check
   ignore_errors: true
   changed_when: false
@@ -13,11 +13,11 @@
   when: oidc_plugin_check.rc != 0
 
 #- name: "Upgrade Moodle to apply OIDC plugin"
-#  command: "docker exec --user {{ bitnami_user }} {{ moodle_container }} php /opt/bitnami/moodle/admin/cli/upgrade.php --non-interactive"
+#  command: "docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/upgrade.php --non-interactive"
 #
 #- name: Clear Moodle cache
 #  command: >
-#    docker exec --user {{ bitnami_user }} {{ moodle_container }} php /opt/bitnami/moodle/admin/cli/purge_caches.php
+#    docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/purge_caches.php
 
 - name: "Set Moodle OIDC configuration via CLI"
   loop:
@@ -43,11 +43,11 @@
   loop_control:
     label: "{{ item.name }}"
   command: >
-    docker exec --user {{ bitnami_user }} {{ moodle_container }} php /opt/bitnami/moodle/admin/cli/cfg.php --component=auth_oidc
+    docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --component=auth_oidc
     --name={{ item.name }} --set="{{ item.value }}"
 
 - name: "Enable OIDC login"
-  command: "docker exec --user {{ bitnami_user }} {{ moodle_container }} php /opt/bitnami/moodle/admin/cli/cfg.php --name=auth --set=oidc"
+  command: "docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --name=auth --set=oidc"
 
 - name: Set auth = 'oidc' for all users except guest
   shell: >
@@ -57,4 +57,4 @@
     executable: /bin/bash
 
 #- name: Prevent Account Creation
-#  command: docker exec --user {{ bitnami_user }} {{ moodle_container }} php /opt/bitnami/moodle/admin/cli/cfg.php --name=authpreventaccountcreation --set=1
+#  command: docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --name=authpreventaccountcreation --set=1

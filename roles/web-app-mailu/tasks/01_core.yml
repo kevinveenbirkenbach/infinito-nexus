@@ -1,4 +1,4 @@
-- include_tasks: utils/once_flag.yml
+- include_tasks: utils/once/flag.yml
 
 - name: Ensure MAILU_HOSTNAMES is a list with max 1 entry
   ansible.builtin.assert:

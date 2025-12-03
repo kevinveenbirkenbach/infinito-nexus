@@ -11,6 +11,11 @@
 - name: "For '{{ application_id }}': load docker, db and proxy"
   include_role:
     name: sys-stk-full-stateful
+  vars:
+    docker_repository_address:            "https://github.com/akaunting/docker.git"
+    docker_pull_git_repository:           true
+    docker_repository_branch:             "master"
+    docker_compose_file_creation_enabled: true
 
 - name: "Akaunting | Create first-run marker to disable future setup"
   ansible.builtin.file:

@@ -3,7 +3,7 @@
     include_role:
       name: sys-ctl-hlth-journalctl
     when: run_once_sys_ctl_hlth_journalctl is not defined
-  - include_tasks: utils/once_finalize.yml
+  - include_tasks: utils/once/finalize.yml
   when: run_once_sys_svc_journalctl is not defined
 
 - name: copy journald.conf

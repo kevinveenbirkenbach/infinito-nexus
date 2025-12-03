@@ -14,6 +14,6 @@
       system_service_copy_files:          false
       system_service_force_linear_sync:   false
 
-  - include_tasks: utils/once_finalize.yml
+  - include_tasks: utils/once/finalize.yml
   when:
     - run_once_sys_ctl_cln_anon_volumes is not defined

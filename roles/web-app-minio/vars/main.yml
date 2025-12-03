@@ -1,10 +1,6 @@
 # General
 application_id:                       "web-app-minio"
 
-# Docker
-docker_pull_git_repository:           false
-docker_compose_file_creation_enabled: true
-
 # MINIO
 # https://www.min.io/
 MINIO_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.minio.version') }}"

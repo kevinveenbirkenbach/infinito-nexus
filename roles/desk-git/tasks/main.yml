@@ -16,6 +16,6 @@
       command: gitconfig --merge-option rebase --name "{{users.client.full_name}}" --email "{{users.client.email}}" --website "{{users.client.website}}" --signing gpg --gpg-key "{{users.client.gpg}}"
       become: false
   
-    - include_tasks: utils/once_finalize.yml
+    - include_tasks: utils/once/finalize.yml
       vars:
         flush_handlers: false

@@ -3,7 +3,7 @@
     include_role:
       name: sys-svc-webserver-https
     when: run_once_sys_svc_webserver_https is not defined
-  - include_tasks: utils/once_finalize.yml
+  - include_tasks: utils/once/finalize.yml
   when: run_once_web_opt_rdr_domains is not defined
 
 - name: "Include domains redirects"

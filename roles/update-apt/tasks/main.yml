@@ -5,7 +5,7 @@
         upgrade: dist
         force_apt_get: yes
 
-    - include_tasks: utils/once_finalize.yml
+    - include_tasks: utils/once/finalize.yml
       vars:
         flush_handlers: false
   when: run_once_update_apt is not defined

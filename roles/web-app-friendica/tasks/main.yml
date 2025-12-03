@@ -2,6 +2,8 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full-stateful
+  vars:
+    docker_compose_flush_handlers: false
 
 - name: Integrate LDAP
   include_tasks: 01_ldap.yml

@@ -1,5 +1,4 @@
 # Docker
-docker_pull_git_repository: false # Deactivated here to don't inhire this
 
 SRV_WEB_INJ_COMP_FEATURES_ALL:
   - 'javascript'

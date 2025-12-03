@@ -22,7 +22,8 @@
     name: "svc-db-{{ database_type }}"
   when: SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool
   vars:
-    database_init: true # Initialize a custom database for the application
+    database_init:              true  # Initialize a custom database for the application
+    docker_pull_git_repository: false # Deactivated here to don't inhire the variable
 
 - name: "For '{{ application_id }}': Add Entry for Backup Procedure"
   include_tasks: "{{ playbook_dir }}/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"

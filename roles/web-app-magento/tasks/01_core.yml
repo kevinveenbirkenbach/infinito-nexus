@@ -41,11 +41,11 @@
       --admin-user=\"$MAGENTO_ADMIN_USERNAME\" \
       --admin-password=\"$MAGENTO_ADMIN_PASSWORD\""
   args:
-    creates: "{{ [ (MAGENTO_VOLUME | docker_volume_path), 'app/etc/env.php' ] | path_join }}"
+    creates: "{{ [ MAGENTO_VOLUME, 'app/etc/env.php' ] | path_join }}"
   register: magento_install
   changed_when: >
     (magento_install.stdout is defined and
      ('Magento installation complete' in magento_install.stdout
       or 'successfully installed' in magento_install.stdout))
 
-- include_tasks: utils/once_finalize.yml
+- include_tasks: utils/once/finalize.yml

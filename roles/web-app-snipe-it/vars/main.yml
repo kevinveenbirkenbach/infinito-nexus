@@ -2,16 +2,13 @@
 application_id:     "web-app-snipe-it"
 
 # Database
-database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password', True) }}"
+database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
 database_type:      "mariadb"
 
-# Docker
-docker_compose_flush_handlers:          true
-
 # Snipe-IT specific
-snipe_it_url:       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-snipe_it_version:   "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.version', True) }}"
-snipe_it_image:     "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.image', True) }}"
-snipe_it_container:      "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.name', True) }}"
-snipe_it_volume:    "{{ applications | get_app_conf(application_id, 'docker.volumes.data', True) }}"
-snipe_it_user:      "www-data"
+SNIPE_IT_URL:       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+SNIPE_IT_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.version') }}"
+SNIPE_IT_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.image') }}"
+SNIPE_IT_CONTAINER: "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.name') }}"
+SNIPE_IT_VOLUME:    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+SNIPE_IT_USER:      "www-data"

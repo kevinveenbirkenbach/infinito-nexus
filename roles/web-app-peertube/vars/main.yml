@@ -3,9 +3,6 @@ application_id:                   "web-app-peertube"
 database_type:                    "postgres"
 entity_name:                      "{{ application_id | get_entity_name }}"
 
-# Docker
-docker_compose_flush_handlers:    true
-
 # Role variables
 PEERTUBE_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.peertube.version') }}"
 PEERTUBE_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.peertube.image') }}"

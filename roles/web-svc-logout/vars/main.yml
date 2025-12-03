@@ -1,6 +1,4 @@
 application_id:               "web-svc-logout"
-docker_repository_address:    "https://github.com/kevinveenbirkenbach/universal-logout"
-docker_pull_git_repository:   true
 container_port:               8000
 
 # The following line leads to that services which arent listed directly in the inventory, 
