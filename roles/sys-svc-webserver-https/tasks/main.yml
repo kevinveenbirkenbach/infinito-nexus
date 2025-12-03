@@ -7,5 +7,6 @@
     - sys-svc-cln-domains
     - sys-svc-letsencrypt
     - sys-svc-dns
-  - include_tasks: utils/once/finalize.yml
+  - meta: flush_handlers
+  - include_tasks: utils/once/flag.yml
   when: run_once_sys_svc_webserver_https is not defined

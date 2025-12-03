@@ -11,4 +11,4 @@
     system_service_tpl_exec_start: "{{ system_service_script_exec }} {{ SIZE_PERCENT_CLEANUP_DISC_SPACE }}"
     system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }} {{ SYS_SERVICE_CLEANUP_DISC_SPACE }}"
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

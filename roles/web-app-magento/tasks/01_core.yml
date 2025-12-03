@@ -48,4 +48,4 @@
      ('Magento installation complete' in magento_install.stdout
       or 'successfully installed' in magento_install.stdout))
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

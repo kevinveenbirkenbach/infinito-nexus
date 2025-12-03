@@ -3,5 +3,7 @@
   - name: "load docker, db and proxy for {{ application_id }}"
     include_role:
       name: sys-stk-full-stateful
-  - include_tasks: utils/once/finalize.yml
+    vars:
+      docker_compose_flush_handlers: true
+  - include_tasks: utils/once/flag.yml
   when: run_once_web_app_jira is not defined

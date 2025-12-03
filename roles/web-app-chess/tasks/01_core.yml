@@ -1,6 +1,8 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full-stateful
+  vars:
+    docker_compose_flush_handlers: false
 
 - name: "Deploy '{{ CHESS_ENTRYPOINT_ABS }}'"
   copy:
@@ -9,4 +11,6 @@
   notify: 
     - docker compose build
 
-- include_tasks: utils/once/finalize.yml
+- meta: flush_handlers
+
+- include_tasks: utils/once/flag.yml

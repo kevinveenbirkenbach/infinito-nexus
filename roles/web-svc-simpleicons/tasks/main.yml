@@ -1,21 +1,4 @@
 ---
-- block:
-  - name: "load docker, proxy for '{{ application_id }}'"
-    include_role:
-      name: sys-stk-full-stateless
-    vars:
-      aca_origin:  "* always"
-      aca_methods: "'GET, OPTIONS' always"
-      aca_headers: '"Origin, X-Requested-With, Content-Type, Accept, Authorization" always'
-  - name: "Copy '{{ application_id }}' files"
-    template:
-      src: "{{ item.source }}"
-      dest: "{{ item.target }}"
-      mode: '0755'
-    loop:
-      - { source: "server.js.j2",     target: "{{ simpleicons_host_server_file }}" }
-      - { source: "package.json.j2",  target: "{{ simpleicons_host_package_file }}" }
-    notify:
-      - docker compose up
-  - include_tasks: utils/once/finalize.yml
+- name: "Load core functions for '{{ application_id }}'"
+  include_tasks: 01_core.yml
   when: run_once_web_svc_simpleicons is not defined

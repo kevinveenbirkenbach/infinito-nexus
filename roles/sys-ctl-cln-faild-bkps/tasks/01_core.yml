@@ -22,4 +22,4 @@
     system_service_tpl_exec_start_pre:  '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP| join(" ") }} --timeout "{{ SYS_TIMEOUT_CLEANUP_SERVICES }}"'
     system_service_tpl_exec_start:      '/bin/sh -c "{{ CLEANUP_FAILED_BACKUPS_PKG }} --all --workers {{ CLEANUP_FAILED_BACKUPS_WORKERS }} --yes"'
     system_service_force_linear_sync:   false
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

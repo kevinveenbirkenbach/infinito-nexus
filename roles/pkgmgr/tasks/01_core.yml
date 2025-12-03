@@ -6,6 +6,12 @@
   - dev-make
   - dev-python-yaml
 
+- name: Ensure OpenSSH client is installed
+  community.general.pacman:
+    name: openssh
+    state: present
+  become: true
+
 - name: Ensure GitHub host key is in known_hosts
   known_hosts:
     path: "~/.ssh/known_hosts"
@@ -48,4 +54,4 @@
   command: "pkgmgr pull --all"
   when: MODE_UPDATE | bool
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

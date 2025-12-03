@@ -8,4 +8,4 @@
 - name: "Setup '{{ application_id }}' network"
   include_tasks: 04_network.yml
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

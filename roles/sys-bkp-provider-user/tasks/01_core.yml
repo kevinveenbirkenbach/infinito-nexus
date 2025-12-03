@@ -16,4 +16,4 @@
 
 - include_tasks: 03_permissions_folders.yml
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

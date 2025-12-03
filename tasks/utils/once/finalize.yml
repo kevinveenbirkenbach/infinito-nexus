@@ -1,6 +1,0 @@
----
-# This is necessary to flush the handlers before the when is set, because otherwise the when will be attached to the handlers
-
-- include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/up.yml' ] | path_join }}"
-
-- include_tasks: utils/once/flag.yml

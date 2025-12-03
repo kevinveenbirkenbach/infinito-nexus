@@ -1,13 +1,13 @@
 - block:
-  - name: Include dependency 'dev-yay'
-    include_role:
-      name: dev-yay
+    - name: Include dependency 'dev-yay'
+      include_role:
+        name: dev-yay
 
-  - name: install video conference software
-    kewlfft.aur.aur:
-      use: yay
-      name:
-      - zoom
-    become: false
-  - include_tasks: utils/once/finalize.yml
+    - name: install video conference software
+      kewlfft.aur.aur:
+        use: yay
+        name:
+        - zoom
+      become: false
+    - include_tasks: utils/once/flag.yml
   when: run_once_desk_zoom is not defined

@@ -10,7 +10,7 @@ What it enforces:
       - That exact suffix must be defined EITHER
           A) globally via any `set_fact:` assigning `run_once_<suffix>: ...`, OR
           B) inside that role's tasks:
-               - include_tasks|import_tasks: utils/once/finalize.yml (any style), OR
+               - include_tasks|import_tasks:  OR
                - set_fact: { run_once_<suffix>: ... }
   * If <suffix> does NOT match any role (an unknown suffix):
       - It MUST be defined globally via `set_fact` somewhere in a valid YAML file.
@@ -45,7 +45,6 @@ RUN_ONCE_USAGE_RE = re.compile(r'\brun_once_([A-Za-z0-9_]+)\b')
 
 # Task files that "define" a run-once flag for a role
 RUN_ONCE_TASK_FILES = (
-    'utils/once/finalize.yml',
     'utils/once/flag.yml',
 )
 

@@ -6,6 +6,4 @@
         name: python-yaml
         state: present
       
-    - include_tasks: utils/once/finalize.yml
-      vars:
-        flush_handlers: false
+    - include_tasks: utils/once/flag.yml

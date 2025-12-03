@@ -1,14 +1,13 @@
 - block:
+    - name: Include dependency 'dev-yay'
+      include_role:
+        name: dev-yay
+      when: run_once_dev_yay is not defined
 
-  - name: Include dependency 'dev-yay'
-    include_role:
-      name: dev-yay
-    when: run_once_dev_yay is not defined
-
-  - name: install torrent software
-    kewlfft.aur.aur:
-      use: yay
-      name:
-      - qbittorrent
-  - include_tasks: utils/once/finalize.yml
+    - name: install torrent software
+      kewlfft.aur.aur:
+        use: yay
+        name:
+        - qbittorrent
+    - include_tasks: utils/once/flag.yml
   when: run_once_desk_qbittorrent is not defined

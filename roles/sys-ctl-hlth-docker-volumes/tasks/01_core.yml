@@ -11,4 +11,4 @@
     system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }} {{ SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES }}"
     system_service_tpl_exec_start:      '{{ system_service_script_exec }} "{{ DOCKER_WHITELISTET_ANON_VOLUMES | join(" ") }}"'
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

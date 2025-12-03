@@ -5,4 +5,4 @@
     docker_compose_flush_handlers:  true
     docker_git_repository_pull:     false
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

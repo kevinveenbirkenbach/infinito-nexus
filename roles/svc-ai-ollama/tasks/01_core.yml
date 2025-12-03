@@ -4,6 +4,7 @@
   vars:
     docker_network_name:    "{{ OLLAMA_NETWORK }}"
     docker_network_subnet:  "{{ networks.local[application_id].subnet }}"
+    docker_compose_flush_handlers: true
 
 - name: Pre-pull Ollama models
   vars:
@@ -24,4 +25,4 @@
     (pull_result.rc | default(0)) != 0 and
     ('up to date' not in (pull_result.stdout | default('')))
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

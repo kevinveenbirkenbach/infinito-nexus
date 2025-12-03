@@ -1,11 +1,11 @@
 - block:
-  - name: Include dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-ctl-cln-bkps
-    - sys-lock
-  - include_tasks: utils/once/finalize.yml
+    - name: Include dependencies
+      include_role:
+        name: '{{ item }}'
+      loop:
+      - sys-ctl-cln-bkps
+      - sys-lock
+    - include_tasks: utils/once/flag.yml
   when: run_once_svc_bkp_loc_2_usb is not defined
 
 - name: Fail if any backup_to_usb variable is empty

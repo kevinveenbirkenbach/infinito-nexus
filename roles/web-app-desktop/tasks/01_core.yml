@@ -1,8 +1,6 @@
 - name: "Load brand logos role for '{{ application_id }}'"
   include_role:
     name: web-svc-simpleicons
-  vars:
-    flush_handlers: true
   when:
     - run_once_web_svc_simpleicons is not defined
     - DESKTOP_SIMPLEICONS_ENABLED | bool
@@ -19,7 +17,7 @@
     name: sys-stk-full-stateless
   vars:
     docker_compose_flush_handlers:  false
-    docker_git_repository_address:      "https://github.com/kevinveenbirkenbach/port-ui"
+    docker_git_repository_address:  "https://github.com/kevinveenbirkenbach/port-ui"
     docker_git_repository_pull:     true
 
 - name: "Check if host-specific config.yaml exists in {{ DESKTOP_CONFIG_INV_PATH }}"
@@ -73,4 +71,4 @@
   delay: 5
   until: desktop_http.status == 200
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

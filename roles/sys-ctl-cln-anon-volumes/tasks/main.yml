@@ -1,19 +1,18 @@
 - block:
-  - name: "pkgmgr install"
-    include_role:
-      name: pkgmgr-install
-    vars:
-      package_name: dockreap
-  
-  - include_role:
-      name: sys-service
-    vars:
-      system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
-      system_service_tpl_exec_start:      dockreap --no-confirmation
-      system_service_tpl_exec_start_pre:  "" # Anonymous volumes can allways be removed. It isn't necessary to wait for any service to stop.
-      system_service_copy_files:          false
-      system_service_force_linear_sync:   false
+    - name: "pkgmgr install"
+      include_role:
+        name: pkgmgr-install
+      vars:
+        package_name: dockreap
+    
+    - include_role:
+        name: sys-service
+      vars:
+        system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+        system_service_tpl_exec_start:      dockreap --no-confirmation
+        system_service_tpl_exec_start_pre:  "" # Anonymous volumes can allways be removed. It isn't necessary to wait for any service to stop.
+        system_service_copy_files:          false
+        system_service_force_linear_sync:   false
 
-  - include_tasks: utils/once/finalize.yml
-  when:
-    - run_once_sys_ctl_cln_anon_volumes is not defined
+    - include_tasks: utils/once/flag.yml
+  when: run_once_sys_ctl_cln_anon_volumes is not defined

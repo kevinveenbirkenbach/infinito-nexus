@@ -5,7 +5,5 @@
         src: sys-lock.py
         dest: "{{ PATH_SYSTEM_LOCK_SCRIPT }}"
 
-    - include_tasks: utils/once/finalize.yml
-      vars:
-        flush_handlers: false
+    - include_tasks: utils/once/flag.yml
   when: run_once_sys_lock is not defined

@@ -55,4 +55,4 @@
     aur_only: yes
   when: MODE_UPDATE | bool
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

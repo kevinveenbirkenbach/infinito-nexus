@@ -20,9 +20,7 @@
         or
         env_template.changed          | default(false)
       )
-    - docker_compose is defined # @todo remove in the future, non docker roles shouldn't include this file
-    - (application_id | get_entity_name) == (docker_compose.directories.instance | basename)
   notify: docker compose up
 
-- meta: flush_handlers
-  when: flush_handlers | default(true) | bool
+- name: "Flush Docker Compose Up Handlers for {{ docker_compose.directories.instance }}"
+  meta: flush_handlers

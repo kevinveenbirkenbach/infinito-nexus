@@ -18,4 +18,4 @@
     - ansible_facts['distribution'] == "Debian"
     - run_once_update_apt is not defined
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

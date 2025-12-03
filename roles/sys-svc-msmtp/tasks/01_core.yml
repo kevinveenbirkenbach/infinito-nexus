@@ -45,4 +45,4 @@
     name: sys-ctl-hlth-msmtp
   when: run_once_sys_ctl_hlth_msmtp is not defined
 
-- include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/up.yml' ] | path_join }}"
+- include_tasks: utils/once/flag.yml

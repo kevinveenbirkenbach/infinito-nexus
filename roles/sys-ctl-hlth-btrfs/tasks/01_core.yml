@@ -10,4 +10,4 @@
     system_service_timer_enabled:  true
     system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

@@ -4,7 +4,7 @@ Description=Timer to start {{ system_service_timer_service }}{{ SYS_SERVICE_SUFF
 [Timer]
 OnCalendar={{ system_service_on_calendar }}
 RandomizedDelaySec={{ RANDOMIZED_DELAY_SEC }}
-Persistent={{ persistent | default('false') }}
+Persistent={{ system_service_timer_persistent | default('false') }}
 
 [Install]
 WantedBy=timers.target

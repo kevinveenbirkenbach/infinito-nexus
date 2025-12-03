@@ -4,7 +4,5 @@
         name: git
         state:  present
 
-    - include_tasks: utils/once/finalize.yml
-      vars:
-        flush_handlers: false
+    - include_tasks: utils/once/flag.yml
   when: run_once_dev_git is not defined

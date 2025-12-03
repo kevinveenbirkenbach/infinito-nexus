@@ -38,10 +38,6 @@
     # Explicit set to guaranty that application_id will not be overwritten.
     # Should be anyhow the default case
     public: false
-
-  vars:
-    # Flush openresty handler on first run, so that openresty is up, before openresty related handlers are triggered
-    flush_handlers: true
   when: run_once_svc_prx_openresty is not defined
 
 - name: Include health dependencies
@@ -50,7 +46,7 @@
   loop:
     - sys-ctl-hlth-webserver
     - sys-ctl-hlth-csp
-  vars:
-    flush_handlers: false
 
-- include_tasks: utils/once/finalize.yml
+- meta: flush_handlers 
+
+- include_tasks: utils/once/flag.yml

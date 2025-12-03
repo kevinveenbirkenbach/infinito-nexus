@@ -15,6 +15,6 @@
   vars:
     system_service_on_calendar:   "{{ SYS_SCHEDULE_ANIMATION_KEYBOARD_COLOR }}"
     system_service_timer_enabled: true
-    persistent:                   true
+    system_service_timer_persistent:   true
 
 - include_tasks: utils/once/flag.yml
