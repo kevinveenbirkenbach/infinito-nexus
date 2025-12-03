@@ -3,6 +3,6 @@
     name: sys-stk-full-stateless
   vars: 
     docker_compose_flush_handlers:  true
-    docker_pull_git_repository:     false
+    docker_git_repository_pull:     false
 
 - include_tasks: utils/once/finalize.yml

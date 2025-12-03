@@ -8,8 +8,8 @@
     name: sys-stk-full-stateless
   vars:
     docker_compose_flush_handlers:  true
-    docker_pull_git_repository:     true
-    docker_repository_address:      "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
+    docker_git_repository_pull:     true
+    docker_git_repository_address:      "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
 
 - include_tasks: 02_cleanup.yml
   when: MODE_CLEANUP | bool

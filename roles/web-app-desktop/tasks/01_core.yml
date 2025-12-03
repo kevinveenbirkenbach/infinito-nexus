@@ -19,8 +19,8 @@
     name: sys-stk-full-stateless
   vars:
     docker_compose_flush_handlers:  false
-    docker_repository_address:      "https://github.com/kevinveenbirkenbach/port-ui"
-    docker_pull_git_repository:     true
+    docker_git_repository_address:      "https://github.com/kevinveenbirkenbach/port-ui"
+    docker_git_repository_pull:     true
 
 - name: "Check if host-specific config.yaml exists in {{ DESKTOP_CONFIG_INV_PATH }}"
   stat:

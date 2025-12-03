@@ -4,6 +4,6 @@
       name: docker-compose
     vars:
       docker_compose_flush_handlers:  true
-      docker_pull_git_repository:     false # Deactivated here to deactivate inhirement
+      docker_git_repository_pull:     false # Deactivated here to deactivate inhirement
   - include_tasks: utils/once/finalize.yml
   when: run_once_svc_prx_openresty is not defined

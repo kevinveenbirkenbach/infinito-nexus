@@ -5,7 +5,7 @@
   vars:
     docker_compose_flush_handlers:        true
     docker_compose_file_creation_enabled: true
-    docker_pull_git_repository:           false
+    docker_git_repository_pull:           false
 
 - name: Update Collabora systemplate to include new fonts
   command: "{{ COLLABORA_DOCKER_CONF_EXEC }} update-system-template"

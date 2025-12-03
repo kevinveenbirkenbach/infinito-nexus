@@ -15,7 +15,7 @@
 
 - name: "Include routines to set up a git repository based installation for '{{ application_id }}'."
   include_tasks: "03_repository.yml"
-  when: docker_pull_git_repository | bool
+  when: docker_git_repository_pull | bool
 
 - block:
   - name: "Include file management routines for '{{ application_id }}'."

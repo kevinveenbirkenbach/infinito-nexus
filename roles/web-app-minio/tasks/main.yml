@@ -4,7 +4,7 @@
     name: sys-stk-back-stateless
   vars:
     docker_compose_flush_handlers:        true
-    docker_pull_git_repository:           false
+    docker_git_repository_pull:           false
     docker_compose_file_creation_enabled: true
 
 - name: "Include role sys-stk-front-proxy for '{{ application_id }}'"
