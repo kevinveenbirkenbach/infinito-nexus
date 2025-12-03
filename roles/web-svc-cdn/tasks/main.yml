@@ -1,5 +1,7 @@
 - include_tasks: 01_core.yml
   when: run_once_web_svc_cdn is not defined
+  vars:
+    application_id: 'web-svc-cdn'
 
 - include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
   vars:
