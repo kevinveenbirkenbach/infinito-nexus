@@ -45,5 +45,3 @@
       token_auth: "{{ matomo_auth_token }}"
     return_content: yes
     status_code: 200
-
-- include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/up.yml' ] | path_join }}"

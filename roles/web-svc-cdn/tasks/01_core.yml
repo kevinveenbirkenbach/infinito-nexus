@@ -6,5 +6,3 @@
   loop:
   - sys-stk-front-proxy
   - dev-git
-
-- include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/up.yml' ] | path_join }}"
