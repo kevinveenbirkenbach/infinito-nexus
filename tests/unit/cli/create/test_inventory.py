@@ -13,6 +13,7 @@ sys.path.insert(0, dir_path)
 from cli.create.inventory import (  # type: ignore
     merge_inventories,
     ensure_host_vars_file,
+    ensure_become_password,
 )
 
 from ruamel.yaml import YAML
@@ -242,6 +243,46 @@ existing_key: foo
                 data2 = yaml_rt.load(f)
 
             self.assertEqual(data2["ansible_connection"], "local")
+            
+    def test_ensure_become_password_keeps_existing_when_no_cli_password(self):
+        """
+        If no --become-password is provided and ansible_become_password already
+        exists in host_vars, ensure_become_password must not overwrite it and
+        must not attempt to generate or vault a new one.
+        """
+
+        yaml_rt = YAML(typ="rt")
+        yaml_rt.preserve_quotes = True
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            host = "localhost"
+            host_vars_dir = Path(tmpdir)
+            host_vars_file = host_vars_dir / f"{host}.yml"
+            vault_pw_file = host_vars_dir / ".password"
+
+            # Create a dummy vault password file (not actually used in this test)
+            vault_pw_file.write_text("dummy\n", encoding="utf-8")
+
+            # Seed host_vars with an existing ansible_become_password value
+            initial = CommentedMap()
+            initial["ansible_become_password"] = "EXISTING_VALUE"
+            with host_vars_file.open("w", encoding="utf-8") as f:
+                yaml_rt.dump(initial, f)
+
+            # Call helper WITHOUT an explicit become_password
+            ensure_become_password(
+                host_vars_file=host_vars_file,
+                vault_password_file=vault_pw_file,
+                become_password=None,
+            )
+
+            # Reload and verify ansible_become_password remains unchanged
+            with host_vars_file.open("r", encoding="utf-8") as f:
+                doc = yaml_rt.load(f)
+
+            self.assertIsNotNone(doc)
+            self.assertIn("ansible_become_password", doc)
+            self.assertEqual(doc["ansible_become_password"], "EXISTING_VALUE")
 
 if __name__ == "__main__":
     unittest.main()

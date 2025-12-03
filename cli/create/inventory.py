@@ -50,6 +50,7 @@ try:
 except ImportError:  # pragma: no cover
     raise SystemExit("Please `pip install ruamel.yaml` to use `infinito create inventory`.")
 
+from module_utils.handler.vault import VaultHandler
 
 # ---------------------------------------------------------------------------
 # Generic helpers
@@ -91,6 +92,75 @@ def build_env_with_project_root(project_root: Path) -> Dict[str, str]:
     else:
         env["PYTHONPATH"] = root_str
     return env
+
+def ensure_become_password(
+    host_vars_file: Path,
+    vault_password_file: Path,
+    become_password: Optional[str],
+) -> None:
+    """
+    Ensure ansible_become_password exists and is stored as a vaulted string
+    according to the following rules:
+
+      - If become_password is provided:
+          Encrypt it with Ansible Vault and set/overwrite ansible_become_password.
+      - If become_password is not provided and ansible_become_password already exists:
+          Do nothing (respect the existing value, even if it is plain text).
+      - If become_password is not provided and ansible_become_password is missing:
+          Generate a random password, encrypt it, and set ansible_become_password.
+
+    The encryption is done via module_utils.handler.vault.VaultHandler so that the
+    resulting value is a !vault tagged scalar in host_vars.
+    """
+    yaml_rt = YAML(typ="rt")
+    yaml_rt.preserve_quotes = True
+
+    # Load existing host_vars document (created earlier by ensure_host_vars_file)
+    if host_vars_file.exists():
+        with host_vars_file.open("r", encoding="utf-8") as f:
+            doc = yaml_rt.load(f)
+        if doc is None:
+            doc = CommentedMap()
+    else:
+        doc = CommentedMap()
+
+    if not isinstance(doc, CommentedMap):
+        tmp = CommentedMap()
+        for k, v in dict(doc).items():
+            tmp[k] = v
+        doc = tmp
+
+    current_value = doc.get("ansible_become_password")
+
+    # Case 1: no explicit password provided, but value already exists → respect it
+    if become_password is None and current_value is not None:
+        return
+
+    # Case 2: explicit password provided → use it
+    # Case 3: no password provided and no value present → generate a random one
+    if become_password is not None:
+        plain_password = become_password
+    else:
+        plain_password = generate_random_password()
+
+    # Use VaultHandler to encrypt the password via ansible-vault encrypt_string
+    handler = VaultHandler(str(vault_password_file))
+    snippet_text = handler.encrypt_string(plain_password, "ansible_become_password")
+
+    # Parse the snippet with ruamel.yaml to get the tagged !vault scalar node
+    snippet_yaml = YAML(typ="rt")
+    encrypted_doc = snippet_yaml.load(snippet_text) or CommentedMap()
+    encrypted_value = encrypted_doc.get("ansible_become_password")
+    if encrypted_value is None:
+        raise SystemExit(
+            "Failed to parse 'ansible_become_password' from ansible-vault output."
+        )
+
+    # Store the vaulted value in host_vars
+    doc["ansible_become_password"] = encrypted_value
+
+    with host_vars_file.open("w", encoding="utf-8") as f:
+        yaml_rt.dump(doc, f)
 
 
 def detect_project_root() -> Path:
@@ -670,6 +740,16 @@ def main(argv: Optional[List[str]] = None) -> None:
         help="Disable SSL for this host (sets SSL_ENABLED: false in host_vars).",
     )
     parser.add_argument(
+        "--become-password",
+        required=False,
+        help=(
+            "Optional become password. If omitted and ansible_become_password is "
+            "missing, a random one is generated and vaulted. If omitted and "
+            "ansible_become_password already exists, it is left unchanged."
+        ),
+    )
+
+    parser.add_argument(
         "--ip4",
         default="127.0.0.1",
         help="IPv4 address for networks.internet.ip4 (default: 127.0.0.1).",
@@ -825,6 +905,14 @@ def main(argv: Optional[List[str]] = None) -> None:
         ssl_disabled=args.ssl_disabled,
         ip4=args.ip4,
         ip6=args.ip6,
+    )
+
+    # 4b) Ensure ansible_become_password is vaulted according to CLI options
+    print(f"[INFO] Ensuring ansible_become_password for host '{args.host}'")
+    ensure_become_password(
+        host_vars_file=host_vars_file,
+        vault_password_file=vault_password_file,
+        become_password=args.become_password,
     )
 
     # 5) Generate credentials for all application_ids (snippets + single merge)
