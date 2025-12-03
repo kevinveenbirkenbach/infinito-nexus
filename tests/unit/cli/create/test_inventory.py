@@ -14,6 +14,9 @@ from cli.create.inventory import (  # type: ignore
     merge_inventories,
     ensure_host_vars_file,
     ensure_become_password,
+    parse_roles_list,
+    filter_inventory_by_include,
+    filter_inventory_by_ignore,
 )
 
 from ruamel.yaml import YAML
@@ -21,6 +24,73 @@ from ruamel.yaml.comments import CommentedMap
 
 
 class TestCreateInventory(unittest.TestCase):
+
+    def test_parse_roles_list_supports_commas_and_spaces(self):
+        """
+        parse_roles_list() should:
+        - return None for None or empty input,
+        - split comma separated values,
+        - strip whitespace,
+        - deduplicate values.
+        """
+        self.assertIsNone(parse_roles_list(None))
+        self.assertIsNone(parse_roles_list([]))
+
+        roles = parse_roles_list([
+            "web-app-nextcloud, web-app-matomo",
+            "web-app-phpmyadmin",
+            "web-app-nextcloud",  # duplicate
+        ])
+
+        self.assertIsInstance(roles, set)
+        self.assertEqual(
+            roles,
+            {"web-app-nextcloud", "web-app-matomo", "web-app-phpmyadmin"},
+        )
+
+    def test_filter_inventory_by_include_keeps_only_selected_groups(self):
+        """
+        filter_inventory_by_include() must:
+        - keep only groups whose names are in the include set,
+        - preserve the original group data for kept groups,
+        - remove groups not listed in the include set.
+        """
+        original_inventory = {
+            "all": {
+                "children": {
+                    "web-app-nextcloud": {
+                        "hosts": {"localhost": {"ansible_host": "127.0.0.1"}},
+                    },
+                    "web-app-matomo": {
+                        "hosts": {"localhost": {"ansible_host": "127.0.0.2"}},
+                    },
+                    "web-app-phpmyadmin": {
+                        "hosts": {"localhost": {"ansible_host": "127.0.0.3"}},
+                    },
+                }
+            }
+        }
+
+        include_set = {"web-app-nextcloud", "web-app-phpmyadmin"}
+
+        filtered = filter_inventory_by_include(original_inventory, include_set)
+        children = filtered["all"]["children"]
+
+        # Only the included groups must remain
+        self.assertIn("web-app-nextcloud", children)
+        self.assertIn("web-app-phpmyadmin", children)
+        self.assertNotIn("web-app-matomo", children)
+
+        # The content of the kept groups must be identical to the original
+        self.assertEqual(
+            children["web-app-nextcloud"],
+            original_inventory["all"]["children"]["web-app-nextcloud"],
+        )
+        self.assertEqual(
+            children["web-app-phpmyadmin"],
+            original_inventory["all"]["children"]["web-app-phpmyadmin"],
+        )
+
     def test_merge_inventories_adds_host_and_preserves_existing(self):
         """
         merge_inventories() must:

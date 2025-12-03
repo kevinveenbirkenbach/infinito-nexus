@@ -11,8 +11,8 @@ This subcommand:
    host containing all invokable applications.
 2. Optionally filters the resulting groups by:
    - --include: only listed application_ids are kept
-   - --ignore:  listed application_ids are removed
-   - --roles:   legacy include filter (used only if --include/--ignore are not set)
+   - --exclude:  listed application_ids are removed
+   - --roles:   legacy include filter (used only if --include/--exclude are not set)
 3. Merges the generated inventory into an existing inventory file, without
    deleting or overwriting unrelated entries.
 4. Ensures `host_vars/<host>.yml` exists and stores base settings such as:
@@ -192,7 +192,7 @@ def parse_roles_list(raw_roles: Optional[List[str]]) -> Optional[Set[str]]:
     Parse a list of IDs supplied on the CLI. Supports:
       --include web-app-nextcloud web-app-mastodon
       --include web-app-nextcloud,web-app-mastodon
-    Same logic is reused for --ignore and --roles.
+    Same logic is reused for --exclude and --roles.
     """
     if not raw_roles:
         return None
@@ -768,7 +768,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         nargs="+",
         help=(
             "Optional legacy list of application_ids to include. "
-            "Used only if neither --include nor --ignore is specified. "
+            "Used only if neither --include nor --exclude is specified. "
             "Supports comma-separated values as well."
         ),
     )
@@ -777,11 +777,11 @@ def main(argv: Optional[List[str]] = None) -> None:
         nargs="+",
         help=(
             "Only include the listed application_ids in the inventory. "
-            "Mutually exclusive with --ignore."
+            "Mutually exclusive with --exclude."
         ),
     )
     parser.add_argument(
-        "--ignore",
+        "--exclude",
         nargs="+",
         help=(
             "Exclude the listed application_ids from the inventory. "
@@ -814,14 +814,14 @@ def main(argv: Optional[List[str]] = None) -> None:
 
     args = parser.parse_args(argv)
 
-    # Parse include/ignore/roles lists
+    # Parse include/exclude/roles lists
     include_filter = parse_roles_list(args.include)
-    ignore_filter = parse_roles_list(args.ignore)
+    ignore_filter = parse_roles_list(args.exclude)
     roles_filter = parse_roles_list(args.roles)
 
-    # Enforce mutual exclusivity: only one of --include / --ignore may be used
+    # Enforce mutual exclusivity: only one of --include / --exclude may be used
     if include_filter and ignore_filter:
-        fatal("Options --include and --ignore are mutually exclusive. Please use only one of them.")
+        fatal("Options --include and --exclude are mutually exclusive. Please use only one of them.")
 
     project_root = detect_project_root()
     roles_dir = Path(args.roles_dir) if args.roles_dir else (project_root / "roles")
@@ -849,7 +849,7 @@ def main(argv: Optional[List[str]] = None) -> None:
             try:
                 vault_password_file.chmod(0o600)
             except PermissionError:
-                # Best-effort; ignore if chmod is not allowed
+                # Best-effort; exclude if chmod is not allowed
                 pass
         else:
             print(f"[INFO] Using existing vault password file: {vault_password_file}")
@@ -866,7 +866,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         project_root=project_root,
     )
 
-    # 2) Apply filters: include → ignore → legacy roles
+    # 2) Apply filters: include → exclude → legacy roles
     if include_filter:
         print(f"[INFO] Including only application_ids: {', '.join(sorted(include_filter))}")
         dyn_inv = filter_inventory_by_include(dyn_inv, include_filter)
