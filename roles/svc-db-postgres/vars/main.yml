@@ -16,7 +16,7 @@ POSTGRES_SUBNET:                          "{{ networks.local['svc-db-postgres'].
 POSTGRES_PASSWORD:                        "{{ applications | get_app_conf(application_id, 'credentials.POSTGRES_PASSWORD') }}"
 POSTGRES_PORT:                            "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
 POSTGRES_EXPOSE_LOCAL:                    True # Exposes the db to localhost, almost everytime neccessary
-POSTGRES_CUSTOM_IMAGE_NAME:               "postgres_custom"
+POSTGRES_CUSTOM_IMAGE:                    "postgres_custom"
 POSTGRES_LOCAL_HOST:                      "127.0.0.1"
 POSTGRES_VECTOR_ENABLED:                  True # Required by discourse, propably in a later step it makes sense to define this as a configuration option in config/main.yml
 POSTGRES_RETRIES:                         5

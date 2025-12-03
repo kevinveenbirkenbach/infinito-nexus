@@ -1,7 +1,4 @@
 - include_tasks: 01_core.yml
-  vars:
-    # Force the flush of the pg handler on the first run
-    flush_handlers: true
   when: run_once_svc_db_postgres is not defined
 
 - include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"

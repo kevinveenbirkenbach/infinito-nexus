@@ -8,10 +8,11 @@
   vars:
     docker_network_name:    "{{ POSTGRES_NETWORK_NAME }}"
     docker_network_subnet:  "{{ POSTGRES_SUBNET }}"
+    docker_compose_flush_handlers: true
 
 - name: install python-psycopg2
   community.general.pacman:
     name: python-psycopg2
     state: present
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

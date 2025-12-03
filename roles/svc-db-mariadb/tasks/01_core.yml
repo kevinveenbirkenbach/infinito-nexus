@@ -1,31 +1,9 @@
 - name: "Setup docker network for {{ application_id }}"
   include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
-    docker_network_name:    "{{ MARIADB_NETWORK }}"
-    docker_network_subnet:  "{{ MARIADB_SUBNET }}"
-
-- name: install MariaDB
-  community.docker.docker_container:
-    name: "{{ MARIADB_NAME }}"
-    image: "{{ MARIADB_IMAGE }}:{{ MARIADB_VERSION}}"
-    detach: yes
-    env:
-      MARIADB_ROOT_PASSWORD:  "{{ MARIADB_ROOT_PWD }}"
-      MARIADB_AUTO_UPGRADE:   "1"
-    networks:
-      - name: "{{ MARIADB_NETWORK }}"
-    volumes:
-      - "{{ MARIADB_VOLUME }}:/var/lib/mysql"
-    published_ports:
-      - "127.0.0.1:{{ MARIADB_PORT }}:3306" # can be that this will be removed if all applications use sockets
-    command: "--transaction-isolation=READ-COMMITTED --binlog-format=ROW" #for nextcloud
-    restart_policy: "{{ DOCKER_RESTART_POLICY }}"
-    healthcheck:
-      test: "/usr/bin/mariadb --user=root --password={{ MARIADB_ROOT_PWD }} --execute \"SHOW DATABASES;\""
-      interval: 10s
-      timeout: 5s
-      retries: 18
-  register: setup_mariadb_container_result
+    docker_network_name:            "{{ MARIADB_NETWORK }}"
+    docker_network_subnet:          "{{ MARIADB_SUBNET }}"
+    docker_compose_flush_handlers:  true
 
 - name: install python-mysqlclient
   community.general.pacman: 
@@ -41,8 +19,5 @@
   - db_info.container.State.Health.Status == "healthy"
   retries: 30
   delay: 5
-  when:
-    - setup_mariadb_container_result is defined
-    - setup_mariadb_container_result.changed
 
-- include_tasks: utils/once/finalize.yml
+- include_tasks: utils/once/flag.yml

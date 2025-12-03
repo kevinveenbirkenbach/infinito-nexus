@@ -2,7 +2,7 @@
 
   postgres:
     container_name:   "{{ POSTGRES_CONTAINER }}"
-    image:            "{{ POSTGRES_CUSTOM_IMAGE_NAME }}"
+    image:            "{{ POSTGRES_CUSTOM_IMAGE }}"
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     command:
       - "postgres"
