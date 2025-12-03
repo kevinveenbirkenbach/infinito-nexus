@@ -1,5 +1,7 @@
 # Administration
+
 ## Client
+
 ### Setup wireguard
 ```bash
   pacman -S wireguard-tools

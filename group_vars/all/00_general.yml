@@ -113,3 +113,11 @@ HCAPTCHA_ENABLED:  "{{ (CAPTCHA.HCAPTCHA.KEY   | default('') | length > 0)
 WEBSERVER_CORE_APPLICATIONS: 
   - web-svc-logout
   - web-svc-cdn
+
+# Global flag for detecting containerized environments
+IS_CONTAINER: >-
+  {{
+    (ansible_virtualization_role | default('') == 'guest')
+    and
+    (ansible_virtualization_type | default('') in ['docker', 'podman', 'lxc', 'container'])
+  }}

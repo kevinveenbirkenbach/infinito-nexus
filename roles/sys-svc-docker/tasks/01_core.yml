@@ -8,6 +8,9 @@
     state: present
   notify: docker restart
 
+- name: Restart and enable docker service
+  meta: flush_handlers
+
 - name: Setup Swapfile to prevent OOM Failures
   # @ See https://en.wikipedia.org/wiki/Out_of_memory
   include_role:

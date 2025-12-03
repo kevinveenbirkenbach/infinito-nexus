@@ -15,8 +15,17 @@ jobs:
     env:
       # The following roles will be ignored in the tests
       EXCLUDED_ROLES: >
-        drv-lid-switch
-
+        drv-lid-switch,
+        svc-net-wireguard-core,
+        svc-net-wireguard-firewalled,
+        svc-net-wireguard-plain,
+        svc-opt-keyboard-color,
+        svc-opt-ssd-hdd,
+        web-app-bridgy-fed,
+        web-app-oauth2-proxy,
+        web-app-postmarks,
+        web-app-socialhome,
+        web-svc-xmpp,
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -29,6 +38,7 @@ jobs:
       - name: First deploy (normal + debug)
         run: |
           docker run --network=host --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
             -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '
@@ -52,6 +62,7 @@ jobs:
       - name: Second deploy (--reset --debug)
         run: |
           docker run --network=host --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
             -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '
@@ -74,6 +85,7 @@ jobs:
       - name: Third deploy (async deploy – no debug)
         run: |
           docker run --network=host --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
             -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '

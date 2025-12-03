@@ -1,6 +1,7 @@
 ---
 - name: docker restart
-  service:
+  ansible.builtin.service:
     name: docker.service
     state:  restarted
     enabled: yes
+  when: not (IS_CONTAINER | bool)

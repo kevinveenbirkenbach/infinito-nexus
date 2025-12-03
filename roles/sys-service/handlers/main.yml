@@ -7,6 +7,7 @@
   async:  "{{ system_service_async }}"
   poll:   "{{ system_service_poll }}"
   listen: refresh systemctl service
+  when: not (IS_CONTAINER | bool)
 
 - name: "Set systemctl service state"
   systemd:
@@ -15,5 +16,7 @@
   become: true
   async:  "{{ system_service_async }}"
   poll:   "{{ system_service_poll }}"
-  when:   not (system_service_suppress_flush | bool)
+  when:   
+    - not (system_service_suppress_flush | bool)
+    - not (IS_CONTAINER | bool)
   listen: refresh systemctl service
