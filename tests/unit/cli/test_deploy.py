@@ -289,8 +289,9 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         # Verify that for ansible-playbook, we asked for text+capture_output
         last_call = mock_run.call_args_list[-1]
-        self.assertTrue(last_call.kwargs.get("text", False))
-        self.assertTrue(last_call.kwargs.get("capture_output", False))
+        # In streaming mode we no longer pass text/capture_output to subprocess.run
+        self.assertNotIn("text", last_call.kwargs)
+        self.assertNotIn("capture_output", last_call.kwargs)
 
     @mock.patch("subprocess.run")
     def test_run_ansible_playbook_failure_exits_with_code(self, mock_run):
