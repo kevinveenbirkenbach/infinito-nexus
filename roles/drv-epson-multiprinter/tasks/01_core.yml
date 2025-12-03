@@ -11,11 +11,7 @@
     - imagescan-plugin-networkscan
     - epson-inkjet-printer-escpr
     - epson-inkjet-printer-escpr2
+    - imagescan
   become: false
-
-- name: install imagescan
-  community.general.pacman:
-    name: imagescan
-    state: present
 
 - include_tasks: utils/once/flag.yml
