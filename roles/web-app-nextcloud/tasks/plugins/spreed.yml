@@ -1,6 +1,7 @@
 - name: "Load Coturn Role for '{{ application_id }}'"
-  include_role:
-    name: web-svc-coturn
+  include_tasks: "utils/load_app.yml"
+  vars: 
+    load_app_id: web-svc-coturn
   when:    
     - run_once_web_svc_coturn is not defined
     - NEXTCLOUD_HPB_TURN_STANDALONE_ENABLED | bool

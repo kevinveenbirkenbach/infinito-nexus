@@ -2,4 +2,6 @@
     import_role:
       name:           "{{ handler_role_name }}"
       tasks_from:     "none.yml"
-      handlers_from:  main
+      handlers_from:  "main"
+    vars:
+      application_id: "{{ handler_role_name }}"

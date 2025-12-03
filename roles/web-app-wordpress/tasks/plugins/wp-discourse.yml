@@ -1,7 +1,8 @@
 ---
 - name: "Include web-app-discourse"
-  include_role:
-    name: web-app-discourse
+  include_tasks: "utils/load_app.yml"
+  vars: 
+    load_app_id: web-app-discourse
 
 - name: Wait for Discourse API
   wait_for:

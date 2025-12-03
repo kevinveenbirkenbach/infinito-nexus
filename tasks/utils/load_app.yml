@@ -1,0 +1,9 @@
+
+# Load with load app id
+- name: "Load Application: '{{ load_app_id }}'"
+  include_role:
+    name:   "{{ application_id }}"
+    public: false
+  vars:
+    application_id: "{{ load_app_id }}"
+    domain:         "{{ domains | get_domain(load_app_id) }}"

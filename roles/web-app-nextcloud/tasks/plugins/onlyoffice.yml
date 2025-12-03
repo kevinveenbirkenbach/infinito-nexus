@@ -1,4 +1,5 @@
 - name: "Install OnlyOffice dependency (Document Server)"
-  include_role:
-    name: web-svc-onlyoffice
+  include_tasks: "utils/load_app.yml"
+  vars: 
+    load_app_id: web-svc-onlyoffice
   when: run_once_web_svc_onlyoffice is not defined

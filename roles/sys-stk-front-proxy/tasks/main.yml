@@ -1,5 +1,5 @@
 # run_once_sys_stk_front_proxy: deactivated
 
 - name: "Load Proxy procedures if Proxy is enabled"
-  include_tasks: "01_base.yml"
+  include_tasks: "01_core.yml"
   when: SYS_STK_FRONT_PROXY_ENABLED | bool

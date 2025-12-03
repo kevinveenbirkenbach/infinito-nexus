@@ -1,6 +1,7 @@
 - name: "Load brand logos role for '{{ application_id }}'"
-  include_role:
-    name: web-svc-simpleicons
+  include_tasks: "utils/load_app.yml"
+  vars: 
+    load_app_id: web-svc-simpleicons
   when:
     - run_once_web_svc_simpleicons is not defined
     - DESKTOP_SIMPLEICONS_ENABLED | bool

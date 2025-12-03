@@ -13,30 +13,30 @@
     - application_id != 'web-app-matomo'
     - run_once_web_app_matomo is not defined
 
-- name: "Setup web-app-matomo"
-  include_role:
-    name: web-app-matomo
-    public: false
+- name: "Load Matomo (Once)"
+  include_tasks: "utils/load_app.yml"
   when:
     - matomo_reachability is defined
     - (matomo_reachability.status | default(0) | int) != 200
+  vars:
+    load_app_id: 'web-app-matomo'
 
 # Matomo can't use this dependencies - At least not on the initial setup run
 - when:
     - application_id != 'web-app-matomo'
   block:
-    - name: "Load CDN for '{{ domain }}'"
-      include_role:
-        name: web-svc-cdn
-        public: false
+    - name: "Load CDN (Once)"
+      include_tasks: "utils/load_app.yml"
       when:
         - application_id != 'web-svc-cdn'
         - run_once_web_svc_cdn is not defined
+      vars:
+        load_app_id: 'web-svc-cdn'
 
-    - name: Load Logout for '{{ domain }}'
-      include_role:
-        name: web-svc-logout
-        public: false
+    - name: "Load Logout (Once)"
+      include_tasks: "utils/load_app.yml"
       when: 
         - run_once_web_svc_logout is not defined
         - application_id != 'web-svc-logout'
+      vars:
+        load_app_id: 'web-svc-logout'

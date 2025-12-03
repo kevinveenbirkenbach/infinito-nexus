@@ -1,10 +1,10 @@
 # General
-application_id:                 "svc-prx-openresty"
+application_id:       "svc-prx-openresty"
 
 # Deactivate Database for openresty
-database_type:                  ""
+database_type:        ""
 
 # Openresty
-OPENRESTY_IMAGE:                "openresty/openresty"
-OPENRESTY_VERSION:              "alpine"
-OPENRESTY_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.openresty.name') }}"
+OPENRESTY_IMAGE:      "openresty/openresty"
+OPENRESTY_VERSION:    "alpine"
+OPENRESTY_CONTAINER:  "{{ applications | get_app_conf(application_id, 'docker.services.openresty.name') }}"
