@@ -9,6 +9,7 @@
 - include_tasks: "01_cloudflare.yml"
   when: DNS_PROVIDER == "cloudflare"
 
-- include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
+- name: "Reinitialize OpenResty Handler"
+  include_tasks: utils/load_handlers.yml
   vars:
     handler_role_name: "svc-prx-openresty"

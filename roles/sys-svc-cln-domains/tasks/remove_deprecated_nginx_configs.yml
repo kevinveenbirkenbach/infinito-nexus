@@ -5,6 +5,11 @@
     patterns: "*.{{ domain }}.conf"
   register: find_result
 
+- name: "Reinitialize OpenResty Handler"
+  include_tasks: utils/load_handlers.yml
+  vars:
+    handler_role_name: "svc-prx-openresty"
+
 - name: Remove wildcard nginx configs for {{ domain }}
   ansible.builtin.file:
     path: "{{ item.path }}"

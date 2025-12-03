@@ -1,6 +1,7 @@
 # run_once_sys_stk_full_stateful: deactivated
 
-- include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
+- name: "Reinitialize OpenResty Handler"
+  include_tasks: utils/load_handlers.yml
   vars:
     handler_role_name: "svc-prx-openresty"
 

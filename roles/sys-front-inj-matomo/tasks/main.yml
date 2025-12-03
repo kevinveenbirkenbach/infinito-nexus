@@ -1,14 +1,5 @@
 # run_once_sys_front_inj_matomo: deactivated
 
-- name: "Relevant variables for role: {{ role_path | basename }}"
-  debug:
-    msg:
-      domain: "{{ domain }}"
-      base_domain: "{{ base_domain }}"
-      matomo_verification_url: "{{ matomo_verification_url }}"
-  when: MODE_DEBUG | bool
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
 - name: "Check if site {{ domain }} is allready registered at Matomo"
   uri:
     url: "{{ matomo_verification_url }}"

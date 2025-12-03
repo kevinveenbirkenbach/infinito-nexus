@@ -3,6 +3,6 @@
   vars:
     application_id: 'web-svc-cdn'
 
-- include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
+- include_tasks: utils/load_handlers.yml
   vars:
     handler_role_name: "docker-compose"

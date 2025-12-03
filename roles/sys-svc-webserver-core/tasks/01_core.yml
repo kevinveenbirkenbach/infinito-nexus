@@ -12,7 +12,7 @@
   include_vars: "{{ DOCKER_VARS_FILE }}"
 
 - name: "Load docker compose & openresty handlers"
-  include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
+  include_tasks: utils/load_handlers.yml
   loop:
     - docker-compose
     - svc-prx-openresty

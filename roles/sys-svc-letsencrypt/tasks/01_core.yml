@@ -3,6 +3,11 @@
     name: sys-ctl-mtn-cert-renew
   when: run_once_sys_ctl_mtn_cert_renew is not defined
 
+- name: "Reinitialize OpenResty Handler"
+  include_tasks: utils/load_handlers.yml
+  vars:
+    handler_role_name: "svc-prx-openresty"
+
 - name: create nginx letsencrypt config file
   template:
     src: "letsencrypt.conf.j2"

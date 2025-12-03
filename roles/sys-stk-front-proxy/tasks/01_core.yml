@@ -1,7 +1,3 @@
-- include_tasks: "{{ [ playbook_dir, 'tasks/utils/load_handlers.yml' ] | path_join }}"
-  vars:
-    handler_role_name: "svc-prx-openresty"
-
 - name: Front bootstrap
   include_role:
     name: sys-stk-front-base
@@ -9,6 +5,11 @@
 - name: "include role for '{{ domain }}' to receive certificates and do the modification routines"
   include_role:
     name: sys-util-csp-cert
+
+- name: "Reinitialize OpenResty Handler"
+  include_tasks: utils/load_handlers.yml
+  vars:
+    handler_role_name: "svc-prx-openresty"
 
 - name: "Copy nginx config to '{{ front_proxy_domain_conf_dst }}'"
   template:
