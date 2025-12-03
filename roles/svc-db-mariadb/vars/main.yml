@@ -8,4 +8,4 @@ MARIADB_VERSION:      "{{ applications | get_app_conf(application_id,'docker.ser
 MARIADB_NAME:         "{{ applications | get_app_conf(application_id,'docker.services.mariadb.name') }}"
 MARIADB_PORT:         "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
 MARIADB_CUSTOM_IMAGE: "mariadb_custom"
-MARIADB_EXPOSE_LOCAL: false
+MARIADB_EXPOSE_LOCAL: True
