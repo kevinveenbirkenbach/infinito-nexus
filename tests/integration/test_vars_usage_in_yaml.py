@@ -157,7 +157,8 @@ class TestVarsPassedAreUsed(unittest.TestCase):
                 or self._used_in_ansible_exprs(var_name, ansible_exprs)
             )
             if not used:
-                unused.append(var_name)
+                if var_name not in ['ansible_python_interpreter']:
+                    unused.append(var_name)
 
         if unused:
             msg = (
