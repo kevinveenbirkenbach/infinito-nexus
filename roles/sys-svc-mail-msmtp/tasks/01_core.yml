@@ -1,0 +1,24 @@
+- include_tasks: utils/once/flag.yml
+
+- name: Install msmtp base package
+  community.general.pacman:
+    name:
+      - msmtp
+    state: present
+
+- name: Install msmtp-mta when Mailu is used (no local postfix relay)
+  community.general.pacman:
+    name: msmtp-mta
+    state: present
+  when: "'web-app-mailu' in group_names"
+
+- name: configure msmtprc.conf.j2
+  template:
+    src: "msmtprc.conf.j2"
+    dest: "/root/.msmtprc"
+    mode: 600
+
+- include_role:
+    name: sys-ctl-hlth-msmtp
+  when: run_once_sys_ctl_hlth_msmtp is not defined
+

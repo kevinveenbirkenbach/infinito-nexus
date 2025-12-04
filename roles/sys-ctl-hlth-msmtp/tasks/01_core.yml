@@ -1,16 +1,8 @@
-- name: Include dependency 'sys-ctl-alm-telegram'
-  include_role:
-    name: sys-ctl-alm-telegram
-  when: run_once_sys_ctl_alm_telegram is not defined
-  
 - include_role:
     name: sys-service
   vars:
     system_service_tpl_on_failure: "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     system_service_on_calendar:    "{{ SYS_SCHEDULE_HEALTH_MSMTP }}"
     system_service_timer_enabled:  true
-  when:
-    - not MODE_RESET | bool
-    - users['no-reply'].mailu_token is defined
 
 - include_tasks: utils/once/flag.yml

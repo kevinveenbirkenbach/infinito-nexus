@@ -36,4 +36,6 @@
     ansible.builtin.systemd:
       name: "{{ system_service_id | get_service_name(SOFTWARE_NAME, False) ~ escaped_name.stdout }}.service"
       state: started
-  when: MODE_ASSERT | bool
+  when:
+    - MODE_ASSERT | bool
+    - not( IS_CONTAINER | bool ) 

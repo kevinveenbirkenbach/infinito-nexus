@@ -1,0 +1,42 @@
+- include_tasks: utils/once/flag.yml
+
+- block:
+  - name: "Check if Mail Host is reachable"
+    uri:
+      url: "{{ WEB_PROTOCOL }}://{{ SYSTEM_EMAIL.HOST }}"
+      method: HEAD
+      validate_certs: yes
+      status_code: 200
+    register: mail_host_reachability
+    failed_when: false
+    changed_when: false
+    when:
+      - run_once_web_app_mailu is not defined
+      - SYSTEM_EMAIL.HOST == (domains | get_domain('web-app-mailu'))
+
+  - name: "Load Mailu Routines for '{{ role_name }}'"
+    include_tasks: 02_mailu.yml
+    when:
+      - >
+          (
+            mail_host_reachability is defined and
+            (mail_host_reachability.status | default(0) | int) != 200
+          )
+          or
+          (
+            users.get('no-reply', {}).get('mailu_token', '') | length == 0
+          )
+  when: "'web-app-mailu' in group_names"
+
+- name: Setup emails via localhost
+  include_role:
+    name: sys-svc-mail-smtp
+  when: 
+    - run_once_sys_svc_mail_smtp is not defined
+    - "'web-app-mailu' not in group_names"
+
+- name: Setup msmtp client
+  include_role:
+    name: sys-svc-mail-msmtp
+  when: 
+    - run_once_sys_svc_mail_msmtp is not defined

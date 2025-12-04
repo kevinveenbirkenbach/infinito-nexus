@@ -4,7 +4,7 @@ database_type:              "mariadb"
 
 # WordPress
 WORDPRESS_URL:                "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-WORDPRESS_MSMTP_SRC:          "{{ [ playbook_dir, 'roles/sys-svc-msmtp/templates/msmtprc.conf.j2' ] | path_join }}"
+WORDPRESS_MSMTP_SRC:          "{{ [ playbook_dir, 'roles/sys-svc-mail-msmtp/templates/msmtprc.conf.j2' ] | path_join }}"
 WORDPRESS_MSMTP_ABS:          "{{ [ docker_compose.directories.config, 'msmtprc.conf'] | path_join }}"
 WORDPRESS_MAX_UPLOAD_SIZE:    "{{ applications | get_app_conf(application_id, 'max_upload_size') }}"
 WORDPRESS_CUSTOM_IMAGE:       "wordpress_custom"

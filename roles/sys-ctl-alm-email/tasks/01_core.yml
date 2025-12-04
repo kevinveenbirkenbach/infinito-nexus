@@ -2,8 +2,8 @@
 
 - name: Include dependencies
   include_role:
-    name: "sys-svc-msmtp"
-  when: not run_once_sys_svc_msmtp | default(false)
+    name: "sys-svc-mail"
+  when: not (run_once_sys_svc_mail | default(false) | bool)
 
 - include_role:
     name: sys-service

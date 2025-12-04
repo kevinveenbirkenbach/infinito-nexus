@@ -1,0 +1,26 @@
+- include_tasks: utils/once/flag.yml
+
+- name: "Ensure msmtp-mta is absent (conflicts with postfix smtp-forwarder)"
+  community.general.pacman:
+    name:
+      - msmtp-mta
+    state: absent
+
+- name: "Install local SMTP relay (Postfix)"
+  community.general.pacman:
+    name:
+      - postfix
+    state: present
+
+- name: "Configure Postfix as localhost-only relay"
+  ansible.builtin.template:
+    src: "postfix-main.cf.j2"
+    dest: "/etc/postfix/main.cf"
+    mode: "0644"
+
+- name: "Ensure postfix is enabled and running"
+  ansible.builtin.systemd:
+    name: postfix
+    enabled: true
+    state: started
+  when: not( IS_CONTAINER | bool ) 

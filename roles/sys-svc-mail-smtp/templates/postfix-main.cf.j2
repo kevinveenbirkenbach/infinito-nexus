@@ -1,0 +1,8 @@
+# roles/sys-svc-msmtp/templates/postfix-main.cf.j2
+myhostname = {{ inventory_hostname }}
+inet_interfaces = loopback-only
+mydestination =
+relayhost =
+mynetworks = 127.0.0.0/8
+local_transport = error: local delivery disabled
+default_transport = smtp
