@@ -78,8 +78,8 @@
     cmd: "docker-compose -p {{ MATRIX_PROJECT }} up -d --remove-orphans"
     chdir: "{{ docker_compose.directories.instance }}"
   environment:
-    COMPOSE_HTTP_TIMEOUT:   600
-    DOCKER_CLIENT_TIMEOUT:  600
+    COMPOSE_HTTP_TIMEOUT:   "600"
+    DOCKER_CLIENT_TIMEOUT:  "600"
   register: result
   until:    result is succeeded
   retries:  12

@@ -34,8 +34,8 @@
   register: compose_pull
   changed_when: "'pulled' in compose_pull.stdout"
   environment:
-    COMPOSE_HTTP_TIMEOUT: 600
-    DOCKER_CLIENT_TIMEOUT: 600
+    COMPOSE_HTTP_TIMEOUT:   "600"
+    DOCKER_CLIENT_TIMEOUT:  "600"
   when: MODE_UPDATE | bool
   listen:
     - docker compose up
@@ -52,8 +52,8 @@
     chdir: "{{ docker_compose.directories.instance }}"
     executable: /bin/bash
   environment:
-    COMPOSE_HTTP_TIMEOUT: 600
-    DOCKER_CLIENT_TIMEOUT: 600
+    COMPOSE_HTTP_TIMEOUT:   "600"
+    DOCKER_CLIENT_TIMEOUT:  "600"
     # Faster build
     DOCKER_BUILDKIT: "1"
     COMPOSE_DOCKER_CLI_BUILD: "1"
@@ -71,8 +71,8 @@
     chdir: "{{ docker_compose.directories.instance }}"
     executable: /bin/bash
   environment:
-    COMPOSE_HTTP_TIMEOUT: 600
-    DOCKER_CLIENT_TIMEOUT: 600
+    COMPOSE_HTTP_TIMEOUT:   "600"
+    DOCKER_CLIENT_TIMEOUT:  "600"
   listen:
     - docker compose up
 
