@@ -38,11 +38,11 @@ WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"
 AUTO_BUILD_ALIASES:     False # If enabled it creates an alias domain for each web application by the entity name, recommended to set to false to safge domain space
 
 # Domain
-PRIMARY_DOMAIN:                           "localhost" # Primary Domain of the server
+PRIMARY_DOMAIN:                           "localhost"   # Primary Domain of the server
 
-DNS_PROVIDER:                             cloudflare              # The DNS Provider\Registrar for the domain
+DNS_PROVIDER:                             "localhost"   # The DNS Provider\Registrar for the domain -> Legit values: cloudflare
 
-HOSTING_PROVIDER:                         hetzner                 # Provider which hosts the server
+HOSTING_PROVIDER:                         "localhost"   # Provider which hosts the server -> hetzner
 
 # Which ACME method to use: webroot, cloudflare, or hetzner
 CERTBOT_ACME_CHALLENGE_METHOD:            "cloudflare"
