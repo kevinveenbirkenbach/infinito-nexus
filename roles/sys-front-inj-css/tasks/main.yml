@@ -14,7 +14,7 @@
     app_style_present: "{{ _app_style_src | length > 0 }}"
 
 - name: "Deploy per-app '{{ app_style_src }}' to '{{ css_app_dst }}'"
-  when: app_style_present
+  when: app_style_present | bool
   copy:
     content:  "{{ lookup('template', app_style_src) }}"
     dest:     "{{ css_app_dst }}"

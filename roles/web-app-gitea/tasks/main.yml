@@ -56,7 +56,7 @@
 
 - name: Execute Cleanup Routines
   include_tasks: 03_cleanup.yml 
-  when: MODE_CLEANUP
+  when: MODE_CLEANUP | bool
 
 - name: Include DNS role to register Gitea domain(s)
   include_role:

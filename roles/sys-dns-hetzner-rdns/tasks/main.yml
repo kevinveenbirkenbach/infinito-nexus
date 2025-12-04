@@ -14,11 +14,11 @@
 - name: "Note: both Cloud token and Robot creds provided; using Cloud flavor"
   debug:
     msg: "Both HETZNER_API_TOKEN and Robot credentials present → proceeding with Cloud (hcloud) flavor."
-  when: _use_cloud and _use_robot
+  when: _use_cloud | bool and _use_robot | bool
 
 - name: Include Cloud flavor (hcloud)
   include_tasks: flavors/cloud.yml
-  when: _use_cloud
+  when: _use_cloud | bool
 
 - name: Include Robot flavor (Robot Webservice)
   include_tasks: flavors/robot.yml
