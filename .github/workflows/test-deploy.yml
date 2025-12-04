@@ -43,7 +43,7 @@ jobs:
       # 1) First deploy: normal + debug (inner dockerd with vfs)
       - name: First deploy (normal + debug)
         run: |
-          docker run --network=host --rm --privileged \
+          docker run --network=host --rm --privileged --cgroupns=host \
             -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '
@@ -93,7 +93,7 @@ jobs:
       # 2) Second deploy: reset + debug (same inner dockerd pattern, also vfs)
       - name: Second deploy (--reset --debug)
         run: |
-          docker run --network=host --rm --privileged \
+          docker run --network=host --rm --privileged --cgroupns=host \
             -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '
@@ -142,7 +142,7 @@ jobs:
       # 3) Third deploy: async (no debug, same inner dockerd, also vfs)
       - name: Third deploy (async deploy – no debug)
         run: |
-          docker run --network=host --rm --privileged \
+          docker run --network=host --rm --privileged --cgroupns=host \
             -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
             infinito:latest \
             /bin/sh -lc '
