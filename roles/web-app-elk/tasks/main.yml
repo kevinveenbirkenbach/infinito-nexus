@@ -1,11 +1,15 @@
 ---
-
-- name: "include role sys-stk-front-proxy for {{ application_id }}"
+- name: "load docker, proxy for '{{ application_id }}'"
   include_role:
-    name: sys-stk-front-proxy
+    name: sys-stk-full-stateless
   vars:
-    domain:   "{{ domains | get_domain(application_id) }}"
-    http_port:   "{{ ports.localhost.http[application_id] }}"
+    docker_compose_flush_handlers:        false
+    docker_compose_file_creation_enabled: false
+    docker_git_repository_pull:           true
+    docker_git_repository_address:        "https://github.com/kevinveenbirkenbach/web-app-elk.git"
+    docker_git_repository_branch:         "master"
+    domain:                               "{{ domains | get_domain(application_id) }}"
+    http_port:                            "{{ ports.localhost.http[application_id] }}"
 
 - name: create elasticsearch-sysctl.conf
   copy:
@@ -18,36 +22,22 @@
   command:
     cmd: sysctl -w vm.max_map_count=262144
 
-- name: "create {{docker_elk_compose_path}}"
-  file:
-    path: "{{docker_elk_compose_path}}"
-    state: directory
-    mode: "0755"
-
-- name: git pull web-app-elk
-  git:
-    repo: "https://github.com/kevinveenbirkenbach/web-app-elk.git"
-    dest: "{{docker_elk_compose_path}}"
-    update: yes
-  notify: recreate web-app-elk
-  ignore_errors: true
-
 - name: copy docker-compose.yml
-  template: src=docker-compose.yml.j2 dest={{docker_elk_compose_path}}docker-compose.yml
-  notify: recreate web-app-elk
+  template: src=docker-compose.yml.j2 dest={{ docker_compose.directories.instance }}docker-compose.yml
+  notify: docker compose up
 
 - name: copy elasticsearch.yml
-  template: src=elasticsearch.yml.j2 dest={{docker_elk_compose_path}}elasticsearch/config/elasticsearch.yml
-  notify: recreate web-app-elk
+  template: src=elasticsearch.yml.j2 dest={{ docker_compose.directories.volumes }}elasticsearch/config/elasticsearch.yml
+  notify: docker compose up
 
 - name: copy kibana.yml
-  template: src=kibana.yml.j2 dest={{docker_elk_compose_path}}kibana/config/kibana.yml
-  notify: recreate web-app-elk
+  template: src=kibana.yml.j2 dest={{ docker_compose.directories.volumes }}kibana/config/kibana.yml
+  notify: docker compose up
 
 - name: copy logstash.yml
-  template: src=logstash.yml.j2 dest={{docker_elk_compose_path}}logstash/config/logstash.yml
-  notify: recreate web-app-elk
+  template: src=logstash.yml.j2 dest={{ docker_compose.directories.volumes }}logstash/config/logstash.yml
+  notify: docker compose up
 
 - name: copy logstash.conf
-  template: src=logstash.conf.j2 dest={{docker_elk_compose_path}}logstash/pipeline/logstash.conf
-  notify: recreate web-app-elk
+  template: src=logstash.conf.j2 dest={{ docker_compose.directories.volumes }}logstash/pipeline/logstash.conf
+  notify: docker compose up

@@ -1,7 +1,0 @@
----
-- name: recreate web-app-elk
-  command:
-    cmd: docker-compose up -d --force-recreate
-    chdir: "{{docker_elk_compose_path}}"
-  environment:
-    COMPOSE_HTTP_TIMEOUT: 600

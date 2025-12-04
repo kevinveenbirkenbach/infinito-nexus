@@ -1,3 +1,2 @@
 ---
-docker_elk_compose_path: "/srv/github.com/kevinveenbirkenbach/web-app-elk/"
 elastic_search_password: '' # Just defined to pass the integration test. this role is old and hadn't been used since ages so @todo delete it as soon as you implement it productive
