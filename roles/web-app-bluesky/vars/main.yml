@@ -5,7 +5,7 @@ application_id:                 "web-app-bluesky"
 
 ## Social App
 BLUESKY_SOCIAL_APP_DIR:         "{{ [ docker_compose.directories.services, 'social-app' ] | path_join  }}"
-BLUESKY_GEOLOCATION_PATH:       "{{ [ BLUESKY_SOCIAL_APP_DIR,'src/state/geolocation/index.tsx' ] | path_join }}"
+BLUESKY_GEOLOCATION_PATH:       "{{ [ BLUESKY_SOCIAL_APP_DIR,'src/geolocation/index.tsx' ] | path_join }}"
 
 # This should be removed when the following issue is closed:
 # https://github.com/bluesky-social/pds/issues/52

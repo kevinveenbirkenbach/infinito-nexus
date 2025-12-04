@@ -1,0 +1,59 @@
+- include_tasks: utils/once/flag.yml
+
+- name: "include docker-compose role"
+  include_role:
+    name: docker-compose
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: "Include front proxy for {{ BLUESKY_API_DOMAIN }}:{{ BLUESKY_API_PORT }}"
+  include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain: "{{ BLUESKY_API_DOMAIN }}"
+    http_port: "{{ BLUESKY_API_PORT }}"
+
+- name: "Include front proxy for {{ BLUESKY_WEB_DOMAIN }}:{{ BLUESKY_WEB_PORT }}"
+  include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain:                         "{{ BLUESKY_WEB_DOMAIN }}"
+    http_port:                      "{{ BLUESKY_WEB_PORT }}"
+    webserver_extra_configuration:  "{{ BLUESKY_FRONT_PROXY_CONTENT }}"
+  when: BLUESKY_WEB_ENABLED | bool
+
+- name: "Include front proxy for {{ BLUESKY_VIEW_DOMAIN_FINAL }}:{{ BLUESKY_VIEW_PORT }}"
+  include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain:     "{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
+    http_port:  "{{ BLUESKY_VIEW_PORT }}"
+  when: BLUESKY_VIEW_ENABLED | bool
+
+- name: "Execute PDS routines"
+  ansible.builtin.include_tasks: "02_pds.yml"
+
+- name: "Execute Social App routines"
+  ansible.builtin.include_tasks: "03_social_app.yml"
+  when: BLUESKY_WEB_ENABLED | bool
+
+- name: "DNS for Bluesky"
+  include_tasks: "04_dns.yml"
+  when: DNS_PROVIDER | lower == 'cloudflare'
+
+- name: Resolve redirect_domain_mappings now (before include_role)
+  set_fact:
+    BLUESKY_REDIRECT_DOMAIN_MAPPINGS: >-
+      {{
+        ( (BLUESKY_WEB_ENABLED  | bool) | ternary([], [ {'source': BLUESKY_WEB_DOMAIN,  'target': BLUESKY_API_DOMAIN } ]) )
+        + ( (BLUESKY_VIEW_ENABLED | bool) | ternary([], [ {'source': BLUESKY_VIEW_DOMAIN_LOCAL, 'target': BLUESKY_API_DOMAIN } ]) )
+      }}
+
+- name: "Redirect deactivated BlueSky Services to {{ BLUESKY_API_DOMAIN }}"
+  include_tasks: "utils/load_app.yml"
+  vars:
+    load_app_id: web-opt-rdr-domains
+    redirect_domain_mappings: "{{ BLUESKY_REDIRECT_DOMAIN_MAPPINGS }}"
+
+- name: "Flush handlers for '{{ role_name }}'"
+  meta: flush_handlers
