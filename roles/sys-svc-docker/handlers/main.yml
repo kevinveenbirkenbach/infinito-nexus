@@ -1,5 +1,5 @@
 ---
-- name: docker restart
+- name: Ensure Docker daemon is running on host
   ansible.builtin.service:
     name: docker.service
     state:  restarted

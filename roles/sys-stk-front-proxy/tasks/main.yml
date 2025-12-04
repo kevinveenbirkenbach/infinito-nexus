@@ -1,6 +1,6 @@
 # run_once_sys_stk_front_proxy: deactivated
 
-- name: Front bootstrap
+- name: Bootstrap Frontend Nase
   include_role:
     name: sys-stk-front-base
 
@@ -8,7 +8,7 @@
   include_role:
     name: sys-util-csp-cert
 
-- name: "Copy nginx config to '{{ front_proxy_domain_conf_dst }}'"
+- name: "Copy NGINX ('{{ domain }}') config to '{{ front_proxy_domain_conf_dst }}'"
   template:
     src: "{{ item }}"
     dest: "{{ front_proxy_domain_conf_dst }}"
@@ -28,7 +28,7 @@
     failed_when: false
     changed_when: false
 
-  - name: Restart nginx if site is down
+  - name: Restart NGINX if site is down
     command:
       cmd: "true"
     notify: restart openresty

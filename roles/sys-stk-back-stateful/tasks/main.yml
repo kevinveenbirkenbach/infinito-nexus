@@ -2,7 +2,8 @@
 
 - name: "For '{{ application_id }}': Set database_application_id (Needed due to lazzy loading issue)"
   set_fact:
-    database_application_id: "{{ application_id }}"
+    database_application_id:    "{{ application_id }}"
+    database_application_type:  "{{ database_type }}"
 
 - name: "For '{{ application_id }}': Load database variables"
   include_vars: "{{ item }}"
