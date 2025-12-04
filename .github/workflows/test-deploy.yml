@@ -1,3 +1,4 @@
+# .github/workflows/test-deploy.yml
 name: Build & Test Infinito.Nexus CLI in Docker Container
 
 on:
@@ -15,7 +16,6 @@ jobs:
     timeout-minutes: 240
 
     env:
-      # The following roles will be ignored in the tests
       EXCLUDED_ROLES: >
         drv-lid-switch,
         svc-net-wireguard-core,
@@ -26,8 +26,12 @@ jobs:
         web-app-bridgy-fed,
         web-app-oauth2-proxy,
         web-app-postmarks,
+        web-app-elk,
+        web-app-syncope,
         web-app-socialhome,
         web-svc-xmpp,
+
+      INFINITO_IMAGE: infinito:latest
 
     steps:
       - name: Main Checkout repository
@@ -36,154 +40,29 @@ jobs:
       - name: Show Docker version
         run: docker version
 
-      - name: Build Docker image
-        run: |
-          docker build --network=host --pull -t infinito:latest .
-
-      # 1) First deploy: normal + debug (inner dockerd with vfs)
+      # First deploy: normal + debug
       - name: First deploy (normal + debug)
         run: |
-          docker run --network=host --rm --privileged --cgroupns=host \
-            -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
-            infinito:latest \
-            /bin/sh -lc '
-              set -e
+          python -m cli.deploy.container --build --exclude "$EXCLUDED_ROLES" -- \
+            -T server \
+            --debug \
+            --skip-cleanup \
+            --skip-tests
 
-              echo ">>> Starting inner dockerd..."
-              dockerd --debug --host=unix:///var/run/docker.sock --storage-driver=vfs \
-                >/var/log/dockerd.log 2>&1 &
-
-              echo ">>> Waiting for inner Docker daemon..."
-              for i in $(seq 1 60); do
-                if docker info >/dev/null 2>&1; then
-                  echo ">>> Inner Docker daemon is up."
-                  break
-                fi
-                sleep 1
-              done
-
-              if ! docker info >/dev/null 2>&1; then
-                echo "ERROR: Inner Docker daemon did not start in time." >&2
-                echo "----------- dockerd.log (inside infinito) -----------" >&2
-                if [ -f /var/log/dockerd.log ]; then
-                  sed -n "1,200p" /var/log/dockerd.log >&2
-                else
-                  echo "dockerd.log not found" >&2
-                fi
-                echo "-----------------------------------------------------" >&2
-                exit 1
-              fi
-
-              echo ">>> Inner Docker daemon is up, proceeding with deploy."
-              cd /opt/infinito-src
-
-              echo ">>> Create CI inventory (normal + debug)..."
-              infinito create inventory inventories/github-ci \
-                --host localhost \
-                --exclude "$EXCLUDED_ROLES" \
-                --ssl-disabled
-
-              INVENTORY_PATH="inventories/github-ci/servers.yml"
-              VAULT_FILE="inventories/github-ci/.password"
-
-              echo ">>> First deploy (normal + debug)..."
-              infinito deploy "$INVENTORY_PATH" -T server -p "$VAULT_FILE" --debug --skip-tests
-            '
-
-      # 2) Second deploy: reset + debug (same inner dockerd pattern, also vfs)
+      # Second deploy: reset + debug
       - name: Second deploy (--reset --debug)
         run: |
-          docker run --network=host --rm --privileged --cgroupns=host \
-            -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
-            infinito:latest \
-            /bin/sh -lc '
-              set -e
+          python -m cli.deploy.container --exclude "$EXCLUDED_ROLES" -- \
+            -T server \
+            --reset \
+            --debug \
+            --skip-cleanup \
+            --skip-tests
 
-              echo ">>> Starting inner dockerd..."
-              dockerd --debug --host=unix:///var/run/docker.sock --storage-driver=vfs \
-                >/var/log/dockerd.log 2>&1 &
-
-              echo ">>> Waiting for inner Docker daemon..."
-              for i in $(seq 1 60); do
-                if docker info >/dev/null 2>&1; then
-                  echo ">>> Inner Docker daemon is up."
-                  break
-                fi
-                sleep 1
-              done
-
-              if ! docker info >/dev/null 2>&1; then
-                echo "ERROR: Inner Docker daemon did not start in time." >&2
-                echo "----------- dockerd.log (inside infinito) -----------" >&2
-                if [ -f /var/log/dockerd.log ]; then
-                  sed -n "1,200p" /var/log/dockerd.log >&2
-                else
-                  echo "dockerd.log not found" >&2
-                fi
-                echo "-----------------------------------------------------" >&2
-                exit 1
-              fi
-
-              cd /opt/infinito-src
-
-              echo ">>> Recreate CI inventory (reset run)..."
-              infinito create inventory inventories/github-ci \
-                --host localhost \
-                --exclude "$EXCLUDED_ROLES" \
-                --ssl-disabled
-
-              INVENTORY_PATH="inventories/github-ci/servers.yml"
-              VAULT_FILE="inventories/github-ci/.password"
-
-              echo ">>> Second deploy (--reset --debug)..."
-              infinito deploy "$INVENTORY_PATH" -T server -p "$VAULT_FILE" --skip-tests --reset --debug
-            '
-
-      # 3) Third deploy: async (no debug, same inner dockerd, also vfs)
+      # Third deploy: async, no debug
       - name: Third deploy (async deploy – no debug)
         run: |
-          docker run --network=host --rm --privileged --cgroupns=host \
-            -e EXCLUDED_ROLES="$EXCLUDED_ROLES" \
-            infinito:latest \
-            /bin/sh -lc '
-              set -e
-
-              echo ">>> Starting inner dockerd..."
-              dockerd --debug --host=unix:///var/run/docker.sock --storage-driver=vfs \
-                >/var/log/dockerd.log 2>&1 &
-
-              echo ">>> Waiting for inner Docker daemon..."
-              for i in $(seq 1 60); do
-                if docker info >/dev/null 2>&1; then
-                  echo ">>> Inner Docker daemon is up."
-                  break
-                fi
-                sleep 1
-              done
-
-              if ! docker info >/dev/null 2>&1; then
-                echo "ERROR: Inner Docker daemon did not start in time." >&2
-                echo "----------- dockerd.log (inside infinito) -----------" >&2
-                if [ -f /var/log/dockerd.log ]; then
-                  sed -n "1,200p" /var/log/dockerd.log >&2
-                else
-                  echo "dockerd.log not found" >&2
-                fi
-                echo "-----------------------------------------------------" >&2
-                exit 1
-              fi
-
-              cd /opt/infinito-src
-
-              echo ">>> Create/update inventory for async deploy..."
-              infinito create inventory inventories/github-ci \
-                --host localhost \
-                --exclude "$EXCLUDED_ROLES" \
-                --ssl-disabled
-
-              INVENTORY_PATH="inventories/github-ci/servers.yml"
-              VAULT_FILE="inventories/github-ci/.password"
-
-              echo ">>> Third deploy (async, no debug)..."
-              infinito deploy "$INVENTORY_PATH" -T server -p "$VAULT_FILE" --skip-tests --async
-            '
+          python -m cli.deploy.container --exclude "$EXCLUDED_ROLES" -- \
+            -T server \
+            --skip-cleanup \
+            --skip-tests
