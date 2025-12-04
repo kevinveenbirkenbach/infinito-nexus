@@ -1,12 +1,13 @@
-#!/usr/bin/env python3
+    #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
-Infinito.Nexus deploy CLI
+Infinito.Nexus Deploy CLI
 
 This script is the main entrypoint for running the Ansible playbook with
 dynamic MODE_* flags, automatic inventory validation, and optional build/test
-steps.
+phases. It supports partial deployments, dynamic MODE flag generation,
+inventory validation, and structured execution flow.
 """
 
 import argparse
@@ -17,6 +18,20 @@ import sys
 import re
 from typing import Optional, Dict, Any, List
 
+
+# --------------------------------------------------------------------------------------
+# Path resolution
+# --------------------------------------------------------------------------------------
+
+# Current file: .../cli/deploy/deploy.py
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))        # → cli/deploy
+CLI_ROOT   = os.path.dirname(SCRIPT_DIR)                        # → cli
+REPO_ROOT  = os.path.dirname(CLI_ROOT)                          # → project root
+
+
+# --------------------------------------------------------------------------------------
+# Main execution logic
+# --------------------------------------------------------------------------------------
 
 def run_ansible_playbook(
     inventory: str,
@@ -30,96 +45,97 @@ def run_ansible_playbook(
     logs: bool = False,
     diff: bool = False,
 ) -> None:
-    """Run ansible-playbook with the given parameters and modes."""
+    """Run ansible-playbook with the given parameters and execution modes."""
     start_time = datetime.datetime.now()
     print(f"\n▶️ Script started at: {start_time.isoformat()}\n")
 
-    # 1) Cleanup phase (MODE_CLEANUP)
+    # ---------------------------------------------------------
+    # 1) Cleanup Phase
+    # ---------------------------------------------------------
     if modes.get("MODE_CLEANUP", False):
-        cleanup_command = ["make", "clean-keep-logs"] if logs else ["make", "clean"]
-        print(f"\n🧹 Cleaning up project ({' '.join(cleanup_command)})...\n")
-        subprocess.run(cleanup_command, check=True)
+        cleanup_cmd = ["make", "clean-keep-logs"] if logs else ["make", "clean"]
+        print(f"\n🧹 Running cleanup ({' '.join(cleanup_cmd)})...\n")
+        subprocess.run(cleanup_cmd, check=True)
     else:
-        print("\n🧹 Cleanup skipped (MODE_CLEANUP=false or not set)\n")
+        print("\n🧹 Cleanup skipped (MODE_CLEANUP not set or False)\n")
 
-    # 2) Build phase
+    # ---------------------------------------------------------
+    # 2) Build Phase
+    # ---------------------------------------------------------
     if not skip_build:
-        print("\n🛠️  Building project (make messy-build)...\n")
+        print("\n🛠️  Running project build (make messy-build)...\n")
         subprocess.run(["make", "messy-build"], check=True)
     else:
         print("\n🛠️  Build skipped (--skip-build)\n")
 
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    repo_root = os.path.dirname(script_dir)
-    playbook = os.path.join(repo_root, "playbook.yml")
+    # The Ansible playbook is located in the repo root
+    playbook_path = os.path.join(REPO_ROOT, "playbook.yml")
 
-    # 3) Inventory validation phase (MODE_ASSERT)
+    # ---------------------------------------------------------
+    # 3) Inventory Validation Phase
+    # ---------------------------------------------------------
     if modes.get("MODE_ASSERT", None) is False:
         print("\n🔍 Inventory assertion explicitly disabled (MODE_ASSERT=false)\n")
-    elif "MODE_ASSERT" not in modes or modes["MODE_ASSERT"] is True:
+    else:
         print("\n🔍 Validating inventory before deployment...\n")
+        validator_path = os.path.join(CLI_ROOT, "validate", "inventory.py")
         try:
             subprocess.run(
-                [
-                    sys.executable,
-                    os.path.join(script_dir, "validate", "inventory.py"),
-                    os.path.dirname(inventory),
-                ],
+                [sys.executable, validator_path, os.path.dirname(inventory)],
                 check=True,
             )
         except subprocess.CalledProcessError:
             print(
-                "\n[ERROR] Inventory validation failed. Aborting deploy.\n",
+                "\n[ERROR] Inventory validation failed. Aborting deployment.\n",
                 file=sys.stderr,
             )
             sys.exit(1)
 
-    # 4) Test phase
+    # ---------------------------------------------------------
+    # 4) Test Phase
+    # ---------------------------------------------------------
     if not skip_tests:
         print("\n🧪 Running tests (make messy-test)...\n")
         subprocess.run(["make", "messy-test"], check=True)
     else:
         print("\n🧪 Tests skipped (--skip-tests)\n")
 
+    # ---------------------------------------------------------
     # 5) Build ansible-playbook command
-    cmd: List[str] = ["ansible-playbook", "-i", inventory, playbook]
+    # ---------------------------------------------------------
+    cmd: List[str] = ["ansible-playbook", "-i", inventory, playbook_path]
 
-    # --limit / -l
+    # Limit hosts
     if limit:
         cmd.extend(["-l", limit])
 
-    # extra var: allowed_applications
+    # Allowed applications (partial deployment)
     if allowed_applications:
         joined = ",".join(allowed_applications)
         cmd.extend(["-e", f"allowed_applications={joined}"])
 
-    # inject MODE_* variables as extra vars
+    # MODE_* flags
     for key, value in modes.items():
         val = str(value).lower() if isinstance(value, bool) else str(value)
         cmd.extend(["-e", f"{key}={val}"])
 
-    # vault password handling
+    # Vault password file
     if password_file:
-        # If a file is explicitly provided, pass it through
         cmd.extend(["--vault-password-file", password_file])
-    # else:
-    #   No explicit vault option → ansible will prompt if it needs a password.
-    #   This keeps the old behaviour and the CLI help text correct.
 
-    # diff mode
+    # Enable diff mode
     if diff:
         cmd.append("--diff")
 
-    # MODE_DEBUG=true → always at least -vvv
+    # MODE_DEBUG → enforce high verbosity
     if modes.get("MODE_DEBUG", False):
         verbose = max(verbose, 3)
 
-    # verbosity flags
+    # Verbosity flags
     if verbose:
         cmd.append("-" + "v" * verbose)
 
     print("\n🚀 Launching Ansible Playbook...\n")
-    # Capture output so the real Ansible error is visible before exit
     result = subprocess.run(cmd)
 
     if result.returncode != 0:
@@ -130,14 +146,17 @@ def run_ansible_playbook(
         sys.exit(result.returncode)
 
     end_time = datetime.datetime.now()
+
     print(f"\n✅ Script ended at: {end_time.isoformat()}\n")
+    print(f"⏱️ Total execution time: {end_time - start_time}\n")
 
-    duration = end_time - start_time
-    print(f"⏱️ Total execution time: {duration}\n")
 
+# --------------------------------------------------------------------------------------
+# Application ID validation
+# --------------------------------------------------------------------------------------
 
 def validate_application_ids(inventory: str, app_ids: List[str]) -> None:
-    """Use ValidDeployId helper to ensure all requested IDs are valid."""
+    """Validate requested application IDs using ValidDeployId."""
     if not app_ids:
         return
 
@@ -145,17 +164,22 @@ def validate_application_ids(inventory: str, app_ids: List[str]) -> None:
 
     validator = ValidDeployId()
     invalid = validator.validate(inventory, app_ids)
+
     if invalid:
         print("\n[ERROR] Some application_ids are invalid for this inventory:\n")
         for app_id, status in invalid.items():
-            reasons: List[str] = []
+            reasons = []
             if not status.get("allowed", True):
                 reasons.append("not allowed by configuration")
             if not status.get("in_inventory", True):
                 reasons.append("not present in inventory")
-            print(f"  - {app_id}: " + ", ".join(reasons))
+            print(f"  - {app_id}: {', '.join(reasons)}")
         sys.exit(1)
 
+
+# --------------------------------------------------------------------------------------
+# MODE_* parsing logic
+# --------------------------------------------------------------------------------------
 
 MODE_LINE_RE = re.compile(
     r"""^\s*(?P<key>[A-Z0-9_]+)\s*:\s*(?P<value>.+?)\s*(?:#\s*(?P<cmt>.*))?\s*$"""
@@ -163,7 +187,7 @@ MODE_LINE_RE = re.compile(
 
 
 def _parse_bool_literal(text: str) -> Optional[bool]:
-    """Parse a simple true/false/yes/no/on/off into bool or None."""
+    """Convert simple true/false/yes/no/on/off into boolean."""
     t = text.strip().lower()
     if t in ("true", "yes", "on"):
         return True
@@ -173,12 +197,9 @@ def _parse_bool_literal(text: str) -> Optional[bool]:
 
 
 def load_modes_from_yaml(modes_yaml_path: str) -> List[Dict[str, Any]]:
-    """
-    Load MODE_* metadata from a simple key: value file.
-
-    Each non-comment, non-empty line is parsed via MODE_LINE_RE.
-    """
+    """Load MODE_* definitions from YAML-like key/value file."""
     modes: List[Dict[str, Any]] = []
+
     if not os.path.exists(modes_yaml_path):
         raise FileNotFoundError(f"Modes file not found: {modes_yaml_path}")
 
@@ -187,9 +208,11 @@ def load_modes_from_yaml(modes_yaml_path: str) -> List[Dict[str, Any]]:
             line = line.rstrip()
             if not line or line.lstrip().startswith("#"):
                 continue
+
             m = MODE_LINE_RE.match(line)
             if not m:
                 continue
+
             key = m.group("key")
             val = m.group("value").strip()
             cmt = (m.group("cmt") or "").strip()
@@ -198,6 +221,7 @@ def load_modes_from_yaml(modes_yaml_path: str) -> List[Dict[str, Any]]:
                 continue
 
             default_bool = _parse_bool_literal(val)
+
             modes.append(
                 {
                     "name": key,
@@ -205,20 +229,23 @@ def load_modes_from_yaml(modes_yaml_path: str) -> List[Dict[str, Any]]:
                     "help": cmt or f"Toggle {key}",
                 }
             )
+
     return modes
 
+
+# --------------------------------------------------------------------------------------
+# Dynamic argparse mode injection
+# --------------------------------------------------------------------------------------
 
 def add_dynamic_mode_args(
     parser: argparse.ArgumentParser, modes_meta: List[Dict[str, Any]]
 ) -> Dict[str, Dict[str, Any]]:
     """
-    Add dynamic CLI flags based on MODE_* metadata.
-
-    - MODE_FOO: true  -> --skip-foo (default enabled, flag disables it)
-    - MODE_BAR: false -> --bar     (default disabled, flag enables it)
-    - MODE_BAZ: null  -> --baz {true,false} (explicit)
+    Add command-line arguments dynamically based on MODE_* metadata.
     """
+
     spec: Dict[str, Dict[str, Any]] = {}
+
     for m in modes_meta:
         name = m["name"]
         default = m["default"]
@@ -226,25 +253,24 @@ def add_dynamic_mode_args(
         short = name.replace("MODE_", "").lower()
 
         if default is True:
+            # MODE_FOO: true  → --skip-foo disables it
             opt = f"--skip-{short}"
             dest = f"skip_{short}"
-            help_txt = desc or f"Skip/disable {short} (default: enabled)"
-            parser.add_argument(opt, action="store_true", help=help_txt, dest=dest)
+            parser.add_argument(opt, action="store_true", dest=dest, help=desc)
             spec[name] = {"dest": dest, "default": True, "kind": "bool_true"}
+
         elif default is False:
+            # MODE_BAR: false → --bar enables it
             opt = f"--{short}"
             dest = short
-            help_txt = desc or f"Enable {short} (default: disabled)"
-            parser.add_argument(opt, action="store_true", help=help_txt, dest=dest)
+            parser.add_argument(opt, action="store_true", dest=dest, help=desc)
             spec[name] = {"dest": dest, "default": False, "kind": "bool_false"}
+
         else:
+            # Explicit: MODE_XYZ: null → --xyz true|false
             opt = f"--{short}"
             dest = short
-            help_txt = (
-                desc
-                or f"Set {short} explicitly (true/false). If omitted, keep inventory default."
-            )
-            parser.add_argument(opt, choices=["true", "false"], help=help_txt, dest=dest)
+            parser.add_argument(opt, choices=["true", "false"], dest=dest, help=desc)
             spec[name] = {"dest": dest, "default": None, "kind": "explicit"}
 
     return spec
@@ -253,116 +279,76 @@ def add_dynamic_mode_args(
 def build_modes_from_args(
     spec: Dict[str, Dict[str, Any]], args_namespace: argparse.Namespace
 ) -> Dict[str, Any]:
-    """
-    Build a MODE_* dict from parsed CLI args and the dynamic spec.
-    """
+    """Resolve CLI arguments into a MODE_* dictionary."""
     modes: Dict[str, Any] = {}
+
     for mode_name, info in spec.items():
         dest = info["dest"]
         kind = info["kind"]
-        val = getattr(args_namespace, dest, None)
+        value = getattr(args_namespace, dest, None)
 
         if kind == "bool_true":
-            # default True, flag means "skip" → False
-            modes[mode_name] = False if val else True
+            modes[mode_name] = False if value else True
+
         elif kind == "bool_false":
-            # default False, flag enables → True
-            modes[mode_name] = True if val else False
+            modes[mode_name] = True if value else False
+
         else:  # explicit
-            if val is not None:
-                modes[mode_name] = True if val == "true" else False
+            if value is not None:
+                modes[mode_name] = (value == "true")
+
     return modes
 
 
+# --------------------------------------------------------------------------------------
+# Main entrypoint
+# --------------------------------------------------------------------------------------
+
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Deploy the Infinito.Nexus stack via ansible-playbook."
+        description="Deploy the Infinito.Nexus stack using ansible-playbook."
     )
 
+    # Standard arguments
+    parser.add_argument("inventory", help="Path to the inventory file.")
+    parser.add_argument("-l", "--limit", help="Limit execution to certain hosts or groups.")
     parser.add_argument(
-        "inventory",
-        help="Path to the inventory file (INI or YAML) containing hosts and variables.",
+        "-T", "--host-type", choices=["server", "desktop"], default="server",
+        help="Specify target type: server or desktop."
     )
     parser.add_argument(
-        "-l",
-        "--limit",
-        help="Restrict execution to a specific host or host group from the inventory.",
+        "-p", "--password-file",
+        help="Vault password file for encrypted variables."
+    )
+    parser.add_argument("-B", "--skip-build", action="store_true", help="Skip build phase.")
+    parser.add_argument("-t", "--skip-tests", action="store_true", help="Skip test phase.")
+    parser.add_argument(
+        "-i", "--id", nargs="+", default=[], dest="id",
+        help="List of application_ids for partial deployment."
     )
     parser.add_argument(
-        "-T",
-        "--host-type",
-        choices=["server", "desktop"],
-        default="server",
-        help=(
-            "Specify whether the target is a server or a personal computer. "
-            "Affects role selection and variables."
-        ),
+        "-v", "--verbose", action="count", default=0,
+        help="Increase verbosity (e.g. -vvv)."
     )
-    parser.add_argument(
-        "-p",
-        "--password-file",
-        help=(
-            "Path to the file containing the Vault password. "
-            "If not provided, ansible-vault will prompt interactively."
-        ),
-    )
-    parser.add_argument(
-        "-B",
-        "--skip-build",
-        action="store_true",
-        help="Skip running 'make messy-build' before deployment.",
-    )
-    parser.add_argument(
-        "-t",
-        "--skip-tests",
-        action="store_true",
-        help="Skip running 'make messy-test' before deployment.",
-    )
-    parser.add_argument(
-        "-i",
-        "--id",
-        nargs="+",
-        default=[],
-        dest="id",
-        help=(
-            "List of application_id's for partial deploy. "
-            "If not set, all application IDs defined in the inventory will be executed."
-        ),
-    )
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="count",
-        default=0,
-        help=(
-            "Increase verbosity level. Multiple -v flags increase detail "
-            "(e.g., -vvv for maximum log output)."
-        ),
-    )
-    parser.add_argument(
-        "--logs",
-        action="store_true",
-        help="Keep the CLI logs during cleanup command.",
-    )
-    parser.add_argument(
-        "--diff",
-        action="store_true",
-        help="Pass --diff to ansible-playbook to show configuration changes.",
-    )
+    parser.add_argument("--logs", action="store_true", help="Keep logs during cleanup.")
+    parser.add_argument("--diff", action="store_true", help="Enable Ansible diff mode.")
 
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    repo_root = os.path.dirname(script_dir)
-    modes_yaml_path = os.path.join(repo_root, "group_vars", "all", "01_modes.yml")
+    # Dynamic MODE_* parsing
+    modes_yaml_path = os.path.join(REPO_ROOT, "group_vars", "all", "01_modes.yml")
     modes_meta = load_modes_from_yaml(modes_yaml_path)
     modes_spec = add_dynamic_mode_args(parser, modes_meta)
 
     args = parser.parse_args()
+
+    # Validate application IDs
     validate_application_ids(args.inventory, args.id)
 
+    # Build final mode map
     modes = build_modes_from_args(modes_spec, args)
     modes["MODE_LOGS"] = args.logs
     modes["host_type"] = args.host_type
 
+    # Run playbook
     run_ansible_playbook(
         inventory=args.inventory,
         modes=modes,
