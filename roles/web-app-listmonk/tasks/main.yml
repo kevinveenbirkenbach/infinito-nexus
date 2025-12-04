@@ -78,7 +78,7 @@
   loop: "{{ LISTMONK_SETTINGS }}"
   loop_control:
     label: "{{ item.key }}"
-  when: item.when is not defined or item.when
+  when: (item.when | default(true)) | bool
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
