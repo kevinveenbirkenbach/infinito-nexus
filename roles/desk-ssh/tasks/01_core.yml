@@ -5,9 +5,10 @@
 
 - name: pull ssh repository from {{desk_ssh_repository}}
   git:
-    repo: "{{desk_ssh_repository}}"
-    dest: "$HOME/.ssh"
-    update: yes
+    repo:     "{{desk_ssh_repository}}"
+    dest:     "$HOME/.ssh"
+    update:   yes
+    depth:    1
   register: git_result
   ignore_errors: true
   become: false

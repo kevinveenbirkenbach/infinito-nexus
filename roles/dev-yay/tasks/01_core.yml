@@ -32,10 +32,11 @@
   become: true
   become_user: "{{ AUR_BUILDER_USER }}"
   git:
-    repo: https://aur.archlinux.org/yay.git
-    dest: "/home/{{ AUR_BUILDER_USER }}/yay"
-    clone: yes
+    repo:   https://aur.archlinux.org/yay.git
+    dest:   "/home/{{ AUR_BUILDER_USER }}/yay"
+    clone:  yes
     update: yes
+    depth:  1
 
 - name: Build and install yay
   become: true

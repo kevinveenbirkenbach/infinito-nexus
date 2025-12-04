@@ -29,10 +29,11 @@
 
 - name: Clone Kevin's Package Manager repository
   git:
-    repo: "{{ PKGMGR_REPO_URL }}"
-    dest: "{{ PKGMGR_INSTALL_PATH }}"
-    version: "HEAD"
-    force: yes
+    repo:     "{{ PKGMGR_REPO_URL }}"
+    dest:     "{{ PKGMGR_INSTALL_PATH }}"
+    version:  "HEAD"
+    force:    yes
+    depth:    1
   become: true
 
 - name: create config.yaml

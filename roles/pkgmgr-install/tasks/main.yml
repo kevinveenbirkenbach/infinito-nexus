@@ -4,7 +4,7 @@
 - name: "Install '{{ package_name }}' via Kevin's Package Manager (pkgmgr)"
   ansible.builtin.shell: |
     source ~/.venvs/pkgmgr/bin/activate
-    pkgmgr update {{ package_name }} --dependencies --clone-mode https
+    pkgmgr update {{ package_name }} --dependencies --clone-mode shallow
   args:
     executable: /bin/bash
   notify: "{{ package_notify | default(omit,true) }}"
