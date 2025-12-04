@@ -5,7 +5,7 @@ database_type:                        "postgres"
 
 # Webserver
 location_upload:                      "~ ^/_matrix/media/v3/"
-client_max_body_size:                 "{{ applications | get_app_conf(application_id, 'server.client_max_body_size') }}"
+webserver_client_max_body_size:       "{{ applications | get_app_conf(application_id, 'server.client_max_body_size') }}"
 
 # Matrix
 

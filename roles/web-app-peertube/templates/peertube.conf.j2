@@ -46,11 +46,11 @@ server {
   # Websocket
   ##
 
-  {% set location_ws = "@websocket" %}
+  {% set webserver_websocket_location = "@websocket" %}
   {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
 
   location /socket.io {
-    try_files /dev/null {{ location_ws }};
+    try_files /dev/null {{ webserver_websocket_location }};
   }
 
   location /tracker/socket {
@@ -58,6 +58,6 @@ server {
     # Don't close the websocket before then
     proxy_read_timeout 15m; # default is 60s
 
-    try_files /dev/null {{ location_ws }};
+    try_files /dev/null {{ webserver_websocket_location }};
   }
 }

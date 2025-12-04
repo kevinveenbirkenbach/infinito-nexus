@@ -8,7 +8,7 @@
   include_role:
     name: sys-util-csp-cert
 
-- name: "Copy NGINX ('{{ domain }}') config to '{{ front_proxy_domain_conf_dst }}'"
+- name: "Deploy NGINX config: '{{ domain }}' -> '{{ front_proxy_domain_conf_dst }}'"
   template:
     src: "{{ item }}"
     dest: "{{ front_proxy_domain_conf_dst }}"
@@ -17,7 +17,7 @@
   vars:
     nginx_template_candidates:
       - "{{ application_id | abs_role_path_by_application_id }}/templates/proxy.conf.j2"
-      - "roles/sys-svc-proxy/templates/vhost/{{ vhost_flavour }}.conf.j2"
+      - "roles/sys-svc-proxy/templates/vhost/{{ webserver_vhost_flavour }}.conf.j2"
   with_first_found: "{{ nginx_template_candidates }}"
 
 - block:

@@ -1,0 +1,68 @@
+---
+- name: "load docker, proxy for '{{ application_id }}'"
+  include_role:
+    name: sys-stk-full-stateless
+  vars:
+    docker_compose_flush_handlers:        false
+    docker_compose_file_creation_enabled: false
+    docker_git_repository_pull:           true
+    docker_git_repository_address:        "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
+    docker_git_repository_branch:         "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+    webserver_extra_configuration: >-
+      {{ lookup(
+           'ansible.builtin.template',
+           playbook_dir ~ '/roles/sys-svc-proxy/templates/location/html.conf.j2',
+           template_vars={
+             'location': '^~ /html5client',
+             'oauth2_proxy_enabled': false,
+             'proxy_lua_enabled': false
+           }
+         ) | trim }}
+
+- name: "Include Seed routines for '{{ application_id }}' database backup"
+  include_tasks: "{{ [ playbook_dir, 'roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml' ] | path_join }}"
+  vars:
+    database_type:      "postgres"
+    database_instance:  "{{ entity_name }}"
+    database_password:  "{{ applications | get_app_conf(application_id, 'credentials.postgresql_secret') }}"
+    database_username:  "postgres"
+    database_name:      "" # Multiple databases
+
+- name: configure websocket_upgrade.conf
+  copy: 
+    src:  "websocket_upgrade.conf"
+    dest: "{{ [ NGINX.DIRECTORIES.HTTP.MAPS, 'websocket_upgrade.conf' ] | path_join }}"
+  notify: restart openresty
+
+- name: "Set BBB Facts"
+  set_fact:
+    BBB_ENV_FILE_LINK:                "{{ [ docker_repository_path, '.env' ] | path_join }}"
+    BBB_ENV_FILE_ORIGINE:             "{{ docker_compose.files.env }}"
+    BBB_DOCKER_COMPOSE_FILE_ORIGINE:  "{{ [ docker_repository_path, 'docker-compose.yml' ] | path_join }}"
+    BBB_DOCKER_COMPOSE_FILE_FINAL:    "{{ [ docker_compose.directories.instance, 'docker-compose.yml' ] | path_join }}"
+
+- name: Write docker-compose.override.yml for BigBlueButton
+  template:
+    src:  docker-compose.override.yml.j2
+    dest: "{{ [ docker_compose.directories.instance, 'docker-compose.override.yml' ] | path_join }}"
+  notify: docker compose up
+
+- name: Create symbolic link from .env file to target location
+  file:
+    src:    "{{ BBB_ENV_FILE_ORIGINE }}"
+    dest:   "{{ BBB_ENV_FILE_LINK }}"
+    state:  link
+
+- name: "Setup docker-compose.yml file"
+  include_tasks: "02_docker-compose.yml"
+
+- name: flush docker service
+  meta: flush_handlers
+
+- name: "Setup administrator"
+  include_tasks: "03_administrator.yml"
+
+- name: "Load '{{ application_id }}' dependencies"
+  include_tasks: "04_dependencies.yml"
+
+- include_tasks: utils/once/flag.yml

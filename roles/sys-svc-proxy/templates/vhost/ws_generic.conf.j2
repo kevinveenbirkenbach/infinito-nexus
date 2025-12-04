@@ -5,7 +5,7 @@ server {
 
   {% include 'roles/sys-front-inj-all/templates/server.conf.j2' %}
 
-  client_max_body_size {{ client_max_body_size | default('100m') }};
+  client_max_body_size {{ webserver_client_max_body_size | default('100m') }};
   keepalive_timeout    70;
   sendfile             on;
 
@@ -22,7 +22,7 @@ server {
 
   {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
 
-  {% if location_ws | default(false) %}
+  {% if webserver_websocket_location | default(false) %}
     {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
   {% endif %}
 

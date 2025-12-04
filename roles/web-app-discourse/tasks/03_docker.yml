@@ -8,7 +8,8 @@
   include_role:
     name: sys-stk-full-stateful
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers:  true
+    webserver_vhost_flavour:        "basic"
 
 - name: pull docker repository
   git:

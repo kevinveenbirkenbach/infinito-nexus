@@ -19,7 +19,7 @@ server {
   {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
 
   {# WebSocket handling for Collabora #}
-  {% set location_ws = '^~ /cool/' %}
-  {% set ws_port = http_port %}
+  {% set webserver_websocket_location = '^~ /cool/' %}
+  {% set webserver_websocket_port = http_port %}
   {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
 }

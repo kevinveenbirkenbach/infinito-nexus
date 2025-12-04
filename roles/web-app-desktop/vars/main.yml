@@ -3,7 +3,7 @@ application_id:                   "web-app-desktop"
 http_port:                        "{{ ports.localhost.http[application_id] }}"
 
 ## Webserver
-proxy_extra_configuration:        "{{ lookup('template', 'nginx/sso.html.conf.j2') }}"
+webserver_extra_configuration:        "{{ lookup('template', 'nginx/sso.html.conf.j2') }}"
 
 # Desktop
 

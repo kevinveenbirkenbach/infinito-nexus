@@ -6,7 +6,7 @@
   loop_control:
     loop_var: domain
   vars:
-    proxy_extra_configuration: "client_max_body_size {{ WORDPRESS_MAX_UPLOAD_SIZE }};"
+    webserver_extra_configuration: "client_max_body_size {{ WORDPRESS_MAX_UPLOAD_SIZE }};"
     http_port: "{{ ports.localhost.http[application_id] }}"
 
 - name: "load docker and db for {{ application_id }}"

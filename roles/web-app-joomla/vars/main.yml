@@ -2,7 +2,7 @@
 application_id:                   "web-app-joomla"
 database_type:                    "mariadb"
 container_port:                   80
-client_max_body_size:             "{{ JOOMLA_POST_MAX_SIZE }}"
+webserver_client_max_body_size:             "{{ JOOMLA_POST_MAX_SIZE }}"
 
 # Joomla
 JOOMLA_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.joomla.version') }}"

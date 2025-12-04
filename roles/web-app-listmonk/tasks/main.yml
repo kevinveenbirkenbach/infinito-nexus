@@ -4,7 +4,7 @@
     name: sys-stk-full-stateful
   vars:
     docker_compose_flush_handlers: false
-    proxy_extra_configuration: >-
+    webserver_extra_configuration: >-
       {% if not LISTMONK_PUBLIC_API_ENABLED | bool %}
       {{ lookup('file', '{{ playbook_dir }}/roles/web-app-listmonk/files/deactivate-public-api.conf') }}
       {% else %}

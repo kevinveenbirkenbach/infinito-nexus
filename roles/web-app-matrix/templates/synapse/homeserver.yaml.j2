@@ -1,6 +1,6 @@
 server_name: "{{ MATRIX_SERVER_NAME }}"
 pid_file: /data/homeserver.pid
-max_upload_size: {{ client_max_body_size }}
+max_upload_size: {{ webserver_client_max_body_size }}
 listeners:
   - port: 8008
     tls: false

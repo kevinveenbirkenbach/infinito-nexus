@@ -10,7 +10,7 @@ location {{location}}
   {% include 'roles/sys-svc-proxy/templates/headers/access_control_allow.conf.j2' %}
 
   # Client Limits for HTML
-  client_max_body_size {{ client_max_body_size | default('100m') }};
+  client_max_body_size {{ webserver_client_max_body_size | default('100m') }};
 
   {% set _loc = location|trim %}
   proxy_pass http://127.0.0.1:{{ http_port }}{{ (_loc|regex_replace('^(?:=|\\^~)\\s*','')) if not (_loc is match('^(@|~)')) else '' }};

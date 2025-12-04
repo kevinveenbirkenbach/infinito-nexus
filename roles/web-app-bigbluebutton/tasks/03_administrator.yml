@@ -1,0 +1,63 @@
+---
+- name: "Wait until Greenlight is reachable via Nginx"
+  uri:
+    url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+    validate_certs: true
+    status_code: 200
+    return_content: true
+  register: greenlight_http
+  until:
+    - greenlight_http.status == 200
+    - "'Greenlight' in greenlight_http.content or 'Sign in' in greenlight_http.content"
+  retries: 30
+  delay: 5
+  changed_when: false
+
+# Case 1: OIDC disabled → use primary password
+- name: "Create admin with primary password"
+  when: not (BBB_OIDC_ENABLED | bool)
+  command:
+    cmd: >
+      {{ docker_compose_command_exec }}
+      greenlight
+      bundle exec rake
+      admin:create['{{ users.administrator.username | upper }}',
+                   '{{ users.administrator.email }}',
+                   '{{ users.administrator.password }}']
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: admin_create
+  failed_when:
+    # Only fail if rc != 0 AND it's NOT the "already taken" case
+    - admin_create.rc != 0
+    - "'Email has already been taken' not in (admin_create.stderr | default(''))"
+  changed_when: admin_create.rc == 0
+
+# Case 2: OIDC enabled → retry with starred password
+- name: "Retry with starred password when OIDC enabled"
+  when: BBB_OIDC_ENABLED | bool
+  command:
+    cmd: >
+      {{ docker_compose_command_exec }}
+      greenlight
+      bundle exec rake
+      admin:create['{{ users.administrator.username | upper }}',
+                   '{{ users.administrator.email }}',
+                   '{{ users.administrator.password ~ '*' }}']
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: admin_create
+  failed_when:
+    - admin_create.rc != 0
+    - "'Email has already been taken' not in (admin_create.stderr | default(''))"
+  changed_when: admin_create.rc == 0
+
+- name: "Make existing user administrator (fallback)"
+  command:
+    cmd: >
+      {{ docker_compose_command_exec }}
+      greenlight
+      bundle exec rake
+      user:set_admin_role['{{ users.administrator.email }}']
+    chdir: "{{ docker_compose.directories.instance }}"
+  when:
+    - admin_create is defined
+    - "'Email has already been taken' in (admin_create.stderr | default(''))"

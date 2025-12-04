@@ -1,7 +1,8 @@
 - include_tasks: 01_core.yml
   when: run_once_web_svc_cdn is not defined
   vars:
-    application_id: 'web-svc-cdn'
+    application_id:           'web-svc-cdn'
+    webserver_vhost_flavour:  "basic"
 
 - name: "Reset docker compose Handler for CDN"
   include_tasks: utils/load_handlers.yml

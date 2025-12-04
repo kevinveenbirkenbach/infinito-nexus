@@ -29,8 +29,9 @@
   include_role:
     name: sys-stk-full-stateful
   vars:
-    docker_compose_flush_handlers: true
-    domain: "{{ MAILU_HOSTNAME }}"
+    docker_compose_flush_handlers:  true
+    webserver_vhost_flavour:        "basic"
+    domain:                         "{{ MAILU_HOSTNAME }}"
 
 - name: "Include Cert deploy service for '{{ role_name }}'"
   include_role:

@@ -1,7 +1,7 @@
 # General
 application_id:                       "web-app-mailu"
 http_port:                            "{{ ports.localhost.http[application_id] }}"
-proxy_extra_configuration:            "client_max_body_size 31M;"
+webserver_extra_configuration:            "client_max_body_size 31M;"
 
 # Database Configuration
 database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"

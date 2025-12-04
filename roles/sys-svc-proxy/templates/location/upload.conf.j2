@@ -13,5 +13,5 @@ location {{ location_upload }} {
     proxy_send_timeout      120s;
 
     # Client Limits for Upload
-    client_max_body_size    {{ client_max_body_size }};
+    client_max_body_size    {{ webserver_client_max_body_size }};
 }

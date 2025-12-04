@@ -2,9 +2,10 @@
   include_role:
     name: sys-stk-full-stateless
   vars:
-    aca_origin:  "* always"
-    aca_methods: "'GET, OPTIONS' always"
-    aca_headers: '"Origin, X-Requested-With, Content-Type, Accept, Authorization" always'
+    aca_origin:               "* always"
+    aca_methods:              "'GET, OPTIONS' always"
+    aca_headers:              '"Origin, X-Requested-With, Content-Type, Accept, Authorization" always'
+    webserver_vhost_flavour:  "basic"
 
 - name: "Copy '{{ application_id }}' files"
   template:

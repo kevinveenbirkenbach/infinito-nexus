@@ -7,7 +7,7 @@ domain:                               "{{ domains | get_domain(application_id) }
 database_type:                        "mariadb"
 
 # Webserver
-client_max_body_size:                 "100m"
+webserver_client_max_body_size:                 "100m"
 
 # General
 SUITECRM_WELL_SOFTWARE_NAME:          "{{ SOFTWARE_NAME | lower | replace('.', '-') }}"

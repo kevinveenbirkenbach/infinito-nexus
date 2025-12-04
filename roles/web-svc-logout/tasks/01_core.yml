@@ -24,11 +24,15 @@
   include_role:
     name: sys-stk-full-stateless
   vars:
-    client_max_body_size:         "10M" # Necessary to overwrite parent values
-    location_ws:                  ""
-    docker_git_repository_address:    "https://github.com/kevinveenbirkenbach/universal-logout"
-    docker_git_repository_pull:   true
-    docker_compose_flush_handlers: true
+    application_id:                 'web-svc-logout'
+    webserver_client_max_body_size: "10M" # Necessary to overwrite parent values
+    webserver_websocket_location:   ""
+    webserver_vhost_flavour:        "basic"
+    webserver_extra_configuration:  ""
+    docker_git_repository_address:  "https://github.com/kevinveenbirkenbach/universal-logout"
+    docker_git_repository_pull:     true
+    docker_git_repository_branch:   "main"
+    docker_compose_flush_handlers:  true
 
 - name: Create symbolic link from .env file to repository
   file:

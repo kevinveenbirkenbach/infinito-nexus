@@ -7,7 +7,7 @@
   vars:
     # Websockt and http listen to the same port
     http_port:  "{{ ports.localhost.http[application_id] }}"
-    ws_port:    "{{ ports.localhost.http[application_id] }}"
+    webserver_websocket_port:    "{{ ports.localhost.http[application_id] }}"
 
 - name: "load docker and db for {{ application_id }}"
   include_role:

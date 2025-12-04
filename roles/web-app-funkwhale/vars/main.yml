@@ -1,5 +1,5 @@
 application_id:                   "web-app-funkwhale"
-proxy_extra_configuration:        "client_max_body_size 512M;"
+webserver_extra_configuration:        "client_max_body_size 512M;"
 database_type:                    "postgres"
 funkwhale_media_root:             "/srv/funkwhale/data/"
 funkwhale_static_root:            "{{funkwhale_media_root}}static"

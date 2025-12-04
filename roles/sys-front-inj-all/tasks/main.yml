@@ -15,7 +15,7 @@
 - name: "Included dependent services"
   include_tasks: 01_dependencies.yml
   vars:
-    proxy_extra_configuration:     ""
+    webserver_extra_configuration:     ""
     docker_compose_flush_handlers: true
 
 - name: Reinitialize 'inj_enabled' for '{{ domain }}', after loading the required webservices

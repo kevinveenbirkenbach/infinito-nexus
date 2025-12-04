@@ -6,11 +6,11 @@
   loop_control:
     loop_var: domain
   vars:
-    http_port:            "{{ ports.localhost.http[application_id] }}"
-    location_ws:          "/api/v1/streaming"
-    ws_port:              "{{ ports.localhost.websocket[application_id] }}"
-    client_max_body_size: "80m"
-    vhost_flavour:        "ws_generic"
+    http_port:                      "{{ ports.localhost.http[application_id] }}"
+    webserver_websocket_location:   "/api/v1/streaming"
+    webserver_websocket_port:       "{{ ports.localhost.websocket[application_id] }}"
+    webserver_client_max_body_size: "80m"
+    webserver_vhost_flavour:        "ws_generic"
 
 - name: "load docker and db for {{ application_id }}"
   include_role:

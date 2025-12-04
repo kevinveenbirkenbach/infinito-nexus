@@ -1,6 +1,6 @@
 # General
 application_id:             "web-app-pixelfed"
-proxy_extra_configuration:  "client_max_body_size 512M;"
+webserver_extra_configuration:  "client_max_body_size 512M;"
 database_type:              "mariadb"
 
 # Pixelfed

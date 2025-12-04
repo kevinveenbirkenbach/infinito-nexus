@@ -1,16 +1,15 @@
 # General
-application_id:                   "web-app-espocrm"
-entity_name:                      "{{ application_id | get_entity_name }}"
-
+application_id:                     "web-app-espocrm"
+entity_name:                        "{{ application_id | get_entity_name }}"
 
 # Database
-database_type:                    "mariadb"
+database_type:                      "mariadb"
 
 # Webserver
-location_ws:                      "/ws"
-ws_port:                          "{{ ports.localhost.websocket[application_id] }}"
-client_max_body_size:             "100m"
-vhost_flavour:                    "ws_generic"
+webserver_websocket_location:              "/ws"
+webserver_websocket_port:           "{{ ports.localhost.websocket[application_id] }}"
+webserver_client_max_body_size:     "100m"
+webserver_vhost_flavour:            "ws_generic"
 
 # Espocrm
 

@@ -3,7 +3,7 @@ application_id:                 "web-app-yourls"
 database_type:                  "mariadb"
 
 # Webserver
-proxy_extra_configuration:      "{{ lookup('template', 'redirect.conf.j2') }}"
+webserver_extra_configuration:      "{{ lookup('template', 'redirect.conf.j2') }}"
 
 # Yourls
 YOURLS_USER:                    "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
