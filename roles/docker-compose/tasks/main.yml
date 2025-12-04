@@ -24,6 +24,3 @@
     include_tasks: "utils/up.yml"
   when: docker_compose_file_creation_enabled | bool
 
-- name: "flush docker compose for '{{ application_id }}'"
-  meta: flush_handlers
-  when: docker_compose_flush_handlers | bool
