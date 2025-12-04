@@ -14,17 +14,21 @@
 - name: "Include tasks to create directories"
   include_tasks: 04_directories.yml
 
-- name: Load OpenResty
-  include_tasks: "utils/load_app.yml"
+- name: "Provide OpenResty Handlers for Webserver"
+  include_tasks: utils/load_handlers.yml
   vars:
-    load_app_id:                    svc-prx-openresty
-    docker_compose_flush_handlers:  false # Prevent deploy until initial Config is created
+    handler_role_name: svc-prx-openresty
 
 - name: Deploy OpenResty NGINX Base Configuration
   template:
     src:  nginx.conf.j2
     dest: "{{ NGINX.FILES.CONFIGURATION }}"
   notify: restart openresty
+
+- name: Load OpenResty
+  include_tasks: "utils/load_app.yml"
+  vars:
+    load_app_id:                    svc-prx-openresty
 
 - name: Flush OpenResty Base Setup
   meta: flush_handlers

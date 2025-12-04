@@ -3,8 +3,15 @@
       include_role:
         name: docker-compose
       vars:
-        docker_compose_flush_handlers:  true
         docker_git_repository_pull:     false # Deactivated here to deactivate inhirement
-        database_type:        ""              # Deactivate Database for openresty  
+        database_type:                  ""    # Deactivate Database for openresty
+        docker_compose_flush_handlers:  true
     - include_tasks: utils/once/flag.yml
   when: run_once_svc_prx_openresty is not defined
+
+- name: "Reinitialize OpenResty Handler"
+  # The 'when: run_once_svc_prx_openresty is not defined' prevents otherwise 
+  # the handler execution 
+  include_tasks: utils/load_handlers.yml
+  vars:
+    handler_role_name: "svc-prx-openresty"

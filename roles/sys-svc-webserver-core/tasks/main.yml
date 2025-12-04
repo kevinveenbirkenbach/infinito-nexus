@@ -1,9 +1,3 @@
 ---
 - include_tasks: 01_core.yml
   when: run_once_sys_svc_webserver_core is not defined
-
-- name: "Provide OpenResty Handlers for Webserver"
-  include_tasks: utils/load_handlers.yml
-  vars:
-    handler_role_name: svc-prx-openresty
-  when: run_once_sys_svc_webserver_core is defined
