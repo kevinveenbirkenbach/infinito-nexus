@@ -8,7 +8,6 @@
     name: pkgmgr-install
   vars:
     package_name: checkcsp
-    package_notify: rebuild checkcsp docker image
 
 - include_role:
     name: sys-service
