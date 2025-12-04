@@ -17,6 +17,8 @@ from cli.create.inventory import (  # type: ignore
     parse_roles_list,
     filter_inventory_by_include,
     filter_inventory_by_ignore,
+    get_path_administrator_home_from_group_vars,
+    ensure_administrator_authorized_keys,
 )
 
 from ruamel.yaml import YAML
@@ -353,6 +355,156 @@ existing_key: foo
             self.assertIsNotNone(doc)
             self.assertIn("ansible_become_password", doc)
             self.assertEqual(doc["ansible_become_password"], "EXISTING_VALUE")
+            
+    def test_get_path_administrator_home_from_group_vars_reads_value(self):
+        """
+        get_path_administrator_home_from_group_vars() must:
+        - read PATH_ADMINISTRATOR_HOME from group_vars/all/06_paths.yml,
+        - normalize it to have exactly one trailing slash.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_root = Path(tmpdir)
+
+            # Create group_vars/all/06_paths.yml with a custom PATH_ADMINISTRATOR_HOME
+            gv_dir = project_root / "group_vars" / "all"
+            gv_dir.mkdir(parents=True, exist_ok=True)
+            paths_file = gv_dir / "06_paths.yml"
+            paths_file.write_text(
+                'PATH_ADMINISTRATOR_HOME: "/custom/admin"\n',
+                encoding="utf-8",
+            )
+
+            value = get_path_administrator_home_from_group_vars(project_root)
+            # Must normalize to exactly one trailing slash
+            self.assertEqual(value, "/custom/admin/")
+
+    def test_get_path_administrator_home_from_group_vars_falls_back_if_missing(self):
+        """
+        If group_vars/all/06_paths.yml does not exist or does not define
+        PATH_ADMINISTRATOR_HOME, the helper must fall back to '/home/administrator/'.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            project_root = Path(tmpdir)
+
+            # No group_vars/all/06_paths.yml present
+            value = get_path_administrator_home_from_group_vars(project_root)
+            self.assertEqual(value, "/home/administrator/")
+
+            # Now create an empty 06_paths.yml without PATH_ADMINISTRATOR_HOME
+            gv_dir = project_root / "group_vars" / "all"
+            gv_dir.mkdir(parents=True, exist_ok=True)
+            paths_file = gv_dir / "06_paths.yml"
+            paths_file.write_text("", encoding="utf-8")
+
+            value2 = get_path_administrator_home_from_group_vars(project_root)
+            self.assertEqual(value2, "/home/administrator/")
+
+    def test_ensure_administrator_authorized_keys_uses_file_and_deduplicates(self):
+        """
+        ensure_administrator_authorized_keys() must:
+        - read PATH_ADMINISTRATOR_HOME from group_vars/all/06_paths.yml,
+        - treat authorized_keys_spec as file path when it exists,
+        - append keys that are not yet present,
+        - not duplicate existing keys.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+
+            # Fake project_root with group_vars/all/06_paths.yml
+            project_root = tmp / "project"
+            project_root.mkdir(parents=True, exist_ok=True)
+            gv_dir = project_root / "group_vars" / "all"
+            gv_dir.mkdir(parents=True, exist_ok=True)
+            paths_file = gv_dir / "06_paths.yml"
+            paths_file.write_text(
+                'PATH_ADMINISTRATOR_HOME: "/home/administrator/"\n',
+                encoding="utf-8",
+            )
+
+            # Inventory dir (separate from project_root, as in real usage)
+            inventory_dir = tmp / "inventory"
+            inventory_dir.mkdir(parents=True, exist_ok=True)
+
+            host = "galaxyserver"
+
+            # Prepare a source authorized_keys file with two keys
+            keys_file = tmp / "keys.pub"
+            key1 = "ssh-ed25519 AAAA... key1@example"
+            key2 = "ssh-ed25519 AAAA... key2@example"
+            keys_file.write_text(f"{key1}\n{key2}\n", encoding="utf-8")
+
+            # Pre-create target file with key1 already present and a comment
+            # Path must match: files/<host><PATH_ADMINISTRATOR_HOME>.ssh/authorized_keys
+            # PATH_ADMINISTRATOR_HOME = /home/administrator/
+            target_rel = f"{host}/home/administrator/.ssh/authorized_keys"
+            target_path = inventory_dir / "files" / target_rel
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            target_path.write_text(
+                f"# existing authorized_keys\n{key1}\n",
+                encoding="utf-8",
+            )
+
+            # Run helper with spec pointing to the keys file
+            ensure_administrator_authorized_keys(
+                inventory_dir=inventory_dir,
+                host=host,
+                authorized_keys_spec=str(keys_file),
+                project_root=project_root,
+            )
+
+            # Verify that file contains key1 only once and key2 appended
+            content = target_path.read_text(encoding="utf-8").strip().splitlines()
+            self.assertIn("# existing authorized_keys", content)
+            self.assertEqual(content.count(key1), 1)
+            self.assertEqual(content.count(key2), 1)
+
+    def test_ensure_administrator_authorized_keys_accepts_literal_keys_string(self):
+        """
+        When authorized_keys_spec is not a path to an existing file,
+        ensure_administrator_authorized_keys() must treat it as literal content.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+
+            project_root = tmp / "project"
+            project_root.mkdir(parents=True, exist_ok=True)
+            gv_dir = project_root / "group_vars" / "all"
+            gv_dir.mkdir(parents=True, exist_ok=True)
+            paths_file = gv_dir / "06_paths.yml"
+            paths_file.write_text(
+                'PATH_ADMINISTRATOR_HOME: "/home/administrator/"\n',
+                encoding="utf-8",
+            )
+
+            inventory_dir = tmp / "inventory"
+            inventory_dir.mkdir(parents=True, exist_ok=True)
+
+            host = "localhost"
+
+            key1 = "ssh-rsa AAAA... literal1@example"
+            key2 = "ssh-rsa AAAA... literal2@example"
+            literal_spec = f"{key1}\n{key2}\n"
+
+            ensure_administrator_authorized_keys(
+                inventory_dir=inventory_dir,
+                host=host,
+                authorized_keys_spec=literal_spec,
+                project_root=project_root,
+            )
+
+            # Target file should now exist with both keys
+            target_rel = f"{host}/home/administrator/.ssh/authorized_keys"
+            target_path = inventory_dir / "files" / target_rel
+            self.assertTrue(target_path.exists())
+
+            lines = [
+                line.strip()
+                for line in target_path.read_text(encoding="utf-8").splitlines()
+                if line.strip() and not line.strip().startswith("#")
+            ]
+            self.assertIn(key1, lines)
+            self.assertIn(key2, lines)
+
 
 if __name__ == "__main__":
     unittest.main()

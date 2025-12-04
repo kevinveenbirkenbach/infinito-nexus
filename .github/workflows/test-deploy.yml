@@ -1,4 +1,3 @@
-# .github/workflows/test-deploy.yml
 name: Build & Test Infinito.Nexus CLI in Docker Container
 
 on:
@@ -18,9 +17,13 @@ jobs:
     env:
       EXCLUDED_ROLES: >
         drv-lid-switch,
+        svc-db-memcached,
+        svc-db-redis,
         svc-net-wireguard-core,
         svc-net-wireguard-firewalled,
         svc-net-wireguard-plain,
+        svc-bkp-loc-2-usb,
+        svc-bkp-rmt-2-loc,
         svc-opt-keyboard-color,
         svc-opt-ssd-hdd,
         web-app-bridgy-fed,
@@ -40,29 +43,38 @@ jobs:
       - name: Show Docker version
         run: docker version
 
-      # First deploy: normal + debug
+      # 1) First deploy: normal + debug (mit Build)
       - name: First deploy (normal + debug)
         run: |
-          python -m cli.deploy.container --build --exclude "$EXCLUDED_ROLES" -- \
+          python -m cli.deploy.container run --image "$INFINITO_IMAGE" --build -- \
+            --exclude "$EXCLUDED_ROLES" \
+            --authorized-keys "ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito" \
+            -- \
             -T server \
             --debug \
             --skip-cleanup \
             --skip-tests
 
-      # Second deploy: reset + debug
+      # 2) Second deploy: reset + debug (ohne Build, nur reuse Image)
       - name: Second deploy (--reset --debug)
         run: |
-          python -m cli.deploy.container --exclude "$EXCLUDED_ROLES" -- \
+          python -m cli.deploy.container run --image "$INFINITO_IMAGE" -- \
+            --exclude "$EXCLUDED_ROLES" \
+            --authorized-keys "ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito" \
+            -- \
             -T server \
             --reset \
             --debug \
             --skip-cleanup \
             --skip-tests
 
-      # Third deploy: async, no debug
+      # 3) Third deploy: async deploy – no debug
       - name: Third deploy (async deploy – no debug)
         run: |
-          python -m cli.deploy.container --exclude "$EXCLUDED_ROLES" -- \
+          python -m cli.deploy.container run --image "$INFINITO_IMAGE" -- \
+            --exclude "$EXCLUDED_ROLES" \
+            --authorized-keys "ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito" \
+            -- \
             -T server \
             --skip-cleanup \
             --skip-tests
