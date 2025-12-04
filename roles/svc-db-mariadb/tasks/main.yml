@@ -1,6 +1,10 @@
-- include_tasks: 01_core.yml
-  when: run_once_svc_db_mariadb is not defined
 
-- name: "Initialize database for '{{ database_name }}'"
-  include_tasks: 02_init.yml
-  when: database_init | bool
+- block:
+    - include_tasks: 01_core.yml
+      when: run_once_svc_db_mariadb is not defined
+
+    - name: "Initialize database for '{{ database_name }}'"
+      include_tasks: 02_init.yml
+      when: database_init | bool
+  vars:
+    application_id: svc-db-mariadb
