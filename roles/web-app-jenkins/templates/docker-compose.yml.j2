@@ -6,5 +6,5 @@
         - "127.0.0.1:{{ ports.localhost.http[application_id] }}:8080"
       volumes:
         - jenkins_data:/var/jenkins_home
-      log_driver: journald
+      log_driver: {{ "json-file" if IS_CONTAINER | bool else 'journald' }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

@@ -5,7 +5,7 @@
     container_name: {{ MATRIX_SYNAPSE_NAME }}
     restart: {{ DOCKER_RESTART_POLICY }}
     logging:
-      driver: journald
+      driver: {{ "json-file" if IS_CONTAINER | bool else 'journald' }}
     volumes:
       - synapse_data:/data
       - {{ MATRIX_SYNAPSE_CONFIG_PATH_HOST }}:{{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }}:ro

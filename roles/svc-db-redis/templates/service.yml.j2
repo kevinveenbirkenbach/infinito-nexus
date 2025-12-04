@@ -6,7 +6,7 @@
     container_name: {{ application_id | get_entity_name }}-redis
     restart: {{ DOCKER_RESTART_POLICY }}
     logging:
-      driver: journald
+      driver: {{ "json-file" if IS_CONTAINER else 'journald' }}
     volumes:
       - redis:/data
     # Just save in memory and prevent huge redis_volumes
