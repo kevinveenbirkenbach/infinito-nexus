@@ -6,9 +6,9 @@
 - name: "Setup docker network for {{ application_id }}"
   include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
-    docker_network_name:    "{{ POSTGRES_NETWORK_NAME }}"
-    docker_network_subnet:  "{{ POSTGRES_SUBNET }}"
-    docker_compose_flush_handlers: true
+    docker_network_name:            "{{ POSTGRES_NETWORK_NAME }}"
+    docker_network_subnet:          "{{ POSTGRES_SUBNET }}"
+    docker_compose_flush_handlers:  true
 
 - name: install python-psycopg2
   community.general.pacman:
