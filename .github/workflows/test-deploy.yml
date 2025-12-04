@@ -48,6 +48,7 @@ jobs:
         run: |
           python -m cli.deploy.container run --image "$INFINITO_IMAGE" --build -- \
             --exclude "$EXCLUDED_ROLES" \
+            --vars '{"MASK_CREDENTIALS_IN_LOGS": false}' \
             --authorized-keys "ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito" \
             -- \
             -T server \
@@ -60,6 +61,7 @@ jobs:
         run: |
           python -m cli.deploy.container run --image "$INFINITO_IMAGE" -- \
             --exclude "$EXCLUDED_ROLES" \
+            --vars '{"MASK_CREDENTIALS_IN_LOGS": false}' \
             --authorized-keys "ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito" \
             -- \
             -T server \
@@ -73,6 +75,7 @@ jobs:
         run: |
           python -m cli.deploy.container run --image "$INFINITO_IMAGE" -- \
             --exclude "$EXCLUDED_ROLES" \
+            --vars '{"MASK_CREDENTIALS_IN_LOGS": false}' \
             --authorized-keys "ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito" \
             -- \
             -T server \

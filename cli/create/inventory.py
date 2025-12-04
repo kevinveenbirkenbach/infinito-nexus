@@ -38,6 +38,7 @@ import concurrent.futures
 import os
 import secrets
 import string
+import json
 
 try:
     import yaml
@@ -75,6 +76,69 @@ def run_subprocess(
             msg += f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}\n"
         raise SystemExit(msg)
     return result
+
+def deep_update_commented_map(target: CommentedMap, updates: Dict[str, Any]) -> None:
+    """
+    Recursively merge updates into a ruamel CommentedMap.
+
+    - If a value in updates is a mapping, it is merged into the existing mapping.
+    - Non-mapping values overwrite existing values.
+    """
+    for key, value in updates.items():
+        if isinstance(value, dict):
+            existing = target.get(key)
+            if not isinstance(existing, CommentedMap):
+                existing = CommentedMap()
+                target[key] = existing
+            deep_update_commented_map(existing, value)
+        else:
+            target[key] = value
+
+
+def apply_vars_overrides(host_vars_file: Path, json_str: str) -> None:
+    """
+    Apply JSON overrides to host_vars/<host>.yml.
+
+    Behavior:
+      - json_str must contain a JSON object at the top level.
+      - All keys in that object (possibly nested) are merged into the
+        existing document.
+      - Existing values are overwritten by values from the JSON.
+      - Non-existing keys are created.
+
+    Example:
+        --vars '{"SSL_ENABLED": false, "networks": {"internet": {"ip4": "10.0.0.10"}}}'
+    """
+    try:
+        overrides = json.loads(json_str)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Invalid JSON passed to --vars: {exc}") from exc
+
+    if not isinstance(overrides, dict):
+        raise SystemExit("JSON for --vars must be an object at the top level.")
+
+    yaml_rt = YAML(typ="rt")
+    yaml_rt.preserve_quotes = True
+
+    if host_vars_file.exists():
+        with host_vars_file.open("r", encoding="utf-8") as f:
+            doc = yaml_rt.load(f)
+        if doc is None:
+            doc = CommentedMap()
+    else:
+        doc = CommentedMap()
+
+    if not isinstance(doc, CommentedMap):
+        tmp = CommentedMap()
+        for k, v in dict(doc).items():
+            tmp[k] = v
+        doc = tmp
+
+    deep_update_commented_map(doc, overrides)
+
+    host_vars_file.parent.mkdir(parents=True, exist_ok=True)
+    with host_vars_file.open("w", encoding="utf-8") as f:
+        yaml_rt.dump(doc, f)
 
 
 def build_env_with_project_root(project_root: Path) -> Dict[str, str]:
@@ -893,6 +957,16 @@ def main(argv: Optional[List[str]] = None) -> None:
         ),
     )
     parser.add_argument(
+        "--vars",
+        required=False,
+        help=(
+            "Optional JSON string with additional values for host_vars/<host>.yml. "
+            "The JSON must have an object at the top level. All keys from this "
+            "object (including nested ones) are merged into host_vars and "
+            "overwrite existing values."
+        ),
+    )
+    parser.add_argument(
         "--ip4",
         default="127.0.0.1",
         help="IPv4 address for networks.internet.ip4 (default: 127.0.0.1).",
@@ -1081,6 +1155,15 @@ def main(argv: Optional[List[str]] = None) -> None:
             vault_password_file=vault_password_file,
             project_root=project_root,
             workers=args.workers,
+        )
+    if args.vars:
+        print(
+            f"[INFO] Applying JSON overrides to host_vars for host '{args.host}' "
+            f"via --vars"
+        )
+        apply_vars_overrides(
+            host_vars_file=host_vars_file,
+            json_str=args.vars,
         )
 
     print("[INFO] Done. Inventory and host_vars updated without deleting existing values.")

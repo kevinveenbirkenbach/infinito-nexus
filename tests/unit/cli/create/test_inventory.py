@@ -3,6 +3,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+import yaml
 
 # Make cli module importable (same pattern as test_credentials.py)
 dir_path = os.path.abspath(
@@ -19,6 +20,7 @@ from cli.create.inventory import (  # type: ignore
     filter_inventory_by_ignore,
     get_path_administrator_home_from_group_vars,
     ensure_administrator_authorized_keys,
+    apply_vars_overrides,
 )
 
 from ruamel.yaml import YAML
@@ -504,6 +506,84 @@ existing_key: foo
             ]
             self.assertIn(key1, lines)
             self.assertIn(key2, lines)
+
+    def test_apply_vars_overrides_sets_top_level_flag(self):
+        """
+        apply_vars_overrides() should create the host_vars file (if missing)
+        and set a simple top-level flag like MASK_CREDENTIALS_IN_LOGS: false.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            host_vars_file = Path(tmpdir) / "host_vars.yml"
+
+            # File should not exist initially
+            self.assertFalse(host_vars_file.exists())
+
+            json_payload = '{"MASK_CREDENTIALS_IN_LOGS": false}'
+            apply_vars_overrides(host_vars_file, json_payload)
+
+            # File must now exist and contain the flag as a boolean
+            self.assertTrue(host_vars_file.exists())
+            with host_vars_file.open("r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+
+            self.assertIn("MASK_CREDENTIALS_IN_LOGS", data)
+            self.assertIs(data["MASK_CREDENTIALS_IN_LOGS"], False)
+
+    def test_apply_vars_overrides_nested_merge_and_overwrite(self):
+        """
+        apply_vars_overrides() must overwrite nested values but preserve
+        unrelated keys, effectively doing a deep merge.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            host_vars_file = Path(tmpdir) / "host_vars_nested.yml"
+
+            original = {
+                "networks": {
+                    "internet": {
+                        "ip4": "1.2.3.4",
+                        "ip6": "::1",
+                    }
+                },
+                "SSL_ENABLED": True,
+            }
+            host_vars_file.write_text(
+                yaml.safe_dump(original),
+                encoding="utf-8",
+            )
+
+            json_payload = """
+            {
+                "networks": {
+                    "internet": {
+                        "ip4": "10.0.0.10"
+                    }
+                },
+                "SSL_ENABLED": false
+            }
+            """
+            apply_vars_overrides(host_vars_file, json_payload)
+
+            with host_vars_file.open("r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+
+            # Nested merge: ip4 overwritten, ip6 preserved
+            self.assertEqual(data["networks"]["internet"]["ip4"], "10.0.0.10")
+            self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
+
+            # Top-level boolean flag overwritten
+            self.assertIs(data["SSL_ENABLED"], False)
+
+    def test_apply_vars_overrides_requires_object(self):
+        """
+        apply_vars_overrides() must reject JSON that does not contain an
+        object at the top level (e.g. an array) and exit with SystemExit.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            host_vars_file = Path(tmpdir) / "host_vars_invalid.yml"
+
+            invalid_json = '["not-an-object"]'
+            with self.assertRaises(SystemExit):
+                apply_vars_overrides(host_vars_file, invalid_json)
 
 
 if __name__ == "__main__":
