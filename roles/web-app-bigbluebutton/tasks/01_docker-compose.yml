@@ -3,8 +3,8 @@
     cmd: bash ./scripts/generate-compose
     chdir: "{{ docker_repository_path }}"
   environment:
-    COMPOSE_HTTP_TIMEOUT: 600
-    DOCKER_CLIENT_TIMEOUT: 600
+    COMPOSE_HTTP_TIMEOUT: "600"
+    DOCKER_CLIENT_TIMEOUT: "600"
 
 - name: Slurp docker-compose.yml from remote host
   slurp:

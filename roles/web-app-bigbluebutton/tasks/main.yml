@@ -70,7 +70,7 @@
   include_tasks: "01_docker-compose.yml"
 
 - name: Ensure all containers in instance are running
-  include_tasks: "{{ [ playbook_dir , 'roles/docker-compose/tasks/05_ensure_up.yml' ] | path_join }}"
+  include_tasks: "{{ [ playbook_dir , 'roles/docker-compose/tasks/utils/up.yml' ] | path_join }}"
 
 - name: flush docker service
   meta: flush_handlers
