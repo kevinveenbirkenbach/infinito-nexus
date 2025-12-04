@@ -3,11 +3,15 @@ application_id:                 "web-app-moodle"
 database_type:                  "mariadb"
 entity_name:                    "{{ application_id | get_entity_name }}"
 
+# Code & data paths inside the container
+BITNAMI_CODE_DIR:               "/opt/bitnami/moodle"
 BITNAMI_CODE_LINK:              "/bitnami/moodle"
-BITNAMI_CODE_DIR:               "{{ ['/opt', BITNAMI_CODE_LINK ] | path_join }}"
 BITNAMI_DATA_DIR:               "/bitnami/moodledata"
-BITNAMI_OIDC_PLUGIN_DIR:        "{{ [BITNAMI_CODE_DIR,'/auth/oidc'] | path_join }}"
-BITNAMI_USER:                   "daemon"  
+
+# OIDC plugin dir: /opt/bitnami/moodle/auth/oidc
+BITNAMI_OIDC_PLUGIN_DIR:        "{{ [BITNAMI_CODE_DIR, 'auth', 'oidc'] | path_join }}"
+
+BITNAMI_USER:                   "daemon"
 BITNAMI_USER_GROUP:             "{{ BITNAMI_USER }}:{{ BITNAMI_USER }}"
 
 MOODLE_CONFIG:                  "/bitnami/moodle/config.php"
@@ -17,4 +21,3 @@ MOODLE_IMAGE:                   "{{ applications | get_app_conf(application_id, 
 MOODLE_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.moodle.name') }}"
 MOODLE_VOLUME_DATA:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 MOODLE_VOLUME_CODE:             "{{ applications | get_app_conf(application_id, 'docker.volumes.code') }}"
-                    
