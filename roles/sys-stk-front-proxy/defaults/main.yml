@@ -1,5 +1,2 @@
 # default vhost flavour
 vhost_flavour:              "basic" # valid: basic, ws_generic
-
-# Enable / Disable Proxy during development, for faster Debugging
-SYS_STK_FRONT_PROXY_ENABLED: true

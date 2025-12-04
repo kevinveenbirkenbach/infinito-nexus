@@ -11,30 +11,19 @@
 - name: "Load variables from {{ DOCKER_VARS_FILE }} for {{ role_name }}/{{ application_id }}"
   include_vars: "{{ DOCKER_VARS_FILE }}"
 
-- name: "Load docker compose & openresty handlers"
-  include_tasks: utils/load_handlers.yml
-  loop:
-    - docker-compose
-    - svc-prx-openresty
-  loop_control:
-    loop_var: handler_role_name
-  vars:
-    application_id: svc-prx-openresty # Required to use correct config path at handlers
-
 - name: "Include tasks to create directories"
   include_tasks: 04_directories.yml
+
+- name: Include OpenResty (Once)
+  include_tasks: "utils/load_app.yml"
+  vars:
+    load_app_id: svc-prx-openresty
 
 - name: Create NGINX Base Config
   template:
     src:  nginx.conf.j2
     dest: "{{ NGINX.FILES.CONFIGURATION }}"
   notify: restart openresty
-
-- name: Include OpenResty (Once)
-  include_tasks: "utils/load_app.yml"
-  vars:
-    load_app_id: svc-prx-openresty
-  when: run_once_svc_prx_openresty is not defined
 
 - name: Include health dependencies
   include_role:

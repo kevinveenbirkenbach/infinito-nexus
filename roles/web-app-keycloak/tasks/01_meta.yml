@@ -1,7 +1,10 @@
-- include_tasks: utils/load_handlers.yml
+- name: "Reset Docker Compose Handler for Keycloak"
+  include_tasks: utils/load_handlers.yml
   vars:
     handler_role_name: "docker-compose"
-- ansible.builtin.include_vars:
+
+- name: Load Variables for Keycloak
+  ansible.builtin.include_vars:
     file: "{{ item }}"
   loop:
     - "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"

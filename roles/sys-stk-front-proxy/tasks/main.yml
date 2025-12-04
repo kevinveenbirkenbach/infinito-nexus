@@ -1,5 +1,41 @@
 # run_once_sys_stk_front_proxy: deactivated
 
-- name: "Load Proxy procedures if Proxy is enabled"
-  include_tasks: "01_core.yml"
-  when: SYS_STK_FRONT_PROXY_ENABLED | bool
+- name: Front bootstrap
+  include_role:
+    name: sys-stk-front-base
+
+- name: "include role for '{{ domain }}' to receive certificates and do the modification routines"
+  include_role:
+    name: sys-util-csp-cert
+
+- name: "Copy nginx config to '{{ front_proxy_domain_conf_dst }}'"
+  template:
+    src: "{{ item }}"
+    dest: "{{ front_proxy_domain_conf_dst }}"
+  register: nginx_conf
+  notify: restart openresty
+  vars:
+    nginx_template_candidates:
+      - "{{ application_id | abs_role_path_by_application_id }}/templates/proxy.conf.j2"
+      - "roles/sys-svc-proxy/templates/vhost/{{ vhost_flavour }}.conf.j2"
+  with_first_found: "{{ nginx_template_candidates }}"
+
+- block:
+  - name: "Check if {{ domains | get_domain(application_id) }} is reachable (only if config unchanged)"
+    uri:
+      url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+    register: site_check
+    failed_when: false
+    changed_when: false
+
+  - name: Restart nginx if site is down
+    command:
+      cmd: "true"
+    notify: restart openresty
+    when:
+    - site_check.status is defined
+    - not site_check.status in [200,301,302]
+  when: not nginx_conf.changed
+
+- name: "Restart Webserver for '{{ front_proxy_domain_conf_dst }}'"
+  meta: flush_handlers

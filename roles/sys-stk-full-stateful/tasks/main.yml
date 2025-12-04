@@ -1,10 +1,4 @@
 # run_once_sys_stk_full_stateful: deactivated
-
-- name: "Reinitialize OpenResty Handler"
-  include_tasks: utils/load_handlers.yml
-  vars:
-    handler_role_name: "svc-prx-openresty"
-
 - name: "For '{{ application_id }}': include role sys-stk-front-proxy"
   include_role:
     name: sys-stk-front-proxy
