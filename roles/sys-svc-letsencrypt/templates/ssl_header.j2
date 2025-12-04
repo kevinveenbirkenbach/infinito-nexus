@@ -1,3 +1,4 @@
+{% if SSL_ENABLED | bool %}
 listen {{ WEB_PORT }} ssl http2;
 listen [::]:{{ WEB_PORT }} ssl http2;
 
@@ -13,3 +14,7 @@ add_header Strict-Transport-Security max-age=15768000;
 ssl_stapling on;
 ssl_stapling_verify on;
 {% include 'roles/sys-svc-letsencrypt/templates/ssl_credentials.j2' %}
+{% else %}
+listen {{ WEB_PORT }};
+listen [::]:{{ WEB_PORT }};
+{% endif %}
