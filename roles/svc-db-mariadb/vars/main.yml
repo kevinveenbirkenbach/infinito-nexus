@@ -1,11 +1,14 @@
 application_id:         svc-db-mariadb
+entity_name:            "{{ application_id | get_entity_name }}"
+database_type:          "{{ entity_name }}"
+
 MARIADB_ROOT_PWD:       "{{ applications | get_app_conf(application_id,'credentials.root_password') }}"
 MARIADB_SUBNET:         "{{ networks.local['svc-db-mariadb'].subnet  }}"
 MARIADB_NETWORK:        "{{ applications | get_app_conf(application_id,'docker.network') }}"
 MARIADB_VOLUME:         "{{ applications | get_app_conf(application_id,'docker.volumes.data') }}"
-MARIADB_IMAGE:          "{{ applications | get_app_conf(application_id,'docker.services.mariadb.image','mariadb') }}"
-MARIADB_VERSION:        "{{ applications | get_app_conf(application_id,'docker.services.mariadb.version') }}"
-MARIADB_NAME:           "{{ applications | get_app_conf(application_id,'docker.services.mariadb.name') }}"
+MARIADB_IMAGE:          "{{ applications | get_app_conf(application_id,'docker.services.' ~ entity_name ~ '.image','mariadb') }}"
+MARIADB_VERSION:        "{{ applications | get_app_conf(application_id,'docker.services.' ~ entity_name ~ '.version') }}"
+MARIADB_NAME:           "{{ applications | get_app_conf(application_id,'docker.services.' ~ entity_name ~ '.name') }}"
 MARIADB_PORT:           "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
 MARIADB_HOST:           "127.0.0.1"
 MARIADB_CUSTOM_IMAGE:   "mariadb_custom"
