@@ -21,9 +21,7 @@
       {{ docker_compose_command_exec }}
       greenlight
       bundle exec rake
-      admin:create['{{ users.administrator.username | upper }}',
-                   '{{ users.administrator.email }}',
-                   '{{ users.administrator.password }}']
+      admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password }}']
     chdir: "{{ docker_compose.directories.instance }}"
   register: admin_create
   failed_when:
@@ -40,9 +38,7 @@
       {{ docker_compose_command_exec }}
       greenlight
       bundle exec rake
-      admin:create['{{ users.administrator.username | upper }}',
-                   '{{ users.administrator.email }}',
-                   '{{ users.administrator.password ~ '*' }}']
+      admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password ~ '*' }}']
     chdir: "{{ docker_compose.directories.instance }}"
   register: admin_create
   failed_when:
