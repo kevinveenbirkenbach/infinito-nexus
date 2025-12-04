@@ -1,7 +1,7 @@
 - include_tasks: 01_core.yml
   when: run_once_pkgmgr_install is not defined
 
-- name: "update {{ package_name }}"
+- name: "Install '{{ package_name }}' via Kevin's Package Manager (pkgmgr)"
   ansible.builtin.shell: |
     source ~/.venvs/pkgmgr/bin/activate
     pkgmgr update {{ package_name }} --dependencies --clone-mode https
