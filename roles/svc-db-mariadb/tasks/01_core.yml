@@ -9,15 +9,50 @@
   community.general.pacman: 
     name: python-mysqlclient
     state: present
+  when: not IS_CONTAINER | bool
 
+- name: Ensure PyMySQL is installed for Ansible interpreter
+  ansible.builtin.pip:
+    name: PyMySQL
+  when: IS_CONTAINER | bool
+    
 - name: "Wait until the MariaDB container with hostname '{{ MARIADB_NAME }}' is healthy"
   community.docker.docker_container_info:
     name: "{{ MARIADB_NAME }}"
   register: db_info
   until:
-  - db_info.container is defined
-  - db_info.container.State.Health.Status == "healthy"
+    - db_info.container is defined
+    - db_info.container.State.Health.Status == "healthy"
   retries: 30
   delay: 5
+
+- name: "Wait until MariaDB accepts root credentials (inside container)"
+  community.docker.docker_container_exec:
+    container: "{{ MARIADB_NAME }}"
+    command: >
+      mariadb
+      {{ '-h127.0.0.1 -P3306' if MARIADB_EXPOSE_LOCAL else '' }}
+      -uroot -p'{{ MARIADB_ROOT_PWD }}'
+      -e 'SELECT 1;'
+  register: mariadb_cli
+  changed_when: false
+  retries: 30
+  delay: 5
+  until: mariadb_cli.rc == 0
+
+- name: "Wait until MariaDB accepts root credentials (via mysql_db)"
+  community.mysql.mysql_db:
+    name: "{{ MARIADB_HEALTHCHECK_DB }}"
+    state: present
+    login_user: root
+    login_password: "{{ MARIADB_ROOT_PWD }}"
+    login_host: "{{ MARIADB_HOST }}"
+    login_port: "{{ MARIADB_PORT }}"
+    config_file: ""
+  register: mariadb_ready
+  retries: 30
+  delay: 5
+  until: mariadb_ready is succeeded
+  changed_when: false
 
 - include_tasks: utils/once/flag.yml

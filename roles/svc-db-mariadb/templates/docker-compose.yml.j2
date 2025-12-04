@@ -17,7 +17,12 @@
       - "data:/var/lib/mysql"
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     healthcheck:
-      test: "/usr/bin/mariadb --user=root --password={{ MARIADB_ROOT_PWD }} --execute \"SHOW DATABASES;\""
+      test:
+        - "CMD-SHELL"
+        - >
+          mariadb
+          {% if MARIADB_EXPOSE_LOCAL %}-h127.0.0.1 -P3306{% endif %}
+          -u root -p{{ MARIADB_ROOT_PWD }} -e 'SHOW DATABASES;'
       interval: 10s
       timeout: 5s
       retries: 18
