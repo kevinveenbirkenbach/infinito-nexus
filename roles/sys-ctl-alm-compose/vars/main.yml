@@ -1,7 +1,15 @@
 system_service_id: sys-ctl-alm-compose@
 
-SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES:
-  - 'sys-ctl-alm-email'
-  - 'sys-ctl-alm-telegram'
+SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES: >-
+  {{
+    ['sys-ctl-alm-email']
+    +
+    (
+      ['sys-ctl-alm-telegram']
+      if (TELEGRAM_BOT_TOKEN | default('') | trim != '')
+         and (TELEGRAM_CHAT_ID  | default('') | trim != '')
+      else []
+    )
+  }}
 
 SYSTEMCTL_ALARM_COMPOSER_DUMMY_MESSAGE: "[Info] Dummy Message: No Failure; Ansible is initializing {{ SOFTWARE_NAME }} on {{ inventory_hostname }}."
