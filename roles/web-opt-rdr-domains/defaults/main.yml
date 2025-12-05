@@ -1,1 +1,2 @@
-redirect_domain_mappings: []  # Format [{source: target:},...]
+redirect_domain_mappings:             []      # Format [{source: target:},...]
+web_opt_rdr_domains_logout_enabled::  false   # Activate headers for logout
