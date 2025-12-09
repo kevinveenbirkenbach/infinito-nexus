@@ -1,0 +1,18 @@
+---
+# Path to the installer script inside this role
+dev_nix_installer_source: "nix-install.sh"
+
+# Path where the installer will be copied on the target host
+dev_nix_installer_dest: "/usr/local/share/nix-install.sh"
+
+# Expected SHA256 of the installer file.
+# You MUST set this to the actual hash of files/nix-install.sh, e.g.:
+#   sha256sum roles/dev-nix/files/nix-install.sh
+dev_nix_installer_sha256: "CHANGE_ME_SHA256_OF_INSTALLER"
+
+# Whether to drop a small shell snippet into /etc/profile.d to ensure
+# Nix environment is available for login shells.
+dev_nix_enable_shell_snippet: false
+
+# Path of the profile.d snippet
+dev_nix_shell_snippet_path: "/etc/profile.d/nix.sh"
