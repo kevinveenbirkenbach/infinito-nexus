@@ -5,4 +5,4 @@
 
 - name: "configure pgadmin servers"
   include_tasks: configuration.yml
-  when: applications | get_app_conf(application_id, 'server_mode', True) | bool
+  when: applications | get_app_conf(application_id, 'server_mode') | bool
