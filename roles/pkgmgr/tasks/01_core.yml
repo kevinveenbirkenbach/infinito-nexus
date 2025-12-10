@@ -2,9 +2,9 @@
   include_role:
     name: '{{ item }}'
   loop:
-  - dev-git
-  - dev-make
-  - dev-python-yaml
+    - dev-git
+    - dev-make
+    - dev-python-yaml
 
 - name: Ensure OpenSSH client is installed
   community.general.pacman:
@@ -27,7 +27,21 @@
     mode: '0755'
   become: true
 
-- name: Clone Kevin's Package Manager repository
+- name: Check if pkgmgr git repo already exists
+  stat:
+    path: "{{ PKGMGR_INSTALL_PATH }}/.git"
+  register: pkgmgr_git_repo
+  become: true
+
+- name: Remove legacy 'latest' tag from existing pkgmgr repo (if present)
+  command: git tag -d latest
+  args:
+    chdir: "{{ PKGMGR_INSTALL_PATH }}"
+  when: pkgmgr_git_repo.stat.exists
+  ignore_errors: true
+  become: true
+
+- name: Clone Kevin's Package Manager repository (always latest HEAD)
   git:
     repo:     "{{ PKGMGR_REPO_URL }}"
     dest:     "{{ PKGMGR_INSTALL_PATH }}"
