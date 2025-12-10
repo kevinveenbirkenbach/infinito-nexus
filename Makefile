@@ -1,3 +1,24 @@
+# ------------------------------------------------------------
+# Multi-distro Docker build configuration (similar to pkgmgr)
+# ------------------------------------------------------------
+DISTROS           := arch debian ubuntu fedora centos
+BASE_IMAGE_ARCH   := archlinux:latest
+BASE_IMAGE_DEBIAN := debian:stable-slim
+BASE_IMAGE_UBUNTU := ubuntu:latest
+BASE_IMAGE_FEDORA := fedora:latest
+BASE_IMAGE_CENTOS := quay.io/centos/centos:stream9
+
+# Make them available to scripts (if you later add resolve-base-image.sh, etc.)
+export DISTROS
+export BASE_IMAGE_ARCH
+export BASE_IMAGE_DEBIAN
+export BASE_IMAGE_UBUNTU
+export BASE_IMAGE_FEDORA
+export BASE_IMAGE_CENTOS
+
+# ------------------------------------------------------------
+# Infinito roles/config generation
+# ------------------------------------------------------------
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
 APPLICATIONS_SCRIPT := ./cli/build/defaults/applications.py
@@ -19,31 +40,36 @@ RESERVED_USERNAMES := $(shell \
     | paste -sd, - \
 )
 
-.PHONY: build install test
+.PHONY: build install test clean clean-keep-logs list tree mig dockerignore \
+        messy-build messy-test \
+        docker-build docker-build-no-cache
 
+# ------------------------------------------------------------
+# Core project targets
+# ------------------------------------------------------------
 clean-keep-logs:
 	@echo "🧹 Cleaning ignored files but keeping logs/…"
 	git clean -fdX -- ':!logs' ':!logs/**'
 
 clean:
-	@echo "Removing ignored git files"
+	@echo "🧹 Removing ignored git files…"
 	git clean -fdX
 
 list:
-	@echo Generating the roles list
+	@echo "📦 Generating the roles list…"
 	python3 main.py build roles_list
 
 tree:
-	@echo Generating Tree
+	@echo "🌳 Generating roles tree…"
 	python3 main.py build tree -D 2 --no-signal
 
 mig: list tree
-	@echo Creating meta data for meta infinity graph
+	@echo "🔗 Creating meta data for meta infinity graph…"
 
 dockerignore:
-	@echo Create dockerignore
+	@echo "📝 Creating .dockerignore from .gitignore…"
 	cat .gitignore > .dockerignore
-	echo ".git" >> .dockerignore 
+	echo ".git" >> .dockerignore
 
 messy-build: dockerignore
 	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
@@ -69,7 +95,7 @@ messy-build: dockerignore
 	  echo "  ✅ $$out"; \
 	)
 
-messy-test: 
+messy-test:
 	@echo "🧪 Running Python tests…"
 	PYTHONPATH=. python -m unittest discover -s tests
 	@echo "📑 Checking Ansible syntax…"
@@ -79,7 +105,60 @@ install: build
 	@echo "⚙️  Install complete."
 
 build: clean messy-build
-	@echo "Full build with cleanup before was executed."
+	@echo "✅ Full build (with cleanup) finished."
 
 test: build messy-test
-	@echo "Full test with build before was executed."
+	@echo "✅ Full test (with build) finished."
+
+# ------------------------------------------------------------
+# Docker: multi-distro dev containers for Infinito
+# Uses the multi-distro Dockerfile with ARG BASE_IMAGE
+# ------------------------------------------------------------
+
+# Helper to map distro → BASE_IMAGE_* variable
+define _infinito_base_image
+$(if $(filter $(1),arch),$(BASE_IMAGE_ARCH),\
+$(if $(filter $(1),debian),$(BASE_IMAGE_DEBIAN),\
+$(if $(filter $(1),ubuntu),$(BASE_IMAGE_UBUNTU),\
+$(if $(filter $(1),fedora),$(BASE_IMAGE_FEDORA),\
+$(if $(filter $(1),centos),$(BASE_IMAGE_CENTOS),)))))
+endef
+
+docker-build:
+	@echo "============================================================"
+	@echo ">>> Building Infinito dev containers for: $(DISTROS)"
+	@echo "============================================================"
+	@for distro in $(DISTROS); do \
+	  base_image="$(call _infinito_base_image,$$distro)"; \
+	  image_name="infinito-dev-$$distro"; \
+	  echo; \
+	  echo "------------------------------------------------------------"; \
+	  echo ">>> Building $$image_name (BASE_IMAGE=$$base_image)…"; \
+	  echo "------------------------------------------------------------"; \
+	  docker build \
+	    --build-arg BASE_IMAGE="$$base_image" \
+	    -t "$$image_name" \
+	    . || exit $$?; \
+	done
+	@echo
+	@echo "✅ All Infinito dev images built."
+
+docker-build-no-cache:
+	@echo "============================================================"
+	@echo ">>> Building Infinito dev containers (NO CACHE) for: $(DISTROS)"
+	@echo "============================================================"
+	@for distro in $(DISTROS); do \
+	  base_image="$(call _infinito_base_image,$$distro)"; \
+	  image_name="infinito-dev-$$distro"; \
+	  echo; \
+	  echo "------------------------------------------------------------"; \
+	  echo ">>> Building $$image_name with NO CACHE (BASE_IMAGE=$$base_image)…"; \
+	  echo "------------------------------------------------------------"; \
+	  docker build \
+	    --no-cache \
+	    --build-arg BASE_IMAGE="$$base_image" \
+	    -t "$$image_name" \
+	    . || exit $$?; \
+	done
+	@echo
+	@echo "✅ All Infinito dev images built (no cache)."
