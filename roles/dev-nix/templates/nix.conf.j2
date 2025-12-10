@@ -1,0 +1,12 @@
+# Nix configuration file
+# Managed by the {{ SOFTWARE_NAME }}dev-nix Ansible role
+
+# Unix group containing the Nix build user accounts
+build-users-group = nixbld
+
+# Enable experimental features if configured
+{% if dev_nix_enable_experimental_features %}
+experimental-features = {{ dev_nix_experimental_features | join(" ") }}
+{% endif %}
+
+# (Optional) Add more global nix.conf options below

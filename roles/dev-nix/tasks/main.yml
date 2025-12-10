@@ -1,5 +1,3 @@
 ---
-# Main entrypoint for the dev-nix role
-
-- name: Include installation tasks for Nix
-  ansible.builtin.include_tasks: install.yml
+- include_tasks: 01_core.yml
+  when: run_once_dev_nix is not defined

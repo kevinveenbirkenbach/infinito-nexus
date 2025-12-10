@@ -1,14 +1,22 @@
 ---
-# Path to the installer script inside this role
-dev_nix_installer_source: "nix-install.sh"
+# Nix version to install via official installer
+dev_nix_installer_version: "2.32.4"
 
-# Path where the installer will be copied on the target host
+# Base URL for Nix releases
+dev_nix_installer_base_url: "https://releases.nixos.org/nix"
+
+# Full URL to the installer script (can be overridden if needed)
+dev_nix_installer_url: >-
+  {{ dev_nix_installer_base_url }}/nix-{{ dev_nix_installer_version }}/install
+
+# Full URL to the SHA256 checksum file
+dev_nix_installer_sha256_url: "{{ dev_nix_installer_url }}.sha256"
+
+# Path where the installer will be downloaded on the target host
 dev_nix_installer_dest: "/usr/local/share/nix-install.sh"
 
-# Expected SHA256 of the installer file.
-# You MUST set this to the actual hash of files/nix-install.sh, e.g.:
-#   sha256sum roles/dev-nix/files/nix-install.sh
-dev_nix_installer_sha256: "CHANGE_ME_SHA256_OF_INSTALLER"
+# Will be filled at runtime from dev_nix_installer_sha256_url
+dev_nix_installer_sha256: ""
 
 # Whether to drop a small shell snippet into /etc/profile.d to ensure
 # Nix environment is available for login shells.
@@ -16,3 +24,11 @@ dev_nix_enable_shell_snippet: false
 
 # Path of the profile.d snippet
 dev_nix_shell_snippet_path: "/etc/profile.d/nix.sh"
+
+# Enable experimental features such as nix-command and flakes
+dev_nix_enable_experimental_features: true
+
+# List of experimental features to enable when dev_nix_enable_experimental_features is true
+dev_nix_experimental_features:
+  - nix-command
+  - flakes

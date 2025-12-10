@@ -1,0 +1,37 @@
+---
+# Non-Arch installer logic:
+# Download the official Nix installer and its SHA256 from releases.nixos.org
+# and run the daemon (multi-user) installer.
+
+# 1) Fetch the official SHA256 from releases.nixos.org on the control node
+- name: Fetch official Nix installer SHA256
+  ansible.builtin.uri:
+    url: "{{ dev_nix_installer_sha256_url }}"
+    return_content: true
+  register: dev_nix_official_sha_response
+  delegate_to: localhost
+  run_once: true
+
+- name: Set expected installer checksum from official SHA256
+  ansible.builtin.set_fact:
+    dev_nix_installer_sha256: >-
+      {{ dev_nix_official_sha_response.content.split()[0] | trim }}
+  run_once: true
+
+# 2) Download installer script on the target and verify via checksum
+- name: Download Nix installer script from official releases
+  ansible.builtin.get_url:
+    url: "{{ dev_nix_installer_url }}"
+    dest: "{{ dev_nix_installer_dest }}"
+    mode: "0755"
+    # get_url will verify the checksum and fail if it does not match
+    checksum: "sha256:{{ dev_nix_installer_sha256 }}"
+  become: true
+
+# 3) Run Nix installer in daemon (multi-user) mode if Nix is not installed
+- name: Run Nix installer in daemon (multi-user) mode if Nix is not installed
+  ansible.builtin.shell: >
+    "{{ dev_nix_installer_dest }}" --daemon
+  args:
+    creates: "/nix/store"
+  become: true

@@ -1,0 +1,49 @@
+---
+# Install Nix differently depending on the target platform:
+# - Arch-based systems: install via package manager
+# - Non-Arch systems: use the official installer with SHA256 verification
+
+# 1) Arch-based systems: just install the distro package
+- name: Install Nix via package manager on Arch-based systems
+  community.general.pacman:
+    name: nix
+    state: present
+  become: true
+  when: ansible_facts.os_family == "Archlinux"
+
+# 2) Non-Arch systems: delegate installer logic to a separate task file
+- name: Include non-Arch installer logic
+  ansible.builtin.include_tasks: 02_non_arch_installer.yml
+  when: ansible_facts.os_family != "Archlinux"
+
+# 3) Configure Nix experimental features (common for all platforms)
+- name: Ensure Nix config directory exists
+  ansible.builtin.file:
+    path: /etc/nix
+    state: directory
+    mode: "0755"
+  when: dev_nix_enable_experimental_features | bool
+  become: true
+
+- name: Deploy Nix configuration (nix.conf)
+  ansible.builtin.template:
+    src: "nix.conf.j2"
+    dest: "/etc/nix/nix.conf"
+    mode: "0644"
+  become: true
+
+# 4) Optionally drop shell snippet for Nix
+- name: Optionally drop shell snippet for Nix
+  ansible.builtin.copy:
+    dest: "{{ dev_nix_shell_snippet_path }}"
+    mode: "0644"
+    content: |
+      # Added by dev-nix Ansible role
+      if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      fi
+  when: dev_nix_enable_shell_snippet | bool
+  become: true
+
+# 5) Mark this role as "run once" in your global once-flag system
+- include_tasks: utils/once/flag.yml
