@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "infinito-nexus"
+version = "0.0.0"
+description = "Infinito.Nexus"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE.md" }
+
+dependencies = [
+  "simpleaudio",
+  "numpy",
+  "ansible",
+  "colorscheme-generator @ https://github.com/kevinveenbirkenbach/colorscheme-generator/archive/refs/tags/v0.3.0.zip",
+  "bcrypt",
+  "ruamel.yaml",
+  "tld",
+  "passlib",
+  "requests",
+]
+
+[tool.setuptools]
+# Non-src layout: explicitly control packaged modules
+packages = { find = { where = ["."], include = [
+  "cli*",
+  "filter_plugins*",
+  "lookup_plugins*",
+  "module_utils*",
+  "library*",
+], exclude = [
+  "roles*",
+  "assets*",
+  "docs*",
+  "templates*",
+  "logs*",
+  "tasks*",
+  "tests*",
+  "__pycache__*",
+] } }
+include-package-data = true

@@ -1,9 +1,0 @@
-colorscheme-generator @ https://github.com/kevinveenbirkenbach/colorscheme-generator/archive/refs/tags/v0.3.0.zip
-numpy
-bcrypt
-ruamel.yaml
-tld
-passlib
-requests
-ansible
-pytest
