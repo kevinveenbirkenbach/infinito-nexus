@@ -10,3 +10,5 @@ venv
 *tree.json
 roles/list.json
 *.pyc
+*.egg-info
+build
