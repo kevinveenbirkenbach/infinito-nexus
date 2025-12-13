@@ -7,7 +7,7 @@ import yaml
 from collections import OrderedDict
 
 # Add cli/ to import path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../..", "cli/build/defaults/")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../..", "cli/setup/")))
 
 import users
 
@@ -159,7 +159,7 @@ class TestGenerateUsers(unittest.TestCase):
             out_file = tmpdir / "users.yml"
 
             # Resolve script path like in other tests (relative to repo root)
-            script_path = Path(__file__).resolve().parents[5] / "cli" / "build" / "defaults" / "users.py"
+            script_path = Path(__file__).resolve().parents[4] / "cli" / "setup" / "users.py"
 
             # Run generator
             result = subprocess.run(
@@ -215,7 +215,7 @@ class TestGenerateUsers(unittest.TestCase):
                     yaml.safe_dump({"users": users_map}, f)
 
             out_file = tmpdir / "users.yml"
-            script_path = Path(__file__).resolve().parents[5] / "cli" / "build" / "defaults" / "users.py"
+            script_path = Path(__file__).resolve().parents[5] / "cli" / "setup" / "users.py"
 
             # First run
             r1 = subprocess.run(
@@ -303,7 +303,7 @@ class TestGenerateUsers(unittest.TestCase):
                 )
 
             out_file = tmpdir / "users.yml"
-            script_path = Path(__file__).resolve().parents[5] / "cli" / "build" / "defaults" / "users.py"
+            script_path = Path(__file__).resolve().parents[5] / "cli" / "setup" / "users.py"
 
             result = subprocess.run(
                 [

@@ -45,7 +45,7 @@ class TestGenerateDefaultApplicationsUsers(unittest.TestCase):
         When a users.yml exists with defined users, the script should inject a 'users'
         mapping in the generated YAML, mapping each username to a Jinja2 reference.
         """
-        script_path = Path(__file__).resolve().parents[5] / "cli" / "build/defaults/applications.py"
+        script_path = Path(__file__).resolve().parents[4] / "cli" / "setup/applications.py"
         result = subprocess.run([
             "python3", str(script_path),
             "--roles-dir", str(self.roles_dir),

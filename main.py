@@ -209,7 +209,7 @@ def print_global_help(available, cli_dir):
         Fore.CYAN
     ))
     print(color_text(
-        "    corresponds to `cli/build/defaults/users.py`.",
+        "    corresponds to `cli/setup/users.py`.",
         Fore.CYAN
     ))
     print()

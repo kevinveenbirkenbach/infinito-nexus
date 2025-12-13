@@ -69,7 +69,7 @@ class TestMainHelpers(unittest.TestCase):
         """
         available = [
             (None, "deploy"),
-            ("build/defaults", "users"),
+            ("setup", "users"),
         ]
 
         main.show_full_help_for_all("/fake/cli", available)

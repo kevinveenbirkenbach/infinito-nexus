@@ -10,7 +10,7 @@ import subprocess
 class TestGenerateDefaultApplications(unittest.TestCase):
     def setUp(self):
         # Path to the generator script under test
-        self.script_path = Path(__file__).resolve().parents[5] / "cli" / "build" / "defaults" / "applications.py"
+        self.script_path = Path(__file__).resolve().parents[4] / "cli" / "setup" / "applications.py"
         # Create temp role structure
         self.temp_dir = Path(tempfile.mkdtemp())
         self.roles_dir = self.temp_dir / "roles"
@@ -32,7 +32,7 @@ class TestGenerateDefaultApplications(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def test_script_generates_expected_yaml(self):
-        script_path = Path(__file__).resolve().parent.parent.parent.parent.parent.parent / "cli/build/defaults/applications.py"
+        script_path = Path(__file__).resolve().parent.parent.parent.parent.parent.parent / "cli/setup/applications.py"
 
         result = subprocess.run(
             [

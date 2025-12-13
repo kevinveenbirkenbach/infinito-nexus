@@ -95,8 +95,8 @@ def run_ansible_playbook(
     # 4) Test Phase
     # ---------------------------------------------------------
     if not skip_tests:
-        print("\n🧪 Running tests (make messy-test)...\n")
-        subprocess.run(["make", "messy-test"], check=True)
+        print("\n🧪 Running tests (make test-messy)...\n")
+        subprocess.run(["make", "test-messy"], check=True)
     else:
         print("\n🧪 Tests skipped (--skip-tests)\n")
 

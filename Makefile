@@ -1,12 +1,13 @@
+SHELL 				:= /usr/bin/env bash
+VENV        		?= .venv
+PYTHON      		:= $(VENV)/bin/python
+PIP         		:= $(PYTHON) -m pip
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
-APPLICATIONS_SCRIPT := ./cli/build/defaults/applications.py
+APPLICATIONS_SCRIPT := ./cli/setup/applications.py
+USERS_SCRIPT        := ./cli/setup/users.py
 USERS_OUT           := ./group_vars/all/03_users.yml
-USERS_SCRIPT        := ./cli/build/defaults/users.py
 INCLUDES_SCRIPT     := ./cli/build/role_include.py
-PYTHON  			?= python3
-
-INCLUDE_GROUPS = $(shell $(PYTHON) main.py meta categories invokable -s "-" --no-signal | tr '\n' ' ')
 
 # Directory where these include-files will be written
 INCLUDES_OUT_DIR    := ./tasks/groups
@@ -20,7 +21,7 @@ RESERVED_USERNAMES := $(shell \
     | paste -sd, - \
 )
 
-.PHONY: build install test
+.PHONY: deps setup setup-clean test-messy test install
 
 clean-keep-logs:
 	@echo "🧹 Cleaning ignored files but keeping logs/…"
@@ -46,7 +47,7 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore 
 
-messy-build: dockerignore
+setup: deps dockerignore
 	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
 	$(PYTHON) $(USERS_SCRIPT) \
 	  --roles-dir $(ROLES_DIR) \
@@ -62,25 +63,35 @@ messy-build: dockerignore
 
 	@echo "🔧 Generating role-include files for each group…"
 	@mkdir -p $(INCLUDES_OUT_DIR)
-	@$(foreach grp,$(INCLUDE_GROUPS), \
-	  out=$(INCLUDES_OUT_DIR)/$(grp)roles.yml; \
-	  echo "→ Building $$out (pattern: '$(grp)')…"; \
-	  $(PYTHON) $(INCLUDES_SCRIPT) $(ROLES_DIR) \
-	    -p $(grp) -o $$out; \
+	@INCLUDE_GROUPS="$$( $(PYTHON) main.py meta categories invokable -s "-" --no-signal | tr '\n' ' ' )"; \
+	for grp in $$INCLUDE_GROUPS; do \
+	  out="$(INCLUDES_OUT_DIR)/$${grp}roles.yml"; \
+	  echo "→ Building $$out (pattern: '$$grp')…"; \
+	  $(PYTHON) $(INCLUDES_SCRIPT) $(ROLES_DIR) -p $$grp -o $$out; \
 	  echo "  ✅ $$out"; \
-	)
+	done
 
-messy-test: 
+setup-clean: clean setup
+	@echo "Full build with cleanup before was executed."
+
+test-messy: 
 	@echo "🧪 Running Python tests…"
 	PYTHONPATH=. $(PYTHON) -m unittest discover -s tests
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-install: build
-	@echo "⚙️  Install complete."
+test: setup-clean test-messy
+	@echo "Full test with setup-clean before was executed."
 
-build: clean messy-build
-	@echo "Full build with cleanup before was executed."
+deps:
+	@if [ ! -x "$(PYTHON)" ]; then \
+		echo "🐍 Creating virtualenv $(VENV)"; \
+		python3 -m venv $(VENV); \
+	fi
+	@echo "📦 Installing Python dependencies"
+	@$(PIP) install --upgrade pip setuptools wheel
+	@$(PIP) install -e .
 
-test: build messy-test
-	@echo "Full test with build before was executed."
+install: deps
+	@echo "✅ Python environment installed (editable)."
+
