@@ -55,6 +55,9 @@ tree:
 mig: list tree
 	@echo "Creating meta data for meta infinity graph"
 
+make build:
+	docker build --network=host -t infinito:latest .
+
 dockerignore:
 	@echo "Create dockerignore"
 	cat .gitignore > .dockerignore
