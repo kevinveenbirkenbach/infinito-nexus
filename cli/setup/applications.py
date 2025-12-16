@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 # Ensure project root on PYTHONPATH so module_utils is importable
-repo_root = Path(__file__).resolve().parent.parent.parent.parent
+repo_root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(repo_root))
 
 # Add lookup_plugins for application_gid
