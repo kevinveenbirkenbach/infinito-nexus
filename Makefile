@@ -2,6 +2,7 @@ SHELL 				:= /usr/bin/env bash
 VENV        		?= .venv
 PYTHON      		:= $(VENV)/bin/python
 PIP         		:= $(PYTHON) -m pip
+
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
 APPLICATIONS_SCRIPT := ./cli/setup/applications.py
@@ -12,6 +13,12 @@ INCLUDES_SCRIPT     := ./cli/build/role_include.py
 # Directory where these include-files will be written
 INCLUDES_OUT_DIR    := ./tasks/groups
 
+# --- Test filtering (unittest discover) ---
+TEST_PATTERN            ?= test*.py
+LINT_TESTS_DIR          ?= tests/lint
+UNIT_TESTS_DIR          ?= tests/unit
+INTEGRATION_TESTS_DIR   ?= tests/integration
+
 # Compute extra users as before
 RESERVED_USERNAMES := $(shell \
   find $(ROLES_DIR) -maxdepth 1 -type d -printf '%f\n' \
@@ -21,7 +28,10 @@ RESERVED_USERNAMES := $(shell \
     | paste -sd, - \
 )
 
-.PHONY: deps setup setup-clean test-messy test install
+.PHONY: \
+	deps setup setup-clean install \
+	test test-messy test-lint test-unit test-integration \
+	clean clean-keep-logs list tree mig dockerignore
 
 clean-keep-logs:
 	@echo "🧹 Cleaning ignored files but keeping logs/…"
@@ -32,20 +42,20 @@ clean:
 	git clean -fdX
 
 list:
-	@echo Generating the roles list
+	@echo "Generating the roles list"
 	$(PYTHON) main.py build roles_list
 
 tree:
-	@echo Generating Tree
+	@echo "Generating Tree"
 	$(PYTHON) main.py build tree -D 2 --no-signal
 
 mig: list tree
-	@echo Creating meta data for meta infinity graph
+	@echo "Creating meta data for meta infinity graph"
 
 dockerignore:
-	@echo Create dockerignore
+	@echo "Create dockerignore"
 	cat .gitignore > .dockerignore
-	echo ".git" >> .dockerignore 
+	echo ".git" >> .dockerignore
 
 setup: deps dockerignore
 	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
@@ -74,9 +84,34 @@ setup: deps dockerignore
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
-test-messy: 
-	@echo "🧪 Running Python tests…"
-	PYTHONPATH=. $(PYTHON) -m unittest discover -s tests
+# --- Tests (separated) ---
+
+test-lint:
+	@if [ ! -d "$(LINT_TESTS_DIR)" ]; then \
+		echo "ℹ️  No lint tests directory found at $(LINT_TESTS_DIR) (skipping)."; \
+		exit 0; \
+	fi
+	@echo "🔎 Running lint tests (dir: $(LINT_TESTS_DIR), pattern: $(TEST_PATTERN))…"
+	PYTHONPATH=. $(PYTHON) -m unittest discover -s $(LINT_TESTS_DIR) -p "$(TEST_PATTERN)"
+
+test-unit:
+	@if [ ! -d "$(UNIT_TESTS_DIR)" ]; then \
+		echo "ℹ️  No unit tests directory found at $(UNIT_TESTS_DIR) (skipping)."; \
+		exit 0; \
+	fi
+	@echo "🧪 Running unit tests (dir: $(UNIT_TESTS_DIR), pattern: $(TEST_PATTERN))…"
+	PYTHONPATH=. $(PYTHON) -m unittest discover -s $(UNIT_TESTS_DIR) -p "$(TEST_PATTERN)"
+
+test-integration:
+	@if [ ! -d "$(INTEGRATION_TESTS_DIR)" ]; then \
+		echo "ℹ️  No integration tests directory found at $(INTEGRATION_TESTS_DIR) (skipping)."; \
+		exit 0; \
+	fi
+	@echo "🧪 Running integration tests (dir: $(INTEGRATION_TESTS_DIR), pattern: $(TEST_PATTERN))…"
+	PYTHONPATH=. $(PYTHON) -m unittest discover -s $(INTEGRATION_TESTS_DIR) -p "$(TEST_PATTERN)"
+
+# Backwards compatible target (kept)
+test-messy: test-lint test-unit test-integration
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
@@ -94,4 +129,3 @@ deps:
 
 install: deps
 	@echo "✅ Python environment installed (editable)."
-
