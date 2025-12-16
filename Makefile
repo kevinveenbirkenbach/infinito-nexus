@@ -1,7 +1,7 @@
 SHELL 				:= /usr/bin/env bash
 VENV        		?= .venv
-PYTHON 				:= python3
-PIP    				:= python3 -m pip
+PYTHON 				?= python3
+PIP    				?= $(PYTHON) -m pip
 
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
@@ -18,6 +18,9 @@ TEST_PATTERN            ?= test*.py
 LINT_TESTS_DIR          ?= tests/lint
 UNIT_TESTS_DIR          ?= tests/unit
 INTEGRATION_TESTS_DIR   ?= tests/integration
+
+# Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
+PYTHONPATH              ?= .
 
 # Compute extra users as before
 RESERVED_USERNAMES := $(shell \
@@ -92,7 +95,10 @@ test-lint:
 		exit 0; \
 	fi
 	@echo "🔎 Running lint tests (dir: $(LINT_TESTS_DIR), pattern: $(TEST_PATTERN))…"
-	PYTHONPATH=. $(PYTHON) -m unittest discover -s $(LINT_TESTS_DIR) -p "$(TEST_PATTERN)"
+	@PYTHONPATH="$(PYTHONPATH)" $(PYTHON) -m unittest discover \
+		-s "$(LINT_TESTS_DIR)" \
+		-p "$(TEST_PATTERN)" \
+		-t "$(PYTHONPATH)"
 
 test-unit:
 	@if [ ! -d "$(UNIT_TESTS_DIR)" ]; then \
@@ -100,7 +106,10 @@ test-unit:
 		exit 0; \
 	fi
 	@echo "🧪 Running unit tests (dir: $(UNIT_TESTS_DIR), pattern: $(TEST_PATTERN))…"
-	PYTHONPATH=. $(PYTHON) -m unittest discover -s $(UNIT_TESTS_DIR) -p "$(TEST_PATTERN)"
+	@PYTHONPATH="$(PYTHONPATH)" $(PYTHON) -m unittest discover \
+		-s "$(UNIT_TESTS_DIR)" \
+		-p "$(TEST_PATTERN)" \
+		-t "$(PYTHONPATH)"
 
 test-integration:
 	@if [ ! -d "$(INTEGRATION_TESTS_DIR)" ]; then \
@@ -108,20 +117,23 @@ test-integration:
 		exit 0; \
 	fi
 	@echo "🧪 Running integration tests (dir: $(INTEGRATION_TESTS_DIR), pattern: $(TEST_PATTERN))…"
-	PYTHONPATH=. $(PYTHON) -m unittest discover -s $(INTEGRATION_TESTS_DIR) -p "$(TEST_PATTERN)"
+	@PYTHONPATH="$(PYTHONPATH)" $(PYTHON) -m unittest discover \
+		-s "$(INTEGRATION_TESTS_DIR)" \
+		-p "$(TEST_PATTERN)" \
+		-t "$(PYTHONPATH)"
 
 # Backwards compatible target (kept)
 test-messy: test-lint test-unit test-integration
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-test: setup-clean test-messy
-	@echo "Full test with setup-clean before was executed."
+test: clean setup test-messy
+	@echo "✅ Full test (setup + tests) executed."
 
 deps:
-	@if [ ! -x "$(PYTHON)" ]; then \
+	@if [ ! -d "$(VENV)" ]; then \
 		echo "🐍 Creating virtualenv $(VENV)"; \
-		python3 -m venv $(VENV); \
+		python3 -m venv "$(VENV)"; \
 	fi
 	@echo "📦 Installing Python dependencies"
 	@$(PIP) install --upgrade pip setuptools wheel

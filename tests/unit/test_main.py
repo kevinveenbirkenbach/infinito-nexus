@@ -74,7 +74,7 @@ class TestMainHelpers(unittest.TestCase):
 
         main.show_full_help_for_all("/fake/cli", available)
 
-        expected_modules = {"cli.deploy", "cli.build.defaults.users"}
+        expected_modules = {"cli.deploy", "cli.setup.users"}
         invoked_modules = set()
 
         for call in mock_run.call_args_list:
