@@ -19,5 +19,5 @@ url: "{{ WEB_PROTOCOL }}://<< defaults_applications.web-svc-file.domains.canonic
 ```
 
 - The `<< ... >>` placeholders are resolved by the [`DictRenderer`](../../../utils/dict_renderer.py) helper class.
-- The CLI uses the [`DefaultsGenerator`](../../../cli/build/defaults/applications.py) class to merge all role configurations into a single YAML and then calls the renderer to substitute each `<< ... >>` occurrence.
+- The CLI uses the [`DefaultsGenerator`](../../../cli/setup/applications.py) class to merge all role configurations into a single YAML and then calls the renderer to substitute each `<< ... >>` occurrence.
 - Use the `--verbose` flag on the CLI script to log every replacement step, and rely on the built‑in timeout (default: 10 seconds) to prevent infinite loops.

@@ -29,7 +29,7 @@ infinito --help
 To deploy Infinito.Nexus on a personal computer (e.g., a laptop), you can run:
 
 ```bash
-infinito playbook \
+infinito deploy dedicated \
   --limit hp-spectre-x360 \
   --host-type personal-computer \
   --update \
@@ -64,7 +64,7 @@ To avoid typing your vault password interactively, you can provide a file:
 
 ## 🔍 Full Command-Line Reference
 
-Here’s a breakdown of all available parameters from `infinito playbook --help`:
+Here’s a breakdown of all available parameters from `infinito deploy dedicated --help`:
 
 | Argument | Description |
 |----------|-------------|
@@ -87,7 +87,7 @@ Here’s a breakdown of all available parameters from `infinito playbook --help`
 You can mix and match modes like this:
 
 ```bash
-infinito playbook --update --backup --cleanup pcs.yml
+infinito deploy dedicated --update --backup --cleanup pcs.yml
 ```
 
 This will update the system, create a backup, and clean up unnecessary files in one run.
