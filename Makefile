@@ -1,7 +1,7 @@
 SHELL 				:= /usr/bin/env bash
 VENV        		?= .venv
-PYTHON      		:= $(VENV)/bin/python
-PIP         		:= $(PYTHON) -m pip
+PYTHON 				:= python3
+PIP    				:= python3 -m pip
 
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
@@ -57,7 +57,7 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-setup: deps dockerignore
+setup: dockerignore
 	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
 	$(PYTHON) $(USERS_SCRIPT) \
 	  --roles-dir $(ROLES_DIR) \
