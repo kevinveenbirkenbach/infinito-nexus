@@ -230,8 +230,8 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "Expected 'make clean' when MODE_CLEANUP is true",
         )
         self.assertTrue(
-            any(call == ["make", "messy-build"] for call in calls),
-            "Expected 'make messy-build' when skip_build=False",
+            any(call == ["make", "setup"] for call in calls),
+            "Expected 'make setup' when skip_build=False",
         )
         self.assertTrue(
             any(call == ["make", "test-messy"] for call in calls),
@@ -329,7 +329,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         )
         # No cleanup, no build, no tests, no inventory validation
         self.assertFalse(any(call == ["make", "clean"] for call in calls))
-        self.assertFalse(any(call == ["make", "messy-build"] for call in calls))
+        self.assertFalse(any(call == ["make", "setup"] for call in calls))
         self.assertFalse(any(call == ["make", "test-messy"] for call in calls))
         self.assertFalse(
             any(

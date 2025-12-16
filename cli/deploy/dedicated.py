@@ -1,4 +1,4 @@
-    #!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -63,8 +63,8 @@ def run_ansible_playbook(
     # 2) Build Phase
     # ---------------------------------------------------------
     if not skip_build:
-        print("\n🛠️  Running project build (make messy-build)...\n")
-        subprocess.run(["make", "messy-build"], check=True)
+        print("\n🛠️  Running project build (make setup)...\n")
+        subprocess.run(["make", "setup"], check=True)
     else:
         print("\n🛠️  Build skipped (--skip-build)\n")
 
