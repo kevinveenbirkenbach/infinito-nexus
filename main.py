@@ -9,6 +9,7 @@ from datetime import datetime
 import pty
 from module_utils.sounds import Sound
 import time
+from multiprocessing import Process, get_start_method, set_start_method
 
 # Color support
 try:
@@ -233,11 +234,7 @@ def play_start_intro():
     Sound.play_start_sound()
     Sound.play_infinito_intro_sound()
 
-
-from multiprocessing import Process, get_start_method, set_start_method
-
 def _call_sound(method_name: str):
-   # Re-import inside child to (re)init audio backend cleanly under 'spawn'
     from module_utils.sounds import Sound as _Sound
     getattr(_Sound, method_name)()
 
@@ -247,7 +244,6 @@ def _play_in_child(method_name: str) -> bool:
     p.join()
     if p.exitcode != 0:
         try:
-            # Sichtbare Diagnose, wenn das Kind crasht/fehlschlägt
             print(color_text(f"[sound] child '{method_name}' exitcode={p.exitcode}", Fore.YELLOW))
         except Exception:
             pass

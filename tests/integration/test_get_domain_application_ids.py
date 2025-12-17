@@ -1,13 +1,8 @@
 import os
 import re
-import sys
 import unittest
-
-# Ensure filter_plugins is on the path
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-sys.path.insert(0, PROJECT_ROOT)
-
 from filter_plugins.get_all_application_ids import get_all_application_ids
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 class TestGetDomainApplicationIds(unittest.TestCase):
     """
