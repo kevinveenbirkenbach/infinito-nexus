@@ -3,8 +3,6 @@ from __future__ import annotations
 
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
 from module_utils.config_utils import get_app_conf, AppConfigKeyError, ConfigEntryNotSetError  # noqa: F401
 from module_utils.entity_name_utils import get_entity_name
 

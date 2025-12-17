@@ -4,14 +4,6 @@ import base64
 import sys
 import os
 import copy
-
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../../")
-    ),
-)
-
 from filter_plugins.csp_filters import FilterModule, AnsibleFilterError
 
 class TestCspFilters(unittest.TestCase):

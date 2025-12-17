@@ -5,11 +5,6 @@ import yaml
 import re
 from pathlib import Path
 
-# Ensure imports work when run directly
-script_dir = Path(__file__).resolve().parent
-repo_root = script_dir.parent.parent
-sys.path.insert(0, str(repo_root))
-
 from cli.meta.applications.all import find_application_ids
 
 def load_yaml_file(path):

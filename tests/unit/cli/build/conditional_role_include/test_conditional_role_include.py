@@ -5,10 +5,6 @@ import unittest
 import tempfile
 import shutil
 import yaml
-
-# Adjust path to include cli/ folder
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../..", "cli")))
-
 from cli.build.role_include import build_dependency_graph, topological_sort, gen_condi_role_incl
 
 class TestGeneratePlaybook(unittest.TestCase):

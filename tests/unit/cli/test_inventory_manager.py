@@ -5,15 +5,6 @@ import tempfile
 import shutil
 from pathlib import Path
 from unittest.mock import patch
-
-# Ensure the cli package is on sys.path
-sys.path.insert(
-    0,
-    os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../../../cli")
-    ),
-)
-
 from module_utils.handler.yaml import YamlHandler
 from module_utils.handler.vault import VaultHandler, VaultScalar
 from module_utils.manager.inventory import InventoryManager

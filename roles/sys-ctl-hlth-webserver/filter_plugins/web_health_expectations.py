@@ -1,11 +1,7 @@
 import os
 import sys
 from collections.abc import Mapping
-
-# Make repo-level module_utils importable (go up three levels from this file)
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from module_utils.config_utils import get_app_conf  # reuse existing helper
-
 
 DEFAULT_OK = [200, 302, 301]
 

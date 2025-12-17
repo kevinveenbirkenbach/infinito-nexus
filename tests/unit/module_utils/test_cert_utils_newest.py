@@ -4,12 +4,6 @@ import sys
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
-
-# Add the project root/module_utils to the import path
-CURRENT_DIR = os.path.dirname(__file__)
-PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../.."))
-sys.path.insert(0, PROJECT_ROOT)
-
 from module_utils.cert_utils import CertUtils
 
 

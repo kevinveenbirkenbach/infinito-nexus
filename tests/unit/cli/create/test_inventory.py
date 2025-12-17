@@ -4,13 +4,6 @@ import tempfile
 import unittest
 from pathlib import Path
 import yaml
-
-# Make cli module importable (same pattern as test_credentials.py)
-dir_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../../../cli')
-)
-sys.path.insert(0, dir_path)
-
 from cli.create.inventory import (  # type: ignore
     merge_inventories,
     ensure_host_vars_file,

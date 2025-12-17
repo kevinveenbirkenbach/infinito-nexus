@@ -1,12 +1,6 @@
-# tests/unit/filter_plugins/test_active_docker.py
 import sys
 import unittest
 from pathlib import Path
-
-# Ensure repository root is on sys.path so "filter_plugins" can be imported
-ROOT = Path(__file__).resolve().parents[3]  # .../tests/unit/filter_plugins -> repo root
-sys.path.insert(0, str(ROOT))
-
 from filter_plugins.active_docker import (
     active_docker_container_count,
     FilterModule,

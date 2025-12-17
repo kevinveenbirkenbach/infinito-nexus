@@ -3,11 +3,7 @@
 import os
 import sys
 import unittest
-
-# Add filter_plugins/ to the import path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..", "filter_plugins")))
-
-from get_docker_image import FilterModule
+from filter_plugins.get_docker_image import FilterModule
 
 class TestGetDockerImage(unittest.TestCase):
     def setUp(self):

@@ -4,14 +4,7 @@ import tempfile
 import shutil
 import unittest
 import yaml
-
-dir_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../../../lookup_plugins')
-)
-sys.path.insert(0, dir_path)
-
-from application_gid import LookupModule
-
+from lookup_plugins.application_gid import LookupModule
 
 class TestApplicationGidLookup(unittest.TestCase):
 

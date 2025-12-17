@@ -12,10 +12,6 @@ if "__file__" in globals():
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 else:
     project_root = os.getcwd()
-
-# Ensure project root on PYTHONPATH so 'filter_plugins' can be imported
-sys.path.insert(0, project_root)
-
 import argparse
 import yaml
 from filter_plugins.invokable_paths import get_invokable_paths, get_non_invokable_paths

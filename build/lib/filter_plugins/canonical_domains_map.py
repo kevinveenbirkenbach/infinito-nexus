@@ -1,8 +1,6 @@
 from ansible.errors import AnsibleFilterError
 import sys
 import os
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from module_utils.entity_name_utils import get_entity_name
 from module_utils.role_dependency_resolver import RoleDependencyResolver
 from typing import Iterable

@@ -1,16 +1,6 @@
-# tests/unit/filter_plugins/test_reserved_users.py
-
 import os
 import sys
 import unittest
-
-# Ensure that the filter_plugins directory is importable
-CURRENT_DIR = os.path.dirname(__file__)
-REPO_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", "..", ".."))
-FILTER_PLUGINS_DIR = os.path.join(REPO_ROOT, "filter_plugins")
-
-if FILTER_PLUGINS_DIR not in sys.path:
-    sys.path.insert(0, FILTER_PLUGINS_DIR)
 
 import reserved_users  # noqa: E402
 from reserved_users import reserved_usernames, non_reserved_users  # noqa: E402

@@ -1,9 +1,6 @@
-# roles/web-svc-logout/filter_plugins/domain_filters.py
-
 from ansible.errors import AnsibleFilterError
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 from module_utils.config_utils import get_app_conf
 
 class FilterModule(object):

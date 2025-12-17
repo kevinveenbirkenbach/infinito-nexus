@@ -3,9 +3,6 @@ import hashlib
 import base64
 import sys
 import os
-
-# Ensure module_utils is importable when this filter runs from Ansible
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from module_utils.config_utils import get_app_conf
 from module_utils.get_url import get_url
 

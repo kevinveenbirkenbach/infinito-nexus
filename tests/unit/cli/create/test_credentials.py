@@ -2,14 +2,6 @@ import os
 import sys
 import unittest
 from unittest import mock
-
-# Ensure cli module is importable
-dir_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../../../cli')
-)
-sys.path.insert(0, dir_path)
-
-# Import functions and classes to test
 from cli.create.credentials import ask_for_confirmation, main
 from module_utils.handler.vault import VaultHandler
 import subprocess
