@@ -45,7 +45,8 @@ class TestStandaloneCheckerScript(unittest.TestCase):
     @patch("requests.head")
     def test_all_ok_returns_zero(self, mock_head):
         def head_side_effect(url, allow_redirects=False, timeout=10):
-            class R: pass
+            class R:
+                pass
             r = R()
             domain = url.split("://", 1)[1]
             # both match expectations exactly
@@ -68,7 +69,8 @@ class TestStandaloneCheckerScript(unittest.TestCase):
     @patch("requests.head")
     def test_mismatches_counted(self, mock_head):
         def head_side_effect(url, allow_redirects=False, timeout=10):
-            class R: pass
+            class R:
+                pass
             r = R()
             domain = url.split("://", 1)[1]
             mapping = {"bad.example.org": 200, "ok301.example.org": 301}
@@ -93,7 +95,8 @@ class TestStandaloneCheckerScript(unittest.TestCase):
     def test_non_list_values_sanitize_to_empty_and_fail(self, mock_head):
         # If a domain maps to a non-list, it becomes [] and is treated as a failure
         def head_side_effect(url, allow_redirects=False, timeout=10):
-            class R: pass
+            class R:
+                pass
             r = R()
             r.status_code = 200
             return r

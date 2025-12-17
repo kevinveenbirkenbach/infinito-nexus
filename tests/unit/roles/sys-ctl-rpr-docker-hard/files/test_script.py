@@ -54,7 +54,8 @@ class TestRepairDockerHard(unittest.TestCase):
 
         def fake_run(cmd, cwd=None, check=None):
             calls.append({"cmd": cmd, "cwd": cwd, "check": check})
-            class R: pass
+            class R:
+                pass
             return R()
 
         old_run = s.subprocess.run
