@@ -6,7 +6,7 @@ configuration:
     default_push_create_private:  True      # Default private when creating a new repository with push-to-create.
 features:
   matomo:                         true
-  css:                            false
+  css:                            true
   desktop:                        true
   central_database:               true
   ldap:                           true

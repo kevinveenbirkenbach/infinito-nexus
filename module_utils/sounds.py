@@ -1,27 +1,55 @@
 import os
 import warnings
+from typing import Optional
+
+_SOUND_DISABLED_REASON: Optional[str] = None
+_SOUND_WARNED: bool = False
+
+
+def _warn_sound_disabled_once() -> None:
+    """
+    Emit the 'Sound support disabled' warning at most once per Python process.
+
+    Important:
+    - Do NOT warn at import time (avoids noisy unit test output).
+    - Warn only when a sound function is actually called.
+    """
+    global _SOUND_WARNED
+
+    if _SOUND_WARNED:
+        return
+
+    if not _SOUND_DISABLED_REASON:
+        return
+
+    _SOUND_WARNED = True
+    warnings.warn(
+        f"Sound support disabled: {_SOUND_DISABLED_REASON}",
+        RuntimeWarning,
+        stacklevel=2,
+    )
 
 
 class DummySound:
     @staticmethod
     def play_start_sound() -> None:
-        pass
+        _warn_sound_disabled_once()
 
     @staticmethod
     def play_infinito_intro_sound() -> None:
-        pass
+        _warn_sound_disabled_once()
 
     @staticmethod
     def play_finished_successfully_sound() -> None:
-        pass
+        _warn_sound_disabled_once()
 
     @staticmethod
     def play_finished_failed_sound() -> None:
-        pass
+        _warn_sound_disabled_once()
 
     @staticmethod
     def play_warning_sound() -> None:
-        pass
+        _warn_sound_disabled_once()
 
 
 try:
@@ -210,7 +238,9 @@ try:
             cls._prepare_and_play(freqs)
 
         @classmethod
-        def _prepare_and_play(cls, freqs: list[float], durations: list[float] | None = None) -> None:
+        def _prepare_and_play(
+            cls, freqs: list[float], durations: list[float] | None = None
+        ) -> None:
             count = len(freqs)
 
             if durations is None:
@@ -223,5 +253,7 @@ try:
             cls._play(np.concatenate(waves))
 
 except ImportError as exc:
-    warnings.warn(f"Sound support disabled: {exc}", RuntimeWarning)
+    # Do NOT warn at import time — this module is used in many unit tests / subprocess calls.
+    # Warn only when a sound method is actually invoked.
+    _SOUND_DISABLED_REASON = str(exc)
     Sound = DummySound

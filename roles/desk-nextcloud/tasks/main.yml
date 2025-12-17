@@ -3,32 +3,45 @@
     name: nextcloud-client
     state: present
 
-- name: Link homefolders to cloud
-  ansible.builtin.file:
-    src: "{{nextcloud_cloud_directory}}{{ item }}"
-    dest: "{{nextcloud_user_home_directory}}{{ item }}"
-    owner: "{{ users[desktop_username].username }}"
-    group: "{{ users[desktop_username].username }}"
-    state: link
-    force: yes
-  ignore_errors: true # Just temporary @todo remove
-  loop:
-    - Templates
-    - Documents
-    - Videos
-    - Pictures
-    - Music
-    - Desktop
-    - Software
-    - Downloads
-    - Workspaces
-    - Books
-    - Screenshots
+- name: Initialize dotlinker mapping list
+  ansible.builtin.set_fact:
+    nextcloud_dotlinker_mappings: []
 
-- name: Link dump folder
-  ansible.builtin.file:
-    src: "{{nextcloud_cloud_directory}}InstantUpload"
-    dest: "{{nextcloud_user_home_directory}}Dump"
-    owner: "{{ users[desktop_username].username }}"
-    group: "{{ users[desktop_username].username }}"
-    state: link
+- name: Build dotlinker mappings for Nextcloud folders
+  ansible.builtin.set_fact:
+    nextcloud_dotlinker_mappings: >-
+      {{
+        nextcloud_dotlinker_mappings + [
+          {
+            'name': 'nextcloud-' ~ (item | lower),
+            'backend': 'cloud',
+            'src': nextcloud_user_home_directory ~ item,
+            'dest': nextcloud_cloud_directory ~ item
+          }
+        ]
+      }}
+  loop: "{{ nextcloud_dotlinker_folders }}"
+
+- name: Add dump mapping (Dump -> InstantUpload)
+  ansible.builtin.set_fact:
+    nextcloud_dotlinker_mappings: >-
+      {{
+        nextcloud_dotlinker_mappings + [
+          {
+            'name': 'nextcloud-dump',
+            'backend': 'cloud',
+            'src': nextcloud_user_home_directory ~ 'Dump',
+            'dest': nextcloud_cloud_directory ~ 'InstantUpload'
+          }
+        ]
+      }}
+
+- name: Apply Nextcloud folder mappings via dotlinker
+  ansible.builtin.include_role:
+    name: desk-dotlinker
+  vars:
+    dotlinker_user: "{{ users[desktop_username].username }}"
+    dotlinker_config_path: "{{ nextcloud_user_home_directory }}.config/dotlinker/config.yaml"
+    dotlinker_replace: true
+    dotlinker_apply: true
+    dotlinker_mappings: "{{ nextcloud_dotlinker_mappings }}"

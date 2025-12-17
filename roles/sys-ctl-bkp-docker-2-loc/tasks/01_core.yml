@@ -5,6 +5,7 @@
   - sys-bkp-provider
   - sys-ctl-alm-compose
   - sys-lock
+  - dev-nix
 
 - include_tasks: 02_pkgmgr_routines.yml
   when: backup_docker_to_local_folder is not defined

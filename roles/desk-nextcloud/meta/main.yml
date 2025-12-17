@@ -4,7 +4,7 @@ galaxy_info:
   description: "Installs and links Nextcloud desktop client folders for cloud-integrated user environments."
   license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
-  company: | 
+  company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
@@ -23,5 +23,3 @@ galaxy_info:
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
   documentation: "https://docs.infinito.nexus/"
-
-dependencies: []
