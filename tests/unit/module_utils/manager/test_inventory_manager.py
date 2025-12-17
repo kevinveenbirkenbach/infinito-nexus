@@ -4,13 +4,6 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
-
-# Make project root importable so that `module_utils` can be imported
-ROOT_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../../../..")
-)
-sys.path.insert(0, ROOT_DIR)
-
 from module_utils.manager.inventory import InventoryManager  # type: ignore
 from module_utils.handler.vault import VaultScalar  # type: ignore
 

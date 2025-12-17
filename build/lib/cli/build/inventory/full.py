@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# cli/build/inventory/full.py
 
 import argparse
 import sys

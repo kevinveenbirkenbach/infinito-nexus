@@ -401,7 +401,6 @@ def process_role(role_dir: str,
     moved: List[str] = []
     for producer in meta_deps:
         # Only consider local roles we can analyze
-        producer_dir = path_if_exists(os.path.dirname(role_dir), producer) or path_if_exists(os.path.dirname(roles_root(os.path.dirname(role_dir))), "roles", producer)
         if producer not in providers_index:
             # Unknown/external role → skip (we cannot verify safety)
             continue

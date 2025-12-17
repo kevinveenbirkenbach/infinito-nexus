@@ -53,7 +53,6 @@ def main():
 
     # Default to invokable if neither flag is provided
     list_non = args.non_invokable
-    list_inv = args.invokable or not (args.non_invokable or args.invokable)
 
     try:
         if list_non:
