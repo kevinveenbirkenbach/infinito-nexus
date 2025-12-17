@@ -27,8 +27,11 @@ audio = [
   "simpleaudio",
 ]
 
+[project.scripts]
+infinito = "main:main"
+
 [tool.setuptools]
-# Non-src layout: explicitly control packaged modules
+py-modules = ["main"]
 packages = { find = { where = ["."], include = [
   "cli*",
   "filter_plugins*",

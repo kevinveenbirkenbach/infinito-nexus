@@ -1,10 +1,10 @@
-name: Install Infinito.Nexus with Package Manager (pkgmgr)
+name: Install Infinito.Nexus with Make
 
 on:
   workflow_call:
 
 jobs:
-  test-install-pkgmgr:
+  test-install-make:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -19,12 +19,13 @@ jobs:
       - name: Install & test in pkgmgr virgin container
         run: |
           docker run --rm \
-            -w "/root/" \
             -e REINSTALL_INFINITO=0 \
-            -v "$(pwd):/root/Repositories/github.com/kevinveenbirkenbach/infinito-nexus" \
+            -v "$(pwd):/opt/src/infinito" \
+            -w "/opt/src/infinito" \
             "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}-virgin:stable" \
             bash -lc '
               set -euo pipefail
-              pkgmgr install infinito
+              make install
+              make setup
               infinito --help
             '

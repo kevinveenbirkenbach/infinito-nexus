@@ -27,13 +27,10 @@ jobs:
     uses: ./.github/workflows/test-deploy-universal.yml
   test-deploy-workstation:
     uses: ./.github/workflows/test-deploy-workstation.yml
-  test-install-nix:
-    uses: ./.github/workflows/test-install-nix.yml
+  test-install-make:
+    uses: ./.github/workflows/test-install-make.yml
   test-install-pkgmgr:
     uses: ./.github/workflows/test-install-pkgmgr.yml
-  test-install-virgin:
-    uses: ./.github/workflows/test-install-virgin.yml
-  
   mark-stable:
     needs:
       - lint-python
@@ -44,9 +41,8 @@ jobs:
       - test-deploy-server
       - test-deploy-universal
       - test-deploy-workstation
-      - test-install-nix
+      - test-install-make
       - test-install-pkgmgr
-      - test-install-virgin
     runs-on: ubuntu-latest
 
     # Only run this job if the push is for a version tag (v*)
