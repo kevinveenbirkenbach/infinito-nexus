@@ -22,7 +22,7 @@ jobs:
             -w "/root/" \
             -e REINSTALL_INFINITO=0 \
             -v "$(pwd):/root/Repositories/github.com/kevinveenbirkenbach/infinito-nexus" \
-            "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}-virgin:stable" \
+            "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable" \
             bash -lc '
               set -euo pipefail
               pkgmgr install infinito
