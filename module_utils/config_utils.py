@@ -8,7 +8,8 @@ from ansible.errors import AnsibleUndefinedVariable
 try:
     from ansible.utils.unsafe_proxy import AnsibleUndefined
 except ImportError:
-    class AnsibleUndefined: pass
+    class AnsibleUndefined:
+        pass
 
 class AppConfigKeyError(AnsibleFilterError, ValueError):
     """

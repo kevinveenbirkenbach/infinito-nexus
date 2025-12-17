@@ -46,3 +46,12 @@ packages = { find = { where = ["."], include = [
   "__pycache__*",
 ] } }
 include-package-data = true
+
+[tool.ruff]
+exclude = [
+  "build",
+  "dist",
+  "*.egg-info",
+  ".venv",
+  "venv",
+]

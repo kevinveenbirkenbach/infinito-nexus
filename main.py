@@ -243,7 +243,8 @@ def _call_sound(method_name: str):
 
 def _play_in_child(method_name: str) -> bool:
     p = Process(target=_call_sound, args=(method_name,))
-    p.start(); p.join()
+    p.start()
+    p.join()
     if p.exitcode != 0:
         try:
             # Sichtbare Diagnose, wenn das Kind crasht/fehlschlägt
