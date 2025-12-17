@@ -27,5 +27,6 @@ jobs:
               set -euo pipefail
               make install
               make setup
+              source /opt/venvs/infinito/bin/activate
               infinito --help
             '
