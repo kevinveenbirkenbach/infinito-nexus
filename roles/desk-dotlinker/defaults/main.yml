@@ -1,0 +1,17 @@
+# Package name in pkgmgr
+dotlinker_package_name: "doli"
+
+# Binary name
+dotlinker_cli_name: "doli"
+
+# If true, doli add will use --replace
+dotlinker_replace: true
+
+# If true, run doli pull after registering mappings
+dotlinker_apply: true
+
+# Default config path (can be overridden by caller)
+dotlinker_config_path: "~/.config/dotlinker/config.yaml"
+
+# Mappings provided by caller (list of dicts)
+dotlinker_mappings: []

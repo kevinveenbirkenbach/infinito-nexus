@@ -153,7 +153,7 @@ test-lint: build-missing
 test-unit: build-missing
 	@TEST_TYPE="unit" bash scripts/tests/code.sh
 
-test-integration: build-missing
+test-integration: setup-clean build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
 # Backwards compatible target (kept)
@@ -161,7 +161,7 @@ test-messy: test-lint test-unit test-integration
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-test: clean setup test-messy
+test: setup-clean test-messy
 	@echo "✅ Full test (setup + tests) executed."
 
 # Debug helper

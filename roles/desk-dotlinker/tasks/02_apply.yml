@@ -1,0 +1,42 @@
+- name: Ensure dotlinker user is defined
+  ansible.builtin.assert:
+    that:
+      - dotlinker_user is defined
+      - dotlinker_user | length > 0
+    fail_msg: "dotlinker_user must be provided by the calling role."
+
+- name: Ensure dotlinker config directory exists
+  ansible.builtin.file:
+    path: "{{ dotlinker_config_path | dirname }}"
+    state: directory
+    owner: "{{ dotlinker_user }}"
+    group: "{{ dotlinker_user }}"
+    mode: "0755"
+
+- name: Register mappings in dotlinker
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ([dotlinker_cli_name, '-c', dotlinker_config_path, 'add']
+         + (['--replace'] if (dotlinker_replace | bool) else [])
+         + ['-N', item.name, '-b', item.backend, '-s', item.src]
+         + (['-d', item.dest] if item.backend == 'cloud' else [])
+        )
+      }}
+  become: true
+  become_user: "{{ dotlinker_user }}"
+  loop: "{{ dotlinker_mappings }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: dotlinker_mappings | length > 0
+
+- name: Apply dotlinker mappings (pull)
+  ansible.builtin.command: >
+    {{ dotlinker_cli_name | quote }}
+    -c {{ (dotlinker_config_path ) | quote }}
+    pull
+  become: true
+  become_user: "{{ dotlinker_user }}"
+  when:
+    - dotlinker_apply | bool
+    - dotlinker_mappings | length > 0
