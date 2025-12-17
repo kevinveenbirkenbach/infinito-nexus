@@ -1,5 +1,3 @@
-import os
-import sys
 import unittest
 from ansible.errors import AnsibleFilterError
 from filter_plugins.domain_redirect_mappings import FilterModule
