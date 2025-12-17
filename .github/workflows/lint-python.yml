@@ -1,4 +1,4 @@
-name: Lint Python (ruff)
+name: Lint Infinito.Nexus Python with ruff
 
 on:
   push:
