@@ -15,17 +15,15 @@ class TestInventoryManager(unittest.TestCase):
 
         # Patch YamlHandler.load_yaml
         self.load_yaml_patcher = patch.object(
-            YamlHandler,
-            'load_yaml',
-            side_effect=self.fake_load_yaml
+            YamlHandler, "load_yaml", side_effect=self.fake_load_yaml
         )
         self.load_yaml_patcher.start()
 
         # Patch VaultHandler.encrypt_string with correct signature
         self.encrypt_patcher = patch.object(
             VaultHandler,
-            'encrypt_string',
-            new=lambda self, plain, key: f"{key}: !vault |\n    encrypted_{plain}"
+            "encrypt_string",
+            new=lambda self, plain, key: f"{key}: !vault |\n    encrypted_{plain}",
         )
         self.encrypt_patcher.start()
 
@@ -41,8 +39,18 @@ class TestInventoryManager(unittest.TestCase):
         if path.match("*/schema/main.yml"):
             return {
                 "credentials": {
-                    "plain_cred": {"description": "desc", "algorithm": "plain", "validation": {}},
-                    "nested": {"inner": {"description": "desc2", "algorithm": "sha256", "validation": {}}}
+                    "plain_cred": {
+                        "description": "desc",
+                        "algorithm": "plain",
+                        "validation": {},
+                    },
+                    "nested": {
+                        "inner": {
+                            "description": "desc2",
+                            "algorithm": "sha256",
+                            "validation": {},
+                        }
+                    },
                 }
             }
         # Return application_id for vars/main.yml
@@ -62,9 +70,11 @@ class TestInventoryManager(unittest.TestCase):
         (role_dir / "vars").mkdir(parents=True)
         (role_dir / "vars" / "main.yml").write_text("{}")
 
-        with patch.object(YamlHandler, 'load_yaml', return_value={}):
+        with patch.object(YamlHandler, "load_yaml", return_value={}):
             with self.assertRaises(SystemExit):
-                InventoryManager(role_dir, self.tmpdir / "inventory.yml", "pw", {}).load_application_id(role_dir)
+                InventoryManager(
+                    role_dir, self.tmpdir / "inventory.yml", "pw", {}
+                ).load_application_id(role_dir)
 
     def test_generate_value_algorithms(self):
         """Verify generate_value produces outputs of the expected form and contains no dollar signs."""
@@ -75,40 +85,39 @@ class TestInventoryManager(unittest.TestCase):
         hex_val = im.generate_value("random_hex")
         self.assertEqual(len(hex_val), 128)
         self.assertTrue(all(c in "0123456789abcdef" for c in hex_val))
-        self.assertNotIn('$', hex_val)  # no dollar sign
+        self.assertNotIn("$", hex_val)  # no dollar sign
 
         # sha256 → 64 hex chars
         sha256_val = im.generate_value("sha256")
         self.assertEqual(len(sha256_val), 64)
-        self.assertNotIn('$', sha256_val)  # no dollar sign
+        self.assertNotIn("$", sha256_val)  # no dollar sign
 
         # sha1 → 40 hex chars
         sha1_val = im.generate_value("sha1")
         self.assertEqual(len(sha1_val), 40)
-        self.assertNotIn('$', sha1_val)  # no dollar sign
+        self.assertNotIn("$", sha1_val)  # no dollar sign
 
         # bcrypt → should *not* start with '$2' after escaping, and contain no '$'
         bcrypt_val = im.generate_value("bcrypt")
         self.assertFalse(bcrypt_val.startswith("$2"))
-        self.assertNotIn('$', bcrypt_val)  # no dollar sign
+        self.assertNotIn("$", bcrypt_val)  # no dollar sign
 
         # alphanumeric → 64 chars
         alnum = im.generate_value("alphanumeric")
         self.assertEqual(len(alnum), 64)
         self.assertTrue(alnum.isalnum())
-        self.assertNotIn('$', alnum)  # no dollar sign
+        self.assertNotIn("$", alnum)  # no dollar sign
 
         # base64_prefixed_32 → starts with "base64:"
         b64 = im.generate_value("base64_prefixed_32")
         self.assertTrue(b64.startswith("base64:"))
-        self.assertNotIn('$', b64)  # no dollar sign
+        self.assertNotIn("$", b64)  # no dollar sign
 
         # random_hex_16 → 32 hex chars
         hex16 = im.generate_value("random_hex_16")
         self.assertEqual(len(hex16), 32)
         self.assertTrue(all(c in "0123456789abcdef" for c in hex16))
-        self.assertNotIn('$', hex16)  # no dollar sign
-
+        self.assertNotIn("$", hex16)  # no dollar sign
 
     def test_apply_schema_and_recurse(self):
         """
@@ -124,13 +133,15 @@ class TestInventoryManager(unittest.TestCase):
         inv_file.write_text(" ")
 
         # Provide override for plain_cred to avoid SystemExit
-        overrides = {'credentials.plain_cred': 'OVERRIDE_PLAIN'}
+        overrides = {"credentials.plain_cred": "OVERRIDE_PLAIN"}
 
         # Instantiate manager with overrides
         mgr = InventoryManager(role_dir, inv_file, "pw", overrides=overrides)
 
         # Patch generate_value locally for predictable values
-        with patch.object(InventoryManager, 'generate_value', lambda self, alg: f"GEN_{alg}"):
+        with patch.object(
+            InventoryManager, "generate_value", lambda self, alg: f"GEN_{alg}"
+        ):
             result = mgr.apply_schema()
 
         apps = result["applications"]["testapp"]

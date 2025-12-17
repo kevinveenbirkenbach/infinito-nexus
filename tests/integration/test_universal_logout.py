@@ -2,12 +2,15 @@ import unittest
 import glob
 import yaml
 
+
 class TestUniversalLogoutSetting(unittest.TestCase):
     ROLES_PATH = "roles/web-app-*/config/main.yml"
 
     def test_logout_defined(self):
         files = glob.glob(self.ROLES_PATH)
-        self.assertGreater(len(files), 0, f"No role config files found under {self.ROLES_PATH}")
+        self.assertGreater(
+            len(files), 0, f"No role config files found under {self.ROLES_PATH}"
+        )
 
         errors = []
 

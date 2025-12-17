@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
 
+
 class TestInitFiles(unittest.TestCase):
     def test_all_test_dirs_have_init(self):
         """
@@ -13,9 +14,9 @@ class TestInitFiles(unittest.TestCase):
                 init_file = path / "__init__.py"
                 with self.subTest(directory=str(path.relative_to(tests_root))):
                     self.assertTrue(
-                        init_file.exists(),
-                        f"Missing __init__.py in directory: {path}"
+                        init_file.exists(), f"Missing __init__.py in directory: {path}"
                     )
+
 
 if __name__ == "__main__":
     unittest.main()

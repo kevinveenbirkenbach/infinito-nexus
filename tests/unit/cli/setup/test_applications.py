@@ -10,7 +10,9 @@ import subprocess
 class TestGenerateDefaultApplications(unittest.TestCase):
     def setUp(self):
         # Path to the generator script under test
-        self.script_path = Path(__file__).resolve().parents[4] / "cli" / "setup" / "applications.py"
+        self.script_path = (
+            Path(__file__).resolve().parents[4] / "cli" / "setup" / "applications.py"
+        )
         # Create temp role structure
         self.temp_dir = Path(tempfile.mkdtemp())
         self.roles_dir = self.temp_dir / "roles"
@@ -32,13 +34,19 @@ class TestGenerateDefaultApplications(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def test_script_generates_expected_yaml(self):
-        script_path = Path(__file__).resolve().parent.parent.parent.parent.parent / "cli/setup/applications.py"
+        script_path = (
+            Path(__file__).resolve().parent.parent.parent.parent.parent
+            / "cli/setup/applications.py"
+        )
 
         result = subprocess.run(
             [
-                "python3", str(script_path),
-                "--roles-dir", str(self.roles_dir),
-                "--output-file", str(self.output_file)
+                "python3",
+                str(script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
             ],
             capture_output=True,
             text=True,
@@ -52,7 +60,7 @@ class TestGenerateDefaultApplications(unittest.TestCase):
         self.assertIn("testapp", data["defaults_applications"])
         self.assertEqual(data["defaults_applications"]["testapp"]["foo"], "bar")
         self.assertEqual(data["defaults_applications"]["testapp"]["baz"], 123)
-        
+
     def test_missing_config_adds_empty_defaults(self):
         """
         If a role has vars/main.yml but no config/main.yml,
@@ -61,14 +69,22 @@ class TestGenerateDefaultApplications(unittest.TestCase):
         # Create a role with vars/main.yml but without config/main.yml
         role_no_config = self.roles_dir / "role-no-config"
         (role_no_config / "vars").mkdir(parents=True)
-        (role_no_config / "vars" / "main.yml").write_text("application_id: noconfigapp\n")
+        (role_no_config / "vars" / "main.yml").write_text(
+            "application_id: noconfigapp\n"
+        )
 
         # Run the generator
         result = subprocess.run(
-            ["python3", str(self.script_path),
-             "--roles-dir", str(self.roles_dir),
-             "--output-file", str(self.output_file)],
-            capture_output=True, text=True
+            [
+                "python3",
+                str(self.script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
+            ],
+            capture_output=True,
+            text=True,
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
 
@@ -88,15 +104,23 @@ class TestGenerateDefaultApplications(unittest.TestCase):
         # Create a role with vars/main.yml but do not create config/ at all
         role_no_cfg_dir = self.roles_dir / "role-no-cfg-dir"
         (role_no_cfg_dir / "vars").mkdir(parents=True)
-        (role_no_cfg_dir / "vars" / "main.yml").write_text("application_id: nocfgdirapp\n")
+        (role_no_cfg_dir / "vars" / "main.yml").write_text(
+            "application_id: nocfgdirapp\n"
+        )
         # Note: no config/ directory is created here
 
         # Run the generator again
         result = subprocess.run(
-            ["python3", str(self.script_path),
-             "--roles-dir", str(self.roles_dir),
-             "--output-file", str(self.output_file)],
-            capture_output=True, text=True
+            [
+                "python3",
+                str(self.script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
+            ],
+            capture_output=True,
+            text=True,
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
 
@@ -114,22 +138,30 @@ class TestGenerateDefaultApplications(unittest.TestCase):
         """
         # Create several roles in non-sorted order
         for name, cfg in [
-            ("web-app-zeta",  {"vars_id": "zeta",  "cfg": "z: 1\n"}),
+            ("web-app-zeta", {"vars_id": "zeta", "cfg": "z: 1\n"}),
             ("web-app-alpha", {"vars_id": "alpha", "cfg": "a: 1\n"}),
-            ("web-app-mu",    {"vars_id": "mu",    "cfg": "m: 1\n"}),
+            ("web-app-mu", {"vars_id": "mu", "cfg": "m: 1\n"}),
         ]:
             role = self.roles_dir / name
             (role / "vars").mkdir(parents=True, exist_ok=True)
             (role / "config").mkdir(parents=True, exist_ok=True)
-            (role / "vars" / "main.yml").write_text(f"application_id: {cfg['vars_id']}\n")
+            (role / "vars" / "main.yml").write_text(
+                f"application_id: {cfg['vars_id']}\n"
+            )
             (role / "config" / "main.yml").write_text(cfg["cfg"])
 
         # Run generator
         result = subprocess.run(
-            ["python3", str(self.script_path),
-            "--roles-dir", str(self.roles_dir),
-            "--output-file", str(self.output_file)],
-            capture_output=True, text=True
+            [
+                "python3",
+                str(self.script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
+            ],
+            capture_output=True,
+            text=True,
         )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
 
@@ -142,12 +174,11 @@ class TestGenerateDefaultApplications(unittest.TestCase):
         self.assertEqual(
             keys_in_file,
             sorted(keys_in_file),
-            msg=f"Applications are not sorted: {keys_in_file}"
+            msg=f"Applications are not sorted: {keys_in_file}",
         )
         # Sanity: all expected apps present
         for app in ("alpha", "mu", "zeta", "testapp"):
             self.assertIn(app, apps)
-
 
     def test_sorting_is_stable_across_runs(self):
         """
@@ -166,10 +197,16 @@ class TestGenerateDefaultApplications(unittest.TestCase):
 
         # First run
         result1 = subprocess.run(
-            ["python3", str(self.script_path),
-            "--roles-dir", str(self.roles_dir),
-            "--output-file", str(self.output_file)],
-            capture_output=True, text=True
+            [
+                "python3",
+                str(self.script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
+            ],
+            capture_output=True,
+            text=True,
         )
         self.assertEqual(result1.returncode, 0, msg=result1.stderr)
         content_run1 = self.output_file.read_text()
@@ -179,18 +216,26 @@ class TestGenerateDefaultApplications(unittest.TestCase):
             os.utime(p, None)
 
         result2 = subprocess.run(
-            ["python3", str(self.script_path),
-            "--roles-dir", str(self.roles_dir),
-            "--output-file", str(self.output_file)],
-            capture_output=True, text=True
+            [
+                "python3",
+                str(self.script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
+            ],
+            capture_output=True,
+            text=True,
         )
         self.assertEqual(result2.returncode, 0, msg=result2.stderr)
         content_run2 = self.output_file.read_text()
 
         self.assertEqual(
-            content_run1, content_run2,
-            msg="Output differs between runs; sorting should be stable."
+            content_run1,
+            content_run2,
+            msg="Output differs between runs; sorting should be stable.",
         )
+
 
 if __name__ == "__main__":
     unittest.main()

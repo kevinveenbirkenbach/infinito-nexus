@@ -1,9 +1,10 @@
 from ansible.errors import AnsibleFilterError
 from module_utils.entity_name_utils import get_entity_name
 
+
 class FilterModule(object):
     def filters(self):
-        return {'domain_mappings': self.domain_mappings}
+        return {"domain_mappings": self.domain_mappings}
 
     def domain_mappings(self, apps, primary_domain, auto_build_alias):
         """
@@ -12,6 +13,7 @@ class FilterModule(object):
           - target: the first canonical domain
         Skip mappings where source == target, since they make no sense.
         """
+
         def parse_entry(domains_cfg, key, app_id):
             if key not in domains_cfg:
                 return None
@@ -31,15 +33,15 @@ class FilterModule(object):
                     )
             return values
 
-        def default_domain(app_id:str, primary:str):
+        def default_domain(app_id: str, primary: str):
             subdomain = get_entity_name(app_id)
             return f"{subdomain}.{primary}"
 
         # 1) Compute canonical domains per app (always as a list)
         canonical_map = {}
         for app_id, cfg in apps.items():
-            domains_cfg = cfg.get('server',{}).get('domains',{})
-            entry = domains_cfg.get('canonical')
+            domains_cfg = cfg.get("server", {}).get("domains", {})
+            entry = domains_cfg.get("canonical")
             if entry is None:
                 canonical_map[app_id] = [default_domain(app_id, primary_domain)]
             elif isinstance(entry, dict):
@@ -54,7 +56,7 @@ class FilterModule(object):
         # 2) Compute alias domains per app
         alias_map = {}
         for app_id, cfg in apps.items():
-            domains_cfg = cfg.get('server',{}).get('domains',{})
+            domains_cfg = cfg.get("server", {}).get("domains", {})
             if domains_cfg is None:
                 alias_map[app_id] = []
                 continue
@@ -62,10 +64,10 @@ class FilterModule(object):
                 alias_map[app_id] = [default_domain(app_id, primary_domain)]
                 continue
 
-            aliases = parse_entry(domains_cfg, 'aliases', app_id) or []
+            aliases = parse_entry(domains_cfg, "aliases", app_id) or []
             default = default_domain(app_id, primary_domain)
-            has_aliases = 'aliases' in domains_cfg
-            has_canonical = 'canonical' in domains_cfg
+            has_aliases = "aliases" in domains_cfg
+            has_canonical = "canonical" in domains_cfg
 
             if has_aliases:
                 if default not in aliases:
@@ -82,14 +84,13 @@ class FilterModule(object):
         mappings = []
         for app_id, sources in alias_map.items():
             canon_list = canonical_map.get(app_id, [])
-            target = canon_list[0] if canon_list else default_domain(app_id, primary_domain)
+            target = (
+                canon_list[0] if canon_list else default_domain(app_id, primary_domain)
+            )
             for src in sources:
                 if src == target:
                     # skip self-redirects
                     continue
-                mappings.append({
-                    'source': src,
-                    'target': target
-                })
+                mappings.append({"source": src, "target": target})
 
         return mappings

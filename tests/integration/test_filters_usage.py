@@ -15,6 +15,7 @@ SEARCH_BASES = [PROJECT_ROOT]
 
 SEARCH_EXTS = (".yml", ".yaml", ".j2", ".jinja2", ".tmpl", ".py")
 
+
 def _iter_files(base: str, *, py_only: bool = False):
     for root, _, files in os.walk(base):
         for fn in files:
@@ -24,8 +25,10 @@ def _iter_files(base: str, *, py_only: bool = False):
                 continue
             yield os.path.join(root, fn)
 
+
 def _is_filter_plugins_dir(path: str) -> bool:
     return "filter_plugins" in os.path.normpath(path).split(os.sep)
+
 
 def _read(path: str) -> str:
     try:
@@ -34,9 +37,11 @@ def _read(path: str) -> str:
     except Exception:
         return ""
 
+
 # ---------------------------
 # Filter definition extraction
 # ---------------------------
+
 
 class _FiltersCollector(ast.NodeVisitor):
     """
@@ -46,6 +51,7 @@ class _FiltersCollector(ast.NodeVisitor):
       d = {'name': fn}; d.update({...}); return d
       return dict(name=fn, x=y)
     """
+
     def __init__(self):
         self.defs: List[Tuple[str, str]] = []  # (filter_name, callable_name)
 
@@ -60,14 +66,22 @@ class _FiltersCollector(ast.NodeVisitor):
         # dict literal
         if isinstance(node, ast.Dict):
             for k, v in zip(node.keys, node.values):
-                key = k.value if isinstance(k, ast.Constant) and isinstance(k.value, str) else None
+                key = (
+                    k.value
+                    if isinstance(k, ast.Constant) and isinstance(k.value, str)
+                    else None
+                )
                 val = self._name_of(v)
                 if key:
                     pairs.append((key, val))
             return pairs
 
         # dict(...) call
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "dict":
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "dict"
+        ):
             # keywords: dict(name=fn)
             for kw in node.keywords or []:
                 if kw.arg:
@@ -89,7 +103,10 @@ class _FiltersCollector(ast.NodeVisitor):
             return v.attr  # take right-most name
         return ""
 
-def _collect_filters_from_filters_method(func: ast.FunctionDef) -> List[Tuple[str, str]]:
+
+def _collect_filters_from_filters_method(
+    func: ast.FunctionDef,
+) -> List[Tuple[str, str]]:
     """
     Walks the function to assemble any mapping that flows into the return.
     We capture direct return dicts and also a common pattern:
@@ -118,7 +135,9 @@ def _collect_filters_from_filters_method(func: ast.FunctionDef) -> List[Tuple[st
             if isinstance(n.func, ast.Attribute) and n.func.attr == "update":
                 obj = n.func.value
                 if isinstance(obj, ast.Name):
-                    add_pairs = _FiltersCollector()._extract_mapping(n.args[0] if n.args else None)
+                    add_pairs = _FiltersCollector()._extract_mapping(
+                        n.args[0] if n.args else None
+                    )
                     if add_pairs:
                         name_dicts.setdefault(obj.id, []).extend(add_pairs)
         elif isinstance(n, ast.Return) and isinstance(n.value, ast.Name):
@@ -137,6 +156,7 @@ def _collect_filters_from_filters_method(func: ast.FunctionDef) -> List[Tuple[st
             out.append((k, v))
     return out
 
+
 def _ast_collect_filters_from_file(path: str) -> List[Tuple[str, str, str]]:
     code = _read(path)
     if not code:
@@ -151,9 +171,10 @@ def _ast_collect_filters_from_file(path: str) -> List[Tuple[str, str, str]]:
         if isinstance(node, ast.ClassDef) and node.name == "FilterModule":
             for item in node.body:
                 if isinstance(item, ast.FunctionDef) and item.name == "filters":
-                    for (fname, callname) in _collect_filters_from_filters_method(item):
+                    for fname, callname in _collect_filters_from_filters_method(item):
                         results.append((fname, callname, path))
     return results
+
 
 def collect_defined_filters() -> List[Dict[str, str]]:
     found: List[Dict[str, str]] = []
@@ -161,13 +182,19 @@ def collect_defined_filters() -> List[Dict[str, str]]:
         for path in _iter_files(base, py_only=True):
             if not _is_filter_plugins_dir(path):
                 continue
-            for (filter_name, callable_name, fpath) in _ast_collect_filters_from_file(path):
-                found.append({"filter": filter_name, "callable": callable_name, "file": fpath})
+            for filter_name, callable_name, fpath in _ast_collect_filters_from_file(
+                path
+            ):
+                found.append(
+                    {"filter": filter_name, "callable": callable_name, "file": fpath}
+                )
     return found
+
 
 # ---------------------------
 # Usage detection
 # ---------------------------
+
 
 def _compile_jinja_patterns(name: str) -> list[re.Pattern]:
     """
@@ -180,18 +207,24 @@ def _compile_jinja_patterns(name: str) -> list[re.Pattern]:
     """
     escaped = re.escape(name)
     return [
-        re.compile(r"\{\{[^}]*\|\s*" + escaped + r"\b", re.DOTALL),   # {{ ... | name }}
-        re.compile(r"\{%\s*[^%]*\|\s*" + escaped + r"\b", re.DOTALL), # {% ... | name %}
-        re.compile(r"\{%\s*filter\s+" + escaped + r"\b"),             # {% filter name %}
-        re.compile(r"\|\s*" + escaped + r"\b"),                       # bare: when: x | name
+        re.compile(r"\{\{[^}]*\|\s*" + escaped + r"\b", re.DOTALL),  # {{ ... | name }}
+        re.compile(
+            r"\{%\s*[^%]*\|\s*" + escaped + r"\b", re.DOTALL
+        ),  # {% ... | name %}
+        re.compile(r"\{%\s*filter\s+" + escaped + r"\b"),  # {% filter name %}
+        re.compile(r"\|\s*" + escaped + r"\b"),  # bare: when: x | name
     ]
+
 
 def _python_call_pattern(callable_name: str) -> Optional[re.Pattern]:
     if not callable_name:
         return None
     return re.compile(r"\b%s\s*\(" % re.escape(callable_name))
 
-def search_usage(filter_name: str, callable_name: str, *, skip_file: str) -> tuple[bool, bool]:
+
+def search_usage(
+    filter_name: str, callable_name: str, *, skip_file: str
+) -> tuple[bool, bool]:
     """
     Search for filter usage.
 
@@ -235,6 +268,7 @@ def search_usage(filter_name: str, callable_name: str, *, skip_file: str) -> tup
 
     return used_anywhere, used_outside_tests
 
+
 class TestFilterDefinitionsAreUsed(unittest.TestCase):
     def test_every_defined_filter_is_used(self):
         definitions = collect_defined_filters()
@@ -253,8 +287,11 @@ class TestFilterDefinitionsAreUsed(unittest.TestCase):
         if unused:
             msg = ["The following filters are invalidly unused:"]
             for f, c, p, reason in sorted(unused):
-                msg.append(f"- '{f}' (callable '{c or 'unknown'}') defined in {p} → {reason}")
+                msg.append(
+                    f"- '{f}' (callable '{c or 'unknown'}') defined in {p} → {reason}"
+                )
             self.fail("\n".join(msg))
+
 
 if __name__ == "__main__":
     unittest.main()

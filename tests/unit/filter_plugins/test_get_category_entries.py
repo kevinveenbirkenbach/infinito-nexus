@@ -21,7 +21,9 @@ class TestGetCategoryEntries(unittest.TestCase):
         """If the roles directory does not exist, the filter must return an empty list."""
         missing_dir = self.tmp / "no_such_roles_dir"
         self.assertFalse(missing_dir.exists())
-        self.assertEqual(get_category_entries("docker-", roles_path=str(missing_dir)), [])
+        self.assertEqual(
+            get_category_entries("docker-", roles_path=str(missing_dir)), []
+        )
 
     def test_matches_prefix_and_sorts(self):
         """

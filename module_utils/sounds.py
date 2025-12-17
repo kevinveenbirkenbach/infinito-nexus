@@ -139,7 +139,9 @@ try:
                     return
                 if shutil.which("aplay") and run(["aplay", "-q", fname]):
                     return
-                if shutil.which("ffplay") and run(["ffplay", "-autoexit", "-nodisp", fname]):
+                if shutil.which("ffplay") and run(
+                    ["ffplay", "-autoexit", "-nodisp", fname]
+                ):
                     return
 
                 play_obj = sa.play_buffer(wave, 1, 2, Sound.fs)
@@ -187,10 +189,16 @@ try:
 
             for i in range(steps):
                 amp = (i + 1) / steps
-                b = cls._generate_complex_wave(bass_freq, bass_seg).astype(np.float32) * amp
-                m = cls._generate_complex_wave(
-                    melody_freqs[i % len(melody_freqs)], melody_seg
-                ).astype(np.float32) * amp
+                b = (
+                    cls._generate_complex_wave(bass_freq, bass_seg).astype(np.float32)
+                    * amp
+                )
+                m = (
+                    cls._generate_complex_wave(
+                        melody_freqs[i % len(melody_freqs)], melody_seg
+                    ).astype(np.float32)
+                    * amp
+                )
                 build_seq.append(b.astype(np.int16))
                 build_seq.append(m.astype(np.int16))
 
@@ -202,7 +210,10 @@ try:
 
             for root in roots:
                 t = np.linspace(0, chord_time, int(cls.fs * chord_time), False)
-                chord = sum(np.sin(2 * np.pi * f * t) for f in [root, root * 5 / 4, root * 3 / 2])
+                chord = sum(
+                    np.sin(2 * np.pi * f * t)
+                    for f in [root, root * 5 / 4, root * 3 / 2]
+                )
                 chord /= np.max(np.abs(chord))
                 celebr_seq.append((chord * (2**15 - 1)).astype(np.int16))
 

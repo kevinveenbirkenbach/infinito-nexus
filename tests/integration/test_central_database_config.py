@@ -34,9 +34,19 @@ class TestCentralDatabaseConfig(unittest.TestCase):
             cfg_data = load_yaml(cfg_file)
 
             # Check if the feature key is defined in either file (value is irrelevant).
-            vars_features = vars_data.get("features", {}) if isinstance(vars_data.get("features"), dict) else {}
-            cfg_features = cfg_data.get("features", {}) if isinstance(cfg_data.get("features"), dict) else {}
-            central_defined = ("central_database" in vars_features) or ("central_database" in cfg_features)
+            vars_features = (
+                vars_data.get("features", {})
+                if isinstance(vars_data.get("features"), dict)
+                else {}
+            )
+            cfg_features = (
+                cfg_data.get("features", {})
+                if isinstance(cfg_data.get("features"), dict)
+                else {}
+            )
+            central_defined = ("central_database" in vars_features) or (
+                "central_database" in cfg_features
+            )
 
             if not central_defined:
                 continue

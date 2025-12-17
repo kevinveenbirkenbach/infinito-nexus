@@ -3,6 +3,7 @@ from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 import os
 
+
 class LookupModule(LookupBase):
     """
     Return a cache-busting string based on the LOCAL file's mtime.
@@ -24,10 +25,10 @@ class LookupModule(LookupBase):
         if not terms:
             return []
 
-        param = kwargs.get('param', 'version')
-        mode  = kwargs.get('mode', 'qs')
+        param = kwargs.get("param", "version")
+        mode = kwargs.get("mode", "qs")
 
-        if mode not in ('qs', 'epoch'):
+        if mode not in ("qs", "epoch"):
             raise AnsibleError("local_mtime_qs: 'mode' must be 'qs' or 'epoch'")
 
         results = []
@@ -45,7 +46,7 @@ class LookupModule(LookupBase):
             except OSError as e:
                 raise AnsibleError(f"local_mtime_qs: cannot stat '{path}': {e}")
 
-            if mode == 'qs':
+            if mode == "qs":
                 results.append(f"?{param}={mtime}")
             else:  # mode == 'epoch'
                 results.append(str(mtime))

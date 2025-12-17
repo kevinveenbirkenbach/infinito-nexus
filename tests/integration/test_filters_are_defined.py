@@ -23,26 +23,98 @@ USAGE_EXTS = (".yml", ".yaml", ".j2", ".jinja2", ".tmpl")
 # Built-in / common filters that shouldn't require local definitions
 BUILTIN_FILTERS: Set[str] = {
     # Jinja2 core/common
-    "abs", "attr", "batch", "capitalize", "center", "default", "d", "dictsort", "escape",
-    "e", "filesizeformat", "first", "float", "forceescape", "format", "groupby", "indent",
-    "int", "join", "last", "length", "list", "lower", "map", "min", "max", "random",
-    "reject", "rejectattr", "replace", "reverse", "round", "safe", "select",
-    "selectattr", "slice", "sort", "string", "striptags", "sum", "title", "trim",
-    "truncate", "unique", "upper", "urlencode", "urlize", "wordcount", "xmlattr","contains",
-
+    "abs",
+    "attr",
+    "batch",
+    "capitalize",
+    "center",
+    "default",
+    "d",
+    "dictsort",
+    "escape",
+    "e",
+    "filesizeformat",
+    "first",
+    "float",
+    "forceescape",
+    "format",
+    "groupby",
+    "indent",
+    "int",
+    "join",
+    "last",
+    "length",
+    "list",
+    "lower",
+    "map",
+    "min",
+    "max",
+    "random",
+    "reject",
+    "rejectattr",
+    "replace",
+    "reverse",
+    "round",
+    "safe",
+    "select",
+    "selectattr",
+    "slice",
+    "sort",
+    "string",
+    "striptags",
+    "sum",
+    "title",
+    "trim",
+    "truncate",
+    "unique",
+    "upper",
+    "urlencode",
+    "urlize",
+    "wordcount",
+    "xmlattr",
+    "contains",
     # Common Ansible filters (subset, extend as needed)
-    "b64decode", "b64encode", "basename", "dirname", "from_json", "to_json",
-    "from_yaml", "to_yaml", "combine", "difference", "intersect",
-    "flatten", "zip", "regex_search", "regex_replace", "bool",
-    "type_debug", "json_query", "mandatory", "hash", "checksum",
-    "lower", "upper", "capitalize", "unique", "dict2items", "items2dict", 
-    "password_hash", "path_join", "product", "quote", "split", "ternary", "to_nice_yaml", 
-    "tojson", "to_nice_json", "human_to_bytes",
-
-
+    "b64decode",
+    "b64encode",
+    "basename",
+    "dirname",
+    "from_json",
+    "to_json",
+    "from_yaml",
+    "to_yaml",
+    "combine",
+    "difference",
+    "intersect",
+    "flatten",
+    "zip",
+    "regex_search",
+    "regex_replace",
+    "bool",
+    "type_debug",
+    "json_query",
+    "mandatory",
+    "hash",
+    "checksum",
+    "lower",
+    "upper",
+    "capitalize",
+    "unique",
+    "dict2items",
+    "items2dict",
+    "password_hash",
+    "path_join",
+    "product",
+    "quote",
+    "split",
+    "ternary",
+    "to_nice_yaml",
+    "tojson",
+    "to_nice_json",
+    "human_to_bytes",
     # Date/time-ish
     "strftime",
 }
+
 
 def _iter_files(base: str, *, exts: Tuple[str, ...]):
     for root, _, files in os.walk(base):
@@ -52,8 +124,10 @@ def _iter_files(base: str, *, exts: Tuple[str, ...]):
             if fn.endswith(exts):
                 yield os.path.join(root, fn)
 
+
 def _is_filter_plugins_dir(path: str) -> bool:
     return "filter_plugins" in os.path.normpath(path).split(os.sep)
+
 
 def _read(path: str) -> str:
     try:
@@ -62,9 +136,11 @@ def _read(path: str) -> str:
     except Exception:
         return ""
 
+
 # ---------------------------
 # Collect defined filters (AST)
 # ---------------------------
+
 
 class _FiltersCollector(ast.NodeVisitor):
     def __init__(self):
@@ -77,12 +153,20 @@ class _FiltersCollector(ast.NodeVisitor):
         pairs: List[Tuple[str, str]] = []
         if isinstance(node, ast.Dict):
             for k, v in zip(node.keys, node.values):
-                key = k.value if isinstance(k, ast.Constant) and isinstance(k.value, str) else None
+                key = (
+                    k.value
+                    if isinstance(k, ast.Constant) and isinstance(k.value, str)
+                    else None
+                )
                 val = self._name_of(v)
                 if key:
                     pairs.append((key, val))
             return pairs
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "dict":
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "dict"
+        ):
             for kw in node.keywords or []:
                 if kw.arg:
                     pairs.append((kw.arg, self._name_of(kw.value)))
@@ -99,7 +183,10 @@ class _FiltersCollector(ast.NodeVisitor):
             return v.attr
         return ""
 
-def _collect_filters_from_filters_method(func: ast.FunctionDef) -> List[Tuple[str, str]]:
+
+def _collect_filters_from_filters_method(
+    func: ast.FunctionDef,
+) -> List[Tuple[str, str]]:
     c = _FiltersCollector()
     c.visit(func)
 
@@ -136,6 +223,7 @@ def _collect_filters_from_filters_method(func: ast.FunctionDef) -> List[Tuple[st
             out.append((k, v))
     return out
 
+
 def collect_defined_filters() -> Set[str]:
     defined: Set[str] = set()
     for base in FILTER_PLUGIN_BASES:
@@ -153,9 +241,12 @@ def collect_defined_filters() -> Set[str]:
                 if isinstance(node, ast.ClassDef) and node.name == "FilterModule":
                     for item in node.body:
                         if isinstance(item, ast.FunctionDef) and item.name == "filters":
-                            for fname, _call in _collect_filters_from_filters_method(item):
+                            for fname, _call in _collect_filters_from_filters_method(
+                                item
+                            ):
                                 defined.add(fname)
     return defined
+
 
 # ---------------------------
 # Collect used filters (Jinja-only scanning with string stripping)
@@ -163,13 +254,14 @@ def collect_defined_filters() -> Set[str]:
 
 # Capture inner bodies of Jinja blocks
 RE_JINJA_MUSTACHE = re.compile(r"\{\{(.*?)\}\}", re.DOTALL)
-RE_JINJA_TAG      = re.compile(r"\{%(.*?)%\}", re.DOTALL)
+RE_JINJA_TAG = re.compile(r"\{%(.*?)%\}", re.DOTALL)
 
 # Within a Jinja body, capture "| filter_name" (with args or not)
-RE_PIPE_IN_BODY   = re.compile(r"\|\s*([A-Za-z_]\w*)\b")
+RE_PIPE_IN_BODY = re.compile(r"\|\s*([A-Za-z_]\w*)\b")
 
 # Matches "{% filter filter_name %}"
-RE_BLOCK_FILTER   = re.compile(r"\{%\s*filter\s+([A-Za-z_]\w*)\b", re.DOTALL)
+RE_BLOCK_FILTER = re.compile(r"\{%\s*filter\s+([A-Za-z_]\w*)\b", re.DOTALL)
+
 
 def _strip_quoted(text: str) -> str:
     """
@@ -199,10 +291,12 @@ def _strip_quoted(text: str) -> str:
             i += 1
     return "".join(out)
 
+
 def _extract_filters_from_jinja_body(body: str) -> Set[str]:
     # Strip quoted strings first so pipes inside strings are ignored
     body_no_str = _strip_quoted(body)
     return {m.group(1) for m in RE_PIPE_IN_BODY.finditer(body_no_str)}
+
 
 def collect_used_filters() -> Set[str]:
     used: Set[str] = set()
@@ -226,9 +320,11 @@ def collect_used_filters() -> Set[str]:
 
     return used
 
+
 # ---------------------------
 # Test
 # ---------------------------
+
 
 class TestAllUsedFiltersAreDefined(unittest.TestCase):
     def test_all_used_filters_have_definitions(self):

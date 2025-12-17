@@ -8,7 +8,9 @@ from collections import defaultdict
 GROUPVARS_DIR = Path(__file__).resolve().parents[3] / "group_vars" / "all"
 JINJA_RE = re.compile(r"{{\s*([^}]+)\s*}}")
 # Matches variables like foo.bar, foo["bar"], foo['bar']
-VAR_PATTERN = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(?:\.(?:[A-Za-z_][A-Za-z0-9_]*|\[\"[^\"]+\"\]))*")
+VAR_PATTERN = re.compile(
+    r"[A-Za-z_][A-Za-z0-9_]*(?:\.(?:[A-Za-z_][A-Za-z0-9_]*|\[\"[^\"]+\"\]))*"
+)
 
 
 def load_all_yaml():
@@ -23,8 +25,12 @@ def load_all_yaml():
             base = k
             for p in ("defaults_", "default_"):
                 if base.startswith(p):
-                    base = base[len(p):]
-            if base in result and isinstance(result[base], dict) and isinstance(v, dict):
+                    base = base[len(p) :]
+            if (
+                base in result
+                and isinstance(result[base], dict)
+                and isinstance(v, dict)
+            ):
                 result[base].update(v)
             else:
                 result[base] = v
@@ -57,6 +63,7 @@ def build_edges(vars_dict):
     Walk the variables dict, return list of (source_key, referenced_var) edges.
     """
     edges = []
+
     def walk(node, path):
         if isinstance(node, dict):
             for k, v in node.items():
@@ -68,6 +75,7 @@ def build_edges(vars_dict):
             full_key = ".".join(path)
             for ref in find_jinja_refs(node):
                 edges.append((full_key, ref))
+
     walk(vars_dict, [])
     return edges
 
@@ -78,8 +86,7 @@ class TestNoJinjaReferenceCycles(unittest.TestCase):
         edges = build_edges(all_vars)
 
         user_to_app = any(
-            src.startswith("users.") and ref == "applications"
-            for src, ref in edges
+            src.startswith("users.") and ref == "applications" for src, ref in edges
         )
         app_to_user = any(
             src.startswith("applications.") and ref.startswith("users.")
@@ -102,7 +109,7 @@ class TestNoJinjaReferenceCycles(unittest.TestCase):
 
         def dfs(node, visited, stack):
             if node in stack:
-                return stack[stack.index(node):] + [node]
+                return stack[stack.index(node) :] + [node]
             if node in visited:
                 return None
             visited.add(node)
@@ -117,7 +124,9 @@ class TestNoJinjaReferenceCycles(unittest.TestCase):
         for node in list(graph):
             cycle = dfs(node, set(), [])
             if cycle:
-                self.fail("❌ Jinja recursion cycle detected:\n    " + " -> ".join(cycle))
+                self.fail(
+                    "❌ Jinja recursion cycle detected:\n    " + " -> ".join(cycle)
+                )
 
 
 if __name__ == "__main__":

@@ -41,7 +41,9 @@ class TestInjSnippets(unittest.TestCase):
         os.makedirs(cls.roles_dir, exist_ok=True)
 
         # Dynamically load inj_snippets by file path
-        spec = importlib.util.spec_from_file_location("inj_snippets", cls.inj_snippets_path)
+        spec = importlib.util.spec_from_file_location(
+            "inj_snippets", cls.inj_snippets_path
+        )
         if spec is None or spec.loader is None:
             raise RuntimeError("Failed to create import spec for inj_snippets.py")
         module = importlib.util.module_from_spec(spec)
@@ -70,10 +72,14 @@ class TestInjSnippets(unittest.TestCase):
         tmpl_dir = os.path.join(role_dir, "templates")
         os.makedirs(tmpl_dir, exist_ok=True)
         if head:
-            with open(os.path.join(tmpl_dir, "head_sub.j2"), "w", encoding="utf-8") as f:
+            with open(
+                os.path.join(tmpl_dir, "head_sub.j2"), "w", encoding="utf-8"
+            ) as f:
                 f.write("<!-- head test -->\n")
         if body:
-            with open(os.path.join(tmpl_dir, "body_sub.j2"), "w", encoding="utf-8") as f:
+            with open(
+                os.path.join(tmpl_dir, "body_sub.j2"), "w", encoding="utf-8"
+            ) as f:
                 f.write("<!-- body test -->\n")
 
     @classmethod

@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 import yaml
 
+
 class TestDeprecatedVersionKey(unittest.TestCase):
     def test_version_key_deprecation(self):
         """
@@ -27,8 +28,8 @@ class TestDeprecatedVersionKey(unittest.TestCase):
                 print(f"YAML parse error in {cfg_file}: {e}")
                 continue
 
-            uses_version = 'version' in config
-            uses_images = 'images' in config
+            uses_version = "version" in config
+            uses_images = "images" in config
 
             if uses_version:
                 warnings.append(
@@ -44,10 +45,13 @@ class TestDeprecatedVersionKey(unittest.TestCase):
         if warnings:
             print("\n".join(warnings))
         else:
-            print("No deprecated 'version:' keys found in docker roles without 'images:'.")
+            print(
+                "No deprecated 'version:' keys found in docker roles without 'images:'."
+            )
 
         # Never fail, just warn
         self.assertTrue(True)
+
 
 if __name__ == "__main__":
     unittest.main()

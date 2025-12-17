@@ -25,7 +25,6 @@ def _load_littlejs_module():
 
 
 class TestLittlejsHref(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         module = _load_littlejs_module()
@@ -39,27 +38,20 @@ class TestLittlejsHref(unittest.TestCase):
     def test_full_example_project(self):
         example = {"file": "starter", "is_project": True}
         href = type(self)._littlejs_href(example, "https", "littlejs.example.com")
-        self.assertEqual(
-            href,
-            "https://littlejs.example.com/examples/starter/"
-        )
+        self.assertEqual(href, "https://littlejs.example.com/examples/starter/")
 
     def test_short_example_uses_runner(self):
         # no is_project → False by default
         example = {"file": "clock.js"}
         href = type(self)._littlejs_href(example, "https", "littlejs.example.com")
         self.assertEqual(
-            href,
-            "https://littlejs.example.com/examples/shorts/run.html?file=clock.js"
+            href, "https://littlejs.example.com/examples/shorts/run.html?file=clock.js"
         )
 
     def test_respects_protocol_and_domain(self):
         example = {"file": "platformer", "is_project": True}
         href = type(self)._littlejs_href(example, "http", "littlejs.infinito.nexus")
-        self.assertEqual(
-            href,
-            "http://littlejs.infinito.nexus/examples/platformer/"
-        )
+        self.assertEqual(href, "http://littlejs.infinito.nexus/examples/platformer/")
 
 
 if __name__ == "__main__":

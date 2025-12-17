@@ -3,16 +3,14 @@ import argparse
 import subprocess
 import sys
 
+
 def get_disk_usage_percentages():
     """
     Returns a list of filesystem usage percentages as integers.
     Equivalent to: df --output=pcent | sed 1d | tr -d '%'
     """
     result = subprocess.run(
-        ["df", "--output=pcent"],
-        capture_output=True,
-        text=True,
-        check=True
+        ["df", "--output=pcent"], capture_output=True, text=True, check=True
     )
 
     lines = result.stdout.strip().split("\n")[1:]  # Skip header
@@ -34,7 +32,7 @@ def main():
     parser.add_argument(
         "minimum_percent_cleanup_disk_space",
         type=int,
-        help="Minimum free disk space percentage threshold that triggers a warning."
+        help="Minimum free disk space percentage threshold that triggers a warning.",
     )
 
     args = parser.parse_args()

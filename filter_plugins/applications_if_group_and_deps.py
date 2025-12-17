@@ -6,7 +6,7 @@ import yaml
 class FilterModule(object):
     def filters(self):
         return {
-            'applications_if_group_and_deps': self.applications_if_group_and_deps,
+            "applications_if_group_and_deps": self.applications_if_group_and_deps,
         }
 
     def applications_if_group_and_deps(self, applications, group_names):
@@ -28,15 +28,19 @@ class FilterModule(object):
     def _validate_inputs(self, applications, group_names):
         """Validate the inputs for correct types."""
         if not isinstance(applications, dict):
-            raise AnsibleFilterError(f"Expected applications as dict, got {type(applications).__name__}")
+            raise AnsibleFilterError(
+                f"Expected applications as dict, got {type(applications).__name__}"
+            )
         if not isinstance(group_names, (list, tuple)):
-            raise AnsibleFilterError(f"Expected group_names as list/tuple, got {type(group_names).__name__}")
+            raise AnsibleFilterError(
+                f"Expected group_names as list/tuple, got {type(group_names).__name__}"
+            )
 
     def _get_roles_directory(self):
         """Locate and return the roles directory."""
         plugin_dir = os.path.dirname(__file__)
-        project_root = os.path.abspath(os.path.join(plugin_dir, '..'))
-        return os.path.join(project_root, 'roles')
+        project_root = os.path.abspath(os.path.join(plugin_dir, ".."))
+        return os.path.join(project_root, "roles")
 
     def _collect_reachable_roles(self, group_names, roles_dir):
         """Recursively collect all roles reachable from the given groups via meta/dependencies."""
@@ -51,7 +55,7 @@ class FilterModule(object):
             return
         seen.add(group)
 
-        meta_file = os.path.join(roles_dir, group, 'meta', 'main.yml')
+        meta_file = os.path.join(roles_dir, group, "meta", "main.yml")
         if not os.path.isfile(meta_file):
             return
 
@@ -61,7 +65,7 @@ class FilterModule(object):
         except Exception:
             return
 
-        for dep in meta.get('dependencies', []):
+        for dep in meta.get("dependencies", []):
             dep_name = self._get_dependency_name(dep)
             if dep_name:
                 self._collect_roles_from_group(dep_name, seen, roles_dir)
@@ -71,14 +75,14 @@ class FilterModule(object):
         if isinstance(dependency, str):
             return dependency
         elif isinstance(dependency, dict):
-            return dependency.get('role') or dependency.get('name')
+            return dependency.get("role") or dependency.get("name")
         return None
 
     def _gather_application_ids(self, included_roles, roles_dir):
         """Gather application_ids from the roles."""
         included_app_ids = set()
         for role in included_roles:
-            vars_file = os.path.join(roles_dir, role, 'vars', 'main.yml')
+            vars_file = os.path.join(roles_dir, role, "vars", "main.yml")
             if not os.path.isfile(vars_file):
                 continue
             try:
@@ -87,7 +91,7 @@ class FilterModule(object):
             except Exception:
                 continue
 
-            app_id = vars_data.get('application_id')
+            app_id = vars_data.get("application_id")
             if isinstance(app_id, str) and app_id:
                 included_app_ids.add(app_id)
 

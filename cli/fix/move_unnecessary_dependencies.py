@@ -37,12 +37,16 @@ try:
     from ruamel.yaml import YAML
     from ruamel.yaml.comments import CommentedMap, CommentedSeq
     from ruamel.yaml.scalarstring import SingleQuotedScalarString
+
     _HAVE_RUAMEL = True
 except Exception:
     _HAVE_RUAMEL = False
 
 if not _HAVE_RUAMEL:
-    print("[ERR] ruamel.yaml is required to preserve comments/quotes. Install with: pip install ruamel.yaml", file=sys.stderr)
+    print(
+        "[ERR] ruamel.yaml is required to preserve comments/quotes. Install with: pip install ruamel.yaml",
+        file=sys.stderr,
+    )
     sys.exit(3)
 
 yaml_rt = YAML()
@@ -51,9 +55,11 @@ yaml_rt.width = 10**9  # prevent line wrapping
 
 # ---------------- Utilities ----------------
 
+
 def _backup(path: str):
     if os.path.exists(path):
         shutil.copy2(path, path + ".bak")
+
 
 def read_text(path: str) -> str:
     try:
@@ -61,6 +67,7 @@ def read_text(path: str) -> str:
             return f.read()
     except Exception:
         return ""
+
 
 def load_yaml_rt(path: str):
     try:
@@ -73,24 +80,30 @@ def load_yaml_rt(path: str):
         print(f"[WARN] Failed to parse YAML: {path}: {e}", file=sys.stderr)
         return CommentedMap()
 
+
 def dump_yaml_rt(data, path: str):
     _backup(path)
     with open(path, "w", encoding="utf-8") as f:
         yaml_rt.dump(data, f)
 
+
 def roles_root(project_root: str) -> str:
     return os.path.join(project_root, "roles")
+
 
 def iter_role_dirs(project_root: str) -> List[str]:
     root = roles_root(project_root)
     return [d for d in glob.glob(os.path.join(root, "*")) if os.path.isdir(d)]
 
+
 def role_name_from_dir(role_dir: str) -> str:
     return os.path.basename(role_dir.rstrip(os.sep))
+
 
 def path_if_exists(*parts) -> Optional[str]:
     p = os.path.join(*parts)
     return p if os.path.exists(p) else None
+
 
 def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
     files: List[str] = []
@@ -98,11 +111,14 @@ def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
         files.extend(glob.glob(os.path.join(base, pat), recursive=True))
     return [f for f in files if os.path.isfile(f)]
 
+
 def sq(v: str):
     """Return a single-quoted scalar (ruamel) for consistent quoting."""
     return SingleQuotedScalarString(v)
 
+
 # ---------------- Providers: vars & handlers ----------------
+
 
 def flatten_keys(data) -> Set[str]:
     out: Set[str] = set()
@@ -116,6 +132,7 @@ def flatten_keys(data) -> Set[str]:
             out |= flatten_keys(item)
     return out
 
+
 def collect_role_defined_vars(role_dir: str) -> Set[str]:
     """Vars a role 'provides': defaults/vars keys + set_fact keys in tasks."""
     provided: Set[str] = set()
@@ -127,16 +144,23 @@ def collect_role_defined_vars(role_dir: str) -> Set[str]:
             provided |= flatten_keys(data)
 
     # set_fact keys
-    task_files = gather_yaml_files(os.path.join(role_dir, "tasks"), ["**/*.yml", "*.yml"])
+    task_files = gather_yaml_files(
+        os.path.join(role_dir, "tasks"), ["**/*.yml", "*.yml"]
+    )
     for tf in task_files:
         data = load_yaml_rt(tf)
         if isinstance(data, list):
             for task in data:
-                if isinstance(task, dict) and "set_fact" in task and isinstance(task["set_fact"], dict):
+                if (
+                    isinstance(task, dict)
+                    and "set_fact" in task
+                    and isinstance(task["set_fact"], dict)
+                ):
                     provided |= set(task["set_fact"].keys())
 
     noisy = {"when", "name", "vars", "tags", "register"}
     return {v for v in provided if isinstance(v, str) and v and v not in noisy}
+
 
 def collect_role_handler_names(role_dir: str) -> Set[str]:
     """Handler names defined by a role (for notify detection)."""
@@ -153,7 +177,9 @@ def collect_role_handler_names(role_dir: str) -> Set[str]:
                     names.add(nm.strip())
     return names
 
+
 # ---------------- Consumers: usage scanning ----------------
+
 
 def find_var_positions(text: str, varname: str) -> List[int]:
     """Return byte offsets for occurrences of varname (word-ish boundary)."""
@@ -165,6 +191,7 @@ def find_var_positions(text: str, varname: str) -> List[int]:
         positions.append(m.start())
     return positions
 
+
 def first_var_use_offset_in_text(text: str, provided_vars: Set[str]) -> Optional[int]:
     first: Optional[int] = None
     for v in provided_vars:
@@ -173,6 +200,7 @@ def first_var_use_offset_in_text(text: str, provided_vars: Set[str]) -> Optional
                 first = off
     return first
 
+
 def first_include_offset_for_role(text: str, producer_role: str) -> Optional[int]:
     """
     Find earliest include/import of a given role in this YAML text.
@@ -180,14 +208,17 @@ def first_include_offset_for_role(text: str, producer_role: str) -> Optional[int
     """
     pattern = re.compile(
         r"(include_role|import_role)\s*:\s*\{[^}]*\bname\s*:\s*['\"]?"
-        + re.escape(producer_role) + r"['\"]?[^}]*\}"
+        + re.escape(producer_role)
+        + r"['\"]?[^}]*\}"
         r"|"
         r"(include_role|import_role)\s*:\s*\n(?:\s+[a-z_]+\s*:\s*.*\n)*\s*name\s*:\s*['\"]?"
-        + re.escape(producer_role) + r"['\"]?",
+        + re.escape(producer_role)
+        + r"['\"]?",
         re.IGNORECASE,
     )
     m = pattern.search(text)
     return m.start() if m else None
+
 
 def find_notify_offsets_for_handlers(text: str, handler_names: Set[str]) -> List[int]:
     """
@@ -206,6 +237,7 @@ def find_notify_offsets_for_handlers(text: str, handler_names: Set[str]) -> List
                 offsets.append(start)
     return sorted(offsets)
 
+
 def parse_meta_dependencies(role_dir: str) -> List[str]:
     meta = path_if_exists(role_dir, "meta/main.yml")
     if not meta:
@@ -223,7 +255,9 @@ def parse_meta_dependencies(role_dir: str) -> List[str]:
                 deps.append(str(item["name"]))
     return deps
 
+
 # ---------------- Fix application ----------------
+
 
 def sanitize_run_once_var(role_name: str) -> str:
     """
@@ -231,6 +265,7 @@ def sanitize_run_once_var(role_name: str) -> str:
     Example: 'sys-front-inj-logout' -> 'run_once_sys_front_inj_logout'
     """
     return "run_once_" + role_name.replace("-", "_")
+
 
 def build_include_block_yaml(consumer_role: str, moved_deps: List[str]) -> List[dict]:
     """
@@ -267,6 +302,7 @@ def build_include_block_yaml(consumer_role: str, moved_deps: List[str]) -> List[
 
     return [block_task]
 
+
 def prepend_tasks(tasks_path: str, new_tasks, dry_run: bool):
     """
     Prepend new_tasks (CommentedSeq) to an existing tasks YAML list while preserving comments.
@@ -293,11 +329,14 @@ def prepend_tasks(tasks_path: str, new_tasks, dry_run: bool):
         combined = new_tasks
 
     if dry_run:
-        print(f"[DRY-RUN] Would write {tasks_path} with {len(new_tasks)} prepended task(s).")
+        print(
+            f"[DRY-RUN] Would write {tasks_path} with {len(new_tasks)} prepended task(s)."
+        )
         return
 
     dump_yaml_rt(combined, tasks_path)
     print(f"[OK] Updated {tasks_path} (prepended {len(new_tasks)} task(s)).")
+
 
 def update_meta_remove_deps(meta_path: str, remove: List[str], dry_run: bool):
     """
@@ -344,25 +383,34 @@ def update_meta_remove_deps(meta_path: str, remove: List[str], dry_run: bool):
     print(f"[OK] Rewrote {meta_path}; removed: {', '.join(removed)}")
     return True
 
-def dependency_is_unnecessary(consumer_dir: str,
-                              consumer_name: str,
-                              producer_name: str,
-                              provider_vars: Set[str],
-                              provider_handlers: Set[str]) -> bool:
+
+def dependency_is_unnecessary(
+    consumer_dir: str,
+    consumer_name: str,
+    producer_name: str,
+    provider_vars: Set[str],
+    provider_handlers: Set[str],
+) -> bool:
     """Apply heuristic to decide if we can move this dependency."""
     # 1) Early usage in defaults/vars/handlers? If yes -> necessary
-    defaults_files = [p for p in [
-        path_if_exists(consumer_dir, "defaults/main.yml"),
-        path_if_exists(consumer_dir, "vars/main.yml"),
-        path_if_exists(consumer_dir, "handlers/main.yml"),
-    ] if p]
+    defaults_files = [
+        p
+        for p in [
+            path_if_exists(consumer_dir, "defaults/main.yml"),
+            path_if_exists(consumer_dir, "vars/main.yml"),
+            path_if_exists(consumer_dir, "handlers/main.yml"),
+        ]
+        if p
+    ]
     for p in defaults_files:
         text = read_text(p)
         if first_var_use_offset_in_text(text, provider_vars) is not None:
             return False  # needs meta dep
 
     # 2) Tasks: any usage before include/import? If yes -> keep meta dep
-    task_files = gather_yaml_files(os.path.join(consumer_dir, "tasks"), ["**/*.yml", "*.yml"])
+    task_files = gather_yaml_files(
+        os.path.join(consumer_dir, "tasks"), ["**/*.yml", "*.yml"]
+    )
     for p in task_files:
         text = read_text(p)
         if not text:
@@ -382,10 +430,13 @@ def dependency_is_unnecessary(consumer_dir: str,
     # If we get here: no early use, and either no usage at all or usage after include
     return True
 
-def process_role(role_dir: str,
-                 providers_index: Dict[str, Tuple[Set[str], Set[str]]],
-                 only_role: Optional[str],
-                 dry_run: bool) -> bool:
+
+def process_role(
+    role_dir: str,
+    providers_index: Dict[str, Tuple[Set[str], Set[str]]],
+    only_role: Optional[str],
+    dry_run: bool,
+) -> bool:
     """
     Returns True if any change suggested/made for this role.
     """
@@ -405,7 +456,9 @@ def process_role(role_dir: str,
             # Unknown/external role → skip (we cannot verify safety)
             continue
         pvars, phandlers = providers_index[producer]
-        if dependency_is_unnecessary(role_dir, consumer_name, producer, pvars, phandlers):
+        if dependency_is_unnecessary(
+            role_dir, consumer_name, producer, pvars, phandlers
+        ):
             moved.append(producer)
 
     if not moved:
@@ -423,6 +476,7 @@ def process_role(role_dir: str,
     prepend_tasks(target_tasks, include_block, dry_run=dry_run)
     return True
 
+
 def build_providers_index(all_roles: List[str]) -> Dict[str, Tuple[Set[str], Set[str]]]:
     """
     Map role_name -> (provided_vars, handler_names)
@@ -432,6 +486,7 @@ def build_providers_index(all_roles: List[str]) -> Dict[str, Tuple[Set[str], Set
         rn = role_name_from_dir(rd)
         index[rn] = (collect_role_defined_vars(rd), collect_role_handler_names(rd))
     return index
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -457,7 +512,10 @@ def main():
 
     roles = iter_role_dirs(args.project_root)
     if not roles:
-        print(f"[ERR] No roles found under {roles_root(args.project_root)}", file=sys.stderr)
+        print(
+            f"[ERR] No roles found under {roles_root(args.project_root)}",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     providers_index = build_providers_index(roles)
@@ -474,6 +532,7 @@ def main():
             print("[DRY-RUN] Completed analysis. No files were changed.")
         else:
             print("[OK] Finished moving unnecessary dependencies.")
+
 
 if __name__ == "__main__":
     main()

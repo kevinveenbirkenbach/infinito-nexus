@@ -3,6 +3,7 @@
 import os
 import unittest
 
+
 class TestRolesFolderNames(unittest.TestCase):
     def test_no_underscore_in_role_folder_names(self):
         """
@@ -11,9 +12,7 @@ class TestRolesFolderNames(unittest.TestCase):
         """
         # Determine the absolute path to the 'roles' directory
         roles_dir = os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__), '..', '..', 'roles'
-            )
+            os.path.join(os.path.dirname(__file__), "..", "..", "roles")
         )
 
         # List all entries in the roles directory
@@ -26,10 +25,10 @@ class TestRolesFolderNames(unittest.TestCase):
         invalid = []
         for name in entries:
             # Skip the '__pycache__' directory
-            if name == '__pycache__':
+            if name == "__pycache__":
                 continue
             path = os.path.join(roles_dir, name)
-            if os.path.isdir(path) and '_' in name:
+            if os.path.isdir(path) and "_" in name:
                 invalid.append(name)
 
         # Fail the test if any invalid folder names are found
@@ -38,5 +37,6 @@ class TestRolesFolderNames(unittest.TestCase):
                 f"Role folder names must not contain underscores: {', '.join(sorted(invalid))}"
             )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

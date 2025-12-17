@@ -9,7 +9,7 @@ ROLES_DIR = Path(__file__).resolve().parent.parent.parent / "roles"
 class TestApplicationIdConsistency(unittest.TestCase):
     def test_application_id_matches_docker_prefix(self):
         failed_roles = []
-        prefixes = (get_invokable_paths(suffix="-"))
+        prefixes = get_invokable_paths(suffix="-")
 
         for role_path in ROLES_DIR.iterdir():
             if not role_path.is_dir():
@@ -23,7 +23,7 @@ class TestApplicationIdConsistency(unittest.TestCase):
 
             prefix = matching[0]
             # expected_id is just the remainder after the prefix
-            expected_id = role_name[len(prefix):]
+            expected_id = role_name[len(prefix) :]
 
             vars_file = role_path / "vars" / "main.yml"
             if not vars_file.exists():
@@ -39,14 +39,18 @@ class TestApplicationIdConsistency(unittest.TestCase):
 
             actual_id = vars_data.get("application_id")
             if actual_id not in [expected_id, role_name]:
-                failed_roles.append((
-                    role_name,
-                    f"application_id is '{actual_id}', expected '{expected_id}'"
-                ))
+                failed_roles.append(
+                    (
+                        role_name,
+                        f"application_id is '{actual_id}', expected '{expected_id}'",
+                    )
+                )
 
         if failed_roles:
             msg = "\n".join(f"{r}: {reason}" for r, reason in failed_roles)
-            self.fail(f"The following roles have mismatching or missing application_id:\n{msg}")
+            self.fail(
+                f"The following roles have mismatching or missing application_id:\n{msg}"
+            )
 
 
 if __name__ == "__main__":

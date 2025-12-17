@@ -11,6 +11,7 @@ except ImportError:  # pragma: no cover
 
 # ---------- Helpers: repo + YAML parsing ----------
 
+
 def _find_repo_root_containing(relative: str, max_depth: int = 8) -> str:
     """Walk upwards from this file to find the repo root that contains `relative`."""
     here = os.path.abspath(os.path.dirname(__file__))
@@ -50,6 +51,7 @@ def _load_yaml_file(path: str) -> List[Dict[str, Any]]:
 
 
 # ---------- Helpers: when / structure checks ----------
+
 
 def _normalize_when(value: Any) -> List[str]:
     """
@@ -91,6 +93,7 @@ def _is_pure_guarded_tasks_file(tasks: List[Dict[str, Any]]) -> Tuple[List[str],
 
 
 # ---------- Helpers: discovery ----------
+
 
 def _iter_all_tasks_files(repo_root: str) -> List[str]:
     """
@@ -144,7 +147,9 @@ def _contains_jinja(s: str) -> bool:
     return "{{" in s or "{%" in s or "}}" in s or "%}" in s
 
 
-def _resolve_include_tasks_path(include_value: str, including_file: str) -> Optional[str]:
+def _resolve_include_tasks_path(
+    include_value: str, including_file: str
+) -> Optional[str]:
     """
     Resolve an include_tasks path relative to the including file.
     If it contains Jinja or does not resolve to an existing file, return None.
@@ -196,7 +201,9 @@ class PureGuardedIncludeTest(unittest.TestCase):
 
         role_main_glob = os.path.join(cls.repo_root, "roles", "*", "tasks", "main.yml")
         for main_path in glob.glob(role_main_glob):
-            role_name = os.path.basename(os.path.dirname(os.path.dirname(main_path)))  # roles/<role>/tasks/main.yml
+            role_name = os.path.basename(
+                os.path.dirname(os.path.dirname(main_path))
+            )  # roles/<role>/tasks/main.yml
             try:
                 tasks = _load_yaml_file(main_path)
                 guards, pure = _is_pure_guarded_tasks_file(tasks)
@@ -218,7 +225,9 @@ class PureGuardedIncludeTest(unittest.TestCase):
         failures: List[str] = []
 
         if not self.pure_guarded_roles:
-            self.skipTest("No pure guarded roles found; nothing to validate for include_role.")
+            self.skipTest(
+                "No pure guarded roles found; nothing to validate for include_role."
+            )
 
         for path in self.all_tasks_files:
             try:
@@ -242,7 +251,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
 
                 if not include_when:
                     failures.append(
-                        f"{path} (task #{idx+1}) includes role '{role_name}' "
+                        f"{path} (task #{idx + 1}) includes role '{role_name}' "
                         f"but lacks a 'when'. The role is pure guarded by {guards} in {main_path}. "
                         f"Add at least one of those guard expressions to the include to avoid loading the role unnecessarily."
                     )
@@ -250,7 +259,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
 
                 if not any(req in include_when for req in guards):
                     failures.append(
-                        f"{path} (task #{idx+1}) includes role '{role_name}' but its 'when' "
+                        f"{path} (task #{idx + 1}) includes role '{role_name}' but its 'when' "
                         f"does not contain the role's guard.\n"
                         f"Role guard(s) from {main_path}: {guards}\n"
                         f"Include 'when': {include_when}\n"
@@ -258,7 +267,10 @@ class PureGuardedIncludeTest(unittest.TestCase):
                     )
 
         if failures:
-            self.fail("Some include_role calls are missing pure-guard short-circuiting:\n\n" + "\n\n".join(failures))
+            self.fail(
+                "Some include_role calls are missing pure-guard short-circuiting:\n\n"
+                + "\n\n".join(failures)
+            )
 
     def test_include_tasks_short_circuits_when_target_is_pure_guarded(self):
         failures: List[str] = []
@@ -287,7 +299,9 @@ class PureGuardedIncludeTest(unittest.TestCase):
                         guards, pure = _is_pure_guarded_tasks_file(target_tasks)
                         self.tasks_file_cache[resolved] = (guards, pure)
                     except Exception as e:
-                        failures.append(f"[PARSE ERROR] included by {including_path} (task #{idx+1}): {resolved}: {e}")
+                        failures.append(
+                            f"[PARSE ERROR] included by {including_path} (task #{idx + 1}): {resolved}: {e}"
+                        )
                         # mark as non-pure to avoid repeated parsing attempts
                         self.tasks_file_cache[resolved] = ([], False)
 
@@ -300,7 +314,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
 
                 if not include_when:
                     failures.append(
-                        f"{including_path} (task #{idx+1}) includes tasks '{include_value}' "
+                        f"{including_path} (task #{idx + 1}) includes tasks '{include_value}' "
                         f"-> {resolved}, which is PURE GUARDED by {guards}. "
                         f"Add at least one of those guard expressions to the include to avoid loading the file unnecessarily."
                     )
@@ -308,7 +322,7 @@ class PureGuardedIncludeTest(unittest.TestCase):
 
                 if not any(req in include_when for req in guards):
                     failures.append(
-                        f"{including_path} (task #{idx+1}) includes tasks '{include_value}' "
+                        f"{including_path} (task #{idx + 1}) includes tasks '{include_value}' "
                         f"-> {resolved}, but its 'when' does not contain the target's guard.\n"
                         f"Target guard(s): {guards}\n"
                         f"Include 'when': {include_when}\n"
@@ -316,7 +330,10 @@ class PureGuardedIncludeTest(unittest.TestCase):
                     )
 
         if failures:
-            self.fail("Some include_tasks calls are missing pure-guard short-circuiting:\n\n" + "\n\n".join(failures))
+            self.fail(
+                "Some include_tasks calls are missing pure-guard short-circuiting:\n\n"
+                + "\n\n".join(failures)
+            )
 
 
 if __name__ == "__main__":

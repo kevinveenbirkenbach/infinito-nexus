@@ -22,8 +22,7 @@ def littlejs_href(example, protocol, domain):
     # Non-full shorts: use custom runner without example browser overhead
     return f"{protocol}://{domain}/examples/shorts/run.html?file={file}"
 
+
 class FilterModule(object):
     def filters(self):
-        return {
-            "littlejs_href": littlejs_href
-        }
+        return {"littlejs_href": littlejs_href}

@@ -4,7 +4,13 @@ import ipaddress
 
 
 def _validate(d: str) -> None:
-    if not isinstance(d, str) or not d.strip() or d.startswith(".") or d.endswith(".") or ".." in d:
+    if (
+        not isinstance(d, str)
+        or not d.strip()
+        or d.startswith(".")
+        or d.endswith(".")
+        or ".." in d
+    ):
         raise AnsibleFilterError(f"Invalid domain: {d!r}")
 
 
@@ -100,14 +106,16 @@ def _build_wildcard_records(
     records: list[dict] = []
 
     def _add(name: str, rtype: str, content: str):
-        records.append({
-            "zone": apex,
-            "type": rtype,
-            "name": name,     # For apex wildcard, name "*" means "*.apex" in Cloudflare
-            "content": content,
-            "proxied": bool(proxied),
-            "ttl": 1,
-        })
+        records.append(
+            {
+                "zone": apex,
+                "type": rtype,
+                "name": name,  # For apex wildcard, name "*" means "*.apex" in Cloudflare
+                "content": content,
+                "proxied": bool(proxied),
+                "ttl": 1,
+            }
+        )
 
     for p in sorted(set(parents)):
         # Create wildcard at apex as well (name="*")
@@ -115,7 +123,7 @@ def _build_wildcard_records(
             wc = "*"
         else:
             # relative part (drop ".apex")
-            rel = p[:-len(apex)-1]
+            rel = p[: -len(apex) - 1]
             if not rel:
                 # Safety guard; should not happen because p==apex handled above
                 wc = "*"
@@ -147,7 +155,9 @@ def wildcard_records(
     """
     # Source domains
     if explicit_domains and len(explicit_domains) > 0:
-        if not isinstance(explicit_domains, list) or not all(isinstance(x, str) for x in explicit_domains):
+        if not isinstance(explicit_domains, list) or not all(
+            isinstance(x, str) for x in explicit_domains
+        ):
             raise AnsibleFilterError("explicit_domains must be list[str]")
         domains = sorted(set(explicit_domains))
     else:

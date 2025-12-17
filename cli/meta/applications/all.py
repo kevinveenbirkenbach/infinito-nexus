@@ -8,7 +8,9 @@ import sys
 try:
     from filter_plugins.get_all_application_ids import get_all_application_ids
 except ImportError:
-    sys.stderr.write("Filter plugin `get_all_application_ids` not found. Ensure `filter_plugins/get_all_application_ids.py` is in your PYTHONPATH.\n")
+    sys.stderr.write(
+        "Filter plugin `get_all_application_ids` not found. Ensure `filter_plugins/get_all_application_ids.py` is in your PYTHONPATH.\n"
+    )
     sys.exit(1)
 
 
@@ -22,7 +24,7 @@ def find_application_ids():
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Output a list of all application_id values defined in roles/*/vars/main.yml'
+        description="Output a list of all application_id values defined in roles/*/vars/main.yml"
     )
     parser.parse_args()
 
@@ -36,5 +38,5 @@ def main():
         print(app_id)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

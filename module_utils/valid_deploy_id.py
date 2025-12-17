@@ -2,13 +2,15 @@
 """
 Utility for validating deployment application IDs against defined roles and inventory.
 """
+
 import os
 import yaml
 
 from filter_plugins.get_all_application_ids import get_all_application_ids
 
+
 class ValidDeployId:
-    def __init__(self, roles_dir='roles'):
+    def __init__(self, roles_dir="roles"):
         # Load all known application IDs from roles
         self.valid_ids = set(get_all_application_ids(roles_dir))
 
@@ -27,15 +29,12 @@ class ValidDeployId:
             in_roles = app_id in self.valid_ids
             in_inventory = self._exists_in_inventory(inventory_path, app_id)
             if not (in_roles and in_inventory):
-                invalid[app_id] = {
-                    'in_roles': in_roles,
-                    'in_inventory': in_inventory
-                }
+                invalid[app_id] = {"in_roles": in_roles, "in_inventory": in_inventory}
         return invalid
 
     def _exists_in_inventory(self, inventory_path, app_id):
         _, ext = os.path.splitext(inventory_path)
-        if ext in ('.yml', '.yaml'):
+        if ext in (".yml", ".yaml"):
             return self._search_yaml_keys(inventory_path, app_id)
         else:
             return self._search_ini_sections(inventory_path, app_id)
@@ -45,15 +44,15 @@ class ValidDeployId:
         Manually parse INI inventory for sections and host lists.
         Returns True if app_id matches a section name or a host in a section.
         """
-        with open(inventory_path, 'r', encoding='utf-8') as f:
+        with open(inventory_path, "r", encoding="utf-8") as f:
             current_section = None
             for raw in f:
                 line = raw.strip()
                 # Skip blanks and comments
-                if not line or line.startswith(('#', ';')):
+                if not line or line.startswith(("#", ";")):
                     continue
                 # Section header
-                if line.startswith('[') and line.endswith(']'):
+                if line.startswith("[") and line.endswith("]"):
                     current_section = line[1:-1].strip()
                     if current_section == app_id:
                         return True
@@ -61,13 +60,13 @@ class ValidDeployId:
                 # Host or variable line under a section
                 if current_section:
                     # Split on commas or whitespace
-                    for part in [p.strip() for p in line.replace(',', ' ').split()]:
+                    for part in [p.strip() for p in line.replace(",", " ").split()]:
                         if part == app_id:
                             return True
         return False
 
     def _search_yaml_keys(self, inventory_path, app_id):
-        with open(inventory_path, 'r', encoding='utf-8') as f:
+        with open(inventory_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
         return self._find_key(data, app_id)
 

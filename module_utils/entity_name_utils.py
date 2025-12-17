@@ -1,12 +1,14 @@
 import os
 import yaml
 
+
 def load_categories_tree(categories_file):
-    with open(categories_file, 'r', encoding='utf-8') as f:
-        categories = yaml.safe_load(f)['roles']
+    with open(categories_file, "r", encoding="utf-8") as f:
+        categories = yaml.safe_load(f)["roles"]
     return categories
 
-def flatten_categories(tree, prefix=''):
+
+def flatten_categories(tree, prefix=""):
     """Flattens nested category tree to all possible category paths."""
     result = []
     for k, v in tree.items():
@@ -18,15 +20,16 @@ def flatten_categories(tree, prefix=''):
                     result.extend(flatten_categories({sk: sv}, current))
     return result
 
+
 def get_entity_name(role_name):
     """
     Get the entity name from a role name by removing the
     longest matching category path from categories.yml.
     """
     possible_locations = [
-        os.path.join(os.getcwd(), 'roles', 'categories.yml'),
-        os.path.join(os.path.dirname(__file__), '..', 'roles', 'categories.yml'),
-        'roles/categories.yml',
+        os.path.join(os.getcwd(), "roles", "categories.yml"),
+        os.path.join(os.path.dirname(__file__), "..", "roles", "categories.yml"),
+        "roles/categories.yml",
     ]
     categories_file = None
     for loc in possible_locations:
@@ -43,7 +46,7 @@ def get_entity_name(role_name):
     all_category_paths = [cat.lower() for cat in all_category_paths]
     for cat in sorted(all_category_paths, key=len, reverse=True):
         if role_name_lc.startswith(cat + "-"):
-            return role_name[len(cat) + 1:]
+            return role_name[len(cat) + 1 :]
         if role_name_lc == cat:
             return ""
     return role_name

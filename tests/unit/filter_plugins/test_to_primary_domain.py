@@ -4,6 +4,7 @@ from ansible.errors import AnsibleFilterError
 # Import the filter plugin
 from filter_plugins.to_primary_domain import FilterModule
 
+
 class TestToPrimaryDomain(unittest.TestCase):
     def setUp(self):
         self.filtermod = FilterModule()
@@ -18,18 +19,21 @@ class TestToPrimaryDomain(unittest.TestCase):
         ]
         for input_domain, expected in cases:
             with self.subTest(domain=input_domain):
-                self.assertEqual(self.filtermod.to_primary_domain(input_domain), expected)
+                self.assertEqual(
+                    self.filtermod.to_primary_domain(input_domain), expected
+                )
 
     def test_invalid_domains(self):
         invalid_cases = [
             "localhost",  # not a real domain
-            1234,         # not a string
-            "",           # empty string
+            1234,  # not a string
+            "",  # empty string
         ]
         for input_domain in invalid_cases:
             with self.subTest(domain=input_domain):
                 with self.assertRaises(AnsibleFilterError):
                     self.filtermod.to_primary_domain(input_domain)
+
 
 if __name__ == "__main__":
     unittest.main()

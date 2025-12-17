@@ -3,10 +3,12 @@ from __future__ import annotations
 
 import re
 from typing import Any, Iterable
+
 try:
     # Ansible provides this; don't hard-depend at import time for unit tests
     from ansible.errors import AnsibleFilterError
 except Exception:  # pragma: no cover
+
     class AnsibleFilterError(Exception):
         pass
 
@@ -16,6 +18,7 @@ _JOB_LOC_RE = re.compile(r"/rest/jobstatus/([^?\s#]+)")
 
 def _join_elements(elems: Iterable[Any]) -> str:
     return "/".join(str(x) for x in elems)
+
 
 def xwiki_extension_status(raw: str) -> int:
     """
@@ -34,7 +37,7 @@ def xwiki_extension_status(raw: str) -> int:
         return 404
 
     text = re.sub(r"<[^>]+>", "", str(raw))
-    text = text.replace("&nbsp;", " ").replace("\u00A0", " ")
+    text = text.replace("&nbsp;", " ").replace("\u00a0", " ")
     text = text.strip()
 
     if text.startswith("INSTALLED::"):
@@ -44,6 +47,7 @@ def xwiki_extension_status(raw: str) -> int:
 
 class FilterModule(object):
     """Custom filters for XWiki helpers."""
+
     def filters(self):
         return {
             "xwiki_extension_status": xwiki_extension_status,

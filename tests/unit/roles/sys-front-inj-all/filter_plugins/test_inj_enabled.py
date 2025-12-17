@@ -6,8 +6,11 @@ import unittest
 
 THIS_FILE = Path(__file__)
 
+
 def find_repo_root(start: Path) -> Path:
-    target_rel = Path("roles") / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
+    target_rel = (
+        Path("roles") / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
+    )
     cur = start
     for _ in range(12):
         if (cur / target_rel).is_file():
@@ -15,8 +18,11 @@ def find_repo_root(start: Path) -> Path:
         cur = cur.parent
     return start.parents[6]
 
+
 REPO_ROOT = find_repo_root(THIS_FILE)
-PLUGIN_PATH = REPO_ROOT / "roles" / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
+PLUGIN_PATH = (
+    REPO_ROOT / "roles" / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
+)
 
 # Ensure 'module_utils' is importable under its canonical package name
 if str(REPO_ROOT) not in sys.path:
@@ -46,19 +52,34 @@ class TestInjEnabledFilter(unittest.TestCase):
 
     def test_basic_build(self):
         applications = {
-            "myapp": {"features": {
-                "javascript": True, "logout": False, "css": True, "matomo": False, "desktop": True
-            }}
+            "myapp": {
+                "features": {
+                    "javascript": True,
+                    "logout": False,
+                    "css": True,
+                    "matomo": False,
+                    "desktop": True,
+                }
+            }
         }
         features = ["javascript", "logout", "css", "matomo", "desktop"]
         result = self.filter(applications, "myapp", features)
-        self.assertEqual(result, {
-            "javascript": True, "logout": False, "css": True, "matomo": False, "desktop": True
-        })
+        self.assertEqual(
+            result,
+            {
+                "javascript": True,
+                "logout": False,
+                "css": True,
+                "matomo": False,
+                "desktop": True,
+            },
+        )
 
     def test_missing_keys_return_default_false(self):
         applications = {"app": {"features": {"javascript": True}}}
-        result = self.filter(applications, "app", ["javascript", "logout", "css"], default=False)
+        result = self.filter(
+            applications, "app", ["javascript", "logout", "css"], default=False
+        )
         self.assertEqual(result["javascript"], True)
         self.assertEqual(result["logout"], False)
         self.assertEqual(result["css"], False)
@@ -70,7 +91,9 @@ class TestInjEnabledFilter(unittest.TestCase):
 
     def test_custom_prefix(self):
         applications = {"app": {"flags": {"logout": True, "css": False}}}
-        result = self.filter(applications, "app", ["logout", "css"], prefix="flags", default=False)
+        result = self.filter(
+            applications, "app", ["logout", "css"], prefix="flags", default=False
+        )
         self.assertEqual(result, {"logout": True, "css": False})
 
     def test_missing_application_id_raises(self):

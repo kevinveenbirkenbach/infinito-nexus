@@ -11,17 +11,17 @@ def abs_role_path_by_application_id(application_id):
     zero or more than one match is found.
     """
     base_dir = os.getcwd()
-    pattern = os.path.join(base_dir, 'roles', '*', 'vars', 'main.yml')
+    pattern = os.path.join(base_dir, "roles", "*", "vars", "main.yml")
     matches = []
 
     for filepath in glob.glob(pattern):
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 data = yaml.safe_load(f) or {}
         except Exception:
             continue
 
-        if data.get('application_id') == application_id:
+        if data.get("application_id") == application_id:
             role_dir = os.path.dirname(os.path.dirname(filepath))
             abs_path = os.path.abspath(role_dir)
             matches.append(abs_path)
@@ -46,17 +46,17 @@ def rel_role_path_by_application_id(application_id):
     Raises an error if zero or more than one match is found.
     """
     base_dir = os.getcwd()
-    pattern = os.path.join(base_dir, 'roles', '*', 'vars', 'main.yml')
+    pattern = os.path.join(base_dir, "roles", "*", "vars", "main.yml")
     matches = []
 
     for filepath in glob.glob(pattern):
         try:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 data = yaml.safe_load(f) or {}
         except Exception:
             continue
 
-        if data.get('application_id') == application_id:
+        if data.get("application_id") == application_id:
             role_dir = os.path.dirname(os.path.dirname(filepath))
             rel_path = os.path.relpath(role_dir, base_dir)
             matches.append(rel_path)
@@ -79,8 +79,9 @@ class FilterModule(object):
     Provides the filters `abs_role_path_by_application_id` and
     `rel_role_path_by_application_id`.
     """
+
     def filters(self):
         return {
-            'abs_role_path_by_application_id': abs_role_path_by_application_id,
-            'rel_role_path_by_application_id': rel_role_path_by_application_id,
+            "abs_role_path_by_application_id": abs_role_path_by_application_id,
+            "rel_role_path_by_application_id": rel_role_path_by_application_id,
         }

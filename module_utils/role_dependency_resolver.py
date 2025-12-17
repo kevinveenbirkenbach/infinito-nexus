@@ -119,13 +119,19 @@ class RoleDependencyResolver:
                     if not isinstance(task, dict):
                         continue
                     if "include_role" in task:
-                        include_roles |= self._extract_from_task(task, "include_role", all_roles)
+                        include_roles |= self._extract_from_task(
+                            task, "include_role", all_roles
+                        )
                     if "import_role" in task:
-                        import_roles |= self._extract_from_task(task, "import_role", all_roles)
+                        import_roles |= self._extract_from_task(
+                            task, "import_role", all_roles
+                        )
 
         return include_roles, import_roles
 
-    def _extract_from_task(self, task: dict, key: str, all_roles: Iterable[str]) -> Set[str]:
+    def _extract_from_task(
+        self, task: dict, key: str, all_roles: Iterable[str]
+    ) -> Set[str]:
         roles: Set[str] = set()
         spec = task.get(key)
         if not isinstance(spec, dict):
@@ -140,8 +146,16 @@ class RoleDependencyResolver:
                 if cand:
                     roles.add(cand)
 
-            if isinstance(name, str) and name.strip() and not self._is_pure_jinja_var(name):
-                pattern = self._jinja_to_glob(name) if ("{{" in name and "}}" in name) else name
+            if (
+                isinstance(name, str)
+                and name.strip()
+                and not self._is_pure_jinja_var(name)
+            ):
+                pattern = (
+                    self._jinja_to_glob(name)
+                    if ("{{" in name and "}}" in name)
+                    else name
+                )
                 self._match_glob_into(pattern, all_roles, roles)
             return roles
 
@@ -183,7 +197,11 @@ class RoleDependencyResolver:
             for k in ("role", "name"):
                 v = item.get(k)
                 if isinstance(v, str) and v.strip():
-                    if tmpl in (f"{{{{ item.{k} }}}}", f"{{{{item.{k}}}}}") or not tmpl or "item" in tmpl:
+                    if (
+                        tmpl in (f"{{{{ item.{k} }}}}", f"{{{{item.{k}}}}}")
+                        or not tmpl
+                        or "item" in tmpl
+                    ):
                         return v.strip()
         return None
 
@@ -240,7 +258,8 @@ class RoleDependencyResolver:
 
     def _list_role_dirs(self, roles_dir: str) -> list[str]:
         return [
-            d for d in os.listdir(roles_dir)
+            d
+            for d in os.listdir(roles_dir)
             if os.path.isdir(os.path.join(roles_dir, d))
         ]
 

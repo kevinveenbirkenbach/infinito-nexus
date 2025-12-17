@@ -17,7 +17,9 @@ def _load_social_module():
     test_file = pathlib.Path(__file__).resolve()
     repo_root = test_file.parents[5]
 
-    social_path = repo_root / "roles" / "web-app-desktop" / "filter_plugins" / "social.py"
+    social_path = (
+        repo_root / "roles" / "web-app-desktop" / "filter_plugins" / "social.py"
+    )
 
     if not social_path.is_file():
         raise RuntimeError(f"Could not find social.py at expected path: {social_path}")

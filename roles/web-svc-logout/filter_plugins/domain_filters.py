@@ -1,12 +1,13 @@
 from ansible.errors import AnsibleFilterError
 from module_utils.config_utils import get_app_conf
 
+
 class FilterModule(object):
     """Ansible filter plugin for generating logout domains based on logout feature."""
 
     def filters(self):
         return {
-            'logout_domains': self.logout_domains,
+            "logout_domains": self.logout_domains,
         }
 
     def logout_domains(self, applications, group_names):
@@ -23,11 +24,13 @@ class FilterModule(object):
                 if app_id not in group_names:
                     continue
 
-                if not get_app_conf(applications, app_id, 'features.logout', False):
+                if not get_app_conf(applications, app_id, "features.logout", False):
                     continue
 
                 # use canonical domains list if present
-                domains_entry = config.get('server', {}).get('domains', {}).get('canonical', [])
+                domains_entry = (
+                    config.get("server", {}).get("domains", {}).get("canonical", [])
+                )
 
                 # normalize to a list of strings
                 if isinstance(domains_entry, dict):

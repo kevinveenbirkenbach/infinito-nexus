@@ -16,7 +16,9 @@ class TestNodeAutosizeFilter(unittest.TestCase):
 
     def setUp(self):
         # Default parameters used by all tests
-        self.applications = {"web-app-nextcloud": {"docker": {"services": {"whiteboard": {}}}}}
+        self.applications = {
+            "web-app-nextcloud": {"docker": {"services": {"whiteboard": {}}}}
+        }
         self.application_id = "web-app-nextcloud"
         self.service_name = "whiteboard"
 
@@ -29,10 +31,19 @@ class TestNodeAutosizeFilter(unittest.TestCase):
 
     def _set_mem_limit(self, value):
         """Helper: mock get_app_conf to return a specific mem_limit value."""
-        def _fake_get_app_conf(applications, application_id, config_path, strict=True, default=None, **_kwargs):
+
+        def _fake_get_app_conf(
+            applications,
+            application_id,
+            config_path,
+            strict=True,
+            default=None,
+            **_kwargs,
+        ):
             assert application_id == self.application_id
             assert config_path == f"docker.services.{self.service_name}.mem_limit"
             return value
+
         self.mock_get_app_conf.side_effect = _fake_get_app_conf
 
     # --- Tests for node_max_old_space_size (MB) ---
@@ -41,39 +52,53 @@ class TestNodeAutosizeFilter(unittest.TestCase):
         # mem_limit=512 MB < min_mb=768 -> must raise
         self._set_mem_limit("512m")
         with self.assertRaises(AnsibleFilterError):
-            na.node_max_old_space_size(self.applications, self.application_id, self.service_name)
+            na.node_max_old_space_size(
+                self.applications, self.application_id, self.service_name
+            )
 
     def test_2g_caps_to_minimum_768(self):
         self._set_mem_limit("2g")
-        mb = na.node_max_old_space_size(self.applications, self.application_id, self.service_name)
+        mb = na.node_max_old_space_size(
+            self.applications, self.application_id, self.service_name
+        )
         self.assertEqual(mb, 768)  # 35% of 2g = 700 < 768 -> min wins
 
     def test_8g_uses_35_percent_without_hitting_hardcap(self):
         self._set_mem_limit("8g")
-        mb = na.node_max_old_space_size(self.applications, self.application_id, self.service_name)
+        mb = na.node_max_old_space_size(
+            self.applications, self.application_id, self.service_name
+        )
         self.assertEqual(mb, 2800)  # 8g -> 8000 MB * 0.35 = 2800
 
     def test_16g_hits_hardcap_3072(self):
         self._set_mem_limit("16g")
-        mb = na.node_max_old_space_size(self.applications, self.application_id, self.service_name)
+        mb = na.node_max_old_space_size(
+            self.applications, self.application_id, self.service_name
+        )
         self.assertEqual(mb, 3072)  # 35% of 16g = 5600, hardcap=3072
 
     def test_numeric_bytes_input(self):
         # 2 GiB in bytes (IEC): 2 * 1024 ** 3 = 2147483648
         self._set_mem_limit(2147483648)
-        mb = na.node_max_old_space_size(self.applications, self.application_id, self.service_name)
+        mb = na.node_max_old_space_size(
+            self.applications, self.application_id, self.service_name
+        )
         # 2 GiB ≈ 2147 MB; 35% => ~751, min 768 => 768
         self.assertEqual(mb, 768)
 
     def test_invalid_unit_raises_error(self):
         self._set_mem_limit("12x")  # invalid unit
         with self.assertRaises(AnsibleFilterError):
-            na.node_max_old_space_size(self.applications, self.application_id, self.service_name)
+            na.node_max_old_space_size(
+                self.applications, self.application_id, self.service_name
+            )
 
     def test_missing_mem_limit_raises_error(self):
         self._set_mem_limit(None)
         with self.assertRaises(AnsibleFilterError):
-            na.node_max_old_space_size(self.applications, self.application_id, self.service_name)
+            na.node_max_old_space_size(
+                self.applications, self.application_id, self.service_name
+            )
 
 
 if __name__ == "__main__":

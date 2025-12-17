@@ -17,11 +17,13 @@ import os
 
 # This file lives at: roles/sys-front-inj-all/filter_plugins/inj_snippets.py
 _THIS_DIR = os.path.dirname(__file__)
-_ROLE_DIR = os.path.abspath(os.path.join(_THIS_DIR, ".."))   # roles/sys-front-inj-all
+_ROLE_DIR = os.path.abspath(os.path.join(_THIS_DIR, ".."))  # roles/sys-front-inj-all
 _ROLES_DIR = os.path.abspath(os.path.join(_ROLE_DIR, ".."))  # roles
+
 
 def _feature_role_dir(feature: str) -> str:
     return os.path.join(_ROLES_DIR, f"sys-front-inj-{feature}")
+
 
 def _has_snippet(feature: str, kind: str) -> bool:
     if kind not in ("head", "body"):
@@ -37,6 +39,7 @@ def _has_snippet(feature: str, kind: str) -> bool:
     path = os.path.join(role_dir, "templates", f"{kind}_sub.j2")
     return os.path.exists(path)
 
+
 def inj_features_filter(features, kind: str = "head"):
     if not isinstance(features, (list, tuple)):
         return []
@@ -47,6 +50,7 @@ def inj_features_filter(features, kind: str = "head"):
         if _has_snippet(name, kind):
             valid.append(name)
     return valid
+
 
 class FilterModule(object):
     def filters(self):

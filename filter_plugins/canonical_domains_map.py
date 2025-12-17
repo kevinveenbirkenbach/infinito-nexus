@@ -7,7 +7,7 @@ from typing import Iterable
 
 class FilterModule(object):
     def filters(self):
-        return {'canonical_domains_map': self.canonical_domains_map}
+        return {"canonical_domains_map": self.canonical_domains_map}
 
     def canonical_domains_map(
         self,
@@ -25,9 +25,11 @@ class FilterModule(object):
         'run_after' wird hier absichtlich ignoriert.
         """
         if not isinstance(apps, dict):
-            raise AnsibleFilterError(f"'apps' must be a dict, got {type(apps).__name__}")
+            raise AnsibleFilterError(
+                f"'apps' must be a dict, got {type(apps).__name__}"
+            )
 
-        app_keys  = set(apps.keys())
+        app_keys = set(apps.keys())
         seed_keys = set(seed) if seed is not None else app_keys
 
         if recursive:
@@ -65,13 +67,15 @@ class FilterModule(object):
                     f"Invalid configuration for application '{app_id}': expected dict, got {cfg!r}"
                 )
 
-            domains_cfg = cfg.get('server', {}).get('domains', {})
-            if not domains_cfg or 'canonical' not in domains_cfg:
+            domains_cfg = cfg.get("server", {}).get("domains", {})
+            if not domains_cfg or "canonical" not in domains_cfg:
                 self._add_default_domain(app_id, PRIMARY_DOMAIN, seen_domains, result)
                 continue
 
-            canonical_domains = domains_cfg['canonical']
-            self._process_canonical_domains(app_id, canonical_domains, seen_domains, result)
+            canonical_domains = domains_cfg["canonical"]
+            self._process_canonical_domains(
+                app_id, canonical_domains, seen_domains, result
+            )
 
         return result
 
@@ -86,7 +90,9 @@ class FilterModule(object):
         seen_domains[default_domain] = app_id
         result[app_id] = [default_domain]
 
-    def _process_canonical_domains(self, app_id, canonical_domains, seen_domains, result):
+    def _process_canonical_domains(
+        self, app_id, canonical_domains, seen_domains, result
+    ):
         if isinstance(canonical_domains, dict):
             for _, domain in canonical_domains.items():
                 self._validate_and_check_domain(app_id, domain, seen_domains)

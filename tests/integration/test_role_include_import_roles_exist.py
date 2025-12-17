@@ -4,17 +4,20 @@ import glob
 import yaml
 import re
 
+
 class TestIncludeImportRoleExistence(unittest.TestCase):
     def setUp(self):
         # Determine project root and roles directory
         tests_dir = os.path.dirname(__file__)
         project_root = os.path.abspath(os.path.join(tests_dir, os.pardir, os.pardir))
-        self.roles_dir = os.path.join(project_root, 'roles')
+        self.roles_dir = os.path.join(project_root, "roles")
         # Collect all .yml files in project (recursive), excluding .git and tests dirs
         self.files_to_scan = []
-        for filepath in glob.glob(os.path.join(project_root, '**', '*.yml'), recursive=True):
+        for filepath in glob.glob(
+            os.path.join(project_root, "**", "*.yml"), recursive=True
+        ):
             # Skip .git, tests folders
-            if '/.git/' in filepath or '/tests/' in filepath:
+            if "/.git/" in filepath or "/tests/" in filepath:
                 continue
             self.files_to_scan.append(filepath)
 
@@ -26,20 +29,20 @@ class TestIncludeImportRoleExistence(unittest.TestCase):
         roles = []
         if isinstance(data, dict):
             for key, val in data.items():
-                if key in ('include_role', 'import_role'):
+                if key in ("include_role", "import_role"):
                     # Scalar syntax: include_role: role_name
                     if isinstance(val, str):
                         roles.append(val)
                     # Block syntax: include_role: { name: role_name }
-                    elif isinstance(val, dict) and 'name' in val:
-                        roles.append(val['name'])
+                    elif isinstance(val, dict) and "name" in val:
+                        roles.append(val["name"])
                     # Block-list syntax: include_role:
                     #  - name: foo
                     #  - name: bar
                     elif isinstance(val, list):
                         for item in val:
-                            if isinstance(item, dict) and 'name' in item:
-                                roles.append(item['name'])
+                            if isinstance(item, dict) and "name" in item:
+                                roles.append(item["name"])
                 else:
                     roles.extend(self._collect_includes(val))
         elif isinstance(data, list):
@@ -62,7 +65,6 @@ class TestIncludeImportRoleExistence(unittest.TestCase):
                     continue
 
                 for role_name in self._collect_includes(doc):
-
                     # NEW: Validate that role_name is a proper string
                     if not isinstance(role_name, str) or not role_name.strip():
                         self.fail(
@@ -76,7 +78,7 @@ class TestIncludeImportRoleExistence(unittest.TestCase):
                         )
 
                     # Convert Jinja2 templates and wildcards to glob patterns
-                    pattern = re.sub(r"\{\{.*?\}\}", '*', role_name)
+                    pattern = re.sub(r"\{\{.*?\}\}", "*", role_name)
                     glob_path = os.path.join(self.roles_dir, pattern)
 
                     matches = [p for p in glob.glob(glob_path) if os.path.isdir(p)]
@@ -85,10 +87,10 @@ class TestIncludeImportRoleExistence(unittest.TestCase):
 
         if missing:
             messages = [
-                f"File '{fp}' references missing role '{rn}'"
-                for fp, rn in missing
+                f"File '{fp}' references missing role '{rn}'" for fp, rn in missing
             ]
             self.fail("\n".join(messages))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

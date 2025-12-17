@@ -2,11 +2,13 @@ import re
 import time
 from typing import Any, Dict, Union, List, Set
 
+
 class DictRenderer:
     """
     Resolves placeholders in the form << path >> within nested dictionaries,
     supporting hyphens, numeric list indexing, and quoted keys via ['key'] or ["key"].
     """
+
     # Match << path >> where path contains no whitespace or closing >
     PATTERN = re.compile(r"<<\s*(?P<path>[^\s>]+)\s*>>")
     # Tokenizes a path into unquoted keys, single-quoted, double-quoted keys, or numeric indices
@@ -21,7 +23,9 @@ class DictRenderer:
         self.verbose = verbose
         self.timeout = timeout
 
-    def render(self, data: Union[Dict[str, Any], List[Any]]) -> Union[Dict[str, Any], List[Any]]:
+    def render(
+        self, data: Union[Dict[str, Any], List[Any]]
+    ) -> Union[Dict[str, Any], List[Any]]:
         start = time.monotonic()
         self.root = data
         rendered = data
@@ -37,12 +41,16 @@ class DictRenderer:
                     print(f"[DictRenderer] No more placeholders after pass {pass_num}.")
                 break
             if time.monotonic() - start > self.timeout:
-                raise TimeoutError(f"Rendering exceeded timeout of {self.timeout} seconds")
+                raise TimeoutError(
+                    f"Rendering exceeded timeout of {self.timeout} seconds"
+                )
 
         # After all passes, raise error on unresolved placeholders
         unresolved = self.find_unresolved(rendered)
         if unresolved:
-            raise ValueError(f"Unresolved placeholders: {', '.join(sorted(unresolved))}")
+            raise ValueError(
+                f"Unresolved placeholders: {', '.join(sorted(unresolved))}"
+            )
 
         return rendered
 
@@ -64,14 +72,16 @@ class DictRenderer:
                 changed = changed or ch
             return new_list, changed
         if isinstance(obj, str):
+
             def repl(m):
-                path = m.group('path')
+                path = m.group("path")
                 val = self._lookup(path)
                 if val is not None:
                     if self.verbose:
                         print(f"[DictRenderer] Resolving <<{path}>> -> {val}")
                     return str(val)
                 return m.group(0)
+
             new_str = self.PATTERN.sub(repl, obj)
             return new_str, new_str != obj
         return obj, False
@@ -79,23 +89,23 @@ class DictRenderer:
     def _lookup(self, path: str) -> Any:
         current = self.root
         for m in self.TOKEN_REGEX.finditer(path):
-            if m.group('key') is not None:
+            if m.group("key") is not None:
                 if isinstance(current, dict):
-                    current = current.get(m.group('key'))
+                    current = current.get(m.group("key"))
                 else:
                     return None
-            elif m.group('qkey') is not None:
+            elif m.group("qkey") is not None:
                 if isinstance(current, dict):
-                    current = current.get(m.group('qkey'))
+                    current = current.get(m.group("qkey"))
                 else:
                     return None
-            elif m.group('dkey') is not None:
+            elif m.group("dkey") is not None:
                 if isinstance(current, dict):
-                    current = current.get(m.group('dkey'))
+                    current = current.get(m.group("dkey"))
                 else:
                     return None
-            elif m.group('idx') is not None:
-                idx = int(m.group('idx'))
+            elif m.group("idx") is not None:
+                idx = int(m.group("idx"))
                 if isinstance(current, list) and 0 <= idx < len(current):
                     current = current[idx]
                 else:
@@ -115,5 +125,5 @@ class DictRenderer:
                 unresolved |= self.find_unresolved(item)
         elif isinstance(data, str):
             for m in self.PATTERN.finditer(data):
-                unresolved.add(m.group('path'))
+                unresolved.add(m.group("path"))
         return unresolved

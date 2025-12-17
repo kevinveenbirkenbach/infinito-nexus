@@ -4,6 +4,7 @@ from pathlib import Path
 
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent / "roles"
 
+
 class TestOauth2AclMutualExclusion(unittest.TestCase):
     def test_acl_has_either_whitelist_or_blacklist(self):
         failures = []
@@ -40,6 +41,7 @@ class TestOauth2AclMutualExclusion(unittest.TestCase):
                 "The following roles define both whitelist and blacklist under docker.services.oauth2_proxy.acl:\n"
                 + "\n".join(failures)
             )
+
 
 if __name__ == "__main__":
     unittest.main()

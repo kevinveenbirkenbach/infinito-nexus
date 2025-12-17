@@ -4,16 +4,17 @@ import yaml
 import glob
 import ipaddress
 
+
 class TestNetworksUniqueValidAndMapped(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # locate group_vars/all/09_networks.yml
         base_dir = os.path.dirname(__file__)
         cls.networks_file = os.path.abspath(
-            os.path.join(base_dir, '..', '..', 'group_vars', 'all', '09_networks.yml')
+            os.path.join(base_dir, "..", "..", "group_vars", "all", "09_networks.yml")
         )
         if os.path.isfile(cls.networks_file):
-            with open(cls.networks_file, 'r', encoding='utf-8') as f:
+            with open(cls.networks_file, "r", encoding="utf-8") as f:
                 cls.networks_data = yaml.safe_load(f)
         else:
             cls.networks_data = None
@@ -21,8 +22,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
     def test_networks_file_exists(self):
         """Fail if the networks file is missing."""
         self.assertTrue(
-            os.path.isfile(self.networks_file),
-            f"{self.networks_file} does not exist."
+            os.path.isfile(self.networks_file), f"{self.networks_file} does not exist."
         )
 
     def test_unique_and_non_overlapping_subnets(self):
@@ -31,10 +31,10 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
             self.skipTest("09_networks.yml not found, skipping subnet validation.")
 
         # extract all named subnets under defaults_networks.local
-        local = self.networks_data.get('defaults_networks', {}).get('local', {})
+        local = self.networks_data.get("defaults_networks", {}).get("local", {})
         name_to_net = {}
         for name, cfg in local.items():
-            subnet = cfg.get('subnet')
+            subnet = cfg.get("subnet")
             if not subnet:
                 continue
             try:
@@ -59,7 +59,7 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
         items = list(name_to_net.items())
         for i in range(len(items)):
             name1, net1 = items[i]
-            for j in range(i+1, len(items)):
+            for j in range(i + 1, len(items)):
                 name2, net2 = items[j]
                 if net1.overlaps(net2):
                     self.fail(
@@ -73,23 +73,25 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
         matches an application_id in some roles/*/vars/main.yml.
         """
         if self.networks_data is None:
-            self.skipTest("09_networks.yml not found, skipping application_id mapping check.")
+            self.skipTest(
+                "09_networks.yml not found, skipping application_id mapping check."
+            )
 
         # collect network names
-        local = self.networks_data.get('defaults_networks', {}).get('local', {})
-        network_names = [name for name, cfg in local.items() if 'subnet' in cfg]
+        local = self.networks_data.get("defaults_networks", {}).get("local", {})
+        network_names = [name for name, cfg in local.items() if "subnet" in cfg]
 
         # gather all application_id values from roles/*/vars/main.yml
         base_dir = os.path.dirname(__file__)
-        roles_dir = os.path.abspath(os.path.join(base_dir, '..', '..', 'roles'))
+        roles_dir = os.path.abspath(os.path.join(base_dir, "..", "..", "roles"))
         app_ids = set()
-        for role_path in glob.glob(os.path.join(roles_dir, '*')):
-            vars_file = os.path.join(role_path, 'vars', 'main.yml')
+        for role_path in glob.glob(os.path.join(roles_dir, "*")):
+            vars_file = os.path.join(role_path, "vars", "main.yml")
             if not os.path.isfile(vars_file):
                 continue
-            with open(vars_file, 'r', encoding='utf-8') as f:
+            with open(vars_file, "r", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
-            app_id = data.get('application_id')
+            app_id = data.get("application_id")
             if app_id:
                 app_ids.add(app_id)
 
@@ -100,5 +102,6 @@ class TestNetworksUniqueValidAndMapped(unittest.TestCase):
                 + ", ".join(missing)
             )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

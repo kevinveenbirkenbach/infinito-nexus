@@ -1,6 +1,7 @@
 from ansible.errors import AnsibleFilterError
 import copy
 
+
 def append_csp_hash(applications, application_id, code_one_liner):
     """
     Ensures that applications[application_id].csp.hashes['script-src-elem']
@@ -13,19 +14,18 @@ def append_csp_hash(applications, application_id, code_one_liner):
 
     apps = copy.deepcopy(applications)
     app = apps[application_id]
-    server = app.setdefault('server', {})
-    csp = server.setdefault('csp', {})
-    hashes = csp.setdefault('hashes', {})
+    server = app.setdefault("server", {})
+    csp = server.setdefault("csp", {})
+    hashes = csp.setdefault("hashes", {})
 
-    existing = hashes.get('script-src-elem', [])
+    existing = hashes.get("script-src-elem", [])
     if code_one_liner not in existing:
         existing.append(code_one_liner)
-    hashes['script-src-elem'] = existing
+    hashes["script-src-elem"] = existing
 
     return apps
 
+
 class FilterModule(object):
     def filters(self):
-        return {
-            'append_csp_hash': append_csp_hash
-        }
+        return {"append_csp_hash": append_csp_hash}

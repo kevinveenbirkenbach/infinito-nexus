@@ -1,6 +1,7 @@
 # filter_plugins/timeout_start_sec_for_domains.py (nur Kern geändert)
 from ansible.errors import AnsibleFilterError
 
+
 class FilterModule(object):
     def filters(self):
         return {
@@ -51,7 +52,11 @@ class FilterModule(object):
 
             if include_www:
                 base_unique = sorted(set(flat))
-                www_variants = [f"www.{d}" for d in base_unique if not str(d).lower().startswith("www.")]
+                www_variants = [
+                    f"www.{d}"
+                    for d in base_unique
+                    if not str(d).lower().startswith("www.")
+                ]
                 flat.extend(www_variants)
 
             unique_domains = sorted(set(flat))

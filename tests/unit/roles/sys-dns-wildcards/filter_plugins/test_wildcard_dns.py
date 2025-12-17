@@ -13,7 +13,9 @@ def _load_module():
     # Go up to repository root (…/tests/unit/roles/… → 5 levels up)
     repo_root = here.parents[5] if len(here.parents) >= 6 else here.parents[0]
 
-    path = repo_root / "roles" / "sys-dns-wildcards" / "filter_plugins" / "wildcard_dns.py"
+    path = (
+        repo_root / "roles" / "sys-dns-wildcards" / "filter_plugins" / "wildcard_dns.py"
+    )
     if not path.exists():
         raise FileNotFoundError(f"Could not find {path}")
 
@@ -72,7 +74,6 @@ class TestWildcardDNS(unittest.TestCase):
             # apex wildcard always
             ("A", "*", "203.0.113.10", True),
             ("AAAA", "*", "2606:4700:4700::1111", True),
-
             # derived parents
             ("A", "*.wiki", "203.0.113.10", True),
             ("AAAA", "*.wiki", "2606:4700:4700::1111", True),
@@ -187,7 +188,6 @@ class TestWildcardDNS(unittest.TestCase):
                 # apex wildcard always
                 ("A", "*", "203.0.113.5", False),
                 ("AAAA", "*", "2606:4700:4700::1111", False),
-
                 # derived from explicit domain
                 ("A", "*.wiki", "203.0.113.5", False),
                 ("AAAA", "*.wiki", "2606:4700:4700::1111", False),
@@ -219,7 +219,6 @@ class TestWildcardDNS(unittest.TestCase):
             # apex wildcard always
             ("A", "*", "203.0.113.21", False),
             ("AAAA", "*", "2606:4700:4700::1111", False),
-
             # derived parents
             ("A", "*.wiki", "203.0.113.21", False),
             ("AAAA", "*.wiki", "2606:4700:4700::1111", False),

@@ -9,18 +9,20 @@ def _f():
 
 
 class TestTimeoutStartSecForDomains(unittest.TestCase):
-
     def test_basic_calculation_with_www(self):
         # 3 unique base domains → + www.* = 6 domains
         domains = {
             "canonical": ["example.com", "foo.bar"],
             "api": {"a": "api.example.com"},
         }
-        result = _f()(domains, include_www=True,
-                      per_domain_seconds=25,
-                      overhead_seconds=30,
-                      min_seconds=120,
-                      max_seconds=3600)
+        result = _f()(
+            domains,
+            include_www=True,
+            per_domain_seconds=25,
+            overhead_seconds=30,
+            min_seconds=120,
+            max_seconds=3600,
+        )
         # raw = 30 + 25 * 6 = 180
         self.assertEqual(result, 180)
 
@@ -30,22 +32,28 @@ class TestTimeoutStartSecForDomains(unittest.TestCase):
             "canonical": ["example.com", "foo.bar"],
             "api": {"a": "api.example.com"},
         }
-        result = _f()(domains, include_www=False,
-                      per_domain_seconds=25,
-                      overhead_seconds=30,
-                      min_seconds=120,
-                      max_seconds=3600)
+        result = _f()(
+            domains,
+            include_www=False,
+            per_domain_seconds=25,
+            overhead_seconds=30,
+            min_seconds=120,
+            max_seconds=3600,
+        )
         self.assertEqual(result, 120)
 
     def test_max_clamp_applies(self):
         # >143 domains needed to exceed 3600 (25s each + 30 overhead)
         many = [f"host{i}.example.com" for i in range(150)]
         domains = {"canonical": many}
-        result = _f()(domains, include_www=False,
-                      per_domain_seconds=25,
-                      overhead_seconds=30,
-                      min_seconds=120,
-                      max_seconds=3600)
+        result = _f()(
+            domains,
+            include_www=False,
+            per_domain_seconds=25,
+            overhead_seconds=30,
+            min_seconds=120,
+            max_seconds=3600,
+        )
         self.assertEqual(result, 3600)
 
     def test_deduplication_of_domains(self):
@@ -55,11 +63,14 @@ class TestTimeoutStartSecForDomains(unittest.TestCase):
             "b": "x.com",
             "c": {"k": "x.com"},
         }
-        result = _f()(domains, include_www=False,
-                      per_domain_seconds=25,
-                      overhead_seconds=30,
-                      min_seconds=120,
-                      max_seconds=3600)
+        result = _f()(
+            domains,
+            include_www=False,
+            per_domain_seconds=25,
+            overhead_seconds=30,
+            min_seconds=120,
+            max_seconds=3600,
+        )
         # raw = 30 + 25 * 1 = 55 → clamped to 120
         self.assertEqual(result, 120)
 
@@ -69,11 +80,14 @@ class TestTimeoutStartSecForDomains(unittest.TestCase):
             "canonical": ["a.com", "b.com", "www.a.com"],
             "extra": {"x": "a.com"},
         }
-        result = _f()(domains, include_www=True,
-                      per_domain_seconds=25,
-                      overhead_seconds=30,
-                      min_seconds=1,
-                      max_seconds=10000)
+        result = _f()(
+            domains,
+            include_www=True,
+            per_domain_seconds=25,
+            overhead_seconds=30,
+            min_seconds=1,
+            max_seconds=10000,
+        )
         # Unique: {"a.com","b.com","www.a.com","www.b.com"} → 4
         # raw = 30 + 25*4 = 130
         self.assertEqual(result, 130)
@@ -88,18 +102,29 @@ class TestTimeoutStartSecForDomains(unittest.TestCase):
 
     def test_accepts_list_input(self):
         domains_list = ["a.com", "www.a.com", "b.com"]
-        result = _f()(domains_list, include_www=True,
-                    per_domain_seconds=25, overhead_seconds=30,
-                    min_seconds=1, max_seconds=10000)
+        result = _f()(
+            domains_list,
+            include_www=True,
+            per_domain_seconds=25,
+            overhead_seconds=30,
+            min_seconds=1,
+            max_seconds=10000,
+        )
         # unique + www for b.com -> {"a.com","www.a.com","b.com","www.b.com"} = 4
-        self.assertEqual(result, 30 + 25*4)
+        self.assertEqual(result, 30 + 25 * 4)
 
     def test_accepts_str_input(self):
-        result = _f()("a.com", include_www=True,
-                    per_domain_seconds=25, overhead_seconds=30,
-                    min_seconds=1, max_seconds=10000)
+        result = _f()(
+            "a.com",
+            include_www=True,
+            per_domain_seconds=25,
+            overhead_seconds=30,
+            min_seconds=1,
+            max_seconds=10000,
+        )
         # {"a.com","www.a.com"} = 2
-        self.assertEqual(result, 30 + 25*2)
+        self.assertEqual(result, 30 + 25 * 2)
+
 
 if __name__ == "__main__":
     unittest.main()

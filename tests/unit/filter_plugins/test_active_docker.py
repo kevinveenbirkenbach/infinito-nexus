@@ -60,15 +60,10 @@ class TestActiveDockerFilter(unittest.TestCase):
                     }
                 }
             },
-
             # NOT counted: wrong prefix
-            "db-core-mariadb": {
-                "docker": {"services": {"mariadb": {"enabled": True}}}
-            },
+            "db-core-mariadb": {"docker": {"services": {"mariadb": {"enabled": True}}}},
             # NOT counted: not in group_names
-            "web-app-gitlab": {
-                "docker": {"services": {"gitlab": {"enabled": True}}}
-            },
+            "web-app-gitlab": {"docker": {"services": {"gitlab": {"enabled": True}}}},
             # NOT counted: missing docker/services
             "web-app-empty": {},
         }
@@ -138,9 +133,7 @@ class TestActiveDockerFilter(unittest.TestCase):
             "web-app-foo": {"docker": {"services": {"s": {"enabled": False}}}},
         }
         cnt0 = active_docker_container_count(apps, ["web-app-foo"])
-        cnt1 = active_docker_container_count(
-            apps, ["web-app-foo"], ensure_min_one=True
-        )
+        cnt1 = active_docker_container_count(apps, ["web-app-foo"], ensure_min_one=True)
         self.assertEqual(cnt0, 0)
         self.assertEqual(cnt1, 1)
 

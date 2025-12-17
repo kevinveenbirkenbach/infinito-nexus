@@ -6,14 +6,11 @@ import sys
 
 # Projekt-Root: vier Ebenen über diesem File
 PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(
-        os.path.dirname(
-            os.path.dirname(__file__)
-        )
-    )
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 )
 
 INCLUDE_RE = re.compile(r"^(\s*)\{%\s*include\s*['\"]([^'\"]+)['\"]\s*%\}")
+
 
 def expand_includes(rel_path, seen=None):
     """
@@ -45,6 +42,7 @@ def expand_includes(rel_path, seen=None):
     seen.remove(rp)
     return output_lines
 
+
 def parse_args():
     p = argparse.ArgumentParser(
         description="Expand all {% include '...' %} directives in a Jinja2 template (no variable rendering)."
@@ -53,9 +51,10 @@ def parse_args():
     p.add_argument(
         "--out",
         help="If given, write output to this file instead of stdout",
-        default=None
+        default=None,
     )
     return p.parse_args()
+
 
 def main():
     args = parse_args()
@@ -71,6 +70,7 @@ def main():
     except Exception as e:
         sys.stderr.write(f"Error: {e}\n")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

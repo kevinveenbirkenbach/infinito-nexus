@@ -10,11 +10,7 @@ def run_command(command, capture_output=True, check=False, shell=True):
     """Run a shell command and return its output as string."""
     try:
         result = subprocess.run(
-            command,
-            capture_output=capture_output,
-            shell=shell,
-            text=True,
-            check=check
+            command, capture_output=capture_output, shell=shell, text=True, check=check
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
@@ -32,7 +28,9 @@ def pull_backups(hostname: str):
     remote_host = f"backup@{hostname}"
     print(f"host address:         {remote_host}")
 
-    remote_machine_id = run_command(f'ssh "{remote_host}" sha256sum /etc/machine-id')[:64]
+    remote_machine_id = run_command(f'ssh "{remote_host}" sha256sum /etc/machine-id')[
+        :64
+    ]
     print(f"remote machine id:    {remote_machine_id}")
 
     general_backup_machine_dir = f"/Backups/{remote_machine_id}/"
@@ -57,7 +55,9 @@ def pull_backups(hostname: str):
 
         # local previous version
         try:
-            local_previous_version_dir = run_command(f"ls -d {general_versions_dir}* | tail -1")
+            local_previous_version_dir = run_command(
+                f"ls -d {general_versions_dir}* | tail -1"
+            )
         except subprocess.CalledProcessError:
             local_previous_version_dir = ""
         print(f"last local backup:      {local_previous_version_dir}")
@@ -68,7 +68,9 @@ def pull_backups(hostname: str):
         ).splitlines()
         print(f"remote backup versions:   {' '.join(remote_backup_versions)}")
 
-        remote_last_backup_dir = remote_backup_versions[-1] if remote_backup_versions else ""
+        remote_last_backup_dir = (
+            remote_backup_versions[-1] if remote_backup_versions else ""
+        )
         print(f"last remote backup:       {remote_last_backup_dir}")
 
         remote_source_path = f"{remote_host}:{remote_last_backup_dir}/"
@@ -100,7 +102,9 @@ def pull_backups(hostname: str):
                 current_time = int(time.time())
                 last_retry_duration = current_time - last_retry_start
                 if last_retry_duration >= max_retry_duration:
-                    print("Last retry took more than 12 hours, increasing max retries to 12.")
+                    print(
+                        "Last retry took more than 12 hours, increasing max retries to 12."
+                    )
                     max_retries = 12
             last_retry_start = int(time.time())
             rsync_exit_code = os.system(rsync_command)
@@ -120,10 +124,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Pull backups from a remote backup host via rsync."
     )
-    parser.add_argument(
-        "hostname",
-        help="Hostname from which backup should be pulled"
-    )
+    parser.add_argument("hostname", help="Hostname from which backup should be pulled")
     args = parser.parse_args()
     pull_backups(args.hostname)
 

@@ -84,8 +84,11 @@ def _normalize_selection(group_names):
         sel = set()
 
     if not sel:
-        raise ValueError("web_health_expectations: 'group_names' must be provided and non-empty")
+        raise ValueError(
+            "web_health_expectations: 'group_names' must be provided and non-empty"
+        )
     return sel
+
 
 def _normalize_codes(x):
     """
@@ -108,7 +111,10 @@ def _normalize_codes(x):
     c = _valid_http_code(x)
     return [c] if c is not None else []
 
-def web_health_expectations(applications, www_enabled: bool = False, group_names=None, redirect_maps=None):
+
+def web_health_expectations(
+    applications, www_enabled: bool = False, group_names=None, redirect_maps=None
+):
     """Produce a **flat mapping**: domain -> [expected_status_codes].
 
     Selection (REQUIRED):
@@ -135,18 +141,15 @@ def web_health_expectations(applications, www_enabled: bool = False, group_names
             continue
 
         canonical_raw = get_app_conf(
-            applications, app_id, 'server.domains.canonical',
-            strict=False, default=[]
+            applications, app_id, "server.domains.canonical", strict=False, default=[]
         )
         aliases_raw = get_app_conf(
-            applications, app_id, 'server.domains.aliases',
-            strict=False, default=[]
+            applications, app_id, "server.domains.aliases", strict=False, default=[]
         )
         aliases = _to_list(aliases_raw, allow_mapping=True)
 
         sc_raw = get_app_conf(
-            applications, app_id, 'server.status_codes',
-            strict=False, default={}
+            applications, app_id, "server.status_codes", strict=False, default={}
         )
         sc_map = {}
         if isinstance(sc_raw, Mapping):
@@ -194,5 +197,5 @@ def web_health_expectations(applications, www_enabled: bool = False, group_names
 class FilterModule(object):
     def filters(self):
         return {
-            'web_health_expectations': web_health_expectations,
+            "web_health_expectations": web_health_expectations,
         }

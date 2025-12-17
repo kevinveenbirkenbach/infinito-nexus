@@ -3,6 +3,7 @@ import unittest
 from ansible.errors import AnsibleFilterError
 from filter_plugins.text_filters import to_one_liner
 
+
 class TestTextFilters(unittest.TestCase):
     def test_collapse_whitespace(self):
         s = """Line one
@@ -47,18 +48,19 @@ Line three"""
         self.assertEqual(to_one_liner(s), expected)
 
     def test_preserve_templating_expressions(self):
-        s = 'var tracker = "//{{ domains | get_domain(\'web-app-matomo\') }}/matomo.js"; // loader'
-        expected = 'var tracker = "//{{ domains | get_domain(\'web-app-matomo\') }}/matomo.js";'
+        s = "var tracker = \"//{{ domains | get_domain('web-app-matomo') }}/matomo.js\"; // loader"
+        expected = "var tracker = \"//{{ domains | get_domain('web-app-matomo') }}/matomo.js\";"
         self.assertEqual(to_one_liner(s), expected)
 
     def test_mixed_string_and_comment(self):
-        s = '''
+        s = """
             var a = "foo // still part of string";
             // top-level comment
             var b = 2; // end comment
-        '''
+        """
         expected = 'var a = "foo // still part of string"; var b = 2;'
         self.assertEqual(to_one_liner(s), expected)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

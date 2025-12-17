@@ -3,6 +3,7 @@ from yaml.loader import SafeLoader
 from typing import Any, Dict
 from module_utils.handler.vault import VaultScalar
 
+
 class YamlHandler:
     @staticmethod
     def load_yaml(path) -> Dict:

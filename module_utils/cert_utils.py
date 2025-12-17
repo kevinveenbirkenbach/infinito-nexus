@@ -1,11 +1,13 @@
 #!/usr/bin/python
 
 from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import os
 import subprocess
 from datetime import datetime
+
 
 class CertUtils:
     _domain_cert_mapping = None
@@ -15,8 +17,8 @@ class CertUtils:
     def run_openssl(cert_path):
         try:
             output = subprocess.check_output(
-                ['openssl', 'x509', '-in', cert_path, '-noout', '-text'],
-                universal_newlines=True
+                ["openssl", "x509", "-in", cert_path, "-noout", "-text"],
+                universal_newlines=True,
             )
             return output
         except subprocess.CalledProcessError:
@@ -29,19 +31,31 @@ class CertUtils:
         """
         try:
             output = subprocess.check_output(
-                ['openssl', 'x509', '-in', cert_path, '-noout', '-startdate', '-enddate'],
-                universal_newlines=True
+                [
+                    "openssl",
+                    "x509",
+                    "-in",
+                    cert_path,
+                    "-noout",
+                    "-startdate",
+                    "-enddate",
+                ],
+                universal_newlines=True,
             )
             nb, na = None, None
             for line in output.splitlines():
                 line = line.strip()
-                if line.startswith('notBefore='):
-                    nb = line.split('=', 1)[1].strip()
-                elif line.startswith('notAfter='):
-                    na = line.split('=', 1)[1].strip()
+                if line.startswith("notBefore="):
+                    nb = line.split("=", 1)[1].strip()
+                elif line.startswith("notAfter="):
+                    na = line.split("=", 1)[1].strip()
+
             def _parse(openssl_dt):
                 # OpenSSL format example: "Oct 10 12:34:56 2025 GMT"
-                return int(datetime.strptime(openssl_dt, "%b %d %H:%M:%S %Y %Z").timestamp())
+                return int(
+                    datetime.strptime(openssl_dt, "%b %d %H:%M:%S %Y %Z").timestamp()
+                )
+
             return (_parse(nb) if nb else None, _parse(na) if na else None)
         except Exception:
             return (None, None)
@@ -52,32 +66,34 @@ class CertUtils:
         in_san = False
         for line in cert_text.splitlines():
             line = line.strip()
-            if 'X509v3 Subject Alternative Name:' in line:
+            if "X509v3 Subject Alternative Name:" in line:
                 in_san = True
                 continue
             if in_san:
                 if not line:
                     break
-                dns_entries += [e.strip().replace('DNS:', '') for e in line.split(',') if e.strip()]
+                dns_entries += [
+                    e.strip().replace("DNS:", "") for e in line.split(",") if e.strip()
+                ]
         return dns_entries
 
     @staticmethod
     def list_cert_files(cert_base_path):
         cert_files = []
         for root, dirs, files in os.walk(cert_base_path):
-            if 'cert.pem' in files:
-                cert_files.append(os.path.join(root, 'cert.pem'))
+            if "cert.pem" in files:
+                cert_files.append(os.path.join(root, "cert.pem"))
         return cert_files
 
     @staticmethod
     def matches(domain, san):
         """RFC compliant SAN matching."""
-        if san.startswith('*.'):
+        if san.startswith("*."):
             base = san[2:]
             # Wildcard matches ONLY one additional label
             if domain == base:
                 return False
-            if domain.endswith('.' + base) and domain.count('.') == base.count('.') + 1:
+            if domain.endswith("." + base) and domain.count(".") == base.count(".") + 1:
                 return True
             return False
         else:
@@ -132,19 +148,21 @@ class CertUtils:
 
             for san in sans:
                 entry = {
-                    'folder': folder,
-                    'cert_path': cert_path,
-                    'mtime': mtime,
-                    'not_before': nb,
-                    'not_after': na,
-                    'is_wildcard': san.startswith('*.'),
+                    "folder": folder,
+                    "cert_path": cert_path,
+                    "mtime": mtime,
+                    "not_before": nb,
+                    "not_after": na,
+                    "is_wildcard": san.startswith("*."),
                 }
                 mapping.setdefault(san, []).append(entry)
 
         cls._domain_cert_mapping = mapping
         if debug:
-            print(f"[DEBUG] Refreshed domain-to-cert mapping (counts): "
-                  f"{ {k: len(v) for k, v in mapping.items()} }")
+            print(
+                f"[DEBUG] Refreshed domain-to-cert mapping (counts): "
+                f"{ {k: len(v) for k, v in mapping.items()} }"
+            )
 
     @classmethod
     def ensure_cert_mapping(cls, cert_base_path, debug=False):
@@ -157,8 +175,8 @@ class CertUtils:
         Return tuple used for sorting newest-first:
         (not_before or -inf, mtime)
         """
-        nb = entry.get('not_before')
-        mtime = entry.get('mtime', 0.0)
+        nb = entry.get("not_before")
+        mtime = entry.get("mtime", 0.0)
         return (nb if nb is not None else -1, mtime)
 
     @classmethod
@@ -171,9 +189,11 @@ class CertUtils:
         for san, entries in cls._domain_cert_mapping.items():
             if san == domain:
                 candidates_exact.extend(entries)
-            elif san.startswith('*.'):
+            elif san.startswith("*."):
                 base = san[2:]
-                if domain.count('.') == base.count('.') + 1 and domain.endswith('.' + base):
+                if domain.count(".") == base.count(".") + 1 and domain.endswith(
+                    "." + base
+                ):
                     candidates_wild.extend(entries)
 
         def _pick_newest(entries):
@@ -187,17 +207,21 @@ class CertUtils:
         best_wild = _pick_newest(candidates_wild)
 
         if best_exact and debug:
-            print(f"[DEBUG] Best exact match for {domain}: {best_exact['folder']} "
-                  f"(not_before={best_exact['not_before']}, mtime={best_exact['mtime']})")
+            print(
+                f"[DEBUG] Best exact match for {domain}: {best_exact['folder']} "
+                f"(not_before={best_exact['not_before']}, mtime={best_exact['mtime']})"
+            )
         if best_wild and debug:
-            print(f"[DEBUG] Best wildcard match for {domain}: {best_wild['folder']} "
-                  f"(not_before={best_wild['not_before']}, mtime={best_wild['mtime']})")
+            print(
+                f"[DEBUG] Best wildcard match for {domain}: {best_wild['folder']} "
+                f"(not_before={best_wild['not_before']}, mtime={best_wild['mtime']})"
+            )
 
         # Prefer exact if it exists; otherwise wildcard
         chosen = best_exact or best_wild
 
         if chosen:
-            return chosen['folder']
+            return chosen["folder"]
 
         if debug:
             print(f"[DEBUG] No certificate folder found for {domain}")

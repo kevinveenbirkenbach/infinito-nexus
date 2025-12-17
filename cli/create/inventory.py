@@ -49,13 +49,16 @@ try:
     from ruamel.yaml import YAML
     from ruamel.yaml.comments import CommentedMap
 except ImportError:  # pragma: no cover
-    raise SystemExit("Please `pip install ruamel.yaml` to use `infinito create inventory`.")
+    raise SystemExit(
+        "Please `pip install ruamel.yaml` to use `infinito create inventory`."
+    )
 
 from module_utils.handler.vault import VaultHandler
 
 # ---------------------------------------------------------------------------
 # Generic helpers
 # ---------------------------------------------------------------------------
+
 
 def run_subprocess(
     cmd: List[str],
@@ -76,6 +79,7 @@ def run_subprocess(
             msg += f"STDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}\n"
         raise SystemExit(msg)
     return result
+
 
 def deep_update_commented_map(target: CommentedMap, updates: Dict[str, Any]) -> None:
     """
@@ -156,6 +160,7 @@ def build_env_with_project_root(project_root: Path) -> Dict[str, str]:
     else:
         env["PYTHONPATH"] = root_str
     return env
+
 
 def ensure_become_password(
     host_vars_file: Path,
@@ -285,6 +290,7 @@ def generate_random_password(length: int = 64) -> str:
 # Inventory generation (servers.yml via build/inventory/full.py)
 # ---------------------------------------------------------------------------
 
+
 def generate_dynamic_inventory(
     host: str,
     roles_dir: Path,
@@ -301,12 +307,18 @@ def generate_dynamic_inventory(
     cmd = [
         sys.executable,
         str(script),
-        "--host", host,
-        "--format", "yaml",
-        "--inventory-style", "group",
-        "-c", str(categories_file),
-        "-r", str(roles_dir),
-        "-o", str(tmp_inventory),
+        "--host",
+        host,
+        "--format",
+        "yaml",
+        "--inventory-style",
+        "group",
+        "-c",
+        str(categories_file),
+        "-r",
+        str(roles_dir),
+        "-o",
+        str(tmp_inventory),
     ]
     run_subprocess(cmd, capture_output=False, env=env)
     data = load_yaml(tmp_inventory)
@@ -334,7 +346,9 @@ def _filter_inventory_children(
     return {"all": new_all}
 
 
-def filter_inventory_by_roles(inv_data: Dict[str, Any], roles_filter: Set[str]) -> Dict[str, Any]:
+def filter_inventory_by_roles(
+    inv_data: Dict[str, Any], roles_filter: Set[str]
+) -> Dict[str, Any]:
     """
     Legacy: keep only groups whose names are in roles_filter.
     """
@@ -344,7 +358,9 @@ def filter_inventory_by_roles(inv_data: Dict[str, Any], roles_filter: Set[str]) 
     )
 
 
-def filter_inventory_by_include(inv_data: Dict[str, Any], include_set: Set[str]) -> Dict[str, Any]:
+def filter_inventory_by_include(
+    inv_data: Dict[str, Any], include_set: Set[str]
+) -> Dict[str, Any]:
     """
     Keep only groups whose names are in include_set.
     """
@@ -354,7 +370,9 @@ def filter_inventory_by_include(inv_data: Dict[str, Any], include_set: Set[str])
     )
 
 
-def filter_inventory_by_ignore(inv_data: Dict[str, Any], ignore_set: Set[str]) -> Dict[str, Any]:
+def filter_inventory_by_ignore(
+    inv_data: Dict[str, Any], ignore_set: Set[str]
+) -> Dict[str, Any]:
     """
     Keep all groups except those whose names are in ignore_set.
     """
@@ -407,6 +425,7 @@ def merge_inventories(
 # host_vars helpers
 # ---------------------------------------------------------------------------
 
+
 def ensure_host_vars_file(
     host_vars_file: Path,
     host: str,
@@ -443,7 +462,6 @@ def ensure_host_vars_file(
         for k, v in dict(data).items():
             tmp[k] = v
         data = tmp
-        
 
     # Ensure local Ansible connection settings for local hosts.
     # This avoids SSH in CI containers (e.g. GitHub Actions) where no ssh client exists
@@ -629,6 +647,7 @@ def ensure_administrator_authorized_keys(
 # Role resolution (meta/applications/role_name.py)
 # ---------------------------------------------------------------------------
 
+
 def resolve_role_path(
     application_id: str,
     roles_dir: Path,
@@ -654,13 +673,17 @@ def resolve_role_path(
         sys.executable,
         str(script),
         application_id,
-        "-r", str(roles_dir),
+        "-r",
+        str(roles_dir),
     ]
     result = run_subprocess(cmd, capture_output=True, env=env)
     raw = (result.stdout or "").strip()
 
     if not raw:
-        print(f"[WARN] Could not resolve role for application_id '{application_id}'. Skipping.", file=sys.stderr)
+        print(
+            f"[WARN] Could not resolve role for application_id '{application_id}'. Skipping.",
+            file=sys.stderr,
+        )
         return None
 
     printed = Path(raw)
@@ -687,7 +710,10 @@ def resolve_role_path(
                 return None
 
     if not role_path.exists():
-        print(f"[WARN] Resolved role path does not exist: {role_path} (application_id={application_id})", file=sys.stderr)
+        print(
+            f"[WARN] Resolved role path does not exist: {role_path} (application_id={application_id})",
+            file=sys.stderr,
+        )
         return None
 
     return role_path
@@ -702,6 +728,7 @@ def fatal(msg: str) -> NoReturn:
 # ---------------------------------------------------------------------------
 # Credentials generation via create/credentials.py --snippet
 # ---------------------------------------------------------------------------
+
 
 def _generate_credentials_snippet_for_app(
     app_id: str,
@@ -748,9 +775,12 @@ def _generate_credentials_snippet_for_app(
     cmd = [
         sys.executable,
         str(credentials_script),
-        "--role-path", str(role_path),
-        "--inventory-file", str(host_vars_file),
-        "--vault-password-file", str(vault_password_file),
+        "--role-path",
+        str(role_path),
+        "--inventory-file",
+        str(host_vars_file),
+        "--vault-password-file",
+        str(vault_password_file),
         "--snippet",
         "--allow-empty-plain",
     ]
@@ -815,7 +845,10 @@ def generate_credentials_for_roles(
          - ansible_become_password is added only if missing
     """
     if not application_ids:
-        print("[WARN] No application_ids to process for credential generation.", file=sys.stderr)
+        print(
+            "[WARN] No application_ids to process for credential generation.",
+            file=sys.stderr,
+        )
         return
 
     credentials_script = project_root / "cli" / "create" / "credentials.py"
@@ -896,7 +929,10 @@ def generate_credentials_for_roles(
                         creds_doc[key] = val
 
         # ansible_become_password: only add if missing
-        if "ansible_become_password" in snippet and "ansible_become_password" not in doc:
+        if (
+            "ansible_become_password" in snippet
+            and "ansible_become_password" not in doc
+        ):
             doc["ansible_become_password"] = snippet["ansible_become_password"]
 
     with host_vars_file.open("w", encoding="utf-8") as f:
@@ -906,6 +942,7 @@ def generate_credentials_for_roles(
 # ---------------------------------------------------------------------------
 # main
 # ---------------------------------------------------------------------------
+
 
 def main(argv: Optional[List[str]] = None) -> None:
     parser = argparse.ArgumentParser(
@@ -1038,16 +1075,26 @@ def main(argv: Optional[List[str]] = None) -> None:
 
     # Enforce mutual exclusivity: only one of --include / --exclude may be used
     if include_filter and ignore_filter:
-        fatal("Options --include and --exclude are mutually exclusive. Please use only one of them.")
+        fatal(
+            "Options --include and --exclude are mutually exclusive. Please use only one of them."
+        )
 
     project_root = detect_project_root()
     roles_dir = Path(args.roles_dir) if args.roles_dir else (project_root / "roles")
-    categories_file = Path(args.categories_file) if args.categories_file else (roles_dir / "categories.yml")
+    categories_file = (
+        Path(args.categories_file)
+        if args.categories_file
+        else (roles_dir / "categories.yml")
+    )
 
     inventory_dir = Path(args.inventory_dir).resolve()
     inventory_dir.mkdir(parents=True, exist_ok=True)
 
-    inventory_file = Path(args.inventory_file) if args.inventory_file else (inventory_dir / "servers.yml")
+    inventory_file = (
+        Path(args.inventory_file)
+        if args.inventory_file
+        else (inventory_dir / "servers.yml")
+    )
     inventory_file = inventory_file.resolve()
 
     host_vars_dir = inventory_dir / "host_vars"
@@ -1059,7 +1106,9 @@ def main(argv: Optional[List[str]] = None) -> None:
     else:
         vault_password_file = inventory_dir / ".password"
         if not vault_password_file.exists():
-            print(f"[INFO] No --vault-password-file provided. Creating {vault_password_file} ...")
+            print(
+                f"[INFO] No --vault-password-file provided. Creating {vault_password_file} ..."
+            )
             password = generate_random_password()
             with vault_password_file.open("w", encoding="utf-8") as f:
                 f.write(password + "\n")
@@ -1085,13 +1134,17 @@ def main(argv: Optional[List[str]] = None) -> None:
 
     # 2) Apply filters: include → exclude → legacy roles
     if include_filter:
-        print(f"[INFO] Including only application_ids: {', '.join(sorted(include_filter))}")
+        print(
+            f"[INFO] Including only application_ids: {', '.join(sorted(include_filter))}"
+        )
         dyn_inv = filter_inventory_by_include(dyn_inv, include_filter)
     elif ignore_filter:
         print(f"[INFO] Ignoring application_ids: {', '.join(sorted(ignore_filter))}")
         dyn_inv = filter_inventory_by_ignore(dyn_inv, ignore_filter)
     elif roles_filter:
-        print(f"[INFO] Filtering inventory to roles (legacy): {', '.join(sorted(roles_filter))}")
+        print(
+            f"[INFO] Filtering inventory to roles (legacy): {', '.join(sorted(roles_filter))}"
+        )
         dyn_inv = filter_inventory_by_roles(dyn_inv, roles_filter)
 
     # Collect final application_ids from dynamic inventory for credential generation
@@ -1100,7 +1153,10 @@ def main(argv: Optional[List[str]] = None) -> None:
     application_ids = sorted(dyn_children.keys())
 
     if not application_ids:
-        print("[WARN] No application_ids found in dynamic inventory after filtering. Nothing to do.", file=sys.stderr)
+        print(
+            "[WARN] No application_ids found in dynamic inventory after filtering. Nothing to do.",
+            file=sys.stderr,
+        )
 
     # 3) Merge with existing inventory file (if any)
     if inventory_file.exists():
@@ -1147,7 +1203,9 @@ def main(argv: Optional[List[str]] = None) -> None:
 
     # 5) Generate credentials for all application_ids (snippets + single merge)
     if application_ids:
-        print(f"[INFO] Generating credentials for {len(application_ids)} applications...")
+        print(
+            f"[INFO] Generating credentials for {len(application_ids)} applications..."
+        )
         generate_credentials_for_roles(
             application_ids=application_ids,
             roles_dir=roles_dir,
@@ -1166,7 +1224,9 @@ def main(argv: Optional[List[str]] = None) -> None:
             json_str=args.vars,
         )
 
-    print("[INFO] Done. Inventory and host_vars updated without deleting existing values.")
+    print(
+        "[INFO] Done. Inventory and host_vars updated without deleting existing values."
+    )
 
 
 if __name__ == "__main__":  # pragma: no cover

@@ -2,7 +2,8 @@
 
 from ansible.errors import AnsibleFilterError
 
-def merge_mapping(list1, list2, key_name='source'):
+
+def merge_mapping(list1, list2, key_name="source"):
     """
     Merge two lists of dicts on a given key.
     - list1, list2: each must be a List[Dict]
@@ -38,5 +39,5 @@ def merge_mapping(list1, list2, key_name='source'):
 class FilterModule(object):
     def filters(self):
         return {
-            'merge_mapping': merge_mapping,
+            "merge_mapping": merge_mapping,
         }

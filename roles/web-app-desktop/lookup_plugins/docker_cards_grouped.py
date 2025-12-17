@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 from ansible.plugins.lookup import LookupBase
@@ -25,7 +26,7 @@ class LookupModule(LookupBase):
         for card in cards:
             found = False
             for category, data in menu_categories.items():
-                if any(tag in data.get('tags', []) for tag in card.get('tags', [])):
+                if any(tag in data.get("tags", []) for tag in card.get("tags", [])):
                     categorized.setdefault(category, []).append(card)
                     found = True
                     break
@@ -39,7 +40,7 @@ class LookupModule(LookupBase):
 
         return [
             {
-                'categorized': sorted_categorized,
-                'uncategorized': uncategorized,
+                "categorized": sorted_categorized,
+                "uncategorized": uncategorized,
             }
         ]

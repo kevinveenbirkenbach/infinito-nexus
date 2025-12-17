@@ -6,30 +6,30 @@ import argparse
 
 
 def run_command(command):
-    """ Run a shell command and return its output """
+    """Run a shell command and return its output"""
     print(command)
-    output = subprocess.check_output(command, shell=True).decode('utf-8').strip()
+    output = subprocess.check_output(command, shell=True).decode("utf-8").strip()
     print(output)
     return output
 
 
 def stop_containers(containers):
     """Stop a list of containers."""
-    container_list = ' '.join(containers)
+    container_list = " ".join(containers)
     print(f"Stopping containers {container_list}...")
     run_command(f"docker stop {container_list}")
 
 
 def start_containers(containers):
     """Start a list of containers."""
-    container_list = ' '.join(containers)
+    container_list = " ".join(containers)
     print(f"Starting containers {container_list}...")
     run_command(f"docker start {container_list}")
 
 
 def is_database(image):
     databases = {"postgres", "mariadb", "redis", "memcached", "mongo"}
-    prefix = image.split(':')[0]
+    prefix = image.split(":")[0]
     return prefix in databases
 
 
@@ -38,7 +38,9 @@ def is_symbolic_link(file_path):
 
 
 def get_volume_path(volume):
-    return run_command(f"docker volume inspect --format '{{{{ .Mountpoint }}}}' {volume}")
+    return run_command(
+        f"docker volume inspect --format '{{{{ .Mountpoint }}}}' {volume}"
+    )
 
 
 def get_image(container):
@@ -76,7 +78,9 @@ def delete_directory(path):
 
 def pause_and_move(storage_path, volume, volume_path, containers):
     stop_containers(containers)
-    storage_volume_path = os.path.join(storage_path, 'data', 'docker', 'volumes', volume)
+    storage_volume_path = os.path.join(
+        storage_path, "data", "docker", "volumes", volume
+    )
     os.makedirs(storage_volume_path, exist_ok=False)
     run_rsync(f"{volume_path}/", f"{storage_volume_path}/")
     delete_directory(volume_path)
@@ -94,15 +98,13 @@ def has_container_with_database(containers):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Migrate Docker volumes to SSD or HDD based on container image.'
+        description="Migrate Docker volumes to SSD or HDD based on container image."
     )
     parser.add_argument(
-        '--rapid-storage-path', type=str, required=True,
-        help='Path to the SSD storage'
+        "--rapid-storage-path", type=str, required=True, help="Path to the SSD storage"
     )
     parser.add_argument(
-        '--mass-storage-path', type=str, required=True,
-        help='Path to the HDD storage'
+        "--mass-storage-path", type=str, required=True, help="Path to the HDD storage"
     )
     args = parser.parse_args()
 
@@ -113,22 +115,24 @@ if __name__ == "__main__":
 
     for volume in volumes:
         volume_path = get_volume_path(volume)
-        containers = run_command(
-            f"docker ps -q --filter volume={volume}"
-        ).splitlines()
+        containers = run_command(f"docker ps -q --filter volume={volume}").splitlines()
 
         if not containers:
-            print(f"Skipped Volume {volume}. It does not belong to a running container.")
+            print(
+                f"Skipped Volume {volume}. It does not belong to a running container."
+            )
             continue
         if is_symbolic_link(volume_path):
-            print(f"Skipped Volume {volume}. The storage path {volume_path} is a symbolic link.")
+            print(
+                f"Skipped Volume {volume}. The storage path {volume_path} is a symbolic link."
+            )
             continue
 
         # Wait until containers with a healthcheck are healthy (not starting or unhealthy)
         for container in containers:
             if has_healthcheck(container):
                 status = get_health_status(container)
-                while status != 'healthy':
+                while status != "healthy":
                     print(f"Wait for Container {container}, Status '{status}'...")
                     time.sleep(1)
                     status = get_health_status(container)

@@ -1,6 +1,7 @@
 import os
 import unittest
 
+
 class TestFilenameConventions(unittest.TestCase):
     """
     Integration test to ensure README.md and TODO.md files
@@ -17,11 +18,16 @@ class TestFilenameConventions(unittest.TestCase):
                         bad_files.append(os.path.join(root, filename))
 
         msg = (
-            "The following files violate uppercase naming convention "
-            "(must be README.md or TODO.md):\n- " + "\n- ".join(bad_files)
-        ) if bad_files else None
+            (
+                "The following files violate uppercase naming convention "
+                "(must be README.md or TODO.md):\n- " + "\n- ".join(bad_files)
+            )
+            if bad_files
+            else None
+        )
 
         self.assertEqual(bad_files, [], msg)
+
 
 if __name__ == "__main__":
     unittest.main()

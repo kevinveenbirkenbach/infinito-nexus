@@ -9,7 +9,6 @@ import module_utils.manager.inventory as inv_mod
 
 
 class TestInventoryManager(unittest.TestCase):
-
     def setUp(self):
         # Dummy paths (no real files will be read)
         self.role_path = Path("/tmp/role")
@@ -41,11 +40,11 @@ class TestInventoryManager(unittest.TestCase):
                     "description": "will be skipped if dict",
                     "algorithm": "random_hex_16",
                     "validation": {},
-                }
+                },
             },
             "non_credentials": {  # not encrypted, just copied
                 "flag": True
-            }
+            },
         }
 
         # Dummy VaultHandler output
@@ -71,6 +70,7 @@ class TestInventoryManager(unittest.TestCase):
         # Dummy VaultScalar (only type matters)
         class _DummyVaultScalar(str):
             pass
+
         self.DummyVaultScalar = _DummyVaultScalar
 
         # Dummy VaultHandler
@@ -79,8 +79,12 @@ class TestInventoryManager(unittest.TestCase):
 
         # Start patches
         self.p_yaml = patch.object(inv_mod.YamlHandler, "load_yaml", self.yaml_loader)
-        self.p_vault_scalar = patch.object(inv_mod, "VaultScalar", self.DummyVaultScalar)
-        self.p_vault_handler_ctor = patch.object(inv_mod, "VaultHandler", return_value=self.vault_handler_mock)
+        self.p_vault_scalar = patch.object(
+            inv_mod, "VaultScalar", self.DummyVaultScalar
+        )
+        self.p_vault_handler_ctor = patch.object(
+            inv_mod, "VaultHandler", return_value=self.vault_handler_mock
+        )
 
         self.p_yaml.start()
         self.p_vault_scalar.start()
@@ -96,7 +100,7 @@ class TestInventoryManager(unittest.TestCase):
             role_path=self.role_path,
             inventory_path=self.inv_path,
             vault_pw=self.vault_pw,
-            overrides=overrides or {}
+            overrides=overrides or {},
         )
 
     # ---------- Tests ----------
@@ -114,6 +118,7 @@ class TestInventoryManager(unittest.TestCase):
             if p == str(self.inv_path):
                 return self.inventory_yaml
             return {}
+
         self.yaml_loader.side_effect = _yaml_side_effect_missing
 
         with self.assertRaises(SystemExit):
@@ -121,7 +126,7 @@ class TestInventoryManager(unittest.TestCase):
                 role_path=self.role_path,
                 inventory_path=self.inv_path,
                 vault_pw=self.vault_pw,
-                overrides={}
+                overrides={},
             )
 
     def test_apply_schema_with_features_and_plain_override(self):

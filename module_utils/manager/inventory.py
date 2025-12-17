@@ -9,6 +9,7 @@ import string
 import sys
 import base64
 
+
 class InventoryManager:
     def __init__(
         self,
@@ -51,11 +52,18 @@ class InventoryManager:
 
         # Check if 'central-database' is enabled in the features section of data
         if "features" in data:
-            if "central_database" in data["features"] and data["features"]["central_database"]:
+            if (
+                "central_database" in data["features"]
+                and data["features"]["central_database"]
+            ):
                 # Add 'central_database' value (password) to credentials
-                target.setdefault("credentials", {})["database_password"] = self.generate_value("alphanumeric")
+                target.setdefault("credentials", {})["database_password"] = (
+                    self.generate_value("alphanumeric")
+                )
             if "oauth2" in data["features"] and data["features"]["oauth2"]:
-                target.setdefault("credentials", {})["oauth2_proxy_cookie_secret"] = self.generate_value("random_hex_16")
+                target.setdefault("credentials", {})["oauth2_proxy_cookie_secret"] = (
+                    self.generate_value("random_hex_16")
+                )
 
         # Apply recursion only for the `credentials` section
         self.recurse_credentials(self.schema, target)
@@ -67,8 +75,10 @@ class InventoryManager:
             full_key = f"{prefix}.{key}" if prefix else key
 
             # Only process 'credentials' section for encryption
-            if prefix == "credentials" and isinstance(meta, dict) and all(
-                k in meta for k in ("description", "algorithm", "validation")
+            if (
+                prefix == "credentials"
+                and isinstance(meta, dict)
+                and all(k in meta for k in ("description", "algorithm", "validation"))
             ):
                 alg = meta["algorithm"]
                 if alg == "plain":
@@ -92,12 +102,18 @@ class InventoryManager:
 
                 # If existing_value is a dictionary, print a warning and skip encryption
                 if isinstance(existing_value, dict):
-                    print(f"Skipping encryption for '{key}', as it is a dictionary.", file=sys.stderr)
+                    print(
+                        f"Skipping encryption for '{key}', as it is a dictionary.",
+                        file=sys.stderr,
+                    )
                     continue
 
                 # Check if the value is a VaultScalar and already vaulted
                 if existing_value and isinstance(existing_value, VaultScalar):
-                    print(f"Skipping encryption for '{key}', as it is already vaulted.", file=sys.stderr)
+                    print(
+                        f"Skipping encryption for '{key}', as it is already vaulted.",
+                        file=sys.stderr,
+                    )
                     continue
 
                 # Empty strings should *not* be encrypted
@@ -121,7 +137,7 @@ class InventoryManager:
     def generate_secure_alphanumeric(self, length: int) -> str:
         """Generate a cryptographically secure random alphanumeric string of the given length."""
         characters = string.ascii_letters + string.digits  # a-zA-Z0-9
-        return ''.join(secrets.choice(characters) for _ in range(length))
+        return "".join(secrets.choice(characters) for _ in range(length))
 
     def generate_value(self, algorithm: str) -> str:
         """
@@ -173,7 +189,9 @@ class InventoryManager:
             raw_hash = bcrypt.hashpw(pw, bcrypt.gensalt()).decode()
             # Replace every '$' with a random lowercase alphanumeric character
             alnum = string.digits + string.ascii_lowercase
-            escaped = "".join(secrets.choice(alnum) if ch == '$' else ch for ch in raw_hash)
+            escaped = "".join(
+                secrets.choice(alnum) if ch == "$" else ch for ch in raw_hash
+            )
             return escaped
         if algorithm == "alphanumeric":
             return self.generate_secure_alphanumeric(64)

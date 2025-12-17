@@ -6,18 +6,24 @@ from module_utils.config_utils import get_app_conf
 from module_utils.entity_name_utils import get_entity_name
 
 # Regex and unit conversion table
-_UNIT_RE = re.compile(r'^\s*(\d+(?:\.\d+)?)\s*([kKmMgGtT]?[bB]?)?\s*$')
+_UNIT_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([kKmMgGtT]?[bB]?)?\s*$")
 _FACTORS = {
-    '': 1, 'b': 1,
-    'k': 1024, 'kb': 1024,
-    'm': 1024**2, 'mb': 1024**2,
-    'g': 1024**3, 'gb': 1024**3,
-    't': 1024**4, 'tb': 1024**4,
+    "": 1,
+    "b": 1,
+    "k": 1024,
+    "kb": 1024,
+    "m": 1024**2,
+    "mb": 1024**2,
+    "g": 1024**3,
+    "gb": 1024**3,
+    "t": 1024**4,
+    "tb": 1024**4,
 }
 
 # ------------------------------------------------------
 # Helpers: unit conversion
 # ------------------------------------------------------
+
 
 def _to_bytes(v: str) -> int:
     """Convert a human-readable size string (e.g., '2g', '512m') to bytes."""
@@ -29,7 +35,7 @@ def _to_bytes(v: str) -> int:
     if not m:
         raise AnsibleFilterError(f"memory_filters: invalid size '{v}'")
 
-    num, unit = m.group(1), (m.group(2) or '').lower()
+    num, unit = m.group(1), (m.group(2) or "").lower()
 
     try:
         val = float(num)
@@ -51,6 +57,7 @@ def _to_mb(v: str) -> int:
 # ------------------------------------------------------
 # JVM-specific helpers
 # ------------------------------------------------------
+
 
 def _svc(app_id: str) -> str:
     """Resolve the internal service name for JVM-based applications."""
@@ -121,6 +128,7 @@ def jvm_min_mb(apps: dict, app_id: str) -> int:
 # Redis-specific helpers (always service name "redis")
 # ------------------------------------------------------
 
+
 def _redis_mem_limit_mb(apps: dict, app_id: str, default_mb: int = 256) -> int:
     """
     Resolve mem_limit for the Redis service of an application.
@@ -147,10 +155,7 @@ def _redis_mem_limit_mb(apps: dict, app_id: str, default_mb: int = 256) -> int:
 
 
 def redis_maxmemory_mb(
-    apps: dict,
-    app_id: str,
-    factor: float = 0.8,
-    min_mb: int = 64
+    apps: dict, app_id: str, factor: float = 0.8, min_mb: int = 64
 ) -> int:
     """
     Compute recommended Redis `maxmemory` in MB.
@@ -167,6 +172,7 @@ def redis_maxmemory_mb(
 # ------------------------------------------------------
 # Filter module
 # ------------------------------------------------------
+
 
 class FilterModule(object):
     def filters(self):

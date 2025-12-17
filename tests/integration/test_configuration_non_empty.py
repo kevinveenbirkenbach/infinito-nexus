@@ -36,15 +36,21 @@ class TestConfigurationNoNone(unittest.TestCase):
         # Find all config/main.yml files under roles/*/vars
         pattern = os.path.join(
             os.path.dirname(__file__),
-            os.pardir, os.pardir,
-            'roles', '*', "config" , "main.yml"
+            os.pardir,
+            os.pardir,
+            "roles",
+            "*",
+            "config",
+            "main.yml",
         )
         files = glob.glob(pattern)
-        self.assertTrue(files, f"No config/main.yml files found with pattern: {pattern}")
+        self.assertTrue(
+            files, f"No config/main.yml files found with pattern: {pattern}"
+        )
 
         all_errors = []
         for filepath in files:
-            with open(filepath, 'r') as f:
+            with open(filepath, "r") as f:
                 try:
                     data = yaml.safe_load(f)
                 except yaml.YAMLError as e:
@@ -54,8 +60,10 @@ class TestConfigurationNoNone(unittest.TestCase):
                 all_errors.append(f"{filepath}: Key '{path}' is None")
 
         if all_errors:
-            self.fail("None values found in configuration files:\n" + "\n".join(all_errors))
+            self.fail(
+                "None values found in configuration files:\n" + "\n".join(all_errors)
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

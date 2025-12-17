@@ -84,7 +84,9 @@ class TestReservedUsersFilters(unittest.TestCase):
         self.assertIn("kevin", result)
         self.assertNotIn("admin", result)
         self.assertNotIn("backup", result)
-        self.assertNotIn("service.user", result)  # key is "service.user" but reserved=True
+        self.assertNotIn(
+            "service.user", result
+        )  # key is "service.user" but reserved=True
 
     def test_non_reserved_users_ignores_non_dict_entries(self):
         result = non_reserved_users(self.users)

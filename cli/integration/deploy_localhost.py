@@ -4,14 +4,16 @@ Run the full localhost integration flow entirely inside the infinito Docker cont
 without writing any artifacts to the host filesystem.
 Catches missing schema/config errors during credential vaulting and skips those apps.
 """
+
 import subprocess
 import os
 import sys
 
+
 def main():
     repo = os.path.abspath(os.getcwd())
 
-    bash_script = '''
+    bash_script = """
 set -e
 
 ART=/integration-artifacts
@@ -108,19 +110,26 @@ python3 -m cli.deploy \
   --limit localhost \
   --vault-password-file "$ART/vaultpw.txt" \
   --verbose
-'''
+"""
 
     cmd = [
-        "docker", "run", "--rm",
-        "-v", f"{repo}:/repo",
-        "-w", "/repo",
-        "--entrypoint", "bash",
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        f"{repo}:/repo",
+        "-w",
+        "/repo",
+        "--entrypoint",
+        "bash",
         "infinito:latest",
-        "-c", bash_script
+        "-c",
+        bash_script,
     ]
     print(f"\033[96m> {' '.join(cmd)}\033[0m")
     rc = subprocess.call(cmd)
     sys.exit(rc)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

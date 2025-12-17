@@ -7,14 +7,18 @@ from pathlib import Path
 from module_utils.dict_renderer import DictRenderer
 from lookup_plugins.application_gid import LookupModule
 
+
 def load_yaml_file(path: Path) -> dict:
     if not path.exists():
         return {}
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
+
 class DefaultsGenerator:
-    def __init__(self, roles_dir: Path, output_file: Path, verbose: bool, timeout: float):
+    def __init__(
+        self, roles_dir: Path, output_file: Path, verbose: bool, timeout: float
+    ):
         self.roles_dir = roles_dir
         self.output_file = output_file
         self.verbose = verbose
@@ -44,22 +48,31 @@ class DefaultsGenerator:
                 continue
 
             if not config_file.exists():
-                self.log(f"Config missing for {role_name}, adding empty defaults for '{application_id}'")
+                self.log(
+                    f"Config missing for {role_name}, adding empty defaults for '{application_id}'"
+                )
                 result["defaults_applications"][application_id] = {}
                 continue
 
             config_data = load_yaml_file(config_file)
             if not config_data:
                 # Empty or null config → still register the application with empty defaults
-                self.log(f"Empty config for {role_name}, adding empty defaults for '{application_id}'")
+                self.log(
+                    f"Empty config for {role_name}, adding empty defaults for '{application_id}'"
+                )
                 result["defaults_applications"][application_id] = {}
                 continue
 
             # Existing non-empty config: keep current behavior
             try:
-                gid_number = self.gid_lookup.run([application_id], roles_dir=str(self.roles_dir))[0]
+                gid_number = self.gid_lookup.run(
+                    [application_id], roles_dir=str(self.roles_dir)
+                )[0]
             except Exception as e:
-                print(f"Warning: failed to determine gid for '{application_id}': {e}", file=sys.stderr)
+                print(
+                    f"Warning: failed to determine gid for '{application_id}': {e}",
+                    file=sys.stderr,
+                )
                 sys.exit(1)
 
             config_data["group_id"] = gid_number
@@ -68,7 +81,7 @@ class DefaultsGenerator:
             # Inject users mapping as Jinja2 references (unchanged)
             users_meta = load_yaml_file(role_dir / "users" / "main.yml")
             users_data = users_meta.get("users", {})
-            transformed = {user: f"{{{{ users[\"{user}\"] }}}}" for user in users_data}
+            transformed = {user: f'{{{{ users["{user}"] }}}}' for user in users_data}
             if transformed:
                 result["defaults_applications"][application_id]["users"] = transformed
 
@@ -83,9 +96,7 @@ class DefaultsGenerator:
         # Sort applications by application key for stable output
         apps = result.get("defaults_applications", {})
         if isinstance(apps, dict) and apps:
-            result["defaults_applications"] = {
-                k: apps[k] for k in sorted(apps.keys())
-            }
+            result["defaults_applications"] = {k: apps[k] for k in sorted(apps.keys())}
 
         # Write output
         self.output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -188,12 +199,19 @@ class DefaultsGenerator:
             msg="Role with empty config file should produce an empty defaults mapping",
         )
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Generate defaults_applications YAML...")
-    parser.add_argument("--roles-dir", default="roles", help="Path to the roles directory")
+    parser = argparse.ArgumentParser(
+        description="Generate defaults_applications YAML..."
+    )
+    parser.add_argument(
+        "--roles-dir", default="roles", help="Path to the roles directory"
+    )
     parser.add_argument("--output-file", required=True, help="Path to output YAML file")
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging")
-    parser.add_argument("--timeout", type=float, default=10.0, help="Timeout for rendering")
+    parser.add_argument(
+        "--timeout", type=float, default=10.0, help="Timeout for rendering"
+    )
 
     args = parser.parse_args()
     cwd = Path.cwd()

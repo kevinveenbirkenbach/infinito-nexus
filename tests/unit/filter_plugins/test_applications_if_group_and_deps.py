@@ -31,7 +31,9 @@ class TestApplicationsIfGroupAndDeps(unittest.TestCase):
     @patch("filter_plugins.applications_if_group_and_deps.yaml.safe_load")
     @patch("filter_plugins.applications_if_group_and_deps.open", new_callable=mock_open)
     @patch("filter_plugins.applications_if_group_and_deps.os.path.isfile")
-    def test_indirect_inclusion_via_dependencies(self, mock_isfile, mock_file, mock_yaml):
+    def test_indirect_inclusion_via_dependencies(
+        self, mock_isfile, mock_file, mock_yaml
+    ):
         """
         Simulate that group 'groupX' has a dependency on 'roleA', and that
         roleA's vars/main.yml contains application_id: 'roleA'.
@@ -61,6 +63,7 @@ class TestApplicationsIfGroupAndDeps(unittest.TestCase):
         If a meta/main.yml dependency exists but vars/main.yml is missing,
         that role won't contribute an application_id, so nothing is returned.
         """
+
         # meta exists, vars does not
         def isfile_side(path: str) -> bool:
             return path.endswith("meta/main.yml")

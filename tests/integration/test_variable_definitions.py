@@ -18,27 +18,27 @@ class TestVariableDefinitions(unittest.TestCase):
     def setUp(self):
         # Project root = repo root (tests/integration/.. -> ../../)
         self.project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '../../')
+            os.path.join(os.path.dirname(__file__), "../../")
         )
 
         # Collect all variable definition files: roles/*/{vars,defaults}/**/*.yml and group_vars/all/*.yml
         self.var_files = []
         patterns = [
-            os.path.join(self.project_root, 'roles', '*', 'vars', '**', '*.yml'),
-            os.path.join(self.project_root, 'roles', '*', 'defaults', '**', '*.yml'),
-            os.path.join(self.project_root, 'group_vars', 'all', '*.yml'),
+            os.path.join(self.project_root, "roles", "*", "vars", "**", "*.yml"),
+            os.path.join(self.project_root, "roles", "*", "defaults", "**", "*.yml"),
+            os.path.join(self.project_root, "group_vars", "all", "*.yml"),
         ]
         for pat in patterns:
             self.var_files.extend(glob(pat, recursive=True))
 
         # File extensions to scan for Jinja usage/inline definitions
-        self.scan_extensions = {'.yml', '.j2'}
+        self.scan_extensions = {".yml", ".j2"}
 
         # -----------------------
         # Raw-block pattern (ignore any Jinja inside {% raw %}...{% endraw %})
         # Supports trimmed variants: {%- raw -%} ... {%- endraw -%}
         self.raw_block_re = re.compile(
-            r'{%\s*-?\s*raw\s*-?\s*%}.*?{%\s*-?\s*endraw\s*-?\s*%}',
+            r"{%\s*-?\s*raw\s*-?\s*%}.*?{%\s*-?\s*endraw\s*-?\s*%}",
             re.DOTALL,
         )
 
@@ -50,35 +50,35 @@ class TestVariableDefinitions(unittest.TestCase):
         self.simple_var_pattern = re.compile(r"{{\s*([a-zA-Z_]\w*)\s*(?:\|[^}]*)?}}")
 
         # {% set var = ... %}   (allow trimmed variants)
-        self.jinja_set_def = re.compile(r'{%\s*-?\s*set\s+([a-zA-Z_]\w*)\s*=')
-        
+        self.jinja_set_def = re.compile(r"{%\s*-?\s*set\s+([a-zA-Z_]\w*)\s*=")
+
         # {% set var %} ... {% endset %}  (block-style set)
-        self.jinja_set_block_def = re.compile(r'{%\s*-?\s*set\s+([a-zA-Z_]\w*)\s*-?%}')
+        self.jinja_set_block_def = re.compile(r"{%\s*-?\s*set\s+([a-zA-Z_]\w*)\s*-?%}")
 
         # {% for x in ... %}  or  {% for k, v in ... %}   (allow trimmed variants)
         self.jinja_for_def = re.compile(
-            r'{%\s*-?\s*for\s+([a-zA-Z_]\w*)(?:\s*,\s*([a-zA-Z_]\w*))?\s+in'
+            r"{%\s*-?\s*for\s+([a-zA-Z_]\w*)(?:\s*,\s*([a-zA-Z_]\w*))?\s+in"
         )
 
         # {% macro name(param1, param2=..., *varargs, **kwargs) %}   (allow trimmed variants)
         self.jinja_macro_def = re.compile(
-            r'{%\s*-?\s*macro\s+[a-zA-Z_]\w*\s*\((.*?)\)\s*-?%}'
+            r"{%\s*-?\s*macro\s+[a-zA-Z_]\w*\s*\((.*?)\)\s*-?%}"
         )
 
         # Ansible YAML anchors for inline var declarations
         # Support short and FQCN forms, plus inline dict after colon
         self.ansible_set_fact = re.compile(
-            r'^(?:\s*-\s*)?(?:ansible\.builtin\.)?set_fact\s*:\s*(\{[^}]*\})?\s*$'
+            r"^(?:\s*-\s*)?(?:ansible\.builtin\.)?set_fact\s*:\s*(\{[^}]*\})?\s*$"
         )
-        self.ansible_vars_block = re.compile(r'^(?:\s*[-]\s*)?vars\s*:\s*$')
-        self.ansible_loop_var = re.compile(r'^\s*loop_var\s*:\s*([a-zA-Z_]\w*)')
-        self.mapping_key = re.compile(r'^\s*([a-zA-Z_]\w*)\s*:\s*')
-        self.register_pat = re.compile(r'^\s*register\s*:\s*([a-zA-Z_]\w*)')
-        
+        self.ansible_vars_block = re.compile(r"^(?:\s*[-]\s*)?vars\s*:\s*$")
+        self.ansible_loop_var = re.compile(r"^\s*loop_var\s*:\s*([a-zA-Z_]\w*)")
+        self.mapping_key = re.compile(r"^\s*([a-zA-Z_]\w*)\s*:\s*")
+        self.register_pat = re.compile(r"^\s*register\s*:\s*([a-zA-Z_]\w*)")
+
         # Bare vars in YAML list expressions wie:
         #   - SOME_VAR | bool
         #   - OTHER_VAR | length > 0
-        self.bare_list_expr_var = re.compile(r'^\s*-\s*([a-zA-Z_]\w*)\b')
+        self.bare_list_expr_var = re.compile(r"^\s*-\s*([a-zA-Z_]\w*)\b")
 
         # -----------------------
         # Collect "defined" names
@@ -88,7 +88,7 @@ class TestVariableDefinitions(unittest.TestCase):
         # 1) Keys from var files (top-level dict keys)
         for vf in self.var_files:
             try:
-                with open(vf, 'r', encoding='utf-8') as f:
+                with open(vf, "r", encoding="utf-8") as f:
                     data = yaml.safe_load(f)
                 if isinstance(data, dict):
                     self.defined.update(data.keys())
@@ -112,7 +112,7 @@ class TestVariableDefinitions(unittest.TestCase):
                 vars_block_indent = 0
 
                 try:
-                    with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                    with open(path, "r", encoding="utf-8", errors="ignore") as f:
                         for line in f:
                             stripped = line.lstrip()
                             indent = len(line) - len(stripped)
@@ -127,7 +127,9 @@ class TestVariableDefinitions(unittest.TestCase):
                                         data = yaml.safe_load(inline_map)
                                         if isinstance(data, dict):
                                             self.defined.update(
-                                                k for k in data.keys() if isinstance(k, str)
+                                                k
+                                                for k in data.keys()
+                                                if isinstance(k, str)
                                             )
                                     except Exception:
                                         pass
@@ -178,13 +180,13 @@ class TestVariableDefinitions(unittest.TestCase):
 
                             for m in self.jinja_macro_def.finditer(line):
                                 params_blob = m.group(1)
-                                params = [p.strip() for p in params_blob.split(',')]
+                                params = [p.strip() for p in params_blob.split(",")]
                                 for p in params:
                                     if not p:
                                         continue
-                                    p = p.lstrip('*')
-                                    name = p.split('=', 1)[0].strip()
-                                    if re.match(r'^[a-zA-Z_]\w*$', name):
+                                    p = p.lstrip("*")
+                                    name = p.split("=", 1)[0].strip()
+                                    if re.match(r"^[a-zA-Z_]\w*$", name):
                                         self.defined.add(name)
 
                             m_loop = self.ansible_loop_var.match(stripped)
@@ -213,13 +215,13 @@ class TestVariableDefinitions(unittest.TestCase):
 
                 path = os.path.join(root, fn)
                 try:
-                    with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+                    with open(path, "r", encoding="utf-8", errors="ignore") as f:
                         content = f.read()
 
                     # Mask {% raw %} ... {% endraw %} blocks
                     def _mask_raw(m):
                         s = m.group(0)
-                        return re.sub(r'[^\n]', ' ', s)
+                        return re.sub(r"[^\n]", " ", s)
 
                     content_wo_raw = self.raw_block_re.sub(_mask_raw, content)
 
@@ -228,11 +230,20 @@ class TestVariableDefinitions(unittest.TestCase):
                             var = m.group(1)
 
                             if var in (
-                                'lookup', 'role_name', 'domains', 'item', 'host_type',
-                                'inventory_hostname', 'role_path', 'playbook_dir',
-                                'ansible_become_password', 'inventory_dir',
-                                'ansible_memtotal_mb', 'omit', 'group_names',
-                                'ansible_processor_vcpus'
+                                "lookup",
+                                "role_name",
+                                "domains",
+                                "item",
+                                "host_type",
+                                "inventory_hostname",
+                                "role_path",
+                                "playbook_dir",
+                                "ansible_become_password",
+                                "inventory_dir",
+                                "ansible_memtotal_mb",
+                                "omit",
+                                "group_names",
+                                "ansible_processor_vcpus",
                             ):
                                 continue
 
@@ -249,17 +260,33 @@ class TestVariableDefinitions(unittest.TestCase):
                         stripped = line.lstrip()
 
                         # Heuristic: "- VAR | ..." but not a mapping ("key: value")
-                        if stripped.startswith('- ') and '|' in stripped and ':' not in stripped:
+                        if (
+                            stripped.startswith("- ")
+                            and "|" in stripped
+                            and ":" not in stripped
+                        ):
                             m_expr = self.bare_list_expr_var.match(stripped)
                             if m_expr:
                                 var = m_expr.group(1)
 
                                 if var not in (
-                                    'lookup', 'role_name', 'domains', 'item', 'host_type',
-                                    'inventory_hostname', 'role_path', 'playbook_dir',
-                                    'ansible_become_password', 'inventory_dir',
-                                    'ansible_memtotal_mb', 'omit', 'group_names',
-                                    'ansible_processor_vcpus', 'not', 'and', 'or',
+                                    "lookup",
+                                    "role_name",
+                                    "domains",
+                                    "item",
+                                    "host_type",
+                                    "inventory_hostname",
+                                    "role_path",
+                                    "playbook_dir",
+                                    "ansible_become_password",
+                                    "inventory_dir",
+                                    "ansible_memtotal_mb",
+                                    "omit",
+                                    "group_names",
+                                    "ansible_processor_vcpus",
+                                    "not",
+                                    "and",
+                                    "or",
                                 ):
                                     if (
                                         var not in self.defined
@@ -280,5 +307,5 @@ class TestVariableDefinitions(unittest.TestCase):
             )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

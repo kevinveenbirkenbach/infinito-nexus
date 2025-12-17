@@ -5,8 +5,8 @@ import unittest
 import yaml
 from lookup_plugins.application_gid import LookupModule
 
-class TestApplicationGidLookup(unittest.TestCase):
 
+class TestApplicationGidLookup(unittest.TestCase):
     def setUp(self):
         # Create a temporary roles directory
         self.temp_dir = tempfile.mkdtemp()
@@ -18,7 +18,7 @@ class TestApplicationGidLookup(unittest.TestCase):
             "nextcloud": "web-app-nextcloud",
             "moodle": "web-app-moodle",
             "wordpress": "web-app-wordpress",
-            "taiga": "web-app-taiga"
+            "taiga": "web-app-taiga",
         }
 
         # Create fake role dirs and vars/main.yml
@@ -50,5 +50,5 @@ class TestApplicationGidLookup(unittest.TestCase):
         self.assertIn("Application ID 'unknownapp' not found", str(context.exception))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

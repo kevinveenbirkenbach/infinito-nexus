@@ -5,7 +5,9 @@ import types
 import unittest
 import importlib.util
 
-PLUGIN_REL_PATH = os.path.join("roles", "web-app-keycloak", "filter_plugins", "redirect_uris.py")
+PLUGIN_REL_PATH = os.path.join(
+    "roles", "web-app-keycloak", "filter_plugins", "redirect_uris.py"
+)
 
 
 def _find_repo_root_containing(rel_path, max_depth=8):
@@ -99,7 +101,9 @@ class RedirectUrisTest(unittest.TestCase):
         domains = {"appX": ["a.example.org", "b.example.org"]}
         applications = {"appX": {"features": {"oidc": True}}}
         result = self.plugin.redirect_uris(domains, applications, web_protocol="https")
-        self.assertCountEqual(result, ["https://a.example.org/*", "https://b.example.org/*"])
+        self.assertCountEqual(
+            result, ["https://a.example.org/*", "https://b.example.org/*"]
+        )
 
     def test_feature_missing_is_skipped(self):
         domains = {"app1": "example.org"}
@@ -110,7 +114,9 @@ class RedirectUrisTest(unittest.TestCase):
     def test_protocol_and_wildcard_customization(self):
         domains = {"app1": "x.test"}
         applications = {"app1": {"features": {"oauth2": True}}}
-        result = self.plugin.redirect_uris(domains, applications, web_protocol="http", wildcard="/cb")
+        result = self.plugin.redirect_uris(
+            domains, applications, web_protocol="http", wildcard="/cb"
+        )
         self.assertEqual(result, ["http://x.test/cb"])
 
     def test_dedup_default_true(self):
@@ -133,6 +139,7 @@ class RedirectUrisTest(unittest.TestCase):
         # Make get_url raise an arbitrary error; plugin should re-raise AnsibleFilterError
         def boom(*args, **kwargs):
             raise RuntimeError("boom")
+
         self.plugin.get_url = boom
 
         domains = {"app1": "example.org"}
@@ -146,10 +153,13 @@ class RedirectUrisTest(unittest.TestCase):
         # Make get_app_conf raise AppConfigKeyError; plugin should treat as not enabled and skip
         def raising_get_app_conf(*args, **kwargs):
             raise self.plugin.AppConfigKeyError("missing key")
+
         self.plugin.get_app_conf = raising_get_app_conf
 
         domains = {"app1": "example.org"}
-        applications = {"app1": {"features": {"oauth2": True}}}  # value won't be read due to exception
+        applications = {
+            "app1": {"features": {"oauth2": True}}
+        }  # value won't be read due to exception
 
         result = self.plugin.redirect_uris(domains, applications)
         self.assertEqual(result, [])
@@ -164,9 +174,9 @@ class RedirectUrisTest(unittest.TestCase):
             }
         }
         applications = {"app1": {"features": {"oauth2": True}}}
-    
+
         result = self.plugin.redirect_uris(domains, applications)
-    
+
         self.assertEqual(
             result,
             [
@@ -176,6 +186,7 @@ class RedirectUrisTest(unittest.TestCase):
                 "https://d.example.org/*",
             ],
         )
+
 
 if __name__ == "__main__":
     unittest.main()

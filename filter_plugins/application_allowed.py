@@ -5,7 +5,9 @@
 from ansible.errors import AnsibleFilterError
 
 
-def application_allowed(application_id: str, group_names: list, allowed_applications: list = []):
+def application_allowed(
+    application_id: str, group_names: list, allowed_applications: list = []
+):
     """
     Return True if:
       - application_id exists in group_names, AND
@@ -21,7 +23,9 @@ def application_allowed(application_id: str, group_names: list, allowed_applicat
     """
     # Ensure group_names is iterable
     if not isinstance(group_names, (list, tuple)):
-        raise AnsibleFilterError(f"Expected group_names to be a list, str or tuple, got {type(group_names)}")
+        raise AnsibleFilterError(
+            f"Expected group_names to be a list, str or tuple, got {type(group_names)}"
+        )
 
     # Must be part of the host's groups
     if application_id not in group_names:
@@ -30,7 +34,9 @@ def application_allowed(application_id: str, group_names: list, allowed_applicat
     # If allowed_applications provided, only allow if ID is in that list
     if allowed_applications:
         if not isinstance(allowed_applications, (list, tuple, str)):
-            raise AnsibleFilterError(f"allowed_applications must be a list or tuple if provided, got {type(allowed_applications)}")
+            raise AnsibleFilterError(
+                f"allowed_applications must be a list or tuple if provided, got {type(allowed_applications)}"
+            )
         return application_id in allowed_applications
 
     # No filter provided → allow all in group_names
@@ -40,5 +46,5 @@ def application_allowed(application_id: str, group_names: list, allowed_applicat
 class FilterModule(object):
     def filters(self):
         return {
-            'application_allowed': application_allowed,
+            "application_allowed": application_allowed,
         }

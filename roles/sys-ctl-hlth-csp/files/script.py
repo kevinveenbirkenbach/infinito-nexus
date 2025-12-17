@@ -6,11 +6,12 @@ import subprocess
 import sys
 import argparse
 
+
 def extract_domains(config_path):
     """
     Extracts domain names from .conf filenames in the given directory.
     """
-    domain_pattern = re.compile(r'^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\.conf$')
+    domain_pattern = re.compile(r"^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\.conf$")
     try:
         return [
             fn[:-5]
@@ -20,6 +21,7 @@ def extract_domains(config_path):
     except FileNotFoundError:
         print(f"Directory {config_path} not found.", file=sys.stderr)
         return None
+
 
 def run_checkcsp(domains, ignore_network_blocks_from):
     """
@@ -45,6 +47,7 @@ def run_checkcsp(domains, ignore_network_blocks_from):
         print(f"Unexpected error: {e}", file=sys.stderr)
         return 1
 
+
 def main():
     parser = argparse.ArgumentParser(
         description="Extract domains from NGINX and run checkcsp against them"
@@ -52,13 +55,13 @@ def main():
     parser.add_argument(
         "--nginx-config-dir",
         required=True,
-        help="Directory containing NGINX .conf files"
+        help="Directory containing NGINX .conf files",
     )
     parser.add_argument(
         "--ignore-network-blocks-from",
         nargs="*",
         default=[],
-        help="Optional: one or more domains whose network block failures should be ignored"
+        help="Optional: one or more domains whose network block failures should be ignored",
     )
     args = parser.parse_args()
 
@@ -72,6 +75,7 @@ def main():
 
     rc = run_checkcsp(domains, args.ignore_network_blocks_from)
     sys.exit(rc)
+
 
 if __name__ == "__main__":
     main()

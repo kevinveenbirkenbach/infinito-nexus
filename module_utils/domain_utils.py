@@ -1,6 +1,7 @@
 # filter_plugins/domain_utils.py
 from ansible.errors import AnsibleFilterError
 
+
 def get_domain(domains, application_id):
     """
     Return the domain for application_id from the domains mapping:
@@ -10,10 +11,14 @@ def get_domain(domains, application_id):
       - Otherwise, raise an error.
     """
     if not isinstance(domains, dict):
-        raise AnsibleFilterError(f"'domains' must be a dict, got {type(domains).__name__}")
+        raise AnsibleFilterError(
+            f"'domains' must be a dict, got {type(domains).__name__}"
+        )
 
     if application_id not in domains:
-        raise AnsibleFilterError(f"application_id '{application_id}' not found in domains mapping")
+        raise AnsibleFilterError(
+            f"application_id '{application_id}' not found in domains mapping"
+        )
 
     val = domains[application_id]
 

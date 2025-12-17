@@ -83,7 +83,9 @@ class TestCspConfigurationConsistency(unittest.TestCase):
                 continue  # No CSP section, nothing to check
 
             if not isinstance(csp, dict):
-                errors.append(f"{role_path.name}: 'server.csp' must be a dict (found {type(csp).__name__}) in {cfg_file}")
+                errors.append(
+                    f"{role_path.name}: 'server.csp' must be a dict (found {type(csp).__name__}) in {cfg_file}"
+                )
                 # Can't proceed safely with sub-sections
                 continue
 
@@ -179,7 +181,10 @@ class TestCspConfigurationConsistency(unittest.TestCase):
                             )
 
         if errors:
-            self.fail(f"CSP configuration validation failures ({len(errors)}):\n" + "\n".join(errors))
+            self.fail(
+                f"CSP configuration validation failures ({len(errors)}):\n"
+                + "\n".join(errors)
+            )
 
 
 if __name__ == "__main__":

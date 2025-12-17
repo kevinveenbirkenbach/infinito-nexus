@@ -14,9 +14,18 @@ import requests
 
 
 def parse_args(argv=None):
-    p = argparse.ArgumentParser(description="Web health checker (expects precomputed domain→codes mapping).")
-    p.add_argument("--web-protocol", default="https", choices=["http", "https"], help="Protocol to use")
-    p.add_argument("--expectations", required=True, help="JSON STRING: {\"domain\": [codes], ...}")
+    p = argparse.ArgumentParser(
+        description="Web health checker (expects precomputed domain→codes mapping)."
+    )
+    p.add_argument(
+        "--web-protocol",
+        default="https",
+        choices=["http", "https"],
+        help="Protocol to use",
+    )
+    p.add_argument(
+        "--expectations", required=True, help='JSON STRING: {"domain": [codes], ...}'
+    )
     return p.parse_args(argv)
 
 
@@ -54,7 +63,9 @@ def main(argv=None) -> int:
                 print(f"{domain}: OK")
             elif not expected:
                 # If somehow empty list slipped through, treat as failure to be explicit
-                print(f"{domain}: ERROR: No expectations provided. Got {r.status_code}.")
+                print(
+                    f"{domain}: ERROR: No expectations provided. Got {r.status_code}."
+                )
                 errors += 1
             else:
                 print(f"{domain}: ERROR: Expected {expected}. Got {r.status_code}.")
@@ -64,7 +75,9 @@ def main(argv=None) -> int:
             errors += 1
 
     if errors:
-        print(f"Warning: {errors} domains responded with an unexpected https status code.")
+        print(
+            f"Warning: {errors} domains responded with an unexpected https status code."
+        )
     return errors
 
 

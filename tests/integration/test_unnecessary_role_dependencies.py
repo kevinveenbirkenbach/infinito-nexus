@@ -8,12 +8,14 @@ from typing import Dict, Set, List, Optional
 
 # ---------------- Utilities ----------------
 
+
 def safe_load_yaml(path: str):
     try:
         with open(path, "r", encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
     except Exception:
         return {}
+
 
 def read_text(path: str) -> str:
     try:
@@ -22,19 +24,24 @@ def read_text(path: str) -> str:
     except Exception:
         return ""
 
+
 def roles_root(project_root: str) -> str:
     return os.path.join(project_root, "roles")
+
 
 def iter_role_dirs(project_root: str) -> List[str]:
     root = roles_root(project_root)
     return [d for d in glob.glob(os.path.join(root, "*")) if os.path.isdir(d)]
 
+
 def role_name_from_dir(role_dir: str) -> str:
     return os.path.basename(role_dir.rstrip(os.sep))
+
 
 def path_if_exists(*parts) -> Optional[str]:
     p = os.path.join(*parts)
     return p if os.path.exists(p) else None
+
 
 def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
     files: List[str] = []
@@ -42,7 +49,9 @@ def gather_yaml_files(base: str, patterns: List[str]) -> List[str]:
         files.extend(glob.glob(os.path.join(base, pat), recursive=True))
     return [f for f in files if os.path.isfile(f)]
 
+
 # ---------------- Providers: vars & handlers ----------------
+
 
 def flatten_keys(data) -> Set[str]:
     out: Set[str] = set()
@@ -56,6 +65,7 @@ def flatten_keys(data) -> Set[str]:
             out |= flatten_keys(item)
     return out
 
+
 def collect_role_defined_vars(role_dir: str) -> Set[str]:
     """Vars a role 'provides': defaults/vars keys + set_fact keys in tasks."""
     provided: Set[str] = set()
@@ -67,16 +77,23 @@ def collect_role_defined_vars(role_dir: str) -> Set[str]:
             provided |= flatten_keys(data)
 
     # set_fact keys
-    task_files = gather_yaml_files(os.path.join(role_dir, "tasks"), ["**/*.yml", "*.yml"])
+    task_files = gather_yaml_files(
+        os.path.join(role_dir, "tasks"), ["**/*.yml", "*.yml"]
+    )
     for tf in task_files:
         data = safe_load_yaml(tf)
         if isinstance(data, list):
             for task in data:
-                if isinstance(task, dict) and "set_fact" in task and isinstance(task["set_fact"], dict):
+                if (
+                    isinstance(task, dict)
+                    and "set_fact" in task
+                    and isinstance(task["set_fact"], dict)
+                ):
                     provided |= set(task["set_fact"].keys())
 
     noisy = {"when", "name", "vars", "tags", "register"}
     return {v for v in provided if isinstance(v, str) and v and v not in noisy}
+
 
 def collect_role_handler_names(role_dir: str) -> Set[str]:
     """Handler names defined by a role (for notify detection)."""
@@ -93,7 +110,9 @@ def collect_role_handler_names(role_dir: str) -> Set[str]:
                     names.add(nm.strip())
     return names
 
+
 # ---------------- Consumers: usage scanning ----------------
+
 
 def find_var_positions(text: str, varname: str) -> List[int]:
     """Return byte offsets for occurrences of varname (word-ish boundary)."""
@@ -103,6 +122,7 @@ def find_var_positions(text: str, varname: str) -> List[int]:
         positions.append(m.start())
     return positions
 
+
 def first_var_use_offset_in_text(text: str, provided_vars: Set[str]) -> Optional[int]:
     first: Optional[int] = None
     for v in provided_vars:
@@ -111,6 +131,7 @@ def first_var_use_offset_in_text(text: str, provided_vars: Set[str]) -> Optional
                 first = off
     return first
 
+
 def first_include_offset_for_role(text: str, producer_role: str) -> Optional[int]:
     """
     Find earliest include/import of a given role in this YAML text.
@@ -118,14 +139,17 @@ def first_include_offset_for_role(text: str, producer_role: str) -> Optional[int
     """
     pattern = re.compile(
         r"(include_role|import_role)\s*:\s*\{[^}]*\bname\s*:\s*['\"]?"
-        + re.escape(producer_role) + r"['\"]?[^}]*\}"
+        + re.escape(producer_role)
+        + r"['\"]?[^}]*\}"
         r"|"
         r"(include_role|import_role)\s*:\s*\n(?:\s+[a-z_]+\s*:\s*.*\n)*\s*name\s*:\s*['\"]?"
-        + re.escape(producer_role) + r"['\"]?",
+        + re.escape(producer_role)
+        + r"['\"]?",
         re.IGNORECASE,
     )
     m = pattern.search(text)
     return m.start() if m else None
+
 
 def find_notify_offsets_for_handlers(text: str, handler_names: Set[str]) -> List[int]:
     """
@@ -146,6 +170,7 @@ def find_notify_offsets_for_handlers(text: str, handler_names: Set[str]) -> List
                 offsets.append(start)
     return sorted(offsets)
 
+
 def parse_meta_dependencies(role_dir: str) -> Set[str]:
     deps: Set[str] = set()
     meta = path_if_exists(role_dir, "meta/main.yml")
@@ -163,7 +188,9 @@ def parse_meta_dependencies(role_dir: str) -> Set[str]:
                 deps.add(str(item["name"]))
     return deps
 
+
 # ---------------- The Test ----------------
+
 
 class TestUnnecessaryRoleDependencies(unittest.TestCase):
     """
@@ -180,7 +207,9 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
 
     def setUp(self):
         # project root = two levels up from this test file
-        self.project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        self.project_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..")
+        )
         self.roles = iter_role_dirs(self.project_root)
 
         # Index provider data
@@ -210,14 +239,20 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
                 continue
 
             # Load consumer files
-            defaults_files = [p for p in [
-                path_if_exists(consumer_dir, "defaults/main.yml"),
-                path_if_exists(consumer_dir, "vars/main.yml"),
-                path_if_exists(consumer_dir, "handlers/main.yml"),
-            ] if p]
+            defaults_files = [
+                p
+                for p in [
+                    path_if_exists(consumer_dir, "defaults/main.yml"),
+                    path_if_exists(consumer_dir, "vars/main.yml"),
+                    path_if_exists(consumer_dir, "handlers/main.yml"),
+                ]
+                if p
+            ]
             defaults_texts = [(p, read_text(p)) for p in defaults_files]
 
-            task_files = gather_yaml_files(os.path.join(consumer_dir, "tasks"), ["**/*.yml", "*.yml"])
+            task_files = gather_yaml_files(
+                os.path.join(consumer_dir, "tasks"), ["**/*.yml", "*.yml"]
+            )
             task_texts = [(p, read_text(p)) for p in task_files]
 
             for producer in sorted(meta_deps):
@@ -254,7 +289,9 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
 
                     include_off = first_include_offset_for_role(text, producer)
                     var_use_off = first_var_use_offset_in_text(text, provided_vars)
-                    notify_offs = find_notify_offsets_for_handlers(text, provider_handlers)
+                    notify_offs = find_notify_offsets_for_handlers(
+                        text, provider_handlers
+                    )
 
                     if var_use_off is not None:
                         any_usage = True

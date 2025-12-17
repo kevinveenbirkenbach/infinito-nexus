@@ -1,10 +1,8 @@
 class FilterModule(object):
-    ''' Custom filter to safely check if a docker service is enabled for an application_id '''
+    """Custom filter to safely check if a docker service is enabled for an application_id"""
 
     def filters(self):
-        return {
-            'is_docker_service_enabled': self.is_docker_service_enabled
-        }
+        return {"is_docker_service_enabled": self.is_docker_service_enabled}
 
     @staticmethod
     def is_docker_service_enabled(applications, application_id, service_name):
@@ -16,10 +14,11 @@ class FilterModule(object):
             return bool(
                 applications
                 and application_id in applications
-                and applications[application_id].get('docker', {})
-                .get('services', {})
+                and applications[application_id]
+                .get("docker", {})
+                .get("services", {})
                 .get(service_name, {})
-                .get('enabled', False)
+                .get("enabled", False)
             )
         except Exception:
             return False

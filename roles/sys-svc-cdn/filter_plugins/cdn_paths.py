@@ -1,5 +1,6 @@
 import os
 
+
 def cdn_paths(cdn_root, application_id, version):
     """
     Build a structured dictionary of all CDN paths for a given application.
@@ -33,10 +34,13 @@ def cdn_paths(cdn_root, application_id, version):
                 "css": os.path.join(cdn_root, "roles", application_id, version, "css"),
                 "js": os.path.join(cdn_root, "roles", application_id, version, "js"),
                 "img": os.path.join(cdn_root, "roles", application_id, version, "img"),
-                "fonts": os.path.join(cdn_root, "roles", application_id, version, "fonts"),
+                "fonts": os.path.join(
+                    cdn_root, "roles", application_id, version, "fonts"
+                ),
             },
         },
     }
+
 
 class FilterModule(object):
     def filters(self):

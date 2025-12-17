@@ -2,6 +2,7 @@
 
 import os
 
+
 def get_category_entries(prefix, roles_path="roles"):
     """
     Returns a list of role names under the given roles_path
@@ -22,10 +23,9 @@ def get_category_entries(prefix, roles_path="roles"):
 
     return sorted(roles)
 
+
 class FilterModule(object):
-    """ Custom filters for Ansible """
+    """Custom filters for Ansible"""
 
     def filters(self):
-        return {
-            "get_category_entries": get_category_entries
-        }
+        return {"get_category_entries": get_category_entries}

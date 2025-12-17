@@ -49,12 +49,10 @@ def main():
     )
     parser.add_argument(
         "parent_directory",
-        help="Path to the parent directory containing docker-compose projects"
+        help="Path to the parent directory containing docker-compose projects",
     )
     parser.add_argument(
-        "--only",
-        nargs="+",
-        help="Restart only the specified subdirectories (by name)"
+        "--only", nargs="+", help="Restart only the specified subdirectories (by name)"
     )
     args = parser.parse_args()
 

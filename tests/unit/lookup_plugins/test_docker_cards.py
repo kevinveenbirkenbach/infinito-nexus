@@ -7,7 +7,12 @@ import shutil
 import unittest
 
 # Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-desktop role.
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../roles/web-app-desktop/lookup_plugins'))
+sys.path.insert(
+    0,
+    os.path.join(
+        os.path.dirname(__file__), "../../../roles/web-app-desktop/lookup_plugins"
+    ),
+)
 
 from docker_cards import LookupModule
 
@@ -53,14 +58,8 @@ galaxy_info:
         # Define dummy variables including group_names that contain the application_id "portfolio".
         fake_variables = {
             "domains": {"portfolio": "myportfolio.com"},
-            "applications": {
-                "portfolio": {
-                    "features": {
-                        "desktop": True
-                    }
-                }
-            },
-            "group_names": ["portfolio"]
+            "applications": {"portfolio": {"features": {"desktop": True}}},
+            "group_names": ["portfolio"],
         }
         result = lookup_module.run([self.test_roles_dir], variables=fake_variables)
 
@@ -86,14 +85,8 @@ galaxy_info:
         # Set fake variables with group_names that do NOT include the application_id "portfolio".
         fake_variables = {
             "domains": {"portfolio": "myportfolio.com"},
-            "applications": {
-                "portfolio": {
-                    "features": {
-                        "desktop": True
-                    }
-                }
-            },
-            "group_names": []  # Not including "portfolio"
+            "applications": {"portfolio": {"features": {"desktop": True}}},
+            "group_names": [],  # Not including "portfolio"
         }
         result = lookup_module.run([self.test_roles_dir], variables=fake_variables)
 

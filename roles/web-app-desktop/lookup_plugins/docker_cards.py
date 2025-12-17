@@ -1,4 +1,5 @@
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 import glob
@@ -47,7 +48,9 @@ class LookupModule(LookupBase):
             vars_path = os.path.join(role_dir, "vars", "main.yml")
             try:
                 if not os.path.isfile(vars_path):
-                    raise AnsibleError(f"Vars file not found for role '{role_basename}': {vars_path}")
+                    raise AnsibleError(
+                        f"Vars file not found for role '{role_basename}': {vars_path}"
+                    )
                 with open(vars_path, "r", encoding="utf-8") as vf:
                     vars_content = vf.read()
                 vars_data = yaml.safe_load(vars_content) or {}
@@ -55,7 +58,9 @@ class LookupModule(LookupBase):
                 if not application_id:
                     raise AnsibleError(f"Key 'application_id' not found in {vars_path}")
             except Exception as e:
-                raise AnsibleError(f"Error getting application_id for role '{role_basename}': {e}")
+                raise AnsibleError(
+                    f"Error getting application_id for role '{role_basename}': {e}"
+                )
 
             # Skip roles not listed in group_names
             if application_id not in group_names:
@@ -73,7 +78,7 @@ class LookupModule(LookupBase):
             try:
                 with open(readme_path, "r", encoding="utf-8") as f:
                     readme_content = f.read()
-                title_match = re.search(r'^#\s+(.*)$', readme_content, re.MULTILINE)
+                title_match = re.search(r"^#\s+(.*)$", readme_content, re.MULTILINE)
                 title = title_match.group(1).strip() if title_match else application_id
             except Exception as e:
                 raise AnsibleError(f"Error reading '{readme_path}': {e}")
@@ -125,7 +130,7 @@ class LookupModule(LookupBase):
             cards.append(card)
 
         # Sort A-Z
-        cards.sort(key=lambda c: c['title'].lower())
+        cards.sort(key=lambda c: c["title"].lower())
 
         # Return the list of cards
         return [cards]

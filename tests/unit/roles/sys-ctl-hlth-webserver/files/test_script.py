@@ -30,15 +30,21 @@ class TestStandaloneCheckerScript(unittest.TestCase):
 
     def test_rejects_invalid_json(self):
         with self.assertRaises(SystemExit):
-            self.script.main([
-                "--expectations", '{"bad json": [200, 301]',  # missing closing brace
-            ])
+            self.script.main(
+                [
+                    "--expectations",
+                    '{"bad json": [200, 301]',  # missing closing brace
+                ]
+            )
 
     def test_rejects_non_mapping_json(self):
         with self.assertRaises(SystemExit):
-            self.script.main([
-                "--expectations", '["not", "a", "mapping"]',
-            ])
+            self.script.main(
+                [
+                    "--expectations",
+                    '["not", "a", "mapping"]',
+                ]
+            )
 
     # ------------- Happy path / mismatches -------
 
@@ -47,6 +53,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
         def head_side_effect(url, allow_redirects=False, timeout=10):
             class R:
                 pass
+
             r = R()
             domain = url.split("://", 1)[1]
             # both match expectations exactly
@@ -60,10 +67,14 @@ class TestStandaloneCheckerScript(unittest.TestCase):
             "ok1.example.org": [200, 302, 301],
             "ok2.example.org": [301],
         }
-        exit_code = self.script.main([
-            "--web-protocol", "https",
-            "--expectations", self._to_json(exp),
-        ])
+        exit_code = self.script.main(
+            [
+                "--web-protocol",
+                "https",
+                "--expectations",
+                self._to_json(exp),
+            ]
+        )
         self.assertEqual(exit_code, 0)
 
     @patch("requests.head")
@@ -71,6 +82,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
         def head_side_effect(url, allow_redirects=False, timeout=10):
             class R:
                 pass
+
             r = R()
             domain = url.split("://", 1)[1]
             mapping = {"bad.example.org": 200, "ok301.example.org": 301}
@@ -80,14 +92,19 @@ class TestStandaloneCheckerScript(unittest.TestCase):
         mock_head.side_effect = head_side_effect
 
         exp = {
-            "bad.example.org":   [404],  # mismatch (got 200)
+            "bad.example.org": [404],  # mismatch (got 200)
             "ok301.example.org": [301],  # OK
-            "never.example.org": [200],  # will default to 200 in side effect? No mapping -> 200 -> OK
+            "never.example.org": [
+                200
+            ],  # will default to 200 in side effect? No mapping -> 200 -> OK
         }
         # Adjust side effect to ensure "never.example.org" is OK 200
-        exit_code = self.script.main([
-            "--expectations", self._to_json(exp),
-        ])
+        exit_code = self.script.main(
+            [
+                "--expectations",
+                self._to_json(exp),
+            ]
+        )
         # only 'bad.example.org' mismatched
         self.assertEqual(exit_code, 1)
 
@@ -97,6 +114,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
         def head_side_effect(url, allow_redirects=False, timeout=10):
             class R:
                 pass
+
             r = R()
             r.status_code = 200
             return r
@@ -105,9 +123,12 @@ class TestStandaloneCheckerScript(unittest.TestCase):
 
         exp_json = '{"foo.example.org": "not-a-list", "bar.example.org": 200}'
         # Both entries get empty expectations -> 2 errors
-        exit_code = self.script.main([
-            "--expectations", exp_json,
-        ])
+        exit_code = self.script.main(
+            [
+                "--expectations",
+                exp_json,
+            ]
+        )
         self.assertEqual(exit_code, 2)
 
     # ------------- Helpers -----------------------
@@ -115,6 +136,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
     @staticmethod
     def _to_json(obj) -> str:
         import json
+
         return json.dumps(obj, separators=(",", ":"))
 
 

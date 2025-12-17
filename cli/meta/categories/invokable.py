@@ -27,26 +27,26 @@ def main():
     )
     parser.add_argument(
         "roles_file",
-        nargs='?',
+        nargs="?",
         default=None,
-        help="Path to the roles YAML file (default: roles/categories.yml at project root)"
+        help="Path to the roles YAML file (default: roles/categories.yml at project root)",
     )
     parser.add_argument(
-        "--suffix", "-s",
-        help="Optional suffix to append to each path.",
-        default=None
+        "--suffix", "-s", help="Optional suffix to append to each path.", default=None
     )
 
     mode_group = parser.add_mutually_exclusive_group()
     mode_group.add_argument(
-        "--non-invokable", "-n",
-        action='store_true',
-        help="List paths where 'invokable' is False or not set."
+        "--non-invokable",
+        "-n",
+        action="store_true",
+        help="List paths where 'invokable' is False or not set.",
     )
     mode_group.add_argument(
-        "--invokable", "-i",
-        action='store_true',
-        help="List paths where 'invokable' is True. (default behavior)"
+        "--invokable",
+        "-i",
+        action="store_true",
+        help="List paths where 'invokable' is True. (default behavior)",
     )
 
     args = parser.parse_args()

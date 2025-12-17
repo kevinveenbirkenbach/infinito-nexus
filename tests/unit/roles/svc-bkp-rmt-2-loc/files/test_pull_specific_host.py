@@ -15,7 +15,9 @@ def load_module():
     here = Path(__file__).resolve()
     # tests/unit/roles/svc-bkp-rmt-2-loc/files -> up 5 levels to repo root
     repo_root = here.parents[5]
-    target_path = repo_root / "roles" / "svc-bkp-rmt-2-loc" / "files" / "pull-specific-host.py"
+    target_path = (
+        repo_root / "roles" / "svc-bkp-rmt-2-loc" / "files" / "pull-specific-host.py"
+    )
     if not target_path.exists():
         raise FileNotFoundError(f"Cannot find script at {target_path}")
     spec = types.ModuleType("pull_specific_host_module")
@@ -37,13 +39,19 @@ class PullSpecificHostTests(unittest.TestCase):
         self.last_remote = f"{self.type_dir}20250202000000"
 
     def _completed(self, stdout="", returncode=0):
-        return subprocess.CompletedProcess(args="mock", returncode=returncode, stdout=stdout, stderr="")
+        return subprocess.CompletedProcess(
+            args="mock", returncode=returncode, stdout=stdout, stderr=""
+        )
 
-    def _run_side_effect_success(self, command, capture_output=True, shell=True, text=True, check=False):
+    def _run_side_effect_success(
+        self, command, capture_output=True, shell=True, text=True, check=False
+    ):
         cmd = command if isinstance(command, str) else " ".join(command)
         if cmd.startswith(f'ssh "{self.remote}" sha256sum /etc/machine-id'):
             return self._completed(stdout=f"{self.hash64}  /etc/machine-id\n")
-        if cmd.startswith(f'ssh "{self.remote}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'):
+        if cmd.startswith(
+            f'ssh "{self.remote}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'
+        ):
             return self._completed(stdout=f"{self.hash64}\n{self.backup_type}\n")
         if cmd.startswith(f"ls -d {self.type_dir}* | tail -1"):
             return self._completed(stdout=self.last_local)
@@ -51,19 +59,29 @@ class PullSpecificHostTests(unittest.TestCase):
             return self._completed(stdout=f"{self.last_remote}\n")
         return self._completed(stdout="")
 
-    def _run_side_effect_find_fail(self, command, capture_output=True, shell=True, text=True, check=False):
+    def _run_side_effect_find_fail(
+        self, command, capture_output=True, shell=True, text=True, check=False
+    ):
         cmd = command if isinstance(command, str) else " ".join(command)
-        if cmd.startswith(f'ssh "backup@{self.host}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'):
-            raise subprocess.CalledProcessError(returncode=1, cmd=cmd, output="", stderr="find: error")
+        if cmd.startswith(
+            f'ssh "backup@{self.host}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'
+        ):
+            raise subprocess.CalledProcessError(
+                returncode=1, cmd=cmd, output="", stderr="find: error"
+            )
         if cmd.startswith(f'ssh "backup@{self.host}" sha256sum /etc/machine-id'):
             return self._completed(stdout=f"{self.hash64}  /etc/machine-id\n")
         return self._completed(stdout="")
 
-    def _run_side_effect_no_types(self, command, capture_output=True, shell=True, text=True, check=False):
+    def _run_side_effect_no_types(
+        self, command, capture_output=True, shell=True, text=True, check=False
+    ):
         cmd = command if isinstance(command, str) else " ".join(command)
         if cmd.startswith(f'ssh "{self.remote}" sha256sum /etc/machine-id'):
             return self._completed(stdout=f"{self.hash64}  /etc/machine-id\n")
-        if cmd.startswith(f'ssh "{self.remote}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'):
+        if cmd.startswith(
+            f'ssh "{self.remote}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'
+        ):
             return self._completed(stdout="")
         return self._completed(stdout="")
 
@@ -89,7 +107,9 @@ class PullSpecificHostTests(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             self.mod.pull_backups(self.host)
         self.assertEqual(cm.exception.code, 0)
-        self.assertFalse(mock_system.called, "rsync should not be called when no types found")
+        self.assertFalse(
+            mock_system.called, "rsync should not be called when no types found"
+        )
 
     @patch("time.sleep", new=lambda *a, **k: None)
     @patch.object(os, "makedirs")
@@ -101,7 +121,9 @@ class PullSpecificHostTests(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             self.mod.pull_backups(self.host)
         self.assertEqual(cm.exception.code, 1)
-        self.assertFalse(mock_system.called, "rsync should not be called when find fails")
+        self.assertFalse(
+            mock_system.called, "rsync should not be called when find fails"
+        )
 
     @patch("time.sleep", new=lambda *a, **k: None)
     @patch.object(os, "makedirs")
@@ -113,7 +135,9 @@ class PullSpecificHostTests(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             self.mod.pull_backups(self.host)
         self.assertEqual(cm.exception.code, 1)
-        self.assertEqual(mock_system.call_count, 12, "rsync should have retried 12 times")
+        self.assertEqual(
+            mock_system.call_count, 12, "rsync should have retried 12 times"
+        )
 
 
 if __name__ == "__main__":

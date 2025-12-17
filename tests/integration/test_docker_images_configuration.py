@@ -2,6 +2,7 @@ import unittest
 import yaml
 from pathlib import Path
 
+
 class TestDockerRoleServicesConfiguration(unittest.TestCase):
     def test_services_keys_and_templates(self):
         """
@@ -29,13 +30,17 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
                 errors.append(f"{role_path.name}: YAML parse error: {e}")
                 continue
 
-            services = config.get("docker",{}).get("services",{})
+            services = config.get("docker", {}).get("services", {})
             if not services:
-                warnings.append(f"[WARNING] {role_path.name}: No 'docker.services' key in config/main.yml")
+                warnings.append(
+                    f"[WARNING] {role_path.name}: No 'docker.services' key in config/main.yml"
+                )
                 continue
 
             if not isinstance(services, dict):
-                errors.append(f"{role_path.name}: 'services' must be a dict in config/main.yml")
+                errors.append(
+                    f"{role_path.name}: 'services' must be a dict in config/main.yml"
+                )
                 continue
 
                 # OPTIONAL: Check if the image is available locally via docker images
@@ -51,9 +56,15 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
                 #     except Exception as e:
                 #         errors.append(f"{role_path.name}: Error running 'docker images' (optional): {e}")
         if warnings:
-            print("\nWarnings in docker role services configuration:\n" + "\n".join(warnings))
+            print(
+                "\nWarnings in docker role services configuration:\n"
+                + "\n".join(warnings)
+            )
         if errors:
-            self.fail("Errors in docker role services configuration:\n" + "\n".join(errors))
+            self.fail(
+                "Errors in docker role services configuration:\n" + "\n".join(errors)
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

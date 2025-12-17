@@ -1,6 +1,7 @@
 # filter_plugins/cdn_urls.py
 import os
 
+
 def _to_url_tree(obj, cdn_root, base_url):
     """
     Recursively walk a nested dict and replace any string paths under cdn_root
@@ -16,7 +17,7 @@ def _to_url_tree(obj, cdn_root, base_url):
     if isinstance(obj, str):
         # Normalize inputs
         norm_root = os.path.abspath(cdn_root)
-        norm_val  = os.path.abspath(obj)
+        norm_val = os.path.abspath(obj)
 
         if norm_val.startswith(norm_root):
             # Compute path relative to CDN root and map to URL

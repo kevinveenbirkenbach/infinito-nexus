@@ -8,6 +8,7 @@ import yaml
 # Adjust this import to match the real path in your project
 from cli.fix.vars_main_files import run, ROLES_DIR
 
+
 class TestEnsureVarsMain(unittest.TestCase):
     def setUp(self):
         # create a temporary directory to act as our roles dir
@@ -17,11 +18,19 @@ class TestEnsureVarsMain(unittest.TestCase):
 
         # Monkey-patch the module's ROLES_DIR to point here
         self._orig_roles_dir = ROLES_DIR
-        setattr(__import__("cli.fix.vars_main_files", fromlist=["ROLES_DIR"]), "ROLES_DIR", self.roles_dir)
+        setattr(
+            __import__("cli.fix.vars_main_files", fromlist=["ROLES_DIR"]),
+            "ROLES_DIR",
+            self.roles_dir,
+        )
 
     def tearDown(self):
         # restore and cleanup
-        setattr(__import__("cli.fix.vars_main_files", fromlist=["ROLES_DIR"]), "ROLES_DIR", self._orig_roles_dir)
+        setattr(
+            __import__("cli.fix.vars_main_files", fromlist=["ROLES_DIR"]),
+            "ROLES_DIR",
+            self._orig_roles_dir,
+        )
         shutil.rmtree(self.tmpdir)
 
     def _make_role(self, name, vars_content=None):
@@ -78,6 +87,7 @@ class TestEnsureVarsMain(unittest.TestCase):
         # Run in preview => no file creation
         run(prefix="desk-", preview=True, overwrite=False)
         self.assertFalse(os.path.exists(vm))
+
 
 if __name__ == "__main__":
     unittest.main()

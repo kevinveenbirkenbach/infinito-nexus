@@ -151,7 +151,9 @@ class WhenConditionDuplicationTest(unittest.TestCase):
     """
 
     def test_excessive_repeated_when_in_tasks_files(self):
-        repo_root = _find_repo_root_containing(marker_names=(".git", "roles", "playbooks"))
+        repo_root = _find_repo_root_containing(
+            marker_names=(".git", "roles", "playbooks")
+        )
         tasks_globs = [
             "**/tasks/**/*.yml",
             "**/tasks/**/*.yaml",
@@ -175,8 +177,7 @@ class WhenConditionDuplicationTest(unittest.TestCase):
                     if len(occurrences) > THRESHOLD:
                         # Build a helpful error message showing a few sample tasks with this condition
                         sample = "\n".join(
-                            f"    - {tname} ({hint})"
-                            for tname, hint in occurrences[:5]
+                            f"    - {tname} ({hint})" for tname, hint in occurrences[:5]
                         )
                         violations.append(
                             (

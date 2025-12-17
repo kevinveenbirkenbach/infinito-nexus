@@ -14,8 +14,9 @@ Suffix handling:
 - Any string → ".{suffix}" (lowercased)
 """
 
+
 def get_service_name(systemctl_id, software_name, suffix=""):
-    sid           = str(systemctl_id).strip().lower()
+    sid = str(systemctl_id).strip().lower()
     software_name = str(software_name).strip().lower()
 
     # Determine suffix
@@ -31,6 +32,7 @@ def get_service_name(systemctl_id, software_name, suffix=""):
         return f"{base}.{software_name}@{sfx}"
     else:
         return f"{sid}.{software_name}{sfx}"
+
 
 class FilterModule(object):
     def filters(self):

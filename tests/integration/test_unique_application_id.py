@@ -15,9 +15,9 @@ def find_application_ids():
     pattern = os.path.join(base_dir, "roles", "*", "vars", "main.yml")
 
     for file_path in glob.glob(pattern):
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = yaml.safe_load(f) or {}
-        app_id = data.get('application_id')
+        app_id = data.get("application_id")
         if app_id is not None:
             ids.setdefault(app_id, []).append(file_path)
     return ids
@@ -30,10 +30,12 @@ class TestUniqueApplicationId(unittest.TestCase):
         if duplicates:
             messages = []
             for app_id, paths in duplicates.items():
-                file_list = '\n    '.join(paths)
-                messages.append(f"application_id '{app_id}' found in multiple files:\n    {file_list}")
+                file_list = "\n    ".join(paths)
+                messages.append(
+                    f"application_id '{app_id}' found in multiple files:\n    {file_list}"
+                )
             self.fail("\n\n".join(messages))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

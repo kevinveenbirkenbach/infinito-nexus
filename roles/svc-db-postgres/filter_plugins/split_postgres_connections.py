@@ -2,6 +2,7 @@ import os
 import yaml
 from ansible.errors import AnsibleFilterError
 
+
 def _iter_role_vars_files(roles_dir):
     if not os.path.isdir(roles_dir):
         raise AnsibleFilterError(f"roles_dir not found: {roles_dir}")
@@ -13,6 +14,7 @@ def _iter_role_vars_files(roles_dir):
         if os.path.isfile(vars_main):
             yield vars_main
 
+
 def _is_postgres_role(vars_file):
     try:
         with open(vars_file, "r", encoding="utf-8") as f:
@@ -23,6 +25,7 @@ def _is_postgres_role(vars_file):
         # ignore unreadable/broken YAML files quietly
         return False
 
+
 def split_postgres_connections(total_connections, roles_dir="roles"):
     """
     Return an integer average: total_connections / number_of_roles_with_database_type_postgres.
@@ -31,14 +34,15 @@ def split_postgres_connections(total_connections, roles_dir="roles"):
     try:
         total = int(total_connections)
     except Exception:
-        raise AnsibleFilterError(f"total_connections must be int-like, got: {total_connections!r}")
+        raise AnsibleFilterError(
+            f"total_connections must be int-like, got: {total_connections!r}"
+        )
 
     count = sum(1 for vf in _iter_role_vars_files(roles_dir) if _is_postgres_role(vf))
     denom = max(count, 1)
     return max(1, total // denom)
 
+
 class FilterModule(object):
     def filters(self):
-        return {
-            "split_postgres_connections": split_postgres_connections
-        }
+        return {"split_postgres_connections": split_postgres_connections}

@@ -8,12 +8,13 @@ sys.path.insert(
     os.path.abspath(
         os.path.join(
             os.path.dirname(__file__),
-            '../../../../../roles/web-app-bigbluebutton/filter_plugins'
+            "../../../../../roles/web-app-bigbluebutton/filter_plugins",
         )
-    )
+    ),
 )
 
 from compose_mods import compose_mods
+
 
 def sort_dict(obj):
     if isinstance(obj, dict):
@@ -22,6 +23,7 @@ def sort_dict(obj):
         return [sort_dict(v) for v in obj]
     else:
         return obj
+
 
 class TestComposeModsFullFile(unittest.TestCase):
     def setUp(self):
@@ -135,11 +137,14 @@ volumes:
 """
 
     def test_full_file_semantic_match(self):
-        actual_data = yaml.safe_load(compose_mods(self.original, self.docker_repository_path, self.env_file))
+        actual_data = yaml.safe_load(
+            compose_mods(self.original, self.docker_repository_path, self.env_file)
+        )
         expected_data = yaml.safe_load(self.expected)
         for key in expected_data:
             self.assertIn(key, actual_data)
             self.assertEqual(sort_dict(actual_data[key]), sort_dict(expected_data[key]))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -225,9 +225,14 @@ def remove_container(name: str) -> None:
     print(f">>> Container '{name}' removed.")
 
 
-def exec_in_container(name: str, cmd_args: List[str], workdir: str | None = WORKDIR_DEFAULT) -> int:
+def exec_in_container(
+    name: str, cmd_args: List[str], workdir: str | None = WORKDIR_DEFAULT
+) -> int:
     if not cmd_args:
-        print("Error: exec mode requires a command to run inside the container.", file=sys.stderr)
+        print(
+            "Error: exec mode requires a command to run inside the container.",
+            file=sys.stderr,
+        )
         return 1
 
     print(f">>> Executing command in container '{name}': {' '.join(cmd_args)}")
@@ -267,7 +272,7 @@ def main() -> int:
     if "--" in raw_argv:
         sep_index = raw_argv.index("--")
         container_argv = raw_argv[:sep_index]
-        rest = raw_argv[sep_index + 1:]
+        rest = raw_argv[sep_index + 1 :]
     else:
         container_argv = raw_argv
         rest = []
@@ -284,16 +289,18 @@ def main() -> int:
             "  python -m cli.deploy.container run --build -- \\\n"
             "    --include svc-db-mariadb -- \\\n"
             "    -T server --debug\n"
-        )
+        ),
     )
 
     parser.add_argument(
         "mode",
         choices=["run", "start", "stop", "exec", "remove"],
-        help="Container mode: run, start, stop, exec, remove."
+        help="Container mode: run, start, stop, exec, remove.",
     )
 
-    parser.add_argument("--image", default=os.environ.get("INFINITO_IMAGE", "infinito:latest"))
+    parser.add_argument(
+        "--image", default=os.environ.get("INFINITO_IMAGE", "infinito:latest")
+    )
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--rebuild", action="store_true")
     parser.add_argument("--no-cache", action="store_true")
@@ -312,7 +319,7 @@ def main() -> int:
             print(
                 "Error: missing deploy arguments in run mode.\n"
                 "Use:  container run [opts] -- [inventory args] -- [deploy args]",
-                file=sys.stderr
+                file=sys.stderr,
             )
             return 1
 
@@ -327,7 +334,10 @@ def main() -> int:
                 name=args.name,
             )
         except subprocess.CalledProcessError as exc:
-            print(f"[ERROR] Deploy failed with exit code {exc.returncode}", file=sys.stderr)
+            print(
+                f"[ERROR] Deploy failed with exit code {exc.returncode}",
+                file=sys.stderr,
+            )
             return exc.returncode
 
         return 0
@@ -367,6 +377,7 @@ def main() -> int:
 
     print(f"Unknown mode: {mode}", file=sys.stderr)
     return 1
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

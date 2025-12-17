@@ -1,6 +1,7 @@
 import unittest
 from module_utils.dict_renderer import DictRenderer
 
+
 class TestDictRenderer(unittest.TestCase):
     def setUp(self):
         # Timeout is small for tests, verbose off
@@ -41,22 +42,16 @@ class TestDictRenderer(unittest.TestCase):
         data = {"foo": "bar", "tmpl": "{{ <<foo>> }}"}
         rendered = self.renderer.render(data)
         self.assertEqual(rendered["tmpl"], "{{ bar }}")
-        
+
     def test_single_quoted_key(self):
         # ['foo-bar'] should resolve the key 'foo-bar'
-        data = {
-            "foo-bar": {"val": "xyz"},
-            "result": "<<['foo-bar'].val>>"
-        }
+        data = {"foo-bar": {"val": "xyz"}, "result": "<<['foo-bar'].val>>"}
         rendered = self.renderer.render(data)
         self.assertEqual(rendered["result"], "xyz")
 
     def test_double_quoted_key(self):
         # ["foo-bar"] should also resolve the key 'foo-bar'
-        data = {
-            "foo-bar": {"val": 123},
-            "result": '<<["foo-bar"].val>>'
-        }
+        data = {"foo-bar": {"val": 123}, "result": '<<["foo-bar"].val>>'}
         rendered = self.renderer.render(data)
         self.assertEqual(rendered["result"], "123")
 
@@ -64,25 +59,19 @@ class TestDictRenderer(unittest.TestCase):
         # Combine quoted key, dot access and numeric index
         data = {
             "web-svc-file": {
-                'server':{
-                    "domains": {
-                        "canonical": ["file.example.com"]
-                    }
-                }
+                "server": {"domains": {"canonical": ["file.example.com"]}}
             },
-            "url": '<<[\'web-svc-file\'].server.domains.canonical[0]>>'
+            "url": "<<['web-svc-file'].server.domains.canonical[0]>>",
         }
         rendered = self.renderer.render(data)
         self.assertEqual(rendered["url"], "file.example.com")
 
     def test_double_quoted_key_with_list_index(self):
         # Double-quoted key and list index together
-        data = {
-            "my-list": [ "a", "b", "c" ],
-            "pick": '<<["my-list"][2]>>'
-        }
+        data = {"my-list": ["a", "b", "c"], "pick": '<<["my-list"][2]>>'}
         rendered = self.renderer.render(data)
         self.assertEqual(rendered["pick"], "c")
+
 
 if __name__ == "__main__":
     unittest.main()

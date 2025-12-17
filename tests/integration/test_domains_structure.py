@@ -5,6 +5,7 @@ from collections import Counter
 
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent / "roles"
 
+
 class TestDomainsStructure(unittest.TestCase):
     def test_domains_keys_types_and_uniqueness(self):
         """Ensure that under 'domains' only 'canonical' and 'aliases' keys exist,
@@ -23,59 +24,97 @@ class TestDomainsStructure(unittest.TestCase):
 
             for vars_file in vars_dir.glob("*.yml"):
                 try:
-                    with open(vars_file, 'r') as f:
+                    with open(vars_file, "r") as f:
                         data = yaml.safe_load(f) or {}
                 except yaml.YAMLError as e:
-                    failed_roles.append((role_path.name, vars_file.name, f"YAML error: {e}"))
+                    failed_roles.append(
+                        (role_path.name, vars_file.name, f"YAML error: {e}")
+                    )
                     continue
 
-                if 'domains' not in data:
+                if "domains" not in data:
                     continue
 
-                domains = data.get('server',{}).get('domains')
+                domains = data.get("server", {}).get("domains")
                 if not isinstance(domains, dict):
-                    failed_roles.append((role_path.name, vars_file.name, "'domains' should be a dict"))
+                    failed_roles.append(
+                        (role_path.name, vars_file.name, "'domains' should be a dict")
+                    )
                     continue
 
                 # Check allowed keys
-                allowed_keys = {'canonical', 'aliases'}
+                allowed_keys = {"canonical", "aliases"}
                 extra_keys = set(domains.keys()) - allowed_keys
                 if extra_keys:
-                    failed_roles.append((role_path.name, vars_file.name,
-                                         f"Unexpected keys in 'domains': {extra_keys}"))
+                    failed_roles.append(
+                        (
+                            role_path.name,
+                            vars_file.name,
+                            f"Unexpected keys in 'domains': {extra_keys}",
+                        )
+                    )
 
                 # Validate and collect 'aliases'
-                if 'aliases' in domains:
-                    aliases = domains['aliases']
-                    if not isinstance(aliases, list) or not all(isinstance(item, str) for item in aliases):
-                        failed_roles.append((role_path.name, vars_file.name,
-                                             "'aliases' must be a list of strings"))
+                if "aliases" in domains:
+                    aliases = domains["aliases"]
+                    if not isinstance(aliases, list) or not all(
+                        isinstance(item, str) for item in aliases
+                    ):
+                        failed_roles.append(
+                            (
+                                role_path.name,
+                                vars_file.name,
+                                "'aliases' must be a list of strings",
+                            )
+                        )
                     else:
                         all_domains.extend(aliases)
 
                 # Validate and collect 'canonical'
-                if 'canonical' in domains:
-                    canonical = domains['canonical']
+                if "canonical" in domains:
+                    canonical = domains["canonical"]
                     if isinstance(canonical, list):
                         if not all(isinstance(item, str) for item in canonical):
-                            failed_roles.append((role_path.name, vars_file.name,
-                                                 "'canonical' list items must be strings"))
+                            failed_roles.append(
+                                (
+                                    role_path.name,
+                                    vars_file.name,
+                                    "'canonical' list items must be strings",
+                                )
+                            )
                         else:
                             all_domains.extend(canonical)
                     elif isinstance(canonical, dict):
-                        if not all(isinstance(k, str) and isinstance(v, str) for k, v in canonical.items()):
-                            failed_roles.append((role_path.name, vars_file.name,
-                                                 "All keys and values in 'canonical' dict must be strings"))
+                        if not all(
+                            isinstance(k, str) and isinstance(v, str)
+                            for k, v in canonical.items()
+                        ):
+                            failed_roles.append(
+                                (
+                                    role_path.name,
+                                    vars_file.name,
+                                    "All keys and values in 'canonical' dict must be strings",
+                                )
+                            )
                         else:
                             all_domains.extend(canonical.values())
                     else:
-                        failed_roles.append((role_path.name, vars_file.name,
-                                             "'canonical' must be a list or a dict"))
+                        failed_roles.append(
+                            (
+                                role_path.name,
+                                vars_file.name,
+                                "'canonical' must be a list or a dict",
+                            )
+                        )
 
         # Check for duplicate domains across all roles
-        duplicates = [domain for domain, count in Counter(all_domains).items() if count > 1]
+        duplicates = [
+            domain for domain, count in Counter(all_domains).items() if count > 1
+        ]
         if duplicates:
-            failed_roles.append(("GLOBAL", "", f"Duplicate domain entries found: {duplicates}"))
+            failed_roles.append(
+                ("GLOBAL", "", f"Duplicate domain entries found: {duplicates}")
+            )
 
         if failed_roles:
             messages = []
@@ -83,6 +122,7 @@ class TestDomainsStructure(unittest.TestCase):
                 entry = f"{role}/{file}: {reason}" if file else f"{role}: {reason}"
                 messages.append(entry)
             self.fail("Domain structure errors found:\n" + "\n".join(messages))
+
 
 if __name__ == "__main__":
     unittest.main()

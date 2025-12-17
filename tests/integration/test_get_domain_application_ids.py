@@ -2,7 +2,9 @@ import os
 import re
 import unittest
 from filter_plugins.get_all_application_ids import get_all_application_ids
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+
 
 class TestGetDomainApplicationIds(unittest.TestCase):
     """
@@ -20,13 +22,13 @@ class TestGetDomainApplicationIds(unittest.TestCase):
         invalid_usages = []
         for root, dirs, files in os.walk(PROJECT_ROOT):
             # Skip tests directory to avoid matching in test code
-            if 'tests' in root.split(os.sep):
+            if "tests" in root.split(os.sep):
                 continue
             for fname in files:
-                if not fname.endswith('.py'):
+                if not fname.endswith(".py"):
                     continue
                 path = os.path.join(root, fname)
-                with open(path, 'r', encoding='utf-8') as f:
+                with open(path, "r", encoding="utf-8") as f:
                     content = f.read()
                 for match in self.GET_DOMAIN_PATTERN.finditer(content):
                     literal = match.group(1)
@@ -34,8 +36,12 @@ class TestGetDomainApplicationIds(unittest.TestCase):
                         invalid_usages.append((path, literal))
 
         if invalid_usages:
-            msgs = [f"{path}: '{lit}' is not a valid application_id" for path, lit in invalid_usages]
+            msgs = [
+                f"{path}: '{lit}' is not a valid application_id"
+                for path, lit in invalid_usages
+            ]
             self.fail("Found invalid get_domain() usages:\n" + "\n".join(msgs))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

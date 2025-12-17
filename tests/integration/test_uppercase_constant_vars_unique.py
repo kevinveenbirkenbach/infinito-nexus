@@ -96,9 +96,7 @@ class TestUppercaseConstantVarsUnique(unittest.TestCase):
 
         # Duplicates are same TOP-LEVEL constant appearing in >1 files
         duplicates = {
-            c: sorted(files)
-            for c, files in constant_to_files.items()
-            if len(files) > 1
+            c: sorted(files) for c, files in constant_to_files.items() if len(files) > 1
         }
 
         if duplicates:

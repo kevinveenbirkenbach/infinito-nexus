@@ -2,20 +2,23 @@ import os
 import unittest
 import yaml
 
+
 class TestCategoryPaths(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Load categories.yml
         file_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', '..', 'roles', 'categories.yml')
+            os.path.join(
+                os.path.dirname(__file__), "..", "..", "roles", "categories.yml"
+            )
         )
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             data = yaml.safe_load(f)
-        cls.roles_def = data['roles']
+        cls.roles_def = data["roles"]
 
         # List of actual directories under roles/
         roles_dir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', '..', 'roles')
+            os.path.join(os.path.dirname(__file__), "..", "..", "roles")
         )
         cls.existing_dirs = os.listdir(roles_dir)
 
@@ -29,7 +32,7 @@ class TestCategoryPaths(unittest.TestCase):
             # Nested subcategories (keys other than metadata)
             for sub_key in attrs:
                 # Skip metadata keys
-                if sub_key in ('title', 'description', 'icon', 'children', 'invokable'):
+                if sub_key in ("title", "description", "icon", "children", "invokable"):
                     continue
                 expected.add(f"{top_key}-{sub_key}")
 
@@ -41,5 +44,6 @@ class TestCategoryPaths(unittest.TestCase):
         if missing:
             self.fail(f"Missing role directories for: {', '.join(sorted(missing))}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

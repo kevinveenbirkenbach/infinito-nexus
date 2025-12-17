@@ -96,7 +96,9 @@ class TestResourceFilter(unittest.TestCase):
 
     def test_hard_default_passthrough_type(self):
         """Ensure the hard_default (including non-string types) is passed through correctly."""
-        self.mock_get_app_conf.return_value = 2048  # simulate get_app_conf returning the default
+        self.mock_get_app_conf.return_value = (
+            2048  # simulate get_app_conf returning the default
+        )
 
         result = plugin_module.resource_filter(
             self.applications,

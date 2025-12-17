@@ -2,9 +2,10 @@ import sys
 import datetime
 import subprocess
 
+
 def hex_to_rgb(hex_color):
-    """ Converts a hexadecimal color string to an RGB tuple.
-    
+    """Converts a hexadecimal color string to an RGB tuple.
+
     Args:
         hex_color (str): Hexadecimal color string.
 
@@ -13,10 +14,11 @@ def hex_to_rgb(hex_color):
     """
     if len(hex_color) != 6:
         raise ValueError("Hex color must be 6 characters long.")
-    return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    return tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
+
 
 def calculate_color(start_color, end_color, ratio):
-    """ Calculates the interpolated color between two colors.
+    """Calculates the interpolated color between two colors.
 
     Args:
         start_color (str): Start color in hex format.
@@ -28,8 +30,11 @@ def calculate_color(start_color, end_color, ratio):
     """
     start_rgb = hex_to_rgb(start_color)
     end_rgb = hex_to_rgb(end_color)
-    current_rgb = [round(start + (end - start) * ratio) for start, end in zip(start_rgb, end_rgb)]
-    return ''.join(f"{value:02x}" for value in current_rgb)
+    current_rgb = [
+        round(start + (end - start) * ratio) for start, end in zip(start_rgb, end_rgb)
+    ]
+    return "".join(f"{value:02x}" for value in current_rgb)
+
 
 def get_current_period(current_time, color_times):
     """
@@ -49,6 +54,7 @@ def get_current_period(current_time, color_times):
         if current_time <= period_start_time:
             return sorted_periods[i - 1 if i > 0 else -1][1]
     return sorted_periods[0][1]
+
 
 def calculate_transition_ratio(current_time, start_time, end_time):
     """
@@ -72,7 +78,7 @@ def calculate_transition_ratio(current_time, start_time, end_time):
     # If start and end times are the same, return 0 to indicate no transition
     if start_timestamp == end_timestamp:
         return 0
-    
+
     # Calculate the current timestamp
     current_timestamp = datetime.datetime.combine(today, current_time).timestamp()
 
@@ -83,8 +89,9 @@ def calculate_transition_ratio(current_time, start_time, end_time):
     # Ratio as the proportion of time elapsed in the total transition duration
     return time_since_start / transition_duration
 
+
 def change_keyboard_color(color, device_id):
-    """ Changes the keyboard color using an external command.
+    """Changes the keyboard color using an external command.
 
     Args:
         color (str): Color in hex format.
@@ -97,6 +104,7 @@ def change_keyboard_color(color, device_id):
     except subprocess.CalledProcessError as e:
         print(f"Error setting keyboard color: {e}")
         sys.exit(1)
+
 
 def main(vendor_and_product_id):
     color_times = {
@@ -111,7 +119,7 @@ def main(vendor_and_product_id):
         "05:00": ("5bc0eb", "ff7f00"),  # Morning Blue to Dawn
         "04:00": ("990000", "5bc0eb"),  # Night to Blue
     }
-    
+
     current_time = datetime.datetime.now().time()
     start_color, end_color = get_current_period(current_time, color_times)
 
@@ -121,13 +129,22 @@ def main(vendor_and_product_id):
         if current_time < next_start_time_obj:
             break
 
-    current_period_start_time_str = [time for time, colors in color_times.items() if colors == (start_color, end_color)][0]
-    current_period_start_time_obj = datetime.datetime.strptime(current_period_start_time_str, "%H:%M").time()
+    current_period_start_time_str = [
+        time
+        for time, colors in color_times.items()
+        if colors == (start_color, end_color)
+    ][0]
+    current_period_start_time_obj = datetime.datetime.strptime(
+        current_period_start_time_str, "%H:%M"
+    ).time()
 
-    transition_ratio = calculate_transition_ratio(current_time, current_period_start_time_obj, next_start_time_obj)
+    transition_ratio = calculate_transition_ratio(
+        current_time, current_period_start_time_obj, next_start_time_obj
+    )
     current_color = calculate_color(start_color, end_color, transition_ratio)
 
     change_keyboard_color(current_color, vendor_and_product_id)
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

@@ -12,7 +12,11 @@ class TestGenerateUsers(unittest.TestCase):
     def test_build_users_auto_increment_and_overrides(self):
         defs = {
             "alice": {},
-            "bob": {"uid": 2000, "email": "bob@custom.com", "description": "Custom user"},
+            "bob": {
+                "uid": 2000,
+                "email": "bob@custom.com",
+                "description": "Custom user",
+            },
             "carol": {},
         }
         build = users.build_users(
@@ -40,7 +44,9 @@ class TestGenerateUsers(unittest.TestCase):
         the become_pwd lookup template string must be used as the password.
         """
         defs = {"frank": {}}
-        lookup_template = '{{ lookup("password", "/dev/null length=42 chars=ascii_letters,digits") }}'
+        lookup_template = (
+            '{{ lookup("password", "/dev/null length=42 chars=ascii_letters,digits") }}'
+        )
         build = users.build_users(
             defs=defs,
             primary_domain="example.com",
@@ -59,7 +65,9 @@ class TestGenerateUsers(unittest.TestCase):
         that custom password must be used instead of become_pwd.
         """
         defs = {"eva": {"password": "custompw"}}
-        lookup_template = '{{ lookup("password", "/dev/null length=42 chars=ascii_letters,digits") }}'
+        lookup_template = (
+            '{{ lookup("password", "/dev/null length=42 chars=ascii_letters,digits") }}'
+        )
         build = users.build_users(
             defs=defs,
             primary_domain="example.com",

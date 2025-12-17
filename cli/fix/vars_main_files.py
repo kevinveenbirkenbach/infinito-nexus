@@ -3,6 +3,7 @@
 Script to ensure each Ansible role under ../roles/ with a given prefix has a vars/main.yml
 containing the correct application_id. Can preview actions or overwrite mismatches.
 """
+
 import argparse
 import sys
 import yaml
@@ -12,12 +13,13 @@ from pathlib import Path
 MODULE_DIR = Path(__file__).resolve().parent
 ROLES_DIR = (MODULE_DIR.parent.parent / "roles").resolve()
 
+
 def process_role(role_dir: Path, prefix: str, preview: bool, overwrite: bool):
     name = role_dir.name
     if not name.startswith(prefix):
         return
     # Expected application_id is role name minus prefix
-    expected_id = name[len(prefix):]
+    expected_id = name[len(prefix) :]
     vars_dir = role_dir / "vars"
     vars_file = vars_dir / "main.yml"
     if vars_file.exists():
@@ -35,17 +37,25 @@ def process_role(role_dir: Path, prefix: str, preview: bool, overwrite: bool):
             # Update only application_id
             existing["application_id"] = expected_id
             if preview:
-                print(f"[PREVIEW] Would update {vars_file}: application_id -> {expected_id}")
+                print(
+                    f"[PREVIEW] Would update {vars_file}: application_id -> {expected_id}"
+                )
             else:
                 with open(vars_file, "w") as f:
-                    yaml.safe_dump(existing, f, default_flow_style=False, sort_keys=False)
+                    yaml.safe_dump(
+                        existing, f, default_flow_style=False, sort_keys=False
+                    )
                 print(f"Updated {vars_file}: application_id -> {expected_id}")
         else:
-            print(f"Mismatch in {vars_file}: application_id='{actual_id}', expected='{expected_id}'")
+            print(
+                f"Mismatch in {vars_file}: application_id='{actual_id}', expected='{expected_id}'"
+            )
     else:
         # Create new vars/main.yml
         if preview:
-            print(f"[PREVIEW] Would create {vars_file} with application_id: {expected_id}")
+            print(
+                f"[PREVIEW] Would create {vars_file} with application_id: {expected_id}"
+            )
         else:
             vars_dir.mkdir(parents=True, exist_ok=True)
             content = {"application_id": expected_id}
@@ -68,16 +78,19 @@ def main():
         description="Ensure vars/main.yml for roles with a given prefix has correct application_id"
     )
     parser.add_argument(
-        "--prefix", required=True,
-        help="Role name prefix to filter (e.g. 'web-', 'svc-', 'desk-')"
+        "--prefix",
+        required=True,
+        help="Role name prefix to filter (e.g. 'web-', 'svc-', 'desk-')",
     )
     parser.add_argument(
-        "--preview", action="store_true",
-        help="Show what would be done without making changes"
+        "--preview",
+        action="store_true",
+        help="Show what would be done without making changes",
     )
     parser.add_argument(
-        "--overwrite", action="store_true",
-        help="If vars/main.yml exists but application_id mismatches, overwrite only that key"
+        "--overwrite",
+        action="store_true",
+        help="If vars/main.yml exists but application_id mismatches, overwrite only that key",
     )
     args = parser.parse_args()
 

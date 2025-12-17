@@ -33,12 +33,15 @@ from module_utils.handler.vault import VaultHandler  # uses your existing handle
 
 # ---------- helpers ----------
 
+
 def ask_for_confirmation(key: str) -> bool:
     """Prompt the user for confirmation to overwrite an existing value."""
-    confirmation = input(
-        f"Are you sure you want to overwrite the value for '{key}'? (y/n): "
-    ).strip().lower()
-    return confirmation == 'y'
+    confirmation = (
+        input(f"Are you sure you want to overwrite the value for '{key}'? (y/n): ")
+        .strip()
+        .lower()
+    )
+    return confirmation == "y"
 
 
 def ensure_map(node: CommentedMap, key: str) -> CommentedMap:
@@ -53,7 +56,7 @@ def ensure_map(node: CommentedMap, key: str) -> CommentedMap:
 def _is_ruamel_vault(val: Any) -> bool:
     """Detect if a ruamel scalar already carries the !vault tag."""
     try:
-        return getattr(val, 'tag', None) == '!vault'
+        return getattr(val, "tag", None) == "!vault"
     except Exception:
         return False
 
@@ -95,7 +98,9 @@ def _make_vault_scalar_from_text(text: str) -> Any:
     return y.load(snippet)["v"]
 
 
-def to_vault_block(vault_handler: VaultHandler, value: Union[str, Any], label: str) -> Any:
+def to_vault_block(
+    vault_handler: VaultHandler, value: Union[str, Any], label: str
+) -> Any:
     """
     Return a ruamel scalar tagged as !vault. If the input value is already
     vault-encrypted (string contains $ANSIBLE_VAULT or is a !vault scalar), reuse/wrap.
@@ -120,6 +125,7 @@ def to_vault_block(vault_handler: VaultHandler, value: Union[str, Any], label: s
     snippet = vault_handler.encrypt_string(str(value), label)
     return _make_vault_scalar_from_text(snippet)
 
+
 def parse_overrides(pairs: list[str]) -> Dict[str, str]:
     """
     Parse --set key=value pairs into a dict.
@@ -134,24 +140,35 @@ def parse_overrides(pairs: list[str]) -> Dict[str, str]:
 
 # ---------- main ----------
 
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Selectively add & vault NEW credentials in your inventory, preserving comments/formatting."
     )
     parser.add_argument("--role-path", required=True, help="Path to your role")
-    parser.add_argument("--inventory-file", required=True, help="Host vars file to update")
-    parser.add_argument("--vault-password-file", required=True, help="Vault password file")
     parser.add_argument(
-        "--set", nargs="*", default=[],
-        help="Override values key[.subkey]=VALUE (applied to NEW keys; with --force also to existing)"
+        "--inventory-file", required=True, help="Host vars file to update"
     )
     parser.add_argument(
-        "-f", "--force", action="store_true",
-        help="Allow overrides to replace existing values (will ask per key unless combined with --yes)"
+        "--vault-password-file", required=True, help="Vault password file"
     )
     parser.add_argument(
-        "-y", "--yes", action="store_true",
-        help="Non-interactive: assume 'yes' for all overwrite confirmations when --force is used"
+        "--set",
+        nargs="*",
+        default=[],
+        help="Override values key[.subkey]=VALUE (applied to NEW keys; with --force also to existing)",
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="Allow overrides to replace existing values (will ask per key unless combined with --yes)",
+    )
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Non-interactive: assume 'yes' for all overwrite confirmations when --force is used",
     )
     parser.add_argument(
         "--snippet",
@@ -190,7 +207,11 @@ def main() -> int:
     schema_inventory: Dict[str, Any] = manager.apply_schema()
     schema_apps = schema_inventory.get("applications", {})
     schema_app_block = schema_apps.get(manager.app_id, {})
-    schema_creds = schema_app_block.get("credentials", {}) if isinstance(schema_app_block, dict) else {}
+    schema_creds = (
+        schema_app_block.get("credentials", {})
+        if isinstance(schema_app_block, dict)
+        else {}
+    )
 
     # -------------------------------------------------------------------------
     # SNIPPET MODE: only build a YAML fragment and print to stdout, no file I/O
@@ -218,7 +239,9 @@ def main() -> int:
                 value_for_key: Union[str, Any] = ov
             else:
                 if _is_vault_encrypted(default_val):
-                    creds_snip[key] = to_vault_block(manager.vault_handler, default_val, key)
+                    creds_snip[key] = to_vault_block(
+                        manager.vault_handler, default_val, key
+                    )
                     continue
                 value_for_key = "" if default_val is None else str(default_val)
 
@@ -290,14 +313,18 @@ def main() -> int:
             do_overwrite = args.yes or ask_for_confirmation("ansible_become_password")
             if do_overwrite:
                 data["ansible_become_password"] = to_vault_block(
-                    manager.vault_handler, overrides["ansible_become_password"], "ansible_become_password"
+                    manager.vault_handler,
+                    overrides["ansible_become_password"],
+                    "ansible_become_password",
                 )
 
     # 5) Overrides for existing credential keys (only with --force)
     if args.force:
         for ov_key, ov_val in overrides.items():
             # Accept both 'credentials.key' and bare 'key'
-            key = ov_key.split(".", 1)[1] if ov_key.startswith("credentials.") else ov_key
+            key = (
+                ov_key.split(".", 1)[1] if ov_key.startswith("credentials.") else ov_key
+            )
             if key in creds:
                 # If we just added it in this run, don't ask again or rewrap
                 if key in newly_added_keys:
@@ -309,7 +336,9 @@ def main() -> int:
     with open(args.inventory_file, "w", encoding="utf-8") as f:
         yaml_rt.dump(data, f)
 
-    print(f"✅ Added new credentials without touching existing formatting/comments → {args.inventory_file}")
+    print(
+        f"✅ Added new credentials without touching existing formatting/comments → {args.inventory_file}"
+    )
     return 0
 
 

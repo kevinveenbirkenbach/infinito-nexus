@@ -5,6 +5,7 @@ import importlib.util
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
+
 def _find_repo_root(start_dir: str, probe_parts: list[str]) -> str:
     """
     Walk upwards from start_dir until a path joined with probe_parts exists.
@@ -23,8 +24,10 @@ def _find_repo_root(start_dir: str, probe_parts: list[str]) -> str:
         f"Could not locate {'/'.join(probe_parts)} starting from {start_dir}"
     )
 
+
 PROBE = ["roles", "sys-svc-cdn", "filter_plugins", "cdn_paths.py"]
 ROOT = _find_repo_root(HERE, PROBE)
+
 
 def _load_module(mod_name: str, rel_path_from_root: str):
     """Load a python module from an absolute file path (hyphen-safe)."""
@@ -37,15 +40,20 @@ def _load_module(mod_name: str, rel_path_from_root: str):
     spec.loader.exec_module(module)  # type: ignore[attr-defined]
     return module
 
+
 cdn_paths_mod = _load_module(
-    "cdn_paths_mod", os.path.join("roles", "sys-svc-cdn", "filter_plugins", "cdn_paths.py")
+    "cdn_paths_mod",
+    os.path.join("roles", "sys-svc-cdn", "filter_plugins", "cdn_paths.py"),
 )
 cdn_urls_mod = _load_module(
-    "cdn_urls_mod", os.path.join("roles", "sys-svc-cdn", "filter_plugins", "cdn_urls.py")
+    "cdn_urls_mod",
+    os.path.join("roles", "sys-svc-cdn", "filter_plugins", "cdn_urls.py"),
 )
 cdn_dirs_mod = _load_module(
-    "cdn_dirs_mod", os.path.join("roles", "sys-svc-cdn", "filter_plugins", "cdn_dirs.py")
+    "cdn_dirs_mod",
+    os.path.join("roles", "sys-svc-cdn", "filter_plugins", "cdn_dirs.py"),
 )
+
 
 class TestCdnPathsUrlsDirs(unittest.TestCase):
     def setUp(self):
@@ -71,7 +79,9 @@ class TestCdnPathsUrlsDirs(unittest.TestCase):
         self.assertEqual(t["role"]["version"], self.ver)
         self.assertTrue(t["shared"]["css"].endswith(os.path.join("_shared", "css")))
         self.assertTrue(
-            t["role"]["release"]["css"].endswith(os.path.join(self.app, self.ver, "css"))
+            t["role"]["release"]["css"].endswith(
+                os.path.join(self.app, self.ver, "css")
+            )
         )
 
     # ---- cdn_urls ----
@@ -103,6 +113,7 @@ class TestCdnPathsUrlsDirs(unittest.TestCase):
         self.assertIn(os.path.join(self.root, "roles", self.app, self.ver, "img"), dirs)
         self.assertEqual(dirs, sorted(dirs))
         self.assertEqual(len(dirs), len(set(dirs)))
+
 
 if __name__ == "__main__":
     unittest.main()

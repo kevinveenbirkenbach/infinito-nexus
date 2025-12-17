@@ -14,11 +14,17 @@ def load_filter_module(repo_root: str) -> ModuleType:
       roles/svc-db-postgres/filter_plugins/split_postgres_connections.py
     """
     plugin_path = os.path.join(
-        repo_root, "roles", "svc-db-postgres", "filter_plugins", "split_postgres_connections.py"
+        repo_root,
+        "roles",
+        "svc-db-postgres",
+        "filter_plugins",
+        "split_postgres_connections.py",
     )
     if not os.path.isfile(plugin_path):
         raise FileNotFoundError(f"Filter plugin not found at {plugin_path}")
-    spec = importlib.util.spec_from_file_location("split_postgres_connections_plugin", plugin_path)
+    spec = importlib.util.spec_from_file_location(
+        "split_postgres_connections_plugin", plugin_path
+    )
     module = importlib.util.module_from_spec(spec)
     assert spec and spec.loader
     spec.loader.exec_module(module)  # type: ignore[attr-defined]
@@ -35,10 +41,12 @@ def write_role_vars(repo_root: str, role_name: str, database_type: str | None):
     if database_type is not None:
         os.makedirs(vars_dir, exist_ok=True)
         with open(os.path.join(vars_dir, "main.yml"), "w", encoding="utf-8") as f:
-            f.write(textwrap.dedent(f"""\
+            f.write(
+                textwrap.dedent(f"""\
                 # auto-generated for test
                 database_type: {database_type}
-            """))
+            """)
+            )
 
 
 class SplitPostgresConnectionsTests(unittest.TestCase):
@@ -61,13 +69,22 @@ class SplitPostgresConnectionsTests(unittest.TestCase):
         # Copy the real plugin into this temp repo structure, preserving your path layout.
         # (Adjust src_plugin_path if your test runner runs from a different CWD.)
         src_plugin_path = os.path.join(
-            os.getcwd(), "roles", "svc-db-postgres", "filter_plugins", "split_postgres_connections.py"
+            os.getcwd(),
+            "roles",
+            "svc-db-postgres",
+            "filter_plugins",
+            "split_postgres_connections.py",
         )
         if not os.path.isfile(src_plugin_path):
             self.skipTest(f"Source plugin not found at {src_plugin_path}")
-        dst_plugin_dir = os.path.join(self.repo, "roles", "svc-db-postgres", "filter_plugins")
+        dst_plugin_dir = os.path.join(
+            self.repo, "roles", "svc-db-postgres", "filter_plugins"
+        )
         os.makedirs(dst_plugin_dir, exist_ok=True)
-        shutil.copy2(src_plugin_path, os.path.join(dst_plugin_dir, "split_postgres_connections.py"))
+        shutil.copy2(
+            src_plugin_path,
+            os.path.join(dst_plugin_dir, "split_postgres_connections.py"),
+        )
 
         self.mod = load_filter_module(self.repo)
 
@@ -84,10 +101,14 @@ class SplitPostgresConnectionsTests(unittest.TestCase):
         self.assertEqual(avg, 100)
 
         # 5 / 2 -> floor 2
-        self.assertEqual(self.mod.split_postgres_connections(5, roles_dir=self.roles_dir), 2)
+        self.assertEqual(
+            self.mod.split_postgres_connections(5, roles_dir=self.roles_dir), 2
+        )
 
         # Safety floor: at least 1
-        self.assertEqual(self.mod.split_postgres_connections(1, roles_dir=self.roles_dir), 1)
+        self.assertEqual(
+            self.mod.split_postgres_connections(1, roles_dir=self.roles_dir), 1
+        )
 
     def test_split_handles_non_int_input(self):
         with self.assertRaises(AnsibleFilterError):

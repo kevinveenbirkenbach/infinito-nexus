@@ -14,7 +14,7 @@ class TestTreeMain(unittest.TestCase):
         os.makedirs(os.path.join(self.role_path, "meta"))
 
         meta_path = os.path.join(self.role_path, "meta", "main.yml")
-        with open(meta_path, 'w') as f:
+        with open(meta_path, "w") as f:
             f.write("galaxy_info:\n  author: test\n  run_after: []\ndependencies: []\n")
 
     def tearDown(self):
@@ -28,13 +28,14 @@ class TestTreeMain(unittest.TestCase):
     def test_main_execution_does_not_raise(self):
         # Mocking sys.argv and running main should not raise
         import sys
+
         old_argv = sys.argv
-        sys.argv = ['tree.py', '-d', self.temp_dir, '-p']
+        sys.argv = ["tree.py", "-d", self.temp_dir, "-p"]
         try:
             tree.main()
         finally:
             sys.argv = old_argv
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

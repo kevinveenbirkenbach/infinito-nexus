@@ -18,7 +18,6 @@ from ruamel.yaml.comments import CommentedMap
 
 
 class TestCreateInventory(unittest.TestCase):
-
     def test_parse_roles_list_supports_commas_and_spaces(self):
         """
         parse_roles_list() should:
@@ -30,11 +29,13 @@ class TestCreateInventory(unittest.TestCase):
         self.assertIsNone(parse_roles_list(None))
         self.assertIsNone(parse_roles_list([]))
 
-        roles = parse_roles_list([
-            "web-app-nextcloud, web-app-matomo",
-            "web-app-phpmyadmin",
-            "web-app-nextcloud",  # duplicate
-        ])
+        roles = parse_roles_list(
+            [
+                "web-app-nextcloud, web-app-matomo",
+                "web-app-phpmyadmin",
+                "web-app-nextcloud",  # duplicate
+            ]
+        )
 
         self.assertIsInstance(roles, set)
         self.assertEqual(
@@ -127,7 +128,7 @@ class TestCreateInventory(unittest.TestCase):
                         }
                     },
                     # A new group with no hosts → merge_inventories must create hosts + localhost
-                    "web-app-phpmyadmin": {}
+                    "web-app-phpmyadmin": {},
                 }
             }
         }
@@ -232,7 +233,7 @@ existing_key: foo
                 host_vars_file=host_vars_file,
                 host="other-host",
                 primary_domain="other.example",
-                ssl_disabled=True,   # would switch to false if it overwrote
+                ssl_disabled=True,  # would switch to false if it overwrote
                 ip4="10.0.0.1",
                 ip6="::2",
             )
@@ -247,7 +248,6 @@ existing_key: foo
             internet2 = data2["networks"]["internet"]
             self.assertEqual(internet2["ip4"], "127.0.0.1")
             self.assertEqual(internet2["ip6"], "::1")
-
 
     def test_ensure_host_vars_file_sets_local_connection_for_localhost(self):
         """
@@ -307,7 +307,7 @@ existing_key: foo
                 data2 = yaml_rt.load(f)
 
             self.assertEqual(data2["ansible_connection"], "local")
-            
+
     def test_ensure_become_password_keeps_existing_when_no_cli_password(self):
         """
         If no --become-password is provided and ansible_become_password already
@@ -347,7 +347,7 @@ existing_key: foo
             self.assertIsNotNone(doc)
             self.assertIn("ansible_become_password", doc)
             self.assertEqual(doc["ansible_become_password"], "EXISTING_VALUE")
-            
+
     def test_get_path_administrator_home_from_group_vars_reads_value(self):
         """
         get_path_administrator_home_from_group_vars() must:

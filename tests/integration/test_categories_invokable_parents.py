@@ -2,6 +2,7 @@ import os
 import unittest
 import yaml
 
+
 class TestCategoriesInvokableExclusion(unittest.TestCase):
     def test_no_child_invokable_if_any_parent_is_invokable(self):
         """
@@ -11,10 +12,10 @@ class TestCategoriesInvokableExclusion(unittest.TestCase):
         # locate roles/categories.yml
         base_dir = os.path.dirname(__file__)
         yaml_path = os.path.abspath(
-            os.path.join(base_dir, '..', '..', 'roles', 'categories.yml')
+            os.path.join(base_dir, "..", "..", "roles", "categories.yml")
         )
 
-        with open(yaml_path, 'r', encoding='utf-8') as f:
+        with open(yaml_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f)
 
         violations = []
@@ -24,12 +25,12 @@ class TestCategoriesInvokableExclusion(unittest.TestCase):
                 if not isinstance(value, dict):
                     continue
 
-                is_invokable = value.get('invokable', False)
+                is_invokable = value.get("invokable", False)
                 current_path = path + [key]
 
                 # Violation: a descendant is invokable despite an invokable ancestor
                 if ancestor_invokable and is_invokable:
-                    ancestor_name = '.'.join(path) if path else '<root>'
+                    ancestor_name = ".".join(path) if path else "<root>"
                     violations.append(
                         f"{'.'.join(current_path)} is invokable, "
                         f"but its ancestor ({ancestor_name}) is also invokable."
@@ -44,7 +45,7 @@ class TestCategoriesInvokableExclusion(unittest.TestCase):
                         recurse({subkey: subval}, current_path, new_ancestor_flag)
 
         # start at top-level roles, with no invokable ancestor
-        recurse(data.get('roles', {}), [], False)
+        recurse(data.get("roles", {}), [], False)
 
         if violations:
             self.fail(
@@ -52,5 +53,6 @@ class TestCategoriesInvokableExclusion(unittest.TestCase):
                 + "\n".join(violations)
             )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

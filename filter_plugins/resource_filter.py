@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from module_utils.config_utils import get_app_conf, AppConfigKeyError, ConfigEntryNotSetError  # noqa: F401
+from module_utils.config_utils import (
+    get_app_conf,
+    AppConfigKeyError,
+    ConfigEntryNotSetError,
+)  # noqa: F401
 from module_utils.entity_name_utils import get_entity_name
 
 from ansible.errors import AnsibleFilterError
@@ -23,8 +27,16 @@ def resource_filter(
     - required=False always.
     """
     try:
-        primary_service = service_name if service_name != "" else get_entity_name(application_id)
-        return get_app_conf(applications, application_id, f"docker.services.{primary_service}.{key}", False, hard_default)
+        primary_service = (
+            service_name if service_name != "" else get_entity_name(application_id)
+        )
+        return get_app_conf(
+            applications,
+            application_id,
+            f"docker.services.{primary_service}.{key}",
+            False,
+            hard_default,
+        )
     except (AppConfigKeyError, ConfigEntryNotSetError) as e:
         raise AnsibleFilterError(str(e))
 

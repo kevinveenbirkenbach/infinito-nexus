@@ -1,9 +1,10 @@
 import os
 
+
 def filetype(path, full=False):
     """
     Extract file type (extension) from a given path.
-    
+
     :param path: Path or filename
     :param full: If True, return the full extension (e.g., 'sh.j2'),
                  else only the last extension (e.g., 'sh').
@@ -11,12 +12,12 @@ def filetype(path, full=False):
     """
     if not path or not isinstance(path, str):
         return ""
-    
+
     basename = os.path.basename(path)
-    
+
     if full:
         # Full extension chain (e.g., "script.sh.j2" -> "sh.j2")
-        parts = basename.split('.', 1)
+        parts = basename.split(".", 1)
         if len(parts) == 2:
             return parts[1]
         return ""
@@ -27,9 +28,7 @@ def filetype(path, full=False):
 
 
 class FilterModule(object):
-    """ Custom Jinja2 filters for Ansible """
+    """Custom Jinja2 filters for Ansible"""
 
     def filters(self):
-        return {
-            "filetype": filetype
-        }
+        return {"filetype": filetype}

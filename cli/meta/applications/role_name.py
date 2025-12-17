@@ -7,6 +7,7 @@ by inspecting each role's vars/main.yml within the roles directory. By default, 
 roles directory is located at the project root, relative to this script's location.
 
 """
+
 import os
 import sys
 import argparse
@@ -27,36 +28,41 @@ def get_role(application_id, roles_path):
 
     for role in sorted(os.listdir(roles_path)):
         role_dir = os.path.join(roles_path, role)
-        vars_file = os.path.join(role_dir, 'vars', 'main.yml')
+        vars_file = os.path.join(role_dir, "vars", "main.yml")
         if os.path.isfile(vars_file):
             try:
-                with open(vars_file, 'r') as f:
+                with open(vars_file, "r") as f:
                     data = yaml.safe_load(f) or {}
             except Exception as e:
                 raise RuntimeError(f"Failed to load {vars_file}: {e}")
 
-            if data.get('application_id') == application_id:
+            if data.get("application_id") == application_id:
                 return role
 
-    raise RuntimeError(f"No role found with application_id '{application_id}' in {roles_path}")
+    raise RuntimeError(
+        f"No role found with application_id '{application_id}' in {roles_path}"
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Determine the Ansible role folder by application_id'
+        description="Determine the Ansible role folder by application_id"
     )
     parser.add_argument(
-        'application_id',
-        help='The application_id defined in vars/main.yml to search for'
+        "application_id",
+        help="The application_id defined in vars/main.yml to search for",
     )
     parser.add_argument(
-        '-r', '--roles-path',
+        "-r",
+        "--roles-path",
         default=os.path.join(
             os.path.dirname(os.path.realpath(__file__)),
-            os.pardir, os.pardir, os.pardir,
-            'roles'
+            os.pardir,
+            os.pardir,
+            os.pardir,
+            "roles",
         ),
-        help='Path to the roles directory (default: roles/ at project root)'
+        help="Path to the roles directory (default: roles/ at project root)",
     )
 
     args = parser.parse_args()
@@ -70,5 +76,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

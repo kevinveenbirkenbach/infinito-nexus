@@ -102,9 +102,9 @@ class TestDynamicModes(unittest.TestCase):
         args = real_parser.parse_args([])
         modes = deploy.build_modes_from_args(spec, args)
 
-        self.assertTrue(modes["MODE_CLEANUP"])   # default True
-        self.assertFalse(modes["MODE_DEBUG"])    # default False
-        self.assertNotIn("MODE_ASSERT", modes)   # explicit, not set
+        self.assertTrue(modes["MODE_CLEANUP"])  # default True
+        self.assertFalse(modes["MODE_DEBUG"])  # default False
+        self.assertNotIn("MODE_ASSERT", modes)  # explicit, not set
 
     def test_add_dynamic_mode_args_and_build_modes_flags_true(self):
         from argparse import ArgumentParser
@@ -132,8 +132,8 @@ class TestDynamicModes(unittest.TestCase):
         args = parser.parse_args(["--assert", "false"])
         modes = deploy.build_modes_from_args(spec, args)
 
-        self.assertTrue(modes["MODE_CLEANUP"])   # still default True
-        self.assertFalse(modes["MODE_DEBUG"])    # still default False
+        self.assertTrue(modes["MODE_CLEANUP"])  # still default True
+        self.assertFalse(modes["MODE_DEBUG"])  # still default False
         self.assertIn("MODE_ASSERT", modes)
         self.assertFalse(modes["MODE_ASSERT"])
 
@@ -239,8 +239,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         )
         self.assertTrue(
             any(
-                isinstance(call, list)
-                and any("inventory.py" in part for part in call)
+                isinstance(call, list) and any("inventory.py" in part for part in call)
                 for call in calls
             ),
             "Expected inventory validation call (... inventory.py ...)",
@@ -298,7 +297,9 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         self.assertNotIn("capture_output", last_call.kwargs)
 
     @mock.patch("subprocess.run")
-    def test_run_ansible_playbook_failure_exits_with_code_and_skips_phases(self, mock_run):
+    def test_run_ansible_playbook_failure_exits_with_code_and_skips_phases(
+        self, mock_run
+    ):
         calls: List[List[str]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=4)
 
@@ -333,14 +334,15 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         self.assertFalse(any(call == ["make", "test-messy"] for call in calls))
         self.assertFalse(
             any(
-                isinstance(call, list)
-                and any("inventory.py" in part for part in call)
+                isinstance(call, list) and any("inventory.py" in part for part in call)
                 for call in calls
             )
         )
 
     @mock.patch("subprocess.run")
-    def test_run_ansible_playbook_cleanup_with_logs_uses_clean_keep_logs(self, mock_run):
+    def test_run_ansible_playbook_cleanup_with_logs_uses_clean_keep_logs(
+        self, mock_run
+    ):
         calls: List[List[str]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
 

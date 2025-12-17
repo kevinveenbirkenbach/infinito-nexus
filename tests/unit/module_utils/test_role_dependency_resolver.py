@@ -56,7 +56,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             - name: import C
               import_role:
                 name: C
-            """
+            """,
         )
 
         r = RoleDependencyResolver(self.roles_dir)
@@ -88,7 +88,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
               with_items:
                 - { role: "F" }
                 - { role: "G" }
-            """
+            """,
         )
 
         r = RoleDependencyResolver(self.roles_dir)
@@ -109,7 +109,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             - name: pure var ignored
               include_role:
                 name: "{{ something }}"
-            """
+            """,
         )
 
         r = RoleDependencyResolver(self.roles_dir)
@@ -135,7 +135,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             dependencies:
               - H
               - { role: I }
-            """
+            """,
         )
 
         r = RoleDependencyResolver(self.roles_dir)
@@ -159,7 +159,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
                 - J
                 - K
             dependencies: []
-            """
+            """,
         )
 
         r = RoleDependencyResolver(self.roles_dir)
@@ -193,14 +193,14 @@ class TestRoleDependencyResolver(unittest.TestCase):
             """
             - include_role:
                 name: B
-            """
+            """,
         )
         write(
             os.path.join(self.roles_dir, "B", "tasks", "main.yml"),
             """
             - import_role:
                 name: A
-            """
+            """,
         )
 
         r = RoleDependencyResolver(self.roles_dir)
@@ -226,7 +226,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             """
             - include_role: { name: C1 }
             - import_role:  { name: C2 }
-            """
+            """,
         )
         write(
             os.path.join(self.roles_dir, "ROOT", "meta", "main.yml"),
@@ -238,7 +238,7 @@ class TestRoleDependencyResolver(unittest.TestCase):
             galaxy_info:
               run_after:
                 - RA1
-            """
+            """,
         )
 
         r = RoleDependencyResolver(self.roles_dir)

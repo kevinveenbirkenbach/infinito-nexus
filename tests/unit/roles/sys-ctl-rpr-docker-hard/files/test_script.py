@@ -9,8 +9,12 @@ def load_script_module():
     Import the script under test from roles/sys-ctl-rpr-docker-hard/files/script.py
     """
     test_file = Path(__file__).resolve()
-    repo_root = test_file.parents[5]  # .../tests/unit/roles/sys-ctl-rpr-docker-hard/files -> repo root
-    script_path = repo_root / "roles" / "sys-ctl-rpr-docker-hard" / "files" / "script.py"
+    repo_root = test_file.parents[
+        5
+    ]  # .../tests/unit/roles/sys-ctl-rpr-docker-hard/files -> repo root
+    script_path = (
+        repo_root / "roles" / "sys-ctl-rpr-docker-hard" / "files" / "script.py"
+    )
     if not script_path.exists():
         raise FileNotFoundError(f"script.py not found at {script_path}")
     spec = spec_from_file_location("rpr_hard_script", str(script_path))
@@ -54,8 +58,10 @@ class TestRepairDockerHard(unittest.TestCase):
 
         def fake_run(cmd, cwd=None, check=None):
             calls.append({"cmd": cmd, "cwd": cwd, "check": check})
+
             class R:
                 pass
+
             return R()
 
         old_run = s.subprocess.run
@@ -93,6 +99,7 @@ class TestRepairDockerHard(unittest.TestCase):
             def __init__(self, path, is_dir=True):
                 self.path = path
                 self._is_dir = is_dir
+
             def is_dir(self):
                 return self._is_dir
 

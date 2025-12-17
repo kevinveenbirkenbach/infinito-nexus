@@ -8,6 +8,7 @@ from typing import Any, Dict, Iterable, List, Set, Tuple, Optional
 
 # ---------- YAML helpers ----------
 
+
 def load_yaml_documents(path: str) -> List[Any]:
     """
     Load one or more YAML documents from a file and return them as a list.
@@ -72,10 +73,14 @@ def _jinja_mixed_to_regex(value: str) -> Optional[re.Pattern]:
     if "{{" not in s or "}}" not in s:
         return None
     parts = re.split(r"(\{\{.*?\}\})", s)
-    regex_str = "^" + "".join(
-        (".+" if p.startswith("{{") and p.endswith("}}") else re.escape(p))
-        for p in parts
-    ) + "$"
+    regex_str = (
+        "^"
+        + "".join(
+            (".+" if p.startswith("{{") and p.endswith("}}") else re.escape(p))
+            for p in parts
+        )
+        + "$"
+    )
     return re.compile(regex_str)
 
 
@@ -99,6 +104,7 @@ def _expand_dynamic_notify(value: str) -> List[str]:
 
 
 # ---------- Extraction from handlers/tasks ----------
+
 
 def collect_handler_groups(handler_file: str) -> List[Set[str]]:
     """
@@ -131,7 +137,9 @@ def collect_handler_groups(handler_file: str) -> List[Set[str]]:
     return groups
 
 
-def collect_notify_calls_from_tasks(task_file: str) -> Tuple[Set[str], List[re.Pattern]]:
+def collect_notify_calls_from_tasks(
+    task_file: str,
+) -> Tuple[Set[str], List[re.Pattern]]:
     """
     From a task file, collect all notification targets via:
       - 'notify:' (string or list), including dynamic Jinja expressions with literals,
@@ -155,7 +163,7 @@ def collect_notify_calls_from_tasks(task_file: str) -> Tuple[Set[str], List[re.P
                 if item_str.startswith("{{") and item_str.endswith("}}"):
                     continue
 
-                has_jinja = ("{{" in item_str and "}}" in item_str)
+                has_jinja = "{{" in item_str and "}}" in item_str
 
                 # Case 2: expand quoted literals inside Jinja expressions (as exacts)
                 if has_jinja:
@@ -185,7 +193,7 @@ def collect_notify_calls_from_tasks(task_file: str) -> Tuple[Set[str], List[re.P
                             if item_str.startswith("{{") and item_str.endswith("}}"):
                                 continue
 
-                            has_jinja = ("{{" in item_str and "}}" in item_str)
+                            has_jinja = "{{" in item_str and "}}" in item_str
 
                             if has_jinja:
                                 # Only quoted literals as exacts
@@ -213,6 +221,7 @@ def collect_notify_calls_from_tasks(task_file: str) -> Tuple[Set[str], List[re.P
 
 # ---------- Test case ----------
 
+
 class TestHandlersInvoked(unittest.TestCase):
     """
     Ensures:
@@ -226,15 +235,15 @@ class TestHandlersInvoked(unittest.TestCase):
         self.roles_dir = os.path.join(repo_root, "roles")
 
         # Handlers: support .yml and .yaml
-        self.handler_files = (
-            glob.glob(os.path.join(self.roles_dir, "*/handlers/*.yml"))
-            + glob.glob(os.path.join(self.roles_dir, "*/handlers/*.yaml"))
-        )
+        self.handler_files = glob.glob(
+            os.path.join(self.roles_dir, "*/handlers/*.yml")
+        ) + glob.glob(os.path.join(self.roles_dir, "*/handlers/*.yaml"))
 
         # Tasks: recurse under tasks for both .yml and .yaml
-        self.task_files = (
-            glob.glob(os.path.join(self.roles_dir, "*", "tasks", "**", "*.yml"), recursive=True)
-            + glob.glob(os.path.join(self.roles_dir, "*", "tasks", "**", "*.yaml"), recursive=True)
+        self.task_files = glob.glob(
+            os.path.join(self.roles_dir, "*", "tasks", "**", "*.yml"), recursive=True
+        ) + glob.glob(
+            os.path.join(self.roles_dir, "*", "tasks", "**", "*.yaml"), recursive=True
         )
 
     def test_all_handlers_have_a_notifier_and_all_notifies_have_a_handler(self):
@@ -244,7 +253,9 @@ class TestHandlersInvoked(unittest.TestCase):
             handler_groups.extend(collect_handler_groups(hf))
 
         # Flatten all handler aliases for reverse checks
-        all_aliases: Set[str] = set().union(*handler_groups) if handler_groups else set()
+        all_aliases: Set[str] = (
+            set().union(*handler_groups) if handler_groups else set()
+        )
 
         # 2) Collect all notified targets (notify + package_notify) from tasks
         notified_exact: Set[str] = set()
@@ -266,7 +277,9 @@ class TestHandlersInvoked(unittest.TestCase):
             return False
 
         # 3A) Every handler group is covered if any alias is notified (exact or regex)
-        missing_groups: List[Set[str]] = [grp for grp in handler_groups if not group_is_covered(grp)]
+        missing_groups: List[Set[str]] = [
+            grp for grp in handler_groups if not group_is_covered(grp)
+        ]
 
         if missing_groups:
             representatives: List[str] = []
@@ -294,10 +307,13 @@ class TestHandlersInvoked(unittest.TestCase):
         #     - Jinja-mixed strings (patterns) must match at least one alias via regex.
         missing_exacts = sorted([s for s in notified_exact if s not in all_aliases])
 
-        orphan_patterns = sorted({
-            rx.pattern for rx in notified_patterns
-            if not any(rx.match(alias) for alias in all_aliases)
-        })
+        orphan_patterns = sorted(
+            {
+                rx.pattern
+                for rx in notified_patterns
+                if not any(rx.match(alias) for alias in all_aliases)
+            }
+        )
 
         if missing_exacts or orphan_patterns:
             msg = ["Some notify targets do not map to any existing handler:"]
@@ -305,7 +321,9 @@ class TestHandlersInvoked(unittest.TestCase):
                 msg.append("  • Missing exact handler aliases:")
                 msg.extend([f"    - {s}" for s in missing_exacts])
             if orphan_patterns:
-                msg.append("  • Pattern notifications with no matching handler alias (regex):")
+                msg.append(
+                    "  • Pattern notifications with no matching handler alias (regex):"
+                )
                 msg.extend([f"    - {pat}" for pat in orphan_patterns])
             msg += [
                 "",

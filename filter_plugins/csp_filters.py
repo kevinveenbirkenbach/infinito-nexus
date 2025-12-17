@@ -15,6 +15,7 @@ def _dedup_preserve(seq):
             out.append(x)
     return out
 
+
 def _sort_tokens(tokens):
     """
     Return a deterministically ordered list of CSP tokens.
@@ -36,6 +37,7 @@ def _sort_tokens(tokens):
 
     return uniq
 
+
 class FilterModule(object):
     """
     Jinja filters for building a robust, CSP3-aware Content-Security-Policy header.
@@ -46,7 +48,7 @@ class FilterModule(object):
 
     def filters(self):
         return {
-            'build_csp_header': self.build_csp_header,
+            "build_csp_header": self.build_csp_header,
         }
 
     # -------------------------------
@@ -54,16 +56,14 @@ class FilterModule(object):
     # -------------------------------
 
     @staticmethod
-    def is_feature_enabled(applications: dict, feature: str, application_id: str) -> bool:
+    def is_feature_enabled(
+        applications: dict, feature: str, application_id: str
+    ) -> bool:
         """
         Returns True if applications[application_id].features[feature] is truthy.
         """
         return get_app_conf(
-            applications,
-            application_id,
-            'features.' + feature,
-            False,
-            False
+            applications, application_id, "features." + feature, False, False
         )
 
     @staticmethod
@@ -73,11 +73,7 @@ class FilterModule(object):
         Accepts both scalar and list in config; always returns a list.
         """
         wl = get_app_conf(
-            applications,
-            application_id,
-            'server.csp.whitelist.' + directive,
-            False,
-            []
+            applications, application_id, "server.csp.whitelist." + directive, False, []
         )
         if isinstance(wl, list):
             return wl
@@ -97,15 +93,11 @@ class FilterModule(object):
           - For scripts we do NOT enable 'unsafe-inline' by default.
         """
         default_flags = {}
-        if directive in ('style-src', 'style-src-elem', 'style-src-attr'):
-            default_flags = {'unsafe-inline': True}
+        if directive in ("style-src", "style-src-elem", "style-src-attr"):
+            default_flags = {"unsafe-inline": True}
 
         configured = get_app_conf(
-            applications,
-            application_id,
-            'server.csp.flags.' + directive,
-            False,
-            {}
+            applications, application_id, "server.csp.flags." + directive, False, {}
         )
 
         merged = {**default_flags, **configured}
@@ -123,11 +115,7 @@ class FilterModule(object):
         Accepts both scalar and list in config; always returns a list.
         """
         snippets = get_app_conf(
-            applications,
-            application_id,
-            'server.csp.hashes.' + directive,
-            False,
-            []
+            applications, application_id, "server.csp.hashes." + directive, False, []
         )
         if isinstance(snippets, list):
             return snippets
@@ -142,8 +130,8 @@ class FilterModule(object):
         a CSP token like "'sha256-<base64>'".
         """
         try:
-            digest = hashlib.sha256(content.encode('utf-8')).digest()
-            b64 = base64.b64encode(digest).decode('utf-8')
+            digest = hashlib.sha256(content.encode("utf-8")).digest()
+            b64 = base64.b64encode(digest).decode("utf-8")
             return f"'sha256-{b64}'"
         except Exception as exc:
             raise AnsibleFilterError(f"get_csp_hash failed: {exc}")
@@ -157,8 +145,8 @@ class FilterModule(object):
         applications,
         application_id,
         domains,
-        web_protocol='https',
-        matomo_feature_name='matomo'
+        web_protocol="https",
+        matomo_feature_name="matomo",
     ):
         """
         Builds the Content-Security-Policy header value dynamically based on application settings.
@@ -185,20 +173,20 @@ class FilterModule(object):
         """
         try:
             directives = [
-                'default-src',
-                'connect-src',
-                'frame-ancestors',
-                'frame-src',
-                'script-src',
-                'script-src-elem',
-                'script-src-attr',
-                'style-src',
-                'style-src-elem',
-                'style-src-attr',
-                'font-src',
-                'worker-src',
-                'manifest-src',
-                'media-src',
+                "default-src",
+                "connect-src",
+                "frame-ancestors",
+                "frame-src",
+                "script-src",
+                "script-src-elem",
+                "script-src-attr",
+                "style-src",
+                "style-src-elem",
+                "style-src-attr",
+                "font-src",
+                "worker-src",
+                "manifest-src",
+                "media-src",
             ]
 
             tokens_by_dir = {}
@@ -209,9 +197,9 @@ class FilterModule(object):
                 explicit_flags = get_app_conf(
                     applications,
                     application_id,
-                    'server.csp.flags.' + directive,
+                    "server.csp.flags." + directive,
                     False,
-                    {}
+                    {},
                 )
                 explicit_flags_by_dir[directive] = explicit_flags
 
@@ -222,56 +210,72 @@ class FilterModule(object):
                 tokens += flags
 
                 # Internal CDN defaults for selected directives
-                if directive in ('script-src-elem', 'connect-src', 'style-src-elem', 'style-src'):
-                    tokens.append(get_url(domains, 'web-svc-cdn', web_protocol))
+                if directive in (
+                    "script-src-elem",
+                    "connect-src",
+                    "style-src-elem",
+                    "style-src",
+                ):
+                    tokens.append(get_url(domains, "web-svc-cdn", web_protocol))
 
                 # Matomo (if enabled)
-                if directive in ('script-src-elem', 'connect-src'):
-                    if self.is_feature_enabled(applications, matomo_feature_name, application_id):
-                        tokens.append(get_url(domains, 'web-app-matomo', web_protocol))
+                if directive in ("script-src-elem", "connect-src"):
+                    if self.is_feature_enabled(
+                        applications, matomo_feature_name, application_id
+                    ):
+                        tokens.append(get_url(domains, "web-app-matomo", web_protocol))
 
                 # Simpleicons (if enabled) – typically used via connect-src (fetch)
-                if directive == 'connect-src':
-                    if self.is_feature_enabled(applications, 'simpleicons', application_id):
-                        tokens.append(get_url(domains, 'web-svc-simpleicons', web_protocol))
+                if directive == "connect-src":
+                    if self.is_feature_enabled(
+                        applications, "simpleicons", application_id
+                    ):
+                        tokens.append(
+                            get_url(domains, "web-svc-simpleicons", web_protocol)
+                        )
 
                 # reCAPTCHA (if enabled) – scripts + frames
-                if self.is_feature_enabled(applications, 'recaptcha', application_id):
-                    if directive in ('script-src-elem', 'frame-src'):
-                        tokens.append('https://www.gstatic.com')
-                        tokens.append('https://www.google.com')
-                        
+                if self.is_feature_enabled(applications, "recaptcha", application_id):
+                    if directive in ("script-src-elem", "frame-src"):
+                        tokens.append("https://www.gstatic.com")
+                        tokens.append("https://www.google.com")
+
                 # hCaptcha (if enabled) – scripts + frames
-                if self.is_feature_enabled(applications, 'hcaptcha', application_id):
-                    if directive in ('script-src-elem'):
-                        tokens.append('https://www.hcaptcha.com')
-                        tokens.append('https://js.hcaptcha.com')
-                    if directive in ('frame-src'):
-                        tokens.append('https://newassets.hcaptcha.com/')
+                if self.is_feature_enabled(applications, "hcaptcha", application_id):
+                    if directive in ("script-src-elem"):
+                        tokens.append("https://www.hcaptcha.com")
+                        tokens.append("https://js.hcaptcha.com")
+                    if directive in ("frame-src"):
+                        tokens.append("https://newassets.hcaptcha.com/")
 
                 # Frame ancestors (desktop + logout)
-                if directive == 'frame-ancestors':
-                    if self.is_feature_enabled(applications, 'desktop', application_id):
+                if directive == "frame-ancestors":
+                    if self.is_feature_enabled(applications, "desktop", application_id):
                         # Allow being embedded by the desktop app domain's site
-                        domain = domains.get('web-app-desktop')[0]
+                        domain = domains.get("web-app-desktop")[0]
                         sld_tld = ".".join(domain.split(".")[-2:])  # e.g., example.com
                         tokens.append(f"{sld_tld}")
-                    if self.is_feature_enabled(applications, 'logout', application_id):
-                        tokens.append(get_url(domains, 'web-svc-logout', web_protocol))
-                        tokens.append(get_url(domains, 'web-app-keycloak', web_protocol))
-                        
+                    if self.is_feature_enabled(applications, "logout", application_id):
+                        tokens.append(get_url(domains, "web-svc-logout", web_protocol))
+                        tokens.append(
+                            get_url(domains, "web-app-keycloak", web_protocol)
+                        )
+
                 # Logout support requires inline handlers (script-src-attr)
-                if directive in ('script-src-attr','script-src-elem'):
-                    if self.is_feature_enabled(applications, 'logout', application_id):
+                if directive in ("script-src-attr", "script-src-elem"):
+                    if self.is_feature_enabled(applications, "logout", application_id):
                         tokens.append("'unsafe-inline'")
 
-
                 # Custom whitelist
-                tokens += self.get_csp_whitelist(applications, application_id, directive)
+                tokens += self.get_csp_whitelist(
+                    applications, application_id, directive
+                )
 
                 # Inline hashes (only if this directive does NOT include 'unsafe-inline')
                 if "'unsafe-inline'" not in tokens:
-                    for snippet in self.get_csp_inline_content(applications, application_id, directive):
+                    for snippet in self.get_csp_inline_content(
+                        applications, application_id, directive
+                    ):
                         tokens.append(self.get_csp_hash(snippet))
 
                 tokens_by_dir[directive] = _dedup_preserve(tokens)
@@ -287,7 +291,10 @@ class FilterModule(object):
                 Remove a token (e.g. 'unsafe-inline') from the unioned token list
                 if it is explicitly disabled in the base directive flags.
                 """
-                if isinstance(explicit_flags, dict) and explicit_flags.get(name) is False:
+                if (
+                    isinstance(explicit_flags, dict)
+                    and explicit_flags.get(name) is False
+                ):
                     tok = f"'{name}'"
                     return [t for t in unioned_tokens if t != tok]
                 return unioned_tokens
@@ -301,13 +308,13 @@ class FilterModule(object):
                 # Respect explicit disables on the base
                 explicit_base = explicit_flags_by_dir.get(base_key, {})
                 # The most relevant flags for script/style:
-                for flag_name in ('unsafe-inline', 'unsafe-eval'):
+                for flag_name in ("unsafe-inline", "unsafe-eval"):
                     union = _strip_if_disabled(union, explicit_base, flag_name)
 
                 tokens_by_dir[base_key] = union  # write back only to base
 
-            merge_family('style-src',  'style-src-elem',  'style-src-attr')
-            merge_family('script-src', 'script-src-elem', 'script-src-attr')
+            merge_family("style-src", "style-src-elem", "style-src-attr")
+            merge_family("script-src", "script-src-elem", "script-src-attr")
 
             # ----------------------------------------------------------
             # Assemble header
@@ -324,7 +331,7 @@ class FilterModule(object):
             # Keep permissive img-src for data/blob + any host (as before)
             parts.append("img-src * data: blob:;")
 
-            return ' '.join(parts)
+            return " ".join(parts)
 
         except Exception as exc:
             raise AnsibleFilterError(f"build_csp_header failed: {exc}")

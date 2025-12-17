@@ -4,9 +4,11 @@ from pathlib import Path
 import yaml
 from typing import Any, Dict, List, Tuple, Union
 
+
 # -------- YAML loader that's tolerant of Ansible-specific tags (e.g. !vault) -----
 class AnsibleTolerantLoader(yaml.SafeLoader):
     pass
+
 
 def _ansible_tag_passthrough(loader: yaml.Loader, tag_prefix: str, node: yaml.Node):
     # Treat unknown/Ansible custom tags as plain YAML
@@ -18,15 +20,17 @@ def _ansible_tag_passthrough(loader: yaml.Loader, tag_prefix: str, node: yaml.No
         return loader.construct_mapping(node)
     return None
 
-yaml.add_multi_constructor('!', _ansible_tag_passthrough, Loader=AnsibleTolerantLoader)
+
+yaml.add_multi_constructor("!", _ansible_tag_passthrough, Loader=AnsibleTolerantLoader)
 
 # -------------------------------------------------------------------------------
+
 
 def _repo_root() -> Path:
     """Find a plausible project root by walking upward from this file."""
     here = Path(__file__).resolve()
     cur = here.parent
-    markers = {'.git', 'ansible.cfg', 'roles', 'playbook.yml'}
+    markers = {".git", "ansible.cfg", "roles", "playbook.yml"}
     for _ in range(7):
         if any((cur / m).exists() for m in markers):
             return cur
@@ -37,36 +41,50 @@ def _repo_root() -> Path:
     # Fallback: project/tests/integration/ -> pick parent of 'tests'
     return here.parents[2] if len(here.parents) >= 3 else here.parent
 
+
 Yaml = Union[Dict[str, Any], List[Any], Any]
+
 
 def _iter_yaml_files(root: Path) -> List[Path]:
     """Return all *.yml files in the repository (excluding common junk dirs)."""
-    ignore_dirs = {'.git', '.venv', 'venv', '.tox', '.idea', '.pytest_cache', '__pycache__'}
+    ignore_dirs = {
+        ".git",
+        ".venv",
+        "venv",
+        ".tox",
+        ".idea",
+        ".pytest_cache",
+        "__pycache__",
+    }
     files: List[Path] = []
-    for p in root.rglob('*.yml'):
+    for p in root.rglob("*.yml"):
         if any(part in ignore_dirs for part in p.parts):
             continue
         files.append(p)
     return files
 
+
 def _safe_load_all(path: Path) -> List[Yaml]:
     """Load all YAML documents from a file, tolerating Ansible tags; return list of docs."""
     try:
-        with path.open('r', encoding='utf-8') as fh:
+        with path.open("r", encoding="utf-8") as fh:
             return list(yaml.load_all(fh, Loader=AnsibleTolerantLoader))
     except Exception:
         # If a file is completely unparsable, treat as empty (so test won't crash).
         return []
 
-def _find_blocks_with_when(node: Yaml, path: str = "") -> List[Tuple[str, Dict[str, Any]]]:
+
+def _find_blocks_with_when(
+    node: Yaml, path: str = ""
+) -> List[Tuple[str, Dict[str, Any]]]:
     """
     Recursively find mappings that represent an Ansible block with a block-level `when`.
     Returns list of (yaml_path, block_mapping).
     """
     found: List[Tuple[str, Dict[str, Any]]] = []
     if isinstance(node, dict):
-        if 'block' in node and 'when' in node and isinstance(node['block'], list):
-            found.append((path or '/', node))
+        if "block" in node and "when" in node and isinstance(node["block"], list):
+            found.append((path or "/", node))
         # Recurse into all values to catch nested blocks
         for k, v in node.items():
             child_path = f"{path}/{k}" if path else f"/{k}"
@@ -77,8 +95,10 @@ def _find_blocks_with_when(node: Yaml, path: str = "") -> List[Tuple[str, Dict[s
             found.extend(_find_blocks_with_when(item, child_path))
     return found
 
+
 def _len_if_list(x: Any) -> int:
     return len(x) if isinstance(x, list) else 0
+
 
 class BlockWhenSizeTest(unittest.TestCase):
     MAX_TASKS = 3  # performance threshold
@@ -95,11 +115,11 @@ class BlockWhenSizeTest(unittest.TestCase):
             for doc_idx, doc in enumerate(docs):
                 blocks = _find_blocks_with_when(doc, path=f"{yml}:{doc_idx}")
                 for yaml_path, mapping in blocks:
-                    name = mapping.get('name') or '<unnamed block>'
-                    when_expr = mapping.get('when')
+                    name = mapping.get("name") or "<unnamed block>"
+                    when_expr = mapping.get("when")
 
                     # Check main block size
-                    block_tasks = mapping.get('block', [])
+                    block_tasks = mapping.get("block", [])
                     block_count = _len_if_list(block_tasks)
                     if block_count > self.MAX_TASKS:
                         violations.append(
@@ -109,7 +129,7 @@ class BlockWhenSizeTest(unittest.TestCase):
                         )
 
                     # Check rescue size (if present)
-                    rescue_tasks = mapping.get('rescue', [])
+                    rescue_tasks = mapping.get("rescue", [])
                     rescue_count = _len_if_list(rescue_tasks)
                     if rescue_count > self.MAX_TASKS:
                         violations.append(
@@ -119,7 +139,7 @@ class BlockWhenSizeTest(unittest.TestCase):
                         )
 
                     # Check always size (if present)
-                    always_tasks = mapping.get('always', [])
+                    always_tasks = mapping.get("always", [])
                     always_count = _len_if_list(always_tasks)
                     if always_count > self.MAX_TASKS:
                         violations.append(
@@ -164,6 +184,7 @@ class BlockWhenSizeTest(unittest.TestCase):
                 "       when: feature_enabled\n\n"
                 "Violations:\n" + "\n".join(violations)
             )
+
 
 if __name__ == "__main__":
     unittest.main()

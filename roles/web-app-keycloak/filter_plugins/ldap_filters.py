@@ -1,5 +1,6 @@
 from typing import Iterable
 
+
 class FilterModule(object):
     """Custom Jinja2 filters for LDAP related rendering."""
 
@@ -31,10 +32,12 @@ class FilterModule(object):
             # be forgiving if someone passes a comma-separated string
             flavors = [f.strip() for f in flavors.split(",") if f.strip()]
         if not isinstance(flavors, Iterable):
-            raise ValueError("ldap_groups_filter: 'flavors' must be an iterable or comma-separated string")
+            raise ValueError(
+                "ldap_groups_filter: 'flavors' must be an iterable or comma-separated string"
+            )
 
         have_gon = "groupOfNames" in flavors
-        have_ou  = "organizationalUnit" in flavors
+        have_ou = "organizationalUnit" in flavors
 
         if have_gon and have_ou:
             classes = ["groupOfNames", "organizationalUnit"]

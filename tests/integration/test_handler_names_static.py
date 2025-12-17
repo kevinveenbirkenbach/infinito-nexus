@@ -63,7 +63,9 @@ class StaticHandlerNamesTest(unittest.TestCase):
     """
 
     def test_no_templated_names_in_handlers(self):
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        project_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..")
+        )
         pattern = os.path.join(project_root, "roles", "*", "handlers", "main.yml")
 
         violations = []
@@ -76,9 +78,7 @@ class StaticHandlerNamesTest(unittest.TestCase):
             except FileNotFoundError:
                 continue
             except yaml.YAMLError as e:
-                violations.append(
-                    f"{handler_path} -> YAML parse error: {e}"
-                )
+                violations.append(f"{handler_path} -> YAML parse error: {e}")
                 continue
 
             for doc in docs:
@@ -105,8 +105,7 @@ class StaticHandlerNamesTest(unittest.TestCase):
 
         if violations:
             self.fail(
-                "Templated handler names are not allowed.\n\n"
-                + "\n\n".join(violations)
+                "Templated handler names are not allowed.\n\n" + "\n\n".join(violations)
             )
 
 

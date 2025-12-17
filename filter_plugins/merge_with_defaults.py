@@ -4,6 +4,7 @@ def merge_with_defaults(defaults, customs):
     For each top-level key in customs, ensure all dict keys from defaults are present (at least empty dict).
     Customs always take precedence.
     """
+
     def merge_dict(d1, d2):
         # Recursively merge d2 into d1, d2 wins
         result = dict(d1) if d1 else {}
@@ -31,9 +32,11 @@ def merge_with_defaults(defaults, customs):
         merged[app_key] = result
     return merged
 
+
 class FilterModule(object):
-    '''Custom merge filter for Infinito.Nexus: merge_with_defaults'''
+    """Custom merge filter for Infinito.Nexus: merge_with_defaults"""
+
     def filters(self):
         return {
-            'merge_with_defaults': merge_with_defaults,
+            "merge_with_defaults": merge_with_defaults,
         }

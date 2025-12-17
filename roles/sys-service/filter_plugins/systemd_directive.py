@@ -10,6 +10,7 @@ def systemd_directive(value, key: str) -> str:
         return ""
     return f"{key}={sval}"
 
+
 class FilterModule(object):
     def filters(self):
         return {

@@ -6,9 +6,12 @@ from datetime import datetime
 # Global variable definition
 BREAK_TIME_SECONDS = 5
 
+
 class AttemptException(Exception):
     """A custom exception for maximum number of attempts."""
+
     pass
+
 
 def parse_time_to_seconds(time_str):
     """
@@ -25,15 +28,19 @@ def parse_time_to_seconds(time_str):
         raise ValueError("Invalid time unit")
     return int(number) * units[unit]
 
+
 def check_service_active(service_name):
     """
     Check if a systemd service is currently active or activating.
     """
-    result = subprocess.run(['systemctl', 'is-active', service_name], stdout=subprocess.PIPE)
-    service_status = result.stdout.decode('utf-8').strip()
-    is_active = service_status in ['active', 'activating']
+    result = subprocess.run(
+        ["systemctl", "is-active", service_name], stdout=subprocess.PIPE
+    )
+    service_status = result.stdout.decode("utf-8").strip()
+    is_active = service_status in ["active", "activating"]
     print(f"Service {service_name} is {'active' if is_active else 'not active'}.")
     return is_active
+
 
 def check_any_service_active(services):
     """
@@ -41,11 +48,13 @@ def check_any_service_active(services):
     """
     return any(check_service_active(service) for service in services)
 
+
 def filter_services(services, ignored_services):
     """
     Filter out services that are in the ignored_services list from services list.
     """
     return [service for service in services if service not in ignored_services]
+
 
 def wait_for_all_services_to_stop(filtered_services, max_attempts, attempt):
     """
@@ -55,8 +64,12 @@ def wait_for_all_services_to_stop(filtered_services, max_attempts, attempt):
         while check_service_active(service):
             attempt += 1
             if attempt > max_attempts:
-                raise AttemptException(f"Maximum attempts ({max_attempts}) reached. Exiting.")
-            print(f"{datetime.now().isoformat()}#{attempt}/{max_attempts}: Waiting for {BREAK_TIME_SECONDS} seconds for {service} to stop...")
+                raise AttemptException(
+                    f"Maximum attempts ({max_attempts}) reached. Exiting."
+                )
+            print(
+                f"{datetime.now().isoformat()}#{attempt}/{max_attempts}: Waiting for {BREAK_TIME_SECONDS} seconds for {service} to stop..."
+            )
             time.sleep(BREAK_TIME_SECONDS)
     return attempt
 
@@ -64,28 +77,45 @@ def wait_for_all_services_to_stop(filtered_services, max_attempts, attempt):
 def get_max_attempts(timeout_sec):
     return timeout_sec // BREAK_TIME_SECONDS
 
+
 def main(services, ignored_services, timeout_sec):
     """
     Main function to process the command-line arguments and perform actions.
     """
-    filtered_services = filter_services(services, ignored_services )
+    filtered_services = filter_services(services, ignored_services)
     print(f"Services to handle: {services}")
     print(f"Services to ignore: {ignored_services}")
     print(f"Services filtered: {filtered_services}")
-    
+
     print("Waiting for services to stop.")
-    
+
     attempt = 0
     max_attempts = get_max_attempts(timeout_sec)
     while check_any_service_active(filtered_services):
-        attempt = wait_for_all_services_to_stop(filtered_services, max_attempts, attempt)
+        attempt = wait_for_all_services_to_stop(
+            filtered_services, max_attempts, attempt
+        )
     print("All required services have stopped.")
-    
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Blocks the code execution as long as defined services are running. Terminates with 0 when all services stopped')
-    parser.add_argument('services', nargs='+', help='List of services to apply the action to.')
-    parser.add_argument('--ignore', nargs='*', help='List of services to ignore in the action.', default=[])
-    parser.add_argument('--timeout', help='Timeout for lock actions (e.g., 1h, 30min, 45s).', default='1min')
+    parser = argparse.ArgumentParser(
+        description="Blocks the code execution as long as defined services are running. Terminates with 0 when all services stopped"
+    )
+    parser.add_argument(
+        "services", nargs="+", help="List of services to apply the action to."
+    )
+    parser.add_argument(
+        "--ignore",
+        nargs="*",
+        help="List of services to ignore in the action.",
+        default=[],
+    )
+    parser.add_argument(
+        "--timeout",
+        help="Timeout for lock actions (e.g., 1h, 30min, 45s).",
+        default="1min",
+    )
     args = parser.parse_args()
     services = args.services
     ignored_services = args.ignore if args.ignore else []

@@ -16,9 +16,13 @@ def load_target_module():
     """
     # tests/unit/roles/sys-ctl-hlth-disc-space/files/script.py
     test_file_path = pathlib.Path(__file__).resolve()
-    repo_root = test_file_path.parents[4]  # go up: files -> ... -> unit -> tests -> <root>
+    repo_root = test_file_path.parents[
+        4
+    ]  # go up: files -> ... -> unit -> tests -> <root>
 
-    script_path = repo_root / "roles" / "sys-ctl-hlth-disc-space" / "files" / "script.py"
+    script_path = (
+        repo_root / "roles" / "sys-ctl-hlth-disc-space" / "files" / "script.py"
+    )
     if not script_path.is_file():
         raise FileNotFoundError(f"Target script not found at: {script_path}")
 
@@ -72,7 +76,9 @@ class TestDiskSpaceScript(unittest.TestCase):
 
         with mock.patch.object(SCRIPT_MODULE.subprocess, "run", side_effect=fake_run):
             with mock.patch.object(sys, "argv", ["script.py", "80"]):
-                with mock.patch.object(SCRIPT_MODULE.sys, "exit", side_effect=SystemExit) as mock_exit:
+                with mock.patch.object(
+                    SCRIPT_MODULE.sys, "exit", side_effect=SystemExit
+                ) as mock_exit:
                     # Capture stdout to avoid clutter in test output
                     with contextlib.redirect_stdout(io.StringIO()):
                         with self.assertRaises(SystemExit):
@@ -101,7 +107,9 @@ class TestDiskSpaceScript(unittest.TestCase):
 
         with mock.patch.object(SCRIPT_MODULE.subprocess, "run", side_effect=fake_run):
             with mock.patch.object(sys, "argv", ["script.py", "80"]):
-                with mock.patch.object(SCRIPT_MODULE.sys, "exit", side_effect=SystemExit) as mock_exit:
+                with mock.patch.object(
+                    SCRIPT_MODULE.sys, "exit", side_effect=SystemExit
+                ) as mock_exit:
                     buffer = io.StringIO()
                     with contextlib.redirect_stdout(buffer):
                         with self.assertRaises(SystemExit):

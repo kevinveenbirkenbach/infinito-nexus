@@ -1,9 +1,10 @@
 import re
 from ansible.errors import AnsibleFilterError
 
+
 class FilterModule(object):
     def filters(self):
-        return {'generate_base_sld_domains': self.generate_base_sld_domains}
+        return {"generate_base_sld_domains": self.generate_base_sld_domains}
 
     def generate_base_sld_domains(self, domains_list):
         """
@@ -16,24 +17,33 @@ class FilterModule(object):
                 f"generate_base_sld_domains expected a list, got {type(domains_list).__name__}"
             )
 
-        ip_pattern = re.compile(r'^\d{1,3}(?:\.\d{1,3}){3}$')
+        ip_pattern = re.compile(r"^\d{1,3}(?:\.\d{1,3}){3}$")
         results = set()
 
         for hostname in domains_list:
             # type check
             if not isinstance(hostname, str):
-                raise AnsibleFilterError(f"Invalid domain entry (not a string): {hostname!r}")
+                raise AnsibleFilterError(
+                    f"Invalid domain entry (not a string): {hostname!r}"
+                )
 
             # malformed or empty
-            if not hostname or hostname.startswith('.') or hostname.endswith('.') or '..' in hostname:
-                raise AnsibleFilterError(f"Invalid domain entry (malformed): {hostname!r}")
+            if (
+                not hostname
+                or hostname.startswith(".")
+                or hostname.endswith(".")
+                or ".." in hostname
+            ):
+                raise AnsibleFilterError(
+                    f"Invalid domain entry (malformed): {hostname!r}"
+                )
 
             # IP addresses disallowed
             if ip_pattern.match(hostname):
                 raise AnsibleFilterError(f"IP addresses not allowed: {hostname!r}")
 
             # single-label hostnames
-            labels = hostname.split('.')
+            labels = hostname.split(".")
             if len(labels) == 1:
                 results.add(hostname)
             else:

@@ -2,19 +2,22 @@ import unittest
 import os
 import yaml
 
+
 def load_yaml_file(file_path):
     """Load a YAML file and return its content."""
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         return yaml.safe_load(file) or {}
+
 
 def get_meta_info(role_path):
     """Extract dependencies from the meta/main.yml of a role."""
-    meta_file = os.path.join(role_path, 'meta', 'main.yml')
+    meta_file = os.path.join(role_path, "meta", "main.yml")
     if not os.path.isfile(meta_file):
         return []
     meta_data = load_yaml_file(meta_file)
-    dependencies = meta_data.get('dependencies', [])
+    dependencies = meta_data.get("dependencies", [])
     return dependencies
+
 
 def resolve_dependencies(roles_dir):
     """Resolve all role dependencies and detect circular dependencies."""
@@ -25,7 +28,9 @@ def resolve_dependencies(roles_dir):
 
         # Check for circular dependencies (if role is already in the current stack)
         if role_name in stack:
-            raise ValueError(f"Circular dependency detected: {' -> '.join(stack)} -> {role_name}")
+            raise ValueError(
+                f"Circular dependency detected: {' -> '.join(stack)} -> {role_name}"
+            )
 
         # Check if role is already processed
         if role_name in visited:
@@ -49,7 +54,10 @@ def resolve_dependencies(roles_dir):
             try:
                 visit(role_path, [])  # Start recursion from this role
             except ValueError as e:
-                raise ValueError(f"Error processing role '{role_name}' at path '{role_path}': {str(e)}")
+                raise ValueError(
+                    f"Error processing role '{role_name}' at path '{role_path}': {str(e)}"
+                )
+
 
 class TestRoleDependencies(unittest.TestCase):
     def test_no_circular_dependencies(self):
@@ -63,5 +71,6 @@ class TestRoleDependencies(unittest.TestCase):
         # If no exception, the test passed
         self.assertTrue(True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

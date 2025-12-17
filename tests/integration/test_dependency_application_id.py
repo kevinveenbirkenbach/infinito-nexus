@@ -3,6 +3,7 @@ import unittest
 import yaml
 import glob
 
+
 class TestDependencyApplicationId(unittest.TestCase):
     def test_application_id_matches_folder_for_dependent_roles(self):
         """
@@ -11,41 +12,41 @@ class TestDependencyApplicationId(unittest.TestCase):
         then application_id must equal the role's folder name for both.
         """
         base_dir = os.path.dirname(__file__)
-        roles_dir = os.path.abspath(os.path.join(base_dir, '..', '..', 'roles'))
+        roles_dir = os.path.abspath(os.path.join(base_dir, "..", "..", "roles"))
 
         violations = []
 
         # Helper to load application_id if present
         def load_app_id(role_path):
-            vars_file = os.path.join(role_path, 'vars', 'main.yml')
+            vars_file = os.path.join(role_path, "vars", "main.yml")
             if not os.path.isfile(vars_file):
                 return None
-            with open(vars_file, encoding='utf-8') as f:
+            with open(vars_file, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
-            return data.get('application_id')
+            return data.get("application_id")
 
         # Iterate all roles
-        for role_path in glob.glob(os.path.join(roles_dir, '*')):
+        for role_path in glob.glob(os.path.join(roles_dir, "*")):
             if not os.path.isdir(role_path):
                 continue
 
             role_name = os.path.basename(role_path)
-            meta_file = os.path.join(role_path, 'meta', 'main.yml')
+            meta_file = os.path.join(role_path, "meta", "main.yml")
             if not os.path.isfile(meta_file):
                 continue
 
-            with open(meta_file, encoding='utf-8') as f:
+            with open(meta_file, encoding="utf-8") as f:
                 meta = yaml.safe_load(f) or {}
 
-            deps = meta.get('dependencies', [])
+            deps = meta.get("dependencies", [])
             if not isinstance(deps, list):
                 continue
 
             # collect just the role names this role depends on
             dep_names = []
             for item in deps:
-                if isinstance(item, dict) and 'role' in item:
-                    dep_names.append(item['role'])
+                if isinstance(item, dict) and "role" in item:
+                    dep_names.append(item["role"])
                 elif isinstance(item, str):
                     dep_names.append(item)
 
@@ -78,5 +79,6 @@ class TestDependencyApplicationId(unittest.TestCase):
                 + "\n".join(violations)
             )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

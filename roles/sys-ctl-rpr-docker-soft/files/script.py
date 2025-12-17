@@ -10,6 +10,7 @@ the script records an error for that container.
 All shell interactions that matter for tests go through print_bash()
 so they can be monkeypatched in unit tests.
 """
+
 import subprocess
 import time
 import os
@@ -20,6 +21,7 @@ from typing import List, Optional, Tuple
 # ---------------------------
 # Shell helpers
 # ---------------------------
+
 
 def bash(command: str) -> List[str]:
     print(command)
@@ -55,6 +57,7 @@ def print_bash(command: str) -> List[str]:
 # Filesystem / compose helpers
 # ---------------------------
 
+
 def find_docker_compose_file(directory: str) -> Optional[str]:
     """
     Search for docker-compose.yml beneath a directory.
@@ -79,17 +82,19 @@ def detect_env_file(project_path: str) -> Optional[str]:
     return None
 
 
-def compose_cmd(subcmd: str, project_path: str, project_name: Optional[str] = None) -> str:
+def compose_cmd(
+    subcmd: str, project_path: str, project_name: Optional[str] = None
+) -> str:
     """
     Build a docker-compose command string with optional -p and --env-file if present.
     Example: compose_cmd("restart", "/opt/docker/foo", "foo")
     """
     parts: List[str] = [f'cd "{project_path}" && docker-compose']
     if project_name:
-        parts += ['-p', f'"{project_name}"']
+        parts += ["-p", f'"{project_name}"']
     env_file = detect_env_file(project_path)
     if env_file:
-        parts += ['--env-file', f'"{env_file}"']
+        parts += ["--env-file", f'"{env_file}"']
     parts += subcmd.split()
     return " ".join(parts)
 
@@ -97,6 +102,7 @@ def compose_cmd(subcmd: str, project_path: str, project_name: Optional[str] = No
 # ---------------------------
 # Business logic
 # ---------------------------
+
 
 def normalize_services_arg(raw: List[str] | None, raw_str: str | None) -> List[str]:
     """
@@ -137,9 +143,13 @@ def wait_while_manipulation_running(
         if any_active:
             elapsed = time.time() - start
             if timeout and elapsed >= timeout:
-                print(f"Timeout ({timeout}s) reached while waiting for services. Continuing anyway.")
+                print(
+                    f"Timeout ({timeout}s) reached while waiting for services. Continuing anyway."
+                )
                 break
-            print(f"Manipulation service is running. Trying again in {waiting_time} seconds.")
+            print(
+                f"Manipulation service is running. Trying again in {waiting_time} seconds."
+            )
             time.sleep(waiting_time)
         else:
             print("No blocking service is running.")
@@ -164,14 +174,20 @@ def get_compose_project_info(container: str) -> Tuple[str, str]:
     if not project:
         raise RuntimeError(f"No compose project label found for container {container}")
     if not workdir:
-        raise RuntimeError(f"No compose working_dir label found for container {container}")
+        raise RuntimeError(
+            f"No compose working_dir label found for container {container}"
+        )
 
     return project, workdir
 
 
-def main(base_directory: str, manipulation_services: List[str], timeout: Optional[int]) -> int:
+def main(
+    base_directory: str, manipulation_services: List[str], timeout: Optional[int]
+) -> int:
     errors = 0
-    wait_while_manipulation_running(manipulation_services, waiting_time=600, timeout=timeout)
+    wait_while_manipulation_running(
+        manipulation_services, waiting_time=600, timeout=timeout
+    )
 
     unhealthy_container_names = print_bash(
         "docker ps --filter health=unhealthy --format '{{.Names}}'"
@@ -192,7 +208,9 @@ def main(base_directory: str, manipulation_services: List[str], timeout: Optiona
         compose_file_path = os.path.join(workdir, "docker-compose.yml")
         if not os.path.isfile(compose_file_path):
             # As STRICT: we only trust labels; if file not there, error out.
-            print(f"Error: docker-compose.yml not found at {compose_file_path} for container {container}")
+            print(
+                f"Error: docker-compose.yml not found at {compose_file_path} for container {container}"
+            )
             errors += 1
             continue
 

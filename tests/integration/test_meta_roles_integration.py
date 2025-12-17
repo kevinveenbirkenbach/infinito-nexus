@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 STAGES_DIR = ROOT / "tasks" / "stages"
 GROUPS_DIR = ROOT / "tasks" / "groups"
 
+
 class TestMetaRolesIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -36,8 +37,7 @@ class TestMetaRolesIntegration(unittest.TestCase):
             if not path.is_file():
                 missing.append(fname)
         self.assertFalse(
-            missing,
-            f"The following role files are missing at project root: {missing}"
+            missing, f"The following role files are missing at project root: {missing}"
         )
 
     def test_each_invokable_item_referenced_in_playbooks(self):
@@ -57,9 +57,11 @@ class TestMetaRolesIntegration(unittest.TestCase):
                 not_referenced.append(item)
 
         self.assertEqual(
-            not_referenced, [],
-            f"The following invokable items are not referenced in any playbook: {not_referenced}"
+            not_referenced,
+            [],
+            f"The following invokable items are not referenced in any playbook: {not_referenced}",
         )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,7 +12,7 @@ def build_ldap_role_entries(applications, users, ldap):
             **base_roles,
             "administrator": {
                 "description": "Has full administrative access: manage themes, plugins, settings, and users"
-            }
+            },
         }
 
         group_id = application_config.get("group_id")
@@ -59,6 +59,4 @@ def build_ldap_role_entries(applications, users, ldap):
 
 class FilterModule(object):
     def filters(self):
-        return {
-            "build_ldap_role_entries": build_ldap_role_entries
-        }
+        return {"build_ldap_role_entries": build_ldap_role_entries}

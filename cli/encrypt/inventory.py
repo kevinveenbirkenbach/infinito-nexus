@@ -6,18 +6,28 @@ from module_utils.handler.vault import VaultHandler, VaultScalar
 from module_utils.handler.yaml import YamlHandler
 from yaml.dumper import SafeDumper
 
+
 def ask_for_confirmation(key: str) -> bool:
     """Prompt the user for confirmation to overwrite an existing value."""
-    confirmation = input(f"Do you want to encrypt the value for '{key}'? (y/n): ").strip().lower()
-    return confirmation == 'y'
+    confirmation = (
+        input(f"Do you want to encrypt the value for '{key}'? (y/n): ").strip().lower()
+    )
+    return confirmation == "y"
 
 
-def encrypt_recursively(data: Any, vault_handler: VaultHandler, ask_confirmation: bool = True, prefix: str = "") -> Any:
+def encrypt_recursively(
+    data: Any,
+    vault_handler: VaultHandler,
+    ask_confirmation: bool = True,
+    prefix: str = "",
+) -> Any:
     """Recursively encrypt values in the data."""
     if isinstance(data, dict):
         for key, value in data.items():
             new_prefix = f"{prefix}.{key}" if prefix else key
-            data[key] = encrypt_recursively(value, vault_handler, ask_confirmation, new_prefix)
+            data[key] = encrypt_recursively(
+                value, vault_handler, ask_confirmation, new_prefix
+            )
     elif isinstance(data, list):
         for i, item in enumerate(data):
             data[i] = encrypt_recursively(item, vault_handler, ask_confirmation, prefix)
@@ -41,9 +51,15 @@ def main():
     parser = argparse.ArgumentParser(
         description="Encrypt all fields, ask for confirmation unless --all is specified."
     )
-    parser.add_argument("--inventory-file", required=True, help="Host vars file to update")
-    parser.add_argument("--vault-password-file", required=True, help="Vault password file")
-    parser.add_argument("--all", action="store_true", help="Encrypt all fields without confirmation")
+    parser.add_argument(
+        "--inventory-file", required=True, help="Host vars file to update"
+    )
+    parser.add_argument(
+        "--vault-password-file", required=True, help="Vault password file"
+    )
+    parser.add_argument(
+        "--all", action="store_true", help="Encrypt all fields without confirmation"
+    )
     args = parser.parse_args()
 
     # Initialize the VaultHandler and load the inventory
@@ -51,7 +67,9 @@ def main():
     updated_inventory = YamlHandler.load_yaml(Path(args.inventory_file))
 
     # 1) Encrypt all fields recursively
-    updated_inventory = encrypt_recursively(updated_inventory, vault_handler, ask_confirmation=not args.all)
+    updated_inventory = encrypt_recursively(
+        updated_inventory, vault_handler, ask_confirmation=not args.all
+    )
 
     # 2) Save the updated inventory to file
     with open(args.inventory_file, "w", encoding="utf-8") as f:

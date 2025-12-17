@@ -4,14 +4,17 @@ try:
     import tld
     from tld.exceptions import TldDomainNotFound, TldBadUrl
 except ImportError:
-    raise AnsibleFilterError("The 'tld' Python package is required for the to_primary_domain filter. Install with 'pip install tld'.")
+    raise AnsibleFilterError(
+        "The 'tld' Python package is required for the to_primary_domain filter. Install with 'pip install tld'."
+    )
+
 
 class FilterModule(object):
-    ''' Custom filter to extract the primary/zone domain from a full domain name '''
+    """Custom filter to extract the primary/zone domain from a full domain name"""
 
     def filters(self):
         return {
-            'to_primary_domain': self.to_primary_domain,
+            "to_primary_domain": self.to_primary_domain,
         }
 
     def to_primary_domain(self, domain):
@@ -24,7 +27,9 @@ class FilterModule(object):
         try:
             res = tld.get_fld(domain, fix_protocol=True)
             if not res:
-                raise AnsibleFilterError(f"Could not extract primary domain from: {domain}")
+                raise AnsibleFilterError(
+                    f"Could not extract primary domain from: {domain}"
+                )
             return res
         except (TldDomainNotFound, TldBadUrl) as exc:
             raise AnsibleFilterError(str(exc))

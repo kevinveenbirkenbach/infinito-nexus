@@ -2,6 +2,7 @@ import re
 import unittest
 from pathlib import Path
 
+
 class TestJinjaIncludePaths(unittest.TestCase):
     """
     Verifies that in all .j2 files in the project (root + subfolders):
@@ -9,6 +10,7 @@ class TestJinjaIncludePaths(unittest.TestCase):
     - Any include using a variable or concatenation is ignored.
     - Includes are resolved relative to project root, template directory, or file's parent.
     """
+
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
     INCLUDE_STMT_RE = re.compile(r"{%\s*include\s+(.+?)\s*%}")
     LITERAL_PATH_RE = re.compile(r"^[\'\"]([^\'\"]+)[\'\"]$")
@@ -16,8 +18,7 @@ class TestJinjaIncludePaths(unittest.TestCase):
     def test_all_jinja_includes_exist(self):
         template_paths = list(self.PROJECT_ROOT.glob("**/*.j2"))
         self.assertTrue(
-            template_paths,
-            "No .j2 templates found anywhere in the project"
+            template_paths, "No .j2 templates found anywhere in the project"
         )
 
         missing = []
@@ -38,7 +39,7 @@ class TestJinjaIncludePaths(unittest.TestCase):
                 # check path relative to role's templates directory
                 role_templates_root = None
                 for parent in tpl.parents:
-                    if parent.name == 'templates':
+                    if parent.name == "templates":
                         role_templates_root = parent
                         break
                 role_target = None
@@ -46,9 +47,9 @@ class TestJinjaIncludePaths(unittest.TestCase):
                     role_target = role_templates_root / include_path
 
                 if not (
-                    abs_target.exists() or
-                    rel_target.exists() or
-                    (role_target and role_target.exists())
+                    abs_target.exists()
+                    or rel_target.exists()
+                    or (role_target and role_target.exists())
                 ):
                     rel_tpl = tpl.relative_to(self.PROJECT_ROOT)
                     missing.append(
@@ -58,6 +59,7 @@ class TestJinjaIncludePaths(unittest.TestCase):
 
         if missing:
             self.fail("Broken {% include %} references:\n" + "\n".join(missing))
+
 
 if __name__ == "__main__":
     unittest.main()

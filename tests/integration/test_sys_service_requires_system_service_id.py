@@ -18,9 +18,14 @@ def _safe_yaml_load(path):
 class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
     def setUp(self):
         # Repo root = three levels up from this file: tests/integration/<this_file>.py
-        self.repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        self.repo_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..")
+        )
         self.roles_dir = os.path.join(self.repo_root, "roles")
-        self.assertTrue(os.path.isdir(self.roles_dir), f"'roles' directory not found at: {self.roles_dir}")
+        self.assertTrue(
+            os.path.isdir(self.roles_dir),
+            f"'roles' directory not found at: {self.roles_dir}",
+        )
 
     def _iter_task_files(self, role_dir):
         tasks_dir = os.path.join(role_dir, "tasks")
@@ -33,7 +38,9 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
 
         # also scan nested includes like tasks/**/*.yml
         for pattern in patterns:
-            for path in glob.glob(os.path.join(tasks_dir, "**", pattern), recursive=True):
+            for path in glob.glob(
+                os.path.join(tasks_dir, "**", pattern), recursive=True
+            ):
                 yield path
 
     def _role_includes_sys_service(self, tasks_doc) -> bool:
@@ -42,6 +49,7 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
           - include_role:
               name: sys-service
         """
+
         def check_task(task):
             if not isinstance(task, dict):
                 return False
@@ -62,7 +70,11 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
                 if check_task(t):
                     return True
                 # handle blocks within list items
-                if isinstance(t, dict) and "block" in t and isinstance(t["block"], list):
+                if (
+                    isinstance(t, dict)
+                    and "block" in t
+                    and isinstance(t["block"], list)
+                ):
                     for bt in t["block"]:
                         if check_task(bt):
                             return True

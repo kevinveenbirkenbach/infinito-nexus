@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch
 
 import importlib
+
 memory_filters = importlib.import_module("filter_plugins.memory_filters")
 
 
@@ -20,12 +21,17 @@ class TestMemoryFilters(unittest.TestCase):
         can be controlled in tests.
         """
         patches = [
-            patch("filter_plugins.memory_filters.get_entity_name", return_value="confluence"),
+            patch(
+                "filter_plugins.memory_filters.get_entity_name",
+                return_value="confluence",
+            ),
             patch(
                 "filter_plugins.memory_filters.get_app_conf",
                 side_effect=lambda apps, app_id, key, required=True, **kwargs: (
-                    mem_limit if key.endswith(".mem_limit")
-                    else mem_res if key.endswith(".mem_reservation")
+                    mem_limit
+                    if key.endswith(".mem_limit")
+                    else mem_res
+                    if key.endswith(".mem_reservation")
                     else None
                 ),
             ),
@@ -95,26 +101,50 @@ class TestMemoryFilters(unittest.TestCase):
     # Tests: JVM failure cases / validation
     # -----------------------------
     def test_invalid_unit_raises(self):
-        with patch("filter_plugins.memory_filters.get_entity_name", return_value="confluence"), \
-             patch("filter_plugins.memory_filters.get_app_conf",
-                   side_effect=lambda apps, app_id, key, required=True, **kwargs:
-                   "8Q" if key.endswith(".mem_limit") else "4g"):
+        with (
+            patch(
+                "filter_plugins.memory_filters.get_entity_name",
+                return_value="confluence",
+            ),
+            patch(
+                "filter_plugins.memory_filters.get_app_conf",
+                side_effect=lambda apps, app_id, key, required=True, **kwargs: "8Q"
+                if key.endswith(".mem_limit")
+                else "4g",
+            ),
+        ):
             with self.assertRaises(memory_filters.AnsibleFilterError):
                 memory_filters.jvm_max_mb(self.apps, self.app_id)
 
     def test_zero_limit_raises(self):
-        with patch("filter_plugins.memory_filters.get_entity_name", return_value="confluence"), \
-             patch("filter_plugins.memory_filters.get_app_conf",
-                   side_effect=lambda apps, app_id, key, required=True, **kwargs:
-                   "0" if key.endswith(".mem_limit") else "4g"):
+        with (
+            patch(
+                "filter_plugins.memory_filters.get_entity_name",
+                return_value="confluence",
+            ),
+            patch(
+                "filter_plugins.memory_filters.get_app_conf",
+                side_effect=lambda apps, app_id, key, required=True, **kwargs: "0"
+                if key.endswith(".mem_limit")
+                else "4g",
+            ),
+        ):
             with self.assertRaises(memory_filters.AnsibleFilterError):
                 memory_filters.jvm_max_mb(self.apps, self.app_id)
 
     def test_zero_reservation_raises(self):
-        with patch("filter_plugins.memory_filters.get_entity_name", return_value="confluence"), \
-             patch("filter_plugins.memory_filters.get_app_conf",
-                   side_effect=lambda apps, app_id, key, required=True, **kwargs:
-                   "8g" if key.endswith(".mem_limit") else "0"):
+        with (
+            patch(
+                "filter_plugins.memory_filters.get_entity_name",
+                return_value="confluence",
+            ),
+            patch(
+                "filter_plugins.memory_filters.get_app_conf",
+                side_effect=lambda apps, app_id, key, required=True, **kwargs: "8g"
+                if key.endswith(".mem_limit")
+                else "0",
+            ),
+        ):
             with self.assertRaises(memory_filters.AnsibleFilterError):
                 memory_filters.jvm_min_mb(self.apps, self.app_id)
 
@@ -123,10 +153,18 @@ class TestMemoryFilters(unittest.TestCase):
         Ensure get_entity_name() is called internally and the app_id is not
         passed around manually from the template.
         """
-        with patch("filter_plugins.memory_filters.get_entity_name", return_value="confluence") as mock_entity, \
-             patch("filter_plugins.memory_filters.get_app_conf",
-                   side_effect=lambda apps, app_id, key, required=True, **kwargs:
-                   "8g" if key.endswith(".mem_limit") else "6g"):
+        with (
+            patch(
+                "filter_plugins.memory_filters.get_entity_name",
+                return_value="confluence",
+            ) as mock_entity,
+            patch(
+                "filter_plugins.memory_filters.get_app_conf",
+                side_effect=lambda apps, app_id, key, required=True, **kwargs: "8g"
+                if key.endswith(".mem_limit")
+                else "6g",
+            ),
+        ):
             xmx = memory_filters.jvm_max_mb(self.apps, self.app_id)
             xms = memory_filters.jvm_min_mb(self.apps, self.app_id)
             self.assertGreater(xmx, 0)
@@ -207,14 +245,23 @@ class TestMemoryFilters(unittest.TestCase):
         When docker.services.redis.mem_limit is not configured, the filter
         should fall back to its internal default (256m).
         """
+
         def fake_get_app_conf(apps, app_id, key, required=True, **kwargs):
             # Simulate missing mem_limit: return the provided default
             if key.endswith(".mem_limit"):
                 return kwargs.get("default")
             return None
 
-        with patch("filter_plugins.memory_filters.get_app_conf", side_effect=fake_get_app_conf), \
-             patch("filter_plugins.memory_filters.get_entity_name", return_value="confluence"):
+        with (
+            patch(
+                "filter_plugins.memory_filters.get_app_conf",
+                side_effect=fake_get_app_conf,
+            ),
+            patch(
+                "filter_plugins.memory_filters.get_entity_name",
+                return_value="confluence",
+            ),
+        ):
             maxmem = memory_filters.redis_maxmemory_mb(self.apps, self.app_id)
 
         # default_mb = 256 → factor 0.8 → floor(256 * 0.8) = 204

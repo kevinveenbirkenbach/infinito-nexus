@@ -12,8 +12,11 @@ Ansible filter plugin that safely joins URL components from a list.
 import re
 from ansible.errors import AnsibleFilterError
 
-_SCHEME_RE = re.compile(r'^([a-zA-Z][a-zA-Z0-9+.\-]*://)(.*)$')
-_QUERY_PAIR_RE = re.compile(r'^[^&=?#]+=[^&?#]*$')  # key=value (no '&', no extra '?' or '#')
+_SCHEME_RE = re.compile(r"^([a-zA-Z][a-zA-Z0-9+.\-]*://)(.*)$")
+_QUERY_PAIR_RE = re.compile(
+    r"^[^&=?#]+=[^&?#]*$"
+)  # key=value (no '&', no extra '?' or '#')
+
 
 def _to_str_or_error(obj, index):
     """Cast to str, raising a specific AnsibleFilterError with index context."""
@@ -23,6 +26,7 @@ def _to_str_or_error(obj, index):
         raise AnsibleFilterError(
             f"url_join: unable to convert part at index {index} to string: {e}"
         )
+
 
 def url_join(parts):
     """
@@ -64,8 +68,10 @@ def url_join(parts):
             f"got '{first_str}'"
         )
 
-    scheme = m.group(1)                    # e.g., 'https://', 'ftp://', 'myapp+v1://'
-    after_scheme = m.group(2).lstrip('/')  # strip only leading slashes right after scheme
+    scheme = m.group(1)  # e.g., 'https://', 'ftp://', 'myapp+v1://'
+    after_scheme = m.group(2).lstrip(
+        "/"
+    )  # strip only leading slashes right after scheme
 
     # --- iterate parts: collect path parts until first query part; then only query parts allowed ---
     path_parts = []
@@ -91,15 +97,15 @@ def url_join(parts):
             s = after_scheme
 
         # check if this is a query element (starts with ? or &)
-        if s.startswith('?') or s.startswith('&'):
+        if s.startswith("?") or s.startswith("&"):
             in_query = True
             raw_pair = s[1:]  # strip the leading ? or &
-            if raw_pair == '':
+            if raw_pair == "":
                 raise AnsibleFilterError(
                     f"url_join: query element at index {i} is empty; expected '?key=value' or '&key=value'"
                 )
             # Disallow multiple pairs in a single element; enforce exactly one key=value
-            if '&' in raw_pair:
+            if "&" in raw_pair:
                 raise AnsibleFilterError(
                     f"url_join: query element at index {i} must contain exactly one 'key=value' pair "
                     f"without '&'; got '{s}'"
@@ -118,10 +124,10 @@ def url_join(parts):
                     f"query parts must come last"
                 )
             # normal path part: strip slashes to avoid duplicate '/'
-            path_parts.append(s.strip('/'))
+            path_parts.append(s.strip("/"))
 
     # normalize path: remove empty chunks
-    path_parts = [p for p in path_parts if p != '']
+    path_parts = [p for p in path_parts if p != ""]
 
     # --- build result ---
     # path portion
@@ -142,5 +148,5 @@ def url_join(parts):
 class FilterModule(object):
     def filters(self):
         return {
-            'url_join': url_join,
+            "url_join": url_join,
         }

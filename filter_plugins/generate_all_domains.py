@@ -1,14 +1,16 @@
 from ansible.errors import AnsibleFilterError
 
+
 class FilterModule(object):
     def filters(self):
-        return {'generate_all_domains': self.generate_all_domains}
+        return {"generate_all_domains": self.generate_all_domains}
 
-    def generate_all_domains(self, domains_dict, include_www:bool=True):
+    def generate_all_domains(self, domains_dict, include_www: bool = True):
         """
         Transform a dict of domains (values: str, list, dict) into a flat list,
         optionally add 'www.' prefixes, dedupe and sort alphabetically.
         """
+
         # lokaler Helfer zum Flatten
         def _flatten(domains):
             flat = []

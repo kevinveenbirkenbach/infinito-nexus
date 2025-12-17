@@ -3,6 +3,7 @@
 import unittest
 from filter_plugins.get_docker_image import FilterModule
 
+
 class TestGetDockerImage(unittest.TestCase):
     def setUp(self):
         self.get_docker_image = FilterModule().filters()["get_docker_image"]
@@ -13,8 +14,8 @@ class TestGetDockerImage(unittest.TestCase):
                 "version": "1.0.0",
                 "docker": {
                     "images": {"akaunting": "docker.io/akaunting/akaunting"},
-                    "versions": {"akaunting": "2.0.0"}
-                }
+                    "versions": {"akaunting": "2.0.0"},
+                },
             }
         }
         result = self.get_docker_image(applications, "akaunting", "akaunting")
@@ -22,13 +23,7 @@ class TestGetDockerImage(unittest.TestCase):
 
     def test_missing_image_raises_error(self):
         applications = {
-            "akaunting": {
-                "version": "1.0.0",
-                "docker": {
-                    "images": {},
-                    "versions": {}
-                }
-            }
+            "akaunting": {"version": "1.0.0", "docker": {"images": {}, "versions": {}}}
         }
         with self.assertRaises(ValueError):
             self.get_docker_image(applications, "akaunting", "akaunting")
@@ -36,10 +31,7 @@ class TestGetDockerImage(unittest.TestCase):
     def test_missing_version_raises_error(self):
         applications = {
             "akaunting": {
-                "docker": {
-                    "images": {"akaunting": "some/image"},
-                    "versions": {}
-                }
+                "docker": {"images": {"akaunting": "some/image"}, "versions": {}}
             }
         }
         with self.assertRaises(ValueError):
@@ -52,8 +44,8 @@ class TestGetDockerImage(unittest.TestCase):
                 "version": "3.0.0",
                 "docker": {
                     "images": {"myapp": "registry/myapp"},
-                    "versions": {"myapp": "4.5.6"}
-                }
+                    "versions": {"myapp": "4.5.6"},
+                },
             }
         }
         # No image_key argument → falls back to application_id
@@ -68,12 +60,10 @@ class TestGetDockerImage(unittest.TestCase):
                 "docker": {
                     "images": {
                         "service": "registry/service",
-                        "db":      "registry/service-db"
+                        "db": "registry/service-db",
                     },
-                    "versions": {
-                        "db": "2.2.2"
-                    }
-                }
+                    "versions": {"db": "2.2.2"},
+                },
             }
         }
         result = self.get_docker_image(applications, "service", "db")
@@ -84,6 +74,7 @@ class TestGetDockerImage(unittest.TestCase):
         applications = {}
         with self.assertRaises(ValueError):
             self.get_docker_image(applications, "does_not_exist")
+
 
 if __name__ == "__main__":
     unittest.main()

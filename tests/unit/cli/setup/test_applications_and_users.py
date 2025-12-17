@@ -5,6 +5,7 @@ import yaml
 from pathlib import Path
 import subprocess
 
+
 class TestGenerateDefaultApplicationsUsers(unittest.TestCase):
     def setUp(self):
         # Setup temporary roles directory
@@ -25,12 +26,12 @@ class TestGenerateDefaultApplicationsUsers(unittest.TestCase):
 
         # Write users meta
         users_meta = {
-            'users': {
-                'alice': {'uid': 2001, 'gid': 2001},
-                'bob': {'uid': 2002, 'gid': 2002}
+            "users": {
+                "alice": {"uid": 2001, "gid": 2001},
+                "bob": {"uid": 2002, "gid": 2002},
             }
         }
-        with (self.role / "users" / "main.yml").open('w', encoding='utf-8') as f:
+        with (self.role / "users" / "main.yml").open("w", encoding="utf-8") as f:
             yaml.dump(users_meta, f)
 
         # Output file path
@@ -44,23 +45,33 @@ class TestGenerateDefaultApplicationsUsers(unittest.TestCase):
         When a users.yml exists with defined users, the script should inject a 'users'
         mapping in the generated YAML, mapping each username to a Jinja2 reference.
         """
-        script_path = Path(__file__).resolve().parents[4] / "cli" / "setup/applications.py"
-        result = subprocess.run([
-            "python3", str(script_path),
-            "--roles-dir", str(self.roles_dir),
-            "--output-file", str(self.output_file)
-        ], capture_output=True, text=True)
+        script_path = (
+            Path(__file__).resolve().parents[4] / "cli" / "setup/applications.py"
+        )
+        result = subprocess.run(
+            [
+                "python3",
+                str(script_path),
+                "--roles-dir",
+                str(self.roles_dir),
+                "--output-file",
+                str(self.output_file),
+            ],
+            capture_output=True,
+            text=True,
+        )
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         data = yaml.safe_load(self.output_file.read_text())
 
-        apps = data.get('defaults_applications', {})
+        apps = data.get("defaults_applications", {})
         # Only the app with users should be present
-        self.assertIn('app_with_users', apps)
+        self.assertIn("app_with_users", apps)
 
         # 'users' section should be present and correct
-        users_map = apps['app_with_users']['users']
-        expected = {'alice': '{{ users["alice"] }}', 'bob': '{{ users["bob"] }}'}
+        users_map = apps["app_with_users"]["users"]
+        expected = {"alice": '{{ users["alice"] }}', "bob": '{{ users["bob"] }}'}
         self.assertEqual(users_map, expected)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -24,14 +24,15 @@ from typing import Optional, Dict, Any, List
 # --------------------------------------------------------------------------------------
 
 # Current file: .../cli/deploy/deploy.py
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))        # → cli/deploy
-CLI_ROOT   = os.path.dirname(SCRIPT_DIR)                        # → cli
-REPO_ROOT  = os.path.dirname(CLI_ROOT)                          # → project root
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))  # → cli/deploy
+CLI_ROOT = os.path.dirname(SCRIPT_DIR)  # → cli
+REPO_ROOT = os.path.dirname(CLI_ROOT)  # → project root
 
 
 # --------------------------------------------------------------------------------------
 # Main execution logic
 # --------------------------------------------------------------------------------------
+
 
 def run_ansible_playbook(
     inventory: str,
@@ -155,6 +156,7 @@ def run_ansible_playbook(
 # Application ID validation
 # --------------------------------------------------------------------------------------
 
+
 def validate_application_ids(inventory: str, app_ids: List[str]) -> None:
     """Validate requested application IDs using ValidDeployId."""
     if not app_ids:
@@ -237,6 +239,7 @@ def load_modes_from_yaml(modes_yaml_path: str) -> List[Dict[str, Any]]:
 # Dynamic argparse mode injection
 # --------------------------------------------------------------------------------------
 
+
 def add_dynamic_mode_args(
     parser: argparse.ArgumentParser, modes_meta: List[Dict[str, Any]]
 ) -> Dict[str, Dict[str, Any]]:
@@ -295,7 +298,7 @@ def build_modes_from_args(
 
         else:  # explicit
             if value is not None:
-                modes[mode_name] = (value == "true")
+                modes[mode_name] = value == "true"
 
     return modes
 
@@ -304,6 +307,7 @@ def build_modes_from_args(
 # Main entrypoint
 # --------------------------------------------------------------------------------------
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Deploy the Infinito.Nexus stack using ansible-playbook."
@@ -311,24 +315,39 @@ def main() -> None:
 
     # Standard arguments
     parser.add_argument("inventory", help="Path to the inventory file.")
-    parser.add_argument("-l", "--limit", help="Limit execution to certain hosts or groups.")
     parser.add_argument(
-        "-T", "--host-type", choices=["server", "desktop"], default="server",
-        help="Specify target type: server or desktop."
+        "-l", "--limit", help="Limit execution to certain hosts or groups."
     )
     parser.add_argument(
-        "-p", "--password-file",
-        help="Vault password file for encrypted variables."
-    )
-    parser.add_argument("-B", "--skip-build", action="store_true", help="Skip build phase.")
-    parser.add_argument("-t", "--skip-tests", action="store_true", help="Skip test phase.")
-    parser.add_argument(
-        "-i", "--id", nargs="+", default=[], dest="id",
-        help="List of application_ids for partial deployment."
+        "-T",
+        "--host-type",
+        choices=["server", "desktop"],
+        default="server",
+        help="Specify target type: server or desktop.",
     )
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0,
-        help="Increase verbosity (e.g. -vvv)."
+        "-p", "--password-file", help="Vault password file for encrypted variables."
+    )
+    parser.add_argument(
+        "-B", "--skip-build", action="store_true", help="Skip build phase."
+    )
+    parser.add_argument(
+        "-t", "--skip-tests", action="store_true", help="Skip test phase."
+    )
+    parser.add_argument(
+        "-i",
+        "--id",
+        nargs="+",
+        default=[],
+        dest="id",
+        help="List of application_ids for partial deployment.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="count",
+        default=0,
+        help="Increase verbosity (e.g. -vvv).",
     )
     parser.add_argument("--logs", action="store_true", help="Keep logs during cleanup.")
     parser.add_argument("--diff", action="store_true", help="Enable Ansible diff mode.")

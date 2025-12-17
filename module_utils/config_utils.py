@@ -5,29 +5,42 @@ from ansible.errors import AnsibleFilterError
 from collections.abc import Mapping
 
 from ansible.errors import AnsibleUndefinedVariable
+
 try:
     from ansible.utils.unsafe_proxy import AnsibleUndefined
 except ImportError:
+
     class AnsibleUndefined:
         pass
+
 
 class AppConfigKeyError(AnsibleFilterError, ValueError):
     """
     Raised when a required application config key is missing (strict mode).
     Compatible with Ansible error handling and Python ValueError.
     """
+
     pass
+
 
 class ConfigEntryNotSetError(AppConfigKeyError):
     """
     Raised when a config entry is defined in schema but not set in application.
     """
+
     pass
 
 
-def get_app_conf(applications, application_id, config_path, strict=True, default=None, skip_missing_app=False):
+def get_app_conf(
+    applications,
+    application_id,
+    config_path,
+    strict=True,
+    default=None,
+    skip_missing_app=False,
+):
     # Path to the schema file for this application
-    schema_path = os.path.join('roles', application_id, 'schema', 'main.yml')
+    schema_path = os.path.join("roles", application_id, "schema", "main.yml")
 
     def schema_defines(path):
         if not os.path.isfile(schema_path):
@@ -35,7 +48,7 @@ def get_app_conf(applications, application_id, config_path, strict=True, default
         with open(schema_path) as f:
             schema = yaml.safe_load(f) or {}
         node = schema
-        for part in path.split('.'):
+        for part in path.split("."):
             key_match = re.match(r"^([a-zA-Z0-9_-]+)", part)
             if not key_match:
                 return False
@@ -58,8 +71,9 @@ def get_app_conf(applications, application_id, config_path, strict=True, default
             )
         k, idx = m.group(1), m.group(2)
 
-        if (hasattr(obj, '__class__') and obj.__class__.__name__ == 'AnsibleUndefined') \
-            or isinstance(obj, AnsibleUndefinedVariable):
+        if (
+            hasattr(obj, "__class__") and obj.__class__.__name__ == "AnsibleUndefined"
+        ) or isinstance(obj, AnsibleUndefinedVariable):
             if not strict:
                 return default if default is not None else False
             raise AppConfigKeyError(
@@ -78,7 +92,7 @@ def get_app_conf(applications, application_id, config_path, strict=True, default
                 if not strict:
                     return default if default is not None else False
                 # Schema-defined but unset: strict raises ConfigEntryNotSetError
-                trace_path = '.'.join(path_trace[1:])
+                trace_path = ".".join(path_trace[1:])
                 if schema_defines(trace_path):
                     raise ConfigEntryNotSetError(
                         f"Config entry '{trace_path}' is defined in schema at '{schema_path}' but not set in application '{application_id}'."
@@ -144,10 +158,9 @@ def get_app_conf(applications, application_id, config_path, strict=True, default
             f"config_path: {config_path}"
         )
 
-    for part in config_path.split('.'):
+    for part in config_path.split("."):
         path_trace.append(part)
         obj = access(obj, part, path_trace)
         if obj is False and not strict:
             return default if default is not None else False
     return obj
-

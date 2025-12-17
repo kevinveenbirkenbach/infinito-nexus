@@ -42,11 +42,12 @@ class TestInventoryManager(unittest.TestCase):
                     return {"features": {}}
                 return {}
 
-            with mock.patch(
-                "module_utils.manager.inventory.YamlHandler.load_yaml",
-                side_effect=fake_load_yaml,
-            ), mock.patch(
-                "module_utils.manager.inventory.VaultHandler"
+            with (
+                mock.patch(
+                    "module_utils.manager.inventory.YamlHandler.load_yaml",
+                    side_effect=fake_load_yaml,
+                ),
+                mock.patch("module_utils.manager.inventory.VaultHandler"),
             ):
                 with self.assertRaises(SystemExit) as ctx:
                     InventoryManager(
@@ -96,11 +97,12 @@ class TestInventoryManager(unittest.TestCase):
                     return {"features": {}}
                 return {}
 
-            with mock.patch(
-                "module_utils.manager.inventory.YamlHandler.load_yaml",
-                side_effect=fake_load_yaml,
-            ), mock.patch(
-                "module_utils.manager.inventory.VaultHandler"
+            with (
+                mock.patch(
+                    "module_utils.manager.inventory.YamlHandler.load_yaml",
+                    side_effect=fake_load_yaml,
+                ),
+                mock.patch("module_utils.manager.inventory.VaultHandler"),
             ):
                 mgr = InventoryManager(
                     role_path=role_path,
@@ -153,15 +155,20 @@ class TestInventoryManager(unittest.TestCase):
                     return {"features": {}}
                 return {}
 
-            with mock.patch(
-                "module_utils.manager.inventory.YamlHandler.load_yaml",
-                side_effect=fake_load_yaml,
-            ), mock.patch(
-                "module_utils.manager.inventory.VaultHandler"
-            ) as mock_vault_cls:
+            with (
+                mock.patch(
+                    "module_utils.manager.inventory.YamlHandler.load_yaml",
+                    side_effect=fake_load_yaml,
+                ),
+                mock.patch(
+                    "module_utils.manager.inventory.VaultHandler"
+                ) as mock_vault_cls,
+            ):
                 # VaultHandler instance
                 mock_vault = mock_vault_cls.return_value
-                mock_vault.encrypt_string.return_value = "!vault |\n  $ANSIBLE_VAULT;1.1;AES256\n    ENCRYPTED"
+                mock_vault.encrypt_string.return_value = (
+                    "!vault |\n  $ANSIBLE_VAULT;1.1;AES256\n    ENCRYPTED"
+                )
 
                 mgr = InventoryManager(
                     role_path=role_path,
@@ -225,15 +232,19 @@ class TestInventoryManager(unittest.TestCase):
 
             fake_snippet = "!vault |\n  $ANSIBLE_VAULT;1.1;AES256\n    ENCRYPTEDVALUE"
 
-            with mock.patch(
-                "module_utils.manager.inventory.YamlHandler.load_yaml",
-                side_effect=fake_load_yaml,
-            ), mock.patch(
-                "module_utils.manager.inventory.VaultHandler"
-            ) as mock_vault_cls, mock.patch.object(
-                InventoryManager,
-                "generate_value",
-                return_value="PLAINVAL",
+            with (
+                mock.patch(
+                    "module_utils.manager.inventory.YamlHandler.load_yaml",
+                    side_effect=fake_load_yaml,
+                ),
+                mock.patch(
+                    "module_utils.manager.inventory.VaultHandler"
+                ) as mock_vault_cls,
+                mock.patch.object(
+                    InventoryManager,
+                    "generate_value",
+                    return_value="PLAINVAL",
+                ),
             ):
                 mock_vault = mock_vault_cls.return_value
                 mock_vault.encrypt_string.return_value = fake_snippet
@@ -324,15 +335,19 @@ class TestInventoryManager(unittest.TestCase):
                     return {"features": {}}
                 return {}
 
-            with mock.patch(
-                "module_utils.manager.inventory.YamlHandler.load_yaml",
-                side_effect=fake_load_yaml,
-            ), mock.patch(
-                "module_utils.manager.inventory.VaultHandler"
-            ) as mock_vault_cls, mock.patch.object(
-                InventoryManager,
-                "generate_value",
-                return_value="IGNORED",
+            with (
+                mock.patch(
+                    "module_utils.manager.inventory.YamlHandler.load_yaml",
+                    side_effect=fake_load_yaml,
+                ),
+                mock.patch(
+                    "module_utils.manager.inventory.VaultHandler"
+                ) as mock_vault_cls,
+                mock.patch.object(
+                    InventoryManager,
+                    "generate_value",
+                    return_value="IGNORED",
+                ),
             ):
                 mock_vault = mock_vault_cls.return_value
                 mock_vault.encrypt_string.side_effect = AssertionError(

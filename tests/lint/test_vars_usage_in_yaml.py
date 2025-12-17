@@ -55,7 +55,9 @@ class TestVarsPassedAreUsed(unittest.TestCase):
 
     # ---------- Collect vars passed via `vars:` (with locations) ----------
 
-    def _collect_vars_passed_with_locations(self) -> Tuple[Set[str], Dict[str, Set[Tuple[Path, int]]]]:
+    def _collect_vars_passed_with_locations(
+        self,
+    ) -> Tuple[Set[str], Dict[str, Set[Tuple[Path, int]]]]:
         """
         Returns:
           - a set of all var names passed via `vars:`
@@ -107,7 +109,9 @@ class TestVarsPassedAreUsed(unittest.TestCase):
                         key = km.group(2).strip()
                         if key:
                             collected.add(key)
-                            locations.setdefault(key, set()).add((yml, i + 1))  # 1-based line number
+                            locations.setdefault(key, set()).add(
+                                (yml, i + 1)
+                            )  # 1-based line number
                     i += 1
 
         return collected, locations
@@ -187,7 +191,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
         self.assertTrue(
             vars_passed,
             "No variables passed via `vars:` were found. "
-            "Check the repo root path in this test."
+            "Check the repo root path in this test.",
         )
 
         all_text = self._concat_texts()
@@ -195,10 +199,9 @@ class TestVarsPassedAreUsed(unittest.TestCase):
 
         unused: List[str] = []
         for var_name in sorted(vars_passed):
-            used = (
-                self._used_in_jinja_blocks(var_name, all_text)
-                or self._used_in_ansible_exprs(var_name, ansible_exprs)
-            )
+            used = self._used_in_jinja_blocks(
+                var_name, all_text
+            ) or self._used_in_ansible_exprs(var_name, ansible_exprs)
             if not used:
                 if var_name not in ["ansible_python_interpreter"]:
                     unused.append(var_name)

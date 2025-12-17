@@ -1,5 +1,6 @@
 from ansible.errors import AnsibleFilterError
 
+
 def docker_volume_path(volume_name: str) -> str:
     """
     Returns the absolute filesystem path of a Docker volume.
@@ -11,6 +12,7 @@ def docker_volume_path(volume_name: str) -> str:
         raise AnsibleFilterError(f"Invalid volume name: {volume_name}")
 
     return f"/var/lib/docker/volumes/{volume_name}/_data/"
+
 
 class FilterModule(object):
     """Docker volume path filters."""

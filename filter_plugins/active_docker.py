@@ -24,10 +24,12 @@ def _is_mapping(x: Any) -> bool:
         return isinstance(x, dict)
 
 
-def active_docker_container_count(applications: Mapping[str, Any],
-                                  group_names: Iterable[str],
-                                  prefix_regex: str = r'^(web-|svc-).*',
-                                  ensure_min_one: bool = False) -> int:
+def active_docker_container_count(
+    applications: Mapping[str, Any],
+    group_names: Iterable[str],
+    prefix_regex: str = r"^(web-|svc-).*",
+    ensure_min_one: bool = False,
+) -> int:
     if not _is_mapping(applications):
         return 1 if ensure_min_one else 0
 
@@ -35,7 +37,7 @@ def active_docker_container_count(applications: Mapping[str, Any],
     try:
         pattern = re.compile(prefix_regex)
     except re.error:
-        pattern = re.compile(r'^(web-|svc-).*')  # fallback
+        pattern = re.compile(r"^(web-|svc-).*")  # fallback
 
     count = 0
 
@@ -46,8 +48,8 @@ def active_docker_container_count(applications: Mapping[str, Any],
         if not pattern.match(str(app_key)):
             continue
 
-        docker = app_val.get('docker') if _is_mapping(app_val) else None
-        services = docker.get('services') if _is_mapping(docker) else None
+        docker = app_val.get("docker") if _is_mapping(app_val) else None
+        services = docker.get("services") if _is_mapping(docker) else None
         if not _is_mapping(services):
             # sometimes roles define a single service name string; ignore
             continue
@@ -57,7 +59,7 @@ def active_docker_container_count(applications: Mapping[str, Any],
                 # allow shorthand like: service: {} or image string -> counts as enabled
                 count += 1
                 continue
-            enabled = svc_cfg.get('enabled', True)
+            enabled = svc_cfg.get("enabled", True)
             if isinstance(enabled, bool):
                 if enabled:
                     count += 1
@@ -75,5 +77,5 @@ class FilterModule(object):
     def filters(self):
         return {
             # usage: {{ applications | active_docker_container_count(group_names) }}
-            'active_docker_container_count': active_docker_container_count,
+            "active_docker_container_count": active_docker_container_count,
         }
