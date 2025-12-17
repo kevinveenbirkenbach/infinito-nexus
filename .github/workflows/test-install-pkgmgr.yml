@@ -25,7 +25,7 @@ jobs:
             "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable" \
             bash -lc '
               set -euo pipefail
-              ${HOME}/.venvs/pkgmgr/bin/activate
+              ${HOME}/.venvs/infinito/bin/activate
               pkgmgr install infinito --clone-mode shallow --no-verification
               infinito --help
             '
