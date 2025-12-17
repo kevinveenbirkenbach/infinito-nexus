@@ -26,6 +26,6 @@ jobs:
             bash -lc '
               set -euo pipefail
               pkgmgr install infinito --clone-mode shallow --no-verification
-              ${HOME}/.venvs/infinito/bin/activate
+              source "${HOME}/.venvs/infinito/bin/activate"
               infinito --help
             '
