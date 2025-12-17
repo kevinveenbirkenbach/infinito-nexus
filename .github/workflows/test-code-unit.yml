@@ -15,5 +15,5 @@ jobs:
       - name: Show Docker version
         run: docker version
 
-      - name: Run unit tests via make (Arch container)
-        run: make test-unit INFINITO_DISTRO="arch"
+      - name: Run unit tests via make
+        run: make test-unit

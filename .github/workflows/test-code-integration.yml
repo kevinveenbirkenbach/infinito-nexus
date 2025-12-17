@@ -16,20 +16,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: |
-          make build
+      - name: Show Docker version
+        run: docker version
 
-      - name: Clean build artifacts
-        run: |
-          docker run --rm \
-          -v "$PWD":/src \
-          infinito:latest infinito make clean
+      - name: Run integration tests via make
+        run: make test-integration
 
-      - name: Generate project outputs
-        run: |
-          docker run --rm infinito:latest infinito make setup
-
-      - name: Run tests
-        run: |
-          docker run --rm infinito:latest infinito make test-integration

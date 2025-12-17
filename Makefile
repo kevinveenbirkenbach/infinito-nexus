@@ -83,14 +83,12 @@ mig: list tree
 # Docker build targets (delegated to scripts/build)
 # ------------------------------------------------------------
 build:
-	@bash scripts/build/image.sh --target virgin
 	@bash scripts/build/image.sh
 
 build-missing:
 	@bash scripts/build/image.sh --missing
 
 build-no-cache:
-	# @bash scripts/build/image.sh --target virgin --no-cache
 	@bash scripts/build/image.sh --no-cache
 
 build-no-cache-all:
@@ -150,13 +148,13 @@ setup-clean: clean setup
 # --- Tests (separated) ---
 
 test-lint: build-missing
-	@TEST_TYPE="lint" bash scripts/tests/static.sh
+	@TEST_TYPE="lint" bash scripts/tests/code.sh
 
 test-unit: build-missing
-	@TEST_TYPE="unit" bash scripts/tests/static.sh
+	@TEST_TYPE="unit" bash scripts/tests/code.sh
 
 test-integration: build-missing
-	@TEST_TYPE="integration" bash scripts/tests/static.sh
+	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
 # Backwards compatible target (kept)
 test-messy: test-lint test-unit test-integration
