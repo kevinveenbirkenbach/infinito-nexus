@@ -4,8 +4,6 @@ Utility for validating deployment application IDs against defined roles and inve
 """
 import os
 import yaml
-import glob
-import configparser
 
 from filter_plugins.get_all_application_ids import get_all_application_ids
 

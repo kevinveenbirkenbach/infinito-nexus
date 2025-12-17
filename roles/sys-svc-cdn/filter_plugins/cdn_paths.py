@@ -1,4 +1,3 @@
-import datetime
 import os
 
 def cdn_paths(cdn_root, application_id, version):

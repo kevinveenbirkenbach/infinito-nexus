@@ -2,7 +2,7 @@ import unittest
 import yaml
 import subprocess
 from pathlib import Path
-from collections import Counter, defaultdict
+from collections import defaultdict
 
 class TestDomainUniqueness(unittest.TestCase):
     def test_no_duplicate_domains(self):

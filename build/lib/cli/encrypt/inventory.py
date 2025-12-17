@@ -1,9 +1,7 @@
 import argparse
-import subprocess
-import sys
 from pathlib import Path
 import yaml
-from typing import Dict, Any
+from typing import Any
 from module_utils.handler.vault import VaultHandler, VaultScalar
 from module_utils.handler.yaml import YamlHandler
 from yaml.dumper import SafeDumper

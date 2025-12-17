@@ -1,6 +1,7 @@
 # roles/web-app-keycloak/filter_plugins/redirect_uris.py
 from __future__ import annotations
-import os, sys
+import os
+import sys
 from typing import Iterable, Sequence
 from ansible.errors import AnsibleFilterError
 

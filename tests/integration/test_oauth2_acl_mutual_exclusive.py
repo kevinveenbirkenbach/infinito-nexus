@@ -1,4 +1,3 @@
-import os
 import yaml
 import unittest
 from pathlib import Path

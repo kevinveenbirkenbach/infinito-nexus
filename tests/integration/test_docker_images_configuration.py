@@ -1,7 +1,6 @@
 import unittest
 import yaml
 from pathlib import Path
-import re
 
 class TestDockerRoleServicesConfiguration(unittest.TestCase):
     def test_services_keys_and_templates(self):

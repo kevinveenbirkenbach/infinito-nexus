@@ -1,6 +1,4 @@
 import unittest
-import sys
-import os
 from filter_plugins.get_domain import FilterModule
 from ansible.errors import AnsibleFilterError
 

@@ -16,7 +16,6 @@ def is_under_root_tasks(fpath):
 
 
 import os
-import re
 
 def find_role_includes(roles_dir):
     """

@@ -1,5 +1,4 @@
 # tests/unit/filter_plugins/test_active_docker.py
-import os
 import sys
 import unittest
 from pathlib import Path

@@ -1,5 +1,4 @@
 # tests/integration/test_when_condition_duplication.py
-import os
 import unittest
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Tuple

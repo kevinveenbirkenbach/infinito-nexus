@@ -17,7 +17,6 @@ from cli.create.inventory import (  # type: ignore
     ensure_become_password,
     parse_roles_list,
     filter_inventory_by_include,
-    filter_inventory_by_ignore,
     get_path_administrator_home_from_group_vars,
     ensure_administrator_authorized_keys,
     apply_vars_overrides,

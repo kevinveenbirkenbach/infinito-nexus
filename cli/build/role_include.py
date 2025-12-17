@@ -104,7 +104,6 @@ def topological_sort(graph, in_degree, roles=None):
     Perform topological sort on the dependency graph.
     If a cycle is detected, raise an Exception with detailed debug info.
     """
-    from collections import deque
 
     queue = deque([r for r, d in in_degree.items() if d == 0])
     sorted_roles = []

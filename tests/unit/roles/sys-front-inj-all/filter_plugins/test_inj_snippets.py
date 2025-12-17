@@ -9,7 +9,6 @@ Unit tests for roles/sys-front-inj-all/filter_plugins/inj_snippets.py
 """
 
 import os
-import sys
 import unittest
 import tempfile
 import importlib.util

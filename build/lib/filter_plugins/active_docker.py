@@ -13,7 +13,7 @@ Returns an integer. If ensure_min_one=True, returns at least 1.
 """
 
 import re
-from typing import Any, Dict, Mapping, Iterable
+from typing import Any, Mapping, Iterable
 
 
 def _is_mapping(x: Any) -> bool:

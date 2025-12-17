@@ -2,11 +2,11 @@
 import argparse
 import shutil
 import ipaddress
-import difflib
 from jinja2 import Environment, FileSystemLoader
 from ruamel.yaml import YAML
 
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from module_utils.entity_name_utils import get_entity_name
 

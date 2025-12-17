@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-import sys, os, re
+import sys
+import os
+import re
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from ansible.errors import AnsibleFilterError

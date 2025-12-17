@@ -1,9 +1,7 @@
 # Unit tests for the get_category_entries Ansible filter plugin (unittest version).
 
-import os
 import unittest
 import tempfile
-import shutil
 from pathlib import Path
 
 from filter_plugins.get_category_entries import get_category_entries

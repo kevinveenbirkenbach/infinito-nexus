@@ -4,7 +4,7 @@ import re
 import glob
 import yaml
 import unittest
-from typing import Dict, Set, List, Tuple, Optional
+from typing import Dict, Set, List, Optional
 
 # ---------------- Utilities ----------------
 

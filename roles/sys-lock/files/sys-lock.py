@@ -1,7 +1,6 @@
 import argparse
 import subprocess
 import time
-import os
 from datetime import datetime
 
 # Global variable definition

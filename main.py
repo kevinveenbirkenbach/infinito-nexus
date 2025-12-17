@@ -5,7 +5,6 @@ import subprocess
 import sys
 import textwrap
 import threading
-import signal
 from datetime import datetime
 import pty
 from module_utils.sounds import Sound
@@ -236,7 +235,6 @@ def play_start_intro():
 
 
 from multiprocessing import Process, get_start_method, set_start_method
-import time
 
 def _call_sound(method_name: str):
    # Re-import inside child to (re)init audio backend cleanly under 'spawn'

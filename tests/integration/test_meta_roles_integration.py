@@ -1,7 +1,6 @@
 import unittest
 from pathlib import Path
 import re
-import os
 import sys
 
 # Ensure your project root is on PYTHONPATH so filter_plugins can be imported

@@ -11,7 +11,7 @@ sys.path.insert(0, dir_path)
 
 # Import functions and classes to test
 from cli.create.credentials import ask_for_confirmation, main
-from module_utils.handler.vault import VaultHandler, VaultScalar
+from module_utils.handler.vault import VaultHandler
 import subprocess
 import tempfile
 import yaml

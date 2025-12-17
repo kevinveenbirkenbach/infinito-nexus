@@ -1,5 +1,4 @@
 import unittest
-import sys
 import os
 import importlib.util
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../'))

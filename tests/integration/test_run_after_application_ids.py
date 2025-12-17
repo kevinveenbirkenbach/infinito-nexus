@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import unittest
 import yaml
 from pathlib import Path

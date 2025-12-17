@@ -3,7 +3,7 @@ import yaml
 import os
 import glob
 
-from filter_plugins.invokable_paths import get_invokable_paths, get_non_invokable_paths
+from filter_plugins.invokable_paths import get_invokable_paths
 
 class TestSysRolesApplicationId(unittest.TestCase):
     """

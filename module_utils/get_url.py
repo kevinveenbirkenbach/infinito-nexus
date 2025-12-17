@@ -1,5 +1,6 @@
 from ansible.errors import AnsibleFilterError
-import sys, os
+import sys
+import os
 
 def get_url(domains, application_id, protocol):
     plugin_dir   = os.path.dirname(__file__)

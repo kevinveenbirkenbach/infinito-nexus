@@ -2,7 +2,6 @@ import unittest
 import tempfile
 import shutil
 import os
-import json
 from cli.build import tree
 
 

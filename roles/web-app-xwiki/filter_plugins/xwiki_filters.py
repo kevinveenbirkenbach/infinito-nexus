@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Dict, Optional, Iterable
+from typing import Any, Iterable
 try:
     # Ansible provides this; don't hard-depend at import time for unit tests
     from ansible.errors import AnsibleFilterError

@@ -1,6 +1,5 @@
 import unittest
 import types
-import sys
 from pathlib import Path
 from importlib.util import spec_from_file_location, module_from_spec
 

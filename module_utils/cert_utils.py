@@ -5,7 +5,6 @@ __metaclass__ = type
 
 import os
 import subprocess
-import time
 from datetime import datetime
 
 class CertUtils:

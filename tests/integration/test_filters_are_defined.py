@@ -247,7 +247,7 @@ class TestAllUsedFiltersAreDefined(unittest.TestCase):
                 "(and are not in BUILTIN_FILTERS):"
             ]
             for f in unknown:
-                lines.append(f"- " + f)
+                lines.append("- " + f)
             self.fail("\n".join(lines))
 
 

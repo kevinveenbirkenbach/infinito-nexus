@@ -1,7 +1,6 @@
 import subprocess
 import os
 import time
-import sys
 import shutil
 import argparse
 
