@@ -1,7 +1,43 @@
 SHELL 				:= /usr/bin/env bash
-VENV        		?= .venv
-PYTHON 				?= python3
-PIP    				?= $(PYTHON) -m pip
+
+# ------------------------------------------------------------
+# Python / venv selection (runtime-evaluated!)
+#
+# Priority:
+#  1) Use local project venv if present: ./$(VENV)/bin/python
+#  2) Else use the currently active shell python (via `command -v python`)
+#     BUT only if that python is running inside a venv
+#  3) Else fallback to the pkgmgr venv python (if it exists)
+#  4) Else fallback to whatever `python` is on PATH (last resort)
+#
+# NOTE:
+# Use recursive variables (=) so that after `.venv` is created during `make install`,
+# subsequent lines will pick it up.
+# ------------------------------------------------------------
+VENV                ?= .venv
+FALLBACK_PYTHON     ?= /home/kevinveenbirkenbach/.venvs/pkgmgr/bin/python
+
+PYTHON = $(shell \
+  if [ -x "$(VENV)/bin/python" ]; then \
+    echo "$(VENV)/bin/python"; \
+    exit 0; \
+  fi; \
+  py="$$(command -v python 2>/dev/null || true)"; \
+  if [ -n "$$py" ]; then \
+    is_venv="$$( "$$py" -c 'import sys; print("1" if sys.prefix != sys.base_prefix else "0")' 2>/dev/null || echo 0 )"; \
+    if [ "$$is_venv" = "1" ]; then \
+      echo "$$py"; \
+      exit 0; \
+    fi; \
+  fi; \
+  if [ -x "$(FALLBACK_PYTHON)" ]; then \
+    echo "$(FALLBACK_PYTHON)"; \
+  else \
+    echo "$$py"; \
+  fi \
+)
+
+PIP = $(PYTHON) -m pip
 
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
@@ -22,6 +58,11 @@ INTEGRATION_TESTS_DIR   ?= tests/integration
 # Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
 PYTHONPATH              ?= .
 
+# Distro
+INFINITO_DISTRO		?= arch
+PKGMGR_DISTRO		= $(INFINITO_DISTRO)
+export PKGMGR_DISTRO
+
 # Compute extra users as before
 RESERVED_USERNAMES := $(shell \
   find $(ROLES_DIR) -maxdepth 1 -type d -printf '%f\n' \
@@ -34,7 +75,8 @@ RESERVED_USERNAMES := $(shell \
 .PHONY: \
 	deps setup setup-clean install \
 	test test-messy test-lint test-unit test-integration \
-	clean clean-keep-logs list tree mig dockerignore
+	clean clean-keep-logs list tree mig dockerignore \
+	print-python
 
 clean-keep-logs:
 	@echo "🧹 Cleaning ignored files but keeping logs/…"
@@ -62,6 +104,16 @@ dockerignore:
 	@echo "Create dockerignore"
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
+
+install: deps
+	@echo "✅ Python environment installed (editable)."
+	@if [ ! -d "$(VENV)" ]; then \
+			echo "🐍 Creating virtualenv $(VENV)"; \
+			python3 -m venv "$(VENV)"; \
+	fi
+	@echo "📦 Installing Python dependencies"
+	@"$(VENV)/bin/python" -m pip install --upgrade pip setuptools wheel
+	@"$(VENV)/bin/python" -m pip install -e .
 
 setup: dockerignore
 	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
@@ -133,14 +185,7 @@ test-messy: test-lint test-unit test-integration
 test: clean setup test-messy
 	@echo "✅ Full test (setup + tests) executed."
 
-deps:
-	@if [ ! -d "$(VENV)" ]; then \
-		echo "🐍 Creating virtualenv $(VENV)"; \
-		python3 -m venv "$(VENV)"; \
-	fi
-	@echo "📦 Installing Python dependencies"
-	@$(PIP) install --upgrade pip setuptools wheel
-	@$(PIP) install -e .
-
-install: deps
-	@echo "✅ Python environment installed (editable)."
+# Debug helper
+print-python:
+	@echo "Selected PYTHON = $(PYTHON)"
+	@$(PYTHON) -c 'import sys; print("sys.executable =", sys.executable); print("sys.prefix     =", sys.prefix); print("sys.base_prefix=", sys.base_prefix); print("is_venv        =", sys.prefix != sys.base_prefix)'

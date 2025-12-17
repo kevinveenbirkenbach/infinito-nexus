@@ -1,10 +1,10 @@
 # syntax=docker/dockerfile:1
 
-ARG DISTRO=arch
+ARG PKGMGR_DISTRO=arch
 
 ARG PKGMGR_IMAGE_OWNER=kevinveenbirkenbach
 ARG PKGMGR_IMAGE_TAG=stable
-ARG PKGMGR_IMAGE="ghcr.io/${PKGMGR_IMAGE_OWNER}/pkgmgr-${DISTRO}:${PKGMGR_IMAGE_TAG}"
+ARG PKGMGR_IMAGE="ghcr.io/${PKGMGR_IMAGE_OWNER}/pkgmgr-${PKGMGR_DISTRO}:${PKGMGR_IMAGE_TAG}"
 
 FROM ${PKGMGR_IMAGE} AS infinito
 SHELL ["/bin/bash", "-lc"]
@@ -20,22 +20,23 @@ COPY . /opt/infinito-src
 # Install infinito via pkgmgr (shallow)
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
-  pkgmgr install infinito --clone-mode shallow
+  pkgmgr install infinito --clone-mode shallow;
 
 # ------------------------------------------------------------
 # Override with local source
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
   INFINITO_PATH="$(pkgmgr path infinito)"; \
-  rm -rf "${INFINITO_PATH:?}/"*; \
-  rsync -a --delete --exclude='.git' /opt/infinito-src/ "${INFINITO_PATH}/"
+  rm -rf "${INFINITO_PATH}/"*; \
+  rsync -a --delete --exclude='.git' /opt/infinito-src/ "${INFINITO_PATH}/"; \
+  ln -sf "${INFINITO_PATH}/main.py" /usr/local/bin/infinito; \
+  chmod +x /usr/local/bin/infinito; \
+  cd "${INFINITO_PATH}/"; \
+  make install;
 
 # ------------------------------------------------------------
-# Symlink entry
+# Verify Installation
 # ------------------------------------------------------------
-RUN set -euo pipefail; \
-  INFINITO_PATH="$(pkgmgr path infinito)"; \
-  ln -sf "${INFINITO_PATH}/main.py" /usr/local/bin/infinito; \
-  chmod +x /usr/local/bin/infinito
+RUN infinito --help
 
 CMD ["bash", "-lc", "infinito --help && exec tail -f /dev/null"]
