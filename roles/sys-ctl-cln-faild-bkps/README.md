@@ -5,7 +5,6 @@ Validation is performed via `dirval`; failures can be removed automatically in a
 
 ## Behavior
 - Installs `cleanback` via `pkgmgr`.
-- Runs `cleanback` (`main.py`) as a **systemd oneshot** service.
 - Executes `--all` with `--yes` so failing directories are deleted automatically.
 - **No defaults** for runtime knobs:
   - `CLEANBACK_TIMEOUT_SECONDS` (required)

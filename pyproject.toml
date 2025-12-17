@@ -28,10 +28,9 @@ audio = [
 ]
 
 [project.scripts]
-infinito = "main:main"
+infinito = "cli.__main__:main"
 
 [tool.setuptools]
-py-modules = ["main"]
 packages = { find = { where = ["."], include = [
   "cli*",
   "filter_plugins*",

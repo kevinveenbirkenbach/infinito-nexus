@@ -26,10 +26,10 @@ RUN set -euo pipefail; \
   INFINITO_PATH="$(pkgmgr path infinito)"; \
   rm -rf "${INFINITO_PATH}/"*; \
   rsync -a --delete --exclude='.git' /opt/src/infinito/ "${INFINITO_PATH}/"; \
-  ln -sf "${INFINITO_PATH}/main.py" /usr/local/bin/infinito; \
-  chmod +x /usr/local/bin/infinito; \
   cd "${INFINITO_PATH}/"; \
   make install;
+
+ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
 CMD ["infinito", "--help"]

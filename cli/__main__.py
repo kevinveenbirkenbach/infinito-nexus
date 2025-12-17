@@ -10,10 +10,11 @@ import pty
 from module_utils.sounds import Sound
 import time
 from multiprocessing import Process, get_start_method, set_start_method
+from pathlib import Path
 
 # Color support
 try:
-    from colorama import init as colorama_init, Fore, Back, Style
+    from colorama import init as colorama_init, Fore, Style
 
     colorama_init(autoreset=True)
 except ImportError:
@@ -32,16 +33,6 @@ except ImportError:
         MAGENTA = "\033[35m"
         CYAN = "\033[36m"
         WHITE = "\033[37m"
-
-    class Back:
-        BLACK = "\033[40m"
-        RED = "\033[41m"
-        GREEN = "\033[42m"
-        YELLOW = "\033[43m"
-        BLUE = "\033[44m"
-        MAGENTA = "\033[45m"
-        CYAN = "\033[46m"
-        WHITE = "\033[47m"
 
 
 def color_text(text, color):
@@ -83,8 +74,7 @@ def list_cli_commands(cli_dir):
 
 def extract_description_via_help(cli_script_path):
     try:
-        script_dir = os.path.dirname(os.path.realpath(__file__))
-        cli_dir = os.path.join(script_dir, "cli")
+        cli_dir = os.path.dirname(os.path.realpath(__file__))
         rel = os.path.relpath(cli_script_path, cli_dir)
         module = "cli." + rel[:-3].replace(os.sep, ".")
 
@@ -134,7 +124,11 @@ def show_full_help_for_all(cli_dir, available):
         print(color_text("-" * 80, Fore.BLUE))
 
         try:
-            module = "cli." + file_path[:-3].replace(os.sep, ".")
+            parts = ["cli"]
+            if folder:
+                parts += folder.split("/")
+            parts.append(cmd)
+            module = ".".join(parts)
             result = subprocess.run(
                 [sys.executable, "-m", module, "--help"],
                 capture_output=True,
@@ -329,7 +323,7 @@ def failure_with_warning_loop(no_signal, sound_enabled, alarm_timeout=60):
         sys.exit(1)
 
 
-if __name__ == "__main__":
+def main() -> None:
     # IMPORTANT: use 'spawn' so the child re-initializes audio cleanly
     try:
         if get_start_method(allow_none=True) != "spawn":
@@ -363,10 +357,7 @@ if __name__ == "__main__":
     # Play intro melody if requested
     if sound_enabled:
         threading.Thread(target=play_start_intro, daemon=True).start()
-
-    script_dir = os.path.dirname(os.path.realpath(__file__))
-    cli_dir = os.path.join(script_dir, "cli")
-    os.chdir(script_dir)
+    cli_dir = os.path.dirname(os.path.realpath(__file__))
 
     if git_clean:
         git_clean_repo()
@@ -421,13 +412,11 @@ if __name__ == "__main__":
             sys.exit(0)
 
     # Resolve script path
-    script_path = None
     cli_args = []
     module = None
     for n in range(len(args), 0, -1):
         candidate = os.path.join(cli_dir, *args[:n]) + ".py"
         if os.path.isfile(candidate):
-            script_path = candidate
             cli_args = args[n:]
             rel = os.path.relpath(candidate, cli_dir)
             module = "cli." + rel[:-3].replace(os.sep, ".")
@@ -439,11 +428,14 @@ if __name__ == "__main__":
 
     log_file = None
     if log_enabled:
-        log_dir = os.path.join(script_dir, "logs")
+        base = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
+        log_dir = base / "infinito" / "logs"
         os.makedirs(log_dir, exist_ok=True)
+        os.chmod(log_dir, 0o700)
         timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
-        log_file_path = os.path.join(log_dir, f"{timestamp}.log")
-        log_file = open(log_file_path, "a", encoding="utf-8")
+        log_file_path = log_dir / f"{timestamp}.log"
+        fd = os.open(str(log_file_path), os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+        log_file = os.fdopen(fd, "a", encoding="utf-8")
         print(color_text(f"Tip: Log file created at {log_file_path}", Fore.GREEN))
 
     full_cmd = [sys.executable, "-m", module] + cli_args
@@ -479,9 +471,6 @@ if __name__ == "__main__":
                 proc.wait()
                 rc = proc.returncode
 
-            if log_file:
-                log_file.close()
-
             if rc != 0:
                 failure_with_warning_loop(no_signal, sound_enabled, alarm_timeout)
                 sys.exit(rc)
@@ -494,13 +483,25 @@ if __name__ == "__main__":
             failure_with_warning_loop(no_signal, sound_enabled, alarm_timeout)
             sys.exit(1)
 
-    if infinite:
-        print(color_text("Starting infinite execution mode...", Fore.CYAN))
-        count = 1
-        while True:
-            print(color_text(f"Run #{count}", Style.BRIGHT))
+    try:
+        if infinite:
+            print(color_text("Starting infinite execution mode...", Fore.CYAN))
+            count = 1
+            while True:
+                print(color_text(f"Run #{count}", Style.BRIGHT))
+                run_once()
+                count += 1
+        else:
             run_once()
-            count += 1
-    else:
-        run_once()
-        sys.exit(0)
+            sys.exit(0)
+    except KeyboardInterrupt:
+        print()
+        print(color_text("Execution interrupted by user (Ctrl+C).", Fore.YELLOW))
+        sys.exit(130)  # POSIX-konformer Exit-Code für SIGINT
+    finally:
+        if log_file:
+            log_file.close()
+
+
+if __name__ == "__main__":
+    main()

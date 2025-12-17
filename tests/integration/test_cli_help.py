@@ -7,12 +7,11 @@ import subprocess
 class CLIHelpIntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Projekt-Root ermitteln
         cls.project_root = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "..")
         )
-        cls.main_py = os.path.join(cls.project_root, "main.py")
         cls.cli_dir = os.path.join(cls.project_root, "cli")
+        cls.main_py = os.path.join(cls.cli_dir, "__main__.py")
         cls.python = sys.executable
 
     def test_all_cli_commands_help(self):
@@ -26,7 +25,6 @@ class CLIHelpIntegrationTest(unittest.TestCase):
                 if not fname.endswith(".py") or fname.startswith("__"):
                     continue
 
-                # Bestimme Subcommand-Segmente
                 rel_dir = os.path.relpath(root, self.cli_dir)
                 cmd_name = os.path.splitext(fname)[0]
                 if rel_dir == ".":

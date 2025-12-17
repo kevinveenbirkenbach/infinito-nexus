@@ -8,7 +8,6 @@ This Ansible role installs and configures [Kevin's Package Manager](https://gith
 
 This role automates the deployment of Kevin's Package Manager by:
 - Cloning the repository from GitHub.
-- Setting the proper executable permissions on `main.py`.
 - Executing the installation command to create/update repository command wrappers.
 
 It ensures that the Package Manager is ready to manage repositories, perform Git operations, and streamline software management tasks.
