@@ -1,11 +1,7 @@
 name: Build & Test Infinito.Nexus CLI in Docker Container
 
 on:
-  push:
-    branches:
-      - master
-      - main
-  pull_request:
+  workflow_call:
 
 jobs:
   test-code:
