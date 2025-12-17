@@ -157,7 +157,7 @@ test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
 # Backwards compatible target (kept)
-test-ansible:
+lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
