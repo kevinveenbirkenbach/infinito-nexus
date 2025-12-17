@@ -7,7 +7,7 @@ import uuid
 from typing import List, Tuple
 
 
-WORKDIR_DEFAULT = "/opt/infinito-src"
+WORKDIR_DEFAULT = "/opt/src/infinito"
 
 
 def ensure_image(image: str, rebuild: bool = False, no_cache: bool = False) -> None:
