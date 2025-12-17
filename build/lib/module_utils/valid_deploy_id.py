@@ -45,7 +45,6 @@ class ValidDeployId:
         Manually parse INI inventory for sections and host lists.
         Returns True if app_id matches a section name or a host in a section.
         """
-        present = False
         with open(inventory_path, 'r', encoding='utf-8') as f:
             current_section = None
             for raw in f:

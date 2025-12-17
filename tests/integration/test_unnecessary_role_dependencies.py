@@ -247,16 +247,12 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
                 # --- 2) Task-level analysis
                 any_usage = False
                 any_bad_order = False
-                any_include_somewhere = False
 
                 for path, text in task_texts:
                     if not text:
                         continue
 
                     include_off = first_include_offset_for_role(text, producer)
-                    if include_off is not None:
-                        any_include_somewhere = True
-
                     var_use_off = first_var_use_offset_in_text(text, provided_vars)
                     notify_offs = find_notify_offsets_for_handlers(text, provider_handlers)
 
@@ -277,14 +273,12 @@ class TestUnnecessaryRoleDependencies(unittest.TestCase):
                 if not any_bad_order:
                     if not any_usage:
                         reason = "no variable/handler usage detected in consumer"
-                        suggest = "remove from meta/dependencies; include only where needed (optionally guarded)."
                         warnings.append(
                             f"[{consumer}] meta dependency on '{producer}' appears unnecessary: {reason}."
                         )
                     else:
                         # Usage exists but guarded by include in each file
                         reason = "all usages occur after include/import in the same task file"
-                        suggest = "remove from meta/dependencies; keep the explicit include/import (guard with run_once_* if global)."
                         warnings.append(
                             f"[{consumer}] meta dependency on '{producer}' appears unnecessary: {reason}."
                         )

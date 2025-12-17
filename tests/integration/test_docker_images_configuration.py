@@ -24,7 +24,7 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
             try:
                 config = yaml.safe_load(cfg_file.read_text("utf-8")) or {}
                 main_file = role_path / "vars" / "main.yml"
-                main = yaml.safe_load(main_file.read_text("utf-8")) or {}
+                yaml.safe_load(main_file.read_text("utf-8")) or {}
             except yaml.YAMLError as e:
                 errors.append(f"{role_path.name}: YAML parse error: {e}")
                 continue

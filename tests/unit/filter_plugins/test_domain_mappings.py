@@ -20,7 +20,6 @@ class TestDomainMappings(unittest.TestCase):
 
     def test_empty_domains_cfg(self):
         apps = {'web-app-desktop': {'domains': {}}}
-        default = 'desktop.example.com'
         expected = []
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, expected)

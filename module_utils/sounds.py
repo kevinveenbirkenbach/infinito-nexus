@@ -175,7 +175,6 @@ try:
         def play_infinito_intro_sound(cls) -> None:
             build_time = 10.0
             celebr_time = 12.0
-            breakdown_time = 10.0
             overlap = 3.0
 
             bass_seg = 0.125
