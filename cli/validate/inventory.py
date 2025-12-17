@@ -4,11 +4,11 @@ import sys
 import yaml
 import re
 from pathlib import Path
+from cli.meta.applications.all import find_application_ids
 
 # Ensure imports work when run directly
 script_dir = Path(__file__).resolve().parent
 repo_root = script_dir.parent.parent
-from cli.meta.applications.all import find_application_ids
 
 def load_yaml_file(path):
     try:
@@ -19,7 +19,6 @@ def load_yaml_file(path):
     except Exception as e:
         print(f"Warning: Could not parse {path}: {e}", file=sys.stderr)
         return None
-
 
 def recursive_keys(d, prefix=''):
     keys = set()

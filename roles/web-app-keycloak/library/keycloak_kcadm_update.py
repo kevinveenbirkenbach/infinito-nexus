@@ -3,6 +3,11 @@
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+from ansible.module_utils.basic import AnsibleModule
+import json
+import subprocess
+from copy import deepcopy
+
 DOCUMENTATION = r'''
 ---
 module: keycloak_kcadm_update
@@ -112,12 +117,6 @@ result:
   type: dict
   returned: always
 '''
-
-from ansible.module_utils.basic import AnsibleModule
-import json
-import subprocess
-from copy import deepcopy
-
 
 def run_kcadm(module, cmd, ignore_rc=False):
     """Run a shell command for kcadm."""

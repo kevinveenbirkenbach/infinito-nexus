@@ -1,15 +1,8 @@
 import os
 import sys
 import unittest
-
-# Add the filter_plugins directory to the import path
-dir_path = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), '../../../filter_plugins')
-)
-sys.path.insert(0, dir_path)
-
 from ansible.errors import AnsibleFilterError
-from domain_redirect_mappings import FilterModule
+from filter_plugins.domain_redirect_mappings import FilterModule
 
 class TestDomainMappings(unittest.TestCase):
     def setUp(self):

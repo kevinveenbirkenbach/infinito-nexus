@@ -14,9 +14,6 @@ def is_under_root_tasks(fpath):
     abs_path = os.path.abspath(fpath)
     return abs_path.startswith(os.path.abspath(ROOT_TASKS_DIR) + os.sep)
 
-
-import os
-
 def find_role_includes(roles_dir):
     """
     Scan all YAML files under `roles_dir`, skipping any under a top-level `tasks/` directory,

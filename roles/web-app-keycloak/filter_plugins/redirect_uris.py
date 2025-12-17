@@ -1,9 +1,10 @@
-# roles/web-app-keycloak/filter_plugins/redirect_uris.py
 from __future__ import annotations
 import os
 import sys
 from typing import Iterable, Sequence
 from ansible.errors import AnsibleFilterError
+from module_utils.config_utils import get_app_conf, AppConfigKeyError, ConfigEntryNotSetError
+from module_utils.get_url import get_url  # returns "<protocol>://<domain>"
 
 # --- Locate project root that contains `module_utils/` dynamically (up to 5 levels) ---
 def _ensure_module_utils_on_path():
@@ -16,10 +17,6 @@ def _ensure_module_utils_on_path():
             return
     # If not found, imports below will raise a clear error
 _ensure_module_utils_on_path()
-
-# Import your existing helpers
-from module_utils.config_utils import get_app_conf, AppConfigKeyError, ConfigEntryNotSetError
-from module_utils.get_url import get_url  # returns "<protocol>://<domain>"
 
 def _stable_dedup(items: Sequence[str]) -> list[str]:
     seen = set()

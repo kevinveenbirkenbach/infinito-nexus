@@ -1,10 +1,6 @@
-#
-# Usage in tasks:
-#   - set_fact:
-#       inj_enabled: "{{ applications | inj_enabled(application_id, ['javascript','logout','css','matomo','desktop']) }}"
-
 import sys
 import os
+from module_utils.config_utils import get_app_conf
 
 # allow imports from module_utils (same trick as your get_app_conf filter)
 base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
@@ -12,8 +8,6 @@ mu = os.path.join(base, 'module_utils')
 for p in (base, mu):
     if p not in sys.path:
         sys.path.insert(0, p)
-
-from module_utils.config_utils import get_app_conf
 
 def inj_enabled_filter(applications, application_id, features, prefix="features", default=False):
     """

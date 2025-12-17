@@ -3,11 +3,6 @@ import sys
 import tempfile
 import time
 import unittest
-
-# ensure repo root on path
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-sys.path.insert(0, ROOT)
-
 from ansible.errors import AnsibleError  # type: ignore
 from lookup_plugins.local_mtime_qs import LookupModule
 
