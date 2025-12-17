@@ -2,6 +2,7 @@
 import argparse
 import yaml
 import sys
+import subprocess
 from pathlib import Path
 from module_utils.dict_renderer import DictRenderer
 from lookup_plugins.application_gid import LookupModule

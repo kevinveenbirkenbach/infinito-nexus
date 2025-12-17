@@ -195,47 +195,6 @@ class RoleDependencyResolver:
         else:
             out.add(pattern)
 
-    def test_jinja_mixed_name_glob_matching(self):
-        """
-        include_role:
-        name: "prefix-{{ item }}-suffix"
-        loop: [x, y]
-        Existing roles: prefix-x-suffix, prefix-y-suffix, prefix-z-suffix
-
-        Expectation:
-        - NO raw loop items ('x', 'y') end up as roles
-        - Glob matching resolves to all three concrete roles
-        """
-        make_role(self.roles_dir, "A")
-        for rn in ["prefix-x-suffix", "prefix-y-suffix", "prefix-z-suffix"]:
-            make_role(self.roles_dir, rn)
-
-        write(
-            os.path.join(self.roles_dir, "A", "tasks", "main.yml"),
-            """
-            - name: jinja-mixed glob
-            include_role:
-                name: "prefix-{{ item }}-suffix"
-            loop:
-                - x
-                - y
-            """
-        )
-
-        r = RoleDependencyResolver(self.roles_dir)
-        deps = r.get_role_dependencies("A")
-
-        # ensure no raw loop items leak into the results
-        self.assertNotIn("x", deps)
-        self.assertNotIn("y", deps)
-
-        # only the resolved role names should be present
-        self.assertEqual(
-            deps,
-            {"prefix-x-suffix", "prefix-y-suffix", "prefix-z-suffix"},
-        )
-
-
     # -------------------------- meta helpers --------------------------
 
     def _extract_meta_dependencies(self, role_path: str) -> Set[str]:

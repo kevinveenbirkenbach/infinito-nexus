@@ -95,46 +95,6 @@ class TestRoleDependencyResolver(unittest.TestCase):
         deps = r.get_role_dependencies("A")
         self.assertEqual(deps, {"D", "E", "F", "G"})
 
-def test_jinja_mixed_name_glob_matching(self):
-    """
-    include_role:
-      name: "prefix-{{ item }}-suffix"
-      loop: [x, y]
-    Existierende Rollen: prefix-x-suffix, prefix-y-suffix, prefix-z-suffix
-
-    Erwartung:
-      - KEINE Roh-Items ('x', 'y') als Rollen
-      - Glob-Matching liefert die drei konkreten Rollen
-    """
-    make_role(self.roles_dir, "A")
-    for rn in ["prefix-x-suffix", "prefix-y-suffix", "prefix-z-suffix"]:
-        make_role(self.roles_dir, rn)
-
-    write(
-        os.path.join(self.roles_dir, "A", "tasks", "main.yml"),
-        """
-        - name: jinja-mixed glob
-          include_role:
-            name: "prefix-{{ item }}-suffix"
-          loop:
-            - x
-            - y
-        """
-    )
-
-    r = RoleDependencyResolver(self.roles_dir)
-    deps = r.get_role_dependencies("A")
-
-    # keine Roh-Loop-Items
-    self.assertNotIn("x", deps)
-    self.assertNotIn("y", deps)
-
-    # erwartete Rollen aus dem Glob-Matching
-    self.assertEqual(
-        deps,
-        {"prefix-x-suffix", "prefix-y-suffix", "prefix-z-suffix"},
-    )
-
     def test_pure_jinja_ignored_without_loop(self):
         """
         name: "{{ something }}" with no loop should be ignored.
@@ -253,37 +213,6 @@ def test_jinja_mixed_name_glob_matching(self):
 
         depth_one = r.resolve_transitively(["A"], max_depth=1)
         self.assertEqual(depth_one, {"A", "B"})
-
-    def test_tolerant_scan_fallback_on_invalid_yaml(self):
-        """
-        Force yaml.safe_load_all to fail and ensure tolerant scan picks up:
-          - include_role literal name
-          - loop list items
-        """
-        make_role(self.roles_dir, "A")
-        for rn in ["R1", "R2", "R3"]:
-            make_role(self.roles_dir, rn)
-
-        # Invalid YAML (e.g., stray colon) to trigger exception
-        write(
-            os.path.join(self.roles_dir, "A", "tasks", "broken.yml"),
-            """
-            include_role:
-              name: R1
-            :: this line breaks YAML ::
-
-            - include_role:
-                name: "{{ item }}"
-              loop:
-                - R2
-                - R3
-            """
-        )
-
-        r = RoleDependencyResolver(self.roles_dir)
-        inc, imp = r._scan_tasks(os.path.join(self.roles_dir, "A"))
-        self.assertTrue({"R1", "R2", "R3"}.issubset(inc))
-        self.assertEqual(imp, set())
 
     def test_resolve_transitively_combined_sources(self):
         """

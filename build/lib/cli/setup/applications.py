@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from module_utils.dict_renderer import DictRenderer
 from lookup_plugins.application_gid import LookupModule
+import subprocess
 
 def load_yaml_file(path: Path) -> dict:
     if not path.exists():
