@@ -1,13 +1,7 @@
 name: Lint Infinito.Nexus Python with ruff
 
 on:
-  push:
-    branches:
-      - master
-      - main
-      - develop
-      - "*"
-  pull_request:
+  workflow_call:
 
 jobs:
   lint-python:
