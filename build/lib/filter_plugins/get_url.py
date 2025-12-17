@@ -1,6 +1,4 @@
 #!/usr/bin/python
-import sys
-import os
 from module_utils.get_url import get_url
 
 class FilterModule(object):

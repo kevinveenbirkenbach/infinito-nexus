@@ -1,8 +1,6 @@
 import unittest
 import hashlib
 import base64
-import sys
-import os
 import copy
 from filter_plugins.csp_filters import FilterModule, AnsibleFilterError
 

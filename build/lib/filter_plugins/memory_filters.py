@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sys
-import os
 import re
 from ansible.errors import AnsibleFilterError
 from module_utils.config_utils import get_app_conf

@@ -1,8 +1,6 @@
 # filter_plugins/resource_filter.py
 from __future__ import annotations
 
-import sys
-import os
 from module_utils.config_utils import get_app_conf, AppConfigKeyError, ConfigEntryNotSetError  # noqa: F401
 from module_utils.entity_name_utils import get_entity_name
 

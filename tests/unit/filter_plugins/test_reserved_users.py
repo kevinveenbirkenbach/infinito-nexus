@@ -1,5 +1,3 @@
-import os
-import sys
 import unittest
 
 import reserved_users  # noqa: E402

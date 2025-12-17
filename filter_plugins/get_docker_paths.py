@@ -1,5 +1,3 @@
-import sys
-import os
 from module_utils.entity_name_utils import get_entity_name
 
 def get_docker_paths(application_id: str, path_docker_compose_instances: str) -> dict:

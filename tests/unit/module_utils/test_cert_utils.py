@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import unittest
 from module_utils.cert_utils import CertUtils
 

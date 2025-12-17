@@ -1,6 +1,4 @@
-import sys
 import unittest
-from pathlib import Path
 from filter_plugins.active_docker import (
     active_docker_container_count,
     FilterModule,

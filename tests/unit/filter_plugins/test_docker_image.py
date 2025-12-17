@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import unittest
 from filter_plugins.get_docker_image import FilterModule
 

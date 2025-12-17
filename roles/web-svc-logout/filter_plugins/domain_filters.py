@@ -1,6 +1,4 @@
 from ansible.errors import AnsibleFilterError
-import sys
-import os
 from module_utils.config_utils import get_app_conf
 
 class FilterModule(object):

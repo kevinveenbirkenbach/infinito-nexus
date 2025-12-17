@@ -1,5 +1,3 @@
-import os
-import sys
 from collections.abc import Mapping
 from module_utils.config_utils import get_app_conf  # reuse existing helper
 
