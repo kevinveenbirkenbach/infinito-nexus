@@ -88,7 +88,7 @@ def render_templates(src_dir, dst_dir, context):
                     with open(dst_file) as f_old:
                         old_lines = f_old.readlines()
                     new_lines = rendered.splitlines(keepends=True)
-                    additions = [l for l in new_lines if l not in old_lines]
+                    additions = [line for line in new_lines if line not in old_lines]
                     if additions:
                         with open(dst_file, 'a') as f:
                             f.writelines(additions)
