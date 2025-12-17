@@ -1,4 +1,4 @@
-name: Lint Infinito.Nexus Python with ruff
+name: Python Linter
 
 on:
   workflow_call:

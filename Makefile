@@ -66,7 +66,7 @@ clean-keep-logs:
 
 clean:
 	@echo "Removing ignored git files"
-	git clean -fdX
+	sudo git clean -fdX
 
 list:
 	@echo "Generating the roles list"
@@ -153,15 +153,15 @@ test-lint: build-missing
 test-unit: build-missing
 	@TEST_TYPE="unit" bash scripts/tests/code.sh
 
-test-integration: setup-clean build-missing
+test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
 # Backwards compatible target (kept)
-test-messy: test-lint test-unit test-integration
+test-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-test: setup-clean test-messy
+test: test-lint test-unit test-integration test-ansible
 	@echo "✅ Full test (setup + tests) executed."
 
 # Debug helper

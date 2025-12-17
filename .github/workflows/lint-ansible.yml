@@ -1,4 +1,4 @@
-name: Test Units
+name: Ansible Linter
 
 on:
   workflow_call:
@@ -12,5 +12,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run unit tests via make
-        run: make test-unit
+      - name: Show Docker version
+        run: docker version
+
+      - name: Run lint-ansible via make
+        run: make lint-ansible

@@ -9,6 +9,8 @@ on:
       - 'v*'
 
 jobs:
+  lint-ansible:
+    uses: ./.github/workflows/lint-ansible.yml
   lint-python:
     uses: ./.github/workflows/lint-python.yml
   lint-shell:

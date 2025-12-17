@@ -11,4 +11,4 @@ venv
 roles/list.json
 *.pyc
 *.egg-info
-build.git
+./build/*.git

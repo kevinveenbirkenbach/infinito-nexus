@@ -1,4 +1,4 @@
-name: ShellCheck
+name: Shell Linter
 
 on:
   workflow_call:

@@ -20,5 +20,6 @@ docker run --rm \
     echo "PYTHON=${PYTHON}"
     export PATH="$(dirname "$PYTHON"):$PATH"
     # Ensure we really use the exported interpreter (and thus the global venv)
+    make setup
     "${PYTHON}" -m unittest discover -s tests/${TEST_TYPE} -t . -p "${TEST_PATTERN}"
   '
