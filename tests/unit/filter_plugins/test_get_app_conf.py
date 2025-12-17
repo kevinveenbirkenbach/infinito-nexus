@@ -4,7 +4,8 @@ import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../filter_plugins')))
 
-from get_app_conf import get_app_conf, AppConfigKeyError
+from get_app_conf import get_app_conf
+from module_utils.config_utils import AppConfigKeyError
 from ansible.errors import AnsibleFilterError
 
 class TestGetAppConf(unittest.TestCase):
