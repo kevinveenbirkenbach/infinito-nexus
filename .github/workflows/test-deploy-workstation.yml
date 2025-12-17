@@ -1,0 +1,32 @@
+name: Test Infinito.Nexus Deploy (workstation)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+      - "*"
+  pull_request:
+
+jobs:
+  test-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [arch, debian, ubuntu, fedora, centos]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show Docker version
+        run: docker version
+
+      - name: Run deploy test suite (workstation)
+        run: |
+          chmod +x scripts/tests/deploy.sh
+          scripts/tests/deploy.sh --type workstation --distro "${{ matrix.distro }}"

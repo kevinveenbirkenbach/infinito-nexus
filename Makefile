@@ -1,43 +1,25 @@
 SHELL 				:= /usr/bin/env bash
 
 # ------------------------------------------------------------
-# Python / venv selection (runtime-evaluated!)
+# Python / venv (GLOBAL, NOT inside project)
 #
-# Priority:
-#  1) Use local project venv if present: ./$(VENV)/bin/python
-#  2) Else use the currently active shell python (via `command -v python`)
-#     BUT only if that python is running inside a venv
-#  3) Else fallback to the pkgmgr venv python (if it exists)
-#  4) Else fallback to whatever `python` is on PATH (last resort)
+# Goal:
+#  - Never create a venv inside the project folder.
+#  - Use a stable venv location and export PYTHON so subprocesses can reuse it.
 #
-# NOTE:
-# Use recursive variables (=) so that after `.venv` is created during `make install`,
-# subsequent lines will pick it up.
+# Defaults work well inside the Docker image.
+# On a local host you may want to override:
+#   make VENV_BASE=$$HOME/.venvs install
 # ------------------------------------------------------------
-VENV                ?= .venv
-FALLBACK_PYTHON     ?= /home/kevinveenbirkenbach/.venvs/pkgmgr/bin/python
+VENV_BASE           ?= /opt/venvs
+VENV_NAME           ?= infinito
+VENV                := $(VENV_BASE)/$(VENV_NAME)
 
-PYTHON = $(shell \
-  if [ -x "$(VENV)/bin/python" ]; then \
-    echo "$(VENV)/bin/python"; \
-    exit 0; \
-  fi; \
-  py="$$(command -v python 2>/dev/null || true)"; \
-  if [ -n "$$py" ]; then \
-    is_venv="$$( "$$py" -c 'import sys; print("1" if sys.prefix != sys.base_prefix else "0")' 2>/dev/null || echo 0 )"; \
-    if [ "$$is_venv" = "1" ]; then \
-      echo "$$py"; \
-      exit 0; \
-    fi; \
-  fi; \
-  if [ -x "$(FALLBACK_PYTHON)" ]; then \
-    echo "$(FALLBACK_PYTHON)"; \
-  else \
-    echo "$$py"; \
-  fi \
-)
+PYTHON              := $(VENV)/bin/python
+PIP                 := $(PYTHON) -m pip
 
-PIP = $(PYTHON) -m pip
+export PYTHON
+export PIP
 
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
@@ -51,6 +33,7 @@ INCLUDES_OUT_DIR    := ./tasks/groups
 
 # --- Test filtering (unittest discover) ---
 TEST_PATTERN            ?= test*.py
+export TEST_PATTERN
 LINT_TESTS_DIR          ?= tests/lint
 UNIT_TESTS_DIR          ?= tests/unit
 INTEGRATION_TESTS_DIR   ?= tests/integration
@@ -60,8 +43,7 @@ PYTHONPATH              ?= .
 
 # Distro
 INFINITO_DISTRO		?= arch
-PKGMGR_DISTRO		= $(INFINITO_DISTRO)
-export PKGMGR_DISTRO
+export INFINITO_DISTRO
 
 # Compute extra users as before
 RESERVED_USERNAMES := $(shell \
@@ -97,23 +79,46 @@ tree:
 mig: list tree
 	@echo "Creating meta data for meta infinity graph"
 
-make build:
-	docker build --network=host -t infinito:latest .
+# ------------------------------------------------------------
+# Docker build targets (delegated to scripts/build)
+# ------------------------------------------------------------
+build:
+	@bash scripts/build/image.sh --target virgin
+	@bash scripts/build/image.sh
+
+build-missing:
+	@bash scripts/build/image.sh --missing
+
+build-no-cache:
+	# @bash scripts/build/image.sh --target virgin --no-cache
+	@bash scripts/build/image.sh --no-cache
+
+build-no-cache-all:
+	@set -e; \
+	for d in $(DISTROS); do \
+	  echo "=== build-no-cache: $$d ==="; \
+	  INFINITO_DISTRO="$$d" $(MAKE) build-no-cache; \
+	done
 
 dockerignore:
 	@echo "Create dockerignore"
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
+# ------------------------------------------------------------
+# Install (GLOBAL venv, never in project folder)
+# ------------------------------------------------------------
 install: deps
 	@echo "✅ Python environment installed (editable)."
-	@if [ ! -d "$(VENV)" ]; then \
-			echo "🐍 Creating virtualenv $(VENV)"; \
-			python3 -m venv "$(VENV)"; \
+	@echo "🐍 Using global venv: $(VENV)"
+	@mkdir -p "$(VENV_BASE)"
+	@if [ ! -x "$(PYTHON)" ]; then \
+		echo "→ Creating virtualenv $(VENV)"; \
+		python3 -m venv "$(VENV)"; \
 	fi
 	@echo "📦 Installing Python dependencies"
-	@"$(VENV)/bin/python" -m pip install --upgrade pip setuptools wheel
-	@"$(VENV)/bin/python" -m pip install -e .
+	@"$(PYTHON)" -m pip install --upgrade pip setuptools wheel
+	@"$(PYTHON)" -m pip install -e .
 
 setup: dockerignore
 	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
@@ -144,38 +149,14 @@ setup-clean: clean setup
 
 # --- Tests (separated) ---
 
-test-lint:
-	@if [ ! -d "$(LINT_TESTS_DIR)" ]; then \
-		echo "ℹ️  No lint tests directory found at $(LINT_TESTS_DIR) (skipping)."; \
-		exit 0; \
-	fi
-	@echo "🔎 Running lint tests (dir: $(LINT_TESTS_DIR), pattern: $(TEST_PATTERN))…"
-	@PYTHONPATH="$(PYTHONPATH)" $(PYTHON) -m unittest discover \
-		-s "$(LINT_TESTS_DIR)" \
-		-p "$(TEST_PATTERN)" \
-		-t "$(PYTHONPATH)"
+test-lint: build-missing
+	@TEST_TYPE="lint" bash scripts/tests/static.sh
 
-test-unit:
-	@if [ ! -d "$(UNIT_TESTS_DIR)" ]; then \
-		echo "ℹ️  No unit tests directory found at $(UNIT_TESTS_DIR) (skipping)."; \
-		exit 0; \
-	fi
-	@echo "🧪 Running unit tests (dir: $(UNIT_TESTS_DIR), pattern: $(TEST_PATTERN))…"
-	@PYTHONPATH="$(PYTHONPATH)" $(PYTHON) -m unittest discover \
-		-s "$(UNIT_TESTS_DIR)" \
-		-p "$(TEST_PATTERN)" \
-		-t "$(PYTHONPATH)"
+test-unit: build-missing
+	@TEST_TYPE="unit" bash scripts/tests/static.sh
 
-test-integration:
-	@if [ ! -d "$(INTEGRATION_TESTS_DIR)" ]; then \
-		echo "ℹ️  No integration tests directory found at $(INTEGRATION_TESTS_DIR) (skipping)."; \
-		exit 0; \
-	fi
-	@echo "🧪 Running integration tests (dir: $(INTEGRATION_TESTS_DIR), pattern: $(TEST_PATTERN))…"
-	@PYTHONPATH="$(PYTHONPATH)" $(PYTHON) -m unittest discover \
-		-s "$(INTEGRATION_TESTS_DIR)" \
-		-p "$(TEST_PATTERN)" \
-		-t "$(PYTHONPATH)"
+test-integration: build-missing
+	@TEST_TYPE="integration" bash scripts/tests/static.sh
 
 # Backwards compatible target (kept)
 test-messy: test-lint test-unit test-integration
@@ -187,5 +168,8 @@ test: clean setup test-messy
 
 # Debug helper
 print-python:
+	@echo "VENV_BASE       = $(VENV_BASE)"
+	@echo "VENV_NAME       = $(VENV_NAME)"
+	@echo "VENV            = $(VENV)"
 	@echo "Selected PYTHON = $(PYTHON)"
 	@$(PYTHON) -c 'import sys; print("sys.executable =", sys.executable); print("sys.prefix     =", sys.prefix); print("sys.base_prefix=", sys.base_prefix); print("is_venv        =", sys.prefix != sys.base_prefix)'

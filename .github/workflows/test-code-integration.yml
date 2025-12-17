@@ -1,0 +1,35 @@
+name: Test Infinito.Nexus Code
+
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+jobs:
+  test-code-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          make build
+
+      - name: Clean build artifacts
+        run: |
+          docker run --rm \
+          -v "$PWD":/src \
+          infinito:latest infinito make clean
+
+      - name: Generate project outputs
+        run: |
+          docker run --rm infinito:latest infinito make setup
+
+      - name: Run tests
+        run: |
+          docker run --rm infinito:latest infinito make test-integration
