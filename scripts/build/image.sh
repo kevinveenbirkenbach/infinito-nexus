@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
 : "${INFINITO_DISTRO:?Environment variable 'INFINITO_DISTRO' must be set (arch|debian|ubuntu|fedora|centos)}"
 
 NO_CACHE=0
