@@ -11,7 +11,7 @@ SHELL 				:= /usr/bin/env bash
 # On a local host you may want to override:
 #   make VENV_BASE=$$HOME/.venvs install
 # ------------------------------------------------------------
-VENV_BASE           ?= ${HOME}/.venvs
+VENV_BASE           ?= /opt/venvs
 VENV_NAME           ?= infinito
 VENV                := $(VENV_BASE)/$(VENV_NAME)
 

@@ -29,7 +29,7 @@ RUN set -euo pipefail; \
   cd "${INFINITO_PATH}/"; \
   make install;
 
-ENV PATH="${HOME}/.venvs/infinito/bin:${PATH}"
+ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
 CMD ["infinito", "--help"]
