@@ -482,6 +482,7 @@ def main() -> None:
             print(color_text(f"Exception running command: {e}", Fore.RED))
             failure_with_warning_loop(no_signal, sound_enabled, alarm_timeout)
             sys.exit(1)
+        return None
 
     try:
         if infinite:
