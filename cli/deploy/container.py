@@ -172,15 +172,14 @@ def run_in_container(
 
         # 2) Ensure vault password file exists
         print(">>> Ensuring CI vault password file exists...")
+        ensure_pw_cmd = (
+            "mkdir -p inventories/github-ci && "
+            "[ -f inventories/github-ci/.password ] || "
+            "printf '%s\n' 'ci-vault-password' > inventories/github-ci/.password"
+        )
         docker_exec(
             container_name,
-            [
-                "sh",
-                "-c",
-                "mkdir -p inventories/github-ci && "
-                "[ -f inventories/github-ci/.password ] || "
-                "printf '%s\n' 'ci-vault-password' > inventories/github-ci/.password",
-            ],
+            ["sh", "-c", ensure_pw_cmd],
             workdir=WORKDIR_DEFAULT,
             check=True,
         )
