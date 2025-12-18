@@ -69,7 +69,7 @@ def render_templates(src_dir, dst_dir, context):
         keep_trailing_newline=True,
         autoescape=select_autoescape(["html", "xml"]),
     )
-    env.filters["bool"] = lambda x: bool(x)
+    env.filters["bool"] = bool
     env.filters["get_entity_name"] = get_entity_name
 
     for root, _, files in os.walk(src_dir):
