@@ -37,7 +37,7 @@ def is_directory_used_by_another_process(directory_path):
     process = subprocess.Popen(
         [command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
-    output, error = process.communicate()
+    output, _ = process.communicate()
     # @See https://stackoverflow.com/questions/29841984/non-zero-exit-code-for-lsof
     if process.wait() > bool(0):
         return False
