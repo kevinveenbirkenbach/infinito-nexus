@@ -4,9 +4,6 @@ set -euo pipefail
 # -------------------------------------------------------------------
 # Config
 # -------------------------------------------------------------------
-INFINITO_IMAGE_TEMPLATE_DEFAULT="infinito:{distro}:latest"
-INFINITO_IMAGE_TEMPLATE="${INFINITO_IMAGE_TEMPLATE:-$INFINITO_IMAGE_TEMPLATE_DEFAULT}"
-
 MASK_CREDENTIALS_IN_LOGS_DEFAULT="false"
 MASK_CREDENTIALS_IN_LOGS="${MASK_CREDENTIALS_IN_LOGS:-$MASK_CREDENTIALS_IN_LOGS_DEFAULT}"
 
@@ -46,11 +43,6 @@ EOF
 # Helpers
 # -------------------------------------------------------------------
 die() { echo "[ERROR] $*" >&2; exit 1; }
-
-render_image() {
-  local distro="$1"
-  echo "${INFINITO_IMAGE_TEMPLATE//\{distro\}/$distro}"
-}
 
 join_by_comma() {
   local IFS=","
@@ -152,7 +144,6 @@ while [[ $# -gt 0 ]]; do
     --type)  DEPLOY_TYPE="${2:-}"; shift 2 ;;
     --distro) DISTRO="${2:-}"; shift 2 ;;
     --target) DEPLOY_TARGET="${2:-}"; shift 2 ;;
-    --image-template) INFINITO_IMAGE_TEMPLATE="${2:-}"; shift 2 ;;
     --) shift; break ;;
     *) die "Unknown arg: $1" ;;
   esac
@@ -166,7 +157,7 @@ case "$DISTRO" in
   *) die "Unsupported distro: $DISTRO" ;;
 esac
 
-IMAGE="$(render_image "$DISTRO")"
+IMAGE="ghcr.io/kevinveenbirkenbach/pkgmgr-${{ $DISTRO }}-virgin:stable"
 EXCLUDE_CSV="$(compute_exclude_csv "$DEPLOY_TYPE")"
 
 echo ">>> Deploy type:     $DEPLOY_TYPE"
