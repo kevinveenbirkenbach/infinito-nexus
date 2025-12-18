@@ -11,10 +11,14 @@ on:
 jobs:
   lint-ansible:
     uses: ./.github/workflows/lint-ansible.yml
+  lint-docker:
+    uses: ./.github/workflows/lint-docker.yml
   lint-python:
     uses: ./.github/workflows/lint-python.yml
   lint-shell:
     uses: ./.github/workflows/lint-shell.yml
+  security-codeql:
+    uses: ./.github/workflows/security-codeql.yml
   test-code-integration:
     uses: ./.github/workflows/test-code-integration.yml
   test-code-lint:
@@ -35,6 +39,8 @@ jobs:
     needs:
       - lint-python
       - lint-shell
+      - lint-docker
+      - security-codeql
       - test-code-integration
       - test-code-lint
       - test-code-unit
