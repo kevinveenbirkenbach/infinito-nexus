@@ -137,8 +137,8 @@ try:
             finally:
                 try:
                     os.unlink(fname)
-                except Exception:
-                    pass
+                except Exception as e:
+                    warnings.warn(f"Failed to delete temporary sound file {fname}: {e}", RuntimeWarning)
 
         @staticmethod
         def _play(wave: np.ndarray) -> None:
