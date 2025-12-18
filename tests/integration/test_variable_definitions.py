@@ -3,6 +3,7 @@ import os
 import yaml
 import re
 from glob import glob
+import sys
 
 
 class TestVariableDefinitions(unittest.TestCase):
@@ -297,8 +298,8 @@ class TestVariableDefinitions(unittest.TestCase):
                                             f"{path}:{lineno}: bare var '{var}' used but not defined"
                                         )
 
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(f"WARNING: Skipping file due to exception ({path}): {e}", file=sys.stderr)
 
         if undefined_uses:
             self.fail(
