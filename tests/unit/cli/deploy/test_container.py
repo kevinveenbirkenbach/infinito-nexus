@@ -3,13 +3,13 @@ import subprocess
 import sys
 import unittest
 from typing import List
-from unittest import mock
+
 
 from cli.deploy import container as deploy_container
 
 
 class TestEnsureImage(unittest.TestCase):
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_ensure_image_skips_build_when_image_exists(self, mock_run):
         """
         If the image already exists, ensure_image should only call
@@ -39,7 +39,7 @@ class TestEnsureImage(unittest.TestCase):
             "docker build should not run when the image already exists",
         )
 
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_ensure_image_builds_when_missing(self, mock_run):
         """
         If the image does not exist, ensure_image should call
@@ -91,7 +91,7 @@ class TestEnsureImage(unittest.TestCase):
 
 
 class TestRunInContainer(unittest.TestCase):
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_in_container_calls_single_docker_run(self, mock_run):
         """
         run_in_container should start exactly one 'docker run' CI container,
@@ -157,7 +157,7 @@ class TestRunInContainer(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
-    @mock.patch("cli.deploy.container.run_in_container")
+    @unittest.mock.patch("cli.deploy.container.run_in_container")
     def test_main_requires_forwarded_args(self, mock_run_in_container):
         """
         In 'run' mode, main() must return 1 and not call run_in_container()
@@ -199,7 +199,7 @@ class TestMain(unittest.TestCase):
             "--debug",
         ]
 
-        with mock.patch.object(sys, "argv", argv):
+        with unittest.mock.patch.object(sys, "argv", argv):
             rc = deploy_container.main()
 
         self.assertEqual(rc, 0)
