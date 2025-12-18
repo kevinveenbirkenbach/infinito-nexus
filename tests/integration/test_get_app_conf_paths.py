@@ -200,6 +200,7 @@ class TestGetAppConfPaths(unittest.TestCase):
                         continue
                     except AssertionError:
                         # It's expected that subpath may not exist in default_users; continue.
+                        pass
                 # application defaults
                 for aid, cfg in self.defaults_app.items():
                     try:

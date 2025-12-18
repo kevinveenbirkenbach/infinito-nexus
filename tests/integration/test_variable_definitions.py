@@ -6,7 +6,9 @@ from glob import glob
 import sys
 
 import logging
+
 logging.basicConfig(level=logging.WARNING)
+
 
 class TestVariableDefinitions(unittest.TestCase):
     """

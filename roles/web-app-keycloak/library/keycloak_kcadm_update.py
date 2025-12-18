@@ -228,6 +228,7 @@ def get_current_object(module, object_kind, api, object_id, realm, kcadm_exec):
         )
         return None
 
+
 def send_update(module, object_kind, api, object_id, realm, kcadm_exec, payload):
     payload_json = json.dumps(payload)
     if object_kind == "realm":

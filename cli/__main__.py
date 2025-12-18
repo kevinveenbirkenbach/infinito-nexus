@@ -292,7 +292,10 @@ def _play_in_child(method_name: str) -> bool:
         except Exception as e:
             # Failed to print warning about sound child process;
             # log the exception to stderr for debugging purposes.
-            print(f"Error while attempting to print sound process warning: {e}", file=sys.stderr)
+            print(
+                f"Error while attempting to print sound process warning: {e}",
+                file=sys.stderr,
+            )
             traceback.print_exc()
     return p.exitcode == 0
 

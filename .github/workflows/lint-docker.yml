@@ -51,3 +51,4 @@ jobs:
         with:
           sarif_file: hadolint-results.sarif
           wait-for-processing: true
+          category: hadolint
