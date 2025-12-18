@@ -226,7 +226,7 @@ def get_current_object(module, object_kind, api, object_id, realm, kcadm_exec):
         module.fail_json(
             msg="Failed to parse current Keycloak object JSON", error=str(e), stdout=out
         )
-
+        return None
 
 def send_update(module, object_kind, api, object_id, realm, kcadm_exec, payload):
     payload_json = json.dumps(payload)
