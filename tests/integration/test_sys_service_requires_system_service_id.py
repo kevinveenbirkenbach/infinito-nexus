@@ -90,8 +90,40 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
         vars_dir = os.path.join(role_dir, "vars")
         if not os.path.isdir(vars_dir):
             return (False, "vars/ directory not found")
+
         candidates = []
         candidates.extend(glob.glob(os.path.join(vars_dir, "main.yml")))
         candidates.extend(glob.glob(os.path.join(vars_dir, "main.yaml")))
         if not candidates:
-            return
+            return (False, "vars/main.yml|yaml not found")
+
+        # If both exist, prefer main.yml deterministically
+        path = sorted(candidates)[0]
+        doc = _safe_yaml_load(path)
+
+        if not isinstance(doc, dict):
+            return (False, f"{os.path.relpath(path, self.repo_root)} is not a mapping")
+
+        if "system_service_id" not in doc:
+            return (False, f"system_service_id not defined in {os.path.relpath(path, self.repo_root)}")
+
+        value = doc.get("system_service_id")
+        if value is None or (isinstance(value, str) and not value.strip()):
+            return (False, f"system_service_id is empty in {os.path.relpath(path, self.repo_root)}")
+
+        return (True, "ok")
+
+    def test_roles_including_sys_service_define_system_service_id(self):
+        for role in os.listdir(self.roles_dir):
+            role_dir = os.path.join(self.roles_dir, role)
+            if not os.path.isdir(role_dir):
+                continue
+
+            for task_file in self._iter_task_files(role_dir):
+                tasks_doc = _safe_yaml_load(task_file)
+                if self._role_includes_sys_service(tasks_doc):
+                    has_var, msg = self._vars_has_system_service_id(role_dir)
+                    self.assertTrue(
+                        has_var,
+                        f"{role}: includes sys-service but system_service_id missing ({msg})",
+                    )
