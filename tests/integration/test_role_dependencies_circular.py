@@ -48,6 +48,8 @@ def resolve_dependencies(roles_dir):
 
         stack.pop()  # Remove the current role from the stack
 
+        return None
+
     for role_name in os.listdir(roles_dir):
         role_path = os.path.join(roles_dir, role_name)
         if os.path.isdir(role_path):
