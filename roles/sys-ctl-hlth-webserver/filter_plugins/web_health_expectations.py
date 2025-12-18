@@ -10,10 +10,7 @@ def _to_list(x, *, allow_mapping: bool = True):
         return []
 
     if isinstance(x, bytes):
-        try:
-            return [x.decode("utf-8")]
-        except Exception:
-            return []
+        return [x.decode("utf-8", errors="replace")]
     if isinstance(x, str):
         return [x]
 
@@ -23,10 +20,7 @@ def _to_list(x, *, allow_mapping: bool = True):
             if isinstance(v, (list, tuple, set)):
                 out.extend(_to_list(v, allow_mapping=False))
             elif isinstance(v, bytes):
-                try:
-                    out.append(v.decode("utf-8"))
-                except Exception:
-                    pass
+                out.append(v.decode("utf-8", errors="replace"))
             elif isinstance(v, str):
                 out.append(v)
             elif isinstance(v, Mapping):
