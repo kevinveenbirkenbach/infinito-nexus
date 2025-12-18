@@ -16,6 +16,7 @@ class TestRolesFolderNames(unittest.TestCase):
         )
 
         # List all entries in the roles directory
+        entries = []
         try:
             entries = os.listdir(roles_dir)
         except FileNotFoundError:
