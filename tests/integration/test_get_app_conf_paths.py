@@ -207,6 +207,8 @@ class TestGetAppConfPaths(unittest.TestCase):
                         found = True
                         break
                     except AssertionError:
+                        # It's expected that not every config dict will have the required nested keys;
+                        # try the next config dict until found.
                         pass
                 if not found:
                     file_path, lineno = occs[0]
