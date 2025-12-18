@@ -25,6 +25,27 @@ jobs:
           output-file: hadolint-results.sarif
           failure-threshold: warning
 
+      - name: Assert SARIF file exists
+        run: |
+          test -f hadolint-results.sarif
+          echo "SARIF file present."
+
+      - name: Debug SARIF result count
+        run: |
+          python - <<'PY'
+          import json
+          p="hadolint-results.sarif"
+          with open(p,"r",encoding="utf-8") as f:
+            sarif=json.load(f)
+          results = sarif.get("runs",[{}])[0].get("results",[])
+          print("SARIF results:", len(results))
+          for r in results[:20]:
+            rid = r.get("ruleId")
+            loc = (r.get("locations") or [{}])[0].get("physicalLocation",{}).get("artifactLocation",{}).get("uri")
+            reg = (r.get("locations") or [{}])[0].get("physicalLocation",{}).get("region",{})
+            print("-", rid, loc, reg)
+          PY
+
       - name: Upload analysis results to GitHub
         uses: github/codeql-action/upload-sarif@v4
         with:
