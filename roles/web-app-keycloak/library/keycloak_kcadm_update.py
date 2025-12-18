@@ -135,6 +135,7 @@ def run_kcadm(module, cmd, ignore_rc=False):
         return rc.returncode, stdout, stderr
     except Exception as e:
         module.fail_json(msg="Failed to run kcadm command", cmd=cmd, error=str(e))
+        return None, None, None
 
 
 def deep_merge(a, b):
