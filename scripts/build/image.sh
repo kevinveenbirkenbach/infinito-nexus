@@ -18,7 +18,9 @@ DEFAULT_DISTRO="arch"
 
 PKGMGR_IMAGE_OWNER=kevinveenbirkenbach
 PKGMGR_IMAGE_TAG=stable
-INFINITO_IMAGE_BASE="ghcr.io/${PKGMGR_IMAGE_OWNER}/pkgmgr-${INFINITO_DISTRO}:${PKGMGR_IMAGE_TAG}"
+
+INFINITO_IMAGE_REPO="ghcr.io/${PKGMGR_IMAGE_OWNER}/pkgmgr-${INFINITO_DISTRO}"
+INFINITO_IMAGE_TAG="${PKGMGR_IMAGE_TAG}"
 
 usage() {
   local default_tag="infinito-${INFINITO_DISTRO}"
@@ -138,22 +140,26 @@ fi
 echo
 echo "------------------------------------------------------------"
 echo "[build] Building image"
-echo "distro     = ${INFINITO_DISTRO}"
-echo "INFINITO_IMAGE_BASE = ${INFINITO_IMAGE_BASE}"
-if [[ -n "${TARGET}" ]]; then echo "target    = ${TARGET}"; fi
-if [[ "${NO_CACHE}" == "1" ]]; then echo "cache     = disabled"; fi
-if [[ "${PUSH}" == "1" ]]; then echo "push      = enabled"; fi
+echo "distro               = ${INFINITO_DISTRO}"
+echo "INFINITO_IMAGE_REPO  = ${INFINITO_IMAGE_REPO}"
+echo "INFINITO_IMAGE_TAG   = ${INFINITO_IMAGE_TAG}"
+if [[ -n "${TARGET}" ]]; then echo "target              = ${TARGET}"; fi
+if [[ "${NO_CACHE}" == "1" ]]; then echo "cache               = disabled"; fi
+if [[ "${PUSH}" == "1" ]]; then echo "push                = enabled"; fi
 if [[ "${PUBLISH}" == "1" ]]; then
-  echo "publish   = enabled"
-  echo "registry  = ${REGISTRY}"
-  echo "owner     = ${OWNER}"
-  echo "version   = ${VERSION}"
-  echo "stable    = ${IS_STABLE}"
+  echo "publish             = enabled"
+  echo "registry            = ${REGISTRY}"
+  echo "owner               = ${OWNER}"
+  echo "version             = ${VERSION}"
+  echo "stable              = ${IS_STABLE}"
 fi
 echo "------------------------------------------------------------"
 
 # Common build args
-build_args=(--build-arg "INFINITO_IMAGE_BASE=${INFINITO_IMAGE_BASE}")
+build_args=(
+  --build-arg "INFINITO_IMAGE_REPO=${INFINITO_IMAGE_REPO}"
+  --build-arg "INFINITO_IMAGE_TAG=${INFINITO_IMAGE_TAG}"
+)
 
 if [[ "${NO_CACHE}" == "1" ]]; then
   build_args+=(--no-cache)

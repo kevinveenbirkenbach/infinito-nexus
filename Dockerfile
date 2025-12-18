@@ -1,9 +1,10 @@
 # syntax=docker/dockerfile:1
 
-ARG INFINITO_DISTRO
-ARG INFINITO_IMAGE_BASE
+# Hadolint: enforce explicit tag via separate repo + tag args
+ARG INFINITO_IMAGE_REPO
+ARG INFINITO_IMAGE_TAG
 
-FROM ${INFINITO_IMAGE_BASE} AS full
+FROM ${INFINITO_IMAGE_REPO}:${INFINITO_IMAGE_TAG} AS full
 SHELL ["/bin/bash", "-lc"]
 
 RUN cat /etc/os-release || true
@@ -17,17 +18,18 @@ COPY . /opt/src/infinito
 # Install infinito via pkgmgr (shallow)
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
-  pkgmgr install infinito --clone-mode shallow;
+  pkgmgr install infinito --clone-mode shallow
 
 # ------------------------------------------------------------
 # Override with local source
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
   INFINITO_PATH="$(pkgmgr path infinito)"; \
-  rm -rf "${INFINITO_PATH}/"*; \
-  rsync -a --delete --exclude='.git' /opt/src/infinito/ "${INFINITO_PATH}/"; \
-  cd "${INFINITO_PATH}/"; \
-  make install;
+  : "${INFINITO_PATH:?}"; \
+  test "${INFINITO_PATH}" != "/"; \
+  rm -rf -- "${INFINITO_PATH:?}/"*; \
+  rsync -a --delete --exclude='.git' /opt/src/infinito/ "${INFINITO_PATH:?}/"; \
+  make -C "${INFINITO_PATH:?}" install
 
 ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
