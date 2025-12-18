@@ -1,7 +1,6 @@
 import os
 import tempfile
 import unittest
-from unittest import mock
 import cli.__main__ as main
 
 
@@ -10,7 +9,7 @@ class TestMainHelpers(unittest.TestCase):
     # Existing tests …
     # ----------------------
 
-    @mock.patch("cli.__main__.Style")
+    @unittest.mock.patch("cli.__main__.Style")
     def test_color_text_wraps_text_with_color_and_reset(self, mock_style):
         """
         color_text() should wrap text with the given color prefix and Style.RESET_ALL.
@@ -43,7 +42,7 @@ class TestMainHelpers(unittest.TestCase):
             self.assertIn((None, "rootcmd"), commands)
             self.assertIn(("sub", "innercmd"), commands)
 
-    @mock.patch("cli.__main__.subprocess.run", side_effect=Exception("mocked error"))
+    @unittest.mock.patch("cli.__main__.subprocess.run", side_effect=Exception("mocked error"))
     def test_extract_description_via_help_returns_dash_on_exception(self, mock_run):
         """
         extract_description_via_help() should return '-' if subprocess.run
@@ -52,7 +51,7 @@ class TestMainHelpers(unittest.TestCase):
         result = main.extract_description_via_help("/fake/path/script.py")
         self.assertEqual(result, "-")
 
-    @mock.patch("cli.__main__.subprocess.run")
+    @unittest.mock.patch("cli.__main__.subprocess.run")
     def test_show_full_help_for_all_invokes_help_for_each_command(self, mock_run):
         """
         show_full_help_for_all() should execute a help subprocess call for each
@@ -120,24 +119,24 @@ class TestMainHelpers(unittest.TestCase):
             main.git_clean_repo()
             mock_run.assert_called_once_with(["git", "clean", "-Xfd"], check=True)
 
-    @mock.patch("cli.__main__.subprocess.run")
+    @unittest.mock.patch("cli.__main__.subprocess.run")
     def test_extract_description_via_help_with_description(self, mock_run):
         # Simulate subprocess returning help output with a description
         mock_stdout = "usage: dummy.py [options]\n\nThis is a help description.\n"
-        mock_run.return_value = mock.Mock(stdout=mock_stdout)
+        mock_run.return_value = unittest.mock.Mock(stdout=mock_stdout)
         description = main.extract_description_via_help("/fake/path/dummy.py")
         self.assertEqual(description, "This is a help description.")
 
-    @mock.patch("cli.__main__.subprocess.run")
+    @unittest.mock.patch("cli.__main__.subprocess.run")
     def test_extract_description_via_help_without_description(self, mock_run):
         # Simulate subprocess returning help output without a description
         mock_stdout = "usage: empty.py [options]\n"
-        mock_run.return_value = mock.Mock(stdout=mock_stdout)
+        mock_run.return_value = unittest.mock.Mock(stdout=mock_stdout)
         description = main.extract_description_via_help("/fake/path/empty.py")
         self.assertEqual(description, "-")
 
-    @mock.patch("cli.__main__.extract_description_via_help")
-    @mock.patch("cli.__main__.format_command_help")
+    @unittest.mock.patch("cli.__main__.extract_description_via_help")
+    @unittest.mock.patch("cli.__main__.format_command_help")
     @mock.patch("builtins.print")
     def test_print_global_help_uses_helpers_per_command(
         self, mock_print, mock_fmt, mock_extract
