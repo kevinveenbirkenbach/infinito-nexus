@@ -12,19 +12,45 @@ WORKDIR_DEFAULT = "/opt/src/infinito"
 
 def ensure_image(image: str, rebuild: bool = False, no_cache: bool = False) -> None:
     """
-    Handle Docker image creation rules:
-      - rebuild=True  => always rebuild
-      - rebuild=False & image missing => build once
-      - no_cache=True => add '--no-cache' to docker build
+    Build a Docker image from the repository Dockerfile.
+
+    This image is meant to be the "CI runner" image which runs an inner dockerd.
+    The Dockerfile expects these build args (required):
+      - INFINITO_IMAGE_REPO
+      - INFINITO_IMAGE_TAG
+
+    You can pass them via environment variables:
+      - INFINITO_IMAGE_REPO=ghcr.io/<owner>/pkgmgr-<distro>-virgin
+      - INFINITO_IMAGE_TAG=stable
     """
-    build_args = ["docker", "build", "--network=host", "--pull"]
+    build_cmd = ["docker", "build", "--network=host", "--pull"]
+
+    infinito_repo = os.environ.get("INFINITO_IMAGE_REPO")
+    infinito_tag = os.environ.get("INFINITO_IMAGE_TAG")
+
+    if infinito_repo:
+        build_cmd += ["--build-arg", f"INFINITO_IMAGE_REPO={infinito_repo}"]
+    if infinito_tag:
+        build_cmd += ["--build-arg", f"INFINITO_IMAGE_TAG={infinito_tag}"]
+
     if no_cache:
-        build_args.append("--no-cache")
-    build_args += ["-t", image, "."]
+        build_cmd.append("--no-cache")
+
+    build_cmd += ["-t", image, "."]
+
+    # If Dockerfile requires args but none were provided, fail with a clear error.
+    if not infinito_repo or not infinito_tag:
+        raise RuntimeError(
+            "Missing required build args for Dockerfile. "
+            "Please set environment variables INFINITO_IMAGE_REPO and INFINITO_IMAGE_TAG "
+            "before using --build/--rebuild. "
+            "Example: INFINITO_IMAGE_REPO=ghcr.io/kevinveenbirkenbach/pkgmgr-arch-virgin "
+            "INFINITO_IMAGE_TAG=stable"
+        )
 
     if rebuild:
         print(f">>> Forcing rebuild of Docker image '{image}'...")
-        subprocess.run(build_args, check=True)
+        subprocess.run(build_cmd, check=True)
         print(f">>> Docker image '{image}' rebuilt (forced).")
         return
 
@@ -33,13 +59,14 @@ def ensure_image(image: str, rebuild: bool = False, no_cache: bool = False) -> N
         ["docker", "image", "inspect", image],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
+        check=False,
     )
     if result.returncode == 0:
         print(f">>> Docker image '{image}' already exists.")
         return
 
     print(f">>> Docker image '{image}' not found. Building it...")
-    subprocess.run(build_args, check=True)
+    subprocess.run(build_cmd, check=True)
     print(f">>> Docker image '{image}' successfully built.")
 
 
@@ -50,7 +77,7 @@ def docker_exec(
     check: bool = True,
 ) -> subprocess.CompletedProcess:
     """
-    Helper to run `docker exec` with optional working directory.
+    Helper to run `docker exec` with an optional working directory.
     """
     cmd = ["docker", "exec"]
     if workdir:
@@ -71,6 +98,7 @@ def wait_for_inner_docker(container: str, timeout: int = 60) -> None:
             ["docker", "exec", container, "docker", "info"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            check=False,
         )
         if result.returncode == 0:
             print(">>> Inner Docker daemon is UP.")
@@ -209,6 +237,7 @@ def run_in_container(
                 ["docker", "rm", "-f", container_name],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                check=False,
             )
 
 
@@ -338,6 +367,9 @@ def main() -> int:
                 file=sys.stderr,
             )
             return exc.returncode
+        except Exception as exc:
+            print(f"[ERROR] {exc}", file=sys.stderr)
+            return 1
 
         return 0
 

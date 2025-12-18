@@ -26,5 +26,4 @@ jobs:
 
       - name: Run deploy test suite (workstation)
         run: |
-          chmod +x scripts/tests/deploy.sh
           scripts/tests/deploy.sh --type workstation --distro "${{ matrix.distro }}"

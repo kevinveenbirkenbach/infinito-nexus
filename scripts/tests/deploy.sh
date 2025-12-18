@@ -2,21 +2,14 @@
 set -euo pipefail
 
 # -------------------------------------------------------------------
-# Config
+# Config (safe defaults)
 # -------------------------------------------------------------------
-MASK_CREDENTIALS_IN_LOGS_DEFAULT="false"
-MASK_CREDENTIALS_IN_LOGS="${MASK_CREDENTIALS_IN_LOGS:-$MASK_CREDENTIALS_IN_LOGS_DEFAULT}"
+MASK_CREDENTIALS_IN_LOGS="${MASK_CREDENTIALS_IN_LOGS:-false}"
+DEPLOY_TARGET="${DEPLOY_TARGET:-server}"
+AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito}"
 
-AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
-AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
-
-DEPLOY_TARGET_DEFAULT="server"
-DEPLOY_TARGET="${DEPLOY_TARGET:-$DEPLOY_TARGET_DEFAULT}"
-
-# Optional: allow adding additional excludes globally (comma-separated or newline-separated)
 ALWAYS_EXCLUDE="${ALWAYS_EXCLUDE:-}"
 
-# Central excludes (same everywhere) - can be comma-separated or newline-separated.
 BASE_EXCLUDE="${BASE_EXCLUDE:-$(
   cat <<'EOF'
 drv-lid-switch
@@ -43,143 +36,134 @@ EOF
 # Helpers
 # -------------------------------------------------------------------
 die() { echo "[ERROR] $*" >&2; exit 1; }
-
-join_by_comma() {
-  local IFS=","
-  echo "$*"
-}
-
-trim_lines() {
-  sed -e 's/[[:space:]]\+$//' -e '/^$/d'
-}
-
-get_invokable() {
-  if command -v infinito >/dev/null 2>&1; then
-    infinito meta applications invokable | trim_lines
-    return 0
-  fi
-
-  # Best-effort fallback: if your repo exposes a python module for this.
-  if python3 -c "import cli" >/dev/null 2>&1; then
-    python3 -m cli.meta.applications invokable 2>/dev/null | trim_lines || true
-    return 0
-  fi
-
-  die "Cannot list invokable applications (neither 'infinito' nor usable python module found)."
-}
-
-filter_allowed() {
-  local type="$1"
-  case "$type" in
-    workstation)
-      # desk-* and util-desk-*
-      grep -E '^(desk-|util-desk-)' || true
-      ;;
-    server)
-      # web-* (includes web-app-*, web-svc-*, etc.)
-      grep -E '^web-' || true
-      ;;
-    universal)
-      cat
-      ;;
-    *)
-      die "Unknown deploy type: $type (expected: workstation|server|universal)"
-      ;;
-  esac
-}
-
-compute_exclude_csv() {
-  local type="$1"
-
-  local all allowed computed combined final
-  all="$(get_invokable)"
-  allowed="$(printf "%s\n" "$all" | filter_allowed "$type")"
-
-  # computed = all - allowed
-  computed="$(comm -23 <(printf "%s\n" "$all" | sort) <(printf "%s\n" "$allowed" | sort) | trim_lines)"
-
-  # combined = computed ∪ BASE_EXCLUDE ∪ ALWAYS_EXCLUDE
-  combined="$(
-    printf "%s\n%s\n%s\n" \
-      "$computed" \
-      "$(printf "%s\n" "$BASE_EXCLUDE" | tr ',' '\n')" \
-      "$(printf "%s\n" "$ALWAYS_EXCLUDE" | tr ',' '\n')" \
-    | trim_lines | sort -u
-  )"
-
-  # final = combined ∩ all   (keep only invokable names)
-  final="$(comm -12 <(printf "%s\n" "$combined" | sort) <(printf "%s\n" "$all" | sort) | trim_lines)"
-
-  # To comma-separated
-  # shellcheck disable=SC2206
-  local arr=($final)
-  if [[ ${#arr[@]} -eq 0 ]]; then
-    echo ""
-  else
-    join_by_comma "${arr[@]}"
-  fi
-}
-
-run_deploy() {
-  local image="$1"
-  local exclude_csv="$2"
-  shift 2
-
-  python3 -m cli.deploy.container run --image "$image" "$@" -- \
-    --exclude "$exclude_csv" \
-    --vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
-    --authorized-keys "$AUTHORIZED_KEYS" \
-    -- \
-    -T "$DEPLOY_TARGET"
-}
+trim_lines() { sed -e 's/[[:space:]]\+$//' -e '/^$/d'; }
 
 # -------------------------------------------------------------------
-# Main
+# Args
 # -------------------------------------------------------------------
 DEPLOY_TYPE=""
 DISTRO=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --type)  DEPLOY_TYPE="${2:-}"; shift 2 ;;
-    --distro) DISTRO="${2:-}"; shift 2 ;;
-    --target) DEPLOY_TARGET="${2:-}"; shift 2 ;;
-    --) shift; break ;;
+    --type)   DEPLOY_TYPE="$2"; shift 2 ;;
+    --distro) DISTRO="$2"; shift 2 ;;
     *) die "Unknown arg: $1" ;;
   esac
 done
 
-[[ -n "$DEPLOY_TYPE" ]] || die "Missing --type workstation|server|universal"
-[[ -n "$DISTRO" ]] || die "Missing --distro arch|debian|ubuntu|fedora|centos"
+[[ -n "${DEPLOY_TYPE}" ]] || die "Missing --type workstation|server|universal"
+[[ -n "${DISTRO}" ]] || die "Missing --distro arch|debian|ubuntu|fedora|centos"
 
-case "$DISTRO" in
-  arch|debian|ubuntu|fedora|centos) ;;
-  *) die "Unsupported distro: $DISTRO" ;;
-esac
+CONTROLLER_IMAGE="infinito-${DISTRO}"
 
-IMAGE="ghcr.io/kevinveenbirkenbach/pkgmgr-$DISTRO-virgin:stable"
-EXCLUDE_CSV="$(compute_exclude_csv "$DEPLOY_TYPE")"
-
-echo ">>> Deploy type:     $DEPLOY_TYPE"
-echo ">>> Distro:          $DISTRO"
-echo ">>> Target:          $DEPLOY_TARGET"
-echo ">>> Image:           $IMAGE"
-echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
+echo ">>> Deploy type: ${DEPLOY_TYPE}"
+echo ">>> Distro:      ${DISTRO}"
+echo ">>> Target:      ${DEPLOY_TARGET}"
+echo ">>> Controller: ${CONTROLLER_IMAGE}"
 
 # -------------------------------------------------------------------
-# 1) First deploy: normal + debug (with build)
+# Ensure controller image
 # -------------------------------------------------------------------
-echo ">>> [1/3] First deploy (normal + debug, with build)"
-run_deploy "$IMAGE" "$EXCLUDE_CSV" --build -- --debug --skip-cleanup --skip-tests
+echo ">>> Ensuring controller image exists (missing-only)"
+INFINITO_DISTRO="${DISTRO}" bash scripts/build/image.sh --missing --tag "${CONTROLLER_IMAGE}"
 
 # -------------------------------------------------------------------
-# 2) Second deploy: reset + debug (without build)
+# Controller run (localhost deploy, NO ssh, NO target container)
 # -------------------------------------------------------------------
-echo ">>> [2/3] Second deploy (--reset --debug, reuse image)"
-run_deploy "$IMAGE" "$EXCLUDE_CSV" -- --reset --debug --skip-cleanup --skip-tests
+docker run --rm \
+  --network=host \
+  -e DEPLOY_TYPE="${DEPLOY_TYPE}" \
+  -e DEPLOY_TARGET="${DEPLOY_TARGET}" \
+  -e MASK_CREDENTIALS_IN_LOGS="${MASK_CREDENTIALS_IN_LOGS}" \
+  -e AUTHORIZED_KEYS="${AUTHORIZED_KEYS}" \
+  -e BASE_EXCLUDE="${BASE_EXCLUDE}" \
+  -e ALWAYS_EXCLUDE="${ALWAYS_EXCLUDE}" \
+  -v "$(pwd):/opt/src/infinito" \
+  -w /opt/src/infinito \
+  "${CONTROLLER_IMAGE}" \
+  bash -lc '
+    set -euo pipefail
 
-# -------------------------------------------------------------------
-# 3) Third deploy: async deploy – no debug (reuse image)
-# -------------------------------------------------------------------
-echo ">>> [3/3] Third deploy (async deploy – no debug)"
-run_deploy "$IMAGE" "$EXCLUDE_CSV" -- --skip-cleanup --skip-tests
+    : "${MASK_CREDENTIALS_IN_LOGS:=false}"
+
+    die() { echo "[ERROR] $*" >&2; exit 1; }
+    trim_lines() { sed -e "s/[[:space:]]\+$//" -e "/^$/d"; }
+
+    infinito --help >/dev/null || die "infinito missing"
+
+    get_invokable() {
+      infinito meta applications invokable | trim_lines
+    }
+
+    filter_allowed() {
+      case "$1" in
+        workstation) grep -E "^(desk-|util-desk-)" || true ;;
+        server)      grep -E "^web-" || true ;;
+        universal)   cat ;;
+        *) die "Invalid DEPLOY_TYPE: $1" ;;
+      esac
+    }
+
+    compute_exclude_csv() {
+      tmp="$(mktemp -d)"
+      all="$tmp/all"
+      allowed="$tmp/allowed"
+      combined="$tmp/combined"
+
+      get_invokable | sort >"$all"
+      get_invokable | filter_allowed "$DEPLOY_TYPE" | sort >"$allowed"
+
+      comm -23 "$all" "$allowed" >"$combined"
+
+      printf "%s\n%s\n" "$BASE_EXCLUDE" "$ALWAYS_EXCLUDE" \
+        | tr "," "\n" >>"$combined"
+
+      sort -u "$combined" | comm -12 - "$all" | paste -sd, -
+      rm -rf "$tmp"
+    }
+
+    EXCLUDE_CSV="$(compute_exclude_csv)"
+    echo ">>> Excluded roles: ${EXCLUDE_CSV:-<none>}"
+
+    # ------------------------------------------------------------
+    # Inventory: localhost (NO SSH)
+    # ------------------------------------------------------------
+    mkdir -p inventories/github-ci
+
+    cat > inventories/github-ci/servers.yml <<YML
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+YML
+
+    printf "ci-vault-password\n" > inventories/github-ci/.password
+
+    run_round() {
+      local name="$1"; shift
+      echo "============================================================"
+      echo ">>> ${name}"
+      echo "============================================================"
+
+      python3 -m cli.deploy.dedicated \
+        inventories/github-ci/servers.yml \
+        -p inventories/github-ci/.password \
+        --exclude "${EXCLUDE_CSV}" \
+        --vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
+        --authorized-keys "${AUTHORIZED_KEYS}" \
+        -- \
+        -T "${DEPLOY_TARGET}" "$@"
+    }
+
+    run_round "[1/3] First deploy (debug)" \
+      --debug --skip-cleanup --skip-tests
+
+    run_round "[2/3] Second deploy (--reset)" \
+      --reset --debug --skip-cleanup --skip-tests
+
+    run_round "[3/3] Third deploy (async)" \
+      --skip-cleanup --skip-tests
+
+    echo ">>> Done."
+  '
