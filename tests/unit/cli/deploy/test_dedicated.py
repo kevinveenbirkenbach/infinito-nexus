@@ -2,7 +2,6 @@ import os
 import tempfile
 import unittest
 from typing import Any, Dict, List
-from unittest import mock
 import subprocess
 
 from cli.deploy import dedicated as deploy
