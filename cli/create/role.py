@@ -65,8 +65,9 @@ def prompt_conflict(dst_file):
 
 def render_templates(src_dir, dst_dir, context):
     env = Environment(
-        loader=FileSystemLoader(src_dir), keep_trailing_newline=True,
-        autoescape=select_autoescape(['html', 'xml'])
+        loader=FileSystemLoader(src_dir),
+        keep_trailing_newline=True,
+        autoescape=select_autoescape(["html", "xml"]),
     )
     env.filters["bool"] = lambda x: bool(x)
     env.filters["get_entity_name"] = get_entity_name

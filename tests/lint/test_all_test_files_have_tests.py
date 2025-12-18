@@ -8,9 +8,14 @@ from typing import List
 class TestTestFilesContainUnittestTests(unittest.TestCase):
     def setUp(self) -> None:
         # repo root = two levels up from tests/integration/<this_file>.py
-        self.repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        self.repo_root = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..")
+        )
         self.tests_dir = os.path.join(self.repo_root, "tests")
-        self.assertTrue(os.path.isdir(self.tests_dir), f"'tests' directory not found at: {self.tests_dir}")
+        self.assertTrue(
+            os.path.isdir(self.tests_dir),
+            f"'tests' directory not found at: {self.tests_dir}",
+        )
 
     def _iter_test_files(self) -> List[str]:
         out: List[str] = []
@@ -55,7 +60,10 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
                 return True
             # unittest.TestCase or alias.TestCase
             if isinstance(base, ast.Attribute) and base.attr == "TestCase":
-                if isinstance(base.value, ast.Name) and base.value.id in unittest_aliases:
+                if (
+                    isinstance(base.value, ast.Name)
+                    and base.value.id in unittest_aliases
+                ):
                     return True
             return False
 
@@ -73,7 +81,9 @@ class TestTestFilesContainUnittestTests(unittest.TestCase):
             if not any(is_testcase_base(b) for b in node.bases):
                 continue
             for item in node.body:
-                if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and item.name.startswith("test_"):
+                if isinstance(
+                    item, (ast.FunctionDef, ast.AsyncFunctionDef)
+                ) and item.name.startswith("test_"):
                     return True
 
         return False

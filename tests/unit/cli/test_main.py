@@ -207,7 +207,9 @@ class TestMainHelpers(unittest.TestCase):
         """
 
         # Simulate time.monotonic jumping past the timeout immediately
-        with unittest.mock.patch("cli.__main__.time.monotonic", side_effect=[0.0, 100.0]):
+        with unittest.mock.patch(
+            "cli.__main__.time.monotonic", side_effect=[0.0, 100.0]
+        ):
             with unittest.mock.patch(
                 "cli.__main__.sys.exit", side_effect=SystemExit
             ) as mock_exit:

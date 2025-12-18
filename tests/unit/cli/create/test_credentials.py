@@ -80,7 +80,7 @@ class TestCreateCredentials(unittest.TestCase):
             completed = subprocess.CompletedProcess(
                 args=["ansible-vault"], returncode=0, stdout=fake_snippet, stderr=""
             )
-            with mock.patch("subprocess.run", return_value=completed):
+            with unittest.mock.patch("subprocess.run", return_value=completed):
                 # Run main with override for credentials.api_key and force to skip prompt
                 sys.argv = [
                     "create/credentials.py",
@@ -157,7 +157,7 @@ class TestCreateCredentials(unittest.TestCase):
                     "ansible-vault must not be called for allow_empty_plain + empty plain"
                 )
 
-            with mock.patch("subprocess.run", side_effect=fail_run):
+            with unittest.mock.patch("subprocess.run", side_effect=fail_run):
                 sys.argv = [
                     "create/credentials.py",
                     "--role-path",

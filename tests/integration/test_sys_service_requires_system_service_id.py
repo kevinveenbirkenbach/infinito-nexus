@@ -105,11 +105,17 @@ class TestSysServiceRequiresSystemServiceId(unittest.TestCase):
             return (False, f"{os.path.relpath(path, self.repo_root)} is not a mapping")
 
         if "system_service_id" not in doc:
-            return (False, f"system_service_id not defined in {os.path.relpath(path, self.repo_root)}")
+            return (
+                False,
+                f"system_service_id not defined in {os.path.relpath(path, self.repo_root)}",
+            )
 
         value = doc.get("system_service_id")
         if value is None or (isinstance(value, str) and not value.strip()):
-            return (False, f"system_service_id is empty in {os.path.relpath(path, self.repo_root)}")
+            return (
+                False,
+                f"system_service_id is empty in {os.path.relpath(path, self.repo_root)}",
+            )
 
         return (True, "ok")
 
