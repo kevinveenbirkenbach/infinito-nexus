@@ -6,6 +6,7 @@ from typing import Dict, Set, Iterable, Tuple, Optional
 import yaml
 import logging
 
+
 class RoleDependencyResolver:
     _RE_PURE_JINJA = re.compile(r"\s*\{\{\s*[^}]+\s*\}\}\s*$")
 

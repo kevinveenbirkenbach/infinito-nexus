@@ -299,7 +299,10 @@ class TestVariableDefinitions(unittest.TestCase):
                                         )
 
                 except Exception as e:
-                    print(f"WARNING: Skipping file due to exception ({path}): {e}", file=sys.stderr)
+                    print(
+                        f"WARNING: Skipping file due to exception ({path}): {e}",
+                        file=sys.stderr,
+                    )
 
         if undefined_uses:
             self.fail(

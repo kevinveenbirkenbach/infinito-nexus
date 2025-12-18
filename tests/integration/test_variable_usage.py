@@ -39,7 +39,7 @@ class TestTopLevelVariableUsage(unittest.TestCase):
                 if isinstance(data, dict):
                     return list(data.keys())
             except yaml.YAMLError as e:
-                logging.warning(f"Failed to parse YAML file '%s': %s", file_path, e)
+                logging.warning("Failed to parse YAML file '%s': %s", file_path, e)
         return []
 
     def find_declaration_line(self, file_path, varname):
