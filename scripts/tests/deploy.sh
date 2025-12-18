@@ -157,7 +157,7 @@ case "$DISTRO" in
   *) die "Unsupported distro: $DISTRO" ;;
 esac
 
-IMAGE="ghcr.io/kevinveenbirkenbach/pkgmgr-${{ $DISTRO }}-virgin:stable"
+IMAGE="ghcr.io/kevinveenbirkenbach/pkgmgr-$DISTRO-virgin:stable"
 EXCLUDE_CSV="$(compute_exclude_csv "$DEPLOY_TYPE")"
 
 echo ">>> Deploy type:     $DEPLOY_TYPE"
