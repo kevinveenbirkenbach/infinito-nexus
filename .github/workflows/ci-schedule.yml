@@ -1,0 +1,8 @@
+name: CI (Scheduled)
+
+on:
+  schedule:
+    - cron: '33 10 * * 2'
+jobs:
+  ci-schedule:
+    uses: ./.github/workflows/code-analyses.yml

@@ -13,8 +13,6 @@ name: "CodeQL Advanced"
 
 on:
   workflow_call:
-  schedule:
-    - cron: '36 9 * * 6'
 
 jobs:
   analyze:

@@ -2,7 +2,7 @@ name: Publish container images (GHCR)
 
 on:
   workflow_run:
-    workflows: ["Mark stable commit"]
+    workflows: ["Mark commit as stable"]
     types: [completed]
 
 jobs:

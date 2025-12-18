@@ -1,4 +1,4 @@
-name: Mark stable commit
+name: Mark commit as stable
 
 on:
   push:
@@ -7,48 +7,12 @@ on:
       - master
     tags:
       - 'v*'
-
 jobs:
-  lint-ansible:
-    uses: ./.github/workflows/lint-ansible.yml
-  lint-docker:
-    uses: ./.github/workflows/lint-docker.yml
-  lint-python:
-    uses: ./.github/workflows/lint-python.yml
-  lint-shell:
-    uses: ./.github/workflows/lint-shell.yml
-  security-codeql:
-    uses: ./.github/workflows/security-codeql.yml
-  test-code-integration:
-    uses: ./.github/workflows/test-code-integration.yml
-  test-code-lint:
-    uses: ./.github/workflows/test-code-lint.yml
-  test-code-unit:
-    uses: ./.github/workflows/test-code-unit.yml
-  test-deploy-server:
-    uses: ./.github/workflows/test-deploy-server.yml
-  test-deploy-universal:
-    uses: ./.github/workflows/test-deploy-universal.yml
-  test-deploy-workstation:
-    uses: ./.github/workflows/test-deploy-workstation.yml
-  test-install-make:
-    uses: ./.github/workflows/test-install-make.yml
-  test-install-pkgmgr:
-    uses: ./.github/workflows/test-install-pkgmgr.yml
-  mark-stable:
+  code-analyses:
+    uses: ./.github/workflows/code-analyses.yml
+  ci-version:
     needs:
-      - lint-python
-      - lint-shell
-      - lint-docker
-      - security-codeql
-      - test-code-integration
-      - test-code-lint
-      - test-code-unit
-      - test-deploy-server
-      - test-deploy-universal
-      - test-deploy-workstation
-      - test-install-make
-      - test-install-pkgmgr
+      - code-analyses
     runs-on: ubuntu-latest
 
     # Only run this job if the push is for a version tag (v*)

@@ -1,0 +1,7 @@
+name: CI (PR)
+on:
+  pull_request:
+
+jobs:
+  code-analyses:
+    uses: ./.github/workflows/code-analyses.yml

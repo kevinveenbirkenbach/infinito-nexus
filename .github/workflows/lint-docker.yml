@@ -6,12 +6,10 @@
 # that helps you build best practice Docker images.
 # More details at https://github.com/hadolint/hadolint
 
-name: Hadolint
+name: Docker Linter
 
 on:
   workflow_call:
-  schedule:
-    - cron: '33 10 * * 2'
 
 permissions:
   contents: read

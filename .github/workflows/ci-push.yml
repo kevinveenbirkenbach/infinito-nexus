@@ -1,0 +1,7 @@
+name: CI (push)
+on:
+  push:
+
+jobs:
+  code-analyses:
+    uses: ./.github/workflows/code-analyses.yml
