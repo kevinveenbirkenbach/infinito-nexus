@@ -199,7 +199,7 @@ class TestGetAppConfPaths(unittest.TestCase):
                         self.assertNested(self.defaults_users, subpath, "default_users")
                         continue
                     except AssertionError:
-                        pass
+                        # It's expected that subpath may not exist in default_users; continue.
                 # application defaults
                 for aid, cfg in self.defaults_app.items():
                     try:
