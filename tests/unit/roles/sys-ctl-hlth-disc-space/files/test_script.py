@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import io
 import sys
-import pathlib
 import contextlib
 import importlib.util
 from types import SimpleNamespace
