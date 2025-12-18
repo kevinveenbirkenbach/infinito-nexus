@@ -5,31 +5,22 @@ import pathlib
 import contextlib
 import importlib.util
 from types import SimpleNamespace
+from pathlib import Path
 from unittest import TestCase, main, mock
 
 
 def load_target_module():
-    """
-    Load the target script (roles/sys-ctl-hlth-disc-space/files/script.py)
-    via its file path so that dashes in the directory name are not an issue.
-    """
-    test_file_path = pathlib.Path(__file__).resolve()
-    repo_root = test_file_path.parents[
-        4
-    ]  # go up: files -> ... -> unit -> tests -> <root>
+    repo_root = Path(__file__).resolve().parents[5]  # /opt/src/infinito
+    script_path = repo_root / "roles" / "sys-ctl-hlth-disc-space" / "files" / "script.py"
 
-    script_path = (
-        repo_root / "roles" / "sys-ctl-hlth-disc-space" / "files" / "script.py"
-    )
     if not script_path.is_file():
         raise FileNotFoundError(f"Target script not found at: {script_path}")
 
-    spec = importlib.util.spec_from_file_location("disk_space_script", script_path)
+    spec = importlib.util.spec_from_file_location("target_script", script_path)
     module = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None
+    assert spec and spec.loader
     spec.loader.exec_module(module)
     return module
-
 
 # Load the module once for all tests
 SCRIPT_MODULE = load_target_module()
