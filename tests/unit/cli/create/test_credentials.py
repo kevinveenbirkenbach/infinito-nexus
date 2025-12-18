@@ -97,7 +97,8 @@ class TestCreateCredentials(unittest.TestCase):
                 # Should complete without error
                 main()
                 # Verify inventory file updated with vaulted api_key
-                data = yaml.safe_load(open(inventory_file))
+                with open(inventory_file) as f:
+                    data = yaml.safe_load(f)
                 creds = data["applications"]["app_test"]["credentials"]
                 self.assertIn("api_key", creds)
                 # VaultScalar serializes to a vault block, safe_load returns a string containing the vault header
