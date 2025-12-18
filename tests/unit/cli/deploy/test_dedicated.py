@@ -142,7 +142,7 @@ class TestValidateApplicationIds(unittest.TestCase):
         # Should not raise
         deploy.validate_application_ids("inventories/github-ci/servers.yml", [])
 
-    @mock.patch("module_utils.valid_deploy_id.ValidDeployId")
+    @unittest.mock.patch("module_utils.valid_deploy_id.ValidDeployId")
     def test_invalid_ids_raise_system_exit(self, mock_vdi_cls):
         instance = mock_vdi_cls.return_value
         instance.validate.return_value = {
@@ -194,7 +194,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         return _side_effect
 
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_ansible_playbook_builds_correct_command(self, mock_run):
         calls: List[List[str]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
@@ -295,7 +295,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         self.assertNotIn("text", last_call.kwargs)
         self.assertNotIn("capture_output", last_call.kwargs)
 
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_ansible_playbook_failure_exits_with_code_and_skips_phases(
         self, mock_run
     ):
@@ -338,7 +338,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             )
         )
 
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_ansible_playbook_cleanup_with_logs_uses_clean_keep_logs(
         self, mock_run
     ):

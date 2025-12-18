@@ -1,9 +1,7 @@
-# tests/unit/cli/deploy/test_container.py
 import subprocess
 import sys
 import unittest
 from typing import List
-
 
 from cli.deploy import container as deploy_container
 
@@ -172,13 +170,13 @@ class TestMain(unittest.TestCase):
             "--",
             # no inventory/deploy args here
         ]
-        with mock.patch.object(sys, "argv", argv):
+        with unittest.mock.patch.object(sys, "argv", argv):
             rc = deploy_container.main()
 
         self.assertEqual(rc, 1)
         mock_run_in_container.assert_not_called()
 
-    @mock.patch("cli.deploy.container.run_in_container")
+    @unittest.mock.patch("cli.deploy.container.run_in_container")
     def test_main_passes_arguments_to_run_in_container(self, mock_run_in_container):
         """
         Ensure that main() correctly splits container args vs inventory/deploy
