@@ -37,7 +37,7 @@ jobs:
   test-install-pkgmgr:
     uses: ./.github/workflows/test-install-pkgmgr.yml
 
-  code-analyses:
+  done:
     needs:
       - lint-python
       - lint-shell
