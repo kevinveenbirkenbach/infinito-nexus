@@ -1,6 +1,7 @@
 import unittest
 import os
 import yaml
+import logging
 from glob import glob
 import re
 
@@ -37,8 +38,8 @@ class TestTopLevelVariableUsage(unittest.TestCase):
                 data = yaml.safe_load(f)
                 if isinstance(data, dict):
                     return list(data.keys())
-            except yaml.YAMLError:
-                pass
+            except yaml.YAMLError as e:
+                logging.warning(f"Failed to parse YAML file '%s': %s", file_path, e)
         return []
 
     def find_declaration_line(self, file_path, varname):
