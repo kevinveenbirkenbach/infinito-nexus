@@ -101,8 +101,8 @@ class TestUppercaseConstantVarsUnique(unittest.TestCase):
 
         if duplicates:
             msg_lines = [
-                "Found TOP-LEVEL constants defined more than once. "
-                "ALL-CAPS top-level variables are treated as constants and must be defined only once project-wide.\n"
+                "Found TOP-LEVEL constants defined more than once. ",
+                "ALL-CAPS top-level variables are treated as constants and must be defined only once project-wide.\n",
                 "Nested ALL-CAPS keys are allowed and ignored by this test.",
                 "",
             ]
