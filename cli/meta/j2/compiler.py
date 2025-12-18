@@ -30,15 +30,16 @@ def expand_includes(rel_path, seen=None):
         raise FileNotFoundError(f"Template not found: {rp}")
 
     output_lines = []
-    for line in open(abs_path, encoding="utf-8"):
-        m = INCLUDE_RE.match(line)
-        if not m:
-            output_lines.append(line.rstrip("\n"))
-        else:
-            indent, inc_rel = m.group(1), m.group(2)
-            # rekursiver Aufruf
-            for inc_line in expand_includes(inc_rel, seen):
-                output_lines.append(indent + inc_line)
+    with open(abs_path, encoding="utf-8") as f:
+        for line in f:
+            m = INCLUDE_RE.match(line)
+            if not m:
+                output_lines.append(line.rstrip("\n"))
+            else:
+                indent, inc_rel = m.group(1), m.group(2)
+                # rekursiver Aufruf
+                for inc_line in expand_includes(inc_rel, seen):
+                    output_lines.append(indent + inc_line)
     seen.remove(rp)
     return output_lines
 
