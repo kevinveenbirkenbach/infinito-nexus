@@ -6,6 +6,7 @@ import sys
 import textwrap
 import threading
 from datetime import datetime
+import traceback
 import pty
 from module_utils.sounds import Sound
 import time
@@ -288,8 +289,11 @@ def _play_in_child(method_name: str) -> bool:
                     f"[sound] child '{method_name}' exitcode={p.exitcode}", Fore.YELLOW
                 )
             )
-        except Exception:
-            pass
+        except Exception as e:
+            # Failed to print warning about sound child process;
+            # log the exception to stderr for debugging purposes.
+            print(f"Error while attempting to print sound process warning: {e}", file=sys.stderr)
+            traceback.print_exc()
     return p.exitcode == 0
 
 
