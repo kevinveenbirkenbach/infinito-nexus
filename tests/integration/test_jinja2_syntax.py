@@ -2,7 +2,7 @@
 
 import os
 import unittest
-from jinja2 import Environment, exceptions
+from jinja2 import Environment, exceptions, select_autoescape
 
 
 class TestJinja2Syntax(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestJinja2Syntax(unittest.TestCase):
         project_root = os.path.abspath(
             os.path.join(os.path.dirname(__file__), "..", "..")
         )
-        env = Environment()
+        env = Environment(autoescape=select_autoescape())
 
         failures = []
 
