@@ -4,7 +4,7 @@ import re
 from typing import Dict, Set, Iterable, Tuple, Optional
 
 import yaml
-
+import logging
 
 class RoleDependencyResolver:
     _RE_PURE_JINJA = re.compile(r"\s*\{\{\s*[^}]+\s*\}\}\s*$")
@@ -233,7 +233,7 @@ class RoleDependencyResolver:
                         if isinstance(r, str) and r.strip():
                             deps.add(r.strip())
         except Exception:
-            pass
+            logging.exception(f"Failed to parse dependencies from {meta_main}")
         return deps
 
     def _extract_meta_run_after(self, role_path: str) -> Set[str]:
@@ -251,7 +251,7 @@ class RoleDependencyResolver:
                     if isinstance(item, str) and item.strip():
                         deps.add(item.strip())
         except Exception:
-            pass
+            logging.exception(f"Failed to parse run_after from {meta_main}")
         return deps
 
     # -------------------------- small utils --------------------------
