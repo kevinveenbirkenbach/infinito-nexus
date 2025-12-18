@@ -42,19 +42,6 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
                     f"{role_path.name}: 'services' must be a dict in config/main.yml"
                 )
                 continue
-
-                # OPTIONAL: Check if the image is available locally via docker images
-                # from shutil import which
-                # import subprocess
-                # if which("docker"):
-                #     try:
-                #         out = subprocess.check_output(
-                #             ["docker", "images", "--format", "{{.Repository}}:{{.Tag}}"]
-                #         ).decode()
-                #         if value not in out:
-                #             errors.append(f"{role_path.name}: Image '{value}' not found locally (optional check)")
-                #     except Exception as e:
-                #         errors.append(f"{role_path.name}: Error running 'docker images' (optional): {e}")
         if warnings:
             print(
                 "\nWarnings in docker role services configuration:\n"
