@@ -2,7 +2,7 @@
 import argparse
 import shutil
 import ipaddress
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from ruamel.yaml import YAML
 
 import sys
@@ -65,7 +65,8 @@ def prompt_conflict(dst_file):
 
 def render_templates(src_dir, dst_dir, context):
     env = Environment(
-        loader=FileSystemLoader(src_dir), keep_trailing_newline=True, autoescape=False
+        loader=FileSystemLoader(src_dir), keep_trailing_newline=True,
+        autoescape=select_autoescape(['html', 'xml'])
     )
     env.filters["bool"] = lambda x: bool(x)
     env.filters["get_entity_name"] = get_entity_name
