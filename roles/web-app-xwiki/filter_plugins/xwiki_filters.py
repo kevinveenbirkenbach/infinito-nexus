@@ -12,6 +12,7 @@ except Exception:  # pragma: no cover
     class AnsibleFilterError(Exception):
         pass
 
+
 def _join_elements(elems: Iterable[Any]) -> str:
     return "/".join(str(x) for x in elems)
 

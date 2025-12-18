@@ -42,7 +42,9 @@ class TestMainHelpers(unittest.TestCase):
             self.assertIn((None, "rootcmd"), commands)
             self.assertIn(("sub", "innercmd"), commands)
 
-    @unittest.mock.patch("cli.__main__.subprocess.run", side_effect=Exception("mocked error"))
+    @unittest.mock.patch(
+        "cli.__main__.subprocess.run", side_effect=Exception("mocked error")
+    )
     def test_extract_description_via_help_returns_dash_on_exception(self, mock_run):
         """
         extract_description_via_help() should return '-' if subprocess.run

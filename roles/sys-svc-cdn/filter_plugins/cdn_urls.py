@@ -1,5 +1,6 @@
 import os
 
+
 def _to_url_tree(obj, cdn_root, base_url):
     """
     Recursively walk a nested dict and replace any string paths under cdn_root

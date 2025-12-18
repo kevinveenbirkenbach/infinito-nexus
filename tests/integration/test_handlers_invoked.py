@@ -61,6 +61,7 @@ def as_str_list(val: Any) -> List[str]:
 # Extract quoted literals inside a string (e.g. from Jinja conditionals)
 _QUOTED_RE = re.compile(r"""(['"])(.+?)\1""")
 
+
 def _jinja_mixed_to_regex(value: str) -> Optional[re.Pattern]:
     """
     Turn a string that mixes plain text with Jinja placeholders into a ^...$ regex.

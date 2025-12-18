@@ -5,6 +5,7 @@ from typing import Optional
 
 _SOUND_DISABLED_REASON: Optional[str] = None
 
+
 @lru_cache(maxsize=1)
 def _warn_sound_disabled_once() -> None:
     if not _SOUND_DISABLED_REASON:
