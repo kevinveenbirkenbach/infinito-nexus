@@ -60,8 +60,6 @@ def as_str_list(val: Any) -> List[str]:
 
 # Extract quoted literals inside a string (e.g. from Jinja conditionals)
 _QUOTED_RE = re.compile(r"""(['"])(.+?)\1""")
-_JINJA_TOKEN_RE = re.compile(r"\{\{.*?\}\}")
-
 
 def _jinja_mixed_to_regex(value: str) -> Optional[re.Pattern]:
     """

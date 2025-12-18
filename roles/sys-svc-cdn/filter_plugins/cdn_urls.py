@@ -1,6 +1,4 @@
-# filter_plugins/cdn_urls.py
 import os
-
 
 def _to_url_tree(obj, cdn_root, base_url):
     """

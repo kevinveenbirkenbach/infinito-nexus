@@ -1,28 +1,14 @@
 import os
 import warnings
+from functools import lru_cache
 from typing import Optional
 
 _SOUND_DISABLED_REASON: Optional[str] = None
-_SOUND_WARNED: bool = False
 
-
+@lru_cache(maxsize=1)
 def _warn_sound_disabled_once() -> None:
-    """
-    Emit the 'Sound support disabled' warning at most once per Python process.
-
-    Important:
-    - Do NOT warn at import time (avoids noisy unit test output).
-    - Warn only when a sound function is actually called.
-    """
-    global _SOUND_WARNED
-
-    if _SOUND_WARNED:
-        return
-
     if not _SOUND_DISABLED_REASON:
         return
-
-    _SOUND_WARNED = True
     warnings.warn(
         f"Sound support disabled: {_SOUND_DISABLED_REASON}",
         RuntimeWarning,
