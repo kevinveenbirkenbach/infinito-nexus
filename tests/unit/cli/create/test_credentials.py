@@ -1,7 +1,7 @@
 import os
 import sys
 import unittest
-from unittest import mock
+
 from cli.create.credentials import ask_for_confirmation, main
 from module_utils.handler.vault import VaultHandler
 import subprocess
@@ -11,11 +11,11 @@ import yaml
 
 class TestCreateCredentials(unittest.TestCase):
     def test_ask_for_confirmation_yes(self):
-        with mock.patch("builtins.input", return_value="y"):
+        with unittest.mock.patch("builtins.input", return_value="y"):
             self.assertTrue(ask_for_confirmation("test_key"))
 
     def test_ask_for_confirmation_no(self):
-        with mock.patch("builtins.input", return_value="n"):
+        with unittest.mock.patch("builtins.input", return_value="n"):
             self.assertFalse(ask_for_confirmation("test_key"))
 
     def test_vault_encrypt_string_success(self):
@@ -25,7 +25,7 @@ class TestCreateCredentials(unittest.TestCase):
         completed = subprocess.CompletedProcess(
             args=["ansible-vault"], returncode=0, stdout=fake_output, stderr=""
         )
-        with mock.patch("subprocess.run", return_value=completed) as proc_run:
+        with unittest.mock.patch("subprocess.run", return_value=completed) as proc_run:
             result = handler.encrypt_string("plain_val", "name")
             proc_run.assert_called_once()
             self.assertEqual(result, fake_output)
@@ -36,7 +36,7 @@ class TestCreateCredentials(unittest.TestCase):
         completed = subprocess.CompletedProcess(
             args=["ansible-vault"], returncode=1, stdout="", stderr="error"
         )
-        with mock.patch("subprocess.run", return_value=completed):
+        with unittest.mock.patch("subprocess.run", return_value=completed):
             with self.assertRaises(RuntimeError):
                 handler.encrypt_string("plain_val", "name")
 
