@@ -5,6 +5,8 @@ import re
 from glob import glob
 import sys
 
+import logging
+logging.basicConfig(level=logging.WARNING)
 
 class TestVariableDefinitions(unittest.TestCase):
     """
@@ -199,7 +201,7 @@ class TestVariableDefinitions(unittest.TestCase):
                                 self.defined.add(m_reg.group(1))
 
                 except Exception:
-                    pass
+                    logging.warning(f"Failed to parse file: {path}", exc_info=True)
 
     def test_all_used_vars_are_defined(self):
         """
