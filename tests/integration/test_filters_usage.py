@@ -2,6 +2,7 @@ import ast
 import os
 import re
 import unittest
+import logging
 from typing import Dict, List, Tuple, Optional
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
@@ -245,9 +246,10 @@ def search_usage(
             try:
                 if os.path.samefile(path, skip_file):
                     continue
-            except Exception:
-                pass
-
+            except Exception as e:
+                # Exception can occur if files do not exist or are inaccessible.
+                # Skip comparison but log at debug level for diagnosis.
+                logging.debug("Failed to compare files %r and %r: %s", path, skip_file, e)
             content = _read(path)
             if not content:
                 continue
