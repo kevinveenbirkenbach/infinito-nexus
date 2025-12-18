@@ -1,3 +1,8 @@
+## [0.3.1] - 2025-12-18
+
+* Enabled ***pkgmgr install infinito*** test
+
+
 ## [0.3.0] - 2025-12-17
 
 * - Introduced a layered Docker architecture: Infinito.Nexus now builds on pre-built pkgmgr base images, with a clear separation between base tooling, application source, and runtime logic.
