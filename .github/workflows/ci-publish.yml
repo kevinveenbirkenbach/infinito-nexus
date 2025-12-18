@@ -5,6 +5,9 @@ on:
     workflows: ["Mark commit as stable"]
     types: [completed]
 
+permissions:
+  contents: read
+
 jobs:
   publish:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}

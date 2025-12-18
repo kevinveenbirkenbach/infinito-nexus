@@ -3,6 +3,9 @@ name: Shell Linter
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   lint-shell:
     runs-on: ubuntu-latest

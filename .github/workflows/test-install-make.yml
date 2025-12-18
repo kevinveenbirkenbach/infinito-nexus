@@ -3,6 +3,10 @@ name: Install Infinito.Nexus with Make
 on:
   workflow_call:
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   test-install-make:
     runs-on: ubuntu-latest

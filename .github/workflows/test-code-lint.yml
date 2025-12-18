@@ -3,6 +3,10 @@ name: Test Infinito.Nexus Code
 on:
   workflow_call:
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   test-code-lint:
     runs-on: ubuntu-latest
@@ -17,4 +21,3 @@ jobs:
 
       - name: Run custom lint tests via make
         run: make test-lint
-

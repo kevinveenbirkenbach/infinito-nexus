@@ -3,6 +3,9 @@ name: Python Linter
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   lint-python:
     name: lint-python

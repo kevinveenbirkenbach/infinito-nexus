@@ -1,6 +1,10 @@
 name: CI (PR)
+
 on:
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   code-analyses:

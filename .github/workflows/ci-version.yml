@@ -6,10 +6,15 @@ on:
       - main
       - master
     tags:
-      - 'v*'
+      - "v*"
+
+permissions:
+  contents: read
+
 jobs:
   code-analyses:
     uses: ./.github/workflows/code-analyses.yml
+
   ci-version:
     needs:
       - code-analyses
@@ -19,14 +24,14 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     permissions:
-      contents: write  # Required to move/update the tag
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          fetch-tags: true  # We need all tags for version comparison
+          fetch-tags: true
 
       - name: Move 'stable' tag only if this version is the highest
         run: |
@@ -52,9 +57,7 @@ jobs:
           echo "All version tags:"
           echo "${ALL_V_TAGS}"
 
-          # Determine highest version using natural version sorting
           LATEST_TAG="$(printf '%s\n' ${ALL_V_TAGS} | sort -V | tail -n1)"
-
           echo "Highest version tag: ${LATEST_TAG}"
 
           if [[ "${VERSION}" != "${LATEST_TAG}" ]]; then
@@ -66,11 +69,9 @@ jobs:
           echo "Current version ${VERSION} IS the highest version."
           echo "Updating 'stable' tag..."
 
-          # Delete existing stable tag (local + remote)
           git tag -d stable 2>/dev/null || true
           git push origin :refs/tags/stable || true
 
-          # Create new stable tag
           git tag stable "$GITHUB_SHA"
           git push origin stable
 

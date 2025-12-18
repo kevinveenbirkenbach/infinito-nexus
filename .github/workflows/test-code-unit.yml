@@ -3,6 +3,9 @@ name: Test Units
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   test-unit:
     runs-on: ubuntu-latest
