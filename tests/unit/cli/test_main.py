@@ -117,7 +117,7 @@ class TestMainHelpers(unittest.TestCase):
             self.assertEqual([(None, "one"), (None, "two")], commands)
 
     def test_git_clean_repo_invokes_git_clean(self):
-        with mock.patch("cli.__main__.subprocess.run") as mock_run:
+        with unittest.mock.patch("cli.__main__.subprocess.run") as mock_run:
             main.git_clean_repo()
             mock_run.assert_called_once_with(["git", "clean", "-Xfd"], check=True)
 
@@ -139,7 +139,7 @@ class TestMainHelpers(unittest.TestCase):
 
     @unittest.mock.patch("cli.__main__.extract_description_via_help")
     @unittest.mock.patch("cli.__main__.format_command_help")
-    @mock.patch("builtins.print")
+    @unittest.mock.patch("builtins.print")
     def test_print_global_help_uses_helpers_per_command(
         self, mock_print, mock_fmt, mock_extract
     ):
@@ -170,7 +170,7 @@ class TestMainHelpers(unittest.TestCase):
         called_names = [call.args[0] for call in mock_fmt.call_args_list]
         self.assertEqual(["rootcmd", "compiler"], called_names)
 
-    @mock.patch("builtins.print")
+    @unittest.mock.patch("builtins.print")
     def test__play_in_child_failure_returns_false_and_prints_warning(self, mock_print):
         """
         _play_in_child() should return False and print a diagnostic
@@ -187,7 +187,7 @@ class TestMainHelpers(unittest.TestCase):
             def join(self):
                 pass
 
-        with mock.patch("cli.__main__.Process", FakeProcess):
+        with unittest.mock.patch("cli.__main__.Process", FakeProcess):
             ok = main._play_in_child("play_warning_sound")
 
         self.assertFalse(ok)
@@ -196,8 +196,8 @@ class TestMainHelpers(unittest.TestCase):
             "Expected a diagnostic print when exitcode != 0",
         )
 
-    @mock.patch("cli.__main__._play_in_child")
-    @mock.patch("cli.__main__.time.sleep")
+    @unittest.mock.patch("cli.__main__._play_in_child")
+    @unittest.mock.patch("cli.__main__.time.sleep")
     def test_failure_with_warning_loop_no_signal_skips_sounds_and_exits(
         self, mock_sleep, mock_play
     ):
@@ -207,8 +207,8 @@ class TestMainHelpers(unittest.TestCase):
         """
 
         # Simulate time.monotonic jumping past the timeout immediately
-        with mock.patch("cli.__main__.time.monotonic", side_effect=[0.0, 100.0]):
-            with mock.patch(
+        with unittest.mock.patch("cli.__main__.time.monotonic", side_effect=[0.0, 100.0]):
+            with unittest.mock.patch(
                 "cli.__main__.sys.exit", side_effect=SystemExit
             ) as mock_exit:
                 with self.assertRaises(SystemExit):
