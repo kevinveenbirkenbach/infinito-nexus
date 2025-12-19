@@ -61,23 +61,65 @@ def docker_exec(
     return subprocess.run(cmd, check=check)
 
 
-def wait_for_inner_docker(container: str, timeout: int = 60) -> None:
+def _docker_exec_capture(container: str, args: List[str]) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["docker", "exec", container, *args],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+
+def wait_for_docker_socket(container: str, timeout: int = 60) -> None:
     """
-    Poll `docker exec <container> docker info` until inner dockerd is ready.
+    Ensure Docker CLI exists in the container and the host docker socket is usable.
     """
-    print(">>> Waiting for inner Docker daemon inside CI container...")
-    for _ in range(timeout):
-        result = subprocess.run(
-            ["docker", "exec", container, "docker", "info"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+    print(">>> Waiting for Docker to be usable inside CI container...")
+
+    # 0) Verify docker CLI exists
+    which = _docker_exec_capture(container, ["sh", "-lc", "command -v docker || true"])
+    docker_path = (which.stdout or "").strip()
+    if not docker_path:
+        diag = _docker_exec_capture(
+            container,
+            ["sh", "-lc", "echo '[diag] PATH='\"$PATH\"; ls -la /usr/bin /bin 2>/dev/null | head -n 200 || true"],
         )
-        if result.returncode == 0:
-            print(">>> Inner Docker daemon is UP.")
+        raise RuntimeError(
+            "Docker CLI ('docker') not found inside CI container.\n"
+            "Fix: install docker client in the image used for --image.\n\n"
+            f"[diag stdout]\n{diag.stdout}\n"
+            f"[diag stderr]\n{diag.stderr}\n"
+        )
+
+    # 1) Show basic socket permissions once
+    sock = _docker_exec_capture(container, ["sh", "-lc", "ls -l /var/run/docker.sock || true; id || true"])
+    if sock.stdout.strip():
+        print(sock.stdout.rstrip())
+
+    # 2) Poll docker info
+    last_out = ""
+    last_err = ""
+    for _ in range(timeout):
+        result = _docker_exec_capture(container, ["sh", "-lc", "docker info >/dev/null 2>&1; echo $?"])
+        rc = (result.stdout or "").strip()
+        if rc == "0":
+            print(">>> Docker is usable inside container.")
             return
+
+        # capture a bit more detail for later
+        dv = _docker_exec_capture(container, ["sh", "-lc", "docker version 2>&1 || true"])
+        last_out = dv.stdout
+        last_err = dv.stderr
         time.sleep(1)
 
-    raise RuntimeError("Inner Docker daemon did not become ready in time")
+    raise RuntimeError(
+        "Docker did not become usable inside container in time.\n\n"
+        "Most common causes:\n"
+        "  - docker client exists but cannot access /var/run/docker.sock (permissions / mount)\n"
+        "  - DOCKER_HOST is wrong\n\n"
+        f"[last docker version stdout]\n{last_out}\n"
+        f"[last docker version stderr]\n{last_err}\n"
+    )
 
 
 def start_ci_container(
@@ -88,7 +130,7 @@ def start_ci_container(
     name: str | None = None,
 ) -> str:
     """
-    Start a CI container running dockerd inside.
+    Start a CI container that uses the host Docker socket (no Docker-in-Docker).
 
     Returns the container name.
     """
@@ -98,7 +140,7 @@ def start_ci_container(
     if not name:
         name = f"infinito-ci-{uuid.uuid4().hex[:8]}"
 
-    print(f">>> Starting CI container '{name}' with inner dockerd...")
+    print(f">>> Starting CI container '{name}' (host Docker socket mode)...")
     subprocess.run(
         [
             "docker",
@@ -107,19 +149,20 @@ def start_ci_container(
             "--name",
             name,
             "--network=host",
-            "--privileged",
-            "--cgroupns=host",
+            "-v",
+            "/var/run/docker.sock:/var/run/docker.sock",
+            "-e",
+            "DOCKER_HOST=unix:///var/run/docker.sock",
             image,
-            "dockerd",
-            "--debug",
-            "--host=unix:///var/run/docker.sock",
-            "--storage-driver=vfs",
+            "tail",
+            "-f",
+            "/dev/null",
         ],
         check=True,
     )
 
-    wait_for_inner_docker(name)
-    print(f">>> CI container '{name}' started and inner dockerd is ready.")
+    wait_for_docker_socket(name)
+    print(f">>> CI container '{name}' started and Docker socket is usable.")
     return name
 
 
@@ -134,7 +177,7 @@ def run_in_container(
 ) -> None:
     """
     Full CI "run" mode:
-      - start CI container with dockerd
+      - start CI container (host docker socket mode)
       - run cli.create.inventory (with forwarded inventory_args)
       - ensure CI vault password file
       - run cli.deploy.dedicated (with forwarded deploy_args)
@@ -264,10 +307,8 @@ def split_inventory_and_deploy_args(rest: List[str]) -> Tuple[List[str], List[st
 
 
 def main() -> int:
-    # Capture raw arguments without program name
     raw_argv = sys.argv[1:]
 
-    # Split container-args vs forwarded args using first "--"
     if "--" in raw_argv:
         sep_index = raw_argv.index("--")
         container_argv = raw_argv[:sep_index]
@@ -279,8 +320,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         prog="infinito-deploy-container",
         description=(
-            "Run Ansible deploy inside an infinito Docker image with an inner "
-            "Docker daemon (dockerd + vfs) and auto-generated CI inventory.\n\n"
+            "Run Ansible deploy inside an infinito Docker image using the host Docker socket "
+            "(no Docker-in-Docker) and auto-generated CI inventory.\n\n"
             "Usage (run mode):\n"
             "  python -m cli.deploy.container run [container-opts] -- \\\n"
             "    [inventory-args ...] -- [deploy-args ...]\n\n"
@@ -297,20 +338,15 @@ def main() -> int:
         help="Container mode: run, start, stop, exec, remove.",
     )
 
-    parser.add_argument(
-        "--image", default=os.environ.get("INFINITO_IMAGE", "infinito:latest")
-    )
+    parser.add_argument("--image", default=os.environ.get("INFINITO_IMAGE", "infinito:latest"))
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--rebuild", action="store_true")
     parser.add_argument("--no-cache", action="store_true")
     parser.add_argument("--name")
 
-    # Parse only container-level arguments
     args = parser.parse_args(container_argv)
-
     mode = args.mode
 
-    # --- RUN MODE ---
     if mode == "run":
         inventory_args, deploy_args = split_inventory_and_deploy_args(rest)
 
@@ -333,15 +369,14 @@ def main() -> int:
                 name=args.name,
             )
         except subprocess.CalledProcessError as exc:
-            print(
-                f"[ERROR] Deploy failed with exit code {exc.returncode}",
-                file=sys.stderr,
-            )
+            print(f"[ERROR] Deploy failed with exit code {exc.returncode}", file=sys.stderr)
             return exc.returncode
+        except Exception as exc:
+            print(f"[ERROR] {exc}", file=sys.stderr)
+            return 1
 
         return 0
 
-    # --- START MODE ---
     if mode == "start":
         try:
             name = start_ci_container(
@@ -358,7 +393,6 @@ def main() -> int:
         print(f">>> Started CI container: {name}")
         return 0
 
-    # For stop/remove/exec, a container name is mandatory
     if not args.name:
         print(f"Error: '{mode}' requires --name", file=sys.stderr)
         return 1

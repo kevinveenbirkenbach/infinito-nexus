@@ -1,185 +1,113 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# -------------------------------------------------------------------
-# Config
-# -------------------------------------------------------------------
-MASK_CREDENTIALS_IN_LOGS_DEFAULT="false"
-MASK_CREDENTIALS_IN_LOGS="${MASK_CREDENTIALS_IN_LOGS:-$MASK_CREDENTIALS_IN_LOGS_DEFAULT}"
+# scripts/tests/deploy.sh
+#
+# Variant B (fixed):
+# - Build the local Infinito.Nexus Docker image via Makefile (make build/build-no-cache/build-missing)
+# - Use ONLY that local image tag (e.g. infinito-arch) for the deploy container
+# - Run the real deploy via: python3 -m cli.deploy.container run ...
+#
+# NOTE:
+# This script does NOT call `infinito deploy ...` (your CLI doesn't have that).
+# It uses your existing container runner in cli/deploy/container.py.
 
-AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
-AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
-DEPLOY_TARGET_DEFAULT="server"
-DEPLOY_TARGET="${DEPLOY_TARGET:-$DEPLOY_TARGET_DEFAULT}"
-
-# Optional: allow adding additional excludes globally (comma-separated or newline-separated)
-ALWAYS_EXCLUDE="${ALWAYS_EXCLUDE:-}"
-
-# Central excludes (same everywhere) - can be comma-separated or newline-separated.
-BASE_EXCLUDE="${BASE_EXCLUDE:-$(
-  cat <<'EOF'
-drv-lid-switch
-svc-db-memcached
-svc-db-redis
-svc-net-wireguard-core
-svc-net-wireguard-firewalled
-svc-net-wireguard-plain
-svc-bkp-loc-2-usb
-svc-bkp-rmt-2-loc
-svc-opt-keyboard-color
-svc-opt-ssd-hdd
-web-app-bridgy-fed
-web-app-oauth2-proxy
-web-app-postmarks
-web-app-elk
-web-app-syncope
-web-app-socialhome
-web-svc-xmpp
-EOF
-)}"
-
-# -------------------------------------------------------------------
-# Helpers
-# -------------------------------------------------------------------
-die() { echo "[ERROR] $*" >&2; exit 1; }
-
-join_by_comma() {
-  local IFS=","
-  echo "$*"
-}
-
-trim_lines() {
-  sed -e 's/[[:space:]]\+$//' -e '/^$/d'
-}
-
-get_invokable() {
-  if command -v infinito >/dev/null 2>&1; then
-    infinito meta applications invokable | trim_lines
-    return 0
-  fi
-
-  # Best-effort fallback: if your repo exposes a python module for this.
-  if python3 -c "import cli" >/dev/null 2>&1; then
-    python3 -m cli.meta.applications invokable 2>/dev/null | trim_lines || true
-    return 0
-  fi
-
-  die "Cannot list invokable applications (neither 'infinito' nor usable python module found)."
-}
-
-filter_allowed() {
-  local type="$1"
-  case "$type" in
-    workstation)
-      # desk-* and util-desk-*
-      grep -E '^(desk-|util-desk-)' || true
-      ;;
-    server)
-      # web-* (includes web-app-*, web-svc-*, etc.)
-      grep -E '^web-' || true
-      ;;
-    universal)
-      cat
-      ;;
-    *)
-      die "Unknown deploy type: $type (expected: workstation|server|universal)"
-      ;;
-  esac
-}
-
-compute_exclude_csv() {
-  local type="$1"
-
-  local all allowed computed combined final
-  all="$(get_invokable)"
-  allowed="$(printf "%s\n" "$all" | filter_allowed "$type")"
-
-  # computed = all - allowed
-  computed="$(comm -23 <(printf "%s\n" "$all" | sort) <(printf "%s\n" "$allowed" | sort) | trim_lines)"
-
-  # combined = computed ∪ BASE_EXCLUDE ∪ ALWAYS_EXCLUDE
-  combined="$(
-    printf "%s\n%s\n%s\n" \
-      "$computed" \
-      "$(printf "%s\n" "$BASE_EXCLUDE" | tr ',' '\n')" \
-      "$(printf "%s\n" "$ALWAYS_EXCLUDE" | tr ',' '\n')" \
-    | trim_lines | sort -u
-  )"
-
-  # final = combined ∩ all   (keep only invokable names)
-  final="$(comm -12 <(printf "%s\n" "$combined" | sort) <(printf "%s\n" "$all" | sort) | trim_lines)"
-
-  # To comma-separated
-  # shellcheck disable=SC2206
-  local arr=($final)
-  if [[ ${#arr[@]} -eq 0 ]]; then
-    echo ""
-  else
-    join_by_comma "${arr[@]}"
-  fi
-}
-
-run_deploy() {
-  local image="$1"
-  local exclude_csv="$2"
-  shift 2
-
-  python3 -m cli.deploy.container run --image "$image" "$@" -- \
-    --exclude "$exclude_csv" \
-    --vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
-    --authorized-keys "$AUTHORIZED_KEYS" \
-    -- \
-    -T "$DEPLOY_TARGET"
-}
-
-# -------------------------------------------------------------------
-# Main
-# -------------------------------------------------------------------
-DEPLOY_TYPE=""
+TYPE=""
 DISTRO=""
+IMAGE=""          # default: infinito-<distro>
+NO_CACHE=0
+MISSING_ONLY=0
+
+usage() {
+  cat <<'EOF'
+Usage: scripts/tests/deploy.sh --type <server|workstation|universal> --distro <arch|debian|ubuntu|fedora|centos> [options]
+
+Options:
+  --image <name>   Use a specific local image tag (no pull). Default: infinito-<distro>
+  --no-cache       Rebuild image with --no-cache (make build-no-cache)
+  --missing        Build only if missing (make build-missing)
+  -h, --help       Show this help
+
+What it runs:
+  1) INFINITO_DISTRO=<distro> make build|build-no-cache|build-missing
+  2) python3 -m cli.deploy.container run --image <local-image> -- -T <type>
+EOF
+}
+
+die() { echo "[ERROR] $*" >&2; exit 1; }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --type)  DEPLOY_TYPE="${2:-}"; shift 2 ;;
+    --type)   TYPE="${2:-}"; shift 2 ;;
     --distro) DISTRO="${2:-}"; shift 2 ;;
-    --target) DEPLOY_TARGET="${2:-}"; shift 2 ;;
-    --) shift; break ;;
-    *) die "Unknown arg: $1" ;;
+    --image)  IMAGE="${2:-}"; shift 2 ;;
+    --no-cache) NO_CACHE=1; shift ;;
+    --missing)  MISSING_ONLY=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) die "Unknown argument: $1" ;;
   esac
 done
 
-[[ -n "$DEPLOY_TYPE" ]] || die "Missing --type workstation|server|universal"
-[[ -n "$DISTRO" ]] || die "Missing --distro arch|debian|ubuntu|fedora|centos"
+[[ -n "${TYPE}" ]]  || die "--type is required"
+[[ -n "${DISTRO}" ]] || die "--distro is required"
 
-case "$DISTRO" in
-  arch|debian|ubuntu|fedora|centos) ;;
-  *) die "Unsupported distro: $DISTRO" ;;
+case "${TYPE}" in
+  server|workstation|universal) ;;
+  *) die "Invalid --type '${TYPE}' (expected: server|workstation|universal)" ;;
 esac
 
-IMAGE="ghcr.io/kevinveenbirkenbach/pkgmgr-$DISTRO-virgin:stable"
-EXCLUDE_CSV="$(compute_exclude_csv "$DEPLOY_TYPE")"
+case "${DISTRO}" in
+  arch|debian|ubuntu|fedora|centos) ;;
+  *) die "Invalid --distro '${DISTRO}' (expected: arch|debian|ubuntu|fedora|centos)" ;;
+esac
 
-echo ">>> Deploy type:     $DEPLOY_TYPE"
-echo ">>> Distro:          $DISTRO"
-echo ">>> Target:          $DEPLOY_TARGET"
-echo ">>> Image:           $IMAGE"
-echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
+if [[ -z "${IMAGE}" ]]; then
+  IMAGE="infinito-${DISTRO}"
+fi
 
-# -------------------------------------------------------------------
-# 1) First deploy: normal + debug (with build)
-# -------------------------------------------------------------------
-echo ">>> [1/3] First deploy (normal + debug, with build)"
-run_deploy "$IMAGE" "$EXCLUDE_CSV" --build -- --debug --skip-cleanup --skip-tests
+echo ">>> Deploy type:   ${TYPE}"
+echo ">>> Distro:        ${DISTRO}"
+echo ">>> Local image:   ${IMAGE}"
+echo ">>> Repo root:     ${REPO_ROOT}"
 
-# -------------------------------------------------------------------
-# 2) Second deploy: reset + debug (without build)
-# -------------------------------------------------------------------
-echo ">>> [2/3] Second deploy (--reset --debug, reuse image)"
-run_deploy "$IMAGE" "$EXCLUDE_CSV" -- --reset --debug --skip-cleanup --skip-tests
+# ---------------------------------------------------------------------------
+# 1) Build local image via Makefile
+# ---------------------------------------------------------------------------
+pushd "${REPO_ROOT}" >/dev/null
 
-# -------------------------------------------------------------------
-# 3) Third deploy: async deploy – no debug (reuse image)
-# -------------------------------------------------------------------
-echo ">>> [3/3] Third deploy (async deploy – no debug)"
-run_deploy "$IMAGE" "$EXCLUDE_CSV" -- --skip-cleanup --skip-tests
+if [[ "${NO_CACHE}" == "1" ]]; then
+  echo ">>> make build-no-cache (INFINITO_DISTRO=${DISTRO})"
+  INFINITO_DISTRO="${DISTRO}" make build-no-cache
+elif [[ "${MISSING_ONLY}" == "1" ]]; then
+  echo ">>> make build-missing (INFINITO_DISTRO=${DISTRO})"
+  INFINITO_DISTRO="${DISTRO}" make build-missing
+else
+  echo ">>> make build (INFINITO_DISTRO=${DISTRO})"
+  INFINITO_DISTRO="${DISTRO}" make build
+fi
+
+# Ensure the image exists locally
+docker image inspect "${IMAGE}" >/dev/null 2>&1 || die "Local image not found after build: ${IMAGE}"
+
+# ---------------------------------------------------------------------------
+# 2) Run deploy via your existing container runner
+# ---------------------------------------------------------------------------
+#
+# cli/deploy/container.py expects:
+#   python3 -m cli.deploy.container run [container-opts] -- [deploy-args]
+#
+# We provide deploy args as:
+#   -T <type>
+#
+echo ">>> Running deploy via cli.deploy.container (local image only)..."
+python3 -m cli.deploy.container run \
+  --image "${IMAGE}" \
+  -- \
+  -T "${TYPE}"
+
+popd >/dev/null
+
+echo ">>> Deploy test suite finished successfully."
