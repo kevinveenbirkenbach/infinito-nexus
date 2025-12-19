@@ -10,15 +10,6 @@ export INFINITO_PATH
 export INFINITO_SRC_DIR
 
 # ---------------------------------------------------------------------------
-# Log distribution info
-# ---------------------------------------------------------------------------
-if [[ -f /etc/os-release ]]; then
-  # shellcheck disable=SC1091
-  . /etc/os-release
-  echo "[docker-infinito] Detected distro: ${ID:-unknown} (like: ${ID_LIKE:-})"
-fi
-
-# ---------------------------------------------------------------------------
 # DEV mode: rebuild infinito
 # ---------------------------------------------------------------------------
 if [[ "${INSTALL_LOCAL_BUILD:-0}" == "1" ]]; then
@@ -41,6 +32,6 @@ if [[ $# -eq 0 ]]; then
   echo "[docker-infinito] No arguments provided. Showing infinito help..."
   exec infinito --help
 else
-  echo "[docker-infinito] Executing command: $*"
+  cd "${INFINITO_PATH}"
   exec "$@"
 fi
