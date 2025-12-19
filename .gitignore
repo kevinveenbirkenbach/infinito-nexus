@@ -12,3 +12,4 @@ roles/list.json
 *.pyc
 *.egg-info
 ./build/*
+.ruff_cache
