@@ -26,4 +26,4 @@ jobs:
 
       - name: Run deploy test suite (workstation)
         run: |
-          scripts/tests/deploy.sh --type workstation --distro "${{ matrix.distro }}"
+          scripts/tests/deploy.sh --type workstation --distro "${{ matrix.distro }}" --missing

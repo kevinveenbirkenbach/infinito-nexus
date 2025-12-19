@@ -140,7 +140,7 @@ class TestDynamicModes(unittest.TestCase):
 class TestValidateApplicationIds(unittest.TestCase):
     def test_no_ids_does_nothing(self):
         # Should not raise
-        deploy.validate_application_ids("inventories/github-ci/servers.yml", [])
+        deploy.validate_application_ids("/etc/inventories/github-ci/servers.yml", [])
 
     @unittest.mock.patch("module_utils.valid_deploy_id.ValidDeployId")
     def test_invalid_ids_raise_system_exit(self, mock_vdi_cls):
@@ -152,13 +152,13 @@ class TestValidateApplicationIds(unittest.TestCase):
 
         with self.assertRaises(SystemExit) as ctx:
             deploy.validate_application_ids(
-                "inventories/github-ci/servers.yml",
+                "/etc/inventories/github-ci/servers.yml",
                 ["web-app-foo", "web-app-bar"],
             )
 
         self.assertEqual(ctx.exception.code, 1)
         instance.validate.assert_called_once_with(
-            "inventories/github-ci/servers.yml",
+            "/etc/inventories/github-ci/servers.yml",
             ["web-app-foo", "web-app-bar"],
         )
 
@@ -205,10 +205,10 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "MODE_DEBUG": True,
         }
 
-        inventory_path = "inventories/github-ci/servers.yml"
+        inventory_path = "/etc/inventories/github-ci/servers.yml"
         limit = "localhost"
         allowed_apps = ["web-app-foo", "web-app-bar"]
-        password_file = "inventories/github-ci/.password"
+        password_file = "/etc/inventories/github-ci/.password"
 
         deploy.run_ansible_playbook(
             inventory=inventory_path,
@@ -310,7 +310,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         with self.assertRaises(SystemExit) as ctx:
             deploy.run_ansible_playbook(
-                inventory="inventories/github-ci/servers.yml",
+                inventory="/etc/inventories/github-ci/servers.yml",
                 modes=modes,
                 limit=None,
                 allowed_applications=None,
@@ -352,7 +352,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         }
 
         deploy.run_ansible_playbook(
-            inventory="inventories/github-ci/servers.yml",
+            inventory="/etc/inventories/github-ci/servers.yml",
             modes=modes,
             limit=None,
             allowed_applications=None,
