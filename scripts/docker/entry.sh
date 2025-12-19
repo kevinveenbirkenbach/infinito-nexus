@@ -1,26 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "[docker-infinito] Starting package-manager container"
+echo "[docker-infinito] Starting infinito container"
+
+# Compute dynamically if not provided from outside
+INFINITO_PATH="$(pkgmgr path infinito)"
+INFINITO_SRC_DIR="/opt/src/infinito"
+export INFINITO_PATH
+export INFINITO_SRC_DIR
 
 # ---------------------------------------------------------------------------
-# Log distribution info
+# DEV mode: rebuild infinito
 # ---------------------------------------------------------------------------
-if [[ -f /etc/os-release ]]; then
-  # shellcheck disable=SC1091
-  . /etc/os-release
-  echo "[docker-infinito] Detected distro: ${ID:-unknown} (like: ${ID_LIKE:-})"
-fi
-
-# ---------------------------------------------------------------------------
-# DEV mode: rebuild package-manager from the mounted /opt/src/infinito tree
-# ---------------------------------------------------------------------------
-if [[ "${REINSTALL_INFINITO:-0}" == "1" ]]; then
-  echo "[docker-infinito] Using /opt/src/infinito as working directory"
-  cd /opt/src/infinito
-  echo "[docker-infinito] DEV mode enabled (REINSTALL_INFINITO=1)"
+if [[ "${INSTALL_LOCAL_BUILD:-0}" == "1" ]]; then
+  echo "[docker-infinito] Build enabled (INSTALL_LOCAL_BUILD=1)"
+  echo "[docker-infinito] Using ${INFINITO_PATH} as working directory"
+  mkdir -p "${INFINITO_PATH}"
+  cd "${INFINITO_PATH}"
+  echo "[docker-infinito] Copy ${INFINITO_SRC_DIR} to ${INFINITO_PATH}..."
+  rsync -av --delete --exclude='.git' "${INFINITO_SRC_DIR}/" "${INFINITO_PATH}/"
   echo "[docker-infinito] Reinstall via 'make install'..."
   make install || exit 1
+  echo "[docker-infinito] Installed:"
+  pkgmgr version infinito 
 fi
 
 # ---------------------------------------------------------------------------
@@ -30,6 +32,6 @@ if [[ $# -eq 0 ]]; then
   echo "[docker-infinito] No arguments provided. Showing infinito help..."
   exec infinito --help
 else
-  echo "[docker-infinito] Executing command: $*"
+  cd "${INFINITO_PATH}"
   exec "$@"
 fi

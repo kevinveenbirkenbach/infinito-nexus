@@ -23,7 +23,7 @@ jobs:
       - name: Install & test in pkgmgr virgin container
         run: |
           docker run --rm \
-            -e REINSTALL_INFINITO=0 \
+            -e INSTALL_LOCAL_BUILD=0 \
             -v "$(pwd):/opt/src/infinito" \
             -w "/opt/src/infinito" \
             "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}-virgin:stable" \

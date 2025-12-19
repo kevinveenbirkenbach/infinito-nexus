@@ -6,7 +6,7 @@ echo ">>> Running UNIT tests in ${INFINITO_DISTRO} container"
 echo "============================================================"
 
 docker run --rm \
-  -e REINSTALL_INFINITO=1 \
+  -e INSTALL_LOCAL_BUILD=1 \
   -e PYTHON="${PYTHON}" \
   -e TEST_PATTERN="${TEST_PATTERN}" \
   -e TEST_TYPE="${TEST_TYPE}" \

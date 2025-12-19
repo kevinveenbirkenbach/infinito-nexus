@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# cli/meta/applications/invokable.py
 
 import argparse
 import sys

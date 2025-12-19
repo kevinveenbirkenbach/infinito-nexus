@@ -24,7 +24,7 @@ jobs:
         run: |
           docker run --rm \
             -w "/root/" \
-            -e REINSTALL_INFINITO=0 \
+            -e INSTALL_LOCAL_BUILD=0 \
             -v "$(pwd):/root/Repositories/github.com/kevinveenbirkenbach/infinito-nexus" \
             "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable" \
             bash -lc '
