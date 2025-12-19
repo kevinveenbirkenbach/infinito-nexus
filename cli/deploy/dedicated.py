@@ -34,6 +34,15 @@ REPO_ROOT = os.path.dirname(CLI_ROOT)  # → project root
 # --------------------------------------------------------------------------------------
 
 
+def run(cmd: list[str]) -> None:
+    subprocess.run(
+        cmd,
+        check=True,
+        stdout=sys.stdout,
+        stderr=sys.stderr,
+    )
+
+
 def run_ansible_playbook(
     inventory: str,
     modes: Dict[str, Any],
@@ -54,9 +63,8 @@ def run_ansible_playbook(
     # 1) Cleanup Phase
     # ---------------------------------------------------------
     if modes.get("MODE_CLEANUP", False):
-        cleanup_cmd = ["make", "clean-keep-logs"] if logs else ["make", "clean"]
-        print(f"\n🧹 Running cleanup ({' '.join(cleanup_cmd)})...\n")
-        subprocess.run(cleanup_cmd, check=True)
+        print("\n🧹 Cleaning up...\n", flush=True)
+        run(["make", "clean"])
     else:
         print("\n🧹 Cleanup skipped (MODE_CLEANUP not set or False)\n")
 

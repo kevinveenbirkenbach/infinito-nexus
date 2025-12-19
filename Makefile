@@ -57,16 +57,16 @@ RESERVED_USERNAMES := $(shell \
 .PHONY: \
 	deps setup setup-clean install \
 	test test-messy test-lint test-unit test-integration \
-	clean clean-keep-logs list tree mig dockerignore \
+	clean list tree mig dockerignore \
 	print-python
-
-clean-keep-logs:
-	@echo "🧹 Cleaning ignored files but keeping logs/…"
-	git clean -fdX -- ':!logs' ':!logs/**'
 
 clean:
 	@echo "Removing ignored git files"
-	sudo git clean -fdX
+	@git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { \
+		echo "Error: not inside a git repository"; \
+		exit 1; \
+	}
+	git clean -fdX
 
 list:
 	@echo "Generating the roles list"

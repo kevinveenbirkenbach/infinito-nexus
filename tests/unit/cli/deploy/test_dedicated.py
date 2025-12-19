@@ -339,9 +339,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         )
 
     @unittest.mock.patch("subprocess.run")
-    def test_run_ansible_playbook_cleanup_with_logs_uses_clean_keep_logs(
-        self, mock_run
-    ):
+    def test_run_ansible_playbook_cleanup_with_logs_uses_clean(self, mock_run):
         calls: List[List[str]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
 
@@ -365,8 +363,8 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         )
 
         self.assertTrue(
-            any(call == ["make", "clean-keep-logs"] for call in calls),
-            "Expected 'make clean-keep-logs' when MODE_CLEANUP=true and logs=True",
+            any(call == ["make", "clean"] for call in calls),
+            "Expected 'make clean' when MODE_CLEANUP=true (logs flag ignored by Makefile)",
         )
 
 
