@@ -19,6 +19,8 @@ if [[ "${REINSTALL_INFINITO:-0}" == "1" ]]; then
   echo "[docker-infinito] Using /opt/src/infinito as working directory"
   cd /opt/src/infinito
   echo "[docker-infinito] DEV mode enabled (REINSTALL_INFINITO=1)"
+  echo "[docker-infinito] Git safety: fix "detected dubious ownership" on bind mounts"
+  git config --global --add safe.directory /opt/src/infinito || true
   echo "[docker-infinito] Reinstall via 'make install'..."
   make install || exit 1
 fi
