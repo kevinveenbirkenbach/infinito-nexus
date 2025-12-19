@@ -26,5 +26,4 @@ jobs:
 
       - name: Run deploy test suite (server)
         run: |
-          chmod +x scripts/tests/deploy.sh
           scripts/tests/deploy.sh --type server --distro "${{ matrix.distro }}"

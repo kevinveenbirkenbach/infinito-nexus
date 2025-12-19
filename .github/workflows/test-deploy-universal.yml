@@ -26,5 +26,4 @@ jobs:
 
       - name: Run deploy test suite (universal)
         run: |
-          chmod +x scripts/tests/deploy.sh
           scripts/tests/deploy.sh --type universal --distro "${{ matrix.distro }}"
