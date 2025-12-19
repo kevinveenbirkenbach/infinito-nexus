@@ -1,11 +1,14 @@
 # syntax=docker/dockerfile:1
 
-# Hadolint: enforce explicit tag via separate repo + tag args
-ARG INFINITO_IMAGE_REPO
-ARG INFINITO_IMAGE_TAG
+ARG PKGMGR_IMAGE_REPO=ghcr.io/kevinveenbirkenbach/pkgmgr-arch
+ARG PKGMGR_IMAGE_TAG=stable
 
-FROM ${INFINITO_IMAGE_REPO}:${INFINITO_IMAGE_TAG} AS full
+FROM ${PKGMGR_IMAGE_REPO}:${PKGMGR_IMAGE_TAG} AS full
+
 SHELL ["/bin/bash", "-lc"]
+
+ENV INFINITO_SRC_DIR="/opt/src/infinito"
+ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
 RUN cat /etc/os-release || true
 
@@ -66,26 +69,25 @@ RUN set -euo pipefail; \
 # ------------------------------------------------------------
 # Infinito.Nexus source in
 # ------------------------------------------------------------
-COPY . /opt/src/infinito
+COPY . ${INFINITO_SRC_DIR}
 
 # ------------------------------------------------------------
 # Install infinito via pkgmgr (shallow)
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
-  pkgmgr install infinito --clone-mode shallow
+  echo "[docker-infinito] Install Infinito.Nexus via pkgmgr" && \
+  pkgmgr install infinito --clone-mode shallow && \
+  echo "[docker-infinito] Installed Infinito.Nexus Version:" && \
+  pkgmgr version infinito
 
 # ------------------------------------------------------------
 # Override with local source
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
-  INFINITO_PATH="$(pkgmgr path infinito)"; \
-  : "${INFINITO_PATH:?}"; \
-  test "${INFINITO_PATH}" != "/"; \
-  rm -rf -- "${INFINITO_PATH:?}/"*; \
-  rsync -a --delete --exclude='.git' /opt/src/infinito/ "${INFINITO_PATH:?}/"; \
-  make -C "${INFINITO_PATH:?}" install
+  INSTALL_LOCAL_BUILD=1 /opt/src/infinito/scripts/docker/entry.sh true
 
-ENV PATH="/opt/venvs/infinito/bin:${PATH}"
+# Set workdir to / to avasoid ambigious commands
+WORKDIR /
 
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
 CMD ["infinito", "--help"]
