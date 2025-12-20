@@ -237,8 +237,8 @@ def detect_project_root() -> Path:
     Detect project root assuming this file is at: <root>/cli/create/inventory/__main__.py
     """
     here = Path(__file__).resolve()
-    # .../repo/cli/create/inventory/__main__.py → parents[2] == repo
-    return here.parents[2]
+    # .../repo/cli/create/inventory/__main__.py → parents[3] == repo
+    return here.parents[3]
 
 
 def load_yaml(path: Path) -> Dict[str, Any]:
