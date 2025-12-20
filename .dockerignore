@@ -11,5 +11,5 @@ venv
 roles/list.json
 *.pyc
 *.egg-info
-./build/*
+build/*
 .ruff_cache.git

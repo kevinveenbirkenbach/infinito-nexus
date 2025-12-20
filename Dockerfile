@@ -9,6 +9,8 @@ FROM ${PKGMGR_IMAGE_REPO}:${PKGMGR_IMAGE_TAG} AS full
 SHELL ["/bin/bash", "-o", "pipefail", "-lc"]
 
 ENV INFINITO_SRC_DIR="/opt/src/infinito"
+ENV PYTHON="/opt/venvs/infinito/bin/python"
+ENV PIP="/opt/venvs/infinito/bin/python -m pip"
 ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
 RUN cat /etc/os-release || true

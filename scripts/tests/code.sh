@@ -7,7 +7,6 @@ echo "============================================================"
 
 docker run --rm \
   -e INSTALL_LOCAL_BUILD=1 \
-  -e PYTHON="${PYTHON}" \
   -e TEST_PATTERN="${TEST_PATTERN}" \
   -e TEST_TYPE="${TEST_TYPE}" \
   -v "$(pwd):/opt/src/infinito" \
