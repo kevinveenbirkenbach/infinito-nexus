@@ -32,7 +32,7 @@ RUN set -euo pipefail; \
     # Debian/Ubuntu: use Docker official repo for docker-ce-cli
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
-    apt-get install -y --no-install-recommends ca-certificates curl gnupg lsb-release; \
+    apt-get install -y --no-install-recommends curl gnupg lsb-release; \
     install -m 0755 -d /etc/apt/keyrings; \
     curl -fsSL "https://download.docker.com/linux/${ID}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg; \
     chmod a+r /etc/apt/keyrings/docker.gpg; \
@@ -46,7 +46,6 @@ RUN set -euo pipefail; \
   \
   elif [[ "${ID}" == "fedora" || "${ID_LIKE:-}" =~ fedora ]]; then \
     # Fedora: docker client via docker-cli or moby-engine
-    dnf -y install ca-certificates curl; \
     (dnf -y install docker-cli) || (dnf -y install moby-engine); \
     dnf -y clean all; \
     rm -rf /var/cache/dnf; \
@@ -54,7 +53,6 @@ RUN set -euo pipefail; \
   elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|centos|fedora) ]]; then \
     # CentOS/RHEL-like
     if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi; \
-    ${PM} -y install ca-certificates curl; \
     ${PM} -y install yum-utils || true; \
     ${PM} -y install dnf-plugins-core || true; \
     ( ${PM} config-manager --add-repo "https://download.docker.com/linux/centos/docker-ce.repo" ) || true; \
