@@ -44,13 +44,13 @@ RUN set -euo pipefail; \
     apt-get install -y --no-install-recommends docker-ce-cli; \
     rm -rf /var/lib/apt/lists/*; \
   \
-  elif [[ "${ID}" == "fedora" || "${ID_LIKE:-}" =~ fedora ]]; then \
+  elif [[ "${ID}" == "fedora" ]]; then \
     # Fedora: docker client via docker-cli or moby-engine
     (dnf -y install docker-cli) || (dnf -y install moby-engine); \
     dnf -y clean all; \
     rm -rf /var/cache/dnf; \
   \
-  elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|centos|fedora) ]]; then \
+  elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|centos) ]]; then \
     # CentOS/RHEL-like
     if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi; \
     ${PM} -y install yum-utils || true; \
