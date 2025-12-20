@@ -65,8 +65,7 @@ RUN set -euo pipefail; \
   else \
     echo "[ERROR] Unsupported distro for docker client install: ID=${ID} ID_LIKE=${ID_LIKE:-}" >&2; \
     exit 1; \
-  fi; \
-  \
+  fi
 
 # ------------------------------------------------------------
 # Infinito.Nexus source in
