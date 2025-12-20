@@ -67,8 +67,6 @@ RUN set -euo pipefail; \
     exit 1; \
   fi; \
   \
-  echo ">>> docker version (client):"; \
-  docker version || true
 
 # ------------------------------------------------------------
 # Infinito.Nexus source in
