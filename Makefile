@@ -70,11 +70,11 @@ clean:
 
 list:
 	@echo "Generating the roles list"
-	$(PYTHON) -m cli build roles_list
+	$(PYTHON) -m cli.build.roles_list
 
 tree:
 	@echo "Generating Tree"
-	$(PYTHON) -m cli build tree -D 2 --no-signal
+	$(PYTHON) -m cli.build.tree -D 2
 
 mig: list tree
 	@echo "Creating meta data for meta infinity graph"
@@ -134,7 +134,7 @@ setup: dockerignore
 
 	@echo "🔧 Generating role-include files for each group…"
 	@mkdir -p $(INCLUDES_OUT_DIR)
-	@INCLUDE_GROUPS="$$( $(PYTHON) -m cli.meta.categories.invokable -s "-" --no-signal | tr '\n' ' ' )"; \
+	@INCLUDE_GROUPS="$$( $(PYTHON) -m cli.meta.categories.invokable -s "-" | tr '\n' ' ' )"; \
 	for grp in $$INCLUDE_GROUPS; do \
 	  out="$(INCLUDES_OUT_DIR)/$${grp}roles.yml"; \
 	  echo "→ Building $$out (pattern: '$$grp')…"; \

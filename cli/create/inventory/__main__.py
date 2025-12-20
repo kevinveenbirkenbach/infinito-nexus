@@ -1128,7 +1128,9 @@ def main(argv: Optional[List[str]] = None) -> None:
     tmp_inventory = inventory_dir / "_inventory_full_tmp.yml"
 
     # 1) Generate dynamic inventory via build/inventory/full/__main__.py
-    print("[INFO] Generating dynamic inventory via cli/build/inventory/full/__main__.py ...")
+    print(
+        "[INFO] Generating dynamic inventory via cli/build/inventory/full/__main__.py ..."
+    )
     dyn_inv = generate_dynamic_inventory(
         host=args.host,
         roles_dir=roles_dir,

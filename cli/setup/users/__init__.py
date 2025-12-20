@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 import importlib
 
+
 def _import_main():
     # When executed as a script, we have no package context.
     if __package__ in (None, ""):
@@ -14,6 +15,7 @@ def _import_main():
 
     return importlib.import_module(__package__ + ".__main__")
 
+
 _main = _import_main()
 
 # Re-export public API
@@ -22,11 +24,14 @@ for _name in dir(_main):
         continue
     globals()[_name] = getattr(_main, _name)
 
+
 def main():
     return _main.main()
 
+
 def __getattr__(name: str):
     return getattr(_main, name)
+
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -8,7 +8,9 @@ import sys
 import yaml
 
 SCRIPT_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../../../../cli/validate/inventory/__main__.py")
+    os.path.join(
+        os.path.dirname(__file__), "../../../../cli/validate/inventory/__main__.py"
+    )
 )
 
 

@@ -11,7 +11,10 @@ class TestGenerateDefaultApplications(unittest.TestCase):
     def setUp(self):
         # Path to the generator script under test
         self.script_path = (
-            Path(__file__).resolve().parents[4] / "cli" / "setup" / "applications/__main__.py"
+            Path(__file__).resolve().parents[4]
+            / "cli"
+            / "setup"
+            / "applications/__main__.py"
         )
         # Create temp role structure
         self.temp_dir = Path(tempfile.mkdtemp())
