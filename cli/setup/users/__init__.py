@@ -1,15 +1,32 @@
-"""Compatibility wrapper.
-
-This package was migrated from a flat module (users/__main__.py) to a package layout:
-  users/__main__.py contains the original implementation.
-
-We re-export the public API so existing imports keep working.
-"""
-
 from __future__ import annotations
 
-from . import __main__ as _main
-from .__main__ import *  # noqa: F401,F403
+import sys
+from pathlib import Path
+import importlib
 
-# Prefer explicit __all__ if the original module defined it.
-__all__ = getattr(_main, "__all__", [n for n in dir(_main) if not n.startswith("_")])
+def _import_main():
+    # When executed as a script, we have no package context.
+    if __package__ in (None, ""):
+        repo_root = Path(__file__).resolve().parents[3]
+        if str(repo_root) not in sys.path:
+            sys.path.insert(0, str(repo_root))
+        return importlib.import_module("cli.setup.users.__main__")
+
+    return importlib.import_module(__package__ + ".__main__")
+
+_main = _import_main()
+
+# Re-export public API
+for _name in dir(_main):
+    if _name.startswith("_"):
+        continue
+    globals()[_name] = getattr(_main, _name)
+
+def main():
+    return _main.main()
+
+def __getattr__(name: str):
+    return getattr(_main, name)
+
+if __name__ == "__main__":
+    raise SystemExit(main())
