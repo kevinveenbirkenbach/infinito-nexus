@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
-
+import sys
 from .role_resolver import resolve_role_path
 
 
@@ -37,11 +37,11 @@ def _generate_credentials_snippet_for_app(
     if not schema_path.exists():
         return None
 
-    credentials_script = project_root / "cli" / "create" / "credentials.py"
     cmd = [
         # Use current interpreter so module_utils + deps match the runtime
-        __import__("sys").executable,
-        str(credentials_script),
+        sys.executable,
+        "-m",
+        "cli.create.credentials",
         "--role-path",
         str(role_path),
         "--inventory-file",
