@@ -42,9 +42,6 @@ def build_parser() -> argparse.ArgumentParser:
         "-B", "--skip-build", action="store_true", help="Skip build phase."
     )
     parser.add_argument(
-        "-t", "--skip-tests", action="store_true", help="Skip test phase."
-    )
-    parser.add_argument(
         "-i",
         "--id",
         nargs="+",
@@ -94,7 +91,6 @@ def main() -> None:
         password_file=args.password_file,
         verbose=args.verbose,
         skip_build=args.skip_build,
-        skip_tests=args.skip_tests,
         logs=args.logs,
         diff=args.diff,
     )

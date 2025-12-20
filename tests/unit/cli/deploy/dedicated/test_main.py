@@ -17,7 +17,6 @@ class TestDedicatedMainParser(unittest.TestCase):
         self.assertIn("host_type", opts)
         self.assertIn("password_file", opts)
         self.assertIn("skip_build", opts)
-        self.assertIn("skip_tests", opts)
         self.assertIn("id", opts)
         self.assertIn("verbose", opts)
         self.assertIn("logs", opts)

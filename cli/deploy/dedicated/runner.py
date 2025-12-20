@@ -22,7 +22,6 @@ def run_ansible_playbook(
     password_file: Optional[str] = None,
     verbose: int = 0,
     skip_build: bool = False,
-    skip_tests: bool = False,
     logs: bool = False,
     diff: bool = False,
 ) -> None:
@@ -67,15 +66,6 @@ def run_ansible_playbook(
                 file=sys.stderr,
             )
             sys.exit(1)
-
-    # ---------------------------------------------------------
-    # 4) Test Phase
-    # ---------------------------------------------------------
-    if not skip_tests:
-        print("\n🧪 Running tests (make test-messy)...\n")
-        run_make(repo_root, "test-messy")
-    else:
-        print("\n🧪 Tests skipped (--skip-tests)\n")
 
     # ---------------------------------------------------------
     # 5) Build ansible-playbook command

@@ -76,7 +76,6 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             password_file=password_file,
             verbose=1,
             skip_build=False,
-            skip_tests=False,
             logs=False,
             diff=True,
         )
@@ -87,9 +86,6 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         # Cleanup, build, tests (make must run in repo_root)
         self.assertTrue(was_called(["make", "clean"]), "Expected 'make clean'")
         self.assertTrue(was_called(["make", "setup"]), "Expected 'make setup'")
-        self.assertTrue(
-            was_called(["make", "test-messy"]), "Expected 'make test-messy'"
-        )
 
         for call_cmd, kw in calls:
             if call_cmd and call_cmd[0] == "make":
@@ -186,7 +182,6 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
                 password_file=None,
                 verbose=0,
                 skip_build=True,
-                skip_tests=True,
                 logs=False,
                 diff=False,
             )
@@ -243,7 +238,6 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             password_file=None,
             verbose=0,
             skip_build=True,
-            skip_tests=True,
             logs=True,
             diff=False,
         )
