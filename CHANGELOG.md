@@ -1,6 +1,6 @@
 ## [0.3.2] - 2025-12-19
 
-* * Unified cleanup and simplified deploy flow using ***make clean***
+* Unified cleanup and simplified deploy flow using ***make clean***
 * Switched Docker image base to pkgmgr and enforced local images for deploy tests
 * Improved CI reliability with reusable workflows, fixed permissions, and consistent SARIF uploads
 * Addressed multiple CodeQL and Hadolint findings; applied formatting and security fixes
@@ -15,7 +15,7 @@
 
 ## [0.3.0] - 2025-12-17
 
-* - Introduced a layered Docker architecture: Infinito.Nexus now builds on pre-built pkgmgr base images, with a clear separation between base tooling, application source, and runtime logic.
+- Introduced a layered Docker architecture: Infinito.Nexus now builds on pre-built pkgmgr base images, with a clear separation between base tooling, application source, and runtime logic.
 - Standardized container paths (`/opt/src/infinito`) and switched to a global virtual environment to ensure reproducible builds and consistent test execution.
 - Unit and lint tests now run reliably on this new layer model, both locally and in CI.
 - Refactored build, setup, and deploy workflows to match the new layered design and improve maintainability.
