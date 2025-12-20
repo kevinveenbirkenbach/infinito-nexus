@@ -1,4 +1,3 @@
-# tests/cli/test_fix/vars_main_files.py
 import os
 import shutil
 import tempfile

@@ -1,32 +1,29 @@
 SHELL 				:= /usr/bin/env bash
 
 # ------------------------------------------------------------
-# Python / venv (GLOBAL, NOT inside project)
+# Python / venv
 #
-# Goal:
-#  - Never create a venv inside the project folder.
-#  - Use a stable venv location and export PYTHON so subprocesses can reuse it.
-#
-# Defaults work well inside the Docker image.
-# On a local host you may want to override:
-#   make VENV_BASE=$$HOME/.venvs install
+# Rule:
+#  - If a venv is already active (VIRTUAL_ENV), use it.
+#  - Otherwise fall back to the global venv location.
 # ------------------------------------------------------------
-VENV_BASE           ?= /opt/venvs
-VENV_NAME           ?= infinito
-VENV                := $(VENV_BASE)/$(VENV_NAME)
+VENV_BASE ?= $(if $(VIRTUAL_ENV),$(dir $(VIRTUAL_ENV)),/opt/venvs)
+VENV_NAME ?= infinito
+VENV_FALLBACK := $(VENV_BASE)/$(VENV_NAME)
 
-PYTHON              := $(VENV)/bin/python
-PIP                 := $(PYTHON) -m pip
+VENV := $(if $(VIRTUAL_ENV),$(VIRTUAL_ENV),$(VENV_FALLBACK))
 
+PYTHON := $(VENV)/bin/python
+PIP    := $(PYTHON) -m pip
 export PYTHON
 export PIP
 
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
-APPLICATIONS_SCRIPT := ./cli/setup/applications.py
-USERS_SCRIPT        := ./cli/setup/users.py
+APPLICATIONS_SCRIPT := ./cli/setup/applications/__main__.py
+USERS_SCRIPT        := ./cli/setup/users/__main__.py
 USERS_OUT           := ./group_vars/all/03_users.yml
-INCLUDES_SCRIPT     := ./cli/build/role_include.py
+INCLUDES_SCRIPT     := ./cli/build/role_include/__main__.py
 
 # Directory where these include-files will be written
 INCLUDES_OUT_DIR    := ./tasks/groups
@@ -55,26 +52,27 @@ RESERVED_USERNAMES := $(shell \
 )
 
 .PHONY: \
-	deps setup setup-clean install \
-	test test-messy test-lint test-unit test-integration \
+	setup setup-clean install install-ansible install-venv install-python \
+	test test-lint test-unit test-integration \
 	clean list tree mig dockerignore \
-	print-python
+	print-python lint-ansible
 
 clean:
 	@echo "Removing ignored git files"
-	@git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { \
-		echo "Error: not inside a git repository"; \
-		exit 1; \
-	}
-	git clean -fdX
+	@if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
+		git clean -fdX; \
+	else \
+		echo "WARNING: not inside a git repository -> skipping 'git clean -fdX'"; \
+		echo "WARNING: (cleanup continues)"; \
+	fi
 
 list:
 	@echo "Generating the roles list"
-	$(PYTHON) -m cli build roles_list
+	$(PYTHON) -m cli.build.roles_list
 
 tree:
 	@echo "Generating Tree"
-	$(PYTHON) -m cli build tree -D 2 --no-signal
+	$(PYTHON) -m cli.build.tree -D 2
 
 mig: list tree
 	@echo "Creating meta data for meta infinity graph"
@@ -103,20 +101,32 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-# ------------------------------------------------------------
-# Install (GLOBAL venv, never in project folder)
-# ------------------------------------------------------------
-install: deps
+ANSIBLE_COLLECTIONS_DIR ?= ./collections
+
+install-ansible:
+	@echo "📦 Installing Ansible collections from requirements.yml → $(ANSIBLE_COLLECTIONS_DIR)"
+	@mkdir -p "$(ANSIBLE_COLLECTIONS_DIR)"
+	@"$(PYTHON)" -m ansible.cli.galaxy collection install \
+		-r requirements.yml \
+		-p "$(ANSIBLE_COLLECTIONS_DIR)"
+
+install-venv:
 	@echo "✅ Python environment installed (editable)."
-	@echo "🐍 Using global venv: $(VENV)"
-	@mkdir -p "$(VENV_BASE)"
+	@echo "🐍 Using venv: $(VENV)"
+	@if [ -z "$(VIRTUAL_ENV)" ]; then \
+		mkdir -p "$(VENV_BASE)"; \
+	fi
 	@if [ ! -x "$(PYTHON)" ]; then \
 		echo "→ Creating virtualenv $(VENV)"; \
 		python3 -m venv "$(VENV)"; \
 	fi
+
+install-python: install-venv
 	@echo "📦 Installing Python dependencies"
 	@"$(PYTHON)" -m pip install --upgrade pip setuptools wheel
 	@"$(PYTHON)" -m pip install -e .
+
+install: install-python install-ansible
 
 setup: dockerignore
 	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
@@ -134,7 +144,7 @@ setup: dockerignore
 
 	@echo "🔧 Generating role-include files for each group…"
 	@mkdir -p $(INCLUDES_OUT_DIR)
-	@INCLUDE_GROUPS="$$( $(PYTHON) -m cli meta categories invokable -s "-" --no-signal | tr '\n' ' ' )"; \
+	@INCLUDE_GROUPS="$$( $(PYTHON) -m cli.meta.categories.invokable -s "-" | tr '\n' ' ' )"; \
 	for grp in $$INCLUDE_GROUPS; do \
 	  out="$(INCLUDES_OUT_DIR)/$${grp}roles.yml"; \
 	  echo "→ Building $$out (pattern: '$$grp')…"; \
@@ -161,7 +171,7 @@ lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-test: test-lint test-unit test-integration test-ansible
+test: test-lint test-unit test-integration lint-ansible
 	@echo "✅ Full test (setup + tests) executed."
 
 # Debug helper
