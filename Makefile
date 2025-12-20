@@ -59,11 +59,12 @@ RESERVED_USERNAMES := $(shell \
 
 clean:
 	@echo "Removing ignored git files"
-	@git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { \
-		echo "Error: not inside a git repository"; \
-		exit 1; \
-	}
-	git clean -fdX
+	@if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
+		git clean -fdX; \
+	else \
+		echo "WARNING: not inside a git repository -> skipping 'git clean -fdX'"; \
+		echo "WARNING: (cleanup continues)"; \
+	fi
 
 list:
 	@echo "Generating the roles list"
