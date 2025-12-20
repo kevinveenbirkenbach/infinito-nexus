@@ -287,7 +287,7 @@ def generate_random_password(length: int = 64) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Inventory generation (servers.yml via build/inventory/full.py)
+# Inventory generation (servers.yml via build/inventory/full/__main__.py)
 # ---------------------------------------------------------------------------
 
 
@@ -299,10 +299,10 @@ def generate_dynamic_inventory(
     project_root: Path,
 ) -> Dict[str, Any]:
     """
-    Call `cli/build/inventory/full.py` directly to generate a dynamic inventory
+    Call `cli/build/inventory/full/__main__.py` directly to generate a dynamic inventory
     YAML for the given host and return it as a Python dict.
     """
-    script = project_root / "cli" / "build" / "inventory" / "full.py"
+    script = project_root / "cli" / "build" / "inventory" / "full/__main__.py"
     env = build_env_with_project_root(project_root)
     cmd = [
         sys.executable,
@@ -1127,8 +1127,8 @@ def main(argv: Optional[List[str]] = None) -> None:
 
     tmp_inventory = inventory_dir / "_inventory_full_tmp.yml"
 
-    # 1) Generate dynamic inventory via build/inventory/full.py
-    print("[INFO] Generating dynamic inventory via cli/build/inventory/full.py ...")
+    # 1) Generate dynamic inventory via build/inventory/full/__main__.py
+    print("[INFO] Generating dynamic inventory via cli/build/inventory/full/__main__.py ...")
     dyn_inv = generate_dynamic_inventory(
         host=args.host,
         roles_dir=roles_dir,

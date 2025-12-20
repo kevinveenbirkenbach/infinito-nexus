@@ -46,7 +46,7 @@ class TestGenerateDefaultApplicationsUsers(unittest.TestCase):
         mapping in the generated YAML, mapping each username to a Jinja2 reference.
         """
         script_path = (
-            Path(__file__).resolve().parents[4] / "cli" / "setup/applications.py"
+            Path(__file__).resolve().parents[4] / "cli" / "setup/applications/__main__.py"
         )
         result = subprocess.run(
             [

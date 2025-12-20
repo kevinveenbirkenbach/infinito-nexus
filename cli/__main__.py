@@ -240,7 +240,7 @@ def print_global_help(available, cli_dir):
         )
     )
     print(color_text("    e.g. `infinito build defaults users` →", Fore.CYAN))
-    print(color_text("    corresponds to `cli/setup/users.py`.", Fore.CYAN))
+    print(color_text("    corresponds to `cli/setup/users/__main__.py`.", Fore.CYAN))
     print()
     print(
         color_text(

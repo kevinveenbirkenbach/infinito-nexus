@@ -2,7 +2,7 @@ import unittest
 import os
 import importlib.util
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../../'))
-SCRIPT_PATH = os.path.join(PROJECT_ROOT, 'cli', 'build', 'inventory', 'full.py')
+SCRIPT_PATH = os.path.join(PROJECT_ROOT, 'cli', 'build', 'inventory', 'full/__main__.py')
 spec = importlib.util.spec_from_file_location('full', SCRIPT_PATH)
 full = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(full)

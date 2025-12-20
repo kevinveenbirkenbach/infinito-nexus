@@ -1,6 +1,6 @@
 """Compatibility wrapper.
 
-This package was migrated from a flat module (role_include.py) to a package layout:
+This package was migrated from a flat module (role_include/__main__.py) to a package layout:
   role_include/__main__.py contains the original implementation.
 
 We re-export the public API so existing imports keep working.

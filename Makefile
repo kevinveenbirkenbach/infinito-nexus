@@ -23,10 +23,10 @@ export PIP
 
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
-APPLICATIONS_SCRIPT := ./cli/setup/applications.py
-USERS_SCRIPT        := ./cli/setup/users.py
+APPLICATIONS_SCRIPT := ./cli/setup/applications/__main__.py
+USERS_SCRIPT        := ./cli/setup/users/__main__.py
 USERS_OUT           := ./group_vars/all/03_users.yml
-INCLUDES_SCRIPT     := ./cli/build/role_include.py
+INCLUDES_SCRIPT     := ./cli/build/role_include/__main__.py
 
 # Directory where these include-files will be written
 INCLUDES_OUT_DIR    := ./tasks/groups
