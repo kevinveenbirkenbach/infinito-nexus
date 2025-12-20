@@ -24,7 +24,7 @@ class TestValidApplicationUsage(unittest.TestCase):
     APPLICATION_GET_RE = re.compile(
         r"applications\.get\(\s*['\"](?P<name>[^'\"]+)['\"]"
     )
-    APPLICATION_ATTR_RE = re.compile(r"applications\.(?P<name>[A-Za-z_]\w*)")
+    APPLICATION_ATTR_RE = re.compile(r"(?<!\.)applications\.(?P<name>[A-Za-z_]\w*)")
     APPLICATION_DOMAIN_RE = re.compile(
         r"get_domain\(\s*['\"](?P<name>[^'\"]+)['\"]\s*\)"
     )

@@ -24,10 +24,10 @@ from typing import Optional, Dict, Any, List
 # --------------------------------------------------------------------------------------
 
 # Current file: .../cli/deploy/deploy.py
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))  # → cli/deploy
-CLI_ROOT = os.path.dirname(SCRIPT_DIR)  # → cli
-REPO_ROOT = os.path.dirname(CLI_ROOT)  # → project root
-
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))  # .../cli/deploy/dedicated
+DEPLOY_DIR = os.path.dirname(SCRIPT_DIR)  # .../cli/deploy
+CLI_ROOT = os.path.dirname(DEPLOY_DIR)  # .../cli
+REPO_ROOT = os.path.dirname(CLI_ROOT)  # .../<repo-root>
 
 # --------------------------------------------------------------------------------------
 # Main execution logic
