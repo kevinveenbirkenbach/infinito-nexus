@@ -134,7 +134,7 @@ setup: dockerignore
 
 	@echo "🔧 Generating role-include files for each group…"
 	@mkdir -p $(INCLUDES_OUT_DIR)
-	@INCLUDE_GROUPS="$$( $(PYTHON) -m cli meta categories invokable -s "-" --no-signal | tr '\n' ' ' )"; \
+	@INCLUDE_GROUPS="$$( $(PYTHON) -m cli.meta.categories.invokable -s "-" --no-signal | tr '\n' ' ' )"; \
 	for grp in $$INCLUDE_GROUPS; do \
 	  out="$(INCLUDES_OUT_DIR)/$${grp}roles.yml"; \
 	  echo "→ Building $$out (pattern: '$$grp')…"; \

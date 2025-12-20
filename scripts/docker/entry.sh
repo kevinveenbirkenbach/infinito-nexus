@@ -18,7 +18,7 @@ if [[ "${INSTALL_LOCAL_BUILD:-0}" == "1" ]]; then
   mkdir -p "${INFINITO_PATH}"
   cd "${INFINITO_PATH}"
   echo "[docker-infinito] Copy ${INFINITO_SRC_DIR} to ${INFINITO_PATH}..."
-  rsync -av --delete --exclude='.git' "${INFINITO_SRC_DIR}/" "${INFINITO_PATH}/"
+  rsync -a --delete --exclude='.git' "${INFINITO_SRC_DIR}/" "${INFINITO_PATH}/"
   echo "[docker-infinito] Reinstall via 'make install'..."
   make install || exit 1
   echo "[docker-infinito] Installed:"
