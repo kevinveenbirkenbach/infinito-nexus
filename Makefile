@@ -1,23 +1,20 @@
 SHELL 				:= /usr/bin/env bash
 
 # ------------------------------------------------------------
-# Python / venv (GLOBAL, NOT inside project)
+# Python / venv
 #
-# Goal:
-#  - Never create a venv inside the project folder.
-#  - Use a stable venv location and export PYTHON so subprocesses can reuse it.
-#
-# Defaults work well inside the Docker image.
-# On a local host you may want to override:
-#   make VENV_BASE=$$HOME/.venvs install
+# Rule:
+#  - If a venv is already active (VIRTUAL_ENV), use it.
+#  - Otherwise fall back to the global venv location.
 # ------------------------------------------------------------
-VENV_BASE           ?= /opt/venvs
-VENV_NAME           ?= infinito
-VENV                := $(VENV_BASE)/$(VENV_NAME)
+VENV_BASE ?= $(if $(VIRTUAL_ENV),$(dir $(VIRTUAL_ENV)),/opt/venvs)
+VENV_NAME ?= infinito
+VENV_FALLBACK := $(VENV_BASE)/$(VENV_NAME)
 
-PYTHON              := $(VENV)/bin/python
-PIP                 := $(PYTHON) -m pip
+VENV := $(if $(VIRTUAL_ENV),$(VIRTUAL_ENV),$(VENV_FALLBACK))
 
+PYTHON := $(VENV)/bin/python
+PIP    := $(PYTHON) -m pip
 export PYTHON
 export PIP
 
@@ -103,13 +100,12 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-# ------------------------------------------------------------
-# Install (GLOBAL venv, never in project folder)
-# ------------------------------------------------------------
 install: deps
 	@echo "✅ Python environment installed (editable)."
-	@echo "🐍 Using global venv: $(VENV)"
-	@mkdir -p "$(VENV_BASE)"
+	@echo "🐍 Using venv: $(VENV)"
+	@if [ -z "$(VIRTUAL_ENV)" ]; then \
+		mkdir -p "$(VENV_BASE)"; \
+	fi
 	@if [ ! -x "$(PYTHON)" ]; then \
 		echo "→ Creating virtualenv $(VENV)"; \
 		python3 -m venv "$(VENV)"; \
