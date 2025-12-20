@@ -1,6 +1,6 @@
 """Compatibility wrapper.
 
-This package was migrated from a flat module (tree.py) to a package layout:
+This package was migrated from a flat module (tree/__main__.py) to a package layout:
   tree/__main__.py contains the original implementation.
 
 We re-export the public API so existing imports keep working.

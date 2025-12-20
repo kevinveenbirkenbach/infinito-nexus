@@ -6,9 +6,9 @@ import shutil
 import unittest
 from unittest.mock import patch
 
-# Absolute path to the tree.py script
+# Absolute path to the tree/__main__.py script
 SCRIPT_PATH = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../../../../cli/build/tree.py")
+    os.path.join(os.path.dirname(__file__), "../../../../cli/build/tree/__main__.py")
 )
 
 class TestTreeShadowFolder(unittest.TestCase):

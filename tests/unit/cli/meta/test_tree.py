@@ -30,7 +30,7 @@ class TestTreeMain(unittest.TestCase):
         import sys
 
         old_argv = sys.argv
-        sys.argv = ["tree.py", "-d", self.temp_dir, "-p"]
+        sys.argv = ["tree/__main__.py", "-d", self.temp_dir, "-p"]
         try:
             tree.main()
         finally:
