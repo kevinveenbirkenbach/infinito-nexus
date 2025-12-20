@@ -87,7 +87,7 @@ def run_ansible_playbook(
         print("\n🔍 Inventory assertion explicitly disabled (MODE_ASSERT=false)\n")
     else:
         print("\n🔍 Validating inventory before deployment...\n")
-        validator_path = os.path.join(CLI_ROOT, "validate", "inventory.py")
+        validator_path = os.path.join(CLI_ROOT, "validate", "inventory/__main__.py")
         try:
             subprocess.run(
                 [sys.executable, validator_path, os.path.dirname(inventory)],

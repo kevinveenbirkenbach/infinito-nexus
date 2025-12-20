@@ -238,10 +238,10 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         )
         self.assertTrue(
             any(
-                isinstance(call, list) and any("inventory.py" in part for part in call)
+                isinstance(call, list) and any("inventory/__main__.py" in part for part in call)
                 for call in calls
             ),
-            "Expected inventory validation call (... inventory.py ...)",
+            "Expected inventory validation call (... inventory/__main__.py ...)",
         )
 
         # The last call should be ansible-playbook
@@ -333,7 +333,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         self.assertFalse(any(call == ["make", "test-messy"] for call in calls))
         self.assertFalse(
             any(
-                isinstance(call, list) and any("inventory.py" in part for part in call)
+                isinstance(call, list) and any("inventory/__main__.py" in part for part in call)
                 for call in calls
             )
         )
