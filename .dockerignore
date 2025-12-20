@@ -12,4 +12,6 @@ roles/list.json
 *.pyc
 *.egg-info
 build/*
-.ruff_cache.git
+.ruff_cache
+collections/
+.git
