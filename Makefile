@@ -52,10 +52,10 @@ RESERVED_USERNAMES := $(shell \
 )
 
 .PHONY: \
-	deps setup setup-clean install \
-	test test-messy test-lint test-unit test-integration \
+	setup setup-clean install install-ansible install-venv install-python \
+	test test-lint test-unit test-integration \
 	clean list tree mig dockerignore \
-	print-python
+	print-python lint-ansible
 
 clean:
 	@echo "Removing ignored git files"
@@ -101,7 +101,14 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-install: deps
+ANSIBLE_COLLECTIONS_DIR ?= ./collections
+
+install-ansible:
+	@echo "📦 Installing Ansible collections from requirements.yml → $(ANSIBLE_COLLECTIONS_DIR)"
+	@mkdir -p "$(ANSIBLE_COLLECTIONS_DIR)"
+	@ansible-galaxy collection install -r requirements.yml -p "$(ANSIBLE_COLLECTIONS_DIR)"
+
+install-venv:
 	@echo "✅ Python environment installed (editable)."
 	@echo "🐍 Using venv: $(VENV)"
 	@if [ -z "$(VIRTUAL_ENV)" ]; then \
@@ -111,9 +118,13 @@ install: deps
 		echo "→ Creating virtualenv $(VENV)"; \
 		python3 -m venv "$(VENV)"; \
 	fi
+
+install-python: install-venv
 	@echo "📦 Installing Python dependencies"
 	@"$(PYTHON)" -m pip install --upgrade pip setuptools wheel
 	@"$(PYTHON)" -m pip install -e .
+
+install: install-python install-ansible
 
 setup: dockerignore
 	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
@@ -158,7 +169,7 @@ lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-test: test-lint test-unit test-integration test-ansible
+test: test-lint test-unit test-integration lint-ansible
 	@echo "✅ Full test (setup + tests) executed."
 
 # Debug helper

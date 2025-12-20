@@ -13,3 +13,4 @@ roles/list.json
 *.egg-info
 build/*
 .ruff_cache
+collections/
