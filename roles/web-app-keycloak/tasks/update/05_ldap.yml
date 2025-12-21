@@ -1,3 +1,5 @@
+# roles/web-app-keycloak/tasks/update/05_ldap.yml
+
 - name: "Update REALM settings (merge LDAP component .config)"
   keycloak_kcadm_update:
     object_kind: "component"
@@ -16,12 +18,17 @@
     assert_mode: "{{ MODE_ASSERT }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: Resolve LDAP component id
+- name: Resolve LDAP component id (client-side filter; avoid unreliable --query)
   shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} get components
-    -r {{ KEYCLOAK_REALM }}
-    --query 'name={{ KEYCLOAK_LDAP_CMP_NAME }}'
-    --fields id --format json | jq -r '.[0].id'
+    {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
+    | jq -r '
+      .[]
+      | select(
+          .providerType=="org.keycloak.storage.UserStorageProvider"
+          and .providerId=="ldap"
+          and .name=="{{ KEYCLOAK_LDAP_CMP_NAME }}"
+        )
+      | .id' | head -n1
   register: ldap_cmp_id
   changed_when: false
 
@@ -39,6 +46,7 @@
         | selectattr('name','equalto', KEYCLOAK_LDAP_CMP_NAME)
         | list | first | default({})
       }}
+  changed_when: false
 
 - name: Sanity check dictionary LDAP component
   assert:
@@ -59,6 +67,7 @@
         | selectattr('name','equalto','ldap-roles')
         | list | first | default({})
       }}
+  changed_when: false
 
 - name: Ensure mapper exists in dictionary
   assert:
@@ -66,7 +75,7 @@
     fail_msg: "'ldap-roles' mapper not found in dictionary under LDAP component."
   when: MODE_ASSERT | bool
 
-- name: Build clean mapper payload
+- name: Build clean mapper payload (drop id/subComponents)
   set_fact:
     desired_group_mapper: >-
       {{
@@ -75,11 +84,12 @@
         | rejectattr('key','in',['subComponents','id'])
         | list | items2dict
       }}
+  changed_when: false
 
 - name: Extract desired groups.path (if any)
   set_fact:
     desired_groups_path: "{{ (desired_group_mapper.config['groups.path'] | default([])) | first | default('') | trim }}"
-    desired_groups_top: "{{ ( (desired_group_mapper.config['groups.path'] | default([])) | first | default('') | trim ).lstrip('/') | split('/') | first | default('') }}"
+    desired_groups_top: "{{ ((desired_group_mapper.config['groups.path'] | default([])) | first | default('') | trim).lstrip('/') | split('/') | first | default('') }}"
   changed_when: false
 
 - name: Resolve existing top-level group id for groups.path
@@ -100,25 +110,88 @@
   changed_when: create_groups_top.rc == 0
   failed_when: create_groups_top.rc != 0 and ('already exists' not in (create_groups_top.stderr | lower))
 
-- name: Find existing 'ldap-roles' mapper under LDAP component
+# ---------------------------------------------------------------------------
+# Ensure ONLY ONE canonical 'ldap-roles' mapper exists under this LDAP component
+# (Keycloak server-side --query filtering is unreliable here, so we filter client-side)
+# Canonical choice is deterministic: keep the lexicographically smallest id.
+# ---------------------------------------------------------------------------
+
+- name: List all existing 'ldap-roles' mapper ids under LDAP component (client-side filter)
   shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} get components
-    -r {{ KEYCLOAK_REALM }}
-    --query "parent={{ ldap_cmp_id.stdout | trim }}&type=org.keycloak.storage.ldap.mappers.LDAPStorageMapper&name=ldap-roles"
-    --format json
-    | jq -r '.[] | select(.parentId=="{{ ldap_cmp_id.stdout | trim }}" and .name=="ldap-roles") | .id' | head -n1
-  register: grp_mapper_id
+    {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
+    | jq -r '
+      .[]
+      | select(
+          .parentId=="{{ ldap_cmp_id.stdout | trim }}"
+          and .providerId=="group-ldap-mapper"
+          and .providerType=="org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+          and .name=="ldap-roles"
+        )
+      | .id'
+  register: grp_mapper_ids_raw
+  changed_when: false
+
+- name: Normalize mapper ids list (stable ordering)
+  set_fact:
+    grp_mapper_ids: >-
+      {{
+        (grp_mapper_ids_raw.stdout_lines | default([]))
+        | map('trim')
+        | reject('equalto','')
+        | list
+        | sort
+      }}
+  changed_when: false
+
+- name: Delete duplicate 'ldap-roles' mappers (keep canonical first)
+  when: grp_mapper_ids | length > 1
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} delete components/{{ item }} -r {{ KEYCLOAK_REALM }}
+  loop: "{{ grp_mapper_ids[1:] }}"
+  register: del_dupes
+  changed_when: del_dupes.rc == 0
+  failed_when: del_dupes.rc != 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: Refresh mapper ids after dedupe (authoritative)
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
+    | jq -r '
+      .[]
+      | select(
+          .parentId=="{{ ldap_cmp_id.stdout | trim }}"
+          and .providerId=="group-ldap-mapper"
+          and .providerType=="org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+          and .name=="ldap-roles"
+        )
+      | .id'
+  register: grp_mapper_ids_raw_after
+  changed_when: false
+
+- name: Set canonical mapper id
+  set_fact:
+    grp_mapper_id: >-
+      {{
+        (
+          (grp_mapper_ids_raw_after.stdout_lines | default([]))
+          | map('trim')
+          | reject('equalto','')
+          | list
+          | sort
+          | first
+        ) | default('')
+      }}
   changed_when: false
 
 - name: Create 'ldap-roles' mapper if missing
-  when: (grp_mapper_id.stdout | trim) in ["", "null"]
+  when: (grp_mapper_id | trim) in ["", "null"]
   shell: |
     cat <<'JSON' | {{ KEYCLOAK_EXEC_KCADM }} create components -r {{ KEYCLOAK_REALM }} -f -
     {{
       desired_group_mapper
       | combine({
           'name':         'ldap-roles',
-          'parentId':     ldap_cmp_id.stdout | trim,
+          'parentId':     (ldap_cmp_id.stdout | trim),
           'providerType': 'org.keycloak.storage.ldap.mappers.LDAPStorageMapper',
           'providerId':   'group-ldap-mapper'
         }, recursive=True)
@@ -130,18 +203,48 @@
   failed_when: create_mapper.rc != 0 and ('already exists' not in (create_mapper.stderr | lower))
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+- name: Set canonical mapper id after create (prefer returned id, fallback to refresh)
+  when: (grp_mapper_id | trim) in ["", "null"]
+  block:
+    - name: Parse created id from kcadm output (safe)
+      set_fact:
+        grp_mapper_id: "{{ (create_mapper.stderr | default('') | regex_findall(\"id '([^']+)'\")) | first | default('') }}"
+      changed_when: false
+
+    - name: Refresh canonical mapper id if parse failed
+      when: (grp_mapper_id | trim) in ["", "null"]
+      shell: >
+        {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
+        | jq -r '
+          .[]
+          | select(
+              .parentId=="{{ ldap_cmp_id.stdout | trim }}"
+              and .providerId=="group-ldap-mapper"
+              and .providerType=="org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
+              and .name=="ldap-roles"
+            )
+          | .id' | head -n1
+      register: grp_mapper_id_after_create
+      changed_when: false
+
+    - name: Set canonical mapper id from refresh
+      when: (grp_mapper_id | trim) in ["", "null"]
+      set_fact:
+        grp_mapper_id: "{{ grp_mapper_id_after_create.stdout | trim }}"
+      changed_when: false
+
 - name: Update 'ldap-roles' mapper config (merge only .config)
-  when: (grp_mapper_id.stdout | trim) not in ["", "null"]
+  when: (grp_mapper_id | trim) not in ["", "null"]
   keycloak_kcadm_update:
     object_kind: "component"
     lookup_field: "id"
-    lookup_value: "{{ grp_mapper_id.stdout | trim }}"
+    lookup_value: "{{ grp_mapper_id | trim }}"
     desired: >-
       {{
         desired_group_mapper
         | combine({
             'name':         'ldap-roles',
-            'parentId':     ldap_cmp_id.stdout | trim,
+            'parentId':     (ldap_cmp_id.stdout | trim),
             'providerType': 'org.keycloak.storage.ldap.mappers.LDAPStorageMapper',
             'providerId':   'group-ldap-mapper'
           }, recursive=True)
@@ -152,4 +255,4 @@
     assert_mode: "{{ MODE_ASSERT }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

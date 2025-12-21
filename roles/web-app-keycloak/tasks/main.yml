@@ -29,8 +29,15 @@
 - name: "Load RBAC Update routines for '{{ application_id }}'"
   include_tasks: update/04_rbac_client_scope.yml
 
-- name: "Load LDAP Update routines for '{{ application_id }}'"
-  include_tasks: update/05_ldap.yml
+- block:
+    
+    - name: "Load LDAP Update routines for '{{ application_id }}'"
+      include_tasks: update/05_ldap.yml
+
+    - name: Assert Keycloak LDAP configuration
+      include_tasks: assert/05_ldap.yml
+      when: MODE_ASSERT | bool
+  
   when: KEYCLOAK_LDAP_ENABLED | bool
 
 - name: "Load reCAPTCHA Update routines for '{{ application_id }}'"
