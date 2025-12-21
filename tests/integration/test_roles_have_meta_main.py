@@ -1,9 +1,7 @@
 import os
 import unittest
 
-ROLES_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../../roles")
-)
+ROLES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../roles"))
 
 
 class TestRolesHaveMetaMain(unittest.TestCase):

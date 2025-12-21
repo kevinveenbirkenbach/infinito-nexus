@@ -1,0 +1,23 @@
+---
+sys_util_git_pull_repo_url: ""
+sys_util_git_pull_dest: ""
+
+# Initial clone/update base ref (branch/commit) used by the helper
+sys_util_git_pull_version: "main"
+sys_util_git_pull_depth: 1
+
+# Optional: pin to tag (detached). Example: "stable". Empty disables pin.
+sys_util_git_pull_pin_tag: ""
+
+# Remove these local tags before fetch --tags (prevents "would clobber existing tag")
+sys_util_git_pull_remove_tags: []
+
+# Mark changed if remote pin tag moved compared to local (informational)
+sys_util_git_pull_mark_changed_on_tag_move: true
+
+# Remote name to use for git operations
+sys_util_git_pull_remote: "origin"
+
+# Privilege handling
+sys_util_git_pull_become: true
+sys_util_git_pull_become_user: ~

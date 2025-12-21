@@ -20,49 +20,21 @@
   become: true
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: Create installation directory for Kevin's Package Manager
-  file:
-    path: "{{ PKGMGR_INSTALL_PATH }}"
-    state: directory
-    mode: '0755'
-  become: true
-
-- name: Check if pkgmgr git repo already exists
-  stat:
-    path: "{{ PKGMGR_INSTALL_PATH }}/.git"
-  register: pkgmgr_git_repo
-  become: true
-
-- name: Remove legacy 'latest' tag from existing pkgmgr repo (if present)
-  command: git tag -d latest
-  args:
-    chdir: "{{ PKGMGR_INSTALL_PATH }}"
-  when: pkgmgr_git_repo.stat.exists
-  ignore_errors: true
-  become: true
-
-- name: Clone pkgmgr repository (shallow)
-  git:
-    repo: "{{ PKGMGR_REPO_URL }}"
-    dest: "{{ PKGMGR_INSTALL_PATH }}"
-    version: main
-    depth: 1
-    force: yes
-  become: true
-
-- name: Fetch stable tag commit (shallow-safe)
-  command: git fetch --depth=1 origin tag stable
-  args:
-    chdir: "{{ PKGMGR_INSTALL_PATH }}"
-  changed_when: false
-  become: true
-
-- name: Checkout stable
-  command: git checkout --detach stable
-  args:
-    chdir: "{{ PKGMGR_INSTALL_PATH }}"
-  changed_when: false
-  become: true
+- name: Pull pkgmgr repo (shallow) and pin to stable
+  include_role:
+    name: sys-util-git-pull
+  vars:
+    sys_util_git_pull_repo_url: "{{ PKGMGR_REPO_URL }}"
+    sys_util_git_pull_dest: "{{ PKGMGR_INSTALL_PATH }}"
+    sys_util_git_pull_version: "main"
+    sys_util_git_pull_depth: 1
+    sys_util_git_pull_pin_tag: "stable"
+    sys_util_git_pull_remove_tags:
+      - latest
+      - stable
+    sys_util_git_pull_mark_changed_on_tag_move: true
+    sys_util_git_pull_remote: "origin"
+    sys_util_git_pull_become: true
 
 - name: create config.yaml
   template:

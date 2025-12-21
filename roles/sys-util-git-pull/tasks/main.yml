@@ -1,0 +1,19 @@
+---
+# run_once_sys_util_git_pull: deactivated
+- name: Run sys-util-git-pull helper (verbose)
+  script: >-
+    sys_util_git_pull.py
+    --repo-url "{{ sys_util_git_pull_repo_url }}"
+    --dest "{{ sys_util_git_pull_dest }}"
+    --branch "{{ sys_util_git_pull_version }}"
+    --depth "{{ sys_util_git_pull_depth }}"
+    --remote "{{ sys_util_git_pull_remote }}"
+    --verbose
+    {% if sys_util_git_pull_pin_tag | length > 0 %} --pin-tag "{{ sys_util_git_pull_pin_tag }}" {% endif %}
+    {% if sys_util_git_pull_mark_changed_on_tag_move | bool %} --mark-changed-on-tag-move {% endif %}
+    {% for t in sys_util_git_pull_remove_tags %} --remove-tag "{{ t }}" {% endfor %}
+  register: sys_util_git_pull_run
+  changed_when: >
+    (sys_util_git_pull_run.stdout | default('')) is search('CHANGED=true')
+  become: "{{ sys_util_git_pull_become }}"
+  become_user: "{{ sys_util_git_pull_become_user | default(omit) }}"
