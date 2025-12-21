@@ -3,7 +3,6 @@ from __future__ import annotations
 import subprocess
 import unittest
 from typing import Any, Dict, List, Tuple
-from unittest import mock
 
 from cli.deploy.dedicated import runner
 
@@ -42,7 +41,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         return _side_effect
 
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_ansible_playbook_builds_correct_command_and_uses_repo_root_cwd(
         self, mock_run
     ):
@@ -152,7 +151,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         self.assertNotIn("text", last_kw)
         self.assertNotIn("capture_output", last_kw)
 
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_ansible_playbook_failure_exits_with_code_and_skips_phases(
         self, mock_run
     ):
@@ -211,7 +210,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "Inventory validation should be skipped when MODE_ASSERT is False",
         )
 
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_ansible_playbook_cleanup_with_logs_uses_clean(self, mock_run):
         calls: List[Tuple[List[str], Dict[str, Any]]] = []
         mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)

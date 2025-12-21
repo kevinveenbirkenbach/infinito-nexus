@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import subprocess
 import unittest
-from unittest import mock
 
 from cli.deploy.dedicated import proc
 
 
 class TestProcRun(unittest.TestCase):
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_passes_through_cwd_and_check(self, mock_run):
         mock_run.return_value = subprocess.CompletedProcess(["echo", "hi"], 0)
 
@@ -23,7 +22,7 @@ class TestProcRun(unittest.TestCase):
         self.assertIn("stdout", kwargs)
         self.assertIn("stderr", kwargs)
 
-    @mock.patch("subprocess.run")
+    @unittest.mock.patch("subprocess.run")
     def test_run_make_builds_correct_command(self, mock_run):
         mock_run.return_value = subprocess.CompletedProcess(["make", "clean"], 0)
 
