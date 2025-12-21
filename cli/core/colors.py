@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+
 class Style:  # type: ignore
     RESET_ALL = "\033[0m"
     BRIGHT = "\033[1m"
     DIM = "\033[2m"
+
 
 class Fore:  # type: ignore
     BLACK = "\033[30m"
@@ -14,6 +16,7 @@ class Fore:  # type: ignore
     MAGENTA = "\033[35m"
     CYAN = "\033[36m"
     WHITE = "\033[37m"
+
 
 def color_text(text: str, color: str) -> str:
     return f"{color}{text}{Style.RESET_ALL}"
