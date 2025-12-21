@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 jobs:
-  hadolint:
+  lint-docker:
     runs-on: ubuntu-latest
     permissions:
       contents: read
