@@ -24,3 +24,16 @@
     ('no command defined' not in ((pkgmgr_update_result.stdout | default('') | lower)
       ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
 
+- name: "update '{{ package_name }}' via pkgmgr (non-interactive)"
+  shell: |
+    set -euo pipefail
+    export GIT_TERMINAL_PROMPT=0
+    export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
+    export PYTHONUNBUFFERED=1
+    timeout --signal=KILL 600s "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" update "{{ package_name }}" --clone-mode shallow </dev/null
+  args:
+    executable: /bin/bash
+  register: pkgmgr_update
+  changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
+  become: true
+  when: MODE_UPDATE | bool

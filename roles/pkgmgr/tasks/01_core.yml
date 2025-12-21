@@ -45,8 +45,18 @@
     executable: /bin/bash
   become: true
 
-- name: "Update all repositories with pkgmgr"
-  command: "pkgmgr update --all --clone-mode shallow"
+- name: update pkgmgr (non-interactive)
+  shell: |
+    set -euo pipefail
+    export GIT_TERMINAL_PROMPT=0
+    export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
+    export PYTHONUNBUFFERED=1
+    timeout --signal=KILL 600s "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" update pkgmgr --clone-mode shallow </dev/null
+  args:
+    executable: /bin/bash
+  register: pkgmgr_update
+  changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
+  become: true
   when: MODE_UPDATE | bool
 
 - include_tasks: utils/once/flag.yml

@@ -3,11 +3,4 @@
     name: pkgmgr
   when: run_once_pkgmgr is not defined
 
-- name: update pkgmgr
-  shell: |
-    source ~/.venvs/pkgmgr/bin/activate
-    pkgmgr update pkgmgr --clone-mode shallow
-  register: pkgmgr_update
-  changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
-
 - include_tasks: utils/once/flag.yml
