@@ -8,7 +8,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
 from filter_plugins.get_all_invokable_apps import get_all_invokable_apps  # noqa: E402
- 
+
 
 def main():
     parser = argparse.ArgumentParser(

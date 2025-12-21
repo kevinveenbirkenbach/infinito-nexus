@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from cli.deploy.dedicated import __main__ as dedicated_main
+from cli.deploy.dedicated import command as dedicated_main
 
 
 class TestDedicatedMainParser(unittest.TestCase):
