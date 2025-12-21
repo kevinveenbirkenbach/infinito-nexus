@@ -11,6 +11,9 @@ jobs:
   test-code-lint:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout repository

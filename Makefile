@@ -18,6 +18,10 @@ PIP    := $(PYTHON) -m pip
 export PYTHON
 export PIP
 
+# Nix Config Variable (To avoid rate limit)
+NIX_CONFIG ?=
+export NIX_CONFIG
+
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
 APPLICATIONS_SCRIPT := ./cli/setup/applications/__main__.py

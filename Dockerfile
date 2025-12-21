@@ -8,6 +8,9 @@ FROM ${PKGMGR_IMAGE_REPO}:${PKGMGR_IMAGE_TAG} AS full
 # Hadolint DL4006: ensure pipefail is set for RUN instructions that use pipes
 SHELL ["/bin/bash", "-o", "pipefail", "-lc"]
 
+# Forwardable build-time Nix settings (e.g., GitHub access tokens to avoid rate limits)
+ARG NIX_CONFIG
+
 ENV INFINITO_SRC_DIR="/opt/src/infinito"
 ENV PYTHON="/opt/venvs/infinito/bin/python"
 ENV PIP="/opt/venvs/infinito/bin/python -m pip"
@@ -74,6 +77,7 @@ COPY . ${INFINITO_SRC_DIR}
 # Install infinito via pkgmgr (shallow)
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
+  export NIX_CONFIG="${NIX_CONFIG:-}"; \
   echo "[docker-infinito] Install Infinito.Nexus via pkgmgr"; \
   pkgmgr install infinito --clone-mode shallow; \
   echo "[docker-infinito] Installed Infinito.Nexus Version:"; \
@@ -83,6 +87,7 @@ RUN set -euo pipefail; \
 # Override with local source
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
+  export NIX_CONFIG="${NIX_CONFIG:-}"; \
   INSTALL_LOCAL_BUILD=1 /opt/src/infinito/scripts/docker/entry.sh true
 
 # Set workdir to / to avoid ambiguous commands

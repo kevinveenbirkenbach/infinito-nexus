@@ -47,6 +47,7 @@ Publish options:
 Notes:
 - --publish implies --push and requires --registry, --owner, and --version.
 - Local build (no --push) uses "docker build" and creates local images like "infinito-arch" / "infinito-arch-virgin".
+- If you set NIX_CONFIG in the environment (e.g. access-tokens), it will be forwarded into the build.
 EOF
 }
 
@@ -151,12 +152,19 @@ if [[ "${PUBLISH}" == "1" ]]; then
   echo "version             = ${VERSION}"
   echo "stable              = ${IS_STABLE}"
 fi
+if [[ -n "${NIX_CONFIG:-}" ]]; then
+  echo "NIX_CONFIG           = <set>"
+else
+  echo "NIX_CONFIG           = <empty>"
+fi
 echo "------------------------------------------------------------"
 
 # Common build args
 build_args=(
   --build-arg "PKGMGR_IMAGE_REPO=${PKGMGR_IMAGE_REPO}"
   --build-arg "PKGMGR_IMAGE_TAG=${PKGMGR_IMAGE_TAG}"
+  # Forward Nix auth / settings into the build to avoid GitHub API rate limits.
+  --build-arg "NIX_CONFIG=${NIX_CONFIG:-}"
 )
 
 if [[ "${NO_CACHE}" == "1" ]]; then

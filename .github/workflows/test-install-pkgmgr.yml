@@ -11,6 +11,9 @@ jobs:
   test-install-pkgmgr:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
     strategy:
       fail-fast: false
       matrix:

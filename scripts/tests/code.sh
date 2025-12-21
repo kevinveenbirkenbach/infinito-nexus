@@ -9,6 +9,7 @@ docker run --rm \
   -e INSTALL_LOCAL_BUILD=1 \
   -e TEST_PATTERN="${TEST_PATTERN}" \
   -e TEST_TYPE="${TEST_TYPE}" \
+  -e NIX_CONFIG="${NIX_CONFIG}" \
   -v "$(pwd):/opt/src/infinito" \
   "infinito-${INFINITO_DISTRO}" \
   bash -lc '

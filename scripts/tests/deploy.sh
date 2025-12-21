@@ -83,6 +83,7 @@ join_by_comma() {
 get_invokable() {
   set -o pipefail
   docker run --rm \
+    -e NIX_CONFIG="${NIX_CONFIG}" \
     -v "${REPO_ROOT}:/opt/src/infinito" \
     -w /opt/src/infinito \
     "${IMAGE}" \
@@ -207,7 +208,10 @@ EXCLUDE_CSV="$(compute_exclude_csv "${TYPE}")"
 echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
 
 echo ">>> Preflight: entry.sh inside ${IMAGE}"
-docker run --rm --entrypoint bash "${IMAGE}" -lc '
+docker run \
+  -e NIX_CONFIG="${NIX_CONFIG}" \
+  --rm \
+  --entrypoint bash "${IMAGE}" -lc '
   set -euo pipefail
   ls -la /opt/src/infinito/scripts/docker/entry.sh
   sha256sum /opt/src/infinito/scripts/docker/entry.sh | head -n1
