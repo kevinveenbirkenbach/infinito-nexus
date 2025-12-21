@@ -1,4 +1,6 @@
-SHELL 				:= /usr/bin/env bash
+.ONESHELL:
+SHELL := /bin/bash
+.SHELLFLAGS := -euo pipefail -c
 
 # ------------------------------------------------------------
 # Python / venv
