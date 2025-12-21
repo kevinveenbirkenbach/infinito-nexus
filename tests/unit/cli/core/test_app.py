@@ -26,7 +26,7 @@ class TestApp(unittest.TestCase):
     @patch("cli.core.app.init_multiprocessing")
     @patch(
         "cli.core.app.resolve_command_module",
-        return_value=("cli.deploy.container", ["--x"]),
+        return_value=("cli.deploy.container.command.command", ["--x"]),
     )
     @patch("cli.core.app.run_command_once", return_value=True)
     def test_app_main_dispatches_to_resolved_module(

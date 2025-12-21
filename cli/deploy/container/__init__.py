@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-from . import __main__ as _main
+from .command import (
+    main,
+    remove_container,
+    run_in_container,
+    start_ci_container,
+    stop_container,
+)
 
-# Patchable entrypoint for tests
-run_in_container = _main.run_in_container
-
-
-def main() -> int:
-    _main.run_in_container = run_in_container
-    return _main.main()
-
-
-def __getattr__(name: str):
-    return getattr(_main, name)
+__all__ = [
+    "main",
+    "run_in_container",
+    "start_ci_container",
+    "stop_container",
+    "remove_container",
+]
