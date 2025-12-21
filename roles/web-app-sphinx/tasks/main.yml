@@ -10,7 +10,7 @@
       - docker compose build
 
 - name: Get path of infinito-sphinx using pkgmgr
-  command: pkgmgr path infinito-sphinx
+  command: "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr path infinito-sphinx"
   register: path_infinito_sphinx_output
 
 - name: "load docker, proxy for '{{ application_id }}'"

@@ -12,6 +12,3 @@ PKGMGR_REPOSITORIES_DIR: "/opt/Repositories/"
 
 # The directory where the repository will be cloned
 PKGMGR_INSTALL_PATH:    "{{ [ PKGMGR_REPOSITORIES_DIR, 'github.com/kevinveenbirkenbach/package-manager' ] | path_join }}"
-
-# File containing the configuration
-PKGMGR_CONFIG_PATH:     "{{ [ PKGMGR_INSTALL_PATH, 'config/config.yaml' ] | path_join }}"

@@ -36,12 +36,6 @@
     sys_util_git_pull_remote: "origin"
     sys_util_git_pull_become: true
 
-- name: create config.yaml
-  template:
-    src: config.yaml.j2
-    dest: "{{ PKGMGR_CONFIG_PATH }}"
-  become: true
-
 - name: Run the Package Manager install command to create an alias for Kevins package manager
   shell: |
     source ~/.venvs/pkgmgr/bin/activate
