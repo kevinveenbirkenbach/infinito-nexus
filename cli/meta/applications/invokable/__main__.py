@@ -2,24 +2,13 @@
 
 import argparse
 import sys
-import os
+from pathlib import Path
 
-# Import filter plugin for get_all_invokable_apps
-try:
-    from filter_plugins.get_all_invokable_apps import get_all_invokable_apps
-except ImportError:
-    # Try to adjust sys.path if running outside Ansible
-    sys.path.insert(
-        0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    )
-    try:
-        from filter_plugins.get_all_invokable_apps import get_all_invokable_apps
-    except ImportError:
-        sys.stderr.write(
-            "Could not import filter_plugins.get_all_invokable_apps. Check your PYTHONPATH.\n"
-        )
-        sys.exit(1)
+REPO_ROOT = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO_ROOT))
 
+from filter_plugins.get_all_invokable_apps import get_all_invokable_apps  # noqa: E402
+ 
 
 def main():
     parser = argparse.ArgumentParser(
@@ -28,19 +17,13 @@ def main():
     parser.add_argument(
         "-c",
         "--categories-file",
-        default=os.path.abspath(
-            os.path.join(
-                os.path.dirname(__file__), "..", "..", "..", "roles", "categories.yml"
-            )
-        ),
+        default=str(REPO_ROOT / "roles" / "categories.yml"),
         help="Path to roles/categories.yml (default: roles/categories.yml at project root)",
     )
     parser.add_argument(
         "-r",
         "--roles-dir",
-        default=os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "roles")
-        ),
+        default=str(REPO_ROOT / "roles"),
         help="Path to roles/ directory (default: roles/ at project root)",
     )
     args = parser.parse_args()

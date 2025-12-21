@@ -81,13 +81,12 @@ join_by_comma() {
 }
 
 get_invokable() {
-  set -o pipefail
   docker run --rm \
-    -e NIX_CONFIG="${NIX_CONFIG}" \
+    -e INSTALL_LOCAL_BUILD=1 \
     -v "${REPO_ROOT}:/opt/src/infinito" \
     -w /opt/src/infinito \
     "${IMAGE}" \
-    python3 -m cli.meta.applications.invokable 2>/dev/null | trim_lines
+    python3 -m cli.meta.applications.invokable | trim_lines
 }
 
 filter_allowed() {
@@ -112,32 +111,34 @@ filter_allowed() {
 
 compute_exclude_csv() {
   local type="$1"
-
   local all allowed computed combined final
+  local drv_exclude
 
-  all="$(get_invokable)";
-  if ! all="$(get_invokable)"; then
-    echo "Required module cli.meta.applications.invokable does not exist (or get_invokable failed)"
-  fi
+  all="$(get_invokable)" || die "get_invokable failed (cli.meta.applications.invokable not available?)"
+
   allowed="$(printf "%s\n" "$all" | filter_allowed "$type")"
 
-  # computed = all - allowed
-  computed="$(comm -23 <(printf "%s\n" "$all" | sort) <(printf "%s\n" "$allowed" | sort) | trim_lines)"
+  computed="$(comm -23 \
+    <(printf "%s\n" "$all" | LC_ALL=C sort) \
+    <(printf "%s\n" "$allowed" | LC_ALL=C sort) \
+    | trim_lines)"
 
-  # combined = computed ∪ BASE_EXCLUDE ∪ ALWAYS_EXCLUDE
+  drv_exclude="$(printf "%s\n" "$all" | grep -E '^drv-' || true)"
+
   combined="$(
-    printf "%s\n%s\n%s\n" \
+    printf "%s\n%s\n%s\n%s\n" \
       "$computed" \
+      "$drv_exclude" \
       "$(printf "%s\n" "$BASE_EXCLUDE" | tr ',' '\n')" \
       "$(printf "%s\n" "$ALWAYS_EXCLUDE" | tr ',' '\n')" \
-    | trim_lines | sort -u
+    | trim_lines | LC_ALL=C sort -u
   )"
 
-  # final = combined ∩ all   (keep only invokable names)
-  final="$(comm -12 <(printf "%s\n" "$combined" | sort) <(printf "%s\n" "$all" | sort) | trim_lines)"
+  final="$(comm -12 \
+    <(printf "%s\n" "$combined" | LC_ALL=C sort) \
+    <(printf "%s\n" "$all" | LC_ALL=C sort) \
+    | trim_lines)"
 
-  # To comma-separated
-  # shellcheck disable=SC2206
   local arr=($final)
   if [[ ${#arr[@]} -eq 0 ]]; then
     echo ""
