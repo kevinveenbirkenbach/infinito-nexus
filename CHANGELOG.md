@@ -1,3 +1,12 @@
+## [0.3.4] - 2025-12-21
+
+* * Added ***sys-util-git-pull*** for deterministic shallow Git updates with tag pinning; integrated into ***pkgmgr***.
+* Pinned ***pkgmgr*** clones to ***stable*** for reproducible deployments.
+* Refactored CLI to avoid runpy warnings.
+* Improved Ansible portability (pacman → package) and added formatter workflow.
+* Fixed deploy resolution, AUR installs (use ***aur_builder***), Debian/Ubuntu images (openssh-client), CI rate limits (***NIX_CONFIG***), plus general test and security fixes.
+
+
 ## [0.3.3] - 2025-12-21
 
 * * **More reliable installs and deploys:** Fewer Docker and OS-specific failures (especially on CentOS Stream), cleaner container builds, and stable Python/Ansible execution across CI and local environments.
