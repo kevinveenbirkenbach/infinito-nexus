@@ -1,6 +1,7 @@
 {% if SSL_ENABLED | bool %}
-listen {{ WEB_PORT }} ssl http2;
-listen [::]:{{ WEB_PORT }} ssl http2;
+listen {{ WEB_PORT }} ssl;
+listen [::]:{{ WEB_PORT }} ssl;
+http2 on;
 
 ssl_protocols TLSv1.2 TLSv1.3;
 ssl_ecdh_curve X25519:P-256;
