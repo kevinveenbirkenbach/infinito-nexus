@@ -31,6 +31,7 @@ import re
 import shutil
 import sys
 from typing import Dict, Set, List, Tuple, Optional
+import logging
 
 # --- Require ruamel.yaml for full round-trip preservation ---
 try:
@@ -43,9 +44,8 @@ except Exception:
     _HAVE_RUAMEL = False
 
 if not _HAVE_RUAMEL:
-    print(
-        "[ERR] ruamel.yaml is required to preserve comments/quotes. Install with: pip install ruamel.yaml",
-        file=sys.stderr,
+    logging.error(
+        "ruamel.yaml is required to preserve comments/quotes. Install with: pip install ruamel.yaml"
     )
     sys.exit(3)
 
