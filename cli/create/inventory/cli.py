@@ -4,6 +4,7 @@ import argparse
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import sys
 
 from .project import detect_project_root, build_env_with_project_root
 from .yaml_io import load_yaml, dump_yaml
@@ -181,7 +182,10 @@ def main(argv: Optional[List[str]] = None) -> int:
             try:
                 vault_password_file.chmod(0o600)
             except PermissionError:
-                pass
+                print(
+                    f"[WARN] Could not set permissions to 0o600 on {vault_password_file}.",
+                    file=sys.stderr,
+                )
         else:
             print(f"[INFO] Using existing vault password file: {vault_password_file}")
 
