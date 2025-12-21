@@ -116,15 +116,18 @@ compute_exclude_csv() {
 	local type="$1"
 	local all allowed computed combined final
 	local drv_exclude
+	local -a arr=()
 
 	all="$(get_invokable)" || die "get_invokable failed (cli.meta.applications.invokable not available?)"
 
 	allowed="$(printf "%s\n" "$all" | filter_allowed "$type")"
 
-	computed="$(comm -23 \
-		<(printf "%s\n" "$all" | LC_ALL=C sort) \
-		<(printf "%s\n" "$allowed" | LC_ALL=C sort) |
-		trim_lines)"
+	computed="$(
+		comm -23 \
+			<(printf "%s\n" "$all" | LC_ALL=C sort) \
+			<(printf "%s\n" "$allowed" | LC_ALL=C sort) |
+			trim_lines
+	)"
 
 	drv_exclude="$(printf "%s\n" "$all" | grep -E '^drv-' || true)"
 
@@ -137,12 +140,18 @@ compute_exclude_csv() {
 			trim_lines | LC_ALL=C sort -u
 	)"
 
-	final="$(comm -12 \
-		<(printf "%s\n" "$combined" | LC_ALL=C sort) \
-		<(printf "%s\n" "$all" | LC_ALL=C sort) |
-		trim_lines)"
+	final="$(
+		comm -12 \
+			<(printf "%s\n" "$combined" | LC_ALL=C sort) \
+			<(printf "%s\n" "$all" | LC_ALL=C sort) |
+			trim_lines
+	)"
 
-	local arr=($final)
+	# final is newline-separated -> read safely into array (no word-splitting/globbing)
+	if [[ -n "${final}" ]]; then
+		mapfile -t arr <<<"${final}"
+	fi
+
 	if [[ ${#arr[@]} -eq 0 ]]; then
 		echo ""
 	else
