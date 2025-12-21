@@ -25,3 +25,5 @@
     name: "{{ lookup('env','USER') }}"
     groups: vboxusers
     append: yes
+
+- include_tasks: utils/once/flag.yml
