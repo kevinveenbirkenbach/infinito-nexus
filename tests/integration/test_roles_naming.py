@@ -10,19 +10,23 @@ ROLE_NAME_PATTERN = re.compile(r"^[a-z0-9-]+(?:_[a-z0-9-]+)?$")
 
 class TestRoleNames(unittest.TestCase):
     def test_role_names_follow_naming_convention(self):
-        # go up from tests/integration/test_roles_naming.py to project root, then into roles/
         roles_dir = Path(__file__).resolve().parents[2] / "roles"
         self.assertTrue(
             roles_dir.is_dir(), f"'roles/' directory not found at {roles_dir}"
         )
 
         invalid_names = []
+
         for role_path in roles_dir.iterdir():
             if not role_path.is_dir():
-                # skip non-directories
                 continue
 
             name = role_path.name
+
+            # Ignore Python cache and hidden directories
+            if name.startswith(".") or name == "__pycache__":
+                continue
+
             if not ROLE_NAME_PATTERN.fullmatch(name):
                 invalid_names.append(name)
 
