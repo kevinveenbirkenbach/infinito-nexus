@@ -1,3 +1,8 @@
+## [0.3.5] - 2025-12-21
+
+* SSH client installation is now handled explicitly during user provisioning instead of being bundled into the container build. Root SSH keys are generated in a modular, idempotent way and are preserved across repeated runs. This makes SSH access more predictable, reproducible, and easier to maintain, without changing user-facing behavior.
+
+
 ## [0.3.4] - 2025-12-21
 
 * * Added ***sys-util-git-pull*** for deterministic shallow Git updates with tag pinning; integrated into ***pkgmgr***.
