@@ -15,6 +15,7 @@ def init_multiprocessing() -> None:
         if get_start_method(allow_none=True) != "spawn":
             set_start_method("spawn", force=True)
     except RuntimeError:
+        # The start method can only be set once per interpreter; ignore if it was set elsewhere.
         pass
 
     # Prefer system audio backend by default (prevents simpleaudio segfaults in child processes)
