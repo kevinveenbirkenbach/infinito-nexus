@@ -84,9 +84,9 @@ join_by_comma() {
 }
 
 get_invokable() {
-  # It isn't possible to use INSTALL_LOCAL_BUILD=1 because it leads to noise in the output
 	docker run --rm \
-		-e INSTALL_LOCAL_BUILD=0 \
+		-e INSTALL_LOCAL_BUILD=1 \
+		-e INSTALL_LOCAL_BUILD_SILENCE=1 \
 		-v "${REPO_ROOT}:/opt/src/infinito" \
 		-w /opt/src/infinito \
 		"${IMAGE}" \
