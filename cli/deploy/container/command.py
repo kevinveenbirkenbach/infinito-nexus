@@ -236,6 +236,24 @@ def run_in_container(
             check=True,
         )
 
+        # 1b) Mock backup authorized_keys file for sys-bkp-provider-user
+        print(">>> Mocking backup authorized_keys file inside CI inventory...")
+        mock_key = os.environ.get(
+            "AUTHORIZED_KEYS",
+            "ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito",
+        ).strip()
+
+        mock_cmd = (
+            "set -euo pipefail; "
+            "p=/etc/inventories/github-ci/files/localhost/home/backup/.ssh/authorized_keys; "
+            'mkdir -p "$(dirname "$p")"; '
+            "printf '%s\n' " + shlex.quote(mock_key) + ' > "$p"; '
+            'chmod 0644 "$p"; '
+            'ls -la "$(dirname "$p")"; '
+            'head -n 3 "$p" || true'
+        )
+        docker_exec(container_name, ["sh", "-lc", mock_cmd], check=True)
+
         # 2) Ensure vault password file exists
         print(">>> Ensuring CI vault password file exists...")
         ensure_pw_cmd = (
