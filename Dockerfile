@@ -38,7 +38,6 @@ RUN set -euo pipefail; \
     apt-get install -y --no-install-recommends \
       curl \
       gnupg \
-      openssh-client \
       lsb-release; \
     install -m 0755 -d /etc/apt/keyrings; \
     curl -fsSL "https://download.docker.com/linux/${ID}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg; \

@@ -1,28 +1,16 @@
 - name: Check if the SSH key for root already exists
   ansible.builtin.stat:
-    path: "/root/.ssh/id_rsa.pub"
+    path: "{{ USER_ROOT_SSH_KEY_PUBLIC }}"
   register: ssh_key
 
-- block:
-    - name: Generate a SSH key for root if it does not exist
-      community.crypto.openssh_keypair:
-        path: "/root/.ssh/id_rsa"
-        type: rsa
-        size: 4096
-
-    - name: Display the public SSH key
-      command: cat /root/.ssh/id_rsa.pub
-      register: public_key
-
-    - name: Output the public SSH key
-      debug:
-        msg: "{{ public_key.stdout }}"
+- name: "Include routine to create {{ USER_ROOT_SSH_KEY_PUBLIC }}"
+  include_tasks: 02_ssh.yml
   when: not ssh_key.stat.exists
 
 - name: "embed user routines for {{ role_path | basename }}"
   include_role:
     name: user
   vars:
-    user_name:  "root"
+    user_name: "root"
 
 - include_tasks: utils/once/flag.yml

@@ -1,0 +1,37 @@
+- name: Install OpenSSH client
+  package:
+    name: >-
+      {{
+        ({
+          'Debian': 'openssh-client',
+          'Ubuntu': 'openssh-client',
+          'Archlinux': 'openssh',
+          'Fedora': 'openssh-clients',
+          'RedHat': 'openssh-clients',
+          'Alpine': 'openssh-client'
+        }).get(ansible_distribution, 'openssh-client')
+      }}
+    state: present
+
+- name: Ensure '{{ USER_ROOT_SSH_DIR }}' exists
+  file:
+    path: "{{ USER_ROOT_SSH_DIR }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0700'
+
+- name: Generate a SSH key for root if it does not exist
+  community.crypto.openssh_keypair:
+    path: "{{ USER_ROOT_SSH_KEY_PRIVATE }}"
+    type: rsa
+    size: 4096
+
+- name: Display the public SSH key
+  command:  "cat {{ USER_ROOT_SSH_KEY_PUBLIC }}"
+  register: public_key
+  changed_when: false
+
+- name: Output the public SSH key
+  debug:
+    msg: "{{ public_key.stdout }}"
