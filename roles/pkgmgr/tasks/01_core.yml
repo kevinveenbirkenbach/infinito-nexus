@@ -41,13 +41,27 @@
   ignore_errors: true
   become: true
 
-- name: Clone Kevin's Package Manager repository (always latest HEAD)
+- name: Clone pkgmgr repository (shallow)
   git:
-    repo:     "{{ PKGMGR_REPO_URL }}"
-    dest:     "{{ PKGMGR_INSTALL_PATH }}"
-    version:  "HEAD"
-    force:    yes
-    depth:    1
+    repo: "{{ PKGMGR_REPO_URL }}"
+    dest: "{{ PKGMGR_INSTALL_PATH }}"
+    version: main
+    depth: 1
+    force: yes
+  become: true
+
+- name: Fetch stable tag commit (shallow-safe)
+  command: git fetch --depth=1 origin tag stable
+  args:
+    chdir: "{{ PKGMGR_INSTALL_PATH }}"
+  changed_when: false
+  become: true
+
+- name: Checkout stable
+  command: git checkout --detach stable
+  args:
+    chdir: "{{ PKGMGR_INSTALL_PATH }}"
+  changed_when: false
   become: true
 
 - name: create config.yaml
