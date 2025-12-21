@@ -9,5 +9,8 @@
         use: yay
         name:
         - spotify
+      become: true
+      become_user: aur_builder
+    
     - include_tasks: utils/once/flag.yml
   when: run_once_desk_spotify is not defined

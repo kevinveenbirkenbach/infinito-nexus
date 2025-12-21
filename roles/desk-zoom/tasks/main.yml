@@ -2,12 +2,15 @@
     - name: Include dependency 'dev-yay'
       include_role:
         name: dev-yay
+      when: run_once_dev_yay is not defined
 
     - name: install video conference software
       kewlfft.aur.aur:
         use: yay
         name:
         - zoom
-      become: false
+      become: true
+      become_user: aur_builder
+      
     - include_tasks: utils/once/flag.yml
   when: run_once_desk_zoom is not defined

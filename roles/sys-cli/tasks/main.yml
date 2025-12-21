@@ -1,9 +1,12 @@
 - block:
+  
   - name: Include dependency 'dev-yay'
     include_role:
       name: dev-yay
     when: run_once_dev_yay is not defined
+  
   - include_tasks: utils/once/flag.yml
+  
   when: run_once_sys_cli is not defined
 
 - name: "pkgmgr install infinito"
@@ -11,8 +14,3 @@
     name: pkgmgr-install
   vars:
     package_name: infinito
-
-- name: Get infinito base path
-  command: pkgmgr path infinito
-  register: infinito_path_cmd
-  changed_when: false

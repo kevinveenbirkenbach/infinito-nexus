@@ -12,6 +12,7 @@
     - epson-inkjet-printer-escpr
     - epson-inkjet-printer-escpr2
     - imagescan
-  become: false
+  become: true
+  become_user: aur_builder
 
 - include_tasks: utils/once/flag.yml

@@ -15,6 +15,7 @@
     use: yay
     name:
     - drawio-desktop
-  become: false
+  become: true
+  become_user: aur_builder
 
 - include_tasks: utils/once/flag.yml
