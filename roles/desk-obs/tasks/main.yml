@@ -1,5 +1,5 @@
 - name: install streaming
-  community.general.pacman:
+  package:
     name: 
       - obs-studio
     state: present

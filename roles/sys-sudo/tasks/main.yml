@@ -1,6 +1,6 @@
 - block:
   - name: Install sudo (Arch/Manjaro)
-    community.general.pacman:
+    package:
       name:   sudo
       state:  present
   - name: run the sudo tasks once

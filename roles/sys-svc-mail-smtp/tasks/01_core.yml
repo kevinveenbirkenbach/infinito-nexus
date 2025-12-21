@@ -1,13 +1,13 @@
 - include_tasks: utils/once/flag.yml
 
 - name: "Ensure msmtp-mta is absent (conflicts with postfix smtp-forwarder)"
-  community.general.pacman:
+  package:
     name:
       - msmtp-mta
     state: absent
 
 - name: "Install local SMTP relay (Postfix)"
-  community.general.pacman:
+  package:
     name:
       - postfix
     state: present

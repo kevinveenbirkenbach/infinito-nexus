@@ -1,5 +1,5 @@
 - name: Install core gaming tools from pacman
-  community.general.pacman:
+  package:
     name:
       - steam
       - lutris
@@ -11,4 +11,3 @@
       - wine-mono
       - winetricks
     state: present
-    update_cache: yes

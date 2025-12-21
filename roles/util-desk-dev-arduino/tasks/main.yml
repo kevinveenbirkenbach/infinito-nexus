@@ -1,5 +1,5 @@
 - name: install arduino developer tools
-  community.general.pacman:
+  package:
     name:
       - arduino
       - arduino-docs

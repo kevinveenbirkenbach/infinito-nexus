@@ -5,7 +5,7 @@
 
 # 1) Arch-based systems: just install the distro package
 - name: Install Nix via package manager on Arch-based systems
-  community.general.pacman:
+  package:
     name: nix
     state: present
   become: true

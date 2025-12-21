@@ -1,5 +1,5 @@
 - name: install certbot DNS plugin
-  community.general.pacman:
+  package:
     name: "certbot-dns-{{ CERTBOT_ACME_CHALLENGE_METHOD }}"
     state: present
 

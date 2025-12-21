@@ -5,7 +5,7 @@
     when: run_once_pkgmgr is not defined
 
   - name: install base developer tools
-    community.general.pacman:
+    package:
       name:
       - code
       state: present

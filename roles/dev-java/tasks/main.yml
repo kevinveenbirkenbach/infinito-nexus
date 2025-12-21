@@ -1,5 +1,5 @@
 - name: install java
-  community.general.pacman:
+  package:
     name:
       - jdk11-openjdk
     state: present

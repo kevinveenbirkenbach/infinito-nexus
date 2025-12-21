@@ -1,5 +1,5 @@
 - name: install bash developer tools
-  community.general.pacman:
+  package:
     name:
       - shellcheck
     state: present

@@ -4,7 +4,7 @@
   when: run_once_dev_yay is not defined
 
 - name: install designer tools
-  community.general.pacman:
+  package:
     name:
     - gimp
     - blender

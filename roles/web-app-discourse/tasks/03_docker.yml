@@ -1,6 +1,6 @@
 # Necessary for building: https://chat.openai.com/share/99d258cc-294b-4924-8eef-02fe419bb838
 - name: install which
-  community.general.pacman:
+  package:
     name: which
     state: present
 

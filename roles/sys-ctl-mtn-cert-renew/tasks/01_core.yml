@@ -7,7 +7,7 @@
   - sys-ctl-alm-compose
 
 - name: install certbot
-  community.general.pacman:
+  package:
     name:
     - certbot-nginx
     state: present

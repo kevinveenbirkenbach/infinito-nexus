@@ -6,7 +6,7 @@
     docker_compose_flush_handlers:  true
 
 - name: install python-mysqlclient
-  community.general.pacman: 
+  package: 
     name: python-mysqlclient
     state: present
   when: not IS_CONTAINER | bool

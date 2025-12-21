@@ -1,6 +1,6 @@
 ---
 - name: install neovim
-  community.general.pacman:
+  package:
     name:
       - neovim
     state: present

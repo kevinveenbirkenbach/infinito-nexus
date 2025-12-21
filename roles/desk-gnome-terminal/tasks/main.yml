@@ -1,6 +1,6 @@
 - name: Install Gnome Terminal
 # @see https://en.wikipedia.org/wiki/GNOME_Terminal
-  community.general.pacman:
+  package:
     name:
       - gnome-terminal
     state: present

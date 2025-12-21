@@ -2,7 +2,7 @@
 - when: run_once_dev_python_yaml is not defined
   block:
     - name: python-yaml install
-      community.general.pacman:
+      package:
         name: python-yaml
         state: present
       

@@ -163,7 +163,7 @@ class BlockWhenSizeTest(unittest.TestCase):
                 "Example:\n"
                 " - Bad (heavy tasks directly in sections):\n"
                 "     - block:\n"
-                "         - community.general.pacman: name=foo state=present\n"
+                "         - package: name=foo state=present\n"
                 "         - template: src=a.j2 dest=/a\n"
                 "       rescue:\n"
                 "         - debug: msg='rollback-1'\n"

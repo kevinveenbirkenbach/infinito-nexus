@@ -18,7 +18,7 @@
     system_service_tpl_on_failure: "{{ ('sys-ctl-alm-email@') | get_service_name(SOFTWARE_NAME, False) }}%n.service"
 
 - name: install curl
-  community.general.pacman:
+  package:
     name: curl
     state: present
 

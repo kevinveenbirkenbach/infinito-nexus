@@ -1,5 +1,5 @@
 - name: install certbot
-  community.general.pacman:
+  package:
     name: certbot
     state: present
 

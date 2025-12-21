@@ -1,5 +1,5 @@
 - name: install base-devel
-  community.general.pacman:
+  package:
     name: base-devel
     state: present
   become: true

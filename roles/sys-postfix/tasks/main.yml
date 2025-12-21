@@ -7,6 +7,6 @@
   when: run_once_sys_postfix is not defined
 
 - name: install postfix
-  community.general.pacman:
+  package:
     name: postfix
     state: present

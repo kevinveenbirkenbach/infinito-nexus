@@ -1,5 +1,5 @@
 - name: Install CopyQ clipboard manager
-  community.general.pacman:
+  package:
     name: copyq
     state: present
 

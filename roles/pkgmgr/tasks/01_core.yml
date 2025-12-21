@@ -7,7 +7,7 @@
     - dev-nix
 
 - name: Ensure OpenSSH client is installed
-  community.general.pacman:
+  package:
     name: openssh
     state: present
   become: true

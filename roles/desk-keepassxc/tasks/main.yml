@@ -1,5 +1,5 @@
 - name: install security tools
-  community.general.pacman:
+  package:
     name:
       - keepassxc
     state: present

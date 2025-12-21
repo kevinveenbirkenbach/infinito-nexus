@@ -51,7 +51,7 @@
   meta: flush_handlers
 
 - name: install python-ldap
-  community.general.pacman:
+  package:
     name:
       - python-ldap
     state: present

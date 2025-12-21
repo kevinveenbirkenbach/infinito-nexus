@@ -11,7 +11,7 @@
     docker_compose_flush_handlers:  true
 
 - name: install python-psycopg2
-  community.general.pacman:
+  package:
     name: python-psycopg2
     state: present
 

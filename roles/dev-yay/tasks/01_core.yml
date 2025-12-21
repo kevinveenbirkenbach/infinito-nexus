@@ -7,7 +7,7 @@
   - dev-base-devel
 
 - name: Install yay build prerequisites
-  community.general.pacman:
+  package:
     name:
     - base-devel
     - patch

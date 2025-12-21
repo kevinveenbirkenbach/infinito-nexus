@@ -1,5 +1,4 @@
 - name: Install Default Gaming Software
-  community.general.pacman:
+  package:
     name: "{{ gamer_default_games }}"
     state: present
-    update_cache: yes

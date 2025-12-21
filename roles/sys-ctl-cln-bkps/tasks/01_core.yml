@@ -7,7 +7,7 @@
   - sys-lock
 
 - name: install lsof and python-psutil
-  community.general.pacman:
+  package:
     name:
     - lsof
     - python-psutil

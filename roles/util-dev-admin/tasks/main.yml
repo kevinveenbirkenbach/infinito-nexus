@@ -7,7 +7,7 @@
     - dev-yay
 
   - name: install administration tools
-    community.general.pacman:
+    package:
       name:
       - base-devel
       - cmake

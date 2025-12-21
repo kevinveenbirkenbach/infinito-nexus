@@ -4,7 +4,7 @@
       when: run_once_dev_gcc is not defined
 
     - name: python pip install
-      community.general.pacman:
+      package:
         name: python-pip
         state: present
 

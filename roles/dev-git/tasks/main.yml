@@ -1,6 +1,6 @@
 - block:
     - name: install git
-      community.general.pacman:
+      package:
         name: git
         state:  present
 

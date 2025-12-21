@@ -3,7 +3,7 @@
   when: ansible_facts is not defined
 
 - name: Ensure mhwd is installed on Manjaro
-  community.general.pacman:
+  package:
     name: mhwd
     state: present
   become: true

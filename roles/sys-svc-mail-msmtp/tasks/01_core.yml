@@ -1,13 +1,13 @@
 - include_tasks: utils/once/flag.yml
 
 - name: Install msmtp base package
-  community.general.pacman:
+  package:
     name:
       - msmtp
     state: present
 
 - name: Install msmtp-mta when Mailu is used (no local postfix relay)
-  community.general.pacman:
+  package:
     name: msmtp-mta
     state: present
   when: "'web-app-mailu' in group_names"

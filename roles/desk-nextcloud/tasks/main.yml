@@ -1,5 +1,5 @@
 - name: Install nextcloud-client
-  community.general.pacman:
+  package:
     name: nextcloud-client
     state: present
 

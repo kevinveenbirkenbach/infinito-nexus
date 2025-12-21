@@ -1,5 +1,5 @@
 - name: Install GnuCash
-  community.general.pacman:
+  package:
     name:
       - gnucash
     state: present

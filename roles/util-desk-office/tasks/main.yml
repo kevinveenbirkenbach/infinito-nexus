@@ -1,5 +1,5 @@
 - name: install office sofware
-  community.general.pacman:
+  package:
     name: 
       - thunderbird
       - calibre

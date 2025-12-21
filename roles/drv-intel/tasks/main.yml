@@ -1,4 +1,4 @@
 - name: install intel drivers
-  community.general.pacman:
+  package:
     name: intel-media-driver 
     state: present

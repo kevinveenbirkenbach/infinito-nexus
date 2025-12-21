@@ -2,7 +2,7 @@
 - when: run_once_dev_fakeroot is not defined
   block:
     - name: Install fakeroot
-      community.general.pacman:
+      package:
         name: fakeroot
         state: present
 

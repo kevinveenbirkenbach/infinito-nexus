@@ -1,5 +1,4 @@
 - name: Install RetroArch and assets
-  community.general.pacman:
+  package:
     name: "{{ retroarch_packages }}"
     state: present
-    update_cache: yes

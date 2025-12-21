@@ -1,5 +1,5 @@
 - name: install php developer tools
-  community.general.pacman:
+  package:
     name:
       - php 
     state: present
