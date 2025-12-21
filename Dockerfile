@@ -35,7 +35,11 @@ RUN set -euo pipefail; \
     # Debian/Ubuntu: use Docker official repo for docker-ce-cli
     export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
-    apt-get install -y --no-install-recommends curl gnupg lsb-release; \
+    apt-get install -y --no-install-recommends \
+      curl \
+      gnupg \
+      openssh-client \
+      lsb-release; \
     install -m 0755 -d /etc/apt/keyrings; \
     curl -fsSL "https://download.docker.com/linux/${ID}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg; \
     chmod a+r /etc/apt/keyrings/docker.gpg; \
