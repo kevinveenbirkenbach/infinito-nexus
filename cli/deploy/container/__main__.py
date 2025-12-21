@@ -255,6 +255,7 @@ def run_in_container(
             "/etc/inventories/github-ci/servers.yml",
             "-p",
             "/etc/inventories/github-ci/.password",
+            "-vv",
             *deploy_args,
         ]
         print(">>> Deploy command inside container:")
