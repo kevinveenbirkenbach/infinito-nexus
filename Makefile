@@ -159,6 +159,12 @@ setup: dockerignore
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
+format:
+	set -euo pipefail; \
+	shfmt -w scripts; \
+	ruff format .; \
+	ruff check . --fix
+
 # --- Tests (separated) ---
 
 test-lint: build-missing

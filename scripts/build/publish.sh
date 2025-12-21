@@ -28,27 +28,27 @@ echo "[publish] IS_STABLE=${IS_STABLE}"
 echo "[publish] DISTROS=${DISTROS}"
 
 for d in ${DISTROS}; do
-  echo
-  echo "============================================================"
-  echo "[publish] INFINITO_DISTRO=${d}"
-  echo "============================================================"
+	echo
+	echo "============================================================"
+	echo "[publish] INFINITO_DISTRO=${d}"
+	echo "============================================================"
 
-  # virgin
-  INFINITO_DISTRO="${d}" bash "${SCRIPT_DIR}/image.sh" \
-    --publish \
-    --registry "${REGISTRY}" \
-    --owner "${OWNER}" \
-    --version "${VERSION}" \
-    --stable "${IS_STABLE}" \
-    --target virgin
+	# virgin
+	INFINITO_DISTRO="${d}" bash "${SCRIPT_DIR}/image.sh" \
+		--publish \
+		--registry "${REGISTRY}" \
+		--owner "${OWNER}" \
+		--version "${VERSION}" \
+		--stable "${IS_STABLE}" \
+		--target virgin
 
-  # full (default target)
-  INFINITO_DISTRO="${d}" bash "${SCRIPT_DIR}/image.sh" \
-    --publish \
-    --registry "${REGISTRY}" \
-    --owner "${OWNER}" \
-    --version "${VERSION}" \
-    --stable "${IS_STABLE}"
+	# full (default target)
+	INFINITO_DISTRO="${d}" bash "${SCRIPT_DIR}/image.sh" \
+		--publish \
+		--registry "${REGISTRY}" \
+		--owner "${OWNER}" \
+		--version "${VERSION}" \
+		--stable "${IS_STABLE}"
 done
 
 echo

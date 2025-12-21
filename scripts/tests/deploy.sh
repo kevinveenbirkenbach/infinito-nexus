@@ -33,7 +33,7 @@ ALWAYS_EXCLUDE="${ALWAYS_EXCLUDE:-}"
 
 # Central excludes (same everywhere) - can be comma-separated or newline-separated.
 BASE_EXCLUDE="${BASE_EXCLUDE:-$(
-  cat <<'EOF'
+	cat <<'EOF'
 drv-lid-switch
 svc-db-memcached
 svc-db-redis
@@ -55,7 +55,7 @@ EOF
 )}"
 
 usage() {
-  cat <<'EOF'
+	cat <<'EOF'
 Usage: scripts/tests/deploy.sh --type <server|workstation|universal> --distro <arch|debian|ubuntu|fedora|centos> [options]
 
 Options:
@@ -71,112 +71,133 @@ What it runs:
 EOF
 }
 
-die() { echo "[ERROR] $*" >&2; exit 1; }
+die() {
+	echo "[ERROR] $*" >&2
+	exit 1
+}
 
 trim_lines() { sed -e 's/[[:space:]]\+$//' -e '/^$/d'; }
 
 join_by_comma() {
-  local IFS=","
-  echo "$*"
+	local IFS=","
+	echo "$*"
 }
 
 get_invokable() {
-  docker run --rm \
-    -e INSTALL_LOCAL_BUILD=1 \
-    -v "${REPO_ROOT}:/opt/src/infinito" \
-    -w /opt/src/infinito \
-    "${IMAGE}" \
-    python3 -m cli.meta.applications.invokable | trim_lines
+	docker run --rm \
+		-e INSTALL_LOCAL_BUILD=1 \
+		-v "${REPO_ROOT}:/opt/src/infinito" \
+		-w /opt/src/infinito \
+		"${IMAGE}" \
+		python3 -m cli.meta.applications.invokable | trim_lines
 }
 
 filter_allowed() {
-  local type="$1"
-  case "$type" in
-    workstation)
-      # desk-* and util-desk-*
-      grep -E '^(desk-|util-desk-)' || true
-      ;;
-    server)
-      # web-* (includes web-app-*, web-svc-*, etc.)
-      grep -E '^web-' || true
-      ;;
-    universal)
-      cat
-      ;;
-    *)
-      die "Unknown deploy type: $type (expected: workstation|server|universal)"
-      ;;
-  esac
+	local type="$1"
+	case "$type" in
+	workstation)
+		# desk-* and util-desk-*
+		grep -E '^(desk-|util-desk-)' || true
+		;;
+	server)
+		# web-* (includes web-app-*, web-svc-*, etc.)
+		grep -E '^web-' || true
+		;;
+	universal)
+		cat
+		;;
+	*)
+		die "Unknown deploy type: $type (expected: workstation|server|universal)"
+		;;
+	esac
 }
 
 compute_exclude_csv() {
-  local type="$1"
-  local all allowed computed combined final
-  local drv_exclude
+	local type="$1"
+	local all allowed computed combined final
+	local drv_exclude
 
-  all="$(get_invokable)" || die "get_invokable failed (cli.meta.applications.invokable not available?)"
+	all="$(get_invokable)" || die "get_invokable failed (cli.meta.applications.invokable not available?)"
 
-  allowed="$(printf "%s\n" "$all" | filter_allowed "$type")"
+	allowed="$(printf "%s\n" "$all" | filter_allowed "$type")"
 
-  computed="$(comm -23 \
-    <(printf "%s\n" "$all" | LC_ALL=C sort) \
-    <(printf "%s\n" "$allowed" | LC_ALL=C sort) \
-    | trim_lines)"
+	computed="$(comm -23 \
+		<(printf "%s\n" "$all" | LC_ALL=C sort) \
+		<(printf "%s\n" "$allowed" | LC_ALL=C sort) |
+		trim_lines)"
 
-  drv_exclude="$(printf "%s\n" "$all" | grep -E '^drv-' || true)"
+	drv_exclude="$(printf "%s\n" "$all" | grep -E '^drv-' || true)"
 
-  combined="$(
-    printf "%s\n%s\n%s\n%s\n" \
-      "$computed" \
-      "$drv_exclude" \
-      "$(printf "%s\n" "$BASE_EXCLUDE" | tr ',' '\n')" \
-      "$(printf "%s\n" "$ALWAYS_EXCLUDE" | tr ',' '\n')" \
-    | trim_lines | LC_ALL=C sort -u
-  )"
+	combined="$(
+		printf "%s\n%s\n%s\n%s\n" \
+			"$computed" \
+			"$drv_exclude" \
+			"$(printf "%s\n" "$BASE_EXCLUDE" | tr ',' '\n')" \
+			"$(printf "%s\n" "$ALWAYS_EXCLUDE" | tr ',' '\n')" |
+			trim_lines | LC_ALL=C sort -u
+	)"
 
-  final="$(comm -12 \
-    <(printf "%s\n" "$combined" | LC_ALL=C sort) \
-    <(printf "%s\n" "$all" | LC_ALL=C sort) \
-    | trim_lines)"
+	final="$(comm -12 \
+		<(printf "%s\n" "$combined" | LC_ALL=C sort) \
+		<(printf "%s\n" "$all" | LC_ALL=C sort) |
+		trim_lines)"
 
-  local arr=($final)
-  if [[ ${#arr[@]} -eq 0 ]]; then
-    echo ""
-  else
-    join_by_comma "${arr[@]}"
-  fi
+	local arr=($final)
+	if [[ ${#arr[@]} -eq 0 ]]; then
+		echo ""
+	else
+		join_by_comma "${arr[@]}"
+	fi
 }
 
 # -------------------------------------------------------------------
 # Args
 # -------------------------------------------------------------------
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --type)      TYPE="${2:-}"; shift 2 ;;
-    --distro)    DISTRO="${2:-}"; shift 2 ;;
-    --image)     IMAGE="${2:-}"; shift 2 ;;
-    --no-cache)  NO_CACHE=1; shift ;;
-    --missing)   MISSING_ONLY=1; shift ;;
-    -h|--help)   usage; exit 0 ;;
-    *) die "Unknown argument: $1" ;;
-  esac
+	case "$1" in
+	--type)
+		TYPE="${2:-}"
+		shift 2
+		;;
+	--distro)
+		DISTRO="${2:-}"
+		shift 2
+		;;
+	--image)
+		IMAGE="${2:-}"
+		shift 2
+		;;
+	--no-cache)
+		NO_CACHE=1
+		shift
+		;;
+	--missing)
+		MISSING_ONLY=1
+		shift
+		;;
+	-h | --help)
+		usage
+		exit 0
+		;;
+	*) die "Unknown argument: $1" ;;
+	esac
 done
 
-[[ -n "${TYPE}" ]]   || die "--type is required"
+[[ -n "${TYPE}" ]] || die "--type is required"
 [[ -n "${DISTRO}" ]] || die "--distro is required"
 
 case "${TYPE}" in
-  server|workstation|universal) ;;
-  *) die "Invalid --type '${TYPE}' (expected: server|workstation|universal)" ;;
+server | workstation | universal) ;;
+*) die "Invalid --type '${TYPE}' (expected: server|workstation|universal)" ;;
 esac
 
 case "${DISTRO}" in
-  arch|debian|ubuntu|fedora|centos) ;;
-  *) die "Invalid --distro '${DISTRO}' (expected: arch|debian|ubuntu|fedora|centos)" ;;
+arch | debian | ubuntu | fedora | centos) ;;
+*) die "Invalid --distro '${DISTRO}' (expected: arch|debian|ubuntu|fedora|centos)" ;;
 esac
 
 if [[ -z "${IMAGE}" ]]; then
-  IMAGE="infinito-${DISTRO}"
+	IMAGE="infinito-${DISTRO}"
 fi
 
 # ---------------------------------------------------------------------------
@@ -190,14 +211,14 @@ echo ">>> Repo root:       ${REPO_ROOT}"
 pushd "${REPO_ROOT}" >/dev/null
 
 if [[ "${NO_CACHE}" == "1" ]]; then
-  echo ">>> make build-no-cache (INFINITO_DISTRO=${DISTRO})"
-  INFINITO_DISTRO="${DISTRO}" make build-no-cache
+	echo ">>> make build-no-cache (INFINITO_DISTRO=${DISTRO})"
+	INFINITO_DISTRO="${DISTRO}" make build-no-cache
 elif [[ "${MISSING_ONLY}" == "1" ]]; then
-  echo ">>> make build-missing (INFINITO_DISTRO=${DISTRO})"
-  INFINITO_DISTRO="${DISTRO}" make build-missing
+	echo ">>> make build-missing (INFINITO_DISTRO=${DISTRO})"
+	INFINITO_DISTRO="${DISTRO}" make build-missing
 else
-  echo ">>> make build (INFINITO_DISTRO=${DISTRO})"
-  INFINITO_DISTRO="${DISTRO}" make build
+	echo ">>> make build (INFINITO_DISTRO=${DISTRO})"
+	INFINITO_DISTRO="${DISTRO}" make build
 fi
 
 docker image inspect "${IMAGE}" >/dev/null 2>&1 || die "Local image not found after build: ${IMAGE}"
@@ -210,9 +231,9 @@ echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
 
 echo ">>> Preflight: entry.sh inside ${IMAGE}"
 docker run \
-  -e NIX_CONFIG="${NIX_CONFIG}" \
-  --rm \
-  --entrypoint bash "${IMAGE}" -lc '
+	-e NIX_CONFIG="${NIX_CONFIG}" \
+	--rm \
+	--entrypoint bash "${IMAGE}" -lc '
   set -euo pipefail
   ls -la /opt/src/infinito/scripts/docker/entry.sh
   sha256sum /opt/src/infinito/scripts/docker/entry.sh | head -n1
@@ -224,13 +245,13 @@ docker run \
 # ---------------------------------------------------------------------------
 echo ">>> Running deploy via cli.deploy.container (local image only)..."
 python3 -m cli.deploy.container run \
-  --image "${IMAGE}" \
-  -- \
-  --exclude "${EXCLUDE_CSV}" \
-  --vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
-  --authorized-keys "${AUTHORIZED_KEYS}" \
-  -- \
-  -T "${TYPE}"
+	--image "${IMAGE}" \
+	-- \
+	--exclude "${EXCLUDE_CSV}" \
+	--vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
+	--authorized-keys "${AUTHORIZED_KEYS}" \
+	-- \
+	-T "${TYPE}"
 
 popd >/dev/null
 echo ">>> Deploy test suite finished successfully."
