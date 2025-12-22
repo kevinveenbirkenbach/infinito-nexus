@@ -1,2 +1,4 @@
 - include_tasks: 01_core.yml
-  when: run_once_sys_svc_letsencrypt is not defined
+  when: 
+    - run_once_sys_svc_letsencrypt is not defined
+    - SSL_ENABLED | bool
