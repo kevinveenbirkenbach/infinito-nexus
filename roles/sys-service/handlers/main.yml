@@ -20,3 +20,13 @@
     - not (system_service_suppress_flush | bool)
     - not (IS_CONTAINER | bool)
   listen: refresh systemctl service
+
+- name: "Run systemctl service script in container"
+  command: "{{ system_service_script_exec }}"
+  become: true
+  listen: refresh systemctl service
+  when:
+    - IS_CONTAINER | bool
+    - not (system_service_suppress_flush | bool)
+    - system_service_state | default('') == 'restarted'
+    - system_service_script_exec | default('') | length > 0
