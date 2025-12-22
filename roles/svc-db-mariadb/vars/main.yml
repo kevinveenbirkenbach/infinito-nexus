@@ -2,6 +2,9 @@ application_id:         svc-db-mariadb
 entity_name:            "{{ application_id | get_entity_name }}"
 database_type:          "{{ entity_name }}"
 
+# Host behavior stays unchanged (True).
+# In CI/act container environments we avoid publishing ports to prevent iptables/nft issues.
+MARIADB_EXPOSE_LOCAL:   "{{ not IS_CONTAINER | bool }}"
 MARIADB_ROOT_PWD:       "{{ applications | get_app_conf(application_id,'credentials.root_password') }}"
 MARIADB_SUBNET:         "{{ networks.local['svc-db-mariadb'].subnet  }}"
 MARIADB_NETWORK:        "{{ applications | get_app_conf(application_id,'docker.network') }}"
@@ -12,5 +15,4 @@ MARIADB_NAME:           "{{ applications | get_app_conf(application_id,'docker.s
 MARIADB_PORT:           "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
 MARIADB_HOST:           "127.0.0.1"
 MARIADB_CUSTOM_IMAGE:   "mariadb_custom"
-MARIADB_EXPOSE_LOCAL:   True
 MARIADB_HEALTHCHECK_DB: "{{ SOFTWARE_NAME | lower | regex_replace('[^a-z0-9]+', '_') }}_healthcheck"

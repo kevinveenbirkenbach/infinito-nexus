@@ -54,5 +54,6 @@
   delay: 5
   until: mariadb_ready is succeeded
   changed_when: false
-
+  when: MARIADB_EXPOSE_LOCAL | bool
+  
 - include_tasks: utils/once/flag.yml
