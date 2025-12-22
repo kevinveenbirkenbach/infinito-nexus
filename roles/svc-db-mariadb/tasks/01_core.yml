@@ -5,17 +5,19 @@
     docker_network_subnet:          "{{ MARIADB_SUBNET }}"
     docker_compose_flush_handlers:  true
 
-- name: install python-mysqlclient
-  package: 
-    name: python-mysqlclient
+- name: Install MySQL Python client library (distro-aware)
+  package:
+    name: >-
+      {{
+        'python-mysqlclient'   if ansible_os_family == 'Archlinux' else
+        'python3-mysqldb'      if ansible_os_family == 'Debian'     else
+        'python3-mysqlclient'  if ansible_os_family == 'RedHat'     else
+        'py3-mysqlclient'      if ansible_os_family == 'Alpine'     else
+        omit
+      }}
     state: present
-  when: not IS_CONTAINER | bool
+  when: MARIADB_EXPOSE_LOCAL | bool
 
-- name: Ensure PyMySQL is installed for Ansible interpreter
-  ansible.builtin.pip:
-    name: PyMySQL
-  when: IS_CONTAINER | bool
-    
 - name: "Wait until the MariaDB container with hostname '{{ MARIADB_NAME }}' is healthy"
   community.docker.docker_container_info:
     name: "{{ MARIADB_NAME }}"
@@ -55,5 +57,5 @@
   until: mariadb_ready is succeeded
   changed_when: false
   when: MARIADB_EXPOSE_LOCAL | bool
-  
+
 - include_tasks: utils/once/flag.yml
