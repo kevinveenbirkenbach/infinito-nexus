@@ -2,6 +2,8 @@ name: CI (push)
 
 on:
   push:
+    branches:
+      - "**"
     tags-ignore:
       - "v*"
       - "stable"
