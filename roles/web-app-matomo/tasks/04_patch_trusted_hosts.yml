@@ -1,0 +1,5 @@
+- name: Update trusted host
+  command: >
+    docker exec --user root {{ MATOMO_NAME }}
+    sed -i "s|^trusted_hosts\[\].*|trusted_hosts[] = \"{{ domain }}\"|" {{ MATOMO_CONFIG }}
+  notify: docker compose up

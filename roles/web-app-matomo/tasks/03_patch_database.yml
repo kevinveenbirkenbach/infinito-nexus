@@ -22,9 +22,3 @@
     sed -i "s/^password *=.*/password = {{ database_password }}/" {{ MATOMO_CONFIG }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   notify: docker compose up
-
-- name: Update trusted host
-  command: >
-    docker exec --user root {{ MATOMO_NAME }}
-    sed -i "s|^trusted_hosts\[\].*|trusted_hosts[] = \"{{ domain }}\"|" {{ MATOMO_CONFIG }}
-  notify: docker compose up

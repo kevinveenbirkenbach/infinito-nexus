@@ -6,7 +6,10 @@ features:
   desktop:            false  # Didn't work in frame didn't have high priority @todo figure out why and solve it
   css:                false
   logout:             false
-  matomo:             false 
+  matomo:             false
+
+site_name: "Matomo on {{ PRIMARY_DOMAIN }}"
+
 server:
   csp:
     whitelist:

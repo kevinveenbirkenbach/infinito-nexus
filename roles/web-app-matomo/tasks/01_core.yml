@@ -7,8 +7,39 @@
   vars:
     docker_compose_flush_handlers: true
 
-- name: "Patch Matomo config.ini.php"
-  include_tasks: 02_configuration.yml
+- name: "Matomo install | Wait for Matomo container to be running"
+  command: docker inspect -f '{{ "{{" }}.State.Running{{ "}}" }}' {{ MATOMO_NAME }}
+  register: matomo_running
+  changed_when: false
+  retries: 30
+  delay: 2
+  until: >
+    (matomo_running.rc | default(1)) == 0 and
+    ((matomo_running.stdout | default('') | trim) == 'true')
+
+- name: "Matomo install | Check whether Matomo is already installed (config.ini.php exists)"
+  command:
+    argv:
+      - docker
+      - exec
+      - "{{ MATOMO_NAME }}"
+      - sh
+      - -lc
+      - 'test -f "{{ MATOMO_CONFIG }}"'
+  register: matomo_config_exists
+  changed_when: false
+  failed_when: false
+
+- name: "Install Matomo"
+  include_tasks: 02_install.yml
+  when: matomo_config_exists.rc != 0
+
+- name: "Patch database credentials for {{ application_id }}"
+  include_tasks: 03_patch_database.yml
+  when: matomo_config_exists.rc == 0
+
+- name: "Patch Trusted Hosts for {{ application_id }}"
+  include_tasks: 04_patch_trusted_hosts.yml
 
 - name: flush docker service
   meta: flush_handlers

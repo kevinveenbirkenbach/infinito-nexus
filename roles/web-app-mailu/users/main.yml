@@ -1,3 +1,3 @@
 users:
   administrator:
-    email:                "administrator@{{ PRIMARY_DOMAIN }}"   # Administrator Email for DNS Records
+    email:                "administrator@{{ PRIMARY_DOMAIN }}"
