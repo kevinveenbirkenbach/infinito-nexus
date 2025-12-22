@@ -24,6 +24,8 @@
 - name: "Run systemctl service script in container"
   command: "{{ system_service_script_exec }}"
   become: true
+  async:  "{{ system_service_async }}"
+  poll:   "{{ system_service_poll }}"
   listen: refresh systemctl service
   when:
     - IS_CONTAINER | bool
