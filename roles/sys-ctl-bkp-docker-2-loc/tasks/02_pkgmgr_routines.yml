@@ -14,17 +14,41 @@
           - --clone-mode
           - shallow
       register: pkgmgr_update_result
+
+      retries: 4
+      delay: 30
+      until: >
+        pkgmgr_update_result.rc == 0
+        or
+        ('no command defined' in (
+          (pkgmgr_update_result.stdout | default('') | lower)
+          ~ ' '
+          ~ (pkgmgr_update_result.stderr | default('') | lower)
+        ))
+
       changed_when: >
-        ('already up to date' not in ((pkgmgr_update_result.stdout | default('') | lower)
-          ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
+        pkgmgr_update_result.rc == 0
         and
-        ('no command defined' not in ((pkgmgr_update_result.stdout | default('') | lower)
-          ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
+        ('already up to date' not in (
+          (pkgmgr_update_result.stdout | default('') | lower)
+          ~ ' '
+          ~ (pkgmgr_update_result.stderr | default('') | lower)
+        ))
+        and
+        ('no command defined' not in (
+          (pkgmgr_update_result.stdout | default('') | lower)
+          ~ ' '
+          ~ (pkgmgr_update_result.stderr | default('') | lower)
+        ))
+
       failed_when: >
-        (pkgmgr_update_result.rc != 0)
+        pkgmgr_update_result.rc != 0
         and
-        ('no command defined' not in ((pkgmgr_update_result.stdout | default('') | lower)
-          ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
+        ('no command defined' not in (
+          (pkgmgr_update_result.stdout | default('') | lower)
+          ~ ' '
+          ~ (pkgmgr_update_result.stderr | default('') | lower)
+        ))
 
     - name: "Retrieve {{ BKP_DOCKER_2_LOC_PKG }} path via pkgmgr (nix run)"
       become: true
