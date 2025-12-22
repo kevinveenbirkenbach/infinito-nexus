@@ -50,7 +50,6 @@
     that:
       - ldap_cmp_id_assert not in ["", "null"]
     fail_msg: "LDAP component '{{ KEYCLOAK_LDAP_CMP_NAME }}' not found in realm '{{ KEYCLOAK_REALM }}'."
-  when: MODE_ASSERT | bool
 
 # ---------------------------------------------------------------------------
 # Load ldap-roles mapper from dictionary (desired state)
@@ -76,7 +75,6 @@
     that:
       - desired_group_mapper_raw_assert | length > 0
     fail_msg: "'ldap-roles' mapper missing in KEYCLOAK_DICTIONARY_REALM."
-  when: MODE_ASSERT | bool
 
 # ---------------------------------------------------------------------------
 # Extract desired groups.path (dictionary)
@@ -90,7 +88,7 @@
   changed_when: false
 
 - name: Assert | groups.path defined when mapper exists
-  when: MODE_ASSERT | bool and desired_group_mapper_raw_assert | length > 0
+  when: desired_group_mapper_raw_assert | length > 0
   assert:
     that:
       - desired_groups_path_assert != ""
@@ -127,7 +125,6 @@
   changed_when: false
 
 - name: Assert | Exactly one ldap-roles mapper exists
-  when: MODE_ASSERT | bool
   assert:
     that:
       - grp_mapper_ids_assert | length == 1
@@ -148,7 +145,7 @@
   changed_when: false
 
 - name: Assert | Top-level group exists
-  when: MODE_ASSERT | bool and desired_groups_top_assert | length > 0
+  when: desired_groups_top_assert | length > 0
   assert:
     that:
       - (groups_top_id_assert.stdout | trim) not in ["", "null"]
@@ -167,4 +164,3 @@
       ldap_roles_mapper_ids: "{{ grp_mapper_ids_assert }}"
       groups_path: "{{ desired_groups_path_assert }}"
       top_group: "{{ desired_groups_top_assert }}"
-  when: MODE_ASSERT | bool

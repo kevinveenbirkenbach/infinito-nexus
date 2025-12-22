@@ -212,7 +212,6 @@
       changed_when: false
 
     - name: Refresh canonical mapper id if parse failed
-      when: (grp_mapper_id | trim) in ["", "null"]
       shell: >
         {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
         | jq -r '
@@ -228,7 +227,6 @@
       changed_when: false
 
     - name: Set canonical mapper id from refresh
-      when: (grp_mapper_id | trim) in ["", "null"]
       set_fact:
         grp_mapper_id: "{{ grp_mapper_id_after_create.stdout | trim }}"
       changed_when: false
