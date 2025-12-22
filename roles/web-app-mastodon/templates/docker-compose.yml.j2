@@ -10,7 +10,7 @@
     command: bash -c "rm -f /mastodon/tmp/pids/server.pid; bundle exec rails s -p {{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/wget.yml.j2' %}
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
     volumes:
       - data:/mastodon/public/system
@@ -26,7 +26,7 @@
     command: node ./streaming
 {% include 'roles/docker-container/templates/healthcheck/wget.yml.j2' %}
     ports:
-      - "127.0.0.1:{{ ports.localhost.websocket[application_id] }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.websocket[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 

@@ -4,4 +4,4 @@
     state: restarted
     enabled: yes
     daemon_reload: yes
-  when: not (IS_CONTAINER | bool)
+  when: not (DOCKER_IN_CONTAINER | bool)

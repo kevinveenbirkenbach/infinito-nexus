@@ -5,7 +5,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ MATOMO_IMAGE }}:{{ MATOMO_VERSION }}"
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - data:/var/www/html
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}

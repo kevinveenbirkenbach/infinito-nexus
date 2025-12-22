@@ -60,7 +60,7 @@
         target: /usr/share/kibana/config/kibana.yml
         read_only: true
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:5601"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:5601"
     depends_on:
       - elasticsearch
 

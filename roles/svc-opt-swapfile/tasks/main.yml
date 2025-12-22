@@ -1,4 +1,4 @@
 - include_tasks: 01_core.yml
   when: 
     - run_once_svc_opt_swapfile is not defined
-    - not IS_CONTAINER
+    - not DOCKER_IN_CONTAINER

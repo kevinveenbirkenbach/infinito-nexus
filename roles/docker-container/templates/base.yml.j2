@@ -6,7 +6,7 @@
       - "{{ docker_compose.files.env }}"
 {% endif %}
     logging:
-      driver: {{ "json-file" if IS_CONTAINER | bool else 'journald' }}
+      driver: {{ "json-file" if DOCKER_IN_CONTAINER | bool else 'journald' }}
 {% filter indent(4) %}
     {% include 'roles/docker-container/templates/resource.yml.j2' %}
 {% endfilter %}

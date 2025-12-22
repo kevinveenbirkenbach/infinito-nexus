@@ -5,8 +5,8 @@
     image: {{ MINIO_IMAGE }}:{{ MINIO_VERSION }}
     container_name: {{ MINIO_CONTAINER }}
     ports:
-      - "127.0.0.1:{{ MINIO_API_PORT_PUBLIC }}:{{ MINIO_API_PORT_INTERNAL }}"
-      - "127.0.0.1:{{ MINIO_CONSOLE_PORT_PUBLIC }}:{{ MINIO_CONSOLE_PORT_INTERNAL }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ MINIO_API_PORT_PUBLIC }}:{{ MINIO_API_PORT_INTERNAL }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ MINIO_CONSOLE_PORT_PUBLIC }}:{{ MINIO_CONSOLE_PORT_INTERNAL }}"
     command: server /data --console-address ":{{ MINIO_CONSOLE_PORT_INTERNAL }}"
     volumes:
       - data:/data

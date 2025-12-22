@@ -6,7 +6,7 @@
     container_name: "{{ JIRA_CONTAINER }}"
     hostname: '{{ JIRA_HOSTNAME }}'
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:8080"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8080"
     volumes:
       - 'data:{{ JIRA_STORAGE_PATH }}'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}

@@ -14,6 +14,6 @@
     enabled: yes
   when:
     - dummy_timer.changed or SYS_TIMER_ALL_ENABLED | bool
-    - not (IS_CONTAINER | bool)
+    - not (DOCKER_IN_CONTAINER | bool)
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

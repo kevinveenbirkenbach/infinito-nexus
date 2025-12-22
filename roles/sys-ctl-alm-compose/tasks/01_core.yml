@@ -38,4 +38,4 @@
       state: started
   when:
     - MODE_ASSERT | bool
-    - not( IS_CONTAINER | bool ) 
+    - not( DOCKER_IN_CONTAINER | bool ) 

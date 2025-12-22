@@ -4,7 +4,7 @@
     name: docker.service
     state:  restarted
     enabled: yes
-  when: not (IS_CONTAINER | bool)
+  when: not (DOCKER_IN_CONTAINER | bool)
   listen: docker restart
 
 - name: Ensure Docker daemon is running inside container
@@ -12,5 +12,5 @@
   register: docker_info
   failed_when: docker_info.rc != 0
   changed_when: false
-  when: IS_CONTAINER | bool
+  when: DOCKER_IN_CONTAINER | bool
   listen: docker restart

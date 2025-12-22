@@ -11,7 +11,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% if MARIADB_EXPOSE_LOCAL %}
     ports: 
-      - "127.0.0.1:{{ MARIADB_PORT }}:3306"
+      - "{{ DOCKER_BIND_HOST }}:{{ MARIADB_PORT }}:3306"
 {% endif %}
     volumes:
       - "data:/var/lib/mysql"

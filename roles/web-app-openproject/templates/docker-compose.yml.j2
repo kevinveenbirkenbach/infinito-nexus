@@ -1,7 +1,7 @@
 # @todo Test which containers can be removed crom cental_database networks
 x-op-app: &app
   logging:
-    driver: {{ "json-file" if IS_CONTAINER | bool else 'journald' }}
+    driver: {{ "json-file" if DOCKER_IN_CONTAINER | bool else 'journald' }}
   image: {{ OPENPROJECT_CUSTOM_IMAGE }}
   {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(2) }}
 
@@ -21,7 +21,7 @@ x-op-app: &app
     pull_policy: never
     command: "./docker/prod/proxy"
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
     environment:
       APP_HOST: {{ OPENPROJECT_WEB_SERVICE }}
     depends_on:

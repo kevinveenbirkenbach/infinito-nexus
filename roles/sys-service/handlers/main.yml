@@ -7,7 +7,7 @@
   async:  "{{ system_service_async }}"
   poll:   "{{ system_service_poll }}"
   listen: refresh systemctl service
-  when: not (IS_CONTAINER | bool)
+  when: not (DOCKER_IN_CONTAINER | bool)
 
 - name: "Set systemctl service state"
   systemd:
@@ -18,7 +18,7 @@
   poll:   "{{ system_service_poll }}"
   when:   
     - not (system_service_suppress_flush | bool)
-    - not (IS_CONTAINER | bool)
+    - not (DOCKER_IN_CONTAINER | bool)
   listen: refresh systemctl service
 
 - name: "Run systemctl service script in container"
@@ -34,7 +34,7 @@
     )
   listen: refresh systemctl service
   when:
-    - IS_CONTAINER | bool
+    - DOCKER_IN_CONTAINER | bool
     - not (system_service_suppress_flush | bool)
     - system_service_state | default('') == 'restarted'
     - system_service_script_exec | default('') | length > 0

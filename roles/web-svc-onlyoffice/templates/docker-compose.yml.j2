@@ -5,7 +5,7 @@
     image: "{{ ONLYOFFICE_IMAGE }}:{{ ONLYOFFICE_VERSION }}"
     container_name: {{ ONLYOFFICE_CONTAINER }}
     ports:
-      - "127.0.0.1:{{ http_port }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ http_port }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
     volumes:

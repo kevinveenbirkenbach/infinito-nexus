@@ -8,7 +8,7 @@
       - data:/var/www/data # I assume that this one is unnessecarry
       - {{ friendica_host_ldap_config }}:{{ friendica_docker_ldap_config }}:ro 
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
 
 {% include 'roles/docker-container/templates/healthcheck/msmtp_curl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

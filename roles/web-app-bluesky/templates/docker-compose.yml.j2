@@ -9,7 +9,7 @@
         - pds_data:{{ BLUESKY_PDS_DATA_DIR }}
         - {{ BLUESKY_PDSADMIN_FILE }}:/usr/local/bin/pdsadmin:ro
     ports:
-      - "127.0.0.1:{{ BLUESKY_API_PORT }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_API_PORT }}:{{ container_port }}"
 
 {% include 'roles/docker-container/templates/healthcheck/wget.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
@@ -23,7 +23,7 @@
       dockerfile: Dockerfile
     pull_policy: never
     ports:
-      - "127.0.0.1:{{ BLUESKY_WEB_PORT }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_WEB_PORT }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% endif %}

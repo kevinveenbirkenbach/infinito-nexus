@@ -7,7 +7,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
      - "1935:1935"  # @todo Add to ports
-     - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}" 
+     - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}" 
     volumes:
       - assets:/app/client/dist
       - data:/data

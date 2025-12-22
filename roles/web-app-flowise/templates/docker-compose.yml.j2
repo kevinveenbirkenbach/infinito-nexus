@@ -35,7 +35,7 @@
       - qdrant
       - litellm
     ports:
-      - "127.0.0.1:{{ FLOWISE_PORT_PUBLIC }}:{{ FLOWISE_PORT_INTERNAL }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ FLOWISE_PORT_PUBLIC }}:{{ FLOWISE_PORT_INTERNAL }}"
     volumes:
       - flowise_data:/root/.flowise
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

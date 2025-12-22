@@ -5,7 +5,7 @@
     container_name: "{{ XWIKI_CONTAINER }}"
     hostname: '{{ XWIKI_HOSTNAME}}'
     ports:
-      - "127.0.0.1:{{ XWIKI_HOST_PORT }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ XWIKI_HOST_PORT }}:{{ container_port }}"
     environment:
       JAVA_OPTS: >-
 {% if xwiki_oidc_enabled_switch| bool %}

@@ -5,10 +5,10 @@
     image: "{{ NEXTCLOUD_PROXY_IMAGE }}:{{ NEXTCLOUD_PROXY_VERSION }}"
     container_name: "{{ NEXTCLOUD_PROXY_CONTAINER }}"
     logging:
-      driver: {{ "json-file" if IS_CONTAINER | bool else 'journald' }}
+      driver: {{ "json-file" if DOCKER_IN_CONTAINER | bool else 'journald' }}
     restart: {{ DOCKER_RESTART_POLICY }}
     ports:
-      - "127.0.0.1:{{ NEXTCLOUD_PORT }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ NEXTCLOUD_PORT }}:{{ container_port }}"
     volumes:
       - "{{ NEXTCLOUD_HOST_NGINX_PATH }}:/etc/nginx/nginx.conf:ro"
     volumes_from:
@@ -99,7 +99,7 @@
     image: "{{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}"
     restart: {{ DOCKER_RESTART_POLICY }}
     logging:
-      driver: {{ "json-file" if IS_CONTAINER | bool else 'journald' }}
+      driver: {{ "json-file" if DOCKER_IN_CONTAINER | bool else 'journald' }}
     volumes:
       - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
     entrypoint: /cron.sh

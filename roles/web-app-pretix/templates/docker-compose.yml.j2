@@ -6,7 +6,7 @@
     hostname: '{{ PRETIX_HOSTNAME}}'
     command: ["all"]
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - 'data:/data'
       - 'config:/etc/pretix'

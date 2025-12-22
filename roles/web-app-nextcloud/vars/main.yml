@@ -159,4 +159,4 @@ NEXTCLOUD_DOCKER_EXEC:                    "docker exec -u {{ NEXTCLOUD_DOCKER_US
 NEXTCLOUD_DOCKER_EXEC_OCC:                "{{ NEXTCLOUD_DOCKER_EXEC }} {{ NEXTCLOUD_INTERNAL_OCC_COMMAND }}"      # Execute docker occ command
 
 ## Redis
-NEXTCLOUD_REDIS_CONTAINER:                "{{ entity_name }}-redis"
+NEXTCLOUD_REDDOCKER_IN_CONTAINER:                "{{ entity_name }}-redis"

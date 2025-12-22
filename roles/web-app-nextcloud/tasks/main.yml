@@ -12,7 +12,7 @@
   meta: flush_handlers
 
 - name: Wait until Redis is ready (PONG)
-  command: "docker exec {{ NEXTCLOUD_REDIS_CONTAINER }} redis-cli ping"
+  command: "docker exec {{ NEXTCLOUD_REDDOCKER_IN_CONTAINER }} redis-cli ping"
   register: redis_ping
   retries: 60
   delay: 2

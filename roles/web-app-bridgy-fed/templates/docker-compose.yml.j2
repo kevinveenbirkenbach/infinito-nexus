@@ -10,7 +10,7 @@
     container_name: "{{ BRIDGY_CONTAINER }}"
     hostname: "{{ container_hostname }}"
     ports:
-      - "127.0.0.1:{{ http_port }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ http_port }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

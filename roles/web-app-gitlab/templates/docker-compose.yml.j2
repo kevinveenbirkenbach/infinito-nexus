@@ -6,7 +6,7 @@
     container_name:  "{{ GITLAB_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
       - "{{ports.public.ssh[application_id]}}:22"
     volumes:
       - 'config:/etc/gitlab'

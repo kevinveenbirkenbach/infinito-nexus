@@ -20,7 +20,7 @@ def ensure_image(image: str, rebuild: bool = False, no_cache: bool = False) -> N
       - rebuild=False & image missing => build once
       - no_cache=True => add '--no-cache' to docker build
     """
-    build_args = ["docker", "build", "--network=host", "--pull"]
+    build_args = ["docker", "build", "--pull"]
     if no_cache:
         build_args.append("--no-cache")
     build_args += ["-t", image, "."]
@@ -169,7 +169,6 @@ def start_ci_container(
             "-d",
             "--name",
             name,
-            "--network=host",
             "-v",
             "/var/run/docker.sock:/var/run/docker.sock",
             "-v",

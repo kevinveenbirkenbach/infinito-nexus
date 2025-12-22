@@ -13,7 +13,7 @@
     container_name: "{{ CHESS_CONTAINER }}"
     hostname: "{{ CHESS_HOSTNAME }}"
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - 'data:{{ CHESS_APP_DATA_DIR }}'
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}

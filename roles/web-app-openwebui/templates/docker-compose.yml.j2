@@ -4,7 +4,7 @@
     image: {{ OPENWEBUI_IMAGE }}:{{ OPENWEBUI_VERSION }}
     container_name: {{ OPENWEBUI_CONTAINER }}
     ports:
-      - "127.0.0.1:{{ OPENWEBUI_PORT_PUBLIC }}:8080"
+      - "{{ DOCKER_BIND_HOST }}:{{ OPENWEBUI_PORT_PUBLIC }}:8080"
     volumes:
       - openwebui_data:/app/backend/data
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

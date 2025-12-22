@@ -5,7 +5,7 @@
     container_name: {{ MATRIX_SYNAPSE_NAME }}
     restart: {{ DOCKER_RESTART_POLICY }}
     logging:
-      driver: {{ "json-file" if IS_CONTAINER | bool else 'journald' }}
+      driver: {{ "json-file" if DOCKER_IN_CONTAINER | bool else 'journald' }}
     volumes:
       - synapse_data:/data
       - {{ MATRIX_SYNAPSE_CONFIG_PATH_HOST }}:{{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }}:ro
@@ -17,7 +17,7 @@
       - SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }}
       - SYNAPSE_REPORT_STATS=no
     ports:
-      - "127.0.0.1:{{ports.localhost.http['web-app-matrix_synapse']}}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ports.localhost.http['web-app-matrix_synapse']}}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 {% if MATRIX_BRIDGES | length > 0 %}
 {% for item in MATRIX_BRIDGES %}
@@ -36,7 +36,7 @@
     volumes:
       - {{ MATRIX_ELEMENT_CONFIG_PATH_HOST }}:/app/config.json
     ports:
-      - "127.0.0.1:{{ MATRIX_ELEMENT_PORT }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ MATRIX_ELEMENT_PORT }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/wget.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 

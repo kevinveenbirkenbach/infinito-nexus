@@ -40,7 +40,7 @@ x-environment: &shopware
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     container_name: "{{ SHOPWARE_WEB_CONTAINER }}"
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     depends_on:
       init:
         condition: service_completed_successfully

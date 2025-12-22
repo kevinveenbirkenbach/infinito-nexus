@@ -5,7 +5,7 @@
     container_name: {{ WORDPRESS_CONTAINER }}
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     ports:
-      - "127.0.0.1:{{ ports.localhost.http[application_id] }}:80"
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
     volumes:
       - data:{{ WORDPRESS_DOCKER_HTML_PATH }}
       - {{ WORDPRESS_MSMTP_ABS }}:/etc/msmtprc:ro
