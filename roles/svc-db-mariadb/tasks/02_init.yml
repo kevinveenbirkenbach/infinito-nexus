@@ -32,25 +32,23 @@
     - name: "Create database: {{ database_name }} (container via mariadb CLI)"
       community.docker.docker_container_exec:
         container: "{{ MARIADB_NAME }}"
-        command: >
-          bash -lc
-          "mariadb -uroot -p'{{ MARIADB_ROOT_PWD }}'
-          -e \"CREATE DATABASE IF NOT EXISTS \\\`{{ database_name }}\\\`
-          CHARACTER SET {{ MARIADB_ENCODING }}
-          COLLATE {{ MARIADB_COLLATION }};\""
+        command: >-
+          mariadb -uroot -p'{{ MARIADB_ROOT_PWD }}'
+          -e "CREATE DATABASE IF NOT EXISTS {{ database_name }}
+              CHARACTER SET {{ MARIADB_ENCODING }}
+              COLLATE {{ MARIADB_COLLATION }};"
       register: mariadb_create_db
       changed_when: false
-      
 
     - name: "Create database user + grant privileges (container via mariadb CLI)"
       community.docker.docker_container_exec:
         container: "{{ MARIADB_NAME }}"
-        command: >
-          bash -lc
-          "mariadb -uroot -p'{{ MARIADB_ROOT_PWD }}'
-          -e \"CREATE USER IF NOT EXISTS '{{ database_username }}'@'%' IDENTIFIED BY '{{ database_password }}';
-          GRANT ALL PRIVILEGES ON \\\`{{ database_name }}\\\`.* TO '{{ database_username }}'@'%';
-          FLUSH PRIVILEGES;\""
+        command: >-
+          mariadb -uroot -p'{{ MARIADB_ROOT_PWD }}'
+          -e "CREATE USER IF NOT EXISTS '{{ database_username }}'@'%'
+              IDENTIFIED BY '{{ database_password }}';
+              GRANT ALL PRIVILEGES ON {{ database_name }}.* TO '{{ database_username }}'@'%';
+              FLUSH PRIVILEGES;"
       register: mariadb_create_user
       changed_when: false
   when: not (MARIADB_EXPOSE_LOCAL | bool)

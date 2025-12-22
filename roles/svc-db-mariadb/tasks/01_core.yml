@@ -18,6 +18,25 @@
     state: present
   when: MARIADB_EXPOSE_LOCAL | bool
 
+- block: 
+
+    - name: "Root password reset | Check login with desired password (inside container)"
+      community.docker.docker_container_exec:
+        container: "{{ MARIADB_NAME }}"
+        command: >-
+          mariadb {{ '-h127.0.0.1 -P3306' if MARIADB_EXPOSE_LOCAL else '' }}
+          -uroot -p'{{ MARIADB_ROOT_PWD }}'
+          -e 'SELECT 1;'
+      register: mariadb_login_desired
+      changed_when: false
+      failed_when: false
+
+    - name: "Ensure MariaDB root password matches desired value"
+      include_tasks: 03_reset_root_password.yml
+      when: mariadb_login_desired.rc != 0
+
+  when: MARIADB_ALLOW_RESET_WITHOUT_PREVIOUS | bool
+
 - name: "Wait until the MariaDB container with hostname '{{ MARIADB_NAME }}' is healthy"
   community.docker.docker_container_info:
     name: "{{ MARIADB_NAME }}"
