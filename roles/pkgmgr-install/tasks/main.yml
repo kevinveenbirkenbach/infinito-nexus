@@ -1,30 +1,7 @@
 - include_tasks: 01_core.yml
   when: run_once_pkgmgr_install is not defined
 
-- name: "Install '{{ package_name }}' via Kevin's Package Manager (pkgmgr)"
-  ansible.builtin.shell: |
-    source ~/.venvs/pkgmgr/bin/activate
-    pkgmgr update {{ package_name }} --dependencies --clone-mode shallow
-  args:
-    executable: /bin/bash
-  notify: "{{ package_notify | default(omit,true) }}"
-  register: pkgmgr_update_result
-  # Mark changed only if it's not "already up to date" and not "no command defined..."
-  changed_when: >
-    ('already up to date' not in ((pkgmgr_update_result.stdout | default('') | lower)
-      ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
-    and
-    ('no command defined' not in ((pkgmgr_update_result.stdout | default('') | lower)
-      ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
-
-  # Fail only on real errors; allow the "no command defined..." case
-  failed_when: >
-    (pkgmgr_update_result.rc != 0)
-    and
-    ('no command defined' not in ((pkgmgr_update_result.stdout | default('') | lower)
-      ~ ' ' ~ (pkgmgr_update_result.stderr | default('') | lower)))
-
-- name: "update '{{ package_name }}' via pkgmgr (non-interactive)"
+- name: "Install '{{ package_name }}' via pkgmgr (non-interactive)"
   shell: |
     set -euo pipefail
     export GIT_TERMINAL_PROMPT=0
@@ -37,3 +14,14 @@
   changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
   become: true
   when: MODE_UPDATE | bool
+
+- name: "Assert | pkgmgr path resolves '{{ package_name }}'"
+  shell: |
+    set -euo pipefail
+    "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" path "{{ package_name }}" >/dev/null
+  args:
+    executable: /bin/bash
+  register: pkgmgr_path_assert
+  changed_when: false
+  failed_when: pkgmgr_path_assert.rc != 0
+  when: MODE_ASSERT | bool
