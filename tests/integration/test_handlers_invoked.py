@@ -233,10 +233,12 @@ class TestHandlersInvoked(unittest.TestCase):
         repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
         self.roles_dir = os.path.join(repo_root, "roles")
 
-        # Handlers: support .yml and .yaml
+        # Handlers: only main.yml/main.yaml define handlers.
+        # Other files under handlers/ are typically include_tasks/import_tasks
+        # and contain regular tasks, not handler definitions.
         self.handler_files = glob.glob(
-            os.path.join(self.roles_dir, "*/handlers/*.yml")
-        ) + glob.glob(os.path.join(self.roles_dir, "*/handlers/*.yaml"))
+            os.path.join(self.roles_dir, "*/handlers/main.yml")
+        ) + glob.glob(os.path.join(self.roles_dir, "*/handlers/main.yaml"))
 
         # Tasks: recurse under tasks for both .yml and .yaml
         self.task_files = glob.glob(
