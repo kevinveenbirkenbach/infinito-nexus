@@ -2,9 +2,6 @@ name: Mark commit as stable
 
 on:
   push:
-    branches:
-      - main
-      - master
     tags:
       - "v*"
 

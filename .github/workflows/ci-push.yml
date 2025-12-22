@@ -2,12 +2,10 @@ name: CI (push)
 
 on:
   push:
-    branches:
-      - main
-      - master
     tags-ignore:
       - "v*"
       - "stable"
+      - "latest"
 
 permissions:
   contents: read
