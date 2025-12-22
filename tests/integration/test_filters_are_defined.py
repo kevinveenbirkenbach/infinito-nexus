@@ -50,6 +50,7 @@ BUILTIN_FILTERS: Set[str] = {
     "min",
     "max",
     "random",
+    "regex_findall",
     "reject",
     "rejectattr",
     "replace",
