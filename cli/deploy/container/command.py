@@ -173,6 +173,8 @@ def start_ci_container(
             "-v",
             "/var/run/docker.sock:/var/run/docker.sock",
             "-v",
+            "/tmp/gh-action/:/tmp/gh-action/",
+            "-v",
             f"{project_root}:{INFINITO_SRC_DIR}",
             "-e",
             "DOCKER_HOST=unix:///var/run/docker.sock",

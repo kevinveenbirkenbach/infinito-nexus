@@ -239,16 +239,6 @@ docker image inspect "${IMAGE}" >/dev/null 2>&1 || die "Local image not found af
 EXCLUDE_CSV="$(compute_exclude_csv "${TYPE}")"
 echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
 
-echo ">>> Preflight: entry.sh inside ${IMAGE}"
-docker run \
-	-e NIX_CONFIG="${NIX_CONFIG}" \
-	--rm \
-	--entrypoint bash "${IMAGE}" -lc '
-  set -euo pipefail
-  ls -la /opt/src/infinito/scripts/docker/entry.sh
-  sha256sum /opt/src/infinito/scripts/docker/entry.sh | head -n1
-'
-
 # ---------------------------------------------------------------------------
 # Run deploy via container runner
 #   container run -- [inventory-args ...] -- [deploy-args ...]

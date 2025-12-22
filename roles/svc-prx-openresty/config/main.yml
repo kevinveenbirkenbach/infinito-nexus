@@ -6,5 +6,5 @@ docker:
       mem_reservation:  1g
       mem_limit:        2g
   volumes:
-    www:    "/var/www/"
-    nginx:  "/etc/nginx/"
+    www:    "{{ '/tmp/gh-action/' ~ (lookup('env','GITHUB_RUN_ID') | default('local', true)) if IS_CONTAINER else '' }}/var/www/"
+    nginx:  "{{ '/tmp/gh-action/' ~ (lookup('env','GITHUB_RUN_ID') | default('local', true)) if IS_CONTAINER else '' }}/etc/nginx/"
