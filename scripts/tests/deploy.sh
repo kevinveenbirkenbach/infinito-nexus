@@ -102,7 +102,7 @@ filter_allowed() {
 		;;
 	server)
 		# web-* (includes web-app-*, web-svc-*, etc.)
-		grep -E '^web-' || true
+		grep -E '^web-|svc-db-' || true
 		;;
 	universal)
 		cat
