@@ -24,8 +24,6 @@
 - name: "Run systemctl service script in container"
   command: "{{ system_service_script_exec }}"
   become: true
-  async:  "{{ system_service_async }}"
-  poll:   "{{ system_service_poll }}"
   register: system_service_script_run
   changed_when: system_service_script_run.rc == 0
   failed_when: >
