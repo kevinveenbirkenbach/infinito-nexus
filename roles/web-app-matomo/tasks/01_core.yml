@@ -5,7 +5,7 @@
   include_role:
     name: sys-stk-full-stateful
   vars:
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers: true
 
 - name: "Patch Matomo config.ini.php"
   include_tasks: 02_configuration.yml
