@@ -1,31 +1,64 @@
 ---
-# Installs Matomo non-interactively via Matomo CLI (php console core:install).
-# Idempotent: installation is skipped if config.ini.php already exists.
+# Installs Matomo non-interactively by driving the web installer via Playwright
+# using the Nix flake "matomo-bootstrap".
+#
+# Idempotent: caller skips this file when config.ini.php already exists.
 
-- name: "Matomo install | Install Matomo via CLI (creates config.ini.php)"
-  command:
+- name: "Matomo install | Wait until Matomo HTTP port is reachable"
+  ansible.builtin.wait_for:
+    host: "{{ DOCKER_BIND_HOST }}"
+    port: "{{ ports.localhost.http[application_id] }}"
+    timeout: 180
+
+- name: "Matomo install | Check whether Playwright browsers are already installed"
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.cache/ms-playwright"
+  register: playwright_cache
+
+- name: "Matomo install | Install Playwright Chromium via Nix (one-time)"
+  ansible.builtin.command:
     argv:
-      - docker
-      - exec
-      - "{{ MATOMO_NAME }}"
-      - php
-      - console
-      - core:install
-      - "--db-host={{ database_host }}"
-      - "--db-port={{ database_port }}"
-      - "--db-name={{ database_name }}"
-      - "--db-user={{ database_username }}"
-      - "--db-pass={{ database_password }}"
-      - "--admin-login={{ MATOMO_ADMIN_USER }}"
-      - "--admin-password={{ MATOMO_ADMIN_PASSWORD }}"
-      - "--admin-email={{ MATOMO_ADMIN_EMAIL }}"
-      - "--site-name={{ MATOMO_SITE_NAME }}"
-  register: matomo_install
+      - bash
+      - -lc
+      - >-
+        nix run github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap-playwright-install
+  when: not playwright_cache.stat.exists
+  register: nix_playwright_install
+  changed_when: true
+
+- name: "Matomo install | Run matomo-bootstrap via Nix (installs if needed)"
+  ansible.builtin.command:
+    argv:
+      - bash
+      - -lc
+      - >-
+        nix run github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap -- 
+        --base-url "http://{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}"
+        --admin-user "{{ MATOMO_ADMIN_USER }}"
+        --admin-password "{{ MATOMO_ADMIN_PASSWORD }}"
+        --admin-email "{{ MATOMO_ADMIN_EMAIL }}"
+        --token-description "ansible-bootstrap"
+        --timeout "30"
+        --debug
+  environment:
+    # Keep token stable for the role: matomo-bootstrap will just return this instead of creating a new one.
+    MATOMO_BOOTSTRAP_TOKEN_AUTH: "{{ matomo_auth_token }}"
+
+    # Values used by the recorded installer flow
+    MATOMO_SITE_NAME: "{{ MATOMO_SITE_NAME }}"
+    MATOMO_SITE_URL: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+    MATOMO_TIMEZONE: "Germany - Berlin"
+
+    # Optional knobs (CI / slower hosts)
+    MATOMO_PLAYWRIGHT_HEADLESS: "1"
+    MATOMO_PLAYWRIGHT_NAV_TIMEOUT_MS: "60000"
+    MATOMO_PLAYWRIGHT_SLOWMO_MS: "0"
+  register: matomo_bootstrap_run
   changed_when: true
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Matomo install | Verify config.ini.php now exists"
-  command:
+  ansible.builtin.command:
     argv:
       - docker
       - exec
@@ -35,6 +68,7 @@
       - 'test -f "{{ MATOMO_CONFIG }}"'
   register: matomo_config_exists_after
   changed_when: false
-  retries: 20
+  retries: 30
   delay: 2
-  until:  matomo_config_exists_after.rc == 0
+  until: matomo_config_exists_after.rc == 0
+  when: MODE_ASSERT | bool
