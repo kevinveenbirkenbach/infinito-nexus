@@ -15,7 +15,7 @@
       - bash
       - -lc
       - >-
-        nix run github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap-playwright-install
+        nix run --no-write-lock-file github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap-playwright-install
   when: not playwright_cache.stat.exists
   register: nix_playwright_install
   changed_when: true
@@ -26,7 +26,7 @@
       - bash
       - -lc
       - >-
-        nix run github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap -- 
+        nix run --no-write-lock-file github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap --
         --base-url "http://127.0.0.1:{{ ports.localhost.http[application_id] }}"
         --admin-user "{{ MATOMO_ADMIN_USER }}"
         --admin-password "{{ MATOMO_ADMIN_PASSWORD }}"
