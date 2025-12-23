@@ -46,7 +46,6 @@
       - "ansible-bootstrap"
       - --timeout
       - "30"
-      - --debug
   environment:
     TERM: "xterm"
 
