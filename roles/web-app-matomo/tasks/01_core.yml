@@ -7,6 +7,63 @@
   vars:
     docker_compose_flush_handlers: true
 
+- name: "DEBUG | Network reachability diagnostics for Matomo"
+  block:
+
+    - name: "DEBUG | Show Matomo container port bindings"
+      command: docker port {{ MATOMO_NAME }}
+      register: dbg_docker_port
+      changed_when: false
+      failed_when: false
+
+    - name: "DEBUG | docker port output"
+      debug:
+        var: dbg_docker_port.stdout_lines
+
+    - name: "DEBUG | Show docker bridge gateway"
+      command: >
+        docker network inspect bridge
+        --format '{{ "{{" }}(index .IPAM.Config 0).Gateway{{ "}}" }}'
+      register: dbg_bridge
+      changed_when: false
+      failed_when: false
+
+    - name: "DEBUG | docker bridge gateway"
+      debug:
+        msg: "bridge gateway = {{ dbg_bridge.stdout | default('n/a') | trim }}"
+
+    - name: "DEBUG | Test TCP reachability from THIS container"
+      shell: |
+        set +e
+        gw="{{ dbg_bridge.stdout | default('') | trim }}"
+        for h in 127.0.0.1 host.docker.internal "$gw"; do
+          [ -z "$h" ] && continue
+          echo ">>> testing $h:{{ ports.localhost.http[application_id] }}"
+          timeout 1 bash -c "</dev/tcp/$h/{{ ports.localhost.http[application_id] }}" \
+            && echo "OK" || echo "FAIL"
+        done
+      args:
+        executable: /bin/bash
+      register: dbg_tcp_tests
+      changed_when: false
+      failed_when: false
+
+    - name: "DEBUG | TCP probe results"
+      debug:
+        var: dbg_tcp_tests.stdout_lines
+
+    - name: "DEBUG | Test HTTP from inside Matomo container"
+      command: >
+        docker exec {{ MATOMO_NAME }}
+        sh -lc 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1/'
+      register: dbg_http_inside
+      changed_when: false
+      failed_when: false
+
+    - name: "DEBUG | HTTP status inside container"
+      debug:
+        msg: "HTTP inside container returned: {{ dbg_http_inside.stdout | trim }}"
+
 - name: "Matomo install | Wait for Matomo container to be running"
   command: docker inspect -f '{{ "{{" }}.State.Running{{ "}}" }}' {{ MATOMO_NAME }}
   register: matomo_running
