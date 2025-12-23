@@ -12,29 +12,44 @@
 - name: "Matomo install | Install Playwright Chromium via Nix (one-time)"
   ansible.builtin.command:
     argv:
-      - bash
-      - -lc
-      - >-
-        nix run --no-write-lock-file github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap-playwright-install
+      - nix
+      - run
+      - --no-write-lock-file
+      - github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap-playwright-install
+  environment:
+    # Avoid "TERM environment variable not set." in CI / non-tty contexts
+    TERM: "xterm"
   when: not playwright_cache.stat.exists
   register: nix_playwright_install
   changed_when: true
+  retries: 3
+  delay: 10
+  until: (nix_playwright_install.rc | default(1)) == 0
 
 - name: "Matomo install | Run matomo-bootstrap via Nix (installs if needed)"
   ansible.builtin.command:
     argv:
-      - bash
-      - -lc
-      - >-
-        nix run --no-write-lock-file github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap --
-        --base-url "http://127.0.0.1:{{ ports.localhost.http[application_id] }}"
-        --admin-user "{{ MATOMO_ADMIN_USER }}"
-        --admin-password "{{ MATOMO_ADMIN_PASSWORD }}"
-        --admin-email "{{ MATOMO_ADMIN_EMAIL }}"
-        --token-description "ansible-bootstrap"
-        --timeout "30"
-        --debug
+      - nix
+      - run
+      - --no-write-lock-file
+      - github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap
+      - --
+      - --base-url
+      - "http://127.0.0.1:{{ ports.localhost.http[application_id] }}"
+      - --admin-user
+      - "{{ MATOMO_ADMIN_USER }}"
+      - --admin-password
+      - "{{ MATOMO_ADMIN_PASSWORD }}"
+      - --admin-email
+      - "{{ MATOMO_ADMIN_EMAIL }}"
+      - --token-description
+      - "ansible-bootstrap"
+      - --timeout
+      - "30"
+      - --debug
   environment:
+    TERM: "xterm"
+
     # Keep token stable for the role: matomo-bootstrap will just return this instead of creating a new one.
     MATOMO_BOOTSTRAP_TOKEN_AUTH: "{{ matomo_auth_token }}"
 
