@@ -6,7 +6,7 @@
 
 - name: "Matomo install | Wait until Matomo HTTP port is reachable"
   ansible.builtin.wait_for:
-    host: "{{ DOCKER_BIND_HOST }}"
+    host: "127.0.0.1"
     port: "{{ ports.localhost.http[application_id] }}"
     timeout: 180
 
@@ -33,7 +33,7 @@
       - -lc
       - >-
         nix run github:kevinveenbirkenbach/matomo-bootstrap#matomo-bootstrap -- 
-        --base-url "http://{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}"
+        --base-url "http://127.0.0.1:{{ ports.localhost.http[application_id] }}"
         --admin-user "{{ MATOMO_ADMIN_USER }}"
         --admin-password "{{ MATOMO_ADMIN_PASSWORD }}"
         --admin-email "{{ MATOMO_ADMIN_EMAIL }}"
