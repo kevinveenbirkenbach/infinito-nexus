@@ -20,7 +20,7 @@
 
 - name: "Wait for LDAP to be available"
   wait_for:
-    host: "127.0.0.1"
+    host: "{{ DOCKER_REACH_HOST }}"
     port: "{{ ports.localhost.ldap[application_id] }}"
     delay: 5
     timeout: 120

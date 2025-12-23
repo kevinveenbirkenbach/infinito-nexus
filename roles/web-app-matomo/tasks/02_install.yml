@@ -4,12 +4,6 @@
 #
 # Idempotent: caller skips this file when config.ini.php already exists.
 
-- name: "Matomo install | Wait until Matomo HTTP port is reachable"
-  ansible.builtin.wait_for:
-    host: "127.0.0.1"
-    port: "{{ ports.localhost.http[application_id] }}"
-    timeout: 180
-
 - name: "Matomo install | Check whether Playwright browsers are already installed"
   ansible.builtin.stat:
     path: "{{ ansible_env.HOME }}/.cache/ms-playwright"

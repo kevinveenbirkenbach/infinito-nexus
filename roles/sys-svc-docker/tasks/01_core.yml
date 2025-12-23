@@ -16,6 +16,21 @@
 - name: Restart and enable docker service
   meta: flush_handlers
 
+- name: "Overwrite when DOCKER_IN_CONTAINER is true"
+  block: 
+
+    - name: Get docker bridge gateway
+      docker_bridge_gateway:
+      register: gw
+      changed_when: false
+
+    - name: "Set docker bridge gateway fact to '{{ gw.gateway }}'"
+      set_fact:
+        DOCKER_REACH_HOST: "{{ gw.gateway }}"
+      changed_when: false
+
+  when: DOCKER_IN_CONTAINER | bool
+
 - name: Setup Swapfile to prevent OOM Failures
   # @ See https://en.wikipedia.org/wiki/Out_of_memory
   include_tasks: "utils/load_app.yml"

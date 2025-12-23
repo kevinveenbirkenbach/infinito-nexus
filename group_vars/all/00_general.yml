@@ -65,10 +65,11 @@ DOCKER_IN_CONTAINER: >-
   }}
 
 ## Docker
-DOCKER_RESTART_POLICY:            "unless-stopped"                                                   # Default restart parameter for docker containers
-DOCKER_VARS_FILE:                 "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"  # File containing docker compose variables used by other services
-DOCKER_WHITELISTET_ANON_VOLUMES:  []                                                                 # Volumes which should be ignored during docker anonymous health check
-DOCKER_BIND_HOST:                 "{{ '0.0.0.0' if DOCKER_IN_CONTAINER | bool else '127.0.0.1'}}"
+DOCKER_RESTART_POLICY:            "unless-stopped"                                                    # Default restart parameter for docker containers
+DOCKER_VARS_FILE:                 "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"   # File containing docker compose variables used by other services
+DOCKER_WHITELISTET_ANON_VOLUMES:  []                                                                  # Volumes which should be ignored during docker anonymous health check
+DOCKER_BIND_HOST:                 "{{ '0.0.0.0' if DOCKER_IN_CONTAINER | bool else '127.0.0.1'}}"     # Host to which docker containers publish ports to
+DOCKER_REACH_HOST:                "127.0.0.1"                                                         # Default localhost, will be overwritten if DOCKER_IN_CONTAINER with Docker Bridge Gateway
 
 # Asyn Confitguration
 ASYNC_ENABLED:  "{{ not MODE_DEBUG | bool }}"                  # Activate async, deactivated for debugging
