@@ -23,10 +23,16 @@ def main():
     network = module.params["network"]
 
     try:
-        gw = run([
-            "docker", "network", "inspect", network,
-            "--format", "{{ (index .IPAM.Config 0).Gateway }}"
-        ])
+        gw = run(
+            [
+                "docker",
+                "network",
+                "inspect",
+                network,
+                "--format",
+                "{{ (index .IPAM.Config 0).Gateway }}",
+            ]
+        )
         module.exit_json(changed=False, gateway=gw)
     except Exception as e:
         module.fail_json(msg=str(e))
