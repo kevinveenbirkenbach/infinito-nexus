@@ -1,6 +1,5 @@
 users:      
-  administrator:
-    username:     "administrator"
+  administrator: {}
   no-reply:
     username:     "no-reply"
     roles:

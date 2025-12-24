@@ -1,3 +1,2 @@
 users:                                                            # Credentials
-  administrator:                                                  # WordPress administrator
-    username:         "administrator"
+  administrator: {}

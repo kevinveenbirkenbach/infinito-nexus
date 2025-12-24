@@ -1,3 +1,2 @@
 users:
-  administrator:
-    username: "administrator"
+  administrator: {}
