@@ -6,11 +6,10 @@
     - dev-make
     - dev-nix
 
-- name: Ensure OpenSSH client is installed
-  package:
-    name: openssh
-    state: present
-  become: true
+- name: "Include SSH for '{{ application_id }}'"
+  include_role:
+    name: 'sys-svc-ssh'
+  when: not (run_once_sys_svc_ssh | default(false) | bool)
 
 - name: Ensure GitHub host key is in known_hosts
   known_hosts:
