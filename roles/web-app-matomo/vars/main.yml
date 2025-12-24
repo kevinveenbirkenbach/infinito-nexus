@@ -3,26 +3,28 @@
 application_id:             "web-app-matomo"
 database_type:              "mariadb"
 domain:                     "{{ domains | get_domain(application_id) }}"
+entity_name:                "{{ application_id | get_entity_name }}"
 
 # Matomo
 
 ## Container 
 
-## Application
-MATOMO_SERVICE:             "matomo"
-MATOMO_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.matomo.version') }}"
-MATOMO_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.matomo.image') }}"
-MATOMO_NAME:                "{{ applications | get_app_conf(application_id, 'docker.services.matomo.name') }}"
+### Application
+MATOMO_SERVICE:             "{{ entity_name }}"
+MATOMO_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_SERVICE ~ '.version') }}"
+MATOMO_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_SERVICE ~ '.image') }}"
+MATOMO_NAME:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_SERVICE ~ '.name') }}"
 MATOMO_DATA:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 MATOMO_CONFIG:              "/var/www/html/config/config.ini.php"
+MATOMO_SERVICE_URL:         "http://{{ MATOMO_SERVICE }}"
 
-## Bootstrap
+### Bootstrap
 MATOMO_BOOTSTRAP_SERVICE:   "bootstrap"
 MATOMO_BOOTSTRAP_PROFILE:   "{{ MATOMO_BOOTSTRAP_SERVICE }}"
-MATOMO_BOOTSTRAP_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.bootstrap.image') }}"
-MATOMO_BOOTSTRAP_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.bootstrap.version') }}"
-MATOMO_BOOTSTRAP_NAME:      "{{ applications | get_app_conf(application_id, 'docker.services.bootstrap.name') }}"
-MATOMO_BOOTSTRAP_TIMEOUT:   "{{ applications | get_app_conf(application_id, 'docker.services.bootstrap.timeout') }}"
+MATOMO_BOOTSTRAP_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.image') }}"
+MATOMO_BOOTSTRAP_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.version') }}"
+MATOMO_BOOTSTRAP_NAME:      "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.name') }}"
+MATOMO_BOOTSTRAP_TIMEOUT:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.timeout') }}"
 MATOMO_BOOTSTRAP_ENV_FILE:  "{{ [docker_compose.directories.env, MATOMO_BOOTSTRAP_SERVICE ~ '.env'] | path_join }}"
 
 # Configuration
@@ -30,6 +32,7 @@ MATOMO_ADMIN_USER:          "{{ users.administrator.username }}"
 MATOMO_ADMIN_PASSWORD:      "{{ users.administrator.password }}"
 MATOMO_ADMIN_EMAIL:         "{{ users.administrator.email }}"
 MATOMO_SITE_NAME:           "{{ applications | get_app_conf(application_id, 'site_name') }}"
+MATOMO_SITE_URL:            "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 MATOMO_EXCLUDED_IPS:        "{{ applications | get_app_conf(application_id, 'excluded_ips') }}"
 
 # Token
