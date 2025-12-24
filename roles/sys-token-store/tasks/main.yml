@@ -1,0 +1,3 @@
+---
+- name: "sys-token-store | Ensure store path exists"
+  ansible.builtin.import_tasks: ensure_store.yml

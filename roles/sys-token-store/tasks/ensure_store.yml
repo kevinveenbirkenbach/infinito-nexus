@@ -1,0 +1,16 @@
+---
+- name: "sys-token-store | Ensure base directory"
+  ansible.builtin.file:
+    path: "{{ SYS_TOKEN_STORE_BASE_DIR }}"
+    state: directory
+    owner: "{{ SYS_TOKEN_STORE_OWNER }}"
+    group: "{{ SYS_TOKEN_STORE_GROUP }}"
+    mode: "{{ SYS_TOKEN_STORE_DIR_MODE }}"
+
+- name: "sys-token-store | Ensure store file exists"
+  ansible.builtin.file:
+    path: "{{ SYS_TOKEN_STORE_FILE_PATH }}"
+    state: touch
+    owner: "{{ SYS_TOKEN_STORE_OWNER }}"
+    group: "{{ SYS_TOKEN_STORE_GROUP }}"
+    mode: "{{ SYS_TOKEN_STORE_FILE_MODE }}"

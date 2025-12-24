@@ -1,0 +1,18 @@
+---
+# Base directories
+SYS_SECRETS_BASE_DIR: "/var/lib/infinito/secrets"
+SYS_SECRETS_TOKENS_DIR: "{{ SYS_SECRETS_BASE_DIR }}/tokens"
+
+# Ownership and permissions
+SYS_SECRETS_OWNER: "root"
+SYS_SECRETS_GROUP: "root"
+SYS_SECRETS_DIR_MODE: "0700"
+SYS_SECRETS_FILE_MODE: "0600"
+
+# Token files per service
+SYS_SECRETS_TOKEN_FILES:
+  mailu: "{{ SYS_SECRETS_TOKENS_DIR }}/mailu.yml"
+  matomo: "{{ SYS_SECRETS_TOKENS_DIR }}/matomo.yml"
+
+# Default token length (if generated)
+SYS_SECRETS_DEFAULT_TOKEN_LENGTH: 32

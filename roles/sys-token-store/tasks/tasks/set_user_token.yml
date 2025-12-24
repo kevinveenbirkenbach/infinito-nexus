@@ -1,0 +1,86 @@
+---
+# REQUIRED:
+#   sys_token_store_username
+#   sys_token_store_app
+#
+# OPTIONAL:
+#   sys_token_store_token
+
+- name: "sys-token-store | Ensure store exists"
+  ansible.builtin.import_tasks: ensure_store.yml
+
+- name: "sys-token-store | Load existing store"
+  ansible.builtin.import_tasks: load_store.yml
+
+- name: "sys-token-store | Get existing token"
+  ansible.builtin.set_fact:
+    sys_token_store_existing_token: >-
+      {{
+        (
+          sys_token_store_users.get(sys_token_store_username, {})
+          .get('tokens', {})
+          .get(sys_token_store_app)
+        )
+      }}
+  no_log: true
+
+- name: "sys-token-store | Determine effective token"
+  ansible.builtin.set_fact:
+    sys_token_store_token_effective: >-
+      {{
+        sys_token_store_token
+          | default(sys_token_store_existing_token, true)
+          | default(
+              lookup(
+                'password',
+                '/dev/null length=' ~ SYS_TOKEN_STORE_DEFAULT_TOKEN_LENGTH
+              ),
+              true
+            )
+      }}
+  no_log: true
+
+- name: "sys-token-store | Build merged structure"
+  ansible.builtin.set_fact:
+    sys_token_store_users_merged: >-
+      {{
+        sys_token_store_users
+        | combine({
+            sys_token_store_username: (
+              sys_token_store_users.get(sys_token_store_username, {})
+              | combine({
+                  'tokens': (
+                    sys_token_store_users.get(sys_token_store_username, {}).get('tokens', {})
+                    | combine({ sys_token_store_app: sys_token_store_token_effective })
+                  )
+                }, recursive=True
+              )
+            )
+          }, recursive=True
+        )
+      }}
+  no_log: true
+
+- name: "sys-token-store | Persist store (idempotent)"
+  ansible.builtin.copy:
+    dest: "{{ SYS_TOKEN_STORE_FILE_PATH }}"
+    owner: "{{ SYS_TOKEN_STORE_OWNER }}"
+    group: "{{ SYS_TOKEN_STORE_GROUP }}"
+    mode: "{{ SYS_TOKEN_STORE_FILE_MODE }}"
+    content: |
+      users:
+      {% for user_item in (sys_token_store_users_merged | dict2items | sort(attribute='key')) %}
+        {{ user_item.key }}:
+          tokens:
+      {% set tokens_dict = user_item.value.tokens | default({}) %}
+      {% for tok_item in (tokens_dict | dict2items | sort(attribute='key')) %}
+            {{ tok_item.key }}: {{ tok_item.value }}
+      {% endfor %}
+      {% endfor %}
+  when: sys_token_store_users_merged != sys_token_store_users
+  no_log: true
+
+- name: "sys-token-store | Export resolved token"
+  ansible.builtin.set_fact:
+    SYS_TOKEN_STORE_TOKEN_RESOLVED: "{{ sys_token_store_token_effective }}"
+  no_log: true
