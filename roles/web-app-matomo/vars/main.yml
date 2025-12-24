@@ -3,6 +3,7 @@
 application_id:             "web-app-matomo"
 database_type:              "mariadb"
 domain:                     "{{ domains | get_domain(application_id) }}"
+http_port:                  "{{ ports.localhost.http[application_id] }}"
 entity_name:                "{{ application_id | get_entity_name }}"
 
 # Matomo
@@ -40,4 +41,4 @@ MATOMO_TOKEN_DESCRIPTION:   "{{ applications | get_app_conf(application_id, 'tok
 matomo_token_value:         "{{ applications | get_app_conf(application_id, 'token.value') }}"
 
 # Other Variables
-MATOMO_INDEX_PHP_URL:       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}/index.php"
+MATOMO_INDEX_PHP_URL:       "http://{{ DOCKER_REACH_HOST }}:{{ http_port }}/index.php"
