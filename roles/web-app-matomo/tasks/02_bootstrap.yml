@@ -1,0 +1,39 @@
+- name: "Matomo bootstrap | Run one-shot bootstrap via docker compose profile"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - "{{ docker_compose.files.docker_compose }}"
+      - --profile
+      - "{{ MATOMO_BOOTSTRAP_PROFILE }}"
+      - run
+      - --rm
+      - "{{ MATOMO_BOOTSTRAP_SERVICE }}"
+  register: matomo_bootstrap_run
+  changed_when: true
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Matomo bootstrap | Set effective token (prefer existing, else bootstrap stdout)"
+  ansible.builtin.set_fact:
+    matomo_token_value: >-
+      {{
+        (matomo_token_value | default('') | string | trim)
+        if (matomo_token_value is defined and (matomo_token_value | string | trim) != '')
+        else (matomo_bootstrap_run.stdout | default('') | string | trim)
+      }}
+
+- name: "Matomo bootstrap | Assert we have a token now"
+  ansible.builtin.assert:
+    that:
+      - matomo_token_value is defined
+      - matomo_token_value | length > 0
+      - matomo_token_value is match("^[a-f0-9]{32,64}$")
+    fail_msg: >-
+      Matomo bootstrap did not yield a valid token. stdout={{ matomo_bootstrap_run.stdout | default('') | trim }}
+  when:
+    - matomo_bootstrap_required | bool
+    - MODE_ASSERT | bool
+
+- name: flush docker service
+  meta: flush_handlers

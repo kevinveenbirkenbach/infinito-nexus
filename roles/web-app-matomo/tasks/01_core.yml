@@ -5,7 +5,19 @@
   include_role:
     name: sys-stk-full-stateful
   vars:
-    docker_compose_flush_handlers: true
+    # Suppress flushing of handlers, because bootstrap file needs to be deployed first
+    docker_compose_flush_handlers: false
+
+- name: "Deploy '{{ MATOMO_BOOTSTRAP_ENV_FILE }}'"
+  template:
+    src: "templates/bootstrap.env.j2"
+    dest: "{{ MATOMO_BOOTSTRAP_ENV_FILE }}"
+    mode: '0640'
+    force: yes
+  notify: docker compose up
+
+- name: flush docker service
+  meta: flush_handlers
 
 - name: "Matomo install | Wait for Matomo container to be running"
   command: docker inspect -f '{{ "{{" }}.State.Running{{ "}}" }}' {{ MATOMO_NAME }}
@@ -36,9 +48,18 @@
   changed_when: false
   failed_when: false
 
+- name: "Matomo install | Determine whether bootstrap is required"
+  ansible.builtin.set_fact:
+    matomo_bootstrap_required: >-
+      {{
+        (matomo_config_exists.rc != 0)
+        or (matomo_token_value is not defined)
+        or ((matomo_token_value | string | trim) == '')
+      }}
+
 - name: "Install Matomo"
-  include_tasks: 02_install.yml
-  when: matomo_config_exists.rc != 0
+  include_tasks: 02_bootstrap.yml
+  when: matomo_bootstrap_required | bool
 
 - name: "Patch database credentials for {{ application_id }}"
   include_tasks: 03_patch_database.yml
@@ -50,35 +71,5 @@
 - name: flush docker service
   meta: flush_handlers
 
-# Wait for API
-- name: Exclude global IPs in Matomo
-  uri:
-    url: "{{ matomo_index_php_url }}"
-    method: POST
-    body_format: form-urlencoded
-    body:
-      module: API
-      method: SitesManager.setGlobalExcludedIps
-      excludedIps: "{{ MATOMO_EXCLUDED_IPS | join(',') }}"
-      format: json
-      token_auth: "{{ matomo_auth_token }}"
-    return_content: yes
-    status_code: 200
-  register: matomo_exclude
-  until: matomo_exclude.status == 200
-  retries: 5
-  delay: 10
-
-- name: Exclude CSP-CheckerBot user agent in Matomo
-  uri:
-    url: "{{ matomo_index_php_url }}"
-    method: POST
-    body_format: form-urlencoded
-    body:
-      module: API
-      method: SitesManager.setGlobalExcludedUserAgents
-      excludedUserAgents: "CSP-CheckerBot"
-      format: json
-      token_auth: "{{ matomo_auth_token }}"
-    return_content: yes
-    status_code: 200
+- name: "Config '{{ application_id }}' via API"
+  include_tasks: 05_config.yml
