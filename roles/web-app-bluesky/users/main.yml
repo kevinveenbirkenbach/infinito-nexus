@@ -1,3 +1,2 @@
 users:
   administrator:
-    email:          "administrator@{{ PRIMARY_DOMAIN }}"
