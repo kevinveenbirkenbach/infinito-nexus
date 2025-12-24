@@ -22,8 +22,7 @@ MISSING_ONLY=0
 # -------------------------------------------------------------------
 # Config (kept from the previous version)
 # -------------------------------------------------------------------
-MASK_CREDENTIALS_IN_LOGS_DEFAULT="false"
-MASK_CREDENTIALS_IN_LOGS="${MASK_CREDENTIALS_IN_LOGS:-$MASK_CREDENTIALS_IN_LOGS_DEFAULT}"
+MASK_CREDENTIALS_IN_LOGS="false"
 
 AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
 AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
