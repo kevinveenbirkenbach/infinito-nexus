@@ -1,17 +1,30 @@
 - include_tasks: utils/once/flag.yml
 
-- name: container engine install
-  package:
+- name: "Install docker engine (host only)"
+  ansible.builtin.package:
     name: >-
       {{
-        ['docker', 'docker-compose'] if ansible_os_family == 'Archlinux' else
-        ['docker.io', 'docker-compose-plugin'] if ansible_os_family == 'Debian' else
-        ['podman', 'podman-compose'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
+        ['docker'] if ansible_os_family == 'Archlinux' else
+        ['docker.io'] if ansible_os_family == 'Debian' else
+        ['docker'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
         omit
       }}
     state: present
-  # The following will not work on Red Hat systems, still included until changing to docker/podman agnostic deployment
+  when: not DOCKER_IN_CONTAINER | bool
   notify: docker restart
+
+- name: "Install docker compose"
+  ansible.builtin.package:
+    name: >-
+      {{
+        ['docker-compose'] if ansible_os_family == 'Archlinux' else
+        ['docker-compose-plugin'] if ansible_os_family == 'Debian' else
+        ['docker-compose-plugin'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
+        omit
+      }}
+    state: present
+  notify: docker restart
+
 
 - name: Restart and enable docker service
   meta: flush_handlers
