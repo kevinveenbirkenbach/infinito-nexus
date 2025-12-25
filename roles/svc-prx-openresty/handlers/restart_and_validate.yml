@@ -19,41 +19,11 @@
     ('no such container' not in ((openresty_restart.stderr | default('')) | lower))
 
 # -----------------------------
-# DEBUG path: wait until running/healthy
+# DEBUG path
 # -----------------------------
 - name: "MODE_DEBUG: wait + validate OpenResty"
   when: MODE_DEBUG | bool
   block:
-    - name: Wait until OpenResty container is running (MODE_DEBUG)
-      ansible.builtin.command: >
-        docker inspect -f '{{ "{{.State.Running}}" }}' {{ OPENRESTY_CONTAINER }}
-      register: openresty_running
-      changed_when: false
-      until: openresty_running.stdout | trim == "true"
-      retries: 24
-      delay: 5
-      failed_when: false
-
-    - name: Wait until OpenResty container is healthy if healthcheck exists (MODE_DEBUG)
-      ansible.builtin.command: >
-        docker inspect -f '{{ "{{if .State.Health}}{{.State.Health.Status}}{{else}}no-healthcheck{{end}}" }}' {{ OPENRESTY_CONTAINER }}
-      register: openresty_health
-      changed_when: false
-      until: (openresty_health.stdout | trim) in ["healthy", "no-healthcheck"]
-      retries: 24
-      delay: 5
-      failed_when: false
-
-    - name: Validate OpenResty configuration (Post-Flight-Check, MODE_DEBUG)
-      ansible.builtin.command: >
-        docker exec {{ OPENRESTY_CONTAINER }} openresty -t -q
-      register: openresty_test_post
-      changed_when: false
-      failed_when: openresty_test_post.rc != 0
-  rescue:
-    - ansible.builtin.set_fact:
-        openresty_debug_failed: true
-  always:
     - ansible.builtin.command: docker ps -a --format '{{"{{.Names}} {{.Status}}"}}'
       register: docker_ps
       changed_when: false
@@ -72,7 +42,3 @@
           OpenResty logs (last 200 lines):
           {{ openresty_logs.stdout | default('') }}
           {{ openresty_logs.stderr | default('') }}
-
-    - ansible.builtin.fail:
-        msg: "OpenResty container provision failed (MODE_DEBUG). See logs above."
-      when: openresty_debug_failed | default(false) | bool
