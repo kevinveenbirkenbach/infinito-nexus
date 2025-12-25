@@ -303,6 +303,7 @@ compose_exec python3 -m cli.deploy.dedicated \
 	-p /etc/inventories/github-ci/.password \
 	-vv \
 	--assert true \
+	--debug \
 	-T "${TYPE}"
 
 echo ">>> Deploy test suite finished successfully."
