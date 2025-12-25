@@ -1,0 +1,14 @@
+.:53 {
+  errors
+  log
+
+  template IN A {
+    match (?i)^([a-z0-9-]+\.)*docker\.test\.$
+    answer "{{ .Name }} 60 IN A 172.30.0.1"
+    fallthrough
+  }
+
+  forward . 1.1.1.1 8.8.8.8 {
+    prefer_udp
+  }
+}
