@@ -286,6 +286,7 @@ compose_exec python3 -m cli.create.inventory \
 	/etc/inventories/github-ci \
 	--host localhost \
 	--ssl-disabled \
+	--primary-domain docker.test \
 	--exclude "${EXCLUDE_CSV}" \
 	--vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
 	--authorized-keys "${AUTHORIZED_KEYS}"
