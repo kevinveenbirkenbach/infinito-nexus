@@ -1,4 +1,4 @@
-- name: "Include SSH for '{{ application_id }}'"
+- name: "Include SSH for user root"
   include_role:
     name: 'sys-svc-ssh'
   when: not (run_once_sys_svc_ssh | default(false) | bool)
