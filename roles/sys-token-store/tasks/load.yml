@@ -4,7 +4,8 @@
     src: "{{ SYS_TOKEN_STORE_FILE_PATH }}"
   register: sys_token_store_raw
   failed_when: false
-  no_log: true
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  become: true
 
 - name: "sys-token-store | Parse store YAML"
   ansible.builtin.set_fact:
@@ -18,9 +19,9 @@
         )
         else {}
       }}
-  no_log: true
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "sys-token-store | Normalize users dict"
   ansible.builtin.set_fact:
     sys_token_store_users: "{{ sys_token_store_data.users | default({}, true) }}"
-  no_log: true
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

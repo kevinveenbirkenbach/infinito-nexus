@@ -1,0 +1,159 @@
+# sys-token-store
+
+## Description
+
+`sys-token-store` is a lightweight Ansible helper role for **resolving, persisting, and injecting per-user application tokens** in a unified and idempotent way.
+
+It provides a **single source of truth** for application tokens while keeping runtime usage simple and consistent across roles.
+
+The role is intentionally **not a secret generator**.  
+It only **stores and propagates tokens that already exist** (e.g. created by bootstrap processes or provided externally).
+
+---
+
+## Core Principles
+
+- **Single logic for all roles**
+  - Always resolve tokens as: **`users → token store → empty`**
+- **No implicit token generation**
+  - Empty tokens are rejected
+- **Idempotent persistence**
+  - Store file is only rewritten when content actually changes
+- **Runtime injection**
+  - Tokens are always injected into the `users` fact for immediate use
+- **Case-sensitive keys**
+  - User keys and application IDs must match exactly
+
+---
+
+## Token Resolution Order
+
+When resolving a token, the following order is used:
+
+1. `users.<user>.tokens.<application_id>`
+2. Token store file (`token-store.yml`)
+3. Empty string (`''`)
+
+No automatic fallback generation happens.
+
+---
+
+## Store Format
+
+Tokens are stored in a single YAML file:
+
+```yaml
+users:
+  administrator:
+    tokens:
+      web-app-matomo: "46e50b0eb52d0d141a7d6cf9b3d0b3e2"
+````
+
+Default location:
+
+```
+/var/lib/infinito/secrets/tokens/token-store.yml
+```
+
+Permissions are restricted to root by default.
+
+---
+
+## Provided Tasks
+
+### `lookup.yml`
+
+Resolves a token without modifying anything.
+
+**Input**
+
+* `sys_token_store_user_key`
+* `sys_token_store_app`
+
+**Output**
+
+* `SYS_TOKEN_STORE_TOKEN_RESOLVED`
+
+---
+
+### `write.yml`
+
+Persists a token **and injects it into the runtime `users` variable**.
+
+This is the **canonical way** to store tokens.
+
+**Input**
+
+* `sys_token_store_user_key`
+* `sys_token_store_app`
+* `sys_token_store_token` (must be non-empty)
+
+**Effects**
+
+* Updates the token store file (idempotent)
+* Injects the token into `users.<user>.tokens.<app>`
+* Exports `SYS_TOKEN_STORE_TOKEN_RESOLVED`
+
+Empty tokens are rejected explicitly.
+
+---
+
+## Usage Examples
+
+### Resolve a token (read-only)
+
+```yaml
+- include_role:
+    name: sys-token-store
+    tasks_from: lookup.yml
+  vars:
+    sys_token_store_user_key: administrator
+    sys_token_store_app: web-app-matomo
+```
+
+---
+
+### Persist and inject a token
+
+```yaml
+- include_role:
+    name: sys-token-store
+    tasks_from: write.yml
+  vars:
+    sys_token_store_user_key: administrator
+    sys_token_store_app: web-app-matomo
+    sys_token_store_token: "{{ matomo_token_value }}"
+```
+
+After this, the token is immediately available as:
+
+```yaml
+users.administrator.tokens['web-app-matomo']
+```
+
+---
+
+## What This Role Does *Not* Do
+
+* ❌ No token generation
+* ❌ No encryption
+* ❌ No user management
+* ❌ No application-specific logic
+
+It is a **generic infrastructure helper**.
+
+---
+
+## Best Practices
+
+* Keep all user and application keys lowercase
+* Use stable `application_id` values
+* Let application roles create tokens
+* Let `sys-token-store` handle persistence and propagation
+
+---
+
+## License
+
+Part of the **Infinito.Nexus Project**
+Licensed under the *Infinito.Nexus NonCommercial License*.

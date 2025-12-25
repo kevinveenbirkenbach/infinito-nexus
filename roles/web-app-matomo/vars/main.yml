@@ -29,16 +29,16 @@ MATOMO_BOOTSTRAP_TIMEOUT:   "{{ applications | get_app_conf(application_id, 'doc
 MATOMO_BOOTSTRAP_ENV_FILE:  "{{ [docker_compose.directories.env, MATOMO_BOOTSTRAP_SERVICE ~ '.env'] | path_join }}"
 
 # Configuration
-MATOMO_ADMIN_USER:          "{{ users.administrator.username }}"
-MATOMO_ADMIN_PASSWORD:      "{{ users.administrator.password }}"
-MATOMO_ADMIN_EMAIL:         "{{ users.administrator.email }}"
+MATOMO_ADMIN_USER_KEY:      "administrator"
+MATOMO_ADMIN_USER_NAME:     "{{ users[MATOMO_ADMIN_USER_KEY].username }}"
+MATOMO_ADMIN_PASSWORD:      "{{ users[MATOMO_ADMIN_USER_KEY].password }}"
+MATOMO_ADMIN_EMAIL:         "{{ users[MATOMO_ADMIN_USER_KEY].email }}"
 MATOMO_SITE_NAME:           "{{ applications | get_app_conf(application_id, 'site_name') }}"
 MATOMO_SITE_URL:            "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 MATOMO_EXCLUDED_IPS:        "{{ applications | get_app_conf(application_id, 'excluded_ips') }}"
 
 # Token
-MATOMO_TOKEN_DESCRIPTION:   "{{ applications | get_app_conf(application_id, 'token.description') }}"
-matomo_token_value:         "{{ applications | get_app_conf(application_id, 'token.value') }}"
+MATOMO_TOKEN_DESCRIPTION:       "{{ applications | get_app_conf(application_id, 'token.description') }}"
 
 # Other Variables
 MATOMO_INDEX_PHP_URL:       "http://{{ DOCKER_REACH_HOST }}:{{ http_port }}/index.php"

@@ -1,3 +1,4 @@
 ---
-- name: "sys-token-store | Ensure store path exists"
-  ansible.builtin.import_tasks: ensure_store.yml
+- name: "Execute Role (once)"
+  ansible.builtin.import_tasks: 01_core.yml
+  when: run_once_sys_token_store is not defined

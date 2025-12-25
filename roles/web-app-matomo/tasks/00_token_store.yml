@@ -1,0 +1,14 @@
+---
+- name: "Matomo | Resolve token via sys-token-store (users > store)"
+  ansible.builtin.include_role:
+    name: sys-token-store
+    tasks_from: lookup.yml
+  vars:
+    sys_token_store_user_key: "{{ MATOMO_ADMIN_USER_KEY }}"
+    sys_token_store_app: "{{ application_id }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Matomo | Expose resolved token"
+  ansible.builtin.set_fact:
+    matomo_token_value: "{{ SYS_TOKEN_STORE_TOKEN_RESOLVED | default('') | string | trim }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

@@ -1,6 +1,9 @@
 # Required to be set on the top to prevent infinite recursions appearing in roles/sys-front-inj-all/tasks/01_dependencies.yml
 - include_tasks: utils/once/flag.yml
 
+- name: "Matomo | Resolve token from store/config"
+  include_tasks: 00_token_store.yml
+
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full-stateful
