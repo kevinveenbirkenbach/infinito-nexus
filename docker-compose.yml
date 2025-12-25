@@ -30,7 +30,8 @@ services:
       dockerfile: Dockerfile
       network: host  # affects only image build networking
     pull_policy: never
-    container_name: infinito_nexus
+    command: ["tail", "-f", "/dev/null"]
+    container_name: infinito_nexus_${INFINITO_DISTRO:-arch}
     image: "infinito-${INFINITO_DISTRO:-arch}"
     restart: unless-stopped
     # Use CoreDNS for CI runs (profile gate)
