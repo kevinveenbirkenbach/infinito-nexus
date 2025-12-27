@@ -1,74 +1,26 @@
-- block:
-    - name: "Install/update {{ BKP_DOCKER_2_LOC_PKG }} via pkgmgr (nix run)"
-      become: true
-      ansible.builtin.command:
-        argv:
-          - nix
-          - run
-          - --no-write-lock-file
-          - "github:kevinveenbirkenbach/package-manager#pkgmgr"
-          - --
-          - update
-          - "{{ BKP_DOCKER_2_LOC_PKG }}"
-          - --dependencies
-          - --clone-mode
-          - shallow
-      register: pkgmgr_update_result
+- name: Include dependency 'dev-python-pip'
+  include_role:
+    name: dev-python-pip
+  when: run_once_dev_python_pip is not defined
 
-      retries: 4
-      delay: 30
-      until: >
-        pkgmgr_update_result.rc == 0
-        or
-        ('no command defined' in (
-          (pkgmgr_update_result.stdout | default('') | lower)
-          ~ ' '
-          ~ (pkgmgr_update_result.stderr | default('') | lower)
-        ))
+- name: Install or upgrade baudolo system-wide via pip (force system pip)
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/pip3
+      - install
+      - -U
+      - --break-system-packages
+      - backup-docker-to-local
+  environment:
+    PIP_BREAK_SYSTEM_PACKAGES: "1"
+  changed_when: true
 
-      changed_when: >
-        pkgmgr_update_result.rc == 0
-        and
-        ('already up to date' not in (
-          (pkgmgr_update_result.stdout | default('') | lower)
-          ~ ' '
-          ~ (pkgmgr_update_result.stderr | default('') | lower)
-        ))
-        and
-        ('no command defined' not in (
-          (pkgmgr_update_result.stdout | default('') | lower)
-          ~ ' '
-          ~ (pkgmgr_update_result.stderr | default('') | lower)
-        ))
-
-      failed_when: >
-        pkgmgr_update_result.rc != 0
-        and
-        ('no command defined' not in (
-          (pkgmgr_update_result.stdout | default('') | lower)
-          ~ ' '
-          ~ (pkgmgr_update_result.stderr | default('') | lower)
-        ))
-
-    - name: "Retrieve {{ BKP_DOCKER_2_LOC_PKG }} path via pkgmgr (nix run)"
-      become: true
-      ansible.builtin.command:
-        argv:
-          - nix
-          - run
-          - --no-write-lock-file
-          - "github:kevinveenbirkenbach/package-manager#pkgmgr"
-          - --
-          - path
-          - "{{ BKP_DOCKER_2_LOC_PKG }}"
-      register: pkgmgr_output
-      changed_when: false
-
-    - name: Set fact for backup_docker_to_local_folder
-      ansible.builtin.set_fact:
-        backup_docker_to_local_folder: "{{ (pkgmgr_output.stdout | trim) ~ '/' }}"
-      changed_when: false
-
-  when: backup_docker_to_local_folder is not defined
-  vars:
-    BKP_DOCKER_2_LOC_PKG: backup-docker-to-local
+- name: Assert required baudolo commands are available
+  ansible.builtin.command: "which {{ item }}"
+  loop:
+    - baudolo
+    - baudolo-seed
+  register: baudolo_cmd_check
+  changed_when: false
+  failed_when: baudolo_cmd_check.rc != 0
+  when: MODE_ASSERT | bool

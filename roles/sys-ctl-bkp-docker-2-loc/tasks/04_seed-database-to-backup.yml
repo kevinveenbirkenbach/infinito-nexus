@@ -1,8 +1,15 @@
 - include_tasks: 02_pkgmgr_routines.yml
-  when: backup_docker_to_local_folder is not defined
+
+- name: "Ensure /etc/baudolo exists"
+  ansible.builtin.file:
+    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
 
 - name: "Display all database variables"
-  debug:
+  ansible.builtin.debug:
     msg: |
       database_application_id: "{{ database_application_id | default('undefined') }}"
       database_instance: "{{ database_instance | default('undefined') }}"
@@ -14,8 +21,8 @@
   when: MODE_DEBUG | bool
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: "fail if not all required database variables are defined"
-  fail:
+- name: "Fail if not all required database variables are defined"
+  ansible.builtin.fail:
     msg: "You must define all of the following variables: database_instance, database_name, database_username, database_password"
   when: >
     (database_instance is defined or
@@ -28,15 +35,15 @@
      database_password is defined)
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: "seed database values in directory {{ backup_docker_to_local_folder }}"
-  command: >
-    python database_entry_seeder.py databases.csv
-    "{{ database_instance }}"
-    "{{ database_name }}"
-    "{{ database_username }}"
-    "{{ database_password }}"
-  args:
-    chdir: "{{ backup_docker_to_local_folder }}"
+- name: Seed database definition via baudolo-seed (system binary)
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/baudolo-seed
+      - "{{ BKP_DOCKER_2_LOC_DATABASES_CSV }}"
+      - "{{ database_instance }}"
+      - "{{ database_name }}"
+      - "{{ database_username }}"
+      - "{{ database_password }}"
   when:
     - database_instance is defined
     - database_name is defined
@@ -46,23 +53,23 @@
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
-- name: Set file permissions for databases.csv to be readable, writable, and executable by root only
+- name: "Set permissions for databases.csv (root only)"
   ansible.builtin.file:
-    path: "{{ backup_docker_to_local_folder }}databases.csv"
-    mode: '0700'
+    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV }}"
+    mode: "0600"
     owner: root
     group: root
   when: >
     (database_instance is defined and
-    database_name is defined and
-    database_username is defined and
-    database_password is defined) and
+     database_name is defined and
+     database_username is defined and
+     database_password is defined) and
     run_once_sys_ctl_bkp_docker_2_loc_file_permission is not defined
   register: file_permission_result
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
-- name: run the backup_docker_to_local_file_permission tasks once
-  set_fact:
+- name: "Run the file permission task once"
+  ansible.builtin.set_fact:
     run_once_sys_ctl_bkp_docker_2_loc_file_permission: true
   when: run_once_sys_ctl_bkp_docker_2_loc_file_permission is not defined and file_permission_result is defined and file_permission_result.changed

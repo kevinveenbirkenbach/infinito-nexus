@@ -1,4 +1,4 @@
-# Mapping logic for backup-docker-to-local CLI arguments
+# Mapping logic for baudolo CLI arguments
 #
 # - BKP_DOCKER_2_LOC_DB_ROUTINE:       All service names where backup.database_routine is set (for --database-containers)
 # - BKP_DOCKER_2_LOC_NO_STOP_REQUIRED: All images where backup.no_stop_required is set (for --images-no-stop-required)
@@ -7,7 +7,11 @@
 
 system_service_id: sys-ctl-bkp-docker-2-loc
 
-# Verify if DB is enabled
+# Where baudolo expects the database definitions CSV (used for SQL dump scope)
+# See upstream example usage in README. :contentReference[oaicite:1]{index=1}
+BKP_DOCKER_2_LOC_DATABASES_CSV: "/var/lib/infinito/secrets/databases.csv"
+
+# Verify if DB seeding is enabled (kept compatible with your current variable scheme)
 BKP_DOCKER_2_LOC_DB_ENABLED: "{{ database_type | default('') | bool }}"
 
 # Gather mapped values as lists
@@ -42,7 +46,9 @@ BKP_DOCKER_2_LOC_CLI_ARGS_LIST:
   - "{{ BKP_DOCKER_2_LOC_NO_STOP_REQUIRED_CLI }}"
   - "{{ BKP_DOCKER_2_LOC_DISABLED_CLI }}"
 
+# Main baudolo command
 BKP_DOCKER_2_LOC_EXEC: >-
-  /usr/bin/python {{ backup_docker_to_local_folder }}backup-docker-to-local.py
+  /usr/bin/baudolo
   --compose-dir {{ PATH_DOCKER_COMPOSE_INSTANCES }}
-  {{  BKP_DOCKER_2_LOC_CLI_ARGS_LIST | select('string') | join(' ') }}
+  --databases-csv {{ BKP_DOCKER_2_LOC_DATABASES_CSV }}
+  {{ BKP_DOCKER_2_LOC_CLI_ARGS_LIST | select('string') | join(' ') }}

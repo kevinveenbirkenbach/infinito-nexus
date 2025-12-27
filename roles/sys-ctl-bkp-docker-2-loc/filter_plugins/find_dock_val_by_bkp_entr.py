@@ -1,6 +1,5 @@
 from ansible.errors import AnsibleFilterError
 
-
 def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
     """
     Iterates over all applications and their docker.services, finds services where
@@ -31,9 +30,8 @@ def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
                     results.append(mapped_value)
     return results
 
-
 class FilterModule(object):
     def filters(self):
         return {
-            "find_dock_val_by_bkp_entr": find_dock_val_by_bkp_entr,
+            'find_dock_val_by_bkp_entr': find_dock_val_by_bkp_entr,
         }
