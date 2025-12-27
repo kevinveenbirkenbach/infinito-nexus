@@ -10,7 +10,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-
 TYPE=""
 DISTRO=""
 NO_CACHE=0
@@ -23,9 +22,6 @@ MASK_CREDENTIALS_IN_LOGS="false"
 
 AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
 AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
-
-# IMPORTANT: reduce parallelism to avoid OOM-kills (rc=137) in CI/act
-CI_WORKERS="${CI_WORKERS:-1}"
 
 # Optional: allow adding additional excludes globally (comma-separated or newline-separated)
 ALWAYS_EXCLUDE="${ALWAYS_EXCLUDE:-}"
@@ -62,9 +58,6 @@ Options:
   --missing        Build only if missing (skip build if image exists)
   -h, --help       Show this help
 
-Env:
-  CI_WORKERS       Worker threads for inventory/credentials generation (default: 1)
-
 What it runs (compose-based):
   1) INFINITO_DISTRO=<distro> docker compose --profile ci build (optional)
   2) docker compose --profile ci up -d coredns infinito
@@ -99,11 +92,10 @@ compose() {
 	)
 }
 
-compose_exec() {
-	# Exec in running service "infinito"
-	# -T disables pseudo-tty (needed in CI)
-	compose exec -T infinito "$@"
+infinito_exec() {
+  docker exec "${INFINITO_CONTAINER}" "$@"
 }
+
 
 ensure_compose_image() {
 	# Compose image name in docker-compose.yml:
@@ -127,21 +119,46 @@ ensure_compose_image() {
 }
 
 start_stack() {
-	echo ">>> Starting compose stack (profile=ci): coredns + infinito"
-	compose up -d coredns infinito
+  echo ">>> Starting compose stack (profile=ci): coredns only"
+  compose up -d coredns --force-recreate
+
+  # derive compose network from coredns container
+  local coredns_id net
+  coredns_id="$(compose ps -q coredns)"
+  [[ -n "$coredns_id" ]] || die "Could not get coredns container id"
+
+  net="$(docker inspect -f '{{ range $k,$v := .NetworkSettings.Networks }}{{$k}}{{end}}' "$coredns_id")"
+  [[ -n "$net" ]] || die "Could not determine compose network"
+
+  echo ">>> Starting infinito via docker run (network=${net})"
+  docker rm -f "${INFINITO_CONTAINER}" >/dev/null 2>&1 || true
+
+  docker run -d --name "${INFINITO_CONTAINER}" \
+    --privileged \
+    --cgroupns=host \
+    --tmpfs /run \
+    --tmpfs /run/lock \
+    -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v "${REPO_ROOT}:/opt/src/infinito" \
+    --network "${net}" \
+    -e INSTALL_LOCAL_BUILD=1 \
+    -e DOCKER_HOST=unix:///var/run/docker.sock \
+    "infinito-${DISTRO}" \
+    /sbin/init
 }
 
 stop_stack() {
-	echo ">>> Stopping compose stack (profile=ci)"
-	# no -v by default (keeps named volumes). If you want cleanup, add -v.
-	compose down --remove-orphans
+  echo ">>> Stopping infinito container + compose stack"
+  docker rm -f "${INFINITO_CONTAINER}" >/dev/null 2>&1 || true
+  compose down --remove-orphans
 }
 
 # -------------------------------------------------------------------
 # Inventory/exclude logic (now executed via compose exec)
 # -------------------------------------------------------------------
 get_invokable() {
-	compose_exec sh -lc 'python3 -m cli.meta.applications.invokable' | trim_lines
+	infinito_exec sh -lc 'python3 -m cli.meta.applications.invokable' | trim_lines
 }
 
 filter_allowed() {
@@ -239,6 +256,7 @@ done
 
 [[ -n "${TYPE}" ]] || die "--type is required"
 [[ -n "${DISTRO}" ]] || die "--distro is required"
+INFINITO_CONTAINER="infinito_nexus_${DISTRO}"
 
 case "${TYPE}" in
 server | workstation | universal) ;;
@@ -277,6 +295,7 @@ trap on_exit EXIT
 ensure_compose_image
 start_stack
 
+
 # ---------------------------------------------------------------------------
 # Compute excludes
 # ---------------------------------------------------------------------------
@@ -286,25 +305,24 @@ echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
 # ---------------------------------------------------------------------------
 # Run inventory generation + deploy INSIDE the compose container
 # ---------------------------------------------------------------------------
-echo ">>> Creating CI inventory inside compose container... (CI_WORKERS=${CI_WORKERS})"
-compose_exec python3 -m cli.create.inventory \
+echo ">>> Creating CI inventory inside compose container..."
+infinito_exec python3 -m cli.create.inventory \
 	/etc/inventories/github-ci \
 	--host localhost \
 	--ssl-disabled \
 	--primary-domain docker.test \
 	--exclude "${EXCLUDE_CSV}" \
 	--vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
-	--authorized-keys "${AUTHORIZED_KEYS}" \
-	--workers "${CI_WORKERS}"
+	--authorized-keys "${AUTHORIZED_KEYS}"
 
 echo ">>> Ensuring vault password file exists..."
-compose_exec sh -lc \
+infinito_exec sh -lc \
 	"mkdir -p /etc/inventories/github-ci && \
 	 [ -f /etc/inventories/github-ci/.password ] || \
 	 printf '%s\n' 'ci-vault-password' > /etc/inventories/github-ci/.password"
 
 echo ">>> Running deploy via cli.deploy.dedicated inside compose container..."
-compose_exec python3 -m cli.deploy.dedicated \
+infinito_exec python3 -m cli.deploy.dedicated \
 	/etc/inventories/github-ci/servers.yml \
 	-p /etc/inventories/github-ci/.password \
 	-vv \

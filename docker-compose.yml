@@ -43,7 +43,6 @@ services:
 
     # systemd inside docker needs access to the host cgroup namespace
     privileged: true
-
     tmpfs:
       - /run
       - /run/lock
