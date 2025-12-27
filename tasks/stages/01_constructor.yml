@@ -1,4 +1,10 @@
 ---
+- name: Detect container environment (systemd-detect-virt)
+  ansible.builtin.command: systemd-detect-virt --container
+  register: detect_container
+  changed_when: false
+  failed_when: false
+
 - name: "Debug: allowed_applications"
   debug:
     msg: "{{ allowed_applications }}"
@@ -129,8 +135,7 @@
 - name: "Ensure correct timezone is '{{ HOST_TIMEZONE }}'"
   community.general.timezone:
     name: "{{ HOST_TIMEZONE }}"
-  when: ansible_facts.virtualization_type | default('') not in ['docker', 'containerd', 'podman']
-
+  when: not DOCKER_IN_CONTAINER | bool
 
 - name: "Load base roles"
   include_tasks: "./tasks/groups/{{ item }}-roles.yml"

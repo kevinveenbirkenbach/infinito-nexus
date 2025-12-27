@@ -24,6 +24,9 @@ MASK_CREDENTIALS_IN_LOGS="false"
 AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
 AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
 
+# IMPORTANT: reduce parallelism to avoid OOM-kills (rc=137) in CI/act
+CI_WORKERS="${CI_WORKERS:-1}"
+
 # Optional: allow adding additional excludes globally (comma-separated or newline-separated)
 ALWAYS_EXCLUDE="${ALWAYS_EXCLUDE:-}"
 
@@ -58,6 +61,9 @@ Options:
   --no-cache       Rebuild compose image with --no-cache
   --missing        Build only if missing (skip build if image exists)
   -h, --help       Show this help
+
+Env:
+  CI_WORKERS       Worker threads for inventory/credentials generation (default: 1)
 
 What it runs (compose-based):
   1) INFINITO_DISTRO=<distro> docker compose --profile ci build (optional)
@@ -271,7 +277,6 @@ trap on_exit EXIT
 ensure_compose_image
 start_stack
 
-
 # ---------------------------------------------------------------------------
 # Compute excludes
 # ---------------------------------------------------------------------------
@@ -281,7 +286,7 @@ echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
 # ---------------------------------------------------------------------------
 # Run inventory generation + deploy INSIDE the compose container
 # ---------------------------------------------------------------------------
-echo ">>> Creating CI inventory inside compose container..."
+echo ">>> Creating CI inventory inside compose container... (CI_WORKERS=${CI_WORKERS})"
 compose_exec python3 -m cli.create.inventory \
 	/etc/inventories/github-ci \
 	--host localhost \
@@ -289,7 +294,8 @@ compose_exec python3 -m cli.create.inventory \
 	--primary-domain docker.test \
 	--exclude "${EXCLUDE_CSV}" \
 	--vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
-	--authorized-keys "${AUTHORIZED_KEYS}"
+	--authorized-keys "${AUTHORIZED_KEYS}" \
+	--workers "${CI_WORKERS}"
 
 echo ">>> Ensuring vault password file exists..."
 compose_exec sh -lc \

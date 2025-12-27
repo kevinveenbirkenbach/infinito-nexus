@@ -56,15 +56,8 @@ LETSENCRYPT_WEBROOT_PATH: "/var/lib/letsencrypt/"             # Path where Certb
 LETSENCRYPT_BASE_PATH:    "/etc/letsencrypt/"                 # Base directory containing Certbot configuration, account data, and archives
 LETSENCRYPT_LIVE_PATH:    "{{ LETSENCRYPT_BASE_PATH }}live/"  # Symlink directory for the current active certificate and private key
 
-# Global flag for detecting containerized environments
-DOCKER_IN_CONTAINER: >-
-  {{
-    (ansible_virtualization_role | default('') == 'guest')
-    and
-    (ansible_virtualization_type | default('') in ['docker', 'podman', 'lxc', 'container'])
-  }}
-
 ## Docker
+DOCKER_IN_CONTAINER:              "{{ ansible_env.container | default('') != '' }}"
 DOCKER_RESTART_POLICY:            "unless-stopped"                                                    # Default restart parameter for docker containers
 DOCKER_VARS_FILE:                 "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"   # File containing docker compose variables used by other services
 DOCKER_WHITELISTET_ANON_VOLUMES:  []                                                                  # Volumes which should be ignored during docker anonymous health check

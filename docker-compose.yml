@@ -22,7 +22,7 @@ services:
         ipv4_address: 172.30.0.53
 
   # ------------------------------------------------------------
-  # Infinito runner container
+  # Infinito runner container (systemd-enabled for CI)
   # ------------------------------------------------------------
   infinito:
     build:
@@ -30,21 +30,40 @@ services:
       dockerfile: Dockerfile
       network: host  # affects only image build networking
     pull_policy: never
-    command: ["tail", "-f", "/dev/null"]
+
+    # Run systemd as PID 1
+    command:
+      - /sbin/init
+      - systemd.log_target=console
+      - systemd.log_level=debug
+      - systemd.journald.forward_to_console=1
+      - systemd.journald.max_level_console=debug
+
+    stop_signal: SIGRTMIN+3
+
+    # systemd inside docker needs access to the host cgroup namespace
+    privileged: true
+
+    tmpfs:
+      - /run
+      - /run/lock
+
+    # Helpful for interactive debugging
+    tty: true
+    stdin_open: true
+
     container_name: infinito_nexus_${INFINITO_DISTRO:-arch}
     image: "infinito-${INFINITO_DISTRO:-arch}"
-    restart: unless-stopped
-    # Use CoreDNS for CI runs (profile gate)
+    restart: "no"
+
     profiles: ["ci"]
     <<: *ci_defaults
 
-    # Host docker socket mode (same as your previous docker-run approach)
     volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/gh-action/:/tmp/gh-action/
       - .:/opt/src/infinito
-
-      # Existing volumes you had
       - data:/var/lib/docker/volumes/
       - backups:/Backups/
       - letsencrypt:/etc/letsencrypt/
@@ -57,7 +76,6 @@ services:
       GIT_SSL_NO_VERIFY: "0"
 
     ports:
-      # --- Mail services (classic + secure) ---
       - "${BIND_IP:-127.0.0.1}:25:25"
       - "${BIND_IP:-127.0.0.1}:110:110"
       - "${BIND_IP:-127.0.0.1}:143:143"
@@ -67,25 +85,20 @@ services:
       - "${BIND_IP:-127.0.0.1}:995:995"
       - "${BIND_IP:-127.0.0.1}:4190:4190"
 
-      # --- Web / API services ---
       - "${BIND_IP:-127.0.0.1}:80:80"
       - "${BIND_IP:-127.0.0.1}:443:443"
       - "${BIND_IP:-127.0.0.1}:8448:8448"
 
-      # --- TURN / STUN (UDP + TCP) ---
       - "${BIND_IP:-127.0.0.1}:3478-3480:3478-3480/udp"
       - "${BIND_IP:-127.0.0.1}:3478-3480:3478-3480"
 
-      # --- Streaming / RTMP ---
       - "${BIND_IP:-127.0.0.1}:1935:1935"
 
-      # --- Custom / application ports ---
       - "${BIND_IP:-127.0.0.1}:2201:2201"
       - "${BIND_IP:-127.0.0.1}:2202:2202"
       - "${BIND_IP:-127.0.0.1}:2203:22"
       - "${BIND_IP:-127.0.0.1}:33552:33552"
 
-      # --- Consecutive ranges ---
       - "${BIND_IP:-127.0.0.1}:48081-48083:48081-48083"
       - "${BIND_IP:-127.0.0.1}:48087:48087"
 

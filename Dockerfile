@@ -30,6 +30,39 @@ COPY . ${INFINITO_SRC_DIR}
 RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-docker/files/install-cli.sh
 
 # ------------------------------------------------------------
+# Install systemd + dbus (for CI Ansible systemd/service tests)
+# ------------------------------------------------------------
+RUN set -euo pipefail; \
+  . /etc/os-release; \
+  echo "[docker-infinito] Installing systemd/dbus for ID=${ID}"; \
+  case "${ID}" in \
+    arch) \
+      pacman -Syu --noconfirm --needed systemd dbus; \
+      ;; \
+    debian|ubuntu) \
+      apt-get update; \
+      apt-get install -y --no-install-recommends systemd systemd-sysv dbus; \
+      rm -rf /var/lib/apt/lists/*; \
+      ;; \
+    fedora) \
+      dnf -y install systemd dbus; \
+      dnf -y clean all; \
+      ;; \
+    centos|rhel) \
+      (command -v dnf >/dev/null 2>&1 && dnf -y install systemd dbus && dnf -y clean all) || \
+      (yum -y install systemd dbus && yum -y clean all); \
+      ;; \
+    *) \
+      echo "[WARN] Unknown distro ID=${ID}. Skipping systemd install."; \
+      ;; \
+  esac
+
+# systemd-in-container conventions
+ENV container=docker
+STOPSIGNAL SIGRTMIN+3
+VOLUME ["/sys/fs/cgroup"]
+
+# ------------------------------------------------------------
 # Install infinito via pkgmgr (shallow)
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
@@ -40,7 +73,7 @@ RUN set -euo pipefail; \
   pkgmgr version infinito
 
 # ------------------------------------------------------------
-# Override with local source
+# Override with local source (during build)
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
   export NIX_CONFIG="${NIX_CONFIG:-}"; \
@@ -50,4 +83,6 @@ RUN set -euo pipefail; \
 WORKDIR /
 
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
-CMD ["infinito", "--help"]
+
+# IMPORTANT: default to systemd as PID 1
+CMD ["/sbin/init"]
