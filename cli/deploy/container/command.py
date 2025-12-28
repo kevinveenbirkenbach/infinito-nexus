@@ -237,7 +237,7 @@ def run_in_container(
             check=True,
         )
 
-        # 1b) Mock backup authorized_keys file for sys-bkp-provider-user
+        # 1b) Mock backup authorized_keys file for user-backup
         print(">>> Mocking backup authorized_keys file inside CI inventory...")
         mock_key = os.environ.get(
             "AUTHORIZED_KEYS",

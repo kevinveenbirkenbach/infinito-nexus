@@ -63,4 +63,3 @@
   ansible.builtin.shell: >
     find "{{ PATH_INFINITO_BACKUP_DIR }}" -mindepth 0 -maxdepth 2 -xdev -type d -exec chmod 700 {} +
   changed_when: false
-

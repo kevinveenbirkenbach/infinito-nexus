@@ -1,0 +1,3 @@
+{% for authorized_key in USER_BACKUP_AUTHORIZED_KEYS_LIST %}
+command="{{ USER_BACKUP_WRAPPER_DST }}" {{ authorized_key }}
+{% endfor %}

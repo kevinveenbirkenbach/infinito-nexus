@@ -1,3 +1,0 @@
-authorized_keys_path: '{{ inventory_dir }}/files/{{ inventory_hostname }}/home/backup/.ssh/authorized_keys'
-authorized_keys_list: '{{ lookup(''file'', authorized_keys_path).splitlines() }}'
-
