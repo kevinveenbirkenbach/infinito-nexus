@@ -44,7 +44,7 @@ SYS_SCHEDULE_BACKUP_REMOTE_TO_LOCAL:          "*-*-* 00:30:00"                  
 SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL:          "*-*-* 01:00:00"                        # Backup the current day
 
 ### Schedule for Maintenance Tasks
-SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_RENEW:   "*-*-* 10,22:00:00"                     # Renew Mailu certificates twice per day
+SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_RENEW:   "*-*-2/2  10:00:00"                     # Renew Mailu certificates every two days (even days only)
 SYS_SCHEDULE_MAINTANANCE_LETSENCRYPT_DEPLOY:  "*-*-* 11,23:00:00"                     # Deploy letsencrypt certificates twice per day to docker containers
 SYS_SCHEDULE_MAINTANANCE_NEXTCLOUD:           "21"                                    # Do nextcloud maintanace between 21:00 and 01:00
 
