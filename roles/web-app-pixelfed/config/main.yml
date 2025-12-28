@@ -27,6 +27,8 @@ server:
 docker:
   services:
     redis:
+      backup:
+        disabled: true
       enabled: true
       mem_reservation: 0.1g
       mem_limit:       0.2g

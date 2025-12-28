@@ -20,6 +20,8 @@ server:
 docker:
   services:
     redis:
+      backup:
+        disabled: true
       enabled:            true
       cpus:               "0.3"
       mem_reservation:    "256m"

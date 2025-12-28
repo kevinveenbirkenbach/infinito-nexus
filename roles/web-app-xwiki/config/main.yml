@@ -3,6 +3,8 @@ docker:
   services:
     redis:
       enabled:            false
+      backup:
+        disabled: true
     database:
       enabled:            true
       type:               postgres

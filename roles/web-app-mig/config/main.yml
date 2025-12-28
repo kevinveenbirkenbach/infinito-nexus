@@ -1,6 +1,8 @@
 docker:
   services:
     redis:
+      backup:
+        disabled: true
       enabled:  false # No redis needed
     database:
       enabled:  false # No database needed

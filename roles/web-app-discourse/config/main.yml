@@ -26,6 +26,8 @@ docker:
     database:
       enabled: true
     redis:
+      backup:
+        disabled: true
       enabled: true
     discourse:
       name:               "discourse"

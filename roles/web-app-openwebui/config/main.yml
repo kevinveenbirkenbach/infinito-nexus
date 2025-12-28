@@ -31,6 +31,8 @@ docker:
       offline_mode:       false
       hf_hub_offline:     false
     redis:
+      backup:
+        disabled: true
       enabled: false
     database:
       enabled: false

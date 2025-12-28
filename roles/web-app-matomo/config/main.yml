@@ -62,6 +62,8 @@ docker:
     database:
       enabled: true
     redis:
+      backup:
+        disabled: true
       enabled: false
   volumes: 
     data: matomo_data

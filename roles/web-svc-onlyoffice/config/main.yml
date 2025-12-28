@@ -26,6 +26,8 @@ server:
 docker:
   services:
     redis:
+      backup:
+        disabled: true
       enabled: true
     database:
       enabled: true

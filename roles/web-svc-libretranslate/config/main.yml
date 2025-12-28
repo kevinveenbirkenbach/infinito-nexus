@@ -3,6 +3,8 @@ credentials: {}
 docker:
   services:
     redis:
+      backup:
+        disabled: true
       enabled:      false   # Enable Redis
     database:
       enabled:      false   # Enable the database
