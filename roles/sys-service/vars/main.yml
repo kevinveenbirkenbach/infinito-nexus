@@ -10,11 +10,11 @@ system_service_role_dir:              "{{ [ playbook_dir, 'roles', system_servic
 system_service_script_dir:            "{{ [ PATH_SYSTEMCTL_SCRIPTS, system_service_id ] | path_join }}"
 
 ## Settings
-system_service_force_linear_sync:     "{{ system_service_name in SYS_SERVICE_GROUP_MANIPULATION }}"    # Disables automatic async
-system_service_force_flush:           "{{ SYS_SERVICE_ALL_ENABLED | bool }}"                           # When set to true it activates the flushing of services. defaults to SYS_SERVICE_ALL_ENABLED
-system_service_suppress_flush:        "{{ (system_service_id in SYS_SERVICE_SUPPRESS_FLUSH) | bool }}" # When set to true it suppresses the flushing of services
-system_service_copy_files:            true                                                             # When set to false file copying will be skipped
-system_service_timer_enabled:         false                                                            # When set to true timer will be loaded
+system_service_force_linear_sync:     "{{ system_service_name in SYS_SERVICE_GROUP_MANIPULATION }}"                                 # Disables automatic async
+system_service_force_flush:           "{{ SYS_SERVICE_ALL_ENABLED | bool }}"                                                        # When set to true it activates the flushing of services. defaults to SYS_SERVICE_ALL_ENABLED
+system_service_suppress_flush:        "{{ (system_service_id in SYS_SERVICE_SUPPRESS_FLUSH) | bool or system_service_run_final }}"  # When set to true it suppresses the flushing of services
+system_service_copy_files:            true                                                                                          # When set to false file copying will be skipped
+system_service_timer_enabled:         false                                                                                         # When set to true timer will be loaded
 system_service_state:                 "{{ SYS_SERVICE_DEFAULT_STATE }}"
 
 ## ASYNC Settings
@@ -35,3 +35,6 @@ system_service_tpl_exec_start_pre:    ""
 system_service_tpl_exec_start:        "{{ system_service_script_exec }}"
 system_service_tpl_exec_start_post:   ""
 system_service_tpl_timeout_start_sec: "" # If not defined the default values from sys-daemon in manager will be used
+
+# Final run list aggregation
+system_service_run_final:             false

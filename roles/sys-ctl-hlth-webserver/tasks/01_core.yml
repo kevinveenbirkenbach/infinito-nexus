@@ -24,6 +24,6 @@
       {{ system_service_script_exec }}
       --web-protocol {{ WEB_PROTOCOL }}
       --expectations '{{ applications | web_health_expectations(www_enabled=WWW_REDIRECT_ENABLED | bool, group_names=group_names) | to_json }}'
-    system_service_suppress_flush:        true # The healthcheck will just work after all routines passed
+    system_service_run_final:             true # The healthcheck will just work after all routines passed
 
 - include_tasks: utils/once/flag.yml
