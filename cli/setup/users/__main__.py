@@ -66,7 +66,7 @@ def build_users(defs, primary_domain, start_id, become_pwd):
         password = overrides.get("password", become_pwd)
         reserved = overrides.get("reserved", False)
         tokens = overrides.get("tokens", {})
-        
+
         # Determine UID and GID
         if "uid" in overrides:
             uid = overrides["uid"]

@@ -1,5 +1,4 @@
 import re
-import warnings
 import unittest
 from pathlib import Path
 
@@ -76,6 +75,7 @@ class TestDockerComposeTemplates(unittest.TestCase):
                         idx_net,
                         f"{template_path}: '{self.BASE_INCLUDE}' must come before '{self.NET_INCLUDE}'",
                     )
+
 
 if __name__ == "__main__":
     unittest.main()
