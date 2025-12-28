@@ -1,4 +1,4 @@
-- name: Include dependency 'sys-pip'
+- name: "Install 'backup-docker-to-local' via pip"
   include_role:
     name: sys-pip-install
   vars:
