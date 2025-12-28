@@ -1,7 +1,7 @@
 ---
 - name: "sys-token-store | Ensure base directory"
   ansible.builtin.file:
-    path: "{{ SYS_TOKEN_STORE_BASE_DIR }}"
+    path: "{{ PATH_INFINITO_SECRETS_DIR }}"
     state: directory
     owner: "{{ SYS_TOKEN_STORE_OWNER }}"
     group: "{{ SYS_TOKEN_STORE_GROUP }}"
@@ -10,7 +10,7 @@
 
 - name: "sys-token-store | Ensure store file exists"
   ansible.builtin.file:
-    path: "{{ SYS_TOKEN_STORE_FILE_PATH }}"
+    path: "{{ PATH_INFINITO_TOKENS }}"
     state: touch
     owner: "{{ SYS_TOKEN_STORE_OWNER }}"
     group: "{{ SYS_TOKEN_STORE_GROUP }}"

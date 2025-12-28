@@ -7,3 +7,9 @@ PATH_DOCKER_COMPOSE_INSTANCES:      "/opt/docker/"
 PATH_SYSTEM_LOCK_SCRIPT:            "/opt/scripts/sys-lock.py"
 PATH_SYSTEM_SERVICE_DIR:            "/etc/systemd/system"
 PATH_DOCKER_COMPOSE_PULL_LOCK_DIR:  "/run/ansible/compose-pull/"
+
+# Infinito Credential files
+PATH_INFINITO_VAR_LIB:              "/var/lib/infinito"
+PATH_INFINITO_SECRETS_DIR:          "{{ [PATH_INFINITO_VAR_LIB,     'secrets'] | path_join }}"
+PATH_INFINITO_TOKENS:               "{{ [PATH_INFINITO_SECRETS_DIR, 'tokens.yml'] | path_join }}"
+PATH_INFINITO_DATABASE_SECRETS:     "{{ [PATH_INFINITO_SECRETS_DIR, 'databases.csv'] | path_join }}"

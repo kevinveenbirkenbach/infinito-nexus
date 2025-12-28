@@ -2,7 +2,7 @@
 
 - name: "Ensure /etc/baudolo exists"
   ansible.builtin.file:
-    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV | dirname }}"
+    path: "{{ PATH_INFINITO_DATABASE_SECRETS | dirname }}"
     state: directory
     owner: root
     group: root
@@ -39,7 +39,7 @@
   ansible.builtin.command:
     argv:
       - /usr/bin/baudolo-seed
-      - "{{ BKP_DOCKER_2_LOC_DATABASES_CSV }}"
+      - "{{ PATH_INFINITO_DATABASE_SECRETS }}"
       - "{{ database_instance }}"
       - "{{ database_name }}"
       - "{{ database_username }}"

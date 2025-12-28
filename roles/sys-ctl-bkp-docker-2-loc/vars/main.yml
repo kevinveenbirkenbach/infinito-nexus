@@ -7,10 +7,6 @@
 
 system_service_id: sys-ctl-bkp-docker-2-loc
 
-# Where baudolo expects the database definitions CSV (used for SQL dump scope)
-# See upstream example usage in README. :contentReference[oaicite:1]{index=1}
-BKP_DOCKER_2_LOC_DATABASES_CSV: "/var/lib/infinito/secrets/databases.csv"
-
 # Verify if DB seeding is enabled (kept compatible with your current variable scheme)
 BKP_DOCKER_2_LOC_DB_ENABLED: "{{ database_type | default('') | bool }}"
 
@@ -50,5 +46,5 @@ BKP_DOCKER_2_LOC_CLI_ARGS_LIST:
 BKP_DOCKER_2_LOC_EXEC: >-
   /usr/bin/baudolo
   --compose-dir {{ PATH_DOCKER_COMPOSE_INSTANCES }}
-  --databases-csv {{ BKP_DOCKER_2_LOC_DATABASES_CSV }}
+  --databases-csv {{ PATH_INFINITO_DATABASE_SECRETS }}
   {{ BKP_DOCKER_2_LOC_CLI_ARGS_LIST | select('string') | join(' ') }}

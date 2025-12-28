@@ -1,10 +1,4 @@
 ---
-# Base directory for token store files
-SYS_TOKEN_STORE_BASE_DIR: "/var/lib/infinito/secrets/tokens"
-
-# Store file (single YAML file for all users/apps)
-SYS_TOKEN_STORE_FILE_PATH: "{{ SYS_TOKEN_STORE_BASE_DIR }}/token-store.yml"
-
 # Ownership and permissions
 SYS_TOKEN_STORE_OWNER: "root"
 SYS_TOKEN_STORE_GROUP: "root"

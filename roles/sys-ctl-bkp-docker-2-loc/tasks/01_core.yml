@@ -15,7 +15,7 @@
 
 - name: Ensure secrets directory exists (root only)
   ansible.builtin.file:
-    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV | dirname }}"
+    path: "{{ PATH_INFINITO_DATABASE_SECRETS | dirname }}"
     state: directory
     owner: root
     group: root
@@ -23,7 +23,7 @@
 
 - name: Ensure databases.csv exists (root only)
   ansible.builtin.file:
-    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV }}"
+    path: "{{ PATH_INFINITO_DATABASE_SECRETS }}"
     state: touch
     owner: root
     group: root
