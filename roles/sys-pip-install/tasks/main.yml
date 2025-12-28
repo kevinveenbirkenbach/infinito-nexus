@@ -5,7 +5,7 @@
     name: sys-pip
   when: run_once_sys_pip is not defined
 
-- name: Install or upgrade {{ sys_pip_install_package }} system-wide via system python/pip
+- name: Install or upgrade {{ package_name }} system-wide via system python/pip
   ansible.builtin.command:
     argv:
       - "{{ SYS_PIP_INSTALL_PYTHON }}"
@@ -14,7 +14,7 @@
       - install
       - -U
       - --break-system-packages
-      - "{{ sys_pip_install_package }}"
+      - "{{ package_name }}"
   environment:
     PIP_BREAK_SYSTEM_PACKAGES: "1"
     PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

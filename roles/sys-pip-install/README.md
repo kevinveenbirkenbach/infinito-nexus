@@ -10,14 +10,14 @@ It is intended for CLI tools that should be available globally (e.g., maintenanc
 ## Overview
 
 - Ensures the system `pip` is available (via `sys-pip`).
-- Installs or upgrades a package specified by `sys_pip_install_package`.
+- Installs or upgrades a package specified by `package_name`.
 - Designed for non-interactive automation (CI/maintenance hosts).
 
 ## Variables
 
 ### Required
 
-- `sys_pip_install_package` (string)  
+- `package_name` (string)  
   Name of the Python package to install (e.g., `dockreap`, `backup-docker-to-local`).
 
 ## Notes / Caveats

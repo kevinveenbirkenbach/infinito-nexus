@@ -2,7 +2,7 @@
   include_role:
     name: sys-pip-install
   vars:
-    sys_pip_install_package: '{{ SYS_CTL_CLN_ANON_VOLUMES_COMMAND }}'
+    package_name: '{{ SYS_CTL_CLN_ANON_VOLUMES_COMMAND }}'
 
 - include_role:
     name: sys-service
