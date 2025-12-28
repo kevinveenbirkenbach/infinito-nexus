@@ -1,0 +1,66 @@
+- name: "Enable systemctl service"
+  systemd:
+    name: "{{ system_service_name }}"
+    enabled: yes
+    daemon_reload: true
+  become: true
+  async:  "{{ system_service_async }}"
+  poll:   "{{ system_service_poll }}"
+
+- name: "Set systemctl service state"
+  systemd:
+    name: "{{ system_service_name }}"
+    state: "{{ system_service_state }}"
+  become: true
+  async:  "{{ system_service_async }}"
+  poll:   "{{ system_service_poll }}"
+  when:     not (system_service_suppress_flush | bool)
+  register: systemd_set_state
+  failed_when: false
+
+- name: "Check is-active (rc != 0 means failure)"
+  ansible.builtin.command:
+    cmd: "systemctl --no-pager is-active {{ system_service_name }}"
+  become: true
+  register: svc_active
+  changed_when: false
+  failed_when: false
+  when: not (system_service_suppress_flush | bool)
+
+- name: "Diagnostics on failure (rc != 0)"
+  when:
+    - not (system_service_suppress_flush | bool)
+    - svc_active is defined
+    - svc_active.rc != 0
+  block:
+    - name: "systemctl status (diagnostics)"
+      ansible.builtin.command:
+        cmd: "systemctl --no-pager --full status {{ system_service_name }}"
+      become: true
+      register: systemctl_status
+      changed_when: false
+      failed_when: false
+
+    - name: "journalctl -xeu (diagnostics)"
+      ansible.builtin.command:
+        cmd: "journalctl --no-pager --no-hostname --full -xeu {{ system_service_name }}"
+      become: true
+      register: journalctl_xeu
+      changed_when: false
+      failed_when: false
+
+    - name: "Show diagnostics"
+      ansible.builtin.fail:
+        msg: |
+          Unable to start service {{ system_service_name }}; diagnostics below:
+
+          === systemd result ===
+          {{ systemd_set_state | to_nice_json }}
+
+          === systemctl status {{ system_service_name }} ===
+          {{ systemctl_status.stdout | default('') }}
+          {{ systemctl_status.stderr | default('') }}
+
+          === journalctl -xeu {{ system_service_name }} ===
+          {{ journalctl_xeu.stdout | default('') }}
+          {{ journalctl_xeu.stderr | default('') }}
