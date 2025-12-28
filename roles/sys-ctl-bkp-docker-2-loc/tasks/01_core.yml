@@ -13,15 +13,21 @@
   include_tasks: 03_reset.yml
   when: MODE_RESET | bool
 
-- name: "Set permissions for databases.csv (root only)"
+- name: Ensure secrets directory exists (root only)
   ansible.builtin.file:
-    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV }}"
-    mode: "0600"
+    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV | dirname }}"
+    state: directory
     owner: root
     group: root
-  register: file_permission_result
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+    mode: "0700"
+
+- name: Ensure databases.csv exists (root only)
+  ansible.builtin.file:
+    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV }}"
+    state: touch
+    owner: root
+    group: root
+    mode: "0600"
 
 - name: "Execute system service setup for '{{ system_service_id }}'"
   include_role:

@@ -5,10 +5,12 @@
     sys_pip_install_package: 'backup-docker-to-local'
 
 - name: Assert required baudolo commands are available
-  ansible.builtin.command: "which {{ item }}"
+  ansible.builtin.command: "which {{ cmd_name }}"
   loop:
     - baudolo
     - baudolo-seed
+  loop_control:
+    loop_var: cmd_name
   register: baudolo_cmd_check
   changed_when: false
   failed_when: baudolo_cmd_check.rc != 0
