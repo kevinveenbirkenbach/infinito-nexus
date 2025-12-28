@@ -35,6 +35,8 @@ RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-docker/files/install-cli.sh
 # ------------------------------------------------------------
 # Install systemd + dbus (for CI Ansible systemd/service tests)
 # ------------------------------------------------------------
+
+# hadolint ignore=DL3008,DL3033,DL3041
 RUN set -euo pipefail; \
   . /etc/os-release; \
   echo "[docker-infinito] Installing systemd/dbus for ID=${ID}"; \
