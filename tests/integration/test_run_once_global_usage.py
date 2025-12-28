@@ -144,7 +144,7 @@ def collect_set_fact_suffixes(obj, out_suffixes: set[str]):
         for item in obj:
             collect_set_fact_suffixes(item, out_suffixes)
     elif isinstance(obj, dict):
-        sf = obj.get("set_fact")
+        sf = obj.get("set_fact") or obj.get("ansible.builtin.set_fact")
         if isinstance(sf, dict):
             for k in sf.keys():
                 if isinstance(k, str):
@@ -191,7 +191,7 @@ def role_defines_suffix_in_doc(doc, role_suffix: str) -> bool:
                             ):
                                 return True
             # B) set_fact exact var
-            sf = node.get("set_fact")
+            sf = node.get("set_fact") or node.get("ansible.builtin.set_fact")
             if isinstance(sf, dict) and target_var in sf:
                 return True
             # Recurse
@@ -247,7 +247,6 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
                     "set_fact",
                     "include_tasks",
                     "import_tasks",
-                    'ansible.builtin.set_fact',
                     *RUN_ONCE_TASK_FILES,
                 )
             ):
