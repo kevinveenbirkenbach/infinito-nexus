@@ -4,6 +4,7 @@ import os
 import subprocess
 import time
 import sys
+from pathlib import Path
 
 
 def run_command(command, capture_output=True, check=False, shell=True):
@@ -20,7 +21,8 @@ def run_command(command, capture_output=True, check=False, shell=True):
         raise
 
 
-def pull_backups(hostname: str):
+def pull_backups(hostname: str, backups_dir: str):
+    backups_dir = backups_dir.rstrip("/")
     print(f"pulling backups from: {hostname}")
     errors = 0
 
@@ -33,7 +35,8 @@ def pull_backups(hostname: str):
     ]
     print(f"remote machine id:    {remote_machine_id}")
 
-    general_backup_machine_dir = f"/Backups/{remote_machine_id}/"
+    general_backup_machine_dir = f"{backups_dir}/{remote_machine_id}/"
+    print(f"backup root:          {backups_dir}")
     print(f"backup dir:           {general_backup_machine_dir}")
 
     try:
@@ -64,19 +67,22 @@ def pull_backups(hostname: str):
 
         # remote versions
         remote_backup_versions = run_command(
-            f'ssh "{remote_host}" "ls -d /Backups/{remote_machine_id}/backup-docker-to-local/*"'
+            f'ssh "{remote_host}" "ls -d {backups_dir}/{remote_machine_id}/{backup_type}/*"'
         ).splitlines()
         print(f"remote backup versions:   {' '.join(remote_backup_versions)}")
 
         remote_last_backup_dir = (
             remote_backup_versions[-1] if remote_backup_versions else ""
         )
+        if not remote_last_backup_dir:
+            raise RuntimeError(f"No remote backups found for {hostname}:{backup_type}")
+
         print(f"last remote backup:       {remote_last_backup_dir}")
 
         remote_source_path = f"{remote_host}:{remote_last_backup_dir}/"
         print(f"source path:              {remote_source_path}")
 
-        local_backup_destination_path = remote_last_backup_dir
+        local_backup_destination_path = f"{backups_dir}/{remote_machine_id}/{backup_type}/{Path(remote_last_backup_dir).name}"
         print(f"backup destination:       {local_backup_destination_path}")
 
         print("creating local backup destination folder...")
@@ -125,8 +131,13 @@ def main():
         description="Pull backups from a remote backup host via rsync."
     )
     parser.add_argument("hostname", help="Hostname from which backup should be pulled")
+    parser.add_argument(
+        "--folder",
+        default="/var/lib/infinito/backup",
+        help="Remote and local backup root directory (default: /var/lib/infinito/backup)",
+    )
     args = parser.parse_args()
-    pull_backups(args.hostname)
+    pull_backups(args.hostname, args.folder)
 
 
 if __name__ == "__main__":

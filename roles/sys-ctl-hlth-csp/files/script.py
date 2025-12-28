@@ -23,7 +23,12 @@ def extract_domains(config_path: str) -> list[str] | None:
         return None
 
 
-def build_docker_cmd(image: str, domains: list[str], short_mode: bool, ignore_network_blocks_from: list[str]) -> list[str]:
+def build_docker_cmd(
+    image: str,
+    domains: list[str],
+    short_mode: bool,
+    ignore_network_blocks_from: list[str],
+) -> list[str]:
     """
     Build docker run command that forwards args to the container ENTRYPOINT.
     """
@@ -41,7 +46,13 @@ def build_docker_cmd(image: str, domains: list[str], short_mode: bool, ignore_ne
     return cmd
 
 
-def run_checker(image: str, domains: list[str], short_mode: bool, ignore_network_blocks_from: list[str], always_pull: bool) -> int:
+def run_checker(
+    image: str,
+    domains: list[str],
+    short_mode: bool,
+    ignore_network_blocks_from: list[str],
+    always_pull: bool,
+) -> int:
     """
     Runs the CSP checker container and returns its exit code.
     """

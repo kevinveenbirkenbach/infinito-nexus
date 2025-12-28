@@ -32,9 +32,14 @@ class PullSpecificHostTests(unittest.TestCase):
         self.hash64 = "a" * 64
         self.host = "1.2.3.4"
         self.remote = f"backup@{self.host}"
-        self.base = f"/Backups/{self.hash64}/"
+
+        # IMPORTANT: Script default is /var/lib/infinito/backup now (via --folder / function argument)
+        self.backups_dir = "/var/lib/infinito/backup"
+        self.base = f"{self.backups_dir}/{self.hash64}/"
+
         self.backup_type = "backup-docker-to-local"
         self.type_dir = f"{self.base}{self.backup_type}/"
+
         self.last_local = f"{self.type_dir}20250101000000"
         self.last_remote = f"{self.type_dir}20250202000000"
 
@@ -47,42 +52,85 @@ class PullSpecificHostTests(unittest.TestCase):
         self, command, capture_output=True, shell=True, text=True, check=False
     ):
         cmd = command if isinstance(command, str) else " ".join(command)
+
         if cmd.startswith(f'ssh "{self.remote}" sha256sum /etc/machine-id'):
             return self._completed(stdout=f"{self.hash64}  /etc/machine-id\n")
+
         if cmd.startswith(
             f'ssh "{self.remote}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'
         ):
+            # find returns the machine-id dir itself and then the backup type dir
             return self._completed(stdout=f"{self.hash64}\n{self.backup_type}\n")
+
         if cmd.startswith(f"ls -d {self.type_dir}* | tail -1"):
             return self._completed(stdout=self.last_local)
-        if cmd.startswith(f'ssh "{self.remote}" "ls -d {self.type_dir}*'):
+
+        if cmd.startswith(
+            f'ssh "{self.remote}" "ls -d {self.backups_dir}/{self.hash64}/{self.backup_type}/*"'
+        ):
             return self._completed(stdout=f"{self.last_remote}\n")
+
         return self._completed(stdout="")
 
     def _run_side_effect_find_fail(
         self, command, capture_output=True, shell=True, text=True, check=False
     ):
         cmd = command if isinstance(command, str) else " ".join(command)
+
         if cmd.startswith(
-            f'ssh "backup@{self.host}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'
+            f'ssh "{self.remote}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'
         ):
             raise subprocess.CalledProcessError(
                 returncode=1, cmd=cmd, output="", stderr="find: error"
             )
-        if cmd.startswith(f'ssh "backup@{self.host}" sha256sum /etc/machine-id'):
+
+        if cmd.startswith(f'ssh "{self.remote}" sha256sum /etc/machine-id'):
             return self._completed(stdout=f"{self.hash64}  /etc/machine-id\n")
+
         return self._completed(stdout="")
 
     def _run_side_effect_no_types(
         self, command, capture_output=True, shell=True, text=True, check=False
     ):
         cmd = command if isinstance(command, str) else " ".join(command)
+
         if cmd.startswith(f'ssh "{self.remote}" sha256sum /etc/machine-id'):
             return self._completed(stdout=f"{self.hash64}  /etc/machine-id\n")
+
         if cmd.startswith(
             f'ssh "{self.remote}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'
         ):
+            # No backup types found
             return self._completed(stdout="")
+
+        return self._completed(stdout="")
+
+    def _run_side_effect_no_remote_versions(
+        self, command, capture_output=True, shell=True, text=True, check=False
+    ):
+        """
+        Like success, but remote versions are empty -> should raise RuntimeError
+        """
+        cmd = command if isinstance(command, str) else " ".join(command)
+
+        if cmd.startswith(f'ssh "{self.remote}" sha256sum /etc/machine-id'):
+            return self._completed(stdout=f"{self.hash64}  /etc/machine-id\n")
+
+        if cmd.startswith(
+            f'ssh "{self.remote}" "find {self.base} -maxdepth 1 -type d -execdir basename {{}} ;"'
+        ):
+            return self._completed(stdout=f"{self.hash64}\n{self.backup_type}\n")
+
+        if cmd.startswith(f"ls -d {self.type_dir}* | tail -1"):
+            # local previous backup exists (doesn't matter)
+            return self._completed(stdout=self.last_local)
+
+        if cmd.startswith(
+            f'ssh "{self.remote}" "ls -d {self.backups_dir}/{self.hash64}/{self.backup_type}/*"'
+        ):
+            # no remote backups
+            return self._completed(stdout="")
+
         return self._completed(stdout="")
 
     @patch("time.sleep", new=lambda *a, **k: None)
@@ -93,7 +141,7 @@ class PullSpecificHostTests(unittest.TestCase):
         mock_run.side_effect = self._run_side_effect_success
         mock_system.return_value = 0
         with self.assertRaises(SystemExit) as cm:
-            self.mod.pull_backups(self.host)
+            self.mod.pull_backups(self.host, self.backups_dir)
         self.assertEqual(cm.exception.code, 0)
         self.assertTrue(mock_system.called, "rsync (os.system) should be called")
 
@@ -105,7 +153,7 @@ class PullSpecificHostTests(unittest.TestCase):
         mock_run.side_effect = self._run_side_effect_no_types
         mock_system.return_value = 0
         with self.assertRaises(SystemExit) as cm:
-            self.mod.pull_backups(self.host)
+            self.mod.pull_backups(self.host, self.backups_dir)
         self.assertEqual(cm.exception.code, 0)
         self.assertFalse(
             mock_system.called, "rsync should not be called when no types found"
@@ -119,7 +167,7 @@ class PullSpecificHostTests(unittest.TestCase):
         mock_run.side_effect = self._run_side_effect_find_fail
         mock_system.return_value = 0
         with self.assertRaises(SystemExit) as cm:
-            self.mod.pull_backups(self.host)
+            self.mod.pull_backups(self.host, self.backups_dir)
         self.assertEqual(cm.exception.code, 1)
         self.assertFalse(
             mock_system.called, "rsync should not be called when find fails"
@@ -133,10 +181,27 @@ class PullSpecificHostTests(unittest.TestCase):
         mock_run.side_effect = self._run_side_effect_success
         mock_system.side_effect = [1] * 12  # 12 retries in the script
         with self.assertRaises(SystemExit) as cm:
-            self.mod.pull_backups(self.host)
+            self.mod.pull_backups(self.host, self.backups_dir)
         self.assertEqual(cm.exception.code, 1)
         self.assertEqual(
             mock_system.call_count, 12, "rsync should have retried 12 times"
+        )
+
+    @patch("time.sleep", new=lambda *a, **k: None)
+    @patch.object(os, "makedirs")
+    @patch.object(os, "system")
+    @patch.object(subprocess, "run")
+    def test_no_remote_backups_raises_runtime_error(self, mock_run, mock_system, _mkd):
+        mock_run.side_effect = self._run_side_effect_no_remote_versions
+        mock_system.return_value = 0
+
+        with self.assertRaises(RuntimeError) as cm:
+            self.mod.pull_backups(self.host, self.backups_dir)
+
+        self.assertIn("No remote backups found", str(cm.exception))
+        self.assertFalse(
+            mock_system.called,
+            "rsync should not be called when no remote backups exist",
         )
 
 

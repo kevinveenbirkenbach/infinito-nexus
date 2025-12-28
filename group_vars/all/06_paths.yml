@@ -13,3 +13,4 @@ PATH_INFINITO_VAR_LIB:              "/var/lib/infinito"
 PATH_INFINITO_SECRETS_DIR:          "{{ [PATH_INFINITO_VAR_LIB,     'secrets'] | path_join }}"
 PATH_INFINITO_TOKENS:               "{{ [PATH_INFINITO_SECRETS_DIR, 'tokens.yml'] | path_join }}"
 PATH_INFINITO_DATABASE_SECRETS:     "{{ [PATH_INFINITO_SECRETS_DIR, 'databases.csv'] | path_join }}"
+PATH_INFINITO_BACKUP_DIR:           "{{ [PATH_INFINITO_VAR_LIB, 'backup'] | path_join }}"   # Path to the backups folder

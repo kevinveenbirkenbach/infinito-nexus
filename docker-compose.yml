@@ -62,8 +62,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/gh-action/:/tmp/gh-action/
       - .:/opt/src/infinito
-      - data:/var/lib/docker/volumes/
-      - backups:/Backups/
+      - docker:/var/lib/docker/volumes/
+      - infinito:/var/lib/infinito/
       - letsencrypt:/etc/letsencrypt/
 
     environment:
@@ -101,8 +101,8 @@ services:
       - "${BIND_IP:-127.0.0.1}:48087:48087"
 
 volumes:
-  data:
-  backups:
+  docker:
+  infinito:
   letsencrypt:
 
 networks:

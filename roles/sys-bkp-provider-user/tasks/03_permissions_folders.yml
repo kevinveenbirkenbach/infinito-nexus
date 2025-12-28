@@ -1,7 +1,7 @@
 # Ensure the backups root exists and is owned by backup
 - name: Ensure backups root exists and owned by backup
   file:
-    path: "{{ BACKUPS_FOLDER_PATH }}"
+    path: "{{ PATH_INFINITO_BACKUP_DIR }}"
     state: directory
     owner: backup
     group: backup
@@ -10,7 +10,7 @@
 # Explicit ACL so 'backup' has rwx, others none
 - name: Grant ACL rwx on backups root to backup user
   ansible.posix.acl:
-    path: "{{ BACKUPS_FOLDER_PATH }}"
+    path: "{{ PATH_INFINITO_BACKUP_DIR }}"
     entity: backup
     etype: user
     permissions: rwx
@@ -19,7 +19,7 @@
 # Set default ACLs so new entries inherit rwx for backup and nothing for others
 - name: Set default ACL (inherit) for backup user under backups root
   ansible.posix.acl:
-    path: "{{ BACKUPS_FOLDER_PATH }}"
+    path: "{{ PATH_INFINITO_BACKUP_DIR }}"
     entity: backup
     etype: user
     permissions: rwx
@@ -30,7 +30,7 @@
 # Default ACLs so new entries inherit only backup's rwx
 - name: Default ACL for backup user (inherit)
   ansible.posix.acl:
-    path: "{{ BACKUPS_FOLDER_PATH }}"
+    path: "{{ PATH_INFINITO_BACKUP_DIR }}"
     etype: user
     entity: backup
     permissions: rwx
@@ -40,7 +40,7 @@
 # Explicitly set default group/other to no permissions (instead of absent)
 - name: Default ACL for group -> none
   ansible.posix.acl:
-    path: "{{ BACKUPS_FOLDER_PATH }}"
+    path: "{{ PATH_INFINITO_BACKUP_DIR }}"
     etype: group
     permissions: '---'
     default: true
@@ -48,7 +48,7 @@
 
 - name: Default ACL for other -> none
   ansible.posix.acl:
-    path: "{{ BACKUPS_FOLDER_PATH }}"
+    path: "{{ PATH_INFINITO_BACKUP_DIR }}"
     etype: other
     permissions: '---'
     default: true
@@ -56,11 +56,11 @@
 
 - name: Fix ownership level 0..2 directories to backup:backup
   ansible.builtin.shell: >
-    find "{{ BACKUPS_FOLDER_PATH }}" -mindepth 0 -maxdepth 2 -xdev -type d -exec chown backup:backup {} +
+    find "{{ PATH_INFINITO_BACKUP_DIR }}" -mindepth 0 -maxdepth 2 -xdev -type d -exec chown backup:backup {} +
   changed_when: false
 
 - name: Fix perms level 0..2 directories to 0700
   ansible.builtin.shell: >
-    find "{{ BACKUPS_FOLDER_PATH }}" -mindepth 0 -maxdepth 2 -xdev -type d -exec chmod 700 {} +
+    find "{{ PATH_INFINITO_BACKUP_DIR }}" -mindepth 0 -maxdepth 2 -xdev -type d -exec chmod 700 {} +
   changed_when: false
 
