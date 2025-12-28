@@ -3,7 +3,7 @@
       include_role:
         name: sys-ctl-cln-anon-volumes
       vars: 
-        system_service_force_flush: true
+        system_service_force_flush_instant: true
       when: run_once_sys_ctl_cln_anon_volumes is not defined
     
     - name: "Register Docker prune system service"
@@ -17,7 +17,7 @@
         system_service_tpl_exec_start_pre:  ""
         system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
         system_service_force_linear_sync:   false
-        system_service_force_flush:         "{{ MODE_CLEANUP }}"
+        system_service_force_flush_instant:         "{{ MODE_CLEANUP }}"
 
     - include_tasks: utils/once/flag.yml
   when: run_once_sys_ctl_cln_docker is not defined

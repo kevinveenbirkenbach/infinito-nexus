@@ -35,4 +35,4 @@
         (system_service_run_list | default([]) + [system_service_name])
         | unique
       }}
-  when: system_service_run_final | bool
+  when: system_service_force_flush_final | bool

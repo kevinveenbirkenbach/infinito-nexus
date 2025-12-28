@@ -8,7 +8,7 @@ but should be started once everything they depend on is ready.
 
 ## How it works
 
-- Consumes `system_service_run_list` (created by `sys-service` when `system_service_run_final=true`).
+- Consumes `system_service_run_list` (created by `sys-service` when `system_service_force_flush_final=true`).
 - Enables and starts/restarts each service.
 - Shows diagnostics (`systemctl status`, `journalctl -xeu`) on failure.
 
