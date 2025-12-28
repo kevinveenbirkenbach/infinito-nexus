@@ -76,6 +76,6 @@
 
 - name: "sys-token-store | Export resolved token"
   ansible.builtin.set_fact:
-    SYS_TOKEN_STORE_TOKEN_RESOLVED: "{{ sys_token_store_token_effective }}"
+    sys_token_store_token: "{{ sys_token_store_token_effective }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 

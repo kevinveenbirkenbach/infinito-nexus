@@ -65,7 +65,8 @@ def build_users(defs, primary_domain, start_id, become_pwd):
         roles = overrides.get("roles", [])
         password = overrides.get("password", become_pwd)
         reserved = overrides.get("reserved", False)
-
+        tokens = overrides.get("tokens", {})
+        
         # Determine UID and GID
         if "uid" in overrides:
             uid = overrides["uid"]
@@ -80,6 +81,7 @@ def build_users(defs, primary_domain, start_id, become_pwd):
             "uid": uid,
             "gid": gid,
             "roles": roles,
+            "tokens": tokens,
         }
         if description is not None:
             entry["description"] = description

@@ -72,7 +72,7 @@ Resolves a token without modifying anything.
 
 **Output**
 
-* `SYS_TOKEN_STORE_TOKEN_RESOLVED`
+* `sys_token_store_token`
 
 ---
 
@@ -92,7 +92,7 @@ This is the **canonical way** to store tokens.
 
 * Updates the token store file (idempotent)
 * Injects the token into `users.<user>.tokens.<app>`
-* Exports `SYS_TOKEN_STORE_TOKEN_RESOLVED`
+* Exports `sys_token_store_token`
 
 Empty tokens are rejected explicitly.
 

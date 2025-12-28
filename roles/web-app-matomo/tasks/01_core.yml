@@ -2,7 +2,7 @@
 - include_tasks: utils/once/flag.yml
 
 - name: "Matomo | Resolve token from store/config"
-  include_tasks: 00_token_store.yml
+  include_tasks: 02_token_store.yml
 
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
@@ -51,28 +51,19 @@
   changed_when: false
   failed_when: false
 
-- name: "Matomo install | Determine whether bootstrap is required"
-  ansible.builtin.set_fact:
-    matomo_bootstrap_required: >-
-      {{
-        (matomo_config_exists.rc != 0)
-        or (matomo_token_value is not defined)
-        or ((matomo_token_value | string | trim) == '')
-      }}
-
 - name: "Install Matomo"
-  include_tasks: 02_bootstrap.yml
-  when: matomo_bootstrap_required | bool
+  include_tasks: 03_bootstrap.yml
+  when: matomo_config_exists.rc != 0
 
 - name: "Patch database credentials for {{ application_id }}"
-  include_tasks: 03_patch_database.yml
+  include_tasks: 04_patch_database.yml
   when: matomo_config_exists.rc == 0
 
 - name: "Patch Trusted Hosts for {{ application_id }}"
-  include_tasks: 04_patch_trusted_hosts.yml
+  include_tasks: 05_patch_trusted_hosts.yml
 
 - name: flush docker service
   meta: flush_handlers
 
 - name: "Config '{{ application_id }}' via API"
-  include_tasks: 05_config.yml
+  include_tasks: 06_config.yml

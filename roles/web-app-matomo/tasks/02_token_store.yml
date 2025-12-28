@@ -10,5 +10,5 @@
 
 - name: "Matomo | Expose resolved token"
   ansible.builtin.set_fact:
-    matomo_token_value: "{{ SYS_TOKEN_STORE_TOKEN_RESOLVED | default('') | string | trim }}"
+    matomo_token_value: "{{ sys_token_store_token | default('') | string | trim }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

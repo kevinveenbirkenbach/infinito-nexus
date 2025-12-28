@@ -4,7 +4,7 @@
 #   sys_token_store_app
 #
 # OUTPUT:
-#   SYS_TOKEN_STORE_TOKEN_RESOLVED
+#   sys_token_store_token
 
 - name: "sys-token-store | Ensure store exists"
   ansible.builtin.import_tasks: 01_core.yml
@@ -44,7 +44,7 @@
 
 - name: "sys-token-store | Resolve token (users > store > '')"
   ansible.builtin.set_fact:
-    SYS_TOKEN_STORE_TOKEN_RESOLVED: >-
+    sys_token_store_token: >-
       {{
         sys_token_store_users_token
         if (sys_token_store_users_token != '')
