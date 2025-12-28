@@ -1,3 +1,5 @@
+# run_once_sys_pip_install: disabled
+
 - name: Include dependency 'sys-pip'
   include_role:
     name: sys-pip
