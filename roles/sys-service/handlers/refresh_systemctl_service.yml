@@ -18,20 +18,39 @@
   register: systemd_set_state
   failed_when: false
 
-- name: "Check is-active (rc != 0 means failure)"
+- name: sys-service | Read unit Result (oneshot-safe)
   ansible.builtin.command:
-    cmd: "systemctl --no-pager is-active {{ system_service_name }}"
-  become: true
-  register: svc_active
+    argv:
+      - systemctl
+      - --no-pager
+      - show
+      - -p
+      - Result
+      - --value
+      - "{{ system_service_id }}.infinito.nexus.service"
+  register: system_service_result
   changed_when: false
   failed_when: false
-  when: not (system_service_suppress_flush | bool)
+
+- name: sys-service | Read unit ExecMainStatus (oneshot-safe)
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - --no-pager
+      - show
+      - -p
+      - ExecMainStatus
+      - --value
+      - "{{ system_service_id }}.infinito.nexus.service"
+  register: system_service_exec_status
+  changed_when: false
+  failed_when: false
 
 - name: "Diagnostics on failure (rc != 0)"
   when:
     - not (system_service_suppress_flush | bool)
-    - svc_active is defined
-    - svc_active.rc != 0
+    - (system_service_result.stdout | default('')) not in ['success', '']
+      or (system_service_exec_status.stdout | default('')) not in ['0', '']
   block:
     - name: "systemctl status (diagnostics)"
       ansible.builtin.command:
