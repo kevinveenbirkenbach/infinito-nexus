@@ -7,7 +7,7 @@ import sys
 import argparse
 
 
-def extract_domains(config_path):
+def extract_domains(config_path: str) -> list[str] | None:
     """
     Extracts domain names from .conf filenames in the given directory.
     """
@@ -23,34 +23,47 @@ def extract_domains(config_path):
         return None
 
 
-def run_checkcsp(domains, ignore_network_blocks_from):
+def build_docker_cmd(image: str, domains: list[str], short_mode: bool, ignore_network_blocks_from: list[str]) -> list[str]:
     """
-    Executes the 'checkcsp' command with the given domains and optional ignores.
+    Build docker run command that forwards args to the container ENTRYPOINT.
     """
-    cmd = ["checkcsp", "start", "--short"]
+    cmd = ["docker", "run", "--rm", image]
 
-    # pass through ignore list only if not empty
+    if short_mode:
+        cmd.append("--short")
+
     if ignore_network_blocks_from:
         cmd.append("--ignore-network-blocks-from")
         cmd.extend(ignore_network_blocks_from)
         cmd.append("--")
 
-    cmd += domains
+    cmd.extend(domains)
+    return cmd
 
+
+def run_checker(image: str, domains: list[str], short_mode: bool, ignore_network_blocks_from: list[str], always_pull: bool) -> int:
+    """
+    Runs the CSP checker container and returns its exit code.
+    """
+    if always_pull:
+        # best-effort pull; if it fails, continue with local image
+        subprocess.run(["docker", "pull", image], check=False)
+
+    cmd = build_docker_cmd(image, domains, short_mode, ignore_network_blocks_from)
     try:
-        result = subprocess.run(cmd, check=True)
-        return result.returncode
-    except subprocess.CalledProcessError as e:
-        print(f"'checkcsp' reported issues (exit code {e.returncode})", file=sys.stderr)
-        return e.returncode
-    except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
+        result = subprocess.run(cmd, check=False)
+        return int(result.returncode)
+    except FileNotFoundError:
+        print("docker not found. Please install Docker.", file=sys.stderr)
+        return 127
+    except Exception as exc:
+        print(f"Unexpected error: {exc}", file=sys.stderr)
         return 1
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Extract domains from NGINX and run checkcsp against them"
+        description="Extract domains from NGINX and run CSP checker (Docker) against them"
     )
     parser.add_argument(
         "--nginx-config-dir",
@@ -58,11 +71,27 @@ def main():
         help="Directory containing NGINX .conf files",
     )
     parser.add_argument(
+        "--image",
+        required=True,
+        help="Docker image to run (e.g. ghcr.io/kevinveenbirkenbach/csp-checker:latest)",
+    )
+    parser.add_argument(
+        "--always-pull",
+        action="store_true",
+        help="Pull the docker image before running (best-effort).",
+    )
+    parser.add_argument(
+        "--short",
+        action="store_true",
+        help="Enable short mode (one example per policy/type).",
+    )
+    parser.add_argument(
         "--ignore-network-blocks-from",
         nargs="*",
         default=[],
-        help="Optional: one or more domains whose network block failures should be ignored",
+        help="Optional: domains whose network block failures should be ignored",
     )
+
     args = parser.parse_args()
 
     domains = extract_domains(args.nginx_config_dir)
@@ -73,7 +102,13 @@ def main():
         print("No domains found to check.")
         sys.exit(0)
 
-    rc = run_checkcsp(domains, args.ignore_network_blocks_from)
+    rc = run_checker(
+        image=args.image,
+        domains=domains,
+        short_mode=bool(args.short),
+        ignore_network_blocks_from=list(args.ignore_network_blocks_from or []),
+        always_pull=bool(args.always_pull),
+    )
     sys.exit(rc)
 
 

@@ -3,16 +3,20 @@
     name: sys-ctl-alm-compose
   when: run_once_sys_ctl_alm_compose is not defined
 
-- name: "pkgmgr install"
-  include_role:
-    name: pkgmgr-install
-  vars:
-    package_name: checkcsp
+# Optional: pre-pull once at deploy time (recommended for reliability)
+- name: Pull CSP checker image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - pull
+      - "{{ HEALTH_CSP_IMAGE }}"
+  changed_when: false
+  when: MODE_UPDATE | bool
 
 - include_role:
     name: sys-service
   vars:
-    system_service_suppress_flush:        true # The healthcheck will just work after all routines passed
+    system_service_suppress_flush:        true
     system_service_on_calendar:           "{{ SYS_SCHEDULE_HEALTH_CSP_CRAWLER }}"
     system_service_timer_enabled:         true
     system_service_tpl_on_failure:        "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
@@ -20,6 +24,11 @@
     system_service_tpl_exec_start: >-
       {{ system_service_script_exec }}
       --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}
+      --image={{ HEALTH_CSP_IMAGE }}
+      --short
+      {% if HEALTH_CSP_ALWAYS_PULL | bool %} --always-pull{% endif %}
+      {% if (HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | length) > 0 %}
       --ignore-network-blocks-from {{ HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | join(' ') }}
+      {% endif %}
 
 - include_tasks: utils/once/flag.yml
