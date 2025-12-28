@@ -9,4 +9,4 @@
         state: present
 
     - include_tasks: utils/once/flag.yml
-  when: run_once_dev_python_pip is not defined
+  when: run_once_sys_pip is not defined

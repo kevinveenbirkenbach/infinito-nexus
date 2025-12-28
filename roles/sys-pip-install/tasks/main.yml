@@ -1,0 +1,18 @@
+- name: Include dependency 'sys-pip'
+  include_role:
+    name: sys-pip
+  when: run_once_sys_pip is not defined
+
+- name: Install or upgrade {{ sys_pip_install_package }} system-wide via pip
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -m
+      - pip
+      - install
+      - -U
+      - --break-system-packages
+      - "{{ sys_pip_install_package }}"
+  environment:
+    PIP_BREAK_SYSTEM_PACKAGES: "1"
+  changed_when: true

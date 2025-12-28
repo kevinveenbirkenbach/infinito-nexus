@@ -2,7 +2,7 @@
   include_role:
     name: '{{ item }}'
   loop:
-  - dev-python-pip
+  - sys-pip
   - sys-ctl-alm-compose
   - sys-lock
 

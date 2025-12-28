@@ -1,15 +1,15 @@
 - block:
-    - name: "pkgmgr install"
+    - name: Install '{{ SYS_CTL_CLN_ANON_VOLUMES_COMMAND }}'
       include_role:
-        name: pkgmgr-install
+        name: sys-pip-install
       vars:
-        package_name: dockreap
-    
+        sys_pip_install_package: '{{ SYS_CTL_CLN_ANON_VOLUMES_COMMAND }}'
+
     - include_role:
         name: sys-service
       vars:
         system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
-        system_service_tpl_exec_start:      dockreap --no-confirmation
+        system_service_tpl_exec_start:      '{{ SYS_CTL_CLN_ANON_VOLUMES_COMMAND }} --no-confirmation'
         system_service_tpl_exec_start_pre:  "" # Anonymous volumes can allways be removed. It isn't necessary to wait for any service to stop.
         system_service_copy_files:          false
         system_service_force_linear_sync:   false
