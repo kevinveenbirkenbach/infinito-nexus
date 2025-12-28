@@ -15,8 +15,7 @@ services:
     profiles: ["ci"]
     command: ["-conf", "/Corefile"]
     volumes:
-      # IMPORTANT: mount file -> file (not directory)
-      - ./tests/dns/Corefile:/Corefile:ro
+      - ./compose/Corefile:/Corefile:ro
     networks:
       default:
         ipv4_address: 172.30.0.53
