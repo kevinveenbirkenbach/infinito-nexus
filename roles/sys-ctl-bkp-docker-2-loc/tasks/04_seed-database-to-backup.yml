@@ -52,24 +52,3 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-
-- name: "Set permissions for databases.csv (root only)"
-  ansible.builtin.file:
-    path: "{{ BKP_DOCKER_2_LOC_DATABASES_CSV }}"
-    mode: "0600"
-    owner: root
-    group: root
-  when: >
-    (database_instance is defined and
-     database_name is defined and
-     database_username is defined and
-     database_password is defined) and
-    run_once_sys_ctl_bkp_docker_2_loc_file_permission is not defined
-  register: file_permission_result
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-
-- name: "Run the file permission task once"
-  ansible.builtin.set_fact:
-    run_once_sys_ctl_bkp_docker_2_loc_file_permission: true
-  when: run_once_sys_ctl_bkp_docker_2_loc_file_permission is not defined and file_permission_result is defined and file_permission_result.changed

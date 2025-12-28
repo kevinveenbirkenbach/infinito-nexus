@@ -166,7 +166,7 @@ def file_role_by_prefix(path: str, role_tasks_roots: dict[str, str]) -> str | No
 def role_defines_suffix_in_doc(doc, role_suffix: str) -> bool:
     """
     Return True if this YAML doc (already parsed) defines run-once for the given role suffix via:
-      A) include/import utils/once/finalize.yml or utils/once/flag.yml (string or mapping style), OR
+      A) include/import utils/once/flag.yml or utils/once/flag.yml (string or mapping style), OR
       B) set_fact: { run_once_<role_suffix>: ... }
     """
     if doc is None:
@@ -176,7 +176,7 @@ def role_defines_suffix_in_doc(doc, role_suffix: str) -> bool:
     while queue:
         node = queue.pop()
         if isinstance(node, dict):
-            # A) include/import utils/once/finalize.yml or utils/once/flag.yml
+            # A) include/import utils/once/flag.yml or utils/once/flag.yml
             for key in ("include_tasks", "import_tasks"):
                 if key in node:
                     val = node[key]
@@ -247,6 +247,7 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
                     "set_fact",
                     "include_tasks",
                     "import_tasks",
+                    'ansible.builtin.set_fact',
                     *RUN_ONCE_TASK_FILES,
                 )
             ):
@@ -273,7 +274,7 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
             role = file_role_by_prefix(yml, role_tasks_roots)
             if role:
                 role_suffix = suffix_for_role[role]
-                # utils/once/finalize.yml inside role tasks defines that role's own suffix
+                # utils/once/flag.yml inside role tasks defines that role's own suffix
                 # OR a direct set_fact with exact run_once_<role_suffix>
                 for doc in docs:
                     if role_defines_suffix_in_doc(doc, role_suffix):
@@ -310,7 +311,7 @@ class RunOnceGlobalUsageFastTest(unittest.TestCase):
                 "Some run_once_<suffix> usages in valid YAML files are missing exact definitions.",
                 "Rules:",
                 "  • Unknown suffixes must be defined globally via set_fact.",
-                "  • Known role suffixes must be defined globally OR in that role (include/import utils/once/finalize.yml or set_fact).",
+                "  • Known role suffixes must be defined globally OR in that role (include/import utils/once/flag.yml or set_fact).",
                 "",
                 "Offenders:",
             ]
