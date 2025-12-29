@@ -1,7 +1,7 @@
 - name: "include role for {{ application_id }} to receive certs & do modification routines"
   include_role:
     name: sys-util-csp-cert
-  when: SSL_ENABLED | bool
+  when: TLS_ENABLED | bool
 
 - name: configure {{ domain }}.conf
   template:

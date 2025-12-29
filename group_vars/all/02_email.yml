@@ -7,7 +7,7 @@ _SYSTEM_EMAIL_DOMAIN: "{{ 'secondlevel.' if DOMAIN_PRIMARY == 'localhost' else '
 DEFAULT_SYSTEM_EMAIL:
   DOMAIN:    "{{ _SYSTEM_EMAIL_DOMAIN }}"
   HOST:      "mail.{{ _SYSTEM_EMAIL_DOMAIN }}"
-  PORT:      465
-  TLS:       true   # true for TLS and false for SSL
+  PORT:      "{{ TLS_ENABLED | ternary(465,25) }}" 
+  TLS:       "{{ TLS_ENABLED }}" # true for TLS and false for SSL
   START_TLS: false
   SMTP:      true

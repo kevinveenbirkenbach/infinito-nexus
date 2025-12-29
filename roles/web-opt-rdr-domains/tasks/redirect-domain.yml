@@ -1,7 +1,7 @@
 - name: "include task receive certbot certificate"
   include_role:
     name: sys-svc-certs
-  when: SSL_ENABLED | bool
+  when: TLS_ENABLED | bool
 
 - name: "Deploying NGINX redirect configuration for '{{ domain }}'"
   template:

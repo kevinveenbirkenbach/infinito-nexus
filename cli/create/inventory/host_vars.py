@@ -130,8 +130,8 @@ def ensure_host_vars_file(
     if primary_domain is not None and "DOMAIN_PRIMARY" not in data:
         data["DOMAIN_PRIMARY"] = primary_domain
 
-    if "SSL_ENABLED" not in data:
-        data["SSL_ENABLED"] = not ssl_disabled
+    if "TLS_ENABLED" not in data:
+        data["TLS_ENABLED"] = not ssl_disabled
 
     networks = data.get("networks")
     if not isinstance(networks, CommentedMap):

@@ -50,7 +50,7 @@ existing_key: foo
             self.assertEqual(getattr(data["secret"], "tag", None), "!vault")
 
             self.assertEqual(data["DOMAIN_PRIMARY"], "example.org")
-            self.assertTrue(data["SSL_ENABLED"])
+            self.assertTrue(data["TLS_ENABLED"])
             self.assertEqual(data["networks"]["internet"]["ip4"], "127.0.0.1")
             self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
 
@@ -68,7 +68,7 @@ existing_key: foo
                 data2 = yaml_rt.load(f)
 
             self.assertEqual(data2["DOMAIN_PRIMARY"], "example.org")
-            self.assertTrue(data2["SSL_ENABLED"])
+            self.assertTrue(data2["TLS_ENABLED"])
             self.assertEqual(data2["networks"]["internet"]["ip4"], "127.0.0.1")
             self.assertEqual(data2["networks"]["internet"]["ip6"], "::1")
 
@@ -102,7 +102,7 @@ existing_key: foo
                 yaml.safe_dump(
                     {
                         "networks": {"internet": {"ip4": "1.2.3.4", "ip6": "::1"}},
-                        "SSL_ENABLED": True,
+                        "TLS_ENABLED": True,
                     }
                 ),
                 encoding="utf-8",
@@ -113,7 +113,7 @@ existing_key: foo
                 """
                 {
                   "networks": { "internet": { "ip4": "10.0.0.10" } },
-                  "SSL_ENABLED": false
+                  "TLS_ENABLED": false
                 }
                 """,
             )
@@ -121,7 +121,7 @@ existing_key: foo
             data = yaml.safe_load(host_vars_file.read_text(encoding="utf-8"))
             self.assertEqual(data["networks"]["internet"]["ip4"], "10.0.0.10")
             self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
-            self.assertIs(data["SSL_ENABLED"], False)
+            self.assertIs(data["TLS_ENABLED"], False)
 
     def test_apply_vars_overrides_requires_object(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -268,7 +268,7 @@ def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
             yaml.safe_dump(
                 {
                     "networks": {"internet": {"ip4": "1.2.3.4", "ip6": "::1"}},
-                    "SSL_ENABLED": True,
+                    "TLS_ENABLED": True,
                     "nested": {"keep": "yes"},
                 }
             ),
@@ -280,7 +280,7 @@ def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
             yaml.safe_dump(
                 {
                     "networks": {"internet": {"ip4": "10.0.0.10"}},
-                    "SSL_ENABLED": False,
+                    "TLS_ENABLED": False,
                     "nested": {"newkey": "added"},
                 }
             ),
@@ -294,6 +294,6 @@ def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
         data = yaml.safe_load(host_vars_file.read_text(encoding="utf-8"))
         self.assertEqual(data["networks"]["internet"]["ip4"], "10.0.0.10")
         self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
-        self.assertIs(data["SSL_ENABLED"], False)
+        self.assertIs(data["TLS_ENABLED"], False)
         self.assertEqual(data["nested"]["keep"], "yes")
         self.assertEqual(data["nested"]["newkey"], "added")

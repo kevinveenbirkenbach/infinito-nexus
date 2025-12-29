@@ -72,7 +72,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--ssl-disabled",
         action="store_true",
-        help="Disable SSL for this host (sets SSL_ENABLED: false).",
+        help="Disable SSL for this host (sets TLS_ENABLED: false).",
     )
     parser.add_argument(
         "--become-password", default=None, help="Optional become password (vaulted)."

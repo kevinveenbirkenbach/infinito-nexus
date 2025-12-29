@@ -23,14 +23,14 @@ HOST_THOUSAND_SEPARATOR:  "."
 HOST_DECIMAL_MARK:        ","
 
 # Encryptiom
-SSL_ENABLED:            true
+TLS_ENABLED:            true
 
 # Web
-WEB_PROTOCOL:           "{{ 'https' if SSL_ENABLED | bool else 'http' }}" # Web protocol type. Use https or http. If you run local you need to change it to http
-WEB_PORT:               "{{ 443 if SSL_ENABLED | bool else 80 }}"         # Default port web applications will listen to
+WEB_PROTOCOL:           "{{ 'https' if TLS_ENABLED | bool else 'http' }}" # Web protocol type. Use https or http. If you run local you need to change it to http
+WEB_PORT:               "{{ 443 if TLS_ENABLED | bool else 80 }}"         # Default port web applications will listen to
 
 # Websocket
-WEBSOCKET_PROTOCOL:     "{{ 'wss' if SSL_ENABLED | bool else 'ws' }}"
+WEBSOCKET_PROTOCOL:     "{{ 'wss' if TLS_ENABLED | bool else 'ws' }}"
 
 # WWW-Redirect to None WWW-Domains enabled
 WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"
