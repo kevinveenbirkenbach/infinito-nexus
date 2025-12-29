@@ -10,16 +10,11 @@ credentials:
     validation: "^\\$2[aby]\\$.{56}$"
 
   api_token:
-    description: "Authentication token for accessing the Mailu RESTful API (minimum 3 characters)"
-    algorithm: "plain"
-    validation: "^.{3,}$"
+    description: "Authentication token for accessing the Mailu RESTful API"
+    algorithm: "alphanumeric"
+    validation: "^[A-Za-z0-9]{32,}$"
 
   initial_administrator_password:
     description: "Initial password for the Mailu administrator account (used during setup)"
     algorithm: "sha256"
     validation: "^[a-f0-9]{64}$"
-
-  dkim_public_key:
-    description: "Public DKIM key for DNS configuration (TXT record)"
-    algorithm: "plain"
-    validation: "^.{64,}$"
