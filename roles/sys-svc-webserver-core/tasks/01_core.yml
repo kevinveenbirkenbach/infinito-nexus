@@ -25,14 +25,14 @@
     dest: "{{ NGINX.FILES.CONFIGURATION }}"
   notify: restart openresty
 
+- name: "Assert for '{{ role_name }}'"
+  include_tasks: 05_assert.yml
+  when: MODE_ASSERT | bool
+
 - name: Load OpenResty
   include_tasks: "utils/load_app.yml"
   vars:
     load_app_id: svc-prx-openresty
-
-- name: "Assert for '{{ role_name }}'"
-  include_tasks: 05_assert.yml
-  when: MODE_ASSERT | bool
 
 - name: Flush OpenResty Base Setup
   meta: flush_handlers
