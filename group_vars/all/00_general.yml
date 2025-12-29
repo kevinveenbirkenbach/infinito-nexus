@@ -38,7 +38,7 @@ WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"
 AUTO_BUILD_ALIASES:     False # If enabled it creates an alias domain for each web application by the entity name, recommended to set to false to safe domain space
 
 # Domain
-DOMAIN_PRIMARY:                           "localhost"   # Primary Domain of the server
+DOMAIN_PRIMARY:                           "infinito.localhost" # Primary Domain of the server
 DOMAIN_TEST:                              "test.{{ DOMAIN_PRIMARY }}"
 
 DNS_PROVIDER:                             "localhost"   # The DNS Provider\Registrar for the domain -> Legit values: cloudflare

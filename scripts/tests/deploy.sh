@@ -307,7 +307,7 @@ infinito_exec sh -lc '
     /etc/inventories/github-ci \
     --host localhost \
     --ssl-disabled \
-    --primary-domain localhost \
+    --primary-domain infinito.localhost \
     --exclude "'"${EXCLUDE_CSV}"'" \
     --vars-file inventory.sample.yml \
     --authorized-keys "'"${AUTHORIZED_KEYS}"'"
