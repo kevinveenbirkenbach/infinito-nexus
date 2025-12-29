@@ -3,6 +3,9 @@
   loop:
     - svc-opt # Load optimation services
     - update  # Do additional update routines @todo remove the update from the constructor and the main.py
-    - sys-service-runner
   loop_control:
     label: "{{ item }}-roles.yml"
+
+- name: "Finalize services"
+  include_role:
+    name: sys-service-runner
