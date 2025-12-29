@@ -28,3 +28,24 @@
       Expected conf.d to be a DIRECTORY at {{ NGINX.FILES.CONFIGURATION_DIR }},
       but it is missing or not a directory.
   when: NGINX.FILES.CONFIGURATION_DIR is defined
+
+- name: "Assert default webserver responds with 404 for {{ LOCALHOST_TEST_DOMAIN }}"
+  ansible.builtin.uri:
+    url: "http://{{ LOCALHOST_TEST_DOMAIN }}:80/"
+    method: GET
+    return_content: true
+    status_code: 404
+    use_proxy: false
+    timeout: 10
+  register: default_vhost_check
+
+- name: Assert default webserver response body
+  ansible.builtin.assert:
+    that:
+      - default_vhost_check.status == 404
+      - "'This service is not provided' in (default_vhost_check.content | default(''))"
+    fail_msg: >-
+      Expected http://{{ LOCALHOST_TEST_DOMAIN }} to return HTTP 404 with
+      default Infinito.Nexus fallback message, but got:
+      status={{ default_vhost_check.status }},
+      body={{ default_vhost_check.content | default('') }}

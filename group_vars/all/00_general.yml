@@ -35,10 +35,11 @@ WEBSOCKET_PROTOCOL:     "{{ 'wss' if SSL_ENABLED | bool else 'ws' }}"
 # WWW-Redirect to None WWW-Domains enabled
 WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"
 
-AUTO_BUILD_ALIASES:     False # If enabled it creates an alias domain for each web application by the entity name, recommended to set to false to safge domain space
+AUTO_BUILD_ALIASES:     False # If enabled it creates an alias domain for each web application by the entity name, recommended to set to false to safe domain space
 
 # Domain
 PRIMARY_DOMAIN:                           "localhost"   # Primary Domain of the server
+LOCALHOST_TEST_DOMAIN:                    "test.{{ PRIMARY_DOMAIN }}"
 
 DNS_PROVIDER:                             "localhost"   # The DNS Provider\Registrar for the domain -> Legit values: cloudflare
 
