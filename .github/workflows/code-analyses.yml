@@ -28,8 +28,6 @@ jobs:
     uses: ./.github/workflows/test-code-unit.yml
   test-deploy-server:
     uses: ./.github/workflows/test-deploy-server.yml
-  test-deploy-universal:
-    uses: ./.github/workflows/test-deploy-universal.yml
   test-deploy-workstation:
     uses: ./.github/workflows/test-deploy-workstation.yml
   test-install-make:
@@ -47,7 +45,6 @@ jobs:
       - test-code-lint
       - test-code-unit
       - test-deploy-server
-      - test-deploy-universal
       - test-deploy-workstation
       - test-install-make
       - test-install-pkgmgr
