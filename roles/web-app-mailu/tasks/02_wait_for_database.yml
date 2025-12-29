@@ -1,0 +1,36 @@
+- name: "Wait until Mailu database schema is initialized (domain table exists)"
+  block:
+
+    - name: "Check for Mailu DB domain table"
+      ansible.builtin.command: >
+        {{ docker_compose_command_exec }} -T database
+        mariadb -u {{ database_username }} -p{{ database_password }}
+        -e "SHOW TABLES FROM {{ database_name }} LIKE 'domain';"
+      args:
+        chdir: "{{ docker_compose.directories.instance }}"
+      register: mailu_db_schema_check
+      retries: 30
+      delay: 5
+      until: mailu_db_schema_check.stdout | length > 0
+      changed_when: false
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+  rescue:
+
+    - name: "Collect Mailu admin container logs (last 300 lines)"
+      ansible.builtin.command: >
+        {{ docker_compose_command_exec }} logs --tail=300 admin
+      args:
+        chdir: "{{ docker_compose.directories.instance }}"
+      register: mailu_admin_logs
+      changed_when: false
+
+    - name: "Fail: Mailu database schema not initialized"
+      ansible.builtin.fail:
+        msg: |
+          Mailu database schema was not initialized in time.
+
+          Expected table: {{ database_name }}.domain
+
+          --- Mailu admin container logs (last 300 lines) ---
+          {{ mailu_admin_logs.stdout | default('No logs available') }}
