@@ -50,7 +50,7 @@ EOF
 
 usage() {
 	cat <<'EOF'
-Usage: scripts/tests/deploy.sh --type <server|workstation|universal> --distro <arch|debian|ubuntu|fedora|centos> [options]
+Usage: scripts/tests/deploy.sh --type <server|workstation> --distro <arch|debian|ubuntu|fedora|centos> [options]
 
 Options:
   --no-cache       Rebuild compose image with --no-cache
@@ -168,11 +168,8 @@ filter_allowed() {
 	server)
 		grep -E '^web-|svc-db-' || true
 		;;
-	universal)
-		cat
-		;;
 	*)
-		die "Unknown deploy type: $type (expected: workstation|server|universal)"
+		die "Unknown deploy type: $type (expected: workstation|server)"
 		;;
 	esac
 }
@@ -257,8 +254,8 @@ done
 INFINITO_CONTAINER="infinito_nexus_${DISTRO}"
 
 case "${TYPE}" in
-server | workstation | universal) ;;
-*) die "Invalid --type '${TYPE}' (expected: server|workstation|universal)" ;;
+server | workstation ) ;;
+*) die "Invalid --type '${TYPE}' (expected: server|workstation)" ;;
 esac
 
 case "${DISTRO}" in
