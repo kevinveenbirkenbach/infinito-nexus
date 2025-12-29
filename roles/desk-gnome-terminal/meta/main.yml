@@ -17,4 +17,6 @@ galaxy_info:
     - gnome
     - terminal
     - automation
-dependencies: []
+
+  run_after:
+    - desk-gnome

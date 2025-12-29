@@ -1,12 +1,2 @@
-- name: Install Gnome Terminal
-# @see https://en.wikipedia.org/wiki/GNOME_Terminal
-  package:
-    name:
-      - gnome-terminal
-    state: present
-
-- name: "Set zsh as default shell for {{ users[desktop_username].username }}"
-  user:
-    name: "{{ users[desktop_username].username }}"
-    shell: /usr/bin/zsh
-  become: true
+- include_tasks: 01_core.yml
+  when: run_once_desk_gnome_terminal is not defined

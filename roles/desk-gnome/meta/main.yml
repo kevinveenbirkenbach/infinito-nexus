@@ -18,7 +18,3 @@ galaxy_info:
     - desktop
     - archlinux
     - automation
-dependencies:
-  - desk-gnome-caffeine
-  - desk-gnome-extensions
-  - desk-gnome-terminal

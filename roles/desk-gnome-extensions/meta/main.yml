@@ -17,3 +17,6 @@ galaxy_info:
     - gnome
     - extensions
     - automation
+
+  run_after:
+    - desk-gnome
