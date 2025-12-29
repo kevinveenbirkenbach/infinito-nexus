@@ -2,6 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from cli.create.inventory.host_vars import apply_vars_overrides_from_file
 
 import yaml
 from ruamel.yaml import YAML
@@ -257,8 +258,6 @@ ansible_become_password: !vault |
             self.assertIn(key1, lines)
             self.assertIn(key2, lines)
 
-# Add this import to the existing imports at the top of the file:
-    # from cli.create.inventory.host_vars import apply_vars_overrides_from_file
 
 def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -288,7 +287,9 @@ def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
             encoding="utf-8",
         )
 
-        apply_vars_overrides_from_file(host_vars_file=host_vars_file, vars_file=vars_file)
+        apply_vars_overrides_from_file(
+            host_vars_file=host_vars_file, vars_file=vars_file
+        )
 
         data = yaml.safe_load(host_vars_file.read_text(encoding="utf-8"))
         self.assertEqual(data["networks"]["internet"]["ip4"], "10.0.0.10")
