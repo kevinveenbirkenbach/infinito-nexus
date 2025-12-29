@@ -23,14 +23,14 @@
 
 - name: Reload systemd user daemon
   systemd:
-    user: true
+    scope: user
     daemon_reload: yes
   become: false
 
 - name: Enable and start CopyQ user service
   systemd:
     name: copyq.service
-    user: true
+    scope: user
     enabled: yes
     state: started
   become: false
