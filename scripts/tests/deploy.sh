@@ -139,6 +139,7 @@ start_stack() {
     --tmpfs /run \
     --tmpfs /run/lock \
     -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+	-v /tmp/gh-action:/tmp/gh-action \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v "${REPO_ROOT}:/opt/src/infinito" \
     --network "${net}" \
