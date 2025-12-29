@@ -1,0 +1,11 @@
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name _;
+
+    location / {
+        default_type text/plain;
+        return 404 "This service is not provided by this {{ SOFTWARE_NAME }} instance.\n";
+    }
+}

@@ -35,6 +35,8 @@ docker:
       mem_limit:          "4g"
       pids_limit:         2048
     redis:
+      backup:
+        disabled: true
       enabled: false
     database:
       enabled: false

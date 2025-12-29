@@ -18,17 +18,17 @@ parser.add_argument(
 parser.add_argument(
     "--backups-folder-path",
     type=str,
-    dest="backups_folder_path",
+    dest="backup_dir",
     required=True,
     help="The folder in which the backups are stored",
 )
 args = parser.parse_args()
 
 
-def print_used_disc_space(backups_folder_path):
+def print_used_disc_space(backup_dir):
     print(
         "%d %% of disk %s are used"
-        % (psutil.disk_usage(backups_folder_path).percent, backups_folder_path)
+        % (psutil.disk_usage(backup_dir).percent, backup_dir)
     )
 
 
@@ -44,8 +44,8 @@ def is_directory_used_by_another_process(directory_path):
     return True
 
 
-def isSmallerThenMaximumBackupSize(maximum_backup_size_percent, backups_folder_path):
-    current_disc_usage_percent = psutil.disk_usage(backups_folder_path).percent
+def isSmallerThenMaximumBackupSize(maximum_backup_size_percent, backup_dir):
+    current_disc_usage_percent = psutil.disk_usage(backup_dir).percent
     return current_disc_usage_percent > maximum_backup_size_percent
 
 
@@ -66,20 +66,20 @@ def isDirectoryDeletable(version, versions, version_path):
     return True
 
 
-def deleteVersion(version_path, backups_folder_path):
+def deleteVersion(version_path, backup_dir):
     print("Deleting %s to free space." % (version_path))
-    current_disc_usage_percent = psutil.disk_usage(backups_folder_path).percent
+    current_disc_usage_percent = psutil.disk_usage(backup_dir).percent
     shutil.rmtree(version_path)
-    new_disc_usage_percent = psutil.disk_usage(backups_folder_path).percent
+    new_disc_usage_percent = psutil.disk_usage(backup_dir).percent
     difference_percent = current_disc_usage_percent - new_disc_usage_percent
     print("{:6.2f} %% of drive freed".format(difference_percent))
 
 
-def count_total_application_directories(backups_folder_path):
+def count_total_application_directories(backup_dir):
     total_app_directories = 0
-    for host_backup_directory_name in os.listdir(backups_folder_path):
+    for host_backup_directory_name in os.listdir(backup_dir):
         host_backup_directory_path = os.path.join(
-            backups_folder_path, host_backup_directory_name
+            backup_dir, host_backup_directory_name
         )
         total_app_directories += sum(
             os.path.isdir(os.path.join(host_backup_directory_path, d))
@@ -88,11 +88,11 @@ def count_total_application_directories(backups_folder_path):
     return total_app_directories
 
 
-def count_total_version_folders(backups_folder_path):
+def count_total_version_folders(backup_dir):
     total_version_folders = 0
-    for host_backup_directory_name in os.listdir(backups_folder_path):
+    for host_backup_directory_name in os.listdir(backup_dir):
         host_backup_directory_path = os.path.join(
-            backups_folder_path, host_backup_directory_name
+            backup_dir, host_backup_directory_name
         )
         for application_directory in os.listdir(host_backup_directory_path):
             versions_directory = os.path.join(
@@ -105,9 +105,9 @@ def count_total_version_folders(backups_folder_path):
     return total_version_folders
 
 
-def average_version_directories_per_application(backups_folder_path):
-    total_app_directories = count_total_application_directories(backups_folder_path)
-    total_version_folders = count_total_version_folders(backups_folder_path)
+def average_version_directories_per_application(backup_dir):
+    total_app_directories = count_total_application_directories(backup_dir)
+    total_version_folders = count_total_version_folders(backup_dir)
 
     if total_app_directories == 0:
         return 0
@@ -129,11 +129,11 @@ def getAmountOfIteration(versions, average_version_directories_per_application):
     return amount_of_iterations
 
 
-def deleteIteration(backups_folder_path, average_version_directories_per_application):
-    for host_backup_directory_name in os.listdir(backups_folder_path):
+def deleteIteration(backup_dir, average_version_directories_per_application):
+    for host_backup_directory_name in os.listdir(backup_dir):
         print(f"Iterating over host: {host_backup_directory_name}")
         host_backup_directory_path = os.path.join(
-            backups_folder_path, host_backup_directory_name
+            backup_dir, host_backup_directory_name
         )
         for application_directory in os.listdir(host_backup_directory_path):
             print(f"Iterating over backup application: {application_directory}")
@@ -148,11 +148,11 @@ def deleteIteration(backups_folder_path, average_version_directories_per_applica
             while version_iteration < getAmountOfIteration(
                 versions, average_version_directories_per_application
             ):
-                print_used_disc_space(backups_folder_path)
+                print_used_disc_space(backup_dir)
                 version = versions[version_iteration]
                 version_path = os.path.join(versions_directory, version)
                 if isDirectoryDeletable(version, versions, version_path):
-                    deleteVersion(version_path, backups_folder_path)
+                    deleteVersion(version_path, backup_dir)
                 version_iteration += 1
 
 
@@ -191,24 +191,24 @@ class TimeLimitExceededException(Exception):
         super().__init__(self.message)
 
 
-backups_folder_path = args.backups_folder_path
+backup_dir = args.backup_dir
 maximum_backup_size_percent = args.maximum_backup_size_percent
 start_time = time.time()
 time_limit = 3600
 itteration_counter = 1
-while isSmallerThenMaximumBackupSize(maximum_backup_size_percent, backups_folder_path):
+while isSmallerThenMaximumBackupSize(maximum_backup_size_percent, backup_dir):
     print(f"Delete Iteration: {itteration_counter}")
     if not check_time_left(start_time, time_limit):
         raise TimeLimitExceededException()
 
     average_version_directories = average_version_directories_per_application(
-        backups_folder_path
+        backup_dir
     )
     print(
         f"Average version directories per application directory: {average_version_directories}"
     )
-    deleteIteration(backups_folder_path, average_version_directories)
+    deleteIteration(backup_dir, average_version_directories)
     itteration_counter += 1
 
-print_used_disc_space(backups_folder_path)
+print_used_disc_space(backup_dir)
 print("Cleaning up finished.")

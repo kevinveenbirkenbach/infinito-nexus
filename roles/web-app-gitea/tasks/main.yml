@@ -7,7 +7,7 @@
 
 - name: Wait for Gitea HTTP endpoint
   wait_for:
-    host: "127.0.0.1"
+    host: "{{ DOCKER_REACH_HOST }}"
     port: "{{ ports.localhost.http[application_id] }}"
     delay: 5
     timeout: 300

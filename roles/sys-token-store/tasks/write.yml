@@ -1,0 +1,81 @@
+---
+# REQUIRED:
+#   sys_token_store_user_key
+#   sys_token_store_app
+#   sys_token_store_token  # must be non-empty
+
+- name: "sys-token-store | Ensure store exists"
+  ansible.builtin.import_tasks: 01_core.yml
+
+- name: "sys-token-store | Load existing store"
+  ansible.builtin.import_tasks: load.yml
+
+- name: "sys-token-store | Normalize incoming token"
+  ansible.builtin.set_fact:
+    sys_token_store_token_effective: "{{ sys_token_store_token | string | trim }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "sys-token-store | Abort if token is empty (do not persist empties)"
+  ansible.builtin.assert:
+    that:
+      - sys_token_store_token_effective != ''
+    fail_msg: "sys_token_store_token is empty – refusing to persist empty token."
+  no_log: true
+
+- name: "sys-token-store | Build merged structure"
+  ansible.builtin.set_fact:
+    sys_token_store_users_merged: >-
+      {{
+        sys_token_store_users
+        | combine({
+            sys_token_store_user_key: (
+              sys_token_store_users.get(sys_token_store_user_key, {})
+              | combine({
+                  'tokens': (
+                    sys_token_store_users.get(sys_token_store_user_key, {}).get('tokens', {})
+                    | combine({ sys_token_store_app: sys_token_store_token_effective })
+                  )
+                }, recursive=True
+              )
+            )
+          }, recursive=True
+        )
+      }}
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "sys-token-store | Persist store (idempotent)"
+  ansible.builtin.copy:
+    dest: "{{ PATH_INFINITO_TOKENS }}"
+    owner: "{{ SYS_TOKEN_STORE_OWNER }}"
+    group: "{{ SYS_TOKEN_STORE_GROUP }}"
+    mode: "{{ SYS_TOKEN_STORE_FILE_MODE }}"
+    content: "{{ {'users': sys_token_store_users_merged} | to_nice_yaml(indent=2, width=9999) }}"
+  when: sys_token_store_users_merged != sys_token_store_users
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  become: true
+
+- name: "sys-token-store | Inject token into users (runtime)"
+  ansible.builtin.set_fact:
+    users: >-
+      {{
+        (users | default({}))
+        | combine({
+            sys_token_store_user_key: (
+              (users | default({})).get(sys_token_store_user_key, {})
+              | combine({
+                  'tokens': (
+                    (users | default({})).get(sys_token_store_user_key, {}).get('tokens', {})
+                    | combine({ sys_token_store_app: sys_token_store_token_effective })
+                  )
+                }, recursive=True
+              )
+            )
+          }, recursive=True)
+      }}
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "sys-token-store | Export resolved token"
+  ansible.builtin.set_fact:
+    sys_token_store_token: "{{ sys_token_store_token_effective }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+

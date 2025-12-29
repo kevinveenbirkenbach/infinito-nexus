@@ -13,6 +13,8 @@ server:
 docker:
   services:
     redis:
+      backup:
+        disabled: true
       enabled: false
     database: 
       enabled: false

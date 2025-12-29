@@ -63,6 +63,8 @@ docker:
       mem_limit: 1g
 
     redis:
+      backup:
+        disabled: true
       enabled: true
       image: "redis"
       version: "7-alpine"

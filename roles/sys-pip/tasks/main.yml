@@ -1,0 +1,12 @@
+- block:
+    - include_role:
+        name: dev-gcc
+      when: run_once_dev_gcc is not defined
+
+    - name: python pip install
+      package:
+        name: python-pip
+        state: present
+
+    - include_tasks: utils/once/flag.yml
+  when: run_once_sys_pip is not defined

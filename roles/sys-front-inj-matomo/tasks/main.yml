@@ -1,14 +1,26 @@
 # run_once_sys_front_inj_matomo: deactivated
 
-- name: "Check if site {{ domain }} is allready registered at Matomo"
-  uri:
+- name: "Check if site {{ domain }} is already registered at Matomo"
+  ansible.builtin.uri:
     url: "{{ matomo_verification_url }}"
     method: GET
     return_content: yes
     status_code: 200
     validate_certs: yes
   register: site_check
+  failed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Matomo site check failed"
+  ansible.builtin.fail:
+    msg: >-
+      Matomo site verification failed for {{ domain }}.
+      HTTP status={{ site_check.status | default('n/a') }}
+      msg={{ site_check.msg | default('n/a') }}
+      {% if not (MASK_CREDENTIALS_IN_LOGS | bool) %}
+      content={{ site_check.content | default('n/a') }}
+      {% endif %}
+  when: site_check.status is not defined or site_check.status != 200
 
 - name: Set matomo_site_id to Null
   set_fact:

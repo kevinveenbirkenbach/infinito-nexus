@@ -42,6 +42,8 @@ docker:
     talk_recording_tmp:     nextcloud_talk_recording_tmp
   services:
     redis:
+      backup:
+        disabled: true
       enabled:              true
       cpus:                 "1"
       mem_reservation:      "1g"

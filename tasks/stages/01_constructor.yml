@@ -1,8 +1,21 @@
 ---
+- name: Detect container environment (systemd-detect-virt)
+  ansible.builtin.command: systemd-detect-virt --container
+  register: detect_container
+  changed_when: false
+  failed_when: false
+
 - name: "Debug: allowed_applications"
   debug:
     msg: "{{ allowed_applications }}"
   when: MODE_DEBUG | bool
+
+- name: Check DNS resolution for test domain
+  ansible.builtin.command: "getent hosts {{ LOCALHOST_TEST_DOMAIN }}"
+  register: dns_check
+  changed_when: false
+  failed_when: dns_check.rc != 0
+  when: MODE_ASSERT | bool
 
 - name: Merge system_email definitions
   set_fact:
@@ -129,8 +142,7 @@
 - name: "Ensure correct timezone is '{{ HOST_TIMEZONE }}'"
   community.general.timezone:
     name: "{{ HOST_TIMEZONE }}"
-  when: ansible_facts.virtualization_type | default('') not in ['docker', 'containerd', 'podman']
-
+  when: not DOCKER_IN_CONTAINER | bool
 
 - name: "Load base roles"
   include_tasks: "./tasks/groups/{{ item }}-roles.yml"

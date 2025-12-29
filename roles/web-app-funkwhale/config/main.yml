@@ -9,6 +9,8 @@ docker:
     typesense:  "typesense/typesense"
   services:
     redis:
+      backup:
+        disabled: true
       enabled: true
     database:
       enabled: true

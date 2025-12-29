@@ -11,6 +11,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-lc"]
 # Forwardable build-time Nix settings (e.g., GitHub access tokens to avoid rate limits)
 ARG NIX_CONFIG
 
+# Make Nix non-interactive by default, but allow override/extension via build arg
+ENV NIX_CONFIG="${NIX_CONFIG:+$NIX_CONFIG }accept-flake-config = true"
+
 ENV INFINITO_SRC_DIR="/opt/src/infinito"
 ENV PYTHON="/opt/venvs/infinito/bin/python"
 ENV PIP="/opt/venvs/infinito/bin/python -m pip"
@@ -19,62 +22,50 @@ ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 RUN cat /etc/os-release || true
 
 # ------------------------------------------------------------
-# Install Docker CLI (client only) - distro aware
-# ------------------------------------------------------------
-# hadolint ignore=DL3008,DL3041
-RUN set -euo pipefail; \
-  . /etc/os-release; \
-  echo ">>> Installing docker client on ID=${ID} ID_LIKE=${ID_LIKE:-}"; \
-  \
-  if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then \
-    # Arch: docker CLI already pulls required deps in non-virgin images
-    pacman -Syu --noconfirm --needed docker; \
-    pacman -Scc --noconfirm || true; \
-  \
-  elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]]; then \
-    # Debian/Ubuntu: use Docker official repo for docker-ce-cli
-    export DEBIAN_FRONTEND=noninteractive; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends \
-      curl \
-      gnupg \
-      lsb-release; \
-    install -m 0755 -d /etc/apt/keyrings; \
-    curl -fsSL "https://download.docker.com/linux/${ID}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg; \
-    chmod a+r /etc/apt/keyrings/docker.gpg; \
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${ID} \
-      $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" \
-      > /etc/apt/sources.list.d/docker.list; \
-    apt-get update; \
-    apt-get install -y --no-install-recommends docker-ce-cli; \
-    rm -rf /var/lib/apt/lists/*; \
-  \
-  elif [[ "${ID}" == "fedora" ]]; then \
-    # Fedora: docker client via docker-cli or moby-engine
-    (dnf -y install docker-cli) || (dnf -y install moby-engine); \
-    dnf -y clean all; \
-    rm -rf /var/cache/dnf; \
-  \
-  elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|centos) ]]; then \
-    # CentOS/RHEL-like
-    if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi; \
-    ${PM} -y install yum-utils || true; \
-    ${PM} -y install dnf-plugins-core || true; \
-    ( ${PM} config-manager --add-repo "https://download.docker.com/linux/centos/docker-ce.repo" ) || true; \
-    ( ${PM} -y install docker-ce-cli ) || ( ${PM} -y install docker ); \
-    ${PM} -y clean all || true; \
-    rm -rf "/var/cache/${PM}" || true; \
-  \
-  else \
-    echo "[ERROR] Unsupported distro for docker client install: ID=${ID} ID_LIKE=${ID_LIKE:-}" >&2; \
-    exit 1; \
-  fi
-
-# ------------------------------------------------------------
 # Infinito.Nexus source in
 # ------------------------------------------------------------
 COPY . ${INFINITO_SRC_DIR}
+
+# ------------------------------------------------------------
+# Install Docker CLI (client only) - distro aware
+# ------------------------------------------------------------
+# hadolint ignore=DL3008,DL3041
+RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-docker/files/install-cli.sh
+
+# ------------------------------------------------------------
+# Install systemd + dbus (for CI Ansible systemd/service tests)
+# ------------------------------------------------------------
+
+# hadolint ignore=DL3008,DL3033,DL3041
+RUN set -euo pipefail; \
+  . /etc/os-release; \
+  echo "[docker-infinito] Installing systemd/dbus for ID=${ID}"; \
+  case "${ID}" in \
+    arch) \
+      pacman -Syu --noconfirm --needed systemd dbus; \
+      ;; \
+    debian|ubuntu) \
+      apt-get update; \
+      apt-get install -y --no-install-recommends systemd systemd-sysv dbus; \
+      rm -rf /var/lib/apt/lists/*; \
+      ;; \
+    fedora) \
+      dnf -y install systemd dbus; \
+      dnf -y clean all; \
+      ;; \
+    centos|rhel) \
+      (command -v dnf >/dev/null 2>&1 && dnf -y install systemd dbus && dnf -y clean all) || \
+      (yum -y install systemd dbus && yum -y clean all); \
+      ;; \
+    *) \
+      echo "[WARN] Unknown distro ID=${ID}. Skipping systemd install."; \
+      ;; \
+  esac
+
+# systemd-in-container conventions
+ENV container=docker
+STOPSIGNAL SIGRTMIN+3
+VOLUME ["/sys/fs/cgroup"]
 
 # ------------------------------------------------------------
 # Install infinito via pkgmgr (shallow)
@@ -87,7 +78,7 @@ RUN set -euo pipefail; \
   pkgmgr version infinito
 
 # ------------------------------------------------------------
-# Override with local source
+# Override with local source (during build)
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
   export NIX_CONFIG="${NIX_CONFIG:-}"; \
@@ -97,4 +88,6 @@ RUN set -euo pipefail; \
 WORKDIR /
 
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
-CMD ["infinito", "--help"]
+
+# IMPORTANT: default to systemd as PID 1
+CMD ["/sbin/init"]

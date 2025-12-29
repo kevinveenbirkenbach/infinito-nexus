@@ -1,0 +1,20 @@
+---
+- name: "sys-token-store | Ensure base directory"
+  ansible.builtin.file:
+    path: "{{ PATH_INFINITO_SECRETS_DIR }}"
+    state: directory
+    owner: "{{ SYS_TOKEN_STORE_OWNER }}"
+    group: "{{ SYS_TOKEN_STORE_GROUP }}"
+    mode: "{{ SYS_TOKEN_STORE_DIR_MODE }}"
+  become: true
+
+- name: "sys-token-store | Ensure store file exists"
+  ansible.builtin.file:
+    path: "{{ PATH_INFINITO_TOKENS }}"
+    state: touch
+    owner: "{{ SYS_TOKEN_STORE_OWNER }}"
+    group: "{{ SYS_TOKEN_STORE_GROUP }}"
+    mode: "{{ SYS_TOKEN_STORE_FILE_MODE }}"
+  become: true
+
+- include_tasks: utils/once/flag.yml

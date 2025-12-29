@@ -1,7 +1,12 @@
+# Internal email domain:
+# - append .localdomain when PRIMARY_DOMAIN == localhost
+# - avoids invalid email domains like user@localhost
+_SYSTEM_EMAIL_DOMAIN: "{{ PRIMARY_DOMAIN }}{{ '.localdomain' if PRIMARY_DOMAIN == 'localhost' else '' }}"
+
 # Email Configuration
 DEFAULT_SYSTEM_EMAIL:
-  DOMAIN:    "{{ PRIMARY_DOMAIN }}"
-  HOST:      "mail.{{ PRIMARY_DOMAIN }}"
+  DOMAIN:    "{{ _SYSTEM_EMAIL_DOMAIN }}"
+  HOST:      "mail.{{ _SYSTEM_EMAIL_DOMAIN }}"
   PORT:      465
   TLS:       true   # true for TLS and false for SSL
   START_TLS: false

@@ -62,10 +62,31 @@
 
 - name: docker compose up
   shell: |
+    set -euo pipefail
+
+    {% if MODE_DEBUG | bool %}
+    echo ">>> [dc][DEBUG] docker compose config (FULL)" >&2
     if [ -f "{{ docker_compose.files.env }}" ]; then
-      docker compose -p {{ application_id | get_entity_name }} --env-file "{{ docker_compose.files.env }}" up -d --force-recreate --remove-orphans
+      docker compose --env-file "{{ docker_compose.files.env }}" config >&2
     else
-      docker compose -p {{ application_id | get_entity_name }} up -d --force-recreate --remove-orphans
+      docker compose config >&2
+    fi
+
+    {% if not MASK_CREDENTIALS_IN_LOGS | bool %}
+    if [ -f "{{ docker_compose.files.env }}" ]; then
+      echo ">>> [dc][DEBUG] .env (UNMASKED)" >&2
+      cat "{{ docker_compose.files.env }}" >&2
+    fi
+    {% endif %}
+    {% endif %}
+
+    if [ -f "{{ docker_compose.files.env }}" ]; then
+      docker compose -p {{ application_id | get_entity_name }} \
+        --env-file "{{ docker_compose.files.env }}" \
+        up -d --force-recreate --remove-orphans
+    else
+      docker compose -p {{ application_id | get_entity_name }} \
+        up -d --force-recreate --remove-orphans
     fi
   args:
     chdir: "{{ docker_compose.directories.instance }}"
@@ -75,6 +96,7 @@
     DOCKER_CLIENT_TIMEOUT:  "600"
   listen:
     - docker compose up
+
 
 - name: docker compose restart
   command:

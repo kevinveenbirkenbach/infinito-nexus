@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
 echo "[docker-infinito] Starting infinito container"
 
 # Compute dynamically if not provided from outside
+echo "[docker-infinito] before pkgmgr path"
 INFINITO_PATH="$(pkgmgr path infinito)"
+echo "[docker-infinito] after pkgmgr path: ${INFINITO_PATH}"
+
 INFINITO_SRC_DIR="/opt/src/infinito"
 export INFINITO_PATH
 export INFINITO_SRC_DIR

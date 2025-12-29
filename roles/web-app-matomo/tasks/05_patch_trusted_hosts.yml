@@ -1,0 +1,34 @@
+- name: "Matomo | Set trusted hosts (domain + docker reach host)"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - --user
+      - root
+      - "{{ MATOMO_NAME }}"
+      - sh
+      - -lc
+      - |
+        set -eu
+        CFG="{{ MATOMO_CONFIG }}"
+        DOMAIN="{{ domain }}"
+        LOCAL="{{ DOCKER_REACH_HOST }}:{{ http_port }}"
+
+        # Replace first trusted_hosts[] with DOMAIN
+        sed -i "0,/^trusted_hosts\\[\\].*/s//trusted_hosts[] = \"${DOMAIN}\"/" "$CFG"
+
+        # Ensure LOCAL host exists as additional trusted host
+        if ! grep -qE "^trusted_hosts\\[\\][[:space:]]*= \"${LOCAL}\"$" "$CFG"; then
+          awk -v local="$LOCAL" '
+            BEGIN{done=0}
+            /^\[General\]$/ { print; next }
+            /^trusted_hosts\[\][[:space:]]*=/ && !done {
+              print
+              print "trusted_hosts[] = \""local"\""
+              done=1
+              next
+            }
+            { print }
+          ' "$CFG" > "$CFG.tmp" && mv "$CFG.tmp" "$CFG"
+        fi
+  notify: docker compose up

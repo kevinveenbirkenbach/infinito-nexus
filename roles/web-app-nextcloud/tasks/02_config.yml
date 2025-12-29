@@ -11,7 +11,7 @@
 
 - name: "Wait until Nextcloud is reachable on port {{ ports.localhost.http[application_id] }}"
   wait_for:
-    host: 127.0.0.1
+    host: "{{ DOCKER_REACH_HOST }}"
     port: "{{ ports.localhost.http[application_id] }}"
     timeout: 120
     delay: 2

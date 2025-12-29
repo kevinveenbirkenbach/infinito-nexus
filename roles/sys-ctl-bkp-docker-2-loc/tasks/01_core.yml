@@ -5,14 +5,29 @@
   - sys-bkp-provider
   - sys-ctl-alm-compose
   - sys-lock
-  - dev-nix
 
-- include_tasks: 02_pkgmgr_routines.yml
+- include_tasks: 02_install_routines.yml
   when: backup_docker_to_local_folder is not defined
 
 - name: "reset (if enabled) for {{ role_name}}"
   include_tasks: 03_reset.yml
   when: MODE_RESET | bool
+
+- name: Ensure secrets directory exists (root only)
+  ansible.builtin.file:
+    path: "{{ PATH_INFINITO_DATABASE_SECRETS | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Ensure databases.csv exists (root only)
+  ansible.builtin.file:
+    path: "{{ PATH_INFINITO_DATABASE_SECRETS }}"
+    state: touch
+    owner: root
+    group: root
+    mode: "0600"
 
 - name: "Execute system service setup for '{{ system_service_id }}'"
   include_role:
@@ -21,7 +36,7 @@
     system_service_copy_files:          false
     system_service_timer_enabled:       true
     system_service_force_linear_sync:   true
-    system_service_force_flush:         "{{ MODE_BACKUP | bool }}"
+    system_service_force_flush_instant: "{{ MODE_BACKUP | bool }}"
     system_service_suppress_flush:      "{{ not MODE_BACKUP | bool }}"
     system_service_on_calendar:         "{{ SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL }}"
     system_service_tpl_exec_start_pre:  '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_BACKUP_DOCKER_2_LOC }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'

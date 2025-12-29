@@ -1,5 +1,4 @@
 import re
-import warnings
 import unittest
 from pathlib import Path
 
@@ -76,15 +75,6 @@ class TestDockerComposeTemplates(unittest.TestCase):
                         idx_net,
                         f"{template_path}: '{self.BASE_INCLUDE}' must come before '{self.NET_INCLUDE}'",
                     )
-
-                # Warn on invalid lines before BASE_INCLUDE
-                idx_base = lines.index(self.BASE_INCLUDE)
-                for i, line in enumerate(lines[:idx_base]):
-                    if not any(pat.match(line) for pat in self.ALLOWED_BEFORE_BASE):
-                        warnings.warn(
-                            f"{template_path}: Invalid line before {self.BASE_INCLUDE} (line {i + 1}): {line!r}",
-                            category=RuntimeWarning,
-                        )
 
 
 if __name__ == "__main__":

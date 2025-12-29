@@ -1,0 +1,23 @@
+- name: "create {{ USER_BACKUP_SSH_DIR }}"
+  file:
+    path: "{{ USER_BACKUP_SSH_DIR }}"
+    state: directory
+    owner: backup
+    group: backup
+    mode: '0700'
+
+- name: "create '{{ USER_BACKUP_AUTHORIZED_KEYS_DST }}'"
+  template:
+    src:  "authorized_keys.j2"
+    dest: '{{ USER_BACKUP_AUTHORIZED_KEYS_DST }}'
+    owner: backup
+    group: backup
+    mode: '0644'
+
+- name: "create {{ USER_BACKUP_WRAPPER_DST }}"
+  template:
+    src: "ssh-wrapper.sh.j2"
+    dest: "{{ USER_BACKUP_WRAPPER_DST }}"
+    owner: backup
+    group: backup
+    mode: '0700'

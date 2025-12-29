@@ -1,4 +1,4 @@
-- name: "reset {{ backup_docker_to_local_folder }}databases.csv"
-  file:
-    path: "{{ backup_docker_to_local_folder }}databases.csv"
+- name: "Remove databases CSV (reset)"
+  ansible.builtin.file:
+    path: "{{ PATH_INFINITO_DATABASE_SECRETS }}"
     state: absent

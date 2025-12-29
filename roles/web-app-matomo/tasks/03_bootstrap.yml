@@ -1,0 +1,89 @@
+- block:
+    - name: "Matomo bootstrap | Run one-shot bootstrap via docker compose profile"
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - -f
+          - "{{ docker_compose.files.docker_compose }}"
+          - --profile
+          - "{{ MATOMO_BOOTSTRAP_PROFILE }}"
+          - run
+          - --rm
+          - "{{ MATOMO_BOOTSTRAP_SERVICE }}"
+      register: matomo_bootstrap_run
+      changed_when: true
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+  rescue:
+    - name: "DEBUG | dump compose + env + effective config"
+      ansible.builtin.shell: |
+        set -eo pipefail
+        echo "=== docker compose bootstrap FAILED ==="
+        echo "rc={{ matomo_bootstrap_run.rc | default('n/a') }}"
+        echo
+
+        echo "--- stdout ---"
+        printf "%s\n" "{{ matomo_bootstrap_run.stdout | default('') }}"
+        echo
+        echo "--- stderr ---"
+        printf "%s\n" "{{ matomo_bootstrap_run.stderr | default('') }}"
+        echo
+
+        echo "===== FILE: {{ docker_compose.files.docker_compose }} ====="
+        cat "{{ docker_compose.files.docker_compose }}" || true
+        echo
+
+        if ! {{ MASK_CREDENTIALS_IN_LOGS | bool | lower }}; then
+          echo "===== FILE: {{ MATOMO_BOOTSTRAP_ENV_FILE }} (bootstrap env) ====="
+          cat "{{ MATOMO_BOOTSTRAP_ENV_FILE }}" || true
+          echo
+          echo "===== FILE: {{ docker_compose.files.env }} (default env) ====="
+          cat "{{ docker_compose.files.env }}" || true
+          echo
+        else
+          echo "===== ENV FILES hidden: MASK_CREDENTIALS_IN_LOGS=true ====="
+          echo
+        fi
+
+        echo "===== docker compose config (effective) ====="
+        docker compose -f "{{ docker_compose.files.docker_compose }}" --profile "{{ MATOMO_BOOTSTRAP_PROFILE }}" config || true
+        echo
+      args:
+        executable: /bin/bash
+      changed_when: false
+      no_log: false
+
+    - name: "FAIL | abort after debug dump"
+      ansible.builtin.fail:
+        msg: "Matomo bootstrap failed – compose/env dumped above"
+
+- name: "Matomo bootstrap | Set effective token (prefer existing, else bootstrap stdout)"
+  ansible.builtin.set_fact:
+    matomo_token_value: >-
+      {{
+        (matomo_token_value | default('') | string | trim)
+        if (matomo_token_value is defined and (matomo_token_value | string | trim) != '')
+        else (matomo_bootstrap_run.stdout | default('') | string | trim)
+      }}
+
+- name: "Matomo bootstrap | Assert we have a token now"
+  ansible.builtin.assert:
+    that:
+      - matomo_token_value is defined
+      - matomo_token_value | length > 0
+      - matomo_token_value is match("^[a-f0-9]{32,64}$")
+    fail_msg: >-
+      Matomo bootstrap did not yield a valid token. stdout={{ matomo_bootstrap_run.stdout | default('') | trim }}
+  when: MODE_ASSERT | bool
+
+- name: "Matomo | Persist + inject token via sys-token-store (store + runtime users)"
+  ansible.builtin.include_role:
+    name: sys-token-store
+    tasks_from: write.yml
+  vars:
+    sys_token_store_user_key: "{{ MATOMO_ADMIN_USER_KEY }}"
+    sys_token_store_app: "{{ application_id }}"
+    sys_token_store_token: "{{ matomo_token_value }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+

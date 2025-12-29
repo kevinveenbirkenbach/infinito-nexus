@@ -39,6 +39,8 @@ docker:
       version: latest
       name:    akaunting
     redis:
+      backup:
+        disabled: true
       enabled: false # Set to true to activate redis for akaunting
   volumes: 
     data: akaunting_data

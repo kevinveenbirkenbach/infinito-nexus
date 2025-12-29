@@ -1,0 +1,21 @@
+- name: Ensure '{{ SYS_SVC_DOCKER_DIR }}' exists
+  file:
+    path: "{{ SYS_SVC_DOCKER_DIR }}"
+    state: directory
+    mode: '0755'
+
+- name: Install fuse-overlayfs in container
+  ansible.builtin.package:
+    name: fuse-overlayfs
+    state: present
+  notify: docker restart
+
+- name: Configure docker daemon storage driver (container)
+  ansible.builtin.copy:
+    dest: "{{ SYS_SVC_DOCKER_DAEMON }}"
+    content: |
+      {
+        "storage-driver": "fuse-overlayfs"
+      }
+    mode: "0644"
+  notify: docker restart

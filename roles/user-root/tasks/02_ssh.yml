@@ -1,17 +1,7 @@
-- name: Install OpenSSH client
-  package:
-    name: >-
-      {{
-        ({
-          'Debian': 'openssh-client',
-          'Ubuntu': 'openssh-client',
-          'Archlinux': 'openssh',
-          'Fedora': 'openssh-clients',
-          'RedHat': 'openssh-clients',
-          'Alpine': 'openssh-client'
-        }).get(ansible_distribution, 'openssh-client')
-      }}
-    state: present
+- name: "Include SSH for user root"
+  include_role:
+    name: 'sys-svc-ssh'
+  when: not (run_once_sys_svc_ssh | default(false) | bool)
 
 - name: Ensure '{{ USER_ROOT_SSH_DIR }}' exists
   file:

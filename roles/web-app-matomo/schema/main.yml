@@ -1,5 +1,1 @@
-credentials:
-  auth_token:
-    description: "Authentication token for the Matomo HTTP API (used for automation and integrations)"
-    algorithm: "sha256"
-    validation: "^[a-f0-9]{64}$"
+credentials: {}

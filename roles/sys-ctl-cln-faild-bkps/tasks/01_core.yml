@@ -6,11 +6,11 @@
     - sys-lock
     - sys-daemon
 
-- name: "pkgmgr install '{{ CLEANUP_FAILED_BACKUPS_PKG }}'"
+- name: "Install '{{ CLEANUP_FAILED_BACKUPS_PKG }}' via pip"
   include_role:
-    name: pkgmgr-install
+    name: sys-pip-install
   vars:
-    package_name: "{{ CLEANUP_FAILED_BACKUPS_PKG }}"
+    package_name: '{{ CLEANUP_FAILED_BACKUPS_PKG }}'
 
 - include_role:
     name: sys-service

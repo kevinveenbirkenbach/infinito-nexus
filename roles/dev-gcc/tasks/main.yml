@@ -1,9 +1,19 @@
----
 - block:
-  - name: Install GCC
-    package:
-      name: gcc
-      state: present
-  - set_fact:
-      run_once_dev_gcc: true
+    - name: Install GCC compiler and runtime (cross-distro)
+      ansible.builtin.package:
+        name: >-
+          {{
+            (ansible_distribution == 'Archlinux')
+            | ternary(
+                ['gcc', 'gcc-libs'],
+                {
+                  'Debian': ['gcc', 'libstdc++6'],
+                  'RedHat': ['gcc', 'libstdc++']
+                }[ansible_os_family]
+              )
+          }}
+        state: present
+
+    - ansible.builtin.set_fact:
+        run_once_dev_gcc: true
   when: run_once_dev_gcc is not defined

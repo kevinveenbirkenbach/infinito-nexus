@@ -1,29 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Variant B (local-image + excludes):
-# - Build the local Infinito.Nexus Docker image via Makefile (make build/build-no-cache/build-missing)
-# - Use ONLY that local image tag (e.g. infinito-arch) for the deploy container (no pulling pkgmgr images)
-# - Compute excluded roles automatically based on "invokable" roles and the selected type
-# - Run the real deploy via: python3 -m cli.deploy.container run ...
-#
-# It uses cli/deploy/container.py which supports:
-#   python3 -m cli.deploy.container run [container-opts] -- [inventory-args ...] -- [deploy-args ...]
+# Compose-based deploy test runner:
+# - uses docker-compose.yml (profile "ci") instead of docker run
+# - starts coredns + infinito service
+# - computes excludes by executing inside the running infinito container
+# - runs cli.create.inventory + cli.deploy.dedicated inside the container
+# - shuts down compose stack at the end
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-
 TYPE=""
 DISTRO=""
-IMAGE=""
 NO_CACHE=0
 MISSING_ONLY=0
 
 # -------------------------------------------------------------------
 # Config (kept from the previous version)
 # -------------------------------------------------------------------
-MASK_CREDENTIALS_IN_LOGS_DEFAULT="false"
-MASK_CREDENTIALS_IN_LOGS="${MASK_CREDENTIALS_IN_LOGS:-$MASK_CREDENTIALS_IN_LOGS_DEFAULT}"
+MASK_CREDENTIALS_IN_LOGS="false"
 
 AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
 AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
@@ -59,15 +54,17 @@ usage() {
 Usage: scripts/tests/deploy.sh --type <server|workstation|universal> --distro <arch|debian|ubuntu|fedora|centos> [options]
 
 Options:
-  --image <name>   Use a specific local image tag (no pull). Default: infinito-<distro>
-  --no-cache       Rebuild image with --no-cache (make build-no-cache)
-  --missing        Build only if missing (make build-missing)
+  --no-cache       Rebuild compose image with --no-cache
+  --missing        Build only if missing (skip build if image exists)
   -h, --help       Show this help
 
-What it runs:
-  1) INFINITO_DISTRO=<distro> make build|build-no-cache|build-missing
-  2) Compute excluded roles (invokable-based) + BASE_EXCLUDE + ALWAYS_EXCLUDE
-  3) python3 -m cli.deploy.container run --image <local-image> -- [inventory-args] -- [deploy-args]
+What it runs (compose-based):
+  1) INFINITO_DISTRO=<distro> docker compose --profile ci build (optional)
+  2) docker compose --profile ci up -d coredns infinito
+  3) Compute excluded roles (invokable-based) + BASE_EXCLUDE + ALWAYS_EXCLUDE
+  4) docker compose exec infinito python -m cli.create.inventory ...
+  5) docker compose exec infinito python -m cli.deploy.dedicated ...
+  6) docker compose --profile ci down
 EOF
 }
 
@@ -83,25 +80,93 @@ join_by_comma() {
 	echo "$*"
 }
 
+# -------------------------------------------------------------------
+# Compose helpers
+# -------------------------------------------------------------------
+compose() {
+	# Ensure we always operate in repo root where docker-compose.yml exists
+	(
+		cd "${REPO_ROOT}"
+		# profile ci is important for infinito + coredns
+		INFINITO_DISTRO="${DISTRO}" docker compose --profile ci "$@"
+	)
+}
+
+infinito_exec() {
+  docker exec "${INFINITO_CONTAINER}" "$@"
+}
+
+
+ensure_compose_image() {
+	# Compose image name in docker-compose.yml:
+	#   image: "infinito-${INFINITO_DISTRO:-arch}"
+	local image="infinito-${DISTRO}"
+
+	if [[ "${MISSING_ONLY}" == "1" ]]; then
+		if docker image inspect "${image}" >/dev/null 2>&1; then
+			echo ">>> Image already exists: ${image} (skipping build due to --missing)"
+			return
+		fi
+	fi
+
+	if [[ "${NO_CACHE}" == "1" ]]; then
+		echo ">>> docker compose build --no-cache infinito (INFINITO_DISTRO=${DISTRO})"
+		compose build --no-cache infinito
+	else
+		echo ">>> docker compose build infinito (INFINITO_DISTRO=${DISTRO})"
+		compose build infinito
+	fi
+}
+
+start_stack() {
+  echo ">>> Starting compose stack (profile=ci): coredns only"
+  compose up -d coredns --force-recreate
+
+  # derive compose network from coredns container
+  local coredns_id net
+  coredns_id="$(compose ps -q coredns)"
+  [[ -n "$coredns_id" ]] || die "Could not get coredns container id"
+
+  net="$(docker inspect -f '{{ range $k,$v := .NetworkSettings.Networks }}{{$k}}{{end}}' "$coredns_id")"
+  [[ -n "$net" ]] || die "Could not determine compose network"
+
+  echo ">>> Starting infinito via docker run (network=${net})"
+  docker rm -f "${INFINITO_CONTAINER}" >/dev/null 2>&1 || true
+
+  docker run -d --name "${INFINITO_CONTAINER}" \
+    --privileged \
+    --cgroupns=host \
+    --tmpfs /run \
+    --tmpfs /run/lock \
+    -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
+	-v /tmp/gh-action:/tmp/gh-action \
+    -v "${REPO_ROOT}:/opt/src/infinito" \
+    --network "${net}" \
+    -e INSTALL_LOCAL_BUILD=1 \
+    "infinito-${DISTRO}" \
+    /sbin/init
+}
+
+stop_stack() {
+  echo ">>> Stopping infinito container + compose stack"
+  docker rm -f "${INFINITO_CONTAINER}" >/dev/null 2>&1 || true
+  compose down --remove-orphans
+}
+
+# -------------------------------------------------------------------
+# Inventory/exclude logic (now executed via compose exec)
+# -------------------------------------------------------------------
 get_invokable() {
-	docker run --rm \
-		-e INSTALL_LOCAL_BUILD=1 \
-		-e INSTALL_LOCAL_BUILD_SILENCE=1 \
-		-v "${REPO_ROOT}:/opt/src/infinito" \
-		-w /opt/src/infinito \
-		"${IMAGE}" \
-		python3 -m cli.meta.applications.invokable | trim_lines
+	infinito_exec sh -lc 'python3 -m cli.meta.applications.invokable' | trim_lines
 }
 
 filter_allowed() {
 	local type="$1"
 	case "$type" in
 	workstation)
-		# desk-* and util-desk-*
 		grep -E '^(desk-|util-desk-)' || true
 		;;
 	server)
-		# web-* (includes web-app-*, web-svc-*, etc.)
 		grep -E '^web-|svc-db-' || true
 		;;
 	universal)
@@ -148,7 +213,6 @@ compute_exclude_csv() {
 			trim_lines
 	)"
 
-	# final is newline-separated -> read safely into array (no word-splitting/globbing)
 	if [[ -n "${final}" ]]; then
 		mapfile -t arr <<<"${final}"
 	fi
@@ -173,10 +237,6 @@ while [[ $# -gt 0 ]]; do
 		DISTRO="${2:-}"
 		shift 2
 		;;
-	--image)
-		IMAGE="${2:-}"
-		shift 2
-		;;
 	--no-cache)
 		NO_CACHE=1
 		shift
@@ -195,6 +255,7 @@ done
 
 [[ -n "${TYPE}" ]] || die "--type is required"
 [[ -n "${DISTRO}" ]] || die "--distro is required"
+INFINITO_CONTAINER="infinito_nexus_${DISTRO}"
 
 case "${TYPE}" in
 server | workstation | universal) ;;
@@ -206,52 +267,68 @@ arch | debian | ubuntu | fedora | centos) ;;
 *) die "Invalid --distro '${DISTRO}' (expected: arch|debian|ubuntu|fedora|centos)" ;;
 esac
 
-if [[ -z "${IMAGE}" ]]; then
-	IMAGE="infinito-${DISTRO}"
-fi
-
-# ---------------------------------------------------------------------------
-# Build local image via Makefile
-# ---------------------------------------------------------------------------
 echo ">>> Deploy type:     ${TYPE}"
 echo ">>> Distro:          ${DISTRO}"
-echo ">>> Local image:     ${IMAGE}"
 echo ">>> Repo root:       ${REPO_ROOT}"
 
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 pushd "${REPO_ROOT}" >/dev/null
 
-if [[ "${NO_CACHE}" == "1" ]]; then
-	echo ">>> make build-no-cache (INFINITO_DISTRO=${DISTRO})"
-	INFINITO_DISTRO="${DISTRO}" make build-no-cache
-elif [[ "${MISSING_ONLY}" == "1" ]]; then
-	echo ">>> make build-missing (INFINITO_DISTRO=${DISTRO})"
-	INFINITO_DISTRO="${DISTRO}" make build-missing
-else
-	echo ">>> make build (INFINITO_DISTRO=${DISTRO})"
-	INFINITO_DISTRO="${DISTRO}" make build
-fi
+on_exit() {
+  rc=$?
+  if [[ $rc -eq 0 ]]; then
+    stop_stack
+  else
+    echo ">>> ERROR (rc=$rc) - keeping compose stack for debugging."
+    echo ">>> Hint:"
+    echo "    docker ps"
+    echo "    INFINITO_DISTRO=${DISTRO} docker compose --profile ci ps"
+    echo "    INFINITO_DISTRO=${DISTRO} docker compose --profile ci logs --tail=200"
+  fi
+  exit $rc
+}
+trap on_exit EXIT
 
-docker image inspect "${IMAGE}" >/dev/null 2>&1 || die "Local image not found after build: ${IMAGE}"
+ensure_compose_image
+start_stack
+
 
 # ---------------------------------------------------------------------------
-# Compute excludes (restored)
+# Compute excludes
 # ---------------------------------------------------------------------------
 EXCLUDE_CSV="$(compute_exclude_csv "${TYPE}")"
 echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
 
 # ---------------------------------------------------------------------------
-# Run deploy via container runner
-#   container run -- [inventory-args ...] -- [deploy-args ...]
+# Run inventory generation + deploy INSIDE the compose container
 # ---------------------------------------------------------------------------
-echo ">>> Running deploy via cli.deploy.container (local image only)..."
-python3 -m cli.deploy.container run \
-	--image "${IMAGE}" \
-	-- \
+echo ">>> Creating CI inventory inside compose container..."
+infinito_exec python3 -m cli.create.inventory \
+	/etc/inventories/github-ci \
+	--host localhost \
+	--ssl-disabled \
+	--primary-domain localhost \
 	--exclude "${EXCLUDE_CSV}" \
 	--vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
-	--authorized-keys "${AUTHORIZED_KEYS}" \
-	-- \
+	--authorized-keys "${AUTHORIZED_KEYS}"
+
+echo ">>> Ensuring vault password file exists..."
+infinito_exec sh -lc \
+	"mkdir -p /etc/inventories/github-ci && \
+	 [ -f /etc/inventories/github-ci/.password ] || \
+	 printf '%s\n' 'ci-vault-password' > /etc/inventories/github-ci/.password"
+
+echo ">>> Running deploy via cli.deploy.dedicated inside compose container..."
+infinito_exec python3 -m cli.deploy.dedicated \
+	/etc/inventories/github-ci/servers.yml \
+	-p /etc/inventories/github-ci/.password \
+	-vv \
+	--assert true \
+	--debug \
 	-T "${TYPE}"
 
-popd >/dev/null
 echo ">>> Deploy test suite finished successfully."
+
+popd >/dev/null

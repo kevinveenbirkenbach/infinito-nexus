@@ -15,8 +15,9 @@
 
 - name: "Create (optional) Dockerfile for {{ application_id }}"
   template:
-    src: "{{ dockerfile_src }}"
+    src:  "{{ dockerfile_src }}"
     dest: "{{ docker_compose.files.dockerfile }}"
+    mode: '0640'
   notify:
     - docker compose build
     - docker compose up
@@ -25,9 +26,9 @@
 
 - name: "Create (optional) '{{ docker_compose.files.env }}'"
   template:
-    src: "{{ item }}"
+    src:  "{{ item }}"
     dest: "{{ docker_compose.files.env }}"
-    mode: '770'
+    mode: '0640'
     force: yes
   notify: docker compose up
   with_first_found:
@@ -38,9 +39,9 @@
 
 - name: "Create (optional) '{{ docker_compose.files.docker_compose_override }}'"
   template:
-    src: "{{ item }}"
+    src:  "{{ item }}"
     dest: "{{ docker_compose.files.docker_compose_override }}"
-    mode: '770'
+    mode: '0640'
     force: yes
   notify: docker compose up
   with_first_found:
@@ -53,5 +54,6 @@
   template:
     src:    "docker-compose.yml.j2"
     dest:   "{{ docker_compose.files.docker_compose }}"
+    mode:   '0640'
   notify:   docker compose up
   register: docker_compose_template

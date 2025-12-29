@@ -32,6 +32,8 @@ docker:
       enabled:            true
       version:            "11.4"
     redis:
+      backup:
+        disabled: true
       enabled:            true
     search:
       enabled:            true

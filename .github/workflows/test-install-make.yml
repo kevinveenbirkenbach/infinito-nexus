@@ -27,6 +27,7 @@ jobs:
         run: |
           docker run --rm \
             -e INSTALL_LOCAL_BUILD=0 \
+            -e NIX_CONFIG="${NIX_CONFIG}" \
             -v "$(pwd):/opt/src/infinito" \
             -w "/opt/src/infinito" \
             "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}-virgin:stable" \

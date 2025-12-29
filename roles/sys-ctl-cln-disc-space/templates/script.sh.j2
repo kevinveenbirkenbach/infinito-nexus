@@ -21,12 +21,8 @@ done
 if [ "$force_freeing" = true ]; then
   echo "cleaning up /tmp" &&
   find /tmp -type f -atime +10 -delete || exit 1
-  
-  {% if BACKUPS_FOLDER_PATH is defined and SIZE_PERCENT_MAXIMUM_BACKUP is defined %}
   echo "cleaning up backups" &&
   systemctl start {{ SYS_SERVICE_CLEANUP_BACKUPS }} || exit 2
-  {% endif %}
-
   if command -v docker >/dev/null 2>&1 ; then
     echo "cleaning up docker (prune + anonymous volumes) via systemd service" &&
     systemctl start {{ SYS_SERVICE_CLEANUP_DOCKER }} || exit 3

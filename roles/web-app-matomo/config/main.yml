@@ -9,6 +9,8 @@ features:
   matomo:             false
 
 site_name: "Matomo on {{ PRIMARY_DOMAIN }}"
+token:
+  description:  "Created by {{ SOFTWARE_NAME }}"
 
 server:
   csp:
@@ -44,9 +46,24 @@ docker:
       mem_reservation:    0.5g
       mem_limit:          1g
       pids_limit:         512
+
+    bootstrap:
+      image:              "ghcr.io/kevinveenbirkenbach/matomo-bootstrap"
+      version:            "stable"
+      name:               "matomo-bootstrap"
+      profiles:
+        - "bootstrap"
+      timeout:            30
+      cpus:               1.0
+      mem_reservation:    0.5g
+      mem_limit:          1g
+      pids_limit:         512
+
     database:
       enabled: true
     redis:
+      backup:
+        disabled: true
       enabled: false
   volumes: 
     data: matomo_data

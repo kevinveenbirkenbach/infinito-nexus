@@ -1,6 +1,5 @@
 users:
-  administrator:
-    username:             "administrator"
+  administrator: {}
   contact:
     description:          "General contact account"
     username:             "contact"
