@@ -41,7 +41,7 @@
       - /usr/bin/baudolo-seed
       - "{{ PATH_INFINITO_DATABASE_SECRETS }}"
       - "{{ database_instance }}"
-      - "{{ database_name }}"
+      - "{{ '*' if database_name | length == 0 else database_name }}"
       - "{{ database_username }}"
       - "{{ database_password }}"
   when:
