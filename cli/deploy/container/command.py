@@ -105,13 +105,6 @@ def wait_for_docker_socket(container: str, timeout: int = 60) -> None:
             f"[diag stderr]\n{diag.stderr}\n"
         )
 
-    # 1) Show basic socket permissions once
-    sock = _docker_exec_capture(
-        container, ["sh", "-lc", "ls -l /var/run/docker.sock || true; id || true"]
-    )
-    if sock.stdout.strip():
-        print(sock.stdout.rstrip())
-
     # 2) Poll docker info
     last_out = ""
     last_err = ""
@@ -135,7 +128,6 @@ def wait_for_docker_socket(container: str, timeout: int = 60) -> None:
     raise RuntimeError(
         "Docker did not become usable inside container in time.\n\n"
         "Most common causes:\n"
-        "  - docker client exists but cannot access /var/run/docker.sock (permissions / mount)\n"
         "  - DOCKER_HOST is wrong\n\n"
         f"[last docker version stdout]\n{last_out}\n"
         f"[last docker version stderr]\n{last_err}\n"
@@ -170,13 +162,7 @@ def start_ci_container(
             "--name",
             name,
             "-v",
-            "/var/run/docker.sock:/var/run/docker.sock",
-            "-v",
-            "/tmp/gh-action/:/tmp/gh-action/",
-            "-v",
             f"{project_root}:{INFINITO_SRC_DIR}",
-            "-e",
-            "DOCKER_HOST=unix:///var/run/docker.sock",
             "-e",
             "INSTALL_LOCAL_BUILD=1",
             image,

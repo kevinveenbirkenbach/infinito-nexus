@@ -140,11 +140,9 @@ start_stack() {
     --tmpfs /run/lock \
     -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
 	-v /tmp/gh-action:/tmp/gh-action \
-    -v /var/run/docker.sock:/var/run/docker.sock \
     -v "${REPO_ROOT}:/opt/src/infinito" \
     --network "${net}" \
     -e INSTALL_LOCAL_BUILD=1 \
-    -e DOCKER_HOST=unix:///var/run/docker.sock \
     "infinito-${DISTRO}" \
     /sbin/init
 }

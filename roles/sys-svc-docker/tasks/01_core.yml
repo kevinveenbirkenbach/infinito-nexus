@@ -10,7 +10,6 @@
         omit
       }}
     state: present
-  when: not DOCKER_IN_CONTAINER | bool
   notify: docker restart
 
 - name: "Install docker compose"
@@ -25,6 +24,9 @@
     state: present
   notify: docker restart
 
+- name: "Load fuse-overlayfs (in container)"
+  include_tasks: "02_fuse_overlayfs.yml"
+  when: DOCKER_IN_CONTAINER | bool
 
 - name: Restart and enable docker service
   meta: flush_handlers

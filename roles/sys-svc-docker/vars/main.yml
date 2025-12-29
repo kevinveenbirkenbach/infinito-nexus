@@ -1,0 +1,2 @@
+SYS_SVC_DOCKER_DIR:     "/etc/docker/"
+SYS_SVC_DOCKER_DAEMON:  "{{ [SYS_SVC_DOCKER_DIR, 'daemon.json' ] | path_join }}"

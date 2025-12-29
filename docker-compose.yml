@@ -59,15 +59,12 @@ services:
 
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /tmp/gh-action/:/tmp/gh-action/
       - .:/opt/src/infinito
       - docker:/var/lib/docker/volumes/
       - infinito:/var/lib/infinito/
       - letsencrypt:/etc/letsencrypt/
 
     environment:
-      DOCKER_HOST: unix:///var/run/docker.sock
       INSTALL_LOCAL_BUILD: "1"
       INFINITO_SRC_DIR: /opt/src/infinito
       PYTHONHTTPSVERIFY: "1"
