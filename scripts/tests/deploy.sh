@@ -326,6 +326,7 @@ infinito_exec python3 -m cli.deploy.dedicated \
 	-vv \
 	--assert true \
 	--debug \
+	--diff \
 	-T "${TYPE}"
 
 echo ">>> Deploy test suite finished successfully."
