@@ -4,5 +4,5 @@ features:
 server:
   domains:
     canonical:
-      - jenkins.{{ PRIMARY_DOMAIN }}
+      - jenkins.{{ DOMAIN_PRIMARY }}
     aliases: []

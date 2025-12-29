@@ -5,5 +5,5 @@ features:
 server:
   domains:
     canonical:
-      - "file.{{ PRIMARY_DOMAIN }}"
+      - "file.{{ DOMAIN_PRIMARY }}"
     aliases: []

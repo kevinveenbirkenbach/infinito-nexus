@@ -29,5 +29,5 @@ server:
   domains:
     aliases: []
     canonical:
-      - lam.{{ PRIMARY_DOMAIN }}
+      - lam.{{ DOMAIN_PRIMARY }}
 

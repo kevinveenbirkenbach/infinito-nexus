@@ -40,7 +40,7 @@ server:
         unsafe-inline:  true
   domains:
     canonical:
-      - "x.wiki.{{ PRIMARY_DOMAIN }}"
+      - "x.wiki.{{ DOMAIN_PRIMARY }}"
     aliases: []
 rbac:
   roles: {}

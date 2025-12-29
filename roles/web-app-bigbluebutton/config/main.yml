@@ -17,7 +17,7 @@ server:
         unsafe-inline:  true
   domains:
     canonical:
-      - "meet.{{ PRIMARY_DOMAIN }}"
+      - "meet.{{ DOMAIN_PRIMARY }}"
     aliases: []
 credentials: {}
 

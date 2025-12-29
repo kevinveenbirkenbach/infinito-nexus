@@ -40,7 +40,7 @@ defaults_oidc:
       SECURITY_URL:       "{{ _oidc_account_url ~ '/#/security/signingin' }}"                     # Section for managing login and security settings
     CHANGE_CREDENTIALS:   "{{ _oidc_account_url ~ '/account-security/signing-in' }}"              # URL for managing or changing user credentials
     RESET_CREDENTIALS:    "{{ _oidc_client_issuer_url ~ '/login-actions/reset-credentials?client_id=' ~ _oidc_client_id }}" # Password reset url
-  BUTTON_TEXT:            "SSO Login ({{ PRIMARY_DOMAIN | upper }})"                              # Default button text
+  BUTTON_TEXT:            "SSO Login ({{ DOMAIN_PRIMARY | upper }})"                              # Default button text
   ATTRIBUTES:
     # Attribut to identify the user
     USERNAME:             "preferred_username"

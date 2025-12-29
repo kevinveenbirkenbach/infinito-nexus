@@ -5,12 +5,12 @@ server:
       - 302
   domains:
     canonical:
-      - "onlyoffice.{{ PRIMARY_DOMAIN }}"
+      - "onlyoffice.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     whitelist:
       frame-ancestors:
-        - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
       script-src-elem:
         - "https://fonts.googleapis.com"
       style-src-elem:

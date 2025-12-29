@@ -8,7 +8,7 @@ features:
 server:
   domains:
     canonical:
-      - phpldapadmin.{{ PRIMARY_DOMAIN }}
+      - phpldapadmin.{{ DOMAIN_PRIMARY }}
     aliases: []
 docker:
   services:

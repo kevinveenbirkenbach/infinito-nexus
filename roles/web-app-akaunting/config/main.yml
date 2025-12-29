@@ -1,5 +1,5 @@
 company:
-  name:             "Akaunting on {{ PRIMARY_DOMAIN | upper }}" # @todo load automatic based on service_provider infos, this will fail
+  name:             "Akaunting on {{ DOMAIN_PRIMARY | upper }}" # @todo load automatic based on service_provider infos, this will fail
   email:            "{{ users.administrator.email }}" # @todo load automatic based on service_provider infos, this will fail
 setup_admin_email:  "{{ users.administrator.email }}"
 features:
@@ -12,7 +12,7 @@ features:
 server:
   domains:
     canonical:
-      - "accounting.{{ PRIMARY_DOMAIN }}"
+      - "accounting.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:

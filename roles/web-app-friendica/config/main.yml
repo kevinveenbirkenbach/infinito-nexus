@@ -12,7 +12,7 @@ features:
 server:
   domains:
     canonical:
-      - "social.{{ PRIMARY_DOMAIN }}"
+      - "social.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:

@@ -3,7 +3,7 @@ url:              "{{ WEB_PROTOCOL }}://<< defaults_applications['web-svc-file']
 server:
   domains:
     canonical:
-      - asset.{{ PRIMARY_DOMAIN }}
+      - asset.{{ DOMAIN_PRIMARY }}
     aliases: []
 features:
   matomo: true

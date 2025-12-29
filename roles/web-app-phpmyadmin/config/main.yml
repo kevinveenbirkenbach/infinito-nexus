@@ -17,7 +17,7 @@ server:
   domains:
     aliases: []
     canonical:
-      - phpmyadmin.{{ PRIMARY_DOMAIN }}
+      - phpmyadmin.{{ DOMAIN_PRIMARY }}
 docker:
   services:
     database:

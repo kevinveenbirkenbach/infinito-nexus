@@ -2,7 +2,7 @@ username: coturnconsumer
 server:
   domains:
     canonical:
-      - "coturn.{{ PRIMARY_DOMAIN }}"
+      - "coturn.{{ DOMAIN_PRIMARY }}"
 docker:
   services:
     coturn:

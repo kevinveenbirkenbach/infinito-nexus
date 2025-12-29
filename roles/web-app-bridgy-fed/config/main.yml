@@ -9,7 +9,7 @@ features:
 server:
   domains:
     canonical:
-      - "bridgyfed.{{ PRIMARY_DOMAIN }}"
+      - "bridgyfed.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     whitelist: {}

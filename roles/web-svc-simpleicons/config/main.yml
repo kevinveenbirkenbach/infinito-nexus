@@ -19,7 +19,7 @@ server:
   csp: {}      
   domains:
     canonical:
-      - "icons.{{ PRIMARY_DOMAIN }}"
+      - "icons.{{ DOMAIN_PRIMARY }}"
     aliases: []
 rbac:
   roles:

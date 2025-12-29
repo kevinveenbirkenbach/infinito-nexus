@@ -11,7 +11,7 @@
   when: MODE_DEBUG | bool
 
 - name: Check DNS resolution for test domain
-  ansible.builtin.command: "getent hosts {{ LOCALHOST_TEST_DOMAIN }}"
+  ansible.builtin.command: "getent hosts {{ DOMAIN_TEST }}"
   register: dns_check
   changed_when: false
   failed_when: dns_check.rc != 0
@@ -68,7 +68,7 @@
         {{
           applications
           | canonical_domains_map(
-              PRIMARY_DOMAIN,
+              DOMAIN_PRIMARY,
               recursive=True,
               roles_base_dir=([ playbook_dir, 'roles' ] | path_join),
               seed=(CURRENT_PLAY_APPLICATIONS | dict2items | map(attribute='key') | list)
@@ -81,7 +81,7 @@
       domains: >-
         {{ 
           defaults_applications | 
-          canonical_domains_map(PRIMARY_DOMAIN) | 
+          canonical_domains_map(DOMAIN_PRIMARY) | 
           combine(CURRENT_PLAY_DOMAINS, recursive=True) 
         }}
 
@@ -99,7 +99,7 @@
       redirect_domain_mappings: >-
         {{ 
           CURRENT_PLAY_APPLICATIONS |
-          domain_mappings(PRIMARY_DOMAIN, AUTO_BUILD_ALIASES) |
+          domain_mappings(DOMAIN_PRIMARY, AUTO_BUILD_ALIASES) |
           merge_mapping(redirect_domain_mappings, 'source') 
         }}
 

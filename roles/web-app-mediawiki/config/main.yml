@@ -1,8 +1,8 @@
-sitename:       "Wiki on {{ PRIMARY_DOMAIN | upper }}"
+sitename:       "Wiki on {{ DOMAIN_PRIMARY | upper }}"
 server:
   domains:
     canonical:
-      - "m.wiki.{{ PRIMARY_DOMAIN }}"
+      - "m.wiki.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:

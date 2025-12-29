@@ -2,7 +2,7 @@
 users:
   demo:
     username: demo
-    email: "demo@{{ PRIMARY_DOMAIN }}"
+    email: "demo@{{ DOMAIN_PRIMARY }}"
     roles: []
     description: Demo User
     limits:

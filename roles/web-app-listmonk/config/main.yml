@@ -10,7 +10,7 @@ features:
 server:
   domains:
     canonical:
-      - "newsletter.{{ PRIMARY_DOMAIN }}"
+      - "newsletter.{{ DOMAIN_PRIMARY }}"
     aliases: []
   status_codes:
     default: 404

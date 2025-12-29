@@ -5,5 +5,5 @@ features:
 server:
   domains:
     canonical:
-      - "html.{{ PRIMARY_DOMAIN }}"
+      - "html.{{ DOMAIN_PRIMARY }}"
     aliases: []

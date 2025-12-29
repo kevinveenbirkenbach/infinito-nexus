@@ -4,7 +4,7 @@
       vars:
         wildcard_domain: true
       when: 
-        - domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN)
+        - domain.split('.') | length == (DOMAIN_PRIMARY.split('.') | length + 1) and domain.endswith(DOMAIN_PRIMARY)
     - name: run the receive_certificate tasks once
       set_fact:
         run_once_receive_certificate: true
@@ -15,5 +15,5 @@
   vars:
     wildcard_domain: false
   when: 
-    - not (domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN))
+    - not (domain.split('.') | length == (DOMAIN_PRIMARY.split('.') | length + 1) and domain.endswith(DOMAIN_PRIMARY))
   

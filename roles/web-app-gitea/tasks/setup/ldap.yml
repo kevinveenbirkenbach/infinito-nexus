@@ -13,7 +13,7 @@
     docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth list \
       | tail -n +2 \
-      | grep -F "LDAP ({{ PRIMARY_DOMAIN }})" \
+      | grep -F "LDAP ({{ DOMAIN_PRIMARY }})" \
       | awk '{print $1; exit}'
   args:
     chdir: "{{ docker_compose.directories.instance }}"

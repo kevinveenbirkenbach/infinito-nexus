@@ -8,7 +8,7 @@ features:
   logout:             false
   matomo:             false
 
-site_name: "Matomo on {{ PRIMARY_DOMAIN }}"
+site_name: "Matomo on {{ DOMAIN_PRIMARY }}"
 token:
   description:  "Created by {{ SOFTWARE_NAME }}"
 
@@ -30,7 +30,7 @@ server:
         unsafe-eval:   true
   domains:
     canonical:
-      - "matomo.{{ PRIMARY_DOMAIN }}"
+      - "matomo.{{ DOMAIN_PRIMARY }}"
     aliases: []
 excluded_ips: "{{ networks.internet.values() | list }}"
 

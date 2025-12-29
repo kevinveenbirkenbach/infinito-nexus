@@ -29,9 +29,9 @@
       but it is missing or not a directory.
   when: NGINX.FILES.CONFIGURATION_DIR is defined
 
-- name: "Assert default webserver responds with 404 for {{ LOCALHOST_TEST_DOMAIN }}"
+- name: "Assert default webserver responds with 404 for {{ DOMAIN_TEST }}"
   ansible.builtin.uri:
-    url: "http://{{ LOCALHOST_TEST_DOMAIN }}:80/"
+    url: "http://{{ DOMAIN_TEST }}:80/"
     method: GET
     return_content: true
     status_code: 404
@@ -45,7 +45,7 @@
       - default_vhost_check.status == 404
       - "'This service is not provided' in (default_vhost_check.content | default(''))"
     fail_msg: >-
-      Expected http://{{ LOCALHOST_TEST_DOMAIN }} to return HTTP 404 with
+      Expected http://{{ DOMAIN_TEST }} to return HTTP 404 with
       default Infinito.Nexus fallback message, but got:
       status={{ default_vhost_check.status }},
       body={{ default_vhost_check.content | default('') }}

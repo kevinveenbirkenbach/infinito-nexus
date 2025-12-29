@@ -28,7 +28,7 @@ docker:
 server:
   domains:
     canonical:
-      - lab.git.{{ PRIMARY_DOMAIN }}
+      - lab.git.{{ DOMAIN_PRIMARY }}
   csp:
     flags:
       script-src-elem:

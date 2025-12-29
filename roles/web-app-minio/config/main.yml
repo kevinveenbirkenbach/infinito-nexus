@@ -14,8 +14,8 @@ server:
     console:  200
   domains:
     canonical:
-      console:  "console.s3.{{ PRIMARY_DOMAIN }}"
-      api:      "api.s3.{{ PRIMARY_DOMAIN }}"
+      console:  "console.s3.{{ DOMAIN_PRIMARY }}"
+      api:      "api.s3.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags: {}

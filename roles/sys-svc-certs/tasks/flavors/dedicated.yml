@@ -19,8 +19,8 @@
     -w {{ LETSENCRYPT_WEBROOT_PATH }}
     {% endif %}
     {% if wildcard_domain is defined and ( wildcard_domain | bool ) %}
-    -d {{ PRIMARY_DOMAIN }} 
-    -d *.{{ PRIMARY_DOMAIN }}
+    -d {{ DOMAIN_PRIMARY }} 
+    -d *.{{ DOMAIN_PRIMARY }}
     {% else %}
     -d {{ domain }}
     {% endif %}

@@ -11,7 +11,7 @@ features:
 server:
   domains:
     canonical:
-      openwebui:  "chat.ai.{{ PRIMARY_DOMAIN }}"
+      openwebui:  "chat.ai.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:

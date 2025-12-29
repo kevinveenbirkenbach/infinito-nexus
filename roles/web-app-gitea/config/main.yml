@@ -32,7 +32,7 @@ server:
   domains:
     aliases: []
     canonical:
-      - tea.git.{{ PRIMARY_DOMAIN }}
+      - tea.git.{{ DOMAIN_PRIMARY }}
 docker:
   services:
     database:

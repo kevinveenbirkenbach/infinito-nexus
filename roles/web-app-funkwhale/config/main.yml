@@ -32,7 +32,7 @@ features:
 server:
   domains:
     canonical:
-      - "audio.{{ PRIMARY_DOMAIN }}"
+      - "audio.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:  
     flags:

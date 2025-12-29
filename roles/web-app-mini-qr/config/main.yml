@@ -34,5 +34,5 @@ server:
         unsafe-eval:    true
   domains:
     canonical:
-      - "qr.{{ PRIMARY_DOMAIN }}"
+      - "qr.{{ DOMAIN_PRIMARY }}"
     aliases: []

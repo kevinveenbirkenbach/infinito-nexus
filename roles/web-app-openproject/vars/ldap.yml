@@ -1,5 +1,5 @@
 OPENPROJECT_LDAP:
-  name:                   "{{ PRIMARY_DOMAIN }}"                          # Display name for the LDAP connection in OpenProject
+  name:                   "{{ DOMAIN_PRIMARY }}"                          # Display name for the LDAP connection in OpenProject
   host:                   "{{ LDAP.SERVER.DOMAIN }}"                      # LDAP server address
   port:                   "{{ LDAP.SERVER.PORT }}"                        # LDAP server port (typically 389 or 636)
   account:                "{{ LDAP.DN.ADMINISTRATOR.DATA }}"              # Bind DN (used for authentication)

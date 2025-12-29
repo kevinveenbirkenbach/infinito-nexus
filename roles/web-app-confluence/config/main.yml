@@ -33,7 +33,7 @@ server:
         unsafe-inline:  true
   domains:
     canonical:
-      - "c.wiki.{{ PRIMARY_DOMAIN }}"
+      - "c.wiki.{{ DOMAIN_PRIMARY }}"
     aliases: []
 rbac:
   roles: {}

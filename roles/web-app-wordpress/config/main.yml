@@ -32,7 +32,7 @@ server:
       script-src-elem:
         - "https://cdn.gtranslate.net"    # Necessary for translation plugins
         - "https://translate.google.com"  # Necessary for translation plugins
-        - "blog.{{ PRIMARY_DOMAIN }}"
+        - "blog.{{ DOMAIN_PRIMARY }}"
       style-src-elem:
         - "https://fonts.bunny.net"
       frame-src:
@@ -40,7 +40,7 @@ server:
         - "*"
   domains:
     canonical:
-      - "blog.{{ PRIMARY_DOMAIN }}"
+      - "blog.{{ DOMAIN_PRIMARY }}"
     aliases: []
 docker:
   services:

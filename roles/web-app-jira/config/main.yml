@@ -34,7 +34,7 @@ server:
         unsafe-eval:    true
   domains:
     canonical:
-      - "jira.{{ PRIMARY_DOMAIN }}"
+      - "jira.{{ DOMAIN_PRIMARY }}"
     aliases: []
   status_codes:
     default: 405

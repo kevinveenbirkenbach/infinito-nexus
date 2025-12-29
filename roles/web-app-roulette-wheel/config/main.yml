@@ -6,5 +6,5 @@ features:
 server:
   domains:
     canonical:
-      - "wheel.{{ PRIMARY_DOMAIN }}"
+      - "wheel.{{ DOMAIN_PRIMARY }}"
     aliases: []

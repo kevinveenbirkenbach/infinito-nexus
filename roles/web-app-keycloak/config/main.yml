@@ -28,7 +28,7 @@ server:
         - "*" # For frontend channel logout it's necessary that iframes can be loaded
   domains:
     canonical:
-      - "auth.{{ PRIMARY_DOMAIN }}"
+      - "auth.{{ DOMAIN_PRIMARY }}"
     aliases: []
 scopes:
   nextcloud:  nextcloud

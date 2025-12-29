@@ -9,7 +9,7 @@ Examples:
 
 ## Inputs
 - parent_dns_domains (list[str], optional): FQDNs to evaluate. If empty, the role flattens CURRENT_PLAY_DOMAINS_ALL.
-- PRIMARY_DOMAIN (apex), defaults_networks.internet.ip4, optional defaults_networks.internet.ip6
+- DOMAIN_PRIMARY (apex), defaults_networks.internet.ip4, optional defaults_networks.internet.ip6
 - Flags:
   - parent_dns_enabled (bool, default: true)
   - parent_dns_proxied (bool, default: false)

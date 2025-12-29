@@ -23,7 +23,7 @@ server:
         - "data:"
   domains:
     canonical:
-      - "video.{{ PRIMARY_DOMAIN }}"
+      - "video.{{ DOMAIN_PRIMARY }}"
     aliases: []
     
 docker:

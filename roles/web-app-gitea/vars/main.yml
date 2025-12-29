@@ -7,7 +7,7 @@ container_port:                 "{{ applications | get_app_conf(application_id, 
 
 # Gitea
 GITEA_LDAP_AUTH_ARGS:
-  - '--name "LDAP ({{ PRIMARY_DOMAIN }})"'
+  - '--name "LDAP ({{ DOMAIN_PRIMARY }})"'
   - '--host "{{ LDAP.SERVER.DOMAIN }}"'
   - '--port {{ LDAP.SERVER.PORT }}'
   - '--security-protocol "{{ LDAP.SERVER.SECURITY | trim or "unencrypted" }}"'

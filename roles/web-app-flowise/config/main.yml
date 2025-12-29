@@ -9,7 +9,7 @@ features:
 server:
   domains:
     canonical: 
-      - "flow.ai.{{ PRIMARY_DOMAIN }}"
+      - "flow.ai.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:

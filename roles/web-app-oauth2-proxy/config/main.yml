@@ -9,5 +9,5 @@ features:
 server:
   domains:
     canonical:
-      - oauth2-proxy.{{ PRIMARY_DOMAIN }}
+      - oauth2-proxy.{{ DOMAIN_PRIMARY }}
     aliases: []

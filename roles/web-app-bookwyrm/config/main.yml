@@ -33,7 +33,7 @@ server:
         unsafe-inline:  true
   domains:
     canonical:
-      - "book.{{ PRIMARY_DOMAIN }}"
+      - "book.{{ DOMAIN_PRIMARY }}"
     aliases: []
 rbac:
   roles: {}

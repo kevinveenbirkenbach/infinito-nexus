@@ -20,7 +20,7 @@ server:
   domains:
     aliases: []
     canonical:
-      - shop.{{ PRIMARY_DOMAIN }}
+      - shop.{{ DOMAIN_PRIMARY }}
 docker:
   services:
     database:

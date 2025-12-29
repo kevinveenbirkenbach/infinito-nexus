@@ -2,7 +2,7 @@ SYN_DNS_WILDCARD_RECORDS: >-
   {{
     {} |
     wildcard_records(
-      PRIMARY_DOMAIN,
+      DOMAIN_PRIMARY,
       networks.internet.ip4,
       networks.internet.ip6,
       parent_dns_proxied,

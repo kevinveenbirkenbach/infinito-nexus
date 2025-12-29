@@ -28,7 +28,7 @@ docker:
 server:
   domains:
     canonical:
-      - baserow.{{ PRIMARY_DOMAIN }}
+      - baserow.{{ DOMAIN_PRIMARY }}
     aliases: []
   csp:
     whitelist:

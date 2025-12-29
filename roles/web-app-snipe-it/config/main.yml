@@ -9,7 +9,7 @@ features:
 server:
   domains:
     canonical:
-      - "inventory.{{ PRIMARY_DOMAIN }}"
+      - "inventory.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:

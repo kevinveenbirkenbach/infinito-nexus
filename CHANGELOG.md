@@ -1,6 +1,6 @@
 ## [0.4.0] - 2025-12-29
 
-* * **CI DNS & Defaults:** Introduced CoreDNS-based *.localhost resolution (A/AAAA to loopback), set PRIMARY_DOMAIN to localhost, added DNS assertions and a strict default 404 vhost to stabilize early CI stages.
+* **CI DNS & Defaults:** Introduced CoreDNS-based *.localhost resolution (A/AAAA to loopback), set DOMAIN_PRIMARY to localhost, added DNS assertions and a strict default 404 vhost to stabilize early CI stages.
 
 * **Docker-in-Docker:** Switched the deploy container to real Docker-in-Docker using fuse-overlayfs, fully decoupled from the host Docker socket and configured a deterministic storage driver.
 
@@ -41,7 +41,7 @@
 
 ## [0.3.3] - 2025-12-21
 
-* * **More reliable installs and deploys:** Fewer Docker and OS-specific failures (especially on CentOS Stream), cleaner container builds, and stable Python/Ansible execution across CI and local environments.
+* **More reliable installs and deploys:** Fewer Docker and OS-specific failures (especially on CentOS Stream), cleaner container builds, and stable Python/Ansible execution across CI and local environments.
 * **Simpler deploy experience:** The deploy command is more predictable and faster because testing is no longer mixed into deploy runs.
 * **Fewer “mysterious” errors:** Path, working-directory, and virtualenv issues that previously caused random CI or local failures are fixed.
 * **Smoother inventory creation:** Inventory and credential generation now work consistently after refactors, without brittle path assumptions.

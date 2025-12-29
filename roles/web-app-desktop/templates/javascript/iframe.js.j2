@@ -1,8 +1,8 @@
 window.addEventListener("message", function(event) {
-  const allowedSuffix = ".{{ PRIMARY_DOMAIN }}";
+  const allowedSuffix = ".{{ DOMAIN_PRIMARY }}";
   const origin = event.origin;
 
-  // 1. Only allow messages from *.{{ PRIMARY_DOMAIN }}
+  // 1. Only allow messages from *.{{ DOMAIN_PRIMARY }}
   if (!origin.endsWith(allowedSuffix)) return;
 
   const data = event.data;
@@ -12,7 +12,7 @@ window.addEventListener("message", function(event) {
     try {
       const hrefUrl = new URL(data.href);
 
-      // 3. Only allow redirects to *.{{ PRIMARY_DOMAIN }}
+      // 3. Only allow redirects to *.{{ DOMAIN_PRIMARY }}
       if (!hrefUrl.hostname.endsWith(allowedSuffix)) return;
 
       // 4. Update the ?iframe= parameter in the browser URL

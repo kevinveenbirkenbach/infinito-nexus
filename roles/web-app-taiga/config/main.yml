@@ -75,4 +75,4 @@ server:
         unsafe-eval:   true
   domains:
     canonical:
-      - "taiga.kanban.{{ PRIMARY_DOMAIN }}"
+      - "taiga.kanban.{{ DOMAIN_PRIMARY }}"

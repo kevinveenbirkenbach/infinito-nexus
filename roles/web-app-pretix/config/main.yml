@@ -33,7 +33,7 @@ server:
     flags:          {}
   domains:
     canonical:
-      - "ticket.shop.{{ PRIMARY_DOMAIN }}"
+      - "ticket.shop.{{ DOMAIN_PRIMARY }}"
     aliases: []
 rbac:
   roles: {}

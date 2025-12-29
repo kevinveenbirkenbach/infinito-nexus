@@ -29,8 +29,8 @@
           },
           {
             'type': 'TXT',
-            'zone': (PRIMARY_DOMAIN | to_zone),
-            'name': "_atproto.%s" % PRIMARY_DOMAIN,
+            'zone': (DOMAIN_PRIMARY | to_zone),
+            'name': "_atproto.%s" % DOMAIN_PRIMARY,
             'value': '"did=did:web:%s"' % BLUESKY_API_DOMAIN,
             'solo': True,
           },

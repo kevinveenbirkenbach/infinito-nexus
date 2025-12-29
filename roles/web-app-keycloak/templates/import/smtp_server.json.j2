@@ -7,7 +7,7 @@
     "replyTo": "",
     "host": "{{ SYSTEM_EMAIL.HOST }}",
     "from": "{{ users['no-reply'].email }}",
-    "fromDisplayName": "Authentication System ({{ PRIMARY_DOMAIN | lower }})",
+    "fromDisplayName": "Authentication System ({{ DOMAIN_PRIMARY | lower }})",
     "envelopeFrom": "",
     "ssl": "{{ (SYSTEM_EMAIL.TLS and not SYSTEM_EMAIL.START_TLS) | ternary('true','false') }}",
     "user": "{{ users['no-reply'].email }}"

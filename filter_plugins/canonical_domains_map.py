@@ -12,7 +12,7 @@ class FilterModule(object):
     def canonical_domains_map(
         self,
         apps,
-        PRIMARY_DOMAIN,
+        domain_primary,
         *,
         recursive: bool = False,
         roles_base_dir: str | None = None,
@@ -69,7 +69,7 @@ class FilterModule(object):
 
             domains_cfg = cfg.get("server", {}).get("domains", {})
             if not domains_cfg or "canonical" not in domains_cfg:
-                self._add_default_domain(app_id, PRIMARY_DOMAIN, seen_domains, result)
+                self._add_default_domain(app_id, domain_primary, seen_domains, result)
                 continue
 
             canonical_domains = domains_cfg["canonical"]
@@ -79,9 +79,9 @@ class FilterModule(object):
 
         return result
 
-    def _add_default_domain(self, app_id, PRIMARY_DOMAIN, seen_domains, result):
+    def _add_default_domain(self, app_id, domain_primary, seen_domains, result):
         entity_name = get_entity_name(app_id)
-        default_domain = f"{entity_name}.{PRIMARY_DOMAIN}"
+        default_domain = f"{entity_name}.{domain_primary}"
         if default_domain in seen_domains:
             raise AnsibleFilterError(
                 f"Domain '{default_domain}' is already configured for "

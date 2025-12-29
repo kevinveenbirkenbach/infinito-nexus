@@ -15,5 +15,5 @@ server:
         unsafe-inline:  true
   domains:
     canonical:
-      - "docs.{{ PRIMARY_DOMAIN }}"
+      - "docs.{{ DOMAIN_PRIMARY }}"
     aliases: []

@@ -26,7 +26,7 @@
         --admin \
         --password="{{ users.administrator.password }}" \
         --firstName="{{ users.administrator.username }}" \
-        --lastName="{{ PRIMARY_DOMAIN | lower }}" \
+        --lastName="{{ DOMAIN_PRIMARY | lower }}" \
         --email="{{ users.administrator.email }}" || true
       php bin/console user:change-password "{{ users.administrator.username }}" \
         --password="{{ users.administrator.password }}" || true

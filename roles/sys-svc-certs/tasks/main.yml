@@ -17,9 +17,9 @@
 #      # Cleanup mode is enabled
 #    - CERTBOT_FLAVOR != 'dedicated'
 #      # Wildcard certificate is enabled
-#    - domain.split('.') | length == (PRIMARY_DOMAIN.split('.') | length + 1) and domain.endswith(PRIMARY_DOMAIN)
+#    - domain.split('.') | length == (DOMAIN_PRIMARY.split('.') | length + 1) and domain.endswith(DOMAIN_PRIMARY)
 #      # AND: The domain is a direct first-level subdomain of the primary domain
-#    - domain != PRIMARY_DOMAIN  
+#    - domain != DOMAIN_PRIMARY  
 #      # The domain is not the primary domain
 #  register: certbot_result
 #  failed_when: certbot_result.rc != 0 and ("No certificate found with name" not in certbot_result.stderr)

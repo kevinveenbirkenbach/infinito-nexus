@@ -14,13 +14,13 @@ server:
       script-src-attr:
         unsafe-eval: true
     whitelist:  
-      manifest-src: "{{ WEB_PROTOCOL }}://auth.{{ PRIMARY_DOMAIN }}"
+      manifest-src: "{{ WEB_PROTOCOL }}://auth.{{ DOMAIN_PRIMARY }}"
   domains:
     aliases: []
     canonical:
-      - suite.crm.{{ PRIMARY_DOMAIN }}
+      - suite.crm.{{ DOMAIN_PRIMARY }}
 email:
-  from_name: "Customer Relationship Management (SuiteCRM, {{ PRIMARY_DOMAIN }})"
+  from_name: "Customer Relationship Management (SuiteCRM, {{ DOMAIN_PRIMARY }})"
 
 docker:
   services:

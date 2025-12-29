@@ -17,19 +17,19 @@ server:
         unsafe-eval:    true
     whitelist:
       connect-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://espo.crm.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEBSOCKET_PROTOCOL }}://espo.crm.{{ DOMAIN_PRIMARY }}"
         - "data:"
       frame-src:
         - https://s.espocrm.com/
       frame-ancestors:
-        - "{{ PRIMARY_DOMAIN }}"
-        - "*.{{ PRIMARY_DOMAIN }}"
+        - "{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
   domains:
     aliases: []
     canonical:
-      - espo.crm.{{ PRIMARY_DOMAIN }}
+      - espo.crm.{{ DOMAIN_PRIMARY }}
 email:
-  from_name: "Customer Relationship Management ({{ PRIMARY_DOMAIN }})"
+  from_name: "Customer Relationship Management ({{ DOMAIN_PRIMARY }})"
 credentials:
   recaptcha:
     key:      "{{ CAPTCHA.RECAPTCHA.KEY | default('') }}"

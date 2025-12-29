@@ -9,7 +9,7 @@ features:
 server:
   domains:
     canonical:
-      - "microblog.{{ PRIMARY_DOMAIN }}"
+      - "microblog.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     whitelist:

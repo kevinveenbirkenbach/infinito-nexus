@@ -11,9 +11,9 @@ server:
   domains:
     aliases: []
     canonical:
-      web:  "web.bluesky.{{ PRIMARY_DOMAIN }}"
-      api:  "api.bluesky.{{ PRIMARY_DOMAIN }}"
-      view: "view.bluesky.{{ PRIMARY_DOMAIN }}"
+      web:  "web.bluesky.{{ DOMAIN_PRIMARY }}"
+      api:  "api.bluesky.{{ DOMAIN_PRIMARY }}"
+      view: "view.bluesky.{{ DOMAIN_PRIMARY }}"
   csp:
     whitelist:
       connect-src:

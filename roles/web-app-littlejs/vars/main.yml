@@ -5,7 +5,7 @@ domain:                     "{{ domains | get_domain(application_id) }}"
 
 LITTLEJS_HEADLINE:          "LittleJS Playground"
 
-LITTLEJS_TITLE:             "{{ LITTLEJS_HEADLINE }} – {{ PRIMARY_DOMAIN | upper }}"
+LITTLEJS_TITLE:             "{{ LITTLEJS_HEADLINE }} – {{ DOMAIN_PRIMARY | upper }}"
 
 # Base repository URL for LittleJS
 LITTLEJS_REPOSITORY_BASE:   "https://github.com/KilledByAPixel/LittleJS"

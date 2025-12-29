@@ -5,5 +5,5 @@ features:
 server:
   domains:
     canonical:
-      - "cdn.{{ PRIMARY_DOMAIN }}"
+      - "cdn.{{ DOMAIN_PRIMARY }}"
     aliases: []

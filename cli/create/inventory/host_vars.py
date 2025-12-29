@@ -91,8 +91,8 @@ def ensure_host_vars_file(
     if host in local_hosts and "ansible_connection" not in data:
         data["ansible_connection"] = "local"
 
-    if primary_domain is not None and "PRIMARY_DOMAIN" not in data:
-        data["PRIMARY_DOMAIN"] = primary_domain
+    if primary_domain is not None and "DOMAIN_PRIMARY" not in data:
+        data["DOMAIN_PRIMARY"] = primary_domain
 
     if "SSL_ENABLED" not in data:
         data["SSL_ENABLED"] = not ssl_disabled

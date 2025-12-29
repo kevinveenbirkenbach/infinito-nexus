@@ -11,20 +11,20 @@ server:
         unsafe-inline:  true  # Required for ONLYOFFICE
     whitelist:
       script-src-elem:
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
       font-src:
         - "data:"
       connect-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
-        - "{{ WEBSOCKET_PROTOCOL }}://cloud.{{ PRIMARY_DOMAIN }}"
-        - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ PRIMARY_DOMAIN }}"
-        - "{{ WEB_PROTOCOL }}://cloud.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
+        - "{{ WEBSOCKET_PROTOCOL }}://cloud.{{ DOMAIN_PRIMARY }}"
+        - "{{ WEB_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
+        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
+        - "{{ WEB_PROTOCOL }}://cloud.{{ DOMAIN_PRIMARY }}"
         - "*" # Required to load all external websites in Whiteboard
       frame-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ PRIMARY_DOMAIN }}"
-        - "{{ WEB_PROTOCOL }}://collabora.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
+        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
+        - "{{ WEB_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
         - "*" # Required to load all external websites in Whiteboard
       worker-src:
         - "blob:"
@@ -32,7 +32,7 @@ server:
         - "*" # Required to load all external websites in Whiteboard
   domains:
     canonical:
-      - "next.cloud.{{ PRIMARY_DOMAIN }}"
+      - "next.cloud.{{ DOMAIN_PRIMARY }}"
     aliases: []
 docker:
   volumes:

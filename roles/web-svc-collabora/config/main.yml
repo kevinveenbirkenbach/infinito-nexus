@@ -1,12 +1,12 @@
 server:
   domains:
     canonical:
-      - "collabora.{{ PRIMARY_DOMAIN }}"
+      - "collabora.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     whitelist:
       frame-ancestors:
-        - "{{ WEB_PROTOCOL }}://*.{{ PRIMARY_DOMAIN }}"
+        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
     flags:
       style-src-attr:
         unsafe-inline:  true

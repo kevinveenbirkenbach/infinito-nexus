@@ -4,5 +4,5 @@ features:
 server:
   domains:
     canonical:
-      - xmpp.{{ PRIMARY_DOMAIN }}
+      - xmpp.{{ DOMAIN_PRIMARY }}
     aliases: []

@@ -17,5 +17,5 @@ features:
 server:
   domains:
     canonical:
-      - syncope.{{ PRIMARY_DOMAIN }}
+      - syncope.{{ DOMAIN_PRIMARY }}
     aliases: []

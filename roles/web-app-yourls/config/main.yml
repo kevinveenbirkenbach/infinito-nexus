@@ -8,7 +8,7 @@ features:
 server:
   domains:
     canonical:
-      - "s.{{ PRIMARY_DOMAIN }}"
+      - "s.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:

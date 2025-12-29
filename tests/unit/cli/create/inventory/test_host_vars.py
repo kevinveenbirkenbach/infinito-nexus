@@ -48,7 +48,7 @@ existing_key: foo
             self.assertEqual(data["existing_key"], "foo")
             self.assertEqual(getattr(data["secret"], "tag", None), "!vault")
 
-            self.assertEqual(data["PRIMARY_DOMAIN"], "example.org")
+            self.assertEqual(data["DOMAIN_PRIMARY"], "example.org")
             self.assertTrue(data["SSL_ENABLED"])
             self.assertEqual(data["networks"]["internet"]["ip4"], "127.0.0.1")
             self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
@@ -66,7 +66,7 @@ existing_key: foo
             with host_vars_file.open("r", encoding="utf-8") as f:
                 data2 = yaml_rt.load(f)
 
-            self.assertEqual(data2["PRIMARY_DOMAIN"], "example.org")
+            self.assertEqual(data2["DOMAIN_PRIMARY"], "example.org")
             self.assertTrue(data2["SSL_ENABLED"])
             self.assertEqual(data2["networks"]["internet"]["ip4"], "127.0.0.1")
             self.assertEqual(data2["networks"]["internet"]["ip6"], "::1")
