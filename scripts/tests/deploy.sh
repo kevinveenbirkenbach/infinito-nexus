@@ -18,7 +18,6 @@ MISSING_ONLY=0
 # -------------------------------------------------------------------
 # Config (kept from the previous version)
 # -------------------------------------------------------------------
-MASK_CREDENTIALS_IN_LOGS="false"
 
 AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
 AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
@@ -305,14 +304,17 @@ echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
 # Run inventory generation + deploy INSIDE the compose container
 # ---------------------------------------------------------------------------
 echo ">>> Creating CI inventory inside compose container..."
-infinito_exec python3 -m cli.create.inventory \
-	/etc/inventories/github-ci \
-	--host localhost \
-	--ssl-disabled \
-	--primary-domain localhost \
-	--exclude "${EXCLUDE_CSV}" \
-	--vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
-	--authorized-keys "${AUTHORIZED_KEYS}"
+infinito_exec sh -lc '
+  cd /opt/src/infinito &&
+  python3 -m cli.create.inventory \
+    /etc/inventories/github-ci \
+    --host localhost \
+    --ssl-disabled \
+    --primary-domain localhost \
+    --exclude "'"${EXCLUDE_CSV}"'" \
+    --vars-file inventory.sample.yml \
+    --authorized-keys "'"${AUTHORIZED_KEYS}"'"
+'
 
 echo ">>> Ensuring vault password file exists..."
 infinito_exec sh -lc \

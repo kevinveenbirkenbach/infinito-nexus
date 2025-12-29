@@ -1,0 +1,5 @@
+# Sample inventory for CI Pipeline
+MASK_CREDENTIALS_IN_LOGS: false 
+OIDC:
+  CLIENT:
+    SECRET: VERYUNSAFESAMPLEPASSWORD1234
