@@ -249,6 +249,7 @@ class TestVariableDefinitions(unittest.TestCase):
                                 "omit",
                                 "group_names",
                                 "ansible_processor_vcpus",
+                                'ansible_service_mgr',
                             ):
                                 continue
 
