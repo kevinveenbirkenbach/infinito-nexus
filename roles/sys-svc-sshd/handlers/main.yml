@@ -4,4 +4,3 @@
     state: restarted
     enabled: yes
     daemon_reload: yes
-  # when: not (DOCKER_IN_CONTAINER | bool)

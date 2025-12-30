@@ -41,7 +41,6 @@
   listen: reload system daemon
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  # when: not( DOCKER_IN_CONTAINER | bool )
 
 - name: reexec systemd manager
   # Just execute this during reset, it has potential dangerous side effects
@@ -51,4 +50,3 @@
   listen: reexec systemd manager
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  # when: not( DOCKER_IN_CONTAINER | bool )
