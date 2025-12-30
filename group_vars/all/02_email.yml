@@ -1,8 +1,9 @@
 # Email Configuration
 DEFAULT_SYSTEM_EMAIL:
-  DOMAIN:    "{{ DOMAIN_PRIMARY }}"
-  HOST:      "mail.{{ DOMAIN_PRIMARY }}"
-  PORT:      465
-  TLS:       true # true for TLS and false for SSL
-  START_TLS: false
-  SMTP:      true
+  DOMAIN:     "{{ DOMAIN_PRIMARY }}"
+  HOST:       "mail.{{ DOMAIN_PRIMARY }}"
+  PORT:       465
+  TLS:        true # true for TLS and false for SSL
+  START_TLS:  false
+  SMTP:       true
+  ENABLED:    "{{ DOCKER_IN_CONTAINER }}"   

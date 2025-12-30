@@ -1,4 +1,5 @@
 "smtpServer": {
+{% if SYSTEM_EMAIL.ENABLED | bool %}
     "password": "{{ users['no-reply'].mailu_token }}",
     "replyToDisplayName": "",
     "starttls": "{{ SYSTEM_EMAIL.START_TLS | lower }}",
@@ -11,4 +12,5 @@
     "envelopeFrom": "",
     "ssl": "{{ (SYSTEM_EMAIL.TLS and not SYSTEM_EMAIL.START_TLS) | ternary('true','false') }}",
     "user": "{{ users['no-reply'].email }}"
+{% endif %}
 }
