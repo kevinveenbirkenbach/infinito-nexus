@@ -120,8 +120,15 @@ ensure_compose_image() {
 }
 
 start_stack() {
-  echo ">>> Starting compose stack (profile=ci): coredns only"
-  compose up -d coredns --force-recreate
+  # Reuse existing container if it already exists (e.g. from a previous failed run)
+  if docker ps -a --format '{{.Names}}' | grep -qx "${INFINITO_CONTAINER}"; then
+    echo ">>> Container already exists: ${INFINITO_CONTAINER} (reusing)"
+    if ! docker ps --format '{{.Names}}' | grep -qx "${INFINITO_CONTAINER}"; then
+      echo ">>> Starting existing container: ${INFINITO_CONTAINER}"
+      docker start "${INFINITO_CONTAINER}" >/dev/null
+    fi
+    return
+  fi
 
   # derive compose network from coredns container
   local coredns_id net
