@@ -23,4 +23,4 @@
     name: postfix
     enabled: true
     state: started
-  when: not( DOCKER_IN_CONTAINER | bool ) 
+

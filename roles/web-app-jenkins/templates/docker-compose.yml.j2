@@ -1,10 +1,9 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
     application:
       image: jenkins/jenkins:lts
-      restart: "{{ DOCKER_RESTART_POLICY }}"
+{% include 'roles/docker-container/templates/base.yml.j2' %}
       ports:
         - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8080"
       volumes:
         - jenkins_data:/var/jenkins_home
-      log_driver: {{ "json-file" if DOCKER_IN_CONTAINER | bool else 'journald' }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

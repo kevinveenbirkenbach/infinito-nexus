@@ -2,6 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
+from cli.create.inventory.host_vars import apply_vars_overrides_from_file
 
 import yaml
 from ruamel.yaml import YAML
@@ -49,7 +50,7 @@ existing_key: foo
             self.assertEqual(getattr(data["secret"], "tag", None), "!vault")
 
             self.assertEqual(data["DOMAIN_PRIMARY"], "example.org")
-            self.assertTrue(data["SSL_ENABLED"])
+            self.assertTrue(data["TLS_ENABLED"])
             self.assertEqual(data["networks"]["internet"]["ip4"], "127.0.0.1")
             self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
 
@@ -67,7 +68,7 @@ existing_key: foo
                 data2 = yaml_rt.load(f)
 
             self.assertEqual(data2["DOMAIN_PRIMARY"], "example.org")
-            self.assertTrue(data2["SSL_ENABLED"])
+            self.assertTrue(data2["TLS_ENABLED"])
             self.assertEqual(data2["networks"]["internet"]["ip4"], "127.0.0.1")
             self.assertEqual(data2["networks"]["internet"]["ip6"], "::1")
 
@@ -101,7 +102,7 @@ existing_key: foo
                 yaml.safe_dump(
                     {
                         "networks": {"internet": {"ip4": "1.2.3.4", "ip6": "::1"}},
-                        "SSL_ENABLED": True,
+                        "TLS_ENABLED": True,
                     }
                 ),
                 encoding="utf-8",
@@ -112,7 +113,7 @@ existing_key: foo
                 """
                 {
                   "networks": { "internet": { "ip4": "10.0.0.10" } },
-                  "SSL_ENABLED": false
+                  "TLS_ENABLED": false
                 }
                 """,
             )
@@ -120,7 +121,7 @@ existing_key: foo
             data = yaml.safe_load(host_vars_file.read_text(encoding="utf-8"))
             self.assertEqual(data["networks"]["internet"]["ip4"], "10.0.0.10")
             self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
-            self.assertIs(data["SSL_ENABLED"], False)
+            self.assertIs(data["TLS_ENABLED"], False)
 
     def test_apply_vars_overrides_requires_object(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -256,3 +257,43 @@ ansible_become_password: !vault |
             ]
             self.assertIn(key1, lines)
             self.assertIn(key2, lines)
+
+
+def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp = Path(tmpdir)
+
+        host_vars_file = tmp / "host_vars.yml"
+        host_vars_file.write_text(
+            yaml.safe_dump(
+                {
+                    "networks": {"internet": {"ip4": "1.2.3.4", "ip6": "::1"}},
+                    "TLS_ENABLED": True,
+                    "nested": {"keep": "yes"},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        vars_file = tmp / "vars.yml"
+        vars_file.write_text(
+            yaml.safe_dump(
+                {
+                    "networks": {"internet": {"ip4": "10.0.0.10"}},
+                    "TLS_ENABLED": False,
+                    "nested": {"newkey": "added"},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        apply_vars_overrides_from_file(
+            host_vars_file=host_vars_file, vars_file=vars_file
+        )
+
+        data = yaml.safe_load(host_vars_file.read_text(encoding="utf-8"))
+        self.assertEqual(data["networks"]["internet"]["ip4"], "10.0.0.10")
+        self.assertEqual(data["networks"]["internet"]["ip6"], "::1")
+        self.assertIs(data["TLS_ENABLED"], False)
+        self.assertEqual(data["nested"]["keep"], "yes")
+        self.assertEqual(data["nested"]["newkey"], "added")

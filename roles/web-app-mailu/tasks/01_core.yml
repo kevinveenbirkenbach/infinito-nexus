@@ -36,13 +36,16 @@
 - name: "Include Cert deploy service for '{{ role_name }}'"
   include_role:
     name: sys-ctl-mtn-cert-deploy
-  when: SSL_ENABLED | bool
+  when: TLS_ENABLED | bool
 
 - name: "Flush Docker Compose handlers"
   meta: flush_handlers
 
+- name: Wait for Mailu Database
+  include_tasks: 02_wait_for_database.yml
+
 - name: "Create Mailu accounts"
-  include_tasks: 02_manage_user.yml
+  include_tasks: 03_manage_user.yml
   vars:
     MAILU_DOCKER_DIR:        "{{ docker_compose.directories.instance }}"
     mailu_api_base_url:       "http://127.0.0.1:8080/api/v1"

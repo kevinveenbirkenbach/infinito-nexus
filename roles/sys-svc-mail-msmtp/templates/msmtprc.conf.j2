@@ -3,9 +3,9 @@ defaults
 logfile        ~/.msmtp.log
 
 {% if 'web-app-mailu' in group_names %}
-auth           on
-tls_starttls   {{ 'on' if SYSTEM_EMAIL.START_TLS else 'off' }}
-{% if SYSTEM_EMAIL.TLS %}
+auth           {{ 'on' if SYSTEM_EMAIL.TLS | bool else 'off' }}
+tls_starttls   {{ 'on' if SYSTEM_EMAIL.START_TLS | bool else 'off' }}
+{% if SYSTEM_EMAIL.TLS | bool %}
 tls            on
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
 {% else %}

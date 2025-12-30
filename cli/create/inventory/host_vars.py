@@ -29,6 +29,42 @@ def _deep_update_commented_map(target: CommentedMap, updates: Dict[str, Any]) ->
             target[key] = value
 
 
+def apply_vars_overrides_from_file(host_vars_file: Path, vars_file: Path) -> None:
+    if not vars_file.exists():
+        raise SystemExit(f"Vars file not found: {vars_file}")
+
+    try:
+        overrides = yaml.safe_load(vars_file.read_text(encoding="utf-8")) or {}
+    except Exception as exc:
+        raise SystemExit(f"Failed to load YAML vars file {vars_file}: {exc}") from exc
+
+    if not isinstance(overrides, dict):
+        raise SystemExit(f"Vars file must contain a mapping at top-level: {vars_file}")
+
+    yaml_rt = YAML(typ="rt")
+    yaml_rt.preserve_quotes = True
+
+    if host_vars_file.exists():
+        with host_vars_file.open("r", encoding="utf-8") as f:
+            doc = yaml_rt.load(f)
+        if doc is None:
+            doc = CommentedMap()
+    else:
+        doc = CommentedMap()
+
+    if not isinstance(doc, CommentedMap):
+        tmp = CommentedMap()
+        for k, v in dict(doc).items():
+            tmp[k] = v
+        doc = tmp
+
+    _deep_update_commented_map(doc, overrides)
+
+    host_vars_file.parent.mkdir(parents=True, exist_ok=True)
+    with host_vars_file.open("w", encoding="utf-8") as f:
+        yaml_rt.dump(doc, f)
+
+
 def apply_vars_overrides(host_vars_file: Path, json_str: str) -> None:
     try:
         overrides = json.loads(json_str)
@@ -94,8 +130,8 @@ def ensure_host_vars_file(
     if primary_domain is not None and "DOMAIN_PRIMARY" not in data:
         data["DOMAIN_PRIMARY"] = primary_domain
 
-    if "SSL_ENABLED" not in data:
-        data["SSL_ENABLED"] = not ssl_disabled
+    if "TLS_ENABLED" not in data:
+        data["TLS_ENABLED"] = not ssl_disabled
 
     networks = data.get("networks")
     if not isinstance(networks, CommentedMap):

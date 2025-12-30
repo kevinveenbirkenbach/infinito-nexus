@@ -27,8 +27,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      network: host  # affects only image build networking
-    pull_policy: never
+      network: host
+      args:
+        NIX_CONFIG: ${NIX_CONFIG}
+    pull_policy: never 
 
     # Run systemd as PID 1
     command:
@@ -42,6 +44,7 @@ services:
 
     # systemd inside docker needs access to the host cgroup namespace
     privileged: true
+    cgroup: host
     tmpfs:
       - /run
       - /run/lock

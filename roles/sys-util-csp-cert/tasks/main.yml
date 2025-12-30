@@ -7,4 +7,4 @@
 - name: "include role sys-svc-certs for '{{ domain }}'"
   include_role:
     name: sys-svc-certs
-  when: SSL_ENABLED | bool
+  when: TLS_ENABLED | bool

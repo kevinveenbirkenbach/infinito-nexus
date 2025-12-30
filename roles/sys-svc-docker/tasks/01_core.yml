@@ -24,8 +24,12 @@
     state: present
   notify: docker restart
 
+- name: "Assert that required services are available"
+  include_tasks: "02_assert_requirements.yml"
+  when: MODE_ASSERT | bool
+
 - name: "Load fuse-overlayfs (in container)"
-  include_tasks: "02_fuse_overlayfs.yml"
+  include_tasks: "03_fuse_overlayfs.yml"
   when: DOCKER_IN_CONTAINER | bool
 
 - name: Restart and enable docker service
@@ -43,7 +47,6 @@
       set_fact:
         DOCKER_REACH_HOST: "{{ gw.gateway }}"
       changed_when: false
-
   when: DOCKER_IN_CONTAINER | bool
 
 - name: Setup Swapfile to prevent OOM Failures
@@ -54,7 +57,7 @@
   when: run_once_svc_opt_swapfile is not defined
 
 - name: "Load reset tasks when MODE_RESET is enabled"
-  include_tasks: "02_reset.yml"
+  include_tasks: "04_reset.yml"
   when: MODE_RESET | bool
 
 - name: Include backup, repair and health services for docker

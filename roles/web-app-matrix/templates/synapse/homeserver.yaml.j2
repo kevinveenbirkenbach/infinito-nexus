@@ -31,6 +31,7 @@ trusted_key_servers:
   - server_name: "matrix.org"
 admin_contact: 'mailto:{{ users.administrator.email }}'
 
+{% if SYSTEM_EMAIL.ENABLED | bool %}
 email:
   smtp_host:                    "{{ SYSTEM_EMAIL.HOST }}"
   smtp_port:                    "{{ SYSTEM_EMAIL.PORT }}"
@@ -45,6 +46,7 @@ email:
   notif_for_new_users:          false
   client_base_url:              "{{ MATRIX_SYNAPSE_DOMAIN }}"
   validation_token_lifetime:    15m
+{% endif %}
 
 {% if applications | get_app_conf(application_id, 'features.oidc', False) %}
 # @See https://matrix-org.github.io/synapse/latest/openid.html

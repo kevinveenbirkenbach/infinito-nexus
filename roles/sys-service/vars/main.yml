@@ -11,7 +11,7 @@ system_service_script_dir:            "{{ [ PATH_SYSTEMCTL_SCRIPTS, system_servi
 
 ## Settings
 system_service_force_linear_sync:     "{{ system_service_name in SYS_SERVICE_GROUP_MANIPULATION }}"                                         # Disables automatic async
-system_service_force_flush_instant:   "{{ SYS_SERVICE_ALL_ENABLED | bool }}"                                                                # When set to true it activates the flushing of services. defaults to SYS_SERVICE_ALL_ENABLED
+system_service_force_flush_instant:   "{{ (SYS_SERVICE_ALL_ENABLED | bool) and not system_service_force_flush_final }}"                      # When set to true it activates the flushing of services. defaults to SYS_SERVICE_ALL_ENABLED
 system_service_force_flush_final:     false                                                                                                 # Force run at the end of the play
 system_service_suppress_flush:        "{{ (system_service_id in SYS_SERVICE_SUPPRESS_FLUSH) | bool or system_service_force_flush_final }}"  # When set to true it suppresses the flushing of services
 system_service_copy_files:            true                                                                                                  # When set to false file copying will be skipped

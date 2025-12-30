@@ -1,0 +1,37 @@
+- name: Install GNOME GSettings schemas + GNOME Shell (cross-distro)
+  become: true
+  vars:
+    gnome_schema_packages:
+      Archlinux:
+        - glib2
+        - gsettings-desktop-schemas
+        - gnome-shell
+      Debian:
+        - libglib2.0-bin           # provides gsettings
+        - gsettings-desktop-schemas
+        - gnome-shell
+      Ubuntu:
+        - libglib2.0-bin           # provides gsettings
+        - gsettings-desktop-schemas
+        - gnome-shell
+      Fedora:
+        - glib2
+        - gsettings-desktop-schemas
+        - gnome-shell
+      CentOS:
+        - glib2
+        - gsettings-desktop-schemas
+        - gnome-shell
+  ansible.builtin.package:
+    name: "{{ gnome_schema_packages[ansible_distribution] | default(gnome_schema_packages[ansible_os_family]) }}"
+    state: present
+
+- name: Include dependencies
+  include_role:
+    name: '{{ item }}'
+  loop:
+    - desk-gnome-caffeine
+    - desk-gnome-extensions
+    - desk-gnome-terminal
+
+- include_tasks: utils/once/flag.yml

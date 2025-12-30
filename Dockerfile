@@ -62,6 +62,14 @@ RUN set -euo pipefail; \
       ;; \
   esac
 
+# ------------------------------------------------------------
+# Disable interactive first-boot units (CI / container safe)
+# ------------------------------------------------------------
+RUN set -euo pipefail; \
+  systemctl mask systemd-firstboot.service first-boot-complete.target || true; \
+  systemd-machine-id-setup || true
+
+
 # systemd-in-container conventions
 ENV container=docker
 STOPSIGNAL SIGRTMIN+3

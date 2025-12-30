@@ -11,14 +11,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 TYPE=""
-DISTRO=""
 NO_CACHE=0
 MISSING_ONLY=0
+
+: "${INFINITO_DISTRO:?INFINITO_DISTRO must be set}"
 
 # -------------------------------------------------------------------
 # Config (kept from the previous version)
 # -------------------------------------------------------------------
-MASK_CREDENTIALS_IN_LOGS="false"
 
 AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
 AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
@@ -51,7 +51,7 @@ EOF
 
 usage() {
 	cat <<'EOF'
-Usage: scripts/tests/deploy.sh --type <server|workstation|universal> --distro <arch|debian|ubuntu|fedora|centos> [options]
+Usage: scripts/tests/deploy.sh --type <server|workstation> --distro <arch|debian|ubuntu|fedora|centos> [options]
 
 Options:
   --no-cache       Rebuild compose image with --no-cache
@@ -84,23 +84,20 @@ join_by_comma() {
 # Compose helpers
 # -------------------------------------------------------------------
 compose() {
-	# Ensure we always operate in repo root where docker-compose.yml exists
-	(
-		cd "${REPO_ROOT}"
-		# profile ci is important for infinito + coredns
-		INFINITO_DISTRO="${DISTRO}" docker compose --profile ci "$@"
-	)
+  (
+    cd "${REPO_ROOT}"
+    INFINITO_DISTRO="${INFINITO_DISTRO}" docker compose --profile ci "$@"
+  )
 }
 
 infinito_exec() {
-  docker exec "${INFINITO_CONTAINER}" "$@"
+  compose exec -T infinito "$@"
 }
-
 
 ensure_compose_image() {
 	# Compose image name in docker-compose.yml:
 	#   image: "infinito-${INFINITO_DISTRO:-arch}"
-	local image="infinito-${DISTRO}"
+	local image="infinito-${INFINITO_DISTRO}"
 
 	if [[ "${MISSING_ONLY}" == "1" ]]; then
 		if docker image inspect "${image}" >/dev/null 2>&1; then
@@ -110,47 +107,17 @@ ensure_compose_image() {
 	fi
 
 	if [[ "${NO_CACHE}" == "1" ]]; then
-		echo ">>> docker compose build --no-cache infinito (INFINITO_DISTRO=${DISTRO})"
+		echo ">>> docker compose build --no-cache infinito (INFINITO_DISTRO=${INFINITO_DISTRO})"
 		compose build --no-cache infinito
 	else
-		echo ">>> docker compose build infinito (INFINITO_DISTRO=${DISTRO})"
+		echo ">>> docker compose build infinito (INFINITO_DISTRO=${INFINITO_DISTRO})"
 		compose build infinito
 	fi
 }
 
 start_stack() {
-  echo ">>> Starting compose stack (profile=ci): coredns only"
-  compose up -d coredns --force-recreate
-
-  # derive compose network from coredns container
-  local coredns_id net
-  coredns_id="$(compose ps -q coredns)"
-  [[ -n "$coredns_id" ]] || die "Could not get coredns container id"
-
-  net="$(docker inspect -f '{{ range $k,$v := .NetworkSettings.Networks }}{{$k}}{{end}}' "$coredns_id")"
-  [[ -n "$net" ]] || die "Could not determine compose network"
-
-  echo ">>> Starting infinito via docker run (network=${net})"
-  docker rm -f "${INFINITO_CONTAINER}" >/dev/null 2>&1 || true
-
-  docker run -d --name "${INFINITO_CONTAINER}" \
-    --privileged \
-    --cgroupns=host \
-    --tmpfs /run \
-    --tmpfs /run/lock \
-    -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
-	-v /tmp/gh-action:/tmp/gh-action \
-    -v "${REPO_ROOT}:/opt/src/infinito" \
-    --network "${net}" \
-    -e INSTALL_LOCAL_BUILD=1 \
-    "infinito-${DISTRO}" \
-    /sbin/init
-}
-
-stop_stack() {
-  echo ">>> Stopping infinito container + compose stack"
-  docker rm -f "${INFINITO_CONTAINER}" >/dev/null 2>&1 || true
-  compose down --remove-orphans
+  echo ">>> Starting compose stack (coredns + infinito)"
+  compose up -d coredns infinito
 }
 
 # -------------------------------------------------------------------
@@ -169,11 +136,8 @@ filter_allowed() {
 	server)
 		grep -E '^web-|svc-db-' || true
 		;;
-	universal)
-		cat
-		;;
 	*)
-		die "Unknown deploy type: $type (expected: workstation|server|universal)"
+		die "Unknown deploy type: $type (expected: workstation|server)"
 		;;
 	esac
 }
@@ -233,10 +197,6 @@ while [[ $# -gt 0 ]]; do
 		TYPE="${2:-}"
 		shift 2
 		;;
-	--distro)
-		DISTRO="${2:-}"
-		shift 2
-		;;
 	--no-cache)
 		NO_CACHE=1
 		shift
@@ -254,21 +214,19 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "${TYPE}" ]] || die "--type is required"
-[[ -n "${DISTRO}" ]] || die "--distro is required"
-INFINITO_CONTAINER="infinito_nexus_${DISTRO}"
 
 case "${TYPE}" in
-server | workstation | universal) ;;
-*) die "Invalid --type '${TYPE}' (expected: server|workstation|universal)" ;;
+server | workstation ) ;;
+*) die "Invalid --type '${TYPE}' (expected: server|workstation)" ;;
 esac
 
-case "${DISTRO}" in
+case "${INFINITO_DISTRO}" in
 arch | debian | ubuntu | fedora | centos) ;;
-*) die "Invalid --distro '${DISTRO}' (expected: arch|debian|ubuntu|fedora|centos)" ;;
+*) die "Invalid --distro '${INFINITO_DISTRO}' (expected: arch|debian|ubuntu|fedora|centos)" ;;
 esac
 
 echo ">>> Deploy type:     ${TYPE}"
-echo ">>> Distro:          ${DISTRO}"
+echo ">>> Distro:          ${INFINITO_DISTRO}"
 echo ">>> Repo root:       ${REPO_ROOT}"
 
 # ---------------------------------------------------------------------------
@@ -278,14 +236,12 @@ pushd "${REPO_ROOT}" >/dev/null
 
 on_exit() {
   rc=$?
-  if [[ $rc -eq 0 ]]; then
-    stop_stack
-  else
+  if [[ $rc -ne 0 ]]; then
     echo ">>> ERROR (rc=$rc) - keeping compose stack for debugging."
     echo ">>> Hint:"
     echo "    docker ps"
-    echo "    INFINITO_DISTRO=${DISTRO} docker compose --profile ci ps"
-    echo "    INFINITO_DISTRO=${DISTRO} docker compose --profile ci logs --tail=200"
+    echo "    INFINITO_DISTRO=${INFINITO_DISTRO} docker compose --profile ci ps"
+    echo "    INFINITO_DISTRO=${INFINITO_DISTRO} docker compose --profile ci logs --tail=200"
   fi
   exit $rc
 }
@@ -305,14 +261,17 @@ echo ">>> Excluded roles:  ${EXCLUDE_CSV:-<none>}"
 # Run inventory generation + deploy INSIDE the compose container
 # ---------------------------------------------------------------------------
 echo ">>> Creating CI inventory inside compose container..."
-infinito_exec python3 -m cli.create.inventory \
-	/etc/inventories/github-ci \
-	--host localhost \
-	--ssl-disabled \
-	--primary-domain localhost \
-	--exclude "${EXCLUDE_CSV}" \
-	--vars "{\"MASK_CREDENTIALS_IN_LOGS\": ${MASK_CREDENTIALS_IN_LOGS}}" \
-	--authorized-keys "${AUTHORIZED_KEYS}"
+infinito_exec sh -lc '
+  cd /opt/src/infinito &&
+  python3 -m cli.create.inventory \
+    /etc/inventories/github-ci \
+    --host localhost \
+    --ssl-disabled \
+    --primary-domain infinito.localhost \
+    --exclude "'"${EXCLUDE_CSV}"'" \
+    --vars-file inventory.sample.yml \
+    --authorized-keys "'"${AUTHORIZED_KEYS}"'"
+'
 
 echo ">>> Ensuring vault password file exists..."
 infinito_exec sh -lc \
@@ -327,6 +286,7 @@ infinito_exec python3 -m cli.deploy.dedicated \
 	-vv \
 	--assert true \
 	--debug \
+	--diff \
 	-T "${TYPE}"
 
 echo ">>> Deploy test suite finished successfully."

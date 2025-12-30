@@ -15,6 +15,7 @@ from .host_vars import (
     ensure_become_password,
     apply_vars_overrides,
     ensure_administrator_authorized_keys,
+    apply_vars_overrides_from_file,
 )
 from .credentials_generator import generate_credentials_for_roles
 from .passwords import generate_random_password
@@ -71,7 +72,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--ssl-disabled",
         action="store_true",
-        help="Disable SSL for this host (sets SSL_ENABLED: false).",
+        help="Disable SSL for this host (sets TLS_ENABLED: false).",
     )
     parser.add_argument(
         "--become-password", default=None, help="Optional become password (vaulted)."
@@ -138,6 +139,14 @@ def main(argv: Optional[List[str]] = None) -> int:
         type=int,
         default=4,
         help="Worker threads for credentials generation (default: 4).",
+    )
+    parser.add_argument(
+        "--vars-file",
+        default=None,
+        help=(
+            "Optional YAML file with additional values for host_vars/<host>.yml. "
+            "Merged and overwrites existing values."
+        ),
     )
 
     args = parser.parse_args(argv)
@@ -268,6 +277,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     else:
         print(
             "[WARN] No application_ids found after filtering. Skipping credentials generation."
+        )
+
+    if args.vars_file:
+        print(
+            f"[INFO] Applying YAML overrides to host_vars for host '{args.host}' via --vars-file"
+        )
+        apply_vars_overrides_from_file(
+            host_vars_file=host_vars_file, vars_file=Path(args.vars_file).resolve()
         )
 
     if args.vars:

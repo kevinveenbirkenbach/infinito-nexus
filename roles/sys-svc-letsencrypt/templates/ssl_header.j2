@@ -1,4 +1,4 @@
-{% if SSL_ENABLED | bool %}
+{% if TLS_ENABLED | bool %}
 listen {{ WEB_PORT }} ssl;
 listen [::]:{{ WEB_PORT }} ssl;
 http2 on;
