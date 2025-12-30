@@ -29,4 +29,6 @@ jobs:
 
       - name: Run deploy test suite (server)
         run: |
-          INFINITO_DISTRO="${{ matrix.distro }}" make test-deploy
+          export INFINITO_DISTRO="${{ matrix.distro }}"
+          make clean-container
+          make test-deploy

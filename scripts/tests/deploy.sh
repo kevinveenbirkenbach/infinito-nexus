@@ -15,7 +15,6 @@ NO_CACHE=0
 MISSING_ONLY=0
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set}"
-: "${INFINITO_CONTAINER:?INFINITO_CONTAINER must be set}"
 
 # -------------------------------------------------------------------
 # Config (kept from the previous version)
@@ -85,18 +84,15 @@ join_by_comma() {
 # Compose helpers
 # -------------------------------------------------------------------
 compose() {
-	# Ensure we always operate in repo root where docker-compose.yml exists
-	(
-		cd "${REPO_ROOT}"
-		# profile ci is important for infinito + coredns
-		INFINITO_DISTRO="${INFINITO_DISTRO}" docker compose --profile ci "$@"
-	)
+  (
+    cd "${REPO_ROOT}"
+    INFINITO_DISTRO="${INFINITO_DISTRO}" docker compose --profile ci "$@"
+  )
 }
 
 infinito_exec() {
-  docker exec "${INFINITO_CONTAINER}" "$@"
+  compose exec -T infinito "$@"
 }
-
 
 ensure_compose_image() {
 	# Compose image name in docker-compose.yml:
@@ -120,37 +116,8 @@ ensure_compose_image() {
 }
 
 start_stack() {
-  # Reuse existing container if it already exists (e.g. from a previous failed run)
-  if docker ps -a --format '{{.Names}}' | grep -qx "${INFINITO_CONTAINER}"; then
-    echo ">>> Container already exists: ${INFINITO_CONTAINER} (reusing)"
-    if ! docker ps --format '{{.Names}}' | grep -qx "${INFINITO_CONTAINER}"; then
-      echo ">>> Starting existing container: ${INFINITO_CONTAINER}"
-      docker start "${INFINITO_CONTAINER}" >/dev/null
-    fi
-    return
-  fi
-
-  # derive compose network from coredns container
-  local coredns_id net
-  coredns_id="$(compose ps -q coredns)"
-  [[ -n "$coredns_id" ]] || die "Could not get coredns container id"
-
-  net="$(docker inspect -f '{{ range $k,$v := .NetworkSettings.Networks }}{{$k}}{{end}}' "$coredns_id")"
-  [[ -n "$net" ]] || die "Could not determine compose network"
-
-  echo ">>> Starting infinito via docker run (network=${net})"
-  docker run -d --name "${INFINITO_CONTAINER}" \
-    --privileged \
-    --cgroupns=host \
-    --tmpfs /run \
-    --tmpfs /run/lock \
-    -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
-	-v /tmp/gh-action:/tmp/gh-action \
-    -v "${REPO_ROOT}:/opt/src/infinito" \
-    --network "${net}" \
-    -e INSTALL_LOCAL_BUILD=1 \
-    "infinito-${INFINITO_DISTRO}" \
-    /sbin/init
+  echo ">>> Starting compose stack (coredns + infinito)"
+  compose up -d coredns infinito
 }
 
 # -------------------------------------------------------------------

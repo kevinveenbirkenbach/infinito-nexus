@@ -62,7 +62,8 @@ RESERVED_USERNAMES := $(shell \
 .PHONY: \
 	setup setup-clean install install-ansible install-venv install-python \
 	test test-lint test-unit test-integration test-deploy \
-	clean list tree mig dockerignore \
+	clean clean-container \
+	list tree mig dockerignore \
 	print-python lint-ansible
 
 clean:
@@ -75,9 +76,8 @@ clean:
 	fi
 
 clean-container:
-	@echo ">>> Stopping infinito container + compose stack"
-	@docker rm -f "$(INFINITO_CONTAINER)" >/dev/null 2>&1 || true
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans
+	@echo ">>> Stopping infinito compose stack and removing volumes"
+	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
 
 list:
 	@echo "Generating the roles list"
