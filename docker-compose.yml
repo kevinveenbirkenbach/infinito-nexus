@@ -30,7 +30,7 @@ services:
       network: host
       args:
         NIX_CONFIG: ${NIX_CONFIG}
-    pull_policy: never
+    pull_policy: never 
 
     # Run systemd as PID 1
     command:

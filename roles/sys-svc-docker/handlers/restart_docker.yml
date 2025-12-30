@@ -1,0 +1,52 @@
+- name: Trigger docker restart non-blocking (hard timeout)
+  ansible.builtin.command: "timeout 10s systemctl restart docker.service --no-block"
+  register: restart_cmd
+  changed_when: true
+  failed_when: false
+
+- name: Wait up to 60s for docker.service to become active
+  ansible.builtin.command: "systemctl is-active docker.service"
+  register: docker_active
+  changed_when: false
+  retries: 60
+  delay: 1
+  until: docker_active.stdout.strip() == "active"
+
+- name: Fail with debug if docker did not start
+  block:
+    - name: Assert docker is active
+      ansible.builtin.assert:
+        that:
+          - docker_active.stdout.strip() == "active"
+        fail_msg: "docker.service did not become active within 60s (is-active={{ docker_active.stdout | default('') }})"
+  rescue:
+    - name: systemctl status docker
+      ansible.builtin.command: "timeout 10s systemctl status docker.service --no-pager -l"
+      register: st
+      changed_when: false
+      failed_when: false
+
+    - name: journalctl docker (last 300 lines)
+      ansible.builtin.command: "timeout 10s journalctl -u docker.service --no-pager -n 300 -o cat"
+      register: jr
+      changed_when: false
+      failed_when: false
+
+    - name: Dockerd config + socket
+      ansible.builtin.command: "sh -lc 'cat /etc/docker/daemon.json || true; ls -la /var/run/docker.sock || true'"
+      register: diag
+      changed_when: false
+      failed_when: false
+
+    - name: Debug dump
+      ansible.builtin.debug:
+        msg:
+          - "restart_cmd rc={{ restart_cmd.rc | default('') }} stderr={{ restart_cmd.stderr | default('') }}"
+          - "is-active={{ docker_active.stdout | default('') }}"
+          - "status:\n{{ st.stdout | default('') }}"
+          - "journal:\n{{ jr.stdout | default('') }}"
+          - "diag:\n{{ diag.stdout | default('') }}"
+
+    - name: Hard fail
+      ansible.builtin.fail:
+        msg: "docker.service failed to start (timed out / not active). See debug output above."
