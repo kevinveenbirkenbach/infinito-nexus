@@ -38,7 +38,7 @@ MAILU_CLAMAV_VOLUME:                  "mailu_clamav_data"
 
 ## Network
 MAILU_DNS_RESOLVER:                   "{{ networks.local['web-app-mailu'].dns_resolver }}"
-MAILU_IP4_PUBLIC:                     "{{ networks.internet.ip4 }}"
+MAILU_IP4_PUBLIC:                     "{{ '0.0.0.0' if (DOCKER_IN_CONTAINER | bool) else networks.internet.ip4 }}"
 MAILU_IP6_PUBLIC:                     "" #Deactivated atm. but cloudflare logic present @todo activate it when it's configured for docker. See https://chatgpt.com/share/68a0acb8-db20-800f-9d2c-b34e38b5cdee
 MAILU_SUBNET:                         "{{ networks.local['web-app-mailu'].subnet }}"
 
