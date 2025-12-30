@@ -26,7 +26,7 @@
 
 - name: "Assert that required services are available"
   include_tasks: "02_assert_requirements.yml"
-  when: DOCKER_IN_CONTAINER | bool
+  when: MODE_ASSERT | bool
 
 - name: "Load fuse-overlayfs (in container)"
   include_tasks: "03_fuse_overlayfs.yml"
@@ -47,7 +47,6 @@
       set_fact:
         DOCKER_REACH_HOST: "{{ gw.gateway }}"
       changed_when: false
-
   when: DOCKER_IN_CONTAINER | bool
 
 - name: Setup Swapfile to prevent OOM Failures

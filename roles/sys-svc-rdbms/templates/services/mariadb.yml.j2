@@ -4,7 +4,7 @@
   {{ database_host }}:
     container_name: {{ application_id | get_entity_name }}-database
     logging:
-      driver: {{ "json-file" if DOCKER_IN_CONTAINER | bool else 'journald' }}
+      driver: journald
     image: {{ database_image }}:{{ database_version }}
     restart: {{ DOCKER_RESTART_POLICY }}
     env_file:
