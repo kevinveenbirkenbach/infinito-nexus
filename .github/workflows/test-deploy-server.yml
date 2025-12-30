@@ -29,4 +29,4 @@ jobs:
 
       - name: Run deploy test suite (server)
         run: |
-          scripts/tests/deploy.sh --type server --distro "${{ matrix.distro }}" --missing
+          INFINITO_DISTRO="${{ matrix.distro }}" make test-deploy

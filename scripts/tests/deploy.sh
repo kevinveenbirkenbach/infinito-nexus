@@ -11,9 +11,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 TYPE=""
-DISTRO=""
 NO_CACHE=0
 MISSING_ONLY=0
+
+: "${INFINITO_DISTRO:?INFINITO_DISTRO must be set}"
+: "${INFINITO_CONTAINER:?INFINITO_CONTAINER must be set}"
 
 # -------------------------------------------------------------------
 # Config (kept from the previous version)
@@ -87,7 +89,7 @@ compose() {
 	(
 		cd "${REPO_ROOT}"
 		# profile ci is important for infinito + coredns
-		INFINITO_DISTRO="${DISTRO}" docker compose --profile ci "$@"
+		INFINITO_DISTRO="${INFINITO_DISTRO}" docker compose --profile ci "$@"
 	)
 }
 
@@ -99,7 +101,7 @@ infinito_exec() {
 ensure_compose_image() {
 	# Compose image name in docker-compose.yml:
 	#   image: "infinito-${INFINITO_DISTRO:-arch}"
-	local image="infinito-${DISTRO}"
+	local image="infinito-${INFINITO_DISTRO}"
 
 	if [[ "${MISSING_ONLY}" == "1" ]]; then
 		if docker image inspect "${image}" >/dev/null 2>&1; then
@@ -109,10 +111,10 @@ ensure_compose_image() {
 	fi
 
 	if [[ "${NO_CACHE}" == "1" ]]; then
-		echo ">>> docker compose build --no-cache infinito (INFINITO_DISTRO=${DISTRO})"
+		echo ">>> docker compose build --no-cache infinito (INFINITO_DISTRO=${INFINITO_DISTRO})"
 		compose build --no-cache infinito
 	else
-		echo ">>> docker compose build infinito (INFINITO_DISTRO=${DISTRO})"
+		echo ">>> docker compose build infinito (INFINITO_DISTRO=${INFINITO_DISTRO})"
 		compose build infinito
 	fi
 }
@@ -130,8 +132,6 @@ start_stack() {
   [[ -n "$net" ]] || die "Could not determine compose network"
 
   echo ">>> Starting infinito via docker run (network=${net})"
-  docker rm -f "${INFINITO_CONTAINER}" >/dev/null 2>&1 || true
-
   docker run -d --name "${INFINITO_CONTAINER}" \
     --privileged \
     --cgroupns=host \
@@ -142,14 +142,8 @@ start_stack() {
     -v "${REPO_ROOT}:/opt/src/infinito" \
     --network "${net}" \
     -e INSTALL_LOCAL_BUILD=1 \
-    "infinito-${DISTRO}" \
+    "infinito-${INFINITO_DISTRO}" \
     /sbin/init
-}
-
-stop_stack() {
-  echo ">>> Stopping infinito container + compose stack"
-  docker rm -f "${INFINITO_CONTAINER}" >/dev/null 2>&1 || true
-  compose down --remove-orphans
 }
 
 # -------------------------------------------------------------------
@@ -229,10 +223,6 @@ while [[ $# -gt 0 ]]; do
 		TYPE="${2:-}"
 		shift 2
 		;;
-	--distro)
-		DISTRO="${2:-}"
-		shift 2
-		;;
 	--no-cache)
 		NO_CACHE=1
 		shift
@@ -250,21 +240,19 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "${TYPE}" ]] || die "--type is required"
-[[ -n "${DISTRO}" ]] || die "--distro is required"
-INFINITO_CONTAINER="infinito_nexus_${DISTRO}"
 
 case "${TYPE}" in
 server | workstation ) ;;
 *) die "Invalid --type '${TYPE}' (expected: server|workstation)" ;;
 esac
 
-case "${DISTRO}" in
+case "${INFINITO_DISTRO}" in
 arch | debian | ubuntu | fedora | centos) ;;
-*) die "Invalid --distro '${DISTRO}' (expected: arch|debian|ubuntu|fedora|centos)" ;;
+*) die "Invalid --distro '${INFINITO_DISTRO}' (expected: arch|debian|ubuntu|fedora|centos)" ;;
 esac
 
 echo ">>> Deploy type:     ${TYPE}"
-echo ">>> Distro:          ${DISTRO}"
+echo ">>> Distro:          ${INFINITO_DISTRO}"
 echo ">>> Repo root:       ${REPO_ROOT}"
 
 # ---------------------------------------------------------------------------
@@ -274,14 +262,12 @@ pushd "${REPO_ROOT}" >/dev/null
 
 on_exit() {
   rc=$?
-  if [[ $rc -eq 0 ]]; then
-    stop_stack
-  else
+  if [[ $rc -ne 0 ]]; then
     echo ">>> ERROR (rc=$rc) - keeping compose stack for debugging."
     echo ">>> Hint:"
     echo "    docker ps"
-    echo "    INFINITO_DISTRO=${DISTRO} docker compose --profile ci ps"
-    echo "    INFINITO_DISTRO=${DISTRO} docker compose --profile ci logs --tail=200"
+    echo "    INFINITO_DISTRO=${INFINITO_DISTRO} docker compose --profile ci ps"
+    echo "    INFINITO_DISTRO=${INFINITO_DISTRO} docker compose --profile ci logs --tail=200"
   fi
   exit $rc
 }

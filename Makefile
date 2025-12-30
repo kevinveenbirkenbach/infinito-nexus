@@ -46,7 +46,9 @@ PYTHONPATH              ?= .
 
 # Distro
 INFINITO_DISTRO		?= arch
+INFINITO_CONTAINER 	?= infinito_nexus_$(INFINITO_DISTRO)
 export INFINITO_DISTRO
+export INFINITO_CONTAINER
 
 # Compute extra users as before
 RESERVED_USERNAMES := $(shell \
@@ -59,7 +61,7 @@ RESERVED_USERNAMES := $(shell \
 
 .PHONY: \
 	setup setup-clean install install-ansible install-venv install-python \
-	test test-lint test-unit test-integration \
+	test test-lint test-unit test-integration test-deploy \
 	clean list tree mig dockerignore \
 	print-python lint-ansible
 
@@ -71,6 +73,11 @@ clean:
 		echo "WARNING: not inside a git repository -> skipping 'git clean -fdX'"; \
 		echo "WARNING: (cleanup continues)"; \
 	fi
+
+clean-container:
+	@echo ">>> Stopping infinito container + compose stack"
+	@docker rm -f "$(INFINITO_CONTAINER)" >/dev/null 2>&1 || true
+	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans
 
 list:
 	@echo "Generating the roles list"
@@ -178,12 +185,15 @@ test-unit: build-missing
 test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
+test-deploy:
+	@INFINITO_DISTRO="$(INFINITO_DISTRO)" INFINITO_CONTAINER="$(INFINITO_CONTAINER)" scripts/tests/deploy.sh --type server --missing
+
 # Backwards compatible target (kept)
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-test: test-lint test-unit test-integration lint-ansible
+test: test-lint test-unit test-integration lint-ansible test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
 # Debug helper

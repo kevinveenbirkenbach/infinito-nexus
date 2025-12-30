@@ -27,7 +27,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      network: host  # affects only image build networking
+      network: host
+      args:
+        NIX_CONFIG: ${NIX_CONFIG}
     pull_policy: never
 
     # Run systemd as PID 1
