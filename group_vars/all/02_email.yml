@@ -2,7 +2,7 @@
 DEFAULT_SYSTEM_EMAIL:
   DOMAIN:    "{{ DOMAIN_PRIMARY }}"
   HOST:      "mail.{{ DOMAIN_PRIMARY }}"
-  PORT:      "{{ TLS_ENABLED | ternary(465,25) }}" 
-  TLS:       "{{ TLS_ENABLED }}" # true for TLS and false for SSL
+  PORT:      465
+  TLS:       true # true for TLS and false for SSL
   START_TLS: false
   SMTP:      true
