@@ -5,18 +5,27 @@
     name: sys-pip
   when: run_once_sys_pip is not defined
 
-- name: Install or upgrade {{ package_name }} system-wide via system python/pip
+- name: Resolve pip executable for Ansible Python
   ansible.builtin.command:
     argv:
-      - "{{ SYS_PIP_INSTALL_PYTHON }}"
-      - -m
-      - pip
-      - install
-      - -U
-      - --break-system-packages
-      - "{{ package_name }}"
+      - "{{ ansible_facts.python.executable }}"
+      - -c
+      - "import sys,sysconfig; print(sysconfig.get_path('scripts'))"
+  register: _py_scripts_dir
+  changed_when: false
+
+- name: Set pip executable path
+  ansible.builtin.set_fact:
+    _sys_pip_executable: "{{ (_py_scripts_dir.stdout | trim) ~ '/pip' }}"
+  changed_when: false
+
+- name: Install or upgrade {{ package_name }} system-wide via system pip
+  ansible.builtin.pip:
+    name: "{{ package_name }}"
+    state: latest
+    executable: "{{ _sys_pip_executable }}"
+    extra_args: "--break-system-packages"
   environment:
     PIP_BREAK_SYSTEM_PACKAGES: "1"
     PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   become: true
-  changed_when: true
