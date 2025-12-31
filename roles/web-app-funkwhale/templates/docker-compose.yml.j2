@@ -10,12 +10,13 @@
     #   celery -A funkwhale_api.taskapp worker -l INFO --concurrency=4
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ applications | get_docker_image(application_id,'api') }}"
-    command: celery -A funkwhale_api.taskapp worker -l INFO --concurrency={{celeryd_concurrency}}
+    command: celery -A funkwhale_api.taskapp worker -l INFO --concurrency={{FUNKWHALE_CELERYD_CONCURRENCY}}
     environment:
       - C_FORCE_ROOT=true
     volumes:
-      - "data:{{funkwhale_media_root}}"
-      - "music:{{funkwhale_music_directory_path}}:ro"
+      - "media:{{ FUNKWHALE_MEDIA_DIR }}"
+      - "static:{{ FUNKWHALE_STATIC_DIR }}"
+      - "music:{{ FUNKWHALE_MUSIC_DIR }}:ro"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
@@ -23,6 +24,10 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ applications | get_docker_image(application_id,'api') }}"
     command: celery -A funkwhale_api.taskapp beat --pidfile= -l INFO
+    volumes:
+      - "media:{{ FUNKWHALE_MEDIA_DIR }}"
+      - "static:{{ FUNKWHALE_STATIC_DIR }}"
+      - "music:{{ FUNKWHALE_MUSIC_DIR }}:ro"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
@@ -30,11 +35,11 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: "{{ applications | get_docker_image(application_id,'api') }}"
     volumes:
-      - "music:{{funkwhale_music_directory_path}}:ro"
-      - "data:{{funkwhale_media_root}}"
-      - "funkwhale_static_root:{{funkwhale_static_root}}"
+      - "music:{{ FUNKWHALE_MUSIC_DIR }}:ro"
+      - "media:{{ FUNKWHALE_MEDIA_DIR }}"
+      - "static:{{ FUNKWHALE_STATIC_DIR }}"
     ports:
-      - "{{ funkwhale_docker_api_port }}"
+      - "{{ FUNKWHALE_DOCKER_API_PORT }}"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
@@ -46,8 +51,8 @@
     environment:
       - "NGINX_MAX_BODY_SIZE=100M"
     volumes:
-      - "data:{{funkwhale_media_root}}:ro"
-      #- "{{funkwhale_static_root}}:{{funkwhale_static_root}}:ro"
+      - "media:{{ FUNKWHALE_MEDIA_DIR }}:ro"
+      - "static:{{ FUNKWHALE_STATIC_DIR }}:ro"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
   
@@ -61,8 +66,8 @@
       - typesense
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  data:
-  funkwhale_static_root:
+  media:
+  static:
   music:
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

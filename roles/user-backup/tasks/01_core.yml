@@ -1,3 +1,5 @@
+- include_tasks: utils/once/flag.yml
+
 - name: create backup user
   user:
     name: backup
@@ -15,5 +17,3 @@
 - include_tasks: 02_permissions_ssh.yml
 
 - include_tasks: 03_permissions_folders.yml
-
-- include_tasks: utils/once/flag.yml

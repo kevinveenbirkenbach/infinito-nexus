@@ -1,3 +1,8 @@
+## [0.6.0] - 2025-12-31
+
+* Automated release.
+
+
 ## [0.5.0] - 2025-12-30
 
 * Unified TLS handling by replacing SSL_ENABLED with TLS_ENABLED across the entire stack

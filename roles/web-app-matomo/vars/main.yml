@@ -41,4 +41,4 @@ MATOMO_EXCLUDED_IPS:        "{{ applications | get_app_conf(application_id, 'exc
 MATOMO_TOKEN_DESCRIPTION:       "{{ applications | get_app_conf(application_id, 'token.description') }}"
 
 # Other Variables
-MATOMO_INDEX_PHP_URL:       "http://{{ DOCKER_REACH_HOST }}:{{ http_port }}/index.php"
+matomo_index_php_url:       "http://{{ DOCKER_REACH_HOST }}:{{ http_port }}/index.php"

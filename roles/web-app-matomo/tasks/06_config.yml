@@ -1,7 +1,7 @@
 # Wait for API
 - name: Exclude global IPs in Matomo
   uri:
-    url: "{{ MATOMO_INDEX_PHP_URL }}"
+    url: "{{ matomo_index_php_url }}"
     method: POST
     body_format: form-urlencoded
     body:
@@ -19,7 +19,7 @@
 
 - name: Exclude CSP-CheckerBot user agent in Matomo
   uri:
-    url: "{{ MATOMO_INDEX_PHP_URL }}"
+    url: "{{ matomo_index_php_url }}"
     method: POST
     body_format: form-urlencoded
     body:

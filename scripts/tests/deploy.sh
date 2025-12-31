@@ -20,9 +20,6 @@ MISSING_ONLY=0
 # Config (kept from the previous version)
 # -------------------------------------------------------------------
 
-AUTHORIZED_KEYS_DEFAULT="ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito"
-AUTHORIZED_KEYS="${AUTHORIZED_KEYS:-$AUTHORIZED_KEYS_DEFAULT}"
-
 # Optional: allow adding additional excludes globally (comma-separated or newline-separated)
 ALWAYS_EXCLUDE="${ALWAYS_EXCLUDE:-}"
 
@@ -270,7 +267,6 @@ infinito_exec sh -lc '
     --primary-domain infinito.localhost \
     --exclude "'"${EXCLUDE_CSV}"'" \
     --vars-file inventory.sample.yml \
-    --authorized-keys "'"${AUTHORIZED_KEYS}"'"
 '
 
 echo ">>> Ensuring vault password file exists..."

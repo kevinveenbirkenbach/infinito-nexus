@@ -12,7 +12,6 @@ from cli.create.inventory.host_vars import (
     ensure_host_vars_file,
     apply_vars_overrides,
     ensure_become_password,
-    ensure_administrator_authorized_keys,
 )
 
 
@@ -184,79 +183,6 @@ ansible_become_password: !vault |
 
             node = data["ansible_become_password"]
             self.assertEqual(getattr(node, "tag", None), "!vault")
-
-    def test_ensure_administrator_authorized_keys_uses_file_and_deduplicates(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-
-            project_root = tmp / "project"
-            (project_root / "group_vars" / "all").mkdir(parents=True, exist_ok=True)
-            (project_root / "group_vars" / "all" / "06_paths.yml").write_text(
-                'PATH_ADMINISTRATOR_HOME: "/home/administrator/"\n',
-                encoding="utf-8",
-            )
-
-            inventory_dir = tmp / "inventory"
-            inventory_dir.mkdir(parents=True, exist_ok=True)
-
-            host = "galaxyserver"
-            keys_file = tmp / "keys.pub"
-            key1 = "ssh-ed25519 AAAA... key1@example"
-            key2 = "ssh-ed25519 AAAA... key2@example"
-            keys_file.write_text(f"{key1}\n{key2}\n", encoding="utf-8")
-
-            target_rel = f"{host}/home/administrator/.ssh/authorized_keys"
-            target_path = inventory_dir / "files" / target_rel
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-            target_path.write_text(f"# existing\n{key1}\n", encoding="utf-8")
-
-            ensure_administrator_authorized_keys(
-                inventory_dir=inventory_dir,
-                host=host,
-                authorized_keys_spec=str(keys_file),
-                project_root=project_root,
-            )
-
-            content = target_path.read_text(encoding="utf-8").splitlines()
-            self.assertEqual(content.count(key1), 1)
-            self.assertEqual(content.count(key2), 1)
-
-    def test_ensure_administrator_authorized_keys_accepts_literal_string(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp = Path(tmpdir)
-
-            project_root = tmp / "project"
-            (project_root / "group_vars" / "all").mkdir(parents=True, exist_ok=True)
-            (project_root / "group_vars" / "all" / "06_paths.yml").write_text(
-                'PATH_ADMINISTRATOR_HOME: "/home/administrator/"\n',
-                encoding="utf-8",
-            )
-
-            inventory_dir = tmp / "inventory"
-            inventory_dir.mkdir(parents=True, exist_ok=True)
-
-            host = "localhost"
-            key1 = "ssh-rsa AAAA... literal1@example"
-            key2 = "ssh-rsa AAAA... literal2@example"
-
-            ensure_administrator_authorized_keys(
-                inventory_dir=inventory_dir,
-                host=host,
-                authorized_keys_spec=f"{key1}\n{key2}\n",
-                project_root=project_root,
-            )
-
-            target_rel = f"{host}/home/administrator/.ssh/authorized_keys"
-            target_path = inventory_dir / "files" / target_rel
-            self.assertTrue(target_path.exists())
-
-            lines = [
-                line.strip()
-                for line in target_path.read_text(encoding="utf-8").splitlines()
-                if line.strip() and not line.strip().startswith("#")
-            ]
-            self.assertIn(key1, lines)
-            self.assertIn(key2, lines)
 
 
 def test_apply_vars_overrides_from_file_deep_merge_and_overwrite(self):

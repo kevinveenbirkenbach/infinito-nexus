@@ -1,6 +1,2 @@
-USER_BACKUP_HOME:                 '/home/backup'
-USER_BACKUP_SSH_DIR:              '{{ [ USER_BACKUP_HOME, ".ssh"] | path_join }}'
-USER_BACKUP_AUTHORIZED_KEYS_DST:  '{{ [ USER_BACKUP_HOME, ".ssh/authorized_keys"] | path_join }}'
-USER_BACKUP_AUTHORIZED_KEYS_SRC:  '{{ [ inventory_dir, "files", inventory_hostname ~ USER_BACKUP_AUTHORIZED_KEYS_DST] | path_join }}'
-USER_BACKUP_AUTHORIZED_KEYS_LIST: '{{ lookup("file", USER_BACKUP_AUTHORIZED_KEYS_SRC).splitlines() }}'
-USER_BACKUP_WRAPPER_DST:          '{{ [ USER_BACKUP_HOME, "ssh-wrapper.sh" ] | path_join }}'
+USER_BACKUP_HOME:                 "/home/backup"
+USER_BACKUP_WRAPPER_DST:          "{{ [ USER_BACKUP_HOME, 'ssh-wrapper.sh' ] | path_join }}"

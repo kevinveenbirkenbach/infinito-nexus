@@ -1,7 +1,7 @@
 ---
 galaxy_info:
   author: "Kevin Veen-Birkenbach"
-  description: "Install or upgrade a Python package system-wide using system pip (python3 -m pip)."
+  description: "Install or upgrade a Python package system-wide using system pip."
   license: "Infinito.Nexus NonCommercial License"
   license_url: "https://s.infinito.nexus/license"
   company: |

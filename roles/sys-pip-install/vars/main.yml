@@ -1,7 +1,0 @@
-
-SYS_PIP_INSTALL_PYTHON: >-
-  {{
-    '/usr/bin/python3'
-    if (ansible_facts.os_family in ['Debian', 'RedHat'] or ansible_facts.distribution == 'Archlinux')
-    else '/usr/bin/python3'
-  }}

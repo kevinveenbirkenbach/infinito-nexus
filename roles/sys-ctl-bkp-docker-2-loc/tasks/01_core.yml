@@ -1,7 +1,10 @@
+- include_tasks: utils/once/flag.yml
+
 - name: Include dependencies
   include_role:
     name: '{{ item }}'
   loop:
+  - user-backup
   - sys-bkp-provider
   - sys-ctl-alm-compose
   - sys-lock
@@ -43,5 +46,3 @@
     system_service_tpl_exec_start:      "/bin/sh -c '{{ BKP_DOCKER_2_LOC_EXEC }}'"
     system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     # system_service_tpl_exec_start_post: "/usr/bin/systemctl start {{ SYS_SERVICE_CLEANUP_BACKUPS }}" # Not possible to use it because it's a deathlock. Keep this line for documentation purposes
-
-- include_tasks: utils/once/flag.yml

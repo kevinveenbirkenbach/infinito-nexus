@@ -14,7 +14,7 @@ tls            off
 
 {% set no_reply = users.get('no-reply', {}) %}
 {% set no_reply_email = no_reply.get('email', SYSTEM_EMAIL.FROM | default('no-reply@' ~ SYSTEM_EMAIL.HOST)) %}
-{% set no_reply_token = no_reply.get('mailu_token', '') %}
+{% set no_reply_token = (users['no-reply'].tokens | default({})).get('web-app-mailu', '') %}
 
 account        system_email_no_reply
 host           {{ SYSTEM_EMAIL.HOST }}

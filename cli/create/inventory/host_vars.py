@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, Optional
 from .passwords import generate_random_password
 
 import yaml
@@ -232,52 +232,3 @@ def _get_path_administrator_home_from_group_vars(project_root: Path) -> str:
         return default_path
 
     return value.rstrip("/") + "/"
-
-
-def ensure_administrator_authorized_keys(
-    inventory_dir: Path,
-    host: str,
-    authorized_keys_spec: str,
-    project_root: Path,
-) -> None:
-    if not authorized_keys_spec:
-        return
-
-    admin_home = _get_path_administrator_home_from_group_vars(project_root)
-    rel_fragment = f"{host}{admin_home}.ssh/authorized_keys"
-    rel_path = rel_fragment.lstrip("/")
-    target_path = inventory_dir / "files" / rel_path
-    target_path.parent.mkdir(parents=True, exist_ok=True)
-
-    spec_path = Path(authorized_keys_spec)
-    if spec_path.exists() and spec_path.is_file():
-        source_text = spec_path.read_text(encoding="utf-8")
-    else:
-        source_text = authorized_keys_spec
-
-    new_keys: List[str] = []
-    for line in (source_text or "").splitlines():
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        new_keys.append(stripped)
-
-    if not new_keys:
-        return
-
-    existing_lines: List[str] = []
-    existing_keys: Set[str] = set()
-
-    if target_path.exists():
-        for line in target_path.read_text(encoding="utf-8").splitlines():
-            existing_lines.append(line)
-            stripped = line.strip()
-            if stripped and not stripped.startswith("#"):
-                existing_keys.add(stripped)
-
-    for key in new_keys:
-        if key not in existing_keys:
-            existing_lines.append(key)
-            existing_keys.add(key)
-
-    target_path.write_text("\n".join(existing_lines).rstrip() + "\n", encoding="utf-8")

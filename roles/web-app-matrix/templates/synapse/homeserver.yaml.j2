@@ -36,7 +36,7 @@ email:
   smtp_host:                    "{{ SYSTEM_EMAIL.HOST }}"
   smtp_port:                    "{{ SYSTEM_EMAIL.PORT }}"
   smtp_user:                    "{{ users['no-reply'].email }}"
-  smtp_pass:                    "{{ users['no-reply'].mailu_token }}"
+  smtp_pass:                    "{{ users['no-reply'].tokens['web-app-mailu'] }}"
   #force_tls:                    true
   #require_transport_security:   true
   enable_tls:                   "{{ SYSTEM_EMAIL.TLS | upper }}"

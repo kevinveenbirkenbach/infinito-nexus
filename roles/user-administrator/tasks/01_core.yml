@@ -1,3 +1,9 @@
+- name: Fail if administrator authorized_keys is empty
+  ansible.builtin.fail:
+    msg: >-
+      users.administrator.authorized_keys must contain at least one SSH public key.
+  when: users.administrator.authorized_keys | length == 0
+
 - name: Include dependency 'sys-sudo'
   include_role:
     name: sys-sudo
@@ -12,7 +18,7 @@
     generate_ssh_key: yes
     ssh_key_type: rsa
     ssh_key_bits: 8192
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"  
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "set correct rights for {{ PATH_ADMINISTRATOR_HOME }}"
   file:
@@ -21,22 +27,6 @@
     owner: administrator
     group: administrator
     mode: 0700
-
-- name: "create {{ PATH_ADMINISTRATOR_SCRIPTS }}"
-  file:
-    path: "{{ PATH_ADMINISTRATOR_HOME }}scripts"
-    state: directory
-    owner: administrator
-    group: administrator
-    mode: 0700
-
-- name: create {{ PATH_ADMINISTRATOR_HOME }}.ssh/authorized_keys
-  copy:
-    src: "{{ inventory_dir }}/files/{{ inventory_hostname }}{{ PATH_ADMINISTRATOR_HOME }}.ssh/authorized_keys"
-    dest: "{{ PATH_ADMINISTRATOR_HOME }}.ssh/authorized_keys"
-    owner: administrator
-    group: administrator
-    mode: '0644'
 
 - name: grant administrator sudo rights with password
   copy:

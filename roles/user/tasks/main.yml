@@ -7,8 +7,12 @@
     owner: "{{ user_name }}"
     group: "{{ user_group }}"
     mode: "0644"
-  loop: 
+  loop:
     - bashrc
     - bash_profile
   loop_control:
     label: ".{{ item }}"
+
+- name: Manage SSH authorized_keys (SPOT-only)
+  ansible.builtin.include_tasks: 01_ssh_authorized_keys.yml
+

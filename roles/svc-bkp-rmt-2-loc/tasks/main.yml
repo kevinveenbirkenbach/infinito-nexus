@@ -1,4 +1,5 @@
 - block:
+  - include_tasks: utils/once/flag.yml
   - name: Include dependencies
     include_role:
       name: '{{ item }}'
@@ -6,8 +7,7 @@
     - dev-git
     - sys-ctl-alm-compose
     - sys-lock
-    - sys-timer-cln-bkps
-  - include_tasks: utils/once/flag.yml
+    - user-backup
   when: run_once_svc_bkp_rmt_2_loc is not defined
 
 - name: "Create Directory '{{ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR }}'"

@@ -66,7 +66,7 @@ def compare_user_keys(users, default_users, source):
             continue
         def_conf = default_users[user]
         for key in conf:
-            if key in ("password", "credentials", "mailu_token"):
+            if key in ("password", "credentials"):
                 continue
             if key not in def_conf:
                 errs.append(f"Missing default for user '{user}': key '{key}'")

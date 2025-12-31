@@ -1,8 +1,8 @@
 
 # Path Variables for Key Directories and Scripts
 PATH_ADMINISTRATOR_HOME:            "/home/administrator/"
-PATH_ADMINISTRATOR_SCRIPTS:         "/opt/scripts/"
-PATH_SYSTEMCTL_SCRIPTS:             "{{ [ PATH_ADMINISTRATOR_SCRIPTS, 'systemctl' ] | path_join }}"
+PATH_ROOT_SCRIPTS:         "/opt/scripts/"
+PATH_SYSTEMCTL_SCRIPTS:             "{{ [ PATH_ROOT_SCRIPTS, 'systemctl' ] | path_join }}"
 PATH_DOCKER_COMPOSE_INSTANCES:      "/opt/docker/"
 PATH_SYSTEM_LOCK_SCRIPT:            "/opt/scripts/sys-lock.py"
 PATH_SYSTEM_SERVICE_DIR:            "/etc/systemd/system"

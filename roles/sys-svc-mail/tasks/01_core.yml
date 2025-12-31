@@ -24,7 +24,7 @@
           )
           or
           (
-            users.get('no-reply', {}).get('mailu_token', '') | length == 0
+            (users['no-reply'].tokens | default({})).get('web-app-mailu', '') | length == 0
           )
   when: "'web-app-mailu' in group_names"
 

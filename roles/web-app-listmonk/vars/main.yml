@@ -101,7 +101,7 @@ LISTMONK_SETTINGS:
           "uuid":            "471fd0e9-8c33-4e4a-9183-c4679699faca",
           "enabled":         true,
           "username":        users[LISTMONK_USER_BOUNCE].email,
-          "password":        users[LISTMONK_USER_BOUNCE].mailu_token,
+          "password":        users[LISTMONK_USER_BOUNCE].tokens['web-app-mailu'],
           "return_path":     users[LISTMONK_USER_BOUNCE].email,
           "tls_enabled":     SYSTEM_EMAIL.TLS,
           "auth_protocol":   "userpass",

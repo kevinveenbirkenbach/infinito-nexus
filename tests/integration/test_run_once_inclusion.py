@@ -66,12 +66,11 @@ class RunOnceInclusionTest(unittest.TestCase):
                         and ("include_role" in t or "import_role" in t)
                         for t in block
                     )
-                    # Check that last task is include_tasks:
-                    last_task = block[-1] if block else None
-
-                    has_run_once_flag = (
-                        isinstance(last_task, dict)
-                        and last_task.get("include_tasks") == "utils/once/flag.yml"
+                    # Check that block contains the run-once flag include_tasks anywhere
+                    has_run_once_flag = any(
+                        isinstance(t, dict)
+                        and t.get("include_tasks") == "utils/once/flag.yml"
+                        for t in block
                     )
 
                     if has_role_include and not has_run_once_flag:
