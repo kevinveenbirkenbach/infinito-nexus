@@ -3,3 +3,7 @@ MASK_CREDENTIALS_IN_LOGS: false
 OIDC:
   CLIENT:
     SECRET: VERYUNSAFESAMPLEPASSWORD1234
+users:
+  administrator:
+    authorized_keys:
+      - ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito

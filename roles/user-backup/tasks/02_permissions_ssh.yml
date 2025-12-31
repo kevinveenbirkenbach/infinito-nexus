@@ -1,23 +1,48 @@
-- name: "create {{ USER_BACKUP_SSH_DIR }}"
-  file:
-    path: "{{ USER_BACKUP_SSH_DIR }}"
-    state: directory
-    owner: backup
-    group: backup
-    mode: '0700'
+- name: "Validate users.backup.authorized_keys is defined (SPOT-only, can be empty)"
+  ansible.builtin.fail:
+    msg: >-
+      Missing SSH key configuration for user 'backup'.
+      Define users.backup.authorized_keys (can be empty).
+  when: >-
+    users is not defined
+    or users.backup is not defined
+    or users.backup.authorized_keys is not defined
 
-- name: "create '{{ USER_BACKUP_AUTHORIZED_KEYS_DST }}'"
-  template:
-    src:  "authorized_keys.j2"
-    dest: '{{ USER_BACKUP_AUTHORIZED_KEYS_DST }}'
-    owner: backup
-    group: backup
-    mode: '0644'
+- name: "Set users.backup.authorized_keys to wrapped lines (list)"
+  ansible.builtin.set_fact:
+    users: >-
+      {{
+        (users | default({}))
+        | combine(
+            {
+              'backup': (
+                (users.backup | default({}))
+                | combine(
+                    {
+                      'authorized_keys': (
+                        users.backup.authorized_keys
+                        | map('regex_replace', '^(.*)$', 'command="' ~ USER_BACKUP_WRAPPER_DST ~ '" \\1')
+                        | list
+                      )
+                    },
+                    recursive=True
+                  )
+              )
+            },
+            recursive=True
+          )
+      }}
 
 - name: "create {{ USER_BACKUP_WRAPPER_DST }}"
-  template:
+  ansible.builtin.template:
     src: "ssh-wrapper.sh.j2"
     dest: "{{ USER_BACKUP_WRAPPER_DST }}"
     owner: backup
     group: backup
-    mode: '0700'
+    mode: "0700"
+
+- name: "Write authorized_keys for 'backup' via shared user role (wrapped)"
+  ansible.builtin.include_role:
+    name: user
+  vars:
+    user_name: "backup"

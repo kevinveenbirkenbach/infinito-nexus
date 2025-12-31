@@ -1,0 +1,32 @@
+- name: "Validate users.{{ user_name }}.authorized_keys exists and is a list"
+  ansible.builtin.fail:
+    msg: >-
+      Missing or invalid SSH key configuration for user '{{ user_name }}'.
+      Define users.{{ user_name }}.authorized_keys as a LIST of SSH public keys
+      (may be empty unless restricted by the calling role).
+  when: >
+    users is not defined
+    or users[user_name] is not defined
+    or users[user_name].authorized_keys is not defined
+    or users[user_name].authorized_keys is string
+    or users[user_name].authorized_keys is not iterable
+
+- name: "Ensure SSH directory exists for '{{ user_name }}'"
+  ansible.builtin.file:
+    path: "{{ user_home }}/.ssh"
+    state: directory
+    owner: "{{ user_name }}"
+    group: "{{ user_group }}"
+    mode: "0700"
+
+- name: "Write authorized_keys for '{{ user_name }}'"
+  ansible.builtin.copy:
+    dest: "{{ user_home }}/.ssh/authorized_keys"
+    content: >-
+      {{
+        users[user_name].authorized_keys | join('\n')
+        ~ ((users[user_name].authorized_keys | length > 0) | ternary('\n',''))
+      }}
+    owner: "{{ user_name }}"
+    group: "{{ user_group }}"
+    mode: "0600"

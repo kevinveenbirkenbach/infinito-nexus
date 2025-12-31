@@ -14,7 +14,6 @@ from .host_vars import (
     ensure_host_vars_file,
     ensure_become_password,
     apply_vars_overrides,
-    ensure_administrator_authorized_keys,
     apply_vars_overrides_from_file,
 )
 from .credentials_generator import generate_credentials_for_roles
@@ -76,14 +75,6 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     parser.add_argument(
         "--become-password", default=None, help="Optional become password (vaulted)."
-    )
-    parser.add_argument(
-        "--authorized-keys",
-        required=False,
-        help=(
-            "Optional SSH public keys for the 'administrator' account. "
-            "May be literal key text (possibly multi-line) or a path to a file."
-        ),
     )
     parser.add_argument(
         "--vars",
@@ -250,15 +241,6 @@ def main(argv: Optional[List[str]] = None) -> int:
         vault_password_file=vault_password_file,
         become_password=args.become_password,
     )
-
-    if args.authorized_keys:
-        print(f"[INFO] Ensuring administrator authorized_keys for host '{args.host}'")
-        ensure_administrator_authorized_keys(
-            inventory_dir=inventory_dir,
-            host=args.host,
-            authorized_keys_spec=args.authorized_keys,
-            project_root=project_root,
-        )
 
     # Credentials
     if application_ids:

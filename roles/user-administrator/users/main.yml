@@ -7,3 +7,4 @@ users:
     gid:                1001
     roles:
       - administrator
+    authorized_keys: []
