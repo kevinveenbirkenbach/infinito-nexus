@@ -24,6 +24,7 @@
       /bin/sh -c "{{ CLEANUP_FAILED_BACKUPS_PKG }}
       --backups-root {{ PATH_INFINITO_BACKUP_DIR | quote }}
       --all
+      --force-keep {{ CLEANUP_FAILED_BACKUPS_FORCE_KEEP }}
       --workers {{ CLEANUP_FAILED_BACKUPS_WORKERS }}
       --yes"
 

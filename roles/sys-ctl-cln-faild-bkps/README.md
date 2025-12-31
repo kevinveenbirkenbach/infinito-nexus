@@ -1,4 +1,56 @@
 # Cleanup Failed Backups
 
-This role installs and runs the **cleanback** CLI to validate and delete **failed Docker backups** under `/Backups/*/backup-docker-to-local`.  
-Validation is performed via `dirval`; failures can be removed automatically in a non-interactive service execution.
+This role installs and runs the **cleanback** tool to automatically detect and remove **failed Docker backups**.
+
+The cleanup process scans backup directories located under the configurable path  
+**PATH_INFINITO_BACKUP_DIR** (for example `/Backups`)  
+and removes only those backups that are detected as invalid, while keeping recent backups safe.
+
+To avoid accidental data loss, the role **keeps the most recent backups by default** and runs fully unattended via a scheduled system service.
+
+## What this role does
+
+- Installs the *cleanback* cleanup tool
+- Runs regular, automated cleanup jobs via systemd
+- Removes failed backups only
+- Preserves the newest backups automatically
+- Designed for non-interactive, production-safe operation
+
+## Keeping recent backups safe
+
+By default, the role keeps the **last three backup sets** and does not touch them during cleanup runs.
+
+This behavior is controlled via:
+
+- **CLEANUP_FAILED_BACKUPS_FORCE_KEEP**
+
+Example:
+
+```yaml
+CLEANUP_FAILED_BACKUPS_FORCE_KEEP: 3
+```
+
+This means:
+
+* The newest 3 backup directories under `PATH_INFINITO_BACKUP_DIR` are skipped
+* Older backups are checked and cleaned if they are invalid
+
+The value can be adjusted or overridden via inventory, group vars, or host vars if needed.
+
+## cleanback tool
+
+The cleanup logic itself is provided by the **cleanback** project:
+
+[https://github.com/kevinveenbirkenbach/cleanup-failed-backups](https://github.com/kevinveenbirkenbach/cleanup-failed-backups)
+
+This role focuses on **safe automation and scheduling**, while the linked project contains the actual cleanup implementation.
+
+## Typical use case
+
+This role is intended for servers that create regular Docker backups and need a reliable way to:
+
+* Keep storage usage under control
+* Automatically remove broken or incomplete backups
+* Ensure recent backups are never touched
+
+No manual interaction is required once the role is deployed.

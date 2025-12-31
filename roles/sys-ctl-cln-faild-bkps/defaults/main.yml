@@ -1,0 +1,3 @@
+---
+# Keep (skip) the last N backup folders in --all mode to avoid touching the newest backups.
+CLEANUP_FAILED_BACKUPS_FORCE_KEEP: 3
