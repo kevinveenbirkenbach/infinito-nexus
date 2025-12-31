@@ -48,7 +48,7 @@ OPENPROJECT_RAILS_SETTINGS:
   smtp_address:               "{{ SYSTEM_EMAIL.HOST }}"
   smtp_domain:                "{{ SYSTEM_EMAIL.DOMAIN }}"
   smtp_user_name:             "{{ users['no-reply'].email }}"
-  smtp_password:              "{{ users['no-reply'].mailu_token }}"
+  smtp_password:              "{{ users['no-reply'].tokens['web-app-mailu'] }}"
   smtp_ssl:                   false
 
 ## LDAP

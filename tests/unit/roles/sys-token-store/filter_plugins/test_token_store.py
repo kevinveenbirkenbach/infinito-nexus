@@ -24,7 +24,9 @@ def _find_plugin_path() -> Path:
         candidate = Path(env_root).resolve() / REL_PLUGIN_PATH
         if candidate.is_file():
             return candidate
-        raise FileNotFoundError(f"INFINITO_REPO_ROOT set but plugin not found at: {candidate}")
+        raise FileNotFoundError(
+            f"INFINITO_REPO_ROOT set but plugin not found at: {candidate}"
+        )
 
     here = Path(__file__).resolve()
     for parent in [here, *here.parents]:
@@ -42,7 +44,9 @@ def _find_plugin_path() -> Path:
 def _load_token_store_module() -> ModuleType:
     plugin_path = _find_plugin_path()
 
-    spec = importlib.util.spec_from_file_location("token_store_plugin", str(plugin_path))
+    spec = importlib.util.spec_from_file_location(
+        "token_store_plugin", str(plugin_path)
+    )
     if spec is None or spec.loader is None:
         raise RuntimeError(f"Failed to create import spec for: {plugin_path}")
 

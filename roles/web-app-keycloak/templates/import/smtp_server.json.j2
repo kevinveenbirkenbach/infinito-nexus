@@ -1,6 +1,6 @@
 "smtpServer": {
 {% if SYSTEM_EMAIL.ENABLED | bool %}
-    "password": "{{ users['no-reply'].mailu_token }}",
+    "password": "{{ users['no-reply'].tokens['web-app-mailu'] }}",
     "replyToDisplayName": "",
     "starttls": "{{ SYSTEM_EMAIL.START_TLS | lower }}",
     "auth": "true",

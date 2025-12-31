@@ -68,7 +68,8 @@ class RunOnceInclusionTest(unittest.TestCase):
                     )
                     # Check that block contains the run-once flag include_tasks anywhere
                     has_run_once_flag = any(
-                        isinstance(t, dict) and t.get("include_tasks") == "utils/once/flag.yml"
+                        isinstance(t, dict)
+                        and t.get("include_tasks") == "utils/once/flag.yml"
                         for t in block
                     )
 

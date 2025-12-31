@@ -56,7 +56,7 @@ BOOKWYRM_REDIS_ACTIVITY_URL:     "{{ BOOKWYRM_REDIS_CACHE_URL }}"
 EMAIL_HOST:                     "{{ SYSTEM_EMAIL.HOST }}"
 EMAIL_PORT:                     "{{ SYSTEM_EMAIL.PORT }}"
 EMAIL_HOST_USER:                "{{ users['no-reply'].email }}"
-EMAIL_HOST_PASSWORD:            "{{ users['no-reply'].mailu_token }}"
+EMAIL_HOST_PASSWORD:            "{{ users['no-reply'].tokens['web-app-mailu'] }}"
 # TLS/SSL: If TLS is true → TLS; else → SSL
 EMAIL_USE_TLS:                  "{{ SYSTEM_EMAIL.TLS | ternary('true','false') }}"
 EMAIL_USE_SSL:                  "{{ SYSTEM_EMAIL.TLS | ternary('false','true') }}"
