@@ -1,7 +1,10 @@
+- include_tasks: utils/once/flag.yml
+
 - name: Include dependencies
   include_role:
     name: '{{ item }}'
   loop:
+    - user-backup
     - sys-ctl-alm-compose
     - sys-lock
     - sys-daemon
@@ -27,5 +30,3 @@
       --force-keep {{ CLEANUP_FAILED_BACKUPS_FORCE_KEEP }}
       --workers {{ CLEANUP_FAILED_BACKUPS_WORKERS }}
       --yes"
-
-- include_tasks: utils/once/flag.yml
