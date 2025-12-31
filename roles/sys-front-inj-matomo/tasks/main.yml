@@ -5,6 +5,12 @@
     name: sys-token-store
   when: run_once_sys_token_store is not defined
 
+- name: Fail if Matomo token is empty string
+  ansible.builtin.fail:
+    msg: "Matomo token users.administrator.tokens['web-app-matomo'] is set but empty. Please provide a non-empty token."
+  when: (users.administrator.tokens['web-app-matomo'] | default('') | string | trim) == ""
+
+
 - name: "Check if site {{ domain }} is already registered at Matomo"
   ansible.builtin.uri:
     url: "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ WEB_PROTOCOL }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
