@@ -31,7 +31,7 @@ It only **stores and propagates tokens that already exist** (e.g. created by boo
 When resolving a token, the following order is used:
 
 1. `users.<user>.tokens.<application_id>`
-2. Token store file (`token-store.yml`)
+2. Token store file (`tokens.yml`)
 3. Empty string (`''`)
 
 No automatic fallback generation happens.
@@ -52,7 +52,7 @@ users:
 Default location:
 
 ```
-/var/lib/infinito/secrets/tokens/token-store.yml
+/var/lib/infinito/secrets/tokens.yml
 ```
 
 Permissions are restricted to root by default.
@@ -60,21 +60,6 @@ Permissions are restricted to root by default.
 ---
 
 ## Provided Tasks
-
-### `lookup.yml`
-
-Resolves a token without modifying anything.
-
-**Input**
-
-* `sys_token_store_user_key`
-* `sys_token_store_app`
-
-**Output**
-
-* `sys_token_store_token`
-
----
 
 ### `write.yml`
 
@@ -99,17 +84,6 @@ Empty tokens are rejected explicitly.
 ---
 
 ## Usage Examples
-
-### Resolve a token (read-only)
-
-```yaml
-- include_role:
-    name: sys-token-store
-    tasks_from: lookup.yml
-  vars:
-    sys_token_store_user_key: administrator
-    sys_token_store_app: web-app-matomo
-```
 
 ---
 

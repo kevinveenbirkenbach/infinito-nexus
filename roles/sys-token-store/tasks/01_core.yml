@@ -1,5 +1,7 @@
 ---
-- name: "sys-token-store | Ensure base directory"
+- include_tasks: utils/once/flag.yml
+
+- name: "Ensure base directory"
   ansible.builtin.file:
     path: "{{ PATH_INFINITO_SECRETS_DIR }}"
     state: directory
@@ -8,7 +10,7 @@
     mode: "{{ SYS_TOKEN_STORE_DIR_MODE }}"
   become: true
 
-- name: "sys-token-store | Ensure store file exists"
+- name: "Ensure store file exists"
   ansible.builtin.file:
     path: "{{ PATH_INFINITO_TOKENS }}"
     state: touch
@@ -17,4 +19,10 @@
     mode: "{{ SYS_TOKEN_STORE_FILE_MODE }}"
   become: true
 
-- include_tasks: utils/once/flag.yml
+- name: "Load existing store"
+  ansible.builtin.import_tasks: 02_load.yml
+
+- name: "Hydrate users tokens from store (users wins if non-empty)"
+  ansible.builtin.set_fact:
+    users: "{{ users | default({}) | hydrate_users_tokens(sys_token_store_users | default({})) }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

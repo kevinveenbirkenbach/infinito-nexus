@@ -21,6 +21,10 @@
            | list
          ).0 | default(None) }}
 
-- name:           "Start Mailu token procedures for undefined tokens"
-  when:           users[mailu_user_key].mailu_token is not defined
-  include_tasks:  03b_create_user_token.yml
+- name: "Start Mailu token procedures if token missing"
+  when: >-
+    (
+      users.get(mailu_user_key, {}).get('tokens', {}).get(application_id, '')
+      | string | trim
+    ) == ''
+  include_tasks: 03b_create_user_token.yml

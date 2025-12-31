@@ -1,8 +1,13 @@
 # run_once_sys_front_inj_matomo: deactivated
 
+- name: Include Token Store
+  include_role:
+    name: sys-token-store
+  when: run_once_sys_token_store is not defined
+
 - name: "Check if site {{ domain }} is already registered at Matomo"
   ansible.builtin.uri:
-    url: "{{ matomo_verification_url }}"
+    url: "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ WEB_PROTOCOL }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
     method: GET
     return_content: yes
     status_code: 200
@@ -33,10 +38,10 @@
   changed_when: false
 
 - name: Add site to Matomo and get ID if not exists
-  uri:
+  ansible.builtin.uri:
     url: "{{ matomo_index_php_url }}"
     method: POST
-    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ WEB_PROTOCOL }}://{{ base_domain }}&token_auth={{ matomo_auth_token }}&format=json"
+    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ WEB_PROTOCOL }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
     body_format: form-urlencoded
     status_code: 200
     return_content: yes

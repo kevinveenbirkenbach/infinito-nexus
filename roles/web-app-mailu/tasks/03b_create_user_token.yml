@@ -37,17 +37,12 @@
   changed_when: mailu_token_creation.stdout is search('"token"\\s*:')
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: "Set mailu_token for '{{ mailu_user_key }};{{ mailu_user_name }}' in users dict if newly created"
-  set_fact:
-    users: >-
-      {{ users
-        | combine({
-            mailu_user_key: (
-              users[mailu_user_key]
-              | combine({
-                  'mailu_token': (mailu_token_creation.stdout | from_json).token
-                })
-            )
-          }, recursive=True)
-      }}
+- name: "Persist + inject Mailu API token via sys-token-store"
+  ansible.builtin.include_role:
+    name: sys-token-store
+    tasks_from: write.yml
+  vars:
+    sys_token_store_user_key: "{{ mailu_user_key }}"
+    sys_token_store_app: "{{ application_id }}"
+    sys_token_store_token: "{{ (mailu_token_creation.stdout | from_json).token }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
