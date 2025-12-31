@@ -31,6 +31,8 @@ services:
       args:
         NIX_CONFIG: ${NIX_CONFIG}
     pull_policy: never 
+    depends_on:
+      - coredns
 
     # Run systemd as PID 1
     command:
