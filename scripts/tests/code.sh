@@ -5,14 +5,25 @@ echo "============================================================"
 echo ">>> Running UNIT tests in ${INFINITO_DISTRO} container"
 echo "============================================================"
 
-docker run --rm \
-	-e INSTALL_LOCAL_BUILD=1 \
-	-e TEST_PATTERN="${TEST_PATTERN}" \
-	-e TEST_TYPE="${TEST_TYPE}" \
-	-e NIX_CONFIG="${NIX_CONFIG}" \
-	-v "$(pwd):/opt/src/infinito" \
-	"infinito-${INFINITO_DISTRO}" \
-	bash -lc '
+: "${INFINITO_DISTRO:?INFINITO_DISTRO must be set}"
+
+# Prevent interactive Nix prompt for flake-provided nixConfig
+# while still honoring any existing NIX_CONFIG from CI / env.
+NIX_CONFIG_EFFECTIVE="$(
+  printf "%s\n%s\n" \
+    "${NIX_CONFIG:-}" \
+    "accept-flake-config = true" \
+  | sed -e 's/[[:space:]]\+$//' -e '/^$/d'
+)"
+
+INFINITO_DISTRO="${INFINITO_DISTRO}" docker compose --profile ci run --rm -T \
+  -v "$(pwd):/opt/src/infinito" \
+  -e INSTALL_LOCAL_BUILD=1 \
+  -e TEST_PATTERN="${TEST_PATTERN}" \
+  -e TEST_TYPE="${TEST_TYPE}" \
+  -e NIX_CONFIG="${NIX_CONFIG_EFFECTIVE}" \
+  infinito \
+  bash -lc '
     set -euo pipefail
     cd /opt/src/infinito
 
