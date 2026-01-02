@@ -4,7 +4,7 @@
     container_name: {{ application_id }}
     image: {{ PHPLDAPADMIN_IMAGE }}:{{ PHPLDAPADMIN_VERSION }}
     ports:
-      - 127.0.0.1:{{ ports.localhost.http[application_id] }}:8080
+      - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8080
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

@@ -8,7 +8,7 @@
     image: {{ DESKTOP_IMAGE }}
     container_name: {{ DESKTOP_CONTAINER }}
     ports:
-      - 127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}
+      - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}
     volumes:
       - {{ docker_repository_path }}app:/app
     restart: {{ DOCKER_RESTART_POLICY }}

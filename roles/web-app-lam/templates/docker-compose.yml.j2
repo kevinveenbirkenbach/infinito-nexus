@@ -4,7 +4,7 @@
     container_name: "{{ lam_container }}"
     image: "{{ lam_image }}"
     ports:
-      - 127.0.0.1:{{ ports.localhost.http[application_id] }}:80 
+      - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80 
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 

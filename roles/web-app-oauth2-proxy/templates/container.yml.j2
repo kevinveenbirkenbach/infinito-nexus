@@ -6,7 +6,7 @@
     container_name: {{ application_id | get_entity_name }}-oauth2-proxy
     hostname: oauth2-proxy
     ports:
-      - 127.0.0.1:{{ ports.localhost.oauth2_proxy[application_id] }}:4180/tcp
+      - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.oauth2_proxy[application_id] }}:4180/tcp
     volumes:
       - "{{ docker_compose.directories.volumes }}{{ applications | get_app_conf('web-app-oauth2-proxy','configuration_file')}}:/oauth2-proxy.cfg"
     healthcheck:

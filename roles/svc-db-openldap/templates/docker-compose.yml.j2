@@ -6,7 +6,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% if OPENLDAP_NETWORK_EXPOSE_LOCAL | bool %}
     ports:
-      - 127.0.0.1:{{ports.localhost.ldap['svc-db-openldap']}}:{{ OPENLDAP_DOCKER_PORT_OPEN }}
+      - {{ DOCKER_BIND_HOST }}:{{ports.localhost.ldap['svc-db-openldap']}}:{{ OPENLDAP_DOCKER_PORT_OPEN }}
 {% endif %}
     volumes:
       - 'data:/bitnami/openldap'
