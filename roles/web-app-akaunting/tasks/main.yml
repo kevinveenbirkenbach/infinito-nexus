@@ -20,6 +20,6 @@
 - name: "Akaunting | Create first-run marker to disable future setup"
   ansible.builtin.file:
     path: "{{ AKAUNTING_SETUP_MARKER }}"
-    state: touch
+    state: file
     mode: "0644"
   when: akaunting_setup_enabled | bool
