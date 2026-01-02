@@ -1,6 +1,7 @@
 application_id:       "web-app-phpmyadmin"
 database_type:        "mariadb"
-database_host:        "{{ applications | get_app_conf('svc-db-mariadb', 'docker.services.mariadb.name', True) if applications | get_app_conf(application_id, 'features.central_database', False) }}"
-phpmyadmin_version:   "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.version', True) }}"
-phpmyadmin_image:     "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.image', True) }}"
-phpmyadmin_container:      "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.name', True) }}"
+database_host:        "{{ applications | get_app_conf('svc-db-mariadb', 'docker.services.mariadb.name') if applications | get_app_conf(application_id, 'features.central_database', False) }}"
+
+PHPMYADMIN_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.version') }}"
+PHPMYADMIN_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.image') }}"
+PHPMYADMIN_CONTAINER: "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.name') }}"
