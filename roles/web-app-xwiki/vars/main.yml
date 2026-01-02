@@ -38,7 +38,7 @@ XWIKI_SUPERADMIN_PASSWORD:            "{{ applications | get_app_conf(applicatio
 XWIKI_SUPERADMIN_USERNAME:            "superadmin"
 
 # REST endpoint (local inside container)
-XWIKI_REST_BASE:                      "{{ ['http://127.0.0.1:'~ XWIKI_HOST_PORT, '/rest/'] | url_join  }}"
+XWIKI_REST_BASE:                      "{{ ['http://{{ DOCKER_REACH_HOST }}:'~ XWIKI_HOST_PORT, '/rest/'] | url_join  }}"
 XWIKI_REST_XWIKI:                     "{{ [XWIKI_REST_BASE, 'wikis/xwiki'] | url_join  }}"
 XWIKI_REST_XWIKI_PAGES:               "{{ [XWIKI_REST_BASE, 'wikis/xwiki/spaces/XWiki/pages'] | url_join }}"
 

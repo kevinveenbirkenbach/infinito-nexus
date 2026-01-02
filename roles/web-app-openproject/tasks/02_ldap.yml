@@ -7,7 +7,7 @@
     db: "{{ database_name }}"
     login_user: "{{ database_username }}"
     login_password: "{{ database_password }}"
-    login_host: "127.0.0.1"
+    login_host: "{{ DOCKER_REACH_HOST }}"
     login_port: "{{ database_port }}"
     query: "SELECT id FROM ldap_auth_sources WHERE name = '{{ OPENPROJECT_LDAP.name }}' LIMIT 1;"
   register: ldap_check
@@ -17,7 +17,7 @@
     db: "{{ database_name }}"
     login_user: "{{ database_username }}"
     login_password: "{{ database_password }}"
-    login_host: "127.0.0.1"
+    login_host: "{{ DOCKER_REACH_HOST }}"
     login_port: "{{ database_port }}"
     query: >
       UPDATE ldap_auth_sources SET
@@ -47,7 +47,7 @@
     db: "{{ database_name }}"
     login_user: "{{ database_username }}"
     login_password: "{{ database_password }}"
-    login_host: "127.0.0.1"
+    login_host: "{{ DOCKER_REACH_HOST }}"
     login_port: "{{ database_port }}"
     query: >
       INSERT INTO ldap_auth_sources

@@ -43,7 +43,7 @@
 
 - name: "XWIKI | Execute installer page"
   uri:
-    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/InstallExtensions?xpage=plain"
+    url: "http://{{ DOCKER_REACH_HOST }}:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/InstallExtensions?xpage=plain"
     method: GET
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"

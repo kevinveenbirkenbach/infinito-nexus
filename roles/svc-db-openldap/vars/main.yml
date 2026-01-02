@@ -3,7 +3,7 @@ application_id:                 "svc-db-openldap"
 # LDAP Variables
 OPENLDAP_DOCKER_PORT_SECURE:    636
 OPENLDAP_DOCKER_PORT_OPEN:      389
-OPENLDAP_SERVER_URI:            "ldap://127.0.0.1:{{ ports.localhost.ldap[application_id] }}"
+OPENLDAP_SERVER_URI:            "ldap://{{ DOCKER_REACH_HOST }}:{{ ports.localhost.ldap[application_id] }}"
 OPENLDAP_BIND_DN:               "{{ LDAP.DN.ADMINISTRATOR.CONFIGURATION }}"
 OPENLDAP_BIND_PW:               "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
 

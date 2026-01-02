@@ -34,7 +34,7 @@
 # Call the page to check a single extension
 - name: "XWIKI | Check installed via Groovy for {{ ext_id }}"
   uri:
-    url: "http://127.0.0.1:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/CheckExtension?xpage=plain&id={{ ext_id | urlencode }}"
+    url: "http://{{ DOCKER_REACH_HOST }}:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/CheckExtension?xpage=plain&id={{ ext_id | urlencode }}"
     method: GET
     user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"

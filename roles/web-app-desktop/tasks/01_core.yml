@@ -65,7 +65,7 @@
 
 - name: Wait for Desktop HTTP endpoint (required so all logos can be downloaded during initialization)
   uri:
-    url: "http://127.0.0.1:{{ http_port }}/"
+    url: "http://{{ DOCKER_REACH_HOST }}:{{ http_port }}/"
     status_code: 200
   register: desktop_http
   retries: 60
