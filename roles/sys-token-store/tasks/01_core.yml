@@ -1,5 +1,4 @@
 ---
-- include_tasks: utils/once/flag.yml
 
 - name: "Ensure base directory"
   ansible.builtin.file:
@@ -26,3 +25,5 @@
   ansible.builtin.set_fact:
     users: "{{ users | default({}) | hydrate_users_tokens(sys_token_store_users | default({})) }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- include_tasks: utils/once/flag.yml

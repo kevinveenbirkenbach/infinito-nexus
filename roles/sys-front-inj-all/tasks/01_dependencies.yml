@@ -20,8 +20,7 @@
 - name: "Load Matomo (Once)"
   include_tasks: "utils/load_app.yml"
   when: >
-    matomo_reachability is not defined or
-    (matomo_reachability.status | int) != 200 or
+    (matomo_reachability.status | default(0) | int) != 200 or
     (users.administrator.tokens['web-app-matomo'] | default('') | string | trim) == ""
   vars:
     load_app_id: 'web-app-matomo'

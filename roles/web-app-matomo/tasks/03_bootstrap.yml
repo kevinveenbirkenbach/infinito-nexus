@@ -86,4 +86,3 @@
     sys_token_store_app: "{{ application_id }}"
     sys_token_store_token: "{{ matomo_token_value }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
