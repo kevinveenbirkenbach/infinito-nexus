@@ -22,11 +22,13 @@
 
 - name: Deploy default CSS files
   template:
-    src:    "{{ ['css', item ~ '.j2'] | path_join }}"
-    dest:   "{{ [cdn_paths_all.shared.css, item] | path_join }}"
+    src:    "{{ ['css', css_file ~ '.j2'] | path_join }}"
+    dest:   "{{ [cdn_paths_all.shared.css, css_file] | path_join }}"
     owner:  "{{ NGINX.USER }}"
     group:  "{{ NGINX.USER }}"
     mode:   '0644'
   loop: "{{ CSS_FILES }}"
+  loop_control:
+    loop_var: css_file
 
 - include_tasks: utils/once/flag.yml
