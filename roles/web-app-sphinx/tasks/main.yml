@@ -1,5 +1,8 @@
 ---
-# Docker Routines
+- include_tasks: utils/load_handlers.yml
+  vars:
+    handler_role_name: "docker-compose"
+
 - name: "pkgmgr install"
   include_role:
     name: pkgmgr-install

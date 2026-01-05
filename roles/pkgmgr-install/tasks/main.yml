@@ -4,10 +4,16 @@
 - name: "Install '{{ package_name }}' via pkgmgr (non-interactive)"
   shell: |
     set -euo pipefail
+
+    export PKGMGR_VENV="{{ ansible_env.HOME }}/.venvs/pkgmgr"
+    export PATH="${PKGMGR_VENV}/bin:${PATH}"
+
     export GIT_TERMINAL_PROMPT=0
     export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
     export PYTHONUNBUFFERED=1
-    timeout --signal=KILL 600s "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" update "{{ package_name }}" --clone-mode shallow </dev/null
+
+    timeout --signal=KILL 600s \
+      "${PKGMGR_VENV}/bin/pkgmgr" update "{{ package_name }}" --clone-mode shallow </dev/null
   args:
     executable: /bin/bash
   register: pkgmgr_update
