@@ -1,3 +1,14 @@
+## [0.7.0] - 2026-01-05
+
+* More reliable releases: versioned Docker images are always built and published; latest always points to the newest version.
+* More stable updates: pkgmgr execution is more robust, especially in non-interactive environments and virtual environments.
+* Better readability: Ansible output is now shown in clean, human-readable YAML format by default.
+* More reliable analytics setup: Matomo is initialized automatically even if the service is unreachable or the API token is missing.
+* Improved networking behavior: Docker services now consistently use configurable host addresses instead of hard-coded loopback addresses.
+
+https://chatgpt.com/share/695be0b8-9154-800f-8c03-2bcf3daab157
+
+
 ## [0.6.0] - 2025-12-31
 
 * **SSH keys are now configured in inventory via users.<name>.authorized_keys** (single source of truth). The old CLI option to inject administrator keys and the inventory files-based authorized_keys copy were removed.
