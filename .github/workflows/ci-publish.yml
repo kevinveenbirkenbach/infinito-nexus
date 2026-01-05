@@ -23,13 +23,14 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          fetch-tags: true
 
       - name: Checkout workflow_run commit and refresh tags
         run: |
           set -euo pipefail
           git checkout -f "${{ github.event.workflow_run.head_sha }}"
           git fetch --tags --force
-          git tag --list 'stable' 'v*' --sort=version:refname | tail -n 20
+          git tag --list 'stable' 'v*' --sort=version:refname | tail -n 50
 
       - name: Compute version and stable flag
         id: info
@@ -68,11 +69,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish all images
-        if: ${{ steps.info.outputs.should_publish == 'true' }}
+      - name: Retag images to :stable (no rebuild, does not touch :latest)
+        if: ${{ steps.info.outputs.should_publish == 'true' && steps.info.outputs.is_stable == 'true' }}
         run: |
           set -euo pipefail
           OWNER="${{ github.repository_owner }}" \
           VERSION="${{ steps.info.outputs.version }}" \
-          IS_STABLE="${{ steps.info.outputs.is_stable }}" \
-          bash scripts/build/publish.sh
+          bash scripts/build/retag-stable.sh
