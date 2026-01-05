@@ -26,4 +26,3 @@ server:
         - "https://cdn.jsdelivr.net"
       frame-ancestors:
         - "{{ WEB_PROTOCOL }}://<< defaults_applications[web-app-keycloak].server.domains.canonical[0] >>"
-
