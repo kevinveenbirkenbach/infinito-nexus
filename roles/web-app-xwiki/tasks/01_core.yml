@@ -18,8 +18,8 @@
   uri:
     url: "{{ [XWIKI_REST_XWIKI, 'spaces'] | url_join }}"
     method: GET
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [200]
   register: _super_check_ext

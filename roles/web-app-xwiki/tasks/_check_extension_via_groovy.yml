@@ -1,15 +1,18 @@
+# PUT a temporary Groovy page that checks installed extensions, call it, then delete it.
+
+- name: "XWIKI | Fetch REST session + form token (extension check write ops)"
+  include_tasks: _rest_session.yml
+
 # PUT a temporary Groovy page that checks installed extensions
 - name: "XWIKI | PUT checker page XWiki.CheckExtension"
   uri:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'CheckExtension'] | url_join }}"
     method: PUT
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [200, 201, 202, 204]
-    headers:
-      Content-Type: "application/xml"
-      Accept: "application/xml"
+    headers: "{{ xwiki_rest_headers_write }}"
     body: |
       <page xmlns="http://www.xwiki.org">
         <title>CheckExtension</title>
@@ -34,10 +37,10 @@
 # Call the page to check a single extension
 - name: "XWIKI | Check installed via Groovy for {{ ext_id }}"
   uri:
-    url: "http://{{ DOCKER_REACH_HOST }}:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/CheckExtension?xpage=plain&id={{ ext_id | urlencode }}"
+    url: "{{ XWIKI_DOCKER_REACH_URL }}/bin/view/XWiki/CheckExtension?xpage=plain&id={{ ext_id | urlencode }}"
     method: GET
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [200]
     return_content: yes
@@ -55,9 +58,10 @@
   uri:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'CheckExtension'] | url_join }}"
     method: DELETE
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [204, 200, 202, 404]
+    headers: "{{ xwiki_rest_headers_write }}"
   register: _delete_checker
   changed_when: _delete_checker.status != 404

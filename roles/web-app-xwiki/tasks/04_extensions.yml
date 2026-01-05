@@ -18,17 +18,18 @@
       {{ lookup('file', 'roles/web-app-xwiki/files/extension_installer_b64.groovy')
          | regex_replace('__WANTED_B64__', _wanted_b64) }}
 
+- name: "XWIKI | Fetch REST session + form token (extensions write ops)"
+  include_tasks: _rest_session.yml
+
 - name: "XWIKI | PUT installer page Main.InstallExtensions"
   uri:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'InstallExtensions'] | url_join }}"
     method: PUT
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [200, 201, 202, 204]
-    headers:
-      Content-Type: "application/xml"
-      Accept: "application/xml"
+    headers: "{{ xwiki_rest_headers_write }}"
     body: |
       <page xmlns="http://www.xwiki.org">
         <title>InstallExtensions</title>
@@ -43,10 +44,10 @@
 
 - name: "XWIKI | Execute installer page"
   uri:
-    url: "http://{{ DOCKER_REACH_HOST }}:{{ XWIKI_HOST_PORT }}/bin/view/XWiki/InstallExtensions?xpage=plain"
+    url: "{{ XWIKI_DOCKER_REACH_URL }}/bin/view/XWiki/InstallExtensions?xpage=plain"
     method: GET
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [200]
     return_content: yes
@@ -81,7 +82,6 @@
     loop_var: plugin
   changed_when: false
 
-# Fail if any extension is missing
 - name: "XWIKI | Assert all requested extensions are installed"
   vars:
     missing: "{{ _xwiki_probe_results | selectattr('status','equalto',404) | map(attribute='id') | list }}"
@@ -93,9 +93,10 @@
   uri:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'InstallExtensions'] | url_join }}"
     method: DELETE
-    user: "{{ XWIKI_SUPERADMIN_USERNAME }}"
-    password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
+    url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
+    url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
     status_code: [204, 200, 202, 404]
+    headers: "{{ xwiki_rest_headers_write }}"
   register: _delete_page
   changed_when: _delete_page.status != 404
