@@ -9,7 +9,7 @@
         + [{
             'name': item.key,
             'enabled': (
-              applications | get_app_conf(application_id, 'features.oidc', True)
+              applications | get_app_conf(application_id, 'features.oidc')
                 if item.key == 'keycloakpassword'
               else applications | get_app_conf(application_id, 'features.ldap', True)
                 if item.key == 'ldapauth'

@@ -12,6 +12,7 @@ _database_default_version:          "{{ applications | get_app_conf(_database_id
 database_name:          "{{ _database_consumer_entity_name }}"
 database_instance:      "{{ _database_central_name if _database_central_enabled else database_name }}" # This could lead to bugs at dedicated database @todo cleanup
 database_host:          "{{ _database_central_name if _database_central_enabled else 'database' }}"    # This could lead to bugs at dedicated database @todo cleanup
+database_container:     "{{ _dbtype if _database_central_enabled else _database_consumer_entity_name ~ '-database' }}"
 database_username:      "{{ _database_consumer_entity_name }}"
 database_password:      "{{ applications | get_app_conf(_database_consumer_id, 'credentials.database_password', true) }}"
 database_port:          "{{ (ports.localhost.database[_database_id] | d('')) if _dbtype else '' }}"

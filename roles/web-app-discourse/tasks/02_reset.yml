@@ -20,7 +20,7 @@
 
 - name: "Disconnect DB container from Discourse networks"
   ansible.builtin.command:
-    cmd: "docker network disconnect {{ discourse_network_item }} {{ database_host }}"
+    cmd: "docker network disconnect {{ discourse_network_item }} {{ database_container }}"
   loop:
     - "{{ DISCOURSE_NETWORK }}"
     - "{{ DISCOURSE_PG_NETWORK }}"

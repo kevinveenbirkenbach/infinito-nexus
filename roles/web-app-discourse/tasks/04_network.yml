@@ -9,9 +9,9 @@
   when:
     - applications | get_app_conf(application_id, 'features.central_database', False)
 
-- name: "Remove {{ DISCOURSE_NETWORK }} from {{ database_host }}"
+- name: "Remove {{ DISCOURSE_NETWORK }} from {{ database_container }}"
   command: >
-    docker network disconnect {{ DISCOURSE_NETWORK }} {{ database_host }}
+    docker network disconnect {{ DISCOURSE_NETWORK }} {{ database_container }}
   register: network_disconnect
   failed_when: >
     network_disconnect.rc != 0 and
