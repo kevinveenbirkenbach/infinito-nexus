@@ -12,7 +12,7 @@
 - name: "Ensure store file exists"
   ansible.builtin.file:
     path: "{{ PATH_INFINITO_TOKENS }}"
-    state: file
+    state: touch
     owner: "{{ SYS_TOKEN_STORE_OWNER }}"
     group: "{{ SYS_TOKEN_STORE_GROUP }}"
     mode: "{{ SYS_TOKEN_STORE_FILE_MODE }}"
