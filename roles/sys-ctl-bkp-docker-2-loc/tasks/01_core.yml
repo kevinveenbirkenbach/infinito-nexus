@@ -18,7 +18,7 @@
 
 - name: Ensure secrets directory exists (root only)
   ansible.builtin.file:
-    path: "{{ PATH_INFINITO_DATABASE_SECRETS | dirname }}"
+    path: "{{ PATH_INFINITO_SECRETS_DIR }}"
     state: directory
     owner: root
     group: root

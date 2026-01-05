@@ -2,7 +2,7 @@
 
 - name: "Ensure /etc/baudolo exists"
   ansible.builtin.file:
-    path: "{{ PATH_INFINITO_DATABASE_SECRETS | dirname }}"
+    path: "{{ PATH_INFINITO_SECRETS_DIR }}"
     state: directory
     owner: root
     group: root
