@@ -1,23 +1,25 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Empower your knowledge base with MediaWiki, a versatile and collaborative platform designed for comprehensive, user-driven documentation. Benefit from an extensive extension ecosystem, robust content management, and customizable configurations tailored to your needs."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  author: Kevin Veen-Birkenbach
+  description: Empower your knowledge base with MediaWiki, a versatile and collaborative platform designed for comprehensive,
+    user-driven documentation. Benefit from an extensive extension ecosystem, robust content management, and customizable
+    configurations tailored to your needs.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - mediawiki
-    - wiki
-    - documentation
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://docs.infinito.nexus"
+  - mediawiki
+  - wiki
+  - documentation
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://docs.infinito.nexus
   logo:
-    class: "fa-solid fa-book"
+    class: fa-solid fa-book
   run_after:
-    - web-app-matomo
-    - web-app-keycloak
-    - web-app-mailu
+  - web-app-matomo
+  - web-app-keycloak
+  - web-app-mailu
+  lifecycle: beta

@@ -1,23 +1,24 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Ignite the learning experience with Moodle, a powerful and versatile platform for online education that energizes classrooms and fosters interactive learning."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  author: Kevin Veen-Birkenbach
+  description: Ignite the learning experience with Moodle, a powerful and versatile platform for online education that energizes
+    classrooms and fosters interactive learning.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - moodle
-    - docker
-    - education
-    - cms
-    - e-learning
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://docs.infinito.nexus"
+  - moodle
+  - docker
+  - education
+  - cms
+  - e-learning
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://docs.infinito.nexus
   logo:
-    class: "fa-solid fa-graduation-cap"
+    class: fa-solid fa-graduation-cap
   run_after:
-    - "web-app-keycloak"
+  - web-app-keycloak
+  lifecycle: beta

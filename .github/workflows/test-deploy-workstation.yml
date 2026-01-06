@@ -29,4 +29,6 @@ jobs:
 
       - name: Run deploy test suite (workstation)
         run: |
-          scripts/tests/deploy.sh --type workstation --distro "${{ matrix.distro }}" --missing
+          export INFINITO_DISTRO="${{ matrix.distro }}"
+          make clean-container
+          make test-deploy TEST_DEPLOY_TYPE=workstation

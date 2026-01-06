@@ -20,6 +20,14 @@ MISSING_ONLY=0
 # Config (kept from the previous version)
 # -------------------------------------------------------------------
 
+# -------------------------------------------------------------------
+# Lifecycle gating
+# -------------------------------------------------------------------
+# Only these lifecycles are considered "tested" and therefore allowed to run.
+# Everything else (including missing lifecycle) will be excluded from the CI deploy.
+TESTED_LIFECYCLES="alpha beta rc stable"
+
+
 # Optional: allow adding additional excludes globally (comma-separated or newline-separated)
 ALWAYS_EXCLUDE="${ALWAYS_EXCLUDE:-}"
 
@@ -32,17 +40,10 @@ svc-db-redis
 svc-net-wireguard-core
 svc-net-wireguard-firewalled
 svc-net-wireguard-plain
-svc-bkp-loc-2-usb
 svc-bkp-rmt-2-loc
 svc-opt-keyboard-color
 svc-opt-ssd-hdd
-web-app-bridgy-fed
 web-app-oauth2-proxy
-web-app-postmarks
-web-app-elk
-web-app-syncope
-web-app-socialhome
-web-svc-xmpp
 EOF
 )}"
 
@@ -89,6 +90,15 @@ compose() {
 
 infinito_exec() {
   compose exec -T infinito "$@"
+}
+
+get_lifecycle_exclude() {
+	# We exclude any role whose lifecycle is NOT in TESTED_LIFECYCLES.
+	# The lifecycle_filter prints role names space-separated, so convert to newline.
+	# NOTE: In blacklist mode, missing lifecycle is included by default -> desired here.
+	infinito_exec sh -lc \
+		"python3 -m cli.meta.roles.lifecycle_filter blacklist ${TESTED_LIFECYCLES}" \
+	| tr ' ' '\n' | trim_lines
 }
 
 ensure_compose_image() {
@@ -143,6 +153,7 @@ compute_exclude_csv() {
 	local type="$1"
 	local all allowed computed combined final
 	local drv_exclude
+	local lifecycle_exclude
 	local -a arr=()
 
 	all="$(get_invokable)" || die "get_invokable failed (cli.meta.applications.invokable not available?)"
@@ -157,11 +168,13 @@ compute_exclude_csv() {
 	)"
 
 	drv_exclude="$(printf "%s\n" "$all" | grep -E '^drv-' || true)"
+	lifecycle_exclude="$(get_lifecycle_exclude || true)"
 
 	combined="$(
 		printf "%s\n%s\n%s\n%s\n" \
 			"$computed" \
 			"$drv_exclude" \
+			"$lifecycle_exclude" \
 			"$(printf "%s\n" "$BASE_EXCLUDE" | tr ',' '\n')" \
 			"$(printf "%s\n" "$ALWAYS_EXCLUDE" | tr ',' '\n')" |
 			trim_lines | LC_ALL=C sort -u

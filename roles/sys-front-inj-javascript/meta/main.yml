@@ -1,13 +1,10 @@
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Injects a custom JavaScript snippet into Nginx-served HTML responses via sub_filter."
-  company: |
-    Kevin Veen-Birkenbach  
-    Consulting & Coaching Solutions  
-    https://www.veen.world
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
-  min_ansible_version: "2.9"
+  author: Kevin Veen-Birkenbach
+  description: Injects a custom JavaScript snippet into Nginx-served HTML responses via sub_filter.
+  company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
+  min_ansible_version: '2.9'
   platforms:
   - name: Archlinux
     versions:
@@ -19,7 +16,7 @@ galaxy_info:
   - sub_filter
   - injection
   - global
-  repository: "https://s.infinito.nexus/code"
-  documentation: "https://docs.infinito.nexus"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-
+  repository: https://s.infinito.nexus/code
+  documentation: https://docs.infinito.nexus
+  issue_tracker_url: https://s.infinito.nexus/issues
+  lifecycle: beta

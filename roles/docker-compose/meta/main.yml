@@ -1,13 +1,10 @@
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Manages Docker Compose project structure and execution logic on Arch Linux."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
-  company: |
-    Kevin Veen-Birkenbach  
-    Consulting & Coaching Solutions  
-    https://www.veen.world
-  min_ansible_version: "2.9"
+  author: Kevin Veen-Birkenbach
+  description: Manages Docker Compose project structure and execution logic on Arch Linux.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
+  company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
+  min_ansible_version: '2.9'
   platforms:
   - name: Archlinux
     versions:
@@ -22,4 +19,5 @@ galaxy_info:
   - archlinux
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: "https://docs.infinito.nexus/"
+  documentation: https://docs.infinito.nexus/
+  lifecycle: beta

@@ -1,14 +1,15 @@
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: |
-    Configures an Nginx-based Content Delivery Network Server.
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  author: Kevin Veen-Birkenbach
+  description: 'Configures an Nginx-based Content Delivery Network Server.
+
+    '
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
-  min_ansible_version: "2.9"
+  min_ansible_version: '2.9'
   platforms:
   - name: Archlinux
     versions:
@@ -21,6 +22,7 @@ galaxy_info:
   - ssl
   - letsencrypt
   - automation
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://docs.infinito.nexus"
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://docs.infinito.nexus
+  lifecycle: beta

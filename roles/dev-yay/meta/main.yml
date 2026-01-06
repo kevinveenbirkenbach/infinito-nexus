@@ -1,13 +1,14 @@
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Installs the AUR helper yay and configures an aur_builder user with appropriate sudo privileges to facilitate AUR package management on Arch Linux systems."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  author: Kevin Veen-Birkenbach
+  description: Installs the AUR helper yay and configures an aur_builder user with appropriate sudo privileges to facilitate
+    AUR package management on Arch Linux systems.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
-  min_ansible_version: "2.9"
+  min_ansible_version: '2.9'
   platforms:
   - name: Archlinux
     versions:
@@ -17,8 +18,9 @@ galaxy_info:
   - yay
   - archlinux
   - package-management
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://docs.infinito.nexus"
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://docs.infinito.nexus
   logo:
-    class: "fas fa-archive"
+    class: fas fa-archive
+  lifecycle: beta

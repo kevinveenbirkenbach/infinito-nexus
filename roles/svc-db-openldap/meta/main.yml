@@ -1,22 +1,23 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Unleash the potential of centralized identity management with our robust LDAP Directory solution, powered by OpenLDAP. Manage users, groups, and schemas securely with extensive customization options and integrated TLS support."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  author: Kevin Veen-Birkenbach
+  description: Unleash the potential of centralized identity management with our robust LDAP Directory solution, powered by
+    OpenLDAP. Manage users, groups, and schemas securely with extensive customization options and integrated TLS support.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - ldap
-    - openldap
-    - docker
-    - directory
-    - tls
-    - identity management
+  - ldap
+  - openldap
+  - docker
+  - directory
+  - tls
+  - identity management
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: "https://docs.infinito.nexus/"
+  documentation: https://docs.infinito.nexus/
   logo:
-    class: "fa-solid fa-users"
+    class: fa-solid fa-users
+  lifecycle: beta

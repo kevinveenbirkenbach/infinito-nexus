@@ -1,9 +1,10 @@
 galaxy_info:
   role_name: keyboard-color
   author: Kevin Veen-Birkenbach
-  description: "Ansible role to set up dynamic keyboard color change on MSI laptops"
+  description: Ansible role to set up dynamic keyboard color change on MSI laptops
   min_ansible_version: 2.9
   platforms:
   - name: Linux
     versions:
     - all
+  lifecycle: alpha

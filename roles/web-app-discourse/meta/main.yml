@@ -1,24 +1,25 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Discourse is a popular open-source discussion platform designed to foster community engagement with modern, user-friendly features and robust moderation tools."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  author: Kevin Veen-Birkenbach
+  description: Discourse is a popular open-source discussion platform designed to foster community engagement with modern,
+    user-friendly features and robust moderation tools.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - discourse
-    - docker
-    - discussion
-    - forum
-    - open-source
+  - discourse
+  - docker
+  - discussion
+  - forum
+  - open-source
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: "https://docs.infinito.nexus/"
+  documentation: https://docs.infinito.nexus/
   logo:
-    class: "fa-solid fa-comments"
-  run_after:  
-    - web-app-wordpress
+    class: fa-solid fa-comments
+  run_after:
+  - web-app-wordpress
+  lifecycle: beta
 dependencies: []

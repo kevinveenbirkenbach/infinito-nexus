@@ -1,20 +1,18 @@
----
 galaxy_info:
-  author: "Kevin Veen‑Birkenbach"
-  description: >
-    Role to provision an OpenResty container via Docker Compose.
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
-  company: |
-    Kevin Veen‑Birkenbach  
-    Consulting & Coaching Solutions  
-    https://www.veen.world
+  author: Kevin Veen‑Birkenbach
+  description: 'Role to provision an OpenResty container via Docker Compose.
+
+    '
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
+  company: "Kevin Veen‑Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
   galaxy_tags:
-    - openresty
-    - nginx
-    - docker
-    - reverse_proxy
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/tree/main/roles/svc-prx-openresty"
-  min_ansible_version: "2.9"
+  - openresty
+  - nginx
+  - docker
+  - reverse_proxy
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://s.infinito.nexus/code/tree/main/roles/svc-prx-openresty
+  min_ansible_version: '2.9'
+  lifecycle: beta
