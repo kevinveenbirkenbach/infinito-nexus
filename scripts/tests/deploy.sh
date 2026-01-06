@@ -171,7 +171,7 @@ compute_exclude_csv() {
 	lifecycle_exclude="$(get_lifecycle_exclude || true)"
 
 	combined="$(
-		printf "%s\n%s\n%s\n%s\n" \
+		printf "%s\n%s\n%s\n%s\n%s\n" \
 			"$computed" \
 			"$drv_exclude" \
 			"$lifecycle_exclude" \
