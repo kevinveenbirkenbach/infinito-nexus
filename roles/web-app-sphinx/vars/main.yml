@@ -1,1 +1,9 @@
-application_id: "web-app-sphinx"
+# General
+application_id:     "web-app-sphinx"
+entity_name:        "{{ application_id | get_entity_name }}"
+container_port:     "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.port') }}"
+
+# Sphinx
+SPHINX_VERSION:     "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+SPHINX_IMAGE:       "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+SPHINX_CONTAINER:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"

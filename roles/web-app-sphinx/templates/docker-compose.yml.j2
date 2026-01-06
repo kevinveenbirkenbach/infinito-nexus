@@ -1,14 +1,11 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
   application:
-{% set container_port = 8000 %}
-    build: 
-      context: {{ path_infinito_sphinx_output.stdout }}
-      dockerfile: {{ path_infinito_sphinx_output.stdout }}/Dockerfile
-    pull_policy: never
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+    image: "{{ SPHINX_IMAGE }}:{{ SPHINX_VERSION }}"
+    container_name:  "{{ SPHINX_CONTAINER }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

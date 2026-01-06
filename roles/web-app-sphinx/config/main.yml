@@ -17,3 +17,14 @@ server:
     canonical:
       - "docs.{{ DOMAIN_PRIMARY }}"
     aliases: []
+docker:
+  services:
+    database:
+      enabled:            false
+    sphinx:
+      image:            "ghcr.io/kevinveenbirkenbach/infinito-sphinx"
+      version:          "latest"
+      backup:
+        no_stop_required: true
+      port:               8000
+      name:               "sphinx"

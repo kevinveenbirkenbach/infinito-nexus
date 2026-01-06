@@ -1,28 +1,6 @@
 ---
-- include_tasks: utils/load_handlers.yml
-  vars:
-    handler_role_name: "docker-compose"
-
-- name: "pkgmgr install"
-  include_role:
-    name: pkgmgr-install
-  vars:
-    package_name: infinito-sphinx
-    package_notify: 
-      - docker compose up
-      - docker compose build
-
-- name: Get path of infinito-sphinx using pkgmgr
-  command: "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr path infinito-sphinx"
-  register: path_infinito_sphinx_output
-
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-full-stateless
   vars:  
     application_id: "web-app-sphinx"
-
-# Hack because it wasn't possible to fix an handler bug in pkgmgr install
-- name: „Trigger“ docker compose up
-  command: /bin/true
-  notify: docker compose up
