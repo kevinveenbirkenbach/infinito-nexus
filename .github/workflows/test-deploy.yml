@@ -1,0 +1,73 @@
+name: Test Infinito.Nexus Deploy
+
+on:
+  workflow_call:
+    inputs:
+      deploy_type:
+        description: "server or workstation"
+        required: false
+        type: string
+        default: "server"
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  test-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [arch, debian, ubuntu, fedora, centos]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Show Docker version
+        run: docker version
+
+      - name: Run deploy test suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          export INFINITO_DISTRO="${{ matrix.distro }}"
+          mkdir -p logs
+
+          args=()
+          if [ "${{ inputs.deploy_type }}" = "workstation" ]; then
+            args+=( "TEST_DEPLOY_TYPE=workstation" )
+          fi
+
+          {
+            echo "=== $(date -u) ==="
+            echo "Deploy type: ${{ inputs.deploy_type }}"
+            echo "Distro: ${INFINITO_DISTRO}"
+            echo
+            echo "--- make clean-container ---"
+            make clean-container
+            echo
+            echo "--- make test-deploy ---"
+            make test-deploy "${args[@]}"
+          } 2>&1 | tee "logs/deploy-${{ inputs.deploy_type }}-${{ matrix.distro }}.log"
+
+      - name: Show last lines on failure
+        if: failure()
+        shell: bash
+        run: |
+          tail -n 200 "logs/deploy-${{ inputs.deploy_type }}-${{ matrix.distro }}.log"
+
+      - name: Upload deploy logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-logs-${{ inputs.deploy_type }}-${{ matrix.distro }}
+          path: logs/deploy-${{ inputs.deploy_type }}-${{ matrix.distro }}.log
+          if-no-files-found: warn
+          retention-days: 14

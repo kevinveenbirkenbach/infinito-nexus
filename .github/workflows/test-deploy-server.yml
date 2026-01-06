@@ -8,27 +8,8 @@ permissions:
   packages: read
 
 jobs:
-  test-deploy-server:
-    runs-on: ubuntu-latest
-    timeout-minutes: 240
-    env:
-      NIX_CONFIG: |
-        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        distro: [arch, debian, ubuntu, fedora, centos]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Show Docker version
-        run: docker version
-
-      - name: Run deploy test suite (server)
-        run: |
-          export INFINITO_DISTRO="${{ matrix.distro }}"
-          make clean-container
-          make test-deploy
+  call:
+    uses: ./.github/workflows/test-deploy.yml
+    with:
+      deploy_type: server
+    secrets: inherit
