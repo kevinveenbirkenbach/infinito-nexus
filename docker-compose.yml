@@ -61,7 +61,6 @@ services:
 
     profiles: ["ci"]
     <<: *ci_defaults
-
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - .:/opt/src/infinito

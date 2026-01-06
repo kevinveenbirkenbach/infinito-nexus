@@ -19,7 +19,7 @@ run_local_build() {
 	cd "${INFINITO_PATH}"
 
 	echo "[docker-infinito] Copy ${INFINITO_SRC_DIR} to ${INFINITO_PATH}..."
-	rsync -a --delete --exclude='.git' "${INFINITO_SRC_DIR}/" "${INFINITO_PATH}/"
+	rsync -a --delete --chown=root:root --exclude='.git' "${INFINITO_SRC_DIR}/" "${INFINITO_PATH}/"
 
 	echo "[docker-infinito] Reinstall via 'make install'..."
 	make install

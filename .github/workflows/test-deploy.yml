@@ -50,8 +50,8 @@ jobs:
             echo "Deploy type: ${{ inputs.deploy_type }}"
             echo "Distro: ${INFINITO_DISTRO}"
             echo
-            echo "--- make clean-container ---"
-            make clean-container
+            echo "--- make down ---"
+            make down
             echo
             echo "--- make test-deploy ---"
             make test-deploy "${args[@]}"
