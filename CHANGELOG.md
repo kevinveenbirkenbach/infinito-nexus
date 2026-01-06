@@ -1,3 +1,8 @@
+## [0.8.0] - 2026-01-06
+
+* Safer failed-backup cleanup (04:00, timeout, single worker; cleanback 1.3.0 semantics).
+
+
 ## [0.7.2] - 2026-01-06
 
 * * Introduced lifecycle metadata for roles (`meta/main.yml`)
