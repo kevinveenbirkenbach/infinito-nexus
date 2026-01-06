@@ -1,3 +1,10 @@
+## [0.7.2] - 2026-01-06
+
+* * Introduced lifecycle metadata for roles (`meta/main.yml`)
+* Gated CI deploy tests to tested lifecycles only (alpha, beta, rc, stable)
+* Bumped `cleanback` to 1.2.1 (timestamp-based force-keep)
+
+
 ## [0.7.1] - 2026-01-06
 
 * Switched web-app-sphinx to a prebuilt container image
