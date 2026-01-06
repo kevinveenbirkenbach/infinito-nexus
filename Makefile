@@ -41,6 +41,10 @@ LINT_TESTS_DIR          ?= tests/lint
 UNIT_TESTS_DIR          ?= tests/unit
 INTEGRATION_TESTS_DIR   ?= tests/integration
 
+# Deploy test type
+# Allowed: server, workstation
+TEST_DEPLOY_TYPE ?= server
+
 # Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
 PYTHONPATH              ?= .
 
@@ -190,7 +194,11 @@ test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
 test-deploy:
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" INFINITO_CONTAINER="$(INFINITO_CONTAINER)" scripts/tests/deploy.sh --type server --missing
+	@INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
+	scripts/tests/deploy.sh \
+	  --type "$(TEST_DEPLOY_TYPE)" \
+	  --missing
 
 # Backwards compatible target (kept)
 lint-ansible:
