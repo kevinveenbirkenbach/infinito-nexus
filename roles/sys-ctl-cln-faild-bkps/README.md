@@ -32,10 +32,19 @@ CLEANUP_FAILED_BACKUPS_FORCE_KEEP: 3
 
 This means:
 
-* The newest 3 backup directories under `PATH_INFINITO_BACKUP_DIR` are skipped
-* Older backups are checked and cleaned if they are invalid
+* For each `backup-docker-to-local` directory, the newest 3 timestamp subdirectories are skipped
+* Older backup subdirectories are validated and cleaned if they are invalid
 
 The value can be adjusted or overridden via inventory, group vars, or host vars if needed.
+
+## Failure handling
+
+If a backup validation fails due to infrastructure problems (for example timeouts
+or a missing validation tool), the cleanup service exits with a non-zero status.
+This allows systemd OnFailure handlers or monitoring systems to react accordingly.
+
+Invalid backups are removed automatically, but infrastructure-related issues
+never trigger automatic deletion.
 
 ## cleanback tool
 

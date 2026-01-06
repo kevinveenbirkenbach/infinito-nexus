@@ -29,4 +29,5 @@
       --all
       --force-keep {{ CLEANUP_FAILED_BACKUPS_FORCE_KEEP }}
       --workers {{ CLEANUP_FAILED_BACKUPS_WORKERS }}
+      --timeout {{ CLEANUP_FAILED_BACKUPS_TIMEOUT }}
       --yes"
