@@ -1,23 +1,26 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birchenbach"
-  description: "Installs GnuCash finance management software on Pacman-based systems, ensuring the latest version is present."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
-  company: |
-    Kevin Veen-Birchenbach
+  author: Kevin Veen-Birchenbach
+  description: Installs GnuCash finance management software on Pacman-based systems, ensuring the latest version is present.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
+  company: 'Kevin Veen-Birchenbach
+
     Consulting & Coaching Solutions
+
     https://www.veen.world
+
+    '
   galaxy_tags:
-    - gnucash
-    - finance
-    - accounting
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/tree/main/roles/desk-gnucash"
-  min_ansible_version: "2.9"
+  - gnucash
+  - finance
+  - accounting
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://s.infinito.nexus/code/tree/main/roles/desk-gnucash
+  min_ansible_version: '2.9'
   platforms:
-    - name: Archlinux
-      versions:
-        - all
+  - name: Archlinux
+    versions:
+    - all
+  lifecycle: alpha
 dependencies: []

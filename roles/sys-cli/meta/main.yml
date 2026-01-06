@@ -1,9 +1,11 @@
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: >
-    This role installs and provides the Infinito.Nexus CLI, enabling you to manage your entire Infinito.Nexus environment from the command line. After deployment, the `infinito` command is available.
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  author: Kevin Veen-Birkenbach
+  description: 'This role installs and provides the Infinito.Nexus CLI, enabling you to manage your entire Infinito.Nexus
+    environment from the command line. After deployment, the `infinito` command is available.
+
+    '
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
@@ -13,9 +15,10 @@ galaxy_info:
   - cli
   - management
   - automation
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/"
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://s.infinito.nexus/code/
   logo:
-    class: "fa-solid fa-terminal"
+    class: fa-solid fa-terminal
   run_after: []
+  lifecycle: beta

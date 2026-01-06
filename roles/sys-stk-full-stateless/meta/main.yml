@@ -1,15 +1,16 @@
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: >
-    Combines the docker-compose role with sys-stk-front-proxy to
-    deploy applications behind a reverse proxy.
+  author: Kevin Veen-Birkenbach
+  description: 'Combines the docker-compose role with sys-stk-front-proxy to deploy applications behind a reverse proxy.
+
+    '
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   galaxy_tags:
-    - docker
-    - compose
-    - proxy
+  - docker
+  - compose
+  - proxy
+  lifecycle: beta

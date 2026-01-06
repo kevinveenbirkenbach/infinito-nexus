@@ -1,30 +1,30 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Installs Flowise — a visual builder to create, test, and publish AI workflows (RAG, tools, webhooks)."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
-  company: | 
+  author: Kevin Veen-Birkenbach
+  description: Installs Flowise — a visual builder to create, test, and publish AI workflows (RAG, tools, webhooks).
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
+  company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - ai
-    - llm
-    - rag
-    - workflow
-    - orchestration
-    - self-hosted
-    - qdrant
-    - litellm
-    - ollama
-    - flowise
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://s.infinito.nexus/code/"
+  - ai
+  - llm
+  - rag
+  - workflow
+  - orchestration
+  - self-hosted
+  - qdrant
+  - litellm
+  - ollama
+  - flowise
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://s.infinito.nexus/code/
   logo:
-    class: "fa-solid fa-diagram-project"
+    class: fa-solid fa-diagram-project
   run_after:
-    - web-app-keycloak
-    - web-app-matomo
+  - web-app-keycloak
+  - web-app-matomo
+  lifecycle: alpha
 dependencies: []

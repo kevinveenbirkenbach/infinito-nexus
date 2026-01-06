@@ -1,25 +1,29 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birchenbach"
-  description: "Deploy Magento (Adobe Commerce Open Source) via Docker Compose with OpenSearch, MariaDB, optional Redis, and proxy integration for Infinito.Nexus."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
-  company: |
-    Kevin Veen-Birchenbach
+  author: Kevin Veen-Birchenbach
+  description: Deploy Magento (Adobe Commerce Open Source) via Docker Compose with OpenSearch, MariaDB, optional Redis, and
+    proxy integration for Infinito.Nexus.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
+  company: 'Kevin Veen-Birchenbach
+
     Consulting & Coaching Solutions
+
     https://www.veen.world
+
+    '
   galaxy_tags:
-    - magento
-    - ecommerce
-    - php
-    - docker
-    - opensearch
-    - mariadb
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://docs.infinito.nexus"
+  - magento
+  - ecommerce
+  - php
+  - docker
+  - opensearch
+  - mariadb
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://docs.infinito.nexus
   logo:
-    class: "fa-solid fa-cart-shopping"
+    class: fa-solid fa-cart-shopping
   run_after:
-    - web-app-keycloak
+  - web-app-keycloak
+  lifecycle: planned
 dependencies: []

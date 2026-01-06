@@ -1,15 +1,16 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Runs a collected list of systemd services at the end of a play."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
-  min_ansible_version: "2.9"
+  author: Kevin Veen-Birkenbach
+  description: Runs a collected list of systemd services at the end of a play.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
+  min_ansible_version: '2.9'
   platforms:
-    - name: Linux
-      versions: [all]
+  - name: Linux
+    versions:
+    - all
   galaxy_tags:
-    - systemd
-    - services
-    - infinito
+  - systemd
+  - services
+  - infinito
+  lifecycle: beta
 dependencies: []

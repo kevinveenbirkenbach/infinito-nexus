@@ -1,29 +1,26 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Deploys a corporate identity environment with web assets, legal pages, and a portfolio site on Linux."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
-  company: |
-    Kevin Veen-Birkenbach  
-    Consulting & Coaching Solutions  
-    https://www.veen.world
-  min_ansible_version: "2.9"
+  author: Kevin Veen-Birkenbach
+  description: Deploys a corporate identity environment with web assets, legal pages, and a portfolio site on Linux.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
+  company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
+  min_ansible_version: '2.9'
   platforms:
-    - name: Archlinux
-      versions:
-        - rolling
+  - name: Archlinux
+    versions:
+    - rolling
   galaxy_tags:
-    - web
-    - nginx
-    - corporate
-    - identity
-    - archlinux
-    - persona
+  - web
+  - nginx
+  - corporate
+  - identity
+  - archlinux
+  - persona
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
-  documentation: "https://docs.infinito.nexus/"
+  documentation: https://docs.infinito.nexus/
+  lifecycle: beta
 dependencies:
-  - web-svc-legal
-  - web-svc-asset
-  - web-app-desktop
+- web-svc-legal
+- web-svc-asset
+- web-app-desktop

@@ -1,25 +1,26 @@
----
 galaxy_info:
-  author: "Kevin Veen-Birkenbach"
-  description: "Elevate your email marketing with Listmonk, a high-performance, self-hosted newsletter and mailing list manager featuring a modern dashboard, advanced analytics, and flexible configuration options."
-  license: "Infinito.Nexus NonCommercial License"
-  license_url: "https://s.infinito.nexus/license"
+  author: Kevin Veen-Birkenbach
+  description: Elevate your email marketing with Listmonk, a high-performance, self-hosted newsletter and mailing list manager
+    featuring a modern dashboard, advanced analytics, and flexible configuration options.
+  license: Infinito.Nexus NonCommercial License
+  license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
     Consulting & Coaching Solutions
     https://www.veen.world
   galaxy_tags:
-    - listmonk
-    - docker
-    - newsletter
-    - email marketing
-    - self-hosted
-  repository: "https://s.infinito.nexus/code"
-  issue_tracker_url: "https://s.infinito.nexus/issues"
-  documentation: "https://docs.infinito.nexus"
+  - listmonk
+  - docker
+  - newsletter
+  - email marketing
+  - self-hosted
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://docs.infinito.nexus
   logo:
-    class: "fa-solid fa-envelope"
+    class: fa-solid fa-envelope
   run_after:
-    - web-app-matomo
-    - web-app-keycloak
-    - web-app-mailu
+  - web-app-matomo
+  - web-app-keycloak
+  - web-app-mailu
+  lifecycle: beta
