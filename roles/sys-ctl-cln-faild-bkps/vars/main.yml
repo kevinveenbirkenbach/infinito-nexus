@@ -1,5 +1,5 @@
 system_service_id:              sys-ctl-cln-faild-bkps
 
 CLEANUP_FAILED_BACKUPS_COMMAND: cleanback
-CLEANUP_FAILED_BACKUPS_PKG:     "{{ CLEANUP_FAILED_BACKUPS_COMMAND }}==1.2.0"
+CLEANUP_FAILED_BACKUPS_PKG:     "{{ CLEANUP_FAILED_BACKUPS_COMMAND }}==1.2.1"
 CLEANUP_FAILED_BACKUPS_WORKERS: "{{ ansible_facts.processor_vcpus if ASYNC_ENABLED else 1 }}"
