@@ -100,6 +100,13 @@ def main() -> None:
 
     # Directory-specific help: "<path> -h"
     if len(args) > 1 and args[-1] in ("-h", "--help"):
+        # First: if "<path>" is a real command, forward help to its argparse
+        module, remaining = resolve_command_module(cli_dir, args[:-1])
+        if module and not remaining:
+            subprocess.run([sys.executable, "-m", module, "--help"])
+            raise SystemExit(0)
+
+        # Otherwise: treat it as a folder overview
         dir_parts = args[:-1]
         if show_help_for_directory(cli_dir, dir_parts):
             raise SystemExit(0)
