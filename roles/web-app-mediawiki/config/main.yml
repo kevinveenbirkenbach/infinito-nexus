@@ -20,7 +20,8 @@ docker:
         no_stop_required: true
       name:     mediawiki
   volumes:
-    data:     mediawiki_data
+    images:     mediawiki_images
+    extensions: mediawiki_extensions
 features:
   logout:           true
   central_database: true

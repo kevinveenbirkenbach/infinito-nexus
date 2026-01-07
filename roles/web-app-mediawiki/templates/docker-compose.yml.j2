@@ -4,7 +4,9 @@
     container_name: "{{ MEDIAWIKI_CONTAINER }}"
     image: "{{ MEDIAWIKI_IMAGE }}:{{ MEDIAWIKI_VERSION }}"
     volumes:
-      - "data:/var/www/html/"
+      - "images:/var/www/html/images"
+      - "extensions:/var/www/html/extensions"
+      - "{{ MEDIAWIKI_LOCALSETTINGS_HOST_PATH }}:{{ MEDIAWIKI_LOCALSETTINGS_CONTAINER_PATH }}:ro"
       - "{{ MEDIAWIKI_LOCAL_MOUNT_DIR }}:{{ MEDIAWIKI_LOCAL_PATH }}:ro"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
@@ -13,7 +15,9 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  data:
-    name: {{ MEDIAWIKI_VOLUME }}
+  images:
+    name: {{ MEDIAWIKI_VOLUME_IMAGES }}
+  extensions:
+    name: {{ MEDIAWIKI_VOLUME_EXTENSIONS }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

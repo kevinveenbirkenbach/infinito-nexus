@@ -1,0 +1,5 @@
+credentials:
+  secret_key:
+    description: "MediaWiki $wgSecretKey (hex-encoded 32 random bytes)"
+    algorithm: "random_hex_32"
+    validation: "^[a-f0-9]{64}$"

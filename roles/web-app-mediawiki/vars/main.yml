@@ -2,6 +2,7 @@
 application_id:                   "web-app-mediawiki"
 database_type:                    "mariadb"
 container_port:                   80
+entity_name:                      "{{ application_id | get_entity_name }}"
 
 # Mediawiki
 MEDIAWIKI_SITENAME:               "{{ applications | get_app_conf(application_id, 'sitename') }}"
@@ -11,20 +12,28 @@ MEDIAWIKI_URL:                    "{{ domains | get_url(application_id, WEB_PROT
 MEDIAWIKI_HTML_DIR:               "/var/www/html"
 MEDIAWIKI_CONFIG_DIR:             "{{ docker_compose.directories.config }}"
 MEDIAWIKI_VOLUMES_DIR:            "{{ docker_compose.directories.volumes }}"
+
+# LocalSettings
+MEDIAWIKI_LOCALSETTINGS_HOST_PATH: "{{ MEDIAWIKI_CONFIG_DIR }}/LocalSettings.php"
+MEDIAWIKI_LOCALSETTINGS_CONTAINER_PATH: "{{ MEDIAWIKI_HTML_DIR }}/LocalSettings.php"
+
+# Persistent runtime dirs
 MEDIAWIKI_LOCAL_MOUNT_DIR:        "{{ [ MEDIAWIKI_VOLUMES_DIR, 'mw-local' ] | path_join }}"
 MEDIAWIKI_LOCAL_PATH:             "/opt/mw-local"
 
 ## Docker
-MEDIAWIKI_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.mediawiki.version') }}"
-MEDIAWIKI_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.mediawiki.image') }}"
-MEDIAWIKI_CONTAINER:              "{{ applications | get_app_conf(application_id, 'docker.services.mediawiki.name') }}"
-MEDIAWIKI_VOLUME:                 "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+MEDIAWIKI_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+MEDIAWIKI_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+MEDIAWIKI_CONTAINER:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
+MEDIAWIKI_VOLUME_IMAGES:          "{{ applications | get_app_conf(application_id, 'docker.volumes.images') }}"
+MEDIAWIKI_VOLUME_EXTENSIONS:      "{{ applications | get_app_conf(application_id, 'docker.volumes.extensions') }}"
 MEDIAWIKI_USER:                   "www-data"
+MEDIAWIKI_USER_GID:               "33"
 
-# User
+# User and Credentials
 MEDIAWIKI_ADMINISTRATOR_NAME:     "{{ users.administrator.username }}"
 MEDIAWIKI_ADMINISTRATOR_PASSWORD: "{{ users.administrator.password }}"
-MEDIAWIKI_ADMINISTRATOR_EMAIL:    "{{ users.administrator.email }}"
+MEDIAWIKI_SECRET_KEY:             "{{ applications | get_app_conf(application_id, 'credentials.secret_key') }}"
 
 # OIDC
 MEDIAWIKI_OIDC_ENABLED:           "{{ applications | get_app_conf(application_id, 'features.oidc') }}"

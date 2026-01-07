@@ -1,13 +1,12 @@
-- name: "Create MediaWiki admin user"
+- name: "Create / promote MediaWiki admin user"
   command: >
     docker exec
     -u {{ MEDIAWIKI_USER }}
     {{ MEDIAWIKI_CONTAINER }}
-    php /var/www/html/maintenance/createAndPromote.php
+    php {{ MEDIAWIKI_HTML_DIR }}/maintenance/run.php createAndPromote
     --bureaucrat --sysop
     {{ MEDIAWIKI_ADMINISTRATOR_NAME }}
     {{ MEDIAWIKI_ADMINISTRATOR_PASSWORD }}
-    {{ MEDIAWIKI_ADMINISTRATOR_EMAIL }}
   register: create_admin
   changed_when: >
     ('created' in ((create_admin.stdout | default('')) ~ (create_admin.stderr | default('')))) or

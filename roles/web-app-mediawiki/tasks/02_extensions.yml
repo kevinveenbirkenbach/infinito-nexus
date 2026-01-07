@@ -48,15 +48,8 @@
     loop_var: ext
     label: "{{ ext.name }}"
   register: _install_results
-  changed_when: "'INSTALLED:' in (stdout | default(''))"
-
-- name: "EXT | Determine if any extension was installed"
-  set_fact:
-    _any_installed: >-
-      {{ _install_results.results
-         | map(attribute='stdout')
-         | select('search', 'INSTALLED:')
-         | list | length > 0 }}
+  changed_when: "'INSTALLED:' in (_install_results.stdout | default(''))"
+  notify: "mediawiki update"
 
 # Ensure unzip + git are available in the container (idempotent)
 - name: "EXT | Ensure unzip+git available in container"
@@ -92,8 +85,9 @@
     '
   args:
     executable: /bin/bash
-  register: _composer
-  changed_when: "'INSTALLED_COMPOSER' in (_composer.stdout | default(''))"
+  register: _ext_composer
+  changed_when: "'INSTALLED_COMPOSER' in (_ext_composer.stdout | default(''))"
+  notify: "mediawiki update"
 
 # Install dependencies per extension (only if vendor is missing)
 # Use /tmp/composer for HOME/CACHE to avoid /var/www permission issues.
@@ -106,9 +100,12 @@
         install -d -m 0775 /tmp/composer/cache
         export COMPOSER_HOME=/tmp/composer
         export COMPOSER_CACHE_DIR=/tmp/composer/cache
+        export COMPOSER_ROOT_VERSION=dev-{{ MEDIAWIKI_EXT_BRANCH }}
         cd "$d"
         composer install --no-dev -n --prefer-dist
         echo COMPOSER_INSTALLED:{{ ext.name }}
+      else
+        echo COMPOSER_PRESENT:{{ ext.name }}
       fi
     '
   args:
@@ -117,8 +114,9 @@
   loop_control:
     loop_var: ext
     label: "{{ ext.name }}"
-  register: _ext_composer
-  changed_when: "'COMPOSER_INSTALLED:' in (stdout | default(''))"
+  register: _vendor
+  changed_when: "'COMPOSER_INSTALLED:' in (_vendor.stdout | default(''))"
+  notify: "mediawiki update"
 
 # Sanity check: Jumbojett OIDC client must be loadable
 - name: "EXT | Sanity check: Jumbojett OpenIDConnect client present"
@@ -130,18 +128,3 @@
   register: _oidc_class
   changed_when: false
   failed_when: _oidc_class.rc != 0
-
-# Run MediaWiki updates (changed if something installed)
-- name: "EXT | Run update.php (safe to run repeatedly)"
-  shell: >
-    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }}
-    php {{ MEDIAWIKI_HTML_DIR }}/maintenance/update.php --quick
-  args:
-    executable: /bin/bash
-  register: _mw_upd
-  changed_when: >
-    (_any_installed) or
-    (_ext_composer is defined and
-     (_ext_composer.results | map(attribute='stdout')
-                            | select('search','COMPOSER_INSTALLED:')
-                            | list | length > 0))
