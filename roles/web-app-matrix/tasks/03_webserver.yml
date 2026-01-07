@@ -13,8 +13,8 @@
   include_role:
     name: sys-stk-front-proxy
   vars:        
-    domain:     "{{ MATRIX_ELEMENT_DOMAIN }}"
-    http_port:  "{{ MATRIX_ELEMENT_PORT }}"
+    domain:         "{{ MATRIX_ELEMENT_DOMAIN }}"
+    http_port:      "{{ MATRIX_ELEMENT_PORT }}"
 
 - name: "include role for {{ application_id }} to receive certs & do modification routines for {{ MATRIX_SYNAPSE_DOMAIN }}"
   include_role:

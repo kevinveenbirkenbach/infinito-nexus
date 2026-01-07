@@ -117,3 +117,6 @@
   when: applications | get_app_conf(application_id, 'setup', True) | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+
+- name: Flush all handlers after docker setup so that they don't intervine with openresty
+  meta: flush_handlers
