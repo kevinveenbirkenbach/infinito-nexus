@@ -1,7 +1,8 @@
 # Set default values for all following accounts.
 defaults
-logfile        ~/.msmtp.log
-
+logfile ~/.msmtp.log
+timeout {{ SYSTEM_EMAIL.TIMEOUT }}
+syslog {{ (MODE_DEBUG | bool) | ternary('on','off') }}
 {% if 'web-app-mailu' in group_names %}
 auth           {{ 'on' if SYSTEM_EMAIL.TLS | bool else 'off' }}
 tls_starttls   {{ 'on' if SYSTEM_EMAIL.START_TLS | bool else 'off' }}

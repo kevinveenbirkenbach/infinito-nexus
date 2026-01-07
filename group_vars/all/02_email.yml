@@ -7,3 +7,4 @@ DEFAULT_SYSTEM_EMAIL:
   START_TLS:  false
   SMTP:       true
   ENABLED:    true
+  TIMEOUT:    "30" # default timeout until which mails have to be send.
