@@ -11,6 +11,7 @@
   register: dev_nix_official_sha_response
   delegate_to: localhost
   run_once: true
+  become: false
 
 - name: Set expected installer checksum from official SHA256
   ansible.builtin.set_fact:
