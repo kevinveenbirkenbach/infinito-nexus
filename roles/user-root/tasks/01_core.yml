@@ -30,7 +30,7 @@
   include_role:
     name: user
   vars:
-    user_name: "root"
+    user_key: "root"
 
 - name: "create {{ PATH_ROOT_SCRIPTS }}"
   file:

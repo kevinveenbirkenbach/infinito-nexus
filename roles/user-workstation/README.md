@@ -1,0 +1,28 @@
+# Workstation User
+
+## Description
+
+This role creates the workstation user defined by *WORKSTATION_USER* and configures
+its basic environment. It integrates with the shared `user` role to deploy shell
+dotfiles and SSH `authorized_keys`.
+
+## Single Point of Truth (SPOT)
+
+User data must be defined under `users.<name>` and selected via `WORKSTATION_USER`.
+
+Minimum required fields:
+- `WORKSTATION_USER`
+- `users.<WORKSTATION_USER>.username` (defaults to WORKSTATION_USER if missing)
+
+Optional fields:
+- `users.<WORKSTATION_USER>.uid`
+- `users.<WORKSTATION_USER>.gid`
+- `users.<WORKSTATION_USER>.shell`
+- `users.<WORKSTATION_USER>.groups` (list)
+- `users.<WORKSTATION_USER>.authorized_keys` (list; may be empty)
+
+## Notes
+
+- Sudo can be enabled via `user_workstation_enable_sudo`.
+- Password handling is intentionally conservative. If you want a password, set
+  `users.<WORKSTATION_USER>.password` (plain) and enable `user_workstation_set_password`.

@@ -1,0 +1,18 @@
+# Selected workstation user key (in users dict)
+USER_WORKSTATION_KEY: "{{ WORKSTATION_USER }}"
+
+# Workstation username on the system
+USER_WORKSTATION_USERNAME: "{{ users[USER_WORKSTATION_KEY].username }}"
+
+# Optional UID/GID
+USER_WORKSTATION_UID: "{{ users[USER_WORKSTATION_KEY].uid | default(omit) }}"
+USER_WORKSTATION_GID: "{{ users[USER_WORKSTATION_KEY].gid | default(omit) }}"
+
+# Shell and groups
+USER_WORKSTATION_DEFAULT_SHELL: "/bin/bash"
+USER_WORKSTATION_SHELL: "{{ users[USER_WORKSTATION_KEY].shell | default(USER_WORKSTATION_DEFAULT_SHELL) }}"
+USER_WORKSTATION_GROUPS: "{{ users[USER_WORKSTATION_KEY].groups | default([]) }}"
+
+# Behavior toggles
+USER_WORKSTATION_ENABLE_SUDO: true
+USER_WORKSTATION_SET_PASSWORD: false

@@ -1,2 +1,8 @@
-user_group:         "{{ user_name }}"
-user_home:          "{{ (user_name == 'root') | ternary('/root', '/home/' ~ user_name) }}"
+# Actual system username (can differ from key)
+user_username: "{{ users[user_key].username | default(user_key) }}"
+
+# Primary group (convention: same as username)
+user_group: "{{ user_username }}"
+
+# Home directory (root special case)
+user_home: "{{ (user_username == 'root') | ternary('/root', '/home/' ~ user_username) }}"
