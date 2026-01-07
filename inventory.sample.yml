@@ -7,3 +7,11 @@ users:
   administrator:
     authorized_keys:
       - ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito
+  biber:
+    username:   "biber"
+    full_name:  "Harry Beaver"
+    website:    https://www.infinito.nexus/
+    email:      contact@infinito.nexus
+    gpg:        "DUMMY-GPG-KEY-NOT-SET"
+
+WORKSTATION_USER: biber

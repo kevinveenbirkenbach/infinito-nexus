@@ -40,7 +40,7 @@
   ansible.builtin.include_role:
     name: desk-dotlinker
   vars:
-    dotlinker_user: "{{ users[desktop_username].username }}"
+    dotlinker_user: "{{ users[WORKSTATION_USER].username }}"
     dotlinker_config_path: "{{ nextcloud_user_home_directory }}.config/dotlinker/config.yaml"
     dotlinker_replace: true
     dotlinker_apply: true

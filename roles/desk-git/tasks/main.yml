@@ -13,7 +13,7 @@
 - when: run_once_desk_git is not defined
   block:
     - name: setup git
-      command: gitconfig --merge-option rebase --name "{{users.client.full_name}}" --email "{{users.client.email}}" --website "{{users.client.website}}" --signing gpg --gpg-key "{{users.client.gpg}}"
+      command: gitconfig --merge-option rebase --name "{{ users[WORKSTATION_USER].full_name }}" --email "{{ users[WORKSTATION_USER].email }}" --website "{{ users[WORKSTATION_USER].website }}" --signing gpg --gpg-key "{{ users[WORKSTATION_USER].gpg }}"
       become: false
   
     - include_tasks: utils/once/flag.yml

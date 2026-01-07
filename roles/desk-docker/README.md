@@ -1,4 +1,4 @@
-# README for PC-Docker Playbook
+# Workstation Docker
 
 ## Overview
 This playbook, `desk-docker`, is part of a larger collection housed within the `infinito` repository. It is specifically tailored for setting up Docker and Docker Compose on personal computers (PCs) used for development purposes. The primary goal is to facilitate a development environment on individual workstations rather than configuring servers for hosting or distributing Docker images.

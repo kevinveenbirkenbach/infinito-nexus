@@ -5,7 +5,10 @@
       - arduino-docs
     state: present
 
-- name: Adding user {{ users[desktop_username].username }} to relevant arduino usergroups  
-  user: name={{ users[desktop_username].username }}
-        groups=uucp lock
-        append=yes
+- name: "Adding user {{ users[WORKSTATION_USER].username }} to relevant arduino usergroups"
+  ansible.builtin.user:
+    name: "{{ users[WORKSTATION_USER].username }}"
+    groups:
+      - uucp
+      - lock
+    append: true
