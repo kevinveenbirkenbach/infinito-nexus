@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   test-deploy:
+    name: "deploy:${{ inputs.deploy_type }} (${{ matrix.distro }})"
     runs-on: ubuntu-latest
     timeout-minutes: 240
     env:
