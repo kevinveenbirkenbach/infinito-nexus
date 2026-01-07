@@ -1,8 +1,15 @@
 #!/bin/bash
 # Pulls the remote backups from multiple hosts
-hosts="{{ DOCKER_BACKUP_REMOTE_2_LOCAL_BACKUP_PROVIDERS | join(' ') }}";
+
+hosts="{{ DOCKER_BACKUP_REMOTE_2_LOCAL_BACKUP_PROVIDERS | join(' ') }}"
 errors=0
+
 for host in $hosts; do
-  python {{ DOCKER_BACKUP_REMOTE_2_LOCAL_SCRIPT }} $host || ((errors+=1));
-done;
-exit $errors;
+  python3 {{ DOCKER_BACKUP_REMOTE_2_LOCAL_SCRIPT }} "$host" || ((errors+=1))
+done
+
+# Continue across hosts, but fail overall if any host failed.
+if [ "$errors" -gt 0 ]; then
+  exit 1
+fi
+exit 0

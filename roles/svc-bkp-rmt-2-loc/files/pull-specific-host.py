@@ -2,34 +2,50 @@
 import argparse
 import os
 import subprocess
-import time
 import sys
+import time
 from pathlib import Path
 
 
-def run_command(command, capture_output=True, check=False, shell=True):
-    """Run a shell command and return its output as string."""
+def run_command(
+    command: str,
+    capture_output: bool = True,
+    check: bool = True,
+    shell: bool = True,
+) -> str:
+    """
+    Run a shell command and return its stdout as a string.
+
+    Default behavior: FAIL (raise) when the command returns a non-zero exit code.
+    Use check=False only for optional commands.
+    """
     try:
         result = subprocess.run(
-            command, capture_output=capture_output, shell=shell, text=True, check=check
+            command,
+            capture_output=capture_output,
+            shell=shell,
+            text=True,
+            check=check,
         )
-        return result.stdout.strip()
+        return (result.stdout or "").strip()
     except subprocess.CalledProcessError as e:
-        if capture_output:
-            print(e.stdout)
-            print(e.stderr)
+        print(f"Command failed (exit {e.returncode}): {command}", file=sys.stderr)
+        if e.stdout:
+            print(e.stdout, file=sys.stderr)
+        if e.stderr:
+            print(e.stderr, file=sys.stderr)
         raise
 
 
-def pull_backups(hostname: str, backups_dir: str):
+def pull_backups(hostname: str, backups_dir: str) -> None:
     backups_dir = backups_dir.rstrip("/")
     print(f"pulling backups from: {hostname}")
-    errors = 0
 
     print("loading meta data...")
     remote_host = f"backup@{hostname}"
     print(f"host address:         {remote_host}")
 
+    # required: machine id
     remote_machine_id = run_command(f'ssh "{remote_host}" sha256sum /etc/machine-id')[
         :64
     ]
@@ -39,13 +55,13 @@ def pull_backups(hostname: str, backups_dir: str):
     print(f"backup root:          {backups_dir}")
     print(f"backup dir:           {general_backup_machine_dir}")
 
-    try:
-        remote_backup_types = run_command(
-            f'ssh "{remote_host}" "find {general_backup_machine_dir} -maxdepth 1 -type d -execdir basename {{}} ;"'
-        ).splitlines()
-        print(f"backup types:          {' '.join(remote_backup_types)}")
-    except subprocess.CalledProcessError:
-        sys.exit(1)
+    # IMPORTANT:
+    # This command MUST stay exactly like this to match ssh-wrapper.sh
+    remote_backup_types = run_command(
+        f'ssh "{remote_host}" '
+        f'"find {general_backup_machine_dir} -maxdepth 1 -type d -execdir basename {{}} ;"'
+    ).splitlines()
+    print(f"backup types:          {' '.join(remote_backup_types)}")
 
     for backup_type in remote_backup_types:
         if backup_type == remote_machine_id:
@@ -56,18 +72,21 @@ def pull_backups(hostname: str, backups_dir: str):
         general_backup_type_dir = f"{general_backup_machine_dir}{backup_type}/"
         general_versions_dir = general_backup_type_dir
 
-        # local previous version
+        # Optional: local previous version (may not exist)
+        local_previous_version_dir = ""
         try:
             local_previous_version_dir = run_command(
-                f"ls -d {general_versions_dir}* | tail -1"
+                f"ls -d {general_versions_dir}* | tail -1",
+                check=False,
             )
         except subprocess.CalledProcessError:
             local_previous_version_dir = ""
         print(f"last local backup:      {local_previous_version_dir}")
 
-        # remote versions
+        # Required: remote versions
         remote_backup_versions = run_command(
-            f'ssh "{remote_host}" "ls -d {backups_dir}/{remote_machine_id}/{backup_type}/*"'
+            f'ssh "{remote_host}" '
+            f'"ls -d {backups_dir}/{remote_machine_id}/{backup_type}/*"'
         ).splitlines()
         print(f"remote backup versions:   {' '.join(remote_backup_versions)}")
 
@@ -82,16 +101,22 @@ def pull_backups(hostname: str, backups_dir: str):
         remote_source_path = f"{remote_host}:{remote_last_backup_dir}/"
         print(f"source path:              {remote_source_path}")
 
-        local_backup_destination_path = f"{backups_dir}/{remote_machine_id}/{backup_type}/{Path(remote_last_backup_dir).name}"
+        local_backup_destination_path = (
+            f"{backups_dir}/{remote_machine_id}/{backup_type}/"
+            f"{Path(remote_last_backup_dir).name}"
+        )
         print(f"backup destination:       {local_backup_destination_path}")
 
         print("creating local backup destination folder...")
         os.makedirs(local_backup_destination_path, exist_ok=True)
 
         rsync_command = (
-            f'rsync -abP --delete --delete-excluded --rsync-path="sudo rsync" '
-            f'--link-dest="{local_previous_version_dir}" "{remote_source_path}" "{local_backup_destination_path}"'
+            f"rsync -abP --delete --delete-excluded "
+            f'--rsync-path="sudo rsync" '
+            f'--link-dest="{local_previous_version_dir}" '
+            f'"{remote_source_path}" "{local_backup_destination_path}"'
         )
+
         print("starting backup...")
         print(f"executing:                {rsync_command}")
 
@@ -104,40 +129,58 @@ def pull_backups(hostname: str, backups_dir: str):
         rsync_exit_code = 1
         while retry_count < max_retries:
             print(f"Retry attempt: {retry_count + 1}")
+
             if retry_count > 0:
                 current_time = int(time.time())
                 last_retry_duration = current_time - last_retry_start
                 if last_retry_duration >= max_retry_duration:
+                    # keep original semantics
                     print(
                         "Last retry took more than 12 hours, increasing max retries to 12."
                     )
                     max_retries = 12
+
             last_retry_start = int(time.time())
             rsync_exit_code = os.system(rsync_command)
+
             if rsync_exit_code == 0:
                 break
+
             retry_count += 1
             time.sleep(retry_delay)
 
         if rsync_exit_code != 0:
-            print(f"Error: rsync failed after {max_retries} attempts")
-            errors += 1
+            raise RuntimeError(
+                f"rsync failed after {max_retries} attempts "
+                f"for {hostname}:{backup_type}"
+            )
 
-    sys.exit(errors)
 
-
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Pull backups from a remote backup host via rsync."
     )
-    parser.add_argument("hostname", help="Hostname from which backup should be pulled")
+    parser.add_argument(
+        "hostname",
+        help="Hostname from which backup should be pulled",
+    )
     parser.add_argument(
         "--folder",
         default="/var/lib/infinito/backup",
-        help="Remote and local backup root directory (default: /var/lib/infinito/backup)",
+        help="Remote and local backup root directory "
+        "(default: /var/lib/infinito/backup)",
     )
     args = parser.parse_args()
-    pull_backups(args.hostname, args.folder)
+
+    try:
+        pull_backups(args.hostname, args.folder)
+        sys.exit(0)
+    except Exception as e:
+        print(
+            f"Backup pull failed for host '{args.hostname}': {e}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 if __name__ == "__main__":

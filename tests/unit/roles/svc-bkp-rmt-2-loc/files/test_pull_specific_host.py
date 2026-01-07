@@ -33,7 +33,7 @@ class PullSpecificHostTests(unittest.TestCase):
         self.host = "1.2.3.4"
         self.remote = f"backup@{self.host}"
 
-        # IMPORTANT: Script default is /var/lib/infinito/backup now (via --folder / function argument)
+        # Script default is /var/lib/infinito/backup now (via --folder / function argument)
         self.backups_dir = "/var/lib/infinito/backup"
         self.base = f"{self.backups_dir}/{self.hash64}/"
 
@@ -49,7 +49,7 @@ class PullSpecificHostTests(unittest.TestCase):
         )
 
     def _run_side_effect_success(
-        self, command, capture_output=True, shell=True, text=True, check=False
+        self, command, capture_output=True, shell=True, text=True, check=True
     ):
         cmd = command if isinstance(command, str) else " ".join(command)
 
@@ -73,7 +73,7 @@ class PullSpecificHostTests(unittest.TestCase):
         return self._completed(stdout="")
 
     def _run_side_effect_find_fail(
-        self, command, capture_output=True, shell=True, text=True, check=False
+        self, command, capture_output=True, shell=True, text=True, check=True
     ):
         cmd = command if isinstance(command, str) else " ".join(command)
 
@@ -90,7 +90,7 @@ class PullSpecificHostTests(unittest.TestCase):
         return self._completed(stdout="")
 
     def _run_side_effect_no_types(
-        self, command, capture_output=True, shell=True, text=True, check=False
+        self, command, capture_output=True, shell=True, text=True, check=True
     ):
         cmd = command if isinstance(command, str) else " ".join(command)
 
@@ -106,7 +106,7 @@ class PullSpecificHostTests(unittest.TestCase):
         return self._completed(stdout="")
 
     def _run_side_effect_no_remote_versions(
-        self, command, capture_output=True, shell=True, text=True, check=False
+        self, command, capture_output=True, shell=True, text=True, check=True
     ):
         """
         Like success, but remote versions are empty -> should raise RuntimeError
@@ -140,9 +140,10 @@ class PullSpecificHostTests(unittest.TestCase):
     def test_success_rsync_zero_exit(self, mock_run, mock_system, _mkd):
         mock_run.side_effect = self._run_side_effect_success
         mock_system.return_value = 0
-        with self.assertRaises(SystemExit) as cm:
-            self.mod.pull_backups(self.host, self.backups_dir)
-        self.assertEqual(cm.exception.code, 0)
+
+        # should not raise
+        self.mod.pull_backups(self.host, self.backups_dir)
+
         self.assertTrue(mock_system.called, "rsync (os.system) should be called")
 
     @patch("time.sleep", new=lambda *a, **k: None)
@@ -152,9 +153,10 @@ class PullSpecificHostTests(unittest.TestCase):
     def test_no_backup_types_exit_zero(self, mock_run, mock_system, _mkd):
         mock_run.side_effect = self._run_side_effect_no_types
         mock_system.return_value = 0
-        with self.assertRaises(SystemExit) as cm:
-            self.mod.pull_backups(self.host, self.backups_dir)
-        self.assertEqual(cm.exception.code, 0)
+
+        # should not raise
+        self.mod.pull_backups(self.host, self.backups_dir)
+
         self.assertFalse(
             mock_system.called, "rsync should not be called when no types found"
         )
@@ -163,12 +165,15 @@ class PullSpecificHostTests(unittest.TestCase):
     @patch.object(os, "makedirs")
     @patch.object(os, "system")
     @patch.object(subprocess, "run")
-    def test_find_failure_exits_one(self, mock_run, mock_system, _mkd):
+    def test_find_failure_raises_called_process_error(
+        self, mock_run, mock_system, _mkd
+    ):
         mock_run.side_effect = self._run_side_effect_find_fail
         mock_system.return_value = 0
-        with self.assertRaises(SystemExit) as cm:
+
+        with self.assertRaises(subprocess.CalledProcessError):
             self.mod.pull_backups(self.host, self.backups_dir)
-        self.assertEqual(cm.exception.code, 1)
+
         self.assertFalse(
             mock_system.called, "rsync should not be called when find fails"
         )
@@ -177,12 +182,15 @@ class PullSpecificHostTests(unittest.TestCase):
     @patch.object(os, "makedirs")
     @patch.object(os, "system")
     @patch.object(subprocess, "run")
-    def test_rsync_fails_after_retries_exit_nonzero(self, mock_run, mock_system, _mkd):
+    def test_rsync_fails_after_retries_raises_runtime_error(
+        self, mock_run, mock_system, _mkd
+    ):
         mock_run.side_effect = self._run_side_effect_success
         mock_system.side_effect = [1] * 12  # 12 retries in the script
-        with self.assertRaises(SystemExit) as cm:
+
+        with self.assertRaises(RuntimeError):
             self.mod.pull_backups(self.host, self.backups_dir)
-        self.assertEqual(cm.exception.code, 1)
+
         self.assertEqual(
             mock_system.call_count, 12, "rsync should have retried 12 times"
         )
