@@ -21,7 +21,7 @@
                     {
                       'authorized_keys': (
                         users.backup.authorized_keys
-                        | map('regex_replace', '^(.*)$', 'command="' ~ USER_BACKUP_WRAPPER_DST ~ '" \\1')
+                        | map('regex_replace', '^', 'command="' ~ USER_BACKUP_WRAPPER_DST ~ '" ')
                         | list
                       )
                     },

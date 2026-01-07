@@ -22,10 +22,13 @@
 - name: "Write authorized_keys for '{{ user_name }}'"
   ansible.builtin.copy:
     dest: "{{ user_home }}/.ssh/authorized_keys"
-    content: >-
+    content: |
       {{
-        users[user_name].authorized_keys | join('\n')
-        ~ ((users[user_name].authorized_keys | length > 0) | ternary('\n',''))
+        users[user_name].authorized_keys
+        | default([])
+        | map('regex_replace', '\\\\n$', '')
+        | map('regex_replace', '\\s+$', '')
+        | join('\n')
       }}
     owner: "{{ user_name }}"
     group: "{{ user_group }}"
