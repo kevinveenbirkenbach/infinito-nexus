@@ -4,18 +4,18 @@
     state: present
   become: true
 
-- name: Install gitconfig CLI system-wide via pip
+- name: Install gitcon CLI system-wide via pip
   include_role:
     name: sys-pip-install
   vars:
-    package_name: gitconfig
+    package_name: gitcon
 
 - when: run_once_desk_git is not defined
   block:
     - name: setup git (as workstation user)
       ansible.builtin.command:
         argv:
-          - gitconfig
+          - gitcon
           - --merge-option
           - rebase
           - --name
