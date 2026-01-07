@@ -36,3 +36,23 @@
   args:
     creates: "/nix/store"
   become: true
+
+- name: Ensure nix is reachable in PATH for systemd services
+  ansible.builtin.file:
+    src: /nix/var/nix/profiles/default/bin/nix
+    dest: /usr/local/bin/nix
+    state: link
+  become: true
+
+# 4) Optionally drop shell snippet for Nix
+- name: Optionally drop shell snippet for Nix
+  ansible.builtin.copy:
+    dest: "{{ dev_nix_shell_snippet_path }}"
+    mode: "0644"
+    content: |
+      # Added by dev-nix Ansible role
+      if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+      fi
+  when: dev_nix_enable_shell_snippet | bool
+  become: true

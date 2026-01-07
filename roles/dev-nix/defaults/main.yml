@@ -20,7 +20,7 @@ dev_nix_installer_sha256: ""
 
 # Whether to drop a small shell snippet into /etc/profile.d to ensure
 # Nix environment is available for login shells.
-dev_nix_enable_shell_snippet: false
+dev_nix_enable_shell_snippet: true
 
 # Path of the profile.d snippet
 dev_nix_shell_snippet_path: "/etc/profile.d/nix.sh"

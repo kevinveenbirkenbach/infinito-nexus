@@ -1,6 +1,6 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Installs the Nix package manager using a locally stored installer script with SHA256 verification.
+  description: Installs the Nix package manager via pacman on Arch x86_64 or via the official installer with SHA256 verification.
   license: Infinito.Nexus NonCommercial License
   license_url: https://s.infinito.nexus/license
   company: |
@@ -34,5 +34,5 @@ galaxy_info:
   - build
   - automation
   - infinito-nexus
-  lifecycle: alpha
+  lifecycle: beta
 dependencies: []
