@@ -1,7 +1,7 @@
 oidc:
   email_by_username:      true                        # If true, then the mail is set by the username. If wrong then the OIDC user email is used
   enable_user_creation:   true                        # Users will be created if not existing
-domain:                   "{{ SYSTEM_EMAIL.DOMAIN }}" # The main domain from which mails will be send \ email suffix behind @                              
+domain:                   "{{ SYSTEM_EMAIL_DOMAIN }}" # The main domain from which mails will be send \ email suffix behind @                              
 features:
   matomo:                 true
   css:                    false
@@ -12,7 +12,7 @@ features:
 server:
   domains:
     canonical:
-      - "{{ SYSTEM_EMAIL.HOST }}"
+      - "{{ SYSTEM_EMAIL_HOST }}"
     aliases: []
   csp:
     flags:

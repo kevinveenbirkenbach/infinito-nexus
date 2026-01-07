@@ -48,15 +48,15 @@ LISTMONK_SETTINGS:
     value: >-
       {{ [
         {
-          "host":            SYSTEM_EMAIL.HOST,
-          "port":            SYSTEM_EMAIL.PORT,
-          "enabled":         SYSTEM_EMAIL.SMTP,
+          "host":            SYSTEM_EMAIL_HOST,
+          "port":            SYSTEM_EMAIL_PORT,
+          "enabled":         SYSTEM_EMAIL_SMTP,
           "username":        users[LISTMONK_USER_SEND].email,
           "password":        users[LISTMONK_USER_SEND].password,
           "tls_type":        (
-                                SYSTEM_EMAIL.TLS
+                                SYSTEM_EMAIL_TLS
                                 | ternary("TLS",
-                                    SYSTEM_EMAIL.START_TLS
+                                    SYSTEM_EMAIL_START_TLS
                                       | ternary("STARTTLS","NONE")
                                   )
                               ),
@@ -70,7 +70,7 @@ LISTMONK_SETTINGS:
           "tls_skip_verify": false
         }
       ] | to_json }}
-    when: SYSTEM_EMAIL.SMTP | bool
+    when: SYSTEM_EMAIL_SMTP | bool
 
 
   - key: "app.lang"
@@ -95,7 +95,7 @@ LISTMONK_SETTINGS:
     value: >-
       {{ [
         {
-          "host":            SYSTEM_EMAIL.HOST,
+          "host":            SYSTEM_EMAIL_HOST,
           "port":            995,
           "type":            "pop",
           "uuid":            "471fd0e9-8c33-4e4a-9183-c4679699faca",
@@ -103,7 +103,7 @@ LISTMONK_SETTINGS:
           "username":        users[LISTMONK_USER_BOUNCE].email,
           "password":        users[LISTMONK_USER_BOUNCE].tokens['web-app-mailu'],
           "return_path":     users[LISTMONK_USER_BOUNCE].email,
-          "tls_enabled":     SYSTEM_EMAIL.TLS,
+          "tls_enabled":     SYSTEM_EMAIL_TLS,
           "auth_protocol":   "userpass",
           "scan_interval":   "15m",
           "tls_skip_verify": false

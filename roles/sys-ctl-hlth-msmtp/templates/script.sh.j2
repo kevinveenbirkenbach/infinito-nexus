@@ -1,3 +1,7 @@
 #!/bin/bash
-echo "Subject: $HOSTNAME is alive
-Host $HOSTNAME reports at $(date): I'm alive." | timeout {{ SYSTEM_EMAIL.TIMEOUT }}s msmtp {{ users.administrator.username }}
+{
+  echo "To: {{ users.administrator.email if (SYSTEM_EMAIL_EXTERNAL | bool) else users.administrator.username }}"
+  echo "Subject: $(hostname) is alive"
+  echo
+  echo "Host $(hostname) reports at $(date): I'm alive."
+} | timeout {{ SYSTEM_EMAIL_TIMEOUT }}s msmtp -t

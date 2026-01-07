@@ -53,11 +53,11 @@ BOOKWYRM_REDIS_ACTIVITY_URL:     "{{ BOOKWYRM_REDIS_CACHE_URL }}"
 #BOOKWYRM_CACHE_URL:              "{{ BOOKWYRM_REDIS_CACHE_URL }}"
 
 # Email
-EMAIL_HOST:                     "{{ SYSTEM_EMAIL.HOST }}"
-EMAIL_PORT:                     "{{ SYSTEM_EMAIL.PORT }}"
+EMAIL_HOST:                     "{{ SYSTEM_EMAIL_HOST }}"
+EMAIL_PORT:                     "{{ SYSTEM_EMAIL_PORT }}"
 EMAIL_HOST_USER:                "{{ users['no-reply'].email }}"
 EMAIL_HOST_PASSWORD:            "{{ users['no-reply'].tokens['web-app-mailu'] }}"
 # TLS/SSL: If TLS is true → TLS; else → SSL
-EMAIL_USE_TLS:                  "{{ SYSTEM_EMAIL.TLS | ternary('true','false') }}"
-EMAIL_USE_SSL:                  "{{ SYSTEM_EMAIL.TLS | ternary('false','true') }}"
+EMAIL_USE_TLS:                  "{{ SYSTEM_EMAIL_TLS | ternary('true','false') }}"
+EMAIL_USE_SSL:                  "{{ SYSTEM_EMAIL_TLS | ternary('false','true') }}"
 EMAIL_DEFAULT_FROM:             "BookWyrm <{{ users['no-reply'].email }}>"

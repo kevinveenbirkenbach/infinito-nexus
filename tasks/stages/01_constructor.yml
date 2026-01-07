@@ -17,11 +17,6 @@
   failed_when: dns_check.rc != 0
   when: MODE_ASSERT | bool
 
-- name: Merge system_email definitions
-  set_fact:
-    SYSTEM_EMAIL: "{{ DEFAULT_SYSTEM_EMAIL | combine(SYSTEM_EMAIL | default({}, true), recursive=True) }}"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
 - name: Merge variables
   block:
   - name: Merge users

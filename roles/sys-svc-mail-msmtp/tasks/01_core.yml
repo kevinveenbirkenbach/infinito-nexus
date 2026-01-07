@@ -10,7 +10,7 @@
   package:
     name: msmtp-mta
     state: present
-  when: "'web-app-mailu' in group_names"
+  when: SYSTEM_EMAIL_EXTERNAL | bool
 
 - name: configure msmtprc.conf.j2
   template:
@@ -21,4 +21,3 @@
 - include_role:
     name: sys-ctl-hlth-msmtp
   when: run_once_sys_ctl_hlth_msmtp is not defined
-

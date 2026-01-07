@@ -7,7 +7,7 @@ entity_name:                    "{{ application_id | get_entity_name }}"
 # Taiga      
 
 ## General
-TAIGA_EMAIL_BACKEND:            "{{ 'smtp' if SYSTEM_EMAIL.SMTP else 'console' }}"  ## use an SMTP server or display the emails in the console (either "smtp" or "console")
+TAIGA_EMAIL_BACKEND:            "{{ 'smtp' if SYSTEM_EMAIL_SMTP else 'console' }}"  ## use an SMTP server or display the emails in the console (either "smtp" or "console")
 
 ## User
 TAIGA_SUPERUSER_NAME:           "{{ users.administrator.username }}"

@@ -45,8 +45,8 @@ OPENPROJECT_DUMMY_VOLUME:     "{{ docker_compose.directories.volumes }}dummy_vol
 
 OPENPROJECT_RAILS_SETTINGS:
   email_delivery_method:      "smtp"
-  smtp_address:               "{{ SYSTEM_EMAIL.HOST }}"
-  smtp_domain:                "{{ SYSTEM_EMAIL.DOMAIN }}"
+  smtp_address:               "{{ SYSTEM_EMAIL_HOST }}"
+  smtp_domain:                "{{ SYSTEM_EMAIL_DOMAIN }}"
   smtp_user_name:             "{{ users['no-reply'].email }}"
   smtp_password:              "{{ users['no-reply'].tokens['web-app-mailu'] }}"
   smtp_ssl:                   false

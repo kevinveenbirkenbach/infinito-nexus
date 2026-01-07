@@ -31,15 +31,15 @@ trusted_key_servers:
   - server_name: "matrix.org"
 admin_contact: 'mailto:{{ users.administrator.email }}'
 
-{% if SYSTEM_EMAIL.ENABLED | bool %}
+{% if SYSTEM_EMAIL_ENABLED | bool %}
 email:
-  smtp_host:                    "{{ SYSTEM_EMAIL.HOST }}"
-  smtp_port:                    "{{ SYSTEM_EMAIL.PORT }}"
+  smtp_host:                    "{{ SYSTEM_EMAIL_HOST }}"
+  smtp_port:                    "{{ SYSTEM_EMAIL_PORT }}"
   smtp_user:                    "{{ users['no-reply'].email }}"
   smtp_pass:                    "{{ users['no-reply'].tokens['web-app-mailu'] }}"
   #force_tls:                    true
   #require_transport_security:   true
-  enable_tls:                   "{{ SYSTEM_EMAIL.TLS | upper }}"
+  enable_tls:                   "{{ SYSTEM_EMAIL_TLS | upper }}"
   notif_from:                   "Your Friendly %(app)s homeserver <{{ users['no-reply'].email }}>"
   app_name:                     "Matrix on {{ MATRIX_SYNAPSE_DOMAIN }}"
   enable_notifs:                true

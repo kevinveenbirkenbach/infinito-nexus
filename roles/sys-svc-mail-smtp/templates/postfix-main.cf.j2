@@ -5,14 +5,17 @@
 # -------------------------------------------------------------------
 
 # Host identity
-myhostname = {{ inventory_hostname }}
+myhostname = {{ inventory_hostname }}.localdomain
+mydomain = localdomain
+myorigin = $mydomain
+append_dot_mydomain = no
 
 # Listen only on loopback interfaces
 inet_interfaces = loopback-only
 inet_protocols = all
 
 # Accept mail only for local destinations
-mydestination = localhost
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
 
 # No outbound relay
 relayhost =
@@ -26,12 +29,12 @@ mynetworks = 127.0.0.0/8 [::1]/128
 # local_transport = error: local delivery disabled
 
 # SMTP timeouts (defensive, avoids hanging clients)
-smtp_connect_timeout = {{ SYSTEM_EMAIL.TIMEOUT }}s
-smtp_helo_timeout = {{ SYSTEM_EMAIL.TIMEOUT }}s
-smtp_mail_timeout = {{ SYSTEM_EMAIL.TIMEOUT }}s
-smtp_rcpt_timeout = {{ SYSTEM_EMAIL.TIMEOUT }}s
-smtp_data_init_timeout = {{ SYSTEM_EMAIL.TIMEOUT }}s
-smtp_data_xfer_timeout = {{ SYSTEM_EMAIL.TIMEOUT }}s
+smtp_connect_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
+smtp_helo_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
+smtp_mail_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
+smtp_rcpt_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
+smtp_data_init_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
+smtp_data_xfer_timeout = {{ SYSTEM_EMAIL_TIMEOUT }}s
 
 # Mandatory relay restrictions (prevents open relay and startup failures)
 smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination

@@ -1,41 +1,19 @@
 # Set default values for all following accounts.
 defaults
-logfile ~/.msmtp.log
-timeout {{ SYSTEM_EMAIL.TIMEOUT }}
-syslog {{ (MODE_DEBUG | bool) | ternary('on','off') }}
-{% if 'web-app-mailu' in group_names %}
-auth           {{ 'on' if SYSTEM_EMAIL.TLS | bool else 'off' }}
-tls_starttls   {{ 'on' if SYSTEM_EMAIL.START_TLS | bool else 'off' }}
-{% if SYSTEM_EMAIL.TLS | bool %}
-tls            on
+logfile         ~/.msmtp.log
+timeout         {{ SYSTEM_EMAIL_TIMEOUT }}
+syslog          {{ (MODE_DEBUG | bool) | ternary('on','off') }}
+auth            {{ SYSTEM_EMAIL_AUTH | ternary('on','off')}}
+tls_starttls    {{ (SYSTEM_EMAIL_START_TLS | bool) | ternary('on','off') }}
+tls             {{ (SYSTEM_EMAIL_TLS | bool ) | ternary('on','off') }}
 tls_trust_file /etc/ssl/certs/ca-certificates.crt
-{% else %}
-tls            off
-{% endif %}
-
-{% set no_reply = users.get('no-reply', {}) %}
-{% set no_reply_email = no_reply.get('email', SYSTEM_EMAIL.FROM | default('no-reply@' ~ SYSTEM_EMAIL.HOST)) %}
-{% set no_reply_token = (users['no-reply'].tokens | default({})).get('web-app-mailu', '') %}
 
 account        system_email_no_reply
-host           {{ SYSTEM_EMAIL.HOST }}
-port           {{ SYSTEM_EMAIL.PORT }}
-from           {{ no_reply_email }}
-user           {{ no_reply_email }}
-password       {{ no_reply_token }}
-
-account default : system_email_no_reply
-
-{% else %}
-# Localhost relay – no auth
-auth           off
-tls_starttls   off
-tls            off
-
-account        local_relay
-host           localhost
-port           25
-from           root@{{ inventory_hostname }}
-
-account default : local_relay
+host           {{ SYSTEM_EMAIL_HOST }}
+port           {{ SYSTEM_EMAIL_PORT }}
+from           {{ SYSTEM_EMAIL_FROM }}
+{% if (SYSTEM_EMAIL_AUTH | bool) %}
+user           {{ SYSTEM_EMAIL_USERNAME }}
+password       {{ SYSTEM_EMAIL_PASSWORD }}
 {% endif %}
+account default : system_email_no_reply
