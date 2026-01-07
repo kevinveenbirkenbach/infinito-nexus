@@ -4,16 +4,33 @@
     state: present
   become: true
 
-- name: "pkgmgr install"
+- name: Install gitconfig CLI system-wide via pip
   include_role:
-    name: pkgmgr-install
+    name: sys-pip-install
   vars:
     package_name: gitconfig
 
 - when: run_once_desk_git is not defined
   block:
-    - name: setup git
-      command: gitconfig --merge-option rebase --name "{{ users[WORKSTATION_USER].full_name }}" --email "{{ users[WORKSTATION_USER].email }}" --website "{{ users[WORKSTATION_USER].website }}" --signing gpg --gpg-key "{{ users[WORKSTATION_USER].gpg }}"
-      become: false
-  
+    - name: setup git (as workstation user)
+      ansible.builtin.command:
+        argv:
+          - gitconfig
+          - --merge-option
+          - rebase
+          - --name
+          - "{{ users[WORKSTATION_USER].full_name }}"
+          - --email
+          - "{{ users[WORKSTATION_USER].email }}"
+          - --website
+          - "{{ users[WORKSTATION_USER].website }}"
+          - --signing
+          - gpg
+          - --gpg-key
+          - "{{ users[WORKSTATION_USER].gpg }}"
+      become: true
+      become_user: "{{ users[WORKSTATION_USER].username }}"
+      environment:
+        PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
     - include_tasks: utils/once/flag.yml
