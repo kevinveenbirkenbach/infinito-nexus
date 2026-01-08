@@ -17,9 +17,10 @@ jobs:
     env:
       NIX_CONFIG: |
         access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Show Docker version
         run: docker version
@@ -48,22 +49,15 @@ jobs:
           docker compose --profile ci up -d coredns infinito
 
           apps_json="$(scripts/tests/discover-server-apps.sh)"
-
-          # Ensure we always write valid JSON to the output
           if [[ -z "${apps_json}" ]]; then
             apps_json="[]"
           fi
 
-          {
-            echo "apps<<EOF"
-            echo "${apps_json}"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
-
+          echo "apps=${apps_json}" >> "$GITHUB_OUTPUT"
           echo "Discovered apps: ${apps_json}"
 
   test:
-    name: "deploy:server app=${{ matrix.app }} (${{ matrix.distro }})"
+    name: "deploy:server app=${{ matrix.app }} (all distros)"
     needs: discover
     runs-on: ubuntu-latest
     timeout-minutes: 240
@@ -71,7 +65,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        distro: [arch, debian, ubuntu, fedora, centos]
         app: ${{ fromJson(needs.discover.outputs.apps) }}
 
     env:
@@ -80,44 +73,59 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Show Docker version
         run: docker version
 
-      - name: Run deploy test (server, per app)
+      - name: Run deploy test (server, per app, all distros)
         shell: bash
         run: |
           set -euo pipefail
-          export INFINITO_DISTRO="${{ matrix.distro }}"
+
           mkdir -p logs
 
-          log_file="logs/deploy-server-${{ matrix.distro }}-${{ matrix.app }}.log"
+          app="${{ matrix.app }}"
+          distros=(arch debian ubuntu fedora centos)
 
-          {
-            echo "=== $(date -u) ==="
-            echo "Deploy type: server"
-            echo "Distro: ${INFINITO_DISTRO}"
-            echo "App: ${{ matrix.app }}"
-            echo
-            echo "--- make down ---"
-            make down
-            echo
-            echo "--- deploy (per app) ---"
-            scripts/tests/deploy.sh --type server --app "${{ matrix.app }}"
-          } 2>&1 | tee "${log_file}"
+          overall_rc=0
 
-      - name: Show last lines on failure
-        if: failure()
-        shell: bash
-        run: |
-          tail -n 200 "logs/deploy-server-${{ matrix.distro }}-${{ matrix.app }}.log"
+          for distro in "${distros[@]}"; do
+            export INFINITO_DISTRO="${distro}"
+
+            log_file="logs/deploy-server-${distro}-${app}.log"
+
+            echo "=== $(date -u) ===" | tee "${log_file}"
+            echo "Deploy type: server" | tee -a "${log_file}"
+            echo "Distro: ${distro}" | tee -a "${log_file}"
+            echo "App: ${app}" | tee -a "${log_file}"
+            echo | tee -a "${log_file}"
+
+            {
+              echo "--- make down ---"
+              make down
+              echo
+              echo "--- deploy (per app) ---"
+              scripts/tests/deploy.sh --type server --app "${app}"
+            } 2>&1 | tee -a "${log_file}"
+
+            rc="${PIPESTATUS[0]}"
+            if [[ "${rc}" != "0" ]]; then
+              overall_rc=1
+              echo "[ERROR] Deploy failed for distro=${distro} app=${app}" | tee -a "${log_file}"
+              echo "--- last 200 lines ---" | tee -a "${log_file}"
+              tail -n 200 "${log_file}" || true
+              echo
+            fi
+          done
+
+          exit "${overall_rc}"
 
       - name: Upload deploy logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
-          name: deploy-logs-server-${{ matrix.distro }}-${{ matrix.app }}
-          path: logs/deploy-server-${{ matrix.distro }}-${{ matrix.app }}.log
+          name: deploy-logs-server-${{ matrix.app }}
+          path: logs/deploy-server-*-{{ matrix.app }}.log
           if-no-files-found: warn
           retention-days: 14

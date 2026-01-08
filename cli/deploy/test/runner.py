@@ -26,12 +26,19 @@ def _repo_root_from_here() -> Path:
 def _get_invokable(compose: Compose) -> list[str]:
     # Capture output deterministically.
     r = compose.run(
-        ["exec", "-T", "infinito", "sh", "-lc", "python3 -m cli.meta.applications.invokable"],
+        [
+            "exec",
+            "-T",
+            "infinito",
+            "sh",
+            "-lc",
+            "python3 -m cli.meta.applications.invokable",
+        ],
         check=True,
         capture=True,
     )
     txt = (r.stdout or "").strip()
-    return [l.strip() for l in txt.splitlines() if l.strip()]
+    return [list.strip() for list in txt.splitlines() if list.strip()]
 
 
 def _ensure_vault_password_file(compose: Compose) -> None:
@@ -73,6 +80,7 @@ def _create_inventory(compose: Compose, exclude_csv: str) -> None:
         workdir="/opt/src/infinito",
     )
     _ensure_vault_password_file(compose)
+
 
 def _run_deploy(compose: Compose, deploy_type: str, extra_args: list[str]) -> int:
     cmd = [

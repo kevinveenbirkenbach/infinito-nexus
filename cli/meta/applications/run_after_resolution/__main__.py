@@ -80,7 +80,9 @@ def resolve_run_after_transitively(start_role: str) -> List[str]:
     """
     rdir = roles_dir()
     if not (rdir / start_role).is_dir():
-        raise RunAfterResolutionError(f"Unknown role: {start_role!r} (missing folder {rdir / start_role})")
+        raise RunAfterResolutionError(
+            f"Unknown role: {start_role!r} (missing folder {rdir / start_role})"
+        )
 
     # Cache run_after lists per role for speed and consistent error reporting
     cache: Dict[str, List[str]] = {}
@@ -104,7 +106,9 @@ def resolve_run_after_transitively(start_role: str) -> List[str]:
             # Cycle: show a readable path: A -> B -> C -> A
             idx = stack.index(node)
             cycle = stack[idx:] + [node]
-            raise RunAfterResolutionError(f"Circular run_after dependency detected: {' -> '.join(cycle)}")
+            raise RunAfterResolutionError(
+                f"Circular run_after dependency detected: {' -> '.join(cycle)}"
+            )
 
         if node in visited:
             return
@@ -129,7 +133,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Resolve all galaxy_info.run_after dependencies of a role transitively."
     )
-    parser.add_argument("role_name", help="Name of the role folder under ./roles (e.g., web-app-taiga)")
+    parser.add_argument(
+        "role_name", help="Name of the role folder under ./roles (e.g., web-app-taiga)"
+    )
     args = parser.parse_args()
 
     resolved = resolve_run_after_transitively(args.role_name)
