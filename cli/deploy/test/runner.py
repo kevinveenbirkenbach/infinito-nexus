@@ -217,7 +217,7 @@ def run_test_plan(
         append_text(main_log, f"\nmode=server-per-app\napps={len(server_apps)}\n")
 
         for app in server_apps:
-            deps = resolve_run_after(app)
+            deps = resolve_run_after(compose, app)
             include = apps_with_deps(app, deps_role_names=deps)
 
             include_set = set(include)

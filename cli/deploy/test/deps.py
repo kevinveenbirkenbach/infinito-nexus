@@ -1,22 +1,22 @@
 from __future__ import annotations
 
-import subprocess
+from .compose import Compose
 
 
-def resolve_run_after(role_name: str) -> list[str]:
+def resolve_run_after(compose: Compose, role_name: str) -> list[str]:
     """
-    Calls your existing resolver:
+    Calls resolver inside the infinito container:
       python -m cli.meta.applications.run_after_resolution <role_name>
-
-    Returns a list of role folder names (e.g., web-app-foo web-svc-bar ...)
     """
     cmd = ["python3", "-m", "cli.meta.applications.run_after_resolution", role_name]
-    r = subprocess.run(cmd, text=True, capture_output=True)
+    r = compose.exec(cmd, check=False, workdir="/opt/src/infinito")
+
     if r.returncode != 0:
         raise RuntimeError(
             f"run_after_resolution failed for {role_name} (rc={r.returncode})\n"
             f"STDOUT:\n{r.stdout}\nSTDERR:\n{r.stderr}"
         )
+
     txt = (r.stdout or "").strip()
     if not txt:
         return []
