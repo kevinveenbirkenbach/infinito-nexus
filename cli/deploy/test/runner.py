@@ -267,11 +267,12 @@ def run_test_plan(
         append_text(main_log, f"\nERROR: {exc}\n")
         return 1
     finally:
-        # Keep stack only on failure (as requested)
-        if keep_stack_on_failure and exit_code != 0:
-            return
-
-        try:
-            compose.down()
-        except Exception:
+        should_keep = keep_stack_on_failure and exit_code != 0
+        if should_keep:
+            # do not tear down
             pass
+        else:
+            try:
+                compose.down()
+            except Exception:
+                pass
