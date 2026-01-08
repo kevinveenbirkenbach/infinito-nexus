@@ -198,11 +198,29 @@ test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
 test-deploy:
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
-	scripts/tests/deploy.sh \
-	  --type "$(TEST_DEPLOY_TYPE)" \
-	  --missing
+	@set -euo pipefail; \
+	echo "=== Discover server apps (JSON) ==="; \
+	export INFINITO_DISTRO="arch"; \
+	cleanup() { \
+		$(MAKE) down || true; \
+	}; \
+	trap cleanup EXIT; \
+	$(MAKE) build-missing; \
+	$(MAKE) up SERVICES="coredns infinito"; \
+	apps_json="$$(scripts/tests/discover-server-apps.sh)"; \
+	if [[ -z "$$apps_json" ]]; then apps_json="[]"; fi; \
+	echo "$$apps_json" | jq -e . >/dev/null; \
+	echo "Apps: $$apps_json"; \
+	echo; \
+	for app in $$(echo "$$apps_json" | jq -r '.[]'); do \
+		echo "=== act: deploy:server app=$$app (serial, fail-fast) ==="; \
+		act -W .github/workflows/test-deploy-server.yml \
+		-j test \
+		--matrix app:"$$app" \
+		--privileged --network host --concurrent-jobs 1; \
+		echo; \
+	done
+
 
 # Backwards compatible target (kept)
 lint-ansible:
