@@ -67,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
         "-c",
         "--categories-file",
         default=os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "roles", "categories.yml")
+            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "roles", "categories.yml")
         ),
         help="Path to roles/categories.yml (default: roles/categories.yml at project root)",
     )
@@ -75,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
         "-r",
         "--roles-dir",
         default=os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "roles")
+            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "roles")
         ),
         help="Path to roles/ directory (default: roles/ at project root)",
     )
