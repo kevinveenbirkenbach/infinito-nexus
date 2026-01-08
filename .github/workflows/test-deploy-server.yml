@@ -130,6 +130,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: deploy-logs-server-${{ matrix.app }}
-          path: logs/deploy-server-*-{{ matrix.app }}.log
+          path: logs/deploy-server-*-${{ matrix.app }}.log
           if-no-files-found: warn
           retention-days: 14
