@@ -197,16 +197,10 @@ test-unit: build-missing
 test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
-test-deploy:
+test-deploy: build-missing up
 	@set -euo pipefail; \
 	echo "=== Discover server apps (JSON) ==="; \
 	export INFINITO_DISTRO="arch"; \
-	cleanup() { \
-		$(MAKE) down || true; \
-	}; \
-	trap cleanup EXIT; \
-	$(MAKE) build-missing; \
-	$(MAKE) up SERVICES="coredns infinito"; \
 	apps_json="$$(scripts/tests/discover-server-apps.sh)"; \
 	if [[ -z "$$apps_json" ]]; then apps_json="[]"; fi; \
 	echo "$$apps_json" | jq -e . >/dev/null; \

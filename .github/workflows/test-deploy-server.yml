@@ -37,17 +37,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
           export INFINITO_DISTRO="arch"
-
-          cleanup() {
-            docker compose --profile ci down --remove-orphans -v || true
-          }
-          trap cleanup EXIT
-
-          docker compose --profile ci build infinito
-          docker compose --profile ci up -d coredns infinito
-
+          make down
+          make up
           apps_json="$(scripts/tests/discover-server-apps.sh)"
           if [[ -z "${apps_json}" ]]; then
             apps_json="[]"
@@ -108,7 +100,7 @@ jobs:
               make down || true
               echo
               echo "--- deploy (per app) ---"
-              scripts/tests/deploy.sh --type server --app "${app}"
+              scripts/tests/deploy.sh --missing --type server --app "${app}"
             } 2>&1 | tee -a "${log_file}"
           done
 

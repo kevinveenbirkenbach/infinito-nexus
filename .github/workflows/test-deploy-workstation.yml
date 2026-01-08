@@ -47,7 +47,7 @@ jobs:
             make down
             echo
             echo "--- make test-deploy ---"
-            scripts/tests/deploy.sh --type workstation
+            scripts/tests/deploy.sh --type workstation --missing
           } 2>&1 | tee "${log_file}"
 
       - name: Show last lines on failure
