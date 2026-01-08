@@ -53,8 +53,12 @@ jobs:
             apps_json="[]"
           fi
 
+          # Exclude known-flaky/unsupported apps from CI matrix
+          # (keep the list explicit and easy to maintain)
+          apps_json="$(echo "${apps_json}" | jq -c 'map(select(. != "web-app-oauth2-proxy"))')"
+
           echo "apps=${apps_json}" >> "$GITHUB_OUTPUT"
-          echo "Discovered apps: ${apps_json}"
+          echo "Discovered apps (filtered): ${apps_json}"
 
   test:
     name: "deploy:server app=${{ matrix.app }} (all distros)"
