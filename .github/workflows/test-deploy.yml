@@ -66,7 +66,7 @@ jobs:
 
       - name: Upload deploy logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: deploy-logs-${{ inputs.deploy_type }}-${{ matrix.distro }}
           path: logs/deploy-${{ inputs.deploy_type }}-${{ matrix.distro }}.log
