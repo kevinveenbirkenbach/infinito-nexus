@@ -211,7 +211,9 @@ test-deploy: build-missing up
 		act -W .github/workflows/test-deploy-server.yml \
 		-j test \
 		--matrix app:"$$app" \
-		--privileged --network host --concurrent-jobs 1; \
+		--privileged \
+		--network host \
+		--concurrent-jobs 1; \
 		echo; \
 	done
 

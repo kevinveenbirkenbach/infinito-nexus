@@ -100,7 +100,7 @@ jobs:
               make down || true
               echo
               echo "--- deploy (per app) ---"
-              scripts/tests/deploy.sh --missing --type server --app "${app}"
+              scripts/tests/deploy.sh --missing --type server --app "${app}" --keep-stack-on-failure
             } 2>&1 | tee -a "${log_file}"
           done
 
@@ -110,8 +110,14 @@ jobs:
         run: |
           echo "=== DEBUG: logs directory ==="
           ls -la logs || true
+
+          echo
+          echo "=== tail -n 200 logs/deploy-server-arch-orchestrator.log ==="
+          tail -n 200 logs/deploy-server-arch-orchestrator.log || true
+          echo
+
           shopt -s nullglob
-          for f in logs/deploy-server-*-${{ matrix.app }}.log; do
+          for f in logs/deploy-server-*-${{ matrix.app }}.log logs/deploy-server-*-app-${{ matrix.app }}.log; do
             echo "=== tail -n 200 $f ==="
             tail -n 200 "$f" || true
             echo
