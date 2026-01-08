@@ -11,6 +11,7 @@ from filter_plugins.get_all_application_ids import get_all_application_ids
 class ValidDeployId:
     def __init__(self, roles_dir="roles"):
         # Load all known application IDs from roles
+        print(f"[INFO] roles_dir used for application id discovery: {roles_dir}")
         self.valid_ids = set(get_all_application_ids(roles_dir))
 
     def validate(self, inventory_path, ids):
