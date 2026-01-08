@@ -4,7 +4,6 @@ import os
 import tempfile
 import unittest
 import yaml
-from pathlib import Path
 
 from module_utils.valid_deploy_id import ValidDeployId
 
@@ -45,7 +44,9 @@ class TestValidDeployId(unittest.TestCase):
 """
         inv = self._write_ini_inventory(ini_content)
         result = self.validator.validate(inv, [self.existing_app])
-        self.assertEqual(result, {}, "app should be valid when in roles and ini inventory")
+        self.assertEqual(
+            result, {}, "app should be valid when in roles and ini inventory"
+        )
 
     def test_missing_in_roles(self) -> None:
         ini_content = f"""

@@ -27,7 +27,9 @@ class ValidDeployId:
         self.roles_dir = roles_dir
         self.valid_ids = set(get_all_application_ids(str(roles_dir)))
 
-    def validate(self, inventory_path: str, ids: list[str]) -> dict[str, dict[str, bool]]:
+    def validate(
+        self, inventory_path: str, ids: list[str]
+    ) -> dict[str, dict[str, bool]]:
         """
         Validate a list of application IDs against both role definitions and inventory.
 

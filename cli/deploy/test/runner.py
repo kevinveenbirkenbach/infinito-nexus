@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -38,7 +39,49 @@ def _get_invokable(compose: Compose) -> list[str]:
         capture=True,
     )
     txt = (r.stdout or "").strip()
-    return [list.strip() for list in txt.splitlines() if list.strip()]
+    return [line.strip() for line in txt.splitlines() if line.strip()]
+
+
+def _tested_lifecycles_from_env() -> list[str]:
+    """
+    Lifecycles that are considered "tested" and therefore allowed to run.
+
+    Compatible with the old bash runner behavior:
+      TESTED_LIFECYCLES="alpha beta rc stable"
+    """
+    raw = os.environ.get("TESTED_LIFECYCLES", "alpha beta rc stable").strip()
+    if not raw:
+        return []
+    # allow both space and comma-separated input
+    raw = raw.replace(",", " ")
+    return [t.strip() for t in raw.split() if t.strip()]
+
+
+def _get_lifecycle_exclude(compose: Compose, tested_lifecycles: list[str]) -> list[str]:
+    """
+    Returns role names to exclude based on lifecycle_filter blacklist mode:
+      exclude any role whose lifecycle is NOT in tested_lifecycles
+    """
+    if not tested_lifecycles:
+        return []
+
+    lifecycles_arg = " ".join(tested_lifecycles)
+
+    # lifecycle_filter prints role names space-separated -> convert to newline
+    r = compose.run(
+        [
+            "exec",
+            "-T",
+            "infinito",
+            "sh",
+            "-lc",
+            f"python3 -m cli.meta.roles.lifecycle_filter blacklist {lifecycles_arg} | tr ' ' '\\n'",
+        ],
+        check=True,
+        capture=True,
+    )
+    txt = (r.stdout or "").strip()
+    return [line.strip() for line in txt.splitlines() if line.strip()]
 
 
 def _ensure_vault_password_file(compose: Compose) -> None:
@@ -127,10 +170,31 @@ def run_test_plan(
         compose.up()
 
         invokable = _get_invokable(compose)
+        invokable_set = set(invokable)
+
+        tested_lifecycles = _tested_lifecycles_from_env()
+        lifecycle_exclude = _get_lifecycle_exclude(compose, tested_lifecycles)
+        lifecycle_exclude_set = set(lifecycle_exclude) & invokable_set
+
+        append_text(
+            main_log,
+            "\n".join(
+                [
+                    "",
+                    f"tested_lifecycles={','.join(tested_lifecycles) if tested_lifecycles else '<none>'}",
+                    f"lifecycle_exclude_count={len(lifecycle_exclude_set)}",
+                    "",
+                ]
+            ),
+        )
 
         if deploy_type == "workstation":
             allowed = filter_allowed_workstation(invokable)
-            exclude = sorted(set(invokable) - set(allowed))
+            allowed_set = set(allowed)
+
+            # Exclude everything not in allowed, plus lifecycle-based excludes
+            exclude_set = (invokable_set - allowed_set) | lifecycle_exclude_set
+            exclude = sorted(exclude_set)
             exclude_csv = ",".join(exclude)
 
             append_text(main_log, f"\nmode=workstation\nallowed_count={len(allowed)}\n")
@@ -142,6 +206,11 @@ def run_test_plan(
 
         # server mode: per-app deploy
         server_apps = filter_allowed_server(invokable)
+
+        # Apply lifecycle gating to the server app list (so we don't try apps excluded by lifecycle)
+        if lifecycle_exclude_set:
+            server_apps = [a for a in server_apps if a not in lifecycle_exclude_set]
+
         if only_app:
             server_apps = [only_app]
 
@@ -152,7 +221,10 @@ def run_test_plan(
             include = apps_with_deps(app, deps_role_names=deps)
 
             include_set = set(include)
-            exclude = sorted([a for a in invokable if a not in include_set])
+
+            # Always exclude lifecycle-blacklisted roles as well
+            exclude_set = (invokable_set - include_set) | lifecycle_exclude_set
+            exclude = sorted(exclude_set)
             exclude_csv = ",".join(exclude)
 
             per_app_log = log_path(logs_dir, deploy_type, distro, f"app-{app}")
@@ -164,6 +236,7 @@ def run_test_plan(
                         f"deps={','.join(deps) if deps else '<none>'}",
                         f"include={','.join(include)}",
                         f"exclude_count={len(exclude)}",
+                        f"lifecycle_exclude_count={len(lifecycle_exclude_set)}",
                     ]
                 )
                 + "\n",
