@@ -73,7 +73,6 @@ RUN set -euo pipefail; \
 # systemd-in-container conventions
 ENV container=docker
 STOPSIGNAL SIGRTMIN+3
-VOLUME ["/sys/fs/cgroup"]
 
 # ------------------------------------------------------------
 # Install infinito via pkgmgr (shallow)
