@@ -117,3 +117,6 @@ HCAPTCHA_ENABLED:  "{{ (CAPTCHA.HCAPTCHA.KEY   | default('') | length > 0)
 WEBSERVER_CORE_APPLICATIONS: 
   - web-svc-logout
   - web-svc-cdn
+
+# User of the workstation, change it to the productive user before setup
+WORKSTATION_USER: 'administrator'
