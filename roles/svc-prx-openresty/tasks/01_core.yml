@@ -1,3 +1,12 @@
+- name: Ensure base nginx.conf exists (bootstrap)
+  ansible.builtin.copy:
+    dest: "{{ NGINX.FILES.CONFIGURATION }}"
+    force: false
+    mode: "0644"
+    content: |
+      events {}
+      http { server { listen 8080; return 200; } }
+
 - name: "For '{{ application_id }}': Load docker-compose"
   include_role:
     name: docker-compose
