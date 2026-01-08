@@ -1,4 +1,3 @@
-# File: module_utils/valid_deploy_id.py
 """
 Utility for validating deployment application IDs against defined roles and inventory.
 """
