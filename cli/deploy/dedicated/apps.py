@@ -1,3 +1,9 @@
+from __future__ import annotations
+
+import sys
+from typing import List
+
+
 def _dump_inventory_full(inventory: str) -> None:
     """
     Print the full inventory file content (raw) to simplify CI debugging.
@@ -38,13 +44,11 @@ def validate_application_ids(inventory: str, app_ids: List[str]) -> None:
     print("\n[ERROR] Some application_ids are invalid for this inventory:\n")
     for app_id, status in invalid.items():
         reasons = []
-        if not status.get("allowed", True):
-            reasons.append("not allowed by configuration")
+        if not status.get("in_roles", True):
+            reasons.append("not defined as a role")
         if not status.get("in_inventory", True):
             reasons.append("not present in inventory")
         print(f"  - {app_id}: {', '.join(reasons)}")
 
-    # NEW: dump full inventory content for debugging
     _dump_inventory_full(inventory)
-
     sys.exit(1)
