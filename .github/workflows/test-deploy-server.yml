@@ -107,23 +107,29 @@ jobs:
 
             {
               echo "--- make down ---"
-              make down
+              make down || true
               echo
               echo "--- deploy (per app) ---"
-              scripts/tests/deploy.sh --type server --app "${app}"
+              if ! scripts/tests/deploy.sh --type server --app "${app}"; then
+                overall_rc=1
+              fi
             } 2>&1 | tee -a "${log_file}"
-
-            rc="${PIPESTATUS[0]}"
-            if [[ "${rc}" != "0" ]]; then
-              overall_rc=1
-              echo "[ERROR] Deploy failed for distro=${distro} app=${app}" | tee -a "${log_file}"
-              echo "--- last 200 lines ---" | tee -a "${log_file}"
-              tail -n 200 "${log_file}" || true
-              echo
-            fi
           done
 
           exit "${overall_rc}"
+
+      - name: Show last lines on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "=== DEBUG: logs directory ==="
+          ls -la logs || true
+          shopt -s nullglob
+          for f in logs/deploy-server-*-${{ matrix.app }}.log; do
+            echo "=== tail -n 200 $f ==="
+            tail -n 200 "$f" || true
+            echo
+          done
 
       - name: Upload deploy logs
         if: ${{ always() && env.ACT != 'true' }}
