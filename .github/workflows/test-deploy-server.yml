@@ -8,8 +8,116 @@ permissions:
   packages: read
 
 jobs:
-  call:
-    uses: ./.github/workflows/test-deploy.yml
-    with:
-      deploy_type: server
-    secrets: inherit
+  discover:
+    name: Discover server apps
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      apps: ${{ steps.discover.outputs.apps }}
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Show Docker version
+        run: docker version
+
+      - name: Install jq
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Discover invokable server apps (JSON)
+        id: discover
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          export INFINITO_DISTRO="arch"
+
+          cleanup() {
+            docker compose --profile ci down --remove-orphans -v || true
+          }
+          trap cleanup EXIT
+
+          docker compose --profile ci build infinito
+          docker compose --profile ci up -d coredns infinito
+
+          apps_json="$(scripts/tests/discover-server-apps.sh)"
+
+          # Ensure we always write valid JSON to the output
+          if [[ -z "${apps_json}" ]]; then
+            apps_json="[]"
+          fi
+
+          {
+            echo "apps<<EOF"
+            echo "${apps_json}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Discovered apps: ${apps_json}"
+
+  test:
+    name: "deploy:server app=${{ matrix.app }} (${{ matrix.distro }})"
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: [arch, debian, ubuntu, fedora, centos]
+        app: ${{ fromJson(needs.discover.outputs.apps) }}
+
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Show Docker version
+        run: docker version
+
+      - name: Run deploy test (server, per app)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export INFINITO_DISTRO="${{ matrix.distro }}"
+          mkdir -p logs
+
+          log_file="logs/deploy-server-${{ matrix.distro }}-${{ matrix.app }}.log"
+
+          {
+            echo "=== $(date -u) ==="
+            echo "Deploy type: server"
+            echo "Distro: ${INFINITO_DISTRO}"
+            echo "App: ${{ matrix.app }}"
+            echo
+            echo "--- make down ---"
+            make down
+            echo
+            echo "--- deploy (per app) ---"
+            scripts/tests/deploy.sh --type server --app "${{ matrix.app }}"
+          } 2>&1 | tee "${log_file}"
+
+      - name: Show last lines on failure
+        if: failure()
+        shell: bash
+        run: |
+          tail -n 200 "logs/deploy-server-${{ matrix.distro }}-${{ matrix.app }}.log"
+
+      - name: Upload deploy logs
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: deploy-logs-server-${{ matrix.distro }}-${{ matrix.app }}
+          path: logs/deploy-server-${{ matrix.distro }}-${{ matrix.app }}.log
+          if-no-files-found: warn
+          retention-days: 14
