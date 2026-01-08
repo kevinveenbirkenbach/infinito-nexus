@@ -92,8 +92,6 @@ jobs:
           app="${{ matrix.app }}"
           distros=(arch debian ubuntu fedora centos)
 
-          overall_rc=0
-
           for distro in "${distros[@]}"; do
             export INFINITO_DISTRO="${distro}"
 
@@ -110,13 +108,9 @@ jobs:
               make down || true
               echo
               echo "--- deploy (per app) ---"
-              if ! scripts/tests/deploy.sh --type server --app "${app}"; then
-                overall_rc=1
-              fi
+              scripts/tests/deploy.sh --type server --app "${app}"
             } 2>&1 | tee -a "${log_file}"
           done
-
-          exit "${overall_rc}"
 
       - name: Show last lines on failure
         if: failure()
