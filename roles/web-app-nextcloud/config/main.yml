@@ -115,7 +115,7 @@ docker:
       mem_reservation:     "2g"
       mem_limit:           "4g"
       pids_limit:          1024
-  enabled:  "{{ applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}"   # Activate OIDC for Nextcloud
+  enabled:  "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin
   # @see https://apps.nextcloud.com/apps/oidc_login
@@ -323,13 +323,13 @@ plugins:
   #  enabled: false
   twofactor_nextcloud_notification:
     # Nextcloud two-factor notification: sends notifications for two-factor authentication events (https://apps.nextcloud.com/apps/twofactor_nextcloud_notification)
-    enabled: "{{ not applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True))}}" # Deactivate 2FA if oidc is active
   twofactor_totp:
     # Nextcloud two-factor TOTP: provides time-based one-time password authentication (https://apps.nextcloud.com/apps/twofactor_totp)
-    enabled: "{{ not applications | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True))}}" # Deactivate 2FA if oidc is active
   user_ldap:
     # Nextcloud user LDAP: integrates LDAP for user management and authentication (https://apps.nextcloud.com/apps/user_ldap)
-    enabled: "{{ applications | get_app_conf('web-app-nextcloud', 'features.ldap', False, True, True) }}"
+    enabled: "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'features.ldap', False, True, True) }}"
     user_directory:
       enabled:  true # Enables the LDAP User Directory Search
   user_oidc:
