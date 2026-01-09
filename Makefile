@@ -65,7 +65,7 @@ RESERVED_USERNAMES := $(shell \
 
 .PHONY: \
 	setup setup-clean install install-ansible install-venv install-python \
-	test test-lint test-unit test-integration test-deploy \
+	test test-lint test-unit test-integration test-deploy test-deploy-app\
 	clean down \
 	list tree mig dockerignore \
 	print-python lint-ansible
@@ -188,6 +188,9 @@ format:
 
 # --- Tests (separated) ---
 
+test: test-lint test-unit test-integration lint-ansible test-deploy
+	@echo "✅ Full test (setup + tests) executed."
+
 test-lint: build-missing
 	@TEST_TYPE="lint" bash scripts/tests/code.sh
 
@@ -197,6 +200,29 @@ test-unit: build-missing
 test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
+# ------------------------------------------------------------
+# Deploy test for a single app (serial, fail-fast)
+# Usage:
+#   make test-deploy-app APP=web-app-nextcloud
+# ------------------------------------------------------------
+test-deploy-app: build-missing up
+	@set -euo pipefail; \
+	if [[ -z "$(APP)" ]]; then \
+	  echo "ERROR: APP is not set"; \
+	  echo "Usage: make test-deploy-app APP=web-app-nextcloud"; \
+	  exit 1; \
+	fi; \
+	echo "=== act: deploy:server app=$(APP) (serial, fail-fast) ==="; \
+	act -W .github/workflows/test-deploy-server.yml \
+		-j test \
+		--matrix app:"$(APP)" \
+		--privileged \
+		--network host \
+		--concurrent-jobs 1
+
+# ------------------------------------------------------------
+# Deploy test for all discovered apps (calls test-deploy-app)
+# ------------------------------------------------------------
 test-deploy: build-missing up
 	@set -euo pipefail; \
 	echo "=== Discover server apps (JSON) ==="; \
@@ -207,24 +233,14 @@ test-deploy: build-missing up
 	echo "Apps: $$apps_json"; \
 	echo; \
 	for app in $$(echo "$$apps_json" | jq -r '.[]'); do \
-		echo "=== act: deploy:server app=$$app (serial, fail-fast) ==="; \
-		act -W .github/workflows/test-deploy-server.yml \
-		-j test \
-		--matrix app:"$$app" \
-		--privileged \
-		--network host \
-		--concurrent-jobs 1; \
+		$(MAKE) test-deploy-app APP="$$app"; \
 		echo; \
 	done
-
 
 # Backwards compatible target (kept)
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
-
-test: test-lint test-unit test-integration lint-ansible test-deploy
-	@echo "✅ Full test (setup + tests) executed."
 
 # Debug helper
 print-python:
