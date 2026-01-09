@@ -168,10 +168,9 @@ def run_test_plan(
     try:
         compose.build_infinito(no_cache=no_cache, missing_only=missing_only)
         compose.up()
-        
+
         # critical: avoid race between "container is up" and "systemd is ready"
         compose.wait_for_systemd_ready(timeout_s=90)
-
 
         invokable = _get_invokable(compose)
         invokable_set = set(invokable)

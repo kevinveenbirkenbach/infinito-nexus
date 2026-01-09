@@ -50,11 +50,15 @@ class Compose:
                 stderr=subprocess.DEVNULL,
             )
             if r.returncode == 0:
-                print(f">>> Image already exists: {image} (skipping build due to --missing)")
+                print(
+                    f">>> Image already exists: {image} (skipping build due to --missing)"
+                )
                 return
 
         if no_cache:
-            print(f">>> docker compose build --no-cache infinito (INFINITO_DISTRO={self.distro})")
+            print(
+                f">>> docker compose build --no-cache infinito (INFINITO_DISTRO={self.distro})"
+            )
             self.run(["build", "--no-cache", "infinito"], check=True)
         else:
             print(f">>> docker compose build infinito (INFINITO_DISTRO={self.distro})")
