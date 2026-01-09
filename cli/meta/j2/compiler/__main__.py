@@ -4,9 +4,8 @@ import os
 import re
 import sys
 
-# Projekt-Root: vier Ebenen über diesem File
 PROJECT_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 )
 
 INCLUDE_RE = re.compile(r"^(\s*)\{%\s*include\s*['\"]([^'\"]+)['\"]\s*%\}")
