@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -49,15 +50,11 @@ class Compose:
                 stderr=subprocess.DEVNULL,
             )
             if r.returncode == 0:
-                print(
-                    f">>> Image already exists: {image} (skipping build due to --missing)"
-                )
+                print(f">>> Image already exists: {image} (skipping build due to --missing)")
                 return
 
         if no_cache:
-            print(
-                f">>> docker compose build --no-cache infinito (INFINITO_DISTRO={self.distro})"
-            )
+            print(f">>> docker compose build --no-cache infinito (INFINITO_DISTRO={self.distro})")
             self.run(["build", "--no-cache", "infinito"], check=True)
         else:
             print(f">>> docker compose build infinito (INFINITO_DISTRO={self.distro})")
@@ -77,6 +74,7 @@ class Compose:
         *,
         check: bool = True,
         workdir: str | None = None,
+        capture: bool = False,
     ) -> subprocess.CompletedProcess:
         """
         Execute inside infinito container.
@@ -87,4 +85,35 @@ class Compose:
         if workdir:
             args += ["-w", workdir]
         args += ["infinito", *cmd]
-        return self.run(args, check=check)
+        return self.run(args, check=check, capture=capture)
+
+    def wait_for_systemd_ready(self, *, timeout_s: int = 90) -> None:
+        """
+        Wait until systemd is ready to accept systemctl calls (DBus + /run/systemd/private).
+        Avoids a race right after compose up.
+        """
+        start = time.time()
+        while True:
+            r = self.exec(
+                [
+                    "sh",
+                    "-lc",
+                    # Must have systemd private socket + a stable running/degraded state
+                    "test -S /run/systemd/private && "
+                    "systemctl is-system-running --wait 2>/dev/null | grep -Eq 'running|degraded'",
+                ],
+                check=False,
+                capture=True,
+            )
+            if r.returncode == 0:
+                return
+
+            if (time.time() - start) > timeout_s:
+                raise RuntimeError(
+                    "systemd not ready after waiting. "
+                    f"last rc={r.returncode}\n"
+                    f"STDOUT:\n{r.stdout}\n"
+                    f"STDERR:\n{r.stderr}\n"
+                )
+
+            time.sleep(1)
