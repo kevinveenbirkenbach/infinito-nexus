@@ -12,30 +12,21 @@
   when: MODE_ASSERT | bool
 
 - name: docker compose pull
-  shell: |
-    set -euo pipefail
-    lock="{{ [ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR, (docker_compose.directories.instance | hash('sha1')) ~ '.lock' ] | path_join }}"
-    if [ ! -e "$lock" ]; then
-      mkdir -p "$(dirname "$lock")"
-      if docker compose config | grep -qE '^[[:space:]]+build:'; then
-        docker compose build --pull
-      fi
-      if docker compose pull --help 2>/dev/null | grep -q -- '--ignore-buildable'; then
-        docker compose pull --ignore-buildable
-      else
-        docker compose pull || true
-      fi
-      : > "$lock"
-      echo "pulled"
-    fi
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-    executable: /bin/bash
+  ansible.builtin.script:
+    cmd: >-
+      compose_pull.py
+      --chdir {{ docker_compose.directories.instance }}
+      --lock-dir {{ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR }}
+      --lock-key {{ docker_compose.directories.instance | hash('sha1') }}
+      --attempts 6
+      --sleep 20
+      --sleep-cap 240
+      --ignore-buildable
   register: compose_pull
   changed_when: "'pulled' in compose_pull.stdout"
   environment:
-    COMPOSE_HTTP_TIMEOUT:   "600"
-    DOCKER_CLIENT_TIMEOUT:  "600"
+    COMPOSE_HTTP_TIMEOUT: "600"
+    DOCKER_CLIENT_TIMEOUT: "600"
   when: MODE_UPDATE | bool
   listen:
     - docker compose up
