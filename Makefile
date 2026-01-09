@@ -126,10 +126,15 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
+# Global for all Infinito.Nexus environments used by the user
+ANSIBLE_COLLECTIONS_DIR ?= $(HOME)/.ansible/collections
+
 install-ansible:
-	@echo "📦 Installing Ansible collections globally (user scope) from requirements.yml"
-	@ansible-galaxy collection install \
+	@echo "📦 Installing Ansible collections → $(ANSIBLE_COLLECTIONS_DIR)"
+	@mkdir -p "$(ANSIBLE_COLLECTIONS_DIR)"
+	@"$(PYTHON)" -m ansible.cli.galaxy collection install \
 		-r requirements.yml \
+		-p "$(ANSIBLE_COLLECTIONS_DIR)" \
 		--force-with-deps
 
 install-venv:
