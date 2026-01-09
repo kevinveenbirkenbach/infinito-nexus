@@ -126,14 +126,11 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-ANSIBLE_COLLECTIONS_DIR ?= ./collections
-
 install-ansible:
-	@echo "📦 Installing Ansible collections from requirements.yml → $(ANSIBLE_COLLECTIONS_DIR)"
-	@mkdir -p "$(ANSIBLE_COLLECTIONS_DIR)"
-	@"$(PYTHON)" -m ansible.cli.galaxy collection install \
+	@echo "📦 Installing Ansible collections globally (user scope) from requirements.yml"
+	@ansible-galaxy collection install \
 		-r requirements.yml \
-		-p "$(ANSIBLE_COLLECTIONS_DIR)"
+		--force-with-deps
 
 install-venv:
 	@echo "✅ Python environment installed (editable)."
