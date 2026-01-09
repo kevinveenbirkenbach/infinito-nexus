@@ -225,8 +225,13 @@ def run_test_plan(
 
             include_set = set(include)
 
-            # Always exclude lifecycle-blacklisted roles as well
-            exclude_set = (invokable_set - include_set) | lifecycle_exclude_set
+            # which explicitly included apps are also lifecycle-blacklisted?
+            life_hit = sorted(lifecycle_exclude_set & include_set)
+
+            # Do not let lifecycle blacklist override explicit includes (deps)
+            exclude_set = (invokable_set - include_set) | (
+                lifecycle_exclude_set - include_set
+            )
             exclude = sorted(exclude_set)
             exclude_csv = ",".join(exclude)
 
@@ -238,6 +243,7 @@ def run_test_plan(
                         f"app={app}",
                         f"deps={','.join(deps) if deps else '<none>'}",
                         f"include={','.join(include)}",
+                        f"lifecycle_hit={','.join(life_hit) if life_hit else '<none>'}",
                         f"exclude_count={len(exclude)}",
                         f"lifecycle_exclude_count={len(lifecycle_exclude_set)}",
                     ]
