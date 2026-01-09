@@ -5,6 +5,7 @@ import argparse
 import os
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -16,14 +17,27 @@ class RunResult:
     stderr: str
 
 
+# Common transient network / transport errors seen with git+https in CI/docker.
+# We retry only when we are reasonably sure the failure is transient.
+TRANSIENT_MARKERS = (
+    "Connection reset by peer",
+    "Recv failure",
+    "Could not resolve host",
+    "Failed to connect",
+    "Operation timed out",
+    "The requested URL returned error: 5",  # e.g. 502/503/504 sometimes
+    "HTTP/2 stream",
+    "TLS",
+    "SSL",
+)
+
+
 def log(msg: str, verbose: bool) -> None:
     if verbose:
         print(f"[git-pull] {msg}", file=sys.stderr)
 
 
-def run(
-    cmd: List[str], cwd: Optional[str], verbose: bool, check: bool = False
-) -> RunResult:
+def run(cmd: List[str], cwd: Optional[str], verbose: bool) -> RunResult:
     log(f"run: {' '.join(cmd)} (cwd={cwd})", verbose)
     p = subprocess.run(
         cmd,
@@ -31,18 +45,71 @@ def run(
         text=True,
         capture_output=True,
     )
-    if check and p.returncode != 0:
-        raise RuntimeError(
-            f"Command failed (rc={p.returncode}): {' '.join(cmd)}\n"
-            f"cwd: {cwd}\n"
-            f"stdout:\n{p.stdout}\n"
-            f"stderr:\n{p.stderr}\n"
+    return RunResult(
+        p.returncode,
+        (p.stdout or "").strip(),
+        (p.stderr or "").strip(),
+    )
+
+
+def _is_transient_git_failure(r: RunResult) -> bool:
+    hay = (r.stderr or "") + "\n" + (r.stdout or "")
+    return any(m in hay for m in TRANSIENT_MARKERS)
+
+
+def run_checked(
+    cmd: List[str],
+    cwd: Optional[str],
+    verbose: bool,
+    *,
+    retries: int = 5,
+    backoff_cap_seconds: int = 20,
+) -> RunResult:
+    """
+    Run command and raise on failure.
+
+    For likely transient transport/network issues (common in CI/docker),
+    retry with exponential backoff.
+    """
+    last: Optional[RunResult] = None
+
+    for attempt in range(1, retries + 1):
+        r = run(cmd, cwd=cwd, verbose=verbose)
+        last = r
+
+        if r.rc == 0:
+            return r
+
+        transient = _is_transient_git_failure(r)
+        if not transient or attempt == retries:
+            raise RuntimeError(
+                f"Command failed (rc={r.rc}): {' '.join(cmd)}\n"
+                f"cwd: {cwd}\n"
+                f"stdout:\n{r.stdout}\n"
+                f"stderr:\n{r.stderr}\n"
+            )
+
+        sleep_s = min(2 ** (attempt - 1), backoff_cap_seconds)
+        log(
+            f"transient failure detected, retrying in {sleep_s}s "
+            f"(attempt {attempt}/{retries})",
+            verbose,
         )
-    return RunResult(p.returncode, (p.stdout or "").strip(), (p.stderr or "").strip())
+        time.sleep(sleep_s)
+
+    # Should never be reached, but keep type-checkers happy.
+    if last is not None:
+        raise RuntimeError(
+            f"Command failed (rc={last.rc}): {' '.join(cmd)}\n"
+            f"cwd: {cwd}\n"
+            f"stdout:\n{last.stdout}\n"
+            f"stderr:\n{last.stderr}\n"
+        )
+    raise RuntimeError("Command failed: unknown error")
 
 
-def git(dest: str, verbose: bool, *args: str, check: bool = False) -> RunResult:
-    return run(["git", *args], cwd=dest, verbose=verbose, check=check)
+def git(dest: str, verbose: bool, *args: str, retries: int = 5) -> RunResult:
+    return run_checked(["git", *args], cwd=dest, verbose=verbose, retries=retries)
 
 
 def ensure_dir(dest: str, verbose: bool) -> None:
@@ -62,12 +129,24 @@ def is_git_repo(dest: str) -> bool:
 
 
 def remote_exists(dest: str, remote: str, verbose: bool) -> bool:
-    r = git(dest, verbose, "remote")
+    r = run(["git", "remote"], cwd=dest, verbose=verbose)
+    # "git remote" should not fail for a valid repo; if it does, treat as fatal.
+    if r.rc != 0:
+        raise RuntimeError(
+            f"Command failed (rc={r.rc}): git remote\n"
+            f"cwd: {dest}\n"
+            f"stdout:\n{r.stdout}\n"
+            f"stderr:\n{r.stderr}\n"
+        )
     return remote in r.stdout.splitlines()
 
 
 def tag_exists(dest: str, tag: str, verbose: bool) -> bool:
-    r = git(dest, verbose, "rev-parse", "-q", "--verify", f"refs/tags/{tag}")
+    r = run(
+        ["git", "rev-parse", "-q", "--verify", f"refs/tags/{tag}"],
+        cwd=dest,
+        verbose=verbose,
+    )
     return r.rc == 0
 
 
@@ -75,21 +154,37 @@ def delete_tag_if_exists(dest: str, tag: str, verbose: bool) -> bool:
     if not tag_exists(dest, tag, verbose):
         return False
     log(f"deleting local tag: {tag}", verbose)
-    git(dest, verbose, "tag", "-d", tag, check=True)
+    git(dest, verbose, "tag", "-d", tag, retries=3)
     return True
 
 
 def get_local_tag_commit(dest: str, tag: str, verbose: bool) -> str:
-    r = git(dest, verbose, "rev-parse", "-q", "--verify", f"refs/tags/{tag}")
+    r = run(
+        ["git", "rev-parse", "-q", "--verify", f"refs/tags/{tag}"],
+        cwd=dest,
+        verbose=verbose,
+    )
     return r.stdout.strip() if r.rc == 0 else ""
 
 
 def resolve_remote_tag_commit(dest: str, remote: str, tag: str, verbose: bool) -> str:
-    r = git(dest, verbose, "ls-remote", "--tags", remote, f"{tag}^{{}}")
+    # Annotated tags: tag^{} resolves to the tagged commit.
+    r = run_checked(
+        ["git", "ls-remote", "--tags", remote, f"{tag}^{{}}"],
+        cwd=dest,
+        verbose=verbose,
+        retries=5,
+    )
     if r.stdout:
         return r.stdout.split()[0]
 
-    r = git(dest, verbose, "ls-remote", "--tags", remote, tag)
+    # Lightweight tags
+    r = run_checked(
+        ["git", "ls-remote", "--tags", remote, tag],
+        cwd=dest,
+        verbose=verbose,
+        retries=5,
+    )
     if r.stdout:
         return r.stdout.split()[0]
 
@@ -100,11 +195,11 @@ def clone_shallow(
     repo_url: str, dest: str, branch: str, depth: int, verbose: bool
 ) -> None:
     log(f"cloning repo (shallow): {repo_url} → {dest}", verbose)
-    run(
+    run_checked(
         ["git", "clone", "--depth", str(depth), "--branch", branch, repo_url, dest],
         cwd=None,
         verbose=verbose,
-        check=True,
+        retries=5,
     )
 
 
@@ -112,20 +207,20 @@ def fetch_branch_shallow(
     dest: str, remote: str, branch: str, depth: int, verbose: bool
 ) -> None:
     log(f"updating branch {branch} from {remote} (shallow)", verbose)
-    git(dest, verbose, "fetch", "--depth", str(depth), remote, branch, check=True)
-    git(dest, verbose, "checkout", "-B", branch, f"{remote}/{branch}", check=True)
+    git(dest, verbose, "fetch", "--depth", str(depth), remote, branch, retries=5)
+    git(dest, verbose, "checkout", "-B", branch, f"{remote}/{branch}", retries=3)
 
 
 def fetch_tag_shallow(
     dest: str, remote: str, tag: str, depth: int, verbose: bool
 ) -> None:
     log(f"fetching tag {tag} (shallow)", verbose)
-    git(dest, verbose, "fetch", "--depth", str(depth), remote, "tag", tag, check=True)
+    git(dest, verbose, "fetch", "--depth", str(depth), remote, "tag", tag, retries=5)
 
 
 def checkout_detached(dest: str, ref: str, verbose: bool) -> None:
     log(f"checking out detached ref: {ref}", verbose)
-    git(dest, verbose, "checkout", "--detach", ref, check=True)
+    git(dest, verbose, "checkout", "--detach", ref, retries=3)
 
 
 def main() -> int:
