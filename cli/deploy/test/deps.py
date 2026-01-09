@@ -9,7 +9,7 @@ def resolve_run_after(compose: Compose, role_name: str) -> list[str]:
       python -m cli.meta.applications.run_after_resolution <role_name>
     """
     cmd = ["python3", "-m", "cli.meta.applications.run_after_resolution", role_name]
-    r = compose.exec(cmd, check=False, workdir="/opt/src/infinito")
+    r = compose.exec(cmd, check=False, workdir="/opt/src/infinito", capture=True)
 
     if r.returncode != 0:
         raise RuntimeError(
