@@ -22,7 +22,6 @@
   vars:
     domain:     "{{ MATRIX_SYNAPSE_DOMAIN }}"
     http_port:  "{{ MATRIX_SYNAPSE_PORT }}"
-  when: TLS_ENABLED | bool
 
 - name: create {{ MATRIX_SYNAPSE_DOMAIN }}.conf
   template:
