@@ -3,7 +3,6 @@ server_mode:              False     # If true then the preconfigured database fi
 master_password_required: True      # Master password is required. Recommended True. False is a security risk.
 features:
   css:                    true
-  oauth2:                 true
 server:
   csp:
     flags:
@@ -20,6 +19,9 @@ server:
     aliases: []
 docker:
   services:
+    oauth2:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

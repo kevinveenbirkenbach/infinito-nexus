@@ -2,7 +2,6 @@ autologin:            false         # This is a high security risk. Just activat
 features:
   css:                false
                               # it's anyhow not so enduser relevant, so it can be kept like this
-  oauth2:             true
 server:
   csp:
     flags:
@@ -16,6 +15,9 @@ server:
       - phpmyadmin.{{ DOMAIN_PRIMARY }}
 docker:
   services:
+    oauth2:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

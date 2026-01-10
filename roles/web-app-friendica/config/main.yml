@@ -2,7 +2,6 @@ images:
   friendica:          "friendica:latest"
 features:
   css:                false # Temporary deactivated
-  oauth2:             false # No special login side which could be protected, use 2FA of Friendica instead
 server:
   domains:
     canonical:
@@ -22,6 +21,9 @@ addons:
   ldapauth: {}
 docker:
   services:
+    oauth2:
+      enabled: false
+      shared: false
     oidc:
       enabled: false
       shared: false

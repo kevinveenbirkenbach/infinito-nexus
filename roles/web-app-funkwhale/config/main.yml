@@ -8,6 +8,9 @@ docker:
     front:      "funkwhale/front"
     typesense:  "typesense/typesense"
   services:
+    oauth2:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true
@@ -37,7 +40,6 @@ docker:
           - "/login"
 features:
   css:                false
-  oauth2:             false # Doesn't make sense to activate it atm, because login is possible on homepage
 server:
   domains:
     canonical:

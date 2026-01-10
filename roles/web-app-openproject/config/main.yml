@@ -4,7 +4,6 @@ ldap:
     users:            False   # Set true to filter users
 features:
   css:                false   # Temporary deactivated. Needs to be optimized for production use.
-  oauth2:             true
 server:
   csp:
     flags:
@@ -21,6 +20,9 @@ server:
     aliases: []
 docker:
   services:
+    oauth2:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

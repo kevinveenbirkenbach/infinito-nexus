@@ -1,6 +1,5 @@
 features:
   css:                true
-  oauth2:             true
 server:
   domains:
     canonical:
@@ -20,6 +19,9 @@ server:
     default: 301
 docker:
   services:
+    oauth2:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

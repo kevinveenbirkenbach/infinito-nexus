@@ -1,5 +1,4 @@
 features:
-  oauth2:             false
 
   # Matomo can't use the following settings - At least not on the initial setup run
   css:                false
@@ -32,6 +31,9 @@ excluded_ips: "{{ networks.internet.values() | list }}"
 
 docker:
   services:
+    oauth2:
+      enabled: false
+      shared: false
     logout:
       enabled: false
       shared: false

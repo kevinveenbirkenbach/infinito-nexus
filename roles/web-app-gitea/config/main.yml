@@ -6,7 +6,6 @@ configuration:
     default_push_create_private:  True      # Default private when creating a new repository with push-to-create.
 features:
   css:                            true
-  oauth2:                         true
 
 server:
   csp:
@@ -29,6 +28,9 @@ server:
       - tea.git.{{ DOMAIN_PRIMARY }}
 docker:
   services:
+    oauth2:
+      enabled: true
+      shared: true
     oidc:
       enabled: false
       shared: false

@@ -1,6 +1,9 @@
 credentials: {}
 docker:
   services:
+    oauth2:
+      enabled: false
+      shared: false
     ldap:
       enabled: false
       shared: false
@@ -20,7 +23,6 @@ docker:
 features:
   css:              true    # Enable Global CSS Styling
   recaptcha:        false   # Enable ReCaptcha
-  oauth2:           false   # Enable the OAuth2-Proy
 server:
   csp: {}      
   domains:

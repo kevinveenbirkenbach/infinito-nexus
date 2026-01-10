@@ -1,6 +1,5 @@
 features:
   css:                false # Temporary deactivated
-  oauth2:             true # Deactivated for API
 
 server:
   csp:
@@ -18,6 +17,9 @@ email:
 
 docker:
   services:
+    oauth2:
+      enabled: true
+      shared: true
     oidc:
       enabled: false
       shared: false
