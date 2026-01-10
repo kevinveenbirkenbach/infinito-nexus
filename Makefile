@@ -87,9 +87,9 @@ down:
 	@echo ">>> Stopping infinito compose stack and removing volumes"
 	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
 
-up:
-	@echo ">>> Start infinito compose stack"
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci up -d --remove-orphans
+up: build-missing
+	@echo ">>> Start infinito compose stack (via python orchestrator)"
+	@INFINITO_DISTRO="$(INFINITO_DISTRO)" $(PYTHON) -m cli.deploy.test.up
 
 list:
 	@echo "Generating the roles list"
