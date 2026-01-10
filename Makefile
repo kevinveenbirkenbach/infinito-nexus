@@ -89,7 +89,7 @@ down:
 
 up: build-missing
 	@echo ">>> Start infinito compose stack (via python orchestrator)"
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" $(PYTHON) -m cli.deploy.test.up
+	@INFINITO_DISTRO="$(INFINITO_DISTRO)" python3 -m cli.deploy.test.up
 
 list:
 	@echo "Generating the roles list"
