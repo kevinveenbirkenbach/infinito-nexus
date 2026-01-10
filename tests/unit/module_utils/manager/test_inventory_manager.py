@@ -1,9 +1,13 @@
+# tests/unit/module_utils/manager/test_inventory_manager.py
+
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from module_utils.manager.inventory import InventoryManager  # type: ignore
 from module_utils.handler.vault import VaultScalar  # type: ignore
+from module_utils.manager.value_generator import ValueGenerator  # type: ignore
 
 
 class TestInventoryManager(unittest.TestCase):
@@ -21,7 +25,6 @@ class TestInventoryManager(unittest.TestCase):
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
 
-            # Dummy files so that Path comparisons in the fake loader work
             (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
             (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
             (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
@@ -36,18 +39,17 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "schema" / "main.yml":
                     return {}
                 if p == role_path / "vars" / "main.yml":
-                    # Missing application_id on purpose
-                    return {}
+                    return {}  # missing application_id on purpose
                 if p == role_path / "config" / "main.yml":
-                    return {"features": {}}
+                    return {"docker": {"services": {}}}
                 return {}
 
             with (
-                unittest.mock.patch(
+                mock.patch(
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                unittest.mock.patch("module_utils.manager.inventory.VaultHandler"),
+                mock.patch("module_utils.manager.inventory.VaultHandler"),
             ):
                 with self.assertRaises(SystemExit) as ctx:
                     InventoryManager(
@@ -61,7 +63,7 @@ class TestInventoryManager(unittest.TestCase):
     def test_plain_without_override_and_allow_empty_plain_exits(self):
         """
         For a `plain` algorithm credential, if no override is provided and
-        allow_empty_plain=False, recurse_credentials/apply_schema must exit.
+        allow_empty_plain=False, apply_schema must exit.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             role_path = Path(tmpdir) / "role"
@@ -94,15 +96,15 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
-                    return {"features": {}}
+                    return {"docker": {"services": {}}}
                 return {}
 
             with (
-                unittest.mock.patch(
+                mock.patch(
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                unittest.mock.patch("module_utils.manager.inventory.VaultHandler"),
+                mock.patch("module_utils.manager.inventory.VaultHandler"),
             ):
                 mgr = InventoryManager(
                     role_path=role_path,
@@ -118,8 +120,7 @@ class TestInventoryManager(unittest.TestCase):
     def test_plain_with_allow_empty_plain_sets_empty_string_unencrypted(self):
         """
         For a `plain` algorithm credential, if no override is provided and
-        allow_empty_plain=True, the credential should be set to an empty string
-        and must NOT be encrypted.
+        allow_empty_plain=True, the credential should be set to "" and must NOT be encrypted.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             role_path = Path(tmpdir) / "role"
@@ -152,19 +153,16 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
-                    return {"features": {}}
+                    return {"docker": {"services": {}}}
                 return {}
 
             with (
-                unittest.mock.patch(
+                mock.patch(
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                unittest.mock.patch(
-                    "module_utils.manager.inventory.VaultHandler"
-                ) as mock_vault_cls,
+                mock.patch("module_utils.manager.inventory.VaultHandler") as mock_vault_cls,
             ):
-                # VaultHandler instance
                 mock_vault = mock_vault_cls.return_value
                 mock_vault.encrypt_string.return_value = (
                     "!vault |\n  $ANSIBLE_VAULT;1.1;AES256\n    ENCRYPTED"
@@ -179,22 +177,16 @@ class TestInventoryManager(unittest.TestCase):
                 )
                 inv = mgr.apply_schema()
 
-                apps = inv.get("applications", {})
-                app_block = apps.get("app_test", {})
-                creds = app_block.get("credentials", {})
-
-                # api_key must be present and must be a literal empty string
+                creds = inv["applications"]["app_test"]["credentials"]
                 self.assertIn("api_key", creds)
                 self.assertEqual(creds["api_key"], "")
 
-                # Empty string must not trigger encryption
                 mock_vault.encrypt_string.assert_not_called()
 
     def test_non_plain_algorithm_encrypts_and_sets_vaultscalar(self):
         """
-        For non-plain algorithms, recurse_credentials must generate a value
-        and encrypt it into a VaultScalar, unless an existing VaultScalar
-        is already present.
+        For non-plain algorithms, apply_schema must generate a value (via ValueGenerator)
+        and encrypt it into a VaultScalar.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             role_path = Path(tmpdir) / "role"
@@ -227,24 +219,18 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
-                    return {"features": {}}
+                    return {"docker": {"services": {}}}
                 return {}
 
             fake_snippet = "!vault |\n  $ANSIBLE_VAULT;1.1;AES256\n    ENCRYPTEDVALUE"
 
             with (
-                unittest.mock.patch(
+                mock.patch(
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                unittest.mock.patch(
-                    "module_utils.manager.inventory.VaultHandler"
-                ) as mock_vault_cls,
-                unittest.mock.patch.object(
-                    InventoryManager,
-                    "generate_value",
-                    return_value="PLAINVAL",
-                ),
+                mock.patch("module_utils.manager.inventory.VaultHandler") as mock_vault_cls,
+                mock.patch.object(ValueGenerator, "generate_value", return_value="PLAINVAL"),
             ):
                 mock_vault = mock_vault_cls.return_value
                 mock_vault.encrypt_string.return_value = fake_snippet
@@ -258,19 +244,13 @@ class TestInventoryManager(unittest.TestCase):
                 )
                 inv = mgr.apply_schema()
 
-                apps = inv.get("applications", {})
-                app_block = apps.get("app_test", {})
-                creds = app_block.get("credentials", {})
-
+                creds = inv["applications"]["app_test"]["credentials"]
                 self.assertIn("api_key", creds)
                 value = creds["api_key"]
 
-                # api_key must be a VaultScalar
                 self.assertIsInstance(value, VaultScalar)
-                # Its underlying body should contain the vault header line
                 self.assertIn("$ANSIBLE_VAULT", str(value))
 
-                # Encryption must have been called with generated plaintext and key
                 mock_vault.encrypt_string.assert_called_once_with("PLAINVAL", "api_key")
 
     def test_recurse_skips_existing_dict_and_vaultscalar(self):
@@ -278,8 +258,7 @@ class TestInventoryManager(unittest.TestCase):
         If the destination already contains:
           - a dict for a credential key, or
           - a VaultScalar for a credential key,
-        recurse_credentials must skip re-encryption and leave existing values
-        untouched.
+        recurse_credentials must skip re-encryption and leave existing values untouched.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             role_path = Path(tmpdir) / "role"
@@ -293,7 +272,6 @@ class TestInventoryManager(unittest.TestCase):
 
             inventory_path = inv_path
 
-            # Existing credentials in inventory
             existing_vault = VaultScalar("EXISTING_BODY")
             existing_dict = {"nested": "value"}
 
@@ -332,22 +310,16 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
-                    return {"features": {}}
+                    return {"docker": {"services": {}}}
                 return {}
 
             with (
-                unittest.mock.patch(
+                mock.patch(
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                unittest.mock.patch(
-                    "module_utils.manager.inventory.VaultHandler"
-                ) as mock_vault_cls,
-                unittest.mock.patch.object(
-                    InventoryManager,
-                    "generate_value",
-                    return_value="IGNORED",
-                ),
+                mock.patch("module_utils.manager.inventory.VaultHandler") as mock_vault_cls,
+                mock.patch.object(ValueGenerator, "generate_value", return_value="IGNORED"),
             ):
                 mock_vault = mock_vault_cls.return_value
                 mock_vault.encrypt_string.side_effect = AssertionError(
@@ -363,15 +335,11 @@ class TestInventoryManager(unittest.TestCase):
                 )
                 inv = mgr.apply_schema()
 
-                apps = inv.get("applications", {})
-                app_block = apps.get("app_test", {})
-                creds = app_block.get("credentials", {})
+                creds = inv["applications"]["app_test"]["credentials"]
 
-                # Both keys must still be present
                 self.assertIn("already_vaulted", creds)
                 self.assertIn("complex", creds)
 
-                # Types and values must be preserved
                 self.assertIs(creds["already_vaulted"], existing_vault)
                 self.assertIs(creds["complex"], existing_dict)
 
