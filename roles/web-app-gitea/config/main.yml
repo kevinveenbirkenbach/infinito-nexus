@@ -35,6 +35,7 @@ docker:
       enabled: true
     ldap:
       enabled: true
+      shared: true
     desktop:
       enabled: true
     matomo:

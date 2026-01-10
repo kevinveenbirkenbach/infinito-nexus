@@ -56,6 +56,7 @@ ldap:
 plugins:
   oidc:
     enabled: true
+    shared: true
     items:
       - id: "org.xwiki.contrib.oidc:oidc-authenticator"
         version: ""

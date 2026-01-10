@@ -6,6 +6,7 @@ docker:
   services:
     ldap:
       enabled: true
+      shared: true
     openldap:     
       image:      "bitnamilegacy/openldap"
       name:       "openldap"
