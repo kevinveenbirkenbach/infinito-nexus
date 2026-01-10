@@ -16,11 +16,15 @@
 - include_role:
     name: sys-service
   vars:
-    system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
-    system_service_tpl_exec_start:      "{{ system_service_script_exec }} --backups-folder-path {{ PATH_INFINITO_BACKUP_DIR }} --maximum-backup-size-percent {{ SIZE_PERCENT_MAXIMUM_BACKUP }}"
-    system_service_tpl_exec_start_pre:  '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP | join(" ") }} --timeout 5min' # "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
-    system_service_copy_files:          true
-    system_service_force_linear_sync:   false
+    system_service_tpl_on_failure:          "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
+    system_service_tpl_exec_start:          "{{ system_service_script_exec }} --backups-folder-path {{ PATH_INFINITO_BACKUP_DIR }} --maximum-backup-size-percent {{ SIZE_PERCENT_MAXIMUM_BACKUP }}"
+    system_service_tpl_exec_start_pre:      '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP | join(" ") }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
+    system_service_copy_files:              true
+    system_service_force_linear_sync:       false
+    
+    # The following lines are set for better DiD Github Action Workflow debugging:
+    system_service_tpl_timeout_start_sec:   "{{ '120s' if ((DOCKER_IN_CONTAINER|bool) and (MODE_DEBUG|bool)) else omit }}"
+    system_service_tpl_runtime:             "{{ '300s' if ((DOCKER_IN_CONTAINER|bool) and (MODE_DEBUG|bool)) else omit }}"
 
 - meta: flush_handlers
 
