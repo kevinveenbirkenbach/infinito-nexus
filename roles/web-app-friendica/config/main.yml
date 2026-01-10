@@ -22,23 +22,23 @@ addons:
 docker:
   services:
     oidc:
-      enabled: false
-      shared: false
+      enabled:  false
+      shared:   false
     logout:
-      enabled: true
+      enabled:  true
     ldap:
-      enabled: true
+      enabled:  true
     desktop:
-      enabled: true
+      enabled:  true
     matomo:
-      enabled: true
-      shared: true
+      enabled:  true
+      shared:   true
     database:
-      shared: true
-      type: "mariadb"
-      enabled:      true
+      shared:   true
+      type:     "mariadb"
+      enabled:  true
     oauth2:
       origin:
-        host: "application"
-        port: "80"
-      enabled: false
+        host:   "application"
+        port:   "80"
+      enabled:  false

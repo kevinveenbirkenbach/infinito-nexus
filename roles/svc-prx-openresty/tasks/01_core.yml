@@ -12,7 +12,6 @@
     name: docker-compose
   vars:
     docker_git_repository_pull:     false # Deactivated here to deactivate inhirement
-    database_type:                  ""    # Deactivate Database for openresty
     docker_compose_flush_handlers:  true
 
 - name: "Verify that '{{ role_name }}' works"

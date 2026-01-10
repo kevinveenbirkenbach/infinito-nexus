@@ -1,6 +1,5 @@
 application_id:               "web-svc-logout"
 container_port:               8000
-database_type:                                 # Set null to override including role variables 
 
 # The following line leads to that services which arent listed directly in the inventory, 
 # but are called over other roles, aren't listed here 
