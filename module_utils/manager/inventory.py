@@ -2,7 +2,7 @@ import secrets
 import hashlib
 import bcrypt
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Any, List
 from module_utils.handler.yaml import YamlHandler
 from module_utils.handler.vault import VaultHandler, VaultScalar
 import string
@@ -30,6 +30,7 @@ class InventoryManager:
         self.app_id = self.load_application_id(role_path)
 
         self.vault_handler = VaultHandler(vault_pw)
+        self.roles_root = self.role_path.parent
 
     def load_application_id(self, role_path: Path) -> str:
         """Load the application ID from the role's vars/main.yml file."""
@@ -41,14 +42,68 @@ class InventoryManager:
             sys.exit(1)
         return app_id
 
+    def load_role_schema(self, role_name: str) -> dict:
+        schema_path = self.roles_root / role_name / "schema" / "main.yml"
+        if not schema_path.exists():
+            print(f"ERROR: schema not found: {schema_path}", file=sys.stderr)
+            sys.exit(1)
+        return YamlHandler.load_yaml(schema_path) or {}
+
+    def resolve_schema_includes(self, config: dict) -> List[str]:
+        services = (config.get("docker") or {}).get("services") or {}
+
+        includes: List[str] = []
+
+        ldap = services.get("ldap") or {}
+        if ldap.get("enabled") is True and ldap.get("shared") is True:
+            includes.append("svc-db-openldap")
+
+        oidc = services.get("oidc") or {}
+        if oidc.get("enabled") is True and oidc.get("shared") is True:
+            includes.append("web-app-keycloak")
+
+        matomo = services.get("matomo") or {}
+        if matomo.get("enabled") is True and matomo.get("shared") is True:
+            includes.append("web-app-matomo")
+
+        db = services.get("database") or {}
+        if db.get("shared") is True:
+            db_type = (db.get("type") or "").strip()
+            if db_type:
+                includes.append(f"svc-db-{db_type}")
+            else:
+                print(
+                    "ERROR: docker.services.database.shared=true but docker.services.database.type is missing",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+
+        deduped: List[str] = []
+        seen = set()
+        for r in includes:
+            if r not in seen:
+                deduped.append(r)
+                seen.add(r)
+        return deduped
+
     def apply_schema(self) -> Dict:
         """Apply the schema and return the updated inventory."""
         apps = self.inventory.setdefault("applications", {})
-        target = apps.setdefault(self.app_id, {})
 
         # Load the data from config/main.yml
         vars_file = self.role_path / "config" / "main.yml"
         data = YamlHandler.load_yaml(vars_file) or {}
+
+        # Apply schemas for shared provider roles into their own application blocks
+        for role_name in self.resolve_schema_includes(data):
+            provider_role_path = self.roles_root / role_name
+            provider_app_id = self.load_application_id(provider_role_path)
+            provider_target = apps.setdefault(provider_app_id, {})
+            provider_schema = self.load_role_schema(role_name)
+            self.recurse_credentials(provider_schema, provider_target)
+
+        # Apply this role's schema into its own application block
+        target = apps.setdefault(self.app_id, {})
 
         services = (data.get("docker") or {}).get("services") or {}
 
