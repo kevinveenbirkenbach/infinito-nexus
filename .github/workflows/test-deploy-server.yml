@@ -58,7 +58,7 @@ jobs:
     timeout-minutes: 240
 
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         app: ${{ fromJson(needs.discover.outputs.apps) }}
 
