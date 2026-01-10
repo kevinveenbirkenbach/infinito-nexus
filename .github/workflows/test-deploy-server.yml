@@ -38,7 +38,6 @@ jobs:
         run: |
           set -euo pipefail
           export INFINITO_DISTRO="arch"
-          make down
           make up
           apps_json="$(scripts/tests/discover-server-apps.sh)"
           if [[ -z "${apps_json}" ]]; then
@@ -96,9 +95,6 @@ jobs:
             echo | tee -a "${log_file}"
 
             {
-              echo "--- make down ---"
-              make down || true
-              echo
               echo "--- deploy (per app) ---"
               scripts/tests/deploy.sh --missing --type server --app "${app}" --keep-stack-on-failure
             } 2>&1 | tee -a "${log_file}"
