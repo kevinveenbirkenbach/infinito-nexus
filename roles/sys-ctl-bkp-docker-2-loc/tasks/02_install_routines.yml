@@ -2,7 +2,7 @@
   include_role:
     name: sys-pip-install
   vars:
-    package_name: 'backup-docker-to-local'
+    package_name: 'backup-docker-to-local==1.3.0'
 
 - name: Assert required baudolo commands are available
   ansible.builtin.command: "which {{ cmd_name }}"
