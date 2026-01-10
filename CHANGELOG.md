@@ -1,3 +1,8 @@
+## [0.11.0] - 2026-01-10
+
+* CI failures are easier to debug thanks to clear per-app logs and improved error reporting.
+
+
 ## [0.10.0] - 2026-01-08
 
 * **More reliable workstation setups:** A dedicated *workstation user* ensures deployments and integration tests run consistently.
