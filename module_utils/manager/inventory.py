@@ -46,24 +46,26 @@ class InventoryManager:
         apps = self.inventory.setdefault("applications", {})
         target = apps.setdefault(self.app_id, {})
 
-        # Load the data from vars/main.yml
+        # Load the data from config/main.yml
         vars_file = self.role_path / "config" / "main.yml"
-        data = YamlHandler.load_yaml(vars_file)
+        data = YamlHandler.load_yaml(vars_file) or {}
 
-        # Check if 'central-database' is enabled in the features section of data
-        if "features" in data:
-            if (
-                "central_database" in data["features"]
-                and data["features"]["central_database"]
-            ):
-                # Add 'central_database' value (password) to credentials
-                target.setdefault("credentials", {})["database_password"] = (
-                    self.generate_value("alphanumeric")
-                )
-            if "oauth2" in data["features"] and data["features"]["oauth2"]:
-                target.setdefault("credentials", {})["oauth2_proxy_cookie_secret"] = (
-                    self.generate_value("random_hex_16")
-                )
+        services = (data.get("docker") or {}).get("services") or {}
+
+        database = services.get("database") or {}
+        oauth2 = services.get("oauth2") or {}
+
+        # docker.services.database.shared
+        if database.get("shared") is True:
+            target.setdefault("credentials", {})["database_password"] = (
+                self.generate_value("alphanumeric")
+            )
+
+        # docker.services.oauth2.enabled
+        if oauth2.get("enabled") is True:
+            target.setdefault("credentials", {})["oauth2_proxy_cookie_secret"] = (
+                self.generate_value("random_hex_16")
+            )
 
         # Apply recursion only for the `credentials` section
         self.recurse_credentials(self.schema, target)

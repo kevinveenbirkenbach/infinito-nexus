@@ -56,9 +56,17 @@ class TestInventoryManager(unittest.TestCase):
         # Return application_id for vars/main.yml
         if path.match("*/vars/main.yml"):
             return {"application_id": "testapp"}
-        # Return feature flags for config/main.yml
+
+        # Return docker service flags for config/main.yml
         if path.match("*/config/main.yml"):
-            return {"features": {"central_database": True}}
+            return {
+                "docker": {
+                    "services": {
+                        "database": {"shared": True},
+                    }
+                }
+            }
+
         # Return empty inventory for inventory.yml
         if path.name == "inventory.yml":
             return {}
