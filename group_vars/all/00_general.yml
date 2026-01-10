@@ -76,17 +76,21 @@ allowed_applications: []
 # helper
 _applications_nextcloud_oidc_flavor: >-
   {{
-    applications
+    (applications | default({}, true))
       | get_app_conf(
           'web-app-nextcloud',
           'oidc.flavor',
           False,
-          'oidc_login'
-          if applications
-            | get_app_conf('web-app-nextcloud','features.ldap',False, True, True)
-          else 'sociallogin',
+          (
+            'oidc_login'
+            if (
+              (applications | default({}, true))
+                | get_app_conf('web-app-nextcloud','features.ldap',False, True, True)
+            )
+            else 'sociallogin'
+          ),
           True
-        )
+      )
   }}
 
 # Role-based access control

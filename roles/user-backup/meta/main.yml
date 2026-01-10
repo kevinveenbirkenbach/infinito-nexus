@@ -23,5 +23,3 @@ galaxy_info:
   issue_tracker_url: https://s.infinito.nexus/issues
   documentation: https://docs.infinito.nexus
   lifecycle: beta
-dependencies:
-- sys-svc-sshd

@@ -1,4 +1,5 @@
-- name: reload postfix
+- name: restart postfix
   ansible.builtin.systemd:
     name: postfix
-    state: reloaded
+    enabled: true
+    state: restarted

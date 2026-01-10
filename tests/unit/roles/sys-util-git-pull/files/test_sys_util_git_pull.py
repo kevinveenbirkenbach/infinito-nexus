@@ -1,5 +1,3 @@
-# tests/unit/roles/sys-util-git-pull/files/test_sys_util_git_pull.py
-#
 # Unit tests for roles/sys-util-git-pull/files/sys_util_git_pull.py
 #
 # Option A: import the script via file path (because role paths contain dashes)
@@ -69,17 +67,37 @@ class SysUtilGitPullTests(unittest.TestCase):
         m_run.return_value = MagicMock(
             returncode=0, stdout="  ok \n", stderr="  err \n"
         )
-        res = sut.run(["echo", "x"], cwd="/tmp", verbose=False, check=False)
+        res = sut.run(["echo", "x"], cwd="/tmp", verbose=False)
         self.assertEqual(0, res.rc)
         self.assertEqual("ok", res.stdout)
         self.assertEqual("err", res.stderr)
 
-    @patch("sys_util_git_pull.subprocess.run")
-    def test_run_raises_on_check_true_and_nonzero_rc(self, m_run: MagicMock) -> None:
-        m_run.return_value = MagicMock(returncode=2, stdout="out", stderr="bad")
-        with self.assertRaises(RuntimeError) as ctx:
-            sut.run(["false"], cwd="/tmp", verbose=False, check=True)
-        self.assertIn("Command failed (rc=2)", str(ctx.exception))
+    def test_run_checked_raises_on_non_transient_failure(self) -> None:
+        # Non-transient: stderr doesn't match any transient markers
+        with patch.object(
+            sut, "run", return_value=sut.RunResult(2, "out", "some permanent error")
+        ):
+            with self.assertRaises(RuntimeError) as ctx:
+                sut.run_checked(["false"], cwd="/tmp", verbose=False, retries=3)
+            self.assertIn("Command failed (rc=2)", str(ctx.exception))
+
+    def test_run_checked_retries_on_transient_then_succeeds(self) -> None:
+        # Transient: contains e.g. "Connection reset by peer"
+        seq = [
+            sut.RunResult(128, "", "fatal: ... Recv failure: Connection reset by peer"),
+            sut.RunResult(0, "ok", ""),
+        ]
+        with (
+            patch.object(sut, "run", side_effect=seq) as m_run,
+            patch("sys_util_git_pull.time.sleep") as m_sleep,
+        ):
+            r = sut.run_checked(
+                ["git", "clone", "x"], cwd=None, verbose=True, retries=5
+            )
+            self.assertEqual(0, r.rc)
+            self.assertEqual("ok", r.stdout)
+            self.assertEqual(2, m_run.call_count)
+            m_sleep.assert_called()  # backoff happened at least once
 
     @patch("sys_util_git_pull.os.listdir")
     def test_is_dir_empty_true_for_missing_dir(self, m_listdir: MagicMock) -> None:
@@ -97,17 +115,27 @@ class SysUtilGitPullTests(unittest.TestCase):
         self.assertFalse(sut.is_dir_empty("/tmp/x"))
 
     def test_remote_exists_true_when_remote_list_contains_name(self) -> None:
+        # remote_exists now uses run(["git","remote"]) directly
         with patch.object(
-            sut, "git", return_value=sut.RunResult(0, "origin\nupstream\n", "")
+            sut, "run", return_value=sut.RunResult(0, "origin\nupstream\n", "")
         ):
             self.assertTrue(sut.remote_exists("/repo", "origin", verbose=False))
             self.assertTrue(sut.remote_exists("/repo", "upstream", verbose=False))
             self.assertFalse(sut.remote_exists("/repo", "nope", verbose=False))
 
+    def test_remote_exists_raises_when_git_remote_fails(self) -> None:
+        with patch.object(
+            sut, "run", return_value=sut.RunResult(1, "", "fatal: not a git repository")
+        ):
+            with self.assertRaises(RuntimeError) as ctx:
+                sut.remote_exists("/repo", "origin", verbose=False)
+            self.assertIn("Command failed (rc=1): git remote", str(ctx.exception))
+
     def test_tag_exists_uses_rev_parse_rc(self) -> None:
-        with patch.object(sut, "git", return_value=sut.RunResult(0, "", "")):
+        # tag_exists now uses run([...rev-parse...]) directly
+        with patch.object(sut, "run", return_value=sut.RunResult(0, "", "")):
             self.assertTrue(sut.tag_exists("/repo", "stable", verbose=False))
-        with patch.object(sut, "git", return_value=sut.RunResult(1, "", "")):
+        with patch.object(sut, "run", return_value=sut.RunResult(1, "", "")):
             self.assertFalse(sut.tag_exists("/repo", "stable", verbose=False))
 
     def test_delete_tag_if_exists_deletes_and_returns_true(self) -> None:
@@ -116,7 +144,7 @@ class SysUtilGitPullTests(unittest.TestCase):
             patch.object(sut, "git") as m_git,
         ):
             self.assertTrue(sut.delete_tag_if_exists("/repo", "stable", verbose=True))
-            m_git.assert_called_with("/repo", True, "tag", "-d", "stable", check=True)
+            m_git.assert_called_with("/repo", True, "tag", "-d", "stable", retries=3)
 
     def test_delete_tag_if_exists_returns_false_when_missing(self) -> None:
         with (
@@ -127,25 +155,26 @@ class SysUtilGitPullTests(unittest.TestCase):
             m_git.assert_not_called()
 
     def test_get_local_tag_commit_returns_commit_on_rc0(self) -> None:
-        with patch.object(sut, "git", return_value=sut.RunResult(0, "abc123\n", "")):
+        # get_local_tag_commit uses run([...rev-parse...]) directly
+        with patch.object(sut, "run", return_value=sut.RunResult(0, "abc123\n", "")):
             self.assertEqual(
                 "abc123", sut.get_local_tag_commit("/repo", "stable", verbose=False)
             )
-        with patch.object(sut, "git", return_value=sut.RunResult(1, "abc123\n", "")):
+        with patch.object(sut, "run", return_value=sut.RunResult(1, "abc123\n", "")):
             self.assertEqual(
                 "", sut.get_local_tag_commit("/repo", "stable", verbose=False)
             )
 
     def test_resolve_remote_tag_commit_prefers_peeled(self) -> None:
-        def fake_git(
-            dest: str, verbose: bool, *args: str, check: bool = False
+        def fake_run_checked(
+            cmd, cwd, verbose, retries=5, backoff_cap_seconds=20
         ) -> "sut.RunResult":
-            # args: ("ls-remote", "--tags", remote, "<tag>^{}") or fallback "<tag>"
-            if args[-1].endswith("^{}"):
+            # cmd: ["git","ls-remote","--tags",remote,"stable^{}"] or fallback "stable"
+            if cmd[-1].endswith("^{}"):
                 return sut.RunResult(0, "deadbeef\trefs/tags/stable^{}\n", "")
             return sut.RunResult(0, "cafebabe\trefs/tags/stable\n", "")
 
-        with patch.object(sut, "git", side_effect=fake_git):
+        with patch.object(sut, "run_checked", side_effect=fake_run_checked):
             self.assertEqual(
                 "deadbeef",
                 sut.resolve_remote_tag_commit(
@@ -154,14 +183,14 @@ class SysUtilGitPullTests(unittest.TestCase):
             )
 
     def test_resolve_remote_tag_commit_falls_back_to_lightweight(self) -> None:
-        def fake_git(
-            dest: str, verbose: bool, *args: str, check: bool = False
+        def fake_run_checked(
+            cmd, cwd, verbose, retries=5, backoff_cap_seconds=20
         ) -> "sut.RunResult":
-            if args[-1].endswith("^{}"):
+            if cmd[-1].endswith("^{}"):
                 return sut.RunResult(0, "", "")
             return sut.RunResult(0, "cafebabe\trefs/tags/stable\n", "")
 
-        with patch.object(sut, "git", side_effect=fake_git):
+        with patch.object(sut, "run_checked", side_effect=fake_run_checked):
             self.assertEqual(
                 "cafebabe",
                 sut.resolve_remote_tag_commit(
@@ -170,7 +199,7 @@ class SysUtilGitPullTests(unittest.TestCase):
             )
 
     def test_resolve_remote_tag_commit_returns_empty_when_missing(self) -> None:
-        with patch.object(sut, "git", return_value=sut.RunResult(0, "", "")):
+        with patch.object(sut, "run_checked", return_value=sut.RunResult(0, "", "")):
             self.assertEqual(
                 "",
                 sut.resolve_remote_tag_commit(

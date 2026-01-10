@@ -5,9 +5,9 @@
     name: '{{ item }}'
   loop:
     - user-backup
+    - sys-daemon
     - sys-ctl-alm-compose
     - sys-lock
-    - sys-daemon
 
 - name: "Install '{{ CLEANUP_FAILED_BACKUPS_PKG }}' via pip"
   include_role:

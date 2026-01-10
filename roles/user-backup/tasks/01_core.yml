@@ -5,6 +5,11 @@
     name: backup
     create_home: yes
 
+- name: Include dependency 'sys-svc-sshd'
+  include_role:
+    name: sys-svc-sshd
+  when: run_once_sys_svc_sshd is not defined
+
 - name: grant backup sudo rights
   copy:
     src: "backup"

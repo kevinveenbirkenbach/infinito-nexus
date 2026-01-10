@@ -1,118 +1,108 @@
-# File: tests/unit/module_utils/test_valid_deploy_id.py
+from __future__ import annotations
+
 import os
 import tempfile
 import unittest
 import yaml
+
 from module_utils.valid_deploy_id import ValidDeployId
 
 
 class TestValidDeployId(unittest.TestCase):
-    def setUp(self):
-        # Create a temporary directory for roles
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.roles_dir = os.path.join(self.temp_dir.name, "roles")
-        os.makedirs(self.roles_dir)
+    def setUp(self) -> None:
+        # Uses real repo roles/ via ValidDeployId internal repo-root resolution
+        self.validator = ValidDeployId()
 
-        # Create a dummy role with application_id 'app1'
-        role_path = os.path.join(self.roles_dir, "role1", "vars")
-        os.makedirs(role_path)
-        with open(os.path.join(role_path, "main.yml"), "w", encoding="utf-8") as f:
-            yaml.safe_dump({"application_id": "app1"}, f)
+        # pick a real application id from roles for positive tests
+        self.assertTrue(
+            self.validator.valid_ids,
+            "Expected at least one application id discovered from repo roles/",
+        )
+        self.existing_app = sorted(self.validator.valid_ids)[0]
 
-        # Initialize validator with our temp roles_dir
-        self.validator = ValidDeployId(roles_dir=self.roles_dir)
+        # and a guaranteed non-existing id for negative tests
+        self.missing_app = "this-app-id-should-not-exist-xyz-123"
 
-    def tearDown(self):
-        self.temp_dir.cleanup()
-
-    def _write_ini_inventory(self, content):
+    def _write_ini_inventory(self, content: str) -> str:
         fd, path = tempfile.mkstemp(suffix=".ini")
         os.close(fd)
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
         return path
 
-    def _write_yaml_inventory(self, data):
+    def _write_yaml_inventory(self, data) -> str:
         fd, path = tempfile.mkstemp(suffix=".yml")
         os.close(fd)
         with open(path, "w", encoding="utf-8") as f:
             yaml.safe_dump(data, f)
         return path
 
-    def test_valid_in_roles_and_ini_inventory(self):
-        # Inventory contains app1 as a host
-        ini_content = """
-        [servers]
-        app1,otherhost
-        """
+    def test_valid_in_roles_and_ini_inventory(self) -> None:
+        ini_content = f"""
+[servers]
+{self.existing_app},otherhost
+"""
         inv = self._write_ini_inventory(ini_content)
-        result = self.validator.validate(inv, ["app1"])
+        result = self.validator.validate(inv, [self.existing_app])
         self.assertEqual(
-            result, {}, "app1 should be valid when in roles and ini inventory"
+            result, {}, "app should be valid when in roles and ini inventory"
         )
 
-    def test_missing_in_roles(self):
-        # Inventory contains app2 but roles only have app1
-        ini_content = """
-        [servers]
-        app2
-        """
+    def test_missing_in_roles(self) -> None:
+        ini_content = f"""
+[servers]
+{self.missing_app}
+"""
         inv = self._write_ini_inventory(ini_content)
-        result = self.validator.validate(inv, ["app2"])
-        # app2 not in roles, but in inventory
-        expected = {"app2": {"in_roles": False, "in_inventory": True}}
+        result = self.validator.validate(inv, [self.missing_app])
+        expected = {self.missing_app: {"in_roles": False, "in_inventory": True}}
         self.assertEqual(result, expected)
 
-    def test_missing_in_inventory_ini(self):
-        # Roles have app1 but inventory does not mention it
+    def test_missing_in_inventory_ini(self) -> None:
         ini_content = """
-        [servers]
-        otherhost
-        """
+[servers]
+otherhost
+"""
         inv = self._write_ini_inventory(ini_content)
-        result = self.validator.validate(inv, ["app1"])
-        expected = {"app1": {"in_roles": True, "in_inventory": False}}
+        result = self.validator.validate(inv, [self.existing_app])
+        expected = {self.existing_app: {"in_roles": True, "in_inventory": False}}
         self.assertEqual(result, expected)
 
-    def test_missing_both_ini(self):
-        # Neither roles nor inventory have appX
+    def test_missing_both_ini(self) -> None:
         ini_content = """
-        [servers]
-        otherhost
-        """
+[servers]
+otherhost
+"""
         inv = self._write_ini_inventory(ini_content)
-        result = self.validator.validate(inv, ["appX"])
-        expected = {"appX": {"in_roles": False, "in_inventory": False}}
+        result = self.validator.validate(inv, [self.missing_app])
+        expected = {self.missing_app: {"in_roles": False, "in_inventory": False}}
         self.assertEqual(result, expected)
 
-    def test_valid_in_roles_and_yaml_inventory(self):
-        # YAML inventory with app1 as a dict key
-        data = {"app1": {"hosts": ["app1"]}, "group": {"app1": {}}}
+    def test_valid_in_roles_and_yaml_inventory(self) -> None:
+        data = {self.existing_app: {"hosts": ["localhost"]}}
         inv = self._write_yaml_inventory(data)
-        result = self.validator.validate(inv, ["app1"])
-        self.assertEqual(result, {}, "app1 should be valid in roles and yaml inventory")
+        result = self.validator.validate(inv, [self.existing_app])
+        self.assertEqual(result, {}, "app should be valid in roles and yaml inventory")
 
-    def test_missing_in_roles_yaml(self):
-        # YAML inventory has app2 key but roles only have app1
-        data = {"app2": {}}
+    def test_missing_in_roles_yaml(self) -> None:
+        data = {self.missing_app: {}}
         inv = self._write_yaml_inventory(data)
-        result = self.validator.validate(inv, ["app2"])
-        expected = {"app2": {"in_roles": False, "in_inventory": True}}
+        result = self.validator.validate(inv, [self.missing_app])
+        expected = {self.missing_app: {"in_roles": False, "in_inventory": True}}
         self.assertEqual(result, expected)
 
-    def test_missing_in_inventory_yaml(self):
-        # Roles have app1 but YAML inventory has no app1
+    def test_missing_in_inventory_yaml(self) -> None:
         data = {"group": {"other": {}}}
         inv = self._write_yaml_inventory(data)
-        result = self.validator.validate(inv, ["app1"])
-        expected = {"app1": {"in_roles": True, "in_inventory": False}}
+        result = self.validator.validate(inv, [self.existing_app])
+        expected = {self.existing_app: {"in_roles": True, "in_inventory": False}}
         self.assertEqual(result, expected)
 
-    def test_missing_both_yaml(self):
+    def test_missing_both_yaml(self) -> None:
         data = {}
         inv = self._write_yaml_inventory(data)
-        result = self.validator.validate(inv, ["unknown"])
-        expected = {"unknown": {"in_roles": False, "in_inventory": False}}
+        result = self.validator.validate(inv, [self.missing_app])
+        expected = {self.missing_app: {"in_roles": False, "in_inventory": False}}
         self.assertEqual(result, expected)
 
 

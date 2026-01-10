@@ -65,7 +65,7 @@ RESERVED_USERNAMES := $(shell \
 
 .PHONY: \
 	setup setup-clean install install-ansible install-venv install-python \
-	test test-lint test-unit test-integration test-deploy \
+	test test-lint test-unit test-integration test-deploy test-deploy-app\
 	clean down \
 	list tree mig dockerignore \
 	print-python lint-ansible
@@ -126,14 +126,16 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-ANSIBLE_COLLECTIONS_DIR ?= ./collections
+# Global for all Infinito.Nexus environments used by the user
+ANSIBLE_COLLECTIONS_DIR ?= $(HOME)/.ansible/collections
 
 install-ansible:
-	@echo "📦 Installing Ansible collections from requirements.yml → $(ANSIBLE_COLLECTIONS_DIR)"
+	@echo "📦 Installing Ansible collections → $(ANSIBLE_COLLECTIONS_DIR)"
 	@mkdir -p "$(ANSIBLE_COLLECTIONS_DIR)"
 	@"$(PYTHON)" -m ansible.cli.galaxy collection install \
 		-r requirements.yml \
-		-p "$(ANSIBLE_COLLECTIONS_DIR)"
+		-p "$(ANSIBLE_COLLECTIONS_DIR)" \
+		--force-with-deps
 
 install-venv:
 	@echo "✅ Python environment installed (editable)."
@@ -188,6 +190,9 @@ format:
 
 # --- Tests (separated) ---
 
+test: test-lint test-unit test-integration lint-ansible test-deploy
+	@echo "✅ Full test (setup + tests) executed."
+
 test-lint: build-missing
 	@TEST_TYPE="lint" bash scripts/tests/code.sh
 
@@ -197,20 +202,47 @@ test-unit: build-missing
 test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
-test-deploy:
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
-	scripts/tests/deploy.sh \
-	  --type "$(TEST_DEPLOY_TYPE)" \
-	  --missing
+# ------------------------------------------------------------
+# Deploy test for a single app (serial, fail-fast)
+# Usage:
+#   make test-deploy-app APP=web-app-nextcloud
+# ------------------------------------------------------------
+test-deploy-app: build-missing up
+	@set -euo pipefail; \
+	if [[ -z "$(APP)" ]]; then \
+	  echo "ERROR: APP is not set"; \
+	  echo "Usage: make test-deploy-app APP=web-app-nextcloud"; \
+	  exit 1; \
+	fi; \
+	echo "=== act: deploy:server app=$(APP) (serial, fail-fast) ==="; \
+	act -W .github/workflows/test-deploy-server.yml \
+		-j test \
+		--matrix app:"$(APP)" \
+		--privileged \
+		--network host \
+		--concurrent-jobs 1
+
+# ------------------------------------------------------------
+# Deploy test for all discovered apps (calls test-deploy-app)
+# ------------------------------------------------------------
+test-deploy: build-missing up
+	@set -euo pipefail; \
+	echo "=== Discover server apps (JSON) ==="; \
+	export INFINITO_DISTRO="arch"; \
+	apps_json="$$(scripts/tests/discover-server-apps.sh)"; \
+	if [[ -z "$$apps_json" ]]; then apps_json="[]"; fi; \
+	echo "$$apps_json" | jq -e . >/dev/null; \
+	echo "Apps: $$apps_json"; \
+	echo; \
+	for app in $$(echo "$$apps_json" | jq -r '.[]'); do \
+		$(MAKE) test-deploy-app APP="$$app"; \
+		echo; \
+	done
 
 # Backwards compatible target (kept)
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
-
-test: test-lint test-unit test-integration lint-ansible test-deploy
-	@echo "✅ Full test (setup + tests) executed."
 
 # Debug helper
 print-python:

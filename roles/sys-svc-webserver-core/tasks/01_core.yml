@@ -14,10 +14,15 @@
 - name: "Include tasks to create directories"
   include_tasks: 04_directories.yml
 
-- name: "Provide OpenResty Handlers for Webserver"
-  include_tasks: utils/load_handlers.yml
+- name: Load OpenResty
+  include_tasks: "utils/load_app.yml"
   vars:
-    handler_role_name: svc-prx-openresty
+    load_app_id: svc-prx-openresty
+
+#- name: "Provide OpenResty Handlers for Webserver"
+#  include_tasks: utils/load_handlers.yml
+#  vars:
+#    handler_role_name: svc-prx-openresty
 
 - name: Deploy OpenResty NGINX Base Configuration
   template:
@@ -30,11 +35,6 @@
     src:  default_server.conf.j2
     dest: "{{ [ NGINX.DIRECTORIES.HTTP.GLOBAL, 'default_server.conf' ] | path_join }}"
   notify: restart openresty
-
-- name: Load OpenResty
-  include_tasks: "utils/load_app.yml"
-  vars:
-    load_app_id: svc-prx-openresty
 
 - name: Flush OpenResty Base Setup
   meta: flush_handlers
