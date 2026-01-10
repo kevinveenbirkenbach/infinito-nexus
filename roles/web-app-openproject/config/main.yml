@@ -20,18 +20,13 @@ server:
     aliases: []
 docker:
   services:
-    oauth2:
-      enabled: true
-      shared: true
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: true
       shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -81,7 +76,8 @@ docker:
       mem_reservation:    "512m"
       mem_limit:          "512m"
       pids_limit:         256
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host:             "proxy"
         port:             "80"

@@ -15,12 +15,8 @@ server:
       - phpmyadmin.{{ DOMAIN_PRIMARY }}
 docker:
   services:
-    oauth2:
-      enabled: true
-      shared: true
     logout:
       enabled: true
-      shared: true
     desktop:
       enabled: false
       shared: false
@@ -35,7 +31,8 @@ docker:
       version:  "latest"      # Use the latest phpmyadmin version
       name:     "phpmyadmin"
       image:    "phpmyadmin/phpmyadmin"
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         port:   "80"
         host:   "application"

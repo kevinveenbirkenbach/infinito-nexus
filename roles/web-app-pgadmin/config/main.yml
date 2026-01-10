@@ -19,15 +19,10 @@ server:
     aliases: []
 docker:
   services:
-    oauth2:
-      enabled: true
-      shared: true
     logout:
       enabled: true
-      shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -35,7 +30,8 @@ docker:
       shared: true
       type: "postgres"
       enabled: true
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host: "application"
         port: "80"

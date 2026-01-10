@@ -33,7 +33,6 @@ docker:
   services:
     oauth2:
       enabled: false
-      shared: false
     logout:
       enabled: false
       shared: false

@@ -19,18 +19,13 @@ server:
         - "data:"
 docker:
   services:
-    oauth2:
-      enabled: true
-      shared: true
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: true
       shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -46,7 +41,8 @@ docker:
       version:  "latest"
       name:     "snipe-it"
       image:    "grokability/snipe-it"
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host:  "application"
         port:   "80"

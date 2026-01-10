@@ -1,24 +1,20 @@
 docker:
   services:
-    oauth2:
-      enabled: true
-      shared: true
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: true
       shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
     lam:
       image:        ghcr.io/ldapaccountmanager/lam
       version:      latest
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host:       application
         port:       80

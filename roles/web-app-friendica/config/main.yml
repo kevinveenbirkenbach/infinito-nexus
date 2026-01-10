@@ -21,21 +21,16 @@ addons:
   ldapauth: {}
 docker:
   services:
-    oauth2:
-      enabled: false
-      shared: false
     oidc:
       enabled: false
       shared: false
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: true
       shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -43,7 +38,8 @@ docker:
       shared: true
       type: "mariadb"
       enabled:      true
-    oauth2_proxy:
+    oauth2:
       origin:
         host: "application"
         port: "80"
+      enabled: false

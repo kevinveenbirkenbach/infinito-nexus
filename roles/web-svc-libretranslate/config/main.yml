@@ -4,7 +4,6 @@ docker:
   services:
     oauth2:
       enabled: false
-      shared: false
     logout:
       enabled: false
       shared: false
@@ -13,7 +12,6 @@ docker:
       shared: false
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true

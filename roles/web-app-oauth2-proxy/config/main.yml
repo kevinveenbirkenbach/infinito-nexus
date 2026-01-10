@@ -12,7 +12,6 @@ docker:
   services:
     logout:
       enabled: true
-      shared: true
     desktop:
       enabled: false
       shared: false

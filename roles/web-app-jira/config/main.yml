@@ -7,13 +7,11 @@ docker:
       shared: false
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: false
       shared: false
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true

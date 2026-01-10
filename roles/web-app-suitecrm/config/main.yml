@@ -17,21 +17,16 @@ email:
 
 docker:
   services:
-    oauth2:
-      enabled: true
-      shared: true
     oidc:
       enabled: false
       shared: false
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: true
       shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -49,7 +44,8 @@ docker:
       mem_reservation:  1.2g
       mem_limit:        2g
       pids_limit:       768
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host:           "suitecrm"
         port:           "80"

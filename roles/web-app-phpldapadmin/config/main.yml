@@ -7,25 +7,21 @@ server:
     aliases: []
 docker:
   services:
-    oauth2:
-      enabled: true
-      shared: true
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: true
       shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
     phpldapadmin:
       image:    leenooks/phpldapadmin
       version:  "2.0.0-dev"
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host: application  # Needs to be the same as webinterface
         port: 8080         # application port

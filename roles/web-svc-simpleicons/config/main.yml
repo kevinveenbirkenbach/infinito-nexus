@@ -3,13 +3,11 @@ docker:
   services:
     oauth2:
       enabled: false
-      shared: false
     ldap:
       enabled: false
       shared: false
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: false
       shared: false

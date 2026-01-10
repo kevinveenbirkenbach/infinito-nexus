@@ -28,21 +28,16 @@ server:
       - tea.git.{{ DOMAIN_PRIMARY }}
 docker:
   services:
-    oauth2:
-      enabled: true
-      shared: true
     oidc:
       enabled: false
       shared: false
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: true
       shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -69,12 +64,13 @@ docker:
       mem_reservation:    0.2g
       mem_limit:          0.3g
       pids_limit:         512
-    oauth2_proxy:
+    oauth2:
       origin:
         host:             "application"
         port:             "<< defaults_applications[web-app-gitea].docker.services.gitea.port >>"
       acl:
         blacklist:
           - "/user/login"
+      enabled: false
   volumes:
     data:             "gitea_data"

@@ -8,7 +8,6 @@ docker:
   services:
     logout:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true

@@ -15,10 +15,8 @@ docker:
       shared: false
     logout:
       enabled: true
-      shared: true
     desktop:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
