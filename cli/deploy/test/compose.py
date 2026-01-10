@@ -80,7 +80,6 @@ class Compose:
                 workdir="/opt/src/infinito",
             )
 
-
     def down(self) -> None:
         print(">>> Stopping compose stack and removing volumes")
         self.run(["down", "--remove-orphans", "-v"], check=True)
