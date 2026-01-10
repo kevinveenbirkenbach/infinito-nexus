@@ -15,7 +15,7 @@ def load_yaml(path: Path):
 class TestCentralDatabaseConfig(unittest.TestCase):
     def test_central_database_feature_requires_database_service(self):
         """
-        If features.central_database is defined in either vars/main.yml or config/main.yml,
+        If docker.services.database.shared is defined in either vars/main.yml or config/main.yml,
         then config/main.yml must define docker.services.database.
         """
         repo_root = Path(__file__).resolve().parents[2]

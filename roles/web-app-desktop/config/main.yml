@@ -44,6 +44,5 @@ docker:
       shared: true
     desktop:
       enabled: false
-      shared: false
       name:   "desktop"
       image:  "application-portfolio"

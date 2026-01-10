@@ -1,17 +1,3 @@
-
-features:
-#  syncope:
-#    version:         "latest"
-#    credentials:
-#     anonymous:
-#       password:     # Set in environment file
-#     database:
-#       password:     # Set in environment file
-#     administrator:
-#       password:       "{{ users.administrator.password }}"
-#     users:
-#       administrator:
-#         username:     "{{ users.administrator.username }}"
 server:
   domains:
     canonical:

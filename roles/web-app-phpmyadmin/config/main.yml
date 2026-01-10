@@ -19,7 +19,6 @@ docker:
       enabled: true
     desktop:
       enabled: false
-      shared: false
     matomo:
       enabled: true
       shared: true

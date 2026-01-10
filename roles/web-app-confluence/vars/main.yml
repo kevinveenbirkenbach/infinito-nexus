@@ -14,7 +14,7 @@ CONFLUENCE_HOSTNAME:              "{{ container_hostname }}"
 CONFLUENCE_HOME:                  "/var/atlassian/application-data/confluence"
 
 ## OIDC
-CONFLUENCE_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+CONFLUENCE_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 CONFLUENCE_OIDC_LABEL:            "{{ OIDC.BUTTON_TEXT }}"
 CONFLUENCE_OIDC_CLIENT_ID:        "{{ OIDC.CLIENT.ID }}"
 CONFLUENCE_OIDC_CLIENT_SECRET:    "{{ OIDC.CLIENT.SECRET }}"

@@ -15,16 +15,6 @@ docker:
       container:        "{{ application_id | get_entity_name }}"      # The container name
     volumes:
       data:             "{{ application_id | get_entity_name }}_data"
-features:
-  matomo:           true    # Enable Matomo Tracking
-  css:              true    # Enable Global CSS Styling
-  desktop:          true    # Enable loading of app in iframe
-  ldap:             false   # Enable LDAP Network
-  central_database: false   # Enable Central Database Network
-  recaptcha:        false   # Enable ReCaptcha
-  oauth2:           false   # Enable the OAuth2-Proy
-  javascript:       false   # Enable the custom JS in the javascript.js.j2 file  
-  logout:           true    # Enable the logout via the central logout mechanism (deleting all cookies)  
 server:
   csp:
     whitelist:                # URL's which should be whitelisted           

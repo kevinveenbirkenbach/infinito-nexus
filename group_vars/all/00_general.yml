@@ -85,7 +85,7 @@ _applications_nextcloud_oidc_flavor: >-
             'oidc_login'
             if (
               (applications | default({}, true))
-                | get_app_conf('web-app-nextcloud','features.ldap',False, True, True)
+                | get_app_conf('web-app-nextcloud','docker.services.ldap.enabled',False, True, True)
             )
             else 'sociallogin'
           ),

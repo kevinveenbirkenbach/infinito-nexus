@@ -146,7 +146,7 @@ return array (
     //
     // The `id` attribute in `oidc_login_attributes` must return the
     // "Internal Username" (see expert settings in LDAP integration)
-    'oidc_login_proxy_ldap' => {{ applications | get_app_conf(application_id, 'features.ldap', False) | string | lower }},
+    'oidc_login_proxy_ldap' => {{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False) | string | lower }},
 
     // Disable creation of users new to Nextcloud from OIDC login.
     // A user may be known to the IdP but not (yet) known to Nextcloud.

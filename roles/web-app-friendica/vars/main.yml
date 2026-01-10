@@ -3,7 +3,7 @@ application_id:                 "web-app-friendica"
 
 # Friendica
 friendica_container:            "friendica"
-friendica_no_validation:        "{{ applications | get_app_conf(application_id, 'features.oidc') }}" # Email validation is not neccessary if OIDC is active
+friendica_no_validation:        "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}" # Email validation is not neccessary if OIDC is active
 friendica_application_base:     "/var/www/html"
 friendica_docker_ldap_config:   "{{ [ friendica_application_base,         'config/ldapauth.config.php' ] | path_join }}"
 friendica_host_ldap_config:     "{{ [ docker_compose.directories.volumes, 'ldapauth.config.php' ] | path_join }}"

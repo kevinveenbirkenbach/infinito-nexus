@@ -48,7 +48,7 @@ email:
   validation_token_lifetime:    15m
 {% endif %}
 
-{% if applications | get_app_conf(application_id, 'features.oidc', False) %}
+{% if applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) %}
 # @See https://matrix-org.github.io/synapse/latest/openid.html
 oidc_providers:
   - idp_id:         keycloak

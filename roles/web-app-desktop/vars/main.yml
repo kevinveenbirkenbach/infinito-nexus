@@ -8,7 +8,7 @@ webserver_extra_configuration:        "{{ lookup('template', 'nginx/sso.html.con
 # Desktop
 
 ## Simpleicons
-DESKTOP_SIMPLEICONS_ENABLED:      "{{ applications | get_app_conf(application_id, 'features.simpleicons') }}"
+DESKTOP_SIMPLEICONS_ENABLED:      "{{ applications | get_app_conf(application_id, 'docker.services.simpleicons.enabled') }}"
 
 ## Javascript
 DESKTOP_JS_CDN_URL:               "{{ domains | get_url('web-svc-cdn', WEB_PROTOCOL) }}"
@@ -32,8 +32,8 @@ DESKTOP_KEYCLOAK_LOGIN_URL: >-
      ~ '&response_type=code'
      ~ '&scope=openid%20profile%20email'
      ~ '&redirect_uri=' ~ (domains | get_url(application_id, WEB_PROTOCOL)) | urlencode }}
-DESKTOP_KEYCLOAK_IFRAME_ENABLED:  "{{ applications | get_app_conf( 'web-app-keycloak', 'features.desktop') }}"
-DESKTOP_OIDC_ENABLED:             "{{ applications | get_app_conf( application_id, 'features.oidc') }}"
+DESKTOP_KEYCLOAK_IFRAME_ENABLED:  "{{ applications | get_app_conf( 'web-app-keycloak', 'docker.services.desktop.enabled') }}"
+DESKTOP_OIDC_ENABLED:             "{{ applications | get_app_conf( application_id, 'docker.services.oidc.enabled') }}"
 
 ## Docker
 DESKTOP_CONTAINER:                "{{ applications | get_app_conf( application_id, 'docker.services.desktop.name') }}"

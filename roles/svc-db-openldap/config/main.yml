@@ -6,7 +6,6 @@ docker:
   services:
     ldap:
       enabled: true
-      shared: true
     openldap:     
       image:      "bitnamilegacy/openldap"
       name:       "openldap"
@@ -19,7 +18,6 @@ docker:
   network:        "openldap"
   volumes:
     data:         "openldap_data"
-features:
 provision:           
 # Here it's possible to define what should be imported and updated.
 # It doesn't make sense to let  the import run everytime because its very time consuming

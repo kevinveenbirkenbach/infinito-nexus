@@ -12,9 +12,9 @@ OPENWEBUI_OFFLINE_MODE:               "{{ applications | get_app_conf(applicatio
 OPENWEBUI_HF_HUB_OFFLINE:             "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.hf_hub_offline') }}"
 OPENWEBUI_VOLUME:                     "{{ applications | get_app_conf(application_id, 'docker.volumes.openwebui') }}"
 OPENWEBUI_PORT_PUBLIC:                "{{ ports.localhost.http[application_id] }}"
-OPENWEBUI_LDAP_ENABLED:               "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
+OPENWEBUI_LDAP_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 
 ## OIDC
-OPENWEBUI_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+OPENWEBUI_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 OPENWEBUI_OIDC_REDIRECT_URL:          "{{ [OPENWEBUI_URL,'/oauth/oidc/callback'] | url_join }}"
 OPENWEBUI_OIDC_ADMIN_GROUP:           "{{ [ RBAC.GROUP.NAME, application_id ~ '-administrator' ] | path_join }}"

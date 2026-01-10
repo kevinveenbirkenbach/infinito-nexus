@@ -59,7 +59,10 @@ def redirect_uris(
     applications: dict,
     web_protocol: str = "https",
     wildcard: str = "/*",
-    features: Iterable[str] = ("features.oauth2", "features.oidc"),
+    features: Iterable[str] = (
+        "docker.services.oauth2.enabled",
+        "docker.services.oidc.enabled",
+    ),
     dedup: bool = True,
 ) -> list[str]:
     """

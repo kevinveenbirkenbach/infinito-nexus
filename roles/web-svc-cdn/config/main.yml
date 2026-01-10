@@ -9,7 +9,6 @@ docker:
   services:
     desktop:
       enabled: false
-      shared: false
     matomo:
       enabled: true
       shared: true

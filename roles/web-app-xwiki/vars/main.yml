@@ -24,8 +24,8 @@ XWIKI_CONTAINER:                      "{{ applications | get_app_conf(applicatio
 XWIKI_DATA_VOLUME:                    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 
 # Feature toggles (must be set in config/main.yml -> features)
-XWIKI_LDAP_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
-XWIKI_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+XWIKI_LDAP_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+XWIKI_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 XWIKI_SSO_ENABLED:                    "{{ (XWIKI_OIDC_ENABLED | bool) or (XWIKI_LDAP_ENABLED | bool) }}"
 
 # Admin credentials (must be provided via inventory/vault)

@@ -30,7 +30,7 @@ LISTMONK_SETTINGS:
          "provider_url": OIDC.CLIENT.ISSUER_URL,
          "client_secret": OIDC.CLIENT.SECRET
       } | to_json }}
-    when: applications | get_app_conf(application_id, 'features.oidc', False)
+    when: applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False)
 
   # hCaptcha toggles and credentials
   - key: "security.enable_captcha"

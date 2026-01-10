@@ -3,9 +3,7 @@ docker:
   services:
     oauth2:
       enabled: false
-    ldap:
-      enabled: false
-      shared: false
+
     desktop:
       enabled: true
     matomo:

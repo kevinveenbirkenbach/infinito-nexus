@@ -14,7 +14,7 @@ TAIGA_SUPERUSER_PASSWORD:       "{{ users.administrator.password }}"
 TAIGA_SUPERUSER_EMAIL:          "{{ users.administrator.email }}"
 
 ## OIDC
-TAIGA_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+TAIGA_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 TAIGA_OIDC_FLAVOR:              "{{ applications | get_app_conf(application_id, 'oidc.flavor') }}"
 TAIGA_FLAVOR_ROBROTHERAM:       "{{ TAIGA_OIDC_FLAVOR == 'robrotheram' }}"
 TAIGA_ROBROTHERAM_ENABLED:      "{{ TAIGA_OIDC_ENABLED and TAIGA_FLAVOR_ROBROTHERAM }}"

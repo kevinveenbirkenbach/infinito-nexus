@@ -48,5 +48,5 @@ BBB_IP6_ENABLED:                      "{{ applications | get_app_conf(applicatio
 BBB_GREENLIGHT_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.greenlight.enabled') }}"
 
 ### SSO
-BBB_LDAP_ENABLED:                     "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
-BBB_OIDC_ENABLED:                     "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+BBB_LDAP_ENABLED:                     "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+BBB_OIDC_ENABLED:                     "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"

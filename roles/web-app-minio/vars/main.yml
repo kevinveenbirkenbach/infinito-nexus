@@ -31,7 +31,7 @@ MINIO_MC_INSECURE_SUFFIX:       "{{ '?insecure=true' if (MINIO_MC_INSECURE | boo
 MINIO_MC_HOST_ENV:              "{{ MINIO_MC_SCHEME }}://{{ MINIO_MC_USER }}:{{ MINIO_MC_PASS }}@{{ MINIO_MC_HOST_ONLY }}{{ MINIO_MC_INSECURE_SUFFIX }}"
 
 ## OIDC
-MINIO_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+MINIO_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 MINIO_OIDC_POLICY_NAME:         "{{ [ RBAC.GROUP.NAME, application_id ~ '-administrator' ] | path_join }}"
 MINIO_OIDC_POLICY_CONTENT:      "{{ lookup('template', 'policy.json.j2') }}"
 

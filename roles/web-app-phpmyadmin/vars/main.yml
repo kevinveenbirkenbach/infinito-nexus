@@ -1,5 +1,5 @@
 application_id:       "web-app-phpmyadmin"
-database_host:        "{{ applications | get_app_conf('svc-db-mariadb', 'docker.services.mariadb.name') if applications | get_app_conf(application_id, 'features.central_database', False) }}"
+database_host:        "{{ applications | get_app_conf('svc-db-mariadb', 'docker.services.mariadb.name') if applications | get_app_conf(application_id, 'docker.services.database.shared', False) }}"
 
 PHPMYADMIN_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.version') }}"
 PHPMYADMIN_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.image') }}"

@@ -32,4 +32,5 @@ GITEA_CONFIG:         "/data/gitea/conf/app.ini"
 GITEA_REDIS_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.redis.enabled') }}"
 GITEA_REDIS_ADDRESS:  "redis:6379"
 
-GITEA_IAM_ENABLED:    "{{ applications | get_app_conf(application_id, 'features.oidc', False) or applications | get_app_conf(application_id, 'features.ldap', False) }}"
+GITEA_OIDC_ENABLED:   "{{ applications | get_app_conf(application_id, 'docker.services.oidc.shared', False) | bool }}"
+GITEA_IAM_ENABLED:    "{{ (GITEA_OIDC_ENABLED | bool) or applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False) }}"

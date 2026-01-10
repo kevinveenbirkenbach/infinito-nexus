@@ -1,5 +1,5 @@
 {# This needs to be included in docker-compose.yml which just contain a database volume #}
-{% if not applications | get_app_conf(application_id, 'features.central_database', False)%}
+{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False)%}
 volumes:
   database:
     name: {{ database_volume }}

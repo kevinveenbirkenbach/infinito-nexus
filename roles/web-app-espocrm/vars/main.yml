@@ -32,7 +32,7 @@ ESPOCRM_ENTRYPOINT_SCRIPT_DOCKER:   "{{ [ '/usr/local/bin/', ESPOCRM_ENTRYPOINT_
 
 ESPOCRM_CONFIG_FILE_PRIVATE:        "/var/www/html/data/config-internal.php"
 ESPOCRM_URL:                        "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-ESPOCRM_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+ESPOCRM_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 ESPOCRM_USER:                       "www-data"
 
 

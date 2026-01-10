@@ -23,7 +23,7 @@ class LookupModule(LookupBase):
           - Retrieves the icon class from galaxy_info.logo.class
           - Retrieves the tags from galaxy_info.galaxy_tags
           - Builds the URL using the 'domains' variable
-          - Sets the iframe flag from applications | get_app_conf(application_id, 'features.desktop', True)
+          - Sets the iframe flag from applications | get_app_conf(application_id, 'docker.services.desktop.enabled', True)
 
         Only cards whose application_id is included in the variable group_names are returned.
         """

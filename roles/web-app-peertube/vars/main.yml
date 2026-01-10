@@ -11,7 +11,7 @@ PEERTUBE_CONFIG_VOLUME:           "{{ applications | get_app_conf(application_id
 
 # OIDC
 PEERTUBE_OIDC_PLUGIN:             "peertube-plugin-auth-openid-connect"
-PEERTUBE_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+PEERTUBE_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 
 # Performance
 PEERTUBE_CPUS:                    "{{ applications | get_app_conf(application_id, 'docker.services.peertube.cpus') | float }}"

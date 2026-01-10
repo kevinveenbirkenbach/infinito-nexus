@@ -1,5 +1,4 @@
 # xmpp is more a service then a app with ui interface. @todo Rename it 
-features:
 server:
   domains:
     canonical:

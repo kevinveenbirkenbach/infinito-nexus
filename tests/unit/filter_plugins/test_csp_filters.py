@@ -96,9 +96,7 @@ class TestCspFilters(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_build_csp_header_basic(self):
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
         # Ensure core directives are present
         self.assertIn("default-src 'self';", header)
 
@@ -126,7 +124,7 @@ class TestCspFilters(unittest.TestCase):
         self.assertTrue(header.strip().endswith("img-src * data: blob:;"))
 
     def test_build_csp_header_without_matomo_or_flags(self):
-        header = self.filter.build_csp_header(self.apps, "app2", self.domains)
+        header = self.filter.build_csp_header(self.apps, "app2", self.domains, "https")
         # default-src only contains 'self'
         self.assertIn("default-src 'self';", header)
         self.assertIn("https://cdn.example.org", header)
@@ -170,9 +168,7 @@ class TestCspFilters(unittest.TestCase):
         script-src has unsafe-inline = False -> hash should be included
         style-src has unsafe-inline = True  -> hash should NOT be included
         """
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
 
         # script-src includes hash because 'unsafe-inline' is False
         script_hash = self.filter.get_csp_hash("console.log('hello');")
@@ -190,14 +186,14 @@ class TestCspFilters(unittest.TestCase):
         # enabled case
         self.apps["app1"]["features"]["recaptcha"] = True
         header_enabled = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
+            self.apps, "app1", self.domains, "https"
         )
         self.assertIn("https://www.google.com", header_enabled)
 
         # disabled case
         self.apps["app1"]["features"]["recaptcha"] = False
         header_disabled = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
+            self.apps, "app1", self.domains, "https"
         )
         self.assertNotIn("https://www.google.com", header_disabled)
 
@@ -211,16 +207,14 @@ class TestCspFilters(unittest.TestCase):
         # simulate a subdomain for the application
         self.domains["web-app-desktop"] = ["domain-example.com"]
 
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
         # Expect 'domain-example.com' in the frame-ancestors directive
         self.assertRegex(header, r"frame-ancestors\s+'self'\s+domain-example\.com;")
 
         # Now disable the feature and rebuild
         self.apps["app1"]["features"]["desktop"] = False
         header_no = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
+            self.apps, "app1", self.domains, "https"
         )
         # Should no longer contain the SLD+TLD
         self.assertNotIn("domain-example.com", header_no)
@@ -249,9 +243,7 @@ class TestCspFilters(unittest.TestCase):
         """
         Because 'unsafe-inline' is defaulted for style-src, hashes for style-src should NOT be included.
         """
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
         style_hash = self.filter.get_csp_hash("body { background: #fff; }")
         self.assertNotIn(style_hash, header)
 
@@ -276,9 +268,7 @@ class TestCspFilters(unittest.TestCase):
             "body { background: #fff; }"
         )
 
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
 
         # Then the style hash SHOULD be present
         style_hash = self.filter.get_csp_hash("body { background: #fff; }")
@@ -292,9 +282,7 @@ class TestCspFilters(unittest.TestCase):
         """
         style-src-elem should include 'unsafe-inline' by default (from get_csp_flags defaults).
         """
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
         tokens = self._get_directive_tokens(header, "style-src-elem")
         self.assertIn("'unsafe-inline'", tokens)
 
@@ -305,9 +293,7 @@ class TestCspFilters(unittest.TestCase):
         - If we flip unsafe-inline=True, hashes should NOT be included.
         """
         # Baseline (from setUp): app1 script-src has unsafe-inline=False and one hash
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
         script_hash = self.filter.get_csp_hash("console.log('hello');")
         self.assertIn(script_hash, header)
 
@@ -316,7 +302,7 @@ class TestCspFilters(unittest.TestCase):
             True
         )
         header_inline = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
+            self.apps, "app1", self.domains, "https"
         )
         self.assertNotIn(script_hash, header_inline)
 
@@ -339,9 +325,7 @@ class TestCspFilters(unittest.TestCase):
         )
         style_hash = self.filter.get_csp_hash("body { color: blue; }")
 
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
 
         # Because defaults include 'unsafe-inline' for style-src, the hash MUST NOT appear
         self.assertNotIn(style_hash, header)
@@ -366,9 +350,7 @@ class TestCspFilters(unittest.TestCase):
             "https://attr-only.example.com"
         ]
 
-        header = self.filter.build_csp_header(
-            apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
 
         base_tokens = self._get_directive_tokens(header, "style-src")
         elem_tokens = self._get_directive_tokens(header, "style-src-elem")
@@ -395,9 +377,7 @@ class TestCspFilters(unittest.TestCase):
         ).setdefault("style-src", {})
         apps["app1"]["server"]["csp"]["flags"]["style-src"]["unsafe-inline"] = False
 
-        header = self.filter.build_csp_header(
-            apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
 
         base_tokens = self._get_directive_tokens(header, "style-src")
         elem_tokens = self._get_directive_tokens(header, "style-src-elem")
@@ -434,9 +414,7 @@ class TestCspFilters(unittest.TestCase):
             "unsafe-eval": True,
         }
 
-        header = self.filter.build_csp_header(
-            apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
 
         base_tokens = self._get_directive_tokens(header, "script-src")
         elem_tokens = self._get_directive_tokens(header, "script-src-elem")
@@ -464,9 +442,7 @@ class TestCspFilters(unittest.TestCase):
             "https://attr-scripts.example.com"
         ]
 
-        header = self.filter.build_csp_header(
-            apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
 
         base_tokens = self._get_directive_tokens(header, "script-src")
         self.assertIn("https://elem-scripts.example.com", base_tokens)
@@ -490,9 +466,7 @@ class TestCspFilters(unittest.TestCase):
         apps["app1"]["server"]["csp"].setdefault("hashes", {})["style-src"] = content
         expected_hash = self.filter.get_csp_hash(content)
 
-        header = self.filter.build_csp_header(
-            apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
         base_tokens = self._get_directive_tokens(header, "style-src")
 
         self.assertNotIn("'unsafe-inline'", base_tokens)  # confirm no unsafe-inline
@@ -510,9 +484,7 @@ class TestCspFilters(unittest.TestCase):
             "https://base-only.example.com"
         ]
 
-        header = self.filter.build_csp_header(
-            apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
 
         base_tokens = self._get_directive_tokens(header, "style-src")
         elem_tokens = self._get_directive_tokens(header, "style-src-elem")
@@ -528,9 +500,7 @@ class TestCspFilters(unittest.TestCase):
         When the logout feature is NOT enabled, the filter must NOT
         inject 'unsafe-inline' into script-src-attr or script-src-elem.
         """
-        header = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(self.apps, "app1", self.domains, "https")
 
         attr_tokens = self._get_directive_tokens(header, "script-src-attr")
         elem_tokens = self._get_directive_tokens(header, "script-src-elem")
@@ -550,9 +520,7 @@ class TestCspFilters(unittest.TestCase):
         domains["web-svc-logout"] = ["logout.example.org"]
         domains["web-app-keycloak"] = ["keycloak.example.org"]
 
-        header = self.filter.build_csp_header(
-            apps, "app1", domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", domains, "https")
 
         attr_tokens = self._get_directive_tokens(header, "script-src-attr")
         elem_tokens = self._get_directive_tokens(header, "script-src-elem")
@@ -580,9 +548,7 @@ class TestCspFilters(unittest.TestCase):
         domains["web-svc-logout"] = ["logout.example.org"]
         domains["web-app-keycloak"] = ["keycloak.example.org"]
 
-        header = self.filter.build_csp_header(
-            apps, "app1", domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", domains, "https")
 
         base_tokens = self._get_directive_tokens(header, "script-src")
         attr_tokens = self._get_directive_tokens(header, "script-src-attr")
@@ -615,9 +581,7 @@ class TestCspFilters(unittest.TestCase):
         domains["web-svc-logout"] = ["logout.example.org"]
         domains["web-app-keycloak"] = ["keycloak.example.org"]
 
-        header = self.filter.build_csp_header(
-            apps, "app1", domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", domains, "https")
 
         base_tokens = self._get_directive_tokens(header, "script-src")
         attr_tokens = self._get_directive_tokens(header, "script-src-attr")
@@ -637,7 +601,7 @@ class TestCspFilters(unittest.TestCase):
         # enabled case
         self.apps["app1"].setdefault("features", {})["hcaptcha"] = True
         header_enabled = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
+            self.apps, "app1", self.domains, "https"
         )
 
         # script-src-elem must contain hCaptcha hosts
@@ -659,7 +623,7 @@ class TestCspFilters(unittest.TestCase):
         # disabled case
         self.apps["app1"]["features"]["hcaptcha"] = False
         header_disabled = self.filter.build_csp_header(
-            self.apps, "app1", self.domains, web_protocol="https"
+            self.apps, "app1", self.domains, "https"
         )
 
         for directive in ("script-src", "script-src-elem", "frame-src"):
@@ -683,9 +647,7 @@ class TestCspFilters(unittest.TestCase):
             "https://mmm.example.com",
         ]
 
-        header = self.filter.build_csp_header(
-            apps, "app1", self.domains, web_protocol="https"
-        )
+        header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
         tokens = self._get_directive_tokens(header, "connect-src")
 
         # Ensure we actually have tokens
@@ -721,12 +683,8 @@ class TestCspFilters(unittest.TestCase):
             "https://b.example.com",
         ]
 
-        header1 = self.filter.build_csp_header(
-            apps1, "app1", self.domains, web_protocol="https"
-        )
-        header2 = self.filter.build_csp_header(
-            apps2, "app1", self.domains, web_protocol="https"
-        )
+        header1 = self.filter.build_csp_header(apps1, "app1", self.domains, "https")
+        header2 = self.filter.build_csp_header(apps2, "app1", self.domains, "https")
 
         self.assertEqual(header1, header2)
 

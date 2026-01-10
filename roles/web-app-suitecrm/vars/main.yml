@@ -30,7 +30,7 @@ SUITECRM_DATA_VOLUME:                 "{{ applications | get_app_conf(applicatio
 SUITECRM_URL:                         "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
 
 # LDAP
-SUITECRM_LDAP_ENABLED:                "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
+SUITECRM_LDAP_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 SUITECRM_LDAP_CONFIG_HOST:            "{{ [ docker_compose.directories.config, 'ldap.yaml'] | path_join }}"
 SUITECRM_LDAP_EXTENSION_DIR:          "{{ ['/var/www/html/extensions', SUITECRM_WELL_SOFTWARE_NAME, 'config/services/ldap'] | path_join }}"
 

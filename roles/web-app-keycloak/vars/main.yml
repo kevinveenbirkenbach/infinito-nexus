@@ -52,7 +52,7 @@ KEYCLOAK_VERSION:                   "{{ applications | get_app_conf(application_
 KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[application_id] }}"
   
 ## Update
-KEYCLOAK_REDIRECT_FEATURES:         ["features.oauth2","features.oidc"]
+KEYCLOAK_REDIRECT_FEATURES:         ["docker.services.oauth2.enabled","docker.services.oidc.enabled"]
 KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ domains | get_url('web-svc-logout', WEB_PROTOCOL) }}/"
 KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(applications, WEB_PROTOCOL, '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
 KEYCLOAK_WEB_ORIGINS: >-
@@ -64,7 +64,7 @@ KEYCLOAK_WEB_ORIGINS: >-
 KEYCLOAK_POST_LOGOUT_URIS:           "+"
 
 ## LDAP
-KEYCLOAK_LDAP_ENABLED:              "{{ applications | get_app_conf(application_id, 'features.ldap', False) }}"
+KEYCLOAK_LDAP_ENABLED:              "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False) }}"
 KEYCLOAK_LDAP_CMP_NAME:             "{{ LDAP.SERVER.DOMAIN }}"          # Name of the LDAP User Federation component in Keycloak (as shown in UI)
 KEYCLOAK_LDAP_BIND_DN:              "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
 KEYCLOAK_LDAP_BIND_PW:              "{{ LDAP.BIND_CREDENTIAL }}"

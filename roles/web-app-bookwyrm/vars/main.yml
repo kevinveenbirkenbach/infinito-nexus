@@ -18,7 +18,7 @@ BOOKWYRM_URL:                   "{{ domains | get_url(application_id, WEB_PROTOC
 BOOKWYRM_HOSTNAME:              "{{ container_hostname }}"
 
 ## OIDC (optional; can be fronted by oauth2-proxy or native if you wire it)
-BOOKWYRM_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+BOOKWYRM_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 BOOKWYRM_OIDC_LABEL:            "{{ OIDC.BUTTON_TEXT }}"
 BOOKWYRM_OIDC_CLIENT_ID:        "{{ OIDC.CLIENT.ID }}"
 BOOKWYRM_OIDC_CLIENT_SECRET:    "{{ OIDC.CLIENT.SECRET }}"

@@ -35,7 +35,7 @@ MEDIAWIKI_ADMINISTRATOR_PASSWORD: "{{ users.administrator.password }}"
 MEDIAWIKI_SECRET_KEY:             "{{ applications | get_app_conf(application_id, 'credentials.secret_key') }}"
 
 # OIDC
-MEDIAWIKI_OIDC_ENABLED:           "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+MEDIAWIKI_OIDC_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 MEDIAWIKI_OIDC_CLIENT_ID:         "{{ OIDC.CLIENT.ID }}"
 MEDIAWIKI_OIDC_CLIENT_SECRET:     "{{ OIDC.CLIENT.SECRET }}"
 MEDIAWIKI_OIDC_ISSUER:            "{{ OIDC.CLIENT.ISSUER_URL }}"

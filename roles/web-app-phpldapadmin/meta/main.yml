@@ -27,4 +27,4 @@ galaxy_info:
   run_after:
   - web-app-matomo
   - web-app-keycloak
-  lifecycle: beta
+  lifecycle: pre-alpha

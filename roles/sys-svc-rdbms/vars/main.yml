@@ -1,2 +1,2 @@
 # Docker
-SYS_SVC_RDBMS_CENTRAL_DB_ENABLED: "{{ applications | get_app_conf(application_id, 'features.central_database', False) }}"
+SYS_SVC_RDBMS_CENTRAL_DB_ENABLED: "{{ applications | get_app_conf(application_id, 'docker.services.database.shared', False) }}"

@@ -14,7 +14,7 @@ JIRA_HOSTNAME:                "{{ container_hostname }}"
 JIRA_STORAGE_PATH:            "/var/atlassian/application-data/jira"
 
 ## OIDC
-JIRA_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+JIRA_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 JIRA_OIDC_LABEL:              "{{ OIDC.BUTTON_TEXT }}"
 JIRA_OIDC_CLIENT_ID:          "{{ OIDC.CLIENT.ID }}"
 JIRA_OIDC_CLIENT_SECRET:      "{{ OIDC.CLIENT.SECRET }}"

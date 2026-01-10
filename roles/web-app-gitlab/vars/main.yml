@@ -6,7 +6,7 @@ GITLAB_URL:                 "{{ domains | get_url(application_id, WEB_PROTOCOL) 
 GITLAB_HOSTNAME:            "{{ domains | get_domain(application_id) }}"
 
 ## OIDC
-GITLAB_OIDC_ENABLED:        "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+GITLAB_OIDC_ENABLED:        "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 GITLAB_OIDC_LABEL:          "{{ OIDC.BUTTON_TEXT }}"
 GITLAB_OIDC_UID_FIELD:      "{{ OIDC.ATTRIBUTES.USERNAME }}"
 GITLAB_OIDC_CLIENT_ID:      "{{ OIDC.CLIENT.ID }}"

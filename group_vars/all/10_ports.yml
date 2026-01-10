@@ -8,7 +8,7 @@ ports:
     websocket:
       web-app-mastodon:   4001
       web-app-espocrm:    4002
-    oauth2_proxy:
+    oauth2:
       web-app-phpmyadmin: 4181
       web-app-lam: 4182
       web-app-openproject: 4183

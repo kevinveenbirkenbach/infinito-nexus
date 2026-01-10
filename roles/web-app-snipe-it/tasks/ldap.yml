@@ -10,7 +10,7 @@
   retries: 30
   delay: 5
   until: snipeit_admin_check.status == 200
-  when: not ( applications | get_app_conf(application_id, 'features.oauth2', False))
+  when: not ( applications | get_app_conf(application_id, 'docker.services.oauth2.enabled', False))
 
 - name: "Set all LDAP settings via Laravel Setting model (inside container as {{ SNIPE_IT_USER }})"
   shell: |

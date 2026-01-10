@@ -145,8 +145,7 @@ class FilterModule(object):
         applications,
         application_id,
         domains,
-        web_protocol="https",
-        matomo_feature_name="matomo",
+        web_protocol,
     ):
         """
         Builds the Content-Security-Policy header value dynamically based on application settings.
@@ -220,9 +219,7 @@ class FilterModule(object):
 
                 # Matomo (if enabled)
                 if directive in ("script-src-elem", "connect-src"):
-                    if self.is_feature_enabled(
-                        applications, matomo_feature_name, application_id
-                    ):
+                    if self.is_feature_enabled(applications, "matomo", application_id):
                         tokens.append(get_url(domains, "web-app-matomo", web_protocol))
 
                 # Simpleicons (if enabled) – typically used via connect-src (fetch)
