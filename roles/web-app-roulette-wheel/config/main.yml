@@ -1,10 +1,18 @@
 features:
-  logout:   false
-  matomo:   true
-  desktop:  true
   css:      true
 server:
   domains:
     canonical:
       - "wheel.{{ DOMAIN_PRIMARY }}"
     aliases: []
+docker:
+  services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true

@@ -1,6 +1,5 @@
 # General
 application_id:               "web-app-gitlab"
-database_type:                "postgres"
 
 # GitLab
 GITLAB_URL:                 "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"

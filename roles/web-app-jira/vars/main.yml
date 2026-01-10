@@ -1,6 +1,5 @@
 # General
 application_id:               "web-app-jira"
-database_type:                "postgres"
 entity_name:                  "{{ application_id | get_entity_name }}"
 
 # Container

@@ -1,11 +1,7 @@
 public_api_activated:       False                                 # Security hole. Can be used for spaming                          # Docker Image version
 features:
-  matomo:                   true
   css:                      true
-  desktop:                  true
-  central_database:         true
   oidc:                     true
-  logout:                   true
   hcaptcha:                 "{{ HCAPTCHA_ENABLED | bool }}"
 server:
   domains:
@@ -20,7 +16,18 @@ server:
         unsafe-inline:  true
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled: true
     listmonk:
       image:              listmonk/listmonk

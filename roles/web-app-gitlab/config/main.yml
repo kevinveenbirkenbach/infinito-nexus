@@ -1,17 +1,24 @@
 features:
-  matomo:           true
   css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
   oidc:             true 
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled:      true
     database: 
+      shared: true
+      type: "postgres"
       enabled:      true
     gitlab:
       image:            "gitlab/gitlab-ee"

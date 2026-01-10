@@ -1,8 +1,12 @@
 # xmpp is more a service then a app with ui interface. @todo Rename it 
 features:
-  logout: false # Reactivated as soon as xmpp is fully implemented
 server:
   domains:
     canonical:
       - xmpp.{{ DOMAIN_PRIMARY }}
     aliases: []
+docker:
+  services:
+    logout:
+      enabled: false
+      shared: false

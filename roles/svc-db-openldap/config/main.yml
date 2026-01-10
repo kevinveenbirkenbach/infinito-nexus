@@ -4,6 +4,9 @@ network:
   public:         False                               # Set to true in inventory file if you want to expose the LDAP port to the internet
 docker: 
   services:
+    ldap:
+      enabled: true
+      shared: true
     openldap:     
       image:      "bitnamilegacy/openldap"
       name:       "openldap"
@@ -17,7 +20,6 @@ docker:
   volumes:
     data:         "openldap_data"
 features:
-  ldap:           true
 provision:           
 # Here it's possible to define what should be imported and updated.
 # It doesn't make sense to let  the import run everytime because its very time consuming

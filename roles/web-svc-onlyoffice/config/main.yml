@@ -25,11 +25,22 @@ server:
         unsafe-eval:    true
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled: true
     database:
+      shared: true
+      type: "postgres"
       enabled: true
     onlyoffice:
       image:            "onlyoffice/documentserver"
@@ -50,8 +61,4 @@ docker:
     pgdata:       onlyoffice_pgdata        # /var/lib/postgresql
     redisdata:    onlyoffice_redisdata     # /var/lib/redis
 features:
-  logout:           false
-  desktop:          true
-  matomo:           true
   css:              true
-  central_database: true

@@ -3,11 +3,7 @@ company:
   email:            "{{ users.administrator.email }}" # @todo load automatic based on service_provider infos, this will fail
 setup_admin_email:  "{{ users.administrator.email }}"
 features:
-  matomo:           true
   css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
   javascript:       true
 server:
   domains:
@@ -30,7 +26,18 @@ server:
         - https://akaunting.com
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled: true
     akaunting:
       backup:

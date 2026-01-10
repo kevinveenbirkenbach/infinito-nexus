@@ -1,9 +1,5 @@
 features:
-  matomo:           true
   css:              true
-  desktop:          true
-  central_database: false
-  logout:           true
 server:
   config_upstream_url: "https://ip.bsky.app/config"
   status_codes:
@@ -35,7 +31,17 @@ server:
         - "blob:"
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: false
       enabled: false
     web:
       enabled: true  # @see https://github.com/bluesky-social/social-app

@@ -1,11 +1,6 @@
 features:
-  matomo:           true
   css:              false
-  desktop:          true
-  central_database: true
-  ldap:             true
   oauth2:           true
-  logout:           true
 server:
   domains:
     canonical:
@@ -25,11 +20,25 @@ server:
         - "data:"
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled: true
     database: 
+      shared: true
+      type: "mariadb"
       enabled: true
     snipe-it:
       version:  "latest"

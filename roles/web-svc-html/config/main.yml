@@ -1,9 +1,15 @@
 features:
-  matomo:   true
   css:      true
-  desktop:  true
 server:
   domains:
     canonical:
       - "html.{{ DOMAIN_PRIMARY }}"
     aliases: []
+docker:
+  services:
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true

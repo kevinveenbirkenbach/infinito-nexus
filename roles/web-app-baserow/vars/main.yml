@@ -1,7 +1,6 @@
 # General
 application_id:       "web-app-baserow"
 database_password:    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
-database_type:        "postgres"
 js_application_name:  "Baserow"
 
 # Baserow

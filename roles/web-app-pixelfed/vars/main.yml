@@ -1,7 +1,6 @@
 # General
 application_id:             "web-app-pixelfed"
 webserver_extra_configuration:  "client_max_body_size 512M;"
-database_type:              "mariadb"
 
 # Pixelfed
 PIXELFED_VERSION:           "{{ applications | get_app_conf(application_id, 'docker.services.pixelfed.version') }}"

@@ -1,9 +1,5 @@
 features:
-  matomo:           true
   css:              true
-  desktop:          true
-  central_database: false
-  logout:           false
   oidc:             false
 
 server:
@@ -17,7 +13,17 @@ server:
 
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: false
       enabled:    false
     application:
       image:      "python"

@@ -12,6 +12,15 @@ server:
         unsafe-inline:  true
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
@@ -27,6 +36,3 @@ docker:
       mem_limit:        2g
       pids_limit:       2048
 features:
-  logout:   false 
-  desktop:  true # Just set to allow the iframe to load it
-  matomo:   true

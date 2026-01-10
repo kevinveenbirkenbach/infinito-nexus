@@ -1,8 +1,5 @@
 features:
   css:        true
-  matomo:     true
-  desktop:    true
-  logout:     false
   javascript: true
 
 server:
@@ -34,3 +31,14 @@ server:
     canonical:
       - "littlejs.game.{{ DOMAIN_PRIMARY }}"
     aliases: []
+docker:
+  services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true

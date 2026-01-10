@@ -5,7 +5,6 @@ webserver_extra_configuration:            "client_max_body_size 31M;"
 
 # Database Configuration
 database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
-database_type:                        "mariadb"
 
 # Cert Mount
 cert_mount_directory:                 "{{ docker_compose.directories.volumes }}certs/"

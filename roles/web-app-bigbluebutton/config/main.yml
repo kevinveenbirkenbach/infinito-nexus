@@ -1,12 +1,7 @@
 api_suffix:             "/bigbluebutton/"
 features:
-  matomo:               true
   css:                  true
-  desktop:              false # Videos can't open in frame due to iframe restrictions
-  ldap:                 false
   oidc:                 true
-  central_database:     false # Propably required for backup routines
-  logout:               true
 server:
   ip6_enabled:          false
   csp:
@@ -23,6 +18,18 @@ credentials: {}
 
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: false
+      shared: false
+    matomo:
+      enabled: true
+      shared: true
     bigbluebutton:
       repository:     "https://github.com/kevinveenbirkenbach/bigbluebutton-docker.git"
       version:        "bbb3.0"
@@ -31,6 +38,7 @@ docker:
         cleanup:      true  # Auto-Cleanup Recordings
         max_age_days: 30    # Cleanup recording after this amount of days
     database:
+      shared: false
       # This is set to true to pass integration test, doesn't have any other function
       enabled:    true
     greenlight:

@@ -1,11 +1,7 @@
 titel:                "Pictures on {{ DOMAIN_PRIMARY }}"
 features:
-  matomo:             true
   css:                false # Needs to be reactivated
-  desktop:            true
-  central_database:   true
   oidc:               true
-  logout:             true
 server:
   csp:
     flags:
@@ -26,6 +22,15 @@ server:
     aliases: []
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
@@ -33,6 +38,8 @@ docker:
       mem_reservation: 0.1g
       mem_limit:       0.2g
     database: 
+      shared: true
+      type: "mariadb"
       enabled: true
     pixelfed:
       image:            "zknt/pixelfed"

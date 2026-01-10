@@ -3,12 +3,8 @@ oidc:
   enable_user_creation:   true                        # Users will be created if not existing
 domain:                   "{{ SYSTEM_EMAIL_DOMAIN }}" # The main domain from which mails will be send \ email suffix behind @                              
 features:
-  matomo:                 true
   css:                    false
-  desktop:                true
   oidc:                   true
-  central_database:       true
-  logout:                 true
 server:
   domains:
     canonical:
@@ -29,6 +25,15 @@ rbac:
       description: "Has an token to send and receive emails"
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     mailu:
       version:            "2024.06"
       name:               mailu
@@ -41,6 +46,8 @@ docker:
       mem_limit:          "512m"
       pids_limit:         256
     database:
+      shared: true
+      type: "mariadb"
       enabled:            true
       cpus:               "0.8"
       mem_reservation:    "1g"

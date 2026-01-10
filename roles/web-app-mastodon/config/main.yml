@@ -1,11 +1,7 @@
 single_user_mode:     false                                           # Set true for initial setup
 features:
-  matomo:             true
   css:                true
-  desktop:            true
   oidc:               true
-  central_database:   true
-  logout:             true
 server:
   domains:
     canonical:
@@ -19,6 +15,15 @@ server:
         - "blob:"
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
@@ -28,6 +33,8 @@ docker:
       mem_limit:          "512m"
       pids_limit:         256
     database: 
+      shared: true
+      type: "postgres"
       enabled:            true
       cpus:               "1.0"
       mem_reservation:    "2g"

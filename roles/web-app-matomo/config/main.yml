@@ -1,12 +1,8 @@
 features:
-  central_database:   true
   oauth2:             false
 
   # Matomo can't use the following settings - At least not on the initial setup run
-  desktop:            false  # Didn't work in frame didn't have high priority @todo figure out why and solve it
   css:                false
-  logout:             false
-  matomo:             false
 
 site_name: "Matomo on {{ DOMAIN_PRIMARY }}"
 token:
@@ -36,7 +32,15 @@ excluded_ips: "{{ networks.internet.values() | list }}"
 
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: false
+      shared: false
     matomo:
+      enabled: false
+      shared: false
       image:            "matomo"
       version:          "latest"
       name:             "matomo"
@@ -60,6 +64,8 @@ docker:
       pids_limit:         512
 
     database:
+      shared: true
+      type: "mariadb"
       enabled: true
     redis:
       backup:

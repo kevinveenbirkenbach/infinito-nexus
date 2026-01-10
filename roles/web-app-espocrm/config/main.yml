@@ -1,11 +1,6 @@
 features:
-  matomo:             true
   css:                false
-  desktop:            false # @todo Solve https://chatgpt.com/c/687a50b4-8d78-800f-a202-1631aa05fd4f before setting it to true
-  ldap:               false
   oidc:               true
-  central_database:   true
-  logout:             true
   recaptcha:          "{{ RECAPTCHA_ENABLED | bool }}"  # Required for leads formulars
 server:
   csp:
@@ -36,7 +31,21 @@ credentials:
     secret:   "{{ CAPTCHA.RECAPTCHA.SECRET | default('') }}"
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: false
+      shared: false
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled: true              
     espocrm:
       image:            "espocrm/espocrm"

@@ -3,7 +3,6 @@ application_id:                 web-app-mobilizon
 container_port:                 4000
 
 # Database
-database_type:                  "postgres"
 postgres_gis_enabled:           true
 
 # Mobilizon

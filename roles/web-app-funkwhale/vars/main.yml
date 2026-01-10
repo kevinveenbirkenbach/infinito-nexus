@@ -1,6 +1,5 @@
 application_id:                 "web-app-funkwhale"
 webserver_extra_configuration:  "client_max_body_size 512M;"
-database_type:                  "postgres"
 
 FUNKWHALE_DATA_ROOT:            "/var/lib/funkwhale/"
 FUNKWHALE_MEDIA_DIR:            "{{ [ FUNKWHALE_DATA_ROOT, 'media' ]  | path_join }}"

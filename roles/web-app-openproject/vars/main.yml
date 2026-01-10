@@ -2,7 +2,6 @@
 application_id:                 "web-app-openproject"
 
 # Database
-database_type:                  "postgres"
 
 # Open Project Specific
 OPENPROJECT_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version') }}"

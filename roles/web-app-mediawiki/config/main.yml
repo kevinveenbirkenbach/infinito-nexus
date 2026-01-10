@@ -11,7 +11,18 @@ server:
 
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled:  true
     mediawiki: 
       image:    mediawiki
@@ -23,9 +34,5 @@ docker:
     images:     mediawiki_images
     extensions: mediawiki_extensions
 features:
-  logout:           true
-  central_database: true
   css:              false
-  desktop:          true
   oidc:             true
-  matomo:           true

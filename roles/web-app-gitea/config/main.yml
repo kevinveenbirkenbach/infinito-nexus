@@ -5,14 +5,9 @@ configuration:
     default_private:              last      # Default private when creating a new repository: last, private, public
     default_push_create_private:  True      # Default private when creating a new repository with push-to-create.
 features:
-  matomo:                         true
   css:                            true
-  desktop:                        true
-  central_database:               true
-  ldap:                           true
   oauth2:                         true
   oidc:                           false     # Deactivated because users aren't auto-created. 
-  logout:                         true
 
 server:
   csp:
@@ -35,7 +30,21 @@ server:
       - tea.git.{{ DOMAIN_PRIMARY }}
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled: true
     gitea:                          
       image:            "gitea/gitea"

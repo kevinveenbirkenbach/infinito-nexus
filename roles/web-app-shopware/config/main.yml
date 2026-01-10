@@ -1,13 +1,8 @@
 title:                            "{{ SOFTWARE_NAME }} Shop"
 features:
-  central_database: true
   redis:            true
-  ldap:             false # Not implemented yet
   oidc:             false # Not implemented yet
-  logout:           true
-  desktop:          true
   css:              true
-  matomo:           true
 server:
   csp:
     flags:
@@ -23,7 +18,21 @@ server:
       - shop.{{ DOMAIN_PRIMARY }}
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled: true
 
     init:

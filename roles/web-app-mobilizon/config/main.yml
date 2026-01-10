@@ -1,10 +1,6 @@
 titel:              "Mobilizon on {{ DOMAIN_PRIMARY | upper }}"
 features:
-  central_database: true
   oidc:             true
-  matomo:           true
-  desktop:          true
-  logout:           true
   css:              true
 server:
   csp:
@@ -20,7 +16,18 @@ server:
     
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled: true
     mobilizon:
       image:    "docker.io/kaihuri/mobilizon"

@@ -1,8 +1,5 @@
 features:
-  matomo:   true
   css:      true
-  desktop:  true
-  logout:   false
 server:
   csp:
     whitelist:
@@ -29,3 +26,14 @@ server:
     canonical:
       - "slides.{{ DOMAIN_PRIMARY }}"
     aliases: []
+docker:
+  services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true

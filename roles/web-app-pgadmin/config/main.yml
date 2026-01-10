@@ -2,12 +2,8 @@ version:                  "latest"
 server_mode:              False     # If true then the preconfigured database file is loaded. Recommended False. True is a security risk.
 master_password_required: True      # Master password is required. Recommended True. False is a security risk.
 features:
-  matomo:                 true
   css:                    true
-  desktop:                true
-  central_database:       true
   oauth2:                 true
-  logout:                 true
 server:
   csp:
     flags:
@@ -24,7 +20,18 @@ server:
     aliases: []
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled: true
     oauth2_proxy:
       origin:

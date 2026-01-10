@@ -1,11 +1,24 @@
 credentials: {}
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       enabled:            false
       backup:
         disabled: true
     database:
+      shared: true
       enabled:            true
       type:               postgres
     xwiki:
@@ -21,13 +34,8 @@ docker:
   volumes:
     data:           "xwiki_data"
 features:
-  matomo:           true
   css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
   oidc:             true
-  ldap:             false # Just OIDC or LDAP can be enabled
 server:
   csp:
     whitelist:

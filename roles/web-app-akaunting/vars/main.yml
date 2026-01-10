@@ -4,7 +4,6 @@ application_id:                       "web-app-akaunting"
 js_application_name:                  "Akaunting"
 
 # Database
-database_type:                        "mariadb"
 database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
 
 # Akaunting

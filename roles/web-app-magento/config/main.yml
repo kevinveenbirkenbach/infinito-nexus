@@ -1,11 +1,6 @@
 features:
-  matomo:             true
   css:                true
-  desktop:            true
-  central_database:   false       # Impossible to use central database due to strict database checking
   oidc:               false       # Magento SSO via OIDC requires extensions; not wired by default
-  logout:             true
-  ldap:               false
 
 server:
   csp:
@@ -16,6 +11,18 @@ server:
     aliases: []
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     php:
       image:              "markoshust/magento-php"
       version:            "8.2-fpm"
@@ -29,6 +36,7 @@ docker:
       backup:
         no_stop_required: true
     database:
+      shared: false
       enabled:            true
       version:            "11.4"
     redis:

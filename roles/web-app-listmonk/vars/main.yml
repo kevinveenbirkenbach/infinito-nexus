@@ -1,6 +1,5 @@
 # General 
 application_id:               "web-app-listmonk"
-database_type:                "postgres"
 container_port:               "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.port') }}"
 
 # Listmonk

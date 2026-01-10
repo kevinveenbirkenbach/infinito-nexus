@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-gitea"
-database_type:                  "mariadb"
 
 # Docker
 container_port:                 "{{ applications | get_app_conf(application_id, 'docker.services.gitea.port') }}"

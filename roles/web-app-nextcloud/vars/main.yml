@@ -6,7 +6,6 @@ entity_name:                        "{{ application_id | get_entity_name }}"
 
 # Database
 database_password:                  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
-database_type:                      "mariadb"                                                                                   # Database flavor
 
 # Nextcloud 
 

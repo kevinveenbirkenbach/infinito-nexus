@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-shopware"
-database_type:                  "mariadb"
 entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Docker

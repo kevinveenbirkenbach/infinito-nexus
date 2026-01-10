@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-chess"
-database_type:                  "postgres"
 
 # Container
 container_port:                 5080

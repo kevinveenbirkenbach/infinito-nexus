@@ -8,12 +8,8 @@ plugins:
   activitypub:
     enabled:          true
 features:
-  matomo:             true
   css:                false
-  desktop:            true
   oidc:               true
-  central_database:   true
-  logout:             true
 server:
   csp:
     flags:
@@ -44,7 +40,18 @@ server:
     aliases: []
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled:            true
     wordpress:
       version:            latest 

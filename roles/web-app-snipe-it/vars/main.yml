@@ -3,7 +3,6 @@ application_id:     "web-app-snipe-it"
 
 # Database
 database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
-database_type:      "mariadb"
 
 # Snipe-IT specific
 SNIPE_IT_URL:       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"

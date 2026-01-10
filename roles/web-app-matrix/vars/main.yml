@@ -1,7 +1,6 @@
 ---
 # General 
 application_id:                       "web-app-matrix"
-database_type:                        "postgres"
 
 # Webserver
 location_upload:                      "~ ^/_matrix/media/v3/"

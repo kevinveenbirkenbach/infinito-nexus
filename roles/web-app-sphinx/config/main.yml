@@ -1,8 +1,5 @@
 features:
-  matomo:           true
   css:              true
-  desktop:          true
-  logout:           false
 server:
   csp:
     flags:
@@ -19,6 +16,15 @@ server:
     aliases: []
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
       enabled:            false
     sphinx:

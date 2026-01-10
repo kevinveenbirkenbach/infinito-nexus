@@ -6,5 +6,9 @@ server:
       - asset.{{ DOMAIN_PRIMARY }}
     aliases: []
 features:
-  matomo: true
   css:    true
+docker:
+  services:
+    matomo:
+      enabled: true
+      shared: true

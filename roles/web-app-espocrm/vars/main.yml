@@ -3,7 +3,6 @@ application_id:                     "web-app-espocrm"
 entity_name:                        "{{ application_id | get_entity_name }}"
 
 # Database
-database_type:                      "mariadb"
 
 # Webserver
 webserver_websocket_location:              "/ws"

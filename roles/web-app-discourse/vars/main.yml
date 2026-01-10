@@ -2,7 +2,6 @@ application_id:                 "web-app-discourse"
 
 # Database
 database_password:              "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
-database_type:                  "postgres"
 
 # Discourse
 

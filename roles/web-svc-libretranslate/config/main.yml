@@ -2,22 +2,30 @@
 credentials: {}
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    ldap:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled:      false   # Enable Redis
     database:
+      shared: false
       enabled:      false   # Enable the database
 features:
-  matomo:           true    # Enable Matomo Tracking
   css:              true    # Enable Global CSS Styling
-  desktop:          true    # Enable loading of app in iframe
-  ldap:             false   # Enable LDAP Network
-  central_database: false   # Enable Central Database Network
   recaptcha:        false   # Enable ReCaptcha
   oauth2:           false   # Enable the OAuth2-Proy
   javascript:       false   # Enables the custom JS in the javascript.js.j2 file
-  logout:           false   # With this app I assume that it's a service, so should be renamed and logging is unneccessary
 server:
   csp:
     whitelist:        {}      # URL's which should be whitelisted

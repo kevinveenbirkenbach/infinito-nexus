@@ -1,5 +1,14 @@
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
@@ -7,10 +16,7 @@ docker:
     database:
       enabled:  false # No database needed
 features:
-  matomo:       true  # activate tracking
   css:          true  # use custom infinito stile 
-  desktop:      true  # Enable in desktop
-  logout:       false
 server:
   csp:
     whitelist:

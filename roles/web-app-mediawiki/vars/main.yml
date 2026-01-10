@@ -1,6 +1,5 @@
 # General
 application_id:                   "web-app-mediawiki"
-database_type:                    "mariadb"
 container_port:                   80
 entity_name:                      "{{ application_id | get_entity_name }}"
 

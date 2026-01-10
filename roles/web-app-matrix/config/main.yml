@@ -1,6 +1,17 @@
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: false
+      shared: false
     database:
+      shared: true
+      type: "postgres"
       enabled: true
     synapse: 
       version:          latest 
@@ -18,12 +29,8 @@ playbook_tags:        "setup-all,start"                  # For the initial updat
 server_name:          "{{ DOMAIN_PRIMARY }}"             # Adress for the account names etc.
 setup:                false                              # Set true in inventory file to execute the setup and initializing procedures
 features:
-  matomo:             false                              # Deactivated, because in html CSP restricts use
   css:                true
-  desktop:            true
   oidc:               true                               # Deactivated OIDC due to this issue https://github.com/matrix-org/synapse/issues/10492
-  central_database:   true
-  logout:             true
 server:
   csp:
     flags:

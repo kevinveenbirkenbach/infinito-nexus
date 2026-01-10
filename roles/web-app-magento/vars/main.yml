@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-magento"
-database_type:                  "mariadb"
 
 # Magento (application container)
 

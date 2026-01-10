@@ -1,6 +1,5 @@
 # General Configuration
 application_id:                 web-app-syncope
-database_type:                  "postgres"
 database_password:              "{{ domains | get_domain(application_id).credentials.database_password }}"
 
 # Application Specific

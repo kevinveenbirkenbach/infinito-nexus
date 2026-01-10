@@ -1,18 +1,24 @@
 credentials: {}
 docker:
   services:
+    ldap:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: false
+      shared: false
     redis:
       backup:
         disabled:   true
       enabled:      false   # Enable Redis 
     database:
+      shared: false
       enabled:      false   # Enable the database 
 features:
-  matomo:           false   # Matomo tracking isn't necessary
   css:              true    # Enable Global CSS Styling
-  desktop:          true    # Enable loading of app in iframe
-  ldap:             false   # Enable LDAP Network
-  central_database: false   # Enable Central Database Network
   recaptcha:        false   # Enable ReCaptcha
   oauth2:           false   # Enable the OAuth2-Proy
 server:

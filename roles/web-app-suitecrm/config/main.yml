@@ -1,11 +1,6 @@
 features:
-  matomo:             true
   css:                false # Temporary deactivated
-  desktop:            true
-  ldap:               true
   oidc:               false # OIDC isn't available, just SAML for SSO
-  central_database:   true
-  logout:             true
   oauth2:             true # Deactivated for API
 
 server:
@@ -24,7 +19,21 @@ email:
 
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled: true
     suitecrm:
       image:            "php"

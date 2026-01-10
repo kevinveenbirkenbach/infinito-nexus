@@ -1,6 +1,5 @@
 # General
 application_id:                   "web-app-keycloak"                                                                          # Internal Infinito.Nexus application id 
-database_type:                    "postgres"                                                                                  # Database which will be used
 
 # Keycloak
 

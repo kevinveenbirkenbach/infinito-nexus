@@ -1,11 +1,22 @@
 credentials: {}
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled:      true
     database:
+      shared: true
+      type: "postgres"
       enabled:      true
     pretix:
       image:        pretix/standalone
@@ -21,11 +32,7 @@ docker:
     data:           "pretix_data"
     config:         "pretix_config"
 features:
-  matomo:           true
   css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
   oidc:             true
 server:
   csp:

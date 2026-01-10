@@ -1,11 +1,6 @@
 autocreate_users:     true # Autocreate LDAP users on Login
 features:
-  matomo:             true
   css:                true
-  desktop:            true
-  central_database:   true
-  logout:             true
-  ldap:               false # There is no working free open source LDAP solution 2025-08-28
   oidc:               false # There is no working free open source OIDC solution 2025-08-28
 server:
   domains:
@@ -20,7 +15,21 @@ server:
         unsafe-inline: true
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled:  true
     joomla: 
       image:    joomla

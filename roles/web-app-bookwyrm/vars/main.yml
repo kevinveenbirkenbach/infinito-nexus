@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-bookwyrm"
-database_type:                  "postgres"
 
 # Container
 container_port:                 8000

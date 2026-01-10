@@ -41,6 +41,18 @@ docker:
     whiteboard_fontcache:   nextcloud_whiteboard_fontcache
     talk_recording_tmp:     nextcloud_talk_recording_tmp
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
@@ -50,6 +62,8 @@ docker:
       mem_limit:            "8g"
       pids_limit:           512
     database:
+      shared: true
+      type: "mariadb"
       enabled:              true
       cpus:                 "0.75"
       mem_reservation:      "512m"
@@ -122,13 +136,8 @@ docker:
   # @see https://apps.nextcloud.com/apps/sociallogin
   flavor:                       "oidc_login"                                    # Keeping on sociallogin because the other option is not implemented yet                                             
 features:
-  matomo:           true
   css:              false
-  desktop:          true
-  ldap:             true
   oidc:             true
-  central_database: true
-  logout:           true
   hcaptcha:         "{{ HCAPTCHA_ENABLED | bool }}"
 default_quota:                 '1000000000'                                     # Quota to assign if no quota is specified in the OIDC response (bytes)
 legacy_login_mask:   

@@ -1,7 +1,18 @@
 credentials: {}
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled:      true            # Use central DB role (recommended)
     application:
       image:        "node"          # Base image family; final image is custom
@@ -12,11 +23,7 @@ docker:
   volumes:
     data:           "chess_data"
 features:
-  matomo:           true
   css:              true
-  desktop:          true
-  central_database: true
-  logout:           false
   oidc:             false
 server:
   csp:

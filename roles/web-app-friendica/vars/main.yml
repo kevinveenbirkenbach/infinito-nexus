@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-friendica"
-database_type:                  "mariadb"
 
 # Friendica
 friendica_container:            "friendica"

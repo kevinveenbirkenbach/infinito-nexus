@@ -1,5 +1,17 @@
 docker:
   services:
+    logout:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     lam:
       image:        ghcr.io/ldapaccountmanager/lam
       version:      latest
@@ -10,12 +22,8 @@ docker:
       allowed_groups:
         - "{{ [RBAC.GROUP.NAME, 'web-app-lam-administrator'] | path_join }}"
 features:
-  matomo:                       true
   css:                          true
-  desktop:                      true
-  ldap:                         true
   oauth2:                       true
-  logout:                       true
 server:
   csp:
     flags:

@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-pretix"
-database_type:                  "postgres"
 container_port:                 80
 container_hostname:             "{{ domains | get_domain(application_id) }}"
 

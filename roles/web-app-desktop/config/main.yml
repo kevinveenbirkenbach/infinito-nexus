@@ -1,11 +1,8 @@
 features:
-  matomo:       true
   css:          true
-  desktop:      false
   oidc:         true      # Needs to be activated so that the login url is working
   simpleicons:  true      # Activate Brand Icons for your groups
   javascript:   true      # Necessary for URL sync
-  logout:       true
 server:
   csp:
     whitelist:
@@ -36,6 +33,14 @@ server:
       - "www.{{ DOMAIN_PRIMARY }}"   
 docker: 
   services:
+    logout:
+      enabled: true
+      shared: true
+    matomo:
+      enabled: true
+      shared: true
     desktop:
+      enabled: false
+      shared: false
       name:   "desktop"
       image:  "application-portfolio"
