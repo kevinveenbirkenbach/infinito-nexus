@@ -1,6 +1,5 @@
 features:
   css:                false # Temporary deactivated
-  oidc:               false # OIDC isn't available, just SAML for SSO
   oauth2:             true # Deactivated for API
 
 server:
@@ -19,6 +18,9 @@ email:
 
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true

@@ -1,6 +1,5 @@
 features:
   css:              true
-  oidc:             false
 
 server:
   domains:
@@ -13,6 +12,9 @@ server:
 
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: false
       shared: false

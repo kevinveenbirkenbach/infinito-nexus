@@ -1,7 +1,6 @@
 title:                            "{{ SOFTWARE_NAME }} Shop"
 features:
   redis:            true
-  oidc:             false # Not implemented yet
   css:              true
 server:
   csp:
@@ -18,6 +17,9 @@ server:
       - shop.{{ DOMAIN_PRIMARY }}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true

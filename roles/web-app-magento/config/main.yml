@@ -1,6 +1,5 @@
 features:
   css:                true
-  oidc:               false       # Magento SSO via OIDC requires extensions; not wired by default
 
 server:
   csp:
@@ -11,6 +10,9 @@ server:
     aliases: []
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true

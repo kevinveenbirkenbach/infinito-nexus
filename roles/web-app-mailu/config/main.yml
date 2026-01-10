@@ -4,7 +4,6 @@ oidc:
 domain:                   "{{ SYSTEM_EMAIL_DOMAIN }}" # The main domain from which mails will be send \ email suffix behind @                              
 features:
   css:                    false
-  oidc:                   true
 server:
   domains:
     canonical:
@@ -25,6 +24,9 @@ rbac:
       description: "Has an token to send and receive emails"
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

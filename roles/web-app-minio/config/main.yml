@@ -2,7 +2,6 @@ features:
   css:              true
   javascript:       false
   local_ai:         true
-  oidc:             true
 server:
   status_codes:
     api:      400
@@ -19,6 +18,9 @@ server:
       connect-src: [] 
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

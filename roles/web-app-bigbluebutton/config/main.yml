@@ -1,7 +1,6 @@
 api_suffix:             "/bigbluebutton/"
 features:
   css:                  true
-  oidc:                 true
 server:
   ip6_enabled:          false
   csp:
@@ -18,6 +17,9 @@ credentials: {}
 
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

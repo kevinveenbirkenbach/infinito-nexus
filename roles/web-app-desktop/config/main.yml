@@ -1,7 +1,5 @@
 features:
   css:          true
-  oidc:         true      # Needs to be activated so that the login url is working
-  simpleicons:  true      # Activate Brand Icons for your groups
   javascript:   true      # Necessary for URL sync
 server:
   csp:
@@ -33,6 +31,12 @@ server:
       - "www.{{ DOMAIN_PRIMARY }}"   
 docker: 
   services:
+    oidc:
+      enabled: true
+      shared: true
+    simpleicons:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

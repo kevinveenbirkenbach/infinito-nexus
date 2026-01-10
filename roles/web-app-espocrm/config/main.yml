@@ -1,6 +1,5 @@
 features:
   css:                false
-  oidc:               true
   recaptcha:          "{{ RECAPTCHA_ENABLED | bool }}"  # Required for leads formulars
 server:
   csp:
@@ -31,6 +30,9 @@ credentials:
     secret:   "{{ CAPTCHA.RECAPTCHA.SECRET | default('') }}"
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

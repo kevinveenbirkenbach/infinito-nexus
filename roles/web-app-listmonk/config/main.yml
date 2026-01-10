@@ -1,7 +1,6 @@
 public_api_activated:       False                                 # Security hole. Can be used for spaming                          # Docker Image version
 features:
   css:                      true
-  oidc:                     true
   hcaptcha:                 "{{ HCAPTCHA_ENABLED | bool }}"
 server:
   domains:
@@ -16,6 +15,9 @@ server:
         unsafe-inline:  true
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

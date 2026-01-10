@@ -1,6 +1,9 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true
@@ -29,7 +32,6 @@ docker:
     data:           "confluence_data"
 features:
   css:              true
-  oidc:             false # Not enabled for demo version
 server:
   status_codes:
     default: 302

@@ -1,7 +1,6 @@
 autocreate_users:     true # Autocreate LDAP users on Login
 features:
   css:                true
-  oidc:               false # There is no working free open source OIDC solution 2025-08-28
 server:
   domains:
     canonical:
@@ -15,6 +14,9 @@ server:
         unsafe-inline: true
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true

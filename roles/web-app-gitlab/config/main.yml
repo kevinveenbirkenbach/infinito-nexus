@@ -1,8 +1,10 @@
 features:
   css:              true
-  oidc:             true 
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

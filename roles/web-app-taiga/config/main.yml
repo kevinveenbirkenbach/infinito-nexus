@@ -7,10 +7,12 @@ oidc:
   flavor:             'taigaio' # Potential flavors: robrotheram, taigaio
 features:
   css:                true
-  oidc:               false
   javascript:         true
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true

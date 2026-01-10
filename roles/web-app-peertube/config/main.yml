@@ -1,6 +1,5 @@
 features:
   css:                false
-  oidc:               true
 server:
   csp:
     flags:
@@ -24,6 +23,9 @@ server:
     
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

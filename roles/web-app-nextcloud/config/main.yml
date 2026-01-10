@@ -41,6 +41,9 @@ docker:
     whiteboard_fontcache:   nextcloud_whiteboard_fontcache
     talk_recording_tmp:     nextcloud_talk_recording_tmp
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true
@@ -137,7 +140,6 @@ docker:
   flavor:                       "oidc_login"                                    # Keeping on sociallogin because the other option is not implemented yet                                             
 features:
   css:              false
-  oidc:             true
   hcaptcha:         "{{ HCAPTCHA_ENABLED | bool }}"
 default_quota:                 '1000000000'                                     # Quota to assign if no quota is specified in the OIDC response (bytes)
 legacy_login_mask:   

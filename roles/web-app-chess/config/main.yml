@@ -1,6 +1,9 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: false
       shared: false
@@ -24,7 +27,6 @@ docker:
     data:           "chess_data"
 features:
   css:              true
-  oidc:             false
 server:
   csp:
     whitelist:      {}

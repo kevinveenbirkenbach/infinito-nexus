@@ -1,7 +1,6 @@
 repository:           "repository"  # Name of the repository folder                 
 features:
   css:                true
-  oidc:               true
 server:
   csp:
     flags:
@@ -18,6 +17,9 @@ server:
     aliases: []
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

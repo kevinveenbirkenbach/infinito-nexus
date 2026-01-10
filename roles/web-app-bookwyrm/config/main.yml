@@ -1,6 +1,9 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true
@@ -31,7 +34,6 @@ docker:
     media:      "bookwyrm_media"
 features:
   css:              true
-  oidc:             false
 server:
   csp:
     whitelist: {}

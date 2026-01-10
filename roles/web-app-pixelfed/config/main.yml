@@ -1,7 +1,6 @@
 titel:                "Pictures on {{ DOMAIN_PRIMARY }}"
 features:
   css:                false # Needs to be reactivated
-  oidc:               true
 server:
   csp:
     flags:
@@ -22,6 +21,9 @@ server:
     aliases: []
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true

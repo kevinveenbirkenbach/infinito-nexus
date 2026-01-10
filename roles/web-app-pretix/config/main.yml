@@ -1,6 +1,9 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true
@@ -33,7 +36,6 @@ docker:
     config:         "pretix_config"
 features:
   css:              true
-  oidc:             true
 server:
   csp:
     whitelist:      {}

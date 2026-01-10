@@ -7,7 +7,6 @@ configuration:
 features:
   css:                            true
   oauth2:                         true
-  oidc:                           false     # Deactivated because users aren't auto-created. 
 
 server:
   csp:
@@ -30,6 +29,9 @@ server:
       - tea.git.{{ DOMAIN_PRIMARY }}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
     logout:
       enabled: true
       shared: true

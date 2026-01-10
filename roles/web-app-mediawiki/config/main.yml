@@ -11,6 +11,9 @@ server:
 
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true
@@ -35,4 +38,3 @@ docker:
     extensions: mediawiki_extensions
 features:
   css:              false
-  oidc:             true

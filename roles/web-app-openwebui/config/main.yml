@@ -2,7 +2,6 @@ features:
   css:              false
   javascript:       false
   local_ai:         true
-  oidc:             true
 server:
   domains:
     canonical:
@@ -17,6 +16,9 @@ server:
       connect-src: [] 
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
     logout:
       enabled: true
       shared: true
