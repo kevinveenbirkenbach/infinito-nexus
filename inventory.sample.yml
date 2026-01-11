@@ -13,9 +13,6 @@ users:
     website:    https://www.infinito.nexus/
     email:      contact@infinito.nexus
     gpg:        "DUMMY-GPG-KEY-NOT-SET"
-applications:
-  svc-db-mariadb:
-    credentials:
-      root_password: 'hello_world'
+applications: {}
 
 WORKSTATION_USER: biber
