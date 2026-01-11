@@ -10,6 +10,11 @@
     - "{{ DOCKER_VARS_FILE }}"    # Important to load docker variables first so that database can use them
     - "{{ DATABASE_VARS_FILE }}"  # Important to load them before docker role so that backup can use them
 
+- name: "For '{{ application_id }}': Load OpenLDAP"
+  include_role:
+    name: svc-db-openldap
+  when: SYS_STK_BACK_STATEFULL_LDAP_ENABLED | bool
+
 - name: "For '{{ application_id }}': Load central RDBMS"
   include_role:
     name: sys-svc-rdbms
