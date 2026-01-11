@@ -9,6 +9,7 @@ import yaml
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
+from module_utils.config_utils import get_app_conf
 
 
 class LookupModule(LookupBase):
@@ -113,8 +114,13 @@ class LookupModule(LookupBase):
             # Construct the URL using the domain_url if available.
             url = "https://" + domain_url if domain_url else ""
 
-            app_data = applications.get(application_id, {})
-            iframe = app_data.get("features", {}).get("desktop", False)
+            iframe = get_app_conf(
+                applications,
+                application_id,
+                "docker.services.desktop.enabled",
+                strict=False,
+                default=False,
+            )
 
             # Build card dictionary
             card = {

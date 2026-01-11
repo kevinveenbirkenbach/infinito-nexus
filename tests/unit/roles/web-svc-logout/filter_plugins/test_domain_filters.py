@@ -30,25 +30,25 @@ class TestLogoutDomainsFilter(unittest.TestCase):
         applications = {
             "app1": {
                 "server": {"domains": {"canonical": "single.domain.com"}},
-                "features": {"logout": True},
+                "docker": {"services": {"logout": {"enabled": True}}},
             },
             "app2": {
                 "server": {"domains": {"canonical": ["list1.com", "list2.com"]}},
-                "features": {"logout": True},
+                "docker": {"services": {"logout": {"enabled": True}}},
             },
             "app3": {
                 "server": {
                     "domains": {"canonical": {"k1": "dictA.com", "k2": "dictB.com"}}
                 },
-                "features": {"logout": True},
+                "docker": {"services": {"logout": {"enabled": True}}},
             },
             "app4": {
                 "server": {"domains": {"canonical": "no-logout.com"}},
-                "features": {"logout": False},
+                "docker": {"services": {"logout": {"enabled": False}}},
             },
             "other": {
                 "server": {"domains": {"canonical": "ignored.com"}},
-                "features": {"logout": True},
+                "docker": {"services": {"logout": {"enabled": True}}},
             },
         }
         group_names = ["app1", "app2", "app3", "app4"]
@@ -66,7 +66,7 @@ class TestLogoutDomainsFilter(unittest.TestCase):
         applications = {
             "app1": {
                 "server": {"domains": {}},  # no 'canonical' key
-                "features": {"logout": True},
+                "docker": {"services": {"logout": {"enabled": True}}},
             }
         }
         group_names = ["app1"]
@@ -76,7 +76,7 @@ class TestLogoutDomainsFilter(unittest.TestCase):
         applications = {
             "app1": {
                 "server": {"domains": {"canonical": "domain.com"}},
-                "features": {"logout": True},
+                "docker": {"services": {"logout": {"enabled": True}}},
             }
         }
         group_names = []
@@ -86,7 +86,7 @@ class TestLogoutDomainsFilter(unittest.TestCase):
         applications = {
             "app1": {
                 "server": {"domains": {"canonical": 123}},
-                "features": {"logout": True},
+                "docker": {"services": {"logout": {"enabled": True}}},
             }
         }
         group_names = ["app1"]

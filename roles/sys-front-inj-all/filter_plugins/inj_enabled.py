@@ -15,13 +15,13 @@ def inj_enabled_filter(
     applications: dict,
     application_id: str,
     features: list,
-    prefix: str = "docker.service",
+    prefix: str = "docker.services",
     default: bool = False,
 ) -> dict:
     """
     Build a dict {feature: enabled_bool} by reading flags from:
 
-        docker.service.<feature>.enabled
+        docker.services.<feature>.enabled
     """
     if not isinstance(features, (list, tuple)):
         return {}

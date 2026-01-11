@@ -12,6 +12,24 @@ def load_yaml(path: Path):
         return yaml.safe_load(f) or {}
 
 
+def has_nested_key(data: object, dotted_key: str) -> bool:
+    """
+    Return True if a dotted path exists in a nested dict structure.
+    Example: has_nested_key(cfg, "docker.services.database.shared")
+    """
+    if not isinstance(data, dict):
+        return False
+
+    cur: object = data
+    for part in dotted_key.split("."):
+        if not isinstance(cur, dict):
+            return False
+        if part not in cur:
+            return False
+        cur = cur[part]
+    return True
+
+
 class TestCentralDatabaseConfig(unittest.TestCase):
     def test_central_database_feature_requires_database_service(self):
         """
@@ -33,33 +51,20 @@ class TestCentralDatabaseConfig(unittest.TestCase):
             vars_data = load_yaml(vars_file)
             cfg_data = load_yaml(cfg_file)
 
-            # Check if the feature key is defined in either file (value is irrelevant).
-            vars_features = (
-                vars_data.get("features", {})
-                if isinstance(vars_data.get("features"), dict)
-                else {}
-            )
-            cfg_features = (
-                cfg_data.get("features", {})
-                if isinstance(cfg_data.get("features"), dict)
-                else {}
-            )
-            central_defined = ("central_database" in vars_features) or (
-                "central_database" in cfg_features
-            )
-
-            if not central_defined:
+            # Trigger: docker.services.database.shared defined in either file (value irrelevant)
+            shared_defined = has_nested_key(
+                vars_data, "docker.services.database.shared"
+            ) or has_nested_key(cfg_data, "docker.services.database.shared")
+            if not shared_defined:
                 continue
 
-            # Require docker.services.database in config/main.yml
-            docker = cfg_data.get("docker", {})
-            services = docker.get("services", {}) if isinstance(docker, dict) else {}
-            if "database" not in services:
+            # Requirement: docker.services.database must be defined in config/main.yml
+            if not has_nested_key(cfg_data, "docker.services.database"):
                 violations.append(role_dir.name)
 
         if violations:
             self.fail(
-                "The 'central_database' feature is only available if 'docker.services.database' "
+                "The 'docker.services.database.shared' flag is only valid if 'docker.services.database' "
                 "is defined in config/main.yml. Missing in roles:\n"
                 + "\n".join(f"- {name}" for name in violations)
             )

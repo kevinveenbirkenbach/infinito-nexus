@@ -52,6 +52,6 @@ ESPOCRM_CRON_DISABLED:         "{{ ESPOCRM_MAINTENANCE_MODE }}"        # disable
 ESPOCRM_USE_CACHE:             "{{ not ESPOCRM_MAINTENANCE_MODE }}"    # enable cache when NOT in maintenance
 
 #### reCAPTCHA
-ESPOCRM_RECAPTCHA_ENABLED:     "{{ applications | get_app_conf(application_id, 'features.recaptcha') }}"
+ESPOCRM_RECAPTCHA_ENABLED:     "{{ applications | get_app_conf(application_id, 'docker.services.recaptcha.enabled') }}"
 ESPOCRM_RECAPTCHA_KEY:         "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.key') }}"
 ESPOCRM_RECAPTCHA_SECRET:      "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.secret') }}"

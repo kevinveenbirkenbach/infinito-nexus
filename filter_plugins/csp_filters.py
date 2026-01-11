@@ -63,17 +63,17 @@ class FilterModule(object):
         Returns True if the docker service flag is enabled for this application.
 
         New flag layout (examples):
-          - docker.service.matomo.enabled
-          - docker.service.desktop.enabled
-          - docker.service.simpleicons.enabled
-          - docker.service.logout.enabled
-          - docker.service.hcaptcha.enabled
-          - docker.service.recaptcha.enabled
+          - docker.services.matomo.enabled
+          - docker.services.desktop.enabled
+          - docker.services.simpleicons.enabled
+          - docker.services.logout.enabled
+          - docker.services.hcaptcha.enabled
+          - docker.services.recaptcha.enabled
         """
         return get_app_conf(
             applications,
             application_id,
-            f"docker.service.{feature}.enabled",
+            f"docker.services.{feature}.enabled",
             False,
             False,
         )
@@ -177,10 +177,10 @@ class FilterModule(object):
               server.csp.hashes.<directive>
           - “Smart defaults”:
               * internal CDN for style/script elem and connect
-              * Matomo endpoints (if docker.service.matomo.enabled) for script-elem/connect
-              * Simpleicons service (if docker.service.simpleicons.enabled) for connect
-              * reCAPTCHA (if docker.service.recaptcha.enabled) for script-elem/frame-src
-              * hCaptcha (if docker.service.hcaptcha.enabled) for script-elem/frame-src
+              * Matomo endpoints (if docker.services.matomo.enabled) for script-elem/connect
+              * Simpleicons service (if docker.services.simpleicons.enabled) for connect
+              * reCAPTCHA (if docker.services.recaptcha.enabled) for script-elem/frame-src
+              * hCaptcha (if docker.services.hcaptcha.enabled) for script-elem/frame-src
               * frame-ancestors extended for desktop/logout/keycloak if enabled
         """
         try:
@@ -230,12 +230,12 @@ class FilterModule(object):
                 ):
                     tokens.append(get_url(domains, "web-svc-cdn", web_protocol))
 
-                # Matomo (if enabled via docker.service.matomo.enabled)
+                # Matomo (if enabled via docker.services.matomo.enabled)
                 if directive in ("script-src-elem", "connect-src"):
                     if self.is_feature_enabled(applications, "matomo", application_id):
                         tokens.append(get_url(domains, "web-app-matomo", web_protocol))
 
-                # Simpleicons (if enabled via docker.service.simpleicons.enabled) – typically used via connect-src (fetch)
+                # Simpleicons (if enabled via docker.services.simpleicons.enabled) – typically used via connect-src (fetch)
                 if directive == "connect-src":
                     if self.is_feature_enabled(
                         applications, "simpleicons", application_id
@@ -244,13 +244,13 @@ class FilterModule(object):
                             get_url(domains, "web-svc-simpleicons", web_protocol)
                         )
 
-                # reCAPTCHA (if enabled via docker.service.recaptcha.enabled) – scripts + frames
+                # reCAPTCHA (if enabled via docker.services.recaptcha.enabled) – scripts + frames
                 if self.is_feature_enabled(applications, "recaptcha", application_id):
                     if directive in ("script-src-elem", "frame-src"):
                         tokens.append("https://www.gstatic.com")
                         tokens.append("https://www.google.com")
 
-                # hCaptcha (if enabled via docker.service.hcaptcha.enabled) – scripts + frames
+                # hCaptcha (if enabled via docker.services.hcaptcha.enabled) – scripts + frames
                 if self.is_feature_enabled(applications, "hcaptcha", application_id):
                     if directive == "script-src-elem":
                         tokens.append("https://www.hcaptcha.com")

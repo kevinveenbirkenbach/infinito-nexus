@@ -9,7 +9,7 @@ class TestCspHashes(unittest.TestCase):
         self.filter = FilterModule()
         self.apps = {
             "app1": {
-                "docker": {"service": {"matomo": {"enabled": True}}},
+                "docker": {"services": {"matomo": {"enabled": True}}},
                 "server": {
                     "csp": {
                         "whitelist": {},
