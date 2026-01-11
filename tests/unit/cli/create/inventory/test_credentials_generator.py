@@ -1,3 +1,5 @@
+# tests/unit/cli/create/inventory/test_credentials_generator.py
+
 import tempfile
 import unittest
 from pathlib import Path
@@ -78,7 +80,12 @@ ansible_become_password: !vault |
                 getattr(doc["ansible_become_password"], "tag", None), "!vault"
             )
 
-    def test_generate_credentials_skips_roles_without_schema(self):
+    def test_generate_credentials_does_not_fail_for_roles_without_schema(self):
+        """
+        New behavior: schema-less roles may still be passed to cli.create.credentials
+        because credentials generation can be driven transitively from config/main.yml.
+        The generator must not crash if the snippet is empty.
+        """
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
             roles_dir = tmp / "roles"
@@ -101,6 +108,11 @@ ansible_become_password: !vault |
                     "cli.create.inventory.credentials_generator.subprocess.run"
                 ) as spr,
             ):
+                # Simulate: credentials tool runs fine but outputs nothing
+                spr.return_value.returncode = 0
+                spr.return_value.stdout = ""
+                spr.return_value.stderr = ""
+
                 generate_credentials_for_roles(
                     application_ids=["web-app-noschema"],
                     roles_dir=roles_dir,
@@ -111,4 +123,6 @@ ansible_become_password: !vault |
                     workers=1,
                 )
 
-            spr.assert_not_called()
+            # Should not crash and may or may not call subprocess depending on resolver behavior.
+            # With our patch, it SHOULD call it exactly once.
+            spr.assert_called_once()

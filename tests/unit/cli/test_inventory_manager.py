@@ -1,3 +1,5 @@
+# tests/unit/cli/test_inventory_manager.py
+
 import unittest
 import tempfile
 import shutil
@@ -60,11 +62,13 @@ class TestInventoryManager(unittest.TestCase):
             return {"application_id": "testapp"}
 
         # Return docker service flags for config/main.yml
+        # NOTE: "type" is intentionally omitted; this test stubs out
+        # resolve_schema_includes_recursive() to avoid provider resolution.
         if path.match("*/config/main.yml"):
             return {
                 "docker": {
                     "services": {
-                        "database": {"shared": True},
+                        "database": {"enabled": True, "shared": True},
                     }
                 }
             }
@@ -136,8 +140,15 @@ class TestInventoryManager(unittest.TestCase):
         """
         # Setup role directory
         role_dir = self.tmpdir / "role"
-        (role_dir / "meta").mkdir(parents=True)
-        (role_dir / "vars").mkdir(parents=True)
+        (role_dir / "meta").mkdir(parents=True, exist_ok=True)
+        (role_dir / "vars").mkdir(parents=True, exist_ok=True)
+        (role_dir / "schema").mkdir(parents=True, exist_ok=True)
+        (role_dir / "config").mkdir(parents=True, exist_ok=True)
+
+        # IMPORTANT: files must exist because InventoryManager checks .exists()
+        (role_dir / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+        (role_dir / "config" / "main.yml").write_text("{}", encoding="utf-8")
+        (role_dir / "vars" / "main.yml").write_text("{}", encoding="utf-8")
 
         # Create empty inventory.yml
         inv_file = self.tmpdir / "inventory.yml"
@@ -149,23 +160,33 @@ class TestInventoryManager(unittest.TestCase):
         # Instantiate manager with overrides
         mgr = InventoryManager(role_dir, inv_file, "pw", overrides=overrides)
 
-        # Patch ValueGenerator for predictable outputs
+        # IMPORTANT:
+        # This unit test is NOT about transitive "shared provider" resolution.
+        # Stub it out so missing database.type in config does not trigger sys.exit(1).
         with patch.object(
-            ValueGenerator, "generate_value", side_effect=lambda alg: f"GEN_{alg}"
+            InventoryManager, "resolve_schema_includes_recursive", return_value=[]
         ):
-            result = mgr.apply_schema()
+            # Patch ValueGenerator for predictable outputs
+            with patch.object(
+                ValueGenerator, "generate_value", side_effect=lambda alg: f"GEN_{alg}"
+            ):
+                result = mgr.apply_schema()
 
         apps = result["applications"]["testapp"]
 
+        # credentials must exist now
+        self.assertIn("credentials", apps)
+        creds = apps["credentials"]
+
         # database_password comes from ValueGenerator.generate_value("alphanumeric")
-        self.assertEqual(apps["credentials"]["database_password"], "GEN_alphanumeric")
+        self.assertEqual(creds["database_password"], "GEN_alphanumeric")
 
         # plain_cred vaulted from override
-        self.assertIsInstance(apps["credentials"]["plain_cred"], VaultScalar)
+        self.assertIsInstance(creds["plain_cred"], VaultScalar)
 
         # nested.inner should not be vaulted due to code's prefix check
         self.assertEqual(
-            apps["credentials"]["nested"]["inner"],
+            creds["nested"]["inner"],
             {"description": "desc2", "algorithm": "sha256", "validation": {}},
         )
 

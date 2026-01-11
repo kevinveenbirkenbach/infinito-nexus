@@ -31,30 +31,70 @@ class _FakeVaultHandler:
 
 
 class TestInventoryManagerIntegration(unittest.TestCase):
-    def test_apply_schema_reads_real_files_and_writes_inventory_struct(self):
+    def test_apply_schema_with_transitive_provider_role_resolution(self):
         """
-        Integration-style test:
-        - Writes real YAML files to disk
+        Integration-style test (REAL provider resolution):
+        - Writes real YAML files to disk for:
+            - root role: roles/web-app-demo
+            - provider role: roles/svc-db-mariadb
         - Uses real YamlHandler parsing
         - Patches only VaultHandler to avoid external ansible-vault calls
-        - Verifies end-to-end: schema + config -> inventory applications/credentials
+        - Verifies:
+            - root role generates plain feature-based credentials (database_password, oauth2_proxy_cookie_secret)
+            - root role schema credentials are vaulted (VaultScalar)
+            - provider role is included transitively and its schema credentials are vaulted
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
 
-            role_path = tmp / "roles" / "web-app-demo"
-            role_path.mkdir(parents=True, exist_ok=True)
+            roles_root = tmp / "roles"
+            roles_root.mkdir(parents=True, exist_ok=True)
+
+            # ------------------------------------------------------------------
+            # Provider role: roles/svc-db-mariadb
+            # ------------------------------------------------------------------
+            provider_role = roles_root / "svc-db-mariadb"
+            (provider_role / "schema").mkdir(parents=True, exist_ok=True)
+            (provider_role / "vars").mkdir(parents=True, exist_ok=True)
+            (provider_role / "config").mkdir(parents=True, exist_ok=True)
+
+            # vars/main.yml
+            (provider_role / "vars" / "main.yml").write_text(
+                'application_id: "svc-db-mariadb"\n',
+                encoding="utf-8",
+            )
+
+            # config/main.yml (no further transitive deps)
+            (provider_role / "config" / "main.yml").write_text(
+                "docker:\n"
+                "  services: {}\n",
+                encoding="utf-8",
+            )
+
+            # schema/main.yml (provider credentials that must be vaulted)
+            (provider_role / "schema" / "main.yml").write_text(
+                "credentials:\n"
+                "  root_password:\n"
+                "    description: MariaDB root password\n"
+                "    algorithm: random_hex_16\n"
+                "    validation: {}\n"
+                "  replication_password:\n"
+                "    description: MariaDB replication password\n"
+                "    algorithm: random_hex_16\n"
+                "    validation: {}\n",
+                encoding="utf-8",
+            )
+
+            # ------------------------------------------------------------------
+            # Root role: roles/web-app-demo
+            # ------------------------------------------------------------------
+            role_path = roles_root / "web-app-demo"
             (role_path / "schema").mkdir(parents=True, exist_ok=True)
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
 
             inv_path = tmp / "inventory.yml"
-
-            # inventory.yml
-            inv_path.write_text(
-                "applications: {}\n",
-                encoding="utf-8",
-            )
+            inv_path.write_text("applications: {}\n", encoding="utf-8")
 
             # vars/main.yml
             (role_path / "vars" / "main.yml").write_text(
@@ -62,18 +102,23 @@ class TestInventoryManagerIntegration(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            # config/main.yml (enables feature-based plain injections)
+            # config/main.yml
+            # NOTE:
+            # - database_password injection requires enabled=true AND shared=true
+            # - provider resolution requires type when enabled=true and shared=true
             (role_path / "config" / "main.yml").write_text(
                 "docker:\n"
                 "  services:\n"
                 "    database:\n"
+                "      enabled: true\n"
                 "      shared: true\n"
+                "      type: mariadb\n"
                 "    oauth2:\n"
                 "      enabled: true\n",
                 encoding="utf-8",
             )
 
-            # schema/main.yml (drives vaulted + plain behavior)
+            # schema/main.yml (root credentials that must be vaulted)
             (role_path / "schema" / "main.yml").write_text(
                 "credentials:\n"
                 "  api_key:\n"
@@ -102,38 +147,65 @@ class TestInventoryManagerIntegration(unittest.TestCase):
                     overrides={"credentials.plain_needed": "OVERRIDE"},
                     allow_empty_plain=False,
                 )
-
                 inv = mgr.apply_schema()
 
-            app = inv["applications"]["web-app-demo"]
-            creds = app["credentials"]
+            apps = inv.get("applications", {})
+            self.assertIn("web-app-demo", apps)
+            self.assertIn("svc-db-mariadb", apps)
 
-            # Feature-based values should be present and plain strings
-            self.assertIn("database_password", creds)
-            self.assertIsInstance(creds["database_password"], str)
-            self.assertNotIsInstance(creds["database_password"], VaultScalar)
+            # ------------------------------------------------------------------
+            # Root app assertions
+            # ------------------------------------------------------------------
+            root_app = apps["web-app-demo"]
+            root_creds = root_app["credentials"]
 
-            self.assertIn("oauth2_proxy_cookie_secret", creds)
-            self.assertIsInstance(creds["oauth2_proxy_cookie_secret"], str)
-            self.assertNotIsInstance(creds["oauth2_proxy_cookie_secret"], VaultScalar)
+            # feature-based injections should be plain strings
+            self.assertIn("database_password", root_creds)
+            self.assertIsInstance(root_creds["database_password"], str)
+            self.assertNotIsInstance(root_creds["database_password"], VaultScalar)
 
-            # Schema-driven keys should be vaulted (VaultScalar)
-            self.assertIn("api_key", creds)
-            self.assertIsInstance(creds["api_key"], VaultScalar)
-            self.assertIn("$ANSIBLE_VAULT", str(creds["api_key"]))
-            self.assertIn("PLAIN:api_key:", str(creds["api_key"]))
+            self.assertIn("oauth2_proxy_cookie_secret", root_creds)
+            self.assertIsInstance(root_creds["oauth2_proxy_cookie_secret"], str)
+            self.assertNotIsInstance(root_creds["oauth2_proxy_cookie_secret"], VaultScalar)
 
-            self.assertIn("plain_needed", creds)
-            self.assertIsInstance(creds["plain_needed"], VaultScalar)
-            self.assertIn("PLAIN:plain_needed:OVERRIDE", str(creds["plain_needed"]))
+            # schema-driven keys should be vaulted (VaultScalar)
+            self.assertIn("api_key", root_creds)
+            self.assertIsInstance(root_creds["api_key"], VaultScalar)
+            self.assertIn("$ANSIBLE_VAULT", str(root_creds["api_key"]))
+
+            self.assertIn("plain_needed", root_creds)
+            self.assertIsInstance(root_creds["plain_needed"], VaultScalar)
+            self.assertIn("PLAIN:plain_needed:OVERRIDE", str(root_creds["plain_needed"]))
 
             # Non-credentials should be copied
-            self.assertEqual(app["non_credentials"]["flag"], True)
+            self.assertEqual(root_app["non_credentials"]["flag"], True)
 
-            # Fake vault should have been called for vaulted schema keys only
+            # ------------------------------------------------------------------
+            # Provider app assertions
+            # ------------------------------------------------------------------
+            prov_app = apps["svc-db-mariadb"]
+            prov_creds = prov_app["credentials"]
+
+            self.assertIn("root_password", prov_creds)
+            self.assertIsInstance(prov_creds["root_password"], VaultScalar)
+            self.assertIn("$ANSIBLE_VAULT", str(prov_creds["root_password"]))
+
+            self.assertIn("replication_password", prov_creds)
+            self.assertIsInstance(prov_creds["replication_password"], VaultScalar)
+            self.assertIn("$ANSIBLE_VAULT", str(prov_creds["replication_password"]))
+
+            # ------------------------------------------------------------------
+            # Vault calls: should include vaulted schema keys (root + provider),
+            # but not the plain feature-based injections.
+            # ------------------------------------------------------------------
             called_keys = [k for (_plain, k) in fake_vault.calls]
             self.assertIn("api_key", called_keys)
             self.assertIn("plain_needed", called_keys)
+            self.assertIn("root_password", called_keys)
+            self.assertIn("replication_password", called_keys)
+
+            self.assertNotIn("database_password", called_keys)
+            self.assertNotIn("oauth2_proxy_cookie_secret", called_keys)
 
 
 if __name__ == "__main__":

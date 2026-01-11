@@ -25,6 +25,7 @@ class TestInventoryManager(unittest.TestCase):
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
 
+            # IMPORTANT: ensure files exist for .exists() checks
             (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
             (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
             (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
@@ -74,6 +75,11 @@ class TestInventoryManager(unittest.TestCase):
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
+
+            # IMPORTANT: ensure files exist for .exists() checks
+            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -131,6 +137,11 @@ class TestInventoryManager(unittest.TestCase):
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
+
+            # IMPORTANT: ensure files exist for .exists() checks
+            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -200,6 +211,11 @@ class TestInventoryManager(unittest.TestCase):
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
 
+            # IMPORTANT: ensure files exist for .exists() checks
+            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
+
             inventory_path = inv_path
 
             schema_data = {
@@ -265,6 +281,10 @@ class TestInventoryManager(unittest.TestCase):
           - a dict for a credential key, or
           - a VaultScalar for a credential key,
         recurse_credentials must skip re-encryption and leave existing values untouched.
+
+        NOTE:
+        InventoryManager now checks schema/config file existence on disk before loading,
+        so we must create those files in the temp role directory.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             role_path = Path(tmpdir) / "role"
@@ -275,6 +295,11 @@ class TestInventoryManager(unittest.TestCase):
             (role_path / "vars").mkdir(parents=True, exist_ok=True)
             (role_path / "config").mkdir(parents=True, exist_ok=True)
             inv_path.write_text("{}", encoding="utf-8")
+
+            # IMPORTANT: ensure files exist for .exists() checks
+            (role_path / "schema" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "vars" / "main.yml").write_text("{}", encoding="utf-8")
+            (role_path / "config" / "main.yml").write_text("{}", encoding="utf-8")
 
             inventory_path = inv_path
 
@@ -316,6 +341,7 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
+                    # No provider resolution / no special rules
                     return {"docker": {"services": {}}}
                 return {}
 
@@ -327,6 +353,9 @@ class TestInventoryManager(unittest.TestCase):
                 mock.patch(
                     "module_utils.manager.inventory.VaultHandler"
                 ) as mock_vault_cls,
+                # Even though encryption is skipped, the current implementation
+                # may still call ValueGenerator.generate_value() before checking
+                # existing destination values. Keep it deterministic.
                 mock.patch.object(
                     ValueGenerator, "generate_value", return_value="IGNORED"
                 ),
