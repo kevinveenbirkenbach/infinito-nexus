@@ -9,7 +9,7 @@ from pathlib import Path
 ROLE_FILES = Path(__file__).resolve().parents[5] / "roles/sys-ctl-hlth-csp/files"
 sys.path.insert(0, str(ROLE_FILES))
 
-import script
+import script  # noqa: E402
 
 
 class TestExtractDomains(unittest.TestCase):
