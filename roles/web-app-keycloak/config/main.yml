@@ -1,4 +1,3 @@
-load_dependencies:    True  # When set to false the dependencies aren't loaded. Helpful for developing
 actions:
   import_realm:       True  # Import REALM
 server:
