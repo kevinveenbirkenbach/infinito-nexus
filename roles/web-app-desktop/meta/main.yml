@@ -23,3 +23,5 @@ galaxy_info:
   logo:
     class: fa fa-th-large
   lifecycle: beta
+  run_after:
+  - web-app-matomo
