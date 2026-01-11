@@ -95,8 +95,29 @@ jobs:
             echo | tee -a "${log_file}"
 
             {
+              echo "--- disk before ---"
+              df -h
+              docker system df || true
+
               echo "--- deploy (per app) ---"
+              set +e
               scripts/tests/deploy.sh --missing --type server --app "${app}" --keep-stack-on-failure
+              rc=$?
+              set -e
+
+              echo "--- disk after deploy ---"
+              df -h
+              docker system df || true
+
+              if [[ $rc -eq 0 ]]; then
+                echo "--- cleanup (success) ---"
+                docker system prune -af --volumes
+                docker builder prune -af
+              else
+                echo "--- no cleanup (failure; keep stack for debugging) ---"
+              fi
+
+              exit $rc
             } 2>&1 | tee -a "${log_file}"
           done
 
