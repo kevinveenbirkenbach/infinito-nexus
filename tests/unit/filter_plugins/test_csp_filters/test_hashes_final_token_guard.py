@@ -72,7 +72,9 @@ class TestCspHashesFinalTokenGuard(unittest.TestCase):
         apps = copy.deepcopy(self.apps)
 
         # Explicitly disable 'unsafe-inline' on base 'style-src' so hashes can be included
-        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault("flags", {})
+        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault(
+            "flags", {}
+        )
         apps["app1"]["server"]["csp"]["flags"].setdefault("style-src", {})
         apps["app1"]["server"]["csp"]["flags"]["style-src"]["unsafe-inline"] = False
 

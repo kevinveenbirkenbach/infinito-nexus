@@ -12,7 +12,9 @@ class TestCspDeterminismAndUnion(unittest.TestCase):
                 "server": {
                     "csp": {
                         "whitelist": {"connect-src": []},
-                        "flags": {"script-src": {"unsafe-inline": False, "unsafe-eval": True}},
+                        "flags": {
+                            "script-src": {"unsafe-inline": False, "unsafe-eval": True}
+                        },
                         "hashes": {},
                     }
                 },

@@ -237,8 +237,12 @@ class FilterModule(object):
 
                 # Simpleicons (if enabled via docker.service.simpleicons.enabled) – typically used via connect-src (fetch)
                 if directive == "connect-src":
-                    if self.is_feature_enabled(applications, "simpleicons", application_id):
-                        tokens.append(get_url(domains, "web-svc-simpleicons", web_protocol))
+                    if self.is_feature_enabled(
+                        applications, "simpleicons", application_id
+                    ):
+                        tokens.append(
+                            get_url(domains, "web-svc-simpleicons", web_protocol)
+                        )
 
                 # reCAPTCHA (if enabled via docker.service.recaptcha.enabled) – scripts + frames
                 if self.is_feature_enabled(applications, "recaptcha", application_id):

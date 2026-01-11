@@ -44,7 +44,9 @@ class TestCspFamilyUnionExplicitDisable(unittest.TestCase):
         apps = copy.deepcopy(self.apps)
 
         # Explicitly disable unsafe-inline for the base
-        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault("flags", {})
+        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault(
+            "flags", {}
+        )
         apps["app1"]["server"]["csp"]["flags"].setdefault("style-src", {})
         apps["app1"]["server"]["csp"]["flags"]["style-src"]["unsafe-inline"] = False
 
@@ -69,9 +71,15 @@ class TestCspFamilyUnionExplicitDisable(unittest.TestCase):
         apps = copy.deepcopy(self.apps)
 
         # Force elem/attr to allow unsafe-inline explicitly
-        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault("flags", {})
-        apps["app1"]["server"]["csp"]["flags"]["script-src-elem"] = {"unsafe-inline": True}
-        apps["app1"]["server"]["csp"]["flags"]["script-src-attr"] = {"unsafe-inline": True}
+        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault(
+            "flags", {}
+        )
+        apps["app1"]["server"]["csp"]["flags"]["script-src-elem"] = {
+            "unsafe-inline": True
+        }
+        apps["app1"]["server"]["csp"]["flags"]["script-src-attr"] = {
+            "unsafe-inline": True
+        }
 
         # Explicitly disable on base
         apps["app1"]["server"]["csp"]["flags"]["script-src"] = {

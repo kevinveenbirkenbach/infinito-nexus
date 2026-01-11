@@ -27,7 +27,9 @@ class TestCspTogglesDesktopLogout(unittest.TestCase):
         return []
 
     def _set_service_enabled(self, apps: dict, service: str, enabled: bool):
-        apps["app1"].setdefault("docker", {}).setdefault("service", {}).setdefault(service, {})
+        apps["app1"].setdefault("docker", {}).setdefault("service", {}).setdefault(
+            service, {}
+        )
         apps["app1"]["docker"]["service"][service]["enabled"] = enabled
 
     def test_frame_ancestors_desktop_toggle(self):
@@ -49,20 +51,30 @@ class TestCspTogglesDesktopLogout(unittest.TestCase):
         self._set_service_enabled(apps, "logout", False)
 
         header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
-        self.assertNotIn("'unsafe-inline'", self._get_directive_tokens(header, "script-src-attr"))
-        self.assertNotIn("'unsafe-inline'", self._get_directive_tokens(header, "script-src-elem"))
+        self.assertNotIn(
+            "'unsafe-inline'", self._get_directive_tokens(header, "script-src-attr")
+        )
+        self.assertNotIn(
+            "'unsafe-inline'", self._get_directive_tokens(header, "script-src-elem")
+        )
 
     def test_logout_enabled_adds_unsafe_inline_attr_and_elem(self):
         apps = copy.deepcopy(self.apps)
         self._set_service_enabled(apps, "logout", True)
 
         header = self.filter.build_csp_header(apps, "app1", self.domains, "https")
-        self.assertIn("'unsafe-inline'", self._get_directive_tokens(header, "script-src-attr"))
-        self.assertIn("'unsafe-inline'", self._get_directive_tokens(header, "script-src-elem"))
+        self.assertIn(
+            "'unsafe-inline'", self._get_directive_tokens(header, "script-src-attr")
+        )
+        self.assertIn(
+            "'unsafe-inline'", self._get_directive_tokens(header, "script-src-elem")
+        )
 
     def test_logout_respects_explicit_disable_on_base_script_src(self):
         apps = copy.deepcopy(self.apps)
-        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault("flags", {})
+        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault(
+            "flags", {}
+        )
         apps["app1"]["server"]["csp"]["flags"]["script-src"] = {
             "unsafe-inline": False,
             "unsafe-eval": True,
@@ -80,7 +92,9 @@ class TestCspTogglesDesktopLogout(unittest.TestCase):
 
     def test_logout_propagates_to_base_when_not_explicitly_disabled(self):
         apps = copy.deepcopy(self.apps)
-        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault("flags", {})
+        apps["app1"].setdefault("server", {}).setdefault("csp", {}).setdefault(
+            "flags", {}
+        )
         apps["app1"]["server"]["csp"]["flags"]["script-src"] = {"unsafe-eval": True}
         self._set_service_enabled(apps, "logout", True)
 
