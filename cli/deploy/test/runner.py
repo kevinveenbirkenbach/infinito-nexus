@@ -1,5 +1,6 @@
 from __future__ import annotations
-
+import os
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -39,6 +40,37 @@ def _get_invokable(compose: Compose) -> list[str]:
     )
     txt = (r.stdout or "").strip()
     return [line.strip() for line in txt.splitlines() if line.strip()]
+
+
+def _lifecycle_excludes(compose: Compose) -> set[str]:
+    """
+    Return role names that must be excluded based on lifecycle gating.
+
+    Uses the same semantics as scripts/tests/discover-server-apps.sh:
+      - TESTED_LIFECYCLES (space or comma-separated)
+      - Default: "alpha beta rc stable"
+    """
+    tested = os.environ.get("TESTED_LIFECYCLES", "alpha beta rc stable")
+    tested = tested.replace(",", " ").strip()
+    if not tested:
+        return set()
+
+    tested_q = shlex.quote(tested)
+
+    # lifecycle_filter prints role names space-separated (or nothing)
+    r = compose.exec(
+        [
+            "sh",
+            "-lc",
+            f"python3 -m cli.meta.roles.lifecycle_filter blacklist {tested_q} || true",
+        ],
+        check=False,
+        capture=True,
+    )
+    txt = (r.stdout or "").strip()
+    if not txt:
+        return set()
+    return {t.strip() for t in txt.split() if t.strip()}
 
 
 def _ensure_vault_password_file(compose: Compose) -> None:
@@ -141,6 +173,19 @@ def run_test_plan(
 
         invokable = _get_invokable(compose)
         invokable_set = set(invokable)
+
+        # Apply lifecycle gating globally (workstation + server).
+        excluded_by_lifecycle = _lifecycle_excludes(compose)
+        if excluded_by_lifecycle:
+            invokable = [x for x in invokable if x not in excluded_by_lifecycle]
+            invokable_set = set(invokable)
+            append_text(
+                main_log,
+                "\n"
+                f"lifecycle_tested={os.environ.get('TESTED_LIFECYCLES', 'alpha beta rc stable')}\n"
+                f"lifecycle_excluded_count={len(excluded_by_lifecycle)}\n"
+                f"lifecycle_excluded={','.join(sorted(excluded_by_lifecycle))}\n",
+            )
 
         if deploy_type == "workstation":
             allowed = filter_allowed_workstation(invokable)
