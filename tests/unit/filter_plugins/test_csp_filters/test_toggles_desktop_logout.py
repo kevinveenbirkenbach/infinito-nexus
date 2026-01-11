@@ -8,7 +8,7 @@ class TestCspTogglesDesktopLogout(unittest.TestCase):
         self.filter = FilterModule()
         self.apps = {
             "app1": {
-                "docker": {"service": {"matomo": {"enabled": True}}},
+                "docker": {"service": {"matomo": {"enabled": False}}},
                 "server": {"csp": {"whitelist": {}, "flags": {}, "hashes": {}}},
             }
         }
