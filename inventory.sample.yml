@@ -14,6 +14,16 @@ users:
     email:      contact@infinito.nexus
     gpg:        "DUMMY-GPG-KEY-NOT-SET"
     password:   "VerySecurePassword!"
+
+    # UID/GID allocation policy:
+    # - Use IDs >= 10000 for manually managed users
+    # - IDs below 10000 are reserved for auto-created Infinito.Nexus service accounts
+    # This avoids collisions with system users and managed application accounts.
+    uid: 10001
+    gid: 10001
+    roles: []
+    tokens: {}
+    authorized_keys: []
 applications: {}
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
