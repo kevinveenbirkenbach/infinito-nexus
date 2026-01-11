@@ -66,8 +66,7 @@ class TestInventoryManagerIntegration(unittest.TestCase):
 
             # config/main.yml (no further transitive deps)
             (provider_role / "config" / "main.yml").write_text(
-                "docker:\n"
-                "  services: {}\n",
+                "docker:\n  services: {}\n",
                 encoding="utf-8",
             )
 
@@ -166,7 +165,9 @@ class TestInventoryManagerIntegration(unittest.TestCase):
 
             self.assertIn("oauth2_proxy_cookie_secret", root_creds)
             self.assertIsInstance(root_creds["oauth2_proxy_cookie_secret"], str)
-            self.assertNotIsInstance(root_creds["oauth2_proxy_cookie_secret"], VaultScalar)
+            self.assertNotIsInstance(
+                root_creds["oauth2_proxy_cookie_secret"], VaultScalar
+            )
 
             # schema-driven keys should be vaulted (VaultScalar)
             self.assertIn("api_key", root_creds)
@@ -175,7 +176,9 @@ class TestInventoryManagerIntegration(unittest.TestCase):
 
             self.assertIn("plain_needed", root_creds)
             self.assertIsInstance(root_creds["plain_needed"], VaultScalar)
-            self.assertIn("PLAIN:plain_needed:OVERRIDE", str(root_creds["plain_needed"]))
+            self.assertIn(
+                "PLAIN:plain_needed:OVERRIDE", str(root_creds["plain_needed"])
+            )
 
             # Non-credentials should be copied
             self.assertEqual(root_app["non_credentials"]["flag"], True)

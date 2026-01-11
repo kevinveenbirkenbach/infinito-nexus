@@ -5,6 +5,10 @@ server:
     canonical:
       - "html.{{ DOMAIN_PRIMARY }}"
     aliases: []
+  status_codes:
+    default:
+      - 403 # On initialisation, there is no index.html deployed
+      - 200
 docker:
   services:
     desktop:
