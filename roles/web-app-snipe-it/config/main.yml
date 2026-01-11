@@ -1,5 +1,3 @@
-features:
-  css:              false
 server:
   domains:
     canonical:
@@ -49,6 +47,8 @@ docker:
       acl:
         blacklist:
           - "/login"
+    css:
+      enabled: false
   volumes:
     data:       "snipe-it_data"
     

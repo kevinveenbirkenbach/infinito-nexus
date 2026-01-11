@@ -1,6 +1,3 @@
-features:
-  css:          true
-  javascript:   true      # Necessary for URL sync
 server:
   csp:
     whitelist:
@@ -46,3 +43,7 @@ docker:
       enabled: false
       name:   "desktop"
       image:  "application-portfolio"
+    css:
+      enabled: true
+    javascript:
+      enabled: true

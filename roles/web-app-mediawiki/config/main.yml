@@ -31,8 +31,8 @@ docker:
       backup:
         no_stop_required: true
       name:     mediawiki
+    css:
+      enabled: false
   volumes:
     images:     mediawiki_images
     extensions: mediawiki_extensions
-features:
-  css:              false

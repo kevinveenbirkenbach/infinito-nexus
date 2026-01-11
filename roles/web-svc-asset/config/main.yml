@@ -5,10 +5,10 @@ server:
     canonical:
       - asset.{{ DOMAIN_PRIMARY }}
     aliases: []
-features:
-  css:    true
 docker:
   services:
     matomo:
       enabled: true
       shared: true
+    css:
+      enabled: true

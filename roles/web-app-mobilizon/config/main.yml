@@ -1,6 +1,4 @@
 titel:              "Mobilizon on {{ DOMAIN_PRIMARY | upper }}"
-features:
-  css:              true
 server:
   csp:
     flags:
@@ -33,3 +31,5 @@ docker:
       image:    "docker.io/kaihuri/mobilizon"
       name:     "mobilizon"
       version:  "5.2.0"
+    css:
+      enabled: true

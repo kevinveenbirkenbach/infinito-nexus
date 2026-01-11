@@ -5,9 +5,6 @@ oidc:
     #
     # Due to this reason this plutin is deactivated atm
   flavor:             'taigaio' # Potential flavors: robrotheram, taigaio
-features:
-  css:                true
-  javascript:         true
 docker:
   services:
     oidc:
@@ -70,6 +67,10 @@ docker:
       mem_reservation: "128m"
       mem_limit:       "256m"
       pids_limit:      128
+    css:
+      enabled: true
+    javascript:
+      enabled: true
 server:
   csp:
     flags:

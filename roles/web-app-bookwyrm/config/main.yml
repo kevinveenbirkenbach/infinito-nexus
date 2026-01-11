@@ -25,11 +25,11 @@ docker:
       name:     bookwyrm
     worker:
       enabled:  true
+    css:
+      enabled: true
   volumes:
     data:       "bookwyrm_data"
     media:      "bookwyrm_media"
-features:
-  css:              true
 server:
   csp:
     whitelist: {}

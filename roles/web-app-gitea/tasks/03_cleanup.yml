@@ -4,4 +4,4 @@
 
 - name: Execute LDAP Cleanup Routine
   include_tasks: cleanup/ldap.yml
-  when: not (applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False))
+  when: not (GITEA_LDAP_ENABLED | bool)

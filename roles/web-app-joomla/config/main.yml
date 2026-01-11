@@ -1,6 +1,4 @@
 autocreate_users:     true # Autocreate LDAP users on Login
-features:
-  css:                true
 server:
   domains:
     canonical:
@@ -38,5 +36,7 @@ docker:
       upload:
         # MB Integer for upload size
         size_mb: 100
+    css:
+      enabled: true
   volumes:
     data:       "joomla_data"

@@ -16,9 +16,10 @@ docker:
     database:
       shared: false
       enabled:      false   # Enable the database 
-features:
-  css:              true    # Enable Global CSS Styling
-  recaptcha:        false   # Enable ReCaptcha
+    css:
+      enabled: true
+    recaptcha:
+      enabled: false
 server:
   csp: {}      
   domains:

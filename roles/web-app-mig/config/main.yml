@@ -14,8 +14,8 @@ docker:
       enabled:  false # No redis needed
     database:
       enabled:  false # No database needed
-features:
-  css:          true  # use custom infinito stile 
+    css:
+      enabled: true
 server:
   csp:
     whitelist:

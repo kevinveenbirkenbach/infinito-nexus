@@ -7,8 +7,6 @@ plugins:
     enabled:          true
   activitypub:
     enabled:          true
-features:
-  css:                false
 server:
   csp:
     flags:
@@ -63,6 +61,8 @@ docker:
       mem_reservation:    0.5g
       mem_limit:          1.5g
       pids_limit:         512
+    css:
+      enabled: false
   volumes: 
     data:                 wordpress_data
 rbac:

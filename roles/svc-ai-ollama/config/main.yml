@@ -1,8 +1,8 @@
-features: 
-  local_ai: true # Needs to be set so that network is loaded
+
 docker:
   services:
     ollama:
+      shared:             true
       backup:
         no_stop_required: true
       image:              ollama/ollama

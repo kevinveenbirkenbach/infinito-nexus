@@ -20,8 +20,8 @@ docker:
         port:       80
       allowed_groups:
         - "{{ [RBAC.GROUP.NAME, 'web-app-lam-administrator'] | path_join }}"
-features:
-  css:                          true
+    css:
+      enabled: true
 server:
   csp:
     flags:

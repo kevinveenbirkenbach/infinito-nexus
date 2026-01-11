@@ -1,14 +1,6 @@
 load_dependencies:    True  # When set to false the dependencies aren't loaded. Helpful for developing
 actions:
   import_realm:       True  # Import REALM
-features:
-  css:                true
-  recaptcha:          "{{ RECAPTCHA_ENABLED | bool }}"
-
-  # Doesn't make sense to activate logout page for keycloak, because the logout page 
-  # anyhow should be included via iframe in keycloak.
-  # The JS is also messing with the keycloak config fields
-  # @todo optimize the JS
 server:
   csp:
     flags:
@@ -53,6 +45,10 @@ docker:
       shared: true
       type: "postgres"
       enabled: true
+    css:
+      enabled: true
+    recaptcha:
+      enabled: "{{ RECAPTCHA_ENABLED | bool }}"
 credentials:
   recaptcha:
     key:      "{{ CAPTCHA.RECAPTCHA.KEY | default('') }}"

@@ -24,13 +24,13 @@ docker:
       version:        latest 
       image:          vectorim/element-web
       name:           matrix-element
+    css:
+      enabled: true
   volumes: 
     synapse:          "matrix_synapse_data"
 playbook_tags:        "setup-all,start"                  # For the initial update use: install-all,ensure-matrix-users-created,start
 server_name:          "{{ DOMAIN_PRIMARY }}"             # Adress for the account names etc.
 setup:                false                              # Set true in inventory file to execute the setup and initializing procedures
-features:
-  css:                true
 server:
   csp:
     flags:

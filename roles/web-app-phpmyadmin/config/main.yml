@@ -1,7 +1,4 @@
 autologin:            false         # This is a high security risk. Just activate this option if you know what you're doing
-features:
-  css:                false
-                              # it's anyhow not so enduser relevant, so it can be kept like this
 server:
   csp:
     flags:
@@ -37,3 +34,5 @@ docker:
         host:   "application"
       allowed_groups:
         - "{{ [RBAC.GROUP.NAME, 'web-app-phpmyadmin-administrator'] | path_join }}"
+    css:
+      enabled: false

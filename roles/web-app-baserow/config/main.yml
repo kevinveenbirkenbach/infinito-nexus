@@ -1,6 +1,3 @@
-features:
-  css:              true
-  javascript:       true
 docker:
   services:
     logout:
@@ -28,6 +25,10 @@ docker:
       mem_reservation:    0.5g
       mem_limit:          2g
       pids_limit:         512
+    css:
+      enabled: true
+    javascript:
+      enabled: true
   volumes:
     data:                 "baserow_data"
 server:

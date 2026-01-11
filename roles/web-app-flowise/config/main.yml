@@ -1,7 +1,3 @@
-features:
-  css:              true
-  javascript:       false
-  local_ai:         true
 server:
   domains:
     canonical: 
@@ -67,8 +63,13 @@ docker:
     database:
       shared: false
       enabled: false
-    ollama: 
+    ollama:
       enabled: true
+      shared: true
+    css:
+      enabled: true
+    javascript:
+      enabled: false
   volumes: 
     qdrant:     qdrant_data
     flowise:    flowise_data

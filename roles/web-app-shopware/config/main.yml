@@ -1,7 +1,4 @@
 title:                            "{{ SOFTWARE_NAME }} Shop"
-features:
-  redis:            true
-  css:              true
 server:
   csp:
     flags:
@@ -88,5 +85,7 @@ docker:
       mem_reservation: 2g
       mem_limit: 4g
 
+    css:
+      enabled: true
   volumes:
     data: "shopware_data"

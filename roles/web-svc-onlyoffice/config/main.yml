@@ -49,6 +49,8 @@ docker:
       mem_reservation:  "1g"
       mem_limit:        "2g"
       pids_limit:       2048
+    css:
+      enabled: true
   volumes:
     data:         onlyoffice_data          # /var/www/onlyoffice/Data
     logs:         onlyoffice_logs          # /var/log/onlyoffice
@@ -59,5 +61,3 @@ docker:
     # The redis and db volume are just dummy volumes and aren't used 
     pgdata:       onlyoffice_pgdata        # /var/lib/postgresql
     redisdata:    onlyoffice_redisdata     # /var/lib/redis
-features:
-  css:              true

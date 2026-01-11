@@ -1,6 +1,4 @@
 api_suffix:             "/bigbluebutton/"
-features:
-  css:                  true
 server:
   ip6_enabled:          false
   csp:
@@ -46,3 +44,5 @@ docker:
       internal:   false
     collabora:
       internal:   false
+    css:
+      enabled: true

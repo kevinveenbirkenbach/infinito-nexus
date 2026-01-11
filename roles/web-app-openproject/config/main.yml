@@ -2,8 +2,6 @@ ldap:
   filters:
     administrators:   False   # Set true to filter administrators
     users:            False   # Set true to filter users
-features:
-  css:                false   # Temporary deactivated. Needs to be optimized for production use.
 server:
   csp:
     flags:
@@ -86,5 +84,7 @@ docker:
           - "/users/me"           # Necessary for Nextcloud Plugin to work
           - "/api/"               # Necessary for Nextcloud Plugin to work
           - "/oauth/token"        # Necessary for Nextcloud Plugin to work
+    css:
+      enabled: false
   volumes:
     data:                 "openproject_data"

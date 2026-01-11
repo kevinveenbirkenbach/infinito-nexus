@@ -1,6 +1,4 @@
 titel:                "Pictures on {{ DOMAIN_PRIMARY }}"
-features:
-  css:                false # Needs to be reactivated
 server:
   csp:
     flags:
@@ -56,5 +54,7 @@ docker:
       mem_reservation: 0.75g
       mem_limit:       1g
       pids_limit:      512
+    css:
+      enabled: false
   volumes:
     data:               "pixelfed_data"

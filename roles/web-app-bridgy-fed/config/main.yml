@@ -1,6 +1,3 @@
-features:
-  css:              true
-
 server:
   domains:
     canonical:
@@ -32,6 +29,8 @@ docker:
       name:       "web-app-bridgy-fed"
       repository: "https://github.com/snarfed/bridgy-fed.git"
       branch:     "main"
+    css:
+      enabled: true
 rbac:
   roles: {}
  

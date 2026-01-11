@@ -1,5 +1,3 @@
-features:
-  css:              true
 server:
   csp:
     flags:
@@ -33,3 +31,5 @@ docker:
         no_stop_required: true
       port:               8000
       name:               "sphinx"
+    css:
+      enabled: true

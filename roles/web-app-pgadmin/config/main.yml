@@ -1,8 +1,6 @@
 version:                  "latest"
 server_mode:              False     # If true then the preconfigured database file is loaded. Recommended False. True is a security risk.
 master_password_required: True      # Master password is required. Recommended True. False is a security risk.
-features:
-  css:                    true
 server:
   csp:
     flags:
@@ -37,3 +35,5 @@ docker:
         port: "80"
       allowed_groups:
         - "{{ [RBAC.GROUP.NAME, 'web-app-pgadmin-administrator'] | path_join }}"
+    css:
+      enabled: true

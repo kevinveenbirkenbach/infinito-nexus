@@ -34,8 +34,8 @@ docker:
         blacklist:
           - "/login"
       enabled: false
-features:
-  css:                false
+    css:
+      enabled: false
 server:
   domains:
     canonical:

@@ -1,6 +1,4 @@
 single_user_mode:     false                                           # Set true for initial setup
-features:
-  css:                true
 server:
   domains:
     canonical:
@@ -63,5 +61,7 @@ docker:
       mem_reservation:    "1g"
       mem_limit:          "1.5g"
       pids_limit:         512
+    css:
+      enabled: true
   volumes:
     data:                 "mastodon_data"

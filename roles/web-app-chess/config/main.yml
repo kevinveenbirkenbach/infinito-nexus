@@ -22,10 +22,10 @@ docker:
       name:         "web-app-chess"
       backup:
         no_stop_required: true
+    css:
+      enabled: true
   volumes:
     data:           "chess_data"
-features:
-  css:              true
 server:
   csp:
     whitelist:      {}

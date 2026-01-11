@@ -25,10 +25,10 @@ docker:
       mem_reservation:  "4g"
       mem_limit:        "6g"
       pids_limit:       2048
+    css:
+      enabled: true
   volumes:
     data:           "jira_data"
-features:
-  css:              true
 server:
   csp:
     whitelist:      {}

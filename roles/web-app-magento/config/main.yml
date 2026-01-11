@@ -1,6 +1,3 @@
-features:
-  css:                true
-
 server:
   csp:
     whitelist: {}
@@ -46,5 +43,7 @@ docker:
       image:              "opensearchproject/opensearch"
       version:            "latest"
       name:               "magento-opensearch"
+    css:
+      enabled: true
   volumes:
     data:                 "magento_data"

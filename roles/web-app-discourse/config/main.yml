@@ -1,6 +1,4 @@
 repository:           "repository"  # Name of the repository folder                 
-features:
-  css:                true
 server:
   csp:
     flags:
@@ -42,6 +40,8 @@ docker:
       backup:
         no_stop_required: true
       repository:         "https://github.com/discourse/discourse_docker.git"
+    css:
+      enabled: true
   volumes: 
     data:   discourse_data
   network:  discourse

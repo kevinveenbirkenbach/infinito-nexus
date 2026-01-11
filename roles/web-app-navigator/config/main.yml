@@ -1,5 +1,3 @@
-features:
-  css:      true
 server:
   csp:
     whitelist:
@@ -36,3 +34,5 @@ docker:
     matomo:
       enabled: true
       shared: true
+    css:
+      enabled: true

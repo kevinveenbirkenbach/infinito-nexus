@@ -1,7 +1,5 @@
 images:
   friendica:          "friendica:latest"
-features:
-  css:                false # Temporary deactivated
 server:
   domains:
     canonical:
@@ -43,3 +41,5 @@ docker:
         host:   "application"
         port:   "80"
       enabled:  false
+    css:
+      enabled: false

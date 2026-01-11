@@ -24,10 +24,10 @@ docker:
       mem_reservation:  "6g"
       mem_limit:        "8g"
       pids_limit:       2048
+    css:
+      enabled: true
   volumes:
     data:           "confluence_data"
-features:
-  css:              true
 server:
   status_codes:
     default: 302

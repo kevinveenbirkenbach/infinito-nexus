@@ -1,5 +1,3 @@
-features:
-  css:                true
 server:
   domains:
     canonical:
@@ -44,3 +42,5 @@ docker:
       acl:
         blacklist:
           - "<< defaults_applications[web-app-yourls].server.locations.admin >>" # Protects the admin area
+    css:
+      enabled: true

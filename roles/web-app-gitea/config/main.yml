@@ -4,9 +4,6 @@ configuration:
     enable_push_create_user:      True      # Allow users to push local repositories to Gitea and have them automatically created for a user.
     default_private:              last      # Default private when creating a new repository: last, private, public
     default_push_create_private:  True      # Default private when creating a new repository with push-to-create.
-features:
-  css:                            true
-
 server:
   csp:
     flags:
@@ -72,5 +69,7 @@ docker:
         blacklist:
           - "/user/login"
       enabled: false
+    css:
+      enabled: true
   volumes:
     data:             "gitea_data"

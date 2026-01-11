@@ -29,11 +29,11 @@ docker:
       mem_reservation:    "1.5g"
       mem_limit:          "2g"
       pids_limit:         1024
+    css:
+      enabled: true
   volumes:
     data:           "pretix_data"
     config:         "pretix_config"
-features:
-  css:              true
 server:
   csp:
     whitelist:      {}

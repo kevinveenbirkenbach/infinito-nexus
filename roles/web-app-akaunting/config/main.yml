@@ -2,9 +2,6 @@ company:
   name:             "Akaunting on {{ DOMAIN_PRIMARY | upper }}" # @todo load automatic based on service_provider infos, this will fail
   email:            "{{ users.administrator.email }}" # @todo load automatic based on service_provider infos, this will fail
 setup_admin_email:  "{{ users.administrator.email }}"
-features:
-  css:              true
-  javascript:       true
 server:
   domains:
     canonical:
@@ -47,6 +44,10 @@ docker:
       backup:
         disabled: true
       enabled: false # Set to true to activate redis for akaunting
+    css:
+      enabled: true
+    javascript:
+      enabled: true
   volumes: 
     data: akaunting_data
 credentials: {}

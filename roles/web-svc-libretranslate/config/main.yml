@@ -20,10 +20,12 @@ docker:
     database:
       shared: false
       enabled:      false   # Enable the database
-features:
-  css:              true    # Enable Global CSS Styling
-  recaptcha:        false   # Enable ReCaptcha
-  javascript:       false   # Enables the custom JS in the javascript.js.j2 file
+    css:
+      enabled: true
+    recaptcha:
+      enabled: false
+    javascript:
+      enabled: false
 server:
   csp:
     whitelist:        {}      # URL's which should be whitelisted

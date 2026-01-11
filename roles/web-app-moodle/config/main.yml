@@ -1,6 +1,4 @@
 site_titel:           "Academy on {{ DOMAIN_PRIMARY }}"
-features:
-  css:                false
 server:
   csp:
     flags:
@@ -42,6 +40,8 @@ docker:
       version:        "4.5" # Latest LTS - Necessary for OIDC
       image:          bitnamilegacy/moodle
       name:           moodle
+    css:
+      enabled: false
   volumes:
     data:             moodle_data
     code:             moodle_code

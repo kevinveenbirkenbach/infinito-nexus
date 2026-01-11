@@ -23,5 +23,5 @@ docker:
       enabled:            false
     database: 
       enabled:            false
-features:
-  css: true
+    css:
+      enabled: true
