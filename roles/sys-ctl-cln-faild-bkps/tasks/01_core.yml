@@ -14,6 +14,7 @@
     name: sys-pip-install
   vars:
     package_name: '{{ CLEANUP_FAILED_BACKUPS_PKG }}'
+    global_install: true
 
 - include_role:
     name: sys-service

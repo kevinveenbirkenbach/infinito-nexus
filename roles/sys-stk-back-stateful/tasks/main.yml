@@ -1,4 +1,10 @@
 # run_once_sys_stk_back_stateful: disabled
+- name: "For '{{ application_id }}': Load OpenLDAP"
+  include_role:
+    name: svc-db-openldap
+  when:
+    - SYS_STK_BACK_STATEFULL_LDAP_ENABLED | bool
+    - run_once_svc_db_openldap is not defined
 
 - name: "For '{{ application_id }}': Set database_application_id (Needed due to lazzy loading issue)"
   set_fact:
@@ -9,11 +15,6 @@
   loop:
     - "{{ DOCKER_VARS_FILE }}"    # Important to load docker variables first so that database can use them
     - "{{ DATABASE_VARS_FILE }}"  # Important to load them before docker role so that backup can use them
-
-- name: "For '{{ application_id }}': Load OpenLDAP"
-  include_role:
-    name: svc-db-openldap
-  when: SYS_STK_BACK_STATEFULL_LDAP_ENABLED | bool
 
 - name: "For '{{ application_id }}': Load central RDBMS"
   include_role:
