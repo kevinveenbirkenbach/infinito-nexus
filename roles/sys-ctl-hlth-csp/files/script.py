@@ -28,11 +28,18 @@ def build_docker_cmd(
     domains: list[str],
     short_mode: bool,
     ignore_network_blocks_from: list[str],
+    use_host_network: bool = True,
 ) -> list[str]:
     """
     Build docker run command that forwards args to the container ENTRYPOINT.
     """
-    cmd = ["docker", "run", "--rm", image]
+    cmd = ["docker", "run", "--rm"]
+
+    # Default: make container see the same network namespace as the host
+    if use_host_network:
+        cmd.extend(["--network", "host"])
+
+    cmd.append(image)
 
     if short_mode:
         cmd.append("--short")
@@ -52,6 +59,7 @@ def run_checker(
     short_mode: bool,
     ignore_network_blocks_from: list[str],
     always_pull: bool,
+    use_host_network: bool = True,
 ) -> int:
     """
     Runs the CSP checker container and returns its exit code.
@@ -60,7 +68,13 @@ def run_checker(
         # best-effort pull; if it fails, continue with local image
         subprocess.run(["docker", "pull", image], check=False)
 
-    cmd = build_docker_cmd(image, domains, short_mode, ignore_network_blocks_from)
+    cmd = build_docker_cmd(
+        image=image,
+        domains=domains,
+        short_mode=short_mode,
+        ignore_network_blocks_from=ignore_network_blocks_from,
+        use_host_network=use_host_network,
+    )
     try:
         result = subprocess.run(cmd, check=False)
         return int(result.returncode)
@@ -103,6 +117,13 @@ def main() -> None:
         help="Optional: domains whose network block failures should be ignored",
     )
 
+    # Default: host network ON; allow opt-out
+    parser.add_argument(
+        "--no-host-network",
+        action="store_true",
+        help="Disable --network host for docker run (default is to use host network).",
+    )
+
     args = parser.parse_args()
 
     domains = extract_domains(args.nginx_config_dir)
@@ -119,6 +140,7 @@ def main() -> None:
         short_mode=bool(args.short),
         ignore_network_blocks_from=list(args.ignore_network_blocks_from or []),
         always_pull=bool(args.always_pull),
+        use_host_network=not bool(args.no_host_network),
     )
     sys.exit(rc)
 
