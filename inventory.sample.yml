@@ -13,6 +13,7 @@ users:
     website:    https://www.infinito.nexus/
     email:      contact@infinito.nexus
     gpg:        "DUMMY-GPG-KEY-NOT-SET"
+    password:   "VerySecurePassword!"
 applications: {}
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
