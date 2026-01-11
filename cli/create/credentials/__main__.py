@@ -28,7 +28,10 @@ from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from module_utils.manager.inventory import InventoryManager
-from module_utils.handler.vault import VaultHandler, VaultScalar  # uses your existing handler
+from module_utils.handler.vault import (
+    VaultHandler,
+    VaultScalar,
+)  # uses your existing handler
 
 
 # ---------- helpers ----------
@@ -144,7 +147,9 @@ def parse_overrides(pairs: list[str]) -> Dict[str, str]:
     return out
 
 
-def _override_for(app_id: str, key: str, overrides: Dict[str, str], *, is_primary: bool) -> str | None:
+def _override_for(
+    app_id: str, key: str, overrides: Dict[str, str], *, is_primary: bool
+) -> str | None:
     """
     Resolve overrides for a credential key.
 
@@ -258,7 +263,9 @@ def main() -> int:
             creds_snip = ensure_map(app_block_snip, "credentials")
 
             for key, default_val in schema_creds.items():
-                ov = _override_for(app_id, key, overrides, is_primary=(app_id == manager.app_id))
+                ov = _override_for(
+                    app_id, key, overrides, is_primary=(app_id == manager.app_id)
+                )
 
                 if ov is not None:
                     value_for_key: Union[str, Any] = ov
@@ -267,12 +274,16 @@ def main() -> int:
 
                 # Default rule: if schema provided vault, reuse; otherwise encrypt generated/plain
                 if _is_vault_encrypted(value_for_key):
-                    creds_snip[key] = to_vault_block(manager.vault_handler, value_for_key, key)
+                    creds_snip[key] = to_vault_block(
+                        manager.vault_handler, value_for_key, key
+                    )
                 else:
                     # if schema didn't provide a value, treat as empty string
                     if value_for_key is None:
                         value_for_key = ""
-                    creds_snip[key] = to_vault_block(manager.vault_handler, str(value_for_key), key)
+                    creds_snip[key] = to_vault_block(
+                        manager.vault_handler, str(value_for_key), key
+                    )
 
         # Optional ansible_become_password only if provided via overrides
         if "ansible_become_password" in overrides:
@@ -317,7 +328,9 @@ def main() -> int:
             if key in creds:
                 continue
 
-            ov = _override_for(app_id, key, overrides, is_primary=(app_id == manager.app_id))
+            ov = _override_for(
+                app_id, key, overrides, is_primary=(app_id == manager.app_id)
+            )
             value_for_new_key: Union[str, Any]
 
             if ov is not None:
@@ -326,11 +339,15 @@ def main() -> int:
                 value_for_new_key = default_val
 
             if _is_vault_encrypted(value_for_new_key):
-                creds[key] = to_vault_block(manager.vault_handler, value_for_new_key, key)
+                creds[key] = to_vault_block(
+                    manager.vault_handler, value_for_new_key, key
+                )
             else:
                 if value_for_new_key is None:
                     value_for_new_key = ""
-                creds[key] = to_vault_block(manager.vault_handler, str(value_for_new_key), key)
+                creds[key] = to_vault_block(
+                    manager.vault_handler, str(value_for_new_key), key
+                )
 
             newly_added_keys[app_id].add(key)
 
@@ -368,7 +385,11 @@ def main() -> int:
             else:
                 # legacy: only apply to primary app
                 app_id = manager.app_id
-                key = ov_key.split(".", 1)[1] if ov_key.startswith("credentials.") else ov_key
+                key = (
+                    ov_key.split(".", 1)[1]
+                    if ov_key.startswith("credentials.")
+                    else ov_key
+                )
 
             if app_id not in apps:
                 continue

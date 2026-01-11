@@ -26,9 +26,7 @@ class _FakeVaultHandler:
         # This format must have at least 2 lines after splitlines(),
         # because InventoryManager reads lines[1] for indent detection.
         return (
-            "!vault |\n"
-            "  $ANSIBLE_VAULT;1.1;AES256\n"
-            f"    PLAIN:{key_name}:{plaintext}\n"
+            f"!vault |\n  $ANSIBLE_VAULT;1.1;AES256\n    PLAIN:{key_name}:{plaintext}\n"
         )
 
 

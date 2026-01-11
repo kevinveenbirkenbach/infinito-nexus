@@ -161,7 +161,9 @@ class TestInventoryManager(unittest.TestCase):
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                mock.patch("module_utils.manager.inventory.VaultHandler") as mock_vault_cls,
+                mock.patch(
+                    "module_utils.manager.inventory.VaultHandler"
+                ) as mock_vault_cls,
             ):
                 mock_vault = mock_vault_cls.return_value
                 mock_vault.encrypt_string.return_value = (
@@ -229,8 +231,12 @@ class TestInventoryManager(unittest.TestCase):
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                mock.patch("module_utils.manager.inventory.VaultHandler") as mock_vault_cls,
-                mock.patch.object(ValueGenerator, "generate_value", return_value="PLAINVAL"),
+                mock.patch(
+                    "module_utils.manager.inventory.VaultHandler"
+                ) as mock_vault_cls,
+                mock.patch.object(
+                    ValueGenerator, "generate_value", return_value="PLAINVAL"
+                ),
             ):
                 mock_vault = mock_vault_cls.return_value
                 mock_vault.encrypt_string.return_value = fake_snippet
@@ -318,8 +324,12 @@ class TestInventoryManager(unittest.TestCase):
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                mock.patch("module_utils.manager.inventory.VaultHandler") as mock_vault_cls,
-                mock.patch.object(ValueGenerator, "generate_value", return_value="IGNORED"),
+                mock.patch(
+                    "module_utils.manager.inventory.VaultHandler"
+                ) as mock_vault_cls,
+                mock.patch.object(
+                    ValueGenerator, "generate_value", return_value="IGNORED"
+                ),
             ):
                 mock_vault = mock_vault_cls.return_value
                 mock_vault.encrypt_string.side_effect = AssertionError(

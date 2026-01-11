@@ -82,9 +82,9 @@ class TestInventoryManager(unittest.TestCase):
 
         with patch.object(YamlHandler, "load_yaml", return_value={}):
             with self.assertRaises(SystemExit):
-                InventoryManager(role_dir, self.tmpdir / "inventory.yml", "pw", {}).load_application_id(
-                    role_dir
-                )
+                InventoryManager(
+                    role_dir, self.tmpdir / "inventory.yml", "pw", {}
+                ).load_application_id(role_dir)
 
     def test_generate_value_algorithms(self):
         """
@@ -150,7 +150,9 @@ class TestInventoryManager(unittest.TestCase):
         mgr = InventoryManager(role_dir, inv_file, "pw", overrides=overrides)
 
         # Patch ValueGenerator for predictable outputs
-        with patch.object(ValueGenerator, "generate_value", side_effect=lambda alg: f"GEN_{alg}"):
+        with patch.object(
+            ValueGenerator, "generate_value", side_effect=lambda alg: f"GEN_{alg}"
+        ):
             result = mgr.apply_schema()
 
         apps = result["applications"]["testapp"]

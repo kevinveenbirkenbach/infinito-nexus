@@ -1,16 +1,11 @@
 # module_utils/manager/inventory.py
 
-import secrets
-import hashlib
-import bcrypt
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, List
 from module_utils.handler.yaml import YamlHandler
 from module_utils.handler.vault import VaultHandler, VaultScalar
 from module_utils.manager.value_generator import ValueGenerator
-import string
 import sys
-import base64
 
 
 class InventoryManager:
