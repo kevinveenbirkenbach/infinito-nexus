@@ -1,10 +1,16 @@
 - name: "sys-service-runner | Apply state for {{ system_service_run_unit }}"
   block:
-    - name: "Apply state"
+    - name: "Apply state (retry up to 10 times, 60s delay)"
       ansible.builtin.systemd:
         name: "{{ system_service_run_unit }}"
         state: "{{ sys_service_runner_state }}"
       become: true
+      register: result
+      # Retries are required because a compose-managed service might not be ready yet
+      # (e.g., container dependencies / health checks still settling).
+      retries: 10
+      delay: 60
+      until: result is not failed
 
   rescue:
     - name: "systemctl status (diagnostics)"
