@@ -39,8 +39,6 @@
     daemon_reload: true
   become: true
   listen: reload system daemon
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: reexec systemd manager
   # Just execute this during reset, it has potential dangerous side effects
@@ -48,5 +46,3 @@
     daemon_reexec: true
   become: true
   listen: reexec systemd manager
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

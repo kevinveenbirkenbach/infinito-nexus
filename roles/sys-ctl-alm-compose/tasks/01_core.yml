@@ -15,11 +15,12 @@
   include_role:
     name: sys-service
   vars:
-    system_service_timer_enabled:     false
-    system_service_copy_files:        true
-    system_service_tpl_exec_start:    "{{ system_service_script_exec }} %I"
-    system_service_tpl_on_failure:    "" # No on failure needed, because it's anyhow the default on failure procedure
-    system_service_force_linear_sync: false
+    system_service_timer_enabled:         false
+    system_service_copy_files:            true
+    system_service_tpl_exec_start:        "{{ system_service_script_exec }} %I"
+    system_service_tpl_exec_start_post:   '/bin/echo "Success! Send: %I"'
+    system_service_tpl_on_failure:        "" # No on failure needed, because it's anyhow the default on failure procedure
+    system_service_force_linear_sync:     false
 
 - name: Assert '{{ system_service_id }}'
   block:
