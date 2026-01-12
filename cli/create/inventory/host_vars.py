@@ -5,7 +5,6 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Optional
 from .passwords import generate_random_password
-import os
 
 import yaml
 from ruamel.yaml import YAML
