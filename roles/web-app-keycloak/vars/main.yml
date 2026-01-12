@@ -1,12 +1,16 @@
 # General
-application_id:                   "web-app-keycloak"                                                                          # Internal Infinito.Nexus application id 
+application_id:                   "web-app-keycloak"
+entity_name:                      "{{ application_id | get_entity_name }}"
+domain:                           "{{ domains | get_domain(application_id) }}"
 
 # Keycloak
 
 ## General
-KEYCLOAK_URL:                       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+KEYCLOAK_CONTAINER_HOSTNAME:        "{{ entity_name }}"
+KEYCLOAK_DOMAIN:                    "{{ domain }}"
 KEYCLOAK_REALM:                     "{{ OIDC.CLIENT.REALM }}" # This is the name of the default realm which is used by the applications
-KEYCLOAK_REALM_URL:                 "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}"
+KEYCLOAK_URL:                       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+KEYCLOAK_REALM_URL:                 "{{ KEYCLOAK_URL }}/realms/{{ KEYCLOAK_REALM }}"
 KEYCLOAK_DEBUG_ENABLED:             "{{ MODE_DEBUG }}"
 KEYCLOAK_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
 KEYCLOAK_SERVER_INTERNAL_URL:       "http://127.0.0.1:8080"

@@ -375,7 +375,17 @@
       ]
     }
   },
-  "groups": [],
+  "groups": [
+  {
+      "id": "6ea39fb8-d29a-48f7-8baa-c8952ca97650",
+      "name": "roles",
+      "path": "/roles",
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {},
+      "subGroups": []
+    }
+  ],
   "defaultRole": {
     "name": "default-roles-{{ KEYCLOAK_REALM }}",
     "description": "${role_default-roles}",
@@ -477,7 +487,7 @@
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "desktop-secret",
+      "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "/realms/{{ KEYCLOAK_REALM }}/account/*"
       ],
@@ -532,7 +542,7 @@
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "desktop-secret",
+      "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "/realms/{{ KEYCLOAK_REALM }}/account/*"
       ],
@@ -593,7 +603,7 @@
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "desktop-secret",
+      "clientAuthenticatorType": "client-secret",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -635,7 +645,7 @@
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "desktop-secret",
+      "clientAuthenticatorType": "client-secret",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -676,7 +686,7 @@
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "desktop-secret",
+      "clientAuthenticatorType": "client-secret",
       "redirectUris": [],
       "webOrigins": [],
       "notBefore": 0,
@@ -719,7 +729,7 @@
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
-      "clientAuthenticatorType": "desktop-secret",
+      "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "/admin/{{ KEYCLOAK_REALM }}/console/*"
       ],
@@ -1135,7 +1145,7 @@
         {
           "name": "client roles",
           "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-desktop-role-mapper",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
           "consentRequired": false,
           "config": {
             "user.attribute": "foo",
@@ -1473,6 +1483,7 @@
           ]
         }
       },
+{#
       {
         "name": "Trusted Hosts",
         "providerId": "trusted-hosts",
@@ -1487,6 +1498,7 @@
           ]
         }
       },
+#}
       {
         "name": "Full Scope Disabled",
         "providerId": "scope",
@@ -1514,7 +1526,7 @@
       },
       {
         "name": "Allowed Client Scopes",
-        "providerId": "allowed-desktop-templates",
+        "providerId": "allowed-client-templates",
         "subType": "anonymous",
         "subComponents": {},
         "config": {
@@ -1525,7 +1537,7 @@
       },
       {
         "name": "Allowed Client Scopes",
-        "providerId": "allowed-desktop-templates",
+        "providerId": "allowed-client-templates",
         "subType": "authenticated",
         "subComponents": {},
         "config": {
@@ -1926,12 +1938,12 @@
     {
       "alias": "clients",
       "description": "Base authentication for clients",
-      "providerId": "desktop-flow",
+      "providerId": "client-flow",
       "topLevel": true,
       "builtIn": true,
       "authenticationExecutions": [
         {
-          "authenticator": "desktop-secret",
+          "authenticator": "client-secret",
           "authenticatorFlow": false,
           "requirement": "ALTERNATIVE",
           "priority": 10,
@@ -1939,7 +1951,7 @@
           "userSetupAllowed": false
         },
         {
-          "authenticator": "desktop-jwt",
+          "authenticator": "client-jwt",
           "authenticatorFlow": false,
           "requirement": "ALTERNATIVE",
           "priority": 20,
@@ -1947,7 +1959,7 @@
           "userSetupAllowed": false
         },
         {
-          "authenticator": "desktop-secret-jwt",
+          "authenticator": "client-secret-jwt",
           "authenticatorFlow": false,
           "requirement": "ALTERNATIVE",
           "priority": 30,
@@ -1955,7 +1967,7 @@
           "userSetupAllowed": false
         },
         {
-          "authenticator": "desktop-x509",
+          "authenticator": "client-x509",
           "authenticatorFlow": false,
           "requirement": "ALTERNATIVE",
           "priority": 40,
