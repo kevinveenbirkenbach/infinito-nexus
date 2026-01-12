@@ -8,3 +8,4 @@ MODE_RESET:   false                       # Cleans up all Infinito.Nexus files. 
 MODE_CLEANUP: true                        # Cleanup unused files and configurations
 MODE_ASSERT:  "{{ MODE_DEBUG  | bool }}"  # Executes validation tasks during the run.
 MODE_BACKUP:  true                        # Executes the Backup before the deployment
+MODE_TEST:    false                       # If set to true then the test routines will be triggered 
