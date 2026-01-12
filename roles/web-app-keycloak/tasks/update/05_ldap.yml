@@ -1,5 +1,3 @@
-# roles/web-app-keycloak/tasks/update/05_ldap.yml
-
 - name: "Update REALM settings (merge LDAP component .config)"
   keycloak_kcadm_update:
     object_kind: "component"

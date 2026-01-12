@@ -26,6 +26,12 @@
 - name: "Load Mail Update routines for '{{ application_id }} - master'"
   include_tasks: update/03_mail_master.yml
 
+- name: Ensure jq is installed
+  become: true
+  package:
+    name: jq
+    state: present
+
 - name: "Load RBAC Update routines for '{{ application_id }}'"
   include_tasks: update/04_rbac_client_scope.yml
 
