@@ -1,5 +1,5 @@
-# Load memberOf module (cn=config)
+# Load refint module (cn=config)
 dn: {{ OPENLDAP_MODULE_DN }}
 changetype: modify
 add: olcModuleLoad
-olcModuleLoad: memberof
+olcModuleLoad: refint

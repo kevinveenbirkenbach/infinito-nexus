@@ -9,8 +9,7 @@
         application_id: svc-db-openldap
   when:
     - SYS_STK_BACK_STATEFULL_LDAP_ENABLED | bool
-    - run_once_svc_db_openldap is not defined
-   
+    - run_once_svc_db_openldap is not defined   # pass test_run_once_suffix_matches_role   
 
 - name: "For '{{ application_id }}': Set database_application_id (Needed due to lazzy loading issue)"
   set_fact:

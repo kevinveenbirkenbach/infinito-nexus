@@ -2,12 +2,12 @@
 - name: "Setup docker network for {{ application_id }}"
   include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
-    docker_network_name:    "{{ OPENLDAP_NETWORK }}"
-    docker_network_subnet:  "{{ networks.local[application_id].subnet }}"
+    docker_network_name: "{{ OPENLDAP_NETWORK }}"
+    docker_network_subnet: "{{ networks.local[application_id].subnet }}"
 
 - name: Create {{ domains | get_domain(application_id) }}.conf if LDAP is exposed to internet
   template:
-    src:  "nginx.stream.conf.j2" 
+    src: "nginx.stream.conf.j2"
     dest: "{{ NGINX.DIRECTORIES.STREAMS }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty
   when: OPENLDAP_NETWORK_SWITCH_PUBLIC | bool
@@ -32,12 +32,72 @@
     - OPENLDAP_NETWORK_SWITCH_LOCAL | bool
     - OPENLDAP_PROVISION_CREDENTIALS | bool
 
-- name: "create directory {{ OPENLDAP_LDIF_PATH_HOST }}{{ item }}"
+- name: "Create LDIF directories under {{ OPENLDAP_LDIF_PATH_HOST }}"
   file:
     path: "{{ OPENLDAP_LDIF_PATH_HOST }}{{ item }}"
     state: directory
     mode: "0755"
   loop: "{{ OPENLDAP_LDIF_TYPES }}"
+
+- name: Query cn=config module lists
+  shell: >
+    docker exec {{ OPENLDAP_CONTAINER }}
+    ldapsearch -Y EXTERNAL -H ldapi:/// -LLL -b cn=config "(objectClass=olcModuleList)" dn
+  register: ldap_modules_dns
+  changed_when: false
+
+- name: Set OPENLDAP_MODULE_DN (prefer cn=module{0}, fallback first module list)
+  set_fact:
+    OPENLDAP_MODULE_DN: >-
+      {{
+        (
+          ldap_modules_dns.stdout_lines
+          | select('match', '^dn: ')
+          | map('regex_replace', '^dn: ', '')
+          | list
+        )
+        | select('search', 'cn=module\\{0\\},cn=config')
+        | list
+        | first
+        | default(
+            (
+              ldap_modules_dns.stdout_lines
+              | select('match', '^dn: ')
+              | map('regex_replace', '^dn: ', '')
+              | list
+              | first
+            )
+          )
+      }}
+
+- name: Query available LDAP databases
+  shell: >
+    docker exec {{ OPENLDAP_CONTAINER }}
+    ldapsearch -Y EXTERNAL -H ldapi:/// -LLL -b cn=config "(olcDatabase=*)" dn
+  register: ldap_databases
+  changed_when: false
+
+- name: Set OPENLDAP_DATA_BACKEND_DN (mdb preferred, hdb fallback)
+  set_fact:
+    OPENLDAP_DATA_BACKEND_DN: >-
+      {{
+        (
+          ldap_databases.stdout_lines
+          | select('search', '^dn: olcDatabase=.*mdb')
+          | map('regex_replace', '^dn: ', '')
+          | list
+          | first
+        )
+        | default(
+          (
+            ldap_databases.stdout_lines
+            | select('search', '^dn: olcDatabase=.*hdb')
+            | map('regex_replace', '^dn: ', '')
+            | list
+            | first
+          )
+        )
+      }}
 
 - name: "Import LDIF Configuration"
   include_tasks: _ldifs_creation.yml
