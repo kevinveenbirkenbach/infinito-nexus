@@ -2,6 +2,9 @@
 - name: "For '{{ application_id }}': Load OpenLDAP"
   include_role:
     name: svc-db-openldap
+  vars:
+    # Required to overwrite
+    application_id: svc-db-openldap
   when:
     - SYS_STK_BACK_STATEFULL_LDAP_ENABLED | bool
     - run_once_svc_db_openldap is not defined

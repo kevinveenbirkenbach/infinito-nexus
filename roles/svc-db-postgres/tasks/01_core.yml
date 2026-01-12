@@ -10,10 +10,11 @@
     docker_network_subnet:          "{{ POSTGRES_SUBNET }}"
     docker_compose_flush_handlers:  true
 
-- name: Ensure psycopg2 is available for the Ansible module interpreter
-  ansible.builtin.pip:
-    name: psycopg2-binary
-    state: present
-    extra_args: "--disable-pip-version-check"
+- name: Install 'psycopg2-binary'
+  include_role:
+    name: sys-pip-install
+  vars:
+    package_name: 'psycopg2-binary'
+    global_install: true
 
 - include_tasks: utils/once/flag.yml
