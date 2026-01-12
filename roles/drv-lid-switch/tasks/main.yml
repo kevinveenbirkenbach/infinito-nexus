@@ -1,9 +1,10 @@
 ---
-- name: "pkgmgr install"
+- name: Install setup-hibernate via pip (system-wide)
   include_role:
-    name: pkgmgr-install
+    name: sys-pip-install
   vars:
     package_name: setup-hibernate
+    global_install: true
 
 - name: Setup hibernate
   command: setup-hibernate --non-interactive
