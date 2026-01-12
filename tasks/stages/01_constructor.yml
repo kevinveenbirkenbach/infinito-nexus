@@ -1,4 +1,9 @@
 ---
+- name: Debug group names for this host
+  debug:
+    var: group_names
+  when: MODE_DEBUG | bool
+
 - name: Detect container environment (systemd-detect-virt)
   ansible.builtin.command: systemd-detect-virt --container
   register: detect_container
