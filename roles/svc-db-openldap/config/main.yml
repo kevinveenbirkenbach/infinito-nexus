@@ -8,17 +8,17 @@ docker:
       enabled: true
       shared: true
     openldap:     
-      image:      "bitnamilegacy/openldap"
-      name:       "openldap"
-      version:    "latest"
-      cpus: 1.25
+      image:            "bitnamilegacy/openldap"
+      name:             "openldap"
+      version:          "latest"
+      cpus:             1.25
       # Optimized up to 5k user
-      mem_reservation: 1g
-      mem_limit: 1.5g
-      pids_limit: 1024
-  network:        "openldap"
+      mem_reservation:  1g
+      mem_limit:        1.5g
+      pids_limit:       1024
+  network:              "openldap"
   volumes:
-    data:         "openldap_data"
+    data:               "openldap_data"
 provision:           
 # Here it's possible to define what should be imported and updated.
 # It doesn't make sense to let  the import run everytime because its very time consuming

@@ -3,9 +3,6 @@
     docker exec -i {{ OPENLDAP_CONTAINER }} ldapmodify -Y EXTERNAL -H ldapi:/// -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/01_member_of_configuration.ldif' ] | path_join }}"
   listen:
     - "Import configuration LDIF files"
-  # @todo Remove the following ignore errors when setting up a new server
-  # Just here because debugging would take to much time
-  ignore_errors: true
 
 - name: Refint Module Activation for OpenLDAP
   shell: >
@@ -14,9 +11,6 @@
     - "Import configuration LDIF files"
   register: ldapadd_result
   failed_when: ldapadd_result.rc not in [0, 68]
-  # @todo Remove the following ignore errors when setting up a new server
-  # Just here because debugging would take to much time
-  ignore_errors: true
 
 - name: Refint Overlay Configuration for OpenLDAP
   shell: >
@@ -25,9 +19,6 @@
     - "Import configuration LDIF files"
   register: ldapadd_result
   failed_when: ldapadd_result.rc not in [0, 68]
-  # @todo Remove the following ignore errors when setting up a new server
-  # Just here because debugging would take to much time
-  ignore_errors: true
 
 - name: "Import users, groups, etc. to LDAP"
   shell: >
