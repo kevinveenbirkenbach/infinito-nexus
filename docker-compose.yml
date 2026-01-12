@@ -30,6 +30,9 @@ services:
       network: host
       args:
         NIX_CONFIG: ${NIX_CONFIG}
+    security_opt:
+      # Required to be set for local testing on Manjaro systems
+      - apparmor=unconfined
     pull_policy: never 
     depends_on:
       - coredns
