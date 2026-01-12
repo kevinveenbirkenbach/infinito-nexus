@@ -50,33 +50,16 @@
 - name: flush LDIF handlers
   meta: flush_handlers
 
-- name: Install OS deps for python-ldap (build + runtime)
+- name: Install python-ldap via OS package manager
   ansible.builtin.package:
-    name: "{{ python_ldap_os_deps }}"
+    name: "{{ python_ldap_pkg }}"
     state: present
   vars:
-    python_ldap_os_deps: >-
+    python_ldap_pkg: >-
       {{
         (ansible_facts.distribution == 'Archlinux')
-        | ternary(
-            ['base-devel','python','libldap','openldap','cyrus-sasl','openssl','libffi'],
-            (ansible_facts.os_family == 'Debian')
-            | ternary(
-                ['gcc','python3-dev','libldap2-dev','libsasl2-dev','libssl-dev','libffi-dev'],
-                (ansible_facts.os_family == 'RedHat')
-                | ternary(
-                    ['gcc','python3-devel','openldap-devel','cyrus-sasl-devel','openssl-devel','libffi-devel'],
-                    []
-                )
-            )
-        )
+        | ternary('python-ldap', 'python3-ldap')
       }}
-
-- name: Ensure python-ldap is installed for the Ansible interpreter
-  include_role:
-    name: sys-pip-install
-  vars:
-    package_name: python-ldap
 
 - name: Sanity check python-ldap import (verbose)
   ansible.builtin.shell: |

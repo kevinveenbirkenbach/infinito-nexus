@@ -128,9 +128,6 @@ def ensure_host_vars_file(
     if host in local_hosts and "ansible_connection" not in data:
         data["ansible_connection"] = "local"
 
-    if host in local_hosts and "ansible_python_interpreter" not in data:
-        data["ansible_python_interpreter"] = os.environ.get("PYTHON", sys.executable)
-
     if primary_domain is not None and "DOMAIN_PRIMARY" not in data:
         data["DOMAIN_PRIMARY"] = primary_domain
 
