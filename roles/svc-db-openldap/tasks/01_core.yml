@@ -59,7 +59,7 @@
       {{
         (ansible_facts.distribution == 'Archlinux')
         | ternary(
-            ['base-devel','python','openldap','cyrus-sasl','openssl','libffi'],
+            ['base-devel','python','libldap','openldap','cyrus-sasl','openssl','libffi'],
             (ansible_facts.os_family == 'Debian')
             | ternary(
                 ['gcc','python3-dev','libldap2-dev','libsasl2-dev','libssl-dev','libffi-dev'],
