@@ -1,2 +1,3 @@
 DATABASE_VARS_FILE:                   "{{ playbook_dir }}/roles/sys-svc-rdbms/vars/database.yml"
-SYS_STK_BACK_STATEFULL_LDAP_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.ldap.shared', False) | bool }}"
+SYS_STK_BACK_STATEFULL_LDAP_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False) | bool }}"
+SYS_STK_BACK_STATEFULL_LDAP_SHARED:   "{{ applications | get_app_conf(application_id, 'docker.services.ldap.shared', False) | bool }}"

@@ -1,15 +1,19 @@
 # run_once_sys_stk_back_stateful: disabled
 
-- block: 
-    # Required to prevent when condition overwritte
-    - name: "For '{{ application_id }}': Load OpenLDAP"
-      include_role:
-        name: svc-db-openldap
-      vars:
-        application_id: svc-db-openldap
+- block:
+  - name: Compute LDAP load flag (enabled && shared)
+    ansible.builtin.set_fact:
+      SYS_STK_BACK_STATEFULL_LOAD_LDAP: "{{ (SYS_STK_BACK_STATEFULL_LDAP_ENABLED | bool) and (SYS_STK_BACK_STATEFULL_LDAP_SHARED | bool) }}"
+
+  - name: "For '{{ application_id }}': Load OpenLDAP"
+    include_role:
+      name: svc-db-openldap
+    vars:
+      application_id: svc-db-openldap
+    when:
+      - SYS_STK_BACK_STATEFULL_LOAD_LDAP | bool
   when:
-    - SYS_STK_BACK_STATEFULL_LDAP_ENABLED | bool
-    - run_once_svc_db_openldap is not defined   # pass test_run_once_suffix_matches_role   
+    - run_once_svc_db_openldap is not defined # pass test_run_once_suffix_matches_role   
 
 - name: "For '{{ application_id }}': Set database_application_id (Needed due to lazzy loading issue)"
   set_fact:
