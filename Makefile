@@ -50,13 +50,15 @@ PYTHONPATH              ?= .
 
 # Overwrite defaults
 ifeq ($(GITHUB_ACTIONS),true)
-  # -------- Real GitHub Actions CI --------
-  INFINITO_PULL_POLICY ?= always
-  INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):ci-$(GITHUB_SHA)
-  INFINITO_NO_BUILD ?= 1
-  export INFINITO_NO_BUILD
-  export INFINITO_PULL_POLICY
-  export INFINITO_IMAGE
+	ifneq ($(ACT),true)
+	# -------- Real GitHub Actions CI --------
+	INFINITO_PULL_POLICY ?= always
+	INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):ci-$(GITHUB_SHA)
+	INFINITO_NO_BUILD ?= 1
+	export INFINITO_NO_BUILD
+	export INFINITO_PULL_POLICY
+	export INFINITO_IMAGE
+	endif
 endif
 
 # Distro
