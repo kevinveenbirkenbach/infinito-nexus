@@ -34,3 +34,57 @@ SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in 
 WORKSTATION_USER: biber
 
 ansible_python_interpreter: /usr/bin/python3
+
+# Uncomment the following lines to speed up debugging:
+
+# SYS_SERVICE_SUPPRESS_FLUSH:
+# - sys-ctl-rpr-btrfs-balancer
+# - sys-ctl-hlth-journalctl
+# - sys-ctl-bkp-docker-2-loc
+# - sys-ctl-cln-faild-bkps
+# - sys-ctl-cln-disc-space
+# - sys-ctl-rpr-docker-hard
+# - sys-ctl-rpr-docker-soft
+
+# # Performance:
+# run_once_docker_compose:    true
+# run_once_svc_prx_openresty: true
+# run_once_sys_svc_webserver: true
+
+# # Services
+
+# ## Alarm
+# run_once_sys_ctl_alm_compose: true
+
+# ## Backup
+# run_once_sys_ctl_bkp_docker_2_loc: true
+
+# ## Cleanup
+# run_once_sys_ctl_cln_faild_bkps: true
+# run_once_sys_ctl_cln_disc_space: true
+# run_once_sys_ctl_cln_anon_volumes: true
+
+# ## Repair
+# run_once_sys_ctl_rpr_docker_hard: true
+# run_once_sys_ctl_rpr_docker_soft: true
+# run_once_sys_ctl_rpr_btrfs_balancer: true
+
+# ## Health
+# run_once_sys_ctl_hlth_msmtp: true
+# run_once_sys_ctl_hlth_journalctl: true
+# run_once_sys_ctl_hlth_docker_container: true
+# run_once_sys_ctl_hlth_webserver: true
+# run_once_sys_ctl_hlth_csp: true
+# run_once_sys_ctl_hlth_disc_space: true
+
+# ## Maintain
+# run_once_sys_ctl_mtn_cert_renew: true
+
+# ## Backend
+# run_once_sys_svc_docker: true
+# run_once_svc_db_mariadb: true
+
+# # Front
+# run_once_sys_svc_dns:         true
+# run_once_web_svc_cdn:         true
+# run_once_web_svc_logout:      true
