@@ -1,4 +1,64 @@
 ###############################################################################
+# 0) Ensure base tree exists (suffix + OUs)
+###############################################################################
+- name: Ensure LDAP root (suffix) entry exists
+  community.general.ldap_entry:
+    dn:          "{{ LDAP.DN.ROOT }}"
+    server_uri:  "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:     "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:     "{{ OPENLDAP_BIND_PW }}"
+    objectClass:
+      - top
+      - dcObject
+      - organization
+    attributes:
+      dc: "{{ (LDAP.DN.ROOT | regex_search('dc=([^,]+)', '\\1')) | first | default('infinito') }}"
+      o:  "{{ (LDAP.DN.ROOT | regex_search('dc=([^,]+)', '\\1')) | first | default('infinito') }}"
+    state: present
+
+- name: Ensure people OU exists
+  community.general.ldap_entry:
+    dn:          "{{ LDAP.DN.OU.USERS }}"
+    server_uri:  "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:     "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:     "{{ OPENLDAP_BIND_PW }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: people
+      description: "People container"
+    state: present
+
+- name: Ensure groups OU exists
+  community.general.ldap_entry:
+    dn:          "{{ LDAP.DN.OU.GROUPS }}"
+    server_uri:  "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:     "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:     "{{ OPENLDAP_BIND_PW }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: groups
+      description: "Groups container"
+    state: present
+
+- name: Ensure roles OU exists
+  community.general.ldap_entry:
+    dn:          "{{ LDAP.DN.OU.ROLES }}"
+    server_uri:  "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:     "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:     "{{ OPENLDAP_BIND_PW }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: roles
+      description: "Container for application access profiles"
+    state: present
+
+###############################################################################
 # 1) Create the LDAP entry if it does not yet exist
 ###############################################################################
 - name: Ensure LDAP users exist
@@ -42,15 +102,3 @@
   loop: "{{ OPENLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
-
-- name: "Ensure container for application roles exists"
-  community.general.ldap_entry:
-    dn: "{{ LDAP.DN.OU.ROLES }}"
-    server_uri: "{{ OPENLDAP_SERVER_URI }}"
-    bind_dn:  "{{ OPENLDAP_BIND_DN }}"
-    bind_pw:  "{{ OPENLDAP_BIND_PW }}"
-    objectClass: organizationalUnit
-    attributes:
-      ou: roles
-      description: Container for application access profiles
-    state: present

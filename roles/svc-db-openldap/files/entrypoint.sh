@@ -1,96 +1,170 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# -----------------------------------------------------------------------------
-# Config (bootstrap only)
-# -----------------------------------------------------------------------------
 : "${LDAP_SUFFIX:=dc=infinito,dc=localhost}"
 : "${LDAP_ROOT_DN:=cn=admin,${LDAP_SUFFIX}}"
 : "${LDAP_ROOT_PW:=changeme}"
 
 SLAPD_D_DIR="/etc/ldap/slapd.d"
 DB_DIR="/var/lib/ldap"
+TMP_CONF="/tmp/slapd.conf"
+
+log() { echo "[openldap] $*"; }
+fatal() { echo "[openldap][FATAL] $*" >&2; exit 1; }
 
 bootstrap_needed() {
   [ ! -d "${SLAPD_D_DIR}" ] || [ -z "$(ls -A "${SLAPD_D_DIR}" 2>/dev/null)" ]
 }
 
+has_cn_config() {
+  [ -d "${SLAPD_D_DIR}/cn=config" ]
+}
+
+has_mdb_files() {
+  [ -f "${DB_DIR}/data.mdb" ] || [ -f "${DB_DIR}/data.mdb.lock" ]
+}
+
 detect_module_path() {
-  # Common Debian paths:
-  # - /usr/lib/ldap
-  # - /usr/lib/x86_64-linux-gnu/ldap
-  # (also other multiarch variants)
   if [ -d /usr/lib/ldap ]; then
     echo "/usr/lib/ldap"
     return 0
   fi
-
   local p
   p="$(ls -d /usr/lib/*/ldap 2>/dev/null | head -n1 || true)"
   if [ -n "${p}" ] && [ -d "${p}" ]; then
     echo "${p}"
     return 0
   fi
-
-  # Fallback: keep old default (won't crash bootstrap, but overlays might fail)
   echo "/usr/lib/ldap"
 }
 
-write_minimal_config() {
-  local hash
-  local module_path
-  hash="$(slappasswd -s "${LDAP_ROOT_PW}")"
-  module_path="$(detect_module_path)"
-
-  rm -rf "${SLAPD_D_DIR:?}"/*
-  mkdir -p "${SLAPD_D_DIR}" /run/slapd "${DB_DIR}"
-
-  # Optional log (useful for debugging)
-  echo "[openldap] detected olcModulePath: ${module_path}"
-
-  # Global + module list
-  cat <<EOF | slapadd -n 0 -F "${SLAPD_D_DIR}"
-dn: cn=config
-objectClass: olcGlobal
-cn: config
-olcPidFile: /run/slapd/slapd.pid
-olcArgsFile: /run/slapd/slapd.args
-
-dn: cn=module{0},cn=config
-objectClass: olcModuleList
-cn: module{0}
-olcModulePath: ${module_path}
-EOF
-
-  # Core schemas (ldif form exists on Debian)
-  slapadd -n 0 -F "${SLAPD_D_DIR}" -l /etc/ldap/schema/core.ldif
-  slapadd -n 0 -F "${SLAPD_D_DIR}" -l /etc/ldap/schema/cosine.ldif
-  slapadd -n 0 -F "${SLAPD_D_DIR}" -l /etc/ldap/schema/inetorgperson.ldif
-
-  # MDB database
-  cat <<EOF | slapadd -n 0 -F "${SLAPD_D_DIR}"
-dn: olcDatabase={1}mdb,cn=config
-objectClass: olcDatabaseConfig
-objectClass: olcMdbConfig
-olcDatabase: {1}mdb
-olcSuffix: ${LDAP_SUFFIX}
-olcRootDN: ${LDAP_ROOT_DN}
-olcRootPW: ${hash}
-olcDbDirectory: ${DB_DIR}
-olcDbMaxSize: 1073741824
-olcAccess: to * by dn.exact="${LDAP_ROOT_DN}" manage by * break
-EOF
-
-  chown -R openldap:openldap /run/slapd "${DB_DIR}" "${SLAPD_D_DIR}"
+detect_schema_dir() {
+  if [ -d /etc/ldap/schema ]; then
+    echo "/etc/ldap/schema"
+    return 0
+  fi
+  echo "/etc/ldap/schema"
 }
 
+write_slapd_conf() {
+  local hash module_path schema_dir
+  hash="$(slappasswd -s "${LDAP_ROOT_PW}")"
+  module_path="$(detect_module_path)"
+  schema_dir="$(detect_schema_dir)"
+
+  cat > "${TMP_CONF}" <<EOF
+include         ${schema_dir}/core.schema
+include         ${schema_dir}/cosine.schema
+include         ${schema_dir}/inetorgperson.schema
+
+modulepath      ${module_path}
+moduleload      back_mdb
+
+pidfile         /run/slapd/slapd.pid
+argsfile        /run/slapd/slapd.args
+
+# cn=config access via ldapi EXTERNAL
+access to *
+  by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+  by * break
+
+database        mdb
+maxsize         1073741824
+suffix          "${LDAP_SUFFIX}"
+rootdn          "${LDAP_ROOT_DN}"
+rootpw          ${hash}
+directory       "${DB_DIR}"
+
+access to *
+  by dn.exact="${LDAP_ROOT_DN}" manage
+  by * break
+EOF
+}
+
+bootstrap_cn_config_via_slaptest() {
+  rm -rf "${SLAPD_D_DIR:?}/"*
+  mkdir -p "${SLAPD_D_DIR}" /run/slapd "${DB_DIR}"
+
+  # important: make sure openldap can read/write everything afterwards
+  chown -R openldap:openldap /run/slapd "${DB_DIR}" "${SLAPD_D_DIR}"
+
+  write_slapd_conf
+
+  log "bootstrap slapd.d via slaptest for suffix ${LDAP_SUFFIX}"
+  slaptest -f "${TMP_CONF}" -F "${SLAPD_D_DIR}" >/dev/null
+
+  # slaptest creates root-owned files → fix
+  chown -R openldap:openldap "${SLAPD_D_DIR}"
+
+  if ! has_cn_config; then
+    log "slaptest did not generate cn=config; listing:"
+    ls -la "${SLAPD_D_DIR}" || true
+    fatal "cn=config missing after slaptest"
+  fi
+
+  log "cn=config created successfully"
+}
+
+init_mdb_files_if_needed() {
+  if has_mdb_files; then
+    log "data.mdb already exists; skipping MDB init"
+    return 0
+  fi
+
+  log "initializing MDB files via slapadd -n 1 (creates data.mdb)"
+  mkdir -p "${DB_DIR}"
+  chown -R openldap:openldap "${DB_DIR}"
+
+  local dc
+  dc="$(echo "${LDAP_SUFFIX}" | awk -F'[=,]' '{print $2}' | head -n1)"
+  dc="${dc:-infinito}"
+
+  cat <<EOF | slapadd -F "${SLAPD_D_DIR}" -n 1
+dn: ${LDAP_SUFFIX}
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+o: ${dc}
+dc: ${dc}
+EOF
+
+  # After slapadd, ensure permissions are correct (locks are sensitive)
+  chown -R openldap:openldap "${DB_DIR}"
+  chmod 700 "${DB_DIR}" || true
+
+  if ! has_mdb_files; then
+    fatal "MDB files were not created under ${DB_DIR}"
+  fi
+
+  log "MDB files initialized"
+}
+
+log "starting entrypoint (suffix=${LDAP_SUFFIX}, rootdn=${LDAP_ROOT_DN})"
+
+# Always ensure runtime dirs exist and are writable
+mkdir -p /run/slapd "${DB_DIR}" "${SLAPD_D_DIR}"
+chown -R openldap:openldap /run/slapd "${DB_DIR}" "${SLAPD_D_DIR}"
+
 if bootstrap_needed; then
-  echo "[openldap] bootstrap slapd.d + mdb for suffix ${LDAP_SUFFIX}"
-  write_minimal_config
+  bootstrap_cn_config_via_slaptest
+else
+  if has_cn_config; then
+    log "slapd.d already present; cn=config found"
+  else
+    log "slapd.d present but cn=config missing -> rebuilding"
+    bootstrap_cn_config_via_slaptest
+  fi
 fi
 
+init_mdb_files_if_needed
+
+# Final permission sweep (this is often the real fix)
+chown -R openldap:openldap /run/slapd "${DB_DIR}" "${SLAPD_D_DIR}"
+chmod 700 "${DB_DIR}" || true
+
+log "starting slapd (foreground; drop privileges to openldap)"
 exec /usr/sbin/slapd \
   -F "${SLAPD_D_DIR}" \
-  -u openldap -g openldap \
   -h "ldap:/// ldapi:///" \
-  -d 0
+  -d 0 \
+  -u openldap -g openldap
