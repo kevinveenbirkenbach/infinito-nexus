@@ -95,11 +95,11 @@ RUN set -euo pipefail; \
 WORKDIR /
 
 COPY scripts/docker/healthcheck.sh /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh
 
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
+HEALTHCHECK --interval=5s --timeout=5s --start-period=30s --retries=20 \
+  CMD /usr/local/bin/healthcheck.sh
 
 # IMPORTANT: default to systemd as PID 1
 CMD ["/sbin/init"]
-
-HEALTHCHECK --interval=5s --timeout=5s --start-period=30s --retries=20 \
-  CMD /usr/local/bin/healthcheck.sh

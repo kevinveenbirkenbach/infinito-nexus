@@ -123,7 +123,7 @@ class Compose:
 
         return cid
 
-    def wait_for_healthy(self, *, timeout_s: int = 120) -> None:
+    def wait_for_healthy(self, *, timeout_s: int = 200) -> None:
         """
         Wait until infinito container is marked healthy by Docker.
         On timeout: print last 200 log lines for debugging.
