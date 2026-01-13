@@ -134,7 +134,6 @@ def _iter_files(base: str, *, exts: Tuple[str, ...]):
                 yield os.path.join(root, fn)
 
 
-
 def _is_filter_plugins_dir(path: str) -> bool:
     return "filter_plugins" in os.path.normpath(path).split(os.sep)
 

@@ -1,10 +1,106 @@
-name: Test Infinito.Nexus Deploy (universal-rest)
+name: Test Infinito.Nexus Deploy (workstation)
 
 on:
   workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  MODE: workstation
+  DISTROS: "arch debian ubuntu fedora centos"
+  ONLY_APP: ""
+  MISSING_ONLY: "true"
+  KEEP_STACK: "true"
+  NIX_CONFIG: |
+    access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  rest:
-    uses: ./.github/workflows/_deploy-per-app.yml
-    with:
-      mode: rest
+  workstation:
+    name: deploy:workstation (per app, all distros)
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install jq
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Start stack for discovery (arch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export INFINITO_DISTRO="arch"
+          make up
+
+      - name: Discover apps (JSON)
+        id: discover
+        shell: bash
+        run: |
+          set -euo pipefail
+          apps="$(MODE="${MODE}" scripts/ci/discover.sh)"
+          [[ -n "${apps}" ]] || apps='[]'
+
+          if [[ -n "${ONLY_APP}" ]]; then
+            apps="$(jq -nc --arg a "${ONLY_APP}" '[ $a ]')"
+          fi
+
+          echo "apps=${apps}" >> "$GITHUB_OUTPUT"
+          echo "apps_json=${apps}"
+
+      - name: Deploy each app (matrix via bash loop)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          normalize_bool() {
+            case "${1:-}" in
+              true|True|TRUE|1) echo "true" ;;
+              false|False|FALSE|0) echo "false" ;;
+              *) echo "true" ;;
+            esac
+          }
+
+          apps_json='${{ steps.discover.outputs.apps }}'
+          readarray -t apps < <(echo "${apps_json}" | jq -r '.[]')
+
+          export MODE="workstation"
+          export DISTROS="${DISTROS}"
+          export MISSING_ONLY="$(normalize_bool "${MISSING_ONLY}")"
+          export KEEP_STACK="$(normalize_bool "${KEEP_STACK}")"
+
+          for app in "${apps[@]}"; do
+            export APP="${app}"
+            scripts/ci/deploy-one-app.sh
+          done
+
+      - name: Show last 200 chars on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "=== DEBUG: logs ==="
+          ls -la logs || true
+          echo
+
+          shopt -s nullglob
+          for f in logs/*.log; do
+            echo "=== tail -c 200 $f ==="
+            tail -c 200 "$f" || true
+            echo
+          done
+
+      - name: Upload deploy logs
+        if: ${{ always() && env.ACT != 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-logs-workstation
+          path: logs/
+          if-no-files-found: warn
+          retention-days: 14

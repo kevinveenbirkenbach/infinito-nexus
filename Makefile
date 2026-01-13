@@ -204,12 +204,9 @@ test-integration: build-missing
 
 test-deploy:
 	@echo "=== act: deploy $(TEST_DEPLOY_TYPE) (all apps, distro=$(INFINITO_DISTRO)) ==="
+	@wf=".github/workflows/test-deploy-$(TEST_DEPLOY_TYPE).yml"; \
 	act workflow_dispatch \
-		-W .github/workflows/_deploy-per-app.yml \
-		--input mode:"$(TEST_DEPLOY_TYPE)" \
-		--input distros:"$(INFINITO_DISTRO)" \
-		--input missing_only:"true" \
-		--input keep_stack_on_failure:"true" \
+		-W "$$wf" \
 		--container-options "--privileged" \
 		--network host \
 		--concurrent-jobs 1
@@ -217,13 +214,11 @@ test-deploy:
 test-deploy-app:
 	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set"; exit 1; fi
 	@echo "=== act: deploy $(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
+	@wf=".github/workflows/test-deploy-$(TEST_DEPLOY_TYPE).yml"; \
 	act workflow_dispatch \
-		-W .github/workflows/_deploy-per-app.yml \
-		--input mode:"$(TEST_DEPLOY_TYPE)" \
-		--input only_app:"$(APP)" \
-		--input distros:"$(INFINITO_DISTRO)" \
-		--input missing_only:"true" \
-		--input keep_stack_on_failure:"true" \
+		-W "$$wf" \
+		--env ONLY_APP="$(APP)" \
+		--env DISTROS="$(INFINITO_DISTRO)" \
 		--container-options "--privileged" \
 		--network host \
 		--concurrent-jobs 1
