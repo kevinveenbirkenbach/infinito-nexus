@@ -1,9 +1,6 @@
 ---
 - name: Initialize docker
   include_tasks: 02_docker.yml
-  vars:
-    docker_network_name: "{{ OPENLDAP_NETWORK }}"
-    docker_network_subnet: "{{ networks.local[application_id].subnet }}"
 
 - name: Create {{ domains | get_domain(application_id) }}.conf if LDAP is exposed to internet
   template:
@@ -50,36 +47,17 @@
     mode: "0755"
   loop: "{{ OPENLDAP_LDIF_TYPES }}"
 
-- name: Query cn=config module lists
+- name: Set OPENLDAP_MODULE_DN (from filesystem)
   shell: >
     docker exec {{ OPENLDAP_CONTAINER }}
-    ldapsearch -Q -Y EXTERNAL -H {{ OPENLDAP_CONFIG_URI }} -LLL -b cn=config "(objectClass=olcModuleList)" dn
-  register: ldap_modules_dns
+    sh -lc 'grep -m1 "^dn: " /etc/ldap/slapd.d/cn=config/cn=module{0}.ldif | sed "s/^dn: //"'
+  register: openldap_module_dn
   changed_when: false
+  failed_when: openldap_module_dn.rc != 0 or (openldap_module_dn.stdout | trim) == ""
 
-- name: Set OPENLDAP_MODULE_DN (prefer cn=module{0}, fallback first module list)
+- name: Set OPENLDAP_MODULE_DN fact
   set_fact:
-    OPENLDAP_MODULE_DN: >-
-      {{
-        (
-          ldap_modules_dns.stdout_lines
-          | select('match', '^dn: ')
-          | map('regex_replace', '^dn: ', '')
-          | list
-        )
-        | select('search', 'cn=module\\{0\\},cn=config')
-        | list
-        | first
-        | default(
-            (
-              ldap_modules_dns.stdout_lines
-              | select('match', '^dn: ')
-              | map('regex_replace', '^dn: ', '')
-              | list
-              | first
-            )
-          )
-      }}
+    OPENLDAP_MODULE_DN: "{{ openldap_module_dn.stdout | trim }}"
 
 - name: Query available LDAP databases
   shell: >

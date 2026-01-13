@@ -1,7 +1,8 @@
-- name: Load Docker
+- name: "include docker-compose role"
   include_role:
-    name: sys-svc-docker
-  when: run_once_sys_svc_docker is not defined
+    name: docker-compose
+  vars:
+    docker_compose_flush_handlers: false
 
 - name: Create docker network
   community.docker.docker_network:
@@ -9,12 +10,9 @@
     state: present
     ipam_config:
       - subnet: "{{ docker_network_subnet }}"
-
-- name: "include docker-compose role"
-  include_role:
-    name: docker-compose
   vars:
-    docker_compose_flush_handlers: false
+    docker_network_name: "{{ OPENLDAP_NETWORK }}"
+    docker_network_subnet: "{{ networks.local[application_id].subnet }}"
 
 - name: Copy OpenLDAP image files to instance dir
   ansible.builtin.copy:
@@ -22,7 +20,6 @@
     dest: "{{ [ docker_compose.directories.instance, item.dest ] | path_join }}"
     mode: "{{ item.mode }}"
   loop:
-    # - { src: "image/Dockerfile",     dest: "Dockerfile",     mode: "0644" } Covered by default role
     - { src: "entrypoint.sh",  dest: "entrypoint.sh",  mode: "0755" }
     - { src: "healthcheck.sh", dest: "healthcheck.sh", mode: "0755" }
   loop_control:

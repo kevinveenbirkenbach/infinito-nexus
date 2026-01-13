@@ -63,11 +63,13 @@ moduleload      back_mdb
 pidfile         /run/slapd/slapd.pid
 argsfile        /run/slapd/slapd.args
 
-# cn=config access via ldapi EXTERNAL
+# --- cn=config database (required so cn=config exists over LDAP) ---
+database        config
 access to *
   by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
-  by * break
+  by * none
 
+# --- main data database ---
 database        mdb
 maxsize         1073741824
 suffix          "${LDAP_SUFFIX}"
