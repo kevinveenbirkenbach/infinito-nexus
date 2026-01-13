@@ -1,7 +1,8 @@
-- name: Load Docker
+- name: "include docker-compose role"
   include_role:
-    name: sys-svc-docker
-  when: run_once_sys_svc_docker is not defined
+    name: docker-compose
+  vars:
+    docker_compose_flush_handlers: true
 
 - name: Create docker network
   community.docker.docker_network:
@@ -10,8 +11,5 @@
     ipam_config:
       - subnet: "{{ docker_network_subnet }}"
 
-- name: "include docker-compose role"
-  include_role:
-    name: docker-compose
-  vars:
-    docker_compose_flush_handlers: true
+- name: Flush docker handlers after network is created
+  meta: flush_handlers

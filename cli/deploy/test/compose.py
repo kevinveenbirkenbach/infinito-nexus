@@ -74,8 +74,6 @@ class Compose:
         args += ["coredns", "infinito"]
 
         self.run(args, check=True)
-
-        # NEW: wait for Docker healthcheck
         self.wait_for_healthy()
 
         if run_init:

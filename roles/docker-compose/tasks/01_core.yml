@@ -1,5 +1,9 @@
 - include_tasks: utils/once/flag.yml
 
+- include_role:
+    name: sys-svc-docker
+  when: run_once_sys_svc_docker is not defined
+
 - name: Remove all docker compose pull locks
   file:
     path: "{{ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR }}"
@@ -16,10 +20,6 @@
     mode:   0700
     owner:  root
     group:  root
-
-- include_role:
-    name: sys-svc-docker
-  when: run_once_sys_svc_docker is not defined
 
 - name: Include backup, repair and health services for docker
   include_role:
