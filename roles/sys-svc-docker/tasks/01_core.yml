@@ -1,5 +1,3 @@
-- include_tasks: utils/once/flag.yml
-
 - name: "Install docker engine (host only)"
   ansible.builtin.package:
     name: >-
@@ -23,6 +21,17 @@
       }}
     state: present
   notify: docker restart
+
+- name: "Install python docker dependencies"
+  ansible.builtin.package:
+    name: >-
+      {{
+        ['python-docker', 'python-requests'] if ansible_os_family == 'Archlinux' else
+        ['python3-docker', 'python3-requests'] if ansible_os_family == 'Debian' else
+        ['python3-docker', 'python3-requests'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
+        omit
+      }}
+    state: present
 
 - name: "Assert that required services are available"
   include_tasks: "02_assert_requirements.yml"
@@ -59,3 +68,5 @@
 - name: "Load reset tasks when MODE_RESET is enabled"
   include_tasks: "04_reset.yml"
   when: MODE_RESET | bool
+
+- include_tasks: utils/once/flag.yml
