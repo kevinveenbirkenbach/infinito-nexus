@@ -107,20 +107,12 @@ jobs:
 
           scripts/ci/deploy-one-app.sh
 
-      - name: Show last 200 chars on failure
+      - name: Show last 200 log lines on failure
         if: failure()
         shell: bash
         run: |
-          echo "=== DEBUG: logs ==="
-          ls -la logs || true
-          echo
+          scripts/ci/log-tail.sh logs 200
 
-          shopt -s nullglob
-          for f in logs/*.log; do
-            echo "=== tail -c 200 $f ==="
-            tail -c 200 "$f" || true
-            echo
-          done
 
       - name: Upload deploy logs
         if: ${{ always() && env.ACT != 'true' }}
