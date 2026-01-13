@@ -92,5 +92,6 @@ jobs:
             NIX_CONFIG=access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/infinito-cache-${{ matrix.distro }}:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/infinito-cache-${{ matrix.distro }}:buildcache,mode=max
+
