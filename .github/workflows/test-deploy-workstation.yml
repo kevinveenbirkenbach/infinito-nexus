@@ -1,10 +1,10 @@
-name: Test Infinito.Nexus Deploy (workstation)
+name: Test Infinito.Nexus Deploy (universal-rest)
 
 on:
   workflow_call:
 
 jobs:
-  workstation:
-    uses: ./.github/workflows/_deploy-matrix.yml
+  rest:
+    uses: ./.github/workflows/_deploy-per-app.yml
     with:
-      mode: workstation
+      mode: rest

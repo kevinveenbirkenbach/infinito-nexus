@@ -5,6 +5,6 @@ on:
 
 jobs:
   rest:
-    uses: ./.github/workflows/_deploy-matrix.yml
+    uses: ./.github/workflows/_deploy-per-app.yml
     with:
       mode: rest

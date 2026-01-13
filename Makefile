@@ -202,73 +202,31 @@ test-unit: build-missing
 test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
-# ------------------------------------------------------------
-# Deploy test for a single app (serial, fail-fast)
-# Controlled by:
-#   TEST_DEPLOY_TYPE (server|workstation|rest)
-#   INFINITO_DISTRO  (arch|debian|ubuntu|fedora|centos)
-# Usage:
-#   make test-deploy-app APP=web-app-nextcloud
-#   make test-deploy-app TEST_DEPLOY_TYPE=workstation INFINITO_DISTRO=debian APP=desk-kde
-# ------------------------------------------------------------
-test-deploy-app: build-missing up
-	@if [[ -z "$(APP)" ]]; then \
-	  echo "ERROR: APP is not set"; \
-	  echo "Usage: make test-deploy-app APP=web-app-nextcloud"; \
-	  exit 1; \
-	fi; \
-	case "$(TEST_DEPLOY_TYPE)" in \
-	  server|workstation|rest) ;; \
-	  *) echo "ERROR: invalid TEST_DEPLOY_TYPE=$(TEST_DEPLOY_TYPE) (server|workstation|rest)"; exit 2 ;; \
-	esac; \
-	echo "=== act: workflow_dispatch deploy:$(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="; \
+test-deploy:
+	@echo "=== act: deploy $(TEST_DEPLOY_TYPE) (all apps, distro=$(INFINITO_DISTRO)) ==="
 	act workflow_dispatch \
-		-W .github/workflows/_deploy-matrix.yml \
+		-W .github/workflows/_deploy-per-app.yml \
 		--input mode:"$(TEST_DEPLOY_TYPE)" \
-		--input only_app:"$(APP)" \
-		--input only_distro:"$(INFINITO_DISTRO)" \
-		--privileged \
+		--input distros:"$(INFINITO_DISTRO)" \
+		--input missing_only:"true" \
+		--input keep_stack_on_failure:"true" \
+		--container-options "--privileged" \
 		--network host \
 		--concurrent-jobs 1
 
-
-# ------------------------------------------------------------
-# Deploy test for all discovered apps (calls test-deploy-app)
-# Controlled by:
-#   TEST_DEPLOY_TYPE (server|workstation|rest)
-#   INFINITO_DISTRO  (single distro for local run)
-# ------------------------------------------------------------
-test-deploy: build-missing up
-	@set -euo pipefail; \
-	case "$(TEST_DEPLOY_TYPE)" in \
-	  server) \
-	    include_re='^(web-app-|web-svc-)'; \
-	    exclude_re='^(web-app-oauth2-proxy)$$'; \
-	    ;; \
-	  workstation) \
-	    include_re='^(desk-|util-desk-)'; \
-	    exclude_re=''; \
-	    ;; \
-	  rest) \
-	    include_re='.*'; \
-	    exclude_re=''; \
-	    ;; \
-	  *) \
-	    echo "ERROR: invalid TEST_DEPLOY_TYPE=$(TEST_DEPLOY_TYPE) (server|workstation|rest)"; \
-	    exit 2; \
-	    ;; \
-	esac; \
-	echo "=== Discover apps (JSON) type=$(TEST_DEPLOY_TYPE) distro=$(INFINITO_DISTRO) ==="; \
-	export INFINITO_DISTRO="$(INFINITO_DISTRO)"; \
-	apps_json="$$(INCLUDE_RE="$${include_re}" EXCLUDE_RE="$${exclude_re}" scripts/tests/discover-apps.sh)"; \
-	if [[ -z "$$apps_json" ]]; then apps_json="[]"; fi; \
-	echo "$$apps_json" | jq -e . >/dev/null; \
-	echo "Apps: $$apps_json"; \
-	echo; \
-	for app in $$(echo "$$apps_json" | jq -r '.[]'); do \
-		$(MAKE) test-deploy-app APP="$$app" TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" INFINITO_DISTRO="$(INFINITO_DISTRO)"; \
-		echo; \
-	done
+test-deploy-app:
+	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set"; exit 1; fi
+	@echo "=== act: deploy $(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
+	act workflow_dispatch \
+		-W .github/workflows/_deploy-per-app.yml \
+		--input mode:"$(TEST_DEPLOY_TYPE)" \
+		--input only_app:"$(APP)" \
+		--input distros:"$(INFINITO_DISTRO)" \
+		--input missing_only:"true" \
+		--input keep_stack_on_failure:"true" \
+		--container-options "--privileged" \
+		--network host \
+		--concurrent-jobs 1
 
 # Backwards compatible target (kept)
 lint-ansible:

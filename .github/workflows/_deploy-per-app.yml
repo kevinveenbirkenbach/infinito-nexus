@@ -1,0 +1,245 @@
+name: Deploy per app (all distros)
+
+on:
+  workflow_call:
+    inputs:
+      mode:
+        type: string
+        required: true
+        description: "server | workstation | rest"
+      distros:
+        type: string
+        required: false
+        default: "arch debian ubuntu fedora centos"
+      only_app:
+        type: string
+        required: false
+        default: ""
+      missing_only:
+        type: boolean
+        required: false
+        default: true
+      keep_stack_on_failure:
+        type: boolean
+        required: false
+        default: true
+
+      # regex for discovery
+      server_include_re:
+        type: string
+        required: false
+        default: "^(web-app-|web-svc-)"
+      server_exclude_re:
+        type: string
+        required: false
+        default: "^(web-app-oauth2-proxy)$"
+      workstation_include_re:
+        type: string
+        required: false
+        default: "^(desk-|util-desk-)"
+      workstation_exclude_re:
+        type: string
+        required: false
+        default: ""
+
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "server | workstation | rest"
+        required: true
+        default: "server"
+      distros:
+        description: "space-separated list"
+        required: true
+        default: "arch debian ubuntu fedora centos"
+      only_app:
+        description: "optional: run only this app"
+        required: false
+        default: ""
+      missing_only:
+        description: "build only if missing"
+        required: false
+        default: "true"
+      keep_stack_on_failure:
+        description: "keep stack up on failure"
+        required: false
+        default: "true"
+
+      server_include_re:
+        required: false
+        default: "^(web-app-|web-svc-)"
+      server_exclude_re:
+        required: false
+        default: "^(web-app-oauth2-proxy)$"
+      workstation_include_re:
+        required: false
+        default: "^(desk-|util-desk-)"
+      workstation_exclude_re:
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  discover:
+    name: "discover=({{ inputs.mode }})"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      apps: ${{ steps.out.outputs.apps }}
+      deploy_type: ${{ steps.out.outputs.deploy_type }}
+      distros: ${{ steps.out.outputs.distros }}
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Start stack for discovery (arch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export INFINITO_DISTRO="arch"
+          make up
+
+      - name: Compute discovery result
+        id: out
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mode="${{ inputs.mode || github.event.inputs.mode }}"
+          distros="${{ inputs.distros || github.event.inputs.distros }}"
+          only_app="${{ inputs.only_app || github.event.inputs.only_app }}"
+
+          server_include_re="${{ inputs.server_include_re || github.event.inputs.server_include_re }}"
+          server_exclude_re="${{ inputs.server_exclude_re || github.event.inputs.server_exclude_re }}"
+          workstation_include_re="${{ inputs.workstation_include_re || github.event.inputs.workstation_include_re }}"
+          workstation_exclude_re="${{ inputs.workstation_exclude_re || github.event.inputs.workstation_exclude_re }}"
+
+          : "${mode:=server}"
+          : "${distros:=arch debian ubuntu fedora centos}"
+
+          discover() {
+            local include_re="$1"
+            local exclude_re="$2"
+            INCLUDE_RE="${include_re}" EXCLUDE_RE="${exclude_re}" scripts/tests/discover-apps.sh
+          }
+
+          all_json="$(discover '.*' '')"; [[ -n "$all_json" ]] || all_json='[]'
+          server_json="$(discover "${server_include_re}" "${server_exclude_re}")"; [[ -n "$server_json" ]] || server_json='[]'
+          workstation_json="$(discover "${workstation_include_re}" "${workstation_exclude_re}")"; [[ -n "$workstation_json" ]] || workstation_json='[]'
+
+          case "${mode}" in
+            server)
+              apps_json="${server_json}"
+              deploy_type="server"
+              ;;
+            workstation)
+              apps_json="${workstation_json}"
+              deploy_type="workstation"
+              ;;
+            rest)
+              # rest = all - (server ∪ workstation)
+              apps_json="$(
+                jq -nc \
+                  --argjson all "${all_json}" \
+                  --argjson server "${server_json}" \
+                  --argjson workstation "${workstation_json}" \
+                  '
+                    def uniq: unique;
+                    def union($a;$b): ($a + $b) | uniq;
+                    def minus($a;$b): $a | map(select(. as $x | ($b | index($x)) | not));
+                    (union($server;$workstation) | uniq) as $covered
+                    | minus($all;$covered)
+                    | unique
+                  '
+              )"
+              deploy_type="server"
+              ;;
+            *)
+              echo "ERROR: invalid mode=${mode} (server|workstation|rest)" >&2
+              exit 2
+              ;;
+          esac
+
+          if [[ -n "${only_app}" ]]; then
+            apps_json="$(jq -nc --arg a "${only_app}" '[ $a ]')"
+          fi
+
+          echo "apps=${apps_json}" >> "$GITHUB_OUTPUT"
+          echo "deploy_type=${deploy_type}" >> "$GITHUB_OUTPUT"
+          echo "distros=${distros}" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: "deploy:${{ needs.discover.outputs.deploy_type }} app=${{ matrix.app }} (all distros)"
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    strategy:
+      fail-fast: false
+      # one runner per app, but keep it serial to avoid docker-dind chaos
+      max-parallel: 1
+      matrix:
+        app: ${{ fromJson(needs.discover.outputs.apps) }}
+
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run deploy (this app across all distros)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          app="${{ matrix.app }}"
+          deploy_type="${{ needs.discover.outputs.deploy_type }}"
+          distros="${{ needs.discover.outputs.distros }}"
+
+          # normalize bools (workflow_call boolean vs workflow_dispatch string)
+          missing_only="${{ inputs.missing_only || github.event.inputs.missing_only || 'true' }}"
+          keep_stack="${{ inputs.keep_stack_on_failure || github.event.inputs.keep_stack_on_failure || 'true' }}"
+
+          normalize_bool() {
+            case "$1" in
+              true|True|TRUE|1) echo "true" ;;
+              false|False|FALSE|0) echo "false" ;;
+              *) echo "true" ;;
+            esac
+          }
+          missing_only="$(normalize_bool "${missing_only}")"
+          keep_stack="$(normalize_bool "${keep_stack}")"
+
+          read -r -a distro_arr <<< "${distros}"
+
+          mkdir -p logs
+          for distro in "${distro_arr[@]}"; do
+            export INFINITO_DISTRO="${distro}"
+
+            echo "=== deploy_type=${deploy_type} distro=${distro} app=${app} ==="
+            args=( --type "${deploy_type}" --app "${app}" )
+            if [[ "${missing_only}" == "true" ]]; then args+=( --missing ); fi
+            if [[ "${keep_stack}" == "true" ]]; then args+=( --keep-stack-on-failure ); fi
+
+            scripts/tests/deploy.sh "${args[@]}"
+          done

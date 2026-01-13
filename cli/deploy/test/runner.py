@@ -97,7 +97,9 @@ def run_test_plan(
 
     exit_code = 0
     main_log = log_path(logs_dir, deploy_type, distro, "orchestrator")
-    write_text(main_log, f"deploy_type={deploy_type}\ndistro={distro}\nonly_app={only_app}\n")
+    write_text(
+        main_log, f"deploy_type={deploy_type}\ndistro={distro}\nonly_app={only_app}\n"
+    )
 
     try:
         compose.build_infinito(no_cache=no_cache, missing_only=missing_only)
@@ -119,7 +121,9 @@ def run_test_plan(
             + "\n",
         )
 
-        append_text(main_log, f"\nmode=single-with-deps\nresolved_ids={','.join(deploy_ids)}\n")
+        append_text(
+            main_log, f"\nmode=single-with-deps\nresolved_ids={','.join(deploy_ids)}\n"
+        )
 
         _create_inventory(compose, include=deploy_ids)
 
