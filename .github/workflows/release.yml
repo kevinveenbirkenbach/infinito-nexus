@@ -48,12 +48,12 @@ jobs:
       - name: Determine if this version is the highest (gate stable)
         id: highest
         shell: bash
-        run: scripts/ci/release-is-highest.sh
+        run: scripts/release/is-highest.sh
 
       - name: Move 'stable' git tag only if this version is the highest
         if: needs.code-analyses.result == 'success' && steps.highest.outputs.is_highest == 'true'
         shell: bash
-        run: scripts/ci/release-move-stable-tag.sh
+        run: scripts/release/move-stable-tag.sh
 
       - name: Retag CI images to version/latest (no rebuild)
         shell: bash
@@ -64,4 +64,4 @@ jobs:
           DISTROS: "arch debian ubuntu fedora centos"
           DEFAULT_DISTRO: arch
           GITHUB_REF_NAME: ${{ github.ref_name }}
-        run: scripts/ci/release-retag-ci-images.sh
+        run: scripts/release/retag-ci-images.sh
