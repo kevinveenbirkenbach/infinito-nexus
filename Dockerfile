@@ -94,7 +94,12 @@ RUN set -euo pipefail; \
 # Set workdir to / to avoid ambiguous commands
 WORKDIR /
 
+COPY scripts/docker/healthcheck.sh /usr/local/bin/healthcheck.sh
+
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
 
 # IMPORTANT: default to systemd as PID 1
 CMD ["/sbin/init"]
+
+HEALTHCHECK --interval=5s --timeout=5s --start-period=30s --retries=20 \
+  CMD /usr/local/bin/healthcheck.sh

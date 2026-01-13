@@ -75,8 +75,8 @@ class Compose:
 
         self.run(args, check=True)
 
-        print(">>> Waiting for systemd to be ready")
-        self.wait_for_systemd_ready()
+        # NEW: wait for Docker healthcheck
+        self.wait_for_healthy()
 
         if run_init:
             print(">>> Running infinito entry.sh init")
@@ -108,34 +108,54 @@ class Compose:
         args += ["infinito", *cmd]
         return self.run(args, check=check, capture=capture)
 
-    def wait_for_systemd_ready(self, *, timeout_s: int = 90) -> None:
+    def _get_infinito_container_id(self) -> str:
         """
-        Wait until systemd is ready to accept systemctl calls (DBus + /run/systemd/private).
-        Avoids a race right after compose up.
+        Resolve infinito container ID via docker compose.
+        Works independent of project name.
+        """
+        r = self.run(["ps", "-q", "infinito"], capture=True, check=True)
+        cid = r.stdout.strip()
+
+        if not cid:
+            raise RuntimeError(
+                "infinito container not found (docker compose ps -q infinito returned empty)"
+            )
+
+        return cid
+
+    def wait_for_healthy(self, *, timeout_s: int = 120) -> None:
+        """
+        Wait until infinito container is marked healthy by Docker.
         On timeout: print last 200 log lines for debugging.
         """
+        print(">>> Waiting for infinito container to become healthy")
+
+        cid = self._get_infinito_container_id()
         start = time.time()
 
         while True:
-            r = self.exec(
-                [
-                    "sh",
-                    "-lc",
-                    # Must have systemd private socket + a stable running/degraded state
-                    "test -S /run/systemd/private && "
-                    "systemctl is-system-running --wait 2>/dev/null | grep -Eq 'running|degraded'",
-                ],
-                check=False,
-                capture=True,
+            r = subprocess.run(
+                ["docker", "inspect", "-f", "{{.State.Health.Status}}", cid],
+                cwd=self.repo_root,
+                capture_output=True,
+                text=True,
             )
 
-            if r.returncode == 0:
+            status = r.stdout.strip() if r.returncode == 0 else ""
+
+            if status == "healthy":
+                print(">>> infinito container is healthy")
                 return
 
-            if (time.time() - start) > timeout_s:
-                print(">>> ERROR: systemd not ready, dumping last 200 log lines\n")
+            if status == "unhealthy":
+                print(">>> infinito container is unhealthy")
 
-                # Try journalctl first (preferred for systemd containers)
+            if (time.time() - start) > timeout_s:
+                print(
+                    ">>> ERROR: infinito container not healthy, dumping last 200 log lines\n"
+                )
+
+                # Preferred: systemd logs
                 logs = self.exec(
                     ["sh", "-lc", "journalctl -n 200 --no-pager || true"],
                     check=False,
@@ -148,7 +168,7 @@ class Compose:
 
                 # Fallback: docker logs
                 docker_logs = subprocess.run(
-                    ["docker", "logs", "--tail", "200", "infinito"],
+                    ["docker", "logs", "--tail", "200", cid],
                     cwd=self.repo_root,
                     capture_output=True,
                     text=True,
@@ -159,10 +179,8 @@ class Compose:
                 print("=======================================\n")
 
                 raise RuntimeError(
-                    "systemd not ready after waiting.\n"
-                    f"last rc={r.returncode}\n"
-                    f"STDOUT:\n{r.stdout}\n"
-                    f"STDERR:\n{r.stderr}\n"
+                    f"infinito container not healthy after {timeout_s}s "
+                    f"(last status: {status})"
                 )
 
-            time.sleep(1)
+            time.sleep(2)
