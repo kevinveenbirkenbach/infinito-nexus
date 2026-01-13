@@ -26,11 +26,16 @@ jobs:
     uses: ./.github/workflows/test-code-lint.yml
   test-code-unit:
     uses: ./.github/workflows/test-code-unit.yml
+  build-ci-images:
+    uses: ./.github/workflows/build-ci-images.yml
   test-deploy-server:
+    needs: build-ci-images
     uses: ./.github/workflows/test-deploy-server.yml
   test-deploy-workstation:
+    needs: build-ci-images
     uses: ./.github/workflows/test-deploy-workstation.yml
   test-deploy-universal:
+    needs: build-ci-images
     uses: ./.github/workflows/test-deploy-universal.yml
   test-install-make:
     uses: ./.github/workflows/test-install-make.yml
@@ -39,6 +44,7 @@ jobs:
 
   done:
     needs:
+      - build-ci-images
       - lint-python
       - lint-shell
       - lint-docker
@@ -48,6 +54,7 @@ jobs:
       - test-code-unit
       - test-deploy-server
       - test-deploy-workstation
+      - test-deploy-universal
       - test-install-make
       - test-install-pkgmgr
     runs-on: ubuntu-latest

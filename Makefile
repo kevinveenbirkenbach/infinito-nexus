@@ -87,9 +87,21 @@ down:
 	@echo ">>> Stopping infinito compose stack and removing volumes"
 	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
 
-up: build-missing
+# Control whether images are built before compose up (default: yes)
+UP_BUILD ?= 1
+
+
+up:
+ifeq ($(UP_BUILD),1)
+	@$(MAKE) build-missing
+else
+	@echo ">>> Skipping local image build (UP_BUILD=0)"
+endif
 	@echo ">>> Start infinito compose stack (via python orchestrator)"
 	@INFINITO_DISTRO="$(INFINITO_DISTRO)" python3 -m cli.deploy.test.up
+
+up-local:
+	@$(MAKE) up UP_BUILD=1
 
 list:
 	@echo "Generating the roles list"
