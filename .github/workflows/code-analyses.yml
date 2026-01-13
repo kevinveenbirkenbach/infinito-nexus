@@ -30,6 +30,8 @@ jobs:
     uses: ./.github/workflows/test-deploy-server.yml
   test-deploy-workstation:
     uses: ./.github/workflows/test-deploy-workstation.yml
+  test-deploy-universal:
+    uses: ./.github/workflows/test-deploy-universal.yml
   test-install-make:
     uses: ./.github/workflows/test-install-make.yml
   test-install-pkgmgr:
