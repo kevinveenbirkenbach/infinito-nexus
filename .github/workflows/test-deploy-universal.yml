@@ -1,3 +1,4 @@
+# .github/workflows/test-deploy-universal.yml
 name: Test Infinito.Nexus Deploy (universal-rest)
 
 on:
@@ -18,10 +19,12 @@ env:
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  rest:
-    name: deploy:rest (per app, all distros)
+  discover:
+    name: discover apps (arch)
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 60
+    outputs:
+      apps: ${{ steps.discover.outputs.apps }}
 
     steps:
       - uses: actions/checkout@v6
@@ -55,7 +58,35 @@ jobs:
           echo "apps=${apps}" >> "$GITHUB_OUTPUT"
           echo "apps_json=${apps}"
 
-      - name: Deploy each app (matrix via bash loop)
+  rest:
+    name: deploy:rest (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    needs: discover
+
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJson(needs.discover.outputs.apps) }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install jq
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Start stack (arch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export INFINITO_DISTRO="arch"
+          make up
+
+      - name: Deploy app
         shell: bash
         run: |
           set -euo pipefail
@@ -68,18 +99,13 @@ jobs:
             esac
           }
 
-          apps_json='${{ steps.discover.outputs.apps }}'
-          readarray -t apps < <(echo "${apps_json}" | jq -r '.[]')
-
           export MODE="rest"
           export DISTROS="${DISTROS}"
           export MISSING_ONLY="$(normalize_bool "${MISSING_ONLY}")"
           export KEEP_STACK="$(normalize_bool "${KEEP_STACK}")"
+          export APP="${{ matrix.app }}"
 
-          for app in "${apps[@]}"; do
-            export APP="${app}"
-            scripts/ci/deploy-one-app.sh
-          done
+          scripts/ci/deploy-one-app.sh
 
       - name: Show last 200 chars on failure
         if: failure()
@@ -100,7 +126,7 @@ jobs:
         if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: deploy-logs-rest
+          name: deploy-logs-rest-${{ matrix.app }}
           path: logs/
           if-no-files-found: warn
           retention-days: 14
