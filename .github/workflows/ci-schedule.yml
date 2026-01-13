@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  packages: read
+  packages: write
   security-events: write
 
 jobs:
