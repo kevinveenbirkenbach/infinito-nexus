@@ -50,6 +50,12 @@ def main(argv: Optional[list[str]] = None) -> int:
         action="store_true",
         help="Do not tear down compose stack on failure.",
     )
+    parser.add_argument(
+        "--debug",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Enable/disable Ansible debug mode for the deploy run (default: disabled).",
+    )
 
     args = parser.parse_args(argv)
 
@@ -67,4 +73,5 @@ def main(argv: Optional[list[str]] = None) -> int:
         only_app=args.app,
         logs_dir=logs_dir,
         keep_stack_on_failure=args.keep_stack_on_failure,
+        debug=args.debug,
     )

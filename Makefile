@@ -235,6 +235,18 @@ test-deploy-app:
 		--network host \
 		--concurrent-jobs 1
 
+# Rapid local deploy test for a single app (no debug, no rebuild)
+test-deploy-rapid:
+	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set"; exit 1; fi
+	@echo "=== rapid deploy: $(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
+	@INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	  scripts/tests/deploy.sh \
+	    --type "$(TEST_DEPLOY_TYPE)" \
+	    --app "$(APP)" \
+	    --missing \
+		--keep-stack-on-failure \
+	    --no-debug
+
 # Backwards compatible target (kept)
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"

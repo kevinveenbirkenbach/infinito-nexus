@@ -9,6 +9,7 @@ NO_CACHE=0
 MISSING_ONLY=0
 APP=""
 KEEP_STACK_ON_FAILURE=0
+DEBUG=0
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (e.g. INFINITO_DISTRO=arch)}"
 
@@ -22,6 +23,8 @@ Options:
   --missing               Build only if missing (skip build if image exists)
   --app <application_id>  REQUIRED now (server and workstation)
   --keep-stack-on-failure Keep compose stack up on failure (for debugging)
+  --debug                 Enable Ansible debug mode
+  --no-debug              Disable Ansible debug mode (default)
   -h, --help              Show help
 EOF
 }
@@ -33,6 +36,8 @@ while [[ $# -gt 0 ]]; do
     --missing) MISSING_ONLY=1; shift ;;
     --app) APP="${2:-}"; shift 2 ;;
     --keep-stack-on-failure) KEEP_STACK_ON_FAILURE=1; shift ;;
+    --debug) DEBUG=1; shift ;;
+    --no-debug) DEBUG=0; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "[ERROR] Unknown arg: $1" >&2; usage; exit 2 ;;
   esac
@@ -50,5 +55,6 @@ if [[ "${NO_CACHE}" == "1" ]]; then args+=( "--no-cache" ); fi
 if [[ "${MISSING_ONLY}" == "1" ]]; then args+=( "--missing" ); fi
 args+=( "--app" "${APP}" )
 if [[ "${KEEP_STACK_ON_FAILURE}" == "1" ]]; then args+=( "--keep-stack-on-failure" ); fi
+if [[ "${DEBUG}" == "1" ]]; then args+=( "--debug" ); else args+=( "--no-debug" ); fi
 
 python3 -m cli.deploy.test "${args[@]}"

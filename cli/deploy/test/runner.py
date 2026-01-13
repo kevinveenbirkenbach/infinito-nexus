@@ -49,7 +49,13 @@ def _create_inventory(compose: Compose, *, include: list[str]) -> None:
     _ensure_vault_password_file(compose)
 
 
-def _run_deploy(compose: Compose, *, deploy_type: str, deploy_ids: list[str]) -> int:
+def _run_deploy(
+    compose: Compose,
+    *,
+    deploy_type: str,
+    deploy_ids: list[str],
+    debug: bool,
+) -> int:
     """
     deploy_type: "server" or "workstation"
     """
@@ -63,13 +69,15 @@ def _run_deploy(compose: Compose, *, deploy_type: str, deploy_ids: list[str]) ->
         "-vv",
         "--assert",
         "true",
-        "--debug",
         "--diff",
         "-T",
         deploy_type,
         "-i",
         *deploy_ids,
     ]
+    if debug:
+        cmd.insert(cmd.index("-T"), "--debug")
+
     r = compose.exec(cmd, check=False)
     return r.returncode
 
@@ -83,6 +91,7 @@ def run_test_plan(
     only_app: str | None,
     logs_dir: Path,
     keep_stack_on_failure: bool,
+    debug: bool,
 ) -> int:
     if not only_app:
         raise ValueError(
@@ -98,7 +107,8 @@ def run_test_plan(
     exit_code = 0
     main_log = log_path(logs_dir, deploy_type, distro, "orchestrator")
     write_text(
-        main_log, f"deploy_type={deploy_type}\ndistro={distro}\nonly_app={only_app}\n"
+        main_log,
+        f"deploy_type={deploy_type}\ndistro={distro}\nonly_app={only_app}\ndebug={debug}\n",
     )
 
     try:
@@ -127,7 +137,9 @@ def run_test_plan(
 
         _create_inventory(compose, include=deploy_ids)
 
-        rc = _run_deploy(compose, deploy_type=deploy_type, deploy_ids=deploy_ids)
+        rc = _run_deploy(
+            compose, deploy_type=deploy_type, deploy_ids=deploy_ids, debug=debug
+        )
         exit_code = rc
 
         if rc != 0:
