@@ -59,14 +59,3 @@
 - name: "Load reset tasks when MODE_RESET is enabled"
   include_tasks: "04_reset.yml"
   when: MODE_RESET | bool
-
-- name: Include backup, repair and health services for docker
-  include_role:
-    name: "{{ item }}"
-  loop:
-    - sys-ctl-cln-docker
-    - sys-ctl-bkp-docker-2-loc
-    - sys-ctl-hlth-docker-container
-    - sys-ctl-hlth-docker-volumes
-    - sys-ctl-rpr-docker-hard
-  when: SYS_SVC_DOCKER_LOAD_SERVICES | bool

@@ -17,7 +17,17 @@
     owner:  root
     group:  root
 
-- name: "Load docker container role"
+- include_role:
+    name: sys-svc-docker
+  when: run_once_sys_svc_docker is not defined
+
+- name: Include backup, repair and health services for docker
   include_role:
-    name: docker-container
-  when: run_once_docker_container is not defined
+    name: "{{ item }}"
+  loop:
+    - sys-ctl-cln-docker
+    - sys-ctl-bkp-docker-2-loc
+    - sys-ctl-hlth-docker-container
+    - sys-ctl-hlth-docker-volumes
+    - sys-ctl-rpr-docker-hard
+  when: DOCKER_COMPOSE_LOAD_SERVICES | bool

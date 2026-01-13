@@ -22,4 +22,4 @@ galaxy_info:
   - name: Any
     versions:
     - all
-  lifecycle: beta
+  lifecycle: deprecated
