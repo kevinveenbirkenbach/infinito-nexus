@@ -41,8 +41,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export INFINITO_DISTRO="arch"
-          export INFINITO_IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER}/infinito-${INFINITO_DISTRO}:ci-${GITHUB_SHA}"
           make up UP_BUILD=0
 
       - name: Discover apps (JSON)
@@ -85,8 +83,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export INFINITO_DISTRO="arch"
-          export INFINITO_IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER}/infinito-${INFINITO_DISTRO}:ci-${GITHUB_SHA}"
           make up UP_BUILD=0
 
       - name: Deploy app

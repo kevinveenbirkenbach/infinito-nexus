@@ -48,6 +48,18 @@ TEST_DEPLOY_TYPE ?= server
 # Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
 PYTHONPATH              ?= .
 
+# Control whether images are built before compose up (default: yes)
+UP_BUILD ?= 1
+
+# Overwrite defaults
+ifeq ($(IS_ACT),0)
+  # -------- Real GitHub Actions CI --------
+  INFINITO_PULL_POLICY ?= always
+  INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):ci-$(GITHUB_SHA)
+  export INFINITO_PULL_POLICY
+  export INFINITO_IMAGE
+endif
+
 # Distro
 INFINITO_DISTRO		?= arch
 INFINITO_CONTAINER 	?= infinito_nexus_$(INFINITO_DISTRO)
@@ -87,21 +99,12 @@ down:
 	@echo ">>> Stopping infinito compose stack and removing volumes"
 	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
 
-# Control whether images are built before compose up (default: yes)
-UP_BUILD ?= 1
-
-# Auto-detect act (local) vs GitHub Actions (CI)
-INFINITO_PULL_POLICY ?= $(if $(ACT),never,always)
-
 up:
 ifeq ($(UP_BUILD),1)
 	@$(MAKE) build-missing
 else
 	@echo ">>> Skipping local image build (UP_BUILD=0)"
 endif
-	@echo ">>> Using INFINITO_PULL_POLICY=$(INFINITO_PULL_POLICY)"
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	  INFINITO_PULL_POLICY="$(INFINITO_PULL_POLICY)" \
 	  python3 -m cli.deploy.test.up
 
 up-local:
