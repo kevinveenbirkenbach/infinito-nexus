@@ -20,7 +20,7 @@ Usage:
 Options:
   --no-cache              Rebuild compose image with --no-cache
   --missing               Build only if missing (skip build if image exists)
-  --app <application_id>  Server mode: run only this app (plus run_after deps)
+  --app <application_id>  REQUIRED now (server and workstation)
   --keep-stack-on-failure Keep compose stack up on failure (for debugging)
   -h, --help              Show help
 EOF
@@ -39,16 +39,16 @@ while [[ $# -gt 0 ]]; do
 done
 
 [[ -n "${TYPE}" ]] || { echo "[ERROR] --type is required" >&2; usage; exit 2; }
+[[ -n "${APP}"  ]] || { echo "[ERROR] --app is required now" >&2; usage; exit 2; }
 
 cd "${REPO_ROOT}"
 
 args=( "--type" "${TYPE}" "--logs-dir" "logs" )
-# distro comes from env by default; keep explicit for clarity:
 args+=( "--distro" "${INFINITO_DISTRO}" )
 
 if [[ "${NO_CACHE}" == "1" ]]; then args+=( "--no-cache" ); fi
 if [[ "${MISSING_ONLY}" == "1" ]]; then args+=( "--missing" ); fi
-if [[ -n "${APP}" ]]; then args+=( "--app" "${APP}" ); fi
+args+=( "--app" "${APP}" )
 if [[ "${KEEP_STACK_ON_FAILURE}" == "1" ]]; then args+=( "--keep-stack-on-failure" ); fi
 
 python3 -m cli.deploy.test "${args[@]}"

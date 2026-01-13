@@ -3,61 +3,8 @@ name: Test Infinito.Nexus Deploy (workstation)
 on:
   workflow_call:
 
-permissions:
-  contents: read
-  packages: read
-
 jobs:
-  test:
-    name: "deploy:workstation (${{ matrix.distro }})"
-    runs-on: ubuntu-latest
-    timeout-minutes: 240
-
-    strategy:
-      fail-fast: false
-      matrix:
-        distro: [arch, debian, ubuntu, fedora, centos]
-
-    env:
-      NIX_CONFIG: |
-        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Show Docker version
-        run: docker version
-
-      - name: Run deploy test (workstation)
-        shell: bash
-        run: |
-          set -euo pipefail
-          export INFINITO_DISTRO="${{ matrix.distro }}"
-          mkdir -p logs
-
-          log_file="logs/deploy-workstation-${{ matrix.distro }}.log"
-
-          {
-            echo "=== $(date -u) ==="
-            echo "Deploy type: workstation"
-            echo "Distro: ${INFINITO_DISTRO}"
-            echo
-            echo "--- make test-deploy ---"
-            scripts/tests/deploy.sh --type workstation --missing
-          } 2>&1 | tee "${log_file}"
-
-      - name: Show last lines on failure
-        if: failure()
-        shell: bash
-        run: |
-          tail -n 200 "logs/deploy-workstation-${{ matrix.distro }}.log"
-
-      - name: Upload deploy logs
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: deploy-logs-workstation-${{ matrix.distro }}
-          path: logs/deploy-workstation-${{ matrix.distro }}.log
-          if-no-files-found: warn
-          retention-days: 14
+  workstation:
+    uses: ./.github/workflows/_deploy-matrix.yml
+    with:
+      mode: workstation

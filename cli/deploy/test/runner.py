@@ -1,80 +1,18 @@
 from __future__ import annotations
-import os
-import shlex
+
 import subprocess
 from pathlib import Path
 
 from .compose import Compose
 from .deps import apps_with_deps, resolve_run_after
 from .logs import append_text, log_path, write_text
-from .select import filter_allowed_server, filter_allowed_workstation
 
 
 def _repo_root_from_here() -> Path:
-    """
-    Resolve repo root based on this file location.
-
-    Path: <repo>/cli/deploy/test/runner.py
-    parents:
-      0 -> test
-      1 -> deploy
-      2 -> cli
-      3 -> <repo>
-    """
     return Path(__file__).resolve().parents[3]
 
 
-def _get_invokable(compose: Compose) -> list[str]:
-    # Capture output deterministically.
-    r = compose.run(
-        [
-            "exec",
-            "-T",
-            "infinito",
-            "sh",
-            "-lc",
-            "python3 -m cli.meta.applications.invokable",
-        ],
-        check=True,
-        capture=True,
-    )
-    txt = (r.stdout or "").strip()
-    return [line.strip() for line in txt.splitlines() if line.strip()]
-
-
-def _lifecycle_excludes(compose: Compose) -> set[str]:
-    """
-    Return role names that must be excluded based on lifecycle gating.
-
-    Uses the same semantics as scripts/tests/discover-server-apps.sh:
-      - TESTED_LIFECYCLES (space or comma-separated)
-      - Default: "alpha beta rc stable"
-    """
-    tested = os.environ.get("TESTED_LIFECYCLES", "alpha beta rc stable")
-    tested = tested.replace(",", " ").strip()
-    if not tested:
-        return set()
-
-    tested_q = shlex.quote(tested)
-
-    # lifecycle_filter prints role names space-separated (or nothing)
-    r = compose.exec(
-        [
-            "sh",
-            "-lc",
-            f"python3 -m cli.meta.roles.lifecycle_filter blacklist {tested_q} || true",
-        ],
-        check=False,
-        capture=True,
-    )
-    txt = (r.stdout or "").strip()
-    if not txt:
-        return set()
-    return {t.strip() for t in txt.split() if t.strip()}
-
-
 def _ensure_vault_password_file(compose: Compose) -> None:
-    # Keep as shell snippet (simple and robust)
     compose.exec(
         [
             "sh",
@@ -87,18 +25,10 @@ def _ensure_vault_password_file(compose: Compose) -> None:
     )
 
 
-def _create_inventory(
-    compose: Compose,
-    *,
-    exclude_csv: str = "",
-    include: list[str] | None = None,
-) -> None:
-    """
-    Create CI inventory.
+def _create_inventory(compose: Compose, *, include: list[str]) -> None:
+    if not include:
+        raise ValueError("include must not be empty")
 
-    - If `include` is provided: build inventory containing ONLY these application_ids.
-    - Else: use `exclude_csv` to exclude a set of application_ids.
-    """
     cmd = [
         "python3",
         "-m",
@@ -111,23 +41,18 @@ def _create_inventory(
         "infinito.localhost",
         "--vars-file",
         "inventory.sample.yml",
+        "--include",
+        ",".join(include),
     ]
 
-    # cli.create.inventory has mutually exclusive --include/--exclude
-    if include:
-        cmd += ["--include", ",".join(include)]
-    elif exclude_csv:
-        cmd += ["--exclude", exclude_csv]
-
-    compose.exec(
-        cmd,
-        check=True,
-        workdir="/opt/src/infinito",
-    )
+    compose.exec(cmd, check=True, workdir="/opt/src/infinito")
     _ensure_vault_password_file(compose)
 
 
-def _run_deploy(compose: Compose, deploy_type: str, extra_args: list[str]) -> int:
+def _run_deploy(compose: Compose, *, deploy_type: str, deploy_ids: list[str]) -> int:
+    """
+    deploy_type: "server" or "workstation"
+    """
     cmd = [
         "python3",
         "-m",
@@ -142,7 +67,8 @@ def _run_deploy(compose: Compose, deploy_type: str, extra_args: list[str]) -> in
         "--diff",
         "-T",
         deploy_type,
-        *extra_args,
+        "-i",
+        *deploy_ids,
     ]
     r = compose.exec(cmd, check=False)
     return r.returncode
@@ -158,93 +84,56 @@ def run_test_plan(
     logs_dir: Path,
     keep_stack_on_failure: bool,
 ) -> int:
+    if not only_app:
+        raise ValueError(
+            "Runner no longer performs discovery. You must pass --app from the workflow matrix."
+        )
+
+    if deploy_type not in {"server", "workstation"}:
+        raise ValueError(f"Invalid deploy_type: {deploy_type}")
+
     repo_root = _repo_root_from_here()
     compose = Compose(repo_root=repo_root, distro=distro)
 
-    # Track final exit code so cleanup logic in finally is correct.
     exit_code = 0
-
     main_log = log_path(logs_dir, deploy_type, distro, "orchestrator")
-    write_text(main_log, f"deploy_type={deploy_type}\ndistro={distro}\n")
+    write_text(main_log, f"deploy_type={deploy_type}\ndistro={distro}\nonly_app={only_app}\n")
 
     try:
         compose.build_infinito(no_cache=no_cache, missing_only=missing_only)
         compose.up()
 
-        invokable = _get_invokable(compose)
-        invokable_set = set(invokable)
+        deps = resolve_run_after(compose, only_app)
+        deploy_ids = apps_with_deps(only_app, deps_role_names=deps)
 
-        # Apply lifecycle gating globally (workstation + server).
-        excluded_by_lifecycle = _lifecycle_excludes(compose)
-        if excluded_by_lifecycle:
-            invokable = [x for x in invokable if x not in excluded_by_lifecycle]
-            invokable_set = set(invokable)
+        per_app_log = log_path(logs_dir, deploy_type, distro, f"app-{only_app}")
+        write_text(
+            per_app_log,
+            " ".join(
+                [
+                    f"app={only_app}",
+                    f"deps={','.join(deps) if deps else '<none>'}",
+                    f"deploy_ids={','.join(deploy_ids) if deploy_ids else '<none>'}",
+                ]
+            )
+            + "\n",
+        )
+
+        append_text(main_log, f"\nmode=single-with-deps\nresolved_ids={','.join(deploy_ids)}\n")
+
+        _create_inventory(compose, include=deploy_ids)
+
+        rc = _run_deploy(compose, deploy_type=deploy_type, deploy_ids=deploy_ids)
+        exit_code = rc
+
+        if rc != 0:
             append_text(
-                main_log,
-                "\n"
-                f"lifecycle_tested={os.environ.get('TESTED_LIFECYCLES', 'alpha beta rc stable')}\n"
-                f"lifecycle_excluded_count={len(excluded_by_lifecycle)}\n"
-                f"lifecycle_excluded={','.join(sorted(excluded_by_lifecycle))}\n",
-            )
-
-        if deploy_type == "workstation":
-            allowed = filter_allowed_workstation(invokable)
-            allowed_set = set(allowed)
-
-            # Exclude everything not in allowed
-            exclude_set = invokable_set - allowed_set
-            exclude = sorted(exclude_set)
-            exclude_csv = ",".join(exclude)
-
-            append_text(main_log, f"\nmode=workstation\nallowed_count={len(allowed)}\n")
-            _create_inventory(compose, exclude_csv=exclude_csv)
-
-            rc = _run_deploy(compose, "workstation", extra_args=[])
-            exit_code = rc
-            return rc
-
-        # server mode: per-app deploy
-        server_apps = filter_allowed_server(invokable)
-
-        if only_app:
-            server_apps = [only_app]
-
-        append_text(main_log, f"\nmode=server-per-app\napps={len(server_apps)}\n")
-
-        for app in server_apps:
-            deps = resolve_run_after(compose, app)
-            deploy_ids = apps_with_deps(app, deps_role_names=deps)
-
-            per_app_log = log_path(logs_dir, deploy_type, distro, f"app-{app}")
-            write_text(
                 per_app_log,
-                " ".join(
-                    [
-                        f"app={app}",
-                        f"deps={','.join(deps) if deps else '<none>'}",
-                        f"deploy_ids={','.join(deploy_ids) if deploy_ids else '<none>'}",
-                    ]
-                )
-                + "\n",
+                "\n--- hint ---\n"
+                "Search workflow logs for the failing task output.\n"
+                f"Also run: INFINITO_DISTRO={distro} docker compose --profile ci logs --tail=200\n",
             )
-
-            # Inventory should contain app + run_after deps
-            _create_inventory(compose, include=deploy_ids)
-
-            # Deploy app + deps
-            rc = _run_deploy(compose, "server", extra_args=["-i", *deploy_ids])
-            if rc != 0:
-                exit_code = rc
-                append_text(
-                    per_app_log,
-                    "\n--- hint ---\n"
-                    "Search workflow logs for the failing task output.\n"
-                    f"Also run: INFINITO_DISTRO={distro} docker compose --profile ci logs --tail=200\n",
-                )
-                return rc
-
-        exit_code = 0
-        return 0
+        return rc
 
     except subprocess.CalledProcessError as exc:
         exit_code = exc.returncode
@@ -256,10 +145,7 @@ def run_test_plan(
         return 1
     finally:
         should_keep = keep_stack_on_failure and exit_code != 0
-        if should_keep:
-            # do not tear down
-            pass
-        else:
+        if not should_keep:
             try:
                 compose.down()
             except Exception:
