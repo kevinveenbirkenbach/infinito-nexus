@@ -66,6 +66,7 @@ jobs:
     needs: discover
 
     strategy:
+      fail-fast: false
       matrix:
         app: ${{ fromJson(needs.discover.outputs.apps) }}
 
