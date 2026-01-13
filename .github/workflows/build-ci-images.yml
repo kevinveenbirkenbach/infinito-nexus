@@ -94,4 +94,3 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}
           cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/infinito-cache-${{ matrix.distro }}:buildcache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/infinito-cache-${{ matrix.distro }}:buildcache,mode=max
-
