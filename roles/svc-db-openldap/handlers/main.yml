@@ -1,7 +1,7 @@
-- name: Load memberof module in OpenLDAP
+- name: Load memberof module in OpenLDAP (cn=config via EXTERNAL)
   ansible.builtin.shell: >-
     docker exec -i {{ OPENLDAP_CONTAINER }}
-    ldapmodify -x -H ldapi:/// -D "{{ OPENLDAP_BIND_DN }}" -w "{{ OPENLDAP_BIND_PW }}"
+    ldapmodify -Q -Y EXTERNAL -H ldapi:///
     -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/01_member_of_configuration.ldif'] | path_join }}"
   listen:
     - "Import configuration LDIF files"
@@ -14,10 +14,10 @@
       "Duplicate attribute value" not in (r.stderr | default(''))
     )
 
-- name: Load refint module in OpenLDAP
+- name: Load refint module in OpenLDAP (cn=config via EXTERNAL)
   ansible.builtin.shell: >-
     docker exec -i {{ OPENLDAP_CONTAINER }}
-    ldapmodify -x -H ldapi:/// -D "{{ OPENLDAP_BIND_DN }}" -w "{{ OPENLDAP_BIND_PW }}"
+    ldapmodify -Q -Y EXTERNAL -H ldapi:///
     -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/04_refint_module.ldif'] | path_join }}"
   listen:
     - "Import configuration LDIF files"
@@ -30,31 +30,31 @@
       "Duplicate attribute value" not in (r.stderr | default(''))
     )
 
-- name: Add memberof overlay
+- name: Add memberof overlay (cn=config via EXTERNAL)
   ansible.builtin.shell: >-
     docker exec -i {{ OPENLDAP_CONTAINER }}
-    ldapadd -x -H ldapi:/// -D "{{ OPENLDAP_BIND_DN }}" -w "{{ OPENLDAP_BIND_PW }}"
+    ldapadd -Q -Y EXTERNAL -H ldapi:///
     -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/02_member_of_configuration.ldif'] | path_join }}"
   listen:
     - "Import configuration LDIF files"
   register: r
   failed_when: r.rc not in [0, 68]
 
-- name: Add refint overlay
+- name: Add refint overlay (cn=config via EXTERNAL)
   ansible.builtin.shell: >-
     docker exec -i {{ OPENLDAP_CONTAINER }}
-    ldapadd -x -H ldapi:/// -D "{{ OPENLDAP_BIND_DN }}" -w "{{ OPENLDAP_BIND_PW }}"
+    ldapadd -Q -Y EXTERNAL -H ldapi:///
     -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/03_member_of_configuration.ldif'] | path_join }}"
   listen:
     - "Import configuration LDIF files"
   register: r
   failed_when: r.rc not in [0, 68]
 
-- name: Import users, groups, etc. to LDAP
+- name: Import users, groups, etc. to LDAP (data tree)
   ansible.builtin.shell: >-
     docker exec -i {{ OPENLDAP_CONTAINER }} ldapadd -x
-    -D "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
-    -w "{{ LDAP.BIND_CREDENTIAL }}"
+    -D "{{ OPENLDAP_BIND_DN }}"
+    -w "{{ OPENLDAP_BIND_PW }}"
     -c
     -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'groups', (item | basename | regex_replace('\.j2$', ''))] | path_join }}"
   listen:

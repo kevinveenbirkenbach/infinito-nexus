@@ -5,8 +5,8 @@
   community.general.ldap_entry:
     dn:           "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
     server_uri:   "{{ OPENLDAP_SERVER_URI }}"
-    bind_dn:      "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
-    bind_pw:      "{{ LDAP.BIND_CREDENTIAL }}"
+    bind_dn:      "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:      "{{ OPENLDAP_BIND_PW }}"
     objectClass:  "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
     attributes:
       uid:           "{{ item.value.username }}"
@@ -31,8 +31,8 @@
   community.general.ldap_attrs:
     dn: "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
     server_uri: "{{ OPENLDAP_SERVER_URI }}"
-    bind_dn: "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
-    bind_pw: "{{ LDAP.BIND_CREDENTIAL }}"
+    bind_dn: "{{ OPENLDAP_BIND_DN }}"
+    bind_pw: "{{ OPENLDAP_BIND_PW }}"
     attributes:
       objectClass: "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
       mail:        "{{ item.value.email }}"
@@ -47,8 +47,8 @@
   community.general.ldap_entry:
     dn: "{{ LDAP.DN.OU.ROLES }}"
     server_uri: "{{ OPENLDAP_SERVER_URI }}"
-    bind_dn:  "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
-    bind_pw:  "{{ LDAP.BIND_CREDENTIAL }}"
+    bind_dn:  "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:  "{{ OPENLDAP_BIND_PW }}"
     objectClass: organizationalUnit
     attributes:
       ou: roles

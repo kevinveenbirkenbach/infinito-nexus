@@ -1,6 +1,6 @@
 ---
-- name: "Setup docker network for {{ application_id }}"
-  include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
+- name: Initialize docker
+  include_tasks: 02_docker.yml
   vars:
     docker_network_name: "{{ OPENLDAP_NETWORK }}"
     docker_network_subnet: "{{ networks.local[application_id].subnet }}"
@@ -26,11 +26,13 @@
     timeout: 120
     state: started
 
-- name: "Reset LDAP Credentials"
+- name: Ensure LDAP RootPW is set on every deploy
   include_tasks: 02_credentials.yml
   when:
-    - OPENLDAP_NETWORK_SWITCH_LOCAL | bool
-    - OPENLDAP_PROVISION_CREDENTIALS | bool
+  - OPENLDAP_NETWORK_SWITCH_LOCAL | bool
+  - OPENLDAP_PROVISION_CREDENTIALS | bool
+
+# NOTE: Credentials reset removed (Bitnami-specific). RootDN/RootPW are bootstrapped via container env.
 
 - name: "Create LDIF directories under {{ OPENLDAP_LDIF_PATH_HOST }}"
   file:
@@ -42,7 +44,7 @@
 - name: Query cn=config module lists
   shell: >
     docker exec {{ OPENLDAP_CONTAINER }}
-    ldapsearch -Y EXTERNAL -H ldapi:/// -LLL -b cn=config "(objectClass=olcModuleList)" dn
+    ldapsearch -Q -Y EXTERNAL -H ldapi:/// -LLL -b cn=config "(objectClass=olcModuleList)" dn
   register: ldap_modules_dns
   changed_when: false
 
@@ -73,7 +75,7 @@
 - name: Query available LDAP databases
   shell: >
     docker exec {{ OPENLDAP_CONTAINER }}
-    ldapsearch -Y EXTERNAL -H ldapi:/// -LLL -b cn=config "(olcDatabase=*)" dn
+    ldapsearch -Q -Y EXTERNAL -H ldapi:/// -LLL -b cn=config "(olcDatabase=*)" dn
   register: ldap_databases
   changed_when: false
 

@@ -1,29 +1,33 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-    image: "{{ OPENLDAP_IMAGE }}:{{ OPENLDAP_VERSION }}"
+    # Build local custom image (no Bitnami)
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    image: "infinito/openldap:local"
     container_name: "{{ OPENLDAP_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
+
 {% if OPENLDAP_NETWORK_EXPOSE_LOCAL | bool %}
     ports:
       - {{ DOCKER_BIND_HOST }}:{{ports.localhost.ldap['svc-db-openldap']}}:{{ OPENLDAP_DOCKER_PORT_OPEN }}
 {% endif %}
+
     volumes:
-      - 'data:/bitnami/openldap'
+      # Persist data + config
+      - 'data:/var/lib/ldap'
+      - 'config:/etc/ldap/slapd.d'
+
+      # Rendered LDIFs (read-only)
       - '{{ OPENLDAP_LDIF_PATH_HOST }}:{{ OPENLDAP_LDIF_PATH_DOCKER }}:ro'
-    healthcheck:
-      test: >
-        bash -c '
-        ldapsearch -x -H ldap://localhost:{{ OPENLDAP_DOCKER_PORT_OPEN }} \
-          -D "{{ LDAP.DN.ADMINISTRATOR.DATA }}" -w "{{ LDAP.BIND_CREDENTIAL }}" -b "{{ LDAP.DN.ROOT }}" > /dev/null \
-        && ldapsearch -Y EXTERNAL -H ldapi:/// \
-          -b cn=config "(&(objectClass=olcOverlayConfig)(olcOverlay=memberof))" \
-        | grep "olcOverlay:" | grep -q "memberof"
-        '
+
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% include 'roles/docker-compose/templates/volumes.yml.j2' %}
   data:
     name: "{{ OPENLDAP_VOLUME }}"
+  config:
+    name: "{{ OPENLDAP_VOLUME }}_config"
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
