@@ -43,7 +43,6 @@ jobs:
           set -euo pipefail
           export INFINITO_DISTRO="arch"
           export INFINITO_IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER}/infinito-${INFINITO_DISTRO}:ci-${GITHUB_SHA}"
-          export INFINITO_PULL_POLICY="always"
           make up UP_BUILD=0
 
       - name: Discover apps (JSON)
@@ -88,7 +87,6 @@ jobs:
           set -euo pipefail
           export INFINITO_DISTRO="arch"
           export INFINITO_IMAGE="ghcr.io/${GITHUB_REPOSITORY_OWNER}/infinito-${INFINITO_DISTRO}:ci-${GITHUB_SHA}"
-          export INFINITO_PULL_POLICY="always"
           make up UP_BUILD=0
 
       - name: Deploy app

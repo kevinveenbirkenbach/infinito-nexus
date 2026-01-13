@@ -90,6 +90,8 @@ down:
 # Control whether images are built before compose up (default: yes)
 UP_BUILD ?= 1
 
+# Auto-detect act (local) vs GitHub Actions (CI)
+INFINITO_PULL_POLICY ?= $(if $(ACT),never,always)
 
 up:
 ifeq ($(UP_BUILD),1)
@@ -97,8 +99,10 @@ ifeq ($(UP_BUILD),1)
 else
 	@echo ">>> Skipping local image build (UP_BUILD=0)"
 endif
-	@echo ">>> Start infinito compose stack (via python orchestrator)"
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" python3 -m cli.deploy.test.up
+	@echo ">>> Using INFINITO_PULL_POLICY=$(INFINITO_PULL_POLICY)"
+	@INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	  INFINITO_PULL_POLICY="$(INFINITO_PULL_POLICY)" \
+	  python3 -m cli.deploy.test.up
 
 up-local:
 	@$(MAKE) up UP_BUILD=1
