@@ -85,12 +85,12 @@ for distro in "${distro_arr[@]}"; do
       echo "--- no cleanup (failure) ---"
     fi
 
-    exit $rc
+    exit "$rc"
   } 2>&1 | tee "${log_file}"
 
   rc=${PIPESTATUS[0]}
   if [[ $rc -ne 0 ]]; then
     echo "FAILED: app=${APP} distro=${distro} (see ${log_file})" >&2
-    exit $rc
+    exit "$rc"
   fi
 done
