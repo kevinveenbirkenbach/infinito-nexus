@@ -112,8 +112,10 @@ class Compose:
         """
         Wait until systemd is ready to accept systemctl calls (DBus + /run/systemd/private).
         Avoids a race right after compose up.
+        On timeout: print last 200 log lines for debugging.
         """
         start = time.time()
+
         while True:
             r = self.exec(
                 [
@@ -126,12 +128,38 @@ class Compose:
                 check=False,
                 capture=True,
             )
+
             if r.returncode == 0:
                 return
 
             if (time.time() - start) > timeout_s:
+                print(">>> ERROR: systemd not ready, dumping last 200 log lines\n")
+
+                # Try journalctl first (preferred for systemd containers)
+                logs = self.exec(
+                    ["sh", "-lc", "journalctl -n 200 --no-pager || true"],
+                    check=False,
+                    capture=True,
+                )
+
+                print("===== journalctl (last 200 lines) =====")
+                print(logs.stdout or "<no output>")
+                print("======================================\n")
+
+                # Fallback: docker logs
+                docker_logs = subprocess.run(
+                    ["docker", "logs", "--tail", "200", "infinito"],
+                    cwd=self.repo_root,
+                    capture_output=True,
+                    text=True,
+                )
+
+                print("===== docker logs (last 200 lines) =====")
+                print(docker_logs.stdout or "<no output>")
+                print("=======================================\n")
+
                 raise RuntimeError(
-                    "systemd not ready after waiting. "
+                    "systemd not ready after waiting.\n"
                     f"last rc={r.returncode}\n"
                     f"STDOUT:\n{r.stdout}\n"
                     f"STDERR:\n{r.stderr}\n"
