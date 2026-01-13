@@ -66,15 +66,20 @@ class Compose:
 
     def up(self, *, run_init: bool = True) -> None:
         print(">>> Starting compose stack (coredns + infinito)")
-        self.run(["up", "-d", "coredns", "infinito"], check=True)
+
+        no_build = os.environ.get("INFINITO_NO_BUILD", "0") == "1"
+        args = ["up", "-d"]
+        if no_build:
+            args.append("--no-build")
+        args += ["coredns", "infinito"]
+
+        self.run(args, check=True)
 
         print(">>> Waiting for systemd to be ready")
         self.wait_for_systemd_ready()
 
         if run_init:
             print(">>> Running infinito entry.sh init")
-            # Reuse the same init entrypoint logic as the image does.
-            # Use sh -lc so PATH/env/profile are consistent and we can pass args.
             self.exec(
                 ["sh", "-lc", "/opt/src/infinito/scripts/docker/entry.sh true"],
                 workdir="/opt/src/infinito",

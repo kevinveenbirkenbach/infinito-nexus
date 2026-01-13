@@ -48,14 +48,13 @@ TEST_DEPLOY_TYPE ?= server
 # Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
 PYTHONPATH              ?= .
 
-# Control whether images are built before compose up (default: yes)
-UP_BUILD ?= 1
-
 # Overwrite defaults
-ifeq ($(IS_ACT),0)
+ifeq ($(GITHUB_ACTIONS),true)
   # -------- Real GitHub Actions CI --------
   INFINITO_PULL_POLICY ?= always
   INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):ci-$(GITHUB_SHA)
+  INFINITO_NO_BUILD ?= 1
+  export INFINITO_NO_BUILD
   export INFINITO_PULL_POLICY
   export INFINITO_IMAGE
 endif
@@ -100,15 +99,7 @@ down:
 	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
 
 up:
-ifeq ($(UP_BUILD),1)
-	@$(MAKE) build-missing
-else
-	@echo ">>> Skipping local image build (UP_BUILD=0)"
-endif
-	  python3 -m cli.deploy.test.up
-
-up-local:
-	@$(MAKE) up UP_BUILD=1
+	python3 -m cli.deploy.test.up
 
 list:
 	@echo "Generating the roles list"

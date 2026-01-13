@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          make up UP_BUILD=0
+          make up
 
       - name: Discover apps (JSON)
         id: discover
@@ -83,7 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          make up UP_BUILD=0
+          make up
 
       - name: Deploy app
         shell: bash
