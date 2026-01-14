@@ -10,4 +10,6 @@
 - PGAdmin https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536492 -> OAuth2
 - PHPMyAdmin https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536494 -> docker health
 - Pretix https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536549 -> health webserver
-- Sphinx https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536501 -Y sys-ctl-hlth-docker-volumes.infinito.nexus.service
+- Taiga https://chatgpt.com/c/69680d85-8b24-8330-9711-4ee076317503 https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536580 
+- Yourls sys-ctl-hlth-docker-container.infinito.nexus https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536555
+- web-svc-asset sys-ctl-hlth-webserver.infinito.nexus.service https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536598
