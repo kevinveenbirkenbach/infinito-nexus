@@ -24,6 +24,7 @@ jobs:
     outputs:
       matrix: ${{ steps.out.outputs.matrix }}
       image_tag: ${{ steps.tag.outputs.image_tag }}
+
     steps:
       - name: Install jq
         shell: bash
@@ -70,8 +71,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Disk pressure (start)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== Disk pressure: START ==="
+          echo "Runner: $(uname -a)"
+          echo "NIX_CONFIG=${NIX_CONFIG}"
+          echo
+          df -h
+          echo
+          docker version || true
+          echo
+          docker system df || true
+          echo
+          docker buildx version || true
+          echo
+          docker buildx du || true
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          install: true
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -80,17 +101,61 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push (with GHA cache)
+      - name: Disk pressure (pre-build)
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== Disk pressure: PRE-BUILD ==="
+          df -h
+          echo
+          docker system df || true
+          echo
+          docker buildx du || true
+
+      - name: Build & push (with cache + NIX_CONFIG build-arg)
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}
+
           build-args: |
             PKGMGR_IMAGE_REPO=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}
             PKGMGR_IMAGE_TAG=stable
             NIX_CONFIG=access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/infinito-cache-${{ matrix.distro }}:buildcache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/infinito-cache-${{ matrix.distro }}:buildcache,mode=max
+
+          # GitHub Actions cache (avoids huge GHCR cache images)
+          cache-from: type=gha,scope=infinito-${{ matrix.distro }}
+          cache-to: type=gha,mode=max,scope=infinito-${{ matrix.distro }}
+
+      - name: Disk pressure (post-build)
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== Disk pressure: POST-BUILD ==="
+          df -h
+          echo
+          docker system df || true
+          echo
+          docker buildx du || true
+
+      - name: Cleanup (always)
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== Cleanup ==="
+          docker buildx prune -af || true
+          docker builder prune -af || true
+          docker image prune -af || true
+          docker container prune -f || true
+          echo
+          echo "=== Disk pressure: AFTER CLEANUP ==="
+          df -h
+          echo
+          docker system df || true
+          echo
+          docker buildx du || true
