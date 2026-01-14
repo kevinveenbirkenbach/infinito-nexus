@@ -52,6 +52,7 @@
     src:    "{{ BBB_ENV_FILE_ORIGINE }}"
     dest:   "{{ BBB_ENV_FILE_LINK }}"
     state:  link
+    force:  true
 
 - name: "Setup docker-compose.yml file"
   include_tasks: "02_docker-compose.yml"
