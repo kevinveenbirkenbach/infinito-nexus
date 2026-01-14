@@ -21,6 +21,17 @@
   command: >
     docker cp {{ NEXTCLOUD_HOST_INCL_PATH }} {{ NEXTCLOUD_CONTAINER }}:{{ NEXTCLOUD_DOCKER_INCL_PATH }}
 
+- name: Wait until Nextcloud is installed (occ status)
+  command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} status"
+  register: occ_status
+  retries: 60
+  delay: 5
+  until: >
+    occ_status.rc == 0 and
+    (occ_status.stdout | default('')) is search('installed: true')
+  changed_when: false
+  failed_when: false
+
 - name: Append generated config to config.php only if not present
   command: >
     docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }} sh -c "
