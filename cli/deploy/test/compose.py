@@ -40,8 +40,12 @@ class Compose:
         )
 
     def build_infinito(self, *, no_cache: bool, missing_only: bool) -> None:
+        if os.environ.get("INFINITO_NO_BUILD", "0") == "1":
+            print(">>> INFINITO_NO_BUILD=1 -> skipping docker compose build")
+            return
+
         # image name in compose: "infinito-${INFINITO_DISTRO}"
-        image = f"infinito-{self.distro}"
+        image = os.environ.get("INFINITO_IMAGE") or f"infinito-{self.distro}"
 
         if missing_only:
             r = subprocess.run(

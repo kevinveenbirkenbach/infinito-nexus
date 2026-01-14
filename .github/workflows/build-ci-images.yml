@@ -8,11 +8,6 @@ on:
         required: false
         type: string
         default: "arch debian ubuntu fedora centos"
-      tag:
-        description: "Image tag suffix (default: ci-<sha>)"
-        required: false
-        type: string
-        default: ""
 
 permissions:
   contents: read
@@ -23,11 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.out.outputs.matrix }}
-      image_tag: ${{ steps.tag.outputs.image_tag }}
-
+      image_tag: latest
     steps:
       - name: Install jq
-        shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
@@ -35,27 +28,12 @@ jobs:
 
       - name: Compute matrix JSON
         id: out
-        shell: bash
         run: |
           set -euo pipefail
           distros="${{ inputs.distros }}"
-          # -> ["arch","debian",...]
           json="$(printf '%s' "$distros" | jq -Rc 'split(" ") | map(select(length>0))')"
           echo "matrix=${json}" >> "$GITHUB_OUTPUT"
           echo "Using matrix: ${json}"
-
-      - name: Compute CI tag
-        id: tag
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ -n "${{ inputs.tag }}" ]]; then
-            TAG="${{ inputs.tag }}"
-          else
-            TAG="ci-${GITHUB_SHA}"
-          fi
-          echo "image_tag=${TAG}" >> "$GITHUB_OUTPUT"
-          echo "Using image tag: ${TAG}"
 
   build:
     name: build & push (${{ matrix.distro }})
