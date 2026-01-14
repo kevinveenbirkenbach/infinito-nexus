@@ -77,7 +77,6 @@ jobs:
           set -euo pipefail
           echo "=== Disk pressure: START ==="
           echo "Runner: $(uname -a)"
-          echo "NIX_CONFIG=${NIX_CONFIG}"
           echo
           df -h
           echo
