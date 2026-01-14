@@ -16,6 +16,7 @@
     docker_git_repository_pull:           true
     docker_git_repository_branch:         "master"
     docker_compose_file_creation_enabled: true
+    docker_compose_flush_handlers:        true
 
 - name: "Akaunting | Create first-run marker to disable future setup"
   ansible.builtin.file:
