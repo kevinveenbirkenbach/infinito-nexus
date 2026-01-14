@@ -20,7 +20,7 @@
 - meta: flush_handlers
 
 - name: Check if listmonk database is already initialized
-  command: '{{ docker_compose_command_exec }} -T {{ database_container }} psql -U {{ database_username }} -d {{ database_name }} -c "\dt"'
+  command: '{{ LISTMONK_EXEC_DATABASE }} -c "\dt"'
   register: db_tables
   changed_when: false
   failed_when: false
@@ -51,10 +51,7 @@
 
 - name: Update administrator email and password login in Listmonk (as superuser)
   shell: |
-    docker exec -i {{ database_container }} psql \
-      -U {{ database_username }} \
-      -v ON_ERROR_STOP=1 \
-      -d {{ database_name }} << 'EOSQL'
+    {{ LISTMONK_EXEC_DATABASE }} -v ON_ERROR_STOP=1 << 'EOSQL'
     UPDATE users
     SET email = '{{ users.administrator.email }}',
         password_login = {{ 'false' if applications | get_app_conf(application_id, 'docker.services.oidc.enabled') else 'true' }}
@@ -65,10 +62,7 @@
 
 - name: Apply all Listmonk settings
   shell: |
-    docker exec -i {{ database_container }} psql \
-      -U {{ database_username }} \
-      -v ON_ERROR_STOP=1 \
-      -d {{ database_name }} << 'EOSQL'
+    {{ LISTMONK_EXEC_DATABASE }} -v ON_ERROR_STOP=1 << 'EOSQL'
     UPDATE settings
     SET value = '{{ item.value }}'::jsonb
     WHERE key = '{{ item.key }}';
