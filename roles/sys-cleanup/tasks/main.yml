@@ -1,0 +1,61 @@
+- name: "Cleanup caches and logs (cross-distro: arch/debian/ubuntu/fedora/centos)"
+  # CI/container cleanup to prevent disk blow-ups across all supported distros
+  become: true
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    echo "=== [cleanup] package manager caches ==="
+    if command -v apt-get >/dev/null 2>&1; then
+      apt-get clean || true
+      rm -rf /var/lib/apt/lists/* || true
+    fi
+
+    if command -v pacman >/dev/null 2>&1; then
+      pacman -Scc --noconfirm || true
+    fi
+
+    if command -v dnf >/dev/null 2>&1; then
+      dnf clean all || true
+      rm -rf /var/cache/dnf || true
+    fi
+
+    if command -v yum >/dev/null 2>&1; then
+      yum clean all || true
+      rm -rf /var/cache/yum || true
+    fi
+
+    echo "=== [cleanup] language/tool caches (best effort) ==="
+    rm -rf /root/.cache/pip /home/*/.cache/pip 2>/dev/null || true
+    rm -rf /root/.npm /home/*/.npm 2>/dev/null || true
+    rm -rf /root/.cache/yarn /home/*/.cache/yarn 2>/dev/null || true
+    rm -rf /root/.cargo/registry /root/.cargo/git 2>/dev/null || true
+    rm -rf /home/*/.cargo/registry /home/*/.cargo/git 2>/dev/null || true
+    rm -rf /root/.cache/go-build /home/*/.cache/go-build 2>/dev/null || true
+    rm -rf /root/.m2/repository /home/*/.m2/repository 2>/dev/null || true
+    rm -rf /root/.gradle/caches /home/*/.gradle/caches 2>/dev/null || true
+
+    echo "=== [cleanup] temp ==="
+    rm -rf /tmp/* /var/tmp/* 2>/dev/null || true
+  args:
+    executable: /bin/bash
+  changed_when: true
+
+- name: Cleanup journald logs (CI/container only)
+  # Prevent disk blow-ups in CI containers due to journald accumulation
+  become: true
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    # Show current journald usage (best effort)
+    journalctl --disk-usage || true
+
+    # Keep a small budget (adjust if you want)
+    journalctl --vacuum-size=100M
+
+    # Optional: also cap by age
+    journalctl --vacuum-time=3h || true
+
+    journalctl --disk-usage || true
+  args:
+    executable: /bin/bash
+  changed_when: true

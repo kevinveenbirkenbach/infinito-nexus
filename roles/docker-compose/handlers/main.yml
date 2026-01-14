@@ -1,21 +1,4 @@
 ---
-- name: Aggressively prune Docker data (system + buildx + builder)
-# Required, because otherwise the image gets to huge for github action runs ~ 14GB
-  become: true
-  ansible.builtin.shell: |
-    set -euo pipefail
-    docker system prune -af --volumes
-    docker buildx prune -af || true
-    docker builder prune -af || true
-  args:
-    executable: /bin/bash
-  changed_when: true
-  when: DOCKER_IN_CONTAINER | bool
-  listen:
-    - docker compose up
-    - docker compose restart
-    - docker compose build
-
 - name: Validate Docker Compose configuration
   command:
     cmd: docker compose -f {{ docker_compose.files.docker_compose }} config --quiet
@@ -111,3 +94,23 @@
     cmd: 'docker compose restart'
     chdir: "{{ docker_compose.directories.instance }}"
   listen: docker compose restart
+
+- name: Aggressively prune Docker data (system + buildx + builder)
+# Required, because otherwise the image gets to huge for github action runs ~ 14GB
+  become: true
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker system prune -af
+    docker buildx prune -af || true
+    docker builder prune -af || true
+    find /var/lib/docker/containers -name '*-json.log' -type f -exec truncate -s 0 {} \;
+  args:
+    executable: /bin/bash
+  changed_when: true
+  when:
+    - MODE_CLEANUP | bool
+    - DOCKER_IN_CONTAINER | bool
+  listen:
+    - docker compose up
+    - docker compose restart
+    - docker compose build

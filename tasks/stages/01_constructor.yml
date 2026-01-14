@@ -6,7 +6,6 @@
 
 - name: Detect container environment (systemd-detect-virt)
   ansible.builtin.command: systemd-detect-virt --container
-  register: detect_container
   changed_when: false
   failed_when: false
 
@@ -143,6 +142,13 @@
   community.general.timezone:
     name: "{{ HOST_TIMEZONE }}"
   when: not DOCKER_IN_CONTAINER | bool
+
+- name: System Cleanup
+  include_role:
+    name: sys-cleanup
+  when:
+    - MODE_CLEANUP | bool
+    - DOCKER_IN_CONTAINER | bool
 
 - name: "Load base roles"
   include_tasks: "./tasks/groups/{{ item }}-roles.yml"
