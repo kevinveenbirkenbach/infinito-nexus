@@ -6,7 +6,10 @@ docker:
       shared: true
     logout:
       enabled: true
-
+    ldap:
+      enabled: false
+      shared: false
+      trylocal: true # Allows local login if LDAP is down
     desktop:
       enabled: true
     matomo:
@@ -50,9 +53,6 @@ server:
     aliases: []
 rbac:
   roles: {}
-ldap:
-  local_enabled: true # Allows local login if LDAP is down
-
 plugins:
   oidc:
     enabled: true

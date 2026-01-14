@@ -4,7 +4,7 @@
     name: sys-stk-full-stateful
   vars:
     docker_compose_flush_handlers:  false
-    docker_git_repository_address:      "https://github.com/taigaio/taiga-docker"
+    docker_git_repository_address:  "https://github.com/taigaio/taiga-docker"
     docker_git_repository_pull:     true
 
 - name: "copy templates {{ TAIGA_SETTING_FILES }} for taiga-contrib-oidc-auth"

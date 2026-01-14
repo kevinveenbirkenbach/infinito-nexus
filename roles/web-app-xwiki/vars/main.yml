@@ -49,7 +49,7 @@ XWIKI_LDAP_PORT:                      "{{ LDAP.SERVER.PORT }}"
 XWIKI_LDAP_BASE_DN:                   "{{ LDAP.DN.ROOT }}"
 XWIKI_LDAP_BIND_DN:                   "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
 XWIKI_LDAP_BIND_PASS:                 "{{ LDAP.BIND_CREDENTIAL }}"
-XWIKI_LDAP_TRYLOCAL:                  "{{ applications | get_app_conf(application_id, 'ldap.local_enabled') }}"
+XWIKI_LDAP_TRYLOCAL:                  "{{ applications | get_app_conf(application_id, 'docker.services.ldap.trylocal') }}"
 XWIKI_LDAP_FIELDS_MAPPING:            "last_name={{ LDAP.USER.ATTRIBUTES.SURNAME }},first_name={{ LDAP.USER.ATTRIBUTES.FIRSTNAME }},email={{ LDAP.USER.ATTRIBUTES.MAIL }}"
 XWIKI_LDAP_ADMIN_GROUP_DN:            "cn={{ XWIKI_ADMIN_GROUP ~ ',' ~ LDAP.DN.OU.GROUPS }}"
 
