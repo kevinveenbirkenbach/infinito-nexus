@@ -10,3 +10,4 @@
 - PGAdmin https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536492 -> OAuth2
 - PHPMyAdmin https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536494 -> docker health
 - Pretix https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536549 -> health webserver
+- Sphinx https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536501 -Y sys-ctl-hlth-docker-volumes.infinito.nexus.service

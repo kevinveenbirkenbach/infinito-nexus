@@ -21,5 +21,5 @@ galaxy_info:
   run_after:
   - web-app-keycloak
   - web-app-mailu
-  - web-app-mastodon
+  - web-app-matomo
   lifecycle: beta
