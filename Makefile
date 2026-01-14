@@ -214,6 +214,13 @@ test-unit: build-missing
 test-integration: build-missing
 	@TEST_TYPE="integration" bash scripts/tests/code.sh
 
+ci-deploy-discover:
+	@./scripts/ci/discover.sh
+
+ci-deploy-app:
+	export MISSING_ONLY=true; \
+	./scripts/ci/deploy-app.sh
+
 test-deploy:
 	@echo "=== act: deploy $(TEST_DEPLOY_TYPE) (all apps, distro=$(INFINITO_DISTRO)) ==="
 	@wf=".github/workflows/test-deploy-$(TEST_DEPLOY_TYPE).yml"; \

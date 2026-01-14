@@ -11,10 +11,9 @@ permissions:
 
 env:
   # KISS: configure via env only
-  MODE: server
+  TEST_DEPLOY_TYPE: server
   DISTROS: "arch debian ubuntu fedora centos"
   ONLY_APP: ""
-  MISSING_ONLY: "true"
   NIX_CONFIG: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
@@ -47,7 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          apps="$(MODE="${MODE}" scripts/ci/discover.sh)"
+          apps="$(make ci-deploy-discover)"
           [[ -n "${apps}" ]] || apps='[]'
 
           if [[ -n "${ONLY_APP}" ]]; then
@@ -88,21 +87,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-
-          normalize_bool() {
-            case "${1:-}" in
-              true|True|TRUE|1) echo "true" ;;
-              false|False|FALSE|0) echo "false" ;;
-              *) echo "true" ;;
-            esac
-          }
-
-          export MODE="server"
-          export DISTROS="${DISTROS}"
-          export MISSING_ONLY="$(normalize_bool "${MISSING_ONLY}")"
+          export TEST_DEPLOY_TYPE="server"
           export APP="${{ matrix.app }}"
-
-          scripts/ci/deploy-one-app.sh
+          make ci-deploy-app
 
       - name: Show last 200 log lines on failure
         if: failure()

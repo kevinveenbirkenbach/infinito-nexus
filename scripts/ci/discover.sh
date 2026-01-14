@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose (SRP): Return JSON list of apps based on mode + regex filters.
 #
 # Inputs via env:
-#   MODE              = server|workstation|universal
+#   TEST_DEPLOY_TYPE              = server|workstation|universal
 #   INCLUDE_RE         (optional)
 #   EXCLUDE_RE         (optional)
 #   FINAL_EXCLUDE_RE   (optional)
@@ -12,7 +12,7 @@ set -euo pipefail
 # Output:
 #   JSON array to stdout
 
-MODE="${MODE:-server}"
+TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE:-server}"
 INCLUDE_RE="${INCLUDE_RE:-}"
 EXCLUDE_RE="${EXCLUDE_RE:-}"
 FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}"
@@ -45,7 +45,7 @@ discover_simple() {
   INCLUDE_RE="${include_re}" EXCLUDE_RE="${exclude_re}" scripts/tests/discover-apps.sh
 }
 
-case "${MODE}" in
+case "${TEST_DEPLOY_TYPE}" in
   server)
     : "${INCLUDE_RE:=^(web-app-|web-svc-)}"
     : "${EXCLUDE_RE:=^(web-app-oauth2-proxy)$}"
@@ -86,7 +86,7 @@ case "${MODE}" in
     )"
     ;;
   *)
-    echo "ERROR: MODE must be server|workstation|universal (got: ${MODE})" >&2
+    echo "ERROR: TEST_DEPLOY_TYPE must be server|workstation|universal (got: ${TEST_DEPLOY_TYPE})" >&2
     exit 2
     ;;
 esac

@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # Required env:
 #   APP="web-app-keycloak"
-#   MODE="server|workstation|universal"
+#   TEST_DEPLOY_TYPE="server|workstation|universal"
 #   DISTROS="arch debian ubuntu fedora centos"
 #
 # Optional env:
@@ -14,7 +14,7 @@ set -euo pipefail
 #   KEEP_STACK="true|false"
 
 APP="${APP:-}"
-MODE="${MODE:-server}"
+TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE:-server}"
 DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
 
 TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-alpha beta rc stable}"
@@ -36,7 +36,7 @@ KEEP_STACK="$(normalize_bool "${KEEP_STACK}")"
 
 export TESTED_LIFECYCLES
 
-deploy_type="${MODE}"
+deploy_type="${TEST_DEPLOY_TYPE}"
 
 mkdir -p logs
 
@@ -45,10 +45,10 @@ read -r -a distro_arr <<< "${DISTROS}"
 for distro in "${distro_arr[@]}"; do
   export INFINITO_DISTRO="${distro}"
 
-  log_file="logs/deploy-${MODE}-${distro}-${APP}.log"
+  log_file="logs/deploy-${TEST_DEPLOY_TYPE}-${distro}-${APP}.log"
   {
     echo "=== $(date -u) ==="
-    echo "mode=${MODE}"
+    echo "test_deploy_type=${TEST_DEPLOY_TYPE}"
     echo "deploy_type=${deploy_type}"
     echo "distro=${distro}"
     echo "app=${APP}"
