@@ -1,12 +1,12 @@
-name: CI (Scheduled)
+name: CI (Nightly)
 
 concurrency:
-  group: ci-schedule-global
-  cancel-in-progress: false
+  group: infinito-ci-global
+  cancel-in-progress: true
 
 on:
   schedule:
-    - cron: "33 10 * * 2"
+    - cron: "0 0 * * *"
 
 permissions:
   contents: read

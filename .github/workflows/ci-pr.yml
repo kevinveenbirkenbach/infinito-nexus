@@ -1,7 +1,7 @@
 name: CI (On Pull-Request)
 
 concurrency:
-  group: ci-pr-global
+  group: infinito-ci-global
   cancel-in-progress: false
 
 on:

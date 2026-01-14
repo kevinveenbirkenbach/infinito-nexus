@@ -1,7 +1,7 @@
 name: CI (Release Version)
 
 concurrency:
-  group: ci-version-global
+  group: infinito-ci-global
   cancel-in-progress: false
 
 on:

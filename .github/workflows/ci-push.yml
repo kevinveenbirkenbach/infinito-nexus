@@ -1,7 +1,7 @@
 name: CI (Push)
 
 concurrency:
-  group: ci-push-global
+  group: infinito-ci-global
   cancel-in-progress: false
 
 on:
