@@ -14,7 +14,6 @@ env:
   DISTROS: "arch debian ubuntu fedora centos"
   ONLY_APP: ""
   MISSING_ONLY: "true"
-  KEEP_STACK: "true"
   NIX_CONFIG: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
@@ -100,7 +99,6 @@ jobs:
           export MODE="rest"
           export DISTROS="${DISTROS}"
           export MISSING_ONLY="$(normalize_bool "${MISSING_ONLY}")"
-          export KEEP_STACK="$(normalize_bool "${KEEP_STACK}")"
           export APP="${{ matrix.app }}"
 
           scripts/ci/deploy-one-app.sh

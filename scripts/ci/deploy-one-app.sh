@@ -19,7 +19,7 @@ DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
 
 TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-alpha beta rc stable}"
 MISSING_ONLY="${MISSING_ONLY:-true}"
-KEEP_STACK="${KEEP_STACK:-true}"
+KEEP_STACK="${KEEP_STACK:-$([[ "${ACT:-}" == "true" ]] && echo true || echo false)}"
 
 [[ -n "${APP}" ]] || { echo "ERROR: APP is required"; exit 2; }
 
