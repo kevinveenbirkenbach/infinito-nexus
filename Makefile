@@ -50,7 +50,9 @@ PYTHONPATH              ?= .
 
 # Overwrite defaults
 ifeq ($(GITHUB_ACTIONS),true)
-	ifneq ($(ACT),true)
+	ifeq ($(ACT),true)
+		INSTALL_LOCAL_BUILD = 1
+	else
 		# -------- Real GitHub Actions CI --------
 		INFINITO_PULL_POLICY ?= always
 		INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):ci-$(GITHUB_SHA)
@@ -59,8 +61,7 @@ ifeq ($(GITHUB_ACTIONS),true)
 		export INFINITO_PULL_POLICY
 		export INFINITO_IMAGE
 		INSTALL_LOCAL_BUILD = 0
-	else
-		INSTALL_LOCAL_BUILD = 1
+		
 	endif
 else
 	INSTALL_LOCAL_BUILD = 1
