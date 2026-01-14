@@ -28,5 +28,5 @@ galaxy_info:
     class: fa-solid fa-cloud
   run_after:
   - web-app-keycloak
-  - web-app-mastodon
+  - web-app-matomo
   lifecycle: beta
