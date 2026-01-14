@@ -3,6 +3,13 @@
       include_role:
         name: sys-svc-webserver-https
       when: run_once_sys_svc_webserver_https is not defined
+
+    - name: "Load Alias integration"
+      include_tasks: "utils/load_app.yml"
+      vars:
+        load_app_id: web-opt-rdr-domains
+      when: redirect_domain_mappings | length > 0
+
     - include_tasks: utils/once/flag.yml
   when: run_once_sys_stk_front_base is not defined
 
