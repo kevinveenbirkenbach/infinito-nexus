@@ -253,7 +253,7 @@ test-deploy-app:
 test-deploy-rapid:
 	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set"; exit 1; fi
 	@echo "=== rapid deploy: $(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
 	  scripts/tests/deploy.sh \
 	    --type "$(TEST_DEPLOY_TYPE)" \
 	    --app "$(APP)" \

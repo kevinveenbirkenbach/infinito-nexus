@@ -11,8 +11,8 @@ contact:
       description: Send {{ 'us' if service_provider.type == 'legal' else 'me' }} an email
       icon:
         class: fa-solid fa-envelope
-      url: mailto:{{ service_provider.contact.email }}
-      identifier: {{ service_provider.contact.email }}
+      url: "mailto:{{ service_provider.contact.email }}"
+      identifier: "{{ service_provider.contact.email }}"
 
 {% endif %}
 {% if service_provider.contact.phone is defined %}

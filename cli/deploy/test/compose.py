@@ -82,10 +82,19 @@ class Compose:
 
         if run_init:
             print(">>> Running infinito entry.sh init")
-            self.exec(
+            r = self.exec(
                 ["sh", "-lc", "/opt/src/infinito/scripts/docker/entry.sh true"],
                 workdir="/opt/src/infinito",
+                check=False,
+                capture=True,
             )
+
+            if r.returncode != 0:
+                print("===== entry.sh stdout =====")
+                print(r.stdout or "<empty>")
+                print("===== entry.sh stderr =====")
+                print(r.stderr or "<empty>")
+                raise RuntimeError(f"entry.sh init failed (rc={r.returncode})")
 
     def down(self) -> None:
         print(">>> Stopping compose stack and removing volumes")
