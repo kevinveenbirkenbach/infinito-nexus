@@ -5,11 +5,10 @@
     ansible.builtin.set_fact:
       SYS_STK_BACK_STATEFULL_LOAD_LDAP: "{{ (SYS_STK_BACK_STATEFULL_LDAP_ENABLED | bool) and (SYS_STK_BACK_STATEFULL_LDAP_SHARED | bool) }}"
 
-  - name: "For '{{ application_id }}': Load OpenLDAP"
-    include_role:
-      name: svc-db-openldap
+  - name: "Load OpenLDAP (Once)"
+    include_tasks: "utils/load_app.yml"
     vars:
-      application_id: svc-db-openldap
+      load_app_id: 'svc-db-openldap'
     when:
       - SYS_STK_BACK_STATEFULL_LOAD_LDAP | bool
   when:
