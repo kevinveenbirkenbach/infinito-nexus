@@ -1,4 +1,8 @@
-name: Mark commit as stable
+name: CI (Release Version)
+
+concurrency:
+  group: ci-version-global
+  cancel-in-progress: false
 
 on:
   push:

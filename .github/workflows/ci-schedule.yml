@@ -1,5 +1,9 @@
 name: CI (Scheduled)
 
+concurrency:
+  group: ci-schedule-global
+  cancel-in-progress: false
+
 on:
   schedule:
     - cron: "33 10 * * 2"

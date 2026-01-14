@@ -1,4 +1,3 @@
-# .github/workflows/test-deploy-universal.yml
 name: Test Infinito.Nexus Deploy (universal)
 
 on:

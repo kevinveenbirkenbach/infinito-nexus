@@ -1,4 +1,8 @@
-name: CI (push)
+name: CI (Push)
+
+concurrency:
+  group: ci-push-global
+  cancel-in-progress: false
 
 on:
   push:

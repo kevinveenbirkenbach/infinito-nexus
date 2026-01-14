@@ -1,4 +1,8 @@
-name: CI (PR)
+name: CI (On Pull-Request)
+
+concurrency:
+  group: ci-pr-global
+  cancel-in-progress: false
 
 on:
   pull_request:

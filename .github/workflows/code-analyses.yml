@@ -28,15 +28,20 @@ jobs:
     uses: ./.github/workflows/test-code-unit.yml
   build-ci-images:
     uses: ./.github/workflows/build-ci-images.yml
-  test-deploy-server:
-    needs: build-ci-images
-    uses: ./.github/workflows/test-deploy-server.yml
-  test-deploy-workstation:
-    needs: build-ci-images
-    uses: ./.github/workflows/test-deploy-workstation.yml
   test-deploy-universal:
-    needs: build-ci-images
+    needs: 
+      - build-ci-images
     uses: ./.github/workflows/test-deploy-universal.yml
+  test-deploy-server:
+    needs: 
+      - build-ci-images
+    uses: ./.github/workflows/test-deploy-server.yml
+  # Server debugging has a higher priority, so first wait for all server deployment tests to finish
+  test-deploy-workstation:
+    needs: 
+      - build-ci-images
+      - test-deploy-server
+    uses: ./.github/workflows/test-deploy-workstation.yml
   test-install-make:
     uses: ./.github/workflows/test-install-make.yml
   test-install-pkgmgr:

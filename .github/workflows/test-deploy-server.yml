@@ -1,4 +1,3 @@
-# .github/workflows/test-deploy-server.yml
 name: Test Infinito.Nexus Deploy (server)
 
 on:
@@ -10,7 +9,6 @@ permissions:
   packages: read
 
 env:
-  # KISS: configure via env only
   TEST_DEPLOY_TYPE: server
   DISTROS: "arch debian ubuntu fedora centos"
   ONLY_APP: ""
