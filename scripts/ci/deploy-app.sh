@@ -11,7 +11,6 @@ set -euo pipefail
 # Optional env:
 #   TESTED_LIFECYCLES="alpha beta rc stable"
 #   MISSING_ONLY="true|false"
-#   KEEP_STACK="true|false"
 
 APP="${APP:-}"
 TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE:-server}"
@@ -19,7 +18,6 @@ DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
 
 TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-alpha beta rc stable}"
 MISSING_ONLY="${MISSING_ONLY:-true}"
-KEEP_STACK="${KEEP_STACK:-$([[ "${ACT:-}" == "true" ]] && echo true || echo false)}"
 
 [[ -n "${APP}" ]] || { echo "ERROR: APP is required"; exit 2; }
 
@@ -32,7 +30,6 @@ normalize_bool() {
 }
 
 MISSING_ONLY="$(normalize_bool "${MISSING_ONLY}")"
-KEEP_STACK="$(normalize_bool "${KEEP_STACK}")"
 
 export TESTED_LIFECYCLES
 
@@ -54,7 +51,6 @@ for distro in "${distro_arr[@]}"; do
     echo "app=${APP}"
     echo "tested_lifecycles=${TESTED_LIFECYCLES}"
     echo "missing_only=${MISSING_ONLY}"
-    echo "keep_stack=${KEEP_STACK}"
     echo
 
     echo "--- disk before ---"
@@ -64,7 +60,7 @@ for distro in "${distro_arr[@]}"; do
     set +e
     args=( --type "${deploy_type}" --app "${APP}" )
     if [[ "${MISSING_ONLY}" == "true" ]]; then args+=( --missing ); fi
-    if [[ "${KEEP_STACK}" == "true" ]]; then args+=( --keep-stack-on-failure ); fi
+    args+=( --keep-stack-on-failure )
     scripts/tests/deploy.sh "${args[@]}"
     rc=$?
     set -e
