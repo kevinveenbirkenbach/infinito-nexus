@@ -51,13 +51,17 @@
   shell: >
     docker exec {{ OPENLDAP_CONTAINER }}
     sh -lc 'grep -m1 "^dn: " /etc/ldap/slapd.d/cn=config/cn=module{0}.ldif | sed "s/^dn: //"'
-  register: openldap_module_dn
+  register: openldap_module_dn_raw
   changed_when: false
-  failed_when: openldap_module_dn.rc != 0 or (openldap_module_dn.stdout | trim) == ""
+  failed_when: openldap_module_dn_raw.rc != 0 or (openldap_module_dn_raw.stdout | trim) == ""
 
-- name: Set OPENLDAP_MODULE_DN fact
+- name: Normalize OPENLDAP_MODULE_DN (ensure ,cn=config suffix)
   set_fact:
-    OPENLDAP_MODULE_DN: "{{ openldap_module_dn.stdout | trim }}"
+    OPENLDAP_MODULE_DN: >-
+      {{
+        (openldap_module_dn_raw.stdout | trim)
+        ~ ('' if (openldap_module_dn_raw.stdout | trim) is search(',cn=config$') else ',cn=config')
+      }}
 
 - name: Query available LDAP databases
   shell: >
@@ -87,6 +91,14 @@
           )
         )
       }}
+- name: Normalize OPENLDAP_DATA_BACKEND_DN (ensure ,cn=config suffix)
+  set_fact:
+    OPENLDAP_DATA_BACKEND_DN: >-
+      {{
+        OPENLDAP_DATA_BACKEND_DN
+        ~ ('' if OPENLDAP_DATA_BACKEND_DN is search(',cn=config$') else ',cn=config')
+      }}
+  when: OPENLDAP_DATA_BACKEND_DN | default('') | length > 0
 
 - name: "Import LDIF Configuration"
   include_tasks: _ldifs_creation.yml
