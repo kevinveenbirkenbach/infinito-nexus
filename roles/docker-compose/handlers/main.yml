@@ -95,15 +95,31 @@
     chdir: "{{ docker_compose.directories.instance }}"
   listen: docker compose restart
 
-- name: Aggressively prune Docker data (system + buildx + builder)
-# Required, because otherwise the image gets to huge for github action runs ~ 14GB
+- name: Aggressively prune Docker data (keep networks + keep in-use images)
+  # Required, because otherwise the image grows too large for GitHub Actions (~14 GB).
+  # Docker networks must be preserved, as they may be external and created shortly
+  # before this task runs (e.g. by docker-compose or CI orchestration).
   become: true
   ansible.builtin.shell: |
     set -euo pipefail
-    docker system prune -af
+
+    echo "Docker disk usage before cleanup:"
+    docker system df || true
+
+    # Keep running containers and their images -> only prune unused data
+    docker container prune -f || true
+    docker image prune -af || true
+    docker volume prune -f || true
+
+    # Build cache
     docker buildx prune -af || true
     docker builder prune -af || true
-    find /var/lib/docker/containers -name '*-json.log' -type f -exec truncate -s 0 {} \;
+
+    # Truncate container logs
+    find /var/lib/docker/containers -name '*-json.log' -type f -exec truncate -s 0 {} \; || true
+
+    echo "Docker disk usage after cleanup:"
+    docker system df || true
   args:
     executable: /bin/bash
   changed_when: true
