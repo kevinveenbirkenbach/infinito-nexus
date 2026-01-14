@@ -22,3 +22,4 @@ MASTODON_SIDEKIQ_SERVICE_NAME:        "sidekiq"
 
 ## General
 MASTODON_ALLOWED_PRIVATE_ADDRESSES:   "{{ networks.local['svc-db-postgres'].subnet if 'web-app-chess' in group_names else ''}}"
+MASTODON_OIDC_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled')  }}"
