@@ -5,7 +5,6 @@
   vars:
     docker_compose_flush_handlers:        true
     docker_git_repository_pull:           false
-    docker_compose_file_creation_enabled: true
 
 - name: "Include role sys-stk-front-proxy for '{{ application_id }}'"
   include_role:

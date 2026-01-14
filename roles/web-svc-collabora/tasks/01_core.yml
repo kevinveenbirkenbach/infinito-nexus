@@ -4,7 +4,6 @@
     public: true
   vars:
     docker_compose_flush_handlers:        true
-    docker_compose_file_creation_enabled: true
     docker_git_repository_pull:           false
     webserver_vhost_flavour:              "basic"
     application_id:                       'web-svc-collabora'

@@ -1,4 +1,3 @@
-docker_compose_file_creation_enabled: true  # If set to true the file creation will be skipped
 docker_compose_flush_handlers:        false # Set to true in the vars/main.yml of the including role to autoflush after docker compose routine
 docker_git_repository_pull:           "{{ docker_git_repository_address is defined and docker_git_repository_address is string and docker_git_repository_address | length > 0 }}"
 DOCKER_COMPOSE_LOAD_SERVICES:         true # Implemented to deploy roles during development faster by skipping dependencies

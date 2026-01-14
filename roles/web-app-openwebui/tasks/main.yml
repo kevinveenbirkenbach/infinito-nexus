@@ -12,4 +12,3 @@
     name: sys-stk-full-stateless
   vars:
     docker_git_repository_pull:           false
-    docker_compose_file_creation_enabled: true

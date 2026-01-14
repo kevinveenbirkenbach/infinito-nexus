@@ -3,11 +3,10 @@
   include_role:
     name: sys-stk-full-stateless
   vars:
-    docker_compose_flush_handlers:        false
-    docker_compose_file_creation_enabled: false
-    docker_git_repository_pull:           true
-    docker_git_repository_address:        "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
-    docker_git_repository_branch:         "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+    docker_compose_flush_handlers:  false
+    docker_git_repository_pull:     true
+    docker_git_repository_address:  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
+    docker_git_repository_branch:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
     webserver_extra_configuration: >-
       {{ lookup(
            'ansible.builtin.template',
@@ -52,7 +51,6 @@
     src:    "{{ BBB_ENV_FILE_ORIGINE }}"
     dest:   "{{ BBB_ENV_FILE_LINK }}"
     state:  link
-    force:  true
 
 - name: "Setup docker-compose.yml file"
   include_tasks: "02_docker-compose.yml"
