@@ -16,7 +16,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument(
         "--type",
         required=True,
-        choices=["server", "workstation"],
+        choices=["server", "workstation", "universal"],
         help="Deploy type.",
     )
     parser.add_argument(

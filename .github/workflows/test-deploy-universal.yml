@@ -1,5 +1,5 @@
 # .github/workflows/test-deploy-universal.yml
-name: Test Infinito.Nexus Deploy (universal-rest)
+name: Test Infinito.Nexus Deploy (universal)
 
 on:
   workflow_call:
@@ -10,7 +10,7 @@ permissions:
   packages: read
 
 env:
-  MODE: rest
+  MODE: universal
   DISTROS: "arch debian ubuntu fedora centos"
   ONLY_APP: ""
   MISSING_ONLY: "true"
@@ -56,8 +56,8 @@ jobs:
           echo "apps=${apps}" >> "$GITHUB_OUTPUT"
           echo "apps_json=${apps}"
 
-  rest:
-    name: deploy:rest (${{ matrix.app }})
+  universal:
+    name: deploy:universal (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 240
     needs: discover
@@ -96,7 +96,7 @@ jobs:
             esac
           }
 
-          export MODE="rest"
+          export MODE="universal"
           export DISTROS="${DISTROS}"
           export MISSING_ONLY="$(normalize_bool "${MISSING_ONLY}")"
           export APP="${{ matrix.app }}"
@@ -113,7 +113,7 @@ jobs:
         if: ${{ always() && env.ACT != 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          name: deploy-logs-rest-${{ matrix.app }}
+          name: deploy-logs-universal-${{ matrix.app }}
           path: logs/
           if-no-files-found: warn
           retention-days: 14

@@ -42,7 +42,7 @@ UNIT_TESTS_DIR          ?= tests/unit
 INTEGRATION_TESTS_DIR   ?= tests/integration
 
 # Deploy test type
-# Allowed: server, workstation
+# Allowed: server, workstation, universal
 TEST_DEPLOY_TYPE ?= server
 
 # Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)

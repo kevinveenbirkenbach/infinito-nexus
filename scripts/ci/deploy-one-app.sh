@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # Required env:
 #   APP="web-app-keycloak"
-#   MODE="server|workstation|rest"
+#   MODE="server|workstation|universal"
 #   DISTROS="arch debian ubuntu fedora centos"
 #
 # Optional env:
@@ -37,9 +37,6 @@ KEEP_STACK="$(normalize_bool "${KEEP_STACK}")"
 export TESTED_LIFECYCLES
 
 deploy_type="${MODE}"
-if [[ "${MODE}" == "rest" ]]; then
-  deploy_type="server"
-fi
 
 mkdir -p logs
 

@@ -4,7 +4,7 @@ set -euo pipefail
 # Purpose (SRP): Return JSON list of apps based on mode + regex filters.
 #
 # Inputs via env:
-#   MODE              = server|workstation|rest
+#   MODE              = server|workstation|universal
 #   INCLUDE_RE         (optional)
 #   EXCLUDE_RE         (optional)
 #   FINAL_EXCLUDE_RE   (optional)
@@ -58,8 +58,8 @@ case "${MODE}" in
     apps_json="$(discover_simple "${INCLUDE_RE}" "${EXCLUDE_RE}")"
     apps_json="$(json_nonempty "${apps_json}")"
     ;;
-  rest)
-    # rest = all - (server ∪ workstation)
+  universal)
+    # universal = all - (server ∪ workstation)
     all_json="$(discover_simple '.*' '')"
     all_json="$(json_nonempty "${all_json}")"
 
@@ -86,7 +86,7 @@ case "${MODE}" in
     )"
     ;;
   *)
-    echo "ERROR: MODE must be server|workstation|rest (got: ${MODE})" >&2
+    echo "ERROR: MODE must be server|workstation|universal (got: ${MODE})" >&2
     exit 2
     ;;
 esac

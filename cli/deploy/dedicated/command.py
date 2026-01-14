@@ -28,9 +28,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-T",
         "--host-type",
-        choices=["server", "workstation"],
+        choices=["server", "workstation", "universal"],
         default="server",
-        help="Specify target type: server or workstation.",
+        help="Specify target type: server, workstation or universal.",
     )
     parser.add_argument(
         "-p", "--password-file", help="Vault password file for encrypted variables."

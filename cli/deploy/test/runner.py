@@ -57,7 +57,7 @@ def _run_deploy(
     debug: bool,
 ) -> int:
     """
-    deploy_type: "server" or "workstation"
+    deploy_type: "server", "workstation" or "universal"
     """
     cmd = [
         "python3",
@@ -98,7 +98,7 @@ def run_test_plan(
             "Runner no longer performs discovery. You must pass --app from the workflow matrix."
         )
 
-    if deploy_type not in {"server", "workstation"}:
+    if deploy_type not in {"server", "workstation", "universal"}:
         raise ValueError(f"Invalid deploy_type: {deploy_type}")
 
     repo_root = _repo_root_from_here()
