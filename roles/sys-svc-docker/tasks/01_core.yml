@@ -1,37 +1,22 @@
-- name: "Install docker engine (host only)"
+- name: Install Docker engine, compose, buildx and python dependencies
   ansible.builtin.package:
     name: >-
       {{
-        ['docker'] if ansible_os_family == 'Archlinux' else
-        ['docker.io'] if ansible_os_family == 'Debian' else
-        ['docker'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
-        omit
+        (
+          ['docker', 'docker-compose', 'docker-buildx', 'python-docker', 'python-requests']
+          if ansible_os_family == 'Archlinux' else
+
+          ['docker.io', 'docker-compose-plugin', 'docker-buildx-plugin', 'python3-docker', 'python3-requests']
+          if ansible_os_family == 'Debian' else
+
+          ['docker', 'docker-compose-plugin', 'docker-buildx', 'python3-docker', 'python3-requests']
+          if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
+
+          fail('Unsupported distribution for Docker role: ' ~ ansible_distribution ~ ' (' ~ ansible_os_family ~ ')')
+        )
       }}
     state: present
   notify: docker restart
-
-- name: "Install docker compose"
-  ansible.builtin.package:
-    name: >-
-      {{
-        ['docker-compose'] if ansible_os_family == 'Archlinux' else
-        ['docker-compose-plugin'] if ansible_os_family == 'Debian' else
-        ['docker-compose-plugin'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
-        omit
-      }}
-    state: present
-  notify: docker restart
-
-- name: "Install python docker dependencies"
-  ansible.builtin.package:
-    name: >-
-      {{
-        ['python-docker', 'python-requests'] if ansible_os_family == 'Archlinux' else
-        ['python3-docker', 'python3-requests'] if ansible_os_family == 'Debian' else
-        ['python3-docker', 'python3-requests'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
-        omit
-      }}
-    state: present
 
 - name: "Assert that required services are available"
   include_tasks: "02_assert_requirements.yml"
