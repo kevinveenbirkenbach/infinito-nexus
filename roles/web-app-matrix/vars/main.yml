@@ -32,6 +32,7 @@ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER: "/data/homeserver.yaml"
 MATRIX_SYNAPSE_LOG_PATH_HOST:         "{{ [ docker_compose.directories.config, MATRIX_SYNAPSE_DOMAIN ~'.log.config' ] | path_join }}"
 MATRIX_SYNAPSE_LOG_PATH_CONTAINER:    "/data/{{ MATRIX_SYNAPSE_DOMAIN }}.log.config"
 MATRIX_SYNAPSE_URL:                   "{{ WEB_PROTOCOL }}://{{ MATRIX_SYNAPSE_DOMAIN }}"
+MATRIX_SYNAPSE_LISTEN_FLAGS:          "{{ MATRIX_FEDERATION_PORT }} {{ 'ssl ' if (TLS_ENABLED | bool) else '' }}default_server"
 
 ## Element
 MATRIX_ELEMENT_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.element.version') }}"
