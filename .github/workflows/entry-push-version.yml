@@ -1,0 +1,29 @@
+name: CI (Release Version)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Version tag to release (e.g. v1.2.3)"
+        required: false
+        type: string
+
+concurrency:
+  group: infinito-ci-global
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  call-release:
+    name: Run release logic
+    uses: ./.github/workflows/release-version.yml
+    with:
+      tag: ${{ inputs.tag || github.ref_name }}
