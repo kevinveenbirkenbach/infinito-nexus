@@ -3,10 +3,13 @@
   include_role:
     name: sys-stk-full-stateful
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers: false
 
 - name: "Load install procedures for '{{ application_id }}''"
   include_tasks: 01_install.yml
+
+- name: "flush handlers for '{{ application_id }}' after configuration deployment"
+  meta: flush_handlers
 
 - name: "Load extensions procedures for '{{ application_id }}''"
   include_tasks: "02_extensions.yml"
