@@ -19,25 +19,8 @@
 
 - meta: flush_handlers
 
-- name: Check if listmonk database is already initialized
-  command: '{{ LISTMONK_EXEC_DATABASE }} -c "\dt"'
-  register: db_tables
-  changed_when: false
-  failed_when: false
-
-- name: Run Listmonk setup only if DB is empty
-  command:
-    cmd: docker compose run -T --rm application sh -c "yes | ./listmonk --install"
-    chdir: "{{ docker_compose.directories.instance }}"
-  when: "'No relations found.' in db_tables.stdout"
-
-- name: "Listmonk | run DB/schema upgrade (non-interactive)"
-  ansible.builtin.shell: |
-    set -o pipefail
-    echo "y" | docker compose run -T application ./listmonk --upgrade
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  when: MODE_UPDATE | bool
+- name: Include database setup routine for Listmonk
+  include_tasks: "01_database.yml"
 
 - name: Build OIDC settings JSON
   set_fact:
@@ -76,4 +59,3 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-
