@@ -5,13 +5,6 @@ on:
     tags:
       - "v*"
 
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Version tag to release (e.g. v1.2.3)"
-        required: false
-        type: string
-
 concurrency:
   group: infinito-ci-global
   cancel-in-progress: false
@@ -22,8 +15,35 @@ permissions:
   security-events: write
 
 jobs:
+  gate:
+    name: Ensure tag commit is on master
+    runs-on: ubuntu-latest
+    outputs:
+      allowed: ${{ steps.check.outputs.allowed }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Check tagged commit is reachable from master
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin master --depth=1 || true
+
+          if git merge-base --is-ancestor "${GITHUB_SHA}" "origin/master"; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+          fi
+
   call-release:
     name: Run release logic
+    needs: gate
+    if: needs.gate.outputs.allowed == 'true'
     uses: ./.github/workflows/release-version.yml
     with:
-      tag: ${{ inputs.tag || github.ref_name }}
+      tag: ${{ github.ref_name }}
