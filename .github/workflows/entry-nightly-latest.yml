@@ -2,8 +2,7 @@ name: CI (Nightly)
 
 concurrency:
   group: infinito-ci-global
-  # Kill running workflows for fresh start
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   schedule:
