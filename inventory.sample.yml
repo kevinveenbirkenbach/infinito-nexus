@@ -31,6 +31,11 @@ applications:
   svc-ai-ollama:
     # Disabled for test because they are to huge for github actions test
     preload_models: []
+    services:
+      ollama:
+        # The following image is required for github actions, because the official image is to huge
+        # @see https://hub.docker.com/r/alpine/ollama
+        image:              alpine/ollama
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 
