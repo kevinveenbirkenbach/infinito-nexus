@@ -1,3 +1,9 @@
+- name: Ensure nginx config directory exists
+  ansible.builtin.file:
+    path: "{{ NGINX.FILES.CONFIGURATION | dirname }}"
+    state: directory
+    mode: "0755"
+
 - name: Ensure base nginx.conf exists (bootstrap)
   ansible.builtin.copy:
     dest: "{{ NGINX.FILES.CONFIGURATION }}"
