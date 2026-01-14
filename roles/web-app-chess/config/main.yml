@@ -13,9 +13,9 @@ docker:
       enabled: true
       shared: true
     database:
-      shared: true
-      type: "postgres"
-      enabled:      true            # Use central DB role (recommended)
+      shared:   true
+      type:     "postgres"
+      enabled:  true            # Use central DB role (recommended)
     application:
       image:        "node"          # Base image family; final image is custom
       version:      "20-bullseye"   # >=16 as required upstream
