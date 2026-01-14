@@ -63,10 +63,11 @@ moduleload      back_mdb
 pidfile         /run/slapd/slapd.pid
 argsfile        /run/slapd/slapd.args
 
-# --- cn=config database (required so cn=config exists over LDAP) ---
+# --- cn=config database ---
 database        config
 access to *
   by dn.exact="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" manage
+  by dn.exact="${LDAP_ROOT_DN}" manage
   by * none
 
 # --- main data database ---
