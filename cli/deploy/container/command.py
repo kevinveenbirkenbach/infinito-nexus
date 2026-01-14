@@ -163,8 +163,6 @@ def start_ci_container(
             name,
             "-v",
             f"{project_root}:{INFINITO_SRC_DIR}",
-            "-e",
-            "INSTALL_LOCAL_BUILD=1",
             image,
             "sh",
             "-lc",
