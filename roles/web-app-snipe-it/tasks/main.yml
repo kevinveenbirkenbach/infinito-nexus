@@ -7,4 +7,4 @@
 
 - name: "Configure Snipe-IT LDAP settings"
   import_tasks: ldap.yml
-  when: applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False)
+  when: SNIPE_IT_LDAP_ENABLED | bool 

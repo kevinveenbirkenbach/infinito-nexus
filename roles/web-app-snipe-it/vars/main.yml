@@ -11,3 +11,7 @@ SNIPE_IT_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.serv
 SNIPE_IT_CONTAINER: "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.name') }}"
 SNIPE_IT_VOLUME:    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 SNIPE_IT_USER:      "www-data"
+
+# Authentification
+SNIPE_IT_OAUTH2_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.oauth2.enabled') }}"
+SNIPE_IT_LDAP_ENABLED:    "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
