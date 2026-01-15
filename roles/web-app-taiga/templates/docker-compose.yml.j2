@@ -18,7 +18,7 @@
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
       # - ./config.py:/taiga-back/settings/config.py
 {% if TAIGA_TAIGAIO_ENABLED | bool %}
-      - {{ docker_compose.directories.config }}taiga-local.py:/taiga-back/settings/local.py:ro
+      - {{ [docker_compose.directories.config,'taiga-local.py' ] | path_join }}:/taiga-back/settings/local.py:ro
 {% endif %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       taiga:
