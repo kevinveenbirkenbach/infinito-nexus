@@ -1,17 +1,11 @@
 from __future__ import annotations
 
 import argparse
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from .apps import validate_application_ids
 from .modes import add_dynamic_mode_args, build_modes_from_args, load_modes_from_yaml
-from .paths import (
-    CLI_ROOT,
-    INVENTORY_VALIDATOR_PATH,
-    MODES_FILE,
-    PLAYBOOK_PATH,
-    REPO_ROOT,
-)
+from .paths import INVENTORY_VALIDATOR_PATH, MODES_FILE, PLAYBOOK_PATH, REPO_ROOT
 from .runner import run_ansible_playbook
 
 
@@ -53,10 +47,23 @@ def build_parser() -> argparse.ArgumentParser:
         default=0,
         help="Increase verbosity (e.g. -vvv).",
     )
-    parser.add_argument("--logs", action="store_true", help="Keep logs during cleanup.")
     parser.add_argument("--diff", action="store_true", help="Enable Ansible diff mode.")
 
     return parser
+
+
+def _split_args(
+    argv: Optional[List[str]],
+    parser: argparse.ArgumentParser,
+) -> Tuple[argparse.Namespace, List[str]]:
+    """
+    Parse wrapper args and keep unknown args for direct ansible-playbook passthrough.
+
+    This enables users to pass native Ansible flags like:
+      --tags, --skip-tags, --check, --start-at-task, --forks, -e, ...
+    """
+    args, unknown = parser.parse_known_args(argv)
+    return args, unknown
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -71,19 +78,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     modes_meta = load_modes_from_yaml(MODES_FILE)
     modes_spec = add_dynamic_mode_args(parser, modes_meta)
 
-    args = parser.parse_args(argv)
+    args, passthrough = _split_args(argv, parser)
 
     # Validate application IDs
     validate_application_ids(args.inventory, args.id)
 
     # Build final mode map
     modes: Dict[str, Any] = build_modes_from_args(modes_spec, args)
-    modes["MODE_LOGS"] = args.logs
     modes["host_type"] = args.host_type
 
     run_ansible_playbook(
         repo_root=REPO_ROOT,
-        cli_root=CLI_ROOT,
         playbook_path=PLAYBOOK_PATH,
         inventory_validator_path=INVENTORY_VALIDATOR_PATH,
         inventory=args.inventory,
@@ -93,8 +98,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         password_file=args.password_file,
         verbose=args.verbose,
         skip_build=args.skip_build,
-        logs=args.logs,
         diff=args.diff,
+        ansible_args=passthrough,
     )
 
     return 0

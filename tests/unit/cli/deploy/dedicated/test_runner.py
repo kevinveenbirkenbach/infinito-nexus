@@ -65,7 +65,6 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
 
         runner.run_ansible_playbook(
             repo_root=repo_root,
-            cli_root="/repo/cli",  # currently unused, but kept in signature
             playbook_path=playbook_path,
             inventory_validator_path=inventory_validator_path,
             inventory=inventory_path,
@@ -75,14 +74,14 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             password_file=password_file,
             verbose=1,
             skip_build=False,
-            logs=False,
             diff=True,
+            ansible_args=None,
         )
 
         def was_called(cmd: List[str]) -> bool:
             return any(call_cmd == cmd for call_cmd, _kw in calls)
 
-        # Cleanup, build, tests (make must run in repo_root)
+        # Cleanup, build (make must run in repo_root)
         self.assertTrue(was_called(["make", "clean"]), "Expected 'make clean'")
         self.assertTrue(was_called(["make", "setup"]), "Expected 'make setup'")
 
@@ -152,6 +151,61 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         self.assertNotIn("capture_output", last_kw)
 
     @unittest.mock.patch("subprocess.run")
+    def test_run_ansible_playbook_appends_passthrough_args_last_for_overrides(
+        self, mock_run
+    ):
+        calls: List[Tuple[List[str], Dict[str, Any]]] = []
+        mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
+
+        repo_root = "/repo"
+        playbook_path = "/repo/playbook.yml"
+        inventory_validator_path = "/repo/cli/validate/inventory/__main__.py"
+
+        modes: Dict[str, Any] = {
+            "MODE_CLEANUP": False,
+            "MODE_ASSERT": False,
+            "MODE_DEBUG": False,
+        }
+
+        inventory_path = "/etc/inventories/github-ci/servers.yml"
+
+        passthrough = [
+            "--tags",
+            "deploy",
+            "-e",
+            "allowed_applications=override-app",
+            "-e",
+            "MODE_DEBUG=true",
+        ]
+
+        runner.run_ansible_playbook(
+            repo_root=repo_root,
+            playbook_path=playbook_path,
+            inventory_validator_path=inventory_validator_path,
+            inventory=inventory_path,
+            modes=modes,
+            limit=None,
+            allowed_applications=["web-app-foo"],
+            password_file=None,
+            verbose=0,
+            skip_build=True,
+            diff=False,
+            ansible_args=passthrough,
+        )
+
+        last_cmd, _last_kw = calls[-1]
+        self.assertEqual(last_cmd[0], "ansible-playbook")
+
+        # Passthrough must be appended at the very end (order matters for overrides)
+        self.assertGreaterEqual(len(last_cmd), len(passthrough))
+        self.assertEqual(last_cmd[-len(passthrough) :], passthrough)
+
+        # Ensure both wrapper and override extra-vars are present (override later wins)
+        cmd_str = " ".join(last_cmd)
+        self.assertIn("allowed_applications=web-app-foo", cmd_str)
+        self.assertIn("allowed_applications=override-app", cmd_str)
+
+    @unittest.mock.patch("subprocess.run")
     def test_run_ansible_playbook_failure_exits_with_code_and_skips_phases(
         self, mock_run
     ):
@@ -171,7 +225,6 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         with self.assertRaises(SystemExit) as ctx:
             runner.run_ansible_playbook(
                 repo_root=repo_root,
-                cli_root="/repo/cli",
                 playbook_path=playbook_path,
                 inventory_validator_path=inventory_validator_path,
                 inventory="/etc/inventories/github-ci/servers.yml",
@@ -181,8 +234,8 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
                 password_file=None,
                 verbose=0,
                 skip_build=True,
-                logs=False,
                 diff=False,
+                ansible_args=None,
             )
 
         self.assertEqual(ctx.exception.code, 4)
@@ -200,50 +253,11 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         self.assertFalse(any(call_cmd == ["make", "clean"] for call_cmd, _kw in calls))
         self.assertFalse(any(call_cmd == ["make", "setup"] for call_cmd, _kw in calls))
         self.assertFalse(
-            any(call_cmd == ["make", "test-messy"] for call_cmd, _kw in calls)
-        )
-        self.assertFalse(
             any(
                 any("inventory/__main__.py" in part for part in call_cmd)
                 for call_cmd, _kw in calls
             ),
             "Inventory validation should be skipped when MODE_ASSERT is False",
-        )
-
-    @unittest.mock.patch("subprocess.run")
-    def test_run_ansible_playbook_cleanup_with_logs_uses_clean(self, mock_run):
-        calls: List[Tuple[List[str], Dict[str, Any]]] = []
-        mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
-
-        repo_root = "/repo"
-        playbook_path = "/repo/playbook.yml"
-        inventory_validator_path = "/repo/cli/validate/inventory/__main__.py"
-
-        modes: Dict[str, Any] = {
-            "MODE_CLEANUP": True,
-            "MODE_ASSERT": False,
-            "MODE_DEBUG": False,
-        }
-
-        runner.run_ansible_playbook(
-            repo_root=repo_root,
-            cli_root="/repo/cli",
-            playbook_path=playbook_path,
-            inventory_validator_path=inventory_validator_path,
-            inventory="/etc/inventories/github-ci/servers.yml",
-            modes=modes,
-            limit=None,
-            allowed_applications=None,
-            password_file=None,
-            verbose=0,
-            skip_build=True,
-            logs=True,
-            diff=False,
-        )
-
-        self.assertTrue(
-            any(call_cmd == ["make", "clean"] for call_cmd, _kw in calls),
-            "Expected 'make clean' when MODE_CLEANUP=true (logs flag ignored by Makefile)",
         )
 
 
