@@ -8,7 +8,6 @@
   failed_when: dc_validate.rc != 0
   listen:
     - docker compose up
-    - docker compose restart
   when: MODE_ASSERT | bool
 
 - name: docker compose pull
@@ -30,7 +29,6 @@
   when: MODE_UPDATE | bool
   listen:
     - docker compose up
-    - docker compose restart
 
 - name: Build docker compose
   shell: |
@@ -88,13 +86,6 @@
   listen:
     - docker compose up
 
-
-- name: docker compose restart
-  command:
-    cmd: 'docker compose restart'
-    chdir: "{{ docker_compose.directories.instance }}"
-  listen: docker compose restart
-
 - name: Aggressively prune Docker data (keep networks + keep in-use images)
   # Required, because otherwise the image grows too large for GitHub Actions (~14 GB).
   # Docker networks must be preserved, as they may be external and created shortly
@@ -128,5 +119,4 @@
     - DOCKER_IN_CONTAINER | bool
   listen:
     - docker compose up
-    - docker compose restart
     - docker compose build

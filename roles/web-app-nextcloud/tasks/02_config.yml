@@ -4,7 +4,7 @@
   template:
     src: include.php.j2
     dest: "{{ NEXTCLOUD_HOST_INCL_PATH }}"
-  notify: docker compose restart
+  notify: docker compose up
 
 - name: Flush handlers so Nextcloud container is restarted and ready
   meta: flush_handlers
@@ -37,4 +37,4 @@
     docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }} sh -c "
       grep -q '{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}' {{ NEXTCLOUD_DOCKER_CONFIG_FILE }} || 
       cat {{ NEXTCLOUD_DOCKER_INCL_PATH }} >> {{ NEXTCLOUD_DOCKER_CONFIG_FILE }}"
-  notify: docker compose restart
+  notify: docker compose up

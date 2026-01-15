@@ -2,29 +2,29 @@
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
     sed -i "s/^\$CFG->dbhost *= *.*/\$CFG->dbhost = '{{ database_host }}';/" {{ MOODLE_CONFIG }}
-  notify: docker compose restart
+  notify: docker compose up
 
 - name: Update DB name
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
     sed -i "s/^\$CFG->dbname *= *.*/\$CFG->dbname = '{{ database_name }}';/" {{ MOODLE_CONFIG }}
-  notify: docker compose restart
+  notify: docker compose up
 
 - name: Update DB user
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
     sed -i "s/^\$CFG->dbuser *= *.*/\$CFG->dbuser = '{{ database_username }}';/" {{ MOODLE_CONFIG }}
-  notify: docker compose restart
+  notify: docker compose up
 
 - name: Update DB password
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
     sed -i "s/^\$CFG->dbpass *= *.*/\$CFG->dbpass = '{{ database_password }}';/" {{ MOODLE_CONFIG }}
-  notify: docker compose restart
+  notify: docker compose up
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Update CFG->wwwroot via sed in container
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
     sed -i -E "s|^(\$CFG->wwwroot[[:space:]]*=[[:space:]]*).*$|\1'{{ domains | get_url(application_id, WEB_PROTOCOL) }}';|" {{ MOODLE_CONFIG }}
-  notify: docker compose restart
+  notify: docker compose up
