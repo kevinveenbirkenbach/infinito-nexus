@@ -70,6 +70,10 @@ class Compose:
 
     def up(self, *, run_init: bool = True) -> None:
         print(">>> Starting compose stack (coredns + infinito)")
+        env = self._base_env()
+        keys = ["INFINITO_DISTRO","INFINITO_IMAGE","INFINITO_IMAGE_TAG","INFINITO_PULL_POLICY","INFINITO_NO_BUILD","GITHUB_SHA"]
+        print(">>> env:", {k: env.get(k) for k in keys})
+        print(">>> NIX_CONFIG:", "<set>" if env.get("NIX_CONFIG") else "<empty>")
 
         no_build = os.environ.get("INFINITO_NO_BUILD", "0") == "1"
         args = ["up", "-d"]
