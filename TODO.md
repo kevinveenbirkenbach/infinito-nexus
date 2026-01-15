@@ -15,3 +15,4 @@
 - Taiga https://chatgpt.com/c/69680d85-8b24-8330-9711-4ee076317503 https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536580 
 - Yourls sys-ctl-hlth-docker-container.infinito.nexus https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536555
 - web-svc-asset sys-ctl-hlth-webserver.infinito.nexus.service https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536598
+- web-svc-legal dependencies müssen auch bei der ivnentory erstellugn aufgelöst werden: https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21019474890/job/60431918204

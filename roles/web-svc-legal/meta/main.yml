@@ -24,4 +24,4 @@ galaxy_info:
     - all
   lifecycle: beta
 dependencies:
-- web-svc-html
+  - web-svc-html

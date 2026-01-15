@@ -22,16 +22,17 @@ BBB_COTURN_TLS_CERT_PATH:             "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_fold
 BBB_COTURN_TLS_KEY_PATH:              "{{ [ LETSENCRYPT_LIVE_PATH, ssl_cert_folder,   'privkey.pem'] | path_join }}"
 
 ## Turn
-BBB_COTURN_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.coturn.internal') }}"
+BBB_COTURN_ENABLED:                   "{{ not (applications | get_app_conf(application_id, 'docker.services.coturn.shared')) }}"
 BBB_TURN_DOMAIN:                      "{{ networks.internet.ip4             if BBB_COTURN_ENABLED else domains | get_domain(_BBB_COTURN_ROLE) }}"
 BBB_TURN_PORT:                        "{{ ports.public.stun_turn[application_id] if BBB_COTURN_ENABLED else ports.public.stun_turn[_BBB_COTURN_ROLE] }}"
+BBB_TURN_PROTOCOL:                    "{{ 'turns' if (TLS_ENABLED | bool) else 'turn' }}"
 BBB_STUN_PORT:                        "{{ ports.public.stun_turn[application_id] if BBB_COTURN_ENABLED else ports.public.stun_turn_tls[_BBB_COTURN_ROLE] }}"
 BBB_RELAY_PORT_START:                 "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
 BBB_RELAY_PORT_END:                   "{{ ports.public.relay_port_ranges[application_id ~ '_end'] }}"
 BBB_RELAY_PORT_RANGE:                 "{{ BBB_RELAY_PORT_START }}-{{ BBB_RELAY_PORT_END }}"
 
 ## Collabora
-BBB_COLLABORA_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.collabora.internal') }}"
+BBB_COLLABORA_ENABLED:                "{{ not (applications | get_app_conf(application_id, 'docker.services.collabora.shared')) }}"
 BBB_COLLABORA_URL:                    "{{ 'https://collabora:9980/cool' if BBB_COLLABORA_ENABLED else (domains | get_url('web-svc-collabora', WEB_PROTOCOL)) }}"
 
 ### Recording

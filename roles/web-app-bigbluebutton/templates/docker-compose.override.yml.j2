@@ -21,12 +21,14 @@ services:
       --fingerprint
       --no-multicast-peers
       --no-cli
+      --external-ip=${EXTERNAL_IPv4}
       --min-port={{ BBB_RELAY_PORT_START }}
       --max-port={{ BBB_RELAY_PORT_END }}
-      --external-ip=${EXTERNAL_IPv4}
       {% if BBB_IP6_ENABLED %}--external-ip=${EXTERNAL_IPv6}{% endif %}
+{% if TLS_ENABLED | bool %}
       --cert=${COTURN_TLS_CERT_PATH}
       --pkey=${COTURN_TLS_KEY_PATH}
+{% endif %}
 {% endif %}
 {% if BBB_COLLABORA_ENABLED | bool %}
   bbb-web:

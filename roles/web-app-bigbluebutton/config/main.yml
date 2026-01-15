@@ -28,8 +28,8 @@ docker:
       enabled: true
       shared: true
     bigbluebutton:
-      repository:     "https://github.com/kevinveenbirkenbach/bigbluebutton-docker.git"
-      version:        "bbb3.0"
+      repository:     "https://github.com/bigbluebutton/docker.git"
+      version:        "main"
       recording:
         enabled:      false  # Enable recordings of sessions (deactivated by  default because it crashed, also check GDPR comnpliance)
         cleanup:      true  # Auto-Cleanup Recordings
@@ -41,8 +41,8 @@ docker:
     greenlight:
       enabled:    true
     coturn:
-      internal:   false
+      shared: true
     collabora:
-      internal:   false
+      shared: true
     css:
       enabled: true
