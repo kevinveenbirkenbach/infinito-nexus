@@ -19,13 +19,14 @@ server:
       connect-src: []
 docker:
   services:
+# Deactivated the following services for the CI/CD deploy to keep the container slim
     logout:
-      enabled: true
+      enabled: "{{ not DOCKER_IN_CONTAINER }}"
     desktop:
-      enabled: true
+      enabled: "{{ not DOCKER_IN_CONTAINER }}"
     matomo:
-      enabled: true
-      shared: true
+      enabled: "{{ not DOCKER_IN_CONTAINER }}"
+      shared:  "{{ not DOCKER_IN_CONTAINER }}"
     litellm:
       backup:
         no_stop_required: true
