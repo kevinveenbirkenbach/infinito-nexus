@@ -268,6 +268,27 @@ test-deploy-app:
 		--container-options "--privileged" \
 		--network host
 
+test-deploy-rapid:
+	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set (e.g. APP=web-app-nextcloud)"; exit 1; fi
+	@echo "=== rapid deploy (with entry.sh): type=$(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
+	@docker exec -t "$(INFINITO_CONTAINER)" bash -lc '\
+		set -euo pipefail; \
+		cd /opt/src/infinito; \
+		echo ">>> Running entry.sh"; \
+		./scripts/docker/entry.sh true; \
+		echo ">>> Starting rapid deploy"; \
+		infinito deploy dedicated /etc/inventories/github-ci/servers.yml \
+			-T "$(TEST_DEPLOY_TYPE)" \
+			--skip-update \
+			--skip-backup \
+			--no-signal \
+			-l "localhost" \
+			-i "$(APP)" \
+			--diff \
+			-vv \
+			--password-file "/etc/inventories/github-ci/.password" \
+	'
+
 # Backwards compatible target (kept)
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
