@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 from typing import Any, Dict, List, Optional, Tuple
 
 from .apps import validate_application_ids
@@ -9,9 +10,104 @@ from .paths import INVENTORY_VALIDATOR_PATH, MODES_FILE, PLAYBOOK_PATH, REPO_ROO
 from .runner import run_ansible_playbook
 
 
+def _get_ansible_playbook_help() -> str:
+    """
+    Best-effort retrieval of `ansible-playbook --help`.
+
+    This is executed only when the user asks for --help, so runtime cost is negligible.
+    """
+    try:
+        cp = subprocess.run(
+            ["ansible-playbook", "--help"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
+        out = (cp.stdout or "").rstrip()
+        if not out:
+            return "[ansible-playbook --help returned no output]"
+        return out
+    except FileNotFoundError:
+        return "[ansible-playbook not found in PATH]"
+    except Exception as exc:
+        return f"[failed to run ansible-playbook --help: {exc}]"
+
+
+def _passthrough_explanation() -> str:
+    """
+    Explain how native ansible-playbook flags are used with this wrapper.
+    """
+    return (
+        "Passthrough of ansible-playbook options:\n"
+        "  All unknown CLI options (e.g. --tags, --check, -e, --forks, ...)\n"
+        "  are NOT parsed by this wrapper and are forwarded 1:1 to ansible-playbook.\n"
+        "\n"
+        "Important behavior:\n"
+        "  - The wrapper injects its own -e variables first (MODE_*, host_type, allowed_applications, ...).\n"
+        "  - Your own ansible-playbook options come last and can therefore override them,\n"
+        "    e.g. -e MODE_DEBUG=true.\n"
+        "\n"
+        "Examples:\n"
+        "  Dry-run using Ansible check mode:\n"
+        "    infinito deploy dedicated --check\n"
+        "\n"
+        "  Run only specific tags:\n"
+        "    infinito deploy dedicated --tags nginx,certbot\n"
+        "\n"
+        "  Skip tags:\n"
+        "    infinito deploy dedicated --skip-tags docker,build\n"
+        "\n"
+        "  Set or override extra variables:\n"
+        "    infinito deploy dedicated -e MODE_DEBUG=true -e foo=bar\n"
+        "\n"
+        "  Increase parallelism (Ansible forks):\n"
+        "    infinito deploy dedicated --forks 20\n"
+        "\n"
+        "  Start execution at a specific task:\n"
+        '    infinito deploy dedicated --start-at-task "WEB | Deploy"\n'
+    )
+
+
+class _CombinedHelpAction(argparse.Action):
+    """
+    Replace default argparse help with:
+      - wrapper help
+      - ansible-playbook --help
+      - passthrough usage explanation
+    """
+
+    def __call__(self, parser, namespace, values, option_string=None):  # type: ignore[override]
+        wrapper_help = parser.format_help().rstrip()
+        ansible_help = _get_ansible_playbook_help()
+        extra = _passthrough_explanation().rstrip()
+
+        print(wrapper_help)
+        print("\n" + "=" * 80)
+        print("ansible-playbook --help")
+        print("=" * 80)
+        print(ansible_help)
+        print("\n" + "=" * 80)
+        print("How to use ansible-playbook options with this wrapper")
+        print("=" * 80)
+        print(extra)
+
+        raise SystemExit(0)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Deploy the Infinito.Nexus stack using ansible-playbook."
+        description="Deploy the Infinito.Nexus stack using ansible-playbook.",
+        add_help=False,
+    )
+
+    # Custom combined help (-h / --help)
+    parser.add_argument(
+        "-h",
+        "--help",
+        action=_CombinedHelpAction,
+        nargs=0,
+        help="Show this help message and ansible-playbook --help.",
     )
 
     # Standard arguments
