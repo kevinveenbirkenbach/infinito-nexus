@@ -14,7 +14,7 @@ env:
   ONLY_APP: ""
   NIX_CONFIG: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-
+  INFINITO_IMAGE_TAG: ci-${{ github.sha }}
 jobs:
   discover:
     name: discover apps (arch)

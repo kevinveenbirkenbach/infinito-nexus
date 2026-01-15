@@ -55,7 +55,9 @@ ifeq ($(GITHUB_ACTIONS),true)
 	else
 		# -------- Real GitHub Actions CI --------
 		INFINITO_PULL_POLICY ?= always
-		INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):latest
+		INFINITO_IMAGE_TAG ?= latest
+		export INFINITO_IMAGE_TAG
+		INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):$(INFINITO_IMAGE_TAG) 		
 		INFINITO_NO_BUILD ?= 1
 		export INFINITO_NO_BUILD
 		export INFINITO_PULL_POLICY

@@ -2,58 +2,55 @@
 set -euo pipefail
 
 # Retag already built CI images (ci-<sha>) to <version> and latest (no rebuild).
-#
-# Required env:
-#   OWNER        (e.g. github.repository_owner)
-#   VERSION      (e.g. 1.2.3)  OR  GITHUB_REF_NAME=v1.2.3
-#   GITHUB_SHA
-#
-# Optional env:
-#   REGISTRY        (default: ghcr.io)
-#   REPO_PREFIX     (default: infinito)
-#   DISTROS         (default: "arch debian ubuntu fedora centos")
-#   DEFAULT_DISTRO  (default: arch)
 
-: "${OWNER:?OWNER is required}"
-: "${GITHUB_SHA:?GITHUB_SHA is required}"
+OWNER="${OWNER:-${GITHUB_REPOSITORY_OWNER:-}}"
+[[ -n "${OWNER}" ]] || { echo "ERROR: OWNER not set"; exit 2; }
 
 REGISTRY="${REGISTRY:-ghcr.io}"
 REPO_PREFIX="${REPO_PREFIX:-infinito}"
 DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
 DEFAULT_DISTRO="${DEFAULT_DISTRO:-arch}"
 
-# VERSION can be provided directly or derived from GitHub tag name
-if [[ -z "${VERSION:-}" ]]; then
-  : "${GITHUB_REF_NAME:?Either VERSION or GITHUB_REF_NAME must be set}"
-  VERSION="${GITHUB_REF_NAME#v}"
-fi
+# VERSION_TAG must be like "v1.2.3"
+VERSION_TAG="${VERSION_TAG:-${GITHUB_REF_NAME:-}}"
+[[ -n "${VERSION_TAG}" ]] || { echo "ERROR: VERSION_TAG not set"; exit 2; }
 
-CI_TAG="ci-${GITHUB_SHA}"
+# CI_TAG should be "ci-<sha>"
+CI_TAG="${CI_TAG:-ci-${GITHUB_SHA:-}}"
+[[ -n "${CI_TAG}" ]] || { echo "ERROR: CI_TAG not set"; exit 2; }
 
-echo "[release] OWNER=${OWNER}"
-echo "[release] VERSION=${VERSION}"
-echo "[release] CI_TAG=${CI_TAG}"
-echo "[release] DISTROS=${DISTROS}"
-echo "[release] DEFAULT_DISTRO=${DEFAULT_DISTRO}"
+echo "Retagging CI images:"
+echo "  CI_TAG     = ${CI_TAG}"
+echo "  VERSION_TAG= ${VERSION_TAG}"
+echo "  DISTROS    = ${DISTROS}"
 
-retag_one() {
-  local src="$1"
-  local dst="$2"
-  echo "[release] ${src} -> ${dst}"
-  docker buildx imagetools create -t "${dst}" "${src}"
-}
+for distro in ${DISTROS}; do
+  src="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:${CI_TAG}"
+  dst_ver="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:${VERSION_TAG}"
+  dst_latest="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:latest"
 
-for d in ${DISTROS}; do
-  base="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${d}"
+  echo
+  echo "==> ${distro}"
+  echo "    source: ${src}"
+  echo "    target: ${dst_ver}"
+  echo "    target: ${dst_latest}"
 
-  # full image: ci-<sha> -> version + latest
-  retag_one "${base}:${CI_TAG}" "${base}:${VERSION}"
-  retag_one "${base}:${CI_TAG}" "${base}:latest"
+  # Retag by digest (no rebuild)
+  docker buildx imagetools create \
+    -t "${dst_ver}" \
+    -t "${dst_latest}" \
+    "${src}"
 
-  # aliases for default distro (arch): infinito -> version + latest
-  if [[ "${d}" == "${DEFAULT_DISTRO}" ]]; then
-    alias_base="${REGISTRY}/${OWNER}/${REPO_PREFIX}"
-    retag_one "${base}:${CI_TAG}" "${alias_base}:${VERSION}"
-    retag_one "${base}:${CI_TAG}" "${alias_base}:latest"
+  # Also publish alias tags for the default distro (arch): infinito:<tag>
+  if [[ "${distro}" == "${DEFAULT_DISTRO}" ]]; then
+    alias_ver="${REGISTRY}/${OWNER}/${REPO_PREFIX}:${VERSION_TAG}"
+    alias_latest="${REGISTRY}/${OWNER}/${REPO_PREFIX}:latest"
+    docker buildx imagetools create \
+      -t "${alias_ver}" \
+      -t "${alias_latest}" \
+      "${src}"
   fi
 done
+
+echo
+echo "Done retagging CI images."

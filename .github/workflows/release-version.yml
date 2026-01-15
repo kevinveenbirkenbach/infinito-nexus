@@ -31,6 +31,7 @@ jobs:
     # unify input source (call vs dispatch)
     env:
       VERSION_TAG: ${{ inputs.tag || github.event.inputs.tag }}
+      CI_TAG: ""
       OWNER: ${{ github.repository_owner }}
       REGISTRY: ghcr.io
       REPO_PREFIX: infinito
@@ -54,6 +55,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute CI_TAG from checked out tag commit
+        id: citag
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          echo "CI_TAG=ci-${sha}" >> "$GITHUB_ENV"
+          echo "Using CI_TAG=ci-${sha}"
 
       - name: Verify this is the highest version
         id: highest
