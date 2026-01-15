@@ -4,6 +4,12 @@ DOMAIN_PRIMARY: infinito.example
 
 MODE_TEST: true          
 
+
+design:
+  css:
+    colors:
+      base: "#FFA500"
+
 OIDC:
   CLIENT:
     SECRET: VERYUNSAFESAMPLEPASSWORD1234
