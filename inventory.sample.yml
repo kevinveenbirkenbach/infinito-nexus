@@ -46,6 +46,13 @@ applications:
         matomo:
           enabled: false
           shared:  false
+  web-app-suitecrm:
+    docker:
+      services:
+        logout:
+          enabled: false
+        matomo:
+          enabled: false
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 
