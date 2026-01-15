@@ -69,7 +69,7 @@ services:
       - letsencrypt:/etc/letsencrypt/
 
     environment:
-      INFINITO_BUILD_LOCAL: "${INFINITO_BUILD_LOCAL:-1}"
+      INFINITO_COMPILE: "${INFINITO_COMPILE:-1}"
       INFINITO_SRC_DIR: /opt/src/infinito
       PYTHONHTTPSVERIFY: "1"
       GIT_SSL_NO_VERIFY: "0"

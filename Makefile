@@ -51,7 +51,7 @@ PYTHONPATH              ?= .
 # Overwrite defaults
 ifeq ($(GITHUB_ACTIONS),true)
 	ifeq ($(ACT),true)
-		INFINITO_BUILD_LOCAL ?= 1
+		INFINITO_COMPILE ?= 1
 	else
 		# -------- Real GitHub Actions CI --------
 		INFINITO_PULL_POLICY ?= always
@@ -62,13 +62,13 @@ ifeq ($(GITHUB_ACTIONS),true)
 		export INFINITO_NO_BUILD
 		export INFINITO_PULL_POLICY
 		export INFINITO_IMAGE
-		INFINITO_BUILD_LOCAL ?=  0
+		INFINITO_COMPILE ?=  0
 		
 	endif
 else
-	INFINITO_BUILD_LOCAL ?= 1
+	INFINITO_COMPILE ?= 1
 endif
-export INFINITO_BUILD_LOCAL
+export INFINITO_COMPILE
 
 # Distro
 INFINITO_DISTRO		?= arch
@@ -215,13 +215,22 @@ test: test-lint test-unit test-integration lint-ansible test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
 test-lint: build-missing
-	@TEST_TYPE="lint" INFINITO_BUILD_LOCAL=1 bash scripts/tests/code.sh
+	@TEST_TYPE="lint" \
+	INFINITO_COMPILE=0 \
+	INFINITO_PULL_POLICY="never" \
+	bash scripts/tests/code.sh
 
 test-unit: build-missing
-	@TEST_TYPE="unit" INFINITO_BUILD_LOCAL=1 bash scripts/tests/code.sh
+	@TEST_TYPE="unit" \
+	INFINITO_COMPILE=0 \
+	INFINITO_PULL_POLICY="never" \
+	bash scripts/tests/code.sh
 
 test-integration: build-missing
-	@TEST_TYPE="integration" INFINITO_BUILD_LOCAL=1 bash scripts/tests/code.sh
+	@TEST_TYPE="integration" \
+	INFINITO_COMPILE=0 \
+	INFINITO_PULL_POLICY="never" \
+	bash scripts/tests/code.sh
 
 ci-deploy-discover:
 	@./scripts/ci/discover.sh
