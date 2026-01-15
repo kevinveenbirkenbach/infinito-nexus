@@ -83,6 +83,7 @@
   environment:
     COMPOSE_HTTP_TIMEOUT:   "600"
     DOCKER_CLIENT_TIMEOUT:  "600"
+    COMPOSE_PARALLEL_LIMIT: "{{ '4' if (DOCKER_IN_CONTAINER | bool) else omit }}"
   listen:
     - docker compose up
 
