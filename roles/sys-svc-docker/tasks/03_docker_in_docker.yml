@@ -13,9 +13,6 @@
 - name: Configure docker daemon storage driver (container)
   ansible.builtin.copy:
     dest: "{{ SYS_SVC_DOCKER_DAEMON }}"
-    content: |
-      {
-        "storage-driver": "fuse-overlayfs"
-      }
+    src: daemon.json
     mode: "0644"
   notify: docker restart

@@ -4,6 +4,8 @@ x-ci-defaults: &ci_defaults
     - 172.30.0.53
   dns_opt:
     - ndots:1
+  dns_search:
+    - infinito.example
 
 services:
   # ------------------------------------------------------------
@@ -24,6 +26,9 @@ services:
   # Infinito runner container (systemd-enabled for CI)
   # ------------------------------------------------------------
   infinito:
+    networks:
+      default:
+        ipv4_address: 172.30.0.10
     build:
       context: .
       dockerfile: Dockerfile

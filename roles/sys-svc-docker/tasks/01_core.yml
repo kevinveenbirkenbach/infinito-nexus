@@ -22,8 +22,8 @@
   include_tasks: "02_assert_requirements.yml"
   when: MODE_ASSERT | bool
 
-- name: "Load fuse-overlayfs (in container)"
-  include_tasks: "03_fuse_overlayfs.yml"
+- name: "Load docker in docker procedures"
+  include_tasks: "03_docker_in_docker.yml"
   when: DOCKER_IN_CONTAINER | bool
 
 - name: Restart and enable docker service
