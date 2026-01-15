@@ -28,24 +28,19 @@
   failed_when: false
 
 - block:
-    - name: "DEBUG | superadmin check details"
-      debug:
-        msg: |
-          status={{ _super_check_ext.status }}
-          redirected={{ _super_check_ext.redirected | default('n/a') }}
-          url={{ _super_check_ext.url | default('n/a') }}
-          www_authenticate={{
-            _super_check_ext.www_authenticate
-            | default(_super_check_ext.headers['www-authenticate'] | default('n/a'))
-          }}
-          content_type={{ _super_check_ext.content_type | default(_super_check_ext.headers['content-type'] | default('n/a')) }}
-          content={{ (_super_check_ext.content | default(''))[:600] }}
-      changed_when: false
-
-    - name: "DEBUG | Compare superadminpassword (hash only)"
+    - name: "DEBUG | superadmin check + pw hash compare (condensed)"
       shell: |
         set -euo pipefail
 
+        echo "=== superadmin check ==="
+        echo "status={{ _super_check_ext.status }}"
+        echo "redirected={{ _super_check_ext.redirected | default('n/a') }}"
+        echo "url={{ _super_check_ext.url | default('n/a') }}"
+        echo "www_authenticate={{ _super_check_ext.www_authenticate | default(_super_check_ext.headers['www-authenticate'] | default('n/a')) }}"
+        echo "content_type={{ _super_check_ext.content_type | default(_super_check_ext.headers['content-type'] | default('n/a')) }}"
+        echo "content={{ (_super_check_ext.content | default(''))[:600] | replace('\n','\\n') }}"
+
+        echo "=== password hash compare ==="
         echo -n "container_hash="
         docker exec "{{ XWIKI_CONTAINER }}" sh -lc '
           cfg="/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg";
@@ -60,14 +55,9 @@
 
         echo -n "ansible_hash="
         printf "%s" "{{ XWIKI_SUPERADMIN_PASSWORD }}" | sha256sum | awk '{print $1}'
-      register: _dbg_pw_hash
+      register: _dbg_superadmin
       changed_when: false
       failed_when: false
-
-    - name: "DEBUG | Password hash outputs"
-      debug:
-        var: _dbg_pw_hash.stdout_lines
-      changed_when: false
 
     - name: "FAIL | superadmin authentication failed (extensions phase)"
       fail:
@@ -80,12 +70,11 @@
             | default(_super_check_ext.headers['www-authenticate'] | default('n/a'))
           }}
 
-          hashes:
-          {{ _dbg_pw_hash.stdout_lines | default([]) | join('\n') }}
+          debug:
+          {{ _dbg_superadmin.stdout | default('') }}
 
           hint: check xwiki.cfg in image / password / Dockerfile build
   when: _super_check_ext.status != 200
-
 
 - name: Load setup procedures for admin
   include_tasks: 03_administrator.yml
