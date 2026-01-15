@@ -12,16 +12,16 @@
   until: snipeit_admin_check.status == 200
   when: not ( SNIPE_IT_OAUTH2_ENABLED | bool )
 
-- name: "Wait until Snipe-IT DB migrations are ready (settings table exists)"
+- name: "Wait until Snipe-IT settings row exists (settings table seeded)"
   shell: |
     docker-compose exec -T -u {{ SNIPE_IT_USER }} application \
-      php -r 'require "vendor/autoload.php"; $app=require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); echo Illuminate\Support\Facades\Schema::hasTable("settings") ? "yes\n" : "no\n";'
+      php -r 'require "vendor/autoload.php"; $app=require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); if (!Illuminate\Support\Facades\Schema::hasTable("settings")) { echo "no\n"; exit(0); } echo \App\Models\Setting::query()->count() > 0 ? "yes\n" : "no\n";'
   args:
     chdir: "{{ docker_compose.directories.instance }}"
-  register: snipeit_settings_table
+  register: snipeit_settings_row
   retries: 60
   delay: 5
-  until: snipeit_settings_table.stdout is search("yes")
+  until: snipeit_settings_row.stdout is search("yes")
   changed_when: false
 
 - name: "Set all LDAP settings via Laravel Setting model (inside container as {{ SNIPE_IT_USER }})"
