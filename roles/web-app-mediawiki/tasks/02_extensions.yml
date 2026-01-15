@@ -70,8 +70,8 @@
     executable: /bin/bash
   register: _tools
   changed_when: "'INSTALLED_TOOLS' in (_tools.stdout | default(''))"
+  notify: docker compose up
 
-# Ensure Composer is available inside the container (idempotent)
 - name: "EXT | Ensure Composer available in container"
   shell: |
     docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '

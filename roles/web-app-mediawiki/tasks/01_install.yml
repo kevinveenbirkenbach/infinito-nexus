@@ -16,7 +16,7 @@
     src: "{{ cfg.src }}"
     dest: "{{ cfg.dest }}"
     owner: root
-    group: "{{ MEDIAWIKI_USER_GID }}"          # www-data
+    group: "{{ MEDIAWIKI_USER_GID }}"
     mode: "0640"
   loop:
     - src: "oidc.php.j2"
@@ -34,3 +34,4 @@
   when: cfg.when | bool
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   register: mediawiki_config_render
+  notify: docker compose up

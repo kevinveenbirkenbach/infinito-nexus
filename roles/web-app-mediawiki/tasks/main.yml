@@ -8,12 +8,35 @@
 - name: "Load install procedures for '{{ application_id }}''"
   include_tasks: 01_install.yml
 
+- name: "flush handlers for '{{ application_id }}' after installation finished"
+  meta: flush_handlers
+
+- name: "MEDIAWIKI | Wait until container exists"
+  shell: "docker inspect {{ MEDIAWIKI_CONTAINER }} >/dev/null 2>&1"
+  args:
+    executable: /bin/bash
+  register: _mw_exists
+  retries: 20
+  delay: 1
+  until: _mw_exists.rc == 0
+  changed_when: false
+
 - name: "Load extensions procedures for '{{ application_id }}''"
   include_tasks: "02_extensions.yml"
   when: MEDIAWIKI_OIDC_ENABLED | bool
 
 - name: "flush handlers for '{{ application_id }}' after preparation finished"
   meta: flush_handlers
+
+- name: "MEDIAWIKI | Wait until container exists"
+  shell: "docker inspect {{ MEDIAWIKI_CONTAINER }} >/dev/null 2>&1"
+  args:
+    executable: /bin/bash
+  register: _mw_exists
+  retries: 20
+  delay: 1
+  until: _mw_exists.rc == 0
+  changed_when: false
 
 - name: "Load update procedures for '{{ application_id }}''"
   include_tasks: 03_update.yml
