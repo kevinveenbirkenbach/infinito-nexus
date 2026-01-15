@@ -82,7 +82,7 @@ http {
         fastcgi_hide_header X-Powered-By;
         
         # Path to the root of your installation
-        root /var/www/html;
+        root {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }};
 
         # Specify how to handle directories -- specifying `/index.php$request_uri`
         # here as the fallback means that Nginx always exhibits the desired behaviour
