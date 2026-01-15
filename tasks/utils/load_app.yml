@@ -1,8 +1,8 @@
 
 # Load with load app id
-- name: "Load Application: '{{ load_app_id }}'"
+- name: "Coller '{{application_id }}' loads application: '{{ load_app_id }}'"
   include_role:
-    name:   "{{ application_id }}"
+    name:   "{{ load_app_id }}"
     public: false
   vars:
     application_id: "{{ load_app_id }}"
