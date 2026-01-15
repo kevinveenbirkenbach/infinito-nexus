@@ -3,16 +3,17 @@
 - name: "SYS-STK-BACKEND | Load optional dependencies (once)"
   ansible.builtin.include_tasks: "_load_service.yml"
   loop:
-    - service_id: "svc-db-openldap"
-      service_name: "ldap"
+    - id: "svc-db-openldap"
+      name: "ldap"
 
-    - service_id: "svc-ai-ollama"
-      service_name: "ollama"
+    - id: "svc-ai-ollama"
+      name: "ollama"
   loop_control:
-    label: "{{ item.service_id }}"
+    loop_var: service
+    label: "{{ service.id }}"
   vars:
-    service_id: "{{ item.service_id }}"
-    service_name: "{{ item.service_name }}"
+    service_id: "{{ service.id }}"
+    service_name: "{{ service.name }}"
 
 - name: "Load Database"
   ansible.builtin.include_tasks: "01_database.yml"
