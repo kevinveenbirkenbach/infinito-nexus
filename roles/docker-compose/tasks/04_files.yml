@@ -30,7 +30,9 @@
     dest: "{{ docker_compose.files.env }}"
     mode: '0640'
     force: yes
-  notify: docker compose up
+  notify:
+    - docker compose up
+    - docker compose build
   with_first_found:
     - files:
         - "{{ application_id | abs_role_path_by_application_id }}/templates/env.j2"

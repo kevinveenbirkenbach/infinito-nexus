@@ -20,11 +20,22 @@ class RunConfig:
     log_enabled: bool
 
 
-def open_log_file() -> tuple[TextIO, Path]:
-    base = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
-    log_dir = base / "infinito" / "logs"
-    os.makedirs(log_dir, exist_ok=True)
-    os.chmod(log_dir, 0o700)
+def open_log_file(log_dir: Path) -> tuple[TextIO, Path]:
+    """
+    Create/open a timestamped log file inside log_dir.
+
+    - log_dir is mandatory (provided via --log <LOG_DIR>)
+    - log_dir is created with parents=True if missing
+    """
+    log_dir = log_dir.expanduser()
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    # Best-effort permission hardening (ignore failures on non-POSIX / special FS)
+    try:
+        os.chmod(log_dir, 0o700)
+    except Exception:
+        pass
+
     timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
     log_file_path = log_dir / f"{timestamp}.log"
     fd = os.open(str(log_file_path), os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)

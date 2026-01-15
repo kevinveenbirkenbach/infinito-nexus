@@ -1,4 +1,3 @@
-import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -8,14 +7,14 @@ from cli.core.run import RunConfig, open_log_file, run_command_once
 
 
 class TestRun(unittest.TestCase):
-    def test_open_log_file_creates_in_state_home(self):
+    def test_open_log_file_creates_in_given_dir(self):
         with tempfile.TemporaryDirectory() as td:
-            os.environ["XDG_STATE_HOME"] = td
+            log_dir = Path(td) / "logs"
 
-            f, path = open_log_file()
+            f, path = open_log_file(log_dir)
             try:
                 self.assertTrue(path.exists())
-                self.assertIn(Path(td), path.parents)
+                self.assertIn(log_dir, path.parents)
             finally:
                 f.close()
 

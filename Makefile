@@ -277,16 +277,20 @@ test-local-rapid:
 		echo ">>> Running entry.sh"; \
 		./scripts/docker/entry.sh true; \
 		echo ">>> Starting rapid deploy"; \
-		infinito deploy dedicated /etc/inventories/github-ci/servers.yml \
+		infinito deploy dedicated /etc/inventories/local-full-${TEST_DEPLOY_TYPE}/servers.yml \
 			-T "$(TEST_DEPLOY_TYPE)" \
 			--skip-update \
 			--skip-backup \
+			--id "$(APP)" \
 			--no-signal \
+			--log /opt/src/infinito/logs \
+			--debug \
 			-l "localhost" \
-			-i "$(APP)" \
 			--diff \
 			-vv \
-			--password-file "/etc/inventories/github-ci/.password" \
+			--password-file "/etc/inventories/local-full-${TEST_DEPLOY_TYPE}/.password" \
+			-e ASYNC_ENABLED=false \
+			-e SYS_SERVICE_ALL_ENABLED=false \
 	'
 
 test-local-full: up

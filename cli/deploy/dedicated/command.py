@@ -129,7 +129,6 @@ def build_parser() -> argparse.ArgumentParser:
         "-B", "--skip-build", action="store_true", help="Skip build phase."
     )
     parser.add_argument(
-        "-i",
         "--id",
         nargs="+",
         default=[],

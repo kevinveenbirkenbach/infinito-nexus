@@ -17,8 +17,6 @@
     volumes:
       # Persist data + config
       - 'data:/var/lib/ldap'
-      - 'config:/etc/ldap/slapd.d'
-
       # Rendered LDIFs (read-only)
       - '{{ OPENLDAP_LDIF_PATH_HOST }}:{{ OPENLDAP_LDIF_PATH_DOCKER }}:ro'
 

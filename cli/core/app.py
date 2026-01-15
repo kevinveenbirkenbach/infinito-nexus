@@ -23,7 +23,7 @@ from cli.core.sounds import init_multiprocessing, play_start_intro_async
 class Flags:
     sound_enabled: bool = False
     no_signal: bool = False
-    log_enabled: bool = False
+    log_dir: Path | None = None
     git_clean: bool = False
     infinite: bool = False
     help_all: bool = False
@@ -31,11 +31,71 @@ class Flags:
 
 
 def _first_non_flag_token(argv: List[str]) -> str | None:
-    for token in argv[1:]:  # skip argv[0] (program name)
-        if token.startswith("-"):
+    """
+    Return the first non-flag token after argv[0], but treat '--log <ARG>' as a flag
+    with a required argument (skip both tokens).
+    """
+    i = 1
+    while i < len(argv):
+        token = argv[i]
+
+        # Skip flags and their args
+        if token == "--log":
+            # Skip '--log' and its argument if present
+            i += 2
             continue
+
+        if token.startswith("-"):
+            i += 1
+            continue
+
         return token
+
     return None
+
+
+def _parse_log_dir(argv: List[str]) -> Path | None:
+    """
+    Parse and remove '--log <LOG_DIR>' from argv.
+
+    - The log path argument is mandatory when --log is present.
+    - Logging is only allowed for `deploy` commands. If used with a different
+      top-level command, it is silently ignored (but still removed from argv).
+    """
+    if "--log" not in argv:
+        return None
+
+    i = argv.index("--log")
+    if i + 1 >= len(argv):
+        print(
+            color_text(
+                "Error: --log requires a path argument (e.g. --log /tmp/infinito-logs).",
+                Fore.RED,
+            )
+        )
+        raise SystemExit(1)
+
+    raw = argv[i + 1]
+    if raw.startswith("-"):
+        print(
+            color_text(
+                "Error: --log requires a path argument (e.g. --log /tmp/infinito-logs).",
+                Fore.RED,
+            )
+        )
+        raise SystemExit(1)
+
+    # Determine the first command token (skipping '--log <ARG>' properly)
+    first_cmd = _first_non_flag_token(argv)
+
+    # Always remove '--log <ARG>' from argv
+    del argv[i : i + 2]
+
+    # Keep previous behavior: only enable logging for "deploy"
+    if first_cmd != "deploy":
+        return None
+
+    return Path(raw).expanduser()
 
 
 def parse_flags(argv: List[str]) -> Flags:
@@ -44,12 +104,7 @@ def parse_flags(argv: List[str]) -> Flags:
     flags.sound_enabled = "--sound" in argv and (argv.remove("--sound") or True)
     flags.no_signal = "--no-signal" in argv and (argv.remove("--no-signal") or True)
 
-    flags.log_enabled = "--log" in argv
-    if flags.log_enabled:
-        first_cmd = _first_non_flag_token(argv)
-        if first_cmd != "deploy":
-            argv.remove("--log")
-            flags.log_enabled = False
+    flags.log_dir = _parse_log_dir(argv)
 
     flags.git_clean = "--git-clean" in argv and (argv.remove("--git-clean") or True)
     flags.infinite = "--infinite" in argv and (argv.remove("--infinite") or True)
@@ -78,7 +133,7 @@ def main() -> None:
     if flags.sound_enabled:
         threading.Thread(target=play_start_intro_async, daemon=True).start()
 
-    cli_dir = Path(__file__).resolve().parents[1]  # .../cli/core/app.py -> .../cli
+    cli_dir = Path(__file__).resolve().parents[1]
     # sanity: cli_dir should contain __init__.py and __main__.py of dispatcher
     # but we do not hard-fail here
 
@@ -123,8 +178,8 @@ def main() -> None:
         raise SystemExit(0)
 
     log_file = None
-    if flags.log_enabled:
-        log_file, log_path = open_log_file()
+    if flags.log_dir is not None:
+        log_file, log_path = open_log_file(flags.log_dir)
         print(color_text(f"Tip: Log file created at {log_path}", Fore.GREEN))
 
     full_cmd = [sys.executable, "-m", module] + remaining
@@ -133,7 +188,7 @@ def main() -> None:
         no_signal=flags.no_signal,
         sound_enabled=flags.sound_enabled,
         alarm_timeout=flags.alarm_timeout,
-        log_enabled=flags.log_enabled,
+        log_enabled=flags.log_dir is not None,
     )
 
     try:

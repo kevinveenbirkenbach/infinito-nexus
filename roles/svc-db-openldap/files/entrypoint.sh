@@ -56,6 +56,7 @@ write_slapd_conf() {
 include         ${schema_dir}/core.schema
 include         ${schema_dir}/cosine.schema
 include         ${schema_dir}/inetorgperson.schema
+include         ${schema_dir}/nis.schema
 
 modulepath      ${module_path}
 moduleload      back_mdb
