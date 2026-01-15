@@ -17,5 +17,4 @@
     '
   args:
     executable: /bin/bash
-  listen: "mediawiki update"
   changed_when: false

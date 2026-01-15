@@ -8,9 +8,6 @@
 - name: "Load install procedures for '{{ application_id }}''"
   include_tasks: 01_install.yml
 
-- name: "flush handlers for '{{ application_id }}' after configuration deployment"
-  meta: flush_handlers
-
 - name: "Load extensions procedures for '{{ application_id }}''"
   include_tasks: "02_extensions.yml"
   when: MEDIAWIKI_OIDC_ENABLED | bool
@@ -18,7 +15,17 @@
 - name: "flush handlers for '{{ application_id }}' after preparation finished"
   meta: flush_handlers
 
+- name: "Load update procedures for '{{ application_id }}''"
+  include_tasks: 03_update.yml
+  when: >-
+      {{
+        (mediawiki_config_render.changed | default(false)) or
+        (_install_results.changed | default(false)) or
+        (_ext_composer.changed | default(false)) or
+        (_vendor.changed | default(false))
+      }}
+
 - name: "Load admin setup procedures for '{{ application_id }}''"
-  include_tasks: 03_admin.yml
+  include_tasks: 04_admin.yml
 
 

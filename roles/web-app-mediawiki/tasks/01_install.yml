@@ -34,14 +34,3 @@
   when: cfg.when | bool
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   register: mediawiki_config_render
-
-- block:
-    - name: "MEDIAWIKI | Flush non-update handlers after config deployment"
-      meta: flush_handlers
-
-    - name: "MEDIAWIKI | Notify update handler only if config changed"
-      ansible.builtin.debug:
-        msg: "Config changed -> schedule MediaWiki update"
-      changed_when: true
-      notify: mediawiki update
-  when: mediawiki_config_render.changed | bool
