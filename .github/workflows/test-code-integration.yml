@@ -14,7 +14,7 @@ jobs:
     env:
       NIX_CONFIG: |
         access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-      INFINITO_IMAGE_TAG: ci-${{ github.sha }}
+      INSTALL_LOCAL_BUILD: 1
 
     steps:
       - name: Checkout repository
