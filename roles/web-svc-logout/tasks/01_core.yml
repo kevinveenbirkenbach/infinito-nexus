@@ -22,7 +22,7 @@
 
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
-    name: sys-stk-full-stateless
+    name: sys-stk-full
   vars:
     application_id:                 'web-svc-logout'
     webserver_client_max_body_size: "10M" # Necessary to overwrite parent values

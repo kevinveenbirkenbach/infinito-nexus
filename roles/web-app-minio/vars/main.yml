@@ -1,5 +1,5 @@
 # General
-application_id:                       "web-app-minio"
+application_id:                 "web-app-minio"
 
 # MINIO
 # https://www.min.io/

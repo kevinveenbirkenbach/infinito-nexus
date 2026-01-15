@@ -1,6 +1,6 @@
-- name: "Load 'sys-stk-full-stateless' for '{{ application_id }}'"
+- name: "Load 'sys-stk-full' for '{{ application_id }}'"
   include_role:
-    name: sys-stk-full-stateless
+    name: sys-stk-full
   vars:
     docker_git_repository_pull:           false
     docker_compose_flush_handlers:        true

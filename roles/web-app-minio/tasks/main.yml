@@ -1,7 +1,7 @@
 ---
 - name: "load docker and db for {{ application_id }}"
   include_role:
-    name: sys-stk-back-stateless
+    name: sys-stk-backend
   vars:
     docker_compose_flush_handlers:        true
     docker_git_repository_pull:           false

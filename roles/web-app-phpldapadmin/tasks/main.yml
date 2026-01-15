@@ -1,3 +1,3 @@
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
-    name: sys-stk-full-stateless
+    name: sys-stk-full

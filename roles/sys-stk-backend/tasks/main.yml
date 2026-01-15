@@ -1,4 +1,22 @@
-# run_once_sys_stk_back_stateless: disabled
+# run_once_sys_stk_backend: disabled
+
+- name: "SYS-STK-BACKEND | Load optional dependencies (once)"
+  ansible.builtin.include_tasks: "_load_service.yml"
+  loop:
+    - service_id: "svc-db-openldap"
+      service_name: "ldap"
+
+    - service_id: "svc-ai-ollama"
+      service_name: "ollama"
+  loop_control:
+    label: "{{ item.service_id }}"
+  vars:
+    service_id: "{{ item.service_id }}"
+    service_name: "{{ item.service_name }}"
+
+- name: "Load Database"
+  ansible.builtin.include_tasks: "01_database.yml"
+  when: applications | service_load_enabled(application_id, 'database', False)
 
 - name: "For '{{ application_id }}': Load docker-compose"
   include_role:
@@ -17,3 +35,4 @@
 - name: "flush docker compose and oauth2 proxy for '{{ application_id }}'"
   meta: flush_handlers
   when: docker_compose_flush_handlers | bool
+

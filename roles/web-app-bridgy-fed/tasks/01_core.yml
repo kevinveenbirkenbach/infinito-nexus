@@ -1,6 +1,6 @@
 - name: "Load docker and front proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateless
+    name: sys-stk-full
   vars:
     domain:     "{{ domains | get_domain(application_id) }}"
     http_port:  "{{ ports.localhost.http[application_id] }}"

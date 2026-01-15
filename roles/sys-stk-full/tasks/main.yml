@@ -1,4 +1,4 @@
-# run_once_sys_stk_full_stateful: deactivated
+# run_once_sys_stk_full: deactivated
 - name: "For '{{ application_id }}': include role sys-stk-front-proxy"
   include_role:
     name: sys-stk-front-proxy
@@ -8,4 +8,6 @@
 
 - name: "For '{{ application_id }}': load docker and db"
   include_role:
-    name: sys-stk-back-stateful
+    name: sys-stk-backend
+
+

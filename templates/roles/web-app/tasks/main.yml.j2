@@ -4,14 +4,14 @@
 # Default: Loading; Docker, Database and Reverse Proxy
 - name: "load docker, db and proxy for '{{ application_id }}'"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   when: run_once_docker_{% endraw %}{{ application_id | replace("_", "-") }}{% raw %} is not defined
 {% endraw %}
 {% else %}
 {% raw %}
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   when: run_once_docker_{% endraw %}{{ application_id | replace("_", "-") }}{% raw %} is not defined
 {% endraw %}
 {% endif %}

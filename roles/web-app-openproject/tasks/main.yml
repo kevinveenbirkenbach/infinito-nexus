@@ -1,7 +1,7 @@
 ---
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     webserver_client_max_body_size:           "30m"
     docker_git_repository_branch:       "stable/{{ OPENPROJECT_VERSION }}"

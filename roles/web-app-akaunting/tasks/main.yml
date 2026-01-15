@@ -10,7 +10,7 @@
 
 - name: "For '{{ application_id }}': load docker, db and proxy"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     docker_git_repository_address:        "https://github.com/akaunting/docker.git"
     docker_git_repository_pull:           true

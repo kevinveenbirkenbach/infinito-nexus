@@ -27,7 +27,7 @@
 
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     docker_compose_flush_handlers:  true
     webserver_vhost_flavour:        "basic"
