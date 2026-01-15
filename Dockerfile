@@ -89,7 +89,7 @@ RUN set -euo pipefail; \
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
   export NIX_CONFIG="${NIX_CONFIG:-}"; \
-  INSTALL_LOCAL_BUILD=1 /opt/src/infinito/scripts/docker/entry.sh true
+  INFINITO_BUILD_LOCAL=1 /opt/src/infinito/scripts/docker/entry.sh true
 
 # Set workdir to / to avoid ambiguous commands
 WORKDIR /

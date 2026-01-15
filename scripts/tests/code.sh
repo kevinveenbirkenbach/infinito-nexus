@@ -18,7 +18,7 @@ NIX_CONFIG_EFFECTIVE="$(
 
 INFINITO_DISTRO="${INFINITO_DISTRO}" docker compose --profile ci run --rm -T \
   -v "$(pwd):/opt/src/infinito" \
-  -e INSTALL_LOCAL_BUILD=1 \
+  -e INFINITO_BUILD_LOCAL=1 \
   -e TEST_PATTERN="${TEST_PATTERN}" \
   -e TEST_TYPE="${TEST_TYPE}" \
   -e NIX_CONFIG="${NIX_CONFIG_EFFECTIVE}" \
