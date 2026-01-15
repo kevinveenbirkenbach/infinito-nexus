@@ -16,7 +16,7 @@ on:
         type: string
 
 concurrency:
-  group: infinito-ci-global
+  group: infinito-release
   cancel-in-progress: false
 
 permissions:

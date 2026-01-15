@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: infinito-ci-global
+  group: infinito-nightly-release
   cancel-in-progress: false
 
 permissions:
