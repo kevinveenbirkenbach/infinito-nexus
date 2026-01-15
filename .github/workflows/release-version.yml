@@ -23,15 +23,75 @@ permissions:
   contents: write
   packages: write
   security-events: write
+  actions: read
 
 jobs:
-  release:
+  check-ci-images:
     runs-on: ubuntu-latest
+    outputs:
+      missing: ${{ steps.check.outputs.missing }}
+      ci_tag: ${{ steps.citag.outputs.ci_tag }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.event.inputs.tag }}
+          fetch-depth: 0
+          fetch-tags: true
 
-    # unify input source (call vs dispatch)
+      - id: citag
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          echo "ci_tag=ci-${sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR (manifest checks)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: check
+        shell: bash
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REGISTRY: ghcr.io
+          REPO_PREFIX: infinito
+          DISTROS: "arch debian ubuntu fedora centos"
+          CI_TAG: ${{ steps.citag.outputs.ci_tag }}
+        run: |
+          set -euo pipefail
+          missing="false"
+
+          for d in ${DISTROS}; do
+            img="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${d}:${CI_TAG}"
+            echo "Check: ${img}"
+            if docker manifest inspect "${img}" >/dev/null 2>&1; then
+              echo "  OK"
+            else
+              echo "  MISSING"
+              missing="true"
+            fi
+          done
+
+          echo "missing=${missing}" >> "$GITHUB_OUTPUT"
+
+  build-ci-images-if-missing:
+    needs: check-ci-images
+    if: needs.check-ci-images.outputs.missing == 'true'
+    uses: ./.github/workflows/build-ci-images.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
+
+  release:
+    needs:
+      - check-ci-images
+      - build-ci-images-if-missing
+    runs-on: ubuntu-latest
     env:
       VERSION_TAG: ${{ inputs.tag || github.event.inputs.tag }}
-      CI_TAG: ""
+      CI_TAG: ${{ needs.check-ci-images.outputs.ci_tag }}
       OWNER: ${{ github.repository_owner }}
       REGISTRY: ghcr.io
       REPO_PREFIX: infinito
@@ -55,25 +115,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compute CI_TAG from checked out tag commit
-        id: citag
-        shell: bash
-        run: |
-          set -euo pipefail
-          sha="$(git rev-parse HEAD)"
-          echo "CI_TAG=ci-${sha}" >> "$GITHUB_ENV"
-          echo "Using CI_TAG=ci-${sha}"
-
-      - name: Verify this is the highest version
-        id: highest
-        shell: bash
-        run: scripts/release/is-highest.sh
-
-      - name: Move 'stable' tag (only if highest)
-        if: steps.highest.outputs.is_highest == 'true'
-        shell: bash
-        run: scripts/release/move-stable-tag.sh
 
       - name: Retag CI images to version/latest (no rebuild)
         shell: bash
