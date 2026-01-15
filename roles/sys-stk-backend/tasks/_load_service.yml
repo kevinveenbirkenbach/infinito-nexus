@@ -5,6 +5,8 @@
         (applications | service_load_enabled(application_id, service_name, False))
         and
         (vars['run_once_' ~ (service_id | replace('-', '_'))] is not defined)
+        and 
+        (application_id != service_id)
       }}
 
 - name: "SYS-STK-BACKEND | Load '{{ service_id }}' (Once)"
