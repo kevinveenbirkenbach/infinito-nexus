@@ -247,7 +247,7 @@ ci-deploy-app:
 	export MISSING_ONLY=true; \
 	./scripts/ci/deploy-app.sh
 
-test-deploy:
+test-act:
 	@echo "=== act: deploy local (type=$(TEST_DEPLOY_TYPE), distros=$(INFINITO_DISTRO)) ==="
 	act workflow_dispatch \
 		-W .github/workflows/test-deploy-local.yml \
@@ -257,7 +257,7 @@ test-deploy:
 		--container-options "--privileged" \
 		--network host
 
-test-deploy-app:
+test-act-app:
 	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set"; exit 1; fi
 	@echo "=== act: deploy local (type=$(TEST_DEPLOY_TYPE), app=$(APP), distros=$(INFINITO_DISTRO)) ==="
 	act workflow_dispatch \
@@ -268,7 +268,7 @@ test-deploy-app:
 		--container-options "--privileged" \
 		--network host
 
-test-deploy-rapid:
+test-local-rapid:
 	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set (e.g. APP=web-app-nextcloud)"; exit 1; fi
 	@echo "=== rapid deploy (with entry.sh): type=$(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
 	@docker exec -t "$(INFINITO_CONTAINER)" bash -lc '\
@@ -288,6 +288,12 @@ test-deploy-rapid:
 			-vv \
 			--password-file "/etc/inventories/github-ci/.password" \
 	'
+
+test-local-full: up
+	@echo "=== local full deploy (type=$(TEST_DEPLOY_TYPE), distro=$(INFINITO_DISTRO)) ==="
+	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
+	bash scripts/tests/deploy-local-full.sh
 
 # Backwards compatible target (kept)
 lint-ansible:
