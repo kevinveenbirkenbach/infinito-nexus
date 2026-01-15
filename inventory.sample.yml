@@ -40,12 +40,12 @@ applications:
       services:
         # Deactivated the following services for the CI/CD deploy to keep the container slim
         logout:
-          enabled: "{{ not DOCKER_IN_CONTAINER }}"
+          enabled: false
         desktop:
-          enabled: "{{ not DOCKER_IN_CONTAINER }}"
+          enabled: false
         matomo:
-          enabled: "{{ not DOCKER_IN_CONTAINER }}"
-          shared:  "{{ not DOCKER_IN_CONTAINER }}"
+          enabled: false
+          shared:  false
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 

@@ -106,9 +106,6 @@
     docker buildx prune -af || true
     docker builder prune -af || true
 
-    # Truncate container logs
-    find /var/lib/docker/containers -name '*-json.log' -type f -exec truncate -s 0 {} \; || true
-
     echo "Docker disk usage after cleanup:"
     docker system df || true
   args:
