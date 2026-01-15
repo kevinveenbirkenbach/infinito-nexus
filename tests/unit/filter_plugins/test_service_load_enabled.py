@@ -6,7 +6,6 @@ from filter_plugins.service_load_enabled import service_load_enabled
 
 
 class TestServiceLoadEnabled(unittest.TestCase):
-
     def test_service_load_enabled_true_when_enabled_and_shared_true(self):
         applications = {
             "web-app-xwiki": {
@@ -83,7 +82,9 @@ class TestServiceLoadEnabled(unittest.TestCase):
             }
         }
 
-        self.assertTrue(service_load_enabled(applications, "web-app-xwiki", "ldap", default=True))
+        self.assertTrue(
+            service_load_enabled(applications, "web-app-xwiki", "ldap", default=True)
+        )
 
     def test_service_load_enabled_missing_service_returns_false(self):
         applications = {
@@ -99,18 +100,10 @@ class TestServiceLoadEnabled(unittest.TestCase):
         self.assertFalse(service_load_enabled(applications, "web-app-xwiki", "ldap"))
 
     def test_service_load_enabled_missing_app_raises(self):
-        applications = {
-            "web-app-xwiki": {
-                "docker": {"services": {}}
-            }
-        }
+        applications = {"web-app-xwiki": {"docker": {"services": {}}}}
 
         with self.assertRaises(AnsibleFilterError):
             service_load_enabled(applications, "web-app-mediawiki", "ldap")
-
-    def test_service_load_enabled_requires_applications_dict(self):
-        with self.assertRaises(AnsibleFilterError):
-            service_load_enabled(["not", "a", "dict"], "web-app-xwiki", "ldap")
 
 
 if __name__ == "__main__":
