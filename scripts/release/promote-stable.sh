@@ -45,7 +45,7 @@ ci_succeeded_for_sha() {
         "/repos/${repo}/actions/workflows/${CI_WORKFLOW_PATH}/runs" \
         -f per_page="${CI_PER_PAGE}" \
         -f page="${page}" \
-      | python3 - <<'PY'
+            | python3 -c '
 import json, os, sys
 target = os.environ["TARGET_SHA"]
 data = json.load(sys.stdin)
@@ -59,7 +59,7 @@ for r in runs:
         print("success")
         sys.exit(0)
 print("none")
-PY
+'
     )" || result="none"
 
     if [[ "${result}" == "success" ]]; then
