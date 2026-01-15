@@ -70,7 +70,7 @@ def _run_deploy(
         "--diff",
         "-T",
         deploy_type,
-        "-i",
+        "--id",
         *deploy_ids,
     ]
     if debug:
