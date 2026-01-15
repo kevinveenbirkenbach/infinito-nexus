@@ -21,3 +21,5 @@ permissions:
 jobs:
   code-analyses:
     uses: ./.github/workflows/code-analyses.yml
+    with:
+      distros: "arch"

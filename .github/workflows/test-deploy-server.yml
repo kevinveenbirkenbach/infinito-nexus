@@ -2,7 +2,11 @@ name: Test Infinito.Nexus Deploy (server)
 
 on:
   workflow_call:
-  workflow_dispatch:
+    inputs:
+      distros:
+        description: "Space-separated distro list"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -10,7 +14,7 @@ permissions:
 
 env:
   TEST_DEPLOY_TYPE: server
-  DISTROS: "arch debian ubuntu fedora centos"
+  DISTROS: ${{ inputs.distros }}
   ONLY_APP: ""
   NIX_CONFIG: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}

@@ -16,3 +16,8 @@
 - Yourls sys-ctl-hlth-docker-container.infinito.nexus https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536555
 - web-svc-asset sys-ctl-hlth-webserver.infinito.nexus.service https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21006320627/job/60391536598
 - web-svc-legal dependencies müssen auch bei der ivnentory erstellugn aufgelöst werden: https://github.com/kevinveenbirkenbach/infinito-nexus/actions/runs/21019474890/job/60431918204
+
+-> openldap frontend test
+-> gitea memberof test
+-> matomo
+-> css test

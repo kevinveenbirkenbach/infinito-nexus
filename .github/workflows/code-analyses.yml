@@ -2,6 +2,11 @@ name: Code analyses
 
 on:
   workflow_call:
+    inputs:
+      distros:
+        description: "Space-separated distro list"
+        required: false
+        type: string
   workflow_dispatch:
 
 permissions:
@@ -28,6 +33,8 @@ jobs:
     uses: ./.github/workflows/test-code-unit.yml
   build-ci-images:
     uses: ./.github/workflows/build-ci-images.yml
+    with:
+      distros: ${{ inputs.distros }}
   # During the final code implementation against the e2e tests server -> universal -> workstation to keep focus.
   # Later it can be parallized again
   test-deploy-universal:
@@ -35,16 +42,22 @@ jobs:
       - build-ci-images
       - test-deploy-server
     uses: ./.github/workflows/test-deploy-universal.yml
+    with:
+      distros: ${{ inputs.distros }}
   test-deploy-server:
     needs: 
       - build-ci-images
     uses: ./.github/workflows/test-deploy-server.yml
+    with:
+      distros: ${{ inputs.distros }}
   test-deploy-workstation:
     needs:
       - build-ci-images
       - test-deploy-server
       - test-deploy-universal
     uses: ./.github/workflows/test-deploy-workstation.yml
+    with:
+      distros: ${{ inputs.distros }}
   test-install-make:
     uses: ./.github/workflows/test-install-make.yml
   test-install-pkgmgr:
