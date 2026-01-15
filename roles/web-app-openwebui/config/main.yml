@@ -15,9 +15,11 @@ docker:
     oidc:
       enabled: true
       shared: true
+    ldap:
+      enabled: false
+      shared: false
     logout:
       enabled: true
-
     desktop:
       enabled: true
     matomo:

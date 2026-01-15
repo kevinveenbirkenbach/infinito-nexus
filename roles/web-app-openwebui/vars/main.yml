@@ -1,20 +1,20 @@
 
 # General
-application_id:                       "web-app-openwebui"
+application_id:                   "web-app-openwebui"
 
 # Open WebUI
 # https://openwebui.com/
-OPENWEBUI_URL:                        "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-OPENWEBUI_VERSION:                    "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.version') }}"
-OPENWEBUI_IMAGE:                      "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.image') }}"
-OPENWEBUI_CONTAINER:                  "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.name') }}"
-OPENWEBUI_OFFLINE_MODE:               "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.offline_mode') }}"
-OPENWEBUI_HF_HUB_OFFLINE:             "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.hf_hub_offline') }}"
-OPENWEBUI_VOLUME:                     "{{ applications | get_app_conf(application_id, 'docker.volumes.openwebui') }}"
-OPENWEBUI_PORT_PUBLIC:                "{{ ports.localhost.http[application_id] }}"
-OPENWEBUI_LDAP_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+OPENWEBUI_URL:                    "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+OPENWEBUI_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.version') }}"
+OPENWEBUI_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.image') }}"
+OPENWEBUI_CONTAINER:              "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.name') }}"
+OPENWEBUI_OFFLINE_MODE:           "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.offline_mode') }}"
+OPENWEBUI_HF_HUB_OFFLINE:         "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.hf_hub_offline') }}"
+OPENWEBUI_VOLUME:                 "{{ applications | get_app_conf(application_id, 'docker.volumes.openwebui') }}"
+OPENWEBUI_PORT_PUBLIC:            "{{ ports.localhost.http[application_id] }}"
+OPENWEBUI_LDAP_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 
 ## OIDC
-OPENWEBUI_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
-OPENWEBUI_OIDC_REDIRECT_URL:          "{{ [OPENWEBUI_URL,'/oauth/oidc/callback'] | url_join }}"
-OPENWEBUI_OIDC_ADMIN_GROUP:           "{{ [ RBAC.GROUP.NAME, application_id ~ '-administrator' ] | path_join }}"
+OPENWEBUI_OIDC_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
+OPENWEBUI_OIDC_REDIRECT_URL:      "{{ [OPENWEBUI_URL,'/oauth/oidc/callback'] | url_join }}"
+OPENWEBUI_OIDC_ADMIN_GROUP:       "{{ [ RBAC.GROUP.NAME, application_id ~ '-administrator' ] | path_join }}"
