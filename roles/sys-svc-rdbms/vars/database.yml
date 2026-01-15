@@ -22,3 +22,4 @@ database_url_full:      "{{ database_type }}://{{ database_username }}:{{ databa
 database_volume:        "{{ _database_consumer_entity_name ~ '_' if not _database_central_enabled }}{{ database_host }}"
 database_image:         "{{ _dbtype }}"
 database_version:       "{{ applications | get_app_conf( _database_consumer_id, 'docker.services.database.version', False, _database_default_version) }}"
+database_reach_host:    "127.0.0.1"
