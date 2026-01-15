@@ -22,4 +22,5 @@ jobs:
   code-analyses:
     uses: ./.github/workflows/code-analyses.yml
     with:
+      # Speed up tests by just using arch
       distros: "arch"

@@ -16,5 +16,3 @@ permissions:
 jobs:
   ci-schedule:
     uses: ./.github/workflows/code-analyses.yml
-    with:
-      distros: "arch debian ubuntu fedora centos"
