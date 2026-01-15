@@ -90,7 +90,15 @@ RESERVED_USERNAMES := $(shell \
 	test test-lint test-unit test-integration test-deploy test-deploy-app\
 	clean down \
 	list tree mig dockerignore \
-	print-python lint-ansible
+	print-python lint-ansible \
+	setup-local-dns-infinito remove-local-dns-infinito
+
+setup-local-dns:
+	@bash scripts/local-dns/setup-infinito-dns.sh
+
+remove-local-dns:
+	@bash scripts/local-dns/remove-infinito-dns.sh
+
 
 clean:
 	@echo "Removing ignored git files"

@@ -37,8 +37,6 @@ def _create_inventory(compose: Compose, *, include: list[str]) -> None:
         "--host",
         "localhost",
         "--ssl-disabled",
-        "--primary-domain",
-        "infinito.localhost",
         "--vars-file",
         "inventory.sample.yml",
         "--include",
