@@ -48,6 +48,12 @@ TEST_DEPLOY_TYPE ?= server
 # Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
 PYTHONPATH              ?= .
 
+# Distro
+INFINITO_DISTRO		?= arch
+INFINITO_CONTAINER 	?= infinito_nexus_$(INFINITO_DISTRO)
+export INFINITO_DISTRO
+export INFINITO_CONTAINER
+
 # Overwrite defaults
 ifeq ($(GITHUB_ACTIONS),true)
 	ifeq ($(ACT),true)
@@ -69,12 +75,6 @@ else
 	INFINITO_COMPILE ?= 1
 endif
 export INFINITO_COMPILE
-
-# Distro
-INFINITO_DISTRO		?= arch
-INFINITO_CONTAINER 	?= infinito_nexus_$(INFINITO_DISTRO)
-export INFINITO_DISTRO
-export INFINITO_CONTAINER
 
 # Compute extra users as before
 RESERVED_USERNAMES := $(shell \
@@ -248,37 +248,25 @@ ci-deploy-app:
 	./scripts/ci/deploy-app.sh
 
 test-deploy:
-	@echo "=== act: deploy $(TEST_DEPLOY_TYPE) (all apps, distro=$(INFINITO_DISTRO)) ==="
-	@wf=".github/workflows/test-deploy-$(TEST_DEPLOY_TYPE).yml"; \
+	@echo "=== act: deploy local (type=$(TEST_DEPLOY_TYPE), distros=$(INFINITO_DISTRO)) ==="
 	act workflow_dispatch \
-		-W "$$wf" \
+		-W .github/workflows/test-deploy-local.yml \
+		--env TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+		--env DISTROS="$(INFINITO_DISTRO)" \
+		--env ONLY_APP="" \
 		--container-options "--privileged" \
-		--network host \
-		--concurrent-jobs 1
+		--network host
 
 test-deploy-app:
 	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set"; exit 1; fi
-	@echo "=== act: deploy $(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
-	@wf=".github/workflows/test-deploy-$(TEST_DEPLOY_TYPE).yml"; \
+	@echo "=== act: deploy local (type=$(TEST_DEPLOY_TYPE), app=$(APP), distros=$(INFINITO_DISTRO)) ==="
 	act workflow_dispatch \
-		-W "$$wf" \
-		--env ONLY_APP="$(APP)" \
+		-W .github/workflows/test-deploy-local.yml \
+		--env TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
 		--env DISTROS="$(INFINITO_DISTRO)" \
+		--env ONLY_APP="$(APP)" \
 		--container-options "--privileged" \
-		--network host \
-		--concurrent-jobs 1
-
-# Rapid local deploy test for a single app (no debug, no rebuild)
-test-deploy-rapid:
-	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set"; exit 1; fi
-	@echo "=== rapid deploy: $(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
-	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	  scripts/tests/deploy.sh \
-	    --type "$(TEST_DEPLOY_TYPE)" \
-	    --app "$(APP)" \
-	    --missing \
-		--keep-stack-on-failure \
-	    --no-debug
+		--network host
 
 # Backwards compatible target (kept)
 lint-ansible:
