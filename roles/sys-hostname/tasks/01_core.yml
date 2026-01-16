@@ -1,8 +1,10 @@
-- name: Ensure hostname command exists (Arch)
-  ansible.builtin.package:
-    name: inetutils
-    state: present
-  when: ansible_facts.os_family == "Archlinux"
+- name: Define hostname package per distro
+  ansible.builtin.set_fact:
+    hostname_package: >-
+      {{
+        'inetutils' if ansible_facts.os_family == 'Archlinux' else
+        'hostname'
+      }}
 
 - name: Set system hostname to inventory_hostname (FQDN recommended)
   ansible.builtin.hostname:
