@@ -16,7 +16,7 @@ users:
   administrator:
     authorized_keys:
       - ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito
-    password:   password1234
+    password:   administrator
   biber:
     username:   "biber"
     full_name:  "Harry Beaver"
@@ -60,6 +60,10 @@ applications:
           enabled: false
         matomo:
           enabled: false
+  web-app-keycloak:
+    credentials:
+      administrator_password: administrator
+
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 
