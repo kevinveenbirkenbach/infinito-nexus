@@ -39,21 +39,30 @@ jobs:
     uses: ./.github/workflows/build-ci-images.yml
     with:
       distros: ${{ inputs.distros }}
-  # During the final code implementation against the e2e tests server -> universal -> workstation to keep focus.
-  # Later it can be parallized again
-  test-deploy-universal:
+  test-dns:
     needs: 
+      - build-ci-images
+    uses: ./.github/workflows/test-dns.yml
+    with:
+      distros: "arch"
+  # Priority A
+  test-deploy-server:
+    needs: 
+      - test-dns
+      - build-ci-images
+    uses: ./.github/workflows/test-deploy-server.yml
+    with:
+      distros: ${{ inputs.distros }}
+  # Priority B
+  test-deploy-universal:
+    needs:
+      - test-dns 
       - build-ci-images
       - test-deploy-server
     uses: ./.github/workflows/test-deploy-universal.yml
     with:
       distros: ${{ inputs.distros }}
-  test-deploy-server:
-    needs: 
-      - build-ci-images
-    uses: ./.github/workflows/test-deploy-server.yml
-    with:
-      distros: ${{ inputs.distros }}
+  # Priority C
   test-deploy-workstation:
     needs:
       - build-ci-images

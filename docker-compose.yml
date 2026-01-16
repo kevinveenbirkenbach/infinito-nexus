@@ -1,11 +1,9 @@
 # CI profile defaults: point containers to CoreDNS and set search domain
 x-ci-defaults: &ci_defaults
   dns:
-    - 172.30.0.53
+    - ${DNS_IP}
   dns_opt:
     - ndots:1
-  dns_search:
-    - infinito.example
 
 services:
   # ------------------------------------------------------------
@@ -20,7 +18,7 @@ services:
       - ./compose/Corefile:/Corefile:ro
     networks:
       default:
-        ipv4_address: 172.30.0.53
+        ipv4_address: ${DNS_IP}
 
   # ------------------------------------------------------------
   # Infinito runner container (systemd-enabled for CI)
@@ -28,7 +26,7 @@ services:
   infinito:
     networks:
       default:
-        ipv4_address: 172.30.0.10
+        ipv4_address: ${IP4}
     build:
       context: .
       dockerfile: Dockerfile
@@ -74,6 +72,9 @@ services:
       - letsencrypt:/etc/letsencrypt/
 
     environment:
+      DNS_IP: ${DNS_IP}
+      DOMAIN: ${DOMAIN}
+      IP4: ${IP4}
       INFINITO_COMPILE: "${INFINITO_COMPILE:-1}"
       INFINITO_SRC_DIR: /opt/src/infinito
       PYTHONHTTPSVERIFY: "1"

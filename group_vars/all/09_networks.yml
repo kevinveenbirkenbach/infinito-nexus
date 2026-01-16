@@ -1,7 +1,8 @@
 defaults_networks:
   internet:
-    ip4: "127.0.0.1"       # Change this in inventory to the ip4 address of your server
-    ip6: "::01"            # Change this in inventory to the ip6 address of your server
+    ip4: "{{ lookup('env', 'IP4') | default('127.0.0.1', true) }}"  # Change this in inventory to the ip4 address of your server
+    ip6: "{{ lookup('env', 'IP6') | default('::1', true) }}"        # Change this in inventory to the ip6 address of your server
+    dns: "{{ lookup('env', 'DNS_IP') | default('') }}"              # Relevant for deployment Docker in Docker Ci/CD
   local:
     # The default docker subnetworking does lead to overlapping and to huge networks.
     # Due to this reason networks with 16 ips are created.

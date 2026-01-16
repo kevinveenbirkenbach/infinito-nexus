@@ -39,6 +39,23 @@ class Compose:
             text=text,
         )
 
+    def _render_coredns_corefile(self):
+        env = os.environ.copy()
+
+        # load env.ci into environment
+        with open("env.ci") as f:
+            for line in f:
+                if "=" in line and not line.startswith("#"):
+                    k, v = line.strip().split("=", 1)
+                    env[k] = v
+
+        subprocess.check_call(
+            ["envsubst"],
+            stdin=open("compose/Corefile.tmpl"),
+            stdout=open("compose/Corefile", "w"),
+            env=env,
+        )
+
     def build_infinito(self, *, no_cache: bool, missing_only: bool) -> None:
         if os.environ.get("INFINITO_NO_BUILD", "0") == "1":
             print(">>> INFINITO_NO_BUILD=1 -> skipping docker compose build")
@@ -69,6 +86,9 @@ class Compose:
             self.run(["build", "infinito"], check=True)
 
     def up(self, *, run_init: bool = True) -> None:
+        print(">>> Rendering CoreDNS Corefile from template")
+        self._render_coredns_corefile()
+
         print(">>> Starting compose stack (coredns + infinito)")
         env = self._base_env()
         keys = [
@@ -83,7 +103,7 @@ class Compose:
         print(">>> NIX_CONFIG:", "<set>" if env.get("NIX_CONFIG") else "<empty>")
 
         no_build = os.environ.get("INFINITO_NO_BUILD", "0") == "1"
-        args = ["up", "-d"]
+        args = ["--env-file", "env.ci", "up", "-d"]
         if no_build:
             args.append("--no-build")
         args += ["coredns", "infinito"]

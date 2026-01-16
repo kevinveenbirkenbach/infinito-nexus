@@ -1,0 +1,103 @@
+name: Test DNS (CoreDNS + Docker-in-Docker)
+
+on:
+  workflow_dispatch:
+    inputs:
+      distros:
+        description: "Space-separated distro list (e.g. 'arch debian ubuntu')"
+        required: false
+        default: "arch"
+        type: string
+
+  workflow_call:
+    inputs:
+      distros:
+        description: "Space-separated distro list"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  prepare:
+    name: prepare matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.out.outputs.matrix }}
+    steps:
+      - name: Install jq
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Compute matrix JSON
+        id: out
+        shell: bash
+        run: |
+          set -euo pipefail
+          distros="${{ inputs.distros }}"
+          distros="${distros:-arch}"
+          json="$(printf '%s' "${distros}" | jq -Rc 'split(" ") | map(select(length>0))')"
+          echo "matrix=${json}" >> "$GITHUB_OUTPUT"
+          echo "Using matrix: ${json}"
+
+  dns:
+    name: dns (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: prepare
+
+    strategy:
+      fail-fast: false
+      matrix:
+        distro: ${{ fromJson(needs.prepare.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install dnsutils (dig)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y dnsutils
+
+      - name: Start stack (coredns + infinito) for distro
+        shell: bash
+        env:
+          INFINITO_DISTRO: ${{ matrix.distro }}
+          INFINITO_CONTAINER: infinito_nexus_${{ matrix.distro }}
+        run: |
+          set -euo pipefail
+          make up
+
+      - name: DNS test suite
+        shell: bash
+        env:
+          ENV_FILE: env.ci
+          INFINITO_DISTRO: ${{ matrix.distro }}
+          INFINITO_CONTAINER: infinito_nexus_${{ matrix.distro }}
+        run: |
+          set -euo pipefail
+          chmod +x scripts/tests/dns.sh
+          scripts/tests/dns.sh
+
+      - name: Dump CoreDNS logs on failure
+        if: failure()
+        shell: bash
+        run: |
+          docker ps -a || true
+          docker logs infinito-coredns --tail=200 || true
+
+      - name: Dump infinito logs on failure
+        if: failure()
+        shell: bash
+        env:
+          INFINITO_CONTAINER: infinito_nexus_${{ matrix.distro }}
+        run: |
+          docker logs "${INFINITO_CONTAINER}" --tail=200 || true

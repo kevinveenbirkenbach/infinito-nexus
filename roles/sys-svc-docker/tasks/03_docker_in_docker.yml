@@ -11,8 +11,8 @@
   notify: docker restart
 
 - name: Configure docker daemon storage driver (container)
-  ansible.builtin.copy:
+  ansible.builtin.template:
+    src: daemon.json.j2
     dest: "{{ SYS_SVC_DOCKER_DAEMON }}"
-    src: daemon.json
     mode: "0644"
   notify: docker restart
