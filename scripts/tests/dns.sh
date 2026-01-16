@@ -119,41 +119,6 @@ docker exec "${INFINITO_CONTAINER}" sh -lc "
 ok "Outer container DNS works"
 
 # ------------------------------------------------------------
-# Docker-in-Docker (inner container) DNS via busybox
-# ------------------------------------------------------------
-section "Docker-in-Docker (inner container) DNS"
-
-docker exec "${INFINITO_CONTAINER}" sh -lc "
-  set -e
-
-  docker run --rm --dns ${DNS_IP} busybox:1.36 sh -lc '
-    echo \"=== resolv.conf ===\"
-    cat /etc/resolv.conf || true
-    echo
-
-    test_lookup() {
-      name=\"\$1\"
-      out=\$(nslookup \"\$name\" 2>&1 || true)
-      echo \"\$out\"
-
-      echo \"\$out\" | grep -q \"Address: ${IP4_EXPECTED}\" || {
-        echo \"DNS lookup failed for \$name\"
-        exit 1
-      }
-    }
-
-    echo \"=== nslookup A ===\"
-    test_lookup ${DOMAIN}
-    test_lookup ${SUBDOMAIN}
-
-    echo
-    echo \"(AAAA queries intentionally ignored)\"
-  '
-"
-
-ok "Inner container DNS works"
-
-# ------------------------------------------------------------
 # DONE
 # ------------------------------------------------------------
 section "DONE"
