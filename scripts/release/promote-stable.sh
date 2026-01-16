@@ -10,7 +10,7 @@ REPO_PREFIX="${REPO_PREFIX:-infinito}"
 DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
 DEFAULT_DISTRO="${DEFAULT_DISTRO:-arch}"
 
-CI_WORKFLOW_PATH="${CI_WORKFLOW_PATH:-code-analyses.yml}"
+CI_WORKFLOW_PATH="${CI_WORKFLOW_PATH:-ci-orchestrator.yml}"
 CI_LOOKBACK_PAGES="${CI_LOOKBACK_PAGES:-3}"
 CI_PER_PAGE="${CI_PER_PAGE:-100}"
 

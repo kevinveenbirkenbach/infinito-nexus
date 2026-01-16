@@ -13,5 +13,5 @@ permissions:
   security-events: write
 
 jobs:
-  code-analyses:
-    uses: ./.github/workflows/code-analyses.yml
+  ci-orchestrator:
+    uses: ./.github/workflows/ci-orchestrator.yml

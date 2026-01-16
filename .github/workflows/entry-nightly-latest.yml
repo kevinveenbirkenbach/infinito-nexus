@@ -15,4 +15,4 @@ permissions:
 
 jobs:
   ci-schedule:
-    uses: ./.github/workflows/code-analyses.yml
+    uses: ./.github/workflows/ci-orchestrator.yml

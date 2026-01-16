@@ -1,5 +1,4 @@
-name: Code analyses
-
+name: CI Orchestrator
 on:
   workflow_call:
     inputs:
@@ -44,7 +43,7 @@ jobs:
       - build-ci-images
     uses: ./.github/workflows/test-dns.yml
     with:
-      distros: "arch"
+      distros: ${{ inputs.distros }}
   # Priority A
   test-deploy-server:
     needs: 
