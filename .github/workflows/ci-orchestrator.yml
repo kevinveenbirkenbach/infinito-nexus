@@ -61,19 +61,18 @@ jobs:
     uses: ./.github/workflows/build-ci-images.yml
     with:
       distros: "arch debian ubuntu fedora centos"
-    needs:
-      - code-quality-gate
   
   test-dns:
     needs: 
       - build-ci-images
+      - code-quality-gate
     uses: ./.github/workflows/test-dns.yml
     with:
       distros: "arch debian ubuntu fedora centos"
   
   # Priority A
   test-deploy-server:
-    needs: 
+    needs:
       - test-dns
     uses: ./.github/workflows/test-deploy-server.yml
     with:
@@ -89,6 +88,7 @@ jobs:
   # Priority C
   test-deploy-workstation:
     needs:
+      - code-quality-gate
       - build-ci-images
       - test-deploy-server
       - test-deploy-universal
