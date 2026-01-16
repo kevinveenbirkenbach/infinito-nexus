@@ -107,6 +107,8 @@ PY
     -T '${TEST_DEPLOY_TYPE}' \
     --skip-update \
     --skip-backup \
+    --no-signal \
+    --log /opt/src/infinito/logs \
     -l ${LIMIT_HOST} \
     --diff \
     -vv \
