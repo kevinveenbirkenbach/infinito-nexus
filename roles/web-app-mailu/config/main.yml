@@ -5,7 +5,7 @@ domain:                   "{{ SYSTEM_EMAIL_DOMAIN }}" # The main domain from whi
 server:
   domains:
     canonical:
-      - "{{ SYSTEM_EMAIL_HOST }}"
+      - "mail.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:

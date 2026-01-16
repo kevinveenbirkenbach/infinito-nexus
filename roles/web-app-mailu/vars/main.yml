@@ -1,7 +1,7 @@
 # General
 application_id:                       "web-app-mailu"
 http_port:                            "{{ ports.localhost.http[application_id] }}"
-webserver_extra_configuration:            "client_max_body_size 31M;"
+webserver_extra_configuration:        "client_max_body_size 31M;"
 
 # Database Configuration
 database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
@@ -17,8 +17,7 @@ MAILU_WEBSITE:                        "{{ domains | get_url(application_id, WEB_
 ## Domains
 MAILU_DOMAIN:                         "{{ applications | get_app_conf(application_id, 'domain') }}"
 MAILU_DOMAIN_DNS_ZONE:                "{{ MAILU_DOMAIN | to_zone }}"
-MAILU_HOSTNAMES:                      "{{ domains[application_id] }}"
-MAILU_HOSTNAME:                       "{{ domains | get_domain(application_id) }}"
+MAILU_HOSTNAME:                       "{{ SYSTEM_EMAIL_HOST }}"
 MAILU_HOSTNAME_DNS_ZONE:              "{{ MAILU_HOSTNAME | to_zone }}"
 
 ## Docker
