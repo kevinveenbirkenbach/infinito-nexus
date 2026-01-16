@@ -1,6 +1,6 @@
 {
   "dns": ["172.30.0.53"],
   "dns-search": ["infinito.example"],
-  "dns-opts": ["ndots:1"],
+  "dns-opts": ["ndots:0"],
   "storage-driver": "fuse-overlayfs"
 }
