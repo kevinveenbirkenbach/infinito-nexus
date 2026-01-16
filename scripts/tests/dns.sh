@@ -25,7 +25,6 @@ set +a
 : "${IP4:?Missing IP4 in env file}"
 
 SUBDOMAIN="foo.${DOMAIN}"
-SUBDOMAIN="foo.${DOMAIN}"
 IP4_EXPECTED="${IP4}"
 INFINITO_CONTAINER="${INFINITO_CONTAINER:?Missing INFINITO_CONTAINER env (e.g. infinito_nexus_arch)}"
 
