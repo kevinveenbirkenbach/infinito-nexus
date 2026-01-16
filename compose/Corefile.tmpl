@@ -13,12 +13,12 @@
 
   template IN AAAA {
     match ^${DOMAIN_RE}\.$
-    rcode NXDOMAIN
+    fallthrough
   }
 
   template IN AAAA {
     match ^(.*)\.${DOMAIN_RE}\.$
-    rcode NXDOMAIN
+    fallthrough
   }
 
   forward . /etc/resolv.conf

@@ -21,7 +21,11 @@ section() {
 ok()   { echo "OK:   $*"; }
 fail() { echo "FAIL: $*"; exit 1; }
 
+# ------------------------------------------------------------
+# Wait for Docker-in-Docker daemon
+# ------------------------------------------------------------
 section "Wait for dockerd (DinD)"
+
 for i in $(seq 1 60); do
   if [ -S /var/run/docker.sock ] && docker info >/dev/null 2>&1; then
     ok "dockerd ready"
@@ -33,22 +37,64 @@ done
 [ -S /var/run/docker.sock ] || fail "docker.sock missing after waiting"
 docker info >/dev/null 2>&1 || fail "docker info still failing after waiting"
 
-section "Docker-in-Docker DNS (busybox)"
+# ------------------------------------------------------------
+# DNS tests via Busybox (A + check "no SERVFAIL" robustly)
+# ------------------------------------------------------------
+section "Docker-in-Docker DNS (busybox: A + no SERVFAIL)"
+
 docker run --rm --dns "${DNS_IP}" busybox:1.36 sh -lc "
   set -e
 
-  test_lookup() {
+  test_lookup_a() {
     name=\"\$1\"
     out=\$(nslookup \"\$name\" 2>&1 || true)
     echo \"\$out\"
     echo \"\$out\" | grep -q \"Address: ${IP4_EXPECTED}\" || {
-      echo \"DNS lookup failed for \$name\"
+      echo \"A lookup failed for \$name (expected ${IP4_EXPECTED})\"
       exit 1
     }
   }
 
-  test_lookup \"${DOMAIN}\"
-  test_lookup \"${SUBDOMAIN}\"
+  # We don't require AAAA, but we must never see SERVFAIL (that broke Node/getaddrinfo).
+  test_lookup_no_servfail() {
+    name=\"\$1\"
+    out=\$(nslookup \"\$name\" 2>&1 || true)
+    echo \"\$out\"
+    if echo \"\$out\" | grep -q \"SERVFAIL\"; then
+      echo \"DNS lookup returned SERVFAIL for \$name\"
+      exit 1
+    fi
+  }
+
+  test_lookup_a \"${DOMAIN}\"
+  test_lookup_a \"${SUBDOMAIN}\"
+
+  test_lookup_no_servfail \"${DOMAIN}\"
+  test_lookup_no_servfail \"${SUBDOMAIN}\"
 "
 
-ok "Inner container DNS works"
+ok "Inner container DNS works (A present; no SERVFAIL)"
+
+# ------------------------------------------------------------
+# Node / getaddrinfo test (this is what CSP checker uses)
+# ------------------------------------------------------------
+section "Docker-in-Docker DNS (node/getaddrinfo)"
+
+docker run --rm --dns "${DNS_IP}" node:20-alpine sh -lc "
+  set -e
+  node -e \"
+    const dns = require('dns');
+    dns.lookup('${DOMAIN}', { all: true }, (e, a) => {
+      console.log('err', e && e.code, e && e.message);
+      console.log('addrs', a);
+      process.exit(e ? 1 : 0);
+    });
+  \"
+"
+
+ok "Node/getaddrinfo DNS works"
+
+echo
+echo "============================================================"
+echo "DNS health check completed successfully."
+echo "============================================================"
