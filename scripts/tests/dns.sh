@@ -81,6 +81,38 @@ else
 fi
 
 # ------------------------------------------------------------
+# Host -> CoreDNS AAAA sanity check (must NOT return SERVFAIL)
+# ------------------------------------------------------------
+section "Host -> CoreDNS (AAAA sanity check)"
+
+if command -v dig >/dev/null 2>&1; then
+  aaaa1="$(dig @"${DNS_IP}" "${DOMAIN}" AAAA +comments +noall +answer || true)"
+  aaaa2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" AAAA +comments +noall +answer || true)"
+
+  echo "AAAA ${DOMAIN}:"
+  echo "${aaaa1:-<empty>}"
+  echo
+
+  echo "AAAA ${SUBDOMAIN}:"
+  echo "${aaaa2:-<empty>}"
+  echo
+
+  # dig exits 0 even on NXDOMAIN, so we check for SERVFAIL explicitly
+  status1="$(dig @"${DNS_IP}" "${DOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
+  status2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
+
+  echo "${status1}"
+  echo "${status2}"
+
+  echo "${status1}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${DOMAIN}"
+  echo "${status2}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${SUBDOMAIN}"
+
+  ok "AAAA sanity check passed (no SERVFAIL)"
+else
+  warn "dig not found on host — skipping AAAA sanity test"
+fi
+
+# ------------------------------------------------------------
 # CoreDNS container
 # ------------------------------------------------------------
 section "CoreDNS container status"
