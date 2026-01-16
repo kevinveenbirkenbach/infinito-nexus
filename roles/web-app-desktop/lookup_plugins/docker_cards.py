@@ -112,7 +112,10 @@ class LookupModule(LookupBase):
                 domain_url = next(iter(domain_url.values()))
 
             # Construct the URL using the domain_url if available.
-            url = "https://" + domain_url if domain_url else ""
+            if "WEB_PROTOCOL" not in variables:
+                raise AnsibleError("WEB_PROTOCOL is required to build application URLs")
+            protocol = variables["WEB_PROTOCOL"]
+            url = f"{protocol}://{domain_url}" if domain_url else ""
 
             iframe = get_app_conf(
                 applications,

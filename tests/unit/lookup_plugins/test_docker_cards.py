@@ -1,10 +1,9 @@
-# tests/unit/lookup_plugins/test_docker_cards.py
-
 import os
 import sys
 import tempfile
 import shutil
 import unittest
+from ansible.errors import AnsibleError
 
 # Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-desktop role.
 sys.path.insert(
@@ -52,9 +51,19 @@ galaxy_info:
         # Remove the temporary roles directory after the test.
         shutil.rmtree(self.test_roles_dir)
 
+    def _base_fake_variables(self):
+        return {
+            "domains": {"portfolio": "myportfolio.com"},
+            "applications": {
+                "portfolio": {"docker": {"services": {"desktop": {"enabled": True}}}}
+            },
+            "group_names": ["portfolio"],
+        }
+
     def test_lookup_when_group_includes_application_id(self):
         # Instantiate the LookupModule.
         lookup_module = LookupModule()
+
         # Define dummy variables including group_names that contain the application_id "portfolio".
         fake_variables = {
             "domains": {"portfolio": "myportfolio.com"},
@@ -62,7 +71,9 @@ galaxy_info:
                 "portfolio": {"docker": {"services": {"desktop": {"enabled": True}}}}
             },
             "group_names": ["portfolio"],
+            "WEB_PROTOCOL": "https",
         }
+
         result = lookup_module.run([self.test_roles_dir], variables=fake_variables)
 
         # The result is a list containing one list of card dictionaries.
@@ -81,20 +92,63 @@ galaxy_info:
         self.assertEqual(card["url"], "https://myportfolio.com")
         self.assertTrue(card["iframe"])
 
-    def test_lookup_when_group_excludes_application_id(self):
-        # Instantiate the LookupModule.
+    def test_lookup_url_uses_https_when_web_protocol_is_https(self):
         lookup_module = LookupModule()
-        # Set fake variables with group_names that do NOT include the application_id "portfolio".
+        fake_variables = self._base_fake_variables()
+        fake_variables["WEB_PROTOCOL"] = "https"
+
+        result = lookup_module.run([self.test_roles_dir], variables=fake_variables)
+
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 1)
+
+        cards = result[0]
+        self.assertIsInstance(cards, list)
+        self.assertEqual(len(cards), 1)
+
+        card = cards[0]
+        self.assertEqual(card["url"], "https://myportfolio.com")
+
+    def test_lookup_url_uses_http_when_web_protocol_is_http(self):
+        lookup_module = LookupModule()
+        fake_variables = self._base_fake_variables()
+        fake_variables["WEB_PROTOCOL"] = "http"
+
+        result = lookup_module.run([self.test_roles_dir], variables=fake_variables)
+
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 1)
+
+        cards = result[0]
+        self.assertIsInstance(cards, list)
+        self.assertEqual(len(cards), 1)
+
+        card = cards[0]
+        self.assertEqual(card["url"], "http://myportfolio.com")
+
+    def test_lookup_raises_error_when_web_protocol_is_missing(self):
+        lookup_module = LookupModule()
+        fake_variables = self._base_fake_variables()
+        fake_variables.pop("WEB_PROTOCOL", None)
+
+        with self.assertRaises(AnsibleError) as ctx:
+            lookup_module.run([self.test_roles_dir], variables=fake_variables)
+
+        self.assertIn("WEB_PROTOCOL", str(ctx.exception))
+
+    def test_lookup_when_group_excludes_application_id(self):
+        lookup_module = LookupModule()
         fake_variables = {
             "domains": {"portfolio": "myportfolio.com"},
             "applications": {
                 "portfolio": {"docker": {"services": {"desktop": {"enabled": True}}}}
             },
             "group_names": [],  # Not including "portfolio"
+            "WEB_PROTOCOL": "https",
         }
+
         result = lookup_module.run([self.test_roles_dir], variables=fake_variables)
 
-        # Since the application_id is not in group_names, no card should be added.
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), 1)
 
