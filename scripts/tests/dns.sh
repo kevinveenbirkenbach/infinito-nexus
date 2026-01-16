@@ -6,7 +6,7 @@ set -euo pipefail
 # ------------------------------------------------------------
 ENV_FILE="${ENV_FILE:-env.ci}"
 
-if [[ ! -f "${ENV_FILE}" ]]; then
+if [ ! -f "${ENV_FILE}" ]; then
   echo "ERROR: env file not found: ${ENV_FILE}"
   exit 1
 fi
@@ -65,13 +65,13 @@ if command -v dig >/dev/null 2>&1; then
   a1="$(dig @"${DNS_IP}" "${DOMAIN}" A +short | head -n1 || true)"
   a2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" A +short | head -n1 || true)"
 
-  if [[ "${a1}" == "${IP4_EXPECTED}" ]]; then
+  if [ "${a1}" = "${IP4_EXPECTED}" ]; then
     ok "${DOMAIN} A -> ${a1}"
   else
     fail "${DOMAIN} A failed (got '${a1}')"
   fi
 
-  if [[ "${a2}" == "${IP4_EXPECTED}" ]]; then
+  if [ "${a2}" = "${IP4_EXPECTED}" ]; then
     ok "${SUBDOMAIN} A -> ${a2}"
   else
     fail "${SUBDOMAIN} A failed (got '${a2}')"
@@ -112,8 +112,8 @@ docker exec "${INFINITO_CONTAINER}" sh -lc "
   echo \"${DOMAIN} -> \${h1}\"
   echo \"${SUBDOMAIN} -> \${h2}\"
 
-  [[ \"\${h1}\" = \"${IP4_EXPECTED}\" ]] || exit 11
-  [[ \"\${h2}\" = \"${IP4_EXPECTED}\" ]] || exit 12
+  [ \"\${h1}\" = \"${IP4_EXPECTED}\" ] || exit 11
+  [ \"\${h2}\" = \"${IP4_EXPECTED}\" ] || exit 12
 "
 
 ok "Outer container DNS works"
