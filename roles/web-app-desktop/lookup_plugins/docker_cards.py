@@ -111,10 +111,14 @@ class LookupModule(LookupBase):
             elif isinstance(domain_url, dict):
                 domain_url = next(iter(domain_url.values()))
 
-            # Construct the URL using the domain_url if available.
             if "WEB_PROTOCOL" not in variables:
                 raise AnsibleError("WEB_PROTOCOL is required to build application URLs")
-            protocol = variables["WEB_PROTOCOL"]
+
+            protocol = self._templar.template(variables["WEB_PROTOCOL"]).strip()
+
+            # domain_url kann list/dict sein; nach deiner Normalisierung:
+            domain_url = self._templar.template(domain_url).strip() if domain_url else ""
+
             url = f"{protocol}://{domain_url}" if domain_url else ""
 
             iframe = get_app_conf(
