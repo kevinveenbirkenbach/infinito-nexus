@@ -19,6 +19,9 @@
     validate_certs: yes
   register: site_check
   failed_when: false
+  retries: 30
+  delay: 2
+  until: site_check.status is defined and site_check.status == 200
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Matomo site check failed"
