@@ -23,10 +23,10 @@ set +a
 : "${DNS_IP:?Missing DNS_IP in env file}"
 : "${DOMAIN:?Missing DOMAIN in env file}"
 : "${IP4:?Missing IP4 in env file}"
+: "${INFINITO_CONTAINER:?Missing INFINITO_CONTAINER env (e.g. infinito_nexus_arch)}"
 
 SUBDOMAIN="foo.${DOMAIN}"
 IP4_EXPECTED="${IP4}"
-INFINITO_CONTAINER="${INFINITO_CONTAINER:?Missing INFINITO_CONTAINER env (e.g. infinito_nexus_arch)}"
 
 # ------------------------------------------------------------
 # Output helpers
@@ -62,16 +62,20 @@ echo
 section "Host -> CoreDNS (direct queries)"
 
 if command -v dig >/dev/null 2>&1; then
-  a1="$(dig @${DNS_IP} "${DOMAIN}" A +short | head -n1 || true)"
-  a2="$(dig @${DNS_IP} "${SUBDOMAIN}" A +short | head -n1 || true)"
+  a1="$(dig @"${DNS_IP}" "${DOMAIN}" A +short | head -n1 || true)"
+  a2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" A +short | head -n1 || true)"
 
-  [[ "${a1}" == "${IP4_EXPECTED}" ]] \
-    && ok "${DOMAIN} A -> ${a1}" \
-    || fail "${DOMAIN} A failed (got '${a1}')"
+  if [[ "${a1}" == "${IP4_EXPECTED}" ]]; then
+    ok "${DOMAIN} A -> ${a1}"
+  else
+    fail "${DOMAIN} A failed (got '${a1}')"
+  fi
 
-  [[ "${a2}" == "${IP4_EXPECTED}" ]] \
-    && ok "${SUBDOMAIN} A -> ${a2}" \
-    || fail "${SUBDOMAIN} A failed (got '${a2}')"
+  if [[ "${a2}" == "${IP4_EXPECTED}" ]]; then
+    ok "${SUBDOMAIN} A -> ${a2}"
+  else
+    fail "${SUBDOMAIN} A failed (got '${a2}')"
+  fi
 else
   warn "dig not found on host — skipping host direct DNS tests"
 fi
