@@ -21,6 +21,10 @@
       {{ mailu_user_name }} {{ MAILU_DOMAIN }} '{{ mailu_password }}'
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
+  register: mailu_password_change
+  retries: 30
+  delay: 2
+  until: mailu_password_change.rc == 0
   when: "'mail-bot' in mailu_user_roles or 'administrator' in mailu_user_roles"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
