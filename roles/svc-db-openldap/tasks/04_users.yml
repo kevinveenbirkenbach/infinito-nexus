@@ -80,6 +80,7 @@
     state: present
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  throttle: 1
   loop: "{{ OPENLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -99,6 +100,7 @@
     state: "{{ 'exact' if MODE_CLEANUP else 'present' }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  throttle: 1
   loop: "{{ OPENLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
