@@ -31,5 +31,3 @@ provision:
   groups:         true    # Roles and Groups import
   update:         true    # User Class updates
   reserved:       false   # Reserved Users aren't provisioned
-
-

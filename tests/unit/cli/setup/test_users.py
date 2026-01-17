@@ -281,7 +281,8 @@ class TestGenerateUsers(unittest.TestCase):
 
         self.assertIn("reserved", build["admin"])
         self.assertTrue(build["admin"]["reserved"])
-        self.assertNotIn("reserved", build["bob"])
+        self.assertIn("reserved", build["bob"])
+        self.assertFalse(build["bob"]["reserved"])
 
     def test_cli_reserved_usernames_flag_sets_reserved_field(self):
         """
@@ -341,7 +342,7 @@ class TestGenerateUsers(unittest.TestCase):
             self.assertIn("admin", users_map)
             self.assertEqual(users_map["admin"]["email"], "admin@ex")
             self.assertEqual(users_map["admin"]["description"], "Admin from role")
-            self.assertTrue(users_map["admin"].get("reserved", False))
+            self.assertFalse(users_map["admin"].get("reserved", False))
 
         finally:
             shutil.rmtree(tmpdir)

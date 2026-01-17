@@ -20,8 +20,8 @@ users:
   biber:
     username:   "biber"
     full_name:  "Harry Beaver"
-    website:    https://www.infinito.nexus/
-    email:      contact@infinito.nexus
+    website:    "https://www.infinito.nexus/"
+    email:      "contact@infinito.nexus"
     gpg:        "DUMMY-GPG-KEY-NOT-SET"
     password:   "VerySecurePassword!"
 
@@ -41,6 +41,7 @@ applications:
   web-app-jira:
     server:
       status_codes:
+        # Full auto setup isn't possible
         default: 302
   web-app-flowise:
     docker:
@@ -61,6 +62,9 @@ applications:
         matomo:
           enabled: false
   web-app-keycloak:
+    credentials:
+      administrator_password: administrator
+  web-app-lam:
     credentials:
       administrator_password: administrator
 

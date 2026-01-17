@@ -8,3 +8,5 @@ users:
     roles:
       - administrator
     authorized_keys: []
+    # Overwritte default
+    reserved:           false

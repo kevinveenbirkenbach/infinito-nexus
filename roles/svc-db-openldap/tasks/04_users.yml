@@ -77,7 +77,7 @@
       homeDirectory: "/home/{{ item.key }}"
       uidNumber:     "{{ item.value.uid | int }}"
       gidNumber:     "{{ item.value.gid | int }}"
-    state: present            # ↳ creates but never updates
+    state: present
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   loop: "{{ OPENLDAP_USERS | dict2items }}"
