@@ -117,7 +117,9 @@ class LookupModule(LookupBase):
             protocol = self._templar.template(variables["WEB_PROTOCOL"]).strip()
 
             # domain_url kann list/dict sein; nach deiner Normalisierung:
-            domain_url = self._templar.template(domain_url).strip() if domain_url else ""
+            domain_url = (
+                self._templar.template(domain_url).strip() if domain_url else ""
+            )
 
             url = f"{protocol}://{domain_url}" if domain_url else ""
 

@@ -196,7 +196,9 @@ galaxy_info:
         fake_variables = self._base_fake_variables()
 
         fake_variables["TLS_ENABLED"] = True
-        fake_variables["WEB_PROTOCOL"] = "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
+        fake_variables["WEB_PROTOCOL"] = (
+            "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
+        )
 
         result = self._run_lookup(lookup_module, fake_variables)
 
@@ -207,7 +209,9 @@ galaxy_info:
         fake_variables = self._base_fake_variables()
 
         fake_variables["TLS_ENABLED"] = False
-        fake_variables["WEB_PROTOCOL"] = "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
+        fake_variables["WEB_PROTOCOL"] = (
+            "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
+        )
 
         result = self._run_lookup(lookup_module, fake_variables)
 
@@ -230,7 +234,9 @@ galaxy_info:
         fake_variables = self._base_fake_variables()
 
         fake_variables["TLS_ENABLED"] = "true"
-        fake_variables["WEB_PROTOCOL"] = "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
+        fake_variables["WEB_PROTOCOL"] = (
+            "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
+        )
 
         result = self._run_lookup(lookup_module, fake_variables)
 
