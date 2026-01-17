@@ -26,12 +26,12 @@ server:
   csp:
     flags:
       style-src-attr:
-        unsafe-inline:            true
+        unsafe-inline:  true
       script-src-elem:
-        unsafe-inline:            true
-        unsafe-eval:              true
+        unsafe-inline:  false
+        unsafe-eval:    true
       script-src-attr:
-        unsafe-inline:            true
+        unsafe-inline:  true
   domains:
     aliases: []
     canonical:

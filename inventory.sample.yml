@@ -64,7 +64,6 @@ applications:
     credentials:
       administrator_password: administrator
 
-
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 
 WORKSTATION_USER: biber
@@ -72,15 +71,6 @@ WORKSTATION_USER: biber
 ansible_python_interpreter: /usr/bin/python3
 
 # Uncomment the following lines to speed up debugging:
-
-# SYS_SERVICE_SUPPRESS_FLUSH:
-# - sys-ctl-rpr-btrfs-balancer
-# - sys-ctl-hlth-journalctl
-# - sys-ctl-bkp-docker-2-loc
-# - sys-ctl-cln-faild-bkps
-# - sys-ctl-cln-disc-space
-# - sys-ctl-rpr-docker-hard
-# - sys-ctl-rpr-docker-soft
 
 # # Performance:
 # run_once_docker_compose:    true
