@@ -1,10 +1,16 @@
-- name: "Ensure Mailu user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ MAILU_DOMAIN }}'' exists"
+- name: "Ensure Mailu user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ MAILU_DOMAIN }}' exists"
   command: >
     {{ docker_compose_command_exec }} admin flask mailu {{ mailu_action }}
       {{ mailu_user_name }} {{ MAILU_DOMAIN }} '{{ mailu_password }}'
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
   register: mailu_user_result
+  retries: 340
+  delay: 2
+  until: >
+    mailu_user_result.rc == 0 or
+    "exists, not created" in mailu_user_result.stderr or
+    "Duplicate entry" in mailu_user_result.stderr
   failed_when: >
     mailu_user_result.rc != 0 and
     (
