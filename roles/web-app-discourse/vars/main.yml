@@ -6,11 +6,12 @@ database_password:              "{{ applications | get_app_conf(application_id, 
 # Discourse
 
 ## General
+DISCOURSE_DATABASE_TYPE:        "{{ applications | get_app_conf(application_id, 'docker.services.database.type') }}"
 DISCOURSE_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.discourse.name') }}"
 DISCOURSE_NETWORK:              "{{ applications | get_app_conf(application_id, 'docker.network') }}"
 DISCOURSE_VOLUME:               "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 DISCOURSE_PLUGINS:              "{{ applications | get_app_conf(application_id, 'plugins') }}"
-DISCOURSE_PG_NETWORK:           "{{ applications | get_app_conf('svc-db-' ~ database_type, 'docker.network' ) }}"
+DISCOURSE_PG_NETWORK:           "{{ applications | get_app_conf('svc-db-' ~ DISCOURSE_DATABASE_TYPE, 'docker.network' ) }}"
 DISCOURSE_REDIS_HOST:           "{{ application_id | get_entity_name }}-redis"
 DISCOURSE_REPOSITORY_URL:       "{{ applications | get_app_conf(application_id, 'docker.services.discourse.repository') }}"
 

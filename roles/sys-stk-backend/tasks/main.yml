@@ -36,4 +36,3 @@
 - name: "flush docker compose and oauth2 proxy'"
   meta: flush_handlers
   when: docker_compose_flush_handlers | bool
-

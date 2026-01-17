@@ -11,7 +11,7 @@
 - name: "Display all database variables"
   ansible.builtin.debug:
     msg: |
-      database_application_id: "{{ database_application_id | default('undefined') }}"
+      database_consumer_id: "{{ database_consumer_id | default('undefined') }}"
       database_instance: "{{ database_instance | default('undefined') }}"
       database_name: "{{ database_name | default('undefined') }}"
       database_type: "{{ database_type | default('undefined') }}"

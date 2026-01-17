@@ -288,6 +288,7 @@ test-local-rapid:
 			-T "$(TEST_DEPLOY_TYPE)" \
 			--skip-update \
 			--skip-backup \
+			--skip-cleanup \
 			--id "$(APP)" \
 			--no-signal \
 			--log /opt/src/infinito/logs \

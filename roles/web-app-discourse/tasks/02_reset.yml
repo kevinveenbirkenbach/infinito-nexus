@@ -6,16 +6,14 @@
     file: "{{ item }}"
   loop:
     - "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"
-    - "{{ playbook_dir }}/roles/sys-svc-rdbms/vars/database.yml"
 
 - name: Sanity check for required vars
   assert:
     that:
-      - database_type is defined
       - applications is defined
       - docker_compose is defined
       - ports is defined
-    fail_msg: "Load roles/docker-compose/vars/docker-compose.yml and set `database_type` first."
+    fail_msg: "Load roles/docker-compose/vars/docker-compose.yml first."
   when: MODE_ASSERT | bool
 
 - name: "Disconnect DB container from Discourse networks"
