@@ -301,7 +301,7 @@ test-local-rapid:
 			-e SYS_SERVICE_DEFAULT_STATE=started \
 	'
 
-test-local-full: up
+test-local-full: docker-up
 	@echo "=== local full deploy (type=$(TEST_DEPLOY_TYPE), distro=$(INFINITO_DISTRO)) ==="
 	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
 	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
