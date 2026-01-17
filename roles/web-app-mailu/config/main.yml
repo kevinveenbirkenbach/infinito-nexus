@@ -3,6 +3,10 @@ oidc:
   enable_user_creation:   true                        # Users will be created if not existing
 domain:                   "{{ SYSTEM_EMAIL_DOMAIN }}" # The main domain from which mails will be send \ email suffix behind @                              
 server:
+  status_codes:
+    default:
+      - 301 # Main domain redirects
+      - 200
   domains:
     canonical:
       - "mail.{{ DOMAIN_PRIMARY }}"

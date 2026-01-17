@@ -128,6 +128,11 @@
     set_fact:
       service_provider: "{{ defaults_service_provider | combine(service_provider | default({}, true), recursive=True) }}"
 
+- name: Include Token Store
+  include_role:
+    name: sys-token-store
+  when: run_once_sys_token_store is not defined
+
 - name: init root user
   include_role:
     name: user-root
