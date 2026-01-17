@@ -289,7 +289,7 @@ test-local-rapid:
 			--skip-update \
 			--skip-backup \
 			--skip-cleanup \
-			--id "$(APP)" \
+			--id $(APP) \
 			--no-signal \
 			--log /opt/src/infinito/logs \
 			--debug \

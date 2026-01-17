@@ -161,6 +161,30 @@ def _split_args(
     return args, unknown
 
 
+def _normalize_app_ids(raw_ids: List[str]) -> List[str]:
+    """
+    Normalize application IDs:
+      - allow space-separated
+      - allow comma-separated
+      - allow mixed
+    """
+    result: List[str] = []
+
+    for item in raw_ids:
+        parts = [p.strip() for p in item.split(",") if p.strip()]
+        result.extend(parts)
+
+    # remove duplicates while preserving order
+    seen = set()
+    unique: List[str] = []
+    for app in result:
+        if app not in seen:
+            seen.add(app)
+            unique.append(app)
+
+    return unique
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     """
     CLI entrypoint for `python -m cli.deploy.dedicated`.
@@ -174,6 +198,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     modes_spec = add_dynamic_mode_args(parser, modes_meta)
 
     args, passthrough = _split_args(argv, parser)
+    args.id = _normalize_app_ids(args.id)
 
     # Validate application IDs
     validate_application_ids(args.inventory, args.id)
