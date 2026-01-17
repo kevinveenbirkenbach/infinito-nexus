@@ -23,11 +23,14 @@
 
 - name: Include backup, repair and health services for docker
   include_role:
-    name: "{{ item }}"
+    name: "{{ service_role }}"
   loop:
     - sys-ctl-cln-docker
     - sys-ctl-bkp-docker-2-loc
     - sys-ctl-hlth-docker-container
     - sys-ctl-hlth-docker-volumes
     - sys-ctl-rpr-docker-hard
+  loop_control:
+    loop_var: service_role
   when: DOCKER_COMPOSE_LOAD_SERVICES | bool
+
