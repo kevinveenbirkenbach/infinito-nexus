@@ -42,24 +42,24 @@
 - name: "Create Mailu accounts"
   include_tasks: 03_manage_user.yml
   vars:
-    MAILU_DOCKER_DIR:     "{{ docker_compose.directories.instance }}"
+    MAILU_DOCKER_DIR:      "{{ docker_compose.directories.instance }}"
     mailu_api_base_url:   "http://127.0.0.1:8080/api/v1"
     mailu_action: >-
       {{
         (
-          'administrator' in (item.value.get('roles', []))
+          'administrator' in (user_item.value.get('roles', []))
         )
         | ternary('admin','user')
       }}
-    mailu_user_key:       "{{ item.key }}"
-    mailu_user_name:      "{{ item.value.username }}"
-    mailu_password:       "{{ item.value.password }}"
-    mailu_token_ip:       "{{ item.value.ip | default(networks.internet.ip4) }}"
-    mailu_token_name:     "{{ SOFTWARE_NAME ~ ' Token for ' ~ item.value.username }}"
-    mailu_user_roles:     "{{ item.value.roles | default([]) }}"
-  loop:                   "{{ users | dict2items }}"
+    mailu_user_key:       "{{ user_item.key }}"
+    mailu_user_name:      "{{ user_item.value.username }}"
+    mailu_password:      "{{ user_item.value.password }}"
+    mailu_token_ip:      "{{ user_item.value.ip | default(networks.internet.ip4) }}"
+    mailu_token_name:    "{{ SOFTWARE_NAME ~ ' Token for ' ~ user_item.value.username }}"
+    mailu_user_roles:    "{{ user_item.value.roles | default([]) }}"
+  loop: "{{ users | dict2items }}"
   loop_control:
-    loop_var: item
+    loop_var: user_item
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Generate DKIM public key
