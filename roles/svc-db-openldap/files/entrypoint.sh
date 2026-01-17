@@ -60,6 +60,8 @@ include         ${schema_dir}/nis.schema
 
 modulepath      ${module_path}
 moduleload      back_mdb
+moduleload      memberof
+moduleload      refint
 
 pidfile         /run/slapd/slapd.pid
 argsfile        /run/slapd/slapd.args
