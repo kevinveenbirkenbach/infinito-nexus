@@ -100,3 +100,4 @@ LDAP:
       # Valid values posixGroup, groupOfNames
       - groupOfNames
       # - posixGroup
+    EMPTY_MEMBER_DN: "cn=__empty__,{{ LDAP.DN.ROOT }}"

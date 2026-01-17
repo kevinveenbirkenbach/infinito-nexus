@@ -145,7 +145,7 @@
         "config": {
           "membership.attribute.type": [ "DN" ],
           "group.name.ldap.attribute": [ "cn" ],
-          "membership.user.ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
+          "membership.user.ldap.attribute": [ "dn" ],
           "preserve.group.inheritance": [ "true" ],
           "groups.dn": [ "{{ LDAP.DN.OU.ROLES }}" ],
           "mode": [ "LDAP_ONLY" ],
@@ -208,7 +208,7 @@
           "user.roles.retrieve.strategy": [ "LOAD_ROLES_BY_MEMBER_ATTRIBUTE" ],
           "roles.dn": [ "{{ LDAP.DN.OU.ROLES }}" ],
           "membership.ldap.attribute": [ "member" ],
-          "membership.user.ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
+          "membership.user.ldap.attribute": [ "dn" ],
           "memberof.ldap.attribute": [ "memberOf" ],
           "role.name.ldap.attribute": [ "cn" ],
           "use.realm.roles.mapping": [ "true" ],
