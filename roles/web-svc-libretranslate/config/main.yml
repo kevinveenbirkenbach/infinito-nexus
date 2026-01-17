@@ -36,4 +36,3 @@ server:
     aliases:          []      # Alias redirections to the first element of the canonical domains
 rbac:
   roles: {}
-
