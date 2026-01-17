@@ -3,7 +3,7 @@ galaxy_info:
   description: Take control of your PostgreSQL databases with pgAdmin — a powerful, open source, web-app-based administration
     tool offering an intuitive user interface, multi‑server management, robust configuration options, and optional OAuth2
     integration for enhanced security.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
   min_ansible_version: '2.9'

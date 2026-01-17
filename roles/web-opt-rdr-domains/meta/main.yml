@@ -1,15 +1,11 @@
 galaxy_info:
   author: Kevin Veen-Birchenbach
   description: Configures Nginx to perform 301 redirects based on a list of source→target domain mappings.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: 'Kevin Veen-Birchenbach
-
     Consulting & Coaching Solutions
-
-    https://www.veen.world
-
-    '
+    https://www.veen.world'
   galaxy_tags:
   - nginx
   - redirect

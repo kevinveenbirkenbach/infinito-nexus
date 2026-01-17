@@ -1,7 +1,7 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Runs a collected list of systemd services at the end of a play.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   min_ansible_version: '2.9'
   platforms:

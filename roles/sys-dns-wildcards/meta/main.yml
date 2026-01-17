@@ -1,7 +1,7 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Create Cloudflare wildcard DNS records (*.parent) for parent hosts; no base or *.apex records.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   min_ansible_version: '2.12'
   galaxy_tags:
   - dns

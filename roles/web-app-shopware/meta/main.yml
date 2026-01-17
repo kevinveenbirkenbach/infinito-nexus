@@ -3,7 +3,7 @@ galaxy_info:
   description: Shopware is a modern open-source eCommerce platform built on PHP and Symfony. It enables businesses to create
     scalable online stores with flexible product management, intuitive administration, customizable storefronts, and powerful
     APIs for headless and omnichannel commerce.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

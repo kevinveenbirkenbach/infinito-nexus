@@ -2,7 +2,7 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Pulls backups from a remote server and stores them locally using rsync with retry logic. This role is part
     of a comprehensive backup scheme and works in conjunction with other roles to ensure reliable backup operations.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

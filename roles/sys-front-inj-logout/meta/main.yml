@@ -5,7 +5,7 @@ galaxy_info:
     and redirects users to a centralized OIDC logout endpoint.
 
     '
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   min_ansible_version: '2.9'
   platforms:

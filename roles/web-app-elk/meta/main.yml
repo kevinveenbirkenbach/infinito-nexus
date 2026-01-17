@@ -3,7 +3,7 @@ galaxy_info:
   description: Transform online learning and collaboration with BigBlueButton, an interactive web conferencing solution designed
     to energize virtual classrooms and meetings. Enjoy dynamic tools and an engaging environment that makes every session
     a powerful learning experience.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
   min_ansible_version: '2.9'

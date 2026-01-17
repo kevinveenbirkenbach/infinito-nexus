@@ -3,7 +3,7 @@ galaxy_info:
   description: 'Role to provision an OpenResty container via Docker Compose.
 
     '
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: "Kevin Veen‑Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
   galaxy_tags:

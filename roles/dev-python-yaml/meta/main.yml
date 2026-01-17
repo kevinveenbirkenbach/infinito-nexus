@@ -3,7 +3,7 @@ galaxy_info:
   description: 'Installs the `python-yaml` package to enable YAML support in Python.
 
     '
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

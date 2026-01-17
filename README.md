@@ -85,7 +85,7 @@ docker run --rm -it infinito:latest infinito --help
 
 ## License ⚖️
 
-Infinito.Nexus is distributed under the **Infinito.Nexus NonCommercial License**. Please see [LICENSE.md](LICENSE.md) for full terms.
+Infinito.Nexus is distributed under the **Infinito.Nexus Community License (Non-Commercial)**. Please see [LICENSE.md](LICENSE.md) for full terms.
 
 ---
 

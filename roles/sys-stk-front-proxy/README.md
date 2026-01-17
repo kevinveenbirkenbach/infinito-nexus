@@ -32,4 +32,4 @@ Provide **one-stop, idempotent domain provisioning** for Nginx-based homelabs or
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at <https://www.veen.world>
 
-Part of the **Infinito.Nexus Project** — licensed under the [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)
+Part of the **Infinito.Nexus Project** — licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)

@@ -28,7 +28,7 @@ When enabled via `MODE_CLEANUP` or `MODE_RESET`, it will automatically prune unu
 
 ## License
 
-This role is released under the Infinito.Nexus NonCommercial License (CNCL).  
+This role is released under the Infinito.Nexus Community License (Non-Commercial) (CNCL).  
 See [license details](https://s.infinito.nexus/license).
 
 ## Author Information

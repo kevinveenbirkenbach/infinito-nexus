@@ -25,7 +25,7 @@ vars:
 
 ## License
 
-Infinito.Nexus NonCommercial License
+Infinito.Nexus Community License (Non-Commercial)
 [https://s.infinito.nexus/license](https://s.infinito.nexus/license)
 
 ## Author
