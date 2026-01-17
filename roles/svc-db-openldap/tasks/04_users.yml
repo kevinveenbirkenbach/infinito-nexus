@@ -27,7 +27,7 @@
       - organizationalUnit
     attributes:
       ou: users
-      description: "People container"
+      description: "Users container"
     state: present
 
 - name: Ensure groups OU exists
