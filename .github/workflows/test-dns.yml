@@ -74,7 +74,7 @@ jobs:
           INFINITO_CONTAINER: infinito_nexus_${{ matrix.distro }}
         run: |
           set -euo pipefail
-          make up
+          make docker-up
 
       - name: DNS test suite
         shell: bash
