@@ -33,7 +33,7 @@
       include_tasks: "{{ playbook_dir }}/roles/web-app-oauth2-proxy/tasks/main.yml"
   when: applications | get_app_conf(application_id, 'docker.services.oauth2.enabled', False)
 
-- name: "flush docker compose and oauth2 proxy for '{{ application_id }}'"
+- name: "flush docker compose and oauth2 proxy'"
   meta: flush_handlers
   when: docker_compose_flush_handlers | bool
 
