@@ -5,6 +5,9 @@
     src: include.php.j2
     dest: "{{ NEXTCLOUD_HOST_INCL_PATH }}"
   notify: docker compose up
+  owner: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+  group: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+  mode: "0644"
 
 - name: Flush handlers so Nextcloud container is restarted and ready
   meta: flush_handlers
@@ -20,12 +23,6 @@
 - name: Copy include instructions to the container
   command: >
     docker cp {{ NEXTCLOUD_HOST_INCL_PATH }} {{ NEXTCLOUD_CONTAINER }}:{{ NEXTCLOUD_DOCKER_INCL_PATH }}
-
-- name: "Nextcloud | Ensure {{ NEXTCLOUD_DOCKER_CONF_DIRECTORY }} is writable by www-data"
-  command: >
-    docker exec -u 0 {{ NEXTCLOUD_CONTAINER }} sh -lc "
-      mkdir -p {{ NEXTCLOUD_DOCKER_CONF_DIRECTORY }} &&
-      chown -R {{ NEXTCLOUD_DOCKER_USER_ID }}:{{ NEXTCLOUD_DOCKER_USER_ID }} {{ NEXTCLOUD_DOCKER_CONF_DIRECTORY }}"
 
 - name: Wait until Nextcloud is installed (occ status)
   command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} status"

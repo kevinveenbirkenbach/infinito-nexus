@@ -3,6 +3,7 @@
     name: sys-stk-full
   vars:
     docker_compose_flush_handlers: false
+    application_id: web-app-nextcloud
 
 - when: NEXTCLOUD_WHITEBOARD_ENABLED | bool
   block:
@@ -10,6 +11,8 @@
       file:
         path: "{{ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY }}"
         state: directory
+        owner: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+        group: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
         mode: "0755"
     
     - name: "Deploy Whiteboard Dockerfile to '{{ NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE }}'"
@@ -22,6 +25,8 @@
   file:
     path: "{{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
     state: directory
+    owner: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+    group: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
     mode: "0755"
 
 - name: "Create config files at {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
@@ -30,6 +35,7 @@
     dest:   "{{ NEXTCLOUD_HOST_CONF_ADD_PATH }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
     owner:  "{{ NEXTCLOUD_DOCKER_USER_ID }}"
     group:  "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+    mode:   "0644"
   loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
   notify: docker compose up
 
