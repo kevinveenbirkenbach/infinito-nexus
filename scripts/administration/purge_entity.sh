@@ -8,7 +8,7 @@
 #   ./purge_entity.sh keycloak openldap nextcloud
 #
 # What it does per stack:
-#   - (Optional) Drops the app database if detected (postgres/mariadb)
+#   - (Optional) Drops the app database if detected (postgres/mariadb) (best effort)
 #   - docker compose down
 #   - removes /opt/docker/<STACK>/volumes
 #   - removes /opt/docker/<STACK>
@@ -37,6 +37,68 @@ env_get() {
       print v; exit
     }
   ' "${env_file}"
+}
+
+drop_postgres_db_best_effort() {
+  local db_name="$1"
+
+  # When dropping "postgres" itself, we must NOT connect to it.
+  local admin_db="postgres"
+  if [[ "${db_name}" == "postgres" ]]; then
+    admin_db="template1"
+  fi
+
+  log "Dropping Postgres database '${db_name}' (admin db: ${admin_db})..."
+
+  set +e
+  docker exec -i postgres psql -U postgres -d "${admin_db}" -v ON_ERROR_STOP=1 <<SQL
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = '${db_name}' AND pid <> pg_backend_pid();
+DROP DATABASE IF EXISTS "${db_name}";
+SQL
+  local rc=$?
+  set -e
+
+  if [[ $rc -ne 0 ]]; then
+    warn "Postgres drop failed for '${db_name}' (rc=${rc}) — continuing with purge anyway"
+  fi
+}
+
+drop_mariadb_db_best_effort() {
+  local db_name="$1"
+
+  # Never drop system databases
+  case "${db_name}" in
+    mysql|information_schema|performance_schema|sys)
+      warn "Refusing to drop MariaDB system database '${db_name}' — skipping DB drop"
+      return 0
+      ;;
+  esac
+
+  local mariadb_env="/opt/docker/mariadb/.env/env"
+  if [[ ! -f "${mariadb_env}" ]]; then
+    warn "MariaDB env file not found: ${mariadb_env} — skipping DB drop"
+    return 0
+  fi
+
+  local root_pw
+  root_pw="$(env_get "${mariadb_env}" MARIADB_ROOT_PASSWORD || true)"
+  if [[ -z "${root_pw}" ]]; then
+    warn "MARIADB_ROOT_PASSWORD not found — skipping DB drop"
+    return 0
+  fi
+
+  log "Dropping MariaDB database '${db_name}'..."
+
+  set +e
+  docker exec -i mariadb mariadb -uroot -p"${root_pw}" -e "DROP DATABASE IF EXISTS \`${db_name}\`;"
+  local rc=$?
+  set -e
+
+  if [[ $rc -ne 0 ]]; then
+    warn "MariaDB drop failed for '${db_name}' (rc=${rc}) — continuing with purge anyway"
+  fi
 }
 
 # --- Iterate over all stacks ----------------------------------------------
@@ -105,31 +167,12 @@ for STACK_NAME in "$@"; do
     warn "No DB backend detected — skipping DB drop"
   fi
 
-  # --- Drop database (optional) -------------------------------------------
+  # --- Drop database (optional, BEST EFFORT) -------------------------------
 
   if [[ "${DB_BACKEND}" == "postgres" ]]; then
-    log "Dropping Postgres database '${DB_NAME}'..."
-    docker exec -i postgres psql -U postgres -v ON_ERROR_STOP=1 <<SQL
-SELECT pg_terminate_backend(pid)
-FROM pg_stat_activity
-WHERE datname = '${DB_NAME}' AND pid <> pg_backend_pid();
-DROP DATABASE IF EXISTS "${DB_NAME}";
-SQL
-
+    drop_postgres_db_best_effort "${DB_NAME}"
   elif [[ "${DB_BACKEND}" == "mariadb" ]]; then
-    MARIADB_ENV="/opt/docker/mariadb/.env/env"
-    if [[ -f "${MARIADB_ENV}" ]]; then
-      MARIADB_ROOT_PASSWORD="$(env_get "${MARIADB_ENV}" MARIADB_ROOT_PASSWORD || true)"
-      if [[ -n "${MARIADB_ROOT_PASSWORD}" ]]; then
-        log "Dropping MariaDB database '${DB_NAME}'..."
-        docker exec -i mariadb mariadb -uroot -p"${MARIADB_ROOT_PASSWORD}" \
-          -e "DROP DATABASE IF EXISTS \`${DB_NAME}\`;"
-      else
-        warn "MARIADB_ROOT_PASSWORD not found — skipping DB drop"
-      fi
-    else
-      warn "MariaDB env file not found — skipping DB drop"
-    fi
+    drop_mariadb_db_best_effort "${DB_NAME}"
   fi
 
   # --- Stop/remove compose stack ------------------------------------------
