@@ -1,5 +1,13 @@
 # run_once_sys_stk_backend: disabled
 
+- name: "DEBUG | SYS-STK-BACKEND | Application context"
+  ansible.builtin.debug:
+    msg:
+      - "application_id={{ application_id }}"
+      - "database_enabled={{ SYS_STK_BACKEND_DATABASE_ENABLED }}"
+      - "oauth2_enabled={{ SYS_STK_BACKEND_OAUTH2_ENABLED }}"
+  when: MODE_DEBUG | bool
+
 - name: "SYS-STK-BACKEND | Load optional dependencies (once)"
   ansible.builtin.include_tasks: "_load_service.yml"
   loop:
@@ -17,7 +25,7 @@
 
 - name: "Load Database"
   ansible.builtin.include_tasks: "01_database.yml"
-  when: applications | service_load_enabled(application_id, 'database', False)
+  when: SYS_STK_BACKEND_DATABASE_ENABLED | bool
 
 - name: "For '{{ application_id }}': Load docker-compose"
   include_role:
@@ -31,7 +39,7 @@
         oauth2_proxy_application_id: "{{ application_id }}"
     - name: "load role web-app-oauth2-proxy"
       include_tasks: "{{ playbook_dir }}/roles/web-app-oauth2-proxy/tasks/main.yml"
-  when: applications | get_app_conf(application_id, 'docker.services.oauth2.enabled', False)
+  when: SYS_STK_BACKEND_OAUTH2_ENABLED | bool
 
 - name: "flush docker compose and oauth2 proxy'"
   meta: flush_handlers
