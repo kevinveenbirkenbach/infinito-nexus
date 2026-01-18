@@ -1,0 +1,39 @@
+- name: Apply role include/exclude filters
+  ansible.builtin.set_fact:
+    _cypress_apps: >-
+      {{
+        playbook_dir
+        | discover_cypress_roles(
+            only_roles=TEST_E2E_ONLY_ROLES,
+            skip_roles=TEST_E2E_SKIP_ROLES
+          )
+      }}
+
+- name: Show detected Cypress roles
+  ansible.builtin.debug:
+    msg: "Cypress-enabled roles: {{ _cypress_apps }}"
+  changed_when: false
+
+- name: Ensure staging base dir exists
+  ansible.builtin.file:
+    path: "{{ TEST_E2E_STAGE_BASE_DIR }}"
+    state: directory
+    mode: "0755"
+
+- name: Ensure reports base dir exists
+  ansible.builtin.file:
+    path: "{{ TEST_E2E_REPORTS_BASE_DIR }}"
+    state: directory
+    mode: "0755"
+
+- name: Run Cypress for each detected role
+  ansible.builtin.include_tasks: run_one.yml
+  loop: "{{ _cypress_apps }}"
+  loop_control:
+    loop_var: application_id
+    label: "{{ application_id }}"
+
+- name: Fail if there were Cypress failures
+  ansible.builtin.fail:
+    msg: "Cypress failed for roles: {{ _cypress_failures }}"
+  when: (_cypress_failures | default([])) | length > 0
