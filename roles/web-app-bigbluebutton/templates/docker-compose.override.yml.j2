@@ -5,7 +5,7 @@ services:
       MS_ENABLE_IPV6: "false"
       MS_WEBRTC_LISTEN_IPS: >-
         [{"ip":"0.0.0.0","announcedIp":"${EXTERNAL_IPv4}"}]
-{% if BBB_COTURN_ENABLED | bool %}
+{% if BBB_COTURN_LOCAL_ENABLED | bool %}
   coturn:
     ports:
       - "{{ BBB_TURN_PORT }}:{{ BBB_TURN_PORT }}/udp"

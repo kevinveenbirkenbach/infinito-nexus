@@ -44,6 +44,9 @@ docker:
     oidc:
       enabled: true
       shared: true
+    coturn:
+      shared:   true
+      enabled:  true 
     logout:
       enabled: true
     ldap:

@@ -16,17 +16,17 @@ credentials: {}
 docker:
   services:
     oidc:
-      enabled: true
-      shared: true
+      enabled:  true
+      shared:   true
     logout:
-      enabled: true
+      enabled:  true
     ldap:
-      enabled: false
+      enabled:  false
     desktop:
-      enabled: false
+      enabled:  false
     matomo:
-      enabled: true
-      shared: true
+      enabled:  true
+      shared:   true
     bigbluebutton:
       repository:     "https://github.com/bigbluebutton/docker.git"
       version:        "main"
@@ -35,14 +35,15 @@ docker:
         cleanup:      true  # Auto-Cleanup Recordings
         max_age_days: 30    # Cleanup recording after this amount of days
     database:
-      shared: false
+      shared:   false
       # This is set to true to pass integration test, doesn't have any other function
-      enabled:    true
+      enabled:  true
     greenlight:
-      enabled:    true
+      enabled:  true
     coturn:
-      shared: true
+      shared:   true
+      enabled:  true 
     collabora:
-      shared: true
+      shared:   true
     css:
-      enabled: true
+      enabled:  true
