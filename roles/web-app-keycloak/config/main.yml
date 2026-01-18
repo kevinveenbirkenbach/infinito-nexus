@@ -47,9 +47,9 @@ docker:
       mem_limit:        "4g"
       pids_limit:       1024
     database:
-      shared:   true
-      type:     "postgres"
-      enabled:  true
+      shared:           true
+      type:             "postgres"
+      enabled:          true
     css:
       enabled: true
     recaptcha:

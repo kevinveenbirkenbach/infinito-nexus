@@ -1,6 +1,3 @@
-oidc:
-  email_by_username:      true                        # If true, then the mail is set by the username. If wrong then the OIDC user email is used
-  enable_user_creation:   true                        # Users will be created if not existing
 domain:                   "{{ SYSTEM_EMAIL_DOMAIN }}" # The main domain from which mails will be send \ email suffix behind @                              
 server:
   status_codes:
@@ -27,8 +24,10 @@ rbac:
 docker:
   services:
     oidc:
-      enabled: true
-      shared: true
+      enabled:              true
+      shared:               true
+      email_by_username:    true  # If true, then the mail is set by the username. If wrong then the OIDC user email is used
+      enable_user_creation: true  # Users will be created if not existing
     logout:
       enabled: true
     desktop:
