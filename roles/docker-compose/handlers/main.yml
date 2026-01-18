@@ -112,9 +112,7 @@
   args:
     executable: /bin/bash
   changed_when: true
-  when:
-    - MODE_CLEANUP | bool
-    - DOCKER_IN_CONTAINER | bool
+  when: STORAGE_CONSTRAINED | bool
   listen:
     - docker compose up
     - docker compose build

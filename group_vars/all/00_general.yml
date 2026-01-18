@@ -1,10 +1,11 @@
 ansible_python_interpreter: /usr/bin/python3
 
-SOFTWARE_NAME:            "Infinito.Nexus"  # Name of the software
+SOFTWARE_NAME:              "Infinito.Nexus"  # Name of the software
 
 # Deployment
-ENVIRONMENT:              "production"      # Possible values: production, development
-DEPLOYMENT_MODE:          "single"          # Use single, if you deploy on one server. Use cluster if you setup in cluster mode.
+ENVIRONMENT:                "production"      # Possible values: production, development
+DEPLOYMENT_MODE:            "single"          # Use single, if you deploy on one server. Use cluster if you setup in cluster mode.
+STORAGE_CONSTRAINED:        false             # Storage constraint means that Infinito.Nexus prefers free storage space over cache
 
 # If true, sensitive credentials will be masked or hidden from all Ansible task logs
 # Recommendet to set to true

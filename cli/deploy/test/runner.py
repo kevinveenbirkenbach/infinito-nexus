@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import subprocess
+import json
 from pathlib import Path
 
 from .compose import Compose
 from .deps import apps_with_deps, resolve_run_after
 from .logs import append_text, log_path, write_text
+from .storage import detect_storage_constrained
 
 
 def _repo_root_from_here() -> Path:
@@ -25,9 +27,16 @@ def _ensure_vault_password_file(compose: Compose) -> None:
     )
 
 
-def _create_inventory(compose: Compose, *, include: list[str]) -> None:
+def _create_inventory(
+    compose: Compose,
+    *,
+    include: list[str],
+    storage_constrained: bool,
+) -> None:
     if not include:
         raise ValueError("include must not be empty")
+
+    overrides = {"STORAGE_CONSTRAINED": bool(storage_constrained)}
 
     cmd = [
         "python3",
@@ -39,6 +48,8 @@ def _create_inventory(compose: Compose, *, include: list[str]) -> None:
         "--ssl-disabled",
         "--vars-file",
         "inventory.sample.yml",
+        "--vars",
+        json.dumps(overrides),
         "--include",
         ",".join(include),
     ]
@@ -133,7 +144,11 @@ def run_test_plan(
             main_log, f"\nmode=single-with-deps\nresolved_ids={','.join(deploy_ids)}\n"
         )
 
-        _create_inventory(compose, include=deploy_ids)
+        storage_constrained = detect_storage_constrained(compose, threshold_gib=100)
+        append_text(main_log, f"\nstorage_constrained={storage_constrained}\n")
+        _create_inventory(
+            compose, include=deploy_ids, storage_constrained=storage_constrained
+        )
 
         rc = _run_deploy(
             compose, deploy_type=deploy_type, deploy_ids=deploy_ids, debug=debug

@@ -1,8 +1,7 @@
 # Sample inventory for CI Pipeline
 MASK_CREDENTIALS_IN_LOGS: false
-
-MODE_TEST: true          
-
+ENVIRONMENT:              development
+MODE_TEST:                true
 
 design:
   css:
