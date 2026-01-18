@@ -57,5 +57,8 @@
   changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
   become: true
   when: MODE_UPDATE | bool
+  retries: 6
+  delay: 20
+  until: pkgmgr_update.rc == 0
 
 - include_tasks: utils/once/flag.yml
