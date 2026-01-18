@@ -54,6 +54,7 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
       - oidc enabled+shared    => web-app-keycloak
       - matomo enabled+shared  => web-app-matomo
       - coturn enabled+shared  => web-svc-coturn
+      - onlyoffice enabled+shared => web-svc-onlyoffice
       - database enabled+shared => svc-db-<type> (requires database.type)
       - desktop enabled        => web-app-desktop   (shared does NOT matter)
     """
@@ -73,8 +74,8 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
         ServiceRule("oidc", _is_enabled_shared, lambda _svc: "web-app-keycloak"),
         ServiceRule("matomo", _is_enabled_shared, lambda _svc: "web-app-matomo"),
         ServiceRule("coturn", _is_enabled_shared, lambda _svc: "web-svc-coturn"),
+        ServiceRule("onlyoffice", _is_enabled_shared, lambda _svc: "web-svc-onlyoffice"),
         ServiceRule("database", _is_enabled_shared, map_database),
-        # NEW: desktop is included if enabled, regardless of shared
         ServiceRule("desktop", _is_enabled, lambda _svc: "web-app-desktop"),
     )
 
