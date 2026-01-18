@@ -22,11 +22,17 @@ scopes:
 docker:
   services:
     logout:
-      enabled: false
-      shared: false
+      enabled:  false
+      shared:   false
     ldap:
-      enabled: true
-      shared: true
+      enabled:  true
+      shared:   true
+      sync:
+        period:
+          # Sync user attribute changes all 15 min  
+          changes:  900
+          # Sync everything daily
+          full:     86400
     desktop:
       enabled: true
     matomo:

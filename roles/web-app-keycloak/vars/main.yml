@@ -73,6 +73,8 @@ KEYCLOAK_LDAP_CMP_NAME:             "{{ LDAP.SERVER.DOMAIN }}"          # Name o
 KEYCLOAK_LDAP_BIND_DN:              "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
 KEYCLOAK_LDAP_BIND_PW:              "{{ LDAP.BIND_CREDENTIAL }}"
 KEYCLOAK_LDAP_URL:                  "{{ LDAP.SERVER.URI }}"
+KEYCLOAK_LDAP_SYNC_CHANGES_PERIOD:  "{{ applications | get_app_conf(application_id, 'docker.services.ldap.sync.period.changes') }}"
+KEYCLOAK_LDAP_SYNC_FULL_PERIOD:     "{{ applications | get_app_conf(application_id, 'docker.services.ldap.sync.period.full') }}"
 
 # It's important to filter the posixAccount class out, because it is just used by ansible
 KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >  
