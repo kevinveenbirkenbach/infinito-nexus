@@ -42,7 +42,7 @@ docker:
     oauth2:
       enabled: true
       origin:
-        host:  "application"
+        host:   "snipe-it"
         port:   "80"
       acl:
         blacklist:

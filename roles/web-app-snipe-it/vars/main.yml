@@ -1,5 +1,6 @@
 # General 
 application_id:     "web-app-snipe-it"
+entity_name:        "{{ application_id | get_entity_name }}"
 
 # Database
 database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
@@ -11,6 +12,8 @@ SNIPE_IT_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.serv
 SNIPE_IT_CONTAINER: "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.name') }}"
 SNIPE_IT_VOLUME:    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 SNIPE_IT_USER:      "www-data"
+SNIPE_IT_SERVICE:   "{{ entity_name }}"
+SNIPE_IT_APP_KEY:   "{{ applications | get_app_conf(application_id, 'credentials.app_key') }}"
 
 # Authentification
 SNIPE_IT_OAUTH2_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.oauth2.enabled') }}"

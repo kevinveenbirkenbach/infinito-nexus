@@ -5,6 +5,9 @@
   vars:
     docker_compose_flush_handlers: true
 
+- name: "Installation Procedures"
+  import_tasks: 01_install.yml
+
 - name: "Configure Snipe-IT LDAP settings"
-  import_tasks: ldap.yml
+  import_tasks: 02_ldap.yml
   when: SNIPE_IT_LDAP_ENABLED | bool 
