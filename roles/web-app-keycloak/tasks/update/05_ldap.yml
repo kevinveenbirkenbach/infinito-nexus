@@ -297,5 +297,4 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  notify:
-    - "Keycloak | Sync LDAP groups (ldap-roles mapper)"
+  notify: sync ldap groups
