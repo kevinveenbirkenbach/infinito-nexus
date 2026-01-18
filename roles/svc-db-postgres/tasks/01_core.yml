@@ -9,8 +9,9 @@
     docker_network_name:            "{{ POSTGRES_NETWORK_NAME }}"
     docker_network_subnet:          "{{ POSTGRES_SUBNET }}"
     docker_compose_flush_handlers:  true
-    # Explicit overwritting is required
+    # Explicit overwritting to be sure that there isn't a scope leak by another variable
     application_id:                 "svc-db-postgres"
+    database_consumer_id:           "svc-db-postgres"
 
 - name: Install 'psycopg2-binary'
   include_role:
