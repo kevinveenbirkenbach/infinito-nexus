@@ -1,10 +1,16 @@
+# cli/meta/applications/resolution/combined/role_introspection.py
 from __future__ import annotations
 
 from typing import List, Set
 
 from .errors import CombinedResolutionError
-from .repo_paths import role_dir, role_meta_path, role_vars_path
+from .repo_paths import role_config_path, role_dir, role_meta_path, role_vars_path
 from .yaml_utils import load_yaml_file
+
+from cli.meta.applications.resolution.services.errors import ServicesResolutionError
+from cli.meta.applications.resolution.services.resolver import (
+    resolve_direct_service_roles_from_config,
+)
 
 
 def require_role_exists(role_name: str) -> None:
@@ -79,6 +85,34 @@ def load_dependencies_app_only(role_name: str) -> List[str]:
             out.append(dep)
 
     return _stable_dedup(out)
+
+
+def load_shared_service_roles_for_app(role_name: str) -> List[str]:
+    """
+    If role is an application role, inspect roles/<role>/config/main.yml and
+    return provider roles implied by docker.services.* flags.
+
+    Logic is centralized in cli.meta.applications.resolution.services.resolver.
+    """
+    if not has_application_id(role_name):
+        return []
+
+    cfg_path = role_config_path(role_name)
+    if not cfg_path.exists():
+        return []
+
+    cfg = load_yaml_file(cfg_path)
+
+    try:
+        includes = resolve_direct_service_roles_from_config(cfg)
+    except ServicesResolutionError as exc:
+        # Keep combined's error type for consistent UX
+        raise CombinedResolutionError(str(exc)) from exc
+
+    for r in includes:
+        require_role_exists(r)
+
+    return _stable_dedup(includes)
 
 
 def _extract_dependency_role_names(raw: object, *, meta_path: str) -> List[str]:

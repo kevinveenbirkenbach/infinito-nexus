@@ -1,3 +1,4 @@
+# cli/meta/applications/resolution/combined/repo_paths.py
 from __future__ import annotations
 
 from pathlib import Path
@@ -21,3 +22,7 @@ def role_meta_path(role_name: str) -> Path:
 
 def role_vars_path(role_name: str) -> Path:
     return role_dir(role_name) / "vars" / "main.yml"
+
+
+def role_config_path(role_name: str) -> Path:
+    return role_dir(role_name) / "config" / "main.yml"

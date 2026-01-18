@@ -46,6 +46,8 @@ def print_tree(start_role: str) -> None:
             groups.append(("run_after", edges.run_after))
         if edges.dependencies:
             groups.append(("dependencies", edges.dependencies))
+        if edges.services:
+            groups.append(("services", edges.services))
 
         base_indent = prefix + ("    " if is_last else "│   ")
 

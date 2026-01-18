@@ -1,21 +1,35 @@
+# tests/unit/cli/meta/applications/resolution/combined/test_repo_paths.py
 from __future__ import annotations
 
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from cli.meta.applications.resolution.combined import repo_paths
 
 
-class TestRepoPaths(unittest.TestCase):
-    def test_roles_dir_is_path(self) -> None:
-        # This is a very light test: just ensure it returns a Path
-        rdir = repo_paths.roles_dir()
-        self.assertIsInstance(rdir, Path)
+class TestCombinedRepoPaths(unittest.TestCase):
+    def test_roles_dir_and_role_paths(self) -> None:
+        root = Path("/tmp/fake-root")
 
-    def test_role_meta_and_vars_paths_are_paths(self) -> None:
-        meta = repo_paths.role_meta_path("web-app-x")
-        vars_ = repo_paths.role_vars_path("web-app-x")
-        self.assertIsInstance(meta, Path)
-        self.assertIsInstance(vars_, Path)
-        self.assertTrue(str(meta).endswith("roles/web-app-x/meta/main.yml"))
-        self.assertTrue(str(vars_).endswith("roles/web-app-x/vars/main.yml"))
+        with patch.object(repo_paths, "repo_root_from_here", return_value=root):
+            self.assertEqual(repo_paths.roles_dir(), root / "roles")
+            self.assertEqual(
+                repo_paths.role_dir("web-app-x"), root / "roles" / "web-app-x"
+            )
+            self.assertEqual(
+                repo_paths.role_meta_path("web-app-x"),
+                root / "roles" / "web-app-x" / "meta" / "main.yml",
+            )
+            self.assertEqual(
+                repo_paths.role_vars_path("web-app-x"),
+                root / "roles" / "web-app-x" / "vars" / "main.yml",
+            )
+            self.assertEqual(
+                repo_paths.role_config_path("web-app-x"),
+                root / "roles" / "web-app-x" / "config" / "main.yml",
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

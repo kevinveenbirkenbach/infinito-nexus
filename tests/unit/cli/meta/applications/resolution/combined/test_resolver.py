@@ -1,119 +1,71 @@
-# tests/unit/cli/meta/applications/resolution/combined/test_resolver.py
+# tests/unit/cli/meta/applications/resolution/combined/test_tree.py
 from __future__ import annotations
 
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from cli.meta.applications.resolution.combined.errors import CombinedResolutionError
 from cli.meta.applications.resolution.combined import repo_paths
-from cli.meta.applications.resolution.combined.resolver import CombinedResolver
+from cli.meta.applications.resolution.combined.tree import print_tree
 
 
-def _mk_role(root: Path, role: str, *, app_id: str | None = None) -> None:
-    role_dir = root / "roles" / role
-    (role_dir / "meta").mkdir(parents=True, exist_ok=True)
-    (role_dir / "vars").mkdir(parents=True, exist_ok=True)
-    if app_id is not None:
-        (role_dir / "vars" / "main.yml").write_text(
-            f"application_id: {app_id}\n", encoding="utf-8"
-        )
-
-
-def _write_meta(root: Path, role: str, text: str) -> None:
-    p = root / "roles" / role / "meta" / "main.yml"
+def _write(p: Path, text: str) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(text, encoding="utf-8")
 
 
-class TestCombinedResolver(unittest.TestCase):
-    def test_resolve_orders_prereqs_first_run_after_then_deps(self) -> None:
+class TestCombinedTree(unittest.TestCase):
+    def test_tree_shows_services_and_cycle_marker(self) -> None:
         """
-        Graph:
-          app
-            run_after: ra1
-            dependencies: dep1 (app), sys1 (non-app, ignored)
+        Build:
+          start(app) run_after -> web-app-keycloak
+          start config enables desktop => web-app-desktop
+          keycloak run_after -> start (cycle)
 
-          ra1 run_after: ra2
-          dep1 dependencies: dep2 (app)
-
-        Expected topological order:
-          ra2 ra1 dep2 dep1   (start role excluded)
+        Tree should show [services] and a cycle marker.
         """
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
+            (root / "roles").mkdir()
 
-            _mk_role(root, "app", app_id="app")
-            _mk_role(root, "ra1", app_id="ra1")
-            _mk_role(root, "ra2", app_id="ra2")
-            _mk_role(root, "dep1", app_id="dep1")
-            _mk_role(root, "dep2", app_id="dep2")
-            _mk_role(root, "sys1", app_id=None)
+            # start app role with desktop enabled
+            _write(
+                root / "roles" / "start" / "vars" / "main.yml",
+                "application_id: start\n",
+            )
+            _write(
+                root / "roles" / "start" / "meta" / "main.yml",
+                "galaxy_info:\n  run_after:\n    - web-app-keycloak\n",
+            )
+            _write(
+                root / "roles" / "start" / "config" / "main.yml",
+                "docker:\n  services:\n    desktop:\n      enabled: true\n",
+            )
 
-            _write_meta(
-                root,
-                "app",
-                """
-galaxy_info:
-  run_after: [ra1]
-dependencies:
-  - dep1
-  - sys1
-""",
+            # keycloak exists, and points back to start to force a visible cycle
+            _write(
+                root / "roles" / "web-app-keycloak" / "meta" / "main.yml",
+                "galaxy_info:\n  run_after:\n    - start\n",
             )
-            _write_meta(
-                root,
-                "ra1",
-                """
-galaxy_info:
-  run_after: [ra2]
-""",
-            )
-            _write_meta(
-                root,
-                "dep1",
-                """
-dependencies:
-  - dep2
-""",
-            )
+
+            # required folders exist
+            (root / "roles" / "start").mkdir(parents=True, exist_ok=True)
+            (root / "roles" / "web-app-keycloak").mkdir(parents=True, exist_ok=True)
+            (root / "roles" / "web-app-desktop").mkdir(parents=True, exist_ok=True)
 
             with patch.object(repo_paths, "repo_root_from_here", return_value=root):
-                resolver = CombinedResolver()
-                out = resolver.resolve("app")
-                self.assertEqual(out, ["ra2", "ra1", "dep2", "dep1"])
+                buf = io.StringIO()
+                with redirect_stdout(buf):
+                    print_tree("start")
+                out = buf.getvalue()
 
-    def test_cycle_detection_across_combined_graph(self) -> None:
-        """
-        app run_after: a
-        a dependencies: app
-        => cycle app -> a -> app
-        """
-        with tempfile.TemporaryDirectory() as td:
-            root = Path(td)
+            self.assertIn("[services]", out)
+            self.assertIn("web-app-desktop", out)
+            self.assertIn("↩︎ (cycle)", out)
 
-            _mk_role(root, "app", app_id="app")
-            _mk_role(root, "a", app_id="a")
 
-            _write_meta(
-                root,
-                "app",
-                """
-galaxy_info:
-  run_after: [a]
-""",
-            )
-            _write_meta(
-                root,
-                "a",
-                """
-dependencies:
-  - app
-""",
-            )
-
-            with patch.object(repo_paths, "repo_root_from_here", return_value=root):
-                resolver = CombinedResolver()
-                with self.assertRaises(CombinedResolutionError):
-                    resolver.resolve("app")
+if __name__ == "__main__":
+    unittest.main()

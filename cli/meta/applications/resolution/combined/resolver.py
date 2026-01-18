@@ -1,13 +1,14 @@
+# cli/meta/applications/resolution/combined/resolver.py
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Dict, List, Set, Tuple
 
-from .errors import CombinedResolutionError
 from .role_introspection import (
-    require_role_exists,
-    load_run_after,
     load_dependencies_app_only,
+    load_run_after,
+    load_shared_service_roles_for_app,
+    require_role_exists,
 )
 
 
@@ -15,16 +16,20 @@ from .role_introspection import (
 class RoleEdges:
     run_after: List[str]
     dependencies: List[str]
+    services: List[str]
 
 
 class CombinedResolver:
     """
     Resolve a combined prerequisite graph:
-      prerequisites(role) = run_after(role) + dependencies(role)
+      prerequisites(role) = run_after(role) + dependencies(role) + services(role)
 
     Notes:
     - run_after edges are always followed
     - dependency edges are followed only for application roles (filtered in loader)
+    - services edges are derived from app config flags (filtered in loader)
+    - Cycles do NOT raise; traversal stops expanding the cyclic edge
+      (tree output shows cycles separately via stack detection).
     """
 
     def __init__(self) -> None:
@@ -38,19 +43,22 @@ class CombinedResolver:
 
         ra = load_run_after(role_name)
         deps = load_dependencies_app_only(role_name)
+        svcs = load_shared_service_roles_for_app(role_name)
 
-        # Validate referenced roles exist (run_after must exist; deps already validated)
+        # Validate referenced roles exist for run_after (deps/services validate internally too)
         for r in ra:
             require_role_exists(r)
 
-        edges = RoleEdges(run_after=ra, dependencies=deps)
+        edges = RoleEdges(run_after=ra, dependencies=deps, services=svcs)
         self._cache[role_name] = edges
         return edges
 
     def resolve(self, start_role: str) -> List[str]:
         """
-        Return prerequisites-first (topological) list, excluding start_role.
-        Cycle detection is across the combined graph.
+        Return prerequisites-first (post-order) list, excluding start_role.
+
+        Cycle tolerant:
+        - If a node is already on the current stack, stop expanding that edge.
         """
         require_role_exists(start_role)
 
@@ -60,12 +68,8 @@ class CombinedResolver:
 
         def dfs(node: str) -> None:
             if node in stack:
-                idx = stack.index(node)
-                cycle = stack[idx:] + [node]
-                raise CombinedResolutionError(
-                    f"Circular dependency detected: {' -> '.join(cycle)}"
-                )
-
+                # cycle edge -> stop expansion, do not raise
+                return
             if node in visited:
                 return
 
@@ -74,10 +78,12 @@ class CombinedResolver:
 
             edges = self.edges_for(node)
 
-            # prerequisites: run_after first, then dependencies
+            # Keep stable traversal order
             for dep in edges.run_after:
                 dfs(dep)
             for dep in edges.dependencies:
+                dfs(dep)
+            for dep in edges.services:
                 dfs(dep)
 
             stack.pop()
@@ -91,8 +97,5 @@ class CombinedResolver:
     def resolve_with_edges(
         self, start_role: str
     ) -> Tuple[List[str], Dict[str, RoleEdges]]:
-        """
-        Convenience method for tree printing: returns (resolved_list, cache_snapshot).
-        """
         resolved = self.resolve(start_role)
         return resolved, dict(self._cache)

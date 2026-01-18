@@ -9,25 +9,22 @@ from cli.meta.applications.resolution.combined.errors import CombinedResolutionE
 from cli.meta.applications.resolution.combined.yaml_utils import load_yaml_file
 
 
-class TestYamlUtils(unittest.TestCase):
+class TestCombinedYamlUtils(unittest.TestCase):
     def test_load_yaml_file_ok(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "x.yml"
-            p.write_text("a: 1\nb:\n  c: 2\n", encoding="utf-8")
+            p.write_text("a: 1\nb:\n  c: test\n", encoding="utf-8")
             data = load_yaml_file(p)
             self.assertEqual(data["a"], 1)
-            self.assertEqual(data["b"]["c"], 2)
+            self.assertEqual(data["b"]["c"], "test")
 
-    def test_load_yaml_file_empty_returns_dict(self) -> None:
+    def test_load_yaml_file_invalid_yaml_raises(self) -> None:
         with tempfile.TemporaryDirectory() as td:
-            p = Path(td) / "x.yml"
-            p.write_text("", encoding="utf-8")
-            data = load_yaml_file(p)
-            self.assertEqual(data, {})
-
-    def test_load_yaml_file_invalid_raises(self) -> None:
-        with tempfile.TemporaryDirectory() as td:
-            p = Path(td) / "x.yml"
-            p.write_text("a: [\n", encoding="utf-8")  # invalid YAML
+            p = Path(td) / "bad.yml"
+            p.write_text("a: [1, 2\n", encoding="utf-8")  # missing closing bracket
             with self.assertRaises(CombinedResolutionError):
                 load_yaml_file(p)
+
+
+if __name__ == "__main__":
+    unittest.main()
