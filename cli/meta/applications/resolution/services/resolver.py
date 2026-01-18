@@ -74,7 +74,9 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
         ServiceRule("oidc", _is_enabled_shared, lambda _svc: "web-app-keycloak"),
         ServiceRule("matomo", _is_enabled_shared, lambda _svc: "web-app-matomo"),
         ServiceRule("coturn", _is_enabled_shared, lambda _svc: "web-svc-coturn"),
-        ServiceRule("onlyoffice", _is_enabled_shared, lambda _svc: "web-svc-onlyoffice"),
+        ServiceRule(
+            "onlyoffice", _is_enabled_shared, lambda _svc: "web-svc-onlyoffice"
+        ),
         ServiceRule("database", _is_enabled_shared, map_database),
         ServiceRule("desktop", _is_enabled, lambda _svc: "web-app-desktop"),
     )

@@ -8,6 +8,10 @@ import base64
 
 
 class ValueGenerator:
+    def generate_strong_password(self, length: int = 32) -> str:
+        characters = string.ascii_letters + string.digits + "!@#$%^&*()-_=+[]{}:,.?"
+        return "".join(secrets.choice(characters) for _ in range(length))
+
     def generate_secure_alphanumeric(self, length: int) -> str:
         """Generate a cryptographically secure random alphanumeric string of the given length."""
         characters = string.ascii_letters + string.digits  # a-zA-Z0-9
@@ -37,6 +41,8 @@ class ValueGenerator:
             return hashlib.sha256(secrets.token_bytes(32)).hexdigest()
         if algorithm == "sha1":
             return hashlib.sha1(secrets.token_bytes(20)).hexdigest()
+        if algorithm == "strong_password":
+            return self.generate_strong_password(32)
         if algorithm == "bcrypt":
             pw = secrets.token_urlsafe(16).encode()
             raw_hash = bcrypt.hashpw(pw, bcrypt.gensalt()).decode()
