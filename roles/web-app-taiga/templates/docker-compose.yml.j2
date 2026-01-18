@@ -172,11 +172,10 @@
       - {{ TAIGA_FRONT_SERVICE }}
       - {{ TAIGA_SERVICE }}
       - {{ TAIGA_EVENTS_SERVICE }}
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  static-data:
-  media-data:
-  async-rabbitmq-data:
-  events-rabbitmq-data:
-
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=(database_volume if database_volume is defined else None),
+    extra_volumes={'async-rabbitmq-data': {}, 'events-rabbitmq-data': {}, 'media-data': {}, 'static-data': {}}
+) }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
   taiga:

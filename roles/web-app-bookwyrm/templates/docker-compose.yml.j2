@@ -34,10 +34,9 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  data:
-    name: {{ BOOKWYRM_DATA_VOLUME }}
-  media:
-    name: {{ BOOKWYRM_MEDIA_VOLUME }}
-
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=(database_volume if database_volume is defined else None),
+    extra_volumes={'data': {'name': BOOKWYRM_DATA_VOLUME}, 'media': {'name': BOOKWYRM_MEDIA_VOLUME}}
+) }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

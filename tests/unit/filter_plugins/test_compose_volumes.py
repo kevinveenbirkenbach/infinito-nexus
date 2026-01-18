@@ -78,16 +78,13 @@ class TestComposeVolumes(unittest.TestCase):
     # -----------------------------
     # Database volume
     # -----------------------------
-    def test_database_enabled_not_shared_adds_database_volume_default_name(self):
+    def test_database_enabled_not_shared_requires_database_volume_argument(self):
         apps = self._base_apps()
         apps["app"]["docker"]["services"]["database"]["enabled"] = True
         apps["app"]["docker"]["services"]["database"]["shared"] = False
 
-        rendered = compose_volumes(apps, "app")
-        data = self._parse_yaml(rendered)
-
-        self.assertIn("database", data["volumes"])
-        self.assertEqual(data["volumes"]["database"]["name"], "app_database")
+        with self.assertRaises(AnsibleFilterError):
+            compose_volumes(apps, "app")
 
     def test_database_enabled_not_shared_uses_database_volume_argument(self):
         apps = self._base_apps()
@@ -114,11 +111,11 @@ class TestComposeVolumes(unittest.TestCase):
         apps["app"]["docker"]["services"]["database"]["enabled"] = True
         apps["app"]["docker"]["services"]["database"]["shared"] = None
 
-        rendered = compose_volumes(apps, "app")
+        rendered = compose_volumes(apps, "app", database_volume="my_db_vol")
         data = self._parse_yaml(rendered)
 
         self.assertIn("database", data["volumes"])
-        self.assertEqual(data["volumes"]["database"]["name"], "app_database")
+        self.assertEqual(data["volumes"]["database"]["name"], "my_db_vol")
 
     # -----------------------------
     # Redis volume

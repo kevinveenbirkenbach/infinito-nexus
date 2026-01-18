@@ -133,18 +133,20 @@
       - talk_recording_tmp:/tmp
 {% endif %}
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  data:
-    name: {{ NEXTCLOUD_VOLUME }}
+{% set _extra_volumes = {'data': {'name': NEXTCLOUD_VOLUME}} %}
 {% if NEXTCLOUD_WHITEBOARD_ENABLED %}
-  whiteboard_tmp:
-    name: {{ NEXTCLOUD_WHITEBOARD_TMP_VOLUME }}
-  whiteboard_fontcache:
-    name: {{ NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME }}
+{%   set _ = _extra_volumes.update({
+        'whiteboard_tmp':      {'name': NEXTCLOUD_WHITEBOARD_TMP_VOLUME},
+        'whiteboard_fontcache': {'name': NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME}
+      }) %}
 {% endif %}
 {% if NEXTCLOUD_RECORDING_ENABLED | bool %}
-  talk_recording_tmp:
-    name: {{ NEXTCLOUD_RECORDING_TMP_VOLUME }}
+{%   set _ = _extra_volumes.update({'talk_recording_tmp': {'name': NEXTCLOUD_RECORDING_TMP_VOLUME}}) %}
 {% endif %}
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=(database_volume if database_volume is defined else None),
+    extra_volumes=_extra_volumes
+) }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

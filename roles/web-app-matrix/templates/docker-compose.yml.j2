@@ -96,11 +96,14 @@
       MATRIX_RICH_TEXT: 'true'
 {% endif %}
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  synapse_data:
-    name: {{ MATRIX_SYNAPSE_VOLUME }}
+{% set _extra_volumes = {'synapse_data': {'name': MATRIX_SYNAPSE_VOLUME}} %}
 {% if applications | get_app_conf(application_id, 'plugins.chatgpt', True) | bool %}
-  chatgpt_data:
+{%   set _ = _extra_volumes.update({'chatgpt_data': {}}) %}
 {% endif %}
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=(database_volume if database_volume is defined else None),
+    extra_volumes=_extra_volumes
+) }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

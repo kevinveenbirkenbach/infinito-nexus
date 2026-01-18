@@ -179,24 +179,11 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
       webmail:
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  smtp_queue:
-    name: {{ MAILU_SMTP_QUEUE_VOLUME }}
-  admin_data:
-    name: {{ MAILU_ADMIN_DATA_VOLUME }}
-  webdav_data:
-    name: {{ MAILU_WEBDAV_DATA }}
-  webmail_data:
-    name: {{ MAILU_WEBMAIL_DATA }}
-  filter:
-    name: {{ MAILU_FILTER_VOLUME }}
-  clamav_db:
-    name: {{ MAILU_CLAMAV_VOLUME }}
-  dkim:
-    name: {{ MAILU_DKIM_VOLUME }}
-  dovecot_mail:
-    name: {{ MAILU_DOVECOT_MAIL_VOLUME }}
-
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=(database_volume if database_volume is defined else None),
+    extra_volumes={'admin_data': {'name': MAILU_ADMIN_DATA_VOLUME}, 'clamav_db': {'name': MAILU_CLAMAV_VOLUME}, 'dkim': {'name': MAILU_DKIM_VOLUME}, 'dovecot_mail': {'name': MAILU_DOVECOT_MAIL_VOLUME}, 'filter': {'name': MAILU_FILTER_VOLUME}, 'smtp_queue': {'name': MAILU_SMTP_QUEUE_VOLUME}, 'webdav_data': {'name': MAILU_WEBDAV_DATA}, 'webmail_data': {'name': MAILU_WEBMAIL_DATA}}
+) }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
   radicale:
     driver: bridge
