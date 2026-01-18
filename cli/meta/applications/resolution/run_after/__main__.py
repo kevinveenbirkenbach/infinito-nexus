@@ -3,7 +3,7 @@
 Resolve galaxy_info.run_after transitively for a given role.
 
 Usage:
-  python -m cli.meta.applications.run_after_resolution <role_name>
+  python -m cli.meta.applications.resolution.run_after <role_name>
 
 Output:
   All resolved run_after role names separated by whitespaces (one line).
@@ -23,8 +23,7 @@ class RunAfterResolutionError(RuntimeError):
 
 
 def repo_root_from_here() -> Path:
-    # .../cli/meta/applications/run_after_resolution/__main__.py -> repo root is 5 parents up
-    return Path(__file__).resolve().parents[4]
+    return Path(__file__).resolve().parents[5]
 
 
 def roles_dir() -> Path:

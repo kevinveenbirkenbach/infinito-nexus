@@ -8,8 +8,7 @@ from pathlib import Path
 
 import yaml
 
-# Import the module under test (file: cli/meta/applications/run_after_resolution/__main__.py)
-import cli.meta.applications.run_after_resolution.__main__ as run_after_resolution
+import cli.meta.applications.resolution.run_after.__main__ as run_after_resolution
 
 
 class TestRunAfterResolution(unittest.TestCase):

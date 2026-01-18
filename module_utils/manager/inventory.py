@@ -1,5 +1,3 @@
-# module_utils/manager/inventory.py
-
 from __future__ import annotations
 
 import sys

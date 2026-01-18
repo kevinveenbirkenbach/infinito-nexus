@@ -6,14 +6,14 @@ from .compose import Compose
 def resolve_run_after(compose: Compose, role_name: str) -> list[str]:
     """
     Calls resolver inside the infinito container:
-      python -m cli.meta.applications.run_after_resolution <role_name>
+      python -m cli.meta.applications.resolution.combined <role_name>
     """
-    cmd = ["python3", "-m", "cli.meta.applications.run_after_resolution", role_name]
+    cmd = ["python3", "-m", "cli.meta.applications.resolution.combined", role_name]
     r = compose.exec(cmd, check=False, workdir="/opt/src/infinito", capture=True)
 
     if r.returncode != 0:
         raise RuntimeError(
-            f"run_after_resolution failed for {role_name} (rc={r.returncode})\n"
+            f"resolution.combined failed for {role_name} (rc={r.returncode})\n"
             f"STDOUT:\n{r.stdout}\nSTDERR:\n{r.stderr}"
         )
 

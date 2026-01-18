@@ -2,20 +2,19 @@ credentials: {}
 docker:
   services:
     oauth2:
-      enabled: false
-
+      enabled:  false
     desktop:
-      enabled: true
+      enabled:  true
     matomo:
-      enabled: false
-      shared: false
+      enabled:  false
+      shared:   false
     redis:
       backup:
         disabled:   true
       enabled:      false   # Enable Redis 
     database:
-      shared: false
-      enabled:      false   # Enable the database 
+      shared:   false
+      enabled:  false   # Enable the database 
     css:
       enabled: true
     recaptcha:
