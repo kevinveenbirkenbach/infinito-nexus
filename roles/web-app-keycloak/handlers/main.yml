@@ -3,7 +3,7 @@
     {{ KEYCLOAK_EXEC_KCADM }} create
     user-storage/{{ ldap_cmp_id.stdout | trim }}/mappers/{{ grp_mapper_id | trim }}/sync?direction=fedToKeycloak
     -r {{ KEYCLOAK_REALM }}
-  listen: sync ldap groups 
+  listen: sync ldap groups
   register: group_sync
   changed_when: true
   retries: 6
@@ -11,5 +11,3 @@
   until: group_sync.rc == 0
   failed_when: group_sync.rc != 0
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
