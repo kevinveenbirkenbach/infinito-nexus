@@ -294,7 +294,7 @@ test-local-rapid:
 			--debug \
 			-l "localhost" \
 			--diff \
-			-vvv \
+			-vv \
 			--password-file "/etc/inventories/local-full-${TEST_DEPLOY_TYPE}/.password" \
 			-e ASYNC_ENABLED=false \
 			-e SYS_SERVICE_ALL_ENABLED=false \
