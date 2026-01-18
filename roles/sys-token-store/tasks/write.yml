@@ -17,7 +17,6 @@
     that:
       - sys_token_store_token_effective != ''
     fail_msg: "sys_token_store_token is empty – refusing to persist empty token."
-  no_log: true
 
 - name: "Build merged structure"
   ansible.builtin.set_fact:
