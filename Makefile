@@ -291,7 +291,6 @@ test-local-rapid:
 			--skip-cleanup \
 			--id $(APP) \
 			--no-signal \
-			--log /opt/src/infinito/logs \
 			--debug \
 			-l "localhost" \
 			--diff \
