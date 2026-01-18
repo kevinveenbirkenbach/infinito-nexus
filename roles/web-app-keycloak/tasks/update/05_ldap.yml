@@ -1,3 +1,5 @@
+# roles/web-app-keycloak/tasks/update/05_ldap.yml
+
 - name: "Update REALM settings (merge LDAP component .config)"
   keycloak_kcadm_update:
     object_kind: "component"
@@ -107,6 +109,49 @@
   register: create_groups_top
   changed_when: create_groups_top.rc == 0
   failed_when: create_groups_top.rc != 0 and ('already exists' not in (create_groups_top.stderr | lower))
+
+# ---------------------------------------------------------------------------
+# Ensure groups.path.group points to the actual Keycloak group id of groups.path
+# ---------------------------------------------------------------------------
+
+- name: Refresh existing top-level group id for groups.path (authoritative)
+  when: desired_groups_top | length > 0
+  shell: >
+    {{ KEYCLOAK_EXEC_KCADM }} get groups -r {{ KEYCLOAK_REALM }} --format json
+    | jq -r '.[] | select(.name=="{{ desired_groups_top }}") | .id' | head -n1
+  register: groups_top_id
+  changed_when: false
+
+- name: Assert top-level group for groups.path exists now
+  when: MODE_ASSERT | bool and desired_groups_top | length > 0
+  assert:
+    that:
+      - (groups_top_id.stdout | trim) not in ["", "null"]
+    fail_msg: "Top-level group '{{ desired_groups_top }}' for groups.path could not be resolved."
+
+- name: Inject groups.path.group into desired mapper config (force correct parent group id)
+  when: desired_groups_top | length > 0
+  set_fact:
+    desired_group_mapper: >-
+      {{
+        desired_group_mapper
+        | combine(
+            {
+              "config": (
+                (desired_group_mapper.config | default({}))
+                | combine(
+                    {
+                      "groups.path": [ desired_groups_path ],
+                      "groups.path.group": [ (groups_top_id.stdout | trim) ]
+                    },
+                    recursive=True
+                  )
+              )
+            },
+            recursive=True
+          )
+      }}
+  changed_when: false
 
 # ---------------------------------------------------------------------------
 # Ensure ONLY ONE canonical 'ldap-roles' mapper exists under this LDAP component
@@ -252,3 +297,5 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  notify:
+    - "Keycloak | Sync LDAP groups (ldap-roles mapper)"
