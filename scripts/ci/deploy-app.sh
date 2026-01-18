@@ -58,7 +58,7 @@ for distro in "${distro_arr[@]}"; do
     docker system df || true
 
     set +e
-    args=( --type "${deploy_type}" --app "${APP}" )
+    args=( --type "${deploy_type}" --app "${APP}" --debug)
     if [[ "${MISSING_ONLY}" == "true" ]]; then args+=( --missing ); fi
     args+=( --keep-stack-on-failure )
     scripts/tests/deploy.sh "${args[@]}"
