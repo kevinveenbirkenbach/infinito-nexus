@@ -66,54 +66,53 @@ echo
 # ---------------------------------------------------------------------------
 # 2) Run entry.sh + create inventory + deploy INSIDE container
 # ---------------------------------------------------------------------------
-docker exec -t "${INFINITO_CONTAINER}" bash -lc "
+docker exec -t "${INFINITO_CONTAINER}" bash -lc '
   set -euo pipefail
   cd /opt/src/infinito
 
-  echo '>>> Running entry.sh bootstrap'
+  echo ">>> Running entry.sh bootstrap"
   ./scripts/docker/entry.sh true
 
-  inv_dir='${INVENTORY_BASE_DIR}/local-full-${TEST_DEPLOY_TYPE}'
-  inv_file=\"\${inv_dir}/servers.yml\"
-  pw_file=\"\${inv_dir}/.password\"
+  inv_dir="'"${INVENTORY_BASE_DIR}"'/local-full-'"${TEST_DEPLOY_TYPE}"'"
+  inv_file="${inv_dir}/servers.yml"
+  pw_file="${inv_dir}/.password"
 
-  mkdir -p \"\${inv_dir}\"
+  mkdir -p "${inv_dir}"
 
-  if [[ ! -f \"\${pw_file}\" ]]; then
-    printf '%s\n' 'local-vault-password' > \"\${pw_file}\"
-    chmod 600 \"\${pw_file}\" || true
+  if [[ ! -f "${pw_file}" ]]; then
+    printf "%s\n" "local-vault-password" > "${pw_file}"
+    chmod 600 "${pw_file}" || true
   fi
 
-  echo '>>> Creating inventory at' \"\${inv_file}\"
-  echo '>>> Include apps count: ${apps_count}'
-  # Avoid printing the full CSV (it is huge); show first few instead:
-  echo '>>> Include sample:' \"\$(python3 - <<'PY'
-import sys
-csv=sys.argv[1]
-items=csv.split(',')
-print(','.join(items[:8]) + ('...' if len(items)>8 else ''))
-PY
-'${apps_csv}')\"
+  echo ">>> Creating inventory at ${inv_file}"
+  echo ">>> Include apps count: '"${apps_count}"'"
 
-  python3 -m cli.create.inventory \"\${inv_dir}\" \
-    --host ${LIMIT_HOST} \
+  # Compute a short sample safely (no heredoc, no command-substitution inside echo)
+  sample="$(
+    python3 -c '"'"'import sys; items=sys.argv[1].split(","); print(",".join(items[:8]) + ("..." if len(items)>8 else ""))'"'"' \
+      "'"${apps_csv}"'"
+  )"
+  echo ">>> Include sample: ${sample}"
+
+  python3 -m cli.create.inventory "${inv_dir}" \
+    --host "'"${LIMIT_HOST}"'" \
     --ssl-disabled \
     --vars-file inventory.sample.yml \
-    --include '${apps_csv}'
+    --include "'"${apps_csv}"'"
 
-  echo '>>> Deploying against' \"\${inv_file}\"
+  echo ">>> Deploying against ${inv_file}"
 
-  infinito deploy dedicated \"\${inv_file}\" \
-    -T '${TEST_DEPLOY_TYPE}' \
+  infinito deploy dedicated "${inv_file}" \
+    -T "'"${TEST_DEPLOY_TYPE}"'" \
     --skip-update \
     --skip-backup \
     --no-signal \
     --log /opt/src/infinito/logs \
-    -l ${LIMIT_HOST} \
+    -l "'"${LIMIT_HOST}"'" \
     --diff \
     -vv \
-    --password-file \"\${pw_file}\"
-"
+    --password-file "${pw_file}"
+'
 
 echo
 echo "=== local full deploy finished ==="
