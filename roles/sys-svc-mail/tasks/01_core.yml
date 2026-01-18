@@ -15,6 +15,8 @@
     register: mail_host_reachability
     failed_when: false
     changed_when: false
+    when:
+      - run_once_web_app_mailu is not defined
 
   - name: "Load Mailu Routines for '{{ role_name }}'"
     include_tasks: 02_mailu.yml
@@ -33,7 +35,6 @@
     mailu_valid_status_codes: "{{ applications | get_app_conf('web-app-mailu','server.status_codes.default') }}"
   when:
     - "'web-app-mailu' in group_names"
-    - run_once_web_app_mailu is not defined
 
 - name: Setup emails via localhost
   include_role:
