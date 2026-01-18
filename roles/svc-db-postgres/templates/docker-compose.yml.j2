@@ -20,7 +20,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 {% if POSTGRES_EXPOSE_LOCAL %}
     ports: 
-      - "{{ POSTGRES_LOCAL_HOST }}:{{ POSTGRES_PORT }}:5432"
+      - "{{ DOCKER_BIND_HOST }}:{{ POSTGRES_PORT }}:5432"
 {% endif %}
     volumes:
       - "data:/var/lib/postgresql/data"
