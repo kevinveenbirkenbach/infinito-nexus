@@ -278,13 +278,13 @@ test-act-app:
 test-local-rapid:
 	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set (e.g. APP=web-app-nextcloud)"; exit 1; fi
 	@echo "=== rapid deploy (with entry.sh): type=$(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
-	@docker exec -t "$(INFINITO_CONTAINER)" bash -lc '\
+	@docker exec -it "$(INFINITO_CONTAINER)" bash -lc '\
 		set -euo pipefail; \
 		cd /opt/src/infinito; \
 		echo ">>> Running entry.sh"; \
 		./scripts/docker/entry.sh true; \
 		echo ">>> Starting rapid deploy"; \
-		infinito deploy dedicated /etc/inventories/local-full-${TEST_DEPLOY_TYPE}/servers.yml \
+		exec infinito deploy dedicated /etc/inventories/local-full-${TEST_DEPLOY_TYPE}/servers.yml \
 			-T "$(TEST_DEPLOY_TYPE)" \
 			--skip-update \
 			--skip-backup \
