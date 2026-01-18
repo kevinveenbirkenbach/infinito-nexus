@@ -81,9 +81,17 @@ rootdn          "${LDAP_ROOT_DN}"
 rootpw          ${hash}
 directory       "${DB_DIR}"
 
+# Allow binds for normal users (needed for Keycloak / simple bind)
+access to attrs=userPassword
+  by dn.exact="${LDAP_ROOT_DN}" manage
+  by self write
+  by anonymous auth
+  by * none
+
+# Generic access (tighten later if needed)
 access to *
   by dn.exact="${LDAP_ROOT_DN}" manage
-  by * break
+  by * read
 EOF
 }
 
