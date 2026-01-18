@@ -1,6 +1,10 @@
+- name: "Harden load_app_id"
+  ansible.builtin.set_fact:
+    load_app_id: "{{ load_app_id }}"
+  changed_when: false
 
 # Load with load app id
-- name: "Caller '{{application_id }}' loads application: '{{ load_app_id }}'"
+- name: "Caller '{{ application_id }}' loads application: '{{ load_app_id }}'"
   include_role:
     name:   "{{ load_app_id }}"
     public: false

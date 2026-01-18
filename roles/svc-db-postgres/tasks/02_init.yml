@@ -1,4 +1,10 @@
 ---
+- name: "Assert application_id restored"
+  ansible.builtin.assert:
+    that:
+      - application_id == 'svc-db-postgres'
+  when: MODE_ASSERT | bool
+
 - name: Wait for Postgres inside the container
   shell: "docker exec {{ POSTGRES_CONTAINER }} pg_isready -U postgres"
   register: pg_ready
