@@ -83,7 +83,6 @@ def filter_roles_by_min_storage(
                 )
             continue
 
-
         entity_name = get_entity_name(role_name)
         if not entity_name:
             if emit_warnings:

@@ -72,8 +72,9 @@ jobs:
   
   # Priority A
   test-deploy-server:
-    #needs:
+    needs:
     #  - test-dns
+    - build-ci-images
     uses: ./.github/workflows/test-deploy-server.yml
     with:
       distros: ${{ inputs.distros }}
