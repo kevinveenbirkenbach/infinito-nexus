@@ -1,8 +1,12 @@
 - name: "Keycloak | Sync LDAP groups (ldap-roles mapper)"
-  ansible.builtin.shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} create
-    user-storage/{{ ldap_cmp_id.stdout | trim }}/mappers/{{ grp_mapper_id | trim }}/sync?direction=fedToKeycloak
-    -r {{ KEYCLOAK_REALM }}
+  ansible.builtin.shell: |-
+    {{ KEYCLOAK_COMMAND_PERMANENT_ADMIN_LOGIN }}
+    {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+      set -e
+      {{ KEYCLOAK_KCADM }} create \
+        "user-storage/{{ ldap_cmp_id.stdout | trim }}/mappers/{{ grp_mapper_id | trim }}/sync?direction=fedToKeycloak" \
+        -r {{ KEYCLOAK_REALM }}
+    '
   listen: sync ldap groups
   register: group_sync
   changed_when: true
@@ -11,3 +15,4 @@
   until: group_sync.rc == 0
   failed_when: group_sync.rc != 0
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
