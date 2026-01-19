@@ -256,9 +256,10 @@ ci-deploy-app:
 
 .PHONY: ci-discover-output
 
-.PHONY: ci-discover-output
 ci-discover-output:
 	@set -euo pipefail; \
+	REPO_ROOT="$$(git rev-parse --show-toplevel)"; \
+	cd "$$REPO_ROOT"; \
 	apps="$$(./scripts/ci/discover.sh)"; \
 	[[ -n "$$apps" ]] || apps='[]'; \
 	if [[ -n "$${ONLY_APP:-}" ]]; then \
@@ -269,6 +270,7 @@ ci-discover-output:
 	  echo "apps_json=$$apps" >> "$$GITHUB_OUTPUT"; \
 	fi; \
 	echo "apps_json=$$apps"
+
 
 test-act:
 	@echo "=== act: deploy local (type=$(TEST_DEPLOY_TYPE), distros=$(INFINITO_DISTRO)) ==="
