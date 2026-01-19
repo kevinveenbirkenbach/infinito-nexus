@@ -37,8 +37,9 @@ docker:
 """.lstrip(),
         )
 
-        with patch.object(rrv, "_roles_root", return_value=self.roles_root), patch.object(
-            rrv, "get_entity_name", return_value="demo"
+        with (
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
             kept = rrv.filter_roles_by_min_storage(
                 role_names=["web-app-demo"],
@@ -61,9 +62,11 @@ docker:
         )
 
         err = io.StringIO()
-        with redirect_stderr(err), patch.object(
-            rrv, "_roles_root", return_value=self.roles_root
-        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
+        ):
             kept = rrv.filter_roles_by_min_storage(
                 role_names=["web-app-demo"],
                 required_storage="10G",
@@ -85,9 +88,11 @@ docker:
         )
 
         err = io.StringIO()
-        with redirect_stderr(err), patch.object(
-            rrv, "_roles_root", return_value=self.roles_root
-        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
+        ):
             kept = rrv.filter_roles_by_min_storage(
                 role_names=["web-app-demo"],
                 required_storage="1G",
@@ -99,9 +104,11 @@ docker:
 
     def test_missing_role_directory_emits_absolute_path_warning(self) -> None:
         err = io.StringIO()
-        with redirect_stderr(err), patch.object(
-            rrv, "_roles_root", return_value=self.roles_root
-        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
+        ):
             kept = rrv.filter_roles_by_min_storage(
                 role_names=["web-app-does-not-exist"],
                 required_storage="1G",
@@ -110,7 +117,9 @@ docker:
 
         self.assertEqual(kept, [])
         # Ensure absolute path is shown
-        self.assertIn(str((self.roles_root / "web-app-does-not-exist").resolve()), err.getvalue())
+        self.assertIn(
+            str((self.roles_root / "web-app-does-not-exist").resolve()), err.getvalue()
+        )
 
     def test_missing_config_file_emits_warning(self) -> None:
         # Role dir exists but config missing
@@ -118,9 +127,11 @@ docker:
         role_dir.mkdir(parents=True, exist_ok=True)
 
         err = io.StringIO()
-        with redirect_stderr(err), patch.object(
-            rrv, "_roles_root", return_value=self.roles_root
-        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
+        ):
             kept = rrv.filter_roles_by_min_storage(
                 role_names=["web-app-demo"],
                 required_storage="1G",
@@ -134,9 +145,11 @@ docker:
         self._write_role_config("web-app-demo", yaml_text=": this is not yaml")
 
         err = io.StringIO()
-        with redirect_stderr(err), patch.object(
-            rrv, "_roles_root", return_value=self.roles_root
-        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
+        ):
             kept = rrv.filter_roles_by_min_storage(
                 role_names=["web-app-demo"],
                 required_storage="1G",
@@ -158,9 +171,11 @@ docker:
         )
 
         err = io.StringIO()
-        with redirect_stderr(err), patch.object(
-            rrv, "_roles_root", return_value=self.roles_root
-        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
+        ):
             kept = rrv.filter_roles_by_min_storage(
                 role_names=["web-app-demo"],
                 required_storage="10G",
@@ -191,9 +206,11 @@ docker:
         )
 
         err = io.StringIO()
-        with redirect_stderr(err), patch.object(
-            rrv, "_roles_root", return_value=self.roles_root
-        ), patch.object(rrv, "get_entity_name", return_value=""):
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value=""),
+        ):
             kept = rrv.filter_roles_by_min_storage(
                 role_names=["web-app-demo"],
                 required_storage="10G",

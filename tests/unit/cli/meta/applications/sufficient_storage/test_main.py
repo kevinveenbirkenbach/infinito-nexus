@@ -12,14 +12,24 @@ class TestSufficientStorageCLI(unittest.TestCase):
 
         fake_roles = ["web-app-a", "web-app-b"]
 
-        with patch.object(
-            cli_main,
-            "filter_roles_by_min_storage",
-            return_value=fake_roles,
-        ), patch.object(
-            cli_main.sys,
-            "argv",
-            ["prog", "--roles", "web-app-a", "web-app-b", "--required-storage", "10G"],
+        with (
+            patch.object(
+                cli_main,
+                "filter_roles_by_min_storage",
+                return_value=fake_roles,
+            ),
+            patch.object(
+                cli_main.sys,
+                "argv",
+                [
+                    "prog",
+                    "--roles",
+                    "web-app-a",
+                    "web-app-b",
+                    "--required-storage",
+                    "10G",
+                ],
+            ),
         ):
             out = io.StringIO()
             with redirect_stdout(out):
@@ -31,14 +41,17 @@ class TestSufficientStorageCLI(unittest.TestCase):
     def test_prints_nothing_when_no_matches(self) -> None:
         from cli.meta.applications.sufficient_storage import __main__ as cli_main
 
-        with patch.object(
-            cli_main,
-            "filter_roles_by_min_storage",
-            return_value=[],
-        ), patch.object(
-            cli_main.sys,
-            "argv",
-            ["prog", "--roles", "web-app-a", "--required-storage", "10G"],
+        with (
+            patch.object(
+                cli_main,
+                "filter_roles_by_min_storage",
+                return_value=[],
+            ),
+            patch.object(
+                cli_main.sys,
+                "argv",
+                ["prog", "--roles", "web-app-a", "--required-storage", "10G"],
+            ),
         ):
             out = io.StringIO()
             with redirect_stdout(out):
@@ -50,21 +63,24 @@ class TestSufficientStorageCLI(unittest.TestCase):
     def test_passes_warnings_flag_through(self) -> None:
         from cli.meta.applications.sufficient_storage import __main__ as cli_main
 
-        with patch.object(
-            cli_main,
-            "filter_roles_by_min_storage",
-            return_value=["web-app-a"],
-        ) as mock_filter, patch.object(
-            cli_main.sys,
-            "argv",
-            [
-                "prog",
-                "--roles",
-                "web-app-a",
-                "--required-storage",
-                "10G",
-                "--warnings",
-            ],
+        with (
+            patch.object(
+                cli_main,
+                "filter_roles_by_min_storage",
+                return_value=["web-app-a"],
+            ) as mock_filter,
+            patch.object(
+                cli_main.sys,
+                "argv",
+                [
+                    "prog",
+                    "--roles",
+                    "web-app-a",
+                    "--required-storage",
+                    "10G",
+                    "--warnings",
+                ],
+            ),
         ):
             out = io.StringIO()
             with redirect_stdout(out):
