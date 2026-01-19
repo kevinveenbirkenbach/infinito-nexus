@@ -46,8 +46,6 @@ docker:
       enabled: false # Set to true to activate redis for akaunting
     css:
       enabled: true
-    javascript:
-      enabled: true
   volumes: 
     data: akaunting_data
 credentials: {}
