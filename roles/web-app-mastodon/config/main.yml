@@ -13,9 +13,10 @@ server:
 docker:
   services:
     oidc:
-      # It isn't possible to test OIDC in the CI/CD Pipeline
-      enabled:            "{{ not DOCKER_IN_CONTAINER | bool }}"
-      shared:             "{{ not DOCKER_IN_CONTAINER | bool }}"
+      # It isn't possible to test OIDC in the CI/CD Pipeline, 
+      # it requires https to be enabled 
+      enabled:            "{{ TLS_ENABLED | bool }}"
+      shared:             "{{ TLS_ENABLED | bool }}"
     logout:
       enabled:            true
     desktop:

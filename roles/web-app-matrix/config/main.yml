@@ -1,23 +1,25 @@
 docker:
   services:
     oidc:
-      enabled: true
-      shared: true
+      # It isn't possible to test OIDC in the CI/CD Pipeline, 
+      # it requires https to be enabled 
+      enabled:            "{{ TLS_ENABLED | bool }}"
+      shared:             "{{ TLS_ENABLED | bool }}"
     logout:
-      enabled: true
+      enabled:            true
     desktop:
-      enabled: true
+      enabled:            true
     matomo:
-      enabled: false
-      shared: false
+      enabled:            false
+      shared:             false
     database:
-      shared: true
-      type: "postgres"
-      enabled: true
+      shared:             true
+      type:               "postgres"
+      enabled:            true
     synapse: 
-      version:          latest 
-      image:            matrixdotorg/synapse
-      name:             matrix-synapse
+      version:            latest 
+      image:              matrixdotorg/synapse
+      name:               matrix-synapse
       backup:
         no_stop_required: true
     element: 
@@ -25,7 +27,7 @@ docker:
       image:          vectorim/element-web
       name:           matrix-element
     css:
-      enabled: true
+      enabled:        true
   volumes: 
     synapse:          "matrix_synapse_data"
 playbook_tags:        "setup-all,start"                  # For the initial update use: install-all,ensure-matrix-users-created,start
