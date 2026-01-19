@@ -54,3 +54,6 @@
 
 - name: "Load UserProfile (declarative) Update routines for '{{ application_id }}'"
   include_tasks: update/07_userprofile.yml
+
+- name: "Flush handlers before leaving Keycloak scope"
+  meta: flush_handlers
