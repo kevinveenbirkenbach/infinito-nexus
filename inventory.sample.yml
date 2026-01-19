@@ -66,6 +66,12 @@ applications:
   web-app-lam:
     credentials:
       administrator_password: administrator
+  web-app-phpmyadmin:
+    docker:
+      services:
+        phpmyadmin:
+          # Allows faster debugging
+          autologin: true
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 

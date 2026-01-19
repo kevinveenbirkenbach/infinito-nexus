@@ -1,4 +1,3 @@
-autologin:            false         # This is a high security risk. Just activate this option if you know what you're doing
 server:
   csp:
     flags:
@@ -24,9 +23,11 @@ docker:
       type: "mariadb"
       enabled: true
     phpmyadmin:
-      version:  "latest"      # Use the latest phpmyadmin version
-      name:     "phpmyadmin"
-      image:    "phpmyadmin/phpmyadmin"
+      version:    "latest" # Use the latest phpmyadmin version
+      name:       "phpmyadmin"
+      image:      "phpmyadmin/phpmyadmin"
+      # This is a high security risk. Just activate this option if you know what you're doing
+      autologin:  false
     oauth2:
       enabled: true
       origin:
