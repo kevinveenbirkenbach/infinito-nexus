@@ -11,11 +11,13 @@ set -euo pipefail
 #
 # Output:
 #   JSON array to stdout
-
 TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE:-server}"
 INCLUDE_RE="${INCLUDE_RE:-}"
 EXCLUDE_RE="${EXCLUDE_RE:-}"
 FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$REPO_ROOT"
 
 json_nonempty() {
   local j="${1:-}"
