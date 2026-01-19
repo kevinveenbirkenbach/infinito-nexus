@@ -13,26 +13,27 @@ server:
 docker:
   services:
     oidc:
-      enabled: true
-      shared: true
+      # It isn't possible to test OIDC in the CI/CD Pipeline
+      enabled:            "{{ not DOCKER_IN_CONTAINER | bool }}"
+      shared:             "{{ not DOCKER_IN_CONTAINER | bool }}"
     logout:
-      enabled: true
+      enabled:            true
     desktop:
-      enabled: true
+      enabled:            true
     matomo:
-      enabled: true
-      shared: true
+      enabled:            true
+      shared:             true
     redis:
       backup:
-        disabled: true
+        disabled:         true
       enabled:            true
       cpus:               "0.3"
       mem_reservation:    "256m"
       mem_limit:          "512m"
       pids_limit:         256
     database: 
-      shared: true
-      type: "postgres"
+      shared:             true
+      type:               "postgres"
       enabled:            true
       cpus:               "1.0"
       mem_reservation:    "2g"
@@ -62,6 +63,6 @@ docker:
       mem_limit:          "1.5g"
       pids_limit:         512
     css:
-      enabled: true
+      enabled:            true
   volumes:
     data:                 "mastodon_data"

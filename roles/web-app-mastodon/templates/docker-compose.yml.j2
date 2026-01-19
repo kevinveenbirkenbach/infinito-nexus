@@ -14,6 +14,9 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
     volumes:
       - data:/mastodon/public/system
+{% if MASTODON_HTTP_ONLY_ENABLED | bool %}
+      - "{{ MASTODON_FORCE_SSL_OVERRIDE_FILE }}:{{ MASTODON_CONTAINER_FORCE_SSL_OVERRIDE_PATH }}:ro"
+{% endif %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
 {% set service_name = MASTODON_STREAMING_SERVICE_NAME %}
@@ -39,6 +42,9 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
     volumes:
       - data:/mastodon/public/system
+{% if MASTODON_HTTP_ONLY_ENABLED | bool %}
+      - "{{ MASTODON_FORCE_SSL_OVERRIDE_FILE }}:{{ MASTODON_CONTAINER_FORCE_SSL_OVERRIDE_PATH }}:ro"
+{% endif %}
     healthcheck:
       test: ["CMD-SHELL", "pgrep -f sidekiq || exit 1"]
       interval: 1m

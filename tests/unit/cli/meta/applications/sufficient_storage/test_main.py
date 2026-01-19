@@ -1,4 +1,3 @@
-# tests/unit/cli/meta/applications/sufficient_storage/test_main.py
 from __future__ import annotations
 
 import io
