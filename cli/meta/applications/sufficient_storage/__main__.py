@@ -14,7 +14,9 @@ from module_utils.role_resource_validation import filter_roles_by_min_storage  #
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Validate roles by services.docker.<entity>.min_storage in roles/*/config/main.yml"
+        description=(
+            "Validate roles by docker.services.<entity>.min_storage in roles/*/config/main.yml"
+        )
     )
 
     parser.add_argument(
@@ -36,12 +38,6 @@ def parse_args() -> argparse.Namespace:
         help="Emit GitHub Actions warnings for missing configs/keys",
     )
 
-    parser.add_argument(
-        "--roles-root",
-        default="roles",
-        help="Roles root directory (default: roles)",
-    )
-
     return parser.parse_args()
 
 
@@ -52,7 +48,6 @@ def main() -> int:
         role_names=args.roles,
         required_storage=args.required_storage,
         emit_warnings=args.warnings,
-        roles_root=args.roles_root,
     )
 
     # Print space-separated for easy CI consumption
