@@ -7,6 +7,7 @@ server:
     flags:
       script-src-elem:
         unsafe-inline:  true
+        unsafe-eval: true
     whitelist:
       font-src:
         - https://fonts.gstatic.com
