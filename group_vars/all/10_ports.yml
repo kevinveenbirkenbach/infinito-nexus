@@ -9,16 +9,17 @@ ports:
       web-app-mastodon:   4001
       web-app-espocrm:    4002
     oauth2:
-      web-app-phpmyadmin: 4181
-      web-app-lam: 4182
-      web-app-openproject: 4183
-      web-app-yourls: 4184
-      web-app-pgadmin: 4185
-      web-app-phpldapadmin: 4186
-      web-app-fusiondirectory: 4187
-      web-app-gitea: 4188
-      web-app-snipe-it: 4189
-      web-app-suitecrm: 4190
+      # oauth2-proxy internal callback/listener ports (reserved range: 16480-16499)
+      web-app-phpmyadmin:       16481
+      web-app-lam:              16482
+      web-app-openproject:      16483
+      web-app-yourls:           16484
+      web-app-pgadmin:          16485
+      web-app-phpldapadmin:     16486
+      web-app-fusiondirectory:  16487
+      web-app-gitea:            16488
+      web-app-snipe-it:         16489
+      web-app-suitecrm:         16490
     ldap:
       svc-db-openldap: 389
     http:
