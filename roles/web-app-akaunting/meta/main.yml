@@ -22,4 +22,4 @@ galaxy_info:
   - web-app-matomo
   - web-app-keycloak
   - web-app-mailu
-  lifecycle: beta
+  lifecycle: alpha
