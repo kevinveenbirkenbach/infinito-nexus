@@ -44,7 +44,7 @@ MEDIAWIKI_OIDC_AUTOLOGIN:         true
 MEDIAWIKI_OIDC_LOCALLOGIN:        false
 
 # Extensions
-MEDIAWIKI_EXT_BRANCH:   "REL{{ MEDIAWIKI_VERSION.split('.')[:2] | join('_') }}"
+MEDIAWIKI_EXT_BRANCH: "REL{{ (MEDIAWIKI_VERSION | string).split('.')[:2] | join('_') }}"
 MEDIAWIKI_EXT_CFG_BASE: "{{ [ MEDIAWIKI_CONFIG_DIR, 'mwext', MEDIAWIKI_EXT_BRANCH ] | path_join }}"
 MEDIAWIKI_EXT_LIST:
   - name: "PluggableAuth"
