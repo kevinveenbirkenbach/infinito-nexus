@@ -7,8 +7,25 @@ FROM {{ OPENPROJECT_IMAGE }}:{{ OPENPROJECT_VERSION }}
 
 COPY volumes/plugins/Gemfile.plugins /app/
 
+{% if OPENPROJECT_ENVIRONMENT_IS_DEVELOPMENT | bool %}
+RUN set -euo pipefail; \
+  cd /app; \
+  if ! grep -q "gem ['\"]listen['\"]" Gemfile; then \
+    echo "" >> Gemfile; \
+    echo "group :development do" >> Gemfile; \
+    echo "  gem 'listen'" >> Gemfile; \
+    echo "end" >> Gemfile; \
+  fi
+{% endif %}
+
+# IMPORTANT: ensure bundler is not excluding development gems
+RUN bundle config unset deployment && \
+{% if OPENPROJECT_ENVIRONMENT_IS_DEVELOPMENT | bool %}
+    bundle config unset without && \
+{% endif %}
+    bundle install && \
+    bundle config set deployment 'true'
+
 # If the plugin uses any external NPM dependencies you have to install them here.
 # RUN npm add npm <package-name>*
-
-RUN bundle config unset deployment && bundle install && bundle config set deployment 'true'
 RUN ./docker/prod/setup/precompile-assets.sh

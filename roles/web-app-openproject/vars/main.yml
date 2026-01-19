@@ -4,16 +4,17 @@ application_id:                 "web-app-openproject"
 # Database
 
 # Open Project Specific
-OPENPROJECT_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version') }}"
-OPENPROJECT_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.web.image') }}"
-OPENPROJECT_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-OPENPROJECT_WEB_SERVICE:        "web"
-OPENPROJECT_WEB_CONTAINER:      "{{ applications | get_app_conf(application_id, 'docker.services.' ~ OPENPROJECT_WEB_SERVICE ~ '.name') }}"
-OPENPROJECT_SEEDER_SERVICE:     "seeder"
-OPENPROJECT_SEEDER_CONTAINER:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ OPENPROJECT_SEEDER_SERVICE ~ '.name') }}"
-OPENPROJECT_CRON_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
-OPENPROJECT_PROXY_CONTAINER:    "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name') }}"
-OPENPROJECT_WORKER_CONTAINER:   "{{ applications | get_app_conf(application_id, 'docker.services.worker.name') }}"
+OPENPROJECT_VERSION:                    "{{ applications | get_app_conf(application_id, 'docker.services.web.version') }}"
+OPENPROJECT_IMAGE:                      "{{ applications | get_app_conf(application_id, 'docker.services.web.image') }}"
+OPENPROJECT_VOLUME:                     "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+OPENPROJECT_WEB_SERVICE:                "web"
+OPENPROJECT_WEB_CONTAINER:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ OPENPROJECT_WEB_SERVICE ~ '.name') }}"
+OPENPROJECT_SEEDER_SERVICE:             "seeder"
+OPENPROJECT_SEEDER_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.' ~ OPENPROJECT_SEEDER_SERVICE ~ '.name') }}"
+OPENPROJECT_CRON_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
+OPENPROJECT_PROXY_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name') }}"
+OPENPROJECT_WORKER_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.worker.name') }}"
+OPENPROJECT_ENVIRONMENT_IS_DEVELOPMENT: "{{ (ENVIRONMENT | lower) == 'development' }}"
 
 ## Admin
 OPENPROJECT_ADMINISTRATOR_USERNAME: "{{ users.administrator.username }}"
