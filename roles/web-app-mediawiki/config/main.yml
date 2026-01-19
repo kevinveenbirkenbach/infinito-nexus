@@ -27,7 +27,7 @@ docker:
       enabled:  true
     mediawiki: 
       image:    mediawiki
-      version:  latest
+      version:  1.44
       backup:
         no_stop_required: true
       name:     mediawiki
