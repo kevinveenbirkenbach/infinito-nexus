@@ -72,8 +72,8 @@ jobs:
   
   # Priority A
   test-deploy-server:
-    needs:
-      - test-dns
+    #needs:
+    #  - test-dns
     uses: ./.github/workflows/test-deploy-server.yml
     with:
       distros: ${{ inputs.distros }}

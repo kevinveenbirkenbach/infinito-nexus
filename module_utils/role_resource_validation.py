@@ -74,7 +74,7 @@ def filter_roles_by_min_storage(
         ) from exc
 
     for role_name in role_names:
-        role_dir = roles_root_path / role_name
+        role_dir = (roles_root_path / role_name).resolve()
         if not role_dir.is_dir():
             if emit_warnings:
                 _gha_warning(
@@ -82,6 +82,7 @@ def filter_roles_by_min_storage(
                     title="min_storage validation",
                 )
             continue
+
 
         entity_name = get_entity_name(role_name)
         if not entity_name:
