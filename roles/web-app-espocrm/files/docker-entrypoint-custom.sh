@@ -1,6 +1,6 @@
 #!/bin/sh
 # POSIX-safe entrypoint for EspoCRM container
-# Compatible with /bin/sh (dash/busybox). Avoids 'pipefail' and non-portable features.
+# Runs the original image entrypoint first, then applies custom patching logic.
 set -eu
 
 log() { printf '%s %s\n' "[entrypoint]" "$*" >&2; }
@@ -15,29 +15,38 @@ bool_norm () {
   esac
 }
 
+# --- Run original image entrypoint FIRST -------------------------------------
+ORIG_ENTRYPOINT="/usr/local/bin/docker-entrypoint.sh"
+
+if [ -x "$ORIG_ENTRYPOINT" ]; then
+  log "Running original entrypoint: $ORIG_ENTRYPOINT $*"
+  # IMPORTANT:
+  # - We run it with the same arguments we received.
+  # - The original entrypoint may create/copy webroot and do first-start init.
+  "$ORIG_ENTRYPOINT" "$@"
+else
+  log "WARN: original entrypoint not found/executable at $ORIG_ENTRYPOINT (skipping)"
+fi
+
 # --- Environment initialization ----------------------------------------------
-MAINTENANCE="$(bool_norm "${ESPOCRM_SEED_MAINTENANCE_MODE}")"
-CRON_DISABLED="$(bool_norm "${ESPOCRM_SEED_CRON_DISABLED}")"
-USE_CACHE="$(bool_norm "${ESPOCRM_SEED_USE_CACHE}")"
+MAINTENANCE="$(bool_norm "${ESPOCRM_SEED_MAINTENANCE_MODE:-}")"
+CRON_DISABLED="$(bool_norm "${ESPOCRM_SEED_CRON_DISABLED:-}")"
+USE_CACHE="$(bool_norm "${ESPOCRM_SEED_USE_CACHE:-}")"
 
 APP_DIR="/var/www/html"
 
-# Provided by env.j2 (fallback ensures robustness)
+# Provided by env.j2
+: "${ESPOCRM_SCRIPT_SEED:?missing ESPOCRM_SCRIPT_SEED}"
 SEED_CONFIG_SCRIPT="${ESPOCRM_SCRIPT_SEED}"
 
-# --- Wait for bootstrap.php (max 60s, e.g. fresh volume) ----------------------
-log "Waiting for ${APP_DIR}/bootstrap.php..."
-count=0
-while [ $count -lt 60 ] && [ ! -f "${APP_DIR}/bootstrap.php" ]; do
-  sleep 1
-  count=$((count + 1))
-done
+# --- Guard: bootstrap.php must exist NOW (original entrypoint should have made it) ---
 if [ ! -f "${APP_DIR}/bootstrap.php" ]; then
-  log "ERROR: bootstrap.php missing after 60s"
+  log "ERROR: ${APP_DIR}/bootstrap.php is missing after original entrypoint ran."
+  log "Hint: You are probably mounting a volume over /var/www/html instead of only /var/www/html/data, /custom, /client/custom."
   exit 1
 fi
 
-# --- Apply config flags via seed_config.php ------------------------------------
+# --- Apply config flags via seed_config.php -----------------------------------
 log "Applying runtime flags via seed_config.php..."
 if ! php "${SEED_CONFIG_SCRIPT}"; then
   log "ERROR: seed_config.php execution failed"
@@ -52,12 +61,13 @@ else
 fi
 
 # --- Hand off to CMD ----------------------------------------------------------
+# At this point, the original entrypoint already ran. We still need to run the actual server process.
+# If a command was passed, run it. Otherwise, try common server commands.
 if [ "$#" -gt 0 ]; then
   log "Exec CMD: $*"
   exec "$@"
 fi
 
-# Try common server commands
 for cmd in apache2-foreground httpd-foreground php-fpm php-fpm8.3 php-fpm8.2 supervisord; do
   if command -v "$cmd" >/dev/null 2>&1; then
     log "Starting: $cmd"
@@ -69,6 +79,5 @@ for cmd in apache2-foreground httpd-foreground php-fpm php-fpm8.3 php-fpm8.2 sup
   fi
 done
 
-# --- Fallback ---------------------------------------------------------------
 log "No known server command found; tailing to keep container alive."
 exec tail -f /dev/null
