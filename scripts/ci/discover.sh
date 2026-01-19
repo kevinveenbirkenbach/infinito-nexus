@@ -59,19 +59,20 @@ filter_by_ci_storage() {
 
   # 1) Warnings run (show what gets filtered)
   # We do NOT want to change the JSON output of discover.sh, so we discard this stdout.
-  python -m cli.meta.applications.sufficient_storage \
-    --roles "${roles[@]}" \
-    --required-storage "${required_storage}" \
-    --warnings \
-    >/dev/null || true
-
-  # 2) Filter run: capture kept roles (space-separated)
-  local kept
-  kept="$(
-    python -m cli.meta.applications.sufficient_storage \
+  docker compose --profile ci exec -T infinito \
+    python3 -m cli.meta.applications.sufficient_storage \
       --roles "${roles[@]}" \
-      --required-storage "${required_storage}"
+      --required-storage "${required_storage}" \
+      --warnings \
+      >/dev/null || true
+
+  kept="$(
+    docker compose --profile ci exec -T infinito \
+      python3 -m cli.meta.applications.sufficient_storage \
+        --roles "${roles[@]}" \
+        --required-storage "${required_storage}"
   )"
+
 
   # Convert back to JSON
   if [[ -z "${kept}" ]]; then

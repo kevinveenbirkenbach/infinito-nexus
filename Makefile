@@ -256,13 +256,10 @@ ci-deploy-app:
 
 .PHONY: ci-discover-output
 
+.PHONY: ci-discover-output
 ci-discover-output:
 	@set -euo pipefail; \
-	apps="$$(docker compose --profile ci exec -T infinito bash -lc '\
-	  REPO_ROOT="$$(pkgmgr path infinito)"; \
-	  cd "$$REPO_ROOT"; \
-	  ./scripts/ci/discover.sh \
-	')"; \
+	apps="$$(./scripts/ci/discover.sh)"; \
 	[[ -n "$$apps" ]] || apps='[]'; \
 	if [[ -n "$${ONLY_APP:-}" ]]; then \
 	  apps="$$(jq -nc --arg a "$$ONLY_APP" '[ $$a ]')"; \
