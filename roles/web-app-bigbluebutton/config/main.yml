@@ -34,6 +34,7 @@ docker:
         enabled:      false  # Enable recordings of sessions (deactivated by  default because it crashed, also check GDPR comnpliance)
         cleanup:      true  # Auto-Cleanup Recordings
         max_age_days: 30    # Cleanup recording after this amount of days
+      min_storage:    50GB
     database:
       shared:   false
       # This is set to true to pass integration test, doesn't have any other function

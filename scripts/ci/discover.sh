@@ -39,6 +39,50 @@ apply_final_exclude() {
     | jq -R -s -c 'split("\n") | map(select(length>0))'
 }
 
+filter_by_ci_storage() {
+  local apps_json="$1"
+
+  # Only enforce on GitHub Actions, but NOT in act
+  if [[ -z "${GITHUB_ACTIONS:-}" || -n "${ACT:-}" ]]; then
+    echo "${apps_json}"
+    return 0
+  fi
+
+  local required_storage="${CI_REQUIRED_STORAGE:-12GB}"
+
+  # Extract roles into bash array
+  mapfile -t roles < <(echo "${apps_json}" | jq -r '.[]')
+  if [[ "${#roles[@]}" -eq 0 ]]; then
+    echo "${apps_json}"
+    return 0
+  fi
+
+  # 1) Warnings run (show what gets filtered)
+  # We do NOT want to change the JSON output of discover.sh, so we discard this stdout.
+  python -m cli.meta.applications.sufficient_storage \
+    --roles "${roles[@]}" \
+    --required-storage "${required_storage}" \
+    --warnings \
+    >/dev/null || true
+
+  # 2) Filter run: capture kept roles (space-separated)
+  local kept
+  kept="$(
+    python -m cli.meta.applications.sufficient_storage \
+      --roles "${roles[@]}" \
+      --required-storage "${required_storage}"
+  )"
+
+  # Convert back to JSON
+  if [[ -z "${kept}" ]]; then
+    echo "[]"
+    return 0
+  fi
+
+  # shellcheck disable=SC2086
+  printf "%s\n" ${kept} | jq -R -s -c 'split("\n") | map(select(length>0))'
+}
+
 discover_simple() {
   local include_re="$1"
   local exclude_re="$2"
@@ -90,6 +134,6 @@ case "${TEST_DEPLOY_TYPE}" in
     exit 2
     ;;
 esac
-
+apps_json="$(filter_by_ci_storage "${apps_json}")"
 apps_json="$(apply_final_exclude "${apps_json}" "${FINAL_EXCLUDE_RE}")"
 echo "${apps_json}"
