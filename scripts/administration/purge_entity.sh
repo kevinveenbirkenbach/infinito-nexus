@@ -178,8 +178,8 @@ for STACK_NAME in "$@"; do
   # --- Stop/remove compose stack ------------------------------------------
 
   if [[ -f "${COMPOSE_FILE}" ]]; then
-    log "Stopping/removing compose stack..."
-    docker compose -f "${COMPOSE_FILE}" down --remove-orphans || true
+    log "Stopping/removing compose stack and related volumes..."
+    docker compose -f "${COMPOSE_FILE}" down --remove-orphans -v || true
   else
     warn "No docker-compose.yml found — skipping compose down"
   fi
