@@ -43,20 +43,10 @@ jobs:
           set -euo pipefail
           make docker-up
 
-      - name: Discover apps (JSON)
+      - name: Discover apps
         id: discover
-        shell: bash
         run: |
-          set -euo pipefail
-          apps="$(make ci-deploy-discover)"
-          [[ -n "${apps}" ]] || apps='[]'
-
-          if [[ -n "${ONLY_APP}" ]]; then
-            apps="$(jq -nc --arg a "${ONLY_APP}" '[ $a ]')"
-          fi
-
-          echo "apps=${apps}" >> "$GITHUB_OUTPUT"
-          echo "apps_json=${apps}"
+          make ci-discover-output
 
   universal:
     name: deploy:universal (${{ matrix.app }})

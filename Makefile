@@ -254,6 +254,19 @@ ci-deploy-app:
 	export MISSING_ONLY=true; \
 	./scripts/ci/deploy-app.sh
 
+ci-discover-output:
+	@set -euo pipefail; \
+	apps="$$(docker compose --profile ci exec -T infinito bash -lc './scripts/ci/discover.sh')"; \
+	[[ -n "$$apps" ]] || apps='[]'; \
+	if [[ -n "$${ONLY_APP:-}" ]]; then \
+	  apps="$$(jq -nc --arg a "$$ONLY_APP" '[ $$a ]')"; \
+	fi; \
+	if [[ -n "$${GITHUB_OUTPUT:-}" ]]; then \
+	  echo "apps=$$apps" >> "$$GITHUB_OUTPUT"; \
+	  echo "apps_json=$$apps" >> "$$GITHUB_OUTPUT"; \
+	fi; \
+	echo "apps_json=$$apps"
+
 test-act:
 	@echo "=== act: deploy local (type=$(TEST_DEPLOY_TYPE), distros=$(INFINITO_DISTRO)) ==="
 	act workflow_dispatch \
