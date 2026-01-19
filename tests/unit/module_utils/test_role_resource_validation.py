@@ -1,105 +1,207 @@
 from __future__ import annotations
 
-import os
+import io
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from contextlib import redirect_stderr
-from io import StringIO
+from unittest.mock import patch
 
-from module_utils.role_resource_validation import filter_roles_by_min_storage
+from module_utils import role_resource_validation as rrv
 
 
-class TestRoleResourceValidation(unittest.TestCase):
-    def _write(self, path: Path, content: str) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8")
+class TestFilterRolesByMinStorage(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmp = TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.roles_root = self.root / "roles"
+        self.roles_root.mkdir(parents=True, exist_ok=True)
 
-    def test_filters_by_min_storage_and_emits_warnings(self) -> None:
-        with TemporaryDirectory() as td:
-            root = Path(td)
+    def _write_role_config(self, role_name: str, *, yaml_text: str) -> Path:
+        role_dir = self.roles_root / role_name
+        (role_dir / "config").mkdir(parents=True, exist_ok=True)
+        cfg_path = role_dir / "config" / "main.yml"
+        cfg_path.write_text(yaml_text, encoding="utf-8")
+        return cfg_path
 
-            # Create minimal categories.yml so get_entity_name("web-app-foo") => "foo"
-            self._write(
-                root / "roles" / "categories.yml",
-                "roles:\n  web:\n    app: {}\n",
+    def test_keeps_role_when_min_storage_is_within_required_storage(self) -> None:
+        # min_storage <= required_storage -> keep
+        self._write_role_config(
+            "web-app-demo",
+            yaml_text="""
+docker:
+  services:
+    demo:
+      min_storage: 5G
+""".lstrip(),
+        )
+
+        with patch.object(rrv, "_roles_root", return_value=self.roles_root), patch.object(
+            rrv, "get_entity_name", return_value="demo"
+        ):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="10G",
+                emit_warnings=False,
             )
 
-            # Role A: should be filtered OUT (50GB > 12GB)
-            self._write(
-                root / "roles" / "web-app-bigbluebutton" / "config" / "main.yml",
-                "docker:\n  services:\n    bigbluebutton:\n      min_storage: 50GB\n",
+        self.assertEqual(kept, ["web-app-demo"])
+
+    def test_filters_out_role_when_min_storage_exceeds_required_storage(self) -> None:
+        # min_storage > required_storage -> filtered out
+        self._write_role_config(
+            "web-app-demo",
+            yaml_text="""
+docker:
+  services:
+    demo:
+      min_storage: 50G
+""".lstrip(),
+        )
+
+        err = io.StringIO()
+        with redirect_stderr(err), patch.object(
+            rrv, "_roles_root", return_value=self.roles_root
+        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="10G",
+                emit_warnings=True,
             )
 
-            # Role B: should be kept (2GB <= 12GB)
-            self._write(
-                root / "roles" / "web-app-mediawiki" / "config" / "main.yml",
-                "docker:\n  services:\n    mediawiki:\n      min_storage: 2GB\n",
+        self.assertEqual(kept, [])
+        self.assertIn("requires", err.getvalue())
+
+    def test_missing_key_treats_as_zero_and_keeps_role(self) -> None:
+        # Missing min_storage -> treat as 0GB -> keep
+        self._write_role_config(
+            "web-app-demo",
+            yaml_text="""
+docker:
+  services:
+    demo: {}
+""".lstrip(),
+        )
+
+        err = io.StringIO()
+        with redirect_stderr(err), patch.object(
+            rrv, "_roles_root", return_value=self.roles_root
+        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="1G",
+                emit_warnings=True,
             )
 
-            # Role C: missing min_storage -> should be kept (treated as 0GB) + warning
-            self._write(
-                root / "roles" / "web-app-nextcloud" / "config" / "main.yml",
-                "docker:\n  services:\n    nextcloud:\n      image: nextcloud\n",
+        self.assertEqual(kept, ["web-app-demo"])
+        self.assertIn("Missing key docker.services.demo.min_storage", err.getvalue())
+
+    def test_missing_role_directory_emits_absolute_path_warning(self) -> None:
+        err = io.StringIO()
+        with redirect_stderr(err), patch.object(
+            rrv, "_roles_root", return_value=self.roles_root
+        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-does-not-exist"],
+                required_storage="1G",
+                emit_warnings=True,
             )
 
-            roles = ["web-app-bigbluebutton", "web-app-mediawiki", "web-app-nextcloud"]
+        self.assertEqual(kept, [])
+        # Ensure absolute path is shown
+        self.assertIn(str((self.roles_root / "web-app-does-not-exist").resolve()), err.getvalue())
 
-            buf = StringIO()
-            cwd = os.getcwd()
-            try:
-                os.chdir(
-                    root
-                )  # important: get_entity_name searches for roles/categories.yml via cwd
-                with redirect_stderr(buf):
-                    kept = filter_roles_by_min_storage(
-                        role_names=roles,
-                        required_storage="12GB",
-                        emit_warnings=True,
-                        roles_root="roles",
-                    )
-            finally:
-                os.chdir(cwd)
+    def test_missing_config_file_emits_warning(self) -> None:
+        # Role dir exists but config missing
+        role_dir = self.roles_root / "web-app-demo"
+        role_dir.mkdir(parents=True, exist_ok=True)
 
-            # BBB must be filtered out
-            self.assertNotIn("web-app-bigbluebutton", kept)
-
-            # MediaWiki and Nextcloud kept
-            self.assertIn("web-app-mediawiki", kept)
-            self.assertIn("web-app-nextcloud", kept)
-
-            # Warnings should include:
-            stderr = buf.getvalue()
-            self.assertIn("requires", stderr)  # for BBB too large
-            self.assertIn(
-                "Missing key docker.services.nextcloud.min_storage", stderr
-            )  # for missing key
-
-    def test_accepts_numeric_required_storage(self) -> None:
-        with TemporaryDirectory() as td:
-            root = Path(td)
-            self._write(
-                root / "roles" / "categories.yml",
-                "roles:\n  web:\n    app: {}\n",
-            )
-            self._write(
-                root / "roles" / "web-app-foo" / "config" / "main.yml",
-                "docker:\n  services:\n    foo:\n      min_storage: 2GB\n",
+        err = io.StringIO()
+        with redirect_stderr(err), patch.object(
+            rrv, "_roles_root", return_value=self.roles_root
+        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="1G",
+                emit_warnings=True,
             )
 
-            cwd = os.getcwd()
-            try:
-                os.chdir(root)
-                kept = filter_roles_by_min_storage(
-                    role_names=["web-app-foo"],
-                    required_storage=12,  # numeric accepted (treated as GB)
+        self.assertEqual(kept, [])
+        self.assertIn("Missing config file:", err.getvalue())
+
+    def test_invalid_yaml_emits_warning(self) -> None:
+        self._write_role_config("web-app-demo", yaml_text=": this is not yaml")
+
+        err = io.StringIO()
+        with redirect_stderr(err), patch.object(
+            rrv, "_roles_root", return_value=self.roles_root
+        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="1G",
+                emit_warnings=True,
+            )
+
+        self.assertEqual(kept, [])
+        self.assertIn("Failed to parse YAML:", err.getvalue())
+
+    def test_invalid_min_storage_value_emits_warning(self) -> None:
+        self._write_role_config(
+            "web-app-demo",
+            yaml_text="""
+docker:
+  services:
+    demo:
+      min_storage: "nope"
+""".lstrip(),
+        )
+
+        err = io.StringIO()
+        with redirect_stderr(err), patch.object(
+            rrv, "_roles_root", return_value=self.roles_root
+        ), patch.object(rrv, "get_entity_name", return_value="demo"):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="10G",
+                emit_warnings=True,
+            )
+
+        self.assertEqual(kept, [])
+        self.assertIn("Invalid min_storage value", err.getvalue())
+
+    def test_invalid_required_storage_raises_value_error(self) -> None:
+        with patch.object(rrv, "_roles_root", return_value=self.roles_root):
+            with self.assertRaises(ValueError):
+                rrv.filter_roles_by_min_storage(
+                    role_names=["web-app-demo"],
+                    required_storage="not-a-size",
                     emit_warnings=False,
-                    roles_root="roles",
                 )
-            finally:
-                os.chdir(cwd)
 
-            self.assertEqual(kept, ["web-app-foo"])
+    def test_entity_name_missing_emits_warning_and_skips(self) -> None:
+        self._write_role_config(
+            "web-app-demo",
+            yaml_text="""
+docker:
+  services:
+    demo:
+      min_storage: 1G
+""".lstrip(),
+        )
+
+        err = io.StringIO()
+        with redirect_stderr(err), patch.object(
+            rrv, "_roles_root", return_value=self.roles_root
+        ), patch.object(rrv, "get_entity_name", return_value=""):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="10G",
+                emit_warnings=True,
+            )
+
+        self.assertEqual(kept, [])
+        self.assertIn("Could not derive entity_name", err.getvalue())
 
 
 if __name__ == "__main__":
