@@ -6,7 +6,7 @@
     docker_compose_flush_handlers: false
 
 - name: "Load install procedures for '{{ application_id }}''"
-  include_tasks: 01_install.yml
+  include_tasks: 01_configuration.yml
 
 - name: "flush handlers for '{{ application_id }}' after installation finished"
   meta: flush_handlers
@@ -24,7 +24,7 @@
   when: MEDIAWIKI_OIDC_ENABLED | bool
 
 - name: "Load update procedures for '{{ application_id }}''"
-  include_tasks: 03_update.yml
+  include_tasks: 03_install.yml
   when: >-
       {{
         (mediawiki_config_render.changed | default(false)) or

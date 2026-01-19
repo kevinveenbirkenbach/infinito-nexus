@@ -12,9 +12,9 @@ docker:
       mem_limit:          "4g"
       pids_limit:         1024
     database:
-      shared: true
-      enabled: true
-      type: "mariadb"
+      shared:             true
+      enabled:            true
+      type:               "mariadb"
   network:                "mariadb"
   volumes:
     data:                 "mariadb_data"

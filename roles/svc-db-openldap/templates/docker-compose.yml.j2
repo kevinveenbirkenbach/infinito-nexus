@@ -27,4 +27,5 @@
     database_volume=(database_volume if database_volume is defined else None),
     extra_volumes={'config': {'name': OPENLDAP_VOLUME ~ '_config'}, 'data': {'name': OPENLDAP_VOLUME}}
 ) }}
+
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
