@@ -32,6 +32,11 @@ docker:
   volumes:
     data:                 "baserow_data"
 server:
+  status_codes:
+    default:
+      - 200
+      - 301
+      - 302
   domains:
     canonical:
       - baserow.{{ DOMAIN_PRIMARY }}

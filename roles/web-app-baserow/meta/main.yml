@@ -22,4 +22,4 @@ galaxy_info:
   - web-app-matomo
   - web-app-keycloak
   - web-app-mailu
-  lifecycle: alpha
+  lifecycle: alpha # SSO integration missing
