@@ -2,12 +2,20 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Iterable, List, Any
-import yaml
 import sys
+import yaml
 
 from humanfriendly import parse_size
-
 from module_utils.entity_name_utils import get_entity_name
+
+
+def _repo_root() -> Path:
+    # module_utils/role_resource_validation.py -> repo root = parents[1]
+    return Path(__file__).resolve().parents[1]
+
+
+def _roles_root() -> Path:
+    return (_repo_root() / "roles").resolve()
 
 
 def _deep_get(dct: dict, path: list[str]) -> Any:
@@ -25,23 +33,12 @@ def _load_yaml_file(path: Path) -> dict:
 
 
 def _gha_warning(message: str, *, title: str = "Validation") -> None:
-    """
-    Emit a GitHub Actions warning annotation.
-    Safe outside GitHub Actions; it will just print the annotation line.
-    """
     print(f"::warning title={title}::{message}", file=sys.stderr)
 
 
 def _parse_storage_to_gb(value: Any) -> float:
-    """
-    Parse human-readable storage value to GB using humanfriendly.
-
-    Examples:
-      80G, 500GB, 1Ti, 1024MiB, 2 TB
-    """
     if isinstance(value, (int, float)):
         return float(value)
-
     size_bytes = parse_size(str(value))
     return size_bytes / (1000**3)
 
@@ -51,19 +48,8 @@ def filter_roles_by_min_storage(
     role_names: Iterable[str],
     required_storage: str | int | float,
     emit_warnings: bool = False,
-    roles_root: str | Path = "roles",
 ) -> List[str]:
-    """
-    Returns only those role_names whose roles/<role>/config/main.yml contains:
-        services.docker.<entity_name>.min_storage >= required_storage
-
-    If emit_warnings=True:
-      - Missing config file, missing key, or invalid values will produce
-        GitHub Actions warnings.
-
-    Storage values are parsed using humanfriendly (80G, 1Ti, 500MB, etc.).
-    """
-    roles_root_path = Path(roles_root)
+    roles_root_path = _roles_root()
     out: List[str] = []
 
     try:
