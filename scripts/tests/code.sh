@@ -9,11 +9,7 @@ echo "============================================================"
 : "${TEST_PATTERN:?TEST_PATTERN must be set}"
 : "${TEST_TYPE:?TEST_TYPE must be set}"
 
-# 1) Bring up the development compose stack (coredns + infinito).
-#    This uses the new Python orchestrator (healthcheck + entry init).
-python3 -m cli.deploy.development up \
-  --no-build \
-  --distro "${INFINITO_DISTRO}"
+python3 -m cli.deploy.development up --when-down
 
 # 2) Run tests inside the already running infinito container via the new exec wrapper.
 #    We keep the old NIX_CONFIG behavior (flake config acceptance) but run it inside the container.

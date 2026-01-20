@@ -4,10 +4,11 @@ import argparse
 import os
 from pathlib import Path
 
-from .common import make_compose, resolve_deploy_ids_for_app
-from .init import handler as init_handler
 from .deploy import handler as deploy_handler
+from .init import handler as init_handler
 from .log_utils import append_text, log_path, write_text
+from .common import make_compose, resolve_deploy_ids_for_app
+from .up import handler as up_handler
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
@@ -26,10 +27,6 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         choices=["arch", "debian", "ubuntu", "fedora", "centos"],
         help="Target distro (compose env INFINITO_DISTRO).",
     )
-    p.add_argument(
-        "--no-cache", action="store_true", help="Rebuild compose image with --no-cache."
-    )
-    p.add_argument("--missing", action="store_true", help="Build only if missing.")
     p.add_argument(
         "--skip-entry-init",
         action="store_true",
@@ -61,8 +58,6 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
 
 def handler(args: argparse.Namespace) -> int:
-    compose = make_compose(distro=args.distro)
-
     logs_dir = Path(args.logs_dir).resolve()
     logs_dir.mkdir(parents=True, exist_ok=True)
 
@@ -79,16 +74,26 @@ def handler(args: argparse.Namespace) -> int:
     if passthrough and passthrough[0] == "--":
         passthrough = passthrough[1:]
 
-    try:
-        compose.build_infinito(
-            no_cache=bool(args.no_cache), missing_only=bool(args.missing)
-        )
-        compose.up(run_entry_init=not bool(args.skip_entry_init))
+    compose = None
 
+    try:
+        # 1) up (re-use up handler so build-missing stays SPOT)
+        class _UpArgs:
+            distro = args.distro
+            skip_entry_init = bool(args.skip_entry_init)
+
+        rc_up = int(up_handler(_UpArgs()))
+        if rc_up != 0:
+            return rc_up
+
+        # Create compose AFTER up so we have a fresh instance for the remainder.
+        compose = make_compose(distro=args.distro)
+
+        # 2) resolve deps
         deploy_ids = resolve_deploy_ids_for_app(compose, args.app)
         append_text(main_log, f"\nresolved_ids={','.join(deploy_ids)}\n")
 
-        # init subcommand (re-using its handler via a tiny args object)
+        # 3) init subcommand (re-using its handler via a tiny args object)
         class _InitArgs:
             distro = args.distro
             app = args.app
@@ -98,13 +103,13 @@ def handler(args: argparse.Namespace) -> int:
 
         init_handler(_InitArgs())
 
-        # deploy subcommand
+        # 4) deploy subcommand
         class _DeployArgs:
             distro = args.distro
             type = args.type
             app = args.app
             id = None
-            debug = args.debug
+            debug = bool(args.debug)
             ansible_args = ["--", *passthrough] if passthrough else []
 
         rc = deploy_handler(_DeployArgs())
@@ -130,7 +135,7 @@ def handler(args: argparse.Namespace) -> int:
         return 1
     finally:
         should_keep = bool(args.keep_stack_on_failure) and exit_code != 0
-        if not should_keep:
+        if not should_keep and compose is not None:
             try:
                 compose.down()
             except Exception:

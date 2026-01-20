@@ -56,36 +56,6 @@ class Compose:
             env=env,
         )
 
-    def build_infinito(self, *, no_cache: bool, missing_only: bool) -> None:
-        if os.environ.get("INFINITO_NO_BUILD", "0") == "1":
-            print(">>> INFINITO_NO_BUILD=1 -> skipping docker compose build")
-            return
-
-        # image name in compose: "infinito-${INFINITO_DISTRO}"
-        image = os.environ.get("INFINITO_IMAGE") or f"infinito-{self.distro}"
-
-        if missing_only:
-            r = subprocess.run(
-                ["docker", "image", "inspect", image],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                check=False,
-            )
-            if r.returncode == 0:
-                print(
-                    f">>> Image already exists: {image} (skipping build due to --missing)"
-                )
-                return
-
-        if no_cache:
-            print(
-                f">>> docker compose build --no-cache infinito (INFINITO_DISTRO={self.distro})"
-            )
-            self.run(["build", "--no-cache", "infinito"], check=True)
-        else:
-            print(f">>> docker compose build infinito (INFINITO_DISTRO={self.distro})")
-            self.run(["build", "infinito"], check=True)
-
     def up(self, *, run_entry_init: bool = True) -> None:
         print(">>> Rendering CoreDNS Corefile from template")
         self._render_coredns_corefile()
@@ -103,7 +73,9 @@ class Compose:
         print(">>> env:", {k: env.get(k) for k in keys})
         print(">>> NIX_CONFIG:", "<set>" if env.get("NIX_CONFIG") else "<empty>")
 
-        no_build = os.environ.get("INFINITO_NO_BUILD", "0") == "1"
+        # IMPORTANT: use the same env snapshot that docker compose will use
+        no_build = env.get("INFINITO_NO_BUILD", "0") == "1"
+
         args = ["--env-file", "env.ci", "up", "-d"]
         if no_build:
             args.append("--no-build")
@@ -200,7 +172,6 @@ class Compose:
                     ">>> ERROR: infinito container not healthy, dumping last 200 log lines\n"
                 )
 
-                # Preferred: systemd logs
                 logs = self.exec(
                     ["sh", "-lc", "journalctl -n 200 --no-pager || true"],
                     check=False,
@@ -211,7 +182,6 @@ class Compose:
                 print(logs.stdout or "<no output>")
                 print("======================================\n")
 
-                # Fallback: docker logs
                 docker_logs = subprocess.run(
                     ["docker", "logs", "--tail", "200", cid],
                     cwd=self.repo_root,

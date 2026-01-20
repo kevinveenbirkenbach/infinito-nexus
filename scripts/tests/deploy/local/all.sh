@@ -69,7 +69,6 @@ echo
 # ---------------------------------------------------------------------------
 echo ">>> Starting development compose stack (no build)"
 python3 -m cli.deploy.development up \
-  --no-build \
   --distro "${INFINITO_DISTRO}" \
   --skip-entry-init
 

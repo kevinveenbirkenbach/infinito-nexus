@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from typing import Optional
 
+from . import build as cmd_build
 from . import deploy as cmd_deploy
 from . import down as cmd_down
 from . import exec as cmd_exec
@@ -30,6 +31,7 @@ def build_parser() -> argparse.ArgumentParser:
     cmd_run.add_parser(sub)
     cmd_exec.add_parser(sub)
     cmd_logs.add_parser(sub)
+    cmd_build.add_parser(sub)
 
     return parser
 

@@ -19,16 +19,6 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         help="Target distro (compose env INFINITO_DISTRO).",
     )
 
-    # These mirror 'up' options, but are optional; default behavior is "no force"
-    p.add_argument(
-        "--no-cache", action="store_true", help="Rebuild image with --no-cache."
-    )
-    p.add_argument("--missing", action="store_true", help="Build only if missing.")
-    p.add_argument(
-        "--no-build",
-        action="store_true",
-        help="Do not build (regardless of INFINITO_NO_BUILD).",
-    )
     p.add_argument(
         "--skip-entry-init",
         action="store_true",
@@ -51,9 +41,6 @@ def handler(args: argparse.Namespace) -> int:
     # 2) up (normal behavior, no force unless flags provided)
     class _UpArgs:
         distro = args.distro
-        no_cache = bool(args.no_cache)
-        missing = bool(args.missing)
-        no_build = bool(args.no_build)
         skip_entry_init = bool(args.skip_entry_init)
 
     return int(up_handler(_UpArgs()))
