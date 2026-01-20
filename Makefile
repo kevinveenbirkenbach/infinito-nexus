@@ -143,12 +143,16 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-install-ansible: ANSIBLE_COLLECTIONS_DIR ?= $(HOME)/.ansible/collections
 install-ansible:
-	@bash scripts/install/ansible.sh
+	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
+	PYTHON="$(PYTHON)" \
+	bash scripts/install/ansible.sh
 
 install-venv:
-	@VENV="$(VENV)" bash scripts/install/venv.sh
+	@VENV="$(VENV)" \
+	VENV_BASE="$(VENV_BASE)" \
+	PYTHON="$(PYTHON)" \
+	bash scripts/install/venv.sh
 
 install-python: install-venv
 	@bash scripts/install/python.sh
