@@ -7,9 +7,17 @@ SHELL := /bin/bash
 #
 # Rule:
 #  - If a venv is already active (VIRTUAL_ENV), use it.
-#  - Otherwise fall back to the global venv location.
+#  - Otherwise:
+#     - on GitHub Actions: use workspace-local venv (no /opt permissions needed)
+#     - else: fall back to /opt/venvs
 # ------------------------------------------------------------
-VENV_BASE ?= $(if $(VIRTUAL_ENV),$(dir $(VIRTUAL_ENV)),/opt/venvs)
+ifeq ($(GITHUB_ACTIONS),true)
+	VENV_BASE_DEFAULT := $(CURDIR)/.venv
+else
+	VENV_BASE_DEFAULT := /opt/venvs
+endif
+
+VENV_BASE ?= $(if $(VIRTUAL_ENV),$(dir $(VIRTUAL_ENV)),$(VENV_BASE_DEFAULT))
 VENV_NAME ?= infinito
 VENV_FALLBACK := $(VENV_BASE)/$(VENV_NAME)
 
