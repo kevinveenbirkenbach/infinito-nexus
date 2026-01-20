@@ -1,52 +1,103 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 echo "🔧 Running project setup (no installation)"
 
-: "${PYTHON:?PYTHON not set}"
-: "${ROLES_DIR:?ROLES_DIR not set}"
-: "${USERS_SCRIPT:?USERS_SCRIPT not set}"
-: "${APPLICATIONS_SCRIPT:?APPLICATIONS_SCRIPT not set}"
-: "${INCLUDES_SCRIPT:?INCLUDES_SCRIPT not set}"
-: "${USERS_OUT:?USERS_OUT not set}"
-: "${APPLICATIONS_OUT:?APPLICATIONS_OUT not set}"
-: "${INCLUDES_OUT_DIR:?INCLUDES_OUT_DIR not set}"
-: "${RESERVED_USERNAMES:?RESERVED_USERNAMES not set}"
+# ------------------------------------------------------------
+# Hard-coded configuration (NOT overridable)
+# ------------------------------------------------------------
+PYTHON="python3"
+
+ROLES_DIR="./roles"
+
+APPLICATIONS_OUT="./group_vars/all/04_applications.yml"
+APPLICATIONS_SCRIPT="./cli/setup/applications/__main__.py"
+
+USERS_SCRIPT="./cli/setup/users/__main__.py"
+USERS_OUT="./group_vars/all/03_users.yml"
+
+INCLUDES_SCRIPT="./cli/build/role_include/__main__.py"
+INCLUDES_OUT_DIR="./tasks/groups"
+
+# ------------------------------------------------------------
+# Validation
+# ------------------------------------------------------------
+require_file() {
+  local path="$1"
+  [[ -f "$path" ]] || { echo "❌ File not found: $path" >&2; exit 1; }
+}
+
+require_dir() {
+  local path="$1"
+  [[ -d "$path" ]] || { echo "❌ Directory not found: $path" >&2; exit 1; }
+}
+
+require_cmd() {
+  command -v "$1" >/dev/null || { echo "❌ Command not found: $1" >&2; exit 1; }
+}
+
+require_cmd "${PYTHON}"
+require_dir "${ROLES_DIR}"
+require_file "${APPLICATIONS_SCRIPT}"
+require_file "${USERS_SCRIPT}"
+require_file "${INCLUDES_SCRIPT}"
+
+# ------------------------------------------------------------
+# Helpers
+# ------------------------------------------------------------
+log_section() {
+  echo
+  echo "------------------------------------------------------------"
+  echo "$1"
+  echo "------------------------------------------------------------"
+}
+
+compute_reserved_usernames() {
+  find "${ROLES_DIR}" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' \
+    | sed -E 's/.*-//' \
+    | grep -E -x '[a-z0-9]+' \
+    | sort -u \
+    | paste -sd, -
+}
+
+# ------------------------------------------------------------
+# Reserved usernames
+# ------------------------------------------------------------
+log_section "👤 Reserved usernames"
+RESERVED_USERNAMES="$(compute_reserved_usernames)"
+echo "Reserved usernames: ${RESERVED_USERNAMES:-<none>}"
 
 # ------------------------------------------------------------
 # Users defaults
 # ------------------------------------------------------------
-echo "🔧 Generating users defaults → ${USERS_OUT}"
+log_section "👥 Generating users defaults → ${USERS_OUT}"
 "${PYTHON}" "${USERS_SCRIPT}" \
   --roles-dir "${ROLES_DIR}" \
   --output "${USERS_OUT}" \
   --reserved-usernames "${RESERVED_USERNAMES}"
 
 echo "✅ Users defaults written to ${USERS_OUT}"
-echo
 
 # ------------------------------------------------------------
 # Applications defaults
 # ------------------------------------------------------------
-echo "🔧 Generating applications defaults → ${APPLICATIONS_OUT}"
+log_section "📦 Generating applications defaults → ${APPLICATIONS_OUT}"
 "${PYTHON}" "${APPLICATIONS_SCRIPT}" \
   --roles-dir "${ROLES_DIR}" \
   --output-file "${APPLICATIONS_OUT}"
 
 echo "✅ Applications defaults written to ${APPLICATIONS_OUT}"
-echo
 
 # ------------------------------------------------------------
 # Role include files
 # ------------------------------------------------------------
-echo "🔧 Generating role include files"
+log_section "🧩 Generating role include files"
 mkdir -p "${INCLUDES_OUT_DIR}"
 
-INCLUDE_GROUPS="$("${PYTHON}" -m cli.meta.categories.invokable -s "-" | tr '\n' ' ')"
+mapfile -t INCLUDE_GROUPS < <("${PYTHON}" -m cli.meta.categories.invokable -s "-")
 
-for grp in ${INCLUDE_GROUPS}; do
+for grp in "${INCLUDE_GROUPS[@]}"; do
+  [[ -z "${grp}" ]] && continue
   out="${INCLUDES_OUT_DIR}/${grp}roles.yml"
   echo "→ Building ${out} (pattern: '${grp}')"
   "${PYTHON}" "${INCLUDES_SCRIPT}" "${ROLES_DIR}" -p "${grp}" -o "${out}"

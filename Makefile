@@ -16,16 +16,6 @@ ifdef NIX_CONFIG
 export NIX_CONFIG
 endif
 
-ROLES_DIR           := ./roles
-APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
-APPLICATIONS_SCRIPT := ./cli/setup/applications/__main__.py
-USERS_SCRIPT        := ./cli/setup/users/__main__.py
-USERS_OUT           := ./group_vars/all/03_users.yml
-INCLUDES_SCRIPT     := ./cli/build/role_include/__main__.py
-
-# Directory where these include-files will be written
-INCLUDES_OUT_DIR    := ./tasks/groups
-
 # --- Test filtering (unittest discover) ---
 TEST_PATTERN            ?= test*.py
 export TEST_PATTERN
@@ -78,15 +68,6 @@ else
 	INFINITO_COMPILE ?= 1
 endif
 export INFINITO_COMPILE
-
-# Compute extra users as before
-RESERVED_USERNAMES := $(shell \
-  find $(ROLES_DIR) -maxdepth 1 -type d -printf '%f\n' \
-    | sed -E 's/.*-//' \
-    | grep -E -x '[a-z0-9]+' \
-    | sort -u \
-    | paste -sd, - \
-)
 
 .PHONY: \
 	setup setup-clean install install-ansible install-venv install-python \
