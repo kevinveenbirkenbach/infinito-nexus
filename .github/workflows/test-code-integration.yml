@@ -24,4 +24,6 @@ jobs:
         run: docker version
 
       - name: Run integration tests via make
-        run: make test-integration
+        run: |
+          make docker-up
+          make test-integration
