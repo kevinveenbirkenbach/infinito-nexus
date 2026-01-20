@@ -224,6 +224,19 @@ test-act-app:
 	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
 	bash scripts/tests/deploy/act/app.sh
 
+test-local-inventory-init-all:
+	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	bash scripts/tests/deploy/local/inventory-init-all.sh
+
+test-local-run-all:
+	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	DEBUG="$(DEBUG)" \
+	LIMIT_HOST="$(LIMIT_HOST)" \
+	INVENTORY_BASE_DIR="$(INVENTORY_BASE_DIR)" \
+	bash scripts/tests/deploy/local/run-all.sh
+
 test-local-cleanup:
 	@APP="$(APP)" \
 	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
