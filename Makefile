@@ -181,56 +181,23 @@ dockerignore:
 
 # Global for all Infinito.Nexus environments used by the user
 ANSIBLE_COLLECTIONS_DIR ?= $(HOME)/.ansible/collections
+export ANSIBLE_COLLECTIONS_DIR
 
 install-ansible:
-	@echo "📦 Installing Ansible collections → $(ANSIBLE_COLLECTIONS_DIR)"
-	@mkdir -p "$(ANSIBLE_COLLECTIONS_DIR)"
-	@"$(PYTHON)" -m ansible.cli.galaxy collection install \
-		-r requirements.yml \
-		-p "$(ANSIBLE_COLLECTIONS_DIR)" \
-		--force-with-deps
+	@bash scripts/install/ansible.sh
 
 install-venv:
-	@echo "✅ Python environment installed (editable)."
-	@echo "🐍 Using venv: $(VENV)"
-	@if [ -z "$(VIRTUAL_ENV)" ]; then \
-		mkdir -p "$(VENV_BASE)"; \
-	fi
-	@if [ ! -x "$(PYTHON)" ]; then \
-		echo "→ Creating virtualenv $(VENV)"; \
-		python3 -m venv "$(VENV)"; \
-	fi
+	@bash scripts/install/venv.sh
 
 install-python: install-venv
-	@echo "📦 Installing Python dependencies"
-	@"$(PYTHON)" -m pip install --upgrade pip setuptools wheel
-	@"$(PYTHON)" -m pip install -e .
+	@bash scripts/install/python.sh
 
 install: install-python install-ansible
 
 setup: dockerignore
-	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
-	$(PYTHON) $(USERS_SCRIPT) \
-	  --roles-dir $(ROLES_DIR) \
-	  --output $(USERS_OUT) \
-	  --reserved-usernames "$(RESERVED_USERNAMES)"
-	@echo "✅ Users defaults written to $(USERS_OUT)\n"
+	@bash scripts/setup.sh
 
-	@echo "🔧 Generating applications defaults → $(APPLICATIONS_OUT)…"
-	$(PYTHON) $(APPLICATIONS_SCRIPT) \
-	  --roles-dir $(ROLES_DIR) \
-	  --output-file $(APPLICATIONS_OUT)
-	@echo "✅ Applications defaults written to $(APPLICATIONS_OUT)\n"
-
-	@echo "🔧 Generating role-include files for each group…"
-	@mkdir -p $(INCLUDES_OUT_DIR)
-	@INCLUDE_GROUPS="$$( $(PYTHON) -m cli.meta.categories.invokable -s "-" | tr '\n' ' ' )"; \
-	for grp in $$INCLUDE_GROUPS; do \
-	  out="$(INCLUDES_OUT_DIR)/$${grp}roles.yml"; \
-	  echo "→ Building $$out (pattern: '$$grp')…"; \
-	  $(PYTHON) $(INCLUDES_SCRIPT) $(ROLES_DIR) -p $$grp -o $$out; \
-	  echo "  ✅ $$out"; \
-	done
+bootstrap: install setup
 
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
@@ -267,8 +234,6 @@ ci-deploy-discover:
 ci-deploy-app:
 	export MISSING_ONLY=true; \
 	./scripts/tests/deploy/ci/app.sh
-
-.PHONY: ci-discover-output
 
 ci-discover-output:
 	@set -euo pipefail; \
