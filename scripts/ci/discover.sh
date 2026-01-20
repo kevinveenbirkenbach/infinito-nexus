@@ -50,7 +50,7 @@ filter_by_ci_storage() {
     return 0
   fi
 
-  local required_storage="${CI_REQUIRED_STORAGE:-12GB}"
+  local required_storage="${CI_REQUIRED_STORAGE:-60GB}"
 
   # Extract roles into bash array
   mapfile -t roles < <(echo "${apps_json}" | jq -r '.[]')
