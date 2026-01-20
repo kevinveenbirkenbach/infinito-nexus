@@ -2,25 +2,9 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 
-# ------------------------------------------------------------
-# Python / venv
-#
-# Rule:
-#  - If a venv is already active (VIRTUAL_ENV), use it.
-#  - Otherwise:
-#     - on GitHub Actions: use workspace-local venv (no /opt permissions needed)
-#     - else: fall back to /opt/venvs
-# ------------------------------------------------------------
-ifeq ($(GITHUB_ACTIONS),true)
-	VENV_BASE_DEFAULT := $(CURDIR)/.venv
-else
-	VENV_BASE_DEFAULT := /opt/venvs
-endif
-
-VENV_BASE ?= $(if $(VIRTUAL_ENV),$(dir $(VIRTUAL_ENV)),$(VENV_BASE_DEFAULT))
+VENV_BASE ?= $(if $(VIRTUAL_ENV),$(dir $(VIRTUAL_ENV)),/opt/venvs)
 VENV_NAME ?= infinito
 VENV_FALLBACK := $(VENV_BASE)/$(VENV_NAME)
-
 VENV := $(if $(VIRTUAL_ENV),$(VIRTUAL_ENV),$(VENV_FALLBACK))
 
 PYTHON := $(VENV)/bin/python
@@ -179,10 +163,7 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-# Global for all Infinito.Nexus environments used by the user
-ANSIBLE_COLLECTIONS_DIR ?= $(HOME)/.ansible/collections
-export ANSIBLE_COLLECTIONS_DIR
-
+install-ansible: ANSIBLE_COLLECTIONS_DIR ?= $(HOME)/.ansible/collections
 install-ansible:
 	@bash scripts/install/ansible.sh
 
@@ -283,11 +264,3 @@ test-local-full:
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
-
-# Debug helper
-print-python:
-	@echo "VENV_BASE       = $(VENV_BASE)"
-	@echo "VENV_NAME       = $(VENV_NAME)"
-	@echo "VENV            = $(VENV)"
-	@echo "Selected PYTHON = $(PYTHON)"
-	@$(PYTHON) -c 'import sys; print("sys.executable =", sys.executable); print("sys.prefix     =", sys.prefix); print("sys.base_prefix=", sys.base_prefix); print("is_venv        =", sys.prefix != sys.base_prefix)'
