@@ -246,17 +246,17 @@ format:
 test: test-lint test-unit test-integration lint-ansible test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
-test-lint: build-missing
+test-lint: install
 	@TEST_TYPE="lint" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
-test-unit: build-missing
+test-unit: install
 	@TEST_TYPE="unit" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
-test-integration: build-missing
+test-integration: install
 	@TEST_TYPE="integration" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
