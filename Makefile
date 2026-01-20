@@ -103,16 +103,16 @@ clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX; \
 
-docker-restart: install
+docker-restart:
 	@$(PYTHON) -m cli.deploy.development restart --distro "$(INFINITO_DISTRO)"
 
 docker-up: install
 	@$(PYTHON) -m cli.deploy.development up
 
-docker-down: install
+docker-down:
 	@$(PYTHON) -m cli.deploy.development down
 
-docker-stop: install
+docker-stop:
 	@$(PYTHON) -m cli.deploy.development stop
 
 list:
