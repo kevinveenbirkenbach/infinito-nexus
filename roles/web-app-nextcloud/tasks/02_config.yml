@@ -9,6 +9,14 @@
     mode: "0644"
   notify: docker compose up
 
+- name: "NEXTCLOUD | Ensure includes.php ownership/permissions on host"
+  ansible.builtin.file:
+    path: "{{ NEXTCLOUD_HOST_INCL_PATH }}"
+    state: file
+    owner: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+    group: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+    mode: "0644"  
+
 - name: Flush handlers so Nextcloud container is restarted and ready
   meta: flush_handlers
 
@@ -34,9 +42,22 @@
     (occ_status.stdout | default('')) is search('installed: true')
   changed_when: false
 
-- name: Append generated config to config.php only if not present
-  command: >
-    docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }} sh -c "
-      grep -q '{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}' {{ NEXTCLOUD_DOCKER_CONFIG_FILE }} || 
-      cat {{ NEXTCLOUD_DOCKER_INCL_PATH }} >> {{ NEXTCLOUD_DOCKER_CONFIG_FILE }}"
+- name: Ensure config.php loads /tmp/includes.php (idempotent)
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    docker exec -u root {{ NEXTCLOUD_CONTAINER }} sh -lc '
+      cfg="{{ NEXTCLOUD_DOCKER_CONFIG_FILE }}"
+      marker="INFINITO:NEXUS CONFIG LOADER"
+
+      grep -q "$marker" "$cfg" && exit 0
+
+      printf "\n/* %s */\nif (is_readable(\"/tmp/includes.php\")) {\n  include \"/tmp/includes.php\";\n}\n" \
+        "$marker" >> "$cfg"
+    '
+  args:
+    executable: /bin/bash
+  register: cfg_loader_patch
+  changed_when: cfg_loader_patch.rc == 0
+  failed_when: cfg_loader_patch.rc != 0
   notify: docker compose up

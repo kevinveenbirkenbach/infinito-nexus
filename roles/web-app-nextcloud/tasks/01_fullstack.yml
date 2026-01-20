@@ -39,6 +39,15 @@
   loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
   notify: docker compose up
 
+- name: "NEXTCLOUD | Ensure host-mounted infinito config files ownership/permissions (recursive)"
+  ansible.builtin.file:
+    path: "{{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
+    state: directory
+    recurse: true
+    owner: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+    group: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
+    mode: "u=rwX,g=rX,o=rX"
+
 - name: create internal nextcloud nginx configuration
   template:
     src:  "docker.conf.j2" 

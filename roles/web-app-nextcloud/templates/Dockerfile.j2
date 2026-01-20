@@ -3,3 +3,9 @@ FROM {{ NEXTCLOUD_IMAGE }}:{{ NEXTCLOUD_VERSION }}
 # Required for ONLYOFFICE
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 {% endif %}
+
+# Prepare Nextcloud config directory with correct permissions
+# Mounting leads to the auto creation of root with to restrictive permissions if it doesn't exist
+RUN mkdir -p {{ NEXTCLOUD_DOCKER_CONF_DIRECTORY }} \
+ && chown {{ NEXTCLOUD_DOCKER_USER }}:{{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_DOCKER_CONF_DIRECTORY }} \
+ && chmod 750 {{ NEXTCLOUD_DOCKER_CONF_DIRECTORY }}
