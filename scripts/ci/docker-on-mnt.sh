@@ -21,6 +21,10 @@ $SUDO chmod 1777 "${DOCKER_TMP}"
 log "Stopping docker"
 $SUDO systemctl stop docker || true
 
+# --- CI determinism: always start with a clean Docker root --------------------
+log "Cleaning Docker data-root for deterministic CI runs: ${DOCKER_DATA_ROOT}"
+$SUDO rm -rf "${DOCKER_DATA_ROOT:?}/"*
+
 log "Writing ${DAEMON_JSON} (data-root=${DOCKER_DATA_ROOT})"
 $SUDO mkdir -p "$(dirname "${DAEMON_JSON}")"
 
