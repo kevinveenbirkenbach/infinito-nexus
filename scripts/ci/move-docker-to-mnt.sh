@@ -61,7 +61,7 @@ log "Starting docker"
 $SUDO systemctl start docker
 
 log "Waiting for docker daemon to become ready"
-for i in {1..30}; do
+for ((n=0; n<30; n++)); do
   if docker info >/dev/null 2>&1; then
     break
   fi
