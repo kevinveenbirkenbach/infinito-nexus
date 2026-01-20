@@ -21,8 +21,8 @@ export NIX_CONFIG="${NIX_CONFIG_EFFECTIVE}"
 
 echo "PWD=$(pwd)"
 echo "PYTHON=${PYTHON}"
-
-export PATH="$(dirname "$PYTHON"):$PATH"
+PATH="$(dirname "$PYTHON"):$PATH"
+export PATH
 
 make setup
-"$PYTHON" -m unittest discover -s tests/${TEST_TYPE} -t . -p "${TEST_PATTERN}"
+"$PYTHON" -m unittest discover -s "tests/${TEST_TYPE}" -t . -p "${TEST_PATTERN}"
