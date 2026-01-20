@@ -3,7 +3,6 @@ set -euo pipefail
 
 DOCKER_DATA_ROOT="/mnt/docker"
 DOCKER_TMP="/mnt/docker-tmp"
-MIGRATED_MARKER="${DOCKER_DATA_ROOT}/.migrated"
 DAEMON_JSON="/etc/docker/daemon.json"
 
 log()  { echo ">>> $*"; }
