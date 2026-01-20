@@ -20,14 +20,13 @@ ifdef NIX_CONFIG
 export NIX_CONFIG
 endif
 
+# Ensure TEST_DEPLOY_TYPE is available for the default inventory dir.
+TEST_DEPLOY_TYPE ?= server
+export TEST_DEPLOY_TYPE
+
 # --- Test filtering (unittest discover) ---
 TEST_PATTERN            ?= test*.py
 export TEST_PATTERN
-
-# Deploy test type
-# Allowed: server, workstation, universal
-TEST_DEPLOY_TYPE ?= server
-export TEST_DEPLOY_TYPE
 
 # Distro
 INFINITO_DISTRO		?= arch
@@ -47,6 +46,14 @@ ifeq ($(GITHUB_ACTIONS),true)
 	endif
 endif
 export RUNNING_ON_ACT RUNNING_ON_GITHUB
+
+INVENTORY_DIR ?= $(shell \
+  RUNNING_ON_ACT="$(RUNNING_ON_ACT)" \
+  RUNNING_ON_GITHUB="$(RUNNING_ON_GITHUB)" \
+  HOME="$(HOME)" \
+  bash scripts/inventory/resolve.sh \
+)
+export INVENTORY_DIR
 
 # Overwrite defaults
 ifeq ($(RUNNING_ON_GITHUB),true)
@@ -234,7 +241,7 @@ test-local-run-all:
 	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
 	DEBUG="$(DEBUG)" \
 	LIMIT_HOST="$(LIMIT_HOST)" \
-	INVENTORY_BASE_DIR="$(INVENTORY_BASE_DIR)" \
+	INVENTORY_DIR="$(INVENTORY_DIR)" \
 	bash scripts/tests/deploy/local/run-all.sh
 
 test-local-cleanup:

@@ -7,11 +7,13 @@ set -euo pipefail
 #   TEST_DEPLOY_TYPE   server|workstation|universal
 #   INFINITO_CONTAINER e.g. infinito_nexus_arch
 #   DEBUG              true|false
+#   INVENTORY_DIR      e.g. /etc/inventories/local-full-server
 
 : "${APP:?APP is not set (e.g. APP=web-app-nextcloud)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is not set (server|workstation|universal)}"
 : "${INFINITO_CONTAINER:?INFINITO_CONTAINER is not set (e.g. infinito_nexus_arch)}"
 : "${DEBUG:?DEBUG is not set (true|false)}"
+: "${INVENTORY_DIR:?INVENTORY_DIR is not set (e.g. INVENTORY_DIR=/etc/inventories/local-full-server)}"
 
 case "${TEST_DEPLOY_TYPE}" in
   server|workstation|universal) ;;
@@ -32,6 +34,7 @@ case "${DEBUG}" in
 esac
 
 echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APP} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
+echo "inventory_dir=${INVENTORY_DIR}"
 
 docker exec -it "${INFINITO_CONTAINER}" bash -lc "
   set -euo pipefail
@@ -41,7 +44,7 @@ docker exec -it "${INFINITO_CONTAINER}" bash -lc "
   ./scripts/docker/entry.sh true
 
   echo \">>> Starting rapid deploy\"
-  cmd=(infinito deploy dedicated \"/etc/inventories/local-full-${TEST_DEPLOY_TYPE}/servers.yml\"
+  cmd=(infinito deploy dedicated \"${INVENTORY_DIR}/servers.yml\"
     -T \"${TEST_DEPLOY_TYPE}\"
     --skip-update
     --skip-backup
@@ -51,7 +54,7 @@ docker exec -it "${INFINITO_CONTAINER}" bash -lc "
     -l localhost
     --diff
     -vv
-    --password-file \"/etc/inventories/local-full-${TEST_DEPLOY_TYPE}/.password\"
+    --password-file \"${INVENTORY_DIR}/.password\"
     -e ASYNC_ENABLED=false
     -e SYS_SERVICE_ALL_ENABLED=false
     -e SYS_SERVICE_DEFAULT_STATE=started

@@ -6,9 +6,9 @@ set -euo pipefail
 # Required:
 #   INFINITO_DISTRO   (arch|debian|ubuntu|fedora|centos)
 #   TEST_DEPLOY_TYPE  (server|workstation|universal)
+#   INVENTORY_DIR     (e.g. /etc/inventories/local-full-server)
 #
 # Optional:
-#   INVENTORY_BASE_DIR (default: /etc/inventories)
 #   LIMIT_HOST         (default: localhost)
 #   DEBUG              (default: false)
 #   INCLUDE_RE / EXCLUDE_RE / FINAL_EXCLUDE_RE (to re-derive the same list)
@@ -19,8 +19,8 @@ set -euo pipefail
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
+: "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 
-INVENTORY_BASE_DIR="${INVENTORY_BASE_DIR:-/etc/inventories}"
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
 DEBUG="${DEBUG:-false}"
 
@@ -34,7 +34,7 @@ normalize_bool() {
 
 DEBUG="$(normalize_bool "${DEBUG}")"
 
-inv_dir="${INVENTORY_BASE_DIR}/local-full-${TEST_DEPLOY_TYPE}"
+inv_dir="${INVENTORY_DIR}"
 inv_file="${inv_dir}/servers.yml"
 pw_file="${inv_dir}/.password"
 
@@ -50,11 +50,12 @@ if [[ ! -f "${pw_file}" ]]; then
 fi
 
 echo "=== local run (ALL apps) ==="
-echo "distro   = ${INFINITO_DISTRO}"
-echo "type     = ${TEST_DEPLOY_TYPE}"
-echo "limit    = ${LIMIT_HOST}"
-echo "debug    = ${DEBUG}"
-echo "inv_file = ${inv_file}"
+echo "distro        = ${INFINITO_DISTRO}"
+echo "type          = ${TEST_DEPLOY_TYPE}"
+echo "limit         = ${LIMIT_HOST}"
+echo "debug         = ${DEBUG}"
+echo "inventory_dir = ${inv_dir}"
+echo "inv_file      = ${inv_file}"
 echo
 
 # Ensure stack is up

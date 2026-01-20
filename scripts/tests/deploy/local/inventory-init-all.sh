@@ -6,20 +6,19 @@ set -euo pipefail
 # Required:
 #   INFINITO_DISTRO   (arch|debian|ubuntu|fedora|centos)
 #   TEST_DEPLOY_TYPE  (server|workstation|universal)
+#   INVENTORY_DIR     (e.g. /etc/inventories/local-full-server)
 #
 # Optional:
-#   INVENTORY_BASE_DIR (default: /etc/inventories)
 #   INCLUDE_RE / EXCLUDE_RE / FINAL_EXCLUDE_RE (forwarded to build-test-matrix.sh)
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
-
-INVENTORY_BASE_DIR="${INVENTORY_BASE_DIR:-/etc/inventories}"
+: "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 
 echo "=== local inventory init (ALL apps) ==="
-echo "distro   = ${INFINITO_DISTRO}"
-echo "type     = ${TEST_DEPLOY_TYPE}"
-echo "inv_base = ${INVENTORY_BASE_DIR}"
+echo "distro        = ${INFINITO_DISTRO}"
+echo "type          = ${TEST_DEPLOY_TYPE}"
+echo "inventory_dir = ${INVENTORY_DIR}"
 echo
 
 # 1) Discover apps on HOST (same as local/all.sh)
@@ -82,7 +81,7 @@ python3 -m cli.deploy.development exec \
     echo '>>> entry.sh bootstrap'
     ./scripts/docker/entry.sh true
 
-    inv_dir='${INVENTORY_BASE_DIR}/local-full-${TEST_DEPLOY_TYPE}'
+    inv_dir='${INVENTORY_DIR}'
     inv_file=\"\${inv_dir}/servers.yml\"
     pw_file=\"\${inv_dir}/.password\"
 
@@ -105,4 +104,4 @@ python3 -m cli.deploy.development exec \
 
 echo
 echo "✅ Local inventory init finished."
-echo "Inventory: ${INVENTORY_BASE_DIR}/local-full-${TEST_DEPLOY_TYPE}/servers.yml"
+echo "Inventory: ${INVENTORY_DIR}/servers.yml"

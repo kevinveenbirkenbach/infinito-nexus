@@ -13,14 +13,19 @@ def _run_deploy(
     deploy_ids: list[str],
     debug: bool,
     passthrough: list[str],
+    inventory_dir: str,
 ) -> int:
+    inv_root = str(inventory_dir).rstrip("/")
+    inv_file = f"{inv_root}/servers.yml"
+    pw_file = f"{inv_root}/.password"
+
     cmd = [
         "python3",
         "-m",
         "cli.deploy.dedicated",
-        "/etc/inventories/github-ci/servers.yml",
+        inv_file,
         "-p",
-        "/etc/inventories/github-ci/.password",
+        pw_file,
         "-vv",
         "--assert",
         "true",
@@ -57,6 +62,14 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         choices=["arch", "debian", "ubuntu", "fedora", "centos"],
         help="Target distro (compose env INFINITO_DISTRO).",
     )
+
+    p.add_argument(
+        "--inventory-dir",
+        default=os.environ.get("INVENTORY_DIR"),
+        required=os.environ.get("INVENTORY_DIR") is None,
+        help="Inventory directory to use (default: $INVENTORY_DIR).",
+    )
+
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument(
         "--app", help="Application id (will include run_after deps automatically)."
@@ -100,5 +113,6 @@ def handler(args: argparse.Namespace) -> int:
         deploy_ids=deploy_ids,
         debug=bool(args.debug),
         passthrough=passthrough,
+        inventory_dir=str(args.inventory_dir),
     )
     return rc

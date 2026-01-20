@@ -6,16 +6,16 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
+: "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 
 # Optional overrides
-INVENTORY_BASE_DIR="${INVENTORY_BASE_DIR:-/etc/inventories}"
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
 
 echo "=== local full deploy (development compose stack) ==="
-echo "distro     = ${INFINITO_DISTRO}"
-echo "type       = ${TEST_DEPLOY_TYPE}"
-echo "limit      = ${LIMIT_HOST}"
-echo "inv_base   = ${INVENTORY_BASE_DIR}"
+echo "distro        = ${INFINITO_DISTRO}"
+echo "type          = ${TEST_DEPLOY_TYPE}"
+echo "limit         = ${LIMIT_HOST}"
+echo "inventory_dir = ${INVENTORY_DIR}"
 echo
 
 # ---------------------------------------------------------------------------
@@ -86,7 +86,7 @@ python3 -m cli.deploy.development exec \
     echo '>>> Running entry.sh bootstrap'
     ./scripts/docker/entry.sh true
 
-    inv_dir='${INVENTORY_BASE_DIR}/local-full-${TEST_DEPLOY_TYPE}'
+    inv_dir='${INVENTORY_DIR}'
     inv_file=\"\${inv_dir}/servers.yml\"
     pw_file=\"\${inv_dir}/.password\"
 

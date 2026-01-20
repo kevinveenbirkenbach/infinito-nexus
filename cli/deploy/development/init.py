@@ -8,24 +8,33 @@ from .common import make_compose, resolve_deploy_ids_for_app
 from .storage import detect_storage_constrained
 
 
-def _ensure_vault_password_file(compose) -> None:
+def _ensure_vault_password_file(compose, *, inventory_dir: str) -> None:
+    inv_root = str(inventory_dir).rstrip("/")
+    pw_file = f"{inv_root}/.password"
+
     compose.exec(
         [
             "sh",
             "-lc",
-            "mkdir -p /etc/inventories/github-ci && "
-            "[ -f /etc/inventories/github-ci/.password ] || "
-            "printf '%s\n' 'ci-vault-password' > /etc/inventories/github-ci/.password",
+            f"mkdir -p {inv_root} && "
+            f"[ -f {pw_file} ] || "
+            f"printf '%s\n' 'ci-vault-password' > {pw_file}",
         ],
         check=True,
     )
 
 
 def _create_inventory(
-    compose, *, include: list[str], storage_constrained: bool
+    compose,
+    *,
+    include: list[str],
+    storage_constrained: bool,
+    inventory_dir: str,
 ) -> None:
     if not include:
         raise ValueError("include must not be empty")
+
+    inv_root = str(inventory_dir).rstrip("/")
 
     overrides = {"STORAGE_CONSTRAINED": bool(storage_constrained)}
 
@@ -33,7 +42,7 @@ def _create_inventory(
         "python3",
         "-m",
         "cli.create.inventory",
-        "/etc/inventories/github-ci",
+        inv_root,
         "--host",
         "localhost",
         "--ssl-disabled",
@@ -46,7 +55,7 @@ def _create_inventory(
     ]
 
     compose.exec(cmd, check=True, workdir="/opt/src/infinito")
-    _ensure_vault_password_file(compose)
+    _ensure_vault_password_file(compose, inventory_dir=inv_root)
 
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
@@ -59,6 +68,14 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         choices=["arch", "debian", "ubuntu", "fedora", "centos"],
         help="Target distro (compose env INFINITO_DISTRO).",
     )
+
+    p.add_argument(
+        "--inventory-dir",
+        default=os.environ.get("INVENTORY_DIR"),
+        required=os.environ.get("INVENTORY_DIR") is None,
+        help="Inventory directory to use (default: $INVENTORY_DIR).",
+    )
+
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument(
         "--app", help="Application id (will include run_after deps automatically)."
@@ -100,7 +117,12 @@ def handler(args: argparse.Namespace) -> int:
             compose, threshold_gib=int(args.threshold_gib)
         )
 
-    _create_inventory(compose, include=include, storage_constrained=storage_constrained)
+    _create_inventory(
+        compose,
+        include=include,
+        storage_constrained=storage_constrained,
+        inventory_dir=str(args.inventory_dir),
+    )
     print(
         f">>> Inventory initialized (include={','.join(include)} storage_constrained={storage_constrained})"
     )

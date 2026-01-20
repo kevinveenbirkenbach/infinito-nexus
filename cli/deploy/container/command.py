@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import subprocess
 import sys
 import time
 import uuid
-import shlex
-from typing import List, Tuple
 from pathlib import Path
+from typing import List, Tuple
 
 INFINITO_SRC_DIR = "/opt/src/infinito"
 
@@ -64,9 +64,7 @@ def docker_exec(
     return subprocess.run(cmd, check=check)
 
 
-def _docker_exec_capture(
-    container: str, args: List[str]
-) -> subprocess.CompletedProcess:
+def _docker_exec_capture(container: str, args: List[str]) -> subprocess.CompletedProcess:
     cmd = ["docker", "exec", container, *args]
 
     print(">>> docker exec (capture):")
@@ -118,9 +116,7 @@ def wait_for_docker_socket(container: str, timeout: int = 60) -> None:
             return
 
         # capture a bit more detail for later
-        dv = _docker_exec_capture(
-            container, ["sh", "-lc", "docker version 2>&1 || true"]
-        )
+        dv = _docker_exec_capture(container, ["sh", "-lc", "docker version 2>&1 || true"])
         last_out = dv.stdout
         last_err = dv.stderr
         time.sleep(1)
@@ -180,6 +176,7 @@ def run_in_container(
     build: bool,
     rebuild: bool,
     no_cache: bool,
+    inventory_dir: str,
     inventory_args: List[str],
     deploy_args: List[str],
     name: str | None = None,
@@ -193,6 +190,11 @@ def run_in_container(
       - always remove container at the end
     """
     container_name = None
+
+    inv_root = str(inventory_dir).rstrip("/")
+    inv_file = f"{inv_root}/servers.yml"
+    pw_file = f"{inv_root}/.password"
+
     try:
         container_name = start_ci_container(
             image=image,
@@ -208,7 +210,7 @@ def run_in_container(
             "python3",
             "-m",
             "cli.create.inventory",
-            "/etc/inventories/github-ci",
+            inv_root,
             "--host",
             "localhost",
             "--ssl-disabled",
@@ -230,7 +232,7 @@ def run_in_container(
 
         mock_cmd = (
             "set -euo pipefail; "
-            "p=/etc/inventories/github-ci/files/localhost/home/backup/.ssh/authorized_keys; "
+            f"p={shlex.quote(inv_root)}/files/localhost/home/backup/.ssh/authorized_keys; "
             'mkdir -p "$(dirname "$p")"; '
             "printf '%s\n' " + shlex.quote(mock_key) + ' > "$p"; '
             'chmod 0644 "$p"; '
@@ -242,9 +244,9 @@ def run_in_container(
         # 2) Ensure vault password file exists
         print(">>> Ensuring CI vault password file exists...")
         ensure_pw_cmd = (
-            "mkdir -p /etc/inventories/github-ci && "
-            "[ -f /etc/inventories/github-ci/.password ] || "
-            "printf '%s\n' 'ci-vault-password' > /etc/inventories/github-ci/.password"
+            f"mkdir -p {shlex.quote(inv_root)} && "
+            f"[ -f {shlex.quote(pw_file)} ] || "
+            f"printf '%s\n' 'ci-vault-password' > {shlex.quote(pw_file)}"
         )
         docker_exec(
             container_name,
@@ -257,9 +259,9 @@ def run_in_container(
             "python3",
             "-m",
             "cli.deploy.dedicated",
-            "/etc/inventories/github-ci/servers.yml",
+            inv_file,
             "-p",
-            "/etc/inventories/github-ci/.password",
+            pw_file,
             "-vv",
             "--assert",
             "true",
@@ -373,6 +375,13 @@ def main() -> int:
     parser.add_argument("--no-cache", action="store_true")
     parser.add_argument("--name")
 
+    parser.add_argument(
+        "--inventory-dir",
+        default=os.environ.get("INVENTORY_DIR"),
+        required=os.environ.get("INVENTORY_DIR") is None,
+        help="Inventory directory to use (default: $INVENTORY_DIR).",
+    )
+
     args = parser.parse_args(container_argv)
     mode = args.mode
 
@@ -393,6 +402,7 @@ def main() -> int:
                 build=args.build,
                 rebuild=args.rebuild,
                 no_cache=args.no_cache,
+                inventory_dir=str(args.inventory_dir),
                 inventory_args=inventory_args,
                 deploy_args=deploy_args,
                 name=args.name,
