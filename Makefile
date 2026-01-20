@@ -148,7 +148,7 @@ install-ansible:
 	@bash scripts/install/ansible.sh
 
 install-venv:
-	@bash scripts/install/venv.sh
+	@VENV="$(VENV)" bash scripts/install/venv.sh
 
 install-python: install-venv
 	@bash scripts/install/python.sh
