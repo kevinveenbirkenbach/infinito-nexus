@@ -89,7 +89,7 @@ filter_by_ci_storage() {
 discover_simple() {
   local include_re="$1"
   local exclude_re="$2"
-  INCLUDE_RE="${include_re}" EXCLUDE_RE="${exclude_re}" scripts/tests/discover-apps.sh
+  INCLUDE_RE="${include_re}" EXCLUDE_RE="${exclude_re}" scripts/meta/resolve-invokable-roles.sh
 }
 
 case "${TEST_DEPLOY_TYPE}" in

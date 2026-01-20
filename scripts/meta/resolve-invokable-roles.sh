@@ -19,13 +19,13 @@ set -euo pipefail
 #
 # Examples:
 #   # server apps
-#   INCLUDE_RE='^(web-app-|web-svc-)' scripts/tests/discover-apps.sh
+#   INCLUDE_RE='^(web-app-|web-svc-)' scripts/meta/resolve-invokable-roles.sh
 #
 #   # workstation apps
-#   INCLUDE_RE='^(desk-|util-desk-)' scripts/tests/discover-apps.sh
+#   INCLUDE_RE='^(desk-|util-desk-)' scripts/meta/resolve-invokable-roles.sh
 #
 #   # server apps but exclude known flaky
-#   INCLUDE_RE='^(web-app-|web-svc-)' EXCLUDE_RE='^(web-app-oauth2-proxy)$' scripts/tests/discover-apps.sh
+#   INCLUDE_RE='^(web-app-|web-svc-)' EXCLUDE_RE='^(web-app-oauth2-proxy)$' scripts/meta/resolve-invokable-roles.sh
 
 INCLUDE_RE="${INCLUDE_RE:-.*}"
 EXCLUDE_RE="${EXCLUDE_RE:-}"

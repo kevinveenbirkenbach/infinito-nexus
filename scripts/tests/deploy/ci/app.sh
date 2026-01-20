@@ -61,7 +61,7 @@ for distro in "${distro_arr[@]}"; do
     args=( --type "${deploy_type}" --app "${APP}" --debug)
     if [[ "${MISSING_ONLY}" == "true" ]]; then args+=( --missing ); fi
     args+=( --keep-stack-on-failure )
-    scripts/tests/deploy.sh "${args[@]}"
+    scripts/tests/deploy/ci/distros.sh "${args[@]}"
     rc=$?
     set -e
 

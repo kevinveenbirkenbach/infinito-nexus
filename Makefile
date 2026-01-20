@@ -103,13 +103,13 @@ RESERVED_USERNAMES := $(shell \
 	clean down \
 	list tree mig dockerignore \
 	print-python lint-ansible \
-	setup-local-dns-infinito remove-local-dns-infinito
+	setup-dns remove-dns
 
-setup-local-dns:
-	@bash scripts/local-dns/setup-infinito-dns.sh
+setup-dns:
+	@bash scripts/dns/setup.sh
 
-remove-local-dns:
-	@bash scripts/local-dns/remove-infinito-dns.sh
+remove-dns:
+	@bash scripts/dns/remove.sh
 
 
 clean:
@@ -257,18 +257,18 @@ test-integration: build-missing
 	INFINITO_PULL_POLICY="never" \
 	bash scripts/tests/code.sh
 
-ci-deploy-discover:
-	@./scripts/ci/discover.sh
+ci-deploy-discover: docker-up
+	@./scripts/meta/build-test-matrix.sh
 
 ci-deploy-app:
 	export MISSING_ONLY=true; \
-	./scripts/ci/deploy-app.sh
+	./scripts/tests/deploy/ci/app.sh
 
 .PHONY: ci-discover-output
 
 ci-discover-output:
 	@set -euo pipefail; \
-	apps="$$(./scripts/ci/discover.sh)"; \
+	apps="$$(./scripts/meta/build-test-matrix.sh)"; \
 	[[ -n "$$apps" ]] || apps='[]'; \
 	if [[ -n "$${ONLY_APP:-}" ]]; then \
 	  apps="$$(jq -nc --arg a "$$ONLY_APP" '[ $$a ]')"; \
@@ -351,8 +351,8 @@ test-local-rapid:
 test-local-full: docker-up
 	@echo "=== local full deploy (type=$(TEST_DEPLOY_TYPE), distro=$(INFINITO_DISTRO)) ==="
 	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
-	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
-	bash scripts/tests/deploy-local-full.sh
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	bash scripts/tests/deploy/local/all.sh
 
 # Backwards compatible target (kept)
 lint-ansible:

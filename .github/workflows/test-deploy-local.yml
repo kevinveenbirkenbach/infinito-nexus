@@ -115,4 +115,4 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          scripts/ci/log-tail.sh logs 200
+          scripts/meta/log-tail.sh logs 200

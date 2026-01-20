@@ -16,7 +16,7 @@ DEBUG=0
 usage() {
   cat <<'EOF'
 Usage:
-  INFINITO_DISTRO=<distro> scripts/tests/deploy.sh --type <server|workstation|universal> [options]
+  INFINITO_DISTRO=<distro> scripts/tests/deploy/ci/distros.sh --type <server|workstation|universal> [options]
 
 Options:
   --no-cache              Rebuild compose image with --no-cache
