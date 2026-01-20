@@ -11,9 +11,6 @@ SHELL ["/bin/bash", "-o", "pipefail", "-lc"]
 # Forwardable build-time Nix settings (e.g., GitHub access tokens to avoid rate limits)
 ARG NIX_CONFIG
 
-# Make Nix non-interactive by default, but allow override/extension via build arg
-ENV NIX_CONFIG="${NIX_CONFIG:+$NIX_CONFIG }accept-flake-config = true"
-
 ENV INFINITO_SRC_DIR="/opt/src/infinito"
 ENV PYTHON="/opt/venvs/infinito/bin/python"
 ENV PIP="/opt/venvs/infinito/bin/python -m pip"

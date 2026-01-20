@@ -20,9 +20,10 @@ PIP    := $(PYTHON) -m pip
 export PYTHON
 export PIP
 
-# Nix Config Variable (To avoid rate limit)
+# Always allow flake-provided nixConfig non-interactively
 NIX_CONFIG ?=
-export NIX_CONFIG
+NIX_CONFIG_EFFECTIVE := $(shell printf "%s\n%s\n" "$(NIX_CONFIG)" "accept-flake-config = true" | sed -e 's/[[:space:]]\+$$//' -e '/^$$/d')
+export NIX_CONFIG := $(NIX_CONFIG_EFFECTIVE)
 
 ROLES_DIR           := ./roles
 APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
