@@ -54,23 +54,31 @@ INFINITO_CONTAINER 	?= infinito_nexus_$(INFINITO_DISTRO)
 export INFINITO_DISTRO
 export INFINITO_CONTAINER
 
-# Overwrite defaults
+# Detirmene Environment 
+RUNNING_ON_ACT    ?= false
+RUNNING_ON_GITHUB ?= false
+
 ifeq ($(GITHUB_ACTIONS),true)
+	RUNNING_ON_GITHUB = true
 	ifeq ($(ACT),true)
-		INFINITO_COMPILE ?= 1
-	else
-		# -------- Real GitHub Actions CI --------
-		INFINITO_PULL_POLICY ?= always
-		INFINITO_IMAGE_TAG ?= latest
-		export INFINITO_IMAGE_TAG
-		INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):$(INFINITO_IMAGE_TAG)
-		INFINITO_NO_BUILD ?= 1
-		export INFINITO_NO_BUILD
-		export INFINITO_PULL_POLICY
-		export INFINITO_IMAGE
-		INFINITO_COMPILE ?=  0
-		
+		RUNNING_ON_ACT    = true
+		RUNNING_ON_GITHUB = false
 	endif
+endif
+export RUNNING_ON_ACT RUNNING_ON_GITHUB
+
+# Overwrite defaults
+ifeq ($(RUNNING_ON_GITHUB),true)
+	# -------- Real GitHub Actions CI --------
+	INFINITO_PULL_POLICY ?= always
+	INFINITO_IMAGE_TAG ?= latest
+	INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):$(INFINITO_IMAGE_TAG)
+	INFINITO_NO_BUILD ?= 1
+	export INFINITO_IMAGE_TAG
+	export INFINITO_NO_BUILD
+	export INFINITO_PULL_POLICY
+	export INFINITO_IMAGE
+	INFINITO_COMPILE ?=  0
 else
 	INFINITO_COMPILE ?= 1
 endif
@@ -125,9 +133,9 @@ docker-down:
 	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
 
 docker-up:
-	@if [[ "$(GITHUB_ACTIONS)" == "true" && "$(ACT)" != "true" ]]; then \
+	@if [[ "$(RUNNING_ON_GITHUB)" == "true" ]]; then \
 		echo ">>> GitHub Actions detected -> move Docker storage to /mnt"; \
-		bash scripts/ci/move-docker-to-mnt.sh; \
+		bash scripts/ci/docker-on-mnt.sh; \
 	fi
 	python3 -m cli.deploy.test.up
 
