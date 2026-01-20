@@ -1,14 +1,13 @@
 from __future__ import annotations
 
+import argparse
 import os
 import shutil
 import subprocess
 from pathlib import Path
 
+from .common import repo_root_from_here
 
-# ---------------------------------------------------------------------------
-# Constants (single source of truth)
-# ---------------------------------------------------------------------------
 
 CI_DOCKER_ROOT = Path("/mnt/docker")
 CI_DOCKER_ROOT_STR = str(CI_DOCKER_ROOT)
@@ -32,7 +31,10 @@ def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
 
 
 def _cleanup_docker_root() -> None:
+    docker_root = CI_DOCKER_ROOT
+    
     if os.environ.get("RUNNING_ON_GITHUB") != "true":
+        print(f">>> Not on GitHub - No bind volumes will be deleted: {docker_root}")
         return
 
     docker_root_env = os.environ.get("INFINITO_DOCKER_VOLUME", "").strip().rstrip("/")
@@ -43,8 +45,6 @@ def _cleanup_docker_root() -> None:
             f"INFINITO_DOCKER_VOLUME={docker_root_env} is not allowed on GitHub runner. "
             f"Only {CI_DOCKER_ROOT_STR} is permitted."
         )
-
-    docker_root = CI_DOCKER_ROOT
 
     if not docker_root.exists():
         print(f">>> Docker root does not exist, nothing to clean: {docker_root}")
@@ -65,3 +65,19 @@ def down_stack(*, repo_root: Path, distro: str) -> None:
         )
     finally:
         _cleanup_docker_root()
+
+
+def add_parser(sub: argparse._SubParsersAction) -> None:
+    p = sub.add_parser("down", help="Stop compose stack and remove volumes.")
+    p.add_argument(
+        "--distro",
+        default=os.environ.get("INFINITO_DISTRO", "arch"),
+        choices=["arch", "debian", "ubuntu", "fedora", "centos"],
+        help="Target distro (compose env INFINITO_DISTRO).",
+    )
+    p.set_defaults(_handler=handler)
+
+
+def handler(args: argparse.Namespace) -> int:
+    down_stack(repo_root=repo_root_from_here(), distro=args.distro)
+    return 0

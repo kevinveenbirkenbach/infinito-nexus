@@ -57,4 +57,4 @@ args+=( "--app" "${APP}" )
 if [[ "${KEEP_STACK_ON_FAILURE}" == "1" ]]; then args+=( "--keep-stack-on-failure" ); fi
 if [[ "${DEBUG}" == "1" ]]; then args+=( "--debug" ); else args+=( "--no-debug" ); fi
 
-python3 -m cli.deploy.test "${args[@]}"
+python3 -m cli.deploy.development run "${args[@]}"

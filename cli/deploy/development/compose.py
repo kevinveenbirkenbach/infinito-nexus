@@ -39,11 +39,11 @@ class Compose:
             text=text,
         )
 
-    def _render_coredns_corefile(self):
+    def _render_coredns_corefile(self) -> None:
         env = os.environ.copy()
 
         # load env.ci into environment
-        with open("env.ci") as f:
+        with open("env.ci", encoding="utf-8") as f:
             for line in f:
                 if "=" in line and not line.startswith("#"):
                     k, v = line.strip().split("=", 1)
@@ -51,8 +51,8 @@ class Compose:
 
         subprocess.check_call(
             ["envsubst"],
-            stdin=open("compose/Corefile.tmpl"),
-            stdout=open("compose/Corefile", "w"),
+            stdin=open("compose/Corefile.tmpl", "r", encoding="utf-8"),
+            stdout=open("compose/Corefile", "w", encoding="utf-8"),
             env=env,
         )
 
@@ -69,6 +69,7 @@ class Compose:
                 ["docker", "image", "inspect", image],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                check=False,
             )
             if r.returncode == 0:
                 print(
@@ -85,7 +86,7 @@ class Compose:
             print(f">>> docker compose build infinito (INFINITO_DISTRO={self.distro})")
             self.run(["build", "infinito"], check=True)
 
-    def up(self, *, run_init: bool = True) -> None:
+    def up(self, *, run_entry_init: bool = True) -> None:
         print(">>> Rendering CoreDNS Corefile from template")
         self._render_coredns_corefile()
 
@@ -111,7 +112,7 @@ class Compose:
         self.run(args, check=True)
         self.wait_for_healthy()
 
-        if run_init:
+        if run_entry_init:
             print(">>> Running infinito entry.sh init")
             r = self.exec(
                 ["sh", "-lc", "/opt/src/infinito/scripts/docker/entry.sh true"],
@@ -182,6 +183,7 @@ class Compose:
                 cwd=self.repo_root,
                 capture_output=True,
                 text=True,
+                check=False,
             )
 
             status = r.stdout.strip() if r.returncode == 0 else ""
@@ -215,6 +217,7 @@ class Compose:
                     cwd=self.repo_root,
                     capture_output=True,
                     text=True,
+                    check=False,
                 )
 
                 print("===== docker logs (last 200 lines) =====")

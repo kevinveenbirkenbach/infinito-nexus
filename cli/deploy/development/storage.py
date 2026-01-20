@@ -1,4 +1,3 @@
-# cli/deploy/test/storage.py
 from __future__ import annotations
 
 from .compose import Compose
@@ -31,7 +30,6 @@ printf "%s\n" "${free}"
 
     r = compose.exec(cmd, check=False, capture=True)
     if r.returncode != 0:
-        # If we can't determine free space, do not force constrained mode.
         return False
 
     txt = (r.stdout or "").strip()

@@ -125,19 +125,17 @@ clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX; \
 
-docker-restart: docker-stop docker-up
-	@echo ">>> Restarting infinito compose stack"
-
-docker-stop:
-	@echo ">>> Stopping infinito compose stack"
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci stop
-
-docker-down:
-	@echo ">>> Stopping infinito compose stack and removing volumes"
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
+docker-restart:
+	@$(PYTHON) -m cli.deploy.development restart --distro "$(INFINITO_DISTRO)"
 
 docker-up:
-	python3 -m cli.deploy.test.up
+	@$(PYTHON) -m cli.deploy.development up
+
+docker-down:
+	@$(PYTHON) -m cli.deploy.development down
+
+docker-stop:
+	@$(PYTHON) -m cli.deploy.development stop
 
 list:
 	@echo "Generating the roles list"

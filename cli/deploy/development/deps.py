@@ -28,7 +28,6 @@ def apps_with_deps(app_id: str, deps_role_names: list[str]) -> list[str]:
     The resolver returns role folder names. In your current inventory groups,
     group names == application_ids (folder names). So we can include them directly.
     """
-    # ensure prerequisites first + app_id last
     out: list[str] = []
     for d in deps_role_names:
         if d != app_id and d not in out:
