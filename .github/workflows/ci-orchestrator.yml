@@ -37,13 +37,22 @@ jobs:
     steps:
       - run: echo "lint gate passed"
 
+  # Build Docker Images 
+  build-ci-images:
+    uses: ./.github/workflows/build-ci-images.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
+
   # Code Testing
   test-code-integration:
     uses: ./.github/workflows/test-code-integration.yml
+    needs: build-ci-images
   test-code-lint:
     uses: ./.github/workflows/test-code-lint.yml
+    needs: build-ci-images
   test-code-unit:
     uses: ./.github/workflows/test-code-unit.yml 
+    needs: build-ci-images
   test-code-gate:
     needs: [test-code-integration, test-code-lint, test-code-unit]
     runs-on: ubuntu-latest
@@ -56,13 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Quality Checks passed"
-
-  # Build Docker Images 
-  build-ci-images:
-    uses: ./.github/workflows/build-ci-images.yml
-    with:
-      distros: "arch debian ubuntu fedora centos"
-
+  
   #Test DNS configuration
   test-dns:
     needs: 
