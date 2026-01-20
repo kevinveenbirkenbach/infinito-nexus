@@ -1,6 +1,7 @@
 # tests/unit/roles/sys-ctl-cln-bkps/files/test_script.py
 from __future__ import annotations
 
+import os
 import io
 import runpy
 import sys
@@ -10,8 +11,28 @@ from pathlib import Path
 from types import ModuleType, SimpleNamespace
 from unittest.mock import patch
 
-# CI checkout path (as shown in your logs)
-SCRIPT_PATH = Path("/opt/src/infinito/roles/sys-ctl-cln-bkps/files/script.py")
+
+def _repo_root() -> Path:
+    """
+    Resolve repository root in a way that works locally and in CI.
+
+    Priority:
+      1. INFINITO_REPO_ROOT env var (if explicitly set)
+      2. Derive from this file location
+
+    This file path:
+      <repo>/tests/unit/roles/sys-ctl-cln-bkps/files/test_script.py
+    """
+    env = os.environ.get("INFINITO_REPO_ROOT")
+    if env:
+        return Path(env).expanduser().resolve()
+
+    # parents:
+    # files -> sys-ctl-cln-bkps -> roles -> unit -> tests -> <repo>
+    return Path(__file__).resolve().parents[5]
+
+
+SCRIPT_PATH = _repo_root() / "roles/sys-ctl-cln-bkps/files/script.py"
 
 
 def _fake_psutil(percent: int) -> ModuleType:
@@ -34,7 +55,7 @@ class TestSysCtlClnBkpsScript(unittest.TestCase):
         """
         if not SCRIPT_PATH.is_file():
             raise FileNotFoundError(
-                f"script.py not found at expected path: {SCRIPT_PATH}"
+                f"script.py not found at expected path: {SCRIPT_PATH} (repo_root={_repo_root()})"
             )
 
         fake_psutil = _fake_psutil(disk_percent)

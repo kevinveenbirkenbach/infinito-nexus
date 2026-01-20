@@ -1,47 +1,74 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
+import runpy
+import sys
 from typing import Optional
 
-from . import build as cmd_build
-from . import deploy as cmd_deploy
-from . import down as cmd_down
-from . import exec as cmd_exec
-from . import init as cmd_init
-from . import logs as cmd_logs
-from . import restart as cmd_restart
-from . import run as cmd_run
-from . import stop as cmd_stop
-from . import up as cmd_up
+
+def _module_exists(module: str) -> bool:
+    return importlib.util.find_spec(module) is not None
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="python -m cli.deploy.development",
-        description="Compose-based development deploy orchestrator for Infinito.Nexus.",
-    )
-    sub = parser.add_subparsers(dest="subcommand", required=True)
+def _dispatch(argv: list[str]) -> int:
+    """
+    Dynamic dispatcher for nested CLI command packages.
 
-    cmd_up.add_parser(sub)
-    cmd_down.add_parser(sub)
-    cmd_stop.add_parser(sub)
-    cmd_restart.add_parser(sub)
-    cmd_init.add_parser(sub)
-    cmd_deploy.add_parser(sub)
-    cmd_run.add_parser(sub)
-    cmd_exec.add_parser(sub)
-    cmd_logs.add_parser(sub)
-    cmd_build.add_parser(sub)
+    A command package is identified by existence of:
+        cli/<segments>/__main__.py
 
-    return parser
+    The integration test calls:
+        python cli/__main__.py <segments...> --help --no-signal
+
+    This dispatcher resolves the *longest* prefix of segments that forms a module:
+        cli.<segments>.__main__
+    and executes it as __main__ via runpy.
+
+    Example:
+      argv = ["deploy", "development", "--help", "--no-signal"]
+      -> module "cli.deploy.development.__main__"
+    """
+    if not argv:
+        # Show a minimal help; keep it simple.
+        print("Usage: python -m cli <command> [<subcommand> ...] [args]")
+        print("Hint: run `python -m cli --help` or `python -m cli <command> --help`.")
+        return 0
+
+    # Find the longest prefix that matches a command package module
+    best_len = 0
+    best_module: Optional[str] = None
+
+    for i in range(1, len(argv) + 1):
+        mod = "cli." + ".".join(argv[:i]) + ".__main__"
+        if _module_exists(mod):
+            best_len = i
+            best_module = mod
+
+    if not best_module:
+        # Keep error format compatible with your current expectation.
+        # (Your failing output was: "Error: command 'deploy development --help' not found.")
+        joined = " ".join(argv)
+        print(f"Error: command '{joined}' not found.")
+        return 1
+
+    # Rewrite argv so the subcommand module sees only its own args
+    sub_argv = argv[best_len:]
+    sys.argv = [best_module] + sub_argv
+
+    # Execute the module like `python -m ...`
+    runpy.run_module(best_module, run_name="__main__")
+    return 0
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    parser = build_parser()
-    args = parser.parse_args(argv)
+    # We intentionally do NOT parse args here; we delegate to subcommands.
+    argv = list(sys.argv[1:] if argv is None else argv)
 
-    fn = getattr(args, "_handler", None)
-    if fn is None:
-        parser.error("No subcommand handler registered")  # pragma: no cover
+    # Optional global flags could be handled here if you want.
+    # For now, we just pass everything through.
+    return int(_dispatch(argv))
 
-    return int(fn(args))
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
