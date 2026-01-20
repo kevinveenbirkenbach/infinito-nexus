@@ -213,7 +213,9 @@ class TestMain(unittest.TestCase):
             "server",
         ]
 
-        with unittest.mock.patch.dict(os.environ, {"INVENTORY_DIR": "/env/inventory"}, clear=True):
+        with unittest.mock.patch.dict(
+            os.environ, {"INVENTORY_DIR": "/env/inventory"}, clear=True
+        ):
             with unittest.mock.patch.object(sys, "argv", argv):
                 rc = deploy_container.main()
 

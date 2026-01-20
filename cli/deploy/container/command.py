@@ -64,7 +64,9 @@ def docker_exec(
     return subprocess.run(cmd, check=check)
 
 
-def _docker_exec_capture(container: str, args: List[str]) -> subprocess.CompletedProcess:
+def _docker_exec_capture(
+    container: str, args: List[str]
+) -> subprocess.CompletedProcess:
     cmd = ["docker", "exec", container, *args]
 
     print(">>> docker exec (capture):")
@@ -116,7 +118,9 @@ def wait_for_docker_socket(container: str, timeout: int = 60) -> None:
             return
 
         # capture a bit more detail for later
-        dv = _docker_exec_capture(container, ["sh", "-lc", "docker version 2>&1 || true"])
+        dv = _docker_exec_capture(
+            container, ["sh", "-lc", "docker version 2>&1 || true"]
+        )
         last_out = dv.stdout
         last_err = dv.stderr
         time.sleep(1)

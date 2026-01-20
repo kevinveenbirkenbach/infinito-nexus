@@ -82,11 +82,6 @@ if [[ "${apps_count}" == "0" ]]; then
   exit 2
 fi
 
-apps_csv="$(
-  python3 -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
-    "${apps_json}"
-)"
-
 echo "apps_count=${apps_count}"
 echo "apps_sample=$(
   python3 -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
