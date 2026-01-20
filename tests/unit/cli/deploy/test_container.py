@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import unittest
@@ -101,6 +102,8 @@ class TestMain(unittest.TestCase):
             "--image",
             "myimage:latest",
             "--build",
+            "--inventory-dir",
+            "/tmp/inventory",
             "--",
             # no inventory/deploy args here
         ]
@@ -114,7 +117,8 @@ class TestMain(unittest.TestCase):
     def test_main_passes_arguments_to_run_in_container(self, mock_run_in_container):
         """
         Ensure that main() correctly splits container args vs inventory/deploy
-        args and passes them to run_in_container().
+        args and passes them to run_in_container(). Also ensure inventory_dir
+        is forwarded.
         """
         argv = [
             "cli.deploy.container",
@@ -122,6 +126,8 @@ class TestMain(unittest.TestCase):
             "--image",
             "myimage:latest",
             "--build",
+            "--inventory-dir",
+            "/tmp/inventory",
             "--",
             "--exclude",
             "foo,bar",
@@ -146,6 +152,9 @@ class TestMain(unittest.TestCase):
         self.assertFalse(kwargs["no_cache"])
         self.assertIsNone(kwargs["name"])
 
+        # Inventory dir (new)
+        self.assertEqual(kwargs["inventory_dir"], "/tmp/inventory")
+
         # Inventory args: first segment after first '--' until second '--'
         self.assertEqual(
             kwargs["inventory_args"],
@@ -157,6 +166,62 @@ class TestMain(unittest.TestCase):
             kwargs["deploy_args"],
             ["-T", "server", "--debug"],
         )
+
+    @unittest.mock.patch("cli.deploy.container.command.run_in_container")
+    def test_main_requires_inventory_dir_when_env_missing(self, mock_run_in_container):
+        """
+        main() must fail if neither --inventory-dir is provided nor INVENTORY_DIR env is set.
+        """
+        argv = [
+            "cli.deploy.container",
+            "run",
+            "--image",
+            "myimage:latest",
+            "--build",
+            "--",
+            "--exclude",
+            "foo,bar",
+            "--",
+            "-T",
+            "server",
+        ]
+
+        with unittest.mock.patch.dict(os.environ, {}, clear=True):
+            with unittest.mock.patch.object(sys, "argv", argv):
+                with self.assertRaises(SystemExit):
+                    deploy_container.main()
+
+        mock_run_in_container.assert_not_called()
+
+    @unittest.mock.patch("cli.deploy.container.command.run_in_container")
+    def test_main_uses_inventory_dir_from_env_when_present(self, mock_run_in_container):
+        """
+        If INVENTORY_DIR env is set, --inventory-dir should not be required and the env value
+        must be forwarded to run_in_container().
+        """
+        argv = [
+            "cli.deploy.container",
+            "run",
+            "--image",
+            "myimage:latest",
+            "--build",
+            "--",
+            "--exclude",
+            "foo,bar",
+            "--",
+            "-T",
+            "server",
+        ]
+
+        with unittest.mock.patch.dict(os.environ, {"INVENTORY_DIR": "/env/inventory"}, clear=True):
+            with unittest.mock.patch.object(sys, "argv", argv):
+                rc = deploy_container.main()
+
+        self.assertEqual(rc, 0)
+        mock_run_in_container.assert_called_once()
+
+        kwargs = mock_run_in_container.call_args.kwargs
+        self.assertEqual(kwargs["inventory_dir"], "/env/inventory")
 
 
 if __name__ == "__main__":
