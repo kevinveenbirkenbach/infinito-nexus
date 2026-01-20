@@ -18,6 +18,12 @@ ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
 RUN cat /etc/os-release || true
 
+# Make Nix non-interactive for flake config (CI-friendly)
+RUN if [ -f /etc/nix/nix.conf ]; then \
+      grep -q '^accept-flake-config *= *true' /etc/nix/nix.conf || \
+      echo 'accept-flake-config = true' >> /etc/nix/nix.conf; \
+    fi
+
 # ------------------------------------------------------------
 # Infinito.Nexus source in
 # ------------------------------------------------------------
