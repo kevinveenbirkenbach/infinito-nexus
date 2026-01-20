@@ -128,8 +128,9 @@ class Compose:
                 raise RuntimeError(f"entry.sh init failed (rc={r.returncode})")
 
     def down(self) -> None:
-        print(">>> Stopping compose stack and removing volumes")
-        self.run(["down", "--remove-orphans", "-v"], check=True)
+        from .down import down_stack
+
+        down_stack(repo_root=self.repo_root, distro=self.distro)
 
     def exec(
         self,
