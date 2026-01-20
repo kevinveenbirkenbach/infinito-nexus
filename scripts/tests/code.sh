@@ -2,35 +2,40 @@
 set -euo pipefail
 
 echo "============================================================"
-echo ">>> Running UNIT tests in ${INFINITO_DISTRO} container"
+echo ">>> Running UNIT tests in ${INFINITO_DISTRO:-<unset>} container (compose stack)"
 echo "============================================================"
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set}"
+: "${TEST_PATTERN:?TEST_PATTERN must be set}"
+: "${TEST_TYPE:?TEST_TYPE must be set}"
 
-# Prevent interactive Nix prompt for flake-provided nixConfig
-# while still honoring any existing NIX_CONFIG from CI / env.
-NIX_CONFIG_EFFECTIVE="$(
-  printf "%s\n%s\n" \
-    "${NIX_CONFIG:-}" \
-    "accept-flake-config = true" \
-  | sed -e 's/[[:space:]]\+$//' -e '/^$/d'
-)"
+# 1) Bring up the development compose stack (coredns + infinito).
+#    This uses the new Python orchestrator (healthcheck + entry init).
+python3 -m cli.deploy.development up \
+  --no-build \
+  --distro "${INFINITO_DISTRO}"
 
-INFINITO_DISTRO="${INFINITO_DISTRO}" docker compose --profile ci run --rm -T \
-  -v "$(pwd):/opt/src/infinito" \
-  -e INFINITO_COMPILE=1 \
-  -e TEST_PATTERN="${TEST_PATTERN}" \
-  -e TEST_TYPE="${TEST_TYPE}" \
-  -e NIX_CONFIG="${NIX_CONFIG_EFFECTIVE}" \
-  infinito \
-  bash -lc '
+# 2) Run tests inside the already running infinito container via the new exec wrapper.
+#    We keep the old NIX_CONFIG behavior (flake config acceptance) but run it inside the container.
+python3 -m cli.deploy.development exec \
+  --distro "${INFINITO_DISTRO}" -- \
+  bash -lc "
     set -euo pipefail
+
+    NIX_CONFIG_EFFECTIVE=\"\$(
+      printf '%s\n%s\n' \
+        \"\${NIX_CONFIG:-}\" \
+        'accept-flake-config = true' \
+      | sed -e 's/[[:space:]]\\+$//' -e '/^$/d'
+    )\"
+    export NIX_CONFIG=\"\${NIX_CONFIG_EFFECTIVE}\"
+
     cd /opt/src/infinito
 
-    echo "PWD=$(pwd)"
-    echo "PYTHON=${PYTHON}"
-    export PATH="$(dirname "$PYTHON"):$PATH"
-    # Ensure we really use the exported interpreter (and thus the global venv)
+    echo \"PWD=\$(pwd)\"
+    echo \"PYTHON=\${PYTHON}\"
+
+    export PATH=\"\$(dirname \"\$PYTHON\"):\$PATH\"
     make setup
-    "${PYTHON}" -m unittest discover -s tests/${TEST_TYPE} -t . -p "${TEST_PATTERN}"
-  '
+    \"\$PYTHON\" -m unittest discover -s tests/${TEST_TYPE} -t . -p \"${TEST_PATTERN}\"
+  "
