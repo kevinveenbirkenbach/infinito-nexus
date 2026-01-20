@@ -6,7 +6,7 @@
   when: MODE_ASSERT | bool
 
 - name: Wait for Postgres inside the container
-  shell: "docker exec {{ POSTGRES_CONTAINER }} pg_isready -U postgres"
+  ansible.builtin.shell: "docker exec {{ POSTGRES_CONTAINER }} pg_isready -U postgres"
   register: pg_ready
   until: pg_ready.rc == 0
   retries: 30
@@ -78,8 +78,17 @@
           POSTGRES_NETWORK_NAME: "{{ POSTGRES_NETWORK_NAME | default('n/a') }}"
           POSTGRES_VERSION: "{{ POSTGRES_VERSION | default('n/a') }}"
           POSTGRES_IMAGE: "{{ POSTGRES_IMAGE | default('n/a') }}"
-          docker_root_dir: "{{ (lookup('pipe', 'docker info -f ''{{.DockerRootDir}}'' 2>/dev/null') | default('n/a', true)) }}"
       changed_when: false
+
+    - name: "POSTGRES | docker info (DockerRootDir)"
+      ansible.builtin.shell: |
+        set -e
+        {% raw %}
+        docker info -f '{{.DockerRootDir}}' 2>/dev/null || true
+        {% endraw %}
+      register: dbg_docker_root_dir
+      changed_when: false
+      failed_when: false
 
     # --- Container existence & status ----------------------------------------
     - name: "POSTGRES | docker ps (postgres)"
@@ -110,14 +119,13 @@
         {% endraw %} {{ POSTGRES_CONTAINER }}
 
         echo
-        echo "== Env (keys only) =="
+        echo "== Env (redacted) =="
         {% raw %}
         docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}'
         {% endraw %} {{ POSTGRES_CONTAINER }} | sed -E 's/=.*/=***REDACTED***/'
       register: dbg_docker_inspect
       changed_when: false
       failed_when: false
-
 
     - name: "POSTGRES | docker logs (last 250 lines)"
       ansible.builtin.command: "docker logs --tail 250 {{ POSTGRES_CONTAINER }}"
@@ -138,7 +146,7 @@
       changed_when: false
       failed_when: false
 
-    # Password auth test WITHOUT printing password:
+    # Password auth test
     - name: "POSTGRES | psql auth test (SELECT 1) using PGPASSWORD"
       ansible.builtin.shell: >
         docker exec {{ POSTGRES_CONTAINER }} sh -lc
@@ -190,6 +198,7 @@
       ansible.builtin.debug:
         msg:
           original_error: "{{ ansible_failed_result | default({}) }}"
+          docker_root_dir: "{{ dbg_docker_root_dir.stdout | default('') }}"
           docker_ps: "{{ dbg_docker_ps.stdout | default('') }}"
           docker_inspect: "{{ dbg_docker_inspect.stdout | default('') }}"
           docker_logs: "{{ dbg_docker_logs.stdout | default('') }}"
@@ -287,7 +296,7 @@
   retries: "{{ POSTGRES_RETRIES }}"
   delay: "{{ POSTGRES_DELAY }}"
 
-# 8) Ensure pgvector (vector) extension is installed (for Discourse‑AI, pgvector, …)
+# 8) Ensure pgvector (vector) extension is installed
 - name: "Ensure pgvector (vector) extension is installed"
   community.postgresql.postgresql_ext:
     db:           "{{ database_name }}"
