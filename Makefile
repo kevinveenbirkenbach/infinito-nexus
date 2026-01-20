@@ -136,10 +136,6 @@ docker-down:
 	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
 
 docker-up:
-	# @if [[ "$(RUNNING_ON_GITHUB)" == "true" ]]; then \
-	# 	echo ">>> GitHub Actions detected -> move Docker storage to /mnt"; \
-	# 	bash scripts/ci/docker-on-mnt.sh; \
-	# fi
 	python3 -m cli.deploy.test.up
 
 list:
