@@ -5,13 +5,42 @@
       - application_id == 'svc-db-postgres'
   when: MODE_ASSERT | bool
 
-- name: Wait for Postgres inside the container
-  ansible.builtin.shell: "docker exec {{ POSTGRES_CONTAINER }} pg_isready -U postgres"
-  register: pg_ready
-  until: pg_ready.rc == 0
-  retries: 30
-  delay: 5
-  changed_when: false
+- name: Wait until postgres TCP auth works
+  block:
+
+    - name: Wait for Postgres TCP auth
+      ansible.builtin.shell: >
+        docker exec {{ POSTGRES_CONTAINER }} sh -lc
+        'PGPASSWORD="{{ POSTGRES_PASSWORD }}"
+        psql -h "{{ POSTGRES_LOCAL_HOST }}" -p "{{ POSTGRES_PORT }}"
+        -U postgres -d postgres -c "SELECT 1"'
+      register: pg_ready
+      until: pg_ready.rc == 0
+      retries: 30
+      delay: 5
+      changed_when: false
+
+  rescue:
+
+    - name: "POSTGRES | docker logs (last 200 lines)"
+      ansible.builtin.command: "docker logs --tail 200 {{ POSTGRES_CONTAINER }}"
+      register: dbg_docker_logs
+      changed_when: false
+      failed_when: false
+
+    - name: "POSTGRES | Failure report"
+      ansible.builtin.debug:
+        msg:
+          postgres_container: "{{ POSTGRES_CONTAINER }}"
+          postgres_host: "{{ POSTGRES_LOCAL_HOST }}"
+          postgres_port: "{{ POSTGRES_PORT }}"
+          last_logs: "{{ dbg_docker_logs.stdout | default('') }}"
+
+    - name: "POSTGRES | Fail explicitly after logs"
+      ansible.builtin.fail:
+        msg: >-
+          Postgres did not become ready for TCP authentication.
+          Last 200 container log lines were printed above.
 
 # 1) Create the database
 - name: "Create database: {{ database_name }}"
