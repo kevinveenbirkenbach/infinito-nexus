@@ -74,6 +74,9 @@ ifeq ($(RUNNING_ON_GITHUB),true)
 	INFINITO_IMAGE_TAG ?= latest
 	INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):$(INFINITO_IMAGE_TAG)
 	INFINITO_NO_BUILD ?= 1
+	INFINITO_DOCKER_VOLUME ?= /mnt/docker
+	INFINITO_DOCKER_MOUNT ?= /var/lib/docker
+	export INFINITO_DOCKER_VOLUME INFINITO_DOCKER_MOUNT
 	export INFINITO_IMAGE_TAG
 	export INFINITO_NO_BUILD
 	export INFINITO_PULL_POLICY
@@ -133,10 +136,10 @@ docker-down:
 	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
 
 docker-up:
-	@if [[ "$(RUNNING_ON_GITHUB)" == "true" ]]; then \
-		echo ">>> GitHub Actions detected -> move Docker storage to /mnt"; \
-		bash scripts/ci/docker-on-mnt.sh; \
-	fi
+	# @if [[ "$(RUNNING_ON_GITHUB)" == "true" ]]; then \
+	# 	echo ">>> GitHub Actions detected -> move Docker storage to /mnt"; \
+	# 	bash scripts/ci/docker-on-mnt.sh; \
+	# fi
 	python3 -m cli.deploy.test.up
 
 list:

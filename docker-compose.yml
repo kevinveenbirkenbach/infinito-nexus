@@ -67,7 +67,7 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - .:/opt/src/infinito
-      - docker:/var/lib/docker/volumes/
+      - ${INFINITO_DOCKER_VOLUME:-docker}:${INFINITO_DOCKER_MOUNT:-/var/lib/docker}
       - infinito:/var/lib/infinito/
       - letsencrypt:/etc/letsencrypt/
 
@@ -108,6 +108,7 @@ services:
       - "${BIND_IP:-127.0.0.1}:48087:48087"
 
 volumes:
+  # Fallback docker volume for local deploy, GitHub runner uses mount
   docker:
   infinito:
   letsencrypt:
