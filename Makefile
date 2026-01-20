@@ -261,7 +261,7 @@ test-integration: install
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
-ci-deploy-discover: docker-up
+ci-deploy-discover:
 	@./scripts/meta/build-test-matrix.sh
 
 ci-deploy-app:
