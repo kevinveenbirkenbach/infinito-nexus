@@ -305,52 +305,18 @@ test-act-app:
 		--network host
 
 test-local-cleanup:
-	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set (e.g. APP=web-app-nextcloud)"; exit 1; fi
-	@echo "=== rapid deploy (with entry.sh): type=$(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
-	@docker exec -it "$(INFINITO_CONTAINER)" bash -lc '\
-		set -euo pipefail; \
-		cd /opt/src/infinito; \
-		entity="$$(python3 -c "from module_utils.entity_name_utils import get_entity_name; print(get_entity_name(\"$(APP)\"))")"; \
-		if [[ -z "$$entity" ]]; then \
-			echo "!!! WARNING: could not derive entity from APP=$(APP) — skipping purge"; \
-			exit 0; \
-		fi; \
-		if [[ ! -d "/opt/docker/$$entity" ]]; then \
-			echo "!!! WARNING: /opt/docker/$$entity not found — skipping purge"; \
-			exit 0; \
-		fi; \
-		echo ">>> Derived entity from APP=$(APP): $$entity"; \
-		bash /opt/src/infinito/scripts/administration/purge_entity.sh "$$entity" || true; \
-	'
-
-test-local-rapid-fresh: test-local-cleanup test-local-rapid
-
+	@APP="$(APP)" \
+	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
+	bash scripts/tests/deploy/local/cleanup.sh
 
 test-local-rapid:
-	@if [[ -z "$(APP)" ]]; then echo "ERROR: APP is not set (e.g. APP=web-app-nextcloud)"; exit 1; fi
-	@echo "=== rapid deploy (with entry.sh): type=$(TEST_DEPLOY_TYPE) app=$(APP) distro=$(INFINITO_DISTRO) ==="
-	@docker exec -it "$(INFINITO_CONTAINER)" bash -lc '\
-		set -euo pipefail; \
-		cd /opt/src/infinito; \
-		echo ">>> Running entry.sh"; \
-		./scripts/docker/entry.sh true; \
-		echo ">>> Starting rapid deploy"; \
-		exec infinito deploy dedicated /etc/inventories/local-full-${TEST_DEPLOY_TYPE}/servers.yml \
-			-T "$(TEST_DEPLOY_TYPE)" \
-			--skip-update \
-			--skip-backup \
-			--skip-cleanup \
-			--id $(APP) \
-			--no-signal \
-			--debug \
-			-l "localhost" \
-			--diff \
-			-vv \
-			--password-file "/etc/inventories/local-full-${TEST_DEPLOY_TYPE}/.password" \
-			-e ASYNC_ENABLED=false \
-			-e SYS_SERVICE_ALL_ENABLED=false \
-			-e SYS_SERVICE_DEFAULT_STATE=started \
-	'
+	@APP="$(APP)" \
+	TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
+	DEBUG=true \
+	bash scripts/tests/deploy/local/rapid.sh
+
+test-local-rapid-fresh: test-local-cleanup test-local-rapid
 
 test-local-full:
 	@echo "=== local full deploy (type=$(TEST_DEPLOY_TYPE), distro=$(INFINITO_DISTRO)) ==="
