@@ -12,6 +12,10 @@ PIP    := $(PYTHON) -m pip
 export PYTHON
 export PIP
 
+# Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
+PYTHONPATH ?= .
+export PYTHONPATH
+
 ifdef NIX_CONFIG
 export NIX_CONFIG
 endif
@@ -19,16 +23,11 @@ endif
 # --- Test filtering (unittest discover) ---
 TEST_PATTERN            ?= test*.py
 export TEST_PATTERN
-LINT_TESTS_DIR          ?= tests/lint
-UNIT_TESTS_DIR          ?= tests/unit
-INTEGRATION_TESTS_DIR   ?= tests/integration
 
 # Deploy test type
 # Allowed: server, workstation, universal
 TEST_DEPLOY_TYPE ?= server
-
-# Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
-PYTHONPATH              ?= .
+export TEST_DEPLOY_TYPE
 
 # Distro
 INFINITO_DISTRO		?= arch

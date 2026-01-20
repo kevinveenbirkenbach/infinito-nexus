@@ -1,20 +1,24 @@
 #!/usr/bin/env bash
+# scripts/meta/build-test-matrix.sh (vollständig, final)
 set -euo pipefail
 
 # Purpose (SRP): Return JSON list of apps based on mode + regex filters.
 #
 # Inputs via env:
-#   TEST_DEPLOY_TYPE              = server|workstation|universal
+#   TEST_DEPLOY_TYPE              = server|workstation|universal (required)
 #   INCLUDE_RE         (optional)
 #   EXCLUDE_RE         (optional)
 #   FINAL_EXCLUDE_RE   (optional)
 #
 # Output:
 #   JSON array to stdout
-TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE:-server}"
+
+: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
+
 INCLUDE_RE="${INCLUDE_RE:-}"
 EXCLUDE_RE="${EXCLUDE_RE:-}"
 FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
@@ -74,7 +78,6 @@ filter_by_ci_storage() {
         --roles "${roles[@]}" \
         --required-storage "${required_storage}"
   )"
-
 
   # Convert back to JSON
   if [[ -z "${kept}" ]]; then
@@ -137,6 +140,7 @@ case "${TEST_DEPLOY_TYPE}" in
     exit 2
     ;;
 esac
+
 apps_json="$(filter_by_ci_storage "${apps_json}")"
 apps_json="$(apply_final_exclude "${apps_json}" "${FINAL_EXCLUDE_RE}")"
 echo "${apps_json}"

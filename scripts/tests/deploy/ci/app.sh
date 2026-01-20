@@ -12,20 +12,37 @@ set -euo pipefail
 #   TESTED_LIFECYCLES="alpha beta rc stable"
 #   MISSING_ONLY="true|false"
 
-APP="${APP:-}"
-TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE:-server}"
-DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
+# ---------------------------------------------------------------------
+# Required env
+# ---------------------------------------------------------------------
+: "${APP:?APP is required (e.g. APP=web-app-keycloak)}"
+: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
+: "${DISTROS:?DISTROS is required (e.g. 'arch debian ubuntu fedora centos')}"
 
+# ---------------------------------------------------------------------
+# Optional env
+# ---------------------------------------------------------------------
 TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-alpha beta rc stable}"
 MISSING_ONLY="${MISSING_ONLY:-true}"
 
-[[ -n "${APP}" ]] || { echo "ERROR: APP is required"; exit 2; }
+# Validate deploy type
+case "${TEST_DEPLOY_TYPE}" in
+  server|workstation|universal) ;;
+  *)
+    echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+    echo "Allowed: server | workstation | universal" >&2
+    exit 2
+    ;;
+esac
 
 normalize_bool() {
   case "${1:-}" in
     true|True|TRUE|1) echo "true" ;;
     false|False|FALSE|0) echo "false" ;;
-    *) echo "true" ;;
+    *)
+      echo "Invalid boolean: ${1:-<empty>} (use true/false/1/0)" >&2
+      exit 2
+      ;;
   esac
 }
 
@@ -58,8 +75,10 @@ for distro in "${distro_arr[@]}"; do
     docker system df || true
 
     set +e
-    args=( --type "${deploy_type}" --app "${APP}" --debug)
-    if [[ "${MISSING_ONLY}" == "true" ]]; then args+=( --missing ); fi
+    args=( --type "${deploy_type}" --app "${APP}" --debug )
+    if [[ "${MISSING_ONLY}" == "true" ]]; then
+      args+=( --missing )
+    fi
     args+=( --keep-stack-on-failure )
     scripts/tests/deploy/ci/distros.sh "${args[@]}"
     rc=$?

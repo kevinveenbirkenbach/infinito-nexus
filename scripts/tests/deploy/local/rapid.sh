@@ -2,17 +2,34 @@
 set -euo pipefail
 
 # Rapid deploy for a single app inside the running infinito container.
-# Expects:
-#   APP              (required) e.g. web-app-nextcloud
-#   TEST_DEPLOY_TYPE (optional) server|workstation|universal (default: server)
-#   INFINITO_CONTAINER (required)
-#   DEBUG            (optional) "true"|"false" (default: true)
+# Expects (ALL required):
+#   APP                e.g. web-app-nextcloud
+#   TEST_DEPLOY_TYPE   server|workstation|universal
+#   INFINITO_CONTAINER e.g. infinito_nexus_arch
+#   DEBUG              true|false
 
 : "${APP:?APP is not set (e.g. APP=web-app-nextcloud)}"
+: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is not set (server|workstation|universal)}"
 : "${INFINITO_CONTAINER:?INFINITO_CONTAINER is not set (e.g. infinito_nexus_arch)}"
+: "${DEBUG:?DEBUG is not set (true|false)}"
 
-TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE:-server}"
-DEBUG="${DEBUG:-true}"
+case "${TEST_DEPLOY_TYPE}" in
+  server|workstation|universal) ;;
+  *)
+    echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+    echo "Allowed: server | workstation | universal" >&2
+    exit 2
+    ;;
+esac
+
+case "${DEBUG}" in
+  true|false) ;;
+  *)
+    echo "Invalid DEBUG: ${DEBUG}" >&2
+    echo "Allowed: true | false" >&2
+    exit 2
+    ;;
+esac
 
 echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APP} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
 
