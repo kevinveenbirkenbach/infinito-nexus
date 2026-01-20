@@ -241,19 +241,16 @@ test: test-lint test-unit test-integration lint-ansible test-deploy
 test-lint: build-missing
 	@TEST_TYPE="lint" \
 	INFINITO_COMPILE=0 \
-	INFINITO_PULL_POLICY="never" \
 	bash scripts/tests/code.sh
 
 test-unit: build-missing
 	@TEST_TYPE="unit" \
 	INFINITO_COMPILE=0 \
-	INFINITO_PULL_POLICY="never" \
 	bash scripts/tests/code.sh
 
 test-integration: build-missing
 	@TEST_TYPE="integration" \
 	INFINITO_COMPILE=0 \
-	INFINITO_PULL_POLICY="never" \
 	bash scripts/tests/code.sh
 
 ci-deploy-discover: docker-up
