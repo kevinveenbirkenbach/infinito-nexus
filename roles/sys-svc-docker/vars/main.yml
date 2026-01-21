@@ -1,2 +1,8 @@
-SYS_SVC_DOCKER_DIR:     "/etc/docker/"
-SYS_SVC_DOCKER_DAEMON:  "{{ [SYS_SVC_DOCKER_DIR, 'daemon.json' ] | path_join }}"
+SYS_SVC_DOCKER_DIR:    "/etc/docker/"
+SYS_SVC_DOCKER_DAEMON: "{{ [SYS_SVC_DOCKER_DIR, 'daemon.json' ] | path_join }}"
+
+# Targets to calculate the optimal MTU
+SYS_SVC_DOCKER_AUTOMTU_TARGETS:
+  - registry-1.docker.io
+  - github.com
+  - 1.1.1.1

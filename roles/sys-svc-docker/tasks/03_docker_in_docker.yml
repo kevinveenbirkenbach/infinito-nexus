@@ -10,6 +10,9 @@
     state: present
   notify: docker restart
 
+- name: Compute and set Docker daemon MTU (container)
+  include_tasks: "_mtu.yml"
+
 - name: Configure docker daemon storage driver (container)
   ansible.builtin.template:
     src: daemon.json.j2

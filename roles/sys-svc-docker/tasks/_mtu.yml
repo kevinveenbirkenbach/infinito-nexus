@@ -1,0 +1,33 @@
+---
+- name: Install automtu via pip (system-wide)
+  include_role:
+    name: sys-pip-install
+  vars:
+    package_name: automtu
+    global_install: true
+
+- name: Detect safe Docker MTU
+  ansible.builtin.command:
+    argv:
+      - automtu
+      - --pmtu-target
+      - "{{ SYS_SVC_DOCKER_AUTOMTU_TARGETS | join(',') }}"
+      - --pmtu-policy
+      - min
+      - --print-mtu
+      - effective
+  register: automtu_mtu
+  changed_when: false
+
+- name: Assert automtu returned an integer MTU
+  ansible.builtin.assert:
+    that:
+      - automtu_mtu.stdout is match('^[0-9]+$')
+      - (automtu_mtu.stdout | int) >= 576
+      - (automtu_mtu.stdout | int) <= 9000
+    fail_msg: "automtu returned unexpected MTU output: '{{ automtu_mtu.stdout | default('') }}'"
+
+- name: Set docker daemon MTU fact
+  ansible.builtin.set_fact:
+    SYS_DOCKER_DAEMONM_MTU: "{{ automtu_mtu.stdout | int }}"
+  changed_when: false
