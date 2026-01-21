@@ -5,6 +5,8 @@ import subprocess
 import time
 from pathlib import Path
 
+from .coredns import CoreDNSCorefileRenderer
+
 
 class Compose:
     """
@@ -40,20 +42,12 @@ class Compose:
         )
 
     def _render_coredns_corefile(self) -> None:
-        env = os.environ.copy()
-
-        # load env.ci into environment
-        with open("env.ci", encoding="utf-8") as f:
-            for line in f:
-                if "=" in line and not line.startswith("#"):
-                    k, v = line.strip().split("=", 1)
-                    env[k] = v
-
-        subprocess.check_call(
-            ["envsubst"],
-            stdin=open("compose/Corefile.tmpl", "r", encoding="utf-8"),
-            stdout=open("compose/Corefile", "w", encoding="utf-8"),
-            env=env,
+        renderer = CoreDNSCorefileRenderer(repo_root=self.repo_root)
+        out = renderer.render(show_preview=True, preview_lines=25)
+        print(f"[compose] Corefile generated at: {out}")
+        print(
+            f"[compose] Corefile exists={out.exists()} "
+            f"size={out.stat().st_size if out.exists() else 'n/a'}"
         )
 
     def up(self, *, run_entry_init: bool = True) -> None:
@@ -130,7 +124,7 @@ class Compose:
         Works independent of project name.
         """
         r = self.run(["ps", "-q", "infinito"], capture=True, check=True)
-        cid = r.stdout.strip()
+        cid = (r.stdout or "").strip()
 
         if not cid:
             raise RuntimeError(

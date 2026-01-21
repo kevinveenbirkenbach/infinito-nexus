@@ -81,12 +81,12 @@ export INFINITO_COMPILE
 	clean down \
 	list tree mig dockerignore \
 	print-python lint-ansible \
-	setup-dns remove-dns
+	dns-setup dns-remove
 
-setup-dns:
+dns-setup:
 	@bash scripts/dns/setup.sh
 
-remove-dns:
+dns-remove:
 	@bash scripts/dns/remove.sh
 
 
@@ -220,7 +220,7 @@ ci-discover-output:
 	fi; \
 	echo "apps_json=$$apps"
 
-test-act:
+test-act-all:
 	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
 	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
 	bash scripts/tests/deploy/act/all.sh
