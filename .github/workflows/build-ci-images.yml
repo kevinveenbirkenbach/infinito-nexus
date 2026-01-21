@@ -47,8 +47,10 @@ jobs:
       fail-fast: false
       matrix:
         distro: ${{ fromJson(needs.prepare.outputs.matrix) }}
-        variant: [full, slim]
-
+        variant: 
+          - full
+          # - slim ; It doesn't make sense in this configuration, because it allways uses the full size parents layers
+ 
     steps:
       - name: Checkout
         uses: actions/checkout@v6
