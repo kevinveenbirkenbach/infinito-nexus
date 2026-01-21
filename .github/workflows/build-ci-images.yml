@@ -39,7 +39,7 @@ jobs:
           echo "Using matrix: ${json}"
 
   build:
-    name: "build: ${{ matrix.distro }};(${{ matrix.variant }})"
+    name: "build: ${{ matrix.distro }}-${{ matrix.variant }}"
     needs: prepare
     runs-on: ubuntu-latest
 
