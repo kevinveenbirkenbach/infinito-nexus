@@ -33,6 +33,8 @@ MAINTENANCE="$(bool_norm "${ESPOCRM_SEED_MAINTENANCE_MODE:-}")"
 CRON_DISABLED="$(bool_norm "${ESPOCRM_SEED_CRON_DISABLED:-}")"
 USE_CACHE="$(bool_norm "${ESPOCRM_SEED_USE_CACHE:-}")"
 
+
+log "Flags: maintenance=${MAINTENANCE} cron_disabled=${CRON_DISABLED} use_cache=${USE_CACHE}"
 APP_DIR="/var/www/html"
 
 # Provided by env.j2

@@ -30,7 +30,7 @@ detect_module_path() {
     return 0
   fi
   local p
-  p="$(ls -d /usr/lib/*/ldap 2>/dev/null | head -n1 || true)"
+  p="$(find /usr/lib -maxdepth 2 -type d -name ldap 2>/dev/null | head -n 1 || true)"
   if [ -n "${p}" ] && [ -d "${p}" ]; then
     echo "${p}"
     return 0

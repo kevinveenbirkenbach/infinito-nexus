@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 # Just a little refactoring script, you can delete it later
 ATTR="$1"
 OLD="applications[application_id].$ATTR"

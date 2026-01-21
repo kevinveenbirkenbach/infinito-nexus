@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
 . /etc/os-release
 echo ">>> Installing docker client on ID=${ID} ID_LIKE=${ID_LIKE:-}"
 
+# shellcheck disable=SC2031
 if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then
   pacman -Syu --noconfirm --needed docker
   pacman -Scc --noconfirm || true

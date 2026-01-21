@@ -31,6 +31,7 @@ for i in $(seq 1 60); do
     ok "dockerd ready"
     break
   fi
+  echo "waiting for dockerd... (${i}/60)" >&2
   sleep 1
 done
 
