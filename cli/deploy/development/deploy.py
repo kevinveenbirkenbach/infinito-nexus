@@ -41,15 +41,27 @@ def _run_deploy(
     if passthrough:
         cmd.extend(passthrough)
 
-    # IMPORTANT: capture output so we can show it on failure
-    r = compose.exec(cmd, check=False, capture=True)
+    # Live stream output for immediate visibility,
+    # while keeping a tail buffer for post-failure printing.
+    r = compose.exec(
+        cmd,
+        check=False,
+        live=True,
+        keep_lines=400,
+        extra_env={
+            # Force ANSI colors even when no TTY is allocated (CI default).
+            "ANSIBLE_FORCE_COLOR": "1",
+            "PY_COLORS": "1",
+            "TERM": "xterm-256color",
+        },
+    )
 
     if r.returncode != 0:
-        print("===== deploy stdout =====")
+        print("===== deploy stdout (tail) =====")
         print((r.stdout or "").rstrip() or "<empty>")
-        print("===== deploy stderr =====")
+        print("===== deploy stderr (tail) =====")
         print((r.stderr or "").rstrip() or "<empty>")
-        print("=========================")
+        print("===============================")
 
     return int(r.returncode)
 

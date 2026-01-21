@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from .coredns import CoreDNSCorefileRenderer
+from .proc import run_streaming
 
 
 class Compose:
@@ -23,23 +24,50 @@ class Compose:
         env["INFINITO_DISTRO"] = self.distro
         return env
 
+    def _is_ci(self) -> bool:
+        # keep this conservative (CI -> no TTY by default)
+        return (
+            os.environ.get("GITHUB_ACTIONS") == "true"
+            or os.environ.get("RUNNING_ON_GITHUB") == "true"
+            or os.environ.get("CI") == "true"
+        )
+
     def run(
         self,
         args: list[str],
         *,
         check: bool = True,
         capture: bool = False,
+        live: bool = False,
+        keep_lines: int = 400,
         text: bool = True,
+        extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
         cmd = ["docker", "compose", "--profile", "ci", *args]
-        return subprocess.run(
-            cmd,
-            cwd=self.repo_root,
-            env=self._base_env(),
-            check=check,
-            capture_output=capture,
-            text=text,
-        )
+        env = self._base_env()
+        if extra_env:
+            env.update({k: str(v) for k, v in extra_env.items()})
+
+        if live:
+            r = run_streaming(
+                cmd, cwd=self.repo_root, env=env, keep_lines=keep_lines, text=text
+            )
+        else:
+            r = subprocess.run(
+                cmd,
+                cwd=self.repo_root,
+                env=env,
+                check=False,  # handle check ourselves for consistent behavior
+                capture_output=capture,
+                text=text,
+            )
+
+        if check and int(r.returncode) != 0:
+            raise subprocess.CalledProcessError(
+                int(r.returncode), cmd, output=r.stdout, stderr=r.stderr
+            )
+
+        return r
 
     def _render_coredns_corefile(self) -> None:
         renderer = CoreDNSCorefileRenderer(repo_root=self.repo_root)
@@ -84,14 +112,20 @@ class Compose:
                 ["sh", "-lc", "/opt/src/infinito/scripts/docker/entry.sh true"],
                 workdir="/opt/src/infinito",
                 check=False,
-                capture=True,
+                live=True,  # <--- live output
+                keep_lines=400,  # <--- tail for failure printing
+                extra_env={
+                    "ANSIBLE_FORCE_COLOR": "1",
+                    "PY_COLORS": "1",
+                    "TERM": "xterm-256color",
+                },
             )
 
             if r.returncode != 0:
-                print("===== entry.sh stdout =====")
-                print(r.stdout or "<empty>")
-                print("===== entry.sh stderr =====")
-                print(r.stderr or "<empty>")
+                print("===== entry.sh stdout (tail) =====")
+                print((r.stdout or "").rstrip() or "<empty>")
+                print("===== entry.sh stderr (tail) =====")
+                print((r.stderr or "").rstrip() or "<empty>")
                 raise RuntimeError(f"entry.sh init failed (rc={r.returncode})")
 
     def down(self) -> None:
@@ -106,17 +140,45 @@ class Compose:
         check: bool = True,
         workdir: str | None = None,
         capture: bool = False,
+        live: bool = False,
+        keep_lines: int = 400,
+        tty: bool | None = None,
+        extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
         """
         Execute inside infinito container.
-        -T: no pseudo-tty (CI safe)
-        -w: set working directory
+
+        TTY behavior:
+          - tty=None  -> auto (local: True, CI: False)
+          - tty=True  -> allocate TTY (colors, interactive)
+          - tty=False -> -T (CI safe)
+
+        Streaming:
+          - live=True streams stdout/stderr to terminal while keeping a tail buffer.
         """
-        args = ["exec", "-T"]
+        if tty is None:
+            tty = not self._is_ci()
+
+        args = ["exec"]
+        if not tty:
+            args.append("-T")
+
         if workdir:
             args += ["-w", workdir]
+
+        if extra_env:
+            for k, v in extra_env.items():
+                args += ["-e", f"{k}={v}"]
+
         args += ["infinito", *cmd]
-        return self.run(args, check=check, capture=capture)
+
+        return self.run(
+            args,
+            check=check,
+            capture=capture,
+            live=live,
+            keep_lines=keep_lines,
+        )
 
     def _get_infinito_container_id(self) -> str:
         """
