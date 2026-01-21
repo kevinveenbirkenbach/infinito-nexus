@@ -2,7 +2,9 @@
   include_role:
     name: docker-compose
   vars:
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers:  false
+    docker_git_repository_pull:     false
+    application_id:                 'svc-db-openldap'
 
 - name: Create docker network
   community.docker.docker_network:

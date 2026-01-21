@@ -2,7 +2,7 @@
   shell: >
     {{ docker_compose_command_exec }} web bash -c "
       cd /app &&
-      RAILS_ENV={{ ENVIRONMENT | lower }} bundle exec rails runner \"
+      bundle exec rails runner \"
         u = User.find_by(login: '{{ OPENPROJECT_ADMINISTRATOR_USERNAME }}')
         if u.nil?
           u = User.new(

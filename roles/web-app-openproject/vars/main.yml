@@ -58,3 +58,8 @@ OPENPROJECT_LDAP_FILTERS:
   # The administrator filter just works in the Enterprise edition
   ADMINISTRATORS: "{{ '(memberOf=cn=openproject-admins,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED | bool else '' }}"
   USERS:          "{{ '(memberOf=cn=openproject-users,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_USERS_ENABLED | bool else '' }}"
+
+
+# Performance
+OPENPROJECT_DB_POOL:            "{{ [POSTGRES_ALLOWED_AVG_CONNECTIONS | int, 20] | min }}"
+OPENPROJECT_RAILS_MAX_THREADS:  "{{ [POSTGRES_ALLOWED_AVG_CONNECTIONS | int, 20] | min }}"
