@@ -98,13 +98,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     fi
 
     echo \">>> Creating inventory at \${inv_file}\"
-    echo '>>> Include apps count: ${apps_count}'
-
-    sample=\"\$(
-      python3 -c 'import sys; items=sys.argv[1].split(\",\"); print(\",\".join(items[:8]) + (\"...\" if len(items)>8 else \"\"))' \
-        '${apps_csv}'
-    )\"
-    echo \">>> Include sample: \${sample}\"
+    echo \">>> Include apps (${apps_count}): ${apps_csv}\"
 
     python3 -m cli.create.inventory \"\${inv_dir}\" \
       --host '${LIMIT_HOST}' \
