@@ -14,4 +14,4 @@ jobs:
       - name: Install ShellCheck
         run: sudo apt-get update && sudo apt-get install -y shellcheck
       - name: Run ShellCheck
-        run: shellcheck -x $(find scripts -type f -name '*.sh' -print)
+        run: shellcheck -x $(find . -type f -name '*.sh' -print)
