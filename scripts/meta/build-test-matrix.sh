@@ -66,7 +66,7 @@ filter_by_ci_storage() {
   # 1) Warnings run (show what gets filtered)
   # We do NOT want to change the JSON output of discover.sh, so we discard this stdout.
   docker compose --profile ci exec -T infinito \
-    python3 -m cli.meta.applications.sufficient_storage \
+    "${PYTHON}" -m cli.meta.applications.sufficient_storage \
       --roles "${roles[@]}" \
       --required-storage "${required_storage}" \
       --warnings \
@@ -74,7 +74,7 @@ filter_by_ci_storage() {
 
   kept="$(
     docker compose --profile ci exec -T infinito \
-      python3 -m cli.meta.applications.sufficient_storage \
+      "${PYTHON}" -m cli.meta.applications.sufficient_storage \
         --roles "${roles[@]}" \
         --required-storage "${required_storage}"
   )"

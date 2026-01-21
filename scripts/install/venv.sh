@@ -14,7 +14,7 @@ install_venv() {
 
   if [[ ! -x "${PYTHON}" ]]; then
     echo "→ Creating virtualenv ${VENV}"
-    $(PYTHON) -m venv "${VENV}"
+    "${PYTHON}" -m venv "${VENV}"
   else
     echo "→ Virtualenv already exists"
   fi

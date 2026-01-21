@@ -35,5 +35,5 @@ docker compose --profile ci exec -T \
     fi
 
     make setup
-    "${PYTHON:-python3}" -m unittest discover -s "tests/${TEST_TYPE}" -t . -p "${TEST_PATTERN}"
+    "${PYTHON}" -m unittest discover -s "tests/${TEST_TYPE}" -t . -p "${TEST_PATTERN}"
   '

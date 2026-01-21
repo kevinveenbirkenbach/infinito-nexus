@@ -33,7 +33,7 @@ EXCLUDE_RE="${EXCLUDE_RE:-}"
 # 1) Get invokable roles from container (one per line)
 invokable="$(
   docker compose --profile ci exec -T infinito \
-    python3 -m cli.meta.applications.invokable \
+    "${PYTHON}" -m cli.meta.applications.invokable \
   | sed -e 's/[[:space:]]\+$//' -e '/^$/d'
 )"
 

@@ -39,7 +39,7 @@ jobs:
           echo "Using matrix: ${json}"
 
   build:
-    name: build & push (${{ matrix.distro }})
+    name: build & push (${{ matrix.distro }} / ${{ matrix.variant }})
     needs: prepare
     runs-on: ubuntu-latest
 
@@ -47,6 +47,7 @@ jobs:
       fail-fast: false
       matrix:
         distro: ${{ fromJson(needs.prepare.outputs.matrix) }}
+        variant: [full, slim]
 
     steps:
       - name: Checkout
@@ -92,23 +93,30 @@ jobs:
           echo
           docker buildx du || true
 
-      - name: Build & push (with cache + NIX_CONFIG build-arg)
+      - name: Compute image names
+        id: names
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ matrix.variant }}" == "slim" ]]; then
+            echo "suffix=-slim" >> "$GITHUB_OUTPUT"
+          else
+            echo "suffix=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build & push
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
+          target: ${{ matrix.variant }}
           tags: |
-            ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}
-
+            ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}${{ steps.names.outputs.suffix }}:${{ needs.prepare.outputs.image_tag }}
           build-args: |
-            PKGMGR_IMAGE_REPO=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}
-            PKGMGR_IMAGE_TAG=stable
+            PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}${{ steps.names.outputs.suffix }}:stable
             NIX_CONFIG=access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-
-          # GitHub Actions cache (avoids huge GHCR cache images)
-          cache-from: type=gha,scope=infinito-${{ matrix.distro }}
-          cache-to: type=gha,mode=max,scope=infinito-${{ matrix.distro }}
+          cache-from: type=gha,scope=infinito-${{ matrix.distro }}-${{ matrix.variant }}
+          cache-to: type=gha,mode=max,scope=infinito-${{ matrix.distro }}-${{ matrix.variant }}
 
       - name: Disk pressure (post-build)
         if: always()
@@ -137,5 +145,4 @@ jobs:
           df -h
           echo
           docker system df || true
-          echo
           docker buildx du || true

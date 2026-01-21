@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1
 
-ARG PKGMGR_IMAGE_REPO=ghcr.io/kevinveenbirkenbach/pkgmgr-arch
-ARG PKGMGR_IMAGE_TAG=stable
-
-FROM ${PKGMGR_IMAGE_REPO}:${PKGMGR_IMAGE_TAG} AS full
+# Base image (pkgmgr) selector
+# Example:
+#   PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-arch:stable
+#   PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-arch-slim:stable
+ARG PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-arch:stable
+FROM ${PKGMGR_IMAGE} AS full
 
 # Hadolint DL4006: ensure pipefail is set for RUN instructions that use pipes
 SHELL ["/bin/bash", "-o", "pipefail", "-lc"]
@@ -38,7 +40,6 @@ RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-docker/files/install-cli.sh
 # ------------------------------------------------------------
 # Install systemd + dbus (for CI Ansible systemd/service tests)
 # ------------------------------------------------------------
-
 # hadolint ignore=DL3008,DL3033,DL3041
 RUN set -euo pipefail; \
   . /etc/os-release; \
@@ -72,7 +73,6 @@ RUN set -euo pipefail; \
   systemctl mask systemd-firstboot.service first-boot-complete.target || true; \
   systemd-machine-id-setup || true
 
-
 # systemd-in-container conventions
 ENV container=docker
 STOPSIGNAL SIGRTMIN+3
@@ -102,13 +102,18 @@ RUN chmod +x /usr/local/bin/healthcheck.sh
 HEALTHCHECK --interval=5s --timeout=5s --start-period=30s --retries=20 \
   CMD /usr/local/bin/healthcheck.sh
 
-# ------------------------------------------------------------
-# Image cleanup (reduce final size)
-# ------------------------------------------------------------
-RUN test -x /usr/local/bin/slim.sh || (echo "slim.sh missing in base image" >&2; exit 1)
-RUN /usr/local/bin/slim.sh
-
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
 
 # IMPORTANT: default to systemd as PID 1
 CMD ["/sbin/init"]
+
+
+# ============================================================
+# Target: slim
+# - based on full, runs slim.sh
+# ============================================================
+FROM full AS slim
+
+# Image cleanup (reduce final size)
+RUN test -x /usr/local/bin/slim.sh || (echo "slim.sh missing in base image" >&2; exit 1)
+RUN /usr/local/bin/slim.sh

@@ -38,7 +38,7 @@ echo "apps_json=${apps_json}"
 
 # Validate JSON list + compute count
 apps_count="$(
-  $(PYTHON) -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
+  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
     "${apps_json}"
 )"
 
@@ -49,7 +49,7 @@ fi
 
 # Convert JSON list -> CSV
 apps_csv="$(
-  $(PYTHON) -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
+  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
     "${apps_json}"
 )"
 
@@ -68,7 +68,7 @@ echo
 # 2) Bring up development stack (no build) on host
 # ---------------------------------------------------------------------------
 echo ">>> Starting development compose stack (no build)"
-$(PYTHON) -m cli.deploy.development up \
+"${PYTHON}" -m cli.deploy.development up \
   --distro "${INFINITO_DISTRO}" \
   --skip-entry-init
 
@@ -77,7 +77,7 @@ $(PYTHON) -m cli.deploy.development up \
 # ---------------------------------------------------------------------------
 echo ">>> Running entry/init + inventory + deploy inside infinito container via development exec"
 
-$(PYTHON) -m cli.deploy.development exec \
+"${PYTHON}" -m cli.deploy.development exec \
   --distro "${INFINITO_DISTRO}" -- \
   bash -lc "
     set -euo pipefail

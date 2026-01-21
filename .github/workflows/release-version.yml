@@ -66,8 +66,18 @@ jobs:
 
           for d in ${DISTROS}; do
             img="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${d}:${CI_TAG}"
+            img_slim="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${d}-slim:${CI_TAG}"
+
             echo "Check: ${img}"
             if docker manifest inspect "${img}" >/dev/null 2>&1; then
+              echo "  OK"
+            else
+              echo "  MISSING"
+              missing="true"
+            fi
+
+            echo "Check: ${img_slim}"
+            if docker manifest inspect "${img_slim}" >/dev/null 2>&1; then
               echo "  OK"
             else
               echo "  MISSING"
