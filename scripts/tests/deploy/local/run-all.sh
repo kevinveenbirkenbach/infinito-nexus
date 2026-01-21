@@ -59,7 +59,7 @@ echo "inv_file      = ${inv_file}"
 echo
 
 # Ensure stack is up
-python3 -m cli.deploy.development up \
+$(PYTHON) -m cli.deploy.development up \
   --distro "${INFINITO_DISTRO}" \
   --when-down \
   --skip-entry-init
@@ -74,7 +74,7 @@ apps_json="$(
 )"
 
 apps_count="$(
-  python3 -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
+  $(PYTHON) -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
     "${apps_json}"
 )"
 if [[ "${apps_count}" == "0" ]]; then
@@ -84,13 +84,13 @@ fi
 
 echo "apps_count=${apps_count}"
 echo "apps_sample=$(
-  python3 -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
+  $(PYTHON) -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
     "${apps_json}"
 )"
 echo
 
 # Run deploy inside container
-python3 -m cli.deploy.development exec \
+$(PYTHON) -m cli.deploy.development exec \
   --distro "${INFINITO_DISTRO}" -- \
   bash -lc "
     set -euo pipefail

@@ -36,7 +36,7 @@ if [[ -z "${apps_json}" ]]; then
 fi
 
 apps_count="$(
-  python3 -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
+  $(PYTHON) -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
     "${apps_json}"
 )"
 
@@ -47,7 +47,7 @@ if [[ "${apps_count}" == "0" ]]; then
 fi
 
 apps_csv="$(
-  python3 -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
+  $(PYTHON) -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
     "${apps_json}"
 )"
 
@@ -58,21 +58,21 @@ fi
 
 echo "apps_count=${apps_count}"
 echo "apps_sample=$(
-  python3 -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
+  $(PYTHON) -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
     "${apps_json}"
 )"
 echo
 
 # 2) Bring up development stack (no build)
 echo ">>> Starting development compose stack (no build)"
-python3 -m cli.deploy.development up \
+$(PYTHON) -m cli.deploy.development up \
   --distro "${INFINITO_DISTRO}" \
   --skip-entry-init
 
 # 3) Run entry.sh + create inventory INSIDE container
 echo ">>> Initializing inventory inside container"
 
-python3 -m cli.deploy.development exec \
+$(PYTHON) -m cli.deploy.development exec \
   --distro "${INFINITO_DISTRO}" -- \
   bash -lc "
     set -euo pipefail
