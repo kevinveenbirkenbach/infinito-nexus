@@ -38,11 +38,19 @@ def _run_deploy(
     if debug:
         cmd.insert(cmd.index("-T"), "--debug")
 
-    # Forward native ansible-playbook flags (via dedicated wrapper passthrough)
     if passthrough:
         cmd.extend(passthrough)
 
-    r = compose.exec(cmd, check=False)
+    # IMPORTANT: capture output so we can show it on failure
+    r = compose.exec(cmd, check=False, capture=True)
+
+    if r.returncode != 0:
+        print("===== deploy stdout =====")
+        print((r.stdout or "").rstrip() or "<empty>")
+        print("===== deploy stderr =====")
+        print((r.stderr or "").rstrip() or "<empty>")
+        print("=========================")
+
     return int(r.returncode)
 
 

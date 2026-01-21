@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
+import traceback
 from pathlib import Path
 
+from .common import make_compose, resolve_deploy_ids_for_app
 from .deploy import handler as deploy_handler
 from .init import handler as init_handler
 from .log_utils import append_text, log_path, write_text
-from .common import make_compose, resolve_deploy_ids_for_app
 from .up import handler as up_handler
 
 
@@ -67,20 +69,26 @@ def handler(args: argparse.Namespace) -> int:
         f"deploy_type={args.type}\ndistro={args.distro}\napp={args.app}\ndebug={args.debug}\n",
     )
 
-    exit_code = 0
-
     # Drop leading '--' from REMAINDER
     passthrough = list(args.ansible_args or [])
     if passthrough and passthrough[0] == "--":
         passthrough = passthrough[1:]
 
+    # Inventory dir is required for init+deploy (both default to $INVENTORY_DIR)
+    inv_dir = os.environ.get("INVENTORY_DIR")
+    if not inv_dir:
+        raise SystemExit("INVENTORY_DIR must be set for run (used by init/deploy)")
+    inv_dir = str(inv_dir).rstrip("/")
+
     compose = None
+    exit_code = 0
 
     try:
         # 1) up (re-use up handler so build-missing stays SPOT)
         class _UpArgs:
             distro = args.distro
             skip_entry_init = bool(args.skip_entry_init)
+            when_down = False  # required by up.handler()
 
         rc_up = int(up_handler(_UpArgs()))
         if rc_up != 0:
@@ -98,6 +106,7 @@ def handler(args: argparse.Namespace) -> int:
             distro = args.distro
             app = args.app
             include = None
+            inventory_dir = inv_dir
             threshold_gib = 100
             force_storage_constrained = None
 
@@ -109,6 +118,7 @@ def handler(args: argparse.Namespace) -> int:
             type = args.type
             app = args.app
             id = None
+            inventory_dir = inv_dir
             debug = bool(args.debug)
             ansible_args = ["--", *passthrough] if passthrough else []
 
@@ -129,10 +139,17 @@ def handler(args: argparse.Namespace) -> int:
             )
 
         return exit_code
+
     except Exception as exc:
         exit_code = 1
+
+        # Make the failure visible in CI output (not only in logs file)
+        print(f">>> ERROR: {exc}", file=sys.stderr)
+        traceback.print_exc()
+
         append_text(main_log, f"\nERROR: {exc}\n")
         return 1
+
     finally:
         should_keep = bool(args.keep_stack_on_failure) and exit_code != 0
         if not should_keep and compose is not None:
