@@ -5,8 +5,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 TYPE=""
-NO_CACHE=0
-MISSING_ONLY=0
 APP=""
 KEEP_STACK_ON_FAILURE=0
 DEBUG=0
@@ -19,8 +17,6 @@ Usage:
   INFINITO_DISTRO=<distro> scripts/tests/deploy/ci/distros.sh --type <server|workstation|universal> [options]
 
 Options:
-  --no-cache              Rebuild compose image with --no-cache
-  --missing               Build only if missing (skip build if image exists)
   --app <application_id>  REQUIRED now (server and workstation)
   --keep-stack-on-failure Keep compose stack up on failure (for debugging)
   --debug                 Enable Ansible debug mode
@@ -32,8 +28,6 @@ EOF
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --type) TYPE="${2:-}"; shift 2 ;;
-    --no-cache) NO_CACHE=1; shift ;;
-    --missing) MISSING_ONLY=1; shift ;;
     --app) APP="${2:-}"; shift 2 ;;
     --keep-stack-on-failure) KEEP_STACK_ON_FAILURE=1; shift ;;
     --debug) DEBUG=1; shift ;;
@@ -50,9 +44,6 @@ cd "${REPO_ROOT}"
 
 args=( "--type" "${TYPE}" "--logs-dir" "logs" )
 args+=( "--distro" "${INFINITO_DISTRO}" )
-
-if [[ "${NO_CACHE}" == "1" ]]; then args+=( "--no-cache" ); fi
-if [[ "${MISSING_ONLY}" == "1" ]]; then args+=( "--missing" ); fi
 args+=( "--app" "${APP}" )
 if [[ "${KEEP_STACK_ON_FAILURE}" == "1" ]]; then args+=( "--keep-stack-on-failure" ); fi
 if [[ "${DEBUG}" == "1" ]]; then args+=( "--debug" ); else args+=( "--no-debug" ); fi
