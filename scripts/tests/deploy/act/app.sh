@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
-# Run local deploy workflow via act for a single app
-# Expects (ALL required):
+# Run local deploy workflow via act for a single app (linear matrix)
+# Required:
 #   APP              e.g. web-app-nextcloud
 #   TEST_DEPLOY_TYPE server|workstation|universal
 #   INFINITO_DISTRO  e.g. arch, debian, ubuntu

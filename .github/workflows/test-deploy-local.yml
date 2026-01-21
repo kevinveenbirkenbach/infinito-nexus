@@ -32,6 +32,7 @@ env:
   ONLY_APP: ""
   NIX_CONFIG: ""
   INFINITO_IMAGE_TAG: "latest"
+
 jobs:
   discover:
     name: discover apps (local)
@@ -39,16 +40,30 @@ jobs:
     timeout-minutes: 60
     outputs:
       apps: ${{ steps.discover.outputs.apps }}
+      test_deploy_type: ${{ steps.vars.outputs.test_deploy_type }}
+      distros: ${{ steps.vars.outputs.distros }}
+      only_app: ${{ steps.vars.outputs.only_app }}
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install jq
+      - name: Resolve effective inputs/env
+        id: vars
+        shell: bash
+        env:
+          INPUT_TEST_DEPLOY_TYPE: ${{ inputs.test_deploy_type }}
+          INPUT_DISTROS: ${{ inputs.distros }}
+          INPUT_ONLY_APP: ${{ inputs.only_app }}
+        run: |
+          set -euo pipefail
+          bash scripts/meta/resolve/input.sh
+
+      - name: Install deps (jq + envsubst)
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y jq
+          sudo apt-get install -y jq gettext-base
 
       - name: Start stack for discovery (arch)
         shell: bash
@@ -56,46 +71,34 @@ jobs:
           set -euo pipefail
           make docker-up
 
-      - name: Discover apps (JSON)
+      - name: Discover apps
         id: discover
         shell: bash
         run: |
           set -euo pipefail
-          echo "TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE}"
-          echo "DISTROS=${DISTROS}"
-          echo "ONLY_APP=${ONLY_APP}"
+          make ci-discover-output
 
-          apps="$(make ci-deploy-discover)"
-          [[ -n "${apps}" ]] || apps='[]'
-
-          if [[ -n "${ONLY_APP}" ]]; then
-            apps="$(jq -nc --arg a "${ONLY_APP}" '[ $a ]')"
-          fi
-
-          echo "apps=${apps}" >> "$GITHUB_OUTPUT"
-          echo "apps_json=${apps}"
-
-  local:
-    name: deploy:local (${{ matrix.app }})
+  deploy:
+    name: deploy:${{ needs.discover.outputs.test_deploy_type }} (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 240
     needs: discover
 
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 1   # immer linear
       matrix:
         app: ${{ fromJson(needs.discover.outputs.apps) }}
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install jq
+      - name: Install deps (jq + envsubst)
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y jq
+          sudo apt-get install -y jq gettext-base
 
       - name: Start stack (arch)
         shell: bash
@@ -103,12 +106,14 @@ jobs:
           set -euo pipefail
           make docker-up
 
-      - name: Deploy app
+      - name: Deploy app (same as CI logic)
         shell: bash
         run: |
           set -euo pipefail
+          export TEST_DEPLOY_TYPE="${{ needs.discover.outputs.test_deploy_type }}"
+          export DISTROS="${{ needs.discover.outputs.distros }}"
+          export ONLY_APP="${{ needs.discover.outputs.only_app }}"
           export APP="${{ matrix.app }}"
-          # TEST_DEPLOY_TYPE/DISTROS/ONLY_APP are already in env
           make ci-deploy-app
 
       - name: Show last 200 log lines on failure

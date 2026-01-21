@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run full local deploy workflow via act
-# Expects (ALL required):
+# Run full local deploy workflow via act (linear matrix)
+# Required:
 #   TEST_DEPLOY_TYPE  server|workstation|universal
 #   INFINITO_DISTRO   e.g. arch, debian, ubuntu, fedora, centos
 
