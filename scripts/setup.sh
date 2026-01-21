@@ -6,7 +6,15 @@ echo "🔧 Running project setup (no installation)"
 # ------------------------------------------------------------
 # Hard-coded configuration (NOT overridable)
 # ------------------------------------------------------------
-PYTHON="python3"
+# Prefer Makefile-provided venv interpreter (exported as PYTHON).
+# Fallback to python3 if not set.
+: "${PYTHON:?PYTHON must be set by Makefile (venv python3)}"
+
+# Optional: show interpreter for debugging
+echo "🐍 Using PYTHON=${PYTHON}"
+if command -v "${PYTHON}" >/dev/null 2>&1; then
+  "${PYTHON}" -c 'import sys; print("sys.executable=", sys.executable)' || true
+fi
 
 ROLES_DIR="./roles"
 
