@@ -10,7 +10,6 @@ set -euo pipefail
 #
 # Optional env:
 #   TESTED_LIFECYCLES="alpha beta rc stable"
-#   MISSING_ONLY="true|false"
 
 # ---------------------------------------------------------------------
 # Required env
@@ -23,7 +22,6 @@ set -euo pipefail
 # Optional env
 # ---------------------------------------------------------------------
 TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-alpha beta rc stable}"
-MISSING_ONLY="${MISSING_ONLY:-true}"
 
 # Validate deploy type
 case "${TEST_DEPLOY_TYPE}" in
@@ -46,8 +44,6 @@ normalize_bool() {
   esac
 }
 
-MISSING_ONLY="$(normalize_bool "${MISSING_ONLY}")"
-
 export TESTED_LIFECYCLES
 
 deploy_type="${TEST_DEPLOY_TYPE}"
@@ -67,7 +63,6 @@ for distro in "${distro_arr[@]}"; do
     echo "distro=${distro}"
     echo "app=${APP}"
     echo "tested_lifecycles=${TESTED_LIFECYCLES}"
-    echo "missing_only=${MISSING_ONLY}"
     echo
 
     echo "--- disk before ---"
@@ -76,9 +71,6 @@ for distro in "${distro_arr[@]}"; do
 
     set +e
     args=( --type "${deploy_type}" --app "${APP}" --debug )
-    if [[ "${MISSING_ONLY}" == "true" ]]; then
-      args+=( --missing )
-    fi
     args+=( --keep-stack-on-failure )
     scripts/tests/deploy/ci/distros.sh "${args[@]}"
     rc=$?
