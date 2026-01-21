@@ -201,7 +201,7 @@ test-integration: install
 	bash scripts/tests/code.sh
 
 ci-deploy-discover:
-	@./scripts/meta/build-test-matrix.sh
+	@PYTHON=python3 ./scripts/meta/build-test-matrix.sh
 
 ci-deploy-app:
 	export MISSING_ONLY=true; \
