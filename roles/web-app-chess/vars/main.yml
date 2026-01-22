@@ -8,7 +8,7 @@ container_port:         5080
 container_hostname:     "{{ entity_name }}"
 
 # App URLs & meta
-# CHESS_URL:            "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+# CHESS_URL:            "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
 CHESS_HOSTNAME:         "{{ container_hostname }}"
 CHESS_DOMAIN:           "{{ domain }}"
 CHESS_ADMIN_URL:        ""

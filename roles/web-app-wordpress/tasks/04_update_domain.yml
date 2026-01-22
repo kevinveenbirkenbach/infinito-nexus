@@ -60,7 +60,7 @@
     --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_sr_scheme
   changed_when: "{{ ('Success: Made 0 replacements.' not in wp_sr_scheme.stdout) | bool }}"
-  when: TLS_ENABLED | bool
+  when: applications | tls_enabled(application_id, TLS_ENABLED) | bool
 
 - name: Flush caches and rewrite rules
   command: >

@@ -5,7 +5,7 @@ CDN_ROOT:         "{{ NGINX.DIRECTORIES.DATA.CDN }}"
 CDN_VERSION:      "latest" # Latest is used atm because timestamp based would just lead to an unneccessary overhead
 
 # Base Url to deliver the files
-CDN_BASE_URL:     "{{ domains | get_url('web-svc-cdn', WEB_PROTOCOL) }}"
+CDN_BASE_URL:     "{{ domains | get_url('web-svc-cdn', applications | tls_web_protocol('web-svc-cdn', TLS_ENABLED)) }}"
 
 # Role specific CDN paths
 

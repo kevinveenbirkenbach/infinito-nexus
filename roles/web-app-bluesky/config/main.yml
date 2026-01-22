@@ -11,7 +11,7 @@ server:
   csp:
     whitelist:
       connect-src:
-        - "{{ WEB_PROTOCOL }}://<< defaults_applications[web-app-bluesky].server.domains.canonical.api >>"
+        - "<< defaults_applications[web-app-bluesky].server.domains.canonical.api >>"
         - https://plc.directory
         - https://bsky.social
         - https://api.bsky.app

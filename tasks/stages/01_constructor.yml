@@ -1,9 +1,4 @@
 ---
-- name: Debug group names for this host
-  debug:
-    var: 
-  when: MODE_DEBUG | bool
-
 - name: Detect container environment (systemd-detect-virt)
   ansible.builtin.command: systemd-detect-virt --container
   changed_when: false
@@ -16,6 +11,7 @@
       {{ group_names | to_nice_yaml(indent=2) }}
       allowed_applications: {{ allowed_applications }}
       RUNTIME: {{ RUNTIME }}
+      TLS_ENABLED: {{ TLS_ENABLED }}
   when: MODE_DEBUG | bool
 
 - name: Check DNS resolution for test domain

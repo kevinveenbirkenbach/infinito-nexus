@@ -1,5 +1,5 @@
 source_directory: "{{ playbook_dir }}/assets"
-url:              "{{ WEB_PROTOCOL }}://<< defaults_applications['web-svc-file']server.domains.canonical[0] >>/assets"
+url:              "//<< defaults_applications['web-svc-file']server.domains.canonical[0] >>/assets"
 server:
   domains:
     canonical:

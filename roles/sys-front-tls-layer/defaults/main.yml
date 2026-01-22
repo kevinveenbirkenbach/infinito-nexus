@@ -1,0 +1,22 @@
+---
+# Modes: letsencrypt | self_signed | off
+tls_mode: "letsencrypt"
+tls_domain: ""
+tls_domains_san: []
+tls_app_id: ""
+
+# Letsencrypt layout
+tls_letsencrypt_base: "/etc/letsencrypt"
+tls_letsencrypt_cert_name: ""
+tls_letsencrypt_fullchain: "fullchain.pem"
+tls_letsencrypt_privkey: "privkey.pem"
+
+# Self-signed
+tls_selfsigned_base: "/etc/infinito/selfsigned"
+tls_selfsigned_days: 825
+tls_selfsigned_key_bits: 2048
+tls_selfsigned_subject:
+  C:  "DE"
+  O:  "Infinito.Nexus"
+  OU: "Self-Signed"
+  CN: ""

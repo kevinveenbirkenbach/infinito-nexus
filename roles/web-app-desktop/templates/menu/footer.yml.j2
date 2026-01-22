@@ -9,7 +9,7 @@
       description: Access our comprehensive documentation and support resources to help you get the most out of the software.
       icon:
         class: fas fa-book
-      url: {{ domains | get_url('web-app-sphinx', WEB_PROTOCOL) }}
+      url: {{ domains | get_url('web-app-sphinx', applications | tls_web_protocol('web-app-sphinx', TLS_ENABLED)) }}
       iframe: {{ applications | get_app_conf('web-app-sphinx','docker.services.desktop.enabled') }}
 
 {% endif %}
@@ -20,7 +20,7 @@
       description: Checkout the presentation
       icon:
         class: "fas fa-chalkboard-teacher"
-      url: {{ domains | get_url('web-app-navigator', WEB_PROTOCOL) }}
+      url: {{ domains | get_url('web-app-navigator', applications | tls_web_protocol('web-app-navigator', TLS_ENABLED)) }}
       iframe: {{ applications | get_app_conf('web-app-navigator','docker.services.desktop.enabled') }}
 
 {% endif %}

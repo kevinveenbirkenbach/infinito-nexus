@@ -3,4 +3,4 @@ plugin_configuration:
     configkey: "instances"
     configvalue:
       - name:  "XWiki"
-        url:   "{{ domains | get_url('web-app-xwiki', WEB_PROTOCOL) }}"
+        url:   "{{ domains | get_url('web-app-xwiki', applications | tls_web_protocol('web-app-xwiki', TLS_ENABLED)) }}"

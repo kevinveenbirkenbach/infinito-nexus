@@ -21,11 +21,11 @@ location {{location}}
   proxy_set_header X-Real-IP $remote_addr;
   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
   proxy_set_header X-Forwarded-Proto $scheme;
-  proxy_set_header X-Forwarded-Port {{ WEB_PORT }};
-  proxy_set_header X-Forwarded-Ssl {{ TLS_ENABLED | bool | ternary('on','off') }};
+  proxy_set_header X-Forwarded-Port {{ applications | tls_web_port(application_id, TLS_ENABLED)  }};
+  proxy_set_header X-Forwarded-Ssl {{ applications | tls_enabled(application_id, TLS_ENABLED) | bool | ternary('on','off') }};
   proxy_pass_request_headers on;
 
-  {% if TLS_ENABLED | bool %}
+  {% if applications | tls_enabled(application_id, TLS_ENABLED) | bool %}
   proxy_hide_header Strict-Transport-Security;
   {% endif %}
 

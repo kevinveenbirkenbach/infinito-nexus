@@ -12,7 +12,7 @@ cert_mount_directory:                 "{{ docker_compose.directories.volumes }}c
 # Mailu
 
 ## Meta 
-MAILU_WEBSITE:                        "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+MAILU_WEBSITE:                        "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
 
 ## Domains
 MAILU_DOMAIN:                         "{{ applications | get_app_conf(application_id, 'domain') }}"

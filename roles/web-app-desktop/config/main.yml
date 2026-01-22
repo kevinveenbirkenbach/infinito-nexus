@@ -15,9 +15,9 @@ server:
       connect-src:
         - https://ka-f.fontawesome.com
         - https://cdn.jsdelivr.net
-        - "{{ WEB_PROTOCOL }}://auth.{{ DOMAIN_PRIMARY }}" 
+        - "auth.{{ DOMAIN_PRIMARY }}" 
       frame-src:
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
     flags:
       script-src-attr:
         unsafe-inline: true

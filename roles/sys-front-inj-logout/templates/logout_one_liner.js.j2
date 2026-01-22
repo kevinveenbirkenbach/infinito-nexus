@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     initLogoutPatch(
         '{{ OIDC.CLIENT.LOGOUT_URL }}',
-        '{{ WEB_PROTOCOL }}',
+        '{{ applications | tls_web_protocol(application_id, TLS_ENABLED) }}',
         '{{ DOMAIN_PRIMARY }}',
         {{ MODE_DEBUG | lower }}
     );

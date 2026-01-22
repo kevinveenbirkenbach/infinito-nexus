@@ -72,6 +72,19 @@ applications:
         phpmyadmin:
           # Allows faster debugging
           autologin: true
+  web-app-matrix:
+    oidc:
+      enabled:            true
+      shared:             true
+  web-app-mastodon:
+    oidc:
+      enabled:            true
+      shared:             true
+#  web-app-bigbluebutton:
+#    server:
+#      tls:
+#        enabled:  false  "{{ RUNTIME == 'dev' }}"
+#        flavor:   self_signed
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 

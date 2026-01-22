@@ -9,7 +9,7 @@ domain:                           "{{ domains | get_domain(application_id) }}"
 KEYCLOAK_CONTAINER_HOSTNAME:        "{{ entity_name }}"
 KEYCLOAK_DOMAIN:                    "{{ domain }}"
 KEYCLOAK_REALM:                     "{{ OIDC.CLIENT.REALM }}" # This is the name of the default realm which is used by the applications
-KEYCLOAK_URL:                       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+KEYCLOAK_URL:                       "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
 KEYCLOAK_REALM_URL:                 "{{ KEYCLOAK_URL }}/realms/{{ KEYCLOAK_REALM }}"
 KEYCLOAK_DEBUG_ENABLED:             "{{ MODE_DEBUG }}"
 KEYCLOAK_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
@@ -56,8 +56,9 @@ KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[applicati
   
 ## Update
 KEYCLOAK_REDIRECT_FEATURES:         ["docker.services.oauth2.enabled","docker.services.oidc.enabled"]
-KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ domains | get_url('web-svc-logout', WEB_PROTOCOL) }}/"
-KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(applications, WEB_PROTOCOL, '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
+KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ domains | get_url('web-svc-logout', applications | tls_web_protocol('web-svc-logout', TLS_ENABLED)) }}/"
+# This will lead to issues later @todo; Optimize:
+KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(applications, applications | tls_web_protocol(application_id, TLS_ENABLED), '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
 KEYCLOAK_WEB_ORIGINS: >-
   {{ KEYCLOAK_REDIRECT_URIS
       | map('regex_replace','/\\*$','')

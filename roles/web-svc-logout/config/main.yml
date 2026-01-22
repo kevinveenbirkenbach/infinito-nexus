@@ -11,15 +11,15 @@ server:
         unsafe-inline: true
     whitelist:
       connect-src:
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
+        - "{{ DOMAIN_PRIMARY }}"
         - "https://cdn.jsdelivr.net"
       script-src-elem:
         - "https://cdn.jsdelivr.net"
       style-src-elem:
         - "https://cdn.jsdelivr.net"
       frame-ancestors:
-        - "{{ WEB_PROTOCOL }}://<< defaults_applications[web-app-keycloak].server.domains.canonical[0] >>"
+        - "<< defaults_applications[web-app-keycloak].server.domains.canonical[0] >>"
 docker:
   services:
     logout:

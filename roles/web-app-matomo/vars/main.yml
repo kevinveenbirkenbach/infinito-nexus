@@ -33,7 +33,7 @@ MATOMO_ADMIN_USER_NAME:     "{{ users[MATOMO_ADMIN_USER_KEY].username }}"
 MATOMO_ADMIN_PASSWORD:      "{{ users[MATOMO_ADMIN_USER_KEY].password }}"
 MATOMO_ADMIN_EMAIL:         "{{ users[MATOMO_ADMIN_USER_KEY].email }}"
 MATOMO_SITE_NAME:           "{{ applications | get_app_conf(application_id, 'site_name') }}"
-MATOMO_SITE_URL:            "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+MATOMO_SITE_URL:            "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
 MATOMO_EXCLUDED_IPS:        "{{ applications | get_app_conf(application_id, 'excluded_ips') }}"
 
 # Token

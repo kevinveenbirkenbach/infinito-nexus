@@ -11,20 +11,20 @@ server:
         unsafe-inline:  true  # Required for ONLYOFFICE
     whitelist:
       script-src-elem:
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
+        - "onlyoffice.{{ DOMAIN_PRIMARY }}"
       font-src:
         - "data:"
       connect-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEBSOCKET_PROTOCOL }}://cloud.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://cloud.{{ DOMAIN_PRIMARY }}"
+        - "collabora.{{ DOMAIN_PRIMARY }}"
+        - "cloud.{{ DOMAIN_PRIMARY }}"
+        - "collabora.{{ DOMAIN_PRIMARY }}"
+        - "onlyoffice.{{ DOMAIN_PRIMARY }}"
+        - "cloud.{{ DOMAIN_PRIMARY }}"
         - "*" # Required to load all external websites in Whiteboard
       frame-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
+        - "collabora.{{ DOMAIN_PRIMARY }}"
+        - "onlyoffice.{{ DOMAIN_PRIMARY }}"
+        - "collabora.{{ DOMAIN_PRIMARY }}"
         - "*" # Required to load all external websites in Whiteboard
       worker-src:
         - "blob:"

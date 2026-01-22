@@ -1,4 +1,4 @@
 - include_tasks: 01_core.yml
   when: 
     - run_once_sys_svc_letsencrypt is not defined
-    - TLS_ENABLED | bool
+    - applications | tls_enabled(application_id, TLS_ENABLED) | bool

@@ -6,7 +6,7 @@ server:
   csp:
     whitelist:
       frame-ancestors:
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
     flags:
       style-src-attr:
         unsafe-inline:  true

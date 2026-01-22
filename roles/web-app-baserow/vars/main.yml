@@ -4,7 +4,7 @@ database_password:    "{{ applications | get_app_conf(application_id, 'credentia
 js_application_name:  "Baserow"
 
 # Baserow
-BASEROW_PUBLIC_URL:   "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+BASEROW_PUBLIC_URL:   "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
 BASEROW_VERSION:      "{{ applications | get_app_conf(application_id, 'docker.services.baserow.version') }}"
 BASEROW_IMAGE:        "{{ applications | get_app_conf(application_id, 'docker.services.baserow.image') }}"
 BASEROW_CONTAINER:    "{{ applications | get_app_conf(application_id, 'docker.services.baserow.name') }}"

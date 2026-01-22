@@ -12,7 +12,7 @@ server:
         - https://cdnjs.cloudflare.com
       frame-src:
          # Makes sense that all of the website content is available in the navigator
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
     flags:
       style-src-attr:
         unsafe-inline:  true

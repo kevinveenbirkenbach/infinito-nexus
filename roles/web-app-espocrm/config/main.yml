@@ -8,7 +8,7 @@ server:
         unsafe-eval:    true
     whitelist:
       connect-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://espo.crm.{{ DOMAIN_PRIMARY }}"
+        - "espo.crm.{{ DOMAIN_PRIMARY }}"
         - "data:"
       frame-src:
         - https://s.espocrm.com/

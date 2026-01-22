@@ -26,5 +26,5 @@
 - name: Update CFG->wwwroot via sed in container
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i -E "s|^(\$CFG->wwwroot[[:space:]]*=[[:space:]]*).*$|\1'{{ domains | get_url(application_id, WEB_PROTOCOL) }}';|" {{ MOODLE_CONFIG }}
+    sed -i -E "s|^(\$CFG->wwwroot[[:space:]]*=[[:space:]]*).*$|\1'{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}';|" {{ MOODLE_CONFIG }}
   notify: docker compose up

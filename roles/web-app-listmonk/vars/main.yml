@@ -19,7 +19,7 @@ LISTMONK_RUN:                 "docker compose run -T --rm application"
 
 LISTMONK_SETTINGS:
   - key: "app.root_url"
-    value: '"{{ domains | get_url(application_id, WEB_PROTOCOL) }}"'
+    value: '"{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"'
 
   - key: "app.notify_emails"
     value: "{{ [ users.administrator.email ] | to_json }}"

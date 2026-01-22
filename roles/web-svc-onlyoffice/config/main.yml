@@ -10,7 +10,7 @@ server:
   csp:
     whitelist:
       frame-ancestors:
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
       script-src-elem:
         - "https://fonts.googleapis.com"
       style-src-elem:

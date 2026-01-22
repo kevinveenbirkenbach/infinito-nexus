@@ -39,7 +39,7 @@
     - { name: "field_lock_lastname",  value: "locked" }
     - { name: "field_map_email",      value: "locked" }
     #- { name: "showloginform",        value: 0 }  # Deactivate if OIDC is active
-    - { name: "alternateloginurl",    value: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}/auth/oidc/" }
+    - { name: "alternateloginurl",    value: "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}/auth/oidc/" }
   loop_control:
     label: "{{ item.name }}"
   command: >

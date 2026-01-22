@@ -9,7 +9,7 @@ container_hostname:           "{{ domains | get_domain(application_id) }}"
 # Jira
 
 ## URLs
-JIRA_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+JIRA_URL:                     "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
 JIRA_HOSTNAME:                "{{ container_hostname }}"
 JIRA_STORAGE_PATH:            "/var/atlassian/application-data/jira"
 

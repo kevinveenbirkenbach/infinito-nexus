@@ -11,7 +11,7 @@
 
       {% for key, cat in littlejs_examples|dictsort %}
         {% for ex in cat['items'] %}
-          {% set href = ex | littlejs_href(WEB_PROTOCOL, domain) %}
+          {% set href = ex | littlejs_href(applications | tls_web_protocol(application_id, TLS_ENABLED), domain) %}
           <div class="col-12 col-md-6 col-lg-4 col-xl-3">
             <div class="card app-card h-100">
               <div class="card-body d-flex flex-column">

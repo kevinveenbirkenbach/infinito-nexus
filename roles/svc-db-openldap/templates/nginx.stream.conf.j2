@@ -2,5 +2,5 @@ server {
     listen {{ ports.public.ldaps['svc-db-openldap'] }}ssl;
     proxy_pass 127.0.0.1:{{ ports.localhost.ldap['svc-db-openldap'] }};
     
-    {% include 'roles/sys-svc-letsencrypt/templates/ssl_credentials.j2' %}
+    {% include 'roles/sys-front-tls-layer/templates/ssl_credentials.j2' %}
 }

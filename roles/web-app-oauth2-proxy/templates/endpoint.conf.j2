@@ -1,7 +1,7 @@
 # OAuth2-Proxy-Endpoint
 location /oauth2/ {
     proxy_pass http://127.0.0.1:{{ ports.localhost.oauth2[application_id] }};
-    {% if TLS_ENABLED | bool %}
+    {% if applications | tls_enabled(application_id, TLS_ENABLED) | bool %}
     proxy_hide_header Strict-Transport-Security;
     {% endif %}
     proxy_set_header Host $host;

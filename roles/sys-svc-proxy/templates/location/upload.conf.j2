@@ -15,7 +15,7 @@ location {{ location_upload }} {
     # Client Limits for Upload
     client_max_body_size    {{ webserver_client_max_body_size }};
 
-    {% if TLS_ENABLED | bool %}
+    {% if applications | tls_enabled(application_id, TLS_ENABLED) | bool %}
     proxy_hide_header Strict-Transport-Security;
     {% endif %}
 }

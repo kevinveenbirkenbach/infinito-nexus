@@ -4,7 +4,7 @@ server:
       script-src-attr:
         unsafe-eval: true
     whitelist:  
-      manifest-src: "{{ WEB_PROTOCOL }}://auth.{{ DOMAIN_PRIMARY }}"
+      manifest-src: "auth.{{ DOMAIN_PRIMARY }}"
   domains:
     aliases: []
     canonical:

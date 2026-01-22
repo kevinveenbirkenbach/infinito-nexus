@@ -1,7 +1,7 @@
 ---
 - name: "Wait until Greenlight is reachable via Nginx"
   uri:
-    url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+    url: "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
     validate_certs: true
     status_code: 200
     return_content: true

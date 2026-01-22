@@ -1,7 +1,7 @@
 # Keep in mind to don't use inj_enabled. 
 - name: "Check if Matomo endpoint is reachable"
   uri:
-    url: "{{ domains | get_url('web-app-matomo', WEB_PROTOCOL) }}"
+    url: "{{ domains | get_url('web-app-matomo', applications | tls_web_protocol('web-app-matomo', TLS_ENABLED)) }}"
     method: HEAD
     validate_certs: yes
     status_code: 200

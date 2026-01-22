@@ -12,7 +12,7 @@ database_password:                  "{{ applications | get_app_conf(application_
 ## General 
 NEXTCLOUD_DOMAIN:                   "{{ domains | get_domain(application_id) }}"
 NEXTCLOUD_PORT:                     "{{ ports.localhost.http[application_id] }}"
-NEXTCLOUD_URL:                      "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+NEXTCLOUD_URL:                      "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
 
 ## Plugins
 NEXTCLOUD_PLUGIN_ITEMS:             "{{ applications | get_app_conf(application_id, 'plugins') | dict2items }}"
@@ -142,10 +142,10 @@ NEXTCLOUD_RECORDING_SECRET:               "{{ applications | get_app_conf(applic
 NEXTCLOUD_RECORDING_TMP_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.talk_recording_tmp') }}"
 
 ### Collabora
-NEXTCLOUD_COLLABORA_URL:                  "{{ domains | get_url('web-svc-collabora', WEB_PROTOCOL) }}"
+NEXTCLOUD_COLLABORA_URL:                  "{{ domains | get_url('web-svc-collabora', applications | tls_web_protocol('web-svc-collabora', TLS_ENABLED)) }}"
 
 ### OnlyOffice
-NEXTCLOUD_ONLYOFFICE_URL:                 "{{ domains | get_url('web-svc-onlyoffice', WEB_PROTOCOL) }}"
+NEXTCLOUD_ONLYOFFICE_URL:                 "{{ domains | get_url('web-svc-onlyoffice', applications | tls_web_protocol('web-svc-onlyoffice', TLS_ENABLED)) }}"
 NEXTCLOUD_ONLYOFFICE_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.onlyoffice.enabled') }}"
 
 ## User Configuration

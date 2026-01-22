@@ -1,3 +1,3 @@
 {
-    "m.server": "{{ MATRIX_SYNAPSE_DOMAIN }}:{{ WEB_PORT }}"
+    "m.server": "{{ MATRIX_SYNAPSE_DOMAIN }}:{{ applications | tls_web_port(application_id, TLS_ENABLED)  }}"
 }

@@ -1,7 +1,7 @@
 # Proxy
-xwiki.url.protocol={{ WEB_PROTOCOL }}
+xwiki.url.protocol={{ applications | tls_web_protocol(application_id, TLS_ENABLED) }}
 xwiki.url.host={{ domain }}
-xwiki.url.port={{ WEB_PORT }}
+xwiki.url.port={{ applications | tls_web_port(application_id, TLS_ENABLED)  }}
 
 ############################################
 # OIDC

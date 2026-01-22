@@ -5,7 +5,7 @@ entity_name:                      "{{ application_id | get_entity_name }}"
 
 # Mediawiki
 MEDIAWIKI_SITENAME:               "{{ applications | get_app_conf(application_id, 'sitename') }}"
-MEDIAWIKI_URL:                    "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+MEDIAWIKI_URL:                    "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
 
 ## Folders
 MEDIAWIKI_HTML_DIR:               "/var/www/html"

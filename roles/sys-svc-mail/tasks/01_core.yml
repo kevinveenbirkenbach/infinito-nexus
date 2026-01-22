@@ -8,7 +8,7 @@
 - block:
   - name: "Check if Mail Host is reachable"
     uri:
-      url: "{{ domains | get_url('web-app-mailu', WEB_PROTOCOL) }}"
+      url: "{{ domains | get_url('web-app-mailu', applications | tls_web_protocol('web-app-mailu', TLS_ENABLED)) }}"
       method: HEAD
       validate_certs: yes
       status_code: "{{ mailu_valid_status_codes }}"

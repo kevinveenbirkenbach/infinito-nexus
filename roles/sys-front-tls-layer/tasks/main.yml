@@ -1,0 +1,167 @@
+---
+- name: "TLS | Validate inputs"
+  ansible.builtin.assert:
+    that:
+      - tls_mode in ['letsencrypt', 'self_signed', 'off']
+      - tls_mode == 'off' or (tls_domain | default('') | length > 0)
+    fail_msg: >-
+      Invalid TLS configuration. tls_mode={{ tls_mode }}, tls_domain='{{ tls_domain }}'.
+
+- name: "TLS | Compute effective SAN list"
+  ansible.builtin.set_fact:
+    _tls_san: >-
+      {{
+        (
+          (tls_domains_san | default([]))
+          + ([tls_domain] if (tls_domain | default('') | length > 0) else [])
+        )
+        | unique
+      }}
+  changed_when: false
+
+# -----------------------------
+# Mode: off (HTTP only)
+# -----------------------------
+- name: "TLS | (off) clear cert paths"
+  ansible.builtin.set_fact:
+    TLS_CERT_FILE: ""
+    TLS_KEY_FILE: ""
+    TLS_CA_FILE: ""
+  when: tls_mode == 'off'
+  changed_when: false
+
+# -----------------------------
+# Mode: letsencrypt
+# -----------------------------
+- name: "TLS | (letsencrypt) compute cert name"
+  ansible.builtin.set_fact:
+    _le_name: "{{ (tls_letsencrypt_cert_name | default('') | length > 0) | ternary(tls_letsencrypt_cert_name, tls_domain) }}"
+  when: tls_mode == 'letsencrypt'
+  changed_when: false
+
+- name: "TLS | (letsencrypt) set cert paths"
+  ansible.builtin.set_fact:
+    TLS_CERT_FILE: "{{ [tls_letsencrypt_base, 'live', _le_name, tls_letsencrypt_fullchain] | path_join }}"
+    TLS_KEY_FILE:  "{{ [tls_letsencrypt_base, 'live', _le_name, tls_letsencrypt_privkey] | path_join }}"
+    TLS_CA_FILE:   ""
+  when: tls_mode == 'letsencrypt'
+  changed_when: false
+
+- name: "TLS | (letsencrypt) check cert files exist"
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: _le_stat
+  loop:
+    - "{{ TLS_CERT_FILE }}"
+    - "{{ TLS_KEY_FILE }}"
+  when: tls_mode == 'letsencrypt'
+  changed_when: false
+
+- name: "TLS | (letsencrypt) issue cert if missing"
+  ansible.builtin.include_role:
+    name: sys-svc-certs
+  vars:
+    domain: "{{ tls_domain }}"
+  when: >
+    tls_mode == 'letsencrypt' and
+    (
+      (not _le_stat.results[0].stat.exists | default(false)) or
+      (not _le_stat.results[1].stat.exists | default(false))
+    )
+
+- name: "TLS | (letsencrypt) re-check cert files exist"
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: _le_stat2
+  loop:
+    - "{{ TLS_CERT_FILE }}"
+    - "{{ TLS_KEY_FILE }}"
+  when: tls_mode == 'letsencrypt'
+  changed_when: false
+
+- name: "TLS | (letsencrypt) fail if still missing"
+  ansible.builtin.fail:
+    msg: >-
+      Let's Encrypt certificate files not found after issuance:
+      cert={{ TLS_CERT_FILE }} key={{ TLS_KEY_FILE }}
+  when: >
+    tls_mode == 'letsencrypt' and
+    (
+      (not _le_stat2.results[0].stat.exists | default(false)) or
+      (not _le_stat2.results[1].stat.exists | default(false))
+    )
+
+# -----------------------------
+# Mode: self_signed
+# -----------------------------
+- name: "TLS | (self_signed) compute target paths"
+  ansible.builtin.set_fact:
+    _ss_dir:  "{{ [tls_selfsigned_base, tls_app_id, tls_domain] | path_join }}"
+    _ss_cert: "{{ [tls_selfsigned_base, tls_app_id, tls_domain, 'fullchain.pem'] | path_join }}"
+    _ss_key:  "{{ [tls_selfsigned_base, tls_app_id, tls_domain, 'privkey.pem'] | path_join }}"
+    _ss_conf: "{{ [tls_selfsigned_base, tls_app_id, tls_domain, 'openssl.cnf'] | path_join }}"
+    _ss_cn:   "{{ (tls_selfsigned_subject.CN | default('') | length > 0) | ternary(tls_selfsigned_subject.CN, tls_domain) }}"
+  when: tls_mode == 'self_signed'
+  changed_when: false
+
+- name: "TLS | (self_signed) ensure directory exists"
+  ansible.builtin.file:
+    path: "{{ _ss_dir }}"
+    state: directory
+    mode: "0750"
+  when: tls_mode == 'self_signed'
+
+- name: "TLS | (self_signed) render openssl config (SAN aware)"
+  ansible.builtin.copy:
+    dest: "{{ _ss_conf }}"
+    mode: "0640"
+    content: |
+      [ req ]
+      default_bits       = {{ tls_selfsigned_key_bits }}
+      default_md         = sha256
+      prompt             = no
+      distinguished_name = dn
+      req_extensions     = req_ext
+
+      [ dn ]
+      C  = {{ tls_selfsigned_subject.C }}
+      O  = {{ tls_selfsigned_subject.O }}
+      OU = {{ tls_selfsigned_subject.OU }}
+      CN = {{ _ss_cn }}
+
+      [ req_ext ]
+      subjectAltName = @alt_names
+
+      [ alt_names ]
+      {% for d in _tls_san %}
+      DNS.{{ loop.index }} = {{ d }}
+      {% endfor %}
+  when: tls_mode == 'self_signed'
+
+- name: "TLS | (self_signed) check if cert already exists"
+  ansible.builtin.stat:
+    path: "{{ _ss_cert }}"
+  register: _ss_cert_stat
+  when: tls_mode == 'self_signed'
+  changed_when: false
+
+- name: "TLS | (self_signed) generate key+cert if missing"
+  ansible.builtin.command: >
+    openssl req -x509 -nodes
+    -days {{ tls_selfsigned_days }}
+    -newkey rsa:{{ tls_selfsigned_key_bits }}
+    -keyout {{ _ss_key }}
+    -out {{ _ss_cert }}
+    -config {{ _ss_conf }}
+    -extensions req_ext
+  args:
+    creates: "{{ _ss_cert }}"
+  when: tls_mode == 'self_signed' and (not _ss_cert_stat.stat.exists | default(false))
+
+- name: "TLS | (self_signed) set cert paths"
+  ansible.builtin.set_fact:
+    TLS_CERT_FILE: "{{ _ss_cert }}"
+    TLS_KEY_FILE:  "{{ _ss_key }}"
+    TLS_CA_FILE:   ""
+  when: tls_mode == 'self_signed'
+  changed_when: false
