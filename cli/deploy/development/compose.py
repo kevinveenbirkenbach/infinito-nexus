@@ -101,10 +101,10 @@ class Compose:
         # So env.local should come AFTER env.ci to override CI defaults locally.
         args = ["--env-file", "env.ci"]
 
-        env_local = self.repo_root / "env.local"
+        env_local = self.repo_root / "env.development"
         if env_local.exists():
             print(f">>> Using local env override: {env_local}")
-            args += ["--env-file", "env.local"]
+            args += ["--env-file", "env.development"]
         else:
             print(">>> No env.local found (skipping)")
 

@@ -15,6 +15,9 @@ set -euo pipefail
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 
+# This script always generates inventories for the development compose stack.
+RUNTIME_VARS_JSON='{"RUNTIME":"dev"}'
+
 echo "=== local inventory init (ALL apps) ==="
 echo "distro        = ${INFINITO_DISTRO}"
 echo "type          = ${TEST_DEPLOY_TYPE}"
@@ -94,6 +97,7 @@ echo ">>> Initializing inventory inside container"
 
     echo \">>> Creating inventory at \${inv_file}\"
     python3 -m cli.create.inventory \"\${inv_dir}\" \
+      --vars \"${RUNTIME_VARS_JSON}\" \
       --host 'localhost' \
       --ssl-disabled \
       --vars-file inventory.sample.yml \

@@ -6,6 +6,7 @@ import os
 
 from .common import make_compose, resolve_deploy_ids_for_app
 from .storage import detect_storage_constrained
+from ...meta.runtime import detect_runtime
 
 
 def _ensure_vault_password_file(compose, *, inventory_dir: str) -> None:
@@ -36,7 +37,11 @@ def _create_inventory(
 
     inv_root = str(inventory_dir).rstrip("/")
 
-    overrides = {"STORAGE_CONSTRAINED": bool(storage_constrained)}
+    runtime = os.environ.get("RUNTIME") or detect_runtime()
+    overrides = {
+        "STORAGE_CONSTRAINED": bool(storage_constrained),
+        "RUNTIME": runtime,
+    }
 
     cmd = [
         "python3",

@@ -11,6 +11,9 @@ set -euo pipefail
 # Optional overrides
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
 
+# This script always generates inventories for the development compose stack.
+RUNTIME_VARS_JSON='{"RUNTIME":"dev"}'
+
 echo "=== local full deploy (development compose stack) ==="
 echo "distro        = ${INFINITO_DISTRO}"
 echo "type          = ${TEST_DEPLOY_TYPE}"
@@ -103,6 +106,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     python3 -m cli.create.inventory \"\${inv_dir}\" \
       --host '${LIMIT_HOST}' \
       --ssl-disabled \
+      --vars \"${RUNTIME_VARS_JSON}\" \
       --vars-file inventory.sample.yml \
       --include '${apps_csv}'
 

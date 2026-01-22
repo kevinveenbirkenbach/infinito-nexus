@@ -169,6 +169,9 @@ install: install-python install-ansible
 setup: dockerignore
 	@bash scripts/setup.sh
 
+setup-development: dockerignore
+	touch env.development
+
 bootstrap: install setup
 
 setup-clean: clean setup
