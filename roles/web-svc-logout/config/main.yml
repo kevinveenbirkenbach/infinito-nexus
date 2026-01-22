@@ -19,7 +19,7 @@ server:
       style-src-elem:
         - "https://cdn.jsdelivr.net"
       frame-ancestors:
-        - "<< defaults_applications[web-app-keycloak].server.domains.canonical[0] >>"
+        - "auth.{{ DOMAIN_PRIMARY }}"
 docker:
   services:
     logout:

@@ -1,4 +1,5 @@
 ---
+# run_once_sys_front_tls: deactivated
 - name: "TLS | Compute effective SAN list"
   ansible.builtin.set_fact:
     _tls_san: >-

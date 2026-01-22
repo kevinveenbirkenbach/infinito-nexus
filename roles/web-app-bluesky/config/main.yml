@@ -11,18 +11,18 @@ server:
   csp:
     whitelist:
       connect-src:
-        - "<< defaults_applications[web-app-bluesky].server.domains.canonical.api >>"
-        - https://plc.directory
-        - https://bsky.social
-        - https://api.bsky.app
-        - https://public.api.bsky.app
-        - https://events.bsky.app
-        - https://statsigapi.net
-        - https://ip.bsky.app
-        - https://video.bsky.app
-        - https://bsky.app
-        - wss://bsky.network
-        - wss://*.bsky.app
+        - "api.bluesky.{{ DOMAIN_PRIMARY }}"
+        - "https://plc.directory"
+        - "https://bsky.social"
+        - "https://api.bsky.app"
+        - "https://public.api.bsky.app"
+        - "https://events.bsky.app"
+        - "https://statsigapi.net"
+        - "https://ip.bsky.app"
+        - "https://video.bsky.app"
+        - "https://bsky.app"
+        - "wss://bsky.network"
+        - "wss://*.bsky.app"
       media-src:
         - "blob:"
       worker-src:

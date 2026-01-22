@@ -1,0 +1,24 @@
+galaxy_info:
+  author: Kevin Veen-Birchenbach
+  description: LetsEncrypt TLS provider for sys-front-tls. Ensures certificate presence and exposes TLS_CERT_FILE/TLS_KEY_FILE facts for Nginx.
+  license: Infinito.Nexus Community License (Non-Commercial)
+  license_url: https://s.infinito.nexus/license
+  company: 'Kevin Veen-Birchenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world'
+  galaxy_tags:
+  - nginx
+  - tls
+  - ssl
+  - letsencrypt
+  - acme
+  - certificates
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://s.infinito.nexus/code/tree/main/roles/sys-front-tls-letsencrypt
+  min_ansible_version: '2.9'
+  platforms:
+  - name: Any
+    versions:
+    - all
+  lifecycle: beta
