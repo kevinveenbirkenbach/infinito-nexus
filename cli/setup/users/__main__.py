@@ -198,9 +198,7 @@ def parse_args():
 def main():
     args = parse_args()
     primary_domain = "{{ SYSTEM_EMAIL_DOMAIN }}"
-    become_pwd = (
-        '{{ lookup("password", "/dev/null length=42 chars=ascii_letters,digits") }}'
-    )
+    become_pwd = "{{ 42 | strong_password }}"
 
     try:
         definitions = load_user_defs(args.roles_dir)

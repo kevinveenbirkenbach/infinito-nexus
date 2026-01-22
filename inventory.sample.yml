@@ -15,7 +15,7 @@ users:
   administrator:
     authorized_keys:
       - ssh-ed25519 AAAA_TEST_DUMMY_KEY github-ci-dummy@infinito
-    password:   administrator
+    password:   Str0ng€xampl3PW!
   biber:
     username:   "biber"
     full_name:  "Harry Beaver"

@@ -1,16 +1,37 @@
-# module_utils/manager/value_generator.py
-
-import secrets
-import hashlib
-import bcrypt
-import string
 import base64
+import bcrypt
+import hashlib
+import re
+import secrets
+import string
 
 
 class ValueGenerator:
+    # Password policy:
+    # - min 12 chars
+    # - at least one lowercase
+    # - at least one uppercase
+    # - at least one digit
+    # - at least one special char
+    PASSWORD_REGEX = re.compile(
+        r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$"
+    )
+
     def generate_strong_password(self, length: int = 32) -> str:
+        if length < 12:
+            raise ValueError("Password length must be at least 12 characters")
+
         characters = string.ascii_letters + string.digits + "!@#$%^&*()-_=+[]{}:,.?"
-        return "".join(secrets.choice(characters) for _ in range(length))
+
+        for _ in range(10_000):  # defensive upper bound
+            password = "".join(secrets.choice(characters) for _ in range(length))
+            if self._is_valid_password(password):
+                return password
+
+        raise RuntimeError("Failed to generate a valid password after many attempts")
+
+    def _is_valid_password(self, password: str) -> bool:
+        return bool(self.PASSWORD_REGEX.match(password))
 
     def generate_secure_alphanumeric(self, length: int) -> str:
         """Generate a cryptographically secure random alphanumeric string of the given length."""
@@ -27,6 +48,7 @@ class ValueGenerator:
         • "random_hex_16"
         • "sha256"
         • "sha1"
+        • "strong_password"
         • "bcrypt"
         • "alphanumeric"
         • "base64_prefixed_32"
