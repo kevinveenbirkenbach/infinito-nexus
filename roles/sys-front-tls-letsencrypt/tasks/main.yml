@@ -1,0 +1,52 @@
+---
+- name: "TLS | (letsencrypt) compute cert name"
+  ansible.builtin.set_fact:
+    _le_name: >-
+      {{
+        (tls_letsencrypt_cert_name | default('') | length > 0)
+        | ternary(tls_letsencrypt_cert_name, tls_domain)
+      }}
+  changed_when: false
+
+- name: "TLS | (letsencrypt) set cert paths"
+  ansible.builtin.set_fact:
+    TLS_CERT_FILE: "{{ [tls_letsencrypt_base, 'live', _le_name, tls_letsencrypt_fullchain] | path_join }}"
+    TLS_KEY_FILE:  "{{ [tls_letsencrypt_base, 'live', _le_name, tls_letsencrypt_privkey] | path_join }}"
+    TLS_CA_FILE:   ""
+  changed_when: false
+
+- name: "TLS | (letsencrypt) check cert files exist"
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: _le_stat
+  loop:
+    - "{{ TLS_CERT_FILE }}"
+    - "{{ TLS_KEY_FILE }}"
+  changed_when: false
+
+- name: "TLS | (letsencrypt) issue cert if missing"
+  ansible.builtin.include_role:
+    name: sys-svc-certs
+  vars:
+    domain: "{{ tls_domain }}"
+  when: >
+    (not _le_stat.results[0].stat.exists | default(false)) or
+    (not _le_stat.results[1].stat.exists | default(false))
+
+- name: "TLS | (letsencrypt) re-check cert files exist"
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  register: _le_stat2
+  loop:
+    - "{{ TLS_CERT_FILE }}"
+    - "{{ TLS_KEY_FILE }}"
+  changed_when: false
+
+- name: "TLS | (letsencrypt) fail if still missing"
+  ansible.builtin.fail:
+    msg: >-
+      Let's Encrypt certificate files not found after issuance:
+      cert={{ TLS_CERT_FILE }} key={{ TLS_KEY_FILE }}
+  when: >
+    (not _le_stat2.results[0].stat.exists | default(false)) or
+    (not _le_stat2.results[1].stat.exists | default(false))

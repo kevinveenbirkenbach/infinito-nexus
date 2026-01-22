@@ -10,10 +10,10 @@
 
 - name: "TLS | Apply tls layer"
   ansible.builtin.include_role:
-    name: sys-front-tls-layer
+    name: sys-front-tls
   vars:
     tls_app_id: "{{ application_id }}"
-    tls_mode: "{{ applications | tls_mode(application_id, TLS_ENABLED) }}"
+    tls_mode_effective: "{{ applications | tls_mode(application_id, TLS_ENABLED) }}"
     tls_domains_san: "{{ applications | tls_san(application_id) }}"
     tls_letsencrypt_cert_name: "{{ applications | tls_le_name(application_id) }}"
     tls_letsencrypt_base: "{{ LETSENCRYPT_BASE_PATH }}"

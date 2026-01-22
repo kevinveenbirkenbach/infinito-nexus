@@ -1,0 +1,9 @@
+---
+tls_selfsigned_base: "/etc/infinito/selfsigned"
+tls_selfsigned_days: 825
+tls_selfsigned_key_bits: 2048
+tls_selfsigned_subject:
+  C:  "DE"
+  O:  "{{ DOMAIN_PRIMARY }}"
+  OU: "Self-Signed"
+  CN: ""

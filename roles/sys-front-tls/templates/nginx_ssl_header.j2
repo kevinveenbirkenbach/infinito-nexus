@@ -1,6 +1,6 @@
 {% if (TLS_CERT_FILE | default('') | length > 0) and (TLS_KEY_FILE | default('') | length > 0) %}
-listen {{ applications | tls_web_port(application_id, TLS_ENABLED)  }} ssl;
-listen [::]:{{ applications | tls_web_port(application_id, TLS_ENABLED)  }} ssl;
+listen {{ applications | tls_web_port(application_id, TLS_ENABLED) }} ssl;
+listen [::]:{{ applications | tls_web_port(application_id, TLS_ENABLED) }} ssl;
 http2 on;
 
 ssl_protocols TLSv1.2 TLSv1.3;
@@ -16,9 +16,9 @@ add_header Strict-Transport-Security max-age=15768000;
 ssl_stapling on;
 ssl_stapling_verify on;
 
-{% include 'roles/sys-front-tls-layer/templates/ssl_credentials.j2' %}
+{% include 'roles/sys-front-tls/templates/ssl_credentials.j2' %}
 
 {% else %}
-listen {{ applications | tls_web_port(application_id, TLS_ENABLED)  }};
-listen [::]:{{ applications | tls_web_port(application_id, TLS_ENABLED)  }};
+listen {{ applications | tls_web_port(application_id, TLS_ENABLED) }};
+listen [::]:{{ applications | tls_web_port(application_id, TLS_ENABLED) }};
 {% endif %}

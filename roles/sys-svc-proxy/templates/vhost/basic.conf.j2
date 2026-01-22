@@ -14,7 +14,7 @@ server
     {{ webserver_extra_configuration }}
   {% endif %}
 
-  {% include 'roles/sys-front-tls-layer/templates/nginx_ssl_header.j2' %}
+  {% include 'roles/sys-front-tls/templates/nginx_ssl_header.j2' %}
 
   {% if applications | get_app_conf(application_id, 'docker.services.oauth2.enabled', False) %}
     {% set acl = applications | get_app_conf(application_id, 'docker.services.oauth2.acl', False, {}) %}
