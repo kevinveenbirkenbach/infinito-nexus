@@ -106,7 +106,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     python3 -m cli.create.inventory \"\${inv_dir}\" \
       --host '${LIMIT_HOST}' \
       --ssl-disabled \
-      --vars \"${RUNTIME_VARS_JSON}\" \
+      --vars '${RUNTIME_VARS_JSON}' \
       --vars-file inventory.sample.yml \
       --include '${apps_csv}'
 

@@ -97,7 +97,7 @@ echo ">>> Initializing inventory inside container"
 
     echo \">>> Creating inventory at \${inv_file}\"
     python3 -m cli.create.inventory \"\${inv_dir}\" \
-      --vars \"${RUNTIME_VARS_JSON}\" \
+      --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \
       --ssl-disabled \
       --vars-file inventory.sample.yml \

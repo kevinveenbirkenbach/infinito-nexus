@@ -1,7 +1,7 @@
 ---
 - name: Debug group names for this host
   debug:
-    var: group_names
+    var: 
   when: MODE_DEBUG | bool
 
 - name: Detect container environment (systemd-detect-virt)
@@ -9,9 +9,13 @@
   changed_when: false
   failed_when: false
 
-- name: "Debug: allowed_applications"
-  debug:
-    msg: "{{ allowed_applications }}"
+- name: Display selected initial host vars
+  ansible.builtin.debug:
+    msg: |
+      group_names:
+      {{ group_names | to_nice_yaml(indent=2) }}
+      allowed_applications: {{ allowed_applications }}
+      RUNTIME: {{ RUNTIME }}
   when: MODE_DEBUG | bool
 
 - name: Check DNS resolution for test domain

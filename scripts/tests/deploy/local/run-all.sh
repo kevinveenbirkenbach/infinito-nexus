@@ -40,7 +40,7 @@ pw_file="${inv_dir}/.password"
 
 if [[ ! -f "${inv_file}" ]]; then
   echo "ERROR: inventory not found: ${inv_file}" >&2
-  echo "Run: make test-local-inventory-init-all" >&2
+  echo "Run: make test-local-init" >&2
   exit 2
 fi
 
