@@ -15,4 +15,5 @@ build/*
 .ruff_cache
 collections/
 logs/*
+env.development
 .git
