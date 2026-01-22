@@ -16,6 +16,7 @@ sys.path.insert(
     ),
 )
 
+import docker_cards as docker_cards_module
 from docker_cards import LookupModule
 
 
@@ -67,6 +68,53 @@ class DummyTemplar:
         return value
 
 
+class DummyTlsResolveLookup:
+    """
+    Deterministic tls_resolve stub.
+    Emulates: lookup('tls_resolve', app_id, want='url.base') -> 'http(s)://domain/'
+    """
+
+    def __init__(self, templar):
+        self._templar = templar
+
+    def run(self, terms, variables=None, **kwargs):
+        variables = variables or {}
+        want = kwargs.get("want", "")
+
+        if not terms or len(terms) != 1:
+            raise AnsibleError("dummy tls_resolve: exactly one term required")
+
+        app_id = str(terms[0]).strip()
+        if not app_id:
+            raise AnsibleError("dummy tls_resolve: empty term")
+
+        domains = variables.get("domains", {})
+        if app_id not in domains:
+            raise AnsibleError(f"dummy tls_resolve: app_id '{app_id}' not in domains")
+
+        # normalize domain mapping value (string / dict / list)
+        domain_val = domains[app_id]
+        if isinstance(domain_val, list):
+            domain = domain_val[0] if domain_val else ""
+        elif isinstance(domain_val, dict):
+            domain = next(iter(domain_val.values()), "")
+        else:
+            domain = domain_val
+
+        domain = self._templar.template(domain).strip() if domain else ""
+        if not domain:
+            raise AnsibleError(f"dummy tls_resolve: empty domain for '{app_id}'")
+
+        tls_enabled = _ansible_bool(variables.get("TLS_ENABLED", True))
+        scheme = "https" if tls_enabled else "http"
+        base_url = f"{scheme}://{domain}/"
+
+        if want and want != "url.base":
+            raise AnsibleError(f"dummy tls_resolve: unsupported want='{want}'")
+
+        return [base_url]
+
+
 class TestDockerCardsLookup(unittest.TestCase):
     def setUp(self):
         # Create a temporary directory to simulate the roles directory.
@@ -98,17 +146,35 @@ galaxy_info:
         with open(meta_main_path, "w", encoding="utf-8") as f:
             f.write(meta_yaml)
 
+        # Patch tls_resolve lookup loader with a deterministic stub
+        self._orig_lookup_get = docker_cards_module.lookup_loader.get
+
+        def _patched_get(name, loader=None, templar=None):
+            if name != "tls_resolve":
+                raise AnsibleError(f"Unexpected lookup requested: {name}")
+            return DummyTlsResolveLookup(templar)
+
+        docker_cards_module.lookup_loader.get = _patched_get
+
     def tearDown(self):
+        # Restore patched lookup_loader
+        docker_cards_module.lookup_loader.get = self._orig_lookup_get
+
         # Remove the temporary roles directory after the test.
         shutil.rmtree(self.test_roles_dir)
 
     def _base_fake_variables(self):
+        # include TLS vars (even if our stub doesn't need all of them)
         return {
             "domains": {"portfolio": "myportfolio.com"},
             "applications": {
                 "portfolio": {"docker": {"services": {"desktop": {"enabled": True}}}}
             },
             "group_names": ["portfolio"],
+            "TLS_ENABLED": True,
+            "TLS_MODE": "letsencrypt",
+            "LETSENCRYPT_BASE_PATH": "/etc/letsencrypt",
+            "LETSENCRYPT_LIVE_PATH": "/etc/letsencrypt/live",
         }
 
     def _run_lookup(self, lookup_module, fake_variables):
@@ -119,14 +185,8 @@ galaxy_info:
     def test_lookup_when_group_includes_application_id(self):
         lookup_module = LookupModule()
 
-        fake_variables = {
-            "domains": {"portfolio": "myportfolio.com"},
-            "applications": {
-                "portfolio": {"docker": {"services": {"desktop": {"enabled": True}}}}
-            },
-            "group_names": ["portfolio"],
-            "WEB_PROTOCOL": "https",
-        }
+        fake_variables = self._base_fake_variables()
+        fake_variables["TLS_ENABLED"] = True
 
         result = self._run_lookup(lookup_module, fake_variables)
 
@@ -144,78 +204,33 @@ galaxy_info:
         self.assertEqual(card["url"], "https://myportfolio.com")
         self.assertTrue(card["iframe"])
 
-    def test_lookup_url_uses_https_when_web_protocol_is_https(self):
+    def test_lookup_url_uses_https_when_tls_enabled_true(self):
         lookup_module = LookupModule()
         fake_variables = self._base_fake_variables()
-        fake_variables["WEB_PROTOCOL"] = "https"
+        fake_variables["TLS_ENABLED"] = True
 
         result = self._run_lookup(lookup_module, fake_variables)
 
         self.assertEqual(result[0][0]["url"], "https://myportfolio.com")
 
-    def test_lookup_url_uses_http_when_web_protocol_is_http(self):
+    def test_lookup_url_uses_http_when_tls_enabled_false(self):
         lookup_module = LookupModule()
         fake_variables = self._base_fake_variables()
-        fake_variables["WEB_PROTOCOL"] = "http"
+        fake_variables["TLS_ENABLED"] = False
 
         result = self._run_lookup(lookup_module, fake_variables)
 
         self.assertEqual(result[0][0]["url"], "http://myportfolio.com")
 
-    def test_lookup_raises_error_when_web_protocol_is_missing(self):
-        lookup_module = LookupModule()
-        fake_variables = self._base_fake_variables()
-        fake_variables.pop("WEB_PROTOCOL", None)
-
-        # Still set templar so the plugin behaves like runtime (even if it errors before templating).
-        lookup_module._templar = DummyTemplar(fake_variables)
-
-        with self.assertRaises(AnsibleError) as ctx:
-            lookup_module.run([self.test_roles_dir], variables=fake_variables)
-
-        self.assertIn("WEB_PROTOCOL", str(ctx.exception))
-
     def test_lookup_when_group_excludes_application_id(self):
         lookup_module = LookupModule()
-        fake_variables = {
-            "domains": {"portfolio": "myportfolio.com"},
-            "applications": {
-                "portfolio": {"docker": {"services": {"desktop": {"enabled": True}}}}
-            },
-            "group_names": [],  # Not including "portfolio"
-            "WEB_PROTOCOL": "https",
-        }
+        fake_variables = self._base_fake_variables()
+        fake_variables["group_names"] = []  # Not including "portfolio"
 
         result = self._run_lookup(lookup_module, fake_variables)
 
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0]), 0)
-
-    def test_lookup_url_renders_web_protocol_jinja_https(self):
-        lookup_module = LookupModule()
-        fake_variables = self._base_fake_variables()
-
-        fake_variables["TLS_ENABLED"] = True
-        fake_variables["WEB_PROTOCOL"] = (
-            "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
-        )
-
-        result = self._run_lookup(lookup_module, fake_variables)
-
-        self.assertEqual(result[0][0]["url"], "https://myportfolio.com")
-
-    def test_lookup_url_renders_web_protocol_jinja_http(self):
-        lookup_module = LookupModule()
-        fake_variables = self._base_fake_variables()
-
-        fake_variables["TLS_ENABLED"] = False
-        fake_variables["WEB_PROTOCOL"] = (
-            "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
-        )
-
-        result = self._run_lookup(lookup_module, fake_variables)
-
-        self.assertEqual(result[0][0]["url"], "http://myportfolio.com")
 
     def test_lookup_url_renders_domain_url_jinja(self):
         lookup_module = LookupModule()
@@ -223,24 +238,31 @@ galaxy_info:
 
         fake_variables["domains"] = {"portfolio": "{{ DOMAIN_PRIMARY }}"}
         fake_variables["DOMAIN_PRIMARY"] = "myportfolio.com"
-        fake_variables["WEB_PROTOCOL"] = "https"
+        fake_variables["TLS_ENABLED"] = True
 
         result = self._run_lookup(lookup_module, fake_variables)
 
         self.assertEqual(result[0][0]["url"], "https://myportfolio.com")
 
-    def test_lookup_url_renders_web_protocol_jinja_when_tls_enabled_is_string(self):
+    def test_lookup_url_https_when_tls_enabled_is_string(self):
         lookup_module = LookupModule()
         fake_variables = self._base_fake_variables()
 
         fake_variables["TLS_ENABLED"] = "true"
-        fake_variables["WEB_PROTOCOL"] = (
-            "{{ 'https' if TLS_ENABLED | bool else 'http' }}"
-        )
 
         result = self._run_lookup(lookup_module, fake_variables)
 
         self.assertEqual(result[0][0]["url"], "https://myportfolio.com")
+
+    def test_lookup_url_http_when_tls_enabled_is_string(self):
+        lookup_module = LookupModule()
+        fake_variables = self._base_fake_variables()
+
+        fake_variables["TLS_ENABLED"] = "false"
+
+        result = self._run_lookup(lookup_module, fake_variables)
+
+        self.assertEqual(result[0][0]["url"], "http://myportfolio.com")
 
 
 if __name__ == "__main__":
