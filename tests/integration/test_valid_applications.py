@@ -1,20 +1,29 @@
 import os
 import sys
 import re
+from typing import Optional
 import unittest
-from cli.meta.applications.all import find_application_ids
 
 # ensure project root is on PYTHONPATH so we can import the CLI code
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 sys.path.insert(0, ROOT)
+
+from cli.meta.applications.all import find_application_ids  # noqa: E402
 
 
 class TestValidApplicationUsage(unittest.TestCase):
     """
     Integration test to ensure that only valid application IDs
     are used in all .yml, .yaml, .yml.j2, .yaml.j2, and .py files.
-    Methods like applications.items() and calls to get_domain() can
-    be whitelisted or validated against valid IDs.
+
+    It detects:
+    - applications['name']
+    - applications.get('name')
+    - applications.name
+    - get_domain('name')
+
+    For Python, it avoids false positives like applications.setdefault(...),
+    by skipping attribute matches that are immediately used as a call.
     """
 
     # regex patterns to capture applications['name'], applications.get('name'), applications.name, and get_domain('name')
@@ -33,6 +42,25 @@ class TestValidApplicationUsage(unittest.TestCase):
     DEFAULT_WHITELIST = {"items", "yml", "get", "values"}
     PYTHON_EXTRA_WHITELIST = {"keys"}
 
+    @staticmethod
+    def _line_no_and_col(content: str, index: int) -> tuple[int, int]:
+        """
+        Return 1-based (line_no, col) for a 0-based absolute index into content.
+        """
+        line_no = content.count("\n", 0, index) + 1
+        line_start = content.rfind("\n", 0, index) + 1
+        col = (index - line_start) + 1
+        return line_no, col
+
+    @staticmethod
+    def _next_non_ws_char(content: str, index: int) -> Optional[str]:
+        """
+        Return the next non-whitespace character after index, or None if EOF.
+        """
+        while index < len(content) and content[index].isspace():
+            index += 1
+        return content[index] if index < len(content) else None
+
     def test_application_references_use_valid_ids(self):
         valid_apps = find_application_ids()
 
@@ -47,6 +75,7 @@ class TestValidApplicationUsage(unittest.TestCase):
                     (".yml", ".yaml", ".yml.j2", ".yaml.j2", ".py")
                 ):
                     continue
+
                 filepath = os.path.join(dirpath, filename)
                 try:
                     with open(filepath, "r", encoding="utf-8") as f:
@@ -55,21 +84,24 @@ class TestValidApplicationUsage(unittest.TestCase):
                     # skip files that cannot be opened
                     continue
 
-                # Whitelist je nach Dateityp erweitern
+                # Extend whitelist depending on file type
                 if filename.endswith(".py"):
                     whitelist = self.DEFAULT_WHITELIST | self.PYTHON_EXTRA_WHITELIST
                 else:
                     whitelist = self.DEFAULT_WHITELIST
 
-                for pattern in (
+                patterns = (
                     self.APPLICATION_SUBSCRIPT_RE,
                     self.APPLICATION_GET_RE,
                     self.APPLICATION_ATTR_RE,
                     self.APPLICATION_DOMAIN_RE,
-                ):
+                )
+
+                for pattern in patterns:
                     for match in pattern.finditer(content):
-                        # Determine the full line containing this match
                         start = match.start()
+
+                        # Determine the full line containing this match
                         line_start = content.rfind("\n", 0, start) + 1
                         line_end = content.find("\n", start)
                         line = content[
@@ -81,16 +113,33 @@ class TestValidApplicationUsage(unittest.TestCase):
                             continue
 
                         name = match.group("name")
+
+                        # In Python: avoid false positives like applications.setdefault(...)
+                        # APPLICATION_ATTR_RE matches dict methods too.
+                        # If it is used as a call (applications.<name>(...)), skip it.
+                        if (
+                            filename.endswith(".py")
+                            and pattern is self.APPLICATION_ATTR_RE
+                        ):
+                            nxt = self._next_non_ws_char(content, match.end())
+                            if nxt == "(":
+                                continue
+
                         # skip whitelisted methods/exceptions
                         if name in whitelist:
                             continue
+
+                        line_no, col = self._line_no_and_col(content, start)
+
                         # each found reference must be in valid_apps
                         self.assertIn(
                             name,
                             valid_apps,
                             msg=(
-                                f"{filepath}: reference to application '{name}' "
-                                f"is invalid. Known IDs: {sorted(valid_apps)}"
+                                f"{filepath}: reference to application '{name}' is invalid.\n"
+                                f"Location: line {line_no}, col {col}\n"
+                                f"Line: {line.rstrip()}\n"
+                                f"Known IDs: {sorted(valid_apps)}"
                             ),
                         )
 
