@@ -234,11 +234,11 @@ test-act-app:
 	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
 	bash scripts/tests/deploy/act/app.sh
 
-test-local-init:
+test-local-reset:
 	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
 	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
 	PYTHON=python3 \
-	bash scripts/tests/deploy/local/inventory-init-all.sh
+	bash scripts/tests/deploy/local/reset.sh
 
 test-local-run-all:
 	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \

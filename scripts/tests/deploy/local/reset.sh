@@ -87,7 +87,9 @@ echo ">>> Initializing inventory inside container"
     inv_dir='${INVENTORY_DIR}'
     inv_file=\"\${inv_dir}/servers.yml\"
     pw_file=\"\${inv_dir}/.password\"
-
+    echo \">>> Reset inventory dir \${inv_dir}\"
+    rm -rf \"\${inv_dir}\"
+    mkdir -p \"\${inv_dir}\"
     mkdir -p \"\${inv_dir}\"
 
     if [[ ! -f \"\${pw_file}\" ]]; then
