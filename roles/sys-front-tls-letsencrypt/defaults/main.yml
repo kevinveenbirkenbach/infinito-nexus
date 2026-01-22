@@ -1,4 +1,0 @@
----
-tls_letsencrypt_base: "/etc/letsencrypt"
-tls_letsencrypt_fullchain: "fullchain.pem"
-tls_letsencrypt_privkey: "privkey.pem"

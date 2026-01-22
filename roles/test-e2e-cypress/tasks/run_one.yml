@@ -58,7 +58,7 @@
 # Optional wait until app is ready (uses domain resolution)
 - name: Wait until application is ready (HTTP 200/302)
   ansible.builtin.uri:
-    url: "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
+    url: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
     status_code: [200, 302]
     validate_certs: false
   register: _wait_result

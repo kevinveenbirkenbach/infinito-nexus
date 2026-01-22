@@ -1,20 +1,4 @@
 ---
-- name: "TLS | Compute effective domain"
-  ansible.builtin.set_fact:
-    _tls_domain_effective: >-
-      {{
-        ((domain | default('')) | length > 0)
-          | ternary(domain, (domains | get_domain(application_id)))
-      }}
-  changed_when: false
-
 - name: "TLS | Apply tls layer"
-  ansible.builtin.include_role:
+  include_role:
     name: sys-front-tls
-  vars:
-    tls_app_id: "{{ application_id }}"
-    tls_mode_effective: "{{ applications | tls_mode(application_id, TLS_ENABLED) }}"
-    tls_domains_san: "{{ applications | tls_san(application_id) }}"
-    tls_letsencrypt_cert_name: "{{ applications | tls_le_name(application_id) }}"
-    tls_letsencrypt_base: "{{ LETSENCRYPT_BASE_PATH }}"
-    tls_domain: "{{ _tls_domain_effective }}"

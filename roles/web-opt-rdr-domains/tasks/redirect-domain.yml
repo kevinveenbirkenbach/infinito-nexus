@@ -1,7 +1,7 @@
 - name: "include task receive certbot certificate"
   include_role:
     name: sys-svc-certs
-  when: applications | tls_enabled(application_id, TLS_ENABLED) | bool
+  when: lookup('tls_resolve', application_id, want='enabled') | bool
 
 - name: "Deploying NGINX redirect configuration for '{{ domain }}'"
   template:

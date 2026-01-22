@@ -1,6 +1,0 @@
----
-# Orchestrator inputs
-tls_mode_effective: "off"        # letsencrypt | self_signed | off
-tls_domain: ""
-tls_domains_san: []
-tls_app_id: ""

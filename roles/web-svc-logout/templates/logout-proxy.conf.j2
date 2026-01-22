@@ -6,12 +6,12 @@ location = /logout {
     proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
     proxy_set_header   X-Forwarded-Proto $scheme;
     proxy_http_version 1.1;
-    {% if applications | tls_enabled(application_id, TLS_ENABLED) | bool %}
+    {% if lookup('tls_resolve', application_id, want='enabled') | bool %}
     proxy_hide_header Strict-Transport-Security;
     {% endif %}
 
     {# CORS headers – allow your central page to call this #}
-    {%- set aca_origin = domains | get_url('web-svc-logout', applications | tls_web_protocol('web-svc-logout', TLS_ENABLED)) ~ " always" -%}
+    {%- set aca_origin = (lookup('tls_resolve', 'web-svc-logout', want='url.base')) ~ " always" -%}
     {%- set aca_credentials = "'true' always" -%}
     {%- set aca_methods = "'GET, OPTIONS' always" -%}
     {%- set aca_headers = "'Accept, Authorization' always" -%}

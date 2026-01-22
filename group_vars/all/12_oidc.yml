@@ -12,7 +12,7 @@ _oidc_client_realm:       "{{ OIDC.CLIENT.REALM if OIDC.CLIENT is defined and OI
 _oidc_url:                "{{ 
                             ( OIDC.URL
                               if (OIDC is defined and OIDC.URL is defined) 
-                              else domains | get_url('web-app-keycloak', applications | tls_web_protocol('web-app-keycloak', TLS_ENABLED))
+                              else (lookup('tls_resolve', 'web-app-keycloak', want='url.base'))
                             ).rstrip('/') 
                           }}"
 _oidc_client_issuer_url:  "{{ _oidc_url ~ '/realms/' ~ _oidc_client_realm }}"

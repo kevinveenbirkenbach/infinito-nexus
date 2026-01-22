@@ -2,7 +2,7 @@
 application_id:             "web-app-wordpress"
 
 # WordPress
-WORDPRESS_URL:                "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
+WORDPRESS_URL:                "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 WORDPRESS_MSMTP_SRC:          "{{ [ playbook_dir, 'roles/sys-svc-mail-msmtp/templates/msmtprc.conf.j2' ] | path_join }}"
 WORDPRESS_MSMTP_ABS:          "{{ [ docker_compose.directories.config, 'msmtprc.conf'] | path_join }}"
 WORDPRESS_MAX_UPLOAD_SIZE:    "{{ applications | get_app_conf(application_id, 'max_upload_size') }}"

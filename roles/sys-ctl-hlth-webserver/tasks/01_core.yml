@@ -22,7 +22,7 @@
     system_service_tpl_timeout_start_sec: "{{ CURRENT_PLAY_DOMAINS_ALL | timeout_start_sec_for_domains }}"
     system_service_tpl_exec_start: > 
       {{ system_service_script_exec }}
-      --web-protocol {{ applications | tls_web_protocol(application_id, TLS_ENABLED) }}
+      --web-protocol {{ lookup('tls_resolve', application_id, want='protocols.web') }}
       --expectations '{{ applications | web_health_expectations(www_enabled=WWW_REDIRECT_ENABLED | bool, group_names=group_names) | to_json }}'
     system_service_force_flush_final:             true
 

@@ -1,27 +1,5 @@
 ---
 # run_once_sys_front_tls: deactivated
-- name: "TLS | Compute effective SAN list"
-  ansible.builtin.set_fact:
-    _tls_san: >-
-      {{
-        (
-          (tls_domains_san | default([]))
-          + ([tls_domain] if (tls_domain | default('') | length > 0) else [])
-        )
-        | unique
-      }}
-  changed_when: false
-
-# -----------------------------
-# Mode: off (HTTP only)
-# -----------------------------
-- name: "TLS | (off) clear cert paths"
-  ansible.builtin.set_fact:
-    TLS_CERT_FILE: ""
-    TLS_KEY_FILE: ""
-    TLS_CA_FILE: ""
-  when: tls_mode_effective == 'off'
-  changed_when: false
 
 # -----------------------------
 # Mode: letsencrypt
@@ -29,8 +7,6 @@
 - name: "TLS | (letsencrypt) ensure certs and set paths"
   ansible.builtin.include_role:
     name: sys-front-tls-letsencrypt
-  vars:
-    tls_domains_san: "{{ _tls_san }}"
   when: tls_mode_effective == 'letsencrypt'
 
 # -----------------------------
@@ -39,6 +15,4 @@
 - name: "TLS | (self_signed) ensure certs and set paths"
   ansible.builtin.include_role:
     name: sys-front-tls-selfsigned
-  vars:
-    tls_domains_san: "{{ _tls_san }}"
   when: tls_mode_effective == 'self_signed'

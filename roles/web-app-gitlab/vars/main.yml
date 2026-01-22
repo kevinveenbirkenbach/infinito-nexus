@@ -2,7 +2,7 @@
 application_id:               "web-app-gitlab"
 
 # GitLab
-GITLAB_URL:                 "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
+GITLAB_URL:                 "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 GITLAB_HOSTNAME:            "{{ domains | get_domain(application_id) }}"
 
 ## OIDC

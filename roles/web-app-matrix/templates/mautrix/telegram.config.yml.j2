@@ -62,7 +62,7 @@ appservice:
         prefix: /public
         # The base URL where the public-facing endpoints are available. The prefix is not added
         # implicitly.
-        external: {{ applications | tls_web_protocol(application_id, TLS_ENABLED) }}://{{ MATRIX_SERVER_NAME }}/public
+        external: {{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ MATRIX_SERVER_NAME }}/public
 
     # Provisioning API part of the web server for automated portal creation and fetching information.
     # Used by things like mautrix-manager (https://github.com/tulir/mautrix-manager).

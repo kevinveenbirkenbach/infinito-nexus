@@ -27,7 +27,7 @@
 - block:
     - name: "Check if {{ domains | get_domain(application_id) }} is reachable (only if config unchanged)"
       ansible.builtin.uri:
-        url: "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
+        url: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
       register: site_check
       failed_when: false
       changed_when: false

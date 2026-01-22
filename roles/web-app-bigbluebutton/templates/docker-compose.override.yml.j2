@@ -29,7 +29,7 @@ services:
       --min-port={{ BBB_RELAY_PORT_START }}
       --max-port={{ BBB_RELAY_PORT_END }}
       {% if BBB_IP6_ENABLED %}--external-ip=${EXTERNAL_IPv6}{% endif %}
-{% if applications | tls_enabled(application_id, TLS_ENABLED) | bool %}
+{% if lookup('tls_resolve', application_id, want='enabled') | bool %}
       --cert=${COTURN_TLS_CERT_PATH}
       --pkey=${COTURN_TLS_KEY_PATH}
 {% endif %}

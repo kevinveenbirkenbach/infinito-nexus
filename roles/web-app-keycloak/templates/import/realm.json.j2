@@ -492,7 +492,7 @@
         "/realms/{{ KEYCLOAK_REALM }}/account/*"
       ],
       "webOrigins": [
-        "{{ domains | get_url('web-app-keycloak', applications | tls_web_protocol('web-app-keycloak', TLS_ENABLED)) }}"
+        "{{ lookup('tls_resolve', 'web-app-keycloak', want='url.base') }}"
       ],
       "notBefore": 0,
       "bearerOnly": false,

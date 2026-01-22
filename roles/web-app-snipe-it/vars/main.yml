@@ -6,7 +6,7 @@ entity_name:        "{{ application_id | get_entity_name }}"
 database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
 
 # Snipe-IT specific
-SNIPE_IT_URL:       "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
+SNIPE_IT_URL:       "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 SNIPE_IT_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.version') }}"
 SNIPE_IT_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.image') }}"
 SNIPE_IT_CONTAINER: "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.name') }}"

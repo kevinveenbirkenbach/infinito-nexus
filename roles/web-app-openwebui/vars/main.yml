@@ -4,7 +4,7 @@ application_id:                   "web-app-openwebui"
 
 # Open WebUI
 # https://openwebui.com/
-OPENWEBUI_URL:                    "{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}"
+OPENWEBUI_URL:                    "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 OPENWEBUI_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.version') }}"
 OPENWEBUI_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.image') }}"
 OPENWEBUI_CONTAINER:              "{{ applications | get_app_conf(application_id, 'docker.services.openwebui.name') }}"

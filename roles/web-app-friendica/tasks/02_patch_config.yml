@@ -6,6 +6,6 @@
     -e "s/('database'\s*=>\s*')[^']*(',)/\1{{ database_name }}\2/"
     -e "s/('username'\s*=>\s*')[^']*(',)/\1{{ database_username }}\2/"
     -e "s/('password'\s*=>\s*')[^']*(',)/\1{{ database_password }}\2/"
-    -e "s#('url'\s*=>\s*')[^']*(',)#\1{{ domains | get_url(application_id, applications | tls_web_protocol(application_id, TLS_ENABLED)) }}\2#"
+    -e "s#('url'\s*=>\s*')[^']*(',)#\1{{ lookup('tls_resolve', application_id, want='url.base') }}\2#"
     {{ friendica_config_file }}
   notify: docker compose up

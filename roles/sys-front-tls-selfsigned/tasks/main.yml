@@ -1,13 +1,33 @@
 ---
-# run_once_sys_front_tls_selfsigned: deactivated"
+# run_once_sys_front_tls_selfsigned: deactivate
+
+# Self-signed TLS provider (strict).
+# Requires correct Infinito.Nexus context (domains/applications/TLS_* vars).
+# No fallbacks; everything is derived from tls_resolve.
+
+- name: "TLS | (self_signed) resolve via tls_resolve (strict)"
+  ansible.builtin.set_fact:
+    _tls: "{{ lookup('tls_resolve', application_id) }}"
+  changed_when: false
+
+- name: "TLS | (self_signed) assert mode is self_signed"
+  ansible.builtin.assert:
+    that:
+      - _tls.mode == 'self_signed'
+      - _tls.enabled | bool
+    fail_msg: >-
+      sys-front-tls-selfsigned called for '{{ application_id }}' but resolver returned
+      enabled={{ _tls.enabled }}, mode={{ _tls.mode }}. Expected enabled=true, mode=self_signed.
 
 - name: "TLS | (self_signed) compute target paths"
   ansible.builtin.set_fact:
-    _ss_dir:  "{{ [tls_selfsigned_base, tls_app_id, tls_domain] | path_join }}"
-    _ss_cert: "{{ [tls_selfsigned_base, tls_app_id, tls_domain, 'fullchain.pem'] | path_join }}"
-    _ss_key:  "{{ [tls_selfsigned_base, tls_app_id, tls_domain, 'privkey.pem'] | path_join }}"
-    _ss_conf: "{{ [tls_selfsigned_base, tls_app_id, tls_domain, 'openssl.cnf'] | path_join }}"
-    _ss_cn:   "{{ (tls_selfsigned_subject.CN | default('') | length > 0) | ternary(tls_selfsigned_subject.CN, tls_domain) }}"
+    _ss_domain: "{{ _tls.domains.primary }}"
+    _ss_san:    "{{ _tls.domains.san }}"
+    _ss_cert:   "{{ _tls.files.cert }}"
+    _ss_key:    "{{ _tls.files.key }}"
+    _ss_dir:    "{{ _tls.files.cert | dirname }}"
+    _ss_conf:   "{{ (_tls.files.cert | dirname) ~ '/openssl.cnf' }}"
+    _ss_cn:     "{{ (tls_selfsigned_subject.CN | default('') | length > 0) | ternary(tls_selfsigned_subject.CN, _tls.domains.primary) }}"
   changed_when: false
 
 - name: "TLS | (self_signed) ensure directory exists"
@@ -38,7 +58,7 @@
       subjectAltName = @alt_names
 
       [ alt_names ]
-      {% for d in (tls_domains_san | default([])) %}
+      {% for d in _ss_san %}
       DNS.{{ loop.index }} = {{ d }}
       {% endfor %}
 
@@ -60,10 +80,3 @@
   args:
     creates: "{{ _ss_cert }}"
   when: not (_ss_cert_stat.stat.exists | default(false))
-
-- name: "TLS | (self_signed) set cert paths"
-  ansible.builtin.set_fact:
-    TLS_CERT_FILE: "{{ _ss_cert }}"
-    TLS_KEY_FILE:  "{{ _ss_key }}"
-    TLS_CA_FILE:   ""
-  changed_when: false
