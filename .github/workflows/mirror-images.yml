@@ -1,0 +1,109 @@
+name: Mirror Docker Hub images to GHCR
+
+on:
+  schedule:
+    # GitHub cron is UTC
+    - cron: "0 6 * * *"
+
+  workflow_dispatch:
+    inputs:
+      ghcr_namespace:
+        description: "GHCR namespace/org (e.g. infinito-nexus or kevinveenbirkenbach)"
+        required: true
+        type: string
+      ghcr_prefix:
+        description: "GHCR repo prefix (default: mirror)"
+        required: false
+        default: "mirror"
+      repo_root:
+        description: "Repository root path (default: .)"
+        required: false
+        default: "."
+
+  workflow_call:
+    inputs:
+      ghcr_namespace:
+        description: "GHCR namespace/org (e.g. infinito-nexus or kevinveenbirkenbach)"
+        required: true
+        type: string
+      ghcr_prefix:
+        description: "GHCR repo prefix (default: mirror)"
+        required: false
+        type: string
+        default: "mirror"
+      repo_root:
+        description: "Repository root path (default: .)"
+        required: false
+        type: string
+        default: "."
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  sync:
+    name: Mirror images (skopeo, never-fail)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install PyYAML
+
+      - name: Install skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+
+      # Optional: Docker Hub login to avoid rate limits while mirroring
+      - name: Login to Docker Hub (optional)
+        if: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mirror images to GHCR (never-fail)
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+
+          GHCR_NAMESPACE="${{ inputs.ghcr_namespace || 'infinito-nexus' }}"
+          GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
+          REPO_ROOT="${{ inputs.repo_root || '.' }}"
+
+          echo ">>> Mirror namespace: ${GHCR_NAMESPACE}"
+          echo ">>> Mirror prefix:    ${GHCR_PREFIX}"
+          echo ">>> Repo root:       ${REPO_ROOT}"
+
+          python -m cli.mirror.sync \
+            --repo-root "${REPO_ROOT}" \
+            --ghcr-namespace "${GHCR_NAMESPACE}" \
+            --ghcr-prefix "${GHCR_PREFIX}"
+
+          echo ">>> Mirror sync finished (best-effort)"
+          exit 0
