@@ -97,8 +97,18 @@ class Compose:
 
         # IMPORTANT: use the same env snapshot that docker compose will use
         no_build = env.get("INFINITO_NO_BUILD", "0") == "1"
+        # Compose env-file precedence: later files override earlier ones.
+        # So env.local should come AFTER env.ci to override CI defaults locally.
+        args = ["--env-file", "env.ci"]
 
-        args = ["--env-file", "env.ci", "up", "-d"]
+        env_local = self.repo_root / "env.local"
+        if env_local.exists():
+            print(f">>> Using local env override: {env_local}")
+            args += ["--env-file", "env.local"]
+        else:
+            print(">>> No env.local found (skipping)")
+
+        args += ["up", "-d"]
         if no_build:
             args.append("--no-build")
         args += ["coredns", "infinito"]
