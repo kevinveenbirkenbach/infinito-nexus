@@ -45,8 +45,8 @@
         container: "{{ MARIADB_NAME }}"
         command: >-
           mariadb -uroot -p'{{ MARIADB_ROOT_PWD }}'
-          -e "CREATE USER IF NOT EXISTS '{{ database_username }}'@'%'
-              IDENTIFIED BY '{{ database_password }}';
+          -e "CREATE USER IF NOT EXISTS '{{ database_username }}'@'%';
+              ALTER USER '{{ database_username }}'@'%' IDENTIFIED BY '{{ database_password }}';
               GRANT ALL PRIVILEGES ON `{{ database_name }}`.* TO '{{ database_username }}'@'%';
               FLUSH PRIVILEGES;"
       register: mariadb_create_user
