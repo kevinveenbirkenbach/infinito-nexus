@@ -5,8 +5,8 @@
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
   register: mailu_user_result
-  retries: 340
-  delay: 10
+  retries: 15
+  delay: 20
   until: >
     mailu_user_result.rc == 0 or
     "exists, not created" in mailu_user_result.stderr or
@@ -28,8 +28,8 @@
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
   register: mailu_password_change
-  retries: 30
-  delay: 2
+  retries: 12
+  delay: 10
   until: mailu_password_change.rc == 0
   when: "'mail-bot' in mailu_user_roles or 'administrator' in mailu_user_roles"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
