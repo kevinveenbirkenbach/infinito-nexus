@@ -37,7 +37,7 @@ class TestCertPlanLookup(unittest.TestCase):
             "TLS_ENABLED": True,
             "TLS_MODE": "letsencrypt",
             "LETSENCRYPT_LIVE_PATH": "/etc/letsencrypt/live/",
-            "TLS_SELFSIGNED_BASE_PATH": "/etc/infinito/selfsigned",
+            "TLS_SELFSIGNED_BASE_PATH": "/etc/infinito.nexus/selfsigned",
             "TLS_SELFSIGNED_SCOPE": "global",
         }
 
@@ -71,10 +71,10 @@ class TestCertPlanLookup(unittest.TestCase):
         self.assertEqual(out["scope"], "global")
         self.assertEqual(out["cert_id"], "_global")
         self.assertEqual(
-            out["files"]["cert"], "/etc/infinito/selfsigned/_global/fullchain.pem"
+            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/_global/fullchain.pem"
         )
         self.assertEqual(
-            out["files"]["key"], "/etc/infinito/selfsigned/_global/privkey.pem"
+            out["files"]["key"], "/etc/infinito.nexus/selfsigned/_global/privkey.pem"
         )
 
         # SANs: primary first, then rest of global list (deduped, normalized, first-seen)
@@ -92,11 +92,11 @@ class TestCertPlanLookup(unittest.TestCase):
         self.assertEqual(out["cert_id"], "web-app-b")
         self.assertEqual(
             out["files"]["cert"],
-            "/etc/infinito/selfsigned/web-app-b/b.example/fullchain.pem",
+            "/etc/infinito.nexus/selfsigned/web-app-b/b.example/fullchain.pem",
         )
         self.assertEqual(
             out["files"]["key"],
-            "/etc/infinito/selfsigned/web-app-b/b.example/privkey.pem",
+            "/etc/infinito.nexus/selfsigned/web-app-b/b.example/privkey.pem",
         )
 
     def test_selfsigned_san_override(self):

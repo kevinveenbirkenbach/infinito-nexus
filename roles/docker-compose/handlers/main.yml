@@ -1,8 +1,27 @@
 ---
-- name: Validate Docker Compose configuration
-  command:
-    cmd: docker compose -f {{ docker_compose.files.docker_compose }} config --quiet
+- name: Generate CA trust override (before any compose command)
+  ansible.builtin.shell: |
+    set -euo pipefail
+    {{ lookup('compose_ca_inject_cmd', project=(application_id | get_entity_name)) }}
+  args:
     chdir: "{{ docker_compose.directories.instance }}"
+    executable: /bin/bash
+  listen:
+    - docker compose up
+  when:
+    - lookup('tls_resolve', application_id, want='enabled') | bool
+    - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
+
+- name: Validate Docker Compose configuration
+  ansible.builtin.shell: |
+    set -euo pipefail
+    docker compose -p {{ application_id | get_entity_name }} \
+      {{ lookup('compose_f_args', application_id) }} \
+      {% if docker_compose.files.env | length > 0 %}--env-file {{ docker_compose.files.env }}{% endif %} \
+      config --quiet
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+    executable: /bin/bash
   register: dc_validate
   changed_when: false
   failed_when: dc_validate.rc != 0
@@ -15,6 +34,9 @@
     cmd: >-
       compose_pull.py
       --chdir {{ docker_compose.directories.instance }}
+      --project {{ application_id | get_entity_name }}
+      --compose-files {{ (lookup('compose_f_args', application_id)) | quote }}
+      {% if docker_compose.files.env | length > 0 %}--env-file {{ docker_compose.files.env }}{% endif %}
       --lock-dir {{ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR }}
       --lock-key {{ docker_compose.directories.instance | hash('sha1') }}
       --attempts 6
@@ -31,66 +53,45 @@
     - docker compose up
 
 - name: Build docker compose
-  shell: |
+  ansible.builtin.shell: |
     set -euo pipefail
-    docker compose build || { 
+    docker compose build || {
       echo "Retrying without cache and pulling bases...";
-      docker compose build --no-cache{{ ' --pull' if MODE_UPDATE | bool else ''}}; 
+      docker compose build --no-cache{{ ' --pull' if MODE_UPDATE | bool else ''}};
     }
   args:
     chdir: "{{ docker_compose.directories.instance }}"
     executable: /bin/bash
   environment:
-    COMPOSE_HTTP_TIMEOUT:   "600"
-    DOCKER_CLIENT_TIMEOUT:  "600"
-    # Faster build
+    COMPOSE_HTTP_TIMEOUT: "600"
+    DOCKER_CLIENT_TIMEOUT: "600"
     DOCKER_BUILDKIT: "1"
     COMPOSE_DOCKER_CLI_BUILD: "1"
   listen:
     - docker compose build
 
 - name: docker compose up
-  shell: |
-    set -euo pipefail
-
-    {% if MODE_DEBUG | bool %}
-    echo ">>> [dc][DEBUG] docker compose config (FULL)" >&2
-    if [ -f "{{ docker_compose.files.env }}" ]; then
-      docker compose --env-file "{{ docker_compose.files.env }}" config >&2
-    else
-      docker compose config >&2
-    fi
-
-    {% if not MASK_CREDENTIALS_IN_LOGS | bool %}
-    if [ -f "{{ docker_compose.files.env }}" ]; then
-      echo ">>> [dc][DEBUG] .env (UNMASKED)" >&2
-      cat "{{ docker_compose.files.env }}" >&2
-    fi
-    {% endif %}
-    {% endif %}
-
-    if [ -f "{{ docker_compose.files.env }}" ]; then
-      docker compose -p {{ application_id | get_entity_name }} \
-        --env-file "{{ docker_compose.files.env }}" \
-        up -d --force-recreate --remove-orphans
-    else
-      docker compose -p {{ application_id | get_entity_name }} \
-        up -d --force-recreate --remove-orphans
-    fi
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-    executable: /bin/bash
+  ansible.builtin.script:
+    cmd: >-
+      compose_run.py
+      --chdir {{ docker_compose.directories.instance }}
+      --project {{ application_id | get_entity_name }}
+      --compose-files {{ (lookup('compose_f_args', application_id)) | quote }}
+      {% if docker_compose.files.env | length > 0 %}--env-file {{ docker_compose.files.env }}{% endif %}
+      --action up
+      --detach
+      {% if MODE_DEBUG | bool %}--debug{% endif %}
+      {% if MODE_DEBUG | bool and (not MASK_CREDENTIALS_IN_LOGS | bool) %}--print-env-unmasked{% endif %}
+  register: dc_up
+  changed_when: true
   environment:
-    COMPOSE_HTTP_TIMEOUT:   "600"
-    DOCKER_CLIENT_TIMEOUT:  "600"
+    COMPOSE_HTTP_TIMEOUT: "600"
+    DOCKER_CLIENT_TIMEOUT: "600"
     COMPOSE_PARALLEL_LIMIT: "{{ '4' if (DOCKER_IN_CONTAINER | bool) else omit }}"
   listen:
     - docker compose up
 
 - name: Aggressively prune Docker data (keep networks + keep in-use images)
-  # Required, because otherwise the image grows too large for GitHub Actions (~14 GB).
-  # Docker networks must be preserved, as they may be external and created shortly
-  # before this task runs (e.g. by docker-compose or CI orchestration).
   become: true
   ansible.builtin.shell: |
     set -euo pipefail
@@ -98,12 +99,10 @@
     echo "Docker disk usage before cleanup:"
     docker system df || true
 
-    # Keep running containers and their images -> only prune unused data
     docker container prune -f || true
     docker image prune -af || true
     docker volume prune -f || true
 
-    # Build cache
     docker buildx prune -af || true
     docker builder prune -af || true
 

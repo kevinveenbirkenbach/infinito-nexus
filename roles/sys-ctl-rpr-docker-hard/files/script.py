@@ -17,14 +17,14 @@ def detect_env_file(dir_path: str) -> str | None:
 
 def hard_restart_docker_services(dir_path):
     """
-    Perform a hard restart of docker-compose services in the given directory
-    using docker-compose down and docker-compose up -d, adding --env-file if present.
+    Perform a hard restart of docker compose services in the given directory
+    using docker compose down and docker compose up -d, adding --env-file if present.
     """
     try:
-        print(f"Performing hard restart for docker-compose services in: {dir_path}")
+        print(f"Performing hard restart for docker compose services in: {dir_path}")
 
         env_file = detect_env_file(dir_path)
-        base = ["docker-compose"]
+        base = ["docker", "compose"]
         down_cmd = base.copy()
         up_cmd = base.copy()
 
@@ -41,15 +41,16 @@ def hard_restart_docker_services(dir_path):
         print(f"Hard restart completed successfully in: {dir_path}")
     except subprocess.CalledProcessError as e:
         print(f"Error during hard restart in {dir_path}: {e}")
+        exit(1)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Restart docker-compose services in subdirectories."
+        description="Restart docker compose services in subdirectories."
     )
     parser.add_argument(
         "parent_directory",
-        help="Path to the parent directory containing docker-compose projects",
+        help="Path to the parent directory containing docker compose projects",
     )
     parser.add_argument(
         "--only", nargs="+", help="Restart only the specified subdirectories (by name)"

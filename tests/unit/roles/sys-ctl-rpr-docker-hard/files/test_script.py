@@ -68,21 +68,23 @@ class TestRepairDockerHard(unittest.TestCase):
         old_detect = s.detect_env_file
         try:
             s.subprocess.run = fake_run
-            s.detect_env_file = lambda d: f"{d}/.env/env"  # erzwinge .env/env
+            s.detect_env_file = lambda d: f"{d}/.env/env"  # force .env/env
 
             s.hard_restart_docker_services("/X/APP")
 
-            # Wir erwarten zwei Aufrufe: docker-compose --env-file ... down / up -d
+            # Expect two calls: docker compose ... down / up -d
             self.assertEqual(len(calls), 2)
             self.assertEqual(calls[0]["cwd"], "/X/APP")
             self.assertEqual(calls[1]["cwd"], "/X/APP")
+
             # down
-            self.assertIn("docker-compose", calls[0]["cmd"])
+            self.assertEqual(calls[0]["cmd"][:2], ["docker", "compose"])
             self.assertIn("--env-file", calls[0]["cmd"])
             self.assertIn("/X/APP/.env/env", calls[0]["cmd"])
             self.assertIn("down", calls[0]["cmd"])
+
             # up -d
-            self.assertIn("docker-compose", calls[1]["cmd"])
+            self.assertEqual(calls[1]["cmd"][:2], ["docker", "compose"])
             self.assertIn("--env-file", calls[1]["cmd"])
             self.assertIn("/X/APP/.env/env", calls[1]["cmd"])
             self.assertIn("up", calls[1]["cmd"])
@@ -115,7 +117,7 @@ class TestRepairDockerHard(unittest.TestCase):
             return p == "/PARENT"
 
         def fake_isfile(p):
-            # Nur app2 hat docker-compose.yml
+            # Only app2 has docker-compose.yml
             return p in ("/PARENT/app2/docker-compose.yml",)
 
         def fake_hard_restart(dir_path):
@@ -131,7 +133,7 @@ class TestRepairDockerHard(unittest.TestCase):
             s.os.path.isfile = fake_isfile
             s.hard_restart_docker_services = fake_hard_restart
 
-            # Mit --only app2 -> nur app2 wird aufgerufen
+            # With --only app2 -> only app2 is called
             sys_argv = sys.argv
             sys.argv = ["x", "/PARENT", "--only", "app2"]
             s.main()

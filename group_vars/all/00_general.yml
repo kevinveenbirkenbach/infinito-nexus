@@ -29,10 +29,14 @@ HOST_DECIMAL_MARK:        ","
 # Encryptiom
 TLS_ENABLED:              true
 TLS_MODE:                 "letsencrypt"
-TLS_SELFSIGNED_BASE_PATH: "/etc/infinito/selfsigned"
+TLS_SELFSIGNED_BASE_PATH: "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
 # Controls whether self-signed certs are generated per app ("app")
 # or as one shared cert covering ALL domains across the global "domains" mapping ("global").
 TLS_SELFSIGNED_SCOPE:     "global"
+CA_TRUST:
+  cert_host: "/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt"
+  wrapper_host: "/etc/{{ SOFTWARE_NAME | lower }}/bin/with-ca-trust.sh"
+  inject_script: "/etc/{{ SOFTWARE_NAME | lower }}/bin/compose_ca_inject.py"
 
 # WWW-Redirect to None WWW-Domains enabled
 WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"

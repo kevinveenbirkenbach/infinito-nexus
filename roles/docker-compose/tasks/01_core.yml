@@ -33,4 +33,3 @@
   loop_control:
     loop_var: service_role
   when: DOCKER_COMPOSE_LOAD_SERVICES | bool
-

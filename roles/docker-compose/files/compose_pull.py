@@ -54,11 +54,9 @@ def retry(
                 print(out, end="" if out.endswith("\n") else "\n")
             return
 
-        # Print output always (useful in CI)
         if out.strip():
             print(out, file=sys.stderr, end="" if out.endswith("\n") else "\n")
 
-        # non-transient -> fail fast
         if not TRANSIENT_RE.search(out):
             raise RuntimeError(
                 f"Non-transient failure (rc={rc}) running: {' '.join(cmd)}"
@@ -77,13 +75,22 @@ def retry(
         delay = min(delay * 2, sleep_cap_s)
 
 
-def has_buildable_services(*, cwd: Path, env: dict[str, str]) -> bool:
-    rc, out = run_cmd(["docker", "compose", "config"], cwd=cwd, env=env)
+def base_compose_cmd(*, project: str, compose_files: str, env_file: str) -> list[str]:
+    base = ["docker", "compose", "-p", project]
+    base += compose_files.split()
+    if env_file.strip():
+        base += ["--env-file", env_file.strip()]
+    return base
+
+
+def has_buildable_services(
+    *, base_cmd: list[str], cwd: Path, env: dict[str, str]
+) -> bool:
+    rc, out = run_cmd(base_cmd + ["config"], cwd=cwd, env=env)
     if rc != 0:
         raise RuntimeError(
             "docker compose config failed; cannot detect buildable services"
         )
-    # naive but works: look for "build:" lines with indentation
     return any(
         line.lstrip() != line and line.strip().startswith("build:")
         for line in out.splitlines()
@@ -95,6 +102,14 @@ def main() -> int:
         description="docker compose pull/build with retries + lock"
     )
     ap.add_argument("--chdir", required=True, help="Compose instance directory")
+    ap.add_argument("--project", required=True, help="Compose project name (-p)")
+    ap.add_argument(
+        "--compose-files",
+        required=True,
+        help='Compose files args string like: "-f a.yml -f b.yml"',
+    )
+    ap.add_argument("--env-file", default="", help="Optional env file path")
+
     ap.add_argument("--lock-dir", required=True, help="Directory for lock files")
     ap.add_argument(
         "--lock-key", required=True, help="Unique lock key (e.g. sha1 of instance dir)"
@@ -129,10 +144,16 @@ def main() -> int:
     env["COMPOSE_HTTP_TIMEOUT"] = str(args.compose_http_timeout)
     env["DOCKER_CLIENT_TIMEOUT"] = str(args.docker_client_timeout)
 
+    base_cmd = base_compose_cmd(
+        project=args.project, compose_files=args.compose_files, env_file=args.env_file
+    )
+
     # 1) build --pull when buildable services exist (unless skipped)
-    if not args.skip_build and has_buildable_services(cwd=cwd, env=env):
+    if not args.skip_build and has_buildable_services(
+        base_cmd=base_cmd, cwd=cwd, env=env
+    ):
         retry(
-            ["docker", "compose", "build", "--pull"],
+            base_cmd + ["build", "--pull"],
             cwd=cwd,
             env=env,
             attempts=args.attempts,
@@ -141,12 +162,9 @@ def main() -> int:
         )
 
     # 2) pull (optionally with --ignore-buildable if supported)
-    pull_cmd = ["docker", "compose", "pull"]
+    pull_cmd = base_cmd + ["pull"]
     if args.ignore_buildable:
-        # only add if supported
-        rc, help_out = run_cmd(
-            ["docker", "compose", "pull", "--help"], cwd=cwd, env=env
-        )
+        rc, help_out = run_cmd(base_cmd + ["pull", "--help"], cwd=cwd, env=env)
         if rc == 0 and "--ignore-buildable" in help_out:
             pull_cmd.append("--ignore-buildable")
 

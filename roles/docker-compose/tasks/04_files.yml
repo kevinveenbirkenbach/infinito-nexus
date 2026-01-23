@@ -38,6 +38,7 @@
         - "{{ application_id | abs_role_path_by_application_id }}/templates/env.j2"
         - "{{ application_id | abs_role_path_by_application_id }}/files/env"
       skip: true
+  register: env_template
 
 - name: "Create (optional) '{{ docker_compose.files.docker_compose_override }}'"
   template:

@@ -1,19 +1,22 @@
-- name:           "Check if any container is running in {{ docker_compose.directories.instance }}"
-  command:        docker compose ps -q --filter status=running
+- name: "Check if any container is running in {{ docker_compose.directories.instance }}"
+  command: >-
+    docker compose
+    -p {{ application_id | get_entity_name }}
+    {{ lookup('compose_f_args', application_id) }}
+    {% if docker_compose.files.env | length > 0 %} --env-file {{ docker_compose.files.env }}{% endif %}
+    ps -q --filter status=running
   args:
-    chdir:        "{{ docker_compose.directories.instance }}"
-  register:       docker_ps
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: docker_ps
   changed_when: >
     (docker_ps.stdout | trim) == ""
-  # The failed when catches the condition when an docker compose file will be dynamicly build after the file routine
-  # Also if an .env file isn't present
   failed_when: >
     docker_ps.rc != 0
     and (
       (docker_ps.stderr | default(''))
       | regex_search('(no configuration file provided|no such file or directory|env file .* not found)') is none
     )
-  when: 
+  when:
     - >
       not (
         docker_compose_template.changed | default(false)

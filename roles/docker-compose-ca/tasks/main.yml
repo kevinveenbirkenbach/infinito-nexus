@@ -1,0 +1,2 @@
+- include_tasks: 01_core.yml
+  when: run_once_docker_compose_ca is not defined
