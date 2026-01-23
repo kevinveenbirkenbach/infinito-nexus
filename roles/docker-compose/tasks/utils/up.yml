@@ -3,7 +3,7 @@
     docker compose
     -p {{ application_id | get_entity_name }}
     {{ lookup('compose_f_args', application_id) }}
-    {% if docker_compose.files.env | length > 0 %} --env-file {{ docker_compose.files.env }}{% endif %}
+    {% if docker_compose.files.env is file %} --env-file {{ docker_compose.files.env }}{% endif %}
     ps -q --filter status=running
   args:
     chdir: "{{ docker_compose.directories.instance }}"
