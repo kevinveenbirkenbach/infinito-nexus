@@ -30,6 +30,11 @@ class _TlsResolveStub:
         return [{"enabled": self._enabled, "mode": self._mode}]
 
 
+def _has_domain_filter(domains, application_id) -> bool:
+    # Keep it simple: domain exists if application_id key exists
+    return isinstance(domains, dict) and application_id in domains
+
+
 class TestComposeFArgs(unittest.TestCase):
     def setUp(self):
         self.m = _load_module(
@@ -50,25 +55,39 @@ class TestComposeFArgs(unittest.TestCase):
                     "docker_compose_override": "/x/docker-compose.override.yml",
                     "docker_compose_ca_override": "/x/docker-compose.ca.override.yml",
                 }
-            }
+            },
+            # compose_f_args now requires domains + has_domain filter to decide if tls_resolve is called
+            "domains": {
+                "web-app-a": "example.invalid",
+            },
         }
 
-    def test_includes_base_and_override_only_when_tls_off(self):
-        with patch.object(
-            self.m.lookup_loader, "get", return_value=_TlsResolveStub(False, "off")
+    def test_includes_base_and_override_when_role_provides_override_and_tls_off(self):
+        with (
+            patch.object(self.m, "_role_provides_override", return_value=True),
+            patch.object(self.m.filter_loader, "get", return_value=_has_domain_filter),
+            patch.object(
+                self.m.lookup_loader, "get", return_value=_TlsResolveStub(False, "off")
+            ),
         ):
             out = self.lookup.run(["web-app-a"], variables=self.vars)[0]
+
         self.assertEqual(
             out, "-f /x/docker-compose.yml -f /x/docker-compose.override.yml"
         )
 
-    def test_includes_ca_override_when_self_signed(self):
-        with patch.object(
-            self.m.lookup_loader,
-            "get",
-            return_value=_TlsResolveStub(True, "self_signed"),
+    def test_includes_ca_override_when_self_signed_and_domain_exists(self):
+        with (
+            patch.object(self.m, "_role_provides_override", return_value=True),
+            patch.object(self.m.filter_loader, "get", return_value=_has_domain_filter),
+            patch.object(
+                self.m.lookup_loader,
+                "get",
+                return_value=_TlsResolveStub(True, "self_signed"),
+            ),
         ):
             out = self.lookup.run(["web-app-a"], variables=self.vars)[0]
+
         self.assertEqual(
             out,
             "-f /x/docker-compose.yml -f /x/docker-compose.override.yml -f /x/docker-compose.ca.override.yml",
@@ -82,15 +101,35 @@ class TestComposeFArgs(unittest.TestCase):
                     "docker_compose_override": "/x/docker-compose.override.yml",
                     "docker_compose_ca_override": "",
                 }
-            }
+            },
+            "domains": {
+                "web-app-a": "example.invalid",
+            },
         }
-        with patch.object(
-            self.m.lookup_loader,
-            "get",
-            return_value=_TlsResolveStub(True, "self_signed"),
+
+        with (
+            patch.object(self.m, "_role_provides_override", return_value=True),
+            patch.object(self.m.filter_loader, "get", return_value=_has_domain_filter),
+            patch.object(
+                self.m.lookup_loader,
+                "get",
+                return_value=_TlsResolveStub(True, "self_signed"),
+            ),
         ):
             with self.assertRaises(AnsibleError):
                 self.lookup.run(["web-app-a"], variables=v)
+
+    def test_includes_only_base_when_role_does_not_provide_override(self):
+        with (
+            patch.object(self.m, "_role_provides_override", return_value=False),
+            patch.object(self.m.filter_loader, "get", return_value=_has_domain_filter),
+            patch.object(
+                self.m.lookup_loader, "get", return_value=_TlsResolveStub(False, "off")
+            ),
+        ):
+            out = self.lookup.run(["web-app-a"], variables=self.vars)[0]
+
+        self.assertEqual(out, "-f /x/docker-compose.yml")
 
     def test_requires_one_term(self):
         with self.assertRaises(AnsibleError):

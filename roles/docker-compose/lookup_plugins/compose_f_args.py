@@ -3,29 +3,31 @@
 # Build docker compose "-f <file>" arguments for an application instance.
 #
 # HARD FAIL PRINCIPLE:
-# - No defaults that change behavior.
-# - Fail loudly if required variables or tls_resolve output is missing/invalid.
+# - No silent defaults that change behavior.
+# - Fail loudly if required variables are missing/invalid.
 #
 # Rules:
 # - Always include base docker-compose.yml
-# - Always include docker-compose.override.yml
+# - Include docker-compose.override.yml ONLY when the ROLE (application_id) provides one
+#   (same logic as tasks/04_files.yml with_first_found)
 # - Include docker-compose.ca.override.yml ONLY when:
-#     TLS is enabled AND TLS mode == "self_signed"
+#     the app has a domain AND TLS is enabled AND TLS mode == "self_signed"
 #
 # Requires:
 # - docker_compose.files.docker_compose
-# - docker_compose.files.docker_compose_override
 # - docker_compose.files.docker_compose_ca_override (required when enabled+self_signed)
 # - tls_resolve lookup plugin available
+# - has_domain filter available
 
 from __future__ import annotations
 
+import os
 from typing import Any, Optional
 
 import yaml
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
-from ansible.plugins.loader import lookup_loader
+from ansible.plugins.loader import lookup_loader, filter_loader
 
 
 def _as_str(v: Any) -> str:
@@ -69,7 +71,7 @@ def _coerce_to_dict(v: Any, label: str) -> dict:
 def _maybe_template(templar: Any, value: Any) -> Any:
     """
     Render via Ansible templar if available.
-    Unit tests often set _templar to object() or None -> then we skip templating.
+    Unit tests may not inject a templar -> then we skip templating.
     """
     if isinstance(value, (dict, list, tuple, int, float, bool)) or value is None:
         return value
@@ -79,6 +81,35 @@ def _maybe_template(templar: Any, value: Any) -> Any:
     if callable(tpl):
         return tpl(value)
     return value
+
+
+def _role_provides_override(
+    *, application_id: str, variables: dict, templar: Any
+) -> bool:
+    """
+    Mirror tasks/04_files.yml "with_first_found" logic:
+
+      - "{{ application_id | abs_role_path_by_application_id }}/templates/docker-compose.override.yml.j2"
+      - "{{ application_id | abs_role_path_by_application_id }}/files/docker-compose.override.yml"
+
+    Only if one of these exists, we append "-f <docker_compose.files.docker_compose_override>".
+    """
+    tpl = getattr(templar, "template", None)
+    if not callable(tpl):
+        raise AnsibleError(
+            "compose_f_args: templar is required to resolve abs_role_path_by_application_id"
+        )
+
+    role_base = _as_str(tpl("{{ application_id | abs_role_path_by_application_id }}"))
+    if not role_base:
+        raise AnsibleError(
+            "compose_f_args: abs_role_path_by_application_id resolved to empty"
+        )
+
+    c1 = os.path.join(role_base, "templates", "docker-compose.override.yml.j2")
+    c2 = os.path.join(role_base, "files", "docker-compose.override.yml")
+
+    return os.path.isfile(c1) or os.path.isfile(c2)
 
 
 class LookupModule(LookupBase):
@@ -100,14 +131,13 @@ class LookupModule(LookupBase):
                 "compose_f_args: missing required variable 'docker_compose'"
             )
 
-        # include_vars may load Jinja-templated YAML as TaggedStr.
-        # In real ansible runs, _templar exists. In unit tests, it may be None/object().
-        rendered_dc = _maybe_template(getattr(self, "_templar", None), raw_dc)
+        templar = getattr(self, "_templar", None)
+
+        rendered_dc = _maybe_template(templar, raw_dc)
         docker_compose = _coerce_to_dict(rendered_dc, "variable docker_compose")
         docker_compose = _require_dict(docker_compose, "docker_compose")
 
-        files = docker_compose.get("files")
-        files = _require_dict(files, "docker_compose.files")
+        files = _require_dict(docker_compose.get("files"), "docker_compose.files")
 
         base = _as_str(files.get("docker_compose"))
         override = _as_str(files.get("docker_compose_override"))
@@ -117,38 +147,57 @@ class LookupModule(LookupBase):
             raise AnsibleError(
                 "compose_f_args: docker_compose.files.docker_compose is required"
             )
-        if not override:
-            raise AnsibleError(
-                "compose_f_args: docker_compose.files.docker_compose_override is required"
-            )
 
-        # Resolve TLS using existing strict lookup.
-        tls_resolver = lookup_loader.get("tls_resolve", self._loader, self._templar)
-        tls = tls_resolver.run([application_id], variables=variables)[0]
+        parts = [f"-f {base}"]
 
-        if not isinstance(tls, dict):
-            raise AnsibleError(
-                f"compose_f_args: tls_resolve returned non-dict: {type(tls)}"
-            )
-
-        if "enabled" not in tls:
-            raise AnsibleError("compose_f_args: tls_resolve did not return 'enabled'")
-        if "mode" not in tls:
-            raise AnsibleError("compose_f_args: tls_resolve did not return 'mode'")
-
-        enabled = bool(tls["enabled"])
-        mode = _as_str(tls["mode"])
-        if not mode:
-            raise AnsibleError("compose_f_args: tls_resolve returned empty 'mode'")
-
-        parts = [f"-f {base}", f"-f {override}"]
-
-        if enabled and mode == "self_signed":
-            if not ca_override:
+        # 1) Append override ONLY if the ROLE provides it (same logic as 04_files.yml).
+        if _role_provides_override(
+            application_id=application_id, variables=variables, templar=templar
+        ):
+            if not override:
                 raise AnsibleError(
-                    "compose_f_args: docker_compose.files.docker_compose_ca_override is required "
-                    "when TLS is enabled and mode is self_signed"
+                    "compose_f_args: docker_compose.files.docker_compose_override is required "
+                    "when the role provides an override file"
                 )
-            parts.append(f"-f {ca_override}")
+            parts.append(f"-f {override}")
+
+        # 2) CA override: only when domain exists AND TLS is enabled AND self_signed.
+        if "domains" not in variables:
+            raise AnsibleError("compose_f_args: missing required variable 'domains'")
+
+        has_domain_filter = filter_loader.get("has_domain")
+        if not callable(has_domain_filter):
+            raise AnsibleError("compose_f_args: filter 'has_domain' is not available")
+
+        domains = _maybe_template(templar, variables["domains"])
+        has_domain = bool(has_domain_filter(domains, application_id))
+
+        if has_domain:
+            tls_resolver = lookup_loader.get("tls_resolve", self._loader, self._templar)
+            tls = tls_resolver.run([application_id], variables=variables)[0]
+
+            if not isinstance(tls, dict):
+                raise AnsibleError(
+                    f"compose_f_args: tls_resolve returned non-dict: {type(tls)}"
+                )
+            if "enabled" not in tls:
+                raise AnsibleError(
+                    "compose_f_args: tls_resolve did not return 'enabled'"
+                )
+            if "mode" not in tls:
+                raise AnsibleError("compose_f_args: tls_resolve did not return 'mode'")
+
+            enabled = bool(tls["enabled"])
+            mode = _as_str(tls["mode"])
+            if not mode:
+                raise AnsibleError("compose_f_args: tls_resolve returned empty 'mode'")
+
+            if enabled and mode == "self_signed":
+                if not ca_override:
+                    raise AnsibleError(
+                        "compose_f_args: docker_compose.files.docker_compose_ca_override is required "
+                        "when TLS is enabled and mode is self_signed"
+                    )
+                parts.append(f"-f {ca_override}")
 
         return [" ".join(parts)]
