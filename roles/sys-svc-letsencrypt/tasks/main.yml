@@ -2,3 +2,4 @@
   when: 
     - run_once_sys_svc_letsencrypt is not defined
     - lookup('tls_resolve', application_id, want='enabled') | bool
+    - lookup('tls_resolve', application_id, want='mode') == 'letsencrypt'

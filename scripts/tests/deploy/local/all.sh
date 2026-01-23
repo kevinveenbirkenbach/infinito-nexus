@@ -114,7 +114,6 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
 
     infinito deploy dedicated \"\${inv_file}\" \
       -T '${TEST_DEPLOY_TYPE}' \
-      --skip-update \
       --skip-backup \
       --no-signal \
       --log /opt/src/infinito/logs \
