@@ -1,4 +1,0 @@
----
-- name: "TLS | Apply tls layer"
-  include_role:
-    name: sys-front-tls

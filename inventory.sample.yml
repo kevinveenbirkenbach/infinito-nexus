@@ -2,9 +2,8 @@
 MASK_CREDENTIALS_IN_LOGS: false
 ENVIRONMENT:              development
 MODE_TEST:                true
-
-TLS_ENABLED:  "{{ (RUNTIME == 'dev') | bool }}"
-TLS_MODE:     "self_signed"
+TLS_ENABLED:              true
+TLS_MODE:                 "self_signed"
 
 design:
   css:

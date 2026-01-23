@@ -1,6 +1,6 @@
-- name: "include task receive certbot certificate"
+- name: "TLS | Apply tls layer"
   include_role:
-    name: sys-svc-certs
+    name: sys-front-tls
   when: lookup('tls_resolve', application_id, want='enabled') | bool
 
 - name: "Deploying NGINX redirect configuration for '{{ domain }}'"

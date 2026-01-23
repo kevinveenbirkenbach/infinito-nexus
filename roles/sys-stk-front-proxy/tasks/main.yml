@@ -5,8 +5,10 @@
   ansible.builtin.include_role:
     name: sys-stk-front-base
 
-- name: "TLS | Resolve per-app TLS settings and prepare cert paths"
-  ansible.builtin.include_tasks: tls.yml
+- name: "TLS | Apply tls layer"
+  include_role:
+    name: sys-front-tls
+  when: lookup('tls_resolve', application_id, want='enabled') | bool
 
 - name: "CSP/INJ | Apply global injections for {{ domain }}"
   ansible.builtin.include_role:
