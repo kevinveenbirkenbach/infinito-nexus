@@ -1,52 +1,53 @@
+#!/usr/bin/env python3
 import os
 import sys
 import subprocess
 import argparse
 
-
-def detect_env_file(dir_path: str) -> str | None:
-    """
-    Return the path to a Compose env file if present (.env preferred, fallback to env).
-    """
-    candidates = [os.path.join(dir_path, ".env"), os.path.join(dir_path, ".env", "env")]
-    for candidate in candidates:
-        if os.path.isfile(candidate):
-            return candidate
-    return None
+INFINITO_COMPOSE = "/usr/local/bin/infinito-compose"
 
 
-def hard_restart_docker_services(dir_path):
+def run(cmd: list[str], cwd: str) -> None:
+    subprocess.run(cmd, cwd=cwd, check=True)
+
+
+def hard_restart_docker_services(dir_path: str) -> None:
     """
     Perform a hard restart of docker compose services in the given directory
-    using docker compose down and docker compose up -d, adding --env-file if present.
+    using infinito-compose wrapper (auto env + overrides).
     """
     try:
-        print(f"Performing hard restart for docker compose services in: {dir_path}")
+        abs_dir = os.path.abspath(dir_path)
+        project = os.path.basename(abs_dir)
 
-        env_file = detect_env_file(dir_path)
-        base = ["docker", "compose"]
-        down_cmd = base.copy()
-        up_cmd = base.copy()
+        print(f"Performing hard restart for compose project '{project}' in: {abs_dir}")
 
-        if env_file:
-            down_cmd += ["--env-file", env_file]
-            up_cmd += ["--env-file", env_file]
+        # down + up -d (wrapper resolves env + overrides automatically)
+        run(
+            [INFINITO_COMPOSE, "--chdir", abs_dir, "--project", project, "down"],
+            cwd=abs_dir,
+        )
+        run(
+            [INFINITO_COMPOSE, "--chdir", abs_dir, "--project", project, "up", "-d"],
+            cwd=abs_dir,
+        )
 
-        down_cmd += ["down"]
-        up_cmd += ["up", "-d"]
-
-        subprocess.run(down_cmd, cwd=dir_path, check=True)
-        subprocess.run(up_cmd, cwd=dir_path, check=True)
-
-        print(f"Hard restart completed successfully in: {dir_path}")
+        print(f"Hard restart completed successfully in: {abs_dir}")
     except subprocess.CalledProcessError as e:
-        print(f"Error during hard restart in {dir_path}: {e}")
-        exit(1)
+        print(f"Error during hard restart in {dir_path}: {e}", file=sys.stderr)
+        sys.exit(1)
+    except FileNotFoundError:
+        print(
+            f"Error: required wrapper not found at {INFINITO_COMPOSE}. "
+            "Install it via the docker-compose role first.",
+            file=sys.stderr,
+        )
+        sys.exit(2)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Restart docker compose services in subdirectories."
+        description="Restart docker compose services in subdirectories (with infinito-compose wrapper)."
     )
     parser.add_argument(
         "parent_directory",
@@ -60,25 +61,29 @@ def main():
     parent_directory = args.parent_directory
 
     if not os.path.isdir(parent_directory):
-        print(f"Error: {parent_directory} is not a valid directory.")
+        print(f"Error: {parent_directory} is not a valid directory.", file=sys.stderr)
         sys.exit(1)
 
     for dir_entry in os.scandir(parent_directory):
-        if dir_entry.is_dir():
-            dir_path = dir_entry.path
-            dir_name = os.path.basename(dir_path)
-            print(f"Checking directory: {dir_path}")
+        if not dir_entry.is_dir():
+            continue
 
-            docker_compose_file = os.path.join(dir_path, "docker-compose.yml")
+        dir_path = dir_entry.path
+        dir_name = os.path.basename(dir_path)
+        print(f"Checking directory: {dir_path}")
 
-            if os.path.isfile(docker_compose_file):
-                if args.only and dir_name not in args.only:
-                    print(f"Skipping {dir_name} (not in --only list).")
-                    continue
-                print(f"Performing normal restart in {dir_name}...")
-                hard_restart_docker_services(dir_path)
-            else:
-                print(f"No docker-compose.yml found in {dir_path}. Skipping.")
+        compose_file = os.path.join(dir_path, "docker-compose.yml")
+        if not os.path.isfile(compose_file):
+            print(f"No docker-compose.yml found in {dir_path}. Skipping.")
+            continue
+
+        if args.only and dir_name not in args.only:
+            print(f"Skipping {dir_name} (not in --only list).")
+            continue
+
+        hard_restart_docker_services(dir_path)
+
+    print("Finished hard restart procedure.")
 
 
 if __name__ == "__main__":

@@ -9,6 +9,14 @@ the script records an error for that container.
 
 All shell interactions that matter for tests go through print_bash()
 so they can be monkeypatched in unit tests.
+
+This variant uses the central Infinito.Nexus compose wrapper:
+  /usr/local/bin/infinito-compose
+which auto-adds:
+- -f docker-compose.yml
+- -f docker-compose.override.yml (if present)
+- -f docker-compose.ca.override.yml (if present)
+- --env-file (if .env or .env/env exists)
 """
 
 import subprocess
@@ -16,6 +24,8 @@ import time
 import os
 import argparse
 from typing import List, Optional, Tuple
+
+INFINITO_COMPOSE = "/usr/local/bin/infinito-compose"
 
 
 # ---------------------------
@@ -54,49 +64,16 @@ def print_bash(command: str) -> List[str]:
 
 
 # ---------------------------
-# Filesystem / compose helpers
+# Compose wrapper helpers
 # ---------------------------
 
 
-def find_docker_compose_file(directory: str) -> Optional[str]:
+def compose_cmd(subcmd: str, project_path: str, project_name: str) -> str:
     """
-    Search for docker-compose.yml beneath a directory.
+    Build an infinito-compose command that auto-adds env + override files.
+    Example: infinito-compose --chdir "/opt/docker/foo" --project "foo" restart
     """
-    for root, _, files in os.walk(directory):
-        if "docker-compose.yml" in files:
-            return os.path.join(root, "docker-compose.yml")
-    return None
-
-
-def detect_env_file(project_path: str) -> Optional[str]:
-    """
-    Return the path to a Compose env file if present (.env preferred, fallback to .env/env).
-    """
-    candidates = [
-        os.path.join(project_path, ".env"),
-        os.path.join(project_path, ".env", "env"),
-    ]
-    for candidate in candidates:
-        if os.path.isfile(candidate):
-            return candidate
-    return None
-
-
-def compose_cmd(
-    subcmd: str, project_path: str, project_name: Optional[str] = None
-) -> str:
-    """
-    Build a docker-compose command string with optional -p and --env-file if present.
-    Example: compose_cmd("restart", "/opt/docker/foo", "foo")
-    """
-    parts: List[str] = [f'cd "{project_path}" && docker-compose']
-    if project_name:
-        parts += ["-p", f'"{project_name}"']
-    env_file = detect_env_file(project_path)
-    if env_file:
-        parts += ["--env-file", f'"{env_file}"']
-    parts += subcmd.split()
-    return " ".join(parts)
+    return f'{INFINITO_COMPOSE} --chdir "{project_path}" --project "{project_name}" {subcmd}'
 
 
 # ---------------------------
@@ -184,6 +161,16 @@ def get_compose_project_info(container: str) -> Tuple[str, str]:
 def main(
     base_directory: str, manipulation_services: List[str], timeout: Optional[int]
 ) -> int:
+    _ = base_directory  # unused in STRICT label mode
+
+    if not os.path.isfile(INFINITO_COMPOSE):
+        print(
+            f"Error: required wrapper not found at {INFINITO_COMPOSE}. "
+            "Install it via the docker-compose role first.",
+            file=os.sys.stderr,
+        )
+        return 2
+
     errors = 0
     wait_while_manipulation_running(
         manipulation_services, waiting_time=600, timeout=timeout
@@ -207,7 +194,7 @@ def main(
 
         compose_file_path = os.path.join(workdir, "docker-compose.yml")
         if not os.path.isfile(compose_file_path):
-            # As STRICT: we only trust labels; if file not there, error out.
+            # STRICT: we only trust labels; if file not there, error out.
             print(
                 f"Error: docker-compose.yml not found at {compose_file_path} for container {container}"
             )
@@ -216,13 +203,15 @@ def main(
 
         project_path = os.path.dirname(compose_file_path)
         try:
-            print("Restarting unhealthy container in:", compose_file_path)
+            print(
+                "Restarting unhealthy/exited container via project:", compose_file_path
+            )
             print_bash(compose_cmd("restart", project_path, project))
         except Exception as e:
             if "port is already allocated" in str(e):
                 print("Detected port allocation problem. Executing recovery steps...")
                 try:
-                    print_bash(compose_cmd("down", project_path))
+                    print_bash(compose_cmd("down", project_path, project))
                     print_bash("systemctl restart docker")
                     print_bash(compose_cmd("up -d", project_path, project))
                 except Exception as e2:
@@ -268,4 +257,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     services = normalize_services_arg(args.manipulation, args.manipulation_string)
-    exit(main(args.base_directory, services, args.timeout))
+    raise SystemExit(main(args.base_directory, services, args.timeout))

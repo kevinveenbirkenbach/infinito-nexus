@@ -21,6 +21,15 @@
     owner:  root
     group:  root
 
+- name: Install infinito-compose wrapper
+  become: true
+  ansible.builtin.copy:
+    src: "infinito_compose.py"
+    dest: "/usr/local/bin/infinito-compose"
+    mode: "0755"
+    owner: root
+    group: root
+
 - name: Include backup, repair and health services for docker
   include_role:
     name: "{{ service_role }}"

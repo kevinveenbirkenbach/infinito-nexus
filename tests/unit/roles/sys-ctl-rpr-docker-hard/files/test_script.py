@@ -9,9 +9,7 @@ def load_script_module():
     Import the script under test from roles/sys-ctl-rpr-docker-hard/files/script.py
     """
     test_file = Path(__file__).resolve()
-    repo_root = test_file.parents[
-        5
-    ]  # .../tests/unit/roles/sys-ctl-rpr-docker-hard/files -> repo root
+    repo_root = test_file.parents[5]
     script_path = (
         repo_root / "roles" / "sys-ctl-rpr-docker-hard" / "files" / "script.py"
     )
@@ -29,30 +27,7 @@ class TestRepairDockerHard(unittest.TestCase):
     def setUpClass(cls):
         cls.script = load_script_module()
 
-    def test_detect_env_file_priority(self):
-        s = self.script
-        base = "/proj"
-        old_isfile = s.os.path.isfile
-        try:
-            # only .env
-            s.os.path.isfile = lambda p: p == f"{base}/.env"
-            self.assertEqual(s.detect_env_file(base), f"{base}/.env")
-
-            # only .env/env
-            s.os.path.isfile = lambda p: p == f"{base}/.env/env"
-            self.assertEqual(s.detect_env_file(base), f"{base}/.env/env")
-
-            # both -> prefer .env
-            s.os.path.isfile = lambda p: p in (f"{base}/.env", f"{base}/.env/env")
-            self.assertEqual(s.detect_env_file(base), f"{base}/.env")
-
-            # none
-            s.os.path.isfile = lambda p: False
-            self.assertIsNone(s.detect_env_file(base))
-        finally:
-            s.os.path.isfile = old_isfile
-
-    def test_hard_restart_uses_envfile_and_cwd(self):
+    def test_hard_restart_uses_wrapper_and_cwd(self):
         s = self.script
         calls = []
 
@@ -65,33 +40,34 @@ class TestRepairDockerHard(unittest.TestCase):
             return R()
 
         old_run = s.subprocess.run
-        old_detect = s.detect_env_file
         try:
             s.subprocess.run = fake_run
-            s.detect_env_file = lambda d: f"{d}/.env/env"  # force .env/env
 
             s.hard_restart_docker_services("/X/APP")
 
-            # Expect two calls: docker compose ... down / up -d
+            # Expect two calls: infinito-compose ... down / up -d
             self.assertEqual(len(calls), 2)
             self.assertEqual(calls[0]["cwd"], "/X/APP")
             self.assertEqual(calls[1]["cwd"], "/X/APP")
 
             # down
-            self.assertEqual(calls[0]["cmd"][:2], ["docker", "compose"])
-            self.assertIn("--env-file", calls[0]["cmd"])
-            self.assertIn("/X/APP/.env/env", calls[0]["cmd"])
+            self.assertEqual(calls[0]["cmd"][0], s.INFINITO_COMPOSE)
+            self.assertIn("--chdir", calls[0]["cmd"])
+            self.assertIn("/X/APP", calls[0]["cmd"])
+            self.assertIn("--project", calls[0]["cmd"])
+            self.assertIn("APP", calls[0]["cmd"])  # basename project
             self.assertIn("down", calls[0]["cmd"])
 
             # up -d
-            self.assertEqual(calls[1]["cmd"][:2], ["docker", "compose"])
-            self.assertIn("--env-file", calls[1]["cmd"])
-            self.assertIn("/X/APP/.env/env", calls[1]["cmd"])
+            self.assertEqual(calls[1]["cmd"][0], s.INFINITO_COMPOSE)
+            self.assertIn("--chdir", calls[1]["cmd"])
+            self.assertIn("/X/APP", calls[1]["cmd"])
+            self.assertIn("--project", calls[1]["cmd"])
+            self.assertIn("APP", calls[1]["cmd"])
             self.assertIn("up", calls[1]["cmd"])
             self.assertIn("-d", calls[1]["cmd"])
         finally:
             s.subprocess.run = old_run
-            s.detect_env_file = old_detect
 
     def test_main_scans_parent_and_filters_only(self):
         s = self.script
