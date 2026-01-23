@@ -30,6 +30,9 @@ HOST_DECIMAL_MARK:        ","
 TLS_ENABLED:              true
 TLS_MODE:                 "letsencrypt"
 TLS_SELFSIGNED_BASE_PATH: "/etc/infinito/selfsigned"
+# Controls whether self-signed certs are generated per app ("app")
+# or as one shared cert covering ALL domains across the global "domains" mapping ("global").
+TLS_SELFSIGNED_SCOPE:     "global"
 
 # WWW-Redirect to None WWW-Domains enabled
 WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"

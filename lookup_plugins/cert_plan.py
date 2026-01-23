@@ -111,7 +111,7 @@ class LookupModule(LookupBase):
 
         elif mode == "self_signed":
             ss_base = as_str(require(variables, "TLS_SELFSIGNED_BASE_PATH", str))
-            ss_scope = as_str(variables.get("TLS_SELFSIGNED_SCOPE", "app")).lower()
+            ss_scope = as_str(variables.get("TLS_SELFSIGNED_SCOPE")).lower()
             if ss_scope not in {"app", "global"}:
                 raise AnsibleError(
                     "cert_plan: TLS_SELFSIGNED_SCOPE must be 'app' or 'global'"
