@@ -1,7 +1,11 @@
 ---
-tls_selfsigned_base: "/etc/infinito/selfsigned"
 tls_selfsigned_days: 825
 tls_selfsigned_key_bits: 2048
+
+# Controls whether self-signed certs are generated per app ("app")
+# or as one shared cert covering ALL domains across the global "domains" mapping ("global").
+TLS_SELFSIGNED_SCOPE:     "global"
+
 tls_selfsigned_subject:
   C:  "DE"
   O:  "{{ DOMAIN_PRIMARY }}"

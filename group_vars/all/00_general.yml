@@ -27,8 +27,9 @@ HOST_THOUSAND_SEPARATOR:  "."
 HOST_DECIMAL_MARK:        ","
 
 # Encryptiom
-TLS_ENABLED:            true
-TLS_MODE:               letsencrypt
+TLS_ENABLED:              true
+TLS_MODE:                 "letsencrypt"
+TLS_SELFSIGNED_BASE_PATH: "/etc/infinito/selfsigned"
 
 # WWW-Redirect to None WWW-Domains enabled
 WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"

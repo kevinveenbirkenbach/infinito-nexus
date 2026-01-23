@@ -5,7 +5,6 @@ Self-signed TLS provider for sys-front-tls (SAN aware).
 ## Inputs
 
 - tls_domain
-- tls_domains_san (effective SAN list recommended)
 - application_id
 - tls_selfsigned_base
 - tls_selfsigned_days
