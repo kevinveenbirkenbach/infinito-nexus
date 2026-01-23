@@ -1,6 +1,5 @@
 import unittest
 
-
 from filter_plugins.has_domain import FilterModule
 
 
@@ -25,9 +24,9 @@ class TestHasDomainFilter(unittest.TestCase):
         domains = {"other": "example.local"}
         self.assertFalse(self.has_domain(domains, "app"))
 
-    def test_returns_false_when_domains_not_dict(self):
+    def test_returns_true_when_domains_not_dict_but_contains_domain(self):
         domains = ["example.local"]
-        self.assertFalse(self.has_domain(domains, "app"))
+        self.assertTrue(self.has_domain(domains, "app"))
 
     def test_returns_false_for_empty_string_domain(self):
         domains = {"app": ""}

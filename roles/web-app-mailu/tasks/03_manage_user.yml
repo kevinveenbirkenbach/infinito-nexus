@@ -6,7 +6,7 @@
     chdir: "{{ MAILU_DOCKER_DIR }}"
   register: mailu_user_result
   retries: 340
-  delay: 2
+  delay: 10
   until: >
     mailu_user_result.rc == 0 or
     "exists, not created" in mailu_user_result.stderr or

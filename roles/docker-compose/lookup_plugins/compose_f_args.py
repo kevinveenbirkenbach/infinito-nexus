@@ -1,4 +1,4 @@
-# lookup_plugins/compose_f_args.py
+# roles/docker-compose/lookup_plugins/compose_f_args.py
 #
 # Build docker compose "-f <file>" arguments for an application instance.
 #
@@ -17,7 +17,6 @@
 # - docker_compose.files.docker_compose
 # - docker_compose.files.docker_compose_ca_override (required when enabled+self_signed)
 # - tls_resolve lookup plugin available
-# - has_domain filter available
 
 from __future__ import annotations
 
@@ -27,7 +26,7 @@ from typing import Any, Optional
 import yaml
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
-from ansible.plugins.loader import lookup_loader, filter_loader
+from ansible.plugins.loader import lookup_loader
 
 
 def _as_str(v: Any) -> str:
@@ -83,9 +82,28 @@ def _maybe_template(templar: Any, value: Any) -> Any:
     return value
 
 
-def _role_provides_override(
-    *, application_id: str, variables: dict, templar: Any
-) -> bool:
+def _value_has_domain(v: Any) -> bool:
+    if v is None:
+        return False
+    if isinstance(v, str):
+        return v.strip() != ""
+    if isinstance(v, (list, tuple, set)):
+        return any(_value_has_domain(x) for x in v)
+    if isinstance(v, dict):
+        return any(_value_has_domain(x) for x in v.values())
+    return False
+
+
+def _has_domain(domains: Any, application_id: str) -> bool:
+    """
+    Dependency-free domain existence check that matches the intent of the old filter.
+    """
+    if isinstance(domains, dict):
+        return _value_has_domain(domains.get(application_id))
+    return _value_has_domain(domains)
+
+
+def _role_provides_override(*, application_id: str, templar: Any) -> bool:
     """
     Mirror tasks/04_files.yml "with_first_found" logic:
 
@@ -151,9 +169,7 @@ class LookupModule(LookupBase):
         parts = [f"-f {base}"]
 
         # 1) Append override ONLY if the ROLE provides it (same logic as 04_files.yml).
-        if _role_provides_override(
-            application_id=application_id, variables=variables, templar=templar
-        ):
+        if _role_provides_override(application_id=application_id, templar=templar):
             if not override:
                 raise AnsibleError(
                     "compose_f_args: docker_compose.files.docker_compose_override is required "
@@ -165,14 +181,8 @@ class LookupModule(LookupBase):
         if "domains" not in variables:
             raise AnsibleError("compose_f_args: missing required variable 'domains'")
 
-        has_domain_filter = filter_loader.get("has_domain")
-        if not callable(has_domain_filter):
-            raise AnsibleError("compose_f_args: filter 'has_domain' is not available")
-
         domains = _maybe_template(templar, variables["domains"])
-        has_domain = bool(has_domain_filter(domains, application_id))
-
-        if has_domain:
+        if _has_domain(domains, application_id):
             tls_resolver = lookup_loader.get("tls_resolve", self._loader, self._templar)
             tls = tls_resolver.run([application_id], variables=variables)[0]
 

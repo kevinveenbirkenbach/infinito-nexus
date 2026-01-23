@@ -30,11 +30,6 @@ class _TlsResolveStub:
         return [{"enabled": self._enabled, "mode": self._mode}]
 
 
-def _has_domain_filter(domains, application_id) -> bool:
-    # Keep it simple: domain exists if application_id key exists
-    return isinstance(domains, dict) and application_id in domains
-
-
 class TestComposeFArgs(unittest.TestCase):
     def setUp(self):
         self.m = _load_module(
@@ -56,7 +51,6 @@ class TestComposeFArgs(unittest.TestCase):
                     "docker_compose_ca_override": "/x/docker-compose.ca.override.yml",
                 }
             },
-            # compose_f_args now requires domains + has_domain filter to decide if tls_resolve is called
             "domains": {
                 "web-app-a": "example.invalid",
             },
@@ -65,7 +59,6 @@ class TestComposeFArgs(unittest.TestCase):
     def test_includes_base_and_override_when_role_provides_override_and_tls_off(self):
         with (
             patch.object(self.m, "_role_provides_override", return_value=True),
-            patch.object(self.m.filter_loader, "get", return_value=_has_domain_filter),
             patch.object(
                 self.m.lookup_loader, "get", return_value=_TlsResolveStub(False, "off")
             ),
@@ -79,7 +72,6 @@ class TestComposeFArgs(unittest.TestCase):
     def test_includes_ca_override_when_self_signed_and_domain_exists(self):
         with (
             patch.object(self.m, "_role_provides_override", return_value=True),
-            patch.object(self.m.filter_loader, "get", return_value=_has_domain_filter),
             patch.object(
                 self.m.lookup_loader,
                 "get",
@@ -109,7 +101,6 @@ class TestComposeFArgs(unittest.TestCase):
 
         with (
             patch.object(self.m, "_role_provides_override", return_value=True),
-            patch.object(self.m.filter_loader, "get", return_value=_has_domain_filter),
             patch.object(
                 self.m.lookup_loader,
                 "get",
@@ -122,7 +113,6 @@ class TestComposeFArgs(unittest.TestCase):
     def test_includes_only_base_when_role_does_not_provide_override(self):
         with (
             patch.object(self.m, "_role_provides_override", return_value=False),
-            patch.object(self.m.filter_loader, "get", return_value=_has_domain_filter),
             patch.object(
                 self.m.lookup_loader, "get", return_value=_TlsResolveStub(False, "off")
             ),

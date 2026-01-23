@@ -1,33 +1,66 @@
-#!/usr/bin/python
-import os
-import sys
-from ansible.errors import AnsibleFilterError
+# filter_plugins/has_domain.py
+#
+# Simple, dependency-free "has_domain" filter.
+#
+# Goal:
+#   Return True if the given application_id has any domain configured in `domains`.
+#
+# Supported `domains` shapes (best-effort):
+#   - dict: {app_id: "example.org"} or {app_id: ["a.example.org", ...]} or {app_id: {"main": "..."}}
+#   - str/list/dict directly (edge cases)
+#
+# Important:
+#   No external imports, no sys.path hacks, so Ansible can always load this filter.
+
+from __future__ import annotations
+
+from typing import Any
+
+
+def _is_nonempty_str(v: Any) -> bool:
+    return isinstance(v, str) and v.strip() != ""
+
+
+def _value_has_domain(v: Any) -> bool:
+    if v is None:
+        return False
+
+    if _is_nonempty_str(v):
+        return True
+
+    if isinstance(v, (list, tuple, set)):
+        for item in v:
+            if _value_has_domain(item):
+                return True
+        return False
+
+    if isinstance(v, dict):
+        for _, item in v.items():
+            if _value_has_domain(item):
+                return True
+        return False
+
+    # Fallback: treat other scalars as "no domain"
+    return False
+
+
+def has_domain(domains: Any, application_id: Any) -> bool:
+    """
+    Return True if `domains` contains any domain-like value for `application_id`.
+    """
+    app_id = "" if application_id is None else str(application_id).strip()
+    if not app_id:
+        return False
+
+    if isinstance(domains, dict):
+        return _value_has_domain(domains.get(app_id))
+
+    # If someone passed a non-dict, try to interpret it directly.
+    return _value_has_domain(domains)
 
 
 class FilterModule(object):
     def filters(self):
-        plugin_dir = os.path.dirname(__file__)
-        project_root = os.path.dirname(plugin_dir)
-        module_utils = os.path.join(project_root, "module_utils")
-        if module_utils not in sys.path:
-            sys.path.append(module_utils)
-
-        try:
-            from domain_utils import get_domain
-        except ImportError as e:
-            raise AnsibleFilterError(f"could not import domain_utils: {e}")
-
-        def has_domain(domains, application_id):
-            """
-            Return True if get_domain(domains, application_id) succeeds,
-            False if it raises an AnsibleFilterError.
-            """
-            try:
-                get_domain(domains, application_id)
-                return True
-            except AnsibleFilterError:
-                return False
-
         return {
             "has_domain": has_domain,
         }
