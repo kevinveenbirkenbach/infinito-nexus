@@ -9,6 +9,7 @@
   listen:
     - docker compose up
   when:
+    - domains | has_domain(application_id)
     - lookup('tls_resolve', application_id, want='enabled') | bool
     - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
 
