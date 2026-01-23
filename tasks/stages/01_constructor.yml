@@ -12,6 +12,7 @@
       allowed_applications: {{ allowed_applications }}
       RUNTIME: {{ RUNTIME }}
       TLS_ENABLED: {{ TLS_ENABLED }}
+      ASYNC_ENABLED: {{ ASYNC_ENABLED }}
   when: MODE_DEBUG | bool
 
 - name: Check DNS resolution for test domain
