@@ -16,6 +16,7 @@ from __future__ import annotations
 import os
 from typing import Any, Optional
 
+import yaml
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
@@ -43,11 +44,62 @@ def _shell_quote(s: str) -> str:
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
 
+def _coerce_to_dict(v: Any, label: str) -> dict:
+    """
+    Coerce a value into a dict:
+      - accept dict directly
+      - accept YAML/JSON encoded string and parse it
+    """
+    if isinstance(v, dict):
+        return v
+
+    if isinstance(v, str):
+        s = v.strip()
+        if not s:
+            raise AnsibleError(f"compose_ca_inject_cmd: {label} is empty string")
+        try:
+            loaded = yaml.safe_load(s)
+        except Exception as exc:
+            raise AnsibleError(
+                f"compose_ca_inject_cmd: {label} could not be parsed as YAML: {exc}"
+            )
+        if isinstance(loaded, dict):
+            return loaded
+        raise AnsibleError(
+            f"compose_ca_inject_cmd: {label} parsed but is not a dict (got {type(loaded)})"
+        )
+
+    raise AnsibleError(f"compose_ca_inject_cmd: {label} must be a dict, got {type(v)}")
+
+
+def _maybe_template(templar: Any, value: Any) -> Any:
+    """
+    Render via Ansible templar if available.
+    Unit tests may not inject a templar -> then we skip templating.
+    """
+    if isinstance(value, (dict, list, tuple, int, float, bool)) or value is None:
+        return value
+    if templar is None:
+        return value
+    tpl = getattr(templar, "template", None)
+    if callable(tpl):
+        return tpl(value)
+    return value
+
+
 class LookupModule(LookupBase):
     def run(self, terms, variables: Optional[dict] = None, **kwargs):
         variables = variables or {}
 
-        docker_compose = _require(variables, "docker_compose", dict, label="variable")
+        raw_dc = variables.get("docker_compose", None)
+        if raw_dc is None:
+            raise AnsibleError(
+                "compose_ca_inject_cmd: missing required variable 'docker_compose'"
+            )
+
+        rendered_dc = _maybe_template(getattr(self, "_templar", None), raw_dc)
+        docker_compose = _coerce_to_dict(rendered_dc, "variable docker_compose")
+
         dirs = docker_compose.get("directories")
         files = docker_compose.get("files")
         if not isinstance(dirs, dict) or not isinstance(files, dict):

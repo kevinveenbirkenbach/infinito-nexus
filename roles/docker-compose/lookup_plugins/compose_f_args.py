@@ -22,6 +22,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
+import yaml
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
@@ -37,15 +38,47 @@ def _require_dict(d: Any, label: str) -> dict:
     return d
 
 
-def _require_key(d: dict, key: str, expected_type: Any, *, label: str) -> Any:
-    if key not in d:
-        raise AnsibleError(f"compose_f_args: missing required {label} '{key}'")
-    val = d[key]
-    if not isinstance(val, expected_type):
+def _coerce_to_dict(v: Any, label: str) -> dict:
+    """
+    Coerce a value into a dict:
+      - accept dict directly
+      - accept YAML/JSON encoded string and parse it
+    """
+    if isinstance(v, dict):
+        return v
+
+    if isinstance(v, str):
+        s = v.strip()
+        if not s:
+            raise AnsibleError(f"compose_f_args: {label} is empty string")
+        try:
+            loaded = yaml.safe_load(s)
+        except Exception as exc:
+            raise AnsibleError(
+                f"compose_f_args: {label} could not be parsed as YAML: {exc}"
+            )
+        if isinstance(loaded, dict):
+            return loaded
         raise AnsibleError(
-            f"compose_f_args: {label} '{key}' must be {expected_type}, got {type(val)}"
+            f"compose_f_args: {label} parsed but is not a dict (got {type(loaded)})"
         )
-    return val
+
+    raise AnsibleError(f"compose_f_args: {label} must be a dict, got {type(v)}")
+
+
+def _maybe_template(templar: Any, value: Any) -> Any:
+    """
+    Render via Ansible templar if available.
+    Unit tests often set _templar to object() or None -> then we skip templating.
+    """
+    if isinstance(value, (dict, list, tuple, int, float, bool)) or value is None:
+        return value
+    if templar is None:
+        return value
+    tpl = getattr(templar, "template", None)
+    if callable(tpl):
+        return tpl(value)
+    return value
 
 
 class LookupModule(LookupBase):
@@ -61,9 +94,16 @@ class LookupModule(LookupBase):
         if not application_id:
             raise AnsibleError("compose_f_args: application_id is empty")
 
-        docker_compose = _require_key(
-            variables, "docker_compose", dict, label="variable"
-        )
+        raw_dc = variables.get("docker_compose", None)
+        if raw_dc is None:
+            raise AnsibleError(
+                "compose_f_args: missing required variable 'docker_compose'"
+            )
+
+        # include_vars may load Jinja-templated YAML as TaggedStr.
+        # In real ansible runs, _templar exists. In unit tests, it may be None/object().
+        rendered_dc = _maybe_template(getattr(self, "_templar", None), raw_dc)
+        docker_compose = _coerce_to_dict(rendered_dc, "variable docker_compose")
         docker_compose = _require_dict(docker_compose, "docker_compose")
 
         files = docker_compose.get("files")
