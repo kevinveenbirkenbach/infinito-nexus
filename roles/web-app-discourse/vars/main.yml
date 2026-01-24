@@ -26,3 +26,7 @@ DISCOURSE_APPLICATION_YML_DEST: "{{ [ DISCOURSE_CONTAINERS_DIR, DISCOURSE_CONTAI
 DISCOURSE_ERROR_ALREADY_IN_NET: "Error response from daemon: endpoint with name {{ DISCOURSE_CONTAINER }} already exists in network {{ DISCOURSE_PG_NETWORK }}"
 DISCOURSE_ERROR_NOT_CONNECTED:  'is not connected to network {{ DISCOURSE_NETWORK }}'
 DISCOURSE_LDAP_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+
+# Don't use variable HOST_LL_CC, because this isn't available in the container. 
+# With this setup you have an minimalistic default setup
+DISCOURSE_LOCAL:                "C.UTF-8"

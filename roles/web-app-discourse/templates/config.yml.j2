@@ -31,9 +31,9 @@ params:
   #version: tests-passed
 
 env:
-  LC_ALL:   "{{ HOST_LL_CC }}.UTF-8"
-  LANG:     "{{ HOST_LL_CC }}.UTF-8"
-  LANGUAGE: "{{ HOST_LL_CC }}.UTF-8"
+  LC_ALL:   "{{ DISCOURSE_LOCAL }}"
+  LANG:     "{{ DISCOURSE_LOCAL }}"
+  LANGUAGE: "{{ DISCOURSE_LOCAL }}"
   #DISCOURSE_DEFAULT_LOCALE: {{ HOST_LL }} # Deactivated because not right format was selected @todo find right format
 
   DB_POOL:            "{{ POSTGRES_ALLOWED_AVG_CONNECTIONS }}"
