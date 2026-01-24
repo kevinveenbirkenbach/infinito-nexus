@@ -35,12 +35,12 @@ def handler(args: argparse.Namespace) -> int:
 
     stop_rc = stop_handler(_StopArgs())
     if stop_rc != 0:
-        # Keep going anyway; up might still succeed
         print(f">>> WARNING: stop returned rc={stop_rc}, continuing with up")
 
     # 2) up (normal behavior, no force unless flags provided)
     class _UpArgs:
         distro = args.distro
         skip_entry_init = bool(args.skip_entry_init)
+        when_down = False  # <-- REQUIRED by up.handler()
 
     return int(up_handler(_UpArgs()))
