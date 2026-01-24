@@ -78,12 +78,12 @@ applications:
           autologin: true
   web-app-matrix:
     oidc:
-      enabled:            true
-      shared:             true
+      enabled:            false
+      shared:             false
   web-app-mastodon:
     oidc:
-      enabled:            true
-      shared:             true
+      enabled:            false
+      shared:             false
   web-app-bigbluebutton:
     # Deactivate oidc temporary for testing purposes
     oidc:
