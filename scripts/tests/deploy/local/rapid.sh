@@ -49,7 +49,7 @@ docker exec -it "${INFINITO_CONTAINER}" bash -lc "
     --skip-update
     --skip-backup
     --skip-cleanup
-    --id \"${APP}\"
+    --id ${APP}
     --no-signal
     -l localhost
     --diff
