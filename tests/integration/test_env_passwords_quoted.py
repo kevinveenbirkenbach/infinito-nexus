@@ -1,16 +1,21 @@
 # tests/integration/test_env_passwords_quoted.py
 #
 # Integration test: ensure all password-like assignments in env.j2 templates
-# that are variable-derived (Jinja) are
-#   1) wrapped in DOUBLE QUOTES
+# that are variable-derived (Jinja) are:
+#   1) a PURE Jinja expression (no surrounding quotes in the template)
 #   2) use the `| dotenv_quote` filter
 #
-# A failure is raised if EITHER condition is not met.
+# Rationale:
+#   The `dotenv_quote` filter RETURNS a fully double-quoted string. Therefore
+#   templates MUST NOT wrap it in additional quotes, or double-quoting occurs.
 #
 # Ignored:
 # - literals without Jinja (e.g. REDIS_PASSWORD=null)
 #
 # Required form:
+#   SOME_PASSWORD={{ some_password_var | dotenv_quote }}
+#
+# Forbidden (would double-quote):
 #   SOME_PASSWORD="{{ some_password_var | dotenv_quote }}"
 #
 # Run:
@@ -36,8 +41,11 @@ PASSWORD_ASSIGN_RE = re.compile(
     re.IGNORECASE | re.VERBOSE,
 )
 
-# Exactly: "{{ ... }}"
-JINJA_DOUBLE_QUOTED_RE = re.compile(r'^"\{\{\s*(?P<expr>.+?)\s*\}\}"$')
+# Exactly: {{ ... }}
+JINJA_PURE_RE = re.compile(r"^\{\{\s*(?P<expr>.+?)\s*\}\}$")
+
+# Exactly: "{{ ... }}"  (FORBIDDEN - would double-quote because dotenv_quote already quotes)
+JINJA_DOUBLE_WRAPPED_RE = re.compile(r'^"\{\{\s*(?P<expr>.+?)\s*\}\}"$')
 
 DOTENV_FILTER = "dotenv_quote"
 
@@ -57,7 +65,7 @@ def _is_jinja_control_line(line: str) -> bool:
 
 
 class TestEnvPasswordsQuotedAndFiltered(unittest.TestCase):
-    def test_password_env_vars_are_double_quoted_and_dotenv_filtered(self):
+    def test_password_env_vars_are_dotenv_quoted_without_double_quoting(self):
         root = _repo_root_from_test_file()
         env_templates = sorted(root.rglob("env.j2"))
 
@@ -86,13 +94,23 @@ class TestEnvPasswordsQuotedAndFiltered(unittest.TestCase):
                 if "{{" not in rhs or "}}" not in rhs:
                     continue
 
-                # Must be exactly double-quoted Jinja
-                m_jinja = JINJA_DOUBLE_QUOTED_RE.match(rhs)
+                # Explicitly forbid: "{{ ... }}" (double-quoting in templates)
+                if JINJA_DOUBLE_WRAPPED_RE.match(rhs):
+                    failures.append(
+                        f"{rel}:{lineno}: {key} is wrapped in double quotes, which would cause double-quoting.\n"
+                        f'  Forbidden: "{{{{ ... | {DOTENV_FILTER} }}}}"\n'
+                        f"  Required:  {{{{ ... | {DOTENV_FILTER} }}}}\n"
+                        f"  Found:     {rhs!r}"
+                    )
+                    continue
+
+                # Must be exactly a pure Jinja expression: {{ ... }}
+                m_jinja = JINJA_PURE_RE.match(rhs)
                 if not m_jinja:
                     failures.append(
-                        f"{rel}:{lineno}: {key} must be wrapped in double quotes and be a pure Jinja expression.\n"
-                        f'  Required: "{{{{ ... | {DOTENV_FILTER} }}}}"\n'
-                        f"  Found:    {rhs!r}"
+                        f"{rel}:{lineno}: {key} must be a pure Jinja expression (no surrounding quotes).\n"
+                        f"  Required:  {{{{ ... | {DOTENV_FILTER} }}}}\n"
+                        f"  Found:     {rhs!r}"
                     )
                     continue
 
@@ -102,16 +120,17 @@ class TestEnvPasswordsQuotedAndFiltered(unittest.TestCase):
                 if DOTENV_FILTER not in expr:
                     failures.append(
                         f"{rel}:{lineno}: {key} is missing '| {DOTENV_FILTER}'.\n"
-                        f'  Required: "{{{{ ... | {DOTENV_FILTER} }}}}"\n'
-                        f"  Found:    {rhs!r}"
+                        f"  Required:  {{{{ ... | {DOTENV_FILTER} }}}}\n"
+                        f"  Found:     {rhs!r}"
                     )
 
         if failures:
             self.fail(
                 "Invalid password definitions found in env.j2 templates.\n\n"
                 "Rules:\n"
-                f"  - password variables must be double-quoted\n"
+                f"  - password variables must be a pure Jinja expression: {{{{ ... }}}}\n"
                 f"  - password variables must use '| {DOTENV_FILTER}'\n"
+                f"  - wrapping Jinja in double quotes is forbidden (prevents double-quoting)\n"
                 "  - literals (no Jinja) are ignored\n\n"
                 "Failures:\n- " + "\n- ".join(failures)
             )
