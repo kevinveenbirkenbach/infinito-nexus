@@ -20,4 +20,17 @@
     package_name: 'psycopg2-binary'
     global_install: true
 
+- name: "POSTGRES | Ensure postgres superuser password"
+  ansible.builtin.script:
+    cmd: >
+      scripts/postgres_set_superuser_password.py
+      --container {{ POSTGRES_CONTAINER }}
+      --user postgres
+      --db postgres
+      --password {{ POSTGRES_PASSWORD }}
+  register: pg_set_pwd
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  changed_when: pg_set_pwd.rc == 2
+  failed_when: pg_set_pwd.rc not in [0, 2]
+
 - include_tasks: utils/once/flag.yml
