@@ -30,7 +30,7 @@
       /app/gitea/gitea admin user create \
         --admin \
         --username "{{ users.administrator.username }}" \
-        --password "{{ users.administrator.password }}" \
+        --password {{ users.administrator.password | quote }} \
         --email    "{{ users.administrator.email }}" \
         -c {{ GITEA_CONFIG }}
   args:

@@ -5,7 +5,7 @@
     # Check if MediaWiki tables exist using a MariaDB client container
     has_tables=0
     if docker run --rm --network {{ MEDIAWIKI_NETWORK_DATABASE }} mariadb:{{ database_version | default('latest') }} \
-      mariadb -h "{{ database_host }}" -P "{{ database_port }}" -u "{{ database_username }}" -p"{{ database_password }}" \
+      mariadb -h "{{ database_host }}" -P "{{ database_port }}" -u "{{ database_username }}" -p{{ database_password | quote }} \
       -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='{{ database_name }}';" 2>/dev/null | grep -q -v '^0$'; then
       has_tables=1
     fi
@@ -24,12 +24,12 @@
             --dbserver "{{ database_host }}:{{ database_port }}" \
             --dbname "{{ database_name }}" \
             --dbuser "{{ database_username }}" \
-            --dbpass "{{ database_password }}" \
+            --dbpass {{ database_password | quote }} \
             --server "{{ MEDIAWIKI_URL }}" \
             --scriptpath "" \
             "{{ MEDIAWIKI_SITENAME }}" \
             "{{ MEDIAWIKI_ADMINISTRATOR_NAME }}" \
-            --pass "{{ MEDIAWIKI_ADMINISTRATOR_PASSWORD }}"
+            --pass {{ MEDIAWIKI_ADMINISTRATOR_PASSWORD | quote }}
         '
     else
       echo "[mw] DB already initialized -> skipping install"

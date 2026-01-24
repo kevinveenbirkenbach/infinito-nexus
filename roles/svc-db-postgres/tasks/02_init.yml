@@ -11,7 +11,7 @@
     - name: Wait for Postgres TCP auth
       ansible.builtin.shell: >
         docker exec {{ POSTGRES_CONTAINER }} sh -lc
-        'PGPASSWORD="{{ POSTGRES_PASSWORD }}"
+        'PGPASSWORD={{ POSTGRES_PASSWORD | quote }}
         psql -h "{{ POSTGRES_LOCAL_HOST }}" -p "{{ POSTGRES_PORT }}"
         -U postgres -d postgres -c "SELECT 1"'
       register: pg_ready
@@ -179,7 +179,7 @@
     - name: "POSTGRES | psql auth test (SELECT 1) using PGPASSWORD"
       ansible.builtin.shell: >
         docker exec {{ POSTGRES_CONTAINER }} sh -lc
-        'PGPASSWORD="{{ POSTGRES_PASSWORD }}" psql -U postgres -d postgres -c "SELECT 1"'
+        'PGPASSWORD={{ POSTGRES_PASSWORD | quote }} psql -U postgres -d postgres -c "SELECT 1"'
       register: dbg_psql_select1
       changed_when: false
       failed_when: false
@@ -189,7 +189,7 @@
     - name: "POSTGRES | Show hba_file + config_file"
       ansible.builtin.shell: >
         docker exec {{ POSTGRES_CONTAINER }} sh -lc
-        'PGPASSWORD="{{ POSTGRES_PASSWORD }}" psql -U postgres -d postgres -Atc
+        'PGPASSWORD={{ POSTGRES_PASSWORD | quote }} psql -U postgres -d postgres -Atc
         "SHOW hba_file; SHOW config_file;"'
       register: dbg_psql_show_files
       changed_when: false
@@ -199,7 +199,7 @@
     - name: "POSTGRES | Dump pg_hba.conf (best effort)"
       ansible.builtin.shell: |
         set -e
-        hba="$(docker exec {{ POSTGRES_CONTAINER }} sh -lc 'PGPASSWORD="{{ POSTGRES_PASSWORD }}" psql -U postgres -d postgres -Atc "SHOW hba_file;" 2>/dev/null' || true)"
+        hba="$(docker exec {{ POSTGRES_CONTAINER }} sh -lc 'PGPASSWORD={{ POSTGRES_PASSWORD | quote }} psql -U postgres -d postgres -Atc "SHOW hba_file;" 2>/dev/null' || true)"
         if [ -n "$hba" ]; then
           echo "hba_file=$hba"
           docker exec {{ POSTGRES_CONTAINER }} sh -lc "sed -n '1,200p' \"$hba\" 2>/dev/null || true"
@@ -214,7 +214,7 @@
     - name: "POSTGRES | Active connections / roles snapshot (best effort)"
       ansible.builtin.shell: >
         docker exec {{ POSTGRES_CONTAINER }} sh -lc
-        'PGPASSWORD="{{ POSTGRES_PASSWORD }}" psql -U postgres -d postgres -c
+        'PGPASSWORD={{ POSTGRES_PASSWORD | quote }} psql -U postgres -d postgres -c
         "SELECT now(), usename, client_addr, state, wait_event_type, wait_event, query FROM pg_stat_activity ORDER BY state, usename LIMIT 30;
          \\du+"'
       register: dbg_psql_activity_roles

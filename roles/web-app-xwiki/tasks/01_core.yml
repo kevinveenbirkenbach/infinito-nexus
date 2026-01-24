@@ -54,7 +54,7 @@
         ' || true
 
         echo -n "ansible_hash="
-        printf "%s" "{{ XWIKI_SUPERADMIN_PASSWORD }}" | sha256sum | awk '{print $1}'
+        printf "%s" {{ XWIKI_SUPERADMIN_PASSWORD | quote }} | sha256sum | awk '{print $1}'
       register: _dbg_superadmin
       changed_when: false
       failed_when: false
