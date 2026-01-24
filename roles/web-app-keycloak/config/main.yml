@@ -40,7 +40,7 @@ docker:
       shared: true
     keycloak:
       image:            "quay.io/keycloak/keycloak"
-      version:          "latest"
+      version:          "latest" # 26.5.1 stable
       name:             "keycloak"
       cpus:             "2.0"
       mem_reservation:  "2g"

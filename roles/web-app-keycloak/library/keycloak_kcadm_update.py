@@ -1,13 +1,15 @@
 #!/usr/bin/python
+# roles/web-app-keycloak/library/keycloak_kcadm_update.py
 
 from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 import json
 import subprocess
 from copy import deepcopy
+
+from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = r"""
 ---
@@ -79,27 +81,6 @@ author:
   - Your Name
 """
 
-EXAMPLES = r"""
-- name: Create or update a Keycloak client (merge full object)
-  keycloak_kcadm_update:
-    object_kind: client
-    lookup_value: "{{ KEYCLOAK_CLIENT_ID }}"
-    desired: "{{ KEYCLOAK_DICTIONARY_CLIENT }}"
-    kcadm_exec: "{{ KEYCLOAK_EXEC_KCADM }}"
-    realm: "{{ KEYCLOAK_REALM }}"
-
-- name: Create or update LDAP component (merge only config)
-  keycloak_kcadm_update:
-    object_kind: component
-    lookup_value: "{{ KEYCLOAK_LDAP_CMP_NAME }}"
-    desired: "{{ KEYCLOAK_DICTIONARY_LDAP }}"
-    merge_path: config
-    kcadm_exec: "{{ KEYCLOAK_EXEC_KCADM }}"
-    realm: "{{ KEYCLOAK_REALM }}"
-    force_attrs:
-      parentId: "{{ KEYCLOAK_REALM }}"
-"""
-
 RETURN = r"""
 changed:
   description: Whether the object was created or updated.
@@ -130,18 +111,78 @@ def run_kcadm(module, cmd, ignore_rc=False):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        stdout = rc.stdout.decode("utf-8").strip()
-        stderr = rc.stderr.decode("utf-8").strip()
+        # IMPORTANT: kcadm can print JVM warnings before JSON.
+        # We decode safely and keep the raw string for later parsing.
+        stdout = rc.stdout.decode("utf-8", errors="replace").strip()
+        stderr = rc.stderr.decode("utf-8", errors="replace").strip()
         return rc.returncode, stdout, stderr
     except Exception as e:
         module.fail_json(msg="Failed to run kcadm command", cmd=cmd, error=str(e))
         return None, None, None
 
 
+def parse_json_maybe_noisy(module, text, context=""):
+    """
+    Keycloak/kcadm can emit JVM warnings to stdout before JSON.
+    Some warnings even start with '[' (e.g. "[0.001s][warning]..."), which
+    breaks naive "first '[' or '{'" heuristics.
+
+    Deterministic strategy:
+      - scan for all occurrences of '{' and '['
+      - attempt json.loads() starting from each occurrence (in order)
+      - return the first successfully parsed JSON value
+      - fail if none work
+    """
+    if text is None:
+        module.fail_json(msg="No output to parse as JSON", context=context)
+
+    s = str(text).lstrip()
+    if not s:
+        module.fail_json(msg="Empty output; cannot parse JSON", context=context)
+
+    # Collect candidate start positions in order
+    candidates = []
+    for ch in ("[", "{"):
+        start = 0
+        while True:
+            idx = s.find(ch, start)
+            if idx == -1:
+                break
+            candidates.append(idx)
+            start = idx + 1
+    candidates = sorted(set(candidates))
+
+    if not candidates:
+        module.fail_json(
+            msg="No JSON object/array start found in output",
+            context=context,
+            stdout=text,
+        )
+
+    last_err = None
+    for idx in candidates:
+        chunk = s[idx:].strip()
+        try:
+            return json.loads(chunk)
+        except Exception as e:
+            last_err = e
+            continue
+
+    # Nothing worked → hard fail with helpful previews
+    module.fail_json(
+        msg="Failed to parse JSON from output (possibly noisy stdout)",
+        context=context,
+        error=str(last_err) if last_err else "unknown",
+        stdout=text,
+        extracted_preview=s[:2000],
+    )
+    return None
+
+
 def deep_merge(a, b):
     """Recursive dict merge similar to Ansible's combine(recursive=True)."""
     result = deepcopy(a)
-    for k, v in b.items():
+    for k, v in (b or {}).items():
         if k in result and isinstance(result[k], dict) and isinstance(v, dict):
             result[k] = deep_merge(result[k], v)
         else:
@@ -184,34 +225,58 @@ def resolve_object_id(
 
     if object_kind == "client-scope":
         cmd = f"{kcadm_exec} get client-scopes -r {realm} --format json"
-        rc, out, err = run_kcadm(module, cmd, ignore_rc=True)
+        rc, out, _err = run_kcadm(module, cmd, ignore_rc=True)
         if rc != 0 or not out:
             return "", False
-        try:
-            scopes = json.loads(out)
-        except Exception:
-            return "", False
+        scopes = parse_json_maybe_noisy(
+            module, out, context="resolve_object_id: client-scopes"
+        )
         for obj in scopes:
             if obj.get(lookup_field) == lookup_value:
                 return obj.get("id", ""), True
         return "", False
 
-    # Generic path (client, component via query)
+    # Robust client-side resolution (avoid --query and tolerate noisy stdout)
+    if object_kind == "client":
+        cmd = f"{kcadm_exec} get clients -r {realm} --format json"
+        rc, out, _err = run_kcadm(module, cmd, ignore_rc=True)
+        if rc != 0 or not out:
+            return "", False
+        clients = parse_json_maybe_noisy(
+            module, out, context="resolve_object_id: clients"
+        )
+        for obj in clients:
+            if obj.get(lookup_field) == lookup_value:
+                return obj.get("id", ""), True
+        return "", False
+
+    if object_kind == "component":
+        cmd = f"{kcadm_exec} get components -r {realm} --format json"
+        rc, out, _err = run_kcadm(module, cmd, ignore_rc=True)
+        if rc != 0 or not out:
+            return "", False
+        comps = parse_json_maybe_noisy(
+            module, out, context="resolve_object_id: components"
+        )
+        for obj in comps:
+            if obj.get(lookup_field) == lookup_value:
+                return obj.get("id", ""), True
+        return "", False
+
+    # Fallback generic (kept for future kinds)
     cmd = (
         f"{kcadm_exec} get {api} -r {realm} "
         f"--query '{lookup_field}={lookup_value}' "
         f"--fields id --format json"
     )
-    rc, out, err = run_kcadm(module, cmd, ignore_rc=True)
+    rc, out, _err = run_kcadm(module, cmd, ignore_rc=True)
     if rc != 0 or not out:
         return "", False
-    try:
-        data = json.loads(out)
-        if not data:
-            return "", False
-        return data[0].get("id", ""), True
-    except Exception:
+
+    data = parse_json_maybe_noisy(module, out, context="resolve_object_id: generic")
+    if not data:
         return "", False
+    return data[0].get("id", ""), True
 
 
 def get_current_object(module, object_kind, api, object_id, realm, kcadm_exec):
@@ -219,22 +284,24 @@ def get_current_object(module, object_kind, api, object_id, realm, kcadm_exec):
         cmd = f"{kcadm_exec} get {api}/{object_id} --format json"
     else:
         cmd = f"{kcadm_exec} get {api}/{object_id} -r {realm} --format json"
-    rc, out, err = run_kcadm(module, cmd)
-    try:
-        return json.loads(out)
-    except Exception as e:
-        module.fail_json(
-            msg="Failed to parse current Keycloak object JSON", error=str(e), stdout=out
-        )
-        return None
+    rc, out, _err = run_kcadm(module, cmd)
+    return parse_json_maybe_noisy(
+        module, out, context=f"get_current_object: {api}/{object_id}"
+    )
 
 
 def send_update(module, object_kind, api, object_id, realm, kcadm_exec, payload):
     payload_json = json.dumps(payload)
     if object_kind == "realm":
-        cmd = f"cat <<'JSON' | {kcadm_exec} update {api}/{object_id} -f -\n{payload_json}\nJSON"
+        cmd = (
+            f"cat <<'JSON' | {kcadm_exec} update {api}/{object_id} -f -\n"
+            f"{payload_json}\nJSON"
+        )
     else:
-        cmd = f"cat <<'JSON' | {kcadm_exec} update {api}/{object_id} -r {realm} -f -\n{payload_json}\nJSON"
+        cmd = (
+            f"cat <<'JSON' | {kcadm_exec} update {api}/{object_id} -r {realm} -f -\n"
+            f"{payload_json}\nJSON"
+        )
     rc, out, err = run_kcadm(module, cmd, ignore_rc=True)
     return rc, out, err
 
@@ -244,7 +311,10 @@ def send_create(module, object_kind, api, realm, kcadm_exec, payload):
     if object_kind == "realm":
         cmd = f"cat <<'JSON' | {kcadm_exec} create {api} -f -\n{payload_json}\nJSON"
     else:
-        cmd = f"cat <<'JSON' | {kcadm_exec} create {api} -r {realm} -f -\n{payload_json}\nJSON"
+        cmd = (
+            f"cat <<'JSON' | {kcadm_exec} create {api} -r {realm} -f -\n"
+            f"{payload_json}\nJSON"
+        )
     rc, out, err = run_kcadm(module, cmd, ignore_rc=True)
     return rc, out, err
 
@@ -269,10 +339,7 @@ def run_module():
         result={},
     )
 
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=False,
-    )
+    module = AnsibleModule(argument_spec=module_args, supports_check_mode=False)
 
     object_kind = module.params["object_kind"]
     lookup_value = module.params["lookup_value"]
@@ -298,35 +365,69 @@ def run_module():
     result["object_exists"] = exists
     result["object_id"] = object_id
 
+    # --------------------------------------------------------------
     # CREATE PATH (no existing object)
+    # If create fails with "already exists", re-resolve and fall
+    # through into UPDATE path.
+    # --------------------------------------------------------------
     if not exists or not object_id:
         desired_obj = deepcopy(desired)
 
-        # Drop unsupported fields for components (e.g. subComponents)
         if object_kind == "component":
             desired_obj.pop("subComponents", None)
 
-        # Apply forced attributes (common behavior)
         if force_attrs:
             desired_obj = deep_merge(desired_obj, force_attrs)
 
         rc, out, err = send_create(
             module, object_kind, api, realm, kcadm_exec, desired_obj
         )
+
         if rc != 0:
-            module.fail_json(
-                msg="Failed to create Keycloak object",
-                rc=rc,
-                stdout=out,
-                stderr=err,
-                payload=desired_obj,
-            )
+            err_l = (err or "").lower()
+            already_exists_markers = ["already exists", "exists with same", "conflict"]
+            if any(m in err_l for m in already_exists_markers):
+                # Lookup likely failed; re-resolve id and continue as update.
+                object_id2, exists2 = resolve_object_id(
+                    module,
+                    object_kind,
+                    api,
+                    eff_lookup_field,
+                    lookup_value,
+                    realm,
+                    kcadm_exec,
+                )
+                if exists2 and object_id2:
+                    object_id = object_id2
+                    exists = True
+                    result["object_exists"] = True
+                    result["object_id"] = object_id
+                else:
+                    module.fail_json(
+                        msg="Create failed with 'already exists' but re-resolve did not find object id",
+                        rc=rc,
+                        stdout=out,
+                        stderr=err,
+                        payload=desired_obj,
+                    )
+            else:
+                module.fail_json(
+                    msg="Failed to create Keycloak object",
+                    rc=rc,
+                    stdout=out,
+                    stderr=err,
+                    payload=desired_obj,
+                )
 
-        result["changed"] = True
-        result["result"] = desired_obj
-        module.exit_json(**result)
+        # If create succeeded, we are done.
+        if not exists or not object_id:
+            result["changed"] = True
+            result["result"] = desired_obj
+            module.exit_json(**result)
 
+    # --------------------------------------------------------------
     # UPDATE PATH (object exists)
+    # --------------------------------------------------------------
     cur_obj = get_current_object(module, object_kind, api, object_id, realm, kcadm_exec)
 
     # Optional safety check: providerId must match for components
@@ -358,7 +459,6 @@ def run_module():
         for k in ["id", "providerId", "providerType", "parentId"]:
             if k in cur_obj:
                 desired_obj[k] = cur_obj[k]
-        # Drop unsupported fields such as subComponents
         desired_obj.pop("subComponents", None)
 
     elif object_kind == "client-scope":
@@ -375,8 +475,7 @@ def run_module():
     if force_attrs:
         desired_obj = deep_merge(desired_obj, force_attrs)
 
-    # If nothing changed logically, we could diff & short-circuit.
-    # For simplicity we always send update and rely on Keycloak to no-op.
+    # Always send update and rely on Keycloak to no-op.
     rc, out, err = send_update(
         module, object_kind, api, object_id, realm, kcadm_exec, desired_obj
     )
