@@ -84,7 +84,11 @@ applications:
     oidc:
       enabled:            true
       shared:             true
-#  web-app-bigbluebutton:
+  web-app-bigbluebutton:
+    # Deactivate oidc temporary for testing purposes
+    oidc:
+      enabled:            false
+      shared:             false
 #    server:
 #      tls:
 #        enabled:  false  "{{ RUNTIME == 'dev' }}"
