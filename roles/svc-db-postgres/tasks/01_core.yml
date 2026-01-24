@@ -20,17 +20,26 @@
     package_name: 'psycopg2-binary'
     global_install: true
 
-- name: "POSTGRES | Ensure postgres superuser password"
-  ansible.builtin.script:
-    cmd: >
-      scripts/postgres_set_superuser_password.py
-      --container {{ POSTGRES_CONTAINER }}
-      --user postgres
-      --db postgres
-      --password {{ POSTGRES_PASSWORD }}
-  register: pg_set_pwd
+- name: "POSTGRES | Wait until postgres is ready (inside container)"
+  ansible.builtin.shell: >
+    docker exec {{ POSTGRES_CONTAINER }} pg_isready -U postgres
+  register: postgres_ready
+  until: postgres_ready.rc == 0
+  retries: 30
+  delay: 2
+  changed_when: false
+
+- name: "POSTGRES | Ensure postgres superuser password matches inventory"
+  ansible.builtin.script: >
+    set_postgres_superuser_password.sh
+    {{ POSTGRES_CONTAINER | quote }}
+    {{ POSTGRES_PASSWORD | quote }}
+  register: postgres_pw_result
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  changed_when: pg_set_pwd.rc == 2
-  failed_when: pg_set_pwd.rc not in [0, 2]
+  changed_when: >
+    postgres_pw_result.stdout is search('\\[CHANGED\\]')
+  failed_when: >
+    postgres_pw_result.rc != 0 or
+    postgres_pw_result.stdout is search('\\[FAIL\\]')
 
 - include_tasks: utils/once/flag.yml
