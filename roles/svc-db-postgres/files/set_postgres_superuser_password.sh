@@ -33,6 +33,7 @@ backup="${hba_file}.bak_ansible_pwcheck_$$"
 # Backup hba
 docker exec "$container" bash -lc "cp -a \"$hba_file\" \"$backup\""
 
+# shellcheck disable=SC2329
 restore_hba() {
   # Restore on exit (best effort)
   docker exec "$container" bash -lc "if [ -f \"$backup\" ]; then cp -a \"$backup\" \"$hba_file\" && rm -f \"$backup\"; fi" >/dev/null 2>&1 || true
