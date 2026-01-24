@@ -22,7 +22,15 @@ echo "inventory_dir = ${INVENTORY_DIR}"
 echo
 
 # ---------------------------------------------------------------------------
-# 1) Discover apps on HOST (needs docker compose)
+# 1) Bring up development stack (no build) on host
+# ---------------------------------------------------------------------------
+echo ">>> Starting development compose stack (no build)"
+"${PYTHON}" -m cli.deploy.development up \
+  --distro "${INFINITO_DISTRO}" \
+  --skip-entry-init
+
+# ---------------------------------------------------------------------------
+# 2) Discover apps on HOST (needs docker compose)
 # ---------------------------------------------------------------------------
 echo ">>> Discovering apps on host via make ci-deploy-discover (TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE})"
 
@@ -66,14 +74,6 @@ fi
 
 echo "apps_count=${apps_count}"
 echo
-
-# ---------------------------------------------------------------------------
-# 2) Bring up development stack (no build) on host
-# ---------------------------------------------------------------------------
-echo ">>> Starting development compose stack (no build)"
-"${PYTHON}" -m cli.deploy.development up \
-  --distro "${INFINITO_DISTRO}" \
-  --skip-entry-init
 
 # ---------------------------------------------------------------------------
 # 3) entry.sh + create inventory + deploy INSIDE container via development exec
