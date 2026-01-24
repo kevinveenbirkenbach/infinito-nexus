@@ -13,7 +13,7 @@ if [[ -z "$container" || -z "$new_pw" ]]; then
 fi
 
 # Wait until PostgreSQL is ready (socket)
-for i in $(seq 1 60); do
+for _ in {1..60}; do
   if docker exec "$container" bash -lc 'pg_isready -U postgres >/dev/null 2>&1'; then
     break
   fi
@@ -38,7 +38,9 @@ restore_hba() {
   docker exec "$container" bash -lc "if [ -f \"$backup\" ]; then cp -a \"$backup\" \"$hba_file\" && rm -f \"$backup\"; fi" >/dev/null 2>&1 || true
   docker exec "$container" bash -lc "psql -U postgres -d postgres -Atc 'SELECT pg_reload_conf();' >/dev/null 2>&1" || true
 }
-trap restore_hba EXIT
+
+# Make ShellCheck see this as an invocation path
+trap 'restore_hba' EXIT
 
 # Force password auth for local TCP (127.0.0.1)
 # Prepend a strict rule so it matches first.
