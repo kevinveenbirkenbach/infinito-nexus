@@ -27,7 +27,7 @@
   set_fact:
     kc_recaptcha_cfg_id: >-
       {{
-        kc_reg_exec.stdout | from_json
+        kc_reg_exec.stdout | kcadm_json
         | selectattr('providerId','equalto','registration-recaptcha-action')
         | map(attribute='authenticationConfig')
         | first | default('')
