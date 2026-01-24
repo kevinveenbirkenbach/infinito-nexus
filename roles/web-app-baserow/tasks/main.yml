@@ -8,7 +8,6 @@
 - name: "Bootstrap Baserow Django superuser '{{ BASEROW_BOOTSTRAP_ADMIN_USERNAME }}' (idempotent)"
   ansible.builtin.script:
     cmd: "{{ role_path }}/files/bootstrap_admin_via_compose_env.py"
-  delegate_to: localhost
   environment:
     BASEROW_COMPOSE_DIR: "{{ docker_compose.directories.instance }}"
     BASEROW_COMPOSE_ENV_FILE: "{{ docker_compose.files.env }}"
