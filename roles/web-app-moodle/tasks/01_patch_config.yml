@@ -1,30 +1,30 @@
 - name: Update DB host
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i "s/^\$CFG->dbhost *= *.*/\$CFG->dbhost = '{{ database_host }}';/" {{ MOODLE_CONFIG }}
+    sed -i "s/^\$CFG->dbhost *= *.*/\$CFG->dbhost = '{{ database_host | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
   notify: docker compose up
 
 - name: Update DB name
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i "s/^\$CFG->dbname *= *.*/\$CFG->dbname = '{{ database_name }}';/" {{ MOODLE_CONFIG }}
+    sed -i "s/^\$CFG->dbname *= *.*/\$CFG->dbname = '{{ database_name | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
   notify: docker compose up
 
 - name: Update DB user
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i "s/^\$CFG->dbuser *= *.*/\$CFG->dbuser = '{{ database_username }}';/" {{ MOODLE_CONFIG }}
+    sed -i "s/^\$CFG->dbuser *= *.*/\$CFG->dbuser = '{{ database_username | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
   notify: docker compose up
 
 - name: Update DB password
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i "s/^\$CFG->dbpass *= *.*/\$CFG->dbpass = '{{ database_password }}';/" {{ MOODLE_CONFIG }}
+    sed -i "s/^\$CFG->dbpass *= *.*/\$CFG->dbpass = '{{ database_password | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
   notify: docker compose up
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Update CFG->wwwroot via sed in container
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i -E "s|^(\$CFG->wwwroot[[:space:]]*=[[:space:]]*).*$|\1'{{ lookup('tls_resolve', application_id, want='url.base') }}';|" {{ MOODLE_CONFIG }}
+    sed -i -E "s|^(\$CFG->wwwroot[[:space:]]*=[[:space:]]*).*$|\1'{{ lookup('tls_resolve', application_id, want='url.base') | sed_escape('|') }}';|" {{ MOODLE_CONFIG }}
   notify: docker compose up
