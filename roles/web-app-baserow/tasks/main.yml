@@ -2,3 +2,28 @@
 - name: "For '{{ application_id }}': load docker, db and proxy"
   include_role:
     name: sys-stk-full
+  vars:
+    docker_compose_flush_handlers: true # Required so that new db pw is used
+
+- name: "Bootstrap Baserow Django superuser '{{ BASEROW_BOOTSTRAP_ADMIN_USERNAME }}' (idempotent)"
+  ansible.builtin.script:
+    cmd: "{{ role_path }}/files/bootstrap_admin_via_compose_env.py"
+  delegate_to: localhost
+  environment:
+    BASEROW_COMPOSE_DIR: "{{ docker_compose.directories.instance }}"
+    BASEROW_COMPOSE_ENV_FILE: "{{ docker_compose.files.env }}"
+    BASEROW_SERVICE_NAME: "{{ BASEROW_SERVICE_NAME }}"
+
+    BASEROW_PYTHON_BIN: "{{ BASEROW_PYTHON }}"
+    BASEROW_MANAGE_PY: "{{ BASEROW_MANAGE_PY }}"
+
+    BASEROW_DJANGO_SETTINGS_MODULE: "{{ BASEROW_DJANGO_SETTINGS_MODULE }}"
+    BASEROW_SECRET_KEY: "{{ BASEROW_SECRET_KEY }}"
+
+    BASEROW_BOOTSTRAP_ADMIN_USERNAME: "{{ BASEROW_BOOTSTRAP_ADMIN_USERNAME }}"
+    BASEROW_BOOTSTRAP_ADMIN_EMAIL: "{{ BASEROW_BOOTSTRAP_ADMIN_EMAIL }}"
+    BASEROW_BOOTSTRAP_ADMIN_PASSWORD: "{{ BASEROW_BOOTSTRAP_ADMIN_PASSWORD }}"
+  register: baserow_bootstrap_admin_result
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  changed_when: "'created' in (baserow_bootstrap_admin_result.stdout | default(''))"
+  failed_when: baserow_bootstrap_admin_result.rc != 0

@@ -25,6 +25,26 @@ This role deploys Baserow using Docker Compose, integrating key components such 
 
 SSO is only available in the Enterprise Edition. LDAP configuration is not supported. For more details, please refer to the [Baserow SSO Documentation](https://baserow.io/user-docs/enable-single-sign-on-sso).
 
+## Bootstrap Admin (Django Superuser)
+
+This role can optionally bootstrap a Django superuser inside the Baserow container (useful for initial setup and automation).
+
+- The user is created idempotently (safe to run multiple times).
+- The password is passed via environment variables (robust with special characters).
+- Note: Django superuser enables access to `/admin`. Workspace permissions inside Baserow still need to be configured in Baserow UI/API.
+
+Configuration is controlled via `applications.<app>.bootstrap_admin.*`:
+
+- `enabled` (bool)
+- `username`
+- `email`
+- `password` (should come from vault/credentials)
+
+## Security: SECRET_KEY
+
+Baserow requires Django `SECRET_KEY` for correct backend operation (e.g., JWT, sessions).
+This role reads it from `credentials.secret_key` and writes it into the container environment file.
+
 ## Credits
 
 Developed and maintained by **Kevin Veen-Birkenbach**.  
