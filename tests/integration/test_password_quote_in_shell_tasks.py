@@ -14,6 +14,8 @@ QUOTE_FILTER_RE = re.compile(r"\|\s*quote\b", re.IGNORECASE)
 
 SHELL_KEY_RE = re.compile(r"^\s*(?:ansible\.builtin\.)?shell\s*:\s*(.*)$")
 
+QUOTE_CHARS = {"'", '"'}
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -79,6 +81,20 @@ def _collect_shell_blocks(text: str) -> List[tuple[int, str]]:
     return blocks
 
 
+def _is_directly_wrapped_by_quotes(block: str, start: int, end: int) -> bool:
+    """
+    Heuristic: Treat as "double-quoted" when the Jinja expression is directly
+    adjacent to a quote char, e.g.:
+      --pass "{{ pw | quote }}"
+      -p"{{ pw | quote }}"
+      foo '{{ pw | quote }}'
+    This usually indicates the value will contain quotes literally.
+    """
+    pre = block[start - 1] if start > 0 else ""
+    post = block[end] if end < len(block) else ""
+    return (pre in QUOTE_CHARS) or (post in QUOTE_CHARS)
+
+
 def _scan_shell_block(file_path: Path, start_line: int, block: str) -> List[Finding]:
     findings: List[Finding] = []
 
@@ -86,22 +102,39 @@ def _scan_shell_block(file_path: Path, start_line: int, block: str) -> List[Find
         expr = (m.group(1) or "").strip()
         if not PASSWORD_TOKEN_RE.search(expr):
             continue
-        if QUOTE_FILTER_RE.search(expr):
-            continue
 
         # Approximate line number within block
         rel_line = block.count("\n", 0, m.start())
         line_no = start_line + rel_line
 
         snippet = "{{ " + " ".join(expr.split()) + " }}"
-        findings.append(
-            Finding(
-                file=file_path,
-                line=line_no,
-                reason="In shell tasks, password expressions must include '| quote'",
-                snippet=snippet,
+
+        # 1) Hard fail if missing | quote
+        if not QUOTE_FILTER_RE.search(expr):
+            findings.append(
+                Finding(
+                    file=file_path,
+                    line=line_no,
+                    reason="In shell tasks, password expressions must include '| quote'",
+                    snippet=snippet,
+                )
             )
-        )
+            continue
+
+        # 2) Hard fail if | quote is used but the whole Jinja expression is wrapped in quotes
+        #    -> typical double-quoting like "--pass \"{{ pw | quote }}\""
+        if _is_directly_wrapped_by_quotes(block, m.start(), m.end()):
+            findings.append(
+                Finding(
+                    file=file_path,
+                    line=line_no,
+                    reason=(
+                        "Double-quoting detected: password expression uses '| quote' but is "
+                        "directly wrapped by quotes (remove the surrounding quotes)"
+                    ),
+                    snippet=snippet,
+                )
+            )
 
     return findings
 
@@ -121,7 +154,8 @@ class TestPasswordQuoteInShellTasks(unittest.TestCase):
         if all_findings:
             msg = "\n".join(f.format() for f in all_findings)
             self.fail(
-                "Violations found (password outputs in shell tasks must use '| quote'):\n"
+                "Violations found in shell tasks (password expressions must use '| quote' "
+                "and must not be double-quoted):\n"
                 f"{msg}\n"
             )
 
