@@ -25,3 +25,4 @@ DISCOURSE_APPLICATION_YML_DEST: "{{ [ DISCOURSE_CONTAINERS_DIR, DISCOURSE_CONTAI
 ## Error Strings
 DISCOURSE_ERROR_ALREADY_IN_NET: "Error response from daemon: endpoint with name {{ DISCOURSE_CONTAINER }} already exists in network {{ DISCOURSE_PG_NETWORK }}"
 DISCOURSE_ERROR_NOT_CONNECTED:  'is not connected to network {{ DISCOURSE_NETWORK }}'
+DISCOURSE_LDAP_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"

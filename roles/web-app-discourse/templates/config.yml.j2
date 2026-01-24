@@ -116,7 +116,7 @@ hooks:
 {% endif %}
 {% endfor %}     
 
-{% if applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False) %}
+{% if DISCOURSE_LDAP_ENABLED | bool %}
           - git clone --depth=1 https://github.com/jonmbake/discourse-ldap-auth.git
 {% endif %}
 
@@ -151,7 +151,7 @@ run:
   - exec: rails r "SiteSetting.openid_connect_rp_initiated_logout = true"
 {% endif %}
 
-{% if applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False) %}
+{% if DISCOURSE_LDAP_ENABLED | bool %}
   # Enable LDAP authentication
   - exec: rails r "SiteSetting.ldap_auth_enabled = true"
   - exec: rails r "SiteSetting.ldap_sync_enabled = true"
