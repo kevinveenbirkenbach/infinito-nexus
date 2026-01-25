@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+# shellcheck disable=SC1091
 . /etc/os-release
+
 echo ">>> Installing docker client on ID=${ID} ID_LIKE=${ID_LIKE:-}"
 
 # shellcheck disable=SC2031
@@ -18,6 +21,8 @@ elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]
   install -m 0755 -d /etc/apt/keyrings
   curl -fsSL "https://download.docker.com/linux/${ID}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   chmod a+r /etc/apt/keyrings/docker.gpg
+  
+  # shellcheck disable=SC1091
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${ID} $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" \
     > /etc/apt/sources.list.d/docker.list
   apt-get update

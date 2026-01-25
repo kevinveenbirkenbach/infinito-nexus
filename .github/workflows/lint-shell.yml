@@ -11,7 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Install ShellCheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
-      - name: Run ShellCheck
-        run: shellcheck -x $(find . -type f -name '*.sh' -print)
+      - name: Run ShellCheck (pinned, reproducible)
+        run: |
+          docker run --rm \
+            -v "$PWD:/mnt" \
+            -w /mnt \
+            koalaman/shellcheck:latest \
+            shellcheck -x $(find . -type f -name '*.sh' -print)
+
