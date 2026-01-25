@@ -10,3 +10,4 @@ mobilizon_host_conf_exs_file:   "{{ [ docker_compose.directories.config, 'config
 mobilizon_version:              "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.version') }}"
 mobilizon_image:                "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.image') }}"
 mobilizon_container:            "{{ applications | get_app_conf(application_id, 'docker.services.mobilizon.name') }}"
+MOBILIZON_OIDC_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"

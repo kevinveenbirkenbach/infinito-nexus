@@ -17,7 +17,7 @@ MATRIX_PROJECT:                       "{{ application_id | get_entity_name }}"
 MATRIX_REGISTRATION_FILE_FOLDER:      "/data/"
 MATRIX_REGISTRATION_SHARED_SECRET:    "{{ applications | get_app_conf(application_id, 'credentials.registration_shared_secret') }}"
 MATRIX_FEDERATION_PORT:               "{{ ports.public.federation['web-app-matrix_synapse'] }}"
-MATRIX_OIDC_ENABLED:                  "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) }}"
+MATRIX_OIDC_ENABLED:                  "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 MATRIX_BASE_URL:                      "{{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ DOMAIN_PRIMARY }}"
 
 ## Synapse

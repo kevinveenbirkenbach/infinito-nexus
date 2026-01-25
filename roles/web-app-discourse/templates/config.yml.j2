@@ -127,7 +127,7 @@ run:
   ## If you want to set the 'From' email address for your first registration, uncomment and change:
   ## After getting the first signup email, re-comment the line. It only needs to run once.
   #- exec: rails r "SiteSetting.notification_email='info@unconfigured.discourse.org'"
-{% if applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) %}
+{% if DISCOURSE_OIDC_ENABLED | bool %}
   # Deactivate Default Login
   - exec: rails r "SiteSetting.enable_local_logins = false"
   - exec: rails r "SiteSetting.enable_passkeys = false" # https://meta.discourse.org/t/passwordless-login-using-passkeys/285589

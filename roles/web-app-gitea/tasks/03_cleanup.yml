@@ -1,6 +1,6 @@
 - name: Execute OIDC Cleanup Routine
   include_tasks: cleanup/oidc.yml
-  when: not (applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False))
+  when: not (GITEA_OIDC_ENABLED | bool)
 
 - name: Execute LDAP Cleanup Routine
   include_tasks: cleanup/ldap.yml

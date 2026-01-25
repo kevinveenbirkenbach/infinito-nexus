@@ -30,3 +30,5 @@ DISCOURSE_LDAP_ENABLED:         "{{ applications | get_app_conf(application_id, 
 # Don't use variable HOST_LL_CC, because this isn't available in the container. 
 # With this setup you have an minimalistic default setup
 DISCOURSE_LOCAL:                "C.UTF-8"
+
+DISCOURSE_OIDC_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"

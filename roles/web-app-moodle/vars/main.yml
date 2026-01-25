@@ -20,3 +20,4 @@ MOODLE_IMAGE:                   "{{ applications | get_app_conf(application_id, 
 MOODLE_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.moodle.name') }}"
 MOODLE_VOLUME_DATA:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 MOODLE_VOLUME_CODE:             "{{ applications | get_app_conf(application_id, 'docker.volumes.code') }}"
+MOODLE_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
