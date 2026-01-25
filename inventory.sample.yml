@@ -77,18 +77,24 @@ applications:
           # Allows faster debugging
           autologin: true
   web-app-matrix:
-    oidc:
-      enabled:            false
-      shared:             false
+    docker:
+      services:
+        oidc:
+          enabled:            false
+          shared:             false
   web-app-mastodon:
-    oidc:
-      enabled:            false
-      shared:             false
+    docker:
+      services:
+        oidc:
+          enabled:            false
+          shared:             false
   web-app-bigbluebutton:
     # Deactivate oidc temporary for testing purposes
-    oidc:
-      enabled:            false
-      shared:             false
+    docker:
+      services:
+        oidc:
+          enabled:            false
+          shared:             false
 #    server:
 #      tls:
 #        enabled:  false  "{{ RUNTIME == 'dev' }}"
