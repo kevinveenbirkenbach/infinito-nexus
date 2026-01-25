@@ -87,7 +87,6 @@ jobs:
   test-deploy-universal:
     needs:
       - test-dns
-      - test-deploy-server
     uses: ./.github/workflows/test-deploy-universal.yml
     with:
       distros: ${{ inputs.distros }}
