@@ -11,11 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Run ShellCheck (pinned, reproducible)
+      - name: Run ShellCheck (container)
         run: |
           docker run --rm \
             -v "$PWD:/mnt" \
             -w /mnt \
             koalaman/shellcheck:latest \
-            shellcheck -x $(find . -type f -name '*.sh' -print)
+            -x $(find . -type f -name '*.sh' -print)
+
 
