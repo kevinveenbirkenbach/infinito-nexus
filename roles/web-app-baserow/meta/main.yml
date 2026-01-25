@@ -2,7 +2,7 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Empower your data management with Baserow, an innovative platform that makes building and managing databases
     both fun and efficient. Enjoy a dynamic interface, seamless collaboration, and energetic tools that supercharge your workflow.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
@@ -22,4 +22,4 @@ galaxy_info:
   - web-app-matomo
   - web-app-keycloak
   - web-app-mailu
-  lifecycle: alpha
+  lifecycle: alpha # SSO integration missing

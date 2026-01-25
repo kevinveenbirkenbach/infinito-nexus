@@ -2,7 +2,7 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Pixelfed is a decentralized image sharing platform that champions creativity and privacy. This containerized
     deployment provides a secure, scalable, and modern environment for sharing visual content within a federated network.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

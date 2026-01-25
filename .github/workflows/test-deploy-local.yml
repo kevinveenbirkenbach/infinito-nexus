@@ -1,0 +1,123 @@
+name: Test Infinito.Nexus Deploy (local)
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_deploy_type:
+        description: "server | universal | workstation"
+        required: false
+        default: "server"
+        type: string
+      distros:
+        description: "Space-separated distro list"
+        required: false
+        default: "arch"
+        type: string
+      only_app:
+        description: "Optional single app id"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+# IMPORTANT:
+# - For local `act`, prefer overriding via `--env`.
+# - For GitHub UI dispatch, inputs are used as fallback.
+env:
+  TEST_DEPLOY_TYPE: "server"
+  DISTROS: "arch"
+  ONLY_APP: ""
+  NIX_CONFIG: ""
+  INFINITO_IMAGE_TAG: "latest"
+
+jobs:
+  discover:
+    name: discover apps (local)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      apps: ${{ steps.discover.outputs.apps }}
+      test_deploy_type: ${{ steps.vars.outputs.test_deploy_type }}
+      distros: ${{ steps.vars.outputs.distros }}
+      only_app: ${{ steps.vars.outputs.only_app }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve effective inputs/env
+        id: vars
+        shell: bash
+        env:
+          INPUT_TEST_DEPLOY_TYPE: ${{ inputs.test_deploy_type }}
+          INPUT_DISTROS: ${{ inputs.distros }}
+          INPUT_ONLY_APP: ${{ inputs.only_app }}
+        run: |
+          set -euo pipefail
+          bash scripts/meta/resolve/input.sh
+
+      - name: Install deps (jq + envsubst)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq gettext-base
+
+      - name: Start stack for discovery (arch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          make docker-up
+
+      - name: Discover apps
+        id: discover
+        shell: bash
+        run: |
+          set -euo pipefail
+          make ci-discover-output
+
+  deploy:
+    name: deploy:${{ needs.discover.outputs.test_deploy_type }} (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    needs: discover
+
+    strategy:
+      fail-fast: false
+      max-parallel: 1   # immer linear
+      matrix:
+        app: ${{ fromJson(needs.discover.outputs.apps) }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install deps (jq + envsubst)
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq gettext-base
+
+      - name: Start stack (arch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          make docker-up
+
+      - name: Deploy app (same as CI logic)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export TEST_DEPLOY_TYPE="${{ needs.discover.outputs.test_deploy_type }}"
+          export DISTROS="${{ needs.discover.outputs.distros }}"
+          export ONLY_APP="${{ needs.discover.outputs.only_app }}"
+          export APP="${{ matrix.app }}"
+          make ci-deploy-app
+
+      - name: Show last 200 log lines on failure
+        if: failure()
+        shell: bash
+        run: |
+          scripts/meta/log-tail.sh logs 200

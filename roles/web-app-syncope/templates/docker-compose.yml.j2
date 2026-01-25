@@ -10,7 +10,7 @@
      environment:
        SPRING_PROFILES_ACTIVE: docker,postgresql,saml2
        OPENJPA_REMOTE_COMMIT: sjvm
-       SERVICE_DISCOVERY_ADDRESS: {{ domains | get_url(application_id, WEB_PROTOCOL) }}/{{syncope_paths[rest]}}/
+       SERVICE_DISCOVERY_ADDRESS: {{ lookup('tls_resolve', application_id, want='url.base') }}{{syncope_paths[rest]}}/
     # database variablen auslesen
 
    console: 
@@ -22,7 +22,7 @@
      restart: always
      environment:
        SPRING_PROFILES_ACTIVE: docker,saml2
-       SERVICE_DISCOVERY_ADDRESS: {{ domains | get_url(application_id, WEB_PROTOCOL) }}/{{syncope_paths[console]}}/
+       SERVICE_DISCOVERY_ADDRESS: {{ lookup('tls_resolve', application_id, want='url.base') }}{{syncope_paths[console]}}/
 
    enduser: 
      depends_on:
@@ -33,6 +33,6 @@
      restart: always
      environment:
        SPRING_PROFILES_ACTIVE: docker,saml2
-       SERVICE_DISCOVERY_ADDRESS: {{ domains | get_url(application_id, WEB_PROTOCOL) }}/{{syncope_paths[enduser]}}/
+       SERVICE_DISCOVERY_ADDRESS: {{ lookup('tls_resolve', application_id, want='url.base') }}{{syncope_paths[enduser]}}/
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

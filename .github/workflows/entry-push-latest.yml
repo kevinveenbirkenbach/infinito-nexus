@@ -1,0 +1,22 @@
+name: CI (Push)
+
+concurrency:
+  group: infinito-ci-global
+  cancel-in-progress: false
+
+on:
+  push:
+    branches:
+      - "**"
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  ci-orchestrator:
+    uses: ./.github/workflows/ci-orchestrator.yml
+    with:
+      # Speed up tests by just using arch
+      distros: "arch"

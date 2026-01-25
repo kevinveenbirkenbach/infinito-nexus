@@ -130,4 +130,4 @@ It is a **generic infrastructure helper**.
 ## License
 
 Part of the **Infinito.Nexus Project**
-Licensed under the *Infinito.Nexus NonCommercial License*.
+Licensed under the *Infinito.Nexus Community License (Non-Commercial)*.

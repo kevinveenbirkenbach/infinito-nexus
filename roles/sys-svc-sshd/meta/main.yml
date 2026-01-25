@@ -2,7 +2,7 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Configures a secure SSH daemon environment by deploying a templated sshd_config file and restarting the SSH
     service as needed.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

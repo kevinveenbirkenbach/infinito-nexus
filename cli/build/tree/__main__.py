@@ -74,7 +74,7 @@ def process_role(
 
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    default_roles_dir = os.path.abspath(os.path.join(script_dir, "..", "..", "roles"))
+    default_roles_dir = os.path.abspath(os.path.join(script_dir, "..", "..", "..", "roles"))
 
     parser = argparse.ArgumentParser(
         description="Generate all graphs for each role and write meta/tree.json"

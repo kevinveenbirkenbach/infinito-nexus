@@ -1,5 +1,5 @@
 templates:
-{% if not applications | get_app_conf(application_id, 'features.central_database', False)%}
+{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False)%}
   - "templates/postgres.template.yml"
 {% endif %}
   #- "templates/redis.template.yml"
@@ -31,9 +31,9 @@ params:
   #version: tests-passed
 
 env:
-  LC_ALL:   "{{ HOST_LL_CC }}.UTF-8"
-  LANG:     "{{ HOST_LL_CC }}.UTF-8"
-  LANGUAGE: "{{ HOST_LL_CC }}.UTF-8"
+  LC_ALL:   "{{ DISCOURSE_LOCAL }}"
+  LANG:     "{{ DISCOURSE_LOCAL }}"
+  LANGUAGE: "{{ DISCOURSE_LOCAL }}"
   #DISCOURSE_DEFAULT_LOCALE: {{ HOST_LL }} # Deactivated because not right format was selected @todo find right format
 
   DB_POOL:            "{{ POSTGRES_ALLOWED_AVG_CONNECTIONS }}"
@@ -116,7 +116,7 @@ hooks:
 {% endif %}
 {% endfor %}     
 
-{% if applications | get_app_conf(application_id, 'features.ldap', False) %}
+{% if DISCOURSE_LDAP_ENABLED | bool %}
           - git clone --depth=1 https://github.com/jonmbake/discourse-ldap-auth.git
 {% endif %}
 
@@ -127,7 +127,7 @@ run:
   ## If you want to set the 'From' email address for your first registration, uncomment and change:
   ## After getting the first signup email, re-comment the line. It only needs to run once.
   #- exec: rails r "SiteSetting.notification_email='info@unconfigured.discourse.org'"
-{% if applications | get_app_conf(application_id, 'features.oidc', False) %}
+{% if applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) %}
   # Deactivate Default Login
   - exec: rails r "SiteSetting.enable_local_logins = false"
   - exec: rails r "SiteSetting.enable_passkeys = false" # https://meta.discourse.org/t/passwordless-login-using-passkeys/285589
@@ -151,7 +151,7 @@ run:
   - exec: rails r "SiteSetting.openid_connect_rp_initiated_logout = true"
 {% endif %}
 
-{% if applications | get_app_conf(application_id, 'features.ldap', False) %}
+{% if DISCOURSE_LDAP_ENABLED | bool %}
   # Enable LDAP authentication
   - exec: rails r "SiteSetting.ldap_auth_enabled = true"
   - exec: rails r "SiteSetting.ldap_sync_enabled = true"

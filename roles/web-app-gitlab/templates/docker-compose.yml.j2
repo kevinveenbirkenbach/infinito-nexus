@@ -16,12 +16,9 @@
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  config:
-    name: {{ GITLAB_CONF_VOLUME }}
-  logs:
-    name: {{ GITLAB_LOGS_VOLUME }}
-  data:
-    name: {{ GITLAB_DATA_VOLUME }}
-
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=(database_volume if database_volume is defined else None),
+    extra_volumes={'config': {'name': GITLAB_CONF_VOLUME}, 'data': {'name': GITLAB_DATA_VOLUME}, 'logs': {'name': GITLAB_LOGS_VOLUME}}
+) }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

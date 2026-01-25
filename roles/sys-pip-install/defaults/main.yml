@@ -1,0 +1,2 @@
+# If the following variable is set to true it will be installed globally
+global_install: false

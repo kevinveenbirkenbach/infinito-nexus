@@ -1,0 +1,71 @@
+name: CI (Nightly Release Check)
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: infinito-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+  actions: write
+
+jobs:
+  check-and-trigger:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Login to GHCR (for manifest checks)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine highest version tag without image
+        id: pick
+        shell: bash
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          set -euo pipefail
+
+          mapfile -t tags < <(git tag -l 'v*' | sort -V)
+          [[ ${#tags[@]} -gt 0 ]] || { echo "tag=" >> "$GITHUB_OUTPUT"; exit 0; }
+
+          # iterate from highest to lowest and pick the first missing
+          missing=""
+          for (( i=${#tags[@]}-1; i>=0; i-- )); do
+            t="${tags[$i]}"
+            img="ghcr.io/${OWNER}/infinito-arch:${t}"
+            echo "Check: ${img}"
+            if docker manifest inspect "${img}" >/dev/null 2>&1; then
+              echo "  OK"
+              continue
+            fi
+            echo "  MISSING"
+            missing="${t}"
+            break
+          done
+
+          echo "tag=${missing}" >> "$GITHUB_OUTPUT"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get update && sudo apt-get install -y gh
+
+      - name: Trigger release workflow for missing tag
+        if: ${{ steps.pick.outputs.tag != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.pick.outputs.tag }}
+        run: |
+          gh workflow run release-version.yml -f tag="${TAG}"

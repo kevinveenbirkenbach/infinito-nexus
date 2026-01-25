@@ -1,0 +1,18 @@
+# Where we stage per-role Cypress projects on the host
+TEST_E2E_STAGE_BASE_DIR:    "/tmp/test-e2e-cypress"
+
+# Where to store per-role reports/artifacts (host dir)
+TEST_E2E_REPORTS_BASE_DIR:  "/var/lib/infinito/logs/test-e2e-cypress"
+
+# Cypress image (pin this!)
+TEST_E2E_IMAGE:             "cypress/included:13.6.6"
+
+# Optional readiness wait
+TEST_E2E_WAIT_ENABLED:      true
+TEST_E2E_WAIT_RETRIES:      30
+TEST_E2E_WAIT_DELAY:        5
+
+# Run only a subset (optional)
+TEST_E2E_ONLY_ROLES:        "{{ allowed_applications }}"  # e.g. ["svc-nextcloud","svc-matrix"]
+TEST_E2E_SKIP_ROLES:        []                            # e.g. ["svc-something"]
+

@@ -11,21 +11,28 @@ server:
 
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled:  true
     mediawiki: 
       image:    mediawiki
-      version:  latest
+      version:  "1.44"
       backup:
         no_stop_required: true
       name:     mediawiki
+    css:
+      enabled: false
   volumes:
     images:     mediawiki_images
     extensions: mediawiki_extensions
-features:
-  logout:           true
-  central_database: true
-  css:              false
-  desktop:          true
-  oidc:             true
-  matomo:           true

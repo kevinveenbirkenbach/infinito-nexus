@@ -1,0 +1,24 @@
+{% if lookup('tls_resolve', application_id, want='enabled') | bool %}
+listen {{ lookup('tls_resolve', application_id, want='ports.web') }} ssl;
+listen [::]:{{ lookup('tls_resolve', application_id, want='ports.web') }} ssl;
+http2 on;
+
+ssl_protocols TLSv1.2 TLSv1.3;
+ssl_ecdh_curve X25519:P-256;
+ssl_prefer_server_ciphers on;
+
+ssl_session_timeout 1d;
+ssl_session_cache shared:SSL:50m;
+ssl_session_tickets on;
+
+add_header Strict-Transport-Security max-age=15768000;
+
+ssl_stapling on;
+ssl_stapling_verify on;
+
+{% include 'roles/sys-front-tls/templates/ssl_credentials.j2' %}
+
+{% else %}
+listen {{ lookup('tls_resolve', application_id, want='ports.web') }};
+listen [::]:{{ lookup('tls_resolve', application_id, want='ports.web') }};
+{% endif %}

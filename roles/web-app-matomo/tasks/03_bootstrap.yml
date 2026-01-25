@@ -52,7 +52,7 @@
       args:
         executable: /bin/bash
       changed_when: false
-      no_log: false
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
     - name: "FAIL | abort after debug dump"
       ansible.builtin.fail:

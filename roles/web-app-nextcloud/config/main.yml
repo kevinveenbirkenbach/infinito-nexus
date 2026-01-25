@@ -11,20 +11,20 @@ server:
         unsafe-inline:  true  # Required for ONLYOFFICE
     whitelist:
       script-src-elem:
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
+        - "onlyoffice.{{ DOMAIN_PRIMARY }}"
       font-src:
         - "data:"
       connect-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEBSOCKET_PROTOCOL }}://cloud.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://cloud.{{ DOMAIN_PRIMARY }}"
+        - "collabora.{{ DOMAIN_PRIMARY }}"
+        - "cloud.{{ DOMAIN_PRIMARY }}"
+        - "collabora.{{ DOMAIN_PRIMARY }}"
+        - "onlyoffice.{{ DOMAIN_PRIMARY }}"
+        - "cloud.{{ DOMAIN_PRIMARY }}"
         - "*" # Required to load all external websites in Whiteboard
       frame-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://onlyoffice.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://collabora.{{ DOMAIN_PRIMARY }}"
+        - "collabora.{{ DOMAIN_PRIMARY }}"
+        - "onlyoffice.{{ DOMAIN_PRIMARY }}"
+        - "collabora.{{ DOMAIN_PRIMARY }}"
         - "*" # Required to load all external websites in Whiteboard
       worker-src:
         - "blob:"
@@ -41,6 +41,22 @@ docker:
     whiteboard_fontcache:   nextcloud_whiteboard_fontcache
     talk_recording_tmp:     nextcloud_talk_recording_tmp
   services:
+    oidc:
+      enabled: true
+      shared: true
+    coturn:
+      shared:   true
+      enabled:  true 
+    logout:
+      enabled: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
@@ -50,6 +66,8 @@ docker:
       mem_limit:            "8g"
       pids_limit:           512
     database:
+      shared: true
+      type: "mariadb"
       enabled:              true
       cpus:                 "0.75"
       mem_reservation:      "512m"
@@ -105,6 +123,9 @@ docker:
       mem_reservation:      "128m"
       mem_limit:            "1g"
       pids_limit:           1024
+    onlyoffice:
+      enabled: true
+      shared: true
     talk_recording:
       name:                "nextcloud-talk-recording"
       image:               "nextcloud/aio-talk-recording"
@@ -115,21 +136,16 @@ docker:
       mem_reservation:     "2g"
       mem_limit:           "4g"
       pids_limit:          1024
-  enabled:  "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True) }}"   # Activate OIDC for Nextcloud
+    css:
+      enabled: false
+    hcaptcha:
+      enabled: "{{ HCAPTCHA_ENABLED | bool }}"
+  enabled:  "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'docker.services.oidc.enabled', False, True, True) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin
   # @see https://apps.nextcloud.com/apps/oidc_login
   # @see https://apps.nextcloud.com/apps/sociallogin
   flavor:                       "oidc_login"                                    # Keeping on sociallogin because the other option is not implemented yet                                             
-features:
-  matomo:           true
-  css:              false
-  desktop:          true
-  ldap:             true
-  oidc:             true
-  central_database: true
-  logout:           true
-  hcaptcha:         "{{ HCAPTCHA_ENABLED | bool }}"
 default_quota:                 '1000000000'                                     # Quota to assign if no quota is specified in the OIDC response (bytes)
 legacy_login_mask:   
   enabled:                      False                                           # If true, then legacy  login mask is shown. Otherwise just SSO
@@ -323,13 +339,13 @@ plugins:
   #  enabled: false
   twofactor_nextcloud_notification:
     # Nextcloud two-factor notification: sends notifications for two-factor authentication events (https://apps.nextcloud.com/apps/twofactor_nextcloud_notification)
-    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True)) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'docker.services.oidc.enabled', False, True, True)) }}" # Deactivate 2FA if oidc is active
   twofactor_totp:
     # Nextcloud two-factor TOTP: provides time-based one-time password authentication (https://apps.nextcloud.com/apps/twofactor_totp)
-    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'features.oidc', False, True, True)) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'docker.services.oidc.enabled', False, True, True)) }}" # Deactivate 2FA if oidc is active
   user_ldap:
     # Nextcloud user LDAP: integrates LDAP for user management and authentication (https://apps.nextcloud.com/apps/user_ldap)
-    enabled: "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'features.ldap', False, True, True) }}"
+    enabled: "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'docker.services.ldap.enabled', False, True, True) }}"
     user_directory:
       enabled:  true # Enables the LDAP User Directory Search
   user_oidc:

@@ -2,65 +2,100 @@ name: Test Infinito.Nexus Deploy (workstation)
 
 on:
   workflow_call:
+    inputs:
+      distros:
+        description: "Space-separated distro list"
+        required: true
+        type: string
 
 permissions:
   contents: read
   packages: read
 
+env:
+  TEST_DEPLOY_TYPE: workstation
+  DISTROS: ${{ inputs.distros }}
+  ONLY_APP: ""
+  NIX_CONFIG: |
+    access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+  INFINITO_IMAGE_TAG: ci-${{ github.sha }}
 jobs:
-  test:
-    name: "deploy:workstation (${{ matrix.distro }})"
+  discover:
+    name: discover apps (arch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    outputs:
+      apps: ${{ steps.discover.outputs.apps }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install jq
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Start stack for discovery (arch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          make docker-up
+
+      - name: Discover apps
+        id: discover
+        run: |
+          make ci-discover-output
+
+  workstation:
+    name: deploy:workstation (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 240
+    needs: discover
 
     strategy:
       fail-fast: false
       matrix:
-        distro: [arch, debian, ubuntu, fedora, centos]
-
-    env:
-      NIX_CONFIG: |
-        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+        app: ${{ fromJson(needs.discover.outputs.apps) }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Show Docker version
-        run: docker version
-
-      - name: Run deploy test (workstation)
+      - name: Install jq
         shell: bash
         run: |
           set -euo pipefail
-          export INFINITO_DISTRO="${{ matrix.distro }}"
-          mkdir -p logs
+          sudo apt-get update
+          sudo apt-get install -y jq
 
-          log_file="logs/deploy-workstation-${{ matrix.distro }}.log"
+      - name: Start stack (arch)
+        shell: bash
+        run: |
+          set -euo pipefail
+          make docker-up
 
-          {
-            echo "=== $(date -u) ==="
-            echo "Deploy type: workstation"
-            echo "Distro: ${INFINITO_DISTRO}"
-            echo
-            echo "--- make down ---"
-            make down
-            echo
-            echo "--- make test-deploy ---"
-            scripts/tests/deploy.sh --type workstation --missing
-          } 2>&1 | tee "${log_file}"
+      - name: Deploy app
+        shell: bash
+        run: |
+          set -euo pipefail
+          export TEST_DEPLOY_TYPE="workstation"
+          export DISTROS="${DISTROS}"
+          export APP="${{ matrix.app }}"
+          make ci-deploy-app
 
-      - name: Show last lines on failure
+      - name: Show last 200 log lines on failure
         if: failure()
         shell: bash
         run: |
-          tail -n 200 "logs/deploy-workstation-${{ matrix.distro }}.log"
+          scripts/meta/log-tail.sh logs 200
+
 
       - name: Upload deploy logs
-        if: always()
-        uses: actions/upload-artifact@v6
+        if: ${{ always() && env.ACT != 'true' }}
+        uses: actions/upload-artifact@v4
         with:
-          name: deploy-logs-workstation-${{ matrix.distro }}
-          path: logs/deploy-workstation-${{ matrix.distro }}.log
+          name: deploy-logs-workstation-${{ matrix.app }}
+          path: logs/
           if-no-files-found: warn
           retention-days: 14

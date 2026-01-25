@@ -1,11 +1,11 @@
 application_id:                 "svc-db-openldap"
 
 # LDAP Variables
-OPENLDAP_DOCKER_PORT_SECURE:    636
 OPENLDAP_DOCKER_PORT_OPEN:      389
 OPENLDAP_SERVER_URI:            "ldap://{{ DOCKER_REACH_HOST }}:{{ ports.localhost.ldap[application_id] }}"
-OPENLDAP_BIND_DN:               "{{ LDAP.DN.ADMINISTRATOR.CONFIGURATION }}"
-OPENLDAP_BIND_PW:               "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
+
+# cn=config is managed via LDAPI + SASL EXTERNAL (no bind DN/PW needed)
+OPENLDAP_CONFIG_URI:            "ldapi:///"
 
 # LDIF Variables
 OPENLDAP_LDIF_PATH_HOST:        "{{ docker_compose.directories.volumes }}ldif/"
@@ -16,10 +16,13 @@ OPENLDAP_LDIF_TYPES:
 
 # Container
 OPENLDAP_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.openldap.name') }}"
-OPENLDAP_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.openldap.image') }}"
-OPENLDAP_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.openldap.version') }}"
+# OPENLDAP_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.openldap.image') }}"
+# OPENLDAP_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.openldap.version') }}"
 OPENLDAP_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 OPENLDAP_NETWORK:               "{{ applications | get_app_conf(application_id, 'docker.network') }}"
+
+OPENLDAP_BIND_DN:               "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+OPENLDAP_BIND_PW:               "{{ LDAP.BIND_CREDENTIAL }}"
 
 # Network
 OPENLDAP_NETWORK_SWITCH_PUBLIC: "{{ applications | get_app_conf(application_id, 'network.public') }}"

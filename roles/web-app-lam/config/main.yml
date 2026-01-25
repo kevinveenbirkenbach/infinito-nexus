@@ -1,31 +1,37 @@
 docker:
   services:
+    logout:
+      enabled: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     lam:
       image:        ghcr.io/ldapaccountmanager/lam
       version:      latest
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host:       application
         port:       80
       allowed_groups:
         - "{{ [RBAC.GROUP.NAME, 'web-app-lam-administrator'] | path_join }}"
-features:
-  matomo:                       true
-  css:                          true
-  desktop:                      true
-  ldap:                         true
-  oauth2:                       true
-  logout:                       true
+    css:
+      enabled: true
 server:
   csp:
     flags:
       style-src-attr:
-        unsafe-inline:            true
+        unsafe-inline:  true
       script-src-elem:
-        unsafe-inline:            true
-        unsafe-eval:              true
+        unsafe-inline:  false
+        unsafe-eval:    true
       script-src-attr:
-        unsafe-inline:            true
+        unsafe-inline:  true
   domains:
     aliases: []
     canonical:

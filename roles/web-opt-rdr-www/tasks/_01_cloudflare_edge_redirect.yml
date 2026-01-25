@@ -3,5 +3,5 @@
   vars:
     domain: "{{ item | regex_replace('^www\\.', '') }}"
     www_fqdn: "{{ item }}"
-    apex_url: "{{ WEB_PROTOCOL }}://{{ item | regex_replace('^www\\.', '') }}"
+    apex_url: "{{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ item | regex_replace('^www\\.', '') }}"
   loop: "{{ REDIRECT_WWW_DOMAINS }}"

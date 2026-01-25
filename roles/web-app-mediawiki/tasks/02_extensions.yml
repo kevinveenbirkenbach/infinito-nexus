@@ -49,7 +49,6 @@
     label: "{{ ext.name }}"
   register: _install_results
   changed_when: "'INSTALLED:' in (_install_results.stdout | default(''))"
-  notify: "mediawiki update"
 
 # Ensure unzip + git are available in the container (idempotent)
 - name: "EXT | Ensure unzip+git available in container"
@@ -72,7 +71,6 @@
   register: _tools
   changed_when: "'INSTALLED_TOOLS' in (_tools.stdout | default(''))"
 
-# Ensure Composer is available inside the container (idempotent)
 - name: "EXT | Ensure Composer available in container"
   shell: |
     docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
@@ -87,7 +85,6 @@
     executable: /bin/bash
   register: _ext_composer
   changed_when: "'INSTALLED_COMPOSER' in (_ext_composer.stdout | default(''))"
-  notify: "mediawiki update"
 
 # Install dependencies per extension (only if vendor is missing)
 # Use /tmp/composer for HOME/CACHE to avoid /var/www permission issues.
@@ -116,7 +113,6 @@
     label: "{{ ext.name }}"
   register: _vendor
   changed_when: "'COMPOSER_INSTALLED:' in (_vendor.stdout | default(''))"
-  notify: "mediawiki update"
 
 # Sanity check: Jumbojett OIDC client must be loadable
 - name: "EXT | Sanity check: Jumbojett OpenIDConnect client present"

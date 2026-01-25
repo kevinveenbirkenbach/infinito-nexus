@@ -1,5 +1,6 @@
 import sys
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from cli.core.app import parse_flags, main as app_main
@@ -7,15 +8,31 @@ from cli.core.app import parse_flags, main as app_main
 
 class TestApp(unittest.TestCase):
     def test_parse_flags_log_only_for_deploy(self):
-        argv = ["infinito", "--log", "build", "tree"]
+        # --log is ignored for non-deploy commands; it is removed from argv
+        argv = ["infinito", "--log", "/tmp/infinito-logs", "build", "tree"]
         flags = parse_flags(argv)
-        self.assertFalse(flags.log_enabled)
+        self.assertIsNone(flags.log_dir)
         self.assertNotIn("--log", argv)
+        self.assertNotIn("/tmp/infinito-logs", argv)
 
-        argv2 = ["infinito", "--log", "deploy", "container"]
+        # --log is accepted for deploy; it is removed from argv and stored in flags
+        argv2 = ["infinito", "--log", "/tmp/infinito-logs", "deploy", "container"]
         flags2 = parse_flags(argv2)
-        self.assertTrue(flags2.log_enabled)
-        self.assertIn("--log", argv2)
+        self.assertEqual(flags2.log_dir, Path("/tmp/infinito-logs"))
+        self.assertNotIn("--log", argv2)
+        self.assertNotIn("/tmp/infinito-logs", argv2)
+
+    def test_parse_flags_log_requires_argument(self):
+        # Missing argument: '--log' is followed by another flag (or end of argv)
+        argv = ["infinito", "--log", "--git-clean", "deploy", "container"]
+        with self.assertRaises(SystemExit) as cm:
+            parse_flags(argv)
+        self.assertEqual(cm.exception.code, 1)
+
+        argv2 = ["infinito", "--log"]
+        with self.assertRaises(SystemExit) as cm2:
+            parse_flags(argv2)
+        self.assertEqual(cm2.exception.code, 1)
 
     def test_parse_flags_alarm_timeout(self):
         argv = ["infinito", "--alarm-timeout", "5", "deploy", "container"]

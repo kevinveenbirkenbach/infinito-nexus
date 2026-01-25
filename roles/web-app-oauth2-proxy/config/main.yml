@@ -1,13 +1,19 @@
 configuration_file: "oauth2-proxy-keycloak.cfg" # Needs to be set true in the roles which use it
 version:            "latest"                    # Docker Image version
 allowed_roles:      "admin"                     # Restrict it default to admin role. Use the vars/main.yml to open the specific role for other groups  
-features:
-  matomo:  true
-  css:     true
-  desktop: false
-  logout:  true
 server:
   domains:
     canonical:
       - oauth2-proxy.{{ DOMAIN_PRIMARY }}
     aliases: []
+docker:
+  services:
+    logout:
+      enabled: true
+    desktop:
+      enabled: false
+    matomo:
+      enabled: true
+      shared: true
+    css:
+      enabled: true

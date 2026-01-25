@@ -1,13 +1,3 @@
-features:
-  matomo:           true
-  css:              false
-  desktop:          true
-  central_database: false
-  logout:           true
-  javascript:       false
-  local_ai:         true
-  oidc:             true
-  ldap:             false # default deactivated because OIDC is sufficient
 server:
   domains:
     canonical:
@@ -22,6 +12,19 @@ server:
       connect-src: [] 
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
+    ldap:
+      enabled: false
+      shared: false
+    logout:
+      enabled: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     openwebui:
       backup:
         no_stop_required: true
@@ -35,7 +38,15 @@ docker:
         disabled: true
       enabled: false
     database:
+      shared: false
       enabled: false
+    css:
+      enabled: false
+    javascript:
+      enabled: false
+    ollama:
+      enabled: true
+      shared: true
   volumes: 
     openwebui:  ai_openwebui_data
 credentials: {}

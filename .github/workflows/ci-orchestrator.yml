@@ -1,0 +1,129 @@
+name: CI Orchestrator
+on:
+  workflow_call:
+    inputs:
+      distros:
+        description: "Space-separated distro list"
+        required: false
+        type: string
+        default: "arch debian ubuntu fedora centos"
+
+concurrency:
+  group: infinito-test-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  # Security Checks
+  security-codeql:
+    uses: ./.github/workflows/security-codeql.yml
+
+  # Linting
+  lint-ansible:
+    uses: ./.github/workflows/lint-ansible.yml
+  lint-docker:
+    uses: ./.github/workflows/lint-docker.yml
+  lint-python:
+    uses: ./.github/workflows/lint-python.yml
+  lint-shell:
+    uses: ./.github/workflows/lint-shell.yml
+  lint-gate:
+    needs: [lint-ansible, lint-python, lint-docker, lint-shell]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "lint gate passed"
+
+  # Build Docker Images 
+  build-ci-images:
+    uses: ./.github/workflows/build-ci-images.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
+
+  # Code Testing
+  test-code-integration:
+    uses: ./.github/workflows/test-code-integration.yml
+    needs: build-ci-images
+  test-code-lint:
+    uses: ./.github/workflows/test-code-lint.yml
+    needs: build-ci-images
+  test-code-unit:
+    uses: ./.github/workflows/test-code-unit.yml 
+    needs: build-ci-images
+  test-code-gate:
+    needs: [test-code-integration, test-code-lint, test-code-unit]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "code gate passed"
+
+  # Gate for the code Quality
+  code-quality-gate:
+    needs: [lint-gate, test-code-gate, security-codeql]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Quality Checks passed"
+  
+  #Test DNS configuration
+  test-dns:
+    needs: 
+      - build-ci-images
+      - code-quality-gate
+    uses: ./.github/workflows/test-dns.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
+  
+  # Priority A
+  test-deploy-server:
+    needs:
+      - test-dns
+    uses: ./.github/workflows/test-deploy-server.yml
+    with:
+      distros: ${{ inputs.distros }}
+
+  # Priority B
+  test-deploy-universal:
+    needs:
+      - test-dns
+    uses: ./.github/workflows/test-deploy-universal.yml
+    with:
+      distros: ${{ inputs.distros }}
+  
+  # Priority C
+  # test-deploy-workstation:
+  #   needs:
+  #     - code-quality-gate
+  #     - build-ci-images
+  #     - test-deploy-server
+  #     - test-deploy-universal
+  #   uses: ./.github/workflows/test-deploy-workstation.yml
+  #   with:
+  #     distros: ${{ inputs.distros }}
+
+  # Test Installation
+  test-install-make:
+    uses: ./.github/workflows/test-install-make.yml
+    needs:
+      - code-quality-gate
+  test-install-pkgmgr:
+    uses: ./.github/workflows/test-install-pkgmgr.yml
+    needs:
+      - code-quality-gate
+  test-install-gate:
+    needs: [test-install-make, test-install-pkgmgr]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Installation is possible via pkgmgr and make"
+
+  done:
+    needs:
+      - test-deploy-server
+      - test-deploy-universal
+    # - test-deploy-workstation
+      - test-install-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Done
+        run: echo "All checks passed."

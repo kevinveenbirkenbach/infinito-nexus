@@ -145,7 +145,7 @@
         "config": {
           "membership.attribute.type": [ "DN" ],
           "group.name.ldap.attribute": [ "cn" ],
-          "membership.user.ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
+          "membership.user.ldap.attribute": [ "dn" ],
           "preserve.group.inheritance": [ "true" ],
           "groups.dn": [ "{{ LDAP.DN.OU.ROLES }}" ],
           "mode": [ "LDAP_ONLY" ],
@@ -156,6 +156,7 @@
           "group.object.classes": [ "groupOfNames" ],
           "memberof.ldap.attribute": [ "memberOf" ],
           "drop.non.existing.groups.during.sync": [ "false" ],
+          "groups.path.group": ["6ea39fb8-d29a-48f7-8baa-c8952ca97650"],
           "groups.path": [ "{{ KEYCLOAK_RBAC_GROUP_NAME }}" ]
         }
       },
@@ -207,7 +208,7 @@
           "user.roles.retrieve.strategy": [ "LOAD_ROLES_BY_MEMBER_ATTRIBUTE" ],
           "roles.dn": [ "{{ LDAP.DN.OU.ROLES }}" ],
           "membership.ldap.attribute": [ "member" ],
-          "membership.user.ldap.attribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
+          "membership.user.ldap.attribute": [ "dn" ],
           "memberof.ldap.attribute": [ "memberOf" ],
           "role.name.ldap.attribute": [ "cn" ],
           "use.realm.roles.mapping": [ "true" ],
@@ -217,7 +218,7 @@
     ]
   },
   "config": {
-    "fullSyncPeriod": [ "-1" ],
+    "fullSyncPeriod": [ "{{ KEYCLOAK_LDAP_SYNC_FULL_PERIOD }}" ],
     "pagination": [ "true" ],
     "connectionTrace": [ "false" ],
     "startTls": [ "false" ],
@@ -228,7 +229,7 @@
     "importEnabled": [ "true" ],
     "enabled": [ "true" ],
     "bindCredential": [ "{{ KEYCLOAK_LDAP_BIND_PW }}" ],
-    "changedSyncPeriod": [ "-1" ],
+    "changedSyncPeriod": [ "{{ KEYCLOAK_LDAP_SYNC_CHANGES_PERIOD }}" ],
     "usernameLDAPAttribute": [ "{{ LDAP.USER.ATTRIBUTES.ID }}" ],
     "bindDn": [ "{{ KEYCLOAK_LDAP_BIND_DN }}" ],
     "vendor": [ "other" ],

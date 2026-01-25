@@ -1,9 +1,14 @@
-features:
-  matomo:  true
-  css:     true
-  desktop: false
 server:
   domains:
     canonical:
       - "cdn.{{ DOMAIN_PRIMARY }}"
     aliases: []
+docker:
+  services:
+    desktop:
+      enabled: false
+    matomo:
+      enabled: true
+      shared: true
+    css:
+      enabled: true

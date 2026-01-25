@@ -14,6 +14,8 @@
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  data:
-    name: {{ MINIO_VOLUME }}
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=(database_volume if database_volume is defined else None),
+    extra_volumes={'data': {'name': MINIO_VOLUME}}
+) }}

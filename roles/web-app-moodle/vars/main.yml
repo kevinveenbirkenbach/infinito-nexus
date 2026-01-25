@@ -1,6 +1,5 @@
 ---
 application_id:                 "web-app-moodle"
-database_type:                  "mariadb"
 entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Code & data paths inside the container

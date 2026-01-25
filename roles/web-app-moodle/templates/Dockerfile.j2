@@ -1,6 +1,6 @@
 FROM {{ MOODLE_IMAGE }}:{{ MOODLE_VERSION }}
 
-{% if applications | get_app_conf(application_id, 'features.oidc', False) %}
+{% if applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) %}
 RUN install_packages unzip curl jq \
  && VERSION=$(curl -s https://api.github.com/repos/microsoft/moodle-auth_oidc/tags \
       | jq -r '.[].name' \

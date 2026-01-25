@@ -4,7 +4,6 @@ entity_name:                          "{{ application_id | get_entity_name }}"
 domain:                               "{{ domains | get_domain(application_id) }}"
 
 # Database
-database_type:                        "mariadb"
 
 # Webserver
 webserver_client_max_body_size:                 "100m"
@@ -28,10 +27,10 @@ SUITECRM_SERVICE:                     "{{ entity_name }}"
 SUITECRM_DATA_VOLUME:                 "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 
 # URLs & feature flags
-SUITECRM_URL:                         "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+SUITECRM_URL:                         "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 
 # LDAP
-SUITECRM_LDAP_ENABLED:                "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
+SUITECRM_LDAP_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 SUITECRM_LDAP_CONFIG_HOST:            "{{ [ docker_compose.directories.config, 'ldap.yaml'] | path_join }}"
 SUITECRM_LDAP_EXTENSION_DIR:          "{{ ['/var/www/html/extensions', SUITECRM_WELL_SOFTWARE_NAME, 'config/services/ldap'] | path_join }}"
 

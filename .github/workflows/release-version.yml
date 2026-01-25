@@ -1,0 +1,133 @@
+name: Release Version Logic
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Version tag to release (e.g. v1.2.3)"
+        required: true
+        type: string
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Version tag to release (e.g. v1.2.3)"
+        required: true
+        type: string
+
+concurrency:
+  group: infinito-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
+  security-events: write
+  actions: read
+
+jobs:
+  check-ci-images:
+    runs-on: ubuntu-latest
+    outputs:
+      missing: ${{ steps.check.outputs.missing }}
+      ci_tag: ${{ steps.citag.outputs.ci_tag }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.event.inputs.tag }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - id: citag
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          echo "ci_tag=ci-${sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR (manifest checks)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: check
+        shell: bash
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REGISTRY: ghcr.io
+          REPO_PREFIX: infinito
+          DISTROS: "arch debian ubuntu fedora centos"
+          CI_TAG: ${{ steps.citag.outputs.ci_tag }}
+        run: |
+          set -euo pipefail
+          missing="false"
+
+          for d in ${DISTROS}; do
+            img="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${d}:${CI_TAG}"
+            img_slim="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${d}-slim:${CI_TAG}"
+
+            echo "Check: ${img}"
+            if docker manifest inspect "${img}" >/dev/null 2>&1; then
+              echo "  OK"
+            else
+              echo "  MISSING"
+              missing="true"
+            fi
+
+            echo "Check: ${img_slim}"
+            if docker manifest inspect "${img_slim}" >/dev/null 2>&1; then
+              echo "  OK"
+            else
+              echo "  MISSING"
+              missing="true"
+            fi
+          done
+
+          echo "missing=${missing}" >> "$GITHUB_OUTPUT"
+
+  build-ci-images-if-missing:
+    needs: check-ci-images
+    if: needs.check-ci-images.outputs.missing == 'true'
+    uses: ./.github/workflows/build-ci-images.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
+
+  release:
+    needs:
+      - check-ci-images
+      - build-ci-images-if-missing
+    runs-on: ubuntu-latest
+    env:
+      VERSION_TAG: ${{ inputs.tag || github.event.inputs.tag }}
+      CI_TAG: ${{ needs.check-ci-images.outputs.ci_tag }}
+      OWNER: ${{ github.repository_owner }}
+      REGISTRY: ghcr.io
+      REPO_PREFIX: infinito
+      DISTROS: "arch debian ubuntu fedora centos"
+      DEFAULT_DISTRO: arch
+
+    steps:
+      - name: Checkout repository at version tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.VERSION_TAG }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Retag CI images to version/latest (no rebuild)
+        shell: bash
+        env:
+          GITHUB_REF_NAME: ${{ env.VERSION_TAG }}
+        run: scripts/release/retag-ci-images.sh

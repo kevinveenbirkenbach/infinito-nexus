@@ -1,50 +1,5 @@
-# MemberOf Overlay Configuration for OpenLDAP
-#
-# This file activates the memberOf module and configures the memberOf overlay,
-# which is required by Nextcloud for proper group management.
-# @see https://docs.nextcloud.com/server/latest/admin_manual/configuration_user/user_auth_ldap.html 
-# @see https://www.adimian.com/blog/how-to-enable-memberof-using-openldap/
-#
-# The first section loads the memberof module from the specified path.
-#   - olcModuleLoad: Specifies that the "memberof" module should be loaded.
-#   - olcModulePath: Provides the full path to the memberof shared object.
-#
-# The second section configures the memberOf overlay for the designated database.
-#   - The DN "olcOverlay={0}memberof,olcDatabase={1}hdb,cn=config" sets up the overlay
-#     on the database backend (here assumed to be "hdb").
-#   - olcMemberOfDangling: ignore
-#         Instructs the overlay to ignore references to non-existent objects.
-#   - olcMemberOfRefInt: TRUE
-#         Enables referential integrity so that changes in group membership automatically
-#         update the user's "memberOf" attribute.
-#   - olcMemberOfGroupOC: groupOfNames
-#         Specifies that the overlay applies to groups with the object class "groupOfNames".
-#   - olcMemberOfMemberAD: member
-#         Indicates that the group's membership is stored in the "member" attribute.
-#   - olcMemberOfMemberOfAD: memberOf
-#         Defines that the overlay will maintain the "memberOf" attribute in user entries.
-#
-# IMPORTANT: All groups created before enabling this module must be deleted and recreated,
-# as the overlay only assigns the "member" attribute when a new group is created.
-
-# @todo Solve the following error:
-#fatal: [echoserver]: FAILED! => {"changed": true, "cmd": "docker exec -i ldap ldapmodify -Y EXTERNAL -H ldapi:/// -f /tmp/ldif/01_member_of_configuration.ldif\n", "delta": "0:00:00.059605", "end": "2025-02-25 12:01:18.218851", "msg": "non-zero return code", "rc": 247, "start": "2025-02-25 12:01:18.159246", "stderr": "SASL/EXTERNAL authentication started\nSASL username: gidNumber=0+uidNumber=1001,cn=peercred,cn=external,cn=auth\nSASL SSF: 0\nldapmodify: modify operation type is missing at line 2, entry \"cn=module,cn=config\"", "stderr_lines": ["SASL/EXTERNAL authentication started", "SASL username: gidNumber=0+uidNumber=1001,cn=peercred,cn=external,cn=auth", "SASL SSF: 0", "ldapmodify: modify operation type is missing at line 2, entry \"cn=module,cn=config\""], "stdout": "", "stdout_lines": []}
-
-
-dn: cn=module,cn=config
-cn: module
-objectClass: olcModuleList
+# Load memberOf module (cn=config)
+dn: {{ OPENLDAP_MODULE_DN }}
+changetype: modify
+add: olcModuleLoad
 olcModuleLoad: memberof
-olcModulePath: /opt/bitnami/openldap/lib/openldap/memberof.so
-
-dn: olcOverlay={0}memberof,olcDatabase={1}hdb,cn=config
-objectClass: olcConfig
-objectClass: olcMemberOf
-objectClass: olcOverlayConfig
-objectClass: top
-olcOverlay: memberof
-olcMemberOfDangling: ignore
-olcMemberOfRefInt: TRUE
-olcMemberOfGroupOC: groupOfNames
-olcMemberOfMemberAD: member
-olcMemberOfMemberOfAD: memberOf

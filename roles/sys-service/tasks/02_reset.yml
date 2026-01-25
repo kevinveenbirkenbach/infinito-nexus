@@ -7,4 +7,3 @@
 - name: Remove all '{{ SYS_SERVICE_SUFFIX }}' files with '{{ UNIT_SUFFIX_REMOVER_PACKAGE }}'
   command: "{{ UNIT_SUFFIX_REMOVER_PACKAGE }} -s '{{ SOFTWARE_NAME }}'"
   notify: "reload system daemon"
-  

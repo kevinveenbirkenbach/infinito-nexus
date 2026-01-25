@@ -1,0 +1,11 @@
+- name: "Load server role groups"
+  ansible.builtin.find:
+    paths: "{{ playbook_dir }}/tasks/groups"
+    patterns: "*-roles.yml"
+  delegate_to: localhost
+  run_once: true
+  register: group_roles
+
+- name: "Include server role groups"
+  ansible.builtin.include_tasks: "{{ item.path }}"
+  loop: "{{ group_roles.files | sort(attribute='path') }}"

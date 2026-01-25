@@ -44,18 +44,82 @@
     executable: /bin/bash
   become: true
 
-- name: update pkgmgr (non-interactive)
-  shell: |
-    set -euo pipefail
-    export GIT_TERMINAL_PROMPT=0
-    export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
-    export PYTHONUNBUFFERED=1
-    timeout --signal=KILL 600s "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" update pkgmgr --clone-mode shallow </dev/null
-  args:
-    executable: /bin/bash
-  register: pkgmgr_update
-  changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
-  become: true
-  when: MODE_UPDATE | bool
+- name: "PKGMGR | Update pkgmgr (non-interactive) with safe debug on failure"
+  block:
+
+    - name: update pkgmgr (non-interactive)
+      ansible.builtin.shell: |
+        set -euo pipefail
+        export GIT_TERMINAL_PROMPT=0
+        export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
+        export PYTHONUNBUFFERED=1
+        timeout --signal=KILL 600s "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" update pkgmgr --clone-mode shallow </dev/null
+      args:
+        executable: /bin/bash
+      register: pkgmgr_update
+      changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
+      become: true
+      when: MODE_UPDATE | bool
+      retries: 6
+      delay: 20
+      until: pkgmgr_update.rc == 0
+
+  rescue:
+  
+    - name: "PKGMGR | Failure report (sanitized)"
+      ansible.builtin.debug:
+        msg:
+          note: "Sanitized debug (no credentials printed)."
+          mode_update: "{{ MODE_UPDATE | bool }}"
+          cmd: >-
+            timeout --signal=KILL 600s
+            {{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr update pkgmgr --clone-mode shallow
+          env:
+            GIT_TERMINAL_PROMPT: "0"
+            GIT_SSH_COMMAND: "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
+            PYTHONUNBUFFERED: "1"
+            HOME: "{{ ansible_env.HOME | default('') }}"
+            # show presence & shape, not content
+            NIX_CONFIG_present: "{{ (ansible_env.NIX_CONFIG | default('')) | length > 0 }}"
+            NIX_CONFIG_len: "{{ (ansible_env.NIX_CONFIG | default('')) | length }}"
+            NIX_CONFIG_has_access_tokens: >-
+              {{
+                (ansible_env.NIX_CONFIG | default('')) is search('(^|\\n)\\s*access-tokens\\s*=\\s*github\\.com=')
+              }}
+            NIX_CONFIG_has_empty_github_token: >-
+              {{
+                (ansible_env.NIX_CONFIG | default('')) is search('(^|\\n)\\s*access-tokens\\s*=\\s*github\\.com=\\s*($|\\n)')
+              }}
+            GITHUB_TOKEN_present: "{{ (ansible_env.GITHUB_TOKEN | default('')) | length > 0 }}"
+            GH_TOKEN_present: "{{ (ansible_env.GH_TOKEN | default('')) | length > 0 }}"
+          result:
+            rc: "{{ pkgmgr_update.rc | default('n/a') }}"
+            stdout_tail: "{{ (pkgmgr_update.stdout | default('')).splitlines()[-60:] | join('\n') }}"
+            stderr_tail: "{{ (pkgmgr_update.stderr | default('')).splitlines()[-60:] | join('\n') }}"
+
+    - name: "PKGMGR | Optional: rerun once with --debug (still sanitized)"
+      ansible.builtin.shell: |
+        set -euo pipefail
+        export GIT_TERMINAL_PROMPT=0
+        export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
+        export PYTHONUNBUFFERED=1
+        timeout --signal=KILL 120s "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" update pkgmgr --clone-mode shallow --debug </dev/null || true
+      args:
+        executable: /bin/bash
+      register: pkgmgr_update_debug
+      changed_when: false
+      become: true
+
+    - name: "PKGMGR | Debug rerun output (tails only)"
+      ansible.builtin.debug:
+        msg:
+          rc: "{{ pkgmgr_update_debug.rc | default('n/a') }}"
+          stdout_tail: "{{ (pkgmgr_update_debug.stdout | default('')).splitlines()[-80:] | join('\n') }}"
+          stderr_tail: "{{ (pkgmgr_update_debug.stderr | default('')).splitlines()[-80:] | join('\n') }}"
+
+    - name: "PKGMGR | Fail explicitly after sanitized debug"
+      ansible.builtin.fail:
+        msg: >-
+          pkgmgr update failed. See sanitized debug output above (no credentials printed).
 
 - include_tasks: utils/once/flag.yml

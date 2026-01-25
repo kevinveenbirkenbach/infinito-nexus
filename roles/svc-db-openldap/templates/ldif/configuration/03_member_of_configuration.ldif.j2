@@ -1,23 +1,6 @@
-# Refint Overlay Configuration for OpenLDAP
-#
-# This file configures the refint overlay for the specified LDAP database.
-#
-# The overlay is applied to the database (here using the "hdb" backend) and is
-# responsible for maintaining referential integrity.
-#
-# The attribute "olcRefintAttribute" lists the attributes that will be monitored
-# for changes. In this case, changes to the following attributes will be tracked:
-#   - memberof
-#   - member
-#   - manager
-#   - owner
-#
-# This ensures that any changes in the LDAP directory (such as deletion or modification
-# of an object) automatically update all references to that object, preventing dangling references.
-dn: olcOverlay={1}refint,olcDatabase={1}hdb,cn=config
-objectClass: olcConfig
+# Add refint overlay to data backend (cn=config)
+dn: olcOverlay={1}refint,{{ OPENLDAP_DATA_BACKEND_DN }}
 objectClass: olcOverlayConfig
 objectClass: olcRefintConfig
-objectClass: top
-olcOverlay: {1}refint
-olcRefintAttribute: memberof member manager owner
+olcOverlay: refint
+olcRefintAttribute: memberOf member manager owner

@@ -9,10 +9,37 @@
     docker_network_name:            "{{ POSTGRES_NETWORK_NAME }}"
     docker_network_subnet:          "{{ POSTGRES_SUBNET }}"
     docker_compose_flush_handlers:  true
+    # Explicit overwritting to be sure that there isn't a scope leak by another variable
+    application_id:                 "svc-db-postgres"
+    database_consumer_id:           "svc-db-postgres"
 
-- name: install python-psycopg2
-  package:
-    name: python-psycopg2
-    state: present
+- name: Install 'psycopg2-binary'
+  include_role:
+    name: sys-pip-install
+  vars:
+    package_name: 'psycopg2-binary'
+    global_install: true
+
+- name: "POSTGRES | Wait until postgres is ready (inside container)"
+  ansible.builtin.shell: >
+    docker exec {{ POSTGRES_CONTAINER }} pg_isready -U postgres
+  register: postgres_ready
+  until: postgres_ready.rc == 0
+  retries: 30
+  delay: 2
+  changed_when: false
+
+- name: "POSTGRES | Ensure postgres superuser password matches inventory"
+  ansible.builtin.script: >
+    set_postgres_superuser_password.sh
+    {{ POSTGRES_CONTAINER | quote }}
+    {{ POSTGRES_PASSWORD | quote }}
+  register: postgres_pw_result
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  changed_when: >
+    postgres_pw_result.stdout is search('\\[CHANGED\\]')
+  failed_when: >
+    postgres_pw_result.rc != 0 or
+    postgres_pw_result.stdout is search('\\[FAIL\\]')
 
 - include_tasks: utils/once/flag.yml

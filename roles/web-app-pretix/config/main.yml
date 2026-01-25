@@ -1,11 +1,23 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled:      true
     database:
+      shared: true
+      type: "postgres"
       enabled:      true
     pretix:
       image:        pretix/standalone
@@ -17,16 +29,11 @@ docker:
       mem_reservation:    "1.5g"
       mem_limit:          "2g"
       pids_limit:         1024
+    css:
+      enabled: true
   volumes:
     data:           "pretix_data"
     config:         "pretix_config"
-features:
-  matomo:           true
-  css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
-  oidc:             true
 server:
   csp:
     whitelist:      {}
@@ -40,4 +47,3 @@ rbac:
 plugins:
   oidc:
     version: "2.3.1"
-

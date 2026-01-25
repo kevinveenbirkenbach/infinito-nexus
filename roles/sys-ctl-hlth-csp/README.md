@@ -43,7 +43,7 @@ The role configures a systemd service and timer which executes the CSP crawler p
 
 ## License
 
-Infinito.Nexus NonCommercial License
+Infinito.Nexus Community License (Non-Commercial)
 [https://s.infinito.nexus/license](https://s.infinito.nexus/license)
 
 ## Author

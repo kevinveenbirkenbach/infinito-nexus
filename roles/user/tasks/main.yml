@@ -2,8 +2,8 @@
 
 - name: Deploy shell dotfiles
   ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "{{ user_home }}/.{{ item }}"
+    src: "{{ dotfile }}.j2"
+    dest: "{{ user_home }}/.{{ dotfile }}"
     owner: "{{ user_username }}"
     group: "{{ user_group }}"
     mode: "0644"
@@ -11,7 +11,8 @@
     - bashrc
     - bash_profile
   loop_control:
-    label: ".{{ item }}"
+    loop_var: dotfile
+    label: ".{{ dotfile }}"
 
 - name: Manage SSH authorized_keys (SPOT-only)
   ansible.builtin.include_tasks: 01_ssh_authorized_keys.yml

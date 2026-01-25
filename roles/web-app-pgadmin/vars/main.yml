@@ -1,5 +1,4 @@
 application_id:               "web-app-pgadmin"
-database_type:                "postgres"
-database_host:                "{{ applications | get_app_conf('svc-db-postgres', 'docker.services.postgres.name', True) if applications | get_app_conf(application_id, 'features.central_database', False) }}"
+database_host:                "{{ applications | get_app_conf('svc-db-postgres', 'docker.services.postgres.name', True) if applications | get_app_conf(application_id, 'docker.services.database.shared', False) }}"
 pgadmin_user:                 5050
 pgadmin_group:                "{{ pgadmin_user }}"

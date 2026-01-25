@@ -1,37 +1,5 @@
----
-- name: "pkgmgr install"
-  include_role:
-    name: pkgmgr-install
-  vars:
-    package_name: setup-hibernate
 
-- name: Setup hibernate
-  command: setup-hibernate --non-interactive
-  become: true
-
-- name: Configure systemd lid switch behavior to hibernate on lid close (battery), lock on AC and docked
-  become: true
-  lineinfile:
-    path: /etc/systemd/logind.conf
-    regexp: '^#?HandleLidSwitch='
-    line: 'HandleLidSwitch=hibernate'
-    backup: yes
-  notify: Restart systemd-logind
-
-- name: Configure systemd to lock session when lid is closed on external power
-  lineinfile:
-    path: /etc/systemd/logind.conf
-    regexp: '^#?HandleLidSwitchExternalPower='
-    line: 'HandleLidSwitchExternalPower=lock'
-    backup: yes
-  notify: Restart systemd-logind
-  become: true
-
-- name: Configure systemd to lock session when lid is closed while docked
-  lineinfile:
-    path: /etc/systemd/logind.conf
-    regexp: '^#?HandleLidSwitchDocked='
-    line: 'HandleLidSwitchDocked=lock'
-    backup: yes
-  notify: Restart systemd-logind
-  become: true
+- include_tasks: 01_core.yml
+  when:
+    - run_once_drv_lid_switch is not defined
+    - not (DOCKER_IN_CONTAINER | bool)

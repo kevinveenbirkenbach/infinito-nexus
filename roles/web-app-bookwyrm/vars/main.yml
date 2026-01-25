@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-bookwyrm"
-database_type:                  "postgres"
 
 # Container
 container_port:                 8000
@@ -15,11 +14,11 @@ BOOKWYRM_ALLOW_INVITE_REQUESTS: "{{ applications | get_app_conf(application_id, 
 BOOKWYRM_SECRET_KEY:            "{{ applications | get_app_conf(application_id, 'credentials.secret_key') }}"
 
 ## URLs
-BOOKWYRM_URL:                   "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+BOOKWYRM_URL:                   "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 BOOKWYRM_HOSTNAME:              "{{ container_hostname }}"
 
 ## OIDC (optional; can be fronted by oauth2-proxy or native if you wire it)
-BOOKWYRM_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+BOOKWYRM_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 BOOKWYRM_OIDC_LABEL:            "{{ OIDC.BUTTON_TEXT }}"
 BOOKWYRM_OIDC_CLIENT_ID:        "{{ OIDC.CLIENT.ID }}"
 BOOKWYRM_OIDC_CLIENT_SECRET:    "{{ OIDC.CLIENT.SECRET }}"

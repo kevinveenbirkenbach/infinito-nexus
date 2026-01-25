@@ -3,8 +3,12 @@
 status=0
 
 # The first argument is a space-separated list of whitelisted volume IDs
-whitelist=$1
-whitelisted_volumes=($whitelist)  # Split into an array
+whitelist="${1:-}"
+whitelisted_volumes=()
+if [ -n "$whitelist" ]; then
+    # Split on spaces into a bash array (intentional word-splitting here).
+    IFS=' ' read -r -a whitelisted_volumes <<< "$whitelist"
+fi
 
 anonymous_volumes=$(docker volume ls --format "{{.Name}}" | grep -E '^[a-f0-9]{64}$')
 
@@ -30,15 +34,15 @@ for volume in $anonymous_volumes; do
 
     ((status++))
         
-    container_ids=$(docker ps -aq --filter volume=$volume)
+    container_ids=$(docker ps -aq --filter volume="$volume")
     if [ -z "$container_ids" ]; then
         echo "Volume $volume is not used by any running containers."
         continue
     fi
 
     for container_id in $container_ids; do
-        container_name=$(docker inspect --format '{{ .Name }}' $container_id | sed 's#^/##')
-        mount_path=$(docker inspect --format "{{ range .Mounts }}{{ if eq .Name \"$volume\" }}{{ .Destination }}{{ end }}{{ end }}" $container_id)
+        container_name=$(docker inspect --format '{{ .Name }}' "$container_id" | sed 's#^/##')
+        mount_path=$(docker inspect --format "{{ range .Mounts }}{{ if eq .Name \"$volume\" }}{{ .Destination }}{{ end }}{{ end }}" "$container_id")
         
         if [ -n "$mount_path" ]; then
             echo "Volume $volume is used by container $container_name at mount path $mount_path"

@@ -1,0 +1,175 @@
+# tests/unit/roles/web_app_keycloak/test_library_keycloak_kcadm_update.py
+from __future__ import annotations
+
+import unittest
+from pathlib import Path
+import importlib.util
+import sys
+import types
+from unittest.mock import patch
+
+
+REPO_ROOT = Path(__file__).resolve().parents[4]  # /opt/src/infinito
+ROLE_DIR = REPO_ROOT / "roles" / "web-app-keycloak"
+LIB_PATH = ROLE_DIR / "library" / "keycloak_kcadm_update.py"
+MODUTILS_PATH = ROLE_DIR / "module_utils" / "kcadm_json.py"
+
+
+def _load_py_module(name: str, path: Path):
+    spec = importlib.util.spec_from_file_location(name, str(path))
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Could not create module spec for: {path}")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)  # type: ignore[attr-defined]
+    return mod
+
+
+def _install_role_local_kcadm_json_into_ansible_module_utils() -> None:
+    """
+    Make: from ansible.module_utils.kcadm_json import ...
+    resolve to roles/web-app-keycloak/module_utils/kcadm_json.py
+    """
+    role_modutils = _load_py_module(
+        "role_web_app_keycloak_module_utils_kcadm_json_for_ansible", MODUTILS_PATH
+    )
+
+    if "ansible" not in sys.modules:
+        sys.modules["ansible"] = types.ModuleType("ansible")
+    if "ansible.module_utils" not in sys.modules:
+        sys.modules["ansible.module_utils"] = types.ModuleType("ansible.module_utils")
+
+    sys.modules["ansible.module_utils.kcadm_json"] = role_modutils
+
+
+class DummyModule:
+    def fail_json(self, **kwargs):
+        raise AssertionError(f"Unexpected fail_json call: {kwargs}")
+
+
+class TestKeycloakKcadmUpdate(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        _install_role_local_kcadm_json_into_ansible_module_utils()
+        cls.mod = _load_py_module(
+            "role_web_app_keycloak_library_keycloak_kcadm_update", LIB_PATH
+        )
+
+    def test_get_api_and_lookup_field_defaults(self):
+        m = self.mod
+        self.assertEqual(
+            m.get_api_and_lookup_field("client", None), ("clients", "clientId")
+        )
+        self.assertEqual(
+            m.get_api_and_lookup_field("component", None), ("components", "name")
+        )
+        self.assertEqual(
+            m.get_api_and_lookup_field("client-scope", None), ("client-scopes", "name")
+        )
+        self.assertEqual(m.get_api_and_lookup_field("realm", None), ("realms", "id"))
+
+    def test_deep_merge_recursive(self):
+        m = self.mod
+        a = {"a": 1, "x": {"y": 1, "z": 2}}
+        b = {"b": 2, "x": {"y": 99}}
+        got = m.deep_merge(a, b)
+        self.assertEqual(got["a"], 1)
+        self.assertEqual(got["b"], 2)
+        self.assertEqual(got["x"]["y"], 99)
+        self.assertEqual(got["x"]["z"], 2)
+
+    def test_resolve_object_id_client_scope(self):
+        m = self.mod
+        dummy = DummyModule()
+
+        scopes_json = "\n".join(
+            [
+                "[0.001s][warning][os] noise before json",
+                '[{"id":"s1","name":"a"},{"id":"s2","name":"rbac"}]',
+            ]
+        )
+
+        with patch.object(m, "run_kcadm", return_value=(0, scopes_json, "")):
+            obj_id, exists = m.resolve_object_id(
+                dummy,
+                object_kind="client-scope",
+                api="client-scopes",
+                lookup_field="name",
+                lookup_value="rbac",
+                realm="example",
+                kcadm_exec="kcadm",
+            )
+        self.assertTrue(exists)
+        self.assertEqual(obj_id, "s2")
+
+    def test_resolve_object_id_client(self):
+        m = self.mod
+        dummy = DummyModule()
+
+        clients_json = "\n".join(
+            [
+                "[0.001s][warning] noise",
+                '[{"id":"c1","clientId":"foo"},{"id":"c2","clientId":"bar"}]',
+            ]
+        )
+
+        with patch.object(m, "run_kcadm", return_value=(0, clients_json, "")):
+            obj_id, exists = m.resolve_object_id(
+                dummy,
+                object_kind="client",
+                api="clients",
+                lookup_field="clientId",
+                lookup_value="bar",
+                realm="example",
+                kcadm_exec="kcadm",
+            )
+        self.assertTrue(exists)
+        self.assertEqual(obj_id, "c2")
+
+    def test_resolve_object_id_component(self):
+        m = self.mod
+        dummy = DummyModule()
+
+        comps_json = "\n".join(
+            [
+                "[0.001s][warning] noise",
+                '[{"id":"x1","name":"ldap"},{"id":"x2","name":"oidc"}]',
+            ]
+        )
+
+        with patch.object(m, "run_kcadm", return_value=(0, comps_json, "")):
+            obj_id, exists = m.resolve_object_id(
+                dummy,
+                object_kind="component",
+                api="components",
+                lookup_field="name",
+                lookup_value="oidc",
+                realm="example",
+                kcadm_exec="kcadm",
+            )
+        self.assertTrue(exists)
+        self.assertEqual(obj_id, "x2")
+
+    def test_get_current_object_parses_noisy(self):
+        m = self.mod
+        dummy = DummyModule()
+
+        noisy_obj = "\n".join(
+            [
+                "[0.001s][warning] noise",
+                '{"id":"abc","name":"thing"}',
+            ]
+        )
+        with patch.object(m, "run_kcadm", return_value=(0, noisy_obj, "")):
+            cur = m.get_current_object(
+                dummy,
+                object_kind="client",
+                api="clients",
+                object_id="abc",
+                realm="example",
+                kcadm_exec="kcadm",
+            )
+        self.assertEqual(cur, {"id": "abc", "name": "thing"})
+
+
+if __name__ == "__main__":
+    unittest.main()

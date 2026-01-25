@@ -11,5 +11,6 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
+{{ applications | compose_volumes( application_id) }}
+
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

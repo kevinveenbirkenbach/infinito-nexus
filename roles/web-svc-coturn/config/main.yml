@@ -5,6 +5,9 @@ server:
       - "coturn.{{ DOMAIN_PRIMARY }}"
 docker:
   services:
+    matomo:
+      enabled: true
+      shared: true
     coturn:
       image:              "coturn/coturn"
       version:            "latest"
@@ -20,6 +23,5 @@ docker:
       enabled:            false
     database: 
       enabled:            false
-features:
-  matomo: true
-  css: true
+    css:
+      enabled: true

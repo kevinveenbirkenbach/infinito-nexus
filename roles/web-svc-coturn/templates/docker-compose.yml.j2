@@ -1,5 +1,15 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-  
+  nginx:
+{% include 'roles/docker-container/templates/base.yml.j2' %}
+    image: nginx:alpine
+    container_name: {{ entity_name }}_nginx
+    ports:
+      - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80
+    command: >
+      sh -c "printf 'server { listen 80; location / { default_type text/plain; return 200 \"OK\n\"; } }'
+      > /etc/nginx/conf.d/default.conf
+      && nginx -g 'daemon off;'"
+
   coturn:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ COTURN_IMAGE }}:{{ COTURN_VERSION }}
@@ -9,14 +19,14 @@
     ports:
       - "{{ COTURN_STUN_TURN_PORT }}:{{ COTURN_STUN_TURN_PORT }}/udp"
       - "{{ COTURN_STUN_TURN_PORT }}:{{ COTURN_STUN_TURN_PORT }}/tcp"
-{% if COTURN_TLS_ENABLED | bool %}
+{% if COTURN_TLS_ENABLED| bool %}
       - "{{ COTURN_STUN_TURN_PORT_TLS }}:{{ COTURN_STUN_TURN_PORT_TLS }}/tcp"
 {% endif %}
       - "{{ COTURN_RELAY_PORT_RANGE }}/udp"
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 {% endif %}
     volumes:
-{% if COTURN_TLS_ENABLED | bool %}
+{% if COTURN_TLS_ENABLED| bool %}
       - "{{ COTURN_TLS_CERT_PATH }}:{{ COTURN_TLS_CERT_PATH }}:ro"
       - "{{ COTURN_TLS_KEY_PATH }}:{{ COTURN_TLS_KEY_PATH }}:ro"
 {% endif %}
@@ -41,7 +51,7 @@
       --no-multicast-peers
       --no-cli
       --listening-port={{ COTURN_STUN_TURN_PORT }}
-{% if COTURN_TLS_ENABLED | bool %}
+{% if COTURN_TLS_ENABLED| bool %}
       --tls-listening-port={{ COTURN_STUN_TURN_PORT_TLS }}
       --min-port={{ COTURN_RELAY_PORT_START }}
       --max-port={{ COTURN_RELAY_PORT_END }}
@@ -57,6 +67,8 @@
       start_period: 10s
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  data:
-    name: {{ COTURN_VOLUME }}
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=(database_volume if database_volume is defined else None),
+    extra_volumes={'data': {'name': COTURN_VOLUME}}
+) }}

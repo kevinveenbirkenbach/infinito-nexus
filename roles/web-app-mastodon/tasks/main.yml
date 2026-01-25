@@ -14,9 +14,16 @@
 
 - name: "load docker and db for {{ application_id }}"
   include_role:
-    name: sys-stk-back-stateful
+    name: sys-stk-backend
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers: false
+
+- name: "MASTODON | Apply overrides"
+  include_tasks: 00_overrides.yml
+  when: MASTODON_HTTP_ONLY_ENABLED | bool
+
+- name: Flush handlers to start Mastodon after migration 
+  meta: flush_handlers
 
 - name: "start setup procedures for mastodon"
   include_tasks: 01_setup.yml

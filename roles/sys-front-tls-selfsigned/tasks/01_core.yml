@@ -1,0 +1,134 @@
+---
+# Self-signed TLS provider (strict, SAN aware).
+# This provider uses cert_plan for:
+# - where the cert/key live (shared/global or per-app)
+# - which SAN list is effective
+#
+# It also detects SAN drift and regenerates the cert if the desired SAN set
+# is not covered by the existing certificate.
+
+- name: "TLS | (self_signed) resolve via tls_resolve (strict)"
+  ansible.builtin.set_fact:
+    _tls: "{{ lookup('tls_resolve', application_id) }}"
+  changed_when: false
+
+- name: "TLS | (self_signed) plan certificate via cert_plan (strict)"
+  ansible.builtin.set_fact:
+    _cert: "{{ lookup('cert_plan', application_id) }}"
+  changed_when: false
+
+- name: "TLS | (self_signed) assert mode is self_signed"
+  ansible.builtin.assert:
+    that:
+      - _tls.mode == 'self_signed'
+      - _tls.enabled | bool
+      - _cert.mode == 'self_signed'
+      - _cert.enabled | bool
+    fail_msg: >-
+      sys-front-tls-selfsigned called for '{{ application_id }}' but resolver/plan returned
+      tls.enabled={{ _tls.enabled }}, tls.mode={{ _tls.mode }}, cert.enabled={{ _cert.enabled }}, cert.mode={{ _cert.mode }}.
+      Expected enabled=true, mode=self_signed.
+
+- name: "TLS | (self_signed) compute target paths"
+  ansible.builtin.set_fact:
+    _ss_domain: "{{ _tls.domains.primary }}"
+    _ss_san: "{{ _cert.domains.san }}"
+    _ss_cert: "{{ _cert.files.cert }}"
+    _ss_key: "{{ _cert.files.key }}"
+    _ss_dir: "{{ _cert.files.cert | dirname }}"
+    _ss_conf: "{{ (_cert.files.cert | dirname) ~ '/openssl.cnf' }}"
+    _ss_cn: "{{ (tls_selfsigned_subject.CN | default('') | length > 0) | ternary(tls_selfsigned_subject.CN, _tls.domains.primary) }}"
+  changed_when: false
+
+- name: "TLS | (self_signed) ensure directory exists"
+  ansible.builtin.file:
+    path: "{{ _ss_dir }}"
+    state: directory
+    mode: "0750"
+
+- name: "TLS | (self_signed) render openssl config (SAN aware)"
+  ansible.builtin.copy:
+    dest: "{{ _ss_conf }}"
+    mode: "0640"
+    content: |
+      [ req ]
+      default_bits       = {{ tls_selfsigned_key_bits }}
+      default_md         = sha256
+      prompt             = no
+      distinguished_name = dn
+      req_extensions     = req_ext
+
+      [ dn ]
+      C  = {{ tls_selfsigned_subject.C }}
+      O  = {{ tls_selfsigned_subject.O }}
+      OU = {{ tls_selfsigned_subject.OU }}
+      CN = {{ _ss_cn }}
+
+      [ req_ext ]
+      subjectAltName = @alt_names
+
+      [ alt_names ]
+      {% for d in _ss_san %}
+      DNS.{{ loop.index }} = {{ d }}
+      {% endfor %}
+
+- name: "TLS | (self_signed) check if cert already exists"
+  ansible.builtin.stat:
+    path: "{{ _ss_cert }}"
+  register: _ss_cert_stat
+  changed_when: false
+
+- name: "TLS | (self_signed) read existing certificate (if any)"
+  ansible.builtin.command: "openssl x509 -in {{ _ss_cert }} -noout -text"
+  register: _ss_cert_text
+  changed_when: false
+  failed_when: false
+  when: _ss_cert_stat.stat.exists | default(false)
+
+- name: "TLS | (self_signed) compute wanted/existing SAN sets"
+  ansible.builtin.set_fact:
+    _ss_wanted_sans: "{{ _ss_san | map('lower') | list | unique | sort }}"
+    _ss_existing_sans: >-
+      {{
+        (
+          (_ss_cert_text.stdout | default('')) |
+          regex_findall('DNS:([^,\\s;]+)') |
+          map('lower') | list | unique | sort
+        )
+        if (_ss_cert_stat.stat.exists | default(false)) else
+        []
+      }}
+  changed_when: false
+
+- name: "TLS | (self_signed) decide whether regeneration is needed"
+  ansible.builtin.set_fact:
+    _ss_regen_needed: >-
+      {{
+        (not (_ss_cert_stat.stat.exists | default(false))) or
+        ((_ss_wanted_sans | difference(_ss_existing_sans) | length) > 0)
+      }}
+  changed_when: false
+
+- name: "TLS | (self_signed) remove outdated cert/key if SAN drift detected"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ _ss_cert }}"
+    - "{{ _ss_key }}"
+  when: _ss_regen_needed | bool
+
+- name: "TLS | (self_signed) generate key+cert if missing or drift detected"
+  ansible.builtin.command: >
+    openssl req -x509 -nodes
+    -days {{ tls_selfsigned_days }}
+    -newkey rsa:{{ tls_selfsigned_key_bits }}
+    -keyout {{ _ss_key }}
+    -out {{ _ss_cert }}
+    -config {{ _ss_conf }}
+    -extensions req_ext
+  args:
+    creates: "{{ _ss_cert }}"
+  when: _ss_regen_needed | bool
+
+- include_tasks: utils/once/flag.yml

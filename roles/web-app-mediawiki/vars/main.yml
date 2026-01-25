@@ -1,12 +1,11 @@
 # General
 application_id:                   "web-app-mediawiki"
-database_type:                    "mariadb"
 container_port:                   80
 entity_name:                      "{{ application_id | get_entity_name }}"
 
 # Mediawiki
 MEDIAWIKI_SITENAME:               "{{ applications | get_app_conf(application_id, 'sitename') }}"
-MEDIAWIKI_URL:                    "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+MEDIAWIKI_URL:                    "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 
 ## Folders
 MEDIAWIKI_HTML_DIR:               "/var/www/html"
@@ -30,13 +29,15 @@ MEDIAWIKI_VOLUME_EXTENSIONS:      "{{ applications | get_app_conf(application_id
 MEDIAWIKI_USER:                   "www-data"
 MEDIAWIKI_USER_GID:               "33"
 
+MEDIAWIKI_NETWORK_DATABASE:       "{{ applications | get_app_conf('svc-db-mariadb', 'docker.network') }}"
+
 # User and Credentials
 MEDIAWIKI_ADMINISTRATOR_NAME:     "{{ users.administrator.username }}"
-MEDIAWIKI_ADMINISTRATOR_PASSWORD: "{{ users.administrator.password }}"
+MEDIAWIKI_ADMINISTRATOR_PASSWORD: "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
 MEDIAWIKI_SECRET_KEY:             "{{ applications | get_app_conf(application_id, 'credentials.secret_key') }}"
 
 # OIDC
-MEDIAWIKI_OIDC_ENABLED:           "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+MEDIAWIKI_OIDC_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 MEDIAWIKI_OIDC_CLIENT_ID:         "{{ OIDC.CLIENT.ID }}"
 MEDIAWIKI_OIDC_CLIENT_SECRET:     "{{ OIDC.CLIENT.SECRET }}"
 MEDIAWIKI_OIDC_ISSUER:            "{{ OIDC.CLIENT.ISSUER_URL }}"
@@ -45,8 +46,8 @@ MEDIAWIKI_OIDC_AUTOLOGIN:         true
 MEDIAWIKI_OIDC_LOCALLOGIN:        false
 
 # Extensions
-MEDIAWIKI_EXT_BRANCH:   "REL1_44"
-MEDIAWIKI_EXT_CFG_BASE: "{{ [ MEDIAWIKI_CONFIG_DIR, 'mwext', MEDIAWIKI_EXT_BRANCH ] | path_join }}"
+MEDIAWIKI_EXT_BRANCH:             "REL{{ (MEDIAWIKI_VERSION | string).split('.')[:2] | join('_') }}"
+MEDIAWIKI_EXT_CFG_BASE:           "{{ [ MEDIAWIKI_CONFIG_DIR, 'mwext', MEDIAWIKI_EXT_BRANCH ] | path_join }}"
 MEDIAWIKI_EXT_LIST:
   - name: "PluggableAuth"
     url: "{{ [ 'https://codeload.github.com/wikimedia/mediawiki-extensions-PluggableAuth/tar.gz/refs/heads/',MEDIAWIKI_EXT_BRANCH ] | url_join }}"

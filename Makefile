@@ -2,17 +2,9 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 
-# ------------------------------------------------------------
-# Python / venv
-#
-# Rule:
-#  - If a venv is already active (VIRTUAL_ENV), use it.
-#  - Otherwise fall back to the global venv location.
-# ------------------------------------------------------------
 VENV_BASE ?= $(if $(VIRTUAL_ENV),$(dir $(VIRTUAL_ENV)),/opt/venvs)
 VENV_NAME ?= infinito
 VENV_FALLBACK := $(VENV_BASE)/$(VENV_NAME)
-
 VENV := $(if $(VIRTUAL_ENV),$(VIRTUAL_ENV),$(VENV_FALLBACK))
 
 PYTHON := $(VENV)/bin/python
@@ -20,33 +12,21 @@ PIP    := $(PYTHON) -m pip
 export PYTHON
 export PIP
 
-# Nix Config Variable (To avoid rate limit)
-NIX_CONFIG ?=
+# Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
+PYTHONPATH ?= .
+export PYTHONPATH
+
+ifdef NIX_CONFIG
 export NIX_CONFIG
+endif
 
-ROLES_DIR           := ./roles
-APPLICATIONS_OUT    := ./group_vars/all/04_applications.yml
-APPLICATIONS_SCRIPT := ./cli/setup/applications/__main__.py
-USERS_SCRIPT        := ./cli/setup/users/__main__.py
-USERS_OUT           := ./group_vars/all/03_users.yml
-INCLUDES_SCRIPT     := ./cli/build/role_include/__main__.py
-
-# Directory where these include-files will be written
-INCLUDES_OUT_DIR    := ./tasks/groups
+# Ensure TEST_DEPLOY_TYPE is available for the default inventory dir.
+TEST_DEPLOY_TYPE ?= server
+export TEST_DEPLOY_TYPE
 
 # --- Test filtering (unittest discover) ---
 TEST_PATTERN            ?= test*.py
 export TEST_PATTERN
-LINT_TESTS_DIR          ?= tests/lint
-UNIT_TESTS_DIR          ?= tests/unit
-INTEGRATION_TESTS_DIR   ?= tests/integration
-
-# Deploy test type
-# Allowed: server, workstation
-TEST_DEPLOY_TYPE ?= server
-
-# Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
-PYTHONPATH              ?= .
 
 # Distro
 INFINITO_DISTRO		?= arch
@@ -54,21 +34,61 @@ INFINITO_CONTAINER 	?= infinito_nexus_$(INFINITO_DISTRO)
 export INFINITO_DISTRO
 export INFINITO_CONTAINER
 
-# Compute extra users as before
-RESERVED_USERNAMES := $(shell \
-  find $(ROLES_DIR) -maxdepth 1 -type d -printf '%f\n' \
-    | sed -E 's/.*-//' \
-    | grep -E -x '[a-z0-9]+' \
-    | sort -u \
-    | paste -sd, - \
+# Detirmene Environment 
+RUNNING_ON_ACT    ?= false
+RUNNING_ON_GITHUB ?= false
+
+ifeq ($(GITHUB_ACTIONS),true)
+	RUNNING_ON_GITHUB = true
+	ifeq ($(ACT),true)
+		RUNNING_ON_ACT    = true
+		RUNNING_ON_GITHUB = false
+	endif
+endif
+export RUNNING_ON_ACT RUNNING_ON_GITHUB
+
+INVENTORY_DIR ?= $(shell \
+  RUNNING_ON_ACT="$(RUNNING_ON_ACT)" \
+  RUNNING_ON_GITHUB="$(RUNNING_ON_GITHUB)" \
+  HOME="$(HOME)" \
+  bash scripts/inventory/resolve.sh \
 )
+export INVENTORY_DIR
+
+# Overwrite defaults
+ifeq ($(RUNNING_ON_GITHUB),true)
+	# -------- Real GitHub Actions CI --------
+	INFINITO_PULL_POLICY ?= always
+	INFINITO_IMAGE_TAG ?= latest
+	INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):$(INFINITO_IMAGE_TAG)
+	INFINITO_NO_BUILD ?= 1
+	INFINITO_DOCKER_VOLUME ?= /mnt/docker
+	INFINITO_DOCKER_MOUNT ?= /var/lib/docker
+	export INFINITO_DOCKER_VOLUME INFINITO_DOCKER_MOUNT
+	export INFINITO_IMAGE_TAG
+	export INFINITO_NO_BUILD
+	export INFINITO_PULL_POLICY
+	export INFINITO_IMAGE
+	INFINITO_COMPILE ?=  0
+else
+	INFINITO_COMPILE ?= 1
+endif
+export INFINITO_COMPILE
 
 .PHONY: \
 	setup setup-clean install install-ansible install-venv install-python \
 	test test-lint test-unit test-integration test-deploy test-deploy-app\
 	clean down \
 	list tree mig dockerignore \
-	print-python lint-ansible
+	print-python lint-ansible \
+	dns-setup dns-remove
+
+dns-setup:
+	@bash scripts/dns/setup.sh
+
+dns-remove:
+	@bash scripts/dns/remove.sh
+
 
 clean:
 	@echo "Removing ignored git files"
@@ -83,13 +103,17 @@ clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX; \
 
-down:
-	@echo ">>> Stopping infinito compose stack and removing volumes"
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci down --remove-orphans -v
+docker-restart:
+	@$(PYTHON) -m cli.deploy.development restart --distro "$(INFINITO_DISTRO)"
 
-up:
-	@echo ">>> Start infinito compose stack"
-	@INFINITO_DISTRO="$(INFINITO_DISTRO)" docker compose --profile ci up -d --remove-orphans
+docker-up: install
+	@$(PYTHON) -m cli.deploy.development up
+
+docker-down:
+	@$(PYTHON) -m cli.deploy.development down
+
+docker-stop:
+	@$(PYTHON) -m cli.deploy.development stop
 
 list:
 	@echo "Generating the roles list"
@@ -126,58 +150,29 @@ dockerignore:
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
-# Global for all Infinito.Nexus environments used by the user
-ANSIBLE_COLLECTIONS_DIR ?= $(HOME)/.ansible/collections
-
 install-ansible:
-	@echo "📦 Installing Ansible collections → $(ANSIBLE_COLLECTIONS_DIR)"
-	@mkdir -p "$(ANSIBLE_COLLECTIONS_DIR)"
-	@"$(PYTHON)" -m ansible.cli.galaxy collection install \
-		-r requirements.yml \
-		-p "$(ANSIBLE_COLLECTIONS_DIR)" \
-		--force-with-deps
+	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
+	PYTHON="$(PYTHON)" \
+	bash scripts/install/ansible.sh
 
 install-venv:
-	@echo "✅ Python environment installed (editable)."
-	@echo "🐍 Using venv: $(VENV)"
-	@if [ -z "$(VIRTUAL_ENV)" ]; then \
-		mkdir -p "$(VENV_BASE)"; \
-	fi
-	@if [ ! -x "$(PYTHON)" ]; then \
-		echo "→ Creating virtualenv $(VENV)"; \
-		python3 -m venv "$(VENV)"; \
-	fi
+	@VENV="$(VENV)" \
+	VENV_BASE="$(VENV_BASE)" \
+	PYTHON="$(PYTHON)" \
+	bash scripts/install/venv.sh
 
 install-python: install-venv
-	@echo "📦 Installing Python dependencies"
-	@"$(PYTHON)" -m pip install --upgrade pip setuptools wheel
-	@"$(PYTHON)" -m pip install -e .
+	@bash scripts/install/python.sh
 
 install: install-python install-ansible
 
 setup: dockerignore
-	@echo "🔧 Generating users defaults → $(USERS_OUT)…"
-	$(PYTHON) $(USERS_SCRIPT) \
-	  --roles-dir $(ROLES_DIR) \
-	  --output $(USERS_OUT) \
-	  --reserved-usernames "$(RESERVED_USERNAMES)"
-	@echo "✅ Users defaults written to $(USERS_OUT)\n"
+	@bash scripts/setup.sh
 
-	@echo "🔧 Generating applications defaults → $(APPLICATIONS_OUT)…"
-	$(PYTHON) $(APPLICATIONS_SCRIPT) \
-	  --roles-dir $(ROLES_DIR) \
-	  --output-file $(APPLICATIONS_OUT)
-	@echo "✅ Applications defaults written to $(APPLICATIONS_OUT)\n"
+setup-development: dockerignore
+	touch env.development
 
-	@echo "🔧 Generating role-include files for each group…"
-	@mkdir -p $(INCLUDES_OUT_DIR)
-	@INCLUDE_GROUPS="$$( $(PYTHON) -m cli.meta.categories.invokable -s "-" | tr '\n' ' ' )"; \
-	for grp in $$INCLUDE_GROUPS; do \
-	  out="$(INCLUDES_OUT_DIR)/$${grp}roles.yml"; \
-	  echo "→ Building $$out (pattern: '$$grp')…"; \
-	  $(PYTHON) $(INCLUDES_SCRIPT) $(ROLES_DIR) -p $$grp -o $$out; \
-	  echo "  ✅ $$out"; \
-	done
+bootstrap: install setup
 
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
@@ -193,61 +188,87 @@ format:
 test: test-lint test-unit test-integration lint-ansible test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
-test-lint: build-missing
-	@TEST_TYPE="lint" bash scripts/tests/code.sh
+test-lint: install
+	@TEST_TYPE="lint" \
+	INFINITO_COMPILE=0 \
+	bash scripts/tests/code.sh
 
-test-unit: build-missing
-	@TEST_TYPE="unit" bash scripts/tests/code.sh
+test-unit: install
+	@TEST_TYPE="unit" \
+	INFINITO_COMPILE=0 \
+	bash scripts/tests/code.sh
 
-test-integration: build-missing
-	@TEST_TYPE="integration" bash scripts/tests/code.sh
+test-integration: install
+	@TEST_TYPE="integration" \
+	INFINITO_COMPILE=0 \
+	bash scripts/tests/code.sh
 
-# ------------------------------------------------------------
-# Deploy test for a single app (serial, fail-fast)
-# Usage:
-#   make test-deploy-app APP=web-app-nextcloud
-# ------------------------------------------------------------
-test-deploy-app: build-missing up
+ci-deploy-discover:
+	@PYTHON=python3 ./scripts/meta/build-test-matrix.sh
+
+ci-deploy-app:
+	export MISSING_ONLY=true; \
+	./scripts/tests/deploy/ci/app.sh
+
+ci-discover-output:
 	@set -euo pipefail; \
-	if [[ -z "$(APP)" ]]; then \
-	  echo "ERROR: APP is not set"; \
-	  echo "Usage: make test-deploy-app APP=web-app-nextcloud"; \
-	  exit 1; \
+	apps="$$(./scripts/meta/build-test-matrix.sh)"; \
+	[[ -n "$$apps" ]] || apps='[]'; \
+	if [[ -n "$${ONLY_APP:-}" ]]; then \
+	  apps="$$(jq -nc --arg a "$$ONLY_APP" '[ $$a ]')"; \
 	fi; \
-	echo "=== act: deploy:server app=$(APP) (serial, fail-fast) ==="; \
-	act -W .github/workflows/test-deploy-server.yml \
-		-j test \
-		--matrix app:"$(APP)" \
-		--privileged \
-		--network host \
-		--concurrent-jobs 1
+	if [[ -n "$${GITHUB_OUTPUT:-}" ]]; then \
+	  echo "apps=$$apps" >> "$$GITHUB_OUTPUT"; \
+	  echo "apps_json=$$apps" >> "$$GITHUB_OUTPUT"; \
+	fi; \
+	echo "apps_json=$$apps"
 
-# ------------------------------------------------------------
-# Deploy test for all discovered apps (calls test-deploy-app)
-# ------------------------------------------------------------
-test-deploy: build-missing up
-	@set -euo pipefail; \
-	echo "=== Discover server apps (JSON) ==="; \
-	export INFINITO_DISTRO="arch"; \
-	apps_json="$$(scripts/tests/discover-server-apps.sh)"; \
-	if [[ -z "$$apps_json" ]]; then apps_json="[]"; fi; \
-	echo "$$apps_json" | jq -e . >/dev/null; \
-	echo "Apps: $$apps_json"; \
-	echo; \
-	for app in $$(echo "$$apps_json" | jq -r '.[]'); do \
-		$(MAKE) test-deploy-app APP="$$app"; \
-		echo; \
-	done
+test-act-all:
+	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	bash scripts/tests/deploy/act/all.sh
+
+test-act-app:
+	@APP="$(APP)" \
+	TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	bash scripts/tests/deploy/act/app.sh
+
+test-local-reset:
+	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	PYTHON=python3 \
+	bash scripts/tests/deploy/local/reset.sh
+
+test-local-run-all:
+	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	DEBUG="$(DEBUG)" \
+	LIMIT_HOST="$(LIMIT_HOST)" \
+	INVENTORY_DIR="$(INVENTORY_DIR)" \
+	bash scripts/tests/deploy/local/run-all.sh
+
+test-local-cleanup:
+	@APP="$(APP)" \
+	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
+	bash scripts/tests/deploy/local/cleanup.sh
+
+test-local-rapid:
+	@APP="$(APP)" \
+	TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
+	DEBUG=true \
+	bash scripts/tests/deploy/local/rapid.sh
+
+test-local-rapid-fresh: test-local-cleanup test-local-rapid
+
+test-local-full:
+	@echo "=== local full deploy (type=$(TEST_DEPLOY_TYPE), distro=$(INFINITO_DISTRO)) ==="
+	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
+	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
+	bash scripts/tests/deploy/local/all.sh
 
 # Backwards compatible target (kept)
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
-
-# Debug helper
-print-python:
-	@echo "VENV_BASE       = $(VENV_BASE)"
-	@echo "VENV_NAME       = $(VENV_NAME)"
-	@echo "VENV            = $(VENV)"
-	@echo "Selected PYTHON = $(PYTHON)"
-	@$(PYTHON) -c 'import sys; print("sys.executable =", sys.executable); print("sys.prefix     =", sys.prefix); print("sys.base_prefix=", sys.base_prefix); print("is_venv        =", sys.prefix != sys.base_prefix)'

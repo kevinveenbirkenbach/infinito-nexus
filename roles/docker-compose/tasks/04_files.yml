@@ -30,12 +30,15 @@
     dest: "{{ docker_compose.files.env }}"
     mode: '0640'
     force: yes
-  notify: docker compose up
+  notify:
+    - docker compose up
+    - docker compose build
   with_first_found:
     - files:
         - "{{ application_id | abs_role_path_by_application_id }}/templates/env.j2"
         - "{{ application_id | abs_role_path_by_application_id }}/files/env"
       skip: true
+  register: env_template
 
 - name: "Create (optional) '{{ docker_compose.files.docker_compose_override }}'"
   template:
@@ -50,10 +53,15 @@
         - "{{ application_id | abs_role_path_by_application_id }}/files/docker-compose.override.yml"
       skip: true
 
-- name:      "Create (obligatoric) '{{ docker_compose.files.docker_compose }}'"
-  template:
-    src:    "docker-compose.yml.j2"
-    dest:   "{{ docker_compose.files.docker_compose }}"
-    mode:   '0640'
-  notify:   docker compose up
+- name: "Create (optional) '{{ docker_compose.files.docker_compose }}'"
+  ansible.builtin.template:
+    src:  "{{ item }}"
+    dest: "{{ docker_compose.files.docker_compose }}"
+    mode: "0640"
+    force: yes
+  with_first_found:
+    - files:
+        - "docker-compose.yml.j2"
+      skip: true
   register: docker_compose_template
+  notify: docker compose up

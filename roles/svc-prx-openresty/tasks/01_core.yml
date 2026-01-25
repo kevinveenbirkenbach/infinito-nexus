@@ -1,3 +1,9 @@
+- name: Ensure nginx config directory exists
+  ansible.builtin.file:
+    path: "{{ NGINX.FILES.CONFIGURATION | dirname }}"
+    state: directory
+    mode: "0755"
+
 - name: Ensure base nginx.conf exists (bootstrap)
   ansible.builtin.copy:
     dest: "{{ NGINX.FILES.CONFIGURATION }}"
@@ -12,7 +18,6 @@
     name: docker-compose
   vars:
     docker_git_repository_pull:     false # Deactivated here to deactivate inhirement
-    database_type:                  ""    # Deactivate Database for openresty
     docker_compose_flush_handlers:  true
 
 - name: "Verify that '{{ role_name }}' works"

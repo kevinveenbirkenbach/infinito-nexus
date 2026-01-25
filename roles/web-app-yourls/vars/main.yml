@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-yourls"
-database_type:                  "mariadb"
 
 # Webserver
 webserver_extra_configuration:      "{{ lookup('template', 'redirect.conf.j2') }}"

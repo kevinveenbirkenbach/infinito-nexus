@@ -1,21 +1,13 @@
-
-features:
-  logout: false # Role is not enabled until then keep it false
-  matomo: true
-#  syncope:
-#    version:         "latest"
-#    credentials:
-#     anonymous:
-#       password:     # Set in environment file
-#     database:
-#       password:     # Set in environment file
-#     administrator:
-#       password:       "{{ users.administrator.password }}"
-#     users:
-#       administrator:
-#         username:     "{{ users.administrator.username }}"
 server:
   domains:
     canonical:
       - syncope.{{ DOMAIN_PRIMARY }}
     aliases: []
+docker:
+  services:
+    logout:
+      enabled: false
+      shared: false
+    matomo:
+      enabled: true
+      shared: true

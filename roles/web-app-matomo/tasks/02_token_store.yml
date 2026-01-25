@@ -1,9 +1,4 @@
 ---
-- name: Include Token Store
-  include_role:
-    name: sys-token-store
-  when: run_once_sys_token_store is not defined
-
 - name: "Matomo | Expose resolved token"
   ansible.builtin.set_fact:
     matomo_token_value: "{{ users.administrator.tokens['web-app-matomo'] | default('') | string | trim }}"

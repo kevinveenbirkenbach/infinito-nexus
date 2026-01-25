@@ -2,14 +2,6 @@ ldap:
   filters:
     administrators:   False   # Set true to filter administrators
     users:            False   # Set true to filter users
-features:
-  matomo:             true
-  css:                false   # Temporary deactivated. Needs to be optimized for production use.
-  desktop:            true
-  ldap:               true
-  central_database:   true
-  oauth2:             true
-  logout:             true
 server:
   csp:
     flags:
@@ -26,7 +18,19 @@ server:
     aliases: []
 docker:
   services:
+    logout:
+      enabled: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled: true
     web:
       name:               openproject-web
@@ -70,7 +74,8 @@ docker:
       mem_reservation:    "512m"
       mem_limit:          "512m"
       pids_limit:         256
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host:             "proxy"
         port:             "80"
@@ -79,5 +84,7 @@ docker:
           - "/users/me"           # Necessary for Nextcloud Plugin to work
           - "/api/"               # Necessary for Nextcloud Plugin to work
           - "/oauth/token"        # Necessary for Nextcloud Plugin to work
+    css:
+      enabled: false
   volumes:
     data:                 "openproject_data"

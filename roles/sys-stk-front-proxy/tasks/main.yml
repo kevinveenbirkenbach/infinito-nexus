@@ -1,15 +1,21 @@
+---
 # run_once_sys_stk_front_proxy: deactivated
 
 - name: Bootstrap Frontend Nase
-  include_role:
+  ansible.builtin.include_role:
     name: sys-stk-front-base
 
-- name: "include role for '{{ domain }}' to receive certificates and do the modification routines"
+- name: "TLS | Apply tls layer"
   include_role:
-    name: sys-util-csp-cert
+    name: sys-front-tls
+  when: lookup('tls_resolve', application_id, want='enabled') | bool
+
+- name: "CSP/INJ | Apply global injections for {{ domain }}"
+  ansible.builtin.include_role:
+    name: sys-front-inj-all
 
 - name: "Deploy NGINX config: '{{ domain }}' -> '{{ front_proxy_domain_conf_dst }}'"
-  template:
+  ansible.builtin.template:
     src: "{{ item }}"
     dest: "{{ front_proxy_domain_conf_dst }}"
   register: nginx_conf
@@ -21,21 +27,21 @@
   with_first_found: "{{ nginx_template_candidates }}"
 
 - block:
-  - name: "Check if {{ domains | get_domain(application_id) }} is reachable (only if config unchanged)"
-    uri:
-      url: "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-    register: site_check
-    failed_when: false
-    changed_when: false
+    - name: "Check if {{ domains | get_domain(application_id) }} is reachable (only if config unchanged)"
+      ansible.builtin.uri:
+        url: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+      register: site_check
+      failed_when: false
+      changed_when: false
 
-  - name: Restart NGINX if site is down
-    command:
-      cmd: "true"
-    notify: restart openresty
-    when:
-    - site_check.status is defined
-    - not site_check.status in [200,301,302]
+    - name: Restart NGINX if site is down
+      ansible.builtin.command:
+        cmd: "true"
+      notify: restart openresty
+      when:
+        - site_check.status is defined
+        - site_check.status not in [200, 301, 302]
   when: not nginx_conf.changed
 
 - name: "Restart Webserver for '{{ front_proxy_domain_conf_dst }}'"
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers

@@ -1,7 +1,7 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Installs OpenJDK 11 (`jdk11-openjdk`) on Pacman-based systems to provide a Java runtime and development environment.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1
 
-ARG PKGMGR_IMAGE_REPO=ghcr.io/kevinveenbirkenbach/pkgmgr-arch
-ARG PKGMGR_IMAGE_TAG=stable
-
-FROM ${PKGMGR_IMAGE_REPO}:${PKGMGR_IMAGE_TAG} AS full
+# Base image (pkgmgr) selector
+# Example:
+#   PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-arch:stable
+#   PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-arch-slim:stable
+ARG PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-arch:stable
+FROM ${PKGMGR_IMAGE} AS full
 
 # Hadolint DL4006: ensure pipefail is set for RUN instructions that use pipes
 SHELL ["/bin/bash", "-o", "pipefail", "-lc"]
@@ -11,15 +13,18 @@ SHELL ["/bin/bash", "-o", "pipefail", "-lc"]
 # Forwardable build-time Nix settings (e.g., GitHub access tokens to avoid rate limits)
 ARG NIX_CONFIG
 
-# Make Nix non-interactive by default, but allow override/extension via build arg
-ENV NIX_CONFIG="${NIX_CONFIG:+$NIX_CONFIG }accept-flake-config = true"
-
 ENV INFINITO_SRC_DIR="/opt/src/infinito"
 ENV PYTHON="/opt/venvs/infinito/bin/python"
 ENV PIP="/opt/venvs/infinito/bin/python -m pip"
 ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
 RUN cat /etc/os-release || true
+
+# Make Nix non-interactive for flake config (CI-friendly)
+RUN if [ -f /etc/nix/nix.conf ]; then \
+      grep -q '^accept-flake-config *= *true' /etc/nix/nix.conf || \
+      echo 'accept-flake-config = true' >> /etc/nix/nix.conf; \
+    fi
 
 # ------------------------------------------------------------
 # Infinito.Nexus source in
@@ -35,7 +40,6 @@ RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-docker/files/install-cli.sh
 # ------------------------------------------------------------
 # Install systemd + dbus (for CI Ansible systemd/service tests)
 # ------------------------------------------------------------
-
 # hadolint ignore=DL3008,DL3033,DL3041
 RUN set -euo pipefail; \
   . /etc/os-release; \
@@ -69,7 +73,6 @@ RUN set -euo pipefail; \
   systemctl mask systemd-firstboot.service first-boot-complete.target || true; \
   systemd-machine-id-setup || true
 
-
 # systemd-in-container conventions
 ENV container=docker
 STOPSIGNAL SIGRTMIN+3
@@ -89,12 +92,28 @@ RUN set -euo pipefail; \
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
   export NIX_CONFIG="${NIX_CONFIG:-}"; \
-  INSTALL_LOCAL_BUILD=1 /opt/src/infinito/scripts/docker/entry.sh true
+  INFINITO_COMPILE=1 /opt/src/infinito/scripts/docker/entry.sh true
 
 # Set workdir to / to avoid ambiguous commands
 WORKDIR /
+
+COPY scripts/docker/healthcheck.sh /usr/local/bin/healthcheck.sh
+RUN chmod +x /usr/local/bin/healthcheck.sh
+HEALTHCHECK --interval=5s --timeout=5s --start-period=30s --retries=20 \
+  CMD /usr/local/bin/healthcheck.sh
 
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]
 
 # IMPORTANT: default to systemd as PID 1
 CMD ["/sbin/init"]
+
+
+# ============================================================
+# Target: slim
+# - based on full, runs slim.sh
+# ============================================================
+FROM full AS slim
+
+# Image cleanup (reduce final size)
+RUN test -x /usr/local/bin/slim.sh || (echo "slim.sh missing in base image" >&2; exit 1)
+RUN /usr/local/bin/slim.sh

@@ -1,0 +1,106 @@
+###############################################################################
+# 0) Ensure base tree exists (suffix + OUs)
+###############################################################################
+- name: Ensure LDAP root (suffix) entry exists
+  community.general.ldap_entry:
+    dn:          "{{ LDAP.DN.ROOT }}"
+    server_uri:  "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:     "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:     "{{ OPENLDAP_BIND_PW }}"
+    objectClass:
+      - top
+      - dcObject
+      - organization
+    attributes:
+      dc: "{{ (LDAP.DN.ROOT | regex_search('dc=([^,]+)', '\\1')) | first | default('infinito') }}"
+      o:  "{{ (LDAP.DN.ROOT | regex_search('dc=([^,]+)', '\\1')) | first | default('infinito') }}"
+    state: present
+
+- name: Ensure people OU exists
+  community.general.ldap_entry:
+    dn:          "{{ LDAP.DN.OU.USERS }}"
+    server_uri:  "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:     "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:     "{{ OPENLDAP_BIND_PW }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: users
+      description: "Users container"
+    state: present
+
+- name: Ensure groups OU exists
+  community.general.ldap_entry:
+    dn:          "{{ LDAP.DN.OU.GROUPS }}"
+    server_uri:  "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:     "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:     "{{ OPENLDAP_BIND_PW }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: groups
+      description: "Groups container"
+    state: present
+
+- name: Ensure roles OU exists
+  community.general.ldap_entry:
+    dn:          "{{ LDAP.DN.OU.ROLES }}"
+    server_uri:  "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:     "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:     "{{ OPENLDAP_BIND_PW }}"
+    objectClass:
+      - top
+      - organizationalUnit
+    attributes:
+      ou: roles
+      description: "Container for application access profiles"
+    state: present
+
+###############################################################################
+# 1) Create the LDAP entry if it does not yet exist
+###############################################################################
+- name: Ensure LDAP users exist
+  community.general.ldap_entry:
+    dn:           "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
+    server_uri:   "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:      "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:      "{{ OPENLDAP_BIND_PW }}"
+    objectClass:  "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
+    attributes:
+      uid:           "{{ item.value.username }}"
+      sn:            "{{ item.value.sn  | default(item.key) }}"
+      cn:            "{{ item.value.cn  | default(item.key) }}"
+      userPassword:  "{SSHA}{{ item.value.password }}"
+      loginShell:    /bin/bash
+      homeDirectory: "/home/{{ item.key }}"
+      uidNumber:     "{{ item.value.uid | int }}"
+      gidNumber:     "{{ item.value.gid | int }}"
+    state: present
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  throttle: 1
+  loop: "{{ OPENLDAP_USERS | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+###############################################################################
+# 2) Keep the objectClass list AND the mail attribute up-to-date
+###############################################################################
+- name: Ensure required objectClass values and mail address are present
+  community.general.ldap_attrs:
+    dn: "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
+    server_uri: "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn: "{{ OPENLDAP_BIND_DN }}"
+    bind_pw: "{{ OPENLDAP_BIND_PW }}"
+    attributes:
+      objectClass: "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
+      mail:        "{{ item.value.email }}"
+    state: "{{ 'exact' if MODE_CLEANUP else 'present' }}"
+  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  throttle: 1
+  loop: "{{ OPENLDAP_USERS | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"

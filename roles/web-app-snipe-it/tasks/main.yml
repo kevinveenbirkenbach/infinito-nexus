@@ -1,10 +1,13 @@
 ---
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     docker_compose_flush_handlers: true
 
+- name: "Installation Procedures"
+  import_tasks: 01_install.yml
+
 - name: "Configure Snipe-IT LDAP settings"
-  import_tasks: ldap.yml
-  when: applications | get_app_conf(application_id, 'features.ldap', False)
+  import_tasks: 02_ldap.yml
+  when: SNIPE_IT_LDAP_ENABLED | bool 

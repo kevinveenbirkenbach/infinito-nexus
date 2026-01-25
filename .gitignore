@@ -14,3 +14,5 @@ roles/list.json
 build/*
 .ruff_cache
 collections/
+logs/*
+env.development

@@ -1,13 +1,3 @@
-features:
-  matomo:           true
-  css:              true
-  desktop:          true
-  central_database: false
-  logout:           true
-  javascript:       false
-  local_ai:         true
-  oidc:             true
-  ldap:             false # OIDC is already activated so LDAP isn't necessary
 server:
   status_codes:
     api:      400
@@ -24,6 +14,17 @@ server:
       connect-src: [] 
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     minio:
       backup:
         no_stop_required: false
@@ -39,7 +40,15 @@ docker:
         disabled: true
       enabled: false
     database:
+      shared: false
       enabled: false
+    css:
+      enabled: true
+    javascript:
+      enabled: false
+    ollama:
+      enabled: true
+      shared: true
   volumes: 
     data:      minio_data
 credentials: {}

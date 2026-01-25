@@ -1,7 +1,7 @@
 ---
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     docker_compose_flush_handlers: false
     webserver_extra_configuration: >-
@@ -19,25 +19,8 @@
 
 - meta: flush_handlers
 
-- name: Check if listmonk database is already initialized
-  command: '{{ docker_compose_command_exec }} -T {{ database_container }} psql -U {{ database_username }} -d {{ database_name }} -c "\dt"'
-  register: db_tables
-  changed_when: false
-  failed_when: false
-
-- name: Run Listmonk setup only if DB is empty
-  command:
-    cmd: docker compose run -T --rm application sh -c "yes | ./listmonk --install"
-    chdir: "{{ docker_compose.directories.instance }}"
-  when: "'No relations found.' in db_tables.stdout"
-
-- name: "Listmonk | run DB/schema upgrade (non-interactive)"
-  ansible.builtin.shell: |
-    set -o pipefail
-    echo "y" | docker compose run -T application ./listmonk --upgrade
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  when: MODE_UPDATE | bool
+- name: Include database setup routine for Listmonk
+  include_tasks: "01_database.yml"
 
 - name: Build OIDC settings JSON
   set_fact:
@@ -51,13 +34,10 @@
 
 - name: Update administrator email and password login in Listmonk (as superuser)
   shell: |
-    docker exec -i {{ database_container }} psql \
-      -U {{ database_username }} \
-      -v ON_ERROR_STOP=1 \
-      -d {{ database_name }} << 'EOSQL'
+    {{ LISTMONK_EXEC_DATABASE }} -v ON_ERROR_STOP=1 << 'EOSQL'
     UPDATE users
     SET email = '{{ users.administrator.email }}',
-        password_login = {{ 'false' if applications | get_app_conf(application_id, 'features.oidc') else 'true' }}
+        password_login = {{ 'false' if applications | get_app_conf(application_id, 'docker.services.oidc.enabled') else 'true' }}
     WHERE username = 'administrator';
     EOSQL
   args:
@@ -65,10 +45,7 @@
 
 - name: Apply all Listmonk settings
   shell: |
-    docker exec -i {{ database_container }} psql \
-      -U {{ database_username }} \
-      -v ON_ERROR_STOP=1 \
-      -d {{ database_name }} << 'EOSQL'
+    {{ LISTMONK_EXEC_DATABASE }} -v ON_ERROR_STOP=1 << 'EOSQL'
     UPDATE settings
     SET value = '{{ item.value }}'::jsonb
     WHERE key = '{{ item.key }}';
@@ -82,4 +59,3 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-

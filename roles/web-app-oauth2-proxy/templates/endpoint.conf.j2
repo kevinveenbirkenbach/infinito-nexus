@@ -1,6 +1,9 @@
 # OAuth2-Proxy-Endpoint
 location /oauth2/ {
-    proxy_pass http://127.0.0.1:{{ ports.localhost.oauth2_proxy[application_id] }};
+    proxy_pass http://127.0.0.1:{{ ports.localhost.oauth2[application_id] }};
+    {% if lookup('tls_resolve', application_id, want='enabled') | bool %}
+    proxy_hide_header Strict-Transport-Security;
+    {% endif %}
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

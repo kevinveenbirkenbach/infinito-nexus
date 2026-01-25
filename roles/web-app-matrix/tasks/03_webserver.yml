@@ -1,33 +1,34 @@
+---
 - name: create {{ MATRIX_WELL_KNOWN_DIRECTORY }}
-  file:
+  ansible.builtin.file:
     path: "{{ MATRIX_WELL_KNOWN_DIRECTORY }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: create {{ MATRIX_WELL_KNOWN_FILE }}
-  template:
-    src:  "well-known.j2" 
+  ansible.builtin.template:
+    src: "well-known.j2"
     dest: "{{ MATRIX_WELL_KNOWN_FILE }}"
-        
-- name: "include role sys-stk-front-proxy for {{ MATRIX_ELEMENT_DOMAIN }}"
-  include_role:
-    name: sys-stk-front-proxy
-  vars:        
-    domain:         "{{ MATRIX_ELEMENT_DOMAIN }}"
-    http_port:      "{{ MATRIX_ELEMENT_PORT }}"
 
-- name: "include role for {{ application_id }} to receive certs & do modification routines for {{ MATRIX_SYNAPSE_DOMAIN }}"
-  include_role:
-    name: sys-util-csp-cert
+- name: "include role sys-stk-front-proxy for {{ MATRIX_ELEMENT_DOMAIN }}"
+  ansible.builtin.include_role:
+    name: sys-stk-front-proxy
   vars:
-    domain:     "{{ MATRIX_SYNAPSE_DOMAIN }}"
-    http_port:  "{{ MATRIX_SYNAPSE_PORT }}"
+    domain: "{{ MATRIX_ELEMENT_DOMAIN }}"
+    http_port: "{{ MATRIX_ELEMENT_PORT }}"
+
+- name: "include role sys-stk-front-proxy for {{ MATRIX_SYNAPSE_DOMAIN }}"
+  ansible.builtin.include_role:
+    name: sys-stk-front-proxy
+  vars:
+    domain: "{{ MATRIX_SYNAPSE_DOMAIN }}"
+    http_port: "{{ MATRIX_SYNAPSE_PORT }}"
 
 - name: create {{ MATRIX_SYNAPSE_DOMAIN }}.conf
-  template:
-    src:  "templates/synapse.conf.j2" 
-    dest: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}{{ MATRIX_SYNAPSE_DOMAIN }}.conf"
+  ansible.builtin.template:
+    src: "templates/synapse.conf.j2"
+    dest: "{{ [NGINX.DIRECTORIES.HTTP.SERVERS, MATRIX_SYNAPSE_DOMAIN ~ '.conf'] | path_join }}"
   vars:
-    domain:     "{{ MATRIX_SYNAPSE_DOMAIN }}"
-    http_port:  "{{ MATRIX_SYNAPSE_PORT }}"
+    domain: "{{ MATRIX_SYNAPSE_DOMAIN }}"
+    http_port: "{{ MATRIX_SYNAPSE_PORT }}"
   notify: restart openresty

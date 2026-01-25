@@ -28,11 +28,13 @@
       register: docker_ps
       changed_when: false
       failed_when: false
+      ignore_errors: true
 
     - ansible.builtin.command: docker logs --tail=200 {{ OPENRESTY_CONTAINER }}
       register: openresty_logs
       changed_when: false
       failed_when: false
+      ignore_errors: true
 
     - ansible.builtin.debug:
         msg: |
@@ -42,3 +44,4 @@
           OpenResty logs (last 200 lines):
           {{ openresty_logs.stdout | default('') }}
           {{ openresty_logs.stderr | default('') }}
+      ignore_errors: true

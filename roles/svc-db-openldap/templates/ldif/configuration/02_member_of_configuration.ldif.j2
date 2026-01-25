@@ -1,10 +1,10 @@
-# Refint Module Activation for OpenLDAP
-#
-# This section adds the refint module to the LDAP configuration.
-# The refint module ensures referential integrity by automatically updating
-# or removing references when objects are renamed or deleted.
-#
-# In this file, the "olcmoduleload" attribute is used to load the "refint" module.
-dn: cn=module{1},cn=config
-add: olcmoduleload
-olcmoduleload: refint
+# Add memberOf overlay to data backend (cn=config)
+dn: olcOverlay={0}memberof,{{ OPENLDAP_DATA_BACKEND_DN }}
+objectClass: olcOverlayConfig
+objectClass: olcMemberOf
+olcOverlay: memberof
+olcMemberOfDangling: ignore
+olcMemberOfRefInt: TRUE
+olcMemberOfGroupOC: groupOfNames
+olcMemberOfMemberAD: member
+olcMemberOfMemberOfAD: memberOf

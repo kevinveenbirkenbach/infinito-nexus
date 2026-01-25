@@ -31,7 +31,7 @@
 
                 <ul class="dropdown-menu dropdown-menu-dark">
                   {% for ex in cat['items'] %}
-                    {% set href = ex | littlejs_href(WEB_PROTOCOL, domain) %}
+                    {% set href = ex | littlejs_href(lookup('tls_resolve', application_id, want='protocols.web'), domain) %}
                     <li>
                       <a class="dropdown-item d-flex align-items-center" href="{{ href }}">
                         <i class="{{ ex.icon }} me-2"></i>{{ ex.name }}

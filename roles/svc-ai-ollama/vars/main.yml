@@ -1,13 +1,12 @@
 # General
-application_id:                 "svc-ai-ollama"
+application_id:         "svc-ai-ollama"
 
 # Ollama
 # https://ollama.com/
-OLLAMA_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.ollama.version') }}"
-OLLAMA_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.ollama.image') }}"
-OLLAMA_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.ollama.name') }}"
-OLLAMA_PORT:                    "{{ applications | get_app_conf(application_id, 'docker.services.ollama.port') }}"
-OLLAMA_VOLUME:                  "{{ applications | get_app_conf(application_id, 'docker.volumes.models') }}"
-OLLAMA_NETWORK:                 "{{ applications | get_app_conf(application_id, 'docker.network') }}"
-OLLAMA_PRELOAD_MODELS:          "{{ applications | get_app_conf(application_id, 'preload_models') }}"
-
+OLLAMA_VERSION:         "{{ applications | get_app_conf(application_id, 'docker.services.ollama.version') }}"
+OLLAMA_IMAGE:           "{{ applications | get_app_conf(application_id, 'docker.services.ollama.image') }}"
+OLLAMA_CONTAINER:       "{{ applications | get_app_conf(application_id, 'docker.services.ollama.name') }}"
+OLLAMA_PORT:            "{{ applications | get_app_conf(application_id, 'docker.services.ollama.port') }}"
+OLLAMA_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.models') }}"
+OLLAMA_NETWORK:         "{{ applications | get_app_conf(application_id, 'docker.network') }}"
+OLLAMA_PRELOAD_MODELS:  "{{ applications | get_app_conf(application_id, 'preload_models') }}"

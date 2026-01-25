@@ -26,23 +26,27 @@
 # Resolve LDAP component id (authoritative, client-side filtered)
 # ---------------------------------------------------------------------------
 
-- name: Assert | Resolve LDAP component id
+- name: Assert | Fetch components (JSON)
   shell: >
     {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
-    | jq -r '
-      .[]
-      | select(
-          .providerType=="org.keycloak.storage.UserStorageProvider"
-          and .providerId=="ldap"
-          and .name=="{{ KEYCLOAK_LDAP_CMP_NAME }}"
-        )
-      | .id' | head -n1
-  register: ldap_cmp_id_assert_raw
+  register: kc_components_assert
   changed_when: false
 
-- name: Assert | Set LDAP component id fact
+- name: Assert | Resolve LDAP component id (client-side filter)
   set_fact:
-    ldap_cmp_id_assert: "{{ ldap_cmp_id_assert_raw.stdout | trim }}"
+    ldap_cmp_id_assert: >-
+      {{
+        (
+          kc_components_assert.stdout | kcadm_json
+          | selectattr('providerType','equalto','org.keycloak.storage.UserStorageProvider')
+          | selectattr('providerId','equalto','ldap')
+          | selectattr('name','equalto', KEYCLOAK_LDAP_CMP_NAME)
+          | map(attribute='id')
+          | list
+          | first
+          | default('')
+        ) | string | trim
+      }}
   changed_when: false
 
 - name: Assert | LDAP component exists
@@ -98,29 +102,19 @@
 # Verify ldap-roles mapper instances in Keycloak (actual state)
 # ---------------------------------------------------------------------------
 
-- name: Assert | List ldap-roles mappers under LDAP component
-  shell: >
-    {{ KEYCLOAK_EXEC_KCADM }} get components -r {{ KEYCLOAK_REALM }} --format json
-    | jq -r '
-      .[]
-      | select(
-          .parentId=="{{ ldap_cmp_id_assert }}"
-          and .providerId=="group-ldap-mapper"
-          and .providerType=="org.keycloak.storage.ldap.mappers.LDAPStorageMapper"
-          and .name=="ldap-roles"
-        )
-      | .id'
-  register: grp_mapper_ids_assert_raw
-  changed_when: false
-
-- name: Assert | Normalize ldap-roles mapper ids
+- name: Assert | List ldap-roles mappers under LDAP component (client-side)
   set_fact:
     grp_mapper_ids_assert: >-
       {{
-        (grp_mapper_ids_assert_raw.stdout_lines | default([]))
-        | map('trim')
-        | reject('equalto','')
-        | list
+        (
+          kc_components_assert.stdout | kcadm_json
+          | selectattr('parentId','equalto', ldap_cmp_id_assert)
+          | selectattr('providerId','equalto','group-ldap-mapper')
+          | selectattr('providerType','equalto','org.keycloak.storage.ldap.mappers.LDAPStorageMapper')
+          | selectattr('name','equalto','ldap-roles')
+          | map(attribute='id')
+          | list
+        )
       }}
   changed_when: false
 
@@ -136,19 +130,34 @@
 # Verify top-level group for groups.path exists
 # ---------------------------------------------------------------------------
 
-- name: Assert | Resolve top-level group id
+- name: Assert | Fetch groups (JSON)
   when: desired_groups_top_assert | length > 0
   shell: >
     {{ KEYCLOAK_EXEC_KCADM }} get groups -r {{ KEYCLOAK_REALM }} --format json
-    | jq -r '.[] | select(.name=="{{ desired_groups_top_assert }}") | .id' | head -n1
-  register: groups_top_id_assert
+  register: kc_groups_assert
+  changed_when: false
+
+- name: Assert | Resolve top-level group id
+  when: desired_groups_top_assert | length > 0
+  set_fact:
+    groups_top_id_assert: >-
+      {{
+        (
+          kc_groups_assert.stdout | kcadm_json
+          | selectattr('name','equalto', desired_groups_top_assert)
+          | map(attribute='id')
+          | list
+          | first
+          | default('')
+        ) | string | trim
+      }}
   changed_when: false
 
 - name: Assert | Top-level group exists
   when: desired_groups_top_assert | length > 0
   assert:
     that:
-      - (groups_top_id_assert.stdout | trim) not in ["", "null"]
+      - groups_top_id_assert not in ["", "null"]
     fail_msg: >-
       groups.path='{{ desired_groups_path_assert }}' requires top-level group
       '{{ desired_groups_top_assert }}', but it does not exist.

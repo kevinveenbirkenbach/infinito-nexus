@@ -15,3 +15,4 @@ OPENPROJECT_LDAP:
   verify_peer:            false                                           # Whether to verify the SSL certificate
   filter_string:          "{{ OPENPROJECT_LDAP_FILTERS.USERS }}"          # Optional: Custom filter for users (e.g., "(objectClass=person)")
   tls_certificate_string: ""                                              # Optional: Client certificate string for TLS (usually left empty)
+  

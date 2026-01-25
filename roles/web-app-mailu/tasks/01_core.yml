@@ -1,15 +1,5 @@
 - include_tasks: utils/once/flag.yml
 
-- name: Ensure MAILU_HOSTNAMES is a list with max 1 entry
-  ansible.builtin.assert:
-    that:
-      - MAILU_HOSTNAMES is iterable
-      - MAILU_HOSTNAMES is sequence
-      - MAILU_HOSTNAMES | length <= 1
-    fail_msg: "MAILU_HOSTNAMES must be a list with at most one entry (only one host is supported). You can set the other ones as alias."
-    success_msg: "MAILU_HOSTNAMES is valid."
-  when: MODE_ASSERT | bool
-
 - name: "load variables from {{ DOCKER_VARS_FILE }}"
   include_vars: "{{ DOCKER_VARS_FILE }}"
 
@@ -27,7 +17,7 @@
 
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     docker_compose_flush_handlers:  true
     webserver_vhost_flavour:        "basic"
@@ -36,7 +26,7 @@
 - name: "Include Cert deploy service for '{{ role_name }}'"
   include_role:
     name: sys-ctl-mtn-cert-deploy
-  when: TLS_ENABLED | bool
+  when: lookup('tls_resolve', application_id, want='enabled') | bool
 
 - name: "Flush Docker Compose handlers"
   meta: flush_handlers
@@ -44,32 +34,27 @@
 - name: Wait for Mailu Database
   include_tasks: 02_wait_for_database.yml
 
-- name: Include Token Store
-  include_role:
-    name: sys-token-store
-  when: run_once_sys_token_store is not defined
-
 - name: "Create Mailu accounts"
   include_tasks: 03_manage_user.yml
   vars:
-    MAILU_DOCKER_DIR:     "{{ docker_compose.directories.instance }}"
+    MAILU_DOCKER_DIR:      "{{ docker_compose.directories.instance }}"
     mailu_api_base_url:   "http://127.0.0.1:8080/api/v1"
     mailu_action: >-
       {{
         (
-          'administrator' in (item.value.get('roles', []))
+          'administrator' in (user_item.value.get('roles', []))
         )
         | ternary('admin','user')
       }}
-    mailu_user_key:       "{{ item.key }}"
-    mailu_user_name:      "{{ item.value.username }}"
-    mailu_password:       "{{ item.value.password }}"
-    mailu_token_ip:       "{{ item.value.ip | default(networks.internet.ip4) }}"
-    mailu_token_name:     "{{ SOFTWARE_NAME ~ ' Token for ' ~ item.value.username }}"
-    mailu_user_roles:     "{{ item.value.roles | default([]) }}"
-  loop:                   "{{ users | dict2items }}"
+    mailu_user_key:       "{{ user_item.key }}"
+    mailu_user_name:      "{{ user_item.value.username }}"
+    mailu_user_password:  "{{ user_item.value.password }}"
+    mailu_token_ip:       "{{ user_item.value.ip | default(networks.internet.ip4) }}"
+    mailu_token_name:     "{{ SOFTWARE_NAME ~ ' Token for ' ~ user_item.value.username }}"
+    mailu_user_roles:     "{{ user_item.value.roles | default([]) }}"
+  loop: "{{ users | dict2items }}"
   loop_control:
-    loop_var: item
+    loop_var: user_item
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Generate DKIM public key

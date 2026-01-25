@@ -2,22 +2,25 @@ network:
   local:          True                                # Activates local network. Necessary for LDIF import routines
   docker:         True                                # Activates docker network to allow other docker containers to connect
   public:         False                               # Set to true in inventory file if you want to expose the LDAP port to the internet
-docker: 
+
+docker:
   services:
-    openldap:     
-      image:      "bitnamilegacy/openldap"
-      name:       "openldap"
-      version:    "latest"
-      cpus: 1.25
-      # Optimized up to 5k user
-      mem_reservation: 1g
-      mem_limit: 1.5g
-      pids_limit: 1024
-  network:        "openldap"
+    ldap:
+      enabled: true
+      shared: true
+    openldap:
+      image:            "infinito/openldap"   # not used for build-tag, but kept for catalog consistency
+      name:             "openldap"
+      version:          "local"
+      cpus:             1.25
+      mem_reservation:  1g
+      mem_limit:        1.5g
+      pids_limit:       1024
+
+  network:              "openldap"
   volumes:
-    data:         "openldap_data"
-features:
-  ldap:           true
+    data:               "openldap_data"
+
 provision:           
 # Here it's possible to define what should be imported and updated.
 # It doesn't make sense to let  the import run everytime because its very time consuming

@@ -24,8 +24,8 @@
       timeout: 5s
       retries: 18
 
-{% include 'roles/docker-compose/templates/volumes.yml.j2' %}
-  data:
-    name: "{{ MARIADB_VOLUME }}"
-
+{{ applications | compose_volumes(
+    application_id,
+    extra_volumes={'data': {'name': MARIADB_VOLUME}}
+) }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

@@ -12,7 +12,6 @@ from .proc import run, run_make
 def run_ansible_playbook(
     *,
     repo_root: str,
-    cli_root: str,
     playbook_path: str,
     inventory_validator_path: str,
     inventory: str,
@@ -22,15 +21,15 @@ def run_ansible_playbook(
     password_file: Optional[str] = None,
     verbose: int = 0,
     skip_build: bool = False,
-    logs: bool = False,
     diff: bool = False,
+    ansible_args: Optional[List[str]] = None,
 ) -> None:
     """Run ansible-playbook with the given parameters and execution modes."""
     start_time = datetime.datetime.now()
     print(f"\n▶️ Script started at: {start_time.isoformat()}\n")
 
     # ---------------------------------------------------------
-    # 1) Cleanup Phase
+    # 1) Cleanup Phase (wrapper-level)
     # ---------------------------------------------------------
     if modes.get("MODE_CLEANUP", False):
         print("\n🧹 Cleaning up...\n", flush=True)
@@ -68,13 +67,14 @@ def run_ansible_playbook(
             sys.exit(1)
 
     # ---------------------------------------------------------
-    # 5) Build ansible-playbook command
+    # 4) Build ansible-playbook command
     # ---------------------------------------------------------
     cmd: List[str] = ["ansible-playbook", "-i", inventory, playbook_path]
 
     if limit:
         cmd.extend(["-l", limit])
 
+    # Wrapper-provided extra-vars first; user can override via passthrough -e later.
     if allowed_applications:
         joined = ",".join(allowed_applications)
         cmd.extend(["-e", f"allowed_applications={joined}"])
@@ -94,6 +94,10 @@ def run_ansible_playbook(
 
     if verbose:
         cmd.append("-" + "v" * verbose)
+
+    # Native ansible-playbook flags passthrough (must come last for override behavior)
+    if ansible_args:
+        cmd.extend(ansible_args)
 
     print("\n🚀 Launching Ansible Playbook...\n")
     result = subprocess.run(cmd, cwd=repo_root)

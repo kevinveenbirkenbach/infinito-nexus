@@ -2,7 +2,7 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Sets up a dedicated backup user with restricted SSH commands for backup operations. This role configures a
     backup user with custom SSH key restrictions and sudo rights, ensuring secure and controlled access for backup processes.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

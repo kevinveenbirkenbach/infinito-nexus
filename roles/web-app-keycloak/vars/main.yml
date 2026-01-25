@@ -1,17 +1,19 @@
 # General
-application_id:                   "web-app-keycloak"                                                                          # Internal Infinito.Nexus application id 
-database_type:                    "postgres"                                                                                  # Database which will be used
+application_id:                   "web-app-keycloak"
+entity_name:                      "{{ application_id | get_entity_name }}"
+domain:                           "{{ domains | get_domain(application_id) }}"
 
 # Keycloak
 
 ## General
-KEYCLOAK_URL:                       "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+KEYCLOAK_CONTAINER_HOSTNAME:        "{{ entity_name }}"
+KEYCLOAK_DOMAIN:                    "{{ domain }}"
 KEYCLOAK_REALM:                     "{{ OIDC.CLIENT.REALM }}" # This is the name of the default realm which is used by the applications
-KEYCLOAK_REALM_URL:                 "{{ WEB_PROTOCOL }}://{{ KEYCLOAK_REALM }}"
+KEYCLOAK_URL:                       "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+KEYCLOAK_REALM_URL:                 "{{ KEYCLOAK_URL }}/realms/{{ KEYCLOAK_REALM }}"
 KEYCLOAK_DEBUG_ENABLED:             "{{ MODE_DEBUG }}"
 KEYCLOAK_CLIENT_ID:                 "{{ OIDC.CLIENT.ID }}"
 KEYCLOAK_SERVER_INTERNAL_URL:       "http://127.0.0.1:8080"
-KEYCLOAK_LOAD_DEPENDENCIES:         "{{ applications | get_app_conf(application_id, 'load_dependencies') }}"
 
 # RBAC
 KEYCLOAK_RBAC_GROUP_CLAIM:          "{{ RBAC.GROUP.CLAIM }}"
@@ -53,23 +55,27 @@ KEYCLOAK_VERSION:                   "{{ applications | get_app_conf(application_
 KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[application_id] }}"
   
 ## Update
-KEYCLOAK_REDIRECT_FEATURES:         ["features.oauth2","features.oidc"]
-KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ domains | get_url('web-svc-logout', WEB_PROTOCOL) }}/"
-KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(applications, WEB_PROTOCOL, '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
+KEYCLOAK_REDIRECT_FEATURES:         ["docker.services.oauth2.enabled","docker.services.oidc.enabled"]
+KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ lookup('tls_resolve', 'web-svc-logout', want='url.base') }}"
+# This will lead to issues later @todo; Optimize:
+KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(applications, lookup('tls_resolve', application_id, want='protocols.web'), '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
 KEYCLOAK_WEB_ORIGINS: >-
   {{ KEYCLOAK_REDIRECT_URIS
       | map('regex_replace','/\\*$','')
       | map('regex_search','^(https?://[^/]+)')
       | select('string')
       | list | unique }}
-KEYCLOAK_POST_LOGOUT_URIS:           "+"
+KEYCLOAK_POST_LOGOUT_URIS:          "+"
 
 ## LDAP
-KEYCLOAK_LDAP_ENABLED:              "{{ applications | get_app_conf(application_id, 'features.ldap', False) }}"
+KEYCLOAK_LDAP_ENABLED:              "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+KEYCLOAK_LDAP_SHARED:               "{{ applications | get_app_conf(application_id, 'docker.services.ldap.shared') }}"
 KEYCLOAK_LDAP_CMP_NAME:             "{{ LDAP.SERVER.DOMAIN }}"          # Name of the LDAP User Federation component in Keycloak (as shown in UI)
 KEYCLOAK_LDAP_BIND_DN:              "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
 KEYCLOAK_LDAP_BIND_PW:              "{{ LDAP.BIND_CREDENTIAL }}"
 KEYCLOAK_LDAP_URL:                  "{{ LDAP.SERVER.URI }}"
+KEYCLOAK_LDAP_SYNC_CHANGES_PERIOD:  "{{ applications | get_app_conf(application_id, 'docker.services.ldap.sync.period.changes') }}"
+KEYCLOAK_LDAP_SYNC_FULL_PERIOD:     "{{ applications | get_app_conf(application_id, 'docker.services.ldap.sync.period.full') }}"
 
 # It's important to filter the posixAccount class out, because it is just used by ansible
 KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >  
@@ -81,7 +87,7 @@ KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >
   }}
 
 # reCAPTCHA
-KEYCLOAK_RECAPTCHA_ENABLED: "{{ applications | get_app_conf(application_id, 'features.recaptcha') }}"
+KEYCLOAK_RECAPTCHA_ENABLED: "{{ applications | get_app_conf(application_id, 'docker.services.recaptcha.enabled') }}"
 KEYCLOAK_RECAPTCHA_KEY:     "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.key') }}"
 KEYCLOAK_RECAPTCHA_SECRET:  "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.secret') }}"
 
@@ -115,3 +121,14 @@ KEYCLOAK_USER_PROFILE_CONFIG_PAYLOAD: >-
       }
     }
   }}
+
+
+KEYCLOAK_COMMAND_PERMANENT_ADMIN_LOGIN: |-
+  {{ KEYCLOAK_EXEC_CONTAINER }} sh -lc '
+    set -e
+    {{ KEYCLOAK_KCADM }} config credentials \
+      --server {{ KEYCLOAK_SERVER_INTERNAL_URL }} \
+      --realm master \
+      --user "$KEYCLOAK_PERMANENT_ADMIN_USERNAME" \
+      --password "$KEYCLOAK_PERMANENT_ADMIN_PASSWORD"
+  '

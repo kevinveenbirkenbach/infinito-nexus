@@ -21,3 +21,10 @@
     - web-opt   # 4. Load optimation scrips last
   loop_control:
     label: "{{ item }}-roles.yml"
+
+- name: Run E2E Cypress tests
+  include_role:
+    name: "test-e2e-cypress"
+  when: 
+    - DOCKER_IN_CONTAINER | bool
+    - MODE_TEST | bool

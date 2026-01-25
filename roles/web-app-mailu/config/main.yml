@@ -1,18 +1,12 @@
-oidc:
-  email_by_username:      true                        # If true, then the mail is set by the username. If wrong then the OIDC user email is used
-  enable_user_creation:   true                        # Users will be created if not existing
 domain:                   "{{ SYSTEM_EMAIL_DOMAIN }}" # The main domain from which mails will be send \ email suffix behind @                              
-features:
-  matomo:                 true
-  css:                    false
-  desktop:                true
-  oidc:                   true
-  central_database:       true
-  logout:                 true
 server:
+  status_codes:
+    default:
+      - 301 # Main domain redirects
+      - 200
   domains:
     canonical:
-      - "{{ SYSTEM_EMAIL_HOST }}"
+      - "mail.{{ DOMAIN_PRIMARY }}"
     aliases: []
   csp:
     flags:
@@ -29,6 +23,18 @@ rbac:
       description: "Has an token to send and receive emails"
 docker:
   services:
+    oidc:
+      enabled:              true
+      shared:               true
+      email_by_username:    true  # If true, then the mail is set by the username. If wrong then the OIDC user email is used
+      enable_user_creation: true  # Users will be created if not existing
+    logout:
+      enabled: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     mailu:
       version:            "2024.06"
       name:               mailu
@@ -41,6 +47,8 @@ docker:
       mem_limit:          "512m"
       pids_limit:         256
     database:
+      shared: true
+      type: "mariadb"
       enabled:            true
       cpus:               "0.8"
       mem_reservation:    "1g"
@@ -101,3 +109,5 @@ docker:
       mem_reservation:    "512m"
       mem_limit:          "1g"
       pids_limit:         512
+    css:
+      enabled: false

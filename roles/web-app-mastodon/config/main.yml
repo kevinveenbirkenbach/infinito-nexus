@@ -1,11 +1,4 @@
 single_user_mode:     false                                           # Set true for initial setup
-features:
-  matomo:             true
-  css:                true
-  desktop:            true
-  oidc:               true
-  central_database:   true
-  logout:             true
 server:
   domains:
     canonical:
@@ -19,15 +12,27 @@ server:
         - "blob:"
 docker:
   services:
+    oidc:
+      enabled:            true
+      shared:             true
+    logout:
+      enabled:            true
+    desktop:
+      enabled:            true
+    matomo:
+      enabled:            true
+      shared:             true
     redis:
       backup:
-        disabled: true
+        disabled:         true
       enabled:            true
       cpus:               "0.3"
       mem_reservation:    "256m"
       mem_limit:          "512m"
       pids_limit:         256
     database: 
+      shared:             true
+      type:               "postgres"
       enabled:            true
       cpus:               "1.0"
       mem_reservation:    "2g"
@@ -56,5 +61,7 @@ docker:
       mem_reservation:    "1g"
       mem_limit:          "1.5g"
       pids_limit:         512
+    css:
+      enabled:            true
   volumes:
     data:                 "mastodon_data"

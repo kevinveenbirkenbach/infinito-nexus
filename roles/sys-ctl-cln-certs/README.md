@@ -33,5 +33,5 @@ This Ansible role automates the detection, revocation and deletion of unused Let
 
 - [certreap on GitHub](https://github.com/kevinveenbirkenbach/certreap)  
 - [Ansible community.general.pacman module](https://docs.ansible.com/ansible/latest/collections/community/general/pacman_module.html)  
-- [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)  
+- [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)  
 - [systemd.unit(5) manual](https://www.freedesktop.org/software/systemd/man/systemd.unit.html)  

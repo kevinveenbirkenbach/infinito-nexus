@@ -13,10 +13,13 @@ jobs:
     env:
       NIX_CONFIG: |
         access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      INFINITO_IMAGE_TAG: ci-${{ github.sha }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       - name: Run unit tests via make
-        run: make test-unit
+        run: |
+          make docker-up 
+          make test-unit

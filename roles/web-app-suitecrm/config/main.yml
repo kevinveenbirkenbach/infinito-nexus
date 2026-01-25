@@ -1,20 +1,10 @@
-features:
-  matomo:             true
-  css:                false # Temporary deactivated
-  desktop:            true
-  ldap:               true
-  oidc:               false # OIDC isn't available, just SAML for SSO
-  central_database:   true
-  logout:             true
-  oauth2:             true # Deactivated for API
-
 server:
   csp:
     flags:
       script-src-attr:
         unsafe-eval: true
     whitelist:  
-      manifest-src: "{{ WEB_PROTOCOL }}://auth.{{ DOMAIN_PRIMARY }}"
+      manifest-src: "auth.{{ DOMAIN_PRIMARY }}"
   domains:
     aliases: []
     canonical:
@@ -24,7 +14,22 @@ email:
 
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
+    logout:
+      enabled: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled: true
     suitecrm:
       image:            "php"
@@ -36,10 +41,13 @@ docker:
       mem_reservation:  1.2g
       mem_limit:        2g
       pids_limit:       768
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host:           "suitecrm"
         port:           "80"
+    css:
+      enabled: false
   volumes:
     data:       suitecrm_data
 

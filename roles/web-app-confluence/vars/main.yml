@@ -1,6 +1,5 @@
 # General
 application_id:                   "web-app-confluence"
-database_type:                    "postgres"
 entity_name:                      "{{ application_id | get_entity_name }}"
 
 # Container
@@ -10,12 +9,12 @@ container_hostname:               "{{ domains | get_domain(application_id) }}"
 # Confluence 
 
 ## URLs
-CONFLUENCE_URL:                   "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+CONFLUENCE_URL:                   "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 CONFLUENCE_HOSTNAME:              "{{ container_hostname }}"
 CONFLUENCE_HOME:                  "/var/atlassian/application-data/confluence"
 
 ## OIDC
-CONFLUENCE_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+CONFLUENCE_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 CONFLUENCE_OIDC_LABEL:            "{{ OIDC.BUTTON_TEXT }}"
 CONFLUENCE_OIDC_CLIENT_ID:        "{{ OIDC.CLIENT.ID }}"
 CONFLUENCE_OIDC_CLIENT_SECRET:    "{{ OIDC.CLIENT.SECRET }}"

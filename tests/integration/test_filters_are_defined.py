@@ -117,10 +117,18 @@ BUILTIN_FILTERS: Set[str] = {
 }
 
 
+EXCLUDE_DIRS = {".github"}
+if EXCLUDE_TESTS:
+    EXCLUDE_DIRS.add("tests")
+
+
 def _iter_files(base: str, *, exts: Tuple[str, ...]):
     for root, _, files in os.walk(base):
-        if EXCLUDE_TESTS and (os.sep + "tests" + os.sep) in (root + os.sep):
+        parts = set(os.path.normpath(root).split(os.sep))
+
+        if parts & EXCLUDE_DIRS:
             continue
+
         for fn in files:
             if fn.endswith(exts):
                 yield os.path.join(root, fn)

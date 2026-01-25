@@ -3,12 +3,19 @@ SYSTEM_EMAIL_ENABLED:         true
 SYSTEM_EMAIL_TIMEOUT:         "30"
 SYSTEM_EMAIL_EXTERNAL:        "{{ ('web-app-mailu' in group_names) | bool }}"
 
+# In DiD it's just possible to react on localhost. Full qualified mail host names aren't possible.
+# From Docker->DiD->DiD it is propably not possible to send emails.
+# Will lead to problems with the health checks 
+SYSTEM_EMAIL_ENVIRONMENT: >-
+  {{ ('external' if (SYSTEM_EMAIL_EXTERNAL | bool) else 'localhost')
+     ~ ('_container' if DOCKER_IN_CONTAINER | bool else '') }}
+
 # Server
 SYSTEM_EMAIL_DOMAIN:          "{{ DOMAIN_PRIMARY }}"
-SYSTEM_EMAIL_HOST:            "{{ (SYSTEM_EMAIL_EXTERNAL | bool) | ternary('mail.' ~ DOMAIN_PRIMARY,'127.0.0.1') }}"
+SYSTEM_EMAIL_HOST:            "{{ (SYSTEM_EMAIL_ENVIRONMENT in ['external_container','localhost','localhost_container']) | ternary('localhost',(domains | get_domain('web-app-mailu'))) }}"
 SYSTEM_EMAIL_PORT:            "{{ (SYSTEM_EMAIL_EXTERNAL | bool and SYSTEM_EMAIL_TLS | bool) | ternary(465,25) }}"
-SYSTEM_EMAIL_AUTH:            "{{ (SYSTEM_EMAIL_EXTERNAL | bool) | ternary(SYSTEM_EMAIL_TLS,false) }}"
 SYSTEM_EMAIL_TLS:             "{{ (SYSTEM_EMAIL_EXTERNAL | bool) | ternary(TLS_ENABLED,false) }}"
+SYSTEM_EMAIL_AUTH:            "{{ (SYSTEM_EMAIL_ENVIRONMENT in ['external_container','localhost']) | ternary(false,SYSTEM_EMAIL_TLS) }}"
 SYSTEM_EMAIL_START_TLS:       false
 SYSTEM_EMAIL_SMTP:            true
 

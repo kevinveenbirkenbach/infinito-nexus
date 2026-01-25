@@ -29,7 +29,7 @@ BLUESKY_WEB_PORT:               "{{ ports.localhost.http['web-app-bluesky_web'] 
 BLUESKY_VIEW_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.view.enabled') }}"
 BLUESKY_VIEW_DOMAIN_LOCAL:      "{{ domains[application_id].view }}"
 BLUESKY_VIEW_DOMAIN_FINAL:      "{{ BLUESKY_VIEW_DOMAIN_LOCAL if BLUESKY_VIEW_ENABLED else 'api.bsky.app' }}"
-BLUESKY_VIEW_URL:               "{{ WEB_PROTOCOL }}://{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
+BLUESKY_VIEW_URL:               "{{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
 BLUESKY_VIEW_DID:               "did:web:{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
 BLUESKY_VIEW_PORT:              "{{ ports.localhost.http['web-app-bluesky_view'] }}"
 

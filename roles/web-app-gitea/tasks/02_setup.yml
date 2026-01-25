@@ -1,7 +1,7 @@
 - name: Execute OIDC Setup Routine
   include_tasks: setup/oidc.yml
-  when: applications | get_app_conf(application_id, 'features.oidc', False)
+  when: applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False)
 
 - name: Execute LDAP Setup Routine
   include_tasks: setup/ldap.yml
-  when: applications | get_app_conf(application_id, 'features.ldap', False)
+  when: GITEA_LDAP_ENABLED | bool

@@ -1,4 +1,4 @@
-{% if not applications | get_app_conf(application_id, 'features.central_database', False)%}
+{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False)%}
       {{ database_host }}:
         condition: service_healthy
 {% endif %}

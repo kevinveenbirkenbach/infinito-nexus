@@ -1,4 +1,3 @@
-# tests/unit/roles/web-app-keycloak/filter_plugins/test_redirect_uris.py
 import os
 import sys
 import types
@@ -93,13 +92,13 @@ class RedirectUrisTest(unittest.TestCase):
 
     def test_single_domain_oauth2_enabled(self):
         domains = {"app1": "example.org"}
-        applications = {"app1": {"features": {"oauth2": True}}}
+        applications = {"app1": {"docker": {"services": {"oauth2": {"enabled": True}}}}}
         result = self.plugin.redirect_uris(domains, applications, web_protocol="https")
         self.assertEqual(result, ["https://example.org/*"])
 
     def test_multiple_domains_oidc_enabled(self):
         domains = {"appX": ["a.example.org", "b.example.org"]}
-        applications = {"appX": {"features": {"oidc": True}}}
+        applications = {"appX": {"docker": {"services": {"oidc": {"enabled": True}}}}}
         result = self.plugin.redirect_uris(domains, applications, web_protocol="https")
         self.assertCountEqual(
             result, ["https://a.example.org/*", "https://b.example.org/*"]
@@ -113,7 +112,7 @@ class RedirectUrisTest(unittest.TestCase):
 
     def test_protocol_and_wildcard_customization(self):
         domains = {"app1": "x.test"}
-        applications = {"app1": {"features": {"oauth2": True}}}
+        applications = {"app1": {"docker": {"services": {"oauth2": {"enabled": True}}}}}
         result = self.plugin.redirect_uris(
             domains, applications, web_protocol="http", wildcard="/cb"
         )
@@ -121,13 +120,13 @@ class RedirectUrisTest(unittest.TestCase):
 
     def test_dedup_default_true(self):
         domains = {"app1": ["dup.test", "dup.test", "other.test"]}
-        applications = {"app1": {"features": {"oidc": True}}}
+        applications = {"app1": {"docker": {"services": {"oidc": {"enabled": True}}}}}
         result = self.plugin.redirect_uris(domains, applications)
         self.assertEqual(result, ["https://dup.test/*", "https://other.test/*"])
 
     def test_dedup_false_keeps_duplicates(self):
         domains = {"app1": ["dup.test", "dup.test"]}
-        applications = {"app1": {"features": {"oidc": True}}}
+        applications = {"app1": {"docker": {"services": {"oidc": {"enabled": True}}}}}
         result = self.plugin.redirect_uris(domains, applications, dedup=False)
         self.assertEqual(result, ["https://dup.test/*", "https://dup.test/*"])
 
@@ -143,7 +142,7 @@ class RedirectUrisTest(unittest.TestCase):
         self.plugin.get_url = boom
 
         domains = {"app1": "example.org"}
-        applications = {"app1": {"features": {"oauth2": True}}}
+        applications = {"app1": {"docker": {"services": {"oauth2": {"enabled": True}}}}}
 
         with self.assertRaises(self.plugin.AnsibleFilterError) as ctx:
             self.plugin.redirect_uris(domains, applications)
@@ -158,7 +157,7 @@ class RedirectUrisTest(unittest.TestCase):
 
         domains = {"app1": "example.org"}
         applications = {
-            "app1": {"features": {"oauth2": True}}
+            "app1": {"docker": {"services": {"oauth2": {"enabled": True}}}}
         }  # value won't be read due to exception
 
         result = self.plugin.redirect_uris(domains, applications)
@@ -173,7 +172,7 @@ class RedirectUrisTest(unittest.TestCase):
                 "nested": {"x": "c.example.org", "y": ["d.example.org"]},
             }
         }
-        applications = {"app1": {"features": {"oauth2": True}}}
+        applications = {"app1": {"docker": {"services": {"oauth2": {"enabled": True}}}}}
 
         result = self.plugin.redirect_uris(domains, applications)
 

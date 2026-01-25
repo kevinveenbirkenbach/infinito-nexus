@@ -1,7 +1,14 @@
+# General
 application_id:       "web-app-phpmyadmin"
-database_type:        "mariadb"
-database_host:        "{{ applications | get_app_conf('svc-db-mariadb', 'docker.services.mariadb.name') if applications | get_app_conf(application_id, 'features.central_database', False) }}"
+database_host:        "{{ applications | get_app_conf('svc-db-mariadb', 'docker.services.mariadb.name') if applications | get_app_conf(application_id, 'docker.services.database.shared', False) }}"
 
-PHPMYADMIN_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.version') }}"
-PHPMYADMIN_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.image') }}"
-PHPMYADMIN_CONTAINER: "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.name') }}"
+# PHPMyAdmin
+PHPMYADMIN_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.version') }}"
+PHPMYADMIN_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.image') }}"
+PHPMYADMIN_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.name') }}"
+PHPMAYADMIN_AUTOLOGIN_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.phpmyadmin.autologin') | bool }}"
+
+# Credentials
+PHPMAYADMIN_ROOT_PASSWORD:  "{{ applications | get_app_conf('svc-db-mariadb', 'credentials.root_password') }}"
+PHPMAYADMIN_ROOT_USER:      "root"
+PHPMAYADMIN_DB_HOST:        "{{ applications | get_app_conf('svc-db-mariadb', 'docker.services.mariadb.name') }}"

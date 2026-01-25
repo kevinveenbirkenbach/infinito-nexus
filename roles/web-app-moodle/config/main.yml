@@ -1,11 +1,4 @@
 site_titel:           "Academy on {{ DOMAIN_PRIMARY }}"
-features:
-  matomo:             true
-  css:                false
-  desktop:            true
-  central_database:   true
-  oidc:               true
-  logout:             true
 server:
   csp:
     flags:
@@ -29,12 +22,26 @@ server:
     aliases: []
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled:        true
     moodle:
       version:        "4.5" # Latest LTS - Necessary for OIDC
       image:          bitnamilegacy/moodle
       name:           moodle
+    css:
+      enabled: false
   volumes:
     data:             moodle_data
     code:             moodle_code

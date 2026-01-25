@@ -1,6 +1,5 @@
 # General
 application_id:               "web-app-jira"
-database_type:                "postgres"
 entity_name:                  "{{ application_id | get_entity_name }}"
 
 # Container
@@ -10,12 +9,12 @@ container_hostname:           "{{ domains | get_domain(application_id) }}"
 # Jira
 
 ## URLs
-JIRA_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+JIRA_URL:                     "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 JIRA_HOSTNAME:                "{{ container_hostname }}"
 JIRA_STORAGE_PATH:            "/var/atlassian/application-data/jira"
 
 ## OIDC
-JIRA_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+JIRA_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 JIRA_OIDC_LABEL:              "{{ OIDC.BUTTON_TEXT }}"
 JIRA_OIDC_CLIENT_ID:          "{{ OIDC.CLIENT.ID }}"
 JIRA_OIDC_CLIENT_SECRET:      "{{ OIDC.CLIENT.SECRET }}"

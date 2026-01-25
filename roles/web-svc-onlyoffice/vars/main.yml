@@ -1,7 +1,6 @@
 ---
 # General
 application_id:             web-svc-onlyoffice
-database_type:              "postgres"
 domain:                     "{{ domains | get_domain(application_id) }}"
 http_port:                  "{{ ports.localhost.http[application_id] }}"
 container_port:             80   # OnlyOffice DocumentServer Standardport

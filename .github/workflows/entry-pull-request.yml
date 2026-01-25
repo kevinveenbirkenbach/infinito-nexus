@@ -1,0 +1,17 @@
+name: CI (On Pull-Request)
+
+concurrency:
+  group: infinito-ci-global
+  cancel-in-progress: false
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  ci-orchestrator:
+    uses: ./.github/workflows/ci-orchestrator.yml

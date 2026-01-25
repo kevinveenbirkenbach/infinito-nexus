@@ -56,3 +56,24 @@
       fi
   when: dev_nix_enable_shell_snippet | bool
   become: true
+
+- name: Aggressively prune Nix data (GC + optimise)
+  # CI/Debug cleanup to prevent huge disk usage from Nix store + old generations
+  become: true
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    # Remove old generations for all users + root (aggressive)
+    nix-collect-garbage -d
+
+    # Additional GC pass (useful on some setups / older nix)
+    nix-store --gc || true
+
+    # Deduplicate store paths to reduce disk usage (can take a bit)
+    nix store optimise
+  args:
+    executable: /bin/bash
+  changed_when: true
+  when:
+    - MODE_CLEANUP | bool
+    - DOCKER_IN_CONTAINER | bool

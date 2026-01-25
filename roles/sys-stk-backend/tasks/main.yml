@@ -1,0 +1,46 @@
+# run_once_sys_stk_backend: disabled
+
+- name: "DEBUG | SYS-STK-BACKEND | Application context"
+  ansible.builtin.debug:
+    msg:
+      - "application_id={{ application_id }}"
+      - "database_enabled={{ SYS_STK_BACKEND_DATABASE_ENABLED }}"
+      - "oauth2_enabled={{ SYS_STK_BACKEND_OAUTH2_ENABLED }}"
+  when: MODE_DEBUG | bool
+
+- name: "SYS-STK-BACKEND | Load optional dependencies (once)"
+  ansible.builtin.include_tasks: "_load_service.yml"
+  loop:
+    - id: "svc-db-openldap"
+      name: "ldap"
+
+    - id: "svc-ai-ollama"
+      name: "ollama"
+  loop_control:
+    loop_var: service
+    label: "{{ service.id }}"
+  vars:
+    service_id: "{{ service.id }}"
+    service_name: "{{ service.name }}"
+
+- name: "Load Database"
+  ansible.builtin.include_tasks: "01_database.yml"
+  when: SYS_STK_BACKEND_DATABASE_ENABLED | bool
+
+- name: "For '{{ application_id }}': Load docker-compose"
+  include_role:
+    name: docker-compose
+  vars:
+    docker_compose_flush_handlers: false
+
+- block:
+    - name: "set oauth2_proxy_application_id (Needed due to lazzy loading issue)"
+      set_fact:
+        oauth2_proxy_application_id: "{{ application_id }}"
+    - name: "load role web-app-oauth2-proxy"
+      include_tasks: "{{ playbook_dir }}/roles/web-app-oauth2-proxy/tasks/main.yml"
+  when: SYS_STK_BACKEND_OAUTH2_ENABLED | bool
+
+- name: "flush docker compose and oauth2 proxy'"
+  meta: flush_handlers
+  when: docker_compose_flush_handlers | bool

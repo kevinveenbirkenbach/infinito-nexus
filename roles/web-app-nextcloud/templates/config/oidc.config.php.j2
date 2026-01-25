@@ -146,7 +146,7 @@ return array (
     //
     // The `id` attribute in `oidc_login_attributes` must return the
     // "Internal Username" (see expert settings in LDAP integration)
-    'oidc_login_proxy_ldap' => {{ applications | get_app_conf(application_id, 'features.ldap', False) | string | lower }},
+    'oidc_login_proxy_ldap' => {{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False) | string | lower }},
 
     // Disable creation of users new to Nextcloud from OIDC login.
     // A user may be known to the IdP but not (yet) known to Nextcloud.
@@ -173,7 +173,7 @@ return array (
 
     // For development, you may disable TLS verification. Default value is `true`
     // which should be kept in production
-    'oidc_login_tls_verify' => true,
+    'oidc_login_tls_verify' => {{ lookup('tls_resolve', application_id, want='enabled') | string | bool }},
 
     // If you get your groups from the oidc_login_attributes, you might want
     // to create them if they are not already existing, Default is `false`.

@@ -10,7 +10,7 @@ server:
   csp:
     whitelist:
       frame-ancestors:
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
       script-src-elem:
         - "https://fonts.googleapis.com"
       style-src-elem:
@@ -25,11 +25,21 @@ server:
         unsafe-eval:    true
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled: true
     database:
+      shared: true
+      type: "postgres"
       enabled: true
     onlyoffice:
       image:            "onlyoffice/documentserver"
@@ -39,6 +49,8 @@ docker:
       mem_reservation:  "1g"
       mem_limit:        "2g"
       pids_limit:       2048
+    css:
+      enabled: true
   volumes:
     data:         onlyoffice_data          # /var/www/onlyoffice/Data
     logs:         onlyoffice_logs          # /var/log/onlyoffice
@@ -49,9 +61,3 @@ docker:
     # The redis and db volume are just dummy volumes and aren't used 
     pgdata:       onlyoffice_pgdata        # /var/lib/postgresql
     redisdata:    onlyoffice_redisdata     # /var/lib/redis
-features:
-  logout:           false
-  desktop:          true
-  matomo:           true
-  css:              true
-  central_database: true

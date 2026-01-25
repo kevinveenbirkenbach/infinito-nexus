@@ -9,6 +9,7 @@
     name: sys-pip-install
   vars:
     package_name: gitcon
+    global_install: true
 
 - when: run_once_desk_git is not defined
   block:

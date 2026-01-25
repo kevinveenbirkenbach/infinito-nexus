@@ -65,7 +65,7 @@ def print_global_help(cli_dir: Path) -> None:
             "Usage: infinito "
             "[--sound] "
             "[--no-signal] "
-            "[--log] "
+            "[--log <LOG_DIR>] "
             "[--git-clean] "
             "[--infinite] "
             "[--help-all] "
@@ -87,7 +87,7 @@ def print_global_help(cli_dir: Path) -> None:
     )
     print(
         color_text(
-            "  --log             Log all proxied command output to logfile.log",
+            "  --log <LOG_DIR>   Log all proxied command output to <LOG_DIR>/<timestamp>.log",
             Fore.YELLOW,
         )
     )
@@ -177,7 +177,7 @@ def show_full_help_for_all(cli_dir: Path) -> None:
     for cmd in commands:
         file_path = str(
             cmd.main_path.relative_to(cli_dir.parent)
-        )  # show as cli/<...>/__main__.py
+        )  # cli/<...>/__main__.py
         print(color_text("=" * 80, Fore.BLUE + Style.BRIGHT))
         print(color_text(f"Subcommand: {cmd.subcommand}", Fore.YELLOW + Style.BRIGHT))
         print(color_text(f"File: {file_path}", Fore.CYAN))

@@ -17,10 +17,16 @@
   include_tasks: "03_repository.yml"
   when: docker_git_repository_pull | bool
 
-- block:
-  - name: "Include file management routines for '{{ application_id }}'."
-    include_tasks: "04_files.yml"
-  - name: "Ensure that {{ docker_compose.directories.instance }} is up"
-    include_tasks: "utils/up.yml"
-  when: docker_compose_file_creation_enabled | bool
+- name: "Include file management routines for '{{ application_id }}'."
+  include_tasks: "04_files.yml"
 
+- name: "Ensure CA trust assets are installed (only when needed)"
+  ansible.builtin.include_role:
+    name: docker-compose-ca
+  when:
+    - domains | has_domain(application_id)
+    - lookup('tls_resolve', application_id, want='enabled') | bool
+    - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
+
+- name: "Ensure that {{ docker_compose.directories.instance }} is up"
+  include_tasks: "utils/up.yml"

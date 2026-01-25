@@ -6,12 +6,20 @@ server:
   csp:
     whitelist:
       frame-ancestors:
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
     flags:
       style-src-attr:
         unsafe-inline:  true
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
@@ -26,7 +34,3 @@ docker:
       mem_reservation:  1g
       mem_limit:        2g
       pids_limit:       2048
-features:
-  logout:   false 
-  desktop:  true # Just set to allow the iframe to load it
-  matomo:   true

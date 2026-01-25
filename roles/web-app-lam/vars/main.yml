@@ -2,5 +2,6 @@
 application_id: "web-app-lam"
 
 # LAM specific
-lam_image:      "{{ applications | get_app_conf(application_id, 'docker.services.lam.image', True) }}"
-lam_container:  "{{ application_id | get_entity_name }}"
+LAM_IMAGE:      "{{ applications | get_app_conf(application_id, 'docker.services.lam.image') }}"
+LAM_CONTAINER:  "{{ application_id | get_entity_name }}"
+LAM_PASSWORD:   "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"

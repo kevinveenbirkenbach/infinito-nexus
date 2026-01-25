@@ -1,10 +1,3 @@
-features:
-  matomo:             true
-  css:                true
-  desktop:            true
-  central_database:   true
-  oauth2:             true
-  logout:             true
 server:
   domains:
     canonical:
@@ -24,13 +17,23 @@ server:
     default: 301
 docker:
   services:
+    logout:
+      enabled: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled:    true
     yourls: 
       version:    "latest"
       name:       "yourls"
       image:      "yourls"
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
         host: "application"
         port: "80"
@@ -39,3 +42,5 @@ docker:
       acl:
         blacklist:
           - "<< defaults_applications[web-app-yourls].server.locations.admin >>" # Protects the admin area
+    css:
+      enabled: true

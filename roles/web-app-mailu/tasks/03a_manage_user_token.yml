@@ -1,4 +1,4 @@
-
+---
 - name: "Fetch existing API tokens via curl inside admin container"
   command: >-
     {{ docker_compose_command_exec }} -T admin \
@@ -9,6 +9,9 @@
   register: mailu_tokens_cli
   changed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+  retries: 30
+  delay: 2
+  until: mailu_tokens_cli.rc == 0 and mailu_tokens_cli.stdout | length > 0
 
 - name: "Extract existing token info for '{{ mailu_user_key }};{{ mailu_user_name }}'"
   set_fact:

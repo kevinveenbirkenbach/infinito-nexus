@@ -7,7 +7,7 @@
     DISCOURSE_ERROR_ALREADY_IN_NET not in network_connect.stderr
   changed_when: network_connect.rc == 0
   when:
-    - applications | get_app_conf(application_id, 'features.central_database', False)
+    - applications | get_app_conf(application_id, 'docker.services.database.shared', False)
 
 - name: "Remove {{ DISCOURSE_NETWORK }} from {{ database_container }}"
   command: >
@@ -18,4 +18,4 @@
     DISCOURSE_ERROR_NOT_CONNECTED not in network_disconnect.stderr
   changed_when: network_disconnect.rc == 0
   when:
-    - applications | get_app_conf(application_id, 'features.central_database', False)
+    - applications | get_app_conf(application_id, 'docker.services.database.shared', False)

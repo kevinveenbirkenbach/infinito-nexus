@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-shopware"
-database_type:                  "mariadb"
 entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Docker
@@ -39,9 +38,10 @@ SHOPWARE_REDIS_ENABLED:               "{{ applications | get_app_conf(applicatio
 SHOPWARE_REDIS_ADDRESS:               "redis:6379"
 
 # Opensearch
-SHOPWARE_OPENSEARCH_PORT:             "9200"
-SHOPWARE_OPENSEARCH_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.enabled') }}"
-SHOPWARE_OPENSEARCH_IMAGE:            "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.image') }}"
-SHOPWARE_OPENSEARCH_VERSION:          "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.version') }}"
-SHOPWARE_OPENSEARCH_CONTAINER:        "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.name') }}"
-SHOPWARE_OPENSEARCH_MEM_RESERVATION:  "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.mem_reservation') }}"
+SHOPWARE_OPENSEARCH_PORT:                   "9200"
+SHOPWARE_OPENSEARCH_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.enabled') }}"
+SHOPWARE_OPENSEARCH_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.image') }}"
+SHOPWARE_OPENSEARCH_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.version') }}"
+SHOPWARE_OPENSEARCH_CONTAINER:              "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.name') }}"
+SHOPWARE_OPENSEARCH_MEM_RESERVATION:        "{{ applications | get_app_conf(application_id, 'docker.services.opensearch.mem_reservation') }}"
+SHOPWARE_OPENSEARCH_INITIAL_ADMIN_PASSWORD: "{{ applications | get_app_conf(application_id, 'credentials.opensearch_initial_admin_password') }}"

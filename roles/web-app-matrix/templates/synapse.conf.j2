@@ -1,10 +1,10 @@
 server {
     server_name {{ domain }};
-    {% include 'roles/sys-svc-letsencrypt/templates/ssl_header.j2' %}
+    {% include 'roles/sys-front-tls/templates/nginx_ssl_header.j2' %}
     
     # For the federation port
-    listen {{ MATRIX_FEDERATION_PORT }} ssl default_server;
-    listen [::]:{{ MATRIX_FEDERATION_PORT }} ssl default_server;
+    listen {{ MATRIX_SYNAPSE_LISTEN_FLAGS }};
+    listen [::]:{{ MATRIX_SYNAPSE_LISTEN_FLAGS }};
 
     {% include 'roles/sys-front-inj-all/templates/server.conf.j2'%}
 

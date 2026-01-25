@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
   initIframeHandler(
     '{{ DOMAIN_PRIMARY }}',
     '{{ domain }}',
-    '{{ domains | get_url("web-app-desktop", WEB_PROTOCOL) }}'
+    '{{ lookup("tls_resolve", "web-app-desktop", want="url.base") }}'
   );
 });
 {% if MODE_DEBUG | bool %}

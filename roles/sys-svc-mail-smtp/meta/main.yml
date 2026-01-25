@@ -1,7 +1,7 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Configures a local SMTP relay using Postfix, listening only on localhost for secure, lightweight mail delivery.
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

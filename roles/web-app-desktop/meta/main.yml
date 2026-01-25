@@ -2,7 +2,7 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: PortUI provides Infinito.Nexus users with a unified web interface to easily access all their applications in
     one place
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach
@@ -23,3 +23,5 @@ galaxy_info:
   logo:
     class: fa fa-th-large
   lifecycle: beta
+  run_after:
+  - web-app-matomo

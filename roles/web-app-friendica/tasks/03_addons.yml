@@ -9,9 +9,9 @@
         + [{
             'name': item.key,
             'enabled': (
-              applications | get_app_conf(application_id, 'features.oidc')
+              applications | get_app_conf(application_id, 'docker.services.oidc.enabled')
                 if item.key == 'keycloakpassword'
-              else applications | get_app_conf(application_id, 'features.ldap', True)
+              else applications | get_app_conf(application_id, 'docker.services.ldap.enabled', True)
                 if item.key == 'ldapauth'
               else (item.value.enabled if item.value is mapping and 'enabled' in item.value else False)
             )

@@ -53,12 +53,14 @@ class TestInjEnabledFilter(unittest.TestCase):
     def test_basic_build(self):
         applications = {
             "myapp": {
-                "features": {
-                    "javascript": True,
-                    "logout": False,
-                    "css": True,
-                    "matomo": False,
-                    "desktop": True,
+                "docker": {
+                    "services": {
+                        "javascript": {"enabled": True},
+                        "logout": {"enabled": False},
+                        "css": {"enabled": True},
+                        "matomo": {"enabled": False},
+                        "desktop": {"enabled": True},
+                    }
                 }
             }
         }
@@ -76,7 +78,16 @@ class TestInjEnabledFilter(unittest.TestCase):
         )
 
     def test_missing_keys_return_default_false(self):
-        applications = {"app": {"features": {"javascript": True}}}
+        applications = {
+            "app": {
+                "docker": {
+                    "services": {
+                        "javascript": {"enabled": True},
+                        # logout/css missing
+                    }
+                }
+            }
+        }
         result = self.filter(
             applications, "app", ["javascript", "logout", "css"], default=False
         )
@@ -85,29 +96,36 @@ class TestInjEnabledFilter(unittest.TestCase):
         self.assertEqual(result["css"], False)
 
     def test_default_true_applied_to_missing(self):
-        applications = {"app": {"features": {}}}
+        applications = {"app": {"docker": {"services": {}}}}
         result = self.filter(applications, "app", ["logout", "css"], default=True)
         self.assertEqual(result, {"logout": True, "css": True})
 
     def test_custom_prefix(self):
-        applications = {"app": {"flags": {"logout": True, "css": False}}}
+        # inj_enabled always appends ".<feature>.enabled" to the prefix
+        applications = {
+            "app": {"flags": {"logout": {"enabled": True}, "css": {"enabled": False}}}
+        }
         result = self.filter(
             applications, "app", ["logout", "css"], prefix="flags", default=False
         )
         self.assertEqual(result, {"logout": True, "css": False})
 
     def test_missing_application_id_raises(self):
-        applications = {"other": {"features": {"logout": True}}}
+        applications = {
+            "other": {"docker": {"services": {"logout": {"enabled": True}}}}
+        }
         with self.assertRaises(AppConfigKeyError):
             _ = self.filter(applications, "unknown-app", ["logout"])
 
     def test_truthy_string_is_returned_as_is(self):
-        applications = {"app": {"features": {"logout": "true"}}}
+        applications = {
+            "app": {"docker": {"services": {"logout": {"enabled": "true"}}}}
+        }
         result = self.filter(applications, "app", ["logout"], default=False)
         self.assertEqual(result["logout"], "true")
 
     def test_nonexistent_feature_path_uses_default(self):
-        applications = {"app": {"features": {}}}
+        applications = {"app": {"docker": {"services": {}}}}
         result = self.filter(applications, "app", ["nonexistent"], default=False)
         self.assertEqual(result["nonexistent"], False)
 

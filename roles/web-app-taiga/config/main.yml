@@ -5,17 +5,21 @@ oidc:
     #
     # Due to this reason this plutin is deactivated atm
   flavor:             'taigaio' # Potential flavors: robrotheram, taigaio
-features:
-  matomo:             true
-  css:                true
-  desktop:            true
-  oidc:               false
-  central_database:   true
-  logout:             true
-  javascript:         true
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
+    logout:
+      enabled: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled:        true
     taiga: 
       version:        "latest"
@@ -63,6 +67,10 @@ docker:
       mem_reservation: "128m"
       mem_limit:       "256m"
       pids_limit:      128
+    css:
+      enabled: true
+    javascript:
+      enabled: true
 server:
   csp:
     flags:

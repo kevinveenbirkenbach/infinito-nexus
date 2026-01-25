@@ -1,12 +1,3 @@
-autologin:            false         # This is a high security risk. Just activate this option if you know what you're doing
-features:
-  matomo:             true
-  css:                false
-  desktop:            false   # Opens itself in a new window, when it's loaded in an iframe.
-                              # it's anyhow not so enduser relevant, so it can be kept like this
-  central_database:   true
-  oauth2:             true
-  logout:             true
 server:
   csp:
     flags:
@@ -20,15 +11,29 @@ server:
       - phpmyadmin.{{ DOMAIN_PRIMARY }}
 docker:
   services:
+    logout:
+      enabled: true
+    desktop:
+      enabled: false
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled: true
     phpmyadmin:
-      version:  "latest"      # Use the latest phpmyadmin version
-      name:     "phpmyadmin"
-      image:    "phpmyadmin/phpmyadmin"
-    oauth2_proxy:
+      version:    "latest" # Use the latest phpmyadmin version
+      name:       "phpmyadmin"
+      image:      "phpmyadmin/phpmyadmin"
+      # This is a high security risk. Just activate this option if you know what you're doing
+      autologin:  false
+    oauth2:
+      enabled: true
       origin:
         port:   "80"
         host:   "application"
       allowed_groups:
         - "{{ [RBAC.GROUP.NAME, 'web-app-phpmyadmin-administrator'] | path_join }}"
+    css:
+      enabled: false

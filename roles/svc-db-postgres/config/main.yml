@@ -13,6 +13,10 @@ docker:
       mem_reservation:    "4g"
       mem_limit:          "6g"
       pids_limit:         1024
+    database:
+      shared: true
+      enabled: true
+      type: "postgres"
   volumes:
-    data:                 "postgres_data"
-  network:                "postgres"
+    data:   "postgres_data"
+  network:  "postgres"

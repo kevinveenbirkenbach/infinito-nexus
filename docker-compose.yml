@@ -1,7 +1,7 @@
 # CI profile defaults: point containers to CoreDNS and set search domain
 x-ci-defaults: &ci_defaults
   dns:
-    - 172.30.0.53
+    - ${DNS_IP}
   dns_opt:
     - ndots:1
 
@@ -18,19 +18,23 @@ services:
       - ./compose/Corefile:/Corefile:ro
     networks:
       default:
-        ipv4_address: 172.30.0.53
+        ipv4_address: ${DNS_IP}
 
   # ------------------------------------------------------------
   # Infinito runner container (systemd-enabled for CI)
   # ------------------------------------------------------------
   infinito:
+    networks:
+      default:
+        ipv4_address: ${IP4}
     build:
       context: .
       dockerfile: Dockerfile
       network: host
       args:
         NIX_CONFIG: ${NIX_CONFIG}
-    pull_policy: never 
+    image: "${INFINITO_IMAGE:-infinito-${INFINITO_DISTRO:-arch}}"
+    pull_policy: "${INFINITO_PULL_POLICY:-never}"
     depends_on:
       - coredns
 
@@ -46,6 +50,12 @@ services:
 
     # systemd inside docker needs access to the host cgroup namespace
     privileged: true
+    # The following lines exist for documentation puporses;
+    # It could be that IPv6 behaves flaky in this case it may makes sense to deactivate IPv6
+    #sysctls:
+    #  net.ipv6.conf.all.disable_ipv6: 1
+    #  net.ipv6.conf.default.disable_ipv6: 1
+    #  net.ipv6.conf.lo.disable_ipv6: 1
     cgroup: host
     tmpfs:
       - /run
@@ -56,7 +66,6 @@ services:
     stdin_open: true
 
     container_name: infinito_nexus_${INFINITO_DISTRO:-arch}
-    image: "infinito-${INFINITO_DISTRO:-arch}"
     restart: "no"
 
     profiles: ["ci"]
@@ -64,12 +73,15 @@ services:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
       - .:/opt/src/infinito
-      - docker:/var/lib/docker/volumes/
+      - ${INFINITO_DOCKER_VOLUME:-docker}:${INFINITO_DOCKER_MOUNT:-/var/lib/docker}
       - infinito:/var/lib/infinito/
       - letsencrypt:/etc/letsencrypt/
 
     environment:
-      INSTALL_LOCAL_BUILD: "1"
+      DNS_IP: ${DNS_IP}
+      DOMAIN: ${DOMAIN}
+      IP4: ${IP4}
+      INFINITO_COMPILE: "${INFINITO_COMPILE:-1}"
       INFINITO_SRC_DIR: /opt/src/infinito
       PYTHONHTTPSVERIFY: "1"
       GIT_SSL_NO_VERIFY: "0"
@@ -102,6 +114,7 @@ services:
       - "${BIND_IP:-127.0.0.1}:48087:48087"
 
 volumes:
+  # Fallback docker volume for local deploy, GitHub runner uses mount
   docker:
   infinito:
   letsencrypt:

@@ -1,9 +1,18 @@
-features:
-  matomo:   true
-  css:      true
-  desktop:  true
 server:
   domains:
     canonical:
       - "html.{{ DOMAIN_PRIMARY }}"
     aliases: []
+  status_codes:
+    default:
+      - 403 # On initialisation, there is no index.html deployed
+      - 200
+docker:
+  services:
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
+    css:
+      enabled: true

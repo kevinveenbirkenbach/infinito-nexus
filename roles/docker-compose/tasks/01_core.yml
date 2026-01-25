@@ -1,5 +1,9 @@
 - include_tasks: utils/once/flag.yml
 
+- include_role:
+    name: sys-svc-docker
+  when: run_once_sys_svc_docker is not defined
+
 - name: Remove all docker compose pull locks
   file:
     path: "{{ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR }}"
@@ -17,7 +21,24 @@
     owner:  root
     group:  root
 
-- name: "Load docker container role"
+- name: Install infinito-compose wrapper
+  become: true
+  ansible.builtin.copy:
+    src: "infinito_compose.py"
+    dest: "/usr/local/bin/infinito-compose"
+    mode: "0755"
+    owner: root
+    group: root
+
+- name: Include backup, repair and health services for docker
   include_role:
-    name: docker-container
-  when: run_once_docker_container is not defined
+    name: "{{ service_role }}"
+  loop:
+    - sys-ctl-cln-docker
+    - sys-ctl-bkp-docker-2-loc
+    - sys-ctl-hlth-docker-container
+    - sys-ctl-hlth-docker-volumes
+    - sys-ctl-rpr-docker-hard
+  loop_control:
+    loop_var: service_role
+  when: DOCKER_COMPOSE_LOAD_SERVICES | bool

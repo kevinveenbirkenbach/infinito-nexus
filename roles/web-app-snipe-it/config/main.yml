@@ -1,11 +1,3 @@
-features:
-  matomo:           true
-  css:              false
-  desktop:          true
-  central_database: true
-  ldap:             true
-  oauth2:           true
-  logout:           true
 server:
   domains:
     canonical:
@@ -25,23 +17,38 @@ server:
         - "data:"
 docker:
   services:
+    logout:
+      enabled: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled: true
     database: 
+      shared: true
+      type: "mariadb"
       enabled: true
     snipe-it:
       version:  "latest"
       name:     "snipe-it"
       image:    "grokability/snipe-it"
-    oauth2_proxy:
+    oauth2:
+      enabled: true
       origin:
-        host:  "application"
+        host:   "snipe-it"
         port:   "80"
       acl:
         blacklist:
           - "/login"
+    css:
+      enabled: false
   volumes:
     data:       "snipe-it_data"
     

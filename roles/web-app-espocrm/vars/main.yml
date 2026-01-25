@@ -3,7 +3,6 @@ application_id:                     "web-app-espocrm"
 entity_name:                        "{{ application_id | get_entity_name }}"
 
 # Database
-database_type:                      "mariadb"
 
 # Webserver
 webserver_websocket_location:              "/ws"
@@ -32,8 +31,9 @@ ESPOCRM_ENTRYPOINT_SCRIPT_HOST_REL: "volumes/{{ ESPOCRM_ENTRYPOINT_SCRIPT_FILE }
 ESPOCRM_ENTRYPOINT_SCRIPT_DOCKER:   "{{ [ '/usr/local/bin/', ESPOCRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
 
 ESPOCRM_CONFIG_FILE_PRIVATE:        "/var/www/html/data/config-internal.php"
-ESPOCRM_URL:                        "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
-ESPOCRM_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+ESPOCRM_URL:                        "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+ESPOCRM_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
+ESPOCRM_LDAP_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 ESPOCRM_USER:                       "www-data"
 
 
@@ -53,6 +53,6 @@ ESPOCRM_CRON_DISABLED:         "{{ ESPOCRM_MAINTENANCE_MODE }}"        # disable
 ESPOCRM_USE_CACHE:             "{{ not ESPOCRM_MAINTENANCE_MODE }}"    # enable cache when NOT in maintenance
 
 #### reCAPTCHA
-ESPOCRM_RECAPTCHA_ENABLED:     "{{ applications | get_app_conf(application_id, 'features.recaptcha') }}"
+ESPOCRM_RECAPTCHA_ENABLED:     "{{ applications | get_app_conf(application_id, 'docker.services.recaptcha.enabled') }}"
 ESPOCRM_RECAPTCHA_KEY:         "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.key') }}"
 ESPOCRM_RECAPTCHA_SECRET:      "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.secret') }}"

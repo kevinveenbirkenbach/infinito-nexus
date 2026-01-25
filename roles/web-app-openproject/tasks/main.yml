@@ -1,13 +1,14 @@
 ---
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
-    webserver_client_max_body_size:           "30m"
-    docker_git_repository_branch:       "stable/{{ OPENPROJECT_VERSION }}"
-    docker_git_repository_address:      "https://github.com/opf/openproject-deploy"
+    webserver_client_max_body_size: "30m"
+    docker_git_repository_branch:   "stable/{{ OPENPROJECT_VERSION }}"
+    docker_git_repository_address:  "https://github.com/opf/openproject-deploy"
     docker_git_repository_pull:     true
     docker_compose_flush_handlers:  false
+    application_id:                 'web-app-openproject'
 
 - name: "Create {{ OPENPROJECT_PLUGINS_FOLDER }}"
   file:

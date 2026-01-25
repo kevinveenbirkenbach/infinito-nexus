@@ -1,11 +1,12 @@
-features: 
-  local_ai: true # Needs to be set so that network is loaded
 docker:
   services:
     ollama:
+      shared:             true
       backup:
         no_stop_required: true
-      image:              ollama/ollama
+      # The following image is required for github actions, because the official image is to huge
+      # @see https://hub.docker.com/r/alpine/ollama
+      image:              "{{'alpine' if (DOCKER_IN_CONTAINER | bool) else 'ollama'}}/ollama"
       version:            latest
       name:               ollama
       port:               11434

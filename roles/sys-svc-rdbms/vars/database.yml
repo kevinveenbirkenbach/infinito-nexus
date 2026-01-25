@@ -2,23 +2,23 @@
 _dbtype:                            "{{ (database_type | d('') | trim) }}"
 _database_id:                       "{{ ('svc-db-' ~ _dbtype) if _dbtype else '' }}"
 _database_central_name:             "{{ (applications | get_app_conf(_database_id, 'docker.services.' ~ _dbtype ~ '.name', False, '')) if _dbtype else '' }}"
-_database_consumer_id:              "{{ database_application_id | d(application_id) }}"
-_database_consumer_entity_name:     "{{ _database_consumer_id | get_entity_name }}"
-_database_central_enabled:          "{{ (applications | get_app_conf(_database_consumer_id, 'features.central_database', False)) if _dbtype else False }}"
+_database_consumer_entity_name:     "{{ database_consumer_id | get_entity_name }}"
+_database_central_enabled:          "{{ (applications | get_app_conf(database_consumer_id, 'docker.services.database.shared', False)) if _dbtype else False }}"
 _database_default_version:          "{{ applications | get_app_conf(_database_id, 'docker.services.' ~ _dbtype ~ '.version') }}"
 
 # Definition
-
+database_type:          "{{ applications | get_app_conf(database_consumer_id, 'docker.services.database.type') }}"
 database_name:          "{{ _database_consumer_entity_name }}"
 database_instance:      "{{ _database_central_name if _database_central_enabled else database_name }}" # This could lead to bugs at dedicated database @todo cleanup
 database_host:          "{{ _database_central_name if _database_central_enabled else 'database' }}"    # This could lead to bugs at dedicated database @todo cleanup
 database_container:     "{{ _dbtype if _database_central_enabled else _database_consumer_entity_name ~ '-database' }}"
 database_username:      "{{ _database_consumer_entity_name }}"
-database_password:      "{{ applications | get_app_conf(_database_consumer_id, 'credentials.database_password', true) }}"
+database_password:      "{{ applications | get_app_conf(database_consumer_id, 'credentials.database_password') }}"
 database_port:          "{{ (ports.localhost.database[_database_id] | d('')) if _dbtype else '' }}"
 database_env:           "{{ docker_compose.directories.env }}{{ database_type }}.env"
 database_url_jdbc:      "jdbc:{{ database_type if database_type == 'mariadb' else 'postgresql' }}://{{ database_host }}:{{ database_port }}/{{ database_name }}"
 database_url_full:      "{{ database_type }}://{{ database_username }}:{{ database_password }}@{{ database_host }}:{{ database_port }}/{{ database_name }}"
 database_volume:        "{{ _database_consumer_entity_name ~ '_' if not _database_central_enabled }}{{ database_host }}"
 database_image:         "{{ _dbtype }}"
-database_version:       "{{ applications | get_app_conf( _database_consumer_id, 'docker.services.database.version', False, _database_default_version) }}"
+database_version:       "{{ applications | get_app_conf( database_consumer_id, 'docker.services.database.version', False, _database_default_version) }}"
+database_reach_host:    "127.0.0.1"

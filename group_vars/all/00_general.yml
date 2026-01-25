@@ -1,8 +1,12 @@
-SOFTWARE_NAME:            "Infinito.Nexus"  # Name of the software
+ansible_python_interpreter: /usr/bin/python3
+
+SOFTWARE_NAME:              "Infinito.Nexus"  # Name of the software
 
 # Deployment
-ENVIRONMENT:              "production"      # Possible values: production, development
-DEPLOYMENT_MODE:          "single"          # Use single, if you deploy on one server. Use cluster if you setup in cluster mode.
+ENVIRONMENT:                "production"      # Possible values: production, development
+RUNTIME:                    "host"            # Where does this instance run in? Valid: act, github, dev, host
+DEPLOYMENT_MODE:            "single"          # Use single, if you deploy on one server. Use cluster if you setup in cluster mode.
+STORAGE_CONSTRAINED:        false             # Storage constraint means that Infinito.Nexus prefers free storage space over cache
 
 # If true, sensitive credentials will be masked or hidden from all Ansible task logs
 # Recommendet to set to true
@@ -23,14 +27,16 @@ HOST_THOUSAND_SEPARATOR:  "."
 HOST_DECIMAL_MARK:        ","
 
 # Encryptiom
-TLS_ENABLED:            true
-
-# Web
-WEB_PROTOCOL:           "{{ 'https' if TLS_ENABLED | bool else 'http' }}" # Web protocol type. Use https or http. If you run local you need to change it to http
-WEB_PORT:               "{{ 443 if TLS_ENABLED | bool else 80 }}"         # Default port web applications will listen to
-
-# Websocket
-WEBSOCKET_PROTOCOL:     "{{ 'wss' if TLS_ENABLED | bool else 'ws' }}"
+TLS_ENABLED:              true
+TLS_MODE:                 "letsencrypt"
+TLS_SELFSIGNED_BASE_PATH: "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
+# Controls whether self-signed certs are generated per app ("app")
+# or as one shared cert covering ALL domains across the global "domains" mapping ("global").
+TLS_SELFSIGNED_SCOPE:     "global"
+CA_TRUST:
+  cert_host: "/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt"
+  wrapper_host: "/etc/{{ SOFTWARE_NAME | lower }}/bin/with-ca-trust.sh"
+  inject_script: "/etc/{{ SOFTWARE_NAME | lower }}/bin/compose_ca_inject.py"
 
 # WWW-Redirect to None WWW-Domains enabled
 WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"
@@ -38,7 +44,7 @@ WWW_REDIRECT_ENABLED:   "{{ ('web-opt-rdr-www' in group_names) | bool }}"
 AUTO_BUILD_ALIASES:     False # If enabled it creates an alias domain for each web application by the entity name, recommended to set to false to safe domain space
 
 # Domain
-DOMAIN_PRIMARY:                           "infinito.localhost" # Primary Domain of the server
+DOMAIN_PRIMARY:                           "{{ lookup('env', 'DOMAIN') | default('infinito.localhost', true) }}" # Primary Domain of the server
 DOMAIN_TEST:                              "test.{{ DOMAIN_PRIMARY }}"
 
 DNS_PROVIDER:                             "localhost"   # The DNS Provider\Registrar for the domain -> Legit values: cloudflare
@@ -85,7 +91,7 @@ _applications_nextcloud_oidc_flavor: >-
             'oidc_login'
             if (
               (applications | default({}, true))
-                | get_app_conf('web-app-nextcloud','features.ldap',False, True, True)
+                | get_app_conf('web-app-nextcloud','docker.services.ldap.enabled',False, True, True)
             )
             else 'sociallogin'
           ),

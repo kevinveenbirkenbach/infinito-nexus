@@ -1,13 +1,18 @@
 ---
 - name: Detect container environment (systemd-detect-virt)
   ansible.builtin.command: systemd-detect-virt --container
-  register: detect_container
   changed_when: false
   failed_when: false
 
-- name: "Debug: allowed_applications"
-  debug:
-    msg: "{{ allowed_applications }}"
+- name: Display selected initial host vars
+  ansible.builtin.debug:
+    msg: |
+      group_names:
+      {{ group_names | to_nice_yaml(indent=2) }}
+      allowed_applications: {{ allowed_applications }}
+      RUNTIME: {{ RUNTIME }}
+      TLS_ENABLED: {{ TLS_ENABLED }}
+      ASYNC_ENABLED: {{ ASYNC_ENABLED }}
   when: MODE_DEBUG | bool
 
 - name: Check DNS resolution for test domain
@@ -124,6 +129,11 @@
     set_fact:
       service_provider: "{{ defaults_service_provider | combine(service_provider | default({}, true), recursive=True) }}"
 
+- name: Include Token Store
+  include_role:
+    name: sys-token-store
+  when: run_once_sys_token_store is not defined
+
 - name: init root user
   include_role:
     name: user-root
@@ -138,6 +148,13 @@
   community.general.timezone:
     name: "{{ HOST_TIMEZONE }}"
   when: not DOCKER_IN_CONTAINER | bool
+
+- name: System Cleanup
+  include_role:
+    name: sys-cleanup
+  when:
+    - MODE_CLEANUP | bool
+    - DOCKER_IN_CONTAINER | bool
 
 - name: "Load base roles"
   include_tasks: "./tasks/groups/{{ item }}-roles.yml"

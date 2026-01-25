@@ -9,6 +9,8 @@ import yaml
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
+from module_utils.config_utils import get_app_conf
+from ansible.plugins.loader import lookup_loader
 
 
 class LookupModule(LookupBase):
@@ -23,7 +25,7 @@ class LookupModule(LookupBase):
           - Retrieves the icon class from galaxy_info.logo.class
           - Retrieves the tags from galaxy_info.galaxy_tags
           - Builds the URL using the 'domains' variable
-          - Sets the iframe flag from applications | get_app_conf(application_id, 'features.desktop', True)
+          - Sets the iframe flag from applications | get_app_conf(application_id, 'docker.services.desktop.enabled', True)
 
         Only cards whose application_id is included in the variable group_names are returned.
         """
@@ -110,11 +112,35 @@ class LookupModule(LookupBase):
             elif isinstance(domain_url, dict):
                 domain_url = next(iter(domain_url.values()))
 
-            # Construct the URL using the domain_url if available.
-            url = "https://" + domain_url if domain_url else ""
+            # domain_url kann list/dict sein; nach deiner Normalisierung:
+            domain_url = (
+                self._templar.template(domain_url).strip() if domain_url else ""
+            )
 
-            app_data = applications.get(application_id, {})
-            iframe = app_data.get("features", {}).get("desktop", False)
+            # Build URL via strict tls resolver
+            url = ""
+            if domain_url:
+                try:
+                    tls_lookup = lookup_loader.get(
+                        "tls_resolve", loader=self._loader, templar=self._templar
+                    )
+                    # tls_resolve returns base URL with trailing slash (e.g. https://meet.example/)
+                    base_url = tls_lookup.run(
+                        [application_id], variables=variables, want="url.base"
+                    )[0]
+                    url = str(base_url).strip().rstrip("/")
+                except Exception as e:
+                    raise AnsibleError(
+                        f"Error building URL via tls_resolve for '{application_id}': {e}"
+                    )
+
+            iframe = get_app_conf(
+                applications,
+                application_id,
+                "docker.services.desktop.enabled",
+                strict=False,
+                default=False,
+            )
 
             # Build card dictionary
             card = {

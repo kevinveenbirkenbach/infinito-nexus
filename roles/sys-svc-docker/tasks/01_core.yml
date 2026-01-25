@@ -1,25 +1,19 @@
-- include_tasks: utils/once/flag.yml
-
-- name: "Install docker engine (host only)"
+- name: Install Docker engine, compose, buildx and python dependencies
   ansible.builtin.package:
     name: >-
       {{
-        ['docker'] if ansible_os_family == 'Archlinux' else
-        ['docker.io'] if ansible_os_family == 'Debian' else
-        ['docker'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
-        omit
-      }}
-    state: present
-  notify: docker restart
+        (
+          ['docker', 'docker-compose', 'docker-buildx', 'python-docker', 'python-requests']
+          if ansible_os_family == 'Archlinux' else
 
-- name: "Install docker compose"
-  ansible.builtin.package:
-    name: >-
-      {{
-        ['docker-compose'] if ansible_os_family == 'Archlinux' else
-        ['docker-compose-plugin'] if ansible_os_family == 'Debian' else
-        ['docker-compose-plugin'] if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
-        omit
+          ['docker.io', 'docker-compose-plugin', 'docker-buildx-plugin', 'python3-docker', 'python3-requests']
+          if ansible_os_family == 'Debian' else
+
+          ['docker', 'docker-compose-plugin', 'docker-buildx', 'python3-docker', 'python3-requests']
+          if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
+
+          fail('Unsupported distribution for Docker role: ' ~ ansible_distribution ~ ' (' ~ ansible_os_family ~ ')')
+        )
       }}
     state: present
   notify: docker restart
@@ -28,8 +22,8 @@
   include_tasks: "02_assert_requirements.yml"
   when: MODE_ASSERT | bool
 
-- name: "Load fuse-overlayfs (in container)"
-  include_tasks: "03_fuse_overlayfs.yml"
+- name: "Load docker in docker procedures"
+  include_tasks: "03_docker_in_docker.yml"
   when: DOCKER_IN_CONTAINER | bool
 
 - name: Restart and enable docker service
@@ -60,13 +54,4 @@
   include_tasks: "04_reset.yml"
   when: MODE_RESET | bool
 
-- name: Include backup, repair and health services for docker
-  include_role:
-    name: "{{ item }}"
-  loop:
-    - sys-ctl-cln-docker
-    - sys-ctl-bkp-docker-2-loc
-    - sys-ctl-hlth-docker-container
-    - sys-ctl-hlth-docker-volumes
-    - sys-ctl-rpr-docker-hard
-  when: SYS_SVC_DOCKER_LOAD_SERVICES | bool
+- include_tasks: utils/once/flag.yml

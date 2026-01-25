@@ -15,7 +15,7 @@ applications:
 You can reference values from the generated `defaults_applications` dictionary at build time by embedding `<< ... >>` placeholders inside your template. For example:
 
 ```yaml
-url: "{{ WEB_PROTOCOL }}://<< defaults_applications.web-svc-file.domains.canonical[0] >>/assets"
+url: "{{ lookup('tls_resolve', application_id, want='protocols.web') }}://<< defaults_applications.web-svc-file.domains.canonical[0] >>/assets"
 ```
 
 - The `<< ... >>` placeholders are resolved by the [`DictRenderer`](../../../utils/dict_renderer.py) helper class.

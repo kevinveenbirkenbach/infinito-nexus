@@ -204,6 +204,11 @@ while isSmallerThenMaximumBackupSize(maximum_backup_size_percent, backup_dir):
     average_version_directories = average_version_directories_per_application(
         backup_dir
     )
+    if average_version_directories <= 0:
+        print(
+            "No backup versions found to delete (average_version_directories=0). Exiting."
+        )
+        break
     print(
         f"Average version directories per application directory: {average_version_directories}"
     )

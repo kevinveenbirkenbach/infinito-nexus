@@ -7,13 +7,6 @@ plugins:
     enabled:          true
   activitypub:
     enabled:          true
-features:
-  matomo:             true
-  css:                false
-  desktop:            true
-  oidc:               true
-  central_database:   true
-  logout:             true
 server:
   csp:
     flags:
@@ -44,7 +37,19 @@ server:
     aliases: []
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled:            true
     wordpress:
       version:            latest 
@@ -56,6 +61,8 @@ docker:
       mem_reservation:    0.5g
       mem_limit:          1.5g
       pids_limit:         512
+    css:
+      enabled: false
   volumes: 
     data:                 wordpress_data
 rbac:

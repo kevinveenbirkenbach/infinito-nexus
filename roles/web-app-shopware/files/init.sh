@@ -55,6 +55,7 @@ APP_URL_STR=$($PHP_BIN -r 'echo getenv("APP_URL") ?: "";' 2>/dev/null || true)
 # 1) Database reachability check (PDO)
 # ---------------------------
 log "Checking database via PDO..."
+# shellcheck disable=SC2016
 $PHP_BIN -r '
 $url = getenv("DATABASE_URL");
 if (!$url) { fwrite(STDERR, "DATABASE_URL not set\n"); exit(1); }
@@ -80,6 +81,7 @@ fwrite(STDERR, "DB not reachable\n"); exit(1);
 FIRST_INSTALL=0
 if [ ! -f "$MARKER" ]; then
   log "Checking if database is empty..."
+  # shellcheck disable=SC2016
   if $PHP_BIN -r '
     $url = getenv("DATABASE_URL");
     $p   = parse_url($url);

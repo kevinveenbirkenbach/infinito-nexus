@@ -1,12 +1,4 @@
 repository:           "repository"  # Name of the repository folder                 
-features:
-  matomo:             true
-  css:                true
-  desktop:            true
-  oidc:               true
-  central_database:   true
-  ldap:               false         # @todo implement and activate
-  logout:             true
 server:
   csp:
     flags:
@@ -16,14 +8,29 @@ server:
         unsafe-inline: true
     whitelist:
       font-src:
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
   domains:
     canonical:
       - "forum.{{ DOMAIN_PRIMARY }}"
     aliases: []
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+    ldap:
+      enabled: false
+      shared:  false
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled: true
     redis:
       backup:
@@ -35,6 +42,8 @@ docker:
       backup:
         no_stop_required: true
       repository:         "https://github.com/discourse/discourse_docker.git"
+    css:
+      enabled: true
   volumes: 
     data:   discourse_data
   network:  discourse

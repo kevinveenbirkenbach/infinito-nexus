@@ -1,12 +1,3 @@
-features:
-  matomo:             true
-  css:                false
-  desktop:            false # @todo Solve https://chatgpt.com/c/687a50b4-8d78-800f-a202-1631aa05fd4f before setting it to true
-  ldap:               false
-  oidc:               true
-  central_database:   true
-  logout:             true
-  recaptcha:          "{{ RECAPTCHA_ENABLED | bool }}"  # Required for leads formulars
 server:
   csp:
     flags:
@@ -17,7 +8,7 @@ server:
         unsafe-eval:    true
     whitelist:
       connect-src:
-        - "{{ WEBSOCKET_PROTOCOL }}://espo.crm.{{ DOMAIN_PRIMARY }}"
+        - "espo.crm.{{ DOMAIN_PRIMARY }}"
         - "data:"
       frame-src:
         - https://s.espocrm.com/
@@ -36,7 +27,23 @@ credentials:
     secret:   "{{ CAPTCHA.RECAPTCHA.SECRET | default('') }}"
 docker:
   services:
+    ldap:
+      enabled: false
+      shared: false
+    oidc:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+
+    desktop:
+      enabled: false
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "mariadb"
       enabled: true              
     espocrm:
       image:            "espocrm/espocrm"
@@ -56,6 +63,10 @@ docker:
       mem_reservation:  0.25g
       mem_limit:        0.5g
       pids_limit:       384
+    css:
+      enabled: false
+    recaptcha:
+      enabled: "{{ RECAPTCHA_ENABLED | bool }}"
   volumes:
     data:       espocrm_data
 maintenance_mode: false

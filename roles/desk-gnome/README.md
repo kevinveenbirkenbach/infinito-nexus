@@ -24,4 +24,4 @@ The purpose of this role is to provide a complete GNOME desktop experience by or
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Learn more at [www.veen.world](https://www.veen.world)
 
-License: [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license)
+License: [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)

@@ -15,4 +15,3 @@
     applications: "{{ applications | append_csp_hash(application_id, iframe_init_code_one_liner) }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   changed_when: false
-

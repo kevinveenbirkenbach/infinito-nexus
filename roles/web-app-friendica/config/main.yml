@@ -1,14 +1,5 @@
 images:
   friendica:          "friendica:latest"
-features:
-  matomo:             true
-  css:                false # Temporary deactivated
-  desktop:            true
-  oidc:               false # Implementation doesn't work yet
-  central_database:   true
-  ldap:               true
-  oauth2:             false # No special login side which could be protected, use 2FA of Friendica instead
-  logout:             true
 server:
   domains:
     canonical:
@@ -28,9 +19,27 @@ addons:
   ldapauth: {}
 docker:
   services:
+    oidc:
+      enabled:  false
+      shared:   false
+    logout:
+      enabled:  true
+    ldap:
+      enabled:  true
+      shared: true
+    desktop:
+      enabled:  true
+    matomo:
+      enabled:  true
+      shared:   true
     database:
-      enabled:      true
-    oauth2_proxy:
+      shared:   true
+      type:     "mariadb"
+      enabled:  true
+    oauth2:
       origin:
-        host: "application"
-        port: "80"
+        host:   "application"
+        port:   "80"
+      enabled:  false
+    css:
+      enabled: false

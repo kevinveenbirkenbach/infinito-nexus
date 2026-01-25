@@ -1,6 +1,5 @@
 # General
 application_id:                       "web-app-xwiki"
-database_type:                        "{{ applications | get_app_conf(application_id, 'docker.services.database.type') }}"
 domain:                               "{{ domains | get_domain(application_id) }}"
 
 container_port:                       8080
@@ -25,8 +24,8 @@ XWIKI_CONTAINER:                      "{{ applications | get_app_conf(applicatio
 XWIKI_DATA_VOLUME:                    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 
 # Feature toggles (must be set in config/main.yml -> features)
-XWIKI_LDAP_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
-XWIKI_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+XWIKI_LDAP_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+XWIKI_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 XWIKI_SSO_ENABLED:                    "{{ (XWIKI_OIDC_ENABLED | bool) or (XWIKI_LDAP_ENABLED | bool) }}"
 
 # Admin credentials (must be provided via inventory/vault)
@@ -50,7 +49,7 @@ XWIKI_LDAP_PORT:                      "{{ LDAP.SERVER.PORT }}"
 XWIKI_LDAP_BASE_DN:                   "{{ LDAP.DN.ROOT }}"
 XWIKI_LDAP_BIND_DN:                   "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
 XWIKI_LDAP_BIND_PASS:                 "{{ LDAP.BIND_CREDENTIAL }}"
-XWIKI_LDAP_TRYLOCAL:                  "{{ applications | get_app_conf(application_id, 'ldap.local_enabled') }}"
+XWIKI_LDAP_TRYLOCAL:                  "{{ applications | get_app_conf(application_id, 'docker.services.ldap.trylocal') }}"
 XWIKI_LDAP_FIELDS_MAPPING:            "last_name={{ LDAP.USER.ATTRIBUTES.SURNAME }},first_name={{ LDAP.USER.ATTRIBUTES.FIRSTNAME }},email={{ LDAP.USER.ATTRIBUTES.MAIL }}"
 XWIKI_LDAP_ADMIN_GROUP_DN:            "cn={{ XWIKI_ADMIN_GROUP ~ ',' ~ LDAP.DN.OU.GROUPS }}"
 

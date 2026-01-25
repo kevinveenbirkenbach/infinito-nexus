@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_KEY_FILE="${APP_KEY_FILE}"
+: "${APP_KEY_FILE:?Missing env APP_KEY_FILE}"
+
 APP_KEY_PUB="${APP_KEY_FILE}.pub"
 
 # 1) Generate signing key pair if missing

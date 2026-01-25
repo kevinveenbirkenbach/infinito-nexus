@@ -1,5 +1,5 @@
 {# This template needs to be included in docker-compose.yml, which depend on a mariadb database #}
-{% if not applications | get_app_conf(application_id, 'features.central_database', False) %}
+{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False) %}
 
   {{ database_host }}:
     container_name: {{ application_id | get_entity_name }}-database

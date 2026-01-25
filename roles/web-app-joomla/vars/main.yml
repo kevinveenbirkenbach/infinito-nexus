@@ -1,6 +1,5 @@
 # General
 application_id:                   "web-app-joomla"
-database_type:                    "mariadb"
 container_port:                   80
 webserver_client_max_body_size:             "{{ JOOMLA_POST_MAX_SIZE }}"
 

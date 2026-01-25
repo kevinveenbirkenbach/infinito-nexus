@@ -60,10 +60,22 @@ class FilterModule(object):
         applications: dict, feature: str, application_id: str
     ) -> bool:
         """
-        Returns True if applications[application_id].features[feature] is truthy.
+        Returns True if the docker service flag is enabled for this application.
+
+        New flag layout (examples):
+          - docker.services.matomo.enabled
+          - docker.services.desktop.enabled
+          - docker.services.simpleicons.enabled
+          - docker.services.logout.enabled
+          - docker.services.hcaptcha.enabled
+          - docker.services.recaptcha.enabled
         """
         return get_app_conf(
-            applications, application_id, "features." + feature, False, False
+            applications,
+            application_id,
+            f"docker.services.{feature}.enabled",
+            False,
+            False,
         )
 
     @staticmethod
@@ -145,8 +157,7 @@ class FilterModule(object):
         applications,
         application_id,
         domains,
-        web_protocol="https",
-        matomo_feature_name="matomo",
+        web_protocol,
     ):
         """
         Builds the Content-Security-Policy header value dynamically based on application settings.
@@ -166,9 +177,10 @@ class FilterModule(object):
               server.csp.hashes.<directive>
           - “Smart defaults”:
               * internal CDN for style/script elem and connect
-              * Matomo endpoints (if feature enabled) for script-elem/connect
-              * Simpleicons (if feature enabled) for connect
-              * reCAPTCHA (if feature enabled) for script-elem/frame-src
+              * Matomo endpoints (if docker.services.matomo.enabled) for script-elem/connect
+              * Simpleicons service (if docker.services.simpleicons.enabled) for connect
+              * reCAPTCHA (if docker.services.recaptcha.enabled) for script-elem/frame-src
+              * hCaptcha (if docker.services.hcaptcha.enabled) for script-elem/frame-src
               * frame-ancestors extended for desktop/logout/keycloak if enabled
         """
         try:
@@ -218,14 +230,12 @@ class FilterModule(object):
                 ):
                     tokens.append(get_url(domains, "web-svc-cdn", web_protocol))
 
-                # Matomo (if enabled)
+                # Matomo (if enabled via docker.services.matomo.enabled)
                 if directive in ("script-src-elem", "connect-src"):
-                    if self.is_feature_enabled(
-                        applications, matomo_feature_name, application_id
-                    ):
+                    if self.is_feature_enabled(applications, "matomo", application_id):
                         tokens.append(get_url(domains, "web-app-matomo", web_protocol))
 
-                # Simpleicons (if enabled) – typically used via connect-src (fetch)
+                # Simpleicons (if enabled via docker.services.simpleicons.enabled) – typically used via connect-src (fetch)
                 if directive == "connect-src":
                     if self.is_feature_enabled(
                         applications, "simpleicons", application_id
@@ -234,18 +244,18 @@ class FilterModule(object):
                             get_url(domains, "web-svc-simpleicons", web_protocol)
                         )
 
-                # reCAPTCHA (if enabled) – scripts + frames
+                # reCAPTCHA (if enabled via docker.services.recaptcha.enabled) – scripts + frames
                 if self.is_feature_enabled(applications, "recaptcha", application_id):
                     if directive in ("script-src-elem", "frame-src"):
                         tokens.append("https://www.gstatic.com")
                         tokens.append("https://www.google.com")
 
-                # hCaptcha (if enabled) – scripts + frames
+                # hCaptcha (if enabled via docker.services.hcaptcha.enabled) – scripts + frames
                 if self.is_feature_enabled(applications, "hcaptcha", application_id):
-                    if directive in ("script-src-elem"):
+                    if directive == "script-src-elem":
                         tokens.append("https://www.hcaptcha.com")
                         tokens.append("https://js.hcaptcha.com")
-                    if directive in ("frame-src"):
+                    if directive == "frame-src":
                         tokens.append("https://newassets.hcaptcha.com/")
 
                 # Frame ancestors (desktop + logout)
@@ -261,7 +271,7 @@ class FilterModule(object):
                             get_url(domains, "web-app-keycloak", web_protocol)
                         )
 
-                # Logout support requires inline handlers (script-src-attr)
+                # Logout support requires inline handlers (script-src-attr + script-src-elem)
                 if directive in ("script-src-attr", "script-src-elem"):
                     if self.is_feature_enabled(applications, "logout", application_id):
                         tokens.append("'unsafe-inline'")
@@ -307,7 +317,6 @@ class FilterModule(object):
 
                 # Respect explicit disables on the base
                 explicit_base = explicit_flags_by_dir.get(base_key, {})
-                # The most relevant flags for script/style:
                 for flag_name in ("unsafe-inline", "unsafe-eval"):
                     union = _strip_if_disabled(union, explicit_base, flag_name)
 
@@ -319,7 +328,6 @@ class FilterModule(object):
             # ----------------------------------------------------------
             # Assemble header
             # ----------------------------------------------------------
-            # Sort tokens per directive for deterministic output
             for directive, toks in list(tokens_by_dir.items()):
                 tokens_by_dir[directive] = _sort_tokens(toks)
 

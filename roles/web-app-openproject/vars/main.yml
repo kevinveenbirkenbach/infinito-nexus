@@ -2,7 +2,6 @@
 application_id:                 "web-app-openproject"
 
 # Database
-database_type:                  "postgres"
 
 # Open Project Specific
 OPENPROJECT_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version') }}"
@@ -52,10 +51,15 @@ OPENPROJECT_RAILS_SETTINGS:
   smtp_ssl:                   false
 
 ## LDAP
-OPENPROJECT_LDAP_ENABLED:                       "{{ applications | get_app_conf(application_id, 'features.ldap') }}"
+OPENPROJECT_LDAP_ENABLED:                       "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED: "{{ applications | get_app_conf(application_id, 'ldap.filters.administrators') }}"
 OPENPROJECT_LDAP_FILTER_USERS_ENABLED:          "{{ applications | get_app_conf(application_id, 'ldap.filters.users') }}"
 OPENPROJECT_LDAP_FILTERS:
   # The administrator filter just works in the Enterprise edition
   ADMINISTRATORS: "{{ '(memberOf=cn=openproject-admins,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED | bool else '' }}"
   USERS:          "{{ '(memberOf=cn=openproject-users,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_USERS_ENABLED | bool else '' }}"
+
+
+# Performance
+OPENPROJECT_DB_POOL:            "{{ [POSTGRES_ALLOWED_AVG_CONNECTIONS | int, 20] | min }}"
+OPENPROJECT_RAILS_MAX_THREADS:  "{{ [POSTGRES_ALLOWED_AVG_CONNECTIONS | int, 20] | min }}"

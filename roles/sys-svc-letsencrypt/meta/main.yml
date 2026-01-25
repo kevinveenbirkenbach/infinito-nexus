@@ -1,7 +1,7 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: An Ansible role to automate Let’s Encrypt SSL certificate issuance and renewal for Nginx
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
     Kevin Veen-Birkenbach

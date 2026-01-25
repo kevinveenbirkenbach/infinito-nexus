@@ -1,9 +1,3 @@
-features:
-  matomo:     true
-  css:        true
-  desktop:    true
-  javascript: false
-  logout:     false
 server:
   domains:
     canonical:
@@ -17,12 +11,26 @@ server:
         unsafe-inline: true
     whitelist:
       connect-src:
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
-        - "{{ WEB_PROTOCOL }}://{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
+        - "{{ DOMAIN_PRIMARY }}"
         - "https://cdn.jsdelivr.net"
       script-src-elem:
         - "https://cdn.jsdelivr.net"
       style-src-elem:
         - "https://cdn.jsdelivr.net"
       frame-ancestors:
-        - "{{ WEB_PROTOCOL }}://<< defaults_applications[web-app-keycloak].server.domains.canonical[0] >>"
+        - "auth.{{ DOMAIN_PRIMARY }}"
+docker:
+  services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
+    css:
+      enabled: true
+    javascript:
+      enabled: false

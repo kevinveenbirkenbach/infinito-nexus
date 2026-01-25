@@ -61,7 +61,7 @@ def build_users(defs, primary_domain, start_id, become_pwd):
     for key, overrides in defs.items():
         username = overrides.get("username", key)
         email = overrides.get("email", f"{username}@{primary_domain}")
-        description = overrides.get("description")
+        description = overrides.get("description", "")
         roles = overrides.get("roles", [])
         password = overrides.get("password", become_pwd)
         reserved = overrides.get("reserved", False)
@@ -86,13 +86,9 @@ def build_users(defs, primary_domain, start_id, become_pwd):
             "roles": roles,
             "tokens": tokens,
             "authorized_keys": authorized_keys,
+            "reserved": reserved,
+            "description": description,
         }
-
-        if description is not None:
-            entry["description"] = description
-        if reserved:
-            entry["reserved"] = reserved
-
         users[key] = entry
 
     # Ensure uniqueness of usernames and emails
@@ -202,9 +198,7 @@ def parse_args():
 def main():
     args = parse_args()
     primary_domain = "{{ SYSTEM_EMAIL_DOMAIN }}"
-    become_pwd = (
-        '{{ lookup("password", "/dev/null length=42 chars=ascii_letters,digits") }}'
-    )
+    become_pwd = "{{ 42 | strong_password }}"
 
     try:
         definitions = load_user_defs(args.roles_dir)
@@ -223,6 +217,7 @@ def main():
                     f"Warning: reserved user '{user_key}' already defined; skipping (not changing existing definition).",
                     file=sys.stderr,
                 )
+                continue
             else:
                 definitions[user_key] = {}
             # Mark user as reserved

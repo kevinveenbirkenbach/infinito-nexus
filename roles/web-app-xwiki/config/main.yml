@@ -1,11 +1,26 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+    ldap:
+      enabled: false
+      shared: false
+      trylocal: true # Allows local login if LDAP is down
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       enabled:            false
       backup:
         disabled: true
     database:
+      shared: true
       enabled:            true
       type:               postgres
     xwiki:
@@ -18,16 +33,10 @@ docker:
       mem_reservation:    1g
       mem_limit:          2g
       pids_limit:         1024
+    css:
+      enabled: true
   volumes:
     data:           "xwiki_data"
-features:
-  matomo:           true
-  css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
-  oidc:             true
-  ldap:             false # Just OIDC or LDAP can be enabled
 server:
   csp:
     whitelist:
@@ -44,12 +53,10 @@ server:
     aliases: []
 rbac:
   roles: {}
-ldap:
-  local_enabled: true # Allows local login if LDAP is down
-
 plugins:
   oidc:
     enabled: true
+    shared: true
     items:
       - id: "org.xwiki.contrib.oidc:oidc-authenticator"
         version: ""

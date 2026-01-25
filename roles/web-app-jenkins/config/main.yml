@@ -1,8 +1,12 @@
-features:
-  logout: true # Same like with elk, anyhow not active atm
-  matomo: true
 server:
   domains:
     canonical:
       - jenkins.{{ DOMAIN_PRIMARY }}
     aliases: []
+docker:
+  services:
+    logout:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true

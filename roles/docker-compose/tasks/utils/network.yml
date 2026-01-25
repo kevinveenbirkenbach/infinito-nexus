@@ -1,16 +1,16 @@
-- name: Load Docker
+- name: "1) Load the dependencies for the Anisble/Docker network management"
   include_role:
     name: sys-svc-docker
   when: run_once_sys_svc_docker is not defined
 
-- name: Create docker network
+- name: "2) Create the network"
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
     state: present
     ipam_config:
       - subnet: "{{ docker_network_subnet }}"
 
-- name: "include docker-compose role"
+- name: "3) Include and flush the compose which requires the network"
   include_role:
     name: docker-compose
   vars:

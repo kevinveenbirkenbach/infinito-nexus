@@ -4,7 +4,7 @@
 - block:
     - name: "load docker, db and proxy for {{ application_id }}"
       include_role:
-        name: sys-stk-full-stateful
+        name: sys-stk-full
       vars:
         docker_compose_flush_handlers: false
 
@@ -21,12 +21,59 @@
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
     url_password: "{{ XWIKI_SUPERADMIN_PASSWORD }}"
     force_basic_auth: true
-    status_code: [200]
+    status_code: [200, 401, 403, 500, 503]
+    return_content: yes
   register: _super_check_ext
+  changed_when: false
+  failed_when: false
 
-- name: "FAIL | superadmin authentication failed (extensions phase)"
-  fail:
-    msg: "superadmin authentication failed (check xwiki.cfg in image / password / Dockerfile build)"
+- block:
+    - name: "DEBUG | superadmin check + pw hash compare (condensed)"
+      shell: |
+        set -euo pipefail
+
+        echo "=== superadmin check ==="
+        echo "status={{ _super_check_ext.status }}"
+        echo "redirected={{ _super_check_ext.redirected | default('n/a') }}"
+        echo "url={{ _super_check_ext.url | default('n/a') }}"
+        echo "www_authenticate={{ _super_check_ext.www_authenticate | default(_super_check_ext.headers['www-authenticate'] | default('n/a')) }}"
+        echo "content_type={{ _super_check_ext.content_type | default(_super_check_ext.headers['content-type'] | default('n/a')) }}"
+        echo "content={{ (_super_check_ext.content | default(''))[:600] | replace('\n','\\n') }}"
+
+        echo "=== password hash compare ==="
+        echo -n "container_hash="
+        docker exec "{{ XWIKI_CONTAINER }}" sh -lc '
+          cfg="/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg";
+          if [ ! -f "$cfg" ]; then
+            echo "<missing-xwiki.cfg>"
+            exit 0
+          fi
+          grep -E "^xwiki\.superadminpassword=" "$cfg" \
+            | sed "s/^xwiki\.superadminpassword=//" \
+            | sha256sum | awk "{print \$1}"
+        ' || true
+
+        echo -n "ansible_hash="
+        printf "%s" {{ XWIKI_SUPERADMIN_PASSWORD | quote }} | sha256sum | awk '{print $1}'
+      register: _dbg_superadmin
+      changed_when: false
+      failed_when: false
+
+    - name: "FAIL | superadmin authentication failed (extensions phase)"
+      fail:
+        msg: |
+          superadmin authentication failed (extensions phase)
+
+          superadmin check status={{ _super_check_ext.status }}
+          www_authenticate={{
+            _super_check_ext.www_authenticate
+            | default(_super_check_ext.headers['www-authenticate'] | default('n/a'))
+          }}
+
+          debug:
+          {{ _dbg_superadmin.stdout | default('') }}
+
+          hint: check xwiki.cfg in image / password / Dockerfile build
   when: _super_check_ext.status != 200
 
 - name: Load setup procedures for admin

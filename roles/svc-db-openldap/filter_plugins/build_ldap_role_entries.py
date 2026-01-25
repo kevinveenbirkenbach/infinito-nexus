@@ -6,6 +6,8 @@ def build_ldap_role_entries(applications, users, ldap):
 
     result = {}
 
+    placeholder_dn = ldap.get("RBAC", {}).get("EMPTY_MEMBER_DN")
+
     for application_id, application_config in applications.items():
         base_roles = application_config.get("rbac", {}).get("roles", {})
         roles = {
@@ -48,9 +50,15 @@ def build_ldap_role_entries(applications, users, ldap):
                 if member_uids:
                     entry["memberUid"] = member_uids
 
-            # Add members for groupOfNames
-            if "groupOfNames" in flavors and member_dns:
-                entry["member"] = member_dns
+            if "groupOfNames" in flavors:
+                if member_dns:
+                    entry["member"] = member_dns
+                else:
+                    if not placeholder_dn:
+                        raise ValueError(
+                            "LDAP.RBAC.EMPTY_MEMBER_DN must be defined when using groupOfNames"
+                        )
+                    entry["member"] = [placeholder_dn]
 
             result[dn] = entry
 

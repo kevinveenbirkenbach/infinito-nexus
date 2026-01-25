@@ -1,6 +1,5 @@
 # General
 application_id:                 "web-app-magento"
-database_type:                  "mariadb"
 
 # Magento (application container)
 
@@ -10,7 +9,7 @@ MAGENTO_USER:                   "app"
 
 ## Address
 MAGENTO_DOMAIN:                 "{{ domains | get_domain(application_id) }}"
-MAGENTO_URL:                    "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+MAGENTO_URL:                    "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 
 ## Runtime config paths (used by 02_runtime_conf.yml)
 # Root config directory comes from the docker_compose subsystem (already asserted)

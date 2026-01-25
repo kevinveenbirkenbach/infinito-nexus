@@ -1,23 +1,31 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
-      enabled:      true            # Use central DB role (recommended)
+      shared:   true
+      type:     "postgres"
+      enabled:  true            # Use central DB role (recommended)
     application:
       image:        "node"          # Base image family; final image is custom
       version:      "20-bullseye"   # >=16 as required upstream
       name:         "web-app-chess"
       backup:
         no_stop_required: true
+    css:
+      enabled: true
   volumes:
     data:           "chess_data"
-features:
-  matomo:           true
-  css:              true
-  desktop:          true
-  central_database: true
-  logout:           false
-  oidc:             false
 server:
   csp:
     whitelist:      {}

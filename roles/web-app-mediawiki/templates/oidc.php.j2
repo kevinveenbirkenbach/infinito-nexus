@@ -3,32 +3,39 @@
 
 {% if MEDIAWIKI_OIDC_ENABLED | bool %}
 
-{% if 'web-svc-logout' in CURRENT_PLAY_APPLICATIONS %}
-# The cookie deletion of the logout app leads to a login bug if this isn't set
-$wgPasswordAttemptThrottle = [];
-{% endif %}
+$pa = "$IP/extensions/PluggableAuth/extension.json";
+$oidc = "$IP/extensions/OpenIDConnect/extension.json";
 
-wfLoadExtension( 'PluggableAuth' );
-wfLoadExtension( 'OpenIDConnect' );
+if ( file_exists( $pa ) && file_exists( $oidc ) ) {
 
-$wgPluggableAuth_EnableAutoLogin = {{ MEDIAWIKI_OIDC_AUTOLOGIN | bool | ternary('true','false') }};
-$wgPluggableAuth_EnableLocalLogin = {{ MEDIAWIKI_OIDC_LOCALLOGIN | bool | ternary('true','false') }};
-$wgPluggableAuth_ButtonLabel = '{{ MEDIAWIKI_OIDC_BUTTON_TEXT }}';
+    {% if 'web-svc-logout' in CURRENT_PLAY_APPLICATIONS %}
+    $wgPasswordAttemptThrottle = [];
+    {% endif %}
 
-$wgPluggableAuth_Config = [
-    [
-        'plugin' => 'OpenIDConnect',
-        'data' => [
-            'providerURL'  => '{{ MEDIAWIKI_OIDC_ISSUER }}',
-            'clientID'     => '{{ MEDIAWIKI_OIDC_CLIENT_ID }}',
-            'clientsecret' => '{{ MEDIAWIKI_OIDC_CLIENT_SECRET }}',
-            'scope'        => [ 'openid', 'profile', 'email' ],
+    wfLoadExtension( 'PluggableAuth' );
+    wfLoadExtension( 'OpenIDConnect' );
+
+    $wgPluggableAuth_EnableAutoLogin = {{ MEDIAWIKI_OIDC_AUTOLOGIN | bool | ternary('true','false') }};
+    $wgPluggableAuth_EnableLocalLogin = {{ MEDIAWIKI_OIDC_LOCALLOGIN | bool | ternary('true','false') }};
+    $wgPluggableAuth_ButtonLabel = '{{ MEDIAWIKI_OIDC_BUTTON_TEXT }}';
+
+    $wgPluggableAuth_Config = [
+        [
+            'plugin' => 'OpenIDConnect',
+            'data' => [
+                'providerURL'  => '{{ MEDIAWIKI_OIDC_ISSUER }}',
+                'clientID'     => '{{ MEDIAWIKI_OIDC_CLIENT_ID }}',
+                'clientsecret' => '{{ MEDIAWIKI_OIDC_CLIENT_SECRET }}',
+                'scope'        => [ 'openid', 'profile', 'email' ],
+            ],
         ],
-    ],
-];
+    ];
 
-$wgOpenIDConnect_UseEmailNameAsUserName = true;
-$wgOpenIDConnect_MigrateUsers = true;
-// ### OIDC (PluggableAuth) – END
+    $wgOpenIDConnect_UseEmailNameAsUserName = true;
+    $wgOpenIDConnect_MigrateUsers = true;
+
+} else {
+    // Extensions not present yet; skip OIDC bootstrap to avoid fatal errors during provisioning.
+}
 
 {% endif %}

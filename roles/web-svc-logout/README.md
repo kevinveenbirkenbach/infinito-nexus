@@ -32,4 +32,4 @@ It solves the common challenge of logging a user out from all connected apps wit
 
 ---
 
-*This role is licensed under the [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license).*
+*This role is licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).*

@@ -1,0 +1,49 @@
+name: CI (Release Version)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: infinito-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
+jobs:
+  gate:
+    name: Ensure tag commit is on master
+    runs-on: ubuntu-latest
+    outputs:
+      allowed: ${{ steps.check.outputs.allowed }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Check tagged commit is reachable from master
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin master --depth=1 || true
+
+          if git merge-base --is-ancestor "${GITHUB_SHA}" "origin/master"; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  call-release:
+    name: Run release logic
+    needs: gate
+    if: needs.gate.outputs.allowed == 'true'
+    uses: ./.github/workflows/release-version.yml
+    with:
+      tag: ${{ github.ref_name }}

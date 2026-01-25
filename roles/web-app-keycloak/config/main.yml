@@ -1,19 +1,5 @@
-load_dependencies:    True  # When set to false the dependencies aren't loaded. Helpful for developing
 actions:
   import_realm:       True  # Import REALM
-features:
-  matomo:             true
-  css:                true
-  desktop:            true
-  ldap:               true
-  central_database:   true
-  recaptcha:          "{{ RECAPTCHA_ENABLED | bool }}"
-
-  # Doesn't make sense to activate logout page for keycloak, because the logout page 
-  # anyhow should be included via iframe in keycloak.
-  # The JS is also messing with the keycloak config fields
-  # @todo optimize the JS
-  logout:             false                             
 server:
   csp:
     flags:
@@ -35,6 +21,23 @@ scopes:
 
 docker:
   services:
+    logout:
+      enabled:  false
+      shared:   false
+    ldap:
+      enabled:  true
+      shared:   true
+      sync:
+        period:
+          # Sync user attribute changes all 15 min  
+          changes:  900
+          # Sync everything daily
+          full:     86400
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     keycloak:
       image:            "quay.io/keycloak/keycloak"
       version:          "latest"
@@ -44,7 +47,13 @@ docker:
       mem_limit:        "4g"
       pids_limit:       1024
     database:
+      shared:           true
+      type:             "postgres"
+      enabled:          true
+    css:
       enabled: true
+    recaptcha:
+      enabled: "{{ RECAPTCHA_ENABLED | bool }}"
 credentials:
   recaptcha:
     key:      "{{ CAPTCHA.RECAPTCHA.KEY | default('') }}"

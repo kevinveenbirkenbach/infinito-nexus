@@ -1,10 +1,5 @@
 # run_once_sys_front_inj_matomo: deactivated
 
-- name: Include Token Store
-  include_role:
-    name: sys-token-store
-  when: run_once_sys_token_store is not defined
-
 - name: Fail if Matomo token is empty string
   ansible.builtin.fail:
     msg: "Matomo token users.administrator.tokens['web-app-matomo'] is set but empty. Please provide a non-empty token."
@@ -12,13 +7,16 @@
 
 - name: "Check if site {{ domain }} is already registered at Matomo"
   ansible.builtin.uri:
-    url: "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ WEB_PROTOCOL }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
+    url: "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
     method: GET
     return_content: yes
     status_code: 200
     validate_certs: yes
   register: site_check
   failed_when: false
+  retries: 30
+  delay: 2
+  until: site_check.status is defined and site_check.status == 200
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Matomo site check failed"
@@ -46,7 +44,7 @@
   ansible.builtin.uri:
     url: "{{ matomo_index_php_url }}"
     method: POST
-    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ WEB_PROTOCOL }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
+    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
     body_format: form-urlencoded
     status_code: 200
     return_content: yes

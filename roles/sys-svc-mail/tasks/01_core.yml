@@ -8,16 +8,15 @@
 - block:
   - name: "Check if Mail Host is reachable"
     uri:
-      url: "{{ WEB_PROTOCOL }}://{{ SYSTEM_EMAIL_HOST }}"
+      url: "{{ lookup('tls_resolve', 'web-app-mailu', want='url.base') }}"
       method: HEAD
       validate_certs: yes
-      status_code: 200
+      status_code: "{{ mailu_valid_status_codes }}"
     register: mail_host_reachability
     failed_when: false
     changed_when: false
     when:
       - run_once_web_app_mailu is not defined
-      - SYSTEM_EMAIL_HOST == (domains | get_domain('web-app-mailu'))
 
   - name: "Load Mailu Routines for '{{ role_name }}'"
     include_tasks: 02_mailu.yml
@@ -25,13 +24,17 @@
       - >
           (
             mail_host_reachability is defined and
-            (mail_host_reachability.status | default(0) | int) != 200
+            (mail_host_reachability.status | default(0) | int)
+              not in mailu_valid_status_codes
           )
           or
           (
             (users['no-reply'].tokens | default({})).get('web-app-mailu', '') | length == 0
           )
-  when: "'web-app-mailu' in group_names"
+  vars:
+    mailu_valid_status_codes: "{{ applications | get_app_conf('web-app-mailu','server.status_codes.default') }}"
+  when:
+    - "'web-app-mailu' in group_names"
 
 - name: Setup emails via localhost
   include_role:

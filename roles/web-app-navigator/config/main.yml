@@ -1,8 +1,3 @@
-features:
-  matomo:   true
-  css:      true
-  desktop:  true
-  logout:   false
 server:
   csp:
     whitelist:
@@ -17,7 +12,7 @@ server:
         - https://cdnjs.cloudflare.com
       frame-src:
          # Makes sense that all of the website content is available in the navigator
-        - "{{ WEB_PROTOCOL }}://*.{{ DOMAIN_PRIMARY }}"
+        - "*.{{ DOMAIN_PRIMARY }}"
     flags:
       style-src-attr:
         unsafe-inline:  true
@@ -29,3 +24,15 @@ server:
     canonical:
       - "slides.{{ DOMAIN_PRIMARY }}"
     aliases: []
+docker:
+  services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
+    css:
+      enabled: true

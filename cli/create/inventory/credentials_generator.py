@@ -33,10 +33,6 @@ def _generate_credentials_snippet_for_app(
     if role_path is None:
         return None
 
-    schema_path = role_path / "schema" / "main.yml"
-    if not schema_path.exists():
-        return None
-
     cmd = [
         # Use current interpreter so module_utils + deps match the runtime
         sys.executable,

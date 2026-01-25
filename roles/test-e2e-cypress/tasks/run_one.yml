@@ -1,0 +1,100 @@
+- name: Define per-role paths
+  ansible.builtin.set_fact:
+    _cypress_src_dir: "{{ playbook_dir }}/roles/{{ application_id }}/tests/cypress"
+    _cypress_stage_dir: "{{ TEST_E2E_STAGE_BASE_DIR }}/{{ application_id }}"
+    _cypress_reports_dir: "{{ TEST_E2E_REPORTS_BASE_DIR }}/{{ application_id }}"
+
+- name: Assert required Cypress directory exists
+  ansible.builtin.stat:
+    path: "{{ _cypress_src_dir }}"
+  register: _src_stat
+
+- name: Fail if Cypress src dir missing (should not happen)
+  ansible.builtin.fail:
+    msg: "Missing Cypress src dir: {{ _cypress_src_dir }}"
+  when: not _src_stat.stat.exists
+
+- name: Assert required volume directory exists
+  ansible.builtin.stat:
+    path: "{{ _cypress_src_dir }}/volume"
+  register: _vol_stat
+
+- name: Fail if required volume dir missing
+  ansible.builtin.fail:
+    msg: "Missing required Cypress volume dir: {{ _cypress_src_dir }}/volume"
+  when: not _vol_stat.stat.exists
+
+# Clean stage dir for deterministic results
+- name: Recreate staging directory
+  ansible.builtin.file:
+    path: "{{ _cypress_stage_dir }}"
+    state: absent
+
+- name: Create staging directory
+  ansible.builtin.file:
+    path: "{{ _cypress_stage_dir }}"
+    state: directory
+    mode: "0755"
+
+# Copy the entire Cypress project from role files/
+- name: Copy Cypress project to staging directory
+  ansible.builtin.copy:
+    src: "{{ _cypress_src_dir }}/"
+    dest: "{{ _cypress_stage_dir }}/"
+    mode: preserve
+
+# Render env.j2 -> .env in staging directory
+- name: Render .env from env.j2 (robust)
+  ansible.builtin.copy:
+    dest: "{{ _cypress_stage_dir }}/.env"
+    mode: "0644"
+    content: "{{ lookup('template', _cypress_src_dir ~ '/env.j2') }}"
+  vars:
+    application_id: "{{ application_id }}"
+    domains: "{{ domains }}"
+    users: "{{ users }}"
+    applications: "{{ applications }}"
+
+# Optional wait until app is ready (uses domain resolution)
+- name: Wait until application is ready (HTTP 200/302)
+  ansible.builtin.uri:
+    url: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+    status_code: [200, 302]
+    validate_certs: false
+  register: _wait_result
+  retries: "{{ TEST_E2E_WAIT_RETRIES }}"
+  delay: "{{ TEST_E2E_WAIT_DELAY }}"
+  until: _wait_result.status in [200, 302]
+  when: TEST_E2E_WAIT_ENABLED | bool
+
+- name: Ensure reports dir exists
+  ansible.builtin.file:
+    path: "{{ _cypress_reports_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Run Cypress container
+  ansible.builtin.command: >
+    docker run --rm
+    --ipc=host
+    --shm-size=1g
+    --env-file {{ _cypress_stage_dir }}/.env
+    -v {{ _cypress_stage_dir }}:/e2e
+    -v {{ _cypress_stage_dir }}/volume:/volume
+    -v {{ _cypress_reports_dir }}:/reports
+    -w /e2e
+    {{ TEST_E2E_IMAGE }}
+  register: _cypress_run
+  changed_when: false
+  failed_when: false
+
+- name: Print Cypress output (on failure)
+  ansible.builtin.debug:
+    var: _cypress_run.stdout
+  when: _cypress_run.rc != 0
+  changed_when: false
+
+- name: Record failure
+  ansible.builtin.set_fact:
+    _cypress_failures: "{{ (_cypress_failures | default([])) + [application_id] }}"
+  when: _cypress_run.rc != 0

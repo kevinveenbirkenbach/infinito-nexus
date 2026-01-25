@@ -1,6 +1,5 @@
 # General 
 application_id:               "web-app-listmonk"
-database_type:                "postgres"
 container_port:               "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.port') }}"
 
 # Listmonk
@@ -15,9 +14,12 @@ LISTMONK_PUBLIC_API_ENABLED:  "{{ applications | get_app_conf(application_id, 'p
 LISTMONK_USER_SEND:           "newsletter"
 LISTMONK_USER_BOUNCE:         "bounce"
 
+LISTMONK_EXEC_DATABASE:       "docker exec -i {{ database_container }} psql -U {{ database_username }} -d {{ database_name }}"
+LISTMONK_RUN:                 "docker compose run -T --rm application"
+
 LISTMONK_SETTINGS:
   - key: "app.root_url"
-    value: '"{{ domains | get_url(application_id, WEB_PROTOCOL) }}"'
+    value: "\"{{ lookup(\"tls_resolve\", application_id, want=\"url.base\") }}\""
 
   - key: "app.notify_emails"
     value: "{{ [ users.administrator.email ] | to_json }}"
@@ -31,7 +33,7 @@ LISTMONK_SETTINGS:
          "provider_url": OIDC.CLIENT.ISSUER_URL,
          "client_secret": OIDC.CLIENT.SECRET
       } | to_json }}
-    when: applications | get_app_conf(application_id, 'features.oidc', False)
+    when: applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False)
 
   # hCaptcha toggles and credentials
   - key: "security.enable_captcha"

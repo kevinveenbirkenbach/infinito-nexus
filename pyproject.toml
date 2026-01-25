@@ -20,6 +20,7 @@ dependencies = [
   "tld",
   "passlib",
   "requests",
+  "humanfriendly",
 ]
 
 [project.optional-dependencies]

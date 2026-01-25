@@ -1,7 +1,7 @@
 ---
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     docker_compose_flush_handlers: true
 
@@ -30,7 +30,7 @@
       /app/gitea/gitea admin user create \
         --admin \
         --username "{{ users.administrator.username }}" \
-        --password "{{ users.administrator.password }}" \
+        --password {{ users.administrator.password | quote }} \
         --email    "{{ users.administrator.email }}" \
         -c {{ GITEA_CONFIG }}
   args:
@@ -49,7 +49,7 @@
   until: gitea_ready.status == 200
   retries: 20
   delay: 5
-  when: applications | get_app_conf(application_id, 'features.oidc', False) or applications | get_app_conf(application_id, 'features.ldap', False)
+  when: applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) or ( GITEA_LDAP_ENABLED | bool )
 
 - name: Execute Setup Routines
   include_tasks: 02_setup.yml

@@ -22,20 +22,23 @@ class TestUniversalLogoutSetting(unittest.TestCase):
                     errors.append(f"YAML parse error in '{file_path}': {e}")
                     continue
 
-            features = {}
+            docker = {}
             if data is not None:
-                features = data.get("features", {})
+                docker = data.get("docker", {})
 
-            if "logout" not in features:
+            services = docker.get("services", {})
+            logout = services.get("logout", {})
+
+            if "enabled" not in logout:
                 errors.append(
-                    f"Missing 'logout' setting in features of '{file_path}'. "
-                    "You must explicitly set 'logout' to true or false for this app."
+                    f"Missing 'docker.services.logout.enabled' setting in '{file_path}'. "
+                    "You must explicitly set it to true or false for this app."
                 )
             else:
-                val = features["logout"]
+                val = logout["enabled"]
                 if not isinstance(val, bool):
                     errors.append(
-                        f"The 'logout' setting in '{file_path}' must be boolean true or false, "
+                        f"The 'docker.services.logout.enabled' setting in '{file_path}' must be boolean true or false, "
                         f"but found: {val} (type {type(val).__name__})"
                     )
 

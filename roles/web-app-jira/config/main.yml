@@ -2,7 +2,20 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
+    logout:
+      enabled: true
+
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled:      true
     jira:
       image:            atlassian/jira-software
@@ -12,16 +25,10 @@ docker:
       mem_reservation:  "4g"
       mem_limit:        "6g"
       pids_limit:       2048
+    css:
+      enabled: true
   volumes:
     data:           "jira_data"
-features:
-  matomo:           true
-  css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
-  oidc:             false  # Not enabled for demo version
-  ldap:             false  # Not enabled for demo version
 server:
   csp:
     whitelist:      {}

@@ -1,0 +1,24 @@
+galaxy_info:
+  author: Kevin Veen-Birchenbach
+  description: Self-signed TLS provider for sys-front-tls (SAN aware). Generates and stores self-signed certificates and exposes lookup('tls_resolve', application_id, want='files.cert')/lookup('tls_resolve', application_id, want='files.key') facts for Nginx.
+  license: Infinito.Nexus Community License (Non-Commercial)
+  license_url: https://s.infinito.nexus/license
+  company: 'Kevin Veen-Birchenbach
+    Consulting & Coaching Solutions
+    https://www.veen.world'
+  galaxy_tags:
+  - nginx
+  - tls
+  - ssl
+  - self_signed
+  - certificates
+  - openssl
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://s.infinito.nexus/code/tree/main/roles/sys-front-tls-selfsigned
+  min_ansible_version: '2.9'
+  platforms:
+  - name: Any
+    versions:
+    - all
+  lifecycle: beta

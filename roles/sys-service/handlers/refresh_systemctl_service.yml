@@ -49,8 +49,8 @@
 - name: "Diagnostics on failure (rc != 0)"
   when:
     - not (system_service_suppress_flush | bool)
-    - (system_service_result.stdout | default('')) not in ['success', '']
-      or (system_service_exec_status.stdout | default('')) not in ['0', '']
+    - (system_service_result.stdout | default('') | trim) not in ['success', '']
+      or (system_service_exec_status.stdout | default('') | trim) not in ['0', '']
   block:
     - name: "systemctl status (diagnostics)"
       ansible.builtin.command:

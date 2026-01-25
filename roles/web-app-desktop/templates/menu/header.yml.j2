@@ -17,7 +17,7 @@
       description: Reload the application
       icon:
         class: fa-solid fa-rotate-right
-      url:   "{{ domains | get_url('web-app-desktop', WEB_PROTOCOL) }}"
+      url:   "{{ lookup('tls_resolve', 'web-app-desktop', want='url.base') }}"
 
 {% if DESKTOP_OIDC_ENABLED | bool %}
 

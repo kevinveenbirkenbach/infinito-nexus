@@ -1,17 +1,16 @@
 # General
 application_id:                 "web-app-pretix"
-database_type:                  "postgres"
 container_port:                 80
 container_hostname:             "{{ domains | get_domain(application_id) }}"
 
 # Pretix
 
 ## URLs
-PRETIX_URL:                     "{{ domains | get_url(application_id, WEB_PROTOCOL) }}"
+PRETIX_URL:                     "{{ lookup('tls_resolve', application_id, want='url.base') }}"
 PRETIX_HOSTNAME:                "{{ container_hostname }}"
 
 ## OIDC (mirrors GitLab’s pattern)
-PRETIX_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'features.oidc') }}"
+PRETIX_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 PRETIX_OIDC_LABEL:              "{{ OIDC.BUTTON_TEXT }}"
 PRETIX_OIDC_CLIENT_ID:          "{{ OIDC.CLIENT.ID }}"
 PRETIX_OIDC_CLIENT_SECRET:      "{{ OIDC.CLIENT.SECRET }}"

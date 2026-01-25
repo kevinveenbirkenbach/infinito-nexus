@@ -1,7 +1,20 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
+    logout:
+      enabled: true
+
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled:  true
     redis:
       backup:
@@ -12,17 +25,11 @@ docker:
       name:     bookwyrm
     worker:
       enabled:  true
+    css:
+      enabled: true
   volumes:
     data:       "bookwyrm_data"
     media:      "bookwyrm_media"
-features:
-  matomo:           true
-  css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
-  oidc:             false
-  ldap:             false
 server:
   csp:
     whitelist: {}

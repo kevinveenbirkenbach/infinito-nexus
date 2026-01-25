@@ -49,4 +49,4 @@ With this role, you get a production-ready CRM environment that plugs into your 
 Developed and maintained by **Kevin Veen-Birkenbach**.  
 Consulting & Coaching Solutions: [veen.world](https://www.veen.world) 🌟  
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code) 📂  
-License: [Infinito.Nexus NonCommercial License](https://s.infinito.nexus/license) ⚖️  
+License: [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license) ⚖️  

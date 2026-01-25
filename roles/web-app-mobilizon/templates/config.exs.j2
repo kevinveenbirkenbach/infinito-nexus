@@ -255,7 +255,7 @@ config :mobilizon, Mobilizon.Service.FrontEndAnalytics.Sentry,
       System.get_env("MOBILIZON_ERROR_REPORTING_SENTRY_HOST", "") |> String.split(" ", trim: true)
   ]
 
-{% if applications | get_app_conf(application_id, 'features.oidc', False) %}
+{% if applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) %}
 config :ueberauth,
        Ueberauth,
        providers: [

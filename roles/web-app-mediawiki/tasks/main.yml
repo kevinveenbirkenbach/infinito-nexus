@@ -1,21 +1,39 @@
 ---
 - name: "load docker, db and proxy for '{{ application_id }}'"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers: false
 
 - name: "Load install procedures for '{{ application_id }}''"
-  include_tasks: 01_install.yml
+  include_tasks: 01_configuration.yml
+
+- name: "flush handlers for '{{ application_id }}' after installation finished"
+  meta: flush_handlers
+
+- name: "MEDIAWIKI | Wait until container exists"
+  ansible.builtin.command: "docker inspect {{ MEDIAWIKI_CONTAINER }}"
+  register: _mw_exists
+  retries: 20
+  delay: 3
+  until: _mw_exists.rc == 0
+  changed_when: false
 
 - name: "Load extensions procedures for '{{ application_id }}''"
   include_tasks: "02_extensions.yml"
   when: MEDIAWIKI_OIDC_ENABLED | bool
 
-- name: "flush handlers for '{{ application_id }}' after preparation finished"
-  meta: flush_handlers
+- name: "Load update procedures for '{{ application_id }}''"
+  include_tasks: 03_install.yml
+  when: >-
+      {{
+        (mediawiki_config_render.changed | default(false)) or
+        (_install_results.changed | default(false)) or
+        (_ext_composer.changed | default(false)) or
+        (_vendor.changed | default(false))
+      }}
 
 - name: "Load admin setup procedures for '{{ application_id }}''"
-  include_tasks: 03_admin.yml
+  include_tasks: 04_admin.yml
 
 

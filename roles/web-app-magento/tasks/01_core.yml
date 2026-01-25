@@ -1,6 +1,6 @@
 - name: "load docker, db/redis/proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     docker_compose_flush_handlers: true
 

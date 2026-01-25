@@ -24,12 +24,12 @@
       cd {{ SHOPWARE_ROOT }}
       php bin/console user:create "{{ users.administrator.username }}" \
         --admin \
-        --password="{{ users.administrator.password }}" \
+        --password={{ users.administrator.password | quote }} \
         --firstName="{{ users.administrator.username }}" \
         --lastName="{{ DOMAIN_PRIMARY | lower }}" \
         --email="{{ users.administrator.email }}" || true
       php bin/console user:change-password "{{ users.administrator.username }}" \
-        --password="{{ users.administrator.password }}" || true
+        --password={{ users.administrator.password | quote }} || true
       php bin/console user:update "{{ users.administrator.username }}" \
         --email="{{ users.administrator.email }}" 2>/dev/null || true
     '

@@ -5,3 +5,11 @@
     state:  restarted
     enabled: yes
   listen: docker restart
+
+- name: Ensure Docker-In-Docker DNS works
+  ansible.builtin.script: "{{ role_path }}/files/test-dns.sh"
+  listen: docker restart
+  run_once: true
+  when:
+    - DOCKER_IN_CONTAINER | bool
+    - MODE_DEBUG | bool

@@ -21,7 +21,7 @@
     db: "{{ database_name }}"
     login_user: "{{ database_username }}"
     login_password: "{{ database_password }}"
-    login_host: "{{ DOCKER_REACH_HOST }}"
+    login_host: "{{ database_reach_host }}"
     login_port: "{{ database_port }}"
     query: |
       UPDATE public.plugin

@@ -17,3 +17,11 @@
     dest: "{{ BBB_DOCKER_COMPOSE_FILE_FINAL }}"
   notify:
     - docker compose up
+
+- name: Prebuild etherpad image
+  # On local testing environment errors exist if you don't prebuild
+  # @see https://chatgpt.com/share/6971f56e-bdf0-800f-8582-d1b59d6c67db
+  command:
+    cmd: docker compose build etherpad
+    chdir: "{{ docker_compose.directories.instance }}"
+  when: RUNTIME == 'dev'

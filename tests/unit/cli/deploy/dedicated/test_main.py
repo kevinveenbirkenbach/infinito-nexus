@@ -19,8 +19,10 @@ class TestDedicatedMainParser(unittest.TestCase):
         self.assertIn("skip_build", opts)
         self.assertIn("id", opts)
         self.assertIn("verbose", opts)
-        self.assertIn("logs", opts)
         self.assertIn("diff", opts)
+
+        # Removed in the refactor
+        self.assertNotIn("logs", opts)
 
 
 if __name__ == "__main__":

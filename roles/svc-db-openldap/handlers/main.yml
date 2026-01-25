@@ -1,40 +1,67 @@
-- name: Load memberof module from file in OpenLDAP container
-  shell: >
-    docker exec -i {{ OPENLDAP_CONTAINER }} ldapmodify -Y EXTERNAL -H ldapi:/// -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/01_member_of_configuration.ldif' ] | path_join }}"
+- name: Load memberof module in OpenLDAP (cn=config via EXTERNAL)
+  ansible.builtin.shell: >-
+    docker exec -i {{ OPENLDAP_CONTAINER }}
+    ldapmodify -Q -Y EXTERNAL -H {{ OPENLDAP_CONFIG_URI }}
+    -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/01_member_of_configuration.ldif'] | path_join }}"
   listen:
     - "Import configuration LDIF files"
-  # @todo Remove the following ignore errors when setting up a new server
-  # Just here because debugging would take to much time
-  ignore_errors: true
+  register: r
+  failed_when: >-
+    r.rc != 0 and (
+      "Type or value exists" not in (r.stderr | default('')) and
+      "already exists" not in (r.stderr | default('')) and
+      "Duplicate value" not in (r.stderr | default('')) and
+      "Duplicate attribute value" not in (r.stderr | default(''))
+    )
 
-- name: Refint Module Activation for OpenLDAP
-  shell: >
-    docker exec -i {{ OPENLDAP_CONTAINER }} ldapadd -Y EXTERNAL -H ldapi:/// -f "{{ [ OPENLDAP_LDIF_PATH_DOCKER, 'configuration/02_member_of_configuration.ldif' ] | path_join }}"
+- name: Load refint module in OpenLDAP (cn=config via EXTERNAL)
+  ansible.builtin.shell: >-
+    docker exec -i {{ OPENLDAP_CONTAINER }}
+    ldapmodify -Q -Y EXTERNAL -H {{ OPENLDAP_CONFIG_URI }}
+    -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/04_refint_module.ldif'] | path_join }}"
   listen:
     - "Import configuration LDIF files"
-  register: ldapadd_result
-  failed_when: ldapadd_result.rc not in [0, 68]
-  # @todo Remove the following ignore errors when setting up a new server
-  # Just here because debugging would take to much time
-  ignore_errors: true
+  register: r
+  failed_when: >-
+    r.rc != 0 and (
+      "Type or value exists" not in (r.stderr | default('')) and
+      "already exists" not in (r.stderr | default('')) and
+      "Duplicate value" not in (r.stderr | default('')) and
+      "Duplicate attribute value" not in (r.stderr | default(''))
+    )
 
-- name: Refint Overlay Configuration for OpenLDAP
-  shell: >
-    docker exec -i {{ OPENLDAP_CONTAINER }} ldapmodify -Y EXTERNAL -H ldapi:/// -f "{{ [ OPENLDAP_LDIF_PATH_DOCKER, 'configuration/03_member_of_configuration.ldif' ] | path_join }}"
+- name: Add memberof overlay (cn=config via EXTERNAL)
+  ansible.builtin.shell: >-
+    docker exec -i {{ OPENLDAP_CONTAINER }}
+    ldapadd -Q -Y EXTERNAL -H {{ OPENLDAP_CONFIG_URI }}
+    -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/02_member_of_configuration.ldif'] | path_join }}"
   listen:
     - "Import configuration LDIF files"
-  register: ldapadd_result
-  failed_when: ldapadd_result.rc not in [0, 68]
-  # @todo Remove the following ignore errors when setting up a new server
-  # Just here because debugging would take to much time
-  ignore_errors: true
+  register: r
+  failed_when: r.rc not in [0, 68]
 
-- name: "Import users, groups, etc. to LDAP"
-  shell: >
-    docker exec -i {{ OPENLDAP_CONTAINER }} ldapadd -x -D "{{ LDAP.DN.ADMINISTRATOR.DATA }}" -w "{{ LDAP.BIND_CREDENTIAL }}" -c -f "{{ [ OPENLDAP_LDIF_PATH_DOCKER, 'groups', (item | basename | regex_replace('\.j2$', '')) ] | path_join }}"
-  register: ldapadd_result
-  changed_when: "'adding new entry' in ldapadd_result.stdout"
-  failed_when: ldapadd_result.rc not in [0, 20, 68, 65]
+- name: Add refint overlay (cn=config via EXTERNAL)
+  ansible.builtin.shell: >-
+    docker exec -i {{ OPENLDAP_CONTAINER }}
+    ldapadd -Q -Y EXTERNAL -H {{ OPENLDAP_CONFIG_URI }}
+    -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'configuration/03_member_of_configuration.ldif'] | path_join }}"
+  listen:
+    - "Import configuration LDIF files"
+  register: r
+  failed_when: r.rc not in [0, 68]
+
+- name: Import users, groups, etc. to LDAP (data tree)
+  ansible.builtin.shell: >-
+    docker exec -i {{ OPENLDAP_CONTAINER }} ldapadd -x
+    -D "{{ OPENLDAP_BIND_DN }}"
+    -w "{{ OPENLDAP_BIND_PW }}"
+    -c
+    -f "{{ [OPENLDAP_LDIF_PATH_DOCKER, 'groups', (item | basename | regex_replace('\.j2$', ''))] | path_join }}"
   listen:
     - "Import groups LDIF files"
+  register: ldapadd_result
+  changed_when: "'adding new entry' in (ldapadd_result.stdout | default(''))"
+  failed_when: ldapadd_result.rc not in [0, 20, 68, 65]
   loop: "{{ query('fileglob', role_path ~ '/templates/ldif/groups/*.j2') | sort }}"
+  loop_control:
+    label: "{{ item | basename }}"

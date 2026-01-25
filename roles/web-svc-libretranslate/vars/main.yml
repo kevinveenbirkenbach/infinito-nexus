@@ -1,2 +1,1 @@
 application_id: web-svc-libretranslate # ID of the application
-database_type:  0                    # Database type [postgres, mariadb]

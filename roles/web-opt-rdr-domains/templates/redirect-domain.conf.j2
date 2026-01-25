@@ -1,8 +1,7 @@
 server {
 
-
   server_name {{ domain }};
-  {% include 'roles/sys-svc-letsencrypt/templates/ssl_header.j2' %}
+  {% include 'roles/sys-front-tls/templates/nginx_ssl_header.j2' %}
 
   {% if web_opt_rdr_domains_logout_enabled | bool %}
   {# 
@@ -12,6 +11,6 @@ server {
   {% include 'roles/web-svc-logout/templates/logout-proxy.conf.j2' %}
   {% endif %}
   location / {
-    return 301 {{ WEB_PROTOCOL }}://{{ target }}$request_uri;
+    return 301 {{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ target }}$request_uri;
   }
 }

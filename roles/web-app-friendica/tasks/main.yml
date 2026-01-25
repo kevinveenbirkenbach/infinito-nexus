@@ -1,13 +1,13 @@
 ---
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
-    name: sys-stk-full-stateful
+    name: sys-stk-full
   vars:
     docker_compose_flush_handlers: false
 
 - name: Integrate LDAP
   include_tasks: 01_ldap.yml
-  when: applications | get_app_conf(application_id, 'features.ldap', False)
+  when: applications | get_app_conf(application_id, 'docker.services.ldap.enabled')
 
 # General
 - name: "flush handlers to ensure that '{{ friendica_container }}' is up before executing container tasks"

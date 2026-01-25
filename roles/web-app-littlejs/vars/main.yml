@@ -10,7 +10,7 @@ LITTLEJS_TITLE:             "{{ LITTLEJS_HEADLINE }} – {{ DOMAIN_PRIMARY | upp
 # Base repository URL for LittleJS
 LITTLEJS_REPOSITORY_BASE:   "https://github.com/KilledByAPixel/LittleJS"
 
-# Relative path where sys-stk-full-stateless checks out the repo
+# Relative path where sys-stk-full checks out the repo
 LITTLEJS_APP_REL:           "services/repository"
 LITTLEJS_INDEX_HOST_ABS:    "{{ [ docker_compose.directories.volumes, 'index.html' ] | path_join }}"
 LITTLEJS_INDEX_HOST_REL:    "volumes/index.html"

@@ -1,7 +1,20 @@
 credentials: {}
 docker:
   services:
+    oidc:
+      enabled: false
+      shared: false
+    logout:
+      enabled: true
+
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     database:
+      shared: true
+      type: "postgres"
       enabled:      true
     confluence:
       image:            atlassian/confluence
@@ -11,16 +24,10 @@ docker:
       mem_reservation:  "6g"
       mem_limit:        "8g"
       pids_limit:       2048
+    css:
+      enabled: true
   volumes:
     data:           "confluence_data"
-features:
-  matomo:           true
-  css:              true
-  desktop:          true
-  central_database: true
-  logout:           true
-  oidc:             false # Not enabled for demo version
-  ldap:             false # Not enabled for demo version
 server:
   status_codes:
     default: 302

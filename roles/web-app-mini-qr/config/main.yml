@@ -1,16 +1,21 @@
 docker:
   services:
+    logout:
+      enabled: false
+      shared: false
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled:  false
     database:
       enabled:  false
-features:
-  matomo:       true
-  css:          true
-  desktop:      true
-  logout:       false
+    css:
+      enabled: true
 server:
   csp:
     whitelist:

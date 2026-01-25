@@ -8,27 +8,34 @@ docker:
     front:      "funkwhale/front"
     typesense:  "typesense/typesense"
   services:
+    logout:
+      enabled: true
+    ldap:
+      enabled: true
+      shared: true
+    desktop:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
     redis:
       backup:
         disabled: true
       enabled: true
     database:
+      shared: true
+      type: "postgres"
       enabled: true
-    oauth2_proxy:
+    oauth2:
       origin:
         host: "front"
         port: "80"
       acl:
         blacklist:
           - "/login"
-features:
-  matomo:             true
-  css:                false
-  desktop:            true
-  ldap:               true
-  central_database:   true
-  oauth2:             false # Doesn't make sense to activate it atm, because login is possible on homepage
-  logout:             true
+      enabled: false
+    css:
+      enabled: false
 server:
   domains:
     canonical:

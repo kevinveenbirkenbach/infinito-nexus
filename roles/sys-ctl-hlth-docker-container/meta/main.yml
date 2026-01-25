@@ -2,7 +2,7 @@ galaxy_info:
   author: Kevin Veen-Birkenbach
   description: Checks Docker containers for unhealthy or exited states and alerts on any issues.
   company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
-  license: Infinito.Nexus NonCommercial License
+  license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   min_ansible_version: '2.9'
   platforms:
