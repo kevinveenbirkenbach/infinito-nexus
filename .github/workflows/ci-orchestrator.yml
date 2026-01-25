@@ -82,17 +82,16 @@ jobs:
     uses: ./.github/workflows/test-deploy-server.yml
     with:
       distros: ${{ inputs.distros }}
-  
-  # The following test are deactivated, because they aren't required to setup the MVP
-  #
+
   # Priority B
-  # test-deploy-universal:
-  #   needs:
-  #     - test-dns
-  #     - test-deploy-server
-  #   uses: ./.github/workflows/test-deploy-universal.yml
-  #   with:
-  #     distros: ${{ inputs.distros }}
+  test-deploy-universal:
+    needs:
+      - test-dns
+      - test-deploy-server
+    uses: ./.github/workflows/test-deploy-universal.yml
+    with:
+      distros: ${{ inputs.distros }}
+  
   # Priority C
   # test-deploy-workstation:
   #   needs:
@@ -122,7 +121,7 @@ jobs:
   done:
     needs:
       - test-deploy-server
-    # - test-deploy-universal
+      - test-deploy-universal
     # - test-deploy-workstation
       - test-install-gate
     runs-on: ubuntu-latest
