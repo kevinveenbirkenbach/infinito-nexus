@@ -36,9 +36,9 @@ docker:
       type: "mariadb"
       enabled: true
     snipe-it:
-      version:  "latest"
+      version:  "latest-alpine"
       name:     "snipe-it"
-      image:    "grokability/snipe-it"
+      image:    "snipe/snipe-it"
     oauth2:
       enabled: true
       origin:
