@@ -77,11 +77,13 @@ jobs:
 
       - name: Deploy app
         shell: bash
+        env:
+          APP: ${{ matrix.app }}
         run: |
           set -euo pipefail
           export TEST_DEPLOY_TYPE="workstation"
           export DISTROS="${DISTROS}"
-          export APP="${{ matrix.app }}"
+          export APP="${APP}"
           make ci-deploy-app
 
       - name: Show last 200 log lines on failure
