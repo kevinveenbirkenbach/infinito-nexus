@@ -117,6 +117,7 @@ class TestFileHasContentModule(unittest.TestCase):
         try:
             os.remove(missing)
         except FileNotFoundError:
+            # If the file is already absent, that's the state this test requires.
             pass
 
         payload = self._run_expect_fail(missing)
