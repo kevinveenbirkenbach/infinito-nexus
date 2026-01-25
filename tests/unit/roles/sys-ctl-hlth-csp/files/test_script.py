@@ -1,9 +1,10 @@
+# tests/unit/roles/sys-ctl-hlth-csp/files/test_script.py
 from __future__ import annotations
 
-import unittest
-from unittest.mock import patch, MagicMock
 import sys
+import unittest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 # add role files directory to PYTHONPATH
 ROLE_FILES = Path(__file__).resolve().parents[5] / "roles/sys-ctl-hlth-csp/files"
@@ -12,7 +13,7 @@ sys.path.insert(0, str(ROLE_FILES))
 import script  # noqa: E402
 
 
-class TestExtractDomains(unittest.TestCase):
+class TestExtractDomainsFromFilenames(unittest.TestCase):
     @patch("script.os.listdir")
     def test_extract_domains_filters_valid_conf_domains(
         self, mock_listdir: MagicMock
@@ -29,7 +30,9 @@ class TestExtractDomains(unittest.TestCase):
             "sub.domain.co.uk.conf",
         ]
 
-        domains = script.extract_domains("/etc/nginx/conf.d/http/servers/")
+        domains = script.extract_domains_from_filenames(
+            "/etc/nginx/conf.d/http/servers/"
+        )
         self.assertIsInstance(domains, list)
 
         # valid: must match ^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\.conf$
@@ -49,15 +52,74 @@ class TestExtractDomains(unittest.TestCase):
     def test_extract_domains_returns_none_when_directory_missing(
         self, _mock_listdir: MagicMock
     ) -> None:
-        domains = script.extract_domains("/missing")
+        domains = script.extract_domains_from_filenames("/missing")
         self.assertIsNone(domains)
+
+
+class TestDetectSchemeFromConf(unittest.TestCase):
+    def test_detects_https_via_443(self) -> None:
+        with patch("pathlib.Path.read_text", return_value="listen 443 ssl;"):
+            self.assertEqual(script.detect_scheme_from_conf(Path("x.conf")), "https")
+
+    def test_detects_https_via_ssl_flag(self) -> None:
+        with patch("pathlib.Path.read_text", return_value="listen 8443 ssl;"):
+            self.assertEqual(script.detect_scheme_from_conf(Path("x.conf")), "https")
+
+    def test_detects_http_via_80(self) -> None:
+        with patch("pathlib.Path.read_text", return_value="listen 80;"):
+            self.assertEqual(script.detect_scheme_from_conf(Path("x.conf")), "http")
+
+    def test_detects_none_when_no_listen_lines(self) -> None:
+        with patch("pathlib.Path.read_text", return_value="server_name example.com;"):
+            self.assertIsNone(script.detect_scheme_from_conf(Path("x.conf")))
+
+    def test_ignores_comments_and_blank_lines(self) -> None:
+        conf = """
+# listen 443 ssl;
+    
+    # listen 80;
+    server_name example.com;
+"""
+        with patch("pathlib.Path.read_text", return_value=conf):
+            self.assertIsNone(script.detect_scheme_from_conf(Path("x.conf")))
+
+    def test_returns_none_when_file_missing(self) -> None:
+        with patch("pathlib.Path.read_text", side_effect=FileNotFoundError):
+            self.assertIsNone(script.detect_scheme_from_conf(Path("missing.conf")))
+
+
+class TestBuildUrlsFromNginxConfs(unittest.TestCase):
+    @patch("script.detect_scheme_from_conf")
+    def test_build_urls_https_preferred(self, mock_detect: MagicMock) -> None:
+        mock_detect.return_value = "https"
+
+        urls = script.build_urls_from_nginx_confs("/etc/nginx", ["example.com"])
+        self.assertEqual(urls, ["https://example.com/"])
+
+    @patch("script.detect_scheme_from_conf")
+    def test_build_urls_http_when_http_detected(self, mock_detect: MagicMock) -> None:
+        mock_detect.return_value = "http"
+
+        urls = script.build_urls_from_nginx_confs("/etc/nginx", ["example.com"])
+        self.assertEqual(urls, ["http://example.com/"])
+
+    @patch("script.detect_scheme_from_conf")
+    def test_build_urls_falls_back_to_http_and_warns(
+        self, mock_detect: MagicMock
+    ) -> None:
+        mock_detect.return_value = None
+
+        with patch("sys.stderr") as _stderr:
+            urls = script.build_urls_from_nginx_confs("/etc/nginx", ["example.com"])
+
+        self.assertEqual(urls, ["http://example.com/"])
 
 
 class TestBuildDockerCmd(unittest.TestCase):
     def test_build_docker_cmd_defaults_to_host_network(self) -> None:
         cmd = script.build_docker_cmd(
             image="ghcr.io/kevinveenbirkenbach/csp-checker:stable",
-            domains=["example.com"],
+            urls=["http://example.com/"],
             short_mode=False,
             ignore_network_blocks_from=[],
         )
@@ -66,12 +128,12 @@ class TestBuildDockerCmd(unittest.TestCase):
         self.assertIn("--network", cmd)
         self.assertIn("host", cmd)
         self.assertIn("ghcr.io/kevinveenbirkenbach/csp-checker:stable", cmd)
-        self.assertTrue(cmd[-1] == "example.com")
+        self.assertEqual(cmd[-1], "http://example.com/")
 
     def test_build_docker_cmd_can_disable_host_network(self) -> None:
         cmd = script.build_docker_cmd(
             image="img:tag",
-            domains=["example.com"],
+            urls=["http://example.com/"],
             short_mode=False,
             ignore_network_blocks_from=[],
             use_host_network=False,
@@ -84,16 +146,16 @@ class TestBuildDockerCmd(unittest.TestCase):
     def test_build_docker_cmd_short_mode(self) -> None:
         cmd = script.build_docker_cmd(
             image="img:tag",
-            domains=["example.com"],
+            urls=["http://example.com/"],
             short_mode=True,
             ignore_network_blocks_from=[],
         )
         self.assertIn("--short", cmd)
 
-    def test_build_docker_cmd_ignore_list_adds_separator_and_domains(self) -> None:
+    def test_build_docker_cmd_ignore_list_adds_separator_and_urls(self) -> None:
         cmd = script.build_docker_cmd(
             image="img:tag",
-            domains=["a.example", "b.example"],
+            urls=["http://a.example/", "https://b.example/"],
             short_mode=False,
             ignore_network_blocks_from=["pxscdn.com", "cdn.example.org"],
         )
@@ -104,7 +166,7 @@ class TestBuildDockerCmd(unittest.TestCase):
         self.assertEqual(cmd[idx + 1], "pxscdn.com")
         self.assertEqual(cmd[idx + 2], "cdn.example.org")
         self.assertEqual(cmd[idx + 3], "--")
-        self.assertEqual(cmd[idx + 4 :], ["a.example", "b.example"])
+        self.assertEqual(cmd[idx + 4 :], ["http://a.example/", "https://b.example/"])
 
 
 class TestRunChecker(unittest.TestCase):
@@ -119,7 +181,7 @@ class TestRunChecker(unittest.TestCase):
 
         rc = script.run_checker(
             image="img:tag",
-            domains=["example.com"],
+            urls=["http://example.com/"],
             short_mode=True,
             ignore_network_blocks_from=[],
             always_pull=True,
@@ -145,7 +207,7 @@ class TestRunChecker(unittest.TestCase):
 
         rc = script.run_checker(
             image="img:tag",
-            domains=["example.com"],
+            urls=["http://example.com/"],
             short_mode=False,
             ignore_network_blocks_from=[],
             always_pull=False,
@@ -161,7 +223,7 @@ class TestRunChecker(unittest.TestCase):
 
         rc = script.run_checker(
             image="img:tag",
-            domains=["example.com"],
+            urls=["http://example.com/"],
             short_mode=False,
             ignore_network_blocks_from=[],
             always_pull=False,
@@ -172,7 +234,7 @@ class TestRunChecker(unittest.TestCase):
 
 class TestMain(unittest.TestCase):
     @patch("script.run_checker")
-    @patch("script.extract_domains")
+    @patch("script.extract_domains_from_filenames")
     def test_main_exits_1_when_extract_domains_returns_none(
         self,
         mock_extract: MagicMock,
@@ -192,7 +254,7 @@ class TestMain(unittest.TestCase):
         mock_run_checker.assert_not_called()
 
     @patch("script.run_checker")
-    @patch("script.extract_domains")
+    @patch("script.extract_domains_from_filenames")
     def test_main_exits_0_when_no_domains_found(
         self,
         mock_extract: MagicMock,
@@ -212,13 +274,19 @@ class TestMain(unittest.TestCase):
         mock_run_checker.assert_not_called()
 
     @patch("script.run_checker")
-    @patch("script.extract_domains")
+    @patch("script.build_urls_from_nginx_confs")
+    @patch("script.extract_domains_from_filenames")
     def test_main_passes_defaults_and_exits_with_run_checker_rc(
         self,
         mock_extract: MagicMock,
+        mock_build_urls: MagicMock,
         mock_run_checker: MagicMock,
     ) -> None:
         mock_extract.return_value = ["example.com", "api.example.com"]
+        mock_build_urls.return_value = [
+            "http://example.com/",
+            "https://api.example.com/",
+        ]
         mock_run_checker.return_value = 5
 
         with patch.object(
@@ -244,7 +312,9 @@ class TestMain(unittest.TestCase):
         mock_run_checker.assert_called_once()
         kwargs = mock_run_checker.call_args.kwargs
         self.assertEqual(kwargs["image"], "img:tag")
-        self.assertEqual(kwargs["domains"], ["example.com", "api.example.com"])
+        self.assertEqual(
+            kwargs["urls"], ["http://example.com/", "https://api.example.com/"]
+        )
         self.assertTrue(kwargs["short_mode"])
         self.assertEqual(
             kwargs["ignore_network_blocks_from"], ["pxscdn.com", "cdn.example.org"]
@@ -253,13 +323,16 @@ class TestMain(unittest.TestCase):
         self.assertTrue(kwargs["use_host_network"])
 
     @patch("script.run_checker")
-    @patch("script.extract_domains")
+    @patch("script.build_urls_from_nginx_confs")
+    @patch("script.extract_domains_from_filenames")
     def test_main_no_host_network_flag_disables_host_network(
         self,
         mock_extract: MagicMock,
+        mock_build_urls: MagicMock,
         mock_run_checker: MagicMock,
     ) -> None:
         mock_extract.return_value = ["example.com"]
+        mock_build_urls.return_value = ["http://example.com/"]
         mock_run_checker.return_value = 0
 
         with patch.object(
@@ -281,6 +354,29 @@ class TestMain(unittest.TestCase):
 
         kwargs = mock_run_checker.call_args.kwargs
         self.assertFalse(kwargs["use_host_network"])
+
+    @patch("script.run_checker")
+    @patch("script.build_urls_from_nginx_confs")
+    @patch("script.extract_domains_from_filenames")
+    def test_main_exits_0_when_no_urls_built(
+        self,
+        mock_extract: MagicMock,
+        mock_build_urls: MagicMock,
+        mock_run_checker: MagicMock,
+    ) -> None:
+        mock_extract.return_value = ["example.com"]
+        mock_build_urls.return_value = []
+
+        with patch.object(
+            script.sys,
+            "argv",
+            ["script.py", "--nginx-config-dir", "/etc/nginx", "--image", "img:tag"],
+        ):
+            with self.assertRaises(SystemExit) as cm:
+                script.main()
+
+        self.assertEqual(cm.exception.code, 0)
+        mock_run_checker.assert_not_called()
 
 
 if __name__ == "__main__":

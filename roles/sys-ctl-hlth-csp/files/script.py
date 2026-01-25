@@ -5,27 +5,117 @@ import re
 import subprocess
 import sys
 import argparse
+from pathlib import Path
 
 
-def extract_domains(config_path: str) -> list[str] | None:
+DOMAIN_FROM_FILENAME_RE = re.compile(r"^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\.conf$")
+
+# Very small "listen" heuristics:
+# - treat as HTTPS if we see "listen ... 443" OR "listen ... ssl"
+# - treat as HTTP  if we see "listen ... 80"
+LISTEN_443_RE = re.compile(r"^\s*listen\s+[^;]*\b443\b", re.IGNORECASE)
+LISTEN_80_RE = re.compile(r"^\s*listen\s+[^;]*\b80\b", re.IGNORECASE)
+LISTEN_SSL_RE = re.compile(r"^\s*listen\s+[^;]*\bssl\b", re.IGNORECASE)
+
+
+def extract_domains_from_filenames(config_path: str) -> list[str] | None:
     """
-    Extracts domain names from .conf filenames in the given directory.
+    Extract domain names from .conf filenames in the given directory.
+
+    Example:
+      baserow.infinito.example.conf -> baserow.infinito.example
     """
-    domain_pattern = re.compile(r"^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\.conf$")
     try:
-        return [
-            fn[:-5]
-            for fn in os.listdir(config_path)
-            if fn.endswith(".conf") and domain_pattern.match(fn)
-        ]
+        out: list[str] = []
+        for fn in os.listdir(config_path):
+            if not fn.endswith(".conf"):
+                continue
+            if not DOMAIN_FROM_FILENAME_RE.match(fn):
+                continue
+            out.append(fn[:-5])  # strip ".conf"
+        return out
     except FileNotFoundError:
         print(f"Directory {config_path} not found.", file=sys.stderr)
         return None
 
 
+def detect_scheme_from_conf(conf_path: Path) -> str | None:
+    """
+    Decide whether this conf listens on HTTP or HTTPS.
+
+    Rule:
+      - If HTTPS is present -> return "https"
+      - Else if HTTP present -> return "http"
+      - Else -> None (unknown)
+
+    Note:
+      This is intentionally simple and "best effort".
+    """
+    try:
+        text = conf_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except FileNotFoundError:
+        return None
+    except Exception as exc:
+        print(f"Failed to read {conf_path}: {exc}", file=sys.stderr)
+        return None
+
+    has_443 = False
+    has_80 = False
+    has_ssl = False
+
+    for line in text:
+        # ignore comments quickly
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if LISTEN_443_RE.search(line):
+            has_443 = True
+        if LISTEN_SSL_RE.search(line):
+            has_ssl = True
+        if LISTEN_80_RE.search(line):
+            has_80 = True
+
+    # Prefer HTTPS if present
+    if has_443 or has_ssl:
+        return "https"
+    if has_80:
+        return "http"
+    return None
+
+
+def build_urls_from_nginx_confs(config_path: str, domains: list[str]) -> list[str]:
+    """
+    Build full URLs (http:// or https://) for each domain by inspecting its .conf file.
+
+    Preference:
+      - If the conf indicates HTTPS -> https://domain/
+      - Else if HTTP -> http://domain/
+      - Else fallback to http://domain/ (conservative) but emit warning
+    """
+    base = Path(config_path)
+    urls: list[str] = []
+
+    for domain in domains:
+        conf = base / f"{domain}.conf"
+        scheme = detect_scheme_from_conf(conf)
+
+        if scheme is None:
+            # Fallback (you asked for "best to inspect conf"; but we must return a URL anyway)
+            print(
+                f"Warning: Could not detect scheme from {conf}. Falling back to http://{domain}/",
+                file=sys.stderr,
+            )
+            scheme = "http"
+
+        urls.append(f"{scheme}://{domain}/")
+
+    return urls
+
+
 def build_docker_cmd(
     image: str,
-    domains: list[str],
+    urls: list[str],
     short_mode: bool,
     ignore_network_blocks_from: list[str],
     use_host_network: bool = True,
@@ -49,13 +139,14 @@ def build_docker_cmd(
         cmd.extend(ignore_network_blocks_from)
         cmd.append("--")
 
-    cmd.extend(domains)
+    # URL-only mode: pass full URLs
+    cmd.extend(urls)
     return cmd
 
 
 def run_checker(
     image: str,
-    domains: list[str],
+    urls: list[str],
     short_mode: bool,
     ignore_network_blocks_from: list[str],
     always_pull: bool,
@@ -70,11 +161,12 @@ def run_checker(
 
     cmd = build_docker_cmd(
         image=image,
-        domains=domains,
+        urls=urls,
         short_mode=short_mode,
         ignore_network_blocks_from=ignore_network_blocks_from,
         use_host_network=use_host_network,
     )
+
     try:
         result = subprocess.run(cmd, check=False)
         return int(result.returncode)
@@ -88,7 +180,7 @@ def run_checker(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Extract domains from NGINX and run CSP checker (Docker) against them"
+        description="Extract NGINX domains and build URL(s) (http/https) from listen directives, then run CSP checker (Docker)."
     )
     parser.add_argument(
         "--nginx-config-dir",
@@ -98,7 +190,7 @@ def main() -> None:
     parser.add_argument(
         "--image",
         required=True,
-        help="Docker image to run (e.g. ghcr.io/kevinveenbirkenbach/csp-checker:latest)",
+        help="Docker image to run (e.g. ghcr.io/kevinveenbirkenbach/csp-checker:stable)",
     )
     parser.add_argument(
         "--always-pull",
@@ -126,7 +218,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    domains = extract_domains(args.nginx_config_dir)
+    domains = extract_domains_from_filenames(args.nginx_config_dir)
     if domains is None:
         sys.exit(1)
 
@@ -134,9 +226,14 @@ def main() -> None:
         print("No domains found to check.")
         sys.exit(0)
 
+    urls = build_urls_from_nginx_confs(args.nginx_config_dir, domains)
+    if not urls:
+        print("No URLs built to check.")
+        sys.exit(0)
+
     rc = run_checker(
         image=args.image,
-        domains=domains,
+        urls=urls,
         short_mode=bool(args.short),
         ignore_network_blocks_from=list(args.ignore_network_blocks_from or []),
         always_pull=bool(args.always_pull),
