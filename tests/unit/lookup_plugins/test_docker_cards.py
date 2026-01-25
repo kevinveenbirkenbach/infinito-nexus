@@ -49,7 +49,9 @@ class DummyTemplar:
 
     def __init__(self, variables):
         self._vars = variables
-        self._env = Environment(undefined=StrictUndefined, autoescape=select_autoescape())
+        self._env = Environment(
+            undefined=StrictUndefined, autoescape=select_autoescape()
+        )
         self._env.filters["bool"] = _ansible_bool
 
     def template(self, value):
