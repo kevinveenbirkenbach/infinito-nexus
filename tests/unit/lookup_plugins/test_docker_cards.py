@@ -5,7 +5,7 @@ import shutil
 import unittest
 
 from ansible.errors import AnsibleError
-from jinja2 import Environment, StrictUndefined
+from jinja2 import Environment, StrictUndefined, select_autoescape
 
 
 # Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-desktop role.
@@ -49,7 +49,7 @@ class DummyTemplar:
 
     def __init__(self, variables):
         self._vars = variables
-        self._env = Environment(undefined=StrictUndefined)
+        self._env = Environment(undefined=StrictUndefined, autoescape=select_autoescape())
         self._env.filters["bool"] = _ansible_bool
 
     def template(self, value):
