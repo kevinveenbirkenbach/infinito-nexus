@@ -15,5 +15,5 @@ galaxy_info:
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
   documentation: https://s.infinito.nexus/code/tree/main/roles/svc-db-memcached
-  lifecycle: alpha
+  lifecycle: pre-alpha
 dependencies: []
