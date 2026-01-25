@@ -30,7 +30,7 @@ def main():
     # Determine default roles_dir relative to this script: ../../.. -> roles
     script_dir = os.path.dirname(os.path.abspath(__file__))
     default_roles_dir = os.path.abspath(
-        os.path.join(script_dir, '..', '..', 'roles')
+        os.path.join(script_dir, '..', '..', '..', 'roles')
     )
     default_output = os.path.join(default_roles_dir, 'list.json')
 
