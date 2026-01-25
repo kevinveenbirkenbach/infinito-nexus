@@ -8,9 +8,9 @@
   until: snipeit_app_id.stdout | length > 0
   changed_when: false
 
-- name: "Wait until the Snipe-IT Login is available"
+- name: "Wait until the Snipe-IT Service is available"
   uri:
-    url: "{{ SNIPE_IT_URL }}/login"
+    url: "{{ SNIPE_IT_URL }}"
     method: GET
     return_content: no
     status_code: 200
@@ -23,7 +23,6 @@
 - name: Run Snipe-IT migrations (idempotent)
   shell: |
     docker-compose exec -T \
-      -u {{ SNIPE_IT_USER }} \
       -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
       -e XDG_CONFIG_HOME=/tmp \
       {{ SNIPE_IT_SERVICE }} \
@@ -39,11 +38,10 @@
 - name: Seed Snipe-IT database (optional, safe to rerun if seeder is idempotent)
   shell: |
     docker-compose exec -T \
-      -u {{ SNIPE_IT_USER }} \
       -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
       -e XDG_CONFIG_HOME=/tmp \
       {{ SNIPE_IT_SERVICE }} \
-      php artisan db:seed --force
+      php -d memory_limit=512M artisan db:seed --force
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   register: snipeit_seed

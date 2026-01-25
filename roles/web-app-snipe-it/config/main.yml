@@ -36,9 +36,13 @@ docker:
       type: "mariadb"
       enabled: true
     snipe-it:
-      version:  "latest-alpine"
-      name:     "snipe-it"
-      image:    "snipe/snipe-it"
+      version:          "latest-alpine"
+      name:             "snipe-it"
+      image:            "snipe/snipe-it"
+      cpus:             "1.0"
+      mem_reservation:  "256m"
+      mem_limit:        "2g"
+      pids_limit:       512
     oauth2:
       enabled: true
       origin:

@@ -4,7 +4,7 @@
 
 - name: "Wait until Snipe-IT settings row exists (settings table seeded)"
   shell: |
-    docker-compose exec -T -u {{ SNIPE_IT_USER }} {{ SNIPE_IT_SERVICE }} \
+    docker-compose exec -T {{ SNIPE_IT_SERVICE }} \
       php -r 'require "vendor/autoload.php"; $app=require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); if (!Illuminate\Support\Facades\Schema::hasTable("settings")) { echo "no\n"; exit(0); } echo \App\Models\Setting::query()->count() > 0 ? "yes\n" : "no\n";'
   args:
     chdir: "{{ docker_compose.directories.instance }}"
@@ -19,7 +19,7 @@
     docker-compose exec -T \
     -e APP_KEY='{{ SNIPE_IT_APP_KEY }}' \
     -e XDG_CONFIG_HOME=/tmp \
-    -u {{ SNIPE_IT_USER }} {{ SNIPE_IT_SERVICE }} \
+    {{ SNIPE_IT_SERVICE }} \
     sh -c 'php artisan tinker << "EOF"
     $s = \App\Models\Setting::getSettings();
     $s->ldap_enabled             = 1;
@@ -55,7 +55,6 @@
 - name: Encrypt & save LDAP bind password via Crypt + DB façade
   shell: |
     docker-compose exec -T \
-      -u {{ SNIPE_IT_USER }} \
       -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
       -e XDG_CONFIG_HOME=/tmp \
       {{ SNIPE_IT_SERVICE }} \
@@ -80,8 +79,7 @@
 
 - name: "Clear Laravel config & cache (inside container as {{ SNIPE_IT_USER }})"
   shell: |
-    docker-compose exec -T -u {{ SNIPE_IT_USER }} {{ SNIPE_IT_SERVICE }} php artisan config:clear
-    docker-compose exec -T -u {{ SNIPE_IT_USER }} {{ SNIPE_IT_SERVICE }} php artisan cache:clear
+    docker-compose exec -T {{ SNIPE_IT_SERVICE }} php artisan config:clear && php artisan cache:clear
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   notify: docker compose up 

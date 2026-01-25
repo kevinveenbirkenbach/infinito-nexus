@@ -66,10 +66,10 @@ applications:
           enabled: false
   web-app-keycloak:
     credentials:
-      administrator_password: administrator
+      administrator_password: "'$tr0ng€xampl3PW!"
   web-app-lam:
     credentials:
-      administrator_password: administrator
+      administrator_password: "'$tr0ng€xampl3PW!"
   web-app-phpmyadmin:
     docker:
       services:
