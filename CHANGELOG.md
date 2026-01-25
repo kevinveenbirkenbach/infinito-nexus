@@ -1,3 +1,19 @@
+## [0.12.0] - 2026-01-25
+
+* * Hardened CI/CD pipelines with retries and Git fallback for Ansible Galaxy collections
+* Unified ShellCheck execution via container for reproducible linting
+* Enforced secure secret handling across all roles (shell quoting, dotenv, sed safety)
+* Introduced `sed_escape` filter to prevent sed injection and config corruption
+* Implemented robust, idempotent PostgreSQL superuser password rotation
+* Improved Mailu and MariaDB user/password idempotency and CLI safety
+* Added optional Django admin bootstrap and secure `SECRET_KEY` handling for Baserow
+* Refactored TLS into a single, explicit resolution layer with SAN-aware certificates
+* Improved Keycloak reliability by handling noisy CLI output without jq
+* Fixed Discourse startup issues by enforcing `C.UTF-8` locale
+* Refactored CSP health checks to operate on full URLs derived from Nginx configs (**breaking change**)
+* Improved developer experience with cleaner CLI structure, scripts, and tests
+
+
 ## [0.11.0] - 2026-01-10
 
 * CI failures are easier to debug thanks to clear per-app logs and improved error reporting.
