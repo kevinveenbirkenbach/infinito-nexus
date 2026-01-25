@@ -79,7 +79,8 @@
 
 - name: "Clear Laravel config & cache (inside container as {{ SNIPE_IT_USER }})"
   shell: |
-    docker-compose exec -T {{ SNIPE_IT_SERVICE }} php artisan config:clear && php artisan cache:clear
+    docker-compose exec -T {{ SNIPE_IT_SERVICE }} php artisan config:clear
+    docker-compose exec -T {{ SNIPE_IT_SERVICE }} php artisan cache:clear
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   notify: docker compose up 
