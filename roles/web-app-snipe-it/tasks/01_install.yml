@@ -18,7 +18,6 @@
   retries: 30
   delay: 5
   until: snipeit_admin_check.status == 200
-  when: not ( SNIPE_IT_OAUTH2_ENABLED | bool )
 
 - name: Run Snipe-IT migrations (idempotent)
   shell: |
