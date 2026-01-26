@@ -1,86 +1,22 @@
 # @See https://raw.githubusercontent.com/snipe/snipe-it/master/app/Models/Setting.php
 ---
 
-
-- name: "Wait until Snipe-IT settings row exists (settings table seeded)"
-  shell: |
-    docker-compose exec -T {{ SNIPE_IT_SERVICE }} \
-      php -r 'require "vendor/autoload.php"; $app=require "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); if (!Illuminate\Support\Facades\Schema::hasTable("settings")) { echo "no\n"; exit(0); } echo \App\Models\Setting::query()->count() > 0 ? "yes\n" : "no\n";'
+- name: Configure Snipe-IT LDAP
+  ansible.builtin.script: ldap.sh
   args:
     chdir: "{{ docker_compose.directories.instance }}"
-  register: snipeit_settings_row
-  retries: 60
-  delay: 5
-  until: snipeit_settings_row.stdout is search("yes")
-  changed_when: false
-
-- name: "Set all LDAP settings via Laravel Setting model (inside container as {{ SNIPE_IT_USER }})"
-  shell: |
-    docker-compose exec -T \
-    -e APP_KEY='{{ SNIPE_IT_APP_KEY }}' \
-    -e XDG_CONFIG_HOME=/tmp \
-    {{ SNIPE_IT_SERVICE }} \
-    sh -c 'php artisan tinker << "EOF"
-    $s = \App\Models\Setting::getSettings();
-    $s->ldap_enabled             = 1;
-    $s->ldap_server              = "{{ LDAP.SERVER.URI }}";
-    $s->ldap_port                = {{ LDAP.SERVER.PORT }};
-    $s->ldap_uname               = "{{ LDAP.DN.ADMINISTRATOR.DATA }}";
-    $s->ldap_basedn              = "{{ LDAP.DN.OU.USERS }}";
-    $s->ldap_filter              = "&(objectClass=inetOrgPerson)";
-    $s->ldap_username_field      = "{{ LDAP.USER.ATTRIBUTES.ID }}";
-    $s->ldap_fname_field         = "{{ LDAP.USER.ATTRIBUTES.FIRSTNAME }}";
-    $s->ldap_lname_field         = "{{ LDAP.USER.ATTRIBUTES.SURNAME }}";
-    $s->ldap_auth_filter_query   = "uid=";
-    $s->ldap_version             = 3;
-    $s->ldap_pw_sync             = 0;
-    $s->is_ad                    = 0;
-    $s->ad_domain                = "";
-    $s->ldap_default_group       = "";
-    $s->ldap_email               = "{{ LDAP.USER.ATTRIBUTES.MAIL }}";
-    $s->custom_forgot_pass_url   = "{{ OIDC.CLIENT.RESET_CREDENTIALS }}";
-    $s->save();
-    EOF'
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  register: ldap_tinker
-  failed_when: >
-    ldap_tinker.stdout_lines is not defined
-    or ldap_tinker.stdout_lines[0] != '= true'
-  changed_when: >
-    ldap_tinker.stdout_lines is defined
-    and ldap_tinker.stdout_lines[0] == '= true'
-  notify: docker compose up
-
-- name: Encrypt & save LDAP bind password via Crypt + DB façade
-  shell: |
-    docker-compose exec -T \
-      -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
-      -e XDG_CONFIG_HOME=/tmp \
-      {{ SNIPE_IT_SERVICE }} \
-      php artisan tinker --execute="
-        use Illuminate\Support\Facades\Crypt;
-        use Illuminate\Support\Facades\DB;
-
-        /* encrypt the clear-text password */
-        \$encrypted = Crypt::encrypt('{{ LDAP.BIND_CREDENTIAL }}');
-
-        /* write it straight into settings.ldap_pword */
-        /* update the one and only row in `settings` */
-        DB::table('settings')->update([
-          'ldap_pword' => \$encrypted
-        ]);
-        echo 'Stored: ' . \$encrypted . PHP_EOL;
-      "
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  register: ldap_encrypt
-  failed_when: ldap_encrypt.rc != 0
-
-- name: "Clear Laravel config & cache (inside container as {{ SNIPE_IT_USER }})"
-  shell: |
-    docker-compose exec -T {{ SNIPE_IT_SERVICE }} php artisan config:clear
-    docker-compose exec -T {{ SNIPE_IT_SERVICE }} php artisan cache:clear
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  notify: docker compose up 
+  environment:
+    SNIPE_IT_SERVICE: "{{ SNIPE_IT_SERVICE }}"
+    APP_KEY: "{{ SNIPE_IT_APP_KEY }}"
+    LDAP_SERVER_URI: "{{ LDAP.SERVER.URI }}"
+    LDAP_SERVER_PORT: "{{ LDAP.SERVER.PORT }}"
+    LDAP_BIND_DN: "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+    LDAP_BIND_PASSWORD: "{{ LDAP.BIND_CREDENTIAL }}"
+    LDAP_BASEDN: "{{ LDAP.DN.OU.USERS }}"
+    LDAP_FILTER_USERS_ALL: "{{ LDAP.FILTERS.USERS.ALL }}"
+    LDAP_USER_ID_ATTR: "{{ LDAP.USER.ATTRIBUTES.ID }}"
+    LDAP_USER_FIRSTNAME_ATTR: "{{ LDAP.USER.ATTRIBUTES.FIRSTNAME }}"
+    LDAP_USER_SURNAME_ATTR: "{{ LDAP.USER.ATTRIBUTES.SURNAME }}"
+    LDAP_USER_MAIL_ATTR: "{{ LDAP.USER.ATTRIBUTES.MAIL }}"
+    OIDC_RESET_URL: "{{ OIDC.CLIENT.RESET_CREDENTIALS }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
