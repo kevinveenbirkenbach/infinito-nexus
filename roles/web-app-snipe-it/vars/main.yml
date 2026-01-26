@@ -16,3 +16,4 @@ SNIPE_IT_APP_KEY:   "{{ applications | get_app_conf(application_id, 'credentials
 
 # Authentification
 SNIPE_IT_LDAP_ENABLED:    "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+SNIPE_IT_TLS_ENABLED:         "{{ lookup('tls_resolve', application_id, want='enabled') | bool }}"
