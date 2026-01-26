@@ -9,7 +9,8 @@
 #   ./purge_entity.sh --wipe-data-only keycloak nextcloud
 #
 # What it does per stack:
-#   - Detects DB backend (postgres/mariadb) best effort
+#   - Detects DB backend (postgres/mariadb) best effort from stack env
+#   - If stack dir is missing: still tries BOTH backends by DB name (=stack name)
 #   - Without --wipe-data-only:
 #       * DROP DATABASE IF EXISTS
 #   - With --wipe-data-only:
@@ -77,6 +78,12 @@ run_no_stdin() {
 drop_postgres_db_best_effort() {
   local db_name="$1"
 
+  # Only attempt if container exists (best effort)
+  if ! docker ps --format '{{.Names}}' | grep -qx 'postgres'; then
+    warn "Postgres container 'postgres' not running — skipping Postgres DROP for '${db_name}'"
+    return 0
+  fi
+
   local admin_db="postgres"
   [[ "${db_name}" == "postgres" ]] && admin_db="template1"
 
@@ -98,6 +105,11 @@ SQL
 
 truncate_postgres_db_best_effort() {
   local db_name="$1"
+
+  if ! docker ps --format '{{.Names}}' | grep -qx 'postgres'; then
+    warn "Postgres container 'postgres' not running — skipping Postgres TRUNCATE for '${db_name}'"
+    return 0
+  fi
 
   log "Truncating all tables in Postgres database '${db_name}'..."
 
@@ -129,6 +141,12 @@ SQL
 drop_mariadb_db_best_effort() {
   local db_name="$1"
 
+  # Only attempt if container exists (best effort)
+  if ! docker ps --format '{{.Names}}' | grep -qx 'mariadb'; then
+    warn "MariaDB container 'mariadb' not running — skipping MariaDB DROP for '${db_name}'"
+    return 0
+  fi
+
   case "${db_name}" in
     mysql|information_schema|performance_schema|sys)
       warn "Refusing to drop MariaDB system database '${db_name}'"
@@ -138,14 +156,14 @@ drop_mariadb_db_best_effort() {
 
   local mariadb_env="/opt/docker/mariadb/.env/env"
   [[ ! -f "${mariadb_env}" ]] && {
-    warn "MariaDB env file not found — skipping DB drop"
+    warn "MariaDB env file not found (${mariadb_env}) — skipping MariaDB DROP"
     return 0
   }
 
   local root_pw
   root_pw="$(env_get "${mariadb_env}" MARIADB_ROOT_PASSWORD || true)"
   [[ -z "${root_pw}" ]] && {
-    warn "MARIADB_ROOT_PASSWORD not found — skipping DB drop"
+    warn "MARIADB_ROOT_PASSWORD not found — skipping MariaDB DROP"
     return 0
   }
 
@@ -164,16 +182,21 @@ drop_mariadb_db_best_effort() {
 truncate_mariadb_db_best_effort() {
   local db_name="$1"
 
+  if ! docker ps --format '{{.Names}}' | grep -qx 'mariadb'; then
+    warn "MariaDB container 'mariadb' not running — skipping MariaDB TRUNCATE for '${db_name}'"
+    return 0
+  fi
+
   local mariadb_env="/opt/docker/mariadb/.env/env"
   [[ ! -f "${mariadb_env}" ]] && {
-    warn "MariaDB env file not found — skipping truncate"
+    warn "MariaDB env file not found (${mariadb_env}) — skipping MariaDB TRUNCATE"
     return 0
   }
 
   local root_pw
   root_pw="$(env_get "${mariadb_env}" MARIADB_ROOT_PASSWORD || true)"
   [[ -z "${root_pw}" ]] && {
-    warn "MARIADB_ROOT_PASSWORD not found — skipping truncate"
+    warn "MARIADB_ROOT_PASSWORD not found — skipping MariaDB TRUNCATE"
     return 0
   }
 
@@ -208,6 +231,22 @@ truncate_mariadb_db_best_effort() {
 }
 
 # ---------------------------------------------------------------------------
+# Combined DB purge helpers (try BOTH backends)
+# ---------------------------------------------------------------------------
+
+purge_db_both_backends_best_effort() {
+  local db_name="$1"
+
+  if [[ "${WIPE_DATA_ONLY}" == "true" ]]; then
+    truncate_postgres_db_best_effort "${db_name}"
+    truncate_mariadb_db_best_effort "${db_name}"
+  else
+    drop_postgres_db_best_effort "${db_name}"
+    drop_mariadb_db_best_effort "${db_name}"
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Main loop (isolated per stack)
 # ---------------------------------------------------------------------------
 
@@ -226,10 +265,17 @@ for STACK_NAME in "$@"; do
   ENV_FILE="${STACK_DIR}/.env/env"
   COMPOSE_FILE="${STACK_DIR}/docker-compose.yml"
 
-  [[ ! -d "${STACK_DIR}" ]] && {
-    warn "Stack dir not found: ${STACK_DIR} — skipping"
+  # -----------------------------------------------------------------------
+  # If stack dir is missing: still try DB purge by name on BOTH backends.
+  # -----------------------------------------------------------------------
+  if [[ ! -d "${STACK_DIR}" ]]; then
+    warn "Stack dir not found: ${STACK_DIR} — attempting DB purge best effort anyway"
+    DB_NAME="${STACK_NAME}"
+    log "Fallback DB purge: trying BOTH backends | DB name: ${DB_NAME}"
+    purge_db_both_backends_best_effort "${DB_NAME}"
+    log "Stack '${STACK_NAME}' (dir missing) processed."
     exit 0
-  }
+  fi
 
   DB_BACKEND=""
   DB_NAME="${STACK_NAME}"
@@ -263,22 +309,14 @@ for STACK_NAME in "$@"; do
   if [[ -n "${DB_BACKEND}" ]]; then
     log "DB backend: ${DB_BACKEND} | DB name: ${DB_NAME}"
   else
-    warn "No DB backend detected"
+    warn "No DB backend detected — will still try BOTH backends by DB name as best effort"
+    log "Fallback DB purge: trying BOTH backends | DB name: ${DB_NAME}"
   fi
 
-  if [[ "${DB_BACKEND}" == "postgres" ]]; then
-    if [[ "${WIPE_DATA_ONLY}" == "true" ]]; then
-      truncate_postgres_db_best_effort "${DB_NAME}"
-    else
-      drop_postgres_db_best_effort "${DB_NAME}"
-    fi
-  elif [[ "${DB_BACKEND}" == "mariadb" ]]; then
-    if [[ "${WIPE_DATA_ONLY}" == "true" ]]; then
-      truncate_mariadb_db_best_effort "${DB_NAME}"
-    else
-      drop_mariadb_db_best_effort "${DB_NAME}"
-    fi
-  fi
+  # -----------------------------------------------------------------------
+  # Always try BOTH backends (requested). Detection is informational.
+  # -----------------------------------------------------------------------
+  purge_db_both_backends_best_effort "${DB_NAME}"
 
   if [[ -f "${COMPOSE_FILE}" ]]; then
     log "Stopping/removing compose stack..."
