@@ -64,6 +64,12 @@ env_get() {
   ' "${env_file}"
 }
 
+# Run a command but ensure it does NOT read from the current STDIN/TTY.
+# This prevents weird nested docker exec TTY behavior from aborting the script.
+run_no_stdin() {
+  "$@" </dev/null
+}
+
 # ---------------------------------------------------------------------------
 # PostgreSQL
 # ---------------------------------------------------------------------------
@@ -77,6 +83,7 @@ drop_postgres_db_best_effort() {
   log "Dropping Postgres database '${db_name}' (admin db: ${admin_db})..."
 
   set +e
+  # Needs stdin for heredoc -> keep -i but still safe in subshell isolation.
   docker exec -i postgres psql -U postgres -d "${admin_db}" <<SQL
 SELECT pg_terminate_backend(pid)
 FROM pg_stat_activity
@@ -116,7 +123,7 @@ SQL
 }
 
 # ---------------------------------------------------------------------------
-# MariaDB
+# MariaDB (TTY-safe)
 # ---------------------------------------------------------------------------
 
 drop_mariadb_db_best_effort() {
@@ -145,7 +152,8 @@ drop_mariadb_db_best_effort() {
   log "Dropping MariaDB database '${db_name}'..."
 
   set +e
-  docker exec -i mariadb mariadb -uroot -p"${root_pw}" \
+  # IMPORTANT: no "-i" here, and also disconnect stdin from our current TTY.
+  run_no_stdin docker exec mariadb mariadb -uroot -p"${root_pw}" \
     -e "DROP DATABASE IF EXISTS \`${db_name}\`;"
   local rc=$?
   set -e
@@ -172,26 +180,43 @@ truncate_mariadb_db_best_effort() {
   log "Truncating all tables in MariaDB database '${db_name}'..."
 
   set +e
+  # Generate truncates without stdin/tty involvement
+  truncates="$(
+    run_no_stdin docker exec mariadb mariadb -uroot -p"${root_pw}" -N -B "${db_name}" -e "
+      SELECT CONCAT('TRUNCATE TABLE \`', table_name, '\`;')
+      FROM information_schema.tables
+      WHERE table_schema = DATABASE();
+    "
+  )"
+  local gen_rc=$?
+
+  if [[ $gen_rc -ne 0 ]]; then
+    set -e
+    warn "MariaDB TRUNCATE statement generation failed for '${db_name}' (rc=${gen_rc})"
+    return 0
+  fi
+
   {
     echo "SET FOREIGN_KEY_CHECKS=0;"
-    docker exec -i mariadb mariadb -uroot -p"${root_pw}" -N -B "${db_name}" <<'SQL'
-SELECT CONCAT('TRUNCATE TABLE `', table_name, '`;')
-FROM information_schema.tables
-WHERE table_schema = DATABASE();
-SQL
+    echo "${truncates}"
     echo "SET FOREIGN_KEY_CHECKS=1;"
-  } | docker exec -i mariadb mariadb -uroot -p"${root_pw}" "${db_name}"
+  } | run_no_stdin docker exec -i mariadb mariadb -uroot -p"${root_pw}" "${db_name}"
   local rc=$?
-  set -e
 
+  set -e
   [[ $rc -ne 0 ]] && warn "MariaDB TRUNCATE failed for '${db_name}' (rc=${rc})"
 }
 
 # ---------------------------------------------------------------------------
-# Main loop
+# Main loop (isolated per stack)
 # ---------------------------------------------------------------------------
 
+overall_rc=0
+
 for STACK_NAME in "$@"; do
+(
+  set -euo pipefail
+
   echo
   log "============================================================"
   log "Purging stack: ${STACK_NAME}"
@@ -203,7 +228,7 @@ for STACK_NAME in "$@"; do
 
   [[ ! -d "${STACK_DIR}" ]] && {
     warn "Stack dir not found: ${STACK_DIR} — skipping"
-    continue
+    exit 0
   }
 
   DB_BACKEND=""
@@ -241,7 +266,6 @@ for STACK_NAME in "$@"; do
     warn "No DB backend detected"
   fi
 
-
   if [[ "${DB_BACKEND}" == "postgres" ]]; then
     if [[ "${WIPE_DATA_ONLY}" == "true" ]]; then
       truncate_postgres_db_best_effort "${DB_NAME}"
@@ -258,7 +282,7 @@ for STACK_NAME in "$@"; do
 
   if [[ -f "${COMPOSE_FILE}" ]]; then
     log "Stopping/removing compose stack..."
-    docker compose -f "${COMPOSE_FILE}" down --remove-orphans -v || true
+    run_no_stdin docker compose -f "${COMPOSE_FILE}" down --remove-orphans -v || true
   else
     warn "docker-compose.yml not found — skipping compose down"
   fi
@@ -272,6 +296,12 @@ for STACK_NAME in "$@"; do
   rm -rf "${STACK_DIR}"
 
   log "Stack '${STACK_NAME}' purged."
+) || {
+  rc=$?
+  overall_rc=1
+  warn "Stack '${STACK_NAME}' purge failed (rc=${rc}) — continuing"
+}
 done
 
 log "All requested stacks processed."
+exit "${overall_rc}"
