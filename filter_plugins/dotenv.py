@@ -23,17 +23,14 @@ class FilterModule:
 
     @staticmethod
     def dotenv_quote(value):
-        """
-        Quote a value for use in a .env file.
-
-        Example:
-          password -> "pa$'ss\"word"
-
-        """
         if value is None:
             return '""'
 
         s = str(value)
+
+        # Escape for docker compose env interpolation:
+        # $VAR would be expanded; $$ becomes literal $
+        s = s.replace("$", "$$")
 
         # Escape backslash first, then double quotes
         s = s.replace("\\", "\\\\")
