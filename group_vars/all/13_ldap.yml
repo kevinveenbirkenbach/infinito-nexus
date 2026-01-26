@@ -12,7 +12,7 @@ _ldap_server_port:            "{{ ports.localhost[_ldap_protocol]['svc-db-openld
 _ldap_name:                   "{{ applications | get_app_conf('svc-db-openldap', 'docker.services.openldap.name') }}"
 _ldap_domain:                 "{{ DOMAIN_PRIMARY }}" # LDAP is jsut listening to a port not to a dedicated domain, so primary domain should be sufficient
 _ldap_user_id:                "uid"
-_ldap_filters_users_all:      "(|(objectclass=inetOrgPerson))"
+_ldap_filters_users_all:      "(objectClass=inetOrgPerson)"
 
 LDAP:
   # Distinguished Names (DN)
@@ -93,8 +93,8 @@ LDAP:
       NEXTCLOUD_QUOTA:    "nextcloudQuota"
   FILTERS:
     USERS:
-      LOGIN:              "(&{{ _ldap_filters_users_all }}({{_ldap_user_id}}=%{{_ldap_user_id}}))"
-      ALL:                "{{ _ldap_filters_users_all }}"
+      ALL:   "{{ _ldap_filters_users_all }}"
+      LOGIN: "(&{{ _ldap_filters_users_all }}({{ _ldap_user_id }}=%{{ _ldap_user_id }}))"
   RBAC:
     FLAVORS:
       # Valid values posixGroup, groupOfNames
