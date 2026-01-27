@@ -1,4 +1,5 @@
 application_id:                 "svc-db-openldap"
+entity_name:                    "{{ application_id | get_entity_name }}"
 
 # LDAP Variables
 OPENLDAP_DOCKER_PORT_OPEN:      389
@@ -20,6 +21,7 @@ OPENLDAP_CONTAINER:             "{{ applications | get_app_conf(application_id, 
 # OPENLDAP_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.openldap.version') }}"
 OPENLDAP_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 OPENLDAP_NETWORK:               "{{ applications | get_app_conf(application_id, 'docker.network') }}"
+OPENLDAP_SERVICE:               "{{ entity_name }}"
 
 OPENLDAP_BIND_DN:               "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
 OPENLDAP_BIND_PW:               "{{ LDAP.BIND_CREDENTIAL }}"

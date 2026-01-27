@@ -1,6 +1,6 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-  application:
+  {{ OPENLDAP_SERVICE }}:
     # Build local custom image (no Bitnami)
     build:
       context: "."
