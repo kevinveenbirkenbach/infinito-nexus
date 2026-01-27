@@ -22,7 +22,8 @@ users:
     password:   "'$tr0ng€xampl3PW!"
   biber:
     username:   "biber"
-    full_name:  "Harry Beaver"
+    firstname:  "Harry"
+    lastname:   "Beaver"
     website:    "https://www.infinito.nexus/"
     email:      "contact@infinito.nexus"
     gpg:        "DUMMY-GPG-KEY-NOT-SET"
@@ -67,6 +68,11 @@ applications:
   web-app-keycloak:
     credentials:
       administrator_password: "'$tr0ng€xampl3PW!"
+    docker:
+      services:
+        keycloak:
+          realm:
+            totp_enabled: False # Deactivate TOTP for testing, to safe this extra step
   web-app-lam:
     credentials:
       administrator_password: "'$tr0ng€xampl3PW!"
