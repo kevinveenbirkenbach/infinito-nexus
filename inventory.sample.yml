@@ -26,7 +26,7 @@ users:
     website:    "https://www.infinito.nexus/"
     email:      "contact@infinito.nexus"
     gpg:        "DUMMY-GPG-KEY-NOT-SET"
-    password:   "VerySecurePassword!"
+    password:   "VeryUnsecurePassword"
 
     # UID/GID allocation policy:
     # - Use IDs >= 10000 for manually managed users

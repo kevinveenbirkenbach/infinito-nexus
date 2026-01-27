@@ -15,5 +15,9 @@ SNIPE_IT_SERVICE:   "{{ entity_name }}"
 SNIPE_IT_APP_KEY:   "{{ applications | get_app_conf(application_id, 'credentials.app_key') }}"
 
 # Authentification
-SNIPE_IT_LDAP_ENABLED:    "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
-SNIPE_IT_TLS_ENABLED:         "{{ lookup('tls_resolve', application_id, want='enabled') | bool }}"
+SNIPE_IT_LDAP_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+SNIPE_IT_TLS_ENABLED:             "{{ lookup('tls_resolve', application_id, want='enabled') | bool }}"
+
+#LDAP
+SNIPE_IT_LDAP_FILTER_FRAGMENT:    "&(objectClass=inetOrgPerson)"
+SNIPE_IT_LDAP_AUTH_FILTER_QUERY:  "{{ LDAP.USER.ATTRIBUTES.ID }}="

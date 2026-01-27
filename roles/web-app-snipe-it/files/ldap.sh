@@ -17,6 +17,7 @@ set -euo pipefail
 : "${LDAP_USER_SURNAME_ATTR:?missing}"
 : "${LDAP_USER_MAIL_ATTR:?missing}"
 : "${OIDC_RESET_URL:?missing}"
+: "${LDAP_AUTH_FILTER_QUERY:?missing}"
 
 export XDG_CONFIG_HOME=/tmp
 
@@ -76,7 +77,7 @@ docker compose exec -T \
     $s->ldap_username_field    = "'"${LDAP_USER_ID_ATTR}"'";
     $s->ldap_fname_field       = "'"${LDAP_USER_FIRSTNAME_ATTR}"'";
     $s->ldap_lname_field       = "'"${LDAP_USER_SURNAME_ATTR}"'";
-    $s->ldap_auth_filter_query = "'"${LDAP_USER_ID_ATTR}="'";
+    $s->ldap_auth_filter_query = "'"${LDAP_AUTH_FILTER_QUERY}"'";
     $s->ldap_version           = 3;
     $s->ldap_pw_sync           = 0;
     $s->is_ad                  = 0;
