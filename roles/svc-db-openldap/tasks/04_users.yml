@@ -80,8 +80,8 @@
     objectClass:  "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
     attributes:
       uid:           "{{ item.value.username }}"
-      givenName:     "{{ item.value.firstname | default(item.key) }}"
-      sn:            "{{ item.value.lastname | default(item.key) }}"
+      givenName:     "{{ item.value.firstname }}"
+      sn:            "{{ item.value.lastname }}"
       cn:            "{{ item.value.cn  | default(item.key) }}"
       loginShell:    /bin/bash
       homeDirectory: "/home/{{ item.key }}"
