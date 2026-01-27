@@ -21,3 +21,4 @@ SNIPE_IT_TLS_ENABLED:             "{{ lookup('tls_resolve', application_id, want
 #LDAP
 SNIPE_IT_LDAP_FILTER_FRAGMENT:    "&(objectClass=inetOrgPerson)"
 SNIPE_IT_LDAP_AUTH_FILTER_QUERY:  "{{ LDAP.USER.ATTRIBUTES.ID }}="
+SNIPE_IT_LDAP_USER_FIRSTNAME:     "{{ LDAP.USER.ATTRIBUTES.FIRSTNAME | lower }}"
