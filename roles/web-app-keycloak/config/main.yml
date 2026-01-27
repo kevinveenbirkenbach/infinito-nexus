@@ -45,8 +45,10 @@ docker:
       mem_limit:          "4g"
       pids_limit:         1024
       realm:
-        import_enabled:   True
-        totp_enabled:     True
+        import_enabled:       True
+        totp_enabled:         True
+      users:
+        emails_verified: True
     database:
       shared:           true
       type:             "postgres"

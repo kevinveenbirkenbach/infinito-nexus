@@ -87,6 +87,9 @@ KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >
       ) | join(', ') 
   }}
 
+# User
+KEYCLOAK_USER_EMAILS_VERIFIED:      "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.users.emails_verified') }}" 
+
 # reCAPTCHA
 KEYCLOAK_RECAPTCHA_ENABLED: "{{ applications | get_app_conf(application_id, 'docker.services.recaptcha.enabled') }}"
 KEYCLOAK_RECAPTCHA_KEY:     "{{ applications | get_app_conf(application_id, 'credentials.recaptcha.key') }}"
