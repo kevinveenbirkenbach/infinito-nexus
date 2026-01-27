@@ -82,49 +82,11 @@ docker compose exec -T \
     $s->is_ad                  = 0;
     $s->ad_domain              = "";
     $s->ldap_default_group     = "";
+    $s->ldap_pword = Crypt::encrypt(base64_decode("'"${LDAP_BIND_PASSWORD_B64}"'"));
     $s->ldap_email             = "'"${LDAP_USER_MAIL_ATTR}"'";
     $s->custom_forgot_pass_url = "'"${OIDC_RESET_URL}"'";
 
     $s->save();
-  '
-
-###############################################################################
-# 3) Store LDAP bind password (B64 → decode → serialize → Crypt::encrypt)
-###############################################################################
-echo "[snipe-it][ldap] storing encrypted bind password (UI-compatible)"
-
-docker compose exec -T \
-  -e APP_KEY="${APP_KEY}" \
-  -e LDAP_BIND_PASSWORD_B64="${LDAP_BIND_PASSWORD_B64}" \
-  "${SNIPE_IT_SERVICE}" \
-  php -r '
-    require "vendor/autoload.php";
-    $app = require "bootstrap/app.php";
-    $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-
-    use App\Models\Setting;
-    use Illuminate\Support\Facades\Crypt;
-
-    $b64 = getenv("LDAP_BIND_PASSWORD_B64");
-    if (!$b64) {
-      fwrite(STDERR, "LDAP_BIND_PASSWORD_B64 missing\n");
-      exit(1);
-    }
-
-    $pw = base64_decode($b64, true);
-    if ($pw === false || $pw === "") {
-      fwrite(STDERR, "LDAP_BIND_PASSWORD_B64 invalid/empty\n");
-      exit(1);
-    }
-
-    $s = Setting::getSettings();
-
-    // EXAKT wie Snipe-IT UI:
-    // serialize() + Crypt::encrypt()
-    $s->ldap_pword = Crypt::encrypt(serialize($pw));
-    $s->save();
-
-    echo "LDAP bind password stored correctly\n";
   '
 
 ###############################################################################
