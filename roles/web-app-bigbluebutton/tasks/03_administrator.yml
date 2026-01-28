@@ -1,6 +1,6 @@
 ---
 - name: "Wait until Greenlight is reachable via Nginx"
-  uri:
+  ansible.builtin.uri:
     url: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
     validate_certs: true
     status_code: 200
@@ -13,47 +13,31 @@
   delay: 5
   changed_when: false
 
-# Case 1: OIDC disabled → use primary password
-- name: "Create admin with primary password"
-  when: not (BBB_OIDC_ENABLED | bool)
-  command:
-    cmd: >
-      {{ docker_compose_command_exec }}
-      greenlight
-      bundle exec rake
-      admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password }}']
+- name: "Ensure Greenlight admin (B64-safe, idempotent)"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --env-file
+      - "{{ docker_compose.files.env }}"
+      - exec
+      - -T
+      - -e
+      - "TARGET_NAME={{ users.administrator.username | upper }}"
+      - -e
+      - "NEW_NAME={{ users.administrator.username | upper }}"
+      - -e
+      - "NEW_EMAIL={{ users.administrator.email }}"
+      - -e
+      - "NEW_PASSWORD_B64={{ users.administrator.password | b64encode }}"
+      - greenlight
+      - bash
+      - -lc
+      - "bundle exec rails runner -"
+    stdin: "{{ lookup('ansible.builtin.file', role_path ~ '/files/greenlight_ensure_admin.rb') }}"
+  args:
     chdir: "{{ docker_compose.directories.instance }}"
-  register: admin_create
-  failed_when:
-    # Only fail if rc != 0 AND it's NOT the "already taken" case
-    - admin_create.rc != 0
-    - "'Email has already been taken' not in (admin_create.stderr | default(''))"
-  changed_when: admin_create.rc == 0
-
-# Case 2: OIDC enabled → retry with starred password
-- name: "Retry with starred password when OIDC enabled"
-  when: BBB_OIDC_ENABLED | bool
-  command:
-    cmd: >
-      {{ docker_compose_command_exec }}
-      greenlight
-      bundle exec rake
-      admin:create['{{ users.administrator.username | upper }}','{{ users.administrator.email }}','{{ users.administrator.password ~ '*' }}']
-    chdir: "{{ docker_compose.directories.instance }}"
-  register: admin_create
-  failed_when:
-    - admin_create.rc != 0
-    - "'Email has already been taken' not in (admin_create.stderr | default(''))"
-  changed_when: admin_create.rc == 0
-
-- name: "Make existing user administrator (fallback)"
-  command:
-    cmd: >
-      {{ docker_compose_command_exec }}
-      greenlight
-      bundle exec rake
-      user:set_admin_role['{{ users.administrator.email }}']
-    chdir: "{{ docker_compose.directories.instance }}"
-  when:
-    - admin_create is defined
-    - "'Email has already been taken' in (admin_create.stderr | default(''))"
+  register: greenlight_admin_map
+  changed_when: "'CHANGED' in (greenlight_admin_map.stdout | default(''))"
+  failed_when: greenlight_admin_map.rc != 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

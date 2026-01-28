@@ -6,7 +6,7 @@
     docker_compose_flush_handlers:  false
     docker_git_repository_pull:     true
     docker_git_repository_address:  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
-    docker_git_repository_branch:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+    docker_git_repository_version:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
     webserver_extra_configuration: >-
       {{ lookup(
            'ansible.builtin.template',
@@ -55,11 +55,11 @@
 - name: "Setup docker-compose.yml file"
   include_tasks: "02_docker-compose.yml"
 
-- name: "Ensure PostgreSQL password matches POSTGRESQL_SECRET"
-  include_tasks: "02a_postgres_password_sync.yml"
-
 - name: flush docker service
   meta: flush_handlers
+
+- name: "Ensure PostgreSQL password matches POSTGRESQL_SECRET"
+  include_tasks: "02a_postgres_password_sync.yml"
 
 - name: "Setup administrator"
   include_tasks: "03_administrator.yml"
