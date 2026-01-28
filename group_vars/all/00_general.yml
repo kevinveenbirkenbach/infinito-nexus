@@ -27,8 +27,10 @@ HOST_THOUSAND_SEPARATOR:  "."
 HOST_DECIMAL_MARK:        ","
 
 # Encryptiom
-TLS_ENABLED:              true
-TLS_MODE:                 "letsencrypt"
+TLS_ENABLED:              true          # Never set this to true, this just exist for development purposes
+                                        # to deactivate TLS can also prevent the login function to work:
+                                        # https://chatgpt.com/share/6979f774-81fc-800f-a674-6c59f1f03954
+TLS_MODE:                 "letsencrypt" # Valid values letsencrypt, self_signed, off
 TLS_SELFSIGNED_BASE_PATH: "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
 # Controls whether self-signed certs are generated per app ("app")
 # or as one shared cert covering ALL domains across the global "domains" mapping ("global").
