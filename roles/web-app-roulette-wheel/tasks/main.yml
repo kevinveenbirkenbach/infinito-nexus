@@ -5,4 +5,4 @@
     docker_compose_flush_handlers:  true
     docker_git_repository_address:  "https://github.com/kevinveenbirkenbach/roulette-wheel.git"
     docker_git_repository_pull:     true
-    docker_git_repository_branch:   "master"
+    docker_git_repository_version:   "master"

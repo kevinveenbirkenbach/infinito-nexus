@@ -6,7 +6,7 @@
     docker_compose_flush_handlers:        false
     docker_git_repository_pull:           true
     docker_git_repository_address:        "https://github.com/kevinveenbirkenbach/web-app-elk.git"
-    docker_git_repository_branch:         "master"
+    docker_git_repository_version:         "master"
     domain:                               "{{ domains | get_domain(application_id) }}"
     http_port:                            "{{ ports.localhost.http[application_id] }}"
 
