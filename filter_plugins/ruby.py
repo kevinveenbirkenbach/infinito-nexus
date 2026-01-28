@@ -9,6 +9,7 @@
 #
 # Safe for GitLab Omnibus (gitlab.rb), Chef, Ruby DSLs.
 
+
 class FilterModule:
     def filters(self):
         return {

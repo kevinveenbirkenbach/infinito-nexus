@@ -2,3 +2,12 @@
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full
+  vars:
+    docker_compose_flush_handlers: false
+
+- name: "Ensure Pixelfed .env ownership and permissions for www-data"
+  ansible.builtin.file:
+    path: "{{ docker_compose.files.env }}"
+    owner: "33"
+    group: "33"
+    mode: "0660"
