@@ -85,7 +85,7 @@ echo ">>> Initializing inventory inside container"
     ./scripts/docker/entry.sh true
 
     inv_dir='${INVENTORY_DIR}'
-    inv_file=\"\${inv_dir}/servers.yml\"
+    inv_file=\"\${inv_dir}/${TEST_DEPLOY_TYPE}.yml\"
     pw_file=\"\${inv_dir}/.password\"
     echo \">>> Reset inventory dir \${inv_dir}\"
     rm -rf \"\${inv_dir}\"
@@ -99,6 +99,7 @@ echo ">>> Initializing inventory inside container"
 
     echo \">>> Creating inventory at \${inv_file}\"
     python3 -m cli.create.inventory \"\${inv_dir}\" \
+      --inventory-file \${inv_file} \
       --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \
       --ssl-disabled \
@@ -110,4 +111,4 @@ echo ">>> Initializing inventory inside container"
 
 echo
 echo "✅ Local inventory init finished."
-echo "Inventory: ${INVENTORY_DIR}/servers.yml"
+echo "Inventory: ${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml"
