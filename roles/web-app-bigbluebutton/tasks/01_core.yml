@@ -55,6 +55,9 @@
 - name: "Setup docker-compose.yml file"
   include_tasks: "02_docker-compose.yml"
 
+- name: "Ensure PostgreSQL password matches POSTGRESQL_SECRET"
+  include_tasks: "02a_postgres_password_sync.yml"
+
 - name: flush docker service
   meta: flush_handlers
 
