@@ -18,9 +18,9 @@ docker:
     redis:
       enabled:            false
       backup:
-        disabled: true
+        disabled:         true
     database:
-      shared: true
+      shared:             true
       enabled:            true
       type:               postgres
     xwiki:
@@ -59,7 +59,7 @@ plugins:
     shared: true
     items:
       - id: "org.xwiki.contrib.oidc:oidc-authenticator"
-        version: ""
+        version: "2.19.6"
 
   ldap:
     enabled: false
