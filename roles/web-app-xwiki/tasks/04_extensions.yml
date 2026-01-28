@@ -64,10 +64,10 @@
         that:
           - (_exec_page.content | default('')) is not search('ERROR::')
           - (_exec_page.content | default('')) is not search('INSTALLED_MISSING::')
-      fail_msg: |
-        XWiki extension installer reported errors.
-        Output:
-        {{ _exec_page.content | default('') }}
+        fail_msg: |
+          XWiki extension installer reported errors.
+          Output:
+          {{ _exec_page.content | default('') }}
 
   rescue:
     - name: "XWIKI | DEBUG | Show installer page output"
