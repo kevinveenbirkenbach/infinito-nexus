@@ -1,3 +1,8 @@
+- name: Include dependency 'sys-lock'
+  include_role:
+    name: sys-lock
+  when: run_once_sys_lock is not defined
+
 - include_role:
     name: sys-service
   vars:
