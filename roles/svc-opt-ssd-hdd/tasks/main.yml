@@ -4,6 +4,10 @@
   when: run_once_sys_lock is not defined
 
 - include_role:
+    name: sys-svc-docker
+  when: run_once_sys_svc_docker is not defined
+
+- include_role:
     name: sys-service
   vars:
     system_service_tpl_exec_start_pre: '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_OPTIMIZE_DRIVE }} {{ SYS_SERVICE_BACKUP_RMT_2_LOC }} {{ SYS_SERVICE_GROUP_CLEANUP | join(" ")  }} --timeout "{{ SYS_TIMEOUT_STORAGE_OPTIMIZER }}"'
