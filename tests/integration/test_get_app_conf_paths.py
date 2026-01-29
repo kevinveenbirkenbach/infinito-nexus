@@ -16,8 +16,8 @@ class TestGetAppConfPaths(unittest.TestCase):
         # Setup paths
         root = Path(__file__).resolve().parents[2]
         cls.root = root
-        cls.app_config_path = root / "group_vars" / "all" / "04_applications.yml"
-        cls.user_config_path = root / "group_vars" / "all" / "03_users.yml"
+        cls.app_config_path = root / "group_vars" / "all" / "05_applications.yml"
+        cls.user_config_path = root / "group_vars" / "all" / "04_users.yml"
 
         # Load application defaults
         with cls.app_config_path.open(encoding="utf-8") as f:

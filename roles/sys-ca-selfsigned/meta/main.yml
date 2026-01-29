@@ -1,17 +1,23 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Installs CA trust injection assets for docker compose (wrapper + inject script) and validates CA cert presence.
+  description: Provisions a local Root CA (self-signed, CA:TRUE) for trusting internal TLS endpoints. Produces /etc/infinito.nexus/ca/root-ca.crt for docker-compose-ca injection.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: "Kevin Veen-Birkenbach Consulting & Coaching Solutions https://www.veen.world"
   galaxy_tags:
-    - docker
-    - docker-compose
     - tls
+    - ssl
     - ca
     - certificates
+    - openssl
+    - infinito
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
+  min_ansible_version: "2.9"
+  platforms:
+    - name: Any
+      versions:
+        - all
+  lifecycle: beta
 
-dependencies:
-  - sys-ca-selfsigned
+dependencies: []
