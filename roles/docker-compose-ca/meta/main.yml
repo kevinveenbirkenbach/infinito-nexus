@@ -12,6 +12,3 @@ galaxy_info:
     - certificates
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
-
-dependencies:
-  - sys-ca-selfsigned

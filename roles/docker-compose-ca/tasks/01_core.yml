@@ -1,4 +1,8 @@
 ---
+- include_role:
+    name: sys-ca-selfsigned
+  when: run_once_sys_ca_selfsigned is not defined
+
 - name: "CA trust | assert CA_TRUST structure"
   ansible.builtin.assert:
     that:
