@@ -1,6 +1,7 @@
 # tests/unit/lookup_plugins/test_cert_plan.py
 import sys
 import unittest
+
 from ansible.errors import AnsibleError
 from lookup_plugins.cert_plan import LookupModule
 
@@ -148,6 +149,114 @@ class TestCertPlanLookup(unittest.TestCase):
         v["TLS_MODE"] = "invalid"
         with self.assertRaises(AnsibleError):
             self.lookup.run(["web-app-a"], variables=v, mode="app")
+
+    # -------------------------------------------------------------------------
+    # New tests for "Jinja-in-vars expansion inside lookup" logic
+    # -------------------------------------------------------------------------
+
+    def test_selfsigned_base_path_expands_jinja_from_hostvars(self):
+        """
+        TLS_SELFSIGNED_BASE_PATH may contain Jinja markers and must be expanded
+        inside the lookup using the host context (hostvars[inventory_hostname]).
+        """
+        v = dict(self.vars)
+        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
+
+        # Simulate real ansible lookup context
+        v["inventory_hostname"] = "localhost"
+        v["hostvars"] = {
+            "localhost": {
+                "SOFTWARE_NAME": "Infinito.Nexus",
+            }
+        }
+
+        out = self.lookup.run(["web-app-b"], variables=v, mode="app")[0]
+        self.assertEqual(out["mode"], "self_signed")
+        self.assertEqual(
+            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/_global/fullchain.pem"
+        )
+        self.assertEqual(
+            out["files"]["key"], "/etc/infinito.nexus/selfsigned/_global/privkey.pem"
+        )
+
+    def test_letsencrypt_live_path_expands_jinja_from_hostvars(self):
+        """
+        LETSENCRYPT_LIVE_PATH may contain Jinja markers and must be expanded.
+        """
+        v = dict(self.vars)
+        v["LETSENCRYPT_LIVE_PATH"] = "/etc/{{ SOFTWARE_NAME | lower }}/letsencrypt/live"
+
+        v["inventory_hostname"] = "localhost"
+        v["hostvars"] = {
+            "localhost": {
+                "SOFTWARE_NAME": "Infinito.Nexus",
+            }
+        }
+
+        out = self.lookup.run(["web-app-a"], variables=v, mode="app")[0]
+        self.assertEqual(out["mode"], "letsencrypt")
+        self.assertEqual(
+            out["files"]["cert"],
+            "/etc/infinito.nexus/letsencrypt/live/a.example/fullchain.pem",
+        )
+        self.assertEqual(
+            out["files"]["key"],
+            "/etc/infinito.nexus/letsencrypt/live/a.example/privkey.pem",
+        )
+
+    def test_jinja_expansion_missing_var_fails_hard(self):
+        """
+        With strict rendering, missing vars used inside the Jinja expression must
+        raise an AnsibleError (no leaking "{{ ... }}" into configs).
+        """
+        v = dict(self.vars)
+        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
+
+        # No SOFTWARE_NAME present in either variables or hostvars context
+        v["inventory_hostname"] = "localhost"
+        v["hostvars"] = {"localhost": {}}
+
+        with self.assertRaises(AnsibleError):
+            self.lookup.run(["web-app-b"], variables=v, mode="app")
+
+    def test_jinja_expansion_uses_hostvars_over_lookup_vars(self):
+        """
+        If both `variables` and hostvars contain SOFTWARE_NAME, hostvars should win
+        (as implemented by ctx.update(hostvars[inventory_hostname])).
+        """
+        v = dict(self.vars)
+        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
+
+        # variables has one value
+        v["SOFTWARE_NAME"] = "Wrong.Name"
+
+        # hostvars has another, should win
+        v["inventory_hostname"] = "localhost"
+        v["hostvars"] = {
+            "localhost": {
+                "SOFTWARE_NAME": "Infinito.Nexus",
+            }
+        }
+
+        out = self.lookup.run(["web-app-b"], variables=v, mode="app")[0]
+        self.assertEqual(
+            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/_global/fullchain.pem"
+        )
+
+    def test_jinja_expression_that_renders_to_empty_triggers_failfast(self):
+        """
+        If Jinja renders to something that still contains Jinja markers, or is invalid,
+        cert_plan should fail fast. Here we use a construction that still contains Jinja
+        after rendering by injecting literal braces.
+        """
+        v = dict(self.vars)
+        # This will render to a string that still contains "{{ STILL_JINJA }}"
+        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ '{{ STILL_JINJA }}' }}/selfsigned"
+        v["inventory_hostname"] = "localhost"
+        v["hostvars"] = {"localhost": {"SOFTWARE_NAME": "Infinito.Nexus"}}
+
+        with self.assertRaises(AnsibleError):
+            self.lookup.run(["web-app-b"], variables=v, mode="app")
 
 
 if __name__ == "__main__":
