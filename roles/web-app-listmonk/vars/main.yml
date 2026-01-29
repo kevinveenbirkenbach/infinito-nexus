@@ -16,7 +16,7 @@ LISTMONK_USER_SEND:           "newsletter"
 LISTMONK_USER_BOUNCE:         "bounce"
 
 LISTMONK_EXEC_DATABASE:       "docker exec -i {{ database_container }} psql -U {{ database_username }} -d {{ database_name }}"
-LISTMONK_RUN:                 "docker compose run -T --rm application"
+LISTMONK_RUN:                 "docker compose {{ lookup('compose_f_args', application_id) }} run -T --rm application"
 
 LISTMONK_SETTINGS:
   - key: "app.root_url"

@@ -1,7 +1,7 @@
 ---
 - name: "Check if a Snipe-IT administrator already exists"
   ansible.builtin.shell: >
-    docker compose exec -T
+    docker compose {{ lookup('compose_f_args', application_id) }} exec -T
     -e APP_KEY="{{ SNIPE_IT_APP_KEY }}"
     {{ SNIPE_IT_SERVICE }}
     php -r '
@@ -20,7 +20,7 @@
 
 - name: "Create Snipe-IT administrator account"
   ansible.builtin.shell: >
-    docker compose exec -T
+    docker compose {{ lookup('compose_f_args', application_id) }} exec -T
     -e APP_KEY="{{ SNIPE_IT_APP_KEY }}"
     {{ SNIPE_IT_SERVICE }}
     php artisan snipeit:create-admin

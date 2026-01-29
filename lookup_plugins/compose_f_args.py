@@ -1,4 +1,4 @@
-# roles/docker-compose/lookup_plugins/compose_f_args.py
+# lookup_plugins/compose_f_args.py
 #
 # Build docker compose "-f <file>" arguments for an application instance.
 #
