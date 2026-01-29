@@ -119,14 +119,24 @@
   when: _ss_regen_needed | bool
 
 - name: "TLS | (self_signed) generate key+cert if missing or drift detected"
-  ansible.builtin.command: >
-    openssl req -x509 -nodes
-    -days {{ tls_selfsigned_days }}
-    -newkey rsa:{{ tls_selfsigned_key_bits }}
-    -keyout {{ _ss_key }}
-    -out {{ _ss_cert }}
-    -config {{ _ss_conf }}
-    -extensions req_ext
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - req
+      - -x509
+      - -nodes
+      - -days
+      - "{{ tls_selfsigned_days | string }}"
+      - -newkey
+      - "rsa:{{ tls_selfsigned_key_bits }}"
+      - -keyout
+      - "{{ _ss_key }}"
+      - -out
+      - "{{ _ss_cert }}"
+      - -config
+      - "{{ _ss_conf }}"
+      - -extensions
+      - req_ext
   args:
     creates: "{{ _ss_cert }}"
   when: _ss_regen_needed | bool
