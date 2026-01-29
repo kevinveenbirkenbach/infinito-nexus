@@ -28,6 +28,8 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
 
+from module_utils.jinja_strict import render_strict
+
 
 def _as_str(v: Any) -> str:
     return "" if v is None else str(v).strip()
@@ -157,11 +159,27 @@ class LookupModule(LookupBase):
 
         files = _require_dict(docker_compose.get("files"), "docker_compose.files")
 
-        base = _as_str(files.get("docker_compose"))
-        override = _as_str(files.get("docker_compose_override"))
-        ca_override = _as_str(files.get("docker_compose_ca_override"))
+        # Use strict rendering to ensure we never leak "{{ ... }}" into generated commands.
+        base = render_strict(
+            files.get("docker_compose"),
+            variables=variables,
+            var_name="docker_compose.files.docker_compose",
+            err_prefix="compose_f_args",
+        )
+        override = render_strict(
+            files.get("docker_compose_override"),
+            variables=variables,
+            var_name="docker_compose.files.docker_compose_override",
+            err_prefix="compose_f_args",
+        )
+        ca_override = render_strict(
+            files.get("docker_compose_ca_override"),
+            variables=variables,
+            var_name="docker_compose.files.docker_compose_ca_override",
+            err_prefix="compose_f_args",
+        )
 
-        if not base:
+        if not _as_str(base):
             raise AnsibleError(
                 "compose_f_args: docker_compose.files.docker_compose is required"
             )
@@ -170,7 +188,7 @@ class LookupModule(LookupBase):
 
         # 1) Append override ONLY if the ROLE provides it (same logic as 04_files.yml).
         if _role_provides_override(application_id=application_id, templar=templar):
-            if not override:
+            if not _as_str(override):
                 raise AnsibleError(
                     "compose_f_args: docker_compose.files.docker_compose_override is required "
                     "when the role provides an override file"
@@ -203,7 +221,7 @@ class LookupModule(LookupBase):
                 raise AnsibleError("compose_f_args: tls_resolve returned empty 'mode'")
 
             if enabled and mode == "self_signed":
-                if not ca_override:
+                if not _as_str(ca_override):
                     raise AnsibleError(
                         "compose_f_args: docker_compose.files.docker_compose_ca_override is required "
                         "when TLS is enabled and mode is self_signed"

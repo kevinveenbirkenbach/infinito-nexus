@@ -15,6 +15,7 @@ from typing import Any, Dict, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
+from module_utils.jinja_strict import render_strict
 from module_utils.tls_common import (
     AVAILABLE_FLAVORS,
     as_str,
@@ -52,84 +53,6 @@ class LookupModule(LookupBase):
         if not term:
             raise AnsibleError("cert_plan: term is empty")
 
-        def _looks_like_jinja(s: str) -> bool:
-            return ("{{" in s) or ("{%" in s)
-
-        def _build_render_context() -> tuple[dict, str]:
-            """
-            Build a robust context for rendering Jinja-in-strings.
-
-            We intentionally do NOT rely on Ansible's Templar here because in some
-            lookup evaluation contexts it can silently keep Jinja markers untouched.
-            """
-            ctx: dict = {}
-            if isinstance(variables, dict):
-                ctx.update(variables)
-
-            inv_host = ""
-            if isinstance(variables, dict):
-                inv_host = as_str(variables.get("inventory_hostname", "")).strip()
-
-            hostvars = (
-                variables.get("hostvars") if isinstance(variables, dict) else None
-            )
-            if inv_host and isinstance(hostvars, dict):
-                hv = hostvars.get(inv_host)
-                if isinstance(hv, dict):
-                    # hostvars should win for things like SOFTWARE_NAME
-                    ctx.update(hv)
-
-            return ctx, inv_host
-
-        def _render_jinja2_strict(
-            raw: str, *, ctx: dict, inv_host: str, var_name: str
-        ) -> str:
-            """
-            Render using plain Jinja2 with StrictUndefined so missing vars fail hard.
-            This ensures we never leak "{{ ... }}" into generated configs.
-            """
-            if not _looks_like_jinja(raw):
-                return raw
-
-            try:
-                from jinja2 import Environment, StrictUndefined
-            except Exception as exc:
-                raise AnsibleError(
-                    f"cert_plan: cannot import jinja2 to expand {var_name}. Error: {exc}"
-                ) from exc
-
-            env = Environment(undefined=StrictUndefined)
-            try:
-                rendered = env.from_string(raw).render(ctx)
-            except Exception as exc:
-                raise AnsibleError(
-                    f"cert_plan: failed to render {var_name} via strict Jinja2. "
-                    f"inventory_hostname='{inv_host}'. Raw: {raw}. Error: {exc}"
-                ) from exc
-
-            rendered_s = as_str(rendered)
-
-            if _looks_like_jinja(rendered_s):
-                raise AnsibleError(
-                    f"cert_plan: {var_name} did not fully expand (still contains Jinja markers). "
-                    f"inventory_hostname='{inv_host}'. Raw: {raw} | Rendered: {rendered_s}."
-                )
-
-            return rendered_s
-
-        def _render_var(value: Any, *, var_name: str) -> str:
-            raw = as_str(value)
-            if not raw:
-                return raw
-
-            if not _looks_like_jinja(raw):
-                return raw
-
-            ctx, inv_host = _build_render_context()
-            return _render_jinja2_strict(
-                raw, ctx=ctx, inv_host=inv_host, var_name=var_name
-            )
-
         domains = require(variables, "domains", dict)
         applications = require(variables, "applications", dict)
         enabled_default = require(variables, "TLS_ENABLED", (bool, int))
@@ -165,7 +88,12 @@ class LookupModule(LookupBase):
 
         elif mode == "letsencrypt":
             le_live_raw = require(variables, "LETSENCRYPT_LIVE_PATH", str)
-            le_live = _render_var(le_live_raw, var_name="LETSENCRYPT_LIVE_PATH")
+            le_live = render_strict(
+                le_live_raw,
+                variables=variables,
+                var_name="LETSENCRYPT_LIVE_PATH",
+                err_prefix="cert_plan",
+            )
 
             le_name = resolve_le_name(app, primary_domain)
             cert_id = le_name
@@ -190,7 +118,12 @@ class LookupModule(LookupBase):
 
         elif mode == "self_signed":
             ss_base_raw = require(variables, "TLS_SELFSIGNED_BASE_PATH", str)
-            ss_base = _render_var(ss_base_raw, var_name="TLS_SELFSIGNED_BASE_PATH")
+            ss_base = render_strict(
+                ss_base_raw,
+                variables=variables,
+                var_name="TLS_SELFSIGNED_BASE_PATH",
+                err_prefix="cert_plan",
+            )
 
             ss_scope = as_str(variables.get("TLS_SELFSIGNED_SCOPE")).lower()
             if ss_scope not in {"app", "global"}:

@@ -1,4 +1,4 @@
-# lookup_plugins/compose_ca_inject_cmd.py
+# roles/docker-compose/lookup_plugins/compose_ca_inject_cmd.py
 #
 # Build the command to generate docker-compose.ca.override.yml via compose_ca_inject.py
 #
@@ -19,6 +19,8 @@ from typing import Any, Optional
 import yaml
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
+
+from module_utils.jinja_strict import render_strict
 
 
 def _as_str(v: Any) -> str:
@@ -107,36 +109,73 @@ class LookupModule(LookupBase):
                 "compose_ca_inject_cmd: docker_compose.directories/files must be dicts"
             )
 
-        instance_dir = _as_str(dirs.get("instance"))
-        env_file = _as_str(files.get("env"))
-        out_file = _as_str(files.get("docker_compose_ca_override"))
-        base = _as_str(files.get("docker_compose"))
-        override = _as_str(files.get("docker_compose_override"))
+        instance_dir = render_strict(
+            dirs.get("instance"),
+            variables=variables,
+            var_name="docker_compose.directories.instance",
+            err_prefix="compose_ca_inject_cmd",
+        )
+        env_file = render_strict(
+            files.get("env"),
+            variables=variables,
+            var_name="docker_compose.files.env",
+            err_prefix="compose_ca_inject_cmd",
+        )
+        out_file = render_strict(
+            files.get("docker_compose_ca_override"),
+            variables=variables,
+            var_name="docker_compose.files.docker_compose_ca_override",
+            err_prefix="compose_ca_inject_cmd",
+        )
+        base = render_strict(
+            files.get("docker_compose"),
+            variables=variables,
+            var_name="docker_compose.files.docker_compose",
+            err_prefix="compose_ca_inject_cmd",
+        )
+        override = render_strict(
+            files.get("docker_compose_override"),
+            variables=variables,
+            var_name="docker_compose.files.docker_compose_override",
+            err_prefix="compose_ca_inject_cmd",
+        )
 
-        if not instance_dir:
+        if not _as_str(instance_dir):
             raise AnsibleError(
                 "compose_ca_inject_cmd: docker_compose.directories.instance is required"
             )
-        if not out_file:
+        if not _as_str(out_file):
             raise AnsibleError(
                 "compose_ca_inject_cmd: docker_compose.files.docker_compose_ca_override is required"
             )
-        if not base:
+        if not _as_str(base):
             raise AnsibleError(
                 "compose_ca_inject_cmd: docker_compose.files.docker_compose is required"
             )
-        if not override:
+        if not _as_str(override):
             raise AnsibleError(
                 "compose_ca_inject_cmd: docker_compose.files.docker_compose_override is required"
             )
 
         ca_trust = _require(variables, "CA_TRUST", dict, label="variable")
-        script_path = _as_str(
-            _require(ca_trust, "inject_script", str, label="CA_TRUST")
+
+        script_path = render_strict(
+            _require(ca_trust, "inject_script", str, label="CA_TRUST"),
+            variables=variables,
+            var_name="CA_TRUST.inject_script",
+            err_prefix="compose_ca_inject_cmd",
         )
-        ca_host = _as_str(_require(ca_trust, "cert_host", str, label="CA_TRUST"))
-        wrapper_host = _as_str(
-            _require(ca_trust, "wrapper_host", str, label="CA_TRUST")
+        ca_host = render_strict(
+            _require(ca_trust, "cert_host", str, label="CA_TRUST"),
+            variables=variables,
+            var_name="CA_TRUST.cert_host",
+            err_prefix="compose_ca_inject_cmd",
+        )
+        wrapper_host = render_strict(
+            _require(ca_trust, "wrapper_host", str, label="CA_TRUST"),
+            variables=variables,
+            var_name="CA_TRUST.wrapper_host",
+            err_prefix="compose_ca_inject_cmd",
         )
 
         project = _as_str(_require(kwargs, "project", str, label="kwargs"))
@@ -165,7 +204,7 @@ class LookupModule(LookupBase):
             _shell_quote(compose_files),
         ]
 
-        if env_file:
+        if _as_str(env_file):
             cmd += ["--env-file", _shell_quote(env_file)]
 
         cmd += [
