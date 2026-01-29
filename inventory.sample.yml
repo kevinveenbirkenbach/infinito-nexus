@@ -4,7 +4,7 @@ ASYNC_ENABLED:            false
 MODE_DEBUG:               true
 ENVIRONMENT:              development
 MODE_TEST:                true
-TLS_ENABLED:              false
+TLS_ENABLED:              true
 TLS_MODE:                 "self_signed"
 
 design:
@@ -47,24 +47,6 @@ applications:
       status_codes:
         # Full auto setup isn't possible
         default: 302
-  web-app-flowise:
-    docker:
-      services:
-        # Deactivated the following services for the CI/CD deploy to keep the container slim
-        logout:
-          enabled: false
-        desktop:
-          enabled: false
-        matomo:
-          enabled: false
-          shared:  false
-  web-app-suitecrm:
-    docker:
-      services:
-        logout:
-          enabled: false
-        matomo:
-          enabled: false
   web-app-keycloak:
     credentials:
       administrator_password: "'$tr0ng€xampl3PW!"
@@ -82,29 +64,6 @@ applications:
         phpmyadmin:
           # Allows faster debugging
           autologin: true
-  web-app-matrix:
-    docker:
-      services:
-        oidc:
-          enabled:            false
-          shared:             false
-  web-app-mastodon:
-    docker:
-      services:
-        oidc:
-          enabled:            false
-          shared:             false
-  web-app-bigbluebutton:
-    # Deactivate oidc temporary for testing purposes
-    docker:
-      services:
-        oidc:
-          enabled:            false
-          shared:             false
-#    server:
-#      tls:
-#        enabled:  false  "{{ RUNTIME == 'dev' }}"
-#        flavor:   self_signed
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 
