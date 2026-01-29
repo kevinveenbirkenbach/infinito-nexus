@@ -34,6 +34,15 @@ class TestComposeCaInject(unittest.TestCase):
         with self.assertRaises(SystemExit):
             self.m.normalize_cmd(123)
 
+    def test_normalize_entrypoint(self):
+        self.assertEqual(self.m.normalize_entrypoint(["a", "b"]), ["a", "b"])
+        self.assertEqual(
+            self.m.normalize_entrypoint("echo hi"), ["/bin/sh", "-lc", "echo hi"]
+        )
+        self.assertEqual(self.m.normalize_entrypoint(None), [])
+        with self.assertRaises(SystemExit):
+            self.m.normalize_entrypoint(123)
+
     def test_parse_yaml_requires_mapping(self):
         doc = self.m.parse_yaml("a: 1\n", "x")
         self.assertEqual(doc["a"], 1)
@@ -43,16 +52,31 @@ class TestComposeCaInject(unittest.TestCase):
 
     @patch.object(Path, "exists", autospec=True, return_value=True)
     @patch.object(Path, "is_dir", autospec=True, return_value=True)
+    @patch.object(Path, "read_text", autospec=True)
     @patch.object(Path, "write_text", autospec=True)
     @patch.object(Path, "mkdir", autospec=True)
-    def test_main_generates_override(self, _mkdir, _write_text, _is_dir, _exists):
+    def test_main_generates_override(
+        self, _mkdir, _write_text, _read_text, _is_dir, _exists
+    ):
+        # The new code scans compose files to discover profiles.
+        # So we must provide read_text() content for those files.
+        _read_text.return_value = "services:\n  app:\n    image: myimage:latest\n"
+
         def fake_run(cmd, *, cwd, env):
-            if cmd[:3] == ["docker", "compose", "-p"]:
+            # docker compose ... config
+            if (
+                len(cmd) >= 1
+                and cmd[0:2] == ["docker", "compose"]
+                and cmd[-1] == "config"
+            ):
                 yml = "services:\n  app:\n    image: myimage:latest\n"
                 return 0, yml, ""
+
+            # docker image inspect <image>  (used both for exists-check and for config inspection)
             if cmd[:3] == ["docker", "image", "inspect"]:
                 json_out = '[{"Config":{"Entrypoint":["/entry"],"Cmd":["run"]}}]'
                 return 0, json_out, ""
+
             return 1, "", "unexpected"
 
         with patch.object(self.m, "run", side_effect=fake_run):

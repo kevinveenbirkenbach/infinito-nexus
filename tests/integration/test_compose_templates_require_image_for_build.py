@@ -14,12 +14,11 @@
 
 from __future__ import annotations
 
-import os
 import re
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 
 BUILD_RE = re.compile(r"^(?P<indent>[ \t]*)build:\s*(#.*)?$")
@@ -56,7 +55,9 @@ def _indent_len(indent: str) -> int:
     return len(indent.replace("\t", " "))
 
 
-def _block_bounds_for_key(lines: List[str], idx: int, key_indent_len: int) -> Tuple[int, int]:
+def _block_bounds_for_key(
+    lines: List[str], idx: int, key_indent_len: int
+) -> Tuple[int, int]:
     """
     Determine bounds of the YAML mapping block that contains the key at lines[idx],
     based on indentation dropping below key_indent_len.
@@ -101,7 +102,9 @@ def _block_bounds_for_key(lines: List[str], idx: int, key_indent_len: int) -> Tu
     return start, end
 
 
-def _has_image_same_indent(lines: List[str], start: int, end: int, indent_str: str) -> bool:
+def _has_image_same_indent(
+    lines: List[str], start: int, end: int, indent_str: str
+) -> bool:
     """
     Check if an `image:` key exists at the same indent (exact prefix match) within [start, end).
     """
