@@ -32,6 +32,8 @@ class TestCertPlanLookup(unittest.TestCase):
             "web-app-off": {"server": {"tls": {"enabled": False}}},
         }
 
+        # IMPORTANT (new strict behavior):
+        # For TLS_SELFSIGNED_SCOPE=global, CURRENT_PLAY_DOMAINS_ALL MUST be list[str].
         self.vars = {
             "domains": self.domains,
             "applications": self.applications,
@@ -40,6 +42,13 @@ class TestCertPlanLookup(unittest.TestCase):
             "LETSENCRYPT_LIVE_PATH": "/etc/letsencrypt/live/",
             "TLS_SELFSIGNED_BASE_PATH": "/etc/infinito.nexus/selfsigned",
             "TLS_SELFSIGNED_SCOPE": "global",
+            "CURRENT_PLAY_DOMAINS_ALL": [
+                "a.example",
+                "b.example",
+                "b-alt.example",
+                "c.example",
+                "api.c.example",
+            ],
         }
 
     def test_letsencrypt_plan_paths_and_sans_default(self):
@@ -78,11 +87,38 @@ class TestCertPlanLookup(unittest.TestCase):
             out["files"]["key"], "/etc/infinito.nexus/selfsigned/_global/privkey.pem"
         )
 
-        # SANs: primary first, then rest of global list (deduped, normalized, first-seen)
+        # New strict behavior:
+        # SANs come from CURRENT_PLAY_DOMAINS_ALL (list[str]), plus primary_domain first.
         self.assertEqual(
             out["domains"]["san"],
             ["b.example", "a.example", "b-alt.example", "c.example", "api.c.example"],
         )
+
+    def test_selfsigned_global_scope_requires_current_play_domains_all_list(self):
+        v = dict(self.vars)
+        del v["CURRENT_PLAY_DOMAINS_ALL"]
+        with self.assertRaises(AnsibleError):
+            self.lookup.run(["web-app-b"], variables=v, mode="app")
+
+        v2 = dict(self.vars)
+        v2["CURRENT_PLAY_DOMAINS_ALL"] = {"a.example": True}  # wrong type
+        with self.assertRaises(AnsibleError):
+            self.lookup.run(["web-app-b"], variables=v2, mode="app")
+
+        v3 = dict(self.vars)
+        v3["CURRENT_PLAY_DOMAINS_ALL"] = []  # empty list not allowed
+        with self.assertRaises(AnsibleError):
+            self.lookup.run(["web-app-b"], variables=v3, mode="app")
+
+        v4 = dict(self.vars)
+        v4["CURRENT_PLAY_DOMAINS_ALL"] = ["a.example", ""]  # empty string not allowed
+        with self.assertRaises(AnsibleError):
+            self.lookup.run(["web-app-b"], variables=v4, mode="app")
+
+        v5 = dict(self.vars)
+        v5["CURRENT_PLAY_DOMAINS_ALL"] = ["a.example", 123]  # non-string not allowed
+        with self.assertRaises(AnsibleError):
+            self.lookup.run(["web-app-b"], variables=v5, mode="app")
 
     def test_selfsigned_app_scope_paths(self):
         v = dict(self.vars)
