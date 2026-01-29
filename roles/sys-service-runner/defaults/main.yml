@@ -1,1 +1,3 @@
-sys_service_runner_state: "{{ 'restarted' if MODE_DEBUG else 'started' }}"
+sys_service_runner_state:   "{{ 'restarted' if MODE_DEBUG else 'started' }}"
+SYS_SERVICE_RUNNER_RETRIES: 10
+SYS_SERVICE_RUNNER_DELAY:   60

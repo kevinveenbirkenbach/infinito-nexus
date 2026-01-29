@@ -16,7 +16,7 @@ set -euo pipefail
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 
 # This script always generates inventories for the development compose stack.
-RUNTIME_VARS_JSON='{"RUNTIME":"dev"}'
+RUNTIME_VARS_JSON='{"RUNTIME":"dev","SYS_SERVICE_RUNNER_RETRIES":1}'
 
 echo "=== local inventory init (ALL apps) ==="
 echo "distro        = ${INFINITO_DISTRO}"
