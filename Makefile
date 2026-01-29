@@ -253,6 +253,10 @@ test-local-cleanup:
 	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
 	bash scripts/tests/deploy/local/cleanup.sh
 
+test-local-web-purge:
+	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
+	bash scripts/tests/deploy/local/purge_web.sh
+
 test-local-rapid:
 	@APP="$(APP)" \
 	TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
