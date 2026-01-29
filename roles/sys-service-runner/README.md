@@ -15,7 +15,7 @@ but should be started once everything they depend on is ready.
 ## Variables
 
 - `system_service_run_list` (list): list of systemd unit names to run
-- `sys_service_runner_state` (string): desired state (`started`, `restarted`, ...)  
+- `SYS_SERVICE_RUNNER_STATE` (string): desired state (`started`, `restarted`, ...)  
 
 ## Further Resources
 
