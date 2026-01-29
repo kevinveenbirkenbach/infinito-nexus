@@ -1,2 +1,0 @@
----
-elastic_search_password: '' # Just defined to pass the integration test. this role is old and hadn't been used since ages so @todo delete it as soon as you implement it productive

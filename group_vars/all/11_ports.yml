@@ -31,7 +31,7 @@ ports:
       web-app-confluence: 8005
       web-app-yourls: 8006
       web-app-mailu: 8007
-      web-app-elk: 8008
+      # web-app-: 8008
       web-app-mastodon: 8009
       web-app-pixelfed: 8010
       web-app-peertube: 8011

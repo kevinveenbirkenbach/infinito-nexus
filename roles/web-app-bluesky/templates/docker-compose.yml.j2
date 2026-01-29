@@ -21,6 +21,7 @@
     build:
       context: "{{ BLUESKY_SOCIAL_APP_DIR }}"
       dockerfile: Dockerfile
+    image: {{ BLUESKY_WEB_IMAGE_CUSTOM }}
     pull_policy: never
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_WEB_PORT }}:{{ container_port }}"

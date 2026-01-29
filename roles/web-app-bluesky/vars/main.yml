@@ -24,6 +24,7 @@ BLUESKY_PDS_BLOBSTORE_LOCATION: "{{ [ BLUESKY_PDS_DATA_DIR, 'blocks' ] | path_jo
 BLUESKY_WEB_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.web.enabled') }}"
 BLUESKY_WEB_DOMAIN:             "{{ domains[application_id].web }}"
 BLUESKY_WEB_PORT:               "{{ ports.localhost.http['web-app-bluesky_web'] }}"
+BLUESKY_WEB_IMAGE_CUSTOM:       "bluesky_web_custom"
 
 ## View
 BLUESKY_VIEW_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.view.enabled') }}"

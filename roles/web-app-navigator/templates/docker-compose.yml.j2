@@ -1,8 +1,9 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-  infinito-presentation:
+  {{ NAVIGATOR_SERVICE }}:
     build:
       context:    {{ path_infinito_presentation_output.stdout }}
       dockerfile: {{ path_infinito_presentation_output.stdout }}/Dockerfile
+    image: {{ NAVIGATOR_IMAGE }}
     pull_policy: never
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:5000"
