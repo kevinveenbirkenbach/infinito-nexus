@@ -34,6 +34,7 @@
   args:
     chdir: "{{ docker_compose.directories.instance }}"
   register: listmonk_install
+  notify: docker compose up
   changed_when: true
   failed_when: listmonk_install.rc not in [0, 141]
   when: listmonk_db_empty
