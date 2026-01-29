@@ -13,10 +13,10 @@
 # - Include docker-compose.ca.override.yml ONLY when:
 #     the app has a domain AND TLS is enabled AND TLS mode == "self_signed"
 #
-# Requires:
-# - docker_compose.files.docker_compose
-# - docker_compose.files.docker_compose_ca_override (required when enabled+self_signed)
-# - tls_resolve lookup plugin available
+# Optional kwargs:
+# - include_ca (bool, default True):
+#     - True  -> normal behavior (append CA override when enabled+self_signed)
+#     - False -> do NOT append CA override (used during CA-inject bootstrap)
 
 from __future__ import annotations
 
@@ -145,6 +145,10 @@ class LookupModule(LookupBase):
         if not application_id:
             raise AnsibleError("compose_f_args: application_id is empty")
 
+        include_ca = kwargs.get("include_ca", True)
+        if not isinstance(include_ca, bool):
+            raise AnsibleError("compose_f_args: include_ca must be a bool")
+
         raw_dc = variables.get("docker_compose", None)
         if raw_dc is None:
             raise AnsibleError(
@@ -195,37 +199,46 @@ class LookupModule(LookupBase):
                 )
             parts.append(f"-f {override}")
 
-        # 2) CA override: only when domain exists AND TLS is enabled AND self_signed.
-        if "domains" not in variables:
-            raise AnsibleError("compose_f_args: missing required variable 'domains'")
-
-        domains = _maybe_template(templar, variables["domains"])
-        if _has_domain(domains, application_id):
-            tls_resolver = lookup_loader.get("tls_resolve", self._loader, self._templar)
-            tls = tls_resolver.run([application_id], variables=variables)[0]
-
-            if not isinstance(tls, dict):
+        # 2) CA override: only when include_ca=True and domain exists AND TLS is enabled AND self_signed.
+        if include_ca:
+            if "domains" not in variables:
                 raise AnsibleError(
-                    f"compose_f_args: tls_resolve returned non-dict: {type(tls)}"
+                    "compose_f_args: missing required variable 'domains'"
                 )
-            if "enabled" not in tls:
-                raise AnsibleError(
-                    "compose_f_args: tls_resolve did not return 'enabled'"
+
+            domains = _maybe_template(templar, variables["domains"])
+            if _has_domain(domains, application_id):
+                tls_resolver = lookup_loader.get(
+                    "tls_resolve", self._loader, self._templar
                 )
-            if "mode" not in tls:
-                raise AnsibleError("compose_f_args: tls_resolve did not return 'mode'")
+                tls = tls_resolver.run([application_id], variables=variables)[0]
 
-            enabled = bool(tls["enabled"])
-            mode = _as_str(tls["mode"])
-            if not mode:
-                raise AnsibleError("compose_f_args: tls_resolve returned empty 'mode'")
-
-            if enabled and mode == "self_signed":
-                if not _as_str(ca_override):
+                if not isinstance(tls, dict):
                     raise AnsibleError(
-                        "compose_f_args: docker_compose.files.docker_compose_ca_override is required "
-                        "when TLS is enabled and mode is self_signed"
+                        f"compose_f_args: tls_resolve returned non-dict: {type(tls)}"
                     )
-                parts.append(f"-f {ca_override}")
+                if "enabled" not in tls:
+                    raise AnsibleError(
+                        "compose_f_args: tls_resolve did not return 'enabled'"
+                    )
+                if "mode" not in tls:
+                    raise AnsibleError(
+                        "compose_f_args: tls_resolve did not return 'mode'"
+                    )
+
+                enabled = bool(tls["enabled"])
+                mode = _as_str(tls["mode"])
+                if not mode:
+                    raise AnsibleError(
+                        "compose_f_args: tls_resolve returned empty 'mode'"
+                    )
+
+                if enabled and mode == "self_signed":
+                    if not _as_str(ca_override):
+                        raise AnsibleError(
+                            "compose_f_args: docker_compose.files.docker_compose_ca_override is required "
+                            "when TLS is enabled and mode is self_signed"
+                        )
+                    parts.append(f"-f {ca_override}")
 
         return [" ".join(parts)]

@@ -2,6 +2,7 @@
 import importlib.util
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 
@@ -45,11 +46,34 @@ class TestComposeCaInjectCmd(unittest.TestCase):
             },
         }
 
+    def _patch_compose_f_args(self, ret: str):
+        """
+        Patch the lookup_loader.get('compose_f_args', ...) call within the lookup plugin
+        so tests do not depend on Ansible loader internals.
+        """
+        fake = type(
+            "FakeComposeFArgs",
+            (),
+            {"run": staticmethod(lambda terms, variables=None, **kwargs: [ret])},
+        )()
+        return patch.object(self.m.lookup_loader, "get", return_value=fake)
+
     def test_builds_command_string(self):
-        out = self.lookup.run([], variables=self.vars, project="myproj")[0]
+        # project is derived from module_utils.entity_name_utils.get_entity_name(application_id)
+        with (
+            patch.object(self.m, "get_entity_name", return_value="myproj"),
+            self._patch_compose_f_args(
+                "-f /opt/docker/app/docker-compose.yml -f /opt/docker/app/docker-compose.override.yml"
+            ),
+        ):
+            out = self.lookup.run(["web-app-foo"], variables=self.vars)[0]
 
         self.assertIn("python3", out)
         self.assertIn("/etc/infinito.nexus/bin/compose_ca_inject.py", out)
+
+        # Must include derived project (entity name)
+        self.assertIn("--project", out)
+        self.assertIn("'myproj'", out)
 
         # Must include base + override only (NOT the CA override)
         self.assertIn("--compose-files", out)
@@ -57,29 +81,70 @@ class TestComposeCaInjectCmd(unittest.TestCase):
             "-f /opt/docker/app/docker-compose.yml -f /opt/docker/app/docker-compose.override.yml",
             out,
         )
+        self.assertNotIn(
+            "docker-compose.ca.override.yml -f", out
+        )  # ensure CA override not appended as -f
 
         # Must include env-file, out basename, and CA args
         self.assertIn("--env-file", out)
+        self.assertIn("/opt/docker/app/.env/env", out)
+
         self.assertIn("--out", out)
-        self.assertIn("docker-compose.ca.override.yml", out)
+        # out must be basename of docker_compose_ca_override
+        self.assertIn("'docker-compose.ca.override.yml'", out)
 
         self.assertIn("--ca-host", out)
         self.assertIn("/etc/infinito.nexus/ca/root-ca.crt", out)
         self.assertIn("--wrapper-host", out)
         self.assertIn("/etc/infinito.nexus/bin/with-ca-trust.sh", out)
 
-    def test_requires_project_kwarg(self):
+    def test_requires_application_id_term(self):
+        # No terms
         with self.assertRaises(AnsibleError):
             self.lookup.run([], variables=self.vars)
 
+        # More than one term
         with self.assertRaises(AnsibleError):
-            self.lookup.run([], variables=self.vars, project="")
+            self.lookup.run(["a", "b"], variables=self.vars)
+
+        # Empty term
+        with self.assertRaises(AnsibleError):
+            self.lookup.run([""], variables=self.vars)
+
+    def test_requires_project_non_empty(self):
+        # If entity name resolution returns empty, this must hard-fail.
+        with patch.object(self.m, "get_entity_name", return_value=""):
+            with self.assertRaises(AnsibleError):
+                self.lookup.run(["web-app-foo"], variables=self.vars)
 
     def test_requires_structures(self):
         v = dict(self.vars)
         del v["CA_TRUST"]
-        with self.assertRaises(AnsibleError):
-            self.lookup.run([], variables=v, project="p")
+        with (
+            patch.object(self.m, "get_entity_name", return_value="p"),
+            self._patch_compose_f_args("-f /opt/docker/app/docker-compose.yml"),
+        ):
+            with self.assertRaises(AnsibleError):
+                self.lookup.run(["web-app-foo"], variables=v)
+
+    def test_requires_docker_compose_variable(self):
+        v = dict(self.vars)
+        del v["docker_compose"]
+        with (
+            patch.object(self.m, "get_entity_name", return_value="p"),
+            self._patch_compose_f_args("-f /opt/docker/app/docker-compose.yml"),
+        ):
+            with self.assertRaises(AnsibleError):
+                self.lookup.run(["web-app-foo"], variables=v)
+
+    def test_requires_compose_f_args_non_empty(self):
+        # compose_f_args returning empty must hard-fail
+        with (
+            patch.object(self.m, "get_entity_name", return_value="p"),
+            self._patch_compose_f_args(""),
+        ):
+            with self.assertRaises(AnsibleError):
+                self.lookup.run(["web-app-foo"], variables=self.vars)
 
 
 if __name__ == "__main__":

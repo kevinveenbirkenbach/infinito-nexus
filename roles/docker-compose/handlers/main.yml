@@ -2,7 +2,7 @@
 - name: Generate CA trust override (before any compose command)
   ansible.builtin.shell: |
     set -euo pipefail
-    {{ lookup('compose_ca_inject_cmd', project=(application_id | get_entity_name)) }}
+    {{ lookup('compose_ca_inject_cmd', application_id) }}
   args:
     chdir: "{{ docker_compose.directories.instance }}"
     executable: /bin/bash
