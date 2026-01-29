@@ -9,7 +9,7 @@ class TestPortsUniqueness(unittest.TestCase):
     def setUpClass(cls):
         base_dir = os.path.dirname(__file__)
         cls.ports_file = os.path.abspath(
-            os.path.join(base_dir, "..", "..", "group_vars", "all", "10_ports.yml")
+            os.path.join(base_dir, "..", "..", "group_vars", "all", "11_ports.yml")
         )
         # Try to load data; leave it as None if missing or invalid YAML
         try:
