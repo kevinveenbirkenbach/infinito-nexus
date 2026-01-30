@@ -37,14 +37,25 @@ log "Sanitized trust name: $name"
 
 installed=0
 
+# Always provide env-based trust hints as a fallback (works for many TLS stacks)
+export SSL_CERT_FILE="$CA_TRUST_CERT"
+export REQUESTS_CA_BUNDLE="$CA_TRUST_CERT"
+export CURL_CA_BUNDLE="$CA_TRUST_CERT"
+# Optional (harmless if unused; helps Node-based tools if any)
+export NODE_EXTRA_CA_CERTS="$CA_TRUST_CERT"
+
 install_anchor() {
   src="$1"
   dst="$2"
 
   log "Installing CA anchor: $dst"
-  run mkdir -p "$(dirname "$dst")"
-  run cp -f "$src" "$dst"
-  installed=1
+  if run mkdir -p "$(dirname "$dst")" 2>/dev/null && run cp -f "$src" "$dst" 2>/dev/null; then
+    installed=1
+    return 0
+  fi
+
+  log "WARN: Cannot write CA anchor to $dst (no permission). Falling back to SSL_CERT_FILE/REQUESTS_CA_BUNDLE only."
+  return 1
 }
 
 #
@@ -52,8 +63,9 @@ install_anchor() {
 #
 if command -v update-ca-certificates >/dev/null 2>&1; then
   log "Detected update-ca-certificates"
-  install_anchor "$CA_TRUST_CERT" "/usr/local/share/ca-certificates/${name}.crt"
-  run update-ca-certificates
+  if install_anchor "$CA_TRUST_CERT" "/usr/local/share/ca-certificates/${name}.crt"; then
+    run update-ca-certificates || true
+  fi
 fi
 
 #
@@ -61,8 +73,9 @@ fi
 #
 if command -v update-ca-trust >/dev/null 2>&1; then
   log "Detected update-ca-trust"
-  install_anchor "$CA_TRUST_CERT" "/etc/pki/ca-trust/source/anchors/${name}.crt"
-  run update-ca-trust extract
+  if install_anchor "$CA_TRUST_CERT" "/etc/pki/ca-trust/source/anchors/${name}.crt"; then
+    run update-ca-trust extract || true
+  fi
 fi
 
 #
@@ -70,23 +83,21 @@ fi
 #
 if command -v trust >/dev/null 2>&1; then
   log "Detected trust"
-  install_anchor "$CA_TRUST_CERT" "/etc/ca-certificates/trust-source/anchors/${name}.crt"
-  install_anchor "$CA_TRUST_CERT" "/etc/pki/ca-trust/source/anchors/${name}.crt"
-  run trust extract-compat
+  if install_anchor "$CA_TRUST_CERT" "/etc/ca-certificates/trust-source/anchors/${name}.crt"; then
+    run trust extract-compat || true
+  fi
 fi
 
-if [ "$installed" = "0" ]; then
-  echo "[with-ca-trust] INFO: No known CA trust mechanism found on this system; skipping CA installation" >&2
-else
+if [ "$installed" = "1" ]; then
   log "CA trust installation completed successfully"
+else
+  log "CA trust not installed into OS trust store; using env-based CA variables only"
 fi
 
-# Wrapper mode: exec target command if provided
 if [ "$#" -gt 0 ]; then
   log "Executing wrapped command: $*"
   exec "$@"
 fi
 
-# Standalone mode: nothing else to do
 log "No command provided to execute; exiting successfully"
 exit 0
