@@ -273,12 +273,17 @@ def render_override(
     env: Dict[str, str],
     ca_host: str,
     wrapper_host: str,
+    trust_name: str,
 ) -> Dict[str, Any]:
     """
     Generate a docker-compose override that injects CA trust into every service by:
       - mounting CA cert + wrapper script
       - setting entrypoint to the wrapper
       - setting command to the ORIGINAL effective command (final entrypoint + final command)
+
+    Also sets:
+      - CA_TRUST_CERT (container path)
+      - CA_TRUST_NAME (trust anchor name; required by with-ca-trust.sh)
     """
     ca_container = "/tmp/infinito/ca/root-ca.crt"
     wrapper_container = "/tmp/infinito/bin/with-ca-trust.sh"
@@ -331,7 +336,10 @@ def render_override(
                 f"{ca_host}:{ca_container}:ro",
                 f"{wrapper_host}:{wrapper_container}:ro",
             ],
-            "environment": {"CA_TRUST_CERT": ca_container},
+            "environment": {
+                "CA_TRUST_CERT": ca_container,
+                "CA_TRUST_NAME": trust_name,
+            },
             "entrypoint": [wrapper_container],
             "command": effective_cmd,
         }
@@ -362,6 +370,11 @@ def main() -> int:
         required=True,
         help="Host path to wrapper script (bind-mounted)",
     )
+    ap.add_argument(
+        "--trust-name",
+        required=True,
+        help="Trust anchor name for CA installation inside containers (CA_TRUST_NAME)",
+    )
     args = ap.parse_args()
 
     cwd = Path(args.chdir)
@@ -374,10 +387,14 @@ def main() -> int:
 
     ca_host = str(args.ca_host).strip()
     wrapper_host = str(args.wrapper_host).strip()
+    trust_name = str(args.trust_name).strip()
+
     if not ca_host:
         die("--ca-host must be non-empty")
     if not wrapper_host:
         die("--wrapper-host must be non-empty")
+    if not trust_name:
+        die("--trust-name must be non-empty")
 
     env = dict(os.environ)
 
@@ -443,6 +460,7 @@ def main() -> int:
         env=env,
         ca_host=ca_host,
         wrapper_host=wrapper_host,
+        trust_name=trust_name,
     )
 
     try:

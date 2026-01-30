@@ -37,7 +37,15 @@
     _ss_key: "{{ _cert.files.key }}"
     _ss_dir: "{{ _cert.files.cert | dirname }}"
     _ss_conf: "{{ (_cert.files.cert | dirname) ~ '/openssl.cnf' }}"
-    _ss_cn: "{{ (tls_selfsigned_subject.CN | default('') | length > 0) | ternary(tls_selfsigned_subject.CN, _tls.domains.primary) }}"
+    _ss_cn: >-
+      {{
+        (_cert.scope == 'global')
+        | ternary(
+            (DOMAIN_PRIMARY | upper) ~ ' Global TLS',
+            ((tls_selfsigned_subject.CN | default('') | length > 0)
+              | ternary(tls_selfsigned_subject.CN, _tls.domains.primary))
+          )
+      }}
   changed_when: false
 
 - name: "TLS | (self_signed) ensure directory exists"
@@ -100,45 +108,41 @@
       }}
   changed_when: false
 
-- name: "TLS | (self_signed) decide whether regeneration is needed"
-  ansible.builtin.set_fact:
-    _ss_regen_needed: >-
+- block:
+    - name: "TLS | (self_signed) remove outdated cert/key if SAN drift detected"
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ _ss_cert }}"
+        - "{{ _ss_key }}"
+
+    - name: "TLS | (self_signed) generate key+cert if missing or drift detected"
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - req
+          - -x509
+          - -nodes
+          - -days
+          - "{{ tls_selfsigned_days | string }}"
+          - -newkey
+          - "rsa:{{ tls_selfsigned_key_bits }}"
+          - -keyout
+          - "{{ _ss_key }}"
+          - -out
+          - "{{ _ss_cert }}"
+          - -config
+          - "{{ _ss_conf }}"
+          - -extensions
+          - req_ext
+      args:
+        creates: "{{ _ss_cert }}"
+
+  when: >-
       {{
         (not (_ss_cert_stat.stat.exists | default(false))) or
         ((_ss_wanted_sans | difference(_ss_existing_sans) | length) > 0)
       }}
-  changed_when: false
-
-- name: "TLS | (self_signed) remove outdated cert/key if SAN drift detected"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - "{{ _ss_cert }}"
-    - "{{ _ss_key }}"
-  when: _ss_regen_needed | bool
-
-- name: "TLS | (self_signed) generate key+cert if missing or drift detected"
-  ansible.builtin.command:
-    argv:
-      - openssl
-      - req
-      - -x509
-      - -nodes
-      - -days
-      - "{{ tls_selfsigned_days | string }}"
-      - -newkey
-      - "rsa:{{ tls_selfsigned_key_bits }}"
-      - -keyout
-      - "{{ _ss_key }}"
-      - -out
-      - "{{ _ss_cert }}"
-      - -config
-      - "{{ _ss_conf }}"
-      - -extensions
-      - req_ext
-  args:
-    creates: "{{ _ss_cert }}"
-  when: _ss_regen_needed | bool
 
 - include_tasks: utils/once/flag.yml

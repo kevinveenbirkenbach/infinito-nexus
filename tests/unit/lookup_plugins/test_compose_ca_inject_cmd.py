@@ -43,14 +43,11 @@ class TestComposeCaInjectCmd(unittest.TestCase):
                 "inject_script": "/etc/infinito.nexus/bin/compose_ca_inject.py",
                 "cert_host": "/etc/infinito.nexus/ca/root-ca.crt",
                 "wrapper_host": "/etc/infinito.nexus/bin/with-ca-trust.sh",
+                "trust_name": "infinito.nexus",
             },
         }
 
     def _patch_compose_f_args(self, ret: str):
-        """
-        Patch the lookup_loader.get('compose_f_args', ...) call within the lookup plugin
-        so tests do not depend on Ansible loader internals.
-        """
         fake = type(
             "FakeComposeFArgs",
             (),
@@ -59,7 +56,6 @@ class TestComposeCaInjectCmd(unittest.TestCase):
         return patch.object(self.m.lookup_loader, "get", return_value=fake)
 
     def test_builds_command_string(self):
-        # project is derived from module_utils.entity_name_utils.get_entity_name(application_id)
         with (
             patch.object(self.m, "get_entity_name", return_value="myproj"),
             self._patch_compose_f_args(
@@ -71,48 +67,42 @@ class TestComposeCaInjectCmd(unittest.TestCase):
         self.assertIn("python3", out)
         self.assertIn("/etc/infinito.nexus/bin/compose_ca_inject.py", out)
 
-        # Must include derived project (entity name)
         self.assertIn("--project", out)
         self.assertIn("'myproj'", out)
 
-        # Must include base + override only (NOT the CA override)
         self.assertIn("--compose-files", out)
         self.assertIn(
             "-f /opt/docker/app/docker-compose.yml -f /opt/docker/app/docker-compose.override.yml",
             out,
         )
-        self.assertNotIn(
-            "docker-compose.ca.override.yml -f", out
-        )  # ensure CA override not appended as -f
+        self.assertNotIn("docker-compose.ca.override.yml -f", out)
 
-        # Must include env-file, out basename, and CA args
         self.assertIn("--env-file", out)
         self.assertIn("/opt/docker/app/.env/env", out)
 
         self.assertIn("--out", out)
-        # out must be basename of docker_compose_ca_override
         self.assertIn("'docker-compose.ca.override.yml'", out)
 
         self.assertIn("--ca-host", out)
         self.assertIn("/etc/infinito.nexus/ca/root-ca.crt", out)
+
         self.assertIn("--wrapper-host", out)
         self.assertIn("/etc/infinito.nexus/bin/with-ca-trust.sh", out)
 
+        self.assertIn("--trust-name", out)
+        self.assertIn("'infinito.nexus'", out)
+
     def test_requires_application_id_term(self):
-        # No terms
         with self.assertRaises(AnsibleError):
             self.lookup.run([], variables=self.vars)
 
-        # More than one term
         with self.assertRaises(AnsibleError):
             self.lookup.run(["a", "b"], variables=self.vars)
 
-        # Empty term
         with self.assertRaises(AnsibleError):
             self.lookup.run([""], variables=self.vars)
 
     def test_requires_project_non_empty(self):
-        # If entity name resolution returns empty, this must hard-fail.
         with patch.object(self.m, "get_entity_name", return_value=""):
             with self.assertRaises(AnsibleError):
                 self.lookup.run(["web-app-foo"], variables=self.vars)
@@ -138,7 +128,6 @@ class TestComposeCaInjectCmd(unittest.TestCase):
                 self.lookup.run(["web-app-foo"], variables=v)
 
     def test_requires_compose_f_args_non_empty(self):
-        # compose_f_args returning empty must hard-fail
         with (
             patch.object(self.m, "get_entity_name", return_value="p"),
             self._patch_compose_f_args(""),

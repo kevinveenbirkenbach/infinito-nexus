@@ -1,5 +1,6 @@
 # tests/unit/roles/docker-compose-ca/files/test_compose_ca_inject.py
 import importlib.util
+import json
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -58,23 +59,39 @@ class TestComposeCaInject(unittest.TestCase):
     def test_main_generates_override(
         self, _mkdir, _write_text, _read_text, _is_dir, _exists
     ):
-        # The new code scans compose files to discover profiles.
-        # So we must provide read_text() content for those files.
+        """
+        The implementation:
+          - parses compose files to discover profiles (reads files from --compose-files)
+          - runs `docker compose ... config` (default + per-profile)
+          - inspects images via `docker image inspect`
+          - writes an override that injects CA_TRUST_CERT + CA_TRUST_NAME
+
+        Therefore we must:
+          - provide readable compose file content (for profile discovery)
+          - mock run() for compose config + image inspect
+          - include the new required arg: --trust-name
+        """
+
+        # Content for compose files referenced by -f ... arguments (profile discovery).
+        # Keep it minimal; no profiles needed, but valid YAML mapping with services.
         _read_text.return_value = "services:\n  app:\n    image: myimage:latest\n"
 
         def fake_run(cmd, *, cwd, env):
             # docker compose ... config
             if (
-                len(cmd) >= 1
+                len(cmd) >= 3
                 and cmd[0:2] == ["docker", "compose"]
                 and cmd[-1] == "config"
             ):
                 yml = "services:\n  app:\n    image: myimage:latest\n"
                 return 0, yml, ""
 
-            # docker image inspect <image>  (used both for exists-check and for config inspection)
+            # docker image inspect <image>
             if cmd[:3] == ["docker", "image", "inspect"]:
-                json_out = '[{"Config":{"Entrypoint":["/entry"],"Cmd":["run"]}}]'
+                # compose_ca_inject expects `run()` to return stdout as JSON string here.
+                json_out = json.dumps(
+                    [{"Config": {"Entrypoint": ["/entry"], "Cmd": ["run"]}}]
+                )
                 return 0, json_out, ""
 
             return 1, "", "unexpected"
@@ -94,12 +111,46 @@ class TestComposeCaInject(unittest.TestCase):
                 "/etc/infinito/ca/root-ca.crt",
                 "--wrapper-host",
                 "/etc/infinito/bin/with-ca-trust.sh",
+                "--trust-name",
+                "infinito.local",
             ]
             with patch("sys.argv", argv):
                 rc = self.m.main()
 
         self.assertEqual(rc, 0)
         self.assertTrue(_write_text.called)
+
+        # Optional extra sanity: ensure the override contains CA_TRUST_NAME
+        # (We can't easily read the written content since write_text is mocked,
+        # but we *can* inspect its call args.)
+        args, kwargs = _write_text.call_args
+        # signature: Path.write_text(self, data, encoding=...)
+        written = args[1] if len(args) > 1 else ""
+        self.assertIn("CA_TRUST_NAME", written)
+        self.assertIn("infinito.local", written)
+
+    @patch.object(Path, "exists", autospec=True, return_value=True)
+    @patch.object(Path, "is_dir", autospec=True, return_value=True)
+    def test_main_requires_trust_name(self, _is_dir, _exists):
+        argv = [
+            "compose_ca_inject.py",
+            "--chdir",
+            "/tmp/app",
+            "--project",
+            "p",
+            "--compose-files",
+            "-f docker-compose.yml",
+            "--out",
+            "docker-compose.ca.override.yml",
+            "--ca-host",
+            "/etc/infinito/ca/root-ca.crt",
+            "--wrapper-host",
+            "/etc/infinito/bin/with-ca-trust.sh",
+            # missing: --trust-name
+        ]
+        with patch("sys.argv", argv):
+            with self.assertRaises(SystemExit):
+                self.m.main()
 
 
 if __name__ == "__main__":

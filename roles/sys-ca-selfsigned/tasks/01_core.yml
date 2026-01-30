@@ -133,4 +133,26 @@
       Generated certificate does not appear to be a CA certificate (CA:TRUE missing).
       Please inspect {{ CA_ROOT.cert_host }}.
 
+- name: "CA | install trust helper script (SPOT) on host"
+  become: true
+  ansible.builtin.copy:
+    src: "with-ca-trust.sh"
+    dest: "{{ CA_TRUST.wrapper_host }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "CA | (optional) install Root CA into host trust store"
+  become: true
+  ansible.builtin.command:
+    argv:
+      - "{{ CA_TRUST.wrapper_host }}"
+  environment:
+    CA_TRUST_CERT: "{{ CA_ROOT.cert_host }}"
+    CA_TRUST_NAME: "{{ DOMAIN_PRIMARY | lower }}"
+  changed_when: true
+  when:
+    - (CA_ROOT.install_to_host_trust | default(false)) | bool
+    - _ca_regen_needed | bool
+
 - include_tasks: utils/once/flag.yml
