@@ -4,8 +4,15 @@
 # - where the cert/key live (shared/global or per-app)
 # - which SAN list is effective
 #
-# It also detects SAN drift and regenerates the cert if the desired SAN set
-# is not covered by the existing certificate.
+# IMPORTANT:
+# - We DO NOT create a self-signed leaf (issuer==subject), because that will always fail curl verification.
+# - Instead, we create a local Root CA (sys-ca-selfsigned) and sign the leaf certificate with it.
+# - The resulting chain is: leaf (app/global) signed by Root CA, and Root CA is installed into trust stores.
+
+- name: "TLS | (self_signed) ensure local Root CA exists (for signing leaf certs)"
+  ansible.builtin.include_role:
+    name: sys-ca-selfsigned
+  when: run_once_sys_ca_selfsigned is not defined
 
 - name: "TLS | (self_signed) resolve via tls_resolve (strict)"
   ansible.builtin.set_fact:
@@ -37,6 +44,7 @@
     _ss_key: "{{ _cert.files.key }}"
     _ss_dir: "{{ _cert.files.cert | dirname }}"
     _ss_conf: "{{ (_cert.files.cert | dirname) ~ '/openssl.cnf' }}"
+    _ss_csr: "{{ (_cert.files.cert | dirname) ~ '/req.csr' }}"
     _ss_cn: >-
       {{
         (_cert.scope == 'global')
@@ -49,12 +57,14 @@
   changed_when: false
 
 - name: "TLS | (self_signed) ensure directory exists"
+  become: true
   ansible.builtin.file:
     path: "{{ _ss_dir }}"
     state: directory
     mode: "0750"
 
 - name: "TLS | (self_signed) render openssl config (SAN aware)"
+  become: true
   ansible.builtin.copy:
     dest: "{{ _ss_conf }}"
     mode: "0640"
@@ -109,30 +119,64 @@
   changed_when: false
 
 - block:
-    - name: "TLS | (self_signed) remove outdated cert/key if SAN drift detected"
+    - name: "TLS | (self_signed) remove outdated cert/key/csr if SAN drift detected"
+      become: true
       ansible.builtin.file:
         path: "{{ item }}"
         state: absent
       loop:
         - "{{ _ss_cert }}"
         - "{{ _ss_key }}"
+        - "{{ _ss_csr }}"
 
-    - name: "TLS | (self_signed) generate key+cert if missing or drift detected"
+    - name: "TLS | (self_signed) generate private key (if missing)"
+      become: true
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - genrsa
+          - -out
+          - "{{ _ss_key }}"
+          - "{{ tls_selfsigned_key_bits | string }}"
+      args:
+        creates: "{{ _ss_key }}"
+
+    - name: "TLS | (self_signed) generate CSR (SAN aware)"
+      become: true
       ansible.builtin.command:
         argv:
           - openssl
           - req
-          - -x509
-          - -nodes
-          - -days
-          - "{{ tls_selfsigned_days | string }}"
-          - -newkey
-          - "rsa:{{ tls_selfsigned_key_bits }}"
-          - -keyout
+          - -new
+          - -key
           - "{{ _ss_key }}"
           - -out
-          - "{{ _ss_cert }}"
+          - "{{ _ss_csr }}"
           - -config
+          - "{{ _ss_conf }}"
+      args:
+        creates: "{{ _ss_csr }}"
+
+    - name: "TLS | (self_signed) sign CSR with local Root CA (creates CA-signed leaf cert)"
+      become: true
+      ansible.builtin.command:
+        argv:
+          - openssl
+          - x509
+          - -req
+          - -in
+          - "{{ _ss_csr }}"
+          - -CA
+          - "{{ CA_ROOT.cert_host }}"
+          - -CAkey
+          - "{{ CA_ROOT.key_host }}"
+          - -CAcreateserial
+          - -out
+          - "{{ _ss_cert }}"
+          - -days
+          - "{{ tls_selfsigned_days | string }}"
+          - -sha256
+          - -extfile
           - "{{ _ss_conf }}"
           - -extensions
           - req_ext
