@@ -7,4 +7,3 @@
 # Testing
 - re-run witrh different credentials/configuration
 - run over all distros for each app
-- http/https logik einbinden

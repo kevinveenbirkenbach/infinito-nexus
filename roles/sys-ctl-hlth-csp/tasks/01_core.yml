@@ -23,7 +23,12 @@
     system_service_tpl_timeout_start_sec: "{{ CURRENT_PLAY_DOMAINS_ALL | timeout_start_sec_for_domains }}"
     system_service_tpl_exec_start: >-
       {{ system_service_script_exec }}
-      --nginx-config-dir={{ NGINX.DIRECTORIES.HTTP.SERVERS }}
+      --nginx-config-dir={{
+          [
+            lookup('nginx_paths', want='directories.configuration.servers'),
+            lookup('tls_resolve', DOMAIN_PRIMARY, want='protocols.web')
+          ] | path_join
+        }}
       --image={{ HEALTH_CSP_IMAGE }}
       --short
       {% if HEALTH_CSP_ALWAYS_PULL | bool %} --always-pull{% endif %}

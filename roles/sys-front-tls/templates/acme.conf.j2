@@ -1,0 +1,6 @@
+location ^~ /.well-known/acme-challenge/ {
+  allow all;
+  root {{ LETSENCRYPT_WEBROOT_PATH }};
+  default_type "text/plain";
+  try_files $uri =404;
+}

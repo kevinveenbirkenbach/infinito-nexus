@@ -11,7 +11,7 @@ webserver_client_max_body_size:       "{{ applications | get_app_conf(applicatio
 ## General
 MATRIX_SERVER_NAME:                   "{{ applications | get_app_conf(application_id, 'server_name') }}"
 MATRIX_ADMINISTRATOR_USERNAME:        "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
-MATRIX_WELL_KNOWN_DIRECTORY:          "{{ [ NGINX.DIRECTORIES.DATA.WELL_KNOWN, 'matrix' ] | path_join }}"
+MATRIX_WELL_KNOWN_DIRECTORY:          "{{ [ lookup('nginx_paths', want='directories.data.well_known'), 'matrix' ] | path_join }}"
 MATRIX_WELL_KNOWN_FILE:               "{{ MATRIX_WELL_KNOWN_DIRECTORY }}server"
 MATRIX_PROJECT:                       "{{ application_id | get_entity_name }}"
 MATRIX_REGISTRATION_FILE_FOLDER:      "/data/"
@@ -32,7 +32,7 @@ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER: "/data/homeserver.yaml"
 MATRIX_SYNAPSE_LOG_PATH_HOST:         "{{ [ docker_compose.directories.config, MATRIX_SYNAPSE_DOMAIN ~'.log.config' ] | path_join }}"
 MATRIX_SYNAPSE_LOG_PATH_CONTAINER:    "/data/{{ MATRIX_SYNAPSE_DOMAIN }}.log.config"
 MATRIX_SYNAPSE_URL:                   "{{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ MATRIX_SYNAPSE_DOMAIN }}"
-MATRIX_SYNAPSE_LISTEN_FLAGS:          "{{ MATRIX_FEDERATION_PORT }} {{ 'ssl ' if (lookup('tls_resolve', application_id, want='enabled') | bool) else '' }}default_server"
+MATRIX_SYNAPSE_LISTEN_FLAGS:          "{{ MATRIX_FEDERATION_PORT }} {{ 'ssl ' if (lookup('tls_resolve', application_id, want='enabled') | bool) else '' }} default_server"
 
 ## Element
 MATRIX_ELEMENT_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.element.version') }}"

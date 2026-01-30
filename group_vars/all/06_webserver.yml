@@ -1,34 +1,5 @@
 # Webserver Configuration
 
-# Helper 
-_nginx_www_dir:   "{{ applications | get_app_conf('svc-prx-openresty','docker.volumes.www') }}"
-_nginx_dir:       "{{ applications | get_app_conf('svc-prx-openresty','docker.volumes.nginx') }}"
-_nginx_conf_dir:  "{{ _nginx_dir }}conf.d/"
-_nginx_http_dir:  "{{ _nginx_conf_dir }}http/"
-
-## Nginx-Specific Path Configurations
-NGINX:
-  FILES:
-    CONFIGURATION:   "{{ _nginx_dir }}nginx.conf"
-  DIRECTORIES:
-    CONFIGURATION:    "{{ _nginx_conf_dir }}"               # Configuration directory
-    HTTP:
-      GLOBAL:         "{{ _nginx_http_dir }}global/"        # Contains global configurations which will be loaded into the http block
-      SERVERS:        "{{ _nginx_http_dir }}servers/"       # Contains one configuration per domain
-      MAPS:           "{{ _nginx_http_dir }}maps/"          # Contains mappings
-    STREAMS:          "{{ _nginx_conf_dir }}streams/"       # Contains streams configuration e.g. for ldaps
-    DATA:
-      WWW:            "{{ _nginx_www_dir }}"
-      WELL_KNOWN:     "/usr/share/nginx/well-known/"        # Path where well-known files are stored
-      HTML:           "{{ _nginx_www_dir }}public_html/"    # Path where the static homepage files are stored
-      FILES:          "{{ _nginx_www_dir }}public_files/"   # Path where the web accessable files are stored
-      CDN:            "{{ _nginx_www_dir }}public_cdn/"     # Contains files which will be accessable via the content delivery network
-      GLOBAL:         "{{ _nginx_www_dir }}global/"         # Directory containing files which will be globaly accessable, @Todo remove this when css migrated to CDN
-    CACHE:
-      GENERAL:        "/tmp/cache_nginx_general/"           # Directory which nginx uses to cache general data
-      IMAGE:          "/tmp/cache_nginx_image/"             # Directory which nginx uses to cache images
-  USER:               "http"                                # Default nginx user in ArchLinux
-
 # Effective CPUs (float) across proxy and the current app
 WEBSERVER_CPUS_EFFECTIVE: >-
   {{

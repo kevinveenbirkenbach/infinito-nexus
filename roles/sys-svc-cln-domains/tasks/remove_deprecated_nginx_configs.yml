@@ -1,7 +1,8 @@
 ---
 - name: Find matching nginx configs for {{ domain }}
   ansible.builtin.find:
-    paths: "{{ NGINX.DIRECTORIES.HTTP.SERVERS }}"
+    paths: "{{ lookup('nginx_paths', want='directories.configuration.servers') }}"
+    recurse: true
     patterns: "*.{{ domain }}.conf"
   register: find_result
 
@@ -15,6 +16,6 @@
 
 - name: Remove exact nginx config for {{ domain }}
   ansible.builtin.file:
-    path: "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
+    path: "{{ lookup('nginx_paths', domain, want='files.domain') }}"
     state: absent
   notify: restart openresty

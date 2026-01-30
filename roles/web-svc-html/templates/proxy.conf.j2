@@ -14,13 +14,13 @@ server
   
   location /
   {
-    root {{NGINX.DIRECTORIES.DATA.HTML}};
+    root {{lookup('nginx_paths', want='directories.data.html')}};
     index index.html index.htm;
     {% include 'roles/sys-front-inj-all/templates/location.lua.j2' %}
   }
 
   location /.well-known/ {
-    alias {{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }};
+    alias {{ lookup('nginx_paths', want='directories.data.well_known') }};
     allow all;
     default_type "text/plain";
     autoindex on;

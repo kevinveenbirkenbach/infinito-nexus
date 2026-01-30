@@ -14,7 +14,7 @@ server
   
   location /
   {
-    alias {{ NGINX.DIRECTORIES.DATA.FILES }}; {# Path to your file directory #}
+    alias {{ lookup('nginx_paths', want='directories.data.files') }}; {# Path to your file directory #}
     autoindex on;                             {# Enable directory listing #}
     autoindex_exact_size off;                 {# Display sizes in a human-readable format #}
     autoindex_localtime on;                   {# Show local time #}
@@ -22,7 +22,7 @@ server
   }
 
   location /.well-known/ {
-    alias {{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }};
+    alias {{ lookup('nginx_paths', want='directories.data.well_known') }};
     allow all;
     default_type "text/plain";
     autoindex on;

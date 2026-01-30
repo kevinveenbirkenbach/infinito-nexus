@@ -1,36 +1,12 @@
-- name: Ensure nginx configuration directories are present
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ NGINX.USER }}"
-    group: "{{ NGINX.USER }}"
-    mode: '0755'
-    recurse: yes
-  loop: >
-    {{
-      ( NGINX.DIRECTORIES.HTTP.values() | list ) +
-      [ NGINX.DIRECTORIES.STREAMS ] 
-    }}
-
-- name: Ensure all NGINX cache directories exist
+- name: Ensure all required NGINX host directories exist (single task)
   become: true
   ansible.builtin.file:
-    path: "{{ item.value }}"
+    path: "{{ item.path }}"
     state: directory
-    owner: "{{ NGINX.USER }}"
-    group: "{{ NGINX.USER }}"
-    mode: '0700'
-  loop: "{{ NGINX.DIRECTORIES.CACHE | dict2items }}"
+    owner: "{{ lookup('nginx_paths', want='user') }}"
+    group: "{{ lookup('nginx_paths', want='user') }}"
+    mode: "{{ item.mode }}"
+    recurse: true
+  loop: "{{ lookup('nginx_paths', want='directories.ensure') }}"
   loop_control:
-    label: "{{ item.key }}"
-
-- name: Ensure nginx data storage directories are present
-  file:
-    path: "{{ item }}"
-    state: directory
-    recurse: yes
-    owner: "{{ NGINX.USER }}"
-    group: "{{ NGINX.USER }}"
-    mode:  '0755'
-  loop: >
-    {{ NGINX.DIRECTORIES.DATA.values() | list }}
+    label: "{{ item.path }}"

@@ -27,13 +27,13 @@
 - name: Deploy OpenResty NGINX Base Configuration
   template:
     src:  nginx.conf.j2
-    dest: "{{ NGINX.FILES.CONFIGURATION }}"
+    dest: "{{ lookup('nginx_paths', want='files.configuration') }}"
   notify: restart openresty
 
 - name: Deploy OpenResty default server configuration
   template:
     src:  default_server.conf.j2
-    dest: "{{ [ NGINX.DIRECTORIES.HTTP.GLOBAL, 'default_server.conf' ] | path_join }}"
+    dest: "{{ [ lookup('nginx_paths', want='directories.configuration.global'), 'default_server.conf' ] | path_join }}"
   notify: restart openresty
 
 - name: Flush OpenResty Base Setup
