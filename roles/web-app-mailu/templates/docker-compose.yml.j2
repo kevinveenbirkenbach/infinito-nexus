@@ -57,6 +57,8 @@
 
   imap:
 {% set service_name = 'imap' %}
+    security_opt:
+      - apparmor=unconfined
     container_name: {{ MAILU_CONTAINER }}_imap
     image: {{ MAILU_DOCKER_FLAVOR }}/dovecot:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
