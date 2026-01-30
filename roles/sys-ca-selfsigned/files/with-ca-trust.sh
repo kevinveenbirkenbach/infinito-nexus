@@ -51,7 +51,7 @@ install_anchor() {
 # Debian / Ubuntu style
 #
 if command -v update-ca-certificates >/dev/null 2>&1; then
-  log "Detected update-ca-certificates (Debian-like)"
+  log "Detected update-ca-certificates"
   install_anchor "$CA_TRUST_CERT" "/usr/local/share/ca-certificates/${name}.crt"
   run update-ca-certificates
 fi
@@ -60,7 +60,7 @@ fi
 # RHEL / p11-kit style
 #
 if command -v update-ca-trust >/dev/null 2>&1; then
-  log "Detected update-ca-trust (RHEL / p11-kit)"
+  log "Detected update-ca-trust"
   install_anchor "$CA_TRUST_CERT" "/etc/pki/ca-trust/source/anchors/${name}.crt"
   run update-ca-trust extract
 fi
@@ -69,27 +69,24 @@ fi
 # Arch / pure p11-kit style
 #
 if command -v trust >/dev/null 2>&1; then
-  log "Detected trust (Arch / p11-kit)"
-
-  install_anchor "$CA_TRUST_CERT" \
-    "/etc/ca-certificates/trust-source/anchors/${name}.crt"
-
-  # Also cover RHEL-style path if present
-  install_anchor "$CA_TRUST_CERT" \
-    "/etc/pki/ca-trust/source/anchors/${name}.crt"
-
+  log "Detected trust"
+  install_anchor "$CA_TRUST_CERT" "/etc/ca-certificates/trust-source/anchors/${name}.crt"
+  install_anchor "$CA_TRUST_CERT" "/etc/pki/ca-trust/source/anchors/${name}.crt"
   run trust extract-compat
 fi
 
 if [ "$installed" = "0" ]; then
-  echo "[with-ca-trust] ERROR: No known CA trust mechanism found on this system" >&2
-  exit 3
+  echo "[with-ca-trust] INFO: No known CA trust mechanism found on this system; skipping CA installation" >&2
+else
+  log "CA trust installation completed successfully"
 fi
 
-log "CA trust installation completed successfully"
-
-# Optional exec (container wrapper mode)
+# Wrapper mode: exec target command if provided
 if [ "$#" -gt 0 ]; then
   log "Executing wrapped command: $*"
   exec "$@"
 fi
+
+# Standalone mode: nothing else to do
+log "No command provided to execute; exiting successfully"
+exit 0
