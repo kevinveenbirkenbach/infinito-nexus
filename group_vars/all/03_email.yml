@@ -7,8 +7,8 @@ SYSTEM_EMAIL_EXTERNAL:        "{{ ('web-app-mailu' in group_names) | bool }}"
 # From Docker->DiD->DiD it is propably not possible to send emails.
 # Will lead to problems with the health checks 
 SYSTEM_EMAIL_ENVIRONMENT: >-
-  {{ ('external' if (SYSTEM_EMAIL_EXTERNAL | bool) else 'localhost')
-     ~ ('_container' if DOCKER_IN_CONTAINER | bool else '') }}
+  {{ ('external' if ((SYSTEM_EMAIL_EXTERNAL | bool) or (TLS_ENABLED | bool )) else 'localhost')
+     ~ ('_container' if ((DOCKER_IN_CONTAINER | bool) and (not TLS_ENABLED | bool)) else '') }}
 
 # Server
 SYSTEM_EMAIL_DOMAIN:          "{{ DOMAIN_PRIMARY }}"
