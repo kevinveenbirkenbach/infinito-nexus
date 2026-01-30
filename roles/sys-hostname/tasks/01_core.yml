@@ -1,10 +1,12 @@
-- name: Define hostname package per distro
-  ansible.builtin.set_fact:
-    hostname_package: >-
+- name: Ensure hostname package is installed
+  become: true
+  ansible.builtin.package:
+    name: >
       {{
         'inetutils' if ansible_facts.os_family == 'Archlinux' else
         'hostname'
       }}
+    state: present
 
 - block:
   - name: Set system hostname to inventory_hostname (FQDN recommended)
