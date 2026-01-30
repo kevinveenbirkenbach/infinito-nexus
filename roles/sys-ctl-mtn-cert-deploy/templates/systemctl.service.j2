@@ -1,7 +1,9 @@
 [Unit]
-Description=Let's Encrypt deploy to {{ docker_compose.directories.instance }}
+Description=TLS cert deploy to {{ docker_compose.directories.instance }}
 OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 
 [Service]
 Type=oneshot
-ExecStart={{ system_service_script_exec }} {{ ssl_cert_folder }} {{ docker_compose.directories.instance }} {{ LETSENCRYPT_LIVE_PATH }}
+ExecStart={{ system_service_script_exec }} \
+  {{ lookup('cert_plan', domain, want='files.cert') | dirname }} \
+  {{ docker_compose.directories.instance }}
