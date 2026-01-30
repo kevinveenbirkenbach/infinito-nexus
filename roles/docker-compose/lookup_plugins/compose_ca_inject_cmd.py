@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any, Optional
 
 import yaml
@@ -33,6 +34,7 @@ def _require(d: Any, key: str, expected_type: Any, *, label: str) -> Any:
 
 
 def _shell_quote(s: str) -> str:
+    # Safe single-quote shell quoting: ' -> '"'"'
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
 
@@ -60,6 +62,7 @@ def _coerce_to_dict(v: Any, label: str) -> dict:
 
 
 def _maybe_template(templar: Any, value: Any) -> Any:
+    # For strings, allow Jinja rendering through templar.template().
     if isinstance(value, (dict, list, tuple, int, float, bool)) or value is None:
         return value
     if templar is None:
@@ -68,6 +71,27 @@ def _maybe_template(templar: Any, value: Any) -> Any:
     if callable(tpl):
         return tpl(value)
     return value
+
+
+def _env_file_if_exists(instance_dir_s: str, env_file_s: str) -> str:
+    """
+    Only return env file path if it exists.
+
+    - If env_file_s is relative, resolve it against the compose instance directory.
+    - Returns "" if missing.
+
+    This mirrors your handler logic:
+      {% if docker_compose.files.env is file %}--env-file ...{% endif %}
+    """
+    env_file_s = (env_file_s or "").strip()
+    if not env_file_s:
+        return ""
+
+    p = Path(env_file_s)
+    if not p.is_absolute():
+        p = Path(instance_dir_s) / p
+
+    return str(p) if p.is_file() else ""
 
 
 class LookupModule(LookupBase):
@@ -183,8 +207,10 @@ class LookupModule(LookupBase):
             _shell_quote(compose_files),
         ]
 
-        if _as_str(env_file):
-            cmd += ["--env-file", _shell_quote(env_file)]
+        # Only pass --env-file if it actually exists (like your other handlers do).
+        env_file_existing = _env_file_if_exists(instance_dir, _as_str(env_file))
+        if env_file_existing:
+            cmd += ["--env-file", _shell_quote(env_file_existing)]
 
         cmd += [
             "--out",

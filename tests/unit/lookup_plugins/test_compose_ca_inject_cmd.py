@@ -55,12 +55,38 @@ class TestComposeCaInjectCmd(unittest.TestCase):
         )()
         return patch.object(self.m.lookup_loader, "get", return_value=fake)
 
+    def _patch_env_file_exists(self, exists: bool):
+        """
+        compose_ca_inject_cmd now checks env file existence via pathlib.Path.is_file().
+        We patch Path.is_file so we can test both branches without touching the FS.
+
+        We keep this narrowly scoped: only treat the configured env path as existing/not existing.
+        """
+        env_path = str(self.vars["docker_compose"]["files"]["env"])
+
+        def _is_file_side_effect(p: Path) -> bool:
+            try:
+                return str(p) == env_path and exists
+            except Exception:
+                return False
+
+        return patch.object(
+            self.m.Path, "is_file", autospec=True, side_effect=_is_file_side_effect
+        )
+
     def test_builds_command_string(self):
+        """
+        Old test retained, but adapted:
+        - Previously expected --env-file unconditionally.
+        - Now env-file is only included if it exists.
+        Here we test the 'exists' branch to preserve the spirit of the old test.
+        """
         with (
             patch.object(self.m, "get_entity_name", return_value="myproj"),
             self._patch_compose_f_args(
                 "-f /opt/docker/app/docker-compose.yml -f /opt/docker/app/docker-compose.override.yml"
             ),
+            self._patch_env_file_exists(True),
         ):
             out = self.lookup.run(["web-app-foo"], variables=self.vars)[0]
 
@@ -77,6 +103,7 @@ class TestComposeCaInjectCmd(unittest.TestCase):
         )
         self.assertNotIn("docker-compose.ca.override.yml -f", out)
 
+        # Updated behavior: --env-file is included only when present.
         self.assertIn("--env-file", out)
         self.assertIn("/opt/docker/app/.env/env", out)
 
@@ -91,6 +118,28 @@ class TestComposeCaInjectCmd(unittest.TestCase):
 
         self.assertIn("--trust-name", out)
         self.assertIn("'infinito.nexus'", out)
+
+    def test_env_file_is_omitted_when_missing(self):
+        with (
+            patch.object(self.m, "get_entity_name", return_value="myproj"),
+            self._patch_compose_f_args("-f /opt/docker/app/docker-compose.yml"),
+            self._patch_env_file_exists(False),
+        ):
+            out = self.lookup.run(["web-app-foo"], variables=self.vars)[0]
+
+        self.assertNotIn("--env-file", out)
+        self.assertNotIn("/opt/docker/app/.env/env", out)
+
+    def test_env_file_is_included_when_present(self):
+        with (
+            patch.object(self.m, "get_entity_name", return_value="myproj"),
+            self._patch_compose_f_args("-f /opt/docker/app/docker-compose.yml"),
+            self._patch_env_file_exists(True),
+        ):
+            out = self.lookup.run(["web-app-foo"], variables=self.vars)[0]
+
+        self.assertIn("--env-file", out)
+        self.assertIn("/opt/docker/app/.env/env", out)
 
     def test_requires_application_id_term(self):
         with self.assertRaises(AnsibleError):
