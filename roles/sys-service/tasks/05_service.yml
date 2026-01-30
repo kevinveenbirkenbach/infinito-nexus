@@ -43,4 +43,3 @@
     notify: refresh systemctl service
     when: not system_service_is_template | bool
   when: system_service_force_flush_instant | bool
-
