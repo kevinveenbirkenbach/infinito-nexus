@@ -84,7 +84,7 @@ def main() -> int:
     project_dir = Path(args.chdir)
     if not project_dir.is_dir():
         print(
-            f"[infinito-compose] --chdir is not a directory: {project_dir}",
+            f"[compose-base] --chdir is not a directory: {project_dir}",
             file=sys.stderr,
         )
         return 2
@@ -93,13 +93,13 @@ def main() -> int:
     if passthrough and passthrough[0] == "--":
         passthrough = passthrough[1:]
     if not passthrough:
-        print("[infinito-compose] No docker compose args provided.", file=sys.stderr)
+        print("[compose-base] No docker compose args provided.", file=sys.stderr)
         return 2
 
     try:
         cmd = build_cmd(args.project, project_dir, passthrough)
     except Exception as exc:
-        print(f"[infinito-compose] {exc}", file=sys.stderr)
+        print(f"[compose-base] {exc}", file=sys.stderr)
         return 2
 
     if args.debug:

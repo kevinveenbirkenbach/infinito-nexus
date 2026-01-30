@@ -45,13 +45,13 @@ class TestRepairDockerHard(unittest.TestCase):
 
             s.hard_restart_docker_services("/X/APP")
 
-            # Expect two calls: infinito-compose ... down / up -d
+            # Expect two calls: compose-base ... down / up -d
             self.assertEqual(len(calls), 2)
             self.assertEqual(calls[0]["cwd"], "/X/APP")
             self.assertEqual(calls[1]["cwd"], "/X/APP")
 
             # down
-            self.assertEqual(calls[0]["cmd"][0], s.INFINITO_COMPOSE)
+            self.assertEqual(calls[0]["cmd"][0], s.compose_base)
             self.assertIn("--chdir", calls[0]["cmd"])
             self.assertIn("/X/APP", calls[0]["cmd"])
             self.assertIn("--project", calls[0]["cmd"])
@@ -59,7 +59,7 @@ class TestRepairDockerHard(unittest.TestCase):
             self.assertIn("down", calls[0]["cmd"])
 
             # up -d
-            self.assertEqual(calls[1]["cmd"][0], s.INFINITO_COMPOSE)
+            self.assertEqual(calls[1]["cmd"][0], s.compose_base)
             self.assertIn("--chdir", calls[1]["cmd"])
             self.assertIn("/X/APP", calls[1]["cmd"])
             self.assertIn("--project", calls[1]["cmd"])

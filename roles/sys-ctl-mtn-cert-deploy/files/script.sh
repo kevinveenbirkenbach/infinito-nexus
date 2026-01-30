@@ -10,8 +10,20 @@ fi
 ssl_cert_source_dir="$1"
 docker_compose_instance_directory="$2"
 
+# Compose wrapper base command (must include quoting as needed)
+# Example:
+#   compose_cmd="/usr/local/bin/compose-base --chdir /opt/docker/mailu --project mailu"
+: "${compose_cmd:=}"
+
+if [ -z "$compose_cmd" ]; then
+  echo "ERROR: compose_cmd is not set. It must point to the compose wrapper base command." >&2
+  echo "Example: compose_cmd='/usr/local/bin/compose-base --chdir <dir> --project <name>'" >&2
+  exit 1
+fi
+
 # Keep your existing target layout (minimal change)
-docker_compose_cert_directory="${docker_compose_instance_directory}volumes/certs"
+# NOTE: original script missed a slash; fix path join safely.
+docker_compose_cert_directory="${docker_compose_instance_directory%/}/volumes/certs"
 
 if [ ! -d "$ssl_cert_source_dir" ]; then
   echo "ERROR: ssl_cert_source_dir does not exist or is not a directory: $ssl_cert_source_dir" >&2
@@ -49,18 +61,22 @@ nginx_reload_successful=false
 nginx_reload_failed=false
 failed_services=""
 
-# Reload Nginx in all containers within the Docker Compose setup
+# Ensure we can chdir (compose project dir)
 cd "$docker_compose_instance_directory" || exit 1
 
 echo "Wait for 5 minutes to prevent interruption of setup procedures"
 sleep 300
 
-for service in $(docker compose ps --services); do
+# List services via wrapper to ensure correct -p/-f/--env-file stack is used
+# IMPORTANT: use "--" to stop wrapper arg parsing (so docker compose flags like "--services" are passed through)
+services="$(sh -c "$compose_cmd -- ps --services")"
+
+for service in $services; do
   echo "Checking service: $service"
 
-  if docker compose exec -T "$service" which nginx > /dev/null 2>&1; then
+  if sh -c "$compose_cmd -- exec -T \"$service\" which nginx" > /dev/null 2>&1; then
     echo "Testing Nginx config for service: $service"
-    if ! docker compose exec -T "$service" nginx -t; then
+    if ! sh -c "$compose_cmd -- exec -T \"$service\" nginx -t"; then
       echo "Nginx config test FAILED for service: $service" >&2
       nginx_reload_failed=true
       failed_services="$failed_services $service"
@@ -68,7 +84,7 @@ for service in $(docker compose ps --services); do
     fi
 
     echo "Reloading Nginx for service: $service"
-    if docker compose exec -T "$service" nginx -s reload; then
+    if sh -c "$compose_cmd -- exec -T \"$service\" nginx -s reload"; then
       nginx_reload_successful=true
       echo "Successfully reloaded Nginx for service: $service"
     else
@@ -85,7 +101,9 @@ if [ "$nginx_reload_failed" = true ]; then
   echo "At least one Nginx reload failed. Affected services:${failed_services}"
   echo "Restarting affected services to apply the new certificates..."
   # shellcheck disable=SC2086
-  (sleep 120 && docker compose restart $failed_services) || (sleep 120 && docker compose restart) || exit 1
+  (sleep 120 && sh -c "$compose_cmd -- restart $failed_services") \
+    || (sleep 120 && sh -c "$compose_cmd -- restart") \
+    || exit 1
 elif [ "$nginx_reload_successful" = true ]; then
   echo "At least one Nginx reload was successful. No restart needed."
 else

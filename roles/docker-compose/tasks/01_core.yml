@@ -21,11 +21,11 @@
     owner:  root
     group:  root
 
-- name: Install infinito-compose wrapper
+- name: Install compose-base wrapper
   become: true
   ansible.builtin.copy:
-    src: "infinito_compose.py"
-    dest: "/usr/local/bin/infinito-compose"
+    src: "compose_base.py"
+    dest: "{{ DOCKER_CMD_BASE }}"
     mode: "0755"
     owner: root
     group: root

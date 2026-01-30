@@ -5,18 +5,16 @@ from importlib.util import spec_from_file_location, module_from_spec
 
 def load_script_module():
     """
-    Import the script under test from roles/docker-compose/files/infinito_compose.py
+    Import the script under test from roles/docker-compose/files/compose_base.py
     """
     test_file = Path(__file__).resolve()
     repo_root = test_file.parents[
         5
     ]  # .../tests/unit/roles/docker-compose/files -> repo root
-    script_path = (
-        repo_root / "roles" / "docker-compose" / "files" / "infinito_compose.py"
-    )
+    script_path = repo_root / "roles" / "docker-compose" / "files" / "compose_base.py"
     if not script_path.exists():
-        raise FileNotFoundError(f"infinito_compose.py not found at {script_path}")
-    spec = spec_from_file_location("infinito_compose", str(script_path))
+        raise FileNotFoundError(f"compose_base.py not found at {script_path}")
+    spec = spec_from_file_location("compose_base", str(script_path))
     mod = module_from_spec(spec)
     assert spec.loader is not None
     spec.loader.exec_module(mod)  # type: ignore[attr-defined]

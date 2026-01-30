@@ -11,7 +11,7 @@ All shell interactions that matter for tests go through print_bash()
 so they can be monkeypatched in unit tests.
 
 This variant uses the central Infinito.Nexus compose wrapper:
-  /usr/local/bin/infinito-compose
+  /usr/local/bin/compose-base
 which auto-adds:
 - -f docker-compose.yml
 - -f docker-compose.override.yml (if present)
@@ -25,7 +25,7 @@ import os
 import argparse
 from typing import List, Optional, Tuple
 
-INFINITO_COMPOSE = "/usr/local/bin/infinito-compose"
+compose_base = "/usr/local/bin/compose-base"
 
 
 # ---------------------------
@@ -70,10 +70,12 @@ def print_bash(command: str) -> List[str]:
 
 def compose_cmd(subcmd: str, project_path: str, project_name: str) -> str:
     """
-    Build an infinito-compose command that auto-adds env + override files.
-    Example: infinito-compose --chdir "/opt/docker/foo" --project "foo" restart
+    Build an compose-base command that auto-adds env + override files.
+    Example: compose-base --chdir "/opt/docker/foo" --project "foo" restart
     """
-    return f'{INFINITO_COMPOSE} --chdir "{project_path}" --project "{project_name}" {subcmd}'
+    return (
+        f'{compose_base} --chdir "{project_path}" --project "{project_name}" {subcmd}'
+    )
 
 
 # ---------------------------
@@ -163,9 +165,9 @@ def main(
 ) -> int:
     _ = base_directory  # unused in STRICT label mode
 
-    if not os.path.isfile(INFINITO_COMPOSE):
+    if not os.path.isfile(compose_base):
         print(
-            f"Error: required wrapper not found at {INFINITO_COMPOSE}. "
+            f"Error: required wrapper not found at {compose_base}. "
             "Install it via the docker-compose role first.",
             file=os.sys.stderr,
         )
