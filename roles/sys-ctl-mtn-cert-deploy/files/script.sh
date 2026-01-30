@@ -64,9 +64,6 @@ failed_services=""
 # Ensure we can chdir (compose project dir)
 cd "$docker_compose_instance_directory" || exit 1
 
-echo "Wait for 5 minutes to prevent interruption of setup procedures"
-sleep 300
-
 # List services via wrapper to ensure correct -p/-f/--env-file stack is used
 # IMPORTANT: use "--" to stop wrapper arg parsing (so docker compose flags like "--services" are passed through)
 services="$(sh -c "$compose_cmd -- ps --services")"
