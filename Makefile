@@ -287,4 +287,3 @@ disarmapp:
 
 trust-ca:
 	@bash scripts/administration/trust_ca.sh
-

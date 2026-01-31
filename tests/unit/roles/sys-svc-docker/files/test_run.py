@@ -296,7 +296,9 @@ class TestRunWrapper(unittest.TestCase):
 
         with patches[0], patches[1], patches[2], patches[3]:
             with self.assertRaises(SystemExit) as cm:
-                with patch.object(self.s.sys, "argv", ["run.py", "--rm", "alpine:3.19"]):
+                with patch.object(
+                    self.s.sys, "argv", ["run.py", "--rm", "alpine:3.19"]
+                ):
                     self.s.main()
             self.assertEqual(cm.exception.code, 2)
 
