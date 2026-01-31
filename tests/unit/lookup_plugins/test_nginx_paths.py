@@ -1,3 +1,4 @@
+# tests/unit/lookup_plugins/test_nginx_paths.py
 import unittest
 from unittest.mock import patch
 
@@ -7,12 +8,21 @@ from ansible.errors import AnsibleError
 from lookup_plugins.nginx_paths import LookupModule
 
 
-class _FakeTemplar:
-    def __init__(self, result: str):
-        self._result = result
+class _FakeTlsResolveLookup:
+    """
+    Minimal fake lookup plugin compatible with both call styles:
+      - run([domain], variables=..., want="protocols.web")
+      - run([domain], variables=...)
+    """
 
-    def template(self, _expr: str, variables=None):
-        return self._result
+    def __init__(self, protocol: str):
+        self._protocol = protocol
+
+    def run(self, terms, variables=None, **kwargs):
+        want = kwargs.get("want", "")
+        if want and want != "protocols.web":
+            raise AssertionError(f"Unexpected want passed to tls_resolve: {want}")
+        return [self._protocol]
 
 
 class TestNginxPathsLookup(unittest.TestCase):
@@ -85,10 +95,17 @@ class TestNginxPathsLookup(unittest.TestCase):
         self.assertNotIn("/usr/share/nginx/well-known/", ensure_paths)
 
     def test_domain_uses_tls_resolve_when_no_override(self):
-        self.plugin._templar = _FakeTemplar("https")
-        with patch(
-            "lookup_plugins.nginx_paths.get_app_conf",
-            side_effect=self._fake_get_app_conf,
+        fake_tls = _FakeTlsResolveLookup("https")
+
+        with (
+            patch(
+                "lookup_plugins.nginx_paths.get_app_conf",
+                side_effect=self._fake_get_app_conf,
+            ),
+            patch(
+                "lookup_plugins.nginx_paths.lookup_loader.get",
+                return_value=fake_tls,
+            ),
         ):
             out = self.plugin.run(["example.com"], variables=self.variables)[0]
 
@@ -101,11 +118,18 @@ class TestNginxPathsLookup(unittest.TestCase):
         )
 
     def test_domain_protocol_override_http(self):
-        # templar value should be ignored when override is present
-        self.plugin._templar = _FakeTemplar("https")
-        with patch(
-            "lookup_plugins.nginx_paths.get_app_conf",
-            side_effect=self._fake_get_app_conf,
+        # tls_resolve should NOT be consulted when override is present
+        with (
+            patch(
+                "lookup_plugins.nginx_paths.get_app_conf",
+                side_effect=self._fake_get_app_conf,
+            ),
+            patch(
+                "lookup_plugins.nginx_paths.lookup_loader.get",
+                side_effect=AssertionError(
+                    "tls_resolve must not be called when protocol override is set"
+                ),
+            ),
         ):
             out = self.plugin.run(
                 ["example.com"], variables=self.variables, protocol="http"

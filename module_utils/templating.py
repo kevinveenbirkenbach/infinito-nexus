@@ -3,14 +3,18 @@ from __future__ import annotations
 
 import os
 import re
-from typing import Any
+from typing import Any, Optional
 
 from ansible.errors import AnsibleError
 
-
-_RE_LOOKUP_ENV = re.compile(
-    r"""^lookup\(\s*['"]env['"]\s*,\s*['"]([^'"]+)['"]\s*\)\s*$"""
+# Match the "lookup('env','NAME')" head (without caring about trailing filters)
+_RE_LOOKUP_ENV_HEAD = re.compile(
+    r"""^lookup\(\s*['"]env['"]\s*,\s*['"]([^'"]+)['"]\s*\)\s*""",
+    re.IGNORECASE,
 )
+
+_RE_ANY_LOOKUP = re.compile(r"""\blookup\s*\(""", re.IGNORECASE)
+
 _RE_VARPATH = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)*$")
 _RE_JINJA_BLOCK = re.compile(r"\{\{\s*(.*?)\s*\}\}", re.DOTALL)
 
@@ -33,7 +37,7 @@ def _apply_filter(value: Any, filt: str) -> Any:
     if f == "upper":
         return str(value).upper()
 
-    # default('x', true)  -> treat None/"" as default
+    # default('x', true) -> treat None/"" as default
     if f.startswith("default(") and f.endswith(")"):
         inner = f[len("default(") : -1].strip()
 
@@ -59,17 +63,17 @@ def _fallback_eval_expr(expr: str, variables: dict) -> str:
     """
     Evaluate a single Jinja expression (no surrounding {{ }}).
 
-    Supported:
+    Supported subset (SAFE fallback only):
       - lookup('env','NAME')
       - VAR / VAR.path
       - filters: | lower, | upper, | default('x', true)
 
-    This is a fallback when Ansible templar can't or won't evaluate.
+    Any other lookup(...) must NOT be handled here.
     """
     parts = [p.strip() for p in expr.split("|")]
-    head = parts[0]
+    head = parts[0].strip()
 
-    m = _RE_LOOKUP_ENV.match(head)
+    m = _RE_LOOKUP_ENV_HEAD.match(head)
     if m:
         key = m.group(1)
         val: Any = os.environ.get(key)
@@ -95,24 +99,71 @@ def _fallback_render_embedded(s: str, variables: dict) -> str:
     return _RE_JINJA_BLOCK.sub(repl, s)
 
 
+def _contains_non_env_lookup(s: str) -> bool:
+    """
+    True if any embedded {{ ... }} contains lookup(...) that is NOT lookup('env', ...).
+
+    IMPORTANT:
+    - Allow lookup('env', ...) even when followed by filters, e.g.
+      {{ lookup('env','domain') | default('x', true) }}
+    """
+    for m in _RE_JINJA_BLOCK.finditer(s):
+        expr = (m.group(1) or "").strip()
+        if _RE_ANY_LOOKUP.search(expr):
+            # If the expression starts with lookup('env', ...) (filters allowed), it's safe
+            if _RE_LOOKUP_ENV_HEAD.match(expr):
+                continue
+            return True
+    return False
+
+
+def _set_templar_var(templar: Any, name: str, value: Any) -> tuple[bool, Any]:
+    """
+    Best-effort setter for templar flags across Ansible versions.
+    Returns (changed, previous_value).
+    """
+    if templar is None or not hasattr(templar, name):
+        return False, None
+    try:
+        prev = getattr(templar, name)
+        setattr(templar, name, value)
+        return True, prev
+    except Exception:
+        return False, None
+
+
 def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
     """
     Render with Ansible templar across versions.
 
-    Compatibility:
-    - Do NOT pass variables=... to templar.template() (breaks on some versions)
-    - Instead set templar.available_variables temporarily.
+    Policy:
+    - Always try templar first (so ALL lookup(...) can be evaluated properly).
+    - If templar returns unchanged while Jinja exists:
+        - If string contains non-env lookup(...): DO NOT fallback (leave as-is)
+        - Else: fallback is allowed (env + varpaths + simple filters)
     """
     if templar is None:
         return _fallback_render_embedded(s, variables)
 
-    prev = None
+    prev_avail: Optional[Any] = None
+    avail_changed = False
+
+    # Temporarily force lookups ON (different Ansible versions use different flags)
+    disable_changed_1, prev_disable_1 = _set_templar_var(
+        templar, "disable_lookups", False
+    )
+    disable_changed_2, prev_disable_2 = _set_templar_var(
+        templar, "_disable_lookups", False
+    )
+
     if hasattr(templar, "available_variables"):
         try:
-            prev = templar.available_variables
+            prev_avail = templar.available_variables
             templar.available_variables = variables
+            avail_changed = True
         except Exception:
-            prev = None
+            prev_avail = None
+            avail_changed = False
 
     try:
         try:
@@ -120,16 +171,36 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
         except TypeError:
             out = templar.template(s)
     finally:
-        if prev is not None and hasattr(templar, "available_variables"):
+        if (
+            avail_changed
+            and prev_avail is not None
+            and hasattr(templar, "available_variables")
+        ):
             try:
-                templar.available_variables = prev
+                templar.available_variables = prev_avail
+            except Exception:
+                pass
+
+        if disable_changed_2:
+            try:
+                setattr(templar, "_disable_lookups", prev_disable_2)
+            except Exception:
+                pass
+        if disable_changed_1:
+            try:
+                setattr(templar, "disable_lookups", prev_disable_1)
             except Exception:
                 pass
 
     out_s = "" if out is None else str(out)
 
-    # If templar didn't change anything while Jinja exists, fallback for embedded patterns.
+    # If templar didn't change anything while Jinja exists:
     if out_s.strip() == s.strip() and ("{{" in s or "{%" in s):
+        # If it contains any non-env lookup(...), fallback would be wrong.
+        if _contains_non_env_lookup(s):
+            return out_s
+
+        # Otherwise safe to attempt limited fallback for embedded patterns.
         return _fallback_render_embedded(s, variables)
 
     return out_s
@@ -148,7 +219,8 @@ def render_ansible_strict(
     Strict rendering helper for lookup/filter plugins.
 
     - Renders via Ansible templar when possible (lookup(), filters, vars).
-    - If templar can't/won't render, applies safe fallback for embedded {{ ... }}.
+    - Automatic fallback is enabled for a SAFE subset (env lookup + varpaths + simple filters)
+      only when templar can't/won't render and NO non-env lookup(...) is present.
     - Re-renders multiple rounds because intermediate results can still contain Jinja.
     - Hard-fails if output is empty or still contains unresolved Jinja markers.
     """

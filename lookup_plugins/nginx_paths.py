@@ -39,6 +39,7 @@ from typing import Any, Dict, List, Optional
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
+from ansible.plugins.loader import lookup_loader
 
 from module_utils.config_utils import get_app_conf
 from module_utils.tls_common import as_str, require, want_get
@@ -75,6 +76,39 @@ def _dir_spec(path: str, mode: str) -> Dict[str, str]:
             f"nginx_paths: invalid mode '{mode}' in directories.ensure (expected 0700|0755)"
         )
     return {"path": path, "mode": mode}
+
+
+def _resolve_protocol_via_tls_resolve(
+    *,
+    domain: str,
+    variables: dict,
+    loader: Any,
+    templar: Any,
+) -> str:
+    """
+    Resolve protocols.web using the tls_resolve lookup directly (no templar.template()).
+    This avoids contexts where templar returns the lookup expression unchanged.
+    """
+    try:
+        tls_lookup = lookup_loader.get("tls_resolve", loader=loader, templar=templar)
+    except Exception as exc:
+        raise AnsibleError(
+            f"nginx_paths: failed to load tls_resolve lookup: {exc}"
+        ) from exc
+
+    try:
+        protocol = tls_lookup.run([domain], variables=variables, want="protocols.web")[
+            0
+        ]
+    except TypeError:
+        protocol = tls_lookup.run([domain], variables=variables)[0]
+
+    protocol_s = as_str(protocol).strip().lower()
+    if protocol_s not in ("http", "https"):
+        raise AnsibleError(
+            f"nginx_paths: unexpected protocol '{protocol_s}' for domain '{domain}'"
+        )
+    return protocol_s
 
 
 class LookupModule(LookupBase):
@@ -126,9 +160,6 @@ class LookupModule(LookupBase):
         cache_general_dir = "/tmp/cache_nginx_general/"
         cache_image_dir = "/tmp/cache_nginx_image/"
 
-        # Host directories to create (single-task friendly)
-        # - Include protocol server dirs so domain conf files can be placed under http/https
-        # - Do NOT include well_known because it is a container path in your setup
         ensure: List[Dict[str, str]] = [
             _dir_spec(nginx_dir, "0755"),
             _dir_spec(conf_dir, "0755"),
@@ -158,8 +189,6 @@ class LookupModule(LookupBase):
                     "servers": servers_dir,
                     "maps": maps_dir,
                     "streams": streams_dir,
-                    # Used by nginx.conf.j2 to include all relevant http-level config folders.
-                    # Each entry is a directory that will be included as: include <dir>*.conf;
                     "http_includes": [
                         global_dir,
                         maps_dir,
@@ -179,7 +208,6 @@ class LookupModule(LookupBase):
                     "general": cache_general_dir,
                     "image": cache_image_dir,
                 },
-                # New: intended for host directory creation
                 "ensure": ensure,
                 "ensure_paths": [d["path"] for d in ensure],
             },
@@ -191,19 +219,15 @@ class LookupModule(LookupBase):
             protocol_override = kwargs.get("protocol", None)
 
             if protocol_override is None or as_str(protocol_override).strip() == "":
-                protocol = self._templar.template(
-                    "{{ lookup('tls_resolve', domain, want='protocols.web') }}",
-                    variables={**variables, "domain": domain},
+                protocol = _resolve_protocol_via_tls_resolve(
+                    domain=domain,
+                    variables=variables,
+                    loader=getattr(self, "_loader", None),
+                    templar=getattr(self, "_templar", None),
                 )
-                protocol = as_str(protocol).strip().lower()
-                if protocol not in ("http", "https"):
-                    raise AnsibleError(
-                        f"nginx_paths: unexpected protocol '{protocol}' for domain '{domain}'"
-                    )
             else:
                 protocol = _normalize_protocol(protocol_override)
 
-            # Final file path: <servers>/<protocol>/<domain>.conf
             domain_conf = _join(servers_dir, protocol, f"{domain}.conf")
 
             resolved["domain"] = {
@@ -214,7 +238,6 @@ class LookupModule(LookupBase):
             }
             resolved["files"]["domain"] = domain_conf
 
-        # Optional want= access
         want = as_str(kwargs.get("want", "")).strip()
         if want:
             return [want_get(resolved, want)]
