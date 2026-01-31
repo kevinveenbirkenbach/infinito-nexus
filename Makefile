@@ -282,3 +282,9 @@ lint-ansible:
 disarmapp:
 	@echo "==> AppArmor: complain mode (dev)"
 	@sudo scripts/administration/disarmapp.sh
+
+.PHONY: trust-ca
+
+trust-ca:
+	@bash scripts/administration/trust_ca.sh
+
