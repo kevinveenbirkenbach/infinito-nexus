@@ -22,7 +22,6 @@ if [ -z "$compose_cmd" ]; then
 fi
 
 # Keep your existing target layout (minimal change)
-# NOTE: original script missed a slash; fix path join safely.
 docker_compose_cert_directory="${docker_compose_instance_directory%/}/volumes/certs"
 
 if [ ! -d "$ssl_cert_source_dir" ]; then
@@ -56,11 +55,6 @@ fi
 # Set correct reading rights
 chmod a+r -v "${docker_compose_cert_directory}/"* || exit 1
 
-# Flags to track Nginx reload status
-nginx_reload_successful=false
-nginx_reload_failed=false
-failed_services=""
-
 # Ensure we can chdir (compose project dir)
 cd "$docker_compose_instance_directory" || exit 1
 
@@ -68,41 +62,24 @@ cd "$docker_compose_instance_directory" || exit 1
 # IMPORTANT: use "--" to stop wrapper arg parsing (so docker compose flags like "--services" are passed through)
 services="$(sh -c "$compose_cmd -- ps --services")"
 
+restart_services=""
+
 for service in $services; do
   echo "Checking service: $service"
 
   if sh -c "$compose_cmd -- exec -T \"$service\" which nginx" > /dev/null 2>&1; then
-    echo "Testing Nginx config for service: $service"
-    if ! sh -c "$compose_cmd -- exec -T \"$service\" nginx -t"; then
-      echo "Nginx config test FAILED for service: $service" >&2
-      nginx_reload_failed=true
-      failed_services="$failed_services $service"
-      continue
-    fi
-
-    echo "Reloading Nginx for service: $service"
-    if sh -c "$compose_cmd -- exec -T \"$service\" nginx -s reload"; then
-      nginx_reload_successful=true
-      echo "Successfully reloaded Nginx for service: $service"
-    else
-      echo "Failed to reload Nginx for service: $service" >&2
-      nginx_reload_failed=true
-      failed_services="$failed_services $service"
-    fi
+    echo "Nginx found in service: $service"
+    restart_services="$restart_services $service"
   else
     echo "Nginx not found in service: $service, skipping."
   fi
 done
 
-if [ "$nginx_reload_failed" = true ]; then
-  echo "At least one Nginx reload failed. Affected services:${failed_services}"
-  echo "Restarting affected services to apply the new certificates..."
+# Restart only the services that actually contain nginx
+if [ -n "$(echo "$restart_services" | tr -d ' ')" ]; then
+  echo "Restarting Nginx services to apply new certificates:${restart_services}"
   # shellcheck disable=SC2086
-  (sleep 120 && sh -c "$compose_cmd -- restart $failed_services") \
-    || (sleep 120 && sh -c "$compose_cmd -- restart") \
-    || exit 1
-elif [ "$nginx_reload_successful" = true ]; then
-  echo "At least one Nginx reload was successful. No restart needed."
+  sh -c "$compose_cmd -- restart $restart_services" || exit 1
 else
-  echo "No Nginx instances found in any service. Nothing to reload."
+  echo "No Nginx instances found in any service. Nothing to restart."
 fi
