@@ -1,4 +1,4 @@
-# sys-service-runner
+# sys-service-terminator
 
 ## Description
 

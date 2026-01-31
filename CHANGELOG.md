@@ -121,7 +121,7 @@ https://chatgpt.com/share/695be0b8-9154-800f-8c03-2bcf3daab157
 
 * **Bind Mount Robustness:** Fixed CI-specific bind mount issues, ensured /tmp/gh-action visibility, prevented file-vs-directory conflicts, and asserted OpenResty/Nginx mount sources before startup.
 
-* **Service Orchestration:** Added deferred service execution via system_service_run_final and the new sys-service-runner, enabling deterministic, end-of-play service execution with built-in rescue diagnostics.
+* **Service Orchestration:** Added deferred service execution via system_service_run_final and the new sys-service-terminator, enabling deterministic, end-of-play service execution with built-in rescue diagnostics.
 
 * **Backup Layout:** Consolidated all backups under /var/lib/infinito, parameterized the pull workflow, switched to dump-only backups, and disabled Redis backups across web applications.
 
