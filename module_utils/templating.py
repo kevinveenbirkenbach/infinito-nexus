@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import posixpath
 import re
 from typing import Any, Optional
 
@@ -17,6 +18,91 @@ _RE_ANY_LOOKUP = re.compile(r"""\blookup\s*\(""", re.IGNORECASE)
 
 _RE_VARPATH = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)*$")
 _RE_JINJA_BLOCK = re.compile(r"\{\{\s*(.*?)\s*\}\}", re.DOTALL)
+
+
+def _split_list_items(s: str) -> list[str]:
+    """
+    Split list literal inner content into items.
+    Supports commas, single/double quotes (no escapes), and bare tokens.
+
+    Example:
+      "PATH_BIN, 'ca-inject'" -> ["PATH_BIN", "'ca-inject'"]
+    """
+    items: list[str] = []
+    buf: list[str] = []
+    q: Optional[str] = None
+
+    for ch in s:
+        if q:
+            buf.append(ch)
+            if ch == q:
+                q = None
+            continue
+
+        if ch in ("'", '"'):
+            buf.append(ch)
+            q = ch
+            continue
+
+        if ch == ",":
+            token = "".join(buf).strip()
+            if token:
+                items.append(token)
+            buf = []
+            continue
+
+        buf.append(ch)
+
+    token = "".join(buf).strip()
+    if token:
+        items.append(token)
+
+    return items
+
+
+def _eval_list_literal(head: str, variables: dict) -> list[str]:
+    """
+    Evaluate a minimal Jinja list literal like:
+      [ PATH_BIN, 'ca-inject' ]
+
+    Items supported:
+      - quoted strings ('x' / "x")
+      - varpaths (FOO / FOO.bar)
+
+    This is intentionally minimal and safe for fallback rendering.
+    """
+    h = head.strip()
+    if not (h.startswith("[") and h.endswith("]")):
+        raise ValueError("not a list literal")
+
+    inner = h[1:-1].strip()
+    if not inner:
+        return []
+
+    out: list[str] = []
+    for tok in _split_list_items(inner):
+        t = tok.strip()
+        if not t:
+            continue
+
+        # Quoted string
+        if t.startswith(("'", '"')) and t.endswith(t[0]) and len(t) >= 2:
+            out.append(t[1:-1])
+            continue
+
+        # Variable path
+        if not _RE_VARPATH.match(t):
+            # Keep the error message consistent with the old behavior
+            raise ValueError(f"unsupported expression: {head}")
+
+        try:
+            v = _get_by_path(variables, t)
+        except KeyError:
+            v = None
+
+        out.append("" if v is None else str(v))
+
+    return out
 
 
 def _get_by_path(variables: dict, path: str) -> Any:
@@ -36,6 +122,15 @@ def _apply_filter(value: Any, filt: str) -> Any:
 
     if f == "upper":
         return str(value).upper()
+
+    # Support the common Ansible/Jinja pattern:
+    #   {{ [ PATH_BIN, 'ca-inject' ] | path_join }}
+    # Only for list/tuple inputs; otherwise no-op.
+    if f == "path_join":
+        if not isinstance(value, (list, tuple)):
+            return value
+        parts = [str(x) for x in value if str(x) != ""]
+        return posixpath.join(*parts) if parts else ""
 
     # default('x', true) -> treat None/"" as default
     if f.startswith("default(") and f.endswith(")"):
@@ -66,7 +161,8 @@ def _fallback_eval_expr(expr: str, variables: dict) -> str:
     Supported subset (SAFE fallback only):
       - lookup('env','NAME')
       - VAR / VAR.path
-      - filters: | lower, | upper, | default('x', true)
+      - list literal: [ VAR, 'literal', ... ]
+      - filters: | lower, | upper, | default('x', true), | path_join
 
     Any other lookup(...) must NOT be handled here.
     """
@@ -78,12 +174,16 @@ def _fallback_eval_expr(expr: str, variables: dict) -> str:
         key = m.group(1)
         val: Any = os.environ.get(key)
     else:
-        if not _RE_VARPATH.match(head):
-            raise ValueError(f"unsupported expression: {head}")
-        try:
-            val = _get_by_path(variables, head)
-        except KeyError:
-            val = None
+        # Allow minimal list literals (needed for patterns like: [ PATH_BIN, 'x' ] | path_join)
+        if head.startswith("[") and head.endswith("]"):
+            val = _eval_list_literal(head, variables)
+        else:
+            if not _RE_VARPATH.match(head):
+                raise ValueError(f"unsupported expression: {head}")
+            try:
+                val = _get_by_path(variables, head)
+            except KeyError:
+                val = None
 
     for filt in parts[1:]:
         val = _apply_filter(val, filt)
