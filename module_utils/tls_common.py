@@ -8,10 +8,14 @@ from typing import Any, Iterable, Optional
 
 from ansible.errors import AnsibleError
 
+from module_utils.domain_mapper import resolve_app_id_for_domain
+
 AVAILABLE_FLAVORS = {"letsencrypt", "self_signed"}
 
 
 def as_str(value: Any) -> str:
+    if value is None:
+        return ""
     return str(value).strip()
 
 
@@ -53,6 +57,13 @@ def want_get(data: Any, dotted: str) -> Any:
 
 
 def iter_domains(value: Any) -> Iterable[str]:
+    """
+    Flatten domains from the *global* domains mapping entry.
+    Supports:
+      - str
+      - list[str]
+      - dict[str, str]   (only one level, legacy behavior)
+    """
     if isinstance(value, str):
         if value.strip():
             yield value.strip()
@@ -87,6 +98,10 @@ def uniq_preserve(items: Iterable[str]) -> list[str]:
 
 
 def resolve_app_id_from_domain(domains: dict, domain: str, *, err_prefix: str) -> str:
+    """
+    Legacy reverse-lookup from the *global* domains mapping.
+    This does NOT know about per-app aliases/canonicals stored in applications.
+    """
     needle = norm_domain(domain)
     matches: list[str] = []
 
@@ -166,12 +181,23 @@ def resolve_term(
     term: str,
     *,
     domains: dict,
+    applications: Optional[dict] = None,
     forced_mode: str,
     err_prefix: str,
 ) -> tuple[str, str]:
     """
     Returns (app_id, primary_domain) where primary_domain is normalized lower-case.
+
+    term can be:
+      - application_id
+      - domain (canonical or alias)
+
     forced_mode: "auto" | "domain" | "app"
+
+    Behavior:
+      1) If term is a domain and exists in *global* domains mapping -> primary_domain = that term (normalized).
+      2) If term is a domain and only exists in applications[*].server.domains -> map to app_id,
+         and primary_domain = canonical primary from global domains mapping (first entry).
     """
     t = as_str(term)
     if not t:
@@ -186,17 +212,45 @@ def resolve_term(
     elif forced == "app":
         is_domain = False
     else:
+        # keep your old heuristic
         is_domain = "." in t
 
     if is_domain:
-        app_id = resolve_app_id_from_domain(domains, t, err_prefix=err_prefix)
-        primary = norm_domain(t)
-    else:
-        app_id = t
-        primary = norm_domain(
-            resolve_primary_domain_from_app(domains, app_id, err_prefix=err_prefix)
-        )
+        # 1) Try legacy reverse mapping (global domains mapping values).
+        #    If this succeeds, the requested domain *is* a canonical/variant in the global mapping,
+        #    so we keep it as primary.
+        try:
+            app_id_legacy = resolve_app_id_from_domain(
+                domains, t, err_prefix=err_prefix
+            )
+            return str(app_id_legacy), norm_domain(t)
+        except AnsibleError:
+            pass
 
+        # 2) Fallback: resolve via applications[*].server.domains.{canonical,aliases}
+        apps = applications or {}
+        if not isinstance(apps, dict):
+            raise AnsibleError(
+                f"{err_prefix}: applications must be dict when resolving domain terms"
+            )
+
+        app_id = resolve_app_id_for_domain(apps, t)
+        if not app_id:
+            raise AnsibleError(
+                f"{err_prefix}: domain '{t}' not found (domains/applications)"
+            )
+
+        # For alias terms, primary should be the canonical primary from global domains mapping
+        primary = norm_domain(
+            resolve_primary_domain_from_app(domains, str(app_id), err_prefix=err_prefix)
+        )
+        return str(app_id), primary
+
+    # app-id path
+    app_id = t
+    primary = norm_domain(
+        resolve_primary_domain_from_app(domains, app_id, err_prefix=err_prefix)
+    )
     return app_id, primary
 
 

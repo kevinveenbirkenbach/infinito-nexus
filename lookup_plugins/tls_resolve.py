@@ -51,7 +51,11 @@ class LookupModule(LookupBase):
         forced_mode = as_str(kwargs.get("mode", "auto")).lower()
 
         app_id, primary_domain = resolve_term(
-            term, domains=domains, forced_mode=forced_mode, err_prefix="tls_resolve"
+            term,
+            domains=domains,
+            applications=applications,
+            forced_mode=forced_mode,
+            err_prefix="tls_resolve",
         )
 
         all_domains = collect_domains_for_app(domains, app_id, err_prefix="tls_resolve")

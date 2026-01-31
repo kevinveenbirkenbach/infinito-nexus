@@ -107,6 +107,7 @@ class LookupModule(LookupBase):
         app_id, primary_domain = resolve_term(
             term,
             domains=domains,
+            applications=applications,
             forced_mode=forced_mode,
             err_prefix="cert_plan",
         )
