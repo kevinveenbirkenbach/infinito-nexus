@@ -135,9 +135,65 @@ def extract_entrypoint(run_opts: List[str]) -> Tuple[List[str], Optional[str]]:
     return out, entrypoint
 
 
+def extract_pull_policy(run_opts: List[str]) -> str:
+    """
+    Extract docker run pull policy from run_opts.
+
+    Supported:
+      --pull always|missing|never
+      --pull=always|missing|never
+
+    If not specified, default to "missing" (Docker's common default in modern versions).
+    """
+    policy = "missing"
+    i = 0
+    while i < len(run_opts):
+        a = run_opts[i]
+
+        if a == "--pull":
+            if i + 1 < len(run_opts):
+                policy = str(run_opts[i + 1]).strip() or policy
+            i += 2
+            continue
+
+        if a.startswith("--pull="):
+            policy = a.split("=", 1)[1].strip() or policy
+            i += 1
+            continue
+
+        i += 1
+
+    policy = policy.lower()
+    if policy not in {"always", "missing", "never"}:
+        # Be conservative: unknown values fall back to "missing"
+        policy = "missing"
+    return policy
+
+
+def docker_pull(image: str) -> None:
+    """
+    Pull image. Fail hard if pull fails, because subsequent execution would be unreliable anyway.
+    """
+    try:
+        p = subprocess.run(
+            ["docker", "pull", image],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        die("docker not found. Please install Docker.", code=127)
+
+    if p.returncode != 0:
+        msg = (p.stderr or p.stdout or "").strip()
+        die(f"docker pull failed for {image}: {msg}", code=2)
+
+
 def inspect_image_entrypoint(image: str) -> List[str]:
     """
     Return image Config.Entrypoint as a list. If not set, returns [].
+
+    Note: This function assumes the image exists locally (or Docker can inspect it).
     """
     try:
         p = subprocess.run(
@@ -157,7 +213,9 @@ def inspect_image_entrypoint(image: str) -> List[str]:
         die("docker not found. Please install Docker.", code=127)
 
     if p.returncode != 0:
-        die(f"docker image inspect failed for {image}: {p.stderr.strip()}", code=2)
+        # Let the caller decide whether to recover (e.g. pull-on-missing).
+        msg = (p.stderr or p.stdout or "").strip()
+        die(f"docker image inspect failed for {image}: {msg}", code=2)
 
     raw = (p.stdout or "").strip()
     if raw in ("", "null", "None"):
@@ -171,6 +229,54 @@ def inspect_image_entrypoint(image: str) -> List[str]:
     if isinstance(val, str) and val:
         return [val]
     return []
+
+
+def try_inspect_entrypoint_with_pull(image: str, pull_policy: str) -> List[str]:
+    """
+    Inspect entrypoint with pull recovery:
+      - if pull_policy == "always": pull first, then inspect
+      - if inspect fails because image is missing and pull_policy == "missing": pull then inspect
+      - if pull_policy == "never": never pull (fail fast)
+
+    We implement this to avoid failing before docker run's auto-pull semantics.
+    """
+    # If user explicitly wants always, do it up front.
+    if pull_policy == "always":
+        docker_pull(image)
+
+    # First inspect attempt
+    try:
+        return inspect_image_entrypoint(image)
+    except SystemExit as exc:
+        # If we are allowed to pull-on-missing, attempt recovery.
+        # We cannot perfectly parse all daemon messages, but "No such image" is the key one.
+        if pull_policy in {"missing", "always"}:
+            # Re-run a lightweight inspect to get stderr in a controlled way:
+            try:
+                p = subprocess.run(
+                    [
+                        "docker",
+                        "image",
+                        "inspect",
+                        image,
+                        "--format",
+                        "{{json .Config.Entrypoint}}",
+                    ],
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
+            except FileNotFoundError:
+                die("docker not found. Please install Docker.", code=127)
+
+            msg = (p.stderr or p.stdout or "").strip()
+            if "No such image" in msg or "not found" in msg.lower():
+                docker_pull(image)
+                # Second inspect attempt after pull
+                return inspect_image_entrypoint(image)
+
+        # Otherwise: propagate original failure
+        raise exc
 
 
 def main() -> int:
@@ -195,6 +301,7 @@ def main() -> int:
     wrapper_host = must_exist(wrapper_host, "CA trust wrapper script")
 
     run_opts, image_and_args = split_docker_run_argv(argv)
+    pull_policy = extract_pull_policy(run_opts)
     run_opts, user_entrypoint = extract_entrypoint(run_opts)
 
     image = image_and_args[0]
@@ -228,7 +335,9 @@ def main() -> int:
         final_cmd.append(user_entrypoint)
         final_cmd.extend(user_args)
     else:
-        ep = inspect_image_entrypoint(image)
+        # This used to fail if the image wasn't present (docker image inspect).
+        # Now we recover by pulling on missing (and honor --pull).
+        ep = try_inspect_entrypoint_with_pull(image, pull_policy=pull_policy)
         if not ep:
             die(
                 "Image has no ENTRYPOINT and you did not pass --entrypoint. "
