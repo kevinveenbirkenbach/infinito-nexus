@@ -20,26 +20,25 @@
     package_name: 'psycopg2-binary'
     global_install: true
 
-- name: "POSTGRES | Wait for init process complete (log marker)"
-  ansible.builtin.shell: |
-    set -o pipefail
-    docker logs {{ POSTGRES_CONTAINER }} 2>&1 | grep -q "init process complete; ready for start up"
-  args:
-    executable: /bin/bash
-  register: pg_init_done
-  until: pg_init_done.rc == 0
+- name: "POSTGRES | Wait until container is running (not restarting)"
+  ansible.builtin.shell: >
+    docker inspect --format '{{ "{{.State.Status}}" }} {{ "{{.State.Restarting}}" }}' {{ POSTGRES_CONTAINER }}
+  register: pg_state
   retries: 120
   delay: 2
+  until: >
+    (pg_state.stdout is search('running')) and
+    (pg_state.stdout is not search('true'))
   changed_when: false
 
-- name: "POSTGRES | Wait for SQL to work (socket) after init"
+- name: "POSTGRES | Confirm SQL works (socket)"
   ansible.builtin.shell: >
     docker exec {{ POSTGRES_CONTAINER }} sh -lc
     'psql -U postgres -d postgres -Atc "SELECT 1" >/dev/null'
   register: pg_sql_ready
-  until: pg_sql_ready.rc == 0
-  retries: 60
+  retries: 30
   delay: 2
+  until: pg_sql_ready.rc == 0
   changed_when: false
 
 - name: "POSTGRES | Ensure postgres superuser password matches inventory"
