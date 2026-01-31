@@ -117,14 +117,14 @@ class TestRepairDockerSoft(unittest.TestCase):
                 return [""]  # other-2 -> missing
 
             # 3) wrapper invocations
-            if "compose-base" in cmd:
+            if "compose" in cmd:
                 return []
 
             return []
 
         def fake_isfile(path):
             return path in (
-                s.compose_base,  # wrapper present
+                s.compose,  # wrapper present
                 "/BASE/app1/docker-compose.yml",
                 "/BASE/db/docker-compose.yml",
             )
@@ -140,18 +140,16 @@ class TestRepairDockerSoft(unittest.TestCase):
             # Expect: only "other-2" fails due to missing labels -> 1 error
             self.assertEqual(errors, 1)
 
-            restart_cmds = [
-                c for c in cmd_log if "compose-base" in c and " restart" in c
-            ]
+            restart_cmds = [c for c in cmd_log if "compose" in c and " restart" in c]
             self.assertTrue(
                 any(
-                    'compose-base --chdir "/BASE/app1" --project "app1" restart' in c
+                    'compose --chdir "/BASE/app1" --project "app1" restart' in c
                     for c in restart_cmds
                 )
             )
             self.assertTrue(
                 any(
-                    'compose-base --chdir "/BASE/db" --project "db" restart' in c
+                    'compose --chdir "/BASE/db" --project "db" restart' in c
                     for c in restart_cmds
                 )
             )

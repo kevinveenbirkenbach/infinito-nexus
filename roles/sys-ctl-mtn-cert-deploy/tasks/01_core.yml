@@ -20,7 +20,7 @@
     system_service_timer_persistent:    true
     system_service_force_flush_instant: true  # Required, because otherwise Mailu may doesn't have certificates
     compose_cmd: >-
-      {{ DOCKER_CMD_BASE }}
+      {{ PATH_COMPOSE }}
       --chdir {{ docker_compose.directories.instance }}
       --project {{ (docker_compose.directories.instance | regex_replace('/+$', '')) | basename }}
 

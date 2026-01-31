@@ -6,5 +6,5 @@ OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 Type=oneshot
 Environment="compose_cmd={{ compose_cmd }}"
 ExecStart={{ system_service_script_exec }} \
-  {{ lookup('cert_plan', domain, want='files.cert') | dirname }} \
+  {{ lookup('cert_plan', application_id, want='files.cert') | dirname }} \
   {{ docker_compose.directories.instance }}

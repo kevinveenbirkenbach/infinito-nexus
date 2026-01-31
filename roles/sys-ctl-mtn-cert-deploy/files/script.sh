@@ -12,12 +12,12 @@ docker_compose_instance_directory="$2"
 
 # Compose wrapper base command (must include quoting as needed)
 # Example:
-#   compose_cmd="/usr/local/bin/compose-base --chdir /opt/docker/mailu --project mailu"
+#   compose_cmd="/usr/local/bin/compose --chdir /opt/docker/mailu --project mailu"
 : "${compose_cmd:=}"
 
 if [ -z "$compose_cmd" ]; then
   echo "ERROR: compose_cmd is not set. It must point to the compose wrapper base command." >&2
-  echo "Example: compose_cmd='/usr/local/bin/compose-base --chdir <dir> --project <name>'" >&2
+  echo "Example: compose_cmd='/usr/local/bin/compose --chdir <dir> --project <name>'" >&2
   exit 1
 fi
 

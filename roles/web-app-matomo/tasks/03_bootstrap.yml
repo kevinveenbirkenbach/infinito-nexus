@@ -5,7 +5,7 @@
     - name: "Matomo bootstrap | Run one-shot bootstrap via docker compose profile"
       ansible.builtin.command:
         argv:
-          - "{{ DOCKER_CMD_BASE }}"
+          - "{{ PATH_COMPOSE }}"
           - --chdir
           - "{{ docker_compose.directories.instance }}"
           - --project
@@ -70,7 +70,7 @@
     - name: "DEBUG | docker compose config (effective)"
       ansible.builtin.command:
         argv:
-          - "{{ DOCKER_CMD_BASE }}"
+          - "{{ PATH_COMPOSE }}"
           - --debug
           - --chdir
           - "{{ docker_compose.directories.instance }}"

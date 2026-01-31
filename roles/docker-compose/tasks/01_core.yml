@@ -21,11 +21,11 @@
     owner:  root
     group:  root
 
-- name: Install compose-base wrapper
+- name: Install compose wrapper
   become: true
   ansible.builtin.copy:
-    src: "compose_base.py"
-    dest: "{{ DOCKER_CMD_BASE }}"
+    src: "compose.py"
+    dest: "{{ PATH_COMPOSE }}"
     mode: "0755"
     owner: root
     group: root

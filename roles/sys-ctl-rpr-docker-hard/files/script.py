@@ -4,7 +4,7 @@ import sys
 import subprocess
 import argparse
 
-compose_base = "/usr/local/bin/compose-base"
+compose = "/usr/local/bin/compose"
 
 
 def run(cmd: list[str], cwd: str) -> None:
@@ -14,7 +14,7 @@ def run(cmd: list[str], cwd: str) -> None:
 def hard_restart_docker_services(dir_path: str) -> None:
     """
     Perform a hard restart of docker compose services in the given directory
-    using compose-base wrapper (auto env + overrides).
+    using compose wrapper (auto env + overrides).
     """
     try:
         abs_dir = os.path.abspath(dir_path)
@@ -24,11 +24,11 @@ def hard_restart_docker_services(dir_path: str) -> None:
 
         # down + up -d (wrapper resolves env + overrides automatically)
         run(
-            [compose_base, "--chdir", abs_dir, "--project", project, "down"],
+            [compose, "--chdir", abs_dir, "--project", project, "down"],
             cwd=abs_dir,
         )
         run(
-            [compose_base, "--chdir", abs_dir, "--project", project, "up", "-d"],
+            [compose, "--chdir", abs_dir, "--project", project, "up", "-d"],
             cwd=abs_dir,
         )
 
@@ -38,7 +38,7 @@ def hard_restart_docker_services(dir_path: str) -> None:
         sys.exit(1)
     except FileNotFoundError:
         print(
-            f"Error: required wrapper not found at {compose_base}. "
+            f"Error: required wrapper not found at {compose}. "
             "Install it via the docker-compose role first.",
             file=sys.stderr,
         )
@@ -47,7 +47,7 @@ def hard_restart_docker_services(dir_path: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Restart docker compose services in subdirectories (with compose-base wrapper)."
+        description="Restart docker compose services in subdirectories (with compose wrapper)."
     )
     parser.add_argument(
         "parent_directory",

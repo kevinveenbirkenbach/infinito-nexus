@@ -64,7 +64,6 @@ def detect_scheme_from_conf(conf_path: Path) -> str | None:
     has_ssl = False
 
     for line in text:
-        # ignore comments quickly
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
@@ -76,7 +75,6 @@ def detect_scheme_from_conf(conf_path: Path) -> str | None:
         if LISTEN_80_RE.search(line):
             has_80 = True
 
-    # Prefer HTTPS if present
     if has_443 or has_ssl:
         return "https"
     if has_80:
@@ -87,11 +85,6 @@ def detect_scheme_from_conf(conf_path: Path) -> str | None:
 def build_urls_from_nginx_confs(config_path: str, domains: list[str]) -> list[str]:
     """
     Build full URLs (http:// or https://) for each domain by inspecting its .conf file.
-
-    Preference:
-      - If the conf indicates HTTPS -> https://domain/
-      - Else if HTTP -> http://domain/
-      - Else fallback to http://domain/ (conservative) but emit warning
     """
     base = Path(config_path)
     urls: list[str] = []
@@ -101,7 +94,6 @@ def build_urls_from_nginx_confs(config_path: str, domains: list[str]) -> list[st
         scheme = detect_scheme_from_conf(conf)
 
         if scheme is None:
-            # Fallback (you asked for "best to inspect conf"; but we must return a URL anyway)
             print(
                 f"Warning: Could not detect scheme from {conf}. Falling back to http://{domain}/",
                 file=sys.stderr,
@@ -120,14 +112,13 @@ def build_docker_cmd(
     ignore_network_blocks_from: list[str],
     use_host_network: bool = True,
 ) -> list[str]:
-    """
-    Build docker run command that forwards args to the container ENTRYPOINT.
-    """
-    cmd = ["docker", "run", "--rm"]
+    cmd = ["run", "--rm"]
 
-    # Default: make container see the same network namespace as the host
     if use_host_network:
         cmd.extend(["--network", "host"])
+
+    # IMPORTANT: allow with-ca-trust.sh to install CA into container trust store
+    cmd.extend(["--user", "0:0"])
 
     cmd.append(image)
 
@@ -139,7 +130,6 @@ def build_docker_cmd(
         cmd.extend(ignore_network_blocks_from)
         cmd.append("--")
 
-    # URL-only mode: pass full URLs
     cmd.extend(urls)
     return cmd
 
@@ -154,9 +144,9 @@ def run_checker(
 ) -> int:
     """
     Runs the CSP checker container and returns its exit code.
+    Always uses run.
     """
     if always_pull:
-        # best-effort pull; if it fails, continue with local image
         subprocess.run(["docker", "pull", image], check=False)
 
     cmd = build_docker_cmd(
@@ -171,7 +161,7 @@ def run_checker(
         result = subprocess.run(cmd, check=False)
         return int(result.returncode)
     except FileNotFoundError:
-        print("docker not found. Please install Docker.", file=sys.stderr)
+        print("run not found. Please install it.", file=sys.stderr)
         return 127
     except Exception as exc:
         print(f"Unexpected error: {exc}", file=sys.stderr)
@@ -208,8 +198,6 @@ def main() -> None:
         default=[],
         help="Optional: domains whose network block failures should be ignored",
     )
-
-    # Default: host network ON; allow opt-out
     parser.add_argument(
         "--no-host-network",
         action="store_true",

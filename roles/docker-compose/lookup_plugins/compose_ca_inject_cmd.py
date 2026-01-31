@@ -155,7 +155,7 @@ class LookupModule(LookupBase):
         script_path = render_ansible_strict(
             templar=templar,
             raw=_require(ca_trust, "inject_script", str, label="CA_TRUST"),
-            var_name="CA_TRUST.inject_script",
+            var_name="PATH_CA_INJECT",
             err_prefix="compose_ca_inject_cmd",
             variables=variables,
         )
@@ -169,7 +169,7 @@ class LookupModule(LookupBase):
         wrapper_host = render_ansible_strict(
             templar=templar,
             raw=_require(ca_trust, "wrapper_host", str, label="CA_TRUST"),
-            var_name="CA_TRUST.wrapper_host",
+            var_name="PATH_CA_TRUST",
             err_prefix="compose_ca_inject_cmd",
             variables=variables,
         )

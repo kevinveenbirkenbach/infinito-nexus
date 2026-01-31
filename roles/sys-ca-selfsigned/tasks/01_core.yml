@@ -137,7 +137,7 @@
   become: true
   ansible.builtin.copy:
     src: "with-ca-trust.sh"
-    dest: "{{ CA_TRUST.wrapper_host }}"
+    dest: "{{ PATH_CA_TRUST }}"
     owner: root
     group: root
     mode: "0755"
@@ -146,7 +146,7 @@
   become: true
   ansible.builtin.command:
     argv:
-      - "{{ CA_TRUST.wrapper_host }}"
+      - "{{ PATH_CA_TRUST }}"
   environment:
     CA_TRUST_CERT: "{{ CA_ROOT.cert_host }}"
     CA_TRUST_NAME: "{{ DOMAIN_PRIMARY | lower }}"

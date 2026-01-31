@@ -88,6 +88,45 @@ if command -v trust >/dev/null 2>&1; then
   fi
 fi
 
+# ------------------------------------------------------------
+# Chromium / NSS trust (per-user DB)
+#
+# Puppeteer/Chromium often uses NSS trust DB and may ignore OS CA store.
+# Import the CA into the user's NSS DB if certutil is available.
+#
+# Requires:
+#   - Debian/Ubuntu: apt-get install libnss3-tools
+#   - Alpine: apk add nss-tools
+# ------------------------------------------------------------
+if command -v certutil >/dev/null 2>&1; then
+  # Prefer real HOME; fall back to a writable temp dir
+  home_dir="${HOME:-}"
+  if [ -z "$home_dir" ] || [ ! -d "$home_dir" ] || [ ! -w "$home_dir" ]; then
+    home_dir="/tmp"
+  fi
+
+  nss_db="${home_dir}/.pki/nssdb"
+  log "Detected certutil; importing CA into NSS DB: ${nss_db}"
+
+  # Ensure directory exists
+  run mkdir -p "$nss_db" 2>/dev/null || true
+
+  # Create NSS DB if missing (empty password)
+  if [ ! -f "$nss_db/cert9.db" ]; then
+    run certutil -N -d "sql:${nss_db}" --empty-password 2>/dev/null || true
+  fi
+
+  # Remove existing cert entry (best-effort)
+  run certutil -D -d "sql:${nss_db}" -n "$name" >/dev/null 2>&1 || true
+
+  # Import as trusted CA (C,, = trusted CA for SSL)
+  run certutil -A -d "sql:${nss_db}" -n "$name" -t "C,," -i "$CA_TRUST_CERT" 2>/dev/null || true
+
+  log "NSS trust import attempted (best-effort)"
+else
+  log "certutil not available; skipping NSS trust import (Chromium may still fail)"
+fi
+
 if [ "$installed" = "1" ]; then
   log "CA trust installation completed successfully"
 else
