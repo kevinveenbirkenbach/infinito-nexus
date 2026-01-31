@@ -7,10 +7,13 @@
 
 - name: Create HTTP->HTTPS handler per domain
   ansible.builtin.template:
-    src: "http.conf.j2"
+    src:  "http.conf.j2"
     dest: "{{ lookup('nginx_paths', domain, protocol='http', want='files.domain') }}"
-  loop: "{{ CURRENT_PLAY_DOMAINS_ALL }}"
+  loop:   "{{ CURRENT_PLAY_DOMAINS_ALL }}"
   loop_control:
     loop_var: domain
-    label: "{{ domain }}"
-  notify: restart openresty
+    label:    "{{ domain }}"
+  async:      "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
+  poll:       "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
+  notify:     restart openresty
+  when:       HTTPS_REDIRECT_ENABLED | bool
