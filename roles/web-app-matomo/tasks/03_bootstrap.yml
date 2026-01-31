@@ -97,15 +97,19 @@
         msg: "Matomo bootstrap failed – see debug output above"
 
 
-- name: "Matomo bootstrap | Set effective token (prefer existing, else bootstrap stdout)"
+- name: "Matomo bootstrap | Set effective token (prefer existing, else parse bootstrap stdout)"
   ansible.builtin.set_fact:
     matomo_token_value: >-
       {{
         (matomo_token_value | default('') | string | trim)
         if (matomo_token_value is defined and (matomo_token_value | string | trim) != '')
-        else (matomo_bootstrap_run.stdout | default('') | string | trim)
+        else (
+          (matomo_bootstrap_run.stdout | default('') | string)
+          | regex_search('(?m)^[a-f0-9]{32,64}$')
+          | default('', true)
+          | trim
+        )
       }}
-
 
 - name: "Matomo bootstrap | Assert we have a token now"
   ansible.builtin.assert:
