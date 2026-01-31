@@ -139,11 +139,9 @@
   include_role:
     name: user-root
 
-# @todo change this to role based todo
 - name: update device
   include_role:
     name: update-compose
-  when: MODE_UPDATE | bool
 
 - name: "Ensure correct timezone is '{{ HOST_TIMEZONE }}'"
   community.general.timezone:
