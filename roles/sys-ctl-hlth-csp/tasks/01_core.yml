@@ -39,12 +39,25 @@
       - "CA_TRUST_NAME={{ CA_TRUST.trust_name }}"
     # Always run with CA trust injected via docker-run-ca (systemd env for wrapper)
     system_service_tpl_exec_start: >-
-      {{ system_service_script_exec }}
-      --nginx-config-dir={{ [lookup('nginx_paths', want='directories.configuration.servers'),
-                            lookup('tls_resolve', DOMAIN_PRIMARY, want='protocols.web')] | path_join }}
-      --image={{ HEALTH_CSP_IMAGE }}
-      --short
-      {%- if HEALTH_CSP_ALWAYS_PULL | bool %} --always-pull{%- endif -%}
-      {%- if (HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | length) > 0 %} --ignore-network-blocks-from {{ HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | join(' ') }}{%- endif -%}
+      {{
+        [
+          system_service_script_exec,
+          '--nginx-config-dir=' ~ (
+            [
+              lookup('nginx_paths', want='directories.configuration.servers'),
+              lookup('tls_resolve', DOMAIN_PRIMARY, want='protocols.web')
+            ] | path_join
+          ),
+          '--image=' ~ HEALTH_CSP_IMAGE,
+          '--short',
+          (HEALTH_CSP_ALWAYS_PULL | bool) | ternary('--always-pull', ''),
+          (HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | length > 0) | ternary(
+            '--ignore-network-blocks-from ' ~ (HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM | join(' ')),
+            ''
+          )
+        ]
+        | reject('equalto','')
+        | join(' ')
+      }}
 
 - include_tasks: utils/once/flag.yml
