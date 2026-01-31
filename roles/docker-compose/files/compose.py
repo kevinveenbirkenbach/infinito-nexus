@@ -67,8 +67,14 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description="Infinito.Nexus docker compose wrapper (auto env + overrides)"
     )
-    ap.add_argument("--chdir", required=True, help="Compose project directory")
-    ap.add_argument("--project", required=True, help="Compose project name (-p)")
+    ap.add_argument(
+        "--chdir",
+        help="Compose project directory (default: current working directory)",
+    )
+    ap.add_argument(
+        "--project",
+        help="Compose project name (-p) (default: basename of chdir)",
+    )
     ap.add_argument(
         "--debug",
         action="store_true",
@@ -81,13 +87,17 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    project_dir = Path(args.chdir)
+    project_dir = Path(args.chdir) if args.chdir else Path.cwd()
+    project_dir = project_dir.resolve()
+
     if not project_dir.is_dir():
         print(
             f"[compose] --chdir is not a directory: {project_dir}",
             file=sys.stderr,
         )
         return 2
+
+    project = args.project if args.project else project_dir.name
 
     passthrough = args.args
     if passthrough and passthrough[0] == "--":
@@ -97,7 +107,7 @@ def main() -> int:
         return 2
 
     try:
-        cmd = build_cmd(args.project, project_dir, passthrough)
+        cmd = build_cmd(project, project_dir, passthrough)
     except Exception as exc:
         print(f"[compose] {exc}", file=sys.stderr)
         return 2
