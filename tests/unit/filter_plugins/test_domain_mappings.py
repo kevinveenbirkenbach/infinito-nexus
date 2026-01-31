@@ -15,12 +15,15 @@ class TestDomainMappings(unittest.TestCase):
 
     def test_app_without_domains(self):
         apps = {"web-app-desktop": {}}
-        # no domains key → no mappings
+        # no server/domains key → no mappings
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, [])
 
     def test_empty_domains_cfg(self):
-        apps = {"web-app-desktop": {"domains": {}}}
+        # Explicitly empty server.domains dict.
+        # With auto_build_alias=True the default alias becomes the target itself,
+        # so it would be skipped as a self-mapping -> no mappings.
+        apps = {"web-app-desktop": {"server": {"domains": {}}}}
         expected = []
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, expected)
@@ -32,7 +35,6 @@ class TestDomainMappings(unittest.TestCase):
             {"source": "alias.com", "target": default},
         ]
         result = self.filter.domain_mappings(apps, self.primary, True)
-        # order not important
         self.assertCountEqual(result, expected)
 
     def test_canonical_not_default(self):
@@ -49,7 +51,7 @@ class TestDomainMappings(unittest.TestCase):
                 }
             }
         }
-        # first canonical key 'one' → one.com
+        # first canonical key 'one' -> one.com (dict insertion order)
         expected = [{"source": "desktop.example.com", "target": "one.com"}]
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, expected)
@@ -93,11 +95,10 @@ class TestDomainMappings(unittest.TestCase):
         result = self.filter.domain_mappings(apps, self.primary, False)
         self.assertEqual(result, [])  # no auto-added default alias
 
-    def test_aliases_and_canonical_no_autobuild_still_adds_default(self):
+    def test_aliases_and_canonical_no_autobuild(self):
         """
-        If explicit aliases are present, the filter always appends the default domain
-        to the alias list (to cover 'www'/'root' style defaults), regardless of auto_build_aliases.
-        With a canonical set, both the explicit alias and the default should point to the canonical.
+        With auto_build_aliases=False we do NOT append the default domain to aliases.
+        Only explicit aliases should map to canonical.
         """
         apps = {
             "web-app-desktop": {
@@ -108,7 +109,6 @@ class TestDomainMappings(unittest.TestCase):
         }
         expected = [
             {"source": "alias.com", "target": "foo.com"},
-            {"source": "desktop.example.com", "target": "foo.com"},
         ]
         result = self.filter.domain_mappings(apps, self.primary, False)
         self.assertCountEqual(result, expected)
@@ -131,13 +131,21 @@ class TestDomainMappings(unittest.TestCase):
 
     def test_no_domains_key_no_autobuild(self):
         """
-        App ohne 'server.domains' erzeugt keine Mappings, unabhängig von auto_build_aliases.
+        App without 'server.domains' produces no mappings regardless of auto_build_aliases.
         """
         apps = {
             "web-app-desktop": {
                 # no 'server' or 'domains'
             }
         }
+        result = self.filter.domain_mappings(apps, self.primary, False)
+        self.assertEqual(result, [])
+
+    def test_empty_server_domains_no_autobuild(self):
+        """
+        Explicit empty server.domains should not generate aliases when auto_build_aliases is False.
+        """
+        apps = {"web-app-desktop": {"server": {"domains": {}}}}
         result = self.filter.domain_mappings(apps, self.primary, False)
         self.assertEqual(result, [])
 

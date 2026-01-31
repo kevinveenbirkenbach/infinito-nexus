@@ -12,6 +12,10 @@ class FilterModule(object):
           - source: each alias domain
           - target: the first canonical domain
         Skip mappings where source == target, since they make no sense.
+
+        IMPORTANT:
+        - If auto_build_alias is False, do NOT automatically add the default alias
+          (<entity>.<primary_domain>) unless it is explicitly configured in aliases.
         """
 
         def parse_entry(domains_cfg, key, app_id):
@@ -60,19 +64,28 @@ class FilterModule(object):
             if domains_cfg is None:
                 alias_map[app_id] = []
                 continue
+
+            default = default_domain(app_id, primary_domain)
+
+            # If domains_cfg is explicitly an empty dict, that used to mean:
+            # "use the default domain". But that is an auto-build behavior and
+            # must be gated by auto_build_alias.
             if isinstance(domains_cfg, dict) and not domains_cfg:
-                alias_map[app_id] = [default_domain(app_id, primary_domain)]
+                alias_map[app_id] = [default] if auto_build_alias else []
                 continue
 
             aliases = parse_entry(domains_cfg, "aliases", app_id) or []
-            default = default_domain(app_id, primary_domain)
             has_aliases = "aliases" in domains_cfg
             has_canonical = "canonical" in domains_cfg
 
             if has_aliases:
-                if default not in aliases:
+                # ONLY auto-add default alias when enabled.
+                # If the user set aliases: [], they likely want "no aliases".
+                if auto_build_alias and default not in aliases:
                     aliases.append(default)
             elif has_canonical:
+                # If canonical exists but aliases key does not, we may auto-add
+                # the default alias when enabled (and only if it isn't already canonical).
                 canon = canonical_map.get(app_id, [])
                 if default not in canon and default not in aliases and auto_build_alias:
                     aliases.append(default)
