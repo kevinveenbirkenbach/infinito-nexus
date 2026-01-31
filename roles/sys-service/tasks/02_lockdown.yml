@@ -57,10 +57,11 @@
   loop: "{{ deploy_timers }}"
   when: deploy_timers | length > 0
 
-- name: "DEPLOY | Mask all {{ SOFTWARE_NAME | lower }} timers (services remain unmasked)"
+- name: "DEPLOY | Disable all {{ SOFTWARE_NAME | lower }} timers (keep unit files)"
   become: true
   ansible.builtin.systemd:
     name: "{{ item }}"
-    masked: true
+    enabled: false
+    state: stopped
   loop: "{{ deploy_timers }}"
   when: deploy_timers | length > 0

@@ -6,12 +6,12 @@
     dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, sys_timer_file ] | path_join }}"
   register: dummy_timer
 
-- name: "restart timer"
+- name: "deploy timer"
   systemd:
     daemon_reload: yes
     name: "{{ sys_timer_file }}"
-    state: restarted
-    enabled: yes
+    state: stopped
+    enabled: false
   when: dummy_timer.changed or SYS_TIMER_ALL_ENABLED | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
