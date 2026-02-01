@@ -40,7 +40,7 @@ class TestComposeCaInjectCmd(unittest.TestCase):
                 },
             },
             "CA_TRUST": {
-                "inject_script": "/etc/infinito.nexus/bin/compose_ca_inject.py",
+                "inject_script": "/etc/infinito.nexus/bin/compose_ca.py",
                 "cert_host": "/etc/infinito.nexus/ca/root-ca.crt",
                 "wrapper_host": "/etc/infinito.nexus/bin/with-ca-trust.sh",
                 "trust_name": "infinito.nexus",
@@ -91,7 +91,7 @@ class TestComposeCaInjectCmd(unittest.TestCase):
             out = self.lookup.run(["web-app-foo"], variables=self.vars)[0]
 
         self.assertIn("python3", out)
-        self.assertIn("/etc/infinito.nexus/bin/compose_ca_inject.py", out)
+        self.assertIn("/etc/infinito.nexus/bin/compose_ca.py", out)
 
         self.assertIn("--project", out)
         self.assertIn("'myproj'", out)

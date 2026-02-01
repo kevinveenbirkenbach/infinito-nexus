@@ -13,7 +13,7 @@ import yaml
 
 
 def die(msg: str, code: int = 2) -> "None":
-    print(f"[compose_ca_inject] {msg}", file=sys.stderr)
+    print(f"[compose_ca] {msg}", file=sys.stderr)
     raise SystemExit(code)
 
 
@@ -128,6 +128,24 @@ def docker_image_inspect(
 
 def docker_image_exists(image: str, *, cwd: Path, env: Dict[str, str]) -> bool:
     rc, _out, _err = run(["docker", "image", "inspect", image], cwd=cwd, env=env)
+    return rc == 0
+
+
+def docker_image_has_bin_sh(image: str, *, cwd: Path, env: Dict[str, str]) -> bool:
+    """
+    Best-effort detection whether the image provides /bin/sh.
+
+    We need /bin/sh to implement a runtime "soft wrapper" entrypoint that can:
+      - run the CA wrapper when executable
+      - otherwise print a warning and continue
+
+    Distroless images usually do not have /bin/sh.
+    """
+    rc, _out, _err = run(
+        ["docker", "run", "--rm", "--entrypoint", "/bin/sh", image, "-c", "exit 0"],
+        cwd=cwd,
+        env=env,
+    )
     return rc == 0
 
 
@@ -319,18 +337,21 @@ def render_override(
 ) -> Dict[str, Any]:
     """
     Generate a docker-compose override that injects CA trust into every service by:
-      - mounting CA cert + wrapper script
-      - setting entrypoint to the wrapper
-      - setting command to the ORIGINAL effective command (final entrypoint + final command)
+      - always: mounting CA cert + wrapper script, setting CA env vars + useful TLS env fallbacks
+      - optionally: using a runtime "soft wrapper" if /bin/sh exists in the image:
+            - if wrapper executable: exec wrapper "$@"
+            - else: print warning and exec "$@"
+        This avoids breaking distroless images that do not provide /bin/sh.
 
-    Also sets:
-      - CA_TRUST_CERT (container path)
-      - CA_TRUST_NAME (trust anchor name; required by with-ca-trust.sh)
+    NOTE:
+      - For images without /bin/sh, we MUST NOT override entrypoint/command.
+        We still inject env vars and mounts.
     """
     ca_container = "/tmp/infinito/ca/root-ca.crt"
     wrapper_container = "/tmp/infinito/bin/with-ca-trust.sh"
 
     out_services: Dict[str, Any] = {}
+    sh_cache: Dict[str, bool] = {}
 
     for name, svc in services.items():
         if not isinstance(svc, dict):
@@ -375,7 +396,8 @@ def render_override(
                 f"Service '{name}' resolved to empty effective command (image='{img_name or image}')"
             )
 
-        out_services[name] = {
+        # Always inject env vars + mounts (requirement: env always set).
+        override_svc: Dict[str, Any] = {
             "volumes": [
                 f"{ca_host}:{ca_container}:ro",
                 f"{wrapper_host}:{wrapper_container}:ro",
@@ -383,10 +405,28 @@ def render_override(
             "environment": {
                 "CA_TRUST_CERT": ca_container,
                 "CA_TRUST_NAME": trust_name,
+                # Useful fallbacks for many TLS stacks even if OS trust install isn't possible.
+                "SSL_CERT_FILE": ca_container,
+                "REQUESTS_CA_BUNDLE": ca_container,
+                "CURL_CA_BUNDLE": ca_container,
+                "NODE_EXTRA_CA_CERTS": ca_container,
             },
-            "entrypoint": [wrapper_container],
-            "command": effective_cmd,
         }
+
+        # Only override entrypoint/command when /bin/sh exists (otherwise distroless breaks).
+        has_sh = False
+        if img_name:
+            if img_name in sh_cache:
+                has_sh = sh_cache[img_name]
+            else:
+                has_sh = docker_image_has_bin_sh(img_name, cwd=cwd, env=env)
+                sh_cache[img_name] = has_sh
+
+        if has_sh:
+            override_svc["entrypoint"] = [wrapper_container]
+            override_svc["command"] = effective_cmd
+
+        out_services[name] = override_svc
 
     return {"services": out_services}
 
