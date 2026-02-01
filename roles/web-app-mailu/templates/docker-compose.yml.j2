@@ -50,10 +50,13 @@
       front:
         condition: service_started
 
-{# Contiously deactivated, because it messes with OIDC url if you test local and use your local DNS
+{% if RUNTIME != 'dev' %}
+
+{# In dev environment with local DNS this doesn't work for OIDC #}
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-#}
+
+{% endif %}
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
