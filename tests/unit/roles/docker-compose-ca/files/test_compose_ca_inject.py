@@ -51,6 +51,172 @@ class TestComposeCaInject(unittest.TestCase):
         with self.assertRaises(SystemExit):
             self.m.parse_yaml("- 1\n- 2\n", "x")
 
+    def test_has_build(self):
+        self.assertTrue(self.m._has_build({"build": {"context": "."}}))
+        self.assertTrue(self.m._has_build({"build": "./"}))
+        self.assertFalse(self.m._has_build({}))
+        self.assertFalse(self.m._has_build({"build": None}))
+
+    def test_find_builder_service_for_image(self):
+        services = {
+            "app": {"image": "custom:1", "build": {"context": "."}},
+            "worker": {"image": "custom:1"},
+            "other": {"image": "other:2", "build": {"context": "."}},
+        }
+        self.assertEqual(
+            self.m._find_builder_service_for_image(image="custom:1", services=services),
+            "app",
+        )
+        self.assertEqual(
+            self.m._find_builder_service_for_image(
+                image="missing:tag", services=services
+            ),
+            "",
+        )
+        self.assertEqual(
+            self.m._find_builder_service_for_image(image="", services=services),
+            "",
+        )
+
+    def test_ensure_image_available_builds_self_when_build_present(self):
+        """
+        If the service has build:, ensure_image_available should run
+        `docker compose ... build <service>` (not pull).
+        """
+        calls = []
+
+        def fake_run(cmd, *, cwd, env):
+            calls.append(cmd)
+
+            # docker image inspect <image>: first missing, second exists
+            if cmd[:3] == ["docker", "image", "inspect"]:
+                inspect_calls = [
+                    c for c in calls if c[:3] == ["docker", "image", "inspect"]
+                ]
+                if len(inspect_calls) == 1:
+                    return 1, "", "no such image"
+                return 0, json.dumps([{"Config": {"Entrypoint": [], "Cmd": []}}]), ""
+
+            # docker compose ... build app
+            if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["build", "app"]:
+                return 0, "built", ""
+
+            # anything else
+            return 1, "", "unexpected"
+
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            self.m.ensure_image_available(
+                service_name="app",
+                svc={"image": "custom:1", "build": {"context": "."}},
+                image="custom:1",
+                services={"app": {"image": "custom:1", "build": {"context": "."}}},
+                service_to_compose_cmd={"app": base_cmd},
+                compose_base_cmd=base_cmd,
+                cwd=Path("/tmp"),
+                env={},
+            )
+
+        self.assertTrue(any(c[-2:] == ["build", "app"] for c in calls))
+        self.assertFalse(any(c[-2:] == ["pull", "app"] for c in calls))
+
+    def test_ensure_image_available_builds_builder_for_shared_image(self):
+        """
+        New robust logic:
+        - 'worker' has no build but references image 'custom:1'
+        - 'app' has build and same image 'custom:1'
+        => should run `docker compose ... build app` and not pull worker.
+        """
+        calls = []
+
+        services = {
+            "app": {"image": "custom:1", "build": {"context": "."}},
+            "worker": {"image": "custom:1"},
+        }
+
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
+        service_to_cmd = {"app": base_cmd, "worker": base_cmd}
+
+        def fake_run(cmd, *, cwd, env):
+            calls.append(cmd)
+
+            # docker image inspect: first missing, second exists
+            if cmd[:3] == ["docker", "image", "inspect"]:
+                inspect_calls = [
+                    c for c in calls if c[:3] == ["docker", "image", "inspect"]
+                ]
+                if len(inspect_calls) == 1:
+                    return 1, "", "no such image"
+                return 0, json.dumps([{"Config": {"Entrypoint": [], "Cmd": []}}]), ""
+
+            # build builder (app)
+            if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["build", "app"]:
+                return 0, "built", ""
+
+            # if pull(worker) happens, that's wrong for this test; still return success
+            if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["pull", "worker"]:
+                return 0, "pulled", ""
+
+            return 1, "", "unexpected"
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            self.m.ensure_image_available(
+                service_name="worker",
+                svc=services["worker"],
+                image="custom:1",
+                services=services,
+                service_to_compose_cmd=service_to_cmd,
+                compose_base_cmd=base_cmd,
+                cwd=Path("/tmp"),
+                env={},
+            )
+
+        self.assertTrue(any(c[-2:] == ["build", "app"] for c in calls))
+        self.assertFalse(any(c[-2:] == ["pull", "worker"] for c in calls))
+
+    def test_ensure_image_available_falls_back_to_pull_when_no_builder(self):
+        """
+        If there is no builder service for an image, fall back to pull(service).
+        """
+        calls = []
+
+        services = {"worker": {"image": "registry.example/worker:1"}}
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
+        service_to_cmd = {"worker": base_cmd}
+
+        def fake_run(cmd, *, cwd, env):
+            calls.append(cmd)
+
+            # image inspect: first missing, second exists after pull
+            if cmd[:3] == ["docker", "image", "inspect"]:
+                inspect_calls = [
+                    c for c in calls if c[:3] == ["docker", "image", "inspect"]
+                ]
+                if len(inspect_calls) == 1:
+                    return 1, "", "no such image"
+                return 0, json.dumps([{"Config": {"Entrypoint": [], "Cmd": []}}]), ""
+
+            # pull succeeds
+            if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["pull", "worker"]:
+                return 0, "pulled", ""
+
+            return 1, "", "unexpected"
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            self.m.ensure_image_available(
+                service_name="worker",
+                svc=services["worker"],
+                image=services["worker"]["image"],
+                services=services,
+                service_to_compose_cmd=service_to_cmd,
+                compose_base_cmd=base_cmd,
+                cwd=Path("/tmp"),
+                env={},
+            )
+
+        self.assertTrue(any(c[-2:] == ["pull", "worker"] for c in calls))
+
     @patch.object(Path, "exists", autospec=True, return_value=True)
     @patch.object(Path, "is_dir", autospec=True, return_value=True)
     @patch.object(Path, "read_text", autospec=True)
@@ -60,20 +226,12 @@ class TestComposeCaInject(unittest.TestCase):
         self, _mkdir, _write_text, _read_text, _is_dir, _exists
     ):
         """
-        The implementation:
-          - parses compose files to discover profiles (reads files from --compose-files)
-          - runs `docker compose ... config` (default + per-profile)
+        main():
+          - parses compose files to discover profiles
+          - runs `docker compose ... config`
           - inspects images via `docker image inspect`
-          - writes an override that injects CA_TRUST_CERT + CA_TRUST_NAME
-
-        Therefore we must:
-          - provide readable compose file content (for profile discovery)
-          - mock run() for compose config + image inspect
-          - include the new required arg: --trust-name
+          - writes override with CA_TRUST_* envs
         """
-
-        # Content for compose files referenced by -f ... arguments (profile discovery).
-        # Keep it minimal; no profiles needed, but valid YAML mapping with services.
         _read_text.return_value = "services:\n  app:\n    image: myimage:latest\n"
 
         def fake_run(cmd, *, cwd, env):
@@ -88,7 +246,6 @@ class TestComposeCaInject(unittest.TestCase):
 
             # docker image inspect <image>
             if cmd[:3] == ["docker", "image", "inspect"]:
-                # compose_ca_inject expects `run()` to return stdout as JSON string here.
                 json_out = json.dumps(
                     [{"Config": {"Entrypoint": ["/entry"], "Cmd": ["run"]}}]
                 )
@@ -120,11 +277,8 @@ class TestComposeCaInject(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertTrue(_write_text.called)
 
-        # Optional extra sanity: ensure the override contains CA_TRUST_NAME
-        # (We can't easily read the written content since write_text is mocked,
-        # but we *can* inspect its call args.)
-        args, kwargs = _write_text.call_args
-        # signature: Path.write_text(self, data, encoding=...)
+        # Optional sanity: ensure the written YAML contains CA_TRUST_NAME and trust-name value
+        args, _kwargs = _write_text.call_args
         written = args[1] if len(args) > 1 else ""
         self.assertIn("CA_TRUST_NAME", written)
         self.assertIn("infinito.local", written)

@@ -101,8 +101,10 @@ def docker_image_inspect(
         die(f"docker image inspect returned empty result for '{image}'")
 
     cfg = data[0].get("Config")
+    if cfg is None:
+        cfg = {}
     if not isinstance(cfg, dict):
-        die(f"docker image inspect missing Config for '{image}'")
+        die(f"docker image inspect missing/invalid Config for '{image}'")
 
     ep = cfg.get("Entrypoint")
     cmd = cfg.get("Cmd")
@@ -129,11 +131,33 @@ def docker_image_exists(image: str, *, cwd: Path, env: Dict[str, str]) -> bool:
     return rc == 0
 
 
+def _has_build(svc: Dict[str, Any]) -> bool:
+    return isinstance(svc.get("build"), (dict, str))
+
+
+def _find_builder_service_for_image(*, image: str, services: Dict[str, Any]) -> str:
+    """
+    If multiple services reference the same locally-built image, only one of them
+    may define `build:`. This function finds that builder service.
+    """
+    wanted = (image or "").strip()
+    if not wanted:
+        return ""
+    for name, svc in services.items():
+        if not isinstance(svc, dict):
+            continue
+        if str(svc.get("image") or "").strip() == wanted and _has_build(svc):
+            return name
+    return ""
+
+
 def ensure_image_available(
     *,
     service_name: str,
     svc: Dict[str, Any],
     image: str,
+    services: Dict[str, Any],
+    service_to_compose_cmd: Dict[str, List[str]],
     compose_base_cmd: List[str],
     cwd: Path,
     env: Dict[str, str],
@@ -144,14 +168,18 @@ def ensure_image_available(
     Strategy:
       1) If docker image inspect works -> OK
       2) Else:
-         - If service has 'build' -> run `docker compose ... build <service>`
+         - If THIS service has 'build' -> run `docker compose ... build <service>`
+         - Else if another service builds the SAME image -> build that builder service
          - Otherwise -> run `docker compose ... pull <service>`
     """
-    if docker_image_exists(image, cwd=cwd, env=env):
+    img = (image or "").strip()
+    if not img:
+        die(f"ensure_image_available: empty image for service '{service_name}'")
+
+    if docker_image_exists(img, cwd=cwd, env=env):
         return
 
-    has_build = isinstance(svc.get("build"), (dict, str))
-    if has_build:
+    if _has_build(svc):
         run_checked(
             compose_base_cmd + ["build", service_name],
             cwd=cwd,
@@ -159,16 +187,30 @@ def ensure_image_available(
             label=f"docker compose build {service_name}",
         )
     else:
-        run_checked(
-            compose_base_cmd + ["pull", service_name],
-            cwd=cwd,
-            env=env,
-            label=f"docker compose pull {service_name}",
-        )
+        builder = _find_builder_service_for_image(image=img, services=services)
+        if builder:
+            builder_cmd = service_to_compose_cmd.get(builder)
+            if not builder_cmd:
+                # should not happen, but keep it robust
+                builder_cmd = compose_base_cmd
+            run_checked(
+                builder_cmd + ["build", builder],
+                cwd=cwd,
+                env=env,
+                label=f"docker compose build {builder} (builder for image {img})",
+            )
+        else:
+            run_checked(
+                compose_base_cmd + ["pull", service_name],
+                cwd=cwd,
+                env=env,
+                label=f"docker compose pull {service_name}",
+            )
 
-    if not docker_image_exists(image, cwd=cwd, env=env):
+    if not docker_image_exists(img, cwd=cwd, env=env):
         die(
-            f"Image '{image}' for service '{service_name}' is still missing after build/pull."
+            f"Image '{img}' for service '{service_name}' is still missing after build/pull. "
+            "If this is a locally-built image, ensure one service defines both `build:` and `image:`."
         )
 
 
@@ -188,8 +230,8 @@ def _extract_compose_files(parts: List[str], *, cwd: Path) -> List[Path]:
                 p = cwd / p
             files.append(p)
             i += 2
-            continue
-        i += 1
+        else:
+            i += 1
     if not files:
         die("No compose files found in --compose-files (expected -f <file> ...)")
     return files
@@ -316,6 +358,8 @@ def render_override(
                 service_name=name,
                 svc=svc,
                 image=img_name,
+                services=services,
+                service_to_compose_cmd=service_to_compose_cmd,
                 compose_base_cmd=compose_cmd,
                 cwd=cwd,
                 env=env,
@@ -381,10 +425,6 @@ def main() -> int:
     if not cwd.exists() or not cwd.is_dir():
         die(f"--chdir must be an existing directory: {cwd}")
 
-    out_path = Path(args.out)
-    if not out_path.is_absolute():
-        out_path = cwd / out_path
-
     ca_host = str(args.ca_host).strip()
     wrapper_host = str(args.wrapper_host).strip()
     trust_name = str(args.trust_name).strip()
@@ -405,6 +445,7 @@ def main() -> int:
             ef = cwd / ef
         if not ef.exists():
             die(f"--env-file was provided but file does not exist: {ef}")
+        env_file = str(ef)
 
     parts = str(args.compose_files).strip().split()
     if not parts:
@@ -414,7 +455,7 @@ def main() -> int:
     compose_base_cmd = _compose_base_cmd(
         project=str(args.project),
         parts=parts,
-        env_file=str(args.env_file) if env_file else "",
+        env_file=env_file if env_file else "",
     )
 
     # Discover all profiles referenced in compose files so we can include profile-only services too.
@@ -462,6 +503,10 @@ def main() -> int:
         wrapper_host=wrapper_host,
         trust_name=trust_name,
     )
+
+    out_path = Path(args.out)
+    if not out_path.is_absolute():
+        out_path = cwd / out_path
 
     try:
         out_path.parent.mkdir(parents=True, exist_ok=True)
