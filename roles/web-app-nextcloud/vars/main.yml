@@ -120,7 +120,6 @@ NEXTCLOUD_WHITEBOARD_CONTAINER:           "{{ applications | get_app_conf(applic
 NEXTCLOUD_WHITEBOARD_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.image') }}"
 NEXTCLOUD_WHITEBOARD_IMAGE_CUSTOM:        "{{ NEXTCLOUD_WHITEBOARD_CONTAINER }}_custom"
 NEXTCLOUD_WHITEBOARD_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.version') }}"
-NEXTCLOUD_WHITEBOARD_CUSTOM_IMAGE:        "nextcloud_whiteboard_custom"
 NEXTCLOUD_WHITEBOARD_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.enabled') }}"
 NEXTCLOUD_WHITEBOARD_PORT_INTERNAL:       "3002"
 NEXTCLOUD_WHITEBOARD_JWT:                 "{{ applications | get_app_conf(application_id, 'credentials.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'_jwt_secret') }}"

@@ -72,10 +72,9 @@
     build:
       context: .
       dockerfile: {{ NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE }}
-    image: {{ NEXTCLOUD_WHITEBOARD_IMAGE_CUSTOM }}
     pull_policy: never
+    image: "{{ NEXTCLOUD_WHITEBOARD_IMAGE_CUSTOM }}"
 {% include 'roles/docker-container/templates/healthcheck/nc.yml.j2' %}
-    image: "{{ NEXTCLOUD_WHITEBOARD_CUSTOM_IMAGE }}"
     container_name: {{ NEXTCLOUD_WHITEBOARD_CONTAINER }}
     volumes:
       - whiteboard_tmp:/tmp
