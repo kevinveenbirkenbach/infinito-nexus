@@ -23,6 +23,7 @@ MEDIAWIKI_LOCAL_PATH:             "/opt/mw-local"
 ## Docker
 MEDIAWIKI_VERSION:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 MEDIAWIKI_IMAGE:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+MEDIAWIKI_CUSTOM_IMAGE:           "{{ entity_name }}_custom:{{ MEDIAWIKI_VERSION }}"
 MEDIAWIKI_CONTAINER:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
 MEDIAWIKI_VOLUME_IMAGES:          "{{ applications | get_app_conf(application_id, 'docker.volumes.images') }}"
 MEDIAWIKI_VOLUME_EXTENSIONS:      "{{ applications | get_app_conf(application_id, 'docker.volumes.extensions') }}"

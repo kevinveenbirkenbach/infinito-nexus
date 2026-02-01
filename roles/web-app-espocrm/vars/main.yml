@@ -15,7 +15,7 @@ webserver_vhost_flavour:            "ws_generic"
 ## Container
 ESPOCRM_VERSION:                    "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~'.version') }}"
 ESPOCRM_IMAGE:                      "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~'.image') }}"
-ESPOCRM_CUSTOM_IMAGE:               "custom_espocrm"
+ESPOCRM_CUSTOM_IMAGE:               "{{ entity_name }}_custom:{{ ESPOCRM_VERSION }}"
 ESPOCRM_CONTAINER:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~'.name') }}"
 ESPOCRM_SERVICE:                    "{{ entity_name }}"
 

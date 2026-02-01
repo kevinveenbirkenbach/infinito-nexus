@@ -37,7 +37,7 @@ OPENPROJECT_CACHE_VERSION: "{{ applications
       
 OPENPROJECT_PLUGINS_FOLDER:   "{{ docker_compose.directories.volumes }}plugins/"
 
-OPENPROJECT_CUSTOM_IMAGE:     "custom_openproject"
+OPENPROJECT_CUSTOM_IMAGE:     "{{ entity_name }}_custom:{{ OPENPROJECT_VERSION }}"
 
 # The following volume doesn't have a practcical function. It just exist to prevent the creation of unnecessary anonymous volumes
 OPENPROJECT_DUMMY_VOLUME:     "{{ docker_compose.directories.volumes }}dummy_volume"

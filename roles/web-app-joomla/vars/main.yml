@@ -1,14 +1,15 @@
 # General
 application_id:                   "web-app-joomla"
 container_port:                   80
-webserver_client_max_body_size:             "{{ JOOMLA_POST_MAX_SIZE }}"
+webserver_client_max_body_size:   "{{ JOOMLA_POST_MAX_SIZE }}"
+entity_name:                      "{{ application_id | get_entity_name }}"
 
 # Joomla
 JOOMLA_VERSION:                   "{{ applications | get_app_conf(application_id, 'docker.services.joomla.version') }}"
 JOOMLA_IMAGE:                     "{{ applications | get_app_conf(application_id, 'docker.services.joomla.image') }}"
 JOOMLA_CONTAINER:                 "{{ applications | get_app_conf(application_id, 'docker.services.joomla.name') }}"
 JOOMLA_VOLUME:                    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-JOOMLA_CUSTOM_IMAGE:              "{{ JOOMLA_IMAGE }}_custom"
+JOOMLA_CUSTOM_IMAGE:              "{{ entity_name }}_custom:{{ JOOMLA_VERSION }}"
 JOOMLA_DOMAINS:                   "{{ applications | get_app_conf(application_id, 'server.domains.canonical') }}"
 JOOMLA_SITE_NAME:                 "{{ SOFTWARE_NAME }} Joomla - CMS"
 JOOMLA_DB_CONNECTOR:              "{{ 'pgsql' if database_type == 'postgres' else 'mysqli' }}"

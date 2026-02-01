@@ -1,8 +1,9 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-  application:
+  {{ entity_name }}:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
+    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     container_name: "{{ MEDIAWIKI_CONTAINER }}"
-    image: "{{ MEDIAWIKI_IMAGE }}:{{ MEDIAWIKI_VERSION }}"
+    image: "{{ MEDIAWIKI_CUSTOM_IMAGE }}"
     volumes:
       - "images:/var/www/html/images"
       - "extensions:/var/www/html/extensions"

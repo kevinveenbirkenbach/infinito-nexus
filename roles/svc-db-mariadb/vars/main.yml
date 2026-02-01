@@ -11,7 +11,7 @@ MARIADB_VERSION:        "{{ applications | get_app_conf(application_id,'docker.s
 MARIADB_NAME:           "{{ applications | get_app_conf(application_id,'docker.services.' ~ entity_name ~ '.name') }}"
 MARIADB_PORT:           "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
 MARIADB_HOST:           "127.0.0.1"
-MARIADB_CUSTOM_IMAGE:   "mariadb_custom"
+MARIADB_CUSTOM_IMAGE:   "{{ entity_name }}_custom:{{ MARIADB_VERSION }}"
 MARIADB_HEALTHCHECK_DB: "{{ SOFTWARE_NAME | lower | regex_replace('[^a-z0-9]+', '_') }}_healthcheck"
 
 # Host behavior stays unchanged (True).

@@ -50,7 +50,7 @@ NEXTCLOUD_SERVICE:                  "{{ entity_name }}"
 NEXTCLOUD_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.version') }}"
 NEXTCLOUD_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.image') }}"
 NEXTCLOUD_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.name') }}"
-NEXTCLOUD_CUSTOM_IMAGE:             "nextcloud_custom"
+NEXTCLOUD_CUSTOM_IMAGE:             "{{ entity_name }}_custom:{{ NEXTCLOUD_VERSION }}"
 
 ### Proxy
 NEXTCLOUD_PROXY_SERVICE:              "proxy"

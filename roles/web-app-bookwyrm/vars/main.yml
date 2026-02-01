@@ -36,7 +36,7 @@ BOOKWYRM_CONTAINER:             "{{ applications | get_app_conf(application_id, 
 BOOKWYRM_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 BOOKWYRM_MEDIA_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.media') }}"
 BOOKWYRM_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
-BOOKWYRM_CUSTOM_IMAGE:          "bookwyrm_custom"
+BOOKWYRM_CUSTOM_IMAGE:          "{{ entity_name }}_custom:{{ BOOKWYRM_VERSION }}"
 BOOKWYRM_WORKER_CONTAINER:      "{{ BOOKWYRM_CONTAINER }}-worker"
 
 ## Redis
