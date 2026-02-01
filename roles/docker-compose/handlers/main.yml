@@ -1,18 +1,4 @@
 ---
-- name: Generate CA trust override (before any compose command)
-  ansible.builtin.shell: |
-    set -euo pipefail
-    {{ lookup('compose_ca_inject_cmd', application_id) }}
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-    executable: /bin/bash
-  listen:
-    - docker compose up
-  when:
-    - domains | has_domain(application_id)
-    - lookup('tls_resolve', application_id, want='enabled') | bool
-    - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
-
 - name: Validate Docker Compose configuration
   ansible.builtin.shell: |
     set -euo pipefail
@@ -70,6 +56,20 @@
     COMPOSE_DOCKER_CLI_BUILD: "1"
   listen:
     - docker compose build
+
+- name: Generate CA trust override
+  ansible.builtin.shell: |
+    set -euo pipefail
+    {{ lookup('compose_ca_inject_cmd', application_id) }}
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+    executable: /bin/bash
+  listen:
+    - docker compose up
+  when:
+    - domains | has_domain(application_id)
+    - lookup('tls_resolve', application_id, want='enabled') | bool
+    - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
 
 - name: docker compose up
   ansible.builtin.script:
