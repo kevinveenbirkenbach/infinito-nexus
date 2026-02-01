@@ -42,7 +42,7 @@ MAILU_SUBNET:                         "{{ networks.local['web-app-mailu'].subnet
 
 ## Credentials
 MAILU_SECRET_KEY:                     "{{ applications | get_app_conf(application_id,'credentials.secret_key') }}"
-MAILU_API_TOKEN:                      "{{ applications | get_app_conf(application_id, 'credentials.api_token') }}"
+MAILU_API_TOKEN:                      "{{ applications | get_app_conf(application_id,'credentials.api_token') }}"
 
 ## OIDC
 MAILU_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
