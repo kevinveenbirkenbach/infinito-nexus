@@ -31,6 +31,7 @@
     volumes:
       - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
       - {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}:{{ NEXTCLOUD_DOCKER_CONF_ADD_PATH }}:ro
+      - {{ NEXTCLOUD_HOST_INCL_PATH }}:{{ NEXTCLOUD_DOCKER_INCL_PATH }}:ro
     healthcheck:
       test: ["CMD", "su", "www-data", "-s", "/bin/sh", "-c", "php {{ NEXTCLOUD_INTERNAL_OCC_COMMAND }} status"]
       interval: 1m

@@ -1,11 +1,11 @@
 nextcloud_system_config:
   - parameter: "hide_login_form"
     type: "boolean"
-    value: "{{ (not applications | get_app_conf(application_id, 'legacy_login_mask.enabled', True)) | lower }}"
+    value: "{{ (not applications | get_app_conf(application_id, 'legacy_login_mask.enabled')) | lower }}"
 
   - parameter: "auth.webauthn.enabled"
     type: "boolean"
-    value: "{{ applications | get_app_conf(application_id, 'legacy_login_mask.enabled', True) | lower }}"
+    value: "{{ applications | get_app_conf(application_id, 'legacy_login_mask.enabled') | lower }}"
 
   - parameter: "maintenance_window_start"
     type: "integer"
@@ -19,3 +19,13 @@ nextcloud_system_config:
 
   - parameter: "overwrite.cli.url"
     value: "{{ NEXTCLOUD_URL }}"
+
+  - parameter: "overwriteprotocol"
+    value: "{{ NEXTCLOUD_PROTOCOL }}"
+
+  - parameter: "overwritehost"
+    value: "{{ NEXTCLOUD_DOMAIN }}"
+
+  - parameter: "trusted_proxies"
+    type: "json"
+    value: "{{ NEXTCLOUD_TRUSTED_PROXIES }}"

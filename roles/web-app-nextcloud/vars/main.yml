@@ -13,6 +13,8 @@ database_password:                  "{{ applications | get_app_conf(application_
 NEXTCLOUD_DOMAIN:                   "{{ domains | get_domain(application_id) }}"
 NEXTCLOUD_PORT:                     "{{ ports.localhost.http[application_id] }}"
 NEXTCLOUD_URL:                      "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+NEXTCLOUD_PROTOCOL:                 "{{ lookup('tls_resolve', application_id, want='protocols.web') }}"
+NEXTCLOUD_TRUSTED_PROXIES:          "{{ networks.internet.values() | select }}"
 
 ## Plugins
 NEXTCLOUD_PLUGIN_ITEMS:             "{{ applications | get_app_conf(application_id, 'plugins') | dict2items }}"
