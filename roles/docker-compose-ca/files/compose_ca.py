@@ -82,6 +82,21 @@ def normalize_entrypoint(value: Any) -> List[str]:
     die(f"Unsupported entrypoint type in compose config: {type(value)}")
 
 
+def escape_compose_vars(argv: List[str]) -> List[str]:
+    """
+    Docker Compose interpolates $FOO and ${FOO} in YAML strings on the HOST side
+    (compose config time). That breaks container-side expansion (e.g. sh -lc 'exec "$FOO"')
+    when the host env var is unset, because it becomes exec "".
+
+    Compose escaping rule:
+      - $$ => literal $ (no interpolation)
+
+    Therefore: replace every "$" with "$$" in exec-form argv strings that we write into
+    docker-compose override YAML (entrypoint/command).
+    """
+    return [s.replace("$", "$$") for s in argv]
+
+
 def docker_image_inspect(
     image: str, *, cwd: Path, env: Dict[str, str]
 ) -> Tuple[List[str], List[str]]:
@@ -135,7 +150,7 @@ def docker_image_has_bin_sh(image: str, *, cwd: Path, env: Dict[str, str]) -> bo
     """
     Best-effort detection whether the image provides /bin/sh.
 
-    We need /bin/sh to implement a runtime "soft wrapper" entrypoint that can:
+    We need /bin/sh to implement a runtime wrapper entrypoint that can:
       - run the CA wrapper when executable
       - otherwise print a warning and continue
 
@@ -209,7 +224,6 @@ def ensure_image_available(
         if builder:
             builder_cmd = service_to_compose_cmd.get(builder)
             if not builder_cmd:
-                # should not happen, but keep it robust
                 builder_cmd = compose_base_cmd
             run_checked(
                 builder_cmd + ["build", builder],
@@ -338,14 +352,14 @@ def render_override(
     """
     Generate a docker-compose override that injects CA trust into every service by:
       - always: mounting CA cert + wrapper script, setting CA env vars + useful TLS env fallbacks
-      - optionally: using a runtime "soft wrapper" if /bin/sh exists in the image:
-            - if wrapper executable: exec wrapper "$@"
-            - else: print warning and exec "$@"
+      - optionally: using wrapper entrypoint when /bin/sh exists in the image:
+            - override entrypoint to wrapper script
+            - set command to the effective original exec-form (entrypoint+cmd)
         This avoids breaking distroless images that do not provide /bin/sh.
 
-    NOTE:
-      - For images without /bin/sh, we MUST NOT override entrypoint/command.
-        We still inject env vars and mounts.
+    IMPORTANT:
+      Docker Compose interpolates $VARS in YAML strings on the host.
+      We escape any $ in the command argv with $$ so container-side expansion works.
     """
     ca_container = "/tmp/infinito/ca/root-ca.crt"
     wrapper_container = "/tmp/infinito/bin/with-ca-trust.sh"
@@ -396,7 +410,7 @@ def render_override(
                 f"Service '{name}' resolved to empty effective command (image='{img_name or image}')"
             )
 
-        # Always inject env vars + mounts (requirement: env always set).
+        # Always inject env vars + mounts.
         override_svc: Dict[str, Any] = {
             "volumes": [
                 f"{ca_host}:{ca_container}:ro",
@@ -405,7 +419,6 @@ def render_override(
             "environment": {
                 "CA_TRUST_CERT": ca_container,
                 "CA_TRUST_NAME": trust_name,
-                # Useful fallbacks for many TLS stacks even if OS trust install isn't possible.
                 "SSL_CERT_FILE": ca_container,
                 "REQUESTS_CA_BUNDLE": ca_container,
                 "CURL_CA_BUNDLE": ca_container,
@@ -424,7 +437,8 @@ def render_override(
 
         if has_sh:
             override_svc["entrypoint"] = [wrapper_container]
-            override_svc["command"] = effective_cmd
+            # Escape $ -> $$ to prevent host-side Compose interpolation.
+            override_svc["command"] = escape_compose_vars(effective_cmd)
 
         out_services[name] = override_svc
 
