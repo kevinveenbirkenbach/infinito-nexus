@@ -106,10 +106,10 @@ clean-sudo:
 docker-restart:
 	@$(PYTHON) -m cli.deploy.development restart --distro "$(INFINITO_DISTRO)"
 
-docker-up: install
+docker-up: apparmor-teardown install
 	@$(PYTHON) -m cli.deploy.development up
 
-docker-down:
+docker-down: apparmor-restore
 	@$(PYTHON) -m cli.deploy.development down
 
 docker-stop:
@@ -277,11 +277,16 @@ lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-.PHONY: apparmor-dev-complain
+.PHONY: apparmor-teardown apparmor-restore
 
-disarmapp:
-	@echo "==> AppArmor: complain mode (dev)"
-	@sudo scripts/administration/disarmapp.sh
+apparmor-teardown:
+	@echo "==> AppArmor: full teardown (local dev)"
+	@sudo bash scripts/administration/apparmor/teardown.sh
+
+apparmor-restore:
+	@echo "==> AppArmor: restore profiles"
+	@sudo bash scripts/administration/apparmor/restore.sh
+
 
 .PHONY: trust-ca
 
