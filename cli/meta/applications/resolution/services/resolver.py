@@ -50,13 +50,14 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
     Single source of truth for "service -> provider role(s)" mapping.
 
     Semantics (intentionally specific to Infinito.Nexus):
-      - ldap enabled+shared    => svc-db-openldap
-      - oidc enabled+shared    => web-app-keycloak
-      - matomo enabled+shared  => web-app-matomo
-      - coturn enabled+shared  => web-svc-coturn
-      - onlyoffice enabled+shared => web-svc-onlyoffice
-      - database enabled+shared => svc-db-<type> (requires database.type)
-      - desktop enabled        => web-app-desktop   (shared does NOT matter)
+      - ldap enabled+shared          => svc-db-openldap
+      - oidc enabled+shared          => web-app-keycloak
+      - matomo enabled+shared        => web-app-matomo
+      - coturn enabled+shared        => web-svc-coturn
+      - onlyoffice enabled+shared    => web-svc-onlyoffice
+      - simpleicons enabled+shared   => web-svc-simpleicons
+      - database enabled+shared      => svc-db-<type> (requires database.type)
+      - desktop enabled              => web-app-desktop   (shared does NOT matter)
     """
     cfg = _as_mapping(config)
     services = _as_mapping(_as_mapping(cfg.get("docker")).get("services"))
@@ -65,7 +66,8 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
         db_type = (svc.get("type") or "").strip()
         if not db_type:
             raise ServicesResolutionError(
-                "docker.services.database.enabled=true and shared=true but docker.services.database.type is missing"
+                "docker.services.database.enabled=true and shared=true "
+                "but docker.services.database.type is missing"
             )
         return f"svc-db-{db_type}"
 
@@ -76,6 +78,12 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
         ServiceRule("coturn", _is_enabled_shared, lambda _svc: "web-svc-coturn"),
         ServiceRule(
             "onlyoffice", _is_enabled_shared, lambda _svc: "web-svc-onlyoffice"
+        ),
+        # ✅ NEW: Simpleicons as first-class shared web service
+        ServiceRule(
+            "simpleicons",
+            _is_enabled_shared,
+            lambda _svc: "web-svc-simpleicons",
         ),
         ServiceRule("database", _is_enabled_shared, map_database),
         ServiceRule("desktop", _is_enabled, lambda _svc: "web-app-desktop"),
@@ -121,7 +129,8 @@ class ServicesResolver:
         role_dir = self._role_dir(role_name)
         if not role_dir.is_dir():
             raise ServicesResolutionError(
-                f"Resolved service role {role_name!r} does not exist (missing folder {role_dir})"
+                f"Resolved service role {role_name!r} does not exist "
+                f"(missing folder {role_dir})"
             )
 
     def direct_includes_from_config(self, config: dict) -> List[str]:
