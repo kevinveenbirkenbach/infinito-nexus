@@ -1,13 +1,14 @@
 docker:
-  versions:               
-    api:        "1.4.0"
-    front:      "1.4.0"
-    typesense:  "typesense/typesense"
-  images:               
-    api:        "funkwhale/api"
-    front:      "funkwhale/front"
-    typesense:  "typesense/typesense"
   services:
+    funkwhale:
+      image:    "funkwhale/front"
+      version:  "1.4.0"
+    api:
+      image:    "funkwhale/api"
+      version:  "1.4.0"
+    typesense:
+      image:    "typesense/typesense"
+      version:  "30.1"
     logout:
       enabled: true
     ldap:
