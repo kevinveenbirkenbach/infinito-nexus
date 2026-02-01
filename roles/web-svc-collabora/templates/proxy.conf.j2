@@ -15,7 +15,7 @@ server {
   {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
 
   {# Optional explicit fast path for discovery #}
-  {% set location = "= " ~ container_healthcheck %}
+  {% set location = "= " ~ COLLABORA_DISCOVERY_PATH %}
   {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
 
   {# WebSocket handling for Collabora #}
