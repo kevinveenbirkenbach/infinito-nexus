@@ -83,11 +83,31 @@ export INFINITO_COMPILE
 	print-python lint-ansible \
 	dns-setup dns-remove
 
+dev-environment-bootstrap: apparmor-teardown dns-setup
+
+dev-environment-teardown: apparmor-restore dns-remove
+
 dns-setup:
 	@bash scripts/dns/setup.sh
 
 dns-remove:
 	@bash scripts/dns/remove.sh
+
+.PHONY: apparmor-teardown apparmor-restore
+
+apparmor-teardown:
+	@echo "==> AppArmor: full teardown (local dev)"
+	@sudo bash scripts/administration/apparmor/teardown.sh
+
+apparmor-restore:
+	@echo "==> AppArmor: restore profiles"
+	@sudo bash scripts/administration/apparmor/restore.sh
+
+
+.PHONY: trust-ca
+
+trust-ca:
+	@bash scripts/administration/trust_ca.sh
 
 
 clean:
@@ -106,10 +126,10 @@ clean-sudo:
 docker-restart:
 	@$(PYTHON) -m cli.deploy.development restart --distro "$(INFINITO_DISTRO)"
 
-docker-up: apparmor-teardown install
+docker-up: install
 	@$(PYTHON) -m cli.deploy.development up
 
-docker-down: apparmor-restore
+docker-down:
 	@$(PYTHON) -m cli.deploy.development down
 
 docker-stop:
@@ -277,18 +297,4 @@ lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
 
-.PHONY: apparmor-teardown apparmor-restore
 
-apparmor-teardown:
-	@echo "==> AppArmor: full teardown (local dev)"
-	@sudo bash scripts/administration/apparmor/teardown.sh
-
-apparmor-restore:
-	@echo "==> AppArmor: restore profiles"
-	@sudo bash scripts/administration/apparmor/restore.sh
-
-
-.PHONY: trust-ca
-
-trust-ca:
-	@bash scripts/administration/trust_ca.sh
