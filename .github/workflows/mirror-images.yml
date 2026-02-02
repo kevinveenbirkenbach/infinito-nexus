@@ -97,7 +97,7 @@ jobs:
         continue-on-error: true
         shell: bash
         run: |
-          set +e
+          set -euo pipefail
 
           # Defaults:
           # - Namespace defaults to repo owner (user/org), works for schedule & normal runs
@@ -116,5 +116,4 @@ jobs:
             --ghcr-namespace "${GHCR_NAMESPACE}" \
             --ghcr-prefix "${GHCR_PREFIX}"
 
-          echo ">>> Mirror sync finished (best-effort)"
-          exit 0
+          echo ">>> Mirror sync finished."
