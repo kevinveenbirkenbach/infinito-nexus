@@ -21,6 +21,10 @@ on:
         required: false
         default: "."
         type: string
+      images_per_hour:
+        description: "Optional throttle: max images mirrored per hour"
+        required: false
+        type: string
 
   workflow_call:
     inputs:
@@ -38,6 +42,10 @@ on:
         required: false
         type: string
         default: "."
+      images_per_hour:
+        description: "Optional throttle: max images mirrored per hour"
+        required: false
+        type: string
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -47,6 +55,9 @@ on:
 permissions:
   contents: read
   packages: write
+concurrency:
+  group: mirror-images-${{ github.repository }}-${{ github.event.inputs.ghcr_namespace || inputs.ghcr_namespace || github.repository_owner }}-${{ github.event.inputs.ghcr_prefix || inputs.ghcr_prefix || 'mirror' }}
+  cancel-in-progress: false
 
 jobs:
   sync:
@@ -58,6 +69,7 @@ jobs:
     env:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      IMAGES_PER_HOUR: ${{ github.event.inputs.images_per_hour || inputs.images_per_hour || '50' }}
 
     steps:
       - name: Checkout
@@ -111,10 +123,16 @@ jobs:
           echo ">>> Mirror prefix:    ${GHCR_PREFIX}"
           echo ">>> Repo root:        ${REPO_ROOT}"
 
+          EXTRA_ARGS=()
+          if [ -n "${IMAGES_PER_HOUR}" ]; then
+            EXTRA_ARGS+=( --images-per-hour "${IMAGES_PER_HOUR}" )
+          fi
+
           python -m cli.mirror.sync \
             --repo-root "${REPO_ROOT}" \
             --ghcr-namespace "${GHCR_NAMESPACE}" \
-            --ghcr-prefix "${GHCR_PREFIX}"
+            --ghcr-prefix "${GHCR_PREFIX}" \
+            "${EXTRA_ARGS[@]}"
 
           echo ">>> Mirror sync finished."
 
@@ -126,7 +144,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          GHCR_NAMESPACE="${{ inputs.ghcr_namespace || 'infinito-nexus' }}"
+          GHCR_NAMESPACE="${{ inputs.ghcr_namespace || github.repository_owner }}"
           GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
           REPO_ROOT="${{ inputs.repo_root || '.' }}"
 
