@@ -17,4 +17,3 @@
       --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   args:
     chdir: "{{ docker_compose.directories.instance }}"
-  when: not plugin_task_file.stat.exists
