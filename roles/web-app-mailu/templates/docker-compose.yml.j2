@@ -49,13 +49,12 @@
         condition: service_started
       front:
         condition: service_started
-
-{% if RUNTIME != 'dev' %}
-
-{# In dev environment with local DNS this doesn't work for OIDC #}
     dns:
       - {{ MAILU_DNS_RESOLVER }}
 
+{% if ( DOCKER_IN_CONTAINER | bool ) and ( MAILU_OIDC_ENABLED | bool ) %}
+    extra_hosts:
+      - "{{ MAILU_OIDC_HOST }}:host-gateway"
 {% endif %}
 
 {% include 'roles/docker-container/templates/networks.yml.j2' %}

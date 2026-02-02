@@ -47,6 +47,7 @@ MAILU_SECRET_KEY:                     "{{ applications | get_app_conf(applicatio
 MAILU_API_TOKEN:                      "{{ applications | get_app_conf(application_id,'credentials.api_token') }}"
 
 ## OIDC
+MAILU_OIDC_HOST:                      "{{ domains | get_domain('web-app-keycloak') }}"
 MAILU_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 MAILU_OIDC_EMAIL_BY_USERNAME_ENABLED: "{{ applications | get_app_conf(application_id, 'docker.services.oidc.email_by_username') }}"
 MAILU_OIDC_ENABLE_USER_CREATION:      "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enable_user_creation') | string | capitalize }}"
