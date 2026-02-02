@@ -55,6 +55,7 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
       - matomo enabled+shared        => web-app-matomo
       - coturn enabled+shared        => web-svc-coturn
       - onlyoffice enabled+shared    => web-svc-onlyoffice
+      - collabora enabled+shared     => web-svc-collabora
       - simpleicons enabled+shared   => web-svc-simpleicons
       - database enabled+shared      => svc-db-<type> (requires database.type)
       - desktop enabled              => web-app-desktop   (shared does NOT matter)
@@ -79,7 +80,7 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
         ServiceRule(
             "onlyoffice", _is_enabled_shared, lambda _svc: "web-svc-onlyoffice"
         ),
-        # ✅ NEW: Simpleicons as first-class shared web service
+        ServiceRule("collabora", _is_enabled_shared, lambda _svc: "web-svc-collabora"),
         ServiceRule(
             "simpleicons",
             _is_enabled_shared,
