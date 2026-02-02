@@ -40,8 +40,9 @@ docker:
     discourse:
       name:               "discourse"
       version:            "v2026.2.0-latest"
-      backup:
-        no_stop_required: true
+# Impossible to don't stop due to 'test_backup_no_stop_required_consistency' :(
+#      backup:
+#        no_stop_required: true
       repository:         "https://github.com/discourse/discourse_docker.git"
     css:
       enabled: true
