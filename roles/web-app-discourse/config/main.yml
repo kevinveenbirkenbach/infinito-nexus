@@ -8,7 +8,8 @@ server:
         unsafe-inline: true
     whitelist:
       font-src:
-        - "*.{{ DOMAIN_PRIMARY }}"
+        # Allow also http connections
+        - "http://forum.{{ DOMAIN_PRIMARY }}"
   domains:
     canonical:
       - "forum.{{ DOMAIN_PRIMARY }}"

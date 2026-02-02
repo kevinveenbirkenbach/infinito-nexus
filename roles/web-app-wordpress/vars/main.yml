@@ -4,20 +4,30 @@ entity_name:                "{{ application_id | get_entity_name }}"
 
 # WordPress
 WORDPRESS_URL:                "{{ lookup('tls_resolve', application_id, want='url.base') }}"
-WORDPRESS_MSMTP_SRC:          "{{ [ playbook_dir, 'roles/sys-svc-mail-msmtp/templates/msmtprc.conf.j2' ] | path_join }}"
-WORDPRESS_MSMTP_ABS:          "{{ [ docker_compose.directories.config, 'msmtprc.conf'] | path_join }}"
+WORDPRESS_TITLE:              "{{ applications | get_app_conf(application_id, 'title') }}"
 WORDPRESS_MAX_UPLOAD_SIZE:    "{{ applications | get_app_conf(application_id, 'max_upload_size') }}"
 WORDPRESS_CUSTOM_IMAGE:       "{{ entity_name }}_custom:{{ WORDPRESS_VERSION }}"
 WORDPRESS_DOCKER_HTML_PATH:   "/var/www/html"
 WORDPRESS_DOCKER_CONF_PATH:   "{{ WORDPRESS_CONFIG_PATH }}"
-WORDPRESS_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.wordpress.version') }}"
-WORDPRESS_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.wordpress.image') }}"
-WORDPRESS_CONTAINER:          "{{ applications | get_app_conf(application_id, 'docker.services.wordpress.name') }}"
+WORDPRESS_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+WORDPRESS_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+WORDPRESS_CONTAINER:          "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
 WORDPRESS_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 WORDPRESS_DOMAINS:            "{{ applications | get_app_conf(application_id, 'server.domains.canonical') }}"
 WORDPRESS_PLUGINS:            "{{ applications | get_app_conf(application_id, 'plugins') | dict2items }}"
 WORDPRESS_USER:               "www-data"
+
+# Email
+WORDPRESS_MSMTP_SRC:          "{{ [ playbook_dir, 'roles/sys-svc-mail-msmtp/templates/msmtprc.conf.j2' ] | path_join }}"
+WORDPRESS_MSMTP_ABS:          "{{ [ docker_compose.directories.config, 'msmtprc.conf'] | path_join }}"
+
+# Config
 WORDPRESS_CONFIG_FILE:        "wp-config.php"
 WORDPRESS_CONFIG_PATH:        "{{ [WORDPRESS_DOCKER_HTML_PATH, WORDPRESS_CONFIG_FILE] | path_join }}"
 WORDPRESS_CONFIG_UPLD_REL:    "config/upload.ini"
 WORDPRESS_CONFIG_UPLD_ABS:    "{{ [docker_compose.directories.instance, WORDPRESS_CONFIG_UPLD_REL ] | path_join }}"
+
+# User 
+WORDPRESS_ADMIN_EMAIL:        "{{ applications | get_app_conf(application_id, 'users.administrator.email') }}"
+WORDPRESS_ADMIN_USER:         "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
+WORDPRESS_ADMIN_PASSWORD:     "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
