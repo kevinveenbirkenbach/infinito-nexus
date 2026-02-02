@@ -1,6 +1,7 @@
 # General Configuration
 application_id:                 web-app-syncope
 database_password:              "{{ domains | get_domain(application_id).credentials.database_password }}"
+entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Application Specific
 syncope_keymaster_address:      http://localhost:8080/syncope/rest/keymaster

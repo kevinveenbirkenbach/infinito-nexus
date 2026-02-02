@@ -2,7 +2,7 @@
    application: 
      depends_on:
        - db
-     image: apache/syncope:{{ applications | get_app_conf(application_id, 'version', True) }}
+     image: apache/syncope:{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}
      ports:
        - "18080:8080"
      restart: always
@@ -16,7 +16,7 @@
    console: 
      depends_on:
        - syncope
-     image: apache/syncope-console:{{ applications | get_app_conf(application_id, 'version', True) }}
+     image: apache/syncope-console:{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}
      ports:
        - "28080:8080"
      restart: always
@@ -27,7 +27,7 @@
    enduser: 
      depends_on:
        - syncope
-     image: apache/syncope-enduser:{{ applications | get_app_conf(application_id, 'version', True) }}
+     image: apache/syncope-enduser:{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}
      ports:
        - "38080:8080"
      restart: always

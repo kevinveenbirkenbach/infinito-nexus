@@ -11,3 +11,5 @@ docker:
     matomo:
       enabled: true
       shared: true
+    syncope:
+      version: latest
