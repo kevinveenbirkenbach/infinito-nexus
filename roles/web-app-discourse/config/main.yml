@@ -40,7 +40,6 @@ docker:
     discourse:
       name:               "discourse"
       version:            "v2026.2.0-latest"
-      image:              "local_discourse/<< defaults_applications[web-app-discourse].docker.services.discourse.name >>" # Necessary to define this for the docker 2 loc backup
       backup:
         no_stop_required: true
       repository:         "https://github.com/discourse/discourse_docker.git"
