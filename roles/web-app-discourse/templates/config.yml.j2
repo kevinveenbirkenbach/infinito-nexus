@@ -146,6 +146,7 @@ run:
   #- exec: rails r "SiteSetting.notification_email='info@unconfigured.discourse.org'"
 {% if DISCOURSE_OIDC_ENABLED | bool %}
   # Deactivate Default Login
+  - exec: rails r "SiteSetting.openid_connect_verbose_logging = {{ MODE_DEBUG | bool | string | lower }}"
   - exec: rails r "SiteSetting.enable_local_logins = false"
   - exec: rails r "SiteSetting.enable_passkeys = false" # https://meta.discourse.org/t/passwordless-login-using-passkeys/285589
 
@@ -162,6 +163,28 @@ run:
   - exec: rails r "SiteSetting.openid_connect_rp_initiated_logout_redirect = '{{ DISCOURSE_OIDC_LOGOUT_REDIRECT_URL }}'"
   - exec: rails r "SiteSetting.openid_connect_allow_association_change = false"
   - exec: rails r "SiteSetting.openid_connect_rp_initiated_logout = true"
+
+  # ---- FinalDestination allowlist (IMPORTANT) ----
+  # Discourse blocks requests to internal/private IPs unless the host is allowlisted.
+  # Extract host from discovery document URL and append to allowed_internal_hosts.
+  - exec: >
+      rails r "url=SiteSetting.openid_connect_discovery_document.to_s.strip;
+      host=url.sub(%r{\Ahttps?://}i,'').split('/').first.to_s.strip;
+      host=host.split(':').first.to_s.strip;
+      list=SiteSetting.allowed_internal_hosts.to_s.split('|').map{|x| x.strip}.reject{|x| x.empty?};
+      if !host.empty? && host =~ /\A[a-z0-9.-]+\z/i && !list.include?(host)
+        list << host;
+        SiteSetting.allowed_internal_hosts = list.join('|');
+      end;
+      puts \"allowed_internal_hosts=#{SiteSetting.allowed_internal_hosts}\";"
+
+  # Clear OIDC discovery cache so the next login attempt refetches with the new allowlist
+  - exec: >
+      rails r "url=SiteSetting.openid_connect_discovery_document.to_s.strip;
+      key=\"openid-connect-discovery-#{url}\";
+      Discourse.cache.delete(key);
+      puts \"deleted_cache_key=#{key}\";"
+
 {% endif %}
 
   # Activate Administrator User (always yes, non-interactive)
