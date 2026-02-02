@@ -5,13 +5,13 @@
 - name: Create {{ domains | get_domain(application_id) }}.conf if LDAP is exposed to internet
   template:
     src: "nginx.stream.conf.j2"
-    dest: "{{ NGINX.DIRECTORIES.STREAMS }}{{ domains | get_domain(application_id) }}.conf"
+    dest: "{{ lookup('nginx_paths', want='directories.configuration.streams') }}{{ domains | get_domain(application_id) }}.conf"
   notify: restart openresty
   when: OPENLDAP_NETWORK_SWITCH_PUBLIC | bool
 
 - name: Remove {{ domains | get_domain(application_id) }}.conf if LDAP is not exposed to internet
   file:
-    path: "{{ NGINX.DIRECTORIES.STREAMS }}{{ domains | get_domain(application_id) }}.conf"
+    path: "{{ lookup('nginx_paths', want='directories.configuration.streams') }}{{ domains | get_domain(application_id) }}.conf"
     state: absent
   when: not OPENLDAP_NETWORK_SWITCH_PUBLIC | bool
 

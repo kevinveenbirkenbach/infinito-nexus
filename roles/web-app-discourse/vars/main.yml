@@ -1,4 +1,5 @@
 application_id:                 "web-app-discourse"
+entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Database
 database_password:              "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
@@ -6,27 +7,36 @@ database_password:              "{{ applications | get_app_conf(application_id, 
 # Discourse
 
 ## General
-DISCOURSE_DATABASE_TYPE:        "{{ applications | get_app_conf(application_id, 'docker.services.database.type') }}"
-DISCOURSE_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.discourse.name') }}"
-DISCOURSE_NETWORK:              "{{ applications | get_app_conf(application_id, 'docker.network') }}"
-DISCOURSE_VOLUME:               "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-DISCOURSE_PLUGINS:              "{{ applications | get_app_conf(application_id, 'plugins') }}"
-DISCOURSE_PG_NETWORK:           "{{ applications | get_app_conf('svc-db-' ~ DISCOURSE_DATABASE_TYPE, 'docker.network' ) }}"
-DISCOURSE_REDIS_HOST:           "{{ application_id | get_entity_name }}-redis"
-DISCOURSE_REPOSITORY_URL:       "{{ applications | get_app_conf(application_id, 'docker.services.discourse.repository') }}"
+DISCOURSE_DATABASE_TYPE:            "{{ applications | get_app_conf(application_id, 'docker.services.database.type') }}"
+DISCOURSE_CONTAINER:                "{{ entity_name }}"
+DISCOURSE_NETWORK:                  "{{ applications | get_app_conf(application_id, 'docker.network') }}"
+DISCOURSE_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+DISCOURSE_PLUGINS:                  "{{ applications | get_app_conf(application_id, 'plugins') }}"
+DISCOURSE_PG_NETWORK:               "{{ applications | get_app_conf('svc-db-' ~ DISCOURSE_DATABASE_TYPE, 'docker.network' ) }}"
+DISCOURSE_REDIS_HOST:               "{{ application_id | get_entity_name }}-redis"
+DISCOURSE_REPOSITORY_URL:           "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
+DISCOURSE_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 
 ## Directories
-DISCOURSE_REPOSITORY_DIR:       "{{ docker_compose.directories.services }}{{ applications | get_app_conf( application_id, 'repository') }}/"
-DISCOURSE_CONTAINERS_DIR:       "{{ [ DISCOURSE_REPOSITORY_DIR, 'containers' ] | path_join }}"
+DISCOURSE_REPOSITORY_DIR:           "{{ docker_compose.directories.services }}{{ applications | get_app_conf( application_id, 'repository') }}/"
+DISCOURSE_CONTAINERS_DIR:           "{{ [ DISCOURSE_REPOSITORY_DIR, 'containers' ] | path_join }}"
 
 ## Files
-DISCOURSE_APPLICATION_YML_DEST: "{{ [ DISCOURSE_CONTAINERS_DIR, DISCOURSE_CONTAINER ~ '.yml' ] | path_join }}"
+DISCOURSE_APPLICATION_YML_DEST:     "{{ [ DISCOURSE_CONTAINERS_DIR, DISCOURSE_CONTAINER ~ '.yml' ] | path_join }}"
 
 ## Error Strings
-DISCOURSE_ERROR_ALREADY_IN_NET: "Error response from daemon: endpoint with name {{ DISCOURSE_CONTAINER }} already exists in network {{ DISCOURSE_PG_NETWORK }}"
-DISCOURSE_ERROR_NOT_CONNECTED:  'is not connected to network {{ DISCOURSE_NETWORK }}'
-DISCOURSE_LDAP_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+DISCOURSE_ERROR_ALREADY_IN_NET:     "Error response from daemon: endpoint with name {{ DISCOURSE_CONTAINER }} already exists in network {{ DISCOURSE_PG_NETWORK }}"
+DISCOURSE_ERROR_NOT_CONNECTED:      'is not connected to network {{ DISCOURSE_NETWORK }}'
+DISCOURSE_LDAP_ENABLED:             "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 
 # Don't use variable HOST_LL_CC, because this isn't available in the container. 
 # With this setup you have an minimalistic default setup
-DISCOURSE_LOCAL:                "C.UTF-8"
+DISCOURSE_LOCAL:                    "C.UTF-8"
+
+DISCOURSE_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
+DISCOURSE_OIDC_LOGOUT_REDIRECT_URL: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+
+# TLS
+DISCOURSE_TLS_ENABLED:              "{{ lookup('tls_resolve', application_id, want='enabled') | bool }}"
+DISCOURSE_TLS_SELFSIGNED:           "{{ lookup('tls_resolve', application_id, want='mode') == 'self_signed' }}"
+DISCOURSE_TLS_SELFSIGNED_ENABLED:   "{{ ( DISCOURSE_TLS_ENABLED | bool ) and ( DISCOURSE_TLS_SELFSIGNED | bool ) }}"

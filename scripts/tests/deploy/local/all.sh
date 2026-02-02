@@ -90,7 +90,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     ./scripts/docker/entry.sh true
 
     inv_dir='${INVENTORY_DIR}'
-    inv_file=\"\${inv_dir}/servers.yml\"
+    inv_file=\"\${inv_dir}/${TEST_DEPLOY_TYPE}.yml\"
     pw_file=\"\${inv_dir}/.password\"
 
     mkdir -p \"\${inv_dir}\"
@@ -104,6 +104,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     echo \">>> Include apps (${apps_count}): ${apps_csv}\"
 
     python3 -m cli.create.inventory \"\${inv_dir}\" \
+      --inventory-file \${inv_file} \
       --host '${LIMIT_HOST}' \
       --ssl-disabled \
       --vars '${RUNTIME_VARS_JSON}' \

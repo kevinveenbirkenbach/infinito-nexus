@@ -1,0 +1,67 @@
+- name: "DEPLOY | Collect {{ SOFTWARE_NAME | lower }} timers"
+  become: true
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - list-unit-files
+      - "*.{{ SOFTWARE_NAME | lower }}.timer"
+      - --no-legend
+      - --no-pager
+  register: deploy_timer_units
+  changed_when: false
+  failed_when: false
+
+- name: "DEPLOY | Collect {{ SOFTWARE_NAME | lower }} services"
+  become: true
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - list-unit-files
+      - "*.{{ SOFTWARE_NAME | lower }}.service"
+      - --no-legend
+      - --no-pager
+  register: deploy_service_units
+  changed_when: false
+  failed_when: false
+
+- name: "DEPLOY | Build unit lists"
+  ansible.builtin.set_fact:
+    deploy_timers: >-
+      {{
+        deploy_timer_units.stdout_lines | default([])
+        | map('split', ' ')
+        | map('first')
+        | list
+      }}
+    deploy_services: >-
+      {{
+        deploy_service_units.stdout_lines | default([])
+        | map('split', ' ')
+        | map('first')
+        | list
+      }}
+
+- name: "DEPLOY | Stop all {{ SOFTWARE_NAME | lower }} services"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+  loop: "{{ deploy_services }}"
+  when: deploy_services | length > 0
+
+- name: "DEPLOY | Stop all {{ SOFTWARE_NAME | lower }} timers (best-effort)"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+  loop: "{{ deploy_timers }}"
+  when: deploy_timers | length > 0
+
+- name: "DEPLOY | Disable all {{ SOFTWARE_NAME | lower }} timers (keep unit files)"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    state: stopped
+  loop: "{{ deploy_timers }}"
+  when: deploy_timers | length > 0

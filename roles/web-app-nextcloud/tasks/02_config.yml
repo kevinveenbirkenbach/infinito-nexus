@@ -9,14 +9,6 @@
     mode: "0644"
   notify: docker compose up
 
-- name: "NEXTCLOUD | Ensure includes.php ownership/permissions on host"
-  ansible.builtin.file:
-    path: "{{ NEXTCLOUD_HOST_INCL_PATH }}"
-    state: file
-    owner: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
-    group: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
-    mode: "0644"  
-
 - name: Flush handlers so Nextcloud container is restarted and ready
   meta: flush_handlers
 
@@ -28,10 +20,6 @@
     delay: 2
     state: started
 
-- name: Copy include instructions to the container
-  command: >
-    docker cp {{ NEXTCLOUD_HOST_INCL_PATH }} {{ NEXTCLOUD_CONTAINER }}:{{ NEXTCLOUD_DOCKER_INCL_PATH }}
-
 - name: Wait until Nextcloud is installed (occ status)
   command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} status"
   register: occ_status
@@ -42,7 +30,7 @@
     (occ_status.stdout | default('')) is search('installed: true')
   changed_when: false
 
-- name: Ensure config.php loads /tmp/includes.php (idempotent)
+- name: Ensure config.php loads {{ NEXTCLOUD_DOCKER_INCL_PATH }} (idempotent)
   ansible.builtin.shell: |
     set -euo pipefail
 
@@ -52,7 +40,7 @@
 
       grep -q "$marker" "$cfg" && exit 0
 
-      printf "\n/* %s */\nif (is_readable(\"/tmp/includes.php\")) {\n  include \"/tmp/includes.php\";\n}\n" \
+      printf "\n/* %s */\nif (is_readable(\"{{ NEXTCLOUD_DOCKER_INCL_PATH }}\")) {\n  include \"{{ NEXTCLOUD_DOCKER_INCL_PATH }}\";\n}\n" \
         "$marker" >> "$cfg"
     '
   args:

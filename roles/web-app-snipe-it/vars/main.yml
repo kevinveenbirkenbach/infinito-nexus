@@ -11,10 +11,14 @@ SNIPE_IT_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.serv
 SNIPE_IT_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.image') }}"
 SNIPE_IT_CONTAINER: "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.name') }}"
 SNIPE_IT_VOLUME:    "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-SNIPE_IT_USER:      "www-data"
 SNIPE_IT_SERVICE:   "{{ entity_name }}"
 SNIPE_IT_APP_KEY:   "{{ applications | get_app_conf(application_id, 'credentials.app_key') }}"
 
 # Authentification
-SNIPE_IT_OAUTH2_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.oauth2.enabled') }}"
-SNIPE_IT_LDAP_ENABLED:    "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+SNIPE_IT_LDAP_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+SNIPE_IT_TLS_ENABLED:             "{{ lookup('tls_resolve', application_id, want='enabled') | bool }}"
+
+#LDAP
+SNIPE_IT_LDAP_FILTER_FRAGMENT:    "&(objectClass=inetOrgPerson)"
+SNIPE_IT_LDAP_AUTH_FILTER_QUERY:  "{{ LDAP.USER.ATTRIBUTES.ID }}="
+SNIPE_IT_LDAP_USER_FIRSTNAME:     "{{ LDAP.USER.ATTRIBUTES.FIRSTNAME | lower }}"

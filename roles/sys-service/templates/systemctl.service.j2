@@ -7,6 +7,10 @@ OnFailureJobMode=replace-irreversibly
 
 [Service]
 Type={{ system_service_tpl_type }}
+{% for _environment in system_service_tpl_environment %}
+Environment={{ _environment }}
+{% endfor %}
+
 {% for key, val in [
   ('TimeoutStartSec', system_service_tpl_timeout_start_sec),
   ('ExecStartPre',    system_service_tpl_exec_start_pre),

@@ -19,4 +19,5 @@ galaxy_info:
   - name: Any
     versions:
     - all
-  lifecycle: beta
+  # Set to pre-alpha, because it isn't a autonomous role atm. Can be reactivated later
+  lifecycle: pre-alpha

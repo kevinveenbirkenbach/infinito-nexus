@@ -15,4 +15,3 @@ YOURLS_LANDINGPAGE_STATUS_CODE: "{{ applications | get_app_conf(application_id, 
 
 # Container
 container_port:                 8080
-container_healthcheck:          "{{ (YOURLS_ADMIN_LOCATION | regex_replace('^/+', '') | regex_replace('/+$', '')) ~ '/' }}"

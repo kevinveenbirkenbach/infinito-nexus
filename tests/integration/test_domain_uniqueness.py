@@ -13,7 +13,7 @@ class TestDomainUniqueness(unittest.TestCase):
         and assert that no domain appears more than once.
         """
         repo_root = Path(__file__).resolve().parents[2]
-        yaml_file = repo_root / "group_vars" / "all" / "04_applications.yml"
+        yaml_file = repo_root / "group_vars" / "all" / "05_applications.yml"
 
         # Generate the file if it doesn't exist
         if not yaml_file.exists():

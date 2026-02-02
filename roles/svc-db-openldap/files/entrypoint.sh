@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${LDAP_SUFFIX:=dc=infinito,dc=localhost}"
-: "${LDAP_ROOT_DN:=cn=admin,${LDAP_SUFFIX}}"
-: "${LDAP_ROOT_PW:=changeme}"
+: "${LDAP_SUFFIX:?LDAP_SUFFIX must be set (e.g. dc=infinito,dc=example)}"
+: "${LDAP_ROOT_DN:?LDAP_ROOT_DN must be set (e.g. cn=administrator,dc=infinito,dc=example)}"
+: "${LDAP_ROOT_PW:?LDAP_ROOT_PW must be set}"
+: "${LDAP_LOG_LEVEL:?LDAP_LOG_LEVEL must be set (e.g. stats, stats2, acl, 0)}"
 
 SLAPD_D_DIR="/etc/ldap/slapd.d"
 DB_DIR="/var/lib/ldap"
@@ -179,6 +180,6 @@ chmod 700 "${DB_DIR}" || true
 log "starting slapd (foreground; drop privileges to openldap)"
 exec /usr/sbin/slapd \
   -F "${SLAPD_D_DIR}" \
+  -d "${LDAP_LOG_LEVEL}" \
   -h "ldap:/// ldapi:///" \
-  -d 0 \
   -u openldap -g openldap

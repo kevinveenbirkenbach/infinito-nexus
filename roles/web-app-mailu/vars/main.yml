@@ -13,6 +13,7 @@ cert_mount_directory:                 "{{ docker_compose.directories.volumes }}c
 
 ## Meta 
 MAILU_WEBSITE:                        "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+MAILU_API_SERVICE_BASE_URL:           "http://{{ MAILU_FRONT_SERVICE }}/api/v1"
 
 ## Domains
 MAILU_DOMAIN:                         "{{ applications | get_app_conf(application_id, 'domain') }}"
@@ -23,6 +24,7 @@ MAILU_HOSTNAME_DNS_ZONE:              "{{ MAILU_HOSTNAME | to_zone }}"
 ## Docker
 MAILU_VERSION:                        "{{ applications | get_app_conf(application_id, 'docker.services.mailu.version') }}"
 MAILU_CONTAINER:                      "{{ applications | get_app_conf(application_id, 'docker.services.mailu.name') }}"
+MAILU_FRONT_SERVICE:                  "front"
 
 ## Volumes
 MAILU_SMTP_QUEUE_VOLUME:              "mailu_smtp_queue"
@@ -42,9 +44,10 @@ MAILU_SUBNET:                         "{{ networks.local['web-app-mailu'].subnet
 
 ## Credentials
 MAILU_SECRET_KEY:                     "{{ applications | get_app_conf(application_id,'credentials.secret_key') }}"
-MAILU_API_TOKEN:                      "{{ applications | get_app_conf(application_id, 'credentials.api_token') }}"
+MAILU_API_TOKEN:                      "{{ applications | get_app_conf(application_id,'credentials.api_token') }}"
 
 ## OIDC
+MAILU_OIDC_HOST:                      "{{ domains | get_domain('web-app-keycloak') }}"
 MAILU_OIDC_ENABLED:                   "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 MAILU_OIDC_EMAIL_BY_USERNAME_ENABLED: "{{ applications | get_app_conf(application_id, 'docker.services.oidc.email_by_username') }}"
 MAILU_OIDC_ENABLE_USER_CREATION:      "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enable_user_creation') | string | capitalize }}"

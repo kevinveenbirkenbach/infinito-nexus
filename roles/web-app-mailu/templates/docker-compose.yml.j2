@@ -9,9 +9,9 @@
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
         ipv4_address: {{ MAILU_DNS_RESOLVER }}
 
-  front:
-{% set service_name = 'front' %}
-    container_name: {{ MAILU_CONTAINER }}_front
+  {{ MAILU_FRONT_SERVICE }}:
+{% set service_name = MAILU_FRONT_SERVICE %}
+    container_name: {{ MAILU_CONTAINER }}_{{ MAILU_FRONT_SERVICE }}
     image: {{ MAILU_DOCKER_FLAVOR }}/nginx:{{ MAILU_VERSION }}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
@@ -51,6 +51,12 @@
         condition: service_started
     dns:
       - {{ MAILU_DNS_RESOLVER }}
+
+{% if ( DOCKER_IN_CONTAINER | bool ) and ( MAILU_OIDC_ENABLED | bool ) %}
+    extra_hosts:
+      - "{{ MAILU_OIDC_HOST }}:host-gateway"
+{% endif %}
+
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
   imap:

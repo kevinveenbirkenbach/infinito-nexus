@@ -1,4 +1,14 @@
 ###############################################################################
+# roles/svc-db-openldap/tasks/04_users.yml
+#
+# Purpose:
+# - Ensure base LDAP tree exists (suffix + OUs)
+# - Ensure LDAP user entries exist (without setting userPassword here)
+# - Always (re-)set user passwords on every deploy via Password Modify extended op
+# - Keep objectClass list and mail attribute up to date
+###############################################################################
+
+###############################################################################
 # 0) Ensure base tree exists (suffix + OUs)
 ###############################################################################
 - name: Ensure LDAP root (suffix) entry exists
@@ -70,9 +80,9 @@
     objectClass:  "{{ LDAP.USER.OBJECTS.STRUCTURAL }}"
     attributes:
       uid:           "{{ item.value.username }}"
-      sn:            "{{ item.value.sn  | default(item.key) }}"
+      givenName:     "{{ item.value.firstname }}"
+      sn:            "{{ item.value.lastname }}"
       cn:            "{{ item.value.cn  | default(item.key) }}"
-      userPassword:  "{SSHA}{{ item.value.password }}"
       loginShell:    /bin/bash
       homeDirectory: "/home/{{ item.key }}"
       uidNumber:     "{{ item.value.uid | int }}"
@@ -84,6 +94,27 @@
   loop: "{{ OPENLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+###############################################################################
+# 1b) Always set LDAP passwords on every deploy
+#
+# Rationale:
+# - Avoid dealing with SSHA generation in Ansible (salted hashes differ each time)
+# - Use LDAP Password Modify extended operation
+# - Server-side hashing is applied (your cn=config sets olcPasswordHash: {SSHA})
+###############################################################################
+- name: Always set LDAP user password (every run)
+  community.general.ldap_passwd:
+    server_uri: "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:    "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:    "{{ OPENLDAP_BIND_PW }}"
+    dn:         "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
+    passwd:     "{{ item.value.password }}"
+  loop: "{{ OPENLDAP_USERS | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 ###############################################################################
 # 2) Keep the objectClass list AND the mail attribute up-to-date
@@ -104,3 +135,4 @@
   loop: "{{ OPENLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

@@ -33,6 +33,10 @@ docker:
       name:               open-webui
       offline_mode:       false
       hf_hub_offline:     false
+      cpus:               2.0
+      mem_reservation:    1g
+      mem_limit:          4g
+      pids_limit:         4096
     redis:
       backup:
         disabled: true

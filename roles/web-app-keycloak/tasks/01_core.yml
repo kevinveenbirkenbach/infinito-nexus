@@ -55,5 +55,9 @@
 - name: "Load UserProfile (declarative) Update routines for '{{ application_id }}'"
   include_tasks: update/07_userprofile.yml
 
+- name: "Load Users Update routines for '{{ application_id }}' (emailVerified)"
+  include_tasks: update/08_users_email_verified.yml
+  when: KEYCLOAK_USER_EMAILS_VERIFIED | bool
+
 - name: "Flush handlers before leaving Keycloak scope"
   meta: flush_handlers

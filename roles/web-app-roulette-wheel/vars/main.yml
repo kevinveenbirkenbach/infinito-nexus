@@ -2,3 +2,4 @@ application_id: "web-app-roulette-wheel"
 entity_name:    "{{ application_id | get_entity_name }}"
 
 ROULETTE_WHEEL_APP_REL:     "services/repository"
+ROULETTE_IMAGE_CUSTOM:      "{{ entity_name }}_custom"

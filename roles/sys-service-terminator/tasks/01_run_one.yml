@@ -1,0 +1,60 @@
+- name: "Apply state for {{ system_service_run_unit }}"
+  block:
+    - name: "Apply state (retry up to {{ SYS_SERVICE_RUNNER_RETRIES }} times, {{ SYS_SERVICE_RUNNER_DELAY }}s delay)"
+      ansible.builtin.systemd:
+        name: "{{ system_service_run_unit }}"
+        state: "{{ SYS_SERVICE_RUNNER_STATE }}"
+      become: true
+      register: result
+      # Retries are required because a compose-managed service might not be ready yet
+      # (e.g., container dependencies / health checks still settling).
+      retries: "{{ SYS_SERVICE_RUNNER_RETRIES }}"
+      delay: "{{ SYS_SERVICE_RUNNER_DELAY }}"
+      until: result is not failed
+
+  rescue:
+    - name: "systemctl status (diagnostics)"
+      ansible.builtin.command:
+        cmd: "systemctl --no-pager --full status {{ system_service_run_unit }}"
+      become: true
+      register: sys_runner_status
+      changed_when: false
+      failed_when: false
+
+    - name: "journalctl -xeu (diagnostics)"
+      ansible.builtin.command:
+        cmd: "journalctl --no-pager --no-hostname --full -xeu {{ system_service_run_unit }}"
+      become: true
+      register: sys_runner_journal
+      changed_when: false
+      failed_when: false
+
+    - name: "docker diagnostics (best-effort via script file)"
+      ansible.builtin.shell: |
+        set -u
+        export SYS_SERVICE_RUNNER_DOCKER_LOG_TAIL="{{ SYS_SERVICE_RUNNER_DOCKER_LOG_TAIL }}"
+        export SYS_SERVICE_RUNNER_DOCKER_INCLUDE_EXITED="{{ SYS_SERVICE_RUNNER_DOCKER_INCLUDE_EXITED| bool | lower }}"
+        bash "{{ role_path }}/files/docker_diagnostics.sh"
+      become: true
+      register: sys_runner_docker_diag
+      changed_when: false
+      failed_when: false
+      when: SYS_SERVICE_RUNNER_DOCKER_DIAGNOSTICS | bool
+
+
+    - name: "Fail with diagnostics"
+      ansible.builtin.fail:
+        msg: |
+          Final-run service failed: {{ system_service_run_unit }}
+
+          === systemctl status ===
+          {{ sys_runner_status.stdout | default('') }}
+          {{ sys_runner_status.stderr | default('') }}
+
+          === journalctl -xeu ===
+          {{ sys_runner_journal.stdout | default('') }}
+          {{ sys_runner_journal.stderr | default('') }}
+
+          === docker diagnostics ===
+          {{ sys_runner_docker_diag.stdout | default('') }}
+          {{ sys_runner_docker_diag.stderr | default('') }}

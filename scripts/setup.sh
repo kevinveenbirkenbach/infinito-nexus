@@ -18,11 +18,11 @@ fi
 
 ROLES_DIR="./roles"
 
-APPLICATIONS_OUT="./group_vars/all/04_applications.yml"
+APPLICATIONS_OUT="./group_vars/all/05_applications.yml"
 APPLICATIONS_SCRIPT="./cli/setup/applications/__main__.py"
 
 USERS_SCRIPT="./cli/setup/users/__main__.py"
-USERS_OUT="./group_vars/all/03_users.yml"
+USERS_OUT="./group_vars/all/04_users.yml"
 
 INCLUDES_SCRIPT="./cli/build/role_include/__main__.py"
 INCLUDES_OUT_DIR="./tasks/groups"

@@ -6,7 +6,7 @@
 - name: configure {{ domain }}.conf
   template:
     src:  "templates/proxy.conf.j2"
-    dest: "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
+    dest: "{{ lookup('nginx_paths', domain, want='files.domain') }}"
   notify: restart openresty
 
 - name: "create {{ docker_compose.files.env }}"

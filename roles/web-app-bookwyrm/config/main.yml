@@ -20,9 +20,10 @@ docker:
       backup:
         disabled: true
       enabled:  true
-    application:
-      version:  'v0.7.5'
-      name:     bookwyrm
+    bookwyrm:
+      version:    'v0.7.5'
+      name:       bookwyrm
+      repository: https://github.com/bookwyrm-social/bookwyrm.git
     worker:
       enabled:  true
     css:

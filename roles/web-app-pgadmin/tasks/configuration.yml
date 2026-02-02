@@ -16,7 +16,7 @@
   template:
     src: pgpass.j2
     dest: "{{ pgadmin_host_password_file }}"
-    owner: "{{ pgadmin_user }}"
-    group: "{{ pgadmin_group }}"
+    owner: "{{ PGADMIN_USER }}"
+    group: "{{ PGADMIN_GROUP }}"
     mode: "0600"
   notify: docker compose up

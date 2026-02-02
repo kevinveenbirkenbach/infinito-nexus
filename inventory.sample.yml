@@ -4,7 +4,7 @@ ASYNC_ENABLED:            false
 MODE_DEBUG:               true
 ENVIRONMENT:              development
 MODE_TEST:                true
-TLS_ENABLED:              false
+TLS_ENABLED:              true
 TLS_MODE:                 "self_signed"
 
 design:
@@ -22,11 +22,12 @@ users:
     password:   "'$tr0ng€xampl3PW!"
   biber:
     username:   "biber"
-    full_name:  "Harry Beaver"
+    firstname:  "Harry"
+    lastname:   "Beaver"
     website:    "https://www.infinito.nexus/"
     email:      "contact@infinito.nexus"
     gpg:        "DUMMY-GPG-KEY-NOT-SET"
-    password:   "VerySecurePassword!"
+    password:   "VeryUnsecurePassword"
 
     # UID/GID allocation policy:
     # - Use IDs >= 10000 for manually managed users
@@ -41,58 +42,34 @@ applications:
   svc-ai-ollama:
     # Disabled for test because they are to huge for github actions test
     preload_models: []
+    docker:
+      services:
+        ollama:
+          # The following image is required for github actions, because the official image is to huge
+          # @see https://hub.docker.com/r/alpine/ollama
+          image: "alpine/ollama"
   web-app-jira:
     server:
       status_codes:
         # Full auto setup isn't possible
         default: 302
-  web-app-flowise:
-    docker:
-      services:
-        # Deactivated the following services for the CI/CD deploy to keep the container slim
-        logout:
-          enabled: false
-        desktop:
-          enabled: false
-        matomo:
-          enabled: false
-          shared:  false
-  web-app-suitecrm:
-    docker:
-      services:
-        logout:
-          enabled: false
-        matomo:
-          enabled: false
   web-app-keycloak:
     credentials:
-      administrator_password: administrator
+      administrator_password: "'$tr0ng€xampl3PW!"
+    docker:
+      services:
+        keycloak:
+          realm:
+            totp_enabled: False # Deactivate TOTP for testing, to safe this extra step
   web-app-lam:
     credentials:
-      administrator_password: administrator
+      administrator_password: "'$tr0ng€xampl3PW!"
   web-app-phpmyadmin:
     docker:
       services:
         phpmyadmin:
           # Allows faster debugging
           autologin: true
-  web-app-matrix:
-    oidc:
-      enabled:            false
-      shared:             false
-  web-app-mastodon:
-    oidc:
-      enabled:            false
-      shared:             false
-  web-app-bigbluebutton:
-    # Deactivate oidc temporary for testing purposes
-    oidc:
-      enabled:            false
-      shared:             false
-#    server:
-#      tls:
-#        enabled:  false  "{{ RUNTIME == 'dev' }}"
-#        flavor:   self_signed
 
 SIZE_PERCENT_CLEANUP_DISC_SPACE: 99 # Set high because in DiD Ci Environment in github workflow it can be verry high e.g. ~92%
 

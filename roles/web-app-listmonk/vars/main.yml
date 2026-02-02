@@ -7,6 +7,7 @@ LISTMONK_VERSION:             "{{ applications | get_app_conf(application_id, 'd
 LISTMONK_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.image') }}"
 LISTMONK_NAME:                "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.name') }}"
 LISTMONK_CONFIG_HOST:         "{{ [ docker_compose.directories.config,'config.toml' ] | path_join }}"
+LISTMONK_OIDC_ENABLED:        "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 
 LISTMONK_PUBLIC_API_ENABLED:  "{{ applications | get_app_conf(application_id, 'public_api_activated') }}"
 
@@ -15,7 +16,7 @@ LISTMONK_USER_SEND:           "newsletter"
 LISTMONK_USER_BOUNCE:         "bounce"
 
 LISTMONK_EXEC_DATABASE:       "docker exec -i {{ database_container }} psql -U {{ database_username }} -d {{ database_name }}"
-LISTMONK_RUN:                 "docker compose run -T --rm application"
+LISTMONK_RUN:                 "docker compose {{ lookup('compose_f_args', application_id) }} run -T --rm application"
 
 LISTMONK_SETTINGS:
   - key: "app.root_url"
@@ -33,7 +34,7 @@ LISTMONK_SETTINGS:
          "provider_url": OIDC.CLIENT.ISSUER_URL,
          "client_secret": OIDC.CLIENT.SECRET
       } | to_json }}
-    when: applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False)
+    when: LISTMONK_OIDC_ENABLED | bool
 
   # hCaptcha toggles and credentials
   - key: "security.enable_captcha"

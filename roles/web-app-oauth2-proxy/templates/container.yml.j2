@@ -1,6 +1,6 @@
 {% if applications | get_app_conf(application_id, 'docker.services.oauth2.enabled', False) %}
   oauth2-proxy:
-    image: quay.io/oauth2-proxy/oauth2-proxy:{{ applications['web-app-oauth2-proxy'].version }}
+    image: {{ applications | get_app_conf('web-app-oauth2-proxy', 'docker.services.oauth2-proxy.image') }}:{{ applications | get_app_conf('web-app-oauth2-proxy', 'docker.services.oauth2-proxy.version') }}
     restart: {{ DOCKER_RESTART_POLICY }}
     command: --config /oauth2-proxy.cfg
     container_name: {{ application_id | get_entity_name }}-oauth2-proxy

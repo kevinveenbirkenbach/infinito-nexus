@@ -1,4 +1,3 @@
-version:                      "production" # @see https://nextcloud.com/blog/nextcloud-release-channels-and-how-to-track-them/
 server:
   csp:
     flags:

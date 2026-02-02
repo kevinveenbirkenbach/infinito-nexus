@@ -49,9 +49,11 @@
     system_service_timer_enabled:       true
     system_service_force_linear_sync:   true
     system_service_force_flush_instant: "{{ _backup_force_flush_instant }}"
+    # Force final flush during ci runs to guaranty that it works:
+    system_service_force_flush_final:   "{{ (RUNTIME in ['act','github']) and (MODE_BACKUP | bool) }}"
     system_service_suppress_flush:      "{{ not _backup_force_flush_instant }}"
     system_service_on_calendar:         "{{ SYS_SCHEDULE_BACKUP_DOCKER_TO_LOCAL }}"
-    system_service_tpl_exec_start_pre:  '/usr/bin/python {{ PATH_SYSTEM_LOCK_SCRIPT }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_BACKUP_DOCKER_2_LOC }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
+    system_service_tpl_exec_start_pre:  '/usr/bin/python {{ PATH_LOCK }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_BACKUP_DOCKER_2_LOC }} --timeout "{{ SYS_TIMEOUT_BACKUP_SERVICES }}"'
     system_service_tpl_exec_start:      "/bin/sh -c '{{ BKP_DOCKER_2_LOC_EXEC }}'"
     system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     # system_service_tpl_exec_start_post: "/usr/bin/systemctl start {{ SYS_SERVICE_CLEANUP_BACKUPS }}" # Not possible to use it because it's a deathlock. Keep this line for documentation purposes

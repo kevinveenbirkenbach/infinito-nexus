@@ -20,7 +20,7 @@
           - --merge-option
           - rebase
           - --name
-          - "{{ users[WORKSTATION_USER].full_name }}"
+          - "{{ users[WORKSTATION_USER].firstname }} {{ users[WORKSTATION_USER].lastname }}"
           - --email
           - "{{ users[WORKSTATION_USER].email }}"
           - --website

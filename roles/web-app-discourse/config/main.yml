@@ -8,7 +8,8 @@ server:
         unsafe-inline: true
     whitelist:
       font-src:
-        - "*.{{ DOMAIN_PRIMARY }}"
+        # Allow also http connections
+        - "http://forum.{{ DOMAIN_PRIMARY }}"
   domains:
     canonical:
       - "forum.{{ DOMAIN_PRIMARY }}"
@@ -35,12 +36,13 @@ docker:
     redis:
       backup:
         disabled: true
-      enabled: true
+      enabled:    true
     discourse:
       name:               "discourse"
-      image:              "local_discourse/<< defaults_applications[web-app-discourse].docker.services.discourse.name >>" # Necessary to define this for the docker 2 loc backup
-      backup:
-        no_stop_required: true
+      version:            "v2026.2.0-latest"
+# Impossible to don't stop due to 'test_backup_no_stop_required_consistency' :(
+#      backup:
+#        no_stop_required: true
       repository:         "https://github.com/discourse/discourse_docker.git"
     css:
       enabled: true

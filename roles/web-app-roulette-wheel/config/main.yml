@@ -15,3 +15,8 @@ docker:
       shared: true
     css:
       enabled: true
+    roulette-wheel:
+      cpus:               0.5
+      mem_reservation:    126m
+      mem_limit:          265m
+      pids_limit:         126

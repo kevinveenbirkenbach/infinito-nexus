@@ -10,11 +10,11 @@
   when: applications | get_app_conf(application_id, 'docker.services.ldap.enabled')
 
 # General
-- name: "flush handlers to ensure that '{{ friendica_container }}' is up before executing container tasks"
+- name: "flush handlers to ensure that '{{ FRIENDICA_CONTAINER }}' is up before executing container tasks"
   meta: flush_handlers
   
 - name: Check if Friendica local.config.php exists
-  command: docker exec --user {{ friendica_user }} {{ friendica_container }} test -f {{ friendica_config_file }}
+  command: docker exec --user {{ FRIENDICA_USER }} {{ FRIENDICA_CONTAINER }} test -f {{ FRIENDICA_CONFIG_FILE }}
   register: friendica_config_exists
   changed_when: false
   failed_when: false

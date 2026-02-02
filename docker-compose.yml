@@ -67,7 +67,6 @@ services:
 
     container_name: infinito_nexus_${INFINITO_DISTRO:-arch}
     restart: "no"
-
     profiles: ["ci"]
     <<: *ci_defaults
     volumes:

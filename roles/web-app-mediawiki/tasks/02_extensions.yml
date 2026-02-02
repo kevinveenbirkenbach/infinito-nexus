@@ -50,42 +50,6 @@
   register: _install_results
   changed_when: "'INSTALLED:' in (_install_results.stdout | default(''))"
 
-# Ensure unzip + git are available in the container (idempotent)
-- name: "EXT | Ensure unzip+git available in container"
-  shell: |
-    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
-      set -e
-      need=0
-      command -v unzip >/dev/null 2>&1 || need=1
-      command -v git   >/dev/null 2>&1 || need=1
-      if [ "$need" -eq 1 ]; then
-        export DEBIAN_FRONTEND=noninteractive
-        apt-get update -y
-        apt-get install -y --no-install-recommends unzip git ca-certificates
-        rm -rf /var/lib/apt/lists/*
-        echo INSTALLED_TOOLS
-      fi
-    '
-  args:
-    executable: /bin/bash
-  register: _tools
-  changed_when: "'INSTALLED_TOOLS' in (_tools.stdout | default(''))"
-
-- name: "EXT | Ensure Composer available in container"
-  shell: |
-    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
-      if ! command -v composer >/dev/null 2>&1; then
-        php -r "copy(\"https://getcomposer.org/installer\", \"composer-setup.php\");"
-        php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-        rm -f composer-setup.php
-        echo INSTALLED_COMPOSER
-      fi
-    '
-  args:
-    executable: /bin/bash
-  register: _ext_composer
-  changed_when: "'INSTALLED_COMPOSER' in (_ext_composer.stdout | default(''))"
-
 # Install dependencies per extension (only if vendor is missing)
 # Use /tmp/composer for HOME/CACHE to avoid /var/www permission issues.
 - name: "EXT | composer install in each extension when needed"

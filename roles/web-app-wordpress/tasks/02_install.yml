@@ -1,13 +1,34 @@
+- name: "Wait until WordPress core files exist in {{ WORDPRESS_DOCKER_HTML_PATH }}"
+  command: >
+    docker exec {{ WORDPRESS_CONTAINER }}
+    test -f {{ WORDPRESS_DOCKER_HTML_PATH }}/wp-includes/version.php
+  register: wp_core_present
+  retries: 60
+  delay: 2
+  changed_when: false
+  until: wp_core_present.rc == 0
+  failed_when: false
+
+- name: "Seed WordPress core into volume if missing"
+  when: wp_core_present.rc != 0
+  command: >
+    docker exec -u root {{ WORDPRESS_CONTAINER }} sh -lc
+    'set -e;
+     echo "[seed] WP core missing, copying from /usr/src/wordpress -> {{ WORDPRESS_DOCKER_HTML_PATH }}";
+     cp -a /usr/src/wordpress/. {{ WORDPRESS_DOCKER_HTML_PATH }}/;
+     chown -R {{ WORDPRESS_USER }}:{{ WORDPRESS_USER }} {{ WORDPRESS_DOCKER_HTML_PATH }}'
+  changed_when: true
+
 - name: "Run WordPress core install via WP CLI"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   command: >
     docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp core install
       --url="{{ WORDPRESS_URL }}"
-      --title="{{ applications | get_app_conf(application_id, 'title', True) }}"
-      --admin_user="{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
-      --admin_password="{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
-      --admin_email="{{ applications | get_app_conf(application_id, 'users.administrator.email', True) }}"
+      --title="{{ WORDPRESS_TITLE }}"
+      --admin_user="{{ WORDPRESS_ADMIN_USER }}"
+      --admin_password="{{ WORDPRESS_ADMIN_PASSWORD }}"
+      --admin_email="{{ WORDPRESS_ADMIN_EMAIL }}"
       --path="{{ WORDPRESS_DOCKER_HTML_PATH }}"
   args:
     chdir: "{{ docker_compose.directories.instance }}"

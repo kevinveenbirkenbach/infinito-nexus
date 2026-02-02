@@ -94,6 +94,11 @@ env:
   ## see https://meta.discourse.org/t/-/137387/23 for details
   #DISCOURSE_MAXMIND_LICENSE_KEY: 1234567890123456
 
+{% if DISCOURSE_TLS_SELFSIGNED_ENABLED | bool %}
+  CA_TRUST_CERT: {{ CA_ROOT.cert_host }}
+  CA_TRUST_NAME: {{ domains | get_domain(application_id) }}
+{% endif %}
+
 ## The Docker container is stateless; all data is stored in /shared
 volumes:
   - volume:
@@ -102,6 +107,15 @@ volumes:
   - volume:
       host: /var/discourse/shared/standalone/log/var-log
       guest: /var/log
+
+{% if DISCOURSE_TLS_SELFSIGNED_ENABLED | bool %}
+  - volume:
+      host:   {{ CA_ROOT.cert_host }}
+      guest:  {{ CA_ROOT.cert_host }}
+  - volume:
+      host:   {{ PATH_CA_TRUST }}
+      guest:  {{ PATH_CA_TRUST }}
+{% endif %}
 
 ## Plugins go here
 ## see https://meta.discourse.org/t/19157 for details
@@ -123,20 +137,20 @@ hooks:
 ## Any custom commands to run after building
 run:
   - exec: echo "Beginning of custom commands"
-  - exec: rails r "SiteSetting.force_https = true"
+  - exec: rails r "SiteSetting.force_https = {{ DISCOURSE_TLS_ENABLED | bool | string | lower }}"
+{% if DISCOURSE_TLS_SELFSIGNED_ENABLED | bool %}
+  - exec: {{ PATH_CA_TRUST }}
+{% endif %}
   ## If you want to set the 'From' email address for your first registration, uncomment and change:
   ## After getting the first signup email, re-comment the line. It only needs to run once.
   #- exec: rails r "SiteSetting.notification_email='info@unconfigured.discourse.org'"
-{% if applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) %}
+{% if DISCOURSE_OIDC_ENABLED | bool %}
   # Deactivate Default Login
+  - exec: rails r "SiteSetting.openid_connect_verbose_logging = {{ MODE_DEBUG | bool | string | lower }}"
   - exec: rails r "SiteSetting.enable_local_logins = false"
   - exec: rails r "SiteSetting.enable_passkeys = false" # https://meta.discourse.org/t/passwordless-login-using-passkeys/285589
 
   - exec: rails r "SiteSetting.username_change_period = 0" # Deactivate changing of username
-
-  # Activate Administrator User
-  #- exec: printf '{{ users.administrator.email }}\n{{users.administrator.password}}\n{{users.administrator.password}}\nY\n' | rake admin:create
-  #- exec: rails r "User.find_by_email('{{ users.administrator.email }}').update(username: '{{users.administrator.username}}')"
 
   # The following code is just an inspiration, how to connect with the oidc account. as long as this is not set the admini account needs to be manually connected with oidc 
   # docker exec -it {{ DISCOURSE_CONTAINER }} rails runner "user = User.find_by_email('test@infinito.nexus'); UserAuth.create(user_id: user.id, provider: 'oidc', uid: 'eindeutige_oidc_id', info: { name: user.username, email: user.email })"
@@ -146,10 +160,45 @@ run:
   - exec: rails r "SiteSetting.openid_connect_discovery_document = '{{OIDC.CLIENT.DISCOVERY_DOCUMENT}}'"
   - exec: rails r "SiteSetting.openid_connect_client_id = '{{ OIDC.CLIENT.ID }}'"         
   - exec: rails r "SiteSetting.openid_connect_client_secret = '{{ OIDC.CLIENT.SECRET }}'"     
-  - exec: rails r "SiteSetting.openid_connect_rp_initiated_logout_redirect = 'https://{{ domains | get_domain(application_id) }}'"
+  - exec: rails r "SiteSetting.openid_connect_rp_initiated_logout_redirect = '{{ DISCOURSE_OIDC_LOGOUT_REDIRECT_URL }}'"
   - exec: rails r "SiteSetting.openid_connect_allow_association_change = false"
   - exec: rails r "SiteSetting.openid_connect_rp_initiated_logout = true"
+
+  # ---- FinalDestination allowlist (IMPORTANT) ----
+  # Discourse blocks requests to internal/private IPs unless the host is allowlisted.
+  # Extract host from discovery document URL and append to allowed_internal_hosts.
+  - exec: >
+      rails r "url=SiteSetting.openid_connect_discovery_document.to_s.strip;
+      host=url.sub(%r{\Ahttps?://}i,'').split('/').first.to_s.strip;
+      host=host.split(':').first.to_s.strip;
+      list=SiteSetting.allowed_internal_hosts.to_s.split('|').map{|x| x.strip}.reject{|x| x.empty?};
+      if !host.empty? && host =~ /\A[a-z0-9.-]+\z/i && !list.include?(host)
+        list << host;
+        SiteSetting.allowed_internal_hosts = list.join('|');
+      end;
+      puts \"allowed_internal_hosts=#{SiteSetting.allowed_internal_hosts}\";"
+
+  # Clear OIDC discovery cache so the next login attempt refetches with the new allowlist
+  - exec: >
+      rails r "url=SiteSetting.openid_connect_discovery_document.to_s.strip;
+      key=\"openid-connect-discovery-#{url}\";
+      Discourse.cache.delete(key);
+      puts \"deleted_cache_key=#{key}\";"
+
 {% endif %}
+
+  # Activate Administrator User (always yes, non-interactive)
+  - exec: |
+      cat <<'EOF' | rake admin:create
+      {{ users.administrator.email }}
+      {{ users.administrator.password }}
+      {{ users.administrator.password }}
+      Y
+      Y
+      EOF
+
+  - exec: >
+      rails r "User.find_by_email('{{ users.administrator.email }}')&.update!(username: '{{ users.administrator.username }}')"
 
 {% if DISCOURSE_LDAP_ENABLED | bool %}
   # Enable LDAP authentication

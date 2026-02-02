@@ -4,6 +4,10 @@
 - name: Set Nextcloud LDAP bind password
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:set-config s01 ldapAgentPassword "{{ LDAP.BIND_CREDENTIAL }}"
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: Warm LDAP cache (to guaranty that all LDAP users are present)
+  command: >
+    {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:search ""
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

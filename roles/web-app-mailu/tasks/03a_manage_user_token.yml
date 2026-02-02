@@ -2,7 +2,7 @@
 - name: "Fetch existing API tokens via curl inside admin container"
   command: >-
     {{ docker_compose_command_exec }} -T admin \
-      curl -s -X GET {{ mailu_api_base_url }}/token \
+      curl -sS -X GET {{ MAILU_API_SERVICE_BASE_URL }}/token \
         -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"

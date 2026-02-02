@@ -21,8 +21,8 @@
     dest:  "{{ TAIGA_DOCKER_COMPOSE_INIT_PATH }}"
   notify: docker compose up
 
-- name: "Flush Taiga handlers"
-  meta: flush_handlers
-
 - name: "Include Taiga administrator routines"
   include_tasks: 01_administrator.yml
+
+- name: "Flush Taiga handlers"
+  meta: flush_handlers

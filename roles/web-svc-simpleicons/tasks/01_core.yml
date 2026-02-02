@@ -17,6 +17,7 @@
     - { source: "package.json.j2",  target: "{{ simpleicons_host_package_file }}" }
   notify:
     - docker compose up
+    - docker compose build
 
 - meta: flush_handlers
 

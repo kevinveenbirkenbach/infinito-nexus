@@ -4,8 +4,15 @@
 # - where the cert/key live (shared/global or per-app)
 # - which SAN list is effective
 #
-# It also detects SAN drift and regenerates the cert if the desired SAN set
-# is not covered by the existing certificate.
+# IMPORTANT:
+# - We DO NOT create a self-signed leaf (issuer==subject), because that will always fail curl verification.
+# - Instead, we create a local Root CA (sys-ca-selfsigned) and sign the leaf certificate with it.
+# - The resulting chain is: leaf (app/global) signed by Root CA, and Root CA is installed into trust stores.
+
+- name: "TLS | (self_signed) ensure local Root CA exists (for signing leaf certs)"
+  ansible.builtin.include_role:
+    name: sys-ca-selfsigned
+  when: run_once_sys_ca_selfsigned is not defined
 
 - name: "TLS | (self_signed) resolve via tls_resolve (strict)"
   ansible.builtin.set_fact:
@@ -37,16 +44,27 @@
     _ss_key: "{{ _cert.files.key }}"
     _ss_dir: "{{ _cert.files.cert | dirname }}"
     _ss_conf: "{{ (_cert.files.cert | dirname) ~ '/openssl.cnf' }}"
-    _ss_cn: "{{ (tls_selfsigned_subject.CN | default('') | length > 0) | ternary(tls_selfsigned_subject.CN, _tls.domains.primary) }}"
+    _ss_csr: "{{ (_cert.files.cert | dirname) ~ '/req.csr' }}"
+    _ss_cn: >-
+      {{
+        (_cert.scope == 'global')
+        | ternary(
+            (DOMAIN_PRIMARY | upper) ~ ' Global TLS',
+            ((tls_selfsigned_subject.CN | default('') | length > 0)
+              | ternary(tls_selfsigned_subject.CN, _tls.domains.primary))
+          )
+      }}
   changed_when: false
 
 - name: "TLS | (self_signed) ensure directory exists"
+  become: true
   ansible.builtin.file:
     path: "{{ _ss_dir }}"
     state: directory
     mode: "0750"
 
 - name: "TLS | (self_signed) render openssl config (SAN aware)"
+  become: true
   ansible.builtin.copy:
     dest: "{{ _ss_conf }}"
     mode: "0640"
@@ -100,35 +118,12 @@
       }}
   changed_when: false
 
-- name: "TLS | (self_signed) decide whether regeneration is needed"
-  ansible.builtin.set_fact:
-    _ss_regen_needed: >-
+- name: "TLS | (self_signed) generate leaf cert (only when missing or SAN drift)"
+  ansible.builtin.include_tasks: 02_generate_leaf.yml
+  when: >-
       {{
         (not (_ss_cert_stat.stat.exists | default(false))) or
         ((_ss_wanted_sans | difference(_ss_existing_sans) | length) > 0)
       }}
-  changed_when: false
-
-- name: "TLS | (self_signed) remove outdated cert/key if SAN drift detected"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - "{{ _ss_cert }}"
-    - "{{ _ss_key }}"
-  when: _ss_regen_needed | bool
-
-- name: "TLS | (self_signed) generate key+cert if missing or drift detected"
-  ansible.builtin.command: >
-    openssl req -x509 -nodes
-    -days {{ tls_selfsigned_days }}
-    -newkey rsa:{{ tls_selfsigned_key_bits }}
-    -keyout {{ _ss_key }}
-    -out {{ _ss_cert }}
-    -config {{ _ss_conf }}
-    -extensions req_ext
-  args:
-    creates: "{{ _ss_cert }}"
-  when: _ss_regen_needed | bool
 
 - include_tasks: utils/once/flag.yml

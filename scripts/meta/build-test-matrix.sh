@@ -134,6 +134,7 @@ case "${TEST_DEPLOY_TYPE}" in
           | unique
         '
     )"
+    apps_json="$(apply_final_exclude "${apps_json}" '^(web-opt-rdr-www)$')"
     ;;
   *)
     echo "ERROR: TEST_DEPLOY_TYPE must be server|workstation|universal (got: ${TEST_DEPLOY_TYPE})" >&2

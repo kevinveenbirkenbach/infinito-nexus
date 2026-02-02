@@ -60,8 +60,12 @@ def build_users(defs, primary_domain, start_id, become_pwd):
     # Build each user entry
     for key, overrides in defs.items():
         username = overrides.get("username", key)
+        firstname = overrides.get("firstname", f"{username}")
+        lastname = overrides.get("lastname", f"{primary_domain}")
         email = overrides.get("email", f"{username}@{primary_domain}")
-        description = overrides.get("description", "")
+        description = overrides.get(
+            "description", f"Created by Infinito.Nexus Ansible for {primary_domain}"
+        )
         roles = overrides.get("roles", [])
         password = overrides.get("password", become_pwd)
         reserved = overrides.get("reserved", False)
@@ -79,6 +83,8 @@ def build_users(defs, primary_domain, start_id, become_pwd):
 
         entry = {
             "username": username,
+            "firstname": firstname,
+            "lastname": lastname,
             "email": email,
             "password": password,
             "uid": uid,

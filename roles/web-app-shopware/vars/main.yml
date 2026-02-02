@@ -10,7 +10,7 @@ SHOPWARE_DOMAIN:                "{{ domains | get_domain(application_id) }}"
 # Shopware container/image vars
 SHOPWARE_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.shopware.version') }}"
 SHOPWARE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.shopware.image') }}"
-SHOPWARE_CUSTOM_IMAGE:          "shopware_custom"
+SHOPWARE_CUSTOM_IMAGE:          "{{ entity_name }}_custom:{{ SHOPWARE_VERSION }}"
 SHOPWARE_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 SHOPWARE_USER:                  "www-data"
 SHOPWARE_ROOT:                  "/var/www/html"

@@ -13,6 +13,8 @@ database_password:                  "{{ applications | get_app_conf(application_
 NEXTCLOUD_DOMAIN:                   "{{ domains | get_domain(application_id) }}"
 NEXTCLOUD_PORT:                     "{{ ports.localhost.http[application_id] }}"
 NEXTCLOUD_URL:                      "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+NEXTCLOUD_PROTOCOL:                 "{{ lookup('tls_resolve', application_id, want='protocols.web') }}"
+NEXTCLOUD_TRUSTED_PROXIES:          "{{ networks.internet.values() | select }}"
 
 ## Plugins
 NEXTCLOUD_PLUGIN_ITEMS:             "{{ applications | get_app_conf(application_id, 'plugins') | dict2items }}"
@@ -48,7 +50,7 @@ NEXTCLOUD_SERVICE:                  "{{ entity_name }}"
 NEXTCLOUD_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.version') }}"
 NEXTCLOUD_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.image') }}"
 NEXTCLOUD_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.name') }}"
-NEXTCLOUD_CUSTOM_IMAGE:             "nextcloud_custom"
+NEXTCLOUD_CUSTOM_IMAGE:             "{{ entity_name }}_custom:{{ NEXTCLOUD_VERSION }}"
 
 ### Proxy
 NEXTCLOUD_PROXY_SERVICE:              "proxy"
@@ -118,8 +120,8 @@ NEXTCLOUD_HPB_TURN_STANDALONE_CONFIG: >-
 NEXTCLOUD_WHITEBOARD_SERVICE:             "whiteboard"
 NEXTCLOUD_WHITEBOARD_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.name') }}"
 NEXTCLOUD_WHITEBOARD_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.image') }}"
+NEXTCLOUD_WHITEBOARD_IMAGE_CUSTOM:        "{{ NEXTCLOUD_WHITEBOARD_CONTAINER }}_custom"
 NEXTCLOUD_WHITEBOARD_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.version') }}"
-NEXTCLOUD_WHITEBOARD_CUSTOM_IMAGE:        "nextcloud_whiteboard_custom"
 NEXTCLOUD_WHITEBOARD_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.enabled') }}"
 NEXTCLOUD_WHITEBOARD_PORT_INTERNAL:       "3002"
 NEXTCLOUD_WHITEBOARD_JWT:                 "{{ applications | get_app_conf(application_id, 'credentials.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'_jwt_secret') }}"

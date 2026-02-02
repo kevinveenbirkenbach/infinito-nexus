@@ -44,7 +44,7 @@ docker exec -it "${INFINITO_CONTAINER}" bash -lc "
   ./scripts/docker/entry.sh true
 
   echo \">>> Starting rapid deploy\"
-  cmd=(infinito deploy dedicated \"${INVENTORY_DIR}/servers.yml\"
+  cmd=(infinito deploy dedicated \"${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml\"
     -T \"${TEST_DEPLOY_TYPE}\"
     --skip-update
     --skip-backup

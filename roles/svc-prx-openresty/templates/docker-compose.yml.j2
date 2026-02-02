@@ -5,12 +5,12 @@
     image: {{ OPENRESTY_IMAGE }}:{{ OPENRESTY_VERSION }}
     network_mode: "host"
     volumes:
-      - {{ NGINX.FILES.CONFIGURATION }}:/usr/local/openresty/nginx/conf/nginx.conf:ro
-      - {{ NGINX.DIRECTORIES.CONFIGURATION }}:/usr/local/openresty/nginx/conf/conf.d:ro
-      - {{ NGINX.FILES.CONFIGURATION }}:{{ NGINX.FILES.CONFIGURATION }}:ro
-      - {{ NGINX.DIRECTORIES.CONFIGURATION }}:{{ NGINX.DIRECTORIES.CONFIGURATION }}:ro
-      - {{ NGINX.DIRECTORIES.DATA.WWW }}:{{ NGINX.DIRECTORIES.DATA.WWW }}:ro
-      - {{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }}:{{ NGINX.DIRECTORIES.DATA.WELL_KNOWN }}:ro
+      - {{ lookup('nginx_paths', want='files.configuration') }}:/usr/local/openresty/nginx/conf/nginx.conf:ro
+      - {{ lookup('nginx_paths', want='directories.configuration.base') }}:/usr/local/openresty/nginx/conf/conf.d:ro
+      - {{ lookup('nginx_paths', want='files.configuration') }}:{{ lookup('nginx_paths', want='files.configuration') }}:ro
+      - {{ lookup('nginx_paths', want='directories.configuration.base') }}:{{ lookup('nginx_paths', want='directories.configuration.base') }}:ro
+      - {{ lookup('nginx_paths', want='directories.data.www') }}:{{ lookup('nginx_paths', want='directories.data.www') }}:ro
+      - {{ lookup('nginx_paths', want='directories.data.well_known') }}:{{ lookup('nginx_paths', want='directories.data.well_known') }}:ro
       - {{ LETSENCRYPT_WEBROOT_PATH }}:{{ LETSENCRYPT_WEBROOT_PATH }}:ro
       - {{ LETSENCRYPT_BASE_PATH }}:{{ LETSENCRYPT_BASE_PATH }}:ro
       - {{ TLS_SELFSIGNED_BASE_PATH }}:{{ TLS_SELFSIGNED_BASE_PATH }}:ro

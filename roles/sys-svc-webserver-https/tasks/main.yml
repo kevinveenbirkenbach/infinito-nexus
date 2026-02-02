@@ -1,12 +1,4 @@
-- block:
-  - name: Include dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-svc-webserver-core
-    - sys-svc-cln-domains
-    - sys-svc-letsencrypt
-    - sys-svc-dns
-  - meta: flush_handlers
-  - include_tasks: utils/once/flag.yml
+---
+- include_tasks: 01_core.yml
   when: run_once_sys_svc_webserver_https is not defined
+

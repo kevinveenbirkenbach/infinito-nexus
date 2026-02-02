@@ -16,3 +16,7 @@
   ansible.builtin.include_role:
     name: sys-front-tls-selfsigned
   when: tls_mode_effective == 'self_signed'
+
+- name: "Load http redirect routines"
+  include_tasks: 02_http.yml
+  when: lookup('tls_resolve', application_id, want='enabled') | bool

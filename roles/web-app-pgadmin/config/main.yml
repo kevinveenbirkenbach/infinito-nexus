@@ -1,6 +1,3 @@
-version:                  "latest"
-server_mode:              False     # If true then the preconfigured database file is loaded. Recommended False. True is a security risk.
-master_password_required: True      # Master password is required. Recommended True. False is a security risk.
 server:
   csp:
     flags:
@@ -17,6 +14,11 @@ server:
     aliases: []
 docker:
   services:
+    pgadmin:
+      image:                    "dpage/pgadmin4"
+      version:                  "latest"
+      server_mode:              False             # If true then the preconfigured database file is loaded. Recommended False. True is a security risk.
+      master_password_required: True              # Master password is required. Recommended True. False is a security risk.
     logout:
       enabled: true
     desktop:

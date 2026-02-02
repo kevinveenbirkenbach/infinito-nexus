@@ -17,7 +17,7 @@ class TestApplicationIDsInPorts(unittest.TestCase):
                 "..",
                 "group_vars",
                 "all",
-                "10_ports.yml",
+                "11_ports.yml",
             )
         )
         with open(ports_file, "r", encoding="utf-8") as f:

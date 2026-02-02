@@ -9,7 +9,7 @@
     # flag:
     #   celery -A funkwhale_api.taskapp worker -l INFO --concurrency=4
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ applications | get_docker_image(application_id,'api') }}"
+    image: "{{ FUNKWHALE_API_IMAGE }}:{{ FUNKWHALE_API_VERSION }}"
     command: celery -A funkwhale_api.taskapp worker -l INFO --concurrency={{FUNKWHALE_CELERYD_CONCURRENCY}}
     environment:
       - C_FORCE_ROOT=true
@@ -22,7 +22,7 @@
 
   celerybeat:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ applications | get_docker_image(application_id,'api') }}"
+    image: "{{ FUNKWHALE_API_IMAGE }}:{{ FUNKWHALE_API_VERSION }}"
     command: celery -A funkwhale_api.taskapp beat --pidfile= -l INFO
     volumes:
       - "media:{{ FUNKWHALE_MEDIA_DIR }}"
@@ -33,7 +33,7 @@
 
   api:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ applications | get_docker_image(application_id,'api') }}"
+    image: "{{ FUNKWHALE_API_IMAGE }}:{{ FUNKWHALE_API_VERSION }}"
     volumes:
       - "music:{{ FUNKWHALE_MUSIC_DIR }}:ro"
       - "media:{{ FUNKWHALE_MEDIA_DIR }}"
@@ -45,7 +45,7 @@
 
   front:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ applications | get_docker_image(application_id,'front') }}"
+    image: "{{ FUNKWHALE_FRONT_IMAGE }}:{{ FUNKWHALE_FRONT_VERSION }}"
     depends_on:
       - api
     environment:
@@ -58,7 +58,7 @@
   
   typesense:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
-    image: "{{ applications | get_app_conf(application_id, 'docker.images.typesense', True) }}"
+    image: "{{ FUNKWHALE_TYPESENSE_IMAGE }}:{{ FUNKWHALE_TYPESENSE_VERSION }}"
     volumes:
       - ./typesense/data:/data
     command: --data-dir /data --enable-cors

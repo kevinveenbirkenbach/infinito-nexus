@@ -6,7 +6,7 @@ domain:                               "{{ domains | get_domain(application_id) }
 # Database
 
 # Webserver
-webserver_client_max_body_size:                 "100m"
+webserver_client_max_body_size:       "100m"
 
 # General
 SUITECRM_WELL_SOFTWARE_NAME:          "{{ SOFTWARE_NAME | lower | replace('.', '-') }}"
@@ -19,7 +19,7 @@ SUITECRM_BASE_VERSION:                "{{ applications | get_app_conf(applicatio
 # Upstream SuiteCRM application version (Git tag, e.g. 8.6.0)
 SUITECRM_APP_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.app_version') }}"
 
-SUITECRM_CUSTOM_IMAGE:                "custom_suitecrm"
+SUITECRM_CUSTOM_IMAGE:                "{{ entity_name }}_custom:{{ SUITECRM_APP_VERSION }}"
 SUITECRM_CONTAINER:                   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
 SUITECRM_SERVICE:                     "{{ entity_name }}"
 

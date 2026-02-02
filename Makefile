@@ -83,11 +83,31 @@ export INFINITO_COMPILE
 	print-python lint-ansible \
 	dns-setup dns-remove
 
+dev-environment-bootstrap: apparmor-teardown dns-setup
+
+dev-environment-teardown: apparmor-restore dns-remove
+
 dns-setup:
 	@bash scripts/dns/setup.sh
 
 dns-remove:
 	@bash scripts/dns/remove.sh
+
+.PHONY: apparmor-teardown apparmor-restore
+
+apparmor-teardown:
+	@echo "==> AppArmor: full teardown (local dev)"
+	@sudo bash scripts/administration/apparmor/teardown.sh
+
+apparmor-restore:
+	@echo "==> AppArmor: restore profiles"
+	@sudo bash scripts/administration/apparmor/restore.sh
+
+
+.PHONY: trust-ca
+
+trust-ca:
+	@bash scripts/administration/trust_ca.sh
 
 
 clean:
@@ -253,6 +273,10 @@ test-local-cleanup:
 	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
 	bash scripts/tests/deploy/local/cleanup.sh
 
+test-local-web-purge:
+	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
+	bash scripts/tests/deploy/local/purge_web.sh
+
 test-local-rapid:
 	@APP="$(APP)" \
 	TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
@@ -272,3 +296,5 @@ test-local-full:
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
+
+

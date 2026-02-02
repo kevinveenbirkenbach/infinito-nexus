@@ -49,7 +49,7 @@
   until: gitea_ready.status == 200
   retries: 20
   delay: 5
-  when: applications | get_app_conf(application_id, 'docker.services.oidc.enabled', False) or ( GITEA_LDAP_ENABLED | bool )
+  when: (GITEA_OIDC_ENABLED | bool) or (GITEA_LDAP_ENABLED | bool)
 
 - name: Execute Setup Routines
   include_tasks: 02_setup.yml

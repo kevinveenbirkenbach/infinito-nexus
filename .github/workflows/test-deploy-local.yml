@@ -32,7 +32,6 @@ env:
   ONLY_APP: ""
   NIX_CONFIG: ""
   INFINITO_IMAGE_TAG: "latest"
-
 jobs:
   discover:
     name: discover apps (local)

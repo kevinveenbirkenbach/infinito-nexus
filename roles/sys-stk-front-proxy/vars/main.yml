@@ -1,1 +1,1 @@
-front_proxy_domain_conf_dst:  "{{ [ NGINX.DIRECTORIES.HTTP.SERVERS, domain ~ '.conf'] | path_join }}"
+front_proxy_domain_conf_dst:  "{{ lookup('nginx_paths', domain, want='files.domain') }}"

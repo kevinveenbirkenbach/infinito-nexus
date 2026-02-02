@@ -1,24 +1,17 @@
-# lookup_plugins/compose_ca_inject_cmd.py
-#
-# Build the command to generate docker-compose.ca.override.yml via compose_ca_inject.py
-#
-# HARD FAIL PRINCIPLE:
-# - No silent defaults.
-# - kwargs.project is required (compose project name).
-#
-# It will call compose_ca_inject.py with docker compose config using:
-# - base docker-compose.yml
-# - docker-compose.override.yml
-# (CA override is intentionally NOT included because it may not exist yet.)
-
+# roles/docker-compose/lookup_plugins/compose_ca_inject_cmd.py
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Any, Optional
 
 import yaml
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
+from ansible.plugins.loader import lookup_loader
+
+from module_utils.entity_name_utils import get_entity_name
+from module_utils.templating import render_ansible_strict
 
 
 def _as_str(v: Any) -> str:
@@ -41,15 +34,11 @@ def _require(d: Any, key: str, expected_type: Any, *, label: str) -> Any:
 
 
 def _shell_quote(s: str) -> str:
+    # Safe single-quote shell quoting: ' -> '"'"'
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
 
 def _coerce_to_dict(v: Any, label: str) -> dict:
-    """
-    Coerce a value into a dict:
-      - accept dict directly
-      - accept YAML/JSON encoded string and parse it
-    """
     if isinstance(v, dict):
         return v
 
@@ -73,10 +62,7 @@ def _coerce_to_dict(v: Any, label: str) -> dict:
 
 
 def _maybe_template(templar: Any, value: Any) -> Any:
-    """
-    Render via Ansible templar if available.
-    Unit tests may not inject a templar -> then we skip templating.
-    """
+    # For strings, allow Jinja rendering through templar.template().
     if isinstance(value, (dict, list, tuple, int, float, bool)) or value is None:
         return value
     if templar is None:
@@ -87,9 +73,43 @@ def _maybe_template(templar: Any, value: Any) -> Any:
     return value
 
 
+def _env_file_if_exists(instance_dir_s: str, env_file_s: str) -> str:
+    """
+    Only return env file path if it exists.
+
+    - If env_file_s is relative, resolve it against the compose instance directory.
+    - Returns "" if missing.
+
+    This mirrors your handler logic:
+      {% if docker_compose.files.env is file %}--env-file ...{% endif %}
+    """
+    env_file_s = (env_file_s or "").strip()
+    if not env_file_s:
+        return ""
+
+    p = Path(env_file_s)
+    if not p.is_absolute():
+        p = Path(instance_dir_s) / p
+
+    return str(p) if p.is_file() else ""
+
+
 class LookupModule(LookupBase):
     def run(self, terms, variables: Optional[dict] = None, **kwargs):
         variables = variables or {}
+
+        if not terms or len(terms) != 1:
+            raise AnsibleError(
+                "compose_ca_inject_cmd: exactly one term required (application_id)"
+            )
+
+        application_id = _as_str(terms[0])
+        if not application_id:
+            raise AnsibleError("compose_ca_inject_cmd: application_id is empty")
+
+        project = _as_str(get_entity_name(application_id))
+        if not project:
+            raise AnsibleError("compose_ca_inject_cmd: resolved project is empty")
 
         raw_dc = variables.get("docker_compose", None)
         if raw_dc is None:
@@ -97,7 +117,8 @@ class LookupModule(LookupBase):
                 "compose_ca_inject_cmd: missing required variable 'docker_compose'"
             )
 
-        rendered_dc = _maybe_template(getattr(self, "_templar", None), raw_dc)
+        templar = getattr(self, "_templar", None)
+        rendered_dc = _maybe_template(templar, raw_dc)
         docker_compose = _coerce_to_dict(rendered_dc, "variable docker_compose")
 
         dirs = docker_compose.get("directories")
@@ -107,43 +128,58 @@ class LookupModule(LookupBase):
                 "compose_ca_inject_cmd: docker_compose.directories/files must be dicts"
             )
 
-        instance_dir = _as_str(dirs.get("instance"))
-        env_file = _as_str(files.get("env"))
-        out_file = _as_str(files.get("docker_compose_ca_override"))
-        base = _as_str(files.get("docker_compose"))
-        override = _as_str(files.get("docker_compose_override"))
-
-        if not instance_dir:
-            raise AnsibleError(
-                "compose_ca_inject_cmd: docker_compose.directories.instance is required"
-            )
-        if not out_file:
-            raise AnsibleError(
-                "compose_ca_inject_cmd: docker_compose.files.docker_compose_ca_override is required"
-            )
-        if not base:
-            raise AnsibleError(
-                "compose_ca_inject_cmd: docker_compose.files.docker_compose is required"
-            )
-        if not override:
-            raise AnsibleError(
-                "compose_ca_inject_cmd: docker_compose.files.docker_compose_override is required"
-            )
+        instance_dir = render_ansible_strict(
+            templar=templar,
+            raw=dirs.get("instance"),
+            var_name="docker_compose.directories.instance",
+            err_prefix="compose_ca_inject_cmd",
+            variables=variables,
+        )
+        env_file = render_ansible_strict(
+            templar=templar,
+            raw=files.get("env"),
+            var_name="docker_compose.files.env",
+            err_prefix="compose_ca_inject_cmd",
+            variables=variables,
+        )
+        out_file = render_ansible_strict(
+            templar=templar,
+            raw=files.get("docker_compose_ca_override"),
+            var_name="docker_compose.files.docker_compose_ca_override",
+            err_prefix="compose_ca_inject_cmd",
+            variables=variables,
+        )
 
         ca_trust = _require(variables, "CA_TRUST", dict, label="variable")
-        script_path = _as_str(
-            _require(ca_trust, "inject_script", str, label="CA_TRUST")
-        )
-        ca_host = _as_str(_require(ca_trust, "cert_host", str, label="CA_TRUST"))
-        wrapper_host = _as_str(
-            _require(ca_trust, "wrapper_host", str, label="CA_TRUST")
-        )
 
-        project = _as_str(_require(kwargs, "project", str, label="kwargs"))
-        if not project:
-            raise AnsibleError(
-                "compose_ca_inject_cmd: kwargs.project must be non-empty"
-            )
+        script_path = render_ansible_strict(
+            templar=templar,
+            raw=_require(ca_trust, "inject_script", str, label="CA_TRUST"),
+            var_name="PATH_CA_INJECT",
+            err_prefix="compose_ca_inject_cmd",
+            variables=variables,
+        )
+        ca_host = render_ansible_strict(
+            templar=templar,
+            raw=_require(ca_trust, "cert_host", str, label="CA_TRUST"),
+            var_name="CA_TRUST.cert_host",
+            err_prefix="compose_ca_inject_cmd",
+            variables=variables,
+        )
+        wrapper_host = render_ansible_strict(
+            templar=templar,
+            raw=_require(ca_trust, "wrapper_host", str, label="CA_TRUST"),
+            var_name="PATH_CA_TRUST",
+            err_prefix="compose_ca_inject_cmd",
+            variables=variables,
+        )
+        trust_name = render_ansible_strict(
+            templar=templar,
+            raw=_require(ca_trust, "trust_name", str, label="CA_TRUST"),
+            var_name="CA_TRUST.trust_name",
+            err_prefix="compose_ca_inject_cmd",
+            variables=variables,
+        )
 
         out_basename = os.path.basename(out_file)
         if not out_basename:
@@ -151,8 +187,14 @@ class LookupModule(LookupBase):
                 "compose_ca_inject_cmd: output basename resolved to empty"
             )
 
-        # IMPORTANT: only base + override (no CA file here)
-        compose_files = f"-f {base} -f {override}"
+        compose_f_args_lkp = lookup_loader.get(
+            "compose_f_args", self._loader, self._templar
+        )
+        compose_files = compose_f_args_lkp.run(
+            [application_id], variables=variables, include_ca=False
+        )[0]
+        if not _as_str(compose_files):
+            raise AnsibleError("compose_ca_inject_cmd: compose_f_args returned empty")
 
         cmd = [
             "python3",
@@ -165,8 +207,10 @@ class LookupModule(LookupBase):
             _shell_quote(compose_files),
         ]
 
-        if env_file:
-            cmd += ["--env-file", _shell_quote(env_file)]
+        # Only pass --env-file if it actually exists (like your other handlers do).
+        env_file_existing = _env_file_if_exists(instance_dir, _as_str(env_file))
+        if env_file_existing:
+            cmd += ["--env-file", _shell_quote(env_file_existing)]
 
         cmd += [
             "--out",
@@ -175,6 +219,8 @@ class LookupModule(LookupBase):
             _shell_quote(ca_host),
             "--wrapper-host",
             _shell_quote(wrapper_host),
+            "--trust-name",
+            _shell_quote(trust_name),
         ]
 
         return [" ".join(cmd)]

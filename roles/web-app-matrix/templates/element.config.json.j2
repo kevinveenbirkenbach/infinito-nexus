@@ -8,7 +8,7 @@
             "base_url": "{{ MATRIX_BASE_URL }}"
         }
     },
-    "logout_redirect_url": "{{ OIDC.CLIENT.LOGOUT_URL if MATRIX_OIDC_ENABLED else MATRIX_BASE_URL }}",
+    "logout_redirect_url": "{{ OIDC.CLIENT.LOGOUT_URL if MATRIX_OIDC_ENABLED | bool else MATRIX_BASE_URL }}",
     "brand": "Element",
     "integrations_ui_url": "https://scalar.vector.im/",
     "integrations_rest_url": "https://scalar.vector.im/api",

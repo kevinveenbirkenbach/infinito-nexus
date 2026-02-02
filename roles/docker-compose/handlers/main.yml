@@ -1,23 +1,9 @@
 ---
-- name: Generate CA trust override (before any compose command)
-  ansible.builtin.shell: |
-    set -euo pipefail
-    {{ lookup('compose_ca_inject_cmd', project=(application_id | get_entity_name)) }}
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-    executable: /bin/bash
-  listen:
-    - docker compose up
-  when:
-    - domains | has_domain(application_id)
-    - lookup('tls_resolve', application_id, want='enabled') | bool
-    - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
-
 - name: Validate Docker Compose configuration
   ansible.builtin.shell: |
     set -euo pipefail
     docker compose -p {{ application_id | get_entity_name }} \
-      {{ lookup('compose_f_args', application_id) }} \
+      {{ lookup('compose_f_args', application_id, include_ca=False) }} \
       {% if docker_compose.files.env is file %}--env-file {{ docker_compose.files.env }}{% endif %} \
       config --quiet
   args:
@@ -36,7 +22,7 @@
       compose_pull.py
       --chdir {{ docker_compose.directories.instance }}
       --project {{ application_id | get_entity_name }}
-      --compose-files {{ (lookup('compose_f_args', application_id)) | quote }}
+      --compose-files {{ lookup('compose_f_args', application_id, include_ca=False) | quote }}
       {% if docker_compose.files.env is file %}--env-file {{ docker_compose.files.env }}{% endif %}
       --lock-dir {{ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR }}
       --lock-key {{ docker_compose.directories.instance | hash('sha1') }}
@@ -70,6 +56,20 @@
     COMPOSE_DOCKER_CLI_BUILD: "1"
   listen:
     - docker compose build
+
+- name: Generate CA trust override
+  ansible.builtin.shell: |
+    set -euo pipefail
+    {{ lookup('compose_ca_inject_cmd', application_id) }}
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+    executable: /bin/bash
+  listen:
+    - docker compose up
+  when:
+    - domains | has_domain(application_id)
+    - lookup('tls_resolve', application_id, want='enabled') | bool
+    - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
 
 - name: docker compose up
   ansible.builtin.script:

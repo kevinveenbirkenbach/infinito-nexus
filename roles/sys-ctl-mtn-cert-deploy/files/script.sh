@@ -1,80 +1,85 @@
 #!/bin/sh
+set -eu
 
-# Check if the necessary parameters are provided
-if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <ssl_cert_folder> <docker_compose_instance_directory> <letsencrypt_live_path>"
-    exit 1
+# Usage: script.sh <ssl_cert_source_dir> <docker_compose_instance_directory>
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <ssl_cert_source_dir> <docker_compose_instance_directory>" >&2
+  exit 1
 fi
 
-# Assign parameters
-ssl_cert_folder="$1"
+ssl_cert_source_dir="$1"
 docker_compose_instance_directory="$2"
-letsencrypt_live_path="$3"
-docker_compose_cert_directory="${docker_compose_instance_directory}volumes/certs"
+
+# Compose wrapper base command (must include quoting as needed)
+# Example:
+#   compose_cmd="/usr/local/bin/compose --chdir /opt/docker/mailu --project mailu"
+: "${compose_cmd:=}"
+
+if [ -z "$compose_cmd" ]; then
+  echo "ERROR: compose_cmd is not set. It must point to the compose wrapper base command." >&2
+  echo "Example: compose_cmd='/usr/local/bin/compose --chdir <dir> --project <name>'" >&2
+  exit 1
+fi
+
+# Keep your existing target layout (minimal change)
+docker_compose_cert_directory="${docker_compose_instance_directory%/}/volumes/certs"
+
+if [ ! -d "$ssl_cert_source_dir" ]; then
+  echo "ERROR: ssl_cert_source_dir does not exist or is not a directory: $ssl_cert_source_dir" >&2
+  exit 1
+fi
 
 # Ensure the target cert directory exists
 if [ ! -d "$docker_compose_cert_directory" ]; then
-    echo "Creating certs directory: $docker_compose_cert_directory"
-    mkdir -p "$docker_compose_cert_directory" || exit 1
+  echo "Creating certs directory: $docker_compose_cert_directory"
+  mkdir -p "$docker_compose_cert_directory"
 fi
 
-# Copy all certificates (generic)
-cp -RvL "${letsencrypt_live_path}/${ssl_cert_folder}/"* "$docker_compose_cert_directory" || exit 1
+echo "Copying certificates from: $ssl_cert_source_dir -> $docker_compose_cert_directory"
+cp -RvL "${ssl_cert_source_dir}/"* "$docker_compose_cert_directory"
 
-# Mailu optimization: explicit key/cert mapping
-cp -v "${letsencrypt_live_path}/${ssl_cert_folder}/privkey.pem"   "${docker_compose_cert_directory}/key.pem"  || exit 1
-cp -v "${letsencrypt_live_path}/${ssl_cert_folder}/fullchain.pem" "${docker_compose_cert_directory}/cert.pem" || exit 1
+# Mailu optimization: create key.pem/cert.pem from whatever exists
+# Prefer LE naming if present
+if [ -f "${ssl_cert_source_dir}/privkey.pem" ] && [ -f "${ssl_cert_source_dir}/fullchain.pem" ]; then
+  cp -v "${ssl_cert_source_dir}/privkey.pem"   "${docker_compose_cert_directory}/key.pem"
+  cp -v "${ssl_cert_source_dir}/fullchain.pem" "${docker_compose_cert_directory}/cert.pem"
+elif [ -f "${ssl_cert_source_dir}/key.pem" ] && [ -f "${ssl_cert_source_dir}/cert.pem" ]; then
+  cp -v "${ssl_cert_source_dir}/key.pem"  "${docker_compose_cert_directory}/key.pem"
+  cp -v "${ssl_cert_source_dir}/cert.pem" "${docker_compose_cert_directory}/cert.pem"
+else
+  echo "ERROR: Could not determine key/cert mapping for Mailu." >&2
+  echo "Looked for: privkey.pem+fullchain.pem OR key.pem+cert.pem in: $ssl_cert_source_dir" >&2
+  exit 1
+fi
 
 # Set correct reading rights
 chmod a+r -v "${docker_compose_cert_directory}/"* || exit 1
 
-# Flags to track Nginx reload status
-nginx_reload_successful=false
-nginx_reload_failed=false
-failed_services=""
-
-# Reload Nginx in all containers within the Docker Compose setup
+# Ensure we can chdir (compose project dir)
 cd "$docker_compose_instance_directory" || exit 1
 
-echo "Wait for 5 minutes to prevent interuption of setup procedures"
-sleep 300
+# List services via wrapper to ensure correct -p/-f/--env-file stack is used
+# IMPORTANT: use "--" to stop wrapper arg parsing (so docker compose flags like "--services" are passed through)
+services="$(sh -c "$compose_cmd -- ps --services")"
 
-# Iterate over all services
-for service in $(docker compose ps --services); do
-    echo "Checking service: $service"
+restart_services=""
 
-    # Check if Nginx exists in the container
-    if docker compose exec -T "$service" which nginx > /dev/null 2>&1; then
-        echo "Testing Nginx config for service: $service"
-        if ! docker compose exec -T "$service" nginx -t; then
-            echo "Nginx config test FAILED for service: $service" >&2
-            nginx_reload_failed=true
-            failed_services="$failed_services $service"
-            continue
-        fi
+for service in $services; do
+  echo "Checking service: $service"
 
-        echo "Reloading Nginx for service: $service"
-        if docker compose exec -T "$service" nginx -s reload; then
-            nginx_reload_successful=true
-            echo "Successfully reloaded Nginx for service: $service"
-        else
-            echo "Failed to reload Nginx for service: $service" >&2
-            nginx_reload_failed=true
-            failed_services="$failed_services $service"
-        fi
-    else
-        echo "Nginx not found in service: $service, skipping."
-    fi
+  if sh -c "$compose_cmd -- exec -T \"$service\" which nginx" > /dev/null 2>&1; then
+    echo "Nginx found in service: $service"
+    restart_services="$restart_services $service"
+  else
+    echo "Nginx not found in service: $service, skipping."
+  fi
 done
 
-# Optional auto-healing: restart only the services whose reload failed
-if [ "$nginx_reload_failed" = true ]; then
-    echo "At least one Nginx reload failed. Affected services:${failed_services}"
-    echo "Restarting affected services to apply the new certificates..."
-    # shellcheck disable=SC2086
-    (sleep 120 && docker compose restart $failed_services) || (sleep 120 && docker compose restart) || exit 1
-elif [ "$nginx_reload_successful" = true ]; then
-    echo "At least one Nginx reload was successful. No restart needed."
+# Restart only the services that actually contain nginx
+if [ -n "$(echo "$restart_services" | tr -d ' ')" ]; then
+  echo "Restarting Nginx services to apply new certificates:${restart_services}"
+  # shellcheck disable=SC2086
+  sh -c "$compose_cmd -- restart $restart_services" || exit 1
 else
-    echo "No Nginx instances found in any service. Nothing to reload."
+  echo "No Nginx instances found in any service. Nothing to restart."
 fi

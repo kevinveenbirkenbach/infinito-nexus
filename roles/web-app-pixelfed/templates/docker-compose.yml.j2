@@ -6,7 +6,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - "data:/var/www/storage"
-      - "./env:/var/www/.env"
+      - "{{ docker_compose.files.env }}:/var/www/.env"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
@@ -17,7 +17,7 @@
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
       - "data:/var/www/storage"
-      - "./env:/var/www/.env"
+      - "{{ docker_compose.files.env }}:/var/www/.env"
     entrypoint: /worker-entrypoint.sh
     healthcheck:
       test: php artisan horizon:status | grep running

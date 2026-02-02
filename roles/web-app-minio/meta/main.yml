@@ -25,5 +25,5 @@ galaxy_info:
   run_after:
   - web-app-keycloak
   - web-app-matomo
-  lifecycle: alpha
+  lifecycle: pre-alpha
 dependencies: []

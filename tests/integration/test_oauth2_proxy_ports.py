@@ -8,7 +8,7 @@ class TestOAuth2ProxyPorts(unittest.TestCase):
     def setUpClass(cls):
         # Set up root paths and load oauth2 ports mapping
         cls.ROOT = Path(__file__).parent.parent.parent.resolve()
-        cls.PORTS_FILE = cls.ROOT / "group_vars" / "all" / "10_ports.yml"
+        cls.PORTS_FILE = cls.ROOT / "group_vars" / "all" / "11_ports.yml"
         with cls.PORTS_FILE.open() as f:
             data = yaml.safe_load(f)
         cls.oauth2_ports = data.get("ports", {}).get("localhost", {}).get("oauth2", {})
@@ -47,7 +47,7 @@ class TestOAuth2ProxyPorts(unittest.TestCase):
                 if app_id not in self.oauth2_ports:
                     self.fail(
                         f"Missing oauth2 port mapping for application '{app_id}' "
-                        f"in group_vars/all/10_ports.yml"
+                        f"in group_vars/all/11_ports.yml"
                     )
 
 

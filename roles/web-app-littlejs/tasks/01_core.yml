@@ -5,7 +5,7 @@
     docker_compose_flush_handlers:  false
     docker_git_repository_address:  "{{ LITTLEJS_REPOSITORY_BASE }}.git"
     docker_git_repository_pull:     true
-    docker_git_repository_branch:   "main"
+    docker_git_repository_version:   "main"
 
 - name: "Load LittleJS example metadata"
   include_vars:

@@ -27,11 +27,12 @@ KEYCLOAK_RESERVED_USERNAMES_REGEX:  "{{ KEYCLOAK_RESERVED_USERNAMES_LIST | join(
 KEYCLOAK_HEALTH_ENABLED:            true
 
 ## Import
-KEYCLOAK_REALM_IMPORT_ENABLED:      "{{ applications | get_app_conf(application_id, 'actions.import_realm') }}"
+KEYCLOAK_REALM_IMPORT_ENABLED:      "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.realm.import_enabled') }}"
 KEYCLOAK_REALM_IMPORT_DIR_HOST:     "{{ [docker_compose.directories.volumes,'import'] | path_join }}"
 KEYCLOAK_REALM_IMPORT_DIR_DOCKER:   "/opt/keycloak/data/import/"
 KEYCLOAK_REALM_IMPORT_FILE_SRC:     "import/realm.json.j2"
 KEYCLOAK_REALM_IMPORT_FILE_DST:     "{{ [KEYCLOAK_REALM_IMPORT_DIR_HOST,'realm.json'] | path_join }}"
+KEYCLOAK_REALM_TOTP_ENABLED:        "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.realm.totp_enabled') }}"
 
 ## Credentials
 
@@ -85,6 +86,9 @@ KEYCLOAK_LDAP_USER_OBJECT_CLASSES: >
         + (LDAP.USER.OBJECTS.AUXILIARY | dict2items | map(attribute='value') | list)
       ) | join(', ') 
   }}
+
+# User
+KEYCLOAK_USER_EMAILS_VERIFIED:      "{{ applications | get_app_conf(application_id, 'docker.services.keycloak.users.emails_verified') }}" 
 
 # reCAPTCHA
 KEYCLOAK_RECAPTCHA_ENABLED: "{{ applications | get_app_conf(application_id, 'docker.services.recaptcha.enabled') }}"

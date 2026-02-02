@@ -1,12 +1,21 @@
 # General
 application_id:                 "web-app-friendica"
+entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Friendica
-friendica_container:            "friendica"
-friendica_no_validation:        "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}" # Email validation is not neccessary if OIDC is active
-friendica_application_base:     "/var/www/html"
-friendica_docker_ldap_config:   "{{ [ friendica_application_base,         'config/ldapauth.config.php' ] | path_join }}"
-friendica_host_ldap_config:     "{{ [ docker_compose.directories.volumes, 'ldapauth.config.php' ] | path_join }}"
-friendica_config_dir:           "{{ [ friendica_application_base,         'config' ] | path_join }}"
-friendica_config_file:          "{{ [ friendica_config_dir,               'local.config.php' ] | path_join }}"
-friendica_user:                 "www-data"
+FRIENDICA_SERVICE:              "{{ entity_name }}"
+FRIENDICA_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+FRIENDICA_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+FRIENDICA_CONTAINER:            "friendica"
+
+FRIENDICA_APPLICATION_DIR:      "/var/www/html"
+FRIENDICA_CONFIG_DIR:           "{{ [ FRIENDICA_APPLICATION_DIR,          'config' ] | path_join }}"
+FRIENDICA_CONFIG_FILE:          "{{ [ FRIENDICA_CONFIG_DIR,               'local.config.php' ] | path_join }}"
+FRIENDICA_USER:                 "www-data"
+FRIENDICA_ADDONS:               "{{ applications | get_app_conf(application_id, 'addons') }}"
+
+# IAM
+FRIENDICA_OIDC_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
+FRIENDICA_LDAP_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+FRIENDICA_LDAP_CONFIG_DOCKER:   "{{ [ FRIENDICA_APPLICATION_DIR,         'config/ldapauth.config.php' ] | path_join }}"
+FRIENDICA_LDAP_CONFIG_HOST:     "{{ [ docker_compose.directories.volumes, 'ldapauth.config.php' ] | path_join }}"

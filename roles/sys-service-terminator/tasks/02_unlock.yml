@@ -1,0 +1,39 @@
+- name: "DEPLOY | Collect {{ SOFTWARE_NAME | lower }} timers (unlock phase)"
+  become: true
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - list-unit-files
+      - "*.{{ SOFTWARE_NAME | lower }}.timer"
+      - --no-legend
+      - --no-pager
+  register: deploy_timer_units_unlock
+  changed_when: false
+  failed_when: false
+
+- name: "DEPLOY | Build timer list (unlock phase)"
+  ansible.builtin.set_fact:
+    deploy_timers_unlock: >-
+      {{
+        deploy_timer_units_unlock.stdout_lines | default([])
+        | map('split', ' ')
+        | map('first')
+        | list
+      }}
+
+- name: "DEPLOY | Unmask all {{ SOFTWARE_NAME | lower }} timers"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    masked: false
+  loop: "{{ deploy_timers_unlock }}"
+  when: deploy_timers_unlock | length > 0
+
+- name: "DEPLOY | Enable and start all {{ SOFTWARE_NAME | lower }} timers"
+  become: true
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop: "{{ deploy_timers_unlock }}"
+  when: deploy_timers_unlock | length > 0

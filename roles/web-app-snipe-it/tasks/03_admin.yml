@@ -1,0 +1,36 @@
+---
+- name: "Check if a Snipe-IT administrator already exists"
+  ansible.builtin.shell: >
+    docker compose {{ lookup('compose_f_args', application_id) }} exec -T
+    -e APP_KEY="{{ SNIPE_IT_APP_KEY }}"
+    {{ SNIPE_IT_SERVICE }}
+    php -r '
+      require "vendor/autoload.php";
+      $app = require "bootstrap/app.php";
+      $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+      exit(
+        \App\Models\User::where("is_admin", 1)->count() > 0 ? 0 : 1
+      );
+    '
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  register: snipeit_admin_exists
+  changed_when: false
+  failed_when: false
+
+- name: "Create Snipe-IT administrator account"
+  ansible.builtin.shell: >
+    docker compose {{ lookup('compose_f_args', application_id) }} exec -T
+    -e APP_KEY="{{ SNIPE_IT_APP_KEY }}"
+    {{ SNIPE_IT_SERVICE }}
+    php artisan snipeit:create-admin
+    --first_name "System"
+    --last_name "Administrator"
+    --username "{{ users.administrator.username }}"
+    --email "{{ users.administrator.email }}"
+    --password {{ users.administrator.password | quote }}
+    --no-interaction
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+  when: snipeit_admin_exists.rc != 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

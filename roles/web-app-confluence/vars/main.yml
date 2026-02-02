@@ -32,7 +32,7 @@ CONFLUENCE_VERSION:               "{{ applications | get_app_conf(application_id
 CONFLUENCE_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
 CONFLUENCE_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
 CONFLUENCE_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-CONFLUENCE_CUSTOM_IMAGE:          "{{ CONFLUENCE_IMAGE }}_custom"
+CONFLUENCE_CUSTOM_IMAGE:          "{{ entity_name }}_custom:{{ CONFLUENCE_VERSION }}"
 
 ## Performance (derive from container limits in config/main.yml)
 CONFLUENCE_JVM_MAX:               "{{ applications | jvm_max_mb(application_id) }}m"

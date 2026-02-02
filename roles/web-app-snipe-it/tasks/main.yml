@@ -11,3 +11,6 @@
 - name: "Configure Snipe-IT LDAP settings"
   import_tasks: 02_ldap.yml
   when: SNIPE_IT_LDAP_ENABLED | bool 
+
+- name: "Create bootstrap Snipe-IT administrator"
+  import_tasks: 03_admin.yml

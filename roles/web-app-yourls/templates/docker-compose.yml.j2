@@ -1,11 +1,11 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-
   application:
     image: "{{ YOURLS_IMAGE }}:{{ YOURLS_VERSION }}"
     container_name: "{{ YOURLS_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+{% set container_healthcheck = (YOURLS_ADMIN_LOCATION | regex_replace('^/+', '') | regex_replace('/+$', '')) ~ '/' %}
 {% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
 
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}

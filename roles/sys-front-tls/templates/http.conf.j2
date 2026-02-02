@@ -1,0 +1,13 @@
+server
+{
+    server_name {{ domain }};
+    listen 80;
+    listen [::]:80;
+    location /
+    {
+      return 301 https://$host$request_uri;
+    }
+    {% if (lookup('tls_resolve', domain, want='mode') == 'letsencrypt') %}
+        {% include 'acme.conf.j2' %}
+    {% endif %}
+}

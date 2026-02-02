@@ -10,16 +10,16 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
+from module_utils.jinja_strict import render_strict
 from module_utils.tls_common import (
     AVAILABLE_FLAVORS,
     as_str,
     collect_domains_for_app,
-    collect_domains_global,
     override_san_list,
     require,
     resolve_enabled,
@@ -39,6 +39,47 @@ def _join(*parts: Any) -> str:
     return os.path.join(*cleaned) if cleaned else ""
 
 
+def _require_current_play_domains_all_strict(variables: dict) -> List[str]:
+    """
+    STRICT FORMAT REQUIREMENT
+
+    CURRENT_PLAY_DOMAINS_ALL MUST:
+    - exist
+    - be list[str]
+    - be non-empty
+    - contain only non-empty strings
+
+    No fallback. No coercion. No dict support.
+    """
+    value = variables.get("CURRENT_PLAY_DOMAINS_ALL")
+
+    if not isinstance(value, list):
+        raise AnsibleError(
+            "cert_plan(strict): CURRENT_PLAY_DOMAINS_ALL must be of type list[str]. "
+            f"Got {type(value).__name__}."
+        )
+
+    cleaned: List[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            raise AnsibleError(
+                "cert_plan(strict): CURRENT_PLAY_DOMAINS_ALL must contain only strings."
+            )
+        item = item.strip()
+        if not item:
+            raise AnsibleError(
+                "cert_plan(strict): CURRENT_PLAY_DOMAINS_ALL must not contain empty strings."
+            )
+        cleaned.append(item)
+
+    if not cleaned:
+        raise AnsibleError(
+            "cert_plan(strict): CURRENT_PLAY_DOMAINS_ALL must not be empty."
+        )
+
+    return cleaned
+
+
 class LookupModule(LookupBase):
     def run(self, terms, variables: Optional[dict] = None, **kwargs):
         variables = variables or {}
@@ -56,7 +97,6 @@ class LookupModule(LookupBase):
         applications = require(variables, "applications", dict)
         enabled_default = require(variables, "TLS_ENABLED", (bool, int))
         mode_default = as_str(require(variables, "TLS_MODE", str))
-        le_live = ""
 
         if mode_default not in AVAILABLE_FLAVORS:
             raise AnsibleError(
@@ -65,7 +105,11 @@ class LookupModule(LookupBase):
 
         forced_mode = as_str(kwargs.get("mode", "auto")).lower()
         app_id, primary_domain = resolve_term(
-            term, domains=domains, forced_mode=forced_mode, err_prefix="cert_plan"
+            term,
+            domains=domains,
+            applications=applications,
+            forced_mode=forced_mode,
+            err_prefix="cert_plan",
         )
 
         app = applications.get(app_id, {})
@@ -78,16 +122,22 @@ class LookupModule(LookupBase):
         cert_file = ""
         key_file = ""
         ca_file = ""
-        san_domains: list[str] = []
+        san_domains: List[str] = []
         cert_id = ""
         scope = "app"
 
         if mode == "off":
-            # deterministic empty structure
             pass
 
         elif mode == "letsencrypt":
-            le_live = as_str(require(variables, "LETSENCRYPT_LIVE_PATH", str))
+            le_live_raw = require(variables, "LETSENCRYPT_LIVE_PATH", str)
+            le_live = render_strict(
+                le_live_raw,
+                variables=variables,
+                var_name="LETSENCRYPT_LIVE_PATH",
+                err_prefix="cert_plan",
+            )
+
             le_name = resolve_le_name(app, primary_domain)
             cert_id = le_name
 
@@ -110,7 +160,14 @@ class LookupModule(LookupBase):
                 san_domains = uniq_preserve([primary_domain] + san_override)
 
         elif mode == "self_signed":
-            ss_base = as_str(require(variables, "TLS_SELFSIGNED_BASE_PATH", str))
+            ss_base_raw = require(variables, "TLS_SELFSIGNED_BASE_PATH", str)
+            ss_base = render_strict(
+                ss_base_raw,
+                variables=variables,
+                var_name="TLS_SELFSIGNED_BASE_PATH",
+                err_prefix="cert_plan",
+            )
+
             ss_scope = as_str(variables.get("TLS_SELFSIGNED_SCOPE")).lower()
             if ss_scope not in {"app", "global"}:
                 raise AnsibleError(
@@ -124,12 +181,13 @@ class LookupModule(LookupBase):
                 cert_file = _join(ss_base, cert_id, LE_FULLCHAIN)
                 key_file = _join(ss_base, cert_id, LE_PRIVKEY)
 
-                san_domains = collect_domains_global(domains)
-                san_domains = (
-                    uniq_preserve([primary_domain] + san_domains)
-                    if primary_domain
-                    else san_domains
-                )
+                # STRICT: list[str] only
+                san_domains = _require_current_play_domains_all_strict(variables)
+
+                # Ensure primary domain is always included
+                if primary_domain:
+                    san_domains = uniq_preserve([primary_domain] + san_domains)
+
             else:
                 cert_id = app_id
                 cert_file = _join(ss_base, app_id, primary_domain, LE_FULLCHAIN)
@@ -167,4 +225,5 @@ class LookupModule(LookupBase):
         want = as_str(kwargs.get("want", ""))
         if want:
             return [want_get(resolved, want)]
+
         return [resolved]

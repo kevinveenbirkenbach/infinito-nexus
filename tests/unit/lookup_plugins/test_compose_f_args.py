@@ -33,7 +33,7 @@ class _TlsResolveStub:
 class TestComposeFArgs(unittest.TestCase):
     def setUp(self):
         self.m = _load_module(
-            "roles/docker-compose/lookup_plugins/compose_f_args.py",
+            "lookup_plugins/compose_f_args.py",
             "compose_f_args_mod",
         )
         self.lookup = self.m.LookupModule()

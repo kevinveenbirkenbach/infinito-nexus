@@ -76,7 +76,7 @@ class TestDetectSchemeFromConf(unittest.TestCase):
     def test_ignores_comments_and_blank_lines(self) -> None:
         conf = """
 # listen 443 ssl;
-    
+
     # listen 80;
     server_name example.com;
 """
@@ -116,7 +116,7 @@ class TestBuildUrlsFromNginxConfs(unittest.TestCase):
 
 
 class TestBuildDockerCmd(unittest.TestCase):
-    def test_build_docker_cmd_defaults_to_host_network(self) -> None:
+    def test_build_docker_cmd_defaults_to_host_network_and_root_user(self) -> None:
         cmd = script.build_docker_cmd(
             image="ghcr.io/kevinveenbirkenbach/csp-checker:stable",
             urls=["http://example.com/"],
@@ -124,9 +124,19 @@ class TestBuildDockerCmd(unittest.TestCase):
             ignore_network_blocks_from=[],
         )
 
-        self.assertEqual(cmd[0:3], ["docker", "run", "--rm"])
+        # NEW: wrapper command starts with ["run", "--rm"]
+        self.assertEqual(cmd[0:2], ["run", "--rm"])
+
+        # NEW: always run as root inside container so with-ca-trust.sh can write trust store
+        self.assertIn("--user", cmd)
+        uidx = cmd.index("--user")
+        self.assertEqual(cmd[uidx + 1], "0:0")
+
+        # host network default
         self.assertIn("--network", cmd)
-        self.assertIn("host", cmd)
+        nidx = cmd.index("--network")
+        self.assertEqual(cmd[nidx + 1], "host")
+
         self.assertIn("ghcr.io/kevinveenbirkenbach/csp-checker:stable", cmd)
         self.assertEqual(cmd[-1], "http://example.com/")
 
@@ -139,7 +149,14 @@ class TestBuildDockerCmd(unittest.TestCase):
             use_host_network=False,
         )
 
-        self.assertEqual(cmd[0:3], ["docker", "run", "--rm"])
+        self.assertEqual(cmd[0:2], ["run", "--rm"])
+
+        # still root user injection
+        self.assertIn("--user", cmd)
+        uidx = cmd.index("--user")
+        self.assertEqual(cmd[uidx + 1], "0:0")
+
+        # no host network flags
         self.assertNotIn("--network", cmd)
         self.assertNotIn("host", cmd)
 
@@ -197,12 +214,17 @@ class TestRunChecker(unittest.TestCase):
 
         run_call = mock_run.call_args_list[1]
         self.assertEqual(run_call.kwargs.get("check"), False)
-        self.assertTrue(run_call.args[0][0:3] == ["docker", "run", "--rm"])
+
+        # NEW: it calls the wrapper "run", not "docker"
+        self.assertEqual(run_call.args[0][0:2], ["run", "--rm"])
+
+        # NEW: should contain injected root user
+        self.assertIn("--user", run_call.args[0])
+        uidx = run_call.args[0].index("--user")
+        self.assertEqual(run_call.args[0][uidx + 1], "0:0")
 
     @patch("script.subprocess.run")
-    def test_run_checker_returns_127_if_docker_missing(
-        self, mock_run: MagicMock
-    ) -> None:
+    def test_run_checker_returns_127_if_run_missing(self, mock_run: MagicMock) -> None:
         mock_run.side_effect = FileNotFoundError
 
         rc = script.run_checker(

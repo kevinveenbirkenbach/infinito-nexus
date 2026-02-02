@@ -20,8 +20,8 @@ BBB_TURN_SECRET_SHARED:               "{{ applications | get_app_conf(_BBB_COTUR
 BBB_TURN_SECRET:                      "{{ BBB_COTURN_LOCAL_ENABLED  | bool | ternary (BBB_TURN_SECRET_LOCAL, BBB_TURN_SECRET_SHARED) }}"
 
 ## TLS
-BBB_COTURN_TLS_CERT_PATH:             "{{ lookup('tls_resolve', application_id, want='files.cert') }}"
-BBB_COTURN_TLS_KEY_PATH:              "{{ lookup('tls_resolve', application_id, want='files.key') }}"
+BBB_COTURN_TLS_CERT_PATH:             "{{ lookup('cert_plan', application_id, want='files.cert') }}"
+BBB_COTURN_TLS_KEY_PATH:              "{{ lookup('cert_plan', application_id, want='files.key') }}"
 
 ## Turn
 BBB_COTURN_LOCAL_ENABLED:             "{{ not (applications | get_app_conf(application_id, 'docker.services.coturn.shared')) }}"

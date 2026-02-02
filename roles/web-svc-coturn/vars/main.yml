@@ -28,5 +28,5 @@ COTURN_USER_AUTH_ENABLED:   "{{ applications | get_app_conf(application_id, 'doc
 
 ## TLS
 COTURN_TLS_ENABLED:         "{{ lookup('tls_resolve', application_id, want='enabled') | bool }}"
-COTURN_TLS_CERT_PATH:       "{{ lookup('tls_resolve', application_id, want='files.cert') }}"
-COTURN_TLS_KEY_PATH:        "{{ lookup('tls_resolve', application_id, want='files.key') }}"
+COTURN_TLS_CERT_PATH:       "{{ lookup('cert_plan', application_id, want='files.cert') }}"
+COTURN_TLS_KEY_PATH:        "{{ lookup('cert_plan', application_id, want='files.key') }}"

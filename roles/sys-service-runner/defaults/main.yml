@@ -1,1 +1,0 @@
-sys_service_runner_state: "{{ 'restarted' if MODE_DEBUG else 'started' }}"

@@ -1,6 +1,9 @@
+# cli/mirror/providers.py
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
 import subprocess
+from typing import List
 
 from .model import ImageRef
 
@@ -22,10 +25,68 @@ class GHCRProvider(RegistryProvider):
         mapped = image.name.replace("/", "-")
         return f"ghcr.io/{self.namespace}/{self.prefix}/{mapped}"
 
+    def _run_copy(self, *, src: str, dest: str, extra: List[str] | None = None) -> None:
+        cmd = [
+            "skopeo",
+            "copy",
+            "--all",
+            "--retry-times",
+            "5",
+            "--dest-precompute-digests",
+        ]
+        if extra:
+            cmd += extra
+        cmd += [src, f"docker://{dest}"]
+
+        subprocess.run(
+            cmd,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+
+    def _looks_like_blob_reuse_problem(self, e: subprocess.CalledProcessError) -> bool:
+        out = (e.stdout or "") + "\n" + (e.stderr or "")
+        s = out.lower()
+        return (
+            "reuse blob" in s
+            or "blob mount" in s
+            or "mount blob" in s
+            or ("failed to mount" in s and ("403" in s or "401" in s))
+            or "denied:" in s
+            or "unauthorized" in s
+        )
+
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
         src = f"docker://docker.io/{image.source}"
-        subprocess.run(["skopeo", "copy", "--all", src, f"docker://{dest}"], check=True)
+
+        try:
+            # Fast path
+            self._run_copy(src=src, dest=dest)
+
+        except subprocess.CalledProcessError as e:
+            # Always print skopeo output for debugging
+            output = (e.stdout or "") + (e.stderr or "")
+            if output.strip():
+                print(output, flush=True)
+
+            # Fallback: force recompress (avoids cross-repo blob reuse)
+            if self._looks_like_blob_reuse_problem(e):
+                self._run_copy(
+                    src=src,
+                    dest=dest,
+                    extra=[
+                        "--dest-compress-format",
+                        "gzip",
+                        "--dest-compress-level",
+                        "1",
+                        "--dest-force-compress-format",
+                    ],
+                )
+                return
+
+            raise
 
 
 class GiteaProvider(RegistryProvider):
@@ -41,4 +102,27 @@ class GiteaProvider(RegistryProvider):
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
         src = f"docker://docker.io/{image.source}"
-        subprocess.run(["skopeo", "copy", "--all", src, f"docker://{dest}"], check=True)
+
+        cmd = [
+            "skopeo",
+            "copy",
+            "--all",
+            "--retry-times",
+            "5",
+            "--dest-precompute-digests",
+            src,
+            f"docker://{dest}",
+        ]
+
+        try:
+            subprocess.run(
+                cmd,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            output = (e.stdout or "") + (e.stderr or "")
+            if output.strip():
+                print(output, flush=True)
+            raise

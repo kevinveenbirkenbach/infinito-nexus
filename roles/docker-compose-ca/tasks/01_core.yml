@@ -1,16 +1,7 @@
 ---
-- name: "CA trust | assert CA_TRUST structure"
-  ansible.builtin.assert:
-    that:
-      - CA_TRUST is mapping
-      - CA_TRUST.cert_host is defined
-      - CA_TRUST.wrapper_host is defined
-      - CA_TRUST.inject_script is defined
-      - (CA_TRUST.cert_host | length) > 0
-      - (CA_TRUST.wrapper_host | length) > 0
-      - (CA_TRUST.inject_script | length) > 0
-    fail_msg: >-
-      CA_TRUST must be defined with keys cert_host, wrapper_host, inject_script.
+- include_role:
+    name: sys-ca-selfsigned
+  when: run_once_sys_ca_selfsigned is not defined
 
 - name: "CA trust | ensure directories exist"
   become: true
@@ -20,8 +11,8 @@
     mode: "0755"
   loop:
     - "{{ CA_TRUST.cert_host | dirname }}"
-    - "{{ CA_TRUST.wrapper_host | dirname }}"
-    - "{{ CA_TRUST.inject_script | dirname }}"
+    - "{{ PATH_CA_TRUST | dirname }}"
+    - "{{ PATH_CA_INJECT | dirname }}"
 
 - name: "CA trust | check CA certificate exists on target host (hard fail if missing)"
   become: true
@@ -36,20 +27,11 @@
       Provision it before running docker-compose CA injection.
   when: not _ca_cert_stat.stat.exists
 
-- name: "CA trust | install wrapper script"
-  become: true
-  ansible.builtin.copy:
-    src: "with-ca-trust.sh"
-    dest: "{{ CA_TRUST.wrapper_host }}"
-    mode: "0755"
-    owner: root
-    group: root
-
 - name: "CA trust | install compose CA inject script"
   become: true
   ansible.builtin.copy:
-    src: "compose_ca_inject.py"
-    dest: "{{ CA_TRUST.inject_script }}"
+    src: "compose_ca.py"
+    dest: "{{ PATH_CA_INJECT }}"
     mode: "0755"
     owner: root
     group: root

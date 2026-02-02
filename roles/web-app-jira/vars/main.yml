@@ -32,7 +32,7 @@ JIRA_VERSION:                 "{{ applications | get_app_conf(application_id, 'd
 JIRA_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
 JIRA_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
 JIRA_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-JIRA_CUSTOM_IMAGE:            "{{ JIRA_IMAGE }}_custom"
+JIRA_CUSTOM_IMAGE:            "{{ entity_name }}_custom:{{ JIRA_VERSION }}"
 
 ## Performance (derive from container limits in config/main.yml)
 JIRA_JVM_MAX:                 "{{ applications | jvm_max_mb(application_id) }}m"

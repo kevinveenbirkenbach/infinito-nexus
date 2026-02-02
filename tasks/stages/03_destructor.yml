@@ -8,4 +8,4 @@
 
 - name: "Finalize services"
   include_role:
-    name: sys-service-runner
+    name: sys-service-terminator
