@@ -8,7 +8,7 @@ database_password:              "{{ applications | get_app_conf(application_id, 
 
 ## General
 DISCOURSE_DATABASE_TYPE:            "{{ applications | get_app_conf(application_id, 'docker.services.database.type') }}"
-DISCOURSE_CONTAINER:                "local_{{ entity_name }}/{{ entity_name }}"
+DISCOURSE_CONTAINER:                "{{ entity_name }}"
 DISCOURSE_NETWORK:                  "{{ applications | get_app_conf(application_id, 'docker.network') }}"
 DISCOURSE_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 DISCOURSE_PLUGINS:                  "{{ applications | get_app_conf(application_id, 'plugins') }}"
