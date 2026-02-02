@@ -1,7 +1,7 @@
 server:
   domains:
     canonical:
-      - phpldapadmin.{{ DOMAIN_PRIMARY }}
+      - "phpldapadmin.{{ DOMAIN_PRIMARY }}"
     aliases: []
 docker:
   services:
@@ -16,8 +16,8 @@ docker:
       enabled: true
       shared: true
     phpldapadmin:
-      image:    leenooks/phpldapadmin
-      version:  "2.0.0-dev"
+      image:    "phpldapadmin/phpldapadmin"
+      version:  "latest"
     oauth2:
       enabled: true
       origin:
