@@ -16,6 +16,7 @@ from .host_vars import (
     apply_vars_overrides,
     apply_vars_overrides_from_file,
 )
+from .mirror_overrides import apply_mirror_overrides
 from .credentials_generator import generate_credentials_for_roles
 from .passwords import generate_random_password
 
@@ -46,6 +47,27 @@ def _resolve_categories_file(
         if categories_file_arg
         else (roles_dir / "categories.yml")
     ).resolve()
+
+
+def _resolve_mirrors_file(
+    project_root: Path, mirror_arg: Optional[str]
+) -> Optional[Path]:
+    """
+    --mirror can be used in two ways:
+      - --mirror            -> uses <repo-root>/mirrors.yml
+      - --mirror /path/file -> uses the given path
+
+    If mirror_arg is None, mirroring is disabled.
+    """
+    if mirror_arg is None:
+        return None
+
+    # argparse uses const="mirrors.yml" when flag is present without value
+    candidate = Path(mirror_arg)
+    if not candidate.is_absolute():
+        candidate = (project_root / candidate).resolve()
+
+    return candidate.resolve()
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -140,6 +162,19 @@ def main(argv: Optional[List[str]] = None) -> int:
         ),
     )
 
+    # New: mirroring support
+    parser.add_argument(
+        "--mirror",
+        nargs="?",
+        const="mirrors.yml",
+        default=None,
+        help=(
+            "Apply docker image mirror overrides to host_vars applications.*.docker.services.* "
+            "(image/version). If used without value, defaults to <repo-root>/mirrors.yml. "
+            "If a value is provided, it is treated as a path to the mirrors YAML/JSON file."
+        ),
+    )
+
     args = parser.parse_args(argv)
 
     include_filter = parse_roles_list(args.include)
@@ -156,6 +191,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     roles_dir = _resolve_roles_dir(project_root, args.roles_dir)
     categories_file = _resolve_categories_file(roles_dir, args.categories_file)
+    mirrors_file = _resolve_mirrors_file(project_root, args.mirror)
 
     inventory_dir = Path(args.inventory_dir).resolve()
     inventory_dir.mkdir(parents=True, exist_ok=True)
@@ -274,6 +310,11 @@ def main(argv: Optional[List[str]] = None) -> int:
             f"[INFO] Applying JSON overrides to host_vars for host '{args.host}' via --vars"
         )
         apply_vars_overrides(host_vars_file=host_vars_file, json_str=args.vars)
+
+    # Mirror overrides should win (requested behavior: "überschreiben")
+    if mirrors_file is not None:
+        print(f"[INFO] Applying mirror overrides from: {mirrors_file}")
+        apply_mirror_overrides(host_vars_file=host_vars_file, mirrors_file=mirrors_file)
 
     print(
         "[INFO] Done. Inventory and host_vars updated without deleting existing values."
