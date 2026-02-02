@@ -1,3 +1,4 @@
+# tests/unit/cli/create/inventory/test_mirror_overrides.py
 from __future__ import annotations
 
 import unittest
@@ -31,17 +32,65 @@ class TestApplyMirrorOverrides(unittest.TestCase):
             doc = self.yaml_rt.load(f)
         if doc is None:
             return {}
-        # ruamel returns CommentedMap; cast to dict for easy assertions
         return dict(doc)
 
-    def test_overwrites_only_image_and_version(self) -> None:
-        # host vars has existing app/service with extra keys
+    def test_default_policy_manual_override_wins(self) -> None:
+        """
+        Default policy is 'if_missing' -> if host_vars already has image/version,
+        mirror must NOT overwrite them.
+        """
         host_vars_data = {
             "applications": {
                 "web-app-nextcloud": {
                     "docker": {
                         "services": {
                             "app": {
+                                "image": "docker.io/library/nextcloud",
+                                "version": "30.0.0",
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        mirrors_data = {
+            "applications": {
+                "web-app-nextcloud": {
+                    "docker": {
+                        "services": {
+                            "app": {
+                                "image": "ghcr.io/acme/mirror/nextcloud",
+                                "version": "30.0.1",
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        self._write_yaml(self.host_vars, host_vars_data)
+        self._write_yaml(self.mirrors, mirrors_data)
+
+        apply_mirror_overrides(self.host_vars, self.mirrors)
+
+        out = self._read_yaml(self.host_vars)
+        svc = out["applications"]["web-app-nextcloud"]["docker"]["services"]["app"]
+
+        self.assertEqual(svc["image"], "docker.io/library/nextcloud")
+        self.assertEqual(svc["version"], "30.0.0")
+
+    def test_force_policy_overwrites_image_and_version(self) -> None:
+        """
+        mirror_policy: force -> mirror always overwrites image/version.
+        """
+        host_vars_data = {
+            "applications": {
+                "web-app-nextcloud": {
+                    "docker": {
+                        "services": {
+                            "app": {
+                                "mirror_policy": "force",
                                 "image": "docker.io/library/nextcloud",
                                 "version": "30.0.0",
                                 "env": {"FOO": "bar"},
@@ -83,9 +132,133 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         # preserved keys
         self.assertEqual(svc["env"], {"FOO": "bar"})
         self.assertEqual(svc["replicas"], 2)
+        self.assertEqual(svc["mirror_policy"], "force")
+
+    def test_skip_policy_never_overwrites(self) -> None:
+        """
+        mirror_policy: skip -> mirror never touches the service.
+        """
+        host_vars_data = {
+            "applications": {
+                "web-app-nextcloud": {
+                    "docker": {
+                        "services": {
+                            "app": {
+                                "mirror_policy": "skip",
+                                "image": "docker.io/library/nextcloud",
+                                "version": "30.0.0",
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        mirrors_data = {
+            "applications": {
+                "web-app-nextcloud": {
+                    "docker": {
+                        "services": {
+                            "app": {
+                                "image": "ghcr.io/acme/mirror/nextcloud",
+                                "version": "30.0.1",
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        self._write_yaml(self.host_vars, host_vars_data)
+        self._write_yaml(self.mirrors, mirrors_data)
+
+        apply_mirror_overrides(self.host_vars, self.mirrors)
+
+        out = self._read_yaml(self.host_vars)
+        svc = out["applications"]["web-app-nextcloud"]["docker"]["services"]["app"]
+
+        self.assertEqual(svc["image"], "docker.io/library/nextcloud")
+        self.assertEqual(svc["version"], "30.0.0")
+        self.assertEqual(svc["mirror_policy"], "skip")
+
+    def test_if_missing_fills_only_missing_keys(self) -> None:
+        """
+        Default policy: if_missing -> fill missing image/version only.
+        """
+        host_vars_data = {
+            "applications": {
+                "svc-ai-ollama": {
+                    "docker": {
+                        "services": {
+                            "ollama": {
+                                # image missing, version missing
+                                "env": {"A": "b"},
+                            }
+                        }
+                    }
+                },
+                "web-app-nextcloud": {
+                    "docker": {
+                        "services": {
+                            "app": {
+                                "image": "docker.io/library/nextcloud",
+                                # version missing
+                            }
+                        }
+                    }
+                },
+            }
+        }
+
+        mirrors_data = {
+            "applications": {
+                "svc-ai-ollama": {
+                    "docker": {
+                        "services": {
+                            "ollama": {
+                                "image": "ghcr.io/acme/mirror/ollama",
+                                "version": "1.2.3",
+                            }
+                        }
+                    }
+                },
+                "web-app-nextcloud": {
+                    "docker": {
+                        "services": {
+                            "app": {
+                                "image": "ghcr.io/acme/mirror/nextcloud",
+                                "version": "30.0.1",
+                            }
+                        }
+                    }
+                },
+            }
+        }
+
+        self._write_yaml(self.host_vars, host_vars_data)
+        self._write_yaml(self.mirrors, mirrors_data)
+
+        apply_mirror_overrides(self.host_vars, self.mirrors)
+
+        out = self._read_yaml(self.host_vars)
+
+        svc_ollama = out["applications"]["svc-ai-ollama"]["docker"]["services"][
+            "ollama"
+        ]
+        self.assertEqual(svc_ollama["image"], "ghcr.io/acme/mirror/ollama")
+        self.assertEqual(svc_ollama["version"], "1.2.3")
+        self.assertEqual(svc_ollama["env"], {"A": "b"})
+
+        svc_nc = out["applications"]["web-app-nextcloud"]["docker"]["services"]["app"]
+        # image should NOT be overwritten (manual wins)
+        self.assertEqual(svc_nc["image"], "docker.io/library/nextcloud")
+        # but version should be filled
+        self.assertEqual(svc_nc["version"], "30.0.1")
 
     def test_creates_missing_app_and_service(self) -> None:
-        # host vars initially empty-ish
+        """
+        If host_vars lacks the app/service, mirror can create it (because missing).
+        """
         host_vars_data = {"TLS_ENABLED": True}
 
         mirrors_data = {
@@ -110,10 +283,7 @@ class TestApplyMirrorOverrides(unittest.TestCase):
 
         out = self._read_yaml(self.host_vars)
 
-        # unrelated top-level keys preserved
         self.assertTrue(out["TLS_ENABLED"])
-
-        # new structure created
         svc = out["applications"]["svc-db-postgres"]["docker"]["services"]["postgres"]
         self.assertEqual(svc["image"], "ghcr.io/acme/mirror/postgres")
         self.assertEqual(svc["version"], "16")
@@ -159,12 +329,10 @@ class TestApplyMirrorOverrides(unittest.TestCase):
 
         out = self._read_yaml(self.host_vars)
 
-        # nextcloud unchanged because mirror entry incomplete
         svc_nc = out["applications"]["web-app-nextcloud"]["docker"]["services"]["app"]
         self.assertEqual(svc_nc["image"], "x")
         self.assertEqual(svc_nc["version"], "1")
 
-        # wordpress should not have been created because mirror entry incomplete
         self.assertNotIn("web-app-wordpress", out.get("applications", {}))
 
     def test_noop_when_mirrors_has_no_applications(self) -> None:
@@ -191,6 +359,51 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         missing = self.root / "does-not-exist.yml"
         with self.assertRaises(SystemExit):
             apply_mirror_overrides(self.host_vars, missing)
+
+    def test_treats_empty_strings_as_missing_for_if_missing(self) -> None:
+        """
+        If host_vars has empty/whitespace image/version, treat them as missing and fill.
+        """
+        host_vars_data = {
+            "applications": {
+                "web-app-nextcloud": {
+                    "docker": {
+                        "services": {
+                            "app": {
+                                "image": "   ",
+                                "version": "",
+                                "env": {"FOO": "bar"},
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        mirrors_data = {
+            "applications": {
+                "web-app-nextcloud": {
+                    "docker": {
+                        "services": {
+                            "app": {
+                                "image": "ghcr.io/acme/mirror/nextcloud",
+                                "version": "30.0.1",
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        self._write_yaml(self.host_vars, host_vars_data)
+        self._write_yaml(self.mirrors, mirrors_data)
+
+        apply_mirror_overrides(self.host_vars, self.mirrors)
+
+        out = self._read_yaml(self.host_vars)
+        svc = out["applications"]["web-app-nextcloud"]["docker"]["services"]["app"]
+        self.assertEqual(svc["image"], "ghcr.io/acme/mirror/nextcloud")
+        self.assertEqual(svc["version"], "30.0.1")
+        self.assertEqual(svc["env"], {"FOO": "bar"})
 
 
 if __name__ == "__main__":

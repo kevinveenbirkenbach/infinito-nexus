@@ -13,10 +13,34 @@ def _ensure_ruamel_map(node: CommentedMap, key: str) -> CommentedMap:
     return node[key]
 
 
+def _is_blank(val: object) -> bool:
+    if val is None:
+        return True
+    if isinstance(val, str):
+        return not val.strip()
+    return False
+
+
+def _get_policy(svc_doc: CommentedMap) -> str:
+    """
+    Read mirror policy from existing host_vars service node.
+    Allowed: force | skip | if_missing
+    Default: if_missing
+    """
+    raw = svc_doc.get("mirror_policy")
+    if raw is None:
+        return "if_missing"
+    if not isinstance(raw, str):
+        return "if_missing"
+    policy = raw.strip().lower()
+    if policy in {"force", "skip", "if_missing"}:
+        return policy
+    return "if_missing"
+
+
 def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
     """
-    Overwrite applications.*.docker.services.*.{image,version} in host_vars
-    based on a mirrors file.
+    Apply docker image mirror overrides to host_vars.
 
     Mirrors file format (YAML or JSON):
       applications:
@@ -27,7 +51,13 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
                 image: <new-image-base>
                 version: <tag>
 
-    Only the keys present in mirrors_file are applied.
+    Behavior / precedence:
+      - By default, manual values in host_vars win.
+      - mirror_policy in host_vars service node controls how mirror applies:
+          - force     -> always overwrite image/version
+          - skip      -> never change image/version
+          - if_missing(default) -> only fill missing/blank image/version
+      - If app/service does not exist in host_vars, it will be created and mirror values applied.
     """
     if not mirrors_file.exists():
         raise SystemExit(f"Mirrors file not found: {mirrors_file}")
@@ -89,15 +119,32 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
             image = svc_block.get("image")
             version = svc_block.get("version")
 
-            if not isinstance(image, str) or not image.strip():
+            if not isinstance(image, str) or _is_blank(image):
                 continue
-            if not isinstance(version, str) or not version.strip():
+            if not isinstance(version, str) or _is_blank(version):
                 continue
 
             svc_doc = _ensure_ruamel_map(services_doc, str(svc_name))
-            svc_doc["image"] = image.strip()
-            svc_doc["version"] = version.strip()
-            applied += 1
+
+            # policy only comes from existing host_vars service node
+            policy = _get_policy(svc_doc)
+
+            if policy == "skip":
+                continue
+
+            if policy == "force":
+                svc_doc["image"] = image.strip()
+                svc_doc["version"] = version.strip()
+                applied += 1
+                continue
+
+            # if_missing (default)
+            if _is_blank(svc_doc.get("image")):
+                svc_doc["image"] = image.strip()
+                applied += 1
+            if _is_blank(svc_doc.get("version")):
+                svc_doc["version"] = version.strip()
+                applied += 1
 
     if applied <= 0:
         return
