@@ -117,3 +117,20 @@ jobs:
             --ghcr-prefix "${GHCR_PREFIX}"
 
           echo ">>> Mirror sync finished."
+
+      - name: Set mirrored GHCR packages to public (best-effort)
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          GHCR_NAMESPACE="${{ inputs.ghcr_namespace || 'infinito-nexus' }}"
+          GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
+          REPO_ROOT="${{ inputs.repo_root || '.' }}"
+
+          ./scripts/release/ghcr_make_public.sh \
+            --ghcr-namespace "${GHCR_NAMESPACE}" \
+            --ghcr-prefix "${GHCR_PREFIX}" \
+            --repo-root "${REPO_ROOT}"
