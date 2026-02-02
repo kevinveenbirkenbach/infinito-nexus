@@ -4,7 +4,6 @@ services:
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
   application:
-    image: "{{ applications | get_app_conf(application_id, 'images.' ~ application_id, True) }}"
     volumes: []
     ports:
       - "127.0.0.1:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
