@@ -1,5 +1,6 @@
 # General
 application_id:                 "web-app-openproject"
+entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Database
 
