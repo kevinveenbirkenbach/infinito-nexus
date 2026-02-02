@@ -45,9 +45,7 @@ class GHCRProvider(RegistryProvider):
             text=True,
         )
 
-    def _looks_like_blob_reuse_problem(
-        self, e: subprocess.CalledProcessError
-    ) -> bool:
+    def _looks_like_blob_reuse_problem(self, e: subprocess.CalledProcessError) -> bool:
         out = (e.stdout or "") + "\n" + (e.stderr or "")
         s = out.lower()
         return (
@@ -92,9 +90,7 @@ class GHCRProvider(RegistryProvider):
 
 
 class GiteaProvider(RegistryProvider):
-    def __init__(
-        self, registry: str, namespace: str, prefix: str = "mirror"
-    ) -> None:
+    def __init__(self, registry: str, namespace: str, prefix: str = "mirror") -> None:
         self.registry = registry.rstrip("/")
         self.namespace = namespace
         self.prefix = prefix.strip("/")

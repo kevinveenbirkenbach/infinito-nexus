@@ -1,3 +1,4 @@
+# cli/deploy/development/init.py
 from __future__ import annotations
 
 import argparse
@@ -5,6 +6,7 @@ import json
 import os
 
 from .common import make_compose, resolve_deploy_ids_for_app
+from .mirrors import generate_ci_mirrors_file, should_use_mirrors_on_ci
 from .storage import detect_storage_constrained
 from ...meta.runtime import detect_runtime
 
@@ -58,6 +60,10 @@ def _create_inventory(
         "--include",
         ",".join(include),
     ]
+
+    if should_use_mirrors_on_ci():
+        mirrors_file = generate_ci_mirrors_file(compose, inventory_dir=inv_root)
+        cmd += ["--mirror", mirrors_file]
 
     compose.exec(cmd, check=True, workdir="/opt/src/infinito")
     _ensure_vault_password_file(compose, inventory_dir=inv_root)
@@ -128,7 +134,9 @@ def handler(args: argparse.Namespace) -> int:
         storage_constrained=storage_constrained,
         inventory_dir=str(args.inventory_dir),
     )
+
     print(
-        f">>> Inventory initialized (include={','.join(include)} storage_constrained={storage_constrained})"
+        f">>> Inventory initialized (include={','.join(include)} "
+        f"storage_constrained={storage_constrained})"
     )
     return 0
