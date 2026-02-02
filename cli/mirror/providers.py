@@ -1,3 +1,4 @@
+# cli/mirror/providers.py
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import subprocess
@@ -25,7 +26,22 @@ class GHCRProvider(RegistryProvider):
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
         src = f"docker://docker.io/{image.source}"
-        subprocess.run(["skopeo", "copy", "--all", src, f"docker://{dest}"], check=True)
+
+        # GHCR often returns 403 when a tool tries to "reuse" blobs (cross-repo blob mount).
+        # Disable destination blob reuse to force a full upload of layers.
+        subprocess.run(
+            [
+                "skopeo",
+                "copy",
+                "--all",
+                "--dest-no-reuse-blobs",
+                "--retry-times",
+                "5",
+                src,
+                f"docker://{dest}",
+            ],
+            check=True,
+        )
 
 
 class GiteaProvider(RegistryProvider):
@@ -41,4 +57,17 @@ class GiteaProvider(RegistryProvider):
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
         src = f"docker://docker.io/{image.source}"
-        subprocess.run(["skopeo", "copy", "--all", src, f"docker://{dest}"], check=True)
+
+        subprocess.run(
+            [
+                "skopeo",
+                "copy",
+                "--all",
+                "--dest-no-reuse-blobs",
+                "--retry-times",
+                "5",
+                src,
+                f"docker://{dest}",
+            ],
+            check=True,
+        )
