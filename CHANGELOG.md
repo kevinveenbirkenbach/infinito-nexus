@@ -1,12 +1,12 @@
 ## [1.0.0] - 2026-02-03
 
-* *** 🚀 Release: Infrastructure Hardening, Mirroring & Deterministic Deploys ***
+### 🚀 Release: Infrastructure Hardening, Mirroring & Deterministic Deploys
 
 This release delivers a major stability and reliability upgrade across the Infinito.Nexus ecosystem. It focuses on **deterministic deployments**, **robust TLS/CA handling**, **mirror-aware inventories**, and **CI/CD resilience**, while standardizing Docker service configuration across roles.
 
-*** ✨ Highlights ***
+### ✨ Highlights
 
-*** 🔐 TLS & Certificate Pipeline ***
+#### 🔐 TLS & Certificate Pipeline
 
 * Switched self-signed mode to a **CA-signed certificate chain** with deterministic trust installation
 * Strict SAN planning driven by `CURRENT_PLAY_DOMAINS_ALL`
@@ -14,7 +14,7 @@ This release delivers a major stability and reliability upgrade across the Infin
 * Faster, safer cert deployment (no global sleeps, deterministic container restarts)
 * Improved domain/alias resolution and strict opt-in auto-alias behavior
 
-*** 🧩 CA Trust Injection (Host & Containers) ***
+#### 🧩 CA Trust Injection (Host & Containers)
 
 * Unified trust injection via `with-ca-trust.sh`
 * Best-effort CA installation (non-fatal in minimal/unprivileged containers)
@@ -22,14 +22,14 @@ This release delivers a major stability and reliability upgrade across the Infin
 * Support for distroless images, profile-only services, NSS/Chromium
 * Hardened CA override generator and correct execution order
 
-*** 🐳 Docker Compose Tooling ***
+#### 🐳 Docker Compose Tooling
 
 * Centralized and hardened compose wrappers (`compose-base`)
 * Strict multi-pass Jinja rendering to prevent leaked templates
 * Correct `--env-file` handling and safe argument escaping
 * Deterministic compose behavior across local, CI, and containerized environments
 
-*** 🪞 Inventory & Image Mirroring ***
+#### 🪞 Inventory & Image Mirroring
 
 * New `--mirror` support for inventory generation
 * Per-service `mirror_policy`:
@@ -41,13 +41,13 @@ This release delivers a major stability and reliability upgrade across the Infin
 * Robust GHCR mirroring with rate limiting, concurrency protection, and recompress fallback
 * CI workflows fully mirror-aware with strict env validation
 
-*** 🧱 Standardized Service Configuration ***
+#### 🧱 Standardized Service Configuration
 
 * Unified Docker image handling via `docker.services.<service>.image/version`
 * Refactored multiple roles (pgAdmin, Friendica, LibreTranslate, oauth2-proxy, Funkwhale, …)
 * Removed misleading/deprecated image/version flags (e.g. Nextcloud)
 
-*** 🧪 CI & Test Guardrails ***
+#### 🧪 CI & Test Guardrails
 
 * New integration tests enforcing:
 
@@ -55,7 +55,7 @@ This release delivers a major stability and reliability upgrade across the Infin
   * required image tags for buildable services
 * Improved CI stability (AppArmor handling, deterministic compose execution)
 
-*** 🛠️ Role Hardening & Idempotency ***
+#### 🛠️ Role Hardening & Idempotency
 
 * Reliable admin bootstrap for Discourse, Snipe-IT, Taiga, WordPress
 * LDAP/OIDC fixes across multiple services (Nextcloud, Mailu, Snipe-IT, Discourse)
@@ -63,14 +63,14 @@ This release delivers a major stability and reliability upgrade across the Infin
 * Safer systemd deploy flow with deploy-safe timer handling
 * Improved admin and cleanup tooling
 
-*** 🧠 Why this matters ***
+### 🧠 Why this matters
 
 * Deployments are now **predictable, repeatable, and debuggable**
 * TLS, CA trust, and Docker behavior are aligned across **local, CI, and production**
 * Image mirroring is **explicit, controlled, and safe by default**
 * Role configuration is **consistent and machine-verifiable**
 
-*** ⚠️ Notes ***
+### ⚠️ Notes
 
 * Mirroring remains **opt-in** via `--mirror`
 * Strict validation fails fast only where silent misconfiguration would be dangerous
@@ -79,7 +79,7 @@ This release delivers a major stability and reliability upgrade across the Infin
 
 ## [0.12.0] - 2026-01-25
 
-* * Hardened CI/CD pipelines with retries and Git fallback for Ansible Galaxy collections
+* Hardened CI/CD pipelines with retries and Git fallback for Ansible Galaxy collections
 * Unified ShellCheck execution via container for reproducible linting
 * Enforced secure secret handling across all roles (shell quoting, dotenv, sed safety)
 * Introduced `sed_escape` filter to prevent sed injection and config corruption
@@ -110,7 +110,7 @@ This release delivers a major stability and reliability upgrade across the Infin
 
 ## [0.9.0] - 2026-01-07
 
-* * Skip hostname configuration when running inside Docker containers
+* Skip hostname configuration when running inside Docker containers
 * Unify workstation user handling via *WORKSTATION_USER* across desktop roles
 * Cleanly resolve conflicts between postfix and msmtp for local and external mail delivery
 * Consolidate mail configuration using flat *SYSTEM_EMAIL_* variables and improve local delivery reliability
@@ -126,7 +126,7 @@ This release delivers a major stability and reliability upgrade across the Infin
 
 ## [0.7.2] - 2026-01-06
 
-* * Introduced lifecycle metadata for roles (`meta/main.yml`)
+* Introduced lifecycle metadata for roles (`meta/main.yml`)
 * Gated CI deploy tests to tested lifecycles only (alpha, beta, rc, stable)
 * Bumped `cleanback` to 1.2.1 (timestamp-based force-keep)
 
@@ -224,7 +224,7 @@ https://chatgpt.com/share/695be0b8-9154-800f-8c03-2bcf3daab157
 
 ## [0.3.4] - 2025-12-21
 
-* * Added ***sys-util-git-pull*** for deterministic shallow Git updates with tag pinning; integrated into ***pkgmgr***.
+* Added ***sys-util-git-pull*** for deterministic shallow Git updates with tag pinning; integrated into ***pkgmgr***.
 * Pinned ***pkgmgr*** clones to ***stable*** for reproducible deployments.
 * Refactored CLI to avoid runpy warnings.
 * Improved Ansible portability (pacman → package) and added formatter workflow.
