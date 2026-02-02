@@ -1,4 +1,14 @@
-application_id:               "web-app-pgadmin"
-database_host:                "{{ applications | get_app_conf('svc-db-postgres', 'docker.services.postgres.name', True) if applications | get_app_conf(application_id, 'docker.services.database.shared', False) }}"
-pgadmin_user:                 5050
-pgadmin_group:                "{{ pgadmin_user }}"
+# General
+application_id:                   "web-app-pgadmin"
+entity_name:                      "{{ application_id | get_entity_name }}"
+database_host:                    "{{ applications | get_app_conf('svc-db-postgres', 'docker.services.postgres.name') if applications | get_app_conf(application_id, 'docker.services.database.shared') }}"
+
+# PgAdmin
+PGADMIN_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+PGADMIN_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+PGADMIN_SERVER_MODE:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.server_mode') | bool  }}"
+PGADMIN_MASTER_PASSWORD_REQUIRED: "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.master_password_required') | bool  }}"
+
+# User
+PGADMIN_USER:                 5050
+PGADMIN_GROUP:                "{{ PGADMIN_USER }}"
