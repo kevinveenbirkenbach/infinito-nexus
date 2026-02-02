@@ -2,6 +2,9 @@
 credentials: {}
 docker:
   services:
+    libretranslate:
+      image:    libretranslate/libretranslate
+      version: latest
     oauth2:
       enabled: false
     logout:

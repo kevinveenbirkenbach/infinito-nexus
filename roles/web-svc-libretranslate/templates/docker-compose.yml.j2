@@ -2,8 +2,8 @@
 services:
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
 
-  application:
-    image: "{{ applications | get_app_conf(application_id, 'images.' ~ application_id, True) }}"
+  {{ LIBRETRANSLATE_SERVICE }}:
+    image: "{{ LIBRETRANSLATE_IMAGE }}:{{ LIBRETRANSLATE_VERSION }}"
     volumes: []
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
@@ -18,5 +18,3 @@ services:
 ) }}
 
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
-
-

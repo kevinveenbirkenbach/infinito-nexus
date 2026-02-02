@@ -1,1 +1,7 @@
 application_id: web-svc-libretranslate # ID of the application
+
+entity_name:                    "{{ application_id | get_entity_name }}"
+
+LIBRETRANSLATE_SERVICE:              "{{ entity_name }}"
+LIBRETRANSLATE_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+LIBRETRANSLATE_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
