@@ -68,8 +68,6 @@ docker:
       pids_limit:         256
     cache:
       name:               openproject-cache
-      image:              "" # If need a specific memcached image you have to define it here, otherwise the version from svc-db-memcached will be used
-      version:            "" # If need a specific memcached version you have to define it here, otherwise the version from svc-db-memcached will be used
       cpus:               "0.3"
       mem_reservation:    "512m"
       mem_limit:          "512m"

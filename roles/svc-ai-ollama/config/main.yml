@@ -4,9 +4,7 @@ docker:
       shared:             true
       backup:
         no_stop_required: true
-      # The following image is required for github actions, because the official image is to huge
-      # @see https://hub.docker.com/r/alpine/ollama
-      image:              "{{'alpine' if (DOCKER_IN_CONTAINER | bool) else 'ollama'}}/ollama"
+      image:              "ollama/ollama"
       version:            latest
       name:               ollama
       port:               11434

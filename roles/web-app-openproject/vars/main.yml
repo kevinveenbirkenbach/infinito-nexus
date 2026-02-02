@@ -22,19 +22,9 @@ OPENPROJECT_ADMINISTRATOR_PASSWORD: "{{ users.administrator.password }}"
 OPENPROJECT_ADMINISTRATOR_EMAIL:    "{{ users.administrator.email }}"
 
 # Open Project Cache
-OPENPROJECT_CACHE_CONTAINER:    "{{ applications | get_app_conf(application_id, 'docker.services.cache.name') }}"
-OPENPROJECT_CACHE_IMAGE:        "{{ applications
-     | get_app_conf(application_id, 'docker.services.cache.image')
-     or applications
-       | get_app_conf('svc-db-memcached', 'docker.services.memcached.image')
-  }}"
-
-OPENPROJECT_CACHE_VERSION: "{{ applications
-     | get_app_conf(application_id, 'docker.services.cache.version')
-     or applications
-       | get_app_conf('svc-db-memcached', 'docker.services.memcached.version')
-  }}"
-
+OPENPROJECT_CACHE_CONTAINER:    "{{ applications | get_app_conf( application_id,    'docker.services.cache.name') }}"
+OPENPROJECT_CACHE_IMAGE:        "{{ applications | get_app_conf('svc-db-memcached', 'docker.services.memcached.image') }}"
+OPENPROJECT_CACHE_VERSION:      "{{ applications | get_app_conf('svc-db-memcached', 'docker.services.memcached.version') }}"
       
 OPENPROJECT_PLUGINS_FOLDER:   "{{ docker_compose.directories.volumes }}plugins/"
 

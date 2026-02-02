@@ -42,6 +42,12 @@ applications:
   svc-ai-ollama:
     # Disabled for test because they are to huge for github actions test
     preload_models: []
+    docker:
+      services:
+        ollama:
+          # The following image is required for github actions, because the official image is to huge
+          # @see https://hub.docker.com/r/alpine/ollama
+          image: "alpine/ollama"
   web-app-jira:
     server:
       status_codes:

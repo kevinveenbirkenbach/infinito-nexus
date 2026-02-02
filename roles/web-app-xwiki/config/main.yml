@@ -25,7 +25,7 @@ docker:
       type:               postgres
     xwiki:
       image:              xwiki
-      version:            lts-<< defaults_applications[web-app-xwiki].docker.services.database.type >>-tomcat
+      version:            lts-postgres-tomcat
       name:               xwiki
       backup:
         no_stop_required: true
