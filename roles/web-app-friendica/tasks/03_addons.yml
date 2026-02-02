@@ -9,22 +9,22 @@
         + [{
             'name': item.key,
             'enabled': (
-              applications | get_app_conf(application_id, 'docker.services.oidc.enabled')
+              FRIENDICA_OIDC_ENABLED
                 if item.key == 'keycloakpassword'
-              else applications | get_app_conf(application_id, 'docker.services.ldap.enabled', True)
+              else FRIENDICA_LDAP_ENABLED
                 if item.key == 'ldapauth'
               else (item.value.enabled if item.value is mapping and 'enabled' in item.value else False)
             )
           }]
       }}
-  loop: "{{ applications | get_app_conf(application_id, 'addons', True) | dict2items }}"
+  loop: "{{ FRIENDICA_ADDONS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
 
 - name: Ensure Friendica addons are in sync
   command: >
-    {{ docker_compose_command_exec }} --user {{ friendica_user }}
-    application
+    {{ docker_compose_command_exec }} --user {{ FRIENDICA_USER }}
+    {{ FRIENDICA_SERVICE }}
     bin/console addon
     {{ 'enable' if item.enabled else 'disable' }}
     {{ item.name }}

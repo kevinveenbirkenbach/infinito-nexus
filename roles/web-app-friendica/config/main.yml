@@ -1,5 +1,3 @@
-images:
-  friendica:          "friendica:latest"
 server:
   domains:
     canonical:
@@ -19,6 +17,9 @@ addons:
   ldapauth: {}
 docker:
   services:
+    friendica:
+      image:    'friendica'
+      version:  'latest'
     oidc:
       enabled:  false
       shared:   false
@@ -26,7 +27,7 @@ docker:
       enabled:  true
     ldap:
       enabled:  true
-      shared: true
+      shared:   true
     desktop:
       enabled:  true
     matomo:

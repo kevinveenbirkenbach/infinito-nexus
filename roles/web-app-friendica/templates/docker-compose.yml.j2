@@ -1,12 +1,12 @@
 {% include 'roles/docker-compose/templates/base.yml.j2' %}
-  application:
-    image: "{{ applications | get_app_conf(application_id, 'images.friendica', True) }}"
-    container_name: "{{ friendica_container }}"
+  {{ FRIENDICA_SERVICE }}:
+    image: "{{ FRIENDICA_IMAGE }}:{{ FRIENDICA_VERSION }}"
+    container_name: "{{ FRIENDICA_CONTAINER }}"
     {% include 'roles/docker-container/templates/base.yml.j2' %}
     volumes:
-      - html:{{ friendica_application_base }}
+      - html:{{ FRIENDICA_APPLICATION_DIR }}
       - data:/var/www/data # I assume that this one is unnessecarry
-      - {{ friendica_host_ldap_config }}:{{ friendica_docker_ldap_config }}:ro 
+      - {{ FRIENDICA_LDAP_CONFIG_HOST }}:{{ FRIENDICA_LDAP_CONFIG_DOCKER }}:ro 
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
 
