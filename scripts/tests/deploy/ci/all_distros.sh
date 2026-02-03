@@ -39,6 +39,8 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
 read -r -a distro_arr <<< "${DISTROS}"
+mapfile -t distro_arr < <(printf '%s\n' "${distro_arr[@]}" | shuf)
+echo "=== Distro execution order: ${distro_arr[*]} ==="
 
 global_start="$(date +%s)"
 deadline=""
