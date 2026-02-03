@@ -66,7 +66,7 @@ jobs:
     steps:
       - run: echo "Quality Checks passed"
   
-  #Test DNS configuration
+  # Test DNS configuration
   test-dns:
     needs: 
       - build-ci-images
@@ -75,10 +75,16 @@ jobs:
     with:
       distros: "arch debian ubuntu fedora centos"
   
+  # Sync Missing Images
+  mirror-images-missing:
+    uses: ./.github/workflows/mirror-images-missing.yml
+    secrets: inherit
+
   # Priority A
   test-deploy-server:
     needs:
       - test-dns
+      - mirror-images-missing
     uses: ./.github/workflows/test-deploy-server.yml
     with:
       distros: ${{ inputs.distros }}
@@ -87,6 +93,7 @@ jobs:
   test-deploy-universal:
     needs:
       - test-dns
+      - mirror-images-missing
     uses: ./.github/workflows/test-deploy-universal.yml
     with:
       distros: ${{ inputs.distros }}
@@ -98,6 +105,7 @@ jobs:
   #     - build-ci-images
   #     - test-deploy-server
   #     - test-deploy-universal
+  #     - mirror-images-missing
   #   uses: ./.github/workflows/test-deploy-workstation.yml
   #   with:
   #     distros: ${{ inputs.distros }}

@@ -1,0 +1,137 @@
+name: Mirror Docker Hub images to GHCR
+
+on:
+  schedule:
+    # GitHub cron is UTC
+    - cron: "0 6 * * *"
+
+  workflow_dispatch:
+    inputs:
+      ghcr_namespace:
+        description: "GHCR namespace/org (default: repository owner)"
+        required: false
+        type: string
+      ghcr_prefix:
+        description: "GHCR repo prefix (default: mirror)"
+        required: false
+        default: "mirror"
+        type: string
+      repo_root:
+        description: "Repository root path (default: .)"
+        required: false
+        default: "."
+        type: string
+      images_per_hour:
+        description: "Optional throttle: max images mirrored per hour"
+        required: false
+        type: string
+
+  workflow_call:
+    inputs:
+      ghcr_namespace:
+        description: "GHCR namespace/org (default: repository owner)"
+        required: false
+        type: string
+      ghcr_prefix:
+        description: "GHCR repo prefix (default: mirror)"
+        required: false
+        type: string
+        default: "mirror"
+      repo_root:
+        description: "Repository root path (default: .)"
+        required: false
+        type: string
+        default: "."
+      images_per_hour:
+        description: "Optional throttle: max images mirrored per hour"
+        required: false
+        type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: mirror-images-${{ github.repository }}-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Mirror images (skopeo, best-effort)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    # Copy secrets into env so we can reference them in "if:" (env.* is allowed there)
+    env:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      IMAGES_PER_HOUR: ${{ github.event.inputs.images_per_hour || inputs.images_per_hour || '50' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install PyYAML
+
+      - name: Install skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
+
+      # Optional: Docker Hub login to avoid rate limits while mirroring
+      - name: Login to Docker Hub (optional)
+        if: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Mirror images to GHCR (best-effort)
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Defaults:
+          # - Namespace defaults to repo owner (user/org), works for schedule & normal runs
+          # - Prefix defaults to "mirror"
+          # - Repo root defaults to "."
+          GHCR_NAMESPACE="${{ inputs.ghcr_namespace || github.repository_owner }}"
+          GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
+          REPO_ROOT="${{ inputs.repo_root || '.' }}"
+
+          echo ">>> Mirror namespace: ${GHCR_NAMESPACE}"
+          echo ">>> Mirror prefix:    ${GHCR_PREFIX}"
+          echo ">>> Repo root:        ${REPO_ROOT}"
+
+          EXTRA_ARGS=()
+          if [ -n "${IMAGES_PER_HOUR}" ]; then
+            EXTRA_ARGS+=( --images-per-hour "${IMAGES_PER_HOUR}" )
+          fi
+
+          python -m cli.mirror.sync \
+            --repo-root "${REPO_ROOT}" \
+            --ghcr-namespace "${GHCR_NAMESPACE}" \
+            --ghcr-prefix "${GHCR_PREFIX}" \
+            "${EXTRA_ARGS[@]}"
+
+          echo ">>> Mirror sync finished."

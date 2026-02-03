@@ -56,6 +56,11 @@ def main() -> int:
     parser.add_argument("--ghcr-namespace", required=True)
     parser.add_argument("--ghcr-prefix", default="mirror")
     parser.add_argument(
+        "--only-missing",
+        action="store_true",
+        help="Mirror only images that do not exist in the destination registry.",
+    )
+    parser.add_argument(
         "--images-per-hour",
         type=_validate_positive_int,
         default=None,
@@ -84,8 +89,17 @@ def main() -> int:
         label = f"{img.role}:{img.service} ({img.name}:{img.version})"
 
         try:
+            if args.only_missing:
+                if provider.tag_exists(img):
+                    print(
+                        f"[mirror] {label}: destination exists, skipping ({dest})",
+                        flush=True,
+                    )
+                    continue
+
             print(f"[mirror] {label}: {src} -> {dest}", flush=True)
             provider.mirror(img)
+
         except subprocess.CalledProcessError as e:
             # keep going, but remember the failure
             msg = (

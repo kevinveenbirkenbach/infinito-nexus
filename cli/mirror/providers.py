@@ -15,6 +15,9 @@ class RegistryProvider(ABC):
     @abstractmethod
     def mirror(self, image: ImageRef) -> None: ...
 
+    @abstractmethod
+    def tag_exists(self, image: ImageRef) -> bool: ...
+
 
 class GHCRProvider(RegistryProvider):
     def __init__(self, namespace: str, prefix: str = "mirror") -> None:
@@ -24,6 +27,24 @@ class GHCRProvider(RegistryProvider):
     def image_base(self, image: ImageRef) -> str:
         mapped = image.name.replace("/", "-")
         return f"ghcr.io/{self.namespace}/{self.prefix}/{mapped}"
+
+    def tag_exists(self, image: ImageRef) -> bool:
+        """
+        Return True if the destination tag already exists in GHCR.
+
+        Uses: skopeo inspect docker://<dest>
+        Exit code:
+          - 0 => exists
+          - !=0 => does not exist OR cannot be accessed (auth/network)
+        """
+        dest = f"{self.image_base(image)}:{image.version}"
+        r = subprocess.run(
+            ["skopeo", "inspect", f"docker://{dest}"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        return r.returncode == 0
 
     def _run_copy(self, *, src: str, dest: str, extra: List[str] | None = None) -> None:
         cmd = [
@@ -98,6 +119,24 @@ class GiteaProvider(RegistryProvider):
     def image_base(self, image: ImageRef) -> str:
         mapped = image.name.replace("/", "-")
         return f"{self.registry}/{self.namespace}/{self.prefix}/{mapped}"
+
+    def tag_exists(self, image: ImageRef) -> bool:
+        """
+        Return True if the destination tag already exists in the target registry.
+
+        Uses: skopeo inspect docker://<dest>
+        Exit code:
+          - 0 => exists
+          - !=0 => does not exist OR cannot be accessed (auth/network)
+        """
+        dest = f"{self.image_base(image)}:{image.version}"
+        r = subprocess.run(
+            ["skopeo", "inspect", f"docker://{dest}"],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        return r.returncode == 0
 
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
