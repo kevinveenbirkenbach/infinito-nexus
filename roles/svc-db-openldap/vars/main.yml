@@ -16,13 +16,13 @@ OPENLDAP_LDIF_TYPES:
   - groups
 
 # Container
-OPENLDAP_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.openldap.name') }}"
-# OPENLDAP_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.openldap.image') }}"
-# OPENLDAP_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.openldap.version') }}"
+OPENLDAP_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
+OPENLDAP_IMAGE:                 "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+OPENLDAP_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 OPENLDAP_VOLUME:                "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 OPENLDAP_NETWORK:               "{{ applications | get_app_conf(application_id, 'docker.network') }}"
 OPENLDAP_SERVICE:               "{{ entity_name }}"
-
+OPENLDAP_IMAGE_CUSTOM:          "infinito/openldap:local"
 OPENLDAP_BIND_DN:               "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
 OPENLDAP_BIND_PW:               "{{ LDAP.BIND_CREDENTIAL }}"
 

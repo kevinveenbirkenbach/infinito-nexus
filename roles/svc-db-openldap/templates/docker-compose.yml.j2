@@ -5,7 +5,7 @@
     build:
       context: "."
       dockerfile: Dockerfile
-    image: "infinito/openldap:local"
+    image: "{{ OPENLDAP_IMAGE_CUSTOM }}"
     container_name: "{{ OPENLDAP_CONTAINER }}"
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 
