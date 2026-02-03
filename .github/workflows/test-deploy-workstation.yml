@@ -88,19 +88,3 @@ jobs:
           export DISTROS="${DISTROS}"
           export APP="${APP}"
           make ci-deploy-app
-
-      - name: Show last 200 log lines on failure
-        if: failure()
-        shell: bash
-        run: |
-          scripts/meta/log-tail.sh logs 200
-
-
-      - name: Upload deploy logs
-        if: ${{ always() && env.ACT != 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: deploy-logs-workstation-${{ matrix.app }}
-          path: logs/
-          if-no-files-found: warn
-          retention-days: 14
