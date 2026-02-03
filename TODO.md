@@ -7,3 +7,4 @@
 # Testing
 - re-run witrh different credentials/configuration
 - run over all distros for each app
+- msg: can not use content with a dir as dest[0m for nginx multi distro
