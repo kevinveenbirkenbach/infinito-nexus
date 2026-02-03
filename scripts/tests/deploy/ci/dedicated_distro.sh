@@ -70,9 +70,10 @@ cleanup() {
   echo ">>> HARD cleanup (containers/volumes/networks), keeping images"
 
   # 1) Remove ALL containers (including running ones)
-  ids="$(docker ps -aq || true)"
-  if [[ -n "${ids}" ]]; then
-    docker rm -f ${ids} >/dev/null 2>&1 || true
+  mapfile -t ids < <(docker ps -aq || true)
+
+  if (( ${#ids[@]} > 0 )); then
+    docker rm -f "${ids[@]}" >/dev/null 2>&1 || true
   fi
 
   # 2) Remove networks (except default ones)
