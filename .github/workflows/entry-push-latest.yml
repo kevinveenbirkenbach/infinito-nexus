@@ -15,22 +15,25 @@ permissions:
   security-events: write
 
 jobs:
-  shuffle-distros:
+  pick-distro:
+    name: 🎲 Pick random distro
     runs-on: ubuntu-latest
     outputs:
-      distros: ${{ steps.shuffle.outputs.distros }}
+      distro: ${{ steps.pick.outputs.distro }}
     steps:
-      - id: shuffle
+      - id: pick
         shell: bash
         run: |
           set -euo pipefail
           distros=(arch debian ubuntu fedora centos)
-          shuffled=$(printf "%s\n" "${distros[@]}" | shuf | tr '\n' ' ')
-          echo "distros=${shuffled% }" >> "$GITHUB_OUTPUT"
+          one="$(printf "%s\n" "${distros[@]}" | shuf -n 1)"
+          echo "distro=${one}" >> "$GITHUB_OUTPUT"
+          echo "=== Picked distro: ${one} ==="
 
   ci-orchestrator:
-    needs: shuffle-distros
+    name: 🎶 Orchestra CI/CD
+    needs: pick-distro
     uses: ./.github/workflows/ci-orchestrator.yml
     with:
-      # Shuffle order across the 5 distros on every run
-      distros: ${{ needs.shuffle-distros.outputs.distros }}
+      # ci-orchestrator expects a space-separated list → give it exactly one
+      distros: ${{ needs.pick-distro.outputs.distro }}
