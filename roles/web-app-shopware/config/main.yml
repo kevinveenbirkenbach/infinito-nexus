@@ -37,9 +37,13 @@ docker:
       mem_limit: 2g
 
     shopware:
-      image: "shopware/production"
-      version: "6.7.3.1"
-    
+      # Docker Image
+      image: "composer"
+      version: "2.7"
+      # Shopware Release
+      package:
+        name: "shopware/production"
+        version: "6.7.3.1"
     php:
       image: "ghcr.io/shopware/docker-base"
       version: "8.3"

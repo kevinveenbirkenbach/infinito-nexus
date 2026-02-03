@@ -9,13 +9,13 @@
 ############################
 # Stage 1: Builder
 ############################
-FROM composer:2.7 AS builder
+FROM {{ SHOPWARE_CONTAINER_IMAGE }}:{{ SHOPWARE_CONTAINER_VERSION }} AS builder
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_NO_INTERACTION=1 \
     COMPOSER_PROCESS_TIMEOUT=900
 
 WORKDIR /app
-ARG SHOPWARE_PROD_VERSION="{{ SHOPWARE_IMAGE }}:{{ SHOPWARE_VERSION }}"
+ARG SHOPWARE_PROD_VERSION="{{ SHOPWARE_PKG_NAME }}:{{ SHOPWARE_PKG_VERSION }}"
 
 # 1) Scaffold project without installing dependencies
 RUN set -eux; \
