@@ -15,8 +15,22 @@ permissions:
   security-events: write
 
 jobs:
+  shuffle-distros:
+    runs-on: ubuntu-latest
+    outputs:
+      distros: ${{ steps.shuffle.outputs.distros }}
+    steps:
+      - id: shuffle
+        shell: bash
+        run: |
+          set -euo pipefail
+          distros=(arch debian ubuntu fedora centos)
+          shuffled=$(printf "%s\n" "${distros[@]}" | shuf | tr '\n' ' ')
+          echo "distros=${shuffled% }" >> "$GITHUB_OUTPUT"
+
   ci-orchestrator:
+    needs: shuffle-distros
     uses: ./.github/workflows/ci-orchestrator.yml
     with:
-      # Speed up tests by just using arch
-      distros: "arch"
+      # Shuffle order across the 5 distros on every run
+      distros: ${{ needs.shuffle-distros.outputs.distros }}
