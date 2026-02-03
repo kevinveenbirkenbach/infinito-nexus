@@ -1,7 +1,7 @@
 ---
 # run_once_sys_stk_front_proxy: deactivated
 
-- name: Bootstrap Frontend Nase
+- name: Bootstrap Frontend Base
   ansible.builtin.include_role:
     name: sys-stk-front-base
 
