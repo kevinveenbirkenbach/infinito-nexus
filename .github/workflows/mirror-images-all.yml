@@ -63,7 +63,6 @@ jobs:
   sync:
     name: Mirror images (skopeo, best-effort)
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     # Copy secrets into env so we can reference them in "if:" (env.* is allowed there)
     env:
@@ -106,7 +105,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Mirror images to GHCR (best-effort)
-        continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
