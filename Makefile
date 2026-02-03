@@ -68,24 +68,24 @@ clean-sudo:
 	sudo git clean -fdX;
 
 docker-restart:
-	@$(PYTHON) -m cli.deploy.development restart --distro "$(INFINITO_DISTRO)"
+	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
 docker-up: install
-	@$(PYTHON) -m cli.deploy.development up
+	@"$${PYTHON}" -m cli.deploy.development up
 
 docker-down:
-	@$(PYTHON) -m cli.deploy.development down
+	@"$${PYTHON}" -m cli.deploy.development down
 
 docker-stop:
-	@$(PYTHON) -m cli.deploy.development stop
+	@"$${PYTHON}" -m cli.deploy.development stop
 
 list:
 	@echo "Generating the roles list"
-	@$(PYTHON) -m cli.build.roles_list
+	@"$${PYTHON}" -m cli.build.roles_list
 
 tree:
 	@echo "Generating Tree"
-	@$(PYTHON) -m cli.build.tree -D 2
+	@"$${PYTHON}" -m cli.build.tree -D 2
 
 mig: list tree
 	@echo "Creating meta data for meta infinity graph"
@@ -103,10 +103,10 @@ build-no-cache:
 	@bash scripts/build/image.sh --no-cache
 
 build-no-cache-all:
-	@set -e; \
-	for d in $(DISTROS); do \
+	@set -euo pipefail; \
+	for d in $${DISTROS}; do \
 	  echo "=== build-no-cache: $$d ==="; \
-	  INFINITO_DISTRO="$$d" $(MAKE) build-no-cache; \
+	  INFINITO_DISTRO="$$d" "$(MAKE)" build-no-cache; \
 	done
 
 dockerignore:
@@ -116,14 +116,10 @@ dockerignore:
 
 install-ansible:
 	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
-	PYTHON="$(PYTHON)" \
 	bash scripts/install/ansible.sh
 
 install-venv:
-	@VENV="$(VENV)" \
-	VENV_BASE="$(VENV_BASE)" \
-	PYTHON="$(PYTHON)" \
-	bash scripts/install/venv.sh
+	@bash scripts/install/venv.sh
 
 install-python: install-venv
 	@bash scripts/install/python.sh
@@ -170,7 +166,7 @@ ci-deploy-discover:
 	@PYTHON=python3 ./scripts/meta/build-test-matrix.sh
 
 ci-deploy-app:
-	export MISSING_ONLY=true; \
+	@export MISSING_ONLY=true; \
 	export MAX_TOTAL_SECONDS=19800; \
 	./scripts/tests/deploy/ci/all_distros.sh
 
@@ -213,7 +209,7 @@ test-local-rapid:
 test-local-rapid-fresh: test-local-cleanup test-local-rapid
 
 test-local-full:
-	@echo "=== local full deploy (type=$(TEST_DEPLOY_TYPE), distro=$(INFINITO_DISTRO)) ==="
+	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
 	@bash scripts/tests/deploy/local/all.sh
 
 # Backwards compatible target (kept)
