@@ -21,7 +21,7 @@ on:
         description: "Optional throttle: max images mirrored per hour"
         required: false
         type: string
-        default: "50"
+        default: ""
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -46,7 +46,7 @@ jobs:
     env:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-      IMAGES_PER_HOUR: ${{ inputs.images_per_hour || '50' }}
+      IMAGES_PER_HOUR: ${{ inputs.images_per_hour || '' }}
 
     steps:
       - name: Checkout
