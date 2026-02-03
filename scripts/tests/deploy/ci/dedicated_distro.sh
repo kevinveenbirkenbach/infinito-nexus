@@ -24,6 +24,7 @@ PYTHON="${PYTHON:-python3}"
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (e.g. arch)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set}"
+: "${INFINITO_DOCKER_VOLUME:?INFINITO_DOCKER_VOLUME must be set}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
@@ -84,6 +85,15 @@ cleanup() {
 
   # 4) Optional: leftover stopped containers (usually redundant after rm -f)
   docker container prune -f >/dev/null 2>&1 || true
+
+  # 5) Remove host-mounted Docker data dir (CI runner only)
+  if [[ -n "${INFINITO_DOCKER_VOLUME:-}" ]]; then
+    if [[ "${INFINITO_DOCKER_VOLUME}" == /* ]]; then
+      echo ">>> Removing host docker volume dir: ${INFINITO_DOCKER_VOLUME}"
+      rm -rvf "${INFINITO_DOCKER_VOLUME}" || true
+      mkdir -vp "${INFINITO_DOCKER_VOLUME}" || true
+    fi
+  fi
 
   echo ">>> HARD cleanup finished"
   return $rc
