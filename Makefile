@@ -191,16 +191,18 @@ test-act-app:
 
 test-local-reset:
 	@PYTHON=python3 \
-	bash scripts/tests/deploy/local/reset.sh
+	bash scripts/tests/deploy/local/utils/reset.sh
 
 test-local-run-all:
 	@bash scripts/tests/deploy/local/run-all.sh
 
 test-local-cleanup:
-	@bash scripts/tests/deploy/local/cleanup.sh
+	@bash scripts/tests/deploy/local/utils/purge/entity.sh
+	@bash scripts/tests/deploy/local/utils/purge/web.sh
+	@bash scripts/tests/deploy/local/utils/purge/lib.sh
 
-test-local-web-purge:
-	@bash scripts/tests/deploy/local/purge_web.sh
+test-local-dedicated: test-local-cleanup
+	@bash scripts/tests/deploy/local/dedicated_distro.sh
 
 test-local-rapid:
 	@DEBUG=true \
