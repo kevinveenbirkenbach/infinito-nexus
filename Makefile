@@ -228,6 +228,7 @@ ci-deploy-discover:
 
 ci-deploy-app:
 	export MISSING_ONLY=true; \
+	export MAX_TOTAL_SECONDS=19800; \
 	./scripts/tests/deploy/ci/all_distros.sh
 
 ci-discover-output:
