@@ -228,7 +228,7 @@ ci-deploy-discover:
 
 ci-deploy-app:
 	export MISSING_ONLY=true; \
-	./scripts/tests/deploy/ci/app.sh
+	./scripts/tests/deploy/ci/all_distros.sh
 
 ci-discover-output:
 	@set -euo pipefail; \
