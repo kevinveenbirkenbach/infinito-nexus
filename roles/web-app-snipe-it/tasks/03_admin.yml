@@ -1,20 +1,29 @@
 ---
-- name: "Check if a Snipe-IT administrator already exists"
-  ansible.builtin.shell: >
-    docker compose {{ lookup('compose_f_args', application_id) }} exec -T
-    -e APP_KEY="{{ SNIPE_IT_APP_KEY }}"
-    {{ SNIPE_IT_SERVICE }}
-    php -r '
-      require "vendor/autoload.php";
-      $app = require "bootstrap/app.php";
-      $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-      exit(
-        \App\Models\User::where("is_admin", 1)->count() > 0 ? 0 : 1
-      );
-    '
-  args:
-    chdir: "{{ docker_compose.directories.instance }}"
-  register: snipeit_admin_exists
+- name: "Check if Snipe-IT admin user already exists (by username)"
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - -f
+      - /opt/docker/snipe-it/docker-compose.yml
+      - -f
+      - /opt/docker/snipe-it/docker-compose.ca.override.yml
+      - exec
+      - -T
+      - -e
+      - "APP_KEY={{ snipe_it_app_key }}"
+      - snipe-it
+      - php
+      - -r
+      - |
+        require "vendor/autoload.php";
+        $app = require "bootstrap/app.php";
+        $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+        $exists = \App\Models\User::where("username", "{{ snipe_it_admin_username }}")
+          ->whereNull("deleted_at")
+          ->exists();
+        exit($exists ? 0 : 1);
+  register: snipe_it_admin_exists
   changed_when: false
   failed_when: false
 
