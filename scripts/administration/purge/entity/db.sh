@@ -1,53 +1,46 @@
 #!/usr/bin/env bash
-# purge_entity.sh
+# DB purge for stacks (best effort):
+# - Tries BOTH backends: Postgres + MariaDB
+# - Detects DB name best effort from /opt/docker/<STACK>/.env/env (Keycloak style vars),
+#   otherwise falls back to DB name = <STACK>.
 #
 # Usage:
-#   ./purge_entity.sh [--wipe-data-only] <STACK1> [STACK2] [...]
+#   ./purge/entity/db.sh [--wipe-data-only] <STACK1> [STACK2] [...]
 #
-# Examples:
-#   ./purge_entity.sh keycloak openldap nextcloud
-#   ./purge_entity.sh --wipe-data-only keycloak nextcloud
-#
-# What it does per stack:
-#   - Detects DB backend (postgres/mariadb) best effort from stack env
-#   - If stack dir is missing: still tries BOTH backends by DB name (=stack name)
-#   - Without --wipe-data-only:
-#       * DROP DATABASE IF EXISTS
-#   - With --wipe-data-only:
-#       * TRUNCATE ALL TABLES (structure preserved)
-#   - docker compose down -v
-#   - removes /opt/docker/<STACK>/volumes
-#   - removes /opt/docker/<STACK>
+# Flags:
+#   --wipe-data-only  Truncate all tables (keep schema) instead of dropping the DB
 
 set -euo pipefail
 
-# ---------------------------------------------------------------------------
-# Flags
-# ---------------------------------------------------------------------------
-
 WIPE_DATA_ONLY=false
 
-if [[ "${1:-}" == "--wipe-data-only" ]]; then
-  WIPE_DATA_ONLY=true
-  shift
-fi
+while [[ "${1:-}" == --* ]]; do
+  case "${1}" in
+    --wipe-data-only) WIPE_DATA_ONLY=true; shift ;;
+    --help|-h)
+      cat <<'EOF'
+Usage:
+  purge/entity/db.sh [--wipe-data-only] <STACK1> [STACK2] [...]
+
+Flags:
+  --wipe-data-only  Truncate all tables (keep schema) instead of dropping DB
+EOF
+      exit 0
+      ;;
+    *)
+      echo "ERROR: Unknown flag: ${1}" >&2
+      exit 2
+      ;;
+  esac
+done
 
 if [[ "$#" -lt 1 ]]; then
-  echo "ERROR: No stack names provided."
-  echo "Usage: $0 [--wipe-data-only] <STACK1> [STACK2] [...]"
+  echo "ERROR: No stack names provided." >&2
   exit 2
 fi
 
-# ---------------------------------------------------------------------------
-# Logging helpers
-# ---------------------------------------------------------------------------
-
 log()  { echo ">>> $*"; }
 warn() { echo "!!! WARNING: $*" >&2; }
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
 
 env_get() {
   local env_file="$1"
@@ -65,11 +58,7 @@ env_get() {
   ' "${env_file}"
 }
 
-# Run a command but ensure it does NOT read from the current STDIN/TTY.
-# This prevents weird nested docker exec TTY behavior from aborting the script.
-run_no_stdin() {
-  "$@" </dev/null
-}
+run_no_stdin() { "$@" </dev/null; }
 
 # ---------------------------------------------------------------------------
 # PostgreSQL
@@ -78,7 +67,6 @@ run_no_stdin() {
 drop_postgres_db_best_effort() {
   local db_name="$1"
 
-  # Only attempt if container exists (best effort)
   if ! docker ps --format '{{.Names}}' | grep -qx 'postgres'; then
     warn "Postgres container 'postgres' not running — skipping Postgres DROP for '${db_name}'"
     return 0
@@ -90,7 +78,6 @@ drop_postgres_db_best_effort() {
   log "Dropping Postgres database '${db_name}' (admin db: ${admin_db})..."
 
   set +e
-  # Needs stdin for heredoc -> keep -i but still safe in subshell isolation.
   docker exec -i postgres psql -U postgres -d "${admin_db}" <<SQL
 SELECT pg_terminate_backend(pid)
 FROM pg_stat_activity
@@ -135,13 +122,12 @@ SQL
 }
 
 # ---------------------------------------------------------------------------
-# MariaDB (TTY-safe)
+# MariaDB
 # ---------------------------------------------------------------------------
 
 drop_mariadb_db_best_effort() {
   local db_name="$1"
 
-  # Only attempt if container exists (best effort)
   if ! docker ps --format '{{.Names}}' | grep -qx 'mariadb'; then
     warn "MariaDB container 'mariadb' not running — skipping MariaDB DROP for '${db_name}'"
     return 0
@@ -170,7 +156,6 @@ drop_mariadb_db_best_effort() {
   log "Dropping MariaDB database '${db_name}'..."
 
   set +e
-  # IMPORTANT: no "-i" here, and also disconnect stdin from our current TTY.
   run_no_stdin docker exec mariadb mariadb -uroot -p"${root_pw}" \
     -e "DROP DATABASE IF EXISTS \`${db_name}\`;"
   local rc=$?
@@ -203,7 +188,6 @@ truncate_mariadb_db_best_effort() {
   log "Truncating all tables in MariaDB database '${db_name}'..."
 
   set +e
-  # Generate truncates without stdin/tty involvement
   truncates="$(
     run_no_stdin docker exec mariadb mariadb -uroot -p"${root_pw}" -N -B "${db_name}" -e "
       SELECT CONCAT('TRUNCATE TABLE \`', table_name, '\`;')
@@ -212,7 +196,6 @@ truncate_mariadb_db_best_effort() {
     "
   )"
   local gen_rc=$?
-
   if [[ $gen_rc -ne 0 ]]; then
     set -e
     warn "MariaDB TRUNCATE statement generation failed for '${db_name}' (rc=${gen_rc})"
@@ -225,14 +208,10 @@ truncate_mariadb_db_best_effort() {
     echo "SET FOREIGN_KEY_CHECKS=1;"
   } | run_no_stdin docker exec -i mariadb mariadb -uroot -p"${root_pw}" "${db_name}"
   local rc=$?
-
   set -e
+
   [[ $rc -ne 0 ]] && warn "MariaDB TRUNCATE failed for '${db_name}' (rc=${rc})"
 }
-
-# ---------------------------------------------------------------------------
-# Combined DB purge helpers (try BOTH backends)
-# ---------------------------------------------------------------------------
 
 purge_db_both_backends_best_effort() {
   local db_name="$1"
@@ -247,7 +226,7 @@ purge_db_both_backends_best_effort() {
 }
 
 # ---------------------------------------------------------------------------
-# Main loop (isolated per stack)
+# Main
 # ---------------------------------------------------------------------------
 
 overall_rc=0
@@ -256,29 +235,11 @@ for STACK_NAME in "$@"; do
 (
   set -euo pipefail
 
-  echo
-  log "============================================================"
-  log "Purging stack: ${STACK_NAME}"
-  log "============================================================"
-
   STACK_DIR="/opt/docker/${STACK_NAME}"
   ENV_FILE="${STACK_DIR}/.env/env"
-  COMPOSE_FILE="${STACK_DIR}/docker-compose.yml"
 
-  # -----------------------------------------------------------------------
-  # If stack dir is missing: still try DB purge by name on BOTH backends.
-  # -----------------------------------------------------------------------
-  if [[ ! -d "${STACK_DIR}" ]]; then
-    warn "Stack dir not found: ${STACK_DIR} — attempting DB purge best effort anyway"
-    DB_NAME="${STACK_NAME}"
-    log "Fallback DB purge: trying BOTH backends | DB name: ${DB_NAME}"
-    purge_db_both_backends_best_effort "${DB_NAME}"
-    log "Stack '${STACK_NAME}' (dir missing) processed."
-    exit 0
-  fi
-
-  DB_BACKEND=""
   DB_NAME="${STACK_NAME}"
+  DB_BACKEND="" # informational only
 
   if [[ -f "${ENV_FILE}" ]]; then
     KC_DB="$(env_get "${ENV_FILE}" KC_DB || true)"
@@ -289,7 +250,7 @@ for STACK_NAME in "$@"; do
       echo "${KC_DB}" | grep -qi mariadb  && DB_BACKEND="mariadb"  || true
     fi
 
-    if [[ -z "${DB_BACKEND}" && -n "${KC_DB_URL}" ]]; then
+    if [[ -n "${KC_DB_URL}" ]]; then
       echo "${KC_DB_URL}" | grep -qi postgresql && DB_BACKEND="postgres" || true
       echo "${KC_DB_URL}" | grep -qi mariadb   && DB_BACKEND="mariadb"  || true
       DB_NAME="$(echo "${KC_DB_URL}" | sed -E 's|.*/([^/?#]+).*|\1|')"
@@ -302,44 +263,21 @@ for STACK_NAME in "$@"; do
       grep -qi mariadb "${ENV_FILE}" && DB_BACKEND="mariadb" || true
     fi
   else
-    warn "Env file not found — DB detection skipped"
+    warn "Env file not found (${ENV_FILE}) — DB name defaults to stack name '${DB_NAME}'"
   fi
 
-  log "Stack dir: ${STACK_DIR}"
   if [[ -n "${DB_BACKEND}" ]]; then
-    log "DB backend: ${DB_BACKEND} | DB name: ${DB_NAME}"
+    log "DB purge (informational backend=${DB_BACKEND}) | stack=${STACK_NAME} | db=${DB_NAME}"
   else
-    warn "No DB backend detected — will still try BOTH backends by DB name as best effort"
-    log "Fallback DB purge: trying BOTH backends | DB name: ${DB_NAME}"
+    log "DB purge (backend unknown; trying BOTH) | stack=${STACK_NAME} | db=${DB_NAME}"
   fi
 
-  # -----------------------------------------------------------------------
-  # Always try BOTH backends (requested). Detection is informational.
-  # -----------------------------------------------------------------------
   purge_db_both_backends_best_effort "${DB_NAME}"
-
-  if [[ -f "${COMPOSE_FILE}" ]]; then
-    log "Stopping/removing compose stack..."
-    run_no_stdin docker compose -f "${COMPOSE_FILE}" down --remove-orphans -v || true
-  else
-    warn "docker-compose.yml not found — skipping compose down"
-  fi
-
-  [[ -d "${STACK_DIR}/volumes" ]] && {
-    log "Removing volumes dir"
-    rm -rf "${STACK_DIR}/volumes"
-  }
-
-  log "Removing stack directory"
-  rm -rf "${STACK_DIR}"
-
-  log "Stack '${STACK_NAME}' purged."
 ) || {
   rc=$?
   overall_rc=1
-  warn "Stack '${STACK_NAME}' purge failed (rc=${rc}) — continuing"
+  warn "DB purge failed for '${STACK_NAME}' (rc=${rc}) — continuing"
 }
 done
 
-log "All requested stacks processed."
 exit "${overall_rc}"
