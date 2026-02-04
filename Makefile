@@ -204,7 +204,7 @@ test-local-cleanup: test-local-cleanup-entity
 	@bash scripts/tests/deploy/local/utils/purge/web.sh
 	@bash scripts/tests/deploy/local/utils/purge/lib.sh
 
-test-local-dedicated: test-local-cleanup
+test-local-dedicated: docker-down docker-up
 	@bash scripts/tests/deploy/local/dedicated_distro.sh
 
 test-local-rapid:
