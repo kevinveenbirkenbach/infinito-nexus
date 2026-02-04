@@ -15,4 +15,3 @@ TEST_E2E_WAIT_DELAY:        5
 # Run only a subset (optional)
 TEST_E2E_ONLY_ROLES:        "{{ allowed_applications }}"  # e.g. ["svc-nextcloud","svc-matrix"]
 TEST_E2E_SKIP_ROLES:        []                            # e.g. ["svc-something"]
-

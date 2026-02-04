@@ -46,4 +46,3 @@
         - mc_policy_info_raw.rc != 0
 
   when: MINIO_OIDC_ENABLED | bool
-

@@ -16,4 +16,3 @@
     mode: "0770"
     force: yes
   notify: docker compose up
-

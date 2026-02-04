@@ -36,4 +36,3 @@
 - name: "Load admin setup procedures for '{{ application_id }}''"
   include_tasks: 04_admin.yml
 
-

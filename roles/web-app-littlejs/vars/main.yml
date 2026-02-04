@@ -23,4 +23,3 @@ LITTLEJS_IMAGE_CUSTOM:      "{{ entity_name }}_custom"
 # Runner HTML for non-full examples
 LITTLEJS_RUN_HOST_ABS:      "{{ [ docker_compose.directories.volumes, 'run.html' ] | path_join }}"
 LITTLEJS_RUN_HOST_REL:      "volumes/run.html"
-

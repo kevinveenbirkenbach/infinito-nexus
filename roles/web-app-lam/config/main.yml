@@ -36,4 +36,3 @@ server:
     aliases: []
     canonical:
       - lam.{{ DOMAIN_PRIMARY }}
-
