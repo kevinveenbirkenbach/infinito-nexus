@@ -39,6 +39,12 @@ echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
   --distro "${INFINITO_DISTRO}" \
   --when-down
 
+docker exec -it "${INFINITO_CONTAINER}" bash -lc "
+  set -euo pipefail
+  echo \">>> Running entry.sh\"
+  /opt/src/infinito/scripts/docker/entry.sh true
+"
+
 deploy_args=(
   --distro "${INFINITO_DISTRO}"
   --type "${TEST_DEPLOY_TYPE}"
