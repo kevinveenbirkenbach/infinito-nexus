@@ -197,6 +197,7 @@ test-local-run-all:
 	@bash scripts/tests/deploy/local/run-all.sh
 
 test-local-cleanup:
+	@bash scripts/tests/deploy/local/utils/purge/inventory.sh
 	@bash scripts/tests/deploy/local/utils/purge/entity.sh
 	@bash scripts/tests/deploy/local/utils/purge/web.sh
 	@bash scripts/tests/deploy/local/utils/purge/lib.sh
