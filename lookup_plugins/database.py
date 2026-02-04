@@ -24,6 +24,7 @@ class LookupModule(LookupBase):
           applications, ports, PATH_DOCKER_COMPOSE_INSTANCES
 
     Output keys (no prefixes):
+      id,
       enabled, shared,
       type, name, instance, host, container, username, password, port, env,
       url_jdbc, url_full, volume, image, version, reach_host
@@ -55,7 +56,6 @@ class LookupModule(LookupBase):
 
         consumer_entity = get_entity_name(consumer_id)
 
-        # New: enabled/shared flags (kept simple & non-strict)
         enabled = bool(
             get_app_conf(
                 applications,
@@ -87,6 +87,7 @@ class LookupModule(LookupBase):
         # If no dbtype configured: keep behavior similar to your vars (mostly empty)
         if not dbtype:
             resolved = {
+                "id": "",
                 "enabled": enabled,
                 "shared": shared,
                 "type": "",
@@ -172,6 +173,7 @@ class LookupModule(LookupBase):
         volume = f"{volume_prefix}{host}"
 
         resolved = {
+            "id": db_id,
             "enabled": enabled,
             "shared": shared,
             "type": dbtype,

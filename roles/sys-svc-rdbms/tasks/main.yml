@@ -20,7 +20,7 @@
   # This is the behaviour which I want, but I'm still wondering why ;) --> seems not anymore
   include_tasks: "utils/load_app.yml"
   vars:
-    load_app_id:                "svc-db-{{ lookup('database', application_id, want='type') }}"
+    load_app_id:                "{{ lookup('database', application_id, want='id') }}"
     database_init:              true  # Initialize a custom database for the application
     docker_git_repository_pull: false # Deactivated here to don't inhire the variable
     database_consumer_id:       "{{ database_consumer_id_passed }}"

@@ -27,9 +27,7 @@ class _DummyTemplar:
 class DatabaseLookupTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.db_lookup_mod = _load_module(
-            "lookup_plugins/database.py", "lookup_database"
-        )
+        cls.db_lookup_mod = _load_module("lookup_plugins/database.py", "lookup_database")
 
     def _make_lookup(self, available_vars: dict):
         lm = self.db_lookup_mod.LookupModule()
@@ -80,6 +78,9 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertFalse(out["enabled"])
         self.assertFalse(out["shared"])
 
+        # id should be empty when dbtype is empty
+        self.assertEqual(out.get("id", ""), "")
+
         # Mirrors the "if _dbtype else '' / False" branches from your vars
         self.assertEqual(out["type"], "")
         self.assertEqual(out["name"], "foo")
@@ -112,9 +113,7 @@ class DatabaseLookupTests(unittest.TestCase):
             # Central DB role config (used only for defaults like version; name not used if shared=false)
             "svc-db-postgres": {
                 "docker": {
-                    "services": {
-                        "postgres": {"name": "postgres-central", "version": "16"}
-                    }
+                    "services": {"postgres": {"name": "postgres-central", "version": "16"}}
                 }
             },
         }
@@ -138,49 +137,24 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertTrue(out["enabled"])
         self.assertFalse(out["shared"])
 
-        # ---- Helper-variable equivalence checks (no database_ prefix in lookup output) ----
-        # database_type
-        self.assertEqual(out["type"], "postgres")
+        # id should be present
+        self.assertEqual(out["id"], "svc-db-postgres")
 
-        # database_name, database_username: entity name of consumer
+        # ---- Helper-variable equivalence checks (no database_ prefix in lookup output) ----
+        self.assertEqual(out["type"], "postgres")
         self.assertEqual(out["name"], "foo")
         self.assertEqual(out["username"], "foo")
-
-        # database_host = 'database' (since shared is false)
         self.assertEqual(out["host"], "database")
-
-        # database_container = "<entity>-database"
         self.assertEqual(out["container"], "foo-database")
-
-        # database_password from credentials
         self.assertEqual(out["password"], "pw")
-
-        # database_port = ports.localhost.database[svc-db-postgres]
         self.assertEqual(out["port"], "5432")
-
-        # database_env = docker_compose.directories.env + type + ".env"
-        # docker_compose.directories.env is derived from PATH_DOCKER_COMPOSE_INSTANCES + entity + "/.env/"
         self.assertEqual(out["env"], "/opt/docker/foo/.env/postgres.env")
-
-        # database_url_jdbc: jdbc:postgresql://host:port/name (postgres maps to postgresql)
         self.assertEqual(out["url_jdbc"], "jdbc:postgresql://database:5432/foo")
-
-        # database_url_full
         self.assertEqual(out["url_full"], "postgres://foo:pw@database:5432/foo")
-
-        # database_volume: "<entity>_" + host  (since not shared)
         self.assertEqual(out["volume"], "foo_database")
-
-        # database_image = _dbtype
         self.assertEqual(out["image"], "postgres")
-
-        # database_version: fallback to _database_default_version (svc-db-postgres docker.services.postgres.version)
         self.assertEqual(out["version"], "16")
-
-        # reach host constant
         self.assertEqual(out["reach_host"], "127.0.0.1")
-
-        # database_instance = name (since not shared)
         self.assertEqual(out["instance"], "foo")
 
     def test_postgres_shared_uses_central_name_for_host_instance_container_volume(self):
@@ -199,9 +173,7 @@ class DatabaseLookupTests(unittest.TestCase):
             },
             "svc-db-postgres": {
                 "docker": {
-                    "services": {
-                        "postgres": {"name": "postgres-central", "version": "16"}
-                    }
+                    "services": {"postgres": {"name": "postgres-central", "version": "16"}}
                 }
             },
         }
@@ -224,6 +196,9 @@ class DatabaseLookupTests(unittest.TestCase):
         # enabled/shared surfaced
         self.assertTrue(out["enabled"])
         self.assertTrue(out["shared"])
+
+        # id should be present
+        self.assertEqual(out["id"], "svc-db-postgres")
 
         # database_host/database_instance = central name
         self.assertEqual(out["host"], "postgres-central")
@@ -255,9 +230,7 @@ class DatabaseLookupTests(unittest.TestCase):
             },
             "svc-db-mariadb": {
                 "docker": {
-                    "services": {
-                        "mariadb": {"name": "mariadb-central", "version": "11.4"}
-                    }
+                    "services": {"mariadb": {"name": "mariadb-central", "version": "11.4"}}
                 }
             },
         }
@@ -280,12 +253,13 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertTrue(out["enabled"])
         self.assertFalse(out["shared"])
 
+        # id should be present
+        self.assertEqual(out["id"], "svc-db-mariadb")
+
         self.assertEqual(out["type"], "mariadb")
         self.assertEqual(out["host"], "database")
         self.assertEqual(out["port"], "3306")
         self.assertEqual(out["env"], "/opt/docker/foo/.env/mariadb.env")
-
-        # jdbc scheme is mariadb (special case)
         self.assertEqual(out["url_jdbc"], "jdbc:mariadb://database:3306/foo")
         self.assertEqual(out["url_full"], "mariadb://foo:pw@database:3306/foo")
 
@@ -306,9 +280,7 @@ class DatabaseLookupTests(unittest.TestCase):
             },
             "svc-db-postgres": {
                 "docker": {
-                    "services": {
-                        "postgres": {"name": "postgres-central", "version": "16"}
-                    }
+                    "services": {"postgres": {"name": "postgres-central", "version": "16"}}
                 }
             },
         }
@@ -332,8 +304,10 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertTrue(out["enabled"])
         self.assertFalse(out["shared"])
 
+        # id should be present
+        self.assertEqual(out["id"], "svc-db-postgres")
+
         # consumer override should win:
-        # database_version = get_app_conf(consumer_id, 'docker.services.database.version', False, default_version)
         self.assertEqual(out["version"], "15")
 
 
