@@ -3,10 +3,7 @@
     database_consumer_id_passed: "{{ application_id }}"
 
 - name: "For '{{ application_id }}': Load database variables"
-  include_vars: "{{ item }}"
-  loop:
-    - "{{ DOCKER_VARS_FILE }}"    # Important to load docker variables first so that database can use them
-    - "{{ DATABASE_VARS_FILE }}"  # Important to load them before docker role so that backup can use them
+  include_vars: "{{ DOCKER_VARS_FILE }}" # Important to load docker variables first so that database can use them
   vars:
     database_consumer_id: "{{ database_consumer_id_passed }}"
 

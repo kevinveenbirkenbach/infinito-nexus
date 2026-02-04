@@ -1,6 +1,3 @@
-- name: "load variables from {{ DATABASE_VARS_FILE }}"
-  include_vars: "{{ DATABASE_VARS_FILE }}"
-
 - name: "loading database configuration variables"
   include_vars:
     file: "{{ role_path }}/vars/db_config.yml"
