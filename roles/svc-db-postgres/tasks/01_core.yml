@@ -1,3 +1,5 @@
+- include_tasks: utils/once/flag.yml
+
 - name: Compute average allowed connections per Postgres app (once)
   set_fact:
     POSTGRES_ALLOWED_AVG_CONNECTIONS: "{{ (POSTGRES_MAX_CONNECTIONS | split_postgres_connections(playbook_dir ~ '/roles')) | int }}"
@@ -53,5 +55,3 @@
   failed_when: >
     postgres_pw_result.rc != 0 or
     postgres_pw_result.stdout is search('\\[FAIL\\]')
-
-- include_tasks: utils/once/flag.yml

@@ -8,7 +8,7 @@
       path: "{{ docker_compose.directories.env }}"
       state: directory
       mode: "0755"
-  - name: "For '{{ application_id }}': Create {{ database_env }}"
+  - name: "For '{{ application_id }}/{{ database_consumer_id }}': Create {{ database_env }}"
     template:
       src: "env/{{ database_type }}.env.j2"
       dest: "{{ database_env }}"
@@ -23,7 +23,9 @@
     load_app_id:                "svc-db-{{ database_type }}"
     database_init:              true  # Initialize a custom database for the application
     docker_git_repository_pull: false # Deactivated here to don't inhire the variable
+    database_consumer_id:       "{{ database_consumer_id_passed }}"
   when: SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool
 
 - name: "For '{{ application_id }}': Add Entry for Backup Procedure"
   include_tasks: "{{ playbook_dir }}/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"
+ 

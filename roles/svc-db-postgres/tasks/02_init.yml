@@ -1,9 +1,9 @@
 ---
-- name: "Assert application_id restored"
+- name: "Assert correct context"
   ansible.builtin.assert:
     that:
       - application_id == 'svc-db-postgres'
-  when: MODE_ASSERT | bool
+      - database_consumer_id != 'svc-db-postgres'
 
 - name: Wait until postgres TCP auth works
   block:

@@ -1,5 +1,3 @@
-import os
-import re
 import unittest
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
@@ -38,7 +36,17 @@ def _iter_task_dicts(obj: Any) -> Iterable[Dict[str, Any]]:
             yield from _iter_task_dicts(item)
     elif isinstance(obj, dict):
         # A task dict itself
-        if any(k in obj for k in ("name", "set_fact", "ansible.builtin.set_fact", "block", "rescue", "always")):
+        if any(
+            k in obj
+            for k in (
+                "name",
+                "set_fact",
+                "ansible.builtin.set_fact",
+                "block",
+                "rescue",
+                "always",
+            )
+        ):
             yield obj
 
         # Recurse into known nesting constructs
@@ -54,7 +62,9 @@ def _is_set_fact_task(task: Dict[str, Any]) -> bool:
 def _get_set_fact_mapping(task: Dict[str, Any]) -> Dict[str, Any]:
     if "set_fact" in task and isinstance(task["set_fact"], dict):
         return task["set_fact"]
-    if "ansible.builtin.set_fact" in task and isinstance(task["ansible.builtin.set_fact"], dict):
+    if "ansible.builtin.set_fact" in task and isinstance(
+        task["ansible.builtin.set_fact"], dict
+    ):
         return task["ansible.builtin.set_fact"]
     return {}
 
@@ -85,7 +95,9 @@ def _looks_dynamic(varname: str) -> bool:
     """
     Ignore non-literal variable keys (very rare, but defensive).
     """
-    return any(x in varname for x in ("{{", "}}", "[", "]", "(", ")", "|", "lookup(", "query("))
+    return any(
+        x in varname for x in ("{{", "}}", "[", "]", "(", ")", "|", "lookup(", "query(")
+    )
 
 
 def _collect_defined_facts(task_files: List[Path]) -> Dict[str, Set[Path]]:
@@ -191,7 +203,9 @@ class TestFactsAreNotOverriddenByVars(unittest.TestCase):
                 continue
             offenders = override_index[fact_name]
 
-            fact_locations = ", ".join(sorted(str(fp.relative_to(repo_root)) for fp in fact_paths))
+            fact_locations = ", ".join(
+                sorted(str(fp.relative_to(repo_root)) for fp in fact_paths)
+            )
             offender_lines = "\n".join(
                 f"    - {op.relative_to(repo_root)} :: task={tname!r}"
                 for op, tname in offenders
@@ -206,7 +220,7 @@ class TestFactsAreNotOverriddenByVars(unittest.TestCase):
                 "Found facts that are overridden via vars: on include/import tasks/roles.\n\n"
                 + "\n\n".join(violations)
                 + "\n\nFix idea: rename the include-time var (e.g. prefix with _ or ctx_), "
-                  "or stop passing the fact name via vars:, or stop using set_fact for context variables."
+                "or stop passing the fact name via vars:, or stop using set_fact for context variables."
             )
 
 

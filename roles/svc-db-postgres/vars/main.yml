@@ -20,7 +20,7 @@ POSTGRES_CUSTOM_IMAGE:                    "{{ entity_name }}_custom:{{ POSTGRES_
 POSTGRES_LOCAL_HOST:                      "127.0.0.1"
 POSTGRES_VECTOR_ENABLED:                  True # Required by discourse, propably in a later step it makes sense to define this as a configuration option in config/main.yml
 POSTGRES_RETRIES:                         5
-POSTGRES_EXEC_SHELL:                      "docker exec {{ POSTGRES_CONTAINER }} sh -lc" 
+POSTGRES_EXEC_SHELL:                      "docker exec -e PGPASSWORD={{ POSTGRES_PASSWORD | quote }} {{ POSTGRES_CONTAINER }} sh -lc" 
 
 ## Performance
 POSTGRES_TOTAL_RAM_MB:                    "{{ ansible_facts['memtotal_mb'] | int }}"
