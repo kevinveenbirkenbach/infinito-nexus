@@ -6,7 +6,7 @@
 - name: "DEBUG | Loading parameters"
   ansible.builtin.debug:
     msg:
-      application_id: "{{ application_id }}"
+      application_id: "{{ application_id | default('undefined') }}"
       _load_app_id:   "{{ load_app_id }}"
   when: MODE_DEBUG | bool
 
