@@ -33,7 +33,7 @@
 
 - name: "POSTGRES | Confirm SQL works (socket)"
   ansible.builtin.shell: >
-    docker exec {{ POSTGRES_CONTAINER }} sh -lc
+    docker exec --user postgres {{ POSTGRES_CONTAINER }} sh -lc
     'psql -U postgres -d postgres -Atc "SELECT 1" >/dev/null'
   register: pg_sql_ready
   retries: 30

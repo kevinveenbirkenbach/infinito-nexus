@@ -17,7 +17,7 @@
 
 - name: "For '{{ application_id }}': Create central database"
   # I don't know why this includes leads to that the application_id in vars/main.yml of the database role isn't used
-  # This is the behaviour which I want, but I'm still wondering why ;)
+  # This is the behaviour which I want, but I'm still wondering why ;) --> seems not anymore
   include_tasks: "utils/load_app.yml"
   vars:
     load_app_id:                "svc-db-{{ database_type }}"
