@@ -196,9 +196,11 @@ test-local-reset:
 test-local-run-all:
 	@bash scripts/tests/deploy/local/run-all.sh
 
-test-local-cleanup:
-	@bash scripts/tests/deploy/local/utils/purge/inventory.sh
+test-local-cleanup-entity:
 	@bash scripts/tests/deploy/local/utils/purge/entity.sh
+
+test-local-cleanup: test-local-cleanup-entity
+	@bash scripts/tests/deploy/local/utils/purge/inventory.sh
 	@bash scripts/tests/deploy/local/utils/purge/web.sh
 	@bash scripts/tests/deploy/local/utils/purge/lib.sh
 
@@ -209,7 +211,7 @@ test-local-rapid:
 	@DEBUG=true \
 	bash scripts/tests/deploy/local/rapid.sh
 
-test-local-rapid-fresh: test-local-cleanup test-local-rapid
+test-local-rapid-fresh: test-local-cleanup-entity test-local-rapid
 
 test-local-full:
 	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
