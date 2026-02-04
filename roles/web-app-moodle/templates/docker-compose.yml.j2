@@ -17,7 +17,7 @@
 
 {{ applications | compose_volumes(
     application_id,
-    database_volume=(lookup('database', application_id).volume if lookup('database', application_id).volume is defined else None),
+    database_volume=lookup('database', application_id).volume,
     extra_volumes={'code': {'name': MOODLE_VOLUME_CODE}, 'data': {'name': MOODLE_VOLUME_DATA}}
 ) }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
