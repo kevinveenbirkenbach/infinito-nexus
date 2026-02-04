@@ -1,15 +1,18 @@
 # tests/unit/filter_plugins/test_get_docker_paths.py
 import unittest
+from unittest.mock import patch
 
 
 class TestGetDockerPaths(unittest.TestCase):
     def test_get_docker_paths_uses_entity_name_and_builds_layout(self):
         import filter_plugins.get_docker_paths as m
 
-        # Patch get_entity_name to avoid dependency on module_utils during this test.
-        m.get_entity_name = lambda app_id: "myentity"
+        # After refactor, get_entity_name is used inside module_utils.docker_paths_utils
+        with patch(
+            "module_utils.docker_paths_utils.get_entity_name", lambda app_id: "myentity"
+        ):
+            out = m.get_docker_paths("web-app-anything", "/opt/docker/")
 
-        out = m.get_docker_paths("web-app-anything", "/opt/docker/")
         self.assertEqual(out["directories"]["instance"], "/opt/docker/myentity/")
         self.assertEqual(out["files"]["env"], "/opt/docker/myentity/.env/env")
         self.assertEqual(
