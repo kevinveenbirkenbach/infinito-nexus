@@ -11,7 +11,7 @@
       - exec
       - -T
       - -e
-      - "APP_KEY={{ snipe_it_app_key }}"
+      - "APP_KEY={{ SNIPE_IT_APP_KEY }}"
       - snipe-it
       - php
       - -r
@@ -19,7 +19,7 @@
         require "vendor/autoload.php";
         $app = require "bootstrap/app.php";
         $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-        $exists = \App\Models\User::where("username", "{{ snipe_it_admin_username }}")
+        $exists = \App\Models\User::where("username", "{{ users.administrator.username }}")
           ->whereNull("deleted_at")
           ->exists();
         exit($exists ? 0 : 1);
