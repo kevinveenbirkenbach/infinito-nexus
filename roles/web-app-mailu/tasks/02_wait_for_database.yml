@@ -3,8 +3,8 @@
 
     - name: "Check for Mailu DB domain table"
       ansible.builtin.command: >
-        docker exec {{ database_container }} mariadb -u {{ database_username }} -p{{ database_password }}
-        -e "SHOW TABLES FROM {{ database_name }} LIKE 'domain';"
+        docker exec {{ lookup('database', application_id, want='container') }} mariadb -u {{ lookup('database', application_id, want='username') }} -p{{ lookup('database', application_id, want='password') }}
+        -e "SHOW TABLES FROM {{ lookup('database', application_id, want='name') }} LIKE 'domain';"
       args:
         chdir: "{{ docker_compose.directories.instance }}"
       register: mailu_db_schema_check
@@ -29,7 +29,7 @@
         msg: |
           Mailu database schema was not initialized in time.
 
-          Expected table: {{ database_name }}.domain
+          Expected table: {{ lookup('database', application_id, want='name') }}.domain
 
           --- Mailu admin container logs (last 300 lines) ---
           {{ mailu_admin_logs.stdout | default('No logs available') }}

@@ -21,8 +21,8 @@
     msg: |
       Listmonk database is not reachable.
 
-      Container: {{ database_container }}
-      Database:  {{ database_name }}
+      Container: {{ lookup('database', application_id, want='container') }}
+      Database:  {{ lookup('database', application_id, want='name') }}
 
       Please ensure the shared PostgreSQL stack is running.
   when: not listmonk_db_reachable

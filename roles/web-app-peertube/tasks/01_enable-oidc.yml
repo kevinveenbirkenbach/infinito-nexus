@@ -18,11 +18,11 @@
 
 - name: "Update the settings column of the auth-openid-connect plugin"
   community.postgresql.postgresql_query:
-    db: "{{ database_name }}"
-    login_user: "{{ database_username }}"
-    login_password: "{{ database_password }}"
-    login_host: "{{ database_reach_host }}"
-    login_port: "{{ database_port }}"
+    db: "{{ lookup('database', application_id, want='name') }}"
+    login_user: "{{ lookup('database', application_id, want='username') }}"
+    login_password: "{{ lookup('database', application_id, want='password') }}"
+    login_host: "{{ lookup('database', application_id, want='reach_host') }}"
+    login_port: "{{ lookup('database', application_id, want='port') }}"
     query: |
       UPDATE public.plugin
       SET settings    = '{{ oidc_settings | to_json }}'::jsonb,

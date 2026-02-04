@@ -2,13 +2,17 @@
     networks:
 {# Central RDMS-Database Network #}
 {% if 
-  (applications | get_app_conf(application_id, 'docker.services.database.shared', False) and database_type is defined) or
+  (
+    lookup('database', application_id, want='enabled') and 
+    lookup('database', application_id, want='shared')
+  )
+  or
   application_id in ['svc-db-mariadb','svc-db-postgres']
 %}
-      {{ applications | get_app_conf('svc-db-' ~ database_type, 'docker.network') }}:
+      {{ applications | get_app_conf('svc-db-' ~ lookup('database', application_id, want='type'), 'docker.network') }}:
 {% if application_id in ['svc-db-mariadb','svc-db-postgres'] %}
           aliases:
-            - {{ database_type }}
+            - {{ lookup('database', application_id, want='type') }}
 {% endif %}
 {% endif %}
 {# Central LDAP Network #}

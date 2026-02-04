@@ -5,8 +5,8 @@ pgadmin_docker_password_file: "/pgpass"
 
 pgadmin_servers:
   - name:           "Central Postgres Database"
-    host:           "{{ database_host }}"
-    port:           "{{ database_port }}"
+    host:           "{{ lookup('database', application_id, want='host') }}"
+    port:           "{{ lookup('database', application_id, want='port') }}"
     username:       "postgres"
     maintenance_db: "postgres"
     password:       "{{ applications['svc-db-postgres'].credentials.POSTGRES_PASSWORD }}"

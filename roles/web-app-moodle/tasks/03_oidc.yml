@@ -51,7 +51,7 @@
 
 - name: Set auth = 'oidc' for all users except guest
   shell: >
-    docker exec {{ database_instance }} mariadb -u {{ database_username }} -p{{ database_password | quote }}
+    docker exec {{ lookup('database', application_id, want='instance') }} mariadb -u {{ lookup('database', application_id, want='username') }} -p{{ lookup('database', application_id, want='password') | quote }}
     -e "UPDATE moodle.mdl_user SET auth = 'oidc' WHERE username != 'guest';"
   args:
     executable: /bin/bash

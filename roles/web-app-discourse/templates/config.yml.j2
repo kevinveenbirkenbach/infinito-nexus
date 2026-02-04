@@ -1,5 +1,5 @@
 templates:
-{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False)%}
+{% if not lookup('database', application_id, want='shared')%}
   - "templates/postgres.template.yml"
 {% endif %}
   #- "templates/redis.template.yml"
@@ -75,10 +75,10 @@ env:
   {% endif %}
 
   # Database Configuration
-  DISCOURSE_DB_USERNAME: {{ database_username }}
-  DISCOURSE_DB_PASSWORD: {{ database_password }}
-  DISCOURSE_DB_HOST:     {{ database_host }}
-  DISCOURSE_DB_NAME:     {{ database_name }}
+  DISCOURSE_DB_USERNAME: {{ lookup('database', application_id, want='username') }}
+  DISCOURSE_DB_PASSWORD: {{ lookup('database', application_id, want='password') }}
+  DISCOURSE_DB_HOST:     {{ lookup('database', application_id, want='host') }}
+  DISCOURSE_DB_NAME:     {{ lookup('database', application_id, want='name') }}
 
   # Redis Configuration
   DISCOURSE_REDIS_HOST: {{ DISCOURSE_REDIS_HOST }}

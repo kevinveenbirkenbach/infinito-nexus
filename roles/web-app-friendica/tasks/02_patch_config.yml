@@ -2,10 +2,10 @@
   command: >
     docker exec --user {{ FRIENDICA_USER }} {{ FRIENDICA_CONTAINER }}
     sed -ri
-    -e "s/('hostname'\s*=>\s*')[^']*(',)/\1{{ database_host | sed_escape('/') }}:{{ database_port | sed_escape('/') }}\2/"
-    -e "s/('database'\s*=>\s*')[^']*(',)/\1{{ database_name | sed_escape('/') }}\2/"
-    -e "s/('username'\s*=>\s*')[^']*(',)/\1{{ database_username | sed_escape('/') }}\2/"
-    -e "s/('password'\s*=>\s*')[^']*(',)/\1{{ database_password | sed_escape('/') }}\2/"
+    -e "s/('hostname'\s*=>\s*')[^']*(',)/\1{{ lookup('database', application_id, want='host') | sed_escape('/') }}:{{ lookup('database', application_id, want='port') | sed_escape('/') }}\2/"
+    -e "s/('database'\s*=>\s*')[^']*(',)/\1{{ lookup('database', application_id, want='name') | sed_escape('/') }}\2/"
+    -e "s/('username'\s*=>\s*')[^']*(',)/\1{{ lookup('database', application_id, want='username') | sed_escape('/') }}\2/"
+    -e "s/('password'\s*=>\s*')[^']*(',)/\1{{ lookup('database', application_id, want='password') | sed_escape('/') }}\2/"
     -e "s#('url'\s*=>\s*')[^']*(',)#\1{{ lookup('tls_resolve', application_id, want='url.base') | sed_escape('#') }}\2#"
     {{ FRIENDICA_CONFIG_FILE }}
   notify: docker compose up

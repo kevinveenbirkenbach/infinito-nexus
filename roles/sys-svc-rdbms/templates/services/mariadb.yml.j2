@@ -1,14 +1,14 @@
 {# This template needs to be included in docker-compose.yml, which depend on a mariadb database #}
-{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False) %}
+{% if not lookup('database', application_id, want='shared') %}
 
-  {{ database_host }}:
+  {{ lookup('database', application_id, want='host') }}:
     container_name: {{ application_id | get_entity_name }}-database
     logging:
       driver: journald
-    image: {{ database_image }}:{{ database_version }}
+    image: {{ lookup('database', application_id, want='image') }}:{{ lookup('database', application_id, want='version') }}
     restart: {{ DOCKER_RESTART_POLICY }}
     env_file:
-      - {{ database_env }}
+      - {{ lookup('database', application_id, want='env') }}
     command: "--transaction-isolation=READ-COMMITTED --binlog-format=ROW"
     volumes:
       - database:/var/lib/mysql

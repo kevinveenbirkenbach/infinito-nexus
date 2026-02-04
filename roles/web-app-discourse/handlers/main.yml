@@ -8,12 +8,12 @@
   listen: recreate discourse
   
 - name: "add central database temporary to discourse network"
-  command: "docker network connect {{ DISCOURSE_NETWORK }} {{ database_container }}"
+  command: "docker network connect {{ DISCOURSE_NETWORK }} {{ lookup('database', application_id, want='container') }}"
   failed_when: >
     result.rc != 0 and
     'already exists in network' not in result.stderr
   register: result
-  when: applications | get_app_conf(application_id, 'docker.services.database.shared', False)
+  when: lookup('database', application_id, want='shared')
   listen: recreate discourse
 
 - name: rebuild discourse

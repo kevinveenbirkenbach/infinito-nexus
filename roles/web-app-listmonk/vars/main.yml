@@ -15,7 +15,7 @@ LISTMONK_PUBLIC_API_ENABLED:  "{{ applications | get_app_conf(application_id, 'p
 LISTMONK_USER_SEND:           "newsletter"
 LISTMONK_USER_BOUNCE:         "bounce"
 
-LISTMONK_EXEC_DATABASE:       "docker exec -i {{ database_container }} psql -U {{ database_username }} -d {{ database_name }}"
+LISTMONK_EXEC_DATABASE:       "docker exec -i {{ lookup('database', application_id, want='container') }} psql -U {{ lookup('database', application_id, want='username') }} -d {{ lookup('database', application_id, want='name') }}"
 LISTMONK_RUN:                 "docker compose {{ lookup('compose_f_args', application_id) }} run -T --rm application"
 
 LISTMONK_SETTINGS:

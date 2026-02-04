@@ -1,24 +1,24 @@
 - name: Update DB host
   command: >
     docker exec --user root {{ MATOMO_NAME }}
-    sed -i "s/^host *=.*/host = {{ database_host | sed_escape('/') }}/" {{ MATOMO_CONFIG }}
+    sed -i "s/^host *=.*/host = {{ lookup('database', application_id, want='host') | sed_escape('/') }}/" {{ MATOMO_CONFIG }}
   notify: docker compose up
 
 - name: Update DB name
   command: >
     docker exec --user root {{ MATOMO_NAME }}
-    sed -i "s/^dbname *=.*/dbname = {{ database_name | sed_escape('/') }}/" {{ MATOMO_CONFIG }}
+    sed -i "s/^dbname *=.*/dbname = {{ lookup('database', application_id, want='name') | sed_escape('/') }}/" {{ MATOMO_CONFIG }}
   notify: docker compose up
 
 - name: Update DB user
   command: >
     docker exec --user root {{ MATOMO_NAME }}
-    sed -i "s/^username *=.*/username = {{ database_username | sed_escape('/') }}/" {{ MATOMO_CONFIG }}
+    sed -i "s/^username *=.*/username = {{ lookup('database', application_id, want='username') | sed_escape('/') }}/" {{ MATOMO_CONFIG }}
   notify: docker compose up
 
 - name: Update DB password
   command: >
     docker exec --user root {{ MATOMO_NAME }}
-    sed -i "s/^password *=.*/password = {{ database_password | sed_escape('/') }}/" {{ MATOMO_CONFIG }}
+    sed -i "s/^password *=.*/password = {{ lookup('database', application_id, want='password') | sed_escape('/') }}/" {{ MATOMO_CONFIG }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   notify: docker compose up

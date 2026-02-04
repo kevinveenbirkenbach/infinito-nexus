@@ -6,13 +6,13 @@
       - -e
       - J_DBTYPE={{ JOOMLA_DB_CONNECTOR }}
       - -e
-      - J_DBHOST={{ database_host }}:{{ database_port }}
+      - J_DBHOST={{ lookup('database', application_id, want='host') }}:{{ lookup('database', application_id, want='port') }}
       - -e
-      - J_DBUSER={{ database_username }}
+      - J_DBUSER={{ lookup('database', application_id, want='username') }}
       - -e
-      - J_DBPASS={{ database_password }}
+      - J_DBPASS={{ lookup('database', application_id, want='password') }}
       - -e
-      - J_DBNAME={{ database_name }}
+      - J_DBNAME={{ lookup('database', application_id, want='name') }}
       - "{{ JOOMLA_CONTAINER }}"
       - php
       - -r

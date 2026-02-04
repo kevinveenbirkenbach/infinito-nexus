@@ -1,5 +1,5 @@
-{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False)%}
-      {{ database_host }}:
+{% if not lookup('database', application_id, want='shared') %}
+      {{ lookup('database', application_id, want='host') }}:
         condition: service_healthy
 {% endif %}
 {% if applications | is_docker_service_enabled(application_id, 'redis') %}

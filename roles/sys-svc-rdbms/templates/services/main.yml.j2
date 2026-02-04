@@ -1,1 +1,1 @@
-{% include 'roles/sys-svc-rdbms/templates/services/' + database_type + '.yml.j2' %}
+{% include 'roles/sys-svc-rdbms/templates/services/' + lookup('database', application_id, want='type') + '.yml.j2' %}
