@@ -83,8 +83,8 @@ defaults_networks:
       subnet: 192.168.103.48/28
     web-app-espocrm:
       subnet: 192.168.103.64/28
-    web-app-syncope:
-      subnet: 192.168.103.80/28
+    # free:
+    #   subnet: 192.168.103.80/28
     web-svc-collabora:
       subnet: 192.168.103.96/28
     web-svc-simpleicons:
