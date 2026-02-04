@@ -31,7 +31,8 @@
   include_role:
     name: docker-compose
   vars:
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers:  false
+    database_consumer_id:           "{{ database_consumer_id_passed }}"
 
 - block:
     - name: "set oauth2_proxy_application_id (Needed due to lazzy loading issue)"
