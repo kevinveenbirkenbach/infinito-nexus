@@ -52,7 +52,11 @@ class DatabaseLookupTests(unittest.TestCase):
     def test_no_dbtype_configured_returns_empty_like_vars_logic(self):
         applications = {
             "web-app-foo": {
-                "docker": {"services": {"database": {"type": "", "shared": False}}},
+                "docker": {
+                    "services": {
+                        "database": {"type": "", "enabled": False, "shared": False}
+                    }
+                },
                 "credentials": {"database_password": "pw"},
             }
         }
@@ -71,6 +75,10 @@ class DatabaseLookupTests(unittest.TestCase):
             side_effect=self._fake_get_entity_name,
         ):
             out = lookup.run(["web-app-foo"], variables=vars_)[0]
+
+        # enabled/shared are surfaced even if type is empty
+        self.assertFalse(out["enabled"])
+        self.assertFalse(out["shared"])
 
         # Mirrors the "if _dbtype else '' / False" branches from your vars
         self.assertEqual(out["type"], "")
@@ -91,7 +99,13 @@ class DatabaseLookupTests(unittest.TestCase):
         applications = {
             "web-app-foo": {
                 "docker": {
-                    "services": {"database": {"type": "postgres", "shared": False}}
+                    "services": {
+                        "database": {
+                            "type": "postgres",
+                            "enabled": True,
+                            "shared": False,
+                        }
+                    }
                 },
                 "credentials": {"database_password": "pw"},
             },
@@ -119,6 +133,10 @@ class DatabaseLookupTests(unittest.TestCase):
             side_effect=self._fake_get_entity_name,
         ):
             out = lookup.run(["web-app-foo"], variables=vars_)[0]
+
+        # enabled/shared surfaced
+        self.assertTrue(out["enabled"])
+        self.assertFalse(out["shared"])
 
         # ---- Helper-variable equivalence checks (no database_ prefix in lookup output) ----
         # database_type
@@ -169,7 +187,13 @@ class DatabaseLookupTests(unittest.TestCase):
         applications = {
             "web-app-foo": {
                 "docker": {
-                    "services": {"database": {"type": "postgres", "shared": True}}
+                    "services": {
+                        "database": {
+                            "type": "postgres",
+                            "enabled": True,
+                            "shared": True,
+                        }
+                    }
                 },
                 "credentials": {"database_password": "pw"},
             },
@@ -197,6 +221,10 @@ class DatabaseLookupTests(unittest.TestCase):
         ):
             out = lookup.run(["web-app-foo"], variables=vars_)[0]
 
+        # enabled/shared surfaced
+        self.assertTrue(out["enabled"])
+        self.assertTrue(out["shared"])
+
         # database_host/database_instance = central name
         self.assertEqual(out["host"], "postgres-central")
         self.assertEqual(out["instance"], "postgres-central")
@@ -215,7 +243,13 @@ class DatabaseLookupTests(unittest.TestCase):
         applications = {
             "web-app-foo": {
                 "docker": {
-                    "services": {"database": {"type": "mariadb", "shared": False}}
+                    "services": {
+                        "database": {
+                            "type": "mariadb",
+                            "enabled": True,
+                            "shared": False,
+                        }
+                    }
                 },
                 "credentials": {"database_password": "pw"},
             },
@@ -243,6 +277,9 @@ class DatabaseLookupTests(unittest.TestCase):
         ):
             out = lookup.run(["web-app-foo"], variables=vars_)[0]
 
+        self.assertTrue(out["enabled"])
+        self.assertFalse(out["shared"])
+
         self.assertEqual(out["type"], "mariadb")
         self.assertEqual(out["host"], "database")
         self.assertEqual(out["port"], "3306")
@@ -259,6 +296,7 @@ class DatabaseLookupTests(unittest.TestCase):
                     "services": {
                         "database": {
                             "type": "postgres",
+                            "enabled": True,
                             "shared": False,
                             "version": "15",
                         }
@@ -289,6 +327,10 @@ class DatabaseLookupTests(unittest.TestCase):
             side_effect=self._fake_get_entity_name,
         ):
             out = lookup.run(["web-app-foo"], variables=vars_)[0]
+
+        # enabled/shared surfaced
+        self.assertTrue(out["enabled"])
+        self.assertFalse(out["shared"])
 
         # consumer override should win:
         # database_version = get_app_conf(consumer_id, 'docker.services.database.version', False, default_version)

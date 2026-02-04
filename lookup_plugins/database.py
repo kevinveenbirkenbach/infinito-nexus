@@ -24,6 +24,7 @@ class LookupModule(LookupBase):
           applications, ports, PATH_DOCKER_COMPOSE_INSTANCES
 
     Output keys (no prefixes):
+      enabled, shared,
       type, name, instance, host, container, username, password, port, env,
       url_jdbc, url_full, volume, image, version, reach_host
     """
@@ -54,6 +55,26 @@ class LookupModule(LookupBase):
 
         consumer_entity = get_entity_name(consumer_id)
 
+        # New: enabled/shared flags (kept simple & non-strict)
+        enabled = bool(
+            get_app_conf(
+                applications,
+                consumer_id,
+                "docker.services.database.enabled",
+                strict=False,
+                default=False,
+            )
+        )
+        shared = bool(
+            get_app_conf(
+                applications,
+                consumer_id,
+                "docker.services.database.shared",
+                strict=False,
+                default=False,
+            )
+        )
+
         dbtype = get_app_conf(
             applications,
             consumer_id,
@@ -66,6 +87,8 @@ class LookupModule(LookupBase):
         # If no dbtype configured: keep behavior similar to your vars (mostly empty)
         if not dbtype:
             resolved = {
+                "enabled": enabled,
+                "shared": shared,
                 "type": "",
                 "name": consumer_entity,
                 "instance": "",
@@ -84,15 +107,8 @@ class LookupModule(LookupBase):
             }
             return [resolved if want == "all" else resolved.get(want, "")]
 
-        central_enabled = bool(
-            get_app_conf(
-                applications,
-                consumer_id,
-                "docker.services.database.shared",
-                strict=False,
-                default=False,
-            )
-        )
+        # Central/shared DB if shared==True
+        central_enabled = shared
 
         db_id = f"svc-db-{dbtype}"
 
@@ -156,6 +172,8 @@ class LookupModule(LookupBase):
         volume = f"{volume_prefix}{host}"
 
         resolved = {
+            "enabled": enabled,
+            "shared": shared,
             "type": dbtype,
             "name": name,
             "instance": instance,
