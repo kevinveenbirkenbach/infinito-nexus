@@ -45,14 +45,14 @@
 
       # database_name may be empty string to represent "all databases"
       - database_name is defined
-  fail_msg: >-
-    You must pass ALL database variables explicitly when including
-    sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml:
+    fail_msg: >-
+      You must pass ALL database variables explicitly when including
+      sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml:
 
-      database_instance, database_type, database_host, database_port,
-      database_username, database_password, database_name
+        database_instance, database_type, database_host, database_port,
+        database_username, database_password, database_name
 
-    Note: database_name may be an empty string to represent "all databases".
+      Note: database_name may be an empty string to represent "all databases".
   changed_when: false
 
 - name: Seed database definition via baudolo-seed (system binary)
