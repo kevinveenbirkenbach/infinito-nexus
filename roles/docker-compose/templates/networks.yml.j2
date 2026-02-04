@@ -3,7 +3,7 @@ networks:
 {# Central RDMS-Database Network #}
 {% if 
   (
-    lookup('database', application_id, want='enabled') and 
+    applications | get_app_conf(application_id, 'docker.services.database.enabled', False) and 
     lookup('database', application_id, want='shared')
   )
   or
