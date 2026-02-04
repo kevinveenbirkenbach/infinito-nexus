@@ -70,8 +70,4 @@
       }}
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: "Export resolved token"
-  ansible.builtin.set_fact:
-    sys_token_store_token: "{{ sys_token_store_token_effective }}"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
