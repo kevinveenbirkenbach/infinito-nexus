@@ -26,6 +26,19 @@
     database_consumer_id:       "{{ database_consumer_id_passed }}"
   when: SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool
 
+# ---------------------------------------------------------------------------
+# Seeder: MUST pass all fields explicitly (strict)
+# Only seed when using central/shared DB; for dedicated DB the app should seed.
+# ---------------------------------------------------------------------------
 - name: "For '{{ application_id }}': Add Entry for Backup Procedure"
   include_tasks: "{{ playbook_dir }}/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"
- 
+  vars:
+    database_consumer_id: "{{ database_consumer_id_passed | default(application_id) }}"
+    database_type:        "{{ lookup('database', database_consumer_id_passed | default(application_id), want='type') }}"
+    database_instance:    "{{ lookup('database', database_consumer_id_passed | default(application_id), want='instance') }}"
+    database_host:        "{{ lookup('database', database_consumer_id_passed | default(application_id), want='host') }}"
+    database_port:        "{{ lookup('database', database_consumer_id_passed | default(application_id), want='port') }}"
+    database_name:        "{{ lookup('database', database_consumer_id_passed | default(application_id), want='name') }}"
+    database_username:    "{{ lookup('database', database_consumer_id_passed | default(application_id), want='username') }}"
+    database_password:    "{{ lookup('database', database_consumer_id_passed | default(application_id), want='password') }}"
+  when: SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool

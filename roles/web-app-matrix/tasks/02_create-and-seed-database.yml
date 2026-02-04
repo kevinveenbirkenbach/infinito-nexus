@@ -1,13 +1,26 @@
-# The following parameters need to be pased:
-# 
-# - database_instance
+---
+# Expected from caller (loop):
 # - database_name
 # - database_username
 # - database_password
-- name: "create {{ database_name }} database"
-  include_role:
-    name: "svc-db-{{ database_type }}"
-  when: lookup('database', application_id, want='shared')
 
-- name: "include 04_seed-database-to-backup.yml"
+- name: "Create DB/user for '{{ database_name }}' in central DB"
+  include_role:
+    name: "{{ lookup('database', application_id, want='id') }}"
+  vars:
+    database_init:        true
+    database_consumer_id: "{{ application_id }}"
+    database_type:        "{{ lookup('database', application_id, want='type') }}"
+  when: lookup('database', application_id, want='shared') | bool
+
+- name: "Seed database entry to backup routine"
   include_tasks: "{{ playbook_dir }}/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"
+  vars:
+    database_consumer_id: "{{ application_id }}"
+    database_type:        "{{ lookup('database', application_id, want='type') }}"
+    database_instance:    "{{ lookup('database', application_id, want='instance') }}"
+    database_host:        "{{ lookup('database', application_id, want='host') }}"
+    database_port:        "{{ lookup('database', application_id, want='port') }}"
+    database_name:        "{{ database_name }}"
+    database_username:    "{{ database_username }}"
+    database_password:    "{{ database_password }}"

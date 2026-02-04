@@ -27,7 +27,9 @@ class _DummyTemplar:
 class DatabaseLookupTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.db_lookup_mod = _load_module("lookup_plugins/database.py", "lookup_database")
+        cls.db_lookup_mod = _load_module(
+            "lookup_plugins/database.py", "lookup_database"
+        )
 
     def _make_lookup(self, available_vars: dict):
         lm = self.db_lookup_mod.LookupModule()
@@ -113,7 +115,9 @@ class DatabaseLookupTests(unittest.TestCase):
             # Central DB role config (used only for defaults like version; name not used if shared=false)
             "svc-db-postgres": {
                 "docker": {
-                    "services": {"postgres": {"name": "postgres-central", "version": "16"}}
+                    "services": {
+                        "postgres": {"name": "postgres-central", "version": "16"}
+                    }
                 }
             },
         }
@@ -173,7 +177,9 @@ class DatabaseLookupTests(unittest.TestCase):
             },
             "svc-db-postgres": {
                 "docker": {
-                    "services": {"postgres": {"name": "postgres-central", "version": "16"}}
+                    "services": {
+                        "postgres": {"name": "postgres-central", "version": "16"}
+                    }
                 }
             },
         }
@@ -230,7 +236,9 @@ class DatabaseLookupTests(unittest.TestCase):
             },
             "svc-db-mariadb": {
                 "docker": {
-                    "services": {"mariadb": {"name": "mariadb-central", "version": "11.4"}}
+                    "services": {
+                        "mariadb": {"name": "mariadb-central", "version": "11.4"}
+                    }
                 }
             },
         }
@@ -280,7 +288,9 @@ class DatabaseLookupTests(unittest.TestCase):
             },
             "svc-db-postgres": {
                 "docker": {
-                    "services": {"postgres": {"name": "postgres-central", "version": "16"}}
+                    "services": {
+                        "postgres": {"name": "postgres-central", "version": "16"}
+                    }
                 }
             },
         }
