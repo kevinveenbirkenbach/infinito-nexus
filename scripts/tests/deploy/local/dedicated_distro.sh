@@ -45,6 +45,11 @@ docker exec -it "${INFINITO_CONTAINER}" bash -lc "
   /opt/src/infinito/scripts/docker/entry.sh true
 "
 
+echo ">>> Pre-cleanup shared entities"
+APP="matomo" \
+INFINITO_CONTAINER="${INFINITO_CONTAINER}" \
+scripts/tests/deploy/local/utils/purge/entity.sh
+
 deploy_args=(
   --distro "${INFINITO_DISTRO}"
   --type "${TEST_DEPLOY_TYPE}"
