@@ -18,7 +18,7 @@ JOOMLA_INSTALLER_CLI_FILE:        "/var/www/html/installation/joomla.php"
 JOOMLA_CLI_FILE:                  "/var/www/html/cli/joomla.php"
 
 ## Upload
-JOOMLA_UPLOAD_CONFIG:             "{{ [ lookup('docker', application_id, want='directories.instance'), 'php-upload.ini' ] | path_join }}"
+JOOMLA_UPLOAD_CONFIG:             "{{ [ lookup('docker', application_id, 'directories.instance'), 'php-upload.ini' ] | path_join }}"
 JOOMLA_UPLOAD_SIZE:               "{{ applications | get_app_conf(application_id, 'docker.services.joomla.upload.size_mb') }}"
 JOOMLA_UPLOAD_MAX_FILESIZE:       "{{ (JOOMLA_UPLOAD_SIZE | int) }}M"
 JOOMLA_POST_MAX_SIZE:             "{{ ((JOOMLA_UPLOAD_SIZE | int) * 12 // 10) }}M"

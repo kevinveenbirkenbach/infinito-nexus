@@ -23,9 +23,9 @@ NEXTCLOUD_PLUGINS_ENABLED:          "{{ applications | get_app_conf(application_
 ## Paths
 
 ### Host
-NEXTCLOUD_HOST_CONF_ADD_PATH:       "{{ [ lookup('docker', application_id, want='directories.volumes'), 'infinito' ] | path_join }}"      # This folder is the path to which the additive configurations will be copied
-NEXTCLOUD_HOST_INCL_PATH:           "{{ [ lookup('docker', application_id, want='directories.volumes'), 'includes.php' ] | path_join }}"  # Path to the instruction file on the host. Responsible for loading the additional configurations
-NEXTCLOUD_HOST_NGINX_PATH:          "{{ [ lookup('docker', application_id, want='directories.volumes'), 'nginx.conf' ] | path_join }}"    # Path where the internal Nextcloud NGinx config on the host server is stored
+NEXTCLOUD_HOST_CONF_ADD_PATH:       "{{ [ lookup('docker', application_id, 'directories.volumes'), 'infinito' ] | path_join }}"      # This folder is the path to which the additive configurations will be copied
+NEXTCLOUD_HOST_INCL_PATH:           "{{ [ lookup('docker', application_id, 'directories.volumes'), 'includes.php' ] | path_join }}"  # Path to the instruction file on the host. Responsible for loading the additional configurations
+NEXTCLOUD_HOST_NGINX_PATH:          "{{ [ lookup('docker', application_id, 'directories.volumes'), 'nginx.conf' ] | path_join }}"    # Path where the internal Nextcloud NGinx config on the host server is stored
 
 ## Control Node
 NEXTCLOUD_CNODE_PLUGIN_VARS_PATH:   "{{ [role_path, 'vars/plugins/'] | path_join }}"                            # Folder in which the files for the plugin configuration are stored
@@ -129,7 +129,7 @@ NEXTCLOUD_WHITEBOARD_LOCATION:            "/whiteboard/"
 NEXTCLOUD_WHITEBOARD_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_WHITEBOARD_LOCATION ] | url_join }}"
 NEXTCLOUD_WHITEBOARD_TMP_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.whiteboard_tmp') }}"
 NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME:   "{{ applications | get_app_conf(application_id, 'docker.volumes.whiteboard_fontcache') }}"
-NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY:   "{{ [ lookup('docker', application_id, want='directories.services'), 'whiteboard' ] | path_join }}"
+NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY:   "{{ [ lookup('docker', application_id, 'directories.services'), 'whiteboard' ] | path_join }}"
 NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE:  "{{ [ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY, 'Dockerfile' ] | path_join }}"
 NEXTCLOUD_WHITEBOARD_MAX_OLD_SPACE_SIZE:  "{{ applications | node_max_old_space_size(application_id, NEXTCLOUD_WHITEBOARD_SERVICE) }}"
 

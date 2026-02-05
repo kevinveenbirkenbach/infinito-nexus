@@ -13,7 +13,7 @@
       fi
     '
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   changed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
@@ -34,5 +34,5 @@
         --email="{{ users.administrator.email }}" 2>/dev/null || true
     '
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

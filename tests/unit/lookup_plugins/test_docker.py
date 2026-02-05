@@ -8,7 +8,6 @@ from ansible.errors import AnsibleError
 
 
 def _repo_root() -> Path:
-    # __file__ = tests/unit/lookup_plugins/test_docker.py
     return Path(__file__).resolve().parents[3]
 
 
@@ -55,6 +54,16 @@ class TestLookupDocker(unittest.TestCase):
             self.assertEqual(out, [self.fake_paths])
             p.assert_called_once_with("web-app-mailu", "/opt/docker/")
 
+    def test_returns_subdict_for_top_level_key(self):
+        with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):
+            out = self.lookup.run(
+                ["web-app-mailu", "directories"], variables=self.vars_ok
+            )
+            self.assertEqual(out, [self.fake_paths["directories"]])
+
+            out = self.lookup.run(["web-app-mailu", "files"], variables=self.vars_ok)
+            self.assertEqual(out, [self.fake_paths["files"]])
+
     def test_returns_deep_value_for_dotted_path(self):
         with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):
             out = self.lookup.run(
@@ -67,29 +76,24 @@ class TestLookupDocker(unittest.TestCase):
             )
             self.assertEqual(out, ["/opt/docker/app/.env/app.env"])
 
-    def test_rejects_non_dotted_path(self):
+    def test_invalid_path_raises(self):
         with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):
-            with self.assertRaises(AnsibleError) as ctx:
+            with self.assertRaises(AnsibleError):
                 self.lookup.run(
-                    ["web-app-mailu", "directories"], variables=self.vars_ok
+                    ["web-app-mailu", "doesnotexist"], variables=self.vars_ok
                 )
-            self.assertIn("only dotted paths are allowed", str(ctx.exception))
 
-    def test_invalid_dotted_path_raises(self):
-        with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):
-            with self.assertRaises(AnsibleError) as ctx:
+            with self.assertRaises(AnsibleError):
                 self.lookup.run(
                     ["web-app-mailu", "directories.doesnotexist"],
                     variables=self.vars_ok,
                 )
-            self.assertIn("invalid path", str(ctx.exception))
 
-            with self.assertRaises(AnsibleError) as ctx:
+            with self.assertRaises(AnsibleError):
                 self.lookup.run(
                     ["web-app-mailu", "directories.instance.foo"],
                     variables=self.vars_ok,
                 )
-            self.assertIn("invalid path", str(ctx.exception))
 
     def test_missing_instances_base_var_raises(self):
         with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):

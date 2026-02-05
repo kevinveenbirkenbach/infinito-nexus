@@ -1,6 +1,6 @@
 - name: Set default docker_repository_path
   set_fact:
-    docker_repository_path: "{{ [ lookup('docker', application_id, want='directories.services'), 'repository/' ] | path_join }}"
+    docker_repository_path: "{{ [ lookup('docker', application_id, 'directories.services'), 'repository/' ] | path_join }}"
 
 - name: Pull docker repository
   git:

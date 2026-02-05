@@ -18,4 +18,4 @@ FRIENDICA_ADDONS:               "{{ applications | get_app_conf(application_id, 
 FRIENDICA_OIDC_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 FRIENDICA_LDAP_ENABLED:         "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 FRIENDICA_LDAP_CONFIG_DOCKER:   "{{ [ FRIENDICA_APPLICATION_DIR,         'config/ldapauth.config.php' ] | path_join }}"
-FRIENDICA_LDAP_CONFIG_HOST:     "{{ [ lookup('docker', application_id, want='directories.volumes'), 'ldapauth.config.php' ] | path_join }}"
+FRIENDICA_LDAP_CONFIG_HOST:     "{{ [ lookup('docker', application_id, 'directories.volumes'), 'ldapauth.config.php' ] | path_join }}"

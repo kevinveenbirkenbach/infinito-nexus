@@ -5,5 +5,5 @@ application_id:                 web-app-mig
 MIG_IMAGE:                      "mig:latest"
 MIG_CONTAINER:                  "mig"
 MIG_BUILD_DATA:                 "{{ applications | get_app_conf(application_id, 'build_data.enabled') }}"
-MIG_ROLES_DIRECTORY:            "{{ [ lookup('docker', application_id, want='directories.volumes'), 'roles' ] | path_join }}"
+MIG_ROLES_DIRECTORY:            "{{ [ lookup('docker', application_id, 'directories.volumes'), 'roles' ] | path_join }}"
 MIG_ROLES_LIST:                 "{{ [ MIG_ROLES_DIRECTORY, 'list.json' ] | path_join }}"

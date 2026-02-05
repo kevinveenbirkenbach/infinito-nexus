@@ -25,9 +25,9 @@ SHOPWARE_INIT_CONTAINER:        "{{ applications | get_app_conf(application_id, 
 SHOPWARE_WEB_CONTAINER:         "{{ applications | get_app_conf(application_id, 'docker.services.web.name') }}"
 SHOPWARE_WORKER_CONTAINER:      "{{ applications | get_app_conf(application_id, 'docker.services.worker.name') }}"
 SHOPWARE_SCHED_CONTAINER:       "{{ applications | get_app_conf(application_id, 'docker.services.scheduler.name') }}"
-SHOPWARE_INIT_HOST:             "{{ [ lookup('docker', application_id, want='directories.volumes'), 'init.sh' ] | path_join }}"
+SHOPWARE_INIT_HOST:             "{{ [ lookup('docker', application_id, 'directories.volumes'), 'init.sh' ] | path_join }}"
 SHOPWARE_INIT_DOCKER:           "/usr/local/bin/init.sh"
-SHOPWARE_FRAMEWORK_HOST:        "{{ [ lookup('docker', application_id, want='directories.config'), 'framework.yaml' ] | path_join }}"
+SHOPWARE_FRAMEWORK_HOST:        "{{ [ lookup('docker', application_id, 'directories.config'), 'framework.yaml' ] | path_join }}"
 SHOPWARE_FRAMEWORK_DOCKER:      "/var/www/html/config/packages/framework.yaml"
 
 # Entrypoints & replicas

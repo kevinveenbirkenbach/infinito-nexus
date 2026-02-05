@@ -23,7 +23,7 @@ DISCOURSE_DATABASE_CONTAINER:       "{{ DISCOURSE_DATABASE.container }}"
 DISCOURSE_DATABASE_IS_SHARED:       "{{ DISCOURSE_DATABASE.shared }}"
 
 ## Directories
-DISCOURSE_REPOSITORY_DIR:           "{{ lookup('docker', application_id, want='directories.services') }}{{ applications | get_app_conf( application_id, 'repository') }}/"
+DISCOURSE_REPOSITORY_DIR:           "{{ lookup('docker', application_id, 'directories.services') }}{{ applications | get_app_conf( application_id, 'repository') }}/"
 DISCOURSE_CONTAINERS_DIR:           "{{ [ DISCOURSE_REPOSITORY_DIR, 'containers' ] | path_join }}"
 
 ## Files

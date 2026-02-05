@@ -19,7 +19,7 @@
       - docker
       - compose
       - --env-file
-      - "{{ lookup('docker', application_id, want='files.env') }}"
+      - "{{ lookup('docker', application_id, 'files.env') }}"
       - exec
       - -T
       - -e
@@ -36,7 +36,7 @@
       - "bundle exec rails runner -"
     stdin: "{{ lookup('ansible.builtin.file', role_path ~ '/files/greenlight_ensure_admin.rb') }}"
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   register: greenlight_admin_map
   changed_when: "'CHANGED' in (greenlight_admin_map.stdout | default(''))"
   failed_when: greenlight_admin_map.rc != 0

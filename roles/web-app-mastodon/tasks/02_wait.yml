@@ -5,7 +5,7 @@
       --format '{{ "{{.State.Health.Status}}" }}' \
       $cid
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   register: healthcheck
   retries: 60
   delay: 5

@@ -4,7 +4,7 @@
       gitea admin auth add-ldap \
       {{ GITEA_LDAP_AUTH_ARGS | join(' ') }}
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   register: ldap_manage
   failed_when: ldap_manage.rc != 0 and "login source already exists" not in ldap_manage.stderr
 
@@ -16,7 +16,7 @@
       | grep -F "LDAP ({{ DOMAIN_PRIMARY }})" \
       | awk '{print $1; exit}'
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   register: ldap_source_id_raw
   failed_when:
     - ldap_source_id_raw.rc != 0
@@ -34,6 +34,6 @@
       --id {{ ldap_source_id }} \
       {{ GITEA_LDAP_AUTH_ARGS | join(' ') }}
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   register: ldap_manage
   failed_when: ldap_manage.rc != 0

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from typing import Any, Dict, Optional
+
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
@@ -23,12 +24,16 @@ def _deep_get(d: Dict[str, Any], path: str) -> Any:
 
 class LookupModule(LookupBase):
     """
-    lookup('docker', application_id[, dotted.path])
+    lookup('docker', application_id[, path])
+
+    path can be:
+      - 'directories' / 'files' (returns sub-dict)
+      - 'directories.instance' (returns leaf)
     """
 
     def run(self, terms, variables: Optional[Dict[str, Any]] = None, **kwargs):
         if not terms or len(terms) > 2:
-            raise AnsibleError("lookup('docker', application_id[, dotted.path])")
+            raise AnsibleError("lookup('docker', application_id[, path])")
 
         application_id = _as_str(terms[0])
         if not application_id:
@@ -44,8 +49,8 @@ class LookupModule(LookupBase):
 
         if len(terms) == 2:
             path = _as_str(terms[1])
-            if "." not in path:
-                raise AnsibleError("lookup('docker'): only dotted paths are allowed")
+            if not path:
+                raise AnsibleError("lookup('docker'): path is empty")
             return [_deep_get(docker_dict, path)]
 
         return [docker_dict]

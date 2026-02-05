@@ -9,8 +9,8 @@
   ansible.builtin.script:
     cmd: "{{ role_path }}/files/bootstrap_admin_via_compose_env.py"
   environment:
-    BASEROW_COMPOSE_DIR: "{{ lookup('docker', application_id, want='directories.instance') }}"
-    BASEROW_COMPOSE_ENV_FILE: "{{ lookup('docker', application_id, want='files.env') }}"
+    BASEROW_COMPOSE_DIR: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    BASEROW_COMPOSE_ENV_FILE: "{{ lookup('docker', application_id, 'files.env') }}"
     BASEROW_SERVICE_NAME: "{{ BASEROW_SERVICE_NAME }}"
 
     BASEROW_PYTHON_BIN: "{{ BASEROW_PYTHON }}"

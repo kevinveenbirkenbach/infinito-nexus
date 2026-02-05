@@ -7,7 +7,7 @@
 
 - name: "Ensure Pixelfed .env ownership and permissions for www-data"
   ansible.builtin.file:
-    path: "{{ lookup('docker', application_id, want='files.env') }}"
+    path: "{{ lookup('docker', application_id, 'files.env') }}"
     owner: "33"
     group: "33"
     mode: "0660"

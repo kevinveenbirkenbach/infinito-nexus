@@ -6,7 +6,7 @@
       - "{{ docker_compose_env }}"
 {% elif application_id | has_env  %}
     env_file:
-      - "{{ lookup('docker', application_id, want='files.env') }}"
+      - "{{ lookup('docker', application_id, 'files.env') }}"
 {% endif %}
     logging:
       driver: journald

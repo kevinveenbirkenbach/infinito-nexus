@@ -9,7 +9,7 @@
       php bin/console cache:clear
     '
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
 
 - name: "Configure LDAP connection"
   shell: |
@@ -24,4 +24,4 @@
       php bin/console cache:clear
     '
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"

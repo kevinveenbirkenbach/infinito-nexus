@@ -13,7 +13,7 @@ XWIKI_HOST_PORT:                      "{{ ports.localhost.http[application_id] }
 XWIKI_HOSTNAME:                       "{{ container_hostname }}"
 
 ## Paths
-XWIKI_HOST_PROPERTIES_PATH:           "{{ [lookup('docker', application_id, want='directories.config'), 'xwiki.properties'] | path_join }}"
+XWIKI_HOST_PROPERTIES_PATH:           "{{ [lookup('docker', application_id, 'directories.config'), 'xwiki.properties'] | path_join }}"
 XWIKI_DOCK_DATA_DIR:                  "/usr/local/xwiki"
 
 ## Docker

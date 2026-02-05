@@ -4,7 +4,7 @@
 - name: Configure Snipe-IT LDAP
   ansible.builtin.script: ldap.sh
   args:
-    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   environment:
     SNIPE_IT_SERVICE: "{{ SNIPE_IT_SERVICE }}"
     APP_KEY: "{{ SNIPE_IT_APP_KEY }}"

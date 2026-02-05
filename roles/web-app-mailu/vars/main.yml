@@ -7,7 +7,7 @@ webserver_extra_configuration:        "client_max_body_size 31M;"
 database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
 
 # Cert Mount
-cert_mount_directory:                 "{{ lookup('docker', application_id, want='directories.volumes') }}certs/"
+cert_mount_directory:                 "{{ lookup('docker', application_id, 'directories.volumes') }}certs/"
 
 # Mailu
 
@@ -62,7 +62,7 @@ MAILU_DKIM_KEY_FILE:                  "{{ MAILU_DOMAIN }}.dkim.key"
 MAILU_DKIM_KEY_PATH:                  "/dkim/{{ MAILU_DKIM_KEY_FILE }}"
 
 ## Rspamd
-MAILU_RSPAMD_HOST_DIR:                "{{ [ lookup('docker', application_id, want='directories.volumes'), 'overrides/rspamd' ] | path_join }}"
+MAILU_RSPAMD_HOST_DIR:                "{{ [ lookup('docker', application_id, 'directories.volumes'), 'overrides/rspamd' ] | path_join }}"
 MAILU_RSPAMD_HOST_FILE:               "{{ [ MAILU_RSPAMD_HOST_DIR,'ratelimit.conf' ] | path_join }}"
 MAILU_RSPAMD_LIMITS_DEFAULTS:
   RATE:   "30 / 1min"

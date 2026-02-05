@@ -26,12 +26,12 @@ OPENPROJECT_CACHE_CONTAINER:    "{{ applications | get_app_conf( application_id,
 OPENPROJECT_CACHE_IMAGE:        "{{ applications | get_app_conf('svc-db-memcached', 'docker.services.memcached.image') }}"
 OPENPROJECT_CACHE_VERSION:      "{{ applications | get_app_conf('svc-db-memcached', 'docker.services.memcached.version') }}"
       
-OPENPROJECT_PLUGINS_FOLDER:   "{{ lookup('docker', application_id, want='directories.volumes') }}plugins/"
+OPENPROJECT_PLUGINS_FOLDER:   "{{ lookup('docker', application_id, 'directories.volumes') }}plugins/"
 
 OPENPROJECT_CUSTOM_IMAGE:     "{{ entity_name }}_custom:{{ OPENPROJECT_VERSION }}"
 
 # The following volume doesn't have a practcical function. It just exist to prevent the creation of unnecessary anonymous volumes
-OPENPROJECT_DUMMY_VOLUME:     "{{ lookup('docker', application_id, want='directories.volumes') }}dummy_volume"
+OPENPROJECT_DUMMY_VOLUME:     "{{ lookup('docker', application_id, 'directories.volumes') }}dummy_volume"
 
 OPENPROJECT_RAILS_SETTINGS:
   email_delivery_method:      "smtp"

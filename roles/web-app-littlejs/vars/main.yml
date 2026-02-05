@@ -12,7 +12,7 @@ LITTLEJS_REPOSITORY_BASE:   "https://github.com/KilledByAPixel/LittleJS"
 
 # Relative path where sys-stk-full checks out the repo
 LITTLEJS_APP_REL:           "services/repository"
-LITTLEJS_INDEX_HOST_ABS:    "{{ [ lookup('docker', application_id, want='directories.volumes'), 'index.html' ] | path_join }}"
+LITTLEJS_INDEX_HOST_ABS:    "{{ [ lookup('docker', application_id, 'directories.volumes'), 'index.html' ] | path_join }}"
 LITTLEJS_INDEX_HOST_REL:    "volumes/index.html"
 
 # Helper variables
@@ -21,5 +21,5 @@ LITTLEJS_SERVICE:           "{{ entity_name }}"
 LITTLEJS_IMAGE_CUSTOM:      "{{ entity_name }}_custom"
 
 # Runner HTML for non-full examples
-LITTLEJS_RUN_HOST_ABS:      "{{ [ lookup('docker', application_id, want='directories.volumes'), 'run.html' ] | path_join }}"
+LITTLEJS_RUN_HOST_ABS:      "{{ [ lookup('docker', application_id, 'directories.volumes'), 'run.html' ] | path_join }}"
 LITTLEJS_RUN_HOST_REL:      "volumes/run.html"
