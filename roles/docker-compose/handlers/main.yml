@@ -80,6 +80,9 @@
     COMPOSE_HTTP_TIMEOUT: "600"
     DOCKER_CLIENT_TIMEOUT: "600"
     COMPOSE_PARALLEL_LIMIT: "{{ '4' if (DOCKER_IN_CONTAINER | bool) else omit }}"
+  args:
+    chdir: "{{ docker_compose.directories.instance }}"
+    executable: /bin/bash
   listen:
     - docker compose up
 
