@@ -1,6 +1,7 @@
 - name: "1) Load the dependencies for the Anisble/Docker network management"
   include_role:
-    name: sys-svc-docker
+    name:   sys-svc-docker
+    public: false
   when: run_once_sys_svc_docker is not defined
 
 - name: "2) Create the network"

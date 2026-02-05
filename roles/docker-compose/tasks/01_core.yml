@@ -1,7 +1,8 @@
 - include_tasks: utils/once/flag.yml
 
 - include_role:
-    name: sys-svc-docker
+    name:   sys-svc-docker
+    public: false
   when: run_once_sys_svc_docker is not defined
 
 - name: Remove all docker compose pull locks

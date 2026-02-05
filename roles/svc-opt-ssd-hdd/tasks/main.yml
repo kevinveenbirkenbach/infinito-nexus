@@ -4,7 +4,8 @@
   when: run_once_sys_lock is not defined
 
 - include_role:
-    name: sys-svc-docker
+    name:   sys-svc-docker
+    public: false
   when: run_once_sys_svc_docker is not defined
 
 - include_role:
