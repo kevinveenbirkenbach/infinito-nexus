@@ -41,5 +41,5 @@
     --no-interaction
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
-  when: snipeit_admin_exists.rc != 0
+  when: snipe_it_admin_exists.rc != 0
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
