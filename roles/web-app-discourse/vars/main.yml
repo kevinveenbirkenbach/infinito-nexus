@@ -7,8 +7,7 @@ database_password:              "{{ applications | get_app_conf(application_id, 
 # Discourse
 
 ## General
-DISCOURSE_DATABASE_TYPE:            "{{ applications | get_app_conf(application_id, 'docker.services.database.type') }}"
-DISCOURSE_CONTAINER:                "{{ entity_name }}"
+DISCOURSE_CONTAINER:                "{{ application_id | get_entity_name }}"
 DISCOURSE_NETWORK:                  "{{ applications | get_app_conf(application_id, 'docker.network') }}"
 DISCOURSE_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 DISCOURSE_PLUGINS:                  "{{ applications | get_app_conf(application_id, 'plugins') }}"
@@ -16,6 +15,12 @@ DISCOURSE_PG_NETWORK:               "{{ applications | get_app_conf('svc-db-' ~ 
 DISCOURSE_REDIS_HOST:               "{{ application_id | get_entity_name }}-redis"
 DISCOURSE_REPOSITORY_URL:           "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.repository') }}"
 DISCOURSE_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+
+## Database
+DISCOURSE_DATABASE:                 "{{ lookup('database', application_id ) }}"
+DISCOURSE_DATABASE_TYPE:            "{{ DISCOURSE_DATABASE.type }}"
+DISCOURSE_DATABASE_CONTAINER:       "{{ DISCOURSE_DATABASE.container }}"
+DISCOURSE_DATABASE_IS_SHARED:       "{{ DISCOURSE_DATABASE.shared }}"
 
 ## Directories
 DISCOURSE_REPOSITORY_DIR:           "{{ docker_compose.directories.services }}{{ applications | get_app_conf( application_id, 'repository') }}/"

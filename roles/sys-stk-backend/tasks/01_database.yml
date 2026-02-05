@@ -10,3 +10,4 @@
 - name: "For '{{ application_id }}': Load central RDBMS"
   include_role:
     name: sys-svc-rdbms
+    public: false
