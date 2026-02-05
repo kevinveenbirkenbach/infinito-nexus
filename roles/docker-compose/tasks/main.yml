@@ -8,7 +8,7 @@
     path: "{{ item.value }}"
     state: directory
     mode: '0755'
-  with_dict: "{{ docker_compose.directories }}"
+  with_dict: "{{ lookup('docker', application_id, 'directories') }}"
 
 - name: "Include routines to set up a git repository based installation for '{{ application_id }}'."
   include_tasks: "03_repository.yml"
