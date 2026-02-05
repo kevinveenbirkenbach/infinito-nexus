@@ -73,15 +73,7 @@
 - name: docker compose up
   ansible.builtin.script:
     cmd: >-
-      compose_run.py
-      --chdir {{ docker_compose.directories.instance }}
-      --project {{ application_id | get_entity_name }}
-      --compose-files {{ (lookup('compose_f_args', application_id)) | quote }}
-      {% if docker_compose.files.env is file %}--env-file {{ docker_compose.files.env }}{% endif %}
-      --action up
-      --detach
-      {% if MODE_DEBUG | bool %}--debug{% endif %}
-      {% if MODE_DEBUG | bool and (not MASK_CREDENTIALS_IN_LOGS | bool) %}--print-env-unmasked{% endif %}
+      {{ PATH_COMPOSE }} up -d --force-recreate --remove-orphans
   register: dc_up
   changed_when: true
   environment:
