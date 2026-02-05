@@ -16,7 +16,7 @@
 
 {{ applications | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id).volume,
+    database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'data': {'name': JIRA_DATA_VOLUME}}
 ) }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}

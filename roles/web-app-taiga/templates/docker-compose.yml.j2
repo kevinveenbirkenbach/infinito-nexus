@@ -174,7 +174,7 @@
       - {{ TAIGA_EVENTS_SERVICE }}
 {{ applications | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id).volume,
+    database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'async-rabbitmq-data': {}, 'events-rabbitmq-data': {}, 'media-data': {}, 'static-data': {}}
 ) }}
 {% include 'roles/docker-compose/templates/networks.yml.j2' %}
