@@ -17,7 +17,7 @@ DISCOURSE_REPOSITORY_URL:           "{{ applications | get_app_conf(application_
 DISCOURSE_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 
 ## Database
-DISCOURSE_DATABASE:                 "{{ lookup('database', 'web-app-discourse' ) }}"
+DISCOURSE_DATABASE:                 "{{ lookup('database', application_id ) }}"
 DISCOURSE_DATABASE_TYPE:            "{{ DISCOURSE_DATABASE.type }}"
 DISCOURSE_DATABASE_CONTAINER:       "{{ DISCOURSE_DATABASE.container }}"
 DISCOURSE_DATABASE_IS_SHARED:       "{{ DISCOURSE_DATABASE.shared }}"
