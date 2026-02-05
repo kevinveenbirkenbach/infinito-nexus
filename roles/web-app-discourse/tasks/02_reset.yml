@@ -1,21 +1,3 @@
-# This reset function is redundant, because the 'sys-scv-docker' role reset will take care of it
-# anyhow lets keep this here for documentary purposes
-
-- name: "Load database & docker-compose variables for reset"
-  ansible.builtin.include_vars:
-    file: "{{ item }}"
-  loop:
-    - "{{ playbook_dir }}/roles/docker-compose/vars/docker-compose.yml"
-
-- name: Sanity check for required vars
-  assert:
-    that:
-      - applications is defined
-      - docker_compose is defined
-      - ports is defined
-    fail_msg: "Load roles/docker-compose/vars/docker-compose.yml first."
-  when: MODE_ASSERT | bool
-
 - name: "Disconnect DB container from Discourse networks"
   ansible.builtin.command:
     cmd: "docker network disconnect {{ discourse_network_item }} {{ lookup('database', application_id, want='container') }}"

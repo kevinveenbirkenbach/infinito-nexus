@@ -1,9 +1,6 @@
 - include_tasks: 01_core.yml
   when: run_once_docker_compose is not defined
 
-- name: "Load variables from {{ DOCKER_COMPOSE_VARIABLE_FILE }} for whole play"
-  include_vars: "{{ DOCKER_COMPOSE_VARIABLE_FILE }}"
-
 # This could lead to problems in docker-compose directories which are based on a git repository
 # @todo Verify that this isn't the case. E.g. in accounting
 - name: "Create all docker-compose directories (including parent directories) for '{{ application_id }}'"

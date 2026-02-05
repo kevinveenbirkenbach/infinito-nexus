@@ -10,11 +10,6 @@ This role combines the central RDBMS role (`sys-svc-rdbms`) with Docker Compose 
 - **Docker Compose**  
   Utilizes the standalone `docker-compose` role to define and bring up containers, networks, and volumes automatically.
 
-- **Variable Load Order**  
-  1. Docker Compose variables (`roles/docker-compose/vars/docker-compose.yml`)  
-  2. Database variables (`roles/sys-svc-rdbms/vars/database.yml`)  
-  Ensures compose ports and volumes are defined before the database role consumes them.
-
 The role will load both sub-roles and satisfy all dependencies transparently.
 
 ## Task Breakdown
