@@ -14,7 +14,7 @@
 
 - name: Check for pending migrations (non-fatal)
   shell: >
-    {{ docker_compose_command_exec }} {{ OPENPROJECT_WEB_SERVICE }} bash -lc
+    {{ PATH_COMPOSE }} exec {{ OPENPROJECT_WEB_SERVICE }} bash -lc
     "cd /app && bin/rails db:abort_if_pending_migrations RAILS_ENV=production"
   args:
     chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
@@ -24,7 +24,7 @@
 
 - name: Run migrations if pending
   shell: >
-    {{ docker_compose_command_exec }} {{ OPENPROJECT_WEB_SERVICE }} bash -lc
+    {{ PATH_COMPOSE }} exec {{ OPENPROJECT_WEB_SERVICE }} bash -lc
     "cd /app && bin/rails db:migrate RAILS_ENV=production"
   args:
     chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
@@ -45,7 +45,7 @@
 
 - name: Set settings in OpenProject (rails runner via STDIN; robust quoting + booleans)
   shell: >
-    {{ docker_compose_command_exec }} {{ OPENPROJECT_WEB_SERVICE }} bash -lc
+    {{ PATH_COMPOSE }} exec {{ OPENPROJECT_WEB_SERVICE }} bash -lc
     "cd /app && cat | bundle exec rails runner -"
   args:
     chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"

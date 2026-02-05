@@ -37,7 +37,7 @@
 
 - name: Ensure siteUrl matches canonical domain
   ansible.builtin.shell: |
-    {{ docker_compose_command_exec }} -T --user {{ ESPOCRM_USER }} {{ ESPOCRM_SERVICE }} php -r '
+    {{ PATH_COMPOSE }} exec -T --user {{ ESPOCRM_USER }} {{ ESPOCRM_SERVICE }} php -r '
       require "/var/www/html/bootstrap.php";
       $app = new \Espo\Core\Application();
       $c   = $app->getContainer();

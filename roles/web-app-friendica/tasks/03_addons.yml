@@ -23,7 +23,7 @@
 
 - name: Ensure Friendica addons are in sync
   command: >
-    {{ docker_compose_command_exec }} --user {{ FRIENDICA_USER }}
+    {{ PATH_COMPOSE }} exec --user {{ FRIENDICA_USER }}
     {{ FRIENDICA_SERVICE }}
     bin/console addon
     {{ 'enable' if item.enabled else 'disable' }}

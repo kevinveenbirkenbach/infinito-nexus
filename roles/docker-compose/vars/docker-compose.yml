@@ -1,3 +1,0 @@
-# @See https://chatgpt.com/share/67a23d18-fb54-800f-983c-d6d00752b0b4
-docker_compose_command_base:  "docker compose --env-file {{ lookup('docker', application_id, want='files.env') }}"
-docker_compose_command_exec:  "{{ docker_compose_command_base }} exec"
