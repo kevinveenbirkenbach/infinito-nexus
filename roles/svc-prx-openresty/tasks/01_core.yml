@@ -19,6 +19,7 @@
   vars:
     docker_git_repository_pull:     false # Deactivated here to deactivate inhirement
     docker_compose_flush_handlers:  true
+    application_id:                 svc-prx-openresty
 
 - name: "Verify that '{{ role_name }}' works"
   include_tasks: 02_assert.yml

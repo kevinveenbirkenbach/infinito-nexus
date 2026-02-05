@@ -10,6 +10,7 @@
   vars:
     docker_compose_flush_handlers:  true
     webserver_vhost_flavour:        "basic"
+    application_id:                 "web-app-discourse"
 
 - name: Pull Discourse docker repository
   git:
