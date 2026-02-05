@@ -17,17 +17,22 @@
 # - include_ca (bool, default True):
 #     - True  -> normal behavior (append CA override when enabled+self_signed)
 #     - False -> do NOT append CA override (used during CA-inject bootstrap)
+#
+# IMPORTANT (your requested change):
+# - This lookup NO LONGER reads variables['docker_compose'].
+# - It ALWAYS builds docker_compose paths via module_utils.docker_paths_utils.get_docker_paths()
+#   using PATH_DOCKER_COMPOSE_INSTANCES.
 
 from __future__ import annotations
 
 import os
 from typing import Any, Optional
 
-import yaml
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
 
+from module_utils.docker_paths_utils import get_docker_paths
 from module_utils.jinja_strict import render_strict
 
 
@@ -39,34 +44,6 @@ def _require_dict(d: Any, label: str) -> dict:
     if not isinstance(d, dict):
         raise AnsibleError(f"compose_f_args: {label} must be a dict, got {type(d)}")
     return d
-
-
-def _coerce_to_dict(v: Any, label: str) -> dict:
-    """
-    Coerce a value into a dict:
-      - accept dict directly
-      - accept YAML/JSON encoded string and parse it
-    """
-    if isinstance(v, dict):
-        return v
-
-    if isinstance(v, str):
-        s = v.strip()
-        if not s:
-            raise AnsibleError(f"compose_f_args: {label} is empty string")
-        try:
-            loaded = yaml.safe_load(s)
-        except Exception as exc:
-            raise AnsibleError(
-                f"compose_f_args: {label} could not be parsed as YAML: {exc}"
-            )
-        if isinstance(loaded, dict):
-            return loaded
-        raise AnsibleError(
-            f"compose_f_args: {label} parsed but is not a dict (got {type(loaded)})"
-        )
-
-    raise AnsibleError(f"compose_f_args: {label} must be a dict, got {type(v)}")
 
 
 def _maybe_template(templar: Any, value: Any) -> Any:
@@ -149,16 +126,16 @@ class LookupModule(LookupBase):
         if not isinstance(include_ca, bool):
             raise AnsibleError("compose_f_args: include_ca must be a bool")
 
-        raw_dc = variables.get("docker_compose", None)
-        if raw_dc is None:
-            raise AnsibleError(
-                "compose_f_args: missing required variable 'docker_compose'"
-            )
-
         templar = getattr(self, "_templar", None)
 
-        rendered_dc = _maybe_template(templar, raw_dc)
-        docker_compose = _coerce_to_dict(rendered_dc, "variable docker_compose")
+        # ALWAYS build docker_compose via module_utils (no dependency on variables['docker_compose'])
+        base_dir = _as_str(variables.get("PATH_DOCKER_COMPOSE_INSTANCES"))
+        if not base_dir:
+            raise AnsibleError(
+                "compose_f_args: missing required variable 'PATH_DOCKER_COMPOSE_INSTANCES'"
+            )
+
+        docker_compose = get_docker_paths(application_id, base_dir)
         docker_compose = _require_dict(docker_compose, "docker_compose")
 
         files = _require_dict(docker_compose.get("files"), "docker_compose.files")

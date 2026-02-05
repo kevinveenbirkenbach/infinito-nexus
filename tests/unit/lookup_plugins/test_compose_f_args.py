@@ -43,21 +43,33 @@ class TestComposeFArgs(unittest.TestCase):
         self.lookup._loader = object()
         self.lookup._templar = object()
 
+        # compose_f_args no longer reads variables['docker_compose'].
+        # It builds docker_compose via get_docker_paths(application_id, PATH_DOCKER_COMPOSE_INSTANCES).
         self.vars = {
-            "docker_compose": {
-                "files": {
-                    "docker_compose": "/x/docker-compose.yml",
-                    "docker_compose_override": "/x/docker-compose.override.yml",
-                    "docker_compose_ca_override": "/x/docker-compose.ca.override.yml",
-                }
-            },
+            "PATH_DOCKER_COMPOSE_INSTANCES": "/x/",
             "domains": {
                 "web-app-a": "example.invalid",
             },
         }
 
+    def _stub_get_docker_paths(self, application_id: str, base_dir: str) -> dict:
+        # Keep structure identical to module_utils.docker_paths_utils.get_docker_paths()
+        # but stable for unit tests.
+        self.assertEqual(application_id, "web-app-a")
+        self.assertEqual(base_dir, "/x/")
+        return {
+            "files": {
+                "docker_compose": "/x/docker-compose.yml",
+                "docker_compose_override": "/x/docker-compose.override.yml",
+                "docker_compose_ca_override": "/x/docker-compose.ca.override.yml",
+            }
+        }
+
     def test_includes_base_and_override_when_role_provides_override_and_tls_off(self):
         with (
+            patch.object(
+                self.m, "get_docker_paths", side_effect=self._stub_get_docker_paths
+            ),
             patch.object(self.m, "_role_provides_override", return_value=True),
             patch.object(
                 self.m.lookup_loader, "get", return_value=_TlsResolveStub(False, "off")
@@ -71,6 +83,9 @@ class TestComposeFArgs(unittest.TestCase):
 
     def test_includes_ca_override_when_self_signed_and_domain_exists(self):
         with (
+            patch.object(
+                self.m, "get_docker_paths", side_effect=self._stub_get_docker_paths
+            ),
             patch.object(self.m, "_role_provides_override", return_value=True),
             patch.object(
                 self.m.lookup_loader,
@@ -86,20 +101,17 @@ class TestComposeFArgs(unittest.TestCase):
         )
 
     def test_fails_when_ca_override_missing_but_required(self):
-        v = {
-            "docker_compose": {
+        def stub_missing_ca(application_id: str, base_dir: str) -> dict:
+            return {
                 "files": {
                     "docker_compose": "/x/docker-compose.yml",
                     "docker_compose_override": "/x/docker-compose.override.yml",
                     "docker_compose_ca_override": "",
                 }
-            },
-            "domains": {
-                "web-app-a": "example.invalid",
-            },
-        }
+            }
 
         with (
+            patch.object(self.m, "get_docker_paths", side_effect=stub_missing_ca),
             patch.object(self.m, "_role_provides_override", return_value=True),
             patch.object(
                 self.m.lookup_loader,
@@ -108,10 +120,13 @@ class TestComposeFArgs(unittest.TestCase):
             ),
         ):
             with self.assertRaises(AnsibleError):
-                self.lookup.run(["web-app-a"], variables=v)
+                self.lookup.run(["web-app-a"], variables=self.vars)
 
     def test_includes_only_base_when_role_does_not_provide_override(self):
         with (
+            patch.object(
+                self.m, "get_docker_paths", side_effect=self._stub_get_docker_paths
+            ),
             patch.object(self.m, "_role_provides_override", return_value=False),
             patch.object(
                 self.m.lookup_loader, "get", return_value=_TlsResolveStub(False, "off")
@@ -127,12 +142,33 @@ class TestComposeFArgs(unittest.TestCase):
         with self.assertRaises(AnsibleError):
             self.lookup.run(["a", "b"], variables=self.vars)
 
-    def test_requires_docker_compose_structure(self):
+    def test_requires_path_docker_compose_instances(self):
         with self.assertRaises(AnsibleError):
-            self.lookup.run(["web-app-a"], variables={})
+            self.lookup.run(
+                ["web-app-a"], variables={"domains": {"web-app-a": "example.invalid"}}
+            )
 
-        with self.assertRaises(AnsibleError):
-            self.lookup.run(["web-app-a"], variables={"docker_compose": "nope"})
+    def test_requires_docker_compose_structure_from_get_docker_paths(self):
+        # get_docker_paths returns non-dict -> must fail
+        with (
+            patch.object(self.m, "get_docker_paths", return_value="nope"),
+        ):
+            with self.assertRaises(AnsibleError):
+                self.lookup.run(["web-app-a"], variables=self.vars)
+
+        # get_docker_paths returns dict but missing files -> must fail
+        with (
+            patch.object(self.m, "get_docker_paths", return_value={}),
+        ):
+            with self.assertRaises(AnsibleError):
+                self.lookup.run(["web-app-a"], variables=self.vars)
+
+        # get_docker_paths returns dict with non-dict files -> must fail
+        with (
+            patch.object(self.m, "get_docker_paths", return_value={"files": "nope"}),
+        ):
+            with self.assertRaises(AnsibleError):
+                self.lookup.run(["web-app-a"], variables=self.vars)
 
 
 if __name__ == "__main__":
