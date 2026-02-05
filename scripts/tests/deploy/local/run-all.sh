@@ -101,7 +101,6 @@ echo
 
     cmd=(infinito deploy dedicated '${inv_file}'
       -T '${TEST_DEPLOY_TYPE}'
-      --skip-update
       --skip-backup
       --skip-cleanup
       --no-signal
