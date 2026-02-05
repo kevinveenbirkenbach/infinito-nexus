@@ -23,8 +23,10 @@
     service_id: "{{ service.id }}"
     service_name: "{{ service.name }}"
 
-- name: "Load Database"
-  ansible.builtin.include_tasks: "01_database.yml"
+- name: "For '{{ application_id }}': Load central RDBMS"
+  include_role:
+    name: sys-svc-rdbms
+    public: false
   when: SYS_STK_BACKEND_DATABASE_ENABLED | bool
 
 - name: "For '{{ application_id }}': Load docker-compose"

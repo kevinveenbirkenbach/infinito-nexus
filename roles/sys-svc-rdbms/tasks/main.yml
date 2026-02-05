@@ -1,4 +1,7 @@
 # run_once_sys_svc_rdbms: deactivated
+- name: "For '{{ application_id }}': Set database_consumer_id (Needed due to lazzy loading issue)"
+  set_fact:
+    database_consumer_id_passed: "{{ application_id }}"
 
 - block:
   - name: "Ensure env dir exists: {{ lookup('docker', application_id, want='directories.env') }}"

@@ -1,6 +1,3 @@
-- name: "load variables from {{ DOCKER_VARS_FILE }}"
-  include_vars: "{{ DOCKER_VARS_FILE }}"
-
 - name: "create directory {{ KEYCLOAK_REALM_IMPORT_DIR_HOST }}"
   file:
     path: "{{ KEYCLOAK_REALM_IMPORT_DIR_HOST }}"

@@ -1,8 +1,5 @@
 - include_tasks: utils/once/flag.yml
 
-- name: "load variables from {{ DOCKER_VARS_FILE }}"
-  include_vars: "{{ DOCKER_VARS_FILE }}"
-
 - name: Ensure Rspamd overrides directory exists (host)
   file:
     path: "{{ MAILU_RSPAMD_HOST_DIR }}"
