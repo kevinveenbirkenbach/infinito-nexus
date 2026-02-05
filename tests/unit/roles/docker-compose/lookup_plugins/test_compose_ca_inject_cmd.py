@@ -1,4 +1,3 @@
-# tests/unit/roles/docker-compose/lookup_plugins/test_compose_ca_inject_cmd.py
 import importlib.util
 import tempfile
 import unittest
@@ -9,7 +8,6 @@ from ansible.errors import AnsibleError
 
 
 def _repo_root() -> Path:
-    # __file__ = tests/unit/roles/docker-compose/lookup_plugins/test_compose_ca_inject_cmd.py
     return Path(__file__).resolve().parents[5]
 
 
