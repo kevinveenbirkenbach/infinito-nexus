@@ -24,12 +24,39 @@
 - name: flush docker service
   meta: flush_handlers
 
-- name: Wait until the Moodle container is healthy
-  shell:    docker inspect --format '{% raw %}{{.State.Health.Status}}{% endraw %}' {{ MOODLE_CONTAINER }}
-  register: health_check
-  until:    health_check.stdout.strip() == "healthy"
-  retries:  120
-  delay:    5
+- name: Wait for Moodle container to become healthy
+  block:
+    - name: Wait until the Moodle container is healthy
+      ansible.builtin.shell: >
+        docker inspect --format '{% raw %}{{.State.Health.Status}}{% endraw %}' {{ MOODLE_CONTAINER }}
+      register: health_check
+      until: health_check.stdout.strip() == "healthy"
+      retries: 120
+      delay: 5
+
+  rescue:
+    - name: Show Moodle container status
+      ansible.builtin.shell: docker inspect {{ MOODLE_CONTAINER }}
+      register: moodle_inspect
+      changed_when: false
+      failed_when: false
+
+    - name: Show Moodle container logs
+      ansible.builtin.shell: docker logs --tail=200 {{ MOODLE_CONTAINER }}
+      register: moodle_logs
+      changed_when: false
+      failed_when: false
+
+    - name: Fail with diagnostic output
+      ansible.builtin.fail:
+        msg: |
+          ❌ Moodle container did not become healthy in time.
+
+          --- docker inspect ---
+          {{ moodle_inspect.stdout | default('no output') }}
+
+          --- docker logs (last 200 lines) ---
+          {{ moodle_logs.stdout | default('no output') }}
 
 - name: "Include ownership settings tasks for moodle"
   include_tasks: 02_ownership.yml
