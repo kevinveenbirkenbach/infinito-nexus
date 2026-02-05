@@ -17,7 +17,7 @@
     {{ docker_compose_command_exec }} {{ OPENPROJECT_WEB_SERVICE }} bash -lc
     "cd /app && bin/rails db:abort_if_pending_migrations RAILS_ENV=production"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   register: openproject_pending_migrations_check
   failed_when: false
   changed_when: false
@@ -27,7 +27,7 @@
     {{ docker_compose_command_exec }} {{ OPENPROJECT_WEB_SERVICE }} bash -lc
     "cd /app && bin/rails db:migrate RAILS_ENV=production"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   when: openproject_pending_migrations_check.rc != 0
   register: openproject_migrate
   retries: 30
@@ -48,7 +48,7 @@
     {{ docker_compose_command_exec }} {{ OPENPROJECT_WEB_SERVICE }} bash -lc
     "cd /app && cat | bundle exec rails runner -"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
     stdin: |
       {% for kv in (OPENPROJECT_RAILS_SETTINGS | dict2items) %}
       Setting[:{{ kv.key }}] = {{ kv.value | to_json }}

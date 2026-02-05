@@ -1,6 +1,6 @@
-pgadmin_host_server_file:     "{{ docker_compose.directories.volumes }}servers.json"
+pgadmin_host_server_file:     "{{ lookup('docker', application_id, want='directories.volumes') }}servers.json"
 pgadmin_docker_server_file:   "/pgadmin4/servers.json"
-pgadmin_host_password_file:   "{{ docker_compose.directories.volumes }}.pgpass"
+pgadmin_host_password_file:   "{{ lookup('docker', application_id, want='directories.volumes') }}.pgpass"
 pgadmin_docker_password_file: "/pgpass"
 
 pgadmin_servers:

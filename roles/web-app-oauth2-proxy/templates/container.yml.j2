@@ -8,7 +8,7 @@
     ports:
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.oauth2[application_id] }}:4180/tcp
     volumes:
-      - "{{ docker_compose.directories.volumes }}{{ applications | get_app_conf('web-app-oauth2-proxy','configuration_file')}}:/oauth2-proxy.cfg"
+      - "{{ lookup('docker', application_id, want='directories.volumes') }}{{ applications | get_app_conf('web-app-oauth2-proxy','configuration_file')}}:/oauth2-proxy.cfg"
     healthcheck:
       test: ["CMD", "/bin/oauth2-proxy", "--version"]
       interval: 30s

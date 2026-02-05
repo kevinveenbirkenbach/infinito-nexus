@@ -52,8 +52,12 @@ class LookupModule(LookupBase):
         if not application_id:
             raise AnsibleError("lookup('docker', ...): application_id is empty")
 
-        path_instances = _as_str(terms[1]) if len(terms) == 2 else _get_instances_base(variables)
+        path_instances = (
+            _as_str(terms[1]) if len(terms) == 2 else _get_instances_base(variables)
+        )
         if not path_instances:
-            raise AnsibleError("lookup('docker', ...): instances base path resolved to empty")
+            raise AnsibleError(
+                "lookup('docker', ...): instances base path resolved to empty"
+            )
 
         return [get_docker_paths(application_id, path_instances)]

@@ -16,16 +16,16 @@
 - name: shut down docker compose project 
   command:
     cmd: docker-compose -p "{{ MATRIX_PROJECT }}" down
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
 
 - name: "cleanup project folder"
   file:
-    path: "{{ docker_compose.directories.instance }}mautrix/"
+    path: "{{ lookup('docker', application_id, want='directories.instance') }}mautrix/"
     state: absent
 
 - name: "create bridge folders"
   file:
-    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}"
+    path: "{{ lookup('docker', application_id, want='directories.instance') }}mautrix/{{ item.bridge_name }}"
     state: directory
     mode: "0755"
   loop: "{{ MATRIX_BRIDGES }}"
@@ -33,7 +33,7 @@
 - name: add multiple mautrix bridge configuration
   template:
     src:  "mautrix/{{ item.bridge_name }}.config.yml.j2" 
-    dest: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/config.yaml"
+    dest: "{{ lookup('docker', application_id, want='directories.instance') }}mautrix/{{ item.bridge_name }}/config.yaml"
   loop: "{{ MATRIX_BRIDGES }}"
   notify: docker compose up
 
@@ -63,19 +63,19 @@
 - name: add docker-compose.yml
   template:
     src:  "docker-compose.yml.j2" 
-    dest: "{{ docker_compose.directories.instance }}docker-compose.yml"
+    dest: "{{ lookup('docker', application_id, want='directories.instance') }}docker-compose.yml"
   notify: docker compose up
 
 # Pull image when update is wished. 
 - name: docker compose pull
   command:
     cmd: docker-compose -p "{{ MATRIX_PROJECT }}" pull
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
 
 - name: docker compose up
   command:
     cmd: "docker-compose -p {{ MATRIX_PROJECT }} up -d --remove-orphans"
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   environment:
     COMPOSE_HTTP_TIMEOUT:   "600"
     DOCKER_CLIENT_TIMEOUT:  "600"
@@ -86,14 +86,14 @@
 
 - name: wait for registration files
   wait_for:
-    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/registration.yaml"
+    path: "{{ lookup('docker', application_id, want='directories.instance') }}mautrix/{{ item.bridge_name }}/registration.yaml"
     state: present  
     timeout: 120
   loop: "{{ MATRIX_BRIDGES }}"
 
 - name: "change file permissions"
   file:
-    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/registration.yaml"
+    path: "{{ lookup('docker', application_id, want='directories.instance') }}mautrix/{{ item.bridge_name }}/registration.yaml"
     mode: "0755"
   loop: "{{ MATRIX_BRIDGES }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
@@ -102,7 +102,7 @@
 - name: create admin account
   command:
     cmd: "{{ docker_compose_command_exec }} -it synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME }} -p {{ applications | get_app_conf(application_id, 'credentials.administrator_password') }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   ignore_errors: true
   when: applications | get_app_conf(application_id, 'setup', True) | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
@@ -111,7 +111,7 @@
 - name: create chatgpt bot
   command:
     cmd: "{{ docker_compose_command_exec }} -it synapse register_new_matrix_user -u chatgptbot -p {{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password')}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   ignore_errors: true
   when: applications | get_app_conf(application_id, 'setup', True) | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"

@@ -29,7 +29,7 @@
     {{ 'enable' if item.enabled else 'disable' }}
     {{ item.name }}
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   loop: "{{ friendica_addons }}"
   loop_control:
     label: "{{ item.name }}"

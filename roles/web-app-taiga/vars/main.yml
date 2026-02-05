@@ -22,11 +22,11 @@ TAIGA_FLAVOR_TAIGAIO:           "{{ TAIGA_OIDC_FLAVOR == 'taigaio' }}"
 TAIGA_TAIGAIO_ENABLED:          "{{ TAIGA_OIDC_ENABLED and TAIGA_FLAVOR_TAIGAIO }}"
 
 ## Docker
-TAIGA_DOCKER_COMPOSE_INIT_PATH: "{{ [ docker_compose.directories.instance,'docker-compose-inits.yml' ] | path_join }}"
-TAIGA_DOCKER_COMPOSE_PATH:      "{{ [ docker_compose.directories.instance,'docker-compose.yml' ] | path_join }}"
+TAIGA_DOCKER_COMPOSE_INIT_PATH: "{{ [ lookup('docker', application_id, want='directories.instance'),'docker-compose-inits.yml' ] | path_join }}"
+TAIGA_DOCKER_COMPOSE_PATH:      "{{ [ lookup('docker', application_id, want='directories.instance'),'docker-compose.yml' ] | path_join }}"
 TAIGA_DOCKER_IMAGE_BACKEND:     "{{ 'robrotheram/taiga-back-openid' if TAIGA_ROBROTHERAM_ENABLED else 'taigaio/taiga-back' }}"
 TAIGA_DOCKER_IMAGE_FRONTEND:    "{{ 'robrotheram/taiga-front-openid' if TAIGA_ROBROTHERAM_ENABLED else 'taigaio/taiga-front' }}"
-TAIGA_FRONTEND_CONF_PATH:       "{{ [ docker_compose.directories.config,'conf.json' ] | path_join }}"
+TAIGA_FRONTEND_CONF_PATH:       "{{ [ lookup('docker', application_id, want='directories.config'),'conf.json' ] | path_join }}"
 TAIGA_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.taiga.version') }}"
 
 ### Backend

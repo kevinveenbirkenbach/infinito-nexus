@@ -20,7 +20,7 @@
     docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea migrate
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   register: migrate
   changed_when: "'migrations completed' in migrate.stdout"
 
@@ -34,7 +34,7 @@
         --email    "{{ users.administrator.email }}" \
         -c {{ GITEA_CONFIG }}
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   register: create_admin
   changed_when: "'has been successfully created' in create_admin.stdout"
   failed_when: create_admin.rc != 0 and 'user already exists' not in create_admin.stderr

@@ -1,4 +1,4 @@
 application_id:                 web-svc-simpleicons
 container_port:                 3000
-simpleicons_host_server_file:   "{{ [ docker_compose.directories.config, 'server.js' ] | path_join }}"
-simpleicons_host_package_file:  "{{ [ docker_compose.directories.config, 'package.json' ] | path_join }}"
+simpleicons_host_server_file:   "{{ [ lookup('docker', application_id, want='directories.config'), 'server.js' ] | path_join }}"
+simpleicons_host_package_file:  "{{ [ lookup('docker', application_id, want='directories.config'), 'package.json' ] | path_join }}"

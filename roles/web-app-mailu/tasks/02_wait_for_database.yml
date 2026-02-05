@@ -6,7 +6,7 @@
         docker exec {{ lookup('database', application_id, want='container') }} mariadb -u {{ lookup('database', application_id, want='username') }} -p{{ lookup('database', application_id, want='password') }}
         -e "SHOW TABLES FROM {{ lookup('database', application_id, want='name') }} LIKE 'domain';"
       args:
-        chdir: "{{ docker_compose.directories.instance }}"
+        chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
       register: mailu_db_schema_check
       retries: 30
       delay: 5
@@ -20,7 +20,7 @@
       ansible.builtin.command: >
         {{ docker_compose_command_exec }} logs --tail=300 admin
       args:
-        chdir: "{{ docker_compose.directories.instance }}"
+        chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
       register: mailu_admin_logs
       changed_when: false
 

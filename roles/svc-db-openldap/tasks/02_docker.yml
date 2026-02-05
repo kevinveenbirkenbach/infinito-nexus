@@ -19,7 +19,7 @@
 - name: Copy OpenLDAP image files to instance dir
   ansible.builtin.copy:
     src: "{{ item.src }}"
-    dest: "{{ [ docker_compose.directories.instance, item.dest ] | path_join }}"
+    dest: "{{ [ lookup('docker', application_id, want='directories.instance'), item.dest ] | path_join }}"
     mode: "{{ item.mode }}"
   loop:
     - { src: "entrypoint.sh",  dest: "entrypoint.sh",  mode: "0755" }

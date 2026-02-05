@@ -1,11 +1,11 @@
 - name: "Execute migration for '{{ application_id }}'"
   command:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
     cmd: "docker compose {{ lookup('compose_f_args', application_id) }} run --rm {{ MASTODON_SERVICE_NAME }} bundle exec rails db:migrate"
 
 - name: "MASTODON | Seed database (idempotent)"
   command:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
     cmd: "docker compose {{ lookup('compose_f_args', application_id) }} run --rm {{ MASTODON_SERVICE_NAME }} bash -lc 'bin/rails db:seed'"
   register: mastodon_seed
   changed_when: false

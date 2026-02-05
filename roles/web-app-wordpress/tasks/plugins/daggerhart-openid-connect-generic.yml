@@ -11,7 +11,7 @@
      wp option add openid_connect_generic_settings \"$serialized_empty_array\" --path={{ WORDPRESS_DOCKER_HTML_PATH }} \
      || wp option update openid_connect_generic_settings \"$serialized_empty_array\" --path={{ WORDPRESS_DOCKER_HTML_PATH }};"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   failed_when: false
 
 - name: "Apply all OIDC settings via WP-CLI eval (safe via base64)"
@@ -22,4 +22,4 @@
     docker-compose exec -u www-data -T application bash -lc
       "wp eval \"update_option('openid_connect_generic_settings', json_decode(base64_decode('{{ oidc_settings_json_b64 }}'), true));\" --path={{ WORDPRESS_DOCKER_HTML_PATH }}"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"

@@ -51,6 +51,6 @@
       }
     '
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   register: siteurl_set
   changed_when: "'CHANGED' in siteurl_set.stdout"

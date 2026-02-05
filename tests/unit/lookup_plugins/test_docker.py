@@ -1,4 +1,4 @@
-    # tests/unit/lookup_plugins/test_docker.py
+# tests/unit/lookup_plugins/test_docker.py
 import importlib.util
 import os
 import unittest

@@ -4,14 +4,14 @@ application_id:                 "web-app-bluesky"
 ## Bluesky
 
 ## Social App
-BLUESKY_SOCIAL_APP_DIR:         "{{ [ docker_compose.directories.services, 'social-app' ] | path_join  }}"
+BLUESKY_SOCIAL_APP_DIR:         "{{ [ lookup('docker', application_id, want='directories.services'), 'social-app' ] | path_join  }}"
 BLUESKY_GEOLOCATION_PATH:       "{{ [ BLUESKY_SOCIAL_APP_DIR,'src/geolocation/index.tsx' ] | path_join }}"
 
 # This should be removed when the following issue is closed:
 # https://github.com/bluesky-social/pds/issues/52
 
 ## PDS
-BLUESKY_PDSADMIN_DIR:           "{{ [ docker_compose.directories.volumes, 'pdsadmin' ] | path_join }}"
+BLUESKY_PDSADMIN_DIR:           "{{ [ lookup('docker', application_id, want='directories.volumes'), 'pdsadmin' ] | path_join }}"
 BLUESKY_PDSADMIN_FILE:          "{{ [ BLUESKY_PDSADMIN_DIR, 'pdsadmin' ] | path_join }}"
 BLUESKY_PDSADMIN_TMP_TAR:       "/tmp/pdsadmin.tar.gz"
 BLUESKY_PDS_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.pds.image') }}"

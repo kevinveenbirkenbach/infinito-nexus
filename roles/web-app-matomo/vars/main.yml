@@ -25,7 +25,7 @@ MATOMO_BOOTSTRAP_IMAGE:     "{{ applications | get_app_conf(application_id, 'doc
 MATOMO_BOOTSTRAP_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.version') }}"
 MATOMO_BOOTSTRAP_NAME:      "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.name') }}"
 MATOMO_BOOTSTRAP_TIMEOUT:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.timeout') }}"
-MATOMO_BOOTSTRAP_ENV_FILE:  "{{ [docker_compose.directories.env, MATOMO_BOOTSTRAP_SERVICE ~ '.env'] | path_join }}"
+MATOMO_BOOTSTRAP_ENV_FILE:  "{{ [lookup('docker', application_id, want='directories.env'), MATOMO_BOOTSTRAP_SERVICE ~ '.env'] | path_join }}"
 
 # Configuration
 MATOMO_ADMIN_USER_KEY:      "administrator"

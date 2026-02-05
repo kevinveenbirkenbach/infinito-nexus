@@ -16,7 +16,7 @@
     docker exec {{ applications['web-app-discourse'].docker.services.discourse.name }} \
       git config --global --add safe.directory /var/www/discourse
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   changed_when: false
 
 - name: Revoke old WP Discourse API keys via Rails
@@ -31,7 +31,7 @@
         ).update_all(revoked_at: Time.current)\
       \""
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   changed_when: false
   failed_when: false
 
@@ -42,7 +42,7 @@
       bin/rake api_key:create_master['WP Discourse Integration']\
     "
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   register: discourse_generated_api_key
 
 - name: Store the new WP Discourse API key in a fact
@@ -59,7 +59,7 @@
       wp plugin install wp-discourse --activate
       --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
 
 - name: "Configure WP Discourse settings"
   loop: "{{ discourse_settings | map(attribute='name') | unique | list }}"
@@ -92,4 +92,4 @@
          )
        );\" --path={{ WORDPRESS_DOCKER_HTML_PATH }}"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"

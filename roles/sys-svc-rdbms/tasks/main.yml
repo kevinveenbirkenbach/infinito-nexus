@@ -1,9 +1,9 @@
 # run_once_sys_svc_rdbms: deactivated
 
 - block:
-  - name: "Ensure env dir exists: {{ docker_compose.directories.env }}"
+  - name: "Ensure env dir exists: {{ lookup('docker', application_id, want='directories.env') }}"
     ansible.builtin.file:
-      path: "{{ docker_compose.directories.env }}"
+      path: "{{ lookup('docker', application_id, want='directories.env') }}"
       state: directory
       mode: "0755"
   - name: "For '{{ application_id }}/{{ database_consumer_id_passed }}': Create {{ lookup('database', application_id, want='env') }}"

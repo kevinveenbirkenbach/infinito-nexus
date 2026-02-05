@@ -9,7 +9,7 @@
       php bin/console cache:clear
     '
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
 
 - name: "Configure OIDC via system:config"
   shell: |
@@ -23,4 +23,4 @@
       php bin/console cache:clear
     '
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"

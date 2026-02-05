@@ -16,4 +16,4 @@
       wp plugin install {{ plugin_name }} --activate
       --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"

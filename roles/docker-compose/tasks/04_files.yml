@@ -16,7 +16,7 @@
 - name: "Create (optional) Dockerfile for {{ application_id }}"
   template:
     src:  "{{ dockerfile_src }}"
-    dest: "{{ docker_compose.files.dockerfile }}"
+    dest: "{{ lookup('docker', application_id, want='files.dockerfile') }}"
     mode: '0640'
   notify:
     - docker compose build
@@ -24,10 +24,10 @@
   when:
     - dockerfile_src | default('') | length > 0
 
-- name: "Create (optional) '{{ docker_compose.files.env }}'"
+- name: "Create (optional) '{{ lookup('docker', application_id, want='files.env') }}'"
   template:
     src:  "{{ item }}"
-    dest: "{{ docker_compose.files.env }}"
+    dest: "{{ lookup('docker', application_id, want='files.env') }}"
     mode: '0640'
     force: yes
   notify:
@@ -40,10 +40,10 @@
       skip: true
   register: env_template
 
-- name: "Create (optional) '{{ docker_compose.files.docker_compose_override }}'"
+- name: "Create (optional) '{{ lookup('docker', application_id, want='files.docker_compose_override') }}'"
   template:
     src:  "{{ item }}"
-    dest: "{{ docker_compose.files.docker_compose_override }}"
+    dest: "{{ lookup('docker', application_id, want='files.docker_compose_override') }}"
     mode: '0640'
     force: yes
   notify: docker compose up
@@ -53,10 +53,10 @@
         - "{{ application_id | abs_role_path_by_application_id }}/files/docker-compose.override.yml"
       skip: true
 
-- name: "Create (optional) '{{ docker_compose.files.docker_compose }}'"
+- name: "Create (optional) '{{ lookup('docker', application_id, want='files.docker_compose') }}'"
   ansible.builtin.template:
     src:  "{{ item }}"
-    dest: "{{ docker_compose.files.docker_compose }}"
+    dest: "{{ lookup('docker', application_id, want='files.docker_compose') }}"
     mode: "0640"
     force: yes
   with_first_found:

@@ -25,6 +25,6 @@ MASTODON_ALLOWED_PRIVATE_ADDRESSES:   "{{ networks.local['svc-db-postgres'].subn
 MASTODON_OIDC_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled')  }}"
 
 MASTODON_HTTP_ONLY_ENABLED:                 "{{ not (lookup('tls_resolve', application_id, want='enabled') | bool) }}"
-MASTODON_OVERRIDES_DIR:                     "{{ docker_compose.directories.instance }}/overrides"
+MASTODON_OVERRIDES_DIR:                     "{{ lookup('docker', application_id, want='directories.instance') }}/overrides"
 MASTODON_FORCE_SSL_OVERRIDE_FILE:           "{{ MASTODON_OVERRIDES_DIR }}/zzz_disable_force_ssl.rb"
 MASTODON_CONTAINER_FORCE_SSL_OVERRIDE_PATH: "/opt/mastodon/config/initializers/zzz_disable_force_ssl.rb"

@@ -9,8 +9,8 @@ MEDIAWIKI_URL:                    "{{ lookup('tls_resolve', application_id, want
 
 ## Folders
 MEDIAWIKI_HTML_DIR:               "/var/www/html"
-MEDIAWIKI_CONFIG_DIR:             "{{ docker_compose.directories.config }}"
-MEDIAWIKI_VOLUMES_DIR:            "{{ docker_compose.directories.volumes }}"
+MEDIAWIKI_CONFIG_DIR:             "{{ lookup('docker', application_id, want='directories.config') }}"
+MEDIAWIKI_VOLUMES_DIR:            "{{ lookup('docker', application_id, want='directories.volumes') }}"
 
 # LocalSettings
 MEDIAWIKI_LOCALSETTINGS_HOST_PATH: "{{ MEDIAWIKI_CONFIG_DIR }}/LocalSettings.php"

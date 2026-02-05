@@ -19,13 +19,13 @@ WORDPRESS_USER:               "www-data"
 
 # Email
 WORDPRESS_MSMTP_SRC:          "{{ [ playbook_dir, 'roles/sys-svc-mail-msmtp/templates/msmtprc.conf.j2' ] | path_join }}"
-WORDPRESS_MSMTP_ABS:          "{{ [ docker_compose.directories.config, 'msmtprc.conf'] | path_join }}"
+WORDPRESS_MSMTP_ABS:          "{{ [ lookup('docker', application_id, want='directories.config'), 'msmtprc.conf'] | path_join }}"
 
 # Config
 WORDPRESS_CONFIG_FILE:        "wp-config.php"
 WORDPRESS_CONFIG_PATH:        "{{ [WORDPRESS_DOCKER_HTML_PATH, WORDPRESS_CONFIG_FILE] | path_join }}"
 WORDPRESS_CONFIG_UPLD_REL:    "config/upload.ini"
-WORDPRESS_CONFIG_UPLD_ABS:    "{{ [docker_compose.directories.instance, WORDPRESS_CONFIG_UPLD_REL ] | path_join }}"
+WORDPRESS_CONFIG_UPLD_ABS:    "{{ [lookup('docker', application_id, want='directories.instance'), WORDPRESS_CONFIG_UPLD_REL ] | path_join }}"
 
 # User 
 WORDPRESS_ADMIN_EMAIL:        "{{ applications | get_app_conf(application_id, 'users.administrator.email') }}"

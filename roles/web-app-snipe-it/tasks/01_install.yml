@@ -1,7 +1,7 @@
 - name: Wait until application container is up
   shell: "docker compose ps -q {{ SNIPE_IT_SERVICE }}"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   register: snipeit_app_id
   retries: 30
   delay: 5
@@ -27,7 +27,7 @@
       {{ SNIPE_IT_SERVICE }} \
       php artisan migrate --force
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   register: snipeit_migrate
   changed_when: >
     ('Migrating:' in snipeit_migrate.stdout)
@@ -42,7 +42,7 @@
       {{ SNIPE_IT_SERVICE }} \
       php -d memory_limit=512M artisan db:seed --force
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('docker', application_id, want='directories.instance') }}"
   register: snipeit_seed
   changed_when: "'Seeding:' in snipeit_seed.stdout"
   failed_when: snipeit_seed.rc != 0

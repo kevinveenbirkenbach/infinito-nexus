@@ -7,9 +7,9 @@
         argv:
           - "{{ PATH_COMPOSE }}"
           - --chdir
-          - "{{ docker_compose.directories.instance }}"
+          - "{{ lookup('docker', application_id, want='directories.instance') }}"
           - --project
-          - "{{ (docker_compose.directories.instance | regex_replace('/+$', '')) | basename }}"
+          - "{{ (lookup('docker', application_id, want='directories.instance') | regex_replace('/+$', '')) | basename }}"
           - --
           - --profile
           - "{{ MATOMO_BOOTSTRAP_PROFILE }}"
@@ -48,7 +48,7 @@
         argv:
           - bash
           - -lc
-          - "sed -n '1,240p' {{ docker_compose.files.docker_compose }} || true"
+          - "sed -n '1,240p' {{ lookup('docker', application_id, want='files.docker_compose') }} || true"
       changed_when: false
       no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
@@ -62,8 +62,8 @@
             echo "===== FILE: {{ MATOMO_BOOTSTRAP_ENV_FILE }} (bootstrap env) ====="
             cat "{{ MATOMO_BOOTSTRAP_ENV_FILE }}" || true
             echo
-            echo "===== FILE: {{ docker_compose.files.env }} (default env) ====="
-            cat "{{ docker_compose.files.env }}" || true
+            echo "===== FILE: {{ lookup('docker', application_id, want='files.env') }} (default env) ====="
+            cat "{{ lookup('docker', application_id, want='files.env') }}" || true
       changed_when: false
       when: not (MASK_CREDENTIALS_IN_LOGS | bool)
 
@@ -73,9 +73,9 @@
           - "{{ PATH_COMPOSE }}"
           - --debug
           - --chdir
-          - "{{ docker_compose.directories.instance }}"
+          - "{{ lookup('docker', application_id, want='directories.instance') }}"
           - --project
-          - "{{ (docker_compose.directories.instance | regex_replace('/+$', '')) | basename }}"
+          - "{{ (lookup('docker', application_id, want='directories.instance') | regex_replace('/+$', '')) | basename }}"
           - --
           - --profile
           - "{{ MATOMO_BOOTSTRAP_PROFILE }}"
