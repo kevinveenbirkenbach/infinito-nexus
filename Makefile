@@ -34,7 +34,7 @@ endif
 	test-local-rapid test-local-rapid-fresh test-local-full \
 	format bootstrap setup-development
 
-dev-environment-bootstrap: apparmor-teardown dns-setup
+dev-environment-bootstrap: apparmor-teardown dns-setup disable-ipv6
 dev-environment-teardown: apparmor-restore dns-remove
 
 dns-setup:
@@ -53,6 +53,10 @@ apparmor-restore:
 
 trust-ca:
 	@bash scripts/administration/trust_ca.sh
+
+disable-ipv6:
+	sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+	sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
 
 clean:
 	@echo "Removing ignored git files"
