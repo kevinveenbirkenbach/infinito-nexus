@@ -2,7 +2,7 @@
   set_fact:
     docker_repository_path: "{{ [ docker_compose.directories.services, 'repository/' ] | path_join }}"
 
-- name: pull docker repository
+- name: Pull docker repository
   git:
     repo:           "{{ docker_git_repository_address }}"
     dest:           "{{ docker_repository_path }}"
@@ -13,6 +13,10 @@
     recursive:      yes
     force:          yes
     accept_hostkey: yes
+  register: docker_repo_pull
+  retries: 12
+  delay: 30
+  until: docker_repo_pull is succeeded
   notify:
     - docker compose build
     - docker compose up

@@ -11,16 +11,19 @@
     docker_compose_flush_handlers:  true
     webserver_vhost_flavour:        "basic"
 
-- name: pull docker repository
+- name: Pull Discourse docker repository
   git:
-    repo:     "{{ DISCOURSE_REPOSITORY_URL }}"
-    dest:     "{{ DISCOURSE_REPOSITORY_DIR }}"
-    version:  "{{ DISCOURSE_VERSION }}"
-    update:   yes
-    depth:    1
-  notify:     recreate discourse
-  become:     true
-  ignore_errors: true
+    repo:    "{{ DISCOURSE_REPOSITORY_URL }}"
+    dest:    "{{ DISCOURSE_REPOSITORY_DIR }}"
+    version: "{{ DISCOURSE_VERSION }}"
+    update:  yes
+    depth:   1
+  register: discourse_repo_pull
+  retries: 12
+  delay: 30
+  until: discourse_repo_pull is succeeded
+  notify: recreate discourse
+  become: true
 
 - name: set chmod 700 for '{{ DISCOURSE_CONTAINERS_DIR }}'
   ansible.builtin.file:
