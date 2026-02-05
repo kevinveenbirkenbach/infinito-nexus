@@ -35,14 +35,13 @@
   include_tasks: 01_patch_config.yml
   when: config_file_exists.rc == 0
 
-- name: Run EspoCRM upgrade (only when MODE_UPDATE is true)
+- name: Run EspoCRM upgrade
   command: >
     docker exec --user {{ ESPOCRM_USER }} {{ ESPOCRM_CONTAINER }}
     php command.php upgrade -y
   register: espocrm_upgrade
   changed_when: "'Upgrading' in espocrm_upgrade.stdout or 'successfully' in espocrm_upgrade.stdout"
   failed_when: false
-  when: MODE_UPDATE | bool
 
 - name: Run flag setter as root (fallback)
   command: >

@@ -20,7 +20,6 @@
 
 - name: Update\Upgrade Nextcloud
   include_tasks: 03_upgrade.yml
-  when: MODE_UPDATE | bool
 
 - name: Load system configuration steps
   include_tasks: "{{ item }}"

@@ -71,7 +71,6 @@
   command:
     cmd: docker-compose -p "{{ MATRIX_PROJECT }}" pull
     chdir: "{{ docker_compose.directories.instance }}"
-  when: MODE_UPDATE | bool
 
 - name: docker compose up
   command:

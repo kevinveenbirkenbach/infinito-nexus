@@ -51,4 +51,3 @@
   when:
     - listmonk_db_reachable
     - not listmonk_db_empty
-    - MODE_UPDATE | bool

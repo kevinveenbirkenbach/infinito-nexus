@@ -23,7 +23,6 @@
       - pull
       - "{{ HEALTH_CSP_IMAGE }}"
   changed_when: false
-  when: MODE_UPDATE | bool
 
 - include_role:
     name: sys-service
