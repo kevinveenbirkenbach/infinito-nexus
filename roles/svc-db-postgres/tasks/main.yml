@@ -7,7 +7,7 @@
     vars:
       handler_role_name: "docker-compose"
 
-  - name: "Initialize database for '{{ database_name }}'"
+  - name: "Initialize dedicated database"
     include_tasks: 02_init.yml
     when: database_init | bool
   vars:
