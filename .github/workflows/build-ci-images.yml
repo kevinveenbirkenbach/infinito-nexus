@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   prepare:
-    name: 🏷️ Set image names
+    name: 🏷️ Label images
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.out.outputs.matrix }}
