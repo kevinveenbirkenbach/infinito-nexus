@@ -35,7 +35,6 @@
   environment:
     COMPOSE_HTTP_TIMEOUT: "600"
     DOCKER_CLIENT_TIMEOUT: "600"
-  when: MODE_UPDATE | bool
   listen:
     - docker compose up
 
