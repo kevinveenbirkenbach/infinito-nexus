@@ -10,7 +10,7 @@
   command: "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr path infinito-presentation"
   register: path_infinito_presentation_output
 
-- name: Get path of infinito using pkgmgrpull docker repository
+- name: Get path of infinito using pkgmgr
   command: "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr path infinito"
   register: path_infinito_output
 
