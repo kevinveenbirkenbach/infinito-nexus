@@ -71,9 +71,9 @@
     - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
 
 - name: docker compose up
-  ansible.builtin.script:
-    cmd: >-
-      {{ PATH_COMPOSE }} up -d --force-recreate --remove-orphans
+  ansible.builtin.shell: |
+    set -euo pipefail
+    {{ PATH_COMPOSE }} up -d --force-recreate --remove-orphans
   register: dc_up
   changed_when: true
   environment:
