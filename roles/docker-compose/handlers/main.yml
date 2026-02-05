@@ -43,7 +43,7 @@
     set -euo pipefail
     docker compose build || {
       echo "Retrying without cache and pulling bases...";
-      docker compose build --no-cache{{ ' --pull' if MODE_UPDATE | bool else ''}};
+      docker compose build --no-cache --pull;
     }
   args:
     chdir: "{{ docker_compose.directories.instance }}"
