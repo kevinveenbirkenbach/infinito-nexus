@@ -6,7 +6,7 @@ entity_name:                        "{{ application_id | get_entity_name }}"
 
 # Webserver
 webserver_websocket_location:              "/ws"
-webserver_websocket_port:           "{{ ports.localhost.websocket[application_id] }}"
+websocket_port:           "{{ ports.localhost.websocket[application_id] }}"
 webserver_client_max_body_size:     "100m"
 webserver_vhost_flavour:            "ws_generic"
 
