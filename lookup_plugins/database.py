@@ -21,7 +21,7 @@ class LookupModule(LookupBase):
     Inputs:
       - term[0] = database_consumer_id
       - reads these from Ansible vars:
-          applications, ports, PATH_COMPOSE_INSTANCES
+          applications, ports, DIR_COMPOSITIONS
 
     Output keys (no prefixes):
       id,
@@ -52,7 +52,7 @@ class LookupModule(LookupBase):
         vars_ = variables or self._templar.available_variables
         applications = self._require_var(vars_, "applications")
         ports = self._require_var(vars_, "ports")
-        path_instances = self._require_var(vars_, "PATH_COMPOSE_INSTANCES")
+        path_instances = self._require_var(vars_, "DIR_COMPOSITIONS")
 
         consumer_entity = get_entity_name(consumer_id)
 

@@ -1,6 +1,6 @@
 - name: Check if DKIM private key file exists in the antispam container
   command: >
-    {{ PATH_COMPOSE }} exec -T antispam
+    {{ BIN_COMPOSE }} exec -T antispam
     test -f {{ MAILU_DKIM_KEY_PATH }}
   register: dkim_key_file_stat
   failed_when:  false
@@ -10,7 +10,7 @@
 
 - name: Generate DKIM key
   command: >
-    {{ PATH_COMPOSE }} exec -T antispam
+    {{ BIN_COMPOSE }} exec -T antispam
     rspamadm dkim_keygen -s dkim -d {{ MAILU_DOMAIN }} -k {{ MAILU_DKIM_KEY_PATH }}
   register: dkim_keygen_output
   when: dkim_key_file_stat.rc != 0
@@ -20,7 +20,7 @@
 
 - name: Fetch DKIM private key from antispam container
   shell: >
-    {{ PATH_COMPOSE }} exec -T antispam
+    {{ BIN_COMPOSE }} exec -T antispam
     cat {{ MAILU_DKIM_KEY_PATH }}
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"

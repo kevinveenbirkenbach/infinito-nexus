@@ -22,7 +22,7 @@
   become: true
   ansible.builtin.copy:
     src: container.py
-    dest: "{{ CONTAINER_BIN }}"
+    dest: "{{ BIN_CONTAINER }}"
     mode: "0755"
     owner: root
     group: root

@@ -55,7 +55,7 @@
 
 - name: "Install WP Discourse plugin"
   command: >
-    {{ PATH_COMPOSE }} exec -u www-data -T application
+    {{ BIN_COMPOSE }} exec -u www-data -T application
       wp plugin install wp-discourse --activate
       --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   args:
@@ -83,7 +83,7 @@
     option_json_b64: "{{ option_kv | to_json | b64encode }}"
 
   command: >
-    {{ PATH_COMPOSE }} exec -u www-data -T application bash -lc
+    {{ BIN_COMPOSE }} exec -u www-data -T application bash -lc
       "wp eval \"update_option(
          '{{ option_name }}',
          json_decode(

@@ -43,5 +43,5 @@ CA_ROOT:
 CA_TRUST:
   cert_host:      "{{ CA_ROOT.cert_host }}"
   trust_name:     "{{ DOMAIN_PRIMARY | lower }}"
-  wrapper_host:   "{{ PATH_CA_TRUST }}"
-  inject_script:  "{{ PATH_CA_INJECT }}"
+  wrapper_host:   "{{ BIN_CA_TRUST }}"
+  inject_script:  "{{ BIN_CA_INJECT }}"

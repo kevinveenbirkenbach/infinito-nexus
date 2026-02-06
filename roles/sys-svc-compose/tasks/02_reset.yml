@@ -7,10 +7,10 @@
   vars:
     package_name: "{{ COMPOSE_DOWN_ALL_PACKAGE }}"
 
-- name: Shutdown all docker compose instances in '{{ PATH_COMPOSE_INSTANCES }}' with '{{ COMPOSE_DOWN_ALL_PACKAGE }}'
-  command: "{{ COMPOSE_DOWN_ALL_PACKAGE }} {{ PATH_COMPOSE_INSTANCES }}"
+- name: Shutdown all docker compose instances in '{{ DIR_COMPOSITIONS }}' with '{{ COMPOSE_DOWN_ALL_PACKAGE }}'
+  command: "{{ COMPOSE_DOWN_ALL_PACKAGE }} {{ DIR_COMPOSITIONS }}"
 
-- name: "Remove directory '{{ PATH_COMPOSE_INSTANCES }}' and all its contents"
+- name: "Remove directory '{{ DIR_COMPOSITIONS }}' and all its contents"
   file:
-    path: "{{ PATH_COMPOSE_INSTANCES }}"
+    path: "{{ DIR_COMPOSITIONS }}"
     state: absent

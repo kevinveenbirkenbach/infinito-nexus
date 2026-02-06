@@ -3,7 +3,7 @@
 
 - name: "Ensure /etc/baudolo exists"
   ansible.builtin.file:
-    path: "{{ PATH_INFINITO_SECRETS_DIR }}"
+    path: "{{ DIR_SECRETS }}"
     state: directory
     owner: root
     group: root
@@ -59,7 +59,7 @@
   ansible.builtin.command:
     argv:
       - /usr/bin/baudolo-seed
-      - "{{ PATH_INFINITO_DATABASE_SECRETS }}"
+      - "{{ FILE_DATABASE_SECRETS }}"
       - "{{ database_instance }}"
       - "{{ '*' if (database_name | string | length) == 0 else (database_name | string) }}"
       - "{{ database_username }}"

@@ -27,7 +27,7 @@
 - name: "setup systemctl '{{ system_service_id }}'"
   template:
     src:  "{{ system_service_template_src }}"
-    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, system_service_name ] | path_join }}"
+    dest: "{{ [ DIR_SYSTEM_SERVICE, system_service_name ] | path_join }}"
     owner: root
     group: root
     mode: '0644'

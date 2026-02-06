@@ -26,7 +26,7 @@ def _split_list_items(s: str) -> list[str]:
     Supports commas, single/double quotes (no escapes), and bare tokens.
 
     Example:
-      "PATH_BIN, 'ca-inject'" -> ["PATH_BIN", "'ca-inject'"]
+      "DIR_BIN, 'ca-inject'" -> ["DIR_BIN", "'ca-inject'"]
     """
     items: list[str] = []
     buf: list[str] = []
@@ -63,7 +63,7 @@ def _split_list_items(s: str) -> list[str]:
 def _eval_list_literal(head: str, variables: dict) -> list[str]:
     """
     Evaluate a minimal Jinja list literal like:
-      [ PATH_BIN, 'ca-inject' ]
+      [ DIR_BIN, 'ca-inject' ]
 
     Items supported:
       - quoted strings ('x' / "x")
@@ -124,7 +124,7 @@ def _apply_filter(value: Any, filt: str) -> Any:
         return str(value).upper()
 
     # Support the common Ansible/Jinja pattern:
-    #   {{ [ PATH_BIN, 'ca-inject' ] | path_join }}
+    #   {{ [ DIR_BIN, 'ca-inject' ] | path_join }}
     # Only for list/tuple inputs; otherwise no-op.
     if f == "path_join":
         if not isinstance(value, (list, tuple)):
@@ -174,7 +174,7 @@ def _fallback_eval_expr(expr: str, variables: dict) -> str:
         key = m.group(1)
         val: Any = os.environ.get(key)
     else:
-        # Allow minimal list literals (needed for patterns like: [ PATH_BIN, 'x' ] | path_join)
+        # Allow minimal list literals (needed for patterns like: [ DIR_BIN, 'x' ] | path_join)
         if head.startswith("[") and head.endswith("]"):
             val = _eval_list_literal(head, variables)
         else:

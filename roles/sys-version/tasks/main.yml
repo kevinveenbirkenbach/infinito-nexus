@@ -17,12 +17,12 @@
 
 - name: Ensure destination directory exists
   ansible.builtin.file:
-    path: "{{ PATH_INFINITO_VERSION | dirname }}"
+    path: "{{ FILE_VERSION | dirname }}"
     state: directory
     mode: "0755"
 
 - name: Write version
   ansible.builtin.copy:
-    dest: "{{ PATH_INFINITO_VERSION }}"
+    dest: "{{ FILE_VERSION }}"
     content: "{{ sys_version_extracted.stdout | trim }}\n"
     mode: "0644"

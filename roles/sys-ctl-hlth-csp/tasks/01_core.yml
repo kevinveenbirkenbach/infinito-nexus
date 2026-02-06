@@ -35,7 +35,7 @@
     system_service_tpl_timeout_start_sec: "{{ CURRENT_PLAY_DOMAINS_ALL | timeout_start_sec_for_domains }}"
     system_service_tpl_environment:
       - "CA_TRUST_CERT_HOST={{ CA_TRUST.cert_host }}"
-      - "CA_TRUST_WRAPPER_HOST={{ PATH_CA_TRUST }}"
+      - "CA_TRUST_WRAPPER_HOST={{ BIN_CA_TRUST }}"
       - "CA_TRUST_NAME={{ CA_TRUST.trust_name }}"
     # Always run with CA trust injected via docker-run-ca (systemd env for wrapper)
     system_service_tpl_exec_start: >-

@@ -20,9 +20,9 @@
     ssh_key_bits: 8192
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: "set correct rights for {{ PATH_ADMINISTRATOR_HOME }}"
+- name: "set correct rights for {{ DIR_HOME_ADMINISTRATOR }}"
   file:
-    path: "{{ PATH_ADMINISTRATOR_HOME }}"
+    path: "{{ DIR_HOME_ADMINISTRATOR }}"
     state: directory
     owner: administrator
     group: administrator

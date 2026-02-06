@@ -209,7 +209,7 @@ def _get_path_administrator_home_from_group_vars(project_root: Path) -> str:
 
     if not paths_file.exists():
         print(
-            f"[WARN] group_vars paths file not found: {paths_file}. Falling back to PATH_ADMINISTRATOR_HOME={default_path}",
+            f"[WARN] group_vars paths file not found: {paths_file}. Falling back to DIR_HOME_ADMINISTRATOR={default_path}",
             file=sys.stderr,
         )
         return default_path
@@ -219,15 +219,15 @@ def _get_path_administrator_home_from_group_vars(project_root: Path) -> str:
             data = yaml.safe_load(f) or {}
     except Exception as exc:  # pragma: no cover
         print(
-            f"[WARN] Failed to load {paths_file}: {exc}. Falling back to PATH_ADMINISTRATOR_HOME={default_path}",
+            f"[WARN] Failed to load {paths_file}: {exc}. Falling back to DIR_HOME_ADMINISTRATOR={default_path}",
             file=sys.stderr,
         )
         return default_path
 
-    value = data.get("PATH_ADMINISTRATOR_HOME", default_path)
+    value = data.get("DIR_HOME_ADMINISTRATOR", default_path)
     if not isinstance(value, str) or not value:
         print(
-            f"[WARN] PATH_ADMINISTRATOR_HOME missing/invalid in {paths_file}. Falling back to {default_path}",
+            f"[WARN] DIR_HOME_ADMINISTRATOR missing/invalid in {paths_file}. Falling back to {default_path}",
             file=sys.stderr,
         )
         return default_path

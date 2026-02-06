@@ -28,7 +28,7 @@ class TestLookupDocker(unittest.TestCase):
 
     def setUp(self):
         self.lookup = self.LookupModule()
-        self.vars_ok = {"PATH_COMPOSE_INSTANCES": "/opt/compose/"}
+        self.vars_ok = {"DIR_COMPOSITIONS": "/opt/compose/"}
 
         self.fake_paths = {
             "directories": {
@@ -99,7 +99,7 @@ class TestLookupDocker(unittest.TestCase):
         with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):
             with self.assertRaises(AnsibleError) as ctx:
                 self.lookup.run(["web-app-mailu"], variables={})
-            self.assertIn("PATH_COMPOSE_INSTANCES not set", str(ctx.exception))
+            self.assertIn("DIR_COMPOSITIONS not set", str(ctx.exception))
 
     def test_empty_application_id_raises(self):
         with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):

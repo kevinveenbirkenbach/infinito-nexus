@@ -18,7 +18,7 @@
 
     - name: "Collect Mailu admin container logs (last 300 lines)"
       ansible.builtin.command: >
-        {{ PATH_COMPOSE }} exec logs --tail=300 admin
+        {{ BIN_COMPOSE }} logs --tail=300 admin
       args:
         chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
       register: mailu_admin_logs

@@ -39,9 +39,9 @@ class LookupModule(LookupBase):
         if not application_id:
             raise AnsibleError("lookup('docker'): application_id is empty")
 
-        base = _as_str((variables or {}).get("PATH_COMPOSE_INSTANCES"))
+        base = _as_str((variables or {}).get("DIR_COMPOSITIONS"))
         if not base:
-            raise AnsibleError("lookup('docker'): PATH_COMPOSE_INSTANCES not set")
+            raise AnsibleError("lookup('docker'): DIR_COMPOSITIONS not set")
 
         docker_dict = get_docker_paths(application_id, base)
 

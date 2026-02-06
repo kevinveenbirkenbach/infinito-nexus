@@ -6,7 +6,7 @@
 - name: "Ensure the OIDC settings option exists as a PHP-serialized empty array"
   # Generate an empty serialized array in the container, then add or update the option
   command: >
-    {{ PATH_COMPOSE }} exec -u www-data -T application bash -lc
+    {{ BIN_COMPOSE }} exec -u www-data -T application bash -lc
     "serialized_empty_array=$(wp eval 'echo serialize(array());' --path={{ WORDPRESS_DOCKER_HTML_PATH }}); \
      wp option add openid_connect_generic_settings \"$serialized_empty_array\" --path={{ WORDPRESS_DOCKER_HTML_PATH }} \
      || wp option update openid_connect_generic_settings \"$serialized_empty_array\" --path={{ WORDPRESS_DOCKER_HTML_PATH }};"
@@ -19,7 +19,7 @@
   vars:
     oidc_settings_json_b64: "{{ oidc_vars.oidc_settings | to_json | b64encode }}"
   command: >
-    {{ PATH_COMPOSE }} exec -u www-data -T application bash -lc
+    {{ BIN_COMPOSE }} exec -u www-data -T application bash -lc
       "wp eval \"update_option('openid_connect_generic_settings', json_decode(base64_decode('{{ oidc_settings_json_b64 }}'), true));\" --path={{ WORDPRESS_DOCKER_HTML_PATH }}"
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"

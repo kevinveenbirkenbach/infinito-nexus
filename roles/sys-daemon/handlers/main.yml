@@ -1,7 +1,7 @@
 - name: collect systemd unit files
   shell: |
     shopt -s nullglob
-    files=({{ PATH_SYSTEM_SERVICE_DIR }}*.service {{ PATH_SYSTEM_SERVICE_DIR }}*.timer)
+    files=({{ DIR_SYSTEM_SERVICE }}*.service {{ DIR_SYSTEM_SERVICE }}*.timer)
     printf "%s\n" "${files[@]}"
   args:
     executable: /bin/bash

@@ -41,7 +41,7 @@
 
 - name: "Persist store (idempotent)"
   ansible.builtin.copy:
-    dest: "{{ PATH_INFINITO_TOKENS }}"
+    dest: "{{ FILE_TOKENS }}"
     owner: "{{ SYS_TOKEN_STORE_OWNER }}"
     group: "{{ SYS_TOKEN_STORE_GROUP }}"
     mode: "{{ SYS_TOKEN_STORE_FILE_MODE }}"

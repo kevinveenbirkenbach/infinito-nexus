@@ -3,7 +3,7 @@
 ## Description
 
 This Ansible role extracts the project version from the local `pyproject.toml` (using `playbook_dir`)
-and writes it to `PATH_INFINITO_VERSION` on the managed host.
+and writes it to `FILE_VERSION` on the managed host.
 
 ## Features
 

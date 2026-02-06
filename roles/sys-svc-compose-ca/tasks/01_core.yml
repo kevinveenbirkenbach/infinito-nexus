@@ -11,8 +11,8 @@
     mode: "0755"
   loop:
     - "{{ CA_TRUST.cert_host | dirname }}"
-    - "{{ PATH_CA_TRUST | dirname }}"
-    - "{{ PATH_CA_INJECT | dirname }}"
+    - "{{ BIN_CA_TRUST | dirname }}"
+    - "{{ BIN_CA_INJECT | dirname }}"
 
 - name: "CA trust | check CA certificate exists on target host (hard fail if missing)"
   become: true
@@ -31,7 +31,7 @@
   become: true
   ansible.builtin.copy:
     src: "compose_ca.py"
-    dest: "{{ PATH_CA_INJECT }}"
+    dest: "{{ BIN_CA_INJECT }}"
     mode: "0755"
     owner: root
     group: root

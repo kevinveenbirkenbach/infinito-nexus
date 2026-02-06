@@ -1,7 +1,7 @@
 ---
 - name: "Ensure Mailu user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ MAILU_DOMAIN }}' exists"
   ansible.builtin.shell: >
-    {{ PATH_COMPOSE }} exec admin flask mailu {{ mailu_action }}
+    {{ BIN_COMPOSE }} exec admin flask mailu {{ mailu_action }}
     {{ mailu_user_name | quote }} {{ MAILU_DOMAIN | quote }} -- {{ mailu_user_password | quote }}
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
@@ -19,7 +19,7 @@
 
 - name: "Change password for user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ MAILU_DOMAIN }}'"
   ansible.builtin.shell: >
-    {{ PATH_COMPOSE }} exec admin flask mailu password
+    {{ BIN_COMPOSE }} exec admin flask mailu password
     {{ mailu_user_name | quote }} {{ MAILU_DOMAIN | quote }} -- {{ mailu_user_password | quote }}
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"

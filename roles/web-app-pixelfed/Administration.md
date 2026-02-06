@@ -101,7 +101,7 @@ docker volume rm pixelfed_application_data pixelfed_database pixelfed_redis
 
 To update your Pixelfed instance, navigate to the directory where your `docker-compose.yml` file is located and run these commands:
 ```bash 
-cd {{ PATH_COMPOSE_INSTANCES }}pixelfed/ &&
+cd {{ DIR_COMPOSITIONS }}pixelfed/ &&
 docker-compose down &&
 docker network prune -f &&
 docker-compose pull &&

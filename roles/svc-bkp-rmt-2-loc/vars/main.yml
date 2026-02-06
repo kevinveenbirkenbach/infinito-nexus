@@ -3,7 +3,7 @@ application_id:                                 svc-bkp-rmt-2-loc
 system_service_id:                              "{{ application_id }}" 
 
 # Role Specific
-DOCKER_BACKUP_REMOTE_2_LOCAL_DIR:               '{{ PATH_ROOT_SCRIPTS }}{{ application_id }}/'
+DOCKER_BACKUP_REMOTE_2_LOCAL_DIR:               '{{ DIR_SCRIPTS_ROOT }}{{ application_id }}/'
 DOCKER_BACKUP_REMOTE_2_LOCAL_FILE:              'pull-specific-host.py'
 DOCKER_BACKUP_REMOTE_2_LOCAL_SCRIPT:            "{{ [ DOCKER_BACKUP_REMOTE_2_LOCAL_DIR , DOCKER_BACKUP_REMOTE_2_LOCAL_FILE ] | path_join }}"
 DOCKER_BACKUP_REMOTE_2_LOCAL_BACKUP_PROVIDERS:  "{{ applications | get_app_conf(application_id, 'backup_providers')  }}"

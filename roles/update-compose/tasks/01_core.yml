@@ -1,7 +1,7 @@
 ---
-- name: "Check if {{ PATH_COMPOSE_INSTANCES }} directory exists"
+- name: "Check if {{ DIR_COMPOSITIONS }} directory exists"
   stat:
-    path: "{{ PATH_COMPOSE_INSTANCES }}"
+    path: "{{ DIR_COMPOSITIONS }}"
   register: docker_compose_directory_stat
 
 - name: "Update with pacman"

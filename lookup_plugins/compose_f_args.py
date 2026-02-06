@@ -21,7 +21,7 @@
 # IMPORTANT (your requested change):
 # - This lookup NO LONGER reads variables['docker_compose'].
 # - It ALWAYS builds docker_compose paths via module_utils.docker_paths_utils.get_docker_paths()
-#   using PATH_COMPOSE_INSTANCES.
+#   using DIR_COMPOSITIONS.
 
 from __future__ import annotations
 
@@ -129,10 +129,10 @@ class LookupModule(LookupBase):
         templar = getattr(self, "_templar", None)
 
         # ALWAYS build docker_compose via module_utils (no dependency on variables['docker_compose'])
-        base_dir = _as_str(variables.get("PATH_COMPOSE_INSTANCES"))
+        base_dir = _as_str(variables.get("DIR_COMPOSITIONS"))
         if not base_dir:
             raise AnsibleError(
-                "compose_f_args: missing required variable 'PATH_COMPOSE_INSTANCES'"
+                "compose_f_args: missing required variable 'DIR_COMPOSITIONS'"
             )
 
         docker_compose = get_docker_paths(application_id, base_dir)

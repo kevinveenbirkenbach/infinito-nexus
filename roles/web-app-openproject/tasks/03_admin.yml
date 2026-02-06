@@ -1,6 +1,6 @@
 - name: Ensure administrator user exists and is admin
   shell: >
-    {{ PATH_COMPOSE }} exec -e OPENPROJECT_ADMIN_PASSWORD={{ OPENPROJECT_ADMINISTRATOR_PASSWORD | quote }} web bash -c "
+    {{ BIN_COMPOSE }} exec -e OPENPROJECT_ADMIN_PASSWORD={{ OPENPROJECT_ADMINISTRATOR_PASSWORD | quote }} web bash -c "
       cd /app &&
       bundle exec rails runner \"
         pw = ENV['OPENPROJECT_ADMIN_PASSWORD']

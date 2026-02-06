@@ -1,7 +1,7 @@
 ---
 - name: "Read token store from host"
   ansible.builtin.slurp:
-    src: "{{ PATH_INFINITO_TOKENS }}"
+    src: "{{ FILE_TOKENS }}"
   register: sys_token_store_raw
   failed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

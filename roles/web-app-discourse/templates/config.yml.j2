@@ -113,8 +113,8 @@ volumes:
       host:   {{ CA_ROOT.cert_host }}
       guest:  {{ CA_ROOT.cert_host }}
   - volume:
-      host:   {{ PATH_CA_TRUST }}
-      guest:  {{ PATH_CA_TRUST }}
+      host:   {{ BIN_CA_TRUST }}
+      guest:  {{ BIN_CA_TRUST }}
 {% endif %}
 
 ## Plugins go here
@@ -139,7 +139,7 @@ run:
   - exec: echo "Beginning of custom commands"
   - exec: rails r "SiteSetting.force_https = {{ DISCOURSE_TLS_ENABLED | bool | string | lower }}"
 {% if DISCOURSE_TLS_SELFSIGNED_ENABLED | bool %}
-  - exec: {{ PATH_CA_TRUST }}
+  - exec: {{ BIN_CA_TRUST }}
 {% endif %}
   ## If you want to set the 'From' email address for your first registration, uncomment and change:
   ## After getting the first signup email, re-comment the line. It only needs to run once.

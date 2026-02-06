@@ -7,16 +7,16 @@
 
 - name: Remove all docker compose pull locks
   file:
-    path: "{{ PATH_COMPOSE_PULL_LOCK_DIR }}"
+    path: "{{ DIR_COMPOSE_PULL_LOCK }}"
     state: absent
 
 - name: "reset (if enabled) for {{ role_name}}"
   include_tasks: 02_reset.yml
   when: MODE_RESET | bool
 
-- name: "create {{ PATH_COMPOSE_INSTANCES }}"
+- name: "create {{ DIR_COMPOSITIONS }}"
   file:
-    path:   "{{ PATH_COMPOSE_INSTANCES }}"
+    path:   "{{ DIR_COMPOSITIONS }}"
     state:  directory
     mode:   0700
     owner:  root
@@ -26,7 +26,7 @@
   become: true
   ansible.builtin.copy:
     src: "compose.py"
-    dest: "{{ PATH_COMPOSE }}"
+    dest: "{{ BIN_COMPOSE }}"
     mode: "0755"
     owner: root
     group: root

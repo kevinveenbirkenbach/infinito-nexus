@@ -15,7 +15,7 @@
 # The following taks are necessary because a clean setup is necessary
 - name: shut down docker compose project 
   command:
-    cmd:    "{{ PATH_COMPOSE }} down"
+    cmd:    "{{ BIN_COMPOSE }} down"
     chdir:  "{{ lookup('docker', application_id, 'directories.instance') }}"
 
 - name: "cleanup project folder"
@@ -69,12 +69,12 @@
 # Pull image when update is wished. 
 - name: docker compose pull
   command:
-    cmd:    "{{ PATH_COMPOSE }} pull"
+    cmd:    "{{ BIN_COMPOSE }} pull"
     chdir:  "{{ lookup('docker', application_id, 'directories.instance') }}"
 
 - name: docker compose up
   command:
-    cmd: "{{ PATH_COMPOSE }} up -d --remove-orphans"
+    cmd: "{{ BIN_COMPOSE }} up -d --remove-orphans"
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   environment:
     COMPOSE_HTTP_TIMEOUT:   "600"
@@ -101,7 +101,7 @@
 
 - name: create admin account
   command:
-    cmd: "{{ PATH_COMPOSE }} exec -it synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME }} -p {{ applications | get_app_conf(application_id, 'credentials.administrator_password') }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
+    cmd: "{{ BIN_COMPOSE }} exec -it synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME }} -p {{ applications | get_app_conf(application_id, 'credentials.administrator_password') }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   ignore_errors: true
   when: applications | get_app_conf(application_id, 'setup', True) | bool
@@ -110,7 +110,7 @@
 
 - name: create chatgpt bot
   command:
-    cmd: "{{ PATH_COMPOSE }} exec -it synapse register_new_matrix_user -u chatgptbot -p {{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password')}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
+    cmd: "{{ BIN_COMPOSE }} exec -it synapse register_new_matrix_user -u chatgptbot -p {{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password')}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   ignore_errors: true
   when: applications | get_app_conf(application_id, 'setup', True) | bool

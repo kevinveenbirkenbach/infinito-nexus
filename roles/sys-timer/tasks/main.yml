@@ -3,7 +3,7 @@
 - name: create {{ sys_timer_file }}
   template:
     src: dummy.timer.j2
-    dest: "{{ [ PATH_SYSTEM_SERVICE_DIR, sys_timer_file ] | path_join }}"
+    dest: "{{ [ DIR_SYSTEM_SERVICE, sys_timer_file ] | path_join }}"
   register: dummy_timer
 
 - name: "deploy timer"
