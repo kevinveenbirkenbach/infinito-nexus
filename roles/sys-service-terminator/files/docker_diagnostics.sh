@@ -61,7 +61,7 @@ for id in ${ids}; do
   echo "    status=${status:-?} health=${health:-n/a}"
   echo "    image=${image:-?}"
   echo "------------------------------------------------------------"
-  docker logs --tail "${TAIL}" "${id}" 2>&1 || true
+  container logs --tail "${TAIL}" "${id}" 2>&1 || true
   echo
 done
 

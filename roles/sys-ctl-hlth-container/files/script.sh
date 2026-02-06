@@ -16,7 +16,7 @@ if [ -n "$docker_ps_grep_unhealthy" ]; then
         echo "------------------------------------------------------------"
         echo "🔍 Last 200 log lines for unhealthy container: $container_name"
         echo "------------------------------------------------------------"
-        docker logs --tail 200 "$container_name" 2>&1 || echo "⚠️ Failed to fetch logs for $container_name"
+        container logs --tail 200 "$container_name" 2>&1 || echo "⚠️ Failed to fetch logs for $container_name"
         echo
 
         summary="$summary\n - $container_name (unhealthy)"
@@ -39,7 +39,7 @@ if [ -n "$docker_ps_grep_exited" ]; then
             echo "------------------------------------------------------------"
             echo "🔍 Last 200 log lines for exited container: $container_name"
             echo "------------------------------------------------------------"
-            docker logs --tail 200 "$container_name" 2>&1 || echo "⚠️ Failed to fetch logs for $container_name"
+            container logs --tail 200 "$container_name" 2>&1 || echo "⚠️ Failed to fetch logs for $container_name"
             echo
 
             summary="$summary\n - $container_name (exited: $container_exit_code)"

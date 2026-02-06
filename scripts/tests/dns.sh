@@ -119,7 +119,7 @@ section "CoreDNS container status"
 
 if docker ps --filter name=infinito-coredns --format '{{.Names}}' | grep -q infinito-coredns; then
   docker ps --filter name=infinito-coredns --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'
-  docker logs --tail=10 infinito-coredns || true
+  container logs --tail=10 infinito-coredns || true
   ok "CoreDNS container is running"
 else
   fail "CoreDNS container not running"
