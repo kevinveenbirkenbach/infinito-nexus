@@ -124,10 +124,8 @@ class TestBuildDockerCmd(unittest.TestCase):
             ignore_network_blocks_from=[],
         )
 
-        # NEW: wrapper command starts with ["run", "--rm"]
-        self.assertEqual(cmd[0:2], ["run", "--rm"])
+        self.assertEqual(cmd[0:2], ["container", "run"])
 
-        # NEW: always run as root inside container so with-ca-trust.sh can write trust store
         self.assertIn("--user", cmd)
         uidx = cmd.index("--user")
         self.assertEqual(cmd[uidx + 1], "0:0")
@@ -149,7 +147,7 @@ class TestBuildDockerCmd(unittest.TestCase):
             use_host_network=False,
         )
 
-        self.assertEqual(cmd[0:2], ["run", "--rm"])
+        self.assertEqual(cmd[0:2], ["container", "run"])
 
         # still root user injection
         self.assertIn("--user", cmd)
@@ -216,7 +214,7 @@ class TestRunChecker(unittest.TestCase):
         self.assertEqual(run_call.kwargs.get("check"), False)
 
         # NEW: it calls the wrapper "run", not "docker"
-        self.assertEqual(run_call.args[0][0:2], ["run", "--rm"])
+        self.assertEqual(run_call.args[0][0:2], ["container", "run"])
 
         # NEW: should contain injected root user
         self.assertIn("--user", run_call.args[0])

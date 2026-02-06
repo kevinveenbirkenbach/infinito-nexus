@@ -18,6 +18,15 @@
     state: present
   notify: docker restart
 
+- name: Install container wrapper (container)
+  become: true
+  ansible.builtin.copy:
+    src: container.py
+    dest: "{{ CONTAINER_BIN }}"
+    mode: "0755"
+    owner: root
+    group: root
+
 - name: "Assert that required services are available"
   include_tasks: "02_assert_requirements.yml"
   when: MODE_ASSERT | bool

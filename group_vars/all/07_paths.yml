@@ -3,14 +3,15 @@
 PATH_ADMINISTRATOR_HOME:            "/home/administrator/"
 PATH_ROOT_SCRIPTS:                  "/opt/scripts/"
 PATH_SYSTEMCTL_SCRIPTS:             "{{ [ PATH_ROOT_SCRIPTS, 'systemctl' ] | path_join }}"
-PATH_COMPOSE_INSTANCES:      "/opt/compose/"
+PATH_COMPOSE_INSTANCES:             "/opt/compose/"
 PATH_SYSTEM_SERVICE_DIR:            "/etc/systemd/system"
-PATH_COMPOSE_PULL_LOCK_DIR:  "/run/ansible/compose-pull/"
+PATH_COMPOSE_PULL_LOCK_DIR:         "/run/ansible/compose-pull/"
 
 # Executable files
 PATH_BIN:                           "/usr/local/bin/"
 PATH_COMPOSE:                       "{{ [ PATH_BIN, 'compose' ] | path_join }}"
 PATH_LOCK:                          "{{ [ PATH_BIN, 'lock' ] | path_join }}"
+CONTAINER_BIN:                      "{{ [ PATH_BIN, 'container' ] | path_join }}" 
 PATH_CA_TRUST:                      "{{ [ PATH_BIN, 'ca-trust' ] | path_join }}"
 PATH_CA_INJECT:                     "{{ [ PATH_BIN, 'ca-inject' ] | path_join }}"
 
