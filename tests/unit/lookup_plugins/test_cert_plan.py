@@ -155,9 +155,9 @@ class TestCertPlanLookup(unittest.TestCase):
         self.assertEqual(out["files"]["key"], "")
         self.assertEqual(out["domains"]["san"], [])
 
-    def test_want(self):
+    def test_want_path(self):
         val = self.lookup.run(
-            ["web-app-a"], variables=self.vars, mode="app", want="files.cert"
+            ["web-app-a", "files.cert"], variables=self.vars, mode="app"
         )[0]
         self.assertEqual(val, "/etc/letsencrypt/live/a.example/fullchain.pem")
 

@@ -64,9 +64,9 @@ class TestTlsResolveLookup(unittest.TestCase):
         self.assertEqual(out["domains"]["primary"], "b.example")
         self.assertEqual(out["domains"]["all"], ["b.example", "b-alt.example"])
 
-    def test_want_returns_scalar(self):
+    def test_want_path_returns_scalar(self):
         val = self.lookup.run(
-            ["web-app-a"], variables=self.base_vars, mode="app", want="url.base"
+            ["web-app-a", "url.base"], variables=self.base_vars, mode="app"
         )[0]
         self.assertEqual(val, "https://a.example/")
 
