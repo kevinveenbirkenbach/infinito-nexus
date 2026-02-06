@@ -23,7 +23,7 @@
   meta: flush_handlers
 
 - name: "Matomo install | Wait for Matomo container to be running"
-  command: docker inspect -f '{{ "{{" }}.State.Running{{ "}}" }}' {{ MATOMO_NAME }}
+  command: "{{ BIN_CONTAINER }} inspect -f '{{ \"{{\" }}.State.Running{{ \"}}\" }}' {{ MATOMO_NAME }}"
   register: matomo_running
   changed_when: false
   retries: 30

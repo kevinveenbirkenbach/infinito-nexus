@@ -58,7 +58,7 @@
 # https://github.com/matrix-org/synapse/issues/6303
 - name: set correct folder permissions
   command:
-    cmd: "docker run --rm --mount type=volume,src={{ MATRIX_SYNAPSE_VOLUME }},dst=/data -e SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }} -e SYNAPSE_REPORT_STATS=no --entrypoint /bin/sh matrixdotorg/synapse:latest -c 'chown -vR 991:991 /data'"
+    cmd: "{{ BIN_CONTAINER }} run --rm --mount type=volume,src={{ MATRIX_SYNAPSE_VOLUME }},dst=/data -e SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }} -e SYNAPSE_REPORT_STATS=no --entrypoint /bin/sh matrixdotorg/synapse:latest -c 'chown -vR 991:991 /data'"
 
 - name: add docker-compose.yml
   template:

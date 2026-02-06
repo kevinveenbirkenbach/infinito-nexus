@@ -24,7 +24,7 @@
 
 - name: "POSTGRES | Wait until container is running (not restarting)"
   ansible.builtin.shell: >
-    docker inspect --format '{{ "{{.State.Status}}" }} {{ "{{.State.Restarting}}" }}' {{ POSTGRES_CONTAINER }}
+    {{ BIN_CONTAINER }} inspect --format '{{ "{{.State.Status}}" }} {{ "{{.State.Restarting}}" }}' {{ POSTGRES_CONTAINER }}
   register: pg_state
   retries: 120
   delay: 2

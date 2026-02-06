@@ -125,32 +125,24 @@
       changed_when: false
       failed_when: false
 
-    - name: "POSTGRES | docker inspect (escaped go-templates)"
+    - name: "POSTGRES | {{ BIN_CONTAINER }} inspect (escaped go-templates)"
       ansible.builtin.shell: |
         set -e
 
         echo "== Container state =="
-        {% raw %}
-        docker inspect --format 'Name={{.Name}} State={{.State.Status}} ExitCode={{.State.ExitCode}} StartedAt={{.State.StartedAt}} Restarting={{.State.Restarting}}'
-        {% endraw %} {{ POSTGRES_CONTAINER }}
+        {{ BIN_CONTAINER }} {% raw %}inspect --format 'Name={{.Name}} State={{.State.Status}} ExitCode={{.State.ExitCode}} StartedAt={{.State.StartedAt}} Restarting={{.State.Restarting}}' {% endraw %} {{ POSTGRES_CONTAINER }}
 
         echo
         echo "== Image =="
-        {% raw %}
-        docker inspect --format 'Image={{.Config.Image}}'
-        {% endraw %} {{ POSTGRES_CONTAINER }}
+        {{ BIN_CONTAINER }} {% raw %} inspect --format 'Image={{.Config.Image}}' {% endraw %} {{ POSTGRES_CONTAINER }}
 
         echo
         echo "== Mounts =="
-        {% raw %}
-        docker inspect --format '{{range .Mounts}}{{.Type}}:{{.Source}}->{{.Destination}}{{"\n"}}{{end}}'
-        {% endraw %} {{ POSTGRES_CONTAINER }}
+        {{ BIN_CONTAINER }} {% raw %} inspect --format '{{range .Mounts}}{{.Type}}:{{.Source}}->{{.Destination}}{{"\n"}}{{end}}' {% endraw %} {{ POSTGRES_CONTAINER }}
 
         echo
         echo "== Env (redacted) =="
-        {% raw %}
-        docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}'
-        {% endraw %} {{ POSTGRES_CONTAINER }} | sed -E 's/=.*/=***REDACTED***/'
+        {{ BIN_CONTAINER }} {% raw %} inspect --format '{{range .Config.Env}}{{println .}}{{end}}' {% endraw %} {{ POSTGRES_CONTAINER }} | sed -E 's/=.*/=***REDACTED***/'
       register: dbg_docker_inspect
       changed_when: false
       failed_when: false

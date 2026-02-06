@@ -28,7 +28,7 @@
   block:
     - name: Wait until the Moodle container is healthy
       ansible.builtin.shell: >
-        docker inspect --format '{% raw %}{{.State.Health.Status}}{% endraw %}' {{ MOODLE_CONTAINER }}
+        {{ BIN_CONTAINER }} inspect --format '{% raw %}{{.State.Health.Status}}{% endraw %}' {{ MOODLE_CONTAINER }}
       register: health_check
       until: health_check.stdout.strip() == "healthy"
       retries: 120
@@ -36,7 +36,7 @@
 
   rescue:
     - name: Show Moodle container status
-      ansible.builtin.shell: docker inspect {{ MOODLE_CONTAINER }}
+      ansible.builtin.shell: {{ BIN_CONTAINER }} inspect {{ MOODLE_CONTAINER }}
       register: moodle_inspect
       changed_when: false
       failed_when: false
@@ -52,7 +52,7 @@
         msg: |
           ❌ Moodle container did not become healthy in time.
 
-          --- docker inspect ---
+          --- {{ BIN_CONTAINER }} inspect ---
           {{ moodle_inspect.stdout | default('no output') }}
 
           --- docker logs (last 200 lines) ---

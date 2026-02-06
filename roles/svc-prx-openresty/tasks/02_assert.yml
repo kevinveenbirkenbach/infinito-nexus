@@ -1,7 +1,7 @@
 - block:
     - name: Wait until OpenResty container is running
       command: >
-        docker inspect -f '{{ "{{.State.Running}}" }}' {{ OPENRESTY_CONTAINER }}
+        {{ BIN_CONTAINER }} inspect -f '{{ "{{.State.Running}}" }}' {{ OPENRESTY_CONTAINER }}
       register: openresty_running
       changed_when: false
       until: openresty_running.stdout | trim == "true"

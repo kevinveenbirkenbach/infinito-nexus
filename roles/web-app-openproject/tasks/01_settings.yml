@@ -5,7 +5,7 @@
 
 - name: Wait until OpenProject web container is running
   shell: >
-    docker inspect -f '{{"{{"}}.State.Status{{"}}"}}' {{ OPENPROJECT_WEB_CONTAINER }}
+    {{ BIN_CONTAINER }} inspect -f '{{"{{"}}.State.Status{{"}}"}}' {{ OPENPROJECT_WEB_CONTAINER }}
   register: openproject_web_state
   retries: 60
   delay: 5
@@ -36,7 +36,7 @@
 
 - name: Wait until OpenProject web container is running (after migrations)
   shell: >
-    docker inspect -f '{{"{{"}}.State.Status{{"}}"}}' {{ OPENPROJECT_WEB_CONTAINER }}
+    {{ BIN_CONTAINER }} inspect -f '{{"{{"}}.State.Status{{"}}"}}' {{ OPENPROJECT_WEB_CONTAINER }}
   register: openproject_web_state_after_migrate
   retries: 60
   delay: 5
