@@ -43,8 +43,8 @@
       <object xmlns="http://www.xwiki.org">
         <className>XWiki.XWikiUsers</className>
         <properties>
-          <property name="first_name">{{ users.administrator.firstname | default('Admin') }}</property>
-          <property name="last_name">{{ users.administrator.lastname  | default('User') }}</property>
+          <property name="first_name">{{ users.administrator.firstname }}</property>
+          <property name="last_name">{{ users.administrator.lastname }}</property>
           <property name="email">{{ users.administrator.email }}</property>
           <property name="active">1</property>
         </properties>
