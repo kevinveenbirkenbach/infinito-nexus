@@ -57,7 +57,7 @@ KEYCLOAK_SERVER_HOST:               "127.0.0.1:{{ ports.localhost.http[applicati
   
 ## Update
 KEYCLOAK_REDIRECT_FEATURES:         ["docker.services.oauth2.enabled","docker.services.oidc.enabled"]
-KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ lookup('tls_resolve', 'web-svc-logout', want='url.base') }}"
+KEYCLOAK_FRONTCHANNEL_LOGOUT_URL:   "{{ lookup('tls_resolve', 'web-svc-logout', 'url.base') }}"
 # This will lead to issues later @todo; Optimize:
 KEYCLOAK_REDIRECT_URIS:             "{{ domains | redirect_uris(applications, lookup('tls_resolve', application_id, 'protocols.web'), '/*', KEYCLOAK_REDIRECT_FEATURES) }}"
 KEYCLOAK_WEB_ORIGINS: >-

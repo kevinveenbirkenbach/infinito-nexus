@@ -8,7 +8,7 @@
 - block:
   - name: "Check if Mail Host is reachable"
     uri:
-      url: "{{ lookup('tls_resolve', 'web-app-mailu', want='url.base') }}"
+      url: "{{ lookup('tls_resolve', 'web-app-mailu', 'url.base') }}"
       method: HEAD
       validate_certs: yes
       status_code: "{{ mailu_valid_status_codes }}"

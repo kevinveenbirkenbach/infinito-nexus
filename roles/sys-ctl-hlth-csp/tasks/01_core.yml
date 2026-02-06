@@ -45,7 +45,7 @@
           '--nginx-config-dir=' ~ (
             [
               lookup('nginx_paths','directories.configuration.servers'),
-              lookup('tls_resolve', DOMAIN_PRIMARY, want='protocols.web')
+              lookup('tls_resolve', DOMAIN_PRIMARY, 'protocols.web')
             ] | path_join
           ),
           '--image=' ~ HEALTH_CSP_IMAGE,

@@ -494,7 +494,7 @@
         "/realms/{{ KEYCLOAK_REALM }}/account/*"
       ],
       "webOrigins": [
-        "{{ lookup('tls_resolve', 'web-app-keycloak', want='url.base') }}"
+        "{{ lookup('tls_resolve', 'web-app-keycloak', 'url.base') }}"
       ],
       "notBefore": 0,
       "bearerOnly": false,

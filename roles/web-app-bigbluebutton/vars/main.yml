@@ -35,7 +35,7 @@ BBB_RELAY_PORT_RANGE:                 "{{ BBB_RELAY_PORT_START }}-{{ BBB_RELAY_P
 
 ## Collabora
 BBB_COLLABORA_ENABLED:                "{{ not (applications | get_app_conf(application_id, 'docker.services.collabora.shared')) }}"
-BBB_COLLABORA_URL:                    "{{ 'https://collabora:9980/cool' if BBB_COLLABORA_ENABLED else ((lookup('tls_resolve', 'web-svc-collabora', want='url.base'))) }}"
+BBB_COLLABORA_URL:                    "{{ 'https://collabora:9980/cool' if BBB_COLLABORA_ENABLED else ((lookup('tls_resolve', 'web-svc-collabora', 'url.base'))) }}"
 
 ### Recording
 BBB_RECORDING_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.'~ entity_name ~'.recording.enabled') }}"

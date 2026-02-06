@@ -8,6 +8,6 @@
 - name: Create HTTP->HTTPS handler per domain
   ansible.builtin.template:
     src:  "http.conf.j2"
-    dest: "{{ lookup('nginx_paths', domain, protocol='http', want='files.domain') }}"
+    dest: "{{ lookup('nginx_paths', 'files.domain', domain, protocol='http') }}"
   notify:     restart openresty
   when:       HTTPS_REDIRECT_ENABLED | bool

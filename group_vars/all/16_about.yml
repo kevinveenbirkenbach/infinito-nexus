@@ -26,9 +26,9 @@ defaults_service_provider:
     pixelfed:       "{{ '@' ~ users.contact.username ~ '@' ~ domains | get_domain('web-app-pixelfed') if 'web-app-pixelfed' in group_names else 'infinito@picture.infinito.nexus' }}"
     phone:          "+0 000 000 404"
     wordpress:      "{{ '@' ~ users.contact.username ~ '@' ~ domains | get_domain('web-app-wordpress') if 'web-app-wordpress' in group_names else '@blog@blog.infinito.nexus' }}"
-    newsletter:     "{{ [ (lookup('tls_resolve', 'web-app-listmonk', want='url.base')), '/subscription/form' ] | url_join  if 'web-app-listmonk' in group_names else 'https://newsletter.infinito.nexus' }}"
+    newsletter:     "{{ [ (lookup('tls_resolve', 'web-app-listmonk', 'url.base')), '/subscription/form' ] | url_join  if 'web-app-listmonk' in group_names else 'https://newsletter.infinito.nexus' }}"
 
   legal:
     editorial_responsible:  "DEMO USER"
     source_code:            "https://s.{{ SOFTWARE_NAME | lower }}/code"
-    imprint:                "{{ lookup('tls_resolve', 'web-svc-html', want='url.base') }}imprint.html"
+    imprint:                "{{ lookup('tls_resolve', 'web-svc-html', 'url.base') }}imprint.html"

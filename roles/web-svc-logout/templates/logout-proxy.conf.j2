@@ -11,7 +11,7 @@ location = /logout {
     {% endif %}
 
     {# CORS headers – allow your central page to call this #}
-    {%- set aca_origin = (lookup('tls_resolve', 'web-svc-logout', want='url.base') | regex_replace('/$', '')) ~ " always" -%}
+    {%- set aca_origin = (lookup('tls_resolve', 'web-svc-logout', 'url.base') | regex_replace('/$', '')) ~ " always" -%}
     {%- set aca_credentials = "'true' always" -%}
     {%- set aca_methods = "'GET, OPTIONS' always" -%}
     {%- set aca_headers = "'Accept, Authorization' always" -%}

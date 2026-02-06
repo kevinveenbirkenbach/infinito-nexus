@@ -1,7 +1,7 @@
 # Keep in mind to don't use inj_enabled. 
 - name: "Check if Matomo endpoint is reachable"
   uri:
-    url: "{{ lookup('tls_resolve', 'web-app-matomo', want='url.base') }}"
+    url: "{{ lookup('tls_resolve', 'web-app-matomo', 'url.base') }}"
     method: HEAD
     validate_certs: yes
     status_code: 200

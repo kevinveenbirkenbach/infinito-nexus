@@ -16,7 +16,7 @@ function getExportName(slug) {
 // Root: redirect to documentation (only if web-app-sphinx is available)
 app.get('/', (req, res) => {
   {% if 'web-app-sphinx' in group_names %}
-  res.redirect('{{ lookup("tls_resolve", "web-app-sphinx", want="url.base") }}{{ application_id | rel_role_path_by_application_id }}/README.html');
+  res.redirect('{{ lookup("tls_resolve", "web-app-sphinx", "url.base") }}{{ application_id | rel_role_path_by_application_id }}/README.html');
   {% else %}
   res
     .status(200)
