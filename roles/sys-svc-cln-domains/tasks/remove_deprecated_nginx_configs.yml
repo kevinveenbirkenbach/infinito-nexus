@@ -16,6 +16,6 @@
 
 - name: Remove exact nginx config for {{ domain }}
   ansible.builtin.file:
-    path: "{{ lookup('nginx_paths', domain, 'files.domain') }}"
+    path: "{{ lookup('nginx_paths', 'files.domain', domain) }}"
     state: absent
   notify: restart openresty
