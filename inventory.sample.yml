@@ -77,6 +77,10 @@ WORKSTATION_USER: biber
 
 ansible_python_interpreter: /usr/bin/python3
 
+## Overrides to avoid hitting rate limits
+SYS_SVC_DOCKER_DNS_TEST_BUSYBOX_IMAGE: "ghcr.io/kevinveenbirkenbach/mirror/busybox:1.36"
+SYS_SVC_DOCKER_DNS_TEST_NODE_IMAGE: "ghcr.io/kevinveenbirkenbach/mirror/node:20-alpine"
+
 # Uncomment the following lines to speed up debugging:
 
 # # Performance:

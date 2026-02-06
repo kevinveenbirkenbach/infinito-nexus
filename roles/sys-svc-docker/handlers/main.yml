@@ -13,3 +13,6 @@
   when:
     - DOCKER_IN_CONTAINER | bool
     - MODE_DEBUG | bool
+  environment:
+    BUSYBOX_IMAGE: "{{ SYS_SVC_DOCKER_DNS_TEST_BUSYBOX_IMAGE }}"
+    NODE_IMAGE: "{{ SYS_SVC_DOCKER_DNS_TEST_NODE_IMAGE }}"

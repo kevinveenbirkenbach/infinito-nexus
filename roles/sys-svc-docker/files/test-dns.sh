@@ -2,6 +2,12 @@
 set -euo pipefail
 
 # ------------------------------------------------------------
+# Optional env overrides (with safe defaults)
+# ------------------------------------------------------------
+: "${BUSYBOX_IMAGE:=busybox:1.36}"
+: "${NODE_IMAGE:=node:20-alpine}"
+
+# ------------------------------------------------------------
 # Required env (must already be present in the container)
 # ------------------------------------------------------------
 : "${DNS_IP:?Missing env DNS_IP}"
@@ -43,7 +49,7 @@ docker info >/dev/null 2>&1 || fail "docker info still failing after waiting"
 # ------------------------------------------------------------
 section "Docker-in-Docker DNS (busybox: A + no SERVFAIL)"
 
-docker run --rm --dns "${DNS_IP}" busybox:1.36 sh -lc "
+docker run --rm --dns "${DNS_IP}" "${BUSYBOX_IMAGE}" sh -lc "
   set -e
 
   test_lookup_a() {
@@ -81,7 +87,7 @@ ok "Inner container DNS works (A present; no SERVFAIL)"
 # ------------------------------------------------------------
 section "Docker-in-Docker DNS (node/getaddrinfo)"
 
-docker run --rm --dns "${DNS_IP}" node:20-alpine sh -lc "
+docker run --rm --dns "${DNS_IP}" "${NODE_IMAGE}" sh -lc "
   set -e
   node -e \"
     const dns = require('dns');
