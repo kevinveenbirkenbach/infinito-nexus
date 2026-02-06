@@ -13,7 +13,7 @@
   loop: "{{ MATRIX_BRIDGES }}"
 
 # The following taks are necessary because a clean setup is necessary
-- name: shut down docker compose project 
+- name: shut down compose project 
   command:
     cmd:    "{{ BIN_COMPOSE }} down"
     chdir:  "{{ lookup('docker', application_id, 'directories.instance') }}"

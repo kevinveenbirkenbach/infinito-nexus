@@ -201,9 +201,9 @@ def ensure_image_available(
     Strategy:
       1) If docker image inspect works -> OK
       2) Else:
-         - If THIS service has 'build' -> run `docker compose ... build <service>`
+         - If THIS service has 'build' -> run `compose ... build <service>`
          - Else if another service builds the SAME image -> build that builder service
-         - Otherwise -> run `docker compose ... pull <service>`
+         - Otherwise -> run `compose ... pull <service>`
     """
     img = (image or "").strip()
     if not img:
@@ -330,9 +330,9 @@ def _load_services_via_config(
 ) -> Dict[str, Any]:
     rc, out, err = run(compose_cmd + ["config"], cwd=cwd, env=env)
     if rc != 0:
-        die(f"docker compose config failed for {label} (rc={rc}): {err.strip()}")
+        die(f"compose config failed for {label} (rc={rc}): {err.strip()}")
 
-    doc = parse_yaml(out, f"docker compose config output ({label})")
+    doc = parse_yaml(out, f"compose config output ({label})")
     services = doc.get("services")
     if not isinstance(services, dict) or not services:
         return {}
@@ -447,7 +447,7 @@ def render_override(
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Generate docker-compose CA trust override via docker compose config"
+        description="Generate docker-compose CA trust override via compose config"
     )
     ap.add_argument("--chdir", required=True, help="Compose instance directory")
     ap.add_argument("--project", required=True, help="Compose project name (-p)")

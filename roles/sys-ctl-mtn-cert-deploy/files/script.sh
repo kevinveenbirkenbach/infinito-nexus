@@ -59,7 +59,7 @@ chmod a+r -v "${docker_compose_cert_directory}/"* || exit 1
 cd "$docker_compose_instance_directory" || exit 1
 
 # List services via wrapper to ensure correct -p/-f/--env-file stack is used
-# IMPORTANT: use "--" to stop wrapper arg parsing (so docker compose flags like "--services" are passed through)
+# IMPORTANT: use "--" to stop wrapper arg parsing (so compose flags like "--services" are passed through)
 services="$(sh -c "$compose_cmd -- ps --services")"
 
 restart_services=""

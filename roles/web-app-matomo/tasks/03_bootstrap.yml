@@ -2,7 +2,7 @@
 
 - block:
 
-    - name: "Matomo bootstrap | Run one-shot bootstrap via docker compose profile"
+    - name: "Matomo bootstrap | Run one-shot bootstrap via compose profile"
       ansible.builtin.command:
         argv:
           - "{{ BIN_COMPOSE }}"
@@ -26,7 +26,7 @@
     - name: "DEBUG | bootstrap result (sanitized/minimal when masked)"
       ansible.builtin.debug:
         msg:
-          - "=== docker compose bootstrap FAILED ==="
+          - "=== compose bootstrap FAILED ==="
           - "rc={{ matomo_bootstrap_run.rc | default('n/a') }}"
           - "stdout_len={{ (matomo_bootstrap_run.stdout | default('') | string) | length }}"
           - "stderr_len={{ (matomo_bootstrap_run.stderr | default('') | string) | length }}"
@@ -35,7 +35,7 @@
     - name: "DEBUG | bootstrap result (full when not masked)"
       ansible.builtin.debug:
         msg:
-          - "=== docker compose bootstrap FAILED ==="
+          - "=== compose bootstrap FAILED ==="
           - "rc={{ matomo_bootstrap_run.rc | default('n/a') }}"
           - "--- stdout ---"
           - "{{ matomo_bootstrap_run.stdout | default('') }}"
@@ -67,7 +67,7 @@
       changed_when: false
       when: not (MASK_CREDENTIALS_IN_LOGS | bool)
 
-    - name: "DEBUG | docker compose config (effective)"
+    - name: "DEBUG | compose config (effective)"
       ansible.builtin.command:
         argv:
           - "{{ BIN_COMPOSE }}"

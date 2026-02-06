@@ -22,7 +22,7 @@
   notify:
     - compose up
 
-- name: "Flush docker compose handlers"
+- name: "Flush compose handlers"
   meta: flush_handlers
 
 - name: Wait for Shopware HTTP endpoint

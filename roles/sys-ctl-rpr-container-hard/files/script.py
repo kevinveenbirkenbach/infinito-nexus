@@ -13,7 +13,7 @@ def run(cmd: list[str], cwd: str) -> None:
 
 def hard_restart_docker_services(dir_path: str) -> None:
     """
-    Perform a hard restart of docker compose services in the given directory
+    Perform a hard restart of compose services in the given directory
     using compose wrapper (auto env + overrides).
     """
     try:
@@ -47,11 +47,11 @@ def hard_restart_docker_services(dir_path: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Restart docker compose services in subdirectories (with compose wrapper)."
+        description="Restart compose services in subdirectories (with compose wrapper)."
     )
     parser.add_argument(
         "parent_directory",
-        help="Path to the parent directory containing docker compose projects",
+        help="Path to the parent directory containing compose projects",
     )
     parser.add_argument(
         "--only", nargs="+", help="Restart only the specified subdirectories (by name)"

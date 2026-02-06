@@ -2,10 +2,7 @@
 - name: Validate Docker Compose configuration
   ansible.builtin.shell: |
     set -euo pipefail
-    docker compose -p {{ application_id | get_entity_name }} \
-      {{ lookup('compose_file_args', application_id, include_ca=False) }} \
-      {% if lookup('docker', application_id, 'files.env') is file %}--env-file {{ lookup('docker', application_id, 'files.env') }}{% endif %} \
-      config --quiet
+    compose config --quiet
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
     executable: /bin/bash
@@ -38,7 +35,7 @@
   listen:
     - compose up
 
-- name: Build docker compose
+- name: Build compose 
   ansible.builtin.shell: |
     set -euo pipefail
     compose build || {

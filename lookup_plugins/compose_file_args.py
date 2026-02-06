@@ -1,6 +1,6 @@
 # lookup_plugins/compose_file_args.py
 #
-# Build docker compose "-f <file>" arguments for an application instance.
+# Build compose "-f <file>" arguments for an application instance.
 #
 # HARD FAIL PRINCIPLE:
 # - No silent defaults that change behavior.

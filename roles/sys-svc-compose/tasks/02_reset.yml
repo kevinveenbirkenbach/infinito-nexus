@@ -7,7 +7,7 @@
   vars:
     package_name: "{{ COMPOSE_DOWN_ALL_PACKAGE }}"
 
-- name: Shutdown all docker compose instances in '{{ DIR_COMPOSITIONS }}' with '{{ COMPOSE_DOWN_ALL_PACKAGE }}'
+- name: Shutdown all compose instances in '{{ DIR_COMPOSITIONS }}' with '{{ COMPOSE_DOWN_ALL_PACKAGE }}'
   command: "{{ COMPOSE_DOWN_ALL_PACKAGE }} {{ DIR_COMPOSITIONS }}"
 
 - name: "Remove directory '{{ DIR_COMPOSITIONS }}' and all its contents"

@@ -60,7 +60,7 @@
   notify: compose up
   when: not config_file.stat.exists
 
-- name: "Flush docker compose handlers"
+- name: "Flush compose handlers"
   meta: flush_handlers
 
 - name: Wait for Desktop HTTP endpoint (required so all logos can be downloaded during initialization)

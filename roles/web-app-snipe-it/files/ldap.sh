@@ -27,7 +27,7 @@ export XDG_CONFIG_HOME=/tmp
 echo "[snipe-it][ldap] waiting for settings table…"
 
 for i in {1..60}; do
-  if docker compose exec -T "${SNIPE_IT_SERVICE}" php -r '
+  if compose exec -T "${SNIPE_IT_SERVICE}" php -r '
     require "vendor/autoload.php";
     $app = require "bootstrap/app.php";
     $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
@@ -56,7 +56,7 @@ done
 ###############################################################################
 echo "[snipe-it][ldap] applying LDAP configuration"
 
-docker compose exec -T \
+compose exec -T \
   -e APP_KEY="${APP_KEY}" \
   "${SNIPE_IT_SERVICE}" \
   php -r '
@@ -95,6 +95,6 @@ docker compose exec -T \
 ###############################################################################
 echo "[snipe-it][ldap] clearing Laravel cache"
 
-docker compose exec -T "${SNIPE_IT_SERVICE}" php artisan optimize:clear
+compose exec -T "${SNIPE_IT_SERVICE}" php artisan optimize:clear
 
 echo "[snipe-it][ldap] LDAP configuration completed successfully"

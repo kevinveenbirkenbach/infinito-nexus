@@ -27,5 +27,5 @@
   loop_control:
     label: "{{ item.dest }}"
 
-- name: "Flush docker compose handlers"
+- name: "Flush compose handlers"
   meta: flush_handlers

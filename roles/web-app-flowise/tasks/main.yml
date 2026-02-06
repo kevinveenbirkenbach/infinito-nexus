@@ -11,7 +11,7 @@
     dest: "{{ FLOWISE_LITELLM_CONFIG_PATH_HOST }}"
   notify: compose up
 
-- name: "flush handlers of docker compose"
+- name: "flush handlers of compose"
   meta: flush_handlers
 
 - name: "Include role sys-stk-front-proxy for '{{ application_id }}'"

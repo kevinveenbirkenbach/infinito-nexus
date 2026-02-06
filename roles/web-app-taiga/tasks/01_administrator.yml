@@ -1,7 +1,6 @@
 - name: "Run Taiga migrations (required before admin creation)"
   command: >
-    docker compose
-    -f {{ TAIGA_COMPOSE_PATH }}
+    compose
     -f {{ TAIGA_COMPOSE_INIT_PATH }}
     run --rm {{ TAIGA_MANAGER_SERVICE }}
     migrate --noinput
@@ -12,8 +11,7 @@
 
 - name: "Create Taiga admin user (idempotent)"
   command: >
-    docker compose
-    -f {{ TAIGA_COMPOSE_PATH }}
+    compose
     -f {{ TAIGA_COMPOSE_INIT_PATH }}
     run --rm {{ TAIGA_MANAGER_SERVICE }}
     createsuperuser --noinput
@@ -32,8 +30,7 @@
 
 - name: "Upsert Taiga admin via manage.py shell"
   command: >
-    docker compose
-    -f {{ TAIGA_COMPOSE_PATH }}
+    compose
     -f {{ TAIGA_COMPOSE_INIT_PATH }}
     run --rm
     -e DJANGO_SUPERUSER_PASSWORD={{ TAIGA_SUPERUSER_PASSWORD | quote }}

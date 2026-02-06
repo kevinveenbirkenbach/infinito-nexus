@@ -320,7 +320,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             s.build_cmd = fake_build_cmd  # type: ignore[assignment]
             s.os.execvp = fake_execvp  # type: ignore[assignment]
 
-            # Everything after "--" must be passed through to docker compose, with the "--" removed
+            # Everything after "--" must be passed through to compose, with the "--" removed
             s.sys.argv = ["compose.py", "--", "ps", "--services"]
 
             with self.assertRaises(RuntimeError):

@@ -1,10 +1,6 @@
 - name: "Check if any container is running in {{ lookup('docker', application_id, 'directories.instance') }}"
   command: >-
-    docker compose
-    -p {{ application_id | get_entity_name }}
-    {{ lookup('compose_file_args', application_id) }}
-    {% if lookup('docker', application_id, 'files.env') is file %} --env-file {{ lookup('docker', application_id, 'files.env') }}{% endif %}
-    ps -q --filter status=running
+    compose ps -q --filter status=running
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   register: docker_ps

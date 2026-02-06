@@ -82,7 +82,7 @@ class TestComposeCaInject(unittest.TestCase):
     def test_ensure_image_available_builds_self_when_build_present(self):
         """
         If the service has build:, ensure_image_available should run
-        `docker compose ... build <service>` (not pull).
+        `compose ... build <service>` (not pull).
         """
         calls = []
 
@@ -98,7 +98,7 @@ class TestComposeCaInject(unittest.TestCase):
                     return 1, "", "no such image"
                 return 0, json.dumps([{"Config": {"Entrypoint": [], "Cmd": []}}]), ""
 
-            # docker compose ... build app
+            # compose ... build app
             if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["build", "app"]:
                 return 0, "built", ""
 
@@ -127,7 +127,7 @@ class TestComposeCaInject(unittest.TestCase):
         New robust logic:
         - 'worker' has no build but references image 'custom:1'
         - 'app' has build and same image 'custom:1'
-        => should run `docker compose ... build app` and not pull worker.
+        => should run `compose ... build app` and not pull worker.
         """
         calls = []
 
@@ -229,14 +229,14 @@ class TestComposeCaInject(unittest.TestCase):
         """
         main():
           - parses compose files to discover profiles
-          - runs `docker compose ... config`
+          - runs `compose ... config`
           - inspects images via `docker image inspect`
           - writes override with CA_TRUST_* envs
         """
         _read_text.return_value = "services:\n  app:\n    image: myimage:latest\n"
 
         def fake_run(cmd, *, cwd, env):
-            # docker compose ... config
+            # compose ... config
             if (
                 len(cmd) >= 3
                 and cmd[0:2] == ["docker", "compose"]
@@ -515,7 +515,7 @@ class TestComposeCaInject(unittest.TestCase):
         ):
 
             def fake_run(cmd, *, cwd, env):
-                # docker compose ... config
+                # compose ... config
                 if (
                     len(cmd) >= 3
                     and cmd[0:2] == ["docker", "compose"]
@@ -690,7 +690,7 @@ class TestComposeCaInject(unittest.TestCase):
         ):
 
             def fake_run(cmd, *, cwd, env):
-                # docker compose ... config
+                # compose ... config
                 if (
                     len(cmd) >= 3
                     and cmd[0:2] == ["docker", "compose"]
