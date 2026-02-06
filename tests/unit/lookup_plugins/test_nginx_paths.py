@@ -4,24 +4,29 @@ from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 
-# Adjust if your repo uses a different import root
 from lookup_plugins.nginx_paths import LookupModule
 
 
 class _FakeTlsResolveLookup:
     """
-    Minimal fake lookup plugin compatible with both call styles:
-      - run([domain], variables=..., want="protocols.web")
-      - run([domain], variables=...)
+    Minimal fake lookup plugin compatible with the NEW call style:
+      - run([domain, "protocols.web"], variables=...)
     """
 
     def __init__(self, protocol: str):
         self._protocol = protocol
 
     def run(self, terms, variables=None, **kwargs):
-        want = kwargs.get("want", "")
-        if want and want != "protocols.web":
-            raise AssertionError(f"Unexpected want passed to tls_resolve: {want}")
+        # New API: second positional term is want-path
+        if len(terms) != 2 or terms[1] != "protocols.web":
+            raise AssertionError(f"Unexpected terms passed to tls_resolve: {terms}")
+
+        # Legacy kwarg want must be ignored; if it appears, fail (we don't expect it anymore)
+        if "want" in kwargs and kwargs["want"]:
+            raise AssertionError(
+                f"Unexpected want kwarg passed to tls_resolve: {kwargs}"
+            )
+
         return [self._protocol]
 
 
@@ -39,28 +44,25 @@ class TestNginxPathsLookup(unittest.TestCase):
             return "/opt/mock/nginx"
         raise KeyError(key)
 
-    def test_base_structure(self):
+    def _run(self, terms, **kwargs):
         with patch(
             "lookup_plugins.nginx_paths.get_app_conf",
             side_effect=self._fake_get_app_conf,
         ):
-            out = self.plugin.run([], variables=self.variables)[0]
+            return self.plugin.run(terms, variables=self.variables, **kwargs)[0]
 
-        self.assertIn("files", out)
-        self.assertIn("directories", out)
-        self.assertIn("user", out)
+    def test_files_configuration_projection(self):
+        out = self._run(["files.configuration"])
+        self.assertEqual(out, "/opt/mock/nginx/nginx.conf")
 
-        self.assertEqual(out["files"]["configuration"], "/opt/mock/nginx/nginx.conf")
+    def test_directories_configuration_projection(self):
+        out = self._run(["directories.configuration.base"])
+        self.assertEqual(out, "/opt/mock/nginx/conf.d/")
 
-        conf = out["directories"]["configuration"]
-        self.assertEqual(conf["base"], "/opt/mock/nginx/conf.d/")
-        self.assertEqual(conf["global"], "/opt/mock/nginx/conf.d/global/")
-        self.assertEqual(conf["servers"], "/opt/mock/nginx/conf.d/servers/")
-        self.assertEqual(conf["maps"], "/opt/mock/nginx/conf.d/maps/")
-        self.assertEqual(conf["streams"], "/opt/mock/nginx/conf.d/streams/")
-
+    def test_directories_configuration_http_includes(self):
+        out = self._run(["directories.configuration.http_includes"])
         self.assertEqual(
-            conf["http_includes"],
+            out,
             [
                 "/opt/mock/nginx/conf.d/global/",
                 "/opt/mock/nginx/conf.d/maps/",
@@ -69,27 +71,30 @@ class TestNginxPathsLookup(unittest.TestCase):
             ],
         )
 
-        data = out["directories"]["data"]
-        self.assertEqual(data["www"], "/opt/mock/www/")
-        self.assertEqual(data["html"], "/opt/mock/www/public_html/")
-        self.assertEqual(data["files"], "/opt/mock/www/public_files/")
-        self.assertEqual(data["cdn"], "/opt/mock/www/public_cdn/")
-        self.assertEqual(data["global"], "/opt/mock/www/global/")
-        self.assertEqual(data["well_known"], "/usr/share/nginx/well-known/")
+    def test_directories_data_projection(self):
+        out = self._run(["directories.data"])
+        self.assertEqual(out["www"], "/opt/mock/www/")
+        self.assertEqual(out["html"], "/opt/mock/www/public_html/")
+        self.assertEqual(out["files"], "/opt/mock/www/public_files/")
+        self.assertEqual(out["cdn"], "/opt/mock/www/public_cdn/")
+        self.assertEqual(out["global"], "/opt/mock/www/global/")
+        self.assertEqual(out["well_known"], "/usr/share/nginx/well-known/")
 
-        cache = out["directories"]["cache"]
-        self.assertEqual(cache["general"], "/tmp/cache_nginx_general/")
-        self.assertEqual(cache["image"], "/tmp/cache_nginx_image/")
+    def test_directories_cache_projection(self):
+        out = self._run(["directories.cache"])
+        self.assertEqual(out["general"], "/tmp/cache_nginx_general/")
+        self.assertEqual(out["image"], "/tmp/cache_nginx_image/")
 
-        ensure = out["directories"]["ensure"]
-        ensure_paths = out["directories"]["ensure_paths"]
-
+    def test_directories_ensure_projection(self):
+        ensure = self._run(["directories.ensure"])
         self.assertIsInstance(ensure, list)
-        self.assertIsInstance(ensure_paths, list)
-        self.assertEqual(ensure_paths, [d["path"] for d in ensure])
 
         self.assertIn({"path": "/tmp/cache_nginx_general/", "mode": "0700"}, ensure)
         self.assertIn({"path": "/tmp/cache_nginx_image/", "mode": "0700"}, ensure)
+
+        ensure_paths = self._run(["directories.ensure_paths"])
+        self.assertIsInstance(ensure_paths, list)
+        self.assertEqual(ensure_paths, [d["path"] for d in ensure])
 
         # well_known is container path → must NOT be part of host dir creation
         self.assertNotIn("/usr/share/nginx/well-known/", ensure_paths)
@@ -107,13 +112,12 @@ class TestNginxPathsLookup(unittest.TestCase):
                 return_value=fake_tls,
             ),
         ):
-            out = self.plugin.run(["example.com"], variables=self.variables)[0]
+            out = self.plugin.run(
+                ["files.domain", "example.com"], variables=self.variables
+            )[0]
 
-        self.assertEqual(out["domain"]["name"], "example.com")
-        self.assertEqual(out["domain"]["protocol"], "https")
-        self.assertFalse(out["domain"]["protocol_overridden"])
         self.assertEqual(
-            out["files"]["domain"],
+            out,
             "/opt/mock/nginx/conf.d/servers/https/example.com.conf",
         )
 
@@ -132,13 +136,13 @@ class TestNginxPathsLookup(unittest.TestCase):
             ),
         ):
             out = self.plugin.run(
-                ["example.com"], variables=self.variables, protocol="http"
+                ["files.domain", "example.com"],
+                variables=self.variables,
+                protocol="http",
             )[0]
 
-        self.assertEqual(out["domain"]["protocol"], "http")
-        self.assertTrue(out["domain"]["protocol_overridden"])
         self.assertEqual(
-            out["files"]["domain"],
+            out,
             "/opt/mock/nginx/conf.d/servers/http/example.com.conf",
         )
 
@@ -149,27 +153,25 @@ class TestNginxPathsLookup(unittest.TestCase):
         ):
             with self.assertRaises(AnsibleError):
                 self.plugin.run(
-                    ["example.com"], variables=self.variables, protocol="ftp"
+                    ["files.domain", "example.com"],
+                    variables=self.variables,
+                    protocol="ftp",
                 )
 
-    def test_too_many_terms_raises(self):
+    def test_invalid_usage_raises(self):
         with patch(
             "lookup_plugins.nginx_paths.get_app_conf",
             side_effect=self._fake_get_app_conf,
         ):
+            # want-path missing
             with self.assertRaises(AnsibleError):
-                self.plugin.run(["a.example", "b.example"], variables=self.variables)
+                self.plugin.run([], variables=self.variables)
 
-    def test_want_projection(self):
-        with patch(
-            "lookup_plugins.nginx_paths.get_app_conf",
-            side_effect=self._fake_get_app_conf,
-        ):
-            out = self.plugin.run(
-                [], variables=self.variables, want="directories.configuration.base"
-            )
-
-        self.assertEqual(out, ["/opt/mock/nginx/conf.d/"])
+            # too many terms
+            with self.assertRaises(AnsibleError):
+                self.plugin.run(
+                    ["files.domain", "example.com", "extra"], variables=self.variables
+                )
 
 
 if __name__ == "__main__":

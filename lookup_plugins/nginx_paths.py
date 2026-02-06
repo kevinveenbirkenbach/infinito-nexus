@@ -126,6 +126,9 @@ class LookupModule(LookupBase):
         data_cdn_dir = _ensure_trailing_slash(_join(www_dir, "public_cdn"))
         data_global_dir = _ensure_trailing_slash(_join(www_dir, "global"))
 
+        cache_general_dir = "/tmp/cache_nginx_general/"
+        cache_image_dir = "/tmp/cache_nginx_image/"
+
         ensure: List[Dict[str, str]] = [
             _dir_spec(nginx_dir, "0755"),
             _dir_spec(conf_dir, "0755"),
@@ -140,8 +143,8 @@ class LookupModule(LookupBase):
             _dir_spec(data_files_dir, "0755"),
             _dir_spec(data_cdn_dir, "0755"),
             _dir_spec(data_global_dir, "0755"),
-            _dir_spec("/tmp/cache_nginx_general/", "0700"),
-            _dir_spec("/tmp/cache_nginx_image/", "0700"),
+            _dir_spec(cache_general_dir, "0700"),
+            _dir_spec(cache_image_dir, "0700"),
         ]
 
         resolved: Dict[str, Any] = {
@@ -169,6 +172,10 @@ class LookupModule(LookupBase):
                     "files": data_files_dir,
                     "cdn": data_cdn_dir,
                     "global": data_global_dir,
+                },
+                "cache": {
+                    "general": cache_general_dir,
+                    "image": cache_image_dir,
                 },
                 "ensure": ensure,
                 "ensure_paths": [d["path"] for d in ensure],
