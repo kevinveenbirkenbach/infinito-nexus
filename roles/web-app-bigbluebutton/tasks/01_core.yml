@@ -33,7 +33,7 @@
 - name: configure websocket_upgrade.conf
   copy: 
     src:  "websocket_upgrade.conf"
-    dest: "{{ [ lookup('nginx_paths','directories.configuration.maps'), 'websocket_upgrade.conf' ] | path_join }}"
+    dest: "{{ [ lookup('nginx','directories.configuration.maps'), 'websocket_upgrade.conf' ] | path_join }}"
   notify: restart openresty
 
 - name: "Set BBB Facts"

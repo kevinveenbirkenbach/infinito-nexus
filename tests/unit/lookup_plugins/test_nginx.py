@@ -1,10 +1,10 @@
-# tests/unit/lookup_plugins/test_nginx_paths.py
+# tests/unit/lookup_plugins/test_nginx.py
 import unittest
 from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 
-from lookup_plugins.nginx_paths import LookupModule
+from lookup_plugins.nginx import LookupModule
 
 
 class _FakeTlsResolveLookup:
@@ -44,7 +44,7 @@ class TestNginxPathsLookup(unittest.TestCase):
 
     def _run(self, terms, **kwargs):
         with patch(
-            "lookup_plugins.nginx_paths.get_app_conf",
+            "lookup_plugins.nginx.get_app_conf",
             side_effect=self._fake_get_app_conf,
         ):
             return self.plugin.run(terms, variables=self.variables, **kwargs)[0]
@@ -102,11 +102,11 @@ class TestNginxPathsLookup(unittest.TestCase):
 
         with (
             patch(
-                "lookup_plugins.nginx_paths.get_app_conf",
+                "lookup_plugins.nginx.get_app_conf",
                 side_effect=self._fake_get_app_conf,
             ),
             patch(
-                "lookup_plugins.nginx_paths.lookup_loader.get",
+                "lookup_plugins.nginx.lookup_loader.get",
                 return_value=fake_tls,
             ),
         ):
@@ -123,11 +123,11 @@ class TestNginxPathsLookup(unittest.TestCase):
         # tls should NOT be consulted when override is present
         with (
             patch(
-                "lookup_plugins.nginx_paths.get_app_conf",
+                "lookup_plugins.nginx.get_app_conf",
                 side_effect=self._fake_get_app_conf,
             ),
             patch(
-                "lookup_plugins.nginx_paths.lookup_loader.get",
+                "lookup_plugins.nginx.lookup_loader.get",
                 side_effect=AssertionError(
                     "tls must not be called when protocol override is set"
                 ),
@@ -146,7 +146,7 @@ class TestNginxPathsLookup(unittest.TestCase):
 
     def test_invalid_protocol_override_raises(self):
         with patch(
-            "lookup_plugins.nginx_paths.get_app_conf",
+            "lookup_plugins.nginx.get_app_conf",
             side_effect=self._fake_get_app_conf,
         ):
             with self.assertRaises(AnsibleError):
@@ -158,7 +158,7 @@ class TestNginxPathsLookup(unittest.TestCase):
 
     def test_invalid_usage_raises(self):
         with patch(
-            "lookup_plugins.nginx_paths.get_app_conf",
+            "lookup_plugins.nginx.get_app_conf",
             side_effect=self._fake_get_app_conf,
         ):
             # want-path missing

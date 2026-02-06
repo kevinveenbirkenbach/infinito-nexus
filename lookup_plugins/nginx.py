@@ -1,4 +1,4 @@
-# lookup_plugins/nginx_paths.py
+# lookup_plugins/nginx.py
 #
 # Resolve nginx path configuration (lowercase keys) and (optionally) a domain-specific
 # server config path placed under:
@@ -6,12 +6,12 @@
 #   <servers_dir>/<protocol>/<domain>.conf
 #
 # New API (STRICT):
-#   lookup('nginx_paths', want_path [, domain ])
+#   lookup('nginx', want_path [, domain ])
 #
 # Examples:
-#   lookup('nginx_paths', 'files.configuration')
-#   lookup('nginx_paths', 'files.domain', 'example.com')
-#   lookup('nginx_paths', 'files.domain', 'example.com', protocol='http')
+#   lookup('nginx', 'files.configuration')
+#   lookup('nginx', 'files.domain', 'example.com')
+#   lookup('nginx', 'files.domain', 'example.com', protocol='http')
 #
 # Notes:
 # - want-path is ALWAYS the first positional argument
@@ -46,7 +46,7 @@ def _normalize_protocol(value: str) -> str:
     if v in ("http", "https"):
         return v
     raise AnsibleError(
-        f"nginx_paths: invalid protocol override '{value}' (expected http|https)"
+        f"nginx: invalid protocol override '{value}' (expected http|https)"
     )
 
 
@@ -54,10 +54,10 @@ def _dir_spec(path: str, mode: str) -> Dict[str, str]:
     path = as_str(path).strip()
     mode = as_str(mode).strip()
     if not path:
-        raise AnsibleError("nginx_paths: empty path in directories.ensure")
+        raise AnsibleError("nginx: empty path in directories.ensure")
     if mode not in ("0700", "0755"):
         raise AnsibleError(
-            f"nginx_paths: invalid mode '{mode}' in directories.ensure (expected 0700|0755)"
+            f"nginx: invalid mode '{mode}' in directories.ensure (expected 0700|0755)"
         )
     return {"path": path, "mode": mode}
 
@@ -68,14 +68,14 @@ def _resolve_protocol_via_tls(
     try:
         tls_lookup = lookup_loader.get("tls", loader=loader, templar=templar)
     except Exception as exc:
-        raise AnsibleError(f"nginx_paths: failed to load tls lookup: {exc}") from exc
+        raise AnsibleError(f"nginx: failed to load tls lookup: {exc}") from exc
 
     protocol = tls_lookup.run([domain, "protocols.web"], variables=variables)[0]
 
     protocol_s = as_str(protocol).strip().lower()
     if protocol_s not in ("http", "https"):
         raise AnsibleError(
-            f"nginx_paths: unexpected protocol '{protocol_s}' for domain '{domain}'"
+            f"nginx: unexpected protocol '{protocol_s}' for domain '{domain}'"
         )
     return protocol_s
 
@@ -87,11 +87,11 @@ class LookupModule(LookupBase):
 
         # STRICT API: want-path is mandatory
         if len(terms) not in (1, 2):
-            raise AnsibleError("nginx_paths: requires want_path [, domain]")
+            raise AnsibleError("nginx: requires want_path [, domain]")
 
         want = as_str(terms[0]).strip()
         if not want:
-            raise AnsibleError("nginx_paths: want_path is empty")
+            raise AnsibleError("nginx: want_path is empty")
 
         domain = as_str(terms[1]).strip() if len(terms) == 2 else ""
 
@@ -99,7 +99,7 @@ class LookupModule(LookupBase):
 
         proxy_app_id = as_str(kwargs.get("proxy_app_id", "svc-prx-openresty")).strip()
         if not proxy_app_id:
-            raise AnsibleError("nginx_paths: proxy_app_id is empty")
+            raise AnsibleError("nginx: proxy_app_id is empty")
 
         www_dir = get_app_conf(
             applications, proxy_app_id, "docker.volumes.www", strict=True

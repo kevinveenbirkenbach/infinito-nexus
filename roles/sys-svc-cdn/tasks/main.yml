@@ -4,8 +4,8 @@
       ansible.builtin.file:
         path:  "{{ item }}"
         state: directory
-        owner: "{{ lookup('nginx_paths','user') }}"
-        group: "{{ lookup('nginx_paths','user') }}"
+        owner: "{{ lookup('nginx','user') }}"
+        group: "{{ lookup('nginx','user') }}"
         mode:  "0755"
       loop: "{{ CDN_DIRS_GLOBAL }}"
     - include_tasks: utils/once/flag.yml
@@ -26,8 +26,8 @@
   file:
     path:  "{{ item }}"
     state: directory
-    owner: "{{ lookup('nginx_paths','user') }}"
-    group: "{{ lookup('nginx_paths','user') }}"
+    owner: "{{ lookup('nginx','user') }}"
+    group: "{{ lookup('nginx','user') }}"
     mode:  "0755"
   loop: "{{ cdn_dirs_role }}"
 

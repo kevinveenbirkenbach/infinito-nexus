@@ -27,7 +27,7 @@
 - name: create {{ MATRIX_SYNAPSE_DOMAIN }}.conf
   ansible.builtin.template:
     src: "templates/synapse.conf.j2"
-    dest: "{{ lookup('nginx_paths', 'files.domain', MATRIX_SYNAPSE_DOMAIN) }}"
+    dest: "{{ lookup('nginx', 'files.domain', MATRIX_SYNAPSE_DOMAIN) }}"
   vars:
     domain: "{{ MATRIX_SYNAPSE_DOMAIN }}"
     http_port: "{{ MATRIX_SYNAPSE_PORT }}"

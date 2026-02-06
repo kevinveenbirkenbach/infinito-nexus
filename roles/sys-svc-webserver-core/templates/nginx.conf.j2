@@ -28,8 +28,8 @@ http
   add_header 'Vary' 'Origin' always;
 
   {# caching #}
-  proxy_cache_path {{ lookup('nginx_paths','directories.cache.general') }} levels=1:2 keys_zone=cache:20m max_size=20g inactive=14d use_temp_path=off;
-  proxy_cache_path {{ lookup('nginx_paths','directories.cache.image') }} levels=1:2 keys_zone=imgcache:10m inactive=60m use_temp_path=off;
+  proxy_cache_path {{ lookup('nginx','directories.cache.general') }} levels=1:2 keys_zone=cache:20m max_size=20g inactive=14d use_temp_path=off;
+  proxy_cache_path {{ lookup('nginx','directories.cache.image') }} levels=1:2 keys_zone=imgcache:10m inactive=60m use_temp_path=off;
 
   # --------------------------------------------------------------------------------
   # Tweak the hash table used to store your server_name entries:
@@ -66,12 +66,12 @@ http
   gzip_types application/atom+xml application/javascript application/xml+rss application/x-javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy text/javascript text/xml;
 
   types_hash_max_size 4096;  
-  {% for dir in lookup('nginx_paths','directories.configuration.http_includes') %}
+  {% for dir in lookup('nginx','directories.configuration.http_includes') %}
   include {{ dir }}*.conf;
   {% endfor %}
 }
 
 # For port proxies
 stream{
-  include {{ lookup('nginx_paths','directories.configuration.streams') }}*.conf;
+  include {{ lookup('nginx','directories.configuration.streams') }}*.conf;
 }

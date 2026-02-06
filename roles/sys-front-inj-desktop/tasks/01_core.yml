@@ -2,8 +2,8 @@
   template:
     src:    "{{ INJ_DESKTOP_JS_FILE_NAME }}.j2"
     dest:   "{{ INJ_DESKTOP_JS_FILE_DESTINATION }}"
-    owner:  "{{ lookup('nginx_paths','user') }}"
-    group:  "{{ lookup('nginx_paths','user') }}"
+    owner:  "{{ lookup('nginx','user') }}"
+    group:  "{{ lookup('nginx','user') }}"
     mode:   '0644'
 
 - include_tasks: utils/once/flag.yml
