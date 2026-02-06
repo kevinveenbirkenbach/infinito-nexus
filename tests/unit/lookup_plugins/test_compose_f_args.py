@@ -44,9 +44,9 @@ class TestComposeFArgs(unittest.TestCase):
         self.lookup._templar = object()
 
         # compose_f_args no longer reads variables['docker_compose'].
-        # It builds docker_compose via get_docker_paths(application_id, PATH_DOCKER_COMPOSE_INSTANCES).
+        # It builds docker_compose via get_docker_paths(application_id, PATH_COMPOSE_INSTANCES).
         self.vars = {
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/x/",
+            "PATH_COMPOSE_INSTANCES": "/x/",
             "domains": {
                 "web-app-a": "example.invalid",
             },

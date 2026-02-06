@@ -64,7 +64,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
+            "PATH_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)
@@ -125,7 +125,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
+            "PATH_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)
@@ -187,7 +187,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
+            "PATH_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)
@@ -246,7 +246,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
+            "PATH_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)
@@ -298,7 +298,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
+            "PATH_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)

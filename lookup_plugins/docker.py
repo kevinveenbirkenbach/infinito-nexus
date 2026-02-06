@@ -39,11 +39,9 @@ class LookupModule(LookupBase):
         if not application_id:
             raise AnsibleError("lookup('docker'): application_id is empty")
 
-        base = _as_str((variables or {}).get("PATH_DOCKER_COMPOSE_INSTANCES"))
+        base = _as_str((variables or {}).get("PATH_COMPOSE_INSTANCES"))
         if not base:
-            raise AnsibleError(
-                "lookup('docker'): PATH_DOCKER_COMPOSE_INSTANCES not set"
-            )
+            raise AnsibleError("lookup('docker'): PATH_COMPOSE_INSTANCES not set")
 
         docker_dict = get_docker_paths(application_id, base)
 

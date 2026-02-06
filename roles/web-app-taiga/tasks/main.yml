@@ -15,10 +15,10 @@
   notify: docker compose up
   loop:   "{{ TAIGA_SETTING_FILES }}"
 
-- name: "create {{ TAIGA_DOCKER_COMPOSE_INIT_PATH }}"
+- name: "create {{ TAIGA_COMPOSE_INIT_PATH }}"
   template:
     src:  "docker-compose-inits.yml.j2"
-    dest:  "{{ TAIGA_DOCKER_COMPOSE_INIT_PATH }}"
+    dest:  "{{ TAIGA_COMPOSE_INIT_PATH }}"
   notify: docker compose up
 
 - name: "Include Taiga administrator routines"

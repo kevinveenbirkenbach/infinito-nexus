@@ -40,8 +40,8 @@
   set_fact:
     BBB_ENV_FILE_LINK:                "{{ [ docker_repository_path, '.env' ] | path_join }}"
     BBB_ENV_FILE_ORIGINE:             "{{ lookup('docker', application_id, 'files.env') }}"
-    BBB_DOCKER_COMPOSE_FILE_ORIGINE:  "{{ [ docker_repository_path, 'docker-compose.yml' ] | path_join }}"
-    BBB_DOCKER_COMPOSE_FILE_FINAL:    "{{ [ lookup('docker', application_id, 'directories.instance'), 'docker-compose.yml' ] | path_join }}"
+    BBB_COMPOSE_FILE_ORIGINE:  "{{ [ docker_repository_path, 'docker-compose.yml' ] | path_join }}"
+    BBB_COMPOSE_FILE_FINAL:    "{{ [ lookup('docker', application_id, 'directories.instance'), 'docker-compose.yml' ] | path_join }}"
 
 - name: Write docker-compose.override.yml for BigBlueButton
   template:

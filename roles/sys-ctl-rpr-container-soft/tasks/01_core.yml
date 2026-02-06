@@ -9,7 +9,7 @@
     system_service_tpl_on_failure:      "{{ SYS_SERVICE_ON_FAILURE_COMPOSE }}"
     system_service_tpl_exec_start_pre:  "/usr/bin/python {{ PATH_LOCK }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(' ')  }} --ignore {{ SYS_SERVICE_GROUP_CLEANUP| join(' ') }} {{ SYS_SERVICE_REPAIR_CONTAINER_SOFT }} --timeout '{{ SYS_TIMEOUT_CONTAINER_RPR_SOFT }}'"
     system_service_tpl_exec_start: >
-      /bin/sh -c '{{ system_service_script_exec }} --manipulation-string "{{ SYS_SERVICE_GROUP_MANIPULATION | join(" ") }}" {{ PATH_DOCKER_COMPOSE_INSTANCES }}'
+      /bin/sh -c '{{ system_service_script_exec }} --manipulation-string "{{ SYS_SERVICE_GROUP_MANIPULATION | join(" ") }}" {{ PATH_COMPOSE_INSTANCES }}'
     system_service_force_linear_sync:   true
 
 - include_tasks: utils/once/flag.yml

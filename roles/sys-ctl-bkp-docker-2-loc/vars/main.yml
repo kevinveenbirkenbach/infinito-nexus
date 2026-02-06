@@ -45,7 +45,7 @@ BKP_DOCKER_2_LOC_CLI_ARGS_LIST:
 # Main baudolo command
 BKP_DOCKER_2_LOC_EXEC: >-
   /usr/bin/baudolo
-  --compose-dir {{ PATH_DOCKER_COMPOSE_INSTANCES }}
+  --compose-dir {{ PATH_COMPOSE_INSTANCES }}
   --databases-csv {{ PATH_INFINITO_DATABASE_SECRETS }}
   --backups-dir {{ PATH_INFINITO_BACKUP_DIR }}
   --dump-only

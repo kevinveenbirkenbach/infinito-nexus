@@ -7,16 +7,16 @@
 
 - name: Remove all docker compose pull locks
   file:
-    path: "{{ PATH_DOCKER_COMPOSE_PULL_LOCK_DIR }}"
+    path: "{{ PATH_COMPOSE_PULL_LOCK_DIR }}"
     state: absent
 
 - name: "reset (if enabled) for {{ role_name}}"
   include_tasks: 02_reset.yml
   when: MODE_RESET | bool
 
-- name: "create {{ PATH_DOCKER_COMPOSE_INSTANCES }}"
+- name: "create {{ PATH_COMPOSE_INSTANCES }}"
   file:
-    path:   "{{ PATH_DOCKER_COMPOSE_INSTANCES }}"
+    path:   "{{ PATH_COMPOSE_INSTANCES }}"
     state:  directory
     mode:   0700
     owner:  root
@@ -42,4 +42,4 @@
     - sys-ctl-rpr-container-hard
   loop_control:
     loop_var: service_role
-  when: DOCKER_COMPOSE_LOAD_SERVICES | bool
+  when: COMPOSE_LOAD_SERVICES | bool

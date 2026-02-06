@@ -5,9 +5,9 @@
       It is a helper role only. Direct use would lead to confusion due to application_id mismatch.
   when: role_name == "web-app-oauth2-proxy"
 
-- name: "Transfering oauth2-proxy-keycloak.cfg.j2 to {{( application_id | get_docker_paths(PATH_DOCKER_COMPOSE_INSTANCES) ).directories.volumes }}"
+- name: "Transfering oauth2-proxy-keycloak.cfg.j2 to {{( application_id | get_docker_paths(PATH_COMPOSE_INSTANCES) ).directories.volumes }}"
   template:
     src:  "{{ playbook_dir }}/roles/web-app-oauth2-proxy/templates/oauth2-proxy-keycloak.cfg.j2"
-    dest: "{{( application_id | get_docker_paths(PATH_DOCKER_COMPOSE_INSTANCES) ).directories.volumes }}{{ applications | get_app_conf('web-app-oauth2-proxy','configuration_file') }}"
+    dest: "{{( application_id | get_docker_paths(PATH_COMPOSE_INSTANCES) ).directories.volumes }}{{ applications | get_app_conf('web-app-oauth2-proxy','configuration_file') }}"
   notify:
     - docker compose up
