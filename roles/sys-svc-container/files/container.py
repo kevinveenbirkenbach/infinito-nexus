@@ -11,9 +11,18 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
 def die(msg: str, code: int = 2) -> "None":
     print(f"[container] {msg}", file=sys.stderr)
     raise SystemExit(code)
+
+
+def warn(msg: str) -> None:
+    print(f"[container][WARN] {msg}", file=sys.stderr)
 
 
 def must_exist(path: str, label: str) -> str:
@@ -65,6 +74,11 @@ FLAGS_TAKE_VALUE = {
     "--log-driver",
     "--log-opt",
 }
+
+
+# ---------------------------------------------------------------------------
+# docker run argument parsing
+# ---------------------------------------------------------------------------
 
 
 def split_docker_run_argv(argv: List[str]) -> Tuple[List[str], List[str]]:
@@ -146,6 +160,7 @@ def extract_pull_policy(run_opts: List[str]) -> str:
     """
     policy = "missing"
     i = 0
+
     while i < len(run_opts):
         a = run_opts[i]
 
@@ -166,6 +181,11 @@ def extract_pull_policy(run_opts: List[str]) -> str:
     if policy not in {"always", "missing", "never"}:
         policy = "missing"
     return policy
+
+
+# ---------------------------------------------------------------------------
+# Docker helpers
+# ---------------------------------------------------------------------------
 
 
 def docker_pull(image: str) -> None:
@@ -209,10 +229,12 @@ def inspect_image_entrypoint(image: str) -> List[str]:
     raw = (p.stdout or "").strip()
     if raw in ("", "null", "None"):
         return []
+
     try:
         val = json.loads(raw)
     except Exception:
         return []
+
     if isinstance(val, list):
         return [str(x) for x in val]
     if isinstance(val, str) and val:
@@ -226,68 +248,76 @@ def try_inspect_entrypoint_with_pull(image: str, pull_policy: str) -> List[str]:
 
     try:
         return inspect_image_entrypoint(image)
-    except SystemExit as exc:
+    except SystemExit:
         if pull_policy in {"missing", "always"}:
-            try:
-                p = subprocess.run(
-                    [
-                        "docker",
-                        "image",
-                        "inspect",
-                        image,
-                        "--format",
-                        "{{json .Config.Entrypoint}}",
-                    ],
-                    check=False,
-                    capture_output=True,
-                    text=True,
-                )
-            except FileNotFoundError:
-                die("docker not found. Please install Docker.", code=127)
-
-            msg = (p.stderr or p.stdout or "").strip()
-            if "No such image" in msg or "not found" in msg.lower():
-                docker_pull(image)
-                return inspect_image_entrypoint(image)
-        raise exc
+            docker_pull(image)
+            return inspect_image_entrypoint(image)
+        raise
 
 
-def require_ca_env() -> Tuple[str, str, str]:
+# ---------------------------------------------------------------------------
+# CA handling (SOFT)
+# ---------------------------------------------------------------------------
+
+
+def require_ca_env_soft() -> Optional[Tuple[str, str, str]]:
     """
-    Return (ca_cert_host, wrapper_host, trust_name).
+    Return (ca_cert_host, wrapper_host, trust_name)
+    or None if CA injection is not available.
     """
     ca_host = os.environ.get("CA_TRUST_CERT_HOST", "").strip()
     wrapper_host = os.environ.get("CA_TRUST_WRAPPER_HOST", "").strip()
     trust_name = os.environ.get("CA_TRUST_NAME", "").strip()
 
+    missing = []
     if not ca_host:
-        die("Missing env CA_TRUST_CERT_HOST")
+        missing.append("CA_TRUST_CERT_HOST")
     if not wrapper_host:
-        die("Missing env CA_TRUST_WRAPPER_HOST")
+        missing.append("CA_TRUST_WRAPPER_HOST")
     if not trust_name:
-        die("Missing env CA_TRUST_NAME")
+        missing.append("CA_TRUST_NAME")
 
-    ca_host = must_exist(ca_host, "CA trust certificate")
-    wrapper_host = must_exist(wrapper_host, "CA trust wrapper script")
+    if missing:
+        warn(
+            "CA injection disabled (missing env: "
+            + ", ".join(missing)
+            + "). Falling back to plain 'docker run'."
+        )
+        return None
+
+    try:
+        ca_host = must_exist(ca_host, "CA trust certificate")
+        wrapper_host = must_exist(wrapper_host, "CA trust wrapper script")
+    except SystemExit:
+        warn(
+            "CA injection disabled (CA files not found). Falling back to plain 'docker run'."
+        )
+        return None
+
     return ca_host, wrapper_host, trust_name
+
+
+# ---------------------------------------------------------------------------
+# Execution
+# ---------------------------------------------------------------------------
 
 
 def exec_docker(cmd: List[str], debug: bool) -> int:
     if debug:
         print(">>> " + " ".join(shlex.quote(x) for x in cmd), file=sys.stderr)
+
     try:
         return subprocess.run(cmd, check=False).returncode
     except FileNotFoundError:
         die("docker not found. Please install Docker.", code=127)
     except Exception as exc:
         die(f"Unexpected error: {exc}", code=1)
-    return 1
 
 
 def container_run(argv: List[str], debug: bool, with_ca: bool) -> int:
     """
-    Wrap docker run only if with_ca is True.
-    Otherwise pass through to docker run.
+    Wrap docker run only if CA injection is available.
+    Otherwise fallback to plain docker run.
     """
     if not argv:
         die("Usage: container run [docker-run-flags...] IMAGE [COMMAND/ARGS...]")
@@ -295,7 +325,11 @@ def container_run(argv: List[str], debug: bool, with_ca: bool) -> int:
     if not with_ca:
         return exec_docker(["docker", "run", *argv], debug=debug)
 
-    ca_host, wrapper_host, trust_name = require_ca_env()
+    ca_env = require_ca_env_soft()
+    if not ca_env:
+        return exec_docker(["docker", "run", *argv], debug=debug)
+
+    ca_host, wrapper_host, trust_name = ca_env
 
     run_opts, image_and_args = split_docker_run_argv(argv)
     pull_policy = extract_pull_policy(run_opts)
@@ -331,10 +365,12 @@ def container_run(argv: List[str], debug: bool, with_ca: bool) -> int:
     else:
         ep = try_inspect_entrypoint_with_pull(image, pull_policy=pull_policy)
         if not ep:
-            die(
-                "Image has no ENTRYPOINT and you did not pass --entrypoint. "
-                "Cannot determine executable to run under CA wrapper."
+            warn(
+                "Image has no ENTRYPOINT and none was provided. "
+                "Running without CA wrapper."
             )
+            return exec_docker(["docker", "run", *argv], debug=debug)
+
         final_cmd.extend(ep)
         final_cmd.extend(user_args)
 
@@ -347,21 +383,23 @@ def container_run(argv: List[str], debug: bool, with_ca: bool) -> int:
 
 def passthrough(subcmd: str, argv: List[str], debug: bool) -> int:
     """
-    Commands where CA wrapping does NOT make sense (host-side operations).
+    Commands where CA wrapping does NOT make sense.
     """
     return exec_docker(["docker", subcmd, *argv], debug=debug)
 
 
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+
 def main() -> int:
-    # Global flags (ours), kept minimal to avoid collisions with docker flags
-    # NOTE: We parse only our flags and leave the rest to subcommands.
     parser = argparse.ArgumentParser(
         prog="container",
-        add_help=True,
-        description="Infinito container wrapper: wraps only what makes sense (e.g. docker run with CA injection).",
+        description="Infinito container wrapper (CA-aware docker wrapper).",
     )
     parser.add_argument(
-        "--debug", action="store_true", help="Print the final docker command(s)."
+        "--debug", action="store_true", help="Print executed docker commands."
     )
     parser.add_argument(
         "command",
@@ -374,7 +412,6 @@ def main() -> int:
     debug = bool(ns.debug)
     cmd = (ns.command or "").strip()
 
-    # argparse REMAINDER keeps a leading "--" sometimes; strip one if present
     args = list(ns.args)
     if args and args[0] == "--":
         args = args[1:]
@@ -383,27 +420,20 @@ def main() -> int:
         parser.print_help()
         return 2
 
-    # Commands we intentionally support:
     if cmd == "run":
-        # default: with CA injection enabled
-        # allow opt-out by env if you really need it:
-        #   INFINITO_CONTAINER_NO_CA=1 container run ...
-        no_ca = os.environ.get("INFINITO_CONTAINER_NO_CA", "").strip() in {
+        no_ca = os.environ.get("INFINITO_CONTAINER_NO_CA", "").lower() in {
             "1",
             "true",
             "yes",
         }
         return container_run(args, debug=debug, with_ca=not no_ca)
 
-    # passthrough commands:
     if cmd in {"exec", "logs", "ps", "inspect", "pull"}:
         return passthrough(cmd, args, debug=debug)
 
     if cmd == "image":
         return passthrough("image", args, debug=debug)
 
-    # Raw escape hatch:
-    # container docker <any docker args...>
     if cmd == "docker":
         return exec_docker(["docker", *args], debug=debug)
 

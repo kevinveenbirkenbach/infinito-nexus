@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import importlib.util
-import subprocess
 import unittest
 from pathlib import Path
-
+import os
+import tempfile
+import contextlib
+import io
 
 # ---------------------------------------------------------------------------
 # Manual import of roles/sys-svc-container/files/container.py
@@ -134,6 +136,13 @@ class TestContainerWrapper(unittest.TestCase):
             container.inspect_image_entrypoint = orig_inspect
 
     def test_try_inspect_entrypoint_pull_missing_recovers(self):
+        """
+        New behavior (after your refactor):
+        - inspect fails (SystemExit)
+        - for pull_policy in {"missing","always"}: docker_pull() is called
+        - then inspect is retried
+        No subprocess.run() probing anymore.
+        """
         calls = []
 
         def inspect_fail(image: str):
@@ -146,26 +155,14 @@ class TestContainerWrapper(unittest.TestCase):
 
         def fake_pull(image: str) -> None:
             calls.append(("pull", image))
-            # swap inspect to succeed after pull
+            # after pull, inspect should succeed
             container.inspect_image_entrypoint = inspect_ok
-
-        class FakeCompleted:
-            def __init__(self):
-                self.returncode = 1
-                self.stdout = ""
-                self.stderr = "No such image: alpine:3.20"
-
-        def fake_run(*_args, **_kwargs):
-            calls.append(("subprocess.run",))
-            return FakeCompleted()
 
         orig_pull = container.docker_pull
         orig_inspect = container.inspect_image_entrypoint
-        orig_run = subprocess.run
         try:
             container.inspect_image_entrypoint = inspect_fail
             container.docker_pull = fake_pull
-            subprocess.run = fake_run  # used only in recovery path
 
             ep = container.try_inspect_entrypoint_with_pull(
                 "alpine:3.20",
@@ -177,7 +174,6 @@ class TestContainerWrapper(unittest.TestCase):
                 calls,
                 [
                     ("inspect_fail", "alpine:3.20"),
-                    ("subprocess.run",),
                     ("pull", "alpine:3.20"),
                     ("inspect_ok", "alpine:3.20"),
                 ],
@@ -185,7 +181,6 @@ class TestContainerWrapper(unittest.TestCase):
         finally:
             container.docker_pull = orig_pull
             container.inspect_image_entrypoint = orig_inspect
-            subprocess.run = orig_run
 
     def test_try_inspect_entrypoint_pull_never_fails(self):
         def inspect_fail(_image: str):
@@ -203,6 +198,156 @@ class TestContainerWrapper(unittest.TestCase):
             self.assertEqual(ctx.exception.code, 2)
         finally:
             container.inspect_image_entrypoint = orig_inspect
+
+    # -----------------------------------------------------------------------
+    # require_ca_env_soft
+    # -----------------------------------------------------------------------
+
+    def test_require_ca_env_soft_missing_env_returns_none_and_warns(self):
+        """
+        If any CA env var is missing, require_ca_env_soft() should:
+          - return None
+          - emit a warning on stderr
+        """
+        old_env = dict(os.environ)
+        try:
+            os.environ.pop("CA_TRUST_CERT_HOST", None)
+            os.environ.pop("CA_TRUST_WRAPPER_HOST", None)
+            os.environ.pop("CA_TRUST_NAME", None)
+
+            buf = io.StringIO()
+            with contextlib.redirect_stderr(buf):
+                res = container.require_ca_env_soft()
+
+            self.assertIsNone(res)
+            out = buf.getvalue()
+            self.assertIn("[container][WARN]", out)
+            self.assertIn("CA injection disabled (missing env:", out)
+        finally:
+            os.environ.clear()
+            os.environ.update(old_env)
+
+    def test_require_ca_env_soft_missing_files_returns_none_and_warns(self):
+        """
+        If env vars exist but point to non-existing files, require_ca_env_soft() should:
+          - return None
+          - emit a warning on stderr
+        """
+        old_env = dict(os.environ)
+        try:
+            os.environ["CA_TRUST_CERT_HOST"] = "/does/not/exist/ca.crt"
+            os.environ["CA_TRUST_WRAPPER_HOST"] = "/does/not/exist/with-ca-trust.sh"
+            os.environ["CA_TRUST_NAME"] = "test-ca"
+
+            buf = io.StringIO()
+            with contextlib.redirect_stderr(buf):
+                res = container.require_ca_env_soft()
+
+            self.assertIsNone(res)
+            out = buf.getvalue()
+            self.assertIn("[container][WARN]", out)
+            self.assertIn("CA injection disabled (CA files not found)", out)
+        finally:
+            os.environ.clear()
+            os.environ.update(old_env)
+
+    def test_require_ca_env_soft_ok_returns_tuple(self):
+        """
+        If env vars and referenced files exist, require_ca_env_soft() should return tuple.
+        """
+        old_env = dict(os.environ)
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                td_path = Path(td)
+                ca_file = td_path / "root-ca.crt"
+                wrapper_file = td_path / "with-ca-trust.sh"
+
+                ca_file.write_text("dummy-ca\n", encoding="utf-8")
+                wrapper_file.write_text("#!/bin/sh\necho ok\n", encoding="utf-8")
+
+                os.environ["CA_TRUST_CERT_HOST"] = str(ca_file)
+                os.environ["CA_TRUST_WRAPPER_HOST"] = str(wrapper_file)
+                os.environ["CA_TRUST_NAME"] = "test-ca"
+
+                buf = io.StringIO()
+                with contextlib.redirect_stderr(buf):
+                    res = container.require_ca_env_soft()
+
+                self.assertIsNotNone(res)
+                assert res is not None
+                ca_host, wrapper_host, trust_name = res
+                self.assertEqual(ca_host, str(ca_file))
+                self.assertEqual(wrapper_host, str(wrapper_file))
+                self.assertEqual(trust_name, "test-ca")
+                # should not warn in the OK case
+                self.assertEqual(buf.getvalue().strip(), "")
+        finally:
+            os.environ.clear()
+            os.environ.update(old_env)
+
+    # -----------------------------------------------------------------------
+    # container_run fallback (no CA available)
+    # -----------------------------------------------------------------------
+
+    def test_container_run_falls_back_to_plain_docker_run_when_ca_missing(self):
+        """
+        When with_ca=True but CA env is missing, container_run() must fallback to:
+          exec_docker(["docker","run", *argv])
+        """
+        old_env = dict(os.environ)
+        calls = []
+
+        def fake_exec_docker(cmd, debug=False):
+            calls.append(("exec_docker", cmd, debug))
+            return 0
+
+        orig_exec_docker = container.exec_docker
+        try:
+            os.environ.pop("CA_TRUST_CERT_HOST", None)
+            os.environ.pop("CA_TRUST_WRAPPER_HOST", None)
+            os.environ.pop("CA_TRUST_NAME", None)
+
+            container.exec_docker = fake_exec_docker
+
+            argv = ["--rm", "alpine:3.20", "sh", "-lc", "echo hi"]
+            rc = container.container_run(argv, debug=True, with_ca=True)
+
+            self.assertEqual(rc, 0)
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(
+                calls[0][1],
+                ["docker", "run", *argv],
+            )
+            self.assertTrue(calls[0][2])  # debug=True
+        finally:
+            container.exec_docker = orig_exec_docker
+            os.environ.clear()
+            os.environ.update(old_env)
+
+    def test_container_run_with_ca_false_always_plain_docker_run(self):
+        """
+        When with_ca=False, container_run() must always call plain docker run (no env needed).
+        """
+        calls = []
+
+        def fake_exec_docker(cmd, debug=False):
+            calls.append(("exec_docker", cmd, debug))
+            return 0
+
+        orig_exec_docker = container.exec_docker
+        try:
+            container.exec_docker = fake_exec_docker
+
+            argv = ["--rm", "alpine:3.20", "echo", "hi"]
+            rc = container.container_run(argv, debug=False, with_ca=False)
+
+            self.assertEqual(rc, 0)
+            self.assertEqual(
+                calls,
+                [("exec_docker", ["docker", "run", *argv], False)],
+            )
+        finally:
+            container.exec_docker = orig_exec_docker
 
 
 if __name__ == "__main__":
