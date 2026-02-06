@@ -21,7 +21,7 @@
     state: directory
     mode: "0755"
 
-- name: Write version to PATH_INFINITO_VERSION
+- name: Write version
   ansible.builtin.copy:
     dest: "{{ PATH_INFINITO_VERSION }}"
     content: "{{ sys_version_extracted.stdout | trim }}\n"

@@ -130,7 +130,7 @@
     set_fact:
       service_provider: "{{ defaults_service_provider | combine(service_provider | default({}, true), recursive=True) }}"
 
-- name: Persist Infinito.Nexus version
+- name: "Persist {{ SOFTWARE_NAME }} version"
   ansible.builtin.include_role:
     name: sys-version
 
