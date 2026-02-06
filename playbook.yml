@@ -1,5 +1,9 @@
 - name: "Execute Infinito.Nexus Play"
   hosts: all
+  environment:
+    CA_TRUST_CERT_HOST:    "{{ CA_TRUST.cert_host }}"
+    CA_TRUST_WRAPPER_HOST: "{{ CA_TRUST.wrapper_host }}"
+    CA_TRUST_NAME:         "{{ CA_TRUST.trust_name }}"
   tasks:
   - name: "Load 'constructor' tasks"
     include_tasks: "tasks/stages/01_constructor.yml"
