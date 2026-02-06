@@ -5,5 +5,5 @@
 - name: configure {{ domain }}.conf
   template:
     src:  "templates/peertube.conf.j2"
-    dest: "{{ lookup('nginx_paths', domain, want='files.domain') }}"
+    dest: "{{ lookup('nginx_paths', domain, 'files.domain') }}"
   notify: restart openresty

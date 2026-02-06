@@ -18,7 +18,7 @@
 
 {{ applications | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, want='volume'),
+    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'config': {'name': GITLAB_CONF_VOLUME}, 'data': {'name': GITLAB_DATA_VOLUME}, 'logs': {'name': GITLAB_LOGS_VOLUME}}
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

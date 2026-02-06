@@ -6,5 +6,5 @@
 - name: "Deploying NGINX redirect configuration for '{{ domain }}'"
   template:
     src:  redirect-domain.conf.j2
-    dest: "{{ lookup('nginx_paths', domain, want='files.domain') }}"
+    dest: "{{ lookup('nginx_paths', domain, 'files.domain') }}"
   notify: restart openresty

@@ -7,13 +7,13 @@ address = "0.0.0.0:{{ container_port }}"
 
 # Database.
 [db]
-host = "{{ lookup('database', application_id, want='host') }}"
-port = {{ lookup('database', application_id, want='port') }}
-user = "{{ lookup('database', application_id, want='username') }}"
-password = "{{ lookup('database', application_id, want='password') }}"
+host = "{{ lookup('database', application_id, 'host') }}"
+port = {{ lookup('database', application_id, 'port') }}
+user = "{{ lookup('database', application_id, 'username') }}"
+password = "{{ lookup('database', application_id, 'password') }}"
 
 # Ensure that this database has been created in Postgres.
-database = "{{ lookup('database', application_id, want='name') }}"
+database = "{{ lookup('database', application_id, 'name') }}"
 
 ssl_mode = "disable"
 max_open = {{ POSTGRES_ALLOWED_AVG_CONNECTIONS }}

@@ -45,7 +45,7 @@
 
 {{ applications | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, want='volume'),
+    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'data': {'name': MAGENTO_VOLUME}}
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

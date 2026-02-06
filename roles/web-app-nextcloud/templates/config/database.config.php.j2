@@ -1,7 +1,7 @@
 <?php
 return [
-  'dbhost'     => '{{ lookup('database', application_id, want='host') }}:{{ lookup('database', application_id, want='port') }}',
-  'dbname'     => '{{ lookup('database', application_id, want='name') }}',
-  'dbuser'     => '{{ lookup('database', application_id, want='username') }}',
-  'dbpassword' => '{{ lookup('database', application_id, want='password') }}',
+  'dbhost'     => '{{ lookup('database', application_id, 'host') }}:{{ lookup('database', application_id, 'port') }}',
+  'dbname'     => '{{ lookup('database', application_id, 'name') }}',
+  'dbuser'     => '{{ lookup('database', application_id, 'username') }}',
+  'dbpassword' => '{{ lookup('database', application_id, 'password') }}',
 ];

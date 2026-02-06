@@ -1,5 +1,5 @@
 ---
-{% if lookup('database', application_id, want='type') | bool %}
+{% if lookup('database', application_id, 'enabled') | bool %}
 {% raw %}
 # Default: Loading; Docker, Database and Reverse Proxy
 - name: "load docker, db and proxy for '{{ application_id }}'"

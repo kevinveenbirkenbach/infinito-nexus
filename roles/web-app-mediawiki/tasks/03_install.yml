@@ -4,9 +4,9 @@
 
     # Check if MediaWiki tables exist using a MariaDB client container
     has_tables=0
-    if docker run --rm --network {{ MEDIAWIKI_NETWORK_DATABASE }} mariadb:{{ lookup('database', application_id, want='version') | default('latest') }} \
-      mariadb -h "{{ lookup('database', application_id, want='host') }}" -P "{{ lookup('database', application_id, want='port') }}" -u "{{ lookup('database', application_id, want='username') }}" -p{{ lookup('database', application_id, want='password') | quote }} \
-      -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='{{ lookup('database', application_id, want='name') }}';" 2>/dev/null | grep -q -v '^0$'; then
+    if docker run --rm --network {{ MEDIAWIKI_NETWORK_DATABASE }} mariadb:{{ lookup('database', application_id, 'version') | default('latest') }} \
+      mariadb -h "{{ lookup('database', application_id, 'host') }}" -P "{{ lookup('database', application_id, 'port') }}" -u "{{ lookup('database', application_id, 'username') }}" -p{{ lookup('database', application_id, 'password') | quote }} \
+      -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='{{ lookup('database', application_id, 'name') }}';" 2>/dev/null | grep -q -v '^0$'; then
       has_tables=1
     fi
 
@@ -21,10 +21,10 @@
           php {{ MEDIAWIKI_HTML_DIR }}/maintenance/run.php install \
             --confpath /tmp \
             --dbtype mysql \
-            --dbserver "{{ lookup('database', application_id, want='host') }}:{{ lookup('database', application_id, want='port') }}" \
-            --dbname "{{ lookup('database', application_id, want='name') }}" \
-            --dbuser "{{ lookup('database', application_id, want='username') }}" \
-            --dbpass {{ lookup('database', application_id, want='password') | quote }} \
+            --dbserver "{{ lookup('database', application_id, 'host') }}:{{ lookup('database', application_id, 'port') }}" \
+            --dbname "{{ lookup('database', application_id, 'name') }}" \
+            --dbuser "{{ lookup('database', application_id, 'username') }}" \
+            --dbpass {{ lookup('database', application_id, 'password') | quote }} \
             --server "{{ MEDIAWIKI_URL }}" \
             --scriptpath "" \
             "{{ MEDIAWIKI_SITENAME }}" \

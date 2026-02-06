@@ -28,7 +28,7 @@
 {% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
 {{ applications | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, want='volume'),
+    database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'assets': {}, 'config': {'name': PEERTUBE_CONFIG_VOLUME}, 'data': {'name': PEERTUBE_DATA_VOLUME}}
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

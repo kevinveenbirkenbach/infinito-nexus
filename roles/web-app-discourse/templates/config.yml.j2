@@ -1,5 +1,5 @@
 templates:
-{% if not lookup('database', application_id, want='shared')%}
+{% if not lookup('database', application_id, 'shared')%}
   - "templates/postgres.template.yml"
 {% endif %}
   #- "templates/redis.template.yml"
@@ -75,10 +75,10 @@ env:
   {% endif %}
 
   # Database Configuration
-  DISCOURSE_DB_USERNAME: {{ lookup('database', application_id, want='username') }}
-  DISCOURSE_DB_PASSWORD: {{ lookup('database', application_id, want='password') }}
-  DISCOURSE_DB_HOST:     {{ lookup('database', application_id, want='host') }}
-  DISCOURSE_DB_NAME:     {{ lookup('database', application_id, want='name') }}
+  DISCOURSE_DB_USERNAME: {{ lookup('database', application_id, 'username') }}
+  DISCOURSE_DB_PASSWORD: {{ lookup('database', application_id, 'password') }}
+  DISCOURSE_DB_HOST:     {{ lookup('database', application_id, 'host') }}
+  DISCOURSE_DB_NAME:     {{ lookup('database', application_id, 'name') }}
 
   # Redis Configuration
   DISCOURSE_REDIS_HOST: {{ DISCOURSE_REDIS_HOST }}

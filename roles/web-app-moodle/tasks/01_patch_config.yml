@@ -1,25 +1,25 @@
 - name: Update DB host
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i "s/^\$CFG->dbhost *= *.*/\$CFG->dbhost = '{{ lookup('database', application_id, want='host') | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
+    sed -i "s/^\$CFG->dbhost *= *.*/\$CFG->dbhost = '{{ lookup('database', application_id, 'host') | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
   notify: docker compose up
 
 - name: Update DB name
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i "s/^\$CFG->dbname *= *.*/\$CFG->dbname = '{{ lookup('database', application_id, want='name') | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
+    sed -i "s/^\$CFG->dbname *= *.*/\$CFG->dbname = '{{ lookup('database', application_id, 'name') | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
   notify: docker compose up
 
 - name: Update DB user
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i "s/^\$CFG->dbuser *= *.*/\$CFG->dbuser = '{{ lookup('database', application_id, want='username') | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
+    sed -i "s/^\$CFG->dbuser *= *.*/\$CFG->dbuser = '{{ lookup('database', application_id, 'username') | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
   notify: docker compose up
 
 - name: Update DB password
   command: >
     docker exec --user root {{ MOODLE_CONTAINER }}
-    sed -i "s/^\$CFG->dbpass *= *.*/\$CFG->dbpass = '{{ lookup('database', application_id, want='password') | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
+    sed -i "s/^\$CFG->dbpass *= *.*/\$CFG->dbpass = '{{ lookup('database', application_id, 'password') | sed_escape('/') }}';/" {{ MOODLE_CONFIG }}
   notify: docker compose up
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 

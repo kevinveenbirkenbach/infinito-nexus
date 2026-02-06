@@ -9,10 +9,10 @@
       path: "{{ lookup('docker', application_id, 'directories.env') }}"
       state: directory
       mode: "0755"
-  - name: "For '{{ application_id }}/{{ database_consumer_id_passed }}': Create {{ lookup('database', application_id, want='env') }}"
+  - name: "For '{{ application_id }}/{{ database_consumer_id_passed }}': Create {{ lookup('database', application_id, 'env') }}"
     template:
-      src: "env/{{ lookup('database', application_id, want='type') }}.env.j2"
-      dest: "{{ lookup('database', application_id, want='env') }}"
+      src: "env/{{ lookup('database', application_id, 'type') }}.env.j2"
+      dest: "{{ lookup('database', application_id, 'env') }}"
     notify: docker compose up
   when: not (SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool)
 
@@ -21,7 +21,7 @@
     - name: "For '{{ application_id }}': Create central database"
       include_tasks: "utils/load_app.yml"
       vars:
-        load_app_id:                "{{ lookup('database', application_id, want='id') }}"
+        load_app_id:                "{{ lookup('database', application_id, 'id') }}"
         database_init:              true  # Initialize a custom database for the application
         docker_git_repository_pull: false # Deactivated here to don't inhire the variable
 
@@ -29,11 +29,11 @@
       include_tasks: "{{ playbook_dir }}/roles/sys-ctl-bkp-docker-2-loc/tasks/04_seed-database-to-backup.yml"
   vars:
     database_consumer_id: "{{ database_consumer_id_passed }}"
-    database_type:        "{{ lookup('database', database_consumer_id_passed | default(application_id), want='type') }}"
-    database_instance:    "{{ lookup('database', database_consumer_id_passed | default(application_id), want='instance') }}"
-    database_host:        "{{ lookup('database', database_consumer_id_passed | default(application_id), want='host') }}"
-    database_port:        "{{ lookup('database', database_consumer_id_passed | default(application_id), want='port') }}"
-    database_name:        "{{ lookup('database', database_consumer_id_passed | default(application_id), want='name') }}"
-    database_username:    "{{ lookup('database', database_consumer_id_passed | default(application_id), want='username') }}"
-    database_password:    "{{ lookup('database', database_consumer_id_passed | default(application_id), want='password') }}"
+    database_type:        "{{ lookup('database', database_consumer_id_passed | default(application_id), 'type') }}"
+    database_instance:    "{{ lookup('database', database_consumer_id_passed | default(application_id), 'instance') }}"
+    database_host:        "{{ lookup('database', database_consumer_id_passed | default(application_id), 'host') }}"
+    database_port:        "{{ lookup('database', database_consumer_id_passed | default(application_id), 'port') }}"
+    database_name:        "{{ lookup('database', database_consumer_id_passed | default(application_id), 'name') }}"
+    database_username:    "{{ lookup('database', database_consumer_id_passed | default(application_id), 'username') }}"
+    database_password:    "{{ lookup('database', database_consumer_id_passed | default(application_id), 'password') }}"
   when: SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool

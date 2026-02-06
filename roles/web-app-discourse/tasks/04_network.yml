@@ -7,15 +7,15 @@
     DISCOURSE_ERROR_ALREADY_IN_NET not in network_connect.stderr
   changed_when: network_connect.rc == 0
   when:
-    - lookup('database', application_id, want='shared')
+    - lookup('database', application_id, 'shared')
 
-- name: "Remove {{ DISCOURSE_NETWORK }} from {{ lookup('database', application_id, want='container') }}"
+- name: "Remove {{ DISCOURSE_NETWORK }} from {{ lookup('database', application_id, 'container') }}"
   command: >
-    docker network disconnect {{ DISCOURSE_NETWORK }} {{ lookup('database', application_id, want='container') }}
+    docker network disconnect {{ DISCOURSE_NETWORK }} {{ lookup('database', application_id, 'container') }}
   register: network_disconnect
   failed_when: >
     network_disconnect.rc != 0 and
     DISCOURSE_ERROR_NOT_CONNECTED not in network_disconnect.stderr
   changed_when: network_disconnect.rc == 0
   when:
-    - lookup('database', application_id, want='shared')
+    - lookup('database', application_id, 'shared')

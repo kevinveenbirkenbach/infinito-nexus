@@ -55,10 +55,10 @@ $wgEmailAuthentication = true;
 
 ## Database settings
 $wgDBtype = "mysql";
-$wgDBserver = "{{ lookup('database', application_id, want='host') }}:{{ lookup('database', application_id, want='port') }}";
-$wgDBname = "{{ lookup('database', application_id, want='name') }}";
-$wgDBuser = "{{ lookup('database', application_id, want='username') }}";
-$wgDBpassword = "{{ lookup('database', application_id, want='password') }}";
+$wgDBserver = "{{ lookup('database', application_id, 'host') }}:{{ lookup('database', application_id, 'port') }}";
+$wgDBname = "{{ lookup('database', application_id, 'name') }}";
+$wgDBuser = "{{ lookup('database', application_id, 'username') }}";
+$wgDBpassword = "{{ lookup('database', application_id, 'password') }}";
 
 # MySQL specific settings
 $wgDBprefix = "";

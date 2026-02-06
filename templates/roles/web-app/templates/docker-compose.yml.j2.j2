@@ -14,7 +14,7 @@ services:
 
 {{ applications | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, want='volume')
+    database_volume=lookup('database', application_id, 'volume')
 ) }}
 
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
