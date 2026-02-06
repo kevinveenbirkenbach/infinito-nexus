@@ -73,7 +73,7 @@ class DummyTemplar:
 class DummyTlsResolveLookup:
     """
     Deterministic tls_resolve stub.
-    Emulates: lookup('tls_resolve', app_id, want='url.base') -> 'http(s)://domain/'
+    Emulates: lookup('tls_resolve', app_id, 'url.base') -> 'http(s)://domain/'
     """
 
     def __init__(self, templar):
@@ -81,14 +81,20 @@ class DummyTlsResolveLookup:
 
     def run(self, terms, variables=None, **kwargs):
         variables = variables or {}
-        want = kwargs.get("want", "")
 
-        if not terms or len(terms) != 1:
-            raise AnsibleError("dummy tls_resolve: exactly one term required")
+        # NEW API: want-path is positional (2nd term)
+        if not terms or len(terms) not in (1, 2):
+            raise AnsibleError(
+                "dummy tls_resolve: terms must be [app_id] or [app_id, want_path]"
+            )
 
         app_id = str(terms[0]).strip()
         if not app_id:
             raise AnsibleError("dummy tls_resolve: empty term")
+
+        want = ""
+        if len(terms) == 2:
+            want = str(terms[1]).strip()
 
         domains = variables.get("domains", {})
         if app_id not in domains:
@@ -112,7 +118,7 @@ class DummyTlsResolveLookup:
         base_url = f"{scheme}://{domain}/"
 
         if want and want != "url.base":
-            raise AnsibleError(f"dummy tls_resolve: unsupported want='{want}'")
+            raise AnsibleError(f"dummy tls_resolve: unsupported want_path='{want}'")
 
         return [base_url]
 

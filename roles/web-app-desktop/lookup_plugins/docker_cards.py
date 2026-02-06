@@ -33,6 +33,9 @@ class LookupModule(LookupBase):
         roles_dir = terms[0] if len(terms) > 0 else "roles"
         cards = []
 
+        # Minimal: keep behavior but avoid None access
+        variables = variables or {}
+
         # Retrieve group_names from variables (used to filter roles)
         group_names = variables.get("group_names", [])
 
@@ -124,9 +127,9 @@ class LookupModule(LookupBase):
                     tls_lookup = lookup_loader.get(
                         "tls_resolve", loader=self._loader, templar=self._templar
                     )
-                    # tls_resolve returns base URL with trailing slash (e.g. https://meet.example/)
+                    # tls_resolve: positional want-path API
                     base_url = tls_lookup.run(
-                        [application_id], variables=variables, want="url.base"
+                        [application_id, "url.base"], variables=variables
                     )[0]
                     url = str(base_url).strip().rstrip("/")
                 except Exception as e:
