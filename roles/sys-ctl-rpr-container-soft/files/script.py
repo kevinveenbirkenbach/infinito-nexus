@@ -137,6 +137,7 @@ def get_compose_project_info(container: str) -> Tuple[str, str]:
     """
     Resolve project name and working dir from Docker labels.
     STRICT: Raises RuntimeError if labels are missing/unreadable.
+    On failure: dump *everything* Docker knows about the container.
     """
     out_project = print_bash(
         f"docker inspect -f '{{{{ index .Config.Labels \"com.docker.compose.project\" }}}}' {container}"
@@ -147,6 +148,13 @@ def get_compose_project_info(container: str) -> Tuple[str, str]:
 
     project = out_project[0].strip() if out_project else ""
     workdir = out_workdir[0].strip() if out_workdir else ""
+
+    if not project or not workdir:
+        print("DEBUG: compose label lookup failed – dumping full docker inspect")
+        try:
+            print_bash(f"docker inspect {container}")
+        except Exception as e:
+            print(f"DEBUG: docker inspect failed completely: {e}")
 
     if not project:
         raise RuntimeError(f"No compose project label found for container {container}")
