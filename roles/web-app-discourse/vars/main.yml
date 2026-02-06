@@ -39,9 +39,9 @@ DISCOURSE_LDAP_ENABLED:             "{{ applications | get_app_conf(application_
 DISCOURSE_LOCAL:                    "C.UTF-8"
 
 DISCOURSE_OIDC_ENABLED:             "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
-DISCOURSE_OIDC_LOGOUT_REDIRECT_URL: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+DISCOURSE_OIDC_LOGOUT_REDIRECT_URL: "{{ lookup('tls_resolve', application_id, 'url.base') }}"
 
 # TLS
-DISCOURSE_TLS_ENABLED:              "{{ lookup('tls_resolve', application_id, want='enabled') | bool }}"
-DISCOURSE_TLS_SELFSIGNED:           "{{ lookup('tls_resolve', application_id, want='mode') == 'self_signed' }}"
+DISCOURSE_TLS_ENABLED:              "{{ lookup('tls_resolve', application_id, 'enabled') | bool }}"
+DISCOURSE_TLS_SELFSIGNED:           "{{ lookup('tls_resolve', application_id, 'mode') == 'self_signed' }}"
 DISCOURSE_TLS_SELFSIGNED_ENABLED:   "{{ ( DISCOURSE_TLS_ENABLED | bool ) and ( DISCOURSE_TLS_SELFSIGNED | bool ) }}"

@@ -8,8 +8,8 @@
   file:
     path: "{{ DESKTOP_JS_SERVER_DIR }}"
     state: directory
-    owner: "{{ lookup('nginx_paths', want='user') }}"
-    group: "{{ lookup('nginx_paths', want='user') }}"
+    owner: "{{ lookup('nginx_paths','user') }}"
+    group: "{{ lookup('nginx_paths','user') }}"
     mode: '0755'
 
 - name: "Include file specific JS Routines"

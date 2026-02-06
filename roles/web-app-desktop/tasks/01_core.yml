@@ -38,7 +38,7 @@
 
 - name: "Load Desktop Brand logos"
   set_fact:
-    portfolio_cards: "{{ portfolio_cards | add_simpleicon_source(domains, lookup('tls_resolve', application_id, want='protocols.web')) }}"
+    portfolio_cards: "{{ portfolio_cards | add_simpleicon_source(domains, lookup('tls_resolve', application_id, 'protocols.web')) }}"
   when: DESKTOP_SIMPLEICONS_ENABLED | bool
   changed_when: false
 

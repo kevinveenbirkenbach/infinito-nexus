@@ -1,6 +1,6 @@
 http_address            =   "0.0.0.0:4180"
 cookie_secret           =   "{{ applications | get_app_conf(oauth2_proxy_application_id, 'credentials.oauth2_proxy_cookie_secret') }}"
-cookie_secure           =   "{{ lookup('tls_resolve', application_id, want='enabled') | string | lower }}"                                                                            # True is necessary to force the cookie set via https
+cookie_secure           =   "{{ lookup('tls_resolve', application_id, 'enabled') | string | lower }}"                                                                            # True is necessary to force the cookie set via https
 upstreams               =   "http://{{ applications | get_app_conf(oauth2_proxy_application_id, 'docker.services.oauth2.origin.host') }}:{{ applications | get_app_conf(oauth2_proxy_application_id, 'docker.services.oauth2.origin.port') }}"
 cookie_domains          =   ["{{ domains | get_domain(oauth2_proxy_application_id) }}", "{{ domains | get_domain('web-app-keycloak') }}"]   # Required so cookie can be read on all subdomains.
 whitelist_domains       =   [".{{ DOMAIN_PRIMARY }}"]                                                                                       # Required to allow redirection back to original requested target.
@@ -8,7 +8,7 @@ whitelist_domains       =   [".{{ DOMAIN_PRIMARY }}"]                           
 # keycloak provider
 client_secret           =   "{{ OIDC.CLIENT.SECRET }}"
 client_id               =   "{{ OIDC.CLIENT.ID }}"
-redirect_url            =   "{{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ domains | get_domain(oauth2_proxy_application_id) }}/oauth2/callback"
+redirect_url            =   "{{ lookup('tls_resolve', application_id, 'protocols.web') }}://{{ domains | get_domain(oauth2_proxy_application_id) }}/oauth2/callback"
 oidc_issuer_url         =   "{{ OIDC.CLIENT.ISSUER_URL }}"
 provider                =   "oidc"
 provider_display_name   =   "{{ OIDC.BUTTON_TEXT }}"

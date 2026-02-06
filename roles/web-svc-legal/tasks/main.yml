@@ -2,6 +2,6 @@
 - name:         copy imprint.html
   template:
     src:        "imprint.html.j2" 
-    dest:       "{{ [ lookup('nginx_paths', want='directories.data.html'), 'imprint.html' ] | path_join }}"
-    owner:      "{{ lookup('nginx_paths', want='user') }}"
-    group:      "{{ lookup('nginx_paths', want='user') }}"
+    dest:       "{{ [ lookup('nginx_paths','directories.data.html'), 'imprint.html' ] | path_join }}"
+    owner:      "{{ lookup('nginx_paths','user') }}"
+    group:      "{{ lookup('nginx_paths','user') }}"

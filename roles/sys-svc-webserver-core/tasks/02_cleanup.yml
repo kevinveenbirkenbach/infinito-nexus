@@ -3,6 +3,6 @@
   ansible.builtin.file:
     path: "{{ item.value }}"
     state: absent
-  loop: "{{ {'general': lookup('nginx_paths', want='directories.cache.general'), 'image': lookup('nginx_paths', want='directories.cache.image')} | dict2items }}"
+  loop: "{{ {'general': lookup('nginx_paths','directories.cache.general'), 'image': lookup('nginx_paths','directories.cache.image')} | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

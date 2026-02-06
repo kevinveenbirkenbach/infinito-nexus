@@ -23,7 +23,7 @@
 - name: "Include Cert deploy service for '{{ role_name }}'"
   include_role:
     name: sys-ctl-mtn-cert-deploy
-  when: lookup('tls_resolve', application_id, want='enabled') | bool
+  when: lookup('tls_resolve', application_id, 'enabled') | bool
 
 - name: "Flush Docker Compose handlers"
   meta: flush_handlers

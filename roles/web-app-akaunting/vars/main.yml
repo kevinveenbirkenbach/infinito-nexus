@@ -7,7 +7,7 @@ js_application_name:                  "Akaunting"
 database_password:                    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
 
 # Akaunting
-AKAUNTING_URL:                        "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+AKAUNTING_URL:                        "{{ lookup('tls_resolve', application_id, 'url.base') }}"
 AKAUNTING_VERSION:                    "{{ applications | get_app_conf(application_id, 'docker.services.akaunting.version') }}"
 AKAUNTING_IMAGE:                      "{{ applications | get_app_conf(application_id, 'docker.services.akaunting.image') }}"
 AKAUNTING_CONTAINER:                  "{{ applications | get_app_conf(application_id, 'docker.services.akaunting.name') }}"

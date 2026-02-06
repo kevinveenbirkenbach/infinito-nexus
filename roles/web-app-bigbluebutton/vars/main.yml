@@ -20,14 +20,14 @@ BBB_TURN_SECRET_SHARED:               "{{ applications | get_app_conf(_BBB_COTUR
 BBB_TURN_SECRET:                      "{{ BBB_COTURN_LOCAL_ENABLED  | bool | ternary (BBB_TURN_SECRET_LOCAL, BBB_TURN_SECRET_SHARED) }}"
 
 ## TLS
-BBB_COTURN_TLS_CERT_PATH:             "{{ lookup('cert_plan', application_id, want='files.cert') }}"
-BBB_COTURN_TLS_KEY_PATH:              "{{ lookup('cert_plan', application_id, want='files.key') }}"
+BBB_COTURN_TLS_CERT_PATH:             "{{ lookup('cert_plan', application_id, 'files.cert') }}"
+BBB_COTURN_TLS_KEY_PATH:              "{{ lookup('cert_plan', application_id, 'files.key') }}"
 
 ## Turn
 BBB_COTURN_LOCAL_ENABLED:             "{{ not (applications | get_app_conf(application_id, 'docker.services.coturn.shared')) }}"
 BBB_TURN_DOMAIN:                      "{{ networks.internet.ip4             if BBB_COTURN_LOCAL_ENABLED else domains | get_domain(_BBB_COTURN_ROLE) }}"
 BBB_TURN_PORT:                        "{{ ports.public.stun_turn[application_id] if BBB_COTURN_LOCAL_ENABLED else ports.public.stun_turn[_BBB_COTURN_ROLE] }}"
-BBB_TURN_PROTOCOL:                    "{{ 'turns' if (lookup('tls_resolve', application_id, want='enabled') | bool) else 'turn' }}"
+BBB_TURN_PROTOCOL:                    "{{ 'turns' if (lookup('tls_resolve', application_id, 'enabled') | bool) else 'turn' }}"
 BBB_STUN_PORT:                        "{{ ports.public.stun_turn[application_id] if BBB_COTURN_LOCAL_ENABLED else ports.public.stun_turn_tls[_BBB_COTURN_ROLE] }}"
 BBB_RELAY_PORT_START:                 "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
 BBB_RELAY_PORT_END:                   "{{ ports.public.relay_port_ranges[application_id ~ '_end'] }}"

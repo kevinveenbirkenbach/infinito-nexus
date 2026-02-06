@@ -67,8 +67,8 @@
     - docker compose up
   when:
     - domains | has_domain(application_id)
-    - lookup('tls_resolve', application_id, want='enabled') | bool
-    - lookup('tls_resolve', application_id, want='mode') == 'self_signed'
+    - lookup('tls_resolve', application_id, 'enabled') | bool
+    - lookup('tls_resolve', application_id, 'mode') == 'self_signed'
 
 - name: docker compose up
   ansible.builtin.shell: |

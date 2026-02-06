@@ -3,7 +3,7 @@ application_id:             "web-app-wordpress"
 entity_name:                "{{ application_id | get_entity_name }}"
 
 # WordPress
-WORDPRESS_URL:                "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+WORDPRESS_URL:                "{{ lookup('tls_resolve', application_id, 'url.base') }}"
 WORDPRESS_TITLE:              "{{ applications | get_app_conf(application_id, 'title') }}"
 WORDPRESS_MAX_UPLOAD_SIZE:    "{{ applications | get_app_conf(application_id, 'max_upload_size') }}"
 WORDPRESS_CUSTOM_IMAGE:       "{{ entity_name }}_custom:{{ WORDPRESS_VERSION }}"

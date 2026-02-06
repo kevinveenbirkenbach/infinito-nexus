@@ -44,7 +44,7 @@
           system_service_script_exec,
           '--nginx-config-dir=' ~ (
             [
-              lookup('nginx_paths', want='directories.configuration.servers'),
+              lookup('nginx_paths','directories.configuration.servers'),
               lookup('tls_resolve', DOMAIN_PRIMARY, want='protocols.web')
             ] | path_join
           ),

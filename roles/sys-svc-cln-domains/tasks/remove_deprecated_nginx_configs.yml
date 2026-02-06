@@ -1,7 +1,7 @@
 ---
 - name: Find matching nginx configs for {{ domain }}
   ansible.builtin.find:
-    paths: "{{ lookup('nginx_paths', want='directories.configuration.servers') }}"
+    paths: "{{ lookup('nginx_paths','directories.configuration.servers') }}"
     recurse: true
     patterns: "*.{{ domain }}.conf"
   register: find_result

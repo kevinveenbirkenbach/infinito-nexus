@@ -9,7 +9,7 @@ container_hostname:               "{{ domains | get_domain(application_id) }}"
 # Confluence 
 
 ## URLs
-CONFLUENCE_URL:                   "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+CONFLUENCE_URL:                   "{{ lookup('tls_resolve', application_id, 'url.base') }}"
 CONFLUENCE_HOSTNAME:              "{{ container_hostname }}"
 CONFLUENCE_HOME:                  "/var/atlassian/application-data/confluence"
 
