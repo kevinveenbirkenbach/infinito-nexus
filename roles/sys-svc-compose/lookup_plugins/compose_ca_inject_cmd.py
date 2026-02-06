@@ -171,17 +171,19 @@ class LookupModule(LookupBase):
         # ---------------------------------------------------------------------
         # Resolve compose files (without CA override!)
         # ---------------------------------------------------------------------
-        compose_f_args_lkp = lookup_loader.get(
-            "compose_f_args", self._loader, self._templar
+        compose_file_args_lkp = lookup_loader.get(
+            "compose_file_args", self._loader, self._templar
         )
-        compose_files = compose_f_args_lkp.run(
+        compose_files = compose_file_args_lkp.run(
             [application_id],
             variables=variables,
             include_ca=False,
         )[0]
 
         if not _as_str(compose_files):
-            raise AnsibleError("compose_ca_inject_cmd: compose_f_args returned empty")
+            raise AnsibleError(
+                "compose_ca_inject_cmd: compose_file_args returned empty"
+            )
 
         # ---------------------------------------------------------------------
         # Build command

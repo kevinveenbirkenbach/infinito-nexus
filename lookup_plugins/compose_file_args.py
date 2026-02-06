@@ -1,4 +1,4 @@
-# lookup_plugins/compose_f_args.py
+# lookup_plugins/compose_file_args.py
 #
 # Build docker compose "-f <file>" arguments for an application instance.
 #
@@ -42,7 +42,7 @@ def _as_str(v: Any) -> str:
 
 def _require_dict(d: Any, label: str) -> dict:
     if not isinstance(d, dict):
-        raise AnsibleError(f"compose_f_args: {label} must be a dict, got {type(d)}")
+        raise AnsibleError(f"compose_file_args: {label} must be a dict, got {type(d)}")
     return d
 
 
@@ -94,13 +94,13 @@ def _role_provides_override(*, application_id: str, templar: Any) -> bool:
     tpl = getattr(templar, "template", None)
     if not callable(tpl):
         raise AnsibleError(
-            "compose_f_args: templar is required to resolve abs_role_path_by_application_id"
+            "compose_file_args: templar is required to resolve abs_role_path_by_application_id"
         )
 
     role_base = _as_str(tpl("{{ application_id | abs_role_path_by_application_id }}"))
     if not role_base:
         raise AnsibleError(
-            "compose_f_args: abs_role_path_by_application_id resolved to empty"
+            "compose_file_args: abs_role_path_by_application_id resolved to empty"
         )
 
     c1 = os.path.join(role_base, "templates", "docker-compose.override.yml.j2")
@@ -115,16 +115,16 @@ class LookupModule(LookupBase):
 
         if not terms or len(terms) != 1:
             raise AnsibleError(
-                "compose_f_args: exactly one term required (application_id)"
+                "compose_file_args: exactly one term required (application_id)"
             )
 
         application_id = _as_str(terms[0])
         if not application_id:
-            raise AnsibleError("compose_f_args: application_id is empty")
+            raise AnsibleError("compose_file_args: application_id is empty")
 
         include_ca = kwargs.get("include_ca", True)
         if not isinstance(include_ca, bool):
-            raise AnsibleError("compose_f_args: include_ca must be a bool")
+            raise AnsibleError("compose_file_args: include_ca must be a bool")
 
         templar = getattr(self, "_templar", None)
 
@@ -132,7 +132,7 @@ class LookupModule(LookupBase):
         base_dir = _as_str(variables.get("DIR_COMPOSITIONS"))
         if not base_dir:
             raise AnsibleError(
-                "compose_f_args: missing required variable 'DIR_COMPOSITIONS'"
+                "compose_file_args: missing required variable 'DIR_COMPOSITIONS'"
             )
 
         docker_compose = get_docker_paths(application_id, base_dir)
@@ -145,24 +145,24 @@ class LookupModule(LookupBase):
             files.get("docker_compose"),
             variables=variables,
             var_name="docker_compose.files.docker_compose",
-            err_prefix="compose_f_args",
+            err_prefix="compose_file_args",
         )
         override = render_strict(
             files.get("docker_compose_override"),
             variables=variables,
             var_name="docker_compose.files.docker_compose_override",
-            err_prefix="compose_f_args",
+            err_prefix="compose_file_args",
         )
         ca_override = render_strict(
             files.get("docker_compose_ca_override"),
             variables=variables,
             var_name="docker_compose.files.docker_compose_ca_override",
-            err_prefix="compose_f_args",
+            err_prefix="compose_file_args",
         )
 
         if not _as_str(base):
             raise AnsibleError(
-                "compose_f_args: docker_compose.files.docker_compose is required"
+                "compose_file_args: docker_compose.files.docker_compose is required"
             )
 
         parts = [f"-f {base}"]
@@ -171,7 +171,7 @@ class LookupModule(LookupBase):
         if _role_provides_override(application_id=application_id, templar=templar):
             if not _as_str(override):
                 raise AnsibleError(
-                    "compose_f_args: docker_compose.files.docker_compose_override is required "
+                    "compose_file_args: docker_compose.files.docker_compose_override is required "
                     "when the role provides an override file"
                 )
             parts.append(f"-f {override}")
@@ -180,7 +180,7 @@ class LookupModule(LookupBase):
         if include_ca:
             if "domains" not in variables:
                 raise AnsibleError(
-                    "compose_f_args: missing required variable 'domains'"
+                    "compose_file_args: missing required variable 'domains'"
                 )
 
             domains = _maybe_template(templar, variables["domains"])
@@ -190,22 +190,24 @@ class LookupModule(LookupBase):
 
                 if not isinstance(tls, dict):
                     raise AnsibleError(
-                        f"compose_f_args: tls returned non-dict: {type(tls)}"
+                        f"compose_file_args: tls returned non-dict: {type(tls)}"
                     )
                 if "enabled" not in tls:
-                    raise AnsibleError("compose_f_args: tls did not return 'enabled'")
+                    raise AnsibleError(
+                        "compose_file_args: tls did not return 'enabled'"
+                    )
                 if "mode" not in tls:
-                    raise AnsibleError("compose_f_args: tls did not return 'mode'")
+                    raise AnsibleError("compose_file_args: tls did not return 'mode'")
 
                 enabled = bool(tls["enabled"])
                 mode = _as_str(tls["mode"])
                 if not mode:
-                    raise AnsibleError("compose_f_args: tls returned empty 'mode'")
+                    raise AnsibleError("compose_file_args: tls returned empty 'mode'")
 
                 if enabled and mode == "self_signed":
                     if not _as_str(ca_override):
                         raise AnsibleError(
-                            "compose_f_args: docker_compose.files.docker_compose_ca_override is required "
+                            "compose_file_args: docker_compose.files.docker_compose_ca_override is required "
                             "when TLS is enabled and mode is self_signed"
                         )
                     parts.append(f"-f {ca_override}")

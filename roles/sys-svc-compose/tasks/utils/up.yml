@@ -2,7 +2,7 @@
   command: >-
     docker compose
     -p {{ application_id | get_entity_name }}
-    {{ lookup('compose_f_args', application_id) }}
+    {{ lookup('compose_file_args', application_id) }}
     {% if lookup('docker', application_id, 'files.env') is file %} --env-file {{ lookup('docker', application_id, 'files.env') }}{% endif %}
     ps -q --filter status=running
   args:

@@ -1,4 +1,4 @@
-# tests/unit/lookup_plugins/test_compose_f_args.py
+# tests/unit/lookup_plugins/test_compose_file_args.py
 import importlib.util
 import unittest
 from pathlib import Path
@@ -8,7 +8,7 @@ from ansible.errors import AnsibleError
 
 
 def _repo_root() -> Path:
-    # __file__ = tests/unit/lookup_plugins/test_compose_f_args.py
+    # __file__ = tests/unit/lookup_plugins/test_compose_file_args.py
     return Path(__file__).resolve().parents[3]
 
 
@@ -33,8 +33,8 @@ class _TlsResolveStub:
 class TestComposeFArgs(unittest.TestCase):
     def setUp(self):
         self.m = _load_module(
-            "lookup_plugins/compose_f_args.py",
-            "compose_f_args_mod",
+            "lookup_plugins/compose_file_args.py",
+            "compose_file_args_mod",
         )
         self.lookup = self.m.LookupModule()
 
@@ -43,7 +43,7 @@ class TestComposeFArgs(unittest.TestCase):
         self.lookup._loader = object()
         self.lookup._templar = object()
 
-        # compose_f_args no longer reads variables['docker_compose'].
+        # compose_file_args no longer reads variables['docker_compose'].
         # It builds docker_compose via get_docker_paths(application_id, DIR_COMPOSITIONS).
         self.vars = {
             "DIR_COMPOSITIONS": "/x/",

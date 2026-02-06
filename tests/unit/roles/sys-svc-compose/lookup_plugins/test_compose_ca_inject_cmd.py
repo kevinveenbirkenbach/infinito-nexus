@@ -42,7 +42,7 @@ class _FakeDockerLookup:
 
 class _FakeComposeFArgsLookup:
     """
-    Mimics lookup('compose_f_args', application_id, include_ca=False).
+    Mimics lookup('compose_file_args', application_id, include_ca=False).
     """
 
     def __init__(self, result: str):
@@ -52,7 +52,9 @@ class _FakeComposeFArgsLookup:
     def run(self, terms, variables=None, **kwargs):
         self.calls.append({"terms": terms, "kwargs": kwargs})
         if kwargs.get("include_ca", None) is not False:
-            raise AnsibleError("Fake compose_f_args lookup: expected include_ca=False")
+            raise AnsibleError(
+                "Fake compose_file_args lookup: expected include_ca=False"
+            )
         return [self._result]
 
 
@@ -85,7 +87,7 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
                 ),
             }
 
-            compose_f_args = _FakeComposeFArgsLookup(
+            compose_file_args = _FakeComposeFArgsLookup(
                 "-f docker-compose.yml -f docker-compose.override.yml"
             )
 
@@ -101,8 +103,8 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
             def _fake_get(name, _loader, _templar):
                 if name == "docker":
                     return _FakeDockerLookup(docker_map)
-                if name == "compose_f_args":
-                    return compose_f_args
+                if name == "compose_file_args":
+                    return compose_file_args
                 raise AssertionError(f"Unexpected lookup requested: {name}")
 
             with (
@@ -145,10 +147,10 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
                     cmd,
                 )
 
-                # ensure compose_f_args called with include_ca=False
-                self.assertTrue(compose_f_args.calls)
+                # ensure compose_file_args called with include_ca=False
+                self.assertTrue(compose_file_args.calls)
                 self.assertEqual(
-                    compose_f_args.calls[0]["kwargs"].get("include_ca"), False
+                    compose_file_args.calls[0]["kwargs"].get("include_ca"), False
                 )
 
     def test_builds_command_omits_env_file_when_missing(self):
@@ -163,7 +165,7 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
                 ),
             }
 
-            compose_f_args = _FakeComposeFArgsLookup("-f docker-compose.yml")
+            compose_file_args = _FakeComposeFArgsLookup("-f docker-compose.yml")
 
             variables = {
                 "CA_TRUST": {
@@ -177,8 +179,8 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
             def _fake_get(name, _loader, _templar):
                 if name == "docker":
                     return _FakeDockerLookup(docker_map)
-                if name == "compose_f_args":
-                    return compose_f_args
+                if name == "compose_file_args":
+                    return compose_file_args
                 raise AssertionError(f"Unexpected lookup requested: {name}")
 
             with (
@@ -208,13 +210,13 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
             "files.docker_compose_ca_override": "/opt/compose/app/docker-compose.ca.override.yml",
         }
 
-        compose_f_args = _FakeComposeFArgsLookup("-f docker-compose.yml")
+        compose_file_args = _FakeComposeFArgsLookup("-f docker-compose.yml")
 
         def _fake_get(name, _loader, _templar):
             if name == "docker":
                 return _FakeDockerLookup(docker_map)
-            if name == "compose_f_args":
-                return compose_f_args
+            if name == "compose_file_args":
+                return compose_file_args
             raise AssertionError(f"Unexpected lookup requested: {name}")
 
         # CA_TRUST intentionally missing
