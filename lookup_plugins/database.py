@@ -14,20 +14,13 @@ class LookupModule(LookupBase):
     """
     Resolve database values for a given database_consumer_id.
 
-    Usage:
+    API (STRICT):
       - {{ lookup('database', database_consumer_id) }}
-      - {{ lookup('database', database_consumer_id, want='url_full') }}
+      - {{ lookup('database', database_consumer_id, 'url_full') }}
 
-    Inputs:
-      - term[0] = database_consumer_id
-      - reads these from Ansible vars:
-          applications, ports, DIR_COMPOSITIONS
-
-    Output keys (no prefixes):
-      id,
-      enabled, shared,
-      type, name, instance, host, container, username, password, port, env,
-      url_jdbc, url_full, volume, image, version, reach_host
+    Notes:
+      - want-path is optional and MUST be the second positional argument if used
+      - kwarg want= is NOT supported (use positional want-path)
     """
 
     def run(
@@ -36,18 +29,25 @@ class LookupModule(LookupBase):
         variables: Optional[Dict[str, Any]] = None,
         **kwargs: Any,
     ) -> List[Any]:
-        if not terms:
+        terms = terms or []
+        if len(terms) not in (1, 2):
+            raise AnsibleError("database: requires database_consumer_id [, want_path]")
+
+        # STRICT: do not support legacy want= kwarg at all
+        if "want" in kwargs and str(kwargs.get("want") or "").strip():
             raise AnsibleError(
-                "lookup 'database': missing required term 'database_consumer_id'"
+                "database: kwarg 'want=' is not supported; use positional want_path "
+                "like lookup('database', <id>, 'url_full')"
             )
 
         consumer_id = str(terms[0]).strip()
         if not consumer_id:
-            raise AnsibleError(
-                "lookup 'database': database_consumer_id must not be empty"
-            )
+            raise AnsibleError("database: database_consumer_id must not be empty")
 
-        want = str(kwargs.get("want", "all"))
+        # STRICT positional want-path (optional)
+        want = str(terms[1]).strip() if len(terms) == 2 else ""
+        if not want:
+            want = "all"
 
         vars_ = variables or self._templar.available_variables
         applications = self._require_var(vars_, "applications")
@@ -110,7 +110,6 @@ class LookupModule(LookupBase):
 
         # Central/shared DB if shared==True
         central_enabled = shared
-
         db_id = f"svc-db-{dbtype}"
 
         central_name = get_app_conf(
@@ -138,7 +137,6 @@ class LookupModule(LookupBase):
         )
 
         # ports.localhost.database[svc-db-<type>]
-        port = ""
         try:
             port = ports["localhost"]["database"].get(db_id, "")
         except Exception:
@@ -198,7 +196,5 @@ class LookupModule(LookupBase):
     @staticmethod
     def _require_var(vars_: Dict[str, Any], key: str) -> Any:
         if key not in vars_:
-            raise AnsibleError(
-                f"lookup 'database': required variable '{key}' is not set"
-            )
+            raise AnsibleError(f"database: required variable '{key}' is not set")
         return vars_[key]

@@ -4,6 +4,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from ansible.errors import AnsibleError
+
 
 def _repo_root() -> Path:
     # __file__ = tests/unit/lookup_plugins/test_database.py
@@ -48,6 +50,23 @@ class DatabaseLookupTests(unittest.TestCase):
             if role_name.startswith(prefix):
                 return role_name[len(prefix) :]
         return role_name
+
+    def test_invalid_terms_raises(self):
+        vars_ = {"applications": {}, "ports": {}, "DIR_COMPOSITIONS": "/opt/compose/"}
+        lookup = self._make_lookup(vars_)
+
+        with self.assertRaises(AnsibleError):
+            lookup.run([], variables=vars_)  # missing consumer_id
+
+        with self.assertRaises(AnsibleError):
+            lookup.run(["a", "b", "c"], variables=vars_)  # too many terms
+
+    def test_kwarg_want_is_not_supported_raises(self):
+        vars_ = {"applications": {}, "ports": {}, "DIR_COMPOSITIONS": "/opt/compose/"}
+        lookup = self._make_lookup(vars_)
+
+        with self.assertRaises(AnsibleError):
+            lookup.run(["web-app-foo"], variables=vars_, want="url_full")
 
     def test_no_dbtype_configured_returns_empty_like_vars_logic(self):
         applications = {
@@ -96,6 +115,16 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["image"], "")
         self.assertEqual(out["version"], "")
         self.assertEqual(out["reach_host"], "127.0.0.1")
+
+        # STRICT projection API (positional want-path)
+        with patch.object(
+            self.db_lookup_mod,
+            "get_entity_name",
+            side_effect=self._fake_get_entity_name,
+        ):
+            self.assertEqual(
+                lookup.run(["web-app-foo", "url_full"], variables=vars_)[0], ""
+            )
 
     def test_postgres_dedicated_matches_helper_variables_definition(self):
         # Consumer config: database.type=postgres, shared=false
@@ -160,6 +189,21 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["version"], "16")
         self.assertEqual(out["reach_host"], "127.0.0.1")
         self.assertEqual(out["instance"], "foo")
+
+        # STRICT projection API (positional want-path)
+        with patch.object(
+            self.db_lookup_mod,
+            "get_entity_name",
+            side_effect=self._fake_get_entity_name,
+        ):
+            self.assertEqual(
+                lookup.run(["web-app-foo", "url_full"], variables=vars_)[0],
+                "postgres://foo:pw@database:5432/foo",
+            )
+            self.assertEqual(
+                lookup.run(["web-app-foo", "port"], variables=vars_)[0],
+                "5432",
+            )
 
     def test_postgres_shared_uses_central_name_for_host_instance_container_volume(self):
         applications = {
