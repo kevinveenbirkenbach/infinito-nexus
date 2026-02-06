@@ -152,4 +152,21 @@
     CA_TRUST_NAME: "{{ DOMAIN_PRIMARY | lower }}"
   changed_when: true
 
+- name: "TLS | (self_signed) ensure CA trust env vars in /etc/environment"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    create: true
+    mode: "0644"
+  loop:
+    - regexp: '^CA_TRUST_CERT_HOST='
+      line: "CA_TRUST_CERT_HOST={{ CA_TRUST.cert_host }}"
+    - regexp: '^CA_TRUST_WRAPPER_HOST='
+      line: "CA_TRUST_WRAPPER_HOST={{ CA_TRUST.wrapper_host }}"
+    - regexp: '^CA_TRUST_NAME='
+      line: "CA_TRUST_NAME={{ CA_TRUST.trust_name }}"
+
 - include_tasks: utils/once/flag.yml

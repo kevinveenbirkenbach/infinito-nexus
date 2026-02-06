@@ -1,4 +1,6 @@
 # run_once_sys_front_tls_letsencrypt: deactivated
+- name: "Disable self-signed environment"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-ca-selfsigned/tasks/disable_env.yml' ] | path_join }}"
 
 - name: "TLS | (letsencrypt) resolve via tls (strict)"
   ansible.builtin.set_fact:
