@@ -3,7 +3,7 @@
 {# Central RDMS-Database Network #}
 {% if 
   (
-    applications | get_app_conf(application_id, 'docker.services.database.enabled', False) and 
+    lookup('config',application_id, 'docker.services.database.enabled', False) and 
     lookup('database', application_id, 'shared')
   )
   or
@@ -16,11 +16,11 @@
 {% endif %}
 {% endif %}
 {# Central LDAP Network #}
-{% if applications | get_app_conf(application_id, 'docker.services.ldap.shared', False) and lookup('config','svc-db-openldap', 'network.docker') %}
+{% if lookup('config',application_id, 'docker.services.ldap.shared', False) and lookup('config','svc-db-openldap', 'network.docker') %}
       {{ lookup('config','svc-db-openldap', 'docker.network') }}:
 {% endif %}
 {# Central AI Network #}
-{% if applications | get_app_conf(application_id, 'docker.services.ollama.shared', False) %}
+{% if lookup('config',application_id, 'docker.services.ollama.shared', False) %}
       {{ lookup('config','svc-ai-ollama', 'docker.network') }}:
 {% endif %}
 {% if not application_id.startswith('svc-db-') and not application_id.startswith('svc-ai-') %}

@@ -6,7 +6,7 @@ MARIADB_ROOT_PWD:       "{{ lookup('config', application_id, 'credentials.root_p
 MARIADB_SUBNET:         "{{ networks.local['svc-db-mariadb'].subnet  }}"
 MARIADB_NETWORK:        "{{ lookup('config', application_id, 'docker.network') }}"
 MARIADB_VOLUME:         "{{ lookup('config', application_id, 'docker.volumes.data') }}"
-MARIADB_IMAGE:          "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.image','mariadb') }}"
+MARIADB_IMAGE:          "{{ lookup('config', application_id, application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
 MARIADB_VERSION:        "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 MARIADB_NAME:           "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
 MARIADB_PORT:           "{{ database_port | default(ports.localhost.database[ application_id ]) }}"

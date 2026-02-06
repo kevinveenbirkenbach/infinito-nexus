@@ -13,7 +13,7 @@ oidc_issuer_url         =   "{{ OIDC.CLIENT.ISSUER_URL }}"
 provider                =   "oidc"
 provider_display_name   =   "{{ OIDC.BUTTON_TEXT }}"
 
-{% if applications | get_app_conf(oauth2_proxy_application_id, 'docker.services.oauth2.allowed_groups', False) %}
+{% if lookup('config',oauth2_proxy_application_id, 'docker.services.oauth2.allowed_groups', False) %}
 {# role based restrictions #}
 scope                   =   "openid email profile {{ RBAC.GROUP.CLAIM }}"
 oidc_groups_claim       =   "{{ RBAC.GROUP.CLAIM }}"

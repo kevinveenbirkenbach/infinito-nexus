@@ -4,7 +4,7 @@ _database_id:                       "{{ ('svc-db-' ~ _dbtype) if _dbtype else ''
 _database_central_name:             "{{ (applications | get_app_conf(_database_id, 'docker.services.' ~ _dbtype ~ '.name', False, '')) if _dbtype else '' }}"
 _database_consumer_id:              "{{ database_consumer_id | default (application_id) }}"
 _database_consumer_entity_name:     "{{ _database_consumer_id | get_entity_name }}"
-_database_central_enabled:          "{{ (applications | get_app_conf(_database_consumer_id, 'docker.services.database.shared', False)) if _dbtype else False }}"
+_database_central_enabled:          "{{ (lookup('config',_database_consumer_id, 'docker.services.database.shared', False)) if _dbtype else False }}"
 _database_default_version:          "{{ lookup('config',_database_id, 'docker.services.' ~ _dbtype ~ '.version') }}"
 
 # Definition
