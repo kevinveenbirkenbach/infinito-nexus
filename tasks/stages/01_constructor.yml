@@ -130,6 +130,10 @@
     set_fact:
       service_provider: "{{ defaults_service_provider | combine(service_provider | default({}, true), recursive=True) }}"
 
+- name: Persist Infinito.Nexus version
+  ansible.builtin.include_role:
+    name: sys-version
+
 - name: Include Token Store
   include_role:
     name: sys-token-store

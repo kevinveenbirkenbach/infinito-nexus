@@ -1,0 +1,28 @@
+- name: Extract version from local pyproject.toml
+  ansible.builtin.shell: >
+    sed -nE 's/^version *= *"([^"]+)".*/\1/p' pyproject.toml
+  args:
+    chdir: "{{ playbook_dir }}"
+  delegate_to: localhost
+  run_once: true
+  register: sys_version_extracted
+  changed_when: false
+
+- name: Fail if version could not be extracted
+  ansible.builtin.fail:
+    msg: "Could not extract version from {{ playbook_dir }}/pyproject.toml"
+  when: (sys_version_extracted.stdout | trim) == ""
+  delegate_to: localhost
+  run_once: true
+
+- name: Ensure destination directory exists
+  ansible.builtin.file:
+    path: "{{ PATH_INFINITO_VERSION | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Write version to PATH_INFINITO_VERSION
+  ansible.builtin.copy:
+    dest: "{{ PATH_INFINITO_VERSION }}"
+    content: "{{ sys_version_extracted.stdout | trim }}\n"
+    mode: "0644"
