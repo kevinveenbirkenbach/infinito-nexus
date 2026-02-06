@@ -21,7 +21,7 @@
     dest: "{{ WORDPRESS_CONFIG_UPLD_ABS }}"
   notify: 
     - compose up
-    - docker compose build
+    - compose build
 
 - name: "Transfering msmtprc to {{ WORDPRESS_MSMTP_ABS }}"
   template:

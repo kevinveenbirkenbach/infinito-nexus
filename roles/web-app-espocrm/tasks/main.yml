@@ -11,7 +11,7 @@
     dest: "{{ ESPOCRM_ENTRYPOINT_SCRIPT_HOST_ABS }}"
   notify: 
     - compose up
-    - docker compose build
+    - compose build
 
 - name: "Deploy '{{ ESPOCRM_SCRIPT_SEED_HOST_ABS }}'"
   copy:
@@ -19,7 +19,7 @@
     dest: "{{ ESPOCRM_SCRIPT_SEED_HOST_ABS }}"
   notify: 
     - compose up
-    - docker compose build
+    - compose build
 
 
 - name: "Docker Compose Up for '{{ application_id }}'"

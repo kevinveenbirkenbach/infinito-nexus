@@ -217,7 +217,7 @@ def ensure_image_available(
             compose_base_cmd + ["build", service_name],
             cwd=cwd,
             env=env,
-            label=f"docker compose build {service_name}",
+            label=f"compose build {service_name}",
         )
     else:
         builder = _find_builder_service_for_image(image=img, services=services)
@@ -229,7 +229,7 @@ def ensure_image_available(
                 builder_cmd + ["build", builder],
                 cwd=cwd,
                 env=env,
-                label=f"docker compose build {builder} (builder for image {img})",
+                label=f"compose build {builder} (builder for image {img})",
             )
         else:
             run_checked(

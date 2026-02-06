@@ -17,7 +17,7 @@
     dest: "{{ LITTLEJS_INDEX_HOST_ABS }}"
     mode: "0644"
   notify:
-    - docker compose build
+    - compose build
     - compose up
 
 - name: "Render LittleJS run.html for shorts"
@@ -26,7 +26,7 @@
     dest: "{{ LITTLEJS_RUN_HOST_ABS }}"
     mode: "0644"
   notify:
-    - docker compose build
+    - compose build
     - compose up
 
 - name: "flush docker compose for '{{ application_id }}'"

@@ -41,9 +41,9 @@
 - name: Build docker compose
   ansible.builtin.shell: |
     set -euo pipefail
-    docker compose build || {
+    compose build || {
       echo "Retrying without cache and pulling bases...";
-      docker compose build --no-cache --pull;
+      compose build --no-cache --pull;
     }
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
@@ -54,7 +54,7 @@
     DOCKER_BUILDKIT: "1"
     COMPOSE_DOCKER_CLI_BUILD: "1"
   listen:
-    - docker compose build
+    - compose build
 
 - name: Generate CA trust override
   ansible.builtin.shell: |
@@ -109,4 +109,4 @@
   when: STORAGE_CONSTRAINED | bool
   listen:
     - compose up
-    - docker compose build
+    - compose build

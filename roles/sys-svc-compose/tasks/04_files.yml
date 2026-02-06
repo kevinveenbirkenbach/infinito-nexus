@@ -19,7 +19,7 @@
     dest: "{{ lookup('docker', application_id, 'files.dockerfile') }}"
     mode: '0640'
   notify:
-    - docker compose build
+    - compose build
     - compose up
   when:
     - dockerfile_src | default('') | length > 0
@@ -32,7 +32,7 @@
     force: yes
   notify:
     - compose up
-    - docker compose build
+    - compose build
   with_first_found:
     - files:
         - "{{ application_id | abs_role_path_by_application_id }}/templates/env.j2"
