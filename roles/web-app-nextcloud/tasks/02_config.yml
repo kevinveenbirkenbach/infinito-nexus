@@ -34,7 +34,7 @@
   ansible.builtin.shell: |
     set -euo pipefail
 
-    {{ BIN_CONTAINER }} exec -u root {{ NEXTCLOUD_CONTAINER }} sh -lc '
+    container exec -u root {{ NEXTCLOUD_CONTAINER }} sh -lc '
       cfg="{{ NEXTCLOUD_DOCKER_CONFIG_FILE }}"
       marker="INFINITO:NEXUS CONFIG LOADER"
 

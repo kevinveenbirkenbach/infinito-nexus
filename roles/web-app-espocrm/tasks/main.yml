@@ -27,7 +27,7 @@
 
 - name: Check if config.php exists in EspoCRM
   command: >
-    {{ BIN_CONTAINER }} exec --user root {{ ESPOCRM_CONTAINER }} test -f {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
+    container exec --user root {{ ESPOCRM_CONTAINER }} test -f {{ ESPOCRM_CONFIG_FILE_PRIVATE }}
   register: config_file_exists
   changed_when: false
   failed_when:  false
@@ -38,7 +38,7 @@
 
 - name: Run EspoCRM upgrade
   command: >
-    {{ BIN_CONTAINER }} exec --user {{ ESPOCRM_USER }} {{ ESPOCRM_CONTAINER }}
+    container exec --user {{ ESPOCRM_USER }} {{ ESPOCRM_CONTAINER }}
     php command.php upgrade -y
   register: espocrm_upgrade
   changed_when: "'Upgrading' in espocrm_upgrade.stdout or 'successfully' in espocrm_upgrade.stdout"
@@ -46,7 +46,7 @@
 
 - name: Run flag setter as root (fallback)
   command: >
-    {{ BIN_CONTAINER }} exec --user root {{ ESPOCRM_CONTAINER }}
+    container exec --user root {{ ESPOCRM_CONTAINER }}
     php {{ ESPOCRM_SCRIPT_SEED_DOCKER }}
   register: flags_result_root
   changed_when: "'CHANGED' in flags_result_root.stdout"

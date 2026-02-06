@@ -12,7 +12,7 @@
   meta: flush_handlers
 
 - name: "MEDIAWIKI | Wait until container exists"
-  ansible.builtin.command: "{{ BIN_CONTAINER }} inspect {{ MEDIAWIKI_CONTAINER }}"
+  ansible.builtin.command: "container inspect {{ MEDIAWIKI_CONTAINER }}"
   register: _mw_exists
   retries: 20
   delay: 3

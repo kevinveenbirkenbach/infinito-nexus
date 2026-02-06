@@ -7,14 +7,14 @@
 
 - name: Check if config.php exists
   command: >
-    {{ BIN_CONTAINER }} exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
+    container exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
   register: config_file_exists
   changed_when: false
   failed_when: false
 
 - name: Check if config.php exists
   command: >
-    {{ BIN_CONTAINER }} exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
+    container exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
   register: config_file_exists
   changed_when: false
   failed_when: false
@@ -30,7 +30,7 @@
   block:
     - name: Wait until the Moodle container is healthy
       ansible.builtin.shell: >
-        {{ BIN_CONTAINER }} inspect --format '{% raw %}{{.State.Health.Status}}{% endraw %}' {{ MOODLE_CONTAINER }}
+        container inspect --format '{% raw %}{{.State.Health.Status}}{% endraw %}' {{ MOODLE_CONTAINER }}
       register: health_check
       until: health_check.stdout.strip() == "healthy"
       retries: 120
@@ -39,14 +39,14 @@
   rescue:
     - name: Show Moodle container status
       ansible.builtin.shell: >
-        {{ BIN_CONTAINER }} inspect {{ MOODLE_CONTAINER }}
+        container inspect {{ MOODLE_CONTAINER }}
       register: moodle_inspect
       changed_when: false
       failed_when: false
 
     - name: Show Moodle container logs
       ansible.builtin.shell: >
-         {{ BIN_CONTAINER }} logs --tail=200 {{ MOODLE_CONTAINER }}
+         container logs --tail=200 {{ MOODLE_CONTAINER }}
       register: moodle_logs
       changed_when: false
       failed_when: false
@@ -56,10 +56,10 @@
         msg: |
           ❌ Moodle container did not become healthy in time.
 
-          --- {{ BIN_CONTAINER }} inspect ---
+          --- container inspect ---
           {{ moodle_inspect.stdout | default('no output') }}
 
-          --- {{ BIN_CONTAINER }} logs (last 200 lines) ---
+          --- container logs (last 200 lines) ---
           {{ moodle_logs.stdout | default('no output') }}
 
 - name: "Include ownership settings tasks for moodle"

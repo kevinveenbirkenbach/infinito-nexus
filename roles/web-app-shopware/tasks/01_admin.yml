@@ -1,6 +1,6 @@
 - name: "Rename default Shopware admin user to {{ users.administrator.username }}"
   shell: |
-    {{ BIN_CONTAINER }} exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
+    container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
       set -e
       cd {{ SHOPWARE_ROOT }}
       old_user="admin"
@@ -19,7 +19,7 @@
 
 - name: "Ensure Shopware admin exists and has the desired password"
   shell: |
-    {{ BIN_CONTAINER }} exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
+    container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
       set -e
       cd {{ SHOPWARE_ROOT }}
       php bin/console user:create "{{ users.administrator.username }}" \

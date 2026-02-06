@@ -15,7 +15,7 @@
   
 - name: Check if Friendica local.config.php exists
   command: >
-    {{ BIN_CONTAINER }} exec --user {{ FRIENDICA_USER }} {{ FRIENDICA_CONTAINER }} test -f {{ FRIENDICA_CONFIG_FILE }}
+    container exec --user {{ FRIENDICA_USER }} {{ FRIENDICA_CONTAINER }} test -f {{ FRIENDICA_CONFIG_FILE }}
   register: friendica_config_exists
   changed_when: false
   failed_when: false

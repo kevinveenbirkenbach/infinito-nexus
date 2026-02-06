@@ -1,7 +1,7 @@
 - name: Check health status of '{{ item }}' container
   shell: |
     cid=$({{ BIN_COMPOSE }} ps -q {{ item }})
-    {{ BIN_CONTAINER }} inspect \
+    container inspect \
       --format '{{ "{{.State.Health.Status}}" }}' \
       $cid
   args:

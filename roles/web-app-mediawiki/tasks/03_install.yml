@@ -4,7 +4,7 @@
 
     # Check if MediaWiki tables exist using a MariaDB client container
     has_tables=0
-    if {{ BIN_CONTAINER }} run --rm --network {{ MEDIAWIKI_NETWORK_DATABASE }} mariadb:{{ lookup('database', application_id, 'version') | default('latest') }} \
+    if container run --rm --network {{ MEDIAWIKI_NETWORK_DATABASE }} mariadb:{{ lookup('database', application_id, 'version') | default('latest') }} \
       mariadb -h "{{ lookup('database', application_id, 'host') }}" -P "{{ lookup('database', application_id, 'port') }}" -u "{{ lookup('database', application_id, 'username') }}" -p{{ lookup('database', application_id, 'password') | quote }} \
       -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='{{ lookup('database', application_id, 'name') }}';" 2>/dev/null | grep -q -v '^0$'; then
       has_tables=1
@@ -12,7 +12,7 @@
 
     if [ "$has_tables" -eq 0 ]; then
       echo "[mw] Fresh DB detected -> running install (one-shot)"
-      {{ BIN_CONTAINER }} run --rm \
+      container run --rm \
         --network {{ MEDIAWIKI_NETWORK_DATABASE }} \
         -u {{ MEDIAWIKI_USER }} \
         {{ MEDIAWIKI_IMAGE }}:{{ MEDIAWIKI_VERSION }} \
@@ -36,7 +36,7 @@
     fi
 
     # Always run update in the real container (managed LocalSettings)
-    {{ BIN_CONTAINER }} exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
+    container exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
       set -euo pipefail
       php {{ MEDIAWIKI_HTML_DIR }}/maintenance/run.php update --quick
     '

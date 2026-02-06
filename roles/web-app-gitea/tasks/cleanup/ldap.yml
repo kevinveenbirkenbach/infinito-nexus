@@ -1,6 +1,6 @@
 - name: "Lookup existing LDAP auth source ID"
   shell: |
-    {{ BIN_CONTAINER }} exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth list \
       | awk -v name="LDAP ({{ SOFTWARE_NAME }})" '$0 ~ name {print $1; exit}'
   args:
@@ -11,7 +11,7 @@
 
 - name: "Delete existing LDAP auth source if present"
   shell: |
-    {{ BIN_CONTAINER }} exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth delete --id {{ ldap_source_id_raw.stdout }}
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"

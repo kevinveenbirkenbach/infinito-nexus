@@ -1,7 +1,7 @@
 # Replace INFX_OIDC_PLUGIN with the actual plugin name (Composer or local)
 - name: "Install OIDC plugin & activate"
   shell: |
-    {{ BIN_CONTAINER }} exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
+    container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
       set -e
       cd {{ SHOPWARE_ROOT }}
       php bin/console plugin:refresh
@@ -13,7 +13,7 @@
 
 - name: "Configure OIDC via system:config"
   shell: |
-    {{ BIN_CONTAINER }} exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
+    container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
       set -e
       cd {{ SHOPWARE_ROOT }}
       php bin/console system:config:set "InfxOidc.config.clientId"        "{{ OIDC.CLIENT.ID }}"

@@ -25,7 +25,7 @@
 
 - name: Check if current RootDN/RootPW already work
   ansible.builtin.shell: >
-    {{ BIN_CONTAINER }} exec {{ OPENLDAP_CONTAINER }}
+    container exec {{ OPENLDAP_CONTAINER }}
     ldapwhoami -x -H ldap://127.0.0.1:389 -D "{{ OPENLDAP_BIND_DN }}" -w "{{ OPENLDAP_BIND_PW }}"
   register: openldap_bind_check
   changed_when: false
@@ -49,7 +49,7 @@
 
 - name: Set OPENLDAP_MODULE_DN (from filesystem)
   shell: >
-    {{ BIN_CONTAINER }} exec {{ OPENLDAP_CONTAINER }}
+    container exec {{ OPENLDAP_CONTAINER }}
     sh -lc 'grep -m1 "^dn: " /etc/ldap/slapd.d/cn=config/cn=module{0}.ldif | sed "s/^dn: //"'
   register: openldap_module_dn_raw
   changed_when: false
@@ -65,7 +65,7 @@
 
 - name: Query available LDAP databases
   shell: >
-    {{ BIN_CONTAINER }} exec {{ OPENLDAP_CONTAINER }}
+    container exec {{ OPENLDAP_CONTAINER }}
     ldapsearch -Q -Y EXTERNAL -H {{ OPENLDAP_CONFIG_URI }} -LLL -b cn=config "(olcDatabase=*)" dn
   register: ldap_databases
   changed_when: false

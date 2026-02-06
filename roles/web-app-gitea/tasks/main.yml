@@ -17,7 +17,7 @@
 
 - name: "Run DB migrations inside Gitea container"
   shell: |
-    {{ BIN_CONTAINER }} exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea migrate
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
@@ -26,7 +26,7 @@
 
 - name: "Create initial admin user"
   shell: |
-    {{ BIN_CONTAINER }} exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea admin user create \
         --admin \
         --username "{{ users.administrator.username }}" \

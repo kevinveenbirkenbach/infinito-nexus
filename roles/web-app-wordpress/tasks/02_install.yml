@@ -1,6 +1,6 @@
 - name: "Wait until WordPress core files exist in {{ WORDPRESS_DOCKER_HTML_PATH }}"
   command: >
-    {{ BIN_CONTAINER }} exec {{ WORDPRESS_CONTAINER }}
+    container exec {{ WORDPRESS_CONTAINER }}
     test -f {{ WORDPRESS_DOCKER_HTML_PATH }}/wp-includes/version.php
   register: wp_core_present
   retries: 60
@@ -12,7 +12,7 @@
 - name: "Seed WordPress core into volume if missing"
   when: wp_core_present.rc != 0
   command: >
-    {{ BIN_CONTAINER }} exec -u root {{ WORDPRESS_CONTAINER }} sh -lc
+    container exec -u root {{ WORDPRESS_CONTAINER }} sh -lc
     'set -e;
      echo "[seed] WP core missing, copying from /usr/src/wordpress -> {{ WORDPRESS_DOCKER_HTML_PATH }}";
      cp -a /usr/src/wordpress/. {{ WORDPRESS_DOCKER_HTML_PATH }}/;
@@ -22,7 +22,7 @@
 - name: "Run WordPress core install via WP CLI"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   command: >
-    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp core install
       --url="{{ WORDPRESS_URL }}"
       --title="{{ WORDPRESS_TITLE }}"

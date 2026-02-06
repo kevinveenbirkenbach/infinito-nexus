@@ -4,7 +4,7 @@
 
 - name: Get current 'home' URL
   command: >
-    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp option get home --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_home
   changed_when: false
@@ -12,7 +12,7 @@
 
 - name: Get current 'siteurl'
   command: >
-    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp option get siteurl --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_siteurl
   changed_when: false
@@ -23,7 +23,7 @@
     wp_new_url_norm: "{{ wp_new_url | regex_replace('/+$','') }}"
     wp_home_norm:    "{{ wp_home.stdout | regex_replace('/+$','') }}"
   command: >
-    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp option update home "{{ wp_new_url_norm }}" --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   when: wp_home_norm != wp_new_url_norm
 
@@ -32,7 +32,7 @@
     wp_new_url_norm:   "{{ wp_new_url | regex_replace('/+$','') }}"
     wp_siteurl_norm:   "{{ wp_siteurl.stdout | regex_replace('/+$','') }}"
   command: >
-    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp option update siteurl "{{ wp_new_url_norm }}" --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   when: wp_siteurl_norm != wp_new_url_norm
 
@@ -41,7 +41,7 @@
     wp_old_url_norm: "{{ wp_home.stdout | regex_replace('/+$','') }}"
     wp_new_url_norm: "{{ wp_new_url | regex_replace('/+$','') }}"
   command: >
-    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp search-replace "{{ wp_old_url_norm }}" "{{ wp_new_url_norm }}"
     --skip-columns=guid --all-tables-with-prefix --precise
     --path={{ WORDPRESS_DOCKER_HTML_PATH }}
@@ -54,7 +54,7 @@
     http_url:    "http://{{ domain_only }}"
     https_url:   "https://{{ domain_only }}"
   command: >
-    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp search-replace "{{ http_url }}" "{{ https_url }}"
     --skip-columns=guid --all-tables-with-prefix --precise
     --path={{ WORDPRESS_DOCKER_HTML_PATH }}
@@ -64,6 +64,6 @@
 
 - name: Flush caches and rewrite rules
   command: >
-    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }} bash -lc
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }} bash -lc
     "wp cache flush --path={{ WORDPRESS_DOCKER_HTML_PATH }} &&
      wp rewrite flush --hard --path={{ WORDPRESS_DOCKER_HTML_PATH }}"

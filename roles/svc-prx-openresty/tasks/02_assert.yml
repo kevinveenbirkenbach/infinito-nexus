@@ -1,7 +1,7 @@
 - block:
     - name: Wait until OpenResty container is running
       command: >
-        {{ BIN_CONTAINER }} inspect -f '{{ "{{.State.Running}}" }}' {{ OPENRESTY_CONTAINER }}
+        container inspect -f '{{ "{{.State.Running}}" }}' {{ OPENRESTY_CONTAINER }}
       register: openresty_running
       changed_when: false
       until: openresty_running.stdout | trim == "true"
@@ -10,7 +10,7 @@
 
     - name: Validate OpenResty configuration (Post-Flight-Check)
       command: >
-        {{ BIN_CONTAINER }} exec {{ OPENRESTY_CONTAINER }} openresty -t -q
+        container exec {{ OPENRESTY_CONTAINER }} openresty -t -q
       register: openresty_test_post
       changed_when: false
       failed_when: openresty_test_post.rc != 0
@@ -27,7 +27,7 @@
 
     - name: Dump OpenResty container logs on failure
       command: >
-        {{ BIN_CONTAINER }} logs --tail=200 {{ OPENRESTY_CONTAINER }}
+        container logs --tail=200 {{ OPENRESTY_CONTAINER }}
       register: openresty_logs
       changed_when: false
       failed_when: false
