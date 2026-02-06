@@ -30,7 +30,8 @@
       failed_when: false
       ignore_errors: true
 
-    - ansible.builtin.command: docker logs --tail=200 {{ OPENRESTY_CONTAINER }}
+    - ansible.builtin.command: >
+        {{ BIN_CONTAINER }} logs --tail=200 {{ OPENRESTY_CONTAINER }}
       register: openresty_logs
       changed_when: false
       failed_when: false

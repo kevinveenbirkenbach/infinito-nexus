@@ -106,7 +106,7 @@
     - name: "XWIKI | DEBUG | Tail container logs"
       ansible.builtin.shell: |
         set -euo pipefail
-        docker logs --tail 300 "{{ XWIKI_CONTAINER }}" || true
+        {{ BIN_CONTAINER }} logs --tail 300 "{{ XWIKI_CONTAINER }}" || true
       register: _dbg_logs
       changed_when: false
       failed_when: false

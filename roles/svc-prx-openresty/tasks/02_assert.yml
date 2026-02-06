@@ -27,7 +27,7 @@
 
     - name: Dump OpenResty container logs on failure
       command: >
-        docker logs --tail=200 {{ OPENRESTY_CONTAINER }}
+        {{ BIN_CONTAINER }} logs --tail=200 {{ OPENRESTY_CONTAINER }}
       register: openresty_logs
       changed_when: false
       failed_when: false

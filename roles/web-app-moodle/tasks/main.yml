@@ -45,7 +45,8 @@
       failed_when: false
 
     - name: Show Moodle container logs
-      ansible.builtin.shell: docker logs --tail=200 {{ MOODLE_CONTAINER }}
+      ansible.builtin.shell: >
+         {{ BIN_CONTAINER }} logs --tail=200 {{ MOODLE_CONTAINER }}
       register: moodle_logs
       changed_when: false
       failed_when: false
@@ -58,7 +59,7 @@
           --- {{ BIN_CONTAINER }} inspect ---
           {{ moodle_inspect.stdout | default('no output') }}
 
-          --- docker logs (last 200 lines) ---
+          --- {{ BIN_CONTAINER }} logs (last 200 lines) ---
           {{ moodle_logs.stdout | default('no output') }}
 
 - name: "Include ownership settings tasks for moodle"

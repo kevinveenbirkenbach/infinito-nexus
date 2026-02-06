@@ -21,8 +21,8 @@
 
   rescue:
 
-    - name: "POSTGRES | docker logs (last 200 lines)"
-      ansible.builtin.command: "docker logs --tail 200 {{ POSTGRES_CONTAINER }}"
+    - name: "POSTGRES | {{ BIN_CONTAINER }} logs (last 200 lines)"
+      ansible.builtin.command: "{{ BIN_CONTAINER }} logs --tail 200 {{ POSTGRES_CONTAINER }}"
       register: dbg_docker_logs
       changed_when: false
       failed_when: false
@@ -147,8 +147,8 @@
       changed_when: false
       failed_when: false
 
-    - name: "POSTGRES | docker logs (last 250 lines)"
-      ansible.builtin.command: "docker logs --tail 250 {{ POSTGRES_CONTAINER }}"
+    - name: "POSTGRES | {{ BIN_CONTAINER }} logs (last 250 lines)"
+      ansible.builtin.command: "{{ BIN_CONTAINER }} logs --tail 250 {{ POSTGRES_CONTAINER }}"
       register: dbg_docker_logs
       changed_when: false
       failed_when: false
@@ -240,7 +240,7 @@
       ansible.builtin.fail:
         msg: >-
           Failed to ALTER ROLE "{{ database_username }}" WITH LOGIN.
-          See debug output above (docker logs, inspect, pg_isready, psql auth test, hba/config).
+          See debug output above ({{ BIN_CONTAINER }} logs, inspect, pg_isready, psql auth test, hba/config).
 
 # 4) Grant ALL privileges on all tables in the public schema
 - name: "Grant ALL privileges on tables in public schema to {{ database_username }}"
