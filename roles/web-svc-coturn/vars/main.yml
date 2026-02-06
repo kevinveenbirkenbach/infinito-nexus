@@ -27,6 +27,6 @@ COTURN_STATIC_AUTH_SECRET:  "{{ applications | get_app_conf(application_id, 'cre
 COTURN_USER_AUTH_ENABLED:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.user_auth_enabled') }}"
 
 ## TLS
-COTURN_TLS_ENABLED:         "{{ lookup('tls_resolve', application_id, 'enabled') | bool }}"
+COTURN_TLS_ENABLED:         "{{ lookup('tls', application_id, 'enabled') | bool }}"
 COTURN_TLS_CERT_PATH:       "{{ lookup('cert_plan', application_id, 'files.cert') }}"
 COTURN_TLS_KEY_PATH:        "{{ lookup('cert_plan', application_id, 'files.key') }}"

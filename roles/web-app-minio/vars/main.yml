@@ -10,13 +10,13 @@ MINIO_VOLUME:                   "{{ applications | get_app_conf(application_id, 
 
 ## Api
 MINIO_API_DOMAIN:               "{{ applications | get_app_conf(application_id, 'server.domains.canonical.api') }}"
-MINIO_API_URL:                  "{{ lookup('tls_resolve', application_id, 'protocols.web') }}://{{ MINIO_API_DOMAIN }}"
+MINIO_API_URL:                  "{{ lookup('tls', application_id, 'protocols.web') }}://{{ MINIO_API_DOMAIN }}"
 MINIO_API_PORT_INTERNAL:        9000
 MINIO_API_PORT_PUBLIC:          "{{ ports.localhost.http[application_id ~ '_api'] }}"
 
 ## Console
 MINIO_CONSOLE_DOMAIN:           "{{ applications | get_app_conf(application_id, 'server.domains.canonical.console') }}"
-MINIO_CONSOLE_URL:              "{{ lookup('tls_resolve', application_id, 'url.base') }}"
+MINIO_CONSOLE_URL:              "{{ lookup('tls', application_id, 'url.base') }}"
 MINIO_CONSOLE_PORT_INTERNAL:    9001
 MINIO_CONSOLE_PORT_PUBLIC:      "{{ ports.localhost.http[application_id ~ '_console'] }}"
 

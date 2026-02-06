@@ -19,13 +19,11 @@ class _FakeTlsResolveLookup:
     def run(self, terms, variables=None, **kwargs):
         # New API: second positional term is want-path
         if len(terms) != 2 or terms[1] != "protocols.web":
-            raise AssertionError(f"Unexpected terms passed to tls_resolve: {terms}")
+            raise AssertionError(f"Unexpected terms passed to tls: {terms}")
 
         # Legacy kwarg want must be ignored; if it appears, fail (we don't expect it anymore)
         if "want" in kwargs and kwargs["want"]:
-            raise AssertionError(
-                f"Unexpected want kwarg passed to tls_resolve: {kwargs}"
-            )
+            raise AssertionError(f"Unexpected want kwarg passed to tls: {kwargs}")
 
         return [self._protocol]
 
@@ -99,7 +97,7 @@ class TestNginxPathsLookup(unittest.TestCase):
         # well_known is container path → must NOT be part of host dir creation
         self.assertNotIn("/usr/share/nginx/well-known/", ensure_paths)
 
-    def test_domain_uses_tls_resolve_when_no_override(self):
+    def test_domain_uses_tls_when_no_override(self):
         fake_tls = _FakeTlsResolveLookup("https")
 
         with (
@@ -122,7 +120,7 @@ class TestNginxPathsLookup(unittest.TestCase):
         )
 
     def test_domain_protocol_override_http(self):
-        # tls_resolve should NOT be consulted when override is present
+        # tls should NOT be consulted when override is present
         with (
             patch(
                 "lookup_plugins.nginx_paths.get_app_conf",
@@ -131,7 +129,7 @@ class TestNginxPathsLookup(unittest.TestCase):
             patch(
                 "lookup_plugins.nginx_paths.lookup_loader.get",
                 side_effect=AssertionError(
-                    "tls_resolve must not be called when protocol override is set"
+                    "tls must not be called when protocol override is set"
                 ),
             ),
         ):

@@ -10,7 +10,7 @@ This release delivers a major stability and reliability upgrade across the Infin
 
 * Switched self-signed mode to a **CA-signed certificate chain** with deterministic trust installation
 * Strict SAN planning driven by `CURRENT_PLAY_DOMAINS_ALL`
-* Clean separation of TLS state (`tls_resolve`) and cert paths (`cert_plan`)
+* Clean separation of TLS state (`tls`) and cert paths (`cert_plan`)
 * Faster, safer cert deployment (no global sleeps, deterministic container restarts)
 * Improved domain/alias resolution and strict opt-in auto-alias behavior
 

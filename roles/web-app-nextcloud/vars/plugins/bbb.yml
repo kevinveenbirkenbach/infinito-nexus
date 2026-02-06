@@ -4,4 +4,4 @@ plugin_configuration:
     configvalue:  "{{ applications | get_app_conf('web-app-bigbluebutton', 'credentials.shared_secret', False,'') }}"
   - appid:        "bbb"
     configkey:    "api.url"
-    configvalue:  "{{ lookup('tls_resolve', 'web-app-bigbluebutton', 'url.base') }}{{ applications | get_app_conf('web-app-bigbluebutton', 'api_suffix', False,'') }}"
+    configvalue:  "{{ lookup('tls', 'web-app-bigbluebutton', 'url.base') }}{{ applications | get_app_conf('web-app-bigbluebutton', 'api_suffix', False,'') }}"

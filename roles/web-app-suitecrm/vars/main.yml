@@ -27,7 +27,7 @@ SUITECRM_SERVICE:                     "{{ entity_name }}"
 SUITECRM_DATA_VOLUME:                 "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
 
 # URLs & feature flags
-SUITECRM_URL:                         "{{ lookup('tls_resolve', application_id, 'url.base') }}"
+SUITECRM_URL:                         "{{ lookup('tls', application_id, 'url.base') }}"
 
 # LDAP
 SUITECRM_LDAP_ENABLED:                "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"

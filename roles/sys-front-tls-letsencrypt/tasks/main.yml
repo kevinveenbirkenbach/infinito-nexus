@@ -1,8 +1,8 @@
 # run_once_sys_front_tls_letsencrypt: deactivated
 
-- name: "TLS | (letsencrypt) resolve via tls_resolve (strict)"
+- name: "TLS | (letsencrypt) resolve via tls (strict)"
   ansible.builtin.set_fact:
-    _tls: "{{ lookup('tls_resolve', application_id) }}"
+    _tls: "{{ lookup('tls', application_id) }}"
   changed_when: false
 
 - name: "TLS | (letsencrypt) assert mode is letsencrypt"

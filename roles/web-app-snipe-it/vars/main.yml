@@ -6,7 +6,7 @@ entity_name:        "{{ application_id | get_entity_name }}"
 database_password:  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
 
 # Snipe-IT specific
-SNIPE_IT_URL:       "{{ lookup('tls_resolve', application_id, 'url.base') }}"
+SNIPE_IT_URL:       "{{ lookup('tls', application_id, 'url.base') }}"
 SNIPE_IT_VERSION:   "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.version') }}"
 SNIPE_IT_IMAGE:     "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.image') }}"
 SNIPE_IT_CONTAINER: "{{ applications | get_app_conf(application_id, 'docker.services.snipe-it.name') }}"
@@ -16,7 +16,7 @@ SNIPE_IT_APP_KEY:   "{{ applications | get_app_conf(application_id, 'credentials
 
 # Authentification
 SNIPE_IT_LDAP_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
-SNIPE_IT_TLS_ENABLED:             "{{ lookup('tls_resolve', application_id, 'enabled') | bool }}"
+SNIPE_IT_TLS_ENABLED:             "{{ lookup('tls', application_id, 'enabled') | bool }}"
 
 #LDAP
 SNIPE_IT_LDAP_FILTER_FRAGMENT:    "&(objectClass=inetOrgPerson)"

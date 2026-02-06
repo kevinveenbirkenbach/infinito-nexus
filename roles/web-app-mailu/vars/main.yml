@@ -12,7 +12,7 @@ cert_mount_directory:                 "{{ lookup('docker', application_id, 'dire
 # Mailu
 
 ## Meta 
-MAILU_WEBSITE:                        "{{ lookup('tls_resolve', application_id, 'url.base') }}"
+MAILU_WEBSITE:                        "{{ lookup('tls', application_id, 'url.base') }}"
 MAILU_API_SERVICE_BASE_URL:           "http://{{ MAILU_FRONT_SERVICE }}/api/v1"
 
 ## Domains

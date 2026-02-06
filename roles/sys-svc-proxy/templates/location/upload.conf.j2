@@ -15,7 +15,7 @@ location {{ location_upload }} {
     # Client Limits for Upload
     client_max_body_size    {{ webserver_client_max_body_size }};
 
-    {% if lookup('tls_resolve', application_id, 'enabled') | bool %}
+    {% if lookup('tls', application_id, 'enabled') | bool %}
     proxy_hide_header Strict-Transport-Security;
     {% endif %}
 }

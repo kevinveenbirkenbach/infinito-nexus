@@ -8,7 +8,7 @@ container_port:         5080
 container_hostname:     "{{ entity_name }}"
 
 # App URLs & meta
-# CHESS_URL:            "{{ lookup('tls_resolve', application_id, 'url.base') }}"
+# CHESS_URL:            "{{ lookup('tls', application_id, 'url.base') }}"
 CHESS_HOSTNAME:         "{{ container_hostname }}"
 CHESS_DOMAIN:           "{{ domain }}"
 CHESS_ADMIN_URL:        ""

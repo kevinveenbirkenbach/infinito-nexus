@@ -31,7 +31,7 @@ ESPOCRM_ENTRYPOINT_SCRIPT_HOST_REL: "volumes/{{ ESPOCRM_ENTRYPOINT_SCRIPT_FILE }
 ESPOCRM_ENTRYPOINT_SCRIPT_DOCKER:   "{{ [ '/usr/local/bin/', ESPOCRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
 
 ESPOCRM_CONFIG_FILE_PRIVATE:        "/var/www/html/data/config-internal.php"
-ESPOCRM_URL:                        "{{ lookup('tls_resolve', application_id, 'url.base') }}"
+ESPOCRM_URL:                        "{{ lookup('tls', application_id, 'url.base') }}"
 ESPOCRM_OIDC_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
 ESPOCRM_LDAP_ENABLED:               "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
 ESPOCRM_USER:                       "www-data"

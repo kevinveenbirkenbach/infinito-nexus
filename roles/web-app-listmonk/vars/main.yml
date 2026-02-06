@@ -20,7 +20,7 @@ LISTMONK_RUN:                 "docker compose {{ lookup('compose_f_args', applic
 
 LISTMONK_SETTINGS:
   - key: "app.root_url"
-    value: "\"{{ lookup(\"tls_resolve\", application_id, \"url.base\") }}\""
+    value: "\"{{ lookup(\"tls\", application_id, \"url.base\") }}\""
 
   - key: "app.notify_emails"
     value: "{{ [ users.administrator.email ] | to_json }}"

@@ -15,7 +15,7 @@ BOOKWYRM_ALLOW_INVITE_REQUESTS: "{{ applications | get_app_conf(application_id, 
 BOOKWYRM_SECRET_KEY:            "{{ applications | get_app_conf(application_id, 'credentials.secret_key') }}"
 
 ## URLs
-BOOKWYRM_URL:                   "{{ lookup('tls_resolve', application_id, 'url.base') }}"
+BOOKWYRM_URL:                   "{{ lookup('tls', application_id, 'url.base') }}"
 BOOKWYRM_HOSTNAME:              "{{ container_hostname }}"
 
 ## OIDC (optional; can be fronted by oauth2-proxy or native if you wire it)

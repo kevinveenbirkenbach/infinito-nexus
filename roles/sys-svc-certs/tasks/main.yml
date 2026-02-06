@@ -27,5 +27,5 @@
 #  changed_when: certbot_result.rc == 0 and ("No certificate found with name" not in certbot_result.stderr)
 
 # NOTE (minimal invasive change):
-# ssl_cert_folder is now derived from tls_resolve so it works for both
+# ssl_cert_folder is now derived from tls so it works for both
 # letsencrypt and self_signed.

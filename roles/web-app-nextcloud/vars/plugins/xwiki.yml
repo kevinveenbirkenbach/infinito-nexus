@@ -3,4 +3,4 @@ plugin_configuration:
     configkey: "instances"
     configvalue:
       - name:  "XWiki"
-        url:   "{{ lookup('tls_resolve', 'web-app-xwiki', 'url.base') }}"
+        url:   "{{ lookup('tls', 'web-app-xwiki', 'url.base') }}"

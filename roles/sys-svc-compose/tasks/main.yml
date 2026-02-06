@@ -22,8 +22,8 @@
     name: sys-svc-compose-ca
   when:
     - domains | has_domain(application_id)
-    - lookup('tls_resolve', application_id, 'enabled') | bool
-    - lookup('tls_resolve', application_id, 'mode') == 'self_signed'
+    - lookup('tls', application_id, 'enabled') | bool
+    - lookup('tls', application_id, 'mode') == 'self_signed'
 
 - name: "Ensure that {{ lookup('docker', application_id, 'directories.instance') }} is up"
   include_tasks: "utils/up.yml"

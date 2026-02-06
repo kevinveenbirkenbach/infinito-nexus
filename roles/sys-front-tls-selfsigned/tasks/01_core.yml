@@ -14,9 +14,9 @@
     name: sys-ca-selfsigned
   when: run_once_sys_ca_selfsigned is not defined
 
-- name: "TLS | (self_signed) resolve via tls_resolve (strict)"
+- name: "TLS | (self_signed) resolve via tls (strict)"
   ansible.builtin.set_fact:
-    _tls: "{{ lookup('tls_resolve', application_id) }}"
+    _tls: "{{ lookup('tls', application_id) }}"
   changed_when: false
 
 - name: "TLS | (self_signed) plan certificate via cert_plan (strict)"

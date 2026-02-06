@@ -185,30 +185,22 @@ class LookupModule(LookupBase):
 
             domains = _maybe_template(templar, variables["domains"])
             if _has_domain(domains, application_id):
-                tls_resolver = lookup_loader.get(
-                    "tls_resolve", self._loader, self._templar
-                )
-                tls = tls_resolver.run([application_id], variables=variables)[0]
+                tlsr = lookup_loader.get("tls", self._loader, self._templar)
+                tls = tlsr.run([application_id], variables=variables)[0]
 
                 if not isinstance(tls, dict):
                     raise AnsibleError(
-                        f"compose_f_args: tls_resolve returned non-dict: {type(tls)}"
+                        f"compose_f_args: tls returned non-dict: {type(tls)}"
                     )
                 if "enabled" not in tls:
-                    raise AnsibleError(
-                        "compose_f_args: tls_resolve did not return 'enabled'"
-                    )
+                    raise AnsibleError("compose_f_args: tls did not return 'enabled'")
                 if "mode" not in tls:
-                    raise AnsibleError(
-                        "compose_f_args: tls_resolve did not return 'mode'"
-                    )
+                    raise AnsibleError("compose_f_args: tls did not return 'mode'")
 
                 enabled = bool(tls["enabled"])
                 mode = _as_str(tls["mode"])
                 if not mode:
-                    raise AnsibleError(
-                        "compose_f_args: tls_resolve returned empty 'mode'"
-                    )
+                    raise AnsibleError("compose_f_args: tls returned empty 'mode'")
 
                 if enabled and mode == "self_signed":
                     if not _as_str(ca_override):

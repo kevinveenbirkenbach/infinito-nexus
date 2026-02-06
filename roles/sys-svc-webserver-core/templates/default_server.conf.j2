@@ -8,7 +8,7 @@ server {
         default_type text/plain;
         return 404 "This service is not provided by this {{ SOFTWARE_NAME }} instance.\n";
     }
-    {% if (lookup('tls_resolve', DOMAIN_PRIMARY, 'mode') == 'letsencrypt') %}
+    {% if (lookup('tls', DOMAIN_PRIMARY, 'mode') == 'letsencrypt') %}
         {% include 'roles/sys-front-tls/templates/acme.conf.j2' %}
     {% endif %}
 }

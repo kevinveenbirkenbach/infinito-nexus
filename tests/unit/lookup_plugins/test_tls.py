@@ -1,8 +1,8 @@
-# tests/unit/lookup_plugins/test_tls_resolve.py
+# tests/unit/lookup_plugins/test_tls.py
 import sys
 import unittest
 from ansible.errors import AnsibleError
-from lookup_plugins.tls_resolve import LookupModule
+from lookup_plugins.tls import LookupModule
 
 # Make "ansible.module_utils.tls_common" importable during plain unit tests.
 import module_utils.tls_common as _tls_common

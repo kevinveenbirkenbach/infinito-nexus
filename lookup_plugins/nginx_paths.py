@@ -62,15 +62,13 @@ def _dir_spec(path: str, mode: str) -> Dict[str, str]:
     return {"path": path, "mode": mode}
 
 
-def _resolve_protocol_via_tls_resolve(
+def _resolve_protocol_via_tls(
     *, domain: str, variables: dict, loader: Any, templar: Any
 ) -> str:
     try:
-        tls_lookup = lookup_loader.get("tls_resolve", loader=loader, templar=templar)
+        tls_lookup = lookup_loader.get("tls", loader=loader, templar=templar)
     except Exception as exc:
-        raise AnsibleError(
-            f"nginx_paths: failed to load tls_resolve lookup: {exc}"
-        ) from exc
+        raise AnsibleError(f"nginx_paths: failed to load tls lookup: {exc}") from exc
 
     protocol = tls_lookup.run([domain, "protocols.web"], variables=variables)[0]
 
@@ -186,7 +184,7 @@ class LookupModule(LookupBase):
         if domain:
             protocol_override = kwargs.get("protocol", None)
             protocol = (
-                _resolve_protocol_via_tls_resolve(
+                _resolve_protocol_via_tls(
                     domain=domain,
                     variables=variables,
                     loader=getattr(self, "_loader", None),

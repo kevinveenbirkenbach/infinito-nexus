@@ -125,16 +125,16 @@ class LookupModule(LookupBase):
             if domain_url:
                 try:
                     tls_lookup = lookup_loader.get(
-                        "tls_resolve", loader=self._loader, templar=self._templar
+                        "tls", loader=self._loader, templar=self._templar
                     )
-                    # tls_resolve: positional want-path API
+                    # tls: positional want-path API
                     base_url = tls_lookup.run(
                         [application_id, "url.base"], variables=variables
                     )[0]
                     url = str(base_url).strip().rstrip("/")
                 except Exception as e:
                     raise AnsibleError(
-                        f"Error building URL via tls_resolve for '{application_id}': {e}"
+                        f"Error building URL via tls for '{application_id}': {e}"
                     )
 
             iframe = get_app_conf(

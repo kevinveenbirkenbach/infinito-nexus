@@ -5,7 +5,7 @@ CDN_ROOT:         "{{ lookup('nginx_paths','directories.data.cdn') }}"
 CDN_VERSION:      "latest" # Latest is used atm because timestamp based would just lead to an unneccessary overhead
 
 # Base Url to deliver the files
-CDN_BASE_URL:     "{{ lookup('tls_resolve', 'web-svc-cdn', 'url.base') }}"
+CDN_BASE_URL:     "{{ lookup('tls', 'web-svc-cdn', 'url.base') }}"
 
 # Role specific CDN paths
 

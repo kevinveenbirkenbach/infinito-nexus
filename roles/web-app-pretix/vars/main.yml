@@ -6,7 +6,7 @@ container_hostname:             "{{ domains | get_domain(application_id) }}"
 # Pretix
 
 ## URLs
-PRETIX_URL:                     "{{ lookup('tls_resolve', application_id, 'url.base') }}"
+PRETIX_URL:                     "{{ lookup('tls', application_id, 'url.base') }}"
 PRETIX_HOSTNAME:                "{{ container_hostname }}"
 
 ## OIDC (mirrors GitLab’s pattern)

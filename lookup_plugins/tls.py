@@ -1,4 +1,4 @@
-# lookup_plugins/tls_resolve.py
+# lookup_plugins/tls.py
 #
 # STRICT TLS resolver (without SAN/cert identity planning).
 #
@@ -33,12 +33,12 @@ class LookupModule(LookupBase):
         # Legacy 'want=' kwarg is ignored (no error) to keep tasks noise-free.
         if not terms or len(terms) not in (1, 2):
             raise AnsibleError(
-                "tls_resolve: one or two terms required: (domain|application_id[, want_path])"
+                "tls: one or two terms required: (domain|application_id[, want_path])"
             )
 
         term = as_str(terms[0])
         if not term:
-            raise AnsibleError("tls_resolve: term is empty")
+            raise AnsibleError("tls: term is empty")
 
         want = as_str(terms[1]).strip() if len(terms) == 2 else ""
 
@@ -49,7 +49,7 @@ class LookupModule(LookupBase):
 
         if mode_default not in AVAILABLE_FLAVORS:
             raise AnsibleError(
-                f"tls_resolve: TLS_MODE must be one of {sorted(AVAILABLE_FLAVORS)}, got '{mode_default}'"
+                f"tls: TLS_MODE must be one of {sorted(AVAILABLE_FLAVORS)}, got '{mode_default}'"
             )
 
         forced_mode = as_str(kwargs.get("mode", "auto")).lower()
@@ -59,10 +59,10 @@ class LookupModule(LookupBase):
             domains=domains,
             applications=applications,
             forced_mode=forced_mode,
-            err_prefix="tls_resolve",
+            err_prefix="tls",
         )
 
-        all_domains = collect_domains_for_app(domains, app_id, err_prefix="tls_resolve")
+        all_domains = collect_domains_for_app(domains, app_id, err_prefix="tls")
         all_domains = (
             uniq_preserve([primary_domain] + all_domains)
             if all_domains
@@ -74,12 +74,10 @@ class LookupModule(LookupBase):
             app = {}
 
         enabled = resolve_enabled(app, bool(enabled_default))
-        mode = resolve_mode(app, enabled, mode_default, err_prefix="tls_resolve")
+        mode = resolve_mode(app, enabled, mode_default, err_prefix="tls")
 
         if mode not in {"off"} | AVAILABLE_FLAVORS:
-            raise AnsibleError(
-                f"tls_resolve: unsupported mode '{mode}' for app '{app_id}'"
-            )
+            raise AnsibleError(f"tls: unsupported mode '{mode}' for app '{app_id}'")
 
         web_protocol = "https" if enabled else "http"
         websocket_protocol = "wss" if enabled else "ws"
