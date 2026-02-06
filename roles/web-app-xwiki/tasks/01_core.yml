@@ -88,7 +88,7 @@
       template:
         src:          "docker-compose.yml.j2"
         dest:         "{{ lookup('docker', application_id, 'files.docker_compose') }}"
-      notify:         docker compose up
+      notify:         compose up
     
     - name: Deploy Final Config
       include_tasks: _flush_config.yml

@@ -5,7 +5,7 @@
     version:  "main"
     force:    true
   notify:
-    - docker compose up
+    - compose up
     - docker compose build
 
 - name: Force BAPP_CONFIG_URL to same-origin /config

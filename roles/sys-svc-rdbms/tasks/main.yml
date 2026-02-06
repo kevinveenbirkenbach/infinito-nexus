@@ -13,7 +13,7 @@
     template:
       src: "env/{{ lookup('database', application_id, 'type') }}.env.j2"
       dest: "{{ lookup('database', application_id, 'env') }}"
-    notify: docker compose up
+    notify: compose up
   when: not (SYS_SVC_RDBMS_CENTRAL_DB_ENABLED | bool)
 
 - name: Central Database Logic

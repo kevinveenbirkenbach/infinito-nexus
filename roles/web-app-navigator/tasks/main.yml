@@ -4,7 +4,7 @@
     name: pkgmgr-install
   vars:
     package_name: infinito-presentation
-    # package_notify: docker compose up
+    # package_notify: compose up
 
 - name: Get path of infinito-presentation using pkgmgr
   command: "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr path infinito-presentation"
@@ -19,6 +19,6 @@
     name: sys-stk-full
 
 # Hack because it wasn't possible to fix an handler bug in pkgmgr install
-- name: „Trigger“ docker compose up
+- name: „Trigger“ compose up
   command: /bin/true
-  notify: docker compose up
+  notify: compose up

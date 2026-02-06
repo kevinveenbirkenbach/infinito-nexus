@@ -23,7 +23,7 @@
     dest: "{{ MAGENTO_NGINX_CONF_PATH }}"
     mode: '0644'
     force: true
-  notify: docker compose up
+  notify: compose up
 
 - name: Render php-fpm pool override (TCP listen; clear_env=no)
   template:
@@ -31,4 +31,4 @@
     dest: "{{ MAGENTO_PHP_ZZ_CONF_PATH }}"
     mode: '0644'
     force: true
-  notify: docker compose up
+  notify: compose up

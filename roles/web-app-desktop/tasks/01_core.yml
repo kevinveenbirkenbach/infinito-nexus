@@ -50,14 +50,14 @@
   template:
     src: "{{ DESKTOP_CONFIG_INV_PATH }}"
     dest: "{{ DESKTOP_CONFIG_YML_DEST }}"
-  notify: docker compose up
+  notify: compose up
   when: config_file.stat.exists
 
 - name: Copy default config.yaml from the role template if host-specific file does not exist
   template:
     src: "{{ DESKTOP_CONFIG_YML_SRC_FILE }}"
     dest: "{{ DESKTOP_CONFIG_YML_DEST }}"
-  notify: docker compose up
+  notify: compose up
   when: not config_file.stat.exists
 
 - name: "Flush docker compose handlers"

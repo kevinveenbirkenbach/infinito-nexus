@@ -18,7 +18,7 @@
     mode: "0644"
   notify:
     - docker compose build
-    - docker compose up
+    - compose up
 
 - name: "Render LittleJS run.html for shorts"
   template:
@@ -27,7 +27,7 @@
     mode: "0644"
   notify:
     - docker compose build
-    - docker compose up
+    - compose up
 
 - name: "flush docker compose for '{{ application_id }}'"
   meta: flush_handlers

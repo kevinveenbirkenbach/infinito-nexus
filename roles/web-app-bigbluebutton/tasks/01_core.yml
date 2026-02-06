@@ -47,7 +47,7 @@
   template:
     src:  docker-compose.override.yml.j2
     dest: "{{ [ lookup('docker', application_id, 'directories.instance'), 'docker-compose.override.yml' ] | path_join }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: Create symbolic link from .env file to target location
   file:

@@ -7,7 +7,7 @@
     dest: "{{ BLUESKY_PDSADMIN_TMP_TAR }}"
     mode: '0644'
   notify:
-    - docker compose up
+    - compose up
     - docker compose build
 
 - name: Create {{ BLUESKY_PDSADMIN_DIR }}

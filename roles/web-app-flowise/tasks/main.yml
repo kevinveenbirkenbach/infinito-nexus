@@ -9,7 +9,7 @@
   template:
     src:  "litellm.config.yaml.j2" 
     dest: "{{ FLOWISE_LITELLM_CONFIG_PATH_HOST }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: "flush handlers of docker compose"
   meta: flush_handlers

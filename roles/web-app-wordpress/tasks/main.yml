@@ -20,14 +20,14 @@
     src: upload.ini.j2
     dest: "{{ WORDPRESS_CONFIG_UPLD_ABS }}"
   notify: 
-    - docker compose up
+    - compose up
     - docker compose build
 
 - name: "Transfering msmtprc to {{ WORDPRESS_MSMTP_ABS }}"
   template:
     src:  "{{ WORDPRESS_MSMTP_SRC }}"
     dest: "{{ WORDPRESS_MSMTP_ABS }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: Flush handlers to make {{ WORDPRESS_CONFIG_FILE }} available before patch
   meta: flush_handlers

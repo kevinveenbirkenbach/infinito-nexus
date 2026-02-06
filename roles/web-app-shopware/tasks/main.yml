@@ -11,7 +11,7 @@
     dest: "{{ SHOPWARE_INIT_HOST }}"
     mode: "0755"
   notify:
-    - docker compose up
+    - compose up
     - docker compose build
 
 - name: "Render framework.yaml (trusted proxies/headers/hosts)"
@@ -20,7 +20,7 @@
     dest: "{{ SHOPWARE_FRAMEWORK_HOST }}"
     mode: "0644"
   notify:
-    - docker compose up
+    - compose up
 
 - name: "Flush docker compose handlers"
   meta: flush_handlers

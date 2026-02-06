@@ -35,25 +35,25 @@
     src:  "mautrix/{{ item.bridge_name }}.config.yml.j2" 
     dest: "{{ lookup('docker', application_id, 'directories.instance') }}mautrix/{{ item.bridge_name }}/config.yaml"
   loop: "{{ MATRIX_BRIDGES }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: add element configuration
   template:
     src:  "element.config.json.j2" 
     dest: "{{ MATRIX_ELEMENT_CONFIG_PATH_HOST }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: add synapse homeserver configuration
   template:
     src:  "synapse/homeserver.yaml.j2" 
     dest: "{{ MATRIX_SYNAPSE_CONFIG_PATH_HOST }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: add synapse log configuration
   template:
     src:  "synapse/log.config.j2" 
     dest: "{{ MATRIX_SYNAPSE_LOG_PATH_HOST }}"
-  notify: docker compose up
+  notify: compose up
 
 # https://github.com/matrix-org/synapse/issues/6303
 - name: set correct folder permissions
@@ -64,7 +64,7 @@
   template:
     src:  "docker-compose.yml.j2" 
     dest: "{{ lookup('docker', application_id, 'directories.instance') }}docker-compose.yml"
-  notify: docker compose up
+  notify: compose up
 
 # Pull image when update is wished. 
 - name: compose pull
@@ -72,7 +72,7 @@
     cmd:    "{{ BIN_COMPOSE }} pull"
     chdir:  "{{ lookup('docker', application_id, 'directories.instance') }}"
 
-- name: docker compose up
+- name: compose up
   command:
     cmd: "{{ BIN_COMPOSE }} up -d --remove-orphans"
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"

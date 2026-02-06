@@ -14,7 +14,7 @@
   command: >
     container exec {{ PEERTUBE_CONTAINER }} npm run plugin:install -- --npm-name {{ PEERTUBE_OIDC_PLUGIN }}
   when: peertube_oidc_plugin_check.rc != 0
-  notify: docker compose up
+  notify: compose up
 
 - name: "Update the settings column of the auth-openid-connect plugin"
   community.postgresql.postgresql_query:
@@ -38,7 +38,7 @@
   retries: 5
   delay: 3
   until: _peertube_oidc_update is succeeded
-  notify: docker compose up
+  notify: compose up
 
 - name: "Ensure plugin is enabled in PeerTube (CLI)"
   command: >

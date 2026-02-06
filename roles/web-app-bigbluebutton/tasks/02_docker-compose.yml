@@ -16,7 +16,7 @@
     content: "{{ compose_slurp.content | b64decode | compose_mods(docker_repository_path, lookup('docker', application_id, 'files.env')) }}"
     dest: "{{ BBB_COMPOSE_FILE_FINAL }}"
   notify:
-    - docker compose up
+    - compose up
 
 - name: Prebuild etherpad image
   # On local testing environment errors exist if you don't prebuild

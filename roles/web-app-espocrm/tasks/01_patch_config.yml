@@ -5,7 +5,7 @@
      { sed -i \"s/'host'\\s*=>\\s*[^,]*,/'host' => '{{ lookup('database', application_id, 'host') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_host_set
   changed_when: "'CHANGED' in db_host_set.stdout"
-  notify: docker compose up
+  notify: compose up
 
 - name: Update DB name (idempotent)
   command: >
@@ -14,7 +14,7 @@
      { sed -i \"s/'dbname'\\s*=>\\s*[^,]*,/'dbname' => '{{ lookup('database', application_id, 'name') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_name_set
   changed_when: "'CHANGED' in db_name_set.stdout"
-  notify: docker compose up
+  notify: compose up
 
 - name: Update DB user (idempotent)
   command: >
@@ -23,7 +23,7 @@
      { sed -i \"s/'user'\\s*=>\\s*[^,]*,/'user' => '{{ lookup('database', application_id, 'username') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_user_set
   changed_when: "'CHANGED' in db_user_set.stdout"
-  notify: docker compose up
+  notify: compose up
 
 - name: Update DB password (idempotent)
   command: >
@@ -32,7 +32,7 @@
      { sed -i \"s/'password'\\s*=>\\s*[^,]*,/'password' => '{{ lookup('database', application_id, 'password') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_pass_set
   changed_when: "'CHANGED' in db_pass_set.stdout"
-  notify: docker compose up
+  notify: compose up
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Ensure siteUrl matches canonical domain

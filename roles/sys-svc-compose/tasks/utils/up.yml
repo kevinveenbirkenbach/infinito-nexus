@@ -23,7 +23,7 @@
         or
         env_template.changed          | default(false)
       )
-  notify: docker compose up
+  notify: compose up
 
 - name: "Flush Docker Compose Up Handlers for {{ lookup('docker', application_id, 'directories.instance') }}"
   meta: flush_handlers

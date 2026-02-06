@@ -19,5 +19,5 @@
   until: docker_repo_pull is succeeded
   notify:
     - docker compose build
-    - docker compose up
+    - compose up
   become: true

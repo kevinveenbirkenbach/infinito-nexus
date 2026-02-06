@@ -12,14 +12,14 @@
     src:  "taiga/{{ item }}.py.j2"
     dest: "{{ [ lookup('docker', application_id, 'directories.config'), 'taiga-' ~ item ~ '.py'] | path_join }}"
   when:   TAIGA_TAIGAIO_ENABLED | bool
-  notify: docker compose up
+  notify: compose up
   loop:   "{{ TAIGA_SETTING_FILES }}"
 
 - name: "create {{ TAIGA_COMPOSE_INIT_PATH }}"
   template:
     src:  "docker-compose-inits.yml.j2"
     dest:  "{{ TAIGA_COMPOSE_INIT_PATH }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: "Include Taiga administrator routines"
   include_tasks: 01_administrator.yml

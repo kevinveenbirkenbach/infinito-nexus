@@ -34,4 +34,4 @@
   when: cfg.when | bool
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   register: mediawiki_config_render
-  notify: docker compose up
+  notify: compose up

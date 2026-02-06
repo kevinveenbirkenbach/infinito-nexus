@@ -10,7 +10,7 @@
     src:  "{{ ESPOCRM_ENTRYPOINT_SCRIPT_FILE }}" 
     dest: "{{ ESPOCRM_ENTRYPOINT_SCRIPT_HOST_ABS }}"
   notify: 
-    - docker compose up
+    - compose up
     - docker compose build
 
 - name: "Deploy '{{ ESPOCRM_SCRIPT_SEED_HOST_ABS }}'"
@@ -18,7 +18,7 @@
     src:  "{{ ESPOCRM_SCRIPT_SEED_FILE }}" 
     dest: "{{ ESPOCRM_SCRIPT_SEED_HOST_ABS }}"
   notify: 
-    - docker compose up
+    - compose up
     - docker compose build
 
 

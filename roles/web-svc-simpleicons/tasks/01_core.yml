@@ -16,7 +16,7 @@
     - { source: "server.js.j2",     target: "{{ simpleicons_host_server_file }}" }
     - { source: "package.json.j2",  target: "{{ simpleicons_host_package_file }}" }
   notify:
-    - docker compose up
+    - compose up
     - docker compose build
 
 - meta: flush_handlers

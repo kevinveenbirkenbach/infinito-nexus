@@ -9,4 +9,4 @@
   template:
     src:  "config.exs.j2" 
     dest: "{{ mobilizon_host_conf_exs_file }}"
-  notify: docker compose up
+  notify: compose up

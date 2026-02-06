@@ -44,4 +44,4 @@
         # Ensure additional trusted hosts exist
         ensure_host "$SERVICE"
         ensure_host "$LOCAL"
-  notify: docker compose up
+  notify: compose up
