@@ -119,8 +119,8 @@
       failed_when: false
 
     # --- Container existence & status ----------------------------------------
-    - name: "POSTGRES | docker ps (postgres)"
-      ansible.builtin.command: "docker ps -a --no-trunc --filter name=^/{{ POSTGRES_CONTAINER }}$"
+    - name: "POSTGRES | container ps (postgres)"
+      ansible.builtin.command: "container ps -a --no-trunc --filter name=^/{{ POSTGRES_CONTAINER }}$"
       register: dbg_docker_ps
       changed_when: false
       failed_when: false

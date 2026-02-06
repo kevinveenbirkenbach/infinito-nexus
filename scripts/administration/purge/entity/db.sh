@@ -67,7 +67,7 @@ run_no_stdin() { "$@" </dev/null; }
 drop_postgres_db_best_effort() {
   local db_name="$1"
 
-  if ! docker ps --format '{{.Names}}' | grep -qx 'postgres'; then
+  if ! container ps --format '{{.Names}}' | grep -qx 'postgres'; then
     warn "Postgres container 'postgres' not running — skipping Postgres DROP for '${db_name}'"
     return 0
   fi
@@ -93,7 +93,7 @@ SQL
 truncate_postgres_db_best_effort() {
   local db_name="$1"
 
-  if ! docker ps --format '{{.Names}}' | grep -qx 'postgres'; then
+  if ! container ps --format '{{.Names}}' | grep -qx 'postgres'; then
     warn "Postgres container 'postgres' not running — skipping Postgres TRUNCATE for '${db_name}'"
     return 0
   fi
@@ -128,7 +128,7 @@ SQL
 drop_mariadb_db_best_effort() {
   local db_name="$1"
 
-  if ! docker ps --format '{{.Names}}' | grep -qx 'mariadb'; then
+  if ! container ps --format '{{.Names}}' | grep -qx 'mariadb'; then
     warn "MariaDB container 'mariadb' not running — skipping MariaDB DROP for '${db_name}'"
     return 0
   fi
@@ -167,7 +167,7 @@ drop_mariadb_db_best_effort() {
 truncate_mariadb_db_best_effort() {
   local db_name="$1"
 
-  if ! docker ps --format '{{.Names}}' | grep -qx 'mariadb'; then
+  if ! container ps --format '{{.Names}}' | grep -qx 'mariadb'; then
     warn "MariaDB container 'mariadb' not running — skipping MariaDB TRUNCATE for '${db_name}'"
     return 0
   fi

@@ -115,7 +115,9 @@ if __name__ == "__main__":
 
     for volume in volumes:
         volume_path = get_volume_path(volume)
-        containers = run_command(f"docker ps -q --filter volume={volume}").splitlines()
+        containers = run_command(
+            f"container ps -q --filter volume={volume}"
+        ).splitlines()
 
         if not containers:
             print(

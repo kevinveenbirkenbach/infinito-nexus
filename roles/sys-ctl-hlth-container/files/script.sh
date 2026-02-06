@@ -1,7 +1,7 @@
 #!/bin/sh
 
-docker_ps_grep_unhealthy="$(docker ps --filter health=unhealthy --format '{{.Names}}')"
-docker_ps_grep_exited="$(docker ps --filter status=exited --format '{{.ID}}')"
+docker_ps_grep_unhealthy="$(container ps --filter health=unhealthy --format '{{.Names}}')"
+docker_ps_grep_exited="$(container ps --filter status=exited --format '{{.ID}}')"
 
 exitcode=0
 summary=""

@@ -185,10 +185,10 @@ def main(
     )
 
     unhealthy_container_names = print_bash(
-        "docker ps --filter label=com.docker.compose.project --filter health=unhealthy --format '{{.Names}}'"
+        "container ps --filter label=com.docker.compose.project --filter health=unhealthy --format '{{.Names}}'"
     )
     exited_container_names = print_bash(
-        "docker ps --filter label=com.docker.compose.project --filter status=exited --format '{{.Names}}'"
+        "container ps --filter label=com.docker.compose.project --filter status=exited --format '{{.Names}}'"
     )
     failed_containers = unhealthy_container_names + exited_container_names
 

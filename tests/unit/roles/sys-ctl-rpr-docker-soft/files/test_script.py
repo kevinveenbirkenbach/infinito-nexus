@@ -89,15 +89,15 @@ class TestRepairDockerSoft(unittest.TestCase):
         def fake_print_bash(cmd):
             cmd_log.append(cmd)
 
-            # 1) docker ps mocks (STRICT: prefilter compose-labeled containers)
+            # 1) container ps mocks (STRICT: prefilter compose-labeled containers)
             if cmd.startswith(
-                "docker ps --filter label=com.docker.compose.project --filter health=unhealthy"
+                "container ps --filter label=com.docker.compose.project --filter health=unhealthy"
             ):
                 return ["app1-web-1", "db-1"]
             if cmd.startswith(
-                "docker ps --filter label=com.docker.compose.project --filter status=exited"
+                "container ps --filter label=com.docker.compose.project --filter status=exited"
             ):
-                # non-compose containers are filtered out by the new docker ps command
+                # non-compose containers are filtered out by the new container ps command
                 return ["app1-worker-1"]
 
             # 2) docker inspect labels (only called for compose containers now)

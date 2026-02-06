@@ -28,18 +28,18 @@ echo "--- docker info (short) ---"
 docker info 2>/dev/null | sed -n '1,120p' || true
 echo
 
-echo "--- docker ps ---"
+echo "--- container ps ---"
 if [ "${INCLUDE_EXITED}" = "true" ]; then
-  docker ps -a --no-trunc 2>&1 || true
+  container ps -a --no-trunc 2>&1 || true
 else
-  docker ps --no-trunc 2>&1 || true
+  container ps --no-trunc 2>&1 || true
 fi
 echo
 
 if [ "${INCLUDE_EXITED}" = "true" ]; then
-  ids="$(docker ps -aq 2>/dev/null || true)"
+  ids="$(container ps -aq 2>/dev/null || true)"
 else
-  ids="$(docker ps -q 2>/dev/null || true)"
+  ids="$(container ps -q 2>/dev/null || true)"
 fi
 
 if [ -z "${ids}" ]; then

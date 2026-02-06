@@ -8,7 +8,7 @@ DIR_SYSTEM_SERVICE:       "/etc/systemd/system"
 DIR_COMPOSE_PULL_LOCK:    "/run/ansible/compose-pull/"
 
 # Executable files
-DIR_BIN:                  "/usr/local/bin/"
+DIR_BIN:                  "/usr/bin"
 BIN_COMPOSE:              "{{ [ DIR_BIN, 'compose' ] | path_join }}"
 BIN_CONTAINER:            "{{ [ DIR_BIN, 'container' ] | path_join }}"
 BIN_LOCK:                 "{{ [ DIR_BIN, 'lock' ] | path_join }}" 
