@@ -54,7 +54,7 @@
       retries: 3
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% endfor %}
-{% if applications | get_app_conf(application_id, 'plugins.chatgpt') | bool %}
+{% if lookup('config',application_id, 'plugins.chatgpt') | bool %}
   matrix-chatgpt-bot:
     restart: {{ DOCKER_RESTART_POLICY }}
     container_name: matrix-chatgpt
@@ -62,7 +62,7 @@
     volumes:
       - chatgpt_data:/storage
     environment:
-      OPENAI_API_KEY: '{{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_openai_api_key')}}'
+      OPENAI_API_KEY: "{{ lookup('config',application_id, 'credentials.chatgpt_bridge_openai_api_key')}}"
       # Uncomment the next two lines if you are using Azure OpenAI API
       # OPENAI_AZURE: 'false'
       # CHATGPT_REVERSE_PROXY: 'your-completion-endpoint-here'
@@ -83,8 +83,8 @@
       KEYV_BOT_STORAGE: 'true'
       MATRIX_HOMESERVER_URL: '{{ MATRIX_SYNAPSE_URL }}'
       MATRIX_BOT_USERNAME: '@chatgptbot:{{ MATRIX_SERVER_NAME }}'
-      MATRIX_ACCESS_TOKEN: '{{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_access_token') | default('') }}'
-      MATRIX_BOT_PASSWORD: '{{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password') }}'
+      MATRIX_ACCESS_TOKEN: "{{ lookup('config',application_id, 'credentials.chatgpt_bridge_access_token') | default('') }}"
+      MATRIX_BOT_PASSWORD: "{{ lookup('config',application_id, 'credentials.chatgpt_bridge_user_password') }}"
       MATRIX_DEFAULT_PREFIX: '!chatgpt'
       MATRIX_DEFAULT_PREFIX_REPLY: 'false'
       #MATRIX_BLACKLIST: ''
@@ -97,7 +97,7 @@
 {% endif %}
 
 {% set _extra_volumes = {'synapse_data': {'name': MATRIX_SYNAPSE_VOLUME}} %}
-{% if applications | get_app_conf(application_id, 'plugins.chatgpt') | bool %}
+{% if lookup('config',application_id, 'plugins.chatgpt') | bool %}
 {%   set _ = _extra_volumes.update({'chatgpt_data': {}}) %}
 {% endif %}
 {{ applications | compose_volumes(

@@ -8,18 +8,18 @@ container_hostname:             "{{ lookup('domain',application_id) }}"
 
 # BookWyrm 
 
-BOOKWYRM_REGISTRATION_OPEN:     "{{ applications | get_app_conf(application_id, 'registration_open') | string | lower }}"
-BOOKWYRM_ALLOW_INVITE_REQUESTS: "{{ applications | get_app_conf(application_id, 'allow_invite_request') | string | lower }}"
+BOOKWYRM_REGISTRATION_OPEN:     "{{ lookup('config',application_id, 'registration_open') | string | lower }}"
+BOOKWYRM_ALLOW_INVITE_REQUESTS: "{{ lookup('config',application_id, 'allow_invite_request') | string | lower }}"
 
 ## Credentrials
-BOOKWYRM_SECRET_KEY:            "{{ applications | get_app_conf(application_id, 'credentials.secret_key') }}"
+BOOKWYRM_SECRET_KEY:            "{{ lookup('config',application_id, 'credentials.secret_key') }}"
 
 ## URLs
 BOOKWYRM_URL:                   "{{ lookup('tls', application_id, 'url.base') }}"
 BOOKWYRM_HOSTNAME:              "{{ container_hostname }}"
 
 ## OIDC (optional; can be fronted by oauth2-proxy or native if you wire it)
-BOOKWYRM_OIDC_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
+BOOKWYRM_OIDC_ENABLED:          "{{ lookup('config',application_id, 'docker.services.oidc.enabled') }}"
 BOOKWYRM_OIDC_LABEL:            "{{ OIDC.BUTTON_TEXT }}"
 BOOKWYRM_OIDC_CLIENT_ID:        "{{ OIDC.CLIENT.ID }}"
 BOOKWYRM_OIDC_CLIENT_SECRET:    "{{ OIDC.CLIENT.SECRET }}"
@@ -33,10 +33,10 @@ BOOKWYRM_OIDC_SCOPES:           "openid,email,profile"
 BOOKWYRM_OIDC_UNIQUE_ATTRIBUTE: "{{ OIDC.ATTRIBUTES.USERNAME }}"
 
 ## Docker
-BOOKWYRM_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~'.name') }}"
-BOOKWYRM_DATA_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-BOOKWYRM_MEDIA_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.media') }}"
-BOOKWYRM_VERSION:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~'.version') }}"
+BOOKWYRM_CONTAINER:             "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~'.name') }}"
+BOOKWYRM_DATA_VOLUME:           "{{ lookup('config',application_id, 'docker.volumes.data') }}"
+BOOKWYRM_MEDIA_VOLUME:          "{{ lookup('config',application_id, 'docker.volumes.media') }}"
+BOOKWYRM_VERSION:               "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~'.version') }}"
 BOOKWYRM_CUSTOM_IMAGE:          "{{ entity_name }}_custom:{{ BOOKWYRM_VERSION }}"
 BOOKWYRM_WORKER_CONTAINER:      "{{ BOOKWYRM_CONTAINER }}-worker"
 

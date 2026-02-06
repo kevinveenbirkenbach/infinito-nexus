@@ -10,9 +10,9 @@ http_port:                  "{{ ports.localhost.http[application_id] }}"
 container_port:             9980
 
 # Collabora
-COLLABORA_CONTAINER:        "{{ applications | get_app_conf(application_id, 'docker.services.collabora.name') }}"
-COLLABORA_IMAGE:            "{{ applications | get_app_conf(application_id, 'docker.services.collabora.image') }}"
-COLLABORA_VERSION:          "{{ applications | get_app_conf(application_id, 'docker.services.collabora.version') }}"
+COLLABORA_CONTAINER:        "{{ lookup('config',application_id, 'docker.services.collabora.name') }}"
+COLLABORA_IMAGE:            "{{ lookup('config',application_id, 'docker.services.collabora.image') }}"
+COLLABORA_VERSION:          "{{ lookup('config',application_id, 'docker.services.collabora.version') }}"
 COLLABORA_DOCKER_CONF_EXEC: "docker exec {{ COLLABORA_CONTAINER }} coolconfig"
 COLLABORA_ALLOWED_DOMAINS:  "(.*\\.|){{ DOMAIN_PRIMARY | regex_replace('\\.', '\\\\.') }}"
 COLLABORA_ALLOWED_HOSTS:    "{{ lookup('domain','web-app-nextcloud') }}"

@@ -63,4 +63,4 @@
 
 - name: "Configure OIDC login for Moodle if enabled"
   include_tasks: 03_oidc.yml
-  when: applications | get_app_conf(application_id, 'docker.services.oidc.enabled')
+  when: lookup('config',application_id, 'docker.services.oidc.enabled')

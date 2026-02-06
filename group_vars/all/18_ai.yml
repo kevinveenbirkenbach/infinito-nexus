@@ -1,2 +1,2 @@
 # URL of Local Ollama Container
-OLLAMA_BASE_LOCAL_URL:  "http://{{ applications | get_app_conf('svc-ai-ollama', 'docker.services.ollama.name') }}:{{ applications | get_app_conf('svc-ai-ollama', 'docker.services.ollama.port') }}"
+OLLAMA_BASE_LOCAL_URL:  "http://{{ lookup('config','svc-ai-ollama', 'docker.services.ollama.name') }}:{{ lookup('config','svc-ai-ollama', 'docker.services.ollama.port') }}"

@@ -1,6 +1,6 @@
 # This template needs to be included in docker-compose.yml, which depend on redis
-{% set redis_image = applications | get_app_conf('svc-db-redis', 'docker.services.redis.image') %}
-{% set redis_version = applications | get_app_conf('svc-db-redis', 'docker.services.redis.version')%}
+{% set redis_image = lookup('config','svc-db-redis', 'docker.services.redis.image') %}
+{% set redis_version = lookup('config','svc-db-redis', 'docker.services.redis.version')%}
   redis:
     image: "{{ redis_image }}:{{ redis_version }}"
     container_name: {{ application_id | get_entity_name }}-redis

@@ -17,12 +17,12 @@ networks:
   applications | get_app_conf(application_id, 'docker.services.ldap.shared', False) and 
   applications | get_app_conf('svc-db-openldap', 'network.docker', False)
   %}
-  {{ applications | get_app_conf('svc-db-openldap', 'docker.network') }}:
+  {{ lookup('config','svc-db-openldap', 'docker.network') }}:
     external: true
 {% endif %}
 {# Central AI Network #}
 {% if applications | get_app_conf(application_id, 'docker.services.ollama.shared', False) %}
-  {{ applications | get_app_conf('svc-ai-ollama', 'docker.network') }}:
+  {{ lookup('config','svc-ai-ollama', 'docker.network') }}:
     external: true
 {% endif %}
 {# Default Network #}

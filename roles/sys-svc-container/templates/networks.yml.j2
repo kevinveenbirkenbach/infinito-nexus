@@ -16,12 +16,12 @@
 {% endif %}
 {% endif %}
 {# Central LDAP Network #}
-{% if applications | get_app_conf(application_id, 'docker.services.ldap.shared', False) and applications | get_app_conf('svc-db-openldap', 'network.docker') %}
-      {{ applications | get_app_conf('svc-db-openldap', 'docker.network') }}:
+{% if applications | get_app_conf(application_id, 'docker.services.ldap.shared', False) and lookup('config','svc-db-openldap', 'network.docker') %}
+      {{ lookup('config','svc-db-openldap', 'docker.network') }}:
 {% endif %}
 {# Central AI Network #}
 {% if applications | get_app_conf(application_id, 'docker.services.ollama.shared', False) %}
-      {{ applications | get_app_conf('svc-ai-ollama', 'docker.network') }}:
+      {{ lookup('config','svc-ai-ollama', 'docker.network') }}:
 {% endif %}
 {% if not application_id.startswith('svc-db-') and not application_id.startswith('svc-ai-') %}
       default:

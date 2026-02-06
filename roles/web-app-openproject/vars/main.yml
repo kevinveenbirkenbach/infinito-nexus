@@ -5,16 +5,16 @@ entity_name:                    "{{ application_id | get_entity_name }}"
 # Database
 
 # Open Project Specific
-OPENPROJECT_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.web.version') }}"
-OPENPROJECT_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.web.image') }}"
-OPENPROJECT_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+OPENPROJECT_VERSION:            "{{ lookup('config',application_id, 'docker.services.web.version') }}"
+OPENPROJECT_IMAGE:              "{{ lookup('config',application_id, 'docker.services.web.image') }}"
+OPENPROJECT_VOLUME:             "{{ lookup('config',application_id, 'docker.volumes.data') }}"
 OPENPROJECT_WEB_SERVICE:        "web"
-OPENPROJECT_WEB_CONTAINER:      "{{ applications | get_app_conf(application_id, 'docker.services.' ~ OPENPROJECT_WEB_SERVICE ~ '.name') }}"
+OPENPROJECT_WEB_CONTAINER:      "{{ lookup('config',application_id, 'docker.services.' ~ OPENPROJECT_WEB_SERVICE ~ '.name') }}"
 OPENPROJECT_SEEDER_SERVICE:     "seeder"
-OPENPROJECT_SEEDER_CONTAINER:   "{{ applications | get_app_conf(application_id, 'docker.services.' ~ OPENPROJECT_SEEDER_SERVICE ~ '.name') }}"
-OPENPROJECT_CRON_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.cron.name') }}"
-OPENPROJECT_PROXY_CONTAINER:    "{{ applications | get_app_conf(application_id, 'docker.services.proxy.name') }}"
-OPENPROJECT_WORKER_CONTAINER:   "{{ applications | get_app_conf(application_id, 'docker.services.worker.name') }}"
+OPENPROJECT_SEEDER_CONTAINER:   "{{ lookup('config',application_id, 'docker.services.' ~ OPENPROJECT_SEEDER_SERVICE ~ '.name') }}"
+OPENPROJECT_CRON_CONTAINER:     "{{ lookup('config',application_id, 'docker.services.cron.name') }}"
+OPENPROJECT_PROXY_CONTAINER:    "{{ lookup('config',application_id, 'docker.services.proxy.name') }}"
+OPENPROJECT_WORKER_CONTAINER:   "{{ lookup('config',application_id, 'docker.services.worker.name') }}"
 
 ## Admin
 OPENPROJECT_ADMINISTRATOR_USERNAME: "{{ users.administrator.username }}"
@@ -22,9 +22,9 @@ OPENPROJECT_ADMINISTRATOR_PASSWORD: "{{ users.administrator.password }}"
 OPENPROJECT_ADMINISTRATOR_EMAIL:    "{{ users.administrator.email }}"
 
 # Open Project Cache
-OPENPROJECT_CACHE_CONTAINER:    "{{ applications | get_app_conf( application_id,    'docker.services.cache.name') }}"
-OPENPROJECT_CACHE_IMAGE:        "{{ applications | get_app_conf('svc-db-memcached', 'docker.services.memcached.image') }}"
-OPENPROJECT_CACHE_VERSION:      "{{ applications | get_app_conf('svc-db-memcached', 'docker.services.memcached.version') }}"
+OPENPROJECT_CACHE_CONTAINER:    "{{ lookup('config',application_id, 'docker.services.cache.name') }}"
+OPENPROJECT_CACHE_IMAGE:        "{{ lookup('config','svc-db-memcached', 'docker.services.memcached.image') }}"
+OPENPROJECT_CACHE_VERSION:      "{{ lookup('config','svc-db-memcached', 'docker.services.memcached.version') }}"
       
 OPENPROJECT_PLUGINS_FOLDER:   "{{ lookup('docker', application_id, 'directories.volumes') }}plugins/"
 
@@ -42,9 +42,9 @@ OPENPROJECT_RAILS_SETTINGS:
   smtp_ssl:                   false
 
 ## LDAP
-OPENPROJECT_LDAP_ENABLED:                       "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
-OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED: "{{ applications | get_app_conf(application_id, 'ldap.filters.administrators') }}"
-OPENPROJECT_LDAP_FILTER_USERS_ENABLED:          "{{ applications | get_app_conf(application_id, 'ldap.filters.users') }}"
+OPENPROJECT_LDAP_ENABLED:                       "{{ lookup('config',application_id, 'docker.services.ldap.enabled') }}"
+OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED: "{{ lookup('config',application_id, 'ldap.filters.administrators') }}"
+OPENPROJECT_LDAP_FILTER_USERS_ENABLED:          "{{ lookup('config',application_id, 'ldap.filters.users') }}"
 OPENPROJECT_LDAP_FILTERS:
   # The administrator filter just works in the Enterprise edition
   ADMINISTRATORS: "{{ '(memberOf=cn=openproject-admins,' ~ LDAP.DN.OU.ROLES ~ ')' if OPENPROJECT_LDAP_FILTER_ADMINISTRATORS_ENABLED | bool else '' }}"

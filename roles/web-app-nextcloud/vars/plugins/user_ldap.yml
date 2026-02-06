@@ -164,7 +164,7 @@ plugin_configuration:
     appid: "user_ldap"
     configkey: "s01ldap_userlist_filter"
     configvalue: |-
-      {% if applications | get_app_conf(application_id, 'plugins.user_ldap.user_directory.enabled') %}
+      {% if lookup('config',application_id, 'plugins.user_ldap.user_directory.enabled') %}
       {{ LDAP.FILTERS.USERS.ALL }}
       {% else %}
       ()

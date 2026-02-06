@@ -10,7 +10,7 @@ PRETIX_URL:                     "{{ lookup('tls', application_id, 'url.base') }}
 PRETIX_HOSTNAME:                "{{ container_hostname }}"
 
 ## OIDC (mirrors GitLab’s pattern)
-PRETIX_OIDC_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
+PRETIX_OIDC_ENABLED:            "{{ lookup('config',application_id, 'docker.services.oidc.enabled') }}"
 PRETIX_OIDC_LABEL:              "{{ OIDC.BUTTON_TEXT }}"
 PRETIX_OIDC_CLIENT_ID:          "{{ OIDC.CLIENT.ID }}"
 PRETIX_OIDC_CLIENT_SECRET:      "{{ OIDC.CLIENT.SECRET }}"
@@ -23,18 +23,18 @@ PRETIX_OIDC_JWKS_URL:           "{{ OIDC.CLIENT.CERTS }}"
 PRETIX_OIDC_SCOPES:             "openid,email,profile"
 # Use Keycloak username claim by default (plugin default is 'sub')
 PRETIX_OIDC_UNIQUE_ATTRIBUTE:   "{{ OIDC.ATTRIBUTES.USERNAME }}"
-PRETIX_OIDC_PLUGIN_VERSION:     "{{ applications | get_app_conf(application_id, 'plugins.oidc.version') }}"
+PRETIX_OIDC_PLUGIN_VERSION:     "{{ lookup('config',application_id, 'plugins.oidc.version') }}"
 
 ## Redis
-PRETIX_REDIS_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.redis.enabled') }}"
+PRETIX_REDIS_ENABLED:           "{{ lookup('config',application_id, 'docker.services.redis.enabled') }}"
 PRETIX_REDIS_CACHE_DB:          1
 PRETIX_REDIS_BROKER_DB:         0
 PRETIX_REDIS_RESULT_DB:         2
 
 ## Docker
 PRETIX_IMAGE_CUSTOM:            "pretix_custom"
-PRETIX_IMAGE:                   "{{ applications | get_app_conf(application_id, 'docker.services.pretix.image') }}"
-PRETIX_VERSION:                 "{{ applications | get_app_conf(application_id, 'docker.services.pretix.version') }}"
-PRETIX_CONTAINER:               "{{ applications | get_app_conf(application_id, 'docker.services.pretix.name') }}"
-PRETIX_DATA_VOLUME:             "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
-PRETIX_CONFIG_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"
+PRETIX_IMAGE:                   "{{ lookup('config',application_id, 'docker.services.pretix.image') }}"
+PRETIX_VERSION:                 "{{ lookup('config',application_id, 'docker.services.pretix.version') }}"
+PRETIX_CONTAINER:               "{{ lookup('config',application_id, 'docker.services.pretix.name') }}"
+PRETIX_DATA_VOLUME:             "{{ lookup('config',application_id, 'docker.volumes.data') }}"
+PRETIX_CONFIG_VOLUME:           "{{ lookup('config',application_id, 'docker.volumes.config') }}"

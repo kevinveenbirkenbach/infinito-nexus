@@ -15,15 +15,15 @@ CHESS_ADMIN_URL:        ""
 CHESS_ADMIN_EMAIL:      "{{ users.administrator.email }}"
 
 # Docker image
-#CHESS_IMAGE:           "{{ applications | get_app_conf(application_id, 'docker.services.application.image') }}"
+#CHESS_IMAGE:           "{{ lookup('config',application_id, 'docker.services.application.image') }}"
 CHESS_CUSTOM_IMAGE:     "{{ entity_name }}_custom:{{ CHESS_REPO_REF }}"
-CHESS_VERSION:          "{{ applications | get_app_conf(application_id, 'docker.services.application.version') }}"
-CHESS_CONTAINER:        "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"
-CHESS_DATA_VOLUME:      "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+CHESS_VERSION:          "{{ lookup('config',application_id, 'docker.services.application.version') }}"
+CHESS_CONTAINER:        "{{ lookup('config',application_id, 'docker.services.application.name') }}"
+CHESS_DATA_VOLUME:      "{{ lookup('config',application_id, 'docker.volumes.data') }}"
 
 # Build source
-CHESS_REPO_URL:         "{{ applications | get_app_conf(application_id, 'source.repo') }}"
-CHESS_REPO_REF:         "{{ applications | get_app_conf(application_id, 'source.ref') }}"
+CHESS_REPO_URL:         "{{ lookup('config',application_id, 'source.repo') }}"
+CHESS_REPO_REF:         "{{ lookup('config',application_id, 'source.ref') }}"
 
 # Security
 CHESS_HMAC_SECRET:      "{{ lookup('password', '/dev/null length=63 chars=ascii_letters,digits') }}"
