@@ -129,7 +129,6 @@ class TestRepairDockerSoft(unittest.TestCase):
 
         def fake_isfile(path):
             return path in (
-                s.compose,  # wrapper present
                 "/BASE/app1/docker-compose.yml",
                 "/BASE/db/docker-compose.yml",
             )

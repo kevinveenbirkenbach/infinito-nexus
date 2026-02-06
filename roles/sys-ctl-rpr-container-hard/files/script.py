@@ -4,8 +4,6 @@ import sys
 import subprocess
 import argparse
 
-compose = "/usr/local/bin/compose"
-
 
 def run(cmd: list[str], cwd: str) -> None:
     subprocess.run(cmd, cwd=cwd, check=True)
@@ -24,11 +22,11 @@ def hard_restart_docker_services(dir_path: str) -> None:
 
         # down + up -d (wrapper resolves env + overrides automatically)
         run(
-            [compose, "--chdir", abs_dir, "--project", project, "down"],
+            ["compose", "--chdir", abs_dir, "--project", project, "down"],
             cwd=abs_dir,
         )
         run(
-            [compose, "--chdir", abs_dir, "--project", project, "up", "-d"],
+            ["compose", "--chdir", abs_dir, "--project", project, "up", "-d"],
             cwd=abs_dir,
         )
 
@@ -36,13 +34,6 @@ def hard_restart_docker_services(dir_path: str) -> None:
     except subprocess.CalledProcessError as e:
         print(f"Error during hard restart in {dir_path}: {e}", file=sys.stderr)
         sys.exit(1)
-    except FileNotFoundError:
-        print(
-            f"Error: required wrapper not found at {compose}. "
-            "Install it via the sys-svc-compose role first.",
-            file=sys.stderr,
-        )
-        sys.exit(2)
 
 
 def main() -> None:

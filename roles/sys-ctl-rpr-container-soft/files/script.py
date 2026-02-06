@@ -11,7 +11,7 @@ All shell interactions that matter for tests go through print_bash()
 so they can be monkeypatched in unit tests.
 
 This variant uses the central Infinito.Nexus compose wrapper:
-  /usr/local/bin/compose
+  compose
 which auto-adds:
 - -f docker-compose.yml
 - -f docker-compose.override.yml (if present)
@@ -24,8 +24,6 @@ import time
 import os
 import argparse
 from typing import List, Optional, Tuple
-
-compose = "/usr/local/bin/compose"
 
 
 # ---------------------------
@@ -73,7 +71,7 @@ def compose_cmd(subcmd: str, project_path: str, project_name: str) -> str:
     Build an compose command that auto-adds env + override files.
     Example: compose --chdir "/opt/compose/foo" --project "foo" restart
     """
-    return f'{compose} --chdir "{project_path}" --project "{project_name}" {subcmd}'
+    return f'compose --chdir "{project_path}" --project "{project_name}" {subcmd}'
 
 
 # ---------------------------
@@ -170,15 +168,6 @@ def main(
     base_directory: str, manipulation_services: List[str], timeout: Optional[int]
 ) -> int:
     _ = base_directory  # unused in STRICT label mode
-
-    if not os.path.isfile(compose):
-        print(
-            f"Error: required wrapper not found at {compose}. "
-            "Install it via the sys-svc-compose role first.",
-            file=os.sys.stderr,
-        )
-        return 2
-
     errors = 0
     wait_while_manipulation_running(
         manipulation_services, waiting_time=600, timeout=timeout

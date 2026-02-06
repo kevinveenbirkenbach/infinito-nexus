@@ -51,7 +51,7 @@ class TestRepairDockerHard(unittest.TestCase):
             self.assertEqual(calls[1]["cwd"], "/X/APP")
 
             # down
-            self.assertEqual(calls[0]["cmd"][0], s.compose)
+            self.assertEqual(calls[0]["cmd"][0], "compose")
             self.assertIn("--chdir", calls[0]["cmd"])
             self.assertIn("/X/APP", calls[0]["cmd"])
             self.assertIn("--project", calls[0]["cmd"])
@@ -59,7 +59,7 @@ class TestRepairDockerHard(unittest.TestCase):
             self.assertIn("down", calls[0]["cmd"])
 
             # up -d
-            self.assertEqual(calls[1]["cmd"][0], s.compose)
+            self.assertEqual(calls[1]["cmd"][0], "compose")
             self.assertIn("--chdir", calls[1]["cmd"])
             self.assertIn("/X/APP", calls[1]["cmd"])
             self.assertIn("--project", calls[1]["cmd"])
