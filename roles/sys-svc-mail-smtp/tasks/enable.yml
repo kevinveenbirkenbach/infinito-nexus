@@ -1,10 +1,7 @@
 - include_tasks: utils/once/flag.yml
 
-- name: "Ensure msmtp-mta is absent (conflicts with postfix smtp-forwarder)"
-  package:
-    name:
-      - msmtp-mta
-    state: absent
+- name: "Disable MSMTP to avoid port conflicts"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-mail-msmtp/tasks/disable.yml' ] | path_join }}"
 
 - name: Include dependency 'sys-daemon'
   include_role:

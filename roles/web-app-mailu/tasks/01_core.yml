@@ -1,5 +1,8 @@
 - include_tasks: utils/once/flag.yml
 
+- name: "Disable SMTP to avoid port conflicts"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-mail-smtp/tasks/disable.yml' ] | path_join }}"
+
 - name: Ensure Rspamd overrides directory exists (host)
   file:
     path: "{{ MAILU_RSPAMD_HOST_DIR }}"

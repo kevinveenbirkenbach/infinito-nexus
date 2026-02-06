@@ -6,13 +6,8 @@
       - msmtp
     state: present
 
-- name: Remove postfix when external SMTP is used (conflicts with msmtp-mta)
-  package:
-    name: 
-      - postfix
-      - postfix-lmdb
-    state: absent
-  when: SYSTEM_EMAIL_EXTERNAL | bool
+- name: "Disable SMTP to avoid port conflicts"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-mail-smtp/tasks/disable.yml' ] | path_join }}"
 
 - name: Install msmtp-mta when Mailu is used (no local postfix relay)
   package:
