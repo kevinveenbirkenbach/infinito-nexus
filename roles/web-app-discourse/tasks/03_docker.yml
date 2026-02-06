@@ -58,11 +58,10 @@
 - name: Load discourse handlers explicitly
   # In the CI somehow, the postgres application id was used,
   # local it behaved normal. I hope this solves the anomaly.
-  ansible.builtin.include_role:
-    name: web-app-discourse
-    handlers_from: main
+  include_tasks: utils/load_handlers.yml
   vars:
-    application_id: "web-app-discourse"
+    handler_role_name: "web-app-discourse"
+
 
 - name: flush, to recreate discourse app
   meta: flush_handlers
