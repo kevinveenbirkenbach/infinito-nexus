@@ -3,7 +3,7 @@
 
     - name: "Check for Mailu DB domain table"
       ansible.builtin.command: >
-        docker exec {{ lookup('database', application_id, 'container') }} mariadb -u {{ lookup('database', application_id, 'username') }} -p{{ lookup('database', application_id, 'password') }}
+        {{ BIN_CONTAINER }} exec {{ lookup('database', application_id, 'container') }} mariadb -u {{ lookup('database', application_id, 'username') }} -p{{ lookup('database', application_id, 'password') }}
         -e "SHOW TABLES FROM {{ lookup('database', application_id, 'name') }} LIKE 'domain';"
       args:
         chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"

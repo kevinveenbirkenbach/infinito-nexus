@@ -7,13 +7,13 @@
       - "{{ BITNAMI_DATA_DIR }}"
   block:
     - name: Ensure ownership is correct
-      command: "docker exec --user root {{ MOODLE_CONTAINER }} chown -R {{ BITNAMI_USER_GROUP }} {{ item }}"
+      command: "{{ BIN_CONTAINER }} exec --user root {{ MOODLE_CONTAINER }} chown -R {{ BITNAMI_USER_GROUP }} {{ item }}"
       loop: "{{ MOODLE_DIRS }}"
 
     - name: Set directory permissions (770)
-      command: "docker exec --user root {{ MOODLE_CONTAINER }} find {{ item }} -type d -exec chmod 770 {} \\;"
+      command: "{{ BIN_CONTAINER }} exec --user root {{ MOODLE_CONTAINER }} find {{ item }} -type d -exec chmod 770 {} \\;"
       loop: "{{ MOODLE_DIRS }}"
 
     - name: Set file permissions (660)
-      command: "docker exec --user root {{ MOODLE_CONTAINER }} find {{ item }} -type f -exec chmod 660 {} \\;"
+      command: "{{ BIN_CONTAINER }} exec --user root {{ MOODLE_CONTAINER }} find {{ item }} -type f -exec chmod 660 {} \\;"
       loop: "{{ MOODLE_DIRS }}"

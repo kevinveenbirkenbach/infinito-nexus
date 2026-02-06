@@ -10,7 +10,7 @@
 
     - name: Validate OpenResty configuration (Post-Flight-Check)
       command: >
-        docker exec {{ OPENRESTY_CONTAINER }} openresty -t -q
+        {{ BIN_CONTAINER }} exec {{ OPENRESTY_CONTAINER }} openresty -t -q
       register: openresty_test_post
       changed_when: false
       failed_when: openresty_test_post.rc != 0

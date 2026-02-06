@@ -1,6 +1,6 @@
 - name: Update DB host (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    {{ BIN_CONTAINER }} exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
     "grep -q \"'host' *=> *'{{ lookup('database', application_id, 'host') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
      { sed -i \"s/'host'\\s*=>\\s*[^,]*,/'host' => '{{ lookup('database', application_id, 'host') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_host_set
@@ -9,7 +9,7 @@
 
 - name: Update DB name (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    {{ BIN_CONTAINER }} exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
     "grep -q \"'dbname' *=> *'{{ lookup('database', application_id, 'name') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
      { sed -i \"s/'dbname'\\s*=>\\s*[^,]*,/'dbname' => '{{ lookup('database', application_id, 'name') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_name_set
@@ -18,7 +18,7 @@
 
 - name: Update DB user (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    {{ BIN_CONTAINER }} exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
     "grep -q \"'user' *=> *'{{ lookup('database', application_id, 'username') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
      { sed -i \"s/'user'\\s*=>\\s*[^,]*,/'user' => '{{ lookup('database', application_id, 'username') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_user_set
@@ -27,7 +27,7 @@
 
 - name: Update DB password (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    {{ BIN_CONTAINER }} exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
     "grep -q \"'password' *=> *'{{ lookup('database', application_id, 'password') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
      { sed -i \"s/'password'\\s*=>\\s*[^,]*,/'password' => '{{ lookup('database', application_id, 'password') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_pass_set

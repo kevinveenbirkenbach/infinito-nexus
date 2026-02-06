@@ -1,6 +1,6 @@
 - name: "Create / promote MediaWiki admin user"
   command: >
-    docker exec
+    {{ BIN_CONTAINER }} exec
     -u {{ MEDIAWIKI_USER }}
     {{ MEDIAWIKI_CONTAINER }}
     php {{ MEDIAWIKI_HTML_DIR }}/maintenance/run.php createAndPromote

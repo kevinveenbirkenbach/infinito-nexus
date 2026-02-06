@@ -1,6 +1,6 @@
 - name: Validate OpenResty configuration (Pre-Flight-Check)
   ansible.builtin.command: >
-    docker exec {{ OPENRESTY_CONTAINER }} openresty -t -q
+    {{ BIN_CONTAINER }} exec {{ OPENRESTY_CONTAINER }} openresty -t -q
   register: openresty_test_pre
   changed_when: false
   failed_when: >

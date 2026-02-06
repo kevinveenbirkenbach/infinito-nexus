@@ -36,7 +36,7 @@
     fi
 
     # Always run update in the real container (managed LocalSettings)
-    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
+    {{ BIN_CONTAINER }} exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
       set -euo pipefail
       php {{ MEDIAWIKI_HTML_DIR }}/maintenance/run.php update --quick
     '

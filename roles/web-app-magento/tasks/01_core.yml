@@ -6,7 +6,7 @@
 
 - name: "Bootstrap Magento 2.4.8 source (exact working variant)"
   command: >
-    docker exec
+    {{ BIN_CONTAINER }} exec
     -e COMPOSER_AUTH='{"http-basic":{"repo.magento.com":{"username":"{{ MAGENTO_REPO_PUBLIC_KEY }}","password":"{{ MAGENTO_REPO_PRIVATE_KEY }}"}}}'
     -e COMPOSER_HOME=/tmp/composer
     -e COMPOSER_CACHE_DIR=/tmp/composer/cache
@@ -23,7 +23,7 @@
 
 - name: "Run Magento setup:install (in container)"
   command: >
-    docker exec --user {{ MAGENTO_USER }} {{ MAGENTO_PHP_CONTAINER }} bash -lc "
+    {{ BIN_CONTAINER }} exec --user {{ MAGENTO_USER }} {{ MAGENTO_PHP_CONTAINER }} bash -lc "
     cd /var/www/html && bin/magento setup:install \
       --base-url='{{ MAGENTO_URL }}/' \
       --db-host=\"$MYSQL_HOST\" \

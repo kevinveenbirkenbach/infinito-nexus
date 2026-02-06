@@ -6,13 +6,15 @@
     docker_compose_flush_handlers: false
 
 - name: Check if config.php exists
-  command: docker exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
+  command: >
+    {{ BIN_CONTAINER }} exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
   register: config_file_exists
   changed_when: false
   failed_when: false
 
 - name: Check if config.php exists
-  command: docker exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
+  command: >
+    {{ BIN_CONTAINER }} exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
   register: config_file_exists
   changed_when: false
   failed_when: false

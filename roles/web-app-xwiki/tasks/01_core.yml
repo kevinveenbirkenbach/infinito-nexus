@@ -42,7 +42,7 @@
 
         echo "=== password hash compare ==="
         echo -n "container_hash="
-        docker exec "{{ XWIKI_CONTAINER }}" sh -lc '
+        {{ BIN_CONTAINER }} exec "{{ XWIKI_CONTAINER }}" sh -lc '
           cfg="/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg";
           if [ ! -f "$cfg" ]; then
             echo "<missing-xwiki.cfg>"

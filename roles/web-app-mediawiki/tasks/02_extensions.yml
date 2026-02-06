@@ -20,7 +20,7 @@
 
 - name: "EXT | Copy & extract into container if not installed"
   shell: >
-    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
+    {{ BIN_CONTAINER }} exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
       set -e
       dst="{{ MEDIAWIKI_HTML_DIR }}/extensions/{{ ext.name }}"
       if [ ! -f "$dst/extension.json" ]; then
@@ -28,7 +28,7 @@
       fi
     '
     && docker cp "{{ MEDIAWIKI_EXT_CFG_BASE }}/{{ ext.name }}.tar.gz" "{{ MEDIAWIKI_CONTAINER }}:/tmp/{{ ext.name }}.tar.gz"
-    && docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
+    && {{ BIN_CONTAINER }} exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
       set -e
       dst="{{ MEDIAWIKI_HTML_DIR }}/extensions/{{ ext.name }}"
       if [ ! -f "$dst/extension.json" ]; then
@@ -54,7 +54,7 @@
 # Use /tmp/composer for HOME/CACHE to avoid /var/www permission issues.
 - name: "EXT | composer install in each extension when needed"
   shell: |
-    docker exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
+    {{ BIN_CONTAINER }} exec -u {{ MEDIAWIKI_USER }} {{ MEDIAWIKI_CONTAINER }} bash -lc '
       set -e
       d="{{ MEDIAWIKI_HTML_DIR }}/extensions/{{ ext.name }}"
       if [ -f "$d/composer.json" ] && [ ! -f "$d/vendor/autoload.php" ]; then
@@ -81,7 +81,7 @@
 # Sanity check: Jumbojett OIDC client must be loadable
 - name: "EXT | Sanity check: Jumbojett OpenIDConnect client present"
   shell: >
-    docker exec {{ MEDIAWIKI_CONTAINER }} bash -lc
+    {{ BIN_CONTAINER }} exec {{ MEDIAWIKI_CONTAINER }} bash -lc
     'php -r "(@require \"{{ MEDIAWIKI_HTML_DIR }}/vendor/autoload.php\"); @require \"{{ MEDIAWIKI_HTML_DIR }}/extensions/OpenIDConnect/vendor/autoload.php\"; exit(class_exists(\"Jumbojett\\\\OpenIDConnectClient\")?0:1);"'
   args:
     executable: /bin/bash

@@ -33,7 +33,8 @@
   meta: flush_handlers
 
 - name: Check if {{ WORDPRESS_CONFIG_FILE }} exists in WordPress
-  command: docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }} test -f {{ WORDPRESS_CONFIG_PATH }}
+  command: >
+    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }} test -f {{ WORDPRESS_CONFIG_PATH }}
   register: wp_config_file_exists
   changed_when: false
   failed_when: false
@@ -60,7 +61,7 @@
 
 - name: Detect if WordPress is Multisite
   command: >
-    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    {{ BIN_CONTAINER }} exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp eval 'echo (int) is_multisite();' --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_is_multisite
   changed_when: false

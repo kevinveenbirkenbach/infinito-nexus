@@ -26,7 +26,7 @@
   when: MARIADB_EXPOSE_LOCAL | bool
 
 # ---------------------------------------------------------------------------
-# CI / Container path: no port publishing → initialize via docker exec
+# CI / Container path: no port publishing → initialize via {{ BIN_CONTAINER }} exec
 # ---------------------------------------------------------------------------
 - block:
     - name: "Create database: {{ database_name }} (container via mariadb CLI)"

@@ -77,7 +77,7 @@
     - name: "XWIKI | DEBUG | Repo reachability from container (nexus + maven central)"
       ansible.builtin.shell: |
         set -euo pipefail
-        docker exec "{{ XWIKI_CONTAINER }}" sh -lc '
+        {{ BIN_CONTAINER }} exec "{{ XWIKI_CONTAINER }}" sh -lc '
           echo "== DNS ==";
           (getent hosts nexus.xwiki.org || true);
           (getent hosts repo1.maven.org || true);
@@ -92,7 +92,7 @@
     - name: "XWIKI | DEBUG | Dump mounted xwiki.properties (first 200 lines)"
       ansible.builtin.shell: |
         set -euo pipefail
-        docker exec "{{ XWIKI_CONTAINER }}" sh -lc '
+        {{ BIN_CONTAINER }} exec "{{ XWIKI_CONTAINER }}" sh -lc '
           echo "== xwiki.properties ==";
           ls -la /usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties || true;
           sed -n "1,200p" /usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.properties 2>/dev/null || true;
