@@ -112,7 +112,7 @@ def build_docker_cmd(
     ignore_network_blocks_from: list[str],
     use_host_network: bool = True,
 ) -> list[str]:
-    cmd = ["container", "run"]
+    cmd = ["container", "run", "--rm"]
 
     if use_host_network:
         cmd.extend(["--network", "host"])
