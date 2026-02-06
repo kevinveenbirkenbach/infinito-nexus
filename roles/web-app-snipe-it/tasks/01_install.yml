@@ -1,5 +1,5 @@
 - name: Wait until application container is up
-  shell: "docker compose ps -q {{ SNIPE_IT_SERVICE }}"
+  shell: "{{ BIN_COMPOSE }} ps -q {{ SNIPE_IT_SERVICE }}"
   args:
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   register: snipeit_app_id
@@ -21,7 +21,7 @@
 
 - name: Run Snipe-IT migrations (idempotent)
   shell: |
-    docker compose {{ lookup('compose_file_args', application_id) }} exec -T \
+    {{ BIN_COMPOSE }} exec -T \
       -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
       -e XDG_CONFIG_HOME=/tmp \
       {{ SNIPE_IT_SERVICE }} \
@@ -36,7 +36,7 @@
 
 - name: Seed Snipe-IT database (optional, safe to rerun if seeder is idempotent)
   shell: |
-    docker compose {{ lookup('compose_file_args', application_id) }} exec -T \
+    {{ BIN_COMPOSE }} exec -T \
       -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
       -e XDG_CONFIG_HOME=/tmp \
       {{ SNIPE_IT_SERVICE }} \

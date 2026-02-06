@@ -1,21 +1,10 @@
 ---
 - name: "Check if Snipe-IT admin user already exists (by username)"
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - -f
-      - /opt/compose/snipe-it/docker-compose.yml
-      - -f
-      - /opt/compose/snipe-it/docker-compose.ca.override.yml
-      - exec
-      - -T
-      - -e
-      - "APP_KEY={{ SNIPE_IT_APP_KEY }}"
-      - snipe-it
-      - php
-      - -r
-      - |
+  ansible.builtin.shell: |
+    {{ BIN_COMPOSE }} exec -T \
+      -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
+      {{ SNIPE_IT_SERVICE }} \
+      php -r '
         require "vendor/autoload.php";
         $app = require "bootstrap/app.php";
         $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
@@ -23,18 +12,21 @@
           ->whereNull("deleted_at")
           ->exists();
         exit($exists ? 0 : 1);
+      '
+  args:
+    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   register: snipe_it_admin_exists
   changed_when: false
   failed_when: false
 
 - name: "Create Snipe-IT administrator account"
   ansible.builtin.shell: >
-    docker compose {{ lookup('compose_file_args', application_id) }} exec -T
+    {{ BIN_COMPOSE }} exec -T
     -e APP_KEY="{{ SNIPE_IT_APP_KEY }}"
     {{ SNIPE_IT_SERVICE }}
     php artisan snipeit:create-admin
-    --first_name "System"
-    --last_name "Administrator"
+    --first_name "{{ users.administrator.firstname }}"
+    --last_name "{{ users.administrator.lastname }}"
     --username "{{ users.administrator.username }}"
     --email "{{ users.administrator.email }}"
     --password {{ users.administrator.password | quote }}
