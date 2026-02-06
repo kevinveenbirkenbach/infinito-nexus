@@ -1,4 +1,4 @@
-# lookup_plugins/cert_plan.py
+# lookup_plugins/cert.py
 #
 # Certificate planning lookup for Infinito.Nexus:
 # - Computes certificate file paths (cert/key/ca)
@@ -55,7 +55,7 @@ def _require_current_play_domains_all_strict(variables: dict) -> List[str]:
 
     if not isinstance(value, list):
         raise AnsibleError(
-            "cert_plan(strict): CURRENT_PLAY_DOMAINS_ALL must be of type list[str]. "
+            "cert(strict): CURRENT_PLAY_DOMAINS_ALL must be of type list[str]. "
             f"Got {type(value).__name__}."
         )
 
@@ -63,19 +63,17 @@ def _require_current_play_domains_all_strict(variables: dict) -> List[str]:
     for item in value:
         if not isinstance(item, str):
             raise AnsibleError(
-                "cert_plan(strict): CURRENT_PLAY_DOMAINS_ALL must contain only strings."
+                "cert(strict): CURRENT_PLAY_DOMAINS_ALL must contain only strings."
             )
         item = item.strip()
         if not item:
             raise AnsibleError(
-                "cert_plan(strict): CURRENT_PLAY_DOMAINS_ALL must not contain empty strings."
+                "cert(strict): CURRENT_PLAY_DOMAINS_ALL must not contain empty strings."
             )
         cleaned.append(item)
 
     if not cleaned:
-        raise AnsibleError(
-            "cert_plan(strict): CURRENT_PLAY_DOMAINS_ALL must not be empty."
-        )
+        raise AnsibleError("cert(strict): CURRENT_PLAY_DOMAINS_ALL must not be empty.")
 
     return cleaned
 
@@ -88,12 +86,12 @@ class LookupModule(LookupBase):
         # Legacy 'want=' kwarg is ignored (no error) to keep tasks noise-free.
         if not terms or len(terms) not in (1, 2):
             raise AnsibleError(
-                "cert_plan: one or two terms required: (domain|application_id[, want_path])"
+                "cert: one or two terms required: (domain|application_id[, want_path])"
             )
 
         term = as_str(terms[0])
         if not term:
-            raise AnsibleError("cert_plan: term is empty")
+            raise AnsibleError("cert: term is empty")
 
         want = as_str(terms[1]).strip() if len(terms) == 2 else ""
 
@@ -104,7 +102,7 @@ class LookupModule(LookupBase):
 
         if mode_default not in AVAILABLE_FLAVORS:
             raise AnsibleError(
-                f"cert_plan: TLS_MODE must be one of {sorted(AVAILABLE_FLAVORS)}, got '{mode_default}'"
+                f"cert: TLS_MODE must be one of {sorted(AVAILABLE_FLAVORS)}, got '{mode_default}'"
             )
 
         forced_mode = as_str(kwargs.get("mode", "auto")).lower()
@@ -113,7 +111,7 @@ class LookupModule(LookupBase):
             domains=domains,
             applications=applications,
             forced_mode=forced_mode,
-            err_prefix="cert_plan",
+            err_prefix="cert",
         )
 
         app = applications.get(app_id, {})
@@ -121,7 +119,7 @@ class LookupModule(LookupBase):
             app = {}
 
         enabled = resolve_enabled(app, bool(enabled_default))
-        mode = resolve_mode(app, enabled, mode_default, err_prefix="cert_plan")
+        mode = resolve_mode(app, enabled, mode_default, err_prefix="cert")
 
         cert_file = ""
         key_file = ""
@@ -139,7 +137,7 @@ class LookupModule(LookupBase):
                 le_live_raw,
                 variables=variables,
                 var_name="LETSENCRYPT_LIVE_PATH",
-                err_prefix="cert_plan",
+                err_prefix="cert",
             )
 
             le_name = resolve_le_name(app, primary_domain)
@@ -148,9 +146,7 @@ class LookupModule(LookupBase):
             cert_file = _join(le_live, le_name, LE_FULLCHAIN)
             key_file = _join(le_live, le_name, LE_PRIVKEY)
 
-            all_domains = collect_domains_for_app(
-                domains, app_id, err_prefix="cert_plan"
-            )
+            all_domains = collect_domains_for_app(domains, app_id, err_prefix="cert")
             all_domains = (
                 uniq_preserve([primary_domain] + all_domains)
                 if all_domains
@@ -169,13 +165,13 @@ class LookupModule(LookupBase):
                 ss_base_raw,
                 variables=variables,
                 var_name="TLS_SELFSIGNED_BASE_PATH",
-                err_prefix="cert_plan",
+                err_prefix="cert",
             )
 
             ss_scope = as_str(variables.get("TLS_SELFSIGNED_SCOPE")).lower()
             if ss_scope not in {"app", "global"}:
                 raise AnsibleError(
-                    "cert_plan: TLS_SELFSIGNED_SCOPE must be 'app' or 'global'"
+                    "cert: TLS_SELFSIGNED_SCOPE must be 'app' or 'global'"
                 )
 
             scope = ss_scope
@@ -198,7 +194,7 @@ class LookupModule(LookupBase):
                 key_file = _join(ss_base, app_id, primary_domain, LE_PRIVKEY)
 
                 all_domains = collect_domains_for_app(
-                    domains, app_id, err_prefix="cert_plan"
+                    domains, app_id, err_prefix="cert"
                 )
                 all_domains = (
                     uniq_preserve([primary_domain] + all_domains)
@@ -213,7 +209,7 @@ class LookupModule(LookupBase):
                     san_domains = uniq_preserve([primary_domain] + san_override)
 
         else:
-            raise AnsibleError(f"cert_plan: unsupported mode '{mode}'")
+            raise AnsibleError(f"cert: unsupported mode '{mode}'")
 
         resolved: Dict[str, Any] = {
             "application_id": app_id,

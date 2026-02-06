@@ -1,6 +1,6 @@
 ---
 # Self-signed TLS provider (strict, SAN aware).
-# This provider uses cert_plan for:
+# This provider uses cert for:
 # - where the cert/key live (shared/global or per-app)
 # - which SAN list is effective
 #
@@ -19,9 +19,9 @@
     _tls: "{{ lookup('tls', application_id) }}"
   changed_when: false
 
-- name: "TLS | (self_signed) plan certificate via cert_plan (strict)"
+- name: "TLS | (self_signed) plan certificate via cert (strict)"
   ansible.builtin.set_fact:
-    _cert: "{{ lookup('cert_plan', application_id) }}"
+    _cert: "{{ lookup('cert', application_id) }}"
   changed_when: false
 
 - name: "TLS | (self_signed) assert mode is self_signed"

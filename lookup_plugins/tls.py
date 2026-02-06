@@ -3,7 +3,7 @@
 # STRICT TLS resolver (without SAN/cert identity planning).
 #
 # Certificate identity planning (SAN list, cert/key paths) is moved to:
-#   lookup_plugins/cert_plan.py
+#   lookup_plugins/cert.py
 
 from __future__ import annotations
 

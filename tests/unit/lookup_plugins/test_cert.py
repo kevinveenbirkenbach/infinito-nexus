@@ -1,9 +1,9 @@
-# tests/unit/lookup_plugins/test_cert_plan.py
+# tests/unit/lookup_plugins/test_cert.py
 import sys
 import unittest
 
 from ansible.errors import AnsibleError
-from lookup_plugins.cert_plan import LookupModule
+from lookup_plugins.cert import LookupModule
 
 # Make "ansible.module_utils.tls_common" importable during plain unit tests.
 import module_utils.tls_common as _tls_common
@@ -282,7 +282,7 @@ class TestCertPlanLookup(unittest.TestCase):
     def test_jinja_expression_that_renders_to_empty_triggers_failfast(self):
         """
         If Jinja renders to something that still contains Jinja markers, or is invalid,
-        cert_plan should fail fast. Here we use a construction that still contains Jinja
+        cert should fail fast. Here we use a construction that still contains Jinja
         after rendering by injecting literal braces.
         """
         v = dict(self.vars)
