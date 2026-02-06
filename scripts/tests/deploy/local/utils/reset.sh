@@ -98,7 +98,7 @@ echo ">>> Initializing inventory inside container"
     fi
 
     echo \">>> Creating inventory at \${inv_file}\"
-    python3 -m cli.create.inventory \"\${inv_dir}\" \
+    infinito create inventory \"\${inv_dir}\" \
       --inventory-file \${inv_file} \
       --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \
