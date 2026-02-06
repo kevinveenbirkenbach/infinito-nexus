@@ -9,7 +9,7 @@ networks:
   or
   application_id in ['svc-db-mariadb','svc-db-postgres']
 %}
-  {{ applications | get_app_conf(lookup('database', application_id, 'id'), 'docker.network') }}:
+  {{ lookup('config', lookup('database', application_id, 'id'), 'docker.network') }}:
     external: true
 {% endif %}
 {# Central LDAP Network #}

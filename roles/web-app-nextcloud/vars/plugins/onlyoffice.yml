@@ -13,7 +13,7 @@ plugin_configuration:
 
   - appid: "onlyoffice"
     configkey: "jwt_secret"
-    configvalue: "{{ applications | get_app_conf('web-svc-onlyoffice', 'credentials.onlyoffice_jwt_secret', False, '') }}"
+    configvalue: "{{ lookup('config','web-svc-onlyoffice', 'credentials.onlyoffice_jwt_secret', '') }}"
 
   - appid: "onlyoffice"
     configkey: "jwt_header"

@@ -1,7 +1,7 @@
 plugin_configuration:
   - appid:        "bbb"
     configkey:    "api.secret"
-    configvalue:  "{{ applications | get_app_conf('web-app-bigbluebutton', 'credentials.shared_secret', False,'') }}"
+    configvalue:  "{{ lookup('config','web-app-bigbluebutton', 'credentials.shared_secret', '') }}"
   - appid:        "bbb"
     configkey:    "api.url"
-    configvalue:  "{{ lookup('tls', 'web-app-bigbluebutton', 'url.base') }}{{ applications | get_app_conf('web-app-bigbluebutton', 'api_suffix', False,'') }}"
+    configvalue:  "{{ lookup('tls', 'web-app-bigbluebutton', 'url.base') }}{{ lookup('config','web-app-bigbluebutton', 'api_suffix','') }}"
