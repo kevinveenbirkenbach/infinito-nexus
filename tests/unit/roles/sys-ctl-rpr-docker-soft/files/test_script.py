@@ -89,13 +89,18 @@ class TestRepairDockerSoft(unittest.TestCase):
         def fake_print_bash(cmd):
             cmd_log.append(cmd)
 
-            # 1) docker ps mocks
-            if cmd.startswith("docker ps --filter health=unhealthy"):
+            # 1) docker ps mocks (STRICT: prefilter compose-labeled containers)
+            if cmd.startswith(
+                "docker ps --filter label=com.docker.compose.project --filter health=unhealthy"
+            ):
                 return ["app1-web-1", "db-1"]
-            if cmd.startswith("docker ps --filter status=exited"):
-                return ["app1-worker-1", "other-2"]
+            if cmd.startswith(
+                "docker ps --filter label=com.docker.compose.project --filter status=exited"
+            ):
+                # non-compose containers are filtered out by the new docker ps command
+                return ["app1-worker-1"]
 
-            # 2) docker inspect labels
+            # 2) docker inspect labels (only called for compose containers now)
             if cmd.startswith(
                 "docker inspect -f '{{ index .Config.Labels \"com.docker.compose.project\" }}'"
             ):
@@ -104,7 +109,7 @@ class TestRepairDockerSoft(unittest.TestCase):
                     return ["app1"]
                 if container == "db-1":
                     return ["db"]
-                return [""]  # other-2 has no labels -> should fail
+                return [""]
 
             if cmd.startswith(
                 "docker inspect -f '{{ index .Config.Labels \"com.docker.compose.project.working_dir\" }}'"
@@ -114,7 +119,7 @@ class TestRepairDockerSoft(unittest.TestCase):
                     return ["/BASE/app1"]
                 if container == "db-1":
                     return ["/BASE/db"]
-                return [""]  # other-2 -> missing
+                return [""]
 
             # 3) wrapper invocations
             if "compose" in cmd:
@@ -137,8 +142,8 @@ class TestRepairDockerSoft(unittest.TestCase):
 
             errors = s.main("/BASE", manipulation_services=[], timeout=None)
 
-            # Expect: only "other-2" fails due to missing labels -> 1 error
-            self.assertEqual(errors, 1)
+            # With label prefilter, non-compose containers are ignored -> 0 errors
+            self.assertEqual(errors, 0)
 
             restart_cmds = [c for c in cmd_log if "compose" in c and " restart" in c]
             self.assertTrue(
@@ -154,8 +159,7 @@ class TestRepairDockerSoft(unittest.TestCase):
                 )
             )
 
-            # Ensure recovery path uses wrapper with project too (down/up) if triggered.
-            # (Not triggered here, but we at least ensure the code path would format correctly.)
+            # Wrapper calls must include --project
             self.assertTrue(
                 all("--project" in c for c in restart_cmds),
                 "Wrapper calls must include --project",
