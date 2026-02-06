@@ -16,7 +16,7 @@
     - docker compose up
   when: MODE_ASSERT | bool
 
-- name: docker compose pull
+- name: compose pull
   ansible.builtin.script:
     cmd: >-
       pull.py

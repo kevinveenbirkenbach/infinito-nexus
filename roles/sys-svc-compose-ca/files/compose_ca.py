@@ -236,7 +236,7 @@ def ensure_image_available(
                 compose_base_cmd + ["pull", service_name],
                 cwd=cwd,
                 env=env,
-                label=f"docker compose pull {service_name}",
+                label=f"compose pull {service_name}",
             )
 
     if not docker_image_exists(img, cwd=cwd, env=env):

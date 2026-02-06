@@ -5,7 +5,7 @@
     public: false
   when: run_once_sys_svc_container is not defined
 
-- name: Remove all docker compose pull locks
+- name: Remove all compose pull locks
   file:
     path: "{{ DIR_COMPOSE_PULL_LOCK }}"
     state: absent

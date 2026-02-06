@@ -67,7 +67,7 @@
   notify: docker compose up
 
 # Pull image when update is wished. 
-- name: docker compose pull
+- name: compose pull
   command:
     cmd:    "{{ BIN_COMPOSE }} pull"
     chdir:  "{{ lookup('docker', application_id, 'directories.instance') }}"
