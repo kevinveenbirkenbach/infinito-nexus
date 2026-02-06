@@ -29,14 +29,18 @@ class LookupModule(LookupBase):
     def run(self, terms, variables: Optional[dict] = None, **kwargs):
         variables = variables or {}
 
-        if not terms or len(terms) != 1:
+        # New API: want-path is the 2nd positional term.
+        # Legacy 'want=' kwarg is ignored (no error) to keep tasks noise-free.
+        if not terms or len(terms) not in (1, 2):
             raise AnsibleError(
-                "tls_resolve: exactly one term required (domain or application_id)"
+                "tls_resolve: one or two terms required: (domain|application_id[, want_path])"
             )
 
         term = as_str(terms[0])
         if not term:
             raise AnsibleError("tls_resolve: term is empty")
+
+        want = as_str(terms[1]).strip() if len(terms) == 2 else ""
 
         domains = require(variables, "domains", dict)
         applications = require(variables, "applications", dict)
@@ -93,7 +97,6 @@ class LookupModule(LookupBase):
             "url": {"base": base_url},
         }
 
-        want = as_str(kwargs.get("want", ""))
         if want:
             return [want_get(resolved, want)]
         return [resolved]
