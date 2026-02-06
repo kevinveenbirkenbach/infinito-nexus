@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
 {% set service_name = NEXTCLOUD_PROXY_SERVICE %}
   {{ service_name }}:
@@ -150,4 +150,4 @@
     extra_volumes=_extra_volumes
 ) }}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

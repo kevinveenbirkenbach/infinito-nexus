@@ -1,4 +1,4 @@
-# tests/unit/roles/docker-compose/files/test_compose_pull.py
+# tests/unit/roles/sys-svc-compose/files/test_compose_pull.py
 import importlib.util
 import sys
 import tempfile
@@ -9,7 +9,7 @@ from unittest.mock import patch
 
 
 def _repo_root(start: Path) -> Path:
-    # __file__ = tests/unit/roles/docker-compose/files/test_compose_pull.py
+    # __file__ = tests/unit/roles/sys-svc-compose/files/test_compose_pull.py
     return start.resolve().parents[5]
 
 
@@ -25,9 +25,7 @@ def _load_module(rel_path: str, name: str) -> ModuleType:
 
 class TestComposePull(unittest.TestCase):
     def setUp(self):
-        self.m = _load_module(
-            "roles/docker-compose/files/compose_pull.py", "compose_pull_mod"
-        )
+        self.m = _load_module("roles/sys-svc-compose/files/pull.py", "compose_pull_mod")
 
     def test_transient_regex_matches(self):
         self.assertTrue(self.m.TRANSIENT_RE.search("TLS handshake timeout"))
@@ -197,7 +195,7 @@ services:
             (lock_dir / f"{lock_key}.lock").write_text("ok\n", encoding="utf-8")
 
             argv = [
-                "compose_pull.py",
+                "pull.py",
                 "--chdir",
                 td,
                 "--project",
@@ -245,7 +243,7 @@ services:
                 return 0, ""
 
             argv = [
-                "compose_pull.py",
+                "pull.py",
                 "--chdir",
                 str(chdir),
                 "--project",

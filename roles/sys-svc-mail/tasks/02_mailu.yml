@@ -6,4 +6,4 @@
 - name: "Reset compose handlers after Mailu include for MSMTP"
   include_tasks: utils/load_handlers.yml
   vars:
-    handler_role_name: "docker-compose"
+    handler_role_name: "sys-svc-compose"

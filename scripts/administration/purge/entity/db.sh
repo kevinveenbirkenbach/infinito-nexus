@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # DB purge for stacks (best effort):
 # - Tries BOTH backends: Postgres + MariaDB
-# - Detects DB name best effort from /opt/docker/<STACK>/.env/env (Keycloak style vars),
+# - Detects DB name best effort from /opt/compose/<STACK>/.env/env (Keycloak style vars),
 #   otherwise falls back to DB name = <STACK>.
 #
 # Usage:
@@ -140,7 +140,7 @@ drop_mariadb_db_best_effort() {
       ;;
   esac
 
-  local mariadb_env="/opt/docker/mariadb/.env/env"
+  local mariadb_env="/opt/compose/mariadb/.env/env"
   [[ ! -f "${mariadb_env}" ]] && {
     warn "MariaDB env file not found (${mariadb_env}) — skipping MariaDB DROP"
     return 0
@@ -172,7 +172,7 @@ truncate_mariadb_db_best_effort() {
     return 0
   fi
 
-  local mariadb_env="/opt/docker/mariadb/.env/env"
+  local mariadb_env="/opt/compose/mariadb/.env/env"
   [[ ! -f "${mariadb_env}" ]] && {
     warn "MariaDB env file not found (${mariadb_env}) — skipping MariaDB TRUNCATE"
     return 0
@@ -235,7 +235,7 @@ for STACK_NAME in "$@"; do
 (
   set -euo pipefail
 
-  STACK_DIR="/opt/docker/${STACK_NAME}"
+  STACK_DIR="/opt/compose/${STACK_NAME}"
   ENV_FILE="${STACK_DIR}/.env/env"
 
   DB_NAME="${STACK_NAME}"

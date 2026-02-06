@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   {{ FRIENDICA_SERVICE }}:
     image: "{{ FRIENDICA_IMAGE }}:{{ FRIENDICA_VERSION }}"
     container_name: "{{ FRIENDICA_CONTAINER }}"
@@ -19,4 +19,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'data': {}, 'html': {}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

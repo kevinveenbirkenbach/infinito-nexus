@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   application:
 {% set container_port = 9000 %}
@@ -31,4 +31,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'assets': {}, 'config': {'name': PEERTUBE_CONFIG_VOLUME}, 'data': {'name': PEERTUBE_DATA_VOLUME}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

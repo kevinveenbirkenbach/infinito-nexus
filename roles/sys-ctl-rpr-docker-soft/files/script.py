@@ -71,7 +71,7 @@ def print_bash(command: str) -> List[str]:
 def compose_cmd(subcmd: str, project_path: str, project_name: str) -> str:
     """
     Build an compose command that auto-adds env + override files.
-    Example: compose --chdir "/opt/docker/foo" --project "foo" restart
+    Example: compose --chdir "/opt/compose/foo" --project "foo" restart
     """
     return f'{compose} --chdir "{project_path}" --project "{project_name}" {subcmd}'
 
@@ -166,7 +166,7 @@ def main(
     if not os.path.isfile(compose):
         print(
             f"Error: required wrapper not found at {compose}. "
-            "Install it via the docker-compose role first.",
+            "Install it via the sys-svc-compose role first.",
             file=os.sys.stderr,
         )
         return 2

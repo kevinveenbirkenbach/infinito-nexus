@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   openwebui:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: {{ OPENWEBUI_IMAGE }}:{{ OPENWEBUI_VERSION }}
@@ -9,7 +9,7 @@
       - openwebui_data:/app/backend/data
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

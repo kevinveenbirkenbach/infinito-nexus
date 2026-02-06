@@ -5,13 +5,13 @@ from importlib.util import spec_from_file_location, module_from_spec
 
 def load_script_module():
     """
-    Import the script under test from roles/docker-compose/files/compose.py
+    Import the script under test from roles/sys-svc-compose/files/compose.py
     """
     test_file = Path(__file__).resolve()
     repo_root = test_file.parents[
         5
-    ]  # .../tests/unit/roles/docker-compose/files -> repo root
-    script_path = repo_root / "roles" / "docker-compose" / "files" / "compose.py"
+    ]  # .../tests/unit/roles/sys-svc-compose/files -> repo root
+    script_path = repo_root / "roles" / "sys-svc-compose" / "files" / "compose.py"
     if not script_path.exists():
         raise FileNotFoundError(f"compose.py not found at {script_path}")
     spec = spec_from_file_location("compose", str(script_path))
@@ -201,7 +201,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
                 return self
 
             def fake_is_dir(self: Path) -> bool:
-                return str(self) == "/opt/docker/nextcloud"
+                return str(self) == "/opt/compose/nextcloud"
 
             def fake_build_cmd(project: str, project_dir: Path, passthrough):
                 calls["build"] = (project, str(project_dir), list(passthrough))
@@ -215,14 +215,14 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             s.build_cmd = fake_build_cmd  # type: ignore[assignment]
             s.os.execvp = fake_execvp  # type: ignore[assignment]
 
-            s.sys.argv = ["compose.py", "--chdir", "/opt/docker/nextcloud", "up", "-d"]
+            s.sys.argv = ["compose.py", "--chdir", "/opt/compose/nextcloud", "up", "-d"]
 
             with self.assertRaises(RuntimeError):
                 s.main()
 
             self.assertEqual(
                 calls["build"],
-                ("nextcloud", "/opt/docker/nextcloud", ["up", "-d"]),
+                ("nextcloud", "/opt/compose/nextcloud", ["up", "-d"]),
             )
         finally:
             s.sys.argv = old_argv

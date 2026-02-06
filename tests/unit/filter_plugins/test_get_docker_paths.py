@@ -11,22 +11,22 @@ class TestGetDockerPaths(unittest.TestCase):
         with patch(
             "module_utils.docker_paths_utils.get_entity_name", lambda app_id: "myentity"
         ):
-            out = m.get_docker_paths("web-app-anything", "/opt/docker/")
+            out = m.get_docker_paths("web-app-anything", "/opt/compose/")
 
-        self.assertEqual(out["directories"]["instance"], "/opt/docker/myentity/")
-        self.assertEqual(out["files"]["env"], "/opt/docker/myentity/.env/env")
+        self.assertEqual(out["directories"]["instance"], "/opt/compose/myentity/")
+        self.assertEqual(out["files"]["env"], "/opt/compose/myentity/.env/env")
         self.assertEqual(
-            out["files"]["docker_compose"], "/opt/docker/myentity/docker-compose.yml"
+            out["files"]["docker_compose"], "/opt/compose/myentity/docker-compose.yml"
         )
         self.assertEqual(
             out["files"]["docker_compose_override"],
-            "/opt/docker/myentity/docker-compose.override.yml",
+            "/opt/compose/myentity/docker-compose.override.yml",
         )
         self.assertEqual(
             out["files"]["docker_compose_ca_override"],
-            "/opt/docker/myentity/docker-compose.ca.override.yml",
+            "/opt/compose/myentity/docker-compose.ca.override.yml",
         )
-        self.assertEqual(out["files"]["dockerfile"], "/opt/docker/myentity/Dockerfile")
+        self.assertEqual(out["files"]["dockerfile"], "/opt/compose/myentity/Dockerfile")
 
         # Ensure required top-level keys exist
         self.assertIn("directories", out)

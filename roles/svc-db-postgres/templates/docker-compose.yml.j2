@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   postgres:
     container_name:   "{{ POSTGRES_CONTAINER }}"
@@ -30,4 +30,4 @@
     application_id,
     extra_volumes={'data': {'name': POSTGRES_VOLUME}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

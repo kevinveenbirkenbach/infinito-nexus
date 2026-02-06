@@ -12,7 +12,7 @@ docker_compose_instance_directory="$2"
 
 # Compose wrapper base command (must include quoting as needed)
 # Example:
-#   compose_cmd="/usr/local/bin/compose --chdir /opt/docker/mailu --project mailu"
+#   compose_cmd="/usr/local/bin/compose --chdir /opt/compose/mailu --project mailu"
 : "${compose_cmd:=}"
 
 if [ -z "$compose_cmd" ]; then

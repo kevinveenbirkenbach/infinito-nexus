@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stops/removes docker compose stack for /opt/docker/<STACK>/docker-compose.yml
+# Stops/removes docker compose stack for /opt/compose/<STACK>/docker-compose.yml
 #
 # Usage:
 #   ./purge/entity/compose.sh <STACK1> [STACK2] [...]
@@ -22,7 +22,7 @@ for STACK_NAME in "$@"; do
 (
   set -euo pipefail
 
-  STACK_DIR="/opt/docker/${STACK_NAME}"
+  STACK_DIR="/opt/compose/${STACK_NAME}"
   COMPOSE_FILE="${STACK_DIR}/docker-compose.yml"
 
   if [[ ! -f "${COMPOSE_FILE}" ]]; then

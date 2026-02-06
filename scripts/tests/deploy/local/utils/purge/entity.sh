@@ -46,8 +46,8 @@ docker exec -it "${INFINITO_CONTAINER}" bash -lc "
       continue
     fi
 
-    if [[ ! -d \"/opt/docker/\${entity}\" ]]; then
-      echo \"!!! WARNING: /opt/docker/\${entity} not found for APP=\${app} — skipping\"
+    if [[ ! -d \"/opt/compose/\${entity}\" ]]; then
+      echo \"!!! WARNING: /opt/compose/\${entity} not found for APP=\${app} — skipping\"
       continue
     fi
 

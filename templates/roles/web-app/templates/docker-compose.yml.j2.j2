@@ -1,7 +1,7 @@
 {% raw %}
 services:
 
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   application:
     volumes: []
@@ -17,6 +17,6 @@ services:
     database_volume=lookup('database', application_id, want='volume')
 ) }}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 {% endraw %}
 

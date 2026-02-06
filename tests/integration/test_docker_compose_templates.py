@@ -16,8 +16,8 @@ class TestDockerComposeTemplates(unittest.TestCase):
         re.compile(r"^\s*\{\#.*\#\}\s*$"),  # Jinja comment {# ... #}
     ]
 
-    BASE_INCLUDE = "{% include 'roles/docker-compose/templates/base.yml.j2' %}"
-    NET_INCLUDE = "{% include 'roles/docker-compose/templates/networks.yml.j2' %}"
+    BASE_INCLUDE = "{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}"
+    NET_INCLUDE = "{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}"
     HOST_MODE = 'network_mode: "host"'
 
     def test_docker_compose_includes(self):

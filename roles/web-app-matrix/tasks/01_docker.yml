@@ -15,8 +15,8 @@
 # The following taks are necessary because a clean setup is necessary
 - name: shut down docker compose project 
   command:
-    cmd: docker-compose -p "{{ MATRIX_PROJECT }}" down
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    cmd:    "{{ PATH_COMPOSE }} down"
+    chdir:  "{{ lookup('docker', application_id, 'directories.instance') }}"
 
 - name: "cleanup project folder"
   file:
@@ -69,12 +69,12 @@
 # Pull image when update is wished. 
 - name: docker compose pull
   command:
-    cmd: docker-compose -p "{{ MATRIX_PROJECT }}" pull
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    cmd:    "{{ PATH_COMPOSE }} pull"
+    chdir:  "{{ lookup('docker', application_id, 'directories.instance') }}"
 
 - name: docker compose up
   command:
-    cmd: "docker-compose -p {{ MATRIX_PROJECT }} up -d --remove-orphans"
+    cmd: "{{ PATH_COMPOSE }} up -d --remove-orphans"
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   environment:
     COMPOSE_HTTP_TIMEOUT:   "600"

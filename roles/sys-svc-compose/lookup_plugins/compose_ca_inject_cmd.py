@@ -1,4 +1,4 @@
-# roles/docker-compose/lookup_plugins/compose_ca_inject_cmd.py
+# roles/sys-svc-compose/lookup_plugins/compose_ca_inject_cmd.py
 from __future__ import annotations
 
 import os

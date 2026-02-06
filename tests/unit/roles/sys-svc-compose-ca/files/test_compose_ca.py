@@ -1,4 +1,4 @@
-# tests/unit/roles/docker-compose-ca/files/test_compose_ca_inject.py
+# tests/unit/roles/sys-svc-compose-ca/files/test_compose_ca_inject.py
 import importlib.util
 import json
 import unittest
@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 
 def _repo_root(start: Path) -> Path:
-    # __file__ = tests/unit/roles/docker-compose-ca/files/test_compose_ca_inject.py
+    # __file__ = tests/unit/roles/sys-svc-compose-ca/files/test_compose_ca_inject.py
     return start.resolve().parents[5]
 
 
@@ -25,7 +25,7 @@ def _load_module(rel_path: str, name: str):
 class TestComposeCaInject(unittest.TestCase):
     def setUp(self):
         self.m = _load_module(
-            "roles/docker-compose-ca/files/compose_ca.py",
+            "roles/sys-svc-compose-ca/files/compose_ca.py",
             "compose_ca_inject_mod",
         )
 

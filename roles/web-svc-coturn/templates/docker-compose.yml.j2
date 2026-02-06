@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   nginx:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     image: nginx:alpine
@@ -65,7 +65,7 @@
       timeout: 5s
       retries: 3
       start_period: 10s
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

@@ -64,7 +64,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/docker/",
+            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)
@@ -125,7 +125,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/docker/",
+            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)
@@ -152,7 +152,7 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["container"], "foo-database")
         self.assertEqual(out["password"], "pw")
         self.assertEqual(out["port"], "5432")
-        self.assertEqual(out["env"], "/opt/docker/foo/.env/postgres.env")
+        self.assertEqual(out["env"], "/opt/compose/foo/.env/postgres.env")
         self.assertEqual(out["url_jdbc"], "jdbc:postgresql://database:5432/foo")
         self.assertEqual(out["url_full"], "postgres://foo:pw@database:5432/foo")
         self.assertEqual(out["volume"], "foo_database")
@@ -187,7 +187,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/docker/",
+            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)
@@ -246,7 +246,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/docker/",
+            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)
@@ -267,7 +267,7 @@ class DatabaseLookupTests(unittest.TestCase):
         self.assertEqual(out["type"], "mariadb")
         self.assertEqual(out["host"], "database")
         self.assertEqual(out["port"], "3306")
-        self.assertEqual(out["env"], "/opt/docker/foo/.env/mariadb.env")
+        self.assertEqual(out["env"], "/opt/compose/foo/.env/mariadb.env")
         self.assertEqual(out["url_jdbc"], "jdbc:mariadb://database:3306/foo")
         self.assertEqual(out["url_full"], "mariadb://foo:pw@database:3306/foo")
 
@@ -298,7 +298,7 @@ class DatabaseLookupTests(unittest.TestCase):
         vars_ = {
             "applications": applications,
             "ports": ports,
-            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/docker/",
+            "PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/",
         }
 
         lookup = self._make_lookup(vars_)

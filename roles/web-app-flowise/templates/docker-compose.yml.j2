@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   litellm:
 {% set service_name = 'litellm' %}
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -40,7 +40,7 @@
       - flowise_data:/root/.flowise
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

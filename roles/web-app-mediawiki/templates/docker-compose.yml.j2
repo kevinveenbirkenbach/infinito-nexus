@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   {{ entity_name }}:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
@@ -20,4 +20,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'extensions': {'name': MEDIAWIKI_VOLUME_EXTENSIONS}, 'images': {'name': MEDIAWIKI_VOLUME_IMAGES}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

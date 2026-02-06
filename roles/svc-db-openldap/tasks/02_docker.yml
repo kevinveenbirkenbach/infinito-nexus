@@ -1,6 +1,6 @@
-- name: "include docker-compose role"
+- name: "include sys-svc-compose role"
   include_role:
-    name: docker-compose
+    name: sys-svc-compose
   vars:
     docker_compose_flush_handlers:  false
     docker_git_repository_pull:     false

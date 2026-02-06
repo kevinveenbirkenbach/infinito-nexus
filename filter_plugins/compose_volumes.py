@@ -55,7 +55,7 @@ def compose_volumes(
     """
     Builds the top-level `volumes:` section for docker-compose.
 
-    Logic is identical to roles/docker-compose/templates/volumes.yml.j2:
+    Logic is identical to roles/sys-svc-compose/templates/volumes.yml.j2:
 
       - database volume if:
           is_docker_service_enabled(database)

@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   {{ entity_name }}:
     container_name: {{ entity_name }}
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
@@ -7,4 +7,4 @@
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8080
 {% include 'roles/docker-container/templates/base.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

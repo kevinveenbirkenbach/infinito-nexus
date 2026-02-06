@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   onlyoffice:
     {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -18,7 +18,7 @@
       - rabbitmqdata:/var/lib/rabbitmq
 {% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

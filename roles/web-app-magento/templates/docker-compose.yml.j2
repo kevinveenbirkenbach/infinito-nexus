@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   nginx:
 {% set container_port = 8000 %}
     image: "{{ MAGENTO_NGINX_IMAGE }}:{{ MAGENTO_NGINX_VERSION }}"
@@ -48,5 +48,5 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'data': {'name': MAGENTO_VOLUME}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 

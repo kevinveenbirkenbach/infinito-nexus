@@ -1,6 +1,6 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Provisions a local Root CA (self-signed, CA:TRUE) for trusting internal TLS endpoints. Produces /etc/infinito.nexus/ca/root-ca.crt for docker-compose-ca injection.
+  description: Provisions a local Root CA (self-signed, CA:TRUE) for trusting internal TLS endpoints. Produces /etc/infinito.nexus/ca/root-ca.crt for sys-svc-compose-ca injection.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: "Kevin Veen-Birkenbach Consulting & Coaching Solutions https://www.veen.world"

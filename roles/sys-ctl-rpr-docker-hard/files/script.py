@@ -39,7 +39,7 @@ def hard_restart_docker_services(dir_path: str) -> None:
     except FileNotFoundError:
         print(
             f"Error: required wrapper not found at {compose}. "
-            "Install it via the docker-compose role first.",
+            "Install it via the sys-svc-compose role first.",
             file=sys.stderr,
         )
         sys.exit(2)

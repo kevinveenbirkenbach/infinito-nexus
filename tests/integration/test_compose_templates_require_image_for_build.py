@@ -1,7 +1,7 @@
 # tests/integration/test_compose_templates_require_image_for_build.py
 #
 # Integration test:
-# Ensures that every docker-compose template/file that contains a `build:` mapping
+# Ensures that every sys-svc-compose template/file that contains a `build:` mapping
 # also contains an `image:` key on the same indentation level (same YAML mapping level).
 #
 # Checked files:
@@ -180,7 +180,7 @@ class TestComposeBuildRequiresImage(unittest.TestCase):
         if all_findings:
             # Pretty error output
             msg_lines = [
-                "Some docker-compose templates/files contain a `build:` key but are missing an `image:` key "
+                "Some sys-svc-compose templates/files contain a `build:` key but are missing an `image:` key "
                 "at the same indentation level (same YAML mapping level).",
                 "",
                 "Offenders:",

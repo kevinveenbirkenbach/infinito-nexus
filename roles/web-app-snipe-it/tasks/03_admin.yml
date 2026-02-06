@@ -5,9 +5,9 @@
       - docker
       - compose
       - -f
-      - /opt/docker/snipe-it/docker-compose.yml
+      - /opt/compose/snipe-it/docker-compose.yml
       - -f
-      - /opt/docker/snipe-it/docker-compose.ca.override.yml
+      - /opt/compose/snipe-it/docker-compose.ca.override.yml
       - exec
       - -T
       - -e

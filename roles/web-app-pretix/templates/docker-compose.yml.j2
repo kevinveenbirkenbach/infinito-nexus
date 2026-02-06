@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   application:
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ PRETIX_IMAGE_CUSTOM }}"
@@ -20,4 +20,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'config': {'name': PRETIX_CONFIG_VOLUME}, 'data': {'name': PRETIX_DATA_VOLUME}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

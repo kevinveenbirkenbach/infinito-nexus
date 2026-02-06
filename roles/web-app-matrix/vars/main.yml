@@ -13,7 +13,6 @@ MATRIX_SERVER_NAME:                   "{{ applications | get_app_conf(applicatio
 MATRIX_ADMINISTRATOR_USERNAME:        "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
 MATRIX_WELL_KNOWN_DIRECTORY:          "{{ [ lookup('nginx_paths', want='directories.data.well_known'), 'matrix' ] | path_join }}"
 MATRIX_WELL_KNOWN_FILE:               "{{ MATRIX_WELL_KNOWN_DIRECTORY }}server"
-MATRIX_PROJECT:                       "{{ application_id | get_entity_name }}"
 MATRIX_REGISTRATION_FILE_FOLDER:      "/data/"
 MATRIX_REGISTRATION_SHARED_SECRET:    "{{ applications | get_app_conf(application_id, 'credentials.registration_shared_secret') }}"
 MATRIX_FEDERATION_PORT:               "{{ ports.public.federation['web-app-matrix_synapse'] }}"

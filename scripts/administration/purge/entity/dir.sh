@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Removes stack directory and its volumes dir:
-#   /opt/docker/<STACK>/volumes
-#   /opt/docker/<STACK>
+#   /opt/compose/<STACK>/volumes
+#   /opt/compose/<STACK>
 #
 # Usage:
 #   ./purge/entity/dir.sh <STACK1> [STACK2] [...]
@@ -22,7 +22,7 @@ for STACK_NAME in "$@"; do
 (
   set -euo pipefail
 
-  STACK_DIR="/opt/docker/${STACK_NAME}"
+  STACK_DIR="/opt/compose/${STACK_NAME}"
 
   if [[ ! -d "${STACK_DIR}" ]]; then
     warn "Stack dir not found for '${STACK_NAME}' (${STACK_DIR}) — skipping filesystem cleanup"

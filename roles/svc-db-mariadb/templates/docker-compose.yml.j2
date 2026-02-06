@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   mariadb:
     container_name:   "{{ MARIADB_NAME }}"
@@ -28,4 +28,4 @@
     application_id,
     extra_volumes={'data': {'name': MARIADB_VOLUME}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

@@ -29,9 +29,9 @@
     public: false
   when: SYS_STK_BACKEND_DATABASE_ENABLED | bool
 
-- name: "For '{{ application_id }}': Load docker-compose"
+- name: "For '{{ application_id }}': Load sys-svc-compose"
   include_role:
-    name: docker-compose
+    name: sys-svc-compose
   vars:
     docker_compose_flush_handlers:  false
     database_consumer_id:           "{{ database_consumer_id_passed }}"

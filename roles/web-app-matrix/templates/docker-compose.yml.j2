@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   synapse:
 {% set container_port = 8008 %}
     image: "{{ MATRIX_SYNAPSE_IMAGE }}:{{ MATRIX_SYNAPSE_VERSION }}"
@@ -106,4 +106,4 @@
     extra_volumes=_extra_volumes
 ) }}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

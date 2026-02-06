@@ -28,21 +28,21 @@ class TestLookupDocker(unittest.TestCase):
 
     def setUp(self):
         self.lookup = self.LookupModule()
-        self.vars_ok = {"PATH_DOCKER_COMPOSE_INSTANCES": "/opt/docker/"}
+        self.vars_ok = {"PATH_DOCKER_COMPOSE_INSTANCES": "/opt/compose/"}
 
         self.fake_paths = {
             "directories": {
-                "instance": "/opt/docker/app/",
-                "env": "/opt/docker/app/.env/",
-                "services": "/opt/docker/app/services/",
-                "volumes": "/opt/docker/app/volumes/",
-                "config": "/opt/docker/app/config/",
+                "instance": "/opt/compose/app/",
+                "env": "/opt/compose/app/.env/",
+                "services": "/opt/compose/app/services/",
+                "volumes": "/opt/compose/app/volumes/",
+                "config": "/opt/compose/app/config/",
             },
             "files": {
-                "env": "/opt/docker/app/.env/app.env",
-                "docker_compose": "/opt/docker/app/docker-compose.yml",
-                "docker_compose_override": "/opt/docker/app/docker-compose.override.yml",
-                "dockerfile": "/opt/docker/app/Dockerfile",
+                "env": "/opt/compose/app/.env/app.env",
+                "docker_compose": "/opt/compose/app/docker-compose.yml",
+                "docker_compose_override": "/opt/compose/app/docker-compose.override.yml",
+                "dockerfile": "/opt/compose/app/Dockerfile",
             },
         }
 
@@ -52,7 +52,7 @@ class TestLookupDocker(unittest.TestCase):
         ) as p:
             out = self.lookup.run(["web-app-mailu"], variables=self.vars_ok)
             self.assertEqual(out, [self.fake_paths])
-            p.assert_called_once_with("web-app-mailu", "/opt/docker/")
+            p.assert_called_once_with("web-app-mailu", "/opt/compose/")
 
     def test_returns_subdict_for_top_level_key(self):
         with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):
@@ -69,12 +69,12 @@ class TestLookupDocker(unittest.TestCase):
             out = self.lookup.run(
                 ["web-app-mailu", "directories.instance"], variables=self.vars_ok
             )
-            self.assertEqual(out, ["/opt/docker/app/"])
+            self.assertEqual(out, ["/opt/compose/app/"])
 
             out = self.lookup.run(
                 ["web-app-mailu", "files.env"], variables=self.vars_ok
             )
-            self.assertEqual(out, ["/opt/docker/app/.env/app.env"])
+            self.assertEqual(out, ["/opt/compose/app/.env/app.env"])
 
     def test_invalid_path_raises(self):
         with patch.object(self.mod, "get_docker_paths", return_value=self.fake_paths):

@@ -1,9 +1,9 @@
 - include_tasks: 01_core.yml
-  when: run_once_docker_compose is not defined
+  when: run_once_sys_svc_compose is not defined
 
-# This could lead to problems in docker-compose directories which are based on a git repository
+# This could lead to problems in sys-svc-compose directories which are based on a git repository
 # @todo Verify that this isn't the case. E.g. in accounting
-- name: "Create all docker-compose directories (including parent directories) for '{{ application_id }}'"
+- name: "Create all sys-svc-compose directories (including parent directories) for '{{ application_id }}'"
   file:
     path: "{{ item.value }}"
     state: directory
@@ -19,7 +19,7 @@
 
 - name: "Ensure CA trust assets are installed (only when needed)"
   ansible.builtin.include_role:
-    name: docker-compose-ca
+    name: sys-svc-compose-ca
   when:
     - domains | has_domain(application_id)
     - lookup('tls_resolve', application_id, want='enabled') | bool

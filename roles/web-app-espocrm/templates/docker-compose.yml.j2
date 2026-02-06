@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
 {% set service_name = ESPOCRM_SERVICE %}
   {{ service_name }}:
@@ -70,4 +70,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'data': {'name': ESPOCRM_DATA_VOLUME}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   confluence:
     {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ CONFLUENCE_CUSTOM_IMAGE }}"
@@ -18,4 +18,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'data': {'name': CONFLUENCE_DATA_VOLUME}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

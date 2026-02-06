@@ -84,7 +84,7 @@ SYS_SVC_DOCKER_DNS_TEST_NODE_IMAGE: "ghcr.io/kevinveenbirkenbach/mirror/node:20-
 # Uncomment the following lines to speed up debugging:
 
 # # Performance:
-# run_once_docker_compose:    true
+# run_once_sys_svc_compose:    true
 # run_once_svc_prx_openresty: true
 # run_once_sys_svc_webserver: true
 

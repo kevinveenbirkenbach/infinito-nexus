@@ -13,9 +13,9 @@
       events {}
       http { server { listen 8080; return 200; } }
 
-- name: "For '{{ application_id }}': Load docker-compose"
+- name: "For '{{ application_id }}': Load sys-svc-compose"
   include_role:
-    name: docker-compose
+    name: sys-svc-compose
   vars:
     docker_git_repository_pull:     false # Deactivated here to deactivate inhirement
     docker_compose_flush_handlers:  true

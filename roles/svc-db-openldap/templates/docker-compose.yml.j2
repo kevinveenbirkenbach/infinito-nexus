@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   {{ OPENLDAP_SERVICE }}:
     # Build local custom image (no Bitnami)
@@ -28,4 +28,4 @@
     extra_volumes={'config': {'name': OPENLDAP_VOLUME ~ '_config'}, 'data': {'name': OPENLDAP_VOLUME}}
 ) }}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

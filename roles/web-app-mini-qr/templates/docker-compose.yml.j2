@@ -1,5 +1,5 @@
 ---
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 {% set container_port = 8080 %}  
   {{ application_id | get_entity_name }}:
 {% include 'roles/docker-container/templates/base.yml.j2' %}
@@ -9,4 +9,4 @@
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}
 {% include 'roles/docker-container/templates/networks.yml.j2' %}
 
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

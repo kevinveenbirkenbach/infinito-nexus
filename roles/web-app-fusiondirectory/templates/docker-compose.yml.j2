@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   fusiondirectory:
     image: tiredofit/fusiondirectory:latest
     container_name: fusiondirectory
@@ -28,4 +28,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'fusiondirectory_data': {}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

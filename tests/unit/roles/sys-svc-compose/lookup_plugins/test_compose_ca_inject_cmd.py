@@ -60,7 +60,7 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.mod = _load_module(
-            "roles/docker-compose/lookup_plugins/compose_ca_inject_cmd.py",
+            "roles/sys-svc-compose/lookup_plugins/compose_ca_inject_cmd.py",
             "compose_ca_inject_cmd",
         )
 
@@ -203,9 +203,9 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
         lk = self._mk_lookup_module()
 
         docker_map = {
-            "directories.instance": "/opt/docker/app",
+            "directories.instance": "/opt/compose/app",
             "files.env": ".env",
-            "files.docker_compose_ca_override": "/opt/docker/app/docker-compose.ca.override.yml",
+            "files.docker_compose_ca_override": "/opt/compose/app/docker-compose.ca.override.yml",
         }
 
         compose_f_args = _FakeComposeFArgsLookup("-f docker-compose.yml")

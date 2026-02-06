@@ -2,7 +2,7 @@
 # Orchestrates entity purge:
 #   1) DB purge (drop or truncate)
 #   2) docker compose down -v
-#   3) remove /opt/docker/<STACK>/volumes and /opt/docker/<STACK>
+#   3) remove /opt/compose/<STACK>/volumes and /opt/compose/<STACK>
 #
 # Usage:
 #   ./purge/entity/all.sh [--wipe-data-only] [--db-only] <STACK1> [STACK2] [...]

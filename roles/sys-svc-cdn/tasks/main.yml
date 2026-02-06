@@ -16,7 +16,7 @@
   ansible.builtin.include_tasks: "tasks/utils/load_handlers.yml"
   loop:
   - svc-prx-openresty
-  - docker-compose
+  - sys-svc-compose
   loop_control:
     label: "{{ item }}"
   vars:

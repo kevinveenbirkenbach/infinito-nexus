@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   application:
     container_name: {{ application_id }}
@@ -14,4 +14,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'data': {}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

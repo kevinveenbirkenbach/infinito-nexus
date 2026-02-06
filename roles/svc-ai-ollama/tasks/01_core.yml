@@ -1,6 +1,6 @@
 
 - name: "Setup docker network for {{ application_id }}"
-  include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
     docker_network_name:            "{{ OLLAMA_NETWORK }}"
     docker_network_subnet:          "{{ networks.local[application_id].subnet }}"

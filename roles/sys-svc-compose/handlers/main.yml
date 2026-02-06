@@ -19,7 +19,7 @@
 - name: docker compose pull
   ansible.builtin.script:
     cmd: >-
-      compose_pull.py
+      pull.py
       --chdir {{ lookup('docker', application_id, 'directories.instance') }}
       --project {{ application_id | get_entity_name }}
       --compose-files {{ lookup('compose_f_args', application_id, include_ca=False) | quote }}
@@ -30,8 +30,8 @@
       --sleep 20
       --sleep-cap 240
       --ignore-buildable
-  register: compose_pull
-  changed_when: "'pulled' in compose_pull.stdout"
+  register: pull
+  changed_when: "'pulled' in pull.stdout"
   environment:
     COMPOSE_HTTP_TIMEOUT: "600"
     DOCKER_CLIENT_TIMEOUT: "600"

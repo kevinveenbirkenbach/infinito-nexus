@@ -3,7 +3,7 @@
 PATH_ADMINISTRATOR_HOME:            "/home/administrator/"
 PATH_ROOT_SCRIPTS:                  "/opt/scripts/"
 PATH_SYSTEMCTL_SCRIPTS:             "{{ [ PATH_ROOT_SCRIPTS, 'systemctl' ] | path_join }}"
-PATH_DOCKER_COMPOSE_INSTANCES:      "/opt/docker/"
+PATH_DOCKER_COMPOSE_INSTANCES:      "/opt/compose/"
 PATH_SYSTEM_SERVICE_DIR:            "/etc/systemd/system"
 PATH_DOCKER_COMPOSE_PULL_LOCK_DIR:  "/run/ansible/compose-pull/"
 

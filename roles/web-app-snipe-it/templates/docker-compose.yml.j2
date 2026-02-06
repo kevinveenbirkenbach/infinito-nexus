@@ -1,4 +1,4 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   {{ SNIPE_IT_SERVICE }}:
 {% set container_port = 80 %}
@@ -29,4 +29,4 @@
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'data': {'name': SNIPE_IT_VOLUME}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

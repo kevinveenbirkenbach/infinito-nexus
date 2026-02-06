@@ -12,7 +12,7 @@ x-environment: &shopware
   working_dir: {{ SHOPWARE_ROOT }}
   pull_policy: never
 
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
 # -------------------------
 # INIT (runs once per deployment)
@@ -130,4 +130,4 @@ x-environment: &shopware
     database_volume=lookup('database', application_id, want='volume'),
     extra_volumes={'bundles': {'name': entity_name ~ '_bundles'}, 'data': {'name': SHOPWARE_VOLUME}, 'files': {'name': entity_name ~ '_files'}, 'media': {'name': entity_name ~ '_media'}, 'sitemap': {'name': entity_name ~ '_sitemap'}, 'theme': {'name': entity_name ~ '_theme'}, 'thumbnail': {'name': entity_name ~ '_thumbnail'}}
 ) }}
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
