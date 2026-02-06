@@ -5,7 +5,7 @@ entity_name:                    "{{ application_id | get_entity_name }}"
 # Docker
 container_port:                 "{{ applications | get_app_conf(application_id, 'docker.services.web.port') }}"
 
-SHOPWARE_DOMAIN:                "{{ domains | get_domain(application_id) }}"
+SHOPWARE_DOMAIN:                "{{ lookup('domain',application_id) }}"
 
 # Shopware container/image vars
 SHOPWARE_CONTAINER_VERSION:     "{{ applications | get_app_conf(application_id, 'docker.services.' ~ entity_name ~ '.version') }}"

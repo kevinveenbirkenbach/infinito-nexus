@@ -6,7 +6,7 @@
 
 - name: Wait for Discourse API
   wait_for:
-    host: "{{ domains | get_domain('web-app-discourse') }}"
+    host: "{{ lookup('domain','web-app-discourse') }}"
     port: 80
     delay: 5
     timeout: 600

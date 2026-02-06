@@ -16,7 +16,7 @@
         - CMD-SHELL
         - >
           if [ ! -f /tmp/email_sent ]; then
-            echo 'Subject: testmessage from {{ domains | get_domain(application_id) }}\n\nSUCCESSFULL' | msmtp -t {{ users.blackhole.email }} && touch /tmp/email_sent;
+            echo 'Subject: testmessage from {{ lookup("domain",application_id) }}\n\nSUCCESSFULL' | msmtp -t {{ users.blackhole.email }} && touch /tmp/email_sent;
           fi &&
           curl -f http://localhost:80/ || exit 1
       interval: 1m

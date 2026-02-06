@@ -1,7 +1,7 @@
 # General
 application_id:                 "web-app-pretix"
 container_port:                 80
-container_hostname:             "{{ domains | get_domain(application_id) }}"
+container_hostname:             "{{ lookup('domain',application_id) }}"
 
 # Pretix
 

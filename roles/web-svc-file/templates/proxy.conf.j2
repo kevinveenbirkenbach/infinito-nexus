@@ -1,6 +1,6 @@
 server
 {
-  server_name {{ domains | get_domain(application_id) }};
+  server_name {{ lookup('domain',application_id) }};
   
   {% include 'roles/sys-front-tls/templates/nginx_ssl_header.j2' %}
 

@@ -27,7 +27,7 @@
   with_first_found: "{{ nginx_template_candidates }}"
 
 - block:
-    - name: "Check if {{ domains | get_domain(application_id) }} is reachable (only if config unchanged)"
+    - name: "Check if {{ lookup('domain',application_id) }} is reachable (only if config unchanged)"
       ansible.builtin.uri:
         url: "{{ lookup('tls', application_id, 'url.base') }}"
       register: site_check

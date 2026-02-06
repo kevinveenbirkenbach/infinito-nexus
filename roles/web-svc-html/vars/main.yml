@@ -1,2 +1,2 @@
 application_id: "web-svc-html"
-domain:         "{{ domains | get_domain(application_id) }}"
+domain:         "{{ lookup('domain',application_id) }}"

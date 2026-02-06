@@ -5,11 +5,11 @@
         (
           not (applications | get_app_conf(item.key, 'docker.services.desktop.enabled', false, false) | bool)
         )
-        or (domains | get_domain(item.key)).endswith(domains | get_domain('web-app-desktop'))
+        or (lookup('domain',item.key)).endswith(lookup('domain','web-app-desktop'))
     fail_msg: >
       Application {{ item.key }}
-      has domain {{ domains | get_domain(item.key) }}
-      but it does not end with {{ domains | get_domain('web-app-desktop') }}!
+      has domain {{ lookup('domain',item.key) }}
+      but it does not end with {{ lookup('domain','web-app-desktop') }}!
   loop: "{{ applications
              | dict2items
              | selectattr('key', 'match', '^(web-app-|web-svc-)')

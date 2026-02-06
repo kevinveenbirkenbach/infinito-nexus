@@ -10,7 +10,7 @@ database_password:                  "{{ applications | get_app_conf(application_
 # Nextcloud 
 
 ## General 
-NEXTCLOUD_DOMAIN:                   "{{ domains | get_domain(application_id) }}"
+NEXTCLOUD_DOMAIN:                   "{{ lookup('domain',application_id) }}"
 NEXTCLOUD_PORT:                     "{{ ports.localhost.http[application_id] }}"
 NEXTCLOUD_URL:                      "{{ lookup('tls', application_id, 'url.base') }}"
 NEXTCLOUD_PROTOCOL:                 "{{ lookup('tls', application_id, 'protocols.web') }}"
@@ -104,7 +104,7 @@ NEXTCLOUD_HPB_TURN_STANDALONE_ROLE:          'web-svc-coturn'
 NEXTCLOUD_HPB_TURN_STANDALONE_PORT:          "{{ ports.public.stun_turn[NEXTCLOUD_HPB_TURN_STANDALONE_ROLE] }}"
 NEXTCLOUD_HPB_TURN_STANDALONE_SECRET:        "{{ applications | get_app_conf(NEXTCLOUD_HPB_TURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
 NEXTCLOUD_HPB_TURN_STANDALONE_ENABLED:       "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.standalone_enabled') if NEXTCLOUD_HPB_PLUGIN_ENABLED else false }}"
-NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN:        "{{ domains | get_domain(NEXTCLOUD_HPB_TURN_STANDALONE_ROLE) }}"
+NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN:        "{{ lookup('domain',NEXTCLOUD_HPB_TURN_STANDALONE_ROLE) }}"
 NEXTCLOUD_HPB_STUN_STANDALONE_CONFIG:        "{{ NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN }}:{{ NEXTCLOUD_HPB_TURN_STANDALONE_PORT }}"
 NEXTCLOUD_HPB_TURN_STANDALONE_CONFIG: >-
   {{

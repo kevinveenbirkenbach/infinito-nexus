@@ -63,9 +63,9 @@
     name: sys-dns-cloudflare-records
   vars:
     cloudflare_records:
-      - zone:     "{{ domains | get_domain(application_id) | to_zone }}"
+      - zone:     "{{ lookup('domain',application_id) | to_zone }}"
         type:     A
-        name:    "{{ domains | get_domain(application_id) }}"
+        name:    "{{ lookup('domain',application_id) }}"
         content: "{{ networks.internet.ip4 }}"
         proxied: false  # Necessary for SSH port
   when: DNS_PROVIDER == 'cloudflare'

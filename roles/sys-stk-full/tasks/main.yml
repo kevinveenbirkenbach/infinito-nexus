@@ -3,7 +3,7 @@
   include_role:
     name: sys-stk-front-proxy
   vars:
-    domain:     "{{ domains | get_domain(application_id) }}"
+    domain:     "{{ lookup('domain',application_id) }}"
     http_port:  "{{ ports.localhost.http[application_id] }}"
 
 - name: "For '{{ application_id }}': load docker and db"

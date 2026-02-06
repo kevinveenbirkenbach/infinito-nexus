@@ -12,7 +12,7 @@ SYSTEM_EMAIL_ENVIRONMENT: >-
 
 # Server
 SYSTEM_EMAIL_DOMAIN:          "{{ DOMAIN_PRIMARY }}"
-SYSTEM_EMAIL_HOST:            "{{ (SYSTEM_EMAIL_ENVIRONMENT in ['external_container','localhost','localhost_container']) | ternary('localhost',(domains | get_domain('web-app-mailu'))) }}"
+SYSTEM_EMAIL_HOST:            "{{ (SYSTEM_EMAIL_ENVIRONMENT in ['external_container','localhost','localhost_container']) | ternary('localhost',(lookup('domain','web-app-mailu'))) }}"
 SYSTEM_EMAIL_PORT:            "{{ (SYSTEM_EMAIL_EXTERNAL | bool and SYSTEM_EMAIL_TLS | bool) | ternary(465,25) }}"
 SYSTEM_EMAIL_TLS:             "{{ (SYSTEM_EMAIL_EXTERNAL | bool) | ternary(TLS_ENABLED,false) }}"
 SYSTEM_EMAIL_AUTH:            "{{ (SYSTEM_EMAIL_ENVIRONMENT in ['external_container','localhost']) | ternary(false,SYSTEM_EMAIL_TLS) }}"

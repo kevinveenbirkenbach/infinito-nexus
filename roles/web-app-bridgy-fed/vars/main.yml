@@ -5,7 +5,7 @@ application_id:       "web-app-bridgy-fed"
 container_port:       8080
 domain:               "{{ container_hostname }}"
 http_port:            "{{ ports.localhost.http[application_id] }}"
-container_hostname:   "{{ domains | get_domain(application_id) }}"
+container_hostname:   "{{ lookup('domain',application_id) }}"
 
 # App container
 BRIDGY_CONTAINER:     "{{ applications | get_app_conf(application_id, 'docker.services.application.name') }}"

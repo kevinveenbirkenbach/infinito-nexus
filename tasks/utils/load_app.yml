@@ -16,4 +16,4 @@
     public: false
   vars:
     application_id: "{{ _load_app_id }}"
-    domain:         "{{ domains | get_domain(load_app_id) }}"
+    domain:         "{{ lookup('domain',load_app_id) }}"

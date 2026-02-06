@@ -2,16 +2,16 @@
 - name: Initialize docker
   include_tasks: 02_docker.yml
 
-- name: Create {{ domains | get_domain(application_id) }}.conf if LDAP is exposed to internet
+- name: Create {{ lookup('domain',application_id) }}.conf if LDAP is exposed to internet
   template:
     src: "nginx.stream.conf.j2"
-    dest: "{{ lookup('nginx','directories.configuration.streams') }}{{ domains | get_domain(application_id) }}.conf"
+    dest: "{{ lookup('nginx','directories.configuration.streams') }}{{ lookup('domain',application_id) }}.conf"
   notify: restart openresty
   when: OPENLDAP_NETWORK_SWITCH_PUBLIC | bool
 
-- name: Remove {{ domains | get_domain(application_id) }}.conf if LDAP is not exposed to internet
+- name: Remove {{ lookup('domain',application_id) }}.conf if LDAP is not exposed to internet
   file:
-    path: "{{ lookup('nginx','directories.configuration.streams') }}{{ domains | get_domain(application_id) }}.conf"
+    path: "{{ lookup('nginx','directories.configuration.streams') }}{{ lookup('domain',application_id) }}.conf"
     state: absent
   when: not OPENLDAP_NETWORK_SWITCH_PUBLIC | bool
 

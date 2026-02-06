@@ -72,7 +72,7 @@ roles/<application_id>/tests/cypress/
 
 Inside `env.j2` you can resolve the application domain via:
 
-- `{{ domains | get_domain(application_id) }}`
+- `{{ lookup('domain',application_id) }}`
 
 ---
 

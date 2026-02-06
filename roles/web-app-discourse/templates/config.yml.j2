@@ -46,7 +46,7 @@ env:
   UNICORN_WORKERS: 8
 
   ## Required. Discourse will not work with a bare IP number.
-  DISCOURSE_HOSTNAME: {{ domains | get_domain(application_id) }}
+  DISCOURSE_HOSTNAME: {{ lookup('domain',application_id) }}
 
   ## Uncomment if you want the container to be started with the same
   ## hostname (-h option) as specified above (default "$hostname-$config")
@@ -96,7 +96,7 @@ env:
 
 {% if DISCOURSE_TLS_SELFSIGNED_ENABLED | bool %}
   CA_TRUST_CERT: {{ CA_ROOT.cert_host }}
-  CA_TRUST_NAME: {{ domains | get_domain(application_id) }}
+  CA_TRUST_NAME: {{ lookup('domain',application_id) }}
 {% endif %}
 
 ## The Docker container is stateless; all data is stored in /shared
