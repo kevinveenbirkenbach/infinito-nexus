@@ -2,7 +2,7 @@
     "policies": {
       "Extensions": {
         "Install": [
-          {% for plugin in applications | get_app_conf(application_id, 'plugins', True) -%}
+          {% for plugin in applications | get_app_conf(application_id, 'plugins') -%}
             "{{ plugin }}"{% if not loop.last %},{% endif %}
           {% endfor %}
         ]

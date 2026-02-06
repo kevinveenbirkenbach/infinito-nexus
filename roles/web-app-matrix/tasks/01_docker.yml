@@ -104,7 +104,7 @@
     cmd: "{{ BIN_COMPOSE }} exec -it synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME }} -p {{ applications | get_app_conf(application_id, 'credentials.administrator_password') }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   ignore_errors: true
-  when: applications | get_app_conf(application_id, 'setup', True) | bool
+  when: applications | get_app_conf(application_id, 'setup') | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
@@ -113,7 +113,7 @@
     cmd: "{{ BIN_COMPOSE }} exec -it synapse register_new_matrix_user -u chatgptbot -p {{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password')}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   ignore_errors: true
-  when: applications | get_app_conf(application_id, 'setup', True) | bool
+  when: applications | get_app_conf(application_id, 'setup') | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 

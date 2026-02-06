@@ -1443,7 +1443,7 @@
     "microprofile-jwt",
     "organization",
     "{{ KEYCLOAK_RBAC_GROUP_CLAIM }}",
-    "{{ applications | get_app_conf(application_id, 'scopes.nextcloud', True) }}"
+    "{{ applications | get_app_conf(application_id, 'scopes.nextcloud') }}"
   ],
   "browserSecurityHeaders": {
     "contentSecurityPolicyReportOnly": "",
