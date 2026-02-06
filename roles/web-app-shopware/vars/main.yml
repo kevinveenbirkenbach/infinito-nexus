@@ -3,47 +3,47 @@ application_id:                 "web-app-shopware"
 entity_name:                    "{{ application_id | get_entity_name }}"
 
 # Docker
-container_port:                 "{{ lookup('config',application_id, 'docker.services.web.port') }}"
+container_port:                 "{{ lookup('config', application_id, 'docker.services.web.port') }}"
 
 SHOPWARE_DOMAIN:                "{{ lookup('domain',application_id) }}"
 
 # Shopware container/image vars
-SHOPWARE_CONTAINER_VERSION:     "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
-SHOPWARE_CONTAINER_IMAGE:       "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
-SHOPWARE_PKG_VERSION:           "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.package.version') }}"
-SHOPWARE_PKG_NAME:              "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.package.name') }}"
+SHOPWARE_CONTAINER_VERSION:     "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+SHOPWARE_CONTAINER_IMAGE:       "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+SHOPWARE_PKG_VERSION:           "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.package.version') }}"
+SHOPWARE_PKG_NAME:              "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.package.name') }}"
 SHOPWARE_CUSTOM_IMAGE:          "{{ entity_name }}_custom:{{ SHOPWARE_PKG_VERSION }}"
-SHOPWARE_VOLUME:                "{{ lookup('config',application_id, 'docker.volumes.data') }}"
+SHOPWARE_VOLUME:                "{{ lookup('config', application_id, 'docker.volumes.data') }}"
 SHOPWARE_USER:                  "www-data"
 SHOPWARE_ROOT:                  "/var/www/html"
 
-SHOPWARE_PHP_VERSION:           "{{ lookup('config',application_id, 'docker.services.php.version') }}"
-SHOPWARE_PHP_IMAGE:             "{{ lookup('config',application_id, 'docker.services.php.image') }}"
+SHOPWARE_PHP_VERSION:           "{{ lookup('config', application_id, 'docker.services.php.version') }}"
+SHOPWARE_PHP_IMAGE:             "{{ lookup('config', application_id, 'docker.services.php.image') }}"
 
 # Split service container names
-SHOPWARE_INIT_CONTAINER:        "{{ lookup('config',application_id, 'docker.services.init.name') }}"
-SHOPWARE_WEB_CONTAINER:         "{{ lookup('config',application_id, 'docker.services.web.name') }}"
-SHOPWARE_WORKER_CONTAINER:      "{{ lookup('config',application_id, 'docker.services.worker.name') }}"
-SHOPWARE_SCHED_CONTAINER:       "{{ lookup('config',application_id, 'docker.services.scheduler.name') }}"
+SHOPWARE_INIT_CONTAINER:        "{{ lookup('config', application_id, 'docker.services.init.name') }}"
+SHOPWARE_WEB_CONTAINER:         "{{ lookup('config', application_id, 'docker.services.web.name') }}"
+SHOPWARE_WORKER_CONTAINER:      "{{ lookup('config', application_id, 'docker.services.worker.name') }}"
+SHOPWARE_SCHED_CONTAINER:       "{{ lookup('config', application_id, 'docker.services.scheduler.name') }}"
 SHOPWARE_INIT_HOST:             "{{ [ lookup('docker', application_id, 'directories.volumes'), 'init.sh' ] | path_join }}"
 SHOPWARE_INIT_DOCKER:           "/usr/local/bin/init.sh"
 SHOPWARE_FRAMEWORK_HOST:        "{{ [ lookup('docker', application_id, 'directories.config'), 'framework.yaml' ] | path_join }}"
 SHOPWARE_FRAMEWORK_DOCKER:      "/var/www/html/config/packages/framework.yaml"
 
 # Entrypoints & replicas
-SHOPWARE_WORKER_ENTRYPOINT:     "{{ lookup('config',application_id, 'docker.services.worker.entrypoint') }}"
-SHOPWARE_SCHED_ENTRYPOINT:      "{{ lookup('config',application_id, 'docker.services.scheduler.entrypoint') }}"
-SHOPWARE_WORKER_REPLICAS:       "{{ lookup('config',application_id, 'docker.services.worker.replicas') }}"
+SHOPWARE_WORKER_ENTRYPOINT:     "{{ lookup('config', application_id, 'docker.services.worker.entrypoint') }}"
+SHOPWARE_SCHED_ENTRYPOINT:      "{{ lookup('config', application_id, 'docker.services.scheduler.entrypoint') }}"
+SHOPWARE_WORKER_REPLICAS:       "{{ lookup('config', application_id, 'docker.services.worker.replicas') }}"
 
 # Redis Cache
-SHOPWARE_REDIS_ENABLED:               "{{ lookup('config',application_id, 'docker.services.redis.enabled') }}"
+SHOPWARE_REDIS_ENABLED:               "{{ lookup('config', application_id, 'docker.services.redis.enabled') }}"
 SHOPWARE_REDIS_ADDRESS:               "redis:6379"
 
 # Opensearch
 SHOPWARE_OPENSEARCH_PORT:                   "9200"
-SHOPWARE_OPENSEARCH_ENABLED:                "{{ lookup('config',application_id, 'docker.services.opensearch.enabled') }}"
-SHOPWARE_OPENSEARCH_IMAGE:                  "{{ lookup('config',application_id, 'docker.services.opensearch.image') }}"
-SHOPWARE_OPENSEARCH_VERSION:                "{{ lookup('config',application_id, 'docker.services.opensearch.version') }}"
-SHOPWARE_OPENSEARCH_CONTAINER:              "{{ lookup('config',application_id, 'docker.services.opensearch.name') }}"
-SHOPWARE_OPENSEARCH_MEM_RESERVATION:        "{{ lookup('config',application_id, 'docker.services.opensearch.mem_reservation') }}"
-SHOPWARE_OPENSEARCH_INITIAL_ADMIN_PASSWORD: "{{ lookup('config',application_id, 'credentials.opensearch_initial_admin_password') }}"
+SHOPWARE_OPENSEARCH_ENABLED:                "{{ lookup('config', application_id, 'docker.services.opensearch.enabled') }}"
+SHOPWARE_OPENSEARCH_IMAGE:                  "{{ lookup('config', application_id, 'docker.services.opensearch.image') }}"
+SHOPWARE_OPENSEARCH_VERSION:                "{{ lookup('config', application_id, 'docker.services.opensearch.version') }}"
+SHOPWARE_OPENSEARCH_CONTAINER:              "{{ lookup('config', application_id, 'docker.services.opensearch.name') }}"
+SHOPWARE_OPENSEARCH_MEM_RESERVATION:        "{{ lookup('config', application_id, 'docker.services.opensearch.mem_reservation') }}"
+SHOPWARE_OPENSEARCH_INITIAL_ADMIN_PASSWORD: "{{ lookup('config', application_id, 'credentials.opensearch_initial_admin_password') }}"

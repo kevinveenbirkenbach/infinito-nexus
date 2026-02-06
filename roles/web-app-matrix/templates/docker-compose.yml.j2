@@ -62,7 +62,7 @@
     volumes:
       - chatgpt_data:/storage
     environment:
-      OPENAI_API_KEY: "{{ lookup('config',application_id, 'credentials.chatgpt_bridge_openai_api_key')}}"
+      OPENAI_API_KEY: "{{ lookup('config', application_id, 'credentials.chatgpt_bridge_openai_api_key')}}"
       # Uncomment the next two lines if you are using Azure OpenAI API
       # OPENAI_AZURE: 'false'
       # CHATGPT_REVERSE_PROXY: 'your-completion-endpoint-here'
@@ -83,8 +83,8 @@
       KEYV_BOT_STORAGE: 'true'
       MATRIX_HOMESERVER_URL: '{{ MATRIX_SYNAPSE_URL }}'
       MATRIX_BOT_USERNAME: '@chatgptbot:{{ MATRIX_SERVER_NAME }}'
-      MATRIX_ACCESS_TOKEN: "{{ lookup('config',application_id, 'credentials.chatgpt_bridge_access_token') | default('') }}"
-      MATRIX_BOT_PASSWORD: "{{ lookup('config',application_id, 'credentials.chatgpt_bridge_user_password') }}"
+      MATRIX_ACCESS_TOKEN: "{{ lookup('config', application_id, 'credentials.chatgpt_bridge_access_token') | default('') }}"
+      MATRIX_BOT_PASSWORD: "{{ lookup('config', application_id, 'credentials.chatgpt_bridge_user_password') }}"
       MATRIX_DEFAULT_PREFIX: '!chatgpt'
       MATRIX_DEFAULT_PREFIX_REPLY: 'false'
       #MATRIX_BLACKLIST: ''

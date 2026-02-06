@@ -18,14 +18,14 @@ XWIKI_DOCK_DATA_DIR:                  "/usr/local/xwiki"
 
 ## Docker
 XWIKI_IMAGE_CUSTOM:                   "xwiki_custom"
-XWIKI_IMAGE:                          "{{ lookup('config',application_id, 'docker.services.xwiki.image') }}"
-XWIKI_VERSION:                        "{{ lookup('config',application_id, 'docker.services.xwiki.version') }}"
-XWIKI_CONTAINER:                      "{{ lookup('config',application_id, 'docker.services.xwiki.name') }}"
-XWIKI_DATA_VOLUME:                    "{{ lookup('config',application_id, 'docker.volumes.data') }}"
+XWIKI_IMAGE:                          "{{ lookup('config', application_id, 'docker.services.xwiki.image') }}"
+XWIKI_VERSION:                        "{{ lookup('config', application_id, 'docker.services.xwiki.version') }}"
+XWIKI_CONTAINER:                      "{{ lookup('config', application_id, 'docker.services.xwiki.name') }}"
+XWIKI_DATA_VOLUME:                    "{{ lookup('config', application_id, 'docker.volumes.data') }}"
 
 # Feature toggles (must be set in config/main.yml -> features)
-XWIKI_LDAP_ENABLED:                   "{{ lookup('config',application_id, 'docker.services.ldap.enabled') }}"
-XWIKI_OIDC_ENABLED:                   "{{ lookup('config',application_id, 'docker.services.oidc.enabled') }}"
+XWIKI_LDAP_ENABLED:                   "{{ lookup('config', application_id, 'docker.services.ldap.enabled') }}"
+XWIKI_OIDC_ENABLED:                   "{{ lookup('config', application_id, 'docker.services.oidc.enabled') }}"
 XWIKI_SSO_ENABLED:                    "{{ (XWIKI_OIDC_ENABLED | bool) or (XWIKI_LDAP_ENABLED | bool) }}"
 
 # Admin credentials (must be provided via inventory/vault)
@@ -33,7 +33,7 @@ XWIKI_ADMIN_USER:                     "{{ users.administrator.username }}"
 XWIKI_ADMIN_GROUP:                    "{{ application_id }}-administrator"
 
 # Superadministrator
-XWIKI_SUPERADMIN_PASSWORD:            "{{ lookup('config',application_id, 'credentials.superadminpassword') }}"
+XWIKI_SUPERADMIN_PASSWORD:            "{{ lookup('config', application_id, 'credentials.superadminpassword') }}"
 XWIKI_SUPERADMIN_USERNAME:            "superadmin"
 
 XWIKI_DOCKER_REACH_URL:               "http://{{ DOCKER_REACH_HOST }}:{{ XWIKI_HOST_PORT }}"
@@ -49,7 +49,7 @@ XWIKI_LDAP_PORT:                      "{{ LDAP.SERVER.PORT }}"
 XWIKI_LDAP_BASE_DN:                   "{{ LDAP.DN.ROOT }}"
 XWIKI_LDAP_BIND_DN:                   "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
 XWIKI_LDAP_BIND_PASS:                 "{{ LDAP.BIND_CREDENTIAL }}"
-XWIKI_LDAP_TRYLOCAL:                  "{{ lookup('config',application_id, 'docker.services.ldap.trylocal') }}"
+XWIKI_LDAP_TRYLOCAL:                  "{{ lookup('config', application_id, 'docker.services.ldap.trylocal') }}"
 XWIKI_LDAP_FIELDS_MAPPING:            "last_name={{ LDAP.USER.ATTRIBUTES.SURNAME }},first_name={{ LDAP.USER.ATTRIBUTES.FIRSTNAME }},email={{ LDAP.USER.ATTRIBUTES.MAIL }}"
 XWIKI_LDAP_ADMIN_GROUP_DN:            "cn={{ XWIKI_ADMIN_GROUP ~ ',' ~ LDAP.DN.OU.GROUPS }}"
 

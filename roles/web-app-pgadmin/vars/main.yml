@@ -4,10 +4,10 @@ entity_name:                      "{{ application_id | get_entity_name }}"
 database_host:                    "{{ lookup('config','svc-db-postgres', 'docker.services.postgres.name') if lookup('config',application_id, 'docker.services.database.shared') }}"
 
 # PgAdmin
-PGADMIN_VERSION:                  "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
-PGADMIN_IMAGE:                    "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
-PGADMIN_SERVER_MODE:              "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.server_mode') | bool  }}"
-PGADMIN_MASTER_PASSWORD_REQUIRED: "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.master_password_required') | bool  }}"
+PGADMIN_VERSION:                  "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+PGADMIN_IMAGE:                    "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+PGADMIN_SERVER_MODE:              "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.server_mode') | bool  }}"
+PGADMIN_MASTER_PASSWORD_REQUIRED: "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.master_password_required') | bool  }}"
 
 # User
 PGADMIN_USER:                 5050

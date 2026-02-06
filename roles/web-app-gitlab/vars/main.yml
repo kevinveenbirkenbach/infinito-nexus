@@ -6,7 +6,7 @@ GITLAB_URL:                 "{{ lookup('tls', application_id, 'url.base') }}"
 GITLAB_HOSTNAME:            "{{ lookup('domain',application_id) }}"
 
 ## OIDC
-GITLAB_OIDC_ENABLED:        "{{ lookup('config',application_id, 'docker.services.oidc.enabled') }}"
+GITLAB_OIDC_ENABLED:        "{{ lookup('config', application_id, 'docker.services.oidc.enabled') }}"
 GITLAB_OIDC_LABEL:          "{{ OIDC.BUTTON_TEXT }}"
 GITLAB_OIDC_UID_FIELD:      "{{ OIDC.ATTRIBUTES.USERNAME }}"
 GITLAB_OIDC_CLIENT_ID:      "{{ OIDC.CLIENT.ID }}"
@@ -16,12 +16,12 @@ GITLAB_OIDC_REDIRECT_URI:   "{{ GITLAB_URL }}/users/auth/openid_connect/callback
 
 ## Docker
 GITLAB_INIT_ROOT_PASSWORD:  "{{ users.administrator.password }}"
-GITLAB_VERSION:             "{{ lookup('config',application_id, 'docker.services.gitlab.version') }}"
-GITLAB_IMAGE:               "{{ lookup('config',application_id, 'docker.services.gitlab.image') }}"
-GITLAB_CONTAINER:           "{{ lookup('config',application_id, 'docker.services.gitlab.name') }}"
-GITLAB_CONF_VOLUME:         "{{ lookup('config',application_id, 'docker.volumes.config') }}"
-GITLAB_LOGS_VOLUME:         "{{ lookup('config',application_id, 'docker.volumes.logs') }}"
-GITLAB_DATA_VOLUME:         "{{ lookup('config',application_id, 'docker.volumes.data') }}"
+GITLAB_VERSION:             "{{ lookup('config', application_id, 'docker.services.gitlab.version') }}"
+GITLAB_IMAGE:               "{{ lookup('config', application_id, 'docker.services.gitlab.image') }}"
+GITLAB_CONTAINER:           "{{ lookup('config', application_id, 'docker.services.gitlab.name') }}"
+GITLAB_CONF_VOLUME:         "{{ lookup('config', application_id, 'docker.volumes.config') }}"
+GITLAB_LOGS_VOLUME:         "{{ lookup('config', application_id, 'docker.volumes.logs') }}"
+GITLAB_DATA_VOLUME:         "{{ lookup('config', application_id, 'docker.volumes.data') }}"
 
 ## Configuration
 GITLAB_OMNIBUS_BASE:

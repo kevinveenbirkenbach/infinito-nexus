@@ -42,7 +42,7 @@ appservice:
     # Format examples:
     #   SQLite:   sqlite:filename.db
     #   Postgres: postgres://username:password@hostname/dbname
-    database: postgres://mautrix_telegram_bridge:{{ lookup('config',application_id, 'credentials.mautrix_telegram_bridge_database_password')}}@{{ lookup('database', application_id, 'host') }}/mautrix_telegram_bridge
+    database: postgres://mautrix_telegram_bridge:{{ lookup('config', application_id, 'credentials.mautrix_telegram_bridge_database_password')}}@{{ lookup('database', application_id, 'host') }}/mautrix_telegram_bridge
     # Additional arguments for asyncpg.create_pool() or sqlite3.connect()
     # https://magicstack.github.io/asyncpg/current/api/index.html#asyncpg.pool.create_pool
     # https://docs.python.org/3/library/sqlite3.html#sqlite3.connect
@@ -564,8 +564,8 @@ bridge:
 # Telegram config
 telegram:
     # Get your own API keys at https://my.telegram.org/apps
-    api_id: {{ lookup('config',application_id, 'credentials.mautrix_telgegram_bridge_api_id')}}
-    api_hash: {{ lookup('config',application_id, 'credentials.mautrix_telgegram_bridge_api_pin')}}
+    api_id: {{ lookup('config', application_id, 'credentials.mautrix_telgegram_bridge_api_id')}}
+    api_hash: {{ lookup('config', application_id, 'credentials.mautrix_telgegram_bridge_api_pin')}}
     # (Optional) Create your own bot at https://t.me/BotFather
     bot_token: disabled
 

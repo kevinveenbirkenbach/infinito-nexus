@@ -6,7 +6,7 @@
   ],
   "ExtensionSettings": {
     "*": {
-      "installation_mode": "{{ lookup('config',application_id, 'default_installation_mode') }}"
+      "installation_mode": "{{ lookup('config', application_id, 'default_installation_mode') }}"
     }
     {% for plugin in lookup('config',application_id, 'plugins') -%},
     "{{ plugin.id }}": {
@@ -16,5 +16,5 @@
     }
     {% endfor %}
   },
-  "PasswordManagerEnabled": {{ lookup('config',application_id, 'password_manager_enabled') }}
+  "PasswordManagerEnabled": {{ lookup('config', application_id, 'password_manager_enabled') }}
 }

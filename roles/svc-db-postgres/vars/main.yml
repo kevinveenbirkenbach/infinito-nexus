@@ -6,14 +6,14 @@ entity_name:                              "{{ application_id | get_entity_name }
 database_type:                            "{{ entity_name }}"
 
 ## Postgres
-POSTGRES_VOLUME:                          "{{ lookup('config',application_id, 'docker.volumes.data') }}"
-POSTGRES_CONTAINER:                       "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
-POSTGRES_IMAGE:                           "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
-POSTGRES_VERSION:                         "{{ lookup('config',application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
+POSTGRES_VOLUME:                          "{{ lookup('config', application_id, 'docker.volumes.data') }}"
+POSTGRES_CONTAINER:                       "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
+POSTGRES_IMAGE:                           "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
+POSTGRES_VERSION:                         "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
 POSTGRES_VERSION_MAJOR:                   "{{ POSTGRES_VERSION | regex_replace('^([0-9]+).*', '\\1') }}"
-POSTGRES_NETWORK_NAME:                    "{{ lookup('config',application_id, 'docker.network') }}"
+POSTGRES_NETWORK_NAME:                    "{{ lookup('config', application_id, 'docker.network') }}"
 POSTGRES_SUBNET:                          "{{ networks.local['svc-db-postgres'].subnet }}"
-POSTGRES_PASSWORD:                        "{{ lookup('config',application_id, 'credentials.POSTGRES_PASSWORD') }}"
+POSTGRES_PASSWORD:                        "{{ lookup('config', application_id, 'credentials.POSTGRES_PASSWORD') }}"
 POSTGRES_PORT:                            "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
 POSTGRES_EXPOSE_LOCAL:                    True # Exposes the db to localhost, almost everytime neccessary
 POSTGRES_CUSTOM_IMAGE:                    "{{ entity_name }}_custom:{{ POSTGRES_VERSION }}"
