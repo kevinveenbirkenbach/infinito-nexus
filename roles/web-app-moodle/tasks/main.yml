@@ -36,7 +36,8 @@
 
   rescue:
     - name: Show Moodle container status
-      ansible.builtin.shell: {{ BIN_CONTAINER }} inspect {{ MOODLE_CONTAINER }}
+      ansible.builtin.shell: >
+        {{ BIN_CONTAINER }} inspect {{ MOODLE_CONTAINER }}
       register: moodle_inspect
       changed_when: false
       failed_when: false
