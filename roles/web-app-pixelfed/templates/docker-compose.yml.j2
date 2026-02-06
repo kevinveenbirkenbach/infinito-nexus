@@ -3,18 +3,18 @@
   application:
     image: "{{ PIXELFED_IMAGE }}:{{ PIXELFED_VERSION }}"
     container_name: {{ PIXELFED_CONTAINER }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "data:/var/www/storage"
       - "{{ lookup('docker', application_id, 'files.env') }}:/var/www/.env"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
   worker:
     container_name: {{ PIXELFED_WORKER_CONTAINER }}
     image: "{{ PIXELFED_IMAGE }}:{{ PIXELFED_VERSION }}"
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "data:/var/www/storage"
       - "{{ lookup('docker', application_id, 'files.env') }}:/var/www/.env"
@@ -24,10 +24,10 @@
       interval: 60s
       timeout: 5s
       retries: 1
-{% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       application:
         condition: service_started
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

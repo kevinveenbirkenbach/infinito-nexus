@@ -1,7 +1,7 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   litellm:
 {% set service_name = 'litellm' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: {{ FLOWISE_LITELLM_IMAGE }}:{{ FLOWISE_LITELLM_VERSION }}
     container_name: {{ FLOWISE_LITELLM_CONTAINER }}
     expose:
@@ -12,11 +12,11 @@
       --host 0.0.0.0
       --port {{ FLOWISE_LITELLM_PORT }}
       --config {{ FLOWISE_LITELLM_CONFIG_PATH_DOCKER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   qdrant:
 {% set service_name = 'qdrant' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: {{ FLOWISE_QDRANT_IMAGE }}:{{ FLOWISE_QDRANT_VERSION }}
     container_name: {{ FLOWISE_QDRANT_CONTAINER }}
     ports:
@@ -24,11 +24,11 @@
       - {{ FLOWISE_QDRANT_GRPC_PORT }}
     volumes:
       - qdrant_data:/qdrant/storage
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   flowise:
 {% set service_name = 'flowise' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: {{ FLOWISE_IMAGE }}:{{ FLOWISE_VERSION }}
     container_name: {{ FLOWISE_CONTAINER }}
     depends_on: 
@@ -38,7 +38,7 @@
       - "{{ DOCKER_BIND_HOST }}:{{ FLOWISE_PORT_PUBLIC }}:{{ FLOWISE_PORT_INTERNAL }}"
     volumes:
       - flowise_data:/root/.flowise
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 

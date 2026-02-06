@@ -20,14 +20,14 @@ x-environment: &shopware
 {% set service_name = 'init' %}
 {% set docker_restart_policy = 'no' %}
   {{ service_name }}:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 {% set docker_restart_policy = DOCKER_RESTART_POLICY %}
     <<: *shopware
     container_name: "{{ SHOPWARE_INIT_CONTAINER }}"
     entrypoint: [ "sh", "{{ SHOPWARE_INIT_DOCKER }}" ]
     user: "0:0"
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {# -------------------------
    WEB (serves HTTP on 8000)
@@ -35,9 +35,9 @@ x-environment: &shopware
 {% set service_name = 'web' %}
 {% set container_port = applications | get_app_conf(application_id, 'docker.services.web.port') %}
   {{ service_name }}:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     <<: *shopware
-    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
     container_name: "{{ SHOPWARE_WEB_CONTAINER }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
@@ -52,14 +52,14 @@ x-environment: &shopware
       start_period: 120s
 
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {# -------------------------
    WORKER (async queues)
    ------------------------- #}
 {% set service_name = 'worker' %}
   {{ service_name }}:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     <<: *shopware
     container_name: "{{ SHOPWARE_WORKER_CONTAINER }}"
     entrypoint: {{ SHOPWARE_WORKER_ENTRYPOINT }}
@@ -76,14 +76,14 @@ x-environment: &shopware
       retries: 3
       start_period: 10s
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {# -------------------------
    SCHEDULER (cron-like)
    ------------------------- #}
 {% set service_name = 'scheduler' %}
   {{ service_name }}:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     <<: *shopware
     container_name: "{{ SHOPWARE_SCHED_CONTAINER }}"
     entrypoint: {{ SHOPWARE_SCHED_ENTRYPOINT }}
@@ -98,12 +98,12 @@ x-environment: &shopware
       start_period: 10s
 
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {% if SHOPWARE_OPENSEARCH_ENABLED %}
 {% set service_name = 'opensearch' %}
   {{ service_name }}:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ SHOPWARE_OPENSEARCH_IMAGE }}:{{ SHOPWARE_OPENSEARCH_VERSION }}"
     container_name: "{{ SHOPWARE_OPENSEARCH_CONTAINER }}"
     environment:
@@ -122,7 +122,7 @@ x-environment: &shopware
       timeout: 10s
       retries: 5
       start_period: 60s
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% endif %}
 
 {{ applications | compose_volumes(

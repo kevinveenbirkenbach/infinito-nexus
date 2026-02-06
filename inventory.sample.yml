@@ -102,14 +102,14 @@ SYS_SVC_DOCKER_DNS_TEST_NODE_IMAGE: "ghcr.io/kevinveenbirkenbach/mirror/node:20-
 # run_once_sys_ctl_cln_anon_volumes: true
 
 # ## Repair
-# run_once_sys_ctl_rpr_docker_hard: true
-# run_once_sys_ctl_rpr_docker_soft: true
+# run_once_sys_ctl_rpr_container_hard: true
+# run_once_sys_ctl_rpr_container_soft: true
 # run_once_sys_ctl_rpr_btrfs_balancer: true
 
 # ## Health
 # run_once_sys_ctl_hlth_msmtp: true
 # run_once_sys_ctl_hlth_journalctl: true
-# run_once_sys_ctl_hlth_docker_container: true
+# run_once_sys_ctl_hlth_container: true
 # run_once_sys_ctl_hlth_webserver: true
 # run_once_sys_ctl_hlth_csp: true
 # run_once_sys_ctl_hlth_disc_space: true
@@ -118,7 +118,7 @@ SYS_SVC_DOCKER_DNS_TEST_NODE_IMAGE: "ghcr.io/kevinveenbirkenbach/mirror/node:20-
 # run_once_sys_ctl_mtn_cert_renew: true
 
 # ## Backend
-# run_once_sys_svc_docker: true
+# run_once_sys_svc_container: true
 # run_once_svc_db_mariadb: true
 
 # # Front

@@ -1,9 +1,9 @@
 - include_tasks: utils/once/flag.yml
 
 - include_role:
-    name:   sys-svc-docker
+    name:   sys-svc-container
     public: false
-  when: run_once_sys_svc_docker is not defined
+  when: run_once_sys_svc_container is not defined
 
 - name: Remove all docker compose pull locks
   file:
@@ -37,9 +37,9 @@
   loop:
     - sys-ctl-cln-docker
     - sys-ctl-bkp-docker-2-loc
-    - sys-ctl-hlth-docker-container
-    - sys-ctl-hlth-docker-volumes
-    - sys-ctl-rpr-docker-hard
+    - sys-ctl-hlth-container
+    - sys-ctl-hlth-volumes
+    - sys-ctl-rpr-container-hard
   loop_control:
     loop_var: service_role
   when: DOCKER_COMPOSE_LOAD_SERVICES | bool

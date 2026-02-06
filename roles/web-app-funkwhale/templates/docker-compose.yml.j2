@@ -8,7 +8,7 @@
     # of CPUs. You can adjust this, by explicitly setting the --concurrency
     # flag:
     #   celery -A funkwhale_api.taskapp worker -l INFO --concurrency=4
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ FUNKWHALE_API_IMAGE }}:{{ FUNKWHALE_API_VERSION }}"
     command: celery -A funkwhale_api.taskapp worker -l INFO --concurrency={{FUNKWHALE_CELERYD_CONCURRENCY}}
     environment:
@@ -17,22 +17,22 @@
       - "media:{{ FUNKWHALE_MEDIA_DIR }}"
       - "static:{{ FUNKWHALE_STATIC_DIR }}"
       - "music:{{ FUNKWHALE_MUSIC_DIR }}:ro"
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   celerybeat:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ FUNKWHALE_API_IMAGE }}:{{ FUNKWHALE_API_VERSION }}"
     command: celery -A funkwhale_api.taskapp beat --pidfile= -l INFO
     volumes:
       - "media:{{ FUNKWHALE_MEDIA_DIR }}"
       - "static:{{ FUNKWHALE_STATIC_DIR }}"
       - "music:{{ FUNKWHALE_MUSIC_DIR }}:ro"
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   api:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ FUNKWHALE_API_IMAGE }}:{{ FUNKWHALE_API_VERSION }}"
     volumes:
       - "music:{{ FUNKWHALE_MUSIC_DIR }}:ro"
@@ -40,11 +40,11 @@
       - "static:{{ FUNKWHALE_STATIC_DIR }}"
     ports:
       - "{{ FUNKWHALE_DOCKER_API_PORT }}"
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   front:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ FUNKWHALE_FRONT_IMAGE }}:{{ FUNKWHALE_FRONT_VERSION }}"
     depends_on:
       - api
@@ -57,7 +57,7 @@
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
   
   typesense:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ FUNKWHALE_TYPESENSE_IMAGE }}:{{ FUNKWHALE_TYPESENSE_VERSION }}"
     volumes:
       - ./typesense/data:/data

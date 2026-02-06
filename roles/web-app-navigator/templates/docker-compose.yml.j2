@@ -10,7 +10,7 @@
     volumes:
       - {{ path_infinito_presentation_output.stdout }}:/app
       - {{ path_infinito_output.stdout }}:/source
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

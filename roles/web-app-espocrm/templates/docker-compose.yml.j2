@@ -2,18 +2,18 @@
 
 {% set service_name = ESPOCRM_SERVICE %}
   {{ service_name }}:
-    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
     container_name: {{ ESPOCRM_CONTAINER }}
     image: "{{ ESPOCRM_CUSTOM_IMAGE }}"
     init: true
     stop_signal: SIGTERM
     stop_grace_period: 30s
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     volumes:
       - data:/var/www/html/
 
@@ -25,9 +25,9 @@
     init: true
     stop_signal: SIGTERM
     stop_grace_period: 30s
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     entrypoint: docker-daemon.sh
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     volumes:
       - data:/var/www/html/
     depends_on:
@@ -48,15 +48,15 @@
     init: true
     stop_signal: SIGTERM
     stop_grace_period: 30s
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     environment:
       - ESPOCRM_CONFIG_USE_WEB_SOCKET=true
       - ESPOCRM_CONFIG_WEB_SOCKET_URL={{  lookup('tls_resolve', application_id, want='protocols.websocket') }}://{{ domains | get_domain(application_id) }}/ws
       - ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBSCRIBER_DSN=tcp://*:7777
       - ESPOCRM_CONFIG_WEB_SOCKET_ZERO_M_Q_SUBMISSION_DSN=tcp://websocket:7777
     entrypoint: docker-websocket.sh
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     volumes:
       - data:/var/www/html/
     ports:

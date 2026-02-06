@@ -6,12 +6,12 @@ from importlib.util import spec_from_file_location, module_from_spec
 
 def load_script_module():
     """
-    Import the script under test from roles/sys-ctl-rpr-docker-soft/files/script.py
+    Import the script under test from roles/sys-ctl-rpr-container-soft/files/script.py
     """
     test_file = Path(__file__).resolve()
     repo_root = test_file.parents[5]
     script_path = (
-        repo_root / "roles" / "sys-ctl-rpr-docker-soft" / "files" / "script.py"
+        repo_root / "roles" / "sys-ctl-rpr-container-soft" / "files" / "script.py"
     )
     if not script_path.exists():
         raise FileNotFoundError(f"script.py not found at {script_path}")

@@ -4,7 +4,7 @@
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}
     hostname:       {{ TAIGA_HOSTNAME }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     healthcheck:
       test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1',8000),5).close()"]
       interval: 30s
@@ -20,9 +20,9 @@
 {% if TAIGA_TAIGAIO_ENABLED | bool %}
       - {{ [lookup('docker', application_id, 'directories.config'),'taiga-local.py' ] | path_join }}:/taiga-back/settings/local.py:ro
 {% endif %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
-{% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       {{ TAIGA_EVENTS_RABBITMQ_SERVICE }}:
         condition: service_started
       {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
@@ -37,7 +37,7 @@
 {% set service_name = TAIGA_ASYNC_SERVICE %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     healthcheck:
       test: ["CMD-SHELL", "tr '\\0' ' ' </proc/1/cmdline | grep -qi celery"]
       interval: 30s
@@ -56,9 +56,9 @@
       - {{ lookup('docker', application_id, 'directories.config') }}taiga-{{ item }}.py:/taiga-back/settings/{{ item }}.py:ro
 {% endfor %}
 {% endif %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
-{% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       {{ TAIGA_EVENTS_RABBITMQ_SERVICE }}:
         condition: service_started
       {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
@@ -77,14 +77,14 @@
     hostname: "{{ TAIGA_ASYNC_RABBITMQ_SERVICE }}"
     volumes:
       - async-rabbitmq-data:/var/lib/rabbitmq
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
       timeout: 5s
       retries: 5
       start_period: 20s
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
 
 {% set service_name = TAIGA_FRONT_SERVICE %}
@@ -92,12 +92,12 @@
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: "{{TAIGA_DOCKER_IMAGE_FRONTEND}}:{{ TAIGA_VERSION }}"
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 {% filter indent(4) %}
-    {% include 'roles/docker-container/templates/healthcheck/http.yml.j2' %}
+    {% include 'roles/sys-svc-container/templates/healthcheck/http.yml.j2' %}
 {% endfilter %}
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
 #    volumes:
 #      - {{ TAIGA_FRONTEND_CONF_PATH }}:/usr/share/nginx/html/conf.json:ro
@@ -106,14 +106,14 @@
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: taigaio/taiga-events:latest
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     healthcheck:
       test: ["CMD-SHELL", "nc -z 127.0.0.1 8888"]
       interval: 30s
       timeout: 5s
       retries: 5
       start_period: 30s
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
     depends_on:
       {{ TAIGA_EVENTS_RABBITMQ_SERVICE }}:
@@ -126,28 +126,28 @@
     hostname: {{ service_name }}
     volumes:
       - events-rabbitmq-data:/var/lib/rabbitmq
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 30s
       timeout: 5s
       retries: 5
       start_period: 20s
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
 
 {% set service_name = 'protected' %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
     image: taigaio/taiga-protected:latest
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     healthcheck:
       test: ["CMD", "python", "-c", "import socket; socket.create_connection(('127.0.0.1',8003),5).close()"]
       interval: 30s
       timeout: 5s
       retries: 5
       start_period: 20s
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
 
 {% set service_name = 'gateway' %}
@@ -161,12 +161,12 @@
       - {{ docker_repository_path }}taiga-gateway/taiga.conf:/etc/nginx/conf.d/default.conf
       - static-data:/taiga/static
       - media-data:/taiga/media
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 {% filter indent(4) %}
-    {% include 'roles/docker-container/templates/healthcheck/http.yml.j2' %}
+    {% include 'roles/sys-svc-container/templates/healthcheck/http.yml.j2' %}
 {% endfilter %}
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
     depends_on:
       - {{ TAIGA_FRONT_SERVICE }}

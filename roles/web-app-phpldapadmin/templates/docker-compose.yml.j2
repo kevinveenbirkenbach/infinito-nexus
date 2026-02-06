@@ -5,9 +5,9 @@
     image: {{ PHPLDAPADMIN_IMAGE }}:{{ PHPLDAPADMIN_VERSION }}
     ports:
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8080
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

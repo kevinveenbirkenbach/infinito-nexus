@@ -4,15 +4,15 @@
 {% set container_port = 3000 %}
 {% set container_healthcheck = 'xrpc/_health' %}
     image: "{{ BLUESKY_PDS_IMAGE }}:{{ BLUESKY_PDS_VERSION }}"
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
         - pds_data:{{ BLUESKY_PDS_DATA_DIR }}
         - {{ BLUESKY_PDSADMIN_FILE }}:/usr/local/bin/pdsadmin:ro
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_API_PORT }}:{{ container_port }}"
 
-{% include 'roles/docker-container/templates/healthcheck/wget.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/wget.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {% if BLUESKY_WEB_ENABLED %}
 {% set container_port = 8100 %}
@@ -25,8 +25,8 @@
     pull_policy: never
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_WEB_PORT }}:{{ container_port }}"
-{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% endif %}
 
 {{ applications | compose_volumes(

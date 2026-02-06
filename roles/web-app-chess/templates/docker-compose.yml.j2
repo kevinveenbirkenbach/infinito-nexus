@@ -1,6 +1,6 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   application:
-    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
       args:
         CHESS_VERSION: "{{ CHESS_VERSION }}"
         CHESS_REPO_URL: "{{ CHESS_REPO_URL }}"
@@ -16,10 +16,10 @@
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - 'data:{{ CHESS_APP_DATA_DIR }}'
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

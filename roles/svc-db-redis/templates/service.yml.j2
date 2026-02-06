@@ -29,7 +29,7 @@
 {% macro include_resource_for(svc, indent=4) -%}
   {% set service_name = svc -%}
   {%- set _snippet -%}
-{% include 'roles/docker-container/templates/resource.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/resource.yml.j2' %}
   {%- endset -%}
 {{ _snippet | indent(indent, true) }}
 {%- endmacro %}

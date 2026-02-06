@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 BUILD_LOOKUP_RE = re.compile(
-    r"""\{\{\s*lookup\(\s*['"]template['"]\s*,\s*['"]roles/docker-container/templates/build\.yml\.j2['"]\s*\)\s*\|\s*indent\(\s*4\s*\)\s*\}\}"""
+    r"""\{\{\s*lookup\(\s*['"]template['"]\s*,\s*['"]roles/sys-svc-container/templates/build\.yml\.j2['"]\s*\)\s*\|\s*indent\(\s*4\s*\)\s*\}\}"""
 )
 
 
@@ -23,7 +23,7 @@ _JINJA_DIRECTIVE_RE = re.compile(r"^\s*\{[%#].*[%#]\}\s*$")
 class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
     """
     Verify that every roles/*/templates/docker-compose.yml.j2 which calls:
-      {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+      {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
     also defines either:
       - an `image:` tag on the same indentation level, OR
       - a YAML merge key `<<:` on the same indentation level (since it may inject `image:`).

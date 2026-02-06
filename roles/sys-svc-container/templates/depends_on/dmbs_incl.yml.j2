@@ -1,0 +1,4 @@
+{# This template needs to be included in docker-compose.yml containers, which depend on a database, redis and optional additional volumes #}
+    depends_on:
+{% include "roles/sys-svc-container/templates/depends_on/dbms_base.yml.j2" %}
+{{ "\n" }}

@@ -5,15 +5,15 @@
 {% set service_name = 'resolver' %}
     image: {{ MAILU_DOCKER_FLAVOR }}/unbound:{{ MAILU_VERSION }}
     container_name: {{ MAILU_CONTAINER }}_resolver
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
         ipv4_address: {{ MAILU_DNS_RESOLVER }}
 
   {{ MAILU_FRONT_SERVICE }}:
 {% set service_name = MAILU_FRONT_SERVICE %}
     container_name: {{ MAILU_CONTAINER }}_{{ MAILU_FRONT_SERVICE }}
     image: {{ MAILU_DOCKER_FLAVOR }}/nginx:{{ MAILU_VERSION }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
       - "{{ MAILU_IP4_PUBLIC }}:25:25"
@@ -27,10 +27,10 @@
     volumes:
       - "{{ lookup('docker', application_id, 'directories.volumes') }}overrides/nginx:/overrides:ro"
       - "{{ cert_mount_directory }}:/certs:ro"
-{% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       resolver:
         condition: service_started
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       webmail:
       radicale:
     dns:
@@ -40,11 +40,11 @@
 {% set service_name = 'admin' %}
     container_name: {{ MAILU_CONTAINER }}_admin
     image: {{ MAILU_DOCKER_FLAVOR }}/admin:{{ MAILU_VERSION }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "admin_data:/data"
       - "dkim:/dkim"
-{% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       resolver:
         condition: service_started
       front:
@@ -57,13 +57,13 @@
       - "{{ MAILU_OIDC_HOST }}:host-gateway"
 {% endif %}
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   imap:
 {% set service_name = 'imap' %}
     container_name: {{ MAILU_CONTAINER }}_imap
     image: {{ MAILU_DOCKER_FLAVOR }}/dovecot:{{ MAILU_VERSION }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "dovecot_mail:/mail"
       - "{{ lookup('docker', application_id, 'directories.volumes') }}overrides:/overrides:ro"
@@ -72,13 +72,13 @@
       - resolver
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   smtp:
 {% set service_name = 'smtp' %}
     container_name: {{ MAILU_CONTAINER }}_smtp
     image: {{ MAILU_DOCKER_FLAVOR }}/postfix:{{ MAILU_VERSION }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "{{ lookup('docker', application_id, 'directories.volumes') }}overrides:/overrides:ro"
       - "smtp_queue:/queue"
@@ -87,11 +87,11 @@
       - resolver
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   oletools:
 {% set service_name = 'oletools' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     container_name: {{ MAILU_CONTAINER }}_oletools
     image: {{ MAILU_DOCKER_FLAVOR }}/oletools:{{ MAILU_VERSION }}
     hostname: oletools
@@ -99,14 +99,14 @@
       - resolver
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       noinet:
 
   antispam:
 {% set service_name = 'antispam' %}
     container_name: {{ MAILU_CONTAINER }}_antispam
     image: {{ MAILU_DOCKER_FLAVOR }}/rspamd:{{ MAILU_VERSION }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "filter:/var/lib/rspamd"
       - "dkim:/dkim"
@@ -118,34 +118,34 @@
       - resolver
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       noinet:  
 
   antivirus:
 {% set service_name = 'antivirus' %}
     container_name: {{ MAILU_CONTAINER }}_antivirus
     image: clamav/clamav-debian:latest
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "clamav_db:/var/lib/clamav"
     depends_on:
       - resolver
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   webdav:
 {% set service_name = 'webdav' %}
     container_name: {{ MAILU_CONTAINER }}_webdav
     image: {{ MAILU_DOCKER_FLAVOR }}/radicale:{{ MAILU_VERSION }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "webdav_data:/data"
     depends_on:
       - resolver
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       radicale:
 
   fetchmail:
@@ -154,7 +154,7 @@
     image: {{ MAILU_DOCKER_FLAVOR }}/fetchmail:{{ MAILU_VERSION }}
     volumes:
       - "admin_data:/data"
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     depends_on:
       - admin
       - smtp
@@ -162,13 +162,13 @@
       - resolver
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   webmail:
 {% set service_name = 'webmail' %}
     container_name: {{ MAILU_CONTAINER }}_webmail
     image: {{ MAILU_DOCKER_FLAVOR }}/webmail:{{ MAILU_VERSION }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 {% if MODE_TEST | bool %}
     healthcheck:
       disable: true
@@ -182,7 +182,7 @@
       - resolver
     dns:
       - {{ MAILU_DNS_RESOLVER }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       webmail:
 
 {{ applications | compose_volumes(

@@ -1,15 +1,15 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   application:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ BASEROW_IMAGE }}:{{ BASEROW_VERSION }}"
     container_name: {{ BASEROW_CONTAINER }}
     volumes:
       - data:/baserow/data
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

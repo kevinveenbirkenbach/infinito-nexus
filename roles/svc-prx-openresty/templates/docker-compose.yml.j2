@@ -1,6 +1,6 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   openresty:
-    {% include 'roles/docker-container/templates/base.yml.j2' %}
+    {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     container_name: {{ OPENRESTY_CONTAINER }}
     image: {{ OPENRESTY_IMAGE }}:{{ OPENRESTY_VERSION }}
     network_mode: "host"

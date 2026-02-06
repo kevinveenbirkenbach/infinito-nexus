@@ -1,14 +1,14 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   ollama:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: {{ OLLAMA_IMAGE }}:{{ OLLAMA_VERSION }}
     container_name: {{ OLLAMA_CONTAINER }}
     expose:
       - "{{ OLLAMA_PORT }}"
     volumes:
       - ollama_models:/root/.ollama
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
   
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 

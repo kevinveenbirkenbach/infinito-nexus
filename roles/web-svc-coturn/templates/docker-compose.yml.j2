@@ -1,6 +1,6 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   nginx:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: nginx:alpine
     container_name: {{ entity_name }}_nginx
     ports:
@@ -11,7 +11,7 @@
       && nginx -g 'daemon off;'"
 
   coturn:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: {{ COTURN_IMAGE }}:{{ COTURN_VERSION }}
     container_name: {{ COTURN_CONTAINER }}
     network_mode: {{ COTURN_NETWORK_MODE }}
@@ -23,7 +23,7 @@
       - "{{ COTURN_STUN_TURN_PORT_TLS }}:{{ COTURN_STUN_TURN_PORT_TLS }}/tcp"
 {% endif %}
       - "{{ COTURN_RELAY_PORT_RANGE }}/udp"
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% endif %}
     volumes:
 {% if COTURN_TLS_ENABLED| bool %}

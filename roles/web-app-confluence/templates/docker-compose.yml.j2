@@ -1,6 +1,6 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   confluence:
-    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ CONFLUENCE_CUSTOM_IMAGE }}"
     container_name: "{{ CONFLUENCE_CONTAINER }}"
     hostname: '{{ CONFLUENCE_HOSTNAME}}'
@@ -8,10 +8,10 @@
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8090"
     volumes:
       - 'data:{{ CONFLUENCE_HOME }}'
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

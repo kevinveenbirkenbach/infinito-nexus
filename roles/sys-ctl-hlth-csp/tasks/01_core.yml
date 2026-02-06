@@ -1,9 +1,9 @@
 
 - name: "Load docker service required for the 'run' command"
   include_role:
-    name:   sys-svc-docker
+    name:   sys-svc-container
     public: false
-  when: run_once_sys_svc_docker is not defined
+  when: run_once_sys_svc_container is not defined
 
 - name: Include dependency 'sys-ctl-alm-compose'
   include_role:

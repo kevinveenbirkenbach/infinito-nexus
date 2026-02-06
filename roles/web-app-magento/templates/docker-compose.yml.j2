@@ -18,30 +18,30 @@
       interval: 10s
       timeout: 5s
       retries: 5
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   php:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ MAGENTO_PHP_IMAGE }}:{{ MAGENTO_PHP_VERSION }}"
     container_name: "{{ MAGENTO_PHP_CONTAINER }}"
     volumes:
       - "data:/var/www/html"
-{% include 'roles/docker-container/templates/depends_on/dmbs_incl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       search:
         condition: service_started
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
   search:
 {% set container_port = 9200 %}
     image: "{{ MAGENTO_SEARCH_IMAGE }}:{{ MAGENTO_SEARCH_VERSION }}"
     container_name: "{{ MAGENTO_SEARCH_CONTAINER }}"
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     environment:
       - discovery.type=single-node
       - plugins.security.disabled=true
       - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
-{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

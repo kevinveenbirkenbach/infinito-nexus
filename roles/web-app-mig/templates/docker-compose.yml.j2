@@ -2,7 +2,7 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   {{ application_id | get_entity_name }}:
 {% set container_port = 80 %}
-    {% include 'roles/docker-container/templates/base.yml.j2' %}
+    {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ MIG_IMAGE }}"
     container_name: "{{ MIG_CONTAINER }}"
     ports:
@@ -14,7 +14,7 @@
     volumes:
       - "{{ MIG_ROLES_DIRECTORY }}:/usr/share/nginx/html/roles:ro"
       - "{{ docker_repository_path }}:/usr/share/nginx/html"
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
 
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

@@ -13,7 +13,7 @@
       - "{{ NEXTCLOUD_HOST_NGINX_PATH }}:/etc/nginx/nginx.conf:ro"
     volumes_from:
       - {{ NEXTCLOUD_SERVICE }}
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2'  %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2'  %}
     networks:
       default:
         ipv4_address: 192.168.102.67
@@ -26,7 +26,7 @@
   {{ service_name }}:
     image: "{{ NEXTCLOUD_CUSTOM_IMAGE }}"
     container_name: {{ NEXTCLOUD_CONTAINER }}
-    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
 
     volumes:
       - data:{{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }}
@@ -37,17 +37,17 @@
       interval: 1m
       timeout: 10s
       retries: 3
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
         ipv4_address: 192.168.102.69
 
 {% if NEXTCLOUD_HPB_SIGNALING_ENABLED | bool %}
 {% set service_name = NEXTCLOUD_HPB_SERVICE %}
   {{ service_name }}:
 {% set container_port = NEXTCLOUD_HPB_SIGNALING_PORT %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
     image: "{{ NEXTCLOUD_HPB_IMAGE }}:{{ NEXTCLOUD_HPB_VERSION }}"
     container_name: {{ NEXTCLOUD_HPB_CONTAINER }}
     init: true
@@ -69,13 +69,13 @@
 {% set service_name = NEXTCLOUD_WHITEBOARD_SERVICE %}
   {{ service_name }}:
 {% set container_port = NEXTCLOUD_WHITEBOARD_PORT_INTERNAL %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     build:
       context: .
       dockerfile: {{ NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE }}
     pull_policy: never
     image: "{{ NEXTCLOUD_WHITEBOARD_IMAGE_CUSTOM }}"
-{% include 'roles/docker-container/templates/healthcheck/nc.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/nc.yml.j2' %}
     container_name: {{ NEXTCLOUD_WHITEBOARD_CONTAINER }}
     volumes:
       - whiteboard_tmp:/tmp
@@ -109,14 +109,14 @@
       interval: 1m
       timeout: 10s
       retries: 3
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
         ipv4_address: 192.168.102.70
 
 {% if NEXTCLOUD_RECORDING_ENABLED | bool %}
 {% set service_name = 'talk_recording' %}
   {{ service_name }}:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ NEXTCLOUD_RECORDING_IMAGE }}:{{ NEXTCLOUD_RECORDING_VERSION }}"
     container_name: "{{ NEXTCLOUD_RECORDING_CONTAINER }}"
     environment:

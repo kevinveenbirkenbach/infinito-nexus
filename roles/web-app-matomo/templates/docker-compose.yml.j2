@@ -2,20 +2,20 @@
   {{ MATOMO_SERVICE }}:
     container_name:  {{ MATOMO_NAME }}
 {% set container_port = 80 %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ MATOMO_IMAGE }}:{{ MATOMO_VERSION }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - data:/var/www/html
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
 
   {{ MATOMO_BOOTSTRAP_SERVICE }}:
 {% set docker_restart_policy = 'no' %}
 {% set docker_compose_env = MATOMO_BOOTSTRAP_ENV_FILE %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 {% set docker_compose_env = '' %}
 {% set docker_restart_policy = DOCKER_RESTART_POLICY %}
     profiles:

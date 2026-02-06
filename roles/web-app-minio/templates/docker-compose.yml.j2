@@ -1,7 +1,7 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   minio:
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: {{ MINIO_IMAGE }}:{{ MINIO_VERSION }}
     container_name: {{ MINIO_CONTAINER }}
     ports:
@@ -10,7 +10,7 @@
     command: server /data --console-address ":{{ MINIO_CONSOLE_PORT_INTERNAL }}"
     volumes:
       - data:/data
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 

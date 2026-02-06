@@ -4,7 +4,7 @@
 {% set container_port = 9000 %}
     image: {{ PEERTUBE_IMAGE }}:{{ PEERTUBE_VERSION }}
     container_name: {{ PEERTUBE_CONTAINER }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     ports:
      - "1935:1935"  # @todo Add to ports
      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}" 
@@ -23,9 +23,9 @@
         soft: 131072
         hard: 131072
       nproc:  8192
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
 {{ applications | compose_volumes(
     application_id,
     database_volume=lookup('database', application_id, want='volume'),

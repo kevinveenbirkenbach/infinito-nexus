@@ -1,7 +1,7 @@
 
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   jira:
-    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
     image: "{{ JIRA_CUSTOM_IMAGE }}"
     container_name: "{{ JIRA_CONTAINER }}"
     hostname: '{{ JIRA_HOSTNAME }}'
@@ -9,10 +9,10 @@
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8080"
     volumes:
       - 'data:{{ JIRA_STORAGE_PATH }}'
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,

@@ -2,12 +2,12 @@
 {% set service_name = TAIGA_MANAGER_SERVICE %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: taigaio/taiga-back:latest
     environment:
       CELERY_ENABLED: "False"
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     entrypoint: "python manage.py"
     volumes:
       - static-data:{{ TAIGA_VOLUME_STATIC }}

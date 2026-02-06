@@ -1,13 +1,13 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
   onlyoffice:
-    {% include 'roles/docker-container/templates/base.yml.j2' %}
+    {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     image: "{{ ONLYOFFICE_IMAGE }}:{{ ONLYOFFICE_VERSION }}"
     container_name: {{ ONLYOFFICE_CONTAINER }}
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ http_port }}:{{ container_port }}"
-{% include 'roles/docker-container/templates/healthcheck/curl.yml.j2' %}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
     volumes:
       - data:/var/www/onlyoffice/Data
       - logs:/var/log/onlyoffice
@@ -16,7 +16,7 @@
       - pgdata:/var/lib/postgresql
       - redisdata:/var/lib/redis
       - rabbitmqdata:/var/lib/rabbitmq
-{% include 'roles/docker-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
 

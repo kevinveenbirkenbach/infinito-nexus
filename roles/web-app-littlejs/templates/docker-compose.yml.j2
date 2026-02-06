@@ -2,10 +2,10 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   {{ LITTLEJS_SERVICE }}:
     container_name: {{ LITTLEJS_CONTAINER }}
-    {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
     image: {{ LITTLEJS_IMAGE_CUSTOM }}
     ports:
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

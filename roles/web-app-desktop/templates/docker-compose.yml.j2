@@ -12,7 +12,7 @@
     volumes:
       - {{ docker_repository_path }}app:/app
     restart: {{ DOCKER_RESTART_POLICY }}
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
-{% include 'roles/docker-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
 
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

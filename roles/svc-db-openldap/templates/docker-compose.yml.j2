@@ -7,7 +7,7 @@
       dockerfile: Dockerfile
     image: "{{ OPENLDAP_IMAGE_CUSTOM }}"
     container_name: "{{ OPENLDAP_CONTAINER }}"
-{% include 'roles/docker-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 
 {% if OPENLDAP_NETWORK_EXPOSE_LOCAL | bool %}
     ports:
@@ -20,7 +20,7 @@
       # Rendered LDIFs (read-only)
       - '{{ OPENLDAP_LDIF_PATH_HOST }}:{{ OPENLDAP_LDIF_PATH_DOCKER }}:ro'
 
-{% include 'roles/docker-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
 {{ applications | compose_volumes(
     application_id,
