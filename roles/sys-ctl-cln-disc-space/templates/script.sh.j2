@@ -30,9 +30,9 @@ if [ "$force_freeing" = true ]; then
     nextcloud_application_container="{{ lookup('config','web-app-nextcloud', 'docker.services.nextcloud.name') }}"
     if [ -n "$nextcloud_application_container" ] && [ "$(container ps -a -q -f name=$nextcloud_application_container)" ] ; then
       echo "cleaning up docker nextcloud" &&
-      docker exec -u www-data $nextcloud_application_container /var/www/html/occ files:cleanup || exit 4
-      docker exec -u www-data $nextcloud_application_container /var/www/html/occ trashbin:cleanup --all-users || exit 5
-      docker exec -u www-data $nextcloud_application_container /var/www/html/occ versions:cleanup || exit 6
+      container exec -u www-data $nextcloud_application_container /var/www/html/occ files:cleanup || exit 4
+      container exec -u www-data $nextcloud_application_container /var/www/html/occ trashbin:cleanup --all-users || exit 5
+      container exec -u www-data $nextcloud_application_container /var/www/html/occ versions:cleanup || exit 6
     fi
 
     # Mastodon cleanup (remote media cache)
@@ -41,11 +41,11 @@ if [ "$force_freeing" = true ]; then
 
     if [ -n "$mastodon_application_container" ] && container ps -a --format '{% raw %}{{.Names}}{% endraw %}' | grep -qw "$mastodon_application_container"; then
       echo "Cleaning up Mastodon media cache (older than ${mastodon_cleanup_days} days)" &&
-      docker exec -u root "$mastodon_application_container" bash -lc "bin/tootctl media remove --days=${mastodon_cleanup_days}" || exit 8
+      container exec -u root "$mastodon_application_container" bash -lc "bin/tootctl media remove --days=${mastodon_cleanup_days}" || exit 8
 
       # Optional: additionally remove local thumbnail/cache files older than X days
       # Warning: these will be regenerated when accessed, which may cause extra CPU/I/O load
-      # docker exec -u root "$mastodon_application_container" bash -lc "find /mastodon/public/system/cache -type f -mtime +${mastodon_cleanup_days} -delete" || exit 9
+      # container exec -u root "$mastodon_application_container" bash -lc "find /mastodon/public/system/cache -type f -mtime +${mastodon_cleanup_days} -delete" || exit 9
     fi
   fi
 

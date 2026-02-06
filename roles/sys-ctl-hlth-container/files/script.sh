@@ -30,8 +30,8 @@ fi
 if [ -n "$docker_ps_grep_exited" ]; then
     for container_id in $docker_ps_grep_exited
     do
-        container_exit_code="$(docker inspect "$container_id" --format='{{.State.ExitCode}}')"
-        container_name="$(docker inspect "$container_id" --format='{{.Name}}')"
+        container_exit_code="$(container inspect "$container_id" --format='{{.State.ExitCode}}')"
+        container_name="$(container inspect "$container_id" --format='{{.Name}}')"
         container_name="${container_name#/}"
 
         if [ "$container_exit_code" -ne "0" ]; then

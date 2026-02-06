@@ -63,7 +63,7 @@ options:
   kcadm_exec:
     description:
       - Command to execute kcadm.
-      - E.g. C(docker exec -i keycloak /opt/keycloak/bin/kcadm.sh).
+      - E.g. C(container exec -i keycloak /opt/keycloak/bin/kcadm.sh).
     type: str
     required: True
   realm:

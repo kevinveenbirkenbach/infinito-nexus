@@ -100,9 +100,9 @@ class TestRepairDockerSoft(unittest.TestCase):
                 # non-compose containers are filtered out by the new container ps command
                 return ["app1-worker-1"]
 
-            # 2) docker inspect labels (only called for compose containers now)
+            # 2) container inspect labels (only called for compose containers now)
             if cmd.startswith(
-                "docker inspect -f '{{ index .Config.Labels \"com.docker.compose.project\" }}'"
+                "container inspect -f '{{ index .Config.Labels \"com.docker.compose.project\" }}'"
             ):
                 container = cmd.split()[-1]
                 if container in ("app1-web-1", "app1-worker-1"):
@@ -112,7 +112,7 @@ class TestRepairDockerSoft(unittest.TestCase):
                 return [""]
 
             if cmd.startswith(
-                "docker inspect -f '{{ index .Config.Labels \"com.docker.compose.project.working_dir\" }}'"
+                "container inspect -f '{{ index .Config.Labels \"com.docker.compose.project.working_dir\" }}'"
             ):
                 container = cmd.split()[-1]
                 if container in ("app1-web-1", "app1-worker-1"):

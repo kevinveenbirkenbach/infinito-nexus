@@ -26,7 +26,7 @@ for volume in $anonymous_volumes; do
         continue
     fi
 
-    container_mount_path=$(container ps -q | xargs -I {} docker inspect {} --format="{{range .Mounts}}{{if eq .Name \"$volume\"}}{{.Destination}}{{end}}{{end}}" | tr -d '\n' | xargs)
+    container_mount_path=$(container ps -q | xargs -I {} container inspect {} --format="{{range .Mounts}}{{if eq .Name \"$volume\"}}{{.Destination}}{{end}}{{end}}" | tr -d '\n' | xargs)
     if [ "$container_mount_path" == "/var/www/bootstrap" ]; then
         echo "Volume $volume is a bootstrap volume and will be skipped."
         continue
@@ -41,8 +41,8 @@ for volume in $anonymous_volumes; do
     fi
 
     for container_id in $container_ids; do
-        container_name=$(docker inspect --format '{{ .Name }}' "$container_id" | sed 's#^/##')
-        mount_path=$(docker inspect --format "{{ range .Mounts }}{{ if eq .Name \"$volume\" }}{{ .Destination }}{{ end }}{{ end }}" "$container_id")
+        container_name=$(container inspect --format '{{ .Name }}' "$container_id" | sed 's#^/##')
+        mount_path=$(container inspect --format "{{ range .Mounts }}{{ if eq .Name \"$volume\" }}{{ .Destination }}{{ end }}{{ end }}" "$container_id")
         
         if [ -n "$mount_path" ]; then
             echo "Volume $volume is used by container $container_name at mount path $mount_path"

@@ -51,10 +51,10 @@ echo "[docker-diag] Found $(echo "${ids}" | wc -w | tr -d ' ') containers. Dumpi
 echo
 
 for id in ${ids}; do
-  name="$(docker inspect -f '{{.Name}}' "${id}" 2>/dev/null | sed 's#^/##' || true)"
-  status="$(docker inspect -f '{{.State.Status}}' "${id}" 2>/dev/null || true)"
-  health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "${id}" 2>/dev/null || true)"
-  image="$(docker inspect -f '{{.Config.Image}}' "${id}" 2>/dev/null || true)"
+  name="$(container inspect -f '{{.Name}}' "${id}" 2>/dev/null | sed 's#^/##' || true)"
+  status="$(container inspect -f '{{.State.Status}}' "${id}" 2>/dev/null || true)"
+  health="$(container inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "${id}" 2>/dev/null || true)"
+  image="$(container inspect -f '{{.Config.Image}}' "${id}" 2>/dev/null || true)"
 
   echo "------------------------------------------------------------"
   echo ">>> ${name:-<unknown>} (id=${id})"

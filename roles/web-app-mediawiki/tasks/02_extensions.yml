@@ -27,7 +27,7 @@
         rm -rf "$dst" && mkdir -p "$dst"
       fi
     '
-    && docker cp "{{ MEDIAWIKI_EXT_CFG_BASE }}/{{ ext.name }}.tar.gz" "{{ MEDIAWIKI_CONTAINER }}:/tmp/{{ ext.name }}.tar.gz"
+    && container cp "{{ MEDIAWIKI_EXT_CFG_BASE }}/{{ ext.name }}.tar.gz" "{{ MEDIAWIKI_CONTAINER }}:/tmp/{{ ext.name }}.tar.gz"
     && container exec {{ MEDIAWIKI_CONTAINER }} bash -lc '
       set -e
       dst="{{ MEDIAWIKI_HTML_DIR }}/extensions/{{ ext.name }}"

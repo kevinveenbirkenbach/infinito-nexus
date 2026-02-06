@@ -16,7 +16,7 @@
         )
       }}
     state: present
-  notify: docker restart
+  notify: container manager restart
 
 - name: Install container wrapper (container)
   become: true

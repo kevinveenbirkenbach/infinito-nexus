@@ -10,7 +10,7 @@
     ('is restarting' not in ((openresty_test_pre.stderr | default('')) | lower))
 
 - name: Restart OpenResty container
-  ansible.builtin.command: docker restart {{ OPENRESTY_CONTAINER }}
+  ansible.builtin.command: container restart {{ OPENRESTY_CONTAINER }}
   register: openresty_restart
   changed_when: true
   failed_when: >

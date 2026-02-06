@@ -404,7 +404,7 @@ def main() -> int:
     parser.add_argument(
         "command",
         nargs="?",
-        help="Subcommand: run|exec|logs|ps|inspect|image|pull|docker",
+        help="Subcommand: run|exec|logs|ps|inspect|image|pull|cp|start|stop|restart|docker",
     )
     parser.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -428,7 +428,17 @@ def main() -> int:
         }
         return container_run(args, debug=debug, with_ca=not no_ca)
 
-    if cmd in {"exec", "logs", "ps", "inspect", "pull"}:
+    if cmd in {
+        "exec",
+        "logs",
+        "ps",
+        "inspect",
+        "pull",
+        "cp",
+        "start",
+        "stop",
+        "restart",
+    }:
         return passthrough(cmd, args, debug=debug)
 
     if cmd == "image":

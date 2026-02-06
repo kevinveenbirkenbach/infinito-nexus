@@ -16,4 +16,4 @@
 - name: Trigger Docker restart
   ansible.builtin.debug:
     msg: "MODE_RESET is enabled → restarting Docker"
-  notify: docker restart
+  notify: container manager restart
