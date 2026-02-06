@@ -177,7 +177,7 @@ class LookupModule(LookupBase):
             scope = ss_scope
 
             if ss_scope == "global":
-                cert_id = "_global"
+                cert_id = "global"
                 cert_file = _join(ss_base, cert_id, LE_FULLCHAIN)
                 key_file = _join(ss_base, cert_id, LE_PRIVKEY)
 

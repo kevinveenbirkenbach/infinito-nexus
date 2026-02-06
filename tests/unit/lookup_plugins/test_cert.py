@@ -79,12 +79,12 @@ class TestCertPlanLookup(unittest.TestCase):
         out = self.lookup.run(["web-app-b"], variables=self.vars, mode="app")[0]
         self.assertEqual(out["mode"], "self_signed")
         self.assertEqual(out["scope"], "global")
-        self.assertEqual(out["cert_id"], "_global")
+        self.assertEqual(out["cert_id"], "global")
         self.assertEqual(
-            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/_global/fullchain.pem"
+            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/global/fullchain.pem"
         )
         self.assertEqual(
-            out["files"]["key"], "/etc/infinito.nexus/selfsigned/_global/privkey.pem"
+            out["files"]["key"], "/etc/infinito.nexus/selfsigned/global/privkey.pem"
         )
 
         # New strict behavior:
@@ -209,10 +209,10 @@ class TestCertPlanLookup(unittest.TestCase):
         out = self.lookup.run(["web-app-b"], variables=v, mode="app")[0]
         self.assertEqual(out["mode"], "self_signed")
         self.assertEqual(
-            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/_global/fullchain.pem"
+            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/global/fullchain.pem"
         )
         self.assertEqual(
-            out["files"]["key"], "/etc/infinito.nexus/selfsigned/_global/privkey.pem"
+            out["files"]["key"], "/etc/infinito.nexus/selfsigned/global/privkey.pem"
         )
 
     def test_letsencrypt_live_path_expands_jinja_from_hostvars(self):
@@ -276,7 +276,7 @@ class TestCertPlanLookup(unittest.TestCase):
 
         out = self.lookup.run(["web-app-b"], variables=v, mode="app")[0]
         self.assertEqual(
-            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/_global/fullchain.pem"
+            out["files"]["cert"], "/etc/infinito.nexus/selfsigned/global/fullchain.pem"
         )
 
     def test_jinja_expression_that_renders_to_empty_triggers_failfast(self):
