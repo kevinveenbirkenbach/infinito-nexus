@@ -9,7 +9,7 @@
   - sys-ctl-alm-compose
   - sys-lock
 
-- include_tasks: 02_install_routines.yml
+- include_tasks: 02_install.yml
   when: backup_docker_to_local_folder is not defined
 
 - name: "reset (if enabled) for {{ role_name}}"

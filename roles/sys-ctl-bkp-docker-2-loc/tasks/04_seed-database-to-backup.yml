@@ -1,5 +1,5 @@
 ---
-- include_tasks: 02_install_routines.yml
+- include_tasks: 02_install.yml
 
 - name: "Ensure /etc/baudolo exists"
   ansible.builtin.file:
