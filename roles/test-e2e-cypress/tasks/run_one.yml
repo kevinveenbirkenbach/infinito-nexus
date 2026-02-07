@@ -75,7 +75,7 @@
 
 - name: Run Cypress container
   ansible.builtin.command: >
-    docker run --rm
+    container run --rm
     --ipc=host
     --shm-size=1g
     --env-file {{ _cypress_stage_dir }}/.env

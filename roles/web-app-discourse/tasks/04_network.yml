@@ -1,6 +1,6 @@
 - name: "Connect '{{ DISCOURSE_CONTAINER }}' to network '{{ DISCOURSE_PG_NETWORK }}'"
   command: >
-    docker network connect {{ DISCOURSE_PG_NETWORK }} {{ DISCOURSE_CONTAINER }}
+    container network connect {{ DISCOURSE_PG_NETWORK }} {{ DISCOURSE_CONTAINER }}
   register: network_connect
   failed_when: >
     network_connect.rc != 0 and
@@ -11,7 +11,7 @@
 
 - name: "Remove {{ DISCOURSE_NETWORK }} from {{ lookup('database', application_id, 'container') }}"
   command: >
-    docker network disconnect {{ DISCOURSE_NETWORK }} {{ lookup('database', application_id, 'container') }}
+    container network disconnect {{ DISCOURSE_NETWORK }} {{ lookup('database', application_id, 'container') }}
   register: network_disconnect
   failed_when: >
     network_disconnect.rc != 0 and

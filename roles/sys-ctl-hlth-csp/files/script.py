@@ -185,7 +185,7 @@ def main() -> None:
     parser.add_argument(
         "--always-pull",
         action="store_true",
-        help="Pull the docker image before running (best-effort).",
+        help="Pull the container image before running (best-effort).",
     )
     parser.add_argument(
         "--short",
@@ -201,7 +201,7 @@ def main() -> None:
     parser.add_argument(
         "--no-host-network",
         action="store_true",
-        help="Disable --network host for docker run (default is to use host network).",
+        help="Disable --network host for container run (default is to use host network).",
     )
 
     args = parser.parse_args()

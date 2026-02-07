@@ -10,7 +10,7 @@ if [ -n "$whitelist" ]; then
     IFS=' ' read -r -a whitelisted_volumes <<< "$whitelist"
 fi
 
-anonymous_volumes=$(docker volume ls --format "{{.Name}}" | grep -E '^[a-f0-9]{64}$')
+anonymous_volumes=$(container volume ls --format "{{.Name}}" | grep -E '^[a-f0-9]{64}$')
 
 if [ -z "$anonymous_volumes" ]; then
     echo "No anonymous volumes found."

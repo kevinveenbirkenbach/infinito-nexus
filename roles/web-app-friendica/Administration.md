@@ -18,7 +18,7 @@ To completely reset Friendica, including its database and volumes, run:
 docker exec -i mariadb mariadb -u root -p"${DB_ROOT_PASSWORD}" -e "DROP DATABASE IF EXISTS friendica; CREATE DATABASE friendica;"
 docker compose down
 rm -rv /mnt/hdd/data/docker/volumes/friendica_data
-docker volume rm friendica_data
+container volume rm friendica_data
 ```
 
 ## Reset Database 🗄️

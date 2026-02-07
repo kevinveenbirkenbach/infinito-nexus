@@ -6,5 +6,5 @@ set -e
 echo "Cleaning up anonymous Docker volumes via systemd service..."
 systemctl start {{ SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES }} || exit 1
 echo "Pruning Docker system resources (images, containers, networks, build cache)..."
-docker system prune -a -f || exit 2
+container system prune -a -f || exit 2
 echo "Docker prune cleanup finished."

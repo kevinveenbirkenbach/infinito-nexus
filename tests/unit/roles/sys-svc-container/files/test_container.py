@@ -326,7 +326,7 @@ class TestContainerWrapper(unittest.TestCase):
 
     def test_container_run_with_ca_false_always_plain_docker_run(self):
         """
-        When with_ca=False, container_run() must always call plain docker run (no env needed).
+        When with_ca=False, container_run() must always call plain container run (no env needed).
         """
         calls = []
 

@@ -6,7 +6,7 @@
     docker_git_repository_pull:     false
     application_id:                 'svc-db-openldap'
 
-- name: Create docker network
+- name: Create container network
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
     state: present

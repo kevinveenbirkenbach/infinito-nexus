@@ -108,11 +108,11 @@
           POSTGRES_IMAGE: "{{ POSTGRES_IMAGE | default('n/a') }}"
       changed_when: false
 
-    - name: "POSTGRES | docker info (DockerRootDir)"
+    - name: "POSTGRES | container info (DockerRootDir)"
       ansible.builtin.shell: |
         set -e
         {% raw %}
-        docker info -f '{{.DockerRootDir}}' 2>/dev/null || true
+        container info -f '{{.DockerRootDir}}' 2>/dev/null || true
         {% endraw %}
       register: dbg_docker_root_dir
       changed_when: false

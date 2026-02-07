@@ -4,7 +4,7 @@ galaxy_info:
     Generic E2E Cypress runner role that auto-discovers application roles providing
     roles/<application_id>/tests/cypress/env.j2, renders a .env file from env.j2,
     optionally waits for the app to become reachable, and runs Cypress in a pinned
-    Docker image with reproducible semantics.
+    Container image with reproducible semantics.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |

@@ -89,7 +89,7 @@ class TestComposeCaInject(unittest.TestCase):
         def fake_run(cmd, *, cwd, env):
             calls.append(cmd)
 
-            # docker image inspect <image>: first missing, second exists
+            # container image inspect <image>: first missing, second exists
             if cmd[:3] == ["docker", "image", "inspect"]:
                 inspect_calls = [
                     c for c in calls if c[:3] == ["docker", "image", "inspect"]
@@ -142,7 +142,7 @@ class TestComposeCaInject(unittest.TestCase):
         def fake_run(cmd, *, cwd, env):
             calls.append(cmd)
 
-            # docker image inspect: first missing, second exists
+            # container image inspect: first missing, second exists
             if cmd[:3] == ["docker", "image", "inspect"]:
                 inspect_calls = [
                     c for c in calls if c[:3] == ["docker", "image", "inspect"]
@@ -230,7 +230,7 @@ class TestComposeCaInject(unittest.TestCase):
         main():
           - parses compose files to discover profiles
           - runs `compose ... config`
-          - inspects images via `docker image inspect`
+          - inspects images via `container image inspect`
           - writes override with CA_TRUST_* envs
         """
         _read_text.return_value = "services:\n  app:\n    image: myimage:latest\n"
@@ -245,7 +245,7 @@ class TestComposeCaInject(unittest.TestCase):
                 yml = "services:\n  app:\n    image: myimage:latest\n"
                 return 0, yml, ""
 
-            # docker image inspect <image>
+            # container image inspect <image>
             if cmd[:3] == ["docker", "image", "inspect"]:
                 json_out = json.dumps(
                     [{"Config": {"Entrypoint": ["/entry"], "Cmd": ["run"]}}]
@@ -309,7 +309,7 @@ class TestComposeCaInject(unittest.TestCase):
 
     def test_docker_image_has_bin_sh_true(self):
         """
-        docker_image_has_bin_sh(): returns True when docker run succeeds.
+        docker_image_has_bin_sh(): returns True when container run succeeds.
         """
 
         def fake_run(cmd, *, cwd, env):
@@ -326,7 +326,7 @@ class TestComposeCaInject(unittest.TestCase):
 
     def test_docker_image_has_bin_sh_false(self):
         """
-        docker_image_has_bin_sh(): returns False when docker run fails (distroless-like).
+        docker_image_has_bin_sh(): returns False when container run fails (distroless-like).
         """
 
         def fake_run(cmd, *, cwd, env):
@@ -518,14 +518,14 @@ class TestComposeCaInject(unittest.TestCase):
                     yml = "services:\n  app:\n    image: myimage:latest\n"
                     return 0, yml, ""
 
-                # docker image inspect <image>
+                # container image inspect <image>
                 if cmd[:3] == ["docker", "image", "inspect"]:
                     json_out = json.dumps(
                         [{"Config": {"Entrypoint": ["/entry"], "Cmd": ["run"]}}]
                     )
                     return 0, json_out, ""
 
-                # docker run --entrypoint /bin/sh ... -c exit 0  (bin/sh probe)
+                # container run --entrypoint /bin/sh ... -c exit 0  (bin/sh probe)
                 if cmd[:6] == [
                     "docker",
                     "run",
@@ -689,7 +689,7 @@ class TestComposeCaInject(unittest.TestCase):
                     yml = "services:\n  app:\n    image: myimage:latest\n"
                     return 0, yml, ""
 
-                # docker image inspect <image> -> Cmd contains '$'
+                # container image inspect <image> -> Cmd contains '$'
                 if cmd[:3] == ["docker", "image", "inspect"]:
                     json_out = json.dumps(
                         [
@@ -707,7 +707,7 @@ class TestComposeCaInject(unittest.TestCase):
                     )
                     return 0, json_out, ""
 
-                # docker run --entrypoint /bin/sh ... (bin/sh probe)
+                # container run --entrypoint /bin/sh ... (bin/sh probe)
                 if cmd[:6] == [
                     "docker",
                     "run",

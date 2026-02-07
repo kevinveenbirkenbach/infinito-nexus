@@ -20,12 +20,12 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 0
 fi
 
-echo "--- docker version ---"
-docker version 2>&1 || true
+echo "--- container version ---"
+container version 2>&1 || true
 echo
 
-echo "--- docker info (short) ---"
-docker info 2>/dev/null | sed -n '1,120p' || true
+echo "--- container info (short) ---"
+container info 2>/dev/null | sed -n '1,120p' || true
 echo
 
 echo "--- container ps ---"

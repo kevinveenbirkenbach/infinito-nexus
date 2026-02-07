@@ -33,7 +33,7 @@ fail() { echo "FAIL: $*"; exit 1; }
 section "Wait for dockerd (DinD)"
 
 for i in $(seq 1 60); do
-  if [ -S /var/run/docker.sock ] && docker info >/dev/null 2>&1; then
+  if [ -S /var/run/docker.sock ] && container info >/dev/null 2>&1; then
     ok "dockerd ready"
     break
   fi
@@ -42,14 +42,14 @@ for i in $(seq 1 60); do
 done
 
 [ -S /var/run/docker.sock ] || fail "docker.sock missing after waiting"
-docker info >/dev/null 2>&1 || fail "docker info still failing after waiting"
+container info >/dev/null 2>&1 || fail "container info still failing after waiting"
 
 # ------------------------------------------------------------
 # DNS tests via Busybox (A + check "no SERVFAIL" robustly)
 # ------------------------------------------------------------
 section "Docker-in-Docker DNS (busybox: A + no SERVFAIL)"
 
-docker run --rm --dns "${DNS_IP}" "${BUSYBOX_IMAGE}" sh -lc "
+container run --rm --dns "${DNS_IP}" "${BUSYBOX_IMAGE}" sh -lc "
   set -e
 
   test_lookup_a() {
@@ -87,7 +87,7 @@ ok "Inner container DNS works (A present; no SERVFAIL)"
 # ------------------------------------------------------------
 section "Docker-in-Docker DNS (node/getaddrinfo)"
 
-docker run --rm --dns "${DNS_IP}" "${NODE_IMAGE}" sh -lc "
+container run --rm --dns "${DNS_IP}" "${NODE_IMAGE}" sh -lc "
   set -e
   node -e \"
     const dns = require('dns');

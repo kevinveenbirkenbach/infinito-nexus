@@ -39,7 +39,7 @@ def is_symbolic_link(file_path):
 
 def get_volume_path(volume):
     return run_command(
-        f"docker volume inspect --format '{{{{ .Mountpoint }}}}' {volume}"
+        f"container volume inspect --format '{{{{ .Mountpoint }}}}' {volume}"
     )
 
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     rapid_storage_path = args.rapid_storage_path
     mass_storage_path = args.mass_storage_path
 
-    volumes = run_command("docker volume ls -q").splitlines()
+    volumes = run_command("container volume ls -q").splitlines()
 
     for volume in volumes:
         volume_path = get_volume_path(volume)

@@ -1,4 +1,4 @@
-- name: "Setup docker network for {{ application_id }}"
+- name: "Setup container network for {{ application_id }}"
   include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
     docker_network_name:            "{{ MARIADB_NETWORK }}"

@@ -10,8 +10,8 @@ compose:
         no_stop_required: true  # The images that don't need to stop
         disabled:         true  # Disables the image
         database_routine: true  # Instead of copying a database routine will be triggered for this container
-      image:            ""                                            # The docker image of the software you want to use
-      version:          "latest"                                      # The docker version of the software you want to use
+      image:            ""                                            # The container image of the software you want to use
+      version:          "latest"                                      # The container version of the software you want to use
       container:        "{{ application_id | get_entity_name }}"      # The container name
     volumes:
       data:             "{{ application_id | get_entity_name }}_data"

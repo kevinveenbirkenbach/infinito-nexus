@@ -27,8 +27,8 @@ Infinito.Nexus.
 **Why it exists**
 
 - Centralizes container execution logic
-- Injects **CA trust** only where it makes sense (`docker run`)
-- Avoids duplicating fragile `docker run` logic across roles and scripts
+- Injects **CA trust** only where it makes sense (`container run`)
+- Avoids duplicating fragile `container run` logic across roles and scripts
 - Provides predictable behavior in CI and production
 
 **Key responsibilities**
@@ -53,7 +53,7 @@ Infinito.Nexus.
 * Health-check scripts (e.g. CSP, DNS, HTTP checks)
 * CI jobs running Docker-in-Docker
 * Infrastructure roles that need reliable container execution
-* Any script that would otherwise call `docker run` directly
+* Any script that would otherwise call `container run` directly
 
 ---
 

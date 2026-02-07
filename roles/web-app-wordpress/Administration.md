@@ -27,7 +27,7 @@ To upgrade the database execute:
 
 ## shell in docker
 
-To execute the commands in the docker container execute:
+To execute the commands in the container container execute:
 
 ```bash
 compose exec -it application /bin/sh

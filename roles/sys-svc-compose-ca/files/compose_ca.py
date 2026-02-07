@@ -105,21 +105,21 @@ def docker_image_inspect(
     """
     rc, out, err = run(["docker", "image", "inspect", image], cwd=cwd, env=env)
     if rc != 0:
-        die(f"docker image inspect failed for '{image}' (rc={rc}): {err.strip()}")
+        die(f"container image inspect failed for '{image}' (rc={rc}): {err.strip()}")
 
     try:
         data = json.loads(out)
     except json.JSONDecodeError as e:
-        die(f"docker image inspect returned invalid JSON for '{image}': {e}")
+        die(f"container image inspect returned invalid JSON for '{image}': {e}")
 
     if not isinstance(data, list) or not data:
-        die(f"docker image inspect returned empty result for '{image}'")
+        die(f"container image inspect returned empty result for '{image}'")
 
     cfg = data[0].get("Config")
     if cfg is None:
         cfg = {}
     if not isinstance(cfg, dict):
-        die(f"docker image inspect missing/invalid Config for '{image}'")
+        die(f"container image inspect missing/invalid Config for '{image}'")
 
     ep = cfg.get("Entrypoint")
     cmd = cfg.get("Cmd")
@@ -199,7 +199,7 @@ def ensure_image_available(
     Ensure the referenced image exists locally.
 
     Strategy:
-      1) If docker image inspect works -> OK
+      1) If container image inspect works -> OK
       2) Else:
          - If THIS service has 'build' -> run `compose ... build <service>`
          - Else if another service builds the SAME image -> build that builder service

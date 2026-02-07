@@ -94,7 +94,7 @@ compose exec -u "www-data" application php artisan schedule:run
 For a hard reset, which will delete all data and stop all services, use the following commands:
 ```bash
 compose down
-docker volume rm pixelfed_application_data pixelfed_database pixelfed_redis
+container volume rm pixelfed_application_data pixelfed_database pixelfed_redis
 ```
 
 ## Update Procedure
@@ -103,7 +103,7 @@ To update your Pixelfed instance, navigate to the directory where your `compose.
 ```bash 
 cd {{ DIR_COMPOSITIONS }}pixelfed/ &&
 compose down &&
-docker network prune -f &&
+container network prune -f &&
 compose pull &&
 compose build &&
 compose -p pixelfed up -d --force-recreate
