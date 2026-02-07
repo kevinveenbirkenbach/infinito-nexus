@@ -381,9 +381,11 @@ def container_run(argv: List[str], debug: bool, with_ca: bool) -> int:
     return 0
 
 
-def passthrough(subcmd: str, argv: List[str], debug: bool) -> int:
+def passthrough_any(subcmd: str, argv: List[str], debug: bool) -> int:
     """
-    Commands where CA wrapping does NOT make sense.
+    Passthrough for ANY docker subcommand.
+    This keeps the wrapper future-proof so new docker subcommands don't require
+    code changes as long as callers use `container <subcmd> ...`.
     """
     return exec_docker(["docker", subcmd, *argv], debug=debug)
 
@@ -404,7 +406,7 @@ def main() -> int:
     parser.add_argument(
         "command",
         nargs="?",
-        help="Subcommand: run|exec|logs|ps|inspect|image|pull|cp|start|stop|restart|docker",
+        help="Subcommand: run|<any docker subcommand>|docker",
     )
     parser.add_argument("args", nargs=argparse.REMAINDER)
 
@@ -428,27 +430,13 @@ def main() -> int:
         }
         return container_run(args, debug=debug, with_ca=not no_ca)
 
-    if cmd in {
-        "exec",
-        "logs",
-        "ps",
-        "inspect",
-        "pull",
-        "cp",
-        "start",
-        "stop",
-        "restart",
-    }:
-        return passthrough(cmd, args, debug=debug)
-
-    if cmd == "image":
-        return passthrough("image", args, debug=debug)
-
     if cmd == "docker":
         return exec_docker(["docker", *args], debug=debug)
 
-    die(f"Unknown subcommand: {cmd}", code=2)
-    return 2
+    # Default: passthrough ANY docker subcommand (info/version/system/network/volume/buildx/...)
+    # Example: `container info` -> `docker info`
+    #          `container system prune -af` -> `docker system prune -af`
+    return passthrough_any(cmd, args, debug=debug)
 
 
 if __name__ == "__main__":
