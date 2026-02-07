@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -49,8 +50,37 @@ def detect_compose_files(project_dir: Path) -> List[Path]:
     return files
 
 
-def build_cmd(project: str, project_dir: Path, passthrough: List[str]) -> List[str]:
+def resolve_files(project_dir: Path, files: List[str]) -> List[Path]:
+    """
+    Resolve -f/--file arguments (absolute or relative to project_dir).
+    """
+    out: List[Path] = []
+    for f in files:
+        p = Path(f)
+        if not p.is_absolute():
+            p = project_dir / p
+        out.append(p.resolve())
+    return out
+
+
+def build_cmd(
+    project: str,
+    project_dir: Path,
+    passthrough: List[str],
+    extra_files: Optional[List[str]] = None,
+) -> List[str]:
+    """
+    Build final `docker compose ...` command.
+
+    Behavior:
+    - Always auto-detect compose files in project_dir
+    - If -f/--file is provided, append those files *after* autodetected ones
+    """
     files = detect_compose_files(project_dir)
+
+    if extra_files:
+        files.extend(resolve_files(project_dir, extra_files))
+
     env_file = detect_env_file(project_dir)
 
     cmd: List[str] = ["docker", "compose", "-p", project]
@@ -70,6 +100,13 @@ def main() -> int:
     ap.add_argument(
         "--chdir",
         help="Compose project directory (default: current working directory)",
+    )
+    ap.add_argument(
+        "-f",
+        "--file",
+        action="append",
+        dest="files",
+        help="Additional compose file(s) appended after auto-detected files",
     )
     ap.add_argument(
         "--project",
@@ -107,13 +144,18 @@ def main() -> int:
         return 2
 
     try:
-        cmd = build_cmd(project, project_dir, passthrough)
+        cmd = build_cmd(
+            project=project,
+            project_dir=project_dir,
+            passthrough=passthrough,
+            extra_files=args.files,
+        )
     except Exception as exc:
         print(f"[compose] {exc}", file=sys.stderr)
         return 2
 
     if args.debug:
-        print(">>> " + " ".join(cmd), file=sys.stderr)
+        print(">>> " + " ".join(shlex.quote(x) for x in cmd), file=sys.stderr)
 
     # execvp keeps signals behavior nice (systemd etc.)
     os.execvp(cmd[0], cmd)

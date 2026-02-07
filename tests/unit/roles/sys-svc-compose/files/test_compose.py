@@ -109,6 +109,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
                 return False
 
             s.Path.is_file = fake_is_file  # type: ignore[assignment]
+            # Signature changed to accept extra_files=None, but default keeps old call valid.
             cmd = s.build_cmd("myproj", base, ["up", "-d"])
 
             self.assertEqual(cmd[:4], ["docker", "compose", "-p", "myproj"])
@@ -124,8 +125,72 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
         finally:
             s.Path.is_file = old_is_file  # type: ignore[assignment]
 
+    def test_build_cmd_appends_extra_files_after_autodetected(self):
+        """
+        New behavior: -f/--file should NOT replace autodetection; it should be appended.
+        """
+        s = self.script
+        base = Path("/proj")
+
+        old_is_file = s.Path.is_file
+        old_resolve_files = getattr(s, "resolve_files", None)
+
+        try:
+
+            def fake_is_file(self: Path) -> bool:
+                if str(self) == "/proj/docker-compose.yml":
+                    return True
+                if str(self) == "/proj/docker-compose.override.yml":
+                    return True
+                if str(self) == "/proj/docker-compose.ca.override.yml":
+                    return False
+                if str(self) == "/proj/.env":
+                    return True
+                if str(self) == "/proj/.env/env":
+                    return False
+                return False
+
+            # Avoid touching real filesystem resolution
+            def fake_resolve_files(project_dir: Path, files):
+                out = []
+                for f in files:
+                    if str(f).startswith("/"):
+                        out.append(Path(f))
+                    else:
+                        out.append(Path("/proj") / str(f))
+                return out
+
+            s.Path.is_file = fake_is_file  # type: ignore[assignment]
+            if old_resolve_files is not None:
+                s.resolve_files = fake_resolve_files  # type: ignore[assignment]
+
+            cmd = s.build_cmd(
+                "myproj",
+                base,
+                ["run", "--rm", "manager", "migrate", "--noinput"],
+                extra_files=["docker-compose-inits.yml"],
+            )
+
+            # Ensure order: autodetected files appear before extra file
+            idx_base = cmd.index("/proj/docker-compose.yml")
+            idx_override = cmd.index("/proj/docker-compose.override.yml")
+            idx_extra = cmd.index("/proj/docker-compose-inits.yml")
+            self.assertLess(idx_base, idx_extra)
+            self.assertLess(idx_override, idx_extra)
+
+            # Basic sanity: env file still included
+            self.assertIn("--env-file", cmd)
+            self.assertIn("/proj/.env", cmd)
+
+            # Passthrough still ends command
+            self.assertEqual(cmd[-5:], ["manager", "migrate", "--noinput"])
+        finally:
+            s.Path.is_file = old_is_file  # type: ignore[assignment]
+            if old_resolve_files is not None:
+                s.resolve_files = old_resolve_files  # type: ignore[assignment]
+
     # ---------------------------------------------------------------------
-    # New tests for optional --chdir / --project behavior in main()
+    # Tests for optional --chdir / --project behavior in main()
     # ---------------------------------------------------------------------
 
     def test_main_defaults_to_cwd_and_project_basename(self):
@@ -152,8 +217,15 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             def fake_is_dir(self: Path) -> bool:
                 return str(self) == "/work/matomo"
 
-            def fake_build_cmd(project: str, project_dir: Path, passthrough):
-                calls["build"] = (project, str(project_dir), list(passthrough))
+            def fake_build_cmd(
+                project: str, project_dir: Path, passthrough, extra_files=None
+            ):
+                calls["build"] = (
+                    project,
+                    str(project_dir),
+                    list(passthrough),
+                    extra_files,
+                )
                 return ["docker", "compose", "-p", project, "ps"]
 
             def fake_execvp(prog, argv):
@@ -171,7 +243,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 s.main()
 
-            self.assertEqual(calls["build"], ("matomo", "/work/matomo", ["ps"]))
+            self.assertEqual(calls["build"], ("matomo", "/work/matomo", ["ps"], None))
             self.assertEqual(calls["exec"][0], "docker")
             self.assertEqual(
                 calls["exec"][1][:4], ["docker", "compose", "-p", "matomo"]
@@ -203,8 +275,15 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             def fake_is_dir(self: Path) -> bool:
                 return str(self) == "/opt/compose/nextcloud"
 
-            def fake_build_cmd(project: str, project_dir: Path, passthrough):
-                calls["build"] = (project, str(project_dir), list(passthrough))
+            def fake_build_cmd(
+                project: str, project_dir: Path, passthrough, extra_files=None
+            ):
+                calls["build"] = (
+                    project,
+                    str(project_dir),
+                    list(passthrough),
+                    extra_files,
+                )
                 return ["docker", "compose", "-p", project, "up", "-d"]
 
             def fake_execvp(prog, argv):
@@ -222,7 +301,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
 
             self.assertEqual(
                 calls["build"],
-                ("nextcloud", "/opt/compose/nextcloud", ["up", "-d"]),
+                ("nextcloud", "/opt/compose/nextcloud", ["up", "-d"], None),
             )
         finally:
             s.sys.argv = old_argv
@@ -254,8 +333,15 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             def fake_is_dir(self: Path) -> bool:
                 return str(self) == "/work/anything"
 
-            def fake_build_cmd(project: str, project_dir: Path, passthrough):
-                calls["build"] = (project, str(project_dir), list(passthrough))
+            def fake_build_cmd(
+                project: str, project_dir: Path, passthrough, extra_files=None
+            ):
+                calls["build"] = (
+                    project,
+                    str(project_dir),
+                    list(passthrough),
+                    extra_files,
+                )
                 return ["docker", "compose", "-p", project, "restart", "web"]
 
             def fake_execvp(prog, argv):
@@ -274,7 +360,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
 
             self.assertEqual(
                 calls["build"],
-                ("customproj", "/work/anything", ["restart", "web"]),
+                ("customproj", "/work/anything", ["restart", "web"], None),
             )
         finally:
             s.sys.argv = old_argv
@@ -307,8 +393,15 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             def fake_is_dir(self: Path) -> bool:
                 return str(self) == "/work/app"
 
-            def fake_build_cmd(project: str, project_dir: Path, passthrough):
-                calls["build"] = (project, str(project_dir), list(passthrough))
+            def fake_build_cmd(
+                project: str, project_dir: Path, passthrough, extra_files=None
+            ):
+                calls["build"] = (
+                    project,
+                    str(project_dir),
+                    list(passthrough),
+                    extra_files,
+                )
                 return ["docker", "compose", "-p", project] + list(passthrough)
 
             def fake_execvp(prog, argv):
@@ -326,7 +419,87 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 s.main()
 
-            self.assertEqual(calls["build"], ("app", "/work/app", ["ps", "--services"]))
+            self.assertEqual(
+                calls["build"],
+                ("app", "/work/app", ["ps", "--services"], None),
+            )
+        finally:
+            s.sys.argv = old_argv
+            s.Path.cwd = old_cwd  # type: ignore[assignment]
+            s.Path.is_dir = old_is_dir  # type: ignore[assignment]
+            s.Path.resolve = old_resolve  # type: ignore[assignment]
+            s.build_cmd = old_build_cmd  # type: ignore[assignment]
+            s.os.execvp = old_execvp  # type: ignore[assignment]
+
+    def test_main_passes_file_args_to_build_cmd(self):
+        """
+        New CLI behavior: `compose -f X ...` should pass extra_files=["X"] to build_cmd
+        and still work with passthrough args.
+        """
+        s = self.script
+
+        old_argv = s.sys.argv
+        old_cwd = s.Path.cwd
+        old_is_dir = s.Path.is_dir
+        old_resolve = s.Path.resolve
+        old_build_cmd = s.build_cmd
+        old_execvp = s.os.execvp
+
+        calls = {"build": None}
+
+        try:
+
+            def fake_cwd() -> Path:
+                return Path("/work/taiga")
+
+            def fake_resolve(self: Path) -> Path:
+                return self
+
+            def fake_is_dir(self: Path) -> bool:
+                return str(self) == "/work/taiga"
+
+            def fake_build_cmd(
+                project: str, project_dir: Path, passthrough, extra_files=None
+            ):
+                calls["build"] = (
+                    project,
+                    str(project_dir),
+                    list(passthrough),
+                    extra_files,
+                )
+                return ["docker", "compose", "-p", project, "ps"]
+
+            def fake_execvp(prog, argv):
+                raise RuntimeError("execvp called")
+
+            s.Path.cwd = staticmethod(fake_cwd)  # type: ignore[assignment]
+            s.Path.resolve = fake_resolve  # type: ignore[assignment]
+            s.Path.is_dir = fake_is_dir  # type: ignore[assignment]
+            s.build_cmd = fake_build_cmd  # type: ignore[assignment]
+            s.os.execvp = fake_execvp  # type: ignore[assignment]
+
+            s.sys.argv = [
+                "compose.py",
+                "-f",
+                "docker-compose-inits.yml",
+                "run",
+                "--rm",
+                "manager",
+                "migrate",
+            ]
+
+            with self.assertRaises(RuntimeError):
+                s.main()
+
+            self.assertEqual(
+                calls["build"],
+                (
+                    "taiga",
+                    "/work/taiga",
+                    ["run", "--rm", "manager", "migrate"],
+                    ["docker-compose-inits.yml"],
+                ),
+            )
         finally:
             s.sys.argv = old_argv
             s.Path.cwd = old_cwd  # type: ignore[assignment]
