@@ -5,7 +5,7 @@ server:
     canonical:
       - "magento.shop.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     oidc:
       enabled: false

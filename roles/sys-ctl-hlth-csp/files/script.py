@@ -147,7 +147,7 @@ def run_checker(
     Always uses run.
     """
     if always_pull:
-        subprocess.run(["docker", "pull", image], check=False)
+        subprocess.run(["container", "pull", image], check=False)
 
     cmd = build_docker_cmd(
         image=image,

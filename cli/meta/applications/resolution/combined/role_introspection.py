@@ -90,7 +90,7 @@ def load_dependencies_app_only(role_name: str) -> List[str]:
 def load_shared_service_roles_for_app(role_name: str) -> List[str]:
     """
     If role is an application role, inspect roles/<role>/config/main.yml and
-    return provider roles implied by docker.services.* flags.
+    return provider roles implied by compose.services.* flags.
 
     Logic is centralized in cli.meta.applications.resolution.services.resolver.
     """

@@ -1,7 +1,7 @@
 http_address            =   "0.0.0.0:4180"
 cookie_secret           =   "{{ lookup('config',oauth2_proxy_application_id, 'credentials.oauth2_proxy_cookie_secret') }}"
 cookie_secure           =   "{{ lookup('tls', application_id, 'enabled') | string | lower }}"                                                                            # True is necessary to force the cookie set via https
-upstreams               =   "http://{{ lookup('config',oauth2_proxy_application_id, 'docker.services.oauth2.origin.host') }}:{{ lookup('config',oauth2_proxy_application_id, 'docker.services.oauth2.origin.port') }}"
+upstreams               =   "http://{{ lookup('config',oauth2_proxy_application_id, 'compose.services.oauth2.origin.host') }}:{{ lookup('config',oauth2_proxy_application_id, 'compose.services.oauth2.origin.port') }}"
 cookie_domains          =   ["{{ lookup('domain',oauth2_proxy_application_id) }}", "{{ lookup('domain','web-app-keycloak') }}"]   # Required so cookie can be read on all subdomains.
 whitelist_domains       =   [".{{ DOMAIN_PRIMARY }}"]                                                                                       # Required to allow redirection back to original requested target.
 
@@ -13,11 +13,11 @@ oidc_issuer_url         =   "{{ OIDC.CLIENT.ISSUER_URL }}"
 provider                =   "oidc"
 provider_display_name   =   "{{ OIDC.BUTTON_TEXT }}"
 
-{% if lookup('config',oauth2_proxy_application_id, 'docker.services.oauth2.allowed_groups', False) %}
+{% if lookup('config',oauth2_proxy_application_id, 'compose.services.oauth2.allowed_groups', False) %}
 {# role based restrictions #}
 scope                   =   "openid email profile {{ RBAC.GROUP.CLAIM }}"
 oidc_groups_claim       =   "{{ RBAC.GROUP.CLAIM }}"
-allowed_groups          =   {{ lookup('config',oauth2_proxy_application_id, 'docker.services.oauth2.allowed_groups') | to_json }}
+allowed_groups          =   {{ lookup('config',oauth2_proxy_application_id, 'compose.services.oauth2.allowed_groups') | to_json }}
 email_domains           =   ["*"]
 {% else %}
 email_domains           =   "{{ DOMAIN_PRIMARY }}"

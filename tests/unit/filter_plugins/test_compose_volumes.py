@@ -35,7 +35,7 @@ class TestComposeVolumes(unittest.TestCase):
     def _base_apps(self) -> Dict[str, Any]:
         return {
             "app": {
-                "docker": {
+                "compose": {
                     "services": {
                         "database": {"enabled": False, "shared": False},
                         "redis": {"enabled": False},
@@ -80,16 +80,16 @@ class TestComposeVolumes(unittest.TestCase):
     # -----------------------------
     def test_database_enabled_not_shared_requires_database_volume_argument(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["database"]["enabled"] = True
-        apps["app"]["docker"]["services"]["database"]["shared"] = False
+        apps["app"]["compose"]["services"]["database"]["enabled"] = True
+        apps["app"]["compose"]["services"]["database"]["shared"] = False
 
         with self.assertRaises(AnsibleFilterError):
             compose_volumes(apps, "app")
 
     def test_database_enabled_not_shared_uses_database_volume_argument(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["database"]["enabled"] = True
-        apps["app"]["docker"]["services"]["database"]["shared"] = False
+        apps["app"]["compose"]["services"]["database"]["enabled"] = True
+        apps["app"]["compose"]["services"]["database"]["shared"] = False
 
         rendered = compose_volumes(apps, "app", database_volume="my_db_vol")
         data = self._parse_yaml(rendered)
@@ -98,8 +98,8 @@ class TestComposeVolumes(unittest.TestCase):
 
     def test_database_enabled_shared_true_does_not_add_database_volume(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["database"]["enabled"] = True
-        apps["app"]["docker"]["services"]["database"]["shared"] = True
+        apps["app"]["compose"]["services"]["database"]["enabled"] = True
+        apps["app"]["compose"]["services"]["database"]["shared"] = True
 
         rendered = compose_volumes(apps, "app")
         data = self._parse_yaml(rendered)
@@ -108,8 +108,8 @@ class TestComposeVolumes(unittest.TestCase):
 
     def test_database_enabled_shared_null_treated_as_not_shared(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["database"]["enabled"] = True
-        apps["app"]["docker"]["services"]["database"]["shared"] = None
+        apps["app"]["compose"]["services"]["database"]["enabled"] = True
+        apps["app"]["compose"]["services"]["database"]["shared"] = None
 
         rendered = compose_volumes(apps, "app", database_volume="my_db_vol")
         data = self._parse_yaml(rendered)
@@ -122,7 +122,7 @@ class TestComposeVolumes(unittest.TestCase):
     # -----------------------------
     def test_redis_enabled_adds_redis_volume(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["redis"]["enabled"] = True
+        apps["app"]["compose"]["services"]["redis"]["enabled"] = True
 
         rendered = compose_volumes(apps, "app")
         data = self._parse_yaml(rendered)
@@ -132,8 +132,8 @@ class TestComposeVolumes(unittest.TestCase):
 
     def test_oauth2_enabled_adds_redis_volume_when_redis_disabled(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["redis"]["enabled"] = False
-        apps["app"]["docker"]["services"]["oauth2"]["enabled"] = True
+        apps["app"]["compose"]["services"]["redis"]["enabled"] = False
+        apps["app"]["compose"]["services"]["oauth2"]["enabled"] = True
 
         rendered = compose_volumes(apps, "app")
         data = self._parse_yaml(rendered)
@@ -143,8 +143,8 @@ class TestComposeVolumes(unittest.TestCase):
 
     def test_oauth2_null_does_not_add_redis_if_redis_disabled(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["redis"]["enabled"] = False
-        apps["app"]["docker"]["services"]["oauth2"]["enabled"] = None
+        apps["app"]["compose"]["services"]["redis"]["enabled"] = False
+        apps["app"]["compose"]["services"]["oauth2"]["enabled"] = None
 
         rendered = compose_volumes(apps, "app")
         data = self._parse_yaml(rendered)
@@ -169,7 +169,7 @@ class TestComposeVolumes(unittest.TestCase):
 
     def test_extra_volumes_override_auto(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["redis"]["enabled"] = True
+        apps["app"]["compose"]["services"]["redis"]["enabled"] = True
 
         rendered = compose_volumes(
             apps,
@@ -182,8 +182,8 @@ class TestComposeVolumes(unittest.TestCase):
 
     def test_database_enabled_not_shared_without_database_volume_raises(self):
         apps = self._base_apps()
-        apps["app"]["docker"]["services"]["database"]["enabled"] = True
-        apps["app"]["docker"]["services"]["database"]["shared"] = False
+        apps["app"]["compose"]["services"]["database"]["enabled"] = True
+        apps["app"]["compose"]["services"]["database"]["shared"] = False
         with self.assertRaises(AnsibleFilterError):
             compose_volumes(apps, "app", database_volume=None)
 

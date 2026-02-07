@@ -19,7 +19,7 @@ server:
       - "video.{{ DOMAIN_PRIMARY }}"
     aliases: []
     
-docker:
+compose:
   services:
     oidc:
       enabled: true

@@ -14,7 +14,7 @@ server:
     canonical:
       - "forum.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     oidc:
       enabled: true

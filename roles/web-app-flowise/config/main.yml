@@ -18,7 +18,7 @@ server:
         - https://fonts.gstatic.com
         - https://r.wdfl.co
       connect-src: []
-docker:
+compose:
   services:
     logout:
       enabled: true

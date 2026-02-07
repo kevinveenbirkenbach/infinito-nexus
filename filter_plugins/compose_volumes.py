@@ -59,13 +59,13 @@ def compose_volumes(
 
       - database volume if:
           is_docker_service_enabled(database)
-          and not docker.services.database.shared
+          and not compose.services.database.shared
 
         name: database_volume   (no fallback!)
 
       - redis volume if:
           is_docker_service_enabled(redis)
-          or docker.services.oauth2.enabled
+          or compose.services.oauth2.enabled
 
         name: {{ application_id | get_entity_name }}_redis
 
@@ -99,7 +99,7 @@ def compose_volumes(
         get_app_conf(
             applications=applications,
             application_id=application_id,
-            config_path="docker.services.database.shared",
+            config_path="compose.services.database.shared",
             strict=False,
             default=False,
             skip_missing_app=True,
@@ -124,7 +124,7 @@ def compose_volumes(
         get_app_conf(
             applications=applications,
             application_id=application_id,
-            config_path="docker.services.oauth2.enabled",
+            config_path="compose.services.oauth2.enabled",
             strict=False,
             default=False,
             skip_missing_app=True,

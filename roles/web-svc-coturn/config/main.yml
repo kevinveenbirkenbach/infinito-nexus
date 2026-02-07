@@ -3,7 +3,7 @@ server:
   domains:
     canonical:
       - "coturn.{{ DOMAIN_PRIMARY }}"
-docker:
+compose:
   services:
     matomo:
       enabled: true

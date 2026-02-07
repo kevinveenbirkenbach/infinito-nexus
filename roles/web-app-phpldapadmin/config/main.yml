@@ -3,7 +3,7 @@ server:
     canonical:
       - "phpldapadmin.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     logout:
       enabled: true

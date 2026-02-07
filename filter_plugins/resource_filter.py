@@ -19,7 +19,7 @@ def resource_filter(
 ):
     """
     Lookup order:
-      1) docker.services.<service_name or get_entity_name(application_id)>.<key>
+      1) compose.services.<service_name or get_entity_name(application_id)>.<key>
       2) hard_default (mandatory)
 
     - service_name may be "" → will resolve to get_entity_name(application_id).
@@ -33,7 +33,7 @@ def resource_filter(
         return get_app_conf(
             applications,
             application_id,
-            f"docker.services.{primary_service}.{key}",
+            f"compose.services.{primary_service}.{key}",
             False,
             hard_default,
         )

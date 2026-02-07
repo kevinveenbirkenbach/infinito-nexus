@@ -8,15 +8,15 @@ http_port:            "{{ ports.localhost.http[application_id] }}"
 container_hostname:   "{{ lookup('domain',application_id) }}"
 
 # App container
-BRIDGY_CONTAINER:     "{{ lookup('config', application_id, 'docker.services.application.name') }}"
-BRIDGY_IMAGE:         "{{ lookup('config', application_id, 'docker.services.application.image') }}"
-BRIDGY_VERSION:       "{{ lookup('config', application_id, 'docker.services.application.version')}}"
+BRIDGY_CONTAINER:     "{{ lookup('config', application_id, 'compose.services.application.name') }}"
+BRIDGY_IMAGE:         "{{ lookup('config', application_id, 'compose.services.application.image') }}"
+BRIDGY_VERSION:       "{{ lookup('config', application_id, 'compose.services.application.version')}}"
 
 BRIDGY_ADMIN_EMAIL:   "{{ users.administrator.email }}"
 
 # Source
-BRIDGY_REPO_URL:      "{{ lookup('config', application_id, 'docker.services.application.repository') }}"
-BRIDGY_REPO_BRANCH:   "{{ lookup('config', application_id, 'docker.services.application.branch') }}"
+BRIDGY_REPO_URL:      "{{ lookup('config', application_id, 'compose.services.application.repository') }}"
+BRIDGY_REPO_BRANCH:   "{{ lookup('config', application_id, 'compose.services.application.branch') }}"
 
 # Runtime env defaults for Bridgy Fed (see upstream README)
 BRIDGY_APPVIEW_HOST:  "api.bsky.app"

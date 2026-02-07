@@ -36,9 +36,9 @@ class TestNginxPathsLookup(unittest.TestCase):
         }
 
     def _fake_get_app_conf(self, applications, app_id, key, strict=True):
-        if key == "docker.volumes.www":
+        if key == "compose.volumes.www":
             return "/opt/mock/www"
-        if key == "docker.volumes.nginx":
+        if key == "compose.volumes.nginx":
             return "/opt/mock/nginx"
         raise KeyError(key)
 

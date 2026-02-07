@@ -23,7 +23,7 @@ server:
       script-src-elem:
         unsafe-inline:  true
         unsafe-eval:    true
-docker:
+compose:
   services:
     logout:
       enabled: false

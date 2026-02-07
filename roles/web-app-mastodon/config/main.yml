@@ -10,7 +10,7 @@ server:
         - "*"
       worker-src:
         - "blob:"
-docker:
+compose:
   services:
     oidc:
       enabled:            true

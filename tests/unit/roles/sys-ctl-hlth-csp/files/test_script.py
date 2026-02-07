@@ -208,7 +208,7 @@ class TestRunChecker(unittest.TestCase):
 
         pull_call = mock_run.call_args_list[0]
         self.assertEqual(pull_call.kwargs.get("check"), False)
-        self.assertEqual(pull_call.args[0], ["docker", "pull", "img:tag"])
+        self.assertEqual(pull_call.args[0], ["container", "pull", "img:tag"])
 
         run_call = mock_run.call_args_list[1]
         self.assertEqual(run_call.kwargs.get("check"), False)

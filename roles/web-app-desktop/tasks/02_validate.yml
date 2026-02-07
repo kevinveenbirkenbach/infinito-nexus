@@ -3,7 +3,7 @@
     that:
       - >
         (
-          not ( lookup('config', item.key, 'docker.services.desktop.enabled', false) | bool)
+          not ( lookup('config', item.key, 'compose.services.desktop.enabled', false) | bool)
         )
         or (lookup('domain',item.key)).endswith(lookup('domain','web-app-desktop'))
     fail_msg: >

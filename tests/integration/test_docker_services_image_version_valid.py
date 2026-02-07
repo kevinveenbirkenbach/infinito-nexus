@@ -39,7 +39,7 @@ def _iter_role_config_files(repo_root: Path) -> List[Path]:
 
 
 def _extract_services(cfg: Dict[str, Any]) -> Dict[str, Any]:
-    docker = _safe_mapping(cfg.get("docker"))
+    docker = _safe_mapping(cfg.get("compose"))
     return _safe_mapping(docker.get("services"))
 
 
@@ -109,17 +109,17 @@ class TestDockerServicesImageVersionValid(unittest.TestCase):
             for svc_name, field, value in _iter_declared_fields(services):
                 if field == "image" and not _is_valid_image(value):
                     failures.append(
-                        f"{cfg_path}: docker.services.{svc_name}.image invalid: {value!r}"
+                        f"{cfg_path}: compose.services.{svc_name}.image invalid: {value!r}"
                     )
 
                 if field == "version" and not _is_valid_version(value):
                     failures.append(
-                        f"{cfg_path}: docker.services.{svc_name}.version invalid: {value!r}"
+                        f"{cfg_path}: compose.services.{svc_name}.version invalid: {value!r}"
                     )
 
         if failures:
             self.fail(
-                "Invalid docker.services image/version entries found:\n"
+                "Invalid compose.services image/version entries found:\n"
                 + "\n".join(f"- {x}" for x in failures)
             )
 

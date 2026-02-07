@@ -102,10 +102,10 @@ class LookupModule(LookupBase):
             raise AnsibleError("nginx: proxy_app_id is empty")
 
         www_dir = get_app_conf(
-            applications, proxy_app_id, "docker.volumes.www", strict=True
+            applications, proxy_app_id, "compose.volumes.www", strict=True
         )
         nginx_dir = get_app_conf(
-            applications, proxy_app_id, "docker.volumes.nginx", strict=True
+            applications, proxy_app_id, "compose.volumes.nginx", strict=True
         )
 
         www_dir = _ensure_trailing_slash(as_str(www_dir))

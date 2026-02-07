@@ -30,7 +30,7 @@ class TestFilterRolesByMinStorage(unittest.TestCase):
         self._write_role_config(
             "web-app-demo",
             yaml_text="""
-docker:
+compose:
   services:
     demo:
       min_storage: 5G
@@ -54,7 +54,7 @@ docker:
         self._write_role_config(
             "web-app-demo",
             yaml_text="""
-docker:
+compose:
   services:
     demo:
       min_storage: 50G
@@ -81,7 +81,7 @@ docker:
         self._write_role_config(
             "web-app-demo",
             yaml_text="""
-docker:
+compose:
   services:
     demo: {}
 """.lstrip(),
@@ -100,7 +100,7 @@ docker:
             )
 
         self.assertEqual(kept, ["web-app-demo"])
-        self.assertIn("Missing key docker.services.demo.min_storage", err.getvalue())
+        self.assertIn("Missing key compose.services.demo.min_storage", err.getvalue())
 
     def test_missing_role_directory_emits_absolute_path_warning(self) -> None:
         err = io.StringIO()
@@ -163,7 +163,7 @@ docker:
         self._write_role_config(
             "web-app-demo",
             yaml_text="""
-docker:
+compose:
   services:
     demo:
       min_storage: "nope"
@@ -198,7 +198,7 @@ docker:
         self._write_role_config(
             "web-app-demo",
             yaml_text="""
-docker:
+compose:
   services:
     demo:
       min_storage: 1G

@@ -11,7 +11,7 @@ server:
       - "event.{{ DOMAIN_PRIMARY }}"
     aliases: []
     
-docker:
+compose:
   services:
     oidc:
       enabled: true

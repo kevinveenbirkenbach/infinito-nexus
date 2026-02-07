@@ -42,7 +42,7 @@ applications:
   svc-ai-ollama:
     # Disabled for test because they are to huge for github actions test
     preload_models: []
-    docker:
+    compose:
       services:
         ollama:
           # The following image is required for github actions, because the official image is to huge
@@ -56,7 +56,7 @@ applications:
   web-app-keycloak:
     credentials:
       administrator_password: "'$tr0ng€xampl3PW!"
-    docker:
+    compose:
       services:
         keycloak:
           realm:
@@ -65,7 +65,7 @@ applications:
     credentials:
       administrator_password: "'$tr0ng€xampl3PW!"
   web-app-phpmyadmin:
-    docker:
+    compose:
       services:
         phpmyadmin:
           # Allows faster debugging

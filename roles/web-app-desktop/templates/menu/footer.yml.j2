@@ -10,7 +10,7 @@
       icon:
         class: fas fa-book
       url: {{ lookup('tls', 'web-app-sphinx', 'url.base') }}
-      iframe: {{ lookup('config','web-app-sphinx', 'docker.services.desktop.enabled') }}
+      iframe: {{ lookup('config','web-app-sphinx', 'compose.services.desktop.enabled') }}
 
 {% endif %}
 
@@ -21,7 +21,7 @@
       icon:
         class: "fas fa-chalkboard-teacher"
       url: {{ lookup('tls', 'web-app-navigator', 'url.base') }}
-      iframe: {{ lookup('config','web-app-navigator', 'docker.services.desktop.enabled') }}
+      iframe: {{ lookup('config','web-app-navigator', 'compose.services.desktop.enabled') }}
 
 {% endif %}
     - name: Solutions

@@ -12,7 +12,7 @@ server:
     canonical:
       - pgadmin.{{ DOMAIN_PRIMARY }}
     aliases: []
-docker:
+compose:
   services:
     pgadmin:
       image:                    "dpage/pgadmin4"

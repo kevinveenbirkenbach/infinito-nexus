@@ -35,7 +35,7 @@ server:
     canonical:
       - "blog.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     oidc:
       enabled: true

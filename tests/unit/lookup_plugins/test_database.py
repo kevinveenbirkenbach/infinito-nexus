@@ -71,7 +71,7 @@ class DatabaseLookupTests(unittest.TestCase):
     def test_no_dbtype_configured_returns_empty_like_vars_logic(self):
         applications = {
             "web-app-foo": {
-                "docker": {
+                "compose": {
                     "services": {
                         "database": {"type": "", "enabled": False, "shared": False}
                     }
@@ -130,7 +130,7 @@ class DatabaseLookupTests(unittest.TestCase):
         # Consumer config: database.type=postgres, shared=false
         applications = {
             "web-app-foo": {
-                "docker": {
+                "compose": {
                     "services": {
                         "database": {
                             "type": "postgres",
@@ -143,7 +143,7 @@ class DatabaseLookupTests(unittest.TestCase):
             },
             # Central DB role config (used only for defaults like version; name not used if shared=false)
             "svc-db-postgres": {
-                "docker": {
+                "compose": {
                     "services": {
                         "postgres": {"name": "postgres-central", "version": "16"}
                     }
@@ -208,7 +208,7 @@ class DatabaseLookupTests(unittest.TestCase):
     def test_postgres_shared_uses_central_name_for_host_instance_container_volume(self):
         applications = {
             "web-app-foo": {
-                "docker": {
+                "compose": {
                     "services": {
                         "database": {
                             "type": "postgres",
@@ -220,7 +220,7 @@ class DatabaseLookupTests(unittest.TestCase):
                 "credentials": {"database_password": "pw"},
             },
             "svc-db-postgres": {
-                "docker": {
+                "compose": {
                     "services": {
                         "postgres": {"name": "postgres-central", "version": "16"}
                     }
@@ -267,7 +267,7 @@ class DatabaseLookupTests(unittest.TestCase):
     def test_mariadb_jdbc_scheme_stays_mariadb(self):
         applications = {
             "web-app-foo": {
-                "docker": {
+                "compose": {
                     "services": {
                         "database": {
                             "type": "mariadb",
@@ -279,7 +279,7 @@ class DatabaseLookupTests(unittest.TestCase):
                 "credentials": {"database_password": "pw"},
             },
             "svc-db-mariadb": {
-                "docker": {
+                "compose": {
                     "services": {
                         "mariadb": {"name": "mariadb-central", "version": "11.4"}
                     }
@@ -318,7 +318,7 @@ class DatabaseLookupTests(unittest.TestCase):
     def test_version_override_on_consumer_wins_over_default(self):
         applications = {
             "web-app-foo": {
-                "docker": {
+                "compose": {
                     "services": {
                         "database": {
                             "type": "postgres",
@@ -331,7 +331,7 @@ class DatabaseLookupTests(unittest.TestCase):
                 "credentials": {"database_password": "pw"},
             },
             "svc-db-postgres": {
-                "docker": {
+                "compose": {
                     "services": {
                         "postgres": {"name": "postgres-central", "version": "16"}
                     }

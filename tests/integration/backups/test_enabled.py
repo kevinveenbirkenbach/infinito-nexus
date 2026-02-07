@@ -12,7 +12,7 @@ class TestBackupsEnabledIntegrity(unittest.TestCase):
 
     def test_backups_enabled_image_consistency(self):
         """
-        Ensure that if `backups.enabled` is set for any docker.services[*]:
+        Ensure that if `backups.enabled` is set for any compose.services[*]:
           - it's a boolean value
           - the containing service dict has an `image` entry at the same level
         """
@@ -30,7 +30,7 @@ class TestBackupsEnabledIntegrity(unittest.TestCase):
                     self.fail(f"YAML parsing failed for {docker_config_path}: {e}")
                     continue
 
-            services = (config.get("docker", {}) or {}).get("services", {}) or {}
+            services = (config.get("compose", {}) or {}).get("services", {}) or {}
 
             for service_key, service in services.items():
                 if not isinstance(service, dict):

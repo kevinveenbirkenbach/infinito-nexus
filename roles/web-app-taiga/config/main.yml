@@ -5,7 +5,7 @@ oidc:
     #
     # Due to this reason this plutin is deactivated atm
   flavor:             'taigaio' # Potential flavors: robrotheram, taigaio
-docker:
+compose:
   services:
     oidc:
       enabled: false

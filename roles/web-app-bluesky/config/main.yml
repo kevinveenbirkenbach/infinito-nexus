@@ -27,7 +27,7 @@ server:
         - "blob:"
       worker-src:
         - "blob:"
-docker:
+compose:
   services:
     logout:
       enabled: true

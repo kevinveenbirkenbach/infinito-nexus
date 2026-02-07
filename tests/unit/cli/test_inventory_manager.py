@@ -66,7 +66,7 @@ class TestInventoryManager(unittest.TestCase):
         # resolve_schema_includes_recursive() to avoid provider resolution.
         if path.match("*/config/main.yml"):
             return {
-                "docker": {
+                "compose": {
                     "services": {
                         "database": {"enabled": True, "shared": True},
                     }

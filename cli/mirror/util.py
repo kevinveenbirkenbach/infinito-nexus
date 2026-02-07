@@ -106,7 +106,7 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
         role_name = config_file.parent.parent.name
         data = load_yaml(config_file)
 
-        docker = data.get("docker", {})
+        docker = data.get("compose", {})
         services = docker.get("services", {})
 
         if not isinstance(services, dict):

@@ -15,7 +15,7 @@ server:
     admin:  "/admin/"
   status_codes:
     default: 301
-docker:
+compose:
   services:
     logout:
       enabled: true

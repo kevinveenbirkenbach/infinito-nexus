@@ -8,7 +8,7 @@ class TestCspFamilyUnionExplicitDisable(unittest.TestCase):
         self.filter = FilterModule()
         self.apps = {
             "app1": {
-                "docker": {"services": {"matomo": {"enabled": True}}},
+                "compose": {"services": {"matomo": {"enabled": True}}},
                 "server": {
                     "csp": {
                         "whitelist": {},

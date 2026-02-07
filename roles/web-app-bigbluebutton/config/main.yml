@@ -13,7 +13,7 @@ server:
     aliases: []
 credentials: {}
 
-docker:
+compose:
   services:
     oidc:
       enabled:  true

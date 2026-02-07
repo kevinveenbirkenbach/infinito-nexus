@@ -5,7 +5,7 @@ server:
     canonical:
       - asset.{{ DOMAIN_PRIMARY }}
     aliases: []
-docker:
+compose:
   services:
     matomo:
       enabled: true

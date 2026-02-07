@@ -53,7 +53,7 @@ class TestInjEnabledFilter(unittest.TestCase):
     def test_basic_build(self):
         applications = {
             "myapp": {
-                "docker": {
+                "compose": {
                     "services": {
                         "javascript": {"enabled": True},
                         "logout": {"enabled": False},
@@ -80,7 +80,7 @@ class TestInjEnabledFilter(unittest.TestCase):
     def test_missing_keys_return_default_false(self):
         applications = {
             "app": {
-                "docker": {
+                "compose": {
                     "services": {
                         "javascript": {"enabled": True},
                         # logout/css missing
@@ -96,7 +96,7 @@ class TestInjEnabledFilter(unittest.TestCase):
         self.assertEqual(result["css"], False)
 
     def test_default_true_applied_to_missing(self):
-        applications = {"app": {"docker": {"services": {}}}}
+        applications = {"app": {"compose": {"services": {}}}}
         result = self.filter(applications, "app", ["logout", "css"], default=True)
         self.assertEqual(result, {"logout": True, "css": True})
 
@@ -112,20 +112,20 @@ class TestInjEnabledFilter(unittest.TestCase):
 
     def test_missing_application_id_raises(self):
         applications = {
-            "other": {"docker": {"services": {"logout": {"enabled": True}}}}
+            "other": {"compose": {"services": {"logout": {"enabled": True}}}}
         }
         with self.assertRaises(AppConfigKeyError):
             _ = self.filter(applications, "unknown-app", ["logout"])
 
     def test_truthy_string_is_returned_as_is(self):
         applications = {
-            "app": {"docker": {"services": {"logout": {"enabled": "true"}}}}
+            "app": {"compose": {"services": {"logout": {"enabled": "true"}}}}
         }
         result = self.filter(applications, "app", ["logout"], default=False)
         self.assertEqual(result["logout"], "true")
 
     def test_nonexistent_feature_path_uses_default(self):
-        applications = {"app": {"docker": {"services": {}}}}
+        applications = {"app": {"compose": {"services": {}}}}
         result = self.filter(applications, "app", ["nonexistent"], default=False)
         self.assertEqual(result["nonexistent"], False)
 

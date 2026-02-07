@@ -16,11 +16,11 @@ OPENLDAP_LDIF_TYPES:
   - groups
 
 # Container
-OPENLDAP_CONTAINER:             "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.name') }}"
-OPENLDAP_IMAGE:                 "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.image') }}"
-OPENLDAP_VERSION:               "{{ lookup('config', application_id, 'docker.services.' ~ entity_name ~ '.version') }}"
-OPENLDAP_VOLUME:                "{{ lookup('config', application_id, 'docker.volumes.data') }}"
-OPENLDAP_NETWORK:               "{{ lookup('config', application_id, 'docker.network') }}"
+OPENLDAP_CONTAINER:             "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.name') }}"
+OPENLDAP_IMAGE:                 "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.image') }}"
+OPENLDAP_VERSION:               "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.version') }}"
+OPENLDAP_VOLUME:                "{{ lookup('config', application_id, 'compose.volumes.data') }}"
+OPENLDAP_NETWORK:               "{{ lookup('config', application_id, 'compose.network') }}"
 OPENLDAP_SERVICE:               "{{ entity_name }}"
 OPENLDAP_IMAGE_CUSTOM:          "infinito/openldap:local"
 OPENLDAP_BIND_DN:               "{{ LDAP.DN.ADMINISTRATOR.DATA }}"

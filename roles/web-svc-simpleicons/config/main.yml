@@ -1,5 +1,5 @@
 credentials: {}
-docker:
+compose:
   services:
     oauth2:
       enabled:  false

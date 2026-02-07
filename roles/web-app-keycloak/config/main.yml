@@ -17,7 +17,7 @@ server:
 scopes:
   nextcloud:  nextcloud
 
-docker:
+compose:
   services:
     logout:
       enabled:  false

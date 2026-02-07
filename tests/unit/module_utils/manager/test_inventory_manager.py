@@ -42,7 +42,7 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {}  # missing application_id on purpose
                 if p == role_path / "config" / "main.yml":
-                    return {"docker": {"services": {}}}
+                    return {"compose": {"services": {}}}
                 return {}
 
             with (
@@ -102,7 +102,7 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
-                    return {"docker": {"services": {}}}
+                    return {"compose": {"services": {}}}
                 return {}
 
             with (
@@ -164,7 +164,7 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
-                    return {"docker": {"services": {}}}
+                    return {"compose": {"services": {}}}
                 return {}
 
             with (
@@ -237,7 +237,7 @@ class TestInventoryManager(unittest.TestCase):
                 if p == role_path / "vars" / "main.yml":
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
-                    return {"docker": {"services": {}}}
+                    return {"compose": {"services": {}}}
                 return {}
 
             fake_snippet = "!vault |\n  $ANSIBLE_VAULT;1.1;AES256\n    ENCRYPTEDVALUE"
@@ -342,7 +342,7 @@ class TestInventoryManager(unittest.TestCase):
                     return {"application_id": "app_test"}
                 if p == role_path / "config" / "main.yml":
                     # No provider resolution / no special rules
-                    return {"docker": {"services": {}}}
+                    return {"compose": {"services": {}}}
                 return {}
 
             with (

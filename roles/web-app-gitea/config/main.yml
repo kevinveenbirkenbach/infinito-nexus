@@ -23,7 +23,7 @@ server:
     aliases: []
     canonical:
       - tea.git.{{ DOMAIN_PRIMARY }}
-docker:
+compose:
   services:
     oidc:
       enabled: false
@@ -64,7 +64,7 @@ docker:
     oauth2:
       origin:
         host:             "application"
-        port:             "<< defaults_applications[web-app-gitea].docker.services.gitea.port >>"
+        port:             "<< defaults_applications[web-app-gitea].compose.services.gitea.port >>"
       acl:
         blacklist:
           - "/user/login"

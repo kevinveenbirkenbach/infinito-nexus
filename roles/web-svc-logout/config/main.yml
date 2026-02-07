@@ -20,7 +20,7 @@ server:
         - "https://cdn.jsdelivr.net"
       frame-ancestors:
         - "auth.{{ DOMAIN_PRIMARY }}"
-docker:
+compose:
   services:
     logout:
       enabled: false

@@ -176,7 +176,7 @@ galaxy_info:
         return {
             "domains": {"portfolio": "myportfolio.com"},
             "applications": {
-                "portfolio": {"docker": {"services": {"desktop": {"enabled": True}}}}
+                "portfolio": {"compose": {"services": {"desktop": {"enabled": True}}}}
             },
             "group_names": ["portfolio"],
             "TLS_ENABLED": True,

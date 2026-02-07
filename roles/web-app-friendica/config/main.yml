@@ -15,7 +15,7 @@ server:
 addons:
   keycloakpassword: {}
   ldapauth: {}
-docker:
+compose:
   services:
     friendica:
       image:    'friendica'

@@ -1,4 +1,4 @@
-docker:
+compose:
   services:
     postgres:
       # Postgis is necessary for mobilizon

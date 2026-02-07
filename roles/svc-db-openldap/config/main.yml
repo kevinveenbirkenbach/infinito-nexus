@@ -1,9 +1,9 @@
 network:
   local:          True                                # Activates local network. Necessary for LDIF import routines
-  docker:         True                                # Activates docker network to allow other docker containers to connect
+  compose:        True                                # Activates docker network to allow other docker containers to connect
   public:         False                               # Set to true in inventory file if you want to expose the LDAP port to the internet
 
-docker:
+compose:
   services:
     ldap:
       enabled: true

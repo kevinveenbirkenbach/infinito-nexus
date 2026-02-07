@@ -3,7 +3,7 @@ server:
     canonical:
       - "file.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     desktop:
       enabled: true

@@ -9,7 +9,7 @@ server:
     aliases: []
     canonical:
       - phpmyadmin.{{ DOMAIN_PRIMARY }}
-docker:
+compose:
   services:
     logout:
       enabled: true

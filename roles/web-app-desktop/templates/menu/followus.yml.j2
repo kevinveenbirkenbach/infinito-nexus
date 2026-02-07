@@ -21,7 +21,7 @@ followus:
         class: fa-brands fa-mastodon
       url: "{{ service_provider.contact.mastodon | fediverse_url(lookup('tls', application_id, 'protocols.web')) }}"
       identifier: "{{ service_provider.contact.mastodon }}"
-      iframe: {{ lookup('config','web-app-mastodon', 'docker.services.desktop.enabled') }}
+      iframe: {{ lookup('config','web-app-mastodon', 'compose.services.desktop.enabled') }}
 {% endif %}
 
 {% if service_provider.contact.bluesky is defined and service_provider.contact.bluesky != "" %}
@@ -41,7 +41,7 @@ followus:
         class: fa-solid fa-camera
       identifier: "{{ service_provider.contact.pixelfed }}"
       url: "{{ service_provider.contact.pixelfed | fediverse_url(lookup('tls', application_id, 'protocols.web')) }}"
-      iframe: {{ lookup('config','web-app-pixelfed', 'docker.services.desktop.enabled') }}
+      iframe: {{ lookup('config','web-app-pixelfed', 'compose.services.desktop.enabled') }}
 {% endif %}
 
 {% if service_provider.contact.peertube is defined and service_provider.contact.peertube != "" %}
@@ -51,7 +51,7 @@ followus:
         class: fa-solid fa-video
       identifier: "{{ service_provider.contact.peertube }}"
       url: "{{ service_provider.contact.peertube | fediverse_url(lookup('tls', application_id, 'protocols.web')) }}"
-      iframe: {{ lookup('config','web-app-peertube', 'docker.services.desktop.enabled') }}
+      iframe: {{ lookup('config','web-app-peertube', 'compose.services.desktop.enabled') }}
 {% endif %}
 
 {% if service_provider.contact.wordpress is defined and service_provider.contact.wordpress != "" %}
@@ -61,7 +61,7 @@ followus:
         class: fa-solid fa-blog
       identifier: "{{ service_provider.contact.wordpress }}"
       url: "{{ service_provider.contact.wordpress | fediverse_url(lookup('tls', application_id, 'protocols.web')) }}"
-      iframe: {{ lookup('config','web-app-wordpress', 'docker.services.desktop.enabled') }}
+      iframe: {{ lookup('config','web-app-wordpress', 'compose.services.desktop.enabled') }}
 {% endif %}
 
 {% if service_provider.contact.friendica is defined and service_provider.contact.friendica != "" %}
@@ -71,7 +71,7 @@ followus:
         class: fa-solid fa-network-wired
       identifier: "{{ service_provider.contact.friendica }}"
       url: "{{ service_provider.contact.friendica | fediverse_url(lookup('tls', application_id, 'protocols.web')) }}"
-      iframe: {{ lookup('config','web-app-friendica', 'docker.services.desktop.enabled') }}
+      iframe: {{ lookup('config','web-app-friendica', 'compose.services.desktop.enabled') }}
 {% endif %}
 
 {% if service_provider.contact.newsletter is defined
@@ -82,6 +82,6 @@ followus:
       icon:
         class: fa-solid fa-envelope
       url: "{{ service_provider.contact.newsletter }}"
-      iframe: {{ lookup('config','web-app-listmonk', 'docker.services.desktop.enabled') }}
+      iframe: {{ lookup('config','web-app-listmonk', 'compose.services.desktop.enabled') }}
 {% endif %}
 {% endif %}

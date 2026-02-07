@@ -60,7 +60,7 @@ class LookupModule(LookupBase):
             get_app_conf(
                 applications,
                 consumer_id,
-                "docker.services.database.enabled",
+                "compose.services.database.enabled",
                 strict=False,
                 default=False,
             )
@@ -69,7 +69,7 @@ class LookupModule(LookupBase):
             get_app_conf(
                 applications,
                 consumer_id,
-                "docker.services.database.shared",
+                "compose.services.database.shared",
                 strict=False,
                 default=False,
             )
@@ -78,7 +78,7 @@ class LookupModule(LookupBase):
         dbtype = get_app_conf(
             applications,
             consumer_id,
-            "docker.services.database.type",
+            "compose.services.database.type",
             strict=False,
             default="",
         )
@@ -115,7 +115,7 @@ class LookupModule(LookupBase):
         central_name = get_app_conf(
             applications,
             db_id,
-            f"docker.services.{dbtype}.name",
+            f"compose.services.{dbtype}.name",
             strict=False,
             default="",
             skip_missing_app=True,
@@ -145,7 +145,7 @@ class LookupModule(LookupBase):
         default_version = get_app_conf(
             applications,
             db_id,
-            f"docker.services.{dbtype}.version",
+            f"compose.services.{dbtype}.version",
             strict=False,
             default="",
             skip_missing_app=True,
@@ -154,7 +154,7 @@ class LookupModule(LookupBase):
         version = get_app_conf(
             applications,
             consumer_id,
-            "docker.services.database.version",
+            "compose.services.database.version",
             strict=False,
             default=default_version,
         )

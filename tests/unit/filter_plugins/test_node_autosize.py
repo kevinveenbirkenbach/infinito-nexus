@@ -17,7 +17,7 @@ class TestNodeAutosizeFilter(unittest.TestCase):
     def setUp(self):
         # Default parameters used by all tests
         self.applications = {
-            "web-app-nextcloud": {"docker": {"services": {"whiteboard": {}}}}
+            "web-app-nextcloud": {"compose": {"services": {"whiteboard": {}}}}
         }
         self.application_id = "web-app-nextcloud"
         self.service_name = "whiteboard"
@@ -41,7 +41,7 @@ class TestNodeAutosizeFilter(unittest.TestCase):
             **_kwargs,
         ):
             assert application_id == self.application_id
-            assert config_path == f"docker.services.{self.service_name}.mem_limit"
+            assert config_path == f"compose.services.{self.service_name}.mem_limit"
             return value
 
         self.mock_get_app_conf.side_effect = _fake_get_app_conf

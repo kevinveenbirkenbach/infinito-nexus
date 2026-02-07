@@ -14,20 +14,20 @@ BLUESKY_GEOLOCATION_PATH:       "{{ [ BLUESKY_SOCIAL_APP_DIR,'src/geolocation/in
 BLUESKY_PDSADMIN_DIR:           "{{ [ lookup('docker', application_id, 'directories.volumes'), 'pdsadmin' ] | path_join }}"
 BLUESKY_PDSADMIN_FILE:          "{{ [ BLUESKY_PDSADMIN_DIR, 'pdsadmin' ] | path_join }}"
 BLUESKY_PDSADMIN_TMP_TAR:       "/tmp/pdsadmin.tar.gz"
-BLUESKY_PDS_IMAGE:              "{{ lookup('config', application_id, 'docker.services.pds.image') }}"
-BLUESKY_PDS_VERSION:            "{{ lookup('config', application_id, 'docker.services.pds.version') }}"
-BLUESKY_PDS_DATA_VOLUME:        "{{ lookup('config', application_id, 'docker.volumes.pds_data') }}"
+BLUESKY_PDS_IMAGE:              "{{ lookup('config', application_id, 'compose.services.pds.image') }}"
+BLUESKY_PDS_VERSION:            "{{ lookup('config', application_id, 'compose.services.pds.version') }}"
+BLUESKY_PDS_DATA_VOLUME:        "{{ lookup('config', application_id, 'compose.volumes.pds_data') }}"
 BLUESKY_PDS_DATA_DIR:           "/opt/pds"
 BLUESKY_PDS_BLOBSTORE_LOCATION: "{{ [ BLUESKY_PDS_DATA_DIR, 'blocks' ] | path_join }}"
 
 ## Web
-BLUESKY_WEB_ENABLED:            "{{ lookup('config', application_id, 'docker.services.web.enabled') }}"
+BLUESKY_WEB_ENABLED:            "{{ lookup('config', application_id, 'compose.services.web.enabled') }}"
 BLUESKY_WEB_DOMAIN:             "{{ domains[application_id].web }}"
 BLUESKY_WEB_PORT:               "{{ ports.localhost.http['web-app-bluesky_web'] }}"
 BLUESKY_WEB_IMAGE_CUSTOM:       "bluesky_web_custom"
 
 ## View
-BLUESKY_VIEW_ENABLED:           "{{ lookup('config', application_id, 'docker.services.view.enabled') }}"
+BLUESKY_VIEW_ENABLED:           "{{ lookup('config', application_id, 'compose.services.view.enabled') }}"
 BLUESKY_VIEW_DOMAIN_LOCAL:      "{{ domains[application_id].view }}"
 BLUESKY_VIEW_DOMAIN_FINAL:      "{{ BLUESKY_VIEW_DOMAIN_LOCAL if BLUESKY_VIEW_ENABLED else 'api.bsky.app' }}"
 BLUESKY_VIEW_URL:               "{{ lookup('tls', application_id, 'protocols.web') }}://{{ BLUESKY_VIEW_DOMAIN_FINAL }}"

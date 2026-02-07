@@ -10,7 +10,7 @@ server:
     flags:
       style-src-attr:
         unsafe-inline:  true
-docker:
+compose:
   services:
     logout:
       enabled: false

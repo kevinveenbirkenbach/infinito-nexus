@@ -33,7 +33,7 @@ x-environment: &shopware
    WEB (serves HTTP on 8000)
    ------------------------- #}
 {% set service_name = 'web' %}
-{% set container_port = lookup('config',application_id, 'docker.services.web.port') %}
+{% set container_port = lookup('config',application_id, 'compose.services.web.port') %}
   {{ service_name }}:
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     <<: *shopware

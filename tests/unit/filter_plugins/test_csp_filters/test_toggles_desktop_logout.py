@@ -8,7 +8,7 @@ class TestCspTogglesDesktopLogout(unittest.TestCase):
         self.filter = FilterModule()
         self.apps = {
             "app1": {
-                "docker": {"services": {"matomo": {"enabled": False}}},
+                "compose": {"services": {"matomo": {"enabled": False}}},
                 "server": {"csp": {"whitelist": {}, "flags": {}, "hashes": {}}},
             }
         }
@@ -27,10 +27,10 @@ class TestCspTogglesDesktopLogout(unittest.TestCase):
         return []
 
     def _set_service_enabled(self, apps: dict, service: str, enabled: bool):
-        apps["app1"].setdefault("docker", {}).setdefault("services", {}).setdefault(
+        apps["app1"].setdefault("compose", {}).setdefault("services", {}).setdefault(
             service, {}
         )
-        apps["app1"]["docker"]["services"][service]["enabled"] = enabled
+        apps["app1"]["compose"]["services"][service]["enabled"] = enabled
 
     def test_frame_ancestors_desktop_toggle(self):
         apps = copy.deepcopy(self.apps)
