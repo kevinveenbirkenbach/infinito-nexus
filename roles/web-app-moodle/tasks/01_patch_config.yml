@@ -23,8 +23,8 @@
   notify: compose up
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: Update CFG->wwwroot via sed in container
+- name: Update CFG->wwwroot via sed in container (no trailing slash)
   command: >
     container exec --user root {{ MOODLE_CONTAINER }}
-    sed -i -E "s|^(\$CFG->wwwroot[[:space:]]*=[[:space:]]*).*$|\1'{{ lookup('tls', application_id, 'url.base') | sed_escape('|') }}';|" {{ MOODLE_CONFIG }}
+    sed -i -E "s|^(\$CFG->wwwroot[[:space:]]*=[[:space:]]*).*$|\1'{{ (lookup('tls', application_id, 'url.base') | regex_replace('/$', '')) | sed_escape('|') }}';|" {{ MOODLE_CONFIG }}
   notify: compose up
