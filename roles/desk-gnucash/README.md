@@ -1,4 +1,4 @@
-# GnuCash Installation Role
+# GnuCash
 
 ## Overview
 This Ansible role is responsible for installing GnuCash, a free and open-source financial management software, on systems utilizing the Pacman package manager. It's particularly useful for setting up GnuCash in a Linux environment with minimal manual intervention.

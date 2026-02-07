@@ -1,4 +1,4 @@
-# Desk-neovim Role for Ansible
+# Neovim
 
 ## Overview
 This role automates the installation of neovim, a CLI text editor, on Pacman‑based systems. It uses the `community.general.pacman` module to ensure the editor is installed and up to date.

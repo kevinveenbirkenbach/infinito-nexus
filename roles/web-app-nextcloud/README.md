@@ -6,12 +6,12 @@ Elevate your collaboration with Nextcloud, a vibrant self-hosted cloud solution 
 
 ## Overview
 
-This role provisions a complete Nextcloud deployment using Docker Compose. It automates the setup of the Nextcloud application along with its underlying MariaDB database and configures the system for secure public access via an Nginx reverse proxy. The deployment includes automated configuration merging into `config.php`, health check routines, and integrated support for backup and recovery operations.
+This role provisions a complete Nextcloud deployment using Docker Compose. It automates the setup of the Nextcloud application along with its underlying MariaDB database and configures the system for secure public access via an NGINX reverse proxy. The deployment includes automated configuration merging into `config.php`, health check routines, and integrated support for backup and recovery operations.
 
 ## Features
 
 - **Fully Dockerized Deployment:** Simplifies installation using Docker Compose for the Nextcloud application and its MariaDB backend.
-- **Secure Access:** Integrates with an Nginx reverse proxy for encrypted, high-performance access.
+- **Secure Access:** Integrates with an NGINX reverse proxy for encrypted, high-performance access.
 - **Robust Authentication:** Supports LDAP and OIDC for secure identity and access management.
 - **Automated Configuration Management:** Uses additive configuration files to dynamically merge system settings into `config.php`.
 - **Integrated Backup & Recovery:** Provides built-in support for backup and restoration operations to safeguard your data.

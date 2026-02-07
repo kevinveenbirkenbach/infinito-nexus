@@ -9,7 +9,7 @@ Enhance your sales and service processes with EspoCRM, an open-source CRM featur
 This Ansible role deploys EspoCRM using Docker. It handles:
 
 - MariaDB database provisioning via the `sys-svc-rdbms` role  
-- Nginx domain setup with WebSocket and reverse-proxy configuration  
+- NGINX domain setup with WebSocket and reverse-proxy configuration  
 - Environment variable management through Jinja2 templates  
 - Docker Compose orchestration for **web**, **daemon**, and **websocket** services  
 - Automatic OIDC scope configuration within the EspoCRM container  
@@ -23,7 +23,7 @@ With this role, you'll have a production-ready CRM environment that's secure, sc
 - **WebSocket Notifications:** Real-time updates via ZeroMQ and WebSockets 🌐  
 - **Config via Templates:** Fully customizable `.env` and `compose.yml` with Jinja2 ⚙️  
 - **Health Checks & Logging:** Monitor service health and logs with built-in checks and journald 📈  
-- **Modular Role Composition:** Leverages central roles for database and Nginx, ensuring consistency across deployments 🔄  
+- **Modular Role Composition:** Leverages central roles for database and NGINX, ensuring consistency across deployments 🔄  
 
 ## Further Resources
 

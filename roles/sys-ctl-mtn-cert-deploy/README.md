@@ -4,12 +4,12 @@
 Keeps Docker Compose services updated with fresh Let’s Encrypt certificates via a systemd oneshot service and timer.
 
 ## Overview
-Installs a small script and a systemd unit that copy certificates into your Compose project and trigger an Nginx hot-reload (fallback: restart) to minimize downtime.
+Installs a small script and a systemd unit that copy certificates into your Compose project and trigger an NGINX hot-reload (fallback: restart) to minimize downtime.
 
 ## Features
 - Automatic certificate sync into the Compose project
 - Mailu-friendly filenames (`key.pem`, `cert.pem`)
-- Nginx hot-reload if available, otherwise restart
+- NGINX hot-reload if available, otherwise restart
 - Runs on a schedule you define
 
 ## Further Resources

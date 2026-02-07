@@ -1,4 +1,4 @@
-# pc-virtual-box
+# Virtual Box
 
 ```bash
 	sudo pacman -S virtualbox "$(pacman -Qsq "^linux" | grep "^linux[0-9]*[-rt]*$" | awk '{print $1"-virtualbox-host-modules"}' ORS=' ')" &&

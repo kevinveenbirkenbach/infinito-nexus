@@ -19,7 +19,7 @@ By default, BigBlueButton is deployed with best-practice hardening, modular secr
 - 🐳 **Docker-based** deployment via official [bigbluebutton/docker](https://github.com/bigbluebutton/docker)
 - ✅ **Greenlight** (v3) frontend support
 - 🔐 **SSO with OIDC & LDAP** (optional)
-- 🧱 Automatic `.env` templating and domain/Nginx integration
+- 🧱 Automatic `.env` templating and domain/NGINX integration
 - 🛠 Volume patching and Docker Compose customization
 - 📬 SMTP integration and Greenlight admin creation
 - 🧪 Workarounds for known Docker Compose or Etherpad issues
@@ -34,7 +34,7 @@ By default, BigBlueButton is deployed with best-practice hardening, modular secr
 
 ## System Requirements
 
-- Arch Linux with Docker, Compose, and Nginx roles pre-installed
+- Arch Linux with Docker, Compose, and NGINX roles pre-installed
 - DNS and reverse proxy configuration using `sys-svc-proxy`
 - Functional email system for Greenlight SMTP
 

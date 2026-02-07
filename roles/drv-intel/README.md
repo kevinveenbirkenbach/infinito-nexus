@@ -1,4 +1,4 @@
-# drv-intel Role
+# Intel Driver
 
 ## Description
 

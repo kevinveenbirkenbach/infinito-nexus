@@ -1,19 +1,19 @@
 # sys-ctl-hlth-webserver
 
 ## Description
-Verifies that each of your Nginx‐served domains returns an expected HTTP status (200, 301, etc.) and alerts on deviations.
+Verifies that each of your NGINX‐served domains returns an expected HTTP status (200, 301, etc.) and alerts on deviations.
 
 ## Features
-- Scans your `nginx` server block `.conf` files for domains.
+- Scans your `NGINX` server block `.conf` files for domains.
 - HEAD-requests each domain and compares against per-domain expected codes.
 - Reports any mismatches via `sys-ctl-alm-compose`.
 - Scheduled via a systemd timer for periodic health sweeps.
 
 ## Usage
-Include this role, install `python-requests`, and define `on_calendar_health_nginx`.
+Include this role, install `python-requests`, and define `on_calendar_health_NGINX`.
 
 ## Further Resources
-- For more details on nginx configurations, visit [nginx documentation](https://nginx.org/en/docs/).
+- For more details on NGINX configurations, visit [NGINX documentation](https://NGINX.org/en/docs/).
 - Learn more about Ansible's `uri_module` [here](https://docs.ansible.com/ansible/latest/modules/uri_module.html).
 
 ## Contributions

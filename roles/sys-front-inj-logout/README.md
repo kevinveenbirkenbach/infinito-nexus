@@ -1,6 +1,6 @@
 # sys-front-inj-logout
 
-This role injects a catcher that intercepts all logout elements in HTML pages served by Nginx and redirects them to a centralized logout endpoint via JavaScript.
+This role injects a catcher that intercepts all logout elements in HTML pages served by NGINX and redirects them to a centralized logout endpoint via JavaScript.
 
 ## Description
 
@@ -15,7 +15,7 @@ The `sys-front-inj-logout` Ansible role automatically embeds a lightweight JavaS
 
 ## Features
 
-- Seamless injection via Nginx `sub_filter` on `</head>`.  
+- Seamless injection via NGINX `sub_filter` on `</head>`.  
 - Automatic detection of various logout mechanisms (links, buttons, forms).  
 - Centralized logout redirection for a unified user experience.  
 - No changes required in application code.  
@@ -25,5 +25,5 @@ The `sys-front-inj-logout` Ansible role automatically embeds a lightweight JavaS
 ## Further Resources
 
 - [OpenID Connect RP-Initiated Logout](https://openid.net/specs/openid-connect-session-1_0.html#RPLogout)  
-- [Nginx `sub_filter` Module](http://nginx.org/en/docs/http/ngx_http_sub_module.html)  
+- [NGINX `sub_filter` Module](http://NGINX.org/en/docs/http/ngx_http_sub_module.html)  
 - [Ansible Role Directory Structure](https://docs.ansible.com/ansible/latest/user_guide/playbooks_roles.html#role-directory-structure)

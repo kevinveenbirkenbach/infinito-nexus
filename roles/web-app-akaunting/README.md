@@ -8,13 +8,13 @@ For detailed administration and troubleshooting, check the [Administration Refer
 
 ## Overview
 
-This role provides a comprehensive Dockerized environment for running Akaunting. It deploys the Akaunting application alongside a MariaDB database, configures environment variables, and integrates with Nginx as a reverse proxy. This setup is ideal for both production and development environments.
+This role provides a comprehensive Dockerized environment for running Akaunting. It deploys the Akaunting application alongside a MariaDB database, configures environment variables, and integrates with NGINX as a reverse proxy. This setup is ideal for both production and development environments.
 
 ### Key Features
 
 - **Complete Dockerized Deployment**: Uses Docker Compose to run Akaunting and its associated database.
 - **Environment Configuration**: Automatically creates and configures the necessary environment files.
-- **Nginx Integration**: Sets up Nginx for handling domain-specific requests and SSL termination.
+- **NGINX Integration**: Sets up NGINX for handling domain-specific requests and SSL termination.
 - **Manual Update and Log Access**: Provides guidance for viewing logs, accessing containers, and performing manual updates.
 
 ## Credits 📝

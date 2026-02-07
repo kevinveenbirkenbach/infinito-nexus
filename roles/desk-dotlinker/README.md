@@ -1,4 +1,4 @@
-# Dotlinker (doli) 🧷
+# Dotlinker
 
 ## Description
 

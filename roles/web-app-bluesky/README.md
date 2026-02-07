@@ -6,7 +6,7 @@ Soar to new digital heights with Bluesky, an innovative platform that reimagines
 
 ## Overview
 
-This role deploys Bluesky using Docker Compose. It sets up the personal data server (PDS) and the social web service, configures multiple domains via Nginx, downloads and extracts the pdsadmin tool for administration, and clones the social app repository to build a fully orchestrated container environment for Bluesky.
+This role deploys Bluesky using Docker Compose. It sets up the personal data server (PDS) and the social web service, configures multiple domains via NGINX, downloads and extracts the pdsadmin tool for administration, and clones the social app repository to build a fully orchestrated container environment for Bluesky.
 
 ## Installation
 

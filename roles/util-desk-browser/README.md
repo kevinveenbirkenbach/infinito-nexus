@@ -1,4 +1,4 @@
-# Browsers 🎨
+# Browsers Collection
 
 ## Description
 

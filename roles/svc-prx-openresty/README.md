@@ -5,8 +5,8 @@ This role deploys an OpenResty container via Docker Compose, validates its confi
 ## Description
 
 - Runs an OpenResty container in host network mode  
-- Mounts Nginx configuration and Let’s Encrypt directories  
-- Validates the OpenResty (Nginx) configuration before any restart  
+- Mounts NGINX configuration and Let’s Encrypt directories  
+- Validates the OpenResty (NGINX) configuration before any restart  
 - Restarts the container only if the configuration is valid  
 
 ## Overview

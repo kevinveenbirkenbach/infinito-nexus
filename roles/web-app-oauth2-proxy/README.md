@@ -1,6 +1,6 @@
-# Docker OAuth2 Proxy Role
+# OAuth2 Proxy
 
-Welcome to the **Docker OAuth2 Proxy Role**! 🌟 This role contains helper functions to set up an OAuth2 proxy using [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy), a tool designed to secure applications by protecting them with OAuth2 authentication. 💡
+Welcome to the **OAuth2 Proxy Role**! 🌟 This role contains helper functions to set up an OAuth2 proxy using [OAuth2 Proxy](https://github.com/oauth2-proxy/oauth2-proxy), a tool designed to secure applications by protecting them with OAuth2 authentication. 💡
 
 ## Overview
 

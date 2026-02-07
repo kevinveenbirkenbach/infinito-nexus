@@ -1,4 +1,4 @@
-# Desk-micro Role for Ansible
+# micro
 
 ## Overview
 This role automates the installation of micro, a CLI text editor, on Pacman‑based systems. It uses the `community.general.pacman` module to ensure the editor is installed and up to date.

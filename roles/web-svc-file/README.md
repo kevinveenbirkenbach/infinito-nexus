@@ -1,12 +1,12 @@
-# Nginx File Server
+# NGINX File Server
 
 ## 🔥 Description
 
-The Nginx File Server role sets up a simple and secure static file server using [Nginx](https://nginx.org/). It provides an easy way to serve files over HTTPS, including directory listing, `.well-known` support, and automatic SSL/TLS certificate integration via Let's Encrypt.
+The NGINX File Server role sets up a simple and secure static file server using [NGINX](https://NGINX.org/). It provides an easy way to serve files over HTTPS, including directory listing, `.well-known` support, and automatic SSL/TLS certificate integration via Let's Encrypt.
 
 ## 📖 Overview
 
-Optimized for Archlinux, this role configures Nginx to act as a lightweight and efficient file server. It ensures that files are served securely, with optional directory browsing enabled, and proper MIME type handling for standard web clients.
+Optimized for Archlinux, this role configures NGINX to act as a lightweight and efficient file server. It ensures that files are served securely, with optional directory browsing enabled, and proper MIME type handling for standard web clients.
 
 ### Key Features
 - **HTTPS Secured File Hosting:** Automatically retrieves SSL/TLS certificates using Let's Encrypt.
@@ -17,7 +17,7 @@ Optimized for Archlinux, this role configures Nginx to act as a lightweight and 
 
 ## 🎯 Purpose
 
-The Nginx File Server role is ideal for hosting static files, sharing resources internally or externally, and serving ACME challenges for certificate issuance. It offers a reliable and minimalistic alternative to more complex file-sharing solutions.
+The NGINX File Server role is ideal for hosting static files, sharing resources internally or externally, and serving ACME challenges for certificate issuance. It offers a reliable and minimalistic alternative to more complex file-sharing solutions.
 
 ## 🚀 Features
 
@@ -29,7 +29,7 @@ The Nginx File Server role is ideal for hosting static files, sharing resources 
 
 ## 🔗 Learn More
 
-- [Nginx Official Website](https://nginx.org/)
+- [NGINX Official Website](https://NGINX.org/)
 - [Let's Encrypt](https://letsencrypt.org/)
 - [HTTP File Server (Wikipedia)](https://en.wikipedia.org/wiki/HTTP_file-server)
 - [HTTPS (Wikipedia)](https://en.wikipedia.org/wiki/HTTPS)
