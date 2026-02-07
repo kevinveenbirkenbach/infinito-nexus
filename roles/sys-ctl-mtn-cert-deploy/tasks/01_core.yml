@@ -5,7 +5,7 @@
 
 - name: "Ensure cert deploy target directory exists"
   file:
-    path: "{{ lookup('docker', application_id, 'directories.volumes') }}certs"
+    path: "{{ lookup('container', application_id, 'directories.volumes') }}certs"
     state: directory
     mode: "0755"
 
@@ -21,7 +21,7 @@
     system_service_force_flush_instant: true  # Required, because otherwise Mailu may doesn't have certificates
     compose_cmd: >-
       {{ BIN_COMPOSE }}
-      --chdir {{ lookup('docker', application_id, 'directories.instance') }}
-      --project {{ (lookup('docker', application_id, 'directories.instance') | regex_replace('/+$', '')) | basename }}
+      --chdir {{ lookup('container', application_id, 'directories.instance') }}
+      --project {{ (lookup('container', application_id, 'directories.instance') | regex_replace('/+$', '')) | basename }}
 
 - include_tasks: utils/once/flag.yml

@@ -63,9 +63,9 @@ def _docker_lookup(
     variables: dict,
 ) -> str:
     """
-    Call lookup('docker', application_id, '<key>') from inside this lookup plugin.
+    Call lookup('container', application_id, '<key>') from inside this lookup plugin.
     """
-    docker_lkp = lookup_loader.get("docker", lookup._loader, lookup._templar)
+    docker_lkp = lookup_loader.get("container", lookup._loader, lookup._templar)
     try:
         value = docker_lkp.run([application_id, key], variables=variables)[0]
     except Exception as exc:
@@ -98,7 +98,7 @@ class LookupModule(LookupBase):
         templar = getattr(self, "_templar", None)
 
         # ---------------------------------------------------------------------
-        # Resolve compose paths via lookup('docker', ...)
+        # Resolve compose paths via lookup('container', ...)
         # ---------------------------------------------------------------------
         instance_dir = _docker_lookup(
             self,
@@ -115,7 +115,7 @@ class LookupModule(LookupBase):
         out_file = _docker_lookup(
             self,
             application_id=application_id,
-            key="files.docker_compose_ca_override",
+            key="files.compose_ca_override",
             variables=variables,
         )
 
@@ -125,7 +125,7 @@ class LookupModule(LookupBase):
             )
         if not out_file:
             raise AnsibleError(
-                "compose_ca_inject_cmd: resolved files.docker_compose_ca_override is empty"
+                "compose_ca_inject_cmd: resolved files.compose_ca_override is empty"
             )
 
         out_basename = os.path.basename(out_file)

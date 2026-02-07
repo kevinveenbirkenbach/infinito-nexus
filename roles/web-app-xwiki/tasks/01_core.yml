@@ -87,7 +87,7 @@
     - name:           "Create Final Docker Compose File"
       template:
         src:          "compose.yml.j2"
-        dest:         "{{ lookup('docker', application_id, 'files.docker_compose') }}"
+        dest:         "{{ lookup('container', application_id, 'files.compose') }}"
       notify:         compose up
     
     - name: Deploy Final Config

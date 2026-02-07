@@ -13,7 +13,7 @@
 
 - name: Transform compose.yml with compose_mods
   copy:
-    content: "{{ compose_slurp.content | b64decode | compose_mods(docker_repository_path, lookup('docker', application_id, 'files.env')) }}"
+    content: "{{ compose_slurp.content | b64decode | compose_mods(docker_repository_path, lookup('container', application_id, 'files.env')) }}"
     dest: "{{ BBB_COMPOSE_FILE_FINAL }}"
   notify:
     - compose up
@@ -23,5 +23,5 @@
   # @see https://chatgpt.com/share/6971f56e-bdf0-800f-8582-d1b59d6c67db
   command:
     cmd: compose build etherpad
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   when: RUNTIME == 'dev'

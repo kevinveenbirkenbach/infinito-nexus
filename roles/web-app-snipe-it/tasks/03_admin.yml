@@ -14,7 +14,7 @@
         exit($exists ? 0 : 1);
       '
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: snipe_it_admin_exists
   changed_when: false
   failed_when: false
@@ -32,6 +32,6 @@
     --password {{ users.administrator.password | quote }}
     --no-interaction
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   when: snipe_it_admin_exists.rc != 0
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

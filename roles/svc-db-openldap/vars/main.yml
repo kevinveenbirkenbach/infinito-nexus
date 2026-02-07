@@ -9,7 +9,7 @@ OPENLDAP_SERVER_URI:            "ldap://{{ DOCKER_REACH_HOST }}:{{ ports.localho
 OPENLDAP_CONFIG_URI:            "ldapi:///"
 
 # LDIF Variables
-OPENLDAP_LDIF_PATH_HOST:        "{{ lookup('docker', application_id, 'directories.volumes') }}ldif/"
+OPENLDAP_LDIF_PATH_HOST:        "{{ lookup('container', application_id, 'directories.volumes') }}ldif/"
 OPENLDAP_LDIF_PATH_DOCKER:      "/tmp/ldif/"
 OPENLDAP_LDIF_TYPES:
   - configuration

@@ -1,4 +1,3 @@
-# tests/unit/lookup_plugins/test_docker.py
 import importlib.util
 import unittest
 from pathlib import Path
@@ -23,7 +22,7 @@ def _load_module(rel_path: str, name: str):
 class TestLookupDocker(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.mod = _load_module("lookup_plugins/docker.py", "lookup_plugins_docker")
+        cls.mod = _load_module("lookup_plugins/container.py", "lookup_plugins_docker")
         cls.LookupModule = cls.mod.LookupModule
 
     def setUp(self):
@@ -40,8 +39,8 @@ class TestLookupDocker(unittest.TestCase):
             },
             "files": {
                 "env": "/opt/compose/app/.env/app.env",
-                "docker_compose": "/opt/compose/app/compose.yml",
-                "docker_compose_override": "/opt/compose/app/compose.override.yml",
+                "compose": "/opt/compose/app/compose.yml",
+                "compose_override": "/opt/compose/app/compose.override.yml",
                 "dockerfile": "/opt/compose/app/Dockerfile",
             },
         }

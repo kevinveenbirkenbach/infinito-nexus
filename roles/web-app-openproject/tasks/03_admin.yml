@@ -25,7 +25,7 @@
       \"
     "
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll: "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

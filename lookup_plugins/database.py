@@ -159,7 +159,7 @@ class LookupModule(LookupBase):
             default=default_version,
         )
 
-        # env path without docker_compose dict
+        # env path without compose dict
         env_dir = f"{path_instances}{get_entity_name(consumer_id)}/.env/"
         env = f"{env_dir}{dbtype}.env"
 

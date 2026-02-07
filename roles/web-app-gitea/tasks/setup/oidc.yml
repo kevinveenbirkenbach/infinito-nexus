@@ -9,7 +9,7 @@
         --auto-discover-url "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}" \
         --scopes   "openid profile email"
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: oidc_manage
   failed_when: oidc_manage.rc != 0 and "login source already exists" not in oidc_manage.stderr
 
@@ -21,7 +21,7 @@
       | grep -F "{{ OIDC.BUTTON_TEXT }}" \
       | awk '{print $1; exit}'
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: oidc_source_id_raw
   failed_when:
     - oidc_source_id_raw.rc != 0
@@ -44,6 +44,6 @@
         --auto-discover-url "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}" \
         --scopes   "openid profile email"
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: oidc_manage
   failed_when: oidc_manage.rc != 0

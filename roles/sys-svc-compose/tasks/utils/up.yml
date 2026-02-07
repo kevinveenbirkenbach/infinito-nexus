@@ -1,8 +1,8 @@
-- name: "Check if any container is running in {{ lookup('docker', application_id, 'directories.instance') }}"
+- name: "Check if any container is running in {{ lookup('container', application_id, 'directories.instance') }}"
   command: >-
     compose ps -q --filter status=running
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: docker_ps
   changed_when: >
     (docker_ps.stdout | trim) == ""
@@ -21,6 +21,6 @@
       )
   notify: compose up
 
-- name: "Flush Docker Compose Up Handlers for {{ lookup('docker', application_id, 'directories.instance') }}"
+- name: "Flush Docker Compose Up Handlers for {{ lookup('container', application_id, 'directories.instance') }}"
   meta: flush_handlers
   when: docker_compose_flush_handlers | bool

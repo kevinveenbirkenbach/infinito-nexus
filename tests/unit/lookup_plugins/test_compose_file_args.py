@@ -43,8 +43,8 @@ class TestComposeFArgs(unittest.TestCase):
         self.lookup._loader = object()
         self.lookup._templar = object()
 
-        # compose_file_args no longer reads variables['docker_compose'].
-        # It builds docker_compose via get_docker_paths(application_id, DIR_COMPOSITIONS).
+        # compose_file_args no longer reads variables['compose'].
+        # It builds compose via get_docker_paths(application_id, DIR_COMPOSITIONS).
         self.vars = {
             "DIR_COMPOSITIONS": "/x/",
             "domains": {
@@ -59,9 +59,9 @@ class TestComposeFArgs(unittest.TestCase):
         self.assertEqual(base_dir, "/x/")
         return {
             "files": {
-                "docker_compose": "/x/compose.yml",
-                "docker_compose_override": "/x/compose.override.yml",
-                "docker_compose_ca_override": "/x/compose.ca.override.yml",
+                "compose": "/x/compose.yml",
+                "compose_override": "/x/compose.override.yml",
+                "compose_ca_override": "/x/compose.ca.override.yml",
             }
         }
 
@@ -102,9 +102,9 @@ class TestComposeFArgs(unittest.TestCase):
         def stub_missing_ca(application_id: str, base_dir: str) -> dict:
             return {
                 "files": {
-                    "docker_compose": "/x/compose.yml",
-                    "docker_compose_override": "/x/compose.override.yml",
-                    "docker_compose_ca_override": "",
+                    "compose": "/x/compose.yml",
+                    "compose_override": "/x/compose.override.yml",
+                    "compose_ca_override": "",
                 }
             }
 

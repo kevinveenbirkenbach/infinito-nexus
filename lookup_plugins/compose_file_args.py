@@ -19,8 +19,8 @@
 #     - False -> do NOT append CA override (used during CA-inject bootstrap)
 #
 # IMPORTANT (your requested change):
-# - This lookup NO LONGER reads variables['docker_compose'].
-# - It ALWAYS builds docker_compose paths via module_utils.docker_paths_utils.get_docker_paths()
+# - This lookup NO LONGER reads variables['compose'].
+# - It ALWAYS builds compose paths via module_utils.docker_paths_utils.get_docker_paths()
 #   using DIR_COMPOSITIONS.
 
 from __future__ import annotations
@@ -89,7 +89,7 @@ def _role_provides_override(*, application_id: str, templar: Any) -> bool:
       - "{{ application_id | abs_role_path_by_application_id }}/templates/compose.override.yml.j2"
       - "{{ application_id | abs_role_path_by_application_id }}/files/compose.override.yml"
 
-    Only if one of these exists, we append "-f <docker_compose.files.docker_compose_override>".
+    Only if one of these exists, we append "-f <compose.files.compose_override>".
     """
     tpl = getattr(templar, "template", None)
     if not callable(tpl):
@@ -128,42 +128,40 @@ class LookupModule(LookupBase):
 
         templar = getattr(self, "_templar", None)
 
-        # ALWAYS build docker_compose via module_utils (no dependency on variables['docker_compose'])
+        # ALWAYS build compose via module_utils (no dependency on variables['compose'])
         base_dir = _as_str(variables.get("DIR_COMPOSITIONS"))
         if not base_dir:
             raise AnsibleError(
                 "compose_file_args: missing required variable 'DIR_COMPOSITIONS'"
             )
 
-        docker_compose = get_docker_paths(application_id, base_dir)
-        docker_compose = _require_dict(docker_compose, "docker_compose")
+        compose = get_docker_paths(application_id, base_dir)
+        compose = _require_dict(compose, "compose")
 
-        files = _require_dict(docker_compose.get("files"), "docker_compose.files")
+        files = _require_dict(compose.get("files"), "compose.files")
 
         # Use strict rendering to ensure we never leak "{{ ... }}" into generated commands.
         base = render_strict(
-            files.get("docker_compose"),
+            files.get("compose"),
             variables=variables,
-            var_name="docker_compose.files.docker_compose",
+            var_name="compose.files.compose",
             err_prefix="compose_file_args",
         )
         override = render_strict(
-            files.get("docker_compose_override"),
+            files.get("compose_override"),
             variables=variables,
-            var_name="docker_compose.files.docker_compose_override",
+            var_name="compose.files.compose_override",
             err_prefix="compose_file_args",
         )
         ca_override = render_strict(
-            files.get("docker_compose_ca_override"),
+            files.get("compose_ca_override"),
             variables=variables,
-            var_name="docker_compose.files.docker_compose_ca_override",
+            var_name="compose.files.compose_ca_override",
             err_prefix="compose_file_args",
         )
 
         if not _as_str(base):
-            raise AnsibleError(
-                "compose_file_args: docker_compose.files.docker_compose is required"
-            )
+            raise AnsibleError("compose_file_args: compose.files.compose is required")
 
         parts = [f"-f {base}"]
 
@@ -171,7 +169,7 @@ class LookupModule(LookupBase):
         if _role_provides_override(application_id=application_id, templar=templar):
             if not _as_str(override):
                 raise AnsibleError(
-                    "compose_file_args: docker_compose.files.docker_compose_override is required "
+                    "compose_file_args: compose.files.compose_override is required "
                     "when the role provides an override file"
                 )
             parts.append(f"-f {override}")
@@ -207,7 +205,7 @@ class LookupModule(LookupBase):
                 if enabled and mode == "self_signed":
                     if not _as_str(ca_override):
                         raise AnsibleError(
-                            "compose_file_args: docker_compose.files.docker_compose_ca_override is required "
+                            "compose_file_args: compose.files.compose_ca_override is required "
                             "when TLS is enabled and mode is self_signed"
                         )
                     parts.append(f"-f {ca_override}")

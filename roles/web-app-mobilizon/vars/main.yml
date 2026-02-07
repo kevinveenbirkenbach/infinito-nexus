@@ -6,7 +6,7 @@ container_port:                 4000
 postgres_gis_enabled:           true
 
 # Mobilizon
-mobilizon_host_conf_exs_file:   "{{ [ lookup('docker', application_id, 'directories.config'), 'config.exs' ] | path_join }}"
+mobilizon_host_conf_exs_file:   "{{ [ lookup('container', application_id, 'directories.config'), 'config.exs' ] | path_join }}"
 mobilizon_version:              "{{ lookup('config', application_id, 'compose.services.mobilizon.version') }}"
 mobilizon_image:                "{{ lookup('config', application_id, 'compose.services.mobilizon.image') }}"
 mobilizon_container:            "{{ lookup('config', application_id, 'compose.services.mobilizon.name') }}"

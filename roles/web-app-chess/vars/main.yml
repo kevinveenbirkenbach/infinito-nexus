@@ -33,5 +33,5 @@ CHESS_APP_KEY_FILE:     "{{ [ CHESS_APP_DATA_DIR, CHESS_KEY_FILENAME ] | path_jo
 
 CHESS_ENTRYPOINT_FILE:  "docker-entrypoint.sh"
 CHESS_ENTRYPOINT_REL:   "{{ CHESS_ENTRYPOINT_FILE }}"
-CHESS_ENTRYPOINT_ABS:   "{{ [lookup('docker', application_id, 'directories.instance'), CHESS_ENTRYPOINT_REL] | path_join }}"
+CHESS_ENTRYPOINT_ABS:   "{{ [lookup('container', application_id, 'directories.instance'), CHESS_ENTRYPOINT_REL] | path_join }}"
 CHESS_ENTRYPOINT_INT:   "{{ ['/usr/local/bin', CHESS_ENTRYPOINT_FILE] | path_join }}"

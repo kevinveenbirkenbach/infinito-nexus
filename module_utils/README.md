@@ -18,7 +18,7 @@ This directory contains shared Python utility code (also known as "library code"
 
 In a custom Ansible module or plugin:
 ```python
-from ansible.module_utils.infinito_utils import my_shared_function
+from module_utils.infinito_utils import my_shared_function
 ````
 
 ## When *not* to Use `module_utils`

@@ -22,7 +22,7 @@ def _load_module(rel_path: str, name: str):
 
 class _FakeDockerLookup:
     """
-    Mimics lookup('docker', application_id, key).
+    Mimics lookup('container', application_id, key).
     """
 
     def __init__(self, mapping: dict[str, str]):
@@ -32,11 +32,11 @@ class _FakeDockerLookup:
         # terms = [application_id, key]
         if not isinstance(terms, list) or len(terms) != 2:
             raise AnsibleError(
-                f"Fake docker lookup: expected [application_id, key], got {terms}"
+                f"Fake container lookup: expected [application_id, key], got {terms}"
             )
         _application_id, key = terms
         if key not in self._mapping:
-            raise AnsibleError(f"Fake docker lookup: missing key '{key}'")
+            raise AnsibleError(f"Fake container lookup: missing key '{key}'")
         return [self._mapping[key]]
 
 
@@ -82,7 +82,7 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
             docker_map = {
                 "directories.instance": str(instance_dir),
                 "files.env": ".env",  # relative -> resolve against instance_dir
-                "files.docker_compose_ca_override": str(
+                "files.compose_ca_override": str(
                     instance_dir / "compose.ca.override.yml"
                 ),
             }
@@ -101,7 +101,7 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
             }
 
             def _fake_get(name, _loader, _templar):
-                if name == "docker":
+                if name == "container":
                     return _FakeDockerLookup(docker_map)
                 if name == "compose_file_args":
                     return compose_file_args
@@ -160,7 +160,7 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
             docker_map = {
                 "directories.instance": str(instance_dir),
                 "files.env": ".env",  # missing
-                "files.docker_compose_ca_override": str(
+                "files.compose_ca_override": str(
                     instance_dir / "compose.ca.override.yml"
                 ),
             }
@@ -177,7 +177,7 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
             }
 
             def _fake_get(name, _loader, _templar):
-                if name == "docker":
+                if name == "container":
                     return _FakeDockerLookup(docker_map)
                 if name == "compose_file_args":
                     return compose_file_args
@@ -207,13 +207,13 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
         docker_map = {
             "directories.instance": "/opt/compose/app",
             "files.env": ".env",
-            "files.docker_compose_ca_override": "/opt/compose/app/compose.ca.override.yml",
+            "files.compose_ca_override": "/opt/compose/app/compose.ca.override.yml",
         }
 
         compose_file_args = _FakeComposeFArgsLookup("-f compose.yml")
 
         def _fake_get(name, _loader, _templar):
-            if name == "docker":
+            if name == "container":
                 return _FakeDockerLookup(docker_map)
             if name == "compose_file_args":
                 return compose_file_args

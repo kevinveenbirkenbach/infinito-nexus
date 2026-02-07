@@ -37,7 +37,7 @@
 - name: "Create Mailu accounts"
   include_tasks: 03_manage_user.yml
   vars:
-    MAILU_DOCKER_DIR:      "{{ lookup('docker', application_id, 'directories.instance') }}"
+    MAILU_DOCKER_DIR:      "{{ lookup('container', application_id, 'directories.instance') }}"
     mailu_action: >-
       {{
         (

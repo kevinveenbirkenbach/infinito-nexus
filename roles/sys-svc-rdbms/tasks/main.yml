@@ -4,9 +4,9 @@
     database_consumer_id_passed: "{{ application_id }}"
 
 - block:
-  - name: "Ensure env dir exists: {{ lookup('docker', application_id, 'directories.env') }}"
+  - name: "Ensure env dir exists: {{ lookup('container', application_id, 'directories.env') }}"
     ansible.builtin.file:
-      path: "{{ lookup('docker', application_id, 'directories.env') }}"
+      path: "{{ lookup('container', application_id, 'directories.env') }}"
       state: directory
       mode: "0755"
   - name: "For '{{ application_id }}/{{ database_consumer_id_passed }}': Create {{ lookup('database', application_id, 'env') }}"

@@ -6,7 +6,7 @@ from module_utils.entity_name_utils import get_entity_name
 
 def get_docker_paths(application_id: str, path_docker_compose_instances: str) -> dict:
     """
-    Build the docker_compose dict based on path_docker_compose_instances and application_id.
+    Build the compose dict based on path_docker_compose_instances and application_id.
     Uses get_entity_name to extract the entity name from application_id.
     """
     entity = get_entity_name(application_id)
@@ -22,9 +22,9 @@ def get_docker_paths(application_id: str, path_docker_compose_instances: str) ->
         },
         "files": {
             "env": f"{base}.env/env",
-            "docker_compose": f"{base}compose.yml",
-            "docker_compose_override": f"{base}compose.override.yml",
-            "docker_compose_ca_override": f"{base}compose.ca.override.yml",
+            "compose": f"{base}compose.yml",
+            "compose_override": f"{base}compose.override.yml",
+            "compose_ca_override": f"{base}compose.ca.override.yml",
             "dockerfile": f"{base}Dockerfile",
         },
     }

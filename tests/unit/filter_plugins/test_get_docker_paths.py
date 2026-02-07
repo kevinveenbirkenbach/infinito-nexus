@@ -15,15 +15,13 @@ class TestGetDockerPaths(unittest.TestCase):
 
         self.assertEqual(out["directories"]["instance"], "/opt/compose/myentity/")
         self.assertEqual(out["files"]["env"], "/opt/compose/myentity/.env/env")
+        self.assertEqual(out["files"]["compose"], "/opt/compose/myentity/compose.yml")
         self.assertEqual(
-            out["files"]["docker_compose"], "/opt/compose/myentity/compose.yml"
-        )
-        self.assertEqual(
-            out["files"]["docker_compose_override"],
+            out["files"]["compose_override"],
             "/opt/compose/myentity/compose.override.yml",
         )
         self.assertEqual(
-            out["files"]["docker_compose_ca_override"],
+            out["files"]["compose_ca_override"],
             "/opt/compose/myentity/compose.ca.override.yml",
         )
         self.assertEqual(out["files"]["dockerfile"], "/opt/compose/myentity/Dockerfile")

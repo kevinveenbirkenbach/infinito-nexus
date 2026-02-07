@@ -36,6 +36,6 @@
 
 - name: Create symbolic link from .env file to repository
   file:
-    src:    "{{ lookup('docker', application_id, 'files.env') }}"
+    src:    "{{ lookup('container', application_id, 'files.env') }}"
     dest:   "{{ [ docker_repository_path, '.env' ] | path_join  }}"
     state:  link

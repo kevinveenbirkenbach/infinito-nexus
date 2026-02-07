@@ -12,9 +12,9 @@ MAGENTO_DOMAIN:                 "{{ lookup('domain',application_id) }}"
 MAGENTO_URL:                    "{{ lookup('tls', application_id, 'url.base') }}"
 
 ## Runtime config paths (used by 02_runtime_conf.yml)
-# Root config directory comes from the docker_compose subsystem (already asserted)
-MAGENTO_NGINX_DIR:              "{{ [ lookup('docker', application_id, 'directories.config'), 'nginx' ] | path_join }}"
-MAGENTO_PHP_DIR:                "{{ [ lookup('docker', application_id, 'directories.config'), 'php' ]   | path_join }}"
+# Root config directory comes from the compose subsystem (already asserted)
+MAGENTO_NGINX_DIR:              "{{ [ lookup('container', application_id, 'directories.config'), 'nginx' ] | path_join }}"
+MAGENTO_PHP_DIR:                "{{ [ lookup('container', application_id, 'directories.config'), 'php' ]   | path_join }}"
 MAGENTO_NGINX_CONF_PATH:        "{{ [ MAGENTO_NGINX_DIR, 'nginx.conf' ] | path_join }}"
 MAGENTO_PHP_ZZ_CONF_PATH:       "{{ [ MAGENTO_PHP_DIR, 'php-fpm-zz-docker.conf' ] | path_join }}"
 

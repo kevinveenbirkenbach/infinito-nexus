@@ -32,7 +32,7 @@
     set -euo pipefail
     yes | {{ LISTMONK_RUN }} ./listmonk --install
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: listmonk_install
   notify: compose up
   changed_when: true
@@ -44,7 +44,7 @@
     set -euo pipefail
     echo y | {{ LISTMONK_RUN }} ./listmonk --upgrade
   args:
-    chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: listmonk_upgrade
   changed_when: true
   failed_when: listmonk_upgrade.rc not in [0, 141]

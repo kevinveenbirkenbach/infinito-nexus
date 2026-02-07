@@ -26,7 +26,7 @@ ESPOCRM_DATA_VOLUME:                "{{ lookup('config', application_id, 'compos
 
 ### Entrypoint
 ESPOCRM_ENTRYPOINT_SCRIPT_FILE:     "docker-entrypoint-custom.sh"
-ESPOCRM_ENTRYPOINT_SCRIPT_HOST_ABS: "{{ [ lookup('docker', application_id, 'directories.volumes'), ESPOCRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
+ESPOCRM_ENTRYPOINT_SCRIPT_HOST_ABS: "{{ [ lookup('container', application_id, 'directories.volumes'), ESPOCRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
 ESPOCRM_ENTRYPOINT_SCRIPT_HOST_REL: "volumes/{{ ESPOCRM_ENTRYPOINT_SCRIPT_FILE }}"
 ESPOCRM_ENTRYPOINT_SCRIPT_DOCKER:   "{{ [ '/usr/local/bin/', ESPOCRM_ENTRYPOINT_SCRIPT_FILE ] | path_join }}"
 
@@ -41,7 +41,7 @@ ESPOCRM_USER:                       "www-data"
 
 ### Seeding Script Parameter
 ESPOCRM_SCRIPT_SEED_FILE:           "seed_config.php"
-ESPOCRM_SCRIPT_SEED_HOST_ABS:       "{{ [ lookup('docker', application_id, 'directories.volumes'), ESPOCRM_SCRIPT_SEED_FILE ] | path_join }}"
+ESPOCRM_SCRIPT_SEED_HOST_ABS:       "{{ [ lookup('container', application_id, 'directories.volumes'), ESPOCRM_SCRIPT_SEED_FILE ] | path_join }}"
 ESPOCRM_SCRIPT_SEED_HOST_REL:       "volumes/{{ ESPOCRM_SCRIPT_SEED_FILE }}"  
 ESPOCRM_SCRIPT_SEED_DOCKER:         "{{ [ '/usr/local/bin/', ESPOCRM_SCRIPT_SEED_FILE ] | path_join }}"
 

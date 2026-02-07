@@ -1,5 +1,5 @@
 [Unit]
-Description=TLS cert deploy to {{ lookup('docker', application_id, 'directories.instance') }}
+Description=TLS cert deploy to {{ lookup('container', application_id, 'directories.instance') }}
 OnFailure={{ SYS_SERVICE_ON_FAILURE_COMPOSE }}
 
 [Service]
@@ -7,4 +7,4 @@ Type=oneshot
 Environment="compose_cmd={{ compose_cmd }}"
 ExecStart={{ system_service_script_exec }} \
   {{ lookup('cert', application_id, 'files.cert') | dirname }} \
-  {{ lookup('docker', application_id, 'directories.instance') }}
+  {{ lookup('container', application_id, 'directories.instance') }}
