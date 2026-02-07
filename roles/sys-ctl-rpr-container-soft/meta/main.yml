@@ -14,7 +14,7 @@ galaxy_info:
     - rolling
   galaxy_tags:
   - docker
-  - docker-compose
+  - compose
   - systemd
   - automation
   - archlinux

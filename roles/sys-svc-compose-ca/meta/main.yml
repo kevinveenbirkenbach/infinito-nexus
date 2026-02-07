@@ -6,7 +6,7 @@ galaxy_info:
   company: "Kevin Veen-Birkenbach Consulting & Coaching Solutions https://www.veen.world"
   galaxy_tags:
     - docker
-    - docker-compose
+    - compose
     - tls
     - ca
     - certificates

@@ -1,6 +1,6 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
-  description: Automates the restart of Docker Compose instances by detecting docker-compose.yml files and executing a restart
+  description: Automates the restart of Docker Compose instances by detecting compose.yml files and executing a restart
     script, ensuring consistent service availability.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
