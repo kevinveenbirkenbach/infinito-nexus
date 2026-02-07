@@ -6,7 +6,7 @@ Instructions for manual administrative operations like container login, config f
 
 ### Enter the Container
 ```bash
-docker-compose exec -it application /bin/sh
+compose exec -it application /bin/sh
 ```
 
 ### Modify the Configuration

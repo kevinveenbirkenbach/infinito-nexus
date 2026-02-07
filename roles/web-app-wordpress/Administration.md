@@ -9,7 +9,7 @@ If you use a local instead of a central database you can use the following comma
 To access the database execute:
 
 ```bash
-  docker-compose exec -it database /bin/mysql -u wordpress -p
+  compose exec -it database /bin/mysql -u wordpress -p
 ```
 
 ### upgrade database
@@ -18,7 +18,7 @@ To upgrade the database execute:
 
 
 ```bash
-  docker-compose exec -it database /bin/mysql_upgrade --user=root --password=
+  compose exec -it database /bin/mysql_upgrade --user=root --password=
 ```
 
 ## change database root password
@@ -30,13 +30,13 @@ To upgrade the database execute:
 To execute the commands in the docker container execute:
 
 ```bash
-docker-compose exec -it application /bin/sh
+compose exec -it application /bin/sh
 ```
 
 ## Test Email
 
 To test the email execute:
 ```bash
-docker-compose exec -it application /bin/sh -c 'echo "Test Email" | sendmail -v your-email@example.com'
+compose exec -it application /bin/sh -c 'echo "Test Email" | sendmail -v your-email@example.com'
 ```
 

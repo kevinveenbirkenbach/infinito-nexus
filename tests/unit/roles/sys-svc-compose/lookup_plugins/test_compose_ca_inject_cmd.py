@@ -83,12 +83,12 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
                 "directories.instance": str(instance_dir),
                 "files.env": ".env",  # relative -> resolve against instance_dir
                 "files.docker_compose_ca_override": str(
-                    instance_dir / "docker-compose.ca.override.yml"
+                    instance_dir / "compose.ca.override.yml"
                 ),
             }
 
             compose_file_args = _FakeComposeFArgsLookup(
-                "-f docker-compose.yml -f docker-compose.override.yml"
+                "-f compose.yml -f compose.override.yml"
             )
 
             variables = {
@@ -133,7 +133,7 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
                 self.assertIn("--project", cmd)
                 self.assertIn("myproj", cmd)
                 self.assertIn("--compose-files", cmd)
-                self.assertIn("docker-compose.yml", cmd)
+                self.assertIn("compose.yml", cmd)
 
                 # env file exists -> included
                 self.assertIn("--env-file", cmd)
@@ -141,9 +141,9 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
 
                 # out uses basename only
                 self.assertIn("--out", cmd)
-                self.assertIn("docker-compose.ca.override.yml", cmd)
+                self.assertIn("compose.ca.override.yml", cmd)
                 self.assertNotIn(
-                    str(instance_dir / "docker-compose.ca.override.yml"),
+                    str(instance_dir / "compose.ca.override.yml"),
                     cmd,
                 )
 
@@ -161,11 +161,11 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
                 "directories.instance": str(instance_dir),
                 "files.env": ".env",  # missing
                 "files.docker_compose_ca_override": str(
-                    instance_dir / "docker-compose.ca.override.yml"
+                    instance_dir / "compose.ca.override.yml"
                 ),
             }
 
-            compose_file_args = _FakeComposeFArgsLookup("-f docker-compose.yml")
+            compose_file_args = _FakeComposeFArgsLookup("-f compose.yml")
 
             variables = {
                 "CA_TRUST": {
@@ -207,10 +207,10 @@ class ComposeCaInjectCmdLookupTests(unittest.TestCase):
         docker_map = {
             "directories.instance": "/opt/compose/app",
             "files.env": ".env",
-            "files.docker_compose_ca_override": "/opt/compose/app/docker-compose.ca.override.yml",
+            "files.docker_compose_ca_override": "/opt/compose/app/compose.ca.override.yml",
         }
 
-        compose_file_args = _FakeComposeFArgsLookup("-f docker-compose.yml")
+        compose_file_args = _FakeComposeFArgsLookup("-f compose.yml")
 
         def _fake_get(name, _loader, _templar):
             if name == "docker":

@@ -28,22 +28,22 @@ def detect_env_file(project_dir: Path) -> Optional[Path]:
 def detect_compose_files(project_dir: Path) -> List[Path]:
     """
     Detect Compose file stack in a directory.
-    Always requires docker-compose.yml.
+    Always requires compose.yml.
     Optionals:
-      - docker-compose.override.yml
-      - docker-compose.ca.override.yml
+      - compose.override.yml
+      - compose.ca.override.yml
     """
-    base = project_dir / "docker-compose.yml"
+    base = project_dir / "compose.yml"
     if not base.is_file():
-        raise FileNotFoundError(f"Missing docker-compose.yml in: {project_dir}")
+        raise FileNotFoundError(f"Missing compose.yml in: {project_dir}")
 
     files = [base]
 
-    override = project_dir / "docker-compose.override.yml"
+    override = project_dir / "compose.override.yml"
     if override.is_file():
         files.append(override)
 
-    ca_override = project_dir / "docker-compose.ca.override.yml"
+    ca_override = project_dir / "compose.ca.override.yml"
     if ca_override.is_file():
         files.append(ca_override)
 

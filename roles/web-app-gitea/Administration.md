@@ -3,9 +3,9 @@
 ## update
 ```bash 
 cd {{ docker_compose.directories.instance }}
-docker-compose down
-docker-compose pull
-docker-compose up -d
+compose down
+compose pull
+compose up -d
 ```
 Keep in mind to track and to don't interrupt the update process until the migration is done. 
 
@@ -17,22 +17,22 @@ Keep in mind to track and to don't interrupt the update process until the migrat
 
 ## recreate
 ```bash
-cd {{ docker_compose.directories.instance }} && docker-compose -p gitea up -d --force-recreate
+cd {{ docker_compose.directories.instance }} && compose -p gitea up -d --force-recreate
 ```
 
 ## database access
 To access the database execute
 ```bash
-  docker-compose exec -it database /bin/mysql -u gitea -p
+  compose exec -it database /bin/mysql -u gitea -p
 ```
 ## bash in application
-docker-compose exec -it application /bin/sh
+compose exec -it application /bin/sh
 
 ## user management
 
 ### Change password
 ```bash 
-docker-compose exec --user git application gitea admin user change-password \
+compose exec --user git application gitea admin user change-password \
   --username administrator \
   --password "MyNewSecureP@ssw0rd"
 ```

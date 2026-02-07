@@ -18,7 +18,7 @@ This Ansible role deploys and configures [FusionDirectory](https://www.fusiondir
 - **LDAP Integration:** Connects to your existing LDAP backend for user management  
 - **Environment Management:** Builds an environment file from role variables and templates  
 - **NGINX Setup:** Automatically configures a virtual host for FusionDirectory  
-- **Docker-Native:** Leverages the `docker-compose` role for container orchestration  
+- **Docker-Native:** Leverages the `compose` role for container orchestration  
 - **Idempotent:** Safe to run multiple times without side effects  
 
 ## Further Resources

@@ -3,18 +3,18 @@
 ### Application Access
 To gain shell access to the application container, run the following command:
 ```bash
-docker-compose exec -it application bash
+compose exec -it application bash
 ```
 
 ### Clear Cache
 ```bash 
-docker compose exec -it application php artisan cache:clear
+compose exec -it application php artisan cache:clear
 ```
 
 ### Database Access
 To access the MariaDB instance in the database container, run the following command:
 ```bash
-docker-compose exec -it database mariadb -u pixelfed -p
+compose exec -it database mariadb -u pixelfed -p
 ```
 
 ### User Management via CLI in Pixelfed Docker Setup
@@ -23,7 +23,7 @@ To manage users in your Pixelfed instance running in a Docker container, as conf
 1. **Access the Application Container:** First, gain shell access to the Pixelfed application container. Use the command provided in the README:
 
    ```bash
-   docker-compose exec -it application bash
+   compose exec -it application bash
    ```
 
    This command lets you access the bash shell inside the `application` Docker container where Pixelfed is running.
@@ -64,7 +64,7 @@ To manage users in your Pixelfed instance running in a Docker container, as conf
 
 - **Commands Variability:** The available Artisan commands can vary based on your version of Pixelfed and Laravel. Always refer to the specific documentation for your version.
 - **Permissions:** Ensure you have the necessary permissions and rights within the Docker container to perform these actions.
-- **Environment Specifics:** The exact paths and commands may vary based on your Docker and Pixelfed setup, as defined in your `docker-compose.yml` and other configuration files.
+- **Environment Specifics:** The exact paths and commands may vary based on your Docker and Pixelfed setup, as defined in your `compose.yml` and other configuration files.
 
 This process provides a streamlined way to manage Pixelfed users directly from the CLI in a Dockerized environment, ensuring that you can efficiently administer your Pixelfed instance without needing to access the Pixelfed web interface.
 
@@ -85,36 +85,36 @@ DELETE from media where deleted_at >= "2023-07-28 14:39:05";
 ### File System Cleanup
 Run these commands to remove the imported files and trigger the cleanup job:
 ```bash
-docker-compose exec -u "www-data" application rm -rv "/var/www/storage/app/imports/1"
-docker-compose exec -u "www-data" application php artisan schedule:run
+compose exec -u "www-data" application rm -rv "/var/www/storage/app/imports/1"
+compose exec -u "www-data" application php artisan schedule:run
 ```
 
 ## Full Cleanup (Reset)
 
 For a hard reset, which will delete all data and stop all services, use the following commands:
 ```bash
-docker-compose down
+compose down
 docker volume rm pixelfed_application_data pixelfed_database pixelfed_redis
 ```
 
 ## Update Procedure
 
-To update your Pixelfed instance, navigate to the directory where your `docker-compose.yml` file is located and run these commands:
+To update your Pixelfed instance, navigate to the directory where your `compose.yml` file is located and run these commands:
 ```bash 
 cd {{ DIR_COMPOSITIONS }}pixelfed/ &&
-docker-compose down &&
+compose down &&
 docker network prune -f &&
-docker-compose pull &&
-docker-compose build &&
-docker-compose -p pixelfed up -d --force-recreate
+compose pull &&
+compose build &&
+compose -p pixelfed up -d --force-recreate
 ```
 
 ## Inspecting the Services
 
 To see the status of all services or follow the logs, use these commands:
 ```bash
-docker-compose ps -a
-docker-compose logs -f
+compose ps -a
+compose logs -f
 ```
 
 ## Debug

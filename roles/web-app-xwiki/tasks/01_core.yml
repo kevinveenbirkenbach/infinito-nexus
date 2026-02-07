@@ -86,7 +86,7 @@
 - block:
     - name:           "Create Final Docker Compose File"
       template:
-        src:          "docker-compose.yml.j2"
+        src:          "compose.yml.j2"
         dest:         "{{ lookup('docker', application_id, 'files.docker_compose') }}"
       notify:         compose up
     

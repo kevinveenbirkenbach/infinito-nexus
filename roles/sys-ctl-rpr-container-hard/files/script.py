@@ -63,9 +63,9 @@ def main() -> None:
         dir_name = os.path.basename(dir_path)
         print(f"Checking directory: {dir_path}")
 
-        compose_file = os.path.join(dir_path, "docker-compose.yml")
+        compose_file = os.path.join(dir_path, "compose.yml")
         if not os.path.isfile(compose_file):
-            print(f"No docker-compose.yml found in {dir_path}. Skipping.")
+            print(f"No compose.yml found in {dir_path}. Skipping.")
             continue
 
         if args.only and dir_name not in args.only:

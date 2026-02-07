@@ -53,7 +53,7 @@ def compose_volumes(
     extra_volumes: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> str:
     """
-    Builds the top-level `volumes:` section for docker-compose.
+    Builds the top-level `volumes:` section for compose.
 
     Logic is identical to roles/sys-svc-compose/templates/volumes.yml.j2:
 

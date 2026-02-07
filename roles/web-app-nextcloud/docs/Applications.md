@@ -5,7 +5,7 @@ Details on specific apps like Cospend, including related SQL queries and debuggi
 ## receive Plugin Information
 To receive the relevant configuration options for a plugin type:
 ```bash
-docker compose exec -u www-data application php occ config:list oidc_login
+compose exec -u www-data application php occ config:list oidc_login
 ```
 
 ## App Relevant Tables 🗃️

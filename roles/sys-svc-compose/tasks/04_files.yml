@@ -49,8 +49,8 @@
   notify: compose up
   with_first_found:
     - files:
-        - "{{ application_id | abs_role_path_by_application_id }}/templates/docker-compose.override.yml.j2"
-        - "{{ application_id | abs_role_path_by_application_id }}/files/docker-compose.override.yml"
+        - "{{ application_id | abs_role_path_by_application_id }}/templates/compose.override.yml.j2"
+        - "{{ application_id | abs_role_path_by_application_id }}/files/compose.override.yml"
       skip: true
 
 - name: "Create (optional) '{{ lookup('docker', application_id, 'files.docker_compose') }}'"
@@ -61,7 +61,7 @@
     force: yes
   with_first_found:
     - files:
-        - "docker-compose.yml.j2"
+        - "compose.yml.j2"
       skip: true
   register: docker_compose_template
   notify: compose up

@@ -105,7 +105,7 @@ class TestComposeCaInject(unittest.TestCase):
             # anything else
             return 1, "", "unexpected"
 
-        base_cmd = ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "compose.yml"]
 
         with patch.object(self.m, "run", side_effect=fake_run):
             self.m.ensure_image_available(
@@ -136,7 +136,7 @@ class TestComposeCaInject(unittest.TestCase):
             "worker": {"image": "custom:1"},
         }
 
-        base_cmd = ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "compose.yml"]
         service_to_cmd = {"app": base_cmd, "worker": base_cmd}
 
         def fake_run(cmd, *, cwd, env):
@@ -183,7 +183,7 @@ class TestComposeCaInject(unittest.TestCase):
         calls = []
 
         services = {"worker": {"image": "registry.example/worker:1"}}
-        base_cmd = ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "compose.yml"]
         service_to_cmd = {"worker": base_cmd}
 
         def fake_run(cmd, *, cwd, env):
@@ -262,9 +262,9 @@ class TestComposeCaInject(unittest.TestCase):
                 "--project",
                 "p",
                 "--compose-files",
-                "-f docker-compose.yml -f docker-compose.override.yml",
+                "-f compose.yml -f compose.override.yml",
                 "--out",
-                "docker-compose.ca.override.yml",
+                "compose.ca.override.yml",
                 "--ca-host",
                 "/etc/infinito/ca/root-ca.crt",
                 "--wrapper-host",
@@ -294,9 +294,9 @@ class TestComposeCaInject(unittest.TestCase):
             "--project",
             "p",
             "--compose-files",
-            "-f docker-compose.yml",
+            "-f compose.yml",
             "--out",
-            "docker-compose.ca.override.yml",
+            "compose.ca.override.yml",
             "--ca-host",
             "/etc/infinito/ca/root-ca.crt",
             "--wrapper-host",
@@ -342,9 +342,7 @@ class TestComposeCaInject(unittest.TestCase):
         This must hold even for images without /bin/sh (no entrypoint override in that case).
         """
         services = {"svc": {"image": "img:1"}}
-        service_to_cmd = {
-            "svc": ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
-        }
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
 
         # For this test, we simulate:
         # - image exists
@@ -397,9 +395,7 @@ class TestComposeCaInject(unittest.TestCase):
         and set command to the effective command (final entrypoint + final cmd).
         """
         services = {"svc": {"image": "img:1"}}
-        service_to_cmd = {
-            "svc": ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
-        }
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
 
         with (
             patch.object(self.m, "ensure_image_available", return_value=None),
@@ -436,9 +432,7 @@ class TestComposeCaInject(unittest.TestCase):
                 "command": ["svc-run", "x"],
             }
         }
-        service_to_cmd = {
-            "svc": ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
-        }
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
 
         with (
             patch.object(self.m, "ensure_image_available", return_value=None),
@@ -471,8 +465,8 @@ class TestComposeCaInject(unittest.TestCase):
             "b": {"image": "img:1"},
         }
         service_to_cmd = {
-            "a": ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"],
-            "b": ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"],
+            "a": ["docker", "compose", "-p", "p", "-f", "compose.yml"],
+            "b": ["docker", "compose", "-p", "p", "-f", "compose.yml"],
         }
 
         with (
@@ -552,9 +546,9 @@ class TestComposeCaInject(unittest.TestCase):
                     "--project",
                     "p",
                     "--compose-files",
-                    "-f docker-compose.yml -f docker-compose.override.yml",
+                    "-f compose.yml -f compose.override.yml",
                     "--out",
-                    "docker-compose.ca.override.yml",
+                    "compose.ca.override.yml",
                     "--ca-host",
                     "/etc/infinito/ca/root-ca.crt",
                     "--wrapper-host",
@@ -604,9 +598,7 @@ class TestComposeCaInject(unittest.TestCase):
         command argv must have $ escaped to $$ to prevent host-side Compose interpolation.
         """
         services = {"svc": {"image": "img:1"}}
-        service_to_cmd = {
-            "svc": ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
-        }
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
 
         # Simulate an image whose Cmd contains a shell expansion.
         # This is exactly the problematic case: Compose would otherwise turn $FOO into "" if unset on host.
@@ -642,9 +634,7 @@ class TestComposeCaInject(unittest.TestCase):
         we must not set 'command' at all (and therefore no escaping occurs).
         """
         services = {"svc": {"image": "img:1"}}
-        service_to_cmd = {
-            "svc": ["docker", "compose", "-p", "p", "-f", "docker-compose.yml"]
-        }
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
 
         with (
             patch.object(self.m, "ensure_image_available", return_value=None),
@@ -738,9 +728,9 @@ class TestComposeCaInject(unittest.TestCase):
                     "--project",
                     "p",
                     "--compose-files",
-                    "-f docker-compose.yml",
+                    "-f compose.yml",
                     "--out",
-                    "docker-compose.ca.override.yml",
+                    "compose.ca.override.yml",
                     "--ca-host",
                     "/etc/infinito/ca/root-ca.crt",
                     "--wrapper-host",

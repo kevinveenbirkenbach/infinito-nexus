@@ -70,7 +70,7 @@
 - name: compose up
   ansible.builtin.shell: |
     set -euo pipefail
-    {{ BIN_COMPOSE }} up -d --force-recreate --remove-orphans
+    compose up -d --force-recreate --remove-orphans
   register: dc_up
   changed_when: true
   environment:

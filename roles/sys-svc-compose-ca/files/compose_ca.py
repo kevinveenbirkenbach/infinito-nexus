@@ -48,7 +48,7 @@ def parse_yaml(text: str, label: str) -> Dict[str, Any]:
 
 def normalize_cmd(value: Any) -> List[str]:
     """
-    Normalize a docker-compose 'command' value into exec-form list[str].
+    Normalize a compose 'command' value into exec-form list[str].
 
     Supported:
       - list[str] => as-is
@@ -66,7 +66,7 @@ def normalize_cmd(value: Any) -> List[str]:
 
 def normalize_entrypoint(value: Any) -> List[str]:
     """
-    Normalize a docker-compose 'entrypoint' value into exec-form list[str].
+    Normalize a compose 'entrypoint' value into exec-form list[str].
 
     Supported:
       - list[str] => as-is
@@ -92,7 +92,7 @@ def escape_compose_vars(argv: List[str]) -> List[str]:
       - $$ => literal $ (no interpolation)
 
     Therefore: replace every "$" with "$$" in exec-form argv strings that we write into
-    docker-compose override YAML (entrypoint/command).
+    compose override YAML (entrypoint/command).
     """
     return [s.replace("$", "$$") for s in argv]
 
@@ -350,7 +350,7 @@ def render_override(
     trust_name: str,
 ) -> Dict[str, Any]:
     """
-    Generate a docker-compose override that injects CA trust into every service by:
+    Generate a compose override that injects CA trust into every service by:
       - always: mounting CA cert + wrapper script, setting CA env vars + useful TLS env fallbacks
       - optionally: using wrapper entrypoint when /bin/sh exists in the image:
             - override entrypoint to wrapper script
@@ -447,7 +447,7 @@ def render_override(
 
 def main() -> int:
     ap = argparse.ArgumentParser(
-        description="Generate docker-compose CA trust override via compose config"
+        description="Generate compose CA trust override via compose config"
     )
     ap.add_argument("--chdir", required=True, help="Compose instance directory")
     ap.add_argument("--project", required=True, help="Compose project name (-p)")

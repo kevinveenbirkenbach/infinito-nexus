@@ -93,8 +93,8 @@ class TestRepairDockerHard(unittest.TestCase):
             return p == "/PARENT"
 
         def fake_isfile(p):
-            # Only app2 has docker-compose.yml
-            return p in ("/PARENT/app2/docker-compose.yml",)
+            # Only app2 has compose.yml
+            return p in ("/PARENT/app2/compose.yml",)
 
         def fake_hard_restart(dir_path):
             seen["called"].append(dir_path)

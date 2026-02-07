@@ -19,7 +19,7 @@ MAGENTO_NGINX_CONF_PATH:        "{{ [ MAGENTO_NGINX_DIR, 'nginx.conf' ] | path_j
 MAGENTO_PHP_ZZ_CONF_PATH:       "{{ [ MAGENTO_PHP_DIR, 'php-fpm-zz-docker.conf' ] | path_join }}"
 
 ## Intra-container wiring (nginx -> php-fpm) and listen port
-# These values mirror the docker-compose template (environment variables and exposed port)
+# These values mirror the compose template (environment variables and exposed port)
 MAGENTO_PHP_HOST:               "php"
 MAGENTO_PHP_PORT:               9000
 MAGENTO_NGINX_PORT:             8000

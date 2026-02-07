@@ -10,5 +10,5 @@ docker compose run --rm application ./listmonk --install
 
 Use the following command to start Listmonk services:
 ```bash
-docker-compose -p listmonk up -d --force-recreate
+compose -p listmonk up -d --force-recreate
 ```

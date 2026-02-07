@@ -7,10 +7,10 @@
 # - Fail loudly if required variables are missing/invalid.
 #
 # Rules:
-# - Always include base docker-compose.yml
-# - Include docker-compose.override.yml ONLY when the ROLE (application_id) provides one
+# - Always include base compose.yml
+# - Include compose.override.yml ONLY when the ROLE (application_id) provides one
 #   (same logic as tasks/04_files.yml with_first_found)
-# - Include docker-compose.ca.override.yml ONLY when:
+# - Include compose.ca.override.yml ONLY when:
 #     the app has a domain AND TLS is enabled AND TLS mode == "self_signed"
 #
 # Optional kwargs:
@@ -86,8 +86,8 @@ def _role_provides_override(*, application_id: str, templar: Any) -> bool:
     """
     Mirror tasks/04_files.yml "with_first_found" logic:
 
-      - "{{ application_id | abs_role_path_by_application_id }}/templates/docker-compose.override.yml.j2"
-      - "{{ application_id | abs_role_path_by_application_id }}/files/docker-compose.override.yml"
+      - "{{ application_id | abs_role_path_by_application_id }}/templates/compose.override.yml.j2"
+      - "{{ application_id | abs_role_path_by_application_id }}/files/compose.override.yml"
 
     Only if one of these exists, we append "-f <docker_compose.files.docker_compose_override>".
     """
@@ -103,8 +103,8 @@ def _role_provides_override(*, application_id: str, templar: Any) -> bool:
             "compose_file_args: abs_role_path_by_application_id resolved to empty"
         )
 
-    c1 = os.path.join(role_base, "templates", "docker-compose.override.yml.j2")
-    c2 = os.path.join(role_base, "files", "docker-compose.override.yml")
+    c1 = os.path.join(role_base, "templates", "compose.override.yml.j2")
+    c2 = os.path.join(role_base, "files", "compose.override.yml")
 
     return os.path.isfile(c1) or os.path.isfile(c2)
 

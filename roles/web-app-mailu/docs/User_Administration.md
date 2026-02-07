@@ -49,10 +49,10 @@ Mailu links user accounts to specific domains, so changing a user's primary doma
 1. Connect to the Mailu MariaDB container:
 
    ```bash
-   docker compose exec -it database mariadb -u mailu -p
+   compose exec -it database mariadb -u mailu -p
    ```
 
-   Enter the password when prompted (you can find it in your `docker-compose.yml` or `.env` file).
+   Enter the password when prompted (you can find it in your `compose.yml` or `.env` file).
 
 2. Select the Mailu database (usually named `mailu`):
 
@@ -97,7 +97,7 @@ If you prefer not to modify the database manually:
 
 Ensure that the new domain is correctly set up:
 
-- Add it to `HOSTNAMES` in your `docker-compose.yml`
+- Add it to `HOSTNAMES` in your `compose.yml`
 - Set up proper DNS records (MX, SPF, DKIM, DMARC)
 - If using Let's Encrypt (`TLS_FLAVOR=cert`), make sure the domain is included in `LETSENCRYPT_HOSTS`
 

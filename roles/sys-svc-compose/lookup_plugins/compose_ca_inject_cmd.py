@@ -98,7 +98,7 @@ class LookupModule(LookupBase):
         templar = getattr(self, "_templar", None)
 
         # ---------------------------------------------------------------------
-        # Resolve docker-compose paths via lookup('docker', ...)
+        # Resolve compose paths via lookup('docker', ...)
         # ---------------------------------------------------------------------
         instance_dir = _docker_lookup(
             self,

@@ -1,4 +1,4 @@
-- name: "create docker-compose.yml for bigbluebutton"
+- name: "create compose.yml for bigbluebutton"
   command:
     cmd: bash ./scripts/generate-compose
     chdir: "{{ docker_repository_path }}"
@@ -6,12 +6,12 @@
     COMPOSE_HTTP_TIMEOUT: "600"
     DOCKER_CLIENT_TIMEOUT: "600"
 
-- name: Slurp docker-compose.yml from remote host
+- name: Slurp compose.yml from remote host
   slurp:
     src: "{{ BBB_COMPOSE_FILE_ORIGINE }}"
   register: compose_slurp
 
-- name: Transform docker-compose.yml with compose_mods
+- name: Transform compose.yml with compose_mods
   copy:
     content: "{{ compose_slurp.content | b64decode | compose_mods(docker_repository_path, lookup('docker', application_id, 'files.env')) }}"
     dest: "{{ BBB_COMPOSE_FILE_FINAL }}"

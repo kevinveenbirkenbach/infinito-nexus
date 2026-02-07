@@ -60,21 +60,21 @@
   command:
     cmd: "container run --rm --mount type=volume,src={{ MATRIX_SYNAPSE_VOLUME }},dst=/data -e SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }} -e SYNAPSE_REPORT_STATS=no --entrypoint /bin/sh matrixdotorg/synapse:latest -c 'chown -vR 991:991 /data'"
 
-- name: add docker-compose.yml
+- name: add compose.yml
   template:
-    src:  "docker-compose.yml.j2" 
-    dest: "{{ lookup('docker', application_id, 'directories.instance') }}docker-compose.yml"
+    src:  "compose.yml.j2" 
+    dest: "{{ [ lookup('docker', application_id, 'directories.instance'),'compose.yml' ] | path_join }}"
   notify: compose up
 
 # Pull image when update is wished. 
 - name: compose pull
   command:
-    cmd:    "{{ BIN_COMPOSE }} pull"
+    cmd:    "compose pull"
     chdir:  "{{ lookup('docker', application_id, 'directories.instance') }}"
 
 - name: compose up
   command:
-    cmd: "{{ BIN_COMPOSE }} up -d --remove-orphans"
+    cmd: "compose up -d --remove-orphans"
     chdir: "{{ lookup('docker', application_id, 'directories.instance') }}"
   environment:
     COMPOSE_HTTP_TIMEOUT:   "600"

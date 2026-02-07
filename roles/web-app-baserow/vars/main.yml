@@ -18,7 +18,7 @@ BASEROW_DJANGO_SETTINGS_MODULE: "baserow.config.settings.base"
 BASEROW_PYTHON:                "/baserow/venv/bin/python"
 BASEROW_MANAGE_PY:             "/baserow/backend/src/baserow/manage.py"
 
-# Compose service name inside docker-compose.yml.j2
+# Compose service name inside compose.yml.j2
 # The template defines the service as "application:".
 BASEROW_SERVICE_NAME:          "application"
 

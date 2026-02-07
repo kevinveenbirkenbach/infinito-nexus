@@ -13,9 +13,9 @@ so they can be monkeypatched in unit tests.
 This variant uses the central Infinito.Nexus compose wrapper:
   compose
 which auto-adds:
-- -f docker-compose.yml
-- -f docker-compose.override.yml (if present)
-- -f docker-compose.ca.override.yml (if present)
+- -f compose.yml
+- -f compose.override.yml (if present)
+- -f compose.ca.override.yml (if present)
 - --env-file (if .env or .env/env exists)
 """
 
@@ -189,11 +189,11 @@ def main(
             errors += 1
             continue
 
-        compose_file_path = os.path.join(workdir, "docker-compose.yml")
+        compose_file_path = os.path.join(workdir, "compose.yml")
         if not os.path.isfile(compose_file_path):
             # STRICT: we only trust labels; if file not there, error out.
             print(
-                f"Error: docker-compose.yml not found at {compose_file_path} for container {container}"
+                f"Error: compose.yml not found at {compose_file_path} for container {container}"
             )
             errors += 1
             continue

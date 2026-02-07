@@ -22,9 +22,9 @@ def get_docker_paths(application_id: str, path_docker_compose_instances: str) ->
         },
         "files": {
             "env": f"{base}.env/env",
-            "docker_compose": f"{base}docker-compose.yml",
-            "docker_compose_override": f"{base}docker-compose.override.yml",
-            "docker_compose_ca_override": f"{base}docker-compose.ca.override.yml",
+            "docker_compose": f"{base}compose.yml",
+            "docker_compose_override": f"{base}compose.override.yml",
+            "docker_compose_ca_override": f"{base}compose.ca.override.yml",
             "dockerfile": f"{base}Dockerfile",
         },
     }

@@ -23,7 +23,7 @@ With this role, you get a production-ready CRM environment that plugs into your 
 - **Workflow Engine:** Automate business processes and notifications 🛠️  
 - **LDAP Authentication:** Centralize user authentication against OpenLDAP 🔐  
 - **SSO-Ready:** Integrates with SAML / OAuth2 providers (e.g. Keycloak as IdP) via SuiteCRM’s admin UI 🌐  
-- **Config via Templates:** Fully customizable `.env` and `docker-compose.yml` rendered via Jinja2 ⚙️  
+- **Config via Templates:** Fully customizable `.env` and `compose.yml` rendered via Jinja2 ⚙️  
 - **Health Checks & Logging:** Integrates with Infinito.Nexus health checking and journald logging 📈  
 - **Modular Role Composition:** Uses shared roles for DB, proxy and monitoring to keep your stack consistent 🔄  
 

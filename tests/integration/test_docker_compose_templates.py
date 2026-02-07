@@ -4,9 +4,9 @@ from pathlib import Path
 
 
 class TestDockerComposeTemplates(unittest.TestCase):
-    # Search for all roles/*/templates/docker-compose.yml.j2
+    # Search for all roles/*/templates/compose.yml.j2
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
-    TEMPLATE_PATTERN = "roles/*/templates/docker-compose.yml.j2"
+    TEMPLATE_PATTERN = "roles/*/templates/compose.yml.j2"
 
     # Allowed lines before BASE_INCLUDE
     ALLOWED_BEFORE_BASE = [
@@ -22,7 +22,7 @@ class TestDockerComposeTemplates(unittest.TestCase):
 
     def test_docker_compose_includes(self):
         """
-        Verifies for each found docker-compose.yml.j2:
+        Verifies for each found compose.yml.j2:
         1. BASE_INCLUDE is present exactly once
         2. If no host‑mode is set, NET_INCLUDE must appear exactly once
         3. BASE_INCLUDE appears before NET_INCLUDE when both are required

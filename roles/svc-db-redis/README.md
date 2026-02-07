@@ -17,7 +17,7 @@ The role’s `service.yml.j2` template includes:
 - A basic healthcheck using `redis-cli ping`
 - Attachment to the default network
 
-Include this snippet in your top-level `docker-compose.yml.j2` where you want Redis to appear.
+Include this snippet in your top-level `compose.yml.j2` where you want Redis to appear.
 
 ## Features
 

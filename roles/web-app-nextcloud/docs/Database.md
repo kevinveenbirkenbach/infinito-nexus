@@ -6,10 +6,10 @@ To manage the database if you installed it locally use the following comments. I
 ## Database Access
 To access the database, execute:
 ```bash
-docker-compose exec -it database mysql -u nextcloud -D nextcloud -p
+compose exec -it database mysql -u nextcloud -D nextcloud -p
 ```
 
 ### Recreate Database with New Volume
 ```bash
-docker-compose run --detach --name database --env MYSQL_USER="nextcloud" --env MYSQL_PASSWORD=PASSWORD --env MYSQL_ROOT_PASSWORD=PASSWORD --env MYSQL_DATABASE="nextcloud" -v nextcloud_database:/var/lib/mysql
+compose run --detach --name database --env MYSQL_USER="nextcloud" --env MYSQL_PASSWORD=PASSWORD --env MYSQL_ROOT_PASSWORD=PASSWORD --env MYSQL_DATABASE="nextcloud" -v nextcloud_database:/var/lib/mysql
 ```

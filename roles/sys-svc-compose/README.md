@@ -2,7 +2,7 @@
 
 ## Description
 
-This Ansible role manages Docker Compose project structures and workflows for applications on Arch Linux. It creates dedicated instance directories, manages `.env` and `docker-compose.yml` files, and provides automation logic for project reset, rebuild, and startup sequences.
+This Ansible role manages Docker Compose project structures and workflows for applications on Arch Linux. It creates dedicated instance directories, manages `.env` and `compose.yml` files, and provides automation logic for project reset, rebuild, and startup sequences.
 
 Refer to the [Docker Compose documentation](https://docs.docker.com/compose/), the [Arch Wiki – Docker](https://wiki.archlinux.org/title/Docker), and [Compose CLI reference](https://docs.docker.com/compose/cli-command/) for more details.
 

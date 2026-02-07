@@ -40,8 +40,8 @@ class TestLookupDocker(unittest.TestCase):
             },
             "files": {
                 "env": "/opt/compose/app/.env/app.env",
-                "docker_compose": "/opt/compose/app/docker-compose.yml",
-                "docker_compose_override": "/opt/compose/app/docker-compose.override.yml",
+                "docker_compose": "/opt/compose/app/compose.yml",
+                "docker_compose_override": "/opt/compose/app/compose.override.yml",
                 "dockerfile": "/opt/compose/app/Dockerfile",
             },
         }

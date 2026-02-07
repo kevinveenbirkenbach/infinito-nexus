@@ -59,9 +59,9 @@ class TestComposeFArgs(unittest.TestCase):
         self.assertEqual(base_dir, "/x/")
         return {
             "files": {
-                "docker_compose": "/x/docker-compose.yml",
-                "docker_compose_override": "/x/docker-compose.override.yml",
-                "docker_compose_ca_override": "/x/docker-compose.ca.override.yml",
+                "docker_compose": "/x/compose.yml",
+                "docker_compose_override": "/x/compose.override.yml",
+                "docker_compose_ca_override": "/x/compose.ca.override.yml",
             }
         }
 
@@ -77,9 +77,7 @@ class TestComposeFArgs(unittest.TestCase):
         ):
             out = self.lookup.run(["web-app-a"], variables=self.vars)[0]
 
-        self.assertEqual(
-            out, "-f /x/docker-compose.yml -f /x/docker-compose.override.yml"
-        )
+        self.assertEqual(out, "-f /x/compose.yml -f /x/compose.override.yml")
 
     def test_includes_ca_override_when_self_signed_and_domain_exists(self):
         with (
@@ -97,15 +95,15 @@ class TestComposeFArgs(unittest.TestCase):
 
         self.assertEqual(
             out,
-            "-f /x/docker-compose.yml -f /x/docker-compose.override.yml -f /x/docker-compose.ca.override.yml",
+            "-f /x/compose.yml -f /x/compose.override.yml -f /x/compose.ca.override.yml",
         )
 
     def test_fails_when_ca_override_missing_but_required(self):
         def stub_missing_ca(application_id: str, base_dir: str) -> dict:
             return {
                 "files": {
-                    "docker_compose": "/x/docker-compose.yml",
-                    "docker_compose_override": "/x/docker-compose.override.yml",
+                    "docker_compose": "/x/compose.yml",
+                    "docker_compose_override": "/x/compose.override.yml",
                     "docker_compose_ca_override": "",
                 }
             }
@@ -134,7 +132,7 @@ class TestComposeFArgs(unittest.TestCase):
         ):
             out = self.lookup.run(["web-app-a"], variables=self.vars)[0]
 
-        self.assertEqual(out, "-f /x/docker-compose.yml")
+        self.assertEqual(out, "-f /x/compose.yml")
 
     def test_requires_one_term(self):
         with self.assertRaises(AnsibleError):

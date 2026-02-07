@@ -129,8 +129,8 @@ class TestRepairDockerSoft(unittest.TestCase):
 
         def fake_isfile(path):
             return path in (
-                "/BASE/app1/docker-compose.yml",
-                "/BASE/db/docker-compose.yml",
+                "/BASE/app1/compose.yml",
+                "/BASE/db/compose.yml",
             )
 
         old_print_bash = s.print_bash

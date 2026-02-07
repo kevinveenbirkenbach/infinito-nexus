@@ -21,7 +21,7 @@ With this role, you'll have a production-ready CRM environment that's secure, sc
 - **Workflow Automation:** Create and manage automated CRM processes with ease 🛠️  
 - **LDAP/OIDC SSO:** Integrate with corporate identity providers for seamless login 🔐  
 - **WebSocket Notifications:** Real-time updates via ZeroMQ and WebSockets 🌐  
-- **Config via Templates:** Fully customizable `.env` and `docker-compose.yml` with Jinja2 ⚙️  
+- **Config via Templates:** Fully customizable `.env` and `compose.yml` with Jinja2 ⚙️  
 - **Health Checks & Logging:** Monitor service health and logs with built-in checks and journald 📈  
 - **Modular Role Composition:** Leverages central roles for database and Nginx, ensuring consistency across deployments 🔄  
 

@@ -1,4 +1,4 @@
-{# Base template for all docker-compose.yml.j2 #}
+{# Base template for all compose.yml.j2 #}
 services:
 {# Load Database #}
 {% if applications | is_docker_service_enabled(application_id, 'database') %}

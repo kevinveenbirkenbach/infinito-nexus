@@ -67,11 +67,11 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
         try:
 
             def fake_is_file(self: Path) -> bool:
-                if str(self) == "/proj/docker-compose.yml":
+                if str(self) == "/proj/compose.yml":
                     return True
-                if str(self) == "/proj/docker-compose.override.yml":
+                if str(self) == "/proj/compose.override.yml":
                     return True
-                if str(self) == "/proj/docker-compose.ca.override.yml":
+                if str(self) == "/proj/compose.ca.override.yml":
                     return True
                 return False
 
@@ -80,9 +80,9 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             self.assertEqual(
                 [str(p) for p in files],
                 [
-                    "/proj/docker-compose.yml",
-                    "/proj/docker-compose.override.yml",
-                    "/proj/docker-compose.ca.override.yml",
+                    "/proj/compose.yml",
+                    "/proj/compose.override.yml",
+                    "/proj/compose.ca.override.yml",
                 ],
             )
         finally:
@@ -96,11 +96,11 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
         try:
 
             def fake_is_file(self: Path) -> bool:
-                if str(self) == "/proj/docker-compose.yml":
+                if str(self) == "/proj/compose.yml":
                     return True
-                if str(self) == "/proj/docker-compose.override.yml":
+                if str(self) == "/proj/compose.override.yml":
                     return True
-                if str(self) == "/proj/docker-compose.ca.override.yml":
+                if str(self) == "/proj/compose.ca.override.yml":
                     return False
                 if str(self) == "/proj/.env":
                     return True
@@ -114,9 +114,9 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
 
             self.assertEqual(cmd[:4], ["docker", "compose", "-p", "myproj"])
             self.assertIn("-f", cmd)
-            self.assertIn("/proj/docker-compose.yml", cmd)
-            self.assertIn("/proj/docker-compose.override.yml", cmd)
-            self.assertNotIn("/proj/docker-compose.ca.override.yml", cmd)
+            self.assertIn("/proj/compose.yml", cmd)
+            self.assertIn("/proj/compose.override.yml", cmd)
+            self.assertNotIn("/proj/compose.ca.override.yml", cmd)
 
             self.assertIn("--env-file", cmd)
             self.assertIn("/proj/.env", cmd)
@@ -138,11 +138,11 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
         try:
 
             def fake_is_file(self: Path) -> bool:
-                if str(self) == "/proj/docker-compose.yml":
+                if str(self) == "/proj/compose.yml":
                     return True
-                if str(self) == "/proj/docker-compose.override.yml":
+                if str(self) == "/proj/compose.override.yml":
                     return True
-                if str(self) == "/proj/docker-compose.ca.override.yml":
+                if str(self) == "/proj/compose.ca.override.yml":
                     return False
                 if str(self) == "/proj/.env":
                     return True
@@ -168,13 +168,13 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
                 "myproj",
                 base,
                 ["run", "--rm", "manager", "migrate", "--noinput"],
-                extra_files=["docker-compose-inits.yml"],
+                extra_files=["compose-inits.yml"],
             )
 
             # Ensure order: autodetected files appear before extra file
-            idx_base = cmd.index("/proj/docker-compose.yml")
-            idx_override = cmd.index("/proj/docker-compose.override.yml")
-            idx_extra = cmd.index("/proj/docker-compose-inits.yml")
+            idx_base = cmd.index("/proj/compose.yml")
+            idx_override = cmd.index("/proj/compose.override.yml")
+            idx_extra = cmd.index("/proj/compose-inits.yml")
             self.assertLess(idx_base, idx_extra)
             self.assertLess(idx_override, idx_extra)
 
@@ -183,7 +183,9 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             self.assertIn("/proj/.env", cmd)
 
             # Passthrough still ends command
-            self.assertEqual(cmd[-5:], ["manager", "migrate", "--noinput"])
+            self.assertEqual(
+                cmd[-5:], ["run", "--rm", "manager", "migrate", "--noinput"]
+            )
         finally:
             s.Path.is_file = old_is_file  # type: ignore[assignment]
             if old_resolve_files is not None:
@@ -481,7 +483,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
             s.sys.argv = [
                 "compose.py",
                 "-f",
-                "docker-compose-inits.yml",
+                "compose-inits.yml",
                 "run",
                 "--rm",
                 "manager",
@@ -497,7 +499,7 @@ class TestInfinitoComposeWrapper(unittest.TestCase):
                     "taiga",
                     "/work/taiga",
                     ["run", "--rm", "manager", "migrate"],
-                    ["docker-compose-inits.yml"],
+                    ["compose-inits.yml"],
                 ),
             )
         finally:
