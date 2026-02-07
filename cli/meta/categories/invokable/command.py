@@ -1,27 +1,35 @@
 #!/usr/bin/env python3
 """
-CLI for extracting invokable or non-invokable role paths from a nested roles YAML file using argparse.
-Assumes a default roles file at the project root if none is provided.
+CLI for extracting invokable or non-invokable role paths from a nested roles YAML file.
+
+Fixed-path resolution without marker scanning.
+
+Layout assumption:
+  <repo_root>/cli/meta/categories/invokable/command.py
+  <repo_root>/filter_plugins/...
+  <repo_root>/roles/categories.yml
 """
 
-import os
-import sys
-
-# ─── Determine project root ───
-if "__file__" in globals():
-    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-else:
-    project_root = os.getcwd()
-
-# Ensure project root on PYTHONPATH so 'filter_plugins' can be imported
-sys.path.insert(0, project_root)
+from __future__ import annotations
 
 import argparse
+import sys
+from pathlib import Path
+
 import yaml
-from filter_plugins.invokable_paths import get_invokable_paths, get_non_invokable_paths
 
 
-def main():
+def _project_root_from_here() -> Path:
+    # command.py -> invokable(0) -> categories(1) -> meta(2) -> cli(3) -> repo_root(4)
+    return Path(__file__).resolve().parents[4]
+
+
+def _default_roles_file() -> str:
+    repo_root = _project_root_from_here()
+    return str(repo_root / "roles" / "categories.yml")
+
+
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="Extract invokable or non-invokable role paths from a nested roles YAML file."
     )
@@ -51,13 +59,25 @@ def main():
 
     args = parser.parse_args()
 
-    # Default to invokable if neither flag is provided
+    repo_root = _project_root_from_here()
+
+    # Ensure repo root on PYTHONPATH so 'filter_plugins' can be imported
+    sys.path.insert(0, str(repo_root))
+
+    from filter_plugins.invokable_paths import (
+        get_invokable_paths,
+        get_non_invokable_paths,
+    )
+
+    roles_file = args.roles_file or _default_roles_file()
+
     list_non = args.non_invokable
+
     try:
         if list_non:
-            paths = get_non_invokable_paths(args.roles_file, args.suffix)
+            paths = get_non_invokable_paths(roles_file, args.suffix)
         else:
-            paths = get_invokable_paths(args.roles_file, args.suffix)
+            paths = get_invokable_paths(roles_file, args.suffix)
     except FileNotFoundError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
