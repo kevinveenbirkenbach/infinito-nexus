@@ -34,4 +34,12 @@
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   when: snipe_it_admin_exists.rc != 0
+  register: snipe_it_admin_create
+  changed_when: "'New user created' in (snipe_it_admin_create.stdout | default(''))"
+  failed_when: >
+    snipe_it_admin_create.rc != 0
+    and not (
+      'Duplicate entry' in (snipe_it_admin_create.stderr | default(''))
+      and 'users_groups' in (snipe_it_admin_create.stderr | default(''))
+    )
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
