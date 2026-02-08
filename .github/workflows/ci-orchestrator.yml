@@ -32,7 +32,7 @@ jobs:
   lint-shell:
     uses: ./.github/workflows/lint-shell.yml
   lint-gate:
-    name: 🚦 Gate lint checks
+    name: 🚦 Gate lint
     needs: [lint-ansible, lint-python, lint-docker, lint-shell]
     runs-on: ubuntu-latest
     steps:
@@ -55,7 +55,7 @@ jobs:
     uses: ./.github/workflows/test-code-unit.yml 
     needs: build-ci-images
   test-code-gate:
-    name: 🚦 Gate code tests
+    name: 🚦 Gate code
     needs: [test-code-integration, test-code-lint, test-code-unit]
     runs-on: ubuntu-latest
     steps:
@@ -119,6 +119,7 @@ jobs:
     needs:
       - code-quality-gate
   test-install-gate:
+    name: 🚦 Gate installation
     needs: [test-install-make, test-install-pkgmgr]
     runs-on: ubuntu-latest
     steps:
