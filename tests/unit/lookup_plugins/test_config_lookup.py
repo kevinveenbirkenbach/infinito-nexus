@@ -58,6 +58,7 @@ class TestConfigLookup(unittest.TestCase):
             try:
                 self._tmp.rmdir()
             except OSError:
+                # Best-effort cleanup: it's acceptable if removing the temp directory fails.
                 pass
 
     def test_requires_2_or_3_terms(self) -> None:
