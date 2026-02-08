@@ -64,33 +64,48 @@ class TestDomainMapper(unittest.TestCase):
 
     def test_iter_app_domains_empty_on_invalid_structure(self):
         self.assertEqual(
-            list(_domain_mapper.iter_app_domains(self.applications["web-app-no-server"])), []
+            list(
+                _domain_mapper.iter_app_domains(self.applications["web-app-no-server"])
+            ),
+            [],
         )
         self.assertEqual(
-            list(_domain_mapper.iter_app_domains(self.applications["web-app-server-not-dict"])), []
+            list(
+                _domain_mapper.iter_app_domains(
+                    self.applications["web-app-server-not-dict"]
+                )
+            ),
+            [],
         )
         self.assertEqual(
-            list(_domain_mapper.iter_app_domains(self.applications["web-app-domains-not-dict"])), []
+            list(
+                _domain_mapper.iter_app_domains(
+                    self.applications["web-app-domains-not-dict"]
+                )
+            ),
+            [],
         )
 
     def test_iter_app_domains_flattens_all_supported_shapes(self):
         # web-app-a: list + list
-        got_a = list(iter_app_domains(self.applications["web-app-a"]))
+        got_a = list(_domain_mapper.iter_app_domains(self.applications["web-app-a"]))
         self.assertEqual(
             got_a,
             ["a.example", "www.a.example", "A.ALIAS.EXAMPLE"],
         )
 
         # web-app-b: canonical str + aliases []
-        got_b = list(iter_app_domains(self.applications["web-app-b"]))
+        got_b = list(_domain_mapper.iter_app_domains(self.applications["web-app-b"]))
         self.assertEqual(got_b, ["b.example"])
 
         # web-app-c: canonical dict + aliases dict
-        got_c = list(iter_app_domains(self.applications["web-app-c"]))
+        got_c = list(_domain_mapper.iter_app_domains(self.applications["web-app-c"]))
         self.assertEqual(got_c, ["c.example", "api.c.example", "www.c.example"])
 
         # web-app-nested: nested list/dict combinations
-        got_nested = list(iter_app_domains(self.applications["web-app-nested"]))
+        got_nested = list(
+            _domain_mapper.iter_app_domains(self.applications["web-app-nested"])
+        )
         self.assertEqual(
             got_nested,
             [
@@ -104,7 +119,7 @@ class TestDomainMapper(unittest.TestCase):
         )
 
     def test_build_domain_index_case_insensitive(self):
-        idx = build_domain_index(self.applications)
+        idx = _domain_mapper.build_domain_index(self.applications)
 
         # Ensure normalized keys exist
         self.assertEqual(idx["a.example"], "web-app-a")
@@ -142,26 +157,43 @@ class TestDomainMapper(unittest.TestCase):
 
     def test_resolve_app_id_for_domain_found(self):
         self.assertEqual(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, "a.example"), "web-app-a"
+            _domain_mapper.resolve_app_id_for_domain(self.applications, "a.example"),
+            "web-app-a",
         )
         self.assertEqual(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, "WWW.A.EXAMPLE"), "web-app-a"
+            _domain_mapper.resolve_app_id_for_domain(
+                self.applications, "WWW.A.EXAMPLE"
+            ),
+            "web-app-a",
         )
         self.assertEqual(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, "api.c.example"), "web-app-c"
+            _domain_mapper.resolve_app_id_for_domain(
+                self.applications, "api.c.example"
+            ),
+            "web-app-c",
         )
         self.assertEqual(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, "DEEP.NESTED.EXAMPLE"),
+            _domain_mapper.resolve_app_id_for_domain(
+                self.applications, "DEEP.NESTED.EXAMPLE"
+            ),
             "web-app-nested",
         )
 
     def test_resolve_app_id_for_domain_not_found_or_empty(self):
         self.assertIsNone(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, "missing.example")
+            _domain_mapper.resolve_app_id_for_domain(
+                self.applications, "missing.example"
+            )
         )
-        self.assertIsNone(_domain_mapper.resolve_app_id_for_domain(self.applications, ""))
-        self.assertIsNone(_domain_mapper.resolve_app_id_for_domain(self.applications, "   "))
-        self.assertIsNone(_domain_mapper.resolve_app_id_for_domain(self.applications, None))  # type: ignore[arg-type]
+        self.assertIsNone(
+            _domain_mapper.resolve_app_id_for_domain(self.applications, "")
+        )
+        self.assertIsNone(
+            _domain_mapper.resolve_app_id_for_domain(self.applications, "   ")
+        )
+        self.assertIsNone(
+            _domain_mapper.resolve_app_id_for_domain(self.applications, None)  # type: ignore[arg-type]
+        )
 
     def test_resolve_app_id_for_domain_raises_on_collision(self):
         apps = {
