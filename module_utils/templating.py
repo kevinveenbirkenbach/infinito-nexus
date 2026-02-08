@@ -278,18 +278,21 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
         ):
             try:
                 templar.available_variables = prev_avail
-            except Exception:
+            except AttributeError:
+                # Best-effort cleanup: ignore if attribute cannot be restored
                 pass
 
         if disable_changed_2:
             try:
                 setattr(templar, "_disable_lookups", prev_disable_2)
-            except Exception:
+            except AttributeError:
+                # Best-effort cleanup: ignore if attribute cannot be restored
                 pass
         if disable_changed_1:
             try:
                 setattr(templar, "disable_lookups", prev_disable_1)
-            except Exception:
+            except AttributeError:
+                # Best-effort cleanup: ignore if attribute cannot be restored
                 pass
 
     out_s = "" if out is None else str(out)
