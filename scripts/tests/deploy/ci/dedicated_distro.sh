@@ -35,7 +35,7 @@ APP=""
 usage() {
   cat <<'EOF'
 Usage:
-  INFINITO_DISTRO=<distro> INVENTORY_DIR=<dir> \
+  INFINITO_DISTRO=<distro> INVENTORY_DIR=<dir> INFINITO_DOCKER_VOLUME=<abs_path> \
     scripts/tests/deploy/ci/dedicated_distro.sh \
     --type <server|workstation|universal> \
     --app <app_id>
@@ -72,7 +72,6 @@ cleanup() {
 
   # 1) Remove ALL containers (including running ones)
   mapfile -t ids < <(docker ps -aq || true)
-
   if (( ${#ids[@]} > 0 )); then
     docker rm -f "${ids[@]}" >/dev/null 2>&1 || true
   fi
@@ -87,11 +86,30 @@ cleanup() {
   docker container prune -f >/dev/null 2>&1 || true
 
   # 5) Remove host-mounted Docker data dir (CI runner only)
+  # IMPORTANT:
+  # - In CI, Docker/DIND/buildx may create root-owned files under this directory.
+  # - A plain 'rm -rf' can fail with "Permission denied" and poison the next distro run.
+  # - Use sudo for a hard reset, then recreate the directory.
   if [[ -n "${INFINITO_DOCKER_VOLUME:-}" ]]; then
     if [[ "${INFINITO_DOCKER_VOLUME}" == /* ]]; then
+      echo ">>> CI cleanup: wiping Docker root: ${INFINITO_DOCKER_VOLUME}"
+
+      echo ">>> Pre-clean ownership/permissions (best-effort)"
+      ls -ld "${INFINITO_DOCKER_VOLUME}" || true
+      sudo ls -ld "${INFINITO_DOCKER_VOLUME}" || true
+
       echo ">>> Removing host docker volume dir: ${INFINITO_DOCKER_VOLUME}"
-      rm -rvf "${INFINITO_DOCKER_VOLUME}" || true
-      mkdir -vp "${INFINITO_DOCKER_VOLUME}" || true
+      sudo rm -rvf "${INFINITO_DOCKER_VOLUME}" || true
+      sudo mkdir -vp "${INFINITO_DOCKER_VOLUME}" || true
+
+      # Optional: keep it writable for the runner user
+      sudo chown -R "$(id -u):$(id -g)" "${INFINITO_DOCKER_VOLUME}" || true
+
+      echo ">>> Post-clean ownership/permissions (best-effort)"
+      ls -ld "${INFINITO_DOCKER_VOLUME}" || true
+      sudo ls -ld "${INFINITO_DOCKER_VOLUME}" || true
+    else
+      echo "[WARN] INFINITO_DOCKER_VOLUME is not an absolute path: '${INFINITO_DOCKER_VOLUME}' (skipping)"
     fi
   fi
 
@@ -99,7 +117,6 @@ cleanup() {
   return $rc
 }
 trap cleanup EXIT
-
 
 echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 "${PYTHON}" -m cli.deploy.development up \
