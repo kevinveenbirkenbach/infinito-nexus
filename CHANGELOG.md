@@ -1,3 +1,8 @@
+## [2.1.5] - 2026-02-09
+
+* Prevents CI failures when no workstation apps are discovered by safely skipping the deploy job, and cleans up unnecessary cleanup output to keep logs readable and focused.
+
+
 ## [2.1.4] - 2026-02-08
 
 * This release ensures that commits carrying a version tag trigger the full distro test matrix by detecting tags pointing at the current commit, while regular commits continue to run on a single random distro.
