@@ -17,4 +17,4 @@ galaxy_info:
   - configuration
   - pacman
   - desktop
-  lifecycle: alpha
+  lifecycle: pre-alpha

@@ -24,7 +24,7 @@ env:
   INFINITO_GHCR_MIRROR_PREFIX: mirror
 jobs:
   discover:
-    name: discover apps (arch)
+    name: 🖥️ Discover apps
     runs-on: ubuntu-latest
     timeout-minutes: 60
     outputs:
@@ -52,7 +52,7 @@ jobs:
           make ci-discover-output
 
   workstation:
-    name: deploy:workstation (${{ matrix.app }})
+    name: 🖥️ Deploy ${{ matrix.app }}
     runs-on: ubuntu-latest
     timeout-minutes: 240
     needs: discover

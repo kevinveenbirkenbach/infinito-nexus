@@ -21,5 +21,5 @@ galaxy_info:
   - name: Archlinux
     versions:
     - all
-  lifecycle: alpha
+  lifecycle: pre-alpha
 dependencies: []

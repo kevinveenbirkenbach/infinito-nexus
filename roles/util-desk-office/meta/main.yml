@@ -23,7 +23,7 @@ galaxy_info:
   - name: Archlinux
     versions:
     - all
-  lifecycle: alpha
+  lifecycle: pre-alpha
 dependencies:
 - desk-libreoffice
 - util-desk-browser

@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   test-code-integration:
+    name: 🧪 Run integration tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:

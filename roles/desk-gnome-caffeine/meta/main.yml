@@ -14,4 +14,4 @@ galaxy_info:
   - archlinux
   run_after:
   - desk-gnome
-  lifecycle: alpha
+  lifecycle: pre-alpha

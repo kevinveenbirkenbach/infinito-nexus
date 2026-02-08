@@ -24,6 +24,12 @@
 - name: install {{ plugin_key }} nextcloud plugin
   command: "{{ NEXTCLOUD_DOCKER_EXEC_OCC }} app:install {{ plugin_key }}"
   register: install_result
+  retries: 6
+  delay: 30
+  until: >
+    install_result.rc == 0
+    or "already installed" in install_result.stdout
+    or "not compatible with this version of the server" in install_result.stdout
   failed_when: >
     install_result.rc != 0
     and
