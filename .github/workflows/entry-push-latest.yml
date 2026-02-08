@@ -56,7 +56,7 @@ jobs:
 
   # Guard job: only allow version releases if the tag commit is contained in origin/master
   release-guard:
-    name: "🛡️ Guard master release"
+    name: "🛡️ Guard release"
     if: startsWith(github.ref, 'refs/tags/v')
     needs: ci-orchestrator
     runs-on: ubuntu-latest
