@@ -3,11 +3,11 @@
 import tempfile
 import unittest
 from pathlib import Path
-from unittest import mock
 
 from module_utils.manager.inventory import InventoryManager  # type: ignore
 from module_utils.handler.vault import VaultScalar  # type: ignore
 from module_utils.manager.value_generator import ValueGenerator  # type: ignore
+from unittest import mock
 
 
 class TestInventoryManager(unittest.TestCase):
@@ -46,11 +46,11 @@ class TestInventoryManager(unittest.TestCase):
                 return {}
 
             with (
-                mock.patch(
+                unittest.mock.patch(
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                mock.patch("module_utils.manager.inventory.VaultHandler"),
+                unittest.mock.patch("module_utils.manager.inventory.VaultHandler"),
             ):
                 with self.assertRaises(SystemExit) as ctx:
                     InventoryManager(
