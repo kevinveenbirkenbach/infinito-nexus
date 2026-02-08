@@ -1,17 +1,16 @@
 from __future__ import annotations
 
 import unittest
-from unittest import mock
 
 from cli.deploy.dedicated import command as dedicated_command
 
 
 class TestDedicatedCommandPassthrough(unittest.TestCase):
-    @mock.patch("cli.deploy.dedicated.command.validate_application_ids")
-    @mock.patch("cli.deploy.dedicated.command.run_ansible_playbook")
-    @mock.patch("cli.deploy.dedicated.command.load_modes_from_yaml")
-    @mock.patch("cli.deploy.dedicated.command.add_dynamic_mode_args")
-    @mock.patch("cli.deploy.dedicated.command.build_modes_from_args")
+    @unittest.mock.patch("cli.deploy.dedicated.command.validate_application_ids")
+    @unittest.mock.patch("cli.deploy.dedicated.command.run_ansible_playbook")
+    @unittest.mock.patch("cli.deploy.dedicated.command.load_modes_from_yaml")
+    @unittest.mock.patch("cli.deploy.dedicated.command.add_dynamic_mode_args")
+    @unittest.mock.patch("cli.deploy.dedicated.command.build_modes_from_args")
     def test_main_passes_unknown_ansible_args_through(
         self,
         mock_build_modes_from_args,
