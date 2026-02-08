@@ -1,0 +1,5 @@
+- name: "Ensure msmtp-mta is absent (conflicts with postfix smtp-forwarder)"
+  package:
+    name:
+      - msmtp-mta
+    state: absent

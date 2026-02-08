@@ -2,7 +2,7 @@
 
 ## Moodle Docker Directory Path
 
-Moodle lives in: ``cd /opt/docker/moodle``
+Moodle lives in: ``cd /opt/compose/moodle``
 
 ## Upgrade 
 
@@ -36,13 +36,13 @@ To manually erase the full moodle setup inkluding all data execute:
 **CLI:**
 
 ```bash 
-cd /opt/docker/moodle && \
+cd /opt/compose/moodle && \
 docker compose down -v || {
   echo "docker compose down failed, cleaning up manually"
   rm -rv /mnt/hdd/data/docker/volumes/moodle_*
   docker compose down -v
 } && \
-rm -rv /opt/docker/moodle
+rm -rv /opt/compose/moodle
 ``` 
 
 Afterwards login to the database and execute

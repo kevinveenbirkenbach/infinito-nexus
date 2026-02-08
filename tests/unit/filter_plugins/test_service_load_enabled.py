@@ -9,7 +9,7 @@ class TestServiceLoadEnabled(unittest.TestCase):
     def test_service_load_enabled_true_when_enabled_and_shared_true(self):
         applications = {
             "web-app-xwiki": {
-                "docker": {
+                "compose": {
                     "services": {
                         "ldap": {
                             "enabled": True,
@@ -25,7 +25,7 @@ class TestServiceLoadEnabled(unittest.TestCase):
     def test_service_load_enabled_false_when_shared_false(self):
         applications = {
             "web-app-xwiki": {
-                "docker": {
+                "compose": {
                     "services": {
                         "ldap": {
                             "enabled": True,
@@ -41,7 +41,7 @@ class TestServiceLoadEnabled(unittest.TestCase):
     def test_service_load_enabled_false_when_enabled_false(self):
         applications = {
             "web-app-xwiki": {
-                "docker": {
+                "compose": {
                     "services": {
                         "ldap": {
                             "enabled": False,
@@ -57,7 +57,7 @@ class TestServiceLoadEnabled(unittest.TestCase):
     def test_service_load_enabled_false_when_keys_missing(self):
         applications = {
             "web-app-xwiki": {
-                "docker": {
+                "compose": {
                     "services": {
                         "ldap": {
                             # enabled/shared missing
@@ -72,7 +72,7 @@ class TestServiceLoadEnabled(unittest.TestCase):
     def test_service_load_enabled_uses_default_when_keys_missing(self):
         applications = {
             "web-app-xwiki": {
-                "docker": {
+                "compose": {
                     "services": {
                         "ldap": {
                             # enabled/shared missing
@@ -89,7 +89,7 @@ class TestServiceLoadEnabled(unittest.TestCase):
     def test_service_load_enabled_missing_service_returns_false(self):
         applications = {
             "web-app-xwiki": {
-                "docker": {
+                "compose": {
                     "services": {
                         # ldap missing entirely
                     }
@@ -100,7 +100,7 @@ class TestServiceLoadEnabled(unittest.TestCase):
         self.assertFalse(service_load_enabled(applications, "web-app-xwiki", "ldap"))
 
     def test_service_load_enabled_missing_app_raises(self):
-        applications = {"web-app-xwiki": {"docker": {"services": {}}}}
+        applications = {"web-app-xwiki": {"compose": {"services": {}}}}
 
         with self.assertRaises(AnsibleFilterError):
             service_load_enabled(applications, "web-app-mediawiki", "ldap")

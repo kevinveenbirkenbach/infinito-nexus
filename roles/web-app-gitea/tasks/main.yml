@@ -17,16 +17,16 @@
 
 - name: "Run DB migrations inside Gitea container"
   shell: |
-    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea migrate
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: migrate
   changed_when: "'migrations completed' in migrate.stdout"
 
 - name: "Create initial admin user"
   shell: |
-    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea admin user create \
         --admin \
         --username "{{ users.administrator.username }}" \
@@ -34,7 +34,7 @@
         --email    "{{ users.administrator.email }}" \
         -c {{ GITEA_CONFIG }}
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: create_admin
   changed_when: "'has been successfully created' in create_admin.stdout"
   failed_when: create_admin.rc != 0 and 'user already exists' not in create_admin.stderr
@@ -63,9 +63,9 @@
     name: sys-dns-cloudflare-records
   vars:
     cloudflare_records:
-      - zone:     "{{ domains | get_domain(application_id) | to_zone }}"
+      - zone:     "{{ lookup('domain',application_id) | to_zone }}"
         type:     A
-        name:    "{{ domains | get_domain(application_id) }}"
+        name:    "{{ lookup('domain',application_id) }}"
         content: "{{ networks.internet.ip4 }}"
         proxied: false  # Necessary for SSH port
   when: DNS_PROVIDER == 'cloudflare'

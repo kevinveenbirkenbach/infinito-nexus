@@ -1,6 +1,6 @@
 - name: "Add Keycloak OIDC Provider"
   shell: |
-    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth add-oauth \
         --provider openidConnect \
         --name     "{{ OIDC.BUTTON_TEXT }}" \
@@ -9,19 +9,19 @@
         --auto-discover-url "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}" \
         --scopes   "openid profile email"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: oidc_manage
   failed_when: oidc_manage.rc != 0 and "login source already exists" not in oidc_manage.stderr
 
 - name: "Lookup existing Keycloak auth source ID"
   shell: |
-    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea admin auth list \
       | tail -n +2 \
       | grep -F "{{ OIDC.BUTTON_TEXT }}" \
       | awk '{print $1; exit}'
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: oidc_source_id_raw
   failed_when:
     - oidc_source_id_raw.rc != 0
@@ -34,7 +34,7 @@
 
 - name: "Update Keycloak OIDC Provider"
   shell: |
-    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth update-oauth \
         --id {{ oidc_source_id }}\
         --provider openidConnect \
@@ -44,6 +44,6 @@
         --auto-discover-url "{{ OIDC.CLIENT.DISCOVERY_DOCUMENT }}" \
         --scopes   "openid profile email"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: oidc_manage
   failed_when: oidc_manage.rc != 0

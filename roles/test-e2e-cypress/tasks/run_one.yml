@@ -58,7 +58,7 @@
 # Optional wait until app is ready (uses domain resolution)
 - name: Wait until application is ready (HTTP 200/302)
   ansible.builtin.uri:
-    url: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+    url: "{{ lookup('tls', application_id, 'url.base') }}"
     status_code: [200, 302]
     validate_certs: false
   register: _wait_result
@@ -75,7 +75,7 @@
 
 - name: Run Cypress container
   ansible.builtin.command: >
-    docker run --rm
+    container run --rm
     --ipc=host
     --shm-size=1g
     --env-file {{ _cypress_stage_dir }}/.env

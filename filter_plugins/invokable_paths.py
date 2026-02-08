@@ -1,21 +1,55 @@
-import os
-import yaml
+from __future__ import annotations
+
+from pathlib import Path
 from typing import Dict, List, Optional
+
+import yaml
+
+
+def _find_project_root(start: Path) -> Optional[Path]:
+    """
+    Walk upwards from `start` until we find a repository root marker.
+    We treat `roles/categories.yml` as the canonical marker for this project.
+    """
+    start = start.resolve()
+    candidates = [start, *start.parents]
+    for p in candidates:
+        if (p / "roles" / "categories.yml").is_file():
+            return p
+    return None
+
+
+def _default_roles_file() -> str:
+    """
+    Determine the default roles/categories.yml path robustly.
+    Priority:
+      1) current working directory (common for CLI usage)
+      2) location of this file (common for ansible execution from repo)
+    """
+    root = _find_project_root(Path.cwd())
+    if root is None:
+        root = _find_project_root(Path(__file__).resolve().parent)
+    if root is None:
+        # Keep the error explicit and helpful
+        raise FileNotFoundError(
+            "Could not locate project root containing roles/categories.yml. "
+            "Run from the repo root or pass roles_file explicitly."
+        )
+    return str(root / "roles" / "categories.yml")
 
 
 def get_invokable_paths(
     roles_file: Optional[str] = None, suffix: Optional[str] = None
 ) -> List[str]:
     """
-    Load nested roles YAML and return dash-joined paths where 'invokable' is True. Appends suffix if provided.
+    Load nested roles YAML and return dash-joined paths where 'invokable' is True.
+    Appends suffix if provided.
     """
     if not roles_file:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(script_dir)
-        roles_file = os.path.join(project_root, "roles", "categories.yml")
+        roles_file = _default_roles_file()
 
     try:
-        with open(roles_file, "r") as f:
+        with open(roles_file, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
     except FileNotFoundError:
         raise FileNotFoundError(f"Roles file not found: {roles_file}")
@@ -29,7 +63,9 @@ def get_invokable_paths(
     if "roles" in roles and isinstance(roles["roles"], dict) and len(roles) == 1:
         roles = roles["roles"]
 
-    def _recurse(subroles: Dict[str, dict], parent: List[str] = None) -> List[str]:
+    def _recurse(
+        subroles: Dict[str, dict], parent: Optional[List[str]] = None
+    ) -> List[str]:
         parent = parent or []
         found: List[str] = []
         METADATA = {"title", "description", "icon", "invokable"}
@@ -62,12 +98,10 @@ def get_non_invokable_paths(
     Appends suffix if provided.
     """
     if not roles_file:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(script_dir)
-        roles_file = os.path.join(project_root, "roles", "categories.yml")
+        roles_file = _default_roles_file()
 
     try:
-        with open(roles_file, "r") as f:
+        with open(roles_file, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
     except FileNotFoundError:
         raise FileNotFoundError(f"Roles file not found: {roles_file}")
@@ -81,7 +115,9 @@ def get_non_invokable_paths(
     if "roles" in roles and isinstance(roles["roles"], dict) and len(roles) == 1:
         roles = roles["roles"]
 
-    def _recurse_non(subroles: Dict[str, dict], parent: List[str] = None) -> List[str]:
+    def _recurse_non(
+        subroles: Dict[str, dict], parent: Optional[List[str]] = None
+    ) -> List[str]:
         parent = parent or []
         found: List[str] = []
         METADATA = {"title", "description", "icon", "invokable"}
@@ -91,8 +127,7 @@ def get_non_invokable_paths(
             p = "-".join(path)
             inv = cfg.get("invokable", False)
             if not inv:
-                entry = p + (suffix or "")
-                found.append(entry)
+                found.append(p + (suffix or ""))
 
             children = {
                 ck: cv

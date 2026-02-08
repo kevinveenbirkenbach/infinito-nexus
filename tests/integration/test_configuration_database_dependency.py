@@ -11,8 +11,8 @@ class TestConfigurationDatabaseDependency(unittest.TestCase):
     def test_central_database_implies_database_service_enabled(self):
         """
         For each roles/*/config/main.yml:
-        If docker.services.database.shared is true,
-        then docker.services.database.enabled must be true.
+        If compose.services.database.shared is true,
+        then compose.services.database.enabled must be true.
         """
         config_paths = sorted(self.PROJECT_ROOT.glob(self.CONFIG_PATTERN))
         self.assertTrue(
@@ -25,7 +25,7 @@ class TestConfigurationDatabaseDependency(unittest.TestCase):
                 content = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
 
                 # Read database enabled flag
-                docker = content.get("docker", {})
+                docker = content.get("compose", {})
                 services = docker.get("services", {})
                 database = services.get("database", {})
                 db_enabled = database.get("enabled", False)
@@ -34,7 +34,7 @@ class TestConfigurationDatabaseDependency(unittest.TestCase):
                 if central_db:
                     self.assertTrue(
                         db_enabled,
-                        f"{config_path}: docker.services.database.shared is true but docker.services.database.enabled is not true",
+                        f"{config_path}: compose.services.database.shared is true but compose.services.database.enabled is not true",
                     )
                 else:
                     # No requirement when central_database is false or absent

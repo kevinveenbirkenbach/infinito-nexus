@@ -1,7 +1,7 @@
 <?php
 # Implementing OICD configuration
 
-{% if applications | get_app_conf(application_id, 'oidc.flavor') == "oidc_login" %}
+{% if lookup('config',application_id, 'oidc.flavor') == "oidc_login" %}
 
 # Check out: https://github.com/pulsejet/nextcloud-oidc-login
 
@@ -33,7 +33,7 @@ return array (
     //
     // NOTE: If you want to allow NextCloud to manage quotas, omit this option. Do not set it to
     // zero or -1 or ''.
-    'oidc_login_default_quota' => '{{ applications | get_app_conf(application_id, 'default_quota', True)}}',
+    'oidc_login_default_quota' => '{{ lookup('config', application_id, 'default_quota')}}',
 
     // Login button text
     'oidc_login_button_text' => '{{ OIDC.BUTTON_TEXT }}',
@@ -146,7 +146,7 @@ return array (
     //
     // The `id` attribute in `oidc_login_attributes` must return the
     // "Internal Username" (see expert settings in LDAP integration)
-    'oidc_login_proxy_ldap' => {{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled', False) | string | lower }},
+    'oidc_login_proxy_ldap' => {{ lookup('config',application_id, 'compose.services.ldap.enabled', False) | string | lower }},
 
     // Disable creation of users new to Nextcloud from OIDC login.
     // A user may be known to the IdP but not (yet) known to Nextcloud.
@@ -173,7 +173,7 @@ return array (
 
     // For development, you may disable TLS verification. Default value is `true`
     // which should be kept in production
-    'oidc_login_tls_verify' => {{ lookup('tls_resolve', application_id, want='enabled') | string | bool }},
+    'oidc_login_tls_verify' => {{ lookup('tls', application_id, 'enabled') | string | bool }},
 
     // If you get your groups from the oidc_login_attributes, you might want
     // to create them if they are not already existing, Default is `false`.

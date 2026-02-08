@@ -5,9 +5,9 @@
 application_id:                         {{ application_id }}    # ID of the application, should be the name of the role folder
 
 # Docker
-# Checkout roles/docker-compose/defaults/main.yml for all configuration options
+# Checkout roles/sys-svc-compose/defaults/main.yml for all configuration options
 
-docker_compose_flush_handlers:          true                    # When this is set to true an auto-flush after the docker-compose.yml, and env deploy is triggered, otherwise you have todo it manual.
+docker_compose_flush_handlers:          true                    # When this is set to true an auto-flush after the compose.yml, and env deploy is triggered, otherwise you have todo it manual.
 docker_git_repository_pull:             true                    # This will automaticly pull a repository from the 'docker_git_repository_address'
 docker_git_repository_address:          ""                      # The address of a repository which should be pulled
 
@@ -15,7 +15,7 @@ docker_git_repository_address:          ""                      # The address of
 {# I recommend, to use this mappings, but you can skipp it and access the config entries direct via 'get_app_conf' #}
 
 # This variables had been autocreated. For a detailled explanation checkout the config/main.yml file 
-{{ application_id | get_entity_name }}_version:   "{% raw %}{{ applications | get_app_conf(application_id, 'docker.services.{% endraw %}{{ application_id | get_entity_name }}{% raw %}.version') }}"{% endraw %}
-{{ application_id | get_entity_name }}_image:     "{% raw %}{{ applications | get_app_conf(application_id, 'docker.services.{% endraw %}{{ application_id | get_entity_name }}{% raw %}.image') }}"{% endraw %}
-{{ application_id | get_entity_name }}_container: "{% raw %}{{ applications | get_app_conf(application_id, 'docker.services.{% endraw %}{{ application_id | get_entity_name }}{% raw %}.name') }}"{% endraw %}
-{{ application_id | get_entity_name }}_volume:    "{% raw %}{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"{% endraw %}
+{{ application_id | get_entity_name }}_version:   "{% raw %}{{ lookup('config', application_id, 'compose.services.{% endraw %}{{ application_id | get_entity_name }}{% raw %}.version') }}"{% endraw %}
+{{ application_id | get_entity_name }}_image:     "{% raw %}{{ lookup('config', application_id, 'compose.services.{% endraw %}{{ application_id | get_entity_name }}{% raw %}.image') }}"{% endraw %}
+{{ application_id | get_entity_name }}_container: "{% raw %}{{ lookup('config', application_id, 'compose.services.{% endraw %}{{ application_id | get_entity_name }}{% raw %}.name') }}"{% endraw %}
+{{ application_id | get_entity_name }}_volume:    "{% raw %}{{ lookup('config', application_id, 'compose.volumes.data') }}"{% endraw %}

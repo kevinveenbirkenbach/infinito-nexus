@@ -4,33 +4,33 @@ application_id:                 "web-app-bluesky"
 ## Bluesky
 
 ## Social App
-BLUESKY_SOCIAL_APP_DIR:         "{{ [ docker_compose.directories.services, 'social-app' ] | path_join  }}"
+BLUESKY_SOCIAL_APP_DIR:         "{{ [ lookup('container', application_id, 'directories.services'), 'social-app' ] | path_join  }}"
 BLUESKY_GEOLOCATION_PATH:       "{{ [ BLUESKY_SOCIAL_APP_DIR,'src/geolocation/index.tsx' ] | path_join }}"
 
 # This should be removed when the following issue is closed:
 # https://github.com/bluesky-social/pds/issues/52
 
 ## PDS
-BLUESKY_PDSADMIN_DIR:           "{{ [ docker_compose.directories.volumes, 'pdsadmin' ] | path_join }}"
+BLUESKY_PDSADMIN_DIR:           "{{ [ lookup('container', application_id, 'directories.volumes'), 'pdsadmin' ] | path_join }}"
 BLUESKY_PDSADMIN_FILE:          "{{ [ BLUESKY_PDSADMIN_DIR, 'pdsadmin' ] | path_join }}"
 BLUESKY_PDSADMIN_TMP_TAR:       "/tmp/pdsadmin.tar.gz"
-BLUESKY_PDS_IMAGE:              "{{ applications | get_app_conf(application_id, 'docker.services.pds.image') }}"
-BLUESKY_PDS_VERSION:            "{{ applications | get_app_conf(application_id, 'docker.services.pds.version') }}"
-BLUESKY_PDS_DATA_VOLUME:        "{{ applications | get_app_conf(application_id, 'docker.volumes.pds_data') }}"
+BLUESKY_PDS_IMAGE:              "{{ lookup('config', application_id, 'compose.services.pds.image') }}"
+BLUESKY_PDS_VERSION:            "{{ lookup('config', application_id, 'compose.services.pds.version') }}"
+BLUESKY_PDS_DATA_VOLUME:        "{{ lookup('config', application_id, 'compose.volumes.pds_data') }}"
 BLUESKY_PDS_DATA_DIR:           "/opt/pds"
 BLUESKY_PDS_BLOBSTORE_LOCATION: "{{ [ BLUESKY_PDS_DATA_DIR, 'blocks' ] | path_join }}"
 
 ## Web
-BLUESKY_WEB_ENABLED:            "{{ applications | get_app_conf(application_id, 'docker.services.web.enabled') }}"
+BLUESKY_WEB_ENABLED:            "{{ lookup('config', application_id, 'compose.services.web.enabled') }}"
 BLUESKY_WEB_DOMAIN:             "{{ domains[application_id].web }}"
 BLUESKY_WEB_PORT:               "{{ ports.localhost.http['web-app-bluesky_web'] }}"
 BLUESKY_WEB_IMAGE_CUSTOM:       "bluesky_web_custom"
 
 ## View
-BLUESKY_VIEW_ENABLED:           "{{ applications | get_app_conf(application_id, 'docker.services.view.enabled') }}"
+BLUESKY_VIEW_ENABLED:           "{{ lookup('config', application_id, 'compose.services.view.enabled') }}"
 BLUESKY_VIEW_DOMAIN_LOCAL:      "{{ domains[application_id].view }}"
 BLUESKY_VIEW_DOMAIN_FINAL:      "{{ BLUESKY_VIEW_DOMAIN_LOCAL if BLUESKY_VIEW_ENABLED else 'api.bsky.app' }}"
-BLUESKY_VIEW_URL:               "{{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
+BLUESKY_VIEW_URL:               "{{ lookup('tls', application_id, 'protocols.web') }}://{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
 BLUESKY_VIEW_DID:               "did:web:{{ BLUESKY_VIEW_DOMAIN_FINAL }}"
 BLUESKY_VIEW_PORT:              "{{ ports.localhost.http['web-app-bluesky_view'] }}"
 
@@ -39,8 +39,8 @@ BLUESKY_API_DOMAIN:             "{{ domains[application_id].api }}"
 BLUESKY_API_PORT:               "{{ ports.localhost.http['web-app-bluesky_api'] }}"
 
 ## Credentials
-BLUESKY_JWT_SECRET:             "{{ applications | get_app_conf(application_id, 'credentials.jwt_secret') }}"
-BLUESKY_ROTATION_KEY:           "{{ applications | get_app_conf(application_id, 'credentials.plc_rotation_key_k256_private_key_hex') }}"
+BLUESKY_JWT_SECRET:             "{{ lookup('config', application_id, 'credentials.jwt_secret') }}"
+BLUESKY_ROTATION_KEY:           "{{ lookup('config', application_id, 'credentials.plc_rotation_key_k256_private_key_hex') }}"
 
 ## Admin
 BLUESKY_ADMIN_EMAIL:            "{{ users.administrator.email }}"
@@ -48,4 +48,4 @@ BLUESKY_ADMIN_PASSWORD:         "{{ users.administrator.password }}"
 
 # Front proxy
 BLUESKY_FRONT_PROXY_CONTENT:    "{{ lookup('template', 'extra_locations.conf.j2') }}"
-BLUESKY_CONFIG_UPSTREAM_URL:    "{{ applications | get_app_conf(application_id, 'server.config_upstream_url') }}"
+BLUESKY_CONFIG_UPSTREAM_URL:    "{{ lookup('config', application_id, 'server.config_upstream_url') }}"

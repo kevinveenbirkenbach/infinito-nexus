@@ -17,14 +17,14 @@ def stop_containers(containers):
     """Stop a list of containers."""
     container_list = " ".join(containers)
     print(f"Stopping containers {container_list}...")
-    run_command(f"docker stop {container_list}")
+    run_command(f"container stop {container_list}")
 
 
 def start_containers(containers):
     """Start a list of containers."""
     container_list = " ".join(containers)
     print(f"Starting containers {container_list}...")
-    run_command(f"docker start {container_list}")
+    run_command(f"container start {container_list}")
 
 
 def is_database(image):
@@ -39,18 +39,20 @@ def is_symbolic_link(file_path):
 
 def get_volume_path(volume):
     return run_command(
-        f"docker volume inspect --format '{{{{ .Mountpoint }}}}' {volume}"
+        f"container volume inspect --format '{{{{ .Mountpoint }}}}' {volume}"
     )
 
 
 def get_image(container):
-    return run_command(f"docker inspect --format='{{{{.Config.Image}}}}' {container}")
+    return run_command(
+        f"container inspect --format='{{{{.Config.Image}}}}' {container}"
+    )
 
 
 def has_healthcheck(container):
     """Check if a container has a HEALTHCHECK defined."""
     result = run_command(
-        f"docker inspect --format='{{{{json .State.Health}}}}' {container}"
+        f"container inspect --format='{{{{json .State.Health}}}}' {container}"
     )
     return result not in ("null", "")
 
@@ -58,7 +60,7 @@ def has_healthcheck(container):
 def get_health_status(container):
     """Return the health status."""
     status = run_command(
-        f"docker inspect --format='{{{{.State.Health.Status}}}}' {container}"
+        f"container inspect --format='{{{{.State.Health.Status}}}}' {container}"
     )
     return status
 
@@ -111,11 +113,13 @@ if __name__ == "__main__":
     rapid_storage_path = args.rapid_storage_path
     mass_storage_path = args.mass_storage_path
 
-    volumes = run_command("docker volume ls -q").splitlines()
+    volumes = run_command("container volume ls -q").splitlines()
 
     for volume in volumes:
         volume_path = get_volume_path(volume)
-        containers = run_command(f"docker ps -q --filter volume={volume}").splitlines()
+        containers = run_command(
+            f"container ps -q --filter volume={volume}"
+        ).splitlines()
 
         if not containers:
             print(

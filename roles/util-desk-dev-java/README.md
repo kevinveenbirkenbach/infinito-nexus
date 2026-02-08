@@ -1,4 +1,4 @@
-# Java Development Utilities ☕️
+# Java Development Utilities
 
 ## Description
 

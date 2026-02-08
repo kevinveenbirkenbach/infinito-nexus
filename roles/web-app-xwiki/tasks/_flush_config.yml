@@ -2,9 +2,9 @@
   template:
     src: "xwiki.properties.j2"
     dest: "{{ XWIKI_HOST_PROPERTIES_PATH }}"
-  notify: docker compose up
+  notify: compose up
 
-- name: "flush docker compose for '{{ application_id }}'"
+- name: "flush compose for '{{ application_id }}'"
   meta: flush_handlers
 
 - name: "Wait until XWiki REST is ready (no DW redirect)"

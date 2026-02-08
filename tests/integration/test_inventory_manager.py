@@ -66,7 +66,7 @@ class TestInventoryManagerIntegration(unittest.TestCase):
 
             # config/main.yml (no further transitive deps)
             (provider_role / "config" / "main.yml").write_text(
-                "docker:\n  services: {}\n",
+                "compose:\n  services: {}\n",
                 encoding="utf-8",
             )
 
@@ -106,7 +106,7 @@ class TestInventoryManagerIntegration(unittest.TestCase):
             # - database_password injection requires enabled=true AND shared=true
             # - provider resolution requires type when enabled=true and shared=true
             (role_path / "config" / "main.yml").write_text(
-                "docker:\n"
+                "compose:\n"
                 "  services:\n"
                 "    database:\n"
                 "      enabled: true\n"

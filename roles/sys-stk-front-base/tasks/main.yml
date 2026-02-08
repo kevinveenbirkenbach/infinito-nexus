@@ -8,7 +8,7 @@
       include_tasks: "utils/load_app.yml"
       vars:
         load_app_id: web-opt-rdr-domains
-      when: redirect_domain_mappings | length > 0
+      when: CURRENT_PLAY_REDIRECT_DOMAINS | length > 0
 
     - include_tasks: utils/once/flag.yml
   when: run_once_sys_stk_front_base is not defined

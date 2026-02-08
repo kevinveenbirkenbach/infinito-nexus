@@ -43,7 +43,7 @@ class TestResourceFilter(unittest.TestCase):
         self.mock_get_app_conf.assert_called_once_with(
             self.applications,
             self.application_id,
-            "docker.services.openresty.cpus",
+            "compose.services.openresty.cpus",
             False,
             "0.5",
         )
@@ -65,7 +65,7 @@ class TestResourceFilter(unittest.TestCase):
         self.mock_get_app_conf.assert_called_once_with(
             self.applications,
             self.application_id,
-            "docker.services.foo.cpus",
+            "compose.services.foo.cpus",
             False,
             "0.5",
         )
@@ -89,7 +89,7 @@ class TestResourceFilter(unittest.TestCase):
         self.mock_get_app_conf.assert_called_once_with(
             self.applications,
             self.application_id,
-            "docker.services.openresty.mem_limit",
+            "compose.services.openresty.mem_limit",
             False,
             "2g",
         )
@@ -112,7 +112,7 @@ class TestResourceFilter(unittest.TestCase):
         self.mock_get_app_conf.assert_called_once_with(
             self.applications,
             self.application_id,
-            "docker.services.openresty.pids_limit",
+            "compose.services.openresty.pids_limit",
             False,
             2048,
         )

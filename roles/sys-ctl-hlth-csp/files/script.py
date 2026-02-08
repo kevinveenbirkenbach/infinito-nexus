@@ -112,7 +112,7 @@ def build_docker_cmd(
     ignore_network_blocks_from: list[str],
     use_host_network: bool = True,
 ) -> list[str]:
-    cmd = ["run", "--rm"]
+    cmd = ["container", "run", "--rm"]
 
     if use_host_network:
         cmd.extend(["--network", "host"])
@@ -147,7 +147,7 @@ def run_checker(
     Always uses run.
     """
     if always_pull:
-        subprocess.run(["docker", "pull", image], check=False)
+        subprocess.run(["container", "pull", image], check=False)
 
     cmd = build_docker_cmd(
         image=image,
@@ -185,7 +185,7 @@ def main() -> None:
     parser.add_argument(
         "--always-pull",
         action="store_true",
-        help="Pull the docker image before running (best-effort).",
+        help="Pull the container image before running (best-effort).",
     )
     parser.add_argument(
         "--short",
@@ -201,7 +201,7 @@ def main() -> None:
     parser.add_argument(
         "--no-host-network",
         action="store_true",
-        help="Disable --network host for docker run (default is to use host network).",
+        help="Disable --network host for container run (default is to use host network).",
     )
 
     args = parser.parse_args()

@@ -12,7 +12,7 @@ server:
 email:
   from_name: "Customer Relationship Management (SuiteCRM, {{ DOMAIN_PRIMARY }})"
 
-docker:
+compose:
   services:
     oidc:
       enabled: false

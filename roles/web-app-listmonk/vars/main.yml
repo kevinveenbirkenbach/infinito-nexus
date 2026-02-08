@@ -1,26 +1,26 @@
 # General 
 application_id:               "web-app-listmonk"
-container_port:               "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.port') }}"
+container_port:               "{{ lookup('config', application_id, 'compose.services.listmonk.port') }}"
 
 # Listmonk
-LISTMONK_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.version') }}"
-LISTMONK_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.image') }}"
-LISTMONK_NAME:                "{{ applications | get_app_conf(application_id, 'docker.services.listmonk.name') }}"
-LISTMONK_CONFIG_HOST:         "{{ [ docker_compose.directories.config,'config.toml' ] | path_join }}"
-LISTMONK_OIDC_ENABLED:        "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
+LISTMONK_VERSION:             "{{ lookup('config', application_id, 'compose.services.listmonk.version') }}"
+LISTMONK_IMAGE:               "{{ lookup('config', application_id, 'compose.services.listmonk.image') }}"
+LISTMONK_NAME:                "{{ lookup('config', application_id, 'compose.services.listmonk.name') }}"
+LISTMONK_CONFIG_HOST:         "{{ [ lookup('container', application_id, 'directories.config'),'config.toml' ] | path_join }}"
+LISTMONK_OIDC_ENABLED:        "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
 
-LISTMONK_PUBLIC_API_ENABLED:  "{{ applications | get_app_conf(application_id, 'public_api_activated') }}"
+LISTMONK_PUBLIC_API_ENABLED:  "{{ lookup('config', application_id, 'public_api_activated') }}"
 
 # User Configuration
 LISTMONK_USER_SEND:           "newsletter"
 LISTMONK_USER_BOUNCE:         "bounce"
 
-LISTMONK_EXEC_DATABASE:       "docker exec -i {{ database_container }} psql -U {{ database_username }} -d {{ database_name }}"
-LISTMONK_RUN:                 "docker compose {{ lookup('compose_f_args', application_id) }} run -T --rm application"
+LISTMONK_EXEC_DATABASE:       "container exec -i {{ lookup('database', application_id, 'container') }} psql -U {{ lookup('database', application_id, 'username') }} -d {{ lookup('database', application_id, 'name') }}"
+LISTMONK_RUN:                 "{{ BIN_COMPOSE }} run -T --rm application"
 
 LISTMONK_SETTINGS:
   - key: "app.root_url"
-    value: "\"{{ lookup(\"tls_resolve\", application_id, want=\"url.base\") }}\""
+    value: "\"{{ lookup('tls', application_id, 'url.base') }}\""
 
   - key: "app.notify_emails"
     value: "{{ [ users.administrator.email ] | to_json }}"
@@ -41,10 +41,10 @@ LISTMONK_SETTINGS:
     value: 'true'
 
   - key: "security.captcha_key"
-    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha.key") }}"'
+    value: "\"{{ lookup('config', application_id, 'credentials.hcaptcha.key') }}\""
 
   - key: "security.captcha_secret"
-    value: '"{{ applications | get_app_conf(application_id, "credentials.hcaptcha.secret") }}"'
+    value: "\"{{ lookup('config', application_id, 'credentials.hcaptcha.secret') }}\""
 
   # SMTP servers
   - key: "smtp"

@@ -21,8 +21,8 @@
     src: Gemfile.plugins
     dest: "{{ [OPENPROJECT_PLUGINS_FOLDER,'Gemfile.plugins'] | path_join }}"
   notify:
-    - docker compose up
-    - docker compose build
+    - compose up
+    - compose build
 
 - name: "create {{ OPENPROJECT_DUMMY_VOLUME }}"
   file:

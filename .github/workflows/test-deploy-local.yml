@@ -114,9 +114,3 @@ jobs:
           export ONLY_APP="${{ needs.discover.outputs.only_app }}"
           export APP="${{ matrix.app }}"
           make ci-deploy-app
-
-      - name: Show last 200 log lines on failure
-        if: failure()
-        shell: bash
-        run: |
-          scripts/meta/log-tail.sh logs 200

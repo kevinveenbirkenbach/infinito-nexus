@@ -7,7 +7,7 @@ server
     {
       return 301 https://$host$request_uri;
     }
-    {% if (lookup('tls_resolve', domain, want='mode') == 'letsencrypt') %}
+    {% if (lookup('tls', domain, 'mode') == 'letsencrypt') %}
         {% include 'acme.conf.j2' %}
     {% endif %}
 }

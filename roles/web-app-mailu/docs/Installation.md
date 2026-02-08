@@ -33,7 +33,7 @@ netstat -tulpn
 To use Mailu, create the primary administrator user account, `admin@{{hostname}}`, using the command below. Replace `PASSWORD` with your preferred password:
 
 ```bash
-docker-compose -p mailu exec admin flask mailu admin {{admin}} {{hostname}} PASSWORD
+compose -p mailu exec admin flask mailu admin {{admin}} {{hostname}} PASSWORD
 ```
 
 ## CLI User Management 🛠️
@@ -45,7 +45,7 @@ For managing users, follow the instructions in the official [Mailu CLI documenta
 To start the server, use the following command:
 
 ```bash
-docker-compose -p mailu up -d
+compose -p mailu up -d
 ```
 
 ## OIDC Support 🔐

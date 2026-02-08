@@ -25,7 +25,7 @@ Taiga is ideal for developers, designers, and agile teams who want:
 
 ## Purpose
 
-This role automates the deployment and configuration of a complete, production-ready Taiga stack using Docker Compose. It ensures integration with common infrastructure tools such as Nginx, PostgreSQL, and RabbitMQ, while optionally enabling OpenID Connect authentication for enterprise-grade SSO.
+This role automates the deployment and configuration of a complete, production-ready Taiga stack using Docker Compose. It ensures integration with common infrastructure tools such as NGINX, PostgreSQL, and RabbitMQ, while optionally enabling OpenID Connect authentication for enterprise-grade SSO.
 
 By using this role, teams can set up Taiga in minutes on Arch Linux systems — whether in a homelab, dev environment, or production cluster.
 
@@ -39,7 +39,7 @@ By using this role, teams can set up Taiga in minutes on Arch Linux systems — 
     - [taiga-contrib-oidc-auth (official)](https://github.com/taigaio/taiga-contrib-oidc-auth)
 - 📨 **Email Backend:** Supports SMTP and console backends for development.
 - 🔁 **Async & Realtime Events:** Includes RabbitMQ and support for Taiga’s event system.
-- 🌐 **Reverse Proxy Ready:** Integrates with Nginx using the `sys-stk-front-proxy` role.
+- 🌐 **Reverse Proxy Ready:** Integrates with NGINX using the `sys-stk-front-proxy` role.
 - 🧩 **Composable Design:** Integrates cleanly with other Infinito.Nexus infrastructure roles.
 
 ---

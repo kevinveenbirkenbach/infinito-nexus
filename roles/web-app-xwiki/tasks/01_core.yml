@@ -42,7 +42,7 @@
 
         echo "=== password hash compare ==="
         echo -n "container_hash="
-        docker exec "{{ XWIKI_CONTAINER }}" sh -lc '
+        container exec "{{ XWIKI_CONTAINER }}" sh -lc '
           cfg="/usr/local/tomcat/webapps/ROOT/WEB-INF/xwiki.cfg";
           if [ ! -f "$cfg" ]; then
             echo "<missing-xwiki.cfg>"
@@ -86,9 +86,9 @@
 - block:
     - name:           "Create Final Docker Compose File"
       template:
-        src:          "docker-compose.yml.j2"
-        dest:         "{{ docker_compose.files.docker_compose }}"
-      notify:         docker compose up
+        src:          "compose.yml.j2"
+        dest:         "{{ lookup('container', application_id, 'files.compose') }}"
+      notify:         compose up
     
     - name: Deploy Final Config
       include_tasks: _flush_config.yml

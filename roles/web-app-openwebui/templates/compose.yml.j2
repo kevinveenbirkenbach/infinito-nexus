@@ -1,0 +1,18 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+  openwebui:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: {{ OPENWEBUI_IMAGE }}:{{ OPENWEBUI_VERSION }}
+    container_name: {{ OPENWEBUI_CONTAINER }}
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ OPENWEBUI_PORT_PUBLIC }}:8080"
+    volumes:
+      - openwebui_data:/app/backend/data
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={'openwebui_data': {'name': OPENWEBUI_VOLUME}}
+) }}

@@ -24,7 +24,7 @@ server:
     canonical:
       - "slides.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     logout:
       enabled: false

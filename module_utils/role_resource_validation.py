@@ -97,13 +97,13 @@ def filter_roles_by_min_storage(
                 )
             continue
 
-        key_path = ["docker", "services", entity_name, "min_storage"]
+        key_path = ["compose", "services", entity_name, "min_storage"]
         min_storage_val = _deep_get(cfg, key_path)
 
         if min_storage_val is None:
             if emit_warnings:
                 _gha_warning(
-                    f"Missing key docker.services.{entity_name}.min_storage in {cfg_path} (treating as 0GB)",
+                    f"Missing key compose.services.{entity_name}.min_storage in {cfg_path} (treating as 0GB)",
                     title="min_storage validation",
                 )
             out.append(role_name)

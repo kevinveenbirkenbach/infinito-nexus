@@ -7,7 +7,7 @@
     owner: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
     group: "{{ NEXTCLOUD_DOCKER_USER_ID }}"
     mode: "0644"
-  notify: docker compose up
+  notify: compose up
 
 - name: Flush handlers so Nextcloud container is restarted and ready
   meta: flush_handlers
@@ -34,7 +34,7 @@
   ansible.builtin.shell: |
     set -euo pipefail
 
-    docker exec -u root {{ NEXTCLOUD_CONTAINER }} sh -lc '
+    container exec -u root {{ NEXTCLOUD_CONTAINER }} sh -lc '
       cfg="{{ NEXTCLOUD_DOCKER_CONFIG_FILE }}"
       marker="INFINITO:NEXUS CONFIG LOADER"
 
@@ -48,4 +48,4 @@
   register: cfg_loader_patch
   changed_when: cfg_loader_patch.rc == 0
   failed_when: cfg_loader_patch.rc != 0
-  notify: docker compose up
+  notify: compose up

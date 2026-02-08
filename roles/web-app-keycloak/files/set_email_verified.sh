@@ -7,7 +7,7 @@ set -euo pipefail
 # Runs on the host and executes kcadm inside the Keycloak container.
 #
 # REQUIRED environment variables:
-#   KEYCLOAK_EXEC_CONTAINER   e.g. "docker exec -i keycloak"
+#   KEYCLOAK_EXEC_CONTAINER   e.g. "container exec -i keycloak"
 #   KEYCLOAK_KCADM            e.g. "/opt/keycloak/bin/kcadm.sh"
 #   KEYCLOAK_REALM            Realm name
 #   KEYCLOAK_USERNAME         Username to update

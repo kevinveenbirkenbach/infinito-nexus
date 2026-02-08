@@ -1,4 +1,4 @@
-# SSH Agent 🔐
+# SSH Agent
 
 ## Description
 

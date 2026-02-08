@@ -1,10 +1,12 @@
+- include_tasks: utils/once/flag.yml
+
 - name: Compute average allowed connections per Postgres app (once)
   set_fact:
     POSTGRES_ALLOWED_AVG_CONNECTIONS: "{{ (POSTGRES_MAX_CONNECTIONS | split_postgres_connections(playbook_dir ~ '/roles')) | int }}"
   run_once: true
 
-- name: "Setup docker network for {{ application_id }}"
-  include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
+- name: "Setup container network for {{ application_id }}"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
     docker_network_name:            "{{ POSTGRES_NETWORK_NAME }}"
     docker_network_subnet:          "{{ POSTGRES_SUBNET }}"
@@ -22,7 +24,7 @@
 
 - name: "POSTGRES | Wait until container is running (not restarting)"
   ansible.builtin.shell: >
-    docker inspect --format '{{ "{{.State.Status}}" }} {{ "{{.State.Restarting}}" }}' {{ POSTGRES_CONTAINER }}
+    container inspect --format '{{ "{{.State.Status}}" }} {{ "{{.State.Restarting}}" }}' {{ POSTGRES_CONTAINER }}
   register: pg_state
   retries: 120
   delay: 2
@@ -33,7 +35,7 @@
 
 - name: "POSTGRES | Confirm SQL works (socket)"
   ansible.builtin.shell: >
-    docker exec {{ POSTGRES_CONTAINER }} sh -lc
+    container exec --user postgres {{ POSTGRES_CONTAINER }} sh -lc
     'psql -U postgres -d postgres -Atc "SELECT 1" >/dev/null'
   register: pg_sql_ready
   retries: 30
@@ -53,5 +55,3 @@
   failed_when: >
     postgres_pw_result.rc != 0 or
     postgres_pw_result.stdout is search('\\[FAIL\\]')
-
-- include_tasks: utils/once/flag.yml

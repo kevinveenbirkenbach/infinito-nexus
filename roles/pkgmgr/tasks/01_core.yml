@@ -59,7 +59,6 @@
       register: pkgmgr_update
       changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
       become: true
-      when: MODE_UPDATE | bool
       retries: 6
       delay: 20
       until: pkgmgr_update.rc == 0
@@ -70,7 +69,6 @@
       ansible.builtin.debug:
         msg:
           note: "Sanitized debug (no credentials printed)."
-          mode_update: "{{ MODE_UPDATE | bool }}"
           cmd: >-
             timeout --signal=KILL 600s
             {{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr update pkgmgr --clone-mode shallow

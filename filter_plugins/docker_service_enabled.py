@@ -7,7 +7,7 @@ class FilterModule(object):
     @staticmethod
     def is_docker_service_enabled(applications, application_id, service_name):
         """
-        Returns True if applications[application_id].docker.services[service_name].enabled is truthy,
+        Returns True if applications[application_id].compose.services[service_name].enabled is truthy,
         otherwise returns False (even if intermediate keys are missing).
         """
         try:
@@ -15,7 +15,7 @@ class FilterModule(object):
                 applications
                 and application_id in applications
                 and applications[application_id]
-                .get("docker", {})
+                .get("compose", {})
                 .get("services", {})
                 .get(service_name, {})
                 .get("enabled", False)

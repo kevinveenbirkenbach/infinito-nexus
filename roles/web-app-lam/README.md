@@ -6,13 +6,13 @@ Elevate your LDAP directory management with LAM (LDAP Account Manager), a powerf
 
 ## Overview
 
-This role deploys LAM in a Docker environment and integrates it with an Nginx reverse proxy to provide secure access. It leverages environment variable templates to configure LDAP connection settings and administrative credentials, ensuring a smooth and customizable installation of LDAP Account Manager.
+This role deploys LAM in a Docker environment and integrates it with an NGINX reverse proxy to provide secure access. It leverages environment variable templates to configure LDAP connection settings and administrative credentials, ensuring a smooth and customizable installation of LDAP Account Manager.
 
 ## Features
 
 - **User-Friendly Interface:** Easily manage LDAP directories through an intuitive web-app-based interface.
 - **Customizable Deployment:** Configure LDAP settings and LAM’s administrative credentials via flexible environment variables.
-- **Secure Access:** Utilize Nginx reverse proxy integration to safeguard your management interface.
+- **Secure Access:** Utilize NGINX reverse proxy integration to safeguard your management interface.
 - **Efficient Administration:** Streamline the handling of LDAP objects such as users, groups, and organizational units.
 
 ## Further Resources

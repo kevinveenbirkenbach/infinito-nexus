@@ -2,7 +2,7 @@
 
 - name: Check if OIDC plugin is present in container
   command: >
-    docker exec --user root {{ MOODLE_CONTAINER }} test -d {{ BITNAMI_OIDC_PLUGIN_DIR }}
+    container exec --user root {{ MOODLE_CONTAINER }} test -d {{ BITNAMI_OIDC_PLUGIN_DIR }}
   register: oidc_plugin_check
   ignore_errors: true
   changed_when: false
@@ -13,11 +13,11 @@
   when: oidc_plugin_check.rc != 0
 
 #- name: "Upgrade Moodle to apply OIDC plugin"
-#  command: "docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/upgrade.php --non-interactive"
+#  command: "container exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/upgrade.php --non-interactive"
 #
 #- name: Clear Moodle cache
 #  command: >
-#    docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/purge_caches.php
+#    container exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/purge_caches.php
 
 - name: "Set Moodle OIDC configuration via CLI"
   loop:
@@ -39,22 +39,22 @@
     - { name: "field_lock_lastname",  value: "locked" }
     - { name: "field_map_email",      value: "locked" }
     #- { name: "showloginform",        value: 0 }  # Deactivate if OIDC is active
-    - { name: "alternateloginurl",    value: "{{ lookup('tls_resolve', application_id, want='url.base') }}auth/oidc/" }
+    - { name: "alternateloginurl",    value: "{{ lookup('tls', application_id, 'url.base') }}auth/oidc/" }
   loop_control:
     label: "{{ item.name }}"
   command: >
-    docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --component=auth_oidc
+    container exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --component=auth_oidc
     --name={{ item.name }} --set="{{ item.value }}"
 
 - name: "Enable OIDC login"
-  command: "docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --name=auth --set=oidc"
+  command: "container exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --name=auth --set=oidc"
 
 - name: Set auth = 'oidc' for all users except guest
   shell: >
-    docker exec {{ database_instance }} mariadb -u {{ database_username }} -p{{ database_password | quote }}
+    container exec {{ lookup('database', application_id, 'instance') }} mariadb -u {{ lookup('database', application_id, 'username') }} -p{{ lookup('database', application_id, 'password') | quote }}
     -e "UPDATE moodle.mdl_user SET auth = 'oidc' WHERE username != 'guest';"
   args:
     executable: /bin/bash
 
 #- name: Prevent Account Creation
-#  command: docker exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --name=authpreventaccountcreation --set=1
+#  command: container exec --user {{ BITNAMI_USER }} {{ MOODLE_CONTAINER }} php /opt/bitnami/moodle/admin/cli/cfg.php --name=authpreventaccountcreation --set=1

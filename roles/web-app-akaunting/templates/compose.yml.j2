@@ -1,0 +1,29 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+  application:
+
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% set container_port = 80 %}
+    container_name: {{ AKAUNTING_CONTAINER }}
+    image: "{{ AKAUNTING_IMAGE }}:{{ AKAUNTING_VERSION }}"
+    build:
+      context:    {{ docker_repository_path }}
+      dockerfile: Dockerfile
+    pull_policy: never
+    ports:
+      - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}
+    volumes:
+      - data:/var/www/html
+{% if akaunting_setup_enabled | bool %}
+    environment:
+      - AKAUNTING_SETUP=true
+{% endif %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={'data': {'name': AKAUNTING_VOLUME}}
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

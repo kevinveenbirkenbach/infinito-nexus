@@ -22,10 +22,10 @@ Use the Mailu CLI inside the `admin` container:
 
 ```bash
 # Add new domain
-docker compose exec admin flask mailu domain add infinito.nexus
+compose exec admin flask mailu domain add infinito.nexus
 
 # Add new user (repeat for each account)
-docker compose exec admin flask mailu user kevinveenbirkenbach infinito.nexus 'NEW_PASSWORD'
+compose exec admin flask mailu user kevinveenbirkenbach infinito.nexus 'NEW_PASSWORD'
 ```
 
 ---
@@ -75,7 +75,7 @@ After copying, restart Mailu services (or at least `imap` and `smtp`) and confir
 To ensure incoming mail for the old domain is still accepted:
 
 ```bash
-docker compose exec admin flask mailu domain alias add cymais.cloud infinito.nexus
+compose exec admin flask mailu domain alias add cymais.cloud infinito.nexus
 ```
 
 This maps all `@cymais.cloud` addresses to their equivalents under `@infinito.nexus`.

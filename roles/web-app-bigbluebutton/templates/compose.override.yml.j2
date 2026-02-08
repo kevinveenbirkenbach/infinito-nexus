@@ -1,0 +1,46 @@
+services:
+  webrtc-sfu:
+    environment:
+      MS_WORKERS: "1"
+      MS_ENABLE_IPV6: "false"
+      MS_WEBRTC_LISTEN_IPS: >-
+        [{"ip":"0.0.0.0","announcedIp":"${EXTERNAL_IPv4}"}]
+{% if RUNTIME == 'dev' %}
+  freeswitch:
+    entrypoint: ["sh", "-c", "iptables -N REJECT 2>/dev/null || true; exec /entrypoint.sh"]
+{% endif %}
+{% if BBB_COTURN_LOCAL_ENABLED | bool %}
+  coturn:
+    ports:
+      - "{{ BBB_TURN_PORT }}:{{ BBB_TURN_PORT }}/udp"
+      - "{{ BBB_TURN_PORT }}:{{ BBB_TURN_PORT }}/tcp"
+      - "{{ BBB_STUN_PORT }}:{{ BBB_STUN_PORT }}/udp"
+      - "{{ BBB_STUN_PORT }}:{{ BBB_STUN_PORT }}/tcp"
+      - "{{ BBB_RELAY_PORT_RANGE }}/udp"
+    command: >-
+      --use-auth-secret
+      --static-auth-secret=${TURN_SECRET}
+      --lt-cred-mech
+      --realm=${DOMAIN}
+      --fingerprint
+      --no-multicast-peers
+      --no-cli
+      --external-ip=${EXTERNAL_IPv4}
+      --min-port={{ BBB_RELAY_PORT_START }}
+      --max-port={{ BBB_RELAY_PORT_END }}
+      {% if BBB_IP6_ENABLED %}--external-ip=${EXTERNAL_IPv6}{% endif %}
+{% if lookup('tls', application_id, 'enabled') | bool %}
+      --cert=${COTURN_TLS_CERT_PATH}
+      --pkey=${COTURN_TLS_KEY_PATH}
+{% endif %}
+{% endif %}
+{% if BBB_COLLABORA_ENABLED | bool %}
+  bbb-web:
+    depends_on:
+      - redis
+      - etherpad
+      - bbb-pads
+  etherpad:
+    depends_on:
+      - redis
+{% endif %}

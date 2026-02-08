@@ -21,7 +21,7 @@ rbac:
   roles:
     mail-bot:
       description: "Has an token to send and receive emails"
-docker:
+compose:
   services:
     oidc:
       enabled:              true

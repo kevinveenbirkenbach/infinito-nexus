@@ -30,10 +30,10 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
                 errors.append(f"{role_path.name}: YAML parse error: {e}")
                 continue
 
-            services = config.get("docker", {}).get("services", {})
+            services = config.get("compose", {}).get("services", {})
             if not services:
                 warnings.append(
-                    f"[WARNING] {role_path.name}: No 'docker.services' key in config/main.yml"
+                    f"[WARNING] {role_path.name}: No 'compose.services' key in config/main.yml"
                 )
                 continue
 

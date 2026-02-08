@@ -1,6 +1,6 @@
-# Nginx vHost Templates: Basic vs. WebSocket (ws_generic)
+# NGINX vHost Templates: Basic vs. WebSocket (ws_generic)
 
-This directory provides two Nginx server templates for reverse proxying Dockerized applications behind Nginx:  
+This directory provides two NGINX server templates for reverse proxying Dockerized applications behind NGINX:  
 - `basic.conf.j2`
 - `ws_generic.conf.j2`
 

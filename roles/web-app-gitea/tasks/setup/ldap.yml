@@ -1,22 +1,22 @@
 - name: "Add LDAP Authentication Source"
   shell: |
-    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth add-ldap \
       {{ GITEA_LDAP_AUTH_ARGS | join(' ') }}
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: ldap_manage
   failed_when: ldap_manage.rc != 0 and "login source already exists" not in ldap_manage.stderr
 
 - name: "Lookup existing LDAP auth source ID"
   shell: |
-    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth list \
       | tail -n +2 \
       | grep -F "LDAP ({{ DOMAIN_PRIMARY }})" \
       | awk '{print $1; exit}'
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: ldap_source_id_raw
   failed_when:
     - ldap_source_id_raw.rc != 0
@@ -29,11 +29,11 @@
 
 - name: "Update LDAP Authentication Source"
   shell: |
-    docker exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
+    container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       gitea admin auth update-ldap \
       --id {{ ldap_source_id }} \
       {{ GITEA_LDAP_AUTH_ARGS | join(' ') }}
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: ldap_manage
   failed_when: ldap_manage.rc != 0

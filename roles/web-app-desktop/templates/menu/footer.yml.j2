@@ -9,8 +9,8 @@
       description: Access our comprehensive documentation and support resources to help you get the most out of the software.
       icon:
         class: fas fa-book
-      url: {{ lookup('tls_resolve', 'web-app-sphinx', want='url.base') }}
-      iframe: {{ applications | get_app_conf('web-app-sphinx','docker.services.desktop.enabled') }}
+      url: {{ lookup('tls', 'web-app-sphinx', 'url.base') }}
+      iframe: {{ lookup('config','web-app-sphinx', 'compose.services.desktop.enabled') }}
 
 {% endif %}
 
@@ -20,8 +20,8 @@
       description: Checkout the presentation
       icon:
         class: "fas fa-chalkboard-teacher"
-      url: {{ lookup('tls_resolve', 'web-app-navigator', want='url.base') }}
-      iframe: {{ applications | get_app_conf('web-app-navigator','docker.services.desktop.enabled') }}
+      url: {{ lookup('tls', 'web-app-navigator', 'url.base') }}
+      iframe: {{ lookup('config','web-app-navigator', 'compose.services.desktop.enabled') }}
 
 {% endif %}
     - name: Solutions

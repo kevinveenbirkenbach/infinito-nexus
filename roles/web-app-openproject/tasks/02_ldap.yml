@@ -4,21 +4,21 @@
 
 - name: Check if LDAP source exists
   community.postgresql.postgresql_query:
-    db: "{{ database_name }}"
-    login_user: "{{ database_username }}"
-    login_password: "{{ database_password }}"
-    login_host: "{{ database_reach_host }}"
-    login_port: "{{ database_port }}"
+    db: "{{ lookup('database', application_id, 'name') }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
     query: "SELECT id FROM ldap_auth_sources WHERE name = '{{ OPENPROJECT_LDAP.name }}' LIMIT 1;"
   register: ldap_check
 
 - name: Update existing LDAP auth source
   community.postgresql.postgresql_query:
-    db: "{{ database_name }}"
-    login_user: "{{ database_username }}"
-    login_password: "{{ database_password }}"
-    login_host: "{{ database_reach_host }}"
-    login_port: "{{ database_port }}"
+    db: "{{ lookup('database', application_id, 'name') }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
     query: >
       UPDATE ldap_auth_sources SET
         host = '{{ OPENPROJECT_LDAP.host }}',
@@ -44,11 +44,11 @@
 
 - name: Create new LDAP auth source
   community.postgresql.postgresql_query:
-    db: "{{ database_name }}"
-    login_user: "{{ database_username }}"
-    login_password: "{{ database_password }}"
-    login_host: "{{ database_reach_host }}"
-    login_port: "{{ database_port }}"
+    db: "{{ lookup('database', application_id, 'name') }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
     query: >
       INSERT INTO ldap_auth_sources
       (name, host, port, account, account_password, base_dn, attr_login,

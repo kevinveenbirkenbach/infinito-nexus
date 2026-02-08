@@ -7,7 +7,7 @@ system_service_is_template:           "{{ system_service_id.endswith('@') }}"
 ## Paths
 system_service_role_name:             "{{ system_service_id | regex_replace('@','') }}"
 system_service_role_dir:              "{{ [ playbook_dir, 'roles', system_service_role_name ] | path_join }}"
-system_service_script_dir:            "{{ [ PATH_SYSTEMCTL_SCRIPTS, system_service_id ] | path_join }}"
+system_service_script_dir:            "{{ [ DIR_SCRIPTS_SYSTEMCTL, system_service_id ] | path_join }}"
 
 ## Settings
 system_service_force_linear_sync:     "{{ system_service_name in SYS_SERVICE_GROUP_MANIPULATION }}"                       # Disables automatic async

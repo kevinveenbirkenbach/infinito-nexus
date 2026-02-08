@@ -7,7 +7,7 @@ server:
     default:
       - 403 # On initialisation, there is no index.html deployed
       - 200
-docker:
+compose:
   services:
     desktop:
       enabled: true

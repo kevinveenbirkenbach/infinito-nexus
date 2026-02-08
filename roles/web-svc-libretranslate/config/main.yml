@@ -1,6 +1,6 @@
 
 credentials: {}
-docker:
+compose:
   services:
     libretranslate:
       image:    libretranslate/libretranslate

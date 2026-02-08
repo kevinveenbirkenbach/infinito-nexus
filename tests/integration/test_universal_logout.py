@@ -24,21 +24,21 @@ class TestUniversalLogoutSetting(unittest.TestCase):
 
             docker = {}
             if data is not None:
-                docker = data.get("docker", {})
+                docker = data.get("compose", {})
 
             services = docker.get("services", {})
             logout = services.get("logout", {})
 
             if "enabled" not in logout:
                 errors.append(
-                    f"Missing 'docker.services.logout.enabled' setting in '{file_path}'. "
+                    f"Missing 'compose.services.logout.enabled' setting in '{file_path}'. "
                     "You must explicitly set it to true or false for this app."
                 )
             else:
                 val = logout["enabled"]
                 if not isinstance(val, bool):
                     errors.append(
-                        f"The 'docker.services.logout.enabled' setting in '{file_path}' must be boolean true or false, "
+                        f"The 'compose.services.logout.enabled' setting in '{file_path}' must be boolean true or false, "
                         f"but found: {val} (type {type(val).__name__})"
                     )
 

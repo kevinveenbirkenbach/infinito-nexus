@@ -8,7 +8,7 @@
 # - Do NOT do shell-style escaping
 #
 # Result is safe for:
-# - docker compose --env-file
+# - compose --env-file
 # - dotenv libraries (PHP, Ruby, Node, Python)
 # - passwords containing ', $, spaces, !
 #
@@ -28,7 +28,7 @@ class FilterModule:
 
         s = str(value)
 
-        # Escape for docker compose env interpolation:
+        # Escape for compose env interpolation:
         # $VAR would be expanded; $$ becomes literal $
         s = s.replace("$", "$$")
 

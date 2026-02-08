@@ -3,7 +3,7 @@ server:
     canonical:
       - "wheel.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     logout:
       enabled: false

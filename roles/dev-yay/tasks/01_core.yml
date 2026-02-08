@@ -80,6 +80,5 @@
     upgrade: yes
     use: "{{ AUR_HELPER }}"
     aur_only: yes
-  when: MODE_UPDATE | bool
 
 - include_tasks: utils/once/flag.yml

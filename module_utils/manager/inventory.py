@@ -73,7 +73,7 @@ class InventoryManager:
         """
         Extract shared-provider dependencies from a single role config.
         """
-        services = (config.get("docker") or {}).get("services") or {}
+        services = (config.get("compose") or {}).get("services") or {}
         includes: List[str] = []
 
         ldap = services.get("ldap") or {}
@@ -93,7 +93,7 @@ class InventoryManager:
             db_type = (db.get("type") or "").strip()
             if not db_type:
                 print(
-                    "ERROR: docker.services.database.enabled=true and shared=true but docker.services.database.type is missing",
+                    "ERROR: compose.services.database.enabled=true and shared=true but compose.services.database.type is missing",
                     file=sys.stderr,
                 )
                 sys.exit(1)
@@ -160,7 +160,7 @@ class InventoryManager:
         apps = self.inventory.setdefault("applications", {})
         target = apps.setdefault(app_id, {})
 
-        services = (cfg.get("docker") or {}).get("services") or {}
+        services = (cfg.get("compose") or {}).get("services") or {}
         database = services.get("database") or {}
         oauth2 = services.get("oauth2") or {}
 

@@ -1,24 +1,25 @@
 - name: Ensure nginx config directory exists
   ansible.builtin.file:
-    path: "{{ lookup('nginx_paths', want='files.configuration') | dirname }}"
+    path: "{{ lookup('nginx','files.configuration') | dirname }}"
     state: directory
     mode: "0755"
 
 - name: Ensure base nginx.conf exists (bootstrap)
   ansible.builtin.copy:
-    dest: "{{ lookup('nginx_paths', want='files.configuration') }}"
+    dest: "{{ lookup('nginx','files.configuration') }}"
     force: false
     mode: "0644"
     content: |
       events {}
       http { server { listen 8080; return 200; } }
 
-- name: "For '{{ application_id }}': Load docker-compose"
+- name: "For '{{ application_id }}': Load sys-svc-compose"
   include_role:
-    name: docker-compose
+    name: sys-svc-compose
   vars:
     docker_git_repository_pull:     false # Deactivated here to deactivate inhirement
     docker_compose_flush_handlers:  true
+    application_id:                 svc-prx-openresty
 
 - name: "Verify that '{{ role_name }}' works"
   include_tasks: 02_assert.yml

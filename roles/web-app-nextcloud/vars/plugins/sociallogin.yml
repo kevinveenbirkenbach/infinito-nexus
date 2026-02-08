@@ -25,7 +25,7 @@ plugin_configuration:
     configkey: "custom_providers"
     configvalue: 
       custom_oidc:
-        - name: "{{ domains | get_domain('web-app-keycloak') }}"
+        - name: "{{ lookup('domain','web-app-keycloak') }}"
           title: "keycloak"
           style: "keycloak"
           authorizeUrl: "{{ OIDC.CLIENT.AUTHORIZE_URL }}"

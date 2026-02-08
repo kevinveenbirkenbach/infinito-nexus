@@ -6,13 +6,8 @@
     docker_compose_flush_handlers: false
 
 - name: Check if config.php exists
-  command: docker exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
-  register: config_file_exists
-  changed_when: false
-  failed_when: false
-
-- name: Check if config.php exists
-  command: docker exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
+  command: >
+    container exec --user root {{ MOODLE_CONTAINER }} test -f {{ MOODLE_CONFIG }}
   register: config_file_exists
   changed_when: false
   failed_when: false
@@ -24,17 +19,45 @@
 - name: flush docker service
   meta: flush_handlers
 
-- name: Wait until the Moodle container is healthy
-  shell:    docker inspect --format '{% raw %}{{.State.Health.Status}}{% endraw %}' {{ MOODLE_CONTAINER }}
-  register: health_check
-  until:    health_check.stdout.strip() == "healthy"
-  retries:  120
-  delay:    5
+- name: Wait for Moodle container to become healthy
+  block:
+    - name: Wait until the Moodle container is healthy
+      ansible.builtin.shell: >
+        container inspect --format '{% raw %}{{.State.Health.Status}}{% endraw %}' {{ MOODLE_CONTAINER }}
+      register: health_check
+      until: health_check.stdout.strip() == "healthy"
+      retries: 120
+      delay: 5
+
+  rescue:
+    - name: Show Moodle container status
+      ansible.builtin.shell: >
+        container inspect {{ MOODLE_CONTAINER }}
+      register: moodle_inspect
+      changed_when: false
+      failed_when: false
+
+    - name: Show Moodle container logs
+      ansible.builtin.shell: >
+         container logs --tail=200 {{ MOODLE_CONTAINER }}
+      register: moodle_logs
+      changed_when: false
+      failed_when: false
+
+    - name: Fail with diagnostic output
+      ansible.builtin.fail:
+        msg: |
+          ❌ Moodle container did not become healthy in time.
+
+          --- container inspect ---
+          {{ moodle_inspect.stdout | default('no output') }}
+
+          --- container logs (last 200 lines) ---
+          {{ moodle_logs.stdout | default('no output') }}
 
 - name: "Include ownership settings tasks for moodle"
   include_tasks: 02_ownership.yml
 
 - name: "Configure OIDC login for Moodle if enabled"
   include_tasks: 03_oidc.yml
-  when: applications | get_app_conf(application_id, 'docker.services.oidc.enabled')
-
+  when: lookup('config',application_id, 'compose.services.oidc.enabled')

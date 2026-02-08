@@ -39,7 +39,7 @@ concurrency:
 
 jobs:
   sync:
-    name: Mirror images (only missing)
+    name: 🪞 Mirror images
     runs-on: ubuntu-latest
 
     # Copy secrets/inputs into env so we can reference them in "if:" (env.* is allowed there)

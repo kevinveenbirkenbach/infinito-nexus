@@ -6,7 +6,7 @@ A lightweight, Docker-powered UI framework that offers Infinito.Nexus users a un
 
 ## Overview
 
-Tailored for creative professionals and developers, this role streamlines the process of setting up a portfolio site. It automates tasks such as Docker container configuration, dynamic routing via Nginx, and repository integration, so you can concentrate on perfecting your content and design. Enjoy a responsive layout and easy-to-modify YAML files that let you rapidly update your online presence without deep technical intervention.
+Tailored for creative professionals and developers, this role streamlines the process of setting up a portfolio site. It automates tasks such as Docker container configuration, dynamic routing via NGINX, and repository integration, so you can concentrate on perfecting your content and design. Enjoy a responsive layout and easy-to-modify YAML files that let you rapidly update your online presence without deep technical intervention.
 
 ## Purpose
 

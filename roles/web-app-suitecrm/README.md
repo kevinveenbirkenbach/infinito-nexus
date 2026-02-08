@@ -9,7 +9,7 @@ Manage your customer relationships with SuiteCRM, a powerful open-source CRM pla
 This Ansible role deploys SuiteCRM using Docker and the Infinito.Nexus shared stack. It handles:
 
 - MariaDB database provisioning via the `sys-svc-rdbms` role  
-- Nginx domain and reverse-proxy configuration  
+- NGINX domain and reverse-proxy configuration  
 - Environment variable management through Jinja2 templates  
 - Docker Compose orchestration for the **SuiteCRM** application container  
 - Native **LDAP** authentication via Symfony’s LDAP configuration  
@@ -23,7 +23,7 @@ With this role, you get a production-ready CRM environment that plugs into your 
 - **Workflow Engine:** Automate business processes and notifications 🛠️  
 - **LDAP Authentication:** Centralize user authentication against OpenLDAP 🔐  
 - **SSO-Ready:** Integrates with SAML / OAuth2 providers (e.g. Keycloak as IdP) via SuiteCRM’s admin UI 🌐  
-- **Config via Templates:** Fully customizable `.env` and `docker-compose.yml` rendered via Jinja2 ⚙️  
+- **Config via Templates:** Fully customizable `.env` and `compose.yml` rendered via Jinja2 ⚙️  
 - **Health Checks & Logging:** Integrates with Infinito.Nexus health checking and journald logging 📈  
 - **Modular Role Composition:** Uses shared roles for DB, proxy and monitoring to keep your stack consistent 🔄  
 

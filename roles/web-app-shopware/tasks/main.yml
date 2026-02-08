@@ -11,8 +11,8 @@
     dest: "{{ SHOPWARE_INIT_HOST }}"
     mode: "0755"
   notify:
-    - docker compose up
-    - docker compose build
+    - compose up
+    - compose build
 
 - name: "Render framework.yaml (trusted proxies/headers/hosts)"
   copy:
@@ -20,9 +20,9 @@
     dest: "{{ SHOPWARE_FRAMEWORK_HOST }}"
     mode: "0644"
   notify:
-    - docker compose up
+    - compose up
 
-- name: "Flush docker compose handlers"
+- name: "Flush compose handlers"
   meta: flush_handlers
 
 - name: Wait for Shopware HTTP endpoint

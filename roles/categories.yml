@@ -1,9 +1,4 @@
 roles:
-  docker:
-    title: "Docker Toolkit"
-    description: "Generic Docker helpers and utilities (compose wrappers, container tooling)."
-    icon: "fas fa-docker"
-    invokable: false
   dev:
     title:  "Software Development Utilties"
     invokable: false

@@ -1,0 +1,22 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+  openresty:
+    {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    container_name: {{ OPENRESTY_CONTAINER }}
+    image: {{ OPENRESTY_IMAGE }}:{{ OPENRESTY_VERSION }}
+    network_mode: "host"
+    volumes:
+      - {{ lookup('nginx','files.configuration') }}:/usr/local/openresty/nginx/conf/nginx.conf:ro
+      - {{ lookup('nginx','directories.configuration.base') }}:/usr/local/openresty/nginx/conf/conf.d:ro
+      - {{ lookup('nginx','files.configuration') }}:{{ lookup('nginx','files.configuration') }}:ro
+      - {{ lookup('nginx','directories.configuration.base') }}:{{ lookup('nginx','directories.configuration.base') }}:ro
+      - {{ lookup('nginx','directories.data.www') }}:{{ lookup('nginx','directories.data.www') }}:ro
+      - {{ lookup('nginx','directories.data.well_known') }}:{{ lookup('nginx','directories.data.well_known') }}:ro
+      - {{ LETSENCRYPT_WEBROOT_PATH }}:{{ LETSENCRYPT_WEBROOT_PATH }}:ro
+      - {{ LETSENCRYPT_BASE_PATH }}:{{ LETSENCRYPT_BASE_PATH }}:ro
+      - {{ TLS_SELFSIGNED_BASE_PATH }}:{{ TLS_SELFSIGNED_BASE_PATH }}:ro
+    command: ["openresty", "-g", "daemon off;"]
+    healthcheck:
+      test: ["CMD", "openresty", "-t", "-q"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

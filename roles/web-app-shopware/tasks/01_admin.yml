@@ -1,6 +1,6 @@
 - name: "Rename default Shopware admin user to {{ users.administrator.username }}"
   shell: |
-    docker exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
+    container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
       set -e
       cd {{ SHOPWARE_ROOT }}
       old_user="admin"
@@ -13,13 +13,13 @@
       fi
     '
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   changed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Ensure Shopware admin exists and has the desired password"
   shell: |
-    docker exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
+    container exec -i --user {{ SHOPWARE_USER }} {{ SHOPWARE_WEB_CONTAINER }} sh -lc '
       set -e
       cd {{ SHOPWARE_ROOT }}
       php bin/console user:create "{{ users.administrator.username }}" \
@@ -34,5 +34,5 @@
         --email="{{ users.administrator.email }}" 2>/dev/null || true
     '
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

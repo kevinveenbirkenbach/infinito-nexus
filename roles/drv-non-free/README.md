@@ -1,4 +1,4 @@
-# Non-Free Drivers
+# Proprietary Drivers
 
 ## Description
 

@@ -25,7 +25,7 @@ credentials:
   recaptcha:
     key:      "{{ CAPTCHA.RECAPTCHA.KEY | default('') }}"
     secret:   "{{ CAPTCHA.RECAPTCHA.SECRET | default('') }}"
-docker:
+compose:
   services:
     ldap:
       enabled: false

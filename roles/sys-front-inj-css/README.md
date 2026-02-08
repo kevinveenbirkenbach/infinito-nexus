@@ -1,13 +1,13 @@
-# 🌍 Global CSS Injection for Nginx
+# 🌍 Global CSS Injection for NGINX
 
 ## Description
 
-This Ansible role ensures **consistent global theming** across all Nginx-served applications by injecting CSS files.  
+This Ansible role ensures **consistent global theming** across all NGINX-served applications by injecting CSS files.  
 The role leverages [`colorscheme-generator`](https://github.com/kevinveenbirkenbach/colorscheme-generator/) to generate a dynamic, customizable color palette for light and dark mode, compatible with popular web tools like **Bootstrap**, **Keycloak**, **Nextcloud**, **Taiga**, **Mastodon**, and many more.
 
 ## Overview
 
-This role deploys a centralized global stylesheet that overrides the default theming of web applications served via Nginx. It's optimized to run only once per deployment and generates a **cache-busting version number** based on file modification timestamps.  
+This role deploys a centralized global stylesheet that overrides the default theming of web applications served via NGINX. It's optimized to run only once per deployment and generates a **cache-busting version number** based on file modification timestamps.  
 It includes support for **dark mode**, **custom fonts**, and **extensive Bootstrap and UI component overrides**.
 
 ## Purpose
@@ -18,7 +18,7 @@ It makes all applications feel like part of the same ecosystem — visually and 
 ## Features
 
 - 🎨 **Dynamic Theming** via [`colorscheme-generator`](https://github.com/kevinveenbirkenbach/colorscheme-generator/)
-- 📁 **Unified CSS Base Configuration** deployment for all Nginx applications
+- 📁 **Unified CSS Base Configuration** deployment for all NGINX applications
 - 🌒 **Dark mode support** out of the box
 - 🚫 **No duplication** – tasks run once per deployment
 - ⏱️ **Versioning logic** to bust browser cache

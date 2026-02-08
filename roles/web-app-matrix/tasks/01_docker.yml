@@ -13,19 +13,19 @@
   loop: "{{ MATRIX_BRIDGES }}"
 
 # The following taks are necessary because a clean setup is necessary
-- name: shut down docker compose project 
+- name: shut down compose project 
   command:
-    cmd: docker-compose -p "{{ MATRIX_PROJECT }}" down
-    chdir: "{{ docker_compose.directories.instance }}"
+    cmd:    "{{ BIN_COMPOSE }} down"
+    chdir:  "{{ lookup('container', application_id, 'directories.instance') }}"
 
 - name: "cleanup project folder"
   file:
-    path: "{{ docker_compose.directories.instance }}mautrix/"
+    path: "{{ lookup('container', application_id, 'directories.instance') }}mautrix/"
     state: absent
 
 - name: "create bridge folders"
   file:
-    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}"
+    path: "{{ lookup('container', application_id, 'directories.instance') }}mautrix/{{ item.bridge_name }}"
     state: directory
     mode: "0755"
   loop: "{{ MATRIX_BRIDGES }}"
@@ -33,50 +33,49 @@
 - name: add multiple mautrix bridge configuration
   template:
     src:  "mautrix/{{ item.bridge_name }}.config.yml.j2" 
-    dest: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/config.yaml"
+    dest: "{{ lookup('container', application_id, 'directories.instance') }}mautrix/{{ item.bridge_name }}/config.yaml"
   loop: "{{ MATRIX_BRIDGES }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: add element configuration
   template:
     src:  "element.config.json.j2" 
     dest: "{{ MATRIX_ELEMENT_CONFIG_PATH_HOST }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: add synapse homeserver configuration
   template:
     src:  "synapse/homeserver.yaml.j2" 
     dest: "{{ MATRIX_SYNAPSE_CONFIG_PATH_HOST }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: add synapse log configuration
   template:
     src:  "synapse/log.config.j2" 
     dest: "{{ MATRIX_SYNAPSE_LOG_PATH_HOST }}"
-  notify: docker compose up
+  notify: compose up
 
 # https://github.com/matrix-org/synapse/issues/6303
 - name: set correct folder permissions
   command:
-    cmd: "docker run --rm --mount type=volume,src={{ MATRIX_SYNAPSE_VOLUME }},dst=/data -e SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }} -e SYNAPSE_REPORT_STATS=no --entrypoint /bin/sh matrixdotorg/synapse:latest -c 'chown -vR 991:991 /data'"
+    cmd: "container run --rm --mount type=volume,src={{ MATRIX_SYNAPSE_VOLUME }},dst=/data -e SYNAPSE_SERVER_NAME={{ MATRIX_SYNAPSE_DOMAIN }} -e SYNAPSE_REPORT_STATS=no --entrypoint /bin/sh matrixdotorg/synapse:latest -c 'chown -vR 991:991 /data'"
 
-- name: add docker-compose.yml
+- name: add compose.yml
   template:
-    src:  "docker-compose.yml.j2" 
-    dest: "{{ docker_compose.directories.instance }}docker-compose.yml"
-  notify: docker compose up
+    src:  "compose.yml.j2" 
+    dest: "{{ [ lookup('container', application_id, 'directories.instance'),'compose.yml' ] | path_join }}"
+  notify: compose up
 
 # Pull image when update is wished. 
-- name: docker compose pull
+- name: compose pull
   command:
-    cmd: docker-compose -p "{{ MATRIX_PROJECT }}" pull
-    chdir: "{{ docker_compose.directories.instance }}"
-  when: MODE_UPDATE | bool
+    cmd:    "compose pull"
+    chdir:  "{{ lookup('container', application_id, 'directories.instance') }}"
 
-- name: docker compose up
+- name: compose up
   command:
-    cmd: "docker-compose -p {{ MATRIX_PROJECT }} up -d --remove-orphans"
-    chdir: "{{ docker_compose.directories.instance }}"
+    cmd: "compose up -d --remove-orphans"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   environment:
     COMPOSE_HTTP_TIMEOUT:   "600"
     DOCKER_CLIENT_TIMEOUT:  "600"
@@ -87,14 +86,14 @@
 
 - name: wait for registration files
   wait_for:
-    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/registration.yaml"
+    path: "{{ lookup('container', application_id, 'directories.instance') }}mautrix/{{ item.bridge_name }}/registration.yaml"
     state: present  
     timeout: 120
   loop: "{{ MATRIX_BRIDGES }}"
 
 - name: "change file permissions"
   file:
-    path: "{{ docker_compose.directories.instance }}mautrix/{{ item.bridge_name }}/registration.yaml"
+    path: "{{ lookup('container', application_id, 'directories.instance') }}mautrix/{{ item.bridge_name }}/registration.yaml"
     mode: "0755"
   loop: "{{ MATRIX_BRIDGES }}"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
@@ -102,19 +101,19 @@
 
 - name: create admin account
   command:
-    cmd: "{{ docker_compose_command_exec }} -it synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME }} -p {{ applications | get_app_conf(application_id, 'credentials.administrator_password') }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
-    chdir: "{{ docker_compose.directories.instance }}"
+    cmd: "{{ BIN_COMPOSE }} exec -it synapse register_new_matrix_user -u {{ MATRIX_ADMINISTRATOR_USERNAME }} -p {{ lookup('config', application_id, 'credentials.administrator_password') }} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   ignore_errors: true
-  when: applications | get_app_conf(application_id, 'setup', True) | bool
+  when: lookup('config',application_id, 'setup') | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 
 - name: create chatgpt bot
   command:
-    cmd: "{{ docker_compose_command_exec }} -it synapse register_new_matrix_user -u chatgptbot -p {{ applications | get_app_conf(application_id, 'credentials.chatgpt_bridge_user_password')}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
-    chdir: "{{ docker_compose.directories.instance }}"
+    cmd: "{{ BIN_COMPOSE }} exec -it synapse register_new_matrix_user -u chatgptbot -p {{ lookup('config', application_id, 'credentials.chatgpt_bridge_user_password')}} -a -c {{ MATRIX_SYNAPSE_CONFIG_PATH_CONTAINER }} http://localhost:8008"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   ignore_errors: true
-  when: applications | get_app_conf(application_id, 'setup', True) | bool
+  when: lookup('config',application_id, 'setup') | bool
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
 

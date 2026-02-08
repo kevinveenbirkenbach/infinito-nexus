@@ -3,7 +3,7 @@
 ## CLI
 The CLI you reach via
 ```bash
-docker compose exec --user www-data application bin/console
+compose exec --user www-data application bin/console
 ```
 
 ## Full Reset 🚫➡️✅
@@ -18,7 +18,7 @@ To completely reset Friendica, including its database and volumes, run:
 docker exec -i mariadb mariadb -u root -p"${DB_ROOT_PASSWORD}" -e "DROP DATABASE IF EXISTS friendica; CREATE DATABASE friendica;"
 docker compose down
 rm -rv /mnt/hdd/data/docker/volumes/friendica_data
-docker volume rm friendica_data
+container volume rm friendica_data
 ```
 
 ## Reset Database 🗄️
@@ -45,14 +45,14 @@ docker exec -i mariadb mariadb -u root -p"${DB_ROOT_PASSWORD}" -e "DROP DATABASE
 
 To access the application container:
 ```bash
-docker compose exec -it application sh
+compose exec -it application sh
 ```
 
 ## Debugging Tools 🛠️
 
 ## Check Environment Variables
 ```bash
-docker compose exec -it application printenv
+compose exec -it application printenv
 ```
 
 ## Inspect Volume Data
@@ -64,19 +64,19 @@ ls -la /var/lib/docker/volumes/friendica_data/_data/
 
 Run the following command to autoinstall Friendica:
 ```bash
-docker compose exec --user www-data -it application bin/console autoinstall
+compose exec --user www-data -it application bin/console autoinstall
 ```
 
 ## Reinitialization 🔄
 
 ## Docker Only:
 ```bash
-docker-compose up -d --force-recreate
+compose up -d --force-recreate
 ```
 
 ## Full Reinitialization:
 ```bash
-docker-compose up -d --force-recreate && sleep 2; docker compose exec --user www-data -it application bin/console autoinstall;
+compose up -d --force-recreate && sleep 2; compose exec --user www-data -it application bin/console autoinstall;
 ```
 
 ## Configuration Information ℹ️
@@ -88,12 +88,12 @@ cat /var/lib/docker/volumes/friendica_data/_data/config/local.config.php
 
 ## Email Configuration:
 ```bash
-docker compose exec -it application cat /etc/msmtprc
+compose exec -it application cat /etc/msmtprc
 ```
 
 ## Email Debugging ✉️
 
 To send a test email:
 ```bash
-docker compose exec -it application msmtp --account=system_email -t test@test.de
+compose exec -it application msmtp --account=system_email -t test@test.de
 ```

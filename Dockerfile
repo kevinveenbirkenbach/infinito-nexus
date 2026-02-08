@@ -35,7 +35,7 @@ COPY . ${INFINITO_SRC_DIR}
 # Install Docker CLI (client only) - distro aware
 # ------------------------------------------------------------
 # hadolint ignore=DL3008,DL3041
-RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-docker/files/install-cli.sh
+RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-container/files/install-cli.sh
 
 # ------------------------------------------------------------
 # Install systemd + dbus (for CI Ansible systemd/service tests)

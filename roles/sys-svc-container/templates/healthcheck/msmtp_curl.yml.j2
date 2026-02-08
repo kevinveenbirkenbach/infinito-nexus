@@ -1,0 +1,25 @@
+  
+{#
+  This health check ensures the test email is sent only once to prevent
+  hitting SMTP rate limits due to multiple health check executions.
+  The logic checks for a temporary file (/tmp/email_sent) to determine
+  if the email has already been sent. If the file exists, the email
+  is skipped, but the health check continues by verifying the HTTP service.
+  Refer to the conversation with ChatGPT (https://chatgpt.com/share/67898c3f-2c1c-800f-861c-47dcbe109135)
+  on January 16, 2025, for the background behind this complexity.
+
+  Additional it is also checked if the host is reachable
+#}
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          if [ ! -f /tmp/email_sent ]; then
+            echo 'Subject: testmessage from {{ lookup("domain",application_id) }}\n\nSUCCESSFULL' | msmtp -t {{ users.blackhole.email }} && touch /tmp/email_sent;
+          fi &&
+          curl -f http://localhost:80/ || exit 1
+      interval: 1m
+      timeout: 20s
+      retries: 3
+{{ "\n" }}

@@ -1,7 +1,7 @@
 - block:
     - name: Wait until OpenResty container is running
       command: >
-        docker inspect -f '{{ "{{.State.Running}}" }}' {{ OPENRESTY_CONTAINER }}
+        container inspect -f '{{ "{{.State.Running}}" }}' {{ OPENRESTY_CONTAINER }}
       register: openresty_running
       changed_when: false
       until: openresty_running.stdout | trim == "true"
@@ -10,13 +10,13 @@
 
     - name: Validate OpenResty configuration (Post-Flight-Check)
       command: >
-        docker exec {{ OPENRESTY_CONTAINER }} openresty -t -q
+        container exec {{ OPENRESTY_CONTAINER }} openresty -t -q
       register: openresty_test_post
       changed_when: false
       failed_when: openresty_test_post.rc != 0
   rescue:
     - name: Debug containers (before OpenResty restart)
-      command: docker ps -a --format '{{"{{.Names}} {{.Status}}"}}'
+      command: container ps -a --format '{{"{{.Names}} {{.Status}}"}}'
       register: docker_ps
       changed_when: false
       failed_when: false
@@ -27,7 +27,7 @@
 
     - name: Dump OpenResty container logs on failure
       command: >
-        docker logs --tail=200 {{ OPENRESTY_CONTAINER }}
+        container logs --tail=200 {{ OPENRESTY_CONTAINER }}
       register: openresty_logs
       changed_when: false
       failed_when: false

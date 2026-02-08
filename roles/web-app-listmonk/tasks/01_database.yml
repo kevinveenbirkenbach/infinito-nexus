@@ -21,8 +21,8 @@
     msg: |
       Listmonk database is not reachable.
 
-      Container: {{ database_container }}
-      Database:  {{ database_name }}
+      Container: {{ lookup('database', application_id, 'container') }}
+      Database:  {{ lookup('database', application_id, 'name') }}
 
       Please ensure the shared PostgreSQL stack is running.
   when: not listmonk_db_reachable
@@ -32,9 +32,9 @@
     set -euo pipefail
     yes | {{ LISTMONK_RUN }} ./listmonk --install
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: listmonk_install
-  notify: docker compose up
+  notify: compose up
   changed_when: true
   failed_when: listmonk_install.rc not in [0, 141]
   when: listmonk_db_empty
@@ -44,11 +44,10 @@
     set -euo pipefail
     echo y | {{ LISTMONK_RUN }} ./listmonk --upgrade
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: listmonk_upgrade
   changed_when: true
   failed_when: listmonk_upgrade.rc not in [0, 141]
   when:
     - listmonk_db_reachable
     - not listmonk_db_empty
-    - MODE_UPDATE | bool

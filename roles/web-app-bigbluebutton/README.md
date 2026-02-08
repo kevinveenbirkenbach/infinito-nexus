@@ -8,7 +8,7 @@ This Ansible role deploys [BigBlueButton](https://bigbluebutton.org/) using Dock
 
 ## Overview
 
-This role provides a fully automated deployment of [BigBlueButton](https://bigbluebutton.org/) using Docker Compose on Arch Linux. It manages the entire lifecycle of the deployment, from cloning the upstream Docker repository and generating the `.env` configuration to customizing `docker-compose.yml` for volume usage, WebSocket proxying, and optional LDAP/OIDC integration.
+This role provides a fully automated deployment of [BigBlueButton](https://bigbluebutton.org/) using Docker Compose on Arch Linux. It manages the entire lifecycle of the deployment, from cloning the upstream Docker repository and generating the `.env` configuration to customizing `compose.yml` for volume usage, WebSocket proxying, and optional LDAP/OIDC integration.
 
 The setup includes conditional Greenlight activation, WebRTC support via TURN/STUN, and various fixes for known container orchestration issues. The role is modular and integrates seamlessly with the Infinito.Nexus infrastructure, including reverse proxy configuration, domain management, and secrets templating.
 
@@ -19,7 +19,7 @@ By default, BigBlueButton is deployed with best-practice hardening, modular secr
 - 🐳 **Docker-based** deployment via official [bigbluebutton/docker](https://github.com/bigbluebutton/docker)
 - ✅ **Greenlight** (v3) frontend support
 - 🔐 **SSO with OIDC & LDAP** (optional)
-- 🧱 Automatic `.env` templating and domain/Nginx integration
+- 🧱 Automatic `.env` templating and domain/NGINX integration
 - 🛠 Volume patching and Docker Compose customization
 - 📬 SMTP integration and Greenlight admin creation
 - 🧪 Workarounds for known Docker Compose or Etherpad issues
@@ -34,7 +34,7 @@ By default, BigBlueButton is deployed with best-practice hardening, modular secr
 
 ## System Requirements
 
-- Arch Linux with Docker, Compose, and Nginx roles pre-installed
+- Arch Linux with Docker, Compose, and NGINX roles pre-installed
 - DNS and reverse proxy configuration using `sys-svc-proxy`
 - Functional email system for Greenlight SMTP
 

@@ -6,7 +6,7 @@ Accelerate your development with GitLab, an all-in-one platform for source code 
 
 ## Overview
 
-This role deploys GitLab using Docker, automating the installation, configuration, and management of your GitLab server. It integrates with an external PostgreSQL database and sets up an Nginx reverse proxy, streamlining your GitLab deployment through efficient container orchestration and customizable Ansible variables.
+This role deploys GitLab using Docker, automating the installation, configuration, and management of your GitLab server. It integrates with an external PostgreSQL database and sets up an NGINX reverse proxy, streamlining your GitLab deployment through efficient container orchestration and customizable Ansible variables.
 
 For a detailed walkthrough of this role, please refer to the [ChatGPT Session Transcript](https://chat.openai.com/share/1b0147bf-d4de-4790-b8ed-c332aa4e3ce3).
 
@@ -14,7 +14,7 @@ For a detailed walkthrough of this role, please refer to the [ChatGPT Session Tr
 
 - **GitLab Installation:** Automatically deploys GitLab within a Docker container.
 - **External PostgreSQL Database:** Configures GitLab to connect to an external PostgreSQL database.
-- **Nginx Reverse Proxy Integration:** Simplifies secure access with an Nginx reverse proxy.
+- **NGINX Reverse Proxy Integration:** Simplifies secure access with an NGINX reverse proxy.
 - **Customizable Configuration:** Easily tailor deployment settings using Ansible variables and templates.
 
 ## Further Resources

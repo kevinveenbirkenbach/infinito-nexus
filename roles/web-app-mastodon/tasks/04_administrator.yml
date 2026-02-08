@@ -2,12 +2,12 @@
 # @see https://chatgpt.com/share/67b9b12c-064c-800f-9354-8e42e6459764
 - name: Remove line containing "- administrator" from config/settings.yml to allow creating administrator account
   command: 
-    cmd:  "docker exec -u root {{ MASTODON_CONTAINER }} sed -i '/- administrator/d' config/settings.yml"
+    cmd:  "container exec -u root {{ MASTODON_CONTAINER }} sed -i '/- administrator/d' config/settings.yml"
   when: users.administrator.username == "administrator"
 
 - name: Create admin account via tootctl
   command:
-    cmd: 'docker exec -u root {{ MASTODON_CONTAINER }} bash -c "bin/tootctl accounts create {{users.administrator.username}} --email {{ users.administrator.email }} --confirmed --role Owner"'
+    cmd: 'container exec -u root {{ MASTODON_CONTAINER }} bash -c "bin/tootctl accounts create {{ users.administrator.username }} --email {{ users.administrator.email }} --confirmed --role Owner"'
   register: tootctl_create
   changed_when: tootctl_create.rc == 0
   failed_when: >
@@ -18,6 +18,7 @@
     
 - name: Approve the administrator account in Mastodon
   command: 
-    cmd: docker exec -u root {{ MASTODON_CONTAINER }} bash -c "bin/tootctl accounts modify {{users.administrator.username}} --approve"
+    cmd: >
+      container exec -u root {{ MASTODON_CONTAINER }} bash -c "bin/tootctl accounts modify {{ users.administrator.username }} --approve"
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

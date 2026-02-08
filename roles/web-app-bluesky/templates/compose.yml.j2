@@ -1,0 +1,37 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  pds:
+{% set container_port = 3000 %}
+{% set container_healthcheck = 'xrpc/_health' %}
+    image: "{{ BLUESKY_PDS_IMAGE }}:{{ BLUESKY_PDS_VERSION }}"
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    volumes:
+        - pds_data:{{ BLUESKY_PDS_DATA_DIR }}
+        - {{ BLUESKY_PDSADMIN_FILE }}:/usr/local/bin/pdsadmin:ro
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_API_PORT }}:{{ container_port }}"
+
+{% include 'roles/sys-svc-container/templates/healthcheck/wget.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+{% if BLUESKY_WEB_ENABLED %}
+{% set container_port = 8100 %}
+  web:
+    command: ["bskyweb","serve"]
+    build:
+      context: "{{ BLUESKY_SOCIAL_APP_DIR }}"
+      dockerfile: Dockerfile
+    image: {{ BLUESKY_WEB_IMAGE_CUSTOM }}
+    pull_policy: never
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ BLUESKY_WEB_PORT }}:{{ container_port }}"
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% endif %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={'pds_data': {'name': BLUESKY_PDS_DATA_VOLUME}}
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

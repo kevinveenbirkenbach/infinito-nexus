@@ -1,24 +1,24 @@
 # General
 application_id:       "web-app-baserow"
-database_password:    "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
+database_password:    "{{ lookup('config', application_id, 'credentials.database_password') }}"
 js_application_name:  "Baserow"
 
 # Baserow
-BASEROW_PUBLIC_URL:   "{{ lookup('tls_resolve', application_id, want='url.base') }}"
-BASEROW_VERSION:      "{{ applications | get_app_conf(application_id, 'docker.services.baserow.version') }}"
-BASEROW_IMAGE:        "{{ applications | get_app_conf(application_id, 'docker.services.baserow.image') }}"
-BASEROW_CONTAINER:    "{{ applications | get_app_conf(application_id, 'docker.services.baserow.name') }}"
-BASEROW_VOLUME:       "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+BASEROW_PUBLIC_URL:   "{{ lookup('tls', application_id, 'url.base') }}"
+BASEROW_VERSION:      "{{ lookup('config', application_id, 'compose.services.baserow.version') }}"
+BASEROW_IMAGE:        "{{ lookup('config', application_id, 'compose.services.baserow.image') }}"
+BASEROW_CONTAINER:    "{{ lookup('config', application_id, 'compose.services.baserow.name') }}"
+BASEROW_VOLUME:       "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 
 # Required by Django/Baserow (e.g. JWT, sessions, etc.)
-BASEROW_SECRET_KEY:   "{{ applications | get_app_conf(application_id, 'credentials.secret_key') }}"
+BASEROW_SECRET_KEY:   "{{ lookup('config', application_id, 'credentials.secret_key') }}"
 
 # Internal runtime paths inside the baserow container image
 BASEROW_DJANGO_SETTINGS_MODULE: "baserow.config.settings.base"
 BASEROW_PYTHON:                "/baserow/venv/bin/python"
 BASEROW_MANAGE_PY:             "/baserow/backend/src/baserow/manage.py"
 
-# Compose service name inside docker-compose.yml.j2
+# Compose service name inside compose.yml.j2
 # The template defines the service as "application:".
 BASEROW_SERVICE_NAME:          "application"
 

@@ -12,7 +12,7 @@ server:
     canonical:
       - "docs.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     logout:
       enabled: false

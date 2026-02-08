@@ -1,1 +1,1 @@
-NGinx Legal role
+NGINX Legal role

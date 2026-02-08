@@ -4,7 +4,7 @@
 
 When deploying OpenResty as a reverse proxy, content may be cached at multiple layers:
 
-- **Local Proxy Cache:** If you configure Nginx/OpenResty with a cache zone (using directives like `proxy_cache`), responses can be stored locally on disk and served to future clients.
+- **Local Proxy Cache:** If you configure NGINX/OpenResty with a cache zone (using directives like `proxy_cache`), responses can be stored locally on disk and served to future clients.
 - **Browser Cache:** Browsers cache responses based on HTTP headers like `Cache-Control` or `Expires`.
 - **CDN Cache (Cloudflare):** If your domain is proxied through Cloudflare, Cloudflare may cache your content at their edge servers and serve it from there, often without requests reaching your origin server.
 
@@ -53,11 +53,11 @@ To find your Zone ID, go to the overview page for your domain in the Cloudflare 
 
 ## Recommendations
 
-* Always purge the Cloudflare cache after significant changes to your website or OpenResty/Nginx configuration.
+* Always purge the Cloudflare cache after significant changes to your website or OpenResty/NGINX configuration.
 * If you use custom cache rules in OpenResty, consider providing cache-busting mechanisms (e.g., versioned URLs).
 * Test changes in a private/incognito window to rule out browser cache.
 
 ## Further Reading
 
 * [Cloudflare Purge Cache Documentation](https://developers.cloudflare.com/cache/how-to/purge-cache/)
-* [Nginx/OpenResty Proxy Cache Guide](https://openresty.org/en/using-ngx_lua.html#caching)
+* [NGINX/OpenResty Proxy Cache Guide](https://openresty.org/en/using-ngx_lua.html#caching)

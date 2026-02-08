@@ -1,7 +1,7 @@
 ---
 - name: "Wait until Greenlight is reachable via Nginx"
   ansible.builtin.uri:
-    url: "{{ lookup('tls_resolve', application_id, want='url.base') }}"
+    url: "{{ lookup('tls', application_id, 'url.base') }}"
     validate_certs: true
     status_code: 200
     return_content: true
@@ -19,7 +19,7 @@
       - docker
       - compose
       - --env-file
-      - "{{ docker_compose.files.env }}"
+      - "{{ lookup('container', application_id, 'files.env') }}"
       - exec
       - -T
       - -e
@@ -36,7 +36,7 @@
       - "bundle exec rails runner -"
     stdin: "{{ lookup('ansible.builtin.file', role_path ~ '/files/greenlight_ensure_admin.rb') }}"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: greenlight_admin_map
   changed_when: "'CHANGED' in (greenlight_admin_map.stdout | default(''))"
   failed_when: greenlight_admin_map.rc != 0

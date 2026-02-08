@@ -15,7 +15,7 @@ server:
     whitelist:
       font-src:
         - "data:"
-docker:
+compose:
   services:
     logout:
       enabled: true

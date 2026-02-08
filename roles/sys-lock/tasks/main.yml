@@ -1,9 +1,9 @@
 ---
 - block:
-    - name: create {{ PATH_LOCK }}
+    - name: create {{ BIN_LOCK }}
       copy:
         src: sys-lock.py
-        dest: "{{ PATH_LOCK }}"
+        dest: "{{ BIN_LOCK }}"
 
     - include_tasks: utils/once/flag.yml
   when: run_once_sys_lock is not defined

@@ -4,9 +4,9 @@ from pathlib import Path
 
 
 class TestDockerComposeTemplates(unittest.TestCase):
-    # Search for all roles/*/templates/docker-compose.yml.j2
+    # Search for all roles/*/templates/compose.yml.j2
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
-    TEMPLATE_PATTERN = "roles/*/templates/docker-compose.yml.j2"
+    TEMPLATE_PATTERN = "roles/*/templates/compose.yml.j2"
 
     # Allowed lines before BASE_INCLUDE
     ALLOWED_BEFORE_BASE = [
@@ -16,13 +16,13 @@ class TestDockerComposeTemplates(unittest.TestCase):
         re.compile(r"^\s*\{\#.*\#\}\s*$"),  # Jinja comment {# ... #}
     ]
 
-    BASE_INCLUDE = "{% include 'roles/docker-compose/templates/base.yml.j2' %}"
-    NET_INCLUDE = "{% include 'roles/docker-compose/templates/networks.yml.j2' %}"
+    BASE_INCLUDE = "{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}"
+    NET_INCLUDE = "{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}"
     HOST_MODE = 'network_mode: "host"'
 
     def test_docker_compose_includes(self):
         """
-        Verifies for each found docker-compose.yml.j2:
+        Verifies for each found compose.yml.j2:
         1. BASE_INCLUDE is present exactly once
         2. If no host‑mode is set, NET_INCLUDE must appear exactly once
         3. BASE_INCLUDE appears before NET_INCLUDE when both are required

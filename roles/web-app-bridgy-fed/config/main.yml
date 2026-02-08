@@ -7,7 +7,7 @@ server:
     whitelist: {}
     flags: {}
 
-docker:
+compose:
   services:
     oidc:
       enabled: false

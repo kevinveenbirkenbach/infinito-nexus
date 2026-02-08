@@ -1,0 +1,26 @@
+- name: "Check if any container is running in {{ lookup('container', application_id, 'directories.instance') }}"
+  command: >-
+    compose ps -q --filter status=running
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: docker_ps
+  changed_when: >
+    (docker_ps.stdout | trim) == ""
+  failed_when: >
+    docker_ps.rc != 0
+    and (
+      (docker_ps.stderr | default(''))
+      | regex_search('(no configuration file provided|no such file or directory|env file .* not found)') is none
+    )
+  when:
+    - >
+      not (
+        docker_compose_template.changed | default(false)
+        or
+        env_template.changed          | default(false)
+      )
+  notify: compose up
+
+- name: "Flush Docker Compose Up Handlers for {{ lookup('container', application_id, 'directories.instance') }}"
+  meta: flush_handlers
+  when: docker_compose_flush_handlers | bool

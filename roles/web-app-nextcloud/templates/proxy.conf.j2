@@ -19,13 +19,13 @@ server
 
   {% if NEXTCLOUD_HPB_SIGNALING_ENABLED | bool %}
     {% set webserver_websocket_location = '^~ ' ~ NEXTCLOUD_HPB_SIGNALING_LOCATION %}
-    {% set webserver_websocket_port     = NEXTCLOUD_PORT %}
+    {% set websocket_port     = NEXTCLOUD_PORT %}
     {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
   {% endif %}
 
   {% if NEXTCLOUD_WHITEBOARD_ENABLED | bool %}
     {% set webserver_websocket_location = '^~ ' ~ NEXTCLOUD_WHITEBOARD_LOCATION %}
-    {% set webserver_websocket_port     = NEXTCLOUD_PORT %}
+    {% set websocket_port     = NEXTCLOUD_PORT %}
     {% include 'roles/sys-svc-proxy/templates/location/ws.conf.j2' %}
   {% endif %}
 

@@ -1,0 +1,42 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    command: >-
+      bash -lc '
+        python manage.py migrate --noinput &&
+        python manage.py collectstatic --noinput &&
+        (python manage.py initdb || true) &&
+        python -m gunicorn bookwyrm.wsgi:application --bind 0.0.0.0:{{ container_port }}
+      '
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+    image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
+    container_name: "{{ BOOKWYRM_CONTAINER }}"
+    hostname: "{{ BOOKWYRM_HOSTNAME }}"
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    volumes:
+      - 'data:/app/data'
+      - 'media:/app/media'
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+  worker:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
+    container_name: "{{ BOOKWYRM_WORKER_CONTAINER }}"
+    command: "bash -lc 'celery -A celerywyrm worker -l INFO'"
+    pull_policy: never
+    volumes:
+      - 'data:/app/data'
+      - 'media:/app/media'
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={'data': {'name': BOOKWYRM_DATA_VOLUME}, 'media': {'name': BOOKWYRM_MEDIA_VOLUME}}
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

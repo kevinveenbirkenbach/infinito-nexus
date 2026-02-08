@@ -17,7 +17,7 @@ server:
     canonical:
       - "picture.{{ DOMAIN_PRIMARY }}"
     aliases: []
-docker:
+compose:
   services:
     oidc:
       enabled: true

@@ -21,5 +21,3 @@
   register: kc_email_verified_updates
   changed_when: true
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-  async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
-  poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

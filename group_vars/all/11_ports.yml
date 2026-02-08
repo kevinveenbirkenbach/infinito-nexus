@@ -64,7 +64,7 @@ ports:
       web-app-fusiondirectory: 8038
       web-app-navigator: 8039
       web-app-espocrm: 8040
-      web-app-syncope: 8041
+      # free : 8041
       web-svc-collabora: 8042
       web-app-mobilizon: 8043
       web-svc-simpleicons: 8044

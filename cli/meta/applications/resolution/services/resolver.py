@@ -61,14 +61,14 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
       - desktop enabled              => web-app-desktop   (shared does NOT matter)
     """
     cfg = _as_mapping(config)
-    services = _as_mapping(_as_mapping(cfg.get("docker")).get("services"))
+    services = _as_mapping(_as_mapping(cfg.get("compose")).get("services"))
 
     def map_database(svc: dict) -> str:
         db_type = (svc.get("type") or "").strip()
         if not db_type:
             raise ServicesResolutionError(
-                "docker.services.database.enabled=true and shared=true "
-                "but docker.services.database.type is missing"
+                "compose.services.database.enabled=true and shared=true "
+                "but compose.services.database.type is missing"
             )
         return f"svc-db-{db_type}"
 

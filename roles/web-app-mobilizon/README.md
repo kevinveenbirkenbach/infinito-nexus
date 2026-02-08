@@ -6,7 +6,7 @@ Experience Mobilizon, an open-source event management platform that empowers com
 
 ## Overview
 
-This role deploys Mobilizon using Docker, automating the setup of your event management platform along with its underlying database. With support for health checks, persistent storage for uploads and configuration, and seamless integration with an Nginx reverse proxy, Mobilizon is configured to provide reliable and scalable event hosting for your community.
+This role deploys Mobilizon using Docker, automating the setup of your event management platform along with its underlying database. With support for health checks, persistent storage for uploads and configuration, and seamless integration with an NGINX reverse proxy, Mobilizon is configured to provide reliable and scalable event hosting for your community.
 
 ## Features
 

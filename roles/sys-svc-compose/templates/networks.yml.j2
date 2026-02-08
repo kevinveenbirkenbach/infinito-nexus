@@ -1,0 +1,43 @@
+{# This template needs to be included in compose.yml #}
+networks:
+{# Central RDMS-Database Network #}
+{% if 
+  (
+    lookup('config',application_id, 'compose.services.database.enabled', False) and 
+    lookup('database', application_id, 'shared')
+  )
+  or
+  application_id in ['svc-db-mariadb','svc-db-postgres']
+%}
+  {{ lookup('config', lookup('database', application_id, 'id'), 'compose.network') }}:
+    external: true
+{% endif %}
+{# Central LDAP Network #}
+{% if 
+  lookup('config',application_id, 'compose.services.ldap.shared', False) and 
+  lookup('config','svc-db-openldap', 'network.compose', False)
+  %}
+  {{ lookup('config','svc-db-openldap', 'compose.network') }}:
+    external: true
+{% endif %}
+{# Central AI Network #}
+{% if lookup('config',application_id, 'compose.services.ollama.shared', False) %}
+  {{ lookup('config','svc-ai-ollama', 'compose.network') }}:
+    external: true
+{% endif %}
+{# Default Network #}
+{% if not application_id.startswith('svc-db-') and not application_id.startswith('svc-ai-') %}
+  default:
+{% if
+  application_id in networks.local and 
+  networks.local[application_id].subnet is defined
+%}
+    name: {{ application_id | get_entity_name }}
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: {{ networks.local[application_id].subnet }}
+{% endif %}
+{% endif %}
+{{ "\n" }}

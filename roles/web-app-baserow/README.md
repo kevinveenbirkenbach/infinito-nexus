@@ -6,7 +6,7 @@ Empower your data management with Baserow, an innovative platform that makes bui
 
 ## Overview
 
-This role deploys Baserow using Docker Compose, integrating key components such as PostgreSQL for the database, Redis for caching, and Nginx for secure domain management and certificate handling. It is designed to offer a robust, scalable solution for running your own Baserow instance in a containerized environment.
+This role deploys Baserow using Docker Compose, integrating key components such as PostgreSQL for the database, Redis for caching, and NGINX for secure domain management and certificate handling. It is designed to offer a robust, scalable solution for running your own Baserow instance in a containerized environment.
 
 ## Features
 

@@ -23,15 +23,18 @@
     service_id: "{{ service.id }}"
     service_name: "{{ service.name }}"
 
-- name: "Load Database"
-  ansible.builtin.include_tasks: "01_database.yml"
+- name: "For '{{ application_id }}': Load central RDBMS"
+  include_role:
+    name: sys-svc-rdbms
+    public: false
   when: SYS_STK_BACKEND_DATABASE_ENABLED | bool
 
-- name: "For '{{ application_id }}': Load docker-compose"
+- name: "For '{{ application_id }}': Load sys-svc-compose"
   include_role:
-    name: docker-compose
+    name: sys-svc-compose
   vars:
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers:  false
+    database_consumer_id:           "{{ database_consumer_id_passed }}"
 
 - block:
     - name: "set oauth2_proxy_application_id (Needed due to lazzy loading issue)"
@@ -41,6 +44,6 @@
       include_tasks: "{{ playbook_dir }}/roles/web-app-oauth2-proxy/tasks/main.yml"
   when: SYS_STK_BACKEND_OAUTH2_ENABLED | bool
 
-- name: "flush docker compose and oauth2 proxy'"
+- name: "flush compose and oauth2 proxy'"
   meta: flush_handlers
   when: docker_compose_flush_handlers | bool

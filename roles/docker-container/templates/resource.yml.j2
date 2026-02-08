@@ -1,4 +1,0 @@
-cpus:               {{ applications | resource_filter(application_id, 'cpus',            service_name | default(''), RESOURCE_CPUS) }}
-mem_reservation:    {{ applications | resource_filter(application_id, 'mem_reservation', service_name | default(''), RESOURCE_MEM_RESERVATION) }}
-mem_limit:          {{ applications | resource_filter(application_id, 'mem_limit',       service_name | default(''), RESOURCE_MEM_LIMIT) }}
-pids_limit:         {{ applications | resource_filter(application_id, 'pids_limit',      service_name | default(''), RESOURCE_PIDS_LIMIT) }}

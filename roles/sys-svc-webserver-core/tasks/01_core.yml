@@ -8,9 +8,6 @@
   include_tasks: 03_reset.yml
   when: MODE_RESET | bool
 
-- name: "Load variables from {{ DOCKER_VARS_FILE }} for {{ role_name }}/{{ application_id }}"
-  include_vars: "{{ DOCKER_VARS_FILE }}"
-
 - name: "Include tasks to create directories"
   include_tasks: 04_directories.yml
 
@@ -27,13 +24,13 @@
 - name: Deploy OpenResty NGINX Base Configuration
   template:
     src:  nginx.conf.j2
-    dest: "{{ lookup('nginx_paths', want='files.configuration') }}"
+    dest: "{{ lookup('nginx','files.configuration') }}"
   notify: restart openresty
 
 - name: Deploy OpenResty default server configuration
   template:
     src:  default_server.conf.j2
-    dest: "{{ [ lookup('nginx_paths', want='directories.configuration.global'), 'default_server.conf' ] | path_join }}"
+    dest: "{{ [ lookup('nginx','directories.configuration.global'), 'default_server.conf' ] | path_join }}"
   notify: restart openresty
 
 - name: Flush OpenResty Base Setup

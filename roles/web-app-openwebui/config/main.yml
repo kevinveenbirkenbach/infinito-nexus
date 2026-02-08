@@ -10,7 +10,7 @@ server:
     whitelist:
       font-src: [] 
       connect-src: [] 
-docker:
+compose:
   services:
     oidc:
       enabled: true

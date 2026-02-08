@@ -2,7 +2,7 @@
 application_id:                 "web-app-gitea"
 
 # Docker
-container_port:                 "{{ applications | get_app_conf(application_id, 'docker.services.gitea.port') }}"
+container_port:                 "{{ lookup('config', application_id, 'compose.services.gitea.port') }}"
 
 # Gitea
 GITEA_LDAP_AUTH_ARGS:
@@ -21,17 +21,17 @@ GITEA_LDAP_AUTH_ARGS:
   - '--email-attribute "{{ LDAP.USER.ATTRIBUTES.MAIL }}"'
   - '--public-ssh-key-attribute "{{ LDAP.USER.ATTRIBUTES.SSH_PUBLIC_KEY }}"'
   - '--synchronize-users'
-GITEA_VERSION:        "{{ applications | get_app_conf(application_id, 'docker.services.gitea.version') }}"
-GITEA_IMAGE:          "{{ applications | get_app_conf(application_id, 'docker.services.gitea.image') }}"
-GITEA_CONTAINER:      "{{ applications | get_app_conf(application_id, 'docker.services.gitea.name') }}"
-GITEA_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+GITEA_VERSION:        "{{ lookup('config', application_id, 'compose.services.gitea.version') }}"
+GITEA_IMAGE:          "{{ lookup('config', application_id, 'compose.services.gitea.image') }}"
+GITEA_CONTAINER:      "{{ lookup('config', application_id, 'compose.services.gitea.name') }}"
+GITEA_VOLUME:         "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 GITEA_USER:           "git"
 GITEA_CONFIG:         "/data/gitea/conf/app.ini"
 
 ## Redis
-GITEA_REDIS_ENABLED:  "{{ applications | get_app_conf(application_id, 'docker.services.redis.enabled') }}"
+GITEA_REDIS_ENABLED:  "{{ lookup('config', application_id, 'compose.services.redis.enabled') }}"
 GITEA_REDIS_ADDRESS:  "redis:6379"
 
-GITEA_OIDC_ENABLED:   "{{ applications | get_app_conf(application_id, 'docker.services.oidc.shared') | bool }}"
-GITEA_LDAP_ENABLED:   "{{ applications | get_app_conf(application_id, 'docker.services.ldap.enabled') }}"
+GITEA_OIDC_ENABLED:   "{{ lookup('config', application_id, 'compose.services.oidc.shared') | bool }}"
+GITEA_LDAP_ENABLED:   "{{ lookup('config', application_id, 'compose.services.ldap.enabled') }}"
 GITEA_IAM_ENABLED:    "{{ (GITEA_OIDC_ENABLED | bool) or ( GITEA_LDAP_ENABLED | bool ) }}"

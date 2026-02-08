@@ -9,7 +9,7 @@ server:
       script-src-elem:
         unsafe-inline:  true
 
-docker:
+compose:
   services:
     oidc:
       enabled: true

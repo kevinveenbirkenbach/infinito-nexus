@@ -18,7 +18,7 @@ server:
         - https://fonts.gstatic.com
         - https://r.wdfl.co
       connect-src: []
-docker:
+compose:
   services:
     logout:
       enabled: true
@@ -75,4 +75,3 @@ docker:
     qdrant:     qdrant_data
     flowise:    flowise_data
 credentials: {}
-

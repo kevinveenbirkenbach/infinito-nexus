@@ -15,7 +15,7 @@ class TestMergeWithDefaultsFilter(unittest.TestCase):
     def test_basic_merge(self):
         defaults = {
             "app1": {
-                "docker": {
+                "compose": {
                     "network": "default",
                     "services": {"foo": "bar"},
                     "volumes": {"data": "/mnt"},
@@ -26,13 +26,13 @@ class TestMergeWithDefaultsFilter(unittest.TestCase):
         }
 
         customs = {
-            "app1": {"docker": {"network": "customnet"}, "version": 2},
-            "app2": {"docker": {"network": "other"}},
+            "app1": {"compose": {"network": "customnet"}, "version": 2},
+            "app2": {"compose": {"network": "other"}},
         }
 
         expected = {
             "app1": {
-                "docker": {
+                "compose": {
                     "network": "customnet",
                     "services": {"foo": "bar"},
                     "volumes": {"data": "/mnt"},
@@ -40,7 +40,7 @@ class TestMergeWithDefaultsFilter(unittest.TestCase):
                 "features": {"ldap": True, "sso": False},
                 "version": 2,
             },
-            "app2": {"docker": {"network": "other"}},
+            "app2": {"compose": {"network": "other"}},
         }
 
         result = merge_with_defaults(defaults, customs)
@@ -48,19 +48,19 @@ class TestMergeWithDefaultsFilter(unittest.TestCase):
 
     def test_keys_from_defaults_only(self):
         defaults = {
-            "foo": {"docker": {"a": 1, "b": 2}, "features": {"x": True}},
+            "foo": {"compose": {"a": 1, "b": 2}, "features": {"x": True}},
         }
         customs = {
             "foo": {},
         }
-        expected = {"foo": {"docker": {"a": 1, "b": 2}, "features": {"x": True}}}
+        expected = {"foo": {"compose": {"a": 1, "b": 2}, "features": {"x": True}}}
         result = merge_with_defaults(defaults, customs)
         self.assertEqual(result, expected)
 
     def test_custom_overrides_nested_dict(self):
-        defaults = {"x": {"docker": {"bar": 1, "baz": 2}}}
-        customs = {"x": {"docker": {"bar": 99}}}
-        expected = {"x": {"docker": {"bar": 99, "baz": 2}}}
+        defaults = {"x": {"compose": {"bar": 1, "baz": 2}}}
+        customs = {"x": {"compose": {"bar": 99}}}
+        expected = {"x": {"compose": {"bar": 99, "baz": 2}}}
         result = merge_with_defaults(defaults, customs)
         self.assertEqual(result, expected)
 

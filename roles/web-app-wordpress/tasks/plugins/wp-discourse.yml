@@ -6,22 +6,22 @@
 
 - name: Wait for Discourse API
   wait_for:
-    host: "{{ domains | get_domain('web-app-discourse') }}"
+    host: "{{ lookup('domain','web-app-discourse') }}"
     port: 80
     delay: 5
     timeout: 600
 
 - name: Add /var/www/discourse to Git safe.directory
   command: >
-    docker exec {{ applications['web-app-discourse'].docker.services.discourse.name }} \
+    container exec {{ applications['web-app-discourse'].compose.services.discourse.name }} \
       git config --global --add safe.directory /var/www/discourse
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   changed_when: false
 
 - name: Revoke old WP Discourse API keys via Rails
   command: >
-    docker exec {{ applications['web-app-discourse'].docker.services.discourse.name }} bash -lc "\
+    container exec {{ applications['web-app-discourse'].compose.services.discourse.name }} bash -lc "\
       cd /var/www/discourse && \
       script/rails runner \"\
         ApiKey.where(\
@@ -31,18 +31,18 @@
         ).update_all(revoked_at: Time.current)\
       \""
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   changed_when: false
   failed_when: false
 
 - name: Generate new WP Discourse API key via Rake task
   command: >
-    docker exec {{ applications['web-app-discourse'].docker.services.discourse.name }} bash -lc "\
+    container exec {{ applications['web-app-discourse'].compose.services.discourse.name }} bash -lc "\
       cd /var/www/discourse && \
       bin/rake api_key:create_master['WP Discourse Integration']\
     "
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: discourse_generated_api_key
 
 - name: Store the new WP Discourse API key in a fact
@@ -55,11 +55,11 @@
 
 - name: "Install WP Discourse plugin"
   command: >
-    docker-compose exec -u www-data -T application
+    {{ BIN_COMPOSE }} exec -u www-data -T application
       wp plugin install wp-discourse --activate
       --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
 
 - name: "Configure WP Discourse settings"
   loop: "{{ discourse_settings | map(attribute='name') | unique | list }}"
@@ -83,7 +83,7 @@
     option_json_b64: "{{ option_kv | to_json | b64encode }}"
 
   command: >
-    docker-compose exec -u www-data -T application bash -lc
+    {{ BIN_COMPOSE }} exec -u www-data -T application bash -lc
       "wp eval \"update_option(
          '{{ option_name }}',
          json_decode(
@@ -92,4 +92,4 @@
          )
        );\" --path={{ WORDPRESS_DOCKER_HTML_PATH }}"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"

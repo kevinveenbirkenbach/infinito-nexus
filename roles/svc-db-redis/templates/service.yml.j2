@@ -1,6 +1,6 @@
-# This template needs to be included in docker-compose.yml, which depend on redis
-{% set redis_image = applications | get_app_conf('svc-db-redis', 'docker.services.redis.image') %}
-{% set redis_version = applications | get_app_conf('svc-db-redis', 'docker.services.redis.version')%}
+# This template needs to be included in compose.yml, which depend on redis
+{% set redis_image = lookup('config','svc-db-redis', 'compose.services.redis.image') %}
+{% set redis_version = lookup('config','svc-db-redis', 'compose.services.redis.version')%}
   redis:
     image: "{{ redis_image }}:{{ redis_version }}"
     container_name: {{ application_id | get_entity_name }}-redis
@@ -29,7 +29,7 @@
 {% macro include_resource_for(svc, indent=4) -%}
   {% set service_name = svc -%}
   {%- set _snippet -%}
-{% include 'roles/docker-container/templates/resource.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/resource.yml.j2' %}
   {%- endset -%}
 {{ _snippet | indent(indent, true) }}
 {%- endmacro %}

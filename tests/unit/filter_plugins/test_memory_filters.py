@@ -108,9 +108,9 @@ class TestMemoryFilters(unittest.TestCase):
             ),
             patch(
                 "filter_plugins.memory_filters.get_app_conf",
-                side_effect=lambda apps, app_id, key, required=True, **kwargs: "8Q"
-                if key.endswith(".mem_limit")
-                else "4g",
+                side_effect=lambda apps, app_id, key, required=True, **kwargs: (
+                    "8Q" if key.endswith(".mem_limit") else "4g"
+                ),
             ),
         ):
             with self.assertRaises(memory_filters.AnsibleFilterError):
@@ -124,9 +124,9 @@ class TestMemoryFilters(unittest.TestCase):
             ),
             patch(
                 "filter_plugins.memory_filters.get_app_conf",
-                side_effect=lambda apps, app_id, key, required=True, **kwargs: "0"
-                if key.endswith(".mem_limit")
-                else "4g",
+                side_effect=lambda apps, app_id, key, required=True, **kwargs: (
+                    "0" if key.endswith(".mem_limit") else "4g"
+                ),
             ),
         ):
             with self.assertRaises(memory_filters.AnsibleFilterError):
@@ -140,9 +140,9 @@ class TestMemoryFilters(unittest.TestCase):
             ),
             patch(
                 "filter_plugins.memory_filters.get_app_conf",
-                side_effect=lambda apps, app_id, key, required=True, **kwargs: "8g"
-                if key.endswith(".mem_limit")
-                else "0",
+                side_effect=lambda apps, app_id, key, required=True, **kwargs: (
+                    "8g" if key.endswith(".mem_limit") else "0"
+                ),
             ),
         ):
             with self.assertRaises(memory_filters.AnsibleFilterError):
@@ -160,9 +160,9 @@ class TestMemoryFilters(unittest.TestCase):
             ) as mock_entity,
             patch(
                 "filter_plugins.memory_filters.get_app_conf",
-                side_effect=lambda apps, app_id, key, required=True, **kwargs: "8g"
-                if key.endswith(".mem_limit")
-                else "6g",
+                side_effect=lambda apps, app_id, key, required=True, **kwargs: (
+                    "8g" if key.endswith(".mem_limit") else "6g"
+                ),
             ),
         ):
             xmx = memory_filters.jvm_max_mb(self.apps, self.app_id)
@@ -242,7 +242,7 @@ class TestMemoryFilters(unittest.TestCase):
 
     def test_redis_maxmemory_uses_default_when_mem_limit_missing(self):
         """
-        When docker.services.redis.mem_limit is not configured, the filter
+        When compose.services.redis.mem_limit is not configured, the filter
         should fall back to its internal default (256m).
         """
 

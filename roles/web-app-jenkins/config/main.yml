@@ -3,7 +3,7 @@ server:
     canonical:
       - jenkins.{{ DOMAIN_PRIMARY }}
     aliases: []
-docker:
+compose:
   services:
     logout:
       enabled: true

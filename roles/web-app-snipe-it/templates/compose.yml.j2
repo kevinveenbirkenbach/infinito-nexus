@@ -1,0 +1,32 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  {{ SNIPE_IT_SERVICE }}:
+{% set container_port = 80 %}
+    image: "{{ SNIPE_IT_IMAGE }}:{{ SNIPE_IT_VERSION }}"
+    container_name: "{{ SNIPE_IT_CONTAINER }}"
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    volumes:
+      - data:/var/lib/snipeit
+      - {{ lookup('container', application_id, 'files.env') }}:/var/www/html/.env:ro
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - -q
+        - -O-
+        - http://localhost/
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={'data': {'name': SNIPE_IT_VOLUME}}
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

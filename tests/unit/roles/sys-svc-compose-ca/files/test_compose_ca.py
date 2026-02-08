@@ -1,0 +1,761 @@
+# tests/unit/roles/sys-svc-compose-ca/files/test_compose_ca_inject.py
+import importlib.util
+import json
+import unittest
+import yaml
+from pathlib import Path
+from unittest.mock import patch
+
+
+def _repo_root(start: Path) -> Path:
+    # __file__ = tests/unit/roles/sys-svc-compose-ca/files/test_compose_ca_inject.py
+    return start.resolve().parents[5]
+
+
+def _load_module(rel_path: str, name: str):
+    root = _repo_root(Path(__file__))
+    path = root / rel_path
+    spec = importlib.util.spec_from_file_location(name, str(path))
+    mod = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(mod)
+    return mod
+
+
+class TestComposeCaInject(unittest.TestCase):
+    def setUp(self):
+        self.m = _load_module(
+            "roles/sys-svc-compose-ca/files/compose_ca.py",
+            "compose_ca_inject_mod",
+        )
+
+    def test_normalize_cmd(self):
+        self.assertEqual(self.m.normalize_cmd(["a", "b"]), ["a", "b"])
+        self.assertEqual(self.m.normalize_cmd("echo hi"), ["/bin/sh", "-lc", "echo hi"])
+        self.assertEqual(self.m.normalize_cmd(None), [])
+        with self.assertRaises(SystemExit):
+            self.m.normalize_cmd(123)
+
+    def test_normalize_entrypoint(self):
+        self.assertEqual(self.m.normalize_entrypoint(["a", "b"]), ["a", "b"])
+        self.assertEqual(
+            self.m.normalize_entrypoint("echo hi"), ["/bin/sh", "-lc", "echo hi"]
+        )
+        self.assertEqual(self.m.normalize_entrypoint(None), [])
+        with self.assertRaises(SystemExit):
+            self.m.normalize_entrypoint(123)
+
+    def test_parse_yaml_requires_mapping(self):
+        doc = self.m.parse_yaml("a: 1\n", "x")
+        self.assertEqual(doc["a"], 1)
+
+        with self.assertRaises(SystemExit):
+            self.m.parse_yaml("- 1\n- 2\n", "x")
+
+    def test_has_build(self):
+        self.assertTrue(self.m._has_build({"build": {"context": "."}}))
+        self.assertTrue(self.m._has_build({"build": "./"}))
+        self.assertFalse(self.m._has_build({}))
+        self.assertFalse(self.m._has_build({"build": None}))
+
+    def test_find_builder_service_for_image(self):
+        services = {
+            "app": {"image": "custom:1", "build": {"context": "."}},
+            "worker": {"image": "custom:1"},
+            "other": {"image": "other:2", "build": {"context": "."}},
+        }
+        self.assertEqual(
+            self.m._find_builder_service_for_image(image="custom:1", services=services),
+            "app",
+        )
+        self.assertEqual(
+            self.m._find_builder_service_for_image(
+                image="missing:tag", services=services
+            ),
+            "",
+        )
+        self.assertEqual(
+            self.m._find_builder_service_for_image(image="", services=services),
+            "",
+        )
+
+    def test_ensure_image_available_builds_self_when_build_present(self):
+        """
+        If the service has build:, ensure_image_available should run
+        `compose ... build <service>` (not pull).
+        """
+        calls = []
+
+        def fake_run(cmd, *, cwd, env):
+            calls.append(cmd)
+
+            # container image inspect <image>: first missing, second exists
+            if cmd[:3] == ["docker", "image", "inspect"]:
+                inspect_calls = [
+                    c for c in calls if c[:3] == ["docker", "image", "inspect"]
+                ]
+                if len(inspect_calls) == 1:
+                    return 1, "", "no such image"
+                return 0, json.dumps([{"Config": {"Entrypoint": [], "Cmd": []}}]), ""
+
+            # compose ... build app
+            if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["build", "app"]:
+                return 0, "built", ""
+
+            # anything else
+            return 1, "", "unexpected"
+
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "compose.yml"]
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            self.m.ensure_image_available(
+                service_name="app",
+                svc={"image": "custom:1", "build": {"context": "."}},
+                image="custom:1",
+                services={"app": {"image": "custom:1", "build": {"context": "."}}},
+                service_to_compose_cmd={"app": base_cmd},
+                compose_base_cmd=base_cmd,
+                cwd=Path("/tmp"),
+                env={},
+            )
+
+        self.assertTrue(any(c[-2:] == ["build", "app"] for c in calls))
+        self.assertFalse(any(c[-2:] == ["pull", "app"] for c in calls))
+
+    def test_ensure_image_available_builds_builder_for_shared_image(self):
+        """
+        New robust logic:
+        - 'worker' has no build but references image 'custom:1'
+        - 'app' has build and same image 'custom:1'
+        => should run `compose ... build app` and not pull worker.
+        """
+        calls = []
+
+        services = {
+            "app": {"image": "custom:1", "build": {"context": "."}},
+            "worker": {"image": "custom:1"},
+        }
+
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "compose.yml"]
+        service_to_cmd = {"app": base_cmd, "worker": base_cmd}
+
+        def fake_run(cmd, *, cwd, env):
+            calls.append(cmd)
+
+            # container image inspect: first missing, second exists
+            if cmd[:3] == ["docker", "image", "inspect"]:
+                inspect_calls = [
+                    c for c in calls if c[:3] == ["docker", "image", "inspect"]
+                ]
+                if len(inspect_calls) == 1:
+                    return 1, "", "no such image"
+                return 0, json.dumps([{"Config": {"Entrypoint": [], "Cmd": []}}]), ""
+
+            # build builder (app)
+            if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["build", "app"]:
+                return 0, "built", ""
+
+            # if pull(worker) happens, that's wrong for this test; still return success
+            if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["pull", "worker"]:
+                return 0, "pulled", ""
+
+            return 1, "", "unexpected"
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            self.m.ensure_image_available(
+                service_name="worker",
+                svc=services["worker"],
+                image="custom:1",
+                services=services,
+                service_to_compose_cmd=service_to_cmd,
+                compose_base_cmd=base_cmd,
+                cwd=Path("/tmp"),
+                env={},
+            )
+
+        self.assertTrue(any(c[-2:] == ["build", "app"] for c in calls))
+        self.assertFalse(any(c[-2:] == ["pull", "worker"] for c in calls))
+
+    def test_ensure_image_available_falls_back_to_pull_when_no_builder(self):
+        """
+        If there is no builder service for an image, fall back to pull(service).
+        """
+        calls = []
+
+        services = {"worker": {"image": "registry.example/worker:1"}}
+        base_cmd = ["docker", "compose", "-p", "p", "-f", "compose.yml"]
+        service_to_cmd = {"worker": base_cmd}
+
+        def fake_run(cmd, *, cwd, env):
+            calls.append(cmd)
+
+            # image inspect: first missing, second exists after pull
+            if cmd[:3] == ["docker", "image", "inspect"]:
+                inspect_calls = [
+                    c for c in calls if c[:3] == ["docker", "image", "inspect"]
+                ]
+                if len(inspect_calls) == 1:
+                    return 1, "", "no such image"
+                return 0, json.dumps([{"Config": {"Entrypoint": [], "Cmd": []}}]), ""
+
+            # pull succeeds
+            if cmd[:2] == ["docker", "compose"] and cmd[-2:] == ["pull", "worker"]:
+                return 0, "pulled", ""
+
+            return 1, "", "unexpected"
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            self.m.ensure_image_available(
+                service_name="worker",
+                svc=services["worker"],
+                image=services["worker"]["image"],
+                services=services,
+                service_to_compose_cmd=service_to_cmd,
+                compose_base_cmd=base_cmd,
+                cwd=Path("/tmp"),
+                env={},
+            )
+
+        self.assertTrue(any(c[-2:] == ["pull", "worker"] for c in calls))
+
+    @patch.object(Path, "exists", autospec=True, return_value=True)
+    @patch.object(Path, "is_dir", autospec=True, return_value=True)
+    @patch.object(Path, "read_text", autospec=True)
+    @patch.object(Path, "write_text", autospec=True)
+    @patch.object(Path, "mkdir", autospec=True)
+    def test_main_generates_override(
+        self, _mkdir, _write_text, _read_text, _is_dir, _exists
+    ):
+        """
+        main():
+          - parses compose files to discover profiles
+          - runs `compose ... config`
+          - inspects images via `container image inspect`
+          - writes override with CA_TRUST_* envs
+        """
+        _read_text.return_value = "services:\n  app:\n    image: myimage:latest\n"
+
+        def fake_run(cmd, *, cwd, env):
+            # compose ... config
+            if (
+                len(cmd) >= 3
+                and cmd[0:2] == ["docker", "compose"]
+                and cmd[-1] == "config"
+            ):
+                yml = "services:\n  app:\n    image: myimage:latest\n"
+                return 0, yml, ""
+
+            # container image inspect <image>
+            if cmd[:3] == ["docker", "image", "inspect"]:
+                json_out = json.dumps(
+                    [{"Config": {"Entrypoint": ["/entry"], "Cmd": ["run"]}}]
+                )
+                return 0, json_out, ""
+
+            return 1, "", "unexpected"
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            argv = [
+                "compose_ca.py",
+                "--chdir",
+                "/tmp/app",
+                "--project",
+                "p",
+                "--compose-files",
+                "-f compose.yml -f compose.override.yml",
+                "--out",
+                "compose.ca.override.yml",
+                "--ca-host",
+                "/etc/infinito/ca/root-ca.crt",
+                "--wrapper-host",
+                "/etc/infinito/bin/with-ca-trust.sh",
+                "--trust-name",
+                "infinito.local",
+            ]
+            with patch("sys.argv", argv):
+                rc = self.m.main()
+
+        self.assertEqual(rc, 0)
+        self.assertTrue(_write_text.called)
+
+        # Optional sanity: ensure the written YAML contains CA_TRUST_NAME and trust-name value
+        args, _kwargs = _write_text.call_args
+        written = args[1] if len(args) > 1 else ""
+        self.assertIn("CA_TRUST_NAME", written)
+        self.assertIn("infinito.local", written)
+
+    @patch.object(Path, "exists", autospec=True, return_value=True)
+    @patch.object(Path, "is_dir", autospec=True, return_value=True)
+    def test_main_requires_trust_name(self, _is_dir, _exists):
+        argv = [
+            "compose_ca.py",
+            "--chdir",
+            "/tmp/app",
+            "--project",
+            "p",
+            "--compose-files",
+            "-f compose.yml",
+            "--out",
+            "compose.ca.override.yml",
+            "--ca-host",
+            "/etc/infinito/ca/root-ca.crt",
+            "--wrapper-host",
+            "/etc/infinito/bin/with-ca-trust.sh",
+            # missing: --trust-name
+        ]
+        with patch("sys.argv", argv):
+            with self.assertRaises(SystemExit):
+                self.m.main()
+
+    def test_docker_image_has_bin_sh_true(self):
+        """
+        docker_image_has_bin_sh(): returns True when container run succeeds.
+        """
+
+        def fake_run(cmd, *, cwd, env):
+            self.assertEqual(
+                cmd[:6],
+                ["docker", "run", "--rm", "--entrypoint", "/bin/sh", "img:1"],
+            )
+            self.assertEqual(cmd[6:], ["-c", "exit 0"])
+            return 0, "", ""
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            ok = self.m.docker_image_has_bin_sh("img:1", cwd=Path("/tmp"), env={})
+        self.assertTrue(ok)
+
+    def test_docker_image_has_bin_sh_false(self):
+        """
+        docker_image_has_bin_sh(): returns False when container run fails (distroless-like).
+        """
+
+        def fake_run(cmd, *, cwd, env):
+            return 1, "", 'exec: "/bin/sh": stat /bin/sh: no such file or directory'
+
+        with patch.object(self.m, "run", side_effect=fake_run):
+            ok = self.m.docker_image_has_bin_sh("img:1", cwd=Path("/tmp"), env={})
+        self.assertFalse(ok)
+
+    def test_render_override_sets_env_and_mounts_always(self):
+        """
+        render_override(): must always set CA env vars + fallback envs and always mount CA+wrapper.
+        This must hold even for images without /bin/sh (no entrypoint override in that case).
+        """
+        services = {"svc": {"image": "img:1"}}
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
+
+        # For this test, we simulate:
+        # - image exists
+        # - image inspect returns entrypoint/cmd (needed for effective_cmd computation)
+        with (
+            patch.object(self.m, "ensure_image_available", return_value=None),
+            patch.object(
+                self.m, "docker_image_inspect", return_value=(["/entry"], ["run"])
+            ),
+            patch.object(self.m, "docker_image_has_bin_sh", return_value=False),
+        ):
+            doc = self.m.render_override(
+                services,
+                service_to_cmd,
+                cwd=Path("/tmp"),
+                env={},
+                ca_host="/host/ca.crt",
+                wrapper_host="/host/with-ca-trust.sh",
+                trust_name="infinito.local",
+            )
+
+        self.assertIn("services", doc)
+        self.assertIn("svc", doc["services"])
+        out = doc["services"]["svc"]
+
+        # Always mounts both CA and wrapper
+        self.assertIn("volumes", out)
+        self.assertIn("/host/ca.crt:/tmp/infinito/ca/root-ca.crt:ro", out["volumes"])
+        self.assertIn(
+            "/host/with-ca-trust.sh:/tmp/infinito/bin/with-ca-trust.sh:ro",
+            out["volumes"],
+        )
+
+        # Always sets env vars
+        env = out.get("environment", {})
+        self.assertEqual(env.get("CA_TRUST_CERT"), "/tmp/infinito/ca/root-ca.crt")
+        self.assertEqual(env.get("CA_TRUST_NAME"), "infinito.local")
+        self.assertEqual(env.get("SSL_CERT_FILE"), "/tmp/infinito/ca/root-ca.crt")
+        self.assertEqual(env.get("REQUESTS_CA_BUNDLE"), "/tmp/infinito/ca/root-ca.crt")
+        self.assertEqual(env.get("CURL_CA_BUNDLE"), "/tmp/infinito/ca/root-ca.crt")
+        self.assertEqual(env.get("NODE_EXTRA_CA_CERTS"), "/tmp/infinito/ca/root-ca.crt")
+
+        # For distroless-like images: do NOT override entrypoint/command
+        self.assertNotIn("entrypoint", out)
+        self.assertNotIn("command", out)
+
+    def test_render_override_wraps_when_sh_exists(self):
+        """
+        render_override(): when /bin/sh exists, it must override entrypoint to wrapper
+        and set command to the effective command (final entrypoint + final cmd).
+        """
+        services = {"svc": {"image": "img:1"}}
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
+
+        with (
+            patch.object(self.m, "ensure_image_available", return_value=None),
+            patch.object(
+                self.m,
+                "docker_image_inspect",
+                return_value=(["/entry"], ["run", "--flag"]),
+            ),
+            patch.object(self.m, "docker_image_has_bin_sh", return_value=True),
+        ):
+            doc = self.m.render_override(
+                services,
+                service_to_cmd,
+                cwd=Path("/tmp"),
+                env={},
+                ca_host="/host/ca.crt",
+                wrapper_host="/host/with-ca-trust.sh",
+                trust_name="infinito.local",
+            )
+
+        out = doc["services"]["svc"]
+        self.assertEqual(out.get("entrypoint"), ["/tmp/infinito/bin/with-ca-trust.sh"])
+        self.assertEqual(out.get("command"), ["/entry", "run", "--flag"])
+
+    def test_render_override_uses_service_entrypoint_command_over_image(self):
+        """
+        If the composed config explicitly sets entrypoint/command, those must win over image defaults.
+        effective_cmd = svc_entrypoint + svc_command
+        """
+        services = {
+            "svc": {
+                "image": "img:1",
+                "entrypoint": ["/svc-entry"],
+                "command": ["svc-run", "x"],
+            }
+        }
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
+
+        with (
+            patch.object(self.m, "ensure_image_available", return_value=None),
+            patch.object(
+                self.m,
+                "docker_image_inspect",
+                return_value=(["/img-entry"], ["img-run"]),
+            ),
+            patch.object(self.m, "docker_image_has_bin_sh", return_value=True),
+        ):
+            doc = self.m.render_override(
+                services,
+                service_to_cmd,
+                cwd=Path("/tmp"),
+                env={},
+                ca_host="/host/ca.crt",
+                wrapper_host="/host/with-ca-trust.sh",
+                trust_name="infinito.local",
+            )
+
+        out = doc["services"]["svc"]
+        self.assertEqual(out["command"], ["/svc-entry", "svc-run", "x"])
+
+    def test_render_override_caches_bin_sh_probe_per_image(self):
+        """
+        docker_image_has_bin_sh() should be called once per image and cached across services.
+        """
+        services = {
+            "a": {"image": "img:1"},
+            "b": {"image": "img:1"},
+        }
+        service_to_cmd = {
+            "a": ["docker", "compose", "-p", "p", "-f", "compose.yml"],
+            "b": ["docker", "compose", "-p", "p", "-f", "compose.yml"],
+        }
+
+        with (
+            patch.object(self.m, "ensure_image_available", return_value=None),
+            patch.object(
+                self.m, "docker_image_inspect", return_value=(["/entry"], ["run"])
+            ),
+            patch.object(
+                self.m, "docker_image_has_bin_sh", return_value=True
+            ) as p_has_sh,
+        ):
+            _doc = self.m.render_override(
+                services,
+                service_to_cmd,
+                cwd=Path("/tmp"),
+                env={},
+                ca_host="/host/ca.crt",
+                wrapper_host="/host/with-ca-trust.sh",
+                trust_name="infinito.local",
+            )
+
+        self.assertEqual(p_has_sh.call_count, 1)
+
+    def test_main_generates_override_includes_entrypoint_when_sh_exists(self):
+        """
+        main(): when /bin/sh exists for the image, the written override should include entrypoint wrapper.
+        """
+        # Compose file content used for profile discovery only
+        with (
+            patch.object(Path, "exists", autospec=True, return_value=True),
+            patch.object(Path, "is_dir", autospec=True, return_value=True),
+            patch.object(
+                Path,
+                "read_text",
+                autospec=True,
+                return_value="services:\n  app:\n    image: myimage:latest\n",
+            ),
+            patch.object(Path, "mkdir", autospec=True),
+            patch.object(Path, "write_text", autospec=True) as p_write,
+        ):
+
+            def fake_run(cmd, *, cwd, env):
+                # compose ... config
+                if (
+                    len(cmd) >= 3
+                    and cmd[0:2] == ["docker", "compose"]
+                    and cmd[-1] == "config"
+                ):
+                    yml = "services:\n  app:\n    image: myimage:latest\n"
+                    return 0, yml, ""
+
+                # container image inspect <image>
+                if cmd[:3] == ["docker", "image", "inspect"]:
+                    json_out = json.dumps(
+                        [{"Config": {"Entrypoint": ["/entry"], "Cmd": ["run"]}}]
+                    )
+                    return 0, json_out, ""
+
+                # container run --entrypoint /bin/sh ... -c exit 0  (bin/sh probe)
+                if cmd[:6] == [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "--entrypoint",
+                    "/bin/sh",
+                    "myimage:latest",
+                ]:
+                    return 0, "", ""
+
+                return 1, "", "unexpected"
+
+            with patch.object(self.m, "run", side_effect=fake_run):
+                argv = [
+                    "compose_ca.py",
+                    "--chdir",
+                    "/tmp/app",
+                    "--project",
+                    "p",
+                    "--compose-files",
+                    "-f compose.yml -f compose.override.yml",
+                    "--out",
+                    "compose.ca.override.yml",
+                    "--ca-host",
+                    "/etc/infinito/ca/root-ca.crt",
+                    "--wrapper-host",
+                    "/etc/infinito/bin/with-ca-trust.sh",
+                    "--trust-name",
+                    "infinito.local",
+                ]
+                with patch("sys.argv", argv):
+                    rc = self.m.main()
+
+            self.assertEqual(rc, 0)
+            self.assertTrue(p_write.called)
+
+            args, _kwargs = p_write.call_args
+            written = args[1] if len(args) > 1 else ""
+            parsed = yaml.safe_load(written)
+            self.assertIn("services", parsed)
+            self.assertIn("app", parsed["services"])
+            self.assertEqual(
+                parsed["services"]["app"].get("entrypoint"),
+                ["/tmp/infinito/bin/with-ca-trust.sh"],
+            )
+
+    def test_escape_compose_vars_replaces_single_dollar(self):
+        """
+        escape_compose_vars(): must replace $ with $$ so Compose does not interpolate on host.
+        """
+        self.assertEqual(
+            self.m.escape_compose_vars(['exec "$FOO"']),
+            ['exec "$$FOO"'],
+        )
+        self.assertEqual(
+            self.m.escape_compose_vars(["$FOO", "${FOO}", "x$y", "$", "plain"]),
+            ["$$FOO", "$${FOO}", "x$$y", "$$", "plain"],
+        )
+
+    def test_escape_compose_vars_keeps_strings_without_dollar_unchanged(self):
+        """
+        escape_compose_vars(): must not modify strings without '$'.
+        """
+        argv = ["/entry", "run", "--flag", "exec /bin/app", "x_y-z.1"]
+        self.assertEqual(self.m.escape_compose_vars(argv), argv)
+
+    def test_render_override_escapes_dollar_in_command_when_wrapping(self):
+        """
+        render_override(): when wrapping is enabled (has /bin/sh),
+        command argv must have $ escaped to $$ to prevent host-side Compose interpolation.
+        """
+        services = {"svc": {"image": "img:1"}}
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
+
+        # Simulate an image whose Cmd contains a shell expansion.
+        # This is exactly the problematic case: Compose would otherwise turn $FOO into "" if unset on host.
+        with (
+            patch.object(self.m, "ensure_image_available", return_value=None),
+            patch.object(
+                self.m,
+                "docker_image_inspect",
+                return_value=([], ["sh", "-lc", 'exec "$CHESS_ENTRYPOINT_INT"']),
+            ),
+            patch.object(self.m, "docker_image_has_bin_sh", return_value=True),
+        ):
+            doc = self.m.render_override(
+                services,
+                service_to_cmd,
+                cwd=Path("/tmp"),
+                env={},
+                ca_host="/host/ca.crt",
+                wrapper_host="/host/with-ca-trust.sh",
+                trust_name="infinito.local",
+            )
+
+        out = doc["services"]["svc"]
+        self.assertEqual(out.get("entrypoint"), ["/tmp/infinito/bin/with-ca-trust.sh"])
+        self.assertEqual(
+            out.get("command"),
+            ["sh", "-lc", 'exec "$$CHESS_ENTRYPOINT_INT"'],
+        )
+
+    def test_render_override_does_not_escape_when_not_wrapping(self):
+        """
+        render_override(): when /bin/sh does NOT exist (distroless-like),
+        we must not set 'command' at all (and therefore no escaping occurs).
+        """
+        services = {"svc": {"image": "img:1"}}
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
+
+        with (
+            patch.object(self.m, "ensure_image_available", return_value=None),
+            patch.object(
+                self.m,
+                "docker_image_inspect",
+                return_value=([], ["sh", "-lc", 'exec "$CHESS_ENTRYPOINT_INT"']),
+            ),
+            patch.object(self.m, "docker_image_has_bin_sh", return_value=False),
+        ):
+            doc = self.m.render_override(
+                services,
+                service_to_cmd,
+                cwd=Path("/tmp"),
+                env={},
+                ca_host="/host/ca.crt",
+                wrapper_host="/host/with-ca-trust.sh",
+                trust_name="infinito.local",
+            )
+
+        out = doc["services"]["svc"]
+        self.assertNotIn("entrypoint", out)
+        self.assertNotIn("command", out)
+
+    def test_main_writes_override_with_escaped_dollar_when_image_cmd_contains_dollar(
+        self,
+    ):
+        """
+        main(): if the image Cmd contains '$VAR', the written override must contain '$$VAR'
+        (Compose-escape) so the container shell can expand it at runtime.
+        """
+        with (
+            patch.object(Path, "exists", autospec=True, return_value=True),
+            patch.object(Path, "is_dir", autospec=True, return_value=True),
+            patch.object(
+                Path,
+                "read_text",
+                autospec=True,
+                return_value="services:\n  app:\n    image: myimage:latest\n",
+            ),
+            patch.object(Path, "mkdir", autospec=True),
+            patch.object(Path, "write_text", autospec=True) as p_write,
+        ):
+
+            def fake_run(cmd, *, cwd, env):
+                # compose ... config
+                if (
+                    len(cmd) >= 3
+                    and cmd[0:2] == ["docker", "compose"]
+                    and cmd[-1] == "config"
+                ):
+                    yml = "services:\n  app:\n    image: myimage:latest\n"
+                    return 0, yml, ""
+
+                # container image inspect <image> -> Cmd contains '$'
+                if cmd[:3] == ["docker", "image", "inspect"]:
+                    json_out = json.dumps(
+                        [
+                            {
+                                "Config": {
+                                    "Entrypoint": [],
+                                    "Cmd": [
+                                        "sh",
+                                        "-lc",
+                                        'exec "$CHESS_ENTRYPOINT_INT"',
+                                    ],
+                                }
+                            }
+                        ]
+                    )
+                    return 0, json_out, ""
+
+                # container run --entrypoint /bin/sh ... (bin/sh probe)
+                if cmd[:6] == [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "--entrypoint",
+                    "/bin/sh",
+                    "myimage:latest",
+                ]:
+                    return 0, "", ""
+
+                return 1, "", "unexpected"
+
+            with patch.object(self.m, "run", side_effect=fake_run):
+                argv = [
+                    "compose_ca.py",
+                    "--chdir",
+                    "/tmp/app",
+                    "--project",
+                    "p",
+                    "--compose-files",
+                    "-f compose.yml",
+                    "--out",
+                    "compose.ca.override.yml",
+                    "--ca-host",
+                    "/etc/infinito/ca/root-ca.crt",
+                    "--wrapper-host",
+                    "/etc/infinito/bin/with-ca-trust.sh",
+                    "--trust-name",
+                    "infinito.local",
+                ]
+                with patch("sys.argv", argv):
+                    rc = self.m.main()
+
+        self.assertEqual(rc, 0)
+        self.assertTrue(p_write.called)
+
+        args, _kwargs = p_write.call_args
+        written = args[1] if len(args) > 1 else ""
+        parsed = yaml.safe_load(written)
+
+        self.assertIn("services", parsed)
+        self.assertIn("app", parsed["services"])
+        # This is the crucial assertion: '$' must be doubled in YAML.
+        self.assertEqual(
+            parsed["services"]["app"].get("command"),
+            ["sh", "-lc", 'exec "$$CHESS_ENTRYPOINT_INT"'],
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()

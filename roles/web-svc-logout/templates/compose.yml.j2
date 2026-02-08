@@ -1,0 +1,15 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+  logout:
+    {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    build:
+      context: {{ docker_repository_path }}
+      dockerfile: Dockerfile
+    pull_policy: never
+    image: logout
+    container_name: logout
+    ports:
+      - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

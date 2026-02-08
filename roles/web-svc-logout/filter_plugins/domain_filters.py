@@ -12,7 +12,7 @@ class FilterModule(object):
 
     def logout_domains(self, applications, group_names):
         """
-        Return a list of domains for applications where docker.services.logout.enabled is true.
+        Return a list of domains for applications where compose.services.logout.enabled is true.
 
         :param applications: dict of application configs
         :param group_names: list of application IDs to consider
@@ -25,7 +25,7 @@ class FilterModule(object):
                     continue
 
                 if not get_app_conf(
-                    applications, app_id, "docker.services.logout.enabled", False
+                    applications, app_id, "compose.services.logout.enabled", False
                 ):
                     continue
 

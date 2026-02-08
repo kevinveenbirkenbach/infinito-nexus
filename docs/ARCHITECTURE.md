@@ -40,7 +40,7 @@ https://github.com/kevinveenbirkenbach/hetzner-arch-luks
 
 ### 4. Networking Layer
 - Secure VPN via WireGuard & OpenVPN  
-- Nginx Reverse Proxy with automated TLS via Let's Encrypt  
+- NGINX Reverse Proxy with automated TLS via Let's Encrypt  
 - Encrypted server setup using [hetzner-arch-luks](https://github.com/kevinveenbirkenbach/hetzner-arch-luks)  
 
 ### 5. Application Layer
@@ -49,7 +49,7 @@ https://github.com/kevinveenbirkenbach/hetzner-arch-luks
 - Integration of external/legacy services into the platform  
 
 ### 6. Monitoring & Maintenance Layer
-- System health monitoring (BTRFS, Docker, Nginx)  
+- System health monitoring (BTRFS, Docker, NGINX)  
 - Automated backup roles (local/remote)  
 - Maintenance automation (cleanup, update, restart tasks)  
 

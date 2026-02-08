@@ -15,7 +15,7 @@ from cli.meta.applications.resolution.services.resolver import (
 class TestServicesResolverDirect(unittest.TestCase):
     def test_direct_mapping_shared_services_and_desktop(self) -> None:
         cfg = {
-            "docker": {
+            "compose": {
                 "services": {
                     "ldap": {"enabled": True, "shared": True},
                     "oidc": {"enabled": True, "shared": True},
@@ -39,7 +39,7 @@ class TestServicesResolverDirect(unittest.TestCase):
 
     def test_database_missing_type_raises(self) -> None:
         cfg = {
-            "docker": {
+            "compose": {
                 "services": {
                     "database": {"enabled": True, "shared": True},
                 }
@@ -50,7 +50,7 @@ class TestServicesResolverDirect(unittest.TestCase):
 
     def test_non_shared_not_included_except_desktop(self) -> None:
         cfg = {
-            "docker": {
+            "compose": {
                 "services": {
                     "ldap": {"enabled": True, "shared": False},
                     "desktop": {"enabled": True},
@@ -78,14 +78,14 @@ class TestServicesResolverTransitive(unittest.TestCase):
             self._mk_role(
                 root,
                 "web-app-app",
-                "docker:\n  services:\n    oidc:\n      enabled: true\n      shared: true\n",
+                "compose:\n  services:\n    oidc:\n      enabled: true\n      shared: true\n",
             )
             self._mk_role(
                 root,
                 "web-app-keycloak",
-                "docker:\n  services:\n    matomo:\n      enabled: true\n      shared: true\n",
+                "compose:\n  services:\n    matomo:\n      enabled: true\n      shared: true\n",
             )
-            self._mk_role(root, "web-app-matomo", "docker: {}\n")
+            self._mk_role(root, "web-app-matomo", "compose: {}\n")
 
             r = ServicesResolver(root / "roles")
             got = r.resolve_transitively("web-app-app")

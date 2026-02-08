@@ -1,4 +1,4 @@
-docker:
+compose:
   services:
     logout:
       enabled: false
@@ -48,4 +48,3 @@ build_data:
   # This shouldn't be relevant anymore, because the data is anyhow build async in background
   # Enables the building of the meta data which the graph requiers
   enabled:  true
-

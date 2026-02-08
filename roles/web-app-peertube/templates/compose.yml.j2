@@ -1,0 +1,34 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+{% set container_port = 9000 %}
+    image: {{ PEERTUBE_IMAGE }}:{{ PEERTUBE_VERSION }}
+    container_name: {{ PEERTUBE_CONTAINER }}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    ports:
+     - "1935:1935"  # @todo Add to ports
+     - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}" 
+    volumes:
+      - assets:/app/client/dist
+      - data:/data
+      - config:/config
+    environment:
+      - NODE_OPTIONS=--max-old-space-size={{ PEERTUBE_MAX_OLD_SPACE_SIZE }}
+      - PEERTUBE_TRANSCODING_CONCURRENCY={{ PEERTUBE_TRANSCODING_CONCURRENCY }}
+    shm_size: "512m"
+    tmpfs:
+      - /tmp:size=1g,exec
+    ulimits:
+      nofile:
+        soft: 131072
+        hard: 131072
+      nproc:  8192
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={'assets': {}, 'config': {'name': PEERTUBE_CONFIG_VOLUME}, 'data': {'name': PEERTUBE_DATA_VOLUME}}
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

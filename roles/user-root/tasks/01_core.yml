@@ -32,9 +32,9 @@
   vars:
     user_key: "root"
 
-- name: "create {{ PATH_ROOT_SCRIPTS }}"
+- name: "create {{ DIR_SCRIPTS_ROOT }}"
   file:
-    path: "{{ PATH_ROOT_SCRIPTS }}"
+    path: "{{ DIR_SCRIPTS_ROOT }}"
     state: directory
     owner: root
     group: root

@@ -1,11 +1,11 @@
 - name: Check health status of '{{ item }}' container
   shell: |
-    cid=$(docker compose ps -q {{ item }})
-    docker inspect \
+    cid=$({{ BIN_COMPOSE }} ps -q {{ item }})
+    container inspect \
       --format '{{ "{{.State.Health.Status}}" }}' \
       $cid
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: healthcheck
   retries: 60
   delay: 5

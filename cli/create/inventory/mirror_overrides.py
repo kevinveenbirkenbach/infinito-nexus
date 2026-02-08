@@ -40,12 +40,12 @@ def _get_policy(svc_doc: CommentedMap) -> str:
 
 def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
     """
-    Apply docker image mirror overrides to host_vars.
+    Apply compose image mirror overrides to host_vars.
 
     Mirrors file format (YAML or JSON):
       applications:
         <app_id>:
-          docker:
+          compose:
             services:
               <svc>:
                 image: <new-image-base>
@@ -100,7 +100,7 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
         if not isinstance(app_block, dict):
             continue
 
-        docker = app_block.get("docker") or {}
+        docker = app_block.get("compose") or {}
         if not isinstance(docker, dict):
             continue
 
@@ -109,7 +109,7 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
             continue
 
         app_doc = _ensure_ruamel_map(apps_doc, str(app_id))
-        docker_doc = _ensure_ruamel_map(app_doc, "docker")
+        docker_doc = _ensure_ruamel_map(app_doc, "compose")
         services_doc = _ensure_ruamel_map(docker_doc, "services")
 
         for svc_name, svc_block in services.items():

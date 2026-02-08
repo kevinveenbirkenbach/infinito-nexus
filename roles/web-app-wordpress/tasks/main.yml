@@ -20,20 +20,21 @@
     src: upload.ini.j2
     dest: "{{ WORDPRESS_CONFIG_UPLD_ABS }}"
   notify: 
-    - docker compose up
-    - docker compose build
+    - compose up
+    - compose build
 
 - name: "Transfering msmtprc to {{ WORDPRESS_MSMTP_ABS }}"
   template:
     src:  "{{ WORDPRESS_MSMTP_SRC }}"
     dest: "{{ WORDPRESS_MSMTP_ABS }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: Flush handlers to make {{ WORDPRESS_CONFIG_FILE }} available before patch
   meta: flush_handlers
 
 - name: Check if {{ WORDPRESS_CONFIG_FILE }} exists in WordPress
-  command: docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }} test -f {{ WORDPRESS_CONFIG_PATH }}
+  command: >
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }} test -f {{ WORDPRESS_CONFIG_PATH }}
   register: wp_config_file_exists
   changed_when: false
   failed_when: false
@@ -60,7 +61,7 @@
 
 - name: Detect if WordPress is Multisite
   command: >
-    docker exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
+    container exec -u {{ WORDPRESS_USER }} {{ WORDPRESS_CONTAINER }}
     wp eval 'echo (int) is_multisite();' --path={{ WORDPRESS_DOCKER_HTML_PATH }}
   register: wp_is_multisite
   changed_when: false

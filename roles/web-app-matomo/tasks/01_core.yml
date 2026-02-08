@@ -17,13 +17,13 @@
     dest: "{{ MATOMO_BOOTSTRAP_ENV_FILE }}"
     mode: '0640'
     force: yes
-  notify: docker compose up
+  notify: compose up
 
 - name: flush docker service
   meta: flush_handlers
 
 - name: "Matomo install | Wait for Matomo container to be running"
-  command: docker inspect -f '{{ "{{" }}.State.Running{{ "}}" }}' {{ MATOMO_NAME }}
+  command: "container inspect -f '{{ \"{{\" }}.State.Running{{ \"}}\" }}' {{ MATOMO_NAME }}"
   register: matomo_running
   changed_when: false
   retries: 30

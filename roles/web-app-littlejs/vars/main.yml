@@ -1,7 +1,7 @@
 # General
 application_id:             "web-app-littlejs"
 entity_name:                "{{ application_id | get_entity_name }}"
-domain:                     "{{ domains | get_domain(application_id) }}"
+domain:                     "{{ lookup('domain',application_id) }}"
 
 LITTLEJS_HEADLINE:          "LittleJS Playground"
 
@@ -12,7 +12,7 @@ LITTLEJS_REPOSITORY_BASE:   "https://github.com/KilledByAPixel/LittleJS"
 
 # Relative path where sys-stk-full checks out the repo
 LITTLEJS_APP_REL:           "services/repository"
-LITTLEJS_INDEX_HOST_ABS:    "{{ [ docker_compose.directories.volumes, 'index.html' ] | path_join }}"
+LITTLEJS_INDEX_HOST_ABS:    "{{ [ lookup('container', application_id, 'directories.volumes'), 'index.html' ] | path_join }}"
 LITTLEJS_INDEX_HOST_REL:    "volumes/index.html"
 
 # Helper variables
@@ -21,6 +21,5 @@ LITTLEJS_SERVICE:           "{{ entity_name }}"
 LITTLEJS_IMAGE_CUSTOM:      "{{ entity_name }}_custom"
 
 # Runner HTML for non-full examples
-LITTLEJS_RUN_HOST_ABS:      "{{ [ docker_compose.directories.volumes, 'run.html' ] | path_join }}"
+LITTLEJS_RUN_HOST_ABS:      "{{ [ lookup('container', application_id, 'directories.volumes'), 'run.html' ] | path_join }}"
 LITTLEJS_RUN_HOST_REL:      "volumes/run.html"
-

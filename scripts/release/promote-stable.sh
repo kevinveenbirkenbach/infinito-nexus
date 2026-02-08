@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ------------------------------------------------------------
+# SPOT: load global environment from scripts/meta/env.sh
+# ------------------------------------------------------------
+_env_sh="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/meta/env.sh"
+
+if [[ ! -f "${_env_sh}" ]]; then
+  echo "[promote-stable] ERROR: env.sh not found: ${_env_sh}" >&2
+  exit 1
+fi
+
+# shellcheck disable=SC1090
+source "${_env_sh}"
+
+
 : "${GH_TOKEN:?GH_TOKEN is required}"
 : "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}"
 : "${OWNER:?OWNER is required (e.g. github.repository_owner)}"
@@ -45,7 +59,7 @@ ci_succeeded_for_sha() {
         "/repos/${repo}/actions/workflows/${CI_WORKFLOW_PATH}/runs" \
         -f per_page="${CI_PER_PAGE}" \
         -f page="${page}" \
-            | $(PYTHON) -c '
+            | "${PYTHON}" -c '
 import json, os, sys
 target = os.environ["TARGET_SHA"]
 data = json.load(sys.stdin)

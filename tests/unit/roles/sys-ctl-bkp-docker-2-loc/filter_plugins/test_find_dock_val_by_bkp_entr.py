@@ -20,7 +20,7 @@ class TestFindDockValByBkpEntr(unittest.TestCase):
     def setUp(self):
         self.applications = {
             "app1": {
-                "docker": {
+                "compose": {
                     "services": {
                         "svc1": {
                             "name": "svc1",
@@ -41,7 +41,7 @@ class TestFindDockValByBkpEntr(unittest.TestCase):
                 }
             },
             "app2": {
-                "docker": {
+                "compose": {
                     "services": {
                         "svcA": {
                             "name": "svcA",
@@ -110,7 +110,7 @@ class TestFindDockValByBkpEntr(unittest.TestCase):
 
     def test_works_with_missing_field(self):
         # mapped_entry fehlt -> kein Eintrag im Ergebnis
-        apps = {"a": {"docker": {"services": {"x": {"backup": {"enabled": True}}}}}}
+        apps = {"a": {"compose": {"services": {"x": {"backup": {"enabled": True}}}}}}
         result = find_dock_val_by_bkp_entr(apps, "enabled", "foo")
         self.assertEqual(result, [])
 
@@ -118,7 +118,7 @@ class TestFindDockValByBkpEntr(unittest.TestCase):
         # Zwei Treffer, beide mit enabled, mit custom Rückgabefeld
         apps = {
             "a": {
-                "docker": {
+                "compose": {
                     "services": {
                         "x": {"backup": {"enabled": True}, "any": "n1"},
                         "y": {"backup": {"enabled": True}, "any": "n2"},

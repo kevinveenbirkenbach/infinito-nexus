@@ -1,43 +1,43 @@
 - name: Update DB host (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
-    "grep -q \"'host' *=> *'{{ database_host }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
-     { sed -i \"s/'host'\\s*=>\\s*[^,]*,/'host' => '{{ database_host | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+    container exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    "grep -q \"'host' *=> *'{{ lookup('database', application_id, 'host') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
+     { sed -i \"s/'host'\\s*=>\\s*[^,]*,/'host' => '{{ lookup('database', application_id, 'host') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_host_set
   changed_when: "'CHANGED' in db_host_set.stdout"
-  notify: docker compose up
+  notify: compose up
 
 - name: Update DB name (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
-    "grep -q \"'dbname' *=> *'{{ database_name }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
-     { sed -i \"s/'dbname'\\s*=>\\s*[^,]*,/'dbname' => '{{ database_name | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+    container exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    "grep -q \"'dbname' *=> *'{{ lookup('database', application_id, 'name') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
+     { sed -i \"s/'dbname'\\s*=>\\s*[^,]*,/'dbname' => '{{ lookup('database', application_id, 'name') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_name_set
   changed_when: "'CHANGED' in db_name_set.stdout"
-  notify: docker compose up
+  notify: compose up
 
 - name: Update DB user (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
-    "grep -q \"'user' *=> *'{{ database_username }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
-     { sed -i \"s/'user'\\s*=>\\s*[^,]*,/'user' => '{{ database_username | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+    container exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    "grep -q \"'user' *=> *'{{ lookup('database', application_id, 'username') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
+     { sed -i \"s/'user'\\s*=>\\s*[^,]*,/'user' => '{{ lookup('database', application_id, 'username') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_user_set
   changed_when: "'CHANGED' in db_user_set.stdout"
-  notify: docker compose up
+  notify: compose up
 
 - name: Update DB password (idempotent)
   command: >
-    docker exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
-    "grep -q \"'password' *=> *'{{ database_password }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
-     { sed -i \"s/'password'\\s*=>\\s*[^,]*,/'password' => '{{ database_password | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
+    container exec --user root {{ ESPOCRM_CONTAINER }} sh -lc
+    "grep -q \"'password' *=> *'{{ lookup('database', application_id, 'password') }}',\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} ||
+     { sed -i \"s/'password'\\s*=>\\s*[^,]*,/'password' => '{{ lookup('database', application_id, 'password') | sed_escape('/') }}',/\" {{ ESPOCRM_CONFIG_FILE_PRIVATE }} && echo CHANGED; }"
   register: db_pass_set
   changed_when: "'CHANGED' in db_pass_set.stdout"
-  notify: docker compose up
+  notify: compose up
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: Ensure siteUrl matches canonical domain
   ansible.builtin.shell: |
-    {{ docker_compose_command_exec }} -T --user {{ ESPOCRM_USER }} {{ ESPOCRM_SERVICE }} php -r '
+    {{ BIN_COMPOSE }} exec -T --user {{ ESPOCRM_USER }} {{ ESPOCRM_SERVICE }} php -r '
       require "/var/www/html/bootstrap.php";
       $app = new \Espo\Core\Application();
       $c   = $app->getContainer();
@@ -51,6 +51,6 @@
       }
     '
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: siteurl_set
   changed_when: "'CHANGED' in siteurl_set.stdout"

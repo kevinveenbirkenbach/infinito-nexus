@@ -9,8 +9,8 @@ HOURS_SERVER_AWAKE:                           "6..23" # Ours in which the server
 RANDOMIZED_DELAY_SEC:                         "5min"  # Random delay for systemd timers to avoid peak loads.
 
 ## Timeouts for all services
-SYS_TIMEOUT_DOCKER_RPR_HARD:                  "10min"
-SYS_TIMEOUT_DOCKER_RPR_SOFT:                  "{{ SYS_TIMEOUT_DOCKER_RPR_HARD }}"
+SYS_TIMEOUT_CONTAINER_RPR_HARD:                  "10min"
+SYS_TIMEOUT_CONTAINER_RPR_SOFT:                  "{{ SYS_TIMEOUT_CONTAINER_RPR_HARD }}"
 SYS_TIMEOUT_CLEANUP_SERVICES:                 "15min"
 SYS_TIMEOUT_DOCKER_UPDATE:                    "20min"
 SYS_TIMEOUT_STORAGE_OPTIMIZER:                "{{ SYS_TIMEOUT_DOCKER_UPDATE }}"
@@ -22,7 +22,7 @@ SYS_TIMEOUT_BACKUP_SERVICES:                  "60min"
 SYS_SCHEDULE_HEALTH_BTRFS:                    "*-*-* 00:00:00"                        # Check once per day the btrfs for errors
 SYS_SCHEDULE_HEALTH_JOURNALCTL:               "*-*-* 00:00:00"                        # Check once per day the journalctl for errors
 SYS_SCHEDULE_HEALTH_DISC_SPACE:               "*-*-* 06,12,18,00:00:00"               # Check four times per day if there is sufficient disc space 
-SYS_SCHEDULE_HEALTH_DOCKER_CONTAINER:         "*-*-* {{ HOURS_SERVER_AWAKE }}:00:00"  # Check once per hour if the docker containers are healthy
+SYS_SCHEDULE_HEALTH_CONTAINER:         "*-*-* {{ HOURS_SERVER_AWAKE }}:00:00"  # Check once per hour if the docker containers are healthy
 SYS_SCHEDULE_HEALTH_DOCKER_VOLUMES:           "*-*-* {{ HOURS_SERVER_AWAKE }}:00:00"  # Check once per hour if the docker volumes are healthy
 SYS_SCHEDULE_HEALTH_CSP_CRAWLER:              "*-*-* {{ HOURS_SERVER_AWAKE }}:00:00"  # Check once per hour if all CSP are fullfilled available
 SYS_SCHEDULE_HEALTH_NGINX:                    "*-*-* {{ HOURS_SERVER_AWAKE }}:00:00"  # Check once per hour if all webservices are available

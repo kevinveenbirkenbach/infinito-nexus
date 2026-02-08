@@ -1,5 +1,5 @@
 templates:
-{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False)%}
+{% if not lookup('database', application_id, 'shared')%}
   - "templates/postgres.template.yml"
 {% endif %}
   #- "templates/redis.template.yml"
@@ -46,7 +46,7 @@ env:
   UNICORN_WORKERS: 8
 
   ## Required. Discourse will not work with a bare IP number.
-  DISCOURSE_HOSTNAME: {{ domains | get_domain(application_id) }}
+  DISCOURSE_HOSTNAME: {{ lookup('domain',application_id) }}
 
   ## Uncomment if you want the container to be started with the same
   ## hostname (-h option) as specified above (default "$hostname-$config")
@@ -75,10 +75,10 @@ env:
   {% endif %}
 
   # Database Configuration
-  DISCOURSE_DB_USERNAME: {{ database_username }}
-  DISCOURSE_DB_PASSWORD: {{ database_password }}
-  DISCOURSE_DB_HOST:     {{ database_host }}
-  DISCOURSE_DB_NAME:     {{ database_name }}
+  DISCOURSE_DB_USERNAME: {{ lookup('database', application_id, 'username') }}
+  DISCOURSE_DB_PASSWORD: {{ lookup('database', application_id, 'password') }}
+  DISCOURSE_DB_HOST:     {{ lookup('database', application_id, 'host') }}
+  DISCOURSE_DB_NAME:     {{ lookup('database', application_id, 'name') }}
 
   # Redis Configuration
   DISCOURSE_REDIS_HOST: {{ DISCOURSE_REDIS_HOST }}
@@ -96,7 +96,7 @@ env:
 
 {% if DISCOURSE_TLS_SELFSIGNED_ENABLED | bool %}
   CA_TRUST_CERT: {{ CA_ROOT.cert_host }}
-  CA_TRUST_NAME: {{ domains | get_domain(application_id) }}
+  CA_TRUST_NAME: {{ lookup('domain',application_id) }}
 {% endif %}
 
 ## The Docker container is stateless; all data is stored in /shared
@@ -113,8 +113,8 @@ volumes:
       host:   {{ CA_ROOT.cert_host }}
       guest:  {{ CA_ROOT.cert_host }}
   - volume:
-      host:   {{ PATH_CA_TRUST }}
-      guest:  {{ PATH_CA_TRUST }}
+      host:   {{ BIN_CA_TRUST }}
+      guest:  {{ BIN_CA_TRUST }}
 {% endif %}
 
 ## Plugins go here
@@ -139,7 +139,7 @@ run:
   - exec: echo "Beginning of custom commands"
   - exec: rails r "SiteSetting.force_https = {{ DISCOURSE_TLS_ENABLED | bool | string | lower }}"
 {% if DISCOURSE_TLS_SELFSIGNED_ENABLED | bool %}
-  - exec: {{ PATH_CA_TRUST }}
+  - exec: {{ BIN_CA_TRUST }}
 {% endif %}
   ## If you want to set the 'From' email address for your first registration, uncomment and change:
   ## After getting the first signup email, re-comment the line. It only needs to run once.
@@ -153,7 +153,7 @@ run:
   - exec: rails r "SiteSetting.username_change_period = 0" # Deactivate changing of username
 
   # The following code is just an inspiration, how to connect with the oidc account. as long as this is not set the admini account needs to be manually connected with oidc 
-  # docker exec -it {{ DISCOURSE_CONTAINER }} rails runner "user = User.find_by_email('test@infinito.nexus'); UserAuth.create(user_id: user.id, provider: 'oidc', uid: 'eindeutige_oidc_id', info: { name: user.username, email: user.email })"
+  # container exec -it {{ DISCOURSE_CONTAINER }} rails runner "user = User.find_by_email('test@infinito.nexus'); UserAuth.create(user_id: user.id, provider: 'oidc', uid: 'eindeutige_oidc_id', info: { name: user.username, email: user.email })"
 
   # OIDC Activation
   - exec: rails r "SiteSetting.openid_connect_enabled = true"

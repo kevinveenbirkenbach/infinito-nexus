@@ -12,7 +12,7 @@ class TestNoStopRequiredIntegrity(unittest.TestCase):
 
     def test_backup_no_stop_required_consistency(self):
         """
-        Ensure that if `backup.no_stop_required: true` is set for any docker.services[*]:
+        Ensure that if `backup.no_stop_required: true` is set for any compose.services[*]:
           - it's a boolean value
           - the containing service dict has an `image` entry at the same level
         """
@@ -32,7 +32,7 @@ class TestNoStopRequiredIntegrity(unittest.TestCase):
                     continue
 
             # Safely get services dict
-            services = (config.get("docker", {}) or {}).get("services", {}) or {}
+            services = (config.get("compose", {}) or {}).get("services", {}) or {}
 
             for service_key, service in services.items():
                 if not isinstance(service, dict):

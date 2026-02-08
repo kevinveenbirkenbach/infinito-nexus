@@ -2,7 +2,7 @@
   include_role:
     name: sys-stk-full
   vars:
-    domain:     "{{ domains | get_domain(application_id) }}"
+    domain:     "{{ lookup('domain',application_id) }}"
     http_port:  "{{ ports.localhost.http[application_id] }}"
 
 - include_tasks: utils/once/flag.yml

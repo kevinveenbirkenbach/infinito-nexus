@@ -1,0 +1,31 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+{% set service_name = SUITECRM_SERVICE %}
+  {{ service_name }}:
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+    container_name: {{ SUITECRM_CONTAINER }}
+    image: "{{ SUITECRM_CUSTOM_IMAGE }}"
+    init: true
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+    volumes:
+      - data:/var/www/html/
+      - "{{ SUITECRM_PHP_CONFIG_HOST }}:/usr/local/etc/php/conf.d/{{ SUITECRM_WELL_SOFTWARE_NAME }}.ini:ro"
+
+{% if SUITECRM_LDAP_ENABLED | bool %}
+      # Readonly isn't possible for LDAP config, because otherwise file permission script will fail
+      - "{{ SUITECRM_LDAP_CONFIG_HOST }}:{{ SUITECRM_LDAP_EXTENSION_DIR }}/ldap.yaml"
+{% endif %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={'data': {'name': SUITECRM_DATA_VOLUME}}
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

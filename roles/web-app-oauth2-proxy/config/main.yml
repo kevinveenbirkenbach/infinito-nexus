@@ -5,7 +5,7 @@ server:
     canonical:
       - oauth2-proxy.{{ DOMAIN_PRIMARY }}
     aliases: []
-docker:
+compose:
   services:
     logout:
       enabled: true

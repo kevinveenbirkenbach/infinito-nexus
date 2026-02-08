@@ -21,7 +21,7 @@
     - name: "Check policy (RAW with slash) exists"
       no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
       shell: >
-        docker run --rm
+        container run --rm
         -e MC_HOST_minio={{ MINIO_MC_HOST_ENV | quote }}
         {{ MINIO_MC_IMAGE }}
         admin policy info minio {{ MINIO_OIDC_POLICY_NAME | quote }}
@@ -34,7 +34,7 @@
         set -euo pipefail
         printf '%s' '{{ (MINIO_OIDC_POLICY_CONTENT | from_yaml | to_json) | b64encode }}' \
           | base64 -d \
-          | docker run --rm -i \
+          | container run --rm -i \
               -e MC_HOST_minio={{ MINIO_MC_HOST_ENV | quote }} \
               {{ MINIO_MC_IMAGE }} \
               admin policy create minio {{ MINIO_OIDC_POLICY_NAME | quote }} /dev/stdin
@@ -46,4 +46,3 @@
         - mc_policy_info_raw.rc != 0
 
   when: MINIO_OIDC_ENABLED | bool
-

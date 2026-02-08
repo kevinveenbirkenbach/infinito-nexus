@@ -1,6 +1,6 @@
 - name: Validate OpenResty configuration (Pre-Flight-Check)
   ansible.builtin.command: >
-    docker exec {{ OPENRESTY_CONTAINER }} openresty -t -q
+    container exec {{ OPENRESTY_CONTAINER }} openresty -t -q
   register: openresty_test_pre
   changed_when: false
   failed_when: >
@@ -10,7 +10,8 @@
     ('is restarting' not in ((openresty_test_pre.stderr | default('')) | lower))
 
 - name: Restart OpenResty container
-  ansible.builtin.command: docker restart {{ OPENRESTY_CONTAINER }}
+  ansible.builtin.command: >
+    container restart {{ OPENRESTY_CONTAINER }}
   register: openresty_restart
   changed_when: true
   failed_when: >
@@ -24,13 +25,14 @@
 - name: "MODE_DEBUG: wait + validate OpenResty"
   when: MODE_DEBUG | bool
   block:
-    - ansible.builtin.command: docker ps -a --format '{{"{{.Names}} {{.Status}}"}}'
+    - ansible.builtin.command: container ps -a --format '{{"{{.Names}} {{.Status}}"}}'
       register: docker_ps
       changed_when: false
       failed_when: false
       ignore_errors: true
 
-    - ansible.builtin.command: docker logs --tail=200 {{ OPENRESTY_CONTAINER }}
+    - ansible.builtin.command: >
+        container logs --tail=200 {{ OPENRESTY_CONTAINER }}
       register: openresty_logs
       changed_when: false
       failed_when: false

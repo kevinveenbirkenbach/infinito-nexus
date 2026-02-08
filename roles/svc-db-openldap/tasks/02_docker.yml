@@ -1,12 +1,12 @@
-- name: "include docker-compose role"
+- name: "include sys-svc-compose role"
   include_role:
-    name: docker-compose
+    name: sys-svc-compose
   vars:
     docker_compose_flush_handlers:  false
     docker_git_repository_pull:     false
     application_id:                 'svc-db-openldap'
 
-- name: Create docker network
+- name: Create container network
   community.docker.docker_network:
     name: "{{ docker_network_name }}"
     state: present
@@ -19,7 +19,7 @@
 - name: Copy OpenLDAP image files to instance dir
   ansible.builtin.copy:
     src: "{{ item.src }}"
-    dest: "{{ [ docker_compose.directories.instance, item.dest ] | path_join }}"
+    dest: "{{ [ lookup('container', application_id, 'directories.instance'), item.dest ] | path_join }}"
     mode: "{{ item.mode }}"
   loop:
     - { src: "entrypoint.sh",  dest: "entrypoint.sh",  mode: "0755" }
@@ -27,5 +27,5 @@
   loop_control:
     label: "{{ item.dest }}"
 
-- name: "Flush docker compose handlers"
+- name: "Flush compose handlers"
   meta: flush_handlers

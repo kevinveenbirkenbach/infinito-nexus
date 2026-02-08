@@ -72,8 +72,8 @@ class DummyTemplar:
 
 class DummyTlsResolveLookup:
     """
-    Deterministic tls_resolve stub.
-    Emulates: lookup('tls_resolve', app_id, want='url.base') -> 'http(s)://domain/'
+    Deterministic tls stub.
+    Emulates: lookup('tls', app_id, 'url.base') -> 'http(s)://domain/'
     """
 
     def __init__(self, templar):
@@ -81,18 +81,24 @@ class DummyTlsResolveLookup:
 
     def run(self, terms, variables=None, **kwargs):
         variables = variables or {}
-        want = kwargs.get("want", "")
 
-        if not terms or len(terms) != 1:
-            raise AnsibleError("dummy tls_resolve: exactly one term required")
+        # NEW API: want-path is positional (2nd term)
+        if not terms or len(terms) not in (1, 2):
+            raise AnsibleError(
+                "dummy tls: terms must be [app_id] or [app_id, want_path]"
+            )
 
         app_id = str(terms[0]).strip()
         if not app_id:
-            raise AnsibleError("dummy tls_resolve: empty term")
+            raise AnsibleError("dummy tls: empty term")
+
+        want = ""
+        if len(terms) == 2:
+            want = str(terms[1]).strip()
 
         domains = variables.get("domains", {})
         if app_id not in domains:
-            raise AnsibleError(f"dummy tls_resolve: app_id '{app_id}' not in domains")
+            raise AnsibleError(f"dummy tls: app_id '{app_id}' not in domains")
 
         # normalize domain mapping value (string / dict / list)
         domain_val = domains[app_id]
@@ -105,14 +111,14 @@ class DummyTlsResolveLookup:
 
         domain = self._templar.template(domain).strip() if domain else ""
         if not domain:
-            raise AnsibleError(f"dummy tls_resolve: empty domain for '{app_id}'")
+            raise AnsibleError(f"dummy tls: empty domain for '{app_id}'")
 
         tls_enabled = _ansible_bool(variables.get("TLS_ENABLED", True))
         scheme = "https" if tls_enabled else "http"
         base_url = f"{scheme}://{domain}/"
 
         if want and want != "url.base":
-            raise AnsibleError(f"dummy tls_resolve: unsupported want='{want}'")
+            raise AnsibleError(f"dummy tls: unsupported want_path='{want}'")
 
         return [base_url]
 
@@ -148,11 +154,11 @@ galaxy_info:
         with open(meta_main_path, "w", encoding="utf-8") as f:
             f.write(meta_yaml)
 
-        # Patch tls_resolve lookup loader with a deterministic stub
+        # Patch tls lookup loader with a deterministic stub
         self._orig_lookup_get = docker_cards_module.lookup_loader.get
 
         def _patched_get(name, loader=None, templar=None):
-            if name != "tls_resolve":
+            if name != "tls":
                 raise AnsibleError(f"Unexpected lookup requested: {name}")
             return DummyTlsResolveLookup(templar)
 
@@ -170,7 +176,7 @@ galaxy_info:
         return {
             "domains": {"portfolio": "myportfolio.com"},
             "applications": {
-                "portfolio": {"docker": {"services": {"desktop": {"enabled": True}}}}
+                "portfolio": {"compose": {"services": {"desktop": {"enabled": True}}}}
             },
             "group_names": ["portfolio"],
             "TLS_ENABLED": True,

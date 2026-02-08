@@ -26,10 +26,10 @@ class TestCspTogglesRecaptchaHcaptchaCss(unittest.TestCase):
         return []
 
     def _set_service_enabled(self, apps: dict, service: str, enabled: bool):
-        apps["app1"].setdefault("docker", {}).setdefault("services", {}).setdefault(
+        apps["app1"].setdefault("compose", {}).setdefault("services", {}).setdefault(
             service, {}
         )
-        apps["app1"]["docker"]["services"][service]["enabled"] = enabled
+        apps["app1"]["compose"]["services"][service]["enabled"] = enabled
 
     def test_recaptcha_toggle(self):
         apps = copy.deepcopy(self.apps)

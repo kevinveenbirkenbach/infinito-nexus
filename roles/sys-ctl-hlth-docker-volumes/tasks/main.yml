@@ -1,2 +1,0 @@
-- include_tasks: 01_core.yml
-  when: run_once_sys_ctl_hlth_docker_volumes is not defined

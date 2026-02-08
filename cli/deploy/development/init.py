@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from typing import Any, Dict
 
 from .common import make_compose, resolve_deploy_ids_for_app
 from .mirrors import generate_ci_mirrors_file, should_use_mirrors_on_ci
@@ -33,17 +34,22 @@ def _create_inventory(
     include: list[str],
     storage_constrained: bool,
     inventory_dir: str,
+    extra_vars: Dict[str, Any] | None,
 ) -> None:
     if not include:
         raise ValueError("include must not be empty")
 
     inv_root = str(inventory_dir).rstrip("/")
-
     runtime = os.environ.get("RUNTIME") or detect_runtime()
-    overrides = {
+
+    overrides: Dict[str, Any] = {
         "STORAGE_CONSTRAINED": bool(storage_constrained),
         "RUNTIME": runtime,
     }
+
+    # User-provided vars always win
+    if extra_vars:
+        overrides.update(extra_vars)
 
     cmd = [
         "python3",
@@ -71,7 +77,8 @@ def _create_inventory(
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser(
-        "init", help="Create development inventory inside the infinito container."
+        "init",
+        help="Create development inventory inside the infinito container.",
     )
     p.add_argument(
         "--distro",
@@ -89,12 +96,14 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument(
-        "--app", help="Application id (will include run_after deps automatically)."
+        "--app",
+        help="Application id (will include run_after deps automatically).",
     )
     g.add_argument(
         "--include",
         help="Comma-separated list of application ids to include (no deps resolution).",
     )
+
     p.add_argument(
         "--threshold-gib",
         type=int,
@@ -106,6 +115,11 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
         choices=["true", "false"],
         default=None,
         help="Override storage detection explicitly.",
+    )
+    p.add_argument(
+        "--vars",
+        default=None,
+        help="JSON object merged into inventory variables (overrides win).",
     )
     p.set_defaults(_handler=handler)
 
@@ -119,7 +133,17 @@ def handler(args: argparse.Namespace) -> int:
         include = [x.strip() for x in (args.include or "").split(",") if x.strip()]
 
     if not include:
-        raise ValueError("Resolved include list is empty")
+        raise SystemExit("Resolved include list is empty")
+
+    extra_vars: Dict[str, Any] | None = None
+    if args.vars is not None:
+        try:
+            parsed = json.loads(args.vars)
+        except Exception as exc:
+            raise SystemExit(f"--vars must be valid JSON: {exc}")
+        if not isinstance(parsed, dict):
+            raise SystemExit("--vars must be a JSON object")
+        extra_vars = parsed
 
     if args.force_storage_constrained is not None:
         storage_constrained = args.force_storage_constrained == "true"
@@ -133,6 +157,7 @@ def handler(args: argparse.Namespace) -> int:
         include=include,
         storage_constrained=storage_constrained,
         inventory_dir=str(args.inventory_dir),
+        extra_vars=extra_vars,
     )
 
     print(

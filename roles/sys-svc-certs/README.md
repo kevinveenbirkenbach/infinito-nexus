@@ -1,8 +1,8 @@
-# Nginx HTTPS Certificate Retrieval
+# NGINX HTTPS Certificate Retrieval
 
 ## 🔥 Description
 
-This role automates the retrieval of [Let's Encrypt](https://letsencrypt.org/) SSL/TLS certificates using [Certbot](https://certbot.eff.org/) for domains served via Nginx. It supports both single-domain and wildcard certificates, and can use either the DNS or webroot ACME challenge methods.
+This role automates the retrieval of [Let's Encrypt](https://letsencrypt.org/) SSL/TLS certificates using [Certbot](https://certbot.eff.org/) for domains served via NGINX. It supports both single-domain and wildcard certificates, and can use either the DNS or webroot ACME challenge methods.
 
 ## 📖 Overview
 
@@ -17,7 +17,7 @@ Designed for Archlinux systems, this role handles issuing certificates per domai
 
 ## 🎯 Purpose
 
-The Nginx HTTPS Certificate Retrieval role ensures that your Nginx-served domains have valid, automatically issued SSL/TLS certificates, improving web security without manual intervention.
+The NGINX HTTPS Certificate Retrieval role ensures that your NGINX-served domains have valid, automatically issued SSL/TLS certificates, improving web security without manual intervention.
 
 ## 🚀 Features
 

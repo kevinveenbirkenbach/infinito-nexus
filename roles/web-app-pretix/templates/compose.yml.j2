@@ -1,0 +1,23 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+  application:
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+    image: "{{ PRETIX_IMAGE_CUSTOM }}"
+    container_name: "{{ PRETIX_CONTAINER }}"
+    hostname: '{{ PRETIX_HOSTNAME}}'
+    command: ["all"]
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    volumes:
+      - 'data:/data'
+      - 'config:/etc/pretix'
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={'config': {'name': PRETIX_CONFIG_VOLUME}, 'data': {'name': PRETIX_DATA_VOLUME}}
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

@@ -33,4 +33,3 @@
 
 - name: Reset Admin Password
   include_tasks: 06_reset_admin_password.yml
-

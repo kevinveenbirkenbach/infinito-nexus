@@ -1,0 +1,67 @@
+- name: "Find optional Dockerfile for {{ application_id }}"
+  set_fact:
+    dockerfile_src: >-
+      {{ lookup(
+           'first_found',
+           {
+             'files': [
+               application_id | abs_role_path_by_application_id ~ '/templates/Dockerfile.j2',
+               application_id | abs_role_path_by_application_id ~ '/files/Dockerfile'
+             ]
+           },
+           errors='ignore'
+         ) | default('', true)
+      }}
+
+- name: "Create (optional) Dockerfile for {{ application_id }}"
+  template:
+    src:  "{{ dockerfile_src }}"
+    dest: "{{ lookup('container', application_id, 'files.dockerfile') }}"
+    mode: '0640'
+  notify:
+    - compose build
+    - compose up
+  when:
+    - dockerfile_src | default('') | length > 0
+
+- name: "Create (optional) '{{ lookup('container', application_id, 'files.env') }}'"
+  template:
+    src:  "{{ item }}"
+    dest: "{{ lookup('container', application_id, 'files.env') }}"
+    mode: '0640'
+    force: yes
+  notify:
+    - compose up
+    - compose build
+  with_first_found:
+    - files:
+        - "{{ application_id | abs_role_path_by_application_id }}/templates/env.j2"
+        - "{{ application_id | abs_role_path_by_application_id }}/files/env"
+      skip: true
+  register: env_template
+
+- name: "Create (optional) '{{ lookup('container', application_id, 'files.compose_override') }}'"
+  template:
+    src:  "{{ item }}"
+    dest: "{{ lookup('container', application_id, 'files.compose_override') }}"
+    mode: '0640'
+    force: yes
+  notify: compose up
+  with_first_found:
+    - files:
+        - "{{ application_id | abs_role_path_by_application_id }}/templates/compose.override.yml.j2"
+        - "{{ application_id | abs_role_path_by_application_id }}/files/compose.override.yml"
+      skip: true
+
+- name: "Create (optional) '{{ lookup('container', application_id, 'files.compose') }}'"
+  ansible.builtin.template:
+    src:  "{{ item }}"
+    dest: "{{ lookup('container', application_id, 'files.compose') }}"
+    mode: "0640"
+    force: yes
+  with_first_found:
+    - files:
+        - "compose.yml.j2"
+      skip: true
+  register: docker_compose_template
+  notify: compose up

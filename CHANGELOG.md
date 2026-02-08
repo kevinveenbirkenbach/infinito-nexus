@@ -10,7 +10,7 @@ This release delivers a major stability and reliability upgrade across the Infin
 
 * Switched self-signed mode to a **CA-signed certificate chain** with deterministic trust installation
 * Strict SAN planning driven by `CURRENT_PLAY_DOMAINS_ALL`
-* Clean separation of TLS state (`tls_resolve`) and cert paths (`cert_plan`)
+* Clean separation of TLS state (`tls`) and cert paths (`cert`)
 * Faster, safer cert deployment (no global sleeps, deterministic container restarts)
 * Improved domain/alias resolution and strict opt-in auto-alias behavior
 
@@ -89,7 +89,7 @@ This release delivers a major stability and reliability upgrade across the Infin
 * Refactored TLS into a single, explicit resolution layer with SAN-aware certificates
 * Improved Keycloak reliability by handling noisy CLI output without jq
 * Fixed Discourse startup issues by enforcing `C.UTF-8` locale
-* Refactored CSP health checks to operate on full URLs derived from Nginx configs (**breaking change**)
+* Refactored CSP health checks to operate on full URLs derived from NGINX configs (**breaking change**)
 * Improved developer experience with cleaner CLI structure, scripts, and tests
 
 
@@ -198,7 +198,7 @@ https://chatgpt.com/share/695be0b8-9154-800f-8c03-2bcf3daab157
 
 * **CI Debugging:** Greatly improved CI diagnostics by dumping resolved docker compose configuration and environment data in debug mode, with optional unmasked .env output.
 
-* **Bind Mount Robustness:** Fixed CI-specific bind mount issues, ensured /tmp/gh-action visibility, prevented file-vs-directory conflicts, and asserted OpenResty/Nginx mount sources before startup.
+* **Bind Mount Robustness:** Fixed CI-specific bind mount issues, ensured /tmp/gh-action visibility, prevented file-vs-directory conflicts, and asserted OpenResty/NGINX mount sources before startup.
 
 * **Service Orchestration:** Added deferred service execution via system_service_run_final and the new sys-service-terminator, enabling deterministic, end-of-play service execution with built-in rescue diagnostics.
 

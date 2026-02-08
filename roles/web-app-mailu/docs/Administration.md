@@ -5,7 +5,7 @@
 To access the database, use the following command:
 
 ```bash
-docker-compose exec -it database mysql -u root -D mailu -p
+compose exec -it database mysql -u root -D mailu -p
 ```
 
 ## Container Access 🖥️
@@ -13,7 +13,7 @@ docker-compose exec -it database mysql -u root -D mailu -p
 To access the front container, use this command:
 
 ```bash
-docker-compose exec -it front /bin/bash
+compose exec -it front /bin/bash
 ```
 
 ## Restarting Services 🔄
@@ -21,7 +21,7 @@ docker-compose exec -it front /bin/bash
 To restart all services, use the following command:
 
 ```bash
-docker-compose restart
+compose restart
 ```
 
 ## Resending Queued Mails ✉️
@@ -29,7 +29,7 @@ docker-compose restart
 To resend queued mails, use this command:
 
 ```bash
-docker-compose exec -it smtp postqueue -f
+compose exec -it smtp postqueue -f
 ```
 
 # Updates 🔄
@@ -43,11 +43,11 @@ To manage the Postfix email queue in Mailu, you can use the following commands:
 - **Display the email queue**:
 
   ```bash
-  docker compose exec -it smtp postqueue -p
+  compose exec -it smtp postqueue -p
   ```
 
 - **Delete all emails in the queue**:
 
   ```bash
-  docker compose exec -it smtp postsuper -d ALL
+  compose exec -it smtp postsuper -d ALL
   ```

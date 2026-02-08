@@ -38,7 +38,7 @@ class TestOauth2AclMutualExclusion(unittest.TestCase):
 
         if failures:
             self.fail(
-                "The following roles define both whitelist and blacklist under docker.services.oauth2.acl:\n"
+                "The following roles define both whitelist and blacklist under compose.services.oauth2.acl:\n"
                 + "\n".join(failures)
             )
 

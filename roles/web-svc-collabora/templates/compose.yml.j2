@@ -1,0 +1,22 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  collabora:
+    {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ COLLABORA_IMAGE }}:{{ COLLABORA_VERSION }}"
+    container_name: {{ COLLABORA_CONTAINER }}
+    security_opt:
+      - seccomp=unconfined
+      - apparmor=unconfined
+    cap_add:
+      - MKNOD
+      - SYS_CHROOT
+      - SETUID
+      - SETGID
+      - FOWNER
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+{% set container_healthcheck = COLLABORA_DISCOVERY_PATH %}
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

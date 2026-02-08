@@ -20,26 +20,26 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 0
 fi
 
-echo "--- docker version ---"
-docker version 2>&1 || true
+echo "--- container version ---"
+container version 2>&1 || true
 echo
 
-echo "--- docker info (short) ---"
-docker info 2>/dev/null | sed -n '1,120p' || true
+echo "--- container info (short) ---"
+container info 2>/dev/null | sed -n '1,120p' || true
 echo
 
-echo "--- docker ps ---"
+echo "--- container ps ---"
 if [ "${INCLUDE_EXITED}" = "true" ]; then
-  docker ps -a --no-trunc 2>&1 || true
+  container ps -a --no-trunc 2>&1 || true
 else
-  docker ps --no-trunc 2>&1 || true
+  container ps --no-trunc 2>&1 || true
 fi
 echo
 
 if [ "${INCLUDE_EXITED}" = "true" ]; then
-  ids="$(docker ps -aq 2>/dev/null || true)"
+  ids="$(container ps -aq 2>/dev/null || true)"
 else
-  ids="$(docker ps -q 2>/dev/null || true)"
+  ids="$(container ps -q 2>/dev/null || true)"
 fi
 
 if [ -z "${ids}" ]; then
@@ -51,17 +51,17 @@ echo "[docker-diag] Found $(echo "${ids}" | wc -w | tr -d ' ') containers. Dumpi
 echo
 
 for id in ${ids}; do
-  name="$(docker inspect -f '{{.Name}}' "${id}" 2>/dev/null | sed 's#^/##' || true)"
-  status="$(docker inspect -f '{{.State.Status}}' "${id}" 2>/dev/null || true)"
-  health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "${id}" 2>/dev/null || true)"
-  image="$(docker inspect -f '{{.Config.Image}}' "${id}" 2>/dev/null || true)"
+  name="$(container inspect -f '{{.Name}}' "${id}" 2>/dev/null | sed 's#^/##' || true)"
+  status="$(container inspect -f '{{.State.Status}}' "${id}" 2>/dev/null || true)"
+  health="$(container inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "${id}" 2>/dev/null || true)"
+  image="$(container inspect -f '{{.Config.Image}}' "${id}" 2>/dev/null || true)"
 
   echo "------------------------------------------------------------"
   echo ">>> ${name:-<unknown>} (id=${id})"
   echo "    status=${status:-?} health=${health:-n/a}"
   echo "    image=${image:-?}"
   echo "------------------------------------------------------------"
-  docker logs --tail "${TAIL}" "${id}" 2>&1 || true
+  container logs --tail "${TAIL}" "${id}" 2>&1 || true
   echo
 done
 

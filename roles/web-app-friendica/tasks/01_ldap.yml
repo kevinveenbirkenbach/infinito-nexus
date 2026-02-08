@@ -6,4 +6,4 @@
     owner: root
     group: 33
     force: yes
-  notify: docker compose up
+  notify: compose up

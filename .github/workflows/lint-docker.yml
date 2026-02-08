@@ -55,4 +55,3 @@ jobs:
           if warn + err > 0:
             sys.exit(1)
           PY
-

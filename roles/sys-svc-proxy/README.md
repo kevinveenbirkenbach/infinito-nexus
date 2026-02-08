@@ -1,13 +1,13 @@
-# Nginx Docker Reverse Proxy 🚀
+# NGINX Docker Reverse Proxy 🚀
 
 ## Description
 
-This Ansible role deploys **Nginx** as a high-performance [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) in front of Docker-hosted services.  
+This Ansible role deploys **NGINX** as a high-performance [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) in front of Docker-hosted services.  
 It provides automatic TLS integration, WebSocket support, and a flexible templating system for per-application configuration.
 
 ## Overview
 
-Optimised for Arch Linux, the role installs Nginx, prepares opinionated configuration snippets and exposes a simple interface for other roles to drop in new virtual-hosts.  
+Optimised for Arch Linux, the role installs NGINX, prepares opinionated configuration snippets and exposes a simple interface for other roles to drop in new virtual-hosts.  
 It plays well with **Let’s Encrypt**, **OAuth2 Proxy**, and your existing Docker stack.
 
 ## Purpose

@@ -1,4 +1,4 @@
-# Arduino Development Utilities 🔌
+# Arduino Development Utilities
 
 ## Description
 

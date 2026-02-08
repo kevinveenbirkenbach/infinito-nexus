@@ -23,7 +23,7 @@ def main() -> int:
 
     for img in iter_role_images(repo_root):
         app = applications.setdefault(img.role, {})
-        docker = app.setdefault("docker", {})
+        docker = app.setdefault("compose", {})
         services = docker.setdefault("services", {})
 
         services[str(img.service)] = {

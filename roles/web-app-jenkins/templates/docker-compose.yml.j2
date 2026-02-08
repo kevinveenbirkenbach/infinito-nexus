@@ -1,9 +1,0 @@
-{% include 'roles/docker-compose/templates/base.yml.j2' %}
-    application:
-      image: jenkins/jenkins:lts
-{% include 'roles/docker-container/templates/base.yml.j2' %}
-      ports:
-        - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8080"
-      volumes:
-        - jenkins_data:/var/jenkins_home
-{% include 'roles/docker-compose/templates/networks.yml.j2' %}

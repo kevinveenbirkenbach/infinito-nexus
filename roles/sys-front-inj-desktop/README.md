@@ -1,5 +1,5 @@
 
-# 🌐 iFrame Notifier for Nginx
+# 🌐 iFrame Notifier for NGINX
 
 This Ansible role injects a small JavaScript snippet into your HTML responses that enables parent pages to get notified whenever the iframe’s location changes and forces external links to open in a new tab.
 

@@ -7,14 +7,15 @@
 
 - name: Integrate LDAP
   include_tasks: 01_ldap.yml
-  when: applications | get_app_conf(application_id, 'docker.services.ldap.enabled')
+  when: lookup('config',application_id, 'compose.services.ldap.enabled')
 
 # General
 - name: "flush handlers to ensure that '{{ FRIENDICA_CONTAINER }}' is up before executing container tasks"
   meta: flush_handlers
   
 - name: Check if Friendica local.config.php exists
-  command: docker exec --user {{ FRIENDICA_USER }} {{ FRIENDICA_CONTAINER }} test -f {{ FRIENDICA_CONFIG_FILE }}
+  command: >
+    container exec --user {{ FRIENDICA_USER }} {{ FRIENDICA_CONTAINER }} test -f {{ FRIENDICA_CONFIG_FILE }}
   register: friendica_config_exists
   changed_when: false
   failed_when: false

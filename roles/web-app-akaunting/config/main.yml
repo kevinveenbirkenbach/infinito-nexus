@@ -21,7 +21,7 @@ server:
         - "data:"
       connect-src:
         - https://akaunting.com
-docker:
+compose:
   services:
     logout:
       enabled: true
@@ -49,4 +49,3 @@ docker:
   volumes: 
     data: akaunting_data
 credentials: {}
-

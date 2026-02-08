@@ -12,12 +12,12 @@ docker_compose_instance_directory="$2"
 
 # Compose wrapper base command (must include quoting as needed)
 # Example:
-#   compose_cmd="/usr/local/bin/compose --chdir /opt/docker/mailu --project mailu"
+#   compose_cmd="compose --chdir /opt/compose/mailu --project mailu"
 : "${compose_cmd:=}"
 
 if [ -z "$compose_cmd" ]; then
   echo "ERROR: compose_cmd is not set. It must point to the compose wrapper base command." >&2
-  echo "Example: compose_cmd='/usr/local/bin/compose --chdir <dir> --project <name>'" >&2
+  echo "Example: compose_cmd='compose --chdir <dir> --project <name>'" >&2
   exit 1
 fi
 
@@ -59,7 +59,7 @@ chmod a+r -v "${docker_compose_cert_directory}/"* || exit 1
 cd "$docker_compose_instance_directory" || exit 1
 
 # List services via wrapper to ensure correct -p/-f/--env-file stack is used
-# IMPORTANT: use "--" to stop wrapper arg parsing (so docker compose flags like "--services" are passed through)
+# IMPORTANT: use "--" to stop wrapper arg parsing (so compose flags like "--services" are passed through)
 services="$(sh -c "$compose_cmd -- ps --services")"
 
 restart_services=""

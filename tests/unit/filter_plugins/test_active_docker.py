@@ -21,7 +21,7 @@ class TestActiveDockerFilter(unittest.TestCase):
         self.apps = {
             # counted (prefix web-/svc- AND in group_names)
             "web-app-jira": {
-                "docker": {
+                "compose": {
                     "services": {
                         "jira": {"enabled": True},
                         "proxy": {},  # enabled undefined -> counts
@@ -30,14 +30,14 @@ class TestActiveDockerFilter(unittest.TestCase):
                 }
             },
             "web-app-confluence": {
-                "docker": {
+                "compose": {
                     "services": {
                         "confluence": {"enabled": True},
                     }
                 }
             },
             "svc-db-postgres": {
-                "docker": {
+                "compose": {
                     "services": {
                         "postgres": {"enabled": True},
                         "backup": {"enabled": False},  # no
@@ -45,7 +45,7 @@ class TestActiveDockerFilter(unittest.TestCase):
                 }
             },
             "svc-ai-ollama": {
-                "docker": {
+                "compose": {
                     "services": {
                         # non-dict service cfg (string) -> should count as "enabled"
                         "ollama": "ghcr.io/ollama/ollama:latest",
@@ -53,7 +53,7 @@ class TestActiveDockerFilter(unittest.TestCase):
                 }
             },
             "web-svc-cdn": {
-                "docker": {
+                "compose": {
                     "services": {
                         # weird truthy value -> treated as enabled
                         "cdn": {"enabled": "yes"},
@@ -61,9 +61,11 @@ class TestActiveDockerFilter(unittest.TestCase):
                 }
             },
             # NOT counted: wrong prefix
-            "db-core-mariadb": {"docker": {"services": {"mariadb": {"enabled": True}}}},
+            "db-core-mariadb": {
+                "compose": {"services": {"mariadb": {"enabled": True}}}
+            },
             # NOT counted: not in group_names
-            "web-app-gitlab": {"docker": {"services": {"gitlab": {"enabled": True}}}},
+            "web-app-gitlab": {"compose": {"services": {"gitlab": {"enabled": True}}}},
             # NOT counted: missing docker/services
             "web-app-empty": {},
         }
@@ -96,7 +98,7 @@ class TestActiveDockerFilter(unittest.TestCase):
     def test_not_in_group_names_excluded(self):
         # Add a matching app but omit from group_names → should not count
         apps = dict(self.apps)
-        apps["web-app-pixelfed"] = {"docker": {"services": {"pix": {"enabled": True}}}}
+        apps["web-app-pixelfed"] = {"compose": {"services": {"pix": {"enabled": True}}}}
         cnt = active_docker_container_count(apps, self.group_names)
         # stays 6
         self.assertEqual(cnt, 6)
@@ -116,21 +118,21 @@ class TestActiveDockerFilter(unittest.TestCase):
     def test_enabled_false_excluded(self):
         # Ensure explicit false is excluded
         apps = dict(self.apps)
-        apps["web-app-jira"]["docker"]["services"]["only_false"] = {"enabled": False}
+        apps["web-app-jira"]["compose"]["services"]["only_false"] = {"enabled": False}
         cnt = active_docker_container_count(apps, self.group_names)
         self.assertEqual(cnt, 6)  # unchanged
 
     def test_enabled_truthy_string_included(self):
         # Already covered by web-svc-cdn ("yes"), but verify explicitly
         apps = dict(self.apps)
-        apps["web-app-confluence"]["docker"]["services"]["extra"] = {"enabled": "true"}
+        apps["web-app-confluence"]["compose"]["services"]["extra"] = {"enabled": "true"}
         cnt = active_docker_container_count(apps, self.group_names)
         self.assertEqual(cnt, 7)
 
     def test_ensure_min_one(self):
         # Construct inputs that produce zero
         apps = {
-            "web-app-foo": {"docker": {"services": {"s": {"enabled": False}}}},
+            "web-app-foo": {"compose": {"services": {"s": {"enabled": False}}}},
         }
         cnt0 = active_docker_container_count(apps, ["web-app-foo"])
         cnt1 = active_docker_container_count(apps, ["web-app-foo"], ensure_min_one=True)

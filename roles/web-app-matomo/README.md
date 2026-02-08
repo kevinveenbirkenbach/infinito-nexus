@@ -6,7 +6,7 @@ Experience the power of Matomo, an innovative open-source analytics platform tha
 
 ## Overview
 
-This role deploys Matomo using Docker, automating the setup of your analytics platform along with its underlying database. With support for health checks, persistent storage for configuration and data, and integration with an Nginx reverse proxy, Matomo is configured to provide reliable and scalable analytics for your digital presence.
+This role deploys Matomo using Docker, automating the setup of your analytics platform along with its underlying database. With support for health checks, persistent storage for configuration and data, and integration with an NGINX reverse proxy, Matomo is configured to provide reliable and scalable analytics for your digital presence.
 
 ## Features
 

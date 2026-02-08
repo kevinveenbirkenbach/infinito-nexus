@@ -19,4 +19,3 @@ jobs:
             koalaman/shellcheck:latest \
             -x $(find . -type f -name '*.sh' -print)
 
-

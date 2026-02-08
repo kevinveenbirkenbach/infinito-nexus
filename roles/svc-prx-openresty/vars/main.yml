@@ -4,4 +4,4 @@ application_id:       "svc-prx-openresty"
 # Openresty
 OPENRESTY_IMAGE:      "openresty/openresty"
 OPENRESTY_VERSION:    "alpine"
-OPENRESTY_CONTAINER:  "{{ applications | get_app_conf('svc-prx-openresty', 'docker.services.openresty.name') }}"
+OPENRESTY_CONTAINER:  "{{ lookup('config','svc-prx-openresty', 'compose.services.openresty.name') }}"

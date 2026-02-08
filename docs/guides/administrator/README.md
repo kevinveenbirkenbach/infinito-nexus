@@ -12,11 +12,11 @@ Follow these guides to install and configure Infinito.Nexus:
 - **User Management** - Configure LDAP, Keycloak, and user permissions.
 - **Security & Backups** - Set up `sys-bkp-rmt-2-loc`, `svc-bkp-loc-2-usb`, and `core-security` roles.
 - **Application Hosting** - Deploy services like `Nextcloud`, `Matrix`, `Gitea`, and more.
-- **Networking & VPN** - Configure `WireGuard`, `OpenVPN`, and `Nginx Reverse Proxy`.
+- **Networking & VPN** - Configure `WireGuard`, `OpenVPN`, and `NGINX Reverse Proxy`.
 
 ## Managing & Updating Infinito.Nexus 🔄
 - Regularly update services using `update-pacman`, or `update-apt`.
-- Monitor system health with `sys-ctl-hlth-btrfs`, `sys-ctl-hlth-webserver`, and `sys-ctl-hlth-docker-container`.
-- Automate system maintenance with `sys-lock`, `sys-ctl-cln-bkps`, and `sys-ctl-rpr-docker-hard`.
+- Monitor system health with `sys-ctl-hlth-btrfs`, `sys-ctl-hlth-webserver`, and `sys-ctl-hlth-container`.
+- Automate system maintenance with `sys-lock`, `sys-ctl-cln-bkps`, and `sys-ctl-rpr-container-hard`.
 
 For more details, refer to the specific guides above.

@@ -9,7 +9,7 @@
     src:    "{{ CHESS_ENTRYPOINT_FILE }}"
     dest:   "{{ CHESS_ENTRYPOINT_ABS }}"
   notify: 
-    - docker compose build
+    - compose build
 
 - meta: flush_handlers
 

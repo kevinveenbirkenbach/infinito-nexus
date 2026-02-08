@@ -22,4 +22,4 @@
       # Defensive: ensure URLs default to http in this process
       Rails.application.routes.default_url_options[:protocol] = "http"
   when: MASTODON_HTTP_ONLY_ENABLED | bool
-  notify: docker compose up
+  notify: compose up

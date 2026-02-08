@@ -1,6 +1,6 @@
 
-- name: "Setup docker network for {{ application_id }}"
-  include_tasks: "{{ [playbook_dir, 'roles/docker-compose/tasks/utils/network.yml' ] | path_join }}"
+- name: "Setup container network for {{ application_id }}"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
     docker_network_name:            "{{ OLLAMA_NETWORK }}"
     docker_network_subnet:          "{{ networks.local[application_id].subnet }}"
@@ -8,7 +8,7 @@
 
 - name: Pre-pull Ollama models
   vars:
-    _cmd: "docker exec -i {{ OLLAMA_CONTAINER }} ollama pull {{ model }}"
+    _cmd: "container exec -i {{ OLLAMA_CONTAINER }} ollama pull {{ model }}"
   shell: "{{ _cmd }}"
   register: pull_result
   loop: "{{ OLLAMA_PRELOAD_MODELS }}"

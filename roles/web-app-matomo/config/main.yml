@@ -24,7 +24,7 @@ server:
     aliases: []
 excluded_ips: "{{ networks.internet.values() | list }}"
 
-docker:
+compose:
   services:
     oauth2:
       enabled: false

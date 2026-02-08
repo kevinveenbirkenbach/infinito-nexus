@@ -1,5 +1,3 @@
-DATABASE_VARS_FILE:               "{{ playbook_dir }}/roles/sys-svc-rdbms/vars/database.yml"
-
 # Declared as extra variable for debugging purposes
 SYS_STK_BACKEND_DATABASE_ENABLED: "{{ applications | service_load_enabled(application_id, 'database', False) }}"
-SYS_STK_BACKEND_OAUTH2_ENABLED:   "{{ applications | get_app_conf(application_id, 'docker.services.oauth2.enabled', False) }}"
+SYS_STK_BACKEND_OAUTH2_ENABLED:   "{{ lookup('config',application_id, 'compose.services.oauth2.enabled', False) }}"

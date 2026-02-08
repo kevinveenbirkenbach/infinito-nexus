@@ -5,27 +5,27 @@ container_port:                     80
 entity_name:                        "{{ application_id | get_entity_name }}"
 
 # Database
-database_password:                  "{{ applications | get_app_conf(application_id, 'credentials.database_password') }}"
+database_password:                  "{{ lookup('config', application_id, 'credentials.database_password') }}"
 
 # Nextcloud 
 
 ## General 
-NEXTCLOUD_DOMAIN:                   "{{ domains | get_domain(application_id) }}"
+NEXTCLOUD_DOMAIN:                   "{{ lookup('domain',application_id) }}"
 NEXTCLOUD_PORT:                     "{{ ports.localhost.http[application_id] }}"
-NEXTCLOUD_URL:                      "{{ lookup('tls_resolve', application_id, want='url.base') }}"
-NEXTCLOUD_PROTOCOL:                 "{{ lookup('tls_resolve', application_id, want='protocols.web') }}"
+NEXTCLOUD_URL:                      "{{ lookup('tls', application_id, 'url.base') }}"
+NEXTCLOUD_PROTOCOL:                 "{{ lookup('tls', application_id, 'protocols.web') }}"
 NEXTCLOUD_TRUSTED_PROXIES:          "{{ networks.internet.values() | select }}"
 
 ## Plugins
-NEXTCLOUD_PLUGIN_ITEMS:             "{{ applications | get_app_conf(application_id, 'plugins') | dict2items }}"
-NEXTCLOUD_PLUGINS_ENABLED:          "{{ applications | get_app_conf(application_id, 'plugins_enabled') }}"
+NEXTCLOUD_PLUGIN_ITEMS:             "{{ lookup('config', application_id, 'plugins') | dict2items }}"
+NEXTCLOUD_PLUGINS_ENABLED:          "{{ lookup('config', application_id, 'plugins_enabled') }}"
 
 ## Paths
 
 ### Host
-NEXTCLOUD_HOST_CONF_ADD_PATH:       "{{ [ docker_compose.directories.volumes, 'infinito' ] | path_join }}"      # This folder is the path to which the additive configurations will be copied
-NEXTCLOUD_HOST_INCL_PATH:           "{{ [ docker_compose.directories.volumes, 'includes.php' ] | path_join }}"  # Path to the instruction file on the host. Responsible for loading the additional configurations
-NEXTCLOUD_HOST_NGINX_PATH:          "{{ [ docker_compose.directories.volumes, 'nginx.conf' ] | path_join }}"    # Path where the internal Nextcloud NGinx config on the host server is stored
+NEXTCLOUD_HOST_CONF_ADD_PATH:       "{{ [ lookup('container', application_id, 'directories.volumes'), 'infinito' ] | path_join }}"      # This folder is the path to which the additive configurations will be copied
+NEXTCLOUD_HOST_INCL_PATH:           "{{ [ lookup('container', application_id, 'directories.volumes'), 'includes.php' ] | path_join }}"  # Path to the instruction file on the host. Responsible for loading the additional configurations
+NEXTCLOUD_HOST_NGINX_PATH:          "{{ [ lookup('container', application_id, 'directories.volumes'), 'nginx.conf' ] | path_join }}"    # Path where the internal Nextcloud NGinx config on the host server is stored
 
 ## Control Node
 NEXTCLOUD_CNODE_PLUGIN_VARS_PATH:   "{{ [role_path, 'vars/plugins/'] | path_join }}"                            # Folder in which the files for the plugin configuration are stored
@@ -39,44 +39,44 @@ NEXTCLOUD_DOCKER_CONF_ADD_PATH:     "{{ [ NEXTCLOUD_DOCKER_CONF_DIRECTORY, 'infi
 NEXTCLOUD_DOCKER_INCL_PATH:         "/tmp/includes.php"                                                   # Path to the temporary file which will be included to the config.php to load the additional configurations
 
 ## Administrator
-NEXTCLOUD_ADMINISTRATOR_PASSWORD:   "{{ applications | get_app_conf(application_id, 'credentials.administrator_password') }}"
-NEXTCLOUD_ADMINISTRATOR_USERNAME:   "{{ applications | get_app_conf(application_id, 'users.administrator.username') }}"
+NEXTCLOUD_ADMINISTRATOR_PASSWORD:   "{{ lookup('config', application_id, 'credentials.administrator_password') }}"
+NEXTCLOUD_ADMINISTRATOR_USERNAME:   "{{ lookup('config', application_id, 'users.administrator.username') }}"
 
 ## Docker
 
 ### Base
-NEXTCLOUD_VOLUME:                   "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+NEXTCLOUD_VOLUME:                   "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 NEXTCLOUD_SERVICE:                  "{{ entity_name }}"
-NEXTCLOUD_VERSION:                  "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.version') }}"
-NEXTCLOUD_IMAGE:                    "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.image') }}"
-NEXTCLOUD_CONTAINER:                "{{ applications | get_app_conf(application_id, 'docker.services.'~ NEXTCLOUD_SERVICE ~'.name') }}"
+NEXTCLOUD_VERSION:                  "{{ lookup('config', application_id, 'compose.services.'~ NEXTCLOUD_SERVICE ~'.version') }}"
+NEXTCLOUD_IMAGE:                    "{{ lookup('config', application_id, 'compose.services.'~ NEXTCLOUD_SERVICE ~'.image') }}"
+NEXTCLOUD_CONTAINER:                "{{ lookup('config', application_id, 'compose.services.'~ NEXTCLOUD_SERVICE ~'.name') }}"
 NEXTCLOUD_CUSTOM_IMAGE:             "{{ entity_name }}_custom:{{ NEXTCLOUD_VERSION }}"
 
 ### Proxy
 NEXTCLOUD_PROXY_SERVICE:              "proxy"
-NEXTCLOUD_PROXY_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.name') }}"
-NEXTCLOUD_PROXY_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.image') }}"
-NEXTCLOUD_PROXY_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.version') }}"
+NEXTCLOUD_PROXY_CONTAINER:            "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.name') }}"
+NEXTCLOUD_PROXY_IMAGE:                "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.image') }}"
+NEXTCLOUD_PROXY_VERSION:              "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_PROXY_SERVICE ~ '.version') }}"
 
 ### Cron
 NEXTCLOUD_CRON_SERVICE:               "cron"
-NEXTCLOUD_CRON_CONTAINER:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_CRON_SERVICE ~ '.name') }}"
+NEXTCLOUD_CRON_CONTAINER:             "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_CRON_SERVICE ~ '.name') }}"
 
 ### High Performance Backend for Talk
 # https://github.com/nextcloud-snap/nextcloud-snap/wiki/How-to-configure-talk-HPB-with-Docker
 
 #### General
 NEXTCLOUD_HPB_SERVICE:                      "talk"
-NEXTCLOUD_HPB_CONTAINER:                    "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.name') }}"
-NEXTCLOUD_HPB_IMAGE:                        "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.image') }}"
-NEXTCLOUD_HPB_VERSION:                      "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.version') }}"
-NEXTCLOUD_HPB_NETWORK_MODE:                 "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.network_mode') }}"
-NEXTCLOUD_HPB_PLUGIN_ENABLED:               "{{ applications | get_app_conf(application_id, 'plugins.spreed.enabled') }}"
-NEXTCLOUD_HPB_INTERNAL_SECRET:              "{{ applications | get_app_conf(application_id, 'credentials.talk_internal_secret') }}"
+NEXTCLOUD_HPB_CONTAINER:                    "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.name') }}"
+NEXTCLOUD_HPB_IMAGE:                        "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.image') }}"
+NEXTCLOUD_HPB_VERSION:                      "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.version') }}"
+NEXTCLOUD_HPB_NETWORK_MODE:                 "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.network_mode') }}"
+NEXTCLOUD_HPB_PLUGIN_ENABLED:               "{{ lookup('config', application_id, 'plugins.spreed.enabled') }}"
+NEXTCLOUD_HPB_INTERNAL_SECRET:              "{{ lookup('config', application_id, 'credentials.talk_internal_secret') }}"
 NEXTCLOUD_HPB_DOMAIN:                       "{{ NEXTCLOUD_DOMAIN }}"
 
 #### Signaling
-NEXTCLOUD_HPB_SIGNALING_SECRET:              "{{ applications | get_app_conf(application_id, 'credentials.talk_signaling_secret') }}"
+NEXTCLOUD_HPB_SIGNALING_SECRET:              "{{ lookup('config', application_id, 'credentials.talk_signaling_secret') }}"
 NEXTCLOUD_HPB_SIGNALING_LOCATION:            "/standalone-signaling/"
 NEXTCLOUD_HPB_SIGNALING_PORT:                "8081"
 NEXTCLOUD_HPB_SIGNALING_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_HPB_SIGNALING_LOCATION ] | url_join }}"
@@ -84,8 +84,8 @@ NEXTCLOUD_HPB_SIGNALING_ENABLED:             "{{ NEXTCLOUD_HPB_PLUGIN_ENABLED }}
 
 #### Talk Turn (Onboard)
 NEXTCLOUD_HPB_TURN_ONBOARD_PORT:             "{{ ports.public.stun_turn[application_id] }}"
-NEXTCLOUD_HPB_TURN_ONBOARD_ENABLED:          "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.turn_server.onboard_enabled') if NEXTCLOUD_HPB_PLUGIN_ENABLED else false }}"
-NEXTCLOUD_HPB_TURN_ONBOARD_SECRET:           "{{ applications | get_app_conf(application_id, 'credentials.talk_turn_secret') }}"
+NEXTCLOUD_HPB_TURN_ONBOARD_ENABLED:          "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_HPB_SERVICE ~ '.turn_server.onboard_enabled') if NEXTCLOUD_HPB_PLUGIN_ENABLED else false }}"
+NEXTCLOUD_HPB_TURN_ONBOARD_SECRET:           "{{ lookup('config', application_id, 'credentials.talk_turn_secret') }}"
 NEXTCLOUD_HPB_TURN_ONBOARD_RELAY_PORT_START: "{{ ports.public.relay_port_ranges[application_id ~ '_start'] }}"
 NEXTCLOUD_HPB_TURN_ONBOARD_RELAY_PORT_END:   "{{ ports.public.relay_port_ranges[application_id ~ '_end'  ] }}"
 NEXTCLOUD_HPB_STUN_ONBOARD_CONFIG:           "{{ NEXTCLOUD_HPB_DOMAIN }}:{{ NEXTCLOUD_HPB_TURN_ONBOARD_PORT }}"
@@ -102,9 +102,9 @@ NEXTCLOUD_HPB_TURN_ONBOARD_CONFIG: >-
 #### Coturn (Standalone)
 NEXTCLOUD_HPB_TURN_STANDALONE_ROLE:          'web-svc-coturn'
 NEXTCLOUD_HPB_TURN_STANDALONE_PORT:          "{{ ports.public.stun_turn[NEXTCLOUD_HPB_TURN_STANDALONE_ROLE] }}"
-NEXTCLOUD_HPB_TURN_STANDALONE_SECRET:        "{{ applications | get_app_conf(NEXTCLOUD_HPB_TURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
-NEXTCLOUD_HPB_TURN_STANDALONE_ENABLED:       "{{ applications | get_app_conf(application_id, 'docker.services.talk.turn_server.standalone_enabled') if NEXTCLOUD_HPB_PLUGIN_ENABLED else false }}"
-NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN:        "{{ domains | get_domain(NEXTCLOUD_HPB_TURN_STANDALONE_ROLE) }}"
+NEXTCLOUD_HPB_TURN_STANDALONE_SECRET:        "{{ lookup('config',NEXTCLOUD_HPB_TURN_STANDALONE_ROLE, 'credentials.auth_secret') }}"
+NEXTCLOUD_HPB_TURN_STANDALONE_ENABLED:       "{{ lookup('config', application_id, 'compose.services.talk.turn_server.standalone_enabled') if NEXTCLOUD_HPB_PLUGIN_ENABLED else false }}"
+NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN:        "{{ lookup('domain',NEXTCLOUD_HPB_TURN_STANDALONE_ROLE) }}"
 NEXTCLOUD_HPB_STUN_STANDALONE_CONFIG:        "{{ NEXTCLOUD_HPB_TURN_STANDALONE_DOMAIN }}:{{ NEXTCLOUD_HPB_TURN_STANDALONE_PORT }}"
 NEXTCLOUD_HPB_TURN_STANDALONE_CONFIG: >-
   {{
@@ -118,37 +118,37 @@ NEXTCLOUD_HPB_TURN_STANDALONE_CONFIG: >-
 
 ### Whiteboard
 NEXTCLOUD_WHITEBOARD_SERVICE:             "whiteboard"
-NEXTCLOUD_WHITEBOARD_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.name') }}"
-NEXTCLOUD_WHITEBOARD_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.image') }}"
+NEXTCLOUD_WHITEBOARD_CONTAINER:           "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.name') }}"
+NEXTCLOUD_WHITEBOARD_IMAGE:               "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.image') }}"
 NEXTCLOUD_WHITEBOARD_IMAGE_CUSTOM:        "{{ NEXTCLOUD_WHITEBOARD_CONTAINER }}_custom"
-NEXTCLOUD_WHITEBOARD_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.version') }}"
-NEXTCLOUD_WHITEBOARD_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.enabled') }}"
+NEXTCLOUD_WHITEBOARD_VERSION:             "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.version') }}"
+NEXTCLOUD_WHITEBOARD_ENABLED:             "{{ lookup('config', application_id, 'plugins.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'.enabled') }}"
 NEXTCLOUD_WHITEBOARD_PORT_INTERNAL:       "3002"
-NEXTCLOUD_WHITEBOARD_JWT:                 "{{ applications | get_app_conf(application_id, 'credentials.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'_jwt_secret') }}"
+NEXTCLOUD_WHITEBOARD_JWT:                 "{{ lookup('config', application_id, 'credentials.' ~ NEXTCLOUD_WHITEBOARD_SERVICE ~'_jwt_secret') }}"
 NEXTCLOUD_WHITEBOARD_LOCATION:            "/whiteboard/"
 NEXTCLOUD_WHITEBOARD_URL:                 "{{ [ NEXTCLOUD_URL, NEXTCLOUD_WHITEBOARD_LOCATION ] | url_join }}"
-NEXTCLOUD_WHITEBOARD_TMP_VOLUME:          "{{ applications | get_app_conf(application_id, 'docker.volumes.whiteboard_tmp') }}"
-NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME:   "{{ applications | get_app_conf(application_id, 'docker.volumes.whiteboard_fontcache') }}"
-NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY:   "{{ [ docker_compose.directories.services, 'whiteboard' ] | path_join }}"
+NEXTCLOUD_WHITEBOARD_TMP_VOLUME:          "{{ lookup('config', application_id, 'compose.volumes.whiteboard_tmp') }}"
+NEXTCLOUD_WHITEBOARD_FRONTCACHE_VOLUME:   "{{ lookup('config', application_id, 'compose.volumes.whiteboard_fontcache') }}"
+NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY:   "{{ [ lookup('container', application_id, 'directories.services'), 'whiteboard' ] | path_join }}"
 NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE:  "{{ [ NEXTCLOUD_WHITEBOARD_SERVICE_DIRECTORY, 'Dockerfile' ] | path_join }}"
 NEXTCLOUD_WHITEBOARD_MAX_OLD_SPACE_SIZE:  "{{ applications | node_max_old_space_size(application_id, NEXTCLOUD_WHITEBOARD_SERVICE) }}"
 
 ### Talk Recording backend
 NEXTCLOUD_RECORDING_SERVICE:              "talk_recording"
-NEXTCLOUD_RECORDING_CONTAINER:            "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.name') }}"
-NEXTCLOUD_RECORDING_IMAGE:                "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.image') }}"
-NEXTCLOUD_RECORDING_VERSION:              "{{ applications | get_app_conf(application_id, 'docker.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.version') }}"
+NEXTCLOUD_RECORDING_CONTAINER:            "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.name') }}"
+NEXTCLOUD_RECORDING_IMAGE:                "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.image') }}"
+NEXTCLOUD_RECORDING_VERSION:              "{{ lookup('config', application_id, 'compose.services.' ~ NEXTCLOUD_RECORDING_SERVICE ~ '.version') }}"
 NEXTCLOUD_RECORDING_ENABLED:              "{{ NEXTCLOUD_HPB_PLUGIN_ENABLED }}"
 NEXTCLOUD_RECORDING_PORT:                 1234
-NEXTCLOUD_RECORDING_SECRET:               "{{ applications | get_app_conf(application_id, 'credentials.talk_recording_secret') }}"
-NEXTCLOUD_RECORDING_TMP_VOLUME:           "{{ applications | get_app_conf(application_id, 'docker.volumes.talk_recording_tmp') }}"
+NEXTCLOUD_RECORDING_SECRET:               "{{ lookup('config', application_id, 'credentials.talk_recording_secret') }}"
+NEXTCLOUD_RECORDING_TMP_VOLUME:           "{{ lookup('config', application_id, 'compose.volumes.talk_recording_tmp') }}"
 
 ### Collabora
-NEXTCLOUD_COLLABORA_URL:                  "{{ lookup('tls_resolve', 'web-svc-collabora', want='url.base') }}"
+NEXTCLOUD_COLLABORA_URL:                  "{{ lookup('tls', 'web-svc-collabora', 'url.base') }}"
 
 ### OnlyOffice
-NEXTCLOUD_ONLYOFFICE_URL:                 "{{ lookup('tls_resolve', 'web-svc-onlyoffice', want='url.base') }}"
-NEXTCLOUD_ONLYOFFICE_ENABLED:             "{{ applications | get_app_conf(application_id, 'plugins.onlyoffice.enabled') }}"
+NEXTCLOUD_ONLYOFFICE_URL:                 "{{ lookup('tls', 'web-svc-onlyoffice', 'url.base') }}"
+NEXTCLOUD_ONLYOFFICE_ENABLED:             "{{ lookup('config', application_id, 'plugins.onlyoffice.enabled') }}"
 
 ## User Configuration
 NEXTCLOUD_DOCKER_USER_ID:                 82         # UID of the www-data user
@@ -156,7 +156,7 @@ NEXTCLOUD_DOCKER_USER:                    "www-data" # Name of the www-data user
 
 ## Execution
 NEXTCLOUD_INTERNAL_OCC_COMMAND:           "{{ [ NEXTCLOUD_DOCKER_WORK_DIRECTORY, 'occ'] | path_join }}"
-NEXTCLOUD_DOCKER_EXEC:                    "docker exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}"  # General execute composition
+NEXTCLOUD_DOCKER_EXEC:                    "container exec -u {{ NEXTCLOUD_DOCKER_USER }} {{ NEXTCLOUD_CONTAINER }}"  # General execute composition
 NEXTCLOUD_DOCKER_EXEC_OCC:                "{{ NEXTCLOUD_DOCKER_EXEC }} {{ NEXTCLOUD_INTERNAL_OCC_COMMAND }}"      # Execute docker occ command
 
 ## Redis

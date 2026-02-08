@@ -1,14 +1,14 @@
-{# This template needs to be included in docker-compose.yml, which depend on a postgres database #}
+{# This template needs to be included in compose.yml, which depend on a postgres database #}
 
-{% if not applications | get_app_conf(application_id, 'docker.services.database.shared', False) %}  
-  {{ database_host }}:
-    image: {{ database_image }}:{{ database_version }}
+{% if not lookup('database', application_id, 'shared') %}  
+  {{ lookup('database', application_id, 'host') }}:
+    image: {{ lookup('database', application_id, 'image') }}:{{ lookup('database', application_id, 'version') }}
     container_name: {{ application_id | get_entity_name }}-database
     env_file:
-      - {{ database_env }}
+      - {{ lookup('database', application_id, 'env') }}
     restart: {{ DOCKER_RESTART_POLICY }}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {{ database_username }}"]
+      test: ["CMD-SHELL", "pg_isready -U {{ lookup('database', application_id, 'username') }}"]
       interval: 10s
       timeout: 5s
       retries: 6

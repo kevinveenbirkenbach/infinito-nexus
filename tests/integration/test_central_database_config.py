@@ -15,7 +15,7 @@ def load_yaml(path: Path):
 def has_nested_key(data: object, dotted_key: str) -> bool:
     """
     Return True if a dotted path exists in a nested dict structure.
-    Example: has_nested_key(cfg, "docker.services.database.shared")
+    Example: has_nested_key(cfg, "compose.services.database.shared")
     """
     if not isinstance(data, dict):
         return False
@@ -33,8 +33,8 @@ def has_nested_key(data: object, dotted_key: str) -> bool:
 class TestCentralDatabaseConfig(unittest.TestCase):
     def test_central_database_feature_requires_database_service(self):
         """
-        If docker.services.database.shared is defined in either vars/main.yml or config/main.yml,
-        then config/main.yml must define docker.services.database.
+        If compose.services.database.shared is defined in either vars/main.yml or config/main.yml,
+        then config/main.yml must define compose.services.database.
         """
         repo_root = Path(__file__).resolve().parents[2]
         roles_dir = repo_root / "roles"
@@ -51,20 +51,20 @@ class TestCentralDatabaseConfig(unittest.TestCase):
             vars_data = load_yaml(vars_file)
             cfg_data = load_yaml(cfg_file)
 
-            # Trigger: docker.services.database.shared defined in either file (value irrelevant)
+            # Trigger: compose.services.database.shared defined in either file (value irrelevant)
             shared_defined = has_nested_key(
-                vars_data, "docker.services.database.shared"
-            ) or has_nested_key(cfg_data, "docker.services.database.shared")
+                vars_data, "compose.services.database.shared"
+            ) or has_nested_key(cfg_data, "compose.services.database.shared")
             if not shared_defined:
                 continue
 
-            # Requirement: docker.services.database must be defined in config/main.yml
-            if not has_nested_key(cfg_data, "docker.services.database"):
+            # Requirement: compose.services.database must be defined in config/main.yml
+            if not has_nested_key(cfg_data, "compose.services.database"):
                 violations.append(role_dir.name)
 
         if violations:
             self.fail(
-                "The 'docker.services.database.shared' flag is only valid if 'docker.services.database' "
+                "The 'compose.services.database.shared' flag is only valid if 'compose.services.database' "
                 "is defined in config/main.yml. Missing in roles:\n"
                 + "\n".join(f"- {name}" for name in violations)
             )

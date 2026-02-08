@@ -6,7 +6,7 @@ Ignite the learning experience with [Moodle](https://moodle.org/), a powerful an
 
 ## Overview
 
-This role deploys Moodle using Docker, automating the setup of both the Moodle application and its underlying MariaDB database. It integrates with an Nginx reverse proxy to ensure secure and efficient web access and uses persistent storage to safeguard your data and configuration.
+This role deploys Moodle using Docker, automating the setup of both the Moodle application and its underlying MariaDB database. It integrates with an NGINX reverse proxy to ensure secure and efficient web access and uses persistent storage to safeguard your data and configuration.
 
 ## Features
 
@@ -14,7 +14,7 @@ This role deploys Moodle using Docker, automating the setup of both the Moodle a
 - **Customizable Interface:** Tailor the look and feel of your learning environment with numerous themes and plugins.
 - **Scalable Deployment:** Leverage Docker for a portable and scalable installation that adapts as your user base grows.
 - **Robust Data Management:** Secure and reliable storage of both the Moodle application and user data through Docker volumes.
-- **Secure Web Access:** Configured to work seamlessly behind an Nginx reverse proxy for enhanced security and performance.
+- **Secure Web Access:** Configured to work seamlessly behind an NGINX reverse proxy for enhanced security and performance.
 * **Single Sign-On (SSO) / OpenID Connect (OIDC):** Seamless integration with external identity providers for centralized authentication.
 
 ## Further Resources

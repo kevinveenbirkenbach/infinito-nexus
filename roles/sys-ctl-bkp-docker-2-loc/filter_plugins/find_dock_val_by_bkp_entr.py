@@ -3,7 +3,7 @@ from ansible.errors import AnsibleFilterError
 
 def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
     """
-    Iterates over all applications and their docker.services, finds services where
+    Iterates over all applications and their compose.services, finds services where
     .backup[search_string] exists (and is truthy), and returns the value of
     .[mapped_entry] for each.
 
@@ -18,7 +18,7 @@ def find_dock_val_by_bkp_entr(applications, search_string, mapped_entry):
     results = []
 
     for app in applications.values():
-        docker = app.get("docker", {})
+        docker = app.get("compose", {})
         services = docker.get("services", {})
         if not isinstance(services, dict):
             continue

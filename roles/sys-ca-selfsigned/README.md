@@ -7,7 +7,7 @@ This role provisions:
 - Root CA private key: `{{ CA_ROOT.key_host }}`
 - Root CA certificate: `{{ CA_ROOT.cert_host }}`
 
-The generated Root CA certificate can be injected into containers (e.g. via `docker-compose-ca`) so that containers trust your internal TLS endpoints.
+The generated Root CA certificate can be injected into containers (e.g. via `sys-svc-compose-ca`) so that containers trust your internal TLS endpoints.
 
 ## Outputs
 

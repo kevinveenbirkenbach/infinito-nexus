@@ -1,12 +1,12 @@
 # tests/integration/test_compose_templates_require_image_for_build.py
 #
 # Integration test:
-# Ensures that every docker-compose template/file that contains a `build:` mapping
+# Ensures that every sys-svc-compose template/file that contains a `build:` mapping
 # also contains an `image:` key on the same indentation level (same YAML mapping level).
 #
 # Checked files:
-#   - roles/*/templates/docker-compose.yml.j2
-#   - roles/*/files/docker-compose.yml
+#   - roles/*/templates/compose.yml.j2
+#   - roles/*/files/compose.yml
 #
 # Rationale:
 # Your CA-injection logic (and other tooling) may need a stable image name to inspect
@@ -160,8 +160,8 @@ class TestComposeBuildRequiresImage(unittest.TestCase):
         roles_dir = repo_root / "roles"
 
         patterns = [
-            "*/templates/docker-compose.yml.j2",
-            "*/files/docker-compose.yml",
+            "*/templates/compose.yml.j2",
+            "*/files/compose.yml",
         ]
 
         targets: List[Path] = []
@@ -180,7 +180,7 @@ class TestComposeBuildRequiresImage(unittest.TestCase):
         if all_findings:
             # Pretty error output
             msg_lines = [
-                "Some docker-compose templates/files contain a `build:` key but are missing an `image:` key "
+                "Some sys-svc-compose templates/files contain a `build:` key but are missing an `image:` key "
                 "at the same indentation level (same YAML mapping level).",
                 "",
                 "Offenders:",

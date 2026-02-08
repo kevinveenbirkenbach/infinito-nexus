@@ -19,7 +19,7 @@
       template:
         src:    "Dockerfiles/Whiteboard.j2"
         dest:   "{{ NEXTCLOUD_WHITEBOARD_SERVICE_DOCKERFILE }}"
-      notify: docker compose build
+      notify: compose build
 
 - name: "create {{ NEXTCLOUD_HOST_CONF_ADD_PATH }}"
   file:
@@ -37,7 +37,7 @@
     group:  "{{ NEXTCLOUD_DOCKER_USER_ID }}"
     mode:   "0644"
   loop:     "{{ lookup('fileglob', role_path ~ '/templates/config/*.j2', wantlist=True) }}"
-  notify: docker compose up
+  notify: compose up
 
 - name: "NEXTCLOUD | Ensure host-mounted infinito config files ownership/permissions (recursive)"
   ansible.builtin.file:
@@ -52,4 +52,4 @@
   template:
     src:  "docker.conf.j2" 
     dest: "{{ NEXTCLOUD_HOST_NGINX_PATH }}"
-  notify: docker compose up
+  notify: compose up

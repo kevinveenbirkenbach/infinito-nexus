@@ -26,7 +26,7 @@ server:
       - "{{ DOMAIN_PRIMARY }}"
     aliases:
       - "www.{{ DOMAIN_PRIMARY }}"   
-docker: 
+compose: 
   services:
     oidc:
       enabled: true

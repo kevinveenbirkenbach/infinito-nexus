@@ -1,7 +1,7 @@
 - name: Wait until application container is up
-  shell: "docker compose ps -q {{ SNIPE_IT_SERVICE }}"
+  shell: "{{ BIN_COMPOSE }} ps -q {{ SNIPE_IT_SERVICE }}"
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: snipeit_app_id
   retries: 30
   delay: 5
@@ -21,13 +21,13 @@
 
 - name: Run Snipe-IT migrations (idempotent)
   shell: |
-    docker compose {{ lookup('compose_f_args', application_id) }} exec -T \
+    {{ BIN_COMPOSE }} exec -T \
       -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
       -e XDG_CONFIG_HOME=/tmp \
       {{ SNIPE_IT_SERVICE }} \
       php artisan migrate --force
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: snipeit_migrate
   changed_when: >
     ('Migrating:' in snipeit_migrate.stdout)
@@ -36,13 +36,13 @@
 
 - name: Seed Snipe-IT database (optional, safe to rerun if seeder is idempotent)
   shell: |
-    docker compose {{ lookup('compose_f_args', application_id) }} exec -T \
+    {{ BIN_COMPOSE }} exec -T \
       -e APP_KEY="{{ SNIPE_IT_APP_KEY }}" \
       -e XDG_CONFIG_HOME=/tmp \
       {{ SNIPE_IT_SERVICE }} \
       php -d memory_limit=512M artisan db:seed --force
   args:
-    chdir: "{{ docker_compose.directories.instance }}"
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: snipeit_seed
   changed_when: "'Seeding:' in snipeit_seed.stdout"
   failed_when: snipeit_seed.rc != 0

@@ -12,7 +12,7 @@
   meta: flush_handlers
 
 - name: "MEDIAWIKI | Wait until container exists"
-  ansible.builtin.command: "docker inspect {{ MEDIAWIKI_CONTAINER }}"
+  ansible.builtin.command: "container inspect {{ MEDIAWIKI_CONTAINER }}"
   register: _mw_exists
   retries: 20
   delay: 3
@@ -35,5 +35,4 @@
 
 - name: "Load admin setup procedures for '{{ application_id }}''"
   include_tasks: 04_admin.yml
-
 

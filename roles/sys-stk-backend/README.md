@@ -8,12 +8,7 @@ This role combines the central RDBMS role (`sys-svc-rdbms`) with Docker Compose 
   Includes the `sys-svc-rdbms` role, which handles backups, restores, user and permission management for your relational database system (PostgreSQL, MariaDB, etc.).
 
 - **Docker Compose**  
-  Utilizes the standalone `docker-compose` role to define and bring up containers, networks, and volumes automatically.
-
-- **Variable Load Order**  
-  1. Docker Compose variables (`roles/docker-compose/vars/docker-compose.yml`)  
-  2. Database variables (`roles/sys-svc-rdbms/vars/database.yml`)  
-  Ensures compose ports and volumes are defined before the database role consumes them.
+  Utilizes the standalone `compose` role to define and bring up containers, networks, and volumes automatically.
 
 The role will load both sub-roles and satisfy all dependencies transparently.
 
@@ -21,5 +16,5 @@ The role will load both sub-roles and satisfy all dependencies transparently.
 
 1. **Set Fact** `database_application_id` to work around lazy‐loading ordering.
 2. **Include Vars** in the specified order.
-3. **Invoke** `docker-compose` role to create containers, networks, and volumes.
+3. **Invoke** `compose` role to create containers, networks, and volumes.
 4. **Invoke** `sys-svc-rdbms` role to provision the database, backups, and users.

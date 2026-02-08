@@ -3,7 +3,7 @@
 This role installs and runs the **cleanback** tool to automatically detect and remove **failed Docker backups**.
 
 The cleanup process scans backup directories located under the configurable path  
-**PATH_INFINITO_BACKUP_DIR** (for example `/Backups`)  
+**DIR_BACKUPS** (for example `/Backups`)  
 and removes only those backups that are detected as invalid, while keeping recent backups safe.
 
 To avoid accidental data loss, the role **keeps the most recent backups by default** and runs fully unattended via a scheduled system service.

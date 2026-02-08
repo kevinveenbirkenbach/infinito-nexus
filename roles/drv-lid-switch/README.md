@@ -1,4 +1,4 @@
-# Driver Lid Switch 🛑💻
+# LID Switch Driver
 
 ## Description
 

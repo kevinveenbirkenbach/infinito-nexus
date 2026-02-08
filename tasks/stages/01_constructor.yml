@@ -86,22 +86,22 @@
           combine(CURRENT_PLAY_DOMAINS, recursive=True) 
         }}
 
-  - name: Merge redirect_domain_mappings
+  - name: Merge CURRENT_PLAY_REDIRECT_DOMAINS
     set_fact:
       # The following mapping is necessary to define the exceptions for domains which are created, but which aren't used
-      redirect_domain_mappings: "{{
+      CURRENT_PLAY_REDIRECT_DOMAINS: "{{
         []  | 
-        add_redirect_if_group('web-svc-asset', domains | get_domain('web-svc-asset'), domains | get_domain('web-svc-file'),  group_names) | 
+        add_redirect_if_group('web-svc-asset', lookup('domain','web-svc-asset'), lookup('domain','web-svc-file'),  group_names) | 
         merge_mapping(redirect_domain_mappings| default([]), 'source')
         }}"
 
   - name: Set current play redirect domain mappings 
     set_fact:
-      redirect_domain_mappings: >-
+      CURRENT_PLAY_REDIRECT_DOMAINS: >-
         {{ 
           CURRENT_PLAY_APPLICATIONS |
           domain_mappings(DOMAIN_PRIMARY, AUTO_BUILD_ALIASES) |
-          merge_mapping(redirect_domain_mappings, 'source') 
+          merge_mapping(CURRENT_PLAY_REDIRECT_DOMAINS, 'source') 
         }}
 
   - name: Set current play all domains incl. www redirect if enabled
@@ -110,7 +110,7 @@
         {{
           (CURRENT_PLAY_DOMAINS |
           combine(
-            redirect_domain_mappings | default([]) | 
+            CURRENT_PLAY_REDIRECT_DOMAINS | default([]) | 
             items2dict(key_name='source', value_name='source'),
             recursive=True
           )) |
@@ -129,6 +129,10 @@
   - name: Merge service_provider configuration
     set_fact:
       service_provider: "{{ defaults_service_provider | combine(service_provider | default({}, true), recursive=True) }}"
+
+- name: "Persist {{ SOFTWARE_NAME }} version"
+  ansible.builtin.include_role:
+    name: sys-version
 
 - name: Include Token Store
   include_role:

@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 BUILD_LOOKUP_RE = re.compile(
-    r"""\{\{\s*lookup\(\s*['"]template['"]\s*,\s*['"]roles/docker-container/templates/build\.yml\.j2['"]\s*\)\s*\|\s*indent\(\s*4\s*\)\s*\}\}"""
+    r"""\{\{\s*lookup\(\s*['"]template['"]\s*,\s*['"]roles/sys-svc-container/templates/build\.yml\.j2['"]\s*\)\s*\|\s*indent\(\s*4\s*\)\s*\}\}"""
 )
 
 
@@ -22,8 +22,8 @@ _JINJA_DIRECTIVE_RE = re.compile(r"^\s*\{[%#].*[%#]\}\s*$")
 
 class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
     """
-    Verify that every roles/*/templates/docker-compose.yml.j2 which calls:
-      {{ lookup('template', 'roles/docker-container/templates/build.yml.j2') | indent(4) }}
+    Verify that every roles/*/templates/compose.yml.j2 which calls:
+      {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
     also defines either:
       - an `image:` tag on the same indentation level, OR
       - a YAML merge key `<<:` on the same indentation level (since it may inject `image:`).
@@ -38,7 +38,7 @@ class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
         roles_dir = repo_root / "roles"
         if not roles_dir.is_dir():
             return []
-        return sorted(roles_dir.glob("*/templates/docker-compose.yml.j2"))
+        return sorted(roles_dir.glob("*/templates/compose.yml.j2"))
 
     @staticmethod
     def _indent_len(line: str) -> int:
@@ -86,7 +86,7 @@ class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
 
         self.assertTrue(
             compose_files,
-            f"No compose templates found under {(repo_root / 'roles').as_posix()}/ */templates/docker-compose.yml.j2",
+            f"No compose templates found under {(repo_root / 'roles').as_posix()}/ */templates/compose.yml.j2",
         )
 
         violations: list[str] = []
@@ -145,7 +145,7 @@ class TestComposeBuildTemplateRequiresImageTag(unittest.TestCase):
 
         if violations:
             msg = (
-                "Found docker-compose.yml.j2 templates that include build.yml.j2 but miss 'image:' (or YAML merge '<<:') on the same level:\n"
+                "Found compose.yml.j2 templates that include build.yml.j2 but miss 'image:' (or YAML merge '<<:') on the same level:\n"
                 + "\n".join(f"- {v}" for v in violations)
             )
             self.fail(msg)

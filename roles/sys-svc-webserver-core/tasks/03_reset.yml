@@ -3,7 +3,7 @@
     path: "{{ item }}"
     state: absent
   loop:
-    - "{{ lookup('nginx_paths', want='directories.configuration.base') }}"
-    - "{{ lookup('nginx_paths', want='files.configuration') }}"
+    - "{{ lookup('nginx','directories.configuration.base') }}"
+    - "{{ lookup('nginx','files.configuration') }}"
   loop_control:
     label: "{{ item }}"

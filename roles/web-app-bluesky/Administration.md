@@ -14,9 +14,9 @@ curl -X POST https://your-pds-domain/xrpc/com.atproto.server.createAccount \
 ```
 
 ## Use pdsadmin
-docker compose exec -it pds pdsadmin
+compose exec -it pds pdsadmin
 
-docker compose exec -it pds pdsadmin account create-invite-code
+compose exec -it pds pdsadmin account create-invite-code
 
 ## Debugging
 

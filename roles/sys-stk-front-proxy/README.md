@@ -1,8 +1,8 @@
-# Nginx Domain Setup 🚀
+# NGINX Domain Setup 🚀
 
 ## Description
 
-This role bootstraps **per-domain Nginx configuration**: it requests TLS certificates, applies global modifiers, deploys a ready-made vHost file, and can optionally lock down access via OAuth2.
+This role bootstraps **per-domain NGINX configuration**: it requests TLS certificates, applies global modifiers, deploys a ready-made vHost file, and can optionally lock down access via OAuth2.
 
 ## Overview
 
@@ -17,14 +17,14 @@ The result is a complete, reproducible domain rollout in a single playbook task.
 
 ## Purpose
 
-Provide **one-stop, idempotent domain provisioning** for Nginx-based homelabs or small production environments.
+Provide **one-stop, idempotent domain provisioning** for NGINX-based homelabs or small production environments.
 
 ## Features
 
 - **End-to-end TLS** — certificate retrieval and secure headers included.  
 - **Template-driven vHosts** — choose *basic* or *ws_generic* flavours (or your own).  
 - **Conditional OAuth2** — easily toggle authentication per application.  
-- **Handler-safe** — automatically triggers an Nginx reload when templates change.  
+- **Handler-safe** — automatically triggers an NGINX reload when templates change.  
 - **Composable** — designed to be called repeatedly for many domains.
 
 ## Credits 📝

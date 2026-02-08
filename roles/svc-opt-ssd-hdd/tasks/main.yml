@@ -4,11 +4,12 @@
   when: run_once_sys_lock is not defined
 
 - include_role:
-    name: sys-svc-docker
-  when: run_once_sys_svc_docker is not defined
+    name:   sys-svc-container
+    public: false
+  when: run_once_sys_svc_container is not defined
 
 - include_role:
     name: sys-service
   vars:
-    system_service_tpl_exec_start_pre: '/usr/bin/python {{ PATH_LOCK }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_OPTIMIZE_DRIVE }} {{ SYS_SERVICE_BACKUP_RMT_2_LOC }} {{ SYS_SERVICE_GROUP_CLEANUP | join(" ")  }} --timeout "{{ SYS_TIMEOUT_STORAGE_OPTIMIZER }}"'
+    system_service_tpl_exec_start_pre: '/usr/bin/python {{ BIN_LOCK }} {{ SYS_SERVICE_GROUP_MANIPULATION | join(" ")  }} --ignore {{ SYS_SERVICE_OPTIMIZE_DRIVE }} {{ SYS_SERVICE_BACKUP_RMT_2_LOC }} {{ SYS_SERVICE_GROUP_CLEANUP | join(" ")  }} --timeout "{{ SYS_TIMEOUT_STORAGE_OPTIMIZER }}"'
     system_service_tpl_exec_start:      '{{ system_service_script_exec }} --mass-storage-path {{ OPT_DRIVE_MASS_STORAGE_PATH }} --rapid-storage-path {{ OPT_DRIVE_RAPID_STORAGE_PATH }}'

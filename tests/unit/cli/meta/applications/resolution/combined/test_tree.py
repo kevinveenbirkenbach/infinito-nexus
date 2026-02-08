@@ -42,7 +42,7 @@ class TestCombinedTree(unittest.TestCase):
             )
             _write(
                 root / "roles" / "start" / "config" / "main.yml",
-                "docker:\n  services:\n    desktop:\n      enabled: true\n",
+                "compose:\n  services:\n    desktop:\n      enabled: true\n",
             )
 
             # keycloak exists, and points back to start to force a visible cycle

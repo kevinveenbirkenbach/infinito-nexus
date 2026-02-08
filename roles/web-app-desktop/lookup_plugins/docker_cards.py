@@ -25,13 +25,16 @@ class LookupModule(LookupBase):
           - Retrieves the icon class from galaxy_info.logo.class
           - Retrieves the tags from galaxy_info.galaxy_tags
           - Builds the URL using the 'domains' variable
-          - Sets the iframe flag from applications | get_app_conf(application_id, 'docker.services.desktop.enabled', True)
+          - Sets the iframe flag from applications | get_app_conf(application_id, 'compose.services.desktop.enabled', True)
 
         Only cards whose application_id is included in the variable group_names are returned.
         """
         # Default to "roles" directory if no path is provided
         roles_dir = terms[0] if len(terms) > 0 else "roles"
         cards = []
+
+        # Minimal: keep behavior but avoid None access
+        variables = variables or {}
 
         # Retrieve group_names from variables (used to filter roles)
         group_names = variables.get("group_names", [])
@@ -122,22 +125,22 @@ class LookupModule(LookupBase):
             if domain_url:
                 try:
                     tls_lookup = lookup_loader.get(
-                        "tls_resolve", loader=self._loader, templar=self._templar
+                        "tls", loader=self._loader, templar=self._templar
                     )
-                    # tls_resolve returns base URL with trailing slash (e.g. https://meet.example/)
+                    # tls: positional want-path API
                     base_url = tls_lookup.run(
-                        [application_id], variables=variables, want="url.base"
+                        [application_id, "url.base"], variables=variables
                     )[0]
                     url = str(base_url).strip().rstrip("/")
                 except Exception as e:
                     raise AnsibleError(
-                        f"Error building URL via tls_resolve for '{application_id}': {e}"
+                        f"Error building URL via tls for '{application_id}': {e}"
                     )
 
             iframe = get_app_conf(
                 applications,
                 application_id,
-                "docker.services.desktop.enabled",
+                "compose.services.desktop.enabled",
                 strict=False,
                 default=False,
             )

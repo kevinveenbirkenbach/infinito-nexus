@@ -7,7 +7,7 @@
 
 - name: "Check if site {{ domain }} is already registered at Matomo"
   ansible.builtin.uri:
-    url: "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
+    url: "{{ matomo_index_php_url }}?module=API&method=SitesManager.getSitesIdFromSiteUrl&url={{ lookup('tls', application_id, 'protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
     method: GET
     return_content: yes
     status_code: 200
@@ -44,7 +44,7 @@
   ansible.builtin.uri:
     url: "{{ matomo_index_php_url }}"
     method: POST
-    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ lookup('tls_resolve', application_id, want='protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
+    body: "module=API&method=SitesManager.addSite&siteName={{ base_domain }}&urls={{ lookup('tls', application_id, 'protocols.web') }}://{{ base_domain }}&format=json&token_auth={{ users.administrator.tokens['web-app-matomo'] }}"
     body_format: form-urlencoded
     status_code: 200
     return_content: yes

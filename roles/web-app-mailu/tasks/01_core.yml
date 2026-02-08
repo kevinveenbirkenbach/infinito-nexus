@@ -1,7 +1,7 @@
 - include_tasks: utils/once/flag.yml
 
-- name: "load variables from {{ DOCKER_VARS_FILE }}"
-  include_vars: "{{ DOCKER_VARS_FILE }}"
+- name: "Disable SMTP to avoid port conflicts"
+  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-mail-smtp/tasks/disable.yml' ] | path_join }}"
 
 - name: Ensure Rspamd overrides directory exists (host)
   file:
@@ -26,7 +26,7 @@
 - name: "Include Cert deploy service for '{{ role_name }}'"
   include_role:
     name: sys-ctl-mtn-cert-deploy
-  when: lookup('tls_resolve', application_id, want='enabled') | bool
+  when: lookup('tls', application_id, 'enabled') | bool
 
 - name: "Flush Docker Compose handlers"
   meta: flush_handlers
@@ -37,7 +37,7 @@
 - name: "Create Mailu accounts"
   include_tasks: 03_manage_user.yml
   vars:
-    MAILU_DOCKER_DIR:      "{{ docker_compose.directories.instance }}"
+    MAILU_DOCKER_DIR:      "{{ lookup('container', application_id, 'directories.instance') }}"
     mailu_action: >-
       {{
         (

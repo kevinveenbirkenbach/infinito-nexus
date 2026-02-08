@@ -93,7 +93,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
             )
             _write(
                 root / "roles" / "web-app-wordpress" / "config" / "main.yml",
-                "docker:\n"
+                "compose:\n"
                 "  services:\n"
                 "    oidc:\n"
                 "      enabled: true\n"

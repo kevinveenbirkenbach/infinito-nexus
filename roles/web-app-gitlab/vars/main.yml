@@ -2,11 +2,11 @@
 application_id:               "web-app-gitlab"
 
 # GitLab
-GITLAB_URL:                 "{{ lookup('tls_resolve', application_id, want='url.base') }}"
-GITLAB_HOSTNAME:            "{{ domains | get_domain(application_id) }}"
+GITLAB_URL:                 "{{ lookup('tls', application_id, 'url.base') }}"
+GITLAB_HOSTNAME:            "{{ lookup('domain',application_id) }}"
 
 ## OIDC
-GITLAB_OIDC_ENABLED:        "{{ applications | get_app_conf(application_id, 'docker.services.oidc.enabled') }}"
+GITLAB_OIDC_ENABLED:        "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
 GITLAB_OIDC_LABEL:          "{{ OIDC.BUTTON_TEXT }}"
 GITLAB_OIDC_UID_FIELD:      "{{ OIDC.ATTRIBUTES.USERNAME }}"
 GITLAB_OIDC_CLIENT_ID:      "{{ OIDC.CLIENT.ID }}"
@@ -16,12 +16,12 @@ GITLAB_OIDC_REDIRECT_URI:   "{{ GITLAB_URL }}/users/auth/openid_connect/callback
 
 ## Docker
 GITLAB_INIT_ROOT_PASSWORD:  "{{ users.administrator.password }}"
-GITLAB_VERSION:             "{{ applications | get_app_conf(application_id, 'docker.services.gitlab.version') }}"
-GITLAB_IMAGE:               "{{ applications | get_app_conf(application_id, 'docker.services.gitlab.image') }}"
-GITLAB_CONTAINER:           "{{ applications | get_app_conf(application_id, 'docker.services.gitlab.name') }}"
-GITLAB_CONF_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.config') }}"
-GITLAB_LOGS_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.logs') }}"
-GITLAB_DATA_VOLUME:         "{{ applications | get_app_conf(application_id, 'docker.volumes.data') }}"
+GITLAB_VERSION:             "{{ lookup('config', application_id, 'compose.services.gitlab.version') }}"
+GITLAB_IMAGE:               "{{ lookup('config', application_id, 'compose.services.gitlab.image') }}"
+GITLAB_CONTAINER:           "{{ lookup('config', application_id, 'compose.services.gitlab.name') }}"
+GITLAB_CONF_VOLUME:         "{{ lookup('config', application_id, 'compose.volumes.config') }}"
+GITLAB_LOGS_VOLUME:         "{{ lookup('config', application_id, 'compose.volumes.logs') }}"
+GITLAB_DATA_VOLUME:         "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 
 ## Configuration
 GITLAB_OMNIBUS_BASE:
@@ -30,11 +30,11 @@ GITLAB_OMNIBUS_BASE:
   - "gitlab_rails['gitlab_shell_ssh_port']={{ ports.public.ssh[application_id] }}"
   - "gitlab_rails['db_adapter']='postgresql'"
   - "gitlab_rails['db_encoding']='utf8'"
-  - "gitlab_rails['db_host']='{{ database_host }}'"
-  - "gitlab_rails['db_port']='{{ database_port }}'"
-  - "gitlab_rails['db_username']='{{ database_username }}'"
-  - "gitlab_rails['db_password']='{{ database_password }}'"
-  - "gitlab_rails['db_database']='{{ database_name }}'"
+  - "gitlab_rails['db_host']='{{ lookup('database', application_id, 'host') }}'"
+  - "gitlab_rails['db_port']='{{ lookup('database', application_id, 'port') }}'"
+  - "gitlab_rails['db_username']='{{ lookup('database', application_id, 'username') }}'"
+  - "gitlab_rails['db_password']='{{ lookup('database', application_id, 'password') }}'"
+  - "gitlab_rails['db_database']='{{ lookup('database', application_id, 'name') }}'"
   - "gitlab_rails['db_pool']={{ POSTGRES_ALLOWED_AVG_CONNECTIONS }}"
   - "nginx['listen_port']=80"
   - "nginx['listen_https']=false"

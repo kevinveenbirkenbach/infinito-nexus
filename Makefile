@@ -2,89 +2,39 @@
 SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 
-VENV_BASE ?= $(if $(VIRTUAL_ENV),$(dir $(VIRTUAL_ENV)),/opt/venvs)
-VENV_NAME ?= infinito
-VENV_FALLBACK := $(VENV_BASE)/$(VENV_NAME)
-VENV := $(if $(VIRTUAL_ENV),$(VIRTUAL_ENV),$(VENV_FALLBACK))
+# ------------------------------------------------------------
+# SPOT: Global environment is defined in scripts/meta/env.sh
+# ------------------------------------------------------------
+ENV_SH ?= $(CURDIR)/scripts/meta/env.sh
+export ENV_SH
 
-PYTHON := $(VENV)/bin/python
-PIP    := $(PYTHON) -m pip
-export PYTHON
-export PIP
-
-# Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
-PYTHONPATH ?= .
-export PYTHONPATH
-
-ifdef NIX_CONFIG
-export NIX_CONFIG
-endif
-
-# Ensure TEST_DEPLOY_TYPE is available for the default inventory dir.
-TEST_DEPLOY_TYPE ?= server
-export TEST_DEPLOY_TYPE
-
-# --- Test filtering (unittest discover) ---
-TEST_PATTERN            ?= test*.py
-export TEST_PATTERN
-
-# Distro
-INFINITO_DISTRO		?= arch
-INFINITO_CONTAINER 	?= infinito_nexus_$(INFINITO_DISTRO)
-export INFINITO_DISTRO
-export INFINITO_CONTAINER
-
-# Detirmene Environment 
-RUNNING_ON_ACT    ?= false
-RUNNING_ON_GITHUB ?= false
-
-ifeq ($(GITHUB_ACTIONS),true)
-	RUNNING_ON_GITHUB = true
-	ifeq ($(ACT),true)
-		RUNNING_ON_ACT    = true
-		RUNNING_ON_GITHUB = false
-	endif
-endif
-export RUNNING_ON_ACT RUNNING_ON_GITHUB
-
-INVENTORY_DIR ?= $(shell \
-  RUNNING_ON_ACT="$(RUNNING_ON_ACT)" \
-  RUNNING_ON_GITHUB="$(RUNNING_ON_GITHUB)" \
-  HOME="$(HOME)" \
-  bash scripts/inventory/resolve.sh \
-)
-export INVENTORY_DIR
-
-# Overwrite defaults
-ifeq ($(RUNNING_ON_GITHUB),true)
-	# -------- Real GitHub Actions CI --------
-	INFINITO_PULL_POLICY ?= always
-	INFINITO_IMAGE_TAG ?= latest
-	INFINITO_IMAGE ?= ghcr.io/$(GITHUB_REPOSITORY_OWNER)/infinito-$(INFINITO_DISTRO):$(INFINITO_IMAGE_TAG)
-	INFINITO_NO_BUILD ?= 1
-	INFINITO_DOCKER_VOLUME ?= /mnt/docker
-	INFINITO_DOCKER_MOUNT ?= /var/lib/docker
-	export INFINITO_DOCKER_VOLUME INFINITO_DOCKER_MOUNT
-	export INFINITO_IMAGE_TAG
-	export INFINITO_NO_BUILD
-	export INFINITO_PULL_POLICY
-	export INFINITO_IMAGE
-	INFINITO_COMPILE ?=  0
+# For non-interactive bash, BASH_ENV is sourced before executing the command.
+# This makes env.sh apply automatically to *all* Make recipes.
+ifneq ("$(wildcard $(ENV_SH))","")
+export BASH_ENV := $(ENV_SH)
 else
-	INFINITO_COMPILE ?= 1
+$(error Missing env file: $(ENV_SH))
 endif
-export INFINITO_COMPILE
 
 .PHONY: \
 	setup setup-clean install install-ansible install-venv install-python \
-	test test-lint test-unit test-integration test-deploy test-deploy-app\
-	clean down \
+	test test-lint test-unit test-integration test-deploy test-deploy-app \
+	clean clean-sudo down \
 	list tree mig dockerignore \
 	print-python lint-ansible \
-	dns-setup dns-remove
+	dns-setup dns-remove \
+	dev-environment-bootstrap dev-environment-teardown \
+	apparmor-teardown apparmor-restore \
+	trust-ca \
+	docker-restart docker-up docker-down docker-stop \
+	build build-missing build-no-cache build-no-cache-all \
+	ci-deploy-discover ci-deploy-app ci-discover-output \
+	test-act-all test-act-app \
+	test-local-reset test-local-run-all test-local-cleanup test-local-web-purge \
+	test-local-rapid test-local-rapid-fresh test-local-full \
+	format bootstrap setup-development
 
-dev-environment-bootstrap: apparmor-teardown dns-setup
-
+dev-environment-bootstrap: apparmor-teardown dns-setup disable-ipv6
 dev-environment-teardown: apparmor-restore dns-remove
 
 dns-setup:
@@ -92,8 +42,6 @@ dns-setup:
 
 dns-remove:
 	@bash scripts/dns/remove.sh
-
-.PHONY: apparmor-teardown apparmor-restore
 
 apparmor-teardown:
 	@echo "==> AppArmor: full teardown (local dev)"
@@ -103,12 +51,12 @@ apparmor-restore:
 	@echo "==> AppArmor: restore profiles"
 	@sudo bash scripts/administration/apparmor/restore.sh
 
-
-.PHONY: trust-ca
-
 trust-ca:
 	@bash scripts/administration/trust_ca.sh
 
+disable-ipv6:
+	sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
+	sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
 
 clean:
 	@echo "Removing ignored git files"
@@ -121,27 +69,27 @@ clean:
 
 clean-sudo:
 	@echo "Removing ignored git files with sudo"
-	sudo git clean -fdX; \
+	sudo git clean -fdX;
 
 docker-restart:
-	@$(PYTHON) -m cli.deploy.development restart --distro "$(INFINITO_DISTRO)"
+	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
 docker-up: install
-	@$(PYTHON) -m cli.deploy.development up
+	@"$${PYTHON}" -m cli.deploy.development up
 
 docker-down:
-	@$(PYTHON) -m cli.deploy.development down
+	@"$${PYTHON}" -m cli.deploy.development down
 
 docker-stop:
-	@$(PYTHON) -m cli.deploy.development stop
+	@"$${PYTHON}" -m cli.deploy.development stop
 
 list:
 	@echo "Generating the roles list"
-	$(PYTHON) -m cli.build.roles_list
+	@"$${PYTHON}" -m cli.build.roles_list
 
 tree:
 	@echo "Generating Tree"
-	$(PYTHON) -m cli.build.tree -D 2
+	@"$${PYTHON}" -m cli.build.tree -D 2
 
 mig: list tree
 	@echo "Creating meta data for meta infinity graph"
@@ -159,10 +107,10 @@ build-no-cache:
 	@bash scripts/build/image.sh --no-cache
 
 build-no-cache-all:
-	@set -e; \
-	for d in $(DISTROS); do \
+	@set -euo pipefail; \
+	for d in $${DISTROS}; do \
 	  echo "=== build-no-cache: $$d ==="; \
-	  INFINITO_DISTRO="$$d" $(MAKE) build-no-cache; \
+	  INFINITO_DISTRO="$$d" "$(MAKE)" build-no-cache; \
 	done
 
 dockerignore:
@@ -172,14 +120,10 @@ dockerignore:
 
 install-ansible:
 	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
-	PYTHON="$(PYTHON)" \
 	bash scripts/install/ansible.sh
 
 install-venv:
-	@VENV="$(VENV)" \
-	VENV_BASE="$(VENV_BASE)" \
-	PYTHON="$(PYTHON)" \
-	bash scripts/install/venv.sh
+	@bash scripts/install/venv.sh
 
 install-python: install-venv
 	@bash scripts/install/python.sh
@@ -204,7 +148,6 @@ format:
 	ruff check . --fix
 
 # --- Tests (separated) ---
-
 test: test-lint test-unit test-integration lint-ansible test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
@@ -227,8 +170,9 @@ ci-deploy-discover:
 	@PYTHON=python3 ./scripts/meta/build-test-matrix.sh
 
 ci-deploy-app:
-	export MISSING_ONLY=true; \
-	./scripts/tests/deploy/ci/app.sh
+	@export MISSING_ONLY=true; \
+	export MAX_TOTAL_SECONDS=19800; \
+	./scripts/tests/deploy/ci/all_distros.sh
 
 ci-discover-output:
 	@set -euo pipefail; \
@@ -244,57 +188,40 @@ ci-discover-output:
 	echo "apps_json=$$apps"
 
 test-act-all:
-	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
-	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	bash scripts/tests/deploy/act/all.sh
+	@bash scripts/tests/deploy/act/all.sh
 
 test-act-app:
-	@APP="$(APP)" \
-	TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
-	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	bash scripts/tests/deploy/act/app.sh
+	@bash scripts/tests/deploy/act/app.sh
 
 test-local-reset:
-	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
-	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	PYTHON=python3 \
-	bash scripts/tests/deploy/local/reset.sh
+	@PYTHON=python3 \
+	bash scripts/tests/deploy/local/utils/reset.sh
 
 test-local-run-all:
-	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
-	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	DEBUG="$(DEBUG)" \
-	LIMIT_HOST="$(LIMIT_HOST)" \
-	INVENTORY_DIR="$(INVENTORY_DIR)" \
-	bash scripts/tests/deploy/local/run-all.sh
+	@bash scripts/tests/deploy/local/run-all.sh
 
-test-local-cleanup:
-	@APP="$(APP)" \
-	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
-	bash scripts/tests/deploy/local/cleanup.sh
+test-local-cleanup-entity:
+	@bash scripts/tests/deploy/local/utils/purge/entity.sh
 
-test-local-web-purge:
-	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
-	bash scripts/tests/deploy/local/purge_web.sh
+test-local-cleanup: test-local-cleanup-entity
+	@bash scripts/tests/deploy/local/utils/purge/inventory.sh
+	@bash scripts/tests/deploy/local/utils/purge/web.sh
+	@bash scripts/tests/deploy/local/utils/purge/lib.sh
+
+test-local-dedicated: docker-down docker-up
+	@bash scripts/tests/deploy/local/dedicated_distro.sh
 
 test-local-rapid:
-	@APP="$(APP)" \
-	TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
-	INFINITO_CONTAINER="$(INFINITO_CONTAINER)" \
-	DEBUG=true \
+	@DEBUG=true \
 	bash scripts/tests/deploy/local/rapid.sh
 
-test-local-rapid-fresh: test-local-cleanup test-local-rapid
+test-local-rapid-fresh: test-local-cleanup-entity test-local-rapid
 
 test-local-full:
-	@echo "=== local full deploy (type=$(TEST_DEPLOY_TYPE), distro=$(INFINITO_DISTRO)) ==="
-	@TEST_DEPLOY_TYPE="$(TEST_DEPLOY_TYPE)" \
-	INFINITO_DISTRO="$(INFINITO_DISTRO)" \
-	bash scripts/tests/deploy/local/all.sh
+	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
+	@bash scripts/tests/deploy/local/all.sh
 
 # Backwards compatible target (kept)
 lint-ansible:
 	@echo "📑 Checking Ansible syntax…"
 	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check
-
-

@@ -15,7 +15,7 @@
   template:
     src:  "config.toml.j2" 
     dest: "{{ LISTMONK_CONFIG_HOST }}"
-  notify: docker compose up
+  notify: compose up
 
 - meta: flush_handlers
 
@@ -37,7 +37,7 @@
     {{ LISTMONK_EXEC_DATABASE }} -v ON_ERROR_STOP=1 << 'EOSQL'
     UPDATE users
     SET email = '{{ users.administrator.email }}',
-        password_login = {{ 'false' if applications | get_app_conf(application_id, 'docker.services.oidc.enabled') else 'true' }}
+        password_login = {{ 'false' if lookup('config',application_id, 'compose.services.oidc.enabled') else 'true' }}
     WHERE username = 'administrator';
     EOSQL
   args:

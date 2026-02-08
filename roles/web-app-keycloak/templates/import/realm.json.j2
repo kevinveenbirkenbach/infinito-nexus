@@ -494,7 +494,7 @@
         "/realms/{{ KEYCLOAK_REALM }}/account/*"
       ],
       "webOrigins": [
-        "{{ lookup('tls_resolve', 'web-app-keycloak', want='url.base') }}"
+        "{{ lookup('tls', 'web-app-keycloak', 'url.base') }}"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -1443,7 +1443,7 @@
     "microprofile-jwt",
     "organization",
     "{{ KEYCLOAK_RBAC_GROUP_CLAIM }}",
-    "{{ applications | get_app_conf(application_id, 'scopes.nextcloud', True) }}"
+    "{{ lookup('config', application_id, 'scopes.nextcloud') }}"
   ],
   "browserSecurityHeaders": {
     "contentSecurityPolicyReportOnly": "",
