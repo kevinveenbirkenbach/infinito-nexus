@@ -1,3 +1,8 @@
+## [2.1.4] - 2026-02-08
+
+* This release ensures that commits carrying a version tag trigger the full distro test matrix by detecting tags pointing at the current commit, while regular commits continue to run on a single random distro.
+
+
 ## [2.1.3] - 2026-02-08
 
 * This release improves CI and developer tooling robustness by fixing hardlink-related errors, stabilizing workflow triggers, resolving type-checking import cycles, and hardening cleanup and teardown logic across the CLI and templating utilities.
