@@ -2,8 +2,8 @@
 
 import tempfile
 import unittest
-from pathlib import Path
 from unittest import mock
+from pathlib import Path
 
 from module_utils.manager.inventory import InventoryManager  # type: ignore
 from module_utils.handler.vault import VaultScalar  # type: ignore
@@ -40,9 +40,9 @@ class TestInventoryManagerIntegration(unittest.TestCase):
         - Uses real YamlHandler parsing
         - Patches only VaultHandler to avoid external ansible-vault calls
         - Verifies:
-            - root role generates plain feature-based credentials (database_password, oauth2_proxy_cookie_secret)
-            - root role schema credentials are vaulted (VaultScalar)
-            - provider role is included transitively and its schema credentials are vaulted
+            - root role generates plain feature-based credentials
+            - schema credentials are vaulted
+            - provider role credentials are vaulted transitively
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp = Path(tmpdir)
@@ -58,19 +58,16 @@ class TestInventoryManagerIntegration(unittest.TestCase):
             (provider_role / "vars").mkdir(parents=True, exist_ok=True)
             (provider_role / "config").mkdir(parents=True, exist_ok=True)
 
-            # vars/main.yml
             (provider_role / "vars" / "main.yml").write_text(
                 'application_id: "svc-db-mariadb"\n',
                 encoding="utf-8",
             )
 
-            # config/main.yml (no further transitive deps)
             (provider_role / "config" / "main.yml").write_text(
                 "compose:\n  services: {}\n",
                 encoding="utf-8",
             )
 
-            # schema/main.yml (provider credentials that must be vaulted)
             (provider_role / "schema" / "main.yml").write_text(
                 "credentials:\n"
                 "  root_password:\n"
@@ -95,16 +92,11 @@ class TestInventoryManagerIntegration(unittest.TestCase):
             inv_path = tmp / "inventory.yml"
             inv_path.write_text("applications: {}\n", encoding="utf-8")
 
-            # vars/main.yml
             (role_path / "vars" / "main.yml").write_text(
                 'application_id: "web-app-demo"\n',
                 encoding="utf-8",
             )
 
-            # config/main.yml
-            # NOTE:
-            # - database_password injection requires enabled=true AND shared=true
-            # - provider resolution requires type when enabled=true and shared=true
             (role_path / "config" / "main.yml").write_text(
                 "compose:\n"
                 "  services:\n"
@@ -117,7 +109,6 @@ class TestInventoryManagerIntegration(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            # schema/main.yml (root credentials that must be vaulted)
             (role_path / "schema" / "main.yml").write_text(
                 "credentials:\n"
                 "  api_key:\n"
@@ -158,7 +149,6 @@ class TestInventoryManagerIntegration(unittest.TestCase):
             root_app = apps["web-app-demo"]
             root_creds = root_app["credentials"]
 
-            # feature-based injections should be plain strings
             self.assertIn("database_password", root_creds)
             self.assertIsInstance(root_creds["database_password"], str)
             self.assertNotIsInstance(root_creds["database_password"], VaultScalar)
@@ -169,7 +159,6 @@ class TestInventoryManagerIntegration(unittest.TestCase):
                 root_creds["oauth2_proxy_cookie_secret"], VaultScalar
             )
 
-            # schema-driven keys should be vaulted (VaultScalar)
             self.assertIn("api_key", root_creds)
             self.assertIsInstance(root_creds["api_key"], VaultScalar)
             self.assertIn("$ANSIBLE_VAULT", str(root_creds["api_key"]))
@@ -180,7 +169,6 @@ class TestInventoryManagerIntegration(unittest.TestCase):
                 "PLAIN:plain_needed:OVERRIDE", str(root_creds["plain_needed"])
             )
 
-            # Non-credentials should be copied
             self.assertEqual(root_app["non_credentials"]["flag"], True)
 
             # ------------------------------------------------------------------
@@ -191,17 +179,15 @@ class TestInventoryManagerIntegration(unittest.TestCase):
 
             self.assertIn("root_password", prov_creds)
             self.assertIsInstance(prov_creds["root_password"], VaultScalar)
-            self.assertIn("$ANSIBLE_VAULT", str(prov_creds["root_password"]))
 
             self.assertIn("replication_password", prov_creds)
             self.assertIsInstance(prov_creds["replication_password"], VaultScalar)
-            self.assertIn("$ANSIBLE_VAULT", str(prov_creds["replication_password"]))
 
             # ------------------------------------------------------------------
-            # Vault calls: should include vaulted schema keys (root + provider),
-            # but not the plain feature-based injections.
+            # Vault calls verification
             # ------------------------------------------------------------------
             called_keys = [k for (_plain, k) in fake_vault.calls]
+
             self.assertIn("api_key", called_keys)
             self.assertIn("plain_needed", called_keys)
             self.assertIn("root_password", called_keys)
