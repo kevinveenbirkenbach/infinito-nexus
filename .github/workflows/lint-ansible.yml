@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   lint-ansible:
-    name: 🧹 Lint Ansible roles
+    name: 🧹 Lint Ansible
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

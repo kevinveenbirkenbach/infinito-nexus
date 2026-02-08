@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   pick-distro:
-    name: 🎲 Pick distros
+    name: 🎲 Pick distro(s)
     runs-on: ubuntu-latest
     outputs:
       distros: ${{ steps.pick.outputs.distros }}
