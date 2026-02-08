@@ -14,7 +14,6 @@ fi
 # shellcheck disable=SC1090
 source "${_env_sh}"
 
-
 : "${GH_TOKEN:?GH_TOKEN is required}"
 : "${GITHUB_REPOSITORY:?GITHUB_REPOSITORY is required}"
 : "${OWNER:?OWNER is required (e.g. github.repository_owner)}"
@@ -145,16 +144,11 @@ fi
 
 echo
 
-# Verify images exist (FULL + SLIM) for candidate tag
+# Verify images exist for candidate tag (NORMAL only)
 for distro in ${DISTROS}; do
   img="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:${candidate_tag}"
-  img_slim="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}-slim:${candidate_tag}"
   if ! docker manifest inspect "${img}" >/dev/null 2>&1; then
     echo "[promote-stable] ERROR: missing image ${img} -> abort"
-    exit 1
-  fi
-  if ! docker manifest inspect "${img_slim}" >/dev/null 2>&1; then
-    echo "[promote-stable] ERROR: missing image ${img_slim} -> abort"
     exit 1
   fi
 done
@@ -173,30 +167,20 @@ git push origin stable
 echo "[promote-stable] ✅ Git tag 'stable' updated."
 
 echo
-echo "[promote-stable] Promoting GHCR :stable tags from ${candidate_tag} (full + slim)"
+echo "[promote-stable] Promoting GHCR :stable tags from ${candidate_tag}"
 
 for distro in ${DISTROS}; do
-  # FULL stable
   src="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:${candidate_tag}"
   dst="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:stable"
-  echo "==> ${distro} (full)"
+  echo "==> ${distro}"
   docker buildx imagetools create -t "${dst}" "${src}"
+
   if [[ "${distro}" == "${DEFAULT_DISTRO}" ]]; then
     alias="${REGISTRY}/${OWNER}/${REPO_PREFIX}:stable"
     docker buildx imagetools create -t "${alias}" "${src}"
   fi
-
-  # SLIM stable
-  src_slim="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}-slim:${candidate_tag}"
-  dst_slim="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}-slim:stable"
-  echo "==> ${distro} (slim)"
-  docker buildx imagetools create -t "${dst_slim}" "${src_slim}"
-  if [[ "${distro}" == "${DEFAULT_DISTRO}" ]]; then
-    alias_slim="${REGISTRY}/${OWNER}/${REPO_PREFIX}-slim:stable"
-    docker buildx imagetools create -t "${alias_slim}" "${src_slim}"
-  fi
 done
 
 echo
-echo "[promote-stable] ✅ GHCR :stable tags updated to ${candidate_tag} (full + slim)"
+echo "[promote-stable] ✅ GHCR :stable tags updated to ${candidate_tag}"
 echo "[promote-stable] Done."

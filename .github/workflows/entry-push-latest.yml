@@ -8,6 +8,8 @@ on:
   push:
     branches:
       - "**"
+    tags:
+      - "v*"
 
 permissions:
   contents: read
@@ -49,3 +51,51 @@ jobs:
     with:
       # ci-orchestrator expects a space-separated list → here it's either one or many
       distros: ${{ needs.pick-distro.outputs.distros }}
+    secrets: inherit
+
+  # Guard job: only allow version releases if the tag commit is contained in origin/master
+  release-guard:
+    name: "🛡️ Guard master release"
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: ci-orchestrator
+    runs-on: ubuntu-latest
+    outputs:
+      allowed: ${{ steps.guard.outputs.allowed }}
+    steps:
+      - name: Checkout (with full history)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Fetch master
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin master:refs/remotes/origin/master --force
+
+      - name: "Guard: tag commit must be contained in origin/master"
+        id: guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          tag_sha="$(git rev-list -n 1 "${tag}")"
+          echo "Tag: ${tag} -> ${tag_sha}"
+
+          if git merge-base --is-ancestor "${tag_sha}" "origin/master"; then
+            echo "allowed=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Tag commit is on origin/master"
+          else
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+            echo "⛔ Tag commit is NOT on origin/master"
+          fi
+
+  release-version:
+    name: 🚀 Release version
+    needs: release-guard
+    if: needs.release-guard.outputs.allowed == 'true'
+    uses: ./.github/workflows/release-version.yml
+    with:
+      tag: ${{ github.ref_name }}
+    secrets: inherit

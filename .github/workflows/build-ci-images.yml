@@ -40,7 +40,7 @@ jobs:
           echo "Using matrix: ${json}"
 
   build:
-    name: "build: ${{ matrix.distro }}-${{ matrix.variant }}"
+    name: "👷‍♀️ build: ${{ matrix.distro }}"
     needs: prepare
     runs-on: ubuntu-latest
 
@@ -48,10 +48,7 @@ jobs:
       fail-fast: false
       matrix:
         distro: ${{ fromJson(needs.prepare.outputs.matrix) }}
-        variant: 
-          - full
-          # - slim ; It doesn't make sense in this configuration, because it allways uses the full size parents layers
- 
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -96,30 +93,21 @@ jobs:
           echo
           docker buildx du || true
 
-      - name: Compute image names
-        id: names
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "${{ matrix.variant }}" == "slim" ]]; then
-            echo "suffix=-slim" >> "$GITHUB_OUTPUT"
-          else
-            echo "suffix=" >> "$GITHUB_OUTPUT"
-          fi
       - name: Build & push
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
-          target: ${{ matrix.variant }}
+          # If your Dockerfile has multiple targets and you want to enforce one, set:
+          # target: full
           tags: |
-            ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}${{ steps.names.outputs.suffix }}:${{ needs.prepare.outputs.image_tag }}
+            ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}
           build-args: |
-            PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}${{ steps.names.outputs.suffix }}:stable
+            PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable
             NIX_CONFIG=access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-          cache-from: type=gha,scope=infinito-${{ matrix.distro }}-${{ matrix.variant }}
-          cache-to: type=gha,mode=max,scope=infinito-${{ matrix.distro }}-${{ matrix.variant }}
+          cache-from: type=gha,scope=infinito-${{ matrix.distro }}
+          cache-to: type=gha,mode=max,scope=infinito-${{ matrix.distro }}
 
       - name: Disk pressure (post-build)
         if: always()
