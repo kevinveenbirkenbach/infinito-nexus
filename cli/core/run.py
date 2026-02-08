@@ -34,6 +34,7 @@ def open_log_file(log_dir: Path) -> tuple[TextIO, Path]:
     try:
         os.chmod(log_dir, 0o700)
     except Exception:
+        # Intentionally ignore chmod failures: non-critical hardening step
         pass
 
     timestamp = datetime.now().strftime("%Y%m%dT%H%M%S")
