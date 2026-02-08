@@ -10,13 +10,16 @@ from .model import ImageRef
 
 class RegistryProvider(ABC):
     @abstractmethod
-    def image_base(self, image: ImageRef) -> str: ...
+    def image_base(self, image: ImageRef) -> str:
+        pass
 
     @abstractmethod
-    def mirror(self, image: ImageRef) -> None: ...
+    def mirror(self, image: ImageRef) -> None:
+        pass
 
     @abstractmethod
-    def tag_exists(self, image: ImageRef) -> bool: ...
+    def tag_exists(self, image: ImageRef) -> bool:
+        pass
 
 
 class GHCRProvider(RegistryProvider):
