@@ -6,7 +6,11 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from .common import repo_root_from_here
+
+def _repo_root_from_here() -> Path:
+    # Derive the repository root relative to this file.
+    # Adjust the number of parents if the project layout changes.
+    return Path(__file__).resolve().parents[3]
 
 
 CI_DOCKER_ROOT = Path("/mnt/docker")
@@ -79,5 +83,5 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
 
 def handler(args: argparse.Namespace) -> int:
-    down_stack(repo_root=repo_root_from_here(), distro=args.distro)
+    down_stack(repo_root=_repo_root_from_here(), distro=args.distro)
     return 0
