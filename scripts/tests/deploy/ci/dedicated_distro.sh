@@ -99,7 +99,7 @@ cleanup() {
       sudo ls -ld "${INFINITO_DOCKER_VOLUME}" || true
 
       echo ">>> Removing host docker volume dir: ${INFINITO_DOCKER_VOLUME}"
-      sudo rm -rvf "${INFINITO_DOCKER_VOLUME}" || true
+      sudo rm -rf "${INFINITO_DOCKER_VOLUME}" || true
       sudo mkdir -vp "${INFINITO_DOCKER_VOLUME}" || true
 
       # Optional: keep it writable for the runner user
