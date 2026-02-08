@@ -281,7 +281,7 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
             except Exception as exc:
                 # Best-effort cleanup: failure to restore available_variables is ignored.
                 pass
-
+                _unused_avail_changed = False
         if disable_changed_2:
             try:
                 setattr(templar, "_disable_lookups", prev_disable_2)
@@ -289,14 +289,14 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
             except Exception as _exc:
                 # Best-effort cleanup: failure to restore _disable_lookups is ignored.
                 pass
-            try:
+                _unused_disable_changed_2 = False
                 setattr(templar, "disable_lookups", prev_disable_1)
             except Exception as exc:
                 # Best-effort cleanup: failure to restore disable_lookups is ignored,
                 # but we clear the flag to reflect that restoration did not succeed.
                 disable_changed_1 = False
 
-    out_s = "" if out is None else str(out)
+                _unused_disable_changed_1 = False
 
     # If templar didn't change anything while Jinja exists:
     if out_s.strip() == s.strip() and ("{{" in s or "{%" in s):
