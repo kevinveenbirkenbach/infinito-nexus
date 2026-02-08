@@ -1,3 +1,8 @@
+## [2.1.3] - 2026-02-08
+
+* This release improves CI and developer tooling robustness by fixing hardlink-related errors, stabilizing workflow triggers, resolving type-checking import cycles, and hardening cleanup and teardown logic across the CLI and templating utilities.
+
+
 ## [2.1.2] - 2026-02-08
 
 * Removes the v* tag trigger from the push workflow so CI runs only on branch pushes. This prevents duplicate pipeline executions when pushing a branch together with a version tag and aligns the workflow with the updated release process.
