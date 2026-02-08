@@ -12,8 +12,9 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
   packages: write
+  actions: read
   security-events: write
 
 jobs:
