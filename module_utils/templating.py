@@ -279,9 +279,8 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
             try:
                 templar.available_variables = prev_avail
             except Exception as exc:
-                # Best-effort cleanup: failure to restore available_variables is ignored,
-                # but we clear the flag to reflect that restoration did not succeed.
-                avail_changed = False
+                # Best-effort cleanup: failure to restore available_variables is ignored.
+                pass
 
         if disable_changed_2:
             try:
