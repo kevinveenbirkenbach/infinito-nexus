@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   prepare:
-    name: prepare matrix
+    name: 🧮 Build matrix
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.out.outputs.matrix }}
@@ -46,7 +46,7 @@ jobs:
           echo "Using matrix: ${json}"
 
   dns:
-    name: dns (${{ matrix.distro }})
+    name: 🌐 Test DNS (${{ matrix.distro }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: prepare

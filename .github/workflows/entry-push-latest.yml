@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   pick-distro:
-    name: 🎲 Pick distro(s)
+    name: 🎲 Pick distros
     runs-on: ubuntu-latest
     outputs:
       distros: ${{ steps.pick.outputs.distros }}
@@ -46,7 +46,7 @@ jobs:
           echo "=== Selected distros: ${distros} ==="
 
   ci-orchestrator:
-    name: 🎶 Orchestra CI/CD
+    name: 🎶 Orchestrate CI
     needs: pick-distro
     uses: ./.github/workflows/ci-orchestrator.yml
     with:

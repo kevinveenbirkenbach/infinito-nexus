@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   lint-docker:
+    name: 🧹 Lint Dockerfile
     runs-on: ubuntu-latest
     permissions:
       contents: read

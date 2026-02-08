@@ -34,7 +34,7 @@ env:
   INFINITO_IMAGE_TAG: "latest"
 jobs:
   discover:
-    name: discover apps (local)
+    name: 🔎 Discover apps (local)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     outputs:
@@ -78,7 +78,7 @@ jobs:
           make ci-discover-output
 
   deploy:
-    name: deploy:${{ needs.discover.outputs.test_deploy_type }} (${{ matrix.app }})
+    name: 🚀 Deploy app (${{ needs.discover.outputs.test_deploy_type }} (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 240
     needs: discover
