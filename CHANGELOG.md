@@ -1,3 +1,8 @@
+## [2.1.0] - 2026-02-08
+
+* Improves CI and release reliability by simplifying workflows, correcting permission handling, and hardening the pipeline against transient upstream failures.
+
+
 ## [2.0.0] - 2026-02-08
 
 * **Standardized container execution** by fully replacing raw Docker CLI usage with the *container* and *compose* wrappers, enforcing engine-agnostic behavior via integration tests
