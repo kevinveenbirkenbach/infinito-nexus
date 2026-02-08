@@ -258,7 +258,6 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
 
     if hasattr(templar, "available_variables"):
         try:
-            out_s: str
             prev_avail = templar.available_variables
             templar.available_variables = variables
             avail_changed = True
@@ -268,9 +267,9 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
 
     try:
         try:
-            out_s = templar.template(s, fail_on_undefined=True)
+            rendered = templar.template(s, fail_on_undefined=True)
         except TypeError:
-            out_s = templar.template(s)
+            rendered = templar.template(s)
     finally:
         if (
             avail_changed
@@ -299,7 +298,8 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
                 # but we clear the flag to reflect that restoration did not succeed.
                 disable_changed_1 = False
 
-                _unused_disable_changed_1 = False
+    # Normalize to string (templar may return None)
+    out_s = "" if rendered is None else str(rendered)
 
     # If templar didn't change anything while Jinja exists:
     if out_s.strip() == s.strip() and ("{{" in s or "{%" in s):

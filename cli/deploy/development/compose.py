@@ -142,8 +142,12 @@ class Compose:
         """
         Tear down the infinito docker compose stack for this repo/distro.
         """
-        # Delegate directly to docker compose to avoid importing cli.deploy.development.down
-        self.run(["down"], check=True, capture=False, live=True)
+        # IMPORTANT:
+        # Keep the same behavior as cli.deploy.development.down (volumes + CI cleanup).
+        # Local import avoids runtime import cycles.
+        from .down import down_stack
+
+        down_stack(repo_root=self.repo_root, distro=self.distro)
 
     def exec(
         self,

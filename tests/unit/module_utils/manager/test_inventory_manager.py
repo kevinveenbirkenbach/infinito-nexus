@@ -3,11 +3,11 @@
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from module_utils.manager.inventory import InventoryManager  # type: ignore
 from module_utils.handler.vault import VaultScalar  # type: ignore
 from module_utils.manager.value_generator import ValueGenerator  # type: ignore
-from unittest import mock
 
 
 class TestInventoryManager(unittest.TestCase):
