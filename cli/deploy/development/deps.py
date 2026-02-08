@@ -1,8 +1,14 @@
+# cli/deploy/development/deps.py
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # Import only for type checking to avoid runtime import cycles.
+    from .compose import Compose
 
 
-def resolve_run_after(compose: Compose, role_name: str) -> list[str]:
+def resolve_run_after(compose: "Compose", role_name: str) -> list[str]:
     """
     Calls resolver inside the infinito container:
       python -m cli.meta.applications.resolution.combined <role_name>
