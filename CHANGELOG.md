@@ -1,3 +1,8 @@
+## [2.1.2] - 2026-02-08
+
+* Removes the v* tag trigger from the push workflow so CI runs only on branch pushes. This prevents duplicate pipeline executions when pushing a branch together with a version tag and aligns the workflow with the updated release process.
+
+
 ## [2.1.1] - 2026-02-08
 
 * Resolved CI instability caused by incomplete Docker cleanup between distro runs
