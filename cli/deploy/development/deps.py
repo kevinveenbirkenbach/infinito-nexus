@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from .compose import Compose
 
 
 def resolve_run_after(compose: Compose, role_name: str) -> list[str]:
