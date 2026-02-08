@@ -27,6 +27,7 @@ permissions:
 
 jobs:
   release:
+    name: 🚀 Release version
     runs-on: ubuntu-latest
     env:
       VERSION_TAG: ${{ inputs.tag || github.event.inputs.tag }}

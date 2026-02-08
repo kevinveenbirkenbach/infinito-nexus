@@ -78,7 +78,7 @@ jobs:
           make ci-discover-output
 
   deploy:
-    name: 🚀 Deploy app (${{ needs.discover.outputs.test_deploy_type }} (${{ matrix.app }})
+    name: 🚀 Deploy ${{ needs.discover.outputs.test_deploy_type }} app (${{ matrix.app }})
     runs-on: ubuntu-latest
     timeout-minutes: 240
     needs: discover

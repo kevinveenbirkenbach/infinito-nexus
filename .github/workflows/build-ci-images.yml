@@ -40,7 +40,7 @@ jobs:
           echo "Using matrix: ${json}"
 
   build:
-    name: "👷‍♀️ build: ${{ matrix.distro }}"
+    name: 🏗️ Build CI image (${{ matrix.distro }})
     needs: prepare
     runs-on: ubuntu-latest
 
