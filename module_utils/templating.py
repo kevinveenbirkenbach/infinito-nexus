@@ -279,23 +279,24 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
             try:
                 templar.available_variables = prev_avail
             except Exception:
-                # Best-effort cleanup: failure to restore available_variables should not
-                # break templating; ignore any error during this rollback.
-                pass
-                _unused_avail_changed = False
+                # Best-effort cleanup: failure to restore available_variables is ignored,
+                # but we clear the flag to reflect that restoration did not succeed.
+                avail_changed = False
+
         if disable_changed_2:
             try:
                 setattr(templar, "_disable_lookups", prev_disable_2)
             except Exception:
-                # Best-effort cleanup: ignore errors while restoring _disable_lookups
-                # to avoid raising from cleanup code.
-                pass
-                _unused_disable_changed_2 = False
+                # Best-effort cleanup: failure to restore _disable_lookups is ignored,
+                # but we clear the flag to reflect that restoration did not succeed.
+                disable_changed_2 = False
+        if disable_changed_1:
+            try:
                 setattr(templar, "disable_lookups", prev_disable_1)
             except Exception:
-                # Best-effort cleanup: ignore errors while restoring disable_lookups
-                # to avoid raising from cleanup code.
-                pass
+                # Best-effort cleanup: failure to restore disable_lookups is ignored,
+                # but we clear the flag to reflect that restoration did not succeed.
+                disable_changed_1 = False
 
                 _unused_disable_changed_1 = False
 
