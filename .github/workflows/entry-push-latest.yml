@@ -16,24 +16,36 @@ permissions:
 
 jobs:
   pick-distro:
-    name: 🎲 Pick random distro
+    name: 🎲 Pick distro(s)
     runs-on: ubuntu-latest
     outputs:
-      distro: ${{ steps.pick.outputs.distro }}
+      distros: ${{ steps.pick.outputs.distros }}
     steps:
       - id: pick
         shell: bash
         run: |
           set -euo pipefail
-          distros=(arch debian ubuntu fedora centos)
-          one="$(printf "%s\n" "${distros[@]}" | shuf -n 1)"
-          echo "distro=${one}" >> "$GITHUB_OUTPUT"
-          echo "=== Picked distro: ${one} ==="
+
+          ALL_DISTROS=(arch debian ubuntu fedora centos)
+
+          # If this is a version tag push like v1.2.3 -> run all distros
+          if [[ "${GITHUB_REF_TYPE}" == "tag" && "${GITHUB_REF_NAME}" =~ ^v[0-9]+(\.[0-9]+)*$ ]]; then
+            distros="${ALL_DISTROS[*]}"
+            echo "🎯 Version tag detected (${GITHUB_REF_NAME}) → running ALL distros"
+          else
+            # Otherwise (branch push) -> pick exactly one random distro
+            one="$(printf "%s\n" "${ALL_DISTROS[@]}" | shuf -n 1)"
+            distros="${one}"
+            echo "🎲 Branch push → picked distro: ${one}"
+          fi
+
+          echo "distros=${distros}" >> "$GITHUB_OUTPUT"
+          echo "=== Selected distros: ${distros} ==="
 
   ci-orchestrator:
     name: 🎶 Orchestra CI/CD
     needs: pick-distro
     uses: ./.github/workflows/ci-orchestrator.yml
     with:
-      # ci-orchestrator expects a space-separated list → give it exactly one
-      distros: ${{ needs.pick-distro.outputs.distro }}
+      # ci-orchestrator expects a space-separated list → here it's either one or many
+      distros: ${{ needs.pick-distro.outputs.distros }}
