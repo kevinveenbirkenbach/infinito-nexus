@@ -24,8 +24,9 @@ def _drain_stream(
     finally:
         try:
             stream.close()
-        except Exception:
-            pass
+        except Exception as exc:
+            sys.stderr.write(f"Warning: failed to close stream {stream!r}: {exc}\n")
+            sys.stderr.flush()
 
 
 def run_streaming(
