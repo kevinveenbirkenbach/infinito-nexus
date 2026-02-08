@@ -18,4 +18,4 @@ galaxy_info:
   - desktop
   - archlinux
   - automation
-  lifecycle: alpha
+  lifecycle: pre-alpha

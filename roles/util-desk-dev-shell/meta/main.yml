@@ -20,6 +20,6 @@ galaxy_info:
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
   documentation: https://docs.infinito.nexus/
-  lifecycle: alpha
+  lifecycle: pre-alpha
 dependencies:
 - util-desk-dev-core
