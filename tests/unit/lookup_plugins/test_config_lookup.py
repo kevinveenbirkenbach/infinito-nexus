@@ -33,6 +33,7 @@ class TestConfigLookup(unittest.TestCase):
                 except IsADirectoryError:
                     p.rmdir()
                 except FileNotFoundError:
+                    # If the file was already removed, we can safely ignore this.
                     pass
             try:
                 self._tmp.rmdir()
@@ -52,6 +53,7 @@ class TestConfigLookup(unittest.TestCase):
                 except IsADirectoryError:
                     p.rmdir()
                 except FileNotFoundError:
+                    # Missing files during teardown are acceptable and can be ignored.
                     pass
             try:
                 self._tmp.rmdir()
