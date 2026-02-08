@@ -139,9 +139,11 @@ class Compose:
                 raise RuntimeError(f"entry.sh init failed (rc={r.returncode})")
 
     def down(self) -> None:
-        from .down import down_stack
-
-        down_stack(repo_root=self.repo_root, distro=self.distro)
+        """
+        Tear down the infinito docker compose stack for this repo/distro.
+        """
+        # Delegate directly to docker compose to avoid importing cli.deploy.development.down
+        self.run(["down"], check=True, capture=False, live=True)
 
     def exec(
         self,
