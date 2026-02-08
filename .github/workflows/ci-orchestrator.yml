@@ -99,16 +99,13 @@ jobs:
       distros: ${{ inputs.distros }}
   
   # Priority C
-  # test-deploy-workstation:
-  #   needs:
-  #     - code-quality-gate
-  #     - build-ci-images
-  #     - test-deploy-server
-  #     - test-deploy-universal
-  #     - mirror-images-missing
-  #   uses: ./.github/workflows/test-deploy-workstation.yml
-  #   with:
-  #     distros: ${{ inputs.distros }}
+  test-deploy-workstation:
+    needs:
+      - code-quality-gate
+      - build-ci-images
+    uses: ./.github/workflows/test-deploy-workstation.yml
+    with:
+      distros: ${{ inputs.distros }}
 
   # Test Installation
   test-install-make:
@@ -129,7 +126,7 @@ jobs:
     needs:
       - test-deploy-server
       - test-deploy-universal
-    # - test-deploy-workstation
+      - test-deploy-workstation
       - test-install-gate
     runs-on: ubuntu-latest
     steps:
