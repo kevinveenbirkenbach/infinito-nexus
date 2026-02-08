@@ -1,3 +1,8 @@
+## [2.1.1] - 2026-02-08
+
+* Resolved CI instability caused by incomplete Docker cleanup between distro runs
+
+
 ## [2.1.0] - 2026-02-08
 
 * Improves CI and release reliability by simplifying workflows, correcting permission handling, and hardening the pipeline against transient upstream failures.
