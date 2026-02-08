@@ -1,5 +1,6 @@
 import sys
 import unittest
+import importlib
 from ansible.errors import AnsibleError
 from module_utils.tls_common import (
     AVAILABLE_FLAVORS,
@@ -21,7 +22,7 @@ from module_utils.tls_common import (
 )
 
 # Make "ansible.module_utils.tls_common" importable during plain unit tests.
-import module_utils.tls_common as _tls_common
+_tls_common = importlib.import_module("module_utils.tls_common")
 
 sys.modules.setdefault("ansible.module_utils.tls_common", _tls_common)
 
