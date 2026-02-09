@@ -25,6 +25,12 @@ jobs:
     outputs:
       distros: ${{ steps.pick.outputs.distros }}
     steps:
+      - name: Checkout (with tags)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
       - id: pick
         shell: bash
         run: |
@@ -32,7 +38,6 @@ jobs:
 
           ALL_DISTROS=(arch debian ubuntu fedora centos)
 
-          # Detect if the current commit (GITHUB_SHA) has an exact version tag (v1.2.3 etc.)
           version_tag="$(
             git tag --points-at "${GITHUB_SHA}" \
               | grep -E '^v[0-9]+(\.[0-9]+)*$' \
