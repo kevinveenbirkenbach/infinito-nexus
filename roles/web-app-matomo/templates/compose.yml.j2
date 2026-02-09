@@ -8,9 +8,18 @@
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
       - data:/var/www/html
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "php -r 'exit(@file_get_contents(\"http://localhost/index.php\")?0:1);'"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
-{% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}
 
   {{ MATOMO_BOOTSTRAP_SERVICE }}:
 {% set docker_restart_policy = 'no' %}
@@ -24,7 +33,7 @@
     image: "{{ MATOMO_BOOTSTRAP_IMAGE }}:{{ MATOMO_BOOTSTRAP_VERSION }}"
     depends_on:
       {{ MATOMO_SERVICE }}:
-        condition: service_started
+        condition: service_healthy
 
 {{ applications | compose_volumes(
     application_id,
