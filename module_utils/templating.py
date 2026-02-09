@@ -246,7 +246,6 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
         return _fallback_render_embedded(s, variables)
 
     prev_avail: Optional[Any] = None
-    avail_changed = False
 
     # Temporarily force lookups ON (different Ansible versions use different flags)
     disable_changed_1, prev_disable_1 = _set_templar_var(
@@ -260,10 +259,8 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
         try:
             prev_avail = templar.available_variables
             templar.available_variables = variables
-            avail_changed = True
         except Exception:
             prev_avail = None
-            avail_changed = False
 
     try:
         try:
@@ -271,17 +268,12 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
         except TypeError:
             rendered = templar.template(s)
     finally:
-        if (
-            avail_changed
-            and prev_avail is not None
-            and hasattr(templar, "available_variables")
-        ):
+        if prev_avail is not None and hasattr(templar, "available_variables"):
             try:
                 templar.available_variables = prev_avail
             except Exception:
-                # Best-effort cleanup: failure to restore available_variables is ignored,
-                # but we clear the flag to reflect that restoration did not succeed.
-                avail_changed = False
+                # Best-effort cleanup: failure to restore available_variables is ignored.
+                pass
 
         if disable_changed_2:
             try:
