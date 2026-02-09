@@ -1,13 +1,13 @@
 # tests/integration/test_inventory_manager.py
 
 import tempfile
-import unittest
 from pathlib import Path
+from unittest import TestCase, main
+from unittest.mock import patch
 
 from module_utils.manager.inventory import InventoryManager  # type: ignore
 from module_utils.handler.vault import VaultScalar  # type: ignore
 
-mock = unittest.mock
 
 class _FakeVaultHandler:
     """
@@ -30,7 +30,7 @@ class _FakeVaultHandler:
         )
 
 
-class TestInventoryManagerIntegration(unittest.TestCase):
+class TestInventoryManagerIntegration(TestCase):
     def test_apply_schema_with_transitive_provider_role_resolution(self):
         """
         Integration-style test (REAL provider resolution):
@@ -126,7 +126,7 @@ class TestInventoryManagerIntegration(unittest.TestCase):
 
             fake_vault = _FakeVaultHandler("pw")
 
-            with mock.patch(
+            with patch(
                 "module_utils.manager.inventory.VaultHandler",
                 side_effect=lambda pw: fake_vault,
             ):
@@ -198,4 +198,4 @@ class TestInventoryManagerIntegration(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
