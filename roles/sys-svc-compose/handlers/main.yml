@@ -20,18 +20,20 @@
       --chdir {{ lookup('container', application_id, 'directories.instance') }}
       --project {{ application_id | get_entity_name }}
       --compose-files {{ lookup('compose_file_args', application_id, include_ca=False) | quote }}
-      {% if lookup('container', application_id, 'files.env') is file %}--env-file {{ lookup('container', application_id, 'files.env') }}{% endif %}
+      {% if lookup('container', application_id, 'files.env') is file %}
+      --env-file {{ lookup('container', application_id, 'files.env') }}
+      {% endif %}
       --lock-dir {{ DIR_COMPOSE_PULL_LOCK }}
       --lock-key {{ lookup('container', application_id, 'directories.instance') | hash('sha1') }}
-      --attempts 6
-      --sleep 20
-      --sleep-cap 240
       --ignore-buildable
   register: pull
   changed_when: "'pulled' in pull.stdout"
   environment:
     COMPOSE_HTTP_TIMEOUT: "600"
     DOCKER_CLIENT_TIMEOUT: "600"
+  retries: 10
+  delay: 30
+  until: pull is succeeded
   listen:
     - compose up
 

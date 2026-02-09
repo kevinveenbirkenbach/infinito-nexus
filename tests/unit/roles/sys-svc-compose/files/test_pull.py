@@ -1,4 +1,3 @@
-# tests/unit/roles/sys-svc-compose/files/test_compose_pull.py
 import importlib.util
 import sys
 import tempfile
@@ -9,7 +8,7 @@ from unittest.mock import patch
 
 
 def _repo_root(start: Path) -> Path:
-    # __file__ = tests/unit/roles/sys-svc-compose/files/test_compose_pull.py
+    # __file__ = tests/unit/roles/sys-svc-compose/files/test_pull.py
     return start.resolve().parents[5]
 
 
@@ -24,42 +23,10 @@ def _load_module(rel_path: str, name: str) -> ModuleType:
 
 
 class TestComposePull(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.m = _load_module("roles/sys-svc-compose/files/pull.py", "compose_pull_mod")
 
-    def test_transient_regex_matches(self):
-        self.assertTrue(self.m.TRANSIENT_RE.search("TLS handshake timeout"))
-        self.assertTrue(self.m.TRANSIENT_RE.search("Could not resolve host"))
-        self.assertTrue(self.m.TRANSIENT_RE.search("unexpected EOF"))
-        self.assertTrue(self.m.TRANSIENT_RE.search("error pulling image configuration"))
-        self.assertTrue(self.m.TRANSIENT_RE.search("image config verification failed"))
-        self.assertFalse(self.m.TRANSIENT_RE.search("permission denied"))
-
-    def test_retry_image_config_verification_failed_then_success(self):
-        side_effects = [
-            (
-                1,
-                "error pulling image configuration: image config verification failed for digest sha256:deadbeef",
-            ),
-            (0, "done\n"),
-        ]
-        with (
-            patch.object(self.m, "run_cmd", side_effect=side_effects) as run_cmd,
-            patch.object(self.m.time, "sleep") as sleep,
-        ):
-            self.m.retry(
-                ["docker", "compose", "pull"],
-                cwd=Path("/"),
-                env={},
-                attempts=6,
-                sleep_s=2.0,
-                sleep_cap_s=60.0,
-            )
-
-        self.assertEqual(run_cmd.call_count, 2)
-        sleep.assert_called_once_with(2.0)
-
-    def test_run_cmd_returns_rc_and_output(self):
+    def test_run_cmd_returns_rc_and_output(self) -> None:
         cwd = Path("/")
         env = {}
 
@@ -77,7 +44,7 @@ class TestComposePull(unittest.TestCase):
         self.assertEqual(rc, 7)
         self.assertEqual(out, "hello\n")
 
-    def test_base_compose_cmd_includes_project_files_and_env(self):
+    def test_base_compose_cmd_includes_project_files_and_env(self) -> None:
         cmd = self.m.base_compose_cmd(
             project="p", compose_files="-f a.yml -f b.yml", env_file="/x/.env"
         )
@@ -88,7 +55,7 @@ class TestComposePull(unittest.TestCase):
         self.assertIn("--env-file", cmd)
         self.assertIn("/x/.env", cmd)
 
-    def test_base_compose_cmd_omits_env_when_empty(self):
+    def test_base_compose_cmd_omits_env_when_empty(self) -> None:
         cmd = self.m.base_compose_cmd(
             project="p", compose_files="-f a.yml", env_file=""
         )
@@ -97,93 +64,7 @@ class TestComposePull(unittest.TestCase):
         self.assertIn("a.yml", cmd)
         self.assertNotIn("--env-file", cmd)
 
-    def test_retry_success_first_try_no_sleep(self):
-        with (
-            patch.object(self.m, "run_cmd", return_value=(0, "ok\n")) as run_cmd,
-            patch.object(self.m.time, "sleep") as sleep,
-        ):
-            self.m.retry(
-                ["docker", "compose", "pull"],
-                cwd=Path("/"),
-                env={},
-                attempts=3,
-                sleep_s=0.1,
-                sleep_cap_s=1.0,
-            )
-
-        run_cmd.assert_called_once()
-        sleep.assert_not_called()
-
-    def test_retry_transient_then_success_sleeps_once(self):
-        side_effects = [
-            (1, 'Get "https://registry-1.docker.io/v2/": TLS handshake timeout'),
-            (0, "done\n"),
-        ]
-        with (
-            patch.object(self.m, "run_cmd", side_effect=side_effects) as run_cmd,
-            patch.object(self.m.time, "sleep") as sleep,
-        ):
-            self.m.retry(
-                ["docker", "compose", "pull"],
-                cwd=Path("/"),
-                env={},
-                attempts=6,
-                sleep_s=2.0,
-                sleep_cap_s=60.0,
-            )
-
-        self.assertEqual(run_cmd.call_count, 2)
-        sleep.assert_called_once_with(2.0)
-
-    def test_retry_non_transient_raises(self):
-        with (
-            patch.object(
-                self.m, "run_cmd", return_value=(1, "unauthorized: access denied")
-            ),
-            patch.object(self.m.time, "sleep") as sleep,
-        ):
-            with self.assertRaises(RuntimeError) as ctx:
-                self.m.retry(
-                    ["docker", "compose", "pull"],
-                    cwd=Path("/"),
-                    env={},
-                    attempts=6,
-                    sleep_s=2.0,
-                    sleep_cap_s=60.0,
-                )
-        self.assertIn("Non-transient failure", str(ctx.exception))
-        sleep.assert_not_called()
-
-    def test_retry_exhausts_attempts_raises(self):
-        # 3 attempts -> 2 sleeps
-        with (
-            patch.object(
-                self.m,
-                "run_cmd",
-                side_effect=[
-                    (1, "TLS handshake timeout"),
-                    (1, "TLS handshake timeout"),
-                    (1, "TLS handshake timeout"),
-                ],
-            ),
-            patch.object(self.m.time, "sleep") as sleep,
-        ):
-            with self.assertRaises(RuntimeError) as ctx:
-                self.m.retry(
-                    ["docker", "compose", "pull"],
-                    cwd=Path("/"),
-                    env={},
-                    attempts=3,
-                    sleep_s=1.0,
-                    sleep_cap_s=60.0,
-                )
-
-        self.assertIn("Transient failure persisted", str(ctx.exception))
-        self.assertEqual(sleep.call_count, 2)
-        sleep.assert_any_call(1.0)
-        sleep.assert_any_call(2.0)
-
-    def test_has_buildable_services_true(self):
+    def test_has_buildable_services_true(self) -> None:
         config_out = """
 services:
   app:
@@ -199,7 +80,7 @@ services:
                 )
             )
 
-    def test_has_buildable_services_false(self):
+    def test_has_buildable_services_false(self) -> None:
         config_out = """
 services:
   app:
@@ -213,7 +94,22 @@ services:
                 )
             )
 
-    def test_main_short_circuits_when_lock_exists(self):
+    def test_run_or_fail_success_does_not_raise(self) -> None:
+        with patch.object(self.m, "run_cmd", return_value=(0, "ok\n")):
+            # Should not raise
+            self.m.run_or_fail(
+                ["docker", "compose", "ps"], cwd=Path("/"), env={}, label="x"
+            )
+
+    def test_run_or_fail_failure_raises(self) -> None:
+        with patch.object(self.m, "run_cmd", return_value=(9, "boom\n")):
+            with self.assertRaises(RuntimeError) as ctx:
+                self.m.run_or_fail(
+                    ["docker", "compose", "pull"], cwd=Path("/"), env={}, label="pull"
+                )
+        self.assertIn("pull failed", str(ctx.exception))
+
+    def test_main_short_circuits_when_lock_exists(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             lock_dir = Path(td) / "locks"
             lock_dir.mkdir(parents=True, exist_ok=True)
@@ -228,8 +124,6 @@ services:
                 "p",
                 "--compose-files",
                 "-f a.yml -f b.yml",
-                "--env-file",
-                "",  # optional
                 "--lock-dir",
                 str(lock_dir),
                 "--lock-key",
@@ -238,35 +132,22 @@ services:
 
             with (
                 patch.object(sys, "argv", argv),
-                patch.object(self.m, "retry") as retry_mock,
+                patch.object(self.m, "run_or_fail") as rof_mock,
                 patch.object(self.m, "has_buildable_services") as hbs_mock,
             ):
                 rc = self.m.main()
 
             self.assertEqual(rc, 0)
-            retry_mock.assert_not_called()
+            rof_mock.assert_not_called()
             hbs_mock.assert_not_called()
 
-    def test_main_runs_build_and_pull_and_writes_lock(self):
+    def test_main_runs_build_and_pull_and_writes_lock(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             chdir = Path(td) / "instance"
             chdir.mkdir(parents=True, exist_ok=True)
 
             lock_dir = Path(td) / "locks"
             lock_key = "k1"
-
-            calls: list[list[str]] = []
-
-            def fake_retry(cmd, *, cwd, env, attempts, sleep_s, sleep_cap_s) -> None:
-                calls.append(cmd)
-
-            def fake_run_cmd(
-                cmd: list[str], *, cwd: Path, env: dict[str, str]
-            ) -> tuple[int, str]:
-                # only used by main() to check pull --help when ignore_buildable is requested
-                if cmd[-2:] == ["pull", "--help"]:
-                    return 0, "Usage:\n  --ignore-buildable\n"
-                return 0, ""
 
             argv = [
                 "pull.py",
@@ -277,17 +158,11 @@ services:
                 "--compose-files",
                 "-f a.yml -f b.yml",
                 "--env-file",
-                "/x/.env",  # optional
+                "/x/.env",
                 "--lock-dir",
                 str(lock_dir),
                 "--lock-key",
                 lock_key,
-                "--attempts",
-                "2",
-                "--sleep",
-                "0.01",
-                "--sleep-cap",
-                "0.02",
                 "--ignore-buildable",
             ]
 
@@ -304,12 +179,27 @@ services:
                 "/x/.env",
             ]
 
+            def fake_run_cmd(
+                cmd: list[str], *, cwd: Path, env: dict[str, str]
+            ) -> tuple[int, str]:
+                # main() probes pull --help to detect --ignore-buildable support
+                if cmd[-2:] == ["pull", "--help"]:
+                    return 0, "Usage:\n  --ignore-buildable\n"
+                return 0, ""
+
+            calls: list[list[str]] = []
+
+            def fake_run_or_fail(
+                cmd: list[str], *, cwd: Path, env: dict[str, str], label: str
+            ) -> None:
+                calls.append(cmd)
+
             with (
                 patch.object(sys, "argv", argv),
                 patch.object(self.m, "has_buildable_services", return_value=True),
-                patch.object(self.m, "retry", side_effect=fake_retry),
                 patch.object(self.m, "run_cmd", side_effect=fake_run_cmd),
                 patch.object(self.m, "base_compose_cmd", return_value=base_cmd),
+                patch.object(self.m, "run_or_fail", side_effect=fake_run_or_fail),
             ):
                 rc = self.m.main()
 
@@ -319,10 +209,61 @@ services:
                 "lock file should be written on success",
             )
 
-            # Expect two retry calls: build --pull, then pull --ignore-buildable
-            self.assertGreaterEqual(len(calls), 2)
+            # Expect two calls: build --pull, then pull --ignore-buildable
             self.assertEqual(calls[0], base_cmd + ["build", "--pull"])
             self.assertEqual(calls[1], base_cmd + ["pull", "--ignore-buildable"])
+
+    def test_main_pull_omits_ignore_buildable_when_not_supported(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            chdir = Path(td) / "instance"
+            chdir.mkdir(parents=True, exist_ok=True)
+
+            lock_dir = Path(td) / "locks"
+            lock_key = "k2"
+
+            argv = [
+                "pull.py",
+                "--chdir",
+                str(chdir),
+                "--project",
+                "p",
+                "--compose-files",
+                "-f a.yml",
+                "--lock-dir",
+                str(lock_dir),
+                "--lock-key",
+                lock_key,
+                "--ignore-buildable",
+            ]
+
+            base_cmd = ["docker", "compose", "-p", "p", "-f", "a.yml"]
+
+            def fake_run_cmd(
+                cmd: list[str], *, cwd: Path, env: dict[str, str]
+            ) -> tuple[int, str]:
+                if cmd[-2:] == ["pull", "--help"]:
+                    return 0, "Usage:\n"  # no --ignore-buildable mentioned
+                return 0, ""
+
+            calls: list[list[str]] = []
+
+            def fake_run_or_fail(
+                cmd: list[str], *, cwd: Path, env: dict[str, str], label: str
+            ) -> None:
+                calls.append(cmd)
+
+            with (
+                patch.object(sys, "argv", argv),
+                patch.object(self.m, "has_buildable_services", return_value=False),
+                patch.object(self.m, "run_cmd", side_effect=fake_run_cmd),
+                patch.object(self.m, "base_compose_cmd", return_value=base_cmd),
+                patch.object(self.m, "run_or_fail", side_effect=fake_run_or_fail),
+            ):
+                rc = self.m.main()
+
+            self.assertEqual(rc, 0)
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(calls[0], base_cmd + ["pull"])
 
 
 if __name__ == "__main__":
