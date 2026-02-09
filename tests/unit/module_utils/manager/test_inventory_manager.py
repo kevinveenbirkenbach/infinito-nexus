@@ -1,15 +1,15 @@
 # tests/unit/module_utils/manager/test_inventory_manager.py
 
 import tempfile
-import unittest
 from pathlib import Path
+from unittest import TestCase, main, mock
 
 from module_utils.manager.inventory import InventoryManager  # type: ignore
 from module_utils.handler.vault import VaultScalar  # type: ignore
 from module_utils.manager.value_generator import ValueGenerator  # type: ignore
 
 
-class TestInventoryManager(unittest.TestCase):
+class TestInventoryManager(TestCase):
     def test_load_application_id_missing_exits(self):
         """
         If vars/main.yml does not contain application_id, InventoryManager
@@ -45,11 +45,11 @@ class TestInventoryManager(unittest.TestCase):
                 return {}
 
             with (
-                unittest.mock.patch(
+                mock.patch(
                     "module_utils.manager.inventory.YamlHandler.load_yaml",
                     side_effect=fake_load_yaml,
                 ),
-                unittest.mock.patch("module_utils.manager.inventory.VaultHandler"),
+                mock.patch("module_utils.manager.inventory.VaultHandler"),
             ):
                 with self.assertRaises(SystemExit) as ctx:
                     InventoryManager(
@@ -383,4 +383,4 @@ class TestInventoryManager(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    main()

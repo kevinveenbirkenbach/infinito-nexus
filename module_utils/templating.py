@@ -173,6 +173,9 @@ def _fallback_eval_expr(expr: str, variables: dict) -> str:
     if m:
         key = m.group(1)
         val: Any = os.environ.get(key)
+        if val is None:
+            # Convenience: match your tests / typical usage (DOMAIN vs domain)
+            val = os.environ.get(key.lower(), os.environ.get(key.upper()))
     else:
         # Allow minimal list literals (needed for patterns like: [ DIR_BIN, 'x' ] | path_join)
         if head.startswith("[") and head.endswith("]"):
@@ -262,11 +265,15 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
         except Exception:
             prev_avail = None
 
+    rendered: Any = s
     try:
         try:
             rendered = templar.template(s, fail_on_undefined=True)
         except TypeError:
             rendered = templar.template(s)
+        except Exception:
+            # If templar is present but fails unexpectedly, fall back to safe subset below.
+            rendered = s
     finally:
         if prev_avail is not None and hasattr(templar, "available_variables"):
             try:
@@ -279,15 +286,14 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
             try:
                 setattr(templar, "_disable_lookups", prev_disable_2)
             except Exception:
-                # Best-effort cleanup: failure to restore _disable_lookups is ignored,
-                # but we clear the flag to reflect that restoration did not succeed.
+                # Best-effort cleanup: failure to restore _disable_lookups is ignored.
                 pass
         if disable_changed_1:
             try:
                 setattr(templar, "disable_lookups", prev_disable_1)
             except Exception:
-                # Best-effort cleanup: failure to restore disable_lookups is ignored,
-                # but we clear the flag to reflect that restoration did not succeed.
+                # Best-effort cleanup: failure to restore disable_lookups is ignored.
+                pass
 
     # Normalize to string (templar may return None)
     out_s = "" if rendered is None else str(rendered)
