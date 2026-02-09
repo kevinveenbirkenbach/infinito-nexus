@@ -1,3 +1,8 @@
+## [2.1.7] - 2026-02-09
+
+* Improves CI stability by extending deploy job timeouts to 6 hours, moving compose pull retries into Ansible, and adding additional deployer metadata.
+
+
 ## [2.1.6] - 2026-02-09
 
 * Improves CI and test robustness by fixing Jinja2 templating edge cases, unifying unittest mock imports, hardening Docker image pull retries, and resolving multiple code-scanning alerts without suppressions.
