@@ -288,7 +288,6 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
             except Exception:
                 # Best-effort cleanup: failure to restore disable_lookups is ignored,
                 # but we clear the flag to reflect that restoration did not succeed.
-                disable_changed_1 = False
 
     # Normalize to string (templar may return None)
     out_s = "" if rendered is None else str(rendered)
