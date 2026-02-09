@@ -478,7 +478,7 @@ class TestComposeCaInject(unittest.TestCase):
                 self.m, "docker_image_has_bin_sh", return_value=True
             ) as p_has_sh,
         ):
-            _doc = self.m.render_override(
+            self.m.render_override(
                 services,
                 service_to_cmd,
                 cwd=Path("/tmp"),
