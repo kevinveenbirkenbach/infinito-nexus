@@ -281,7 +281,7 @@ def _templar_render_best_effort(templar: Any, s: str, variables: dict) -> str:
             except Exception:
                 # Best-effort cleanup: failure to restore _disable_lookups is ignored,
                 # but we clear the flag to reflect that restoration did not succeed.
-                disable_changed_2 = False
+                pass
         if disable_changed_1:
             try:
                 setattr(templar, "disable_lookups", prev_disable_1)
