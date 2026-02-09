@@ -15,6 +15,8 @@ TRANSIENT_RE = re.compile(
     r"TLS handshake timeout|i/o timeout|timed out|timeout|"
     r"connection reset|connection refused|temporary failure|try again|"
     r"unexpected EOF|\bEOF\b|recv failure|"
+    r"error pulling image configuration|"
+    r"image config verification failed|"
     r"could not resolve host|failed to connect|"
     r"network is unreachable|no route to host|"
     r"context deadline exceeded|"
@@ -68,7 +70,7 @@ def retry(
             )
 
         print(
-            f"Retrying in {delay:.1f}s (attempt {attempt}/{attempts})...",
+            f"Retrying in {delay:.1f}s (next attempt {attempt + 1}/{attempts})...",
             file=sys.stderr,
         )
         time.sleep(delay)

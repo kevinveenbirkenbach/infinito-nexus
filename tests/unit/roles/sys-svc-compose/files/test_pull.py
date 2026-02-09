@@ -31,7 +31,33 @@ class TestComposePull(unittest.TestCase):
         self.assertTrue(self.m.TRANSIENT_RE.search("TLS handshake timeout"))
         self.assertTrue(self.m.TRANSIENT_RE.search("Could not resolve host"))
         self.assertTrue(self.m.TRANSIENT_RE.search("unexpected EOF"))
+        self.assertTrue(self.m.TRANSIENT_RE.search("error pulling image configuration"))
+        self.assertTrue(self.m.TRANSIENT_RE.search("image config verification failed"))
         self.assertFalse(self.m.TRANSIENT_RE.search("permission denied"))
+
+    def test_retry_image_config_verification_failed_then_success(self):
+        side_effects = [
+            (
+                1,
+                "error pulling image configuration: image config verification failed for digest sha256:deadbeef",
+            ),
+            (0, "done\n"),
+        ]
+        with (
+            patch.object(self.m, "run_cmd", side_effect=side_effects) as run_cmd,
+            patch.object(self.m.time, "sleep") as sleep,
+        ):
+            self.m.retry(
+                ["docker", "compose", "pull"],
+                cwd=Path("/"),
+                env={},
+                attempts=6,
+                sleep_s=2.0,
+                sleep_cap_s=60.0,
+            )
+
+        self.assertEqual(run_cmd.call_count, 2)
+        sleep.assert_called_once_with(2.0)
 
     def test_run_cmd_returns_rc_and_output(self):
         cwd = Path("/")
