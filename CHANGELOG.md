@@ -1,3 +1,8 @@
+## [2.1.8] - 2026-02-09
+
+* Add SSH client to the CI Docker image so Ansible controller runs no longer fail due to a missing ssh binary.
+
+
 ## [2.1.7] - 2026-02-09
 
 * Improves CI stability by extending deploy job timeouts to 6 hours, moving compose pull retries into Ansible, and adding additional deployer metadata.
