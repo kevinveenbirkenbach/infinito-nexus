@@ -57,10 +57,13 @@ def build_render_context(variables: Dict[str, Any]) -> Tuple[dict, str]:
 
 def _jinja_env():
     try:
-        from jinja2 import Environment, StrictUndefined
+        from jinja2 import Environment, StrictUndefined, select_autoescape
     except Exception as exc:
         raise AnsibleError(f"jinja_strict: cannot import jinja2. Error: {exc}") from exc
-    return Environment(undefined=StrictUndefined)
+    return Environment(
+        undefined=StrictUndefined,
+        autoescape=select_autoescape(["html", "xml"]),
+    )
 
 
 def render_jinja2_strict_once(
