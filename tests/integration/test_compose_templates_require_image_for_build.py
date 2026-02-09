@@ -181,7 +181,7 @@ class TestComposeBuildRequiresImage(unittest.TestCase):
             # Pretty error output
             msg_lines = [
                 "Some sys-svc-compose templates/files contain a `build:` key but are missing an `image:` key "
-                "at the same indentation level (same YAML mapping level).",
+                + "at the same indentation level (same YAML mapping level).",
                 "",
                 "Offenders:",
             ]
