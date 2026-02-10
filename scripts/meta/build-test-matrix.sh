@@ -7,14 +7,12 @@ set -euo pipefail
 #
 # Inputs via env:
 #   TEST_DEPLOY_TYPE   = server|workstation|universal (required)
-#   TESTED_LIFECYCLES  = space-separated list (optional)
 #
 # Output:
 #   JSON array to stdout (single line, always valid)
 
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 
-TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-}"
 PYTHON="${PYTHON:-python3}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -42,13 +40,9 @@ jq_exclude_regex() {
 }
 
 # ------------------------------------------------------------
-# Lifecycle handling (SC2086-safe)
+# Lifecycle handling (always-on, original set)
 # ------------------------------------------------------------
-lifecycles_args=()
-if [[ -n "${TESTED_LIFECYCLES}" ]]; then
-  read -r -a lifecycles_arr <<< "${TESTED_LIFECYCLES}"
-  lifecycles_args=(--lifecycles "${lifecycles_arr[@]}")
-fi
+lifecycles_args=(--lifecycles alpha beta rc stable)
 
 # ------------------------------------------------------------
 # 1) Get JSON list from container (keep as JSON)
