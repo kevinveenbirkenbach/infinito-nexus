@@ -26,8 +26,6 @@ class TestDedicatedCommandPassthrough(unittest.TestCase):
 
         argv = [
             "/etc/inventories/github-ci/servers.yml",
-            "--host-type",
-            "workstation",
             "--diff",
             # passthrough args (unknown to wrapper parser)
             "--tags",
@@ -53,9 +51,7 @@ class TestDedicatedCommandPassthrough(unittest.TestCase):
         self.assertEqual(kwargs["inventory"], "/etc/inventories/github-ci/servers.yml")
         self.assertTrue(kwargs["diff"])
 
-        # host_type must be forwarded via modes
         self.assertIn("modes", kwargs)
-        self.assertEqual(kwargs["modes"].get("host_type"), "workstation")
 
         # Ensure old MODE_LOGS is not reintroduced
         self.assertNotIn("MODE_LOGS", kwargs["modes"])

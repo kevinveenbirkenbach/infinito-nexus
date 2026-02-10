@@ -44,7 +44,7 @@ def _passthrough_explanation() -> str:
         "  are NOT parsed by this wrapper and are forwarded 1:1 to ansible-playbook.\n"
         "\n"
         "Important behavior:\n"
-        "  - The wrapper injects its own -e variables first (MODE_*, host_type, allowed_applications, ...).\n"
+        "  - The wrapper injects its own -e variables first (MODE_*, allowed_applications, ...).\n"
         "  - Your own ansible-playbook options come last and can therefore override them,\n"
         "    e.g. -e MODE_DEBUG=true.\n"
         "\n"
@@ -114,13 +114,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("inventory", help="Path to the inventory file.")
     parser.add_argument(
         "-l", "--limit", help="Limit execution to certain hosts or groups."
-    )
-    parser.add_argument(
-        "-T",
-        "--host-type",
-        choices=["server", "workstation", "universal"],
-        default="server",
-        help="Specify target type: server, workstation or universal.",
     )
     parser.add_argument(
         "-p", "--password-file", help="Vault password file for encrypted variables."
@@ -205,7 +198,6 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # Build final mode map
     modes: Dict[str, Any] = build_modes_from_args(modes_spec, args)
-    modes["host_type"] = args.host_type
 
     run_ansible_playbook(
         repo_root=REPO_ROOT,

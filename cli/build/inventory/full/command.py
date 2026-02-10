@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 
 import yaml
@@ -64,22 +63,6 @@ def main(argv: list[str] | None = None) -> int:
         help="Inventory style: group (default, one group per app) or hostvars (list as hostvar)",
     )
     parser.add_argument(
-        "-c",
-        "--categories-file",
-        default=os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "roles", "categories.yml")
-        ),
-        help="Path to roles/categories.yml (default: roles/categories.yml at project root)",
-    )
-    parser.add_argument(
-        "-r",
-        "--roles-dir",
-        default=os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "roles")
-        ),
-        help="Path to roles/ directory (default: roles/ at project root)",
-    )
-    parser.add_argument(
         "-o",
         "--output",
         help="Write output to file instead of stdout",
@@ -95,10 +78,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
-        apps = get_all_invokable_apps(
-            categories_file=args.categories_file,
-            roles_dir=args.roles_dir,
-        )
+        apps = get_all_invokable_apps()
     except Exception as exc:
         sys.stderr.write(f"Error: {exc}\n")
         return 1

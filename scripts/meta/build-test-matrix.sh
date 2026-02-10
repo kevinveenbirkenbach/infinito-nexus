@@ -6,8 +6,6 @@ set -euo pipefail
 #
 # Inputs via env:
 #   TEST_DEPLOY_TYPE              = server|workstation|universal (required)
-#   INCLUDE_RE         (optional)
-#   EXCLUDE_RE         (optional)
 #   FINAL_EXCLUDE_RE   (optional)
 #
 # Output:
@@ -15,19 +13,11 @@ set -euo pipefail
 
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 
-INCLUDE_RE="${INCLUDE_RE:-}"
-EXCLUDE_RE="${EXCLUDE_RE:-}"
 FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 cd "$REPO_ROOT"
-
-json_nonempty() {
-  local j="${1:-}"
-  [[ -n "${j}" ]] || j='[]'
-  echo "${j}"
-}
 
 apply_final_exclude() {
   local apps_json="$1"
@@ -89,58 +79,25 @@ filter_by_ci_storage() {
   printf "%s\n" ${kept} | jq -R -s -c 'split("\n") | map(select(length>0))'
 }
 
-discover_simple() {
-  local include_re="$1"
-  local exclude_re="$2"
-  INCLUDE_RE="${include_re}" EXCLUDE_RE="${exclude_re}" scripts/meta/resolve-invokable-roles.sh
-}
-
 case "${TEST_DEPLOY_TYPE}" in
-  server)
-    : "${INCLUDE_RE:=^(web-app-|web-svc-)}"
-    : "${EXCLUDE_RE:=^(web-app-oauth2-proxy)$}"
-    apps_json="$(discover_simple "${INCLUDE_RE}" "${EXCLUDE_RE}")"
-    apps_json="$(json_nonempty "${apps_json}")"
-    ;;
-  workstation)
-    : "${INCLUDE_RE:=^(desk-|util-desk-)}"
-    : "${EXCLUDE_RE:=}"
-    apps_json="$(discover_simple "${INCLUDE_RE}" "${EXCLUDE_RE}")"
-    apps_json="$(json_nonempty "${apps_json}")"
-    ;;
-  universal)
-    # universal = all - (server ∪ workstation)
-    all_json="$(discover_simple '.*' '')"
-    all_json="$(json_nonempty "${all_json}")"
-
-    server_json="$(discover_simple '^(web-app-|web-svc-)' '^(web-app-oauth2-proxy)$')"
-    server_json="$(json_nonempty "${server_json}")"
-
-    workstation_json="$(discover_simple '^(desk-|util-desk-)' '')"
-    workstation_json="$(json_nonempty "${workstation_json}")"
-
+  server|workstation|universal)
     apps_json="$(
-      jq -nc \
-        --argjson all "${all_json}" \
-        --argjson server "${server_json}" \
-        --argjson workstation "${workstation_json}" \
-        '
-          def uniq: unique;
-          def union($a;$b): ($a + $b) | uniq;
-          def minus($a;$b): $a | map(select(. as $x | ($b | index($x)) | not));
-
-          (union($server; $workstation) | uniq) as $covered
-          | minus($all; $covered)
-          | unique
-        '
+      docker compose --profile ci exec -T infinito \
+        "${PYTHON}" -m cli.meta.applications.type --format json --type "${TEST_DEPLOY_TYPE}"
     )"
-    apps_json="$(apply_final_exclude "${apps_json}" '^(web-opt-rdr-www)$')"
+    # Ensure non-empty JSON array
+    [[ -n "${apps_json}" ]] || apps_json="[]"
     ;;
   *)
     echo "ERROR: TEST_DEPLOY_TYPE must be server|workstation|universal (got: ${TEST_DEPLOY_TYPE})" >&2
     exit 2
     ;;
 esac
+
+# Keep legacy exclusion for this one role (previously only applied to universal)
+if [[ "${TEST_DEPLOY_TYPE}" == "universal" ]]; then
+  apps_json="$(apply_final_exclude "${apps_json}" '^(web-opt-rdr-www)$')"
+fi
 
 apps_json="$(filter_by_ci_storage "${apps_json}")"
 apps_json="$(apply_final_exclude "${apps_json}" "${FINAL_EXCLUDE_RE}")"

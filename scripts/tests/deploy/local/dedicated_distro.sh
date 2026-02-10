@@ -62,7 +62,6 @@ echo ">>> Running everything inside container via development exec (no logic cha
 
     deploy_args=(
       --distro '${INFINITO_DISTRO}'
-      --type '${TEST_DEPLOY_TYPE}'
       --app '${APP}'
       --inventory-dir '${INVENTORY_DIR}'
       --debug

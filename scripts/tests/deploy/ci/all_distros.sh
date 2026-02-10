@@ -88,7 +88,6 @@ for distro in "${distro_arr[@]}"; do
 
   set +e
   scripts/tests/deploy/ci/dedicated_distro.sh \
-    --type "${TEST_DEPLOY_TYPE}" \
     --app "${APP}"
   rc=$?
   set -e
