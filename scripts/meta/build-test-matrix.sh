@@ -11,12 +11,13 @@ set -euo pipefail
 #   FINAL_EXCLUDE_RE   = optional grep -Ev regex
 #
 # Output:
-#   JSON array to stdout
+#   JSON array to stdout (single line, always valid)
 
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 
 FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}"
 TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-}"
+PYTHON="${PYTHON:-python3}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -34,7 +35,7 @@ apply_final_exclude() {
   local txt
   txt="$(echo "${apps_json}" | jq -r '.[]' | grep -Ev "${final_excl}" || true)"
 
-  printf "%s\n" "${txt}" \
+  printf '%s\n' "${txt}" \
     | jq -R -s -c 'split("\n") | map(select(length>0))'
 }
 
@@ -74,7 +75,7 @@ filter_by_ci_storage() {
     return 0
   fi
 
-  printf "%s\n" "${kept}" \
+  printf '%s\n' "${kept}" \
     | jq -R -s -c 'split("\n") | map(select(length>0))'
 }
 
@@ -97,6 +98,9 @@ case "${TEST_DEPLOY_TYPE}" in
           "${lifecycles_args[@]}"
     )"
     [[ -n "${apps_json}" ]] || apps_json="[]"
+
+    # Normalize to single-line JSON to avoid accidental concatenation
+    apps_json="$(printf '%s' "${apps_json}" | jq -c '.')"
     ;;
   *)
     echo "ERROR: TEST_DEPLOY_TYPE must be server|workstation|universal (got: ${TEST_DEPLOY_TYPE})" >&2
@@ -113,4 +117,5 @@ apps_json="$(apply_final_exclude "${apps_json}" '^(web-opt-rdr-www|web-app-oauth
 apps_json="$(filter_by_ci_storage "${apps_json}")"
 apps_json="$(apply_final_exclude "${apps_json}" "${FINAL_EXCLUDE_RE}")"
 
-echo "${apps_json}"
+# Final safety: always emit valid, compact JSON array
+printf '%s\n' "${apps_json}" | jq -c '.'
