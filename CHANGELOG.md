@@ -1,3 +1,8 @@
+## [2.1.9] - 2026-02-10
+
+* Matomo now waits for a real HTTP-ready state before bootstrapping, replacing the TCP check with a PHP-based /index.php healthcheck to prevent startup race conditions.
+
+
 ## [2.1.8] - 2026-02-09
 
 * Add SSH client to the CI Docker image so Ansible controller runs no longer fail due to a missing ssh binary.
