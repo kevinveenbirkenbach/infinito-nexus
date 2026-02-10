@@ -48,7 +48,7 @@ class CLIHelpIntegrationTest(unittest.TestCase):
     def test_all_cli_commands_help(self):
         for segments in self._discover_command_dirs():
             with self.subTest(command=" ".join(segments)):
-                cmd = [self.python, self.main_py] + segments + ["--help", "--no-signal"]
+                cmd = [self.python, self.main_py] + segments + ["--help"]
                 result = subprocess.run(cmd, capture_output=True, text=True)
                 self.assertEqual(
                     result.returncode,

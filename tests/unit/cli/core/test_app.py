@@ -34,21 +34,12 @@ class TestApp(unittest.TestCase):
             parse_flags(argv2)
         self.assertEqual(cm2.exception.code, 1)
 
-    def test_parse_flags_alarm_timeout(self):
-        argv = ["infinito", "--alarm-timeout", "5", "deploy", "container"]
-        flags = parse_flags(argv)
-        self.assertEqual(flags.alarm_timeout, 5)
-        self.assertNotIn("--alarm-timeout", argv)
-
-    @patch("cli.core.app.init_multiprocessing")
     @patch(
         "cli.core.app.resolve_command_module",
         return_value=("cli.deploy.container.command.command", ["--x"]),
     )
     @patch("cli.core.app.run_command_once", return_value=True)
-    def test_app_main_dispatches_to_resolved_module(
-        self, _mock_run, _mock_resolve, _mock_init
-    ):
+    def test_app_main_dispatches_to_resolved_module(self, _mock_run, _mock_resolve):
         old_argv = sys.argv
         try:
             sys.argv = ["infinito", "deploy", "container", "--x"]
@@ -58,9 +49,8 @@ class TestApp(unittest.TestCase):
         finally:
             sys.argv = old_argv
 
-    @patch("cli.core.app.init_multiprocessing")
     @patch("cli.core.app.resolve_command_module", return_value=(None, ["nope"]))
-    def test_app_main_unknown_command_exits_1(self, _mock_resolve, _mock_init):
+    def test_app_main_unknown_command_exits_1(self, _mock_resolve):
         old_argv = sys.argv
         try:
             sys.argv = ["infinito", "nope"]
@@ -70,9 +60,8 @@ class TestApp(unittest.TestCase):
         finally:
             sys.argv = old_argv
 
-    @patch("cli.core.app.init_multiprocessing")
     @patch("cli.core.app.print_global_help")
-    def test_app_main_global_help(self, mock_help, _mock_init):
+    def test_app_main_global_help(self, mock_help):
         old_argv = sys.argv
         try:
             sys.argv = ["infinito", "--help"]

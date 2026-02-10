@@ -132,8 +132,6 @@ class TestMain(unittest.TestCase):
             "--exclude",
             "foo,bar",
             "--",
-            "-T",
-            "server",
             "--debug",
         ]
 
@@ -164,7 +162,7 @@ class TestMain(unittest.TestCase):
         # Deploy args: everything after the second '--'
         self.assertEqual(
             kwargs["deploy_args"],
-            ["-T", "server", "--debug"],
+            ["--debug"],
         )
 
     @unittest.mock.patch("cli.deploy.container.command.run_in_container")
@@ -181,9 +179,6 @@ class TestMain(unittest.TestCase):
             "--",
             "--exclude",
             "foo,bar",
-            "--",
-            "-T",
-            "server",
         ]
 
         with unittest.mock.patch.dict(os.environ, {}, clear=True):
@@ -208,9 +203,6 @@ class TestMain(unittest.TestCase):
             "--",
             "--exclude",
             "foo,bar",
-            "--",
-            "-T",
-            "server",
         ]
 
         with unittest.mock.patch.dict(

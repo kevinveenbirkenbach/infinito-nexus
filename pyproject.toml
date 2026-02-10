@@ -23,11 +23,6 @@ dependencies = [
   "humanfriendly",
 ]
 
-[project.optional-dependencies]
-audio = [
-  "simpleaudio",
-]
-
 [project.scripts]
 infinito = "cli.__main__:main"
 

@@ -1,7 +1,7 @@
 - name: Build data (single async task)
   shell: |
     set -euo pipefail
-    infinito build tree --no-signal --alarm-timeout 0 -s {{ MIG_ROLES_DIRECTORY }}
-    infinito build roles_list --no-signal --alarm-timeout 0 -o {{ MIG_ROLES_LIST }}
+    infinito build tree -s {{ MIG_ROLES_DIRECTORY }}
+    infinito build roles_list -o {{ MIG_ROLES_LIST }}
   async: "{{ (3600 if ASYNC_ENABLED | bool else omit) }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"

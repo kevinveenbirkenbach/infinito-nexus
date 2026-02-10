@@ -361,7 +361,7 @@ def main() -> int:
             "Example:\n"
             "  python -m cli.deploy.container run --build -- \\\n"
             "    --include svc-db-mariadb -- \\\n"
-            "    -T server --debug\n"
+            "    --debug\n"
         ),
     )
 

@@ -96,10 +96,8 @@ echo
     ./scripts/docker/entry.sh true
 
     cmd=(infinito deploy dedicated '${inv_file}'
-      -T '${TEST_DEPLOY_TYPE}'
       --skip-backup
       --skip-cleanup
-      --no-signal
       -l '${LIMIT_HOST}'
       --diff
       -vv

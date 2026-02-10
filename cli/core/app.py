@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import subprocess
 import sys
-import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
@@ -16,18 +15,14 @@ from cli.core.help import (
     show_help_for_directory,
 )
 from cli.core.run import RunConfig, open_log_file, run_command_once
-from cli.core.sounds import init_multiprocessing, play_start_intro_async
 
 
 @dataclass
 class Flags:
-    sound_enabled: bool = False
-    no_signal: bool = False
     log_dir: Path | None = None
     git_clean: bool = False
     infinite: bool = False
     help_all: bool = False
-    alarm_timeout: int = 60
 
 
 def _first_non_flag_token(argv: List[str]) -> str | None:
@@ -100,38 +95,19 @@ def _parse_log_dir(argv: List[str]) -> Path | None:
 
 def parse_flags(argv: List[str]) -> Flags:
     flags = Flags()
-
-    flags.sound_enabled = "--sound" in argv and (argv.remove("--sound") or True)
-    flags.no_signal = "--no-signal" in argv and (argv.remove("--no-signal") or True)
-
     flags.log_dir = _parse_log_dir(argv)
 
     flags.git_clean = "--git-clean" in argv and (argv.remove("--git-clean") or True)
     flags.infinite = "--infinite" in argv and (argv.remove("--infinite") or True)
     flags.help_all = "--help-all" in argv and (argv.remove("--help-all") or True)
 
-    if "--alarm-timeout" in argv:
-        i = argv.index("--alarm-timeout")
-        try:
-            flags.alarm_timeout = int(argv[i + 1])
-            del argv[i : i + 2]
-        except Exception:
-            print(color_text("Invalid --alarm-timeout value!", Fore.RED))
-            raise SystemExit(1)
-
     return flags
 
 
 def main() -> None:
-    init_multiprocessing()
-
     argv = sys.argv[:]  # keep sys.argv for external tools, but parse on a copy
     flags = parse_flags(argv)
     args = argv[1:]
-
-    # Play intro melody if requested
-    if flags.sound_enabled:
-        threading.Thread(target=play_start_intro_async, daemon=True).start()
 
     cli_dir = Path(__file__).resolve().parents[1]
     # sanity: cli_dir should contain __init__.py and __main__.py of dispatcher
@@ -185,9 +161,6 @@ def main() -> None:
     full_cmd = [sys.executable, "-m", module] + remaining
 
     cfg = RunConfig(
-        no_signal=flags.no_signal,
-        sound_enabled=flags.sound_enabled,
-        alarm_timeout=flags.alarm_timeout,
         log_enabled=flags.log_dir is not None,
     )
 
