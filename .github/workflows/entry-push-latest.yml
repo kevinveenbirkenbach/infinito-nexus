@@ -20,10 +20,13 @@ permissions:
 
 jobs:
   pick-distro:
+    if: github.event.created == false
     name: 🎲 Pick distro(s)
     runs-on: ubuntu-latest
     outputs:
       distros: ${{ steps.pick.outputs.distros }}
+      is_version: ${{ steps.pick.outputs.is_version }}
+      version_tag: ${{ steps.pick.outputs.version_tag }}
     steps:
       - name: Checkout (with tags)
         uses: actions/checkout@v6
@@ -45,9 +48,13 @@ jobs:
           )"
 
           if [[ -n "${version_tag}" ]]; then
+            echo "is_version=true" >> "$GITHUB_OUTPUT"
+            echo "version_tag=${version_tag}" >> "$GITHUB_OUTPUT"
             distros="${ALL_DISTROS[*]}"
             echo "🎯 Commit ${GITHUB_SHA} has version tag ${version_tag} → running ALL distros"
           else
+            echo "is_version=false" >> "$GITHUB_OUTPUT"
+            echo "version_tag=" >> "$GITHUB_OUTPUT"
             one="$(printf "%s\n" "${ALL_DISTROS[@]}" | shuf -n 1)"
             distros="${one}"
             echo "🎲 No version tag on commit → picked distro: ${one}"
@@ -55,8 +62,11 @@ jobs:
 
           echo "distros=${distros}" >> "$GITHUB_OUTPUT"
           echo "=== Selected distros: ${distros} ==="
+          echo "=== is_version: $(grep -E '^is_version=' "$GITHUB_OUTPUT" | tail -n 1) ==="
+          echo "=== version_tag: $(grep -E '^version_tag=' "$GITHUB_OUTPUT" | tail -n 1) ==="
 
   ci-orchestrator:
+    if: github.event.created == false
     name: 🎶 Orchestrate CI
     needs: pick-distro
     uses: ./.github/workflows/ci-orchestrator.yml
@@ -68,8 +78,10 @@ jobs:
   # Guard job: only allow version releases if the tag commit is contained in origin/master
   release-guard:
     name: "🛡️ Guard release"
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: ci-orchestrator
+    if: github.event.created == false && needs.pick-distro.outputs.is_version == 'true'
+    needs:
+      - pick-distro
+      - ci-orchestrator
     runs-on: ubuntu-latest
     outputs:
       allowed: ${{ steps.guard.outputs.allowed }}
@@ -89,9 +101,18 @@ jobs:
       - name: "Guard: tag commit must be contained in origin/master"
         id: guard
         shell: bash
+        env:
+          VERSION_TAG: ${{ needs.pick-distro.outputs.version_tag }}
         run: |
           set -euo pipefail
-          tag="${GITHUB_REF_NAME}"
+
+          if [[ -z "${VERSION_TAG}" ]]; then
+            echo "allowed=false" >> "$GITHUB_OUTPUT"
+            echo "⛔ No version tag detected for this commit"
+            exit 0
+          fi
+
+          tag="${VERSION_TAG}"
           tag_sha="$(git rev-list -n 1 "${tag}")"
           echo "Tag: ${tag} -> ${tag_sha}"
 
@@ -105,9 +126,11 @@ jobs:
 
   release-version:
     name: 🚀 Release version
-    needs: release-guard
-    if: needs.release-guard.outputs.allowed == 'true'
+    needs:
+      - pick-distro
+      - release-guard
+    if: github.event.created == false && needs.release-guard.outputs.allowed == 'true'
     uses: ./.github/workflows/release-version.yml
     with:
-      tag: ${{ github.ref_name }}
+      tag: ${{ needs.pick-distro.outputs.version_tag }}
     secrets: inherit
