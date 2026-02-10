@@ -1,7 +1,8 @@
 server:
   status_codes:
     default:
-      - 200
+      - 308
+      - 302
   domains:
     canonical:
       - "onlyoffice.{{ DOMAIN_PRIMARY }}"
