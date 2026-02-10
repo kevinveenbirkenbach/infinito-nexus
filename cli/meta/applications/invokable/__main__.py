@@ -10,7 +10,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
-from filter_plugins.get_all_invokable_apps import get_all_invokable_apps  # noqa: E402
+from module_utils.invokable import list_invokable_app_ids  # noqa: E402
 
 
 def main() -> None:
@@ -27,7 +27,7 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        result = get_all_invokable_apps()
+        result = list_invokable_app_ids()
     except Exception as e:
         sys.stderr.write(f"Error: {e}\n")
         sys.exit(1)
