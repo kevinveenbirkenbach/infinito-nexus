@@ -26,5 +26,5 @@ jobs:
 
       - name: Run custom lint tests via make
         run: |
-          make docker-up
+          make up
           make test-lint

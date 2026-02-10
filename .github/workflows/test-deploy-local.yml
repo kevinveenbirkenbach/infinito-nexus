@@ -68,7 +68,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          make docker-up
+          make up
 
       - name: Discover apps
         id: discover
@@ -103,7 +103,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          make docker-up
+          make up
 
       - name: Deploy app (same as CI logic)
         shell: bash

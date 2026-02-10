@@ -26,7 +26,7 @@ endif
 	dev-environment-bootstrap dev-environment-teardown \
 	apparmor-teardown apparmor-restore \
 	trust-ca \
-	docker-restart docker-up docker-down docker-stop \
+	restart up down stop \
 	build build-missing build-no-cache build-no-cache-all \
 	ci-deploy-discover ci-deploy-app ci-discover-output \
 	test-act-all test-act-app \
@@ -71,16 +71,16 @@ clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX;
 
-docker-restart:
+restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
-docker-up: install
+up: install
 	@"$${PYTHON}" -m cli.deploy.development up
 
-docker-down:
+down:
 	@"$${PYTHON}" -m cli.deploy.development down
 
-docker-stop:
+stop:
 	@"$${PYTHON}" -m cli.deploy.development stop
 
 list:
@@ -208,7 +208,7 @@ test-local-cleanup: test-local-cleanup-entity
 	@bash scripts/tests/deploy/local/utils/purge/web.sh
 	@bash scripts/tests/deploy/local/utils/purge/lib.sh
 
-test-local-dedicated: docker-down docker-up
+test-local-dedicated: down up
 	@bash scripts/tests/deploy/local/dedicated_distro.sh
 
 test-local-rapid:

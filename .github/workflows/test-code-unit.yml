@@ -22,5 +22,5 @@ jobs:
 
       - name: Run unit tests via make
         run: |
-          make docker-up 
+          make up 
           make test-unit
