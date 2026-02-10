@@ -8,14 +8,12 @@ set -euo pipefail
 # Inputs via env:
 #   TEST_DEPLOY_TYPE   = server|workstation|universal (required)
 #   TESTED_LIFECYCLES  = space-separated list (optional)
-#   FINAL_EXCLUDE_RE   = optional grep -Ev regex (applied as regex in jq)
 #
 # Output:
 #   JSON array to stdout (single line, always valid)
 
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 
-FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}"
 TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-}"
 PYTHON="${PYTHON:-python3}"
 
@@ -103,14 +101,6 @@ if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
 fi
 
 # ------------------------------------------------------------
-# 4) User-defined FINAL_EXCLUDE_RE (regex)
-# ------------------------------------------------------------
-apps_json="$(
-  printf '%s\n' "${apps_json}" \
-  | jq_exclude_regex "${FINAL_EXCLUDE_RE}"
-)"
-
-# ------------------------------------------------------------
-# 5) Final safety: compact JSON array, single line
+# 4) Final safety: compact JSON array, single line
 # ------------------------------------------------------------
 printf '%s\n' "${apps_json}" | json_compact_array

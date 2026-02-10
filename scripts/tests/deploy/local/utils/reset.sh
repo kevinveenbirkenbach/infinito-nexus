@@ -9,7 +9,7 @@ set -euo pipefail
 #   INVENTORY_DIR     (e.g. /etc/inventories/local-full-server)
 #
 # Optional:
-#   INCLUDE_RE / EXCLUDE_RE / FINAL_EXCLUDE_RE (forwarded to build-test-matrix.sh)
+#   INCLUDE_RE / EXCLUDE_RE (forwarded to build-test-matrix.sh)
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
@@ -29,7 +29,6 @@ apps_json="$(
   TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
   INCLUDE_RE="${INCLUDE_RE:-}" \
   EXCLUDE_RE="${EXCLUDE_RE:-}" \
-  FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}" \
   scripts/meta/build-test-matrix.sh
 )"
 

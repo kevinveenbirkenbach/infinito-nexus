@@ -11,7 +11,6 @@ set -euo pipefail
 # Optional:
 #   LIMIT_HOST         (default: localhost)
 #   DEBUG              (default: false)
-#   INCLUDE_RE / EXCLUDE_RE / FINAL_EXCLUDE_RE (to re-derive the same list)
 #
 # Notes:
 # - This does NOT create the inventory. Run inventory-init-all.sh first.
@@ -69,7 +68,6 @@ apps_json="$(
   TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
   INCLUDE_RE="${INCLUDE_RE:-}" \
   EXCLUDE_RE="${EXCLUDE_RE:-}" \
-  FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}" \
   scripts/meta/build-test-matrix.sh
 )"
 
