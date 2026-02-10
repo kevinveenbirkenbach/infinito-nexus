@@ -4,11 +4,12 @@ application_id:             web-svc-onlyoffice
 domain:                     "{{ lookup('domain',application_id) }}"
 http_port:                  "{{ ports.localhost.http[application_id] }}"
 container_port:             80   # OnlyOffice DocumentServer Standardport
+entity_name:                "{{ application_id | get_entity_name }}"
 
 # ONLYOFFICE
-ONLYOFFICE_CONTAINER:       "{{ lookup('config', application_id, 'compose.services.onlyoffice.name') }}"
-ONLYOFFICE_IMAGE:           "{{ lookup('config', application_id, 'compose.services.onlyoffice.image') }}"
-ONLYOFFICE_VERSION:         "{{ lookup('config', application_id, 'compose.services.onlyoffice.version') }}"
+ONLYOFFICE_CONTAINER:       "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.name') }}"
+ONLYOFFICE_IMAGE:           "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.image') }}"
+ONLYOFFICE_VERSION:         "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.version') }}"
 ONLYOFFICE_JWT_SECRET:      "{{ lookup('config', application_id, 'credentials.onlyoffice_jwt_secret') }}"
 
 ## Volumes

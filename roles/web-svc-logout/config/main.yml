@@ -23,8 +23,15 @@ server:
 compose:
   services:
     logout:
-      enabled: false
-      shared: false
+      enabled:          false
+      shared:           false
+      image:            "ghcr.io/kevinveenbirkenbach/universal-logout"
+      version:          "latest"
+      name:             "logout"
+      cpus:             0.2
+      mem_reservation:  "256m"
+      mem_limit:        "512m"
+      pids_limit:       128
     desktop:
       enabled: true
     matomo:
