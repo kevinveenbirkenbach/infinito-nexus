@@ -73,9 +73,7 @@ apps_json="$(
 )"
 
 # ------------------------------------------------------------
-# 3) CI storage filter (still JSON-safe)
-#    NOTE: sufficient_storage currently outputs TEXT (one role per line).
-#    We convert that text to JSON array safely without whitespace collapsing.
+# 3) CI storage filter (JSON-only)
 # ------------------------------------------------------------
 if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
   required_storage="60GB"
@@ -83,30 +81,24 @@ if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
   # Extract roles from JSON to pass as args (safe: one per line -> bash array)
   mapfile -t roles < <(printf '%s\n' "${apps_json}" | jq -r '.[]')
   if [[ "${#roles[@]}" -gt 0 ]]; then
+    # Warnings pass (best-effort)
     docker compose --profile ci exec -T infinito \
       "${PYTHON}" -m cli.meta.applications.sufficient_storage \
         --roles "${roles[@]}" \
         --required-storage "${required_storage}" \
         --warnings \
+        --format json \
       >/dev/null || true
 
-    kept_txt="$(
+    # Real filter (JSON output)
+    apps_json="$(
       docker compose --profile ci exec -T infinito \
         "${PYTHON}" -m cli.meta.applications.sufficient_storage \
           --roles "${roles[@]}" \
           --required-storage "${required_storage}" \
-      | sed -e 's/[[:space:]]\+$//' -e '/^$/d'
+          --format json \
+      | json_compact_array
     )"
-
-    if [[ -z "${kept_txt}" ]]; then
-      apps_json='[]'
-    else
-      # Convert "one per line" to JSON array WITHOUT joining by spaces.
-      apps_json="$(
-        printf '%s\n' "${kept_txt}" \
-        | jq -R -s -c 'split("\n") | map(select(length>0))'
-      )"
-    fi
   fi
 fi
 
