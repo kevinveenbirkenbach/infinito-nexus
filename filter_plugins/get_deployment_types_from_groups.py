@@ -4,12 +4,7 @@ from module_utils.invokable import types_from_group_names
 
 
 def get_deployment_types_from_groups(group_names):
-    # Optional: add your own aliasing conventions here
-    aliases = {
-        "servers": "server",
-        "workstations": "workstation",
-    }
-    return types_from_group_names(group_names or [], aliases=aliases)
+    return types_from_group_names(group_names or [])
 
 
 class FilterModule(object):

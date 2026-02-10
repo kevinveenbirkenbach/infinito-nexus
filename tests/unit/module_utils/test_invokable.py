@@ -102,11 +102,22 @@ class TestInvokable(TestCase):
         self.assertNotIn("web-app-oauth2-proxy", grouped["server"])
 
     def test_types_from_group_names(self) -> None:
-        aliases = {"servers": "server", "workstations": "workstation"}
-        got = inv.types_from_group_names(
-            ["servers", "workstation_ci", "foo", "universal"],
-            aliases=aliases,
-        )
+        with patch.object(inv, "_repo_root", return_value=self.tmp):
+            with patch.object(
+                inv,
+                "_get_invokable_paths",
+                return_value=["web-app", "update", "util-desk"],
+            ):
+                got = inv.types_from_group_names(
+                    [
+                        "all",  # not invokable -> ignored
+                        "web-app-nextcloud",  # invokable + matches server rule
+                        "util-desk-custom",  # invokable + matches workstation rule
+                        "update",  # invokable leftover -> universal
+                        "foo",  # not invokable -> ignored
+                    ]
+                )
+
         self.assertEqual(got, ["server", "universal", "workstation"])
 
 

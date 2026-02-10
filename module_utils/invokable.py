@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Mapping, Set
+from typing import Iterable, Set
 
 import yaml
 
@@ -217,33 +217,41 @@ def list_invokables_by_type(
 def types_from_group_names(
     group_names: Iterable[str],
     *,
-    known_types: Iterable[str] = ("server", "workstation", "universal"),
-    aliases: Mapping[str, str] | None = None,
+    rules: Iterable[DeploymentTypeRule] = DEFAULT_RULES,
 ) -> list[str]:
     """
-    Given group_names, return which deployment types are present.
-    Default behavior: if group name equals a type -> include.
+    SPOT:
+      - invokable is defined by categories.yml via _get_invokable_paths()/_is_role_invokable()
+      - server/workstation/universal classification is defined by DEFAULT_RULES
 
-    Also supports simple aliases or prefix matches if you want them.
+    Semantics:
+      universal = invokable AND NOT matched by any non-universal rule.
     """
-    aliases = dict(aliases or {})
-    normalized = {str(g).strip() for g in group_names if str(g).strip()}
+    names = [str(g).strip() for g in (group_names or []) if str(g).strip()]
+    if not names:
+        return []
 
-    # Apply alias mapping (e.g. "servers" -> "server")
-    mapped = set()
-    for g in normalized:
-        mapped.add(aliases.get(g, g))
+    invokable_paths = _get_invokable_paths()
+    invokable_names = [g for g in names if _is_role_invokable(g, invokable_paths)]
+    if not invokable_names:
+        return []
 
-    result: list[str] = []
-    for t in known_types:
-        if t in mapped:
-            result.append(t)
-            continue
-        # mild convenience: allow "server_*" / "server-*" group naming
-        if any(
-            g == t or g.startswith(t + "_") or g.startswith(t + "-") for g in mapped
-        ):
-            if t not in result:
-                result.append(t)
+    rules_list = list(rules)
+    non_universal = [r for r in rules_list if r.name != "universal"]
 
-    return sorted(set(result))
+    matched: set[str] = set()
+    claimed: set[str] = set()
+
+    # server/workstation via rules
+    for g in invokable_names:
+        for r in non_universal:
+            if _rule_matches_role_name(r, g):
+                matched.add(r.name)
+                claimed.add(g)
+                break
+
+    # universal = invokable leftovers (not claimed by server/workstation)
+    if any(g not in claimed for g in invokable_names):
+        matched.add("universal")
+
+    return sorted(matched)
