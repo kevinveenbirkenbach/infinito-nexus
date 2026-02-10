@@ -66,8 +66,6 @@ echo
 # Recompute apps list (optional, but keeps filters consistent)
 apps_json="$(
   TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  INCLUDE_RE="${INCLUDE_RE:-}" \
-  EXCLUDE_RE="${EXCLUDE_RE:-}" \
   scripts/meta/build-test-matrix.sh
 )"
 
