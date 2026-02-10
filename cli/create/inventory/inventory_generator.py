@@ -32,10 +32,6 @@ def generate_dynamic_inventory(
         "yaml",
         "--inventory-style",
         "group",
-        "-c",
-        str(categories_file),
-        "-r",
-        str(roles_dir),
         "-o",
         str(tmp_inventory),
     ]
