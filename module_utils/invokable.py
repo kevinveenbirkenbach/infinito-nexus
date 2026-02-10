@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Mapping
+from typing import Iterable, Mapping, Set
 
 import yaml
 
@@ -27,7 +27,7 @@ DEFAULT_RULES: tuple[DeploymentTypeRule, ...] = (
         include_re=re.compile(r"^(desk-|util-desk-)"),
         exclude_re=None,
     ),
-    # "universal": alles, was invokable ist, aber nicht in server/workstation fällt
+    # "universal": everything invokable that is not matched by server/workstation rules
     DeploymentTypeRule(
         name="universal",
         include_re=re.compile(r".*"),
@@ -54,6 +54,43 @@ def _read_yaml(path: Path) -> dict:
         return {}
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
+
+
+def _extract_lifecycle(meta: dict) -> str:
+    """
+    Supports both:
+      galaxy_info:
+        lifecycle: stable
+
+    and a possible future form:
+      galaxy_info:
+        lifecycle:
+          stage: stable
+    """
+    gi = meta.get("galaxy_info") or {}
+    lifecycle = gi.get("lifecycle")
+
+    if isinstance(lifecycle, str):
+        return lifecycle.strip().lower()
+
+    if isinstance(lifecycle, dict):
+        stage = lifecycle.get("stage")
+        if isinstance(stage, str):
+            return stage.strip().lower()
+
+    return ""
+
+
+def _role_lifecycle(role_dir: Path) -> str:
+    meta_file = role_dir / "meta" / "main.yml"
+    if not meta_file.is_file():
+        return ""
+    try:
+        meta = _read_yaml(meta_file)
+        return _extract_lifecycle(meta)
+    except Exception:
+        # Best-effort: never fail discovery because of a single broken meta file
+        return ""
 
 
 def _get_invokable_paths() -> list[str]:
@@ -114,6 +151,7 @@ def _rule_matches_role_name(rule: DeploymentTypeRule, role_name: str) -> bool:
 def list_invokables_by_type(
     *,
     rules: Iterable[DeploymentTypeRule] = DEFAULT_RULES,
+    lifecycles: Set[str] | None = None,
 ) -> dict[str, list[str]]:
     """
     Returns:
@@ -124,19 +162,29 @@ def list_invokables_by_type(
       }
 
     "universal" = invokable roles that are NOT matched by any other non-universal rule.
+
+    If lifecycles is provided, only roles whose galaxy_info.lifecycle is in the set
+    are included. Missing lifecycle is treated as "not matching".
     """
     roles_dir = _roles_dir()
     invokable_paths = _get_invokable_paths()
     if not invokable_paths or not roles_dir.is_dir():
         return {r.name: [] for r in rules}
 
-    # Gather invokable role dirs first
+    # Gather invokable role dirs first (+ optional lifecycle gating)
     invokable_role_dirs: list[Path] = []
     for role_dir in sorted(
         [p for p in roles_dir.iterdir() if p.is_dir()], key=lambda p: p.name
     ):
-        if _is_role_invokable(role_dir.name, invokable_paths):
-            invokable_role_dirs.append(role_dir)
+        if not _is_role_invokable(role_dir.name, invokable_paths):
+            continue
+
+        if lifecycles is not None:
+            lc = _role_lifecycle(role_dir)
+            if not lc or lc not in lifecycles:
+                continue
+
+        invokable_role_dirs.append(role_dir)
 
     # Identify non-universal rules for subtraction logic
     rules_list = list(rules)

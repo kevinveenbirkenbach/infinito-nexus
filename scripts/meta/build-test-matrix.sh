@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# scripts/meta/build-test-matrix.sh (vollständig, final)
+# scripts/meta/build-test-matrix.sh
 set -euo pipefail
 
-# Purpose (SRP): Return JSON list of apps based on mode + regex filters.
+# Purpose (SRP): Return JSON list of apps based on deployment type,
+# optionally filtered by lifecycle and CI storage constraints.
 #
 # Inputs via env:
-#   TEST_DEPLOY_TYPE              = server|workstation|universal (required)
-#   FINAL_EXCLUDE_RE   (optional)
+#   TEST_DEPLOY_TYPE   = server|workstation|universal (required)
+#   TESTED_LIFECYCLES  = space-separated list (optional)
+#   FINAL_EXCLUDE_RE   = optional grep -Ev regex
 #
 # Output:
 #   JSON array to stdout
@@ -14,6 +16,7 @@ set -euo pipefail
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 
 FINAL_EXCLUDE_RE="${FINAL_EXCLUDE_RE:-}"
+TESTED_LIFECYCLES="${TESTED_LIFECYCLES:-}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
@@ -46,15 +49,12 @@ filter_by_ci_storage() {
 
   local required_storage="${CI_REQUIRED_STORAGE:-60GB}"
 
-  # Extract roles into bash array
   mapfile -t roles < <(echo "${apps_json}" | jq -r '.[]')
   if [[ "${#roles[@]}" -eq 0 ]]; then
     echo "${apps_json}"
     return 0
   fi
 
-  # 1) Warnings run (show what gets filtered)
-  # We do NOT want to change the JSON output of discover.sh, so we discard this stdout.
   docker compose --profile ci exec -T infinito \
     "${PYTHON}" -m cli.meta.applications.sufficient_storage \
       --roles "${roles[@]}" \
@@ -69,23 +69,33 @@ filter_by_ci_storage() {
         --required-storage "${required_storage}"
   )"
 
-  # Convert back to JSON
   if [[ -z "${kept}" ]]; then
     echo "[]"
     return 0
   fi
 
-  # shellcheck disable=SC2086
-  printf "%s\n" ${kept} | jq -R -s -c 'split("\n") | map(select(length>0))'
+  printf "%s\n" "${kept}" \
+    | jq -R -s -c 'split("\n") | map(select(length>0))'
 }
+
+# ------------------------------------------------------------
+# Lifecycle handling (SC2086-safe)
+# ------------------------------------------------------------
+lifecycles_args=()
+if [[ -n "${TESTED_LIFECYCLES}" ]]; then
+  read -r -a lifecycles_arr <<< "${TESTED_LIFECYCLES}"
+  lifecycles_args=(--lifecycles "${lifecycles_arr[@]}")
+fi
 
 case "${TEST_DEPLOY_TYPE}" in
   server|workstation|universal)
     apps_json="$(
       docker compose --profile ci exec -T infinito \
-        "${PYTHON}" -m cli.meta.applications.type --format json --type "${TEST_DEPLOY_TYPE}"
+        "${PYTHON}" -m cli.meta.applications.type \
+          --format json \
+          --type "${TEST_DEPLOY_TYPE}" \
+          "${lifecycles_args[@]}"
     )"
-    # Ensure non-empty JSON array
     [[ -n "${apps_json}" ]] || apps_json="[]"
     ;;
   *)
@@ -94,11 +104,13 @@ case "${TEST_DEPLOY_TYPE}" in
     ;;
 esac
 
-# Keep legacy exclusion for this one role (previously only applied to universal)
-if [[ "${TEST_DEPLOY_TYPE}" == "universal" ]]; then
-  apps_json="$(apply_final_exclude "${apps_json}" '^(web-opt-rdr-www)$')"
-fi
+# ------------------------------------------------------------
+# Global hard excludes (never tested / deployed)
+# ------------------------------------------------------------
+apps_json="$(apply_final_exclude "${apps_json}" '^(web-opt-rdr-www|web-app-oauth2-proxy)$')"
 
+# CI storage + user-defined excludes
 apps_json="$(filter_by_ci_storage "${apps_json}")"
 apps_json="$(apply_final_exclude "${apps_json}" "${FINAL_EXCLUDE_RE}")"
+
 echo "${apps_json}"

@@ -24,6 +24,12 @@ def main() -> None:
         help="Return only the list for a single deployment type",
     )
     parser.add_argument(
+        "--lifecycles",
+        nargs="+",
+        help="Optional lifecycle filter (space-separated), e.g. alpha beta rc stable. "
+        "If omitted, no lifecycle filtering is applied (all roles are returned).",
+    )
+    parser.add_argument(
         "-f",
         "--format",
         choices=("text", "json"),
@@ -33,7 +39,12 @@ def main() -> None:
     args = parser.parse_args()
 
     try:
-        grouped = list_invokables_by_type()
+        lifecycles = None
+        if args.lifecycles:
+            lifecycles = {
+                str(x).strip().lower() for x in args.lifecycles if str(x).strip()
+            }
+        grouped = list_invokables_by_type(lifecycles=lifecycles)
     except Exception as e:
         sys.stderr.write(f"Error: {e}\n")
         sys.exit(1)

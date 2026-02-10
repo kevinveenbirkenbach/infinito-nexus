@@ -50,6 +50,35 @@ class TestCliMetaApplicationsType(TestCase):
         self.assertEqual(err, "")
         self.assertEqual(out.strip().splitlines(), ["a", "x"])
 
+    def test_lifecycles_are_forwarded(self) -> None:
+        fake = {"server": ["a"], "workstation": [], "universal": []}
+        with patch.object(mod, "list_invokables_by_type", return_value=fake) as mocked:
+            code, out, err = self._run(
+                [
+                    "--format",
+                    "json",
+                    "--type",
+                    "server",
+                    "--lifecycles",
+                    "alpha",
+                    "beta",
+                    "RC",
+                    " stable ",
+                ]
+            )
+
+        self.assertEqual(code, 0)
+        self.assertEqual(err, "")
+
+        # Ensure lifecycles normalization + forwarding happened
+        mocked.assert_called_once()
+        _args, kwargs = mocked.call_args
+        self.assertIn("lifecycles", kwargs)
+        self.assertEqual(kwargs["lifecycles"], {"alpha", "beta", "rc", "stable"})
+
+        # Output still correct
+        self.assertIn('"a"', out)
+
     def test_error_handling(self) -> None:
         with patch.object(
             mod, "list_invokables_by_type", side_effect=RuntimeError("boom")
