@@ -31,9 +31,3 @@
     webserver_extra_configuration:  ""
     docker_git_repository_pull:     false
     docker_compose_flush_handlers:  true
-
-- name: Create symbolic link from .env file to repository
-  file:
-    src:    "{{ lookup('container', application_id, 'files.env') }}"
-    dest:   "{{ [ docker_repository_path, '.env' ] | path_join  }}"
-    state:  link
