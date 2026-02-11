@@ -1,7 +1,10 @@
 # General
 application_id:       "svc-prx-openresty"
 
+
 # Openresty
-OPENRESTY_IMAGE:      "openresty/openresty"
-OPENRESTY_VERSION:    "alpine"
+
+# Probapbly hard to implement to use dynamic entity_name here, so sticking with hard coded entity in conf path
+OPENRESTY_IMAGE:      "{{ lookup('config','svc-prx-openresty', 'compose.services.openresty.image') }}"
+OPENRESTY_VERSION:    "{{ lookup('config','svc-prx-openresty', 'compose.services.openresty.version') }}"
 OPENRESTY_CONTAINER:  "{{ lookup('config','svc-prx-openresty', 'compose.services.openresty.name') }}"
