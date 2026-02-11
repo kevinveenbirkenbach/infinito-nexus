@@ -11,6 +11,7 @@ on:
       - main
       - "feature/**"
       - "hotfix/**"
+      - "fix/**"
 
 permissions:
   contents: write
