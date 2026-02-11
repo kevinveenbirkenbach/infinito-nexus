@@ -15,24 +15,14 @@ CHESS_ADMIN_URL:        ""
 CHESS_ADMIN_EMAIL:      "{{ users.administrator.email }}"
 
 # Docker image
-CHESS_CUSTOM_IMAGE:     "{{ entity_name }}_custom:{{ CHESS_REPO_REF }}"
 CHESS_IMAGE:            "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.image') }}"
 CHESS_SERVICE:          "{{ entity_name }}"
 CHESS_VERSION:          "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.version') }}"
 CHESS_CONTAINER:        "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.name') }}"
 CHESS_DATA_VOLUME:      "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 
-# Build source
-CHESS_REPO_URL:         "{{ lookup('config', application_id, 'source.repo') }}"
-CHESS_REPO_REF:         "{{ lookup('config', application_id, 'source.ref') }}"
-
 # Security
-CHESS_HMAC_SECRET:      "{{ lookup('password', '/dev/null length=63 chars=ascii_letters,digits') }}"
+CHESS_HMAC_SECRET:      "{{ lookup('config', application_id, 'credentials.hmac_secret') }}"
 CHESS_KEY_FILENAME:     "signing-key"
 CHESS_APP_DATA_DIR:     '/app/data'
 CHESS_APP_KEY_FILE:     "{{ [ CHESS_APP_DATA_DIR, CHESS_KEY_FILENAME ] | path_join }}"
-
-CHESS_ENTRYPOINT_FILE:  "docker-entrypoint.sh"
-CHESS_ENTRYPOINT_REL:   "{{ CHESS_ENTRYPOINT_FILE }}"
-CHESS_ENTRYPOINT_ABS:   "{{ [lookup('container', application_id, 'directories.instance'), CHESS_ENTRYPOINT_REL] | path_join }}"
-CHESS_ENTRYPOINT_INT:   "{{ ['/usr/local/bin', CHESS_ENTRYPOINT_FILE] | path_join }}"

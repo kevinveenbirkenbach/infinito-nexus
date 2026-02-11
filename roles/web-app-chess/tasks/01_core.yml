@@ -4,13 +4,6 @@
   vars:
     docker_compose_flush_handlers: false
 
-- name: "Deploy '{{ CHESS_ENTRYPOINT_ABS }}'"
-  copy:
-    src:    "{{ CHESS_ENTRYPOINT_FILE }}"
-    dest:   "{{ CHESS_ENTRYPOINT_ABS }}"
-  notify: 
-    - compose build
-
 - meta: flush_handlers
 
 - include_tasks: utils/once/flag.yml
