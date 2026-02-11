@@ -20,7 +20,6 @@
       delay: 20
       until: matomo_bootstrap_run.rc == 0
 
-
   rescue:
 
     # IMPORTANT: Avoid shell-inlining stdout/stderr because it can contain quotes and break bash parsing.

@@ -12,12 +12,19 @@
       test:
         - CMD-SHELL
         - |
-          code="$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' http://localhost/index.php || echo 000)"
-          [ "$code" = "200" ] || [ "$code" = "302" ]
+          php -r '
+            $h=@get_headers("http://localhost/index.php");
+            if(!$h){exit(1);}
+            if(preg_match("/^HTTP\\/\\S+\\s+(\\d+)/",$h[0],$m)){
+              $c=intval($m[1]);
+              exit(($c===200||$c===302)?0:1);
+            }
+            exit(1);
+          '
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 30s
+      start_period: 60s
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
