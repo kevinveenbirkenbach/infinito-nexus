@@ -1,8 +1,9 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
-  application:
+  {{ CHESS_SERVICE }}:
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
       args:
-        CHESS_VERSION: "{{ CHESS_VERSION }}"
+        CHESS_VERSION:  "{{ CHESS_VERSION }}"
+        CHESS_IMAGE:    "{{ CHESS_IMAGE }}"
         CHESS_REPO_URL: "{{ CHESS_REPO_URL }}"
         CHESS_REPO_REF: "{{ CHESS_REPO_REF }}"
         CHESS_ENTRYPOINT_REL: "{{ CHESS_ENTRYPOINT_REL }}"

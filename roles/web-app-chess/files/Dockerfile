@@ -1,10 +1,12 @@
+# roles/web-app-chess/files/Dockerfile
 # Multi-stage build for castling.club
 
 # Allow a dynamic base image version in both stages
 ARG CHESS_VERSION
+ARG CHESS_IMAGE
 
 # -------- Stage 1: build --------
-FROM node:${CHESS_VERSION} AS build
+FROM ${CHESS_IMAGE}:${CHESS_VERSION} AS build
 
 # Build-time inputs
 ARG CHESS_REPO_URL
@@ -19,11 +21,24 @@ RUN git clone --depth 1 --branch "${CHESS_REPO_REF}" "${CHESS_REPO_URL}" ./
 
 # Prepare Yarn 4 as root (safe during build stage)
 RUN corepack enable && corepack prepare yarn@4.9.1 --activate && yarn -v
-RUN yarn install --immutable --inline-builds
+
+# Install deps:
+# - If upstream ships a lockfile, enforce it (immutable).
+# - If not, fall back to a normal install to avoid YN0028.
+RUN if [ -f yarn.lock ]; then \
+      echo "[chess] yarn.lock found -> installing immutable"; \
+      yarn install --immutable --inline-builds; \
+    else \
+      echo "[chess] yarn.lock missing -> installing non-immutable"; \
+      yarn install --inline-builds; \
+    fi
+
 RUN yarn build
 
 # -------- Stage 2: runtime --------
-FROM node:${CHESS_VERSION}
+ARG CHESS_VERSION
+ARG CHESS_IMAGE
+FROM ${CHESS_IMAGE}:${CHESS_VERSION}
 
 # Runtime inputs (formerly Jinja variables)
 ARG CHESS_ENTRYPOINT_REL

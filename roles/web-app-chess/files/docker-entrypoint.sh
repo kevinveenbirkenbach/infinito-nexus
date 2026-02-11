@@ -13,11 +13,6 @@ if [[ ! -f "${APP_KEY_FILE}" || ! -f "${APP_KEY_PUB}" ]]; then
   ( cd "${key_dir}" && bash /app/tools/gen-signing-key.sh "${key_base}" )
 fi
 
-  # 1.5) Ensure Yarn is ready and deps are installed (PnP, immutable)
-echo "[chess] preparing yarn & installing deps (immutable)"
-corepack enable || true
-yarn install --immutable --inline-builds
-
 # 2) Wait for PostgreSQL if env is provided
 if [[ -n "${PGHOST:-}" ]]; then
   echo "[chess] waiting for PostgreSQL at ${PGHOST}:${PGPORT}..."

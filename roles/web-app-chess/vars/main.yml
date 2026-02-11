@@ -15,10 +15,11 @@ CHESS_ADMIN_URL:        ""
 CHESS_ADMIN_EMAIL:      "{{ users.administrator.email }}"
 
 # Docker image
-#CHESS_IMAGE:           "{{ lookup('config', application_id, 'compose.services.application.image') }}"
 CHESS_CUSTOM_IMAGE:     "{{ entity_name }}_custom:{{ CHESS_REPO_REF }}"
-CHESS_VERSION:          "{{ lookup('config', application_id, 'compose.services.application.version') }}"
-CHESS_CONTAINER:        "{{ lookup('config', application_id, 'compose.services.application.name') }}"
+CHESS_IMAGE:            "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.image') }}"
+CHESS_SERVICE:          "{{ entity_name }}"
+CHESS_VERSION:          "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.version') }}"
+CHESS_CONTAINER:        "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.name') }}"
 CHESS_DATA_VOLUME:      "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 
 # Build source

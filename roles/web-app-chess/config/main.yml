@@ -16,7 +16,7 @@ compose:
       shared:   true
       type:     "postgres"
       enabled:  true            # Use central DB role (recommended)
-    application:
+    chess:
       image:        "node"          # Base image family; final image is custom
       version:      "20-bullseye"   # >=16 as required upstream
       name:         "web-app-chess"
