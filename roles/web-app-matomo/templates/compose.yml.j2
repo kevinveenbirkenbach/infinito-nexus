@@ -10,10 +10,10 @@
       - data:/var/www/html
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "php -r 'exit(@file_get_contents(\"http://localhost/index.php\")?0:1);'"
-        ]
+        - CMD-SHELL
+        - |
+          code="$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' http://localhost/index.php || echo 000)"
+          [ "$code" = "200" ] || [ "$code" = "302" ]
       interval: 10s
       timeout: 5s
       retries: 12
