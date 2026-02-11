@@ -21,6 +21,10 @@ compose:
       name:               "web-app-chess"
       backup:
         no_stop_required: true
+      cpus:               0.5
+      mem_reservation:    "256m"
+      mem_limit:          "512m"
+      pids_limit:         256
     css:
       enabled:            true
   volumes:
