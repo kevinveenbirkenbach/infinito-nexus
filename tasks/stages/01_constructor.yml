@@ -162,12 +162,13 @@
 - name: "Load base roles"
   include_tasks: "./tasks/groups/{{ item }}-roles.yml"
   loop:
-    - drv         # 1. Load driver roles
-    - gen         # 2. Load generic roles
-    - svc-net     # 3. Load network roles
-    - svc-db      # 4. Load database roles
-    - svc-prx     # 5. Load proxy roles
-    - svc-ai      # 6. Load AI roles
-    - svc-bkp     # 7. Load Backup Roles
+    - update      # 1. Update system
+    - drv         # 2. Load driver roles
+    - gen         # 3. Load generic roles
+    - svc-net     # 4. Load network roles
+    - svc-db      # 5. Load database roles
+    - svc-prx     # 6. Load proxy roles
+    - svc-ai      # 7. Load AI roles
+    - svc-bkp     # 8. Load Backup Roles
   loop_control:
     label: "{{ item }}-roles.yml"
