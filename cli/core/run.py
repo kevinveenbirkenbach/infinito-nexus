@@ -9,14 +9,10 @@ from pathlib import Path
 from typing import List, TextIO
 
 from cli.core.colors import Fore, color_text
-from cli.core.sounds import failure_with_warning_loop
 
 
 @dataclass(frozen=True)
 class RunConfig:
-    no_signal: bool
-    sound_enabled: bool
-    alarm_timeout: int
     log_enabled: bool
 
 
@@ -79,22 +75,11 @@ def run_command_once(
             rc = proc.returncode
 
         if rc != 0:
-            failure_with_warning_loop(
-                cfg.no_signal, cfg.sound_enabled, cfg.alarm_timeout
-            )
             raise SystemExit(rc)
-
-        # Success signal (in main process, as before)
-        if not cfg.no_signal:
-            from module_utils.sounds import Sound
-
-            Sound.play_finished_successfully_sound()
-
         return True
 
     except SystemExit:
         raise
     except Exception as e:
         print(color_text(f"Exception running command: {e}", Fore.RED))
-        failure_with_warning_loop(cfg.no_signal, cfg.sound_enabled, cfg.alarm_timeout)
         raise SystemExit(1)

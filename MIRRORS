@@ -1,3 +1,4 @@
 git@github.com:infinito-nexus/core.git
 ssh://git@code.infinito.nexus:2201/infinito/nexus.git
+ssh://git@git.veen.world:2201/kevinveenbirkenbach/infinito-nexus
 git@github.com:kevinveenbirkenbach/infinito-nexus.git

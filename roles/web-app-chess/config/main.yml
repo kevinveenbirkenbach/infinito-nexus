@@ -1,4 +1,3 @@
-credentials: {}
 compose:
   services:
     oidc:
@@ -15,17 +14,17 @@ compose:
     database:
       shared:   true
       type:     "postgres"
-      enabled:  true            # Use central DB role (recommended)
-    application:
-      image:        "node"          # Base image family; final image is custom
-      version:      "20-bullseye"   # >=16 as required upstream
-      name:         "web-app-chess"
+      enabled:  true
+    chess:
+      image:              "ghcr.io/kevinveenbirkenbach/fedi-chess"
+      version:            "v1.0.1"
+      name:               "web-app-chess"
       backup:
         no_stop_required: true
     css:
-      enabled: true
+      enabled:            true
   volumes:
-    data:           "chess_data"
+    data:                 "chess_data"
 server:
   csp:
     whitelist:      {}
@@ -38,6 +37,3 @@ server:
     aliases: []
 rbac:
   roles: {}
-source:
-  repo: "https://github.com/stephank/castling.club.git"
-  ref:  "main"

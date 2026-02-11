@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run full local deploy workflow via act (linear matrix)
+# Run local deploy workflow via act for ALL apps (linear matrix)
 # Required:
-#   TEST_DEPLOY_TYPE  server|workstation|universal
-#   INFINITO_DISTRO   e.g. arch, debian, ubuntu, fedora, centos
+#   TEST_DEPLOY_TYPE server|workstation|universal
+#   INFINITO_DISTRO  e.g. arch, debian, ubuntu
 
-: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
-: "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (e.g. arch, debian, ubuntu)}"
+: "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is not set (server|workstation|universal)}"
+: "${INFINITO_DISTRO:?INFINITO_DISTRO is not set (e.g. arch, debian, ubuntu)}"
 
 case "${TEST_DEPLOY_TYPE}" in
   server|workstation|universal) ;;
@@ -22,8 +22,8 @@ echo "=== act: deploy local (type=${TEST_DEPLOY_TYPE}, distros=${INFINITO_DISTRO
 
 act workflow_dispatch \
   -W .github/workflows/test-deploy-local.yml \
-  --env TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  --env DISTROS="${INFINITO_DISTRO}" \
-  --env ONLY_APP="" \
+  --input test_deploy_type="${TEST_DEPLOY_TYPE}" \
+  --input distros="${INFINITO_DISTRO}" \
+  --input whitelist="" \
   --container-options "--privileged" \
   --network host

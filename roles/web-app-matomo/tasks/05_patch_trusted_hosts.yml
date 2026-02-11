@@ -1,7 +1,7 @@
-- name: "Matomo | Set trusted hosts (domain + service + docker reach host)"
+- name: "Matomo | Set trusted hosts (domain + service + container reach host)"
   ansible.builtin.command:
     argv:
-      - docker
+      - container
       - exec
       - --user
       - root

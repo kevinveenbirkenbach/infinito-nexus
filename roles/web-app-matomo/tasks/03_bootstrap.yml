@@ -1,7 +1,4 @@
-# roles/web-app-matomo/tasks/03_bootstrap.yml
-
 - block:
-
     - name: "Matomo bootstrap | Run one-shot bootstrap via compose profile"
       ansible.builtin.command:
         argv:
@@ -17,8 +14,11 @@
           - --rm
           - "{{ MATOMO_BOOTSTRAP_SERVICE }}"
       register: matomo_bootstrap_run
-      changed_when: true
       no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+      changed_when: true
+      retries: 6
+      delay: 20
+      until: matomo_bootstrap_run.rc == 0
 
   rescue:
 

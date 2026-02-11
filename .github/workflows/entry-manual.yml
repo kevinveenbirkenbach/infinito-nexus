@@ -1,0 +1,34 @@
+name: CI (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      distros:
+        description: "Space-separated distro list (overrides default). Example: 'arch debian'"
+        required: false
+        default: "arch"
+        type: string
+      whitelist:
+        description: "Optional space-separated whitelist of app ids. Example: 'web-app-matomo web-app-chess'"
+        required: false
+        default: ""
+        type: string
+
+concurrency:
+  group: global-ci-${{ github.repository }}-${{ github.ref_name }}-manual
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+  actions: read
+
+jobs:
+  ci-orchestrator:
+    name: 🎛️ Orchestrate CI (manual)
+    uses: ./.github/workflows/ci-orchestrator.yml
+    with:
+      distros: ${{ inputs.distros }}
+      whitelist: ${{ inputs.whitelist }}
+    secrets: inherit

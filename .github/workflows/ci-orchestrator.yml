@@ -7,6 +7,11 @@ on:
         required: false
         type: string
         default: "arch debian ubuntu fedora centos"
+      whitelist:
+        description: "Optional space-separated whitelist of app ids"
+        required: false
+        type: string
+        default: ""
 
 concurrency:
   group: infinito-test-${{ github.ref }}
@@ -82,7 +87,8 @@ jobs:
     uses: ./.github/workflows/mirror-images-missing.yml
     secrets: inherit
 
-  # Priority A
+  # Deploy tests
+
   test-deploy-server:
     needs:
       - test-dns
@@ -90,8 +96,8 @@ jobs:
     uses: ./.github/workflows/test-deploy-server.yml
     with:
       distros: ${{ inputs.distros }}
+      whitelist: ${{ inputs.whitelist }}
 
-  # Priority B
   test-deploy-universal:
     needs:
       - test-dns
@@ -99,8 +105,8 @@ jobs:
     uses: ./.github/workflows/test-deploy-universal.yml
     with:
       distros: ${{ inputs.distros }}
-  
-  # Priority C
+      whitelist: ${{ inputs.whitelist }}
+
   test-deploy-workstation:
     needs:
       - code-quality-gate
@@ -108,6 +114,7 @@ jobs:
     uses: ./.github/workflows/test-deploy-workstation.yml
     with:
       distros: ${{ inputs.distros }}
+      whitelist: ${{ inputs.whitelist }}
 
   # Test Installation
   test-install-make:

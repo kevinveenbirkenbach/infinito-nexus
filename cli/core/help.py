@@ -63,13 +63,10 @@ def print_global_help(cli_dir: Path) -> None:
     print(
         color_text(
             "Usage: infinito "
-            "[--sound] "
-            "[--no-signal] "
             "[--log <LOG_DIR>] "
             "[--git-clean] "
             "[--infinite] "
             "[--help-all] "
-            "[--alarm-timeout <seconds>] "
             "[-h|--help] "
             "<command> [options]",
             Fore.GREEN,
@@ -77,14 +74,6 @@ def print_global_help(cli_dir: Path) -> None:
     )
     print()
     print(color_text("Options:", Style.BRIGHT))
-    print(
-        color_text(
-            "  --sound           Play startup melody and warning sounds", Fore.YELLOW
-        )
-    )
-    print(
-        color_text("  --no-signal       Suppress success/failure signals", Fore.YELLOW)
-    )
     print(
         color_text(
             "  --log <LOG_DIR>   Log all proxied command output to <LOG_DIR>/<timestamp>.log",
@@ -106,12 +95,6 @@ def print_global_help(cli_dir: Path) -> None:
     print(
         color_text(
             "  --help-all        Show full --help for all CLI commands", Fore.YELLOW
-        )
-    )
-    print(
-        color_text(
-            "  --alarm-timeout   Stop warnings and exit after N seconds (default: 60)",
-            Fore.YELLOW,
         )
     )
     print(

@@ -69,6 +69,40 @@ class Compose:
 
         return r
 
+    def _compose_up_with_retries(
+        self,
+        args: list[str],
+        *,
+        attempts: int = 6,
+        delay_s: int = 30,
+    ) -> None:
+        """
+        Retry the underlying `docker compose ... up` to mitigate transient registry errors
+        (e.g., Docker Hub 500 while pulling coredns).
+        """
+        last_exc: Exception | None = None
+
+        for i in range(1, int(attempts) + 1):
+            try:
+                self.run(args, check=True)
+                return
+            except Exception as exc:
+                last_exc = exc
+
+                if i >= int(attempts):
+                    # Re-raise the last error to keep previous behavior (fail CI).
+                    raise
+
+                print(
+                    f">>> WARNING: compose up failed (attempt {i}/{attempts}): {exc}\n"
+                    f">>> Retrying in {int(delay_s)}s..."
+                )
+                time.sleep(int(delay_s))
+
+        # Should be unreachable, but keep mypy happy.
+        if last_exc is not None:
+            raise last_exc
+
     def _render_coredns_corefile(self) -> None:
         renderer = CoreDNSCorefileRenderer(repo_root=self.repo_root)
         out = renderer.render(show_preview=True, preview_lines=25)
@@ -113,7 +147,9 @@ class Compose:
             args.append("--no-build")
         args += ["coredns", "infinito"]
 
-        self.run(args, check=True)
+        # Retry to avoid transient registry/HTTP 5xx errors when pulling images.
+        self._compose_up_with_retries(args, attempts=6, delay_s=30)
+
         self.wait_for_healthy()
 
         if run_entry_init:

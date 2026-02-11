@@ -14,7 +14,6 @@ class TestDedicatedMainParser(unittest.TestCase):
 
         self.assertIn("inventory", opts)
         self.assertIn("limit", opts)
-        self.assertIn("host_type", opts)
         self.assertIn("password_file", opts)
         self.assertIn("skip_build", opts)
         self.assertIn("id", opts)

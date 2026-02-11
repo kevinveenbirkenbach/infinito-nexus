@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+# cli/meta/applications/sufficient_storage/__main__.py
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -38,6 +40,14 @@ def parse_args() -> argparse.Namespace:
         help="Emit GitHub Actions warnings for missing configs/keys",
     )
 
+    parser.add_argument(
+        "-f",
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="Output format (default: text). text = one role per line; json = JSON array.",
+    )
+
     return parser.parse_args()
 
 
@@ -50,9 +60,14 @@ def main() -> int:
         emit_warnings=args.warnings,
     )
 
-    # Print space-separated for easy CI consumption
-    if matching:
-        print(" ".join(matching))
+    if args.format == "json":
+        # Always output valid JSON
+        print(json.dumps(matching, indent=2))
+        return 0
+
+    # text: one role per line (robust for shell pipelines)
+    for role in matching:
+        print(role)
 
     return 0
 

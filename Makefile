@@ -26,9 +26,9 @@ endif
 	dev-environment-bootstrap dev-environment-teardown \
 	apparmor-teardown apparmor-restore \
 	trust-ca \
-	docker-restart docker-up docker-down docker-stop \
+	restart up down stop \
 	build build-missing build-no-cache build-no-cache-all \
-	ci-deploy-discover ci-deploy-app ci-discover-output \
+	ci-deploy-app \
 	test-act-all test-act-app \
 	test-local-reset test-local-run-all test-local-cleanup test-local-web-purge \
 	test-local-rapid test-local-rapid-fresh test-local-full \
@@ -71,16 +71,16 @@ clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX;
 
-docker-restart:
+restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
-docker-up: install
+up: install
 	@"$${PYTHON}" -m cli.deploy.development up
 
-docker-down:
+down:
 	@"$${PYTHON}" -m cli.deploy.development down
 
-docker-stop:
+stop:
 	@"$${PYTHON}" -m cli.deploy.development stop
 
 list:
@@ -166,26 +166,10 @@ test-integration: install
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
-ci-deploy-discover:
-	@PYTHON=python3 ./scripts/meta/build-test-matrix.sh
-
 ci-deploy-app:
 	@export MISSING_ONLY=true; \
 	export MAX_TOTAL_SECONDS=19800; \
 	./scripts/tests/deploy/ci/all_distros.sh
-
-ci-discover-output:
-	@set -euo pipefail; \
-	apps="$$(./scripts/meta/build-test-matrix.sh)"; \
-	[[ -n "$$apps" ]] || apps='[]'; \
-	if [[ -n "$${ONLY_APP:-}" ]]; then \
-	  apps="$$(jq -nc --arg a "$$ONLY_APP" '[ $$a ]')"; \
-	fi; \
-	if [[ -n "$${GITHUB_OUTPUT:-}" ]]; then \
-	  echo "apps=$$apps" >> "$$GITHUB_OUTPUT"; \
-	  echo "apps_json=$$apps" >> "$$GITHUB_OUTPUT"; \
-	fi; \
-	echo "apps_json=$$apps"
 
 test-act-all:
 	@bash scripts/tests/deploy/act/all.sh
@@ -208,7 +192,7 @@ test-local-cleanup: test-local-cleanup-entity
 	@bash scripts/tests/deploy/local/utils/purge/web.sh
 	@bash scripts/tests/deploy/local/utils/purge/lib.sh
 
-test-local-dedicated: docker-down docker-up
+test-local-dedicated: down up
 	@bash scripts/tests/deploy/local/dedicated_distro.sh
 
 test-local-rapid:

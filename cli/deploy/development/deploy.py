@@ -9,7 +9,6 @@ from .common import make_compose, resolve_deploy_ids_for_app
 def _run_deploy(
     compose,
     *,
-    deploy_type: str,
     deploy_ids: list[str],
     debug: bool,
     passthrough: list[str],
@@ -30,13 +29,11 @@ def _run_deploy(
         "--assert",
         "true",
         "--diff",
-        "-T",
-        deploy_type,
         "--id",
         *deploy_ids,
     ]
     if debug:
-        cmd.insert(cmd.index("-T"), "--debug")
+        cmd.insert(cmd.index("--diff") + 1, "--debug")
 
     if passthrough:
         cmd.extend(passthrough)
@@ -69,12 +66,6 @@ def _run_deploy(
 def add_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser(
         "deploy", help="Run deploy inside the infinito container (requires inventory)."
-    )
-    p.add_argument(
-        "--type",
-        required=True,
-        choices=["server", "workstation", "universal"],
-        help="Deploy type.",
     )
     p.add_argument(
         "--distro",
@@ -129,7 +120,6 @@ def handler(args: argparse.Namespace) -> int:
 
     rc = _run_deploy(
         compose,
-        deploy_type=args.type,
         deploy_ids=deploy_ids,
         debug=bool(args.debug),
         passthrough=passthrough,

@@ -45,11 +45,9 @@ docker exec -it "${INFINITO_CONTAINER}" bash -lc "
 
   echo \">>> Starting rapid deploy\"
   cmd=(infinito deploy dedicated \"${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml\"
-    -T \"${TEST_DEPLOY_TYPE}\"
     --skip-backup
     --skip-cleanup
     --id ${APP}
-    --no-signal
     -l localhost
     --diff
     -vv

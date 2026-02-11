@@ -8,15 +8,15 @@ set -euo pipefail
 #   DISTROS            (space-separated distro list, e.g. "arch debian")
 #
 # Always defined:
-#   ONLY_APP           (may be empty, but will always be set)
+#   WHITELIST          (may be empty, but will always be set)
 #
 # Provided either via:
 #   - act --env
 #   - workflow_dispatch inputs (forwarded as INPUT_*)
 #
 # Writes:
-#   - to $GITHUB_OUTPUT: test_deploy_type, distros, only_app
-#   - to $GITHUB_ENV:   TEST_DEPLOY_TYPE, DISTROS, ONLY_APP
+#   - to $GITHUB_OUTPUT: test_deploy_type, distros, whitelist
+#   - to $GITHUB_ENV:   TEST_DEPLOY_TYPE, DISTROS, WHITELIST
 
 : "${GITHUB_OUTPUT:?GITHUB_OUTPUT must be set (running inside GitHub Actions or act)}"
 : "${GITHUB_ENV:?GITHUB_ENV must be set (running inside GitHub Actions or act)}"
@@ -27,9 +27,9 @@ set -euo pipefail
 TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE:-${INPUT_TEST_DEPLOY_TYPE:-}}"
 DISTROS="${DISTROS:-${INPUT_DISTROS:-}}"
 
-# ONLY_APP is special: must always exist, but may be empty
-ONLY_APP="${ONLY_APP:-${INPUT_ONLY_APP:-}}"
-ONLY_APP="${ONLY_APP:-}"  # force defined even if still empty
+# WHITELIST must always exist, but may be empty
+WHITELIST="${WHITELIST:-${INPUT_WHITELIST:-}}"
+WHITELIST="${WHITELIST:-}"  # force defined even if still empty
 
 # Hard requirements
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
@@ -47,18 +47,18 @@ esac
 echo "Resolved inputs:"
 echo "  TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE}"
 echo "  DISTROS=${DISTROS}"
-echo "  ONLY_APP=${ONLY_APP}"
+echo "  WHITELIST=${WHITELIST}"
 
 # Export outputs for workflow
 {
   echo "test_deploy_type=${TEST_DEPLOY_TYPE}"
   echo "distros=${DISTROS}"
-  echo "only_app=${ONLY_APP}"
+  echo "whitelist=${WHITELIST}"
 } >> "${GITHUB_OUTPUT}"
 
 # Export env for subsequent steps
 {
   echo "TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE}"
   echo "DISTROS=${DISTROS}"
-  echo "ONLY_APP=${ONLY_APP}"
+  echo "WHITELIST=${WHITELIST}"
 } >> "${GITHUB_ENV}"

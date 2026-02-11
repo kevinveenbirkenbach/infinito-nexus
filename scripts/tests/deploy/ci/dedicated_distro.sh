@@ -29,7 +29,6 @@ PYTHON="${PYTHON:-python3}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
-TYPE=""
 APP=""
 
 usage() {
@@ -37,14 +36,12 @@ usage() {
 Usage:
   INFINITO_DISTRO=<distro> INVENTORY_DIR=<dir> INFINITO_DOCKER_VOLUME=<abs_path> \
     scripts/tests/deploy/ci/dedicated_distro.sh \
-    --type <server|workstation|universal> \
     --app <app_id>
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --type) TYPE="${2:-}"; shift 2 ;;
     --app)  APP="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *)
@@ -54,13 +51,11 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
-
-[[ -n "${TYPE}" ]] || { echo "[ERROR] --type is required" >&2; usage; exit 2; }
 [[ -n "${APP}"  ]] || { echo "[ERROR] --app is required"  >&2; usage; exit 2; }
 
 cd "${REPO_ROOT}"
 
-echo "=== distro=${INFINITO_DISTRO} type=${TYPE} app=${APP} (debug always on) ==="
+echo "=== distro=${INFINITO_DISTRO} app=${APP} (debug always on) ==="
 
 cleanup() {
   rc=$?
@@ -125,7 +120,6 @@ echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 
 deploy_args=(
   --distro "${INFINITO_DISTRO}"
-  --type "${TYPE}"
   --app "${APP}"
   --inventory-dir "${INVENTORY_DIR}"
   --debug

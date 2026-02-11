@@ -10,14 +10,13 @@
       - data:/var/www/html
     healthcheck:
       test:
-        [
-          "CMD-SHELL",
-          "php -r 'exit(@file_get_contents(\"http://localhost/index.php\")?0:1);'"
-        ]
+        - CMD-SHELL
+        - |
+          [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/index.php || echo 000)" = "200" ]
       interval: 10s
       timeout: 5s
       retries: 12
-      start_period: 30s
+      start_period: 60s
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 

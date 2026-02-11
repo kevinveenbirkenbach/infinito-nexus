@@ -24,8 +24,8 @@ echo "=== act: deploy local (type=${TEST_DEPLOY_TYPE}, app=${APP}, distros=${INF
 
 act workflow_dispatch \
   -W .github/workflows/test-deploy-local.yml \
-  --env TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  --env DISTROS="${INFINITO_DISTRO}" \
-  --env ONLY_APP="${APP}" \
+  --input test_deploy_type="${TEST_DEPLOY_TYPE}" \
+  --input distros="${INFINITO_DISTRO}" \
+  --input whitelist="${APP}" \
   --container-options "--privileged" \
   --network host
