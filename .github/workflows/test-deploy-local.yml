@@ -13,11 +13,11 @@ on:
         required: false
         default: "arch"
         type: string
-      only_app:
-        description: "Optional single app id"
+      whitelist:
+        description: "Optional space-separated whitelist of app ids"
         required: false
-        default: ""
         type: string
+        default: ""
 
 permissions:
   contents: read
@@ -29,9 +29,9 @@ permissions:
 env:
   TEST_DEPLOY_TYPE: "server"
   DISTROS: "arch"
-  ONLY_APP: ""
   NIX_CONFIG: ""
   INFINITO_IMAGE_TAG: "latest"
+
 jobs:
   discover:
     name: 🔎 Discover apps (local)
@@ -41,7 +41,7 @@ jobs:
       apps: ${{ steps.discover.outputs.apps }}
       test_deploy_type: ${{ steps.vars.outputs.test_deploy_type }}
       distros: ${{ steps.vars.outputs.distros }}
-      only_app: ${{ steps.vars.outputs.only_app }}
+      whitelist: ${{ steps.vars.outputs.whitelist }}
 
     steps:
       - uses: actions/checkout@v6
@@ -52,7 +52,7 @@ jobs:
         env:
           INPUT_TEST_DEPLOY_TYPE: ${{ inputs.test_deploy_type }}
           INPUT_DISTROS: ${{ inputs.distros }}
-          INPUT_ONLY_APP: ${{ inputs.only_app }}
+          INPUT_WHITELIST: ${{ inputs.whitelist }}
         run: |
           set -euo pipefail
           bash scripts/meta/resolve/input.sh
@@ -73,9 +73,15 @@ jobs:
       - name: Discover apps
         id: discover
         shell: bash
+        env:
+          WHITELIST: ${{ inputs.whitelist }}
         run: |
           set -euo pipefail
-          make ci-discover-output
+          apps="$(./scripts/meta/resolve/apps.sh)"
+          [[ -n "$apps" ]] || apps='[]'
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
+          echo "apps_json=$apps" >> "$GITHUB_OUTPUT"
+          echo "apps_json=$apps"
 
   deploy:
     name: 🚀 Deploy ${{ needs.discover.outputs.test_deploy_type }} app (${{ matrix.app }})
@@ -111,6 +117,6 @@ jobs:
           set -euo pipefail
           export TEST_DEPLOY_TYPE="${{ needs.discover.outputs.test_deploy_type }}"
           export DISTROS="${{ needs.discover.outputs.distros }}"
-          export ONLY_APP="${{ needs.discover.outputs.only_app }}"
           export APP="${{ matrix.app }}"
+          export WHITELIST="${{ needs.discover.outputs.whitelist }}"
           make ci-deploy-app

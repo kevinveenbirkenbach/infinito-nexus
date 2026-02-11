@@ -10,6 +10,7 @@ set -euo pipefail
 
 # Optional overrides
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
+WHITELIST="${WHITELIST:-}"
 
 # This script always generates inventories for the development compose stack.
 RUNTIME_VARS_JSON='{"RUNTIME":"dev"}'
@@ -19,6 +20,7 @@ echo "distro        = ${INFINITO_DISTRO}"
 echo "type          = ${TEST_DEPLOY_TYPE}"
 echo "limit         = ${LIMIT_HOST}"
 echo "inventory_dir = ${INVENTORY_DIR}"
+echo "whitelist     = ${WHITELIST}"
 echo
 
 # ---------------------------------------------------------------------------
@@ -32,15 +34,16 @@ echo ">>> Starting development compose stack (no build)"
 # ---------------------------------------------------------------------------
 # 2) Discover apps on HOST (needs docker compose)
 # ---------------------------------------------------------------------------
-echo ">>> Discovering apps on host via make ci-deploy-discover (TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE})"
+echo ">>> Discovering apps on host via scripts/meta/resolve/apps.sh (TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE})"
 
 discover_out="$(
   TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  make -s --no-print-directory ci-deploy-discover
+  WHITELIST="${WHITELIST}" \
+  scripts/meta/resolve/apps.sh
 )"
 
 if [[ -z "${discover_out}" ]]; then
-  echo "ERROR: ci-deploy-discover returned empty output"
+  echo "ERROR: app matrix is empty"
   exit 2
 fi
 

@@ -66,7 +66,8 @@ echo
 # Recompute apps list (optional, but keeps filters consistent)
 apps_json="$(
   TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  scripts/meta/build-test-matrix.sh
+  WHITELIST="${WHITELIST:-}" \
+  scripts/meta/resolve/apps.sh
 )"
 
 apps_count="$(

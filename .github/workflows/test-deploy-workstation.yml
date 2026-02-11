@@ -7,6 +7,11 @@ on:
         description: "Space-separated distro list"
         required: true
         type: string
+      whitelist:
+        description: "Optional space-separated whitelist of app ids"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -15,7 +20,6 @@ permissions:
 env:
   TEST_DEPLOY_TYPE: workstation
   DISTROS: ${{ inputs.distros }}
-  ONLY_APP: ""
   NIX_CONFIG: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
   INFINITO_IMAGE_TAG: ci-${{ github.sha }}
@@ -48,8 +52,16 @@ jobs:
 
       - name: Discover apps
         id: discover
+        shell: bash
+        env:
+          WHITELIST: ${{ inputs.whitelist }}
         run: |
-          make ci-discover-output
+          set -euo pipefail
+          apps="$(./scripts/meta/resolve/apps.sh)"
+          [[ -n "$apps" ]] || apps='[]'
+          echo "apps=$apps" >> "$GITHUB_OUTPUT"
+          echo "apps_json=$apps" >> "$GITHUB_OUTPUT"
+          echo "apps_json=$apps"
 
   workstation:
     name: 🖥️ Deploy ${{ matrix.app }}

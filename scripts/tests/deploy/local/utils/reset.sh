@@ -24,11 +24,12 @@ echo
 # 1) Discover apps on HOST (same as local/all.sh)
 apps_json="$(
   TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  scripts/meta/build-test-matrix.sh
+  WHITELIST="${WHITELIST:-}" \
+  scripts/meta/resolve/apps.sh
 )"
 
 if [[ -z "${apps_json}" ]]; then
-  echo "ERROR: build-test-matrix returned empty output" >&2
+  echo "ERROR: app matrix is empty" >&2
   exit 2
 fi
 
