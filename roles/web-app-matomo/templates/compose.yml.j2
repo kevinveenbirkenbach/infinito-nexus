@@ -12,15 +12,7 @@
       test:
         - CMD-SHELL
         - |
-          php -r '
-            $h=@get_headers("http://localhost/index.php");
-            if(!$h){exit(1);}
-            if(preg_match("/^HTTP\\/\\S+\\s+(\\d+)/",$h[0],$m)){
-              $c=intval($m[1]);
-              exit(($c===200||$c===302)?0:1);
-            }
-            exit(1);
-          '
+          [ "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1/index.php || echo 000)" = "200" ]
       interval: 10s
       timeout: 5s
       retries: 12
