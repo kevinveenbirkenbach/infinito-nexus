@@ -22,21 +22,15 @@
 - name: flush docker service
   meta: flush_handlers
 
-- name: "Matomo install | Wait for Matomo container to be running"
-  command: "container inspect -f '{{ \"{{\" }}.State.Running{{ \"}}\" }}' {{ MATOMO_NAME }}"
-  register: matomo_running
+- name: "Matomo install | Wait for Matomo container to be healthy"
+  ansible.builtin.command: >
+    container inspect -f '{{ "{{" }}.State.Health.Status{{ "}}" }}' {{ MATOMO_NAME }}
+  register: matomo_health
   changed_when: false
-  retries: 30
+  retries: 60
   delay: 2
   until: >
-    (matomo_running.rc | default(1)) == 0 and
-    ((matomo_running.stdout | default('') | trim) == 'true')
-
-- name: "Matomo install | Wait until Matomo HTTP port is reachable"
-  ansible.builtin.wait_for:
-    host: "{{ DOCKER_REACH_HOST }}"
-    port: "{{ ports.localhost.http[application_id] }}"
-    timeout: 180
+    matomo_health.rc == 0 and (matomo_health.stdout | trim) == 'healthy'
 
 - name: "Matomo install | Check whether Matomo is already installed (config.ini.php exists)"
   command:
