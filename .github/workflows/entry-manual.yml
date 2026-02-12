@@ -14,10 +14,6 @@ on:
         default: ""
         type: string
 
-concurrency:
-  group: global-ci-${{ github.repository }}-${{ github.ref_name }}-manual
-  cancel-in-progress: false
-
 permissions:
   contents: read
   packages: write
