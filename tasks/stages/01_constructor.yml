@@ -78,7 +78,7 @@
           | combine(
               {
                 'svc-prx-openresty': {
-                  'canonical': [ DOMAIN_PRIMARY ]
+                  'canonical': ([ DOMAIN_PRIMARY ] | flatten | map('string') | list)
                 }
               },
               recursive=True
