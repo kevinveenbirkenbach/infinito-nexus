@@ -4,8 +4,8 @@
 WEBSERVER_CPUS_EFFECTIVE: >-
   {{
     [
-      (applications | resource_filter('svc-prx-openresty', 'cpus', service_name | default(''), RESOURCE_CPUS)) | float,
-      (applications | resource_filter(application_id,           'cpus', service_name | default(''), RESOURCE_CPUS)) | float
+      (applications | resource_filter('svc-prx-openresty',  'cpus', service_name | default(''), RESOURCE_CPUS)) | float,
+      (applications | resource_filter(application_id,       'cpus', service_name | default(''), RESOURCE_CPUS)) | float
     ] | min
   }}
 

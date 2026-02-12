@@ -64,7 +64,7 @@
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge current play domain definitions
-    set_fact:
+    ansible.builtin.set_fact:
       CURRENT_PLAY_DOMAINS: >-
         {{
           applications
@@ -75,12 +75,20 @@
               seed=(CURRENT_PLAY_APPLICATIONS | dict2items | map(attribute='key') | list)
             )
           | combine(domains | default({}, true), recursive=True)
+          | combine(
+              {
+                'svc-prx-openresty': {
+                  'canonical': [ DOMAIN_PRIMARY ]
+                }
+              },
+              recursive=True
+            )
         }}
-  
+
   - name: Merge domain definitions for all domains
     set_fact:
       domains: >-
-        {{ 
+        {{
           defaults_applications | 
           canonical_domains_map(DOMAIN_PRIMARY) | 
           combine(CURRENT_PLAY_DOMAINS, recursive=True) 
