@@ -95,14 +95,28 @@
         }}
 
   - name: Merge CURRENT_PLAY_REDIRECT_DOMAINS
-    set_fact:
+    ansible.builtin.set_fact:
       # The following mapping is necessary to define the exceptions for domains which are created, but which aren't used
-      CURRENT_PLAY_REDIRECT_DOMAINS: "{{
-          [] |
-          add_redirect_if_group('web-svc-asset', lookup('domain','web-svc-asset'), lookup('domain','web-svc-file'), group_names) |
-          merge_mapping(redirect_domain_mappings | default([]), 'source') |
-          merge_mapping([{ 'source': DOMAIN_PRIMARY, 'target': DOMAIN_HOMEPAGE }], 'source')
-        }}"
+      CURRENT_PLAY_REDIRECT_DOMAINS: >-
+        {{
+          []
+          | add_redirect_if_group(
+              'web-svc-asset',
+              (lookup('domain','web-svc-asset') | flatten | map('string') | first),
+              (lookup('domain','web-svc-file')  | flatten | map('string') | first),
+              group_names
+            )
+          | merge_mapping(redirect_domain_mappings | default([]), 'source')
+          | merge_mapping(
+              [
+                {
+                  'source': (DOMAIN_PRIMARY  | flatten | map('string') | first),
+                  'target': (DOMAIN_HOMEPAGE | flatten | map('string') | first)
+                }
+              ],
+              'source'
+            )
+        }}
 
   - name: Set current play redirect domain mappings 
     set_fact:
