@@ -10,3 +10,8 @@ compose:
   volumes:
     www:    "/var/www/"
     nginx:  "/etc/nginx/"
+server:
+  domains:
+    canonical:
+      - "{{ DOMAIN_PRIMARY }}"
+    aliases: []
