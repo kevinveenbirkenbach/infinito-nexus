@@ -138,8 +138,6 @@
                 | items2dict(key_name='source', value_name='source'),
                 recursive=True
               )
-            | to_json
-            | from_json
           )
           | generate_all_domains(WWW_REDIRECT_ENABLED | bool)
         }}
