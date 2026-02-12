@@ -77,9 +77,7 @@
           | combine(domains | default({}, true), recursive=True)
           | combine(
               {
-                'svc-prx-openresty': {
-                  'canonical': ([ DOMAIN_PRIMARY ] | flatten | map('string') | list)
-                }
+                'svc-prx-openresty': ([ DOMAIN_PRIMARY ] | flatten | map('string') | list)
               },
               recursive=True
             )
