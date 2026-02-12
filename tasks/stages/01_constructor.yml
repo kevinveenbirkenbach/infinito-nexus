@@ -90,9 +90,10 @@
     set_fact:
       # The following mapping is necessary to define the exceptions for domains which are created, but which aren't used
       CURRENT_PLAY_REDIRECT_DOMAINS: "{{
-        []  | 
-        add_redirect_if_group('web-svc-asset', lookup('domain','web-svc-asset'), lookup('domain','web-svc-file'),  group_names) | 
-        merge_mapping(redirect_domain_mappings| default([]), 'source')
+          [] |
+          add_redirect_if_group('web-svc-asset', lookup('domain','web-svc-asset'), lookup('domain','web-svc-file'), group_names) |
+          merge_mapping(redirect_domain_mappings | default([]), 'source') |
+          merge_mapping([{ 'source': DOMAIN_PRIMARY, 'target': DOMAIN_HOMEPAGE }], 'source')
         }}"
 
   - name: Set current play redirect domain mappings 

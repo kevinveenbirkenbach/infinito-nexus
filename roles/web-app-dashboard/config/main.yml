@@ -23,9 +23,8 @@ server:
         unsafe-inline: true
   domains:
     canonical:
-      - "{{ DOMAIN_PRIMARY }}"
-    aliases:
-      - "www.{{ DOMAIN_PRIMARY }}"   
+      - "dashboard.{{ DOMAIN_PRIMARY }}"
+    aliases: []
 compose: 
   services:
     oidc:

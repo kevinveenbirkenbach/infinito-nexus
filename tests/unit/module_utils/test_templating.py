@@ -115,14 +115,14 @@ class TestTemplatingRenderStrict(unittest.TestCase):
 
     def test_ca_root_nested_var_resolves_without_templar(self):
         # This is the scenario that kept failing:
-        # Rendered: /etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt
+        # Rendered: /etc/{{ SOFTWARE_DOMAIN }}/ca/root-ca.crt
         # Raw: {{ CA_ROOT.cert_host }}
         #
         # We simulate CA_ROOT.cert_host itself being a Jinja string that requires another variable.
         variables = {
-            "SOFTWARE_NAME": "Infinito.Nexus",
+            "SOFTWARE_DOMAIN": "infinito.nexus",
             "CA_ROOT": {
-                "cert_host": "/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt",
+                "cert_host": "/etc/{{ SOFTWARE_DOMAIN }}/ca/root-ca.crt",
             },
         }
         out = render_ansible_strict(
@@ -163,10 +163,10 @@ class TestTemplatingRenderStrict(unittest.TestCase):
     def test_multi_round_rendering(self):
         # Ensure multi-pass rendering works:
         #   raw -> "{{ CA_ROOT.cert_host }}"
-        #   CA_ROOT.cert_host -> "/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt"
+        #   CA_ROOT.cert_host -> "/etc/{{ SOFTWARE_DOMAIN }}/ca/root-ca.crt"
         variables = {
-            "SOFTWARE_NAME": "Infinito.Nexus",
-            "CA_ROOT": {"cert_host": "/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt"},
+            "SOFTWARE_DOMAIN": "infinito.nexus",
+            "CA_ROOT": {"cert_host": "/etc/{{ SOFTWARE_DOMAIN }}/ca/root-ca.crt"},
         }
         out = render_ansible_strict(
             templar=_FakeTemplarLookupUndefined(),  # returns unchanged => fallback kicks in
@@ -179,10 +179,10 @@ class TestTemplatingRenderStrict(unittest.TestCase):
 
     def test_embedded_expression_in_string(self):
         # Make sure embedded {{ ... }} inside a larger string is handled.
-        variables = {"SOFTWARE_NAME": "Infinito.Nexus"}
+        variables = {"SOFTWARE_DOMAIN": "infinito.nexus"}
         out = render_ansible_strict(
             templar=None,
-            raw="/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt",
+            raw="/etc/{{ SOFTWARE_DOMAIN }}/ca/root-ca.crt",
             var_name="x",
             err_prefix="t",
             variables=variables,

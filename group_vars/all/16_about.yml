@@ -30,5 +30,5 @@ defaults_service_provider:
 
   legal:
     editorial_responsible:  "DEMO USER"
-    source_code:            "https://s.{{ SOFTWARE_NAME | lower }}/code"
+    source_code:            "https://s.{{ SOFTWARE_DOMAIN }}/code"
     imprint:                "{{ lookup('tls', 'web-svc-html', 'url.base') }}imprint.html"

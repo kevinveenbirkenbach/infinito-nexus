@@ -1,6 +1,7 @@
 ansible_python_interpreter: /usr/bin/python3
 
-SOFTWARE_NAME:              "Infinito.Nexus"  # Name of the software
+SOFTWARE_NAME:              "Infinito.Nexus"              # Name of the software
+SOFTWARE_DOMAIN:            "{{ SOFTWARE_NAME | lower }}"
 
 # Deployment
 ENVIRONMENT:                "production"      # Possible values: production, development
@@ -34,6 +35,7 @@ AUTO_BUILD_ALIASES:     False # If enabled it creates an alias domain for each w
 # Domain
 DOMAIN_PRIMARY:                           "{{ lookup('env', 'DOMAIN') | default('infinito.localhost', true) }}" # Primary Domain of the server
 DOMAIN_TEST:                              "test.{{ DOMAIN_PRIMARY }}"
+DOMAIN_HOMEPAGE:                          "{{ lookup('domain','web-app-dashboard') if 'web-app-dashboard' in group_names else SOFTWARE_DOMAIN }}"
 
 DNS_PROVIDER:                             "localhost"   # The DNS Provider\Registrar for the domain -> Legit values: cloudflare
 

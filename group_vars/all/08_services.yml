@@ -2,7 +2,7 @@
 # Services
 
 ## Meta
-SYS_SERVICE_SUFFIX:                     ".{{ SOFTWARE_NAME | lower }}.service"
+SYS_SERVICE_SUFFIX:                     ".{{ SOFTWARE_DOMAIN }}.service"
 
 ## Names
 SYS_SERVICE_CLEANUP_BACKUPS:            "{{ 'sys-ctl-cln-bkps'          | get_service_name(SOFTWARE_NAME) }}"

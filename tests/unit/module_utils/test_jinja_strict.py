@@ -57,10 +57,10 @@ class TestJinjaStrict(unittest.TestCase):
     def test_render_strict_single_pass_success(self):
         variables = {
             "inventory_hostname": "localhost",
-            "SOFTWARE_NAME": "Infinito",
+            "SOFTWARE_DOMAIN": "infinito",
         }
         out = render_strict(
-            "/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt",
+            "/etc/{{ SOFTWARE_DOMAIN }}/ca/root-ca.crt",
             variables=variables,
             var_name="CA_ROOT.cert_host",
             err_prefix="t",
@@ -70,8 +70,8 @@ class TestJinjaStrict(unittest.TestCase):
     def test_render_strict_recursive_nested_vars_success(self):
         variables = {
             "inventory_hostname": "localhost",
-            "SOFTWARE_NAME": "Infinito",
-            "CA_ROOT": {"cert_host": "/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt"},
+            "SOFTWARE_DOMAIN": "infinito",
+            "CA_ROOT": {"cert_host": "/etc/{{ SOFTWARE_DOMAIN }}/ca/root-ca.crt"},
             "CA_TRUST": {"cert_host": "{{ CA_ROOT.cert_host }}"},
         }
         out = render_strict(
