@@ -29,11 +29,23 @@ class TestVarsPassedAreUsed(unittest.TestCase):
     YAML_EXTENSIONS = {".yml", ".yaml"}
     JINJA_EXTENSIONS = {".j2"}
 
+    # Inventories are data-only bundle definitions (not tasks/templates) and can legitimately
+    # contain vars that are not referenced inside Jinja blocks or Ansible expressions.
+    # Therefore they are excluded from this lint.
+    EXCLUDED_TOP_LEVEL_DIRS = {"inventories"}
+
     # ---------- File iteration & YAML loading ----------
 
     def _iter_files(self, extensions: set[str]) -> Iterable[Path]:
         for p in self.REPO_ROOT.rglob("*"):
             if p.is_file() and p.suffix in extensions:
+                try:
+                    rel = p.relative_to(self.REPO_ROOT)
+                except Exception:
+                    continue
+                # Skip excluded top-level dirs (e.g. inventories/*)
+                if rel.parts and rel.parts[0] in self.EXCLUDED_TOP_LEVEL_DIRS:
+                    continue
                 yield p
 
     def _load_yaml_documents(self, path: Path) -> List[Any]:
