@@ -1,0 +1,31 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Digital Office"
+        description: >
+          A digital administration and documentation platform for structured organizations.
+        logo:
+          class: "fa-solid fa-building-columns"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-nextcloud:
+      hosts:
+        server:
+    web-app-openproject:
+      hosts:
+        server:
+    web-app-mediawiki:
+      hosts:
+        server:
+    web-app-keycloak:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

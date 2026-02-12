@@ -1,0 +1,34 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Education Suite"
+        description: >
+          A complete digital learning environment for schools, academies, and universities.
+        logo:
+          class: "fa-solid fa-graduation-cap"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-moodle:
+      hosts:
+        server:
+    web-app-nextcloud:
+      hosts:
+        server:
+    web-app-bigbluebutton:
+      hosts:
+        server:
+    web-svc-onlyoffice:
+      hosts:
+        server:
+    web-app-keycloak:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

@@ -1,0 +1,31 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Power Sale Package"
+        description: >
+          A high-performance e-commerce stack optimized for conversion and analytics.
+        logo:
+          class: "fa-solid fa-cart-shopping"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-magento:
+      hosts:
+        server:
+    web-app-shopware:
+      hosts:
+        server:
+    web-app-matomo:
+      hosts:
+        server:
+    web-app-keycloak:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:
