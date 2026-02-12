@@ -22,7 +22,7 @@ compose:
       enabled:  true
     ldap:
       enabled:  false
-    desktop:
+    dashboard:
       enabled:  false
     matomo:
       enabled:  true

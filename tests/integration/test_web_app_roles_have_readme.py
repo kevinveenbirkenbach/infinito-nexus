@@ -24,7 +24,7 @@ class TestWebAppRolesHaveReadme(unittest.TestCase):
     """
     Ensures every role under roles/web-app-* contains a README.md.
 
-    Why: The README is required for the role to be shown in the Web App Desktop.
+    Why: The README is required for the role to be shown in the Web App Dashboard.
     """
 
     @classmethod
@@ -58,7 +58,7 @@ class TestWebAppRolesHaveReadme(unittest.TestCase):
             self.fail(
                 "The following roles are missing a README.md:\n"
                 f"{formatted}\n\n"
-                "A README.md is required so the role can be displayed in the Web App Desktop."
+                "A README.md is required so the role can be displayed in the Web App Dashboard."
             )
 
 

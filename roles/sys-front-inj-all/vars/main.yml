@@ -5,4 +5,4 @@ SRV_WEB_INJ_COMP_FEATURES_ALL:
   - 'logout'
   - 'css'
   - 'matomo'
-  - 'desktop'
+  - 'dashboard'

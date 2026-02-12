@@ -1,0 +1,49 @@
+server:
+  csp:
+    whitelist:
+      script-src-elem:
+        - https://cdn.jsdelivr.net
+        - https://kit.fontawesome.com
+        - https://code.jquery.com/
+      style-src-elem:
+        - https://cdn.jsdelivr.net
+        - https://kit.fontawesome.com
+        - https://code.jquery.com/
+      font-src:
+        - https://ka-f.fontawesome.com
+        - https://cdn.jsdelivr.net
+      connect-src:
+        - https://ka-f.fontawesome.com
+        - https://cdn.jsdelivr.net
+        - "auth.{{ DOMAIN_PRIMARY }}" 
+      frame-src:
+        - "*.{{ DOMAIN_PRIMARY }}"
+    flags:
+      script-src-attr:
+        unsafe-inline: true
+  domains:
+    canonical:
+      - "{{ DOMAIN_PRIMARY }}"
+    aliases:
+      - "www.{{ DOMAIN_PRIMARY }}"   
+compose: 
+  services:
+    oidc:
+      enabled: true
+      shared: true
+    simpleicons:
+      enabled: true
+      shared: true
+    logout:
+      enabled: true
+    matomo:
+      enabled: true
+      shared: true
+    dashboard:
+      enabled: false
+      name:   "dashboard"
+      image:  "dashboard_custom"
+    css:
+      enabled: true
+    javascript:
+      enabled: true

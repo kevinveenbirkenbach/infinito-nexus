@@ -23,7 +23,7 @@ compose:
     ldap:
       enabled: true
       shared: true
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

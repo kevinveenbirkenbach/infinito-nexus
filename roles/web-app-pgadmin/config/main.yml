@@ -21,7 +21,7 @@ compose:
       master_password_required: True              # Master password is required. Recommended True. False is a security risk.
     logout:
       enabled: true
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

@@ -1,0 +1,40 @@
+# General
+application_id:                   "web-app-dashboard"
+http_port:                        "{{ ports.localhost.http[application_id] }}"
+
+## Webserver
+webserver_extra_configuration:        "{{ lookup('template', 'nginx/sso.html.conf.j2') }}"
+
+# Dashboard
+
+## Simpleicons
+DASHBOARD_SIMPLEICONS_ENABLED:      "{{ lookup('config', application_id, 'compose.services.simpleicons.enabled') }}"
+
+## Javascript
+DASHBOARD_JS_CDN_URL:               "{{ lookup('tls', 'web-svc-cdn', 'url.base') }}"
+DASHBOARD_JS_FILES:                 ['iframe.js','oidc.js']
+DASHBOARD_JS_BASE_PATH:             "{{ application_id | get_entity_name }}/js"
+DASHBOARD_JS_SERVER_DIR:            "{{ [ lookup('nginx','directories.data.cdn'), DASHBOARD_JS_BASE_PATH ] | path_join }}"
+DASHBOARD_JS_BASE_URL:              "{{ (DASHBOARD_JS_CDN_URL | trim('/')) ~ '/' ~ (DASHBOARD_JS_BASE_PATH | trim('/')) }}"
+
+## Webserver
+DASHBOARD_LOCATION_SILENT_CHECK:    "/silent-check-sso.html"
+
+## Configuration
+DASHBOARD_CONFIG_YML_SRC_FILE:      "config.yaml.j2"
+DASHBOARD_CONFIG_INV_PATH:          "{{ [ inventory_dir, 'files', inventory_hostname ,'docker',application_id,DASHBOARD_CONFIG_YML_SRC_FILE] | path_join }}"
+DASHBOARD_CONFIG_YML_DEST:          "{{ [ docker_repository_path, 'app/config.yaml'] | path_join }}"
+
+## OIDC
+DASHBOARD_KEYCLOAK_LOGIN_URL: >-
+  {{ OIDC.CLIENT.AUTHORIZE_URL
+     ~ '?client_id=' ~ OIDC.CLIENT.ID
+     ~ '&response_type=code'
+     ~ '&scope=openid%20profile%20email'
+     ~ '&redirect_uri=' ~ ((lookup('tls', application_id, 'url.base'))) | urlencode }}
+DASHBOARD_KEYCLOAK_IFRAME_ENABLED:  "{{ lookup('config','web-app-keycloak', 'compose.services.dashboard.enabled') }}"
+DASHBOARD_OIDC_ENABLED:             "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
+
+## Docker
+DASHBOARD_CONTAINER:                "{{ lookup('config', application_id, 'compose.services.dashboard.name') }}"
+DASHBOARD_IMAGE:                    "{{ lookup('config', application_id, 'compose.services.dashboard.image') }}"

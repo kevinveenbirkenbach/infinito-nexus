@@ -13,7 +13,7 @@ from cli.meta.applications.resolution.services.resolver import (
 
 
 class TestServicesResolverDirect(unittest.TestCase):
-    def test_direct_mapping_shared_services_and_desktop(self) -> None:
+    def test_direct_mapping_shared_services_and_dashboard(self) -> None:
         cfg = {
             "compose": {
                 "services": {
@@ -21,7 +21,7 @@ class TestServicesResolverDirect(unittest.TestCase):
                     "oidc": {"enabled": True, "shared": True},
                     "matomo": {"enabled": True, "shared": True},
                     "database": {"enabled": True, "shared": True, "type": "mariadb"},
-                    "desktop": {"enabled": True},  # shared irrelevant
+                    "dashboard": {"enabled": True},  # shared irrelevant
                 }
             }
         }
@@ -33,7 +33,7 @@ class TestServicesResolverDirect(unittest.TestCase):
                 "web-app-keycloak",
                 "web-app-matomo",
                 "svc-db-mariadb",
-                "web-app-desktop",
+                "web-app-dashboard",
             ],
         )
 
@@ -48,17 +48,17 @@ class TestServicesResolverDirect(unittest.TestCase):
         with self.assertRaises(ServicesResolutionError):
             resolve_direct_service_roles_from_config(cfg)
 
-    def test_non_shared_not_included_except_desktop(self) -> None:
+    def test_non_shared_not_included_except_dashboard(self) -> None:
         cfg = {
             "compose": {
                 "services": {
                     "ldap": {"enabled": True, "shared": False},
-                    "desktop": {"enabled": True},
+                    "dashboard": {"enabled": True},
                 }
             }
         }
         roles = resolve_direct_service_roles_from_config(cfg)
-        self.assertEqual(roles, ["web-app-desktop"])
+        self.assertEqual(roles, ["web-app-dashboard"])
 
 
 class TestServicesResolverTransitive(unittest.TestCase):

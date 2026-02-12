@@ -8,11 +8,11 @@ from ansible.errors import AnsibleError
 from jinja2 import Environment, StrictUndefined, select_autoescape
 
 
-# Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-desktop role.
+# Adjust the PYTHONPATH to include the lookup_plugins folder from the web-app-dashboard role.
 sys.path.insert(
     0,
     os.path.join(
-        os.path.dirname(__file__), "../../../roles/web-app-desktop/lookup_plugins"
+        os.path.dirname(__file__), "../../../roles/web-app-dashboard/lookup_plugins"
     ),
 )
 
@@ -128,8 +128,8 @@ class TestDockerCardsLookup(unittest.TestCase):
         # Create a temporary directory to simulate the roles directory.
         self.test_roles_dir = tempfile.mkdtemp(prefix="test_roles_")
 
-        # Create a sample role "web-app-desktop" under that directory.
-        self.role_name = "web-app-desktop"
+        # Create a sample role "web-app-dashboard" under that directory.
+        self.role_name = "web-app-dashboard"
         self.role_dir = os.path.join(self.test_roles_dir, self.role_name)
         os.makedirs(os.path.join(self.role_dir, "meta"))
         os.makedirs(os.path.join(self.role_dir, "vars"))
@@ -176,7 +176,7 @@ galaxy_info:
         return {
             "domains": {"portfolio": "myportfolio.com"},
             "applications": {
-                "portfolio": {"compose": {"services": {"desktop": {"enabled": True}}}}
+                "portfolio": {"compose": {"services": {"dashboard": {"enabled": True}}}}
             },
             "group_names": ["portfolio"],
             "TLS_ENABLED": True,

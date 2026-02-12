@@ -14,7 +14,7 @@ class TestDomainMappings(unittest.TestCase):
         self.assertEqual(result, [])
 
     def test_app_without_domains(self):
-        apps = {"web-app-desktop": {}}
+        apps = {"web-app-dashboard": {}}
         # no server/domains key → no mappings
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, [])
@@ -23,14 +23,16 @@ class TestDomainMappings(unittest.TestCase):
         # Explicitly empty server.domains dict.
         # With auto_build_alias=True the default alias becomes the target itself,
         # so it would be skipped as a self-mapping -> no mappings.
-        apps = {"web-app-desktop": {"server": {"domains": {}}}}
+        apps = {"web-app-dashboard": {"server": {"domains": {}}}}
         expected = []
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, expected)
 
     def test_explicit_aliases(self):
-        apps = {"web-app-desktop": {"server": {"domains": {"aliases": ["alias.com"]}}}}
-        default = "desktop.example.com"
+        apps = {
+            "web-app-dashboard": {"server": {"domains": {"aliases": ["alias.com"]}}}
+        }
+        default = "dashboard.example.com"
         expected = [
             {"source": "alias.com", "target": default},
         ]
@@ -38,31 +40,33 @@ class TestDomainMappings(unittest.TestCase):
         self.assertCountEqual(result, expected)
 
     def test_canonical_not_default(self):
-        apps = {"web-app-desktop": {"server": {"domains": {"canonical": ["foo.com"]}}}}
-        expected = [{"source": "desktop.example.com", "target": "foo.com"}]
+        apps = {
+            "web-app-dashboard": {"server": {"domains": {"canonical": ["foo.com"]}}}
+        }
+        expected = [{"source": "dashboard.example.com", "target": "foo.com"}]
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, expected)
 
     def test_canonical_dict(self):
         apps = {
-            "web-app-desktop": {
+            "web-app-dashboard": {
                 "server": {
                     "domains": {"canonical": {"one": "one.com", "two": "two.com"}}
                 }
             }
         }
         # first canonical key 'one' -> one.com (dict insertion order)
-        expected = [{"source": "desktop.example.com", "target": "one.com"}]
+        expected = [{"source": "dashboard.example.com", "target": "one.com"}]
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertEqual(result, expected)
 
     def test_multiple_apps(self):
         apps = {
-            "web-app-desktop": {"server": {"domains": {"aliases": ["a1.com"]}}},
+            "web-app-dashboard": {"server": {"domains": {"aliases": ["a1.com"]}}},
             "web-app-mastodon": {"server": {"domains": {"canonical": ["c2.com"]}}},
         }
         expected = [
-            {"source": "a1.com", "target": "desktop.example.com"},
+            {"source": "a1.com", "target": "dashboard.example.com"},
             {"source": "mastodon.example.com", "target": "c2.com"},
         ]
         result = self.filter.domain_mappings(apps, self.primary, True)
@@ -70,19 +74,19 @@ class TestDomainMappings(unittest.TestCase):
 
     def test_multiple_aliases(self):
         apps = {
-            "web-app-desktop": {
+            "web-app-dashboard": {
                 "server": {"domains": {"aliases": ["a1.com", "a2.com"]}}
             }
         }
         expected = [
-            {"source": "a1.com", "target": "desktop.example.com"},
-            {"source": "a2.com", "target": "desktop.example.com"},
+            {"source": "a1.com", "target": "dashboard.example.com"},
+            {"source": "a2.com", "target": "dashboard.example.com"},
         ]
         result = self.filter.domain_mappings(apps, self.primary, True)
         self.assertCountEqual(result, expected)
 
     def test_invalid_aliases_type(self):
-        apps = {"web-app-desktop": {"server": {"domains": {"aliases": 123}}}}
+        apps = {"web-app-dashboard": {"server": {"domains": {"aliases": 123}}}}
         with self.assertRaises(AnsibleFilterError):
             self.filter.domain_mappings(apps, self.primary, True)
 
@@ -91,7 +95,9 @@ class TestDomainMappings(unittest.TestCase):
         When only a canonical different from the default exists and auto_build_aliases is False,
         we should NOT auto-generate a default alias -> canonical mapping.
         """
-        apps = {"web-app-desktop": {"server": {"domains": {"canonical": ["foo.com"]}}}}
+        apps = {
+            "web-app-dashboard": {"server": {"domains": {"canonical": ["foo.com"]}}}
+        }
         result = self.filter.domain_mappings(apps, self.primary, False)
         self.assertEqual(result, [])  # no auto-added default alias
 
@@ -101,7 +107,7 @@ class TestDomainMappings(unittest.TestCase):
         Only explicit aliases should map to canonical.
         """
         apps = {
-            "web-app-desktop": {
+            "web-app-dashboard": {
                 "server": {
                     "domains": {"aliases": ["alias.com"], "canonical": ["foo.com"]}
                 }
@@ -120,7 +126,7 @@ class TestDomainMappings(unittest.TestCase):
         - The alias-only app maps its aliases to its default domain; default self-mapping is skipped.
         """
         apps = {
-            "web-app-desktop": {"server": {"domains": {"canonical": ["c1.com"]}}},
+            "web-app-dashboard": {"server": {"domains": {"canonical": ["c1.com"]}}},
             "web-app-mastodon": {"server": {"domains": {"aliases": ["m1.com"]}}},
         }
         expected = [
@@ -134,7 +140,7 @@ class TestDomainMappings(unittest.TestCase):
         App without 'server.domains' produces no mappings regardless of auto_build_aliases.
         """
         apps = {
-            "web-app-desktop": {
+            "web-app-dashboard": {
                 # no 'server' or 'domains'
             }
         }
@@ -145,7 +151,7 @@ class TestDomainMappings(unittest.TestCase):
         """
         Explicit empty server.domains should not generate aliases when auto_build_aliases is False.
         """
-        apps = {"web-app-desktop": {"server": {"domains": {}}}}
+        apps = {"web-app-dashboard": {"server": {"domains": {}}}}
         result = self.filter.domain_mappings(apps, self.primary, False)
         self.assertEqual(result, [])
 

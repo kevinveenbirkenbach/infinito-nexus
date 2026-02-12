@@ -59,12 +59,12 @@ class TestInjEnabledFilter(unittest.TestCase):
                         "logout": {"enabled": False},
                         "css": {"enabled": True},
                         "matomo": {"enabled": False},
-                        "desktop": {"enabled": True},
+                        "dashboard": {"enabled": True},
                     }
                 }
             }
         }
-        features = ["javascript", "logout", "css", "matomo", "desktop"]
+        features = ["javascript", "logout", "css", "matomo", "dashboard"]
         result = self.filter(applications, "myapp", features)
         self.assertEqual(
             result,
@@ -73,7 +73,7 @@ class TestInjEnabledFilter(unittest.TestCase):
                 "logout": False,
                 "css": True,
                 "matomo": False,
-                "desktop": True,
+                "dashboard": True,
             },
         )
 

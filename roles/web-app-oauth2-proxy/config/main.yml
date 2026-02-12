@@ -9,7 +9,7 @@ compose:
   services:
     logout:
       enabled: true
-    desktop:
+    dashboard:
       enabled: false
     matomo:
       enabled: true

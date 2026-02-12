@@ -31,7 +31,7 @@ compose:
     logout:
       enabled: false
       shared: false
-    desktop:
+    dashboard:
       enabled: false
     matomo:
       enabled: false

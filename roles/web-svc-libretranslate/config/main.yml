@@ -11,7 +11,7 @@ compose:
       enabled: false
       shared: false
 
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

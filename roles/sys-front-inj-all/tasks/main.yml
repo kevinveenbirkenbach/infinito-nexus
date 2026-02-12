@@ -35,11 +35,11 @@
     public: true
   when: inj_enabled.logout
 
-- name: "Activate Desktop iFrame notifier for '{{ domain }}'"
+- name: "Activate Dashboard iFrame notifier for '{{ domain }}'"
   include_role:
-    name:   sys-front-inj-desktop
+    name:   sys-front-inj-dashboard
     public: true
-  when: inj_enabled.desktop
+  when: inj_enabled.dashboard
 
 - name: "Activate Corporate CSS for '{{ domain }}'"
   include_role:
