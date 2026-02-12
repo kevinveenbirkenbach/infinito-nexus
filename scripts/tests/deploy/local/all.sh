@@ -36,14 +36,26 @@ echo ">>> Starting development compose stack (no build)"
 # ---------------------------------------------------------------------------
 echo ">>> Discovering apps on host via scripts/meta/resolve/apps.sh (TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE})"
 
+# IMPORTANT:
+# - compose can emit warnings on STDOUT (depending on version/config)
+# - we must guarantee JSON-only output for downstream parsing
+# - PYTHON from host venv must NOT be used inside container exec calls
 discover_out="$(
+  set +e
   TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
   WHITELIST="${WHITELIST}" \
-  scripts/meta/resolve/apps.sh
+  PYTHON=python3 \
+  scripts/meta/resolve/apps.sh 2> >(cat >&2) \
+  | jq -c 'if type=="array" then . else [] end' 2>/dev/null
+  echo "rc=$?" >&2
 )"
+# Now discover_out should be compact JSON array or empty.
 
 if [[ -z "${discover_out}" ]]; then
-  echo "ERROR: app matrix is empty"
+  echo "ERROR: apps discovery produced empty output" >&2
+  echo "DEBUG: raw apps.sh output (first 50 lines):" >&2
+  TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" WHITELIST="${WHITELIST}" PYTHON=python3 \
+    scripts/meta/resolve/apps.sh 2>&1 | sed -n '1,50p' >&2
   exit 2
 fi
 
