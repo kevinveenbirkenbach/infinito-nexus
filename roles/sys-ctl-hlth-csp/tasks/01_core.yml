@@ -17,13 +17,17 @@
   when: run_once_sys_ca_selfsigned is not defined
 
 # Optional: pre-pull once at deploy time (recommended for reliability)
-- name: Pull CSP checker image
+- name: Pull CSP checker image (with retries)
   ansible.builtin.command:
     argv:
-      - docker
+      - container
       - pull
       - "{{ HEALTH_CSP_IMAGE }}"
+  register: pull_result
   changed_when: false
+  retries: 6
+  delay: 20
+  until: pull_result.rc == 0
 
 - include_role:
     name: sys-service
