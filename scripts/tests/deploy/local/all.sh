@@ -123,7 +123,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
       --host '${LIMIT_HOST}' \
       --ssl-disabled \
       --vars '${RUNTIME_VARS_JSON}' \
-      --vars-file inventory.sample.yml \
+      --vars-file inventories/dev.yml \
       --include '${apps_csv}'
 
     echo \">>> Deploying against \${inv_file}\"

@@ -98,7 +98,7 @@ echo ">>> Initializing inventory inside container"
       --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \
       --ssl-disabled \
-      --vars-file inventory.sample.yml \
+      --vars-file inventories/dev.yml \
       --include '${apps_csv}'
 
     echo '✅ Inventory initialized.'
