@@ -1,3 +1,21 @@
+## [4.0.0] - 2026-02-13
+
+* **Breaking Changes**
+
+* Renamed *compose.services.desktop* to *compose.services.dashboard*
+* Renamed role *web-app-desktop* to *web-app-dashboard*
+  → Custom inventories and overrides must be updated accordingly
+
+**Added**
+
+* Introduced bundle-based server inventories under *inventories/servers/*
+
+**Changed**
+
+* *DOMAIN_PRIMARY* is now strictly validated (especially for Dashboard and OpenResty)
+* Homepage domain is resolved automatically (Dashboard domain is preferred if present)
+
+
 ## [3.0.0] - 2026-02-11
 
 * **🚨 Breaking Changes**
