@@ -5,11 +5,11 @@
         (
           not ( lookup('config', item.key, 'compose.services.dashboard.enabled', false) | bool)
         )
-        or (lookup('domain',item.key)).endswith(lookup('domain','web-app-dashboard'))
+        or (lookup('domain',item.key)).endswith(DOMAIN_PRIMARY)
     fail_msg: >
       Application {{ item.key }}
       has domain {{ lookup('domain',item.key) }}
-      but it does not end with {{ lookup('domain','web-app-dashboard') }}!
+      but it does not end with {{ DOMAIN_PRIMARY }}!
   loop: "{{ applications
              | dict2items
              | selectattr('key', 'match', '^(web-app-|web-svc-)')
