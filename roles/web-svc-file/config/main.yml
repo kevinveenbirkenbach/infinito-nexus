@@ -5,7 +5,7 @@ server:
     aliases: []
 compose:
   services:
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

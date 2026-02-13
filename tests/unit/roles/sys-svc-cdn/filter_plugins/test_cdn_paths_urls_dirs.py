@@ -59,7 +59,7 @@ class TestCdnPathsUrlsDirs(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = self.tmp.name
-        self.app = "web-app-desktop"
+        self.app = "web-app-dashboard"
         self.ver = "20250101"
 
         self.cdn_paths = cdn_paths_mod.cdn_paths

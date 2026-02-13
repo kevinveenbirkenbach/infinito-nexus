@@ -20,7 +20,7 @@ compose:
       shared: false
     logout:
       enabled: true
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

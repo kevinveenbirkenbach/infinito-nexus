@@ -1,0 +1,34 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Community Hub"
+        description: >
+          A federated and community-driven platform for discussion, media sharing, and social networking.
+        logo:
+          class: "fa-solid fa-people-group"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-discourse:
+      hosts:
+        server:
+    web-app-mastodon:
+      hosts:
+        server:
+    web-app-pixelfed:
+      hosts:
+        server:
+    web-app-peertube:
+      hosts:
+        server:
+    web-app-friendica:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

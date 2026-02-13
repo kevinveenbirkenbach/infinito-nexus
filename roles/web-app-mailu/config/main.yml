@@ -30,7 +30,7 @@ compose:
       enable_user_creation: true  # Users will be created if not existing
     logout:
       enabled: true
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

@@ -1,0 +1,46 @@
+// ===== Runtime loader for external JS files (no Jinja includes) =====
+(function () {
+  // 1) Values injected by Ansible/Jinja
+  //    Base URL where your files were deployed (e.g. CDN), made safe w/o trailing slash
+  const BASE_URL = ("{{ DASHBOARD_JS_BASE_URL }}").replace(/\/+$/, "");
+  //    List of files to load, in order
+  const FILES = [
+    {% for f in DASHBOARD_JS_FILES -%}
+      "{{ f }}"{% if not loop.last %},{% endif %}
+    {%- endfor %}
+  ];
+  //    Cache buster (highest mtime computed during deploy)
+  const VERSION = "{{ javascript_file_version }}";
+
+  // 2) Helper to load a <script> with proper query param
+  function loadScriptSequential(url) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      // Append ?v=... (or &v=... if there are already params)
+      s.src = url + (url.includes("?") ? "&" : "?") + "v=" + encodeURIComponent(VERSION);
+      // Keep execution order: do not set async/defer
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("Failed to load " + url));
+      document.head.appendChild(s);
+    });
+  }
+
+  // 3) Load all files in order
+  async function loadAll() {
+    for (const name of FILES) {
+      const fullUrl = BASE_URL + "/" + name.replace(/^\/+/, "");
+      await loadScriptSequential(fullUrl);
+    }
+    // Optional: hook after everything is ready
+    if (typeof window.onDashboardJsLoaded === "function") {
+      try { window.onDashboardJsLoaded(); } catch {}
+    }
+  }
+
+  // 4) Start after DOM is ready (safe point to inject <script> tags)
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadAll);
+  } else {
+    loadAll();
+  }
+})();

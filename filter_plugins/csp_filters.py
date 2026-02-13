@@ -64,7 +64,7 @@ class FilterModule(object):
 
         New flag layout (examples):
           - compose.services.matomo.enabled
-          - compose.services.desktop.enabled
+          - compose.services.dashboard.enabled
           - compose.services.simpleicons.enabled
           - compose.services.logout.enabled
           - compose.services.hcaptcha.enabled
@@ -181,7 +181,7 @@ class FilterModule(object):
               * Simpleicons service (if compose.services.simpleicons.enabled) for connect
               * reCAPTCHA (if compose.services.recaptcha.enabled) for script-elem/frame-src
               * hCaptcha (if compose.services.hcaptcha.enabled) for script-elem/frame-src
-              * frame-ancestors extended for desktop/logout/keycloak if enabled
+              * frame-ancestors extended for dashboard/logout/keycloak if enabled
         """
         try:
             directives = [
@@ -258,11 +258,13 @@ class FilterModule(object):
                     if directive == "frame-src":
                         tokens.append("https://newassets.hcaptcha.com/")
 
-                # Frame ancestors (desktop + logout)
+                # Frame ancestors (dashboard + logout)
                 if directive == "frame-ancestors":
-                    if self.is_feature_enabled(applications, "desktop", application_id):
-                        # Allow being embedded by the desktop app domain's site
-                        domain = domains.get("web-app-desktop")[0]
+                    if self.is_feature_enabled(
+                        applications, "dashboard", application_id
+                    ):
+                        # Allow being embedded by the dashboard app domain's site
+                        domain = domains.get("web-app-dashboard")[0]
                         sld_tld = ".".join(domain.split(".")[-2:])  # e.g., example.com
                         tokens.append(f"{sld_tld}")
                     if self.is_feature_enabled(applications, "logout", application_id):

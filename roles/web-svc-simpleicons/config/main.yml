@@ -3,7 +3,7 @@ compose:
   services:
     oauth2:
       enabled:  false
-    desktop:
+    dashboard:
       enabled:  true
     matomo:
       enabled:  false

@@ -1,0 +1,34 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Enterprise Stack"
+        description: >
+          A professional collaboration and identity management stack for modern organizations.
+        logo:
+          class: "fa-solid fa-briefcase"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-nextcloud:
+      hosts:
+        server:
+    web-svc-onlyoffice:
+      hosts:
+        server:
+    web-app-openproject:
+      hosts:
+        server:
+    web-app-matrix:
+      hosts:
+        server:
+    web-app-keycloak:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

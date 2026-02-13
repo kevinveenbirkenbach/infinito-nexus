@@ -1,0 +1,34 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Personal Nexus"
+        description: >
+          A personal digital sovereignty stack for individuals controlling their own data.
+        logo:
+          class: "fa-solid fa-shield-halved"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-nextcloud:
+      hosts:
+        server:
+    web-app-minio:
+      hosts:
+        server:
+    web-app-keycloak:
+      hosts:
+        server:
+    web-app-matrix:
+      hosts:
+        server:
+    web-svc-libretranslate:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

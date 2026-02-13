@@ -1,0 +1,31 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Friends & Family"
+        description: >
+          A simple and secure private infrastructure for families and small trusted groups.
+        logo:
+          class: "fa-solid fa-house"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-nextcloud:
+      hosts:
+        server:
+    web-svc-onlyoffice:
+      hosts:
+        server:
+    web-app-matrix:
+      hosts:
+        server:
+    web-app-keycloak:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

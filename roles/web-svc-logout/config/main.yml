@@ -32,7 +32,7 @@ compose:
       mem_reservation:  "256m"
       mem_limit:        "512m"
       pids_limit:       128
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

@@ -16,9 +16,6 @@
       register: matomo_bootstrap_run
       no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
       changed_when: true
-      retries: 6
-      delay: 20
-      until: matomo_bootstrap_run.rc == 0
 
   rescue:
 

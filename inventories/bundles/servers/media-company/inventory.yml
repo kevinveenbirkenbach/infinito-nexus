@@ -1,0 +1,31 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Media Company"
+        description: >
+          A content publishing and distribution ecosystem for creators and media organizations.
+        logo:
+          class: "fa-solid fa-photo-film"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-wordpress:
+      hosts:
+        server:
+    web-app-matomo:
+      hosts:
+        server:
+    web-app-peertube:
+      hosts:
+        server:
+    web-app-funkwhale:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

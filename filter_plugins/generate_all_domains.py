@@ -11,16 +11,28 @@ class FilterModule(object):
         optionally add 'www.' prefixes, dedupe and sort alphabetically.
         """
 
-        # lokaler Helfer zum Flatten
+        def _add(flat, item):
+            """Append strings or recurse into lists/dicts; ignore unsupported types."""
+            if item is None:
+                return
+            if isinstance(item, str):
+                if item.strip():
+                    flat.append(item)
+                return
+            if isinstance(item, list):
+                for x in item:
+                    _add(flat, x)
+                return
+            if isinstance(item, dict):
+                for x in item.values():
+                    _add(flat, x)
+                return
+            # Any other type is ignored on purpose (keeps behavior tolerant)
+
         def _flatten(domains):
             flat = []
             for v in (domains or {}).values():
-                if isinstance(v, str):
-                    flat.append(v)
-                elif isinstance(v, list):
-                    flat.extend(v)
-                elif isinstance(v, dict):
-                    flat.extend(v.values())
+                _add(flat, v)
             return flat
 
         try:

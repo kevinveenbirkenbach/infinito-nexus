@@ -10,7 +10,7 @@ compose:
       enabled: false
       shared: false
       trylocal: true # Allows local login if LDAP is down
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

@@ -1,0 +1,2 @@
+INJ_DASHBOARD_JS_FILE_NAME:        "iframe-handler.js"
+INJ_DASHBOARD_JS_FILE_DESTINATION: "{{ [cdn_paths_all.shared.js, INJ_DASHBOARD_JS_FILE_NAME] | path_join }}"

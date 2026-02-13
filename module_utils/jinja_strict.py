@@ -11,7 +11,7 @@
 # - Support nested Jinja-in-vars by rendering multiple passes with a depth limit.
 #   Example:
 #     CA_TRUST.cert_host = "{{ CA_ROOT.cert_host }}"
-#     CA_ROOT.cert_host  = "/etc/{{ SOFTWARE_NAME | lower }}/ca/root-ca.crt"
+#     CA_ROOT.cert_host  = "/etc/{{ SOFTWARE_DOMAIN }}/ca/root-ca.crt"
 #   We want the final result without any "{{ ... }}" left.
 
 from __future__ import annotations

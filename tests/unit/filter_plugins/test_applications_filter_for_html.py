@@ -22,7 +22,7 @@ class TestApplicationsIfGroupAndDeps(unittest.TestCase):
             "web-svc-legal": {},
             "web-svc-file": {},
             "web-svc-asset": {},
-            "web-app-desktop": {},
+            "web-app-dashboard": {},
             "util-srv-corporate-identity": {},
         }
 

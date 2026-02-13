@@ -31,7 +31,7 @@ compose:
           changes:  900
           # Sync everything daily
           full:     86400
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

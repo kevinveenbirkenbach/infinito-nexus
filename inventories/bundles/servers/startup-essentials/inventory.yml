@@ -1,0 +1,34 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Startup Essentials"
+        description: >
+          A rapid deployment stack for startups building software products and services.
+        logo:
+          class: "fa-solid fa-rocket"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-gitea:
+      hosts:
+        server:
+    web-app-gitlab:
+      hosts:
+        server:
+    web-app-jenkins:
+      hosts:
+        server:
+    web-app-matrix:
+      hosts:
+        server:
+    web-app-keycloak:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

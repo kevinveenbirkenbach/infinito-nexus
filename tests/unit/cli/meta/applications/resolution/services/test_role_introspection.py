@@ -82,7 +82,7 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
                 deps = load_dependencies_app_only("start")
                 self.assertEqual(deps, ["app-dep"])
 
-    def test_load_shared_service_roles_for_app_includes_desktop(self) -> None:
+    def test_load_shared_service_roles_for_app_includes_dashboard(self) -> None:
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
 
@@ -98,17 +98,17 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
                 "    oidc:\n"
                 "      enabled: true\n"
                 "      shared: true\n"
-                "    desktop:\n"
+                "    dashboard:\n"
                 "      enabled: true\n",
             )
 
             # required provider role folders must exist
             (root / "roles" / "web-app-keycloak").mkdir(parents=True)
-            (root / "roles" / "web-app-desktop").mkdir(parents=True)
+            (root / "roles" / "web-app-dashboard").mkdir(parents=True)
 
             with patch.object(repo_paths, "repo_root_from_here", return_value=root):
                 roles = load_shared_service_roles_for_app("web-app-wordpress")
-                self.assertEqual(roles, ["web-app-keycloak", "web-app-desktop"])
+                self.assertEqual(roles, ["web-app-keycloak", "web-app-dashboard"])
 
 
 if __name__ == "__main__":

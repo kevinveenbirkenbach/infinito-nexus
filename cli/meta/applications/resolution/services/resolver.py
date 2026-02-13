@@ -58,7 +58,7 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
       - collabora enabled+shared     => web-svc-collabora
       - simpleicons enabled+shared   => web-svc-simpleicons
       - database enabled+shared      => svc-db-<type> (requires database.type)
-      - desktop enabled              => web-app-desktop   (shared does NOT matter)
+      - dashboard enabled              => web-app-dashboard   (shared does NOT matter)
     """
     cfg = _as_mapping(config)
     services = _as_mapping(_as_mapping(cfg.get("compose")).get("services"))
@@ -87,7 +87,7 @@ def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
             lambda _svc: "web-svc-simpleicons",
         ),
         ServiceRule("database", _is_enabled_shared, map_database),
-        ServiceRule("desktop", _is_enabled, lambda _svc: "web-app-desktop"),
+        ServiceRule("dashboard", _is_enabled, lambda _svc: "web-app-dashboard"),
     )
 
     includes: List[str] = []

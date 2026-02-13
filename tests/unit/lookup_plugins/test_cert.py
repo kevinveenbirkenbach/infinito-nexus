@@ -196,13 +196,13 @@ class TestCertPlanLookup(unittest.TestCase):
         inside the lookup using the host context (hostvars[inventory_hostname]).
         """
         v = dict(self.vars)
-        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
+        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_DOMAIN }}/selfsigned"
 
         # Simulate real ansible lookup context
         v["inventory_hostname"] = "localhost"
         v["hostvars"] = {
             "localhost": {
-                "SOFTWARE_NAME": "Infinito.Nexus",
+                "SOFTWARE_DOMAIN": "infinito.nexus",
             }
         }
 
@@ -220,12 +220,12 @@ class TestCertPlanLookup(unittest.TestCase):
         LETSENCRYPT_LIVE_PATH may contain Jinja markers and must be expanded.
         """
         v = dict(self.vars)
-        v["LETSENCRYPT_LIVE_PATH"] = "/etc/{{ SOFTWARE_NAME | lower }}/letsencrypt/live"
+        v["LETSENCRYPT_LIVE_PATH"] = "/etc/{{ SOFTWARE_DOMAIN }}/letsencrypt/live"
 
         v["inventory_hostname"] = "localhost"
         v["hostvars"] = {
             "localhost": {
-                "SOFTWARE_NAME": "Infinito.Nexus",
+                "SOFTWARE_DOMAIN": "infinito.nexus",
             }
         }
 
@@ -246,9 +246,9 @@ class TestCertPlanLookup(unittest.TestCase):
         raise an AnsibleError (no leaking "{{ ... }}" into configs).
         """
         v = dict(self.vars)
-        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
+        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_DOMAIN }}/selfsigned"
 
-        # No SOFTWARE_NAME present in either variables or hostvars context
+        # No SOFTWARE_DOMAIN present in either variables or hostvars context
         v["inventory_hostname"] = "localhost"
         v["hostvars"] = {"localhost": {}}
 
@@ -257,20 +257,20 @@ class TestCertPlanLookup(unittest.TestCase):
 
     def test_jinja_expansion_uses_hostvars_over_lookup_vars(self):
         """
-        If both `variables` and hostvars contain SOFTWARE_NAME, hostvars should win
+        If both `variables` and hostvars contain SOFTWARE_DOMAIN, hostvars should win
         (as implemented by ctx.update(hostvars[inventory_hostname])).
         """
         v = dict(self.vars)
-        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_NAME | lower }}/selfsigned"
+        v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ SOFTWARE_DOMAIN }}/selfsigned"
 
         # variables has one value
-        v["SOFTWARE_NAME"] = "Wrong.Name"
+        v["SOFTWARE_DOMAIN"] = "Wrong.Name"
 
         # hostvars has another, should win
         v["inventory_hostname"] = "localhost"
         v["hostvars"] = {
             "localhost": {
-                "SOFTWARE_NAME": "Infinito.Nexus",
+                "SOFTWARE_DOMAIN": "infinito.nexus",
             }
         }
 
@@ -289,7 +289,7 @@ class TestCertPlanLookup(unittest.TestCase):
         # This will render to a string that still contains "{{ STILL_JINJA }}"
         v["TLS_SELFSIGNED_BASE_PATH"] = "/etc/{{ '{{ STILL_JINJA }}' }}/selfsigned"
         v["inventory_hostname"] = "localhost"
-        v["hostvars"] = {"localhost": {"SOFTWARE_NAME": "Infinito.Nexus"}}
+        v["hostvars"] = {"localhost": {"SOFTWARE_DOMAIN": "infinito.nexus"}}
 
         with self.assertRaises(AnsibleError):
             self.lookup.run(["web-app-b"], variables=v, mode="app")

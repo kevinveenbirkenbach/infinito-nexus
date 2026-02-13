@@ -58,7 +58,7 @@ roles:
       invokable: false
       inj:
         title: "Injection"
-        description: "Composable HTML injection roles (CSS, JS, logout interceptor, analytics, desktop iframe) for Nginx/OpenResty via sub_filter/Lua with CDN-backed assets."
+        description: "Composable HTML injection roles (CSS, JS, logout interceptor, analytics, dashboard iframe) for Nginx/OpenResty via sub_filter/Lua with CDN-backed assets."
         icon: "fas fa-filter"
         invokable: false
   update:

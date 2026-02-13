@@ -22,7 +22,7 @@ class TestCombinedTree(unittest.TestCase):
         """
         Build:
           start(app) run_after -> web-app-keycloak
-          start config enables desktop => web-app-desktop
+          start config enables dashboard => web-app-dashboard
           keycloak run_after -> start (cycle)
 
         Tree should show [services] and a cycle marker.
@@ -31,7 +31,7 @@ class TestCombinedTree(unittest.TestCase):
             root = Path(td)
             (root / "roles").mkdir()
 
-            # start app role with desktop enabled
+            # start app role with dashboard enabled
             _write(
                 root / "roles" / "start" / "vars" / "main.yml",
                 "application_id: start\n",
@@ -42,7 +42,7 @@ class TestCombinedTree(unittest.TestCase):
             )
             _write(
                 root / "roles" / "start" / "config" / "main.yml",
-                "compose:\n  services:\n    desktop:\n      enabled: true\n",
+                "compose:\n  services:\n    dashboard:\n      enabled: true\n",
             )
 
             # keycloak exists, and points back to start to force a visible cycle
@@ -54,7 +54,7 @@ class TestCombinedTree(unittest.TestCase):
             # required folders exist
             (root / "roles" / "start").mkdir(parents=True, exist_ok=True)
             (root / "roles" / "web-app-keycloak").mkdir(parents=True, exist_ok=True)
-            (root / "roles" / "web-app-desktop").mkdir(parents=True, exist_ok=True)
+            (root / "roles" / "web-app-dashboard").mkdir(parents=True, exist_ok=True)
 
             with patch.object(repo_paths, "repo_root_from_here", return_value=root):
                 buf = io.StringIO()
@@ -63,7 +63,7 @@ class TestCombinedTree(unittest.TestCase):
                 out = buf.getvalue()
 
             self.assertIn("[services]", out)
-            self.assertIn("web-app-desktop", out)
+            self.assertIn("web-app-dashboard", out)
             self.assertIn("↩︎ (cycle)", out)
 
 

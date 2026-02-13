@@ -28,7 +28,7 @@ compose:
     logout:
       enabled: false
       shared: false
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true
@@ -47,8 +47,9 @@ compose:
       name:             "onlyoffice"
       cpus:             2
       mem_reservation:  "1g"
-      mem_limit:        "2g"
-      pids_limit:       2048
+      # Raised due to failures in CI pipeline (Good luck approach)
+      mem_limit:        "4g"
+      pids_limit:       8192
     css:
       enabled: true
   volumes:

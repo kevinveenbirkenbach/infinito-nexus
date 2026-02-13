@@ -12,7 +12,7 @@ MARIADB_NAME:           "{{ lookup('config', application_id, 'compose.services.'
 MARIADB_PORT:           "{{ database_port | default(ports.localhost.database[ application_id ]) }}"
 MARIADB_HOST:           "127.0.0.1"
 MARIADB_CUSTOM_IMAGE:   "{{ entity_name }}_custom:{{ MARIADB_VERSION }}"
-MARIADB_HEALTHCHECK_DB: "{{ SOFTWARE_NAME | lower | regex_replace('[^a-z0-9]+', '_') }}_healthcheck"
+MARIADB_HEALTHCHECK_DB: "{{ SOFTWARE_DOMAIN | regex_replace('[^a-z0-9]+', '_') }}_healthcheck"
 
 # Host behavior stays unchanged (True).
 # In CI/act container environments we avoid publishing ports to prevent iptables/nft issues.

@@ -60,7 +60,7 @@ def _create_inventory(
         "localhost",
         "--ssl-disabled",
         "--vars-file",
-        "inventory.sample.yml",
+        "inventories/dev.yml",
         "--vars",
         json.dumps(overrides),
         "--include",

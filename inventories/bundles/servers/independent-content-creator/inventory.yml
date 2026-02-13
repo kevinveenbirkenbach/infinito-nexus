@@ -1,0 +1,34 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Independent Content Creator"
+        description: >
+          An independent creator stack for publishing, video, audio, analytics, and community without platform lock-in.
+        logo:
+          class: "fa-solid fa-feather-pointed"
+        tags: []
+        categories: []
+
+  hosts:
+    server:
+
+  children:
+    web-app-wordpress:
+      hosts:
+        server:
+    web-app-peertube:
+      hosts:
+        server:
+    web-app-funkwhale:
+      hosts:
+        server:
+    web-app-matomo:
+      hosts:
+        server:
+    web-app-matrix:
+      hosts:
+        server:
+    svc-prx-openresty:
+      hosts:
+        server:

@@ -3,7 +3,7 @@ import copy
 from filter_plugins.csp_filters import FilterModule
 
 
-class TestCspTogglesDesktopLogout(unittest.TestCase):
+class TestCspTogglesDashboardLogout(unittest.TestCase):
     def setUp(self):
         self.filter = FilterModule()
         self.apps = {
@@ -32,17 +32,17 @@ class TestCspTogglesDesktopLogout(unittest.TestCase):
         )
         apps["app1"]["compose"]["services"][service]["enabled"] = enabled
 
-    def test_frame_ancestors_desktop_toggle(self):
+    def test_frame_ancestors_dashboard_toggle(self):
         apps = copy.deepcopy(self.apps)
         domains = copy.deepcopy(self.domains)
-        domains["web-app-desktop"] = ["domain-example.com"]
+        domains["web-app-dashboard"] = ["domain-example.com"]
 
-        self._set_service_enabled(apps, "desktop", True)
+        self._set_service_enabled(apps, "dashboard", True)
         header = self.filter.build_csp_header(apps, "app1", domains, "https")
         self.assertIn("frame-ancestors", header)
         self.assertIn("domain-example.com", header)
 
-        self._set_service_enabled(apps, "desktop", False)
+        self._set_service_enabled(apps, "dashboard", False)
         header_no = self.filter.build_csp_header(apps, "app1", domains, "https")
         self.assertNotIn("domain-example.com", header_no)
 

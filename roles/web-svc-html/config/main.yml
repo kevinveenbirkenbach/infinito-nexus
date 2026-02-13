@@ -9,7 +9,7 @@ server:
       - 200
 compose:
   services:
-    desktop:
+    dashboard:
       enabled: true
     matomo:
       enabled: true

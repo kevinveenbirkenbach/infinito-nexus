@@ -26,21 +26,21 @@
 - name: Merge variables
   block:
   - name: Merge users
-    set_fact:
-      users: "{{ default_users | combine(users| default({}), recursive=True) }}"
+    ansible.builtin.set_fact:
+      users: "{{ default_users | combine(users | default({}), recursive=True) }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge networks definitions
-    set_fact:
+    ansible.builtin.set_fact:
       networks: "{{ defaults_networks | combine(networks | default({}, true), recursive=True) }}"
 
   - name: Merge application definitions
-    set_fact:
+    ansible.builtin.set_fact:
       applications: "{{ defaults_applications | merge_with_defaults(applications | default({}, true)) }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: "Sanity check: all group_names must exist in applications"
-    assert:
+    ansible.builtin.assert:
       that:
         - item in applications
       fail_msg: "Group '{{ item }}' has no entry in 'applications'"
@@ -49,7 +49,7 @@
     when: MODE_ASSERT | bool
 
   - name: Merge current play applications
-    set_fact:
+    ansible.builtin.set_fact:
       CURRENT_PLAY_APPLICATIONS: >-
         {{
           applications
@@ -64,7 +64,7 @@
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge current play domain definitions
-    set_fact:
+    ansible.builtin.set_fact:
       CURRENT_PLAY_DOMAINS: >-
         {{
           applications
@@ -75,59 +75,82 @@
               seed=(CURRENT_PLAY_APPLICATIONS | dict2items | map(attribute='key') | list)
             )
           | combine(domains | default({}, true), recursive=True)
+          | combine(
+              {
+                'svc-prx-openresty': ([ DOMAIN_PRIMARY ] | flatten | map('string') | list)
+              },
+              recursive=True
+            )
         }}
-  
+
   - name: Merge domain definitions for all domains
-    set_fact:
+    ansible.builtin.set_fact:
       domains: >-
-        {{ 
-          defaults_applications | 
-          canonical_domains_map(DOMAIN_PRIMARY) | 
-          combine(CURRENT_PLAY_DOMAINS, recursive=True) 
+        {{
+          defaults_applications
+          | canonical_domains_map(DOMAIN_PRIMARY)
+          | combine(CURRENT_PLAY_DOMAINS, recursive=True)
         }}
 
   - name: Merge CURRENT_PLAY_REDIRECT_DOMAINS
-    set_fact:
+    ansible.builtin.set_fact:
       # The following mapping is necessary to define the exceptions for domains which are created, but which aren't used
-      CURRENT_PLAY_REDIRECT_DOMAINS: "{{
-        []  | 
-        add_redirect_if_group('web-svc-asset', lookup('domain','web-svc-asset'), lookup('domain','web-svc-file'),  group_names) | 
-        merge_mapping(redirect_domain_mappings| default([]), 'source')
-        }}"
-
-  - name: Set current play redirect domain mappings 
-    set_fact:
       CURRENT_PLAY_REDIRECT_DOMAINS: >-
-        {{ 
-          CURRENT_PLAY_APPLICATIONS |
-          domain_mappings(DOMAIN_PRIMARY, AUTO_BUILD_ALIASES) |
-          merge_mapping(CURRENT_PLAY_REDIRECT_DOMAINS, 'source') 
+        {{
+          []
+          | add_redirect_if_group(
+              'web-svc-asset',
+              ([ lookup('domain','web-svc-asset') ] | flatten | map('string') | first),
+              ([ lookup('domain','web-svc-file')  ] | flatten | map('string') | first),
+              group_names
+            )
+          | merge_mapping(redirect_domain_mappings | default([]), 'source')
+          | merge_mapping(
+              [
+                {
+                  'source': ([ DOMAIN_PRIMARY  ] | flatten | map('string') | first),
+                  'target': ([ DOMAIN_HOMEPAGE ] | flatten | map('string') | first)
+                }
+              ],
+              'source'
+            )
+        }}
+
+  - name: Set current play redirect domain mappings
+    ansible.builtin.set_fact:
+      CURRENT_PLAY_REDIRECT_DOMAINS: >-
+        {{
+          CURRENT_PLAY_APPLICATIONS
+          | domain_mappings(DOMAIN_PRIMARY, AUTO_BUILD_ALIASES)
+          | merge_mapping(CURRENT_PLAY_REDIRECT_DOMAINS, 'source')
         }}
 
   - name: Set current play all domains incl. www redirect if enabled
-    set_fact:
+    ansible.builtin.set_fact:
       CURRENT_PLAY_DOMAINS_ALL: >-
         {{
-          (CURRENT_PLAY_DOMAINS |
-          combine(
-            CURRENT_PLAY_REDIRECT_DOMAINS | default([]) | 
-            items2dict(key_name='source', value_name='source'),
-            recursive=True
-          )) |
-          generate_all_domains(WWW_REDIRECT_ENABLED | bool)
+          (
+            CURRENT_PLAY_DOMAINS
+            | combine(
+                CURRENT_PLAY_REDIRECT_DOMAINS | default([])
+                | items2dict(key_name='source', value_name='source'),
+                recursive=True
+              )
+          )
+          | generate_all_domains(WWW_REDIRECT_ENABLED | bool)
         }}
-  
+
   - name: Merge OIDC configuration
-    set_fact:
+    ansible.builtin.set_fact:
       OIDC: "{{ defaults_oidc | combine(OIDC | default({}, true), recursive=True) }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge design configuration
-    set_fact:
+    ansible.builtin.set_fact:
       design: "{{ defaults_design | combine(design | default({}, true), recursive=True) }}"
 
   - name: Merge service_provider configuration
-    set_fact:
+    ansible.builtin.set_fact:
       service_provider: "{{ defaults_service_provider | combine(service_provider | default({}, true), recursive=True) }}"
 
 - name: "Persist {{ SOFTWARE_NAME }} version"
@@ -135,16 +158,16 @@
     name: sys-version
 
 - name: Include Token Store
-  include_role:
+  ansible.builtin.include_role:
     name: sys-token-store
   when: run_once_sys_token_store is not defined
 
 - name: init root user
-  include_role:
+  ansible.builtin.include_role:
     name: user-root
 
 - name: update device
-  include_role:
+  ansible.builtin.include_role:
     name: update-compose
 
 - name: "Ensure correct timezone is '{{ HOST_TIMEZONE }}'"
@@ -153,14 +176,14 @@
   when: not DOCKER_IN_CONTAINER | bool
 
 - name: System Cleanup
-  include_role:
+  ansible.builtin.include_role:
     name: sys-cleanup
   when:
     - MODE_CLEANUP | bool
     - DOCKER_IN_CONTAINER | bool
 
 - name: "Load base roles"
-  include_tasks: "./tasks/groups/{{ item }}-roles.yml"
+  ansible.builtin.include_tasks: "./tasks/groups/{{ item }}-roles.yml"
   loop:
     - update      # 1. Update system
     - drv         # 2. Load driver roles
