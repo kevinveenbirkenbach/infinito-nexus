@@ -1,0 +1,46 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Sovereign Cloud"
+        description: >
+          A fully sovereign private cloud infrastructure with integrated identity,
+          collaboration, and secure service exposure.
+        logo:
+          class: "fa-solid fa-cloud"
+        tags:
+          - sovereign-cloud
+          - digital-sovereignty
+          - private-cloud
+          - compliance
+        categories:
+          - Infrastructure
+          - Collaboration
+
+  hosts:
+    server:
+
+  children:
+    web-app-nextcloud:
+      hosts:
+        server:
+
+    web-svc-onlyoffice:
+      hosts:
+        server:
+
+    web-app-keycloak:
+      hosts:
+        server:
+
+    web-app-minio:
+      hosts:
+        server:
+
+    web-app-matrix:
+      hosts:
+        server:
+
+    svc-prx-openresty:
+      hosts:
+        server:
