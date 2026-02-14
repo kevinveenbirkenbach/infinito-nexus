@@ -1,20 +1,6 @@
-- name: Include dependency 'sys-cli'
-  include_role:
-    name: sys-cli
-  when: run_once_sys_cli is not defined
-
+---
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers:  true
-    docker_git_repository_pull:     true
-    docker_git_repository_address:  "https://github.com/kevinveenbirkenbach/meta-infinite-graph"
-
-- include_tasks: 02_cleanup.yml
-  when: MODE_CLEANUP | bool
-
-- include_tasks: 03_build_data.yml
-  when: MIG_BUILD_DATA | bool
-
-- include_tasks: utils/once/flag.yml
+    application_id: "web-app-mig"

@@ -1,20 +1,10 @@
-
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   {{ application_id | get_entity_name }}:
-{% set container_port = 80 %}
     {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
-    image: "{{ MIG_IMAGE }}"
+    image: "{{ MIG_IMAGE }}:{{ MIG_VERSION }}"
     container_name: "{{ MIG_CONTAINER }}"
     ports:
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}
-    build:
-      context:    "{{ docker_repository_path }}"
-      dockerfile: Dockerfile
-    pull_policy: never
-    volumes:
-      - "{{ MIG_ROLES_DIRECTORY }}:/usr/share/nginx/html/roles:ro"
-      - "{{ docker_repository_path }}:/usr/share/nginx/html"
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
-
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
