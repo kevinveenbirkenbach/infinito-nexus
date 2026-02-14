@@ -1,0 +1,47 @@
+name: Cleanup CI images (GHCR)
+
+on:
+  schedule:
+    # GitHub cron is UTC → Sonntag
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Delete CI images older than N days (default: 7)"
+        required: false
+        default: "7"
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: images-cleanup-ci
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: 🧹 Delete old ci-* image versions
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install jq
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Cleanup old ci-* versions
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          DAYS: ${{ github.event.inputs.days || '7' }}
+          DISTROS: "arch debian ubuntu fedora centos"
+        run: |
+          set -euo pipefail
+          ./scripts/administration/ghcr/cleanup_ci_images.sh

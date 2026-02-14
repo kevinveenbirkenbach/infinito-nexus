@@ -83,8 +83,8 @@ jobs:
       distros: "arch debian ubuntu fedora centos"
   
   # Sync Missing Images
-  mirror-images-missing:
-    uses: ./.github/workflows/mirror-images-missing.yml
+  images-mirror-missing:
+    uses: ./.github/workflows/images-mirror-missing.yml
     secrets: inherit
 
   # Deploy tests
@@ -92,7 +92,7 @@ jobs:
   test-deploy-server:
     needs:
       - test-dns
-      - mirror-images-missing
+      - images-mirror-missing
     uses: ./.github/workflows/test-deploy-server.yml
     with:
       distros: ${{ inputs.distros }}
@@ -101,7 +101,7 @@ jobs:
   test-deploy-universal:
     needs:
       - test-dns
-      - mirror-images-missing
+      - images-mirror-missing
     uses: ./.github/workflows/test-deploy-universal.yml
     with:
       distros: ${{ inputs.distros }}
