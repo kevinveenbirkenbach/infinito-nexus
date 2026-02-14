@@ -9,6 +9,3 @@ container_port: "{{ lookup('config', application_id, 'compose.services.' ~ entit
 MIG_IMAGE:      "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.image') }}"
 MIG_VERSION:    "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.version') }}"
 MIG_CONTAINER:  "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~ '.name') }}"
-
-# Data mount location (roles tree/list generated elsewhere)
-MIG_ROLES_DIRECTORY: "{{ [ lookup('container', application_id, 'directories.volumes'), 'roles' ] | path_join }}"

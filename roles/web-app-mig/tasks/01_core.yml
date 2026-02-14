@@ -4,3 +4,5 @@
     name: sys-stk-full
   vars:
     application_id: "web-app-mig"
+
+- include_tasks: utils/once/flag.yml
