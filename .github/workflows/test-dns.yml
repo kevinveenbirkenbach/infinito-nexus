@@ -6,7 +6,7 @@ on:
       distros:
         description: "Space-separated distro list (e.g. 'arch debian ubuntu')"
         required: false
-        default: "arch"
+        default: "debian"
         type: string
 
   workflow_call:

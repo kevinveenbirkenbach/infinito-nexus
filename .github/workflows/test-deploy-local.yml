@@ -11,7 +11,7 @@ on:
       distros:
         description: "Space-separated distro list"
         required: false
-        default: "arch"
+        default: "debian"
         type: string
       whitelist:
         description: "Optional space-separated whitelist of app ids"
@@ -28,7 +28,7 @@ permissions:
 # - For GitHub UI dispatch, inputs are used as fallback.
 env:
   TEST_DEPLOY_TYPE: "server"
-  DISTROS: "arch"
+  DISTROS: "debian"
   NIX_CONFIG: ""
   INFINITO_IMAGE_TAG: "latest"
 

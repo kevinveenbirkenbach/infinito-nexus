@@ -35,7 +35,7 @@ jobs:
       REGISTRY: ghcr.io
       REPO_PREFIX: infinito
       DISTROS: "arch debian ubuntu fedora centos"
-      DEFAULT_DISTRO: arch
+      DEFAULT_DISTRO: "debian"
 
     steps:
       - name: Checkout repository at version tag

@@ -1,0 +1,35 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Cyber Defense Stack"
+        description: >
+          A cyber-resilient sovereign infrastructure foundation for defense,
+          government, and critical environments with hardened identity and secure communication.
+        logo:
+          class: "fa-solid fa-shield-halved"
+        tags:
+          - cyber-defense
+          - sovereign-infrastructure
+          - zero-trust
+          - resilience
+          - critical-infrastructure
+        categories:
+          - Security
+          - Infrastructure
+
+  hosts:
+    server:
+
+  children:
+    web-app-keycloak:
+      hosts:
+        server:
+
+    web-app-matrix:
+      hosts:
+        server:
+
+    svc-prx-openresty:
+      hosts:
+        server:

@@ -19,7 +19,7 @@ OWNER=""               # e.g. github org/user
 REPO_PREFIX="infinito" # image base name (infinito)
 VERSION=""             # X.Y.Z (required for --publish)
 IS_STABLE="false"      # "true" -> publish stable tags
-DEFAULT_DISTRO="arch"
+DEFAULT_DISTRO="debian"
 
 # Base pkgmgr image selection
 PKGMGR_IMAGE_OWNER="kevinveenbirkenbach"

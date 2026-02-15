@@ -95,26 +95,6 @@
             stdout_tail: "{{ (pkgmgr_update.stdout | default('')).splitlines()[-60:] | join('\n') }}"
             stderr_tail: "{{ (pkgmgr_update.stderr | default('')).splitlines()[-60:] | join('\n') }}"
 
-    - name: "PKGMGR | Optional: rerun once with --debug (still sanitized)"
-      ansible.builtin.shell: |
-        set -euo pipefail
-        export GIT_TERMINAL_PROMPT=0
-        export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
-        export PYTHONUNBUFFERED=1
-        timeout --signal=KILL 120s "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" update pkgmgr --clone-mode shallow --debug </dev/null || true
-      args:
-        executable: /bin/bash
-      register: pkgmgr_update_debug
-      changed_when: false
-      become: true
-
-    - name: "PKGMGR | Debug rerun output (tails only)"
-      ansible.builtin.debug:
-        msg:
-          rc: "{{ pkgmgr_update_debug.rc | default('n/a') }}"
-          stdout_tail: "{{ (pkgmgr_update_debug.stdout | default('')).splitlines()[-80:] | join('\n') }}"
-          stderr_tail: "{{ (pkgmgr_update_debug.stderr | default('')).splitlines()[-80:] | join('\n') }}"
-
     - name: "PKGMGR | Fail explicitly after sanitized debug"
       ansible.builtin.fail:
         msg: >-

@@ -1,0 +1,39 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Sovereign AI"
+        description: >
+          A privacy-first platform for enterprises operating AI locally,
+          keeping data on-prem while enabling secure access and collaboration.
+        logo:
+          class: "fa-solid fa-brain"
+        tags:
+          - sovereign-ai
+          - local-ai
+          - on-prem-ai
+          - privacy-first
+          - data-sovereignty
+        categories:
+          - AI
+          - Infrastructure
+
+  hosts:
+    server:
+
+  children:
+    web-app-minio:
+      hosts:
+        server:
+
+    web-svc-libretranslate:
+      hosts:
+        server:
+
+    web-app-keycloak:
+      hosts:
+        server:
+
+    svc-prx-openresty:
+      hosts:
+        server:

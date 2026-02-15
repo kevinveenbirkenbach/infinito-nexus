@@ -6,7 +6,7 @@ on:
       distros:
         description: "Space-separated distro list (overrides default). Example: 'arch debian'"
         required: false
-        default: "arch"
+        default: "debian"
         type: string
       whitelist:
         description: "Optional space-separated whitelist of app ids. Example: 'web-app-matomo web-app-chess'"
