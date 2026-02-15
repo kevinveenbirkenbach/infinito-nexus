@@ -48,7 +48,7 @@ compose:
 
     bootstrap:
       image:              "ghcr.io/kevinveenbirkenbach/matomo-bootstrap"
-      version:            "1.1.12"
+      version:            "1.1.13"
       name:               "matomo-bootstrap"
       profiles:
         - "bootstrap"
