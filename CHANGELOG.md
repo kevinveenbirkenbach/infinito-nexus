@@ -1,3 +1,8 @@
+## [4.0.2] - 2026-02-15
+
+* Matomo upgrade to 1.1.13
+
+
 ## [4.0.1] - 2026-02-15
 
 * This release focuses on improving Matomo installation stability, aligning base images, and introducing automated CI image cleanup.
