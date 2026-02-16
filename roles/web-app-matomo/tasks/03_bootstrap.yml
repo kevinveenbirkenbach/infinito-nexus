@@ -31,7 +31,6 @@
           - "rc={{ matomo_bootstrap_run.rc | default('n/a') }}"
           - "stdout_len={{ (matomo_bootstrap_run.stdout | default('') | string) | length }}"
           - "stderr_len={{ (matomo_bootstrap_run.stderr | default('') | string) | length }}"
-      when: MASK_CREDENTIALS_IN_LOGS | bool
 
     - name: "DEBUG | bootstrap result (full when not masked)"
       ansible.builtin.debug:
@@ -43,7 +42,6 @@
           - "{{ matomo_bootstrap_run.stdout | default('') }}"
           - "--- stderr ---"
           - "{{ matomo_bootstrap_run.stderr | default('') }}"
-      when: not (MASK_CREDENTIALS_IN_LOGS | bool)
 
     - name: "DEBUG | compose ps -a"
       ansible.builtin.command:
@@ -59,7 +57,6 @@
       register: matomo_bootstrap_ps
       changed_when: false
       failed_when: false
-      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
     - name: "DEBUG | compose ps output (full when not masked)"
       ansible.builtin.debug:
@@ -68,7 +65,6 @@
           - "{{ matomo_bootstrap_ps.stdout | default('') }}"
           - "--- compose ps -a stderr ---"
           - "{{ matomo_bootstrap_ps.stderr | default('') }}"
-      when: not (MASK_CREDENTIALS_IN_LOGS | bool)
 
     - name: "DEBUG | compose logs matomo (tail)"
       ansible.builtin.command:
@@ -88,7 +84,6 @@
       register: matomo_bootstrap_matomo_logs
       changed_when: false
       failed_when: false
-      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
     - name: "DEBUG | compose logs matomo output (full when not masked)"
       ansible.builtin.debug:
@@ -97,7 +92,6 @@
           - "{{ matomo_bootstrap_matomo_logs.stdout | default('') }}"
           - "--- compose logs {{ MATOMO_SERVICE }} stderr ---"
           - "{{ matomo_bootstrap_matomo_logs.stderr | default('') }}"
-      when: not (MASK_CREDENTIALS_IN_LOGS | bool)
 
     - name: "DEBUG | compose logs bootstrap service (tail)"
       ansible.builtin.command:
@@ -117,7 +111,6 @@
       register: matomo_bootstrap_service_logs
       changed_when: false
       failed_when: false
-      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
     - name: "DEBUG | compose logs bootstrap output (full when not masked)"
       ansible.builtin.debug:
@@ -126,7 +119,6 @@
           - "{{ matomo_bootstrap_service_logs.stdout | default('') }}"
           - "--- compose logs {{ MATOMO_BOOTSTRAP_SERVICE }} stderr ---"
           - "{{ matomo_bootstrap_service_logs.stderr | default('') }}"
-      when: not (MASK_CREDENTIALS_IN_LOGS | bool)
 
     - name: "DEBUG | show compose file"
       ansible.builtin.command:
@@ -135,7 +127,6 @@
           - -lc
           - "sed -n '1,240p' {{ lookup('container', application_id, 'files.compose') }} || true"
       changed_when: false
-      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
     - name: "DEBUG | show env files (only when not masked)"
       ansible.builtin.command:
@@ -150,7 +141,6 @@
             echo "===== FILE: {{ lookup('container', application_id, 'files.env') }} (default env) ====="
             cat "{{ lookup('container', application_id, 'files.env') }}" || true
       changed_when: false
-      when: not (MASK_CREDENTIALS_IN_LOGS | bool)
 
     - name: "DEBUG | compose config (effective)"
       ansible.builtin.command:
@@ -168,7 +158,6 @@
       register: matomo_bootstrap_config
       changed_when: false
       failed_when: false
-      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
     - name: "DEBUG | effective config output"
       ansible.builtin.debug:
