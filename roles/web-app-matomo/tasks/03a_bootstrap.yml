@@ -23,7 +23,7 @@
   rescue:
     - name: "Load Boostrap Debug Info"
       include_tasks: 03b_bootstrap_debug.yml
-      when: 
+      when:
         - MASK_CREDENTIALS_IN_LOGS | bool
         - MODE_DEBUG | bool
 
