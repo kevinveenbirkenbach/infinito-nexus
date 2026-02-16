@@ -26,6 +26,9 @@ MATOMO_BOOTSTRAP_VERSION:   "{{ lookup('config', application_id, 'compose.servic
 MATOMO_BOOTSTRAP_NAME:      "{{ lookup('config', application_id, 'compose.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.name') }}"
 MATOMO_BOOTSTRAP_TIMEOUT:   "{{ lookup('config', application_id, 'compose.services.' ~ MATOMO_BOOTSTRAP_SERVICE ~ '.timeout') }}"
 MATOMO_BOOTSTRAP_ENV_FILE:  "{{ [lookup('container', application_id, 'directories.env'), MATOMO_BOOTSTRAP_SERVICE ~ '.env'] | path_join }}"
+MATOMO_BOOTSTRAP_RETRIES:   7
+MATOMO_BOOTSTRAP_RETRY_DELAY_S: 20
+MATOMO_BOOTSTRAP_DEBUG_LOG_TAIL: 300
 
 # Configuration
 MATOMO_ADMIN_USER_KEY:      "administrator"

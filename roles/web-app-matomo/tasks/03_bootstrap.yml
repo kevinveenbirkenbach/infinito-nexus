@@ -16,6 +16,9 @@
       register: matomo_bootstrap_run
       no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
       changed_when: true
+      retries: "{{ MATOMO_BOOTSTRAP_RETRIES | int }}"
+      delay: "{{ MATOMO_BOOTSTRAP_RETRY_DELAY_S | int }}"
+      until: matomo_bootstrap_run.rc == 0
 
   rescue:
 
@@ -24,6 +27,7 @@
       ansible.builtin.debug:
         msg:
           - "=== compose bootstrap FAILED ==="
+          - "attempts={{ matomo_bootstrap_run.attempts | default(1) }}/{{ MATOMO_BOOTSTRAP_RETRIES }}"
           - "rc={{ matomo_bootstrap_run.rc | default('n/a') }}"
           - "stdout_len={{ (matomo_bootstrap_run.stdout | default('') | string) | length }}"
           - "stderr_len={{ (matomo_bootstrap_run.stderr | default('') | string) | length }}"
@@ -33,11 +37,95 @@
       ansible.builtin.debug:
         msg:
           - "=== compose bootstrap FAILED ==="
+          - "attempts={{ matomo_bootstrap_run.attempts | default(1) }}/{{ MATOMO_BOOTSTRAP_RETRIES }}"
           - "rc={{ matomo_bootstrap_run.rc | default('n/a') }}"
           - "--- stdout ---"
           - "{{ matomo_bootstrap_run.stdout | default('') }}"
           - "--- stderr ---"
           - "{{ matomo_bootstrap_run.stderr | default('') }}"
+      when: not (MASK_CREDENTIALS_IN_LOGS | bool)
+
+    - name: "DEBUG | compose ps -a"
+      ansible.builtin.command:
+        argv:
+          - "{{ BIN_COMPOSE }}"
+          - --chdir
+          - "{{ lookup('container', application_id, 'directories.instance') }}"
+          - --project
+          - "{{ (lookup('container', application_id, 'directories.instance') | regex_replace('/+$', '')) | basename }}"
+          - --
+          - ps
+          - -a
+      register: matomo_bootstrap_ps
+      changed_when: false
+      failed_when: false
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+    - name: "DEBUG | compose ps output (full when not masked)"
+      ansible.builtin.debug:
+        msg:
+          - "--- compose ps -a stdout ---"
+          - "{{ matomo_bootstrap_ps.stdout | default('') }}"
+          - "--- compose ps -a stderr ---"
+          - "{{ matomo_bootstrap_ps.stderr | default('') }}"
+      when: not (MASK_CREDENTIALS_IN_LOGS | bool)
+
+    - name: "DEBUG | compose logs matomo (tail)"
+      ansible.builtin.command:
+        argv:
+          - "{{ BIN_COMPOSE }}"
+          - --chdir
+          - "{{ lookup('container', application_id, 'directories.instance') }}"
+          - --project
+          - "{{ (lookup('container', application_id, 'directories.instance') | regex_replace('/+$', '')) | basename }}"
+          - --
+          - logs
+          - --no-color
+          - --timestamps
+          - --tail
+          - "{{ MATOMO_BOOTSTRAP_DEBUG_LOG_TAIL | string }}"
+          - "{{ MATOMO_SERVICE }}"
+      register: matomo_bootstrap_matomo_logs
+      changed_when: false
+      failed_when: false
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+    - name: "DEBUG | compose logs matomo output (full when not masked)"
+      ansible.builtin.debug:
+        msg:
+          - "--- compose logs {{ MATOMO_SERVICE }} stdout ---"
+          - "{{ matomo_bootstrap_matomo_logs.stdout | default('') }}"
+          - "--- compose logs {{ MATOMO_SERVICE }} stderr ---"
+          - "{{ matomo_bootstrap_matomo_logs.stderr | default('') }}"
+      when: not (MASK_CREDENTIALS_IN_LOGS | bool)
+
+    - name: "DEBUG | compose logs bootstrap service (tail)"
+      ansible.builtin.command:
+        argv:
+          - "{{ BIN_COMPOSE }}"
+          - --chdir
+          - "{{ lookup('container', application_id, 'directories.instance') }}"
+          - --project
+          - "{{ (lookup('container', application_id, 'directories.instance') | regex_replace('/+$', '')) | basename }}"
+          - --
+          - logs
+          - --no-color
+          - --timestamps
+          - --tail
+          - "{{ MATOMO_BOOTSTRAP_DEBUG_LOG_TAIL | string }}"
+          - "{{ MATOMO_BOOTSTRAP_SERVICE }}"
+      register: matomo_bootstrap_service_logs
+      changed_when: false
+      failed_when: false
+      no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+    - name: "DEBUG | compose logs bootstrap output (full when not masked)"
+      ansible.builtin.debug:
+        msg:
+          - "--- compose logs {{ MATOMO_BOOTSTRAP_SERVICE }} stdout ---"
+          - "{{ matomo_bootstrap_service_logs.stdout | default('') }}"
+          - "--- compose logs {{ MATOMO_BOOTSTRAP_SERVICE }} stderr ---"
+          - "{{ matomo_bootstrap_service_logs.stderr | default('') }}"
       when: not (MASK_CREDENTIALS_IN_LOGS | bool)
 
     - name: "DEBUG | show compose file"
