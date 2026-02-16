@@ -46,7 +46,7 @@
   failed_when: false
 
 - name: "Bootstrap Matomo (Initialisation and setting of API token if not defined)"
-  include_tasks: 03_bootstrap.yml
+  include_tasks: 03a_bootstrap.yml
   when: >
     (matomo_config_exists.rc != 0) or
     ((users.administrator.tokens['web-app-matomo'] | default('') | string | trim) == "")
