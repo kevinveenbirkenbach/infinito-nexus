@@ -5,17 +5,38 @@ set -euo pipefail
 
 EXTRA="${1:-}"
 
+retry() {
+  local attempts=7
+  local delay=20
+  local count=1
+
+  while true; do
+    if "$@"; then
+      return 0
+    fi
+
+    if [[ $count -ge $attempts ]]; then
+      echo "❌ Command failed after ${attempts} attempts."
+      return 1
+    fi
+
+    echo "⚠️  Attempt ${count}/${attempts} failed. Retrying in ${delay}s..."
+    sleep "${delay}"
+    ((count++))
+  done
+}
+
 install_python_deps() {
   echo "📦 Installing Python dependencies"
 
-  "${PYTHON}" -m pip install --upgrade pip setuptools wheel
+  retry "${PYTHON}" -m pip install --upgrade pip setuptools wheel
 
   if [[ -n "${EXTRA}" ]]; then
     echo "→ Installing with extras: [${EXTRA}]"
-    "${PYTHON}" -m pip install -e ".[${EXTRA}]"
+    retry "${PYTHON}" -m pip install -e ".[${EXTRA}]"
   else
     echo "→ Installing base package"
-    "${PYTHON}" -m pip install -e .
+    retry "${PYTHON}" -m pip install -e .
   fi
 }
 
