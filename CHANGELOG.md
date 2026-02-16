@@ -1,3 +1,8 @@
+## [4.0.3] - 2026-02-16
+
+* Try Matomo Boostrap 7 times if errors occure
+
+
 ## [4.0.2] - 2026-02-15
 
 * Matomo upgrade to 1.1.13
