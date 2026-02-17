@@ -1,11 +1,11 @@
-FROM node:latest AS builder
+FROM {{ SIMPLEICONS_IMAGE }}:{{ SIMPLEICONS_VERSION }} AS builder
 
 WORKDIR /app
 COPY ./config/package*.json ./
 
 RUN npm install
 
-FROM node:latest
+FROM {{ SIMPLEICONS_IMAGE }}:{{ SIMPLEICONS_VERSION }}
 
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
