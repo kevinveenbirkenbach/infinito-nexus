@@ -32,13 +32,13 @@ class DummyTemplar:
 
 class UnitNameLookupTests(unittest.TestCase):
     def _mk_lookup(
-        self, software_name="infinito.nexus", version="1.2.3"
+        self, software_domain="infinito.nexus", version="1.2.3"
     ) -> LookupModule:
         lm = LookupModule()
 
         # Inject a dummy templar with variables
         lm._templar = DummyTemplar(
-            available_variables={"SOFTWARE_NAME": software_name},
+            available_variables={"SOFTWARE_DOMAIN": software_domain},
             version=version,
         )
 
@@ -48,33 +48,33 @@ class UnitNameLookupTests(unittest.TestCase):
         return lm
 
     def test_default_suffix_service(self):
-        lm = self._mk_lookup(software_name="Infinito.Nexus", version="2.0.0")
+        lm = self._mk_lookup(software_domain="Infinito.Nexus", version="2.0.0")
         res = lm.run(["svc-foo"])
         self.assertEqual(res, ["svc-foo.2.0.0.infinito.nexus.service"])
 
     def test_explicit_timer_suffix_with_dot(self):
-        lm = self._mk_lookup(software_name="infinito.nexus", version="2.0.0")
+        lm = self._mk_lookup(software_domain="infinito.nexus", version="2.0.0")
         res = lm.run(["svc-foo"], suffix=".timer")
         self.assertEqual(res, ["svc-foo.2.0.0.infinito.nexus.timer"])
 
     def test_explicit_timer_suffix_without_dot(self):
-        lm = self._mk_lookup(software_name="infinito.nexus", version="2.0.0")
+        lm = self._mk_lookup(software_domain="infinito.nexus", version="2.0.0")
         res = lm.run(["svc-foo"], suffix="timer")
         self.assertEqual(res, ["svc-foo.2.0.0.infinito.nexus.timer"])
 
     def test_suffix_false_means_no_suffix(self):
-        lm = self._mk_lookup(software_name="infinito.nexus", version="2.0.0")
+        lm = self._mk_lookup(software_domain="infinito.nexus", version="2.0.0")
         res = lm.run(["svc-foo"], suffix=False)
         self.assertEqual(res, ["svc-foo.2.0.0.infinito.nexus"])
 
     def test_template_unit_id_endswith_at(self):
-        lm = self._mk_lookup(software_name="infinito.nexus", version="2.0.0")
+        lm = self._mk_lookup(software_domain="infinito.nexus", version="2.0.0")
         res = lm.run(["alarm@"])
         # Template semantics: "<base>.<ver>.<sw>@.service"
         self.assertEqual(res, ["alarm.2.0.0.infinito.nexus@.service"])
 
     def test_multiple_terms(self):
-        lm = self._mk_lookup(software_name="infinito.nexus", version="2.0.0")
+        lm = self._mk_lookup(software_domain="infinito.nexus", version="2.0.0")
         res = lm.run(["a", "b"], suffix=".timer")
         self.assertEqual(
             res,
@@ -97,10 +97,10 @@ class UnitNameLookupTests(unittest.TestCase):
 
         with self.assertRaises(AnsibleError) as ctx:
             lm.run(["svc-foo"])
-        self.assertIn("SOFTWARE_NAME is not defined", str(ctx.exception))
+        self.assertIn("SOFTWARE_DOMAIN is not defined", str(ctx.exception))
 
     def test_empty_version_raises(self):
-        lm = self._mk_lookup(software_name="infinito.nexus", version="   ")
+        lm = self._mk_lookup(software_domain="infinito.nexus", version="   ")
         with self.assertRaises(AnsibleError) as ctx:
             lm.run(["svc-foo"])
         self.assertIn("lookup('version') returned an empty value", str(ctx.exception))

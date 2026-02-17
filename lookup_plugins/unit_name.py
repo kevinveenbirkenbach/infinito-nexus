@@ -3,7 +3,7 @@
 # Ansible lookup plugin to build versioned systemd unit names.
 #
 # Target format:
-#   <systemctl_id>.<version>.<software_name><suffix>
+#   <systemctl_id>.<version>.<software_domain><suffix>
 #
 # Examples:
 #   lookup('unit_name', 'svc-foo')                       -> svc-foo.1.2.3.infinito.nexus.service
@@ -11,7 +11,7 @@
 #   lookup('unit_name', 'alarm@')                        -> alarm.1.2.3.infinito.nexus@.service
 #
 # Requirements:
-# - SOFTWARE_NAME must be available in vars (inventory/group_vars/role vars).
+# - SOFTWARE_DOMAIN must be available in vars (inventory/group_vars/role vars).
 # - Version is read via lookup('version') (your existing version lookup plugin).
 
 from __future__ import annotations
@@ -53,11 +53,11 @@ def _lower_required(value, name: str) -> str:
 
 
 def _build_unit_name(
-    systemctl_id: str, version: str, software_name: str, suffix
+    systemctl_id: str, version: str, software_domain: str, suffix
 ) -> str:
     sid = _lower_required(systemctl_id, "systemctl_id")
     ver = _lower_required(version, "version")
-    sw = _lower_required(software_name, "SOFTWARE_NAME")
+    sw = _lower_required(software_domain, "SOFTWARE_DOMAIN")
     sfx = _normalize_suffix(suffix)
 
     # Keep template semantics compatible with your previous filter:
@@ -87,12 +87,12 @@ class LookupModule(LookupBase):
                 "unit_name lookup: at least one term (systemctl_id) is required."
             )
 
-        # Read SOFTWARE_NAME from current variable context
+        # Read SOFTWARE_DOMAIN from current variable context
         available = getattr(self._templar, "available_variables", {}) or {}
-        software_name = available.get("SOFTWARE_NAME")
-        if not software_name:
+        software_domain = available.get("SOFTWARE_DOMAIN")
+        if not software_domain:
             raise AnsibleError(
-                "unit_name lookup: SOFTWARE_NAME is not defined in the variable context."
+                "unit_name lookup: SOFTWARE_DOMAIN is not defined in the variable context."
             )
 
         # Resolve version using the existing lookup('version')
@@ -107,6 +107,6 @@ class LookupModule(LookupBase):
 
         results = []
         for term in terms:
-            results.append(_build_unit_name(term, version, software_name, suffix))
+            results.append(_build_unit_name(term, version, software_domain, suffix))
 
         return results
