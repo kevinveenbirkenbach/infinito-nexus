@@ -5,19 +5,19 @@
 SYS_SERVICE_SUFFIX:                     ".{{ SOFTWARE_DOMAIN }}.service"
 
 ## Names
-SYS_SERVICE_CLEANUP_BACKUPS:            "{{ 'sys-ctl-cln-bkps'          | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_CLEANUP_BACKUPS_FAILED:     "{{ 'sys-ctl-cln-faild-bkps'    | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES:  "{{ 'sys-ctl-cln-anon-volumes'  | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_CLEANUP_DISC_SPACE:         "{{ 'sys-ctl-cln-disc-space'    | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_CLEANUP_DOCKER:             "{{ 'sys-ctl-cln-docker'        | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_OPTIMIZE_DRIVE:             "{{ 'svc-opt-ssd-hdd'           | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_BACKUP_RMT_2_LOC:           "{{ 'svc-bkp-rmt-2-loc'         | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_BACKUP_DOCKER_2_LOC:        "{{ 'sys-ctl-bkp-docker-2-loc'  | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_REPAIR_CONTAINER_SOFT:         "{{ 'sys-ctl-rpr-container-soft'   | get_service_name(SOFTWARE_NAME) }}"
-SYS_SERVICE_REPAIR_CONTAINER_HARD:         "{{ 'sys-ctl-rpr-container-hard'   | get_service_name(SOFTWARE_NAME) }}"
+SYS_SERVICE_CLEANUP_BACKUPS:            "{{ lookup('unit_name', 'sys-ctl-cln-bkps'            ) }}"
+SYS_SERVICE_CLEANUP_BACKUPS_FAILED:     "{{ lookup('unit_name', 'sys-ctl-cln-faild-bkps'      ) }}"
+SYS_SERVICE_CLEANUP_ANONYMOUS_VOLUMES:  "{{ lookup('unit_name', 'sys-ctl-cln-anon-volumes'    ) }}"
+SYS_SERVICE_CLEANUP_DISC_SPACE:         "{{ lookup('unit_name', 'sys-ctl-cln-disc-space'      ) }}"
+SYS_SERVICE_CLEANUP_DOCKER:             "{{ lookup('unit_name', 'sys-ctl-cln-docker'          ) }}"
+SYS_SERVICE_OPTIMIZE_DRIVE:             "{{ lookup('unit_name', 'svc-opt-ssd-hdd'             ) }}"
+SYS_SERVICE_BACKUP_RMT_2_LOC:           "{{ lookup('unit_name', 'svc-bkp-rmt-2-loc'           ) }}"
+SYS_SERVICE_BACKUP_DOCKER_2_LOC:        "{{ lookup('unit_name', 'sys-ctl-bkp-docker-2-loc'    ) }}"
+SYS_SERVICE_REPAIR_CONTAINER_SOFT:      "{{ lookup('unit_name', 'sys-ctl-rpr-container-soft'  ) }}"
+SYS_SERVICE_REPAIR_CONTAINER_HARD:      "{{ lookup('unit_name', 'sys-ctl-rpr-container-hard'  ) }}"
 
 ## On Failure
-SYS_SERVICE_ON_FAILURE_COMPOSE:         "{{ ('sys-ctl-alm-compose@') | get_service_name(SOFTWARE_NAME, False) }}%n.service"
+SYS_SERVICE_ON_FAILURE_COMPOSE:         "{{ lookup('unit_name','sys-ctl-alm-compose@', suffix=False ) }}%n.service"
 
 ## Groups
 SYS_SERVICE_GROUP_BACKUPS: >

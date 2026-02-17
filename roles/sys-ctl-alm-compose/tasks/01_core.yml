@@ -35,7 +35,7 @@
 
   - name: Start '{{ system_service_id }}' instance
     ansible.builtin.systemd:
-      name: "{{ system_service_id | get_service_name(SOFTWARE_NAME, False) ~ escaped_name.stdout }}.service"
+      name: "{{ lookup('unit_name',system_service_id, suffix=False) ~ escaped_name.stdout }}.service"
       state: started
   when:
     - MODE_ASSERT | bool
