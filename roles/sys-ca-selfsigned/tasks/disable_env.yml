@@ -1,7 +1,7 @@
-- name: "TLS | remove CA trust env vars from /etc/environment"
+- name: "TLS | remove CA trust env vars from {{ FILE_ENVIRONMENT }}"
   become: true
   ansible.builtin.lineinfile:
-    path: /etc/environment
+    path: "{{ FILE_ENVIRONMENT }}"
     regexp: "{{ item }}"
     state: absent
   loop:

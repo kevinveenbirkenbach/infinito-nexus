@@ -152,10 +152,10 @@
     CA_TRUST_NAME: "{{ DOMAIN_PRIMARY | lower }}"
   changed_when: true
 
-- name: "TLS | (self_signed) ensure CA trust env vars in /etc/environment"
+- name: "TLS | (self_signed) ensure CA trust env vars in {{ FILE_ENVIRONMENT }}"
   become: true
   ansible.builtin.lineinfile:
-    path: /etc/environment
+    path: "{{ FILE_ENVIRONMENT }}"
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
     state: present

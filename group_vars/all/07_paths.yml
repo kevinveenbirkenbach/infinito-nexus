@@ -22,3 +22,6 @@ DIR_SECRETS:              "{{ [DIR_VAR_LIB, 'secrets'] | path_join }}"
 FILE_VERSION:             "{{ [DIR_VAR_LIB, 'version'] | path_join }}"
 FILE_TOKENS:              "{{ [DIR_SECRETS, 'tokens.yml'] | path_join }}"
 FILE_DATABASE_SECRETS:    "{{ [DIR_SECRETS, 'databases.csv'] | path_join }}"
+
+# Environment Files
+FILE_ENVIRONMENT:         "/etc/environment" # File to safe environment variables in
