@@ -15,14 +15,11 @@
   delegate_to: localhost
   run_once: true
 
-- name: Ensure destination directory exists
-  ansible.builtin.file:
-    path: "{{ FILE_VERSION | dirname }}"
-    state: directory
-    mode: "0755"
-
-- name: Write version
-  ansible.builtin.copy:
-    dest: "{{ FILE_VERSION }}"
-    content: "{{ sys_version_extracted.stdout | trim }}\n"
+- name: Ensure system version is set in environment file
+  ansible.builtin.lineinfile:
+    path: "{{ FILE_ENVIRONMENT }}"
+    regexp: '^{{ INFINITO_VERSION_ENV_NAME }}='
+    line: '{{ INFINITO_VERSION_ENV_NAME }}="{{ sys_version_extracted.stdout | trim }}"'
+    create: true
     mode: "0644"
+    state: present
