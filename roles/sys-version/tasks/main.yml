@@ -1,25 +1,8 @@
-- name: Extract version from local pyproject.toml
-  ansible.builtin.shell: >
-    sed -nE 's/^version *= *"([^"]+)".*/\1/p' pyproject.toml
-  args:
-    chdir: "{{ playbook_dir }}"
-  delegate_to: localhost
-  run_once: true
-  register: sys_version_extracted
-  changed_when: false
-
-- name: Fail if version could not be extracted
-  ansible.builtin.fail:
-    msg: "Could not extract version from {{ playbook_dir }}/pyproject.toml"
-  when: (sys_version_extracted.stdout | trim) == ""
-  delegate_to: localhost
-  run_once: true
-
 - name: Ensure system version is set in environment file
   ansible.builtin.lineinfile:
     path: "{{ FILE_ENVIRONMENT }}"
     regexp: '^{{ INFINITO_VERSION_ENV_NAME }}='
-    line: '{{ INFINITO_VERSION_ENV_NAME }}="{{ sys_version_extracted.stdout | trim }}"'
+    line: '{{ INFINITO_VERSION_ENV_NAME }}="{{ lookup(''version'') }}"'
     create: true
     mode: "0644"
     state: present
