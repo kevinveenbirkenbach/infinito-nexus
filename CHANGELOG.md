@@ -1,3 +1,28 @@
+## [4.1.0] - 2026-02-17
+
+* **Added**
+
+* Controller-side *version* lookup plugin reading from *pyproject.toml* (with Poetry fallback)
+* New *unit_name* lookup plugin for consistent versioned systemd unit generation
+* Automatic prune phase in *sys-service* (stop/disable outdated units, remove old unit files, trigger daemon-reload)
+* Persist application version as *INFINITO_VERSION* in */etc/environment*
+* Parameterized image and version handling for *web-svc-simpleicons*
+* Introduced *entity_name* derived from *application_id*
+
+**Changed**
+
+* *sys-service* now uses *SOFTWARE_DOMAIN* instead of *SOFTWARE_NAME* for versioned units
+* Reordered service lifecycle: *prune → lockdown → reset*
+* Refactored internal task structure for clearer execution flow
+* Made */etc/environment* path configurable
+
+**Removed**
+
+* Legacy *FILE_VERSION* mechanism
+* Deprecated *get_service_name* filter
+* Legacy *simpleicons_host_* variables
+
+
 ## [4.0.3] - 2026-02-16
 
 * Try Matomo Boostrap 7 times if errors occure
