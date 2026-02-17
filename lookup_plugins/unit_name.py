@@ -20,6 +20,60 @@ from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 
 
+def _looks_like_template(value) -> bool:
+    if not isinstance(value, str):
+        return False
+    return ("{{" in value) or ("{%" in value) or ("{#" in value)
+
+
+def _render_if_template(templar, value, var_name: str):
+    if not _looks_like_template(value):
+        return value
+
+    try:
+        rendered = templar.template(value, disable_lookups=False)
+    except TypeError:
+        # Unit tests can inject a minimal templar without Ansible's full signature.
+        rendered = templar.template(value)
+    except Exception as exc:
+        raise AnsibleError(
+            f"unit_name lookup: failed to render template for '{var_name}': {value}"
+        ) from exc
+
+    if _looks_like_template(rendered):
+        raise AnsibleError(
+            f"unit_name lookup: unresolved template for '{var_name}': {value}"
+        )
+    return rendered
+
+
+def _resolve_version(templar, variables):
+    # Try the canonical lookup call first.
+    try:
+        version = templar.template("{{ lookup('version') }}", disable_lookups=False)
+    except TypeError:
+        # Unit tests can inject a minimal templar without Ansible's full signature.
+        version = templar.template("{{ lookup('version') }}")
+
+    # Some Ansible contexts keep nested lookups unresolved here. Fallback to direct plugin call.
+    if _looks_like_template(version):
+        try:
+            from lookup_plugins.version import LookupModule as VersionLookupModule
+
+            version_lookup = VersionLookupModule()
+            version_values = version_lookup.run([], variables=variables)
+            if isinstance(version_values, list):
+                version = version_values[0] if version_values else ""
+            else:
+                version = version_values
+        except Exception as exc:
+            raise AnsibleError(
+                "unit_name lookup: failed to resolve version via lookup('version')."
+            ) from exc
+
+    return version
+
+
 def _normalize_suffix(suffix) -> str:
     """
     Normalize suffix input to a systemd unit suffix string:
@@ -48,6 +102,10 @@ def _lower_required(value, name: str) -> str:
     if not sval:
         raise AnsibleError(
             f"unit_name lookup: missing required variable '{name}' (empty)."
+        )
+    if _looks_like_template(sval):
+        raise AnsibleError(
+            f"unit_name lookup: unresolved template for '{name}': {sval}"
         )
     return sval.lower()
 
@@ -94,10 +152,13 @@ class LookupModule(LookupBase):
             raise AnsibleError(
                 "unit_name lookup: SOFTWARE_DOMAIN is not defined in the variable context."
             )
+        software_domain = _render_if_template(
+            self._templar, software_domain, "SOFTWARE_DOMAIN"
+        )
 
-        # Resolve version using the existing lookup('version')
-        # We intentionally evaluate it through templating so it uses Ansible's lookup mechanism.
-        version = self._templar.template("{{ lookup('version') }}")
+        # Resolve version via lookup('version'). Fall back to direct lookup plugin invocation
+        # if nested lookup templating remains unresolved in this context.
+        version = _resolve_version(self._templar, variables)
         if not version or not str(version).strip():
             raise AnsibleError(
                 "unit_name lookup: lookup('version') returned an empty value."

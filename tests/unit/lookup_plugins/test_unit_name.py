@@ -23,10 +23,12 @@ class DummyTemplar:
         self.available_variables = available_variables or {}
         self._version = version
 
-    def template(self, s: str):
+    def template(self, s: str, **kwargs):
         # The plugin calls: self._templar.template("{{ lookup('version') }}")
         if "lookup('version')" in s:
             return self._version
+        if "{{ SOFTWARE_NAME | lower }}" in s:
+            return str(self.available_variables.get("SOFTWARE_NAME", "")).lower()
         return s
 
 
@@ -104,6 +106,43 @@ class UnitNameLookupTests(unittest.TestCase):
         with self.assertRaises(AnsibleError) as ctx:
             lm.run(["svc-foo"])
         self.assertIn("lookup('version') returned an empty value", str(ctx.exception))
+
+    def test_templated_software_domain_is_rendered(self):
+        lm = LookupModule()
+        lm._templar = DummyTemplar(
+            available_variables={
+                "SOFTWARE_DOMAIN": "{{ SOFTWARE_NAME | lower }}",
+                "SOFTWARE_NAME": "Infinito.Nexus",
+            },
+            version="2.0.0",
+        )
+        lm.set_options = lambda *args, **kwargs: None  # noqa: E731
+
+        res = lm.run(["svc-foo"])
+        self.assertEqual(res, ["svc-foo.2.0.0.infinito.nexus.service"])
+
+    def test_unresolved_software_domain_template_raises(self):
+        lm = LookupModule()
+        lm._templar = DummyTemplar(
+            available_variables={"SOFTWARE_DOMAIN": "{{ UNKNOWN_VAR | lower }}"},
+            version="2.0.0",
+        )
+        lm.set_options = lambda *args, **kwargs: None  # noqa: E731
+
+        with self.assertRaises(AnsibleError) as ctx:
+            lm.run(["svc-foo"])
+        self.assertIn("unresolved template for 'SOFTWARE_DOMAIN'", str(ctx.exception))
+
+    def test_version_fallback_direct_lookup_plugin(self):
+        lm = self._mk_lookup(
+            software_domain="infinito.nexus", version="{{ lookup('version') }}"
+        )
+        res = lm.run(["svc-foo"])
+
+        self.assertRegex(
+            res[0],
+            r"^svc-foo\.[0-9A-Za-z._+-]+\.infinito\.nexus\.service$",
+        )
 
 
 if __name__ == "__main__":
