@@ -20,6 +20,8 @@ compose:
     recaptcha:
       enabled: false
     simpleicons:
+      image:              node
+      version:            latest
       cpus:               0.5
       mem_reservation:    126m
       mem_limit:          265m
