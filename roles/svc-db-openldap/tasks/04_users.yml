@@ -4,7 +4,9 @@
 # Purpose:
 # - Ensure base LDAP tree exists (suffix + OUs)
 # - Ensure LDAP user entries exist (without setting userPassword here)
-# - Always (re-)set user passwords on every deploy via Password Modify extended op
+# - Set user passwords:
+#   * default: on every deploy
+#   * optional per-user override: set once on create via password_update: false
 # - Keep objectClass list and mail attribute up to date
 ###############################################################################
 
@@ -69,7 +71,41 @@
     state: present
 
 ###############################################################################
-# 1) Create the LDAP entry if it does not yet exist
+# 1) Snapshot: remember which LDAP users already existed before this run
+###############################################################################
+- name: Check whether LDAP users already exist
+  community.general.ldap_search:
+    server_uri: "{{ OPENLDAP_SERVER_URI }}"
+    bind_dn:    "{{ OPENLDAP_BIND_DN }}"
+    bind_pw:    "{{ OPENLDAP_BIND_PW }}"
+    dn:         "{{ LDAP.USER.ATTRIBUTES.ID }}={{ item.key }},{{ LDAP.DN.OU.USERS }}"
+    scope:      base
+    filter:     "(objectClass=*)"
+    attrs:
+      - dn
+  loop: "{{ OPENLDAP_USERS | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: openldap_users_existence_before
+  changed_when: false
+  failed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: Build map of users that existed before this run
+  ansible.builtin.set_fact:
+    openldap_user_existed_before: >-
+      {{
+        (openldap_user_existed_before | default({}))
+        | combine({
+            item.item.key: ((item.results | default([])) | length > 0)
+          })
+      }}
+  loop: "{{ openldap_users_existence_before.results }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+
+###############################################################################
+# 2) Create the LDAP entry if it does not yet exist
 ###############################################################################
 - name: Ensure LDAP users exist
   community.general.ldap_entry:
@@ -97,14 +133,16 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 ###############################################################################
-# 1b) Always set LDAP passwords on every deploy
+# 2b) Set LDAP password:
+# - Default behavior: update on every run (password_update: true/unset)
+# - Opt-out behavior: set only on first creation (password_update: false)
 #
 # Rationale:
 # - Avoid dealing with SSHA generation in Ansible (salted hashes differ each time)
 # - Use LDAP Password Modify extended operation
 # - Server-side hashing is applied (your cn=config sets olcPasswordHash: {SSHA})
 ###############################################################################
-- name: Always set LDAP user password (every run)
+- name: Set LDAP user password (per-user update policy)
   community.general.ldap_passwd:
     server_uri: "{{ OPENLDAP_SERVER_URI }}"
     bind_dn:    "{{ OPENLDAP_BIND_DN }}"
@@ -114,10 +152,14 @@
   loop: "{{ OPENLDAP_USERS | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+  when:
+    - >
+      (item.value.password_update | default(true) | bool)
+      or not ((openldap_user_existed_before | default({})).get(item.key, false) | bool)
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 ###############################################################################
-# 2) Keep the objectClass list AND the mail attribute up-to-date
+# 3) Keep the objectClass list AND the mail attribute up-to-date
 ###############################################################################
 - name: Ensure required objectClass values and mail address are present
   community.general.ldap_attrs:

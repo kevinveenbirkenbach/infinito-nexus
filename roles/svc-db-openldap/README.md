@@ -22,6 +22,21 @@ For further setup instructions and advanced configuration details, please refer 
 - **Comprehensive Query Capabilities:** Utilize LDAP search tools to efficiently query and manage directory data.
 - **High Performance and Scalability:** Designed to handle large-scale deployments with rapid lookup and authentication response times.
 
+## User Password Update Policy
+
+By default, LDAP user passwords are updated on every deployment run.
+
+To set a password only once (on initial user creation), set this flag per user:
+
+```yaml
+users:
+  alice:
+    password: "..."
+    password_update: false
+```
+
+With `password_update: false`, existing LDAP users keep their current password on later runs.
+
 ## Further Resources
 
 - [Bitnami OpenLDAP](https://hub.docker.com/r/bitnami/openldap)
