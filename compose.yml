@@ -33,7 +33,7 @@ services:
       network: host
       args:
         NIX_CONFIG: ${NIX_CONFIG}
-    image: "${INFINITO_IMAGE:-infinito-${INFINITO_DISTRO:-arch}}"
+    image: "${INFINITO_IMAGE:-infinito-${INFINITO_DISTRO:-debian}}"
     pull_policy: "${INFINITO_PULL_POLICY:-never}"
     depends_on:
       - coredns
@@ -65,7 +65,7 @@ services:
     tty: true
     stdin_open: true
 
-    container_name: infinito_nexus_${INFINITO_DISTRO:-arch}
+    container_name: infinito_nexus_${INFINITO_DISTRO:-debian}
     restart: "no"
     profiles: ["ci"]
     <<: *ci_defaults
