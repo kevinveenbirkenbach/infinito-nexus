@@ -28,20 +28,21 @@ server:
 compose: 
   services:
     oidc:
-      enabled: true
-      shared: true
+      enabled:  true
+      shared:   true
     simpleicons:
-      enabled: true
-      shared: true
+      enabled:  true
+      shared:   true
     logout:
-      enabled: true
+      enabled:  true
     matomo:
-      enabled: true
-      shared: true
+      enabled:  true
+      shared:   true
     dashboard:
-      enabled: false
-      name:   "dashboard"
-      image:  "dashboard_custom"
+      enabled:  false
+      name:     "dashboard"
+      image:    "ghcr.io/kevinveenbirkenbach/port-ui"
+      version:  "1.0.0"
     css:
       enabled: true
     javascript:

@@ -1,16 +1,12 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
-  portfolio:
+  dashboard:
 {% set container_port = 5000 %}
-    build:
-      context: {{ docker_repository_path }}
-      dockerfile: Dockerfile
-    pull_policy: never
-    image: {{ DASHBOARD_IMAGE }}
+    image: {{ DASHBOARD_IMAGE }}:{{ DASHBOARD_VERSION }}
     container_name: {{ DASHBOARD_CONTAINER }}
     ports:
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}
     volumes:
-      - {{ docker_repository_path }}app:/app
+      - "{{ DASHBOARD_CONFIG_YML_DEST }}:{{ DASHBOARD_CONFIG_YML_DOCKER_DEST }}:ro"
     restart: {{ DOCKER_RESTART_POLICY }}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}

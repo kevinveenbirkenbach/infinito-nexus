@@ -23,7 +23,8 @@ DASHBOARD_LOCATION_SILENT_CHECK:    "/silent-check-sso.html"
 ## Configuration
 DASHBOARD_CONFIG_YML_SRC_FILE:      "config.yaml.j2"
 DASHBOARD_CONFIG_INV_PATH:          "{{ [ inventory_dir, 'files', inventory_hostname ,'docker',application_id,DASHBOARD_CONFIG_YML_SRC_FILE] | path_join }}"
-DASHBOARD_CONFIG_YML_DEST:          "{{ [ docker_repository_path, 'app/config.yaml'] | path_join }}"
+DASHBOARD_CONFIG_YML_DEST:          "{{ [ lookup('container', application_id, 'directories.volumes'), 'config.yaml' ] | path_join }}"
+DASHBOARD_CONFIG_YML_DOCKER_DEST:   "/app/config.yaml"
 
 ## OIDC
 DASHBOARD_KEYCLOAK_LOGIN_URL: >-
@@ -38,3 +39,4 @@ DASHBOARD_OIDC_ENABLED:             "{{ lookup('config', application_id, 'compos
 ## Docker
 DASHBOARD_CONTAINER:                "{{ lookup('config', application_id, 'compose.services.dashboard.name') }}"
 DASHBOARD_IMAGE:                    "{{ lookup('config', application_id, 'compose.services.dashboard.image') }}"
+DASHBOARD_VERSION:                  "{{ lookup('config', application_id, 'compose.services.dashboard.version') }}"
