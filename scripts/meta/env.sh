@@ -79,7 +79,7 @@ export TEST_DEPLOY_TYPE
 : "${TEST_PATTERN:=test*.py}"
 export TEST_PATTERN
 
-: "${INFINITO_DISTRO:=arch}"
+: "${INFINITO_DISTRO:=debian}"
 : "${INFINITO_CONTAINER:=infinito_nexus_${INFINITO_DISTRO}}"
 export INFINITO_DISTRO INFINITO_CONTAINER
 
