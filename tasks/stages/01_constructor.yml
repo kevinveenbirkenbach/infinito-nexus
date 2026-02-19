@@ -195,3 +195,9 @@
     - svc-bkp     # 8. Load Backup Roles
   loop_control:
     label: "{{ item }}-roles.yml"
+
+- name: Install inventory-defined system packages
+  ansible.builtin.include_role:
+    name: sys-package
+  when:
+    - SYS_PACKAGES | default([]) | length > 0
