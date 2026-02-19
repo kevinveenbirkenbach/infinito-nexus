@@ -50,6 +50,8 @@ compose:
       # Raised due to failures in CI pipeline (Good luck approach)
       mem_limit:        "4g"
       pids_limit:       8192
+      backup:
+        no_stop_required: true
     css:
       enabled: true
   volumes:
