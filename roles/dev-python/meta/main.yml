@@ -1,0 +1,25 @@
+galaxy_info:
+  author: Kevin Veen-Birkenbach
+  description: Installs tools and environment for Python development on Linux.
+  license: Infinito.Nexus Community License (Non-Commercial)
+  license_url: https://s.infinito.nexus/license
+  company: "Kevin Veen-Birkenbach  \nConsulting & Coaching Solutions  \nhttps://www.veen.world\n"
+  min_ansible_version: '2.9'
+  platforms:
+  - name: Archlinux
+    versions:
+    - rolling
+  galaxy_tags:
+  - development
+  - python
+  - software
+  - engineering
+  - archlinux
+  - persona
+  - pip
+  repository: https://s.infinito.nexus/code
+  issue_tracker_url: https://s.infinito.nexus/issues
+  documentation: https://docs.infinito.nexus/
+  lifecycle: pre-alpha
+dependencies:
+- dev-core

@@ -1,7 +1,0 @@
-- name: install office sofware
-  package:
-    name: 
-      - thunderbird
-      - calibre
-      - retext
-    state: present

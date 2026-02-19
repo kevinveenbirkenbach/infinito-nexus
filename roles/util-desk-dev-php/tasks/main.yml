@@ -1,5 +1,0 @@
-- name: install php developer tools
-  package:
-    name:
-      - php 
-    state: present

@@ -44,7 +44,6 @@ class TestGetAllInvokableApps(unittest.TestCase):
             ("web-app-matomo", "matomo-app"),  # application_id differs
             ("web-svc-nginx", None),  # should NOT match any invokable path
             ("update", None),  # exact match to invokable path
-            ("util-desk-custom", None),  # matches util-desk
         ]
         for rolename, appid in roles:
             role_dir = self.roles_dir / rolename
@@ -70,7 +69,6 @@ class TestGetAllInvokableApps(unittest.TestCase):
                 "web-app-nextcloud",  # application_id from role
                 "matomo-app",  # application_id from role
                 "update",  # role directory name
-                "util-desk-custom",  # role directory name
             ]
         )
         self.assertEqual(sorted(result), expected)

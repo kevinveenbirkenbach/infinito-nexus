@@ -11,7 +11,7 @@ The `main.yml` file in the `desk-qbittorrent` role includes the following task:
 
 ## Dependencies
 This role depends on:
-- **dev-yay**: Ensures that an Arch User Repository (AUR) helper is installed, which is necessary for installing packages like `qbittorrent` that are not available in the standard repositories.
+- **sys-aur**: Ensures that an Arch User Repository (AUR) helper is installed, which is necessary for installing packages like `qbittorrent` that are not available in the standard repositories.
 
 ## Purpose and Usage
 The `desk-qbittorrent` role is tailored for users who require a reliable and user-friendly torrent client for downloading and sharing files via the BitTorrent protocol. qBittorrent is known for its balance of features, simplicity, and minimal impact on system resources.

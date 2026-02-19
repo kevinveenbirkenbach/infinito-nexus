@@ -1,0 +1,22 @@
+all:
+  vars:
+    infinito:
+      bundle:
+        title: "Workstation Browser"
+        description: >
+          Browser baseline for workstation environments.
+        logo:
+          class: "fa-solid fa-globe"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    desk-chromium:
+      hosts:
+        workstation:
+    desk-firefox:
+      hosts:
+        workstation:

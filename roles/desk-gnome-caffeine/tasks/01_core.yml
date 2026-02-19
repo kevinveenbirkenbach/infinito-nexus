@@ -1,15 +1,9 @@
-- name: Include dependency 'dev-yay'
-  include_role:
-    name: dev-yay
-  when: run_once_dev_yay is not defined
-
 - name: Install caffeine
-  kewlfft.aur.aur:
-    use: yay
-    name:
-    - caffeine-ng
-  become: true
-  become_user: aur_builder
+  include_role:
+    name: sys-aur-install
+  vars:
+    yay_install_packages:
+      - caffeine-ng
 
 - name: Create autostart directory if it doesn't exist
   file:

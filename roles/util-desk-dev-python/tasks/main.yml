@@ -1,7 +1,0 @@
-- block:
-  - name: Include dependency 'sys-pip'
-    include_role:
-      name: sys-pip
-    when: run_once_sys_pip is not defined
-  - include_tasks: utils/once/flag.yml
-  when: run_once_util_desk_dev_python is not defined

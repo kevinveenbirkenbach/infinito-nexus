@@ -1,18 +1,12 @@
-- name: Include dependency 'dev-yay'
-  include_role:
-    name: dev-yay
-  when: run_once_dev_yay is not defined
-
 - name: install AUR packages for epson
-  kewlfft.aur.aur:
-    use: yay
-    name:
-    - epson-printer-utility
-    - imagescan-plugin-networkscan
-    - epson-inkjet-printer-escpr
-    - epson-inkjet-printer-escpr2
-    - imagescan
-  become: true
-  become_user: aur_builder
+  include_role:
+    name: sys-aur-install
+  vars:
+    yay_install_packages:
+      - epson-printer-utility
+      - imagescan-plugin-networkscan
+      - epson-inkjet-printer-escpr
+      - epson-inkjet-printer-escpr2
+      - imagescan
 
 - include_tasks: utils/once/flag.yml

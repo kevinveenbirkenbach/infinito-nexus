@@ -61,10 +61,6 @@ class TestGetEntityNameFilter(unittest.TestCase):
         self.assertEqual(self.get_entity_name("web-app-nextcloud"), "nextcloud")
         self.assertEqual(self.get_entity_name("web-svc-file"), "file")
 
-    def test_entity_name_util_desk_dev(self):
-        self.assertEqual(self.get_entity_name("util-desk-dev-arduino"), "arduino")
-        self.assertEqual(self.get_entity_name("util-desk-dev-shell"), "shell")
-
     def test_entity_name_sys_bkp(self):
         self.assertEqual(
             self.get_entity_name("sys-ctl-bkp-directory-validator"),

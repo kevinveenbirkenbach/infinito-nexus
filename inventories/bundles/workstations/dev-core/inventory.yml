@@ -1,0 +1,27 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - base-devel
+      - cmake
+      - fdupes
+      - p7zip
+    infinito:
+      bundle:
+        title: "Workstation Dev Core"
+        description: >
+          Core developer tooling bundle for workstation environments.
+        logo:
+          class: "fa-solid fa-code"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    desk-git:
+      hosts:
+        workstation:
+    dev-core:
+      hosts:
+        workstation:

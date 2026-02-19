@@ -42,15 +42,23 @@ class TestMetaRolesIntegration(unittest.TestCase):
 
     def test_each_invokable_item_referenced_in_playbooks(self):
         """
-        Each invokable item (without suffix) must be looped through in at least one playbook
-        and include its corresponding include_tasks entry.
+        Each invokable item (without suffix) must be either:
+        - looped through by a dynamic include_tasks ({{ item }}-roles.yml), or
+        - referenced by a direct include_tasks to ./tasks/groups/<item>-roles.yml.
         """
         not_referenced = []
         for item in self.invokable_items:
             found = False
             loop_entry = re.compile(rf"-\s*{re.escape(item)}\b")
+            direct_include = re.compile(
+                rf'include_tasks:\s*["\']\./tasks/groups/{re.escape(item)}-roles\.yml["\']'
+            )
             for content in self.playbook_contents.values():
-                if self.include_pattern.search(content) and loop_entry.search(content):
+                dynamic_ref = self.include_pattern.search(
+                    content
+                ) and loop_entry.search(content)
+                static_ref = direct_include.search(content)
+                if dynamic_ref or static_ref:
                     found = True
                     break
             if not found:

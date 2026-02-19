@@ -1,5 +1,0 @@
-- name: install bash developer tools
-  package:
-    name:
-      - shellcheck
-    state: present

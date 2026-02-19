@@ -1,14 +1,15 @@
 - include_role:
     name: '{{ item }}'
   loop:
-  - dev-yay
+  - sys-aur
   - sys-ctl-alm-compose
 
 - name: Install MSI packages
-  kewlfft.aur.aur:
-    use: yay
-    name:
-    - msi-perkeyrgb
+  include_role:
+    name: sys-aur-install
+  vars:
+    yay_install_packages:
+      - msi-perkeyrgb
 
 - include_role:
     name: sys-service

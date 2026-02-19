@@ -14,7 +14,7 @@ The `main.yml` file in the `desk-zoom` role includes tasks for setting up video 
 
 ## Dependencies
 This role relies on:
-- **dev-yay**: Ensures that an Arch User Repository (AUR) helper is installed, necessary for installing software like Zoom which may not be available in standard repositories.
+- **sys-aur**: Ensures that an Arch User Repository (AUR) helper is installed, necessary for installing software like Zoom which may not be available in standard repositories.
 
 ## Purpose and Usage
 The `desk-zoom` role is particularly useful for professionals, educators, and anyone who needs reliable video conferencing capabilities on their Linux system. With the increasing demand for remote communication, this role provides an efficient way to set up key video conferencing tools.

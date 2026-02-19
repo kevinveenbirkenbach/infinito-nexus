@@ -23,7 +23,6 @@ class TestApplicationsIfGroupAndDeps(unittest.TestCase):
             "web-svc-file": {},
             "web-svc-asset": {},
             "web-app-dashboard": {},
-            "util-srv-corporate-identity": {},
         }
 
     def test_direct_group(self):
@@ -32,23 +31,24 @@ class TestApplicationsIfGroupAndDeps(unittest.TestCase):
         self.assertNotIn("web-svc-legal", result)
 
     def test_recursive_deps(self):
-        # html -> depends on none, but util-srv-corporate-identity pulls in web-svc-legal -> web-svc-html -> legal
-        result = self.filter(self.sample_apps, ["util-srv-corporate-identity"])
-        self.assertIn("util-srv-corporate-identity", result)
-        self.assertIn("web-svc-legal", result)  # via web-svc-legal
-        self.assertIn("web-svc-html", result)  # via web-svc-legal -> html
+        # legal -> html, asset -> file
+        result = self.filter(self.sample_apps, ["web-svc-legal", "web-svc-asset"])
+        self.assertIn("web-svc-legal", result)
+        self.assertIn("web-svc-asset", result)
+        self.assertIn("web-svc-html", result)
+        self.assertIn("web-svc-file", result)
 
     def test_real_vars_files(self):
         # load real vars to get application_id
-        corp_vars = load_vars("util-srv-corporate-identity")
+        legal_vars = load_vars("web-svc-legal")
         asset_vars = load_vars("web-svc-asset")
         # ensure IDs exist
-        self.assertIn("application_id", corp_vars)
+        self.assertIn("application_id", legal_vars)
         self.assertIn("application_id", asset_vars)
         # run filter
-        result = self.filter(self.sample_apps, ["util-srv-corporate-identity"])
+        result = self.filter(self.sample_apps, ["web-svc-legal", "web-svc-asset"])
         # ids from vars should appear
-        self.assertIn(corp_vars["application_id"], result)
+        self.assertIn(legal_vars["application_id"], result)
         self.assertIn(asset_vars["application_id"], result)
 
 

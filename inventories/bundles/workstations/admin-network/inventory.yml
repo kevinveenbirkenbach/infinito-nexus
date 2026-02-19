@@ -1,0 +1,27 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - base-devel
+      - cmake
+      - fdupes
+      - p7zip
+      - traceroute
+      - wireshark-qt
+      - wireshark-cli
+    infinito:
+      bundle:
+        title: "Workstation Admin Network"
+        description: >
+          Network administration toolkit bundle for workstation environments.
+        logo:
+          class: "fa-solid fa-network-wired"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    desk-git:
+      hosts:
+        workstation:

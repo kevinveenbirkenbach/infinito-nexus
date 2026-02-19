@@ -1,0 +1,28 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - base-devel
+      - cmake
+      - fdupes
+      - p7zip
+      - php
+    infinito:
+      bundle:
+        title: "Workstation PHP Dev"
+        description: >
+          PHP development environment bundle for workstations.
+        logo:
+          class: "fa-brands fa-php"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    desk-git:
+      hosts:
+        workstation:
+    dev-core:
+      hosts:
+        workstation:

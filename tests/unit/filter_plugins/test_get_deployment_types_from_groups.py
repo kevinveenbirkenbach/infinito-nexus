@@ -27,8 +27,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             "web-app",
             "web-svc",
             "desk",
-            "util-desk",
-            "util",  # used to create invokable roles that fall into "universal"
+            "update",
         ]
 
     @patch("module_utils.invokable._get_invokable_paths")
@@ -53,7 +52,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             get_deployment_types_from_groups(
                 [
                     "web-svc-logout",  # server
-                    "util-desk-gamemode",  # workstation
+                    "desk-nextcloud",  # workstation
                 ]
             ),
             ["server", "workstation"],
@@ -63,10 +62,9 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
     def test_universal_only(self, mock_get_invokable_paths) -> None:
         mock_get_invokable_paths.return_value = self._mock_invokable_paths()
 
-        # "util-*" is invokable (because "util" is in invokable paths),
-        # but does not match server/workstation regex => universal.
+        # "update" is invokable but does not match server/workstation regex => universal.
         self.assertEqual(
-            get_deployment_types_from_groups(["util-backup-directory-validator"]),
+            get_deployment_types_from_groups(["update"]),
             ["universal"],
         )
 
@@ -79,7 +77,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             get_deployment_types_from_groups(
                 [
                     "web-app-nextcloud",  # server
-                    "util-cleanup-docker-anonymous-volumes",  # universal
+                    "update",  # universal
                 ]
             ),
             ["server", "universal"],

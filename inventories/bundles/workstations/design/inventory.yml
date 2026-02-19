@@ -1,0 +1,27 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - gimp
+      - blender
+    SYS_AUR_PACKAGES:
+      - drawio-desktop
+    infinito:
+      bundle:
+        title: "Workstation Design"
+        description: >
+          Design toolkit bundle for creative workstation setups.
+        logo:
+          class: "fa-solid fa-palette"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    sys-package:
+      hosts:
+        workstation:
+    sys-aur-install:
+      hosts:
+        workstation:

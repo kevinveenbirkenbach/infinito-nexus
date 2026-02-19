@@ -1,0 +1,26 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - 0ad
+      - warzone2100
+      - supertuxkart
+      - gnuchess
+      - sauerbraten
+      - mari0
+    infinito:
+      bundle:
+        title: "Workstation Open Gaming"
+        description: >
+          Open source gaming package bundle for workstations.
+        logo:
+          class: "fa-solid fa-ghost"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    sys-package:
+      hosts:
+        workstation:

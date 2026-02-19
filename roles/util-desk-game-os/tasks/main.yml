@@ -1,4 +1,0 @@
-- name: Install Default Gaming Software
-  package:
-    name: "{{ gamer_default_games }}"
-    state: present

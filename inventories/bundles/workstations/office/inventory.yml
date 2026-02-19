@@ -1,0 +1,29 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - thunderbird
+      - calibre
+      - retext
+    infinito:
+      bundle:
+        title: "Workstation Office"
+        description: >
+          Office productivity bundle for workstation environments.
+        logo:
+          class: "fa-solid fa-briefcase"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    desk-libreoffice:
+      hosts:
+        workstation:
+    desk-chromium:
+      hosts:
+        workstation:
+    desk-firefox:
+      hosts:
+        workstation:

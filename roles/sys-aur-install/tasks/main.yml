@@ -1,0 +1,15 @@
+# run_once_sys_aur_install: deactivated
+
+- name: Include dependency 'sys-aur'
+  include_role:
+    name: sys-aur
+  when: run_once_sys_aur is not defined
+
+- name: Install or upgrade AUR packages via yay
+  kewlfft.aur.aur:
+    use: "{{ yay_install_use }}"
+    name: "{{ (yay_install_packages | length > 0) | ternary(yay_install_packages, omit) }}"
+    upgrade: "{{ yay_install_upgrade }}"
+    aur_only: "{{ yay_install_aur_only }}"
+  become: true
+  become_user: "{{ yay_install_become_user }}"

@@ -1,7 +1,0 @@
-- name: install administrator network analyze tools
-  package:
-    name:
-      - traceroute
-      - wireshark-qt
-      - wireshark-cli
-    state: present

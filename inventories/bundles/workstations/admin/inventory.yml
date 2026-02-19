@@ -1,0 +1,24 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - base-devel
+      - cmake
+      - fdupes
+      - p7zip
+    infinito:
+      bundle:
+        title: "Workstation Admin"
+        description: >
+          Core administration toolkit bundle for workstation environments.
+        logo:
+          class: "fa-solid fa-screwdriver-wrench"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    desk-git:
+      hosts:
+        workstation:

@@ -81,26 +81,6 @@ roles:
     description: "Desktop environment roles & apps (GNOME, browser, LibreOffice, etc.)"
     icon: "fas fa-desktop"
     invokable: true
-  util:
-    title: "Utilities"
-    description: "General-purpose utility roles for both desktop and server environments—providing helper functions, customizations, and optimizations for applications, workflows, and infrastructure."
-    icon: "fas fa-tools"
-    invokable: false
-    desk:
-      title: "Desktop Utilities"
-      description: "Utility roles for configuring and optimizing desktop applications and workflows—covering browsers, design tools, development environments, office suites, and gaming setups."
-      icon: "fas fa-tools"
-      invokable: true
-    srv:
-      title: "Server Utilities"
-      description: "Utility roles for server-side configuration and management—covering corporate identity provisioning, network helpers, and other service-oriented toolkits."
-      icon: "fas fa-cogs"
-      invokable: true
-    dev:
-      title: "Developer Utilities"
-      description: "Developer-centric server utilities and admin toolkits."
-      icon: "fas fa-code"
-      invokable: false
   web:
     title: "Web Infrastructure"
     description: "Roles for managing web infrastructure—covering static content services and deployable web applications."

@@ -1,5 +1,2 @@
-- name: Install additional system packages from inventory
-  ansible.builtin.package:
-    name: "{{ SYS_PACKAGES }}"
-    state: present
-  when: SYS_PACKAGES | length > 0
+- include_tasks: 01_core.yml
+  when: run_once_sys_package is not defined

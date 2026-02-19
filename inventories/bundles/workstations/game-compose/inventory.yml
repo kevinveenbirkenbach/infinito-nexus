@@ -1,0 +1,38 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - steam
+      - lutris
+      - gamemode
+      - mangohud
+      - lib32-mangohud
+      - wine
+      - wine-gecko
+      - wine-mono
+      - winetricks
+      - 0ad
+      - warzone2100
+      - supertuxkart
+      - gnuchess
+      - sauerbraten
+      - mari0
+    infinito:
+      bundle:
+        title: "Workstation Gaming Suite"
+        description: >
+          Composed gaming setup bundle for workstation environments.
+        logo:
+          class: "fa-solid fa-gamepad"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    desk-retroarch:
+      hosts:
+        workstation:
+    sys-package:
+      hosts:
+        workstation:

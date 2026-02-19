@@ -1,16 +1,11 @@
 - block:
-    - name: Include dependency 'dev-yay'
-      include_role:
-        name: dev-yay
-      when: run_once_dev_yay is not defined
 
     - name: install spotify
-      kewlfft.aur.aur:
-        use: yay
-        name:
-        - spotify
-      become: true
-      become_user: aur_builder
-    
+      include_role:
+        name: sys-aur-install
+      vars:
+        yay_install_packages:
+          - spotify
+
     - include_tasks: utils/once/flag.yml
   when: run_once_desk_spotify is not defined

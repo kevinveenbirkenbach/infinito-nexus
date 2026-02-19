@@ -34,6 +34,15 @@ all:
       hosts:
         server:
 
+    web-svc-legal:
+      hosts:
+        server:
+    web-svc-asset:
+      hosts:
+        server:
+    web-app-dashboard:
+      hosts:
+        server:
     svc-prx-openresty:
       hosts:
         server:

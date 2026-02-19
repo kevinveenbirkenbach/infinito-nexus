@@ -1,0 +1,27 @@
+all:
+  vars:
+    SYS_PACKAGES:
+      - base-devel
+      - cmake
+      - fdupes
+      - p7zip
+    infinito:
+      bundle:
+        title: "Workstation Python Dev"
+        description: >
+          Python development environment bundle for workstations.
+        logo:
+          class: "fa-brands fa-python"
+        tags: []
+        categories: []
+
+  hosts:
+    workstation:
+
+  children:
+    desk-git:
+      hosts:
+        workstation:
+    dev-python:
+      hosts:
+        workstation:

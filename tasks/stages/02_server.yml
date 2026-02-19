@@ -17,7 +17,6 @@
   loop:
     - web-svc   # 1. Load web server services
     - web-app   # 2. Load (UI) web applications
-    - util-srv  # 3. Load web server collection roles
     - web-opt   # 4. Load optimation scrips last
   loop_control:
     label: "{{ item }}-roles.yml"
