@@ -8,6 +8,7 @@
           'Archlinux': 'openssh',
           'Fedora': 'openssh-clients',
           'RedHat': 'openssh-clients',
+          'CentOS': 'openssh-clients',
           'Alpine': 'openssh-client'
         }).get(ansible_distribution, 'openssh-client')
       }}

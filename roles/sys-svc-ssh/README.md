@@ -27,7 +27,7 @@ The role installs the correct SSH client package for the following platforms:
 
 - Debian / Ubuntu → `openssh-client`
 - Arch Linux → `openssh`
-- Fedora / Red Hat → `openssh-clients`
+- Fedora / Red Hat / CentOS → `openssh-clients`
 - Alpine Linux → `openssh-client`
 
 ## Features
