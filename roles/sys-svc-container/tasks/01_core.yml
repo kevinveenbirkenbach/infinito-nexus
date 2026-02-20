@@ -6,7 +6,7 @@
           ['docker', 'docker-compose', 'docker-buildx', 'python-docker', 'python-requests']
           if ansible_os_family == 'Archlinux' else
 
-          ['docker.io', 'docker-compose-plugin', 'docker-buildx-plugin', 'python3-docker', 'python3-requests']
+          ['docker.io', 'docker-compose-plugin', 'docker-buildx', 'python3-docker', 'python3-requests']
           if ansible_os_family == 'Debian' else
 
           ['docker', 'docker-compose-plugin', 'docker-buildx', 'python3-docker', 'python3-requests']
