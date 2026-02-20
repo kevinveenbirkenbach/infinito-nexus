@@ -57,6 +57,21 @@ ran=0
 failed=0
 durations=()  # store "distro=seconds" lines
 
+sync_ci_image_for_distro() {
+  local owner tag
+
+  owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
+  tag="${INFINITO_IMAGE_TAG:-latest}"
+
+  # Keep local/dev workflows untouched; only adjust image when CI owner context exists.
+  if [[ -z "${owner}" ]]; then
+    return 0
+  fi
+
+  export INFINITO_IMAGE="ghcr.io/${owner}/infinito-${INFINITO_DISTRO}:${tag}"
+  echo ">>> CI image synced: ${INFINITO_IMAGE}"
+}
+
 for distro in "${distro_arr[@]}"; do
   now="$(date +%s)"
   remaining=""
@@ -83,6 +98,7 @@ for distro in "${distro_arr[@]}"; do
   fi
 
   export INFINITO_DISTRO="${distro}"
+  sync_ci_image_for_distro
 
   distro_start="$(date +%s)"
 
