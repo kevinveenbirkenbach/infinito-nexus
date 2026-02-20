@@ -71,7 +71,7 @@ def generate_ci_mirrors_file(compose, *, inventory_dir: str) -> str:
         "-lc",
         "set -euo pipefail; "
         f"mkdir -p {shlex.quote(inv_root)}; "
-        f"python3 -m cli.mirror.resolver "
+        '"${PYTHON:-python3}" -m cli.mirror.resolver '
         f"--repo-root {shlex.quote(repo_root)} "
         f"--ghcr-namespace {shlex.quote(ghcr_namespace)} "
         f"--ghcr-prefix {shlex.quote(ghcr_prefix)} "
