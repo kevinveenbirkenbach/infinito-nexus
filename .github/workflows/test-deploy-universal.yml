@@ -84,12 +84,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y jq
 
-      - name: Start stack
-        shell: bash
-        run: |
-          set -euo pipefail
-          make up
-
       - name: Deploy app
         shell: bash
         run: |

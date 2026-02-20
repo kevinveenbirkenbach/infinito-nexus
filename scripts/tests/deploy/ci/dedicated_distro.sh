@@ -114,9 +114,10 @@ cleanup() {
 trap cleanup EXIT
 
 echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
+# Always reconcile the stack to the requested distro.
+# This avoids reusing a pre-started stack with a different INFINITO_DISTRO.
 "${PYTHON}" -m cli.deploy.development up \
-  --distro "${INFINITO_DISTRO}" \
-  --when-down
+  --distro "${INFINITO_DISTRO}"
 
 deploy_args=(
   --distro "${INFINITO_DISTRO}"

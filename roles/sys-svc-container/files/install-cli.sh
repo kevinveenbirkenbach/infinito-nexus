@@ -19,11 +19,20 @@ elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]
     gnupg \
     lsb-release
   install -m 0755 -d /etc/apt/keyrings
-  curl -fsSL "https://download.docker.com/linux/${ID}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  chmod a+r /etc/apt/keyrings/docker.gpg
+  rm -f /etc/apt/keyrings/docker.gpg
+  curl -fsSL "https://download.docker.com/linux/${ID}/gpg" -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
+
+  # Avoid duplicate Docker repo entries with different signed-by paths (gpg vs asc).
+  if compgen -G "/etc/apt/sources.list.d/*.list" > /dev/null; then
+    while IFS= read -r -d '' file; do
+      sed -i "\|download.docker.com/linux/${ID}|d" "${file}"
+      [[ -s "${file}" ]] || rm -f "${file}"
+    done < <(find /etc/apt/sources.list.d -maxdepth 1 -type f -name "*.list" -print0)
+  fi
   
   # shellcheck disable=SC1091
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${ID} $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" \
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${ID} $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" \
     > /etc/apt/sources.list.d/docker.list
   apt-get update
   apt-get install -y --no-install-recommends docker-ce-cli
