@@ -1,0 +1,17 @@
+- name: Configure Docker yum repository
+  ansible.builtin.get_url:
+    url: "https://download.docker.com/linux/{{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_distribution] }}/docker-ce.repo"
+    dest: /etc/yum.repos.d/docker-ce.repo
+    mode: "0644"
+
+- name: Install python3-pip for Docker Ansible modules on RedHat family
+  ansible.builtin.package:
+    name: python3-pip
+    state: present
+
+- name: Install Docker Python SDK dependencies on RedHat family
+  ansible.builtin.pip:
+    name:
+      - docker
+      - requests
+    state: present

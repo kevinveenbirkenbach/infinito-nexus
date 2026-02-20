@@ -6,3 +6,68 @@ SYS_SVC_DOCKER_AUTOMTU_TARGETS:
   - registry-1.docker.io
   - github.com
   - 1.1.1.1
+
+SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION:
+  Debian: debian
+  Ubuntu: ubuntu
+  Fedora: fedora
+  CentOS: centos
+  "CentOS Stream": centos
+  RedHat: rhel
+
+SYS_SVC_CONTAINER_DPKG_ARCH_BY_ANSIBLE_ARCH:
+  x86_64: amd64
+  aarch64: arm64
+  armv7l: armhf
+  armv6l: armhf
+  ppc64le: ppc64el
+  s390x: s390x
+  riscv64: riscv64
+
+SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION:
+  Archlinux:
+    - docker
+    - docker-compose
+    - docker-buildx
+    - python-docker
+    - python-requests
+  Debian:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose-plugin
+    - docker-buildx-plugin
+    - python3-docker
+    - python3-requests
+  Ubuntu:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose-plugin
+    - docker-buildx-plugin
+    - python3-docker
+    - python3-requests
+  Fedora:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose-plugin
+    - docker-buildx-plugin
+  CentOS:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose-plugin
+    - docker-buildx-plugin
+  "CentOS Stream":
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose-plugin
+    - docker-buildx-plugin
+  RedHat:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-compose-plugin
+    - docker-buildx-plugin

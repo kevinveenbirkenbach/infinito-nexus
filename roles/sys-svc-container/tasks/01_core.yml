@@ -1,20 +1,31 @@
-- name: Install Docker engine, compose, buildx and python dependencies
-  ansible.builtin.package:
-    name: >-
+- name: Resolve Docker package list for current distribution
+  ansible.builtin.set_fact:
+    sys_svc_container_packages: >-
       {{
-        (
-          ['docker', 'docker-compose', 'docker-buildx', 'python-docker', 'python-requests']
-          if ansible_os_family == 'Archlinux' else
-
-          ['docker.io', 'docker-compose-plugin', 'docker-buildx', 'python3-docker', 'python3-requests']
-          if ansible_os_family == 'Debian' else
-
-          ['docker', 'docker-compose-plugin', 'docker-buildx', 'python3-docker', 'python3-requests']
-          if ansible_distribution in ['Fedora', 'CentOS', 'CentOS Stream'] else
-
-          fail('Unsupported distribution for Docker role: ' ~ ansible_distribution ~ ' (' ~ ansible_os_family ~ ')')
-        )
+        SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION[ansible_distribution]
+        if ansible_distribution in SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION
+        else []
       }}
+
+- name: Fail for unsupported distribution in Docker role
+  ansible.builtin.assert:
+    that:
+      - (sys_svc_container_packages | length) > 0
+    fail_msg: >-
+      Unsupported distribution for Docker role: {{ ansible_distribution }}
+      ({{ ansible_os_family }}).
+
+- name: Setup Docker repository on Debian and Ubuntu
+  include_tasks: 01a_debian_ubuntu.yml
+  when: ansible_distribution in ['Debian', 'Ubuntu']
+
+- name: Setup Docker repository and SDK prerequisites on RedHat family
+  include_tasks: 01b_redhat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Install Docker packages
+  ansible.builtin.package:
+    name: "{{ sys_svc_container_packages }}"
     state: present
   notify: container manager restart
 
