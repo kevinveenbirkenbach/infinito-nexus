@@ -9,7 +9,7 @@ OWNER="${OWNER:-${GITHUB_REPOSITORY_OWNER:-}}"
 REGISTRY="${REGISTRY:-ghcr.io}"
 REPO_PREFIX="${REPO_PREFIX:-infinito}"
 DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
-DEFAULT_DISTRO="${DEFAULT_DISTRO:-arch}"
+DEFAULT_DISTRO="${DEFAULT_DISTRO:-debian}"
 
 # VERSION_TAG must be like "v1.2.3"
 VERSION_TAG="${VERSION_TAG:-${GITHUB_REF_NAME:-}}"
