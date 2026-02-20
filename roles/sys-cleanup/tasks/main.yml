@@ -7,7 +7,6 @@
     echo "=== [cleanup] package manager caches ==="
     if command -v apt-get >/dev/null 2>&1; then
       apt-get clean || true
-      rm -rf /var/lib/apt/lists/* || true
     fi
 
     if command -v pacman >/dev/null 2>&1; then
