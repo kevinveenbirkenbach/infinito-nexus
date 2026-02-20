@@ -18,12 +18,17 @@
         - glib2
         - gsettings-desktop-schemas
         - gnome-shell
-      CentOS:
+      RedHat:
         - glib2
         - gsettings-desktop-schemas
         - gnome-shell
   ansible.builtin.package:
-    name: "{{ gnome_schema_packages[ansible_distribution] | default(gnome_schema_packages[ansible_os_family]) }}"
+    name: >-
+      {{
+        gnome_schema_packages[ansible_distribution]
+        | default(gnome_schema_packages[ansible_os_family])
+        | default(gnome_schema_packages['RedHat'])
+      }}
     state: present
 
 - name: Include dependencies
