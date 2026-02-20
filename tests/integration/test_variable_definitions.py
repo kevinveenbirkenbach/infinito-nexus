@@ -249,6 +249,9 @@ class TestVariableDefinitions(unittest.TestCase):
                                 "group_names",
                                 "ansible_processor_vcpus",
                                 "ansible_service_mgr",
+                                "ansible_distribution_release",
+                                "ansible_distribution",
+                                "ansible_os_family",
                             ):
                                 continue
 
@@ -288,6 +291,9 @@ class TestVariableDefinitions(unittest.TestCase):
                                     "omit",
                                     "group_names",
                                     "ansible_processor_vcpus",
+                                    "ansible_distribution_release",
+                                    "ansible_distribution",
+                                    "ansible_os_family",
                                     "not",
                                     "and",
                                     "or",
