@@ -35,7 +35,6 @@
     mode: '0644'
     owner: root
     group: root
-  notify: sshd restart
 
 - name: "embed user routines for {{ role_path | basename }}"
   include_role:

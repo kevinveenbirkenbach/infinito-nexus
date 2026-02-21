@@ -49,6 +49,18 @@
 - name: Restart and enable docker service
   meta: flush_handlers
 
+- name: Ensure docker service is enabled and running
+  ansible.builtin.service:
+    name: docker.service
+    state: started
+    enabled: true
+
+- name: Wait for docker socket to be available
+  ansible.builtin.wait_for:
+    path: /var/run/docker.sock
+    state: present
+    timeout: 60
+
 - name: "Overwrite when DOCKER_IN_CONTAINER is true"
   block: 
 
