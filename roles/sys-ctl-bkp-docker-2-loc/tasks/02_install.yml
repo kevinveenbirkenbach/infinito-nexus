@@ -6,7 +6,7 @@
     global_install: true
 
 - name: Assert required baudolo commands are available
-  ansible.builtin.command: "which {{ cmd_name }}"
+  ansible.builtin.shell: "command -v {{ cmd_name }}"
   loop:
     - baudolo
     - baudolo-seed
@@ -15,4 +15,6 @@
   register: baudolo_cmd_check
   changed_when: false
   failed_when: baudolo_cmd_check.rc != 0
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   when: MODE_ASSERT | bool
