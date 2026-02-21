@@ -6,6 +6,11 @@
     package_name: automtu
     global_install: true
 
+- name: Ensure 'ip' command is available for automtu
+  ansible.builtin.package:
+    name: "{{ SYS_SVC_CONTAINER_IPROUTE_PACKAGE_BY_OS_FAMILY.get(ansible_os_family, 'iproute2') }}"
+    state: present
+
 - name: Detect safe Docker MTU
   ansible.builtin.command:
     argv:

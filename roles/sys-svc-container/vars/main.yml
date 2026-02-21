@@ -24,6 +24,11 @@ SYS_SVC_CONTAINER_DPKG_ARCH_BY_ANSIBLE_ARCH:
   s390x: s390x
   riscv64: riscv64
 
+SYS_SVC_CONTAINER_IPROUTE_PACKAGE_BY_OS_FAMILY:
+  Debian: iproute2
+  RedHat: iproute
+  Archlinux: iproute2
+
 SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION:
   Archlinux:
     - docker
