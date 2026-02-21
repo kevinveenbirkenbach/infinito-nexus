@@ -32,6 +32,11 @@ RUN if [ -f /etc/nix/nix.conf ]; then \
 COPY . ${INFINITO_SRC_DIR}
 
 # ------------------------------------------------------------
+# Ensure Python 3.11+ is the default python/pip on supported distros
+# ------------------------------------------------------------
+RUN /bin/bash ${INFINITO_SRC_DIR}/roles/dev-python/files/install.sh
+
+# ------------------------------------------------------------
 # Install Docker CLI (client only) - distro aware
 # ------------------------------------------------------------
 # hadolint ignore=DL3008,DL3041

@@ -17,8 +17,16 @@ To simplify and standardize the provisioning of Python-ready environments for de
 ## Features
 
 - **Installs Python and Pip:** Ensures the interpreter and package manager are available.
+- **Prefers Python 3.11+:** Installs Python 3.11+ where available and makes it the default via `/usr/local/bin/python3` and `/usr/local/bin/pip3`.
 - **Persona Integration:** Extends `dev-core` with Python-specific tools.
 - **Foundation for Further Stacks:** Ideal starting point for Flask, Django, scientific computing, and automation.
+
+Supported distro families in the installer script:
+- Arch Linux
+- Debian
+- Ubuntu
+- Fedora
+- CentOS / RHEL
 
 ## Customization
 

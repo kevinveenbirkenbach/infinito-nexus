@@ -7,7 +7,7 @@ name = "infinito-nexus"
 version = "4.1.0"
 description = "Infinito.Nexus"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = { file = "LICENSE.md" }
 
 dependencies = [

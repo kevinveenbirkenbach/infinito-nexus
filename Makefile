@@ -97,7 +97,7 @@ mig: list tree
 # ------------------------------------------------------------
 # Docker build targets (delegated to scripts/build)
 # ------------------------------------------------------------
-build:
+build: dockerignore
 	@bash scripts/build/image.sh
 
 build-missing:

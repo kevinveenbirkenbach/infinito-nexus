@@ -5,19 +5,24 @@
     name: sys-pip
   when: run_once_sys_pip is not defined
 
-- name: Check whether pip3 supports --break-system-packages
+- name: Probe whether pip3 accepts --break-system-packages
   ansible.builtin.command:
     argv:
       - pip3
       - install
+      - --break-system-packages
       - --help
-  register: sys_pip_install_help
+  register: sys_pip_install_break_system_packages_probe
   changed_when: false
+  failed_when: false
+  become: "{{ true if global_install | bool else false }}"
+  environment:
+    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   when: global_install | bool
 
 - name: Set fact for --break-system-packages support
   ansible.builtin.set_fact:
-    sys_pip_install_supports_break_system_packages: "{{ '--break-system-packages' in sys_pip_install_help.stdout }}"
+    sys_pip_install_supports_break_system_packages: "{{ (sys_pip_install_break_system_packages_probe.rc | int) == 0 }}"
   changed_when: false
   when: global_install | bool
 

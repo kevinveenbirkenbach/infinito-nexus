@@ -1,7 +1,14 @@
 - block:
+
   - name: Include dependency 'sys-pip'
     include_role:
       name: sys-pip
     when: run_once_sys_pip is not defined
+
+  - name: Install and prefer Python 3.11+ as default
+    ansible.builtin.script: "{{ role_path }}/files/install.sh"
+    become: true
+
   - include_tasks: utils/once/flag.yml
+
   when: run_once_dev_python is not defined

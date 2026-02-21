@@ -15,3 +15,4 @@ build/*
 .ruff_cache
 collections/
 env.development
+logs/
