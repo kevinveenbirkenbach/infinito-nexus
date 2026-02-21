@@ -8,16 +8,16 @@
     fail_msg: >
       systemd is not available. This role requires systemd (service manager = {{ ansible_service_mgr }}).
 
-- name: Assert systemd is PID 1
-  ansible.builtin.command: "ps -p 1 -o comm="
-  register: pid1
-  changed_when: false
+- name: Read PID 1 process name
+  ansible.builtin.slurp:
+    src: /proc/1/comm
+  register: pid1_comm
 
 - name: Fail if PID1 is not systemd
   ansible.builtin.assert:
     that:
-      - pid1.stdout.strip() == "systemd"
-    fail_msg: "PID 1 is not systemd (PID1={{ pid1.stdout.strip() }}). Docker service management will hang."
+      - pid1_comm.content | b64decode | trim == "systemd"
+    fail_msg: "PID 1 is not systemd (PID1={{ pid1_comm.content | b64decode | trim }}). Docker service management will hang."
 
 - name: Check docker socket
   ansible.builtin.stat:
