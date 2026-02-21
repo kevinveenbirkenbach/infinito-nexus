@@ -29,6 +29,11 @@ SYS_SVC_CONTAINER_IPROUTE_PACKAGE_BY_OS_FAMILY:
   RedHat: iproute
   Archlinux: iproute2
 
+SYS_SVC_CONTAINER_PING_PACKAGE_BY_OS_FAMILY:
+  Debian: iputils-ping
+  RedHat: iputils
+  Archlinux: iputils
+
 SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION:
   Archlinux:
     - docker
