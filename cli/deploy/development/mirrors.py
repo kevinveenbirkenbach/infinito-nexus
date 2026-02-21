@@ -67,7 +67,7 @@ def generate_ci_mirrors_file(compose, *, inventory_dir: str) -> str:
     repo_root = str(CONTAINER_REPO_ROOT)
 
     cmd = [
-        "sh",
+        "bash",
         "-lc",
         "set -euo pipefail; "
         f"mkdir -p {shlex.quote(inv_root)}; "

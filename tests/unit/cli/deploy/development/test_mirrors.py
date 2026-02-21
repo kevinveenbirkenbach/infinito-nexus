@@ -25,7 +25,7 @@ class TestGenerateCiMirrorsFile(unittest.TestCase):
         compose.exec.assert_called_once()
 
         called_cmd = compose.exec.call_args.args[0]
-        self.assertEqual(called_cmd[0:2], ["sh", "-lc"])
+        self.assertEqual(called_cmd[0:2], ["bash", "-lc"])
         self.assertIn('"${PYTHON:-python3}" -m cli.mirror.resolver', called_cmd[2])
         self.assertNotIn("python3 -m cli.mirror.resolver", called_cmd[2])
 

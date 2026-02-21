@@ -14,7 +14,7 @@ def detect_storage_constrained(compose: Compose, *, threshold_gib: int = 100) ->
     threshold_bytes = threshold_gib * 1024 * 1024 * 1024
 
     cmd = [
-        "sh",
+        "bash",
         "-lc",
         r"""
 set -euo pipefail

@@ -243,7 +243,7 @@ def run_in_container(
             'ls -la "$(dirname "$p")"; '
             'head -n 3 "$p" || true'
         )
-        docker_exec(container_name, ["sh", "-lc", mock_cmd], check=True)
+        docker_exec(container_name, ["bash", "-lc", mock_cmd], check=True)
 
         # 2) Ensure vault password file exists
         print(">>> Ensuring CI vault password file exists...")

@@ -59,9 +59,9 @@ def _expr_contains_pipefail(node: ast.AST, pipefail_vars: Set[str]) -> bool:
         return _expr_contains_pipefail(node.value, pipefail_vars)
 
     if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
-        return _expr_contains_pipefail(node.left, pipefail_vars) or _expr_contains_pipefail(
-            node.right, pipefail_vars
-        )
+        return _expr_contains_pipefail(
+            node.left, pipefail_vars
+        ) or _expr_contains_pipefail(node.right, pipefail_vars)
 
     if isinstance(node, (ast.List, ast.Tuple)):
         return any(_expr_contains_pipefail(v, pipefail_vars) for v in node.elts)
