@@ -3,8 +3,6 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    owner: "{{ lookup('nginx','user') }}"
-    group: "{{ lookup('nginx','user') }}"
     mode: "{{ item.mode }}"
     recurse: true
   loop: "{{ lookup('nginx','directories.ensure') }}"

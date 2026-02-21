@@ -178,7 +178,6 @@ class LookupModule(LookupBase):
                 "ensure": ensure,
                 "ensure_paths": [d["path"] for d in ensure],
             },
-            "user": "http",
         }
 
         if domain:

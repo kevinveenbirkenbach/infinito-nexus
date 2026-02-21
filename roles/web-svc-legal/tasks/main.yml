@@ -3,5 +3,3 @@
   template:
     src:        "imprint.html.j2" 
     dest:       "{{ [ lookup('nginx','directories.data.html'), 'imprint.html' ] | path_join }}"
-    owner:      "{{ lookup('nginx','user') }}"
-    group:      "{{ lookup('nginx','user') }}"

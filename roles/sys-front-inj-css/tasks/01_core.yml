@@ -24,8 +24,6 @@
   template:
     src:    "{{ ['css', css_file ~ '.j2'] | path_join }}"
     dest:   "{{ [cdn_paths_all.shared.css, css_file] | path_join }}"
-    owner:  "{{ lookup('nginx','user') }}"
-    group:  "{{ lookup('nginx','user') }}"
     mode:   '0644'
   loop: "{{ CSS_FILES }}"
   loop_control:

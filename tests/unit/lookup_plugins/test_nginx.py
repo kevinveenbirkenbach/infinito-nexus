@@ -171,6 +171,5 @@ class TestNginxPathsLookup(unittest.TestCase):
                     ["files.domain", "example.com", "extra"], variables=self.variables
                 )
 
-
 if __name__ == "__main__":
     unittest.main()

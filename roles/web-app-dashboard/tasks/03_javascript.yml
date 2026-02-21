@@ -8,8 +8,6 @@
   file:
     path: "{{ DASHBOARD_JS_SERVER_DIR }}"
     state: directory
-    owner: "{{ lookup('nginx','user') }}"
-    group: "{{ lookup('nginx','user') }}"
     mode: '0755'
 
 - name: "Include file specific JS Routines"

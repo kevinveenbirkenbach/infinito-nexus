@@ -18,6 +18,4 @@
   copy:
     content:  "{{ lookup('template', app_style_src) }}"
     dest:     "{{ css_app_dst }}"
-    owner:    "{{ lookup('nginx','user') }}"
-    group:    "{{ lookup('nginx','user') }}"
     mode:     '0644'
