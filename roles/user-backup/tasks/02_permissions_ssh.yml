@@ -33,6 +33,14 @@
           )
       }}
 
+- name: "Ensure backup home directory exists"
+  ansible.builtin.file:
+    path: "{{ USER_BACKUP_HOME }}"
+    state: directory
+    owner: backup
+    group: backup
+    mode: "0700"
+
 - name: "create {{ USER_BACKUP_WRAPPER_DST }}"
   ansible.builtin.template:
     src: "ssh-wrapper.sh.j2"
