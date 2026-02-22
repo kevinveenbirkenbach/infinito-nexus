@@ -67,6 +67,27 @@ find_highest_rpm_python_pkg() {
     | tail -n1
 }
 
+rpm_pkg_exists() {
+  local pm="$1"
+  local pkg="$2"
+
+  run_privileged "${pm}" -q list --available "${pkg}" >/dev/null 2>&1 \
+    || run_privileged "${pm}" -q list installed "${pkg}" >/dev/null 2>&1
+}
+
+install_versioned_rpm_python_and_pip() {
+  local pm="$1"
+  local py_pkg="$2"
+  local pip_pkg="${py_pkg}-pip"
+
+  run_privileged "${pm}" -y install "${py_pkg}" || true
+  if rpm_pkg_exists "${pm}" "${pip_pkg}"; then
+    run_privileged "${pm}" -y install "${pip_pkg}" || true
+  else
+    log "Skipping unavailable package ${pip_pkg}; using generic python3-pip fallback if present."
+  fi
+}
+
 install_python_packages() {
   need_privileged_or_fail
 
@@ -98,8 +119,7 @@ install_python_packages() {
       run_privileged dnf -y install python3 python3-pip
       dnf_best_pkg="$(find_highest_rpm_python_pkg dnf || true)"
       if [[ "${dnf_best_pkg}" =~ ^python3\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 11 )); then
-        run_privileged dnf -y install "${dnf_best_pkg}" || true
-        run_privileged dnf -y install "${dnf_best_pkg}-pip" || true
+        install_versioned_rpm_python_and_pip dnf "${dnf_best_pkg}"
       fi
       run_privileged dnf -y clean all || true
       run_privileged rm -rf /var/cache/dnf || true
@@ -116,8 +136,7 @@ install_python_packages() {
       run_privileged "${PM}" -y install python3 python3-pip || true
       rpm_best_pkg="$(find_highest_rpm_python_pkg "${PM}" || true)"
       if [[ "${rpm_best_pkg}" =~ ^python3\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 11 )); then
-        run_privileged "${PM}" -y install "${rpm_best_pkg}" || true
-        run_privileged "${PM}" -y install "${rpm_best_pkg}-pip" || true
+        install_versioned_rpm_python_and_pip "${PM}" "${rpm_best_pkg}"
       fi
       run_privileged "${PM}" -y clean all || true
       run_privileged rm -rf "/var/cache/${PM}" || true
@@ -135,8 +154,7 @@ install_python_packages() {
         run_privileged "${PM}" -y install python3 python3-pip || true
         rpm_like_best_pkg="$(find_highest_rpm_python_pkg "${PM}" || true)"
         if [[ "${rpm_like_best_pkg}" =~ ^python3\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 11 )); then
-          run_privileged "${PM}" -y install "${rpm_like_best_pkg}" || true
-          run_privileged "${PM}" -y install "${rpm_like_best_pkg}-pip" || true
+          install_versioned_rpm_python_and_pip "${PM}" "${rpm_like_best_pkg}"
         fi
         run_privileged "${PM}" -y clean all || true
         run_privileged rm -rf "/var/cache/${PM}" || true
@@ -157,6 +175,12 @@ raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
 PY
 }
 
+python_has_pip_module() {
+  local bin="$1"
+  command -v "${bin}" >/dev/null 2>&1 || return 1
+  "${bin}" -m pip --version >/dev/null 2>&1
+}
+
 python_minor_version() {
   local bin="$1"
   "${bin}" - <<'PY' 2>/dev/null
@@ -166,7 +190,9 @@ PY
 }
 
 pick_python_bin() {
-  local bin name version best_version="" best_bin=""
+  local bin name version
+  local best_version="" best_bin=""
+  local best_pip_version="" best_pip_bin=""
   for bin in \
     /usr/local/bin/python3.* \
     /usr/bin/python3.* \
@@ -187,7 +213,17 @@ pick_python_bin() {
       best_version="${version}"
       best_bin="${bin}"
     fi
+    if python_has_pip_module "${bin}"; then
+      if [[ -z "${best_pip_version}" ]] || [[ "$(printf '%s\n%s\n' "${best_pip_version}" "${version}" | sort -V | tail -n1)" == "${version}" ]]; then
+        best_pip_version="${version}"
+        best_pip_bin="${bin}"
+      fi
+    fi
   done
+  if [[ -n "${best_pip_bin}" ]]; then
+    printf '%s\n' "${best_pip_bin}"
+    return 0
+  fi
   [[ -n "${best_bin}" ]] || return 1
   printf '%s\n' "${best_bin}"
 }
