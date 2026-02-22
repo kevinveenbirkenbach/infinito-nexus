@@ -146,6 +146,8 @@
   become: true
   ansible.builtin.command:
     argv:
+      - /usr/bin/env
+      - sh
       - "{{ BIN_CA_TRUST }}"
   environment:
     CA_TRUST_CERT: "{{ CA_ROOT.cert_host }}"

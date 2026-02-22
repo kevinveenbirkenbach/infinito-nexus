@@ -12,7 +12,7 @@ DIR_BIN:                  "/usr/bin"
 BIN_COMPOSE:              "{{ [ DIR_BIN, 'compose' ] | path_join }}"
 BIN_CONTAINER:            "{{ [ DIR_BIN, 'container' ] | path_join }}"
 BIN_LOCK:                 "{{ [ DIR_BIN, 'lock' ] | path_join }}" 
-BIN_CA_TRUST:             "{{ [ DIR_BIN, 'ca-trust' ] | path_join }}"
+BIN_CA_TRUST:             "{{ [ DIR_BIN, 'ca-trust-wrapper' ] | path_join }}"
 BIN_CA_INJECT:            "{{ [ DIR_BIN, 'ca-inject' ] | path_join }}"
 
 # Infinito Credential files
