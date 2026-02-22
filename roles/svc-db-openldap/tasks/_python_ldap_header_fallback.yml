@@ -1,0 +1,52 @@
+- name: Resolve active Python major.minor for header package candidates
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_python_interpreter }}"
+      - -c
+      - import sys; print(f'{sys.version_info[0]}.{sys.version_info[1]}')
+  register: openldap_python_major_minor
+  changed_when: false
+
+- name: Resolve Python header package templates and version tokens
+  ansible.builtin.set_fact:
+    openldap_python_major_minor_value: "{{ openldap_python_major_minor.stdout | trim }}"
+    openldap_python_major_minor_nodot: "{{ (openldap_python_major_minor.stdout | trim) | replace('.', '') }}"
+    openldap_python_header_package_templates: >-
+      {{
+        OPENLDAP_PYTHON_HEADER_PACKAGE_TEMPLATES_BY_OS_FAMILY.get(ansible_os_family, [])
+      }}
+  changed_when: false
+
+- name: Build Python header package candidates for current OS family
+  ansible.builtin.set_fact:
+    openldap_python_header_package_candidates: >-
+      {{
+        openldap_python_header_package_templates
+        | map('replace', '__PY_MM_NODOT__', openldap_python_major_minor_nodot)
+        | map('replace', '__PY_MM__', openldap_python_major_minor_value)
+        | unique
+        | list
+      }}
+  changed_when: false
+
+- name: Attempt to install Python header package candidates
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ openldap_python_header_package_candidates }}"
+  failed_when: false
+  when: openldap_python_header_package_candidates | length > 0
+
+- name: Re-check whether Python.h exists for active interpreter
+  ansible.builtin.stat:
+    path: "{{ openldap_python_header_path }}"
+  register: openldap_python_header_after
+
+- name: Assert Python.h exists for active interpreter
+  ansible.builtin.assert:
+    that:
+      - openldap_python_header_after.stat.exists
+    fail_msg: >-
+      Missing Python headers for {{ ansible_python_interpreter }}.
+      Expected file: {{ openldap_python_header_path }}.
+      Tried candidates: {{ openldap_python_header_package_candidates | join(', ') }}.

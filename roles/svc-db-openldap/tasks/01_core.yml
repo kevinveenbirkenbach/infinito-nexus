@@ -111,6 +111,13 @@
 - name: flush LDIF handlers
   meta: flush_handlers
 
+- name: Load python-ldap build prerequisites
+  include_tasks: _python_ldap_prerequisites.yml
+
+- name: Load python-ldap header fallback when Python.h is missing
+  include_tasks: _python_ldap_header_fallback.yml
+  when: not openldap_python_header.stat.exists
+
 - name: Install python-ldap in active Ansible interpreter
   include_role:
     name: sys-pip-install

@@ -42,3 +42,27 @@ OPENLDAP_PROVISION_RESERVED:      "{{ lookup('config', application_id, 'provisio
 
 # Users to be processed by LDAP
 OPENLDAP_USERS:                   "{{ users if OPENLDAP_PROVISION_RESERVED else users | non_reserved_users }}"
+
+OPENLDAP_PYTHON_LDAP_NATIVE_LIB_PACKAGES_BY_OS_FAMILY:
+  Debian:
+    - libldap2-dev
+    - libsasl2-dev
+    - libssl-dev
+  RedHat:
+    - openldap-devel
+    - cyrus-sasl-devel
+    - openssl-devel
+  Archlinux:
+    - openldap
+    - cyrus-sasl
+
+OPENLDAP_PYTHON_HEADER_PACKAGE_TEMPLATES_BY_OS_FAMILY:
+  Debian:
+    - python__PY_MM__-dev
+    - python3-dev
+  RedHat:
+    - python__PY_MM__-devel
+    - python__PY_MM_NODOT__-devel
+    - python3-devel
+  Archlinux:
+    - python
