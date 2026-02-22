@@ -17,7 +17,7 @@ $(error Missing env file: $(ENV_SH))
 endif
 
 .PHONY: \
-	setup setup-clean install install-ansible install-venv install-python \
+	setup setup-clean install install-ansible install-venv install-python install-system-python \
 	test test-lint test-unit test-integration test-deploy test-deploy-app \
 	clean clean-sudo down \
 	list tree mig dockerignore \
@@ -122,7 +122,10 @@ install-ansible:
 	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
 	bash scripts/install/ansible.sh
 
-install-venv:
+install-system-python:
+	@bash roles/dev-python/files/install.sh ensure
+
+install-venv: install-system-python
 	@bash scripts/install/venv.sh
 
 install-python: install-venv

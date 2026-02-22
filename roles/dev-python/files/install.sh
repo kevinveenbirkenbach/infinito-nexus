@@ -1,6 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+MODE="${1:-ensure}"
+case "${MODE}" in
+  ensure | print) ;;
+  *)
+    echo "Usage: $0 [ensure|print]" >&2
+    exit 2
+    ;;
+esac
+
+if [[ "${MODE}" == "print" ]]; then
+  exec 3>&1
+  exec 1>&2
+fi
+
 if [[ ! -f /etc/os-release ]]; then
   echo "[ERROR] /etc/os-release not found; unsupported system." >&2
   exit 1
@@ -14,59 +28,118 @@ log() {
   printf '>>> [dev-python] %s\n' "$*"
 }
 
+run_privileged() {
+  if [[ "${EUID}" -eq 0 ]]; then
+    "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    return 1
+  fi
+}
+
+need_privileged_or_fail() {
+  if [[ "${EUID}" -eq 0 ]]; then
+    return 0
+  fi
+  if command -v sudo >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "[ERROR] Root privileges are required (sudo unavailable)." >&2
+  exit 1
+}
+
+find_highest_apt_python_pkg() {
+  apt-cache pkgnames 2>/dev/null \
+    | grep -E '^python3\.[0-9]+$' \
+    | sort -V \
+    | tail -n1
+}
+
+find_highest_rpm_python_pkg() {
+  local pm="$1"
+  {
+    run_privileged "${pm}" -q list installed "python3.[0-9]*" 2>/dev/null || true
+    run_privileged "${pm}" -q list --available "python3.[0-9]*" 2>/dev/null || true
+  } \
+    | awk '/^python3\.[0-9]+\./ {pkg=$1; sub(/\.[^.]+$/, "", pkg); print pkg}' \
+    | sort -Vu \
+    | tail -n1
+}
+
 install_python_packages() {
+  need_privileged_or_fail
+
   case "${ID}" in
     arch)
-      pacman -Syu --noconfirm --needed python python-pip
-      pacman -Scc --noconfirm || true
+      run_privileged pacman -Syu --noconfirm --needed python python-pip
+      run_privileged pacman -Scc --noconfirm || true
       ;;
 
     debian | ubuntu)
+      local apt_best_pkg=""
+
       export DEBIAN_FRONTEND=noninteractive
-      apt-get update
-      apt-get install -y --no-install-recommends python3 python3-pip
-      for v in 3.13 3.12 3.11; do
-        if apt-cache show "python${v}" >/dev/null 2>&1; then
-          apt-get install -y --no-install-recommends "python${v}" || true
-          if apt-cache show "python${v}-venv" >/dev/null 2>&1; then
-            apt-get install -y --no-install-recommends "python${v}-venv" || true
-          fi
-          break
+      run_privileged apt-get update
+      run_privileged apt-get install -y --no-install-recommends python3 python3-pip
+      apt_best_pkg="$(find_highest_apt_python_pkg || true)"
+      if [[ "${apt_best_pkg}" =~ ^python3\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 11 )); then
+        run_privileged apt-get install -y --no-install-recommends "${apt_best_pkg}" || true
+        if apt-cache show "${apt_best_pkg}-venv" >/dev/null 2>&1; then
+          run_privileged apt-get install -y --no-install-recommends "${apt_best_pkg}-venv" || true
         fi
-      done
-      rm -rf /var/lib/apt/lists/*
+      fi
+      run_privileged rm -rf /var/lib/apt/lists/*
       ;;
 
     fedora)
-      dnf -y install python3 python3-pip
-      dnf -y install python3.11 python3.11-pip || true
-      dnf -y clean all || true
-      rm -rf /var/cache/dnf || true
+      local dnf_best_pkg=""
+
+      run_privileged dnf -y install python3 python3-pip
+      dnf_best_pkg="$(find_highest_rpm_python_pkg dnf || true)"
+      if [[ "${dnf_best_pkg}" =~ ^python3\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 11 )); then
+        run_privileged dnf -y install "${dnf_best_pkg}" || true
+        run_privileged dnf -y install "${dnf_best_pkg}-pip" || true
+      fi
+      run_privileged dnf -y clean all || true
+      run_privileged rm -rf /var/cache/dnf || true
       ;;
 
     centos | rhel)
+      local rpm_best_pkg=""
+
       if command -v dnf >/dev/null 2>&1; then
         PM=dnf
       else
         PM=yum
       fi
-      ${PM} -y install python3 python3-pip || true
-      ${PM} -y install python3.11 python3.11-pip || true
-      ${PM} -y clean all || true
-      rm -rf "/var/cache/${PM}" || true
+      run_privileged "${PM}" -y install python3 python3-pip || true
+      rpm_best_pkg="$(find_highest_rpm_python_pkg "${PM}" || true)"
+      if [[ "${rpm_best_pkg}" =~ ^python3\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 11 )); then
+        run_privileged "${PM}" -y install "${rpm_best_pkg}" || true
+        run_privileged "${PM}" -y install "${rpm_best_pkg}-pip" || true
+      fi
+      run_privileged "${PM}" -y clean all || true
+      run_privileged rm -rf "/var/cache/${PM}" || true
       ;;
 
     *)
+      local rpm_like_best_pkg=""
+
       if [[ "${ID_LIKE}" =~ (rhel|centos) ]]; then
         if command -v dnf >/dev/null 2>&1; then
           PM=dnf
         else
           PM=yum
         fi
-        ${PM} -y install python3 python3-pip || true
-        ${PM} -y install python3.11 python3.11-pip || true
-        ${PM} -y clean all || true
-        rm -rf "/var/cache/${PM}" || true
+        run_privileged "${PM}" -y install python3 python3-pip || true
+        rpm_like_best_pkg="$(find_highest_rpm_python_pkg "${PM}" || true)"
+        if [[ "${rpm_like_best_pkg}" =~ ^python3\.([0-9]+)$ ]] && (( BASH_REMATCH[1] >= 11 )); then
+          run_privileged "${PM}" -y install "${rpm_like_best_pkg}" || true
+          run_privileged "${PM}" -y install "${rpm_like_best_pkg}-pip" || true
+        fi
+        run_privileged "${PM}" -y clean all || true
+        run_privileged rm -rf "/var/cache/${PM}" || true
       else
         echo "[ERROR] Unsupported distro for Python install: ID=${ID} ID_LIKE=${ID_LIKE}" >&2
         exit 1
@@ -77,29 +150,46 @@ install_python_packages() {
 
 python_is_311_or_higher() {
   local bin="$1"
+  command -v "${bin}" >/dev/null 2>&1 || return 1
   "${bin}" - <<'PY' >/dev/null 2>&1
 import sys
 raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
 PY
 }
 
+python_minor_version() {
+  local bin="$1"
+  "${bin}" - <<'PY' 2>/dev/null
+import sys
+print(f"{sys.version_info[0]}.{sys.version_info[1]}")
+PY
+}
+
 pick_python_bin() {
-  local bin
+  local bin name version best_version="" best_bin=""
   for bin in \
-    /usr/bin/python3.15 \
-    /usr/bin/python3.14 \
-    /usr/bin/python3.13 \
-    /usr/bin/python3.12 \
-    /usr/bin/python3.11 \
-    /usr/bin/python3.10 \
-    /usr/bin/python3; do
+    /usr/local/bin/python3.* \
+    /usr/bin/python3.* \
+    /usr/local/bin/python3 \
+    /usr/bin/python3 \
+    python3; do
     [[ -x "${bin}" ]] || continue
-    if python_is_311_or_higher "${bin}"; then
-      printf '%s\n' "${bin}"
-      return 0
+    name="$(basename "${bin}")"
+    if [[ "${name}" == python3.* ]] && [[ ! "${name}" =~ ^python3\.[0-9]+$ ]]; then
+      continue
+    fi
+    if ! python_is_311_or_higher "${bin}"; then
+      continue
+    fi
+    version="$(python_minor_version "${bin}")"
+    [[ -n "${version}" ]] || continue
+    if [[ -z "${best_version}" ]] || [[ "$(printf '%s\n%s\n' "${best_version}" "${version}" | sort -V | tail -n1)" == "${version}" ]]; then
+      best_version="${version}"
+      best_bin="${bin}"
     fi
   done
-  return 1
+  [[ -n "${best_bin}" ]] || return 1
+  printf '%s\n' "${best_bin}"
 }
 
 configure_defaults() {
@@ -107,49 +197,70 @@ configure_defaults() {
   local pyver
   local versioned_pip
 
+  need_privileged_or_fail
+
   pyver="$("${pybin}" -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')"
   versioned_pip="/usr/bin/pip${pyver}"
 
-  install -d /usr/local/bin
-  ln -sfn "${pybin}" /usr/local/bin/python3
-  ln -sfn /usr/local/bin/python3 /usr/local/bin/python
+  run_privileged install -d /usr/local/bin
+  run_privileged ln -sfn "${pybin}" /usr/local/bin/python3
+  run_privileged ln -sfn /usr/local/bin/python3 /usr/local/bin/python
 
   if [[ -x "${versioned_pip}" ]]; then
-    ln -sfn "${versioned_pip}" /usr/local/bin/pip3
+    run_privileged ln -sfn "${versioned_pip}" /usr/local/bin/pip3
   else
     if ! "${pybin}" -m pip --version >/dev/null 2>&1; then
-      "${pybin}" -m ensurepip --upgrade >/dev/null 2>&1 || true
+      run_privileged "${pybin}" -m ensurepip --upgrade >/dev/null 2>&1 || true
     fi
     if "${pybin}" -m pip --version >/dev/null 2>&1; then
-      cat >/usr/local/bin/pip3 <<'EOF'
+      run_privileged tee /usr/local/bin/pip3 >/dev/null <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 exec /usr/local/bin/python3 -m pip "$@"
 EOF
-      chmod 0755 /usr/local/bin/pip3
+      run_privileged chmod 0755 /usr/local/bin/pip3
     elif [[ -x /usr/bin/pip3 ]] && /usr/bin/pip3 --version 2>/dev/null | grep -q "python ${pyver}"; then
-      ln -sfn /usr/bin/pip3 /usr/local/bin/pip3
+      run_privileged ln -sfn /usr/bin/pip3 /usr/local/bin/pip3
     else
       echo "[ERROR] Could not provide pip3 for Python ${pyver}." >&2
       exit 1
     fi
   fi
 
-  ln -sfn /usr/local/bin/pip3 /usr/local/bin/pip
+  run_privileged ln -sfn /usr/local/bin/pip3 /usr/local/bin/pip
 }
 
-log "Installing Python packages for ID=${ID} ID_LIKE=${ID_LIKE}"
-install_python_packages
-
-if ! PYBIN="$(pick_python_bin)"; then
+resolve_python_bin_or_fail() {
+  if PYBIN="$(pick_python_bin)"; then
+    return 0
+  fi
   echo "[ERROR] No Python >= 3.11 found after installation attempt." >&2
   if command -v python3 >/dev/null 2>&1; then
     python3 --version || true
   fi
   exit 1
+}
+
+ensure_python_bin() {
+  log "Ensuring highest available Python >=3.11 for ID=${ID} ID_LIKE=${ID_LIKE}"
+  install_python_packages
+  hash -r || true
+  resolve_python_bin_or_fail
+}
+
+resolve_or_install_python_bin() {
+  if PYBIN="$(pick_python_bin)"; then
+    return 0
+  fi
+  ensure_python_bin
+}
+
+if [[ "${MODE}" == "ensure" ]]; then
+  ensure_python_bin
+  configure_defaults "${PYBIN}"
+  log "Default python: $(python3 --version)"
+  log "Default pip: $(pip3 --version)"
+else
+  resolve_or_install_python_bin
+  printf '%s\n' "${PYBIN}" >&3
 fi
-
-configure_defaults "${PYBIN}"
-
-log "Default python: $(python3 --version)"
-log "Default pip: $(pip3 --version)"

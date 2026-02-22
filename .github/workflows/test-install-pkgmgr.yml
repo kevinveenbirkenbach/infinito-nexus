@@ -34,6 +34,7 @@ jobs:
             "ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable" \
             bash -lc '
               set -euo pipefail
+              make -C "/root/Repositories/github.com/kevinveenbirkenbach/infinito-nexus" install-system-python
               pkgmgr install infinito --clone-mode shallow --no-verification
               source "/opt/venvs/infinito/bin/activate"
               infinito --help

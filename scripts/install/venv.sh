@@ -22,10 +22,20 @@ set -euo pipefail
 : "${VENV:?VENV not set (e.g. /opt/venvs/infinito)}"
 : "${VENV_BASE:?VENV_BASE not set (e.g. /opt/venvs)}"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+DEV_PYTHON_INSTALLER="${REPO_ROOT}/roles/dev-python/files/install.sh"
+
 install_venv() {
+  if [[ ! -f "${DEV_PYTHON_INSTALLER}" ]]; then
+    echo "❌ Missing installer: ${DEV_PYTHON_INSTALLER}" >&2
+    return 1
+  fi
+
   # 🛠 Bootstrap interpreter (system Python, outside of venv)
   # Used ONLY to CREATE the virtualenv.
-  local bootstrap_python="python3"
+  local bootstrap_python
+  bootstrap_python="$(bash "${DEV_PYTHON_INSTALLER}" print)"
 
   # 📦 Target interpreter inside the venv (may not exist yet!)
   local venv_python="${VENV}/bin/python"
