@@ -1,29 +1,28 @@
 # run_once_sys_pip_install: disabled
 
-- name: Include dependency 'sys-pip'
-  include_role:
-    name: sys-pip
-  when: run_once_sys_pip is not defined
+- include_tasks: 01_core.yml
+  when: run_once_sys_pip_install is not defined
 
-- name: Probe whether pip3 accepts --break-system-packages
-  ansible.builtin.command:
-    argv:
-      - pip3
-      - install
-      - --break-system-packages
-      - --help
-  register: sys_pip_install_break_system_packages_probe
-  changed_when: false
-  failed_when: false
-  become: "{{ true if global_install | bool else false }}"
-  environment:
-    PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-  when: global_install | bool
+- block:
+    - name: Probe whether pip3 accepts --break-system-packages
+      ansible.builtin.command:
+        argv:
+          - pip3
+          - install
+          - --break-system-packages
+          - --help
+      register: sys_pip_install_break_system_packages_probe
+      changed_when: false
+      failed_when: false
+      become: "{{ true if global_install | bool else false }}"
+      environment:
+        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-- name: Set fact for --break-system-packages support
-  ansible.builtin.set_fact:
-    sys_pip_install_supports_break_system_packages: "{{ (sys_pip_install_break_system_packages_probe.rc | int) == 0 }}"
-  changed_when: false
+    - name: Set fact for --break-system-packages support
+      ansible.builtin.set_fact:
+        sys_pip_install_supports_break_system_packages: "{{ (sys_pip_install_break_system_packages_probe.rc | int) == 0 }}"
+      changed_when: false
+
   when: global_install | bool
 
 - name: Install or upgrade {{ package_name }} system-wide via pip3
