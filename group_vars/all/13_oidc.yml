@@ -27,13 +27,13 @@ defaults_oidc:
     ID:                   "{{ _oidc_client_id }}"                                                 # Client identifier, typically matching your primary domain
 #   SECRET:                                                                                       # Client secret for authenticating with the OIDC provider (set in the inventory file). Recommend greater then 32 characters
     REALM:                "{{ _oidc_client_realm }}"                                              # The realm to which the client belongs in the OIDC provider
-    ISSUER_URL:           "{{ _oidc_client_issuer_url }}"                                         # Base URL of the OIDC provider (issuer)
+    ISSUER_URL:           "{{ _oidc_client_issuer_url }}"                                         # Issuer URL (must match discovery issuer)
     DISCOVERY_DOCUMENT:   "{{ _oidc_client_issuer_url ~ '/.well-known/openid-configuration' }}"   # URL for fetching the provider's configuration details
     AUTHORIZE_URL:        "{{ _oidc_protocol_oidc ~ '/auth' }}"                                   # Endpoint to start the authorization process
     TOKEN_URL:            "{{ _oidc_protocol_oidc ~ '/token' }}"                                  # Endpoint to exchange authorization codes for tokens (note: 'token_url' may be a typo for 'token_url')
     USER_INFO_URL:        "{{ _oidc_protocol_oidc ~ '/userinfo' }}"                               # Endpoint to retrieve user information
     LOGOUT_URL:           "{{ _oidc_protocol_oidc ~ '/logout' }}"                                 # Endpoint to log out the user
-    CERTS:                "{{ _oidc_protocol_oidc ~ '/certs' }}"                                  # JSON Web Key Set (JWKS)
+    CERTS:                "{{ _oidc_protocol_oidc ~ '/certs' }}"                                  # JSON Web Key Set endpoint (matches discovery jwks_uri)
     ACCOUNT:                                                                                        
       URL:                "{{ _oidc_account_url }}"                                               # Entry point for the user settings console
       PROFILE_URL:        "{{ _oidc_account_url ~ '/#/personal-info' }}"                          # Section for managing personal information
