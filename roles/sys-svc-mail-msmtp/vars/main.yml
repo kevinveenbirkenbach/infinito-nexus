@@ -1,0 +1,57 @@
+SYS_SVC_MAIL_MSMTP_PACKAGES_DEFAULT:
+  base:
+    - msmtp
+  mta: msmtp-mta
+
+SYS_SVC_MAIL_MSMTP_PACKAGES_BY_DISTRIBUTION:
+  Archlinux:
+    base:
+      - msmtp
+    mta: msmtp-mta
+  Debian:
+    base:
+      - msmtp
+    mta: msmtp-mta
+  Ubuntu:
+    base:
+      - msmtp
+    mta: msmtp-mta
+  Fedora:
+    base:
+      - msmtp
+    mta: msmtp-mta
+  CentOS:
+    base:
+      - msmtp
+    mta: ""
+  "CentOS Stream":
+    base:
+      - msmtp
+    mta: ""
+  RedHat:
+    base:
+      - msmtp
+    mta: ""
+  Rocky:
+    base:
+      - msmtp
+    mta: ""
+  AlmaLinux:
+    base:
+      - msmtp
+    mta: ""
+
+SYS_SVC_MAIL_MSMTP_PACKAGES: >-
+  {{
+    SYS_SVC_MAIL_MSMTP_PACKAGES_BY_DISTRIBUTION.get(
+      ansible_distribution | default(ansible_os_family | default('')),
+      SYS_SVC_MAIL_MSMTP_PACKAGES_DEFAULT
+    )
+  }}
+
+SYS_SVC_MAIL_MSMTP_EPEL_DISTRIBUTIONS:
+  - CentOS
+  - "CentOS Stream"
+  - RedHat
+  - Rocky
+  - AlmaLinux

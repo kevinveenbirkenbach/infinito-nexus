@@ -10,6 +10,18 @@ galaxy_info:
   - name: Archlinux
     versions:
     - rolling
+  - name: Debian
+    versions:
+    - all
+  - name: Ubuntu
+    versions:
+    - all
+  - name: Fedora
+    versions:
+    - all
+  - name: EL
+    versions:
+    - all
   galaxy_tags:
   - email
   - smtp
@@ -18,6 +30,10 @@ galaxy_info:
   - automation
   - monitoring
   - archlinux
+  - debian
+  - ubuntu
+  - fedora
+  - centos
   repository: https://s.infinito.nexus/code
   issue_tracker_url: https://s.infinito.nexus/issues
   documentation: https://docs.infinito.nexus

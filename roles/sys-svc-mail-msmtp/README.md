@@ -2,11 +2,11 @@
 
 ## Description
 
-This Ansible role installs and configures **msmtp** and **msmtp-mta** on Arch Linux systems. It provides a lightweight SMTP client that serves as a drop-in replacement for the traditional sendmail command, enabling reliable email delivery via an external SMTP server. For more background on SMTP, see [SMTP on Wikipedia](https://en.wikipedia.org/wiki/SMTP).
+This Ansible role installs and configures **msmtp** (plus optional sendmail compatibility) across the default Infinito distro set: Arch Linux, Debian, Ubuntu, Fedora and CentOS. It provides a lightweight SMTP client that serves as a drop-in replacement for traditional sendmail workflows, enabling reliable email delivery via an external SMTP server. For more background on SMTP, see [SMTP on Wikipedia](https://en.wikipedia.org/wiki/SMTP).
 
 ## Overview
 
-Tailored for Arch Linux, this role uses the `pacman` package manager to install **msmtp** and **msmtp-mta**. It then deploys a pre-configured msmtprc file via a Jinja2 template that defines settings for authentication, TLS, and the target SMTP server. This role is ideal for environments where automated email notifications or direct email sending are required.
+The role installs **msmtp**, handles distro-specific package differences (including EPEL bootstrap on EL-family hosts when required), and deploys a pre-configured `msmtprc` file via Jinja2. For distros without a dedicated `msmtp-mta` package, it configures a direct `/usr/bin/sendmail` compatibility symlink to `msmtp`.
 
 ## Purpose
 
@@ -14,7 +14,8 @@ The purpose of this role is to automate the setup of a lightweight SMTP client t
 
 ## Features
 
-- **Installs msmtp and msmtp-mta:** Uses `pacman` to install the required packages.
+- **Installs msmtp cross-distro:** Uses distro-aware package handling for Arch, Debian, Ubuntu, Fedora, and CentOS.
+- **Handles sendmail compatibility:** Installs `msmtp-mta` where available, otherwise provisions a compatible sendmail symlink.
 - **Customizable SMTP Configuration:** Deploys a customizable msmtprc configuration file with parameters for TLS, authentication, and server details.
 - **Drop-in sendmail Replacement:** Configures msmtp to serve as the default sendmail command.
 - **Idempotent Setup:** Ensures the tasks run only once with internal flagging.
