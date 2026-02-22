@@ -5,7 +5,7 @@
 
 - name: Resolve active Python executable for sys-pip-install
   ansible.builtin.set_fact:
-    sys_pip_install_python_executable: "{{ ansible_facts.python.executable | default(ansible_playbook_python) }}"
+    sys_pip_install_python_executable: "{{ ansible_python_interpreter }}"
   changed_when: false
 
 - block:

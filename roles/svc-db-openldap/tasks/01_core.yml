@@ -111,16 +111,13 @@
 - name: flush LDIF handlers
   meta: flush_handlers
 
-- name: Install python-ldap via OS package manager
-  ansible.builtin.package:
-    name: "{{ python_ldap_pkg }}"
-    state: present
+- name: Install python-ldap in active Ansible interpreter
+  include_role:
+    name: sys-pip-install
   vars:
-    python_ldap_pkg: >-
-      {{
-        (ansible_facts.distribution == 'Archlinux')
-        | ternary('python-ldap', 'python3-ldap')
-      }}
+    package_name: python-ldap
+    package_state: present
+    global_install: true
 
 - name: Sanity check python-ldap import (verbose)
   ansible.builtin.shell: |
