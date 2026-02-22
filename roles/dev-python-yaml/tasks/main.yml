@@ -1,9 +1,0 @@
----
-- when: run_once_dev_python_yaml is not defined
-  block:
-    - name: python-yaml install
-      package:
-        name: python-yaml
-        state: present
-      
-    - include_tasks: utils/once/flag.yml
