@@ -144,14 +144,16 @@
 
 # 4) Optionally drop shell snippet for Nix
 - name: Optionally drop shell snippet for Nix
-  ansible.builtin.copy:
-    dest: "{{ dev_nix_shell_snippet_path }}"
-    mode: "0644"
-    content: |
-      # Added by dev-nix Ansible role
-      if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
-        . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-      fi
+  ansible.builtin.script:
+    cmd: >-
+      {{ role_path }}/files/write_nix_shell_snippet.sh
+      {{ dev_nix_shell_snippet_path | quote }}
+  register: dev_nix_shell_snippet_result
+  changed_when: >
+    dev_nix_shell_snippet_result.stdout is search('\\[CHANGED\\]')
+  failed_when: >
+    dev_nix_shell_snippet_result.rc != 0 or
+    dev_nix_shell_snippet_result.stdout is search('\\[FAIL\\]')
   when: dev_nix_enable_shell_snippet | bool
   become: true
 
