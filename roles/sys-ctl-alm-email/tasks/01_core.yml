@@ -10,4 +10,4 @@
   vars:
     # If the email notifier fails, trigger the Telegram notifier,
     # passing the failing unit's name as the instance text.
-    system_service_tpl_on_failure: "{{ lookup('unit_name','sys-ctl-alm-telegram@', suffix=False) }}%n.service"
+    system_service_tpl_on_failure: "{{ lookup('unit_name','sys-ctl-alm-telegram@', suffix=False) }}%i.service"

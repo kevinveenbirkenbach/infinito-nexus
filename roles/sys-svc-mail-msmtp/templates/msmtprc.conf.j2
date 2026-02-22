@@ -6,7 +6,7 @@ syslog              {{ (MODE_DEBUG | bool) | ternary('on','off') }}
 auth                {{ SYSTEM_EMAIL_AUTH | ternary('on','off')}}
 tls_starttls        {{ (SYSTEM_EMAIL_START_TLS | bool) | ternary('on','off') }}
 tls                 {{ (SYSTEM_EMAIL_TLS | bool ) | ternary('on','off') }}
-tls_trust_file      /etc/ssl/certs/ca-certificates.crt
+tls_trust_file      {{ '/etc/pki/tls/certs/ca-bundle.crt' if (ansible_os_family | default('') | lower == 'redhat') else '/etc/ssl/certs/ca-certificates.crt' }}
 tls_host_override   {{ SYSTEM_EMAIL_HOST }}
 account             system_email_no_reply
 host                {{ '127.0.0.1' if (DOCKER_IN_CONTAINER | bool) else SYSTEM_EMAIL_HOST }}
