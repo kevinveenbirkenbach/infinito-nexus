@@ -20,7 +20,7 @@
     state: present
   when:
     - SYSTEM_EMAIL_EXTERNAL | bool
-    - SYS_SVC_MAIL_MSMTP_PACKAGES.mta
+    - SYS_SVC_MAIL_MSMTP_PACKAGES.mta != ''
 
 - name: Provide sendmail compatibility link when msmtp-mta is unavailable
   file:
@@ -30,7 +30,7 @@
     force: true
   when:
     - SYSTEM_EMAIL_EXTERNAL | bool
-    - not SYS_SVC_MAIL_MSMTP_PACKAGES.mta
+    - SYS_SVC_MAIL_MSMTP_PACKAGES.mta == ''
 
 - name: configure msmtprc.conf.j2
   template:

@@ -3,7 +3,7 @@
     name:
       - "{{ SYS_SVC_MAIL_MSMTP_PACKAGES.mta }}"
     state: absent
-  when: SYS_SVC_MAIL_MSMTP_PACKAGES.mta
+  when: SYS_SVC_MAIL_MSMTP_PACKAGES.mta != ''
 
 - name: Inspect /usr/bin/sendmail path before cleanup
   stat:
