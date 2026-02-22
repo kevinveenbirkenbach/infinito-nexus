@@ -54,6 +54,11 @@ class UnitNameLookupTests(unittest.TestCase):
         res = lm.run(["svc-foo"])
         self.assertEqual(res, ["svc-foo.2.0.0.infinito.nexus.service"])
 
+    def test_sys_ctl_prefix_is_removed(self):
+        lm = self._mk_lookup(software_domain="Infinito.Nexus", version="2.0.0")
+        res = lm.run(["sys-ctl-cln-bkps"])
+        self.assertEqual(res, ["cln-bkps.2.0.0.infinito.nexus.service"])
+
     def test_explicit_timer_suffix_with_dot(self):
         lm = self._mk_lookup(software_domain="infinito.nexus", version="2.0.0")
         res = lm.run(["svc-foo"], suffix=".timer")
@@ -74,6 +79,11 @@ class UnitNameLookupTests(unittest.TestCase):
         res = lm.run(["alarm@"])
         # Template semantics: "<base>.<ver>.<sw>@.service"
         self.assertEqual(res, ["alarm.2.0.0.infinito.nexus@.service"])
+
+    def test_template_unit_id_endswith_at_with_sys_ctl_prefix(self):
+        lm = self._mk_lookup(software_domain="infinito.nexus", version="2.0.0")
+        res = lm.run(["sys-ctl-alm-compose@"], suffix=False)
+        self.assertEqual(res, ["alm-compose.2.0.0.infinito.nexus@"])
 
     def test_multiple_terms(self):
         lm = self._mk_lookup(software_domain="infinito.nexus", version="2.0.0")

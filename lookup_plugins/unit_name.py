@@ -3,10 +3,11 @@
 # Ansible lookup plugin to build versioned systemd unit names.
 #
 # Target format:
-#   <systemctl_id>.<version>.<software_domain><suffix>
+#   <service_name>.<version>.<software_domain><suffix>
 #
 # Examples:
 #   lookup('unit_name', 'svc-foo')                       -> svc-foo.1.2.3.infinito.nexus.service
+#   lookup('unit_name', 'sys-ctl-cln-bkps')              -> cln-bkps.1.2.3.infinito.nexus.service
 #   lookup('unit_name', 'svc-foo', suffix='.timer')      -> svc-foo.1.2.3.infinito.nexus.timer
 #   lookup('unit_name', 'alarm@')                        -> alarm.1.2.3.infinito.nexus@.service
 #
@@ -110,10 +111,21 @@ def _lower_required(value, name: str) -> str:
     return sval.lower()
 
 
+def _strip_sys_ctl_prefix(systemctl_id: str) -> str:
+    prefix = "sys-ctl-"
+    if systemctl_id.startswith(prefix):
+        return systemctl_id[len(prefix) :]
+    return systemctl_id
+
+
 def _build_unit_name(
     systemctl_id: str, version: str, software_domain: str, suffix
 ) -> str:
-    sid = _lower_required(systemctl_id, "systemctl_id")
+    sid = _strip_sys_ctl_prefix(_lower_required(systemctl_id, "systemctl_id"))
+    if not sid:
+        raise AnsibleError(
+            "unit_name lookup: normalized systemctl_id is empty after stripping prefix."
+        )
     ver = _lower_required(version, "version")
     sw = _lower_required(software_domain, "SOFTWARE_DOMAIN")
     sfx = _normalize_suffix(suffix)
