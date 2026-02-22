@@ -189,12 +189,14 @@ plugins:
   drawio:
     # Nextcloud draw.io: integrates diagram creation and editing tools (https://apps.nextcloud.com/apps/drawio)
     enabled: true
-  duplicatefinder:
-    # Nextcloud duplicate finder: scans and identifies duplicate files (https://apps.nextcloud.com/apps/duplicatefinder)
-    enabled: true
-  emlviewer:
-    # Nextcloud EML Viewer: previews and manages EML email files (https://apps.nextcloud.com/apps/emlviewer)
-    enabled: true
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # duplicatefinder:
+  #   # Nextcloud duplicate finder: scans and identifies duplicate files (https://apps.nextcloud.com/apps/duplicatefinder)
+  #   enabled: true
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # emlviewer:
+  #   # Nextcloud EML Viewer: previews and manages EML email files (https://apps.nextcloud.com/apps/emlviewer)
+  #   enabled: true
   event_update_notification:
     # Nextcloud event update notification: sends alerts when events are updated (https://apps.nextcloud.com/apps/event_update_notification)
     enabled: true
@@ -216,28 +218,32 @@ plugins:
   files_bpm:
     # Nextcloud Files BPM: integrates business process management for file workflows (https://apps.nextcloud.com/apps/files_bpm)
     enabled: true
-  files_downloadactivity:
-    # Nextcloud Files Download Activity: tracks and logs file download events (https://apps.nextcloud.com/apps/files_downloadactivity)
-    enabled: true
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # files_downloadactivity:
+  #   # Nextcloud Files Download Activity: tracks and logs file download events (https://apps.nextcloud.com/apps/files_downloadactivity)
+  #   enabled: true
   files_linkeditor:
     # Nextcloud files link editor: allows customization of shared file links (https://apps.nextcloud.com/apps/files_linkeditor)
     enabled: true
-  files_mindmap:
-    # Nextcloud Files Mindmap: visualizes file relationships as mind maps (https://apps.nextcloud.com/apps/files_mindmap)
-    enabled: true
-  files_texteditor:
-    # Nextcloud Files Text Editor: provides an online editor for text files (https://apps.nextcloud.com/apps/files_texteditor)
-    # Not available for Nextcloud < 27
-    enabled: false
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # files_mindmap:
+  #   # Nextcloud Files Mindmap: visualizes file relationships as mind maps (https://apps.nextcloud.com/apps/files_mindmap)
+  #   enabled: true
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # files_texteditor:
+  #   # Nextcloud Files Text Editor: provides an online editor for text files (https://apps.nextcloud.com/apps/files_texteditor)
+  #   # Not available for Nextcloud < 27
+  #   enabled: false
   fileslibreofficeedit:
     # Nextcloud LibreOffice integration: allows online editing of documents with LibreOffice (https://apps.nextcloud.com/apps/fileslibreofficeedit)
     enabled: false
   forms:
     # Nextcloud forms: facilitates creation of forms and surveys (https://apps.nextcloud.com/apps/forms)
     enabled: true
-  gestion:
-    # Nextcloud Gestion: manages administrative tasks and workflows (https://apps.nextcloud.com/apps/gestion)
-    enabled: true
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # gestion:
+  #   # Nextcloud Gestion: manages administrative tasks and workflows (https://apps.nextcloud.com/apps/gestion)
+  #   enabled: true
   groupfolders:
     # Nextcloud Group Folders: centralizes shared folders for group collaboration (https://apps.nextcloud.com/apps/groupfolders)
     enabled: true
@@ -272,16 +278,18 @@ plugins:
   #  # Nextcloud KeeWeb: integrates the KeeWeb password manager within Nextcloud (https://apps.nextcloud.com/apps/keeweb)
   #  # This isn't maintained anymore. The alternatives don't support keepass files
   #  enabled: false
-  keeporsweep:
-    # Nextcloud keep or sweep: helps manage and clean up files and data (https://apps.nextcloud.com/apps/keeporsweep)
-    # Deactivated because installation isn't possible anymore
-    enabled: false
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # keeporsweep:
+  #   # Nextcloud keep or sweep: helps manage and clean up files and data (https://apps.nextcloud.com/apps/keeporsweep)
+  #   # Deactivated because installation isn't possible anymore
+  #   enabled: false
   mail:
     # Nextcloud mail: integrated email client for managing mail accounts (https://apps.nextcloud.com/apps/mail)
     enabled: true
-  maps:
-    # Nextcloud maps: provides mapping and location services integration (https://apps.nextcloud.com/apps/maps)
-    enabled: true
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # maps:
+  #   # Nextcloud maps: provides mapping and location services integration (https://apps.nextcloud.com/apps/maps)
+  #   enabled: true
   metadata:
     # Nextcloud Metadata: manages and displays file metadata for enhanced organization (https://apps.nextcloud.com/apps/metadata)
     enabled: true
@@ -354,7 +362,8 @@ plugins:
     # Nextcloud Whiteboard: provides a collaborative drawing and brainstorming tool (https://apps.nextcloud.com/apps/whiteboard)
     enabled: true
 
-  xwiki:
-    # XWiki Integration: search & display XWiki content from Nextcloud
-    # https://apps.nextcloud.com/apps/xwiki
-    enabled: "{{ 'web-app-xwiki' in group_names | lower }}"
+  # Incompatible with nextcloud:production-fpm-alpine (32.0.6), tested 2026-02-22
+  # xwiki:
+  #   # XWiki Integration: search & display XWiki content from Nextcloud
+  #   # https://apps.nextcloud.com/apps/xwiki
+  #   enabled: "{{ 'web-app-xwiki' in group_names | lower }}"
