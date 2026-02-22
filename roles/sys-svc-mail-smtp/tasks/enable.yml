@@ -1,7 +1,9 @@
 - include_tasks: utils/once/flag.yml
 
 - name: "Disable MSMTP to avoid port conflicts"
-  include_tasks: "{{ [playbook_dir, 'roles/sys-svc-mail-msmtp/tasks/disable.yml' ] | path_join }}"
+  include_role:
+    name: sys-svc-mail-msmtp
+    tasks_from: disable.yml
 
 - name: Include dependency 'sys-daemon'
   include_role:
