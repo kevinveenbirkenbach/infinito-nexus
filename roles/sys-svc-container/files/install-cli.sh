@@ -45,7 +45,10 @@ elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]
   rm -rf /var/lib/apt/lists/*
 
 elif [[ "${ID}" == "fedora" ]]; then
-  (dnf -y install docker-cli) || (dnf -y install moby-engine)
+  dnf -y install dnf-plugins-core
+  dnf config-manager --add-repo "https://download.docker.com/linux/fedora/docker-ce.repo"
+  dnf -y remove docker-cli docker-buildx moby-engine moby-filesystem || true
+  dnf -y install --allowerasing docker-ce-cli docker-buildx-plugin docker-compose-plugin
   dnf -y clean all
   rm -rf /var/cache/dnf
 
