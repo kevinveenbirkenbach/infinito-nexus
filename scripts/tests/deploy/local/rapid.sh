@@ -36,7 +36,7 @@ esac
 echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APP} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
 echo "inventory_dir=${INVENTORY_DIR}"
 
-docker exec -it "${INFINITO_CONTAINER}" bash -lc "
+docker exec -it "${INFINITO_CONTAINER}" bash -c "
   set -euo pipefail
   cd /opt/src/infinito
 

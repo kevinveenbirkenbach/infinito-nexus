@@ -97,7 +97,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
 
 "${PYTHON}" -m cli.deploy.development exec \
   --distro "${INFINITO_DISTRO}" -- \
-  bash -lc "
+  bash -c "
     set -euo pipefail
     cd /opt/src/infinito
 

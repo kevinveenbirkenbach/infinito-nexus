@@ -89,7 +89,7 @@ echo
 # Run deploy inside container
 "${PYTHON}" -m cli.deploy.development exec \
   --distro "${INFINITO_DISTRO}" -- \
-  bash -lc "
+  bash -c "
     set -euo pipefail
     cd /opt/src/infinito
 
