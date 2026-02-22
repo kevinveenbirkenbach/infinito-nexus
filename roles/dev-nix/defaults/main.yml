@@ -15,6 +15,15 @@ dev_nix_installer_sha256_url: "{{ dev_nix_installer_url }}.sha256"
 # Path where the installer will be downloaded on the target host
 dev_nix_installer_dest: "/usr/local/share/nix-install.sh"
 
+# Candidate paths for nix binary across installer/package variants.
+# The first existing path is used as source for /usr/local/bin/nix.
+dev_nix_binary_candidates:
+  - /nix/var/nix/profiles/default/bin/nix
+  - /nix/var/nix/profiles/per-user/root/profile/bin/nix
+  - /root/.nix-profile/bin/nix
+  - /usr/local/bin/nix
+  - /usr/bin/nix
+
 # Will be filled at runtime from dev_nix_installer_sha256_url
 dev_nix_installer_sha256: ""
 
