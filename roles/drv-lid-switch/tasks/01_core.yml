@@ -7,7 +7,10 @@
     global_install: true
 
 - name: Setup hibernate
-  command: setup-hibernate --non-interactive
+  ansible.builtin.command:
+    argv:
+      - "{{ lookup('command_path', 'setup-hibernate') }}"
+      - --non-interactive
   become: true
 
 - name: Configure systemd lid switch behavior to hibernate on lid close (battery), lock on AC and docked

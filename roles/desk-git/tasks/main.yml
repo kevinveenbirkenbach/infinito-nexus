@@ -16,7 +16,7 @@
     - name: setup git (as workstation user)
       ansible.builtin.command:
         argv:
-          - gitcon
+          - "{{ lookup('command_path', 'gitcon') }}"
           - --merge-option
           - rebase
           - --name

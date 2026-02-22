@@ -58,7 +58,7 @@
 - name: Seed database definition via baudolo-seed (system binary)
   ansible.builtin.command:
     argv:
-      - /usr/bin/baudolo-seed
+      - "{{ lookup('command_path', 'baudolo-seed') }}"
       - "{{ FILE_DATABASE_SECRETS }}"
       - "{{ database_instance }}"
       - "{{ '*' if (database_name | string | length) == 0 else (database_name | string) }}"
