@@ -23,6 +23,9 @@ fi
 # shellcheck disable=SC1091
 . /etc/os-release
 ID_LIKE="${ID_LIKE:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+DOCKER_APT_SANITIZER="${REPO_ROOT}/roles/sys-svc-container/files/apt_repo.sh"
 
 log() {
   printf '>>> [dev-python] %s\n' "$*"
@@ -47,6 +50,16 @@ need_privileged_or_fail() {
   fi
   echo "[ERROR] Root privileges are required (sudo unavailable)." >&2
   exit 1
+}
+
+sanitize_debian_docker_apt_sources() {
+  local distro_id="$1"
+
+  if [[ -v SKIP_DOCKER_APT_SANITIZER && "${SKIP_DOCKER_APT_SANITIZER}" == "1" ]]; then
+    return 0
+  fi
+
+  run_privileged bash "${DOCKER_APT_SANITIZER}" sanitize-sources "${distro_id}" 1 >/dev/null
 }
 
 find_highest_apt_python_pkg() {
@@ -101,6 +114,7 @@ install_python_packages() {
       local apt_best_pkg=""
 
       export DEBIAN_FRONTEND=noninteractive
+      sanitize_debian_docker_apt_sources "${ID}"
       run_privileged apt-get update
       run_privileged apt-get install -y --no-install-recommends python3 python3-pip
       apt_best_pkg="$(find_highest_apt_python_pkg || true)"

@@ -16,7 +16,7 @@
       ({{ ansible_os_family }}).
 
 - name: Setup Docker repository on Debian and Ubuntu
-  include_tasks: 01a_debian_ubuntu.yml
+  include_tasks: 01a_debian.yml
   when: ansible_distribution in ['Debian', 'Ubuntu']
 
 - name: Setup Docker repository and SDK prerequisites on RedHat family

@@ -1,14 +1,13 @@
-- name: Ensure apt keyring directory exists for Docker repository
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: "0755"
-
-- name: Install Docker apt repository signing key
-  ansible.builtin.get_url:
-    url: "https://download.docker.com/linux/{{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_distribution] }}/gpg"
-    dest: /etc/apt/keyrings/docker.asc
-    mode: "0644"
+- name: Ensure Docker apt key and sources are consistent
+  ansible.builtin.script:
+    cmd: >-
+      {{ role_path }}/files/apt_repo.sh
+      ensure-key-and-sanitize
+      {{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_distribution] }}
+      1
+    executable: /bin/bash
+  register: sys_svc_container_docker_repo_setup
+  changed_when: "'changed=1' in sys_svc_container_docker_repo_setup.stdout"
 
 - name: Configure Docker apt repository
   ansible.builtin.apt_repository:

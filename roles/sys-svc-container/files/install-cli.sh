@@ -5,6 +5,22 @@ set -euo pipefail
 . /etc/os-release
 
 echo ">>> Installing docker client on ID=${ID} ID_LIKE=${ID_LIKE:-}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOCKER_APT_SANITIZER="${SCRIPT_DIR}/apt_repo.sh"
+
+sanitize_docker_apt_sources() {
+  local distro_id="$1"
+  local keep_canonical="${2:-1}"
+
+  bash "${DOCKER_APT_SANITIZER}" sanitize-sources "${distro_id}" "${keep_canonical}" >/dev/null
+}
+
+ensure_docker_apt_key_and_sources() {
+  local distro_id="$1"
+  local keep_canonical="${2:-1}"
+
+  bash "${DOCKER_APT_SANITIZER}" ensure-key-and-sanitize "${distro_id}" "${keep_canonical}" >/dev/null
+}
 
 # shellcheck disable=SC2031
 if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then
@@ -13,24 +29,14 @@ if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then
 
 elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]]; then
   export DEBIAN_FRONTEND=noninteractive
+  sanitize_docker_apt_sources "${ID}" 0
   apt-get update
   apt-get install -y --no-install-recommends \
     curl \
     gnupg \
     lsb-release
-  install -m 0755 -d /etc/apt/keyrings
-  rm -f /etc/apt/keyrings/docker.gpg
-  curl -fsSL "https://download.docker.com/linux/${ID}/gpg" -o /etc/apt/keyrings/docker.asc
-  chmod a+r /etc/apt/keyrings/docker.asc
+  ensure_docker_apt_key_and_sources "${ID}" 1
 
-  # Avoid duplicate Docker repo entries with different signed-by paths (gpg vs asc).
-  if compgen -G "/etc/apt/sources.list.d/*.list" > /dev/null; then
-    while IFS= read -r -d '' file; do
-      sed -i "\|download.docker.com/linux/${ID}|d" "${file}"
-      [[ -s "${file}" ]] || rm -f "${file}"
-    done < <(find /etc/apt/sources.list.d -maxdepth 1 -type f -name "*.list" -print0)
-  fi
-  
   # shellcheck disable=SC1091
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${ID} $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" \
     > /etc/apt/sources.list.d/docker.list
