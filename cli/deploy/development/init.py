@@ -52,9 +52,9 @@ def _create_inventory(
         overrides.update(extra_vars)
 
     cmd = [
-        "python3",
-        "-m",
-        "cli.create.inventory",
+        "infinito",
+        "create",
+        "inventory",
         inv_root,
         "--host",
         "localhost",

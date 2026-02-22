@@ -118,7 +118,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     echo \">>> Creating inventory at \${inv_file}\"
     echo \">>> Include apps (${apps_count}): ${apps_csv}\"
 
-    python3 -m cli.create.inventory \"\${inv_dir}\" \
+    infinito create inventory \"\${inv_dir}\" \
       --inventory-file \${inv_file} \
       --host '${LIMIT_HOST}' \
       --ssl-disabled \

@@ -188,7 +188,7 @@ def run_in_container(
     """
     Full CI "run" mode:
       - start CI container (host docker socket mode)
-      - run cli.create.inventory (with forwarded inventory_args)
+      - run `infinito create inventory` (with forwarded inventory_args)
       - ensure CI vault password file
       - run cli.deploy.dedicated (with forwarded deploy_args)
       - always remove container at the end
@@ -209,11 +209,11 @@ def run_in_container(
         )
 
         # 1) Create CI inventory
-        print(">>> Creating CI inventory inside container (cli.create.inventory)...")
+        print(">>> Creating CI inventory inside container (infinito create inventory)...")
         inventory_cmd: List[str] = [
-            "python3",
-            "-m",
-            "cli.create.inventory",
+            "infinito",
+            "create",
+            "inventory",
             inv_root,
             "--host",
             "localhost",
