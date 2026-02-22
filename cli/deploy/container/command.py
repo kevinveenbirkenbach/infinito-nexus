@@ -209,7 +209,9 @@ def run_in_container(
         )
 
         # 1) Create CI inventory
-        print(">>> Creating CI inventory inside container (infinito create inventory)...")
+        print(
+            ">>> Creating CI inventory inside container (infinito create inventory)..."
+        )
         inventory_cmd: List[str] = [
             "infinito",
             "create",
