@@ -173,9 +173,6 @@ plugins:
   calendar:
     # Nextcloud calendar: manages calendar events and scheduling (https://apps.nextcloud.com/apps/calendar)
     enabled: true
-  cfg_share_links:
-    # Nextcloud share links configuration: customizes sharing settings and link options (https://apps.nextcloud.com/apps/cfg_share_links)
-    enabled: true
   collectives:
     # Nextcloud collectives: supports collaborative group management and sharing (https://apps.nextcloud.com/apps/collectives)
     enabled: true
