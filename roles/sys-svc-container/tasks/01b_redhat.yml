@@ -4,14 +4,12 @@
     dest: /etc/yum.repos.d/docker-ce.repo
     mode: "0644"
 
-- name: Include dependency 'sys-pip'
-  include_role:
-    name: sys-pip
-  when: run_once_sys_pip is not defined
-
 - name: Install Docker Python SDK dependencies on RedHat family
-  ansible.builtin.pip:
-    name:
+  include_role:
+    name: sys-pip-install
+  vars:
+    package_name:
       - docker
       - requests
-    state: present
+    package_state: present
+    global_install: true

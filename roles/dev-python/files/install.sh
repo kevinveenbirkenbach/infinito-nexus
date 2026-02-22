@@ -189,8 +189,20 @@ print(f"{sys.version_info[0]}.{sys.version_info[1]}")
 PY
 }
 
+canonicalize_python_candidate() {
+  local bin="$1"
+  local resolved=""
+
+  if resolved="$(readlink -f -- "${bin}" 2>/dev/null)" && [[ -x "${resolved}" ]]; then
+    printf '%s\n' "${resolved}"
+    return 0
+  fi
+
+  printf '%s\n' "${bin}"
+}
+
 pick_python_bin() {
-  local bin name version
+  local bin candidate name version
   local best_version="" best_bin=""
   local best_pip_version="" best_pip_bin=""
   for bin in \
@@ -200,23 +212,25 @@ pick_python_bin() {
     /usr/bin/python3 \
     python3; do
     [[ -x "${bin}" ]] || continue
-    name="$(basename "${bin}")"
+    candidate="$(canonicalize_python_candidate "${bin}")"
+    [[ -x "${candidate}" ]] || continue
+    name="$(basename "${candidate}")"
     if [[ "${name}" == python3.* ]] && [[ ! "${name}" =~ ^python3\.[0-9]+$ ]]; then
       continue
     fi
-    if ! python_is_311_or_higher "${bin}"; then
+    if ! python_is_311_or_higher "${candidate}"; then
       continue
     fi
-    version="$(python_minor_version "${bin}")"
+    version="$(python_minor_version "${candidate}")"
     [[ -n "${version}" ]] || continue
     if [[ -z "${best_version}" ]] || [[ "$(printf '%s\n%s\n' "${best_version}" "${version}" | sort -V | tail -n1)" == "${version}" ]]; then
       best_version="${version}"
-      best_bin="${bin}"
+      best_bin="${candidate}"
     fi
-    if python_has_pip_module "${bin}"; then
+    if python_has_pip_module "${candidate}"; then
       if [[ -z "${best_pip_version}" ]] || [[ "$(printf '%s\n%s\n' "${best_pip_version}" "${version}" | sort -V | tail -n1)" == "${version}" ]]; then
         best_pip_version="${version}"
-        best_pip_bin="${bin}"
+        best_pip_bin="${candidate}"
       fi
     fi
   done
@@ -232,8 +246,18 @@ configure_defaults() {
   local pybin="$1"
   local pyver
   local versioned_pip
+  local pybin_resolved=""
 
   need_privileged_or_fail
+
+  if pybin_resolved="$(readlink -f -- "${pybin}" 2>/dev/null)" && [[ -x "${pybin_resolved}" ]]; then
+    pybin="${pybin_resolved}"
+  fi
+
+  if [[ "${pybin}" == "/usr/local/bin/python3" ]]; then
+    echo "[ERROR] Refusing to link /usr/local/bin/python3 to itself." >&2
+    exit 1
+  fi
 
   pyver="$("${pybin}" -c 'import sys; print(f"{sys.version_info[0]}.{sys.version_info[1]}")')"
   versioned_pip="/usr/bin/pip${pyver}"
@@ -264,6 +288,7 @@ EOF
   fi
 
   run_privileged ln -sfn /usr/local/bin/pip3 /usr/local/bin/pip
+
 }
 
 resolve_python_bin_or_fail() {

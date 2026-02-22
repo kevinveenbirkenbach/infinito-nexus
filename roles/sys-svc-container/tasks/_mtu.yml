@@ -16,7 +16,9 @@
 - name: Detect safe Docker MTU
   ansible.builtin.command:
     argv:
-      - "{{ lookup('command_path', 'automtu') }}"
+      - "{{ ansible_facts.python.executable }}"
+      - -m
+      - automtu
       - --pmtu-target
       - "{{ SYS_SVC_DOCKER_AUTOMTU_TARGETS | join(',') }}"
       - --pmtu-policy

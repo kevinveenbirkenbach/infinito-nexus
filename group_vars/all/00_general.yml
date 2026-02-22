@@ -1,4 +1,4 @@
-ansible_python_interpreter: /usr/bin/python3
+ansible_python_interpreter: /usr/local/bin/python3
 
 SOFTWARE_NAME:              "Infinito.Nexus"              # Name of the software
 SOFTWARE_DOMAIN:            "{{ SOFTWARE_NAME | lower }}"

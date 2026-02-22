@@ -22,7 +22,7 @@ It is intended for CLI tools that should be available globally (e.g., maintenanc
 
 ## Notes / Caveats
 
-- The role checks whether `pip3` supports `--break-system-packages` and only uses it (plus `PIP_BREAK_SYSTEM_PACKAGES=1`) when available.
+- The role checks whether `pip` from `ansible_python_interpreter` supports `--break-system-packages` and only uses it (plus `PIP_BREAK_SYSTEM_PACKAGES=1`) when available.
   This keeps the role compatible with older `pip` versions (e.g., some CentOS/RHEL systems).
 - Use with care: installing Python packages system-wide can conflict with OS package management.
   For isolated installs of CLI tools, consider `pipx` instead.
