@@ -41,3 +41,11 @@ dev_nix_enable_experimental_features: true
 dev_nix_experimental_features:
   - nix-command
   - flakes
+
+# Candidate CA bundle paths by distro family.
+# The first existing path is used for nix.conf ssl-cert-file.
+DEV_NIX_SSL_CERT_FILE_CANDIDATES:
+  - /etc/ssl/certs/ca-certificates.crt
+  - /etc/pki/tls/certs/ca-bundle.crt
+  - /etc/ssl/ca-bundle.pem
+  - /etc/pki/tls/cacert.pem

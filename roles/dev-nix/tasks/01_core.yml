@@ -3,6 +3,33 @@
 # - Arch-based systems: install via package manager
 # - Non-Arch systems: use the official installer with SHA256 verification
 
+# 0) Ensure CA trust is present and discover CA bundle path for Nix TLS
+- name: Ensure system CA certificates are installed
+  ansible.builtin.package:
+    name: ca-certificates
+    state: present
+  become: true
+
+- name: Probe CA bundle candidate paths
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ DEV_NIX_SSL_CERT_FILE_CANDIDATES }}"
+  register: dev_nix_ssl_cert_file_probe
+  become: true
+
+- name: Set CA bundle path for Nix
+  ansible.builtin.set_fact:
+    dev_nix_ssl_cert_file: >-
+      {{
+        (
+          dev_nix_ssl_cert_file_probe.results
+          | selectattr("stat.exists")
+          | map(attribute="item")
+          | list
+          | first
+        ) | default("/etc/ssl/certs/ca-certificates.crt", true)
+      }}
+
 # 1) Arch-based systems: just install the distro package
 - name: Install Nix via package manager on Arch-based systems
   package:
