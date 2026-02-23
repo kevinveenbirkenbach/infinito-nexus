@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # roles/web-app-keycloak/library/keycloak_kcadm_update.py
 
 from __future__ import absolute_import, division, print_function

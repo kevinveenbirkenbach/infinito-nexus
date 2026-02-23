@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 from __future__ import annotations
 
 from ansible.module_utils.basic import AnsibleModule
