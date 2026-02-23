@@ -25,7 +25,7 @@ system_service_poll:                  "{{ omit if (system_service_force_linear_s
 # Dynamic Loaded ( Just available when dependencies are loaded )
 system_service_script_base:           "{{ system_service_script_src | basename | regex_replace('\\.j2$', '') }}"
 system_service_script_type:           "{{ system_service_script_base | filetype }}"
-system_service_script_inter:          "/bin/{{ 'bash' if system_service_script_type == 'sh' else 'python3'}}"
+system_service_script_inter:          "{{ '/bin/bash' if system_service_script_type == 'sh' else ansible_python_interpreter }}"
 system_service_script_exec:           "{{ system_service_script_inter }} {{ system_service_id | get_service_script_path( system_service_script_type ) }}"
 
 # Service template
