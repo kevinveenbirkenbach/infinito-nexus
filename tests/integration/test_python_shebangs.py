@@ -10,6 +10,7 @@ from pathlib import Path
 
 class TestPythonShebangs(unittest.TestCase):
     EXPECTED_PYTHON_SHEBANG = "#!/usr/bin/env python3"
+    EXPECTED_ANSIBLE_MODULE_SHEBANG = "#!/usr/bin/python"
 
     @classmethod
     def setUpClass(cls):
@@ -39,8 +40,16 @@ class TestPythonShebangs(unittest.TestCase):
             line = fh.readline(4096)
         return line.decode("utf-8", errors="replace").strip()
 
+    @staticmethod
+    def _is_ansible_custom_module(path: Path, repo_root: Path) -> bool:
+        rel = path.relative_to(repo_root)
+        parts = rel.parts
+        # Custom Ansible modules live in a `library/` directory.
+        return parts[0] == "library" or "library" in parts[1:]
+
     def test_python_shebangs_are_portable(self):
-        violations: list[str] = []
+        portable_violations: list[str] = []
+        ansible_module_violations: list[str] = []
 
         for path in self._tracked_files():
             if not path.is_file():
@@ -54,22 +63,37 @@ class TestPythonShebangs(unittest.TestCase):
             if "python" not in first_line.lower():
                 continue
 
-            if first_line != self.EXPECTED_PYTHON_SHEBANG:
-                rel = path.relative_to(self.repo_root).as_posix()
-                violations.append(f"{rel}: {first_line}")
+            rel = path.relative_to(self.repo_root).as_posix()
+            if self._is_ansible_custom_module(path, self.repo_root):
+                if first_line != self.EXPECTED_ANSIBLE_MODULE_SHEBANG:
+                    ansible_module_violations.append(f"{rel}: {first_line}")
+            elif first_line != self.EXPECTED_PYTHON_SHEBANG:
+                portable_violations.append(f"{rel}: {first_line}")
 
-        if violations:
+        if portable_violations or ansible_module_violations:
             self.fail(
-                "Found non-portable Python shebangs.\n"
-                "Required shebang: '#!/usr/bin/env python3'\n\n"
+                "Found invalid Python shebangs.\n\n"
                 "Why this is necessary:\n"
-                "- Hardcoded interpreter paths like '/usr/bin/python' are not guaranteed "
-                "to exist across distros/images.\n"
-                "- Using '/usr/bin/env python3' resolves python3 via PATH and keeps scripts "
-                "portable in CI, containers, and systemd services.\n"
-                "- Wrong shebangs can lead to runtime failures such as "
-                "'No such file or directory' / status=203/EXEC.\n\n"
-                "Offending files:\n- " + "\n- ".join(violations)
+                "- For normal Python scripts use '#!/usr/bin/env python3' so the interpreter "
+                "is resolved via PATH and remains portable across distros/images.\n"
+                "- For Ansible custom modules in any `library/` directory keep "
+                "'#!/usr/bin/python': Ansible rewrites this interpreter path to the configured "
+                "host interpreter.\n"
+                "- Using '#!/usr/bin/env python3' in Ansible modules can break execution with "
+                "errors like: module interpreter '/usr/bin/env python3' was not found.\n\n"
+                + (
+                    "Expected '#!/usr/bin/env python3' (non-library Python scripts), but found:\n- "
+                    + "\n- ".join(portable_violations)
+                    + "\n\n"
+                    if portable_violations
+                    else ""
+                )
+                + (
+                    "Expected '#!/usr/bin/python' (Ansible custom modules in library/), but found:\n- "
+                    + "\n- ".join(ansible_module_violations)
+                    if ansible_module_violations
+                    else ""
+                )
             )
 
 
