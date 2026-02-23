@@ -10,7 +10,8 @@ Verifies that each of your NGINX‐served domains returns an expected HTTP statu
 - Scheduled via a systemd timer for periodic health sweeps.
 
 ## Usage
-Include this role, install `python-requests`, and define `on_calendar_health_NGINX`.
+Include this role and define `on_calendar_health_NGINX`.
+The role installs `requests` via `pip` automatically.
 
 ## Further Resources
 - For more details on NGINX configurations, visit [NGINX documentation](https://NGINX.org/en/docs/).

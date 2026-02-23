@@ -1,14 +1,15 @@
 - name: Include dependencies
   include_role:
-    name: '{{ item }}'
-  loop:
-  - sys-pip
-  - sys-ctl-alm-compose
+    name: sys-ctl-alm-compose
+  when: run_once_sys_ctl_alm_compose is not defined
 
-- name: Install required Python modules
-  package:
-    name: python-requests
-    state: present
+- name: Install requests via pip
+  include_role:
+    name: sys-pip-install
+  vars:
+    package_name: requests
+    package_state: present
+    global_install: true
 
 - name: "Flush webserver handlers"
   meta: flush_handlers
