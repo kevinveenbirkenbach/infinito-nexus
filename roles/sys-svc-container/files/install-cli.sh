@@ -22,6 +22,24 @@ ensure_docker_apt_key_and_sources() {
   bash "${DOCKER_APT_SANITIZER}" ensure-key-and-sanitize "${distro_id}" "${keep_canonical}" >/dev/null
 }
 
+add_repo_rpm_compatible() {
+  local pm="$1"
+  local repo_url="$2"
+
+  # dnf4/yum: `config-manager --add-repo URL`
+  if "${pm}" config-manager --add-repo "${repo_url}" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  # dnf5: `config-manager addrepo --from-repofile=URL`
+  if "${pm}" config-manager addrepo --from-repofile="${repo_url}" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "[ERROR] Failed to add repo ${repo_url} via ${pm} config-manager" >&2
+  return 1
+}
+
 # shellcheck disable=SC2031
 if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then
   pacman -Syu --noconfirm --needed docker
@@ -46,7 +64,7 @@ elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]
 
 elif [[ "${ID}" == "fedora" ]]; then
   dnf -y install dnf-plugins-core
-  dnf config-manager --add-repo "https://download.docker.com/linux/fedora/docker-ce.repo"
+  add_repo_rpm_compatible dnf "https://download.docker.com/linux/fedora/docker-ce.repo"
   dnf -y install --allowerasing docker-ce-cli docker-buildx-plugin docker-compose-plugin
   dnf -y clean all
   rm -rf /var/cache/dnf
@@ -55,7 +73,7 @@ elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|cent
   if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi
   ${PM} -y install yum-utils || true
   ${PM} -y install dnf-plugins-core || true
-  (${PM} config-manager --add-repo "https://download.docker.com/linux/centos/docker-ce.repo") || true
+  add_repo_rpm_compatible "${PM}" "https://download.docker.com/linux/centos/docker-ce.repo" || true
   (${PM} -y install docker-ce-cli) || (${PM} -y install docker) || true
   ${PM} -y clean all || true
   rm -rf "/var/cache/${PM}" || true
