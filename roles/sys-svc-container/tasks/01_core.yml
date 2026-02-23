@@ -29,6 +29,16 @@
     state: present
   notify: container manager restart
 
+- name: Install Docker Python SDK dependencies via pip
+  include_role:
+    name: sys-pip-install
+  vars:
+    package_name:
+      - docker
+      - requests
+    package_state: present
+    global_install: true
+
 - name: Install container wrapper (container)
   become: true
   ansible.builtin.copy:

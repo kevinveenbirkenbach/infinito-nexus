@@ -5,17 +5,13 @@
     docker_network_subnet:          "{{ MARIADB_SUBNET }}"
     docker_compose_flush_handlers:  true
 
-- name: Install MySQL Python client library (distro-aware)
-  package:
-    name: >-
-      {{
-        'python-mysqlclient'   if ansible_os_family == 'Archlinux' else
-        'python3-mysqldb'      if ansible_os_family == 'Debian'     else
-        'python3-mysqlclient'  if ansible_os_family == 'RedHat'     else
-        'py3-mysqlclient'      if ansible_os_family == 'Alpine'     else
-        omit
-      }}
-    state: present
+- name: Install MySQL Python client library via pip
+  include_role:
+    name: sys-pip-install
+  vars:
+    package_name: PyMySQL
+    package_state: present
+    global_install: true
   when: MARIADB_EXPOSE_LOCAL | bool
 
 - block: 

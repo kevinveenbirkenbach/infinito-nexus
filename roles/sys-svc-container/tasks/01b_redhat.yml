@@ -3,13 +3,3 @@
     url: "https://download.docker.com/linux/{{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_distribution] }}/docker-ce.repo"
     dest: /etc/yum.repos.d/docker-ce.repo
     mode: "0644"
-
-- name: Install Docker Python SDK dependencies on RedHat family
-  include_role:
-    name: sys-pip-install
-  vars:
-    package_name:
-      - docker
-      - requests
-    package_state: present
-    global_install: true

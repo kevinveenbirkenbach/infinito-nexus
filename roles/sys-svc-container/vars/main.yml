@@ -39,24 +39,18 @@ SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION:
     - docker
     - docker-compose
     - docker-buildx
-    - python-docker
-    - python-requests
   Debian:
     - docker-ce
     - docker-ce-cli
     - containerd.io
     - docker-compose-plugin
     - docker-buildx-plugin
-    - python3-docker
-    - python3-requests
   Ubuntu:
     - docker-ce
     - docker-ce-cli
     - containerd.io
     - docker-compose-plugin
     - docker-buildx-plugin
-    - python3-docker
-    - python3-requests
   Fedora:
     - docker-ce
     - docker-ce-cli

@@ -2,16 +2,21 @@
   include_role:
     name: '{{ item }}'
   loop:
-  - sys-pip
   - sys-ctl-alm-compose
   - sys-lock
 
-- name: install lsof and python-psutil
+- name: install lsof
   package:
-    name:
-    - lsof
-    - python-psutil
+    name: lsof
     state: present
+
+- name: install psutil via pip
+  include_role:
+    name: sys-pip-install
+  vars:
+    package_name: psutil
+    package_state: present
+    global_install: true
 
 - include_role:
     name: sys-service
