@@ -31,6 +31,12 @@ class TestTopLevelVariableUsage(unittest.TestCase):
             ".html",
             ".txt",
         }
+        # Global Ansible runtime knobs are consumed by Ansible itself and may not
+        # appear as plain string references inside this repository.
+        self.ignored_top_level_keys = {
+            "ansible_python_interpreter",
+            "ansible_shell_executable",
+        }
 
     def get_top_level_keys(self, file_path):
         with open(file_path, "r") as f:
@@ -92,6 +98,8 @@ class TestTopLevelVariableUsage(unittest.TestCase):
         for varfile in self.all_variable_files:
             keys = self.get_top_level_keys(varfile)
             for key in keys:
+                if key in self.ignored_top_level_keys:
+                    continue
                 if not self.find_usage_in_project(key, varfile):
                     unused.append((varfile, key))
 
