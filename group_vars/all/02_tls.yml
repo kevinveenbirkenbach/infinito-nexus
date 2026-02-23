@@ -45,3 +45,12 @@ CA_TRUST:
   trust_name:     "{{ DOMAIN_PRIMARY | lower }}"
   wrapper_host:   "{{ BIN_CA_TRUST }}"
   inject_script:  "{{ BIN_CA_INJECT }}"
+
+# SPOT: shared systemd env for CA trust aware services
+CA_TRUST_SYSTEMD_ENV:
+  - "CA_TRUST_CERT_HOST={{ CA_TRUST.cert_host }}"
+  - "CA_TRUST_WRAPPER_HOST={{ CA_TRUST.wrapper_host }}"
+  - "CA_TRUST_NAME={{ CA_TRUST.trust_name }}"
+
+CA_TRUST_SYSTEMD_ENV_SELFSIGNED: >-
+  {{ CA_TRUST_SYSTEMD_ENV if (TLS_MODE | lower) == 'self_signed' else [] }}

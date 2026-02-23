@@ -50,7 +50,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
 
     @patch("requests.head")
     def test_all_ok_returns_zero(self, mock_head):
-        def head_side_effect(url, allow_redirects=False, timeout=10):
+        def head_side_effect(url, allow_redirects=False, timeout=10, verify=True):
             class R:
                 pass
 
@@ -79,7 +79,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
 
     @patch("requests.head")
     def test_mismatches_counted(self, mock_head):
-        def head_side_effect(url, allow_redirects=False, timeout=10):
+        def head_side_effect(url, allow_redirects=False, timeout=10, verify=True):
             class R:
                 pass
 
@@ -111,7 +111,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
     @patch("requests.head")
     def test_non_list_values_sanitize_to_empty_and_fail(self, mock_head):
         # If a domain maps to a non-list, it becomes [] and is treated as a failure
-        def head_side_effect(url, allow_redirects=False, timeout=10):
+        def head_side_effect(url, allow_redirects=False, timeout=10, verify=True):
             class R:
                 pass
 

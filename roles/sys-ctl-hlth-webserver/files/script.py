@@ -7,6 +7,7 @@ and verify HTTP HEAD responses. All mapping logic is done in the filter
 
 import argparse
 import json
+import os
 import sys
 from typing import Dict, List
 
@@ -52,13 +53,22 @@ def _parse_json_mapping(name: str, value: str) -> Dict[str, List[int]]:
 def main(argv=None) -> int:
     args = parse_args(argv)
     expectations = _parse_json_mapping("expectations", args.expectations)
+    verify = True
+    ca_trust_cert_host = os.environ.get("CA_TRUST_CERT_HOST", "").strip()
+    if ca_trust_cert_host:
+        if not os.path.isfile(ca_trust_cert_host):
+            print(
+                f"CA_TRUST_CERT_HOST points to a missing certificate: {ca_trust_cert_host}"
+            )
+            return 1
+        verify = ca_trust_cert_host
 
     errors = 0
     for domain in sorted(expectations.keys()):
         expected = expectations[domain] or []
         url = f"{args.web_protocol}://{domain}"
         try:
-            r = requests.head(url, allow_redirects=False, timeout=10)
+            r = requests.head(url, allow_redirects=False, timeout=10, verify=verify)
             if expected and r.status_code in expected:
                 print(f"{domain}: OK")
             elif not expected:
