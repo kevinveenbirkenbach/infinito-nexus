@@ -4,6 +4,7 @@
       copy:
         src: sys-lock.py
         dest: "{{ BIN_LOCK }}"
+        mode: "0755"
 
     - include_tasks: utils/once/flag.yml
   when: run_once_sys_lock is not defined
