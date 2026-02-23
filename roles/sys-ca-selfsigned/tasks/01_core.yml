@@ -11,6 +11,11 @@
     owner: root
     group: root
 
+- name: "CA | ensure openssl is installed"
+  include_role:
+    name: sys-openssl
+  when: run_once_sys_openssl is not defined
+
 - name: "CA | check openssl availability"
   ansible.builtin.command: "openssl version"
   register: _openssl_version

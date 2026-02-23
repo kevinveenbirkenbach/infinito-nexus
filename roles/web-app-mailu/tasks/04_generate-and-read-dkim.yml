@@ -29,6 +29,11 @@
   changed_when: false
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+- name: Ensure openssl is installed on host
+  include_role:
+    name: sys-openssl
+  when: run_once_sys_openssl is not defined
+
 - name: Generate DKIM public key on the host
   command: openssl rsa -pubout
   args:
