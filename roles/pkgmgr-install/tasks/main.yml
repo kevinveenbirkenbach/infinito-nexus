@@ -20,6 +20,9 @@
   notify: "{{ package_notify | default(omit,true) }}"
   changed_when: "'already up to date' not in (pkgmgr_update.stdout | lower)"
   become: true
+  retries: 7
+  delay: 20
+  until: pkgmgr_update.rc == 0
 
 - name: "Assert | pkgmgr path resolves '{{ package_name }}'"
   shell: |
