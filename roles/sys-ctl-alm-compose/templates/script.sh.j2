@@ -1,11 +1,18 @@
 #!/bin/bash
 err=0
 set -u
+start_timeout="{{ SYSTEMCTL_ALARM_COMPOSER_START_TIMEOUT_SECONDS }}"
 {% for alarm in SYSTEMCTL_ALARM_COMPOSER_SUBSERVICES %}
 # sys-ctl-alm-email.infinito.nexus@<escaped>.service (no extra dot!)
 unit="{{ lookup('unit_name', alarm ~ '@', suffix=False) }}$(systemd-escape "$1").service"
-if ! /usr/bin/systemctl start -- "$unit"; then
-  echo "ERROR: Failed to start $unit" >&2
+timeout "${start_timeout}s" /usr/bin/systemctl start -- "$unit"
+rc=$?
+if [ "$rc" -ne 0 ]; then
+  if [ "$rc" -eq 124 ] || [ "$rc" -eq 137 ]; then
+    echo "ERROR: Timeout while starting $unit (${start_timeout}s)" >&2
+  else
+    echo "ERROR: Failed to start $unit" >&2
+  fi
   err=1
 fi
 {% endfor %}
