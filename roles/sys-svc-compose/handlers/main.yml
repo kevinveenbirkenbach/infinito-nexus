@@ -62,6 +62,10 @@
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
     executable: /bin/bash
+  register: compose_ca_override
+  retries: 7
+  delay: 20
+  until: compose_ca_override is succeeded
   listen:
     - compose up
   when:
