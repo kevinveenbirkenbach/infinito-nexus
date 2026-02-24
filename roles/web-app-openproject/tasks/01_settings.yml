@@ -19,7 +19,7 @@
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: openproject_migrate
-  retries: 3
+  retries: 30
   delay: 10
   until: openproject_migrate.rc == 0
 
