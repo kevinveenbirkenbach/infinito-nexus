@@ -83,6 +83,9 @@
 - name: Load setup procedures for extensions
   include_tasks: 04_extensions.yml
 
+- name: "XWIKI | Ensure Main.WebHome exists"
+  include_tasks: 05_main_webhome.yml
+
 - block:
     - name:           "Create Final Docker Compose File"
       template:
