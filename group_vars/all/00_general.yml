@@ -1,8 +1,9 @@
 ansible_python_interpreter: /usr/local/bin/python3  # Force the managed Python used by this stack; avoids distro-default interpreter/module mismatches.
 ansible_shell_executable:   /bin/bash               # Required so shell tasks with `set -euo pipefail` do not fail on distros where /bin/sh is dash.
 
-SOFTWARE_NAME:              "Infinito.Nexus"              # Name of the software
-SOFTWARE_DOMAIN:            "{{ SOFTWARE_NAME | lower }}"
+SOFTWARE_NAME:              "Infinito.Nexus"                # Name of the software
+SOFTWARE_DOMAIN:            "{{ SOFTWARE_NAME | lower }}"   # Software domain
+SOFTWARE_URL:               "https://{{ SOFTWARE_DOMAIN }}" # Url of the software provicer
 
 # Deployment
 ENVIRONMENT:                "production"      # Possible values: production, development
