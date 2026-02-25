@@ -54,9 +54,11 @@
         return_content: yes
         timeout: 300
       register: _exec_page
-      retries: 20
-      delay: 15
-      until: _exec_page is succeeded
+      retries: 12
+      delay: 20
+      until:
+        - _exec_page is succeeded
+        - (_exec_page.content | default('')) is not search('WARN::')
       changed_when: false
 
     - name: "XWIKI | Assert installer output has no errors"
@@ -64,6 +66,7 @@
         that:
           - (_exec_page.content | default('')) is not search('ERROR::')
           - (_exec_page.content | default('')) is not search('INSTALLED_MISSING::')
+          - (_exec_page.content | default('')) is not search('WARN::')
         fail_msg: |
           XWiki extension installer reported errors.
           Output:

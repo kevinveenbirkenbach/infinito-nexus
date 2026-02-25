@@ -23,21 +23,34 @@ wanted.each { e ->
   if (already) { println "ALREADY_INSTALLED::${id}::${already.id?.version}"; return }
 
   println "INSTALL_START::${id}::${ver ? ver : 'latest'}"
-  def job
+  def job = null
+  def caughtErr = null
   try {
     job = ver ? ext.install(id, ver, ns) : ext.install(id, null, ns)
     job?.join()
   } catch (Throwable t) {
-    println "ERROR::${id}::${(t?.message ?: t?.toString())}"
+    caughtErr = (t?.message ?: t?.toString())
   }
 
   def st = job?.status?.state?.name()
   if (st) println "STATE=${st}::${id}"
 
   def err = job?.status?.error  // singular!
-  if (err) println "ERROR::${id}::${(err?.message ?: err?.toString())}"
+  def errMsg = err ? (err?.message ?: err?.toString()) : null
 
   def now = ext.getInstalledExtension(id, ns)
-  if (now) println "INSTALLED_OK::${id}::${now.id?.version}"
-  else     println "INSTALLED_MISSING::${id}"
+  if (now) {
+    // Race-safe: Extension Manager can report "Failed to create install plan"
+    // while the extension gets installed by the concurrent distribution job.
+    if (caughtErr) println "WARN::${id}::${caughtErr}"
+    if (errMsg) println "WARN::${id}::${errMsg}"
+    println "INSTALLED_OK::${id}::${now.id?.version}"
+  } else {
+    if (caughtErr) println "ERROR::${id}::${caughtErr}"
+    if (errMsg) println "ERROR::${id}::${errMsg}"
+    if (!caughtErr && !errMsg && st && st != 'FINISHED') {
+      println "ERROR::${id}::Unexpected install state ${st}"
+    }
+    println "INSTALLED_MISSING::${id}"
+  }
 }
