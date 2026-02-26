@@ -4,9 +4,9 @@
 - name: Assert systemd is available
   ansible.builtin.assert:
     that:
-      - ansible_service_mgr == "systemd"
+      - ansible_facts['service_mgr'] == "systemd"
     fail_msg: >
-      systemd is not available. This role requires systemd (service manager = {{ ansible_service_mgr }}).
+      systemd is not available. This role requires systemd (service manager = {{ ansible_facts['service_mgr'] }}).
 
 - name: Read PID 1 process name
   ansible.builtin.slurp:

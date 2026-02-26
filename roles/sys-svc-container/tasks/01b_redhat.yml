@@ -1,5 +1,5 @@
 - name: Configure Docker yum repository
   ansible.builtin.get_url:
-    url: "https://download.docker.com/linux/{{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_distribution] }}/docker-ce.repo"
+    url: "https://download.docker.com/linux/{{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_facts['distribution']] }}/docker-ce.repo"
     dest: /etc/yum.repos.d/docker-ce.repo
     mode: "0644"

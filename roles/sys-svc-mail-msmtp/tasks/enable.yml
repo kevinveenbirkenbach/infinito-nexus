@@ -4,7 +4,7 @@
   package:
     name: epel-release
     state: present
-  when: ansible_distribution in SYS_SVC_MAIL_MSMTP_EPEL_DISTRIBUTIONS
+  when: ansible_facts['distribution'] in SYS_SVC_MAIL_MSMTP_EPEL_DISTRIBUTIONS
 
 - name: Install msmtp base package
   package:

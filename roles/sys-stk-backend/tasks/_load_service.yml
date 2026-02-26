@@ -4,7 +4,13 @@
       {{
         (applications | service_load_enabled(application_id, service_name, False))
         and
-        (vars['run_once_' ~ (service_id | replace('-', '_'))] is not defined)
+        (
+          lookup(
+            'ansible.builtin.vars',
+            'run_once_' ~ (service_id | replace('-', '_')),
+            default=none
+          ) is none
+        )
         and
         (application_id != service_id)
       }}

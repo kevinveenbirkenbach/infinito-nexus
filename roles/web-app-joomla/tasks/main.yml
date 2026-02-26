@@ -21,11 +21,13 @@
   meta: flush_handlers
 
 - name: Include install routines
-  include_tasks: "{{ item }}"
+  include_tasks: "{{ joomla_step }}"
   loop:
     - 02_install.yml
     - 03_debug.yml
     - 04_patch.yml
+  loop_control:
+    loop_var: joomla_step
 
 - name: Include assert routines
   include_tasks: "05_assert.yml"

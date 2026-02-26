@@ -13,7 +13,7 @@
     openldap_python_major_minor_nodot: "{{ (openldap_python_major_minor.stdout | trim) | replace('.', '') }}"
     openldap_python_header_package_templates: >-
       {{
-        OPENLDAP_PYTHON_HEADER_PACKAGE_TEMPLATES_BY_OS_FAMILY.get(ansible_os_family, [])
+        OPENLDAP_PYTHON_HEADER_PACKAGE_TEMPLATES_BY_OS_FAMILY.get(ansible_facts['os_family'], [])
       }}
   changed_when: false
 

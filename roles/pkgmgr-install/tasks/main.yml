@@ -5,7 +5,7 @@
   shell: |
     set -euo pipefail
 
-    export PKGMGR_VENV="{{ ansible_env.HOME }}/.venvs/pkgmgr"
+    export PKGMGR_VENV="{{ ansible_facts['env']['HOME'] }}/.venvs/pkgmgr"
     export PATH="${PKGMGR_VENV}/bin:${PATH}"
 
     export GIT_TERMINAL_PROMPT=0
@@ -27,7 +27,7 @@
 - name: "Assert | pkgmgr path resolves '{{ package_name }}'"
   shell: |
     set -euo pipefail
-    "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" path "{{ package_name }}" >/dev/null
+    "{{ ansible_facts['env']['HOME'] }}/.venvs/pkgmgr/bin/pkgmgr" path "{{ package_name }}" >/dev/null
   args:
     executable: /bin/bash
   register: pkgmgr_path_assert

@@ -10,7 +10,7 @@ system_service_id: sys-ctl-bkp-docker-2-loc
 BKP_DOCKER_2_LOC_BAUDOLO_BIN: "{{ lookup('command_path', 'baudolo') }}"
 
 # Verify if DB seeding is enabled (kept compatible with your current variable scheme)
-BKP_DOCKER_2_LOC_DB_ENABLED: "{{ database_type | default('') | bool }}"
+BKP_DOCKER_2_LOC_DB_ENABLED: "{{ (database_type | default('') | string | trim | length) > 0 }}"
 
 # Gather mapped values as lists
 BKP_DOCKER_2_LOC_DB_ROUTINE: >-

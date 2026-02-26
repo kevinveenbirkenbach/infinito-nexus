@@ -1,10 +1,12 @@
 - name: Include dependencies
   include_role:
-    name: '{{ item }}'
+    name: '{{ dependency_role }}'
   loop:
     - dev-git
     - dev-make
     - dev-nix
+  loop_control:
+    loop_var: dependency_role
 
 - name: "Include SSH"
   include_role:
@@ -53,7 +55,7 @@
         export GIT_TERMINAL_PROMPT=0
         export GIT_SSH_COMMAND="ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
         export PYTHONUNBUFFERED=1
-        timeout --signal=KILL 600s "{{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr" update pkgmgr --clone-mode shallow </dev/null
+        timeout --signal=KILL 600s "{{ ansible_facts['env']['HOME'] }}/.venvs/pkgmgr/bin/pkgmgr" update pkgmgr --clone-mode shallow </dev/null
       args:
         executable: /bin/bash
       register: pkgmgr_update
@@ -71,25 +73,25 @@
           note: "Sanitized debug (no credentials printed)."
           cmd: >-
             timeout --signal=KILL 600s
-            {{ ansible_env.HOME }}/.venvs/pkgmgr/bin/pkgmgr update pkgmgr --clone-mode shallow
+            {{ ansible_facts['env']['HOME'] }}/.venvs/pkgmgr/bin/pkgmgr update pkgmgr --clone-mode shallow
           env:
             GIT_TERMINAL_PROMPT: "0"
             GIT_SSH_COMMAND: "ssh -o BatchMode=yes -o StrictHostKeyChecking=yes"
             PYTHONUNBUFFERED: "1"
-            HOME: "{{ ansible_env.HOME | default('') }}"
+            HOME: "{{ ansible_facts['env']['HOME'] }}"
             # show presence & shape, not content
-            NIX_CONFIG_present: "{{ (ansible_env.NIX_CONFIG | default('')) | length > 0 }}"
-            NIX_CONFIG_len: "{{ (ansible_env.NIX_CONFIG | default('')) | length }}"
+            NIX_CONFIG_present: "{{ (ansible_facts['env']['NIX_CONFIG'] | default('')) | length > 0 }}"
+            NIX_CONFIG_len: "{{ (ansible_facts['env']['NIX_CONFIG'] | default('')) | length }}"
             NIX_CONFIG_has_access_tokens: >-
               {{
-                (ansible_env.NIX_CONFIG | default('')) is search('(^|\\n)\\s*access-tokens\\s*=\\s*github\\.com=')
+                (ansible_facts['env']['NIX_CONFIG'] | default('')) is search('(^|\\n)\\s*access-tokens\\s*=\\s*github\\.com=')
               }}
             NIX_CONFIG_has_empty_github_token: >-
               {{
-                (ansible_env.NIX_CONFIG | default('')) is search('(^|\\n)\\s*access-tokens\\s*=\\s*github\\.com=\\s*($|\\n)')
+                (ansible_facts['env']['NIX_CONFIG'] | default('')) is search('(^|\\n)\\s*access-tokens\\s*=\\s*github\\.com=\\s*($|\\n)')
               }}
-            GITHUB_TOKEN_present: "{{ (ansible_env.GITHUB_TOKEN | default('')) | length > 0 }}"
-            GH_TOKEN_present: "{{ (ansible_env.GH_TOKEN | default('')) | length > 0 }}"
+            GITHUB_TOKEN_present: "{{ (ansible_facts['env']['GITHUB_TOKEN'] | default('')) | length > 0 }}"
+            GH_TOKEN_present: "{{ (ansible_facts['env']['GH_TOKEN'] | default('')) | length > 0 }}"
           result:
             rc: "{{ pkgmgr_update.rc | default('n/a') }}"
             stdout_tail: "{{ (pkgmgr_update.stdout | default('')).splitlines()[-60:] | join('\n') }}"

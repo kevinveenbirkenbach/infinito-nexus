@@ -3,7 +3,7 @@
     cmd: >-
       {{ role_path }}/files/apt_repo.sh
       ensure-key-and-sanitize
-      {{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_distribution] }}
+      {{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_facts['distribution']] }}
       1
     executable: /bin/bash
   register: sys_svc_container_docker_repo_setup
@@ -12,10 +12,10 @@
 - name: Configure Docker apt repository
   ansible.builtin.apt_repository:
     repo: >-
-      deb [arch={{ SYS_SVC_CONTAINER_DPKG_ARCH_BY_ANSIBLE_ARCH.get(ansible_architecture, ansible_architecture) }}
+      deb [arch={{ SYS_SVC_CONTAINER_DPKG_ARCH_BY_ANSIBLE_ARCH.get(ansible_facts['architecture'], ansible_facts['architecture']) }}
       signed-by=/etc/apt/keyrings/docker.asc]
-      https://download.docker.com/linux/{{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_distribution] }}
-      {{ ansible_distribution_release }} stable
+      https://download.docker.com/linux/{{ SYS_SVC_CONTAINER_DOCKER_REPO_DISTRO_BY_DISTRIBUTION[ansible_facts['distribution']] }}
+      {{ ansible_facts['distribution_release'] }} stable
     filename: docker
     state: present
     update_cache: true

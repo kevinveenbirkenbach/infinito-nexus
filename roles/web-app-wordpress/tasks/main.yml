@@ -52,10 +52,11 @@
       include_tasks: 03_enable_plugin.yml
       loop: "{{ WORDPRESS_PLUGINS }}"
       loop_control:
-        label: "{{ item.key }}"
+        loop_var: wordpress_plugin
+        label: "{{ wordpress_plugin.key }}"
       vars:
-        plugin_name: "{{ item.key }}"
-        plugin_enabled: "{{ item.value.enabled | bool }}"
+        plugin_name: "{{ wordpress_plugin.key }}"
+        plugin_enabled: "{{ wordpress_plugin.value.enabled | bool }}"
         plugin_task_path: "{{ [role_path, 'tasks/plugins', plugin_name  ~ '.yml' ] | path_join }}"
       when: plugin_enabled | bool
 
