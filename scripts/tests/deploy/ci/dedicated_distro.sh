@@ -63,7 +63,9 @@ cleanup() {
   echo ">>> Removing stack for distro ${INFINITO_DISTRO} (fresh start for next distro)"
   "${PYTHON}" -m cli.deploy.development down --distro "${INFINITO_DISTRO}" || true
 
-  echo ">>> HARD cleanup (containers/volumes/networks), keeping images"
+  echo ">>> HARD cleanup (containers/volumes/networks/images/build-cache)"
+  echo ">>> Docker disk usage before HARD cleanup"
+  docker system df || true
 
   # 1) Remove ALL containers (including running ones)
   mapfile -t ids < <(docker ps -aq || true)
@@ -80,7 +82,13 @@ cleanup() {
   # 4) Optional: leftover stopped containers (usually redundant after rm -f)
   docker container prune -f >/dev/null 2>&1 || true
 
-  # 5) Remove host-mounted Docker data dir (CI runner only)
+  # 5) Remove ALL images and build cache.
+  # Important for serial multi-distro CI runs on the same runner.
+  docker image prune -af >/dev/null 2>&1 || true
+  docker buildx prune -af >/dev/null 2>&1 || true
+  docker builder prune -af >/dev/null 2>&1 || true
+
+  # 6) Remove host-mounted Docker data dir (CI runner only)
   # IMPORTANT:
   # - In CI, Docker/DIND/buildx may create root-owned files under this directory.
   # - A plain 'rm -rf' can fail with "Permission denied" and poison the next distro run.
@@ -108,6 +116,8 @@ cleanup() {
     fi
   fi
 
+  echo ">>> Docker disk usage after HARD cleanup"
+  docker system df || true
   echo ">>> HARD cleanup finished"
   return $rc
 }
