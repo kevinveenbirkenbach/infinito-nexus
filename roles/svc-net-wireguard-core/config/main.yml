@@ -1,0 +1,4 @@
+compose:
+  services:
+    wireguard-core:
+      min_storage: "0GB"

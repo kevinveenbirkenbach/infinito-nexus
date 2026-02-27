@@ -7,6 +7,7 @@ compose:
       image:              "ollama/ollama"
       version:            latest
       name:               ollama
+      min_storage:        "20GB"
       port:               11434
       cpus:               "4.0"
       mem_reservation:    "6g"

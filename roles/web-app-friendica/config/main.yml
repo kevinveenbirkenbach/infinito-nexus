@@ -18,8 +18,9 @@ addons:
 compose:
   services:
     friendica:
-      image:    'friendica'
-      version:  'latest'
+      image:        'friendica'
+      version:      'latest'
+      min_storage:  '10GB'
     oidc:
       enabled:  false
       shared:   false

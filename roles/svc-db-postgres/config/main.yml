@@ -7,6 +7,7 @@ compose:
       # Please set an version in your inventory file! 
       # Rolling release isn't recommended
       version:            "17-3.5"
+      min_storage:        "10GB"
       backup:
         database_routine: true
       cpus:               "2.0"

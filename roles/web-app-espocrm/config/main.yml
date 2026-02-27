@@ -49,6 +49,7 @@ compose:
       image:            "espocrm/espocrm"
       version:          "latest"
       name:             "espocrm"
+      min_storage:      "8GB"
       cpus:             1.5
       mem_reservation:  1.2g
       mem_limit:        2g

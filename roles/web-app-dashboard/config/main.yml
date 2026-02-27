@@ -43,6 +43,7 @@ compose:
       name:     "dashboard"
       image:    "ghcr.io/kevinveenbirkenbach/port-ui"
       version:  "1.0.0"
+      min_storage: "1GB"
     css:
       enabled: true
     javascript:
