@@ -2,21 +2,21 @@
 
 ## Description
 
-This Ansible role installs Intel media drivers on Pacman-based Linux distributions (e.g., Arch Linux), ensuring the `intel-media-driver` package is present and up-to-date.
+This Ansible role installs the Intel VA-API media driver for the current Linux distribution.
 
 ## Overview
 
-The `drv-intel` role uses the `community.general.pacman` module to:
+Package name differs across distributions:
 
-1. Update the package cache  
-2. Install or upgrade the `intel-media-driver` package  
-3. Verify the driver installation for media pipelines  
+- Arch Linux: `intel-media-driver`
+- Debian/Ubuntu: `intel-media-va-driver`
+- Fedora: `libva-intel-media-driver`
+- CentOS Stream 9: `libva-intel-hybrid-driver` (via EPEL)
 
 ## Features
 
 * Idempotent installation of Intel media drivers  
-* Automatic Pacman cache update  
-* Support for all Pacman-based distributions  
+* Supports Arch, Debian, Ubuntu, Fedora, CentOS Stream  
 
 ## Further Resources
 
