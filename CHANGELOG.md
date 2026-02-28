@@ -1,3 +1,38 @@
+## [5.1.0] - 2026-02-28
+
+* This minor release improves cross-distro package handling, hardens CI reliability, fixes Ansible compatibility issues, and adds clearer contributor and local test workflows.
+
+**Added**
+
+* Introduced *docs/guides/developer/CONTRIBUTION_WORKFLOW.md* with fork-based workflow, mandatory green fork CI before PRs, and merge policy guidance
+* Added *test-local-app* wrapper and related local test documentation
+* Added *min_storage* entries for warned roles
+
+**Changed**
+
+* Made *dev-base-devel* distro-aware for default distros
+* Removed hardcoded *base-devel* from workstation bundles and *sys-aur*
+* Set *drv-epson-multiprinter* lifecycle to *pre-alpha*
+* Refactored *dev-fakeroot* by extracting *01_core* tasks
+* Documented local *make check* targets
+
+**Fixed**
+
+* Fixed *sys-aur-install* name/upgrade clash
+* Enabled EPEL for *dev-fakeroot* on CentOS
+* Made *drv-intel* VA-API package handling distro-specific
+* Fixed undefined *run_once* lookup in backend service loader
+* Restored DB seed enablement semantics without bool-coercion warning
+* Fixed Ansible fact deprecations and loop variable collisions
+
+**CI and Tests**
+
+* Added retries for Docker-in-Docker DNS handling
+* Added retry loop for buildx push
+* Aggressively pruned Docker artifacts between distro runs
+* Removed deprecated buildx install input
+
+
 ## [5.0.0] - 2026-02-25
 
 * * **Supported distributions:** *Fedora*, *CentOS*, *Ubuntu*, *Debian*
