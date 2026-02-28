@@ -50,6 +50,60 @@ Before even thinking about a Pull Request:
 ✔ Ensure formatting compliance
 ✔ Confirm CI passes in your fork
 
+### Local Checks (Makefile Targets)
+
+The canonical way to run formatting, linting, and tests is via `make` (from the repository root).
+
+#### Formatting
+
+```bash
+make format
+```
+
+Runs `shfmt` for shell scripts and `ruff` for Python (format + auto-fixable lint rules).
+
+#### Linting & Tests (CI-like, inside Docker)
+
+Most code checks run inside the `infinito` container (Docker Compose profile `ci`), so start the stack first:
+
+```bash
+make up
+```
+
+Then run the checks you need:
+
+```bash
+make test-lint
+make test-unit
+make test-integration
+```
+
+To run the full suite:
+
+```bash
+make test
+```
+
+Optional teardown:
+
+```bash
+make down
+```
+
+#### Ansible Syntax Check
+
+```bash
+make lint-ansible
+```
+
+Runs `ansible-playbook --syntax-check` against `playbook.yml`.
+
+#### Deployment Smoke Tests (Optional)
+
+For end-to-end deploy testing against the local development stack, use the `test-local-*` targets (some are destructive and will purge state). Start here:
+
+- `scripts/tests/deploy/local/README.md`
+
 ---
 
 ## 3. CI/CD Must Pass in the Fork First
