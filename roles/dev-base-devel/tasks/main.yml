@@ -1,5 +1,30 @@
-- name: install base-devel
-  package:
-    name: base-devel
-    state: present
+- name: Install base development toolchain (cross-distro)
   become: true
+  vars:
+    dev_base_devel_packages:
+      Archlinux:
+        - base-devel
+      Debian:
+        - build-essential
+      Ubuntu:
+        - build-essential
+      Fedora:
+        - "@development-tools"
+      CentOS:
+        - "@development-tools"
+      "CentOS Stream":
+        - "@development-tools"
+      RedHat:
+        - "@development-tools"
+  ansible.builtin.package:
+    name: >-
+      {{
+        dev_base_devel_packages.get(
+          ansible_facts['distribution'],
+          dev_base_devel_packages.get(
+            ansible_facts['os_family'],
+            dev_base_devel_packages['Debian']
+          )
+        )
+      }}
+    state: present
