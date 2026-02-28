@@ -1,57 +1,271 @@
-# Contributing
+# 🚀 Contributing to Infinito.Nexus
 
-Thank you for your interest in contributing to Infinito.Nexus! We welcome contributions from the community to help improve and enhance this project. Your input makes the project stronger and more adaptable to a wide range of IT infrastructure needs.
+Thank you for your interest in contributing to **Infinito.Nexus**! 🙌
 
-## How to Contribute
+We genuinely appreciate every contribution — whether it's code, documentation, testing, bug reports, or ideas.
+Your involvement helps make Infinito.Nexus more stable, scalable, and powerful.
 
-There are several ways you can help:
-- **Reporting Issues:** Found a bug or have a feature request? Please open an issue on our [GitHub Issues page](https://s.infinito.nexus/issues) with a clear description and steps to reproduce the problem.
-- **Code Contributions:** If you'd like to contribute code, fork the repository, create a new branch for your feature or bug fix, and submit a pull request. Ensure your code adheres to our coding style and includes tests where applicable.
-- **Documentation:** Improving the documentation is a great way to contribute. Whether it's clarifying an existing section or adding new guides, your contributions help others understand and use Infinito.Nexus effectively.
-- **Financial Contributions:** If you appreciate Infinito.Nexus and want to support its ongoing development, consider making a financial contribution. For more details, please see our [donate options](12_DONATE.md).
+Before getting started, please read this document carefully.
+Infinito.Nexus follows a **strict fork-first contribution model** to ensure long-term stability and CI/CD efficiency.
 
-## Code of Conduct
+This workflow is mandatory for all contributors. 💡
 
-All contributors are expected to adhere to our [Code of Conduct](CODE_OF_CONDUCT.md). Please review it to ensure that our community remains welcoming and respectful.
+---
 
-## Pull Request Guidelines
+# 🔐 Our Core Rule: Fork First. Always.
 
-Before submitting a pull request, please ensure that:
-- Your code is well-documented and follows the project's coding standards.
-- All tests pass and, if necessary, new tests are added to cover your changes.
-- The commit messages are clear and descriptive.
-- The relevant documentation is updated to reflect your changes.
+All development must happen in **Folks (Forks)** — never directly in the main repository.
 
-## Reporting Issues
+The `main` branch is production-grade.
+It must remain stable, clean, and green at all times. ✅
 
-When reporting an issue, please include:
-- A descriptive title and detailed explanation.
-- Steps to reproduce the issue.
-- Information about your environment (e.g., operating system, Docker version, Ansible version, etc.).
-- Any relevant logs or error messages.
+---
 
-## Coding Style
+## 🧭 Step 1 — Create Your Folk (Fork)
 
-Please follow these guidelines when contributing code:
-- Write clean, readable code that integrates with the existing codebase.
-- Use descriptive names for variables and functions.
-- Comment your code where necessary, especially in complex sections.
-- Format your code according to the project's style guidelines.
+Before making any change:
 
-## License and Commercial Use
+1. Fork the official repository
+   👉 [https://github.com/kevinveenbirkenbach/infinito-nexus](https://github.com/kevinveenbirkenbach/infinito-nexus)
 
-Infinito.Nexus is primarily designed for private use. Commercial use of Infinito.Nexus is not permitted without a proper licensing agreement. By contributing to this project, you agree that your contributions will be licensed under the same terms as the rest of the project.
+2. Clone your fork locally.
 
-## Getting Started
+3. Create a feature branch inside your fork.
 
-1. **Fork** the repository on GitHub.
-2. **Clone** your fork to your local machine.
-3. **Create** a new branch for your feature or bug fix.
-4. **Implement** your changes and commit them with clear messages.
-5. **Push** your branch to GitHub and open a pull request.
+4. Implement your changes there.
 
-## Community and Support
+This applies to everything:
 
-If you have any questions or need help, feel free to open an issue or join our community discussions. We appreciate your efforts and are here to support you.
+* ✨ New features
+* 🐛 Bug fixes
+* ♻ Refactoring
+* 📚 Documentation
+* 🧪 Experiments
 
-Thank you for contributing to Infinito.Nexus and helping us build a better, more efficient IT infrastructure solution!
+No direct commits to `main`. No exceptions.
+
+---
+
+## 🤔 Why This Model?
+
+This strict model ensures:
+
+* 🟢 `main` always stays stable
+* ⚙️ CI pipelines remain efficient
+* 🧪 Experiments are isolated
+* 💻 Shared runners are protected
+* 📈 The project scales sustainably
+
+Your fork is your workspace.
+The main repository is not a testing playground.
+
+---
+
+# 🛠 Working Inside Your Folk
+
+Once inside your fork:
+
+* Follow the established repository structure.
+* Respect canonical role templates and patterns.
+* Follow naming conventions.
+* Keep commits small and meaningful.
+* Ensure changes are reproducible.
+
+Before opening a Pull Request:
+
+✔ Run all local tests
+✔ Validate linting
+✔ Ensure formatting compliance
+✔ Confirm CI passes in your fork
+
+---
+
+# 🧪 Required Local Checks
+
+All checks are run via `make` from the repository root.
+
+---
+
+## 🎨 Formatting
+
+```bash
+make format
+```
+
+---
+
+## 🧹 Linting & Tests (CI-like via Docker)
+
+Start the CI stack:
+
+```bash
+make up
+```
+
+Run checks:
+
+```bash
+make test-lint
+make test-unit
+make test-integration
+```
+
+Run everything:
+
+```bash
+make test
+```
+
+Optional teardown:
+
+```bash
+make down
+```
+
+---
+
+## 📦 Ansible Syntax Check
+
+```bash
+make lint-ansible
+```
+
+---
+
+## 🌍 Local Deployment Testing
+
+For full end-to-end deployment validation using the local Docker-based development environment, follow the official setup guide on the Hub:
+
+👉 [https://hub.infinito.nexus/t/local-deploy-test-scripts/435](https://hub.infinito.nexus/t/local-deploy-test-scripts/435)
+
+This guide explains how to:
+
+* Run Infinito.Nexus locally
+* Deploy apps under `*.infinito.example`
+* Use the local development test scripts
+* Perform smoke tests
+
+Some commands are destructive — read carefully before running them. ⚠️
+
+---
+
+# 🟢 CI Must Pass in Your Fork First
+
+This is critical.
+
+**All CI/CD pipelines must pass in your fork before opening a Pull Request.**
+
+If CI fails in your fork:
+
+> Fix it there. Do not rely on the main repository to test it for you.
+
+Why?
+
+* 🖥 Main runners are shared and limited
+* ❌ Broken PRs waste compute resources
+* ⏳ They delay other contributors
+* 📉 They reduce reliability
+
+Your fork = your responsibility.
+
+---
+
+# 📬 Pull Request Requirements
+
+Only open a Pull Request when:
+
+* ✅ CI in your fork is fully green
+* 🔄 Your branch is rebased on current `main`
+* 📚 Changes are documented
+* 🧹 Commit history is clean
+* 🧪 Tests pass locally
+
+A good Pull Request:
+
+* Is small and focused
+* Clearly explains its purpose
+* References related issues
+* Follows semantic structure
+
+---
+
+# 💬 Community & Discussion
+
+For questions, development discussions, architecture topics, and Q&A, please use the official Hub:
+
+👉 [https://hub.infinito.nexus/](https://hub.infinito.nexus/)
+
+The Hub is the central place for:
+
+* ❓ Q&A
+* 🧠 Architecture discussions
+* 🛠 Development topics
+* 📣 Announcements
+* 🧪 Testing feedback
+
+We encourage using the Hub instead of GitHub issues for general discussions.
+
+---
+
+# 🐛 Reporting Issues
+
+Bug reports and actionable feature requests should be opened via:
+
+👉 [https://s.infinito.nexus/issues](https://s.infinito.nexus/issues)
+
+Please include:
+
+* Clear description
+* Steps to reproduce
+* Environment details
+* Relevant logs
+
+---
+
+# 🤝 Code of Conduct
+
+All contributors must follow:
+
+`CODE_OF_CONDUCT.md`
+
+Respectful, professional collaboration is expected at all times.
+
+---
+
+# 🌱 Why This Matters
+
+Infinito.Nexus is designed to scale.
+
+Without strict fork-first development:
+
+* CI/CD becomes unstable
+* Review overhead increases
+* Regression risk rises
+* Development velocity drops
+
+By enforcing:
+
+* Fork-first development
+* Green CI in forks
+* Clean Pull Requests
+
+we ensure:
+
+* 🟢 Stable `main`
+* ⚡ Efficient CI usage
+* 🧩 High-quality merges
+* 📈 Sustainable growth
+
+---
+
+# 🏁 Golden Rule
+
+> Work in your Folk.
+> Pass CI in your Folk.
+> Then open a Pull Request.
+
+No direct commits to `main`.
+No CI failures in PR.
+No shortcuts.
+
+Thank you for helping make **Infinito.Nexus** robust, scalable, and future-proof. 💙
