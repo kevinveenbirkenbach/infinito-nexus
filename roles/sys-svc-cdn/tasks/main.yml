@@ -16,9 +16,10 @@
   - svc-prx-openresty
   - sys-svc-compose
   loop_control:
-    label: "{{ item }}"
+    loop_var: handler_role
+    label: "{{ handler_role }}"
   vars:
-    handler_role_name: "{{ item }}"
+    handler_role_name: "{{ handler_role }}"
 
 - name: Ensure CDN directories exist
   file:

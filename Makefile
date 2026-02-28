@@ -30,7 +30,7 @@ endif
 	build build-missing build-no-cache build-no-cache-all \
 	ci-deploy-app \
 	test-act-all test-act-app \
-	test-local-reset test-local-run-all test-local-cleanup test-local-web-purge \
+	test-local-app test-local-reset test-local-run-all test-local-cleanup test-local-web-purge \
 	test-local-rapid test-local-rapid-fresh test-local-full \
 	format bootstrap setup-development
 
@@ -179,6 +179,10 @@ test-act-all:
 
 test-act-app:
 	@bash scripts/tests/deploy/act/app.sh
+
+test-local-app:
+	@: "$${APP:?APP must be set (e.g. APP=web-app-nextcloud)}"
+	@bash scripts/tests/deploy/local/app.sh "$${APP}"
 
 test-local-reset:
 	@PYTHON=python3 \

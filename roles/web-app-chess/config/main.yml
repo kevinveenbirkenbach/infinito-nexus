@@ -19,6 +19,7 @@ compose:
       image:              "ghcr.io/kevinveenbirkenbach/fedi-chess"
       version:            "v1.0.1"
       name:               "web-app-chess"
+      min_storage:        "5GB"
       backup:
         no_stop_required: true
       cpus:               0.5

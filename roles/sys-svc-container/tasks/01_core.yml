@@ -2,8 +2,8 @@
   ansible.builtin.set_fact:
     sys_svc_container_packages: >-
       {{
-        SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION[ansible_distribution]
-        if ansible_distribution in SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION
+        SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION[ansible_facts['distribution']]
+        if ansible_facts['distribution'] in SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION
         else []
       }}
 
@@ -12,16 +12,16 @@
     that:
       - (sys_svc_container_packages | length) > 0
     fail_msg: >-
-      Unsupported distribution for Docker role: {{ ansible_distribution }}
-      ({{ ansible_os_family }}).
+      Unsupported distribution for Docker role: {{ ansible_facts['distribution'] }}
+      ({{ ansible_facts['os_family'] }}).
 
 - name: Setup Docker repository on Debian and Ubuntu
   include_tasks: 01a_debian.yml
-  when: ansible_distribution in ['Debian', 'Ubuntu']
+  when: ansible_facts['distribution'] in ['Debian', 'Ubuntu']
 
 - name: Setup Docker repository and SDK prerequisites on RedHat family
   include_tasks: 01b_redhat.yml
-  when: ansible_os_family == 'RedHat'
+  when: ansible_facts['os_family'] == 'RedHat'
 
 - name: Install Docker packages
   ansible.builtin.package:

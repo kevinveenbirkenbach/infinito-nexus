@@ -1,9 +1,2 @@
----
-- when: run_once_dev_fakeroot is not defined
-  block:
-    - name: Install fakeroot
-      package:
-        name: fakeroot
-        state: present
-
-    - include_tasks: utils/once/flag.yml
+- include_tasks: 01_core.yml
+  when: run_once_dev_fakeroot is not defined

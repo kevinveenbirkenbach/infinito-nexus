@@ -40,6 +40,7 @@ compose:
     discourse:
       name:               "discourse"
       version:            "main" # No version tag on container image exists :(
+      min_storage:        "15GB"
 # Impossible to don't stop due to 'test_backup_no_stop_required_consistency' :(
 #      backup:
 #        no_stop_required: true

@@ -2,7 +2,7 @@
   ansible.builtin.set_fact:
     openldap_python_ldap_native_lib_packages: >-
       {{
-        OPENLDAP_PYTHON_LDAP_NATIVE_LIB_PACKAGES_BY_OS_FAMILY.get(ansible_os_family, [])
+        OPENLDAP_PYTHON_LDAP_NATIVE_LIB_PACKAGES_BY_OS_FAMILY.get(ansible_facts['os_family'], [])
       }}
   changed_when: false
 

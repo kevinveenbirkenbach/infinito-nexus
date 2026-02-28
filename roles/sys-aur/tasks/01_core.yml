@@ -12,7 +12,6 @@
   become: true
   package:
     name:
-      - base-devel
       - patch
       - git
     state: present

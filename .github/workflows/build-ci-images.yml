@@ -72,8 +72,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        with:
-          install: true
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -93,21 +91,40 @@ jobs:
           echo
           docker buildx du || true
 
-      - name: Build & push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          # If your Dockerfile has multiple targets and you want to enforce one, set:
-          # target: full
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}
-          build-args: |
-            PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable
-            NIX_CONFIG=access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-          cache-from: type=gha,scope=infinito-${{ matrix.distro }}
-          cache-to: type=gha,mode=max,scope=infinito-${{ matrix.distro }}
+      - name: Build & push (retry 7x, 20s)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          max_attempts=7
+          retry_delay_seconds=20
+          attempt=1
+
+          while true; do
+            echo "=== Build & push attempt ${attempt}/${max_attempts} ==="
+
+            if docker buildx build \
+              --file ./Dockerfile \
+              --push \
+              --tag "ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}" \
+              --build-arg "PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable" \
+              --build-arg "NIX_CONFIG=access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}" \
+              --cache-from "type=gha,scope=infinito-${{ matrix.distro }}" \
+              --cache-to "type=gha,mode=max,scope=infinito-${{ matrix.distro }}" \
+              .; then
+              echo "Build & push succeeded on attempt ${attempt}/${max_attempts}."
+              break
+            fi
+
+            if [ "${attempt}" -ge "${max_attempts}" ]; then
+              echo "Build & push failed after ${max_attempts} attempts."
+              exit 1
+            fi
+
+            echo "Attempt ${attempt} failed. Retrying in ${retry_delay_seconds}s..."
+            sleep "${retry_delay_seconds}"
+            attempt=$((attempt + 1))
+          done
 
       - name: Disk pressure (post-build)
         if: always()

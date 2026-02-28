@@ -44,7 +44,7 @@ DNS_PROVIDER:                             "localhost"   # The DNS Provider\Regis
 HOSTING_PROVIDER:                         "localhost"   # Provider which hosts the server -> hetzner
 
 ## Docker
-DOCKER_IN_CONTAINER:              "{{ ansible_env.container | default('') != '' }}"
+DOCKER_IN_CONTAINER:              "{{ (ansible_facts['env']['container'] | default('')) != '' }}"
 DOCKER_RESTART_POLICY:            "unless-stopped"                                                    # Default restart parameter for docker containers
 DOCKER_WHITELISTET_ANON_VOLUMES:  []                                                                  # Volumes which should be ignored during docker anonymous health check
 DOCKER_BIND_HOST:                 "{{ '0.0.0.0' if DOCKER_IN_CONTAINER | bool else '127.0.0.1'}}"     # Host to which docker containers publish ports to

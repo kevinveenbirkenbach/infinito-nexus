@@ -22,10 +22,12 @@
   include_tasks: 03_upgrade.yml
 
 - name: Load system configuration steps
-  include_tasks: "{{ item }}"
+  include_tasks: "{{ nextcloud_step }}"
   loop:
     - 04_admin.yml
     - 05_system_config.yml
+  loop_control:
+    loop_var: nextcloud_step
 
 - name: Setup Nextcloud Plugins
   include_tasks: 06_setup_plugin.yml

@@ -1,17 +1,20 @@
 - block:
   - name: Include dependencies
     include_role:
-      name: '{{ item }}'
+      name: '{{ dependency_role }}'
     loop:
     - sys-svc-webserver-core
+    loop_control:
+      loop_var: dependency_role
 
   - name: Include task to remove deprecated nginx configs
     include_tasks: remove_deprecated_nginx_configs.yml
     loop: "{{ deprecated_domains }}"
     loop_control:
-      label: "{{ item }}"
+      loop_var: deprecated_domain
+      label: "{{ deprecated_domain }}"
     vars:
-      domain: "{{ item }}"
+      domain: "{{ deprecated_domain }}"
     when:
     - MODE_CLEANUP | bool
 

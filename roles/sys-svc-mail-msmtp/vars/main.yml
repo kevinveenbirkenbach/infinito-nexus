@@ -44,7 +44,7 @@ SYS_SVC_MAIL_MSMTP_PACKAGES_BY_DISTRIBUTION:
 SYS_SVC_MAIL_MSMTP_PACKAGES: >-
   {{
     SYS_SVC_MAIL_MSMTP_PACKAGES_BY_DISTRIBUTION.get(
-      ansible_distribution,
+      ansible_facts['distribution'],
       SYS_SVC_MAIL_MSMTP_PACKAGES_DEFAULT
     )
   }}

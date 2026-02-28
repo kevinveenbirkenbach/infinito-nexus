@@ -40,6 +40,7 @@ compose:
       image:   docker.io/akaunting/akaunting 
       version: latest
       name:    akaunting
+      min_storage: "8GB"
     redis:
       backup:
         disabled: true

@@ -1,0 +1,16 @@
+---
+# fakeroot is available on all default CI distros, but on CentOS Stream 9 it
+# comes from EPEL.
+DEV_FAKEROOT_PACKAGES_BY_DISTRIBUTION:
+  Archlinux:
+    - fakeroot
+  Debian:
+    - fakeroot
+  Ubuntu:
+    - fakeroot
+  Fedora:
+    - fakeroot
+  CentOS:
+    - fakeroot
+  CentOS Stream:
+    - fakeroot

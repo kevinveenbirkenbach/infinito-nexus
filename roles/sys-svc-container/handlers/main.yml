@@ -8,6 +8,10 @@
 
 - name: Ensure Docker-In-Docker DNS works
   ansible.builtin.script: "{{ role_path }}/files/test-dns.sh"
+  register: docker_in_docker_dns_check
+  until: docker_in_docker_dns_check is succeeded
+  retries: 7
+  delay: 20
   listen: container manager restart
   run_once: true
   when:

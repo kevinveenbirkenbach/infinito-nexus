@@ -20,6 +20,7 @@ compose:
       image:            atlassian/confluence
       version:          latest
       name:             confluence
+      min_storage:      "20GB"
       cpus:             "3.0"
       mem_reservation:  "6g"
       mem_limit:        "8g"
