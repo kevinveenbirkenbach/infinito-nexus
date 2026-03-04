@@ -105,7 +105,7 @@ install_python_packages() {
   need_privileged_or_fail
 
   case "${ID}" in
-    arch)
+    arch | manjaro)
       run_privileged pacman -Syu --noconfirm --needed python python-pip
       run_privileged pacman -Scc --noconfirm || true
       ;;
