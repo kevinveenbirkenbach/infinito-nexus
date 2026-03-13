@@ -4,6 +4,8 @@
   vars:
     docker_compose_flush_handlers: false
     application_id: web-app-nextcloud
+    # Necessary to save talk recordings
+    webserver_client_max_body_size: 10G
 
 - when: NEXTCLOUD_WHITEBOARD_ENABLED | bool
   block:
