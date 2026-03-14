@@ -1,0 +1,38 @@
+---
+- name: "Mattermost | Create system administrator user"
+  shell: |
+    container exec -i {{ MM_CONTAINER }} \
+      /mattermost/bin/mattermost user create \
+        --email    "{{ users.administrator.email }}" \
+        --username "{{ users.administrator.username }}" \
+        --password {{ users.administrator.password | quote }} \
+        --system-admin
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_create_admin
+  changed_when: "'created' in mm_create_admin.stdout"
+  failed_when: mm_create_admin.rc != 0 and 'already exists' not in mm_create_admin.stderr
+
+- name: "Mattermost | Create default team"
+  shell: |
+    container exec -i {{ MM_CONTAINER }} \
+      /mattermost/bin/mattermost team create \
+        --name         "main" \
+        --display_name "{{ SOFTWARE_NAME }}"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_create_team
+  changed_when: "'created' in mm_create_team.stdout"
+  failed_when: mm_create_team.rc != 0 and 'already exists' not in mm_create_team.stderr
+
+- name: "Mattermost | Add administrator to default team"
+  shell: |
+    container exec -i {{ MM_CONTAINER }} \
+      /mattermost/bin/mattermost team add \
+        main \
+        "{{ users.administrator.email }}"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_add_to_team
+  changed_when: "'added' in mm_add_to_team.stdout"
+  failed_when: mm_add_to_team.rc != 0 and 'already' not in mm_add_to_team.stderr

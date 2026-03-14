@@ -1,0 +1,47 @@
+---
+- name: "load docker, db and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full
+  vars:
+    docker_compose_flush_handlers: true
+
+- name: "Wait for Mattermost HTTP endpoint"
+  wait_for:
+    host: "{{ DOCKER_REACH_HOST }}"
+    port: "{{ ports.localhost.http[application_id] }}"
+    delay: 10
+    timeout: 300
+
+- name: "Wait for Mattermost API to be ready"
+  uri:
+    url: "http://{{ DOCKER_REACH_HOST }}:{{ ports.localhost.http[application_id] }}/api/v4/system/ping"
+    method: GET
+    status_code: 200
+    return_content: no
+  register: mm_ping
+  until: mm_ping.status == 200
+  retries: 30
+  delay: 10
+
+- name: "Run Mattermost setup routines"
+  include_tasks: 01_setup.yml
+
+- name: "Configure Keycloak OIDC mappers for Mattermost"
+  include_tasks: 02_keycloak.yml
+  when: MM_OIDC_ENABLED | bool
+
+- name: "Run Mattermost cleanup routines"
+  include_tasks: 03_cleanup.yml
+  when: MODE_CLEANUP | bool
+
+- name: "Include DNS role to register Mattermost domain(s)"
+  include_role:
+    name: sys-dns-cloudflare-records
+  vars:
+    cloudflare_records:
+      - zone:     "{{ lookup('domain', application_id) | to_zone }}"
+        type:     A
+        name:     "{{ lookup('domain', application_id) }}"
+        content:  "{{ networks.internet.ip4 }}"
+        proxied:  true
+  when: DNS_PROVIDER == 'cloudflare'

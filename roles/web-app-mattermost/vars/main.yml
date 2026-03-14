@@ -1,0 +1,19 @@
+# General
+application_id:               "web-app-mattermost"
+
+# Docker
+container_port:               "{{ lookup('config', application_id, 'compose.services.mattermost.port') }}"
+
+# Mattermost
+MM_VERSION:                   "{{ lookup('config', application_id, 'compose.services.mattermost.version') }}"
+MM_IMAGE:                     "{{ lookup('config', application_id, 'compose.services.mattermost.image') }}"
+MM_CONTAINER:                 "{{ lookup('config', application_id, 'compose.services.mattermost.name') }}"
+
+## Volumes
+MM_VOLUME_CONFIG:             "{{ lookup('config', application_id, 'compose.volumes.config') }}"
+MM_VOLUME_DATA:               "{{ lookup('config', application_id, 'compose.volumes.data') }}"
+MM_VOLUME_LOGS:               "{{ lookup('config', application_id, 'compose.volumes.logs') }}"
+MM_VOLUME_PLUGINS:            "{{ lookup('config', application_id, 'compose.volumes.plugins') }}"
+
+## OIDC (via MM_GITLABSETTINGS_* — Team Edition workaround for Keycloak)
+MM_OIDC_ENABLED:              "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
