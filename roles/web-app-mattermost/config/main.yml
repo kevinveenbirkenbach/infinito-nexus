@@ -1,0 +1,54 @@
+server:
+  csp:
+    flags:
+      script-src-elem:
+        unsafe-inline:            true
+      style-src-attr:
+        unsafe-inline:            true
+    whitelist: {}
+  domains:
+    aliases: []
+    canonical:
+      - chat.{{ DOMAIN_PRIMARY }}
+compose:
+  services:
+    oidc:
+      enabled:                    true
+      shared:                     false
+    logout:
+      enabled:                    true
+    ldap:
+      enabled:                    false
+    dashboard:
+      enabled:                    true
+    matomo:
+      enabled:                    true
+      shared:                     true
+    database:
+      shared:                     true
+      type:                       "postgres"
+      enabled:                    true
+    mattermost:
+      image:                      "mattermost/mattermost-team-edition"
+      version:                    "latest"
+      backup:
+        no_stop_required:         true
+      port:                       8065
+      name:                       "mattermost"
+      cpus:                       "1.0"
+      mem_reservation:            "512m"
+      mem_limit:                  "1g"
+      pids_limit:                 512
+    oauth2:
+      enabled:                    false
+    redis:
+      backup:
+        disabled:                 true
+      enabled:                    false
+    css:
+      enabled:                    true
+  volumes:
+    config:                       "mattermost_config"
+    data:                         "mattermost_data"
+    logs:                         "mattermost_logs"
+    plugins:                      "mattermost_plugins"

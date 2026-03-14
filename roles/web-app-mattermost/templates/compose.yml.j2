@@ -1,0 +1,30 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ MM_IMAGE }}:{{ MM_VERSION }}"
+    container_name: "{{ MM_CONTAINER }}"
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    volumes:
+      - config:/mattermost/config
+      - data:/mattermost/data
+      - logs:/mattermost/logs
+      - plugins:/mattermost/plugins
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={
+      'config':   {'name': MM_VOLUME_CONFIG},
+      'data':     {'name': MM_VOLUME_DATA},
+      'logs':     {'name': MM_VOLUME_LOGS},
+      'plugins':  {'name': MM_VOLUME_PLUGINS},
+    }
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
