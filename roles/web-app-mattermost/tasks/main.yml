@@ -5,23 +5,53 @@
   vars:
     docker_compose_flush_handlers: true
 
-- name: "Wait for Mattermost HTTP endpoint"
-  wait_for:
-    host: "{{ DOCKER_REACH_HOST }}"
-    port: "{{ ports.localhost.http[application_id] }}"
-    delay: 10
-    timeout: 300
+- name: "Wait for Mattermost to be ready"
+  block:
 
-- name: "Wait for Mattermost API to be ready"
-  uri:
-    url: "http://{{ DOCKER_REACH_HOST }}:{{ ports.localhost.http[application_id] }}/api/v4/system/ping"
-    method: GET
-    status_code: 200
-    return_content: no
-  register: mm_ping
-  until: mm_ping.status == 200
-  retries: 30
-  delay: 10
+    - name: "Wait for Mattermost HTTP endpoint"
+      wait_for:
+        host: "{{ DOCKER_REACH_HOST }}"
+        port: "{{ ports.localhost.http[application_id] }}"
+        delay: 10
+        timeout: 300
+
+    - name: "Wait for Mattermost API to be ready"
+      uri:
+        url: "http://{{ DOCKER_REACH_HOST }}:{{ ports.localhost.http[application_id] }}/api/v4/system/ping"
+        method: GET
+        status_code: 200
+        return_content: no
+      register: mm_ping
+      until: mm_ping.status == 200
+      retries: 30
+      delay: 10
+
+  rescue:
+
+    - name: "Mattermost | container state"
+      ansible.builtin.shell: >
+        container inspect
+        --format '{{ "{{.State.Status}}" }} exit={{ "{{.State.ExitCode}}" }} restarting={{ "{{.State.Restarting}}" }}'
+        {{ MM_CONTAINER }}
+      register: mm_inspect
+      changed_when: false
+      failed_when: false
+
+    - name: "Mattermost | container logs (last 100 lines)"
+      ansible.builtin.shell: "container logs --tail 100 {{ MM_CONTAINER }} 2>&1"
+      register: mm_logs
+      changed_when: false
+      failed_when: false
+
+    - name: "Mattermost | startup failure report"
+      ansible.builtin.debug:
+        msg:
+          container_state: "{{ mm_inspect.stdout | default('inspect failed') }}"
+          container_logs: "{{ mm_logs.stdout | default('') }}"
+
+    - name: "Mattermost | fail after diagnostics"
+      ansible.builtin.fail:
+        msg: "Mattermost did not become ready. See diagnostic output above."
 
 - name: "Run Mattermost setup routines"
   include_tasks: 01_setup.yml
