@@ -1,11 +1,4 @@
 ---
-# Cleanup tasks for web-app-mattermost.
-#
-# GitLab OAuth2 (OIDC) enable/disable is controlled entirely via the
-# MM_GITLABSETTINGS_ENABLE env var in templates/env.j2, which is set
-# from MM_OIDC_ENABLED. Re-running the role with oidc.enabled: false
-# will redeploy the container with GitLab OAuth disabled — no API call needed.
-
 - name: "Mattermost | Cleanup — confirm OIDC state"
   debug:
     msg: >

@@ -11,8 +11,10 @@
       - data:/mattermost/data
       - logs:/mattermost/logs
       - plugins:/mattermost/plugins
+      - client-plugins:/mattermost/client/plugins
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
+{% set container_healthcheck = 'api/v4/system/ping' %}
 {% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
@@ -24,7 +26,8 @@
       'config':   {'name': MM_VOLUME_CONFIG},
       'data':     {'name': MM_VOLUME_DATA},
       'logs':     {'name': MM_VOLUME_LOGS},
-      'plugins':  {'name': MM_VOLUME_PLUGINS},
+      'plugins':        {'name': MM_VOLUME_PLUGINS},
+      'client-plugins': {'name': MM_VOLUME_CLIENT_PLUGINS},
     }
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

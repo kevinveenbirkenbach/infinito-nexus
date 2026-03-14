@@ -14,6 +14,12 @@ MM_VOLUME_CONFIG:             "{{ lookup('config', application_id, 'compose.volu
 MM_VOLUME_DATA:               "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 MM_VOLUME_LOGS:               "{{ lookup('config', application_id, 'compose.volumes.logs') }}"
 MM_VOLUME_PLUGINS:            "{{ lookup('config', application_id, 'compose.volumes.plugins') }}"
+MM_VOLUME_CLIENT_PLUGINS:    "{{ lookup('config', application_id, 'compose.volumes.client-plugins') }}"
 
 ## OIDC (via MM_GITLABSETTINGS_* — Team Edition workaround for Keycloak)
 MM_OIDC_ENABLED:              "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
+
+## Keycloak integration (for 02_keycloak.yml mapper setup)
+MM_KEYCLOAK_CONTAINER:        "{{ lookup('config', 'web-app-keycloak', 'compose.services.keycloak.name') }}"
+MM_KEYCLOAK_ADMIN_USER:       "{{ lookup('config', 'web-app-keycloak', 'accounts.system.username') }}"
+MM_KEYCLOAK_ADMIN_PASS:       "{{ users.administrator.password }}"
