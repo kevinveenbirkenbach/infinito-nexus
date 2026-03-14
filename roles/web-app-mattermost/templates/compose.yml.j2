@@ -14,8 +14,13 @@
       - client-plugins:/mattermost/client/plugins
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-{% set container_healthcheck = 'api/v4/system/ping' %}
-{% include 'roles/sys-svc-container/templates/healthcheck/curl.yml.j2' %}
+    healthcheck:
+      test: ["CMD", "/mattermost/bin/mmctl", "--local", "system", "status"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
 
