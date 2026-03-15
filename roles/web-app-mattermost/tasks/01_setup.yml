@@ -1,0 +1,45 @@
+---
+- name: "Mattermost | Create system administrator user"
+  shell: |
+    container exec -i {{ MM_CONTAINER }} \
+      /mattermost/bin/mmctl --local user create \
+        --email    "{{ users.administrator.email }}" \
+        --username "{{ users.administrator.username }}" \
+        --password {{ users.administrator.password | quote }} \
+        --system-admin
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_create_admin
+  changed_when: mm_create_admin.rc == 0
+  failed_when: mm_create_admin.rc != 0 and 'already exists' not in (mm_create_admin.stdout + mm_create_admin.stderr)
+
+- name: "Mattermost | Create default team"
+  shell: |
+    container exec -i {{ MM_CONTAINER }} \
+      /mattermost/bin/mmctl --local team create \
+        --name         "main" \
+        --display-name "{{ SOFTWARE_NAME }}"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_create_team
+  changed_when: mm_create_team.rc == 0
+  failed_when: mm_create_team.rc != 0 and 'already exists' not in (mm_create_team.stdout + mm_create_team.stderr)
+
+- name: "Mattermost | Check if administrator is already in default team"
+  shell: |
+    container exec -i {{ MM_CONTAINER }} \
+      /mattermost/bin/mmctl --local user list --team main
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_team_members
+  changed_when: false
+
+- name: "Mattermost | Add administrator to default team"
+  shell: |
+    container exec -i {{ MM_CONTAINER }} \
+      /mattermost/bin/mmctl --local team users add \
+        main \
+        "{{ users.administrator.email }}"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  when: users.administrator.email not in mm_team_members.stdout

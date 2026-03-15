@@ -1,0 +1,77 @@
+---
+# @see https://docs.mattermost.com/deployment/sso-gitlab.html
+
+- name: "Mattermost | Keycloak — authenticate kcadm.sh"
+  shell: >-
+    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh config credentials
+    --server "http://localhost:8080"
+    --realm master
+    --user {{ MM_KEYCLOAK_ADMIN_USER | quote }}
+    --password {{ MM_KEYCLOAK_ADMIN_PASS | quote }}
+  args:
+    chdir: "{{ lookup('container', 'web-app-keycloak', 'directories.instance') }}"
+  changed_when: false
+
+- name: "Mattermost | Keycloak — resolve Mattermost client UUID"
+  shell: >-
+    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh get clients
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    -q clientId={{ OIDC.CLIENT.ID | quote }}
+    --fields id --format csv --noquotes
+  args:
+    chdir: "{{ lookup('container', 'web-app-keycloak', 'directories.instance') }}"
+  register: mm_kc_client_uuid
+  changed_when: false
+  failed_when: mm_kc_client_uuid.stdout | trim == ''
+
+- name: "Mattermost | Keycloak — list existing protocol mappers"
+  shell: >-
+    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh get
+    clients/{{ mm_kc_client_uuid.stdout | trim }}/protocol-mappers/models
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    --fields name --format csv --noquotes
+  args:
+    chdir: "{{ lookup('container', 'web-app-keycloak', 'directories.instance') }}"
+  register: mm_kc_existing_mappers
+  changed_when: false
+
+- name: "Mattermost | Keycloak — add 'id' mapper (integer from LDAP uidNumber)"
+  shell: >-
+    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh create
+    clients/{{ mm_kc_client_uuid.stdout | trim }}/protocol-mappers/models
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    -s name=mattermost-id
+    -s protocol=openid-connect
+    -s protocolMapper=oidc-usermodel-attribute-mapper
+    -s 'config."user.attribute"=uidNumber'
+    -s 'config."claim.name"=id'
+    -s 'config."jsonType.label"=long'
+    -s 'config."userinfo.token.claim"=true'
+    -s 'config."id.token.claim"=true'
+    -s 'config."access.token.claim"=true'
+  args:
+    chdir: "{{ lookup('container', 'web-app-keycloak', 'directories.instance') }}"
+  when: "'mattermost-id' not in mm_kc_existing_mappers.stdout"
+
+- name: "Mattermost | Keycloak — add 'username' mapper (from Keycloak username)"
+  shell: >-
+    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    /opt/keycloak/bin/kcadm.sh create
+    clients/{{ mm_kc_client_uuid.stdout | trim }}/protocol-mappers/models
+    -r {{ OIDC.CLIENT.REALM | quote }}
+    -s name=mattermost-username
+    -s protocol=openid-connect
+    -s protocolMapper=oidc-usermodel-property-mapper
+    -s 'config."user.attribute"=username'
+    -s 'config."claim.name"=username'
+    -s 'config."jsonType.label"=String'
+    -s 'config."userinfo.token.claim"=true'
+    -s 'config."id.token.claim"=true'
+    -s 'config."access.token.claim"=true'
+  args:
+    chdir: "{{ lookup('container', 'web-app-keycloak', 'directories.instance') }}"
+  when: "'mattermost-username' not in mm_kc_existing_mappers.stdout"
