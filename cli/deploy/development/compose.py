@@ -39,7 +39,6 @@ class Compose:
         check: bool = True,
         capture: bool = False,
         live: bool = False,
-        keep_lines: int = 400,
         text: bool = True,
         extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
@@ -49,9 +48,7 @@ class Compose:
             env.update({k: str(v) for k, v in extra_env.items()})
 
         if live:
-            r = run_streaming(
-                cmd, cwd=self.repo_root, env=env, keep_lines=keep_lines, text=text
-            )
+            r = run_streaming(cmd, cwd=self.repo_root, env=env, text=text)
         else:
             r = subprocess.run(
                 cmd,
@@ -158,8 +155,7 @@ class Compose:
                 ["sh", "-lc", "/opt/src/infinito/scripts/docker/entry.sh true"],
                 workdir="/opt/src/infinito",
                 check=False,
-                live=True,  # <--- live output
-                keep_lines=400,  # <--- tail for failure printing
+                live=True,
                 extra_env={
                     "ANSIBLE_FORCE_COLOR": "1",
                     "PY_COLORS": "1",
@@ -168,10 +164,6 @@ class Compose:
             )
 
             if r.returncode != 0:
-                print("===== entry.sh stdout (tail) =====")
-                print((r.stdout or "").rstrip() or "<empty>")
-                print("===== entry.sh stderr (tail) =====")
-                print((r.stderr or "").rstrip() or "<empty>")
                 raise RuntimeError(f"entry.sh init failed (rc={r.returncode})")
 
     def down(self) -> None:
@@ -193,7 +185,6 @@ class Compose:
         workdir: str | None = None,
         capture: bool = False,
         live: bool = False,
-        keep_lines: int = 400,
         tty: bool | None = None,
         extra_env: dict[str, str] | None = None,
     ) -> subprocess.CompletedProcess:
@@ -206,7 +197,7 @@ class Compose:
           - tty=False -> -T (CI safe)
 
         Streaming:
-          - live=True streams stdout/stderr to terminal while keeping a tail buffer.
+          - live=True streams stdout/stderr to terminal.
         """
         if tty is None:
             tty = not self._is_ci()
@@ -229,7 +220,6 @@ class Compose:
             check=check,
             capture=capture,
             live=live,
-            keep_lines=keep_lines,
         )
 
     def _get_infinito_container_id(self) -> str:
