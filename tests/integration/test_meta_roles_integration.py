@@ -24,9 +24,9 @@ class TestMetaRolesIntegration(unittest.TestCase):
         for path in STAGES_DIR.rglob("*.yml"):
             cls.playbook_contents[path] = path.read_text(encoding="utf-8")
 
-        # Regex for include_tasks line with {{ item }}-roles.yml
+        # Regex for include_tasks line with {{ <loop_var> }}-roles.yml
         cls.include_pattern = re.compile(
-            r'include_tasks:\s*["\']\./tasks/groups/\{\{\s*item\s*\}\}-roles\.yml["\']'
+            r'include_tasks:\s*["\']\./tasks/groups/\{\{\s*[A-Za-z_][A-Za-z0-9_]*\s*\}\}-roles\.yml["\']'
         )
 
     def test_all_role_files_exist(self):
