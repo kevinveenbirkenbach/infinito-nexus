@@ -1,0 +1,19 @@
+---
+- name: Ensure virtual memory limit is set for Elasticsearch (Zammad Docs)
+  ansible.posix.sysctl:
+    name: vm.max_map_count
+    value: "{{ zammad_sysctl_max_map_count }}"
+    state: present
+    reload: yes
+
+- name: Create base directory for Zammad data
+  ansible.builtin.file:
+    path: "/opt/zammad"
+    state: directory
+    mode: '0755'
+
+- name: Deploy Zammad Docker Compose from template
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: /opt/zammad/docker-compose.yml
+    mode: '0644'

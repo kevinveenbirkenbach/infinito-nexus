@@ -1,0 +1,39 @@
+services:
+  zammad-db:
+    image: postgres:15.4-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=zammad
+      - POSTGRES_USER=zammad
+      - POSTGRES_PASSWORD={{ vault_zammad_db_password | default('zammad_pass') }}
+    volumes:
+      - /opt/zammad/postgresql:/var/lib/postgresql/data
+
+  zammad-elasticsearch:
+    image: elasticsearch:8.10.2
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    volumes:
+      - /opt/zammad/elasticsearch:/usr/share/elasticsearch/data
+
+  zammad-rail:
+    image: {{ zammad_image }}
+    restart: always
+    depends_on:
+      - zammad-db
+      - zammad-elasticsearch
+    environment:
+      - MEMCACHE_SERVERS=zammad-memcached:11211
+      - POSTGRES_HOST=zammad-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=zammad
+      - POSTGRES_PASS={{ vault_zammad_db_password | default('zammad_pass') }}
+      - TZ={{ zammad_timezone }}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zammad.rule=Host(`{{ zammad_main_domain }}`) || Host(`{{ zammad_alias_domain }}`)"
+      - "traefik.http.routers.zammad.tls=true"
+      - "traefik.http.routers.zammad.tls.certresolver=letsencrypt"

@@ -1,0 +1,6 @@
+---
+- name: "Include Web Application Roles"
+  include_role:
+    name: "{{ item }}"
+  loop:
+    - web-app-zammad
