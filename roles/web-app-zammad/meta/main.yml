@@ -1,0 +1,15 @@
+galaxy_info:
+  author: Nelson Ortiz
+  description: Zammad Helpdesk integration with OIDC IAM support for Infinito.Nexus
+  company: Infinito
+  license: MIT
+  min_ansible_version: "2.10"
+  platforms:
+    - name: GenericUNIX
+      versions:
+        - all
+  categories:
+    - web
+    - helpdesk
+
+dependencies: []
