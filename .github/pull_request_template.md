@@ -1,7 +1,3 @@
-## Collaboration Guidelines
-
-All contributions should follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436).
-
 ## Summary
 
 Briefly describe the purpose of this pull request.
@@ -22,14 +18,17 @@ Select the semantic version impact of this change:
 * [ ] **Minor** – New feature or new role (backwards compatible)
 * [ ] **Patch** – Bugfix or internal improvement
 
-### Breaking Changes
+---
 
-If this PR introduces breaking changes, describe them here.
+## Impacted Areas
 
-Example:
+Select affected components.
 
-* renamed variable `ldap_user_dn` → `ldap_bind_dn`
-* removed deprecated configuration option
+* [ ] Role implementation
+* [ ] Configuration variables
+* [ ] Documentation
+* [ ] CI/CD
+* [ ] Security
 
 ---
 
@@ -48,6 +47,10 @@ Key points:
 ## Definition of Done (DoD)
 
 Please ensure all items are completed before requesting review.
+
+### Workflow
+
+* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436).
 
 ### Code Quality
 
@@ -72,18 +75,6 @@ Please ensure all items are completed before requesting review.
 * [ ] Link from this request to the https://project.infinito.nexus/ workitem and backwards
 * [ ] Workitem in https://project.infinito.nexus/ updated
 * [ ] Attach a **screenshot of the running application** from the local deployment.([📕local environment setup guide](https://hub.infinito.nexus/t/local-test-environment-deploy/435))
-
----
-
-## Impacted Areas
-
-Select affected components.
-
-* [ ] Role implementation
-* [ ] Configuration variables
-* [ ] Documentation
-* [ ] CI/CD
-* [ ] Security
 
 ---
 
