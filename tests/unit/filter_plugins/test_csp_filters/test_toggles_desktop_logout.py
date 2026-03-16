@@ -40,7 +40,9 @@ class TestCspTogglesDashboardLogout(unittest.TestCase):
         self._set_service_enabled(apps, "dashboard", True)
         header = self.filter.build_csp_header(apps, "app1", domains, "https")
         self.assertIn("frame-ancestors", header)
-        self.assertIn("domain-example.com", header)
+        frame_ancestors = self._get_directive_tokens(header, "frame-ancestors")
+        self.assertIn("domain-example.com", frame_ancestors)
+        self.assertNotIn("https://domain-example.com", frame_ancestors)
 
         self._set_service_enabled(apps, "dashboard", False)
         header_no = self.filter.build_csp_header(apps, "app1", domains, "https")
