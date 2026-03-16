@@ -23,7 +23,7 @@
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   register: mm_create_team
   changed_when: mm_create_team.rc == 0
-  failed_when: mm_create_team.rc != 0 and 'already exists' not in (mm_create_team.stdout + mm_create_team.stderr)
+  failed_when: mm_create_team.rc != 0 and 'already exists' not in (mm_create_team.stdout + mm_create_team.stderr) and 'existing team' not in (mm_create_team.stdout + mm_create_team.stderr)
 
 - name: "Mattermost | Check if administrator is already in default team"
   shell: |
@@ -43,3 +43,46 @@
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   when: users.administrator.email not in mm_team_members.stdout
+
+- name: "Mattermost | Check administrator auth service"
+  shell: |
+    container exec -i {{ lookup('database', application_id, 'container') }} \
+      psql -U {{ lookup('database', application_id, 'username') }} \
+           -d {{ lookup('database', application_id, 'name') }} \
+           -t -c "SELECT authservice FROM users WHERE email='{{ users.administrator.email }}';"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_admin_authservice
+  changed_when: false
+  when: MATTERMOST_OIDC_ENABLED | bool
+
+- name: "Mattermost | Get administrator uidNumber from LDAP"
+  shell: |
+    container exec -i {{ MATTERMOST_LDAP_CONTAINER }} \
+      ldapsearch -x -H ldap://localhost:389 \
+        -D {{ LDAP.DN.ADMINISTRATOR.DATA | quote }} \
+        -w {{ LDAP.BIND_CREDENTIAL | quote }} \
+        -b {{ LDAP.DN.OU.USERS | quote }} \
+        "(uid={{ users.administrator.username }})" uidNumber \
+    | grep '^uidNumber:' | awk '{print $2}'
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_admin_uidnumber
+  changed_when: false
+  failed_when: mm_admin_uidnumber.rc != 0 or mm_admin_uidnumber.stdout | trim == ''
+  when:
+    - MATTERMOST_OIDC_ENABLED | bool
+    - mm_admin_authservice.stdout | trim != 'gitlab'
+
+- name: "Mattermost | Convert administrator to gitlab SSO auth"
+  shell: |
+    container exec -i {{ lookup('database', application_id, 'container') }} \
+      psql -U {{ lookup('database', application_id, 'username') }} \
+           -d {{ lookup('database', application_id, 'name') }} \
+           -c "UPDATE users SET authservice='gitlab', authdata='{{ mm_admin_uidnumber.stdout | trim }}', password='' WHERE email='{{ users.administrator.email }}';"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  when:
+    - MATTERMOST_OIDC_ENABLED | bool
+    - mm_admin_authservice.stdout | trim != 'gitlab'
+

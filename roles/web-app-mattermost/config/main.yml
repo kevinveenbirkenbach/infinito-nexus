@@ -10,6 +10,8 @@ server:
     aliases: []
     canonical:
       - chat.{{ DOMAIN_PRIMARY }}
+  status_codes:
+    default:                      [200, 301, 302, 405]
 compose:
   services:
     oidc:
@@ -30,7 +32,7 @@ compose:
       enabled:                    true
     mattermost:
       image:                      "mattermost/mattermost-team-edition"
-      version:                    "latest"
+      version:                    "7.10.5"
       backup:
         no_stop_required:         true
       port:                       8065

@@ -23,3 +23,6 @@ MATTERMOST_OIDC_ENABLED:              "{{ lookup('config', application_id, 'comp
 MATTERMOST_KEYCLOAK_CONTAINER:        "{{ lookup('config', 'web-app-keycloak', 'compose.services.keycloak.name') }}"
 MATTERMOST_KEYCLOAK_ADMIN_USER:       "{{ lookup('config', 'web-app-keycloak', 'accounts.system.username') }}"
 MATTERMOST_KEYCLOAK_ADMIN_PASS:       "{{ users.administrator.password }}"
+
+## LDAP integration
+MATTERMOST_LDAP_CONTAINER:            "{{ lookup('config', 'svc-db-openldap', 'compose.services.openldap.name') }}"
