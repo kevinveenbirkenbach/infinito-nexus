@@ -1,7 +1,7 @@
 ---
 - name: "Mattermost | Create system administrator user"
   shell: |
-    container exec -i {{ MM_CONTAINER }} \
+    container exec -i {{ MATTERMOST_CONTAINER }} \
       /mattermost/bin/mmctl --local user create \
         --email    "{{ users.administrator.email }}" \
         --username "{{ users.administrator.username }}" \
@@ -15,7 +15,7 @@
 
 - name: "Mattermost | Create default team"
   shell: |
-    container exec -i {{ MM_CONTAINER }} \
+    container exec -i {{ MATTERMOST_CONTAINER }} \
       /mattermost/bin/mmctl --local team create \
         --name         "main" \
         --display-name "{{ SOFTWARE_NAME }}"
@@ -27,7 +27,7 @@
 
 - name: "Mattermost | Check if administrator is already in default team"
   shell: |
-    container exec -i {{ MM_CONTAINER }} \
+    container exec -i {{ MATTERMOST_CONTAINER }} \
       /mattermost/bin/mmctl --local user list --team main
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
@@ -36,7 +36,7 @@
 
 - name: "Mattermost | Add administrator to default team"
   shell: |
-    container exec -i {{ MM_CONTAINER }} \
+    container exec -i {{ MATTERMOST_CONTAINER }} \
       /mattermost/bin/mmctl --local team users add \
         main \
         "{{ users.administrator.email }}"

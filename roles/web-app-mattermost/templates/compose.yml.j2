@@ -2,8 +2,8 @@
 
   application:
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
-    image: "{{ MM_IMAGE }}:{{ MM_VERSION }}"
-    container_name: "{{ MM_CONTAINER }}"
+    image: "{{ MATTERMOST_IMAGE }}:{{ MATTERMOST_VERSION }}"
+    container_name: "{{ MATTERMOST_CONTAINER }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
     volumes:
@@ -28,11 +28,11 @@
     application_id,
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={
-      'config':   {'name': MM_VOLUME_CONFIG},
-      'data':     {'name': MM_VOLUME_DATA},
-      'logs':     {'name': MM_VOLUME_LOGS},
-      'plugins':        {'name': MM_VOLUME_PLUGINS},
-      'client-plugins': {'name': MM_VOLUME_CLIENT_PLUGINS},
+      'config':   {'name': MATTERMOST_VOLUME_CONFIG},
+      'data':     {'name': MATTERMOST_VOLUME_DATA},
+      'logs':     {'name': MATTERMOST_VOLUME_LOGS},
+      'plugins':        {'name': MATTERMOST_VOLUME_PLUGINS},
+      'client-plugins': {'name': MATTERMOST_VOLUME_CLIENT_PLUGINS},
     }
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
