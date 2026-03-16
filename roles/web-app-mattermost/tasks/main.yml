@@ -32,13 +32,13 @@
       ansible.builtin.shell: >
         container inspect
         --format '{{ "{{.State.Status}}" }} exit={{ "{{.State.ExitCode}}" }} restarting={{ "{{.State.Restarting}}" }}'
-        {{ MM_CONTAINER }}
+        {{ MATTERMOST_CONTAINER }}
       register: mm_inspect
       changed_when: false
       failed_when: false
 
     - name: "Mattermost | container logs (last 100 lines)"
-      ansible.builtin.shell: "container logs --tail 100 {{ MM_CONTAINER }} 2>&1"
+      ansible.builtin.shell: "container logs --tail 100 {{ MATTERMOST_CONTAINER }} 2>&1"
       register: mm_logs
       changed_when: false
       failed_when: false
@@ -58,7 +58,7 @@
 
 - name: "Configure Keycloak OIDC mappers for Mattermost"
   include_tasks: 02_keycloak.yml
-  when: MM_OIDC_ENABLED | bool
+  when: MATTERMOST_OIDC_ENABLED | bool
 
 - name: "Run Mattermost cleanup routines"
   include_tasks: 03_cleanup.yml

@@ -3,19 +3,19 @@
 
 - name: "Mattermost | Keycloak — authenticate kcadm.sh"
   shell: >-
-    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    container exec -i {{ MATTERMOST_KEYCLOAK_CONTAINER }}
     /opt/keycloak/bin/kcadm.sh config credentials
     --server "http://localhost:8080"
     --realm master
-    --user {{ MM_KEYCLOAK_ADMIN_USER | quote }}
-    --password {{ MM_KEYCLOAK_ADMIN_PASS | quote }}
+    --user {{ MATTERMOST_KEYCLOAK_ADMIN_USER | quote }}
+    --password {{ MATTERMOST_KEYCLOAK_ADMIN_PASS | quote }}
   args:
     chdir: "{{ lookup('container', 'web-app-keycloak', 'directories.instance') }}"
   changed_when: false
 
 - name: "Mattermost | Keycloak — resolve Mattermost client UUID"
   shell: >-
-    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    container exec -i {{ MATTERMOST_KEYCLOAK_CONTAINER }}
     /opt/keycloak/bin/kcadm.sh get clients
     -r {{ OIDC.CLIENT.REALM | quote }}
     -q clientId={{ OIDC.CLIENT.ID | quote }}
@@ -28,7 +28,7 @@
 
 - name: "Mattermost | Keycloak — list existing protocol mappers"
   shell: >-
-    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    container exec -i {{ MATTERMOST_KEYCLOAK_CONTAINER }}
     /opt/keycloak/bin/kcadm.sh get
     clients/{{ mm_kc_client_uuid.stdout | trim }}/protocol-mappers/models
     -r {{ OIDC.CLIENT.REALM | quote }}
@@ -40,7 +40,7 @@
 
 - name: "Mattermost | Keycloak — add 'id' mapper (integer from LDAP uidNumber)"
   shell: >-
-    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    container exec -i {{ MATTERMOST_KEYCLOAK_CONTAINER }}
     /opt/keycloak/bin/kcadm.sh create
     clients/{{ mm_kc_client_uuid.stdout | trim }}/protocol-mappers/models
     -r {{ OIDC.CLIENT.REALM | quote }}
@@ -59,7 +59,7 @@
 
 - name: "Mattermost | Keycloak — add 'username' mapper (from Keycloak username)"
   shell: >-
-    container exec -i {{ MM_KEYCLOAK_CONTAINER }}
+    container exec -i {{ MATTERMOST_KEYCLOAK_CONTAINER }}
     /opt/keycloak/bin/kcadm.sh create
     clients/{{ mm_kc_client_uuid.stdout | trim }}/protocol-mappers/models
     -r {{ OIDC.CLIENT.REALM | quote }}
