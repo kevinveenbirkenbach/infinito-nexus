@@ -12,6 +12,9 @@ zammad_alias_domain: "zammad.infinito.example"
 zammad_sysctl_max_map_count: 262144
 zammad_timezone: "Europe/Berlin"
 
+# Security (Stronger defaults for CI)
+zammad_db_pass: "{{ vault_zammad_db_password | default('zammad_' + ansible_date_time.iso8601_basic_short | hash('sha256') | truncate(12, True, '')) }}"
+
 # IAM / OpenID Connect Settings
 zammad_oidc_enabled: "true"
 zammad_oidc_display_name: "Infinito.Nexus Login"

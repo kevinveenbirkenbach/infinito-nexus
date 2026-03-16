@@ -5,7 +5,7 @@ services:
     environment:
       - POSTGRES_DB=zammad
       - POSTGRES_USER=zammad
-      - POSTGRES_PASSWORD={{ vault_zammad_db_password | default('zammad_pass') }}
+      - POSTGRES_PASSWORD={{ zammad_db_pass }}
     volumes:
       - /opt/zammad/postgresql:/var/lib/postgresql/data
 
@@ -30,14 +30,13 @@ services:
       - zammad-db
       - zammad-elasticsearch
       - zammad-memcached
-    environment:
+    environment: &zammad-env
       - MEMCACHE_SERVERS=zammad-memcached:11211
       - POSTGRES_HOST=zammad-db
       - POSTGRES_PORT=5432
       - POSTGRES_USER=zammad
-      - POSTGRES_PASS={{ vault_zammad_db_password | default('zammad_pass') }}
+      - POSTGRES_PASS={{ zammad_db_pass }}
       - TZ={{ zammad_timezone }}
-      # OIDC Integration Variables
       - AUTH_OIDC_ENABLED={{ zammad_oidc_enabled }}
       - AUTH_OIDC_DISPLAY_NAME={{ zammad_oidc_display_name }}
       - AUTH_OIDC_CLIENT_ID={{ zammad_oidc_client_id }}
@@ -48,3 +47,19 @@ services:
       - "traefik.http.routers.zammad.rule=Host(`{{ zammad_main_domain }}`) || Host(`{{ zammad_alias_domain }}`)"
       - "traefik.http.routers.zammad.tls=true"
       - "traefik.http.routers.zammad.tls.certresolver=letsencrypt"
+
+  zammad-scheduler:
+    image: {{ zammad_image }}
+    command: ["zammad-scheduler"]
+    restart: always
+    depends_on:
+      - zammad-rail
+    environment: *zammad-env
+
+  zammad-websocket:
+    image: {{ zammad_image }}
+    command: ["zammad-websocket"]
+    restart: always
+    depends_on:
+      - zammad-rail
+    environment: *zammad-env
