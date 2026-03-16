@@ -108,7 +108,9 @@ if [[ "${RUNNING_ON_GITHUB}" == "true" ]]; then
   : "${INFINITO_IMAGE_TAG:=latest}"
 
   # Owner can come from GitHub Actions or be provided explicitly (fallback).
+  # Lowercase is required for ghcr.io image tags.
   _owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
+  _owner="${_owner,,}"
   : "${INFINITO_IMAGE:=ghcr.io/${_owner}/infinito-${INFINITO_DISTRO}:${INFINITO_IMAGE_TAG}}"
 
   : "${INFINITO_NO_BUILD:=1}"
