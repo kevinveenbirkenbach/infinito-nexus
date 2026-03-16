@@ -45,16 +45,6 @@ Key points:
 
 ---
 
-## Local Testing
-
-For **new roles**, please provide evidence that the application was successfully deployed and tested locally.
-
-* Follow the local test environment [setup guide](https://hub.infinito.nexus/t/local-test-environment-deploy/435).
-
-* [ ] Attach a **screenshot of the running application** from the local deployment.
-
----
-
 ## Definition of Done (DoD)
 
 Please ensure all items are completed before requesting review.
@@ -81,6 +71,7 @@ Please ensure all items are completed before requesting review.
 * [ ] README.md's and other *.md updated
 * [ ] Link from this request to the https://project.infinito.nexus/ workitem and backwards
 * [ ] Workitem in https://project.infinito.nexus/ updated
+* [ ] Attach a **screenshot of the running application** from the local deployment.([📕local environment setup guide](https://hub.infinito.nexus/t/local-test-environment-deploy/435))
 
 ---
 
