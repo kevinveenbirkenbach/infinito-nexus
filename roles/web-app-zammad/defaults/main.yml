@@ -2,21 +2,19 @@
 # Zammad Infrastructure Defaults
 zammad_version: "6.5.0"
 zammad_image: "zammad/zammad:{{ zammad_version }}"
+zammad_memcached_image: "memcached:1.6-alpine"
 
 # Networking 
 zammad_main_domain: "helpdesk.infinito.example"
 zammad_alias_domain: "zammad.infinito.example"
 
-# System Performance (Zammad Docker Blueprint)
+# System Performance
 zammad_sysctl_max_map_count: 262144
 zammad_timezone: "Europe/Berlin"
-zammad_mem_limit: "4g"
 
 # IAM / OpenID Connect Settings
-zammad_oidc_enabled: true
+zammad_oidc_enabled: "true"
 zammad_oidc_display_name: "Infinito.Nexus Login"
-
-# OIDC Identity Access Management (Kevin's A/C)
-zammad_oidc_client_id: "{{ vault_zammad_oidc_id | default('placeholder_id') }}"
-zammad_oidc_client_secret: "{{ vault_zammad_oidc_secret | default('placeholder_secret') }}"
+zammad_oidc_client_id: "{{ vault_zammad_oidc_id | default('nexus_zammad_client') }}"
+zammad_oidc_client_secret: "{{ vault_zammad_oidc_secret | default('nexus_zammad_secret') }}"
 zammad_oidc_site: "https://iam.infinito.example/auth/realms/nexus"

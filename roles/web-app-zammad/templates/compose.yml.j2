@@ -19,12 +19,17 @@ services:
     volumes:
       - /opt/zammad/elasticsearch:/usr/share/elasticsearch/data
 
+  zammad-memcached:
+    image: {{ zammad_memcached_image }}
+    restart: always
+
   zammad-rail:
     image: {{ zammad_image }}
     restart: always
     depends_on:
       - zammad-db
       - zammad-elasticsearch
+      - zammad-memcached
     environment:
       - MEMCACHE_SERVERS=zammad-memcached:11211
       - POSTGRES_HOST=zammad-db
@@ -32,6 +37,12 @@ services:
       - POSTGRES_USER=zammad
       - POSTGRES_PASS={{ vault_zammad_db_password | default('zammad_pass') }}
       - TZ={{ zammad_timezone }}
+      # OIDC Integration Variables
+      - AUTH_OIDC_ENABLED={{ zammad_oidc_enabled }}
+      - AUTH_OIDC_DISPLAY_NAME={{ zammad_oidc_display_name }}
+      - AUTH_OIDC_CLIENT_ID={{ zammad_oidc_client_id }}
+      - AUTH_OIDC_CLIENT_SECRET={{ zammad_oidc_client_secret }}
+      - AUTH_OIDC_SITE={{ zammad_oidc_site }}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.zammad.rule=Host(`{{ zammad_main_domain }}`) || Host(`{{ zammad_alias_domain }}`)"
