@@ -4,8 +4,9 @@ set -euo pipefail
 : "${MATRIX_DISTRO:?Missing MATRIX_DISTRO}"
 : "${IMAGE_TAG:?Missing IMAGE_TAG}"
 : "${GITHUB_REPOSITORY_OWNER:?Missing GITHUB_REPOSITORY_OWNER}"
+ghcr_owner="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
 
-image="ghcr.io/${GITHUB_REPOSITORY_OWNER}/infinito-${MATRIX_DISTRO}:${IMAGE_TAG}"
+image="ghcr.io/${ghcr_owner}/infinito-${MATRIX_DISTRO}:${IMAGE_TAG}"
 max_attempts="${MAX_WAIT_ATTEMPTS:-180}"
 sleep_seconds="${WAIT_SLEEP_SECONDS:-10}"
 

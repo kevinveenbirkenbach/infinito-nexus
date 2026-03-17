@@ -4,12 +4,13 @@ set -euo pipefail
 : "${GHCR_NAMESPACE:?Missing GHCR_NAMESPACE}"
 : "${GHCR_PREFIX:?Missing GHCR_PREFIX}"
 : "${REPO_ROOT:?Missing REPO_ROOT}"
+ghcr_namespace="$(echo "${GHCR_NAMESPACE}" | tr '[:upper:]' '[:lower:]')"
 
 max_attempts="${MAX_WAIT_ATTEMPTS:-180}"
 sleep_seconds="${WAIT_SLEEP_SECONDS:-10}"
 
 mapfile -t mirror_refs < <(
-  GHCR_NAMESPACE="${GHCR_NAMESPACE}" \
+  GHCR_NAMESPACE="${ghcr_namespace}" \
   GHCR_PREFIX="${GHCR_PREFIX}" \
   REPO_ROOT="${REPO_ROOT}" \
   python - <<'PY'
