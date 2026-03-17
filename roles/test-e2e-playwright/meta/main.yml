@@ -1,10 +1,10 @@
 galaxy_info:
   author: Kevin Veen-Birkenbach
   description: >
-    Generic E2E Cypress runner role that auto-discovers application roles providing
-    roles/<application_id>/tests/cypress/env.j2, renders a .env file from env.j2,
-    optionally waits for the app to become reachable, and runs Cypress in a pinned
-    Container image with reproducible semantics.
+    Generic E2E Playwright runner role that auto-discovers application roles providing
+    roles/<application_id>/tests/playwright/env.j2, renders a .env file from env.j2,
+    optionally waits for the app to become reachable, and runs Playwright in a pinned
+    container image with reproducible semantics.
   license: Infinito.Nexus Community License (Non-Commercial)
   license_url: https://s.infinito.nexus/license
   company: |
@@ -18,7 +18,7 @@ galaxy_info:
     - infinito
     - testing
     - e2e
-    - cypress
+    - playwright
     - docker
     - automation
   lifecycle: beta

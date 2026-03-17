@@ -1,0 +1,116 @@
+- name: Define per-role paths
+  ansible.builtin.set_fact:
+    _playwright_src_dir: "{{ playbook_dir }}/roles/{{ application_id }}/tests/playwright"
+    _playwright_stage_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}"
+    _playwright_reports_dir: "{{ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR }}/{{ application_id }}"
+
+- name: Assert required Playwright directory exists
+  ansible.builtin.stat:
+    path: "{{ _playwright_src_dir }}"
+  register: _src_stat
+
+- name: Fail if Playwright src dir missing (should not happen)
+  ansible.builtin.fail:
+    msg: "Missing Playwright src dir: {{ _playwright_src_dir }}"
+  when: not _src_stat.stat.exists
+
+- name: Assert required volume directory exists
+  ansible.builtin.stat:
+    path: "{{ _playwright_src_dir }}/volume"
+  register: _vol_stat
+
+- name: Fail if required volume dir missing
+  ansible.builtin.fail:
+    msg: "Missing required Playwright volume dir: {{ _playwright_src_dir }}/volume"
+  when: not _vol_stat.stat.exists
+
+# Clean stage dir for deterministic results
+- name: Recreate staging directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_dir }}"
+    state: absent
+
+- name: Create staging directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_dir }}"
+    state: directory
+    mode: "0755"
+
+# Copy the entire Playwright project from role files/
+- name: Copy Playwright project to staging directory
+  ansible.builtin.copy:
+    src: "{{ _playwright_src_dir }}/"
+    dest: "{{ _playwright_stage_dir }}/"
+    mode: preserve
+
+# Render env.j2 -> .env in staging directory
+- name: Render .env from env.j2
+  ansible.builtin.copy:
+    dest: "{{ _playwright_stage_dir }}/.env"
+    mode: "0644"
+    content: "{{ lookup('template', _playwright_src_dir ~ '/env.j2') }}"
+  vars:
+    application_id: "{{ application_id }}"
+    domains: "{{ domains }}"
+    users: "{{ users }}"
+    applications: "{{ applications }}"
+
+# Optional wait until app is ready (uses domain resolution)
+- name: Wait until application is ready (HTTP 200/302)
+  ansible.builtin.uri:
+    url: "{{ lookup('tls', application_id, 'url.base') }}"
+    status_code: [200, 302]
+    validate_certs: false
+  register: _wait_result
+  retries: "{{ TEST_E2E_PLAYWRIGHT_WAIT_RETRIES }}"
+  delay: "{{ TEST_E2E_PLAYWRIGHT_WAIT_DELAY }}"
+  until: _wait_result.status in [200, 302]
+  when: TEST_E2E_PLAYWRIGHT_WAIT_ENABLED | bool
+
+- name: Ensure reports dir exists
+  ansible.builtin.file:
+    path: "{{ _playwright_reports_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Run Playwright container
+  ansible.builtin.command:
+    argv:
+      - container
+      - run
+      - --rm
+      - --ipc=host
+      - --shm-size=1g
+      - --env-file
+      - "{{ _playwright_stage_dir }}/.env"
+      - -v
+      - "{{ _playwright_stage_dir }}:/e2e"
+      - -v
+      - "{{ _playwright_stage_dir }}/volume:/volume"
+      - -v
+      - "{{ _playwright_reports_dir }}:/reports"
+      - -w
+      - /e2e
+      - "{{ TEST_E2E_PLAYWRIGHT_IMAGE }}"
+      - /bin/bash
+      - -lc
+      - "{{ TEST_E2E_PLAYWRIGHT_COMMAND }}"
+  register: _playwright_run
+  changed_when: false
+  failed_when: false
+
+- name: Print Playwright output (on failure)
+  ansible.builtin.debug:
+    msg: |
+      stdout:
+      {{ _playwright_run.stdout }}
+
+      stderr:
+      {{ _playwright_run.stderr }}
+  when: _playwright_run.rc != 0
+  changed_when: false
+
+- name: Record failure
+  ansible.builtin.set_fact:
+    _playwright_failures: "{{ (_playwright_failures | default([])) + [application_id] }}"
+  when: _playwright_run.rc != 0

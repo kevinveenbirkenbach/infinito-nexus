@@ -1,0 +1,11 @@
+{
+  "name": "infinito-playwright-e2e-example",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "record": "bash ./scripts/record.sh"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.1"
+  }
+}
