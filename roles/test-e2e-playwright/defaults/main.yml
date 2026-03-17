@@ -8,7 +8,7 @@ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR:  "/var/lib/infinito/logs/test-e2e-playwrig
 TEST_E2E_PLAYWRIGHT_IMAGE:             "mcr.microsoft.com/playwright:v1.50.1-noble"
 
 # Command executed inside the Playwright container
-TEST_E2E_PLAYWRIGHT_COMMAND:           "npm ci && npx playwright test"
+TEST_E2E_PLAYWRIGHT_COMMAND:           "npm install --no-fund --no-audit && npx playwright test"
 
 # Optional readiness wait
 TEST_E2E_PLAYWRIGHT_WAIT_ENABLED:      true

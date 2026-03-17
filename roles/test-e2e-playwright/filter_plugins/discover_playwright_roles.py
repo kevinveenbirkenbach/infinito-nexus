@@ -17,7 +17,9 @@ def _to_role_set(raw: Optional[Iterable[str] | str], var_name: str) -> Set[str]:
     try:
         return {str(item).strip() for item in raw if str(item).strip()}
     except TypeError as exc:
-        raise AnsibleFilterError(f"{var_name} must be an iterable of role names or CSV string") from exc
+        raise AnsibleFilterError(
+            f"{var_name} must be an iterable of role names or CSV string"
+        ) from exc
 
 
 def discover_playwright_roles(
@@ -33,9 +35,11 @@ def discover_playwright_roles(
     skip = _to_role_set(skip_roles, "skip_roles")
 
     found: List[str] = []
-    for env_file in base.rglob("tests/playwright/env.j2"):
-        # env.j2 is the stable marker
-        role_name = env_file.parents[2].name  # .../roles/<role>/tests/playwright/env.j2
+
+    # Current marker for Playwright-enabled app roles:
+    # .../roles/<role>/templates/playwright.env.j2
+    for env_file in base.rglob("templates/playwright.env.j2"):
+        role_name = env_file.parents[1].name
         found.append(role_name)
 
     # stable, unique

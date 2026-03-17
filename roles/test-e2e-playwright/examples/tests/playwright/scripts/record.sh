@@ -6,6 +6,11 @@ PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.50.1-noble}"
 PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.50.1}"
 PLAYWRIGHT_CODEGEN_BROWSER="${PLAYWRIGHT_CODEGEN_BROWSER:-firefox}"
+REPO_ROOT=""
+PROJECT_RELATIVE_DIR=""
+PROJECT_ROLE=""
+TARGET_ROLE="${ROLE:-}"
+TARGET_URL="${URL:-}"
 
 CONTAINER_RUNTIME=()
 CONTAINER_ARGS=()
@@ -53,18 +58,94 @@ append_display_args() {
   fi
 }
 
-cd "${PROJECT_DIR}"
+find_repo_root() {
+  local current_dir="${PROJECT_DIR}"
 
-if [[ $# -eq 0 ]] || [[ "$1" == -* ]]; then
-  echo "URL is required as the first argument."
-  echo "Example: ./scripts/record.sh https://dashboard.infinito.example"
+  while [[ "${current_dir}" != "/" ]]; do
+    if [[ -e "${current_dir}/.git" ]]; then
+      REPO_ROOT="${current_dir}"
+      return
+    fi
+    current_dir="$(dirname "${current_dir}")"
+  done
+
+  echo "Could not locate the repository root from ${PROJECT_DIR}."
   exit 1
+}
+
+detect_project_context() {
+  local role_relative_path
+  local role_name
+  local role_suffix
+
+  PROJECT_RELATIVE_DIR="${PROJECT_DIR#"${REPO_ROOT}"/}"
+  if [[ "${PROJECT_RELATIVE_DIR}" == "${PROJECT_DIR}" ]]; then
+    echo "Project directory ${PROJECT_DIR} is not inside repository ${REPO_ROOT}."
+    exit 1
+  fi
+
+  role_relative_path="${PROJECT_DIR#"${REPO_ROOT}"/roles/}"
+  if [[ "${role_relative_path}" == "${PROJECT_DIR}" ]]; then
+    return
+  fi
+
+  role_name="${role_relative_path%%/*}"
+  role_suffix="${role_relative_path#"${role_name}"/}"
+  if [[ "${role_suffix}" == "tests/playwright" ]]; then
+    PROJECT_ROLE="${role_name}"
+  fi
+}
+
+show_known_roles() {
+  local role_dir
+  local role_name
+
+  echo "Known roles:"
+  for role_dir in "${REPO_ROOT}"/roles/*; do
+    [[ -d "${role_dir}" ]] || continue
+    role_name="$(basename "${role_dir}")"
+    echo " - ${role_name}"
+  done
+}
+
+prompt_for_role() {
+  while [[ -z "${TARGET_ROLE}" ]]; do
+    read -r -p "Role name: " TARGET_ROLE
+    if [[ -z "${TARGET_ROLE}" ]]; then
+      echo "Role name is required."
+      continue
+    fi
+
+    if [[ -d "${REPO_ROOT}/roles/${TARGET_ROLE}" ]]; then
+      return
+    fi
+
+    echo "Role '${TARGET_ROLE}' does not exist under ${REPO_ROOT}/roles."
+    show_known_roles
+    TARGET_ROLE=""
+  done
+}
+
+prompt_for_url() {
+  while [[ -z "${TARGET_URL}" ]]; do
+    read -r -p "Target URL: " TARGET_URL
+    if [[ -z "${TARGET_URL}" ]]; then
+      echo "A target URL is required."
+    fi
+  done
+}
+
+cd "${PROJECT_DIR}"
+find_repo_root
+detect_project_context
+
+if [[ $# -gt 0 ]] && [[ "$1" != -* ]]; then
+  TARGET_URL="$1"
+  shift
 fi
 
-TARGET_URL="$1"
-shift
 EXTRA_ARGS=("$@")
-DEFAULT_OUTPUT_FILE="volume/codegen.spec.js"
+DEFAULT_OUTPUT_FILE=""
 HAS_OUTPUT_FLAG=0
 HAS_BROWSER_FLAG=0
 
@@ -79,10 +160,28 @@ for arg in "${EXTRA_ARGS[@]}"; do
   esac
 done
 
-if [[ ${HAS_OUTPUT_FLAG} -eq 0 ]]; then
-  EXTRA_ARGS=(-o "${DEFAULT_OUTPUT_FILE}" "${EXTRA_ARGS[@]}")
-  echo "Recording to ${PROJECT_DIR}/${DEFAULT_OUTPUT_FILE}"
+if [[ -z "${TARGET_ROLE}" && -n "${PROJECT_ROLE}" ]]; then
+  TARGET_ROLE="${PROJECT_ROLE}"
+  echo "Using role ${TARGET_ROLE} from the current script location."
 fi
+
+if [[ -n "${TARGET_ROLE}" ]] && [[ ! -d "${REPO_ROOT}/roles/${TARGET_ROLE}" ]]; then
+  echo "Role '${TARGET_ROLE}' does not exist under ${REPO_ROOT}/roles."
+  exit 1
+fi
+
+if [[ ${HAS_OUTPUT_FLAG} -eq 0 ]]; then
+  if [[ -z "${TARGET_ROLE}" ]]; then
+    prompt_for_role
+  fi
+
+  mkdir -p "${REPO_ROOT}/roles/${TARGET_ROLE}/files"
+  DEFAULT_OUTPUT_FILE="/work/roles/${TARGET_ROLE}/files/playwright.spec.js"
+  EXTRA_ARGS=(-o "${DEFAULT_OUTPUT_FILE}" "${EXTRA_ARGS[@]}")
+  echo "Recording to ${REPO_ROOT}/roles/${TARGET_ROLE}/files/playwright.spec.js"
+fi
+
+prompt_for_url
 
 if [[ ${HAS_BROWSER_FLAG} -eq 0 ]]; then
   EXTRA_ARGS=(--browser "${PLAYWRIGHT_CODEGEN_BROWSER}" "${EXTRA_ARGS[@]}")
@@ -107,11 +206,11 @@ CONTAINER_ARGS+=(
   --cap-add=SYS_ADMIN
   --network host
   --user "$(id -u):$(id -g)"
-  -e HOME=/work/volume/home
+  -e "HOME=/work/${PROJECT_RELATIVE_DIR}/volume/home"
   -e PW_CODEGEN_NO_INSPECTOR=1
-  -e npm_config_cache=/work/volume/npm-cache
-  -v "${PROJECT_DIR}:/work"
-  -w /work
+  -e "npm_config_cache=/work/${PROJECT_RELATIVE_DIR}/volume/npm-cache"
+  -v "${REPO_ROOT}:/work"
+  -w "/work/${PROJECT_RELATIVE_DIR}"
 )
 
 if [[ -f /etc/hosts ]]; then
@@ -129,7 +228,7 @@ exec "${CONTAINER_RUNTIME[@]}" \
   "${PLAYWRIGHT_IMAGE}" \
   /bin/bash \
   -lc \
-  "mkdir -p \"\$HOME\" \"\$npm_config_cache\" && exec npx --yes playwright@${PLAYWRIGHT_VERSION} codegen --ignore-https-errors \"\$1\" \"\${@:2}\"" \
+  "mkdir -p \"\$HOME\" \"\$npm_config_cache\" && exec npx --yes playwright@${PLAYWRIGHT_VERSION} codegen --ignore-https-errors \"\${@:2}\" \"\$1\"" \
   playwright-codegen \
   "${TARGET_URL}" \
   "${EXTRA_ARGS[@]}"

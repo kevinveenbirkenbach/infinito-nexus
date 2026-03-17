@@ -214,8 +214,7 @@ test-local-full:
 	@bash scripts/tests/deploy/local/all.sh
 
 record-playwright:
-	@: "$${URL:?URL must be set (e.g. URL=https://dashboard.infinito.example)}"
-	@exec roles/test-e2e-playwright/examples/tests/playwright/scripts/record.sh "$${URL}"
+	@ROLE="$(ROLE)" URL="$(URL)" exec roles/test-e2e-playwright/examples/tests/playwright/scripts/record.sh
 
 # Backwards compatible target (kept)
 lint-ansible:
