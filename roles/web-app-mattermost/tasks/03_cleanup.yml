@@ -1,6 +1,0 @@
----
-- name: "Mattermost | Cleanup — confirm OIDC state"
-  debug:
-    msg: >
-      GitLab OAuth (OIDC) is {{ 'enabled' if MATTERMOST_OIDC_ENABLED | bool else 'disabled' }}.
-      MM_GITLABSETTINGS_ENABLE in env.j2 reflects this automatically on next deploy.

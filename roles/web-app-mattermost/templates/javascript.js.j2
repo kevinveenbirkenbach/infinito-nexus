@@ -1,0 +1,11 @@
+window.addEventListener("DOMContentLoaded", function () {
+    var observer = new MutationObserver(function () {
+        document.querySelectorAll("a[href*='/oauth/gitlab/'], button").forEach(function (el) {
+            if (el.textContent.trim() === "GitLab") {
+                el.textContent = "SSO with Infinito.Nexus";
+                observer.disconnect();
+            }
+        });
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+});

@@ -9,14 +9,14 @@ server:
   domains:
     aliases: []
     canonical:
-      - chat.{{ DOMAIN_PRIMARY }}
+      - mattermost.{{ DOMAIN_PRIMARY }}
   status_codes:
     default:                      [200, 301, 302, 405]
 compose:
   services:
     oidc:
       enabled:                    true
-      shared:                     false
+      shared:                     true
     logout:
       enabled:                    true
     ldap:
@@ -35,7 +35,6 @@ compose:
       version:                    "7.10.5"
       backup:
         no_stop_required:         true
-      port:                       8065
       name:                       "mattermost"
       cpus:                       "1.0"
       mem_reservation:            "512m"
@@ -48,6 +47,8 @@ compose:
         disabled:                 true
       enabled:                    false
     css:
+      enabled:                    true
+    javascript:
       enabled:                    true
   volumes:
     config:                       "mattermost_config"

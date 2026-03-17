@@ -1,57 +1,15 @@
 ---
+- name: "Remove stale nginx config for renamed domain chat.{{ DOMAIN_PRIMARY }}"
+  ansible.builtin.file:
+    path: "{{ [lookup('nginx', 'directories.configuration.servers'), 'https', 'chat.' ~ DOMAIN_PRIMARY ~ '.conf'] | path_join }}"
+    state: absent
+  notify: restart openresty
+
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full
   vars:
     docker_compose_flush_handlers: true
-
-- name: "Wait for Mattermost to be ready"
-  block:
-
-    - name: "Wait for Mattermost HTTP endpoint"
-      wait_for:
-        host: "{{ DOCKER_REACH_HOST }}"
-        port: "{{ ports.localhost.http[application_id] }}"
-        delay: 10
-        timeout: 300
-
-    - name: "Wait for Mattermost API to be ready"
-      uri:
-        url: "http://{{ DOCKER_REACH_HOST }}:{{ ports.localhost.http[application_id] }}/api/v4/system/ping"
-        method: GET
-        status_code: 200
-        return_content: no
-      register: mm_ping
-      until: mm_ping.status == 200
-      retries: 30
-      delay: 10
-
-  rescue:
-
-    - name: "Mattermost | container state"
-      ansible.builtin.shell: >
-        container inspect
-        --format '{{ "{{.State.Status}}" }} exit={{ "{{.State.ExitCode}}" }} restarting={{ "{{.State.Restarting}}" }}'
-        {{ MATTERMOST_CONTAINER }}
-      register: mm_inspect
-      changed_when: false
-      failed_when: false
-
-    - name: "Mattermost | container logs (last 100 lines)"
-      ansible.builtin.shell: "container logs --tail 100 {{ MATTERMOST_CONTAINER }} 2>&1"
-      register: mm_logs
-      changed_when: false
-      failed_when: false
-
-    - name: "Mattermost | startup failure report"
-      ansible.builtin.debug:
-        msg:
-          container_state: "{{ mm_inspect.stdout | default('inspect failed') }}"
-          container_logs: "{{ mm_logs.stdout | default('') }}"
-
-    - name: "Mattermost | fail after diagnostics"
-      ansible.builtin.fail:
-        msg: "Mattermost did not become ready. See diagnostic output above."
 
 - name: "Run Mattermost setup routines"
   include_tasks: 01_setup.yml
@@ -60,18 +18,3 @@
   include_tasks: 02_keycloak.yml
   when: MATTERMOST_OIDC_ENABLED | bool
 
-- name: "Run Mattermost cleanup routines"
-  include_tasks: 03_cleanup.yml
-  when: MODE_CLEANUP | bool
-
-- name: "Include DNS role to register Mattermost domain(s)"
-  include_role:
-    name: sys-dns-cloudflare-records
-  vars:
-    cloudflare_records:
-      - zone:     "{{ lookup('domain', application_id) | to_zone }}"
-        type:     A
-        name:     "{{ lookup('domain', application_id) }}"
-        content:  "{{ networks.internet.ip4 }}"
-        proxied:  true
-  when: DNS_PROVIDER == 'cloudflare'
