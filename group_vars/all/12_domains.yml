@@ -1,3 +1,2 @@
 # Domains which are deprecated and should be cleaned up
-deprecated_domains:
-  - "chat.{{ DOMAIN_PRIMARY }}"
+deprecated_domains: []
