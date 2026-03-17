@@ -48,6 +48,7 @@ jobs:
     uses: ./.github/workflows/build-ci-images.yml
     with:
       distros: "arch debian ubuntu fedora centos"
+      concurrency_channel: ci-orchestrator-build-consumer
 
   # Code Testing
   test-code-integration:
@@ -85,6 +86,8 @@ jobs:
   # Sync Missing Images
   images-mirror-missing:
     uses: ./.github/workflows/images-mirror-missing.yml
+    with:
+      concurrency_channel: ci-orchestrator-mirror-consumer
     secrets: inherit
 
   # Deploy tests
