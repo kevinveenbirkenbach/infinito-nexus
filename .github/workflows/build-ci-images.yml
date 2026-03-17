@@ -7,6 +7,21 @@ on:
         description: "Space-separated distro list"
         required: true
         type: string
+      checkout_ref:
+        description: "Optional git ref to checkout before build (default: event ref)"
+        required: false
+        type: string
+        default: ""
+      image_tag:
+        description: "Optional image tag override (default: ci-${github.sha})"
+        required: false
+        type: string
+        default: ""
+      concurrency_channel:
+        description: "Optional channel to separate concurrency groups between callers"
+        required: false
+        type: string
+        default: "default"
     secrets:
       GHCR_PAT:
         required: false
@@ -18,7 +33,7 @@ permissions:
   packages: write
 
 concurrency:
-  group: infinito-build-${{ github.ref }}
+  group: infinito-build-${{ github.repository }}-${{ inputs.concurrency_channel }}-${{ inputs.checkout_ref || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -27,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.out.outputs.matrix }}
-      image_tag: ci-${{ github.sha }}
+      image_tag: ${{ steps.out.outputs.image_tag }}
     steps:
       - name: Install jq
         run: |
@@ -41,8 +56,14 @@ jobs:
           set -euo pipefail
           distros="${{ inputs.distros }}"
           json="$(printf '%s' "$distros" | jq -Rc 'split(" ") | map(select(length>0))')"
+          image_tag="${{ inputs.image_tag }}"
+          if [ -z "${image_tag}" ]; then
+            image_tag="ci-${GITHUB_SHA}"
+          fi
           echo "matrix=${json}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${image_tag}" >> "$GITHUB_OUTPUT"
           echo "Using matrix: ${json}"
+          echo "Using image tag: ${image_tag}"
 
   build:
     name: 🏗️ Build image (${{ matrix.distro }})
@@ -55,8 +76,19 @@ jobs:
         distro: ${{ fromJson(needs.prepare.outputs.matrix) }}
 
     steps:
-      - name: Checkout
+      - name: Checkout trusted workflow repo (helpers)
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Checkout source to build
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ inputs.checkout_ref || github.ref }}
+          path: _src
+          persist-credentials: false
 
       - name: Disk pressure (start)
         shell: bash
@@ -97,40 +129,24 @@ jobs:
           docker buildx du || true
 
       - name: Build & push (retry 7x, 20s)
+        if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
         shell: bash
-        run: |
-          set -euo pipefail
+        env:
+          BUILD_CONTEXT_DIR: _src
+          MATRIX_DISTRO: ${{ matrix.distro }}
+          IMAGE_TAG: ${{ needs.prepare.outputs.image_tag }}
+          USE_NIX_TOKEN: ${{ !(github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository) }}
+          NIX_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAX_ATTEMPTS: "7"
+          RETRY_DELAY_SECONDS: "20"
+        run: ./scripts/ci/build_and_push_ci_image.sh
 
-          max_attempts=7
-          retry_delay_seconds=20
-          attempt=1
-
-          while true; do
-            echo "=== Build & push attempt ${attempt}/${max_attempts} ==="
-
-            if docker buildx build \
-              --file ./Dockerfile \
-              --push \
-              --tag "ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}" \
-              --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
-              --build-arg "PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable" \
-              --build-arg "NIX_CONFIG=access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}" \
-              --cache-from "type=gha,scope=infinito-${{ matrix.distro }}" \
-              --cache-to "type=gha,mode=max,scope=infinito-${{ matrix.distro }}" \
-              .; then
-              echo "Build & push succeeded on attempt ${attempt}/${max_attempts}."
-              break
-            fi
-
-            if [ "${attempt}" -ge "${max_attempts}" ]; then
-              echo "Build & push failed after ${max_attempts} attempts."
-              exit 1
-            fi
-
-            echo "Attempt ${attempt} failed. Retrying in ${retry_delay_seconds}s..."
-            sleep "${retry_delay_seconds}"
-            attempt=$((attempt + 1))
-          done
+      - name: Wait for prebuilt image (fork PR)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        env:
+          MATRIX_DISTRO: ${{ matrix.distro }}
+          IMAGE_TAG: ${{ needs.prepare.outputs.image_tag }}
+        run: ./scripts/ci/wait_prebuilt_ci_image.sh
 
       - name: Disk pressure (post-build)
         if: always()
