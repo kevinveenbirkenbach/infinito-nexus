@@ -265,8 +265,7 @@ class FilterModule(object):
                     ):
                         # Allow being embedded by the dashboard app domain's site
                         domain = domains.get("web-app-dashboard")[0]
-                        sld_tld = ".".join(domain.split(".")[-2:])  # e.g., example.com
-                        tokens.append(f"{sld_tld}")
+                        tokens.append(f"{domain}")
                     if self.is_feature_enabled(applications, "logout", application_id):
                         tokens.append(get_url(domains, "web-svc-logout", web_protocol))
                         tokens.append(

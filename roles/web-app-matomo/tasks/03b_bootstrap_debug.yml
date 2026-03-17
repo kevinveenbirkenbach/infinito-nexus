@@ -96,6 +96,73 @@
       - "--- compose logs {{ MATOMO_BOOTSTRAP_SERVICE }} stderr ---"
       - "{{ matomo_bootstrap_service_logs.stderr | default('') }}"
 
+- name: "DEBUG | matomo container health (inspect json)"
+  ansible.builtin.command:
+    argv:
+      - container
+      - inspect
+      - --format
+      - '{{ "{{" }}json .State.Health{{ "}}" }}'
+      - "{{ MATOMO_NAME }}"
+  register: matomo_container_health
+  changed_when: false
+  failed_when: false
+
+- name: "DEBUG | matomo container health output"
+  ansible.builtin.debug:
+    msg:
+      - "--- matomo .State.Health (json) ---"
+      - "{{ matomo_container_health.stdout | default('') }}"
+      - "{{ matomo_container_health.stderr | default('') }}"
+
+- name: "DEBUG | matomo tmp permissions + write test (www-data)"
+  ansible.builtin.command:
+    argv:
+      - container
+      - exec
+      - --user
+      - root
+      - "{{ MATOMO_NAME }}"
+      - sh
+      - -lc
+      - |
+        set -eu
+        id
+        for p in /var/www/html /var/www/html/tmp /var/www/html/tmp/templates_c /var/www/html/config; do
+          echo "===== PATH: ${p} ====="
+          ls -ld "${p}" || true
+        done
+        echo "===== WRITE TEST AS www-data ====="
+        su -s /bin/sh www-data -c "mkdir -p /var/www/html/tmp/templates_c && touch /var/www/html/tmp/templates_c/.write-test && rm -f /var/www/html/tmp/templates_c/.write-test"
+  register: matomo_fs_permissions_check
+  changed_when: false
+  failed_when: false
+
+- name: "DEBUG | matomo tmp permissions + write test output"
+  ansible.builtin.debug:
+    msg:
+      - "--- filesystem + write-test diagnostics ---"
+      - "{{ matomo_fs_permissions_check.stdout | default('') }}"
+      - "{{ matomo_fs_permissions_check.stderr | default('') }}"
+
+- name: "DEBUG | bootstrap artifact paths from logs"
+  ansible.builtin.debug:
+    msg:
+      - "--- bootstrap installer artifacts (paths from logs) ---"
+      - >-
+        {{
+          (
+            (
+              matomo_bootstrap_service_logs.stdout | default('')
+            ) ~ '\n' ~ (
+              matomo_bootstrap_service_logs.stderr | default('')
+            )
+          )
+          | regex_findall('/tmp/matomo-bootstrap/installer-failure-[^\\s"]+\\.(?:png|html|txt)')
+          | unique
+          | list
+        }}
+
 - name: "DEBUG | show compose file"
   ansible.builtin.command:
     argv:

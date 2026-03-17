@@ -3,24 +3,21 @@ from __future__ import annotations
 import sys
 import subprocess
 import threading
-from collections import deque
-from typing import Deque, TextIO
+from typing import TextIO
 
 
 def _drain_stream(
     stream: TextIO,
     *,
     sink: TextIO,
-    buf: Deque[str],
 ) -> None:
     """
-    Read a text stream line-by-line, write to sink, and keep a tail buffer.
+    Read a text stream line-by-line and write to sink.
     """
     try:
         for line in iter(stream.readline, ""):
             sink.write(line)
             sink.flush()
-            buf.append(line.rstrip("\n"))
     finally:
         try:
             stream.close()
@@ -34,13 +31,10 @@ def run_streaming(
     *,
     cwd,
     env: dict[str, str],
-    keep_lines: int = 400,
     text: bool = True,
 ) -> subprocess.CompletedProcess:
     """
-    Run a subprocess, stream stdout/stderr live to the terminal, and return
-    a CompletedProcess whose stdout/stderr contain only the last `keep_lines`
-    lines (tail buffers).
+    Run a subprocess and stream stdout/stderr live to the terminal.
     """
     p = subprocess.Popen(
         cmd,
@@ -52,19 +46,16 @@ def run_streaming(
         bufsize=1,  # line buffered (best effort)
     )
 
-    out_buf: Deque[str] = deque(maxlen=int(keep_lines))
-    err_buf: Deque[str] = deque(maxlen=int(keep_lines))
-
     assert p.stdout is not None
     assert p.stderr is not None
 
     t_out = threading.Thread(
         target=_drain_stream,
-        kwargs={"stream": p.stdout, "sink": sys.stdout, "buf": out_buf},
+        kwargs={"stream": p.stdout, "sink": sys.stdout},
     )
     t_err = threading.Thread(
         target=_drain_stream,
-        kwargs={"stream": p.stderr, "sink": sys.stderr, "buf": err_buf},
+        kwargs={"stream": p.stderr, "sink": sys.stderr},
     )
 
     t_out.daemon = True
@@ -78,7 +69,4 @@ def run_streaming(
     t_out.join()
     t_err.join()
 
-    stdout_tail = ("\n".join(out_buf) + ("\n" if out_buf else "")).rstrip("\n")
-    stderr_tail = ("\n".join(err_buf) + ("\n" if err_buf else "")).rstrip("\n")
-
-    return subprocess.CompletedProcess(cmd, rc, stdout=stdout_tail, stderr=stderr_tail)
+    return subprocess.CompletedProcess(cmd, rc)

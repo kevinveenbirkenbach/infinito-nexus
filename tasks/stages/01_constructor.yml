@@ -42,10 +42,12 @@
   - name: "Sanity check: all group_names must exist in applications"
     ansible.builtin.assert:
       that:
-        - item in applications
-      fail_msg: "Group '{{ item }}' has no entry in 'applications'"
-      success_msg: "Group '{{ item }}' is defined in 'applications'"
+        - group_name in applications
+      fail_msg: "Group '{{ group_name }}' has no entry in 'applications'"
+      success_msg: "Group '{{ group_name }}' is defined in 'applications'"
     loop: "{{ group_names }}"
+    loop_control:
+      loop_var: group_name
     when: MODE_ASSERT | bool
 
   - name: Merge current play applications
@@ -183,7 +185,7 @@
     - DOCKER_IN_CONTAINER | bool
 
 - name: "Load base roles"
-  ansible.builtin.include_tasks: "./tasks/groups/{{ item }}-roles.yml"
+  ansible.builtin.include_tasks: "./tasks/groups/{{ role_group }}-roles.yml"
   loop:
     - update      # 1. Update system
     - drv         # 2. Load driver roles
@@ -194,7 +196,8 @@
     - svc-ai      # 7. Load AI roles
     - svc-bkp     # 8. Load Backup Roles
   loop_control:
-    label: "{{ item }}-roles.yml"
+    loop_var: role_group
+    label: "{{ role_group }}-roles.yml"
 
 - name: Install inventory-defined system packages
   ansible.builtin.include_role:
