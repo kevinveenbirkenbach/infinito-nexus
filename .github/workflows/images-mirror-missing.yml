@@ -17,8 +17,33 @@ on:
         required: false
         type: string
         default: "."
+      source_repository:
+        description: "Optional source repository for image config scan (e.g. fork owner/repo)"
+        required: false
+        type: string
+        default: ""
+      source_ref:
+        description: "Optional source ref/SHA for image config scan"
+        required: false
+        type: string
+        default: ""
+      source_path:
+        description: "Optional checkout path for source_repository/source_ref"
+        required: false
+        type: string
+        default: "_pr_source"
       images_per_hour:
         description: "Optional throttle: max images mirrored per hour"
+        required: false
+        type: string
+        default: ""
+      concurrency_channel:
+        description: "Optional channel to separate concurrency groups between callers"
+        required: false
+        type: string
+        default: "default"
+      concurrency_key:
+        description: "Optional key (e.g. pr-123) to scope concurrency within a channel"
         required: false
         type: string
         default: ""
@@ -33,7 +58,7 @@ permissions:
   packages: write
 
 concurrency:
-  group: mirror-images-${{ github.repository }}-${{ github.ref_name }}
+  group: mirror-images-${{ github.repository }}-${{ inputs.concurrency_channel }}-${{ inputs.concurrency_key || github.ref_name }}
   # Cancel scheduled Mirror sync, because may it works with outdatet mirror lists
   cancel-in-progress: true
 
@@ -52,6 +77,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Checkout source repo for scan (optional)
+        if: ${{ inputs.source_repository != '' && inputs.source_ref != '' }}
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ inputs.source_repository }}
+          ref: ${{ inputs.source_ref }}
+          path: ${{ inputs.source_path }}
+          fetch-depth: 1
+          persist-credentials: false
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -69,7 +104,7 @@ jobs:
 
       # Optional: Docker Hub login to avoid rate limits while mirroring
       - name: Login to Docker Hub (optional)
-        if: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
+        if: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' && !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
         uses: docker/login-action@v4
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
@@ -82,7 +117,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Wait for mirrored images (fork PR)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        env:
+          GHCR_NAMESPACE: ${{ inputs.ghcr_namespace || github.repository_owner }}
+          GHCR_PREFIX: ${{ inputs.ghcr_prefix || 'mirror' }}
+          REPO_ROOT: ${{ inputs.repo_root || '.' }}
+        run: ./scripts/ci/wait_mirrored_images.sh
+
       - name: Mirror images to GHCR (only missing, best-effort)
+        if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
         shell: bash
         run: |
           set -euo pipefail
