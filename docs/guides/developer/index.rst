@@ -25,7 +25,7 @@ Contributing to Infinito.Nexus
 
 Want to contribute to the project or explore the source code? Check out our **GitHub repository**:
 
-- `Infinito.Nexus GitHub Repository <https://s.infinito.nexus/code/tree/master/roles>`_
+- `Infinito.Nexus GitHub Repository <https://github.com/infinito-nexus/core/tree/main/roles>`_
 
 Contribution Guidelines
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
