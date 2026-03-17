@@ -4,6 +4,7 @@ set -euo pipefail
 : "${BUILD_CONTEXT_DIR:?Missing BUILD_CONTEXT_DIR}"
 : "${MATRIX_DISTRO:?Missing MATRIX_DISTRO}"
 : "${IMAGE_TAG:?Missing IMAGE_TAG}"
+: "${GITHUB_REPOSITORY:?Missing GITHUB_REPOSITORY}"
 : "${GITHUB_REPOSITORY_OWNER:?Missing GITHUB_REPOSITORY_OWNER}"
 : "${USE_NIX_TOKEN:?Missing USE_NIX_TOKEN}"
 
@@ -26,6 +27,7 @@ while true; do
     --file "${BUILD_CONTEXT_DIR}/Dockerfile" \
     --push \
     --tag "ghcr.io/${GITHUB_REPOSITORY_OWNER}/infinito-${MATRIX_DISTRO}:${IMAGE_TAG}" \
+    --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
     --build-arg "PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${MATRIX_DISTRO}:stable" \
     "${nix_arg[@]}" \
     --cache-from "type=gha,scope=infinito-${MATRIX_DISTRO}" \
