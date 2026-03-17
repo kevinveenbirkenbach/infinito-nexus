@@ -49,6 +49,7 @@ jobs:
     with:
       distros: "arch debian ubuntu fedora centos"
       concurrency_channel: ci-orchestrator-build-consumer
+    secrets: inherit
 
   # Code Testing
   test-code-integration:

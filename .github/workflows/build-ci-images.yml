@@ -22,6 +22,11 @@ on:
         required: false
         type: string
         default: "default"
+    secrets:
+      GHCR_PAT:
+        required: false
+      GHCR_USERNAME:
+        required: false
 
 permissions:
   contents: read
@@ -109,8 +114,8 @@ jobs:
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_USERNAME != '' && secrets.GHCR_USERNAME || github.actor }}
+          password: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_USERNAME != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Disk pressure (pre-build)
         shell: bash
