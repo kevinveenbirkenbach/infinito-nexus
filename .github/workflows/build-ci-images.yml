@@ -7,6 +7,11 @@ on:
         description: "Space-separated distro list"
         required: true
         type: string
+    secrets:
+      GHCR_PAT:
+        required: false
+      GHCR_USERNAME:
+        required: false
 
 permissions:
   contents: read
@@ -77,8 +82,8 @@ jobs:
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_USERNAME != '' && secrets.GHCR_USERNAME || github.actor }}
+          password: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_USERNAME != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Disk pressure (pre-build)
         shell: bash
@@ -107,6 +112,7 @@ jobs:
               --file ./Dockerfile \
               --push \
               --tag "ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:${{ needs.prepare.outputs.image_tag }}" \
+              --label "org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
               --build-arg "PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${{ matrix.distro }}:stable" \
               --build-arg "NIX_CONFIG=access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}" \
               --cache-from "type=gha,scope=infinito-${{ matrix.distro }}" \

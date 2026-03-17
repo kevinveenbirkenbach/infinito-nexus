@@ -48,6 +48,7 @@ jobs:
     uses: ./.github/workflows/build-ci-images.yml
     with:
       distros: "arch debian ubuntu fedora centos"
+    secrets: inherit
 
   # Code Testing
   test-code-integration:
