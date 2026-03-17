@@ -2,6 +2,8 @@ name: CI (On Pull-Request)
 
 concurrency:
   group: global-ci-${{ github.repository }}-${{ github.ref_name }}
+  # Keep only the newest run for the same PR ref (e.g. after synchronize pushes)
+  # to avoid stale waiting approvals and unnecessary CI load.
   cancel-in-progress: true
 
 on:
