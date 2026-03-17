@@ -112,7 +112,7 @@ as central defaults for every app role.
 1. Add the two app-specific files:
    - `roles/<application_id>/templates/playwright.env.j2`
    - `roles/<application_id>/files/playwright.spec.js`
-2. Run deployment with `MODE_TEST=true` and include your app in `allowed_applications` (or leave it empty to run all discovered apps).
+2. Run deployment and include your app in `allowed_applications` (or leave it empty to run all discovered apps).
 3. Keep `package.json` and `playwright.config.js` centralized in `roles/test-e2e-playwright/examples/tests/playwright/`.
 
 Example override for running only one spec:
