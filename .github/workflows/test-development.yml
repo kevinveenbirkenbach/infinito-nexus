@@ -10,23 +10,21 @@ permissions:
 
 jobs:
   test-environment:
-    name: 🧪 Dev env + dashboard (${{ matrix.runtime_image }})
+    name: 🧪 Dev env + dashboard (${{ matrix.dev_runtime_image }})
     runs-on: ubuntu-latest
     timeout-minutes: 180
 
     strategy:
       fail-fast: false
       matrix:
-        runtime_image:
+        dev_runtime_image:
           - manjarolinux/base
           - debian:bookworm
           - ubuntu:latest
           - fedora:latest
 
     env:
-      RUNTIME_IMAGE: ${{ matrix.runtime_image }}
-      INFINITO_IMAGE_TAG: ci-${{ github.sha }}
-      GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+      DEV_RUNTIME_IMAGE: ${{ matrix.dev_runtime_image }}
       NIX_CONFIG: |
         access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
 
@@ -34,55 +32,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Prepare runtime metadata
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          runtime_image_no_digest="${RUNTIME_IMAGE%%@*}"
-          runtime_image_name="${runtime_image_no_digest##*/}"
-          runtime_image_name="${runtime_image_name%%:*}"
-
-          case "${runtime_image_name}" in
-            pkgmgr-*)
-              runtime_distro="${runtime_image_name#pkgmgr-}"
-              ;;
-            *)
-              echo "Unsupported runtime image: ${RUNTIME_IMAGE}" >&2
-              exit 1
-              ;;
-          esac
-
-          echo "INFINITO_DISTRO=${runtime_distro}" >> "${GITHUB_ENV}"
-
       - name: Run dev environment routine
         shell: bash
         run: |
           set -euo pipefail
 
           docker run --rm \
-            -e CI=true \
-            -e GITHUB_ACTIONS=true \
-            -e GITHUB_REPOSITORY_OWNER \
-            -e HOME=/root \
-            -e INFINITO_DISTRO \
-            -e INFINITO_IMAGE_TAG \
             -e NIX_CONFIG \
             -v "$PWD:/workspace" \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v /usr/bin/docker:/usr/bin/docker:ro \
             -v /usr/lib/docker/cli-plugins:/usr/lib/docker/cli-plugins:ro \
             -w /workspace \
-            "${RUNTIME_IMAGE}" \
+            "${DEV_RUNTIME_IMAGE}" \
             bash -lc '
               bash /workspace/scripts/tests/development.sh
             '
-
-      - name: Dump runtime diagnostics on failure
-        if: failure()
-        shell: bash
-        run: |
-          docker ps -a || true
-          docker logs "infinito_nexus_${INFINITO_DISTRO}" --tail=200 || true
-          docker compose logs --tail=200 || true
-          sysctl net.ipv6.conf.all.disable_ipv6 net.ipv6.conf.default.disable_ipv6 || true

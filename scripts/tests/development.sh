@@ -15,6 +15,9 @@ elif command -v apt-get >/dev/null 2>&1; then
 	apt-get update
 	apt-get install -y --no-install-recommends jq
 	rm -rf /var/lib/apt/lists/*
+elif command -v dnf >/dev/null 2>&1; then
+	dnf install -y jq
+	dnf clean all
 else
 	echo "Unsupported package manager for jq installation" >&2
 	exit 1
