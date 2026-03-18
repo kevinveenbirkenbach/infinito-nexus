@@ -26,10 +26,12 @@ on:
         description: "Polling attempts for waiting on prebuilt images"
         required: false
         type: string
+        default: "1440"
       image_wait_sleep_seconds:
         description: "Polling interval in seconds for waiting on prebuilt images"
         required: false
         type: string
+        default: "10"
     secrets:
       GHCR_PAT:
         required: false

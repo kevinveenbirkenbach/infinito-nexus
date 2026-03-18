@@ -12,14 +12,20 @@ on:
         required: false
         type: string
         default: ""
+      image_wait_attempts:
+        description: "Polling attempts for waiting on prebuilt or mirrored images"
+        required: false
+        type: string
+        default: "1440"
+      image_wait_sleep_seconds:
+        description: "Polling interval in seconds for waiting on prebuilt or mirrored images"
+        required: false
+        type: string
+        default: "10"
 
 concurrency:
   group: infinito-test-${{ github.ref }}
   cancel-in-progress: false
-
-env:
-  IMAGE_WAIT_ATTEMPTS: "1440"
-  IMAGE_WAIT_SLEEP_SECONDS: "10"
 
 permissions:
   contents: read
@@ -53,8 +59,8 @@ jobs:
     with:
       distros: "arch debian ubuntu fedora centos"
       concurrency_channel: ci-orchestrator-build-consumer
-      image_wait_attempts: ${{ env.IMAGE_WAIT_ATTEMPTS }}
-      image_wait_sleep_seconds: ${{ env.IMAGE_WAIT_SLEEP_SECONDS }}
+      image_wait_attempts: ${{ inputs.image_wait_attempts }}
+      image_wait_sleep_seconds: ${{ inputs.image_wait_sleep_seconds }}
     secrets: inherit
 
   # Code Testing
@@ -95,8 +101,8 @@ jobs:
     uses: ./.github/workflows/images-mirror-missing.yml
     with:
       concurrency_channel: ci-orchestrator-mirror-consumer
-      image_wait_attempts: ${{ env.IMAGE_WAIT_ATTEMPTS }}
-      image_wait_sleep_seconds: ${{ env.IMAGE_WAIT_SLEEP_SECONDS }}
+      image_wait_attempts: ${{ inputs.image_wait_attempts }}
+      image_wait_sleep_seconds: ${{ inputs.image_wait_sleep_seconds }}
     secrets: inherit
 
   # Deploy tests
