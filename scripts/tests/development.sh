@@ -2,6 +2,11 @@
 set -euo pipefail
 
 APP="${APP:-web-app-dashboard}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+# pkgmgr images may reset the working directory before invoking this script.
+cd "${REPO_ROOT}"
 
 if command -v pacman >/dev/null 2>&1; then
 	pacman -Sy --noconfirm --needed jq
