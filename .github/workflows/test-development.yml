@@ -40,9 +40,7 @@ jobs:
           docker run --rm \
             -e NIX_CONFIG \
             -v "$PWD:/workspace" \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v /usr/bin/docker:/usr/bin/docker:ro \
-            -v /usr/lib/docker/cli-plugins:/usr/lib/docker/cli-plugins:ro \
+            -v "/mnt/docker:/var/lib/docker" \
             -w /workspace \
             "${DEV_RUNTIME_IMAGE}" \
             bash -lc '
