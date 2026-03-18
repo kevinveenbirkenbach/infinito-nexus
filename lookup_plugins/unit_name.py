@@ -32,7 +32,7 @@ def _render_if_template(templar, value, var_name: str):
         return value
 
     try:
-        rendered = templar.template(value, disable_lookups=False)
+        rendered = templar.template(value)
     except TypeError:
         # Unit tests can inject a minimal templar without Ansible's full signature.
         rendered = templar.template(value)
@@ -51,7 +51,7 @@ def _render_if_template(templar, value, var_name: str):
 def _resolve_version(templar, variables):
     # Try the canonical lookup call first.
     try:
-        version = templar.template("{{ lookup('version') }}", disable_lookups=False)
+        version = templar.template("{{ lookup('version') }}")
     except TypeError:
         # Unit tests can inject a minimal templar without Ansible's full signature.
         version = templar.template("{{ lookup('version') }}")

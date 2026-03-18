@@ -24,7 +24,7 @@ class FilterModule:
 
         Ruby rules handled:
         - "  -> \"
-        - \  -> \\
+        - \\  -> \\\\
         - newlines -> \n
         - carriage return -> \r
         - tab -> \t

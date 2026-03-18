@@ -158,8 +158,8 @@ echo ">>> PASS 2: re-init inventory (ASYNC_ENABLED=true)"
   --inventory-dir "${INVENTORY_DIR}" \
   --vars '{"ASYNC_ENABLED": true}'
 
-echo ">>> PASS 2: deploy"
-"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
+echo ">>> PASS 2: deploy (skip wrapper cleanup)"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}" -- --skip-cleanup
 
 echo ">>> DISK / DOCKER STATE AFTER DEPLOY (before cleanup, distro=${INFINITO_DISTRO})"
 df -h || true

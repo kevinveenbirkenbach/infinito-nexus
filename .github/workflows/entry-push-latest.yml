@@ -7,7 +7,6 @@ concurrency:
 on:
   push:
     branches:
-      - master
       - main
       - "feature/**"
       - "hotfix/**"
@@ -76,7 +75,7 @@ jobs:
       distros: ${{ needs.pick-distro.outputs.distros }}
     secrets: inherit
 
-  # Guard job: only allow version releases if the tag commit is contained in origin/master
+  # Guard job: only allow version releases if the tag commit is contained in origin/main
   release-guard:
     name: "🛡️ Guard release"
     if: github.event.created == false && needs.pick-distro.outputs.is_version == 'true'
@@ -93,13 +92,13 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - name: Fetch master
+      - name: Fetch main
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin master:refs/remotes/origin/master --force
+          git fetch origin main:refs/remotes/origin/main --force
 
-      - name: "Guard: tag commit must be contained in origin/master"
+      - name: "Guard: tag commit must be contained in origin/main"
         id: guard
         shell: bash
         env:
@@ -117,12 +116,12 @@ jobs:
           tag_sha="$(git rev-list -n 1 "${tag}")"
           echo "Tag: ${tag} -> ${tag_sha}"
 
-          if git merge-base --is-ancestor "${tag_sha}" "origin/master"; then
+          if git merge-base --is-ancestor "${tag_sha}" "origin/main"; then
             echo "allowed=true" >> "$GITHUB_OUTPUT"
-            echo "✅ Tag commit is on origin/master"
+            echo "✅ Tag commit is on origin/main"
           else
             echo "allowed=false" >> "$GITHUB_OUTPUT"
-            echo "⛔ Tag commit is NOT on origin/master"
+            echo "⛔ Tag commit is NOT on origin/main"
           fi
 
   release-version:

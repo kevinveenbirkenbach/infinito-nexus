@@ -146,7 +146,7 @@ def build_single_graph(
             "id": role,
             **galaxy_info,
             "doc_url": f"https://docs.infinito.nexus/roles/{role}/README.html",
-            "source_url": f"https://github.com/kevinveenbirkenbach/infinito-nexus/tree/master/roles/{role}",
+            "source_url": f"https://github.com/infinito-nexus/core/tree/main/roles/{role}",
         }
         nodes[role] = node
 

@@ -1,11 +1,21 @@
 name: CI (On Pull-Request)
-
-concurrency:
-  group: global-ci-${{ github.repository }}-${{ github.ref_name }}
-  cancel-in-progress: false
+run-name: >-
+  ${{ github.event_name }} / PR #${{ github.event.pull_request.number }} / ${{ github.event.action }} / ${{ github.event.pull_request.head.label }}
 
 on:
   pull_request:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+concurrency:
+  # Keep only the newest run per PR and event type.
+  # This avoids pull_request and pull_request_target cancelling each other.
+  group: pr-ci-${{ github.repository }}-${{ github.event_name }}-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -14,4 +24,44 @@ permissions:
 
 jobs:
   ci-orchestrator:
+    if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/ci-orchestrator.yml
+
+  prepare-fork-merge-ref:
+    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
+    runs-on: ubuntu-latest
+    outputs:
+      checkout_ref: ${{ steps.out.outputs.checkout_ref }}
+      image_tag: ${{ steps.out.outputs.image_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Resolve merge ref and image tag
+        id: out
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha || '' }}
+        run: ./scripts/ci/resolve_pr_merge_ref.sh
+
+  build-ci-images-fork:
+    needs: prepare-fork-merge-ref
+    uses: ./.github/workflows/build-ci-images.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
+      checkout_ref: ${{ needs.prepare-fork-merge-ref.outputs.checkout_ref }}
+      image_tag: ${{ needs.prepare-fork-merge-ref.outputs.image_tag }}
+      concurrency_channel: pr-target-build-producer
+    secrets: inherit
+
+  images-mirror-missing-fork:
+    needs: prepare-fork-merge-ref
+    uses: ./.github/workflows/images-mirror-missing.yml
+    with:
+      repo_root: _pr_source
+      source_repository: ${{ github.repository }}
+      source_ref: ${{ needs.prepare-fork-merge-ref.outputs.checkout_ref }}
+      source_path: _pr_source
+      concurrency_channel: pr-target-mirror-producer
+      concurrency_key: pr-${{ github.event.pull_request.number }}
+    secrets: inherit

@@ -38,13 +38,11 @@ def _run_deploy(
     if passthrough:
         cmd.extend(passthrough)
 
-    # Live stream output for immediate visibility,
-    # while keeping a tail buffer for post-failure printing.
+    # Live stream output for immediate visibility.
     r = compose.exec(
         cmd,
         check=False,
         live=True,
-        keep_lines=400,
         extra_env={
             # Force ANSI colors even when no TTY is allocated (CI default).
             "ANSIBLE_FORCE_COLOR": "1",
@@ -52,13 +50,6 @@ def _run_deploy(
             "TERM": "xterm-256color",
         },
     )
-
-    if r.returncode != 0:
-        print("===== deploy stdout (tail) =====")
-        print((r.stdout or "").rstrip() or "<empty>")
-        print("===== deploy stderr (tail) =====")
-        print((r.stderr or "").rstrip() or "<empty>")
-        print("===============================")
 
     return int(r.returncode)
 

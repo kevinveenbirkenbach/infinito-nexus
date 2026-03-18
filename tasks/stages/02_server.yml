@@ -1,7 +1,7 @@
 ---
 - name: Setup server base
   include_role:
-    name: "{{ item }}"
+    name: "{{ server_role }}"
   loop:
     - user-administrator
     - user-root
@@ -11,15 +11,18 @@
     - sys-ctl-cln-disc-space
     - sys-ctl-hlth-btrfs
     - sys-ctl-rpr-btrfs-balancer
+  loop_control:
+    loop_var: server_role
 
 - name: "Include server roles"
-  include_tasks: "./tasks/groups/{{ item }}-roles.yml"
+  include_tasks: "./tasks/groups/{{ server_group }}-roles.yml"
   loop:
     - web-svc   # 1. Load web server services
     - web-app   # 2. Load (UI) web applications
     - web-opt   # 4. Load optimation scrips last
   loop_control:
-    label: "{{ item }}-roles.yml"
+    loop_var: server_group
+    label: "{{ server_group }}-roles.yml"
 
 - name: Run E2E Playwright tests
   include_role:
