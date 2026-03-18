@@ -28,102 +28,102 @@ PYTHON="${PYTHON:-python3}"
 MAX_TOTAL_SECONDS="${MAX_TOTAL_SECONDS:-}"
 
 if [[ -n "${MAX_TOTAL_SECONDS}" ]]; then
-  if ! [[ "${MAX_TOTAL_SECONDS}" =~ ^[0-9]+$ ]]; then
-    echo "[ERROR] MAX_TOTAL_SECONDS must be an integer (seconds), got: '${MAX_TOTAL_SECONDS}'" >&2
-    exit 2
-  fi
+	if ! [[ "${MAX_TOTAL_SECONDS}" =~ ^[0-9]+$ ]]; then
+		echo "[ERROR] MAX_TOTAL_SECONDS must be an integer (seconds), got: '${MAX_TOTAL_SECONDS}'" >&2
+		exit 2
+	fi
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
-read -r -a distro_arr <<< "${DISTROS}"
+read -r -a distro_arr <<<"${DISTROS}"
 mapfile -t distro_arr < <(printf '%s\n' "${distro_arr[@]}" | shuf)
 echo "=== Distro execution order: ${distro_arr[*]} ==="
 
 global_start="$(date +%s)"
 deadline=""
 if [[ -n "${MAX_TOTAL_SECONDS}" ]]; then
-  deadline="$((global_start + MAX_TOTAL_SECONDS))"
-  echo "=== Global time budget enabled: ${MAX_TOTAL_SECONDS}s (deadline epoch=${deadline}) ==="
+	deadline="$((global_start + MAX_TOTAL_SECONDS))"
+	echo "=== Global time budget enabled: ${MAX_TOTAL_SECONDS}s (deadline epoch=${deadline}) ==="
 else
-  echo "=== Global time budget disabled (set MAX_TOTAL_SECONDS to enable) ==="
+	echo "=== Global time budget disabled (set MAX_TOTAL_SECONDS to enable) ==="
 fi
 
 max_seen=0
 skipped=0
 ran=0
 failed=0
-durations=()  # store "distro=seconds" lines
+durations=() # store "distro=seconds" lines
 
 sync_ci_image_for_distro() {
-  local owner tag
+	local owner tag
 
-  owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
-  tag="${INFINITO_IMAGE_TAG:-latest}"
+	owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
+	tag="${INFINITO_IMAGE_TAG:-latest}"
 
-  # Keep local/dev workflows untouched; only adjust image when CI owner context exists.
-  if [[ -z "${owner}" ]]; then
-    return 0
-  fi
+	# Keep local/dev workflows untouched; only adjust image when CI owner context exists.
+	if [[ -z "${owner}" ]]; then
+		return 0
+	fi
 
-  export INFINITO_IMAGE="ghcr.io/${owner}/infinito-${INFINITO_DISTRO}:${tag}"
-  echo ">>> CI image synced: ${INFINITO_IMAGE}"
+	export INFINITO_IMAGE="ghcr.io/${owner}/infinito-${INFINITO_DISTRO}:${tag}"
+	echo ">>> CI image synced: ${INFINITO_IMAGE}"
 }
 
 for distro in "${distro_arr[@]}"; do
-  now="$(date +%s)"
-  remaining=""
+	now="$(date +%s)"
+	remaining=""
 
-  if [[ -n "${deadline}" ]]; then
-    remaining="$((deadline - now))"
+	if [[ -n "${deadline}" ]]; then
+		remaining="$((deadline - now))"
 
-    if (( remaining <= 0 )); then
-      echo "[WARN] Global budget exhausted (remaining=${remaining}s). Stopping further distro runs."
-      break
-    fi
+		if ((remaining <= 0)); then
+			echo "[WARN] Global budget exhausted (remaining=${remaining}s). Stopping further distro runs."
+			break
+		fi
 
-    # Skip logic: only if we already have a max_seen from a prior run
-    if (( max_seen > 0 && remaining < max_seen )); then
-      echo "[WARN] Skipping distro=${distro}: remaining=${remaining}s < max_seen=${max_seen}s (fast-fail heuristic)"
-      skipped=$((skipped + 1))
-      continue
-    fi
-  fi
+		# Skip logic: only if we already have a max_seen from a prior run
+		if ((max_seen > 0 && remaining < max_seen)); then
+			echo "[WARN] Skipping distro=${distro}: remaining=${remaining}s < max_seen=${max_seen}s (fast-fail heuristic)"
+			skipped=$((skipped + 1))
+			continue
+		fi
+	fi
 
-  echo "=== Running dedicated distro deploy: distro=${distro} app=${APP} type=${TEST_DEPLOY_TYPE} ==="
-  if [[ -n "${remaining}" ]]; then
-    echo ">>> Time budget: remaining=${remaining}s max_seen=${max_seen}s"
-  fi
+	echo "=== Running dedicated distro deploy: distro=${distro} app=${APP} type=${TEST_DEPLOY_TYPE} ==="
+	if [[ -n "${remaining}" ]]; then
+		echo ">>> Time budget: remaining=${remaining}s max_seen=${max_seen}s"
+	fi
 
-  export INFINITO_DISTRO="${distro}"
-  sync_ci_image_for_distro
+	export INFINITO_DISTRO="${distro}"
+	sync_ci_image_for_distro
 
-  distro_start="$(date +%s)"
+	distro_start="$(date +%s)"
 
-  set +e
-  scripts/tests/deploy/ci/dedicated_distro.sh \
-    --app "${APP}"
-  rc=$?
-  set -e
+	set +e
+	scripts/tests/deploy/ci/dedicated_distro.sh \
+		--app "${APP}"
+	rc=$?
+	set -e
 
-  distro_end="$(date +%s)"
-  dur="$((distro_end - distro_start))"
-  durations+=("${distro}=${dur}s")
-  ran=$((ran + 1))
+	distro_end="$(date +%s)"
+	dur="$((distro_end - distro_start))"
+	durations+=("${distro}=${dur}s")
+	ran=$((ran + 1))
 
-  if (( dur > max_seen )); then
-    max_seen="$dur"
-  fi
+	if ((dur > max_seen)); then
+		max_seen="$dur"
+	fi
 
-  echo ">>> Duration: distro=${distro} took ${dur}s (max_seen=${max_seen}s)"
+	echo ">>> Duration: distro=${distro} took ${dur}s (max_seen=${max_seen}s)"
 
-  if [[ $rc -ne 0 ]]; then
-    echo "[ERROR] Deploy failed for distro=${distro} app=${APP} (rc=${rc})" >&2
-    failed=$((failed + 1))
-    exit "$rc"
-  fi
+	if [[ $rc -ne 0 ]]; then
+		echo "[ERROR] Deploy failed for distro=${distro} app=${APP} (rc=${rc})" >&2
+		failed=$((failed + 1))
+		exit "$rc"
+	fi
 done
 
 global_end="$(date +%s)"
@@ -135,11 +135,11 @@ echo "app=${APP} type=${TEST_DEPLOY_TYPE}"
 echo "ran=${ran} skipped=${skipped} failed=${failed}"
 echo "total_runtime=${total}s max_seen_distro=${max_seen}s"
 if [[ -n "${deadline}" ]]; then
-  now="$(date +%s)"
-  remaining="$((deadline - now))"
-  echo "budget=${MAX_TOTAL_SECONDS}s remaining=${remaining}s"
+	now="$(date +%s)"
+	remaining="$((deadline - now))"
+	echo "budget=${MAX_TOTAL_SECONDS}s remaining=${remaining}s"
 fi
 echo "per-distro:"
 for line in "${durations[@]}"; do
-  echo "  - ${line}"
+	echo "  - ${line}"
 done

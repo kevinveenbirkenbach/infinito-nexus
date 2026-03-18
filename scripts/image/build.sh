@@ -7,7 +7,7 @@ NO_CACHE=0
 MISSING_ONLY=0
 
 # New: build variant
-VARIANT="full"         # full | slim
+VARIANT="full" # full | slim
 
 # Keep --target for advanced usage, but default is derived from VARIANT.
 TARGET=""
@@ -81,12 +81,18 @@ while [[ $# -gt 0 ]]; do
 		;;
 	--target)
 		TARGET="${2:-}"
-		[[ -n "${TARGET}" ]] || { echo "ERROR: --target requires a value"; exit 2; }
+		[[ -n "${TARGET}" ]] || {
+			echo "ERROR: --target requires a value"
+			exit 2
+		}
 		shift 2
 		;;
 	--tag)
 		IMAGE_TAG="${2:-}"
-		[[ -n "${IMAGE_TAG}" ]] || { echo "ERROR: --tag requires a value"; exit 2; }
+		[[ -n "${IMAGE_TAG}" ]] || {
+			echo "ERROR: --tag requires a value"
+			exit 2
+		}
 		shift 2
 		;;
 	--push)
@@ -100,30 +106,45 @@ while [[ $# -gt 0 ]]; do
 		;;
 	--registry)
 		REGISTRY="${2:-}"
-		[[ -n "${REGISTRY}" ]] || { echo "ERROR: --registry requires a value"; exit 2; }
+		[[ -n "${REGISTRY}" ]] || {
+			echo "ERROR: --registry requires a value"
+			exit 2
+		}
 		shift 2
 		;;
 	--owner)
 		OWNER="${2:-}"
-		[[ -n "${OWNER}" ]] || { echo "ERROR: --owner requires a value"; exit 2; }
+		[[ -n "${OWNER}" ]] || {
+			echo "ERROR: --owner requires a value"
+			exit 2
+		}
 		shift 2
 		;;
 	--repo-prefix)
 		REPO_PREFIX="${2:-}"
-		[[ -n "${REPO_PREFIX}" ]] || { echo "ERROR: --repo-prefix requires a value"; exit 2; }
+		[[ -n "${REPO_PREFIX}" ]] || {
+			echo "ERROR: --repo-prefix requires a value"
+			exit 2
+		}
 		shift 2
 		;;
 	--version)
 		VERSION="${2:-}"
-		[[ -n "${VERSION}" ]] || { echo "ERROR: --version requires a value"; exit 2; }
+		[[ -n "${VERSION}" ]] || {
+			echo "ERROR: --version requires a value"
+			exit 2
+		}
 		shift 2
 		;;
 	--stable)
 		IS_STABLE="${2:-}"
-		[[ -n "${IS_STABLE}" ]] || { echo "ERROR: --stable requires a value (true|false)"; exit 2; }
+		[[ -n "${IS_STABLE}" ]] || {
+			echo "ERROR: --stable requires a value (true|false)"
+			exit 2
+		}
 		shift 2
 		;;
-	-h|--help)
+	-h | --help)
 		usage
 		exit 0
 		;;
@@ -173,9 +194,18 @@ fi
 
 # Validate publish parameters
 if [[ "${PUBLISH}" == "1" ]]; then
-	[[ -n "${REGISTRY}" ]] || { echo "ERROR: --publish requires --registry"; exit 2; }
-	[[ -n "${OWNER}" ]] || { echo "ERROR: --publish requires --owner"; exit 2; }
-	[[ -n "${VERSION}" ]] || { echo "ERROR: --publish requires --version"; exit 2; }
+	[[ -n "${REGISTRY}" ]] || {
+		echo "ERROR: --publish requires --registry"
+		exit 2
+	}
+	[[ -n "${OWNER}" ]] || {
+		echo "ERROR: --publish requires --owner"
+		exit 2
+	}
+	[[ -n "${VERSION}" ]] || {
+		echo "ERROR: --publish requires --version"
+		exit 2
+	}
 fi
 
 # Guard: --push without --publish requires fully-qualified --tag

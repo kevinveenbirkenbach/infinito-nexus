@@ -17,11 +17,11 @@ $(error Missing env file: $(ENV_SH))
 endif
 
 .PHONY: \
-	setup setup-clean install install-ansible install-venv install-python install-system-python \
-	test test-lint test-unit test-integration test-deploy test-deploy-app \
+	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python \
+	test lint lint-action lint-ansible lint-python lint-shellcheck test-lint test-unit test-integration test-deploy test-deploy-app \
 	clean clean-sudo down \
 	list tree mig dockerignore \
-	print-python lint-ansible \
+	print-python \
 	dns-setup dns-remove \
 	dev-environment-bootstrap dev-environment-teardown \
 	apparmor-teardown apparmor-restore \
@@ -32,7 +32,7 @@ endif
 	test-act-all test-act-app \
 	test-local-app test-local-reset test-local-run-all test-local-cleanup test-local-web-purge \
 	test-local-rapid test-local-rapid-fresh test-local-full \
-	format bootstrap setup-development
+	bootstrap setup-development
 
 dev-environment-bootstrap: apparmor-teardown dns-setup disable-ipv6
 dev-environment-teardown: apparmor-restore dns-remove
@@ -122,6 +122,9 @@ install-ansible:
 	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
 	bash scripts/install/ansible.sh
 
+install-lint:
+	@bash scripts/install/lint.sh
+
 install-system-python:
 	@bash roles/dev-python/files/install.sh ensure
 
@@ -131,7 +134,7 @@ install-venv: install-system-python
 install-python: install-venv
 	@bash scripts/install/python.sh
 
-install: install-python install-ansible
+install: install-python install-ansible install-lint
 
 setup: dockerignore
 	@bash scripts/setup.sh
@@ -144,14 +147,23 @@ bootstrap: install setup
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
-format:
-	set -euo pipefail; \
-	shfmt -w scripts; \
-	ruff format .; \
-	ruff check . --fix
+# --- Lint ---
+lint: lint-action lint-ansible lint-python lint-shellcheck
+
+lint-action:
+	@bash scripts/lint/action.sh
+
+lint-ansible:
+	@bash scripts/lint/ansible.sh
+
+lint-python:
+	@bash scripts/lint/python.sh
+
+lint-shellcheck:
+	@bash scripts/lint/shellcheck.sh
 
 # --- Tests (separated) ---
-test: test-lint test-unit test-integration lint-ansible test-deploy
+test: lint test-lint test-unit test-integration test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
 test-lint: install
@@ -211,8 +223,3 @@ test-local-rapid-fresh: test-local-cleanup-entity test-local-rapid
 test-local-full:
 	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
 	@bash scripts/tests/deploy/local/all.sh
-
-# Backwards compatible target (kept)
-lint-ansible:
-	@echo "📑 Checking Ansible syntax…"
-	ansible-playbook -i localhost, -c local $(foreach f,$(wildcard group_vars/all/*.yml),-e @$(f)) playbook.yml --syntax-check

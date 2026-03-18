@@ -14,7 +14,7 @@ set -euo pipefail
 
 # Prevent double-loading
 if [[ "${INFINITO_ENV_LOADED:-}" == "1" ]]; then
-  return 0
+	return 0
 fi
 export INFINITO_ENV_LOADED="1"
 
@@ -29,9 +29,9 @@ _is_true() { [[ "${1:-}" == "1" || "${1:-}" == "true" ]]; }
 _virtual_env="${VIRTUAL_ENV:-}"
 
 if [[ -n "${_virtual_env}" ]]; then
-  : "${VENV_BASE:=${VENV_BASE:-$(dirname "${_virtual_env}")/}}"
+	: "${VENV_BASE:=${VENV_BASE:-$(dirname "${_virtual_env}")/}}"
 else
-  : "${VENV_BASE:=${VENV_BASE:-/opt/venvs}}"
+	: "${VENV_BASE:=${VENV_BASE:-/opt/venvs}}"
 fi
 
 : "${VENV_NAME:=infinito}"
@@ -40,9 +40,9 @@ fi
 
 _default_python="${VENV%/}/bin/python"
 if [[ -x "${_default_python}" ]]; then
-  : "${PYTHON:=${_default_python}}"
+	: "${PYTHON:=${_default_python}}"
 else
-  : "${PYTHON:=python3}"
+	: "${PYTHON:=python3}"
 fi
 
 : "${PIP:=${PYTHON} -m pip}"
@@ -61,11 +61,11 @@ export PYTHONPATH
 : "${RUNNING_ON_GITHUB:=false}"
 
 if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
-  RUNNING_ON_GITHUB="true"
-  if [[ "${ACT:-}" == "true" ]]; then
-    RUNNING_ON_ACT="true"
-    RUNNING_ON_GITHUB="false"
-  fi
+	RUNNING_ON_GITHUB="true"
+	if [[ "${ACT:-}" == "true" ]]; then
+		RUNNING_ON_ACT="true"
+		RUNNING_ON_GITHUB="false"
+	fi
 fi
 
 export RUNNING_ON_ACT RUNNING_ON_GITHUB
@@ -91,12 +91,12 @@ export DISTROS
 # Inventory dir (needs resolve script)
 # ------------------------------------------------------------
 if [[ -z "${INVENTORY_DIR:-}" ]]; then
-  INVENTORY_DIR="$(
-    RUNNING_ON_ACT="${RUNNING_ON_ACT}" \
-    RUNNING_ON_GITHUB="${RUNNING_ON_GITHUB}" \
-    HOME="${HOME:-}" \
-    bash scripts/inventory/resolve.sh
-  )"
+	INVENTORY_DIR="$(
+		RUNNING_ON_ACT="${RUNNING_ON_ACT}" \
+			RUNNING_ON_GITHUB="${RUNNING_ON_GITHUB}" \
+			HOME="${HOME:-}" \
+			bash scripts/inventory/resolve.sh
+	)"
 fi
 export INVENTORY_DIR
 
@@ -104,27 +104,27 @@ export INVENTORY_DIR
 # GitHub CI overrides
 # ------------------------------------------------------------
 if [[ "${RUNNING_ON_GITHUB}" == "true" ]]; then
-  : "${INFINITO_PULL_POLICY:=always}"
-  : "${INFINITO_IMAGE_TAG:=latest}"
+	: "${INFINITO_PULL_POLICY:=always}"
+	: "${INFINITO_IMAGE_TAG:=latest}"
 
-  # Owner can come from GitHub Actions or be provided explicitly (fallback).
-  _owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
-  : "${INFINITO_IMAGE:=ghcr.io/${_owner}/infinito-${INFINITO_DISTRO}:${INFINITO_IMAGE_TAG}}"
+	# Owner can come from GitHub Actions or be provided explicitly (fallback).
+	_owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
+	: "${INFINITO_IMAGE:=ghcr.io/${_owner}/infinito-${INFINITO_DISTRO}:${INFINITO_IMAGE_TAG}}"
 
-  : "${INFINITO_NO_BUILD:=1}"
-  : "${INFINITO_DOCKER_VOLUME:=/mnt/docker}"
-  : "${INFINITO_DOCKER_MOUNT:=/var/lib/docker}"
-  : "${INFINITO_COMPILE:=0}"
+	: "${INFINITO_NO_BUILD:=1}"
+	: "${INFINITO_DOCKER_VOLUME:=/mnt/docker}"
+	: "${INFINITO_DOCKER_MOUNT:=/var/lib/docker}"
+	: "${INFINITO_COMPILE:=0}"
 
-  export INFINITO_PULL_POLICY INFINITO_IMAGE_TAG INFINITO_IMAGE INFINITO_NO_BUILD
-  export INFINITO_DOCKER_VOLUME INFINITO_DOCKER_MOUNT
-  export INFINITO_COMPILE
+	export INFINITO_PULL_POLICY INFINITO_IMAGE_TAG INFINITO_IMAGE INFINITO_NO_BUILD
+	export INFINITO_DOCKER_VOLUME INFINITO_DOCKER_MOUNT
+	export INFINITO_COMPILE
 else
-  : "${INFINITO_COMPILE:=1}"
-  export INFINITO_COMPILE
+	: "${INFINITO_COMPILE:=1}"
+	export INFINITO_COMPILE
 fi
 
 # NIX_CONFIG is optional; export if set
 if [[ -n "${NIX_CONFIG:-}" ]]; then
-  export NIX_CONFIG
+	export NIX_CONFIG
 fi

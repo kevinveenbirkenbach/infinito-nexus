@@ -24,11 +24,11 @@ PYTHON="${PYTHON:-python3}"
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
 
 case "${TEST_DEPLOY_TYPE}" in
-  server|workstation|universal) ;;
-  *)
-    echo "[ERROR] Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
-    exit 2
-    ;;
+server | workstation | universal) ;;
+*)
+	echo "[ERROR] Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+	exit 2
+	;;
 esac
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -42,13 +42,13 @@ echo
 
 echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 "${PYTHON}" -m cli.deploy.development up \
-  --distro "${INFINITO_DISTRO}" \
-  --when-down
+	--distro "${INFINITO_DISTRO}" \
+	--when-down
 
 echo ">>> Running everything inside container via development exec (no logic changes)"
 "${PYTHON}" -m cli.deploy.development exec \
-  --distro "${INFINITO_DISTRO}" -- \
-  bash -lc "
+	--distro "${INFINITO_DISTRO}" -- \
+	bash -lc "
     set -euo pipefail
     cd /opt/src/infinito
 

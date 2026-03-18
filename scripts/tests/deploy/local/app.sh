@@ -20,17 +20,17 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
 if [[ -f "scripts/meta/env.sh" ]]; then
-  # shellcheck source=scripts/meta/env.sh
-  source "scripts/meta/env.sh"
+	# shellcheck source=scripts/meta/env.sh
+	source "scripts/meta/env.sh"
 else
-  echo "ERROR: missing scripts/meta/env.sh" >&2
-  exit 2
+	echo "ERROR: missing scripts/meta/env.sh" >&2
+	exit 2
 fi
 
 : "${PYTHON:=python3}"
 
 usage() {
-  cat <<'EOF'
+	cat <<'EOF'
 Usage:
   app.sh <app-id>
 
@@ -44,35 +44,35 @@ EOF
 }
 
 normalize_bool() {
-  case "${1:-}" in
-    true|True|TRUE|1) echo "true" ;;
-    false|False|FALSE|0) echo "false" ;;
-    *)
-      echo "ERROR: invalid boolean value '${1:-}' (expected true|false)" >&2
-      exit 2
-      ;;
-  esac
+	case "${1:-}" in
+	true | True | TRUE | 1) echo "true" ;;
+	false | False | FALSE | 0) echo "false" ;;
+	*)
+		echo "ERROR: invalid boolean value '${1:-}' (expected true|false)" >&2
+		exit 2
+		;;
+	esac
 }
 
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" || $# -eq 0 ]]; then
-  usage
-  exit 0
+	usage
+	exit 0
 fi
 
 APP_ID="${1:-}"
 shift
 
 if [[ -z "${APP_ID}" ]]; then
-  echo "ERROR: app-id is required" >&2
-  usage
-  exit 2
+	echo "ERROR: app-id is required" >&2
+	usage
+	exit 2
 fi
 
 if [[ $# -gt 0 ]]; then
-  echo "ERROR: unknown argument(s): $*" >&2
-  echo "Pass config via ENV (INFINITO_DISTRO, INVENTORY_DIR, LIMIT_HOST, DEBUG)." >&2
-  usage
-  exit 2
+	echo "ERROR: unknown argument(s): $*" >&2
+	echo "Pass config via ENV (INFINITO_DISTRO, INVENTORY_DIR, LIMIT_HOST, DEBUG)." >&2
+	usage
+	exit 2
 fi
 
 INFINITO_DISTRO="${INFINITO_DISTRO:-debian}"
@@ -81,16 +81,16 @@ LIMIT_HOST="${LIMIT_HOST:-localhost}"
 DEBUG="${DEBUG:-true}"
 
 if [[ -z "${INVENTORY_DIR}" ]]; then
-  echo "ERROR: INVENTORY_DIR is empty after loading scripts/meta/env.sh" >&2
-  exit 2
+	echo "ERROR: INVENTORY_DIR is empty after loading scripts/meta/env.sh" >&2
+	exit 2
 fi
 
 case "${INFINITO_DISTRO}" in
-  arch|debian|ubuntu|fedora|centos) ;;
-  *)
-    echo "ERROR: invalid distro '${INFINITO_DISTRO}'" >&2
-    exit 2
-    ;;
+arch | debian | ubuntu | fedora | centos) ;;
+*)
+	echo "ERROR: invalid distro '${INFINITO_DISTRO}'" >&2
+	exit 2
+	;;
 esac
 
 DEBUG="$(normalize_bool "${DEBUG}")"
@@ -105,30 +105,30 @@ echo
 
 echo ">>> Ensuring development stack is up (when-down)"
 "${PYTHON}" -m cli.deploy.development up \
-  --distro "${INFINITO_DISTRO}" \
-  --when-down
+	--distro "${INFINITO_DISTRO}" \
+	--when-down
 
 echo ">>> Running entry.sh bootstrap inside container"
 "${PYTHON}" -m cli.deploy.development exec \
-  --distro "${INFINITO_DISTRO}" -- \
-  bash -lc "set -euo pipefail; cd /opt/src/infinito; ./scripts/docker/entry.sh true"
+	--distro "${INFINITO_DISTRO}" -- \
+	bash -lc "set -euo pipefail; cd /opt/src/infinito; ./scripts/docker/entry.sh true"
 
 echo ">>> Creating inventory for app '${APP_ID}'"
 "${PYTHON}" -m cli.deploy.development init \
-  --distro "${INFINITO_DISTRO}" \
-  --app "${APP_ID}" \
-  --inventory-dir "${INVENTORY_DIR}" \
-  --vars '{"ASYNC_ENABLED": false}'
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP_ID}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": false}'
 
 deploy_cmd=(
-  "${PYTHON}" -m cli.deploy.development deploy
-  --distro "${INFINITO_DISTRO}"
-  --app "${APP_ID}"
-  --inventory-dir "${INVENTORY_DIR}"
+	"${PYTHON}" -m cli.deploy.development deploy
+	--distro "${INFINITO_DISTRO}"
+	--app "${APP_ID}"
+	--inventory-dir "${INVENTORY_DIR}"
 )
 
 if [[ "${DEBUG}" == "true" ]]; then
-  deploy_cmd+=(--debug)
+	deploy_cmd+=(--debug)
 fi
 
 # NOTE: --skip-cleanup keeps cleanup routines disabled during this local test run.

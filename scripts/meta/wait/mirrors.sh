@@ -11,10 +11,10 @@ max_attempts="${IMAGE_WAIT_ATTEMPTS}"
 sleep_seconds="${IMAGE_WAIT_SLEEP_SECONDS}"
 
 mapfile -t mirror_refs < <(
-  GHCR_NAMESPACE="${GHCR_NAMESPACE}" \
-  GHCR_PREFIX="${GHCR_PREFIX}" \
-  REPO_ROOT="${REPO_ROOT}" \
-  python - <<'PY'
+	GHCR_NAMESPACE="${GHCR_NAMESPACE}" \
+		GHCR_PREFIX="${GHCR_PREFIX}" \
+		REPO_ROOT="${REPO_ROOT}" \
+		python - <<'PY'
 import os
 from pathlib import Path
 from cli.mirror.providers import GHCRProvider
@@ -38,8 +38,8 @@ PY
 
 total="${#mirror_refs[@]}"
 if [[ "${total}" -eq 0 ]]; then
-  echo "No mirror refs found. Nothing to wait for."
-  exit 0
+	echo "No mirror refs found. Nothing to wait for."
+	exit 0
 fi
 
 echo "Fork pull_request detected; waiting for mirrored images from pull_request_target."
@@ -47,26 +47,26 @@ echo "Need ${total} mirror refs."
 
 missing=()
 for attempt in $(seq 1 "${max_attempts}"); do
-  missing=()
-  for ref in "${mirror_refs[@]}"; do
-    if ! skopeo inspect "docker://${ref}" >/dev/null 2>&1; then
-      missing+=("${ref}")
-    fi
-  done
+	missing=()
+	for ref in "${mirror_refs[@]}"; do
+		if ! skopeo inspect "docker://${ref}" >/dev/null 2>&1; then
+			missing+=("${ref}")
+		fi
+	done
 
-  if [[ "${#missing[@]}" -eq 0 ]]; then
-    echo "All mirrored images are available."
-    exit 0
-  fi
+	if [[ "${#missing[@]}" -eq 0 ]]; then
+		echo "All mirrored images are available."
+		exit 0
+	fi
 
-  echo "[${attempt}/${max_attempts}] Missing ${#missing[@]}/${total} mirror refs. Waiting ${sleep_seconds}s..."
-  echo "Example missing: ${missing[0]}"
-  sleep "${sleep_seconds}"
+	echo "[${attempt}/${max_attempts}] Missing ${#missing[@]}/${total} mirror refs. Waiting ${sleep_seconds}s..."
+	echo "Example missing: ${missing[0]}"
+	sleep "${sleep_seconds}"
 done
 
 echo "Timed out waiting for mirrored images." >&2
 echo "Still missing (first 20):" >&2
 for ref in "${missing[@]:0:20}"; do
-  echo " - ${ref}" >&2
+	echo " - ${ref}" >&2
 done
 exit 1
