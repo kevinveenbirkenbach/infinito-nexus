@@ -42,7 +42,7 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha || '' }}
-        run: ./scripts/ci/resolve_pr_merge_ref.sh
+        run: ./scripts/meta/resolve/pr_merge_ref.sh
 
   build-ci-images-fork:
     needs: prepare-fork-merge-ref

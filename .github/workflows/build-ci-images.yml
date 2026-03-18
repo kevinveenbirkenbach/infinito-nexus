@@ -22,6 +22,14 @@ on:
         required: false
         type: string
         default: "default"
+      image_wait_attempts:
+        description: "Polling attempts for waiting on prebuilt images"
+        required: false
+        type: string
+      image_wait_sleep_seconds:
+        description: "Polling interval in seconds for waiting on prebuilt images"
+        required: false
+        type: string
     secrets:
       GHCR_PAT:
         required: false
@@ -144,7 +152,7 @@ jobs:
           NIX_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MAX_ATTEMPTS: "7"
           RETRY_DELAY_SECONDS: "20"
-        run: ./scripts/ci/build_and_push_ci_image.sh
+        run: ./scripts/image/push.sh
 
       - name: Wait for prebuilt image (fork PR)
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
@@ -152,7 +160,10 @@ jobs:
           GITHUB_REPOSITORY_OWNER: ${{ steps.lower_owner.outputs.owner }}
           MATRIX_DISTRO: ${{ matrix.distro }}
           IMAGE_TAG: ${{ needs.prepare.outputs.image_tag }}
-        run: ./scripts/ci/wait_prebuilt_ci_image.sh
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          IMAGE_WAIT_ATTEMPTS: ${{ inputs.image_wait_attempts }}
+          IMAGE_WAIT_SLEEP_SECONDS: ${{ inputs.image_wait_sleep_seconds }}
+        run: ./scripts/meta/wait/image.sh
 
       - name: Disk pressure (post-build)
         if: always()
