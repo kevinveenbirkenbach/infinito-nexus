@@ -31,7 +31,6 @@ endif
 	ci-deploy-app \
 	test-act-all test-act-app \
 	test-local-app test-local-reset test-local-run-all test-local-cleanup test-local-web-purge \
-	record-playwright \
 	test-local-rapid test-local-rapid-fresh test-local-full \
 	format bootstrap setup-development
 
@@ -212,9 +211,6 @@ test-local-rapid-fresh: test-local-cleanup-entity test-local-rapid
 test-local-full:
 	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
 	@bash scripts/tests/deploy/local/all.sh
-
-record-playwright:
-	@ROLE="$(ROLE)" URL="$(URL)" exec roles/test-e2e-playwright/files/record.sh
 
 # Backwards compatible target (kept)
 lint-ansible:

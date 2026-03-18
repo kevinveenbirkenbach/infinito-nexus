@@ -72,8 +72,6 @@ This role ships central Playwright defaults under:
 Included files:
 - `package.json`
 - `playwright.config.js`
-- `record.sh`
-- `volume/.gitkeep`
 
 `package.json` and `playwright.config.js` are used as central defaults for every app role.
 
@@ -117,29 +115,10 @@ Example override for running only one spec:
 
 `-e TEST_E2E_PLAYWRIGHT_COMMAND='npm install --no-fund --no-audit && npx playwright test tests/login.spec.js'`
 
-## Local Recording
+## Recording
 
-The role includes `record.sh` for interactive local recording with
-`playwright codegen`.
+For interactive Playwright recording, use the external repository:
 
-The script:
-- prompts for the role name and target URL if they are not already set
-- supports pre-seeding role and URL via `ROLE=...` and `URL=...`
-- runs inside the official Playwright container image
-- derives the default Playwright image tag from `roles/test-e2e-playwright/files/package.json`
-- falls back across `container`, `docker`, and `podman`
-- uses Firefox for local `codegen` by default because it is more stable than Chromium with forwarded Linux container GUIs
-- disables the Playwright inspector window because it renders unreliably through container GUI forwarding
-- writes generated code to `roles/<role>/files/playwright.spec.js` by default
-- avoids distro-specific Playwright host dependencies
+`https://github.com/kevinveenbirkenbach/playwright-recorder`
 
-Examples:
-- `make record-playwright`
-- `ROLE=web-app-nextcloud URL=https://dashboard.infinito.example make record-playwright`
-- `roles/test-e2e-playwright/files/record.sh https://dashboard.infinito.example`
-- `roles/test-e2e-playwright/files/record.sh https://dashboard.infinito.example --browser chromium`
-- `roles/test-e2e-playwright/files/record.sh https://dashboard.infinito.example --target javascript -o tests/login.spec.js`
-
-Requirements:
-- a local graphical Linux session (`DISPLAY` or `WAYLAND_DISPLAY`)
-- one of `container`, `docker`, or `podman`
+This role no longer ships its own local recording wrapper.
