@@ -18,9 +18,10 @@ jobs:
       fail-fast: false
       matrix:
         runtime_image:
-          - ghcr.io/kevinveenbirkenbach/pkgmgr-arch:stable
-          - ghcr.io/kevinveenbirkenbach/pkgmgr-debian:stable
-          - ghcr.io/kevinveenbirkenbach/pkgmgr-ubuntu:stable
+          - manjarolinux/base
+          - debian:bookworm
+          - ubuntu:latest
+          - fedora:latest
 
     env:
       RUNTIME_IMAGE: ${{ matrix.runtime_image }}
