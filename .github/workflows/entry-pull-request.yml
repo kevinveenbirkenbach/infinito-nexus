@@ -1,4 +1,6 @@
 name: CI (On Pull-Request)
+run-name: >-
+  ${{ github.event_name }} / PR #${{ github.event.pull_request.number }} / ${{ github.event.action }} / ${{ github.event.pull_request.head.label }}
 
 on:
   pull_request:
