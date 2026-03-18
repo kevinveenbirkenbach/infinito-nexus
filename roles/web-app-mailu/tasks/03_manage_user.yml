@@ -1,8 +1,18 @@
 ---
 - name: "Ensure Mailu user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ MAILU_DOMAIN }}' exists"
-  ansible.builtin.shell: >
-    {{ BIN_COMPOSE }} exec admin flask mailu {{ mailu_action }}
-    {{ mailu_user_name | quote }} {{ MAILU_DOMAIN | quote }} -- {{ mailu_user_password | quote }}
+  ansible.builtin.command:
+    argv:
+      - "{{ BIN_COMPOSE }}"
+      - exec
+      - -T
+      - admin
+      - flask
+      - mailu
+      - "{{ mailu_action }}"
+      - "{{ mailu_user_name }}"
+      - "{{ MAILU_DOMAIN }}"
+      - --
+      - "{{ mailu_user_password }}"
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
   register: mailu_user_result
@@ -18,9 +28,19 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Change password for user '{{ mailu_user_key }};{{ mailu_user_name }}@{{ MAILU_DOMAIN }}'"
-  ansible.builtin.shell: >
-    {{ BIN_COMPOSE }} exec admin flask mailu password
-    {{ mailu_user_name | quote }} {{ MAILU_DOMAIN | quote }} -- {{ mailu_user_password | quote }}
+  ansible.builtin.command:
+    argv:
+      - "{{ BIN_COMPOSE }}"
+      - exec
+      - -T
+      - admin
+      - flask
+      - mailu
+      - password
+      - "{{ mailu_user_name }}"
+      - "{{ MAILU_DOMAIN }}"
+      - --
+      - "{{ mailu_user_password }}"
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
   register: mailu_user_password_change
