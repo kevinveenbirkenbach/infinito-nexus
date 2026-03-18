@@ -39,10 +39,10 @@ dev-environment-bootstrap: install-lint apparmor-teardown dns-setup disable-ipv6
 dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
 
 dns-setup:
-	@bash scripts/dns/setup.sh
+	@bash scripts/administration/network/dns/setup.sh
 
 dns-remove:
-	@bash scripts/dns/remove.sh
+	@bash scripts/administration/network/dns/remove.sh
 
 apparmor-teardown:
 	@echo "==> AppArmor: full teardown (local dev)"
@@ -56,10 +56,10 @@ trust-ca:
 	@bash scripts/administration/trust_ca.sh
 
 disable-ipv6:
-	@sudo bash scripts/administration/network/ipv6_disable.sh
+	@sudo bash scripts/administration/network/ipv6/disable.sh
 
 restore-ipv6:
-	@sudo bash scripts/administration/network/ipv6_restore.sh
+	@sudo bash scripts/administration/network/ipv6/restore.sh
 
 clean:
 	@echo "Removing ignored git files"
