@@ -20,5 +20,12 @@ make dev-environment-bootstrap
 make up
 make test
 make test-local-rapid APP="${APP}"
+make trust-ca
+
+DASHBOARD_URL="https://dashboard.infinito.example"
+
+echo "Checking dashboard URL: ${DASHBOARD_URL}"
+curl -sS -o /dev/null -w '%{http_code}\n' "${DASHBOARD_URL}" | grep -qx '200'
+
 make down
 make dev-environment-teardown

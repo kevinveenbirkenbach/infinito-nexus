@@ -144,7 +144,7 @@ jobs:
     needs:
       - code-quality-gate
   test-dev-environment-dashboard:
-    uses: ./.github/workflows/test-development-environment.yml
+    uses: ./.github/workflows/test-development.yml
     needs:
       - build-ci-images
       - code-quality-gate
