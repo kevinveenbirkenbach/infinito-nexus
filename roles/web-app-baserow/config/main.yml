@@ -19,7 +19,7 @@ compose:
       backup:
         no_stop_required: true
       image:              "baserow/baserow"
-      version:            "latest"
+      version:            "2.1.6"
       name:               "baserow"
       min_storage:        "8GB"
       cpus:               1.0
