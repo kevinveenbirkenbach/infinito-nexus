@@ -47,6 +47,14 @@ on:
         required: false
         type: string
         default: ""
+      image_wait_attempts:
+        description: "Polling attempts for waiting on mirrored images"
+        required: false
+        type: string
+      image_wait_sleep_seconds:
+        description: "Polling interval in seconds for waiting on mirrored images"
+        required: false
+        type: string
     secrets:
       DOCKERHUB_USERNAME:
         required: false
@@ -127,7 +135,9 @@ jobs:
           GHCR_NAMESPACE: ${{ inputs.ghcr_namespace || github.repository_owner }}
           GHCR_PREFIX: ${{ inputs.ghcr_prefix || 'mirror' }}
           REPO_ROOT: ${{ inputs.repo_root || '.' }}
-        run: ./scripts/ci/wait_mirrored_images.sh
+          IMAGE_WAIT_ATTEMPTS: ${{ inputs.image_wait_attempts }}
+          IMAGE_WAIT_SLEEP_SECONDS: ${{ inputs.image_wait_sleep_seconds }}
+        run: ./scripts/meta/wait/mirrors.sh
 
       - name: Mirror images to GHCR (only missing, best-effort)
         if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}

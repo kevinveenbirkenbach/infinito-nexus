@@ -9,7 +9,7 @@ from .common import repo_root_from_here
 
 def add_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser(
-        "build", help="Build infinito image using scripts/build/image.sh (SPOT)."
+        "build", help="Build infinito image using scripts/image/build.sh (SPOT)."
     )
     p.add_argument(
         "--distro",
@@ -38,7 +38,7 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
 def handler(args: argparse.Namespace) -> int:
     repo_root = repo_root_from_here()
-    script = repo_root / "scripts" / "build" / "image.sh"
+    script = repo_root / "scripts" / "image" / "build.sh"
 
     env = dict(os.environ)
     env["INFINITO_DISTRO"] = args.distro

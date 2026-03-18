@@ -17,6 +17,10 @@ concurrency:
   group: infinito-test-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  IMAGE_WAIT_ATTEMPTS: "1440"
+  IMAGE_WAIT_SLEEP_SECONDS: "10"
+
 permissions:
   contents: read
   packages: write
@@ -49,6 +53,8 @@ jobs:
     with:
       distros: "arch debian ubuntu fedora centos"
       concurrency_channel: ci-orchestrator-build-consumer
+      image_wait_attempts: ${{ env.IMAGE_WAIT_ATTEMPTS }}
+      image_wait_sleep_seconds: ${{ env.IMAGE_WAIT_SLEEP_SECONDS }}
     secrets: inherit
 
   # Code Testing
@@ -89,6 +95,8 @@ jobs:
     uses: ./.github/workflows/images-mirror-missing.yml
     with:
       concurrency_channel: ci-orchestrator-mirror-consumer
+      image_wait_attempts: ${{ env.IMAGE_WAIT_ATTEMPTS }}
+      image_wait_sleep_seconds: ${{ env.IMAGE_WAIT_SLEEP_SECONDS }}
     secrets: inherit
 
   # Deploy tests
