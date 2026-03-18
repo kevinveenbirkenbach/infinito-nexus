@@ -96,16 +96,16 @@ mig: list tree
 	@echo "Creating meta data for meta infinity graph"
 
 # ------------------------------------------------------------
-# Docker build targets (delegated to scripts/build)
+# Docker build targets (delegated to scripts/image)
 # ------------------------------------------------------------
 build: dockerignore
-	@bash scripts/build/image.sh
+	@bash scripts/image/build.sh
 
 build-missing:
-	@bash scripts/build/image.sh --missing
+	@bash scripts/image/build.sh --missing
 
 build-no-cache:
-	@bash scripts/build/image.sh --no-cache
+	@bash scripts/image/build.sh --no-cache
 
 build-no-cache-all:
 	@set -euo pipefail; \
