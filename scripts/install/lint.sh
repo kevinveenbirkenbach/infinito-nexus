@@ -5,6 +5,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
+ACTIONLINT_VERSION="${ACTIONLINT_VERSION:-latest}"
+ACTIONLINT_INSTALL_DIR="${ACTIONLINT_INSTALL_DIR:-/usr/local/bin}"
 
 run_privileged() {
 	if [[ "${EUID}" -eq 0 ]] || ! command -v sudo >/dev/null 2>&1; then
@@ -20,6 +22,253 @@ log() {
 
 warn() {
 	printf '%s\n' "$*" >&2
+}
+
+detect_python_bin() {
+	local python_bin="${PYTHON:-python3}"
+
+	if command -v "${python_bin}" >/dev/null 2>&1; then
+		printf '%s\n' "${python_bin}"
+		return 0
+	fi
+
+	if command -v python3 >/dev/null 2>&1; then
+		printf 'python3\n'
+		return 0
+	fi
+
+	if command -v python >/dev/null 2>&1; then
+		printf 'python\n'
+		return 0
+	fi
+
+	warn "Need python, python3, curl, or wget."
+	return 1
+}
+
+download_file() {
+	local url="$1"
+	local output="$2"
+	local python_bin
+
+	if command -v curl >/dev/null 2>&1; then
+		curl -fsSL "${url}" -o "${output}"
+		return 0
+	fi
+
+	if command -v wget >/dev/null 2>&1; then
+		wget -qO "${output}" "${url}"
+		return 0
+	fi
+
+	python_bin="$(detect_python_bin)" || {
+		warn "Need curl, wget, or python to download ${url}."
+		return 1
+	}
+
+	"${python_bin}" - "${url}" "${output}" <<'PY'
+import pathlib
+import sys
+from urllib.request import urlopen
+
+url, output = sys.argv[1], sys.argv[2]
+with urlopen(url) as response:
+    pathlib.Path(output).write_bytes(response.read())
+PY
+}
+
+resolve_latest_actionlint_version() {
+	local latest_url="https://github.com/rhysd/actionlint/releases/latest"
+	local final_url=""
+	local python_bin
+
+	if command -v curl >/dev/null 2>&1; then
+		final_url="$(curl -fsSLI -o /dev/null -w '%{url_effective}' "${latest_url}")"
+	elif command -v wget >/dev/null 2>&1; then
+		final_url="$(
+			wget -q --server-response --max-redirect=0 -O /dev/null "${latest_url}" 2>&1 |
+				sed -n 's/^[[:space:]]*Location: //p' |
+				tr -d '\r' |
+				tail -n1
+		)"
+	else
+		python_bin="$(detect_python_bin)" || return 1
+		final_url="$(
+			"${python_bin}" - "${latest_url}" <<'PY'
+import sys
+from urllib.request import urlopen
+
+with urlopen(sys.argv[1]) as response:
+    print(response.geturl())
+PY
+		)"
+	fi
+
+	final_url="${final_url%/}"
+	if [[ -z "${final_url}" ]]; then
+		warn "Failed to resolve latest actionlint release URL."
+		return 1
+	fi
+
+	if [[ "${final_url}" == "${latest_url}" ]]; then
+		warn "Latest actionlint release URL did not resolve to a versioned tag."
+		return 1
+	fi
+
+	local latest_tag="${final_url##*/}"
+	latest_tag="${latest_tag#v}"
+
+	if [[ -z "${latest_tag}" || "${latest_tag}" == "${final_url}" || "${latest_tag}" == "latest" ]]; then
+		warn "Failed to determine latest actionlint version from ${final_url}."
+		return 1
+	fi
+
+	printf '%s\n' "${latest_tag}"
+}
+
+resolve_actionlint_version() {
+	local requested="${ACTIONLINT_VERSION#v}"
+
+	if [[ "${requested}" != "latest" ]]; then
+		printf '%s\n' "${requested}"
+		return 0
+	fi
+
+	resolve_latest_actionlint_version
+}
+
+detect_actionlint_os() {
+	case "$(uname -s)" in
+	Linux)
+		printf 'linux\n'
+		;;
+	Darwin)
+		printf 'darwin\n'
+		;;
+	FreeBSD)
+		printf 'freebsd\n'
+		;;
+	*)
+		warn "Unsupported OS for actionlint prebuilt binary: $(uname -s)"
+		return 1
+		;;
+	esac
+}
+
+detect_actionlint_arch() {
+	case "$(uname -m)" in
+	x86_64 | amd64)
+		printf 'amd64\n'
+		;;
+	i386 | i486 | i586 | i686)
+		printf '386\n'
+		;;
+	aarch64 | arm64)
+		printf 'arm64\n'
+		;;
+	armv6l | armv7l)
+		printf 'armv6\n'
+		;;
+	*)
+		warn "Unsupported architecture for actionlint prebuilt binary: $(uname -m)"
+		return 1
+		;;
+	esac
+}
+
+ensure_dir_on_path() {
+	local dir="$1"
+
+	case ":${PATH}:" in
+	*:"${dir}":*) ;;
+	*)
+		export PATH="${dir}:${PATH}"
+		;;
+	esac
+}
+
+install_with_optional_sudo() {
+	if "$@"; then
+		return 0
+	fi
+
+	run_privileged "$@"
+}
+
+install_actionlint_binary() {
+	local version
+	local os
+	local arch
+	local archive_name
+	local url
+	local tmpdir
+	local archive_path
+
+	version="$(resolve_actionlint_version)" || return 1
+	os="$(detect_actionlint_os)" || return 1
+	arch="$(detect_actionlint_arch)" || return 1
+	archive_name="actionlint_${version}_${os}_${arch}.tar.gz"
+	url="https://github.com/rhysd/actionlint/releases/download/v${version}/${archive_name}"
+	tmpdir="$(mktemp -d)"
+	archive_path="${tmpdir}/${archive_name}"
+
+	if [[ "${ACTIONLINT_VERSION#v}" == "latest" ]]; then
+		log "Installing latest actionlint (resolved to v${version}) from GitHub releases"
+	else
+		log "Installing actionlint v${version} from GitHub releases"
+	fi
+
+	if ! download_file "${url}" "${archive_path}"; then
+		warn "Failed to download ${url}"
+		rm -rf "${tmpdir}"
+		return 1
+	fi
+
+	if ! tar -xzf "${archive_path}" -C "${tmpdir}"; then
+		warn "Failed to extract ${archive_name}"
+		rm -rf "${tmpdir}"
+		return 1
+	fi
+
+	if [[ ! -f "${tmpdir}/actionlint" ]]; then
+		warn "Archive ${archive_name} did not contain an actionlint binary."
+		rm -rf "${tmpdir}"
+		return 1
+	fi
+
+	if ! install_with_optional_sudo install -d "${ACTIONLINT_INSTALL_DIR}"; then
+		warn "Failed to create ${ACTIONLINT_INSTALL_DIR}"
+		rm -rf "${tmpdir}"
+		return 1
+	fi
+
+	if ! install_with_optional_sudo install -m 0755 "${tmpdir}/actionlint" "${ACTIONLINT_INSTALL_DIR}/actionlint"; then
+		warn "Failed to install actionlint into ${ACTIONLINT_INSTALL_DIR}"
+		rm -rf "${tmpdir}"
+		return 1
+	fi
+
+	rm -rf "${tmpdir}"
+}
+
+ensure_actionlint() {
+	if command -v actionlint >/dev/null 2>&1; then
+		return 0
+	fi
+
+	log "Missing command 'actionlint'. Installing official prebuilt binary."
+	install_actionlint_binary || {
+		warn "Installation failed for 'actionlint'."
+		return 1
+	}
+
+	ensure_dir_on_path "${ACTIONLINT_INSTALL_DIR}"
+	hash -r
+
+	command -v actionlint >/dev/null 2>&1 || {
+		warn "Command 'actionlint' is still unavailable after installation."
+		return 1
+	}
 }
 
 detect_package_manager() {
@@ -100,9 +349,6 @@ install_command() {
 	local command_name="$2"
 
 	case "${command_name}:${manager}" in
-	actionlint:pacman | actionlint:apt-get | actionlint:dnf | actionlint:yum | actionlint:brew)
-		install_package_candidates "${manager}" actionlint
-		;;
 	ansible-galaxy:pacman | ansible-galaxy:apt-get | ansible-galaxy:dnf | ansible-galaxy:yum | ansible-galaxy:brew | \
 		ansible-playbook:pacman | ansible-playbook:apt-get | ansible-playbook:dnf | ansible-playbook:yum | ansible-playbook:brew)
 		if [[ "${manager}" == "brew" ]]; then
@@ -200,7 +446,7 @@ ensure_required_ansible_collections() {
 }
 
 install_action_tools() {
-	ensure_command actionlint
+	ensure_actionlint
 }
 
 install_ansible_tools() {
