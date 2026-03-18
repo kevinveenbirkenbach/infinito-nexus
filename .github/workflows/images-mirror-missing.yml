@@ -91,6 +91,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Resolve GHCR namespace
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          ghcr_namespace="${{ inputs.ghcr_namespace || '' }}"
+          if [[ -n "${ghcr_namespace}" ]]; then
+            ghcr_namespace="${ghcr_namespace,,}"
+          else
+            ghcr_namespace="$(scripts/meta/resolve/repository/owner.sh)"
+          fi
+          echo "ghcr_namespace=${ghcr_namespace}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout source repo for scan (optional)
         if: ${{ inputs.source_repository != '' && inputs.source_ref != '' }}
         uses: actions/checkout@v6
@@ -134,7 +147,7 @@ jobs:
       - name: Wait for mirrored images (fork PR)
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         env:
-          GHCR_NAMESPACE: ${{ inputs.ghcr_namespace || github.repository_owner }}
+          GHCR_NAMESPACE: ${{ steps.vars.outputs.ghcr_namespace }}
           GHCR_PREFIX: ${{ inputs.ghcr_prefix || 'mirror' }}
           REPO_ROOT: ${{ inputs.repo_root || '.' }}
           IMAGE_WAIT_ATTEMPTS: ${{ inputs.image_wait_attempts }}
@@ -147,8 +160,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          GHCR_NAMESPACE="${{ inputs.ghcr_namespace || github.repository_owner }}"
-          GHCR_NAMESPACE="${GHCR_NAMESPACE,,}"
+          GHCR_NAMESPACE="${{ steps.vars.outputs.ghcr_namespace }}"
           GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
           REPO_ROOT="${{ inputs.repo_root || '.' }}"
 

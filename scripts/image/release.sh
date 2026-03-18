@@ -4,12 +4,14 @@ set -euo pipefail
 # Retag already built CI images (ci-<sha>) to <version> and latest (no rebuild).
 
 OWNER="${OWNER:-${GITHUB_REPOSITORY_OWNER:-}}"
+OWNER="$(OWNER="${OWNER}" GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}" GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" scripts/meta/resolve/repository/owner.sh)"
 [[ -n "${OWNER}" ]] || { echo "ERROR: OWNER not set"; exit 2; }
 
 REGISTRY="${REGISTRY:-ghcr.io}"
-REPO_PREFIX="${REPO_PREFIX:-infinito}"
-DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
+: "${REPO_PREFIX:?Missing REPO_PREFIX}"
+: "${DISTROS:?Missing DISTROS}"
 DEFAULT_DISTRO="${DEFAULT_DISTRO:-debian}"
+REPO_PREFIX="${REPO_PREFIX,,}"
 
 # VERSION_TAG must be like "v1.2.3"
 VERSION_TAG="${VERSION_TAG:-${GITHUB_REF_NAME:-}}"
@@ -44,9 +46,9 @@ for distro in ${DISTROS}; do
   echo "==> ${distro}"
 
   # NORMAL
-  src="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:${CI_TAG}"
-  dst_ver="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:${VERSION_TAG}"
-  dst_latest="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${distro}:latest"
+  src="${REGISTRY}/${OWNER}/${REPO_PREFIX}/${distro}:${CI_TAG}"
+  dst_ver="${REGISTRY}/${OWNER}/${REPO_PREFIX}/${distro}:${VERSION_TAG}"
+  dst_latest="${REGISTRY}/${OWNER}/${REPO_PREFIX}/${distro}:latest"
   retag_set "${src}" "${dst_ver}" "${dst_latest}"
 
   # Alias for default distro

@@ -16,7 +16,7 @@ PUSH=0                 # if 1 -> use buildx and push (requires docker buildx)
 PUBLISH=0              # if 1 -> push with semantic tags (latest/version/stable + aliases)
 REGISTRY=""            # e.g. ghcr.io
 OWNER=""               # e.g. github org/user
-REPO_PREFIX="infinito" # image base name (infinito)
+REPO_PREFIX=""         # image repository name
 VERSION=""             # X.Y.Z (required for --publish)
 IS_STABLE="false"      # "true" -> publish stable tags
 DEFAULT_DISTRO="debian"
@@ -27,7 +27,9 @@ PKGMGR_IMAGE_TAG="stable" # can be overridden by env or future flag
 PKGMGR_IMAGE=""           # computed below (single build-arg for Dockerfile)
 
 usage() {
-	local default_tag="${REPO_PREFIX}-${INFINITO_DISTRO}"
+	local repo_prefix="${REPO_PREFIX:-${INFINITO_IMAGE_REPOSITORY:-<repo>}}"
+
+	local default_tag="${repo_prefix}/${INFINITO_DISTRO}"
 	if [[ "${VARIANT}" == "slim" ]]; then
 		default_tag="${default_tag}-slim"
 	fi
@@ -50,13 +52,13 @@ Publish options:
   --publish             Publish semantic tags (latest, <version>, optional stable) + default-distro aliases
   --registry <reg>      Registry (e.g. ghcr.io)
   --owner <owner>       Registry namespace (e.g. \${GITHUB_REPOSITORY_OWNER})
-  --repo-prefix <name>  Image base name (default: infinito)
+  --repo-prefix <name>  Image repository name (default: \$INFINITO_IMAGE_REPOSITORY)
   --version <X.Y.Z>     Version for --publish
   --stable <true|false> Whether to publish :stable tags (default: false)
 
 Notes:
 - --publish implies --push and requires --registry, --owner, and --version.
-- Local build (no --push) uses "docker build" and creates local images like "infinito-arch" / "infinito-arch-slim".
+- Local build (no --push) uses "docker build" and creates local images like "<repo>/arch" / "<repo>/arch-slim".
 - If you set NIX_CONFIG in the environment (e.g. access-tokens), it will be forwarded into the build.
 EOF
 }
@@ -135,6 +137,17 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
+if [[ -z "${REPO_PREFIX}" ]]; then
+	REPO_PREFIX="${INFINITO_IMAGE_REPOSITORY:-}"
+fi
+
+: "${REPO_PREFIX:?Missing REPO_PREFIX or INFINITO_IMAGE_REPOSITORY}"
+REPO_PREFIX="${REPO_PREFIX,,}"
+
+if [[ -n "${OWNER}" || -n "${GITHUB_REPOSITORY_OWNER:-}" || -n "${GITHUB_REPOSITORY:-}" ]]; then
+	OWNER="$(OWNER="${OWNER}" GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}" GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" scripts/meta/resolve/repository/owner.sh)"
+fi
+
 # Derive default TARGET from VARIANT if not explicitly provided
 if [[ -z "${TARGET}" ]]; then
 	if [[ "${VARIANT}" == "slim" ]]; then
@@ -146,7 +159,7 @@ fi
 
 # Derive default local tag if not provided
 if [[ -z "${IMAGE_TAG}" ]]; then
-	IMAGE_TAG="${REPO_PREFIX}-${INFINITO_DISTRO}"
+	IMAGE_TAG="${REPO_PREFIX}/${INFINITO_DISTRO}"
 	if [[ "${VARIANT}" == "slim" ]]; then
 		IMAGE_TAG="${IMAGE_TAG}-slim"
 	fi
@@ -181,7 +194,7 @@ fi
 # Guard: --push without --publish requires fully-qualified --tag
 if [[ "${PUSH}" == "1" && "${PUBLISH}" != "1" ]]; then
 	if [[ "${IMAGE_TAG}" != */* ]]; then
-		echo "ERROR: --push requires --tag with a fully-qualified name (e.g. ghcr.io/<owner>/<image>:tag), or use --publish" >&2
+		echo "ERROR: --push requires --tag with a fully-qualified name (e.g. ghcr.io/<owner>/<repo>/<image>:tag), or use --publish" >&2
 		exit 2
 	fi
 fi
@@ -232,7 +245,7 @@ compute_publish_tags() {
 		suffix="-slim"
 	fi
 
-	distro_tag_base="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${INFINITO_DISTRO}${suffix}"
+	distro_tag_base="${REGISTRY}/${OWNER}/${REPO_PREFIX}/${INFINITO_DISTRO}${suffix}"
 
 	if [[ "${INFINITO_DISTRO}" == "${DEFAULT_DISTRO}" ]]; then
 		alias_tag_base="${REGISTRY}/${OWNER}/${REPO_PREFIX}${suffix}"

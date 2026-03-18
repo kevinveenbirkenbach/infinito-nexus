@@ -3,11 +3,13 @@ set -euo pipefail
 
 : "${MATRIX_DISTRO:?Missing MATRIX_DISTRO}"
 : "${IMAGE_TAG:?Missing IMAGE_TAG}"
-: "${GITHUB_REPOSITORY_OWNER:?Missing GITHUB_REPOSITORY_OWNER}"
 : "${IMAGE_WAIT_SLEEP_SECONDS:?Missing IMAGE_WAIT_SLEEP_SECONDS}"
 : "${IMAGE_WAIT_ATTEMPTS:?Missing IMAGE_WAIT_ATTEMPTS}"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ghcr_owner="$(scripts/meta/resolve/repository/owner.sh)"
+repo_name="${IMAGE_REPO_NAME:-$("${script_dir}/../resolve/repository/name.sh")}"
 
-image="ghcr.io/${GITHUB_REPOSITORY_OWNER}/infinito-${MATRIX_DISTRO}:${IMAGE_TAG}"
+image="ghcr.io/${ghcr_owner}/${repo_name}/${MATRIX_DISTRO}:${IMAGE_TAG}"
 sleep_seconds="${IMAGE_WAIT_SLEEP_SECONDS}"
 max_attempts="${IMAGE_WAIT_ATTEMPTS}"
 pr_number="${PR_NUMBER:-}"

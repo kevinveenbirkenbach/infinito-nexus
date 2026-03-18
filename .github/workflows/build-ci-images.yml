@@ -138,15 +138,18 @@ jobs:
           echo
           docker buildx du || true
 
-      - name: Lowercase owner
-        id: lower_owner
-        run: echo "owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+      - name: Resolve repository owner
+        id: owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "owner=$(scripts/meta/resolve/repository/owner.sh)" >> "$GITHUB_OUTPUT"
 
       - name: Build & push (retry 7x, 20s)
         if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
         shell: bash
         env:
-          GITHUB_REPOSITORY_OWNER: ${{ steps.lower_owner.outputs.owner }}
+          GITHUB_REPOSITORY_OWNER: ${{ steps.owner.outputs.owner }}
           BUILD_CONTEXT_DIR: _src
           MATRIX_DISTRO: ${{ matrix.distro }}
           IMAGE_TAG: ${{ needs.prepare.outputs.image_tag }}
@@ -159,7 +162,7 @@ jobs:
       - name: Wait for prebuilt image (fork PR)
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         env:
-          GITHUB_REPOSITORY_OWNER: ${{ steps.lower_owner.outputs.owner }}
+          GITHUB_REPOSITORY_OWNER: ${{ steps.owner.outputs.owner }}
           MATRIX_DISTRO: ${{ matrix.distro }}
           IMAGE_TAG: ${{ needs.prepare.outputs.image_tag }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
