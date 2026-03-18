@@ -16,7 +16,7 @@ A role is considered Playwright-enabled if it provides:
 
 The role then stages the Playwright project to a local staging directory, renders a `.env`
 file from `templates/playwright.env.j2`, optionally waits until the application is reachable, and executes
-Playwright inside a pinned Docker image.
+Playwright inside a Docker image derived from the central Playwright package version.
 
 ## Overview
 
@@ -52,7 +52,7 @@ roles/<application_id>/
 ```
 
 `package.json` and `playwright.config.js` are provided centrally by this role from:
-`roles/test-e2e-playwright/examples/tests/playwright/`.
+`roles/test-e2e-playwright/files/`.
 
 ### `playwright.env.j2`
 
@@ -63,22 +63,19 @@ Inside `playwright.env.j2` you can resolve the application domain via:
 - `{{ lookup('domain',application_id) }}`
 - Typical for Playwright tests: `APP_BASE_URL={{ lookup('tls', application_id, 'url.base') }}`
 
-## Included Example Files
+## Included Files
 
-This role ships a ready-to-copy Playwright example under:
+This role ships central Playwright defaults under:
 
-`roles/test-e2e-playwright/examples/tests/playwright/`
+`roles/test-e2e-playwright/files/`
 
 Included files:
-- `env.j2`
 - `package.json`
 - `playwright.config.js`
-- `scripts/record.sh`
-- `tests/smoke.spec.js`
+- `record.sh`
 - `volume/.gitkeep`
 
-These files are examples. `package.json` and `playwright.config.js` are also used
-as central defaults for every app role.
+`package.json` and `playwright.config.js` are used as central defaults for every app role.
 
 ## Variables
 
@@ -87,7 +84,8 @@ as central defaults for every app role.
 - `TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR` (default: `/var/lib/infinito/logs/test-e2e-playwright`)
 
 ### Playwright runtime
-- `TEST_E2E_PLAYWRIGHT_IMAGE` (default: `mcr.microsoft.com/playwright:v1.50.1-noble`)
+- `TEST_E2E_PLAYWRIGHT_IMAGE` (default: empty; optional full image override)
+- `TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO` (default: `noble`)
 - `TEST_E2E_PLAYWRIGHT_COMMAND` (default: `npm install --no-fund --no-audit && npx playwright test`)
 
 ### Readiness wait
@@ -102,32 +100,33 @@ as central defaults for every app role.
 ## Design Notes
 
 - The runner is intentionally test-agnostic at runtime: it executes only tests provided by application roles.
-- The bundled example scaffold is optional and not used automatically.
+- The central `files/package.json` is the single source of truth for the default Playwright version.
 - `templates/playwright.env.j2` acts as the stable marker for discovery and as the source of environment configuration.
 - Playwright is executed in Docker for reproducibility and consistent browser dependencies.
 - In `TLS_MODE=self_signed`, the role requires `CA_TRUST.cert_host`, `CA_TRUST.wrapper_host`, and `CA_TRUST.trust_name` and fails early if cert/wrapper files are missing.
 
-## How To Use The Example
+## How To Use
 
 1. Add the two app-specific files:
    - `roles/<application_id>/templates/playwright.env.j2`
    - `roles/<application_id>/files/playwright.spec.js`
 2. Run deployment and include your app in `allowed_applications` (or leave it empty to run all discovered apps).
-3. Keep `package.json` and `playwright.config.js` centralized in `roles/test-e2e-playwright/examples/tests/playwright/`.
+3. Keep `package.json` and `playwright.config.js` centralized in `roles/test-e2e-playwright/files/`.
 
 Example override for running only one spec:
 
-`-e TEST_E2E_PLAYWRIGHT_COMMAND='npm install --no-fund --no-audit && npx playwright test tests/smoke.spec.js'`
+`-e TEST_E2E_PLAYWRIGHT_COMMAND='npm install --no-fund --no-audit && npx playwright test tests/login.spec.js'`
 
 ## Local Recording
 
-The example scaffold includes `scripts/record.sh` for interactive local recording with
+The role includes `record.sh` for interactive local recording with
 `playwright codegen`.
 
 The script:
 - prompts for the role name and target URL if they are not already set
 - supports pre-seeding role and URL via `ROLE=...` and `URL=...`
 - runs inside the official Playwright container image
+- derives the default Playwright image tag from `roles/test-e2e-playwright/files/package.json`
 - falls back across `container`, `docker`, and `podman`
 - uses Firefox for local `codegen` by default because it is more stable than Chromium with forwarded Linux container GUIs
 - disables the Playwright inspector window because it renders unreliably through container GUI forwarding
@@ -137,9 +136,9 @@ The script:
 Examples:
 - `make record-playwright`
 - `ROLE=web-app-nextcloud URL=https://dashboard.infinito.example make record-playwright`
-- `./scripts/record.sh https://dashboard.infinito.example`
-- `./scripts/record.sh https://dashboard.infinito.example --browser chromium`
-- `./scripts/record.sh https://dashboard.infinito.example --target javascript -o tests/login.spec.js`
+- `roles/test-e2e-playwright/files/record.sh https://dashboard.infinito.example`
+- `roles/test-e2e-playwright/files/record.sh https://dashboard.infinito.example --browser chromium`
+- `roles/test-e2e-playwright/files/record.sh https://dashboard.infinito.example --target javascript -o tests/login.spec.js`
 
 Requirements:
 - a local graphical Linux session (`DISPLAY` or `WAYLAND_DISPLAY`)

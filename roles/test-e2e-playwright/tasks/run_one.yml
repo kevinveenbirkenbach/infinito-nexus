@@ -5,8 +5,8 @@
     _playwright_stage_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}"
     _playwright_stage_tests_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}/tests"
     _playwright_reports_dir: "{{ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR }}/{{ application_id }}"
-    _playwright_default_package_json: "{{ playbook_dir }}/roles/test-e2e-playwright/examples/tests/playwright/package.json"
-    _playwright_default_config_js: "{{ playbook_dir }}/roles/test-e2e-playwright/examples/tests/playwright/playwright.config.js"
+    _playwright_default_package_json: "{{ playbook_dir }}/roles/test-e2e-playwright/files/package.json"
+    _playwright_default_config_js: "{{ playbook_dir }}/roles/test-e2e-playwright/files/playwright.config.js"
     _playwright_ca_required: "{{ (TLS_MODE | default('') | lower) == 'self_signed' }}"
     _playwright_ca_cert_host: "{{ (CA_TRUST | default({})).cert_host | default('') }}"
     _playwright_ca_wrapper_host: "{{ (CA_TRUST | default({})).wrapper_host | default('') }}"
@@ -99,6 +99,36 @@
     msg: "Missing central Playwright package.json: {{ _playwright_default_package_json }}"
   when: not _default_package_stat.stat.exists
 
+- name: Read central default package.json
+  ansible.builtin.slurp:
+    src: "{{ _playwright_default_package_json }}"
+  register: _default_package_json_slurp
+
+- name: Derive Playwright version from central package.json
+  ansible.builtin.set_fact:
+    _playwright_test_version: >-
+      {{
+        (
+          ((_default_package_json_slurp.content | b64decode | from_json).devDependencies['@playwright/test'])
+          | string
+          | regex_replace('^[^0-9]*', '')
+        )
+      }}
+
+- name: Fail when @playwright/test version is missing in central package.json
+  ansible.builtin.fail:
+    msg: "Missing @playwright/test devDependency in {{ _playwright_default_package_json }}"
+  when: _playwright_test_version | length == 0
+
+- name: Resolve Playwright image
+  ansible.builtin.set_fact:
+    _playwright_image: >-
+      {{
+        TEST_E2E_PLAYWRIGHT_IMAGE
+        if (TEST_E2E_PLAYWRIGHT_IMAGE | default('') | trim | length > 0)
+        else 'mcr.microsoft.com/playwright:v' ~ _playwright_test_version ~ '-' ~ TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO
+      }}
+
 - name: Copy central default package.json
   ansible.builtin.copy:
     src: "{{ _playwright_default_package_json }}"
@@ -182,7 +212,7 @@
       - "{{ _playwright_reports_dir }}:/reports"
       - -w
       - /e2e
-      - "{{ TEST_E2E_PLAYWRIGHT_IMAGE }}"
+      - "{{ _playwright_image }}"
       - /bin/bash
       - -lc
       - "{{ TEST_E2E_PLAYWRIGHT_COMMAND }}"

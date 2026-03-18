@@ -214,7 +214,7 @@ test-local-full:
 	@bash scripts/tests/deploy/local/all.sh
 
 record-playwright:
-	@ROLE="$(ROLE)" URL="$(URL)" exec roles/test-e2e-playwright/examples/tests/playwright/scripts/record.sh
+	@ROLE="$(ROLE)" URL="$(URL)" exec roles/test-e2e-playwright/files/record.sh
 
 # Backwards compatible target (kept)
 lint-ansible:

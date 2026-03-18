@@ -2,9 +2,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.50.1-noble}"
-PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.50.1}"
+PROJECT_DIR="${SCRIPT_DIR}"
+PLAYWRIGHT_PACKAGE_JSON="${PROJECT_DIR}/package.json"
+PLAYWRIGHT_IMAGE="${PLAYWRIGHT_IMAGE:-}"
+PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-}"
+PLAYWRIGHT_IMAGE_DISTRO="${PLAYWRIGHT_IMAGE_DISTRO:-noble}"
 PLAYWRIGHT_CODEGEN_BROWSER="${PLAYWRIGHT_CODEGEN_BROWSER:-firefox}"
 REPO_ROOT=""
 PROJECT_RELATIVE_DIR=""
@@ -34,6 +36,29 @@ detect_container_runtime() {
   echo "No supported container runtime found."
   echo "Install 'container', 'docker', or 'podman' to use Playwright recording."
   exit 1
+}
+
+detect_playwright_version() {
+  local version
+
+  if [[ -n "${PLAYWRIGHT_VERSION}" ]]; then
+    return
+  fi
+
+  if [[ ! -f "${PLAYWRIGHT_PACKAGE_JSON}" ]]; then
+    echo "Could not find ${PLAYWRIGHT_PACKAGE_JSON}."
+    exit 1
+  fi
+
+  version="$(sed -nE 's/.*"@playwright\/test"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' "${PLAYWRIGHT_PACKAGE_JSON}" | head -n 1)"
+  version="$(printf '%s' "${version}" | sed -E 's/^[^0-9]*//')"
+
+  if [[ -z "${version}" ]]; then
+    echo "Could not determine @playwright/test version from ${PLAYWRIGHT_PACKAGE_JSON}."
+    exit 1
+  fi
+
+  PLAYWRIGHT_VERSION="${version}"
 }
 
 append_display_args() {
@@ -192,6 +217,12 @@ if [[ -z "${DISPLAY:-}" ]] && [[ -z "${WAYLAND_DISPLAY:-}" ]]; then
   echo "No graphical session detected."
   echo "Set DISPLAY or WAYLAND_DISPLAY before starting Playwright recording."
   exit 1
+fi
+
+detect_playwright_version
+
+if [[ -z "${PLAYWRIGHT_IMAGE}" ]]; then
+  PLAYWRIGHT_IMAGE="mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-${PLAYWRIGHT_IMAGE_DISTRO}"
 fi
 
 detect_container_runtime
