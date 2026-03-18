@@ -50,6 +50,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: prepare
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      INFINITO_IMAGE_TAG: ci-${{ github.sha }}
+      # Use the prebuilt CI image directly instead of the :latest fallback from env.sh.
+      INFINITO_IMAGE: ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:ci-${{ github.sha }}
 
     strategy:
       fail-fast: false
