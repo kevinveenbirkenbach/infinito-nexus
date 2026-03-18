@@ -1,4 +1,6 @@
 name: CI (On Pull-Request)
+run-name: >-
+  ${{ github.event_name }} / PR #${{ github.event.pull_request.number }} / ${{ github.event.action }} / ${{ github.event.pull_request.head.label }}
 
 on:
   pull_request:
@@ -43,7 +45,6 @@ jobs:
         run: ./scripts/ci/resolve_pr_merge_ref.sh
 
   build-ci-images-fork:
-    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
     needs: prepare-fork-merge-ref
     uses: ./.github/workflows/build-ci-images.yml
     with:
@@ -54,7 +55,6 @@ jobs:
     secrets: inherit
 
   images-mirror-missing-fork:
-    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
     needs: prepare-fork-merge-ref
     uses: ./.github/workflows/images-mirror-missing.yml
     with:
