@@ -50,6 +50,17 @@ fi
 export VENV_BASE VENV_NAME VENV_FALLBACK VENV
 export PYTHON PIP
 
+# Make venv-installed console scripts (for example ruff) available to Make recipes.
+_venv_bin="${VENV%/}/bin"
+if [[ -d "${_venv_bin}" ]]; then
+	case ":${PATH:-}:" in
+	*:"${_venv_bin}":*) ;;
+	*)
+		export PATH="${_venv_bin}${PATH:+:${PATH}}"
+		;;
+	esac
+fi
+
 # Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
 : "${PYTHONPATH:=.}"
 export PYTHONPATH

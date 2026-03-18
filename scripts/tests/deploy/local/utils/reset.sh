@@ -21,10 +21,17 @@ echo "type          = ${TEST_DEPLOY_TYPE}"
 echo "inventory_dir = ${INVENTORY_DIR}"
 echo
 
-# 1) Discover apps on HOST (same as local/all.sh)
+# 1) Bring up development stack (no build)
+echo ">>> Starting development compose stack (no build)"
+"${PYTHON}" -m cli.deploy.development up \
+	--distro "${INFINITO_DISTRO}" \
+	--skip-entry-init
+
+# 2) Discover apps on HOST (same as local/all.sh)
 apps_json="$(
 	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
 		WHITELIST="${WHITELIST:-}" \
+		PYTHON=python3 \
 		scripts/meta/resolve/apps.sh
 )"
 
@@ -60,12 +67,6 @@ echo "apps_sample=$(
 		"${apps_json}"
 )"
 echo
-
-# 2) Bring up development stack (no build)
-echo ">>> Starting development compose stack (no build)"
-"${PYTHON}" -m cli.deploy.development up \
-	--distro "${INFINITO_DISTRO}" \
-	--skip-entry-init
 
 # 3) Run entry.sh + create inventory INSIDE container
 echo ">>> Initializing inventory inside container"

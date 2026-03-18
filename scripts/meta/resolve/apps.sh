@@ -61,6 +61,20 @@ jq_whitelist_filter() {
 	jq -c --argjson wl "${wl_json}" 'map(select(. as $a | ($wl | index($a)) != null))'
 }
 
+compose_ci_exec() {
+	local -a compose_args=(docker compose --env-file env.ci)
+
+	if [[ -f "env.development" ]]; then
+		compose_args+=(--env-file env.development)
+	fi
+
+	compose_args+=(--profile ci exec -T infinito)
+
+	NIX_CONFIG="${NIX_CONFIG:-}" \
+		INFINITO_DISTRO="${INFINITO_DISTRO}" \
+		"${compose_args[@]}" "$@"
+}
+
 # ------------------------------------------------------------
 # Lifecycle handling (always-on, original set)
 # ------------------------------------------------------------
@@ -70,7 +84,7 @@ lifecycles_args=(--lifecycles alpha beta rc stable)
 # 1) Get JSON list from container (keep as JSON)
 # ------------------------------------------------------------
 apps_json="$(
-	docker compose --profile ci exec -T infinito \
+	compose_ci_exec \
 		"${PYTHON}" -m cli.meta.applications.type \
 		--format json \
 		--type "${TEST_DEPLOY_TYPE}" \
@@ -96,7 +110,7 @@ if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
 	mapfile -t roles < <(printf '%s\n' "${apps_json}" | jq -r '.[]')
 	if [[ "${#roles[@]}" -gt 0 ]]; then
 		# Warnings pass (best-effort)
-		docker compose --profile ci exec -T infinito \
+		compose_ci_exec \
 			"${PYTHON}" -m cli.meta.applications.sufficient_storage \
 			--roles "${roles[@]}" \
 			--required-storage "${required_storage}" \
@@ -106,7 +120,7 @@ if [[ -n "${GITHUB_ACTIONS:-}" && -z "${ACT:-}" ]]; then
 
 		# Real filter (JSON output)
 		apps_json="$(
-			docker compose --profile ci exec -T infinito \
+			compose_ci_exec \
 				"${PYTHON}" -m cli.meta.applications.sufficient_storage \
 				--roles "${roles[@]}" \
 				--required-storage "${required_storage}" \

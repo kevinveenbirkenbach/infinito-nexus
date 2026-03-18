@@ -25,6 +25,7 @@ endif
 	dns-setup dns-remove \
 	dev-environment-bootstrap dev-environment-teardown \
 	apparmor-teardown apparmor-restore \
+	disable-ipv6 restore-ipv6 \
 	trust-ca \
 	restart up down stop \
 	build build-missing build-no-cache build-no-cache-all \
@@ -34,8 +35,8 @@ endif
 	test-local-rapid test-local-rapid-fresh test-local-full \
 	bootstrap setup-development
 
-dev-environment-bootstrap: apparmor-teardown dns-setup disable-ipv6
-dev-environment-teardown: apparmor-restore dns-remove
+dev-environment-bootstrap: install-lint apparmor-teardown dns-setup disable-ipv6
+dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
 
 dns-setup:
 	@bash scripts/dns/setup.sh
@@ -55,8 +56,10 @@ trust-ca:
 	@bash scripts/administration/trust_ca.sh
 
 disable-ipv6:
-	sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
-	sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+	@sudo bash scripts/administration/network/ipv6_disable.sh
+
+restore-ipv6:
+	@sudo bash scripts/administration/network/ipv6_restore.sh
 
 clean:
 	@echo "Removing ignored git files"
@@ -132,9 +135,9 @@ install-venv: install-system-python
 	@bash scripts/install/venv.sh
 
 install-python: install-venv
-	@bash scripts/install/python.sh
+	@bash scripts/install/python.sh lint
 
-install: install-python install-ansible install-lint
+install: install-python install-ansible
 
 setup: dockerignore
 	@bash scripts/setup.sh
@@ -197,8 +200,7 @@ test-local-app:
 	@bash scripts/tests/deploy/local/app.sh "$${APP}"
 
 test-local-reset:
-	@PYTHON=python3 \
-	bash scripts/tests/deploy/local/utils/reset.sh
+	@bash scripts/tests/deploy/local/utils/reset.sh
 
 test-local-run-all:
 	@bash scripts/tests/deploy/local/run-all.sh

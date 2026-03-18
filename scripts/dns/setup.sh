@@ -11,6 +11,10 @@ SYS_DNSMASQ_CONF="/etc/dnsmasq.d/${DOMAIN}.conf"
 
 echo ">>> Setting up local DNS for *.${DOMAIN} -> 127.0.0.1"
 
+systemd_is_operational() {
+	command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]
+}
+
 install_dnsmasq_if_missing() {
 	if command -v dnsmasq >/dev/null 2>&1; then
 		return 0
@@ -30,6 +34,11 @@ install_dnsmasq_if_missing() {
 		exit 1
 	fi
 }
+
+if ! systemd_is_operational; then
+	echo ">>> Skipping local DNS setup: systemd service management is unavailable in this environment."
+	exit 0
+fi
 
 configure_via_networkmanager_dnsmasq() {
 	echo ">>> Detected NetworkManager -> configuring NM dnsmasq plugin (recommended)"

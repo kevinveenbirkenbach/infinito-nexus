@@ -23,6 +23,11 @@ dependencies = [
   "humanfriendly",
 ]
 
+[project.optional-dependencies]
+lint = [
+  "ruff",
+]
+
 [project.scripts]
 infinito = "cli.__main__:main"
 

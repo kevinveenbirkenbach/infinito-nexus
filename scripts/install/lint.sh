@@ -7,6 +7,9 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../.." && pwd)"
 ACTIONLINT_VERSION="${ACTIONLINT_VERSION:-latest}"
 ACTIONLINT_INSTALL_DIR="${ACTIONLINT_INSTALL_DIR:-/usr/local/bin}"
+SHFMT_VERSION="${SHFMT_VERSION:-latest}"
+SHFMT_INSTALL_DIR="${SHFMT_INSTALL_DIR:-/usr/local/bin}"
+RUFF_PIP_SPEC="${RUFF_PIP_SPEC:-ruff}"
 
 run_privileged() {
 	if [[ "${EUID}" -eq 0 ]] || ! command -v sudo >/dev/null 2>&1; then
@@ -78,7 +81,11 @@ PY
 }
 
 resolve_latest_actionlint_version() {
-	local latest_url="https://github.com/rhysd/actionlint/releases/latest"
+	resolve_latest_github_release_version "https://github.com/rhysd/actionlint/releases/latest"
+}
+
+resolve_latest_github_release_version() {
+	local latest_url="$1"
 	local final_url=""
 	local python_bin
 
@@ -135,6 +142,57 @@ resolve_actionlint_version() {
 	fi
 
 	resolve_latest_actionlint_version
+}
+
+resolve_latest_shfmt_version() {
+	resolve_latest_github_release_version "https://github.com/mvdan/sh/releases/latest"
+}
+
+resolve_shfmt_version() {
+	local requested="${SHFMT_VERSION#v}"
+
+	if [[ "${requested}" != "latest" ]]; then
+		printf '%s\n' "${requested}"
+		return 0
+	fi
+
+	resolve_latest_shfmt_version
+}
+
+detect_shfmt_os() {
+	case "$(uname -s)" in
+	Linux)
+		printf 'linux\n'
+		;;
+	Darwin)
+		printf 'darwin\n'
+		;;
+	*)
+		warn "Unsupported OS for shfmt prebuilt binary: $(uname -s)"
+		return 1
+		;;
+	esac
+}
+
+detect_shfmt_arch() {
+	case "$(uname -m)" in
+	x86_64 | amd64)
+		printf 'amd64\n'
+		;;
+	i386 | i486 | i586 | i686)
+		printf '386\n'
+		;;
+	aarch64 | arm64)
+		printf 'arm64\n'
+		;;
+	armv6l | armv7l)
+		printf 'arm\n'
+		;;
+	*)
+		warn "Unsupported architecture for shfmt prebuilt binary: $(uname -m)"
+		return 1
+		;;
+	esac
 }
 
 detect_actionlint_os() {
@@ -251,6 +309,52 @@ install_actionlint_binary() {
 	rm -rf "${tmpdir}"
 }
 
+install_shfmt_binary() {
+	local version
+	local os
+	local arch
+	local asset_name
+	local url
+	local tmpdir
+	local binary_path
+
+	version="$(resolve_shfmt_version)" || return 1
+	os="$(detect_shfmt_os)" || return 1
+	arch="$(detect_shfmt_arch)" || return 1
+	asset_name="shfmt_v${version}_${os}_${arch}"
+	url="https://github.com/mvdan/sh/releases/download/v${version}/${asset_name}"
+	tmpdir="$(mktemp -d)"
+	binary_path="${tmpdir}/shfmt"
+
+	if [[ "${SHFMT_VERSION#v}" == "latest" ]]; then
+		log "Installing latest shfmt (resolved to v${version}) from GitHub releases"
+	else
+		log "Installing shfmt v${version} from GitHub releases"
+	fi
+
+	if ! download_file "${url}" "${binary_path}"; then
+		warn "Failed to download ${url}"
+		rm -rf "${tmpdir}"
+		return 1
+	fi
+
+	if ! install_with_optional_sudo install -d "${SHFMT_INSTALL_DIR}"; then
+		warn "Failed to create ${SHFMT_INSTALL_DIR}"
+		rm -rf "${tmpdir}"
+		return 1
+	fi
+
+	if ! install_with_optional_sudo install -m 0755 "${binary_path}" "${SHFMT_INSTALL_DIR}/shfmt"; then
+		warn "Failed to install shfmt into ${SHFMT_INSTALL_DIR}"
+		rm -rf "${tmpdir}"
+		return 1
+	fi
+
+	ensure_dir_on_path "${SHFMT_INSTALL_DIR}"
+	hash -r
+	rm -rf "${tmpdir}"
+}
+
 ensure_actionlint() {
 	if command -v actionlint >/dev/null 2>&1; then
 		return 0
@@ -269,6 +373,90 @@ ensure_actionlint() {
 		warn "Command 'actionlint' is still unavailable after installation."
 		return 1
 	}
+}
+
+detect_python_scripts_dir() {
+	local python_bin="$1"
+
+	"${python_bin}" - <<'PY'
+import sysconfig
+
+print(sysconfig.get_path("scripts") or "")
+PY
+}
+
+detect_python_user_scripts_dir() {
+	local python_bin="$1"
+
+	"${python_bin}" - <<'PY'
+import site
+import sys
+
+user_base = site.getuserbase()
+if not user_base:
+    sys.exit(1)
+print(f"{user_base}/bin")
+PY
+}
+
+python_runs_in_venv() {
+	local python_bin="$1"
+
+	"${python_bin}" - <<'PY' >/dev/null 2>&1
+import sys
+
+raise SystemExit(0 if sys.prefix != getattr(sys, "base_prefix", sys.prefix) else 1)
+PY
+}
+
+pip_supports_break_system_packages() {
+	local python_bin="$1"
+
+	"${python_bin}" -m pip install --help 2>/dev/null | grep -q -- '--break-system-packages'
+}
+
+install_ruff_with_pip() {
+	local python_bin
+	local scripts_dir=""
+	local user_scripts_dir=""
+	local -a pip_args=(install --upgrade "${RUFF_PIP_SPEC}")
+
+	python_bin="$(detect_python_bin)" || return 1
+	scripts_dir="$(detect_python_scripts_dir "${python_bin}" || true)"
+
+	log "Installing Python package '${RUFF_PIP_SPEC}' via ${python_bin} -m pip"
+
+	if python_runs_in_venv "${python_bin}"; then
+		if ! "${python_bin}" -m pip "${pip_args[@]}"; then
+			return 1
+		fi
+	elif [[ "${EUID}" -eq 0 ]]; then
+		if ! "${python_bin}" -m pip "${pip_args[@]}"; then
+			if ! pip_supports_break_system_packages "${python_bin}"; then
+				return 1
+			fi
+
+			log "Retrying Python package install with --break-system-packages"
+			if ! "${python_bin}" -m pip install --break-system-packages --upgrade "${RUFF_PIP_SPEC}"; then
+				return 1
+			fi
+		fi
+	else
+		if ! "${python_bin}" -m pip install --user --upgrade "${RUFF_PIP_SPEC}"; then
+			return 1
+		fi
+		user_scripts_dir="$(detect_python_user_scripts_dir "${python_bin}" || true)"
+	fi
+
+	if [[ -n "${scripts_dir}" && -d "${scripts_dir}" ]]; then
+		ensure_dir_on_path "${scripts_dir}"
+	fi
+
+	if [[ -n "${user_scripts_dir}" && -d "${user_scripts_dir}" ]]; then
+		ensure_dir_on_path "${user_scripts_dir}"
+	fi
+
+	hash -r
 }
 
 detect_package_manager() {
@@ -344,6 +532,24 @@ install_package_candidates() {
 	return 1
 }
 
+fallback_install_command() {
+	local command_name="$1"
+
+	case "${command_name}" in
+	ruff)
+		log "Falling back to pip installation for 'ruff'."
+		install_ruff_with_pip
+		;;
+	shfmt)
+		log "Falling back to official shfmt binary."
+		install_shfmt_binary
+		;;
+	*)
+		return 1
+		;;
+	esac
+}
+
 install_command() {
 	local manager="$1"
 	local command_name="$2"
@@ -375,6 +581,7 @@ install_command() {
 
 ensure_command() {
 	local command_name="$1"
+	local install_failed=0
 
 	if command -v "${command_name}" >/dev/null 2>&1; then
 		return 0
@@ -387,10 +594,22 @@ ensure_command() {
 	}
 
 	log "Missing command '${command_name}'. Attempting installation via ${manager}."
-	install_command "${manager}" "${command_name}" || {
-		warn "Installation failed for '${command_name}' via ${manager}."
-		return 1
-	}
+	if ! install_command "${manager}" "${command_name}"; then
+		install_failed=1
+		warn "Package-manager installation failed for '${command_name}' via ${manager}."
+	fi
+
+	if command -v "${command_name}" >/dev/null 2>&1; then
+		return 0
+	fi
+
+	if fallback_install_command "${command_name}"; then
+		if command -v "${command_name}" >/dev/null 2>&1; then
+			return 0
+		fi
+	else
+		((install_failed)) || warn "No fallback installer available for '${command_name}'."
+	fi
 
 	command -v "${command_name}" >/dev/null 2>&1 || {
 		warn "Command '${command_name}' is still unavailable after installation."

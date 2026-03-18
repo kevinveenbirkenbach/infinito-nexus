@@ -10,6 +10,15 @@ SYS_DNSMASQ_CONF="/etc/dnsmasq.d/${DOMAIN}.conf"
 
 echo ">>> Removing local DNS for *.${DOMAIN}"
 
+systemd_is_operational() {
+	command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]
+}
+
+if ! systemd_is_operational; then
+	echo ">>> Skipping local DNS removal: systemd service management is unavailable in this environment."
+	exit 0
+fi
+
 # Remove NetworkManager dnsmasq setup
 if systemctl is-active --quiet NetworkManager 2>/dev/null; then
 	echo ">>> NetworkManager active -> removing NM dnsmasq config"
