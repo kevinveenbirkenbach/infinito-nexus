@@ -148,6 +148,7 @@ jobs:
           set -euo pipefail
 
           GHCR_NAMESPACE="${{ inputs.ghcr_namespace || github.repository_owner }}"
+          GHCR_NAMESPACE="${GHCR_NAMESPACE,,}"
           GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
           REPO_ROOT="${{ inputs.repo_root || '.' }}"
 

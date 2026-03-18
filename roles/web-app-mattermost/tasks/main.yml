@@ -1,0 +1,20 @@
+---
+- name: "Remove stale nginx config for renamed domain chat.{{ DOMAIN_PRIMARY }}"
+  ansible.builtin.file:
+    path: "{{ [lookup('nginx', 'directories.configuration.servers'), 'https', 'chat.' ~ DOMAIN_PRIMARY ~ '.conf'] | path_join }}"
+    state: absent
+  notify: restart openresty
+
+- name: "load docker, db and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full
+  vars:
+    docker_compose_flush_handlers: true
+
+- name: "Run Mattermost setup routines"
+  include_tasks: 01_setup.yml
+
+- name: "Configure Keycloak OIDC mappers for Mattermost"
+  include_tasks: 02_keycloak.yml
+  when: MATTERMOST_OIDC_ENABLED | bool
+
