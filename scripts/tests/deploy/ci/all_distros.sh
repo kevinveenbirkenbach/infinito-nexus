@@ -60,7 +60,9 @@ durations=() # store "distro=seconds" lines
 sync_ci_image_for_distro() {
 	local owner tag
 
+	# Lowercase is required for ghcr.io image tags.
 	owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
+	owner="${owner,,}"
 	tag="${INFINITO_IMAGE_TAG:-latest}"
 
 	# Keep local/dev workflows untouched; only adjust image when CI owner context exists.

@@ -58,7 +58,7 @@ def generate_ci_mirrors_file(compose, *, inventory_dir: str) -> str:
         raise RuntimeError("inventory_dir must not be empty")
 
     env = _exec_env()
-    ghcr_namespace = env["GITHUB_REPOSITORY_OWNER"]
+    ghcr_namespace = env["GITHUB_REPOSITORY_OWNER"].lower()
     ghcr_prefix = env["INFINITO_GHCR_MIRROR_PREFIX"].strip().strip("/")
     if not ghcr_prefix:
         raise RuntimeError("INFINITO_GHCR_MIRROR_PREFIX must not be empty")

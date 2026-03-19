@@ -20,6 +20,9 @@ permissions:
   contents: read
   packages: read
 
+env:
+  INFINITO_IMAGE_TAG: ci-${{ github.sha }}
+
 jobs:
   prepare:
     name: 🧮 Build matrix

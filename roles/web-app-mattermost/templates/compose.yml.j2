@@ -1,0 +1,38 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ MATTERMOST_IMAGE }}:{{ MATTERMOST_VERSION }}"
+    container_name: "{{ MATTERMOST_CONTAINER }}"
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    volumes:
+      - config:/mattermost/config
+      - data:/mattermost/data
+      - logs:/mattermost/logs
+      - plugins:/mattermost/plugins
+      - client-plugins:/mattermost/client/plugins
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD", "/mattermost/bin/mmctl", "--local", "system", "status"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={
+      'config':   {'name': MATTERMOST_VOLUME_CONFIG},
+      'data':     {'name': MATTERMOST_VOLUME_DATA},
+      'logs':     {'name': MATTERMOST_VOLUME_LOGS},
+      'plugins':        {'name': MATTERMOST_VOLUME_PLUGINS},
+      'client-plugins': {'name': MATTERMOST_VOLUME_CLIENT_PLUGINS},
+    }
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
