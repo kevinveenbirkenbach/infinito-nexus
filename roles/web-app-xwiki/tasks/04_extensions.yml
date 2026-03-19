@@ -22,7 +22,7 @@
   include_tasks: _rest_session.yml
 
 - name: "XWIKI | PUT installer page Main.InstallExtensions"
-  uri:
+  uri_retry:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'InstallExtensions'] | url_join }}"
     method: PUT
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
@@ -44,7 +44,7 @@
 
 - block:
     - name: "XWIKI | Execute installer page"
-      uri:
+      uri_retry:
         url: "{{ XWIKI_DOCKER_REACH_URL }}/bin/view/XWiki/InstallExtensions?xpage=plain"
         method: GET
         url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
@@ -138,7 +138,7 @@
 
   always:
     - name: "XWIKI | Delete installer page (best effort)"
-      uri:
+      uri_retry:
         url: "{{ [XWIKI_REST_XWIKI_PAGES, 'InstallExtensions'] | url_join }}"
         method: DELETE
         url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
@@ -183,7 +183,7 @@
   when: missing | length > 0
 
 - name: "XWIKI | Delete installer page"
-  uri:
+  uri_retry:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'InstallExtensions'] | url_join }}"
     method: DELETE
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"

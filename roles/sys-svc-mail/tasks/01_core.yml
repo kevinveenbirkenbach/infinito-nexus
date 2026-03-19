@@ -7,7 +7,7 @@
 
 - block:
   - name: "Check if Mail Host is reachable"
-    uri:
+    uri_retry:
       url: "{{ lookup('tls', 'web-app-mailu', 'url.base') }}"
       method: HEAD
       validate_certs: yes

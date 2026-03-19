@@ -1,5 +1,5 @@
 - name: "XWIKI | Check if Main.WebHome exists"
-  uri:
+  uri_retry:
     url: "{{ [XWIKI_REST_BASE, 'wikis/xwiki/spaces/Main/pages/WebHome'] | url_join }}"
     method: GET
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
@@ -15,7 +15,7 @@
   when: _main_webhome_check.status == 404
 
 - name: "XWIKI | Create Main.WebHome if missing"
-  uri:
+  uri_retry:
     url: "{{ [XWIKI_REST_BASE, 'wikis/xwiki/spaces/Main/pages/WebHome'] | url_join }}"
     method: PUT
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"

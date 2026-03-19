@@ -9,7 +9,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")
 
 # Where filter definitions may exist
 FILTER_PLUGIN_BASES = [
-    os.path.join(PROJECT_ROOT, "filter_plugins"),
+    os.path.join(PROJECT_ROOT, "plugins", "filter"),
     os.path.join(PROJECT_ROOT, "roles"),  # includes roles/*/filter_plugins
 ]
 
@@ -135,7 +135,8 @@ def _iter_files(base: str, *, exts: Tuple[str, ...]):
 
 
 def _is_filter_plugins_dir(path: str) -> bool:
-    return "filter_plugins" in os.path.normpath(path).split(os.sep)
+    parts = os.path.normpath(path).split(os.sep)
+    return "filter_plugins" in parts or ("plugins" in parts and "filter" in parts)
 
 
 def _read(path: str) -> str:

@@ -1,32 +1,40 @@
-# Shared Utility Code (`module_utils/`) for Infinito.Nexus
+# Shared Utilities (`module_utils/`)
 
-This directory contains shared Python utility code (also known as "library code") for use by custom Ansible modules, plugins, or roles in the Infinito.Nexus project.
+This directory contains shared Python helpers used by custom modules and plugins.
 
-## When to Use `module_utils`
+## Purpose
 
-- **Shared logic:** Use `module_utils` to define functions, classes, or helpers that are shared across multiple custom modules, plugins, or filter/lookups in your project.
-- **Reduce duplication:** Centralize code such as API clients, input validation, complex calculations, or protocol helpers.
-- **Maintainability:** If you find yourself repeating code in different custom modules/plugins, refactor it into `module_utils/`.
+Use `module_utils/` for reusable code that should not be duplicated across:
+- `library/` modules,
+- `plugins/action/`,
+- `plugins/filter/`,
+- `plugins/lookup/`.
 
-### Examples
+Typical shared utilities:
+- API clients,
+- validation/conversion helpers,
+- path and configuration helpers,
+- cross-plugin/module domain logic.
 
-- Shared HTTP(S) connection handler for multiple modules.
-- Common validation or transformation functions for user input.
-- Utility functions for interacting with Docker, LDAP, etc.
+## Design Guidelines
 
-## Usage Example
+- Keep helpers focused and composable.
+- Avoid side effects during import.
+- Prefer explicit function/class APIs over implicit globals.
+- Keep dependencies minimal so modules/plugins stay lightweight.
 
-In a custom Ansible module or plugin:
+## Example Import
+
 ```python
-from module_utils.infinito_utils import my_shared_function
-````
+from module_utils.my_shared_utils import some_helper
+```
 
-## When *not* to Use `module_utils`
+## What Does Not Belong Here
 
-* Do not place standalone Ansible modules or plugins here—those go into `library/`, `filter_plugins/`, or `lookup_plugins/` respectively.
-* Only use for code that will be **imported** by other plugins or modules.
+- Standalone executable modules (put in `library/`).
+- Ansible plugin entrypoints (put in `plugins/*`).
 
-## Further Reading
+## References
 
-* [Ansible Module Utilities Documentation](https://docs.ansible.com/ansible/latest/dev_guide/developing_module_utilities.html)
-* [Best Practices: Reusing Code with module\_utils](https://docs.ansible.com/ansible/latest/dev_guide/developing_plugins.html#sharing-code-among-plugins)
+- Module utilities: <https://docs.ansible.com/ansible/latest/dev_guide/developing_module_utilities.html>
+- Plugin development: <https://docs.ansible.com/ansible/latest/dev_guide/developing_plugins.html>

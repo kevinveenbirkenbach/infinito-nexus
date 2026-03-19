@@ -5,7 +5,7 @@
 
 # 1) Fetch the official SHA256 from releases.nixos.org on the control node
 - name: Fetch official Nix installer SHA256
-  ansible.builtin.uri:
+  uri_retry:
     url: "{{ dev_nix_installer_sha256_url }}"
     return_content: true
   register: dev_nix_official_sha_response
@@ -25,8 +25,10 @@
     url: "{{ dev_nix_installer_url }}"
     dest: "{{ dev_nix_installer_dest }}"
     mode: "0755"
+    timeout: 30
     # get_url will verify the checksum and fail if it does not match
     checksum: "sha256:{{ dev_nix_installer_sha256 }}"
+  register: dev_nix_installer_download_result
   become: true
 
 # 3) Locate nix binary in common paths and install only if missing

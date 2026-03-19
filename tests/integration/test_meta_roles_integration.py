@@ -2,9 +2,9 @@ import unittest
 from pathlib import Path
 import re
 import sys
-from filter_plugins.invokable_paths import get_invokable_paths
+from plugins.filter.invokable_paths import get_invokable_paths
 
-# Ensure your project root is on PYTHONPATH so filter_plugins can be imported
+# Ensure project root is on PYTHONPATH so plugins.filter.* can be imported
 ROOT = Path(__file__).parents[2]
 sys.path.insert(0, str(ROOT))
 

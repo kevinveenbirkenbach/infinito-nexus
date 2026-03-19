@@ -12,7 +12,7 @@
 - name: "Ensure Cloudflare Zone ID is known for '{{ domain }}'"
   vars:
     cf_api_url: "https://api.cloudflare.com/client/v4/zones"
-  ansible.builtin.uri:
+  uri_retry:
     url: "{{ cf_api_url }}?name={{ domain | to_primary_domain }}"
     method: GET
     headers:

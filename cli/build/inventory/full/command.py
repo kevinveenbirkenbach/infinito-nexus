@@ -6,7 +6,7 @@ import sys
 
 import yaml
 
-from filter_plugins.get_all_invokable_apps import get_all_invokable_apps
+from plugins.filter.get_all_invokable_apps import get_all_invokable_apps
 
 
 def build_group_inventory(apps: list[str], host: str) -> dict:

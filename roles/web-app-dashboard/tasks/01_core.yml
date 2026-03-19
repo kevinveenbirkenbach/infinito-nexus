@@ -63,7 +63,7 @@
   meta: flush_handlers
 
 - name: Wait for Dashboard HTTP endpoint (required so all logos can be downloaded during initialization)
-  uri:
+  uri_retry:
     url: "http://{{ DOCKER_REACH_HOST }}:{{ http_port }}/"
     status_code: 200
   register: dashboard_http

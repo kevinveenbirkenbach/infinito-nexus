@@ -50,7 +50,7 @@ fi
 export VENV_BASE VENV_NAME VENV_FALLBACK VENV
 export PYTHON PIP
 
-# Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
+# Ensure repo root is importable (so module_utils/, plugins/filter/, plugins/lookup/ etc. work)
 : "${PYTHONPATH:=.}"
 export PYTHONPATH
 
