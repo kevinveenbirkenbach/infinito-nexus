@@ -1,0 +1,44 @@
+# Maintainer: Kevin Veen-Birkenbach <info@veen.world>
+
+pkgname=infinito-nexus
+pkgver=5.1.0
+pkgrel=1
+pkgdesc="Meta package for Infinito.Nexus host dependencies (dev + CI)."
+arch=('any')
+url="https://github.com/infinito-nexus/core"
+license=('custom')
+
+depends=(
+  'ansible'
+  'bash'
+  'ca-certificates'
+  'curl'
+  'dbus'
+  'docker'
+  'gettext'
+  'git'
+  'jq'
+  'make'
+  'openssh'
+  'python'
+  'python-pip'
+  'rsync'
+  'sudo'
+  'systemd'
+  'tar'
+)
+
+optdepends=(
+  'bind: provides dig for DNS test scripts'
+  'docker-compose: compose plugin/compat command'
+  'shellcheck: shell linting'
+  'shfmt: shell formatting'
+)
+
+install="${pkgname}.install"
+source=()
+sha256sums=()
+
+package() {
+  install -Dm0644 /dev/null "${pkgdir}/usr/share/doc/${pkgname}/DEPENDENCIES"
+}

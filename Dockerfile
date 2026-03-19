@@ -43,35 +43,10 @@ RUN /bin/bash ${INFINITO_SRC_DIR}/roles/dev-python/files/install.sh
 RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-container/files/install-cli.sh
 
 # ------------------------------------------------------------
-# Install systemd + dbus + ssh client (for CI Ansible systemd/service tests + Ansible controller ssh)
+# Install distro package (dependencies incl. systemd/dbus/ssh are defined in packaging/*)
 # ------------------------------------------------------------
 # hadolint ignore=DL3008,DL3033,DL3041
-RUN set -euo pipefail; \
-  . /etc/os-release; \
-  echo "[docker-infinito] Installing systemd/dbus + ssh client for ID=${ID}"; \
-  case "${ID}" in \
-    arch) \
-      pacman -Syu --noconfirm --needed systemd dbus openssh; \
-      ;; \
-    debian|ubuntu) \
-      apt-get update; \
-      apt-get install -y --no-install-recommends \
-        systemd systemd-sysv dbus \
-        openssh-client; \
-      rm -rf /var/lib/apt/lists/*; \
-      ;; \
-    fedora) \
-      dnf -y install systemd dbus openssh-clients; \
-      dnf -y clean all; \
-      ;; \
-    centos|rhel) \
-      (command -v dnf >/dev/null 2>&1 && dnf -y install systemd dbus openssh-clients && dnf -y clean all) || \
-      (yum -y install systemd dbus openssh-clients && yum -y clean all); \
-      ;; \
-    *) \
-      echo "[WARN] Unknown distro ID=${ID}. Skipping systemd/dbus/ssh install."; \
-      ;; \
-  esac
+RUN /bin/bash ${INFINITO_SRC_DIR}/scripts/install/package.sh
 
 # ------------------------------------------------------------
 # Disable interactive first-boot units (CI / container safe)

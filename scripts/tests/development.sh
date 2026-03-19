@@ -7,21 +7,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 # pkgmgr images may reset the working directory before invoking this script.
 cd "${REPO_ROOT}"
-
-if command -v pacman >/dev/null 2>&1; then
-	pacman -Sy --noconfirm --needed jq
-elif command -v apt-get >/dev/null 2>&1; then
-	export DEBIAN_FRONTEND=noninteractive
-	apt-get update
-	apt-get install -y --no-install-recommends jq
-	rm -rf /var/lib/apt/lists/*
-elif command -v dnf >/dev/null 2>&1; then
-	dnf install -y jq
-	dnf clean all
-else
-	echo "Unsupported package manager for jq installation" >&2
-	exit 1
-fi
+bash "${REPO_ROOT}/scripts/install/package.sh"
 
 make install
 make dev-environment-bootstrap

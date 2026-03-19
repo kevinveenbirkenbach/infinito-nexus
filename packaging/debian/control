@@ -1,0 +1,42 @@
+Source: infinito-nexus
+Section: admin
+Priority: optional
+Maintainer: Kevin Veen-Birkenbach <info@veen.world>
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/infinito-nexus/core
+
+Package: infinito-nexus
+Architecture: all
+Depends:
+ ansible-core | ansible,
+ bash,
+ ca-certificates,
+ curl,
+ dbus,
+ docker-ce-cli | docker.io,
+ gettext-base,
+ git,
+ jq,
+ make,
+ openssh-client,
+ python3 (>= 3.11),
+ python3-pip,
+ python3-venv,
+ rsync,
+ sudo,
+ systemd,
+ systemd-sysv,
+ tar,
+ ${misc:Depends}
+Recommends:
+ dnsutils,
+ docker-compose-v2 | docker-compose-plugin | docker-compose,
+ shellcheck,
+ shfmt
+Description: Meta package for Infinito.Nexus host dependencies
+ This package installs the OS-level dependencies required by
+ Infinito.Nexus development and CI workflows (make, Python, Docker CLI,
+ Ansible controller tooling, and helper utilities).
+ It intentionally ships no application binaries.
