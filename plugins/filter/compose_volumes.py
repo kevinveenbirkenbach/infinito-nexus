@@ -5,11 +5,18 @@ from typing import Any, Dict, Mapping, Optional, Sequence
 import yaml
 from ansible.errors import AnsibleFilterError
 
-from plugins.filter.docker_service_enabled import (
-    FilterModule as _DockerServiceEnabledFilter,
-)
-from plugins.filter.get_app_conf import get_app_conf
-from plugins.filter.get_entity_name import get_entity_name
+try:
+    # Preferred when imported as Python package (tests, local scripts).
+    from plugins.filter.docker_service_enabled import (
+        FilterModule as _DockerServiceEnabledFilter,
+    )
+    from plugins.filter.get_app_conf import get_app_conf
+    from plugins.filter.get_entity_name import get_entity_name
+except ModuleNotFoundError:
+    # Fallback when loaded by Ansible plugin loader from filter_plugins path.
+    from docker_service_enabled import FilterModule as _DockerServiceEnabledFilter
+    from get_app_conf import get_app_conf
+    from get_entity_name import get_entity_name
 
 
 def _to_plain(obj: Any) -> Any:

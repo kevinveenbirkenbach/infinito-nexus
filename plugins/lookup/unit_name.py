@@ -59,7 +59,12 @@ def _resolve_version(templar, variables):
     # Some Ansible contexts keep nested lookups unresolved here. Fallback to direct plugin call.
     if _looks_like_template(version):
         try:
-            from plugins.lookup.version import LookupModule as VersionLookupModule
+            try:
+                # Preferred when imported as Python package (tests, local scripts).
+                from plugins.lookup.version import LookupModule as VersionLookupModule
+            except ModuleNotFoundError:
+                # Fallback when loaded by Ansible plugin loader from lookup_plugins path.
+                from version import LookupModule as VersionLookupModule
 
             version_lookup = VersionLookupModule()
             version_values = version_lookup.run([], variables=variables)

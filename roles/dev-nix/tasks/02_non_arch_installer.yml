@@ -21,7 +21,7 @@
 
 # 2) Download installer script on the target and verify via checksum
 - name: Download Nix installer script from official releases
-  ansible.builtin.get_url:
+  get_url_retry:
     url: "{{ dev_nix_installer_url }}"
     dest: "{{ dev_nix_installer_dest }}"
     mode: "0755"
