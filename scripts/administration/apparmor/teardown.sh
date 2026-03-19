@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Skip gracefully when AppArmor is not installed or not enabled in this environment
-if ! command -v apparmor_parser >/dev/null 2>&1; then
-  echo "[apparmor] apparmor_parser not found — skipping teardown"
+# Skip gracefully when AppArmor module is not loaded in this environment
+if ! grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then
+  echo "[apparmor] AppArmor module is not loaded — skipping teardown"
   exit 0
 fi
 

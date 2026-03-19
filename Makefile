@@ -49,11 +49,19 @@ dns-remove:
 
 apparmor-teardown:
 	@echo "==> AppArmor: full teardown (local dev)"
-	@sudo bash scripts/administration/apparmor/teardown.sh
+	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
+		sudo bash scripts/administration/apparmor/teardown.sh; \
+	else \
+		echo "[apparmor] AppArmor module is not loaded — skipping teardown"; \
+	fi
 
 apparmor-restore:
 	@echo "==> AppArmor: restore profiles"
-	@sudo bash scripts/administration/apparmor/restore.sh
+	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
+		sudo bash scripts/administration/apparmor/restore.sh; \
+	else \
+		echo "[apparmor] AppArmor module is not loaded — skipping restore"; \
+	fi
 
 trust-ca:
 	@bash scripts/administration/trust_ca.sh
