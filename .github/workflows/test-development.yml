@@ -38,9 +38,14 @@ jobs:
           set -euo pipefail
 
           docker run --rm \
+            -e CI=true \
+            -e GITHUB_ACTIONS=true \
+            -e GITHUB_REPOSITORY_OWNER="${{ github.repository_owner }}" \
+            -e GITHUB_SHA="${{ github.sha }}" \
             -e NIX_CONFIG \
             -v "$PWD:/workspace" \
             -v "/mnt/docker:/var/lib/docker" \
+            -v "/var/run/docker.sock:/var/run/docker.sock" \
             -w /workspace \
             "${DEV_RUNTIME_IMAGE}" \
             bash -lc '
