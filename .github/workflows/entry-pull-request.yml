@@ -26,6 +26,8 @@ jobs:
   ci-orchestrator:
     if: ${{ github.event_name == 'pull_request' }}
     uses: ./.github/workflows/ci-orchestrator.yml
+    with:
+      distros: "arch debian ubuntu fedora centos"
 
   prepare-fork-merge-ref:
     if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
