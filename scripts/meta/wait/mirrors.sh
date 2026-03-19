@@ -4,6 +4,7 @@ set -euo pipefail
 : "${GHCR_NAMESPACE:?Missing GHCR_NAMESPACE}"
 : "${GHCR_PREFIX:?Missing GHCR_PREFIX}"
 : "${REPO_ROOT:?Missing REPO_ROOT}"
+ghcr_namespace="$(echo "${GHCR_NAMESPACE}" | tr '[:upper:]' '[:lower:]')"
 : "${IMAGE_WAIT_SLEEP_SECONDS:?Missing IMAGE_WAIT_SLEEP_SECONDS}"
 : "${IMAGE_WAIT_ATTEMPTS:?Missing IMAGE_WAIT_ATTEMPTS}"
 
@@ -11,7 +12,7 @@ max_attempts="${IMAGE_WAIT_ATTEMPTS}"
 sleep_seconds="${IMAGE_WAIT_SLEEP_SECONDS}"
 
 mapfile -t mirror_refs < <(
-  GHCR_NAMESPACE="${GHCR_NAMESPACE}" \
+  GHCR_NAMESPACE="${ghcr_namespace}" \
   GHCR_PREFIX="${GHCR_PREFIX}" \
   REPO_ROOT="${REPO_ROOT}" \
   python - <<'PY'

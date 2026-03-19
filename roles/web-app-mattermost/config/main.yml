@@ -1,0 +1,58 @@
+server:
+  csp:
+    flags:
+      script-src-elem:
+        unsafe-inline:            true
+      style-src-attr:
+        unsafe-inline:            true
+    whitelist: {}
+  domains:
+    aliases: []
+    canonical:
+      - mattermost.{{ DOMAIN_PRIMARY }}
+  status_codes:
+    default:                      [200, 301, 302, 405]
+compose:
+  services:
+    oidc:
+      enabled:                    true
+      shared:                     true
+    logout:
+      enabled:                    true
+    ldap:
+      enabled:                    false
+    dashboard:
+      enabled:                    true
+    matomo:
+      enabled:                    true
+      shared:                     true
+    database:
+      shared:                     true
+      type:                       "postgres"
+      enabled:                    true
+    mattermost:
+      image:                      "mattermost/mattermost-team-edition"
+      version:                    "7.10.5"
+      backup:
+        no_stop_required:         true
+      name:                       "mattermost"
+      cpus:                       "1.0"
+      mem_reservation:            "512m"
+      mem_limit:                  "1g"
+      pids_limit:                 512
+    oauth2:
+      enabled:                    false
+    redis:
+      backup:
+        disabled:                 true
+      enabled:                    false
+    css:
+      enabled:                    true
+    javascript:
+      enabled:                    true
+  volumes:
+    config:                       "mattermost_config"
+    data:                         "mattermost_data"
+    logs:                         "mattermost_logs"
+    plugins:                      "mattermost_plugins"
+    client-plugins:               "mattermost_client_plugins"
