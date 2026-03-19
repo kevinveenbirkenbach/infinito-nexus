@@ -38,7 +38,6 @@ jobs:
           set -euo pipefail
 
           docker run --rm \
-            -e CI=true \
             -e GITHUB_ACTIONS=true \
             -e GITHUB_REPOSITORY_OWNER="${{ github.repository_owner }}" \
             -e GITHUB_SHA="${{ github.sha }}" \
