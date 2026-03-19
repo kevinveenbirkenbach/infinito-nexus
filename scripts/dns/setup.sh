@@ -72,25 +72,16 @@ configure_via_system_dnsmasq() {
   cat <<EOF | sudo tee "${SYS_DNSMASQ_CONF}" >/dev/null
 address=/${DOMAIN}/127.0.0.1
 address=/${DOMAIN}/::1
+# Bind only to 127.0.0.1 to avoid conflicts with systemd-resolved stub (127.0.0.53)
+listen-address=127.0.0.1
+bind-interfaces
 EOF
-
-  # If systemd-resolved stub listener is active it will occupy port 53 and
-  # prevent dnsmasq from binding. Disable the stub before starting dnsmasq.
-  if systemctl is-active --quiet systemd-resolved 2>/dev/null; then
-    echo ">>> Disabling systemd-resolved stub listener to free port 53"
-    sudo mkdir -p /etc/systemd/resolved.conf.d
-    cat <<EOF | sudo tee /etc/systemd/resolved.conf.d/disable-stub.conf >/dev/null
-[Resolve]
-DNSStubListener=no
-EOF
-    sudo systemctl restart systemd-resolved || true
-  fi
 
   echo ">>> Enabling and restarting dnsmasq service"
   sudo systemctl enable dnsmasq --now
   sudo systemctl restart dnsmasq
 
-  # Optional: systemd-resolved integration if it exists, but NEVER fail the script
+  # Route domain queries through systemd-resolved if available
   if command -v resolvectl >/dev/null 2>&1 && systemctl is-active --quiet systemd-resolved 2>/dev/null; then
     echo ">>> Configuring systemd-resolved routing for ${DOMAIN}"
     sudo resolvectl dns lo 127.0.0.1 || true
