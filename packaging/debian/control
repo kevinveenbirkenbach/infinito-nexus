@@ -16,6 +16,7 @@ Depends:
  curl,
  dbus,
  docker-ce-cli | docker.io,
+ docker-compose-v2 | docker-compose-plugin,
  gettext-base,
  git,
  jq,
@@ -32,7 +33,6 @@ Depends:
  ${misc:Depends}
 Recommends:
  dnsutils,
- docker-compose-v2 | docker-compose-plugin | docker-compose,
  shellcheck,
  shfmt
 Description: Meta package for Infinito.Nexus host dependencies

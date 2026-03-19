@@ -87,6 +87,34 @@ class TestComposeUpRetries(unittest.TestCase):
         self.assertEqual(compose.run.call_count, 1)
         sleep_mock.assert_not_called()
 
+    @patch("subprocess.run", autospec=True)
+    def test_run_passes_ci_profile_flag_to_docker_compose(
+        self, run_mock: MagicMock
+    ) -> None:
+        compose = self._compose()
+
+        run_mock.return_value = subprocess.CompletedProcess(
+            ["docker", "compose", "--profile", "ci", "ps", "-q", "infinito"],
+            0,
+            stdout="cid\n",
+            stderr="",
+        )
+
+        r = compose.run(["ps", "-q", "infinito"], check=False, capture=True)
+
+        self.assertEqual(r.returncode, 0)
+        self.assertEqual(run_mock.call_count, 1)
+
+        cmd = run_mock.call_args.args[0]
+        env = run_mock.call_args.kwargs["env"]
+
+        self.assertEqual(
+            cmd,
+            ["docker", "compose", "--profile", "ci", "ps", "-q", "infinito"],
+        )
+        self.assertEqual(env["INFINITO_DISTRO"], "arch")
+        self.assertNotIn("COMPOSE_PROFILES", env)
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

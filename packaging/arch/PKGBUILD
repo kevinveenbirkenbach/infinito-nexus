@@ -15,6 +15,7 @@ depends=(
   'curl'
   'dbus'
   'docker'
+  'docker-compose'
   'gettext'
   'git'
   'jq'
@@ -30,7 +31,6 @@ depends=(
 
 optdepends=(
   'bind: provides dig for DNS test scripts'
-  'docker-compose: compose plugin/compat command'
   'shellcheck: shell linting'
   'shfmt: shell formatting'
 )

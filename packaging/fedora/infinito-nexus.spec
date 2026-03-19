@@ -13,6 +13,7 @@ Requires:       ca-certificates
 Requires:       curl
 Requires:       dbus
 Requires:       (docker-ce-cli or docker or moby-engine)
+Requires:       docker-compose-plugin
 Requires:       gettext
 Requires:       git
 Requires:       jq
@@ -34,7 +35,6 @@ Requires:       sudo
 Requires:       systemd
 Requires:       tar
 Recommends:     bind-utils
-Recommends:     (docker-compose-plugin or docker-compose)
 Recommends:     shellcheck
 Recommends:     shfmt
 
