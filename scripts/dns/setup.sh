@@ -71,8 +71,6 @@ configure_via_system_dnsmasq() {
   sudo mkdir -p /etc/dnsmasq.d
   cat <<EOF | sudo tee "${SYS_DNSMASQ_CONF}" >/dev/null
 address=/${DOMAIN}/127.0.0.1
-address=/${DOMAIN}/::1
-# Bind only to 127.0.0.1 to avoid conflicts with systemd-resolved stub (127.0.0.53)
 listen-address=127.0.0.1
 bind-interfaces
 EOF
@@ -82,7 +80,10 @@ EOF
   sudo systemctl restart dnsmasq
 
   # Route domain queries through systemd-resolved if available
-  if command -v resolvectl >/dev/null 2>&1 && systemctl is-active --quiet systemd-resolved 2>/dev/null; then
+  # Skip on WSL2: resolv.conf is managed by wsl2/setup-dns.sh and networkd is not running
+  if grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then
+    echo ">>> WSL2 detected -> skipping resolvectl integration"
+  elif command -v resolvectl >/dev/null 2>&1 && systemctl is-active --quiet systemd-resolved 2>/dev/null; then
     echo ">>> Configuring systemd-resolved routing for ${DOMAIN}"
     sudo resolvectl dns lo 127.0.0.1 || true
     sudo resolvectl domain lo "~${DOMAIN}" || true
