@@ -4,6 +4,12 @@ set -euo pipefail
 # shellcheck disable=SC1091
 . /etc/os-release
 
+REPO_ONLY=0
+if [[ "${1:-}" == "--repo-only" ]]; then
+  REPO_ONLY=1
+  shift
+fi
+
 echo ">>> Installing docker client on ID=${ID} ID_LIKE=${ID_LIKE:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_APT_SANITIZER="${SCRIPT_DIR}/apt_repo.sh"
@@ -42,7 +48,9 @@ add_repo_rpm_compatible() {
 
 # shellcheck disable=SC2031
 if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then
-  pacman -Syu --noconfirm --needed docker
+  if [[ "${REPO_ONLY}" != "1" ]]; then
+    pacman -Syu --noconfirm --needed docker
+  fi
   pacman -Scc --noconfirm || true
 
 elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]]; then
@@ -50,6 +58,7 @@ elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]
   sanitize_docker_apt_sources "${ID}" 0
   apt-get update
   apt-get install -y --no-install-recommends \
+    ca-certificates \
     curl \
     gnupg \
     lsb-release
@@ -59,13 +68,22 @@ elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${ID} $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" \
     > /etc/apt/sources.list.d/docker.list
   apt-get update
-  apt-get install -y --no-install-recommends docker-ce-cli
+  if [[ "${REPO_ONLY}" != "1" ]]; then
+    apt-get install -y --no-install-recommends \
+      docker-buildx-plugin \
+      docker-ce-cli \
+      docker-compose-plugin
+  fi
   rm -rf /var/lib/apt/lists/*
 
 elif [[ "${ID}" == "fedora" ]]; then
   dnf -y install dnf-plugins-core
   add_repo_rpm_compatible dnf "https://download.docker.com/linux/fedora/docker-ce.repo"
-  dnf -y install --allowerasing docker-ce-cli docker-buildx-plugin docker-compose-plugin
+  if [[ "${REPO_ONLY}" == "1" ]]; then
+    dnf -y makecache
+  else
+    dnf -y install --allowerasing docker-ce-cli docker-buildx-plugin docker-compose-plugin
+  fi
   dnf -y clean all
   rm -rf /var/cache/dnf
 
@@ -74,7 +92,14 @@ elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|cent
   ${PM} -y install yum-utils || true
   ${PM} -y install dnf-plugins-core || true
   add_repo_rpm_compatible "${PM}" "https://download.docker.com/linux/centos/docker-ce.repo" || true
-  (${PM} -y install docker-ce-cli) || (${PM} -y install docker) || true
+  if [[ "${REPO_ONLY}" == "1" ]]; then
+    ${PM} -y makecache || true
+  else
+    # Prefer the same Docker CLI/buildx/compose package set as Fedora.
+    (${PM} -y install docker-ce-cli docker-buildx-plugin docker-compose-plugin) || \
+      (${PM} -y install docker-ce-cli) || \
+      (${PM} -y install docker) || true
+  fi
   ${PM} -y clean all || true
   rm -rf "/var/cache/${PM}" || true
 

@@ -1,6 +1,7 @@
 # tests/cli/deploy/development/test_compose.py
 from __future__ import annotations
 
+import os
 import subprocess
 import unittest
 from pathlib import Path
@@ -114,6 +115,46 @@ class TestComposeUpRetries(unittest.TestCase):
         )
         self.assertEqual(env["INFINITO_DISTRO"], "arch")
         self.assertNotIn("COMPOSE_PROFILES", env)
+
+    @patch.dict(
+        os.environ,
+        {
+            "INFINITO_NO_BUILD": "0",
+            "INFINITO_IMAGE": "infinito-debian",
+            "INFINITO_PULL_POLICY": "never",
+        },
+        clear=False,
+    )
+    def test_up_builds_when_no_build_flag_is_disabled(self) -> None:
+        compose = self._compose()
+        compose._render_coredns_corefile = MagicMock()
+        compose._compose_up_with_retries = MagicMock()
+        compose.wait_for_healthy = MagicMock()
+
+        compose.up(run_entry_init=False)
+
+        compose._compose_up_with_retries.assert_called_once_with(
+            ["--env-file", "env.ci", "up", "-d", "coredns", "infinito"],
+            attempts=6,
+            delay_s=30,
+        )
+        compose.wait_for_healthy.assert_called_once_with()
+
+    @patch.dict(os.environ, {"INFINITO_NO_BUILD": "1"}, clear=False)
+    def test_up_skips_build_when_no_build_flag_is_enabled(self) -> None:
+        compose = self._compose()
+        compose._render_coredns_corefile = MagicMock()
+        compose._compose_up_with_retries = MagicMock()
+        compose.wait_for_healthy = MagicMock()
+
+        compose.up(run_entry_init=False)
+
+        compose._compose_up_with_retries.assert_called_once_with(
+            ["--env-file", "env.ci", "up", "-d", "--no-build", "coredns", "infinito"],
+            attempts=6,
+            delay_s=30,
+        )
+        compose.wait_for_healthy.assert_called_once_with()
 
 
 if __name__ == "__main__":  # pragma: no cover

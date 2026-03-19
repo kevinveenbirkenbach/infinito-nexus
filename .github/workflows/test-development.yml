@@ -37,10 +37,15 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Build the development image in this job and avoid pulling mutable GHCR tags.
           docker run --rm \
             -e GITHUB_ACTIONS=true \
             -e GITHUB_REPOSITORY_OWNER="${{ github.repository_owner }}" \
             -e GITHUB_SHA="${{ github.sha }}" \
+            -e INFINITO_DISTRO=debian \
+            -e INFINITO_IMAGE=infinito-debian \
+            -e INFINITO_PULL_POLICY=never \
+            -e INFINITO_NO_BUILD=0 \
             -e NIX_CONFIG \
             -v "$PWD:/workspace" \
             -v "/mnt/docker:/var/lib/docker" \

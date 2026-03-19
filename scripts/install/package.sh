@@ -3,6 +3,17 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+DOCKER_CLI_INSTALLER="${REPO_ROOT}/roles/sys-svc-container/files/install-cli.sh"
+
+bootstrap_docker_repo() {
+	if [[ ! -f "${DOCKER_CLI_INSTALLER}" ]]; then
+		echo "[pkg] ERROR: missing docker CLI installer helper at ${DOCKER_CLI_INSTALLER}" >&2
+		exit 1
+	fi
+
+	echo "[pkg] Bootstrapping Docker package repository metadata..."
+	bash "${DOCKER_CLI_INSTALLER}" --repo-only
+}
 
 build_and_install_arch() {
 	local build_root="/tmp/infinito-nexus-arch-build"
@@ -88,6 +99,7 @@ build_and_install_debian_like() {
 	fi
 
 	echo "[debian] Installing ${deb_path}..."
+	bootstrap_docker_repo
 	apt-get install -y "${deb_path}"
 	rm -rf /var/lib/apt/lists/*
 }
@@ -118,6 +130,7 @@ build_and_install_rpm_like() {
 	fi
 
 	echo "[rpm] Installing ${rpm_path} via ${pm}..."
+	bootstrap_docker_repo
 	"${pm}" -y install "${rpm_path}"
 	"${pm}" -y clean all || true
 }
