@@ -15,9 +15,9 @@ def _value_generator_cls() -> Type[object]:
 
     Assumptions:
     - module_utils/manager/__init__.py exists (package import works)
-    - filter_plugins/ is located at repo root (or adjust parents[1])
+    - plugins/filter/ is located at repo root
     """
-    repo_root = Path(__file__).resolve().parents[1]
+    repo_root = Path(__file__).resolve().parents[2]
     module_utils_path = repo_root / "module_utils"
 
     if not module_utils_path.is_dir():
@@ -26,7 +26,6 @@ def _value_generator_cls() -> Type[object]:
     if str(module_utils_path) not in sys.path:
         sys.path.insert(0, str(module_utils_path))
 
-    # module_utils/manager/value_generator.py => manager.value_generator
     from manager.value_generator import ValueGenerator  # type: ignore
 
     return ValueGenerator
