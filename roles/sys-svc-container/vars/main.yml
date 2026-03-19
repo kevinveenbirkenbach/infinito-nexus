@@ -49,7 +49,7 @@ SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION:
     - docker-ce
     - docker-ce-cli
     - containerd.io
-    - docker-compose-plugin
+    - docker-compose-v2
     - docker-buildx-plugin
   Fedora:
     - docker-ce
