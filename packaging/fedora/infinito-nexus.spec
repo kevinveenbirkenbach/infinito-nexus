@@ -18,7 +18,16 @@ Requires:       git
 Requires:       jq
 Requires:       make
 Requires:       openssh-clients
+#
+# EL9 AppStream exposes only python3.9 via the generic python3 capability.
+# In those environments we still bootstrap Python 3.11+ separately via
+# roles/dev-python/files/install.sh, but the RPM metadata must remain
+# installable from the stock distro repositories.
+%if 0%{?rhel} == 9
+Requires:       python3
+%else
 Requires:       python3 >= 3.11
+%endif
 Requires:       python3-pip
 Requires:       rsync
 Requires:       sudo
