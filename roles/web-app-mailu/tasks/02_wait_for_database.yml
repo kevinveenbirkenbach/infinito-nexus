@@ -33,3 +33,48 @@
 
           --- Mailu admin container logs (last 300 lines) ---
           {{ mailu_admin_logs.stdout | default('No logs available') }}
+
+- name: "Wait until Mailu admin Flask app is ready"
+  block:
+
+    - name: "Check Mailu admin Flask routes command"
+      ansible.builtin.command:
+        argv:
+          - "{{ BIN_COMPOSE }}"
+          - exec
+          - -T
+          - admin
+          - flask
+          - routes
+      args:
+        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+      register: mailu_admin_cli_check
+      retries: 30
+      delay: 5
+      until: mailu_admin_cli_check.rc == 0
+      changed_when: false
+
+  rescue:
+
+    - name: "Collect Mailu admin container logs after Flask readiness timeout"
+      ansible.builtin.command:
+        argv:
+          - "{{ BIN_COMPOSE }}"
+          - logs
+          - --tail=300
+          - admin
+      args:
+        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+      register: mailu_admin_cli_logs
+      changed_when: false
+
+    - name: "Fail: Mailu admin Flask app not ready"
+      ansible.builtin.fail:
+        msg: |
+          Mailu admin Flask app was not ready in time.
+
+          Last stderr:
+          {{ mailu_admin_cli_check.stderr | default('') }}
+
+          --- Mailu admin container logs (last 300 lines) ---
+          {{ mailu_admin_cli_logs.stdout | default('No logs available') }}
