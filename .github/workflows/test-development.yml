@@ -1,4 +1,4 @@
-name: Test Dev Environment
+name: Test Development Environment
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   test-environment:
-    name: 🧪 Dev env + dashboard (${{ matrix.dev_runtime_image }})
+    name: 🧑‍💻 Environment (${{ matrix.dev_runtime_image }})
     runs-on: ubuntu-latest
     timeout-minutes: 180
 
