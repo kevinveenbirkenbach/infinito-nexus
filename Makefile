@@ -24,6 +24,7 @@ endif
 	print-python lint-ansible \
 	dns-setup dns-remove \
 	dev-environment-bootstrap dev-environment-teardown \
+	wsl2-systemd-check \
 	apparmor-teardown apparmor-restore \
 	trust-ca \
 	restart up down stop \
@@ -34,8 +35,11 @@ endif
 	test-local-rapid test-local-rapid-fresh test-local-full \
 	format bootstrap setup-development
 
-dev-environment-bootstrap: apparmor-teardown dns-setup disable-ipv6
+dev-environment-bootstrap: wsl2-systemd-check apparmor-teardown dns-setup disable-ipv6
 dev-environment-teardown: apparmor-restore dns-remove
+
+wsl2-systemd-check:
+	@bash scripts/administration/wsl2/enable-systemd.sh
 
 dns-setup:
 	@bash scripts/dns/setup.sh
