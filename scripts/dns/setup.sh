@@ -74,6 +74,18 @@ address=/${DOMAIN}/127.0.0.1
 address=/${DOMAIN}/::1
 EOF
 
+  # If systemd-resolved stub listener is active it will occupy port 53 and
+  # prevent dnsmasq from binding. Disable the stub before starting dnsmasq.
+  if systemctl is-active --quiet systemd-resolved 2>/dev/null; then
+    echo ">>> Disabling systemd-resolved stub listener to free port 53"
+    sudo mkdir -p /etc/systemd/resolved.conf.d
+    cat <<EOF | sudo tee /etc/systemd/resolved.conf.d/disable-stub.conf >/dev/null
+[Resolve]
+DNSStubListener=no
+EOF
+    sudo systemctl restart systemd-resolved || true
+  fi
+
   echo ">>> Enabling and restarting dnsmasq service"
   sudo systemctl enable dnsmasq --now
   sudo systemctl restart dnsmasq

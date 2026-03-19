@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Skip gracefully when AppArmor is not installed or not enabled in this environment
+if ! command -v apparmor_parser >/dev/null 2>&1; then
+  echo "[apparmor] apparmor_parser not found — skipping teardown"
+  exit 0
+fi
+
 echo "[apparmor] tearing down (dev mode)"
 
 systemctl stop apparmor || true

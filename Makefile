@@ -55,8 +55,8 @@ trust-ca:
 	@bash scripts/administration/trust_ca.sh
 
 disable-ipv6:
-	sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1
-	sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1
+	sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1 || true
+	sudo sysctl -w net.ipv6.conf.default.disable_ipv6=1 || true
 
 clean:
 	@echo "Removing ignored git files"
