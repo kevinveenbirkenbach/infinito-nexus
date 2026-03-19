@@ -21,7 +21,9 @@ class TestShellScriptsExecutable(unittest.TestCase):
                 continue
 
             mode = path.stat().st_mode
-            has_any_execute_bit = bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
+            has_any_execute_bit = bool(
+                mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+            )
             if not has_any_execute_bit:
                 rel = path.relative_to(self.repo_root).as_posix()
                 missing_executable_bit.append(rel)
