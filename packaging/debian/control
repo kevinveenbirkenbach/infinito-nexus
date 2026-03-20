@@ -24,6 +24,7 @@ Depends:
  openssh-client,
  python3 (>= 3.11),
  python3-pip,
+ python3-yaml,
  python3-venv,
  rsync,
  sudo,

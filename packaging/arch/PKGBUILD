@@ -23,6 +23,7 @@ depends=(
   'openssh'
   'python'
   'python-pip'
+  'python-yaml'
   'rsync'
   'sudo'
   'systemd'

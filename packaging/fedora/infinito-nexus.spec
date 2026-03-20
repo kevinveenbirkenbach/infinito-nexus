@@ -30,6 +30,7 @@ Requires:       python3
 Requires:       python3 >= 3.11
 %endif
 Requires:       python3-pip
+Requires:       python3-pyyaml
 Requires:       rsync
 Requires:       sudo
 Requires:       systemd
