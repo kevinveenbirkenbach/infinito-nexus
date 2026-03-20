@@ -178,7 +178,7 @@
 
 # Optional wait until app is ready (uses domain resolution)
 - name: Wait until application is ready (HTTP 200/302)
-  ansible.builtin.uri:
+  uri_retry:
     url: "{{ lookup('tls', application_id, 'url.base') }}"
     status_code: [200, 302]
     validate_certs: false
