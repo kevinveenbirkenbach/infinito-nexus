@@ -3,13 +3,13 @@ SHELL := /bin/bash
 .SHELLFLAGS := -euo pipefail -c
 
 # ------------------------------------------------------------
-# SPOT: Global environment is defined in scripts/meta/env.sh
+# SPOT: Global environment is defined in scripts/meta/env/all.sh
 # ------------------------------------------------------------
-ENV_SH ?= $(CURDIR)/scripts/meta/env.sh
+ENV_SH ?= $(CURDIR)/scripts/meta/env/all.sh
 export ENV_SH
 
 # For non-interactive bash, BASH_ENV is sourced before executing the command.
-# This makes env.sh apply automatically to *all* Make recipes.
+# This makes the env layer apply automatically to *all* Make recipes.
 ifneq ("$(wildcard $(ENV_SH))","")
 export BASH_ENV := $(ENV_SH)
 else

@@ -36,10 +36,17 @@ docker exec "${INFINITO_CONTAINER}" bash -lc "
   declare -A seen_entities=()
   entities=()
 
+  # Reuse central Python env resolution instead of custom detection.
+  if [[ -f \"scripts/meta/env/python.sh\" ]]; then
+    # shellcheck source=scripts/meta/env/python.sh
+    source \"scripts/meta/env/python.sh\"
+  fi
+  python_bin=\"\${PYTHON:-python3}\"
+
   for app in \"\${apps[@]}\"; do
     [[ -n \"\${app}\" ]] || continue
 
-    entity=\"\$(python3 -c 'from module_utils.entity_name_utils import get_entity_name; import sys; print(get_entity_name(sys.argv[1]) or \"\")' \"\${app}\")\"
+    entity=\"\$(\"\${python_bin}\" -c 'from module_utils.entity_name_utils import get_entity_name; import sys; print(get_entity_name(sys.argv[1]) or \"\")' \"\${app}\")\"
 
     if [[ -z \"\${entity}\" ]]; then
       echo \"!!! WARNING: could not derive entity from APP=\${app} — skipping\"

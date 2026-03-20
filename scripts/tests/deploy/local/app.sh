@@ -6,8 +6,8 @@ set -euo pipefail
 #   scripts/tests/deploy/local/app.sh <app-id>
 #
 # Environment variables:
-#   INFINITO_DISTRO   arch|debian|ubuntu|fedora|centos (default from scripts/meta/env.sh)
-#   INVENTORY_DIR     target inventory dir (default from scripts/meta/env.sh)
+#   INFINITO_DISTRO   arch|debian|ubuntu|fedora|centos (default from scripts/meta/env/all.sh)
+#   INVENTORY_DIR     target inventory dir (default from scripts/meta/env/all.sh)
 #   LIMIT_HOST        host limit (default: localhost)
 #   DEBUG             true|false (default: true)
 #
@@ -19,11 +19,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
-if [[ -f "scripts/meta/env.sh" ]]; then
-	# shellcheck source=scripts/meta/env.sh
-	source "scripts/meta/env.sh"
+if [[ -f "scripts/meta/env/all.sh" ]]; then
+	# shellcheck source=scripts/meta/env/all.sh
+	source "scripts/meta/env/all.sh"
 else
-	echo "ERROR: missing scripts/meta/env.sh" >&2
+	echo "ERROR: missing scripts/meta/env/all.sh" >&2
 	exit 2
 fi
 
@@ -81,7 +81,7 @@ LIMIT_HOST="${LIMIT_HOST:-localhost}"
 DEBUG="${DEBUG:-true}"
 
 if [[ -z "${INVENTORY_DIR}" ]]; then
-	echo "ERROR: INVENTORY_DIR is empty after loading scripts/meta/env.sh" >&2
+	echo "ERROR: INVENTORY_DIR is empty after loading scripts/meta/env/all.sh" >&2
 	exit 2
 fi
 

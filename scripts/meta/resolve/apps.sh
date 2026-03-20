@@ -23,9 +23,9 @@ cd "$REPO_ROOT"
 # ------------------------------------------------------------
 # Load default environment (safe if already loaded via BASH_ENV)
 # ------------------------------------------------------------
-if [[ -f "scripts/meta/env.sh" ]]; then
-	# shellcheck source=scripts/meta/env.sh
-	source "scripts/meta/env.sh"
+if [[ -f "scripts/meta/env/all.sh" ]]; then
+	# shellcheck source=scripts/meta/env/all.sh
+	source "scripts/meta/env/all.sh"
 fi
 
 # ------------------------------------------------------------
