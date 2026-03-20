@@ -19,8 +19,6 @@ for _ in {1..60}; do
   fi
   sleep 1
 done
-container exec "$container" bash -lc 'pg_isready -U postgres'
-
 # Locate pg_hba.conf
 hba_file="$(container exec "$container" bash -lc "psql -U postgres -d postgres -Atc 'SHOW hba_file;'")"
 if [[ -z "$hba_file" ]]; then

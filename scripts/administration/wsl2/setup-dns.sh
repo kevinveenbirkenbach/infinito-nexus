@@ -52,4 +52,16 @@ echo ">>> Restarting dnsmasq"
 sudo systemctl enable dnsmasq --quiet 2>/dev/null || true
 sudo systemctl restart dnsmasq
 
+# Register WSL interop binfmt handler so Windows .exe files can be executed from WSL
+# Required for tools like powershell.exe when appendWindowsPath=false
+BINFMT_CONF="/etc/binfmt.d/WSLInterop.conf"
+if [[ ! -f "${BINFMT_CONF}" ]]; then
+	echo ">>> Registering WSL interop binfmt handler"
+	printf ':WSLInterop:M::MZ::/init:PF\n' | sudo tee "${BINFMT_CONF}" >/dev/null
+	sudo systemctl restart systemd-binfmt
+fi
+if ! grep -qs "WSLInterop" /proc/sys/fs/binfmt_misc/WSLInterop 2>/dev/null; then
+	printf ':WSLInterop:M::MZ::/init:PF\n' | sudo tee /proc/sys/fs/binfmt_misc/register >/dev/null 2>&1 || true
+fi
+
 echo ">>> WSL2 DNS pre-configuration complete"

@@ -24,7 +24,7 @@ endif
 	print-python lint-ansible \
 	dns-setup dns-remove \
 	dev-environment-bootstrap dev-environment-teardown \
-	wsl2-systemd-check wsl2-dns-setup \
+	wsl2-systemd-check wsl2-dns-setup wsl2-trust-windows \
 	apparmor-teardown apparmor-restore \
 	trust-ca \
 	restart up down stop \
@@ -43,6 +43,9 @@ wsl2-systemd-check:
 
 wsl2-dns-setup:
 	@sudo bash scripts/administration/wsl2/setup-dns.sh
+
+wsl2-trust-windows:
+	@bash scripts/administration/wsl2/trust-ca-windows.sh
 
 dns-setup:
 	@bash scripts/dns/setup.sh
@@ -68,6 +71,7 @@ apparmor-restore:
 
 trust-ca:
 	@bash scripts/administration/trust_ca.sh
+	@bash scripts/administration/wsl2/trust-ca-windows.sh
 
 disable-ipv6:
 	sudo sysctl -w net.ipv6.conf.all.disable_ipv6=1 || true
