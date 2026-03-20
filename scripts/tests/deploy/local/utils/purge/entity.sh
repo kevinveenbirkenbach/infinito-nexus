@@ -19,7 +19,7 @@ set -euo pipefail
 
 echo "=== local cleanup: APP=${APP} container=${INFINITO_CONTAINER} ==="
 
-docker exec -it "${INFINITO_CONTAINER}" bash -lc "
+docker exec "${INFINITO_CONTAINER}" bash -lc "
   set -euo pipefail
   cd /opt/src/infinito
 
