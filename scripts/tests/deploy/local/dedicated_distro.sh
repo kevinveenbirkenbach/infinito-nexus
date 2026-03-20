@@ -51,7 +51,7 @@ APP='matomo' \
 	INFINITO_CONTAINER="${INFINITO_CONTAINER:-${target_container}}" \
 	scripts/tests/deploy/local/utils/purge/entity.sh
 
-echo ">>> Running everything inside container via development exec (no logic changes)"
+echo ">>> Running entry.sh inside container"
 "${PYTHON}" -m cli.deploy.development exec \
 	--distro "${INFINITO_DISTRO}" -- \
 	bash -lc "
@@ -60,34 +60,34 @@ echo ">>> Running everything inside container via development exec (no logic cha
 
     echo '>>> Running entry.sh'
     ./scripts/docker/entry.sh true
-
-    deploy_args=(
-      --distro '${INFINITO_DISTRO}'
-      --app '${APP}'
-      --inventory-dir '${INVENTORY_DIR}'
-      --debug
-    )
-
-    echo '>>> PASS 1: init inventory (ASYNC_ENABLED=false)'
-    ${PYTHON} -m cli.deploy.development init \
-      --distro '${INFINITO_DISTRO}' \
-      --app '${APP}' \
-      --inventory-dir '${INVENTORY_DIR}' \
-      --vars '{\"ASYNC_ENABLED\": false}'
-
-    echo '>>> PASS 1: deploy'
-    ${PYTHON} -m cli.deploy.development deploy \"\${deploy_args[@]}\"
-
-    echo '>>> PASS 2: re-init inventory (ASYNC_ENABLED=true)'
-    ${PYTHON} -m cli.deploy.development init \
-      --distro '${INFINITO_DISTRO}' \
-      --app '${APP}' \
-      --inventory-dir '${INVENTORY_DIR}' \
-      --vars '{\"ASYNC_ENABLED\": true}'
-
-    echo '>>> PASS 2: deploy'
-    ${PYTHON} -m cli.deploy.development deploy \"\${deploy_args[@]}\"
   "
+
+deploy_args=(
+	--distro "${INFINITO_DISTRO}"
+	--app "${APP}"
+	--inventory-dir "${INVENTORY_DIR}"
+	--debug
+)
+
+echo ">>> PASS 1: init inventory (ASYNC_ENABLED=false)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": false}'
+
+echo ">>> PASS 1: deploy"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
+
+echo ">>> PASS 2: re-init inventory (ASYNC_ENABLED=true)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": true}'
+
+echo ">>> PASS 2: deploy"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
 
 echo
 echo "✅ Done (no deletion)."
