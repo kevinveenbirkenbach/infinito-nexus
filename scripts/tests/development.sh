@@ -13,7 +13,7 @@ make install
 make dev-environment-bootstrap
 make up
 make test
-make test-local-rapid APP="${APP}"
+make test-local-dedicated APP="${APP}"
 make trust-ca
 
 DASHBOARD_URL="https://dashboard.infinito.example"
