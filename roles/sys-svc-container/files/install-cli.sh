@@ -31,6 +31,11 @@ ensure_docker_apt_key_and_sources() {
 add_repo_rpm_compatible() {
   local pm="$1"
   local repo_url="$2"
+  local repo_file="/etc/yum.repos.d/$(basename "${repo_url}")"
+
+  if [[ -s "${repo_file}" ]]; then
+    return 0
+  fi
 
   # dnf4/yum: `config-manager --add-repo URL`
   if "${pm}" config-manager --add-repo "${repo_url}" >/dev/null 2>&1; then
@@ -51,7 +56,6 @@ if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then
   if [[ "${REPO_ONLY}" != "1" ]]; then
     pacman -Syu --noconfirm --needed docker
   fi
-  pacman -Scc --noconfirm || true
 
 elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]]; then
   export DEBIAN_FRONTEND=noninteractive
@@ -74,7 +78,6 @@ elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]
       docker-ce-cli \
       docker-compose-plugin
   fi
-  rm -rf /var/lib/apt/lists/*
 
 elif [[ "${ID}" == "fedora" ]]; then
   dnf -y install dnf-plugins-core
@@ -84,8 +87,6 @@ elif [[ "${ID}" == "fedora" ]]; then
   else
     dnf -y install --allowerasing docker-ce-cli docker-buildx-plugin docker-compose-plugin
   fi
-  dnf -y clean all
-  rm -rf /var/cache/dnf
 
 elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|centos) ]]; then
   if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi
@@ -100,8 +101,6 @@ elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|cent
       (${PM} -y install docker-ce-cli) || \
       (${PM} -y install docker) || true
   fi
-  ${PM} -y clean all || true
-  rm -rf "/var/cache/${PM}" || true
 
 else
   echo "[ERROR] Unsupported distro for docker client install: ID=${ID} ID_LIKE=${ID_LIKE:-}" >&2

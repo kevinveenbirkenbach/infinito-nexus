@@ -22,6 +22,7 @@ jobs:
           - debian:bookworm
           - ubuntu:latest
           - fedora:latest
+          - quay.io/centos/centos:latest
 
     env:
       DEV_RUNTIME_IMAGE: ${{ matrix.dev_runtime_image }}
