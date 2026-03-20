@@ -9,6 +9,7 @@ set -euo pipefail
 : "${ACT_NETWORK:=host}"
 : "${ACT_PULL:=false}"
 : "${ACT_RM:=true}"
+: "${ACT_CONCURRENT_JOBS:=5}"
 : "${ACT_PLATFORM_IMAGE:=catthehacker/ubuntu:act-latest}"
 
 echo "=== act: workflow=${ACT_WORKFLOW} event=${ACT_EVENT} job=${ACT_JOB:-<all>} matrix=${ACT_MATRIX:-<none>} ==="
@@ -30,6 +31,9 @@ if [[ -n "${ACT_CONTAINER_OPTIONS}" ]]; then
 fi
 if [[ -n "${ACT_NETWORK}" ]]; then
 	cmd+=(--network "${ACT_NETWORK}")
+fi
+if [[ -n "${ACT_CONCURRENT_JOBS}" ]]; then
+	cmd+=(--concurrent-jobs "${ACT_CONCURRENT_JOBS}")
 fi
 
 cmd+=(--pull="${ACT_PULL}")
