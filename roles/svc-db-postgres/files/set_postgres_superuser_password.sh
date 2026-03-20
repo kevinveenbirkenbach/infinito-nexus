@@ -30,7 +30,7 @@ auth_test() {
 
 result=""
 
-for attempt in {1..30}; do
+for _ in {1..30}; do
   hba_file=""
   for _ in {1..30}; do
     if hba_file=$(pg_exec 'SHOW hba_file;'); then

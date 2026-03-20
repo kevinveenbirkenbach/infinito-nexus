@@ -9,7 +9,14 @@ CONTAINER="${INFINITO_CONTAINER:-infinito_nexus_debian}"
 CA_SRC="/etc/infinito.nexus/ca/root-ca.crt"
 CA_NAME="infinito-root-ca.crt"
 
-WIN_USER=$(ls /mnt/c/Users/ | grep -vE "^(All Users|Default|Default User|Public|desktop\.ini)$" | head -1)
+WIN_USER=""
+for _dir in /mnt/c/Users/*/; do
+	_name="${_dir%/}"; _name="${_name##*/}"
+	case "${_name}" in
+		"All Users"|"Default"|"Default User"|"Public"|"desktop.ini") continue ;;
+	esac
+	WIN_USER="${_name}"; break
+done
 WIN_DOWNLOADS="/mnt/c/Users/${WIN_USER}/Downloads"
 WIN_CA_PATH="${WIN_DOWNLOADS}/${CA_NAME}"
 WIN_CA_PATH_WIN="C:\\Users\\${WIN_USER}\\Downloads\\${CA_NAME}"
@@ -46,6 +53,7 @@ PS1_FILE_WIN="C:\\Users\\${WIN_USER}\\AppData\\Local\\Temp\\infinito-hosts-setup
 HOSTS_FILE='C:\Windows\System32\drivers\etc\hosts'
 MARKER='# infinito.example --- managed by infinito-nexus'
 
+# shellcheck disable=SC2016
 {
 	printf '$hostsFile = "%s"\n' "${HOSTS_FILE}"
 	printf '$marker = "%s"\n' "${MARKER}"
