@@ -31,7 +31,8 @@ ensure_docker_apt_key_and_sources() {
 add_repo_rpm_compatible() {
   local pm="$1"
   local repo_url="$2"
-  local repo_file="/etc/yum.repos.d/$(basename "${repo_url}")"
+  local repo_file
+  repo_file="/etc/yum.repos.d/$(basename "${repo_url}")"
 
   if [[ -s "${repo_file}" ]]; then
     return 0
