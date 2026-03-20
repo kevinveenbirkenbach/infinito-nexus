@@ -1,40 +1,51 @@
-# Custom Modules (`library/`) for Infinito.Nexus
+# Custom Modules (`library/`)
 
-This directory contains **custom Ansible modules** developed specifically for the Infinito.Nexus project.
+This directory contains project-specific Ansible modules used by Infinito.Nexus.
 
-## When to Use the `library/` Directory
+## What Belongs Here
 
-- **Place custom Ansible modules here:**  
-  Use this directory for any Python modules you have written yourself that are not part of the official Ansible distribution.
-- **Extend automation capabilities:**  
-  Custom modules allow you to implement logic, workflows, or integrations that are not available through built-in Ansible modules or existing community collections.
-- **Project-specific functionality:**  
-  Use for project- or infrastructure-specific tasks, such as managing custom APIs, provisioning special infrastructure resources, or integrating with internal systems.
+Use `library/` for idempotent module logic that represents concrete automation actions.
 
-### Examples
+Typical cases:
+- managing resources that have no suitable built-in/community module,
+- wrapping internal APIs or internal infrastructure semantics,
+- implementing reusable module interfaces for role/playbook consumption.
 
-- Managing a special internal API for your company.
-- Automating a resource that has no official Ansible module.
-- Creating a highly customized deployment step for your environment.
+## What Does Not Belong Here
 
-## Usage Example
+- Shared helper code used by multiple modules/plugins goes to `module_utils/`.
+- Jinja transformations belong to `plugins/filter/`.
+- Runtime value retrieval belongs to `plugins/lookup/`.
+- Task execution wrappers belong to `plugins/action/`.
 
-In your playbook, call your custom module as you would any other Ansible module:
+## Usage
+
+Ansible searches `library/` for custom modules. In playbooks, call them like built-in modules.
+
 ```yaml
-- name: Use custom Infinito.Nexus module
-  infinito_my_custom_module:
-    option1: value1
-    option2: value2
-````
+- name: Run a custom Infinito module
+  infinito_custom_module:
+    option_one: value
+    option_two: value
+```
 
-Ansible automatically looks in the `library/` directory for custom modules during execution.
+## Implementation Notes
 
-## When *not* to Use the `library/` Directory
+- Keep modules idempotent and predictable.
+- Validate input early and return structured failure messages.
+- Move duplicated helpers into `module_utils/`.
 
-* Do **not** place shared utility code here—put that in `module_utils/` for use across multiple modules or plugins.
-* Do **not** put filter or lookup plugins here—those belong in `filter_plugins/` or `lookup_plugins/` respectively.
+### Shebang Requirement for Custom Modules
 
-## Further Reading
+Files in `library/` should use:
 
-* [Developing Ansible Modules](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules.html)
-* [Best Practices: Organizing Custom Modules](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_documenting.html)
+```python
+#!/usr/bin/python
+```
+
+Ansible rewrites this interpreter path to the configured host interpreter for module execution.
+
+## References
+
+- Developing modules: <https://docs.ansible.com/ansible/latest/dev_guide/developing_modules.html>
+- Module utilities: <https://docs.ansible.com/ansible/latest/dev_guide/developing_module_utilities.html>

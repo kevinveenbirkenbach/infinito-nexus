@@ -9,7 +9,7 @@
   changed_when: false
 
 - name: "Wait until the Snipe-IT Service is available"
-  uri:
+  uri_retry:
     url: "{{ SNIPE_IT_URL }}"
     method: GET
     return_content: no

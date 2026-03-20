@@ -62,7 +62,7 @@ make test-local-app APP=web-app-nextcloud
 Or, without `make`:
 
 ```bash
-bash scripts/tests/deploy/local/app.sh web-app-nextcloud
+scripts/tests/deploy/local/app.sh web-app-nextcloud
 ```
 
 ### Option B: Fast single-app iteration (reuse an existing `${TEST_DEPLOY_TYPE}.yml`)
@@ -71,21 +71,21 @@ bash scripts/tests/deploy/local/app.sh web-app-nextcloud
 
 ```bash
 INFINITO_DISTRO=debian TEST_DEPLOY_TYPE=server INVENTORY_DIR="$HOME/inventories/localhost" \
-bash scripts/tests/deploy/local/utils/reset.sh
+scripts/tests/deploy/local/utils/reset.sh
 ```
 
 2) Rapid deploy one app against that inventory:
 
 ```bash
 APP=web-app-nextcloud TEST_DEPLOY_TYPE=server INFINITO_CONTAINER=infinito_nexus_debian DEBUG=true INVENTORY_DIR="$HOME/inventories/localhost" \
-bash scripts/tests/deploy/local/rapid.sh
+scripts/tests/deploy/local/rapid.sh
 ```
 
 ### Option C: Full end-to-end run (discover apps + init inventory + deploy all)
 
 ```bash
 INFINITO_DISTRO=debian TEST_DEPLOY_TYPE=server INVENTORY_DIR="$HOME/inventories/localhost" \
-bash scripts/tests/deploy/local/all.sh
+scripts/tests/deploy/local/all.sh
 ```
 
 ## After A Successful Local Deploy: Trust The CA 🔐
@@ -140,7 +140,7 @@ Optional ENV:
 Example:
 ```bash
 INFINITO_DISTRO=debian TEST_DEPLOY_TYPE=server INVENTORY_DIR="$HOME/inventories/localhost" \
-bash scripts/tests/deploy/local/all.sh
+scripts/tests/deploy/local/all.sh
 ```
 
 ---
@@ -166,7 +166,7 @@ Optional ENV:
 Example:
 ```bash
 INFINITO_DISTRO=debian TEST_DEPLOY_TYPE=server INVENTORY_DIR="$HOME/inventories/localhost" \
-bash scripts/tests/deploy/local/run-all.sh
+scripts/tests/deploy/local/run-all.sh
 ```
 
 ---
@@ -190,7 +190,7 @@ Optional ENV:
 
 Examples:
 ```bash
-bash scripts/tests/deploy/local/app.sh web-app-nextcloud
+scripts/tests/deploy/local/app.sh web-app-nextcloud
 ```
 
 ---
@@ -213,7 +213,7 @@ Optional ENV:
 Example:
 ```bash
 INFINITO_DISTRO=debian TEST_DEPLOY_TYPE=server INVENTORY_DIR="$HOME/inventories/localhost" APP=web-app-keycloak \
-bash scripts/tests/deploy/local/dedicated_distro.sh
+scripts/tests/deploy/local/dedicated_distro.sh
 ```
 
 ---
@@ -230,7 +230,7 @@ Required ENV:
 Example:
 ```bash
 APP=web-app-nextcloud TEST_DEPLOY_TYPE=server INFINITO_CONTAINER=infinito_nexus_debian DEBUG=true INVENTORY_DIR="$HOME/inventories/localhost" \
-bash scripts/tests/deploy/local/rapid.sh
+scripts/tests/deploy/local/rapid.sh
 ```
 
 ---
@@ -253,7 +253,7 @@ Optional ENV:
 Example:
 ```bash
 INFINITO_DISTRO=debian TEST_DEPLOY_TYPE=server INVENTORY_DIR="$HOME/inventories/localhost" \
-bash scripts/tests/deploy/local/utils/reset.sh
+scripts/tests/deploy/local/utils/reset.sh
 ```
 
 ## Cleanup Helpers 🧹
@@ -269,7 +269,7 @@ Required ENV:
 Example:
 ```bash
 APP="web-app-nextcloud,web-app-keycloak" INFINITO_CONTAINER=infinito_nexus_debian \
-bash scripts/tests/deploy/local/utils/purge/entity.sh
+scripts/tests/deploy/local/utils/purge/entity.sh
 ```
 
 ---
@@ -284,7 +284,7 @@ Required ENV:
 Example:
 ```bash
 INFINITO_CONTAINER=infinito_nexus_debian INVENTORY_DIR="$HOME/inventories/localhost" \
-bash scripts/tests/deploy/local/utils/purge/inventory.sh
+scripts/tests/deploy/local/utils/purge/inventory.sh
 ```
 
 ---
@@ -298,7 +298,7 @@ Required ENV:
 
 Example:
 ```bash
-INFINITO_CONTAINER=infinito_nexus_debian bash scripts/tests/deploy/local/utils/purge/web.sh
+INFINITO_CONTAINER=infinito_nexus_debian scripts/tests/deploy/local/utils/purge/web.sh
 ```
 
 ---
@@ -312,5 +312,5 @@ Required ENV:
 
 Example:
 ```bash
-INFINITO_CONTAINER=infinito_nexus_debian bash scripts/tests/deploy/local/utils/purge/lib.sh
+INFINITO_CONTAINER=infinito_nexus_debian scripts/tests/deploy/local/utils/purge/lib.sh
 ```

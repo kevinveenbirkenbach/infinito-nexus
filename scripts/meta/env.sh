@@ -18,6 +18,12 @@ if [[ "${INFINITO_ENV_LOADED:-}" == "1" ]]; then
 fi
 export INFINITO_ENV_LOADED="1"
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd "${script_dir}/../.." && pwd)"
+repository_name_resolver="${script_dir}/resolve/repository/name.sh"
+repository_owner_resolver="${script_dir}/resolve/repository/owner.sh"
+inventory_resolver="${repo_root}/scripts/inventory/resolve.sh"
+
 # ------------------------------------------------------------
 # Helpers
 # ------------------------------------------------------------
@@ -50,7 +56,7 @@ fi
 export VENV_BASE VENV_NAME VENV_FALLBACK VENV
 export PYTHON PIP
 
-# Ensure repo root is importable (so module_utils/, filter_plugins/ etc. work)
+# Ensure repo root is importable (so module_utils/, plugins/filter/, plugins/lookup/ etc. work)
 : "${PYTHONPATH:=.}"
 export PYTHONPATH
 
@@ -87,6 +93,15 @@ export INFINITO_DISTRO INFINITO_CONTAINER
 : "${DISTROS:=arch debian ubuntu fedora centos}"
 export DISTROS
 
+if [[ -z "${INFINITO_IMAGE_REPOSITORY:-}" ]]; then
+  if INFINITO_IMAGE_REPOSITORY="$("${repository_name_resolver}" 2>/dev/null)"; then
+    :
+  else
+    INFINITO_IMAGE_REPOSITORY=""
+  fi
+fi
+export INFINITO_IMAGE_REPOSITORY
+
 # ------------------------------------------------------------
 # Inventory dir (needs resolve script)
 # ------------------------------------------------------------
@@ -95,7 +110,7 @@ if [[ -z "${INVENTORY_DIR:-}" ]]; then
     RUNNING_ON_ACT="${RUNNING_ON_ACT}" \
     RUNNING_ON_GITHUB="${RUNNING_ON_GITHUB}" \
     HOME="${HOME:-}" \
-    bash scripts/inventory/resolve.sh
+    "${inventory_resolver}"
   )"
 fi
 export INVENTORY_DIR
@@ -107,11 +122,13 @@ if [[ "${RUNNING_ON_GITHUB}" == "true" ]]; then
   : "${INFINITO_PULL_POLICY:=always}"
   : "${INFINITO_IMAGE_TAG:=latest}"
 
-  # Owner can come from GitHub Actions or be provided explicitly (fallback).
-  # Lowercase is required for ghcr.io image tags.
-  _owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
-  _owner="${_owner,,}"
-  : "${INFINITO_IMAGE:=ghcr.io/${_owner}/infinito-${INFINITO_DISTRO}:${INFINITO_IMAGE_TAG}}"
+  if [[ -z "${INFINITO_IMAGE_REPOSITORY}" ]]; then
+    INFINITO_IMAGE_REPOSITORY="$("${repository_name_resolver}")"
+    export INFINITO_IMAGE_REPOSITORY
+  fi
+
+  _owner="$(OWNER="${OWNER:-}" GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}" GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" "${repository_owner_resolver}")"
+  : "${INFINITO_IMAGE:=ghcr.io/${_owner}/${INFINITO_IMAGE_REPOSITORY}/${INFINITO_DISTRO}:${INFINITO_IMAGE_TAG}}"
 
   : "${INFINITO_NO_BUILD:=1}"
   : "${INFINITO_DOCKER_VOLUME:=/mnt/docker}"

@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  cleanup_ci_images.sh [--days N] [--owner OWNER] [--distros "arch debian ..."]
+  cleanup_ci_images.sh [--days N] [--owner OWNER] [--distros "arch debian ..."] [--repo-prefix NAME]
 
 Deletes GHCR container package versions that are:
 - older than N days (default: 7)
@@ -20,23 +20,25 @@ Requires:
   - jq installed
 
 Env:
-  DAYS, OWNER, DISTROS can be used as defaults.
+  DAYS, OWNER, DISTROS, REPO_PREFIX are required via env or flags.
 
 Examples:
-  DAYS=14 OWNER=myorg ./scripts/administration/ghcr/cleanup_ci_images.sh
+  DAYS=14 OWNER=myorg REPO_PREFIX=my-repo ./scripts/administration/ghcr/cleanup_ci_images.sh
   ./scripts/administration/ghcr/cleanup_ci_images.sh --days 7 --owner kevinveenbirkenbach
 USAGE
 }
 
 DAYS="${DAYS:-7}"
-OWNER="${OWNER:-}"
-DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
+OWNER="${OWNER-}"
+DISTROS="${DISTROS-}"
+REPO_PREFIX="${REPO_PREFIX-}"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --days) DAYS="${2:-}"; shift 2 ;;
     --owner) OWNER="${2:-}"; shift 2 ;;
     --distros) DISTROS="${2:-}"; shift 2 ;;
+    --repo-prefix) REPO_PREFIX="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; usage; exit 2 ;;
   esac
@@ -46,6 +48,17 @@ if [[ -z "${OWNER}" ]]; then
   echo "ERROR: OWNER is required (env OWNER or --owner)." >&2
   exit 2
 fi
+if [[ -z "${DISTROS}" ]]; then
+  echo "ERROR: DISTROS is required (env DISTROS or --distros)." >&2
+  exit 2
+fi
+if [[ -z "${REPO_PREFIX}" ]]; then
+  echo "ERROR: REPO_PREFIX is required (env REPO_PREFIX or --repo-prefix)." >&2
+  exit 2
+fi
+
+OWNER="$(scripts/meta/resolve/repository/owner.sh)"
+REPO_PREFIX="${REPO_PREFIX,,}"
 
 if ! command -v gh >/dev/null 2>&1; then
   echo "ERROR: gh CLI not found." >&2
@@ -61,9 +74,15 @@ echo ">>> OWNER=${OWNER}"
 echo ">>> DAYS=${DAYS}"
 echo ">>> cutoff_epoch=${cutoff}"
 echo ">>> DISTROS=${DISTROS}"
+echo ">>> REPO_PREFIX=${REPO_PREFIX}"
 echo
 
 # --- GH API helpers ---------------------------------------------------------
+
+encode_package_name() {
+  local pkg="$1"
+  jq -rn --arg v "${pkg}" '$v|@uri'
+}
 
 # Try orgs first, fall back to users
 gh_api_json() {
@@ -85,7 +104,9 @@ gh_api_json() {
 # Returns: "orgs" or "users" on stdout.
 detect_scope_for_pkg() {
   local pkg="$1"
-  local endpoint="packages/container/${pkg}/versions?per_page=1&page=1"
+  local encoded_pkg
+  encoded_pkg="$(encode_package_name "${pkg}")"
+  local endpoint="packages/container/${encoded_pkg}/versions?per_page=1&page=1"
 
   local r
   r="$(gh_api_json GET "${endpoint}" orgs)"
@@ -106,12 +127,14 @@ detect_scope_for_pkg() {
 
 list_versions() {
   local pkg="$1"
+  local encoded_pkg
+  encoded_pkg="$(encode_package_name "${pkg}")"
   local scope
   scope="$(detect_scope_for_pkg "${pkg}")"
 
   local page=1
   while :; do
-    resp="$(gh_api_json GET "packages/container/${pkg}/versions?per_page=100&page=${page}" "${scope}")"
+    resp="$(gh_api_json GET "packages/container/${encoded_pkg}/versions?per_page=100&page=${page}" "${scope}")"
 
     if [[ -z "${resp}" ]] || [[ "${resp}" == "[]" ]]; then
       break
@@ -130,22 +153,24 @@ list_versions() {
 delete_version() {
   local pkg="$1"
   local id="$2"
+  local encoded_pkg
+  encoded_pkg="$(encode_package_name "${pkg}")"
 
   # Try orgs first
   if gh api -X DELETE -H "Accept: application/vnd.github+json" \
-      "/orgs/${OWNER}/packages/container/${pkg}/versions/${id}" >/dev/null 2>&1; then
+      "/orgs/${OWNER}/packages/container/${encoded_pkg}/versions/${id}" >/dev/null 2>&1; then
     return 0
   fi
 
   # Fallback to users
   gh api -X DELETE -H "Accept: application/vnd.github+json" \
-    "/users/${OWNER}/packages/container/${pkg}/versions/${id}" >/dev/null
+    "/users/${OWNER}/packages/container/${encoded_pkg}/versions/${id}" >/dev/null
 }
 
 # --- main -------------------------------------------------------------------
 
 for d in ${DISTROS}; do
-  pkg="infinito-${d}"
+  pkg="${REPO_PREFIX}/${d}"
   echo "=== Package: ${pkg} ==="
 
   all="$(list_versions "${pkg}" | jq -s 'add' 2>/dev/null || echo '[]')"

@@ -2,7 +2,7 @@
 # https://github.com/bluesky-social/pds/issues/52
 
 - name: Download pdsadmin tarball
-  get_url:
+  get_url_retry:
     url: "https://github.com/lhaig/pdsadmin/releases/download/v1.0.0-dev/pdsadmin_Linux_x86_64.tar.gz"
     dest: "{{ BLUESKY_PDSADMIN_TMP_TAR }}"
     mode: '0644'
