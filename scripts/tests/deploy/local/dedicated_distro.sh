@@ -45,6 +45,12 @@ echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 	--distro "${INFINITO_DISTRO}" \
 	--when-down
 
+echo ">>> Pre-cleanup shared entities (host docker context)"
+target_container="infinito_nexus_${INFINITO_DISTRO}"
+APP='matomo' \
+	INFINITO_CONTAINER="${INFINITO_CONTAINER:-${target_container}}" \
+	scripts/tests/deploy/local/utils/purge/entity.sh
+
 echo ">>> Running everything inside container via development exec (no logic changes)"
 "${PYTHON}" -m cli.deploy.development exec \
 	--distro "${INFINITO_DISTRO}" -- \
@@ -54,11 +60,6 @@ echo ">>> Running everything inside container via development exec (no logic cha
 
     echo '>>> Running entry.sh'
     ./scripts/docker/entry.sh true
-
-    echo '>>> Pre-cleanup shared entities'
-    APP='matomo' \
-    INFINITO_CONTAINER=\"\${INFINITO_CONTAINER:-}\" \
-    scripts/tests/deploy/local/utils/purge/entity.sh
 
     deploy_args=(
       --distro '${INFINITO_DISTRO}'
