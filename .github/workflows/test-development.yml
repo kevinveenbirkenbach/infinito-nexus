@@ -37,8 +37,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          HOST_WORKDIR="$(pwd -P)"
 
           # Build the development image in this job and avoid pulling mutable GHCR tags.
+          # Keep the same absolute path inside the container as on the host.
+          # This is required because docker compose talks to the host daemon via /var/run/docker.sock.
           docker run --rm \
             -e GITHUB_ACTIONS=true \
             -e GITHUB_REPOSITORY_OWNER="${{ github.repository_owner }}" \
@@ -48,11 +51,11 @@ jobs:
             -e INFINITO_PULL_POLICY=never \
             -e INFINITO_NO_BUILD=0 \
             -e NIX_CONFIG \
-            -v "$PWD:/workspace" \
+            -v "${HOST_WORKDIR}:${HOST_WORKDIR}" \
             -v "/mnt/docker:/var/lib/docker" \
             -v "/var/run/docker.sock:/var/run/docker.sock" \
-            -w /workspace \
+            -w "${HOST_WORKDIR}" \
             "${DEV_RUNTIME_IMAGE}" \
             bash -lc '
-              bash /workspace/scripts/tests/development.sh
+              bash ./scripts/tests/development.sh
             '
