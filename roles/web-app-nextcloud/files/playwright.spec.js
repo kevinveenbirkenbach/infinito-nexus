@@ -24,8 +24,26 @@ test("dashboard to nextcloud login", async ({ page }) => {
   await nextcloudFrame.getByRole("textbox", { name: "Password" }).fill(loginPassword);
   await nextcloudFrame.getByText("Remember me").click();
   await nextcloudFrame.getByRole("button", { name: "Sign In" }).click();
-  await nextcloudFrame.locator("div").filter({ hasText: "Welcome to Nextcloud!" }).nth(1).click();
-  await nextcloudFrame.getByRole("button", { name: "Close" }).click();
+
+  // First login may show the welcome modal; later logins usually skip it.
+  const welcomeHeadline = nextcloudFrame.getByText("Welcome to Nextcloud!");
+  const welcomeVisible = await welcomeHeadline
+    .first()
+    .waitFor({ state: "visible", timeout: 15000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (welcomeVisible) {
+    await nextcloudFrame
+      .locator("div")
+      .filter({ hasText: "Welcome to Nextcloud!" })
+      .first()
+      .click({ timeout: 5000 })
+      .catch(() => {});
+    await nextcloudFrame.getByRole("button", { name: /Close/i }).click({ timeout: 10000 });
+  }
+
+  await expect(nextcloudFrame.getByRole("button", { name: "Settings menu" })).toBeVisible({ timeout: 60000 });
   await nextcloudFrame.getByRole("button", { name: "Settings menu" }).click();
   await nextcloudFrame.getByRole("link", { name: "Log out" }).click();
   await nextcloudFrame.getByRole("button", { name: "Logout" }).click();
