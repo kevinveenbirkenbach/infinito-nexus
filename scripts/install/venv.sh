@@ -48,8 +48,12 @@ install_venv() {
 
   # Ensure base directory exists (e.g. /opt/venvs)
   if [[ -z "${VIRTUAL_ENV:-}" ]]; then
-    sudo mkdir -p "${VENV_BASE}"
-    sudo chown "${USER:-$(whoami)}" "${VENV_BASE}"
+    if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+      mkdir -p "${VENV_BASE}"
+    else
+      sudo mkdir -p "${VENV_BASE}"
+      sudo chown "${USER:-$(whoami)}" "${VENV_BASE}"
+    fi
   fi
 
   # ------------------------------------------------------------
