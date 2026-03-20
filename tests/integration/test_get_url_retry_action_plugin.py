@@ -3,7 +3,6 @@ import shutil
 import subprocess
 import tempfile
 import threading
-import traceback
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -57,9 +56,9 @@ class TestGetUrlRetryActionPluginIntegration(unittest.TestCase):
                     }
                 )
             except PermissionError as exc:
-                self.skipTest(
+                raise unittest.SkipTest(
                     f"Cannot bind local test server in this environment: {exc}"
-                )
+                ) from exc
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 tmpdir_path = Path(tmpdir)
@@ -133,11 +132,10 @@ class TestGetUrlRetryActionPluginIntegration(unittest.TestCase):
                 return result, counters, default_content, override_exists
         except unittest.SkipTest:
             raise
-        except Exception:
-            self.fail(
-                "get_url_retry integration test raised an exception:\n"
-                f"{traceback.format_exc()}"
-            )
+        except Exception as exc:
+            raise self.failureException(
+                "get_url_retry integration test raised an exception"
+            ) from exc
         finally:
             if server is not None:
                 server.shutdown()

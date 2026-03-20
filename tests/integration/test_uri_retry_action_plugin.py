@@ -3,7 +3,6 @@ import shutil
 import subprocess
 import tempfile
 import threading
-import traceback
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -49,12 +48,17 @@ class TestUriRetryActionPluginIntegration(unittest.TestCase):
         thread = None
 
         try:
-            server, thread, counters, base_url = self._start_flaky_server(
-                fail_first_by_path={
-                    "/default": 2,
-                    "/override": 2,
-                }
-            )
+            try:
+                server, thread, counters, base_url = self._start_flaky_server(
+                    fail_first_by_path={
+                        "/default": 2,
+                        "/override": 2,
+                    }
+                )
+            except PermissionError as exc:
+                raise unittest.SkipTest(
+                    f"Cannot bind local test server in this environment: {exc}"
+                ) from exc
 
             with tempfile.TemporaryDirectory() as tmpdir:
                 playbook_path = Path(tmpdir) / "playbook.yml"
@@ -118,11 +122,12 @@ class TestUriRetryActionPluginIntegration(unittest.TestCase):
                 )
 
                 return result, counters
-        except Exception:
-            self.fail(
-                "uri_retry integration test raised an exception:\n"
-                f"{traceback.format_exc()}"
-            )
+        except unittest.SkipTest:
+            raise
+        except Exception as exc:
+            raise self.failureException(
+                "uri_retry integration test raised an exception"
+            ) from exc
         finally:
             if server is not None:
                 server.shutdown()
