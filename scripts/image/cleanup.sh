@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
 	cat <<'USAGE'
 Usage:
-  cleanup_ci_images.sh [--days N] [--owner OWNER] [--distros "arch debian ..."]
+  cleanup.sh [--days N] [--owner OWNER] [--distros "arch debian ..."]
 
 Deletes GHCR container package versions that are:
 - older than N days (default: 7)
@@ -23,8 +23,8 @@ Env:
   DAYS, OWNER, DISTROS can be used as defaults.
 
 Examples:
-  DAYS=14 OWNER=myorg ./scripts/administration/ghcr/cleanup_ci_images.sh
-  ./scripts/administration/ghcr/cleanup_ci_images.sh --days 7 --owner kevinveenbirkenbach
+  DAYS=14 OWNER=myorg ./scripts/image/cleanup.sh
+  ./scripts/image/cleanup.sh --days 7 --owner kevinveenbirkenbach
 USAGE
 }
 

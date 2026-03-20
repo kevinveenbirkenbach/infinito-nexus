@@ -28,7 +28,7 @@ endif
 	disable-ipv6 restore-ipv6 \
 	trust-ca \
 	restart up down stop \
-	build build-missing build-no-cache build-no-cache-all \
+	build build-missing build-no-cache build-no-cache-all cleanup-ci-images \
 	ci-deploy-app \
 	test-act-all test-act-app test-act-workflow \
 	test-local-app test-local-reset test-local-run-all test-local-cleanup test-local-web-purge \
@@ -115,6 +115,9 @@ build-no-cache-all:
 	  echo "=== build-no-cache: $$d ==="; \
 	  INFINITO_DISTRO="$$d" "$(MAKE)" build-no-cache; \
 	done
+
+cleanup-ci-images:
+	@bash scripts/image/cleanup.sh
 
 dockerignore:
 	@echo "Create dockerignore"
