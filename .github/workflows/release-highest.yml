@@ -1,0 +1,80 @@
+name: Release Highest Missing Version
+
+on:
+  schedule:
+    - cron: "0 0 * * 6"
+  workflow_dispatch:
+
+concurrency:
+  group: infinito-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: read
+  actions: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  check-and-trigger:
+    name: 🔎 Backfill highest missing release tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (with tags)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Resolve image metadata
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          owner="$(scripts/meta/resolve/repository/owner.sh)"
+          repo_prefix="$(scripts/meta/resolve/repository/name.sh)"
+          distros="$(scripts/meta/resolve/distros.sh)"
+          {
+            echo "owner=${owner}"
+            echo "repo_prefix=${repo_prefix}"
+            echo "distros=${distros}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Login to GHCR (for manifest checks)
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine highest version tag with missing release image
+        id: pick
+        shell: bash
+        env:
+          OWNER: ${{ steps.vars.outputs.owner }}
+          REPO_PREFIX: ${{ steps.vars.outputs.repo_prefix }}
+          DISTROS: ${{ steps.vars.outputs.distros }}
+        run: |
+          set -euo pipefail
+          tag="$(scripts/meta/resolve/missing/highest_release_tag.sh)"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure GitHub CLI is available
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v gh >/dev/null 2>&1; then
+            exit 0
+          fi
+          sudo apt-get update
+          sudo apt-get install -y gh
+
+      - name: Trigger release workflow for missing tag
+        if: ${{ steps.pick.outputs.tag != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.pick.outputs.tag }}
+        run: gh workflow run release-version.yml -f tag="${TAG}"

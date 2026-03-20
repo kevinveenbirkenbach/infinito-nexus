@@ -58,19 +58,26 @@ failed=0
 durations=()  # store "distro=seconds" lines
 
 sync_ci_image_for_distro() {
-  local owner tag
+  local owner tag repo_name
 
-  # Lowercase is required for ghcr.io image tags.
-  owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
-  owner="${owner,,}"
+  if [[ -n "${OWNER:-}" || -n "${GITHUB_REPOSITORY_OWNER:-}" || -n "${GITHUB_REPOSITORY:-}" ]]; then
+    owner="$(OWNER="${OWNER:-}" GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}" GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" scripts/meta/resolve/repository/owner.sh)"
+  else
+    owner=""
+  fi
   tag="${INFINITO_IMAGE_TAG:-latest}"
+  repo_name="${INFINITO_IMAGE_REPOSITORY:-}"
 
   # Keep local/dev workflows untouched; only adjust image when CI owner context exists.
   if [[ -z "${owner}" ]]; then
     return 0
   fi
 
-  export INFINITO_IMAGE="ghcr.io/${owner}/infinito-${INFINITO_DISTRO}:${tag}"
+  if [[ -z "${repo_name}" ]]; then
+    repo_name="$(scripts/meta/resolve/repository/name.sh)"
+  fi
+
+  export INFINITO_IMAGE="ghcr.io/${owner}/${repo_name}/${INFINITO_DISTRO}:${tag}"
   echo ">>> CI image synced: ${INFINITO_IMAGE}"
 }
 

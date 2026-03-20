@@ -25,23 +25,57 @@ permissions:
   security-events: write
   actions: read
 
-jobs:
-  release:
-    name: 🚀 Release version
-    runs-on: ubuntu-latest
-    env:
-      VERSION_TAG: ${{ inputs.tag || github.event.inputs.tag }}
-      OWNER: ${{ github.repository_owner }}
-      REGISTRY: ghcr.io
-      REPO_PREFIX: infinito
-      DISTROS: "arch debian ubuntu fedora centos"
-      DEFAULT_DISTRO: "debian"
+env:
+  REGISTRY: ghcr.io
+  DEFAULT_DISTRO: "debian"
 
+jobs:
+  check-ci-images:
+    name: 🔎 Check CI images
+    runs-on: ubuntu-latest
+    outputs:
+      missing: ${{ steps.check.outputs.missing }}
+      ci_tag: ${{ steps.citag.outputs.ci_tag }}
+      distros: ${{ steps.vars.outputs.distros }}
+      repo_prefix: ${{ steps.vars.outputs.repo_prefix }}
+      owner: ${{ steps.vars.outputs.owner }}
+      version_tag: ${{ steps.vars.outputs.version_tag }}
     steps:
+      - name: Checkout trusted workflow repo (helpers)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          path: _helpers
+          persist-credentials: false
+
+      - name: Resolve release inputs
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version_tag="${{ inputs.tag || github.event.inputs.tag }}"
+          [[ -n "${version_tag}" ]] || {
+            echo "ERROR: tag input is required"
+            exit 1
+          }
+
+          owner="$(_helpers/scripts/meta/resolve/repository/owner.sh)"
+          repo_prefix="$(_helpers/scripts/meta/resolve/repository/name.sh)"
+          distros="$(_helpers/scripts/meta/resolve/distros.sh)"
+
+          {
+            echo "version_tag=${version_tag}"
+            echo "distros=${distros}"
+            echo "repo_prefix=${repo_prefix}"
+            echo "owner=${owner}"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository at version tag
         uses: actions/checkout@v6
         with:
-          ref: ${{ env.VERSION_TAG }}
+          ref: ${{ steps.vars.outputs.version_tag }}
+          path: _src
           fetch-depth: 0
           fetch-tags: true
 
@@ -50,35 +84,78 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sha="$(git rev-parse HEAD)"
+          sha="$(git -C _src rev-parse HEAD)"
           echo "ci_tag=ci-${sha}" >> "$GITHUB_OUTPUT"
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to GHCR
-        uses: docker/login-action@v4
+      - name: Login to GHCR (manifest checks)
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Assert CI images exist (no rebuild)
+      - name: Check whether CI images already exist
+        id: check
         shell: bash
         env:
+          OWNER: ${{ steps.vars.outputs.owner }}
+          REPO_PREFIX: ${{ steps.vars.outputs.repo_prefix }}
+          DISTROS: ${{ steps.vars.outputs.distros }}
           CI_TAG: ${{ steps.citag.outputs.ci_tag }}
         run: |
           set -euo pipefail
-          for d in ${DISTROS}; do
-            img="${REGISTRY}/${OWNER}/${REPO_PREFIX}-${d}:${CI_TAG}"
-            echo "Check: ${img}"
-            docker manifest inspect "${img}" >/dev/null
-          done
+          missing="$(_helpers/scripts/meta/resolve/missing/ci_images.sh)"
+          echo "missing=${missing}" >> "$GITHUB_OUTPUT"
+
+  build-ci-images-if-missing:
+    name: 🏗️ Build missing CI images
+    needs: check-ci-images
+    if: needs.check-ci-images.outputs.missing == 'true'
+    uses: ./.github/workflows/build-ci-images.yml
+    with:
+      distros: ${{ needs.check-ci-images.outputs.distros }}
+      checkout_ref: ${{ needs.check-ci-images.outputs.version_tag }}
+      image_tag: ${{ needs.check-ci-images.outputs.ci_tag }}
+      concurrency_channel: release-backfill
+    secrets: inherit
+
+  release:
+    name: 🚀 Release version
+    needs:
+      - check-ci-images
+      - build-ci-images-if-missing
+    if: |
+      always() &&
+      needs.check-ci-images.result == 'success' &&
+      (
+        needs.build-ci-images-if-missing.result == 'success' ||
+        needs.build-ci-images-if-missing.result == 'skipped'
+      )
+    runs-on: ubuntu-latest
+    env:
+      VERSION_TAG: ${{ needs.check-ci-images.outputs.version_tag }}
+      OWNER: ${{ needs.check-ci-images.outputs.owner }}
+      REPO_PREFIX: ${{ needs.check-ci-images.outputs.repo_prefix }}
+      DISTROS: ${{ needs.check-ci-images.outputs.distros }}
+      CI_TAG: ${{ needs.check-ci-images.outputs.ci_tag }}
+
+    steps:
+      - name: Checkout trusted workflow repo (helpers)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4.0.0
+
+      - name: Login to GHCR
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Retag CI images to version/latest (no rebuild)
         shell: bash
-        env:
-          VERSION_TAG: ${{ env.VERSION_TAG }}
-          CI_TAG: ${{ steps.citag.outputs.ci_tag }}
-        run: scripts/release/retag-ci-images.sh
-
+        run: scripts/image/release.sh

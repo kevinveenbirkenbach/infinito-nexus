@@ -27,7 +27,11 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
     )
     p.add_argument("--registry", default="", help="Registry (e.g. ghcr.io).")
     p.add_argument("--owner", default="", help="Owner/namespace (e.g. org/user).")
-    p.add_argument("--repo-prefix", default="", help="Repo prefix (default: infinito).")
+    p.add_argument(
+        "--repo-prefix",
+        default="",
+        help="Repo prefix (default: current repository name).",
+    )
     p.add_argument("--version", default="", help="Version (required for --publish).")
     p.add_argument(
         "--stable", choices=["true", "false"], default="", help="Publish stable tags."
@@ -39,9 +43,22 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 def handler(args: argparse.Namespace) -> int:
     repo_root = repo_root_from_here()
     script = repo_root / "scripts" / "image" / "build.sh"
+    repository_name_script = (
+        repo_root / "scripts" / "meta" / "resolve" / "repository" / "name.sh"
+    )
 
     env = dict(os.environ)
     env["INFINITO_DISTRO"] = args.distro
+    if not args.repo_prefix and not env.get("INFINITO_IMAGE_REPOSITORY"):
+        resolved_repo = subprocess.run(
+            [str(repository_name_script)],
+            cwd=repo_root,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        env["INFINITO_IMAGE_REPOSITORY"] = resolved_repo
 
     cmd: list[str] = [str(script)]
     if args.missing:

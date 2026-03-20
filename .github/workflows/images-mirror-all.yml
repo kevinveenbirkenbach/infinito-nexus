@@ -78,6 +78,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Resolve GHCR namespace
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          ghcr_namespace="${{ inputs.ghcr_namespace || '' }}"
+          if [[ -n "${ghcr_namespace}" ]]; then
+            ghcr_namespace="${ghcr_namespace,,}"
+          else
+            ghcr_namespace="$(scripts/meta/resolve/repository/owner.sh)"
+          fi
+          echo "ghcr_namespace=${ghcr_namespace}" >> "$GITHUB_OUTPUT"
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -96,13 +109,13 @@ jobs:
       # Optional: Docker Hub login to avoid rate limits while mirroring
       - name: Login to Docker Hub (optional)
         if: ${{ env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}
-        uses: docker/login-action@v4
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_TOKEN }}
 
       - name: Login to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_USERNAME != '' && secrets.GHCR_USERNAME || github.actor }}
@@ -117,7 +130,7 @@ jobs:
           # - Namespace defaults to repo owner (user/org), works for schedule & normal runs
           # - Prefix defaults to "mirror"
           # - Repo root defaults to "."
-          GHCR_NAMESPACE="${{ inputs.ghcr_namespace || github.repository_owner }}"
+          GHCR_NAMESPACE="${{ steps.vars.outputs.ghcr_namespace }}"
           GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
           REPO_ROOT="${{ inputs.repo_root || '.' }}"
 
