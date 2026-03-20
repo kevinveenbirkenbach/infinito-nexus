@@ -9,7 +9,7 @@
     mode: "0755"
 
 - name: "EXT | Download extension tarballs ({{ MEDIAWIKI_EXT_BRANCH }})"
-  get_url:
+  get_url_retry:
     url: "{{ ext.url }}"
     dest: "{{ MEDIAWIKI_EXT_CFG_BASE }}/{{ ext.name }}.tar.gz"
     mode: "0644"

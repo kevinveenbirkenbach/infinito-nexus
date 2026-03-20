@@ -29,7 +29,7 @@
 
 
 - name: "Assert default webserver responds with 404 for {{ DOMAIN_TEST }}"
-  ansible.builtin.uri:
+  uri_retry:
     url: "http://{{ DOMAIN_TEST }}:80/"
     method: GET
     return_content: true

@@ -1,6 +1,6 @@
 # Keep in mind to don't use inj_enabled. 
 - name: "Check if Matomo endpoint is reachable"
-  uri:
+  uri_retry:
     url: "{{ lookup('tls', 'web-app-matomo', 'url.base') }}"
     method: HEAD
     validate_certs: yes

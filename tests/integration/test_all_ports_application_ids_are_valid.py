@@ -4,7 +4,7 @@ import os
 import unittest
 import yaml
 
-from filter_plugins.get_all_application_ids import get_all_application_ids
+from plugins.filter.get_all_application_ids import get_all_application_ids
 
 
 class TestApplicationIDsInPorts(unittest.TestCase):

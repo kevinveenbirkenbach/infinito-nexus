@@ -5,7 +5,7 @@
 # Safe to run repeatedly; only changes when the mode is not already "on".
 
 - name: "Read current Cloudflare development_mode setting"
-  ansible.builtin.uri:
+  uri_retry:
     url: "https://api.cloudflare.com/client/v4/zones/{{ cf_zone_id }}/settings/development_mode"
     method: GET
     headers:
@@ -16,7 +16,7 @@
   when: ASYNC_ENABLED | bool
 
 - name: "Enable Cloudflare Development Mode"
-  ansible.builtin.uri:
+  uri_retry:
     url: "https://api.cloudflare.com/client/v4/zones/{{ cf_zone_id }}/settings/development_mode"
     method: PATCH
     headers:

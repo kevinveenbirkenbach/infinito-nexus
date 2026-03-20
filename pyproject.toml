@@ -29,8 +29,7 @@ infinito = "cli.__main__:main"
 [tool.setuptools]
 packages = { find = { where = ["."], include = [
   "cli*",
-  "filter_plugins*",
-  "lookup_plugins*",
+  "plugins*",
   "module_utils*",
   "library*",
 ], exclude = [

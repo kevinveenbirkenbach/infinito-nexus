@@ -40,7 +40,7 @@
   failed_when: create_admin.rc != 0 and 'user already exists' not in create_admin.stderr
 
 - name: "Wait until Gitea setup and migrations are ready"
-  uri:
+  uri_retry:
     url: "http://{{ DOCKER_REACH_HOST }}:{{ ports.localhost.http[application_id] }}/api/v1/version"
     method: GET
     status_code: 200

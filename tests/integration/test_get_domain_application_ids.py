@@ -1,7 +1,7 @@
 import os
 import re
 import unittest
-from filter_plugins.get_all_application_ids import get_all_application_ids
+from plugins.filter.get_all_application_ids import get_all_application_ids
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 

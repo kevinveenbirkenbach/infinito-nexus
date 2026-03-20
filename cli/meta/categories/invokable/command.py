@@ -4,7 +4,7 @@ CLI for extracting invokable or non-invokable role paths from a nested roles YAM
 
 Layout assumption:
   <repo_root>/cli/meta/categories/invokable/command.py
-  <repo_root>/filter_plugins/...
+  <repo_root>/plugins/filter/...
   <repo_root>/roles/categories.yml
 """
 
@@ -19,7 +19,7 @@ import yaml
 # IMPORTANT:
 # These imports must exist at module level so unittest.mock.patch()
 # can replace them in tests.
-from filter_plugins.invokable_paths import (
+from plugins.filter.invokable_paths import (
     get_invokable_paths,
     get_non_invokable_paths,
 )

@@ -6,8 +6,8 @@ import unittest
 from pathlib import Path
 
 import yaml  # requires PyYAML
-from filter_plugins.get_role import get_role
-from filter_plugins.get_app_conf import get_app_conf, ConfigEntryNotSetError
+from plugins.filter.get_role import get_role
+from plugins.filter.get_app_conf import get_app_conf, ConfigEntryNotSetError
 
 
 class TestGetAppConfPaths(unittest.TestCase):
