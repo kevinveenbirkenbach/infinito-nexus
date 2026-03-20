@@ -16,16 +16,29 @@ if [[ "${RUNNING_ON_GITHUB}" == "true" ]]; then
 	: "${INFINITO_PULL_POLICY:=always}"
 	: "${INFINITO_IMAGE_TAG:=latest}"
 
+	# SPOT: canonical GHCR namespace owner used by image and mirrors resolution.
 	_owner="${GITHUB_REPOSITORY_OWNER:-${OWNER:-}}"
+	if [[ -z "${_owner}" && -n "${GITHUB_REPOSITORY:-}" ]]; then
+		_owner="${GITHUB_REPOSITORY%%/*}"
+	fi
 	_owner="${_owner,,}"
+	if [[ -z "${_owner}" ]]; then
+		echo "ERROR: GITHUB_REPOSITORY_OWNER (or GITHUB_REPOSITORY/OWNER) must be set when RUNNING_ON_GITHUB=true" >&2
+		return 1
+	fi
+	export GITHUB_REPOSITORY_OWNER="${_owner}"
+
 	: "${INFINITO_IMAGE:=ghcr.io/${_owner}/infinito-${INFINITO_DISTRO}:${INFINITO_IMAGE_TAG}}"
+	# SPOT: default GHCR mirror prefix used by development mirror resolution.
+	: "${INFINITO_GHCR_MIRROR_PREFIX:=mirror}"
 
 	: "${INFINITO_NO_BUILD:=1}"
 	: "${INFINITO_DOCKER_VOLUME:=/mnt/docker}"
 	: "${INFINITO_DOCKER_MOUNT:=/var/lib/docker}"
 	: "${INFINITO_COMPILE:=0}"
 
-	export INFINITO_PULL_POLICY INFINITO_IMAGE_TAG INFINITO_IMAGE INFINITO_NO_BUILD
+	export INFINITO_PULL_POLICY INFINITO_IMAGE_TAG INFINITO_IMAGE
+	export INFINITO_GHCR_MIRROR_PREFIX INFINITO_NO_BUILD
 	export INFINITO_DOCKER_VOLUME INFINITO_DOCKER_MOUNT
 	export INFINITO_COMPILE
 else
