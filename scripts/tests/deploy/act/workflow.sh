@@ -15,6 +15,8 @@ set -euo pipefail
 #   ACT_PULL               default: false
 #   ACT_RM                 default: true
 #   ACT_FRESH              default: true
+#   ACT_GIT_CLEAN          default: true (runs git clean -fdX before act)
+#   ACT_CLEANUP_HELPER_IMAGE default: catthehacker/ubuntu:act-latest
 #
 # Optional cleanup variables (space separated):
 #   ACT_CLEANUP_CONTAINERS
@@ -32,6 +34,8 @@ set -euo pipefail
 : "${ACT_PULL:=false}"
 : "${ACT_RM:=true}"
 : "${ACT_FRESH:=true}"
+: "${ACT_GIT_CLEAN:=true}"
+: "${ACT_CLEANUP_HELPER_IMAGE:=catthehacker/ubuntu:act-latest}"
 
 : "${ACT_CLEANUP_CONTAINERS:=}"
 : "${ACT_CLEANUP_NETWORKS:=}"
@@ -51,8 +55,41 @@ add_unique() {
 	arr_ref+=("${item}")
 }
 
+repair_workspace_ownership() {
+	local host_uid host_gid host_workdir
+	host_uid="$(id -u)"
+	host_gid="$(id -g)"
+	host_workdir="$(pwd -P)"
+
+	echo ">>> Repairing workspace ownership via ${ACT_CLEANUP_HELPER_IMAGE}"
+	if ! docker run --rm \
+		--user root \
+		-e HOST_UID="${host_uid}" \
+		-e HOST_GID="${host_gid}" \
+		-v "${host_workdir}:${host_workdir}" \
+		-w "${host_workdir}" \
+		"${ACT_CLEANUP_HELPER_IMAGE}" \
+		bash -euo pipefail -c 'chown -R "${HOST_UID}:${HOST_GID}" .'; then
+		echo ">>> WARNING: ownership repair failed with helper image '${ACT_CLEANUP_HELPER_IMAGE}'"
+		echo ">>> WARNING: set ACT_CLEANUP_HELPER_IMAGE to a local image with bash if needed"
+		return 1
+	fi
+}
+
 if [[ "${ACT_FRESH}" == "true" ]]; then
 	echo ">>> Fresh mode enabled: cleaning stale docker resources"
+
+	if [[ "${ACT_GIT_CLEAN}" == "true" ]]; then
+		if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+			echo ">>> Removing ignored files via git clean -fdX"
+			if ! git clean -fdX >/dev/null 2>&1; then
+				echo ">>> WARNING: git clean failed, likely due to stale container-owned files"
+				repair_workspace_ownership || true
+				echo ">>> Retrying git clean -fdX"
+				git clean -fdX >/dev/null
+			fi
+		fi
+	fi
 
 	declare -a containers=()
 	declare -a networks=()
