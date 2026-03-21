@@ -12,10 +12,10 @@ class FilterModule(object):
             sys.path.append(project_root)
 
         try:
-            from module_utils.domains.primary_domain import get_domain
+            from utils.domains.primary_domain import get_domain
         except ImportError as e:
             raise AnsibleFilterError(
-                f"could not import module_utils.domains.primary_domain: {e}"
+                f"could not import utils.domains.primary_domain: {e}"
             )
 
         return {"get_domain": get_domain}

@@ -27,8 +27,8 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
 
-from module_utils.config_utils import get_app_conf
-from module_utils.tls_common import as_str, require, want_get
+from utils.config_utils import get_app_conf
+from utils.tls_common import as_str, require, want_get
 
 
 def _join(*parts: Any) -> str:

@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from module_utils.config_utils import get_app_conf
+from utils.config_utils import get_app_conf
 
 
 class LookupModule(LookupBase):

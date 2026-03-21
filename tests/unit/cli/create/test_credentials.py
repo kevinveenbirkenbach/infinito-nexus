@@ -3,7 +3,7 @@ import sys
 import unittest
 
 from cli.create.credentials import ask_for_confirmation, main
-from module_utils.handler.vault import VaultHandler
+from utils.handler.vault import VaultHandler
 import subprocess
 import tempfile
 import yaml

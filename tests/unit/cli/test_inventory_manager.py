@@ -6,10 +6,10 @@ import shutil
 from pathlib import Path
 from unittest.mock import patch
 
-from module_utils.handler.yaml import YamlHandler
-from module_utils.handler.vault import VaultHandler, VaultScalar
-from module_utils.manager.inventory import InventoryManager
-from module_utils.manager.value_generator import ValueGenerator
+from utils.handler.yaml import YamlHandler
+from utils.handler.vault import VaultHandler, VaultScalar
+from utils.manager.inventory import InventoryManager
+from utils.manager.value_generator import ValueGenerator
 
 
 class TestInventoryManager(unittest.TestCase):

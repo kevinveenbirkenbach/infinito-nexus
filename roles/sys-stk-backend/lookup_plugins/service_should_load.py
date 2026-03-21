@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from module_utils.config_utils import get_app_conf
+from utils.config_utils import get_app_conf
 
 
 def _require_non_empty(value: Any, name: str) -> str:

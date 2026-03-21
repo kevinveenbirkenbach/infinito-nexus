@@ -22,7 +22,7 @@ class TestNodeAutosizeFilter(unittest.TestCase):
         self.application_id = "web-app-nextcloud"
         self.service_name = "whiteboard"
 
-        # Patch get_app_conf (imported from module_utils.config_utils) inside the filter plugin
+        # Patch get_app_conf (imported from utils.config_utils) inside the filter plugin
         self.patcher = patch("plugins.filter.node_autosize.get_app_conf")
         self.mock_get_app_conf = self.patcher.start()
 

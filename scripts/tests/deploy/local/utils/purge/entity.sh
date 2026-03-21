@@ -46,7 +46,7 @@ docker exec "${INFINITO_CONTAINER}" bash -lc "
   for app in \"\${apps[@]}\"; do
     [[ -n \"\${app}\" ]] || continue
 
-    entity=\"\$(\"\${python_bin}\" -c 'from module_utils.entity_name_utils import get_entity_name; import sys; print(get_entity_name(sys.argv[1]) or \"\")' \"\${app}\")\"
+    entity=\"\$(\"\${python_bin}\" -c 'from utils.entity_name_utils import get_entity_name; import sys; print(get_entity_name(sys.argv[1]) or \"\")' \"\${app}\")\"
 
     if [[ -z \"\${entity}\" ]]; then
       echo \"!!! WARNING: could not derive entity from APP=\${app} — skipping\"

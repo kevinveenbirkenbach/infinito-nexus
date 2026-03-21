@@ -13,7 +13,7 @@ Typical cases:
 
 ## What Does Not Belong Here
 
-- Shared helper code used by multiple modules/plugins goes to `module_utils/`.
+- Shared helper code used by multiple modules/plugins goes to `utils/`.
 - Jinja transformations belong to `plugins/filter/`.
 - Runtime value retrieval belongs to `plugins/lookup/`.
 - Task execution wrappers belong to `plugins/action/`.
@@ -33,7 +33,7 @@ Ansible searches `library/` for custom modules. In playbooks, call them like bui
 
 - Keep modules idempotent and predictable.
 - Validate input early and return structured failure messages.
-- Move duplicated helpers into `module_utils/`.
+- Move duplicated helpers into `utils/`.
 
 ### Shebang Requirement for Custom Modules
 

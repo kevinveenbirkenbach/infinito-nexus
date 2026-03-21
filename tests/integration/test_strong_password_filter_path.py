@@ -8,7 +8,7 @@ from pathlib import Path
 
 class TestStrongPasswordFilterPathIntegration(unittest.TestCase):
     @unittest.skipUnless(shutil.which("ansible"), "ansible not found")
-    def test_strong_password_filter_uses_repo_relative_module_utils_path(self):
+    def test_strong_password_filter_uses_repo_relative_utils_path(self):
         repo_root = Path(__file__).resolve().parents[2]
         source_plugin = repo_root / "plugins" / "filter" / "value_generator.py"
 
@@ -53,7 +53,7 @@ class TestStrongPasswordFilterPathIntegration(unittest.TestCase):
             ),
         )
         self.assertIn("msg:", combined_output)
-        self.assertNotIn("plugins/module_utils", combined_output)
+        self.assertNotIn("plugins/utils", combined_output)
 
 
 if __name__ == "__main__":

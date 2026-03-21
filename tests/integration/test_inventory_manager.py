@@ -5,8 +5,8 @@ from pathlib import Path
 from unittest import TestCase, main
 from unittest.mock import patch
 
-from module_utils.manager.inventory import InventoryManager  # type: ignore
-from module_utils.handler.vault import VaultScalar  # type: ignore
+from utils.manager.inventory import InventoryManager  # type: ignore
+from utils.handler.vault import VaultScalar  # type: ignore
 
 
 class _FakeVaultHandler:
@@ -127,7 +127,7 @@ class TestInventoryManagerIntegration(TestCase):
             fake_vault = _FakeVaultHandler("pw")
 
             with patch(
-                "module_utils.manager.inventory.VaultHandler",
+                "utils.manager.inventory.VaultHandler",
                 side_effect=lambda pw: fake_vault,
             ):
                 mgr = InventoryManager(

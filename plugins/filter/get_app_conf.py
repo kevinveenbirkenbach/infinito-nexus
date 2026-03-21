@@ -1,4 +1,4 @@
-from module_utils.config_utils import (
+from utils.config_utils import (
     AppConfigKeyError,
     ConfigEntryNotSetError,
     get_app_conf as _get_app_conf,

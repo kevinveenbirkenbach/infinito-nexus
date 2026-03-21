@@ -5,7 +5,7 @@ import tempfile
 import unittest
 import yaml
 
-from module_utils.valid_deploy_id import ValidDeployId
+from utils.valid_deploy_id import ValidDeployId
 
 
 class TestValidDeployId(unittest.TestCase):

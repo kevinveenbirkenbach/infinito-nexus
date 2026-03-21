@@ -6,7 +6,7 @@ DNS_DOMAIN="${INFINITO_DNS_DOMAIN:-infinito.example}"
 DNS_HOSTS_FILE="${INFINITO_DNS_HOSTS_FILE:-/etc/hosts}"
 DNS_HOSTS_BLOCK_BEGIN="# BEGIN infinito-dns-fallback"
 DNS_HOSTS_BLOCK_END="# END infinito-dns-fallback"
-DNS_HOSTS_GENERATOR="${DNS_PROJECT_ROOT}/module_utils/domains/list.py"
+DNS_HOSTS_GENERATOR="${DNS_PROJECT_ROOT}/utils/domains/list.py"
 DNS_HOSTS_FALLBACK_DEFAULT_RAW="${DNS_DOMAIN} dashboard.${DNS_DOMAIN} matomo.${DNS_DOMAIN}"
 
 # Used by setup.sh/remove.sh after sourcing this shared helper.

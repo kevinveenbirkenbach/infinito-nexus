@@ -24,12 +24,12 @@ PLUGIN_PATH = (
     REPO_ROOT / "roles" / "sys-front-inj-all" / "filter_plugins" / "inj_enabled.py"
 )
 
-# Ensure 'module_utils' is importable under its canonical package name
+# Ensure 'utils' is importable under its canonical package name
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 # Import the same module path the plugin uses
-mu_mod = import_module("module_utils.config_utils")
+mu_mod = import_module("utils.config_utils")
 AppConfigKeyError = mu_mod.AppConfigKeyError
 
 # Load inj_enabled filter plugin from file
