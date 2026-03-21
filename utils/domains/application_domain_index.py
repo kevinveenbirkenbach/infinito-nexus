@@ -52,7 +52,7 @@ def _flatten_str_values(value: Any) -> List[str]:
     return out
 
 
-def iter_app_domains(app_conf: Any) -> Iterable[str]:
+def iter_app_domains(app_conf: Any, include_aliases: bool = True) -> Iterable[str]:
     """
     Yield all canonical + alias domains from an app config.
 
@@ -72,15 +72,17 @@ def iter_app_domains(app_conf: Any) -> Iterable[str]:
         return []
 
     canonical = domains.get("canonical", [])
-    aliases = domains.get("aliases", [])
-
     result: List[str] = []
     result.extend(_flatten_str_values(canonical))
-    result.extend(_flatten_str_values(aliases))
+    if include_aliases:
+        aliases = domains.get("aliases", [])
+        result.extend(_flatten_str_values(aliases))
     return result
 
 
-def build_domain_index(applications: Dict[str, Any]) -> Dict[str, str]:
+def build_domain_index(
+    applications: Dict[str, Any], include_aliases: bool = True
+) -> Dict[str, str]:
     """
     Build a case-insensitive domain -> application_id index.
     If the same domain appears in multiple apps (case-insensitive), raises an error.
@@ -92,7 +94,7 @@ def build_domain_index(applications: Dict[str, Any]) -> Dict[str, str]:
     collisions: Dict[str, Set[str]] = {}
 
     for app_id, app_conf in applications.items():
-        for d in iter_app_domains(app_conf):
+        for d in iter_app_domains(app_conf, include_aliases=include_aliases):
             nd = _norm_domain(d)
             if not nd:
                 continue

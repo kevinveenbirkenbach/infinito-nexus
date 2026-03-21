@@ -6,7 +6,7 @@ DNS_DOMAIN="${INFINITO_DNS_DOMAIN:-infinito.example}"
 DNS_HOSTS_FILE="${INFINITO_DNS_HOSTS_FILE:-/etc/hosts}"
 DNS_HOSTS_BLOCK_BEGIN="# BEGIN infinito-dns-fallback"
 DNS_HOSTS_BLOCK_END="# END infinito-dns-fallback"
-DNS_HOSTS_GENERATOR="${DNS_PROJECT_ROOT}/utils/domains/list.py"
+DNS_HOSTS_GENERATOR="${DNS_PROJECT_ROOT}/cli/meta/domains/__main__.py"
 DNS_HOSTS_FALLBACK_DEFAULT_RAW="${DNS_DOMAIN} dashboard.${DNS_DOMAIN} matomo.${DNS_DOMAIN}"
 
 # Used by setup.sh/remove.sh after sourcing this shared helper.
@@ -43,6 +43,17 @@ dns_run_with_optional_sudo() {
 	fi
 }
 
+dns_write_file_in_place() {
+	local src="$1"
+	local dest="$2"
+
+	if [[ "$(id -u)" -eq 0 ]] || dns_path_is_writable "${dest}"; then
+		cat "${src}" >"${dest}"
+	else
+		cat "${src}" | sudo tee "${dest}" >/dev/null
+	fi
+}
+
 dns_normalize_hosts_entries() {
 	tr ',[:space:]' '\n' | awk 'NF && !seen[$0]++'
 }
@@ -61,7 +72,7 @@ dns_read_generated_hosts_fallback_entries() {
 	fi
 
 	if ! output="$(
-		DOMAIN="${DNS_DOMAIN}" python3 "${DNS_HOSTS_GENERATOR}" --domain-primary "${DNS_DOMAIN}"
+		DOMAIN="${DNS_DOMAIN}" python3 "${DNS_HOSTS_GENERATOR}" --domain-primary "${DNS_DOMAIN}" --alias --www
 	)"; then
 		echo ">>> Failed to generate DNS hosts from role configs; using static fallback." >&2
 		return 1
@@ -91,7 +102,12 @@ dns_read_hosts_fallback_entries() {
 dns_rewrite_hosts_file() {
 	local tmp="$1"
 
-	dns_run_with_optional_sudo install -m 0644 "${tmp}" "${DNS_HOSTS_FILE}"
+	# Keep the existing inode when the hosts file is bind-mounted (for example /etc/hosts in CI containers).
+	if [[ -e "${DNS_HOSTS_FILE}" ]]; then
+		dns_write_file_in_place "${tmp}" "${DNS_HOSTS_FILE}"
+	else
+		dns_run_with_optional_sudo install -m 0644 "${tmp}" "${DNS_HOSTS_FILE}"
+	fi
 	rm -f "${tmp}"
 }
 

@@ -2,6 +2,7 @@ import importlib
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import yaml
 from ansible.errors import AnsibleError
@@ -58,9 +59,8 @@ class TestDomainList(unittest.TestCase):
                 },
             )
 
-            domains = domain_list.list_application_domains(
-                roles_dir, "infinito.example"
-            )
+            with patch.object(domain_list, "ROLES_DIR", roles_dir):
+                domains = domain_list.list_application_domains("infinito.example")
 
             self.assertEqual(
                 domains,
@@ -70,9 +70,44 @@ class TestDomainList(unittest.TestCase):
                         "console.s3.infinito.example",
                         "dashboard.infinito.example",
                         "test.infinito.example",
-                        "www.dashboard.infinito.example",
                     ]
                 ),
+            )
+
+    def test_list_application_domains_can_include_aliases_and_www_variants(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            roles_dir = Path(tmp) / "roles"
+            roles_dir.mkdir()
+
+            self.write_role(
+                roles_dir,
+                "web-app-dashboard",
+                "web-app-dashboard",
+                {
+                    "server": {
+                        "domains": {
+                            "canonical": ["dashboard.{{ DOMAIN_PRIMARY }}"],
+                            "aliases": ["www.dashboard.{{ DOMAIN_PRIMARY }}"],
+                        }
+                    }
+                },
+            )
+
+            with patch.object(domain_list, "ROLES_DIR", roles_dir):
+                domains = domain_list.list_application_domains(
+                    "infinito.example",
+                    include_aliases=True,
+                    include_www=True,
+                )
+
+            self.assertEqual(
+                domains,
+                [
+                    "dashboard.infinito.example",
+                    "test.infinito.example",
+                    "www.dashboard.infinito.example",
+                    "www.test.infinito.example",
+                ],
             )
 
     def test_list_application_domains_includes_derived_test_domain_without_roles(self):
@@ -80,9 +115,8 @@ class TestDomainList(unittest.TestCase):
             roles_dir = Path(tmp) / "roles"
             roles_dir.mkdir()
 
-            domains = domain_list.list_application_domains(
-                roles_dir, "infinito.example"
-            )
+            with patch.object(domain_list, "ROLES_DIR", roles_dir):
+                domains = domain_list.list_application_domains("infinito.example")
 
             self.assertEqual(domains, ["test.infinito.example"])
 
@@ -102,8 +136,9 @@ class TestDomainList(unittest.TestCase):
             self.write_role(roles_dir, "app-a", "app-a", shared_config)
             self.write_role(roles_dir, "app-b", "app-b", shared_config)
 
-            with self.assertRaises(AnsibleError):
-                domain_list.list_application_domains(roles_dir, "infinito.example")
+            with patch.object(domain_list, "ROLES_DIR", roles_dir):
+                with self.assertRaises(AnsibleError):
+                    domain_list.list_application_domains("infinito.example")
 
 
 if __name__ == "__main__":

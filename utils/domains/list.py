@@ -1,17 +1,12 @@
-#!/usr/bin/env python3
 from __future__ import annotations
 
-import argparse
-import os
-import sys
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+ROLES_DIR = PROJECT_ROOT / "roles"
 
 
 def _render_ansible_strict(
@@ -28,10 +23,12 @@ def _render_ansible_strict(
     )
 
 
-def _build_domain_index(applications: dict[str, Any]) -> dict[str, str]:
+def _build_domain_index(
+    applications: dict[str, Any], include_aliases: bool = True
+) -> dict[str, str]:
     from utils.domains.application_domain_index import build_domain_index
 
-    return build_domain_index(applications)
+    return build_domain_index(applications, include_aliases=include_aliases)
 
 
 def load_yaml_mapping(path: Path) -> dict[str, Any]:
@@ -115,41 +112,26 @@ def list_derived_domains(domain_primary: str) -> list[str]:
     return [f"test.{primary}"]
 
 
-def list_application_domains(roles_dir: Path, domain_primary: str) -> list[str]:
-    applications = build_applications_from_roles(roles_dir, domain_primary)
-    domains = set(_build_domain_index(applications).keys())
+def add_www_variants(domains: list[str]) -> list[str]:
+    expanded = set(domains)
+    for domain in list(expanded):
+        if not domain.startswith("www."):
+            expanded.add(f"www.{domain}")
+    return sorted(expanded)
+
+
+def list_application_domains(
+    domain_primary: str,
+    *,
+    include_aliases: bool = False,
+    include_www: bool = False,
+) -> list[str]:
+    applications = build_applications_from_roles(ROLES_DIR, domain_primary)
+    domains = set(
+        _build_domain_index(applications, include_aliases=include_aliases).keys()
+    )
     domains.update(list_derived_domains(domain_primary))
-    return sorted(domains)
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="List rendered canonical domains and aliases from role configs."
-    )
-    parser.add_argument(
-        "--roles-dir",
-        default=str(PROJECT_ROOT / "roles"),
-        help="Path to the roles directory",
-    )
-    parser.add_argument(
-        "--domain-primary",
-        default=os.environ.get("DOMAIN", "infinito.example"),
-        help="Value used for DOMAIN_PRIMARY rendering",
-    )
-    return parser.parse_args()
-
-
-def main() -> int:
-    args = parse_args()
-    roles_dir = Path(args.roles_dir).resolve()
-    if not roles_dir.is_dir():
-        print(f"Roles directory not found: {roles_dir}", file=sys.stderr)
-        return 1
-
-    for domain in list_application_domains(roles_dir, args.domain_primary):
-        print(domain)
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+    sorted_domains = sorted(domains)
+    if include_www:
+        return add_www_variants(sorted_domains)
+    return sorted_domains
