@@ -7,6 +7,7 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 cd "${REPO_ROOT}"
 
+bash "${REPO_ROOT}/scripts/install/package.sh"
 make install
 make dev-environment-bootstrap
 make up
