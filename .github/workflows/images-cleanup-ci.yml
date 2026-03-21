@@ -41,10 +41,7 @@ jobs:
 
       - name: Install jq
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: ./scripts/install/apt.sh jq
 
       - name: Cleanup old ci-* versions
         shell: bash

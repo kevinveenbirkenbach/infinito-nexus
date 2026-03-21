@@ -125,9 +125,7 @@ jobs:
           python -m pip install PyYAML
 
       - name: Install skopeo
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y skopeo
+        run: ./scripts/install/apt.sh skopeo
 
       # Optional: Docker Hub login to avoid rate limits while mirroring
       - name: Login to Docker Hub (optional)

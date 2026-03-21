@@ -49,10 +49,7 @@ jobs:
 
       - name: Install jq
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: ./scripts/install/apt.sh jq
 
       - name: Compute matrix JSON
         id: out
@@ -88,10 +85,7 @@ jobs:
 
       - name: Install dnsutils (dig)
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y dnsutils
+        run: ./scripts/install/apt.sh dnsutils
 
       - name: Start stack (coredns + infinito) for distro
         shell: bash

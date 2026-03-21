@@ -55,10 +55,7 @@ jobs:
       image_tag: ${{ steps.out.outputs.image_tag }}
     steps:
       - name: Install jq
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: ./scripts/install/apt.sh jq
 
       - name: Compute matrix JSON
         id: out
