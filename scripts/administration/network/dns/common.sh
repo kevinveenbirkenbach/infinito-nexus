@@ -50,7 +50,7 @@ dns_write_file_in_place() {
 	if [[ "$(id -u)" -eq 0 ]] || dns_path_is_writable "${dest}"; then
 		cat "${src}" >"${dest}"
 	else
-		cat "${src}" | sudo tee "${dest}" >/dev/null
+		sudo dd if="${src}" of="${dest}" status=none
 	fi
 }
 
