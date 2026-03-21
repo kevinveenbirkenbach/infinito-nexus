@@ -44,6 +44,7 @@ jobs:
           # This is required because docker compose talks to the host daemon via /var/run/docker.sock.
           docker run --rm \
             -e GITHUB_ACTIONS=true \
+            -e GITHUB_REPOSITORY="${{ github.repository }}" \
             -e GITHUB_REPOSITORY_OWNER="${{ github.repository_owner }}" \
             -e GITHUB_SHA="${{ github.sha }}" \
             -e INFINITO_DISTRO=debian \
