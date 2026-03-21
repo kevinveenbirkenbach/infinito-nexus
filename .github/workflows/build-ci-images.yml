@@ -54,6 +54,8 @@ jobs:
       matrix: ${{ steps.out.outputs.matrix }}
       image_tag: ${{ steps.out.outputs.image_tag }}
     steps:
+      - uses: actions/checkout@v6
+
       - name: Install jq
         run: ./scripts/install/apt.sh jq
 
