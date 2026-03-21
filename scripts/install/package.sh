@@ -21,23 +21,23 @@ run_privileged() {
 
 case "${ID:-}" in
 	arch | manjaro)
-		run_privileged pacman -Syu --noconfirm --needed make git curl bash sudo
+		run_privileged pacman -Syu --noconfirm --needed make git curl bash sudo gettext
 		;;
 	debian | ubuntu)
 		run_privileged apt-get update
-		run_privileged apt-get install -y --no-install-recommends make git curl bash sudo
+		run_privileged apt-get install -y --no-install-recommends make git curl bash sudo gettext-base
 		run_privileged rm -rf /var/lib/apt/lists/*
 		;;
 	fedora)
-		run_privileged dnf -y install make git curl bash sudo
+		run_privileged dnf -y install make git curl bash sudo gettext
 		run_privileged dnf -y clean all || true
 		;;
 	centos | rhel)
 		if command -v dnf >/dev/null 2>&1; then
-			run_privileged dnf -y install make git curl bash sudo
+			run_privileged dnf -y install make git curl bash sudo gettext
 			run_privileged dnf -y clean all || true
 		else
-			run_privileged yum -y install make git curl bash sudo
+			run_privileged yum -y install make git curl bash sudo gettext
 		fi
 		;;
 	*)
