@@ -5,9 +5,10 @@ set -euo pipefail
 : "${MATRIX_DISTRO:?Missing MATRIX_DISTRO}"
 : "${IMAGE_TAG:?Missing IMAGE_TAG}"
 : "${GITHUB_REPOSITORY:?Missing GITHUB_REPOSITORY}"
-: "${GITHUB_REPOSITORY_OWNER:?Missing GITHUB_REPOSITORY_OWNER}"
 : "${USE_NIX_TOKEN:?Missing USE_NIX_TOKEN}"
-ghcr_owner="$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+ghcr_owner="$(scripts/meta/resolve/repository/owner.sh)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_name="$("${script_dir}/../meta/resolve/repository/name.sh")"
 
 max_attempts="${MAX_ATTEMPTS:-7}"
 retry_delay_seconds="${RETRY_DELAY_SECONDS:-20}"
@@ -27,12 +28,12 @@ while true; do
 	if docker buildx build \
 		--file "${BUILD_CONTEXT_DIR}/Dockerfile" \
 		--push \
-		--tag "ghcr.io/${ghcr_owner}/infinito-${MATRIX_DISTRO}:${IMAGE_TAG}" \
+		--tag "ghcr.io/${ghcr_owner}/${repo_name}/${MATRIX_DISTRO}:${IMAGE_TAG}" \
 		--label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
 		--build-arg "PKGMGR_IMAGE=ghcr.io/kevinveenbirkenbach/pkgmgr-${MATRIX_DISTRO}:stable" \
 		"${nix_arg[@]}" \
-		--cache-from "type=gha,scope=infinito-${MATRIX_DISTRO}" \
-		--cache-to "type=gha,mode=max,scope=infinito-${MATRIX_DISTRO}" \
+		--cache-from "type=gha,scope=${repo_name}-${MATRIX_DISTRO}" \
+		--cache-to "type=gha,mode=max,scope=${repo_name}-${MATRIX_DISTRO}" \
 		"${BUILD_CONTEXT_DIR}"; then
 		echo "Build & push succeeded on attempt ${attempt}/${max_attempts}."
 		break

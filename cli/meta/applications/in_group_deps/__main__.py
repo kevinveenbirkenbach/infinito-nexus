@@ -7,7 +7,7 @@ import argparse
 import sys
 import os
 import yaml
-from filter_plugins.applications_if_group_and_deps import FilterModule
+from plugins.filter.applications_if_group_and_deps import FilterModule
 
 
 def find_role_dirs_by_app_id(app_ids, roles_dir):

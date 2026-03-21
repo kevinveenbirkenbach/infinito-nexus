@@ -9,9 +9,13 @@ DNS_HOSTS_BLOCK_END="# END infinito-dns-fallback"
 DNS_HOSTS_GENERATOR="${DNS_PROJECT_ROOT}/module_utils/domains/list.py"
 DNS_HOSTS_FALLBACK_DEFAULT_RAW="${DNS_DOMAIN} dashboard.${DNS_DOMAIN} matomo.${DNS_DOMAIN}"
 
+# Used by setup.sh/remove.sh after sourcing this shared helper.
+# shellcheck disable=SC2034
 DNS_NM_CONF="/etc/NetworkManager/conf.d/00-infinito-dnsmasq.conf"
 DNS_NM_DNSMASQ_DIR="/etc/NetworkManager/dnsmasq.d"
+# shellcheck disable=SC2034
 DNS_NM_DNSMASQ_CONF="${DNS_NM_DNSMASQ_DIR}/${DNS_DOMAIN}.conf"
+# shellcheck disable=SC2034
 DNS_SYS_DNSMASQ_CONF="/etc/dnsmasq.d/${DNS_DOMAIN}.conf"
 
 dns_systemd_is_operational() {
@@ -40,7 +44,7 @@ dns_run_with_optional_sudo() {
 }
 
 dns_normalize_hosts_entries() {
-	tr ',[:space:]' '\n\n' | awk 'NF && !seen[$0]++'
+	tr ',[:space:]' '\n' | awk 'NF && !seen[$0]++'
 }
 
 dns_read_hosts_fallback_entries_from_raw() {
@@ -100,7 +104,7 @@ dns_strip_hosts_fallback_block() {
 			$0 == begin { skip=1; next }
 			$0 == end { skip=0; next }
 			!skip { print }
-		' "${DNS_HOSTS_FILE}" > "${tmp}"
+		' "${DNS_HOSTS_FILE}" >"${tmp}"
 	fi
 	printf '%s\n' "${tmp}"
 }
@@ -121,7 +125,7 @@ dns_write_hosts_fallback() {
 			printf '127.0.0.1 %s\n' "${host}"
 		done < <(dns_read_hosts_fallback_entries)
 		printf '%s\n' "${DNS_HOSTS_BLOCK_END}"
-	} > "${tmp}"
+	} >"${tmp}"
 
 	dns_rewrite_hosts_file "${tmp}"
 	rm -f "${stripped}"

@@ -8,7 +8,7 @@
   meta: flush_handlers
 
 - name: "Wait until XWiki REST is ready (no DW redirect)"
-  uri:
+  uri_retry:
     url: "{{ XWIKI_REST_BASE }}"
     status_code: [200, 401]
     return_content: no

@@ -29,7 +29,24 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.out.outputs.matrix }}
+      owner: ${{ steps.vars.outputs.owner }}
+      repo_name: ${{ steps.vars.outputs.repo_name }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Resolve image coordinates
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          owner="$(scripts/meta/resolve/repository/owner.sh)"
+          repo_name="${{ github.repository }}"
+          repo_name="${repo_name#*/}"
+          repo_name="${repo_name,,}"
+          echo "owner=${owner}" >> "$GITHUB_OUTPUT"
+          echo "repo_name=${repo_name}" >> "$GITHUB_OUTPUT"
+
       - name: Install jq
         shell: bash
         run: |
@@ -58,7 +75,7 @@ jobs:
         access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
       INFINITO_IMAGE_TAG: ci-${{ github.sha }}
       # Use the prebuilt CI image directly instead of the :latest fallback from env/all.sh.
-      INFINITO_IMAGE: ghcr.io/${{ github.repository_owner }}/infinito-${{ matrix.distro }}:ci-${{ github.sha }}
+      INFINITO_IMAGE: ghcr.io/${{ needs.prepare.outputs.owner }}/${{ needs.prepare.outputs.repo_name }}/${{ matrix.distro }}:ci-${{ github.sha }}
 
     strategy:
       fail-fast: false
@@ -93,7 +110,6 @@ jobs:
           INFINITO_CONTAINER: infinito_nexus_${{ matrix.distro }}
         run: |
           set -euo pipefail
-          chmod +x scripts/tests/dns.sh
           scripts/tests/dns.sh
 
       - name: Dump CoreDNS logs on failure

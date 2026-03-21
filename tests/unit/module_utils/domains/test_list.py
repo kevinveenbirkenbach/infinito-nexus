@@ -58,7 +58,9 @@ class TestDomainList(unittest.TestCase):
                 },
             )
 
-            domains = domain_list.list_application_domains(roles_dir, "infinito.example")
+            domains = domain_list.list_application_domains(
+                roles_dir, "infinito.example"
+            )
 
             self.assertEqual(
                 domains,
@@ -78,7 +80,9 @@ class TestDomainList(unittest.TestCase):
             roles_dir = Path(tmp) / "roles"
             roles_dir.mkdir()
 
-            domains = domain_list.list_application_domains(roles_dir, "infinito.example")
+            domains = domain_list.list_application_domains(
+                roles_dir, "infinito.example"
+            )
 
             self.assertEqual(domains, ["test.infinito.example"])
 

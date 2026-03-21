@@ -4,8 +4,24 @@ import yaml
 import sys
 import subprocess
 from pathlib import Path
-from module_utils.dict_renderer import DictRenderer
-from lookup_plugins.application_gid import LookupModule
+
+
+def _load_local_dependencies():
+    """
+    Load local repo modules lazily.
+
+    This avoids module-level E402 lint issues while still supporting direct
+    script execution from arbitrary working directories.
+    """
+    repo_root = Path(__file__).resolve().parents[3]
+    repo_root_str = str(repo_root)
+    if repo_root_str not in sys.path:
+        sys.path.insert(0, repo_root_str)
+
+    from module_utils.dict_renderer import DictRenderer
+    from plugins.lookup.application_gid import LookupModule
+
+    return DictRenderer, LookupModule
 
 
 def load_yaml_file(path: Path) -> dict:
@@ -19,11 +35,12 @@ class DefaultsGenerator:
     def __init__(
         self, roles_dir: Path, output_file: Path, verbose: bool, timeout: float
     ):
+        dict_renderer_cls, lookup_module_cls = _load_local_dependencies()
         self.roles_dir = roles_dir
         self.output_file = output_file
         self.verbose = verbose
-        self.renderer = DictRenderer(verbose=verbose, timeout=timeout)
-        self.gid_lookup = LookupModule()
+        self.renderer = dict_renderer_cls(verbose=verbose, timeout=timeout)
+        self.gid_lookup = lookup_module_cls()
 
     def log(self, message: str):
         if self.verbose:

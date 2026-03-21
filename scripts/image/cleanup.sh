@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
 	cat <<'USAGE'
 Usage:
-  cleanup.sh [--days N] [--owner OWNER] [--distros "arch debian ..."]
+  cleanup.sh [--days N] [--owner OWNER] [--distros "arch debian ..."] [--repo-prefix NAME]
 
 Deletes GHCR container package versions that are:
 - older than N days (default: 7)
@@ -20,17 +20,18 @@ Requires:
   - jq installed
 
 Env:
-  DAYS, OWNER, DISTROS can be used as defaults.
+  DAYS, OWNER, DISTROS, REPO_PREFIX can be used as defaults.
 
 Examples:
-  DAYS=14 OWNER=myorg ./scripts/image/cleanup.sh
+  DAYS=14 OWNER=myorg REPO_PREFIX=my-repo ./scripts/image/cleanup.sh
   ./scripts/image/cleanup.sh --days 7 --owner kevinveenbirkenbach
 USAGE
 }
 
 DAYS="${DAYS:-7}"
 OWNER="${OWNER:-}"
-DISTROS="${DISTROS:-arch debian ubuntu fedora centos}"
+DISTROS="${DISTROS:-}"
+REPO_PREFIX="${REPO_PREFIX:-}"
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
@@ -46,6 +47,10 @@ while [[ $# -gt 0 ]]; do
 		DISTROS="${2:-}"
 		shift 2
 		;;
+	--repo-prefix)
+		REPO_PREFIX="${2:-}"
+		shift 2
+		;;
 	-h | --help)
 		usage
 		exit 0
@@ -58,9 +63,8 @@ while [[ $# -gt 0 ]]; do
 	esac
 done
 
-if [[ -z "${OWNER}" ]]; then
-	echo "ERROR: OWNER is required (env OWNER or --owner)." >&2
-	exit 2
+if [[ -z "${DISTROS}" ]]; then
+	DISTROS="$(scripts/meta/resolve/distros.sh)"
 fi
 
 if ! command -v gh >/dev/null 2>&1; then
@@ -72,14 +76,23 @@ if ! command -v jq >/dev/null 2>&1; then
 	exit 1
 fi
 
+OWNER="$(OWNER="${OWNER:-}" GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}" GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" scripts/meta/resolve/repository/owner.sh)"
+REPO_PREFIX="$(INFINITO_IMAGE_REPOSITORY="${INFINITO_IMAGE_REPOSITORY:-}" REPO_PREFIX="${REPO_PREFIX:-}" GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" scripts/meta/resolve/repository/name.sh)"
+
 cutoff="$(date -u -d "${DAYS} days ago" +%s)"
 echo ">>> OWNER=${OWNER}"
 echo ">>> DAYS=${DAYS}"
 echo ">>> cutoff_epoch=${cutoff}"
 echo ">>> DISTROS=${DISTROS}"
+echo ">>> REPO_PREFIX=${REPO_PREFIX}"
 echo
 
 # --- GH API helpers ---------------------------------------------------------
+
+encode_package_name() {
+	local pkg="$1"
+	jq -rn --arg v "${pkg}" '$v|@uri'
+}
 
 # Try orgs first, fall back to users
 gh_api_json() {
@@ -104,7 +117,9 @@ gh_api_json() {
 # Returns: "orgs" or "users" on stdout.
 detect_scope_for_pkg() {
 	local pkg="$1"
-	local endpoint="packages/container/${pkg}/versions?per_page=1&page=1"
+	local encoded_pkg
+	encoded_pkg="$(encode_package_name "${pkg}")"
+	local endpoint="packages/container/${encoded_pkg}/versions?per_page=1&page=1"
 
 	local r
 	r="$(gh_api_json GET "${endpoint}" orgs)"
@@ -125,12 +140,14 @@ detect_scope_for_pkg() {
 
 list_versions() {
 	local pkg="$1"
+	local encoded_pkg
+	encoded_pkg="$(encode_package_name "${pkg}")"
 	local scope
 	scope="$(detect_scope_for_pkg "${pkg}")"
 
 	local page=1
 	while :; do
-		resp="$(gh_api_json GET "packages/container/${pkg}/versions?per_page=100&page=${page}" "${scope}")"
+		resp="$(gh_api_json GET "packages/container/${encoded_pkg}/versions?per_page=100&page=${page}" "${scope}")"
 
 		if [[ -z "${resp}" ]] || [[ "${resp}" == "[]" ]]; then
 			break
@@ -149,22 +166,24 @@ list_versions() {
 delete_version() {
 	local pkg="$1"
 	local id="$2"
+	local encoded_pkg
+	encoded_pkg="$(encode_package_name "${pkg}")"
 
 	# Try orgs first
 	if gh api -X DELETE -H "Accept: application/vnd.github+json" \
-		"/orgs/${OWNER}/packages/container/${pkg}/versions/${id}" >/dev/null 2>&1; then
+		"/orgs/${OWNER}/packages/container/${encoded_pkg}/versions/${id}" >/dev/null 2>&1; then
 		return 0
 	fi
 
 	# Fallback to users
 	gh api -X DELETE -H "Accept: application/vnd.github+json" \
-		"/users/${OWNER}/packages/container/${pkg}/versions/${id}" >/dev/null
+		"/users/${OWNER}/packages/container/${encoded_pkg}/versions/${id}" >/dev/null
 }
 
 # --- main -------------------------------------------------------------------
 
 for d in ${DISTROS}; do
-	pkg="infinito-${d}"
+	pkg="${REPO_PREFIX}/${d}"
 	echo "=== Package: ${pkg} ==="
 
 	all="$(list_versions "${pkg}" | jq -s 'add' 2>/dev/null || echo '[]')"

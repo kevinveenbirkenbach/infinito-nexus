@@ -1,6 +1,6 @@
 # Wait for API
 - name: Exclude global IPs in Matomo
-  uri:
+  uri_retry:
     url: "{{ matomo_index_php_url }}"
     method: POST
     body_format: form-urlencoded
@@ -18,7 +18,7 @@
   delay: 10
 
 - name: Exclude CSP-CheckerBot user agent in Matomo
-  uri:
+  uri_retry:
     url: "{{ matomo_index_php_url }}"
     method: POST
     body_format: form-urlencoded

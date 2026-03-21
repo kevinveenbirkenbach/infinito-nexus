@@ -15,7 +15,7 @@
     xwiki_ldap_enabled_switch:        false
 
 - name: "ASSERT | superadmin can authenticate (needed for installer)"
-  uri:
+  uri_retry:
     url: "{{ [XWIKI_REST_XWIKI, 'spaces'] | url_join }}"
     method: GET
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"

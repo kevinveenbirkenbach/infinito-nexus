@@ -23,6 +23,7 @@ env:
   NIX_CONFIG: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
   INFINITO_IMAGE_TAG: ci-${{ github.sha }}
+  INFINITO_GHCR_MIRROR_PREFIX: mirror
 jobs:
   discover:
     name: 🖥️ Discover apps
@@ -33,6 +34,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Resolve repository owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "GITHUB_REPOSITORY_OWNER=$(scripts/meta/resolve/repository/owner.sh)" >> "$GITHUB_ENV"
 
       - name: Install jq
         shell: bash
@@ -74,6 +81,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
+
+      - name: Resolve repository owner
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "GITHUB_REPOSITORY_OWNER=$(scripts/meta/resolve/repository/owner.sh)" >> "$GITHUB_ENV"
 
       - name: Install jq
         shell: bash

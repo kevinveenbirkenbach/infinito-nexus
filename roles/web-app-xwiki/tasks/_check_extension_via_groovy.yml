@@ -5,7 +5,7 @@
 
 # PUT a temporary Groovy page that checks installed extensions
 - name: "XWIKI | PUT checker page XWiki.CheckExtension"
-  uri:
+  uri_retry:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'CheckExtension'] | url_join }}"
     method: PUT
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
@@ -36,7 +36,7 @@
 
 # Call the page to check a single extension
 - name: "XWIKI | Check installed via Groovy for {{ ext_id }}"
-  uri:
+  uri_retry:
     url: "{{ XWIKI_DOCKER_REACH_URL }}/bin/view/XWiki/CheckExtension?xpage=plain&id={{ ext_id | urlencode }}"
     method: GET
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"
@@ -55,7 +55,7 @@
 
 # Cleanup (optional; you can leave the page, but we remove it to keep things tidy)
 - name: "XWIKI | Delete checker page"
-  uri:
+  uri_retry:
     url: "{{ [XWIKI_REST_XWIKI_PAGES, 'CheckExtension'] | url_join }}"
     method: DELETE
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"

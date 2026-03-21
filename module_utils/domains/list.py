@@ -13,8 +13,25 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from module_utils.domains.application_domain_index import build_domain_index
-from module_utils.templating import render_ansible_strict
+
+def _render_ansible_strict(
+    *, raw: str, var_name: str, variables: dict[str, Any]
+) -> str:
+    from module_utils.templating import render_ansible_strict
+
+    return render_ansible_strict(
+        templar=None,
+        raw=raw,
+        var_name=var_name,
+        err_prefix="domains.list",
+        variables=variables,
+    )
+
+
+def _build_domain_index(applications: dict[str, Any]) -> dict[str, str]:
+    from module_utils.domains.application_domain_index import build_domain_index
+
+    return build_domain_index(applications)
 
 
 def load_yaml_mapping(path: Path) -> dict[str, Any]:
@@ -29,11 +46,9 @@ def load_yaml_mapping(path: Path) -> dict[str, Any]:
 
 def render_domain_value(value: Any, variables: dict[str, Any], field_name: str) -> Any:
     if isinstance(value, str):
-        return render_ansible_strict(
-            templar=None,
+        return _render_ansible_strict(
             raw=value,
             var_name=field_name,
-            err_prefix="domains.list",
             variables=variables,
         )
 
@@ -102,7 +117,7 @@ def list_derived_domains(domain_primary: str) -> list[str]:
 
 def list_application_domains(roles_dir: Path, domain_primary: str) -> list[str]:
     applications = build_applications_from_roles(roles_dir, domain_primary)
-    domains = set(build_domain_index(applications).keys())
+    domains = set(_build_domain_index(applications).keys())
     domains.update(list_derived_domains(domain_primary))
     return sorted(domains)
 

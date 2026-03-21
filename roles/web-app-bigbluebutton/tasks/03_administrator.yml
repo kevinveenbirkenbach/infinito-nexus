@@ -1,6 +1,6 @@
 ---
 - name: "Wait until Greenlight is reachable via Nginx"
-  ansible.builtin.uri:
+  uri_retry:
     url: "{{ lookup('tls', application_id, 'url.base') }}"
     validate_certs: true
     status_code: 200

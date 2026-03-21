@@ -6,7 +6,7 @@
 # This task file sets a fact `xwiki_rest_headers_write` that you can reuse.
 
 - name: "XWIKI | Fetch REST session + form token (write ops)"
-  uri:
+  uri_retry:
     url: "{{ [XWIKI_REST_XWIKI, 'spaces'] | url_join }}"
     method: GET
     url_username: "{{ XWIKI_SUPERADMIN_USERNAME }}"

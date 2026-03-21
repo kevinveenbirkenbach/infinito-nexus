@@ -23,7 +23,7 @@
   vars:
     hetzner_robot_base_url: "{{ HETZNER_ROBOT_BASE_URL }}"
     ip_path: "{{ item.ip_address | urlencode }}"
-  ansible.builtin.uri:
+  uri_retry:
     url: "{{ hetzner_robot_base_url }}/rdns/{{ ip_path }}"
     method: POST
     user: "{{ HETZNER_ROBOT_USER }}"

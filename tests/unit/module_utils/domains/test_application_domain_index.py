@@ -188,9 +188,7 @@ class TestApplicationDomainIndex(unittest.TestCase):
             )
         )
         self.assertIsNone(
-            _application_domain_index.resolve_app_id_for_domain(
-                self.applications, None
-            )  # type: ignore[arg-type]
+            _application_domain_index.resolve_app_id_for_domain(self.applications, None)  # type: ignore[arg-type]
         )
 
     def test_resolve_app_id_for_domain_raises_on_collision(self):

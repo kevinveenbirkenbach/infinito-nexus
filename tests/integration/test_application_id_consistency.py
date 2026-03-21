@@ -1,7 +1,7 @@
 import yaml
 import unittest
 from pathlib import Path
-from filter_plugins.invokable_paths import get_invokable_paths
+from plugins.filter.invokable_paths import get_invokable_paths
 
 ROLES_DIR = Path(__file__).resolve().parent.parent.parent / "roles"
 

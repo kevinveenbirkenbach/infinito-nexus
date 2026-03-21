@@ -28,7 +28,7 @@
 
 - block:
     - name: "Check if {{ lookup('domain',application_id) }} is reachable (only if config unchanged)"
-      ansible.builtin.uri:
+      uri_retry:
         url: "{{ lookup('tls', application_id, 'url.base') }}"
       register: site_check
       failed_when: false

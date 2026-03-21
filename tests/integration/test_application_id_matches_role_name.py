@@ -5,7 +5,7 @@ import warnings
 import unittest
 
 # import your filters
-from filter_plugins.invokable_paths import get_invokable_paths, get_non_invokable_paths
+from plugins.filter.invokable_paths import get_invokable_paths, get_non_invokable_paths
 
 
 class TestApplicationIdAndInvocability(unittest.TestCase):

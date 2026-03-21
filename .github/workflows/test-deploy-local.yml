@@ -55,7 +55,7 @@ jobs:
           INPUT_WHITELIST: ${{ inputs.whitelist }}
         run: |
           set -euo pipefail
-          bash scripts/meta/resolve/input.sh
+          scripts/meta/resolve/input.sh
 
       - name: Install deps (jq + envsubst)
         shell: bash

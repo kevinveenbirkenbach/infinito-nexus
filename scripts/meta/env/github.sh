@@ -28,7 +28,14 @@ if [[ "${RUNNING_ON_GITHUB}" == "true" ]]; then
 	fi
 	export GITHUB_REPOSITORY_OWNER="${_owner}"
 
-	: "${INFINITO_IMAGE:=ghcr.io/${_owner}/infinito-${INFINITO_DISTRO}:${INFINITO_IMAGE_TAG}}"
+	_repo_name="${INFINITO_IMAGE_REPOSITORY:-}"
+	if [[ -z "${_repo_name}" ]]; then
+		_repo_name="$(scripts/meta/resolve/repository/name.sh)"
+	fi
+	_repo_name="${_repo_name,,}"
+	export INFINITO_IMAGE_REPOSITORY="${_repo_name}"
+
+	: "${INFINITO_IMAGE:=ghcr.io/${_owner}/${_repo_name}/${INFINITO_DISTRO}:${INFINITO_IMAGE_TAG}}"
 	# SPOT: default GHCR mirror prefix used by development mirror resolution.
 	: "${INFINITO_GHCR_MIRROR_PREFIX:=mirror}"
 
