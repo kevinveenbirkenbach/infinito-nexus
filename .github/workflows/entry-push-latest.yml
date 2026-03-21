@@ -19,8 +19,51 @@ permissions:
   security-events: write
 
 jobs:
+  # Skip a branch-creation push only when the pushed commit is already
+  # contained in origin/main. Fresh commits outside main still run CI.
+  run-policy:
+    name: 🧭 Decide CI policy
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.decide.outputs.should_run }}
+      skip_reason: ${{ steps.decide.outputs.skip_reason }}
+      commit_in_main: ${{ steps.decide.outputs.commit_in_main }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Fetch main
+        if: github.event.created == true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main:refs/remotes/origin/main --force
+
+      - name: Decide whether CI should run for this push
+        id: decide
+        env:
+          GITHUB_EVENT_CREATED: ${{ github.event.created }}
+        shell: bash
+        run: bash scripts/meta/resolve/push_ci_policy.sh
+
+  skip-branch-creation-from-main:
+    name: ⏭️ Skip branch creation from main
+    needs: run-policy
+    if: needs.run-policy.outputs.should_run != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain skip
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Skipping CI for branch creation because commit ${GITHUB_SHA} is already contained in origin/main."
+          echo "Reason: ${{ needs.run-policy.outputs.skip_reason }}"
+
   pick-distro:
-    if: github.event.created == false
+    if: needs.run-policy.outputs.should_run == 'true'
+    needs: run-policy
     name: 🎲 Pick distro(s)
     runs-on: ubuntu-latest
     outputs:
@@ -66,9 +109,11 @@ jobs:
           echo "=== version_tag: $(grep -E '^version_tag=' "$GITHUB_OUTPUT" | tail -n 1) ==="
 
   ci-orchestrator:
-    if: github.event.created == false
+    if: needs.run-policy.outputs.should_run == 'true'
     name: 🎶 Orchestrate CI
-    needs: pick-distro
+    needs:
+      - run-policy
+      - pick-distro
     uses: ./.github/workflows/ci-orchestrator.yml
     with:
       # ci-orchestrator expects a space-separated list → here it's either one or many
@@ -78,8 +123,9 @@ jobs:
   # Guard job: only allow version releases if the tag commit is contained in origin/main
   release-guard:
     name: "🛡️ Guard release"
-    if: github.event.created == false && needs.pick-distro.outputs.is_version == 'true'
+    if: needs.run-policy.outputs.should_run == 'true' && needs.pick-distro.outputs.is_version == 'true'
     needs:
+      - run-policy
       - pick-distro
       - ci-orchestrator
     runs-on: ubuntu-latest
@@ -127,9 +173,10 @@ jobs:
   release-version:
     name: 🚀 Release version
     needs:
+      - run-policy
       - pick-distro
       - release-guard
-    if: github.event.created == false && needs.release-guard.outputs.allowed == 'true'
+    if: needs.run-policy.outputs.should_run == 'true' && needs.release-guard.outputs.allowed == 'true'
     uses: ./.github/workflows/release-version.yml
     with:
       tag: ${{ needs.pick-distro.outputs.version_tag }}
