@@ -8,7 +8,7 @@ from typing import Any, Iterable, Optional
 
 from ansible.errors import AnsibleError
 
-from module_utils.domain_mapper import resolve_app_id_for_domain
+from module_utils.domains.application_domain_index import resolve_app_id_for_domain
 
 AVAILABLE_FLAVORS = {"letsencrypt", "self_signed"}
 

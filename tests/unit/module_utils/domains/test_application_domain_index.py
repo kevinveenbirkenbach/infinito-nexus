@@ -1,17 +1,12 @@
-import sys
 import unittest
 
 from ansible.errors import AnsibleError
 
-# Make "ansible.module_utils.domain_mapper" importable during plain unit tests.
-import module_utils.domain_mapper as _domain_mapper
-
-sys.modules.setdefault("ansible.module_utils.domain_mapper", _domain_mapper)
+import module_utils.domains.application_domain_index as _application_domain_index
 
 
-class TestDomainMapper(unittest.TestCase):
+class TestApplicationDomainIndex(unittest.TestCase):
     def setUp(self):
-        # A realistic applications mapping with varying shapes:
         self.applications = {
             "web-app-a": {
                 "server": {
@@ -24,9 +19,7 @@ class TestDomainMapper(unittest.TestCase):
             "web-app-b": {
                 "server": {
                     "domains": {
-                        # canonical as string
                         "canonical": "b.example",
-                        # aliases empty list
                         "aliases": [],
                     }
                 }
@@ -34,9 +27,7 @@ class TestDomainMapper(unittest.TestCase):
             "web-app-c": {
                 "server": {
                     "domains": {
-                        # canonical as dict (variants)
                         "canonical": {"web": "c.example", "api": "api.c.example"},
-                        # aliases as dict (variants)
                         "aliases": {"www": "www.c.example"},
                     }
                 }
@@ -44,7 +35,6 @@ class TestDomainMapper(unittest.TestCase):
             "web-app-nested": {
                 "server": {
                     "domains": {
-                        # nested shapes should flatten fine
                         "canonical": {
                             "web": ["nested.example", "NESTED2.example"],
                             "api": {"v1": "api.nested.example"},
@@ -56,7 +46,6 @@ class TestDomainMapper(unittest.TestCase):
                     }
                 }
             },
-            # invalid/missing structures: should just yield nothing in iter_app_domains
             "web-app-no-server": {},
             "web-app-server-not-dict": {"server": "nope"},
             "web-app-domains-not-dict": {"server": {"domains": "nope"}},
@@ -65,13 +54,15 @@ class TestDomainMapper(unittest.TestCase):
     def test_iter_app_domains_empty_on_invalid_structure(self):
         self.assertEqual(
             list(
-                _domain_mapper.iter_app_domains(self.applications["web-app-no-server"])
+                _application_domain_index.iter_app_domains(
+                    self.applications["web-app-no-server"]
+                )
             ),
             [],
         )
         self.assertEqual(
             list(
-                _domain_mapper.iter_app_domains(
+                _application_domain_index.iter_app_domains(
                     self.applications["web-app-server-not-dict"]
                 )
             ),
@@ -79,7 +70,7 @@ class TestDomainMapper(unittest.TestCase):
         )
         self.assertEqual(
             list(
-                _domain_mapper.iter_app_domains(
+                _application_domain_index.iter_app_domains(
                     self.applications["web-app-domains-not-dict"]
                 )
             ),
@@ -87,24 +78,28 @@ class TestDomainMapper(unittest.TestCase):
         )
 
     def test_iter_app_domains_flattens_all_supported_shapes(self):
-        # web-app-a: list + list
-        got_a = list(_domain_mapper.iter_app_domains(self.applications["web-app-a"]))
+        got_a = list(
+            _application_domain_index.iter_app_domains(self.applications["web-app-a"])
+        )
         self.assertEqual(
             got_a,
             ["a.example", "www.a.example", "A.ALIAS.EXAMPLE"],
         )
 
-        # web-app-b: canonical str + aliases []
-        got_b = list(_domain_mapper.iter_app_domains(self.applications["web-app-b"]))
+        got_b = list(
+            _application_domain_index.iter_app_domains(self.applications["web-app-b"])
+        )
         self.assertEqual(got_b, ["b.example"])
 
-        # web-app-c: canonical dict + aliases dict
-        got_c = list(_domain_mapper.iter_app_domains(self.applications["web-app-c"]))
+        got_c = list(
+            _application_domain_index.iter_app_domains(self.applications["web-app-c"])
+        )
         self.assertEqual(got_c, ["c.example", "api.c.example", "www.c.example"])
 
-        # web-app-nested: nested list/dict combinations
         got_nested = list(
-            _domain_mapper.iter_app_domains(self.applications["web-app-nested"])
+            _application_domain_index.iter_app_domains(
+                self.applications["web-app-nested"]
+            )
         )
         self.assertEqual(
             got_nested,
@@ -119,18 +114,15 @@ class TestDomainMapper(unittest.TestCase):
         )
 
     def test_build_domain_index_case_insensitive(self):
-        idx = _domain_mapper.build_domain_index(self.applications)
+        idx = _application_domain_index.build_domain_index(self.applications)
 
-        # Ensure normalized keys exist
         self.assertEqual(idx["a.example"], "web-app-a")
         self.assertEqual(idx["www.a.example"], "web-app-a")
-        self.assertEqual(idx["a.alias.example"], "web-app-a")  # from "A.ALIAS.EXAMPLE"
-
+        self.assertEqual(idx["a.alias.example"], "web-app-a")
         self.assertEqual(idx["b.example"], "web-app-b")
         self.assertEqual(idx["c.example"], "web-app-c")
         self.assertEqual(idx["api.c.example"], "web-app-c")
         self.assertEqual(idx["www.c.example"], "web-app-c")
-
         self.assertEqual(idx["nested.example"], "web-app-nested")
         self.assertEqual(idx["nested2.example"], "web-app-nested")
         self.assertEqual(idx["api.nested.example"], "web-app-nested")
@@ -140,7 +132,7 @@ class TestDomainMapper(unittest.TestCase):
 
     def test_build_domain_index_type_check(self):
         with self.assertRaises(AnsibleError):
-            _domain_mapper.build_domain_index("nope")  # type: ignore[arg-type]
+            _application_domain_index.build_domain_index("nope")  # type: ignore[arg-type]
 
     def test_build_domain_index_detects_collision_case_insensitive(self):
         apps = {
@@ -152,28 +144,30 @@ class TestDomainMapper(unittest.TestCase):
             },
         }
         with self.assertRaises(AnsibleError) as ctx:
-            _domain_mapper.build_domain_index(apps)
+            _application_domain_index.build_domain_index(apps)
         self.assertIn("domain collision", str(ctx.exception).lower())
 
     def test_resolve_app_id_for_domain_found(self):
         self.assertEqual(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, "a.example"),
+            _application_domain_index.resolve_app_id_for_domain(
+                self.applications, "a.example"
+            ),
             "web-app-a",
         )
         self.assertEqual(
-            _domain_mapper.resolve_app_id_for_domain(
+            _application_domain_index.resolve_app_id_for_domain(
                 self.applications, "WWW.A.EXAMPLE"
             ),
             "web-app-a",
         )
         self.assertEqual(
-            _domain_mapper.resolve_app_id_for_domain(
+            _application_domain_index.resolve_app_id_for_domain(
                 self.applications, "api.c.example"
             ),
             "web-app-c",
         )
         self.assertEqual(
-            _domain_mapper.resolve_app_id_for_domain(
+            _application_domain_index.resolve_app_id_for_domain(
                 self.applications, "DEEP.NESTED.EXAMPLE"
             ),
             "web-app-nested",
@@ -181,18 +175,22 @@ class TestDomainMapper(unittest.TestCase):
 
     def test_resolve_app_id_for_domain_not_found_or_empty(self):
         self.assertIsNone(
-            _domain_mapper.resolve_app_id_for_domain(
+            _application_domain_index.resolve_app_id_for_domain(
                 self.applications, "missing.example"
             )
         )
         self.assertIsNone(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, "")
+            _application_domain_index.resolve_app_id_for_domain(self.applications, "")
         )
         self.assertIsNone(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, "   ")
+            _application_domain_index.resolve_app_id_for_domain(
+                self.applications, "   "
+            )
         )
         self.assertIsNone(
-            _domain_mapper.resolve_app_id_for_domain(self.applications, None)  # type: ignore[arg-type]
+            _application_domain_index.resolve_app_id_for_domain(
+                self.applications, None
+            )  # type: ignore[arg-type]
         )
 
     def test_resolve_app_id_for_domain_raises_on_collision(self):
@@ -205,7 +203,7 @@ class TestDomainMapper(unittest.TestCase):
             },
         }
         with self.assertRaises(AnsibleError):
-            _domain_mapper.resolve_app_id_for_domain(apps, "x.example")
+            _application_domain_index.resolve_app_id_for_domain(apps, "x.example")
 
 
 if __name__ == "__main__":

@@ -8,13 +8,14 @@ class FilterModule(object):
     def filters(self):
         plugin_dir = os.path.dirname(__file__)
         project_root = os.path.dirname(plugin_dir)
-        module_utils = os.path.join(project_root, "module_utils")
-        if module_utils not in sys.path:
-            sys.path.append(module_utils)
+        if project_root not in sys.path:
+            sys.path.append(project_root)
 
         try:
-            from domain_utils import get_domain
+            from module_utils.domains.primary_domain import get_domain
         except ImportError as e:
-            raise AnsibleFilterError(f"could not import domain_utils: {e}")
+            raise AnsibleFilterError(
+                f"could not import module_utils.domains.primary_domain: {e}"
+            )
 
         return {"get_domain": get_domain}

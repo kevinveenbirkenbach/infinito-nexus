@@ -13,12 +13,13 @@ This directory contains shared Python utility code (also known as "library code"
 - Shared HTTP(S) connection handler for multiple modules.
 - Common validation or transformation functions for user input.
 - Utility functions for interacting with Docker, LDAP, etc.
+- Grouped helper packages such as `module_utils/domains/` for related domain logic.
 
 ## Usage Example
 
 In a custom Ansible module or plugin:
 ```python
-from module_utils.infinito_utils import my_shared_function
+from module_utils.domains.primary_domain import get_primary_domain
 ````
 
 ## When *not* to Use `module_utils`

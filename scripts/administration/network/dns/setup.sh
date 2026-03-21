@@ -1,18 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DOMAIN="infinito.example"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/administration/network/dns/common.sh
+source "${SCRIPT_DIR}/common.sh"
 
-NM_CONF="/etc/NetworkManager/conf.d/00-infinito-dnsmasq.conf"
-NM_DNSMASQ_DIR="/etc/NetworkManager/dnsmasq.d"
-NM_DNSMASQ_CONF="${NM_DNSMASQ_DIR}/${DOMAIN}.conf"
+echo ">>> Setting up local DNS for *.${DNS_DOMAIN} -> 127.0.0.1"
 
-SYS_DNSMASQ_CONF="/etc/dnsmasq.d/${DOMAIN}.conf"
+configure_via_hosts_file() {
+	echo ">>> Non-systemd environment detected -> configuring /etc/hosts fallback"
+	echo ">>> Hosts file: ${DNS_HOSTS_FILE}"
+	echo ">>> Host entries:"
+	dns_read_hosts_fallback_entries | sed 's/^/    /'
 
-echo ">>> Setting up local DNS for *.${DOMAIN} -> 127.0.0.1"
+	dns_write_hosts_fallback
+	dns_test_resolution
 
-systemd_is_operational() {
-	command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]
+	echo
+	echo ">>> Local DNS fallback configured for:"
+	dns_read_hosts_fallback_entries | sed 's/^/    /'
 }
 
 install_dnsmasq_if_missing() {
@@ -35,8 +41,9 @@ install_dnsmasq_if_missing() {
 	fi
 }
 
-if ! systemd_is_operational; then
-	echo ">>> Skipping local DNS setup: systemd service management is unavailable in this environment."
+if ! dns_systemd_is_operational; then
+	echo ">>> Skipping local DNS setup via systemd services: systemd service management is unavailable in this environment."
+	configure_via_hosts_file
 	exit 0
 fi
 
@@ -50,19 +57,19 @@ configure_via_networkmanager_dnsmasq() {
 		sudo systemctl disable --now dnsmasq || true
 	fi
 
-	echo ">>> Writing NetworkManager dnsmasq config: ${NM_CONF}"
-	sudo mkdir -p "$(dirname "${NM_CONF}")"
-	cat <<EOF | sudo tee "${NM_CONF}" >/dev/null
+	echo ">>> Writing NetworkManager dnsmasq config: ${DNS_NM_CONF}"
+	sudo mkdir -p "$(dirname "${DNS_NM_CONF}")"
+	cat <<EOF | sudo tee "${DNS_NM_CONF}" >/dev/null
 [main]
 dns=dnsmasq
 EOF
 
-	echo ">>> Writing dnsmasq snippet for NetworkManager: ${NM_DNSMASQ_CONF}"
-	sudo mkdir -p "${NM_DNSMASQ_DIR}"
-	cat <<EOF | sudo tee "${NM_DNSMASQ_CONF}" >/dev/null
+	echo ">>> Writing dnsmasq snippet for NetworkManager: ${DNS_NM_DNSMASQ_CONF}"
+	sudo mkdir -p "${DNS_NM_DNSMASQ_DIR}"
+	cat <<EOF | sudo tee "${DNS_NM_DNSMASQ_CONF}" >/dev/null
 # Map the entire zone to localhost (wildcard)
-address=/${DOMAIN}/127.0.0.1
-address=/${DOMAIN}/::1
+address=/${DNS_DOMAIN}/127.0.0.1
+address=/${DNS_DOMAIN}/::1
 EOF
 
 	echo ">>> Restarting NetworkManager"
@@ -76,11 +83,11 @@ configure_via_system_dnsmasq() {
 	echo ">>> NetworkManager not active -> configuring system dnsmasq (fallback)"
 	install_dnsmasq_if_missing
 
-	echo ">>> Writing system dnsmasq config: ${SYS_DNSMASQ_CONF}"
+	echo ">>> Writing system dnsmasq config: ${DNS_SYS_DNSMASQ_CONF}"
 	sudo mkdir -p /etc/dnsmasq.d
-	cat <<EOF | sudo tee "${SYS_DNSMASQ_CONF}" >/dev/null
-address=/${DOMAIN}/127.0.0.1
-address=/${DOMAIN}/::1
+	cat <<EOF | sudo tee "${DNS_SYS_DNSMASQ_CONF}" >/dev/null
+address=/${DNS_DOMAIN}/127.0.0.1
+address=/${DNS_DOMAIN}/::1
 EOF
 
 	echo ">>> Enabling and restarting dnsmasq service"
@@ -89,9 +96,9 @@ EOF
 
 	# Optional: systemd-resolved integration if it exists, but NEVER fail the script
 	if command -v resolvectl >/dev/null 2>&1 && systemctl is-active --quiet systemd-resolved 2>/dev/null; then
-		echo ">>> Configuring systemd-resolved routing for ${DOMAIN}"
+		echo ">>> Configuring systemd-resolved routing for ${DNS_DOMAIN}"
 		sudo resolvectl dns lo 127.0.0.1 || true
-		sudo resolvectl domain lo "~${DOMAIN}" || true
+		sudo resolvectl domain lo "~${DNS_DOMAIN}" || true
 	else
 		echo ">>> systemd-resolved not active -> skipping resolvectl integration"
 		echo ">>> NOTE: Ensure your system resolver uses 127.0.0.1 to query dnsmasq."
@@ -105,12 +112,9 @@ else
 	configure_via_system_dnsmasq
 fi
 
-echo
-echo ">>> Testing resolution"
-getent hosts "${DOMAIN}" || true
-getent hosts "test.${DOMAIN}" || true
+dns_test_resolution
 
 echo
 echo ">>> Local DNS configured for:"
-echo "    ${DOMAIN}"
-echo "    *.${DOMAIN}"
+echo "    ${DNS_DOMAIN}"
+echo "    *.${DNS_DOMAIN}"

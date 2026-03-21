@@ -12,3 +12,10 @@ Changes in this area should stay careful and conservative:
 - behave gracefully when platform capabilities differ
 
 In short, this directory exists to make local DNS behavior dependable without turning host networking into a fragile black box. 🧭
+
+For the non-`systemd` fallback, the host entries are generated from the role configs:
+
+- canonical domains and aliases come from `roles/*/config/main.yml`
+- the generator lives in `module_utils/domains/list.py`
+- `DOMAIN_PRIMARY` is rendered before the list is emitted
+- `INFINITO_DNS_HOSTS` can still override the generated list explicitly

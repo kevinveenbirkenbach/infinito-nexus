@@ -1,10 +1,9 @@
-# filter_plugins/domain_utils.py
 from ansible.errors import AnsibleFilterError
 
 
-def get_domain(domains, application_id):
+def get_primary_domain(domains, application_id):
     """
-    Return the domain for application_id from the domains mapping:
+    Return the primary domain for application_id from the domains mapping:
       - If value is a string, return it.
       - If value is a dict, return its first value.
       - If value is a list, return its first element.
@@ -22,13 +21,11 @@ def get_domain(domains, application_id):
 
     val = domains[application_id]
 
-    # String case
     if isinstance(val, str):
         if not val:
             raise AnsibleFilterError(f"domains['{application_id}'] is an empty string")
         return val
 
-    # Dict case
     if isinstance(val, dict):
         try:
             first_val = next(iter(val.values()))
@@ -40,7 +37,6 @@ def get_domain(domains, application_id):
             )
         return first_val
 
-    # List case
     if isinstance(val, list):
         if not val:
             raise AnsibleFilterError(f"domains['{application_id}'] list is empty")
@@ -51,7 +47,10 @@ def get_domain(domains, application_id):
             )
         return first
 
-    # Unsupported type
     raise AnsibleFilterError(
         f"domains['{application_id}'] has unsupported type {type(val).__name__}, must be str, dict or list"
     )
+
+
+def get_domain(domains, application_id):
+    return get_primary_domain(domains, application_id)

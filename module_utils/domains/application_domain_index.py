@@ -1,6 +1,5 @@
-# module_utils/domain_mapper.py
 #
-# SRP helper: Map a domain (canonical or alias) to an application_id by scanning
+# Shared helpers for indexing application domains from
 # applications[app_id].server.domains.{canonical,aliases}.
 #
 # Supports canonical/aliases being:
@@ -10,7 +9,7 @@
 #
 # Note:
 # This module does NOT template Jinja. It expects values to already
-# be rendered at lookup runtime (usually true for Ansible variables).
+# be rendered at lookup runtime.
 
 from __future__ import annotations
 
@@ -45,11 +44,9 @@ def _flatten_str_values(value: Any) -> List[str]:
                 walk(item)
             return
         if isinstance(v, dict):
-            # For dicts we take values (keys are semantic like web/api/view)
             for vv in v.values():
                 walk(vv)
             return
-        # ignore other types silently (ints, bools, etc.)
 
     walk(value)
     return out
@@ -89,9 +86,9 @@ def build_domain_index(applications: Dict[str, Any]) -> Dict[str, str]:
     If the same domain appears in multiple apps (case-insensitive), raises an error.
     """
     if not isinstance(applications, dict):
-        raise AnsibleError("domain_mapper: applications must be a dict")
+        raise AnsibleError("application_domain_index: applications must be a dict")
 
-    index: Dict[str, str] = {}  # normalized domain -> app_id
+    index: Dict[str, str] = {}
     collisions: Dict[str, Set[str]] = {}
 
     for app_id, app_conf in applications.items():
@@ -110,7 +107,7 @@ def build_domain_index(applications: Dict[str, Any]) -> Dict[str, str]:
         for domain, apps in sorted(collisions.items(), key=lambda x: x[0]):
             parts.append(f"{domain}: {sorted(apps)}")
         raise AnsibleError(
-            "domain_mapper: domain collision across applications (ambiguous mapping): "
+            "application_domain_index: domain collision across applications (ambiguous mapping): "
             + "; ".join(parts)
         )
 
