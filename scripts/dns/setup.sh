@@ -85,7 +85,8 @@ EOF
     sudo dnsmasq --conf-file="${SYS_DNSMASQ_CONF}"
     if ! grep -q "^nameserver 127.0.0.1" /etc/resolv.conf; then
       echo ">>> Prepending nameserver 127.0.0.1 to /etc/resolv.conf"
-      sudo sed -i '1s/^/nameserver 127.0.0.1\n/' /etc/resolv.conf
+      resolv_content=$(cat /etc/resolv.conf)
+      printf 'nameserver 127.0.0.1\n%s\n' "${resolv_content}" | sudo tee /etc/resolv.conf >/dev/null
     fi
   fi
 
