@@ -97,9 +97,12 @@ class TestVariableDefinitions(unittest.TestCase):
                     data = yaml.safe_load(f)
                 if isinstance(data, dict):
                     self.defined.update(data.keys())
-            except Exception:
-                # Ignore unreadable/invalid YAML files
-                pass
+            except (OSError, yaml.YAMLError) as exc:
+                logging.debug(
+                    "Skipping variable file %s while collecting definitions: %s",
+                    vf,
+                    exc,
+                )
 
         # 2) Inline definitions across all scanned files
         for root, _, files in os.walk(self.project_root):
@@ -136,8 +139,12 @@ class TestVariableDefinitions(unittest.TestCase):
                                                 for k in data.keys()
                                                 if isinstance(k, str)
                                             )
-                                    except Exception:
-                                        pass
+                                    except yaml.YAMLError as exc:
+                                        logging.debug(
+                                            "Skipping inline set_fact mapping in %s: %s",
+                                            path,
+                                            exc,
+                                        )
                                     # do not enter block mode if inline present
                                     in_set_fact = False
                                 else:
