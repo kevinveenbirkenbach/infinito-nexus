@@ -150,6 +150,13 @@ jobs:
     steps:
       - run: echo "Installation is possible via pkgmgr and make"
 
+  # Test Development Environment
+  test-development:
+    uses: ./.github/workflows/test-development.yml
+    needs:
+      - code-quality-gate
+    secrets: inherit
+
   done:
     name: 🏁 Finish pipeline
     needs:
@@ -157,6 +164,7 @@ jobs:
       - test-deploy-universal
       - test-deploy-workstation
       - test-install-gate
+      - test-development
     runs-on: ubuntu-latest
     steps:
       - name: Done
