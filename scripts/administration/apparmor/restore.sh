@@ -9,9 +9,9 @@ fi
 
 echo "[apparmor] restoring profiles"
 
-systemctl start apparmor
-systemctl enable apparmor
+systemctl start apparmor || true
+systemctl enable apparmor || true
 
-apparmor_parser -r /etc/apparmor.d/*
+apparmor_parser -r /etc/apparmor.d/* || true
 
 echo "[apparmor] restore complete"

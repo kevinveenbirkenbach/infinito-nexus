@@ -76,8 +76,18 @@ bind-interfaces
 EOF
 
   echo ">>> Enabling and restarting dnsmasq service"
-  sudo systemctl enable dnsmasq --now
-  sudo systemctl restart dnsmasq
+  if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
+    sudo systemctl enable dnsmasq --now
+    sudo systemctl restart dnsmasq
+  else
+    echo "[dns] systemd not running -> starting dnsmasq directly"
+    pkill dnsmasq 2>/dev/null || true
+    sudo dnsmasq --conf-file="${SYS_DNSMASQ_CONF}"
+    if ! grep -q "^nameserver 127.0.0.1" /etc/resolv.conf; then
+      echo ">>> Prepending nameserver 127.0.0.1 to /etc/resolv.conf"
+      sudo sed -i '1s/^/nameserver 127.0.0.1\n/' /etc/resolv.conf
+    fi
+  fi
 
   # Route domain queries through systemd-resolved if available
   # Skip on WSL2: resolv.conf is managed by wsl2/setup-dns.sh and networkd is not running
