@@ -13,6 +13,7 @@ compose:
     lam:
       image:        ghcr.io/ldapaccountmanager/lam
       version:      latest
+      min_storage:  "1GB"
     oauth2:
       enabled: true
       origin:
