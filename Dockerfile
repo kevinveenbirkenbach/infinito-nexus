@@ -102,6 +102,6 @@ CMD ["/sbin/init"]
 FROM full AS slim
 
 # Image cleanup (reduce final size)
-RUN set -euo pipefail; \
+RUN set -eu; \
   test -x /usr/local/bin/slim.sh || { echo "slim.sh missing in base image" >&2; exit 1; }; \
   /usr/local/bin/slim.sh
