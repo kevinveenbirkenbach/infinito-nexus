@@ -19,6 +19,7 @@ compose:
       version: "latest"
       name:    "mig"
       port:    80
+      min_storage: "1GB"
     css:
       enabled: true
 

@@ -28,6 +28,7 @@ compose:
     mediawiki: 
       image:    mediawiki
       version:  "1.44"
+      min_storage:  "8GB"
       backup:
         no_stop_required: true
       name:     mediawiki

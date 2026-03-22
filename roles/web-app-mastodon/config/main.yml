@@ -41,6 +41,7 @@ compose:
     mastodon: 
       image:              "ghcr.io/mastodon/mastodon"
       version:            latest
+      min_storage:        "15GB"
       backup:
         no_stop_required: true
       name:               "mastodon"
