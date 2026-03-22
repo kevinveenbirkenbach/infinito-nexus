@@ -22,6 +22,7 @@ compose:
       image:            "gitlab/gitlab-ee"
       version:          "latest"
       name:             "gitlab"
+      min_storage:      "30GB"
       cpus:             "4.0"
       mem_reservation:  "8g"
       mem_limit:        "12g"

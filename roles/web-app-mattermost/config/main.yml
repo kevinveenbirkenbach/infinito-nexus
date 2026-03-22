@@ -33,6 +33,7 @@ compose:
     mattermost:
       image:                      "mattermost/mattermost-team-edition"
       version:                    "7.10.5"
+      min_storage:                "10GB"
       backup:
         no_stop_required:         true
       name:                       "mattermost"

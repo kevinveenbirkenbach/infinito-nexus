@@ -47,6 +47,7 @@ compose:
       name:             "peertube"
       version:          "production-bookworm"
       image:            "chocobozzz/peertube"
+      min_storage:      "30GB"
       backup:
         no_stop_required: true
       cpus: 4

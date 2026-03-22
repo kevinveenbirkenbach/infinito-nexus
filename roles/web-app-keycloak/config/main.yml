@@ -40,6 +40,7 @@ compose:
       image:              "quay.io/keycloak/keycloak"
       version:            "latest"
       name:               "keycloak"
+      min_storage:        "5GB"
       cpus:               "2.0"
       mem_reservation:    "2g"
       mem_limit:          "4g"

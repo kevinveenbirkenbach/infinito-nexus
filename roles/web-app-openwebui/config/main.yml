@@ -31,6 +31,7 @@ compose:
       image:              ghcr.io/open-webui/open-webui
       version:            main
       name:               open-webui
+      min_storage:        "5GB"
       offline_mode:       false
       hf_hub_offline:     false
       cpus:               2.0

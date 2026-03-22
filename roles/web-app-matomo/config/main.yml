@@ -39,6 +39,7 @@ compose:
       image:            "matomo"
       version:          "latest"
       name:             "matomo"
+      min_storage:      "5GB"
       backup:
         no_stop_required: true
       cpus:               1.0
