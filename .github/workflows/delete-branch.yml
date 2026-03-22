@@ -1,0 +1,24 @@
+name: Cancel Runs On Branch Delete
+
+on:
+  delete:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel-branch-runs:
+    if: ${{ github.event.ref_type == 'branch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Cancel active workflow runs for deleted branch
+        shell: bash
+        env:
+          BRANCH: ${{ github.event.ref }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: bash scripts/administration/actions/cancel_deleted_branch_runs.sh

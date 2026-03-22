@@ -4,12 +4,13 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  cleanup_ci_images.sh [--days N] [--owner OWNER] [--distros "arch debian ..."] [--repo-prefix NAME]
+  cleanup_ci_images.sh [--days N] [--owner OWNER] [--repository OWNER/REPO] [--distros "arch debian ..."] [--repo-prefix NAME]
 
 Deletes GHCR container package versions that are:
 - older than N days (default: 7)
 - AND have tags
 - AND ALL tags start with "ci-"
+- AND are not referenced by active GitHub Actions runs in the repository
 So versions with any non-ci tag (e.g. latest, v1.2.3) are preserved.
 
 Robust for USER and ORG owners:
@@ -20,16 +21,17 @@ Requires:
   - jq installed
 
 Env:
-  DAYS, OWNER, DISTROS, REPO_PREFIX are required via env or flags.
+  DAYS, OWNER, REPOSITORY, DISTROS, REPO_PREFIX are required via env or flags.
 
 Examples:
-  DAYS=14 OWNER=myorg REPO_PREFIX=my-repo ./scripts/administration/ghcr/cleanup_ci_images.sh
-  ./scripts/administration/ghcr/cleanup_ci_images.sh --days 7 --owner kevinveenbirkenbach
+  DAYS=14 OWNER=myorg REPOSITORY=myorg/my-repo REPO_PREFIX=my-repo ./scripts/administration/ghcr/cleanup_ci_images.sh
+  ./scripts/administration/ghcr/cleanup_ci_images.sh --days 7 --repository kevinveenbirkenbach/infinito-nexus --distros "arch debian" --repo-prefix infinito-nexus
 USAGE
 }
 
 DAYS="${DAYS:-7}"
 OWNER="${OWNER-}"
+REPOSITORY="${REPOSITORY:-${GITHUB_REPOSITORY:-}}"
 DISTROS="${DISTROS-}"
 REPO_PREFIX="${REPO_PREFIX-}"
 
@@ -37,12 +39,48 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --days) DAYS="${2:-}"; shift 2 ;;
     --owner) OWNER="${2:-}"; shift 2 ;;
+    --repository) REPOSITORY="${2:-}"; shift 2 ;;
     --distros) DISTROS="${2:-}"; shift 2 ;;
     --repo-prefix) REPO_PREFIX="${2:-}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; usage; exit 2 ;;
   esac
 done
+
+resolve_repository() {
+  if [[ -n "${REPOSITORY:-}" ]]; then
+    printf '%s\n' "${REPOSITORY,,}"
+    return 0
+  fi
+
+  local remote_url
+  local remote_path
+  if remote_url="$(git config --get remote.origin.url 2>/dev/null)" && [[ -n "${remote_url}" ]]; then
+    remote_path="${remote_url%.git}"
+
+    if [[ "${remote_path}" == *://* ]]; then
+      remote_path="${remote_path#*://}"
+      remote_path="${remote_path#*@}"
+      remote_path="${remote_path#*/}"
+    elif [[ "${remote_path}" == *:* ]]; then
+      remote_path="${remote_path#*:}"
+    fi
+
+    if [[ "${remote_path}" == */* ]]; then
+      printf '%s\n' "${remote_path,,}"
+      return 0
+    fi
+  fi
+
+  echo "ERROR: REPOSITORY is required (env REPOSITORY/GITHUB_REPOSITORY or --repository)." >&2
+  return 1
+}
+
+REPOSITORY="$(resolve_repository)"
+
+if [[ -z "${OWNER}" && "${REPOSITORY}" == */* ]]; then
+  OWNER="${REPOSITORY%%/*}"
+fi
 
 if [[ -z "${OWNER}" ]]; then
   echo "ERROR: OWNER is required (env OWNER or --owner)." >&2
@@ -57,7 +95,7 @@ if [[ -z "${REPO_PREFIX}" ]]; then
   exit 2
 fi
 
-OWNER="$(scripts/meta/resolve/repository/owner.sh)"
+OWNER="${OWNER,,}"
 REPO_PREFIX="${REPO_PREFIX,,}"
 
 if ! command -v gh >/dev/null 2>&1; then
@@ -71,6 +109,7 @@ fi
 
 cutoff="$(date -u -d "${DAYS} days ago" +%s)"
 echo ">>> OWNER=${OWNER}"
+echo ">>> REPOSITORY=${REPOSITORY}"
 echo ">>> DAYS=${DAYS}"
 echo ">>> cutoff_epoch=${cutoff}"
 echo ">>> DISTROS=${DISTROS}"
@@ -167,7 +206,117 @@ delete_version() {
     "/users/${OWNER}/packages/container/${encoded_pkg}/versions/${id}" >/dev/null
 }
 
+list_active_runs() {
+  local status
+
+  for status in requested pending waiting queued in_progress; do
+    gh api --paginate \
+      -H "Accept: application/vnd.github+json" \
+      "/repos/${REPOSITORY}/actions/runs?status=${status}&per_page=100"
+  done \
+  | jq -sc '
+      [
+        .[]
+        | .workflow_runs[]?
+      ]
+      | unique_by(.id)
+    '
+}
+
+resolve_active_pr_merge_tags() {
+  local active_runs_json="$1"
+  local pr_numbers
+  local pr_number
+  local pr_json
+  local merge_sha
+
+  pr_numbers="$(
+    echo "${active_runs_json}" \
+    | jq -r '[ .[] | .pull_requests[]?.number ] | unique[]?'
+  )"
+
+  if [[ -z "${pr_numbers}" ]]; then
+    return 0
+  fi
+
+  while read -r pr_number; do
+    [[ -n "${pr_number}" ]] || continue
+    pr_json="$(gh api -H "Accept: application/vnd.github+json" "/repos/${REPOSITORY}/pulls/${pr_number}")"
+    merge_sha="$(echo "${pr_json}" | jq -r '.merge_commit_sha // empty')"
+    if [[ "${merge_sha}" =~ ^[0-9a-f]{40}$ ]]; then
+      printf 'ci-%s\n' "${merge_sha}"
+    fi
+  done <<< "${pr_numbers}"
+}
+
+collect_protected_ci_tags() {
+  local active_runs_json="$1"
+
+  {
+    echo "${active_runs_json}" \
+      | jq -r '.[] | .head_sha // empty | select(test("^[0-9a-f]{40}$")) | "ci-\(.)"'
+    echo "${active_runs_json}" \
+      | jq -r '.[] | .pull_requests[]?.head.sha // empty | select(test("^[0-9a-f]{40}$")) | "ci-\(.)"'
+    resolve_active_pr_merge_tags "${active_runs_json}"
+  } \
+  | awk 'NF' \
+  | sort -u \
+  | jq -Rsc '
+      split("\n")
+      | map(select(length > 0))
+    '
+}
+
+classify_candidate_versions() {
+  local versions_json="$1"
+  local protected_tags_json="$2"
+
+  echo "${versions_json}" | jq \
+    --argjson cutoff "${cutoff}" \
+    --argjson protected_tags "${protected_tags_json}" '
+      map(
+        . as $v
+        | ($v.created_at | fromdateiso8601) as $created
+        | ($v.metadata.container.tags // []) as $tags
+        | {
+            id: $v.id,
+            created_at: $v.created_at,
+            created_epoch: $created,
+            tags: $tags,
+            protected_tags: [
+              $tags[]?
+              | select(. as $tag | $protected_tags | index($tag))
+            ]
+          }
+      )
+      | map(select(.created_epoch < $cutoff))
+      | map(select((.tags | length) > 0))
+      | map(select((.tags | all(startswith("ci-")))))
+    '
+}
+
 # --- main -------------------------------------------------------------------
+
+active_runs="$(list_active_runs)"
+active_run_count="$(echo "${active_runs}" | jq 'length')"
+echo "Active workflow runs: ${active_run_count}"
+
+if [[ "${active_run_count}" -gt 0 ]]; then
+  echo "${active_runs}" | jq -r '
+    .[]
+    | "ACTIVE run id=\(.id) workflow=\(.name // "unknown") status=\(.status) event=\(.event) head_sha=\(.head_sha // "-")"
+  '
+fi
+
+protected_ci_tags="$(collect_protected_ci_tags "${active_runs}")"
+protected_ci_tag_count="$(echo "${protected_ci_tags}" | jq 'length')"
+echo "Protected ci tags from active runs: ${protected_ci_tag_count}"
+
+if [[ "${protected_ci_tag_count}" -gt 0 ]]; then
+  echo "${protected_ci_tags}" | jq -r '.[] | "PROTECT tag=\(.)"'
+fi
+
+echo
 
 for d in ${DISTROS}; do
   pkg="${REPO_PREFIX}/${d}"
@@ -183,25 +332,21 @@ for d in ${DISTROS}; do
     continue
   fi
 
-  deletable="$(echo "${all}" | jq --argjson cutoff "${cutoff}" '
-    map(
-      . as $v
-      | ($v.created_at | fromdateiso8601) as $created
-      | ($v.metadata.container.tags // []) as $tags
-      | {
-          id: $v.id,
-          created_at: $v.created_at,
-          created_epoch: $created,
-          tags: $tags
-        }
-    )
-    | map(select(.created_epoch < $cutoff))
-    | map(select((.tags | length) > 0))
-    | map(select((.tags | all(startswith("ci-")))))
-  ')"
+  candidates="$(classify_candidate_versions "${all}" "${protected_ci_tags}")"
+  protected_versions="$(echo "${candidates}" | jq '[ .[] | select((.protected_tags | length) > 0) ]')"
+  deletable="$(echo "${candidates}" | jq '[ .[] | select((.protected_tags | length) == 0) ]')"
 
+  protected_count="$(echo "${protected_versions}" | jq 'length')"
   del_count="$(echo "${deletable}" | jq 'length')"
+  echo "Protected versions: ${protected_count}"
   echo "Deletable versions: ${del_count}"
+
+  if [[ "${protected_count}" -gt 0 ]]; then
+    echo "${protected_versions}" | jq -r '
+      .[]
+      | "SKIP id=\(.id) created_at=\(.created_at) tags=\(.tags|join(",")) protected_by=\(.protected_tags|join(","))"
+    '
+  fi
 
   if [[ "${del_count}" -eq 0 ]]; then
     echo "Nothing to delete."
