@@ -32,6 +32,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Download static docker compose plugin
+        run: |
+          mkdir -p /tmp/docker-cli-plugins
+          curl -fsSL "https://github.com/docker/compose/releases/download/v2.35.0/docker-compose-linux-x86_64" \
+            -o /tmp/docker-cli-plugins/docker-compose
+          chmod +x /tmp/docker-cli-plugins/docker-compose
+
       - name: Run dev environment routine
         shell: bash
         run: |
@@ -53,7 +60,7 @@ jobs:
             -v "/mnt/docker:/var/lib/docker" \
             -v "/var/run/docker.sock:/var/run/docker.sock" \
             -v "/usr/bin/docker:/usr/local/bin/docker" \
-            -v "/usr/lib/docker/cli-plugins:/usr/lib/docker/cli-plugins" \
+            -v "/tmp/docker-cli-plugins:/usr/lib/docker/cli-plugins" \
             -w "${HOST_WORKDIR}" \
             "${DEV_RUNTIME_IMAGE}" \
             bash -lc '
