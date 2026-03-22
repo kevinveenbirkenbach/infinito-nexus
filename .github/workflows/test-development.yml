@@ -54,6 +54,7 @@ jobs:
             -e INFINITO_IMAGE=infinito-debian \
             -e INFINITO_PULL_POLICY=never \
             -e INFINITO_NO_BUILD=0 \
+            -e INFINITO_GHCR_MIRROR_PREFIX=mirror \
             -e NIX_CONFIG \
             --network host \
             -v "${HOST_WORKDIR}:${HOST_WORKDIR}" \
