@@ -61,6 +61,7 @@ jobs:
             -v "/mnt/docker:/var/lib/docker" \
             -v "/var/run/docker.sock:/var/run/docker.sock" \
             -v "/usr/bin/docker:/usr/local/bin/docker" \
+            -v "/usr/bin/docker:/usr/bin/docker" \
             -v "/tmp/docker-cli-plugins:/usr/lib/docker/cli-plugins" \
             -w "${HOST_WORKDIR}" \
             "${DEV_RUNTIME_IMAGE}" \
