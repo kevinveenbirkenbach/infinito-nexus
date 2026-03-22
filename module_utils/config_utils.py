@@ -71,9 +71,7 @@ def get_app_conf(
             )
         k, idx = m.group(1), m.group(2)
 
-        if (
-            hasattr(obj, "__class__") and obj.__class__.__name__ == "AnsibleUndefined"
-        ) or isinstance(obj, AnsibleUndefinedVariable):
+        if isinstance(obj, (AnsibleUndefined, AnsibleUndefinedVariable)):
             if not strict:
                 return default if default is not None else False
             raise AppConfigKeyError(
