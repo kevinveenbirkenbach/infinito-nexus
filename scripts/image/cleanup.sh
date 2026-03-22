@@ -229,8 +229,8 @@ list_active_runs() {
 		gh api --paginate \
 			-H "Accept: application/vnd.github+json" \
 			"/repos/${REPOSITORY}/actions/runs?status=${status}&per_page=100"
-	done \
-	| jq -sc '
+	done |
+		jq -sc '
 			[
 				.[]
 				| .workflow_runs[]?
@@ -247,8 +247,8 @@ resolve_active_pr_merge_tags() {
 	local merge_sha
 
 	pr_numbers="$(
-		echo "${active_runs_json}" \
-		| jq -r '[ .[] | .pull_requests[]?.number ] | unique[]?'
+		echo "${active_runs_json}" |
+			jq -r '[ .[] | .pull_requests[]?.number ] | unique[]?'
 	)"
 
 	if [[ -z "${pr_numbers}" ]]; then
@@ -262,22 +262,22 @@ resolve_active_pr_merge_tags() {
 		if [[ "${merge_sha}" =~ ^[0-9a-f]{40}$ ]]; then
 			printf 'ci-%s\n' "${merge_sha}"
 		fi
-	done <<< "${pr_numbers}"
+	done <<<"${pr_numbers}"
 }
 
 collect_protected_ci_tags() {
 	local active_runs_json="$1"
 
 	{
-		echo "${active_runs_json}" \
-			| jq -r '.[] | .head_sha // empty | select(test("^[0-9a-f]{40}$")) | "ci-\(.)"'
-		echo "${active_runs_json}" \
-			| jq -r '.[] | .pull_requests[]?.head.sha // empty | select(test("^[0-9a-f]{40}$")) | "ci-\(.)"'
+		echo "${active_runs_json}" |
+			jq -r '.[] | .head_sha // empty | select(test("^[0-9a-f]{40}$")) | "ci-\(.)"'
+		echo "${active_runs_json}" |
+			jq -r '.[] | .pull_requests[]?.head.sha // empty | select(test("^[0-9a-f]{40}$")) | "ci-\(.)"'
 		resolve_active_pr_merge_tags "${active_runs_json}"
-	} \
-	| awk 'NF' \
-	| sort -u \
-	| jq -Rsc '
+	} |
+		awk 'NF' |
+		sort -u |
+		jq -Rsc '
 			split("\n")
 			| map(select(length > 0))
 		'
