@@ -24,7 +24,7 @@ class RegistryProvider(ABC):
 
 class GHCRProvider(RegistryProvider):
     def __init__(self, namespace: str, prefix: str = "mirror") -> None:
-        self.namespace = namespace
+        self.namespace = namespace.lower()
         self.prefix = prefix.strip("/")
 
     def image_base(self, image: ImageRef) -> str:

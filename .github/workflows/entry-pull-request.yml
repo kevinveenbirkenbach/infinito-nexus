@@ -4,12 +4,18 @@ run-name: >-
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
   pull_request_target:
     types:
       - opened
       - synchronize
       - reopened
       - ready_for_review
+      - closed
 
 concurrency:
   # Keep only the newest run per PR and event type.
@@ -18,19 +24,27 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  actions: read
   contents: read
   packages: write
   security-events: write
 
 jobs:
+  close-pr-run:
+    if: ${{ github.event.action == 'closed' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PR run
+        run: echo "Pull request was closed or merged. Existing runs for this PR are cancelled via concurrency."
+
   ci-orchestrator:
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' }}
     uses: ./.github/workflows/ci-orchestrator.yml
     with:
       distros: "arch debian ubuntu fedora centos"
 
   prepare-fork-merge-ref:
-    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
+    if: ${{ github.event_name == 'pull_request_target' && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name != github.repository }}
     runs-on: ubuntu-latest
     outputs:
       checkout_ref: ${{ steps.out.outputs.checkout_ref }}

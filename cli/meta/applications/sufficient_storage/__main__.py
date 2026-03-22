@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--warnings",
         action="store_true",
-        help="Emit GitHub Actions warnings for missing configs/keys",
+        help="Emit GitHub Actions warnings for invalid min_storage metadata on matching compose services",
     )
 
     parser.add_argument(

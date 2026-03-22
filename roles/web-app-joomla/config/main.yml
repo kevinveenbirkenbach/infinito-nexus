@@ -31,6 +31,7 @@ compose:
       image:    joomla
       version:  latest
       name:     joomla
+      min_storage: "8GB"
       backup:
         no_stop_required: true
       upload:
