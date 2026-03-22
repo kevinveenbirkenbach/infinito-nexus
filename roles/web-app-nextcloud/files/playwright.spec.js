@@ -4,10 +4,30 @@ test.use({
   ignoreHTTPSErrors: true
 });
 
-const loginUsername = process.env.LOGIN_USERNAME;
-const loginPassword = process.env.LOGIN_PASSWORD;
-const oidcIssuerUrl = process.env.OIDC_ISSUER_URL;
-const nextcloudBaseUrl = process.env.NEXTCLOUD_BASE_URL;
+function decodeDotenvQuotedValue(value) {
+  if (typeof value !== "string" || value.length < 2) {
+    return value;
+  }
+
+  if (!(value.startsWith('"') && value.endsWith('"'))) {
+    return value;
+  }
+
+  const encoded = value.slice(1, -1);
+
+  try {
+    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
+  } catch {
+    return encoded.replace(/\$\$/g, "$");
+  }
+}
+
+// `docker --env-file` preserves the quotes emitted by `dotenv_quote`,
+// so normalize these values before building URLs or typing credentials.
+const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
+const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
+const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
+const nextcloudBaseUrl = decodeDotenvQuotedValue(process.env.NEXTCLOUD_BASE_URL);
 
 async function waitForFirstVisible(page, locators, timeout = 60_000) {
   const deadline = Date.now() + timeout;
