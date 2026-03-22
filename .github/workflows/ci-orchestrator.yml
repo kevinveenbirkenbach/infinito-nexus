@@ -16,7 +16,7 @@ on:
         description: "Polling attempts for waiting on prebuilt or mirrored images"
         required: false
         type: string
-        default: "1440"
+        default: "1980"
       image_wait_sleep_seconds:
         description: "Polling interval in seconds for waiting on prebuilt or mirrored images"
         required: false
@@ -28,11 +28,52 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: read
   packages: write
   security-events: write
 
 jobs:
+  wait-fork-prereq-run:
+    name: ⏳ Wait for fork prerequisite run
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout trusted workflow repo (helpers)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Wait for privileged pull_request_target run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_FILE: entry-pull-request.yml
+          TARGET_EVENT: pull_request_target
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_UPDATED_AT: ${{ github.event.pull_request.updated_at }}
+          WAIT_ATTEMPTS: ${{ inputs.image_wait_attempts }}
+          WAIT_SLEEP_SECONDS: ${{ inputs.image_wait_sleep_seconds }}
+        run: ./scripts/meta/wait/workflow_run.sh
+
+  fork-prereqs-ready:
+    name: 🚦 Gate fork prerequisites
+    needs: wait-fork-prereq-run
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assert privileged prerequisites are ready
+        shell: bash
+        run: |
+          set -euo pipefail
+          result="${{ needs.wait-fork-prereq-run.result }}"
+          if [[ "${result}" != "success" && "${result}" != "skipped" ]]; then
+            echo "Fork prerequisites are not ready. wait-fork-prereq-run=${result}" >&2
+            exit 1
+          fi
+          echo "Fork prerequisites are ready."
+
   # Security Checks
   security-codeql:
     uses: ./.github/workflows/security-codeql.yml
@@ -55,12 +96,11 @@ jobs:
 
   # Build Docker Images 
   build-ci-images:
+    needs: fork-prereqs-ready
     uses: ./.github/workflows/build-ci-images.yml
     with:
       distros: "arch debian ubuntu fedora centos"
       concurrency_channel: ci-orchestrator-build-consumer
-      image_wait_attempts: ${{ inputs.image_wait_attempts }}
-      image_wait_sleep_seconds: ${{ inputs.image_wait_sleep_seconds }}
     secrets: inherit
 
   # Code Testing

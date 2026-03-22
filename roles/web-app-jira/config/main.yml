@@ -21,6 +21,7 @@ compose:
       image:            atlassian/jira-software
       version:          latest
       name:             jira
+      min_storage:      "20GB"
       cpus:             "2.0"
       mem_reservation:  "4g"
       mem_limit:        "6g"

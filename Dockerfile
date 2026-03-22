@@ -18,13 +18,13 @@ ENV PYTHON="/opt/venvs/infinito/bin/python"
 ENV PIP="/opt/venvs/infinito/bin/python -m pip"
 ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
-RUN cat /etc/os-release || true
-
 # Make Nix non-interactive for flake config (CI-friendly)
-RUN if [ -f /etc/nix/nix.conf ]; then \
-      grep -q '^accept-flake-config *= *true' /etc/nix/nix.conf || \
-      echo 'accept-flake-config = true' >> /etc/nix/nix.conf; \
-    fi
+RUN set -euo pipefail; \
+  cat /etc/os-release || true; \
+  if [ -f /etc/nix/nix.conf ]; then \
+    grep -q '^accept-flake-config *= *true' /etc/nix/nix.conf || \
+    echo 'accept-flake-config = true' >> /etc/nix/nix.conf; \
+  fi
 
 # ------------------------------------------------------------
 # Infinito.Nexus source in
@@ -60,20 +60,14 @@ ENV container=docker
 STOPSIGNAL SIGRTMIN+3
 
 # ------------------------------------------------------------
-# Install infinito via pkgmgr (shallow)
+# Install infinito via pkgmgr (shallow) and override it with local source
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
   export NIX_CONFIG="${NIX_CONFIG:-}"; \
   echo "[docker-infinito] Install Infinito.Nexus via pkgmgr"; \
   pkgmgr install infinito --clone-mode shallow; \
   echo "[docker-infinito] Installed Infinito.Nexus Version:"; \
-  pkgmgr version infinito
-
-# ------------------------------------------------------------
-# Override with local source (during build)
-# ------------------------------------------------------------
-RUN set -euo pipefail; \
-  export NIX_CONFIG="${NIX_CONFIG:-}"; \
+  pkgmgr version infinito; \
   INFINITO_COMPILE=1 /opt/src/infinito/scripts/docker/entry.sh true
 
 # Set workdir to / to avoid ambiguous commands
@@ -97,5 +91,6 @@ CMD ["/sbin/init"]
 FROM full AS slim
 
 # Image cleanup (reduce final size)
-RUN test -x /usr/local/bin/slim.sh || (echo "slim.sh missing in base image" >&2; exit 1)
-RUN /usr/local/bin/slim.sh
+RUN set -eu; \
+  test -x /usr/local/bin/slim.sh || { echo "slim.sh missing in base image" >&2; exit 1; }; \
+  /usr/local/bin/slim.sh

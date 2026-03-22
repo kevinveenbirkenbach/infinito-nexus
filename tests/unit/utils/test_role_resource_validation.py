@@ -121,7 +121,7 @@ compose:
             str((self.roles_root / "web-app-does-not-exist").resolve()), err.getvalue()
         )
 
-    def test_missing_config_file_emits_warning(self) -> None:
+    def test_missing_config_file_skips_silently(self) -> None:
         # Role dir exists but config missing
         role_dir = self.roles_root / "web-app-demo"
         role_dir.mkdir(parents=True, exist_ok=True)
@@ -139,7 +139,56 @@ compose:
             )
 
         self.assertEqual(kept, [])
-        self.assertIn("Missing config file:", err.getvalue())
+        self.assertEqual(err.getvalue(), "")
+
+    def test_missing_compose_service_entry_keeps_role_without_warning(self) -> None:
+        self._write_role_config(
+            "web-app-demo",
+            yaml_text="""
+compose:
+  services:
+    other: {}
+""".lstrip(),
+        )
+
+        err = io.StringIO()
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
+        ):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="1G",
+                emit_warnings=True,
+            )
+
+        self.assertEqual(kept, ["web-app-demo"])
+        self.assertEqual(err.getvalue(), "")
+
+    def test_missing_compose_section_keeps_role_without_warning(self) -> None:
+        self._write_role_config(
+            "web-app-demo",
+            yaml_text="""
+server:
+  domains: {}
+""".lstrip(),
+        )
+
+        err = io.StringIO()
+        with (
+            redirect_stderr(err),
+            patch.object(rrv, "_roles_root", return_value=self.roles_root),
+            patch.object(rrv, "get_entity_name", return_value="demo"),
+        ):
+            kept = rrv.filter_roles_by_min_storage(
+                role_names=["web-app-demo"],
+                required_storage="1G",
+                emit_warnings=True,
+            )
+
+        self.assertEqual(kept, ["web-app-demo"])
+        self.assertEqual(err.getvalue(), "")
 
     def test_invalid_yaml_emits_warning(self) -> None:
         self._write_role_config("web-app-demo", yaml_text=": this is not yaml")

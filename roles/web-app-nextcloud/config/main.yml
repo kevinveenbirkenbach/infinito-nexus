@@ -76,6 +76,7 @@ compose:
       name:                 "nextcloud"
       image:                "nextcloud"
       version:              "production-fpm-alpine"
+      min_storage:          "20GB"
       backup:
         no_stop_required:   true
       cpus:                 "2.0"
