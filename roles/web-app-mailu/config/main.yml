@@ -38,6 +38,7 @@ compose:
     mailu:
       version:            "2024.06"
       name:               mailu
+      min_storage:        "20GB"
     redis:
       backup:
         disabled: true
