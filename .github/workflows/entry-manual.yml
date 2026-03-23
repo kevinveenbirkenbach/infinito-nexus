@@ -1,5 +1,9 @@
 name: CI (Manual)
 
+concurrency:
+  group: global-ci-${{ github.repository }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
     inputs:
