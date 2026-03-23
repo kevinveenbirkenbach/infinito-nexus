@@ -12,16 +12,81 @@
   until: openproject_web_state.stdout.strip() == "running"
   changed_when: false
 
-- name: Run database migrations
-  shell: >
-    {{ BIN_COMPOSE }} exec {{ OPENPROJECT_WEB_SERVICE }} bash -lc
-    "cd /app && bin/rails db:migrate RAILS_ENV=production"
-  args:
-    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  register: openproject_migrate
-  retries: 30
-  delay: 10
-  until: openproject_migrate.rc == 0
+- name: Run database migrations (with diagnostics)
+  block:
+    - name: Temporarily stop OpenProject worker/cron during migrations
+      shell: >
+        {{ BIN_COMPOSE }} stop worker cron
+      args:
+        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+      register: openproject_stop_aux
+      changed_when: false
+      failed_when: false
+
+    - name: Run database migrations
+      shell: >
+        {{ BIN_COMPOSE }} exec -T {{ OPENPROJECT_WEB_SERVICE }} bash -lc
+        "cd /app && RAILS_ENV=production bin/rails db:migrate"
+      args:
+        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+      register: openproject_migrate
+      retries: 30
+      delay: 10
+      until: openproject_migrate.rc == 0
+  rescue:
+    - name: Collect OpenProject status after migration failure
+      shell: >
+        {{ BIN_COMPOSE }} ps
+      args:
+        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+      register: openproject_migrate_ps
+      changed_when: false
+      failed_when: false
+
+    - name: Collect OpenProject web container state after migration failure
+      shell: >
+        container inspect -f
+        'status={{"{{"}}.State.Status{{"}}"}} exit={{"{{"}}.State.ExitCode{{"}}"}} oom={{"{{"}}.State.OOMKilled{{"}}"}} error={{"{{"}}.State.Error{{"}}"}}'
+        {{ OPENPROJECT_WEB_CONTAINER }}
+      args:
+        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+      register: openproject_migrate_container_state
+      changed_when: false
+      failed_when: false
+
+    - name: Collect OpenProject logs after migration failure
+      shell: >
+        {{ BIN_COMPOSE }} logs --tail=300
+      args:
+        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+      register: openproject_migrate_logs
+      changed_when: false
+      failed_when: false
+
+    - name: Abort with OpenProject migration diagnostics
+      fail:
+        msg: |-
+          OpenProject migrations failed after retries.
+          Last migration rc: {{ openproject_migrate.rc | default('unknown') }}
+
+          compose ps:
+          {{ openproject_migrate_ps.stdout | default('<no output>') }}
+
+          web container state:
+          {{ openproject_migrate_container_state.stdout | default('<no output>') }}
+
+          compose logs (tail 300):
+          {{ openproject_migrate_logs.stdout | default('<no output>') }}
+          {{ openproject_migrate_logs.stderr | default('') }}
+  always:
+    - name: Ensure OpenProject worker/cron are running after migrations
+      shell: >
+        {{ BIN_COMPOSE }} up -d worker cron
+      args:
+        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+      register: openproject_start_aux
+      changed_when: false
+      failed_when: false
 
 - name: Wait until OpenProject web container is running (after migrations)
   shell: >
