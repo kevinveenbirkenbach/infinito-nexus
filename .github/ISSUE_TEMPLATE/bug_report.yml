@@ -1,0 +1,99 @@
+name: 🐞 Bug Report (CI/CD or Application)
+description: Report a bug discovered during development or CI/CD runs
+title: "[Bug]: "
+labels: ["bug"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug 🙏  
+        Please provide as much detail as possible to help us debug efficiently.
+
+  - type: checkboxes
+    id: precheck
+    attributes:
+      label: ✅ Pre-Checks
+      options:
+        - label: I have verified that this issue is not caused by my current branch
+          required: true
+        - label: I have followed the CI/CD debugging guide (https://s.infinito.nexus/debbuging)
+          required: true
+
+  - type: checkboxes
+    id: context
+    attributes:
+      label: 🔍 Context
+      options:
+        - label: This issue was discovered during a CI/CD run
+        - label: This issue occurs on a live system
+        - label: This issue is reproducible locally
+
+  - type: input
+    id: version
+    attributes:
+      label: 🧾 Infinito.Nexus Version / Commit
+      description: Specify the deployed version, tag, or commit hash
+      placeholder: e.g. v1.2.3 or a1b2c3d4
+
+  - type: input
+    id: branch
+    attributes:
+      label: 🌿 Affected Branch
+      description: Which branch did this occur on?
+      placeholder: e.g. feature/openproject-fix
+
+  - type: input
+    id: app
+    attributes:
+      label: 📦 Affected App / Role
+      description: Which app or role is affected?
+      placeholder: e.g. web-app-openproject
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 🧩 Description
+      description: What happened?
+      placeholder: Describe the issue clearly and concisely
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: ✅ Expected Behavior
+      description: What should have happened?
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📄 Logs (job-logs.txt)
+      description: |
+        Paste relevant parts of the logs or attach the full job-logs.txt file.
+        Export logs via "View raw logs" in GitHub Actions.
+      placeholder: Paste logs here or attach file
+
+  - type: checkboxes
+    id: ci_flag
+    attributes:
+      label: ⚙️ CI/CD Metadata
+      options:
+        - label: explored during CI/CD run
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 🔁 Steps to Reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1. Run workflow...
+        2. Deploy app...
+        3. Observe error...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 💬 Additional Context
+      description: Add any other context, screenshots, or links
