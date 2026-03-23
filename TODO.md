@@ -5,6 +5,6 @@
 -. backup docker to local für ca optimieren
 
 # Testing
-- re-run witrh different credentials/configuration
+- re-run with different credentials/configuration
 - run over all distros for each app
-- msg: can not use content with a dir as dest[0m for NGINX multi distro
+- msg: can not use content with a dir as dest for NGINX multi distro

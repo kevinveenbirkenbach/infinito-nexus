@@ -1,0 +1,121 @@
+name: ✨ Feature Request (App / Integration)
+description: Propose a new app, integration, or enhancement for Infinito.Nexus
+title: "[Feature]: "
+labels: ["enhancement"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your idea 💡  
+        Please describe the feature clearly so we can evaluate its value and feasibility.
+
+  - type: checkboxes
+    id: precheck
+    attributes:
+      label: ✅ Pre-Checks
+      options:
+        - label: I have checked that this feature does not already exist
+          required: true
+        - label: I have verified that no similar request already exists
+          required: true
+
+  - type: input
+    id: app_name
+    attributes:
+      label: 📦 App / Integration Name
+      description: Name of the application or feature
+      placeholder: e.g. Nextcloud, Outline, Matrix
+
+  - type: input
+    id: category
+    attributes:
+      label: 🗂️ Category
+      description: Where does this fit in Infinito.Nexus?
+      placeholder: e.g. Project Management, Communication, IAM
+
+  - type: input
+    id: upstream
+    attributes:
+      label: 🌍 Upstream / Open Source Project
+      description: Link to the original project (GitHub, website, etc.)
+      placeholder: https://github.com/...
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 🧩 Feature Description
+      description: What should be implemented?
+      placeholder: Describe the app or feature and its purpose
+    validations:
+      required: true
+
+  - type: textarea
+    id: business_value
+    attributes:
+      label: 💼 Business Value
+      description: Why is this important?
+      placeholder: |
+        - What problem does it solve?
+        - Who benefits from it?
+        - Why should this be prioritized?
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: 🎯 Use Case(s)
+      description: Describe concrete real-world usage scenarios
+      placeholder: |
+        - Scenario 1...
+        - Scenario 2...
+
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: ⚙️ Technical Notes (Optional)
+      description: |
+        Any implementation hints?
+        (Docker image, dependencies, OIDC support, LDAP, etc.)
+      placeholder: |
+        - Docker image:
+        - Requires database:
+        - Supports OIDC/LDAP:
+        - Special requirements:
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternatives Considered
+      description: Are there similar tools or existing solutions?
+      placeholder: |
+        - Alternative 1...
+        - Why not sufficient?
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚦 Priority
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribution
+      options:
+        - label: I am willing to implement this feature in my fork and open a PR
+        - label: I can help with testing
+        - label: I can provide documentation
+        - label: I am willing to pay for the implementation of this feature
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 💬 Additional Context
+      description: Add anything else relevant (screenshots, links, comparisons)
