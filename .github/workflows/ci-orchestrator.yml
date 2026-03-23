@@ -35,17 +35,25 @@ permissions:
 
 jobs:
   wait-fork-prereq-run:
-    name: ⏳ Wait for fork prerequisite run
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+    name: ⏳ Wait for fork run
     runs-on: ubuntu-latest
     steps:
+      - name: Mark fork prerequisites as ready outside fork PRs
+        if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Fork prerequisites are implicitly ready outside fork pull_request events."
+
       - name: Checkout trusted workflow repo (helpers)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
 
       - name: Wait for privileged pull_request_target run
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
