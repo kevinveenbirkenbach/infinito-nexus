@@ -34,10 +34,6 @@ Your OIDC-authenticated user is now a full **global admin** and has access to al
 > 💡 Tip: This method is useful when you're using federated login and want to avoid managing separate local admin credentials.
 
 
-Klar! Hier ist die Anleitung zur Änderung der primären Domain eines Mailu-Benutzers, speziell für **MariaDB** als Datenbank-Backend, auf **Englisch** und im gleichen Stil wie deine Doku:
-
----
-
 ## Changing the Primary Domain of a Mailu Account (MariaDB) 🌐
 
 Mailu links user accounts to specific domains, so changing a user's primary domain cannot be done via the admin interface. You need to update it manually via the database.
@@ -102,7 +98,3 @@ Ensure that the new domain is correctly set up:
 - If using Let's Encrypt (`TLS_FLAVOR=cert`), make sure the domain is included in `LETSENCRYPT_HOSTS`
 
 > 💡 **Tip:** Mailu must be aware of the domain both in its configuration and the database for mail routing and certificate issuance to work correctly.
-
----
-
-Wenn du willst, kann ich dir das gleich in eine fertige Markdown-Datei oder ein Doku-Format einfügen.
