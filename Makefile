@@ -103,7 +103,10 @@ build: dockerignore
 build-missing:
 	@bash scripts/image/build.sh --missing
 
-build-no-cache:
+build-dependency:
+	@docker pull ghcr.io/kevinveenbirkenbach/pkgmgr-$${INFINITO_DISTRO}:stable
+
+build-no-cache: build-dependency
 	@bash scripts/image/build.sh --no-cache
 
 build-no-cache-all:
