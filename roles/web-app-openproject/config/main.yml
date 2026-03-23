@@ -39,8 +39,8 @@ compose:
       backup:
         no_stop_required: true
       cpus:               "3.0"
-      mem_reservation:    "3g"
-      mem_limit:          "4g"
+      mem_reservation:    "4g"
+      mem_limit:          "6g"
       pids_limit:         2048
     seeder:
       name:               openproject-seeder
@@ -57,8 +57,8 @@ compose:
     worker:
       name:               openproject-worker
       cpus:               "2.0"
-      mem_reservation:    "2g"
-      mem_limit:          "3g"
+      mem_reservation:    "3g"
+      mem_limit:          "4g"
       pids_limit:         2048
     proxy:
       name:               openproject-proxy
