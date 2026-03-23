@@ -7,14 +7,20 @@ FROM {{ OPENPROJECT_IMAGE }}:{{ OPENPROJECT_VERSION }}
 
 COPY volumes/plugins/Gemfile.plugins /app/
 
-# Work around sporadic autoload failures for this constant during db:migrate.
+# Work around sporadic autoload failures for these constants during db:migrate.
+# Keep this in the same build step as bundle/install + asset setup to reduce layers.
 RUN f=/app/app/models/queries/projects/filters/custom_field_filter.rb; g=/app/app/models/queries/projects/filters/custom_field_context.rb; \
     if [ -f "$f" ] && [ -f "$g" ] && ! grep -q "require_relative 'custom_field_context'" "$f"; then \
       sed -i "1irequire_relative 'custom_field_context'" "$f"; \
-    fi
+    fi; \
+    f=/app/app/models/queries/projects.rb; g=/app/app/models/queries/projects/filters/project_phase_filter.rb; \
+    if [ -f "$f" ] && [ -f "$g" ] && ! grep -q "require_relative 'projects/filters/project_phase_filter'" "$f"; then \
+      sed -i "1irequire_relative 'projects/filters/project_phase_filter'" "$f"; \
+    fi; \
+    bundle config unset deployment; \
+    bundle install; \
+    bundle config set deployment 'true'; \
+    ./docker/prod/setup/precompile-assets.sh
 
 # If the plugin uses any external NPM dependencies you have to install them here.
 # RUN npm add npm <package-name>*
-
-RUN bundle config unset deployment && bundle install && bundle config set deployment 'true'
-RUN ./docker/prod/setup/precompile-assets.sh
