@@ -41,7 +41,7 @@ WHITELIST_PATH_FRAGMENTS: Tuple[str, ...] = (
     "/node_modules/",
     "/dist/",
     "/build/",
-    ".github/workflows/",
+    "/.github/",
     "/scripts/",
     "/.tox/",
     "/cli/",
