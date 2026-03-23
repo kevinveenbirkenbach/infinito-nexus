@@ -4,7 +4,7 @@
 
 [Taiga](https://www.taiga.io/) is a powerful and intuitive open-source project management platform tailored for agile teams. Whether you're practicing Scrum, Kanban, or a custom hybrid workflow, Taiga offers a rich, customizable environment to plan, track, and collaborate on your projects — without the complexity of enterprise tools or the vendor lock-in of SaaS platforms.
 
-This Ansible role deploys Taiga in a Docker-based environment, allowing fast, reproducible, and secure installations. It also optionally integrates [OpenID Connect (OIDC)](https://openid.net/connect/) for single sign-on via providers like Keycloak.
+This Ansible role deploys Taiga in a Docker-based environment, allowing fast, reproducible, and secure installations. Authentication is handled via [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) in front of Taiga, delegating identity management to Keycloak which federates users from OpenLDAP.
 
 ---
 
@@ -34,9 +34,9 @@ By using this role, teams can set up Taiga in minutes on Arch Linux systems — 
 ## Features
 
 - 🐳 **Docker-Based Deployment:** Easy containerized setup of backend, frontend, async workers, and events service.
-- 🔐 **OIDC (Single Sign-On):** Supported via:
-    - [taiga-contrib-openid-auth (robrotheram)](https://github.com/robrotheram/taiga-contrib-openid-auth)
-    - [taiga-contrib-oidc-auth (official)](https://github.com/taigaio/taiga-contrib-oidc-auth)
+- 🔐 **OAuth2 Proxy (access guard):** [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/) sits in front of Taiga and enforces Keycloak authentication before any request reaches the application.
+- 🔑 **LDAP direct login (Option A, default off):** [`taiga-contrib-ldap-auth-ext`](https://github.com/Monogramm/taiga-contrib-ldap-auth-ext) enables users to log into Taiga directly with their LDAP credentials via the Taiga login form. Settings are appended to `config.py` at container startup.
+- 🔑 **OIDC login via Keycloak (Option B, default on):** [`taiga-contrib-oidc-auth`](https://github.com/taigaio/taiga-contrib-oidc-auth) enables SSO via Keycloak → LDAP. **Note:** The OIDC plugin is not published on PyPI and requires a custom `taiga-front` image with the frontend plugin built in (CoffeeScript/Gulp). Without the custom frontend image the SSO button will not appear in the UI.
 - 📨 **Email Backend:** Supports SMTP and console backends for development.
 - 🔁 **Async & Realtime Events:** Includes RabbitMQ and support for Taiga’s event system.
 - 🌐 **Reverse Proxy Ready:** Integrates with NGINX using the `sys-stk-front-proxy` role.

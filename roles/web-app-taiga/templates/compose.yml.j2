@@ -16,9 +16,11 @@
       # These volumens will be used by taiga-back and taiga-async.
       - static-data:{{ TAIGA_VOLUME_STATIC }}
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
-      # - ./config.py:/taiga-back/settings/config.py
-{% if TAIGA_TAIGAIO_ENABLED | bool %}
-      - {{ [lookup('container', application_id, 'directories.config'),'taiga-local.py' ] | path_join }}:/taiga-back/settings/local.py:ro
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+      - {{ [lookup('container', application_id, 'directories.config'), 'taiga-config.append.py'] | path_join }}:/taiga-back/settings/config.append.py:ro
+{% endif %}
+{% if TAIGA_OIDC_ENABLED | bool %}
+      - {{ [lookup('container', application_id, 'directories.config'), 'taiga-urls.py'] | path_join }}:/taiga-back/settings/urls.py:ro
 {% endif %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
@@ -27,11 +29,12 @@
         condition: service_started
       {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
         condition: service_started
-{% if TAIGA_TAIGAIO_ENABLED | bool %}
+{% if TAIGA_PLUGINS_ENABLED | bool %}
     command: >
       /bin/sh -c "
-        pip install taiga-contrib-oidc-auth &&
-        /taiga-back/docker/entrypoint.sh"
+        pip install{% if TAIGA_OIDC_ENABLED | bool %} mozilla-django-oidc git+https://github.com/taigaio/taiga-contrib-oidc-auth.git{% endif %}{% if TAIGA_LDAP_ENABLED | bool %} taiga-contrib-ldap-auth-ext{% endif %} &&
+        cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py &&
+        exec /taiga-back/docker/entrypoint.sh"
 {% endif %}
 
 {% set service_name = TAIGA_ASYNC_SERVICE %}
@@ -45,16 +48,24 @@
       retries: 5
       start_period: 60s
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      pip install{% if TAIGA_OIDC_ENABLED | bool %} mozilla-django-oidc git+https://github.com/taigaio/taiga-contrib-oidc-auth.git{% endif %}{% if TAIGA_LDAP_ENABLED | bool %} taiga-contrib-ldap-auth-ext{% endif %} &&
+      cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py &&
+      exec /taiga-back/docker/async_entrypoint.sh
+{% else %}
     entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
+{% endif %}
     volumes:
       # These volumens will be used by backend and async service
       - static-data:{{ TAIGA_VOLUME_STATIC }}
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
-      # - ./config.py:/taiga-back/settings/config.py
-{% if TAIGA_TAIGAIO_ENABLED | bool %}
-{% for item in TAIGA_SETTING_FILES %}
-      - {{ lookup('container', application_id, 'directories.config') }}taiga-{{ item }}.py:/taiga-back/settings/{{ item }}.py:ro
-{% endfor %}
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+      - {{ [lookup('container', application_id, 'directories.config'), 'taiga-config.append.py'] | path_join }}:/taiga-back/settings/config.append.py:ro
+{% endif %}
+{% if TAIGA_OIDC_ENABLED | bool %}
+      - {{ [lookup('container', application_id, 'directories.config'), 'taiga-urls.py'] | path_join }}:/taiga-back/settings/urls.py:ro
 {% endif %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
@@ -63,12 +74,6 @@
         condition: service_started
       {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
         condition: service_started
-{% if TAIGA_TAIGAIO_ENABLED | bool %}
-    command: >
-      /bin/sh -c "
-        pip install taiga-contrib-oidc-auth &&
-        /taiga-back/docker/entrypoint.sh"
-{% endif %}
 
 {% set service_name = TAIGA_ASYNC_RABBITMQ_SERVICE %}
   {{ service_name }}:
@@ -91,7 +96,15 @@
 {% set container_port = 80 %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-    image: "{{TAIGA_DOCKER_IMAGE_FRONTEND}}:{{ TAIGA_VERSION }}"
+{% if TAIGA_OIDC_ENABLED | bool %}
+    build:
+      context: "{{ docker_repository_path }}"
+      dockerfile: Dockerfile.taiga-front
+    image: "{{ TAIGA_DOCKER_IMAGE_FRONTEND_OIDC }}"
+    pull_policy: never
+{% else %}
+    image: "{{ TAIGA_DOCKER_IMAGE_FRONTEND }}:{{ TAIGA_VERSION }}"
+{% endif %}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 {% filter indent(4) %}
     {% include 'roles/sys-svc-container/templates/healthcheck/http.yml.j2' %}
@@ -99,8 +112,10 @@
 
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
-#    volumes:
-#      - {{ TAIGA_FRONTEND_CONF_PATH }}:/usr/share/nginx/html/conf.json:ro
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+    volumes:
+      - {{ TAIGA_FRONTEND_CONF_PATH }}:/usr/share/nginx/html/conf.json:ro
+{% endif %}
 
 {% set service_name = TAIGA_EVENTS_SERVICE %}
   {{ service_name }}:

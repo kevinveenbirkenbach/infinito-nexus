@@ -1,0 +1,23 @@
+# ── Stage 1: Build taiga-contrib-oidc-auth frontend plugin ───────────────────
+# Node 16 matches .nvmrc of taiga-contrib-oidc-auth
+FROM node:16-alpine AS plugin-builder
+
+RUN apk add --no-cache git
+
+WORKDIR /build
+RUN git clone --depth=1 https://github.com/taigaio/taiga-contrib-oidc-auth.git .
+
+WORKDIR /build/front
+RUN npm install
+
+# Compile Jade templates → dist/oidc_auth.html
+# Compile CoffeeScript + HTML → dist/oidc_auth.js
+RUN npm run build
+
+# oidc-auth.json (plugin manifest) is not copied by the npm build scripts
+RUN cp oidc-auth.json dist/
+
+# ── Stage 2: Inject plugin into official taiga-front image ───────────────────
+FROM taigaio/taiga-front:{{ TAIGA_VERSION }}
+
+COPY --from=plugin-builder /build/front/dist/ /usr/share/nginx/html/plugins/oidc-auth/
