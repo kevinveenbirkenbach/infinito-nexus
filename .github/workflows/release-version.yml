@@ -40,6 +40,7 @@ jobs:
       repo_prefix: ${{ steps.vars.outputs.repo_prefix }}
       owner: ${{ steps.vars.outputs.owner }}
       version_tag: ${{ steps.vars.outputs.version_tag }}
+      publish_latest: ${{ steps.highest.outputs.publish_latest }}
     steps:
       - name: Checkout trusted workflow repo (helpers)
         uses: actions/checkout@v6
@@ -86,6 +87,14 @@ jobs:
           set -euo pipefail
           sha="$(git -C _src rev-parse HEAD)"
           echo "ci_tag=ci-${sha}" >> "$GITHUB_OUTPUT"
+
+      - name: Decide whether this version should update latest
+        id: highest
+        shell: bash
+        env:
+          REPOSITORY_DIR: _src
+          VERSION_TAG: ${{ steps.vars.outputs.version_tag }}
+        run: _helpers/scripts/meta/resolve/publish_latest.sh
 
       - name: Login to GHCR (manifest checks)
         uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
@@ -138,6 +147,7 @@ jobs:
       REPO_PREFIX: ${{ needs.check-ci-images.outputs.repo_prefix }}
       DISTROS: ${{ needs.check-ci-images.outputs.distros }}
       CI_TAG: ${{ needs.check-ci-images.outputs.ci_tag }}
+      PUBLISH_LATEST: ${{ needs.check-ci-images.outputs.publish_latest }}
 
     steps:
       - name: Checkout trusted workflow repo (helpers)
@@ -156,6 +166,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Retag CI images to version/latest (no rebuild)
+      - name: Retag CI images to release tags (and latest for the highest version)
         shell: bash
         run: scripts/image/release.sh

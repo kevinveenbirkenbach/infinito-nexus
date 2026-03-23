@@ -10,7 +10,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OWNER="$("${script_dir}/../repository/owner.sh")"
 REPO_PREFIX="${REPO_PREFIX,,}"
 
-mapfile -t tags < <(git tag -l 'v*' | sort -V)
+mapfile -t tags < <("${script_dir}/../version_tags.sh")
 
 if [[ ${#tags[@]} -eq 0 ]]; then
   exit 0
