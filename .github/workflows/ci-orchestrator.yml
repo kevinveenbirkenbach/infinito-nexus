@@ -52,7 +52,15 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
 
-      - name: Wait for privileged pull_request_target run
+      - name: Login to GHCR for CI image checks
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for privileged fork CI images
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         shell: bash
         env:
@@ -60,10 +68,13 @@ jobs:
           WORKFLOW_FILE: entry-pull-request.yml
           TARGET_EVENT: pull_request_target
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_UPDATED_AT: ${{ github.event.pull_request.updated_at }}
+          DISTROS: "arch debian ubuntu fedora centos"
+          IMAGE_TAG: ci-${{ github.sha }}
           WAIT_ATTEMPTS: ${{ inputs.image_wait_attempts }}
           WAIT_SLEEP_SECONDS: ${{ inputs.image_wait_sleep_seconds }}
-        run: ./scripts/meta/wait/workflow_run.sh
+        run: ./scripts/meta/wait/images.sh
 
   fork-prereqs-ready:
     name: 🚦 Gate fork prerequisites
