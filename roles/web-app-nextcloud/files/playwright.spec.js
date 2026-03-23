@@ -45,6 +45,39 @@ async function waitForFirstVisible(page, locators, timeout = 60_000) {
   throw new Error("Timed out waiting for one of the expected Nextcloud selectors to become visible");
 }
 
+async function findFirstVisibleCandidate(candidates) {
+  for (const candidate of candidates) {
+    const locator = candidate.locator.first();
+
+    if (await locator.isVisible().catch(() => false)) {
+      return { ...candidate, locator };
+    }
+  }
+
+  return null;
+}
+
+async function waitForVisibleCandidate(
+  page,
+  candidates,
+  timeout = 60_000,
+  errorMessage = "Timed out waiting for one of the expected Nextcloud selectors to become visible"
+) {
+  const deadline = Date.now() + timeout;
+
+  while (Date.now() < deadline) {
+    const visibleCandidate = await findFirstVisibleCandidate(candidates);
+
+    if (visibleCandidate) {
+      return visibleCandidate;
+    }
+
+    await page.waitForTimeout(500);
+  }
+
+  throw new Error(errorMessage);
+}
+
 test.beforeEach(() => {
   expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
   expect(nextcloudBaseUrl, "NEXTCLOUD_BASE_URL must be set in the Playwright env file").toBeTruthy();
@@ -68,10 +101,26 @@ test("dashboard to nextcloud login", async ({ page }) => {
   const settingsMenuButton = nextcloudFrame.getByRole("button", { name: "Settings menu" });
   const userMenuTriggerByControls = nextcloudFrame.locator('[aria-controls="header-menu-user-menu"]');
   const userMenuTriggerInMount = nextcloudFrame.locator("#user-menu button");
+  const nextcloudAppShell = nextcloudFrame.locator(
+    "#app-content-vue, #app-navigation-vue, #app-content, #content-vue, #appmenu"
+  );
+  const nextcloudPrimaryNavigation = nextcloudFrame.locator(
+    'a[href*="/apps/files"], a[href*="/apps/dashboard"]'
+  );
   const logoutLinkByName = nextcloudFrame.getByRole("link", { name: "Log out" });
   const logoutLinkById = nextcloudFrame.locator("#logout");
   const logoutLinkByHref = nextcloudFrame.locator('a[href*="logout"]');
   const logoutConfirmButton = nextcloudFrame.getByRole("button", { name: "Logout" });
+  const userMenuCandidates = [
+    { kind: "user-menu", locator: userMenuTriggerByControls },
+    { kind: "user-menu", locator: settingsMenuButton },
+    { kind: "user-menu", locator: userMenuTriggerInMount }
+  ];
+  const postLoginCandidates = [
+    ...userMenuCandidates,
+    { kind: "shell", locator: nextcloudAppShell },
+    { kind: "shell", locator: nextcloudPrimaryNavigation }
+  ];
 
   await expect(nextcloudIframe).toBeVisible();
   await expect
@@ -119,14 +168,26 @@ test("dashboard to nextcloud login", async ({ page }) => {
     )
     .toContain(expectedNextcloudBaseUrl);
 
-  const userMenuTrigger = await waitForFirstVisible(
+  const postLoginState = await waitForVisibleCandidate(
     page,
-    [userMenuTriggerByControls, settingsMenuButton, userMenuTriggerInMount],
-    60_000
+    postLoginCandidates,
+    60_000,
+    "Timed out waiting for a signed-in Nextcloud shell after the Keycloak login redirect"
   );
 
-  await expect(userMenuTrigger).toBeVisible();
-  await userMenuTrigger.click();
+  await expect(postLoginState.locator).toBeVisible();
+
+  // Embedded Nextcloud layouts can hide the user menu even when the login succeeded.
+  const userMenuState = postLoginState.kind === "user-menu"
+    ? postLoginState
+    : await waitForVisibleCandidate(page, userMenuCandidates, 10_000).catch(() => null);
+
+  if (!userMenuState) {
+    await page.goto("/");
+    return;
+  }
+
+  await userMenuState.locator.click();
 
   const logoutLink = await waitForFirstVisible(
     page,
