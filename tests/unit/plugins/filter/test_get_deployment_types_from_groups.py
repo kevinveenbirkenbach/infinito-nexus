@@ -30,7 +30,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             "update",
         ]
 
-    @patch("module_utils.invokable._get_invokable_paths")
+    @patch("utils.invokable._get_invokable_paths")
     def test_exact_types(self, mock_get_invokable_paths) -> None:
         mock_get_invokable_paths.return_value = self._mock_invokable_paths()
 
@@ -44,7 +44,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             ["server", "workstation"],
         )
 
-    @patch("module_utils.invokable._get_invokable_paths")
+    @patch("utils.invokable._get_invokable_paths")
     def test_prefix_matches(self, mock_get_invokable_paths) -> None:
         mock_get_invokable_paths.return_value = self._mock_invokable_paths()
 
@@ -58,7 +58,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             ["server", "workstation"],
         )
 
-    @patch("module_utils.invokable._get_invokable_paths")
+    @patch("utils.invokable._get_invokable_paths")
     def test_universal_only(self, mock_get_invokable_paths) -> None:
         mock_get_invokable_paths.return_value = self._mock_invokable_paths()
 
@@ -68,7 +68,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             ["universal"],
         )
 
-    @patch("module_utils.invokable._get_invokable_paths")
+    @patch("utils.invokable._get_invokable_paths")
     def test_universal_mixed_with_server(self, mock_get_invokable_paths) -> None:
         mock_get_invokable_paths.return_value = self._mock_invokable_paths()
 
@@ -83,7 +83,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             ["server", "universal"],
         )
 
-    @patch("module_utils.invokable._get_invokable_paths")
+    @patch("utils.invokable._get_invokable_paths")
     def test_non_invokable_groups_are_ignored(self, mock_get_invokable_paths) -> None:
         mock_get_invokable_paths.return_value = self._mock_invokable_paths()
 
@@ -94,7 +94,7 @@ class TestGetDeploymentTypesFromGroups(unittest.TestCase):
             [],
         )
 
-    @patch("module_utils.invokable._get_invokable_paths")
+    @patch("utils.invokable._get_invokable_paths")
     def test_empty_input(self, mock_get_invokable_paths) -> None:
         mock_get_invokable_paths.return_value = self._mock_invokable_paths()
         self.assertEqual(get_deployment_types_from_groups([]), [])

@@ -33,15 +33,15 @@ backup="${hba_file}.bak_ansible_pwcheck_$$"
 # Backup hba
 container exec "$container" bash -lc "cp -a \"$hba_file\" \"$backup\""
 
-# shellcheck disable=SC2329
+# shellcheck disable=SC2329,SC2317
 restore_hba() {
   # Restore on exit (best effort)
   container exec "$container" bash -lc "if [ -f \"$backup\" ]; then cp -a \"$backup\" \"$hba_file\" && rm -f \"$backup\"; fi" >/dev/null 2>&1 || true
   container exec "$container" bash -lc "psql -U postgres -d postgres -Atc 'SELECT pg_reload_conf();' >/dev/null 2>&1" || true
 }
 
-# Make ShellCheck see this as an invocation path
-trap 'restore_hba' EXIT
+# Register direct function trap so ShellCheck sees the invocation path.
+trap restore_hba EXIT
 
 # Force password auth for local TCP (127.0.0.1)
 # Prepend a strict rule so it matches first.

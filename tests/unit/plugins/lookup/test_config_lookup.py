@@ -9,7 +9,7 @@ import yaml
 from ansible.errors import AnsibleError
 
 from plugins.lookup.config import LookupModule
-from module_utils.config_utils import AppConfigKeyError, ConfigEntryNotSetError
+from utils.config_utils import AppConfigKeyError, ConfigEntryNotSetError
 
 
 def _write_schema(base_dir: Path, application_id: str, schema: dict) -> None:

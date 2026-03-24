@@ -14,9 +14,14 @@ jobs:
       - uses: actions/checkout@v6
       - name: Run ShellCheck (container)
         run: |
+          mapfile -d '' shell_files < <(find . -type f -name '*.sh' -print0)
+          if [ "${#shell_files[@]}" -eq 0 ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+
           docker run --rm \
             -v "$PWD:/mnt" \
             -w /mnt \
             koalaman/shellcheck:latest \
-            -x $(find . -type f -name '*.sh' -print)
-
+            -x "${shell_files[@]}"

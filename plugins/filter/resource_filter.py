@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from module_utils.config_utils import (
+from utils.config_utils import (
     get_app_conf,
     AppConfigKeyError,
     ConfigEntryNotSetError,
 )  # noqa: F401
-from module_utils.entity_name_utils import get_entity_name
+from utils.entity_name_utils import get_entity_name
 
 from ansible.errors import AnsibleFilterError
 

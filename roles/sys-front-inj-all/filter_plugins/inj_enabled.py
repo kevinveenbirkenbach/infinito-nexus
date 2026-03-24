@@ -1,11 +1,11 @@
 import os
 import sys
 
-from module_utils.config_utils import get_app_conf
+from utils.config_utils import get_app_conf
 
-# Allow imports from module_utils (same trick as your get_app_conf filter)
+# Allow imports from utils (same trick as your get_app_conf filter)
 _BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-_MODULE_UTILS_DIR = os.path.join(_BASE_DIR, "module_utils")
+_MODULE_UTILS_DIR = os.path.join(_BASE_DIR, "utils")
 for _p in (_BASE_DIR, _MODULE_UTILS_DIR):
     if _p not in sys.path:
         sys.path.insert(0, _p)
