@@ -43,9 +43,7 @@ wsl2-systemd-check:
 	@bash scripts/administration/systemd/enable/wsl2.sh
 
 wsl2-dns-setup:
-	@if grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then \
-		sudo bash scripts/administration/network/dns/setup/wsl.sh; \
-	fi
+	@sudo bash scripts/administration/network/dns/setup/wsl.sh
 
 wsl2-trust-windows:
 	@bash scripts/administration/tls/trust/wsl2.sh
