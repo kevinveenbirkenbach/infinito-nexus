@@ -12,11 +12,13 @@ CA_NAME="infinito-root-ca.crt"
 
 WIN_USER=""
 for _dir in /mnt/c/Users/*/; do
-	_name="${_dir%/}"; _name="${_name##*/}"
+	_name="${_dir%/}"
+	_name="${_name##*/}"
 	case "${_name}" in
-		"All Users"|"Default"|"Default User"|"Public"|"desktop.ini") continue ;;
+	"All Users" | "Default" | "Default User" | "Public" | "desktop.ini") continue ;;
 	esac
-	WIN_USER="${_name}"; break
+	WIN_USER="${_name}"
+	break
 done
 WIN_DOWNLOADS="/mnt/c/Users/${WIN_USER}/Downloads"
 WIN_CA_PATH="${WIN_DOWNLOADS}/${CA_NAME}"
@@ -64,10 +66,10 @@ MARKER='# infinito.example --- managed by infinito-nexus'
 	while IFS= read -r domain; do
 		[[ -z "${domain}" ]] && continue
 		printf '    $entries += "127.0.0.1 %s`r`n"\n' "${domain}"
-	done <<< "${DOMAINS}"
+	done <<<"${DOMAINS}"
 	printf '    Add-Content $hostsFile $entries\n'
 	printf '}\n'
-} > "${PS1_FILE}"
+} >"${PS1_FILE}"
 
 "${POWERSHELL}" -NonInteractive -Command "Start-Process powershell -Verb RunAs -Wait -ArgumentList '-NonInteractive -File ${PS1_FILE_WIN}'"
 
