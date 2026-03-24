@@ -1,0 +1,18 @@
+---
+- name: "load docker, db and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full
+  vars:
+    docker_compose_flush_handlers: true
+
+- name: "Wait for {{ application_id }} HTTP endpoint"
+  wait_for:
+    host: "{{ DOCKER_REACH_HOST }}"
+    port: "{{ ports.localhost.http[application_id] }}"
+    delay: 5
+    timeout: 300
+  when: FIDER_OIDC_ENABLED | bool
+
+- name: "Configure Keycloak OIDC provider for {{ application_id }}"
+  include_tasks: 01_setup.yml
+  when: FIDER_OIDC_ENABLED | bool
