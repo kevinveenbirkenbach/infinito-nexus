@@ -44,14 +44,14 @@ wsl2-systemd-check:
 
 wsl2-dns-setup:
 	@if grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then \
-		sudo bash scripts/administration/wsl2/setup-dns.sh; \
+		sudo bash scripts/administration/network/dns/setup/wsl.sh; \
 	fi
 
 wsl2-trust-windows:
 	@bash scripts/administration/wsl2/trust-ca-windows.sh
 
 dns-setup:
-	@bash scripts/administration/network/dns/setup.sh
+	@bash scripts/administration/network/dns/setup/linux.sh
 
 dns-remove:
 	@bash scripts/administration/network/dns/remove.sh
