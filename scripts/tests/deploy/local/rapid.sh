@@ -16,27 +16,27 @@ set -euo pipefail
 : "${INVENTORY_DIR:?INVENTORY_DIR is not set (e.g. INVENTORY_DIR=/etc/inventories/local-full-server)}"
 
 case "${TEST_DEPLOY_TYPE}" in
-  server|workstation|universal) ;;
-  *)
-    echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
-    echo "Allowed: server | workstation | universal" >&2
-    exit 2
-    ;;
+server | workstation | universal) ;;
+*)
+	echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+	echo "Allowed: server | workstation | universal" >&2
+	exit 2
+	;;
 esac
 
 case "${DEBUG}" in
-  true|false) ;;
-  *)
-    echo "Invalid DEBUG: ${DEBUG}" >&2
-    echo "Allowed: true | false" >&2
-    exit 2
-    ;;
+true | false) ;;
+*)
+	echo "Invalid DEBUG: ${DEBUG}" >&2
+	echo "Allowed: true | false" >&2
+	exit 2
+	;;
 esac
 
 echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APP} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
 echo "inventory_dir=${INVENTORY_DIR}"
 
-docker exec -it "${INFINITO_CONTAINER}" bash -c "
+docker exec "${INFINITO_CONTAINER}" bash -c "
   set -euo pipefail
   cd /opt/src/infinito
 

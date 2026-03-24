@@ -14,14 +14,14 @@ REPO_PREFIX="${REPO_PREFIX,,}"
 missing="false"
 
 for distro in ${DISTROS}; do
-  img="${REGISTRY}/${OWNER}/${REPO_PREFIX}/${distro}:${CI_TAG}"
-  echo "Check: ${img}" >&2
-  if docker manifest inspect "${img}" >/dev/null 2>&1; then
-    echo "  OK" >&2
-  else
-    echo "  MISSING" >&2
-    missing="true"
-  fi
+	img="${REGISTRY}/${OWNER}/${REPO_PREFIX}/${distro}:${CI_TAG}"
+	echo "Check: ${img}" >&2
+	if docker manifest inspect "${img}" >/dev/null 2>&1; then
+		echo "  OK" >&2
+	else
+		echo "  MISSING" >&2
+		missing="true"
+	fi
 done
 
 printf '%s\n' "${missing}"

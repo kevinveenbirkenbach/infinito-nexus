@@ -1,4 +1,5 @@
-# tests/unit/roles/sys-ctl-hlth-webserver/files/test_script.py
+from contextlib import redirect_stdout
+import io
 import os
 import unittest
 import importlib.util
@@ -67,7 +68,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
             "ok1.example.org": [200, 302, 301],
             "ok2.example.org": [301],
         }
-        exit_code = self.script.main(
+        exit_code, output = self._run_main(
             [
                 "--web-protocol",
                 "https",
@@ -76,6 +77,8 @@ class TestStandaloneCheckerScript(unittest.TestCase):
             ]
         )
         self.assertEqual(exit_code, 0)
+        self.assertIn("ok1.example.org: OK", output)
+        self.assertIn("ok2.example.org: OK", output)
 
     @patch("requests.head")
     def test_mismatches_counted(self, mock_head):
@@ -99,7 +102,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
             ],  # will default to 200 in side effect? No mapping -> 200 -> OK
         }
         # Adjust side effect to ensure "never.example.org" is OK 200
-        exit_code = self.script.main(
+        exit_code, output = self._run_main(
             [
                 "--expectations",
                 self._to_json(exp),
@@ -107,6 +110,7 @@ class TestStandaloneCheckerScript(unittest.TestCase):
         )
         # only 'bad.example.org' mismatched
         self.assertEqual(exit_code, 1)
+        self.assertIn("bad.example.org: ERROR: Expected [404]. Got 200.", output)
 
     @patch("requests.head")
     def test_non_list_values_sanitize_to_empty_and_fail(self, mock_head):
@@ -123,15 +127,27 @@ class TestStandaloneCheckerScript(unittest.TestCase):
 
         exp_json = '{"foo.example.org": "not-a-list", "bar.example.org": 200}'
         # Both entries get empty expectations -> 2 errors
-        exit_code = self.script.main(
+        exit_code, output = self._run_main(
             [
                 "--expectations",
                 exp_json,
             ]
         )
         self.assertEqual(exit_code, 2)
+        self.assertIn(
+            "foo.example.org: ERROR: No expectations provided. Got 200.", output
+        )
+        self.assertIn(
+            "bar.example.org: ERROR: No expectations provided. Got 200.", output
+        )
 
     # ------------- Helpers -----------------------
+
+    def _run_main(self, argv):
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            exit_code = self.script.main(argv)
+        return exit_code, buffer.getvalue()
 
     @staticmethod
     def _to_json(obj) -> str:

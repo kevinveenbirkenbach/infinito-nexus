@@ -1,0 +1,6 @@
+infinito-nexus (5.1.0-1) unstable; urgency=medium
+
+  * Add packaging metadata for Debian, Fedora and Arch.
+  * Centralize OS dependency declarations for Infinito.Nexus host workflows.
+
+ -- Kevin Veen-Birkenbach <kevin@veen.world>  Thu, 19 Mar 2026 10:00:00 +0100

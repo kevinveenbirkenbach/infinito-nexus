@@ -34,7 +34,7 @@ def _generate_credentials_snippet_for_app(
         return None
 
     cmd = [
-        # Use current interpreter so module_utils + deps match the runtime
+        # Use current interpreter so utils + deps match the runtime
         sys.executable,
         "-m",
         "cli.create.credentials",

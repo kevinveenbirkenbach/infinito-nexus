@@ -1,5 +1,5 @@
 import unittest
-from module_utils.dict_renderer import DictRenderer
+from utils.dict_renderer import DictRenderer
 
 
 class TestDictRenderer(unittest.TestCase):

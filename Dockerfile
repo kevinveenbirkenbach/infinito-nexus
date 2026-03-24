@@ -32,37 +32,26 @@ RUN set -euo pipefail; \
 COPY . ${INFINITO_SRC_DIR}
 
 # ------------------------------------------------------------
-# Prepare Python, Docker CLI, and system services needed for CI/builds
+# Ensure Python 3.11+ is the default python/pip on supported distros
+# ------------------------------------------------------------
+RUN /bin/bash ${INFINITO_SRC_DIR}/roles/dev-python/files/install.sh
+
+# ------------------------------------------------------------
+# Install Docker CLI (client only) - distro aware
+# ------------------------------------------------------------
+# hadolint ignore=DL3008,DL3041
+RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-container/files/install-cli.sh
+
+# ------------------------------------------------------------
+# Install distro package (dependencies incl. systemd/dbus/ssh are defined in packaging/*)
 # ------------------------------------------------------------
 # hadolint ignore=DL3008,DL3033,DL3041
+RUN /bin/bash ${INFINITO_SRC_DIR}/scripts/install/package.sh
+
+# ------------------------------------------------------------
+# Disable interactive first-boot units (CI / container safe)
+# ------------------------------------------------------------
 RUN set -euo pipefail; \
-  /bin/bash ${INFINITO_SRC_DIR}/roles/dev-python/files/install.sh; \
-  /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-container/files/install-cli.sh; \
-  . /etc/os-release; \
-  echo "[docker-infinito] Installing systemd/dbus + ssh client for ID=${ID}"; \
-  case "${ID}" in \
-    arch) \
-      pacman -Syu --noconfirm --needed systemd dbus openssh; \
-      ;; \
-    debian|ubuntu) \
-      apt-get update; \
-      apt-get install -y --no-install-recommends \
-        systemd systemd-sysv dbus \
-        openssh-client; \
-      rm -rf /var/lib/apt/lists/*; \
-      ;; \
-    fedora) \
-      dnf -y install systemd dbus openssh-clients; \
-      dnf -y clean all; \
-      ;; \
-    centos|rhel) \
-      (command -v dnf >/dev/null 2>&1 && dnf -y install systemd dbus openssh-clients && dnf -y clean all) || \
-      (yum -y install systemd dbus openssh-clients && yum -y clean all); \
-      ;; \
-    *) \
-      echo "[WARN] Unknown distro ID=${ID}. Skipping systemd/dbus/ssh install."; \
-      ;; \
-  esac; \
   systemctl mask systemd-firstboot.service first-boot-complete.target || true; \
   systemd-machine-id-setup || true
 

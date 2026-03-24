@@ -24,11 +24,11 @@ PYTHON="${PYTHON:-python3}"
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
 
 case "${TEST_DEPLOY_TYPE}" in
-  server|workstation|universal) ;;
-  *)
-    echo "[ERROR] Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
-    exit 2
-    ;;
+server | workstation | universal) ;;
+*)
+	echo "[ERROR] Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+	exit 2
+	;;
 esac
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -42,51 +42,52 @@ echo
 
 echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 "${PYTHON}" -m cli.deploy.development up \
-  --distro "${INFINITO_DISTRO}" \
-  --when-down
+	--distro "${INFINITO_DISTRO}" \
+	--when-down
 
-echo ">>> Running everything inside container via development exec (no logic changes)"
+echo ">>> Pre-cleanup shared entities (host docker context)"
+target_container="infinito_nexus_${INFINITO_DISTRO}"
+APP='matomo' \
+	INFINITO_CONTAINER="${INFINITO_CONTAINER:-${target_container}}" \
+	scripts/tests/deploy/local/utils/purge/entity.sh
+
+echo ">>> Running entry.sh inside container"
 "${PYTHON}" -m cli.deploy.development exec \
-  --distro "${INFINITO_DISTRO}" -- \
-  bash -lc "
+	--distro "${INFINITO_DISTRO}" -- \
+	bash -lc "
     set -euo pipefail
     cd /opt/src/infinito
 
     echo '>>> Running entry.sh'
     ./scripts/docker/entry.sh true
-
-    echo '>>> Pre-cleanup shared entities'
-    APP='matomo' \
-    INFINITO_CONTAINER=\"\${INFINITO_CONTAINER:-}\" \
-    scripts/tests/deploy/local/utils/purge/entity.sh
-
-    deploy_args=(
-      --distro '${INFINITO_DISTRO}'
-      --app '${APP}'
-      --inventory-dir '${INVENTORY_DIR}'
-      --debug
-    )
-
-    echo '>>> PASS 1: init inventory (ASYNC_ENABLED=false)'
-    ${PYTHON} -m cli.deploy.development init \
-      --distro '${INFINITO_DISTRO}' \
-      --app '${APP}' \
-      --inventory-dir '${INVENTORY_DIR}' \
-      --vars '{\"ASYNC_ENABLED\": false}'
-
-    echo '>>> PASS 1: deploy'
-    ${PYTHON} -m cli.deploy.development deploy \"\${deploy_args[@]}\"
-
-    echo '>>> PASS 2: re-init inventory (ASYNC_ENABLED=true)'
-    ${PYTHON} -m cli.deploy.development init \
-      --distro '${INFINITO_DISTRO}' \
-      --app '${APP}' \
-      --inventory-dir '${INVENTORY_DIR}' \
-      --vars '{\"ASYNC_ENABLED\": true}'
-
-    echo '>>> PASS 2: deploy'
-    ${PYTHON} -m cli.deploy.development deploy \"\${deploy_args[@]}\"
   "
+
+deploy_args=(
+	--distro "${INFINITO_DISTRO}"
+	--app "${APP}"
+	--inventory-dir "${INVENTORY_DIR}"
+	--debug
+)
+
+echo ">>> PASS 1: init inventory (ASYNC_ENABLED=false)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": false}'
+
+echo ">>> PASS 1: deploy"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
+
+echo ">>> PASS 2: re-init inventory (ASYNC_ENABLED=true)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": true}'
+
+echo ">>> PASS 2: deploy"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
 
 echo
 echo "✅ Done (no deletion)."

@@ -11,12 +11,12 @@ echo "============================================================"
 
 # Execute directly inside the already running infinito container
 INFINITO_DISTRO="${INFINITO_DISTRO}" \
-docker compose --profile ci exec -T \
-  -e TEST_PATTERN="${TEST_PATTERN}" \
-  -e TEST_TYPE="${TEST_TYPE}" \
-  --workdir /opt/src/infinito \
-  infinito \
-  bash -lc '
+	docker compose --profile ci exec -T \
+	-e TEST_PATTERN="${TEST_PATTERN}" \
+	-e TEST_TYPE="${TEST_TYPE}" \
+	--workdir /opt/src/infinito \
+	infinito \
+	bash -lc '
     set -euo pipefail
 
     NIX_CONFIG_EFFECTIVE="$(

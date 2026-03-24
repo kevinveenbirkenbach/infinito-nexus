@@ -12,7 +12,7 @@ from typing import Any, Dict, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from module_utils.tls_common import (
+from utils.tls_common import (
     AVAILABLE_FLAVORS,
     as_str,
     collect_domains_for_app,

@@ -1,11 +1,11 @@
-from module_utils.config_utils import get_app_conf as _get_app_conf
+from utils.config_utils import get_app_conf as _get_app_conf
 
 
 def service_load_enabled(applications, application_id, service_name, default=False):
     """
     Return True if compose.services.<service_name>.enabled AND .shared are true.
 
-    Uses the existing module_utils.config_utils.get_app_conf implementation,
+    Uses the existing utils.config_utils.get_app_conf implementation,
     so schema/strict/default behavior stays consistent across the codebase.
 
     Usage:

@@ -26,7 +26,7 @@ It must remain stable, clean, and green at all times. ✅
 Before making any change:
 
 1. Fork the official repository
-   👉 [https://github.com/kevinveenbirkenbach/infinito-nexus](https://github.com/kevinveenbirkenbach/infinito-nexus)
+   👉 [https://github.com/infinito-nexus/core](https://github.com/infinito-nexus/core)
 
 2. Clone your fork locally.
 

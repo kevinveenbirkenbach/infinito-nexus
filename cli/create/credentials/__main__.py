@@ -27,8 +27,8 @@ from typing import Dict, Any, Union
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-from module_utils.manager.inventory import InventoryManager
-from module_utils.handler.vault import (
+from utils.manager.inventory import InventoryManager
+from utils.handler.vault import (
     VaultHandler,
     VaultScalar,
 )  # uses your existing handler

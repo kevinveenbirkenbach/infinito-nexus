@@ -29,19 +29,19 @@ DISTROS="${DISTROS:-${INPUT_DISTROS:-}}"
 
 # WHITELIST must always exist, but may be empty
 WHITELIST="${WHITELIST:-${INPUT_WHITELIST:-}}"
-WHITELIST="${WHITELIST:-}"  # force defined even if still empty
+WHITELIST="${WHITELIST:-}" # force defined even if still empty
 
 # Hard requirements
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
 : "${DISTROS:?DISTROS must be set (e.g. \"arch debian ubuntu\")}"
 
 case "${TEST_DEPLOY_TYPE}" in
-  server|workstation|universal) ;;
-  *)
-    echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
-    echo "Allowed: server | workstation | universal" >&2
-    exit 2
-    ;;
+server | workstation | universal) ;;
+*)
+	echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+	echo "Allowed: server | workstation | universal" >&2
+	exit 2
+	;;
 esac
 
 echo "Resolved inputs:"
@@ -51,14 +51,14 @@ echo "  WHITELIST=${WHITELIST}"
 
 # Export outputs for workflow
 {
-  echo "test_deploy_type=${TEST_DEPLOY_TYPE}"
-  echo "distros=${DISTROS}"
-  echo "whitelist=${WHITELIST}"
-} >> "${GITHUB_OUTPUT}"
+	echo "test_deploy_type=${TEST_DEPLOY_TYPE}"
+	echo "distros=${DISTROS}"
+	echo "whitelist=${WHITELIST}"
+} >>"${GITHUB_OUTPUT}"
 
 # Export env for subsequent steps
 {
-  echo "TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE}"
-  echo "DISTROS=${DISTROS}"
-  echo "WHITELIST=${WHITELIST}"
-} >> "${GITHUB_ENV}"
+	echo "TEST_DEPLOY_TYPE=${TEST_DEPLOY_TYPE}"
+	echo "DISTROS=${DISTROS}"
+	echo "WHITELIST=${WHITELIST}"
+} >>"${GITHUB_ENV}"

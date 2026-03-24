@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from module_utils.invokable import types_from_group_names
+from utils.invokable import types_from_group_names
 
 
 def get_deployment_types_from_groups(group_names):

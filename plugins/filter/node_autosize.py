@@ -17,12 +17,12 @@ from __future__ import annotations
 import re
 from ansible.errors import AnsibleFilterError
 
-# Import the shared config resolver from module_utils
+# Import the shared config resolver from utils
 try:
-    from module_utils.config_utils import get_app_conf, AppConfigKeyError
+    from utils.config_utils import get_app_conf, AppConfigKeyError
 except Exception as e:
     raise AnsibleFilterError(
-        f"Failed to import get_app_conf from module_utils.config_utils: {e}"
+        f"Failed to import get_app_conf from utils.config_utils: {e}"
     )
 
 _SIZE_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([kmgtp]?i?b?)?\s*$", re.IGNORECASE)
