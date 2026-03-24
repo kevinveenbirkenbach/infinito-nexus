@@ -14,9 +14,9 @@
 
 - name: Run database migrations (with diagnostics)
   block:
-    - name: Temporarily stop OpenProject worker/cron during migrations
+    - name: Temporarily stop OpenProject worker/cron/seeder during migrations
       shell: >
-        {{ BIN_COMPOSE }} stop worker cron
+        {{ BIN_COMPOSE }} stop worker cron seeder
       args:
         chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
       register: openproject_stop_aux
@@ -33,6 +33,7 @@
       retries: 30
       delay: 10
       until: openproject_migrate.rc == 0
+      notify: compose up
   rescue:
     - name: Collect OpenProject status after migration failure
       shell: >
@@ -78,15 +79,9 @@
           compose logs (tail 300):
           {{ openproject_migrate_logs.stdout | default('<no output>') }}
           {{ openproject_migrate_logs.stderr | default('') }}
-  always:
-    - name: Ensure OpenProject worker/cron are running after migrations
-      shell: >
-        {{ BIN_COMPOSE }} up -d worker cron
-      args:
-        chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-      register: openproject_start_aux
-      changed_when: false
-      failed_when: false
+
+- name: Flush handlers to start OpenProject worker/cron/seeder after migrations
+  meta: flush_handlers
 
 - name: Wait until OpenProject web container is running (after migrations)
   shell: >

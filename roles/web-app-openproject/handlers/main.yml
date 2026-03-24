@@ -1,0 +1,7 @@
+---
+- name: Start OpenProject worker cron seeder
+  shell: >
+    {{ BIN_COMPOSE }} up -d worker cron seeder
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: false
