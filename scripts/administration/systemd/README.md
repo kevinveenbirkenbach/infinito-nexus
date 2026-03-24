@@ -6,11 +6,11 @@ This directory contains scripts for managing systemd across different platforms 
 
 ## 📁 Subdirectories
 
-### 🪟 [`windows/`](windows/)
+### ✅ [`enable/`](enable/)
 
-Scripts for managing systemd within a **WSL2** (Windows Subsystem for Linux 2) environment.
+Platform-specific scripts for enabling systemd where it is not active by default.
 
-- **`enable.sh`** — enables systemd as the WSL2 init system via `/etc/wsl.conf` and restarts WSL2 if needed
+- **`windows.sh`** — enables systemd as the WSL2 init system via `/etc/wsl.conf` and restarts WSL2 if needed
 
 ---
 

@@ -1,12 +1,12 @@
-# 🪟 systemd — Windows / WSL2
+# ✅ systemd — Enable
 
-This directory contains scripts for managing systemd within a **WSL2** (Windows Subsystem for Linux 2) environment.
+This directory contains platform-specific scripts for enabling systemd in environments where it is not active by default.
 
 ---
 
 ## 📄 Scripts
 
-### ✅ `enable.sh`
+### 🪟 `windows.sh`
 
 Enables systemd as the WSL2 init system by writing `systemd=true` into `/etc/wsl.conf`.
 
