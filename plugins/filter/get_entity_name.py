@@ -1,4 +1,4 @@
-from module_utils.entity_name_utils import get_entity_name
+from utils.entity_name_utils import get_entity_name
 
 
 class FilterModule(object):

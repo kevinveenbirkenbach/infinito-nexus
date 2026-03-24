@@ -29,9 +29,9 @@ class TestGetAllInvokableApps(unittest.TestCase):
                 },
                 "update": {"title": "Update", "invokable": True},
                 "util": {
-                    "title": "module_utils",
+                    "title": "utils",
                     "invokable": False,
-                    "desk": {"title": "Desktop module_utils", "invokable": True},
+                    "desk": {"title": "Desktop utils", "invokable": True},
                 },
             }
         }
@@ -61,7 +61,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
 
     def test_get_all_invokable_apps(self):
         """Should return only applications whose role paths match invokable paths."""
-        with patch("module_utils.invokable._repo_root", return_value=self.test_dir):
+        with patch("utils.invokable._repo_root", return_value=self.test_dir):
             result = get_all_invokable_apps()
 
         expected = sorted(
@@ -78,7 +78,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
         with self.categories_file.open("w", encoding="utf-8") as f:
             yaml.safe_dump({"roles": {"foo": {"invokable": False}}}, f)
 
-        with patch("module_utils.invokable._repo_root", return_value=self.test_dir):
+        with patch("utils.invokable._repo_root", return_value=self.test_dir):
             with self.assertRaises(RuntimeError):
                 get_all_invokable_apps()
 
@@ -91,7 +91,7 @@ class TestGetAllInvokableApps(unittest.TestCase):
         with self.categories_file.open("w", encoding="utf-8") as f:
             yaml.safe_dump({"roles": {"web": {"app": {"invokable": True}}}}, f)
 
-        with patch("module_utils.invokable._repo_root", return_value=self.test_dir):
+        with patch("utils.invokable._repo_root", return_value=self.test_dir):
             result = get_all_invokable_apps()
 
         self.assertEqual(result, [])
@@ -101,14 +101,14 @@ class TestGetAllInvokableApps(unittest.TestCase):
         Should raise FileNotFoundError if categories.yml is missing.
 
         Note: the implementation resolves invokable paths via
-        module_utils.invokable._get_invokable_paths().
+        utils.invokable._get_invokable_paths().
         To make the test deterministic, patch this function directly.
         """
         self.categories_file.unlink()
 
-        with patch("module_utils.invokable._repo_root", return_value=self.test_dir):
+        with patch("utils.invokable._repo_root", return_value=self.test_dir):
             with patch(
-                "module_utils.invokable._get_invokable_paths",
+                "utils.invokable._get_invokable_paths",
                 side_effect=FileNotFoundError,
             ):
                 with self.assertRaises(FileNotFoundError):

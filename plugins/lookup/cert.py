@@ -5,7 +5,7 @@
 # - Computes effective SAN list (domains.san)
 # - Supports self-signed scope: "app" | "global"
 #
-# See module_utils/tls_common.py for shared resolution logic.
+# See utils/tls_common.py for shared resolution logic.
 
 from __future__ import annotations
 
@@ -15,8 +15,8 @@ from typing import Any, Dict, Optional, List
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from module_utils.jinja_strict import render_strict
-from module_utils.tls_common import (
+from utils.jinja_strict import render_strict
+from utils.tls_common import (
     AVAILABLE_FLAVORS,
     as_str,
     collect_domains_for_app,

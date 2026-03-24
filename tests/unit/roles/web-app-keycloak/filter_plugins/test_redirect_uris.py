@@ -35,10 +35,10 @@ def _load_module_from_path(name, file_path):
 class RedirectUrisTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Create stub package: module_utils, with config_utils and get_url submodules.
-        mu = types.ModuleType("module_utils")
-        mu_config = types.ModuleType("module_utils.config_utils")
-        mu_geturl = types.ModuleType("module_utils.get_url")
+        # Create stub package: utils, with config_utils and get_url submodules.
+        mu = types.ModuleType("utils")
+        mu_config = types.ModuleType("utils.config_utils")
+        mu_geturl = types.ModuleType("utils.get_url")
 
         # Define stub exceptions
         class AppConfigKeyError(Exception):
@@ -58,7 +58,7 @@ class RedirectUrisTest(unittest.TestCase):
                     return default
             return cur
 
-        # Define a simple get_url matching your module_utils/get_url contract
+        # Define a simple get_url matching your utils/get_url contract
         # get_url(domains, application_id, protocol) -> "<protocol>://<domain>"
         def get_url(domains, application_id, protocol):
             domain = domains[application_id]
@@ -72,9 +72,9 @@ class RedirectUrisTest(unittest.TestCase):
         mu_geturl.get_url = staticmethod(get_url)
 
         # Register in sys.modules so plugin imports succeed
-        sys.modules["module_utils"] = mu
-        sys.modules["module_utils.config_utils"] = mu_config
-        sys.modules["module_utils.get_url"] = mu_geturl
+        sys.modules["utils"] = mu
+        sys.modules["utils.config_utils"] = mu_config
+        sys.modules["utils.get_url"] = mu_geturl
 
         # Load the plugin by path
         repo_root = _find_repo_root_containing(PLUGIN_REL_PATH)

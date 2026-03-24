@@ -49,10 +49,7 @@ jobs:
 
       - name: Install jq
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: ./scripts/install/apt.sh jq
 
       - name: Compute matrix JSON
         id: out
@@ -74,7 +71,7 @@ jobs:
       NIX_CONFIG: |
         access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
       INFINITO_IMAGE_TAG: ci-${{ github.sha }}
-      # Use the prebuilt CI image directly instead of the :latest fallback from env.sh.
+      # Use the prebuilt CI image directly instead of the :latest fallback from env/all.sh.
       INFINITO_IMAGE: ghcr.io/${{ needs.prepare.outputs.owner }}/${{ needs.prepare.outputs.repo_name }}/${{ matrix.distro }}:ci-${{ github.sha }}
 
     strategy:
@@ -88,10 +85,7 @@ jobs:
 
       - name: Install dnsutils (dig)
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y dnsutils
+        run: ./scripts/install/apt.sh dnsutils
 
       - name: Start stack (coredns + infinito) for distro
         shell: bash

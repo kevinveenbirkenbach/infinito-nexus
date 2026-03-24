@@ -3,8 +3,8 @@ set -euo pipefail
 echo "[docker-infinito] Starting infinito container"
 
 if [[ "${1:-}" == "/sbin/init" ]]; then
-  echo "[docker-infinito] Starting systemd as PID 1..."
-  exec /sbin/init
+	echo "[docker-infinito] Starting systemd as PID 1..."
+	exec /sbin/init
 fi
 
 # Compute dynamically if not provided from outside

@@ -24,11 +24,14 @@ LIMIT_HOST="${LIMIT_HOST:-localhost}"
 DEBUG="${DEBUG:-false}"
 
 normalize_bool() {
-  case "${1:-}" in
-    true|True|TRUE|1) echo "true" ;;
-    false|False|FALSE|0|"") echo "false" ;;
-    *) echo "ERROR: invalid boolean: ${1}" >&2; exit 2 ;;
-  esac
+	case "${1:-}" in
+	true | True | TRUE | 1) echo "true" ;;
+	false | False | FALSE | 0 | "") echo "false" ;;
+	*)
+		echo "ERROR: invalid boolean: ${1}" >&2
+		exit 2
+		;;
+	esac
 }
 
 DEBUG="$(normalize_bool "${DEBUG}")"
@@ -38,14 +41,14 @@ inv_file="${inv_dir}/servers.yml"
 pw_file="${inv_dir}/.password"
 
 if [[ ! -f "${inv_file}" ]]; then
-  echo "ERROR: inventory not found: ${inv_file}" >&2
-  echo "Run: make test-local-init" >&2
-  exit 2
+	echo "ERROR: inventory not found: ${inv_file}" >&2
+	echo "Run: make test-local-init" >&2
+	exit 2
 fi
 
 if [[ ! -f "${pw_file}" ]]; then
-  echo "ERROR: password file not found: ${pw_file}" >&2
-  exit 2
+	echo "ERROR: password file not found: ${pw_file}" >&2
+	exit 2
 fi
 
 echo "=== local run (ALL apps) ==="
@@ -59,37 +62,37 @@ echo
 
 # Ensure stack is up
 "${PYTHON}" -m cli.deploy.development up \
-  --distro "${INFINITO_DISTRO}" \
-  --when-down \
-  --skip-entry-init
+	--distro "${INFINITO_DISTRO}" \
+	--when-down \
+	--skip-entry-init
 
 # Recompute apps list (optional, but keeps filters consistent)
 apps_json="$(
-  TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  WHITELIST="${WHITELIST:-}" \
-  scripts/meta/resolve/apps.sh
+	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
+		WHITELIST="${WHITELIST:-}" \
+		scripts/meta/resolve/apps.sh
 )"
 
 apps_count="$(
-  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
-    "${apps_json}"
+	"${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
+		"${apps_json}"
 )"
 if [[ "${apps_count}" == "0" ]]; then
-  echo "ERROR: discovered apps list has length 0" >&2
-  exit 2
+	echo "ERROR: discovered apps list has length 0" >&2
+	exit 2
 fi
 
 echo "apps_count=${apps_count}"
 echo "apps_sample=$(
-  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
-    "${apps_json}"
+	"${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
+		"${apps_json}"
 )"
 echo
 
 # Run deploy inside container
 "${PYTHON}" -m cli.deploy.development exec \
-  --distro "${INFINITO_DISTRO}" -- \
-  bash -c "
+	--distro "${INFINITO_DISTRO}" -- \
+	bash -c "
     set -euo pipefail
     cd /opt/src/infinito
 

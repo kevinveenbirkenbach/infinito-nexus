@@ -1,0 +1,6 @@
+# Arch pkg artifacts
+*.pkg.tar.*
+*.log
+infinito-nexus-*
+src/
+pkg/

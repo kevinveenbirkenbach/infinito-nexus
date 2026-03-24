@@ -9,8 +9,8 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
 
-from module_utils.entity_name_utils import get_entity_name
-from module_utils.templating import render_ansible_strict
+from utils.entity_name_utils import get_entity_name
+from utils.templating import render_ansible_strict
 
 
 def _as_str(v: Any) -> str:

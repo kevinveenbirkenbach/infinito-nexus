@@ -46,7 +46,7 @@ class TestHasDomainFilter(unittest.TestCase):
 
     def test_import_errors_are_raised_as_ansible_filter_error(self):
         """
-        Sanity check: FilterModule().filters() should fail loudly if module_utils import breaks.
+        Sanity check: FilterModule().filters() should fail loudly if utils import breaks.
         This test just asserts that filters are already loaded correctly here.
         """
         self.assertIn("has_domain", self.filters)
