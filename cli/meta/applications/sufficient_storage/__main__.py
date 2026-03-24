@@ -11,7 +11,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
-from module_utils.role_resource_validation import filter_roles_by_min_storage  # noqa: E402
+from utils.role_resource_validation import filter_roles_by_min_storage  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -37,7 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--warnings",
         action="store_true",
-        help="Emit GitHub Actions warnings for missing configs/keys",
+        help="Emit GitHub Actions warnings for invalid min_storage metadata on matching compose services",
     )
 
     parser.add_argument(

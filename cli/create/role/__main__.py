@@ -7,7 +7,7 @@ from ruamel.yaml import YAML
 
 import sys
 import os
-from module_utils.entity_name_utils import get_entity_name
+from utils.entity_name_utils import get_entity_name
 
 # Paths to the group-vars files
 PORTS_FILE = "./group_vars/all/11_ports.yml"

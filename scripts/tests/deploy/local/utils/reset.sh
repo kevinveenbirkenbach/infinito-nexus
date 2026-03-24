@@ -21,58 +21,59 @@ echo "type          = ${TEST_DEPLOY_TYPE}"
 echo "inventory_dir = ${INVENTORY_DIR}"
 echo
 
-# 1) Discover apps on HOST (same as local/all.sh)
+# 1) Bring up development stack (no build)
+echo ">>> Starting development compose stack (no build)"
+"${PYTHON}" -m cli.deploy.development up \
+	--distro "${INFINITO_DISTRO}" \
+	--skip-entry-init
+
+# 2) Discover apps on HOST (same as local/all.sh)
 apps_json="$(
-  TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  WHITELIST="${WHITELIST:-}" \
-  scripts/meta/resolve/apps.sh
+	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
+		WHITELIST="${WHITELIST:-}" \
+		PYTHON=python3 \
+		scripts/meta/resolve/apps.sh
 )"
 
 if [[ -z "${apps_json}" ]]; then
-  echo "ERROR: app matrix is empty" >&2
-  exit 2
+	echo "ERROR: app matrix is empty" >&2
+	exit 2
 fi
 
 apps_count="$(
-  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
-    "${apps_json}"
+	"${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
+		"${apps_json}"
 )"
 
 if [[ "${apps_count}" == "0" ]]; then
-  echo "ERROR: discovered apps list has length 0" >&2
-  echo "apps_json=${apps_json}" >&2
-  exit 2
+	echo "ERROR: discovered apps list has length 0" >&2
+	echo "apps_json=${apps_json}" >&2
+	exit 2
 fi
 
 apps_csv="$(
-  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
-    "${apps_json}"
+	"${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
+		"${apps_json}"
 )"
 
 if [[ -z "${apps_csv}" ]]; then
-  echo "ERROR: apps_csv ended up empty even though apps_count=${apps_count}" >&2
-  exit 2
+	echo "ERROR: apps_csv ended up empty even though apps_count=${apps_count}" >&2
+	exit 2
 fi
 
 echo "apps_count=${apps_count}"
 echo "apps_sample=$(
-  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
-    "${apps_json}"
+	"${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(a[:8]) + ("..." if len(a)>8 else ""))' \
+		"${apps_json}"
 )"
 echo
-
-# 2) Bring up development stack (no build)
-echo ">>> Starting development compose stack (no build)"
-"${PYTHON}" -m cli.deploy.development up \
-  --distro "${INFINITO_DISTRO}" \
-  --skip-entry-init
 
 # 3) Run entry.sh + create inventory INSIDE container
 echo ">>> Initializing inventory inside container"
 
 "${PYTHON}" -m cli.deploy.development exec \
-  --distro "${INFINITO_DISTRO}" -- \
-  bash -c "
+	--distro "${INFINITO_DISTRO}" -- \
+	bash -c "
     set -euo pipefail
     cd /opt/src/infinito
 

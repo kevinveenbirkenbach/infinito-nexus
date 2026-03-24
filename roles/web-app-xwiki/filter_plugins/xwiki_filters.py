@@ -2,19 +2,6 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Iterable
-
-try:
-    # Ansible provides this; don't hard-depend at import time for unit tests
-    from ansible.errors import AnsibleFilterError
-except Exception:  # pragma: no cover
-
-    class AnsibleFilterError(Exception):
-        pass
-
-
-def _join_elements(elems: Iterable[Any]) -> str:
-    return "/".join(str(x) for x in elems)
 
 
 def xwiki_extension_status(raw: str) -> int:

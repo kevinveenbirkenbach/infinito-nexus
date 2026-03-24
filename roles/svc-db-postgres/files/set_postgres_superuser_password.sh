@@ -95,4 +95,64 @@ if [[ -z "$result" ]]; then
   exit 1
 fi
 
-echo "$result"
+backup="${hba_file}.bak_ansible_pwcheck_$$"
+
+# Backup hba
+container exec "$container" bash -lc "cp -a \"$hba_file\" \"$backup\""
+
+# shellcheck disable=SC2329,SC2317
+restore_hba() {
+  # Restore on exit (best effort)
+  container exec "$container" bash -lc "if [ -f \"$backup\" ]; then cp -a \"$backup\" \"$hba_file\" && rm -f \"$backup\"; fi" >/dev/null 2>&1 || true
+  container exec "$container" bash -lc "psql -U postgres -d postgres -Atc 'SELECT pg_reload_conf();' >/dev/null 2>&1" || true
+}
+
+# Register direct function trap so ShellCheck sees the invocation path.
+trap restore_hba EXIT
+
+# Force password auth for local TCP (127.0.0.1)
+# Prepend a strict rule so it matches first.
+container exec "$container" bash -lc "{
+  echo 'host all all 127.0.0.1/32 scram-sha-256'
+  cat \"$backup\"
+} > \"$hba_file\""
+
+# Reload config
+container exec "$container" bash -lc "psql -U postgres -d postgres -Atc 'SELECT pg_reload_conf();' >/dev/null"
+
+# Helper: test password auth explicitly over TCP
+auth_test() {
+  container exec -e PGPASSWORD="$new_pw" "$container" bash -lc \
+    'psql -h 127.0.0.1 -p 5432 -U postgres -d postgres -Atc "SELECT 1" >/dev/null 2>&1'
+}
+
+pre_ok=0
+if auth_test; then
+  pre_ok=1
+fi
+
+# Set password (socket, no auth dependency)
+# shellcheck disable=SC2016
+container exec -e NEW_POSTGRES_PASSWORD="$new_pw" "$container" bash -lc '
+  psql -U postgres -d postgres -v ON_ERROR_STOP=1 -v password="$NEW_POSTGRES_PASSWORD" <<'"'"'SQL'"'"'
+ALTER USER postgres WITH PASSWORD :'"'"'password'"'"';
+SQL
+'
+
+post_ok=0
+if auth_test; then
+  post_ok=1
+fi
+
+if [[ "$pre_ok" -eq 0 && "$post_ok" -eq 1 ]]; then
+  echo "[CHANGED] New password did not work before, and works now."
+  exit 0
+fi
+
+if [[ "$pre_ok" -eq 1 && "$post_ok" -eq 1 ]]; then
+  echo "[UNCHANGED] New password already worked before."
+  exit 0
+fi
+
+echo "[FAIL] Password auth test failed even after ALTER USER." >&2
+exit 1

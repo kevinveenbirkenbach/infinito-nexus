@@ -43,17 +43,11 @@ jobs:
 
       - name: Install jq
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: ./scripts/install/apt.sh jq
 
       - name: Install deps (jq + envsubst)
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq gettext-base
+        run: ./scripts/install/apt.sh jq gettext-base
 
       - name: Start stack for discovery
         shell: bash
@@ -96,10 +90,7 @@ jobs:
 
       - name: Install jq
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: ./scripts/install/apt.sh jq
 
       - name: Deploy app
         shell: bash

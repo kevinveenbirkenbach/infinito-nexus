@@ -28,10 +28,10 @@ If you have not bootstrapped the repo yet (or after a fresh checkout), run:
 make bootstrap
 ```
 
-`make` targets automatically load defaults from `scripts/meta/env.sh` via `BASH_ENV`. If you run scripts directly, load the defaults yourself:
+`make` targets automatically load defaults from `scripts/meta/env/all.sh` via `BASH_ENV`. If you run scripts directly, load the defaults yourself:
 
 ```bash
-source scripts/meta/env.sh
+source scripts/meta/env/all.sh
 ```
 
 ## Test Comparison Table 🧾
@@ -111,7 +111,7 @@ If a command fails with "inventory not found", it's usually because the previous
 
 - `INFINITO_DISTRO`: `arch|debian|ubuntu|fedora|centos` (default: `debian`)
 - `TEST_DEPLOY_TYPE`: `server|workstation|universal` (default: `server`)
-- `INVENTORY_DIR`: defaults to `$HOME/inventories/localhost` via `scripts/meta/env.sh`
+- `INVENTORY_DIR`: defaults to `$HOME/inventories/localhost` via `scripts/meta/env/all.sh`
 - `INFINITO_CONTAINER`: defaults to `infinito_nexus_${INFINITO_DISTRO}`
 - `APP`: application id like `web-app-nextcloud` (required by `rapid.sh` and purge helpers)
 - `LIMIT_HOST`: host limit pattern (default: `localhost`, only used by some scripts)
@@ -184,7 +184,7 @@ Args:
 
 Optional ENV:
 - `INFINITO_DISTRO` (default: `debian`)
-- `INVENTORY_DIR` (default from `scripts/meta/env.sh`)
+- `INVENTORY_DIR` (default from `scripts/meta/env/all.sh`)
 - `LIMIT_HOST` (default: `localhost`)
 - `DEBUG` (`true|false`, default: `true`)
 

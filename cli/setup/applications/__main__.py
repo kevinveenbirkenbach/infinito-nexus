@@ -18,7 +18,7 @@ def _load_local_dependencies():
     if repo_root_str not in sys.path:
         sys.path.insert(0, repo_root_str)
 
-    from module_utils.dict_renderer import DictRenderer
+    from utils.dict_renderer import DictRenderer
     from plugins.lookup.application_gid import LookupModule
 
     return DictRenderer, LookupModule

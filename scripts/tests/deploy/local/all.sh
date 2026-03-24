@@ -28,8 +28,8 @@ echo
 # ---------------------------------------------------------------------------
 echo ">>> Starting development compose stack (no build)"
 "${PYTHON}" -m cli.deploy.development up \
-  --distro "${INFINITO_DISTRO}" \
-  --skip-entry-init
+	--distro "${INFINITO_DISTRO}" \
+	--skip-entry-init
 
 # ---------------------------------------------------------------------------
 # 2) Discover apps on HOST (needs docker compose)
@@ -41,22 +41,22 @@ echo ">>> Discovering apps on host via scripts/meta/resolve/apps.sh (TEST_DEPLOY
 # - we must guarantee JSON-only output for downstream parsing
 # - PYTHON from host venv must NOT be used inside container exec calls
 discover_out="$(
-  set +e
-  TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
-  WHITELIST="${WHITELIST}" \
-  PYTHON=python3 \
-  scripts/meta/resolve/apps.sh 2> >(cat >&2) \
-  | jq -c 'if type=="array" then . else [] end' 2>/dev/null
-  echo "rc=$?" >&2
+	set +e
+	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
+		WHITELIST="${WHITELIST}" \
+		PYTHON=python3 \
+		scripts/meta/resolve/apps.sh 2> >(cat >&2) |
+		jq -c 'if type=="array" then . else [] end' 2>/dev/null
+	echo "rc=$?" >&2
 )"
 # Now discover_out should be compact JSON array or empty.
 
 if [[ -z "${discover_out}" ]]; then
-  echo "ERROR: apps discovery produced empty output" >&2
-  echo "DEBUG: raw apps.sh output (first 50 lines):" >&2
-  TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" WHITELIST="${WHITELIST}" PYTHON=python3 \
-    scripts/meta/resolve/apps.sh 2>&1 | sed -n '1,50p' >&2
-  exit 2
+	echo "ERROR: apps discovery produced empty output" >&2
+	echo "DEBUG: raw apps.sh output (first 50 lines):" >&2
+	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" WHITELIST="${WHITELIST}" PYTHON=python3 \
+		scripts/meta/resolve/apps.sh 2>&1 | sed -n '1,50p' >&2
+	exit 2
 fi
 
 apps_json="${discover_out}"
@@ -64,27 +64,27 @@ echo "apps_json=${apps_json}"
 
 # Validate JSON list + compute count
 apps_count="$(
-  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
-    "${apps_json}"
+	"${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); assert isinstance(a,list); print(len(a))' \
+		"${apps_json}"
 )"
 
 if [[ "${apps_count}" == "0" ]]; then
-  echo "ERROR: discovered apps list has length 0"
-  exit 2
+	echo "ERROR: discovered apps list has length 0"
+	exit 2
 fi
 
 # Convert JSON list -> CSV
 apps_csv="$(
-  "${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
-    "${apps_json}"
+	"${PYTHON}" -c 'import json,sys; a=json.loads(sys.argv[1]); print(",".join(map(str,a)))' \
+		"${apps_json}"
 )"
 
 if [[ -z "${apps_csv}" ]]; then
-  echo "ERROR: apps_csv ended up empty even though apps_count=${apps_count}"
-  echo "----- apps_json -----"
-  printf '%s\n' "${apps_json}"
-  echo "---------------------"
-  exit 2
+	echo "ERROR: apps_csv ended up empty even though apps_count=${apps_count}"
+	echo "----- apps_json -----"
+	printf '%s\n' "${apps_json}"
+	echo "---------------------"
+	exit 2
 fi
 
 echo "apps_count=${apps_count}"
@@ -96,8 +96,8 @@ echo
 echo ">>> Running entry/init + inventory + deploy inside infinito container via development exec"
 
 "${PYTHON}" -m cli.deploy.development exec \
-  --distro "${INFINITO_DISTRO}" -- \
-  bash -c "
+	--distro "${INFINITO_DISTRO}" -- \
+	bash -c "
     set -euo pipefail
     cd /opt/src/infinito
 

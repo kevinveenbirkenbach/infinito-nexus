@@ -12,20 +12,20 @@ set -euo pipefail
 : "${INFINITO_DISTRO:?INFINITO_DISTRO is not set (e.g. arch, debian, ubuntu)}"
 
 case "${TEST_DEPLOY_TYPE}" in
-  server|workstation|universal) ;;
-  *)
-    echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
-    echo "Allowed: server | workstation | universal" >&2
-    exit 2
-    ;;
+server | workstation | universal) ;;
+*)
+	echo "Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+	echo "Allowed: server | workstation | universal" >&2
+	exit 2
+	;;
 esac
 
 echo "=== act: deploy local (type=${TEST_DEPLOY_TYPE}, app=${APP}, distros=${INFINITO_DISTRO}) ==="
 
 act workflow_dispatch \
-  -W .github/workflows/test-deploy-local.yml \
-  --input test_deploy_type="${TEST_DEPLOY_TYPE}" \
-  --input distros="${INFINITO_DISTRO}" \
-  --input whitelist="${APP}" \
-  --container-options "--privileged" \
-  --network host
+	-W .github/workflows/test-deploy-local.yml \
+	--input test_deploy_type="${TEST_DEPLOY_TYPE}" \
+	--input distros="${INFINITO_DISTRO}" \
+	--input whitelist="${APP}" \
+	--container-options "--privileged" \
+	--network host

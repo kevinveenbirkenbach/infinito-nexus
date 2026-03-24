@@ -18,13 +18,13 @@ ENV PYTHON="/opt/venvs/infinito/bin/python"
 ENV PIP="/opt/venvs/infinito/bin/python -m pip"
 ENV PATH="/opt/venvs/infinito/bin:${PATH}"
 
-RUN cat /etc/os-release || true
-
 # Make Nix non-interactive for flake config (CI-friendly)
-RUN if [ -f /etc/nix/nix.conf ]; then \
-      grep -q '^accept-flake-config *= *true' /etc/nix/nix.conf || \
-      echo 'accept-flake-config = true' >> /etc/nix/nix.conf; \
-    fi
+RUN set -euo pipefail; \
+  cat /etc/os-release || true; \
+  if [ -f /etc/nix/nix.conf ]; then \
+    grep -q '^accept-flake-config *= *true' /etc/nix/nix.conf || \
+    echo 'accept-flake-config = true' >> /etc/nix/nix.conf; \
+  fi
 
 # ------------------------------------------------------------
 # Infinito.Nexus source in
@@ -43,35 +43,10 @@ RUN /bin/bash ${INFINITO_SRC_DIR}/roles/dev-python/files/install.sh
 RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-container/files/install-cli.sh
 
 # ------------------------------------------------------------
-# Install systemd + dbus + ssh client (for CI Ansible systemd/service tests + Ansible controller ssh)
+# Install distro package (dependencies incl. systemd/dbus/ssh are defined in packaging/*)
 # ------------------------------------------------------------
 # hadolint ignore=DL3008,DL3033,DL3041
-RUN set -euo pipefail; \
-  . /etc/os-release; \
-  echo "[docker-infinito] Installing systemd/dbus + ssh client for ID=${ID}"; \
-  case "${ID}" in \
-    arch) \
-      pacman -Syu --noconfirm --needed systemd dbus openssh; \
-      ;; \
-    debian|ubuntu) \
-      apt-get update; \
-      apt-get install -y --no-install-recommends \
-        systemd systemd-sysv dbus \
-        openssh-client; \
-      rm -rf /var/lib/apt/lists/*; \
-      ;; \
-    fedora) \
-      dnf -y install systemd dbus openssh-clients; \
-      dnf -y clean all; \
-      ;; \
-    centos|rhel) \
-      (command -v dnf >/dev/null 2>&1 && dnf -y install systemd dbus openssh-clients && dnf -y clean all) || \
-      (yum -y install systemd dbus openssh-clients && yum -y clean all); \
-      ;; \
-    *) \
-      echo "[WARN] Unknown distro ID=${ID}. Skipping systemd/dbus/ssh install."; \
-      ;; \
-  esac
+RUN /bin/bash ${INFINITO_SRC_DIR}/scripts/install/package.sh
 
 # ------------------------------------------------------------
 # Disable interactive first-boot units (CI / container safe)
@@ -85,20 +60,14 @@ ENV container=docker
 STOPSIGNAL SIGRTMIN+3
 
 # ------------------------------------------------------------
-# Install infinito via pkgmgr (shallow)
+# Install infinito via pkgmgr (shallow) and override it with local source
 # ------------------------------------------------------------
 RUN set -euo pipefail; \
   export NIX_CONFIG="${NIX_CONFIG:-}"; \
   echo "[docker-infinito] Install Infinito.Nexus via pkgmgr"; \
   pkgmgr install infinito --clone-mode shallow; \
   echo "[docker-infinito] Installed Infinito.Nexus Version:"; \
-  pkgmgr version infinito
-
-# ------------------------------------------------------------
-# Override with local source (during build)
-# ------------------------------------------------------------
-RUN set -euo pipefail; \
-  export NIX_CONFIG="${NIX_CONFIG:-}"; \
+  pkgmgr version infinito; \
   INFINITO_COMPILE=1 /opt/src/infinito/scripts/docker/entry.sh true
 
 # Set workdir to / to avoid ambiguous commands
@@ -122,5 +91,6 @@ CMD ["/sbin/init"]
 FROM full AS slim
 
 # Image cleanup (reduce final size)
-RUN test -x /usr/local/bin/slim.sh || (echo "slim.sh missing in base image" >&2; exit 1)
-RUN /usr/local/bin/slim.sh
+RUN set -eu; \
+  test -x /usr/local/bin/slim.sh || { echo "slim.sh missing in base image" >&2; exit 1; }; \
+  /usr/local/bin/slim.sh

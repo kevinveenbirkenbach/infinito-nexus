@@ -10,7 +10,7 @@ sys.path.insert(
 )
 
 from get_app_conf import get_app_conf
-from module_utils.config_utils import AppConfigKeyError
+from utils.config_utils import AppConfigKeyError
 from ansible.errors import AnsibleFilterError
 
 

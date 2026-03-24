@@ -2,8 +2,8 @@ name: Cleanup CI images (GHCR)
 
 on:
   schedule:
-    # GitHub cron is UTC → Sonntag
-    - cron: "0 6 * * 0"
+    # GitHub cron is UTC -> Monday 00:00 UTC
+    - cron: "0 0 * * 1"
   workflow_dispatch:
     inputs:
       days:
@@ -13,8 +13,10 @@ on:
         type: string
 
 permissions:
+  actions: read
   contents: read
   packages: write
+  pull-requests: read
 
 concurrency:
   group: images-cleanup-ci
@@ -41,10 +43,7 @@ jobs:
 
       - name: Install jq
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: ./scripts/install/apt.sh jq
 
       - name: Cleanup old ci-* versions
         shell: bash
@@ -56,4 +55,4 @@ jobs:
           DISTROS: ${{ steps.vars.outputs.distros }}
         run: |
           set -euo pipefail
-          ./scripts/administration/ghcr/cleanup_ci_images.sh
+          ./scripts/image/cleanup.sh

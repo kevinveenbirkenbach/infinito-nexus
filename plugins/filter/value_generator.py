@@ -11,20 +11,20 @@ from typing import Type
 @lru_cache(maxsize=1)
 def _value_generator_cls() -> Type[object]:
     """
-    Load ValueGenerator from module_utils/manager/value_generator.py.
+    Load ValueGenerator from utils/manager/value_generator.py.
 
     Assumptions:
-    - module_utils/manager/__init__.py exists (package import works)
+    - utils/manager/__init__.py exists (package import works)
     - plugins/filter/ is located at repo root
     """
     repo_root = Path(__file__).resolve().parents[2]
-    module_utils_path = repo_root / "module_utils"
+    utils_path = repo_root / "utils"
 
-    if not module_utils_path.is_dir():
-        raise RuntimeError(f"module_utils directory not found at: {module_utils_path}")
+    if not utils_path.is_dir():
+        raise RuntimeError(f"utils directory not found at: {utils_path}")
 
-    if str(module_utils_path) not in sys.path:
-        sys.path.insert(0, str(module_utils_path))
+    if str(utils_path) not in sys.path:
+        sys.path.insert(0, str(utils_path))
 
     from manager.value_generator import ValueGenerator  # type: ignore
 

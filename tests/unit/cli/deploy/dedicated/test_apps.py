@@ -10,7 +10,7 @@ class TestValidateApplicationIds(unittest.TestCase):
         # Should not raise
         apps.validate_application_ids("/etc/inventories/github-ci/servers.yml", [])
 
-    @unittest.mock.patch("module_utils.valid_deploy_id.ValidDeployId")
+    @unittest.mock.patch("utils.valid_deploy_id.ValidDeployId")
     def test_invalid_ids_raise_system_exit(self, mock_vdi_cls):
         instance = mock_vdi_cls.return_value
         instance.validate.return_value = {
@@ -30,7 +30,7 @@ class TestValidateApplicationIds(unittest.TestCase):
             ["web-app-foo", "web-app-bar"],
         )
 
-    @unittest.mock.patch("module_utils.valid_deploy_id.ValidDeployId")
+    @unittest.mock.patch("utils.valid_deploy_id.ValidDeployId")
     def test_valid_ids_do_not_exit(self, mock_vdi_cls):
         instance = mock_vdi_cls.return_value
         instance.validate.return_value = {}

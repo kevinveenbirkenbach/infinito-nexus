@@ -13,7 +13,7 @@ echo "🔧 Running project setup (no installation)"
 # Optional: show interpreter for debugging
 echo "🐍 Using PYTHON=${PYTHON}"
 if command -v "${PYTHON}" >/dev/null 2>&1; then
-  "${PYTHON}" -c 'import sys; print("sys.executable=", sys.executable)' || true
+	"${PYTHON}" -c 'import sys; print("sys.executable=", sys.executable)' || true
 fi
 
 ROLES_DIR="./roles"
@@ -31,17 +31,26 @@ INCLUDES_OUT_DIR="./tasks/groups"
 # Validation
 # ------------------------------------------------------------
 require_file() {
-  local path="$1"
-  [[ -f "$path" ]] || { echo "❌ File not found: $path" >&2; exit 1; }
+	local path="$1"
+	[[ -f "$path" ]] || {
+		echo "❌ File not found: $path" >&2
+		exit 1
+	}
 }
 
 require_dir() {
-  local path="$1"
-  [[ -d "$path" ]] || { echo "❌ Directory not found: $path" >&2; exit 1; }
+	local path="$1"
+	[[ -d "$path" ]] || {
+		echo "❌ Directory not found: $path" >&2
+		exit 1
+	}
 }
 
 require_cmd() {
-  command -v "$1" >/dev/null || { echo "❌ Command not found: $1" >&2; exit 1; }
+	command -v "$1" >/dev/null || {
+		echo "❌ Command not found: $1" >&2
+		exit 1
+	}
 }
 
 require_cmd "${PYTHON}"
@@ -54,18 +63,18 @@ require_file "${INCLUDES_SCRIPT}"
 # Helpers
 # ------------------------------------------------------------
 log_section() {
-  echo
-  echo "------------------------------------------------------------"
-  echo "$1"
-  echo "------------------------------------------------------------"
+	echo
+	echo "------------------------------------------------------------"
+	echo "$1"
+	echo "------------------------------------------------------------"
 }
 
 compute_reserved_usernames() {
-  find "${ROLES_DIR}" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' \
-    | sed -E 's/.*-//' \
-    | grep -E -x '[a-z0-9]+' \
-    | sort -u \
-    | paste -sd, -
+	find "${ROLES_DIR}" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' |
+		sed -E 's/.*-//' |
+		grep -E -x '[a-z0-9]+' |
+		sort -u |
+		paste -sd, -
 }
 
 # ------------------------------------------------------------
@@ -80,9 +89,9 @@ echo "Reserved usernames: ${RESERVED_USERNAMES:-<none>}"
 # ------------------------------------------------------------
 log_section "👥 Generating users defaults → ${USERS_OUT}"
 "${PYTHON}" "${USERS_SCRIPT}" \
-  --roles-dir "${ROLES_DIR}" \
-  --output "${USERS_OUT}" \
-  --reserved-usernames "${RESERVED_USERNAMES}"
+	--roles-dir "${ROLES_DIR}" \
+	--output "${USERS_OUT}" \
+	--reserved-usernames "${RESERVED_USERNAMES}"
 
 echo "✅ Users defaults written to ${USERS_OUT}"
 
@@ -91,8 +100,8 @@ echo "✅ Users defaults written to ${USERS_OUT}"
 # ------------------------------------------------------------
 log_section "📦 Generating applications defaults → ${APPLICATIONS_OUT}"
 "${PYTHON}" "${APPLICATIONS_SCRIPT}" \
-  --roles-dir "${ROLES_DIR}" \
-  --output-file "${APPLICATIONS_OUT}"
+	--roles-dir "${ROLES_DIR}" \
+	--output-file "${APPLICATIONS_OUT}"
 
 echo "✅ Applications defaults written to ${APPLICATIONS_OUT}"
 
@@ -105,11 +114,11 @@ mkdir -p "${INCLUDES_OUT_DIR}"
 mapfile -t INCLUDE_GROUPS < <("${PYTHON}" -m cli.meta.categories.invokable -s "-")
 
 for grp in "${INCLUDE_GROUPS[@]}"; do
-  [[ -z "${grp}" ]] && continue
-  out="${INCLUDES_OUT_DIR}/${grp}roles.yml"
-  echo "→ Building ${out} (pattern: '${grp}')"
-  "${PYTHON}" "${INCLUDES_SCRIPT}" "${ROLES_DIR}" -p "${grp}" -o "${out}"
-  echo "  ✅ ${out}"
+	[[ -z "${grp}" ]] && continue
+	out="${INCLUDES_OUT_DIR}/${grp}roles.yml"
+	echo "→ Building ${out} (pattern: '${grp}')"
+	"${PYTHON}" "${INCLUDES_SCRIPT}" "${ROLES_DIR}" -p "${grp}" -o "${out}"
+	echo "  ✅ ${out}"
 done
 
 echo

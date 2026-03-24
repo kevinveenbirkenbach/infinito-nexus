@@ -5,13 +5,15 @@ APP="${APP:-web-app-matomo}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
+# pkgmgr images may reset the working directory before invoking this script.
 cd "${REPO_ROOT}"
-
 bash "${REPO_ROOT}/scripts/install/package.sh"
+
 make install
 make dev-environment-bootstrap
 make up
-make test-local-app APP="${APP}"
+make test
+make test-local-dedicated APP="${APP}"
 make trust-ca
 
 MATOMO_URL="https://matomo.infinito.example"
