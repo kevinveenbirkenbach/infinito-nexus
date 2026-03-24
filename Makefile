@@ -36,7 +36,7 @@ endif
 	test-local-rapid test-local-rapid-fresh test-local-full \
 	bootstrap setup-development
 
-dev-environment-bootstrap: wsl2-systemd-check wsl2-dns-setup install-lint apparmor-teardown dns-setup disable-ipv6
+dev-environment-bootstrap: wsl2-systemd-check install-lint apparmor-teardown dns-setup disable-ipv6
 dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
 
 wsl2-systemd-check:
@@ -48,7 +48,7 @@ wsl2-dns-setup:
 wsl2-trust-windows:
 	@bash scripts/administration/tls/trust/wsl2.sh
 
-dns-setup:
+dns-setup: wsl2-dns-setup
 	@bash scripts/administration/network/dns/setup/linux.sh
 
 dns-remove:
