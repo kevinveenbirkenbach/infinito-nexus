@@ -98,22 +98,21 @@ test("dashboard to nextcloud login", async ({ page }) => {
   const passwordField = nextcloudFrame.getByRole("textbox", { name: "Password" });
   const rememberMeCheckbox = nextcloudFrame.getByRole("checkbox", { name: "Remember me" });
   const signInButton = nextcloudFrame.getByRole("button", { name: "Sign In" });
-  const settingsMenuButton = nextcloudFrame.getByRole("button", { name: "Settings menu" });
-  const userMenuTriggerByControls = nextcloudFrame.locator('[aria-controls="header-menu-user-menu"]');
   const userMenuTriggerInMount = nextcloudFrame.locator("#user-menu button");
+  // #app-content-vue: dashboard app (index.php mounts <div id="app-content-vue">)
+  // #app-navigation-vue: Vue-based apps (files etc.)
+  // #app-content: legacy app content container
+  // #header-start__appmenu: always present in layout.user.php <nav>
   const nextcloudAppShell = nextcloudFrame.locator(
-    "#app-content-vue, #app-navigation-vue, #app-content, #content-vue, #appmenu"
+    "#app-content-vue, #app-navigation-vue, #app-content, #header-start__appmenu"
   );
   const nextcloudPrimaryNavigation = nextcloudFrame.locator(
     'a[href*="/apps/files"], a[href*="/apps/dashboard"]'
   );
   const logoutLinkByName = nextcloudFrame.getByRole("link", { name: "Log out" });
-  const logoutLinkById = nextcloudFrame.locator("#logout");
   const logoutLinkByHref = nextcloudFrame.locator('a[href*="logout"]');
   const logoutConfirmButton = nextcloudFrame.getByRole("button", { name: "Logout" });
   const userMenuCandidates = [
-    { kind: "user-menu", locator: userMenuTriggerByControls },
-    { kind: "user-menu", locator: settingsMenuButton },
     { kind: "user-menu", locator: userMenuTriggerInMount }
   ];
   const postLoginCandidates = [
@@ -177,6 +176,15 @@ test("dashboard to nextcloud login", async ({ page }) => {
 
   await expect(postLoginState.locator).toBeVisible();
 
+  // The firstrunwizard modal (firstrunwizard-activate.mjs) opens after DOMContentLoaded on
+  // first login or when a new Nextcloud version is seen. Its .modal-mask intercepts clicks,
+  // so we must dismiss it before interacting with the user menu.
+  const wizardModalClose = nextcloudFrame.locator(".modal-container__close");
+  if (await wizardModalClose.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
+    await wizardModalClose.first().click();
+    await nextcloudFrame.locator(".modal-mask").waitFor({ state: "hidden", timeout: 5_000 }).catch(() => {});
+  }
+
   // Embedded Nextcloud layouts can hide the user menu even when the login succeeded.
   const userMenuState = postLoginState.kind === "user-menu"
     ? postLoginState
@@ -191,7 +199,7 @@ test("dashboard to nextcloud login", async ({ page }) => {
 
   const logoutLink = await waitForFirstVisible(
     page,
-    [logoutLinkByName, logoutLinkById, logoutLinkByHref],
+    [logoutLinkByName, logoutLinkByHref],
     15_000
   );
 
