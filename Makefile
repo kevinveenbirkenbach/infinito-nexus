@@ -40,7 +40,7 @@ dev-environment-bootstrap: wsl2-systemd-check wsl2-dns-setup install-lint apparm
 dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
 
 wsl2-systemd-check:
-	@bash scripts/administration/wsl2/enable-systemd.sh
+	@bash scripts/administration/systemd/windows/enable.sh
 
 wsl2-dns-setup:
 	@if grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then \
