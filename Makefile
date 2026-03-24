@@ -48,7 +48,7 @@ wsl2-dns-setup:
 	fi
 
 wsl2-trust-windows:
-	@bash scripts/administration/wsl2/trust-ca-windows.sh
+	@bash scripts/administration/tls/trust/windows.sh
 
 dns-setup:
 	@bash scripts/administration/network/dns/setup/linux.sh
@@ -73,8 +73,8 @@ apparmor-restore:
 	fi
 
 trust-ca:
-	@bash scripts/administration/trust_ca.sh
-	@bash scripts/administration/wsl2/trust-ca-windows.sh
+	@bash scripts/administration/tls/trust/linux.sh
+	@bash scripts/administration/tls/trust/windows.sh
 
 disable-ipv6:
 	@sudo bash scripts/administration/network/ipv6/disable.sh
