@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if ! grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then
-	exit 0
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/meta/env/runtime.sh
+source "${SCRIPT_DIR}/../../../../meta/env/runtime.sh"
+[[ "${IS_WSL2}" == "true" ]] || exit 0
 
 UPSTREAM_CONF="/etc/dnsmasq.d/00-wsl2-upstream.conf"
 STUB_CONF="/etc/systemd/resolved.conf.d/disable-stub.conf"

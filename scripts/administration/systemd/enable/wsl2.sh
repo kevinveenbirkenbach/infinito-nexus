@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Only relevant on WSL2
-if ! grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then
-	exit 0
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/meta/env/runtime.sh
+source "${SCRIPT_DIR}/../../../meta/env/runtime.sh"
+[[ "${IS_WSL2}" == "true" ]] || exit 0
 
 # /run/systemd/system only exists when systemd is actually running as PID 1
 if [ -d /run/systemd/system ]; then
