@@ -1,8 +1,10 @@
-# Gemini Instructions
+# GEMINI.md
 
-## Debugging
-- Logs are placed in *job-logs.txt or in *.log files
-- Logs should never be committed
+## Purpose
+The single point of truth for agents like Gemini is AGENTS.md.
+Scan AGENTS.md for further instructions.
+The file GEMINI.md exist to extend AGENTS.md for Gemini.
 
-## Testing
-- Verify before every commit with `make test`
+## Further Information
+- https://geminicli.com/docs/cli/gemini-md/
+- https://s.infinito.nexus/aibestpractice
