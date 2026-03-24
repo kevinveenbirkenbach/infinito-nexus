@@ -18,7 +18,7 @@ Trusts the Infinito Root CA on the **Linux host system**.
 
 Requires `INFINITO_CONTAINER` to be set to the name of the running container.
 
-### 🪟 `windows.sh`
+### 🪟 `wsl2.sh`
 
 Trusts the Infinito Root CA on **Windows** from inside a WSL2 environment. Only executes when running on WSL2 (detected via `/proc/version`).
 
@@ -32,5 +32,5 @@ Trusts the Infinito Root CA on **Windows** from inside a WSL2 environment. Only 
 ## 🔗 Related
 
 - [`../`](../) — TLS administration scripts
-- `make trust-ca` — runs `linux.sh` (and `windows.sh` on WSL2)
+- `make trust-ca` — runs `linux.sh` (and `wsl2.sh` on WSL2)
 - `roles/sys-ca-selfsigned/` — generates the self-signed Root CA inside the container

@@ -6,7 +6,7 @@ This directory contains platform-specific scripts for enabling systemd in enviro
 
 ## 📄 Scripts
 
-### 🪟 `windows.sh`
+### 🪟 `wsl2.sh`
 
 Enables systemd as the WSL2 init system by writing `systemd=true` into `/etc/wsl.conf`.
 

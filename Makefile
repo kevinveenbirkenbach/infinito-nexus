@@ -40,7 +40,7 @@ dev-environment-bootstrap: wsl2-systemd-check wsl2-dns-setup install-lint apparm
 dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
 
 wsl2-systemd-check:
-	@bash scripts/administration/systemd/enable/windows.sh
+	@bash scripts/administration/systemd/enable/wsl2.sh
 
 wsl2-dns-setup:
 	@if grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then \
@@ -48,7 +48,7 @@ wsl2-dns-setup:
 	fi
 
 wsl2-trust-windows:
-	@bash scripts/administration/tls/trust/windows.sh
+	@bash scripts/administration/tls/trust/wsl2.sh
 
 dns-setup:
 	@bash scripts/administration/network/dns/setup/linux.sh
@@ -74,7 +74,7 @@ apparmor-restore:
 
 trust-ca:
 	@bash scripts/administration/tls/trust/linux.sh
-	@bash scripts/administration/tls/trust/windows.sh
+	@bash scripts/administration/tls/trust/wsl2.sh
 
 disable-ipv6:
 	@sudo bash scripts/administration/network/ipv6/disable.sh
