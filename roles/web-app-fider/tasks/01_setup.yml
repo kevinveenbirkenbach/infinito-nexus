@@ -26,16 +26,27 @@
     status_code: [200, 201]
   when: FIDER_OIDC_ENABLED | bool and (fider_tenant_count.stdout | trim | int) == 0
 
-- name: "Fider | Activate tenant (bypass email verification)"
+- name: "Fider | Create admin user (bypass email verification)"
   shell: |
     container exec -i {{ lookup('database', application_id, 'container') }} \
       psql -U {{ lookup('database', application_id, 'username') }} \
            -d {{ lookup('database', application_id, 'name') }} \
-           -t -c "UPDATE tenants SET status = 2 WHERE status = 1;" | tr -d ' \n'
+           -c "INSERT INTO users (name, email, created_at, tenant_id, role, status, avatar_type, avatar_bkey)
+               VALUES (
+                 '{{ users.administrator.firstname }} {{ users.administrator.lastname }}',
+                 '{{ users.administrator.email }}',
+                 NOW(),
+                 (SELECT id FROM tenants LIMIT 1),
+                 3, 1, 2, ''
+               )
+               ON CONFLICT (tenant_id, email) DO NOTHING;
+               UPDATE email_verifications
+                 SET verified_at = NOW(),
+                     user_id = (SELECT id FROM users WHERE email = '{{ users.administrator.email }}' AND tenant_id = (SELECT id FROM tenants LIMIT 1))
+               WHERE email = '{{ users.administrator.email }}' AND verified_at IS NULL;"
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  register: fider_activate_result
-  changed_when: fider_activate_result.stdout | trim == 'UPDATE1'
+  changed_when: true
   when: FIDER_OIDC_ENABLED | bool
 
 - name: "Fider | Configure Keycloak as OIDC provider in database"
