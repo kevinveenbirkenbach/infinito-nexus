@@ -32,14 +32,17 @@
       psql -U {{ lookup('database', application_id, 'username') }} \
            -d {{ lookup('database', application_id, 'name') }} \
            -c "INSERT INTO users (name, email, created_at, tenant_id, role, status, avatar_type, avatar_bkey)
-               VALUES (
+               SELECT
                  '{{ users.administrator.firstname }} {{ users.administrator.lastname }}',
                  '{{ users.administrator.email }}',
                  NOW(),
                  (SELECT id FROM tenants LIMIT 1),
                  3, 1, 2, ''
-               )
-               ON CONFLICT (tenant_id, email) DO NOTHING;
+               WHERE NOT EXISTS (
+                 SELECT 1 FROM users
+                 WHERE email = '{{ users.administrator.email }}'
+                   AND tenant_id = (SELECT id FROM tenants LIMIT 1)
+               );
                UPDATE email_verifications
                  SET verified_at = NOW(),
                      user_id = (SELECT id FROM users WHERE email = '{{ users.administrator.email }}' AND tenant_id = (SELECT id FROM tenants LIMIT 1))
