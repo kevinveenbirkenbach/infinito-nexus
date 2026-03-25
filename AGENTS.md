@@ -63,6 +63,7 @@ Playwright tests should minimum check:
 
 - Write unit, integration and lint tests in the `tests` folder with the python `unittest` framework
 - If `make test` fails with `service "infinito" is not running` execute `make up` and restart afterwards `make test` again
+- You MUST not write regression tests that only check whether source code contains a string
 
 ### Unit
 
