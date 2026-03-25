@@ -16,6 +16,7 @@ compose:
     css:
       enabled: true
     roulette-wheel:
+      min_storage:        "1GB"
       cpus:               0.5
       mem_reservation:    126m
       mem_limit:          265m

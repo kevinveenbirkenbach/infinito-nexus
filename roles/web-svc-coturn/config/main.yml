@@ -11,6 +11,7 @@ compose:
     coturn:
       image:              "coturn/coturn"
       version:            "latest"
+      min_storage:        "1GB"
       user_auth_enabled:  false
       cpus:               1.0
       mem_reservation:    512m
