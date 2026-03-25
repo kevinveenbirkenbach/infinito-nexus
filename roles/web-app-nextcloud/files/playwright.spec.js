@@ -78,6 +78,72 @@ async function waitForVisibleCandidate(
   throw new Error(errorMessage);
 }
 
+async function dismissBlockingNextcloudModals(page, nextcloudFrame, maxDismissals = 4) {
+  const modalOverlay = nextcloudFrame.locator(
+    "#firstrunwizard.modal-mask, #firstrunwizard[role='dialog'], .modal-mask[role='dialog'], [role='dialog'][aria-modal='true']"
+  );
+  const dismissButtonCandidates = [
+    nextcloudFrame.getByRole("button", { name: /^close$/i }),
+    nextcloudFrame.getByRole("button", { name: /^schlie(?:ss|ß)en$/i }),
+    nextcloudFrame.locator(
+      ".modal-mask .modal-container__close, .modal-mask .header-close, [role='dialog'] .modal-container__close, [role='dialog'] .header-close"
+    ),
+    nextcloudFrame.locator(
+      ".modal-mask .next, .modal-mask button[aria-label='Next'], [role='dialog'] .next, [role='dialog'] button[aria-label='Next']"
+    ),
+    nextcloudFrame.getByRole("button", { name: /skip|not now|later|dismiss|done|got it/i })
+  ];
+  let stableChecksWithoutModal = 0;
+
+  for (let i = 0; i < maxDismissals; i += 1) {
+    if (!(await modalOverlay.first().isVisible().catch(() => false))) {
+      stableChecksWithoutModal += 1;
+      if (stableChecksWithoutModal >= 2) {
+        return;
+      }
+      await page.waitForTimeout(600);
+      continue;
+    }
+
+    stableChecksWithoutModal = 0;
+    let dismissed = false;
+
+    for (const candidate of dismissButtonCandidates) {
+      const button = candidate.first();
+      if (await button.isVisible().catch(() => false)) {
+        await button.click({ timeout: 2_000 }).catch(() => {});
+        dismissed = true;
+        break;
+      }
+    }
+
+    if (!dismissed) {
+      await page.keyboard.press("Escape").catch(() => {});
+    }
+
+    await page.waitForTimeout(300);
+  }
+}
+
+async function clickUserMenuWithModalRetry(page, nextcloudFrame, userMenuLocator, attempts = 5) {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    await dismissBlockingNextcloudModals(page, nextcloudFrame, 6);
+
+    try {
+      await userMenuLocator.click({ timeout: 4_000 });
+      return;
+    } catch (error) {
+      const message = String(error && error.message ? error.message : error);
+      const retriable = /intercepts pointer events|timed out|timeout/i.test(message);
+
+      if (!retriable || attempt === attempts) {
+        throw error;
+      }
+      await page.waitForTimeout(500);
+    }
+  }
+}
+
 test.beforeEach(() => {
   expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
   expect(nextcloudBaseUrl, "NEXTCLOUD_BASE_URL must be set in the Playwright env file").toBeTruthy();
@@ -176,14 +242,8 @@ test("dashboard to nextcloud login", async ({ page }) => {
 
   await expect(postLoginState.locator).toBeVisible();
 
-  // The firstrunwizard modal (firstrunwizard-activate.mjs) opens after DOMContentLoaded on
-  // first login or when a new Nextcloud version is seen. Its .modal-mask intercepts clicks,
-  // so we must dismiss it before interacting with the user menu.
-  const wizardModalClose = nextcloudFrame.locator(".modal-container__close");
-  if (await wizardModalClose.first().isVisible({ timeout: 3_000 }).catch(() => false)) {
-    await wizardModalClose.first().click();
-    await nextcloudFrame.locator(".modal-mask").waitFor({ state: "hidden", timeout: 5_000 }).catch(() => {});
-  }
+  // First login can show one or more stacked onboarding dialogs that block clicks.
+  await dismissBlockingNextcloudModals(page, nextcloudFrame);
 
   // Embedded Nextcloud layouts can hide the user menu even when the login succeeded.
   const userMenuState = postLoginState.kind === "user-menu"
@@ -195,7 +255,7 @@ test("dashboard to nextcloud login", async ({ page }) => {
     return;
   }
 
-  await userMenuState.locator.click();
+  await clickUserMenuWithModalRetry(page, nextcloudFrame, userMenuState.locator);
 
   const logoutLink = await waitForFirstVisible(
     page,
