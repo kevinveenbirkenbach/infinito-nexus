@@ -103,7 +103,7 @@ Use to add custom Jinja2 test operators for conditional logic.
 ## 🧪 Best Practices
 
 - Keep plugin interfaces explicit and stable.
-- Keep plugin logic focused; move shared logic to `module_utils/`.
+- Keep plugin logic focused; move shared logic to `utils/`.
 - Add unit tests for plugin behavior and integration tests for end-to-end flows.
 - Prefer deterministic outputs and avoid hidden global state.
 - Document any plugin-specific task arguments in the plugin docstring and README.

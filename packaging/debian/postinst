@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+    configure)
+        echo "infinito-nexus dependencies installed."
+        ;;
+esac
+
+exit 0

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import re
 from ansible.errors import AnsibleFilterError
-from module_utils.config_utils import get_app_conf
-from module_utils.entity_name_utils import get_entity_name
+from utils.config_utils import get_app_conf
+from utils.entity_name_utils import get_entity_name
 
 # Regex and unit conversion table
 _UNIT_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*([kKmMgGtT]?[bB]?)?\s*$")

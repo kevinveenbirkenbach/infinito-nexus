@@ -59,10 +59,7 @@ jobs:
 
       - name: Install deps (jq + envsubst)
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq gettext-base
+        run: ./scripts/install/apt.sh jq gettext-base
 
       - name: Start stack for discovery
         shell: bash
@@ -100,10 +97,7 @@ jobs:
 
       - name: Install deps (jq + envsubst)
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq gettext-base
+        run: ./scripts/install/apt.sh jq gettext-base
 
       - name: Deploy app (same as CI logic)
         shell: bash

@@ -7,8 +7,8 @@ set -euo pipefail
 ENV_FILE="${ENV_FILE:-env.ci}"
 
 if [ ! -f "${ENV_FILE}" ]; then
-  echo "ERROR: env file not found: ${ENV_FILE}"
-  exit 1
+	echo "ERROR: env file not found: ${ENV_FILE}"
+	exit 1
 fi
 
 # Export all variables from env file
@@ -32,15 +32,18 @@ IP4_EXPECTED="${IP4}"
 # Output helpers
 # ------------------------------------------------------------
 section() {
-  echo
-  echo "------------------------------------------------------------"
-  echo "$1"
-  echo "------------------------------------------------------------"
+	echo
+	echo "------------------------------------------------------------"
+	echo "$1"
+	echo "------------------------------------------------------------"
 }
 
-ok()   { echo "OK:   $*"; }
+ok() { echo "OK:   $*"; }
 warn() { echo "WARN: $*"; }
-fail() { echo "FAIL: $*"; exit 1; }
+fail() {
+	echo "FAIL: $*"
+	exit 1
+}
 
 # ------------------------------------------------------------
 # Banner
@@ -62,22 +65,22 @@ echo
 section "Host -> CoreDNS (direct queries)"
 
 if command -v dig >/dev/null 2>&1; then
-  a1="$(dig @"${DNS_IP}" "${DOMAIN}" A +short | head -n1 || true)"
-  a2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" A +short | head -n1 || true)"
+	a1="$(dig @"${DNS_IP}" "${DOMAIN}" A +short | head -n1 || true)"
+	a2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" A +short | head -n1 || true)"
 
-  if [ "${a1}" = "${IP4_EXPECTED}" ]; then
-    ok "${DOMAIN} A -> ${a1}"
-  else
-    fail "${DOMAIN} A failed (got '${a1}')"
-  fi
+	if [ "${a1}" = "${IP4_EXPECTED}" ]; then
+		ok "${DOMAIN} A -> ${a1}"
+	else
+		fail "${DOMAIN} A failed (got '${a1}')"
+	fi
 
-  if [ "${a2}" = "${IP4_EXPECTED}" ]; then
-    ok "${SUBDOMAIN} A -> ${a2}"
-  else
-    fail "${SUBDOMAIN} A failed (got '${a2}')"
-  fi
+	if [ "${a2}" = "${IP4_EXPECTED}" ]; then
+		ok "${SUBDOMAIN} A -> ${a2}"
+	else
+		fail "${SUBDOMAIN} A failed (got '${a2}')"
+	fi
 else
-  warn "dig not found on host — skipping host direct DNS tests"
+	warn "dig not found on host — skipping host direct DNS tests"
 fi
 
 # ------------------------------------------------------------
@@ -86,30 +89,30 @@ fi
 section "Host -> CoreDNS (AAAA sanity check)"
 
 if command -v dig >/dev/null 2>&1; then
-  aaaa1="$(dig @"${DNS_IP}" "${DOMAIN}" AAAA +comments +noall +answer || true)"
-  aaaa2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" AAAA +comments +noall +answer || true)"
+	aaaa1="$(dig @"${DNS_IP}" "${DOMAIN}" AAAA +comments +noall +answer || true)"
+	aaaa2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" AAAA +comments +noall +answer || true)"
 
-  echo "AAAA ${DOMAIN}:"
-  echo "${aaaa1:-<empty>}"
-  echo
+	echo "AAAA ${DOMAIN}:"
+	echo "${aaaa1:-<empty>}"
+	echo
 
-  echo "AAAA ${SUBDOMAIN}:"
-  echo "${aaaa2:-<empty>}"
-  echo
+	echo "AAAA ${SUBDOMAIN}:"
+	echo "${aaaa2:-<empty>}"
+	echo
 
-  # dig exits 0 even on NXDOMAIN, so we check for SERVFAIL explicitly
-  status1="$(dig @"${DNS_IP}" "${DOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
-  status2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
+	# dig exits 0 even on NXDOMAIN, so we check for SERVFAIL explicitly
+	status1="$(dig @"${DNS_IP}" "${DOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
+	status2="$(dig @"${DNS_IP}" "${SUBDOMAIN}" AAAA +comments 2>&1 | grep -i status || true)"
 
-  echo "${status1}"
-  echo "${status2}"
+	echo "${status1}"
+	echo "${status2}"
 
-  echo "${status1}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${DOMAIN}"
-  echo "${status2}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${SUBDOMAIN}"
+	echo "${status1}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${DOMAIN}"
+	echo "${status2}" | grep -qi "SERVFAIL" && fail "AAAA lookup returned SERVFAIL for ${SUBDOMAIN}"
 
-  ok "AAAA sanity check passed (no SERVFAIL)"
+	ok "AAAA sanity check passed (no SERVFAIL)"
 else
-  warn "dig not found on host — skipping AAAA sanity test"
+	warn "dig not found on host — skipping AAAA sanity test"
 fi
 
 # ------------------------------------------------------------
@@ -118,11 +121,11 @@ fi
 section "CoreDNS container status"
 
 if docker ps --filter name=infinito-coredns --format '{{.Names}}' | grep -q infinito-coredns; then
-  docker ps --filter name=infinito-coredns --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'
-  container logs --tail=10 infinito-coredns || true
-  ok "CoreDNS container is running"
+	docker ps --filter name=infinito-coredns --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}'
+	container logs --tail=10 infinito-coredns || true
+	ok "CoreDNS container is running"
 else
-  fail "CoreDNS container not running"
+	fail "CoreDNS container not running"
 fi
 
 # ------------------------------------------------------------

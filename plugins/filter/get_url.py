@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from module_utils.get_url import get_url
+from utils.get_url import get_url
 
 
 class FilterModule(object):

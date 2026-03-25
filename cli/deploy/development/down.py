@@ -24,14 +24,15 @@ def _base_env(*, distro: str) -> dict[str, str]:
 
 
 def _compose_run(*, repo_root: Path, distro: str, args: list[str]) -> None:
-    cmd = ["docker", "compose", "--profile", "ci", *args]
-    subprocess.run(
-        cmd,
-        cwd=repo_root,
-        env=_base_env(distro=distro),
-        check=True,
-        text=True,
-    )
+    cmd = ["docker", "compose", "--env-file", "env.ci"]
+    env_development = repo_root / "env.development"
+    if env_development.exists():
+        cmd += ["--env-file", "env.development"]
+
+    cmd += ["--profile", "ci", *args]
+    env = _base_env(distro=distro)
+    env.setdefault("NIX_CONFIG", "")
+    subprocess.run(cmd, cwd=repo_root, env=env, check=True, text=True)
 
 
 def _cleanup_docker_root() -> None:

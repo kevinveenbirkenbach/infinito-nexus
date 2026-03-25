@@ -10,7 +10,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
-from module_utils.invokable import list_invokable_app_ids  # noqa: E402
+from utils.invokable import list_invokable_app_ids  # noqa: E402
 
 
 def main() -> None:

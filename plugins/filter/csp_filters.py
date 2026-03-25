@@ -1,8 +1,8 @@
 from ansible.errors import AnsibleFilterError
 import hashlib
 import base64
-from module_utils.config_utils import get_app_conf
-from module_utils.get_url import get_url
+from utils.config_utils import get_app_conf
+from utils.get_url import get_url
 
 
 def _dedup_preserve(seq):

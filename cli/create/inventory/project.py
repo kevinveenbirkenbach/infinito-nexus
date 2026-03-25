@@ -30,7 +30,7 @@ def detect_project_root(start_file: Path) -> Path:
 def build_env_with_project_root(project_root: Path) -> Dict[str, str]:
     """
     Return an environment dict where PYTHONPATH includes the project root.
-    This makes `module_utils` and other top-level packages importable in subprocesses.
+    This makes `utils` and other top-level packages importable in subprocesses.
     """
     env = os.environ.copy()
     root_str = str(project_root)

@@ -11,7 +11,7 @@ import yaml
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-from module_utils.handler.vault import VaultHandler
+from utils.handler.vault import VaultHandler
 
 
 def _fatal(msg: str) -> None:

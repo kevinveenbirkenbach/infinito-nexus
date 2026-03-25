@@ -43,10 +43,7 @@ jobs:
 
       - name: Install jq
         shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y jq
+        run: ./scripts/install/apt.sh jq
 
       - name: Cleanup old ci-* versions
         shell: bash
@@ -58,4 +55,4 @@ jobs:
           DISTROS: ${{ steps.vars.outputs.distros }}
         run: |
           set -euo pipefail
-          ./scripts/administration/ghcr/cleanup_ci_images.sh
+          ./scripts/image/cleanup.sh
