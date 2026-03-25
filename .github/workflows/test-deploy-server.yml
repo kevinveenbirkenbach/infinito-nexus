@@ -70,6 +70,7 @@ jobs:
 
   server:
     name: 🌐 Deploy ${{ matrix.app }}
+    if: needs.discover.outputs.apps != '' && needs.discover.outputs.apps != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     needs: discover
