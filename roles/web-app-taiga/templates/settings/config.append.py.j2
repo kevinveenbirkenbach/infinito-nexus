@@ -1,3 +1,5 @@
+{{ TAIGA_CONFIG_APPEND_MARKER }}
+
 {% if TAIGA_OIDC_ENABLED | bool %}
 # OIDC via taiga-contrib-oidc-auth (official)
 # @see https://github.com/taigaio/taiga-contrib-oidc-auth
@@ -18,6 +20,7 @@ OIDC_RP_CLIENT_ID     = "{{ OIDC.CLIENT.ID }}"
 OIDC_RP_CLIENT_SECRET = "{{ OIDC.CLIENT.SECRET }}"
 OIDC_RP_SIGN_ALGO     = "RS256"
 OIDC_RP_SCOPES        = "openid profile email"
+OIDC_USERNAME_CLAIM           = "{{ OIDC.ATTRIBUTES.USERNAME }}"
 OIDC_OP_JWKS_ENDPOINT          = "{{ OIDC.CLIENT.CERTS }}"
 OIDC_OP_AUTHORIZATION_ENDPOINT = "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
 OIDC_OP_TOKEN_ENDPOINT         = "{{ OIDC.CLIENT.TOKEN_URL }}"
@@ -30,15 +33,16 @@ OIDC_OP_USER_ENDPOINT          = "{{ OIDC.CLIENT.USER_INFO_URL }}"
 INSTALLED_APPS += ["taiga_contrib_ldap_auth_ext"]
 
 # LDAP_SERVER must not include the port — port is set separately via LDAP_PORT
-LDAP_SERVER = "{{ LDAP.SERVER.URI | regex_replace(':\\d+$', '') }}"
-LDAP_PORT   = {{ LDAP.SERVER.PORT }}
-LDAP_BIND_DN       = "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
-LDAP_BIND_PASSWORD = "{{ LDAP.BIND_CREDENTIAL }}"
-LDAP_SEARCH_BASE   = "{{ LDAP.DN.OU.USERS }}"
-LDAP_SEARCH_FILTER_ADDITIONAL = ""
-LDAP_USERNAME_ATTRIBUTE  = "{{ LDAP.USER.ATTRIBUTES.ID }}"
-LDAP_EMAIL_ATTRIBUTE     = "{{ LDAP.USER.ATTRIBUTES.MAIL }}"
-LDAP_FULL_NAME_ATTRIBUTE = "{{ LDAP.USER.ATTRIBUTES.FULLNAME }}"
-LDAP_SAVE_LOGIN_PASSWORD = False
-LDAP_MAP_USERNAME_TO_UID = None
+LDAP_SERVER                     = "{{ LDAP.SERVER.URI | regex_replace(':\\d+$', '') }}"
+LDAP_PORT                       = {{ LDAP.SERVER.PORT }}
+LDAP_START_TLS                  = {{ 'True' if LDAP.SERVER.SECURITY | upper == 'TLS' else 'False' }}
+LDAP_BIND_DN                    = "{{ LDAP.DN.ADMINISTRATOR.DATA }}"
+LDAP_BIND_PASSWORD              = "{{ LDAP.BIND_CREDENTIAL }}"
+LDAP_SEARCH_BASE                = "{{ LDAP.DN.OU.USERS }}"
+LDAP_SEARCH_FILTER_ADDITIONAL   = "{{ LDAP.FILTERS.USERS.ALL }}"
+LDAP_USERNAME_ATTRIBUTE         = "{{ LDAP.USER.ATTRIBUTES.ID }}"
+LDAP_EMAIL_ATTRIBUTE            = "{{ LDAP.USER.ATTRIBUTES.MAIL }}"
+LDAP_FULL_NAME_ATTRIBUTE        = "{{ LDAP.USER.ATTRIBUTES.FULLNAME }}"
+LDAP_SAVE_LOGIN_PASSWORD        = False
+LDAP_MAP_USERNAME_TO_UID        = None
 {% endif %}

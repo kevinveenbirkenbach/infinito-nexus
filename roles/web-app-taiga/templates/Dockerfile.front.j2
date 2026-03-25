@@ -5,17 +5,15 @@ FROM node:16-alpine AS plugin-builder
 RUN apk add --no-cache git
 
 WORKDIR /build
-RUN git clone --depth=1 https://github.com/taigaio/taiga-contrib-oidc-auth.git .
+RUN git clone {{ TAIGA_OIDC_PLUGIN_REPOSITORY }} . && \
+    git checkout {{ TAIGA_OIDC_PLUGIN_REF }}
 
 WORKDIR /build/front
 RUN npm install
 
-# Compile Jade templates → dist/oidc_auth.html
-# Compile CoffeeScript + HTML → dist/oidc_auth.js
-RUN npm run build
-
-# oidc-auth.json (plugin manifest) is not copied by the npm build scripts
-RUN cp oidc-auth.json dist/
+# Upstream documents gulp build here; npm run build currently concatenates the
+# rendered HTML into CoffeeScript and breaks on the plugin's current sources.
+RUN {{ TAIGA_OIDC_FRONTEND_BUILD_COMMAND }}
 
 # ── Stage 2: Inject plugin into official taiga-front image ───────────────────
 FROM taigaio/taiga-front:{{ TAIGA_VERSION }}

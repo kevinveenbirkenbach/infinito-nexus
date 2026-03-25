@@ -9,5 +9,7 @@
     "gravatar": false,
     "rtlLanguages": ["fa"]{% if TAIGA_LDAP_ENABLED | bool %},
     "loginFormType": "ldap"{% endif %}{% if TAIGA_OIDC_ENABLED | bool %},
-    "contribPlugins": ["/plugins/oidc-auth/oidc-auth.json"]{% endif %}
+    "contribPlugins": ["/plugins/oidc-auth/oidc-auth.json"],
+    "oidcButtonText": "{{ OIDC.BUTTON_TEXT }}",
+    "oidcMountPoint": "/oidc"{% endif %}
 }

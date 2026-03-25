@@ -11,16 +11,30 @@
       timeout: 5s
       retries: 5
       start_period: 40s
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+    build:
+      context: "{{ docker_repository_path }}"
+      dockerfile: Dockerfile.taiga-back
+    image: "{{ TAIGA_DOCKER_IMAGE_BACKEND_AUTH }}"
+    pull_policy: never
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      if ! grep -qxF '{{ TAIGA_CONFIG_APPEND_MARKER }}' /taiga-back/settings/config.py; then
+        cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py;
+      fi;
+      exec /taiga-back/docker/entrypoint.sh
+{% else %}
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
+{% endif %}
     volumes:
       # These volumens will be used by taiga-back and taiga-async.
       - static-data:{{ TAIGA_VOLUME_STATIC }}
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
 {% if TAIGA_PLUGINS_ENABLED | bool %}
-      - {{ [lookup('container', application_id, 'directories.config'), 'taiga-config.append.py'] | path_join }}:/taiga-back/settings/config.append.py:ro
+      - {{ TAIGA_CONFIG_APPEND_PATH }}:/taiga-back/settings/config.append.py:ro
 {% endif %}
 {% if TAIGA_OIDC_ENABLED | bool %}
-      - {{ [lookup('container', application_id, 'directories.config'), 'taiga-urls.py'] | path_join }}:/taiga-back/settings/urls.py:ro
+      - {{ TAIGA_URLS_PATH }}:/taiga-back/settings/urls.py:ro
 {% endif %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
@@ -29,13 +43,6 @@
         condition: service_started
       {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
         condition: service_started
-{% if TAIGA_PLUGINS_ENABLED | bool %}
-    command: >
-      /bin/sh -c "
-        pip install{% if TAIGA_OIDC_ENABLED | bool %} mozilla-django-oidc git+https://github.com/taigaio/taiga-contrib-oidc-auth.git{% endif %}{% if TAIGA_LDAP_ENABLED | bool %} taiga-contrib-ldap-auth-ext{% endif %} &&
-        cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py &&
-        exec /taiga-back/docker/entrypoint.sh"
-{% endif %}
 
 {% set service_name = TAIGA_ASYNC_SERVICE %}
   {{ service_name }}:
@@ -47,14 +54,16 @@
       timeout: 5s
       retries: 5
       start_period: 60s
-    image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
 {% if TAIGA_PLUGINS_ENABLED | bool %}
+    image: "{{ TAIGA_DOCKER_IMAGE_BACKEND_AUTH }}"
     entrypoint: ["/bin/sh", "-c"]
     command: >
-      pip install{% if TAIGA_OIDC_ENABLED | bool %} mozilla-django-oidc git+https://github.com/taigaio/taiga-contrib-oidc-auth.git{% endif %}{% if TAIGA_LDAP_ENABLED | bool %} taiga-contrib-ldap-auth-ext{% endif %} &&
-      cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py &&
+      if ! grep -qxF '{{ TAIGA_CONFIG_APPEND_MARKER }}' /taiga-back/settings/config.py; then
+        cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py;
+      fi;
       exec /taiga-back/docker/async_entrypoint.sh
 {% else %}
+    image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
 {% endif %}
     volumes:
@@ -62,10 +71,10 @@
       - static-data:{{ TAIGA_VOLUME_STATIC }}
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
 {% if TAIGA_PLUGINS_ENABLED | bool %}
-      - {{ [lookup('container', application_id, 'directories.config'), 'taiga-config.append.py'] | path_join }}:/taiga-back/settings/config.append.py:ro
+      - {{ TAIGA_CONFIG_APPEND_PATH }}:/taiga-back/settings/config.append.py:ro
 {% endif %}
 {% if TAIGA_OIDC_ENABLED | bool %}
-      - {{ [lookup('container', application_id, 'directories.config'), 'taiga-urls.py'] | path_join }}:/taiga-back/settings/urls.py:ro
+      - {{ TAIGA_URLS_PATH }}:/taiga-back/settings/urls.py:ro
 {% endif %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
@@ -189,7 +198,7 @@
       - {{ TAIGA_EVENTS_SERVICE }}
 {{ applications | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, 'volume'),
+    database_volume=TAIGA_DATABASE_VOLUME,
     extra_volumes={'async-rabbitmq-data': {}, 'events-rabbitmq-data': {}, 'media-data': {}, 'static-data': {}}
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
