@@ -41,11 +41,14 @@ Solve semantic errors in text whenever you find them without explicit order.
 ## Commiting
 - Verify before every commit with `make test`
 - If fails execute: `make clean-sudo` and afterwards `make test` again
+- `make test` is not required when only `.md` files were changed.
+- Commits are allowed only when all tests pass successfully.
 
 ## Tests
 
 - Write unit, integration and lint tests in the `tests` folder with the python `unittest` framework
 - If `make test` fails with `service "infinito" is not running` execute `make up` and restart afterwards `make test` again
+- You MUST not write regression tests that only check whether source code contains a string
 
 ### Unit
 
