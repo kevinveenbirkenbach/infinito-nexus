@@ -43,7 +43,7 @@ compose:
       # Shopware Release
       package:
         name: "shopware/production"
-        version: "6.7.3.1"
+        version: "6.7.8.2"
     php:
       image: "ghcr.io/shopware/docker-base"
       version: "8.3"
