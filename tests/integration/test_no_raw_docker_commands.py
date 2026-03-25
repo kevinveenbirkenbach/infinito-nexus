@@ -21,6 +21,8 @@ class Finding:
 # Whitelist: ignore these file endings / filenames / path fragments
 WHITELIST_SUFFIXES: Tuple[str, ...] = (
     ".md",
+    ".js",
+    ".json",
     ".png",
     ".jpg",
     ".jpeg",
