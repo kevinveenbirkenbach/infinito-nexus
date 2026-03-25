@@ -19,6 +19,7 @@ SHOPWARE_ROOT:                  "/var/www/html"
 
 SHOPWARE_PHP_VERSION:           "{{ lookup('config', application_id, 'compose.services.php.version') }}"
 SHOPWARE_PHP_IMAGE:             "{{ lookup('config', application_id, 'compose.services.php.image') }}"
+SHOPWARE_COMPOSER_PLATFORM_PHP: "{{ SHOPWARE_PHP_VERSION | regex_replace('^(\\d+\\.\\d+)$', '\\1.0') }}"
 
 # Split service container names
 SHOPWARE_INIT_CONTAINER:        "{{ lookup('config', application_id, 'compose.services.init.name') }}"
