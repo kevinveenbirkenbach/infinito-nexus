@@ -73,6 +73,7 @@ Follow these coding standards where applicable:
 
 - Write unit, integration, and lint tests in the `tests` folder using Python `unittest`.
 - Do not write regression tests that only assert that a source file contains a string.
+- Do not write tests specifically for non-executable files such as `.yml` or `.j2`; test the executable behavior that consumes them instead.
 
 ### Unit
 
