@@ -43,6 +43,7 @@ Follow these coding standards where applicable:
 - Prefer `Dockerfile` over `Dockerfile.j2`.
 - Prefer defining variables once in `vars/main.yml` over using `lookup()` or dotted variable composition in `*.j2` or `*.yml`.
 - Variables that are defined once and treated as constants must be uppercase.
+- When implementing new features, prefer testing against the original upstream Docker images whenever possible to save time.
 
 ## Semantics
 
