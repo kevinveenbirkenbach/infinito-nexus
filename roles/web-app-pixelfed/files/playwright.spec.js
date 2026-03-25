@@ -22,10 +22,22 @@ function decodeDotenvQuotedValue(value) {
   }
 }
 
-const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
-const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
 const oidcIssuerUrl = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const pixelfedBaseUrl = decodeDotenvQuotedValue(process.env.PIXELFED_BASE_URL);
+const loginScenarios = [
+  {
+    envSuffix: "FIRST",
+    label: "biber",
+    username: decodeDotenvQuotedValue(process.env.LOGIN_USERNAME_FIRST),
+    password: decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD_FIRST)
+  },
+  {
+    envSuffix: "SECOND",
+    label: "administrator",
+    username: decodeDotenvQuotedValue(process.env.LOGIN_USERNAME_SECOND),
+    password: decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD_SECOND)
+  }
+];
 
 async function waitForFirstVisible(page, locators, timeout = 60_000, errorMessage = "Timed out waiting for a visible locator") {
   const deadline = Date.now() + timeout;
@@ -111,14 +123,7 @@ async function anyVisible(locators) {
   return false;
 }
 
-test.beforeEach(() => {
-  expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
-  expect(pixelfedBaseUrl, "PIXELFED_BASE_URL must be set in the Playwright env file").toBeTruthy();
-  expect(loginUsername, "LOGIN_USERNAME must be set in the Playwright env file").toBeTruthy();
-  expect(loginPassword, "LOGIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
-});
-
-test("dashboard to pixelfed oidc login", async ({ page }) => {
+async function loginToPixelfedViaDashboard(page, loginScenario) {
   const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedPixelfedBaseUrl = pixelfedBaseUrl.replace(/\/$/, "");
 
@@ -131,7 +136,7 @@ test("dashboard to pixelfed oidc login", async ({ page }) => {
       page.getByRole("link", { name: /^Pixelfed$/i })
     ],
     60_000,
-    "Timed out waiting for the Pixelfed entry on the dashboard"
+    `Timed out waiting for the Pixelfed entry on the dashboard for ${loginScenario.label}`
   );
 
   await pixelfedEntry.click();
@@ -180,6 +185,99 @@ test("dashboard to pixelfed oidc login", async ({ page }) => {
       locator: pixelfedFrame.locator('a[href="/logout"], a[href*="/logout"]')
     }
   ];
+
+  await expect(pixelfedIframe).toBeVisible();
+
+  await waitForIframeUrl(
+    page,
+    pixelfedIframe,
+    (url) => url.includes(expectedOidcAuthUrl) || url.includes(expectedPixelfedBaseUrl),
+    60_000,
+    `Expected the Pixelfed iframe to load Pixelfed or Keycloak for ${loginScenario.label}: ${expectedOidcAuthUrl}`
+  );
+
+  if (!(await getIframeUrl(pixelfedIframe)).includes(expectedOidcAuthUrl)) {
+    const pixelfedOidcEntry = await waitForVisibleCandidate(
+      page,
+      pixelfedOidcEntryCandidates,
+      5_000
+    ).catch(() => null);
+
+    if (!pixelfedOidcEntry) {
+      const pixelfedLoginEntry = await waitForVisibleCandidate(
+        page,
+        pixelfedLoginEntryCandidates,
+        20_000,
+        `Timed out waiting for the Pixelfed login entry before starting the OIDC flow for ${loginScenario.label}`
+      );
+
+      await pixelfedLoginEntry.locator.click();
+    }
+
+    const oidcStartEntry = pixelfedOidcEntry || await waitForVisibleCandidate(
+      page,
+      pixelfedOidcEntryCandidates,
+      20_000,
+      `Timed out waiting for the Pixelfed OIDC action for ${loginScenario.label}`
+    );
+
+    await oidcStartEntry.locator.click();
+
+    await waitForIframeUrl(
+      page,
+      pixelfedIframe,
+      (url) => url.includes(expectedOidcAuthUrl),
+      60_000,
+      `Expected the Pixelfed iframe to navigate to Keycloak for ${loginScenario.label}: ${expectedOidcAuthUrl}`
+    );
+  }
+
+  const visibleUsernameField = await waitForFirstVisible(
+    page,
+    [usernameField, pixelfedFrame.getByRole("textbox", { name: /username|email/i })],
+    60_000,
+    `Timed out waiting for the Keycloak username field in the Pixelfed iframe for ${loginScenario.label}`
+  );
+
+  await expect(visibleUsernameField).toBeVisible();
+  await visibleUsernameField.click();
+  await visibleUsernameField.fill(loginScenario.username);
+  await passwordField.first().fill(loginScenario.password);
+
+  if (await rememberMeCheckbox.first().isVisible().catch(() => false)) {
+    await rememberMeCheckbox.first().check().catch(() => {});
+  } else {
+    await pixelfedFrame.getByText(/remember me/i).click({ timeout: 2_000 }).catch(() => {});
+  }
+
+  const visibleSignInButton = await waitForFirstVisible(
+    page,
+    [signInButton, pixelfedFrame.getByRole("button", { name: /sign in|log in|login/i })],
+    30_000,
+    `Timed out waiting for the Keycloak sign-in button in the Pixelfed iframe for ${loginScenario.label}`
+  );
+
+  await visibleSignInButton.click();
+
+  await waitForIframeUrl(
+    page,
+    pixelfedIframe,
+    (url) => url.includes(expectedPixelfedBaseUrl) && !url.includes(expectedOidcAuthUrl),
+    60_000,
+    `Expected the Pixelfed iframe to redirect back to Pixelfed after Keycloak login for ${loginScenario.label}: ${expectedPixelfedBaseUrl}`
+  );
+
+  const authenticatedState = await waitForVisibleCandidate(
+    page,
+    pixelfedAuthenticatedCandidates,
+    60_000,
+    `Timed out waiting for an authenticated Pixelfed UI after the Keycloak login redirect for ${loginScenario.label}`
+  );
+
+  await expect(authenticatedState.locator).toBeVisible();
+}
+
+async function logoutFromDashboard(page, loginScenario) {
   const dashboardAccountCandidates = [
     page.getByRole("link", { name: /^Account$/i }),
     page.getByRole("button", { name: /^Account$/i }),
@@ -196,96 +294,6 @@ test("dashboard to pixelfed oidc login", async ({ page }) => {
     page.locator("nav").getByText(/^Login$/i)
   ];
 
-  await expect(pixelfedIframe).toBeVisible();
-
-  await waitForIframeUrl(
-    page,
-    pixelfedIframe,
-    (url) => url.includes(expectedOidcAuthUrl) || url.includes(expectedPixelfedBaseUrl),
-    60_000,
-    `Expected Pixelfed iframe to load either Pixelfed or the Keycloak OIDC endpoint: ${expectedOidcAuthUrl}`
-  );
-
-  if (!(await getIframeUrl(pixelfedIframe)).includes(expectedOidcAuthUrl)) {
-    const pixelfedOidcEntry = await waitForVisibleCandidate(
-      page,
-      pixelfedOidcEntryCandidates,
-      5_000
-    ).catch(() => null);
-
-    if (!pixelfedOidcEntry) {
-      const pixelfedLoginEntry = await waitForVisibleCandidate(
-        page,
-        pixelfedLoginEntryCandidates,
-        20_000,
-        "Timed out waiting for the Pixelfed login entry before starting the OIDC flow"
-      );
-
-      await pixelfedLoginEntry.locator.click();
-    }
-
-    const oidcStartEntry = pixelfedOidcEntry || await waitForVisibleCandidate(
-      page,
-      pixelfedOidcEntryCandidates,
-      20_000,
-      "Timed out waiting for the Pixelfed 'Sign-in with OIDC' action"
-    );
-
-    await oidcStartEntry.locator.click();
-
-    await waitForIframeUrl(
-      page,
-      pixelfedIframe,
-      (url) => url.includes(expectedOidcAuthUrl),
-      60_000,
-      `Expected Pixelfed iframe to navigate to Keycloak via Pixelfed's OIDC entry point: ${expectedOidcAuthUrl}`
-    );
-  }
-
-  const visibleUsernameField = await waitForFirstVisible(
-    page,
-    [usernameField, pixelfedFrame.getByRole("textbox", { name: /username|email/i })],
-    60_000,
-    "Timed out waiting for the Keycloak username field in the Pixelfed iframe"
-  );
-
-  await expect(visibleUsernameField).toBeVisible();
-  await visibleUsernameField.click();
-  await visibleUsernameField.fill(loginUsername);
-  await passwordField.first().fill(loginPassword);
-
-  if (await rememberMeCheckbox.first().isVisible().catch(() => false)) {
-    await rememberMeCheckbox.first().check().catch(() => {});
-  } else {
-    await pixelfedFrame.getByText(/remember me/i).click({ timeout: 2_000 }).catch(() => {});
-  }
-
-  const visibleSignInButton = await waitForFirstVisible(
-    page,
-    [signInButton, pixelfedFrame.getByRole("button", { name: /sign in|log in|login/i })],
-    30_000,
-    "Timed out waiting for the Keycloak sign-in button in the Pixelfed iframe"
-  );
-
-  await visibleSignInButton.click();
-
-  await waitForIframeUrl(
-    page,
-    pixelfedIframe,
-    (url) => url.includes(expectedPixelfedBaseUrl) && !url.includes(expectedOidcAuthUrl),
-    60_000,
-    `Expected Pixelfed iframe to redirect back to Pixelfed after Keycloak login: ${expectedPixelfedBaseUrl}`
-  );
-
-  const authenticatedState = await waitForVisibleCandidate(
-    page,
-    pixelfedAuthenticatedCandidates,
-    60_000,
-    "Timed out waiting for an authenticated Pixelfed UI after the Keycloak login redirect"
-  );
-
-  await expect(authenticatedState.locator).toBeVisible();
-
   // Reload the dashboard after the iframe login so the parent page refreshes its Keycloak session state.
   await page.goto("/");
 
@@ -293,7 +301,7 @@ test("dashboard to pixelfed oidc login", async ({ page }) => {
     page,
     dashboardAccountCandidates,
     60_000,
-    "Timed out waiting for the dashboard Account menu after the Pixelfed login"
+    `Timed out waiting for the dashboard Account menu after the Pixelfed login for ${loginScenario.label}`
   );
 
   await accountTrigger.click();
@@ -302,7 +310,7 @@ test("dashboard to pixelfed oidc login", async ({ page }) => {
     page,
     dashboardLogoutCandidates,
     15_000,
-    "Timed out waiting for the dashboard Logout action after opening Account"
+    `Timed out waiting for the dashboard Logout action after opening Account for ${loginScenario.label}`
   );
 
   await logoutTrigger.click();
@@ -317,8 +325,30 @@ test("dashboard to pixelfed oidc login", async ({ page }) => {
       },
       {
         timeout: 60_000,
-        message: "Expected the dashboard to return to a logged-out state after the Pixelfed OIDC logout"
+        message: `Expected the dashboard to return to a logged-out state after the Pixelfed OIDC logout for ${loginScenario.label}`
       }
     )
     .toBe(true);
+}
+
+test.beforeEach(() => {
+  expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
+  expect(pixelfedBaseUrl, "PIXELFED_BASE_URL must be set in the Playwright env file").toBeTruthy();
+  for (const loginScenario of loginScenarios) {
+    expect(
+      loginScenario.username,
+      `LOGIN_USERNAME_${loginScenario.envSuffix} must be set in the Playwright env file`
+    ).toBeTruthy();
+    expect(
+      loginScenario.password,
+      `LOGIN_PASSWORD_${loginScenario.envSuffix} must be set in the Playwright env file`
+    ).toBeTruthy();
+  }
 });
+
+for (const loginScenario of loginScenarios) {
+  test(`dashboard to pixelfed oidc login (${loginScenario.label})`, async ({ page }) => {
+    await loginToPixelfedViaDashboard(page, loginScenario);
+    await logoutFromDashboard(page, loginScenario);
+  });
+}

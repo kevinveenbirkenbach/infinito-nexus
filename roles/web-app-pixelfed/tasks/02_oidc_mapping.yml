@@ -1,0 +1,17 @@
+---
+- name: "Ensure the Pixelfed administrator OIDC mapping exists"
+  vars:
+    pixelfed_admin_oidc_query: >-
+      INSERT INTO user_oidc_mappings (user_id, oidc_id, created_at, updated_at)
+      VALUES ({{ pixelfed_admin_id.stdout | trim }}, '{{ PIXELFED_ADMIN_OIDC_ID }}', NOW(), NOW())
+      ON DUPLICATE KEY UPDATE
+        user_id = VALUES(user_id),
+        updated_at = IF(user_id <> VALUES(user_id), NOW(), updated_at);
+      SELECT ROW_COUNT();
+  ansible.builtin.command:
+    argv: "{{ PIXELFED_MARIADB_ARGS + ['-e', pixelfed_admin_oidc_query] }}"
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_admin_oidc_mapping
+  changed_when: (pixelfed_admin_oidc_mapping.stdout_lines | last | default('0') | int) > 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

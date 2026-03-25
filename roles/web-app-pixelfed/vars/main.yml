@@ -10,3 +10,30 @@ PIXELFED_WORKER_CONTAINER:      "{{ lookup('config', application_id, 'compose.se
 PIXELFED_VOLUME:                "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 PIXELFED_TITEL:                 "{{ lookup('config', application_id, 'titel') }}"
 PIXELFED_OIDC_ENABLED:          "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
+PIXELFED_APP_USER:              "33"
+PIXELFED_INSTANCE_DIR:          "{{ lookup('container', application_id, 'directories.instance') }}"
+PIXELFED_ENV_FILE:              "{{ lookup('container', application_id, 'files.env') }}"
+PIXELFED_DB_CONTAINER:          "{{ lookup('database', application_id, 'container') }}"
+PIXELFED_DB_NAME:               "{{ lookup('database', application_id, 'name') }}"
+PIXELFED_DB_USERNAME:           "{{ lookup('database', application_id, 'username') }}"
+PIXELFED_DB_PASSWORD:           "{{ lookup('database', application_id, 'password') }}"
+PIXELFED_MARIADB_ARGS:
+  - container
+  - exec
+  - -i
+  - "{{ PIXELFED_DB_CONTAINER }}"
+  - mariadb
+  - -N
+  - -s
+  - -u
+  - "{{ PIXELFED_DB_USERNAME }}"
+  - "-p{{ PIXELFED_DB_PASSWORD }}"
+  - "{{ PIXELFED_DB_NAME }}"
+PIXELFED_ADMIN_USER_KEY:        "administrator"
+PIXELFED_ADMIN_USERNAME:        "{{ users[PIXELFED_ADMIN_USER_KEY].username }}"
+PIXELFED_ADMIN_EMAIL:           "{{ users[PIXELFED_ADMIN_USER_KEY].email }}"
+PIXELFED_ADMIN_PASSWORD:        "{{ users[PIXELFED_ADMIN_USER_KEY].password }}"
+PIXELFED_ADMIN_NAME:            "{{ (users[PIXELFED_ADMIN_USER_KEY].firstname ~ ' ' ~ users[PIXELFED_ADMIN_USER_KEY].lastname) | trim }}"
+PIXELFED_ADMIN_OIDC_ID:         "{{ PIXELFED_ADMIN_USERNAME }}"
+PIXELFED_PLAYWRIGHT_FIRST_USER_KEY:  "biber"
+PIXELFED_PLAYWRIGHT_SECOND_USER_KEY: "administrator"

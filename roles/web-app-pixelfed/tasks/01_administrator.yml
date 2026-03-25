@@ -1,0 +1,71 @@
+---
+- name: "Check whether the Pixelfed administrator already exists"
+  vars:
+    pixelfed_admin_id_query: "SELECT id FROM users WHERE username='{{ PIXELFED_ADMIN_USERNAME }}' LIMIT 1;"
+  ansible.builtin.command:
+    argv: "{{ PIXELFED_MARIADB_ARGS + ['-e', pixelfed_admin_id_query] }}"
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_admin_id_existing
+  changed_when: false
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Create the Pixelfed administrator via artisan"
+  ansible.builtin.command:
+    argv:
+      - container
+      - exec
+      - -u
+      - "{{ PIXELFED_APP_USER }}"
+      - "{{ PIXELFED_CONTAINER }}"
+      - php
+      - artisan
+      - user:create
+      - "--name={{ PIXELFED_ADMIN_NAME }}"
+      - "--username={{ PIXELFED_ADMIN_USERNAME }}"
+      - "--email={{ PIXELFED_ADMIN_EMAIL }}"
+      - "--password={{ PIXELFED_ADMIN_PASSWORD }}"
+      - --is_admin=true
+      - --confirm_email=1
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  when: pixelfed_admin_id_existing.stdout | trim == ''
+  register: pixelfed_admin_create
+  changed_when: pixelfed_admin_create.rc == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Resolve the Pixelfed administrator id"
+  vars:
+    pixelfed_admin_id_query: "SELECT id FROM users WHERE username='{{ PIXELFED_ADMIN_USERNAME }}' LIMIT 1;"
+  ansible.builtin.command:
+    argv: "{{ PIXELFED_MARIADB_ARGS + ['-e', pixelfed_admin_id_query] }}"
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_admin_id
+  changed_when: false
+  failed_when: pixelfed_admin_id.stdout | trim == ''
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Ensure the Pixelfed administrator keeps admin attributes"
+  vars:
+    pixelfed_admin_sync_query: >-
+      UPDATE users
+      SET name='{{ PIXELFED_ADMIN_NAME | replace("'", "''") }}',
+          email='{{ PIXELFED_ADMIN_EMAIL | replace("'", "''") }}',
+          is_admin=1,
+          email_verified_at=COALESCE(email_verified_at, NOW())
+      WHERE username='{{ PIXELFED_ADMIN_USERNAME }}'
+        AND (
+          name <> '{{ PIXELFED_ADMIN_NAME | replace("'", "''") }}'
+          OR email <> '{{ PIXELFED_ADMIN_EMAIL | replace("'", "''") }}'
+          OR is_admin <> 1
+          OR email_verified_at IS NULL
+        );
+      SELECT ROW_COUNT();
+  ansible.builtin.command:
+    argv: "{{ PIXELFED_MARIADB_ARGS + ['-e', pixelfed_admin_sync_query] }}"
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_admin_sync
+  changed_when: (pixelfed_admin_sync.stdout_lines | last | default('0') | int) > 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
