@@ -27,6 +27,7 @@ compose:
     sphinx:
       image:            "ghcr.io/kevinveenbirkenbach/infinito-sphinx"
       version:          "latest"
+      min_storage:      "1GB"
       backup:
         no_stop_required: true
       port:               8000

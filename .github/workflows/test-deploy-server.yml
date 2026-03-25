@@ -70,6 +70,7 @@ jobs:
 
   server:
     name: 🌐 Deploy ${{ matrix.app }}
+    if: needs.discover.outputs.apps != '' && needs.discover.outputs.apps != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     needs: discover
@@ -99,3 +100,11 @@ jobs:
           export TEST_DEPLOY_TYPE="server"
           export APP="${{ matrix.app }}"
           make ci-deploy-app
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-server-${{ matrix.app }}
+          path: /tmp/playwright-artifacts/
+          if-no-files-found: ignore

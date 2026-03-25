@@ -32,21 +32,13 @@ RUN set -euo pipefail; \
 COPY . ${INFINITO_SRC_DIR}
 
 # ------------------------------------------------------------
-# Ensure Python 3.11+ is the default python/pip on supported distros
-# ------------------------------------------------------------
-RUN /bin/bash ${INFINITO_SRC_DIR}/roles/dev-python/files/install.sh
-
-# ------------------------------------------------------------
-# Install Docker CLI (client only) - distro aware
-# ------------------------------------------------------------
-# hadolint ignore=DL3008,DL3041
-RUN /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-container/files/install-cli.sh
-
-# ------------------------------------------------------------
-# Install distro package (dependencies incl. systemd/dbus/ssh are defined in packaging/*)
+# Install Python 3.11+, Docker CLI, and distro package dependencies
 # ------------------------------------------------------------
 # hadolint ignore=DL3008,DL3033,DL3041
-RUN /bin/bash ${INFINITO_SRC_DIR}/scripts/install/package.sh
+RUN set -euo pipefail; \
+  /bin/bash ${INFINITO_SRC_DIR}/roles/dev-python/files/install.sh; \
+  /bin/bash ${INFINITO_SRC_DIR}/roles/sys-svc-container/files/install-cli.sh; \
+  /bin/bash ${INFINITO_SRC_DIR}/scripts/install/package.sh
 
 # ------------------------------------------------------------
 # Disable interactive first-boot units (CI / container safe)

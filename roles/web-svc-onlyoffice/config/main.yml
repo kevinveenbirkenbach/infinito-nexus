@@ -45,6 +45,7 @@ compose:
       image:            "onlyoffice/documentserver"
       version:          "latest"
       name:             "onlyoffice"
+      min_storage:      "20GB"
       cpus:             2
       mem_reservation:  "1g"
       # Raised due to failures in CI pipeline (Good luck approach)

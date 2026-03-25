@@ -70,6 +70,10 @@
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:set-config {{ nextcloud_ldap_config_id }} ldapAgentPassword "{{ LDAP.BIND_CREDENTIAL }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
+- name: Activate Nextcloud LDAP backend (ldap:create-empty-config resets ldapConfigurationActive to empty)
+  command: >
+    {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:set-config {{ nextcloud_ldap_config_id }} ldapConfigurationActive 1
+
 - name: Warm LDAP cache (to guaranty that all LDAP users are present)
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:search ""

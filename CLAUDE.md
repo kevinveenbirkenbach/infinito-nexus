@@ -1,10 +1,16 @@
 # CLAUDE.md
 
 ## Purpose
-The single point of truth for agents like claude is AGENTS.md.
-Scan AGENTS.md for further instructions.
-The file CLAUDE.md exist to extend AGENTS.md for claude.
+
+- `AGENTS.md` is the single source of truth for repository-wide agent instructions.
+- Read `AGENTS.md` first.
+- Use `CLAUDE.md` only for Claude-specific additions or clarifications.
+
+## Current Status
+
+- No Claude-specific additions are currently defined.
 
 ## Further Information
+
 - https://code.claude.com/docs/en/overview
 - https://s.infinito.nexus/aibestpractice
