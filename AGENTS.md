@@ -17,13 +17,18 @@ Follow this coding  standards:
 - [shellcheck](https://github.com/koalaman/shellcheck)
 - [hadolint](https://github.com/hadolint/hadolint)
 
+### Refactoring
+
+- If you touch files refactor them by the Code Quality rules
+- Check if other files in the project use similar code and refactor it
+
 ## Architecture
 
 ### roles
 
 #### web-*
 - Prefer `Dockerfile` over `Dockerfile.j2`.
-- Prefer one time variable definition in `vars/main.yml` over `lookup` or dot connected variables in `.j2` or `.yml` files  
+- Prefer one time variable definition in `vars/main.yml` over `lookup()` or dot connected variables in `*.j2` or `*.yml` files  
 - Variables which are just defined once are constants and MUST be written uppercase
 
 ## Semantic
@@ -36,6 +41,20 @@ Solve semantic errors in text whenever you find them without explicit order.
 ## Commiting
 - Verify before every commit with `make test`
 - If fails execute: `make clean-sudo` and afterwards `make test` again
+
+## Tests
+
+- Write unit, integration and lint tests in the `tests` folder with the python `unittest` framework
+
+### Unit
+
+- Implement a unit test for each `*.py` file and place it in the equivalent path in the `tests/unit` folder
+
+### Playwright
+
+Playwright tests should minimum check:
+- login 
+- logout 
 
 ## Help
 
