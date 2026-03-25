@@ -58,6 +58,20 @@ Playwright tests should minimum check:
 - login 
 - logout 
 
+## Tests
+
+- Write unit, integration and lint tests in the `tests` folder with the python `unittest` framework
+
+### Unit
+
+- Implement a unit test for each `*.py` file and place it in the equivalent path in the `tests/unit` folder
+
+### Playwright
+
+Playwright tests should minimum check:
+- login 
+- logout 
+
 ## Help
 
 ### Locale Development Environment
