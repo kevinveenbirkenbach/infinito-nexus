@@ -3,7 +3,6 @@ MASK_CREDENTIALS_IN_LOGS: false
 ASYNC_ENABLED:            false
 MODE_DEBUG:               true
 ENVIRONMENT:              development
-MODE_TEST:                true
 TLS_ENABLED:              true
 TLS_MODE:                 "self_signed"
 

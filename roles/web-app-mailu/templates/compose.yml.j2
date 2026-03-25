@@ -169,10 +169,6 @@
     container_name: {{ MAILU_CONTAINER }}_webmail
     image: {{ MAILU_DOCKER_FLAVOR }}/webmail:{{ MAILU_VERSION }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
-{% if MODE_TEST | bool %}
-    healthcheck:
-      disable: true
-{% endif %}
     volumes:
       - "webmail_data:/data"
       - "{{ lookup('container', application_id, 'directories.volumes') }}overrides:/overrides:ro"
