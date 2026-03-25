@@ -41,6 +41,8 @@ Solve semantic errors in text whenever you find them without explicit order.
 ## Commiting
 - Verify before every commit with `make test`
 - If fails execute: `make clean-sudo` and afterwards `make test` again
+- `make test` is not required when only `.md` files were changed.
+- Commits are allowed only when all tests pass successfully.
 
 ## Tests
 
