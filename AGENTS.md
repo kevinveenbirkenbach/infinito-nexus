@@ -61,6 +61,7 @@ Playwright tests should minimum check:
 ## Tests
 
 - Write unit, integration and lint tests in the `tests` folder with the python `unittest` framework
+- If `make test` fails with `service "infinito" is not running` execute `make up` and restart afterwards `make test` again
 
 ### Unit
 
