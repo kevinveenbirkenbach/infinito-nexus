@@ -39,7 +39,7 @@ compose:
     shopware:
       # Docker Image
       image: "composer"
-      version: "2.7"
+      version: "2.9"
       # Shopware Release
       package:
         name: "shopware/production"
@@ -83,7 +83,7 @@ compose:
     opensearch:
       enabled: true
       image: "opensearchproject/opensearch"
-      version: "2.12.0"
+      version: "3.5.0"
       name: "shopware-opensearch"
       cpus: 1.0
       mem_reservation: 2g
