@@ -24,9 +24,7 @@
     loop_var: server_group
     label: "{{ server_group }}-roles.yml"
 
-- name: Run E2E Cypress tests
+- name: Run E2E Playwright tests
   include_role:
-    name: "test-e2e-cypress"
-  when: 
-    - DOCKER_IN_CONTAINER | bool
-    - MODE_TEST | bool
+    name: "test-e2e-playwright"
+  when: DOCKER_IN_CONTAINER | bool

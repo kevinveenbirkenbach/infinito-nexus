@@ -1,0 +1,39 @@
+- name: Apply role include/exclude filters
+  ansible.builtin.set_fact:
+    _playwright_apps: >-
+      {{
+        playbook_dir
+        | discover_playwright_roles(
+            only_roles=TEST_E2E_PLAYWRIGHT_ONLY_ROLES,
+            skip_roles=TEST_E2E_PLAYWRIGHT_SKIP_ROLES
+          )
+      }}
+
+- name: Show detected Playwright roles
+  ansible.builtin.debug:
+    msg: "Playwright-enabled roles: {{ _playwright_apps }}"
+  changed_when: false
+
+- name: Ensure staging base dir exists
+  ansible.builtin.file:
+    path: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}"
+    state: directory
+    mode: "0755"
+
+- name: Ensure reports base dir exists
+  ansible.builtin.file:
+    path: "{{ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR }}"
+    state: directory
+    mode: "0755"
+
+- name: Run Playwright for each detected role
+  ansible.builtin.include_tasks: run_one.yml
+  loop: "{{ _playwright_apps }}"
+  loop_control:
+    loop_var: application_id
+    label: "{{ application_id }}"
+
+- name: Fail if there were Playwright failures
+  ansible.builtin.fail:
+    msg: "Playwright failed for roles: {{ _playwright_failures }}"
+  when: (_playwright_failures | default([])) | length > 0
