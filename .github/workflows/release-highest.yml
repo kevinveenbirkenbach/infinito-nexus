@@ -69,8 +69,7 @@ jobs:
           if command -v gh >/dev/null 2>&1; then
             exit 0
           fi
-          sudo apt-get update
-          sudo apt-get install -y gh
+          ./scripts/install/apt.sh gh
 
       - name: Trigger release workflow for missing tag
         if: ${{ steps.pick.outputs.tag != '' }}

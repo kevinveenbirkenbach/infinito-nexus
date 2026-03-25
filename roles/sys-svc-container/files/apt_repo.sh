@@ -78,7 +78,7 @@ install_key() {
   fi
 
   tmp="$(mktemp)"
-  trap 'rm -f "${tmp}"' EXIT
+  trap 'rm -f "${tmp:-}"' EXIT
   download_file "https://download.docker.com/linux/${distro_id}/gpg" "${tmp}"
 
   if [[ ! -f "${KEY_PATH}" ]] || ! cmp -s "${tmp}" "${KEY_PATH}"; then

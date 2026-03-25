@@ -4,6 +4,12 @@ set -euo pipefail
 # shellcheck disable=SC1091
 . /etc/os-release
 
+REPO_ONLY=0
+if [[ "${1:-}" == "--repo-only" ]]; then
+  REPO_ONLY=1
+  shift
+fi
+
 echo ">>> Installing docker client on ID=${ID} ID_LIKE=${ID_LIKE:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOCKER_APT_SANITIZER="${SCRIPT_DIR}/apt_repo.sh"
@@ -25,6 +31,12 @@ ensure_docker_apt_key_and_sources() {
 add_repo_rpm_compatible() {
   local pm="$1"
   local repo_url="$2"
+  local repo_file
+  repo_file="/etc/yum.repos.d/$(basename "${repo_url}")"
+
+  if [[ -s "${repo_file}" ]]; then
+    return 0
+  fi
 
   # dnf4/yum: `config-manager --add-repo URL`
   if "${pm}" config-manager --add-repo "${repo_url}" >/dev/null 2>&1; then
@@ -42,14 +54,16 @@ add_repo_rpm_compatible() {
 
 # shellcheck disable=SC2031
 if [[ "${ID}" == "arch" || "${ID_LIKE:-}" =~ arch ]]; then
-  pacman -Syu --noconfirm --needed docker
-  pacman -Scc --noconfirm || true
+  if [[ "${REPO_ONLY}" != "1" ]]; then
+    pacman -Syu --noconfirm --needed docker
+  fi
 
 elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]]; then
   export DEBIAN_FRONTEND=noninteractive
   sanitize_docker_apt_sources "${ID}" 0
   apt-get update
   apt-get install -y --no-install-recommends \
+    ca-certificates \
     curl \
     gnupg \
     lsb-release
@@ -59,24 +73,35 @@ elif [[ "${ID}" == "debian" || "${ID}" == "ubuntu" || "${ID_LIKE:-}" =~ debian ]
   echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${ID} $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" \
     > /etc/apt/sources.list.d/docker.list
   apt-get update
-  apt-get install -y --no-install-recommends docker-ce-cli
-  rm -rf /var/lib/apt/lists/*
+  if [[ "${REPO_ONLY}" != "1" ]]; then
+    apt-get install -y --no-install-recommends \
+      docker-buildx-plugin \
+      docker-ce-cli \
+      docker-compose-plugin
+  fi
 
 elif [[ "${ID}" == "fedora" ]]; then
   dnf -y install dnf-plugins-core
   add_repo_rpm_compatible dnf "https://download.docker.com/linux/fedora/docker-ce.repo"
-  dnf -y install --allowerasing docker-ce-cli docker-buildx-plugin docker-compose-plugin
-  dnf -y clean all
-  rm -rf /var/cache/dnf
+  if [[ "${REPO_ONLY}" == "1" ]]; then
+    dnf -y makecache
+  else
+    dnf -y install --allowerasing docker-ce-cli docker-buildx-plugin docker-compose-plugin
+  fi
 
 elif [[ "${ID}" == "centos" || "${ID}" == "rhel" || "${ID_LIKE:-}" =~ (rhel|centos) ]]; then
   if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi
   ${PM} -y install yum-utils || true
   ${PM} -y install dnf-plugins-core || true
   add_repo_rpm_compatible "${PM}" "https://download.docker.com/linux/centos/docker-ce.repo" || true
-  (${PM} -y install docker-ce-cli) || (${PM} -y install docker) || true
-  ${PM} -y clean all || true
-  rm -rf "/var/cache/${PM}" || true
+  if [[ "${REPO_ONLY}" == "1" ]]; then
+    ${PM} -y makecache || true
+  else
+    # Prefer the same Docker CLI/buildx/compose package set as Fedora.
+    (${PM} -y install docker-ce-cli docker-buildx-plugin docker-compose-plugin) || \
+      (${PM} -y install docker-ce-cli) || \
+      (${PM} -y install docker) || true
+  fi
 
 else
   echo "[ERROR] Unsupported distro for docker client install: ID=${ID} ID_LIKE=${ID_LIKE:-}" >&2

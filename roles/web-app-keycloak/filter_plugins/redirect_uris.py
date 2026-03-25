@@ -3,27 +3,27 @@ import os
 import sys
 from typing import Iterable, Sequence
 from ansible.errors import AnsibleFilterError
-from module_utils.config_utils import (
+from utils.config_utils import (
     get_app_conf,
     AppConfigKeyError,
     ConfigEntryNotSetError,
 )
-from module_utils.get_url import get_url  # returns "<protocol>://<domain>"
+from utils.get_url import get_url  # returns "<protocol>://<domain>"
 
 
-# --- Locate project root that contains `module_utils/` dynamically (up to 5 levels) ---
-def _ensure_module_utils_on_path():
+# --- Locate project root that contains `utils/` dynamically (up to 5 levels) ---
+def _ensure_utils_on_path():
     here = os.path.dirname(__file__)
     for depth in range(1, 6):
         candidate = os.path.abspath(os.path.join(here, *([".."] * depth)))
-        if os.path.isdir(os.path.join(candidate, "module_utils")):
+        if os.path.isdir(os.path.join(candidate, "utils")):
             if candidate not in sys.path:
                 sys.path.insert(0, candidate)
             return
     # If not found, imports below will raise a clear error
 
 
-_ensure_module_utils_on_path()
+_ensure_utils_on_path()
 
 
 def _stable_dedup(items: Sequence[str]) -> list[str]:

@@ -1,7 +1,7 @@
 # filter_plugins/get_all_invokable_apps.py
 from __future__ import annotations
 
-from module_utils.invokable import list_invokable_app_ids
+from utils.invokable import list_invokable_app_ids
 
 
 def get_all_invokable_apps():

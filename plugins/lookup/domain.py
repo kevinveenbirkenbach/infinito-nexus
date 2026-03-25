@@ -17,7 +17,7 @@ class LookupModule(LookupBase):
     Reads:
       - variables['domains'] (required)
     Returns:
-      - domain as string (resolved via module_utils/domain_utils.get_domain)
+      - domain as string (resolved via utils.domains.primary_domain.get_domain)
     """
 
     def run(self, terms, variables: Optional[Dict[str, Any]] = None, **kwargs):
@@ -36,18 +36,17 @@ class LookupModule(LookupBase):
         if "domains" not in variables:
             raise AnsibleError("lookup('domain'): missing required variable 'domains'")
 
-        # Make module_utils importable (project_root/module_utils)
+        # Make utils importable (project_root/utils)
         plugin_dir = os.path.dirname(os.path.abspath(__file__))
         project_root = os.path.abspath(os.path.join(plugin_dir, "..", ".."))
-        module_utils = os.path.join(project_root, "module_utils")
-        if module_utils not in sys.path:
-            sys.path.append(module_utils)
+        if project_root not in sys.path:
+            sys.path.append(project_root)
 
         try:
-            from domain_utils import get_domain  # module_utils/domain_utils.py
+            from utils.domains.primary_domain import get_domain
         except Exception as e:
             raise AnsibleError(
-                f"lookup('domain'): could not import domain_utils.get_domain: {e}"
+                f"lookup('domain'): could not import utils.domains.primary_domain.get_domain: {e}"
             )
 
         try:

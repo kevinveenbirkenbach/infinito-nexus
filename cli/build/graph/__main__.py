@@ -6,7 +6,7 @@ import json
 import re
 from typing import List, Dict, Any, Set
 
-from module_utils.role_dependency_resolver import RoleDependencyResolver
+from utils.role_dependency_resolver import RoleDependencyResolver
 
 # Regex used to ignore Jinja expressions inside include/import statements
 JINJA_PATTERN = re.compile(r'{{.*}}')

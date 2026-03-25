@@ -34,6 +34,7 @@
   ansible.builtin.command:
     argv:
       - "{{ sys_pip_install_python_executable }}"
+      - -I
       - -c
       - import packaging
   register: sys_pip_install_python_packaging_check

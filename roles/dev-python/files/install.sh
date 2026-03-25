@@ -41,11 +41,16 @@ run_privileged() {
   fi
 }
 
-need_privileged_or_fail() {
+can_run_privileged() {
   if [[ "${EUID}" -eq 0 ]]; then
     return 0
   fi
-  if command -v sudo >/dev/null 2>&1; then
+  command -v sudo >/dev/null 2>&1 || return 1
+  sudo -n true >/dev/null 2>&1
+}
+
+need_privileged_or_fail() {
+  if can_run_privileged; then
     return 0
   fi
   echo "[ERROR] Root privileges are required (sudo unavailable)." >&2
@@ -331,7 +336,18 @@ resolve_or_install_python_bin() {
 }
 
 if [[ "${MODE}" == "ensure" ]]; then
-  ensure_python_bin
+  if PYBIN="$(pick_python_bin)"; then
+    if ! can_run_privileged; then
+      log "Using existing Python without privileged system-wide symlink updates: $("${PYBIN}" --version)"
+      if "${PYBIN}" -m pip --version >/dev/null 2>&1; then
+        log "Existing pip: $("${PYBIN}" -m pip --version)"
+        exit 0
+      fi
+    fi
+  else
+    ensure_python_bin
+  fi
+
   configure_defaults "${PYBIN}"
   log "Default python: $(python3 --version)"
   log "Default pip: $(pip3 --version)"

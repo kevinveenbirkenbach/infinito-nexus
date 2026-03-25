@@ -202,6 +202,11 @@ jobs:
     uses: ./.github/workflows/test-install-pkgmgr.yml
     needs:
       - code-quality-gate
+  test-dev-environment-dashboard:
+    uses: ./.github/workflows/test-development.yml
+    needs:
+      - build-ci-images
+      - code-quality-gate
   test-install-gate:
     name: 🚦 Gate installation
     needs: [test-install-make, test-install-pkgmgr]
@@ -215,6 +220,7 @@ jobs:
       - test-deploy-server
       - test-deploy-universal
       - test-deploy-workstation
+      - test-dev-environment-dashboard
       - test-install-gate
     runs-on: ubuntu-latest
     steps:

@@ -23,6 +23,11 @@ dependencies = [
   "humanfriendly",
 ]
 
+[project.optional-dependencies]
+lint = [
+  "ruff",
+]
+
 [project.scripts]
 infinito = "cli.__main__:main"
 
@@ -30,7 +35,7 @@ infinito = "cli.__main__:main"
 packages = { find = { where = ["."], include = [
   "cli*",
   "plugins*",
-  "module_utils*",
+  "utils*",
   "library*",
 ], exclude = [
   "roles*",

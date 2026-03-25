@@ -7,9 +7,9 @@ class TestGetDockerPaths(unittest.TestCase):
     def test_get_docker_paths_uses_entity_name_and_builds_layout(self):
         import plugins.filter.get_docker_paths as m
 
-        # After refactor, get_entity_name is used inside module_utils.docker_paths_utils
+        # After refactor, get_entity_name is used inside utils.docker_paths_utils
         with patch(
-            "module_utils.docker_paths_utils.get_entity_name", lambda app_id: "myentity"
+            "utils.docker_paths_utils.get_entity_name", lambda app_id: "myentity"
         ):
             out = m.get_docker_paths("web-app-anything", "/opt/compose/")
 

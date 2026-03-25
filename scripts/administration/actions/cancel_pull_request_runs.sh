@@ -7,53 +7,53 @@ set -euo pipefail
 : "${CURRENT_RUN_ID:?Missing CURRENT_RUN_ID}"
 
 if ! command -v gh >/dev/null 2>&1; then
-  echo "ERROR: gh CLI not found." >&2
-  exit 1
+	echo "ERROR: gh CLI not found." >&2
+	exit 1
 fi
 
 if ! command -v jq >/dev/null 2>&1; then
-  echo "ERROR: jq not found." >&2
-  exit 1
+	echo "ERROR: jq not found." >&2
+	exit 1
 fi
 
 echo "Searching active workflow runs for PR #${PR_NUMBER}"
 
 cancel_runs_by_status() {
-  local status="$1"
-  local run_ids
+	local status="$1"
+	local run_ids
 
-  run_ids="$(
-    gh api --paginate \
-      -H "Accept: application/vnd.github+json" \
-      "/repos/${REPOSITORY}/actions/runs?status=${status}&per_page=100" \
-    | jq -r \
-        --argjson pr_number "${PR_NUMBER}" \
-        --argjson current_run_id "${CURRENT_RUN_ID}" '
+	run_ids="$(
+		gh api --paginate \
+			-H "Accept: application/vnd.github+json" \
+			"/repos/${REPOSITORY}/actions/runs?status=${status}&per_page=100" |
+			jq -r \
+				--argjson pr_number "${PR_NUMBER}" \
+				--argjson current_run_id "${CURRENT_RUN_ID}" '
           .workflow_runs[]
           | select(.id != $current_run_id)
           | select(.event == "pull_request" or .event == "pull_request_target")
           | select(any(.pull_requests[]?; (.number // -1) == $pr_number))
           | .id
-        ' \
-    | sort -u
-  )"
+        ' |
+			sort -u
+	)"
 
-  if [[ -z "${run_ids}" ]]; then
-    echo "No ${status} runs found for PR #${PR_NUMBER}"
-    return 0
-  fi
+	if [[ -z "${run_ids}" ]]; then
+		echo "No ${status} runs found for PR #${PR_NUMBER}"
+		return 0
+	fi
 
-  while read -r run_id; do
-    [[ -n "${run_id}" ]] || continue
-    echo "Cancelling ${status} run ${run_id}"
-    if ! gh api \
-      -X POST \
-      -H "Accept: application/vnd.github+json" \
-      "/repos/${REPOSITORY}/actions/runs/${run_id}/cancel" \
-      >/dev/null; then
-      echo "Run ${run_id} could not be cancelled, likely because it already completed"
-    fi
-  done <<< "${run_ids}"
+	while read -r run_id; do
+		[[ -n "${run_id}" ]] || continue
+		echo "Cancelling ${status} run ${run_id}"
+		if ! gh api \
+			-X POST \
+			-H "Accept: application/vnd.github+json" \
+			"/repos/${REPOSITORY}/actions/runs/${run_id}/cancel" \
+			>/dev/null; then
+			echo "Run ${run_id} could not be cancelled, likely because it already completed"
+		fi
+	done <<<"${run_ids}"
 }
 
 cancel_runs_by_status requested
