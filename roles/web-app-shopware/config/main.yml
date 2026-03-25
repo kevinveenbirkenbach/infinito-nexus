@@ -40,6 +40,7 @@ compose:
       # Docker Image
       image: "composer"
       version: "2.9"
+      min_storage: "20GB"
       # Shopware Release
       package:
         name: "shopware/production"

@@ -43,6 +43,7 @@ compose:
       image:            "zknt/pixelfed"
       version:          "latest"
       name:             "pixelfed"
+      min_storage:      "15GB"
       backup:
         no_stop_required: true
       cpus:            0.75

@@ -26,6 +26,7 @@ compose:
       version:    "latest" # Use the latest phpmyadmin version
       name:       "phpmyadmin"
       image:      "phpmyadmin/phpmyadmin"
+      min_storage: "1GB"
       # This is a high security risk. Just activate this option if you know what you're doing
       autologin:  false
     oauth2:

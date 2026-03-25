@@ -5,6 +5,7 @@ compose:
     libretranslate:
       image:    libretranslate/libretranslate
       version: latest
+      min_storage: "5GB"
     oauth2:
       enabled: false
     logout:

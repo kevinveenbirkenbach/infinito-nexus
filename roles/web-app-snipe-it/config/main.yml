@@ -39,6 +39,7 @@ compose:
       version:          "latest-alpine"
       name:             "snipe-it"
       image:            "snipe/snipe-it"
+      min_storage:      "8GB"
       cpus:             "1.0"
       mem_reservation:  "256m"
       mem_limit:        "2g"
