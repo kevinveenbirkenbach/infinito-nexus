@@ -28,8 +28,15 @@ import unittest
 import urllib.error
 import urllib.request
 from pathlib import Path
+from urllib.parse import quote, urlencode
 
 import yaml
+
+from utils.docker_image_ref import (
+    DOCKER_HUB_REGISTRIES,
+    GHCR_REGISTRY,
+    split_registry_and_name,
+)
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _ROLES_ROOT = _REPO_ROOT / "roles"
@@ -57,17 +64,22 @@ def _is_dockerhub(image: str) -> bool:
     Handles both plain names (``nginx``, ``gitea/gitea``) and the explicit
     ``docker.io/`` registry prefix.
     """
-    if image.startswith("docker.io/"):
-        return True
-    first_part = image.split("/")[0]
-    return "." not in first_part and ":" not in first_part
+    parsed = split_registry_and_name(image)
+    if parsed is None:
+        return False
+    registry, _name = parsed
+    return registry is None or registry in DOCKER_HUB_REGISTRIES
 
 
 def _dockerhub_repo(image: str) -> str:
     """Normalise a Docker Hub image reference to ``namespace/name``."""
-    if image.startswith("docker.io/"):
-        image = image[len("docker.io/") :]
-    return image if "/" in image else f"library/{image}"
+    parsed = split_registry_and_name(image)
+    if parsed is None:
+        raise ValueError(f"Invalid Docker image reference: {image!r}")
+    registry, name = parsed
+    if registry is not None and registry not in DOCKER_HUB_REGISTRIES:
+        raise ValueError(f"Image is not a Docker Hub reference: {image!r}")
+    return name if "/" in name else f"library/{name}"
 
 
 def _fetch_dockerhub_tags(image: str, max_pages: int = 5) -> list[str]:
@@ -98,13 +110,25 @@ def _fetch_dockerhub_tags(image: str, max_pages: int = 5) -> list[str]:
 
 def _is_ghcr(image: str) -> bool:
     """Return True when *image* refers to a GitHub Container Registry repository."""
-    return image.startswith("ghcr.io/")
+    parsed = split_registry_and_name(image)
+    return parsed is not None and parsed[0] == GHCR_REGISTRY
+
+
+def _ghcr_repo(image: str) -> str:
+    """Return the validated repository path of a ghcr.io image."""
+    parsed = split_registry_and_name(image)
+    if parsed is None or parsed[0] != GHCR_REGISTRY:
+        raise ValueError(f"Image is not a GHCR reference: {image!r}")
+    return parsed[1]
 
 
 def _fetch_ghcr_tags(image: str) -> list[str]:
     """Return tag names for a ghcr.io image using anonymous token flow."""
-    name = image[len("ghcr.io/") :]  # "owner/repo"
-    token_url = f"https://ghcr.io/token?scope=repository:{name}:pull&service=ghcr.io"
+    name = _ghcr_repo(image)
+    token_query = urlencode(
+        {"scope": f"repository:{name}:pull", "service": GHCR_REGISTRY}
+    )
+    token_url = f"https://{GHCR_REGISTRY}/token?{token_query}"
     try:
         req = urllib.request.Request(
             token_url, headers={"User-Agent": "infinito-nexus-version-check"}
@@ -118,7 +142,7 @@ def _fetch_ghcr_tags(image: str) -> list[str]:
     if not token:
         return []
 
-    tags_url = f"https://ghcr.io/v2/{name}/tags/list"
+    tags_url = f"https://{GHCR_REGISTRY}/v2/{quote(name, safe='/')}/tags/list"
     req = urllib.request.Request(
         tags_url,
         headers={

@@ -54,6 +54,13 @@ Follow these coding standards where applicable:
 - Relevant logs are typically stored in `*job-logs.txt` or `*.log`.
 - Never commit log files.
 
+### Playwright Failures
+
+- If `*job-logs.txt` shows that a Playwright test failed, download the corresponding Playwright assets.
+- Save the downloaded Playwright assets in a `/tmp/` directory and do not delete them.
+- Output the storage path for the downloaded Playwright assets file.
+- Analyze the downloaded Playwright assets in addition to `*job-logs.txt`.
+
 ## Committing
 
 - Run `make test` before every commit.
