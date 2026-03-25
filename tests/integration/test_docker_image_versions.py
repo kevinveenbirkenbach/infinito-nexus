@@ -66,7 +66,7 @@ def _is_dockerhub(image: str) -> bool:
 def _dockerhub_repo(image: str) -> str:
     """Normalise a Docker Hub image reference to ``namespace/name``."""
     if image.startswith("docker.io/"):
-        image = image[len("docker.io/"):]
+        image = image[len("docker.io/") :]
     return image if "/" in image else f"library/{image}"
 
 
@@ -103,10 +103,8 @@ def _is_ghcr(image: str) -> bool:
 
 def _fetch_ghcr_tags(image: str) -> list[str]:
     """Return tag names for a ghcr.io image using anonymous token flow."""
-    name = image[len("ghcr.io/"):]  # "owner/repo"
-    token_url = (
-        f"https://ghcr.io/token?scope=repository:{name}:pull&service=ghcr.io"
-    )
+    name = image[len("ghcr.io/") :]  # "owner/repo"
+    token_url = f"https://ghcr.io/token?scope=repository:{name}:pull&service=ghcr.io"
     try:
         req = urllib.request.Request(
             token_url, headers={"User-Agent": "infinito-nexus-version-check"}
@@ -240,22 +238,20 @@ def _emit_annotation(
     current: str,
     latest: str,
 ) -> None:
-    msg = (
-        f"{role}/{service}: {image} is at {current}, "
-        f"latest semver tag is {latest}"
-    )
+    msg = f"{role}/{service}: {image} is at {current}, latest semver tag is {latest}"
     if os.getenv("GITHUB_ACTIONS") == "true":
         print(f"::warning file={config_path},title=⚠️ Outdated Docker image::{msg}")
 
 
-def _emit_unchecked_annotation(config_path: str, role: str, service: str, image: str) -> None:
+def _emit_unchecked_annotation(
+    config_path: str, role: str, service: str, image: str
+) -> None:
     msg = (
         f"{role}/{service}: {image} version could not be checked "
         f"(registry not supported)"
     )
     if os.getenv("GITHUB_ACTIONS") == "true":
         print(f"::warning file={config_path},title=🔍 Unchecked Docker image::{msg}")
-
 
 
 class TestDockerImageVersions(unittest.TestCase):
@@ -302,7 +298,9 @@ class TestDockerImageVersions(unittest.TestCase):
                 f"{o['image']:<{col_w[2]}} {o['version']:<{col_w[3]}} {o['latest']}"
                 for o in outdated
             )
-            print(f"\n⚠️  Outdated Docker image versions:\n{header}\n{'-' * 120}\n{rows}\n\n💡 To suppress a warning add above the version: key:\n  # nocheck: docker-version")
+            print(
+                f"\n⚠️  Outdated Docker image versions:\n{header}\n{'-' * 120}\n{rows}\n\n💡 To suppress a warning add above the version: key:\n  # nocheck: docker-version"
+            )
             for o in outdated:
                 _emit_annotation(
                     o["config_path"],
