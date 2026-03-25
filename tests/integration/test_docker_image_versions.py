@@ -240,7 +240,7 @@ def _emit_annotation(
 ) -> None:
     msg = f"{role}/{service}: {image} is at {current}, latest semver tag is {latest}"
     if os.getenv("GITHUB_ACTIONS") == "true":
-        print(f"::warning file={config_path},title=⚠️ Outdated Docker image::{msg}")
+        print(f"::warning file={config_path},title=Outdated Docker image::{msg}")
 
 
 def _emit_unchecked_annotation(
