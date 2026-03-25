@@ -52,14 +52,27 @@ def _version_key(tag: str) -> tuple[int, ...]:
 
 
 def _is_dockerhub(image: str) -> bool:
-    """Return True when *image* refers to a Docker Hub repository."""
+    """Return True when *image* refers to a Docker Hub repository.
+
+    Handles both plain names (``nginx``, ``gitea/gitea``) and the explicit
+    ``docker.io/`` registry prefix.
+    """
+    if image.startswith("docker.io/"):
+        return True
     first_part = image.split("/")[0]
     return "." not in first_part and ":" not in first_part
 
 
+def _dockerhub_repo(image: str) -> str:
+    """Normalise a Docker Hub image reference to ``namespace/name``."""
+    if image.startswith("docker.io/"):
+        image = image[len("docker.io/"):]
+    return image if "/" in image else f"library/{image}"
+
+
 def _fetch_dockerhub_tags(image: str, max_pages: int = 5) -> list[str]:
     """Return tag names for a Docker Hub image (up to *max_pages* x 100)."""
-    repo = image if "/" in image else f"library/{image}"
+    repo = _dockerhub_repo(image)
     tags: list[str] = []
     for page in range(1, max_pages + 1):
         url = (
@@ -83,9 +96,60 @@ def _fetch_dockerhub_tags(image: str, max_pages: int = 5) -> list[str]:
     return tags
 
 
-def _latest_semver(tags: list[str]) -> str | None:
-    """Return the highest semver-compatible tag from *tags*, or None."""
-    candidates = [t for t in tags if _is_semver(t)]
+def _is_ghcr(image: str) -> bool:
+    """Return True when *image* refers to a GitHub Container Registry repository."""
+    return image.startswith("ghcr.io/")
+
+
+def _fetch_ghcr_tags(image: str) -> list[str]:
+    """Return tag names for a ghcr.io image using anonymous token flow."""
+    name = image[len("ghcr.io/"):]  # "owner/repo"
+    token_url = (
+        f"https://ghcr.io/token?scope=repository:{name}:pull&service=ghcr.io"
+    )
+    try:
+        req = urllib.request.Request(
+            token_url, headers={"User-Agent": "infinito-nexus-version-check"}
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            token_body = json.loads(resp.read().decode())
+        token = token_body.get("token") or token_body.get("access_token")
+    except (urllib.error.URLError, OSError, json.JSONDecodeError):
+        return []
+
+    if not token:
+        return []
+
+    tags_url = f"https://ghcr.io/v2/{name}/tags/list"
+    req = urllib.request.Request(
+        tags_url,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "User-Agent": "infinito-nexus-version-check",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            body = json.loads(resp.read().decode())
+    except (urllib.error.URLError, OSError, json.JSONDecodeError):
+        return []
+
+    return body.get("tags") or []
+
+
+def _version_depth(tag: str) -> int:
+    """Return the number of dot-separated segments in a version string."""
+    return len(str(tag).strip().lstrip("v").split("."))
+
+
+def _latest_semver(tags: list[str], depth: int) -> str | None:
+    """Return the highest semver tag from *tags* that has exactly *depth* segments.
+
+    This ensures that a configured ``version: "15"`` (depth 1) is only compared
+    against other single-segment tags, ``version: "8.3"`` (depth 2) only against
+    ``x.x`` tags, and so on.
+    """
+    candidates = [t for t in tags if _is_semver(t) and _version_depth(t) == depth]
     return max(candidates, key=_version_key, default=None)
 
 
@@ -187,7 +251,7 @@ def _emit_annotation(
 def _emit_unchecked_annotation(config_path: str, role: str, service: str, image: str) -> None:
     msg = (
         f"{role}/{service}: {image} version could not be checked "
-        f"(registry not supported, only Docker Hub is checked)"
+        f"(registry not supported)"
     )
     if os.getenv("GITHUB_ACTIONS") == "true":
         print(f"::warning file={config_path},title=🔍 Unchecked Docker image::{msg}")
@@ -201,21 +265,29 @@ class TestDockerImageVersions(unittest.TestCase):
         entries = _collect_entries()
         self.assertTrue(entries, "No semver-versioned config entries found")
 
-        # Deduplicate Docker Hub queries per image
+        # Deduplicate registry queries per image
         image_tags: dict[str, list[str]] = {}
         for e in entries:
             img = e["image"]
-            if _is_dockerhub(img) and img not in image_tags:
+            if img in image_tags:
+                continue
+            if _is_dockerhub(img):
                 image_tags[img] = _fetch_dockerhub_tags(img)
+            elif _is_ghcr(img):
+                image_tags[img] = _fetch_ghcr_tags(img)
 
         outdated: list[dict] = []
         unchecked: list[dict] = []
         for e in entries:
-            if not _is_dockerhub(e["image"]):
+            img = e["image"]
+            if not _is_dockerhub(img) and not _is_ghcr(img):
                 unchecked.append(e)
                 continue
-            tags = image_tags.get(e["image"], [])
-            latest = _latest_semver(tags)
+            tags = image_tags.get(img, [])
+            if not tags:
+                unchecked.append(e)
+                continue
+            latest = _latest_semver(tags, _version_depth(e["version"]))
             if latest and _version_key(e["version"]) < _version_key(latest):
                 outdated.append({**e, "latest": latest})
 
