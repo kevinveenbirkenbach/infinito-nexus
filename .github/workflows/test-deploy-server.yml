@@ -103,7 +103,7 @@ jobs:
 
       - name: Upload Playwright artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-server-${{ matrix.app }}
           path: /tmp/playwright-artifacts/
