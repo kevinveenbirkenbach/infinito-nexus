@@ -60,9 +60,9 @@ Key points:
 
 Describe how the instruction change was validated.
 
-* Conflicting or ambiguous guidance checked:
-* Consistency between `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` verified:
-* Examples, workflows, or affected contributor paths reviewed:
+* [ ] Conflicting or ambiguous guidance checked
+* [ ] Consistency between `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` verified
+* [ ] Examples, workflows, or affected contributor paths reviewed
 
 ---
 
@@ -94,31 +94,7 @@ For repository-wide contribution and review expectations, see [CONTRIBUTING.md](
 
 ## Definition of Done (DoD)
 
-### Workflow
-
-* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436)
-
-### Code Quality
-
-* [ ] Instructions follow repository conventions
-* [ ] Text is written in English
-* [ ] `AGENTS.md` remains the repository-wide source of truth
-
-### Functionality
-
-* [ ] The updated guidance is internally consistent and actionable
-* [ ] Agent-specific files extend `AGENTS.md` without contradicting it
-
-### Validation
-
-* [ ] Relevant instruction paths were reviewed
-* [ ] Examples or workflows affected by the change were sanity-checked
-
-### Documentation
-
-* [ ] Related documentation updated if contributor or reviewer behavior changed
-* [ ] Link this PR to the work item in https://project.infinito.nexus/ and back
-* [ ] Work item in https://project.infinito.nexus/ updated
+* [ ] The implementation follows the Definition of Done, and the contribution guidelines in [CONTRIBUTING.md](../../CONTRIBUTING.md) were considered and applied during implementation.
 
 ---
 

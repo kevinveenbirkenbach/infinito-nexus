@@ -56,9 +56,9 @@ Key points:
 
 Describe how the documentation change was validated.
 
-* Technical accuracy checked against the current implementation:
-* Broken wording, stale steps, or missing context reviewed:
-* Links, paths, commands, or references verified:
+* [ ] Technical accuracy checked against the current implementation
+* [ ] Broken wording, stale steps, or missing context reviewed
+* [ ] Links, paths, commands, or references verified
 
 ---
 
@@ -90,26 +90,7 @@ For repository-wide contribution and review expectations, see [CONTRIBUTING.md](
 
 ## Definition of Done (DoD)
 
-### Workflow
-
-* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436)
-
-### Documentation Quality
-
-* [ ] Text is written in English
-* [ ] Wording is clear, consistent, and semantically correct
-* [ ] The content matches the current implementation or intended workflow
-
-### Validation
-
-* [ ] Relevant links, paths, commands, and references were checked
-* [ ] Audience and usage context were considered
-
-### Documentation
-
-* [ ] Related `README.md` files, guides, or cross-references were updated where needed
-* [ ] Link this PR to the work item in https://project.infinito.nexus/ and back
-* [ ] Work item in https://project.infinito.nexus/ updated
+* [ ] The implementation follows the Definition of Done, and the contribution guidelines in [CONTRIBUTING.md](../../CONTRIBUTING.md) were considered and applied during implementation.
 
 ---
 

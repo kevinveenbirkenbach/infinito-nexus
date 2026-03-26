@@ -57,10 +57,10 @@ Key points:
 
 Describe how the change was validated locally.
 
-* Installation tested:
-* Application startup tested:
-* Basic workflow tested:
-* Screenshot attached for user-visible changes:
+* [ ] Installation tested
+* [ ] Application startup tested
+* [ ] Basic workflow tested
+* [ ] Screenshot attached for user-visible changes
 
 ---
 
@@ -92,33 +92,7 @@ For repository-wide contribution and review expectations, see [CONTRIBUTING.md](
 
 ## Definition of Done (DoD)
 
-### Workflow
-
-* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436)
-
-### Code Quality
-
-* [ ] Code follows repository conventions
-* [ ] Code and comments are written in English
-
-### Functionality
-
-* [ ] Change works as expected on the tested workstation setup
-* [ ] Package installation, launch, and basic usage were verified
-
-### Testing
-
-* [ ] Changes tested locally
-* [ ] CI pipeline passes
-* [ ] Unit test added for touched `*.py` files
-* [ ] Integration test added for touched `*.py` files
-
-### Documentation
-
-* [ ] Relevant `README.md` files and docs updated
-* [ ] Link this PR to the work item in https://project.infinito.nexus/ and back
-* [ ] Work item in https://project.infinito.nexus/ updated
-* [ ] Screenshot attached when the change is user-visible
+* [ ] The implementation follows the Definition of Done, and the contribution guidelines in [CONTRIBUTING.md](../../CONTRIBUTING.md) were considered and applied during implementation.
 
 ---
 

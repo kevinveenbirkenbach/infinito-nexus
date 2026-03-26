@@ -52,15 +52,43 @@ Key points:
 
 ---
 
+## File Checklist
+
+Check the relevant rows and explain intentional omissions in `Additional Notes`.
+
+| Check | Item | When to include | Purpose |
+|---|---|---|---|
+| [ ] | `README.md` | Usually | Documents role-specific usage, setup notes, and contributor context. |
+| [ ] | `meta/main.yml` | Usually | Declares role metadata and dependencies. |
+| [ ] | `vars/main.yml` | Usually | Defines the shared fixed role variables as the main source of truth. |
+| [ ] | `config/main.yml` | Usually | Defines the configurable app-facing settings for the role. |
+| [ ] | `schema/main.yml` | When schema validation is used | Describes and validates the supported configuration surface. |
+| [ ] | `tasks/main.yml` | Usually | Acts as the role entry point and includes the main task flow. |
+| [ ] | `templates/compose.yml.j2` | For containerized app roles | Defines the service, volume, environment, port, and network wiring. |
+| [ ] | `templates/env.j2` | When the app uses environment files | Renders the app environment configuration. |
+| [ ] | `users/main.yml` | When the role bootstraps users or identities | Defines user bootstrap or role-specific user management data. |
+| [ ] | `files/Dockerfile` | When a custom image is required | Provides a custom image build path. Prefer this over `Dockerfile.j2`. |
+| [ ] | `templates/playwright.env.j2` | When Playwright coverage is included | Configures the Playwright test environment. |
+| [ ] | `files/playwright.spec.js` | When Playwright coverage is included | Defines the Playwright login and logout test flow. |
+
+### Registered
+
+| Check | Item | When to include | Purpose |
+|---|---|---|---|
+| [ ] | Port defined in `group_vars/all/11_ports.yml` | When the app exposes a service | Confirms that the app port is defined consistently in the central port mapping. |
+| [ ] | Network defined in `group_vars/all/10_networks.yml` | When the app communicates over container networks | Confirms that the required network wiring is defined consistently in the central network mapping. |
+
+---
+
 ## Local Validation
 
 Describe how the change was validated locally.
 
-* Deployment target and distro:
-* Playwright test run:
-* Login flow tested:
-* Logout flow tested:
-* Screenshot attached:
+* [ ] Deployment target and distro documented
+* [ ] Playwright test run documented
+* [ ] Login flow tested
+* [ ] Logout flow tested
+* [ ] Screenshot attached when the change is user-visible
 
 ---
 
@@ -92,35 +120,7 @@ For repository-wide contribution and review expectations, see [CONTRIBUTING.md](
 
 ## Definition of Done (DoD)
 
-### Workflow
-
-* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436)
-
-### Code Quality
-
-* [ ] Code follows repository conventions
-* [ ] Code and comments are written in English
-
-### Functionality
-
-* [ ] Change works as expected in a local deployment
-* [ ] Original upstream Docker image was used for testing where practical
-
-### Testing
-
-* [ ] Changes tested locally
-* [ ] CI pipeline passes
-* [ ] Playwright test added or updated for the affected `web-*` flow
-* [ ] Playwright test verifies login and logout
-* [ ] Unit test added for touched `*.py` files
-* [ ] Integration test added for touched `*.py` files
-
-### Documentation
-
-* [ ] Relevant `README.md` files and docs updated
-* [ ] Link this PR to the work item in https://project.infinito.nexus/ and back
-* [ ] Work item in https://project.infinito.nexus/ updated
-* [ ] Screenshot of the running application from the local deployment attached when the change is user-visible
+* [ ] The implementation follows the Definition of Done, and the contribution guidelines in [CONTRIBUTING.md](../../CONTRIBUTING.md) were considered and applied during implementation.
 
 ---
 

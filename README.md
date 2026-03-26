@@ -47,8 +47,6 @@
 * **Application Ecosystem** 🚀
   A curated suite of self-hosted apps—from **project management**, **version control**, and **CI/CD** to **chat**, **video conferencing**, **CMS**, **e-learning**, **social networking**, and **e-commerce**—all seamlessly integrated.
 
-More informations about the features you will find [here](docs/overview/Features.md).
-
 ---
 
 ## Get Started 🚀
@@ -57,36 +55,41 @@ More informations about the features you will find [here](docs/overview/Features
 
 Try [Infinito.Nexus](https://infinito.nexus) – sign up in seconds, explore the platform, and discover what our solution can do for you! 🚀🔧✨
 
-### Install locally 💻
-1. **Install Infinito.Nexus** via [Kevin's Package Manager](https://github.com/kevinveenbirkenbach/package-manager)
-2. **Setup Infinito.Nexus** using:
-   ```sh
-   pkgmgr install infinito
-   ```
-3. **Explore Commands** with:
-   ```sh
-   infinito --help
-   ```
+### CLI Execution
 
-### Running on WSL2 / Windows 🪟
+#### Install locally 💻
 
-Infinito.Nexus supports development on **WSL2 (Windows Subsystem for Linux)**. All WSL2-specific steps (port 53 conflicts, AppArmor, Docker buildx) are handled automatically by the Makefile and scripts.
+Install the CLI via [Kevin's Package Manager](https://github.com/kevinveenbirkenbach/package-manager) and inspect the available commands:
 
-For the full manual background and context, see the [WSL2 / Windows Setup Guide](https://hub.infinito.nexus/t/infinito-nexus-wsl2-windows-setup-guide/454).
+```sh
+pkgmgr install infinito
+infinito --help
+```
 
----
+#### Run with Docker 🚢
 
-### Setup with Docker🚢
-
-Get Infinito.Nexus up and running inside Docker in just a few steps. For detailed build options and troubleshooting, see the [Docker Guide](docs/Docker.md).
+Build the image and run the CLI. For more options, see the [Docker Guide](docs/Docker.md).
 
 ```bash
-# 1. Build the Docker image: the Docker image:
 docker build -t infinito:latest .
-
-# 2. Run the CLI interactively:
 docker run --rm -it infinito:latest infinito --help
 ```
+
+#### Develop from Source
+
+Clone the repository and install the project from the repository root:
+
+```bash
+git clone https://github.com/infinito-nexus/core.git
+cd core
+make install
+```
+
+This prepares the repository for local development.
+
+### Contributing
+
+For the full development setup, contribution workflow, testing, and coding standards, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -98,4 +101,4 @@ Infinito.Nexus is distributed under the **Infinito.Nexus Community License (Non-
 
 ## Professional Setup & Support 💼
 
-For expert installation and configuration visit [cybermaster.space](https://cybermaster.space/) or write to us at **[contact@cymais.cloud](mailto:contact@cymais.cloud)**.
+For expert installation and configuration visit [cybermaster.space](https://cybermaster.space/) or write to us at **[contact@infinito.nexus](mailto:contact@infinito.nexus)**.

@@ -56,10 +56,10 @@ Key points:
 
 Describe how the pipeline change was validated.
 
-* Local or targeted script validation performed:
-* Workflow run in fork or equivalent validation:
-* Relevant logs or run links attached:
-* Failure-path or retry behavior checked:
+* [ ] Local or targeted script validation performed
+* [ ] Workflow run in fork or equivalent validation
+* [ ] Relevant logs or run links attached
+* [ ] Failure-path or retry behavior checked
 
 ---
 
@@ -91,33 +91,7 @@ For repository-wide contribution and review expectations, see [CONTRIBUTING.md](
 
 ## Definition of Done (DoD)
 
-### Workflow
-
-* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436)
-
-### Code Quality
-
-* [ ] Code follows repository conventions
-* [ ] Code and comments are written in English
-
-### Functionality
-
-* [ ] Change works as expected in the tested CI/CD path
-* [ ] Trigger behavior, permissions, and failure handling were verified where applicable
-
-### Testing
-
-* [ ] Changes tested locally where practical
-* [ ] CI pipeline passes
-* [ ] Relevant workflow or script paths were validated
-* [ ] Unit test added for touched `*.py` files
-* [ ] Integration test added for touched `*.py` files
-
-### Documentation
-
-* [ ] Relevant workflow docs, `README.md` files, or runbook notes updated
-* [ ] Link this PR to the work item in https://project.infinito.nexus/ and back
-* [ ] Work item in https://project.infinito.nexus/ updated
+* [ ] The implementation follows the Definition of Done, and the contribution guidelines in [CONTRIBUTING.md](../../CONTRIBUTING.md) were considered and applied during implementation.
 
 ---
 

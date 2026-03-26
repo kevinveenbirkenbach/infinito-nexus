@@ -1,279 +1,439 @@
-# 🚀 Contributing to Infinito.Nexus
+# Contributing to Infinito.Nexus
 
-Thank you for your interest in contributing to **Infinito.Nexus**! 🙌
+This guide is for both human contributors and AI assistants.
+It explains the expected setup, contribution workflow, testing, review, and AI usage for this repository.
 
-We genuinely appreciate every contribution — whether it's code, documentation, testing, bug reports, or ideas.
-Your involvement helps make Infinito.Nexus more stable, scalable, and powerful.
+The [Development Hub](https://s.infinito.nexus/development) is the central information hub for developers and contains further guidance, discussion, and exchange with other contributors.
+New permanent team members should follow the [onboarding document](https://s.infinito.nexus/onboarding).
 
-Before getting started, please read this document carefully.
-Infinito.Nexus follows a **strict fork-first contribution model** to ensure long-term stability and CI/CD efficiency.
+## Quick Start
 
-This workflow is mandatory for all contributors. 💡
+If you only read one section, read this one:
 
----
+1. Create a fork and a feature branch.
+2. Set up your local environment.
+3. Make a focused change.
+4. Run the relevant checks.
+5. Push to your fork.
+6. Open a Pull Request with the right template.
+7. Request review and address feedback in your fork.
 
-# 🔐 Our Core Rule: Fork First. Always.
+## Development Environment Setup
 
-All development must happen in **Folks (Forks)** — never directly in the main repository.
+Use the repository's real setup flow. The main source of truth is the [Makefile](Makefile).
 
-The `main` branch is production-grade.
-It must remain stable, clean, and green at all times. ✅
+Important:
 
----
+- Some local development commands change host settings such as [DNS](https://en.wikipedia.org/wiki/Domain_Name_System), [AppArmor](https://en.wikipedia.org/wiki/AppArmor), and [IPv6](https://en.wikipedia.org/wiki/IPv6).
+- Some commands use `sudo`.
+- Read the setup guides first if you are new to this environment.
+- The local development workflow is mainly tested on Linux.
 
-## 🧭 Step 1 — Create Your Folk (Fork)
+### Platform-Specific Instructions
 
-Before making any change:
+#### Linux
 
-1. Fork the official repository
-   👉 [https://github.com/infinito-nexus/core](https://github.com/infinito-nexus/core)
+On Linux, follow the normal local setup guide and use the repository commands directly on your machine. More information [here](https://s.infinito.nexus/localenv).
 
-2. Clone your fork locally.
+#### macOS
 
-3. Create a feature branch inside your fork.
+On macOS, use [Lima](https://lima-vm.io/) so the project runs inside a Linux environment instead of directly on the host system.
+Use [Homebrew](https://brew.sh/) on macOS to install and manage Lima, then run the normal Linux-oriented project setup inside the Lima environment.
+This keeps the development workflow closer to the Linux-first setup used by this repository.
+More information [here](https://s.infinito.nexus/localenv).
 
-4. Implement your changes there.
+#### Windows (WSL2)
 
-This applies to everything:
+On Windows, use [WSL2](https://learn.microsoft.com/en-us/windows/wsl/about) as the development environment and run the repository commands inside WSL2, not directly in [PowerShell](https://learn.microsoft.com/en-us/powershell/).
+Use Ubuntu 24.04 with [Docker Desktop WSL2 integration](https://docs.docker.com/desktop/features/wsl/), enable [`systemd`](https://systemd.io/), and expect a few Windows-specific follow-up steps around [certificate authority (CA)](https://en.wikipedia.org/wiki/Certificate_authority) trust and local name resolution.
 
-* ✨ New features
-* 🐛 Bug fixes
-* ♻ Refactoring
-* 📚 Documentation
-* 🧪 Experiments
+Keep these WSL2 specifics in mind:
 
-No direct commits to `main`. No exceptions.
+- Trust the generated [CA](https://en.wikipedia.org/wiki/Certificate_authority) in Windows, not only inside WSL2.
+- If `*.infinito.example` does not resolve correctly, check Windows-side [DNS](https://en.wikipedia.org/wiki/Domain_Name_System) or hosts configuration.
+- If container or security setup behaves differently than on Linux, the WSL2 guide covers the usual [Docker Buildx](https://docs.docker.com/reference/cli/docker/buildx/), [DNS](https://en.wikipedia.org/wiki/Domain_Name_System), and [AppArmor](https://en.wikipedia.org/wiki/AppArmor)-related workarounds.
 
----
+More information and detailed instructions [here](https://s.infinito.nexus/wsl2env).
 
-## 🤔 Why This Model?
+### Platform Agnostic
 
-This strict model ensures:
+These steps are the shared repository workflow and apply regardless of whether you work on Linux, macOS, or Windows with WSL2.
 
-* 🟢 `main` always stays stable
-* ⚙️ CI pipelines remain efficient
-* 🧪 Experiments are isolated
-* 💻 Shared runners are protected
-* 📈 The project scales sustainably
+#### Bootstrap
 
-Your fork is your workspace.
-The main repository is not a testing playground.
-
----
-
-# 🛠 Working Inside Your Folk
-
-Once inside your fork:
-
-* Follow the established repository structure.
-* Respect canonical role templates and patterns.
-* Follow naming conventions.
-* Keep commits small and meaningful.
-* Ensure changes are reproducible.
-
-Before opening a Pull Request:
-
-✔ Run all local tests
-✔ Validate linting
-✔ Ensure formatting compliance
-✔ Confirm CI passes in your fork
-
----
-
-# 🧪 Required Local Checks
-
-All checks are run via `make` from the repository root.
-
----
-
-## 🎨 Formatting
+Run these commands from the repository root:
 
 ```bash
-make format
-```
-
----
-
-## 🧹 Linting & Tests (CI-like via Docker)
-
-Start the CI stack:
-
-```bash
+make bootstrap
+make dev-environment-bootstrap
 make up
+make trust-ca
 ```
 
-Run checks:
+##### Bootstrap Commands
 
-```bash
-make test-lint
-make test-unit
-make test-integration
-```
+| Phase | Command | What it does |
+|---|---|---|
+| Initial setup | `make bootstrap` | Installs project dependencies and runs the first repository setup. |
+| Host preparation | `make dev-environment-bootstrap` | Prepares the local development machine for the project workflow. |
+| Start stack | `make up` | Starts the local development stack. |
+| Browser trust | `make trust-ca` | Trusts the generated local [CA](https://en.wikipedia.org/wiki/Certificate_authority) so `*.infinito.example` works correctly in your browser. |
 
-Run everything:
+#### Teardown
 
-```bash
-make test
-```
-
-Optional teardown:
+When you are done, use these commands to stop the stack and clean up the local environment:
 
 ```bash
 make down
+make dev-environment-teardown
 ```
 
----
+##### Teardown Commands
 
-## 📦 Ansible Syntax Check
+| Phase | Command | What it does |
+|---|---|---|
+| Stop stack | `make down` | Stops the local development stack. |
+| Host cleanup | `make dev-environment-teardown` | Reverts local development environment changes where supported. |
 
-```bash
-make lint-ansible
+### Full Development Flow
+
+The repository already contains a development helper script at [development.sh](scripts/tests/development.sh). The commands from that file are explained here as the intended end-to-end flow.
+
+##### Flow Summary
+
+| Step | Command | Purpose in this flow |
+|---|---|---|
+| 1 | `make install` | Installs the dependencies needed before running the local development flow. |
+| 2 | `make dev-environment-bootstrap` | Prepares the host machine for local development. |
+| 3 | `make up` | Starts the development stack. |
+| 4 | `make test` | Runs the main combined validation flow. |
+| 5 | `APP=web-app-matomo make test-local-dedicated` | Runs a stronger local validation path for one concrete app. |
+| 6 | `make trust-ca` | Makes the generated local certificates trusted by the host browser. |
+| 7 | `make down` | Stops the running development stack. |
+| 8 | `make dev-environment-teardown` | Cleans up host-side development environment changes. |
+
+Use this as a practical reference when you want to understand how local development is expected to work.
+
+### Local Deployment Shortcuts
+
+The local deploy targets are summarized in the tables in the `Testing and Validation` section below.
+
+Important:
+
+- Some local deploy commands are destructive.
+- Read [README.md](scripts/tests/deploy/local/README.md) before using reset or cleanup commands.
+- After a successful local deploy, run `make trust-ca` and restart your browser.
+More information [here](https://s.infinito.nexus/localenv).
+
+#### Minimal Hardware Resources
+
+If you work on a machine with limited CPU, RAM, or disk space, keep the local stack minimal and disable optional services you do not currently need.
+This is useful when you focus on one app and do not need Matomo, the dashboard, OIDC, or the logout service during local development.
+
+Example `compose` settings:
+
+```yaml
+compose:
+  services:
+    matomo:
+      enabled: false
+      shared: false
+    dashboard:
+      enabled: false
+      shared: false
+    oidc:
+      enabled: false
+      shared: false
+    logout:
+      enabled: false
+      shared: false
 ```
 
----
+## Contribution Flow
 
-## 🌍 Local Deployment Testing
+This repository uses a strict fork-first workflow.
 
-For full end-to-end deployment validation using the local Docker-based development environment, follow the official setup guide on the Hub:
+- Do not commit directly to `main`.
+- Do all work in your own fork.
+- Open Pull Requests from your fork back to the main repository.
 
-👉 [https://hub.infinito.nexus/t/local-deploy-test-scripts/435](https://hub.infinito.nexus/t/local-deploy-test-scripts/435)
+Why this matters:
 
-This guide explains how to:
+- `main` should stay stable.
+- Shared CI resources are limited.
+- Broken experimental work should not run in the main repository.
 
-* Run Infinito.Nexus locally
-* Deploy apps under `*.infinito.example`
-* Use the local development test scripts
-* Perform smoke tests
+### Step-by-Step Flow
 
-Some commands are destructive — read carefully before running them. ⚠️
+1. Create or update your fork.
+2. Create a feature branch in your fork.
+3. Make one focused change at a time.
+4. Run the relevant local checks.
+5. Push the branch to your fork.
+6. Wait until the CI in your fork is green.
+7. Open a Pull Request.
+8. Address review feedback in your fork.
 
----
+Use the prefix `feature` for feature branches and `fix` for bugfixes and other fixes, for example `feature/my-change` or `fix/login-bug`.
 
-# 🟢 CI Must Pass in Your Fork First
+More information about the contribution workflow is available [here](https://s.infinito.nexus/forking).
 
-This is critical.
+### Choose the Right Pull Request Template
 
-**All CI/CD pipelines must pass in your fork before opening a Pull Request.**
+Pick the template that matches your change:
+All Pull Request templates are located in [PULL_REQUEST_TEMPLATE](.github/PULL_REQUEST_TEMPLATE).
 
-If CI fails in your fork:
+| Change type | Template |
+|---|---|
+| Server and `web-*` changes | [server.md](.github/PULL_REQUEST_TEMPLATE/server.md) |
+| Workstation and `desk-*` changes | [workstation.md](.github/PULL_REQUEST_TEMPLATE/workstation.md) |
+| Shared system changes such as `sys-*`, `svc-*`, `dev-*`, `drv-*`, `pkgmgr`, `update-*`, or `user-*` | [system.md](.github/PULL_REQUEST_TEMPLATE/system.md) |
+| CI/CD and workflow changes | [pipeline.md](.github/PULL_REQUEST_TEMPLATE/pipeline.md) |
+| Documentation-only changes | [documentation.md](.github/PULL_REQUEST_TEMPLATE/documentation.md) |
+| Agent-specific changes | [agents.md](.github/PULL_REQUEST_TEMPLATE/agents.md) |
 
-> Fix it there. Do not rely on the main repository to test it for you.
+### Pull Request Checklist
 
-Why?
+Before you open a Pull Request, make sure:
 
-* 🖥 Main runners are shared and limited
-* ❌ Broken PRs waste compute resources
-* ⏳ They delay other contributors
-* 📉 They reduce reliability
+- CI in your fork is green.
+- Your branch is up to date with `main`.
+- Your change is small and focused.
+- Your Pull Request explains the problem, the solution, and the test result.
+- Relevant documentation is updated.
+- The correct Pull Request template is used.
+- The Pull Request is linked to the related work item in [project.infinito.nexus](https://project.infinito.nexus/) and back.
+- Screenshots, logs, traces, or migration notes are attached when they help review the change.
 
-Your fork = your responsibility.
+### CI Failures and Debugging
 
----
+If CI fails, follow a clean debugging workflow:
 
-# 📬 Pull Request Requirements
+1. Export the raw failing logs.
+2. Save them locally as `job-logs.txt`.
+3. Decide whether the failure belongs to your branch or to something unrelated.
+4. Fix related failures in the same branch.
+5. Open an issue for unrelated failures instead of mixing them into your branch.
 
-Only open a Pull Request when:
+Important:
 
-* ✅ CI in your fork is fully green
-* 🔄 Your branch is rebased on current `main`
-* 📚 Changes are documented
-* 🧹 Commit history is clean
-* 🧪 Tests pass locally
+- Do not debug from screenshots alone. Use raw logs.
+- Do not commit log files to the repository.
+- If a [Playwright](https://playwright.dev/) job fails, also download the Playwright assets, store them in `/tmp/`, and analyze them together with the logs.
+More information [here](https://hub.infinito.nexus/t/infinito-nexus-ci-cd-debugging-guide/462).
 
-A good Pull Request:
+### Use Targeted Manual CI Jobs
 
-* Is small and focused
-* Clearly explains its purpose
-* References related issues
-* Follows semantic structure
+Do not rerun the full CI over and over if you only need one focused check.
 
-Repository-wide review expectations are documented in this guide.
-PR templates document author-side requirements.
-The reviewer guide documents reviewer-side checks.
+Prefer the manual workflow in [entry-manual.yml](.github/workflows/entry-manual.yml):
 
----
+- Select your branch.
+- Use `debian` unless you have a clear reason to use a different distro.
+- Limit the run to the affected app when possible.
 
-# 💬 Community & Discussion
+This gives faster feedback and protects shared CI runners.
 
-For questions, development discussions, architecture topics, and Q&A, please use the official Hub:
+## Testing and Validation
 
-👉 [https://hub.infinito.nexus/](https://hub.infinito.nexus/)
+Use the real commands from the repository. Run them from the repository root.
 
-For chat-based help, you can also use the public Matrix room:
+This repository uses several test and validation types:
 
-`#public:infinito.nexus`
+- `Lint and syntax checks` catch style, formatting, and Ansible syntax problems early.
+- `Unit tests` verify isolated logic.
+- `Integration tests` verify behavior across modules and runtime boundaries.
+- `Combined validation` runs the standard main verification flow.
+- `Local deploy and E2E validation` checks whether apps and deployment flows work in a realistic local stack.
 
-The Hub is the central place for:
+### Code Quality and Automated Checks
 
-* ❓ Q&A
-* 🧠 Architecture discussions
-* 🛠 Development topics
-* 📣 Announcements
-* 🧪 Testing feedback
+Use the following table to choose the right lint, syntax, unit, integration, or combined validation command for your change.
 
-We encourage using the Hub instead of GitHub issues for general discussions.
+#### Validation Commands
 
----
+| Category | Command | What it does | When to use it |
+|---|---|---|---|
+| Lint | `make lint` | Runs the main lint checks for the repository. | Use this when you want a broad lint pass before pushing. |
+| Syntax | `make lint-ansible` | Runs the Ansible syntax validation for `playbook.yml`. | Use this when you changed Ansible roles, inventories, or playbook-related files. |
+| Lint tests | `make test-lint` | Runs the lint test suite inside the development environment. | Use this when you want CI-like lint validation. |
+| Unit tests | `make test-unit` | Runs the unit test suite. | Use this when you changed Python logic or other isolated code paths. |
+| Integration tests | `make test-integration` | Runs the integration test suite. | Use this when your change affects behavior across modules or runtime boundaries. |
+| Combined validation | `make test` | Runs the main combined validation flow. | Use this before opening a Pull Request or when you want the standard all-in-one check. |
 
-# 🐛 Reporting Issues
+### Local Deploy and End-to-End Checks
 
-Bug reports and actionable feature requests should be opened via:
+Use the following table when you need realistic local deployment validation or app-level end-to-end checks.
 
-👉 [https://s.infinito.nexus/issues](https://s.infinito.nexus/issues)
+#### Local Validation Commands
 
-Please include:
+| Category | Command | What it does | When to use it |
+|---|---|---|---|
+| Local deploy | `APP=web-app-nextcloud make test-local-app` | Creates the needed inventory and deploys one app. | Use this for the first local validation of a single app. |
+| Local deploy | `APP=web-app-nextcloud make test-local-rapid` | Reuses an existing local inventory and redeploys one app quickly. | Use this when you already have a working local setup and want faster iteration. |
+| Local deploy and E2E | `APP=web-app-matomo make test-local-dedicated` | Runs a dedicated local validation flow for one app against the dev stack. | Use this when you want a stronger app-specific validation path. |
+| Full local validation | `make test-local-full` | Builds the broader local deployment flow across apps. | Use this for a wider full-stack validation pass. |
+| Local reset | `make test-local-reset` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |
+| Local cleanup | `make test-local-cleanup` | Deletes local deploy state and cleanup data. | Use this only when you really want to remove local state. |
 
-* Clear description
-* Steps to reproduce
-* Environment details
-* Relevant logs
+### Playwright
 
----
+[Playwright](https://playwright.dev/) tests are part of deployment and end-to-end validation for `web-*` roles. They are not exposed here as a separate top-level `make` command.
 
-# 🤝 Code of Conduct
+To enable Playwright for a `web-*` role, provide:
 
-All contributors must follow:
+- `templates/playwright.env.j2`
+- `files/playwright.spec.js`
 
-`CODE_OF_CONDUCT.md`
+During the deploy stage, the shared `test-e2e-playwright` role:
 
-Respectful, professional collaboration is expected at all times.
+- discovers the relevant app roles
+- stages the test project
+- renders the `.env`
+- injects the shared `package.json` and `playwright.config.js`
+- waits until the app is reachable
+- runs Playwright in Docker
 
----
+In practice, Playwright coverage is usually exercised through local deploy flows and deploy CI runs. Every `web-*` suite should verify at least login and logout.
 
-# 🌱 Why This Matters
+## Review Requirements
 
-Infinito.Nexus is designed to scale.
+Open a Pull Request only when it is ready for real review.
 
-Without strict fork-first development:
+The matching Pull Request template is the SPOT for PR structure, required author input, and review context. Use the correct template from [PULL_REQUEST_TEMPLATE](.github/PULL_REQUEST_TEMPLATE) and orient your Pull Request to it.
+The [Coding Standards](#coding-standards) section is the SPOT for repository-wide code quality expectations such as diff quality, maintainability, and conventions.
 
-* CI/CD becomes unstable
-* Review overhead increases
-* Regression risk rises
-* Development velocity drops
+In addition to the templates, keep these repository-wide review rules in mind:
 
-By enforcing:
+- Keep commit history clear and reviewable.
+- Code ownership is defined in [CODEOWNERS](.github/CODEOWNERS).
+- Auth, proxy, TLS, networking, migrations, and shared abstractions deserve extra review attention.
+- Attach screenshots, traces, logs, and migration notes when they materially help validate the change.
 
-* Fork-first development
-* Green CI in forks
-* Clean Pull Requests
+More information [here](https://s.infinito.nexus/reviewguide).
 
-we ensure:
+## AI Best Practices
 
-* 🟢 Stable `main`
-* ⚡ Efficient CI usage
-* 🧩 High-quality merges
-* 📈 Sustainable growth
+AI assistants are welcome, but they must follow the same workflow as humans.
 
----
+This file is the SPOT for contributor workflow, testing, review, and coding standards.
+[AGENTS.md](AGENTS.md) is the SPOT for agent-specific execution rules and repository-wide agent behavior.
 
-# 🏁 Golden Rule
+Additional AI-specific rules:
 
-> Work in your Folk.
-> Pass CI in your Folk.
-> Then open a Pull Request.
+- Read [AGENTS.md](AGENTS.md) before making changes.
+- Do not invent commands, workflows, or files that do not exist.
+- Keep explanations simple and explicit.
+- State assumptions clearly.
+- Never expose secrets in prompts, code, screenshots, or logs.
+- Treat AI output as a draft that must be reviewed for wrong assumptions, duplicate logic, and security mistakes.
+- Keep agent instructions consistent: [AGENTS.md](AGENTS.md) is the repository-wide source of truth, while [CLAUDE.md](CLAUDE.md) and [GEMINI.md](GEMINI.md) are tool-specific additions.
 
-No direct commits to `main`.
-No CI failures in PR.
-No shortcuts.
+More information here:
 
-Thank you for helping make **Infinito.Nexus** robust, scalable, and future-proof. 💙
+- [AI best practices](https://s.infinito.nexus/aibestpractice)
+- [Review guide](https://s.infinito.nexus/reviewguide)
+
+## Coding Standards
+
+This repository values simple, maintainable, and well-tested changes.
+
+### Principles
+
+Follow these principles:
+
+- [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)
+- [SPOT](https://en.wikipedia.org/wiki/Single_source_of_truth)
+- [KISS](https://en.wikipedia.org/wiki/KISS_principle)
+- [Agile Manifesto](https://agilemanifesto.org/)
+- [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) for all code
+- [TDD](https://en.wikipedia.org/wiki/Test-driven_development)
+
+### Diff Quality
+
+- Keep diffs focused, readable, and easy to review.
+- Avoid duplicate, conflicting, or purely cosmetic churn unless formatting cleanup is part of the task.
+- Prefer semantic improvements that reduce maintenance effort.
+
+### Lint
+
+Use these linting and quality tools where applicable:
+
+- [ruff](https://github.com/astral-sh/ruff)
+- [shellcheck](https://github.com/koalaman/shellcheck)
+- [hadolint](https://github.com/hadolint/hadolint)
+
+### Refactoring
+
+- If you touch a file, refactor it according to these coding standards where practical.
+- If similar logic exists elsewhere in the project, refactor it toward a shared implementation.
+
+### Testing Standards
+
+- Write tests in the `tests` folder.
+- Use Python `unittest` for unit, integration, and lint tests.
+- Do not write tests that only check whether a file contains a string.
+- Do not write tests only for non-executable files such as `.yml` or `.j2`.
+- Test the behavior that consumes the configuration.
+
+### Unit
+
+- For touched `*.py` files, add or update unit tests in `tests/unit`.
+- For touched `*.py` files, add or update integration tests in `tests/integration`.
+
+### Playwright
+
+- Playwright tests are required for `web-*` roles.
+- Every Playwright test suite must verify login and logout.
+
+#### Development Procedure
+
+- Analyze the code first.
+- Build hypotheses before writing the test.
+- Write the Playwright test.
+- Run it against a fresh pure Docker image.
+- Add additional procedures when relevant, for example OIDC or Keycloak.
+- Start from the dashboard.
+- End with a successful logout.
+
+#### Minimum Requirements
+
+- The test must verify that login is possible.
+- The test must verify that logout is possible.
+
+### Architecture
+
+- Prefer `Dockerfile` over `Dockerfile.j2`.
+- Prefer defining shared variables once in `vars/main.yml`.
+- Treat constants as uppercase when they are defined once and used as fixed values.
+- For `web-*` roles, test against the original upstream Docker image when practical.
+
+### Documentation and Comments
+
+- Keep core information inside the repository, either in code or in `.md` files.
+- Use `.md` files for commands, workflows, setup, and contributor guidance.
+- Do not use `.md` files to describe implementation logic that is already visible in the code.
+- Write code so it is logical and self-explanatory and usually does not need comments.
+- Add code comments only when an exception, edge case, or surprising decision would otherwise confuse readers.
+- Use comments to explain why something is unusual, not to restate what obvious code already does.
+
+### Semantics and Writing
+
+- Keep code and comments in English.
+- Fix nearby wording and semantic issues when you touch a file.
+
+## Need Help
+
+For general discussion:
+More information [here](https://hub.infinito.nexus/).
+
+For bug reports and actionable feature requests:
+More information [here](https://s.infinito.nexus/issues).
+
+## Code of Conduct
+
+All contributors must follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Join the Project
+
+If you want to join the project as a permanent team member, write to [hr@infinito.nexus](mailto:hr@infinito.nexus) or request a meeting [here](https://s.infinito.nexus/meet).

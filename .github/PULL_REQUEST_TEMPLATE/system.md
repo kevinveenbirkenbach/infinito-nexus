@@ -58,10 +58,10 @@ Key points:
 
 Describe how the change was validated locally.
 
-* Fresh deploy or targeted rerun tested:
-* Idempotency verified:
-* Service health, timers, or package behavior verified:
-* Cross-distro notes:
+* [ ] Fresh deploy or targeted rerun tested
+* [ ] Idempotency verified
+* [ ] Service health, timers, or package behavior verified
+* [ ] Cross-distro notes documented
 
 ---
 
@@ -93,33 +93,7 @@ For repository-wide contribution and review expectations, see [CONTRIBUTING.md](
 
 ## Definition of Done (DoD)
 
-### Workflow
-
-* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436)
-
-### Code Quality
-
-* [ ] Code follows repository conventions
-* [ ] Code and comments are written in English
-* [ ] Shared logic and variables were kept DRY where practical
-
-### Functionality
-
-* [ ] Change works as expected in the tested environment
-* [ ] Idempotency and service behavior were verified where applicable
-
-### Testing
-
-* [ ] Changes tested locally
-* [ ] CI pipeline passes
-* [ ] Unit test added for touched `*.py` files
-* [ ] Integration test added for touched `*.py` files
-
-### Documentation
-
-* [ ] Relevant `README.md` files and docs updated
-* [ ] Link this PR to the work item in https://project.infinito.nexus/ and back
-* [ ] Work item in https://project.infinito.nexus/ updated
+* [ ] The implementation follows the Definition of Done, and the contribution guidelines in [CONTRIBUTING.md](../../CONTRIBUTING.md) were considered and applied during implementation.
 
 ---
 
