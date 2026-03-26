@@ -36,23 +36,4 @@ jobs:
 
       - name: Fail if SARIF contains warnings/errors
         if: always()
-        run: |
-          python - <<'PY'
-          import json, sys
-          p="hadolint-results.sarif"
-          with open(p,"r",encoding="utf-8") as f:
-            sarif=json.load(f)
-
-          results = sarif.get("runs",[{}])[0].get("results",[])
-          # Hadolint SARIF usually provides severity via level: "error" | "warning" | "note"
-          levels = [r.get("level","") for r in results]
-          warn = sum(1 for l in levels if l == "warning")
-          err  = sum(1 for l in levels if l == "error")
-
-          print(f"SARIF results: total={len(results)} warnings={warn} errors={err}")
-
-          # mirror your chosen threshold here:
-          # - fail on any warning or error
-          if warn + err > 0:
-            sys.exit(1)
-          PY
+        run: python3 utils/check_hadolint_sarif.py hadolint-results.sarif
