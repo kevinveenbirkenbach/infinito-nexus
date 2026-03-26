@@ -125,6 +125,30 @@ Important:
 - After a successful local deploy, run `make trust-ca` and restart your browser.
 More information [here](https://s.infinito.nexus/localenv).
 
+#### Minimal Hardware Resources
+
+If you work on a machine with limited CPU, RAM, or disk space, keep the local stack minimal and disable optional services you do not currently need.
+This is useful when you focus on one app and do not need Matomo, the dashboard, OIDC, or the logout service during local development.
+
+Example `compose` settings:
+
+```yaml
+compose:
+  services:
+    matomo:
+      enabled: false
+      shared: false
+    dashboard:
+      enabled: false
+      shared: false
+    oidc:
+      enabled: false
+      shared: false
+    logout:
+      enabled: false
+      shared: false
+```
+
 ## Contribution Flow
 
 This repository uses a strict fork-first workflow.
@@ -149,6 +173,8 @@ Why this matters:
 6. Wait until the CI in your fork is green.
 7. Open a Pull Request.
 8. Address review feedback in your fork.
+
+Use the prefix `feature` for feature branches and `fix` for bugfixes and other fixes, for example `feature/my-change` or `fix/login-bug`.
 
 More information about the contribution workflow is available [here](https://s.infinito.nexus/forking).
 
