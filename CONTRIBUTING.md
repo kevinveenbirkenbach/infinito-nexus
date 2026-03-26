@@ -96,18 +96,7 @@ make dev-environment-teardown
 
 ### Full Development Flow
 
-The repository already contains a development helper script at [development.sh](scripts/tests/development.sh). It shows the intended end-to-end flow:
-
-```bash
-make install
-make dev-environment-bootstrap
-make up
-make test
-APP=web-app-matomo make test-local-dedicated
-make trust-ca
-make down
-make dev-environment-teardown
-```
+The repository already contains a development helper script at [development.sh](scripts/tests/development.sh). The commands from that file are explained here as the intended end-to-end flow.
 
 ##### Flow Summary
 
