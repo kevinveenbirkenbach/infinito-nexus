@@ -187,6 +187,10 @@ A good Pull Request:
 * References related issues
 * Follows semantic structure
 
+For repository-wide review expectations, see https://s.infinito.nexus/reviewguide.
+PR templates document author-side requirements.
+The reviewer guide documents reviewer-side checks.
+
 ---
 
 # 💬 Community & Discussion
