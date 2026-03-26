@@ -410,4 +410,4 @@ All contributors must follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## Join the Project
 
-If you want to join the project as a paid long-term contributor, write to [hr@infinito.nexus](mailto:hr@infinito.nexus) or request a meeting [here](https://s.infinito.nexus/meet).
+If you want to join the project as a permanent team member, write to [hr@infinito.nexus](mailto:hr@infinito.nexus) or request a meeting [here](https://s.infinito.nexus/meet).
