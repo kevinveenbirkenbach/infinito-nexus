@@ -92,35 +92,7 @@ For repository-wide contribution and review expectations, see [CONTRIBUTING.md](
 
 ## Definition of Done (DoD)
 
-### Workflow
-
-* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436)
-
-### Code Quality
-
-* [ ] Code follows repository conventions
-* [ ] Code and comments are written in English
-
-### Functionality
-
-* [ ] Change works as expected in a local deployment
-* [ ] Original upstream Docker image was used for testing where practical
-
-### Testing
-
-* [ ] Changes tested locally
-* [ ] CI pipeline passes
-* [ ] Playwright test added or updated for the affected `web-*` flow
-* [ ] Playwright test verifies login and logout
-* [ ] Unit test added for touched `*.py` files
-* [ ] Integration test added for touched `*.py` files
-
-### Documentation
-
-* [ ] Relevant `README.md` files and docs updated
-* [ ] Link this PR to the work item in https://project.infinito.nexus/ and back
-* [ ] Work item in https://project.infinito.nexus/ updated
-* [ ] Screenshot of the running application from the local deployment attached when the change is user-visible
+* [ ] The implementation follows the Definition of Done, and the contribution guidelines in [CONTRIBUTING.md](../../CONTRIBUTING.md) were considered and applied during implementation.
 
 ---
 
