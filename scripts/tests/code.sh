@@ -12,6 +12,7 @@ echo "============================================================"
 # Execute directly inside the already running infinito container
 INFINITO_DISTRO="${INFINITO_DISTRO}" \
 	docker compose --profile ci exec -T \
+	-e GITHUB_ACTIONS="${GITHUB_ACTIONS:-}" \
 	-e TEST_PATTERN="${TEST_PATTERN}" \
 	-e TEST_TYPE="${TEST_TYPE}" \
 	--workdir /opt/src/infinito \
