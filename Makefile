@@ -24,6 +24,7 @@ endif
 	print-python \
 	dns-setup dns-remove \
 	dev-environment-bootstrap dev-environment-teardown \
+	wsl2-systemd-check wsl2-dns-setup wsl2-trust-windows \
 	apparmor-teardown apparmor-restore \
 	disable-ipv6 restore-ipv6 \
 	trust-ca \
@@ -35,25 +36,43 @@ endif
 	test-local-rapid test-local-rapid-fresh test-local-full \
 	bootstrap setup-development
 
-dev-environment-bootstrap: install-lint apparmor-teardown dns-setup disable-ipv6
+dev-environment-bootstrap: wsl2-systemd-check install-lint apparmor-teardown dns-setup disable-ipv6
 dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
 
-dns-setup:
-	@bash scripts/administration/network/dns/setup.sh
+wsl2-systemd-check:
+	@bash scripts/administration/systemd/enable/wsl2.sh
+
+wsl2-dns-setup:
+	@sudo bash scripts/administration/network/dns/setup/wsl.sh
+
+wsl2-trust-windows:
+	@bash scripts/administration/tls/trust/wsl2.sh
+
+dns-setup: wsl2-dns-setup
+	@bash scripts/administration/network/dns/setup/linux.sh
 
 dns-remove:
 	@bash scripts/administration/network/dns/remove.sh
 
 apparmor-teardown:
 	@echo "==> AppArmor: full teardown (local dev)"
-	@sudo bash scripts/administration/apparmor/teardown.sh
+	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
+		sudo bash scripts/administration/apparmor/teardown.sh; \
+	else \
+		echo "[apparmor] AppArmor module is not loaded — skipping teardown"; \
+	fi
 
 apparmor-restore:
 	@echo "==> AppArmor: restore profiles"
-	@sudo bash scripts/administration/apparmor/restore.sh
+	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
+		sudo bash scripts/administration/apparmor/restore.sh; \
+	else \
+		echo "[apparmor] AppArmor module is not loaded — skipping restore"; \
+	fi
 
 trust-ca:
-	@bash scripts/administration/trust_ca.sh
+	@bash scripts/administration/tls/trust/linux.sh
+	@bash scripts/administration/tls/trust/wsl2.sh
 
 disable-ipv6:
 	@sudo bash scripts/administration/network/ipv6/disable.sh

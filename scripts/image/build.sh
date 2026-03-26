@@ -300,6 +300,15 @@ compute_publish_tags() {
 	printf '%s\n' "${tags[@]}"
 }
 
+# WSL2: detect and remove a corrupted docker-buildx plugin (text file instead of ELF binary)
+_buildx_bin="${HOME}/.docker/cli-plugins/docker-buildx"
+if [[ -f "${_buildx_bin}" ]] && command -v file >/dev/null 2>&1; then
+	if ! file "${_buildx_bin}" | grep -qE "ELF|executable"; then
+		echo "[build] WARNING: Removing corrupted docker-buildx plugin (not an ELF binary)"
+		rm -f "${_buildx_bin}"
+	fi
+fi
+
 if [[ "${PUSH}" == "1" ]]; then
 	bx_args=(docker buildx build --push)
 
