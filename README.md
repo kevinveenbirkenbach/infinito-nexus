@@ -101,4 +101,4 @@ Infinito.Nexus is distributed under the **Infinito.Nexus Community License (Non-
 
 ## Professional Setup & Support 💼
 
-For expert installation and configuration visit [cybermaster.space](https://cybermaster.space/) or write to us at **[contact@cymais.cloud](mailto:contact@cymais.cloud)**.
+For expert installation and configuration visit [cybermaster.space](https://cybermaster.space/) or write to us at **[contact@infinito.nexus](mailto:contact@infinito.nexus)**.
