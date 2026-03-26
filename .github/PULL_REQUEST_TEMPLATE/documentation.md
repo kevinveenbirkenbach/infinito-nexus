@@ -56,9 +56,9 @@ Key points:
 
 Describe how the documentation change was validated.
 
-* Technical accuracy checked against the current implementation:
-* Broken wording, stale steps, or missing context reviewed:
-* Links, paths, commands, or references verified:
+* [ ] Technical accuracy checked against the current implementation
+* [ ] Broken wording, stale steps, or missing context reviewed
+* [ ] Links, paths, commands, or references verified
 
 ---
 

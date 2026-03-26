@@ -60,9 +60,9 @@ Key points:
 
 Describe how the instruction change was validated.
 
-* Conflicting or ambiguous guidance checked:
-* Consistency between `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` verified:
-* Examples, workflows, or affected contributor paths reviewed:
+* [ ] Conflicting or ambiguous guidance checked
+* [ ] Consistency between `AGENTS.md`, `CLAUDE.md`, and `GEMINI.md` verified
+* [ ] Examples, workflows, or affected contributor paths reviewed
 
 ---
 

@@ -57,10 +57,10 @@ Key points:
 
 Describe how the change was validated locally.
 
-* Installation tested:
-* Application startup tested:
-* Basic workflow tested:
-* Screenshot attached for user-visible changes:
+* [ ] Installation tested
+* [ ] Application startup tested
+* [ ] Basic workflow tested
+* [ ] Screenshot attached for user-visible changes
 
 ---
 

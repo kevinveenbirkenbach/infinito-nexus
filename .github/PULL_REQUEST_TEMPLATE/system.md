@@ -58,10 +58,10 @@ Key points:
 
 Describe how the change was validated locally.
 
-* Fresh deploy or targeted rerun tested:
-* Idempotency verified:
-* Service health, timers, or package behavior verified:
-* Cross-distro notes:
+* [ ] Fresh deploy or targeted rerun tested
+* [ ] Idempotency verified
+* [ ] Service health, timers, or package behavior verified
+* [ ] Cross-distro notes documented
 
 ---
 

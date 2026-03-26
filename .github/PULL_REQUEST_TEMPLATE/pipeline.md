@@ -56,10 +56,10 @@ Key points:
 
 Describe how the pipeline change was validated.
 
-* Local or targeted script validation performed:
-* Workflow run in fork or equivalent validation:
-* Relevant logs or run links attached:
-* Failure-path or retry behavior checked:
+* [ ] Local or targeted script validation performed
+* [ ] Workflow run in fork or equivalent validation
+* [ ] Relevant logs or run links attached
+* [ ] Failure-path or retry behavior checked
 
 ---
 
