@@ -64,10 +64,10 @@ Follow these coding standards where applicable:
 
 ## Committing
 
-- Run `make test` before every commit.
+- Run `make test` before every commit unless explicitly instructed not to do so.
 - If `make test` fails, run `make clean-sudo` and then `make test` again.
 - If `make test` fails with `service "infinito" is not running`, run `make up` and then retry `make test`.
-- `make test` is not required when only `.md` files were changed.
+- When only `.md` files were changed, `make test` is not required unless explicitly instructed to run it.
 - Commits are allowed only when all required tests pass successfully.
 
 ## Tests
