@@ -38,6 +38,7 @@ Contribution Guidelines
 For detailed guidelines, refer to:
 
 - :doc:`../../../CONTRIBUTING`
+- `Review Guide <https://s.infinito.nexus/reviewguide>`_
 - :doc:`../../../CODE_OF_CONDUCT`
 
 Community & Support
