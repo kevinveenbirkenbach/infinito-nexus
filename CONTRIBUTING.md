@@ -187,7 +187,7 @@ A good Pull Request:
 * References related issues
 * Follows semantic structure
 
-For repository-wide review expectations, see https://s.infinito.nexus/reviewguide.
+Repository-wide review expectations are documented in this guide.
 PR templates document author-side requirements.
 The reviewer guide documents reviewer-side checks.
 
@@ -198,6 +198,10 @@ The reviewer guide documents reviewer-side checks.
 For questions, development discussions, architecture topics, and Q&A, please use the official Hub:
 
 👉 [https://hub.infinito.nexus/](https://hub.infinito.nexus/)
+
+For chat-based help, you can also use the public Matrix room:
+
+`#public:infinito.nexus`
 
 The Hub is the central place for:
 

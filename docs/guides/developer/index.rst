@@ -38,7 +38,6 @@ Contribution Guidelines
 For detailed guidelines, refer to:
 
 - :doc:`../../../CONTRIBUTING`
-- `Review Guide <https://s.infinito.nexus/reviewguide>`_
 - :doc:`../../../CODE_OF_CONDUCT`
 
 Community & Support
@@ -46,6 +45,7 @@ Community & Support
 If you have questions or need help, visit the **Infinito.Nexus Information Hub**:
 
 - `hub.infinito.nexus <https://hub.infinito.nexus>`_
+- `#public:infinito.nexus <https://matrix.to/#/#public:infinito.nexus>`_
 
 This is the best place to ask questions, get support, and collaborate with other contributors.
 
