@@ -80,7 +80,7 @@ If security impact is present, explain:
 ## Review Focus
 
 Help reviewers focus on the riskiest parts of this PR.
-For the repository-wide reviewer checklist, see https://s.infinito.nexus/reviewguide.
+For repository-wide contribution and review expectations, see [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 * Highest-risk statements, commands, or assumptions:
 * Accuracy, clarity, or audience-fit concerns:
