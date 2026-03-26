@@ -1,7 +1,11 @@
 ## Choose a Pull Request Template
 
-Do not submit this chooser as the final pull request description.
-Select the template that best matches your change:
+🙏 Thank you for your contribution to [https://Infinito.Nexus](https://Infinito.Nexus).
+
+⚠️ Do not submit this chooser as the final pull request description.
+
+👀 Click `View` to render this chooser and make the buttons visible.
+Then select the template that best matches your change:
 
 [![Server](https://img.shields.io/badge/Server-web--*-0A7B83?style=for-the-badge)](?quick_pull=1&template=server.md)
 [![Workstation](https://img.shields.io/badge/Workstation-desk--*-2E6F40?style=for-the-badge)](?quick_pull=1&template=workstation.md)
@@ -24,13 +28,13 @@ If the buttons do not work in your GitHub client, append one of these query para
 
 ### Contribution Guide
 
-Repository-wide contribution and review expectations:
+📘 Repository-wide contribution and review expectations:
 
 * [CONTRIBUTING.md](../CONTRIBUTING.md)
 
 ### Need Help?
 
-If you need support choosing the right template or preparing your pull request:
+💬 If you need support choosing the right template or preparing your pull request:
 
 * Hub: https://hub.infinito.nexus/
 * Matrix: `#public:infinito.nexus`
