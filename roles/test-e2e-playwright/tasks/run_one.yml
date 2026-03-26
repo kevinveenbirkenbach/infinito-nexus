@@ -1,0 +1,245 @@
+- name: Define per-role paths
+  ansible.builtin.set_fact:
+    _playwright_env_template: "{{ playbook_dir }}/roles/{{ application_id }}/templates/playwright.env.j2"
+    _playwright_spec_src: "{{ playbook_dir }}/roles/{{ application_id }}/files/playwright.spec.js"
+    _playwright_stage_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}"
+    _playwright_stage_tests_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}/tests"
+    _playwright_reports_dir: "{{ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR }}/{{ application_id }}"
+    _playwright_default_package_json: "{{ playbook_dir }}/roles/test-e2e-playwright/files/package.json"
+    _playwright_default_config_js: "{{ playbook_dir }}/roles/test-e2e-playwright/files/playwright.config.js"
+    _playwright_ca_required: "{{ (TLS_MODE | default('') | lower) == 'self_signed' }}"
+    _playwright_ca_cert_host: "{{ (CA_TRUST | default({})).cert_host | default('') }}"
+    _playwright_ca_wrapper_host: "{{ (CA_TRUST | default({})).wrapper_host | default('') }}"
+    _playwright_ca_trust_name: "{{ (CA_TRUST | default({})).trust_name | default('') }}"
+
+- name: Validate CA_TRUST configuration for self-signed TLS
+  ansible.builtin.fail:
+    msg: >-
+      TLS_MODE=self_signed requires CA_TRUST.cert_host, CA_TRUST.wrapper_host and CA_TRUST.trust_name
+      to inject trust into the Playwright container.
+  when: >-
+    (_playwright_ca_required | bool) and
+    (
+      (_playwright_ca_cert_host | length == 0) or
+      (_playwright_ca_wrapper_host | length == 0) or
+      (_playwright_ca_trust_name | length == 0)
+    )
+
+- name: Check CA certificate for Playwright injection
+  ansible.builtin.stat:
+    path: "{{ _playwright_ca_cert_host }}"
+  register: _playwright_ca_cert_stat
+  when: _playwright_ca_required | bool
+
+- name: Check CA wrapper for Playwright injection
+  ansible.builtin.stat:
+    path: "{{ _playwright_ca_wrapper_host }}"
+  register: _playwright_ca_wrapper_stat
+  when: _playwright_ca_required | bool
+
+- name: Fail if CA certificate is missing on host
+  ansible.builtin.fail:
+    msg: >-
+      TLS_MODE=self_signed requires CA injection, but certificate is missing:
+      {{ _playwright_ca_cert_host }}
+  when: (_playwright_ca_required | bool) and not (_playwright_ca_cert_stat.stat.exists | default(false))
+
+- name: Fail if CA wrapper script is missing on host
+  ansible.builtin.fail:
+    msg: >-
+      TLS_MODE=self_signed requires CA injection, but wrapper script is missing:
+      {{ _playwright_ca_wrapper_host }}
+  when: (_playwright_ca_required | bool) and not (_playwright_ca_wrapper_stat.stat.exists | default(false))
+
+- name: Assert required Playwright env template exists
+  ansible.builtin.stat:
+    path: "{{ _playwright_env_template }}"
+  register: _env_template_stat
+
+- name: Fail if Playwright env template is missing
+  ansible.builtin.fail:
+    msg: "Missing Playwright env template: {{ _playwright_env_template }}"
+  when: not _env_template_stat.stat.exists
+
+- name: Assert required Playwright spec exists
+  ansible.builtin.stat:
+    path: "{{ _playwright_spec_src }}"
+  register: _spec_stat
+
+- name: Fail if Playwright spec is missing
+  ansible.builtin.fail:
+    msg: "Missing Playwright spec file: {{ _playwright_spec_src }}"
+  when: not _spec_stat.stat.exists
+
+# Clean stage dir for deterministic results
+- name: Recreate staging directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_dir }}"
+    state: absent
+
+- name: Create staging directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Create staging tests directory
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_tests_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Check central default package.json
+  ansible.builtin.stat:
+    path: "{{ _playwright_default_package_json }}"
+  register: _default_package_stat
+
+- name: Fail when central default package.json is missing
+  ansible.builtin.fail:
+    msg: "Missing central Playwright package.json: {{ _playwright_default_package_json }}"
+  when: not _default_package_stat.stat.exists
+
+- name: Read central default package.json
+  ansible.builtin.slurp:
+    src: "{{ _playwright_default_package_json }}"
+  register: _default_package_json_slurp
+
+- name: Derive Playwright version from central package.json
+  ansible.builtin.set_fact:
+    _playwright_test_version: >-
+      {{
+        (
+          ((_default_package_json_slurp.content | b64decode | from_json).devDependencies['@playwright/test'])
+          | string
+          | regex_replace('^[^0-9]*', '')
+        )
+      }}
+
+- name: Fail when @playwright/test version is missing in central package.json
+  ansible.builtin.fail:
+    msg: "Missing @playwright/test devDependency in {{ _playwright_default_package_json }}"
+  when: _playwright_test_version | length == 0
+
+- name: Resolve Playwright image
+  ansible.builtin.set_fact:
+    _playwright_image: >-
+      {{
+        TEST_E2E_PLAYWRIGHT_IMAGE
+        if (TEST_E2E_PLAYWRIGHT_IMAGE | default('') | trim | length > 0)
+        else 'mcr.microsoft.com/playwright:v' ~ _playwright_test_version ~ '-' ~ TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO
+      }}
+
+- name: Copy central default package.json
+  ansible.builtin.copy:
+    src: "{{ _playwright_default_package_json }}"
+    dest: "{{ _playwright_stage_dir }}/package.json"
+    mode: "0644"
+
+- name: Check central default playwright.config.js
+  ansible.builtin.stat:
+    path: "{{ _playwright_default_config_js }}"
+  register: _default_config_stat
+
+- name: Fail when central default playwright.config.js is missing
+  ansible.builtin.fail:
+    msg: "Missing central Playwright config: {{ _playwright_default_config_js }}"
+  when: not _default_config_stat.stat.exists
+
+- name: Copy central default playwright.config.js
+  ansible.builtin.copy:
+    src: "{{ _playwright_default_config_js }}"
+    dest: "{{ _playwright_stage_dir }}/playwright.config.js"
+    mode: "0644"
+
+- name: Copy role Playwright spec into staging tests directory
+  ansible.builtin.copy:
+    src: "{{ _playwright_spec_src }}"
+    dest: "{{ _playwright_stage_tests_dir }}/playwright.spec.js"
+    mode: "0644"
+
+# Keep /volume mount stable even if the source project does not define one.
+- name: Ensure staging volume directory exists
+  ansible.builtin.file:
+    path: "{{ _playwright_stage_dir }}/volume"
+    state: directory
+    mode: "0755"
+
+# Render templates/playwright.env.j2 -> .env in staging directory
+- name: Render .env from templates/playwright.env.j2
+  ansible.builtin.copy:
+    dest: "{{ _playwright_stage_dir }}/.env"
+    mode: "0644"
+    content: "{{ lookup('template', _playwright_env_template) }}"
+  vars:
+    application_id: "{{ application_id }}"
+    domains: "{{ domains }}"
+    users: "{{ users }}"
+    applications: "{{ applications }}"
+
+# Optional wait until app is ready (uses domain resolution)
+- name: Wait until application is ready (HTTP 200/302)
+  uri_retry:
+    url: "{{ lookup('tls', application_id, 'url.base') }}"
+    status_code: [200, 302]
+    validate_certs: false
+  register: _wait_result
+  retries: "{{ TEST_E2E_PLAYWRIGHT_WAIT_RETRIES }}"
+  delay: "{{ TEST_E2E_PLAYWRIGHT_WAIT_DELAY }}"
+  until: _wait_result.status in [200, 302]
+  when: TEST_E2E_PLAYWRIGHT_WAIT_ENABLED | bool
+
+- name: Ensure reports dir exists
+  ansible.builtin.file:
+    path: "{{ _playwright_reports_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Run Playwright container
+  ansible.builtin.command:
+    argv:
+      - container
+      - run
+      - --rm
+      - --ipc=host
+      - --shm-size=1g
+      - --env-file
+      - "{{ _playwright_stage_dir }}/.env"
+      - -v
+      - "{{ _playwright_stage_dir }}:/e2e"
+      - -v
+      - "{{ _playwright_stage_dir }}/volume:/volume"
+      - -v
+      - "{{ _playwright_reports_dir }}:/reports"
+      - -w
+      - /e2e
+      - "{{ _playwright_image }}"
+      - /bin/bash
+      - -lc
+      - "{{ TEST_E2E_PLAYWRIGHT_COMMAND }}"
+  environment: >-
+    {{
+      {
+        'CA_TRUST_CERT_HOST': _playwright_ca_cert_host,
+        'CA_TRUST_WRAPPER_HOST': _playwright_ca_wrapper_host,
+        'CA_TRUST_NAME': _playwright_ca_trust_name
+      } if (_playwright_ca_required | bool) else {}
+    }}
+  register: _playwright_run
+  changed_when: false
+  failed_when: false
+
+- name: Print Playwright output (on failure)
+  ansible.builtin.debug:
+    msg: |
+      stdout:
+      {{ _playwright_run.stdout }}
+
+      stderr:
+      {{ _playwright_run.stderr }}
+  when: _playwright_run.rc != 0
+  changed_when: false
+
+- name: Record failure
+  ansible.builtin.set_fact:
+    _playwright_failures: "{{ (_playwright_failures | default([])) + [application_id] }}"
+  when: _playwright_run.rc != 0

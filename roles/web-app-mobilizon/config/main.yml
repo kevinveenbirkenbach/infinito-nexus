@@ -30,7 +30,7 @@ compose:
     mobilizon:
       image:    "docker.io/kaihuri/mobilizon"
       name:     "mobilizon"
-      version:  "5.2.0"
+      version:  "5.2.3"
       min_storage:  "5GB"
     css:
       enabled: true

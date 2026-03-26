@@ -16,4 +16,5 @@ build/*
 collections/
 env.development
 logs/
+job-logs.txt
 .git
