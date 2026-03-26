@@ -26,6 +26,10 @@ For the general CI debugging workflow, follow [CONTRIBUTING.md](CONTRIBUTING.md)
 - When only `.md` files were changed, `make test` is not required unless explicitly instructed to run it.
 - Commits are allowed only when all required tests pass successfully.
 
+## Pull Requests
+
+When asked to provide a Pull Request description, always choose the matching Pull Request template first. Follow the template selection guidance in [CONTRIBUTING.md](CONTRIBUTING.md) and use the templates from [PULL_REQUEST_TEMPLATE](.github/PULL_REQUEST_TEMPLATE). The selected template is the SPOT for the required PR structure, author input, and review context.
+
 ## Help
 
 For local development setup, contribution workflow, testing, and review, see [CONTRIBUTING.md](CONTRIBUTING.md).
