@@ -23,6 +23,8 @@ For the general CI debugging workflow, follow [CONTRIBUTING.md](CONTRIBUTING.md)
 - Run `make test` before every commit unless explicitly instructed not to do so.
 - If `make test` fails, run `make clean-sudo` and then `make test` again.
 - If `make test` fails with `service "infinito" is not running`, run `make up` and then retry `make test`.
+- If tests emit warnings about a staged file, a file in the current diff, or another file within the same role as a staged file, ask whether those warnings should also be fixed before proceeding.
+- Apply that follow-up explicitly only to roles touched by staged files so the resulting change stays focused and does not grow into oversized chunks.
 - When only `.md` files were changed, `make test` is not required unless explicitly instructed to run it.
 - Commits are allowed only when all required tests pass successfully.
 
