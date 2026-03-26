@@ -4,6 +4,7 @@ This guide is for both human contributors and AI assistants.
 It explains the expected setup, contribution workflow, testing, review, and AI usage for this repository.
 
 The [Development Hub](https://s.infinito.nexus/development) is the central information hub for developers and contains further guidance, discussion, and exchange with other contributors.
+New permanent team members should follow the [onboarding document](https://s.infinito.nexus/onboarding).
 
 ## Quick Start
 
@@ -406,3 +407,7 @@ More information [here](https://s.infinito.nexus/issues).
 ## Code of Conduct
 
 All contributors must follow [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Join the Project
+
+If you want to join the project as a paid long-term contributor, write to [hr@infinito.nexus](mailto:hr@infinito.nexus) or request a meeting [here](https://s.infinito.nexus/meet).
