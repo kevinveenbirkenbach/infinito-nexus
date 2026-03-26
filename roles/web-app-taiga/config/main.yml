@@ -7,7 +7,7 @@ compose:
       enabled: false
       shared: true
     oauth2:
-      enabled: true
+      enabled: false
       origin:
         host: "gateway"
         port: "80"
