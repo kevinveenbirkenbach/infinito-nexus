@@ -12,7 +12,7 @@ CA_DST_PATH="${CA_DST_DIR}/root-ca.crt"
 CA_TRUST_NAME="infinito-root-ca"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WITH_CA_TRUST_SCRIPT="${SCRIPT_DIR}/../../roles/sys-ca-selfsigned/files/with-ca-trust.sh"
+WITH_CA_TRUST_SCRIPT="${SCRIPT_DIR}/../../../../roles/sys-ca-selfsigned/files/with-ca-trust.sh"
 
 log() {
 	echo "[trust-ca] $*" >&2

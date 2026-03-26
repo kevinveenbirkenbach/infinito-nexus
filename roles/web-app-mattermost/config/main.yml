@@ -32,7 +32,7 @@ compose:
       enabled:                    true
     mattermost:
       image:                      "mattermost/mattermost-team-edition"
-      version:                    "7.10.5"
+      version:                    "11.5.1"
       min_storage:                "10GB"
       backup:
         no_stop_required:         true

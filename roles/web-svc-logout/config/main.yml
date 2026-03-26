@@ -28,6 +28,7 @@ compose:
       image:            "ghcr.io/kevinveenbirkenbach/universal-logout"
       version:          "latest"
       name:             "logout"
+      min_storage:      "1GB"
       cpus:             0.2
       mem_reservation:  "256m"
       mem_limit:        "512m"

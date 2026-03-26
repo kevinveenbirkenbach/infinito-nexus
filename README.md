@@ -67,6 +67,13 @@ Try [Infinito.Nexus](https://infinito.nexus) – sign up in seconds, explore the
    ```sh
    infinito --help
    ```
+
+### Running on WSL2 / Windows 🪟
+
+Infinito.Nexus supports development on **WSL2 (Windows Subsystem for Linux)**. All WSL2-specific steps (port 53 conflicts, AppArmor, Docker buildx) are handled automatically by the Makefile and scripts.
+
+For the full manual background and context, see the [WSL2 / Windows Setup Guide](https://hub.infinito.nexus/t/infinito-nexus-wsl2-windows-setup-guide/454).
+
 ---
 
 ### Setup with Docker🚢

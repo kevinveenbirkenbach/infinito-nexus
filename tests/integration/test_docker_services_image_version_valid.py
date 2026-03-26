@@ -8,20 +8,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 import yaml
 
-
-# Docker image reference (name only, WITHOUT tag/digest).
-IMAGE_NAME_RE = re.compile(
-    r"^"
-    r"("  # optional registry
-    r"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)"
-    r"(?:\.(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?))*"
-    r"(?:\:[0-9]{1,5})?"
-    r"/"
-    r")?"
-    r"[a-z0-9]+(?:[._-][a-z0-9]+)*"
-    r"(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)*"
-    r"$"
-)
+from utils.docker_image_ref import is_valid_image_name
 
 # Docker tag (version)
 TAG_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$")
@@ -58,19 +45,7 @@ def _iter_declared_fields(
 
 
 def _is_valid_image(image: Any) -> bool:
-    if not isinstance(image, str):
-        return False
-    image = image.strip()
-    if not image or " " in image or "@" in image:
-        return False
-
-    # Reject repo:tag (tag must be in `version`)
-    if ":" in image:
-        before_colon = image.split(":", 1)[0]
-        if "/" not in before_colon:
-            return False
-
-    return IMAGE_NAME_RE.fullmatch(image) is not None
+    return is_valid_image_name(image)
 
 
 def _is_valid_version(version: Any) -> bool:

@@ -32,6 +32,7 @@ compose:
       version:    "latest"
       name:       "yourls"
       image:      "yourls"
+      min_storage: "1GB"
     oauth2:
       enabled: true
       origin:
