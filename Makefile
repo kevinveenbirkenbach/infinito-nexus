@@ -35,24 +35,33 @@ endif
 	deploy-fresh-purged-app deploy-reuse-kept-app deploy-reuse-purged-app deploy-fresh-kept-all \
 	bootstrap setup-development
 
+# Bootstrap the local development environment.
 dev-environment-bootstrap: wsl2-systemd-check install-lint apparmor-teardown dns-setup disable-ipv6
+
+# Tear down the local development environment.
 dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
 
+# Enable systemd on WSL2.
 wsl2-systemd-check:
 	@bash scripts/administration/systemd/enable/wsl2.sh
 
+# Set up DNS on WSL2.
 wsl2-dns-setup:
 	@sudo bash scripts/administration/network/dns/setup/wsl.sh
 
+# Trust Windows certificates in WSL2.
 wsl2-trust-windows:
 	@bash scripts/administration/tls/trust/wsl2.sh
 
+# Configure DNS on Linux.
 dns-setup: wsl2-dns-setup
 	@bash scripts/administration/network/dns/setup/linux.sh
 
+# Remove the DNS configuration.
 dns-remove:
 	@bash scripts/administration/network/dns/remove.sh
 
+# Tear down AppArmor for local development.
 apparmor-teardown:
 	@echo "==> AppArmor: full teardown (local dev)"
 	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
@@ -61,6 +70,7 @@ apparmor-teardown:
 		echo "[apparmor] AppArmor module is not loaded — skipping teardown"; \
 	fi
 
+# Restore AppArmor profiles.
 apparmor-restore:
 	@echo "==> AppArmor: restore profiles"
 	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
@@ -69,16 +79,20 @@ apparmor-restore:
 		echo "[apparmor] AppArmor module is not loaded — skipping restore"; \
 	fi
 
+# Trust the local CA on Linux and WSL2.
 trust-ca:
 	@bash scripts/administration/tls/trust/linux.sh
 	@bash scripts/administration/tls/trust/wsl2.sh
 
+# Disable IPv6 for local development.
 disable-ipv6:
 	@sudo bash scripts/administration/network/ipv6/disable.sh
 
+# Restore IPv6 settings.
 restore-ipv6:
 	@sudo bash scripts/administration/network/ipv6/restore.sh
 
+# Remove ignored files from the working tree.
 clean:
 	@echo "Removing ignored git files"
 	@if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
@@ -88,48 +102,58 @@ clean:
 		echo "WARNING: (cleanup continues)"; \
 	fi
 
+# Remove ignored files from the working tree with sudo.
 clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX;
 
+# Restart the development stack.
 restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
+# Start the development stack.
 up: install
 	@"$${PYTHON}" -m cli.deploy.development up
 
+# Stop the development stack.
 down:
 	@"$${PYTHON}" -m cli.deploy.development down
 
+# Stop the development stack without removing volumes.
 stop:
 	@"$${PYTHON}" -m cli.deploy.development stop
 
+# Print the repository role list.
 list:
 	@echo "Generating the roles list"
 	@"$${PYTHON}" -m cli.build.roles_list
 
+# Print the repository tree.
 tree:
 	@echo "Generating Tree"
 	@"$${PYTHON}" -m cli.build.tree -D 2
 
+# Build the meta graph inputs.
 mig: list tree
 	@echo "Creating meta data for meta infinity graph"
 
-# ------------------------------------------------------------
-# Docker build targets (delegated to scripts/image)
-# ------------------------------------------------------------
+# Build the local image.
 build: dockerignore
 	@bash scripts/image/build.sh
 
+# Build the local image if it is missing.
 build-missing:
 	@bash scripts/image/build.sh --missing
 
+# Pull the build dependency image.
 build-dependency:
 	@docker pull ghcr.io/kevinveenbirkenbach/pkgmgr-$${INFINITO_DISTRO}:stable
 
+# Build the local image without cache.
 build-no-cache: build-dependency
 	@bash scripts/image/build.sh --no-cache
 
+# Build the no-cache image for every distro.
 build-no-cache-all:
 	@set -euo pipefail; \
 	for d in $${DISTROS}; do \
@@ -137,83 +161,105 @@ build-no-cache-all:
 	  INFINITO_DISTRO="$$d" "$(MAKE)" build-no-cache; \
 	done
 
+# Clean up image artifacts.
 build-cleanup:
 	@bash scripts/image/cleanup.sh
 
+# Regenerate .dockerignore from .gitignore.
 dockerignore:
 	@echo "Create dockerignore"
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
+# Install Ansible dependencies.
 install-ansible:
 	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
 	bash scripts/install/ansible.sh
 
+# Install lint dependencies.
 install-lint:
 	@bash scripts/install/lint.sh
 
+# Install the system Python prerequisites.
 install-system-python:
 	@bash roles/dev-python/files/install.sh ensure
 
+# Install the virtual environment.
 install-venv: install-system-python
 	@bash scripts/install/venv.sh
 
+# Install Python tooling.
 install-python: install-venv
 	@bash scripts/install/python.sh lint
 
+# Install all runtime dependencies.
 install: install-python install-ansible
 
+# Run the setup step after generating .dockerignore.
 setup: dockerignore
 	@bash scripts/setup.sh
 
+# Create the development setup marker.
 setup-development: dockerignore
 	touch env.development
 
+# Install dependencies and prepare the project.
 bootstrap: install setup
 
+# Run setup after cleaning ignored files.
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
-# --- Lint ---
+# Run all lint checks.
 lint: lint-action lint-ansible lint-python lint-shellcheck
 
+# Run the GitHub Actions lint checks.
 lint-action:
 	@bash scripts/lint/action.sh
 
+# Run Ansible lint checks.
 lint-ansible:
 	@bash scripts/lint/ansible.sh
 
+# Run Python lint checks.
 lint-python:
 	@bash scripts/lint/python.sh
 
+# Run shellcheck lint checks.
 lint-shellcheck:
 	@bash scripts/lint/shellcheck.sh
 
-# --- Tests (separated) ---
+# Run the full test suite.
 test: lint test-lint test-unit test-integration test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
+# Run the lint test suite.
 test-lint: install
 	@TEST_TYPE="lint" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
+# Run the unit test suite.
 test-unit: install
 	@TEST_TYPE="unit" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
+# Run the integration test suite.
 test-integration: install
 	@TEST_TYPE="integration" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
+# Run all act-based deploy checks.
 act-all:
 	@bash scripts/tests/deploy/act/all.sh
 
+# Run the act-based app deploy check.
 act-app:
 	@bash scripts/tests/deploy/act/app.sh
 
+# Run the act-based workflow deploy check.
 act-workflow:
 	@bash scripts/tests/deploy/act/workflow.sh
 
