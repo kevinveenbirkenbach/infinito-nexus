@@ -2,12 +2,23 @@
 
 # Development
 
+## System
+
+- Capture system-wide development requirements in the root `TODO.md` file so global work stays visible in one place.
+- When a TODO is completed, remove it from `TODO.md`.
+
 ## New Apps
 
 - Use [CONTRIBUTING.md](../../CONTRIBUTING.md) as the SPOT for the general development workflow, testing, review, and coding standards.
 - Treat the matching Pull Request template described in [Pull Requests](../../docs/contributing/pull-requests.md) and stored in [PULL_REQUEST_TEMPLATE](../../.github/PULL_REQUEST_TEMPLATE) as the SPOT for requirements, file checks, validation expectations, and the Definition of Done.
 - Start from the smallest app-specific change that can be validated locally, then expand only when the requirements or behavior demand it.
 - Keep the implementation, local validation, and PR template in sync so the app can be reviewed without guessing the intent.
+
+### Documentation
+
+- Capture open development requirements for a role in its `TODO.md` file so the remaining work stays visible.
+- Keep the role's `README.md` as the clear description of what the role can do.
+- When a TODO is completed, promote the finished capability into `README.md` and remove the TODO entry from `TODO.md`.
 
 ## Bugs and Warnings
 
