@@ -201,6 +201,7 @@ What it does:
 - Deploys exactly one app twice against the same stack/inventory:
   - Pass 1: `ASYNC_ENABLED=false`
   - Pass 2: `ASYNC_ENABLED=true`
+- Creates and re-initializes the `servers.yml` inventory on both passes.
 - Purges shared entities up-front (currently purges the `matomo` entity).
 
 Required ENV:
