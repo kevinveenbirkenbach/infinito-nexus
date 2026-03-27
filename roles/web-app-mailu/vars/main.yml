@@ -6,8 +6,10 @@ webserver_extra_configuration:        "client_max_body_size 31M;"
 # Database Configuration
 database_password:                    "{{ lookup('config', application_id, 'credentials.database_password') }}"
 
-# Cert Mount
-cert_mount_directory:                 "{{ lookup('container', application_id, 'directories.volumes') }}certs/"
+# Host Directories
+MAILU_VOLUMES_DIR:                    "{{ lookup('container', application_id, 'directories.volumes') }}"
+MAILU_CERT_DIR:                       "{{ [ MAILU_VOLUMES_DIR, 'certs' ] | path_join }}"
+MAILU_OVERRIDES_DIR:                  "{{ [ MAILU_VOLUMES_DIR, 'overrides' ] | path_join }}"
 
 # Mailu
 
@@ -62,7 +64,7 @@ MAILU_DKIM_KEY_FILE:                  "{{ MAILU_DOMAIN }}.dkim.key"
 MAILU_DKIM_KEY_PATH:                  "/dkim/{{ MAILU_DKIM_KEY_FILE }}"
 
 ## Rspamd
-MAILU_RSPAMD_HOST_DIR:                "{{ [ lookup('container', application_id, 'directories.volumes'), 'overrides/rspamd' ] | path_join }}"
+MAILU_RSPAMD_HOST_DIR:                "{{ [ MAILU_OVERRIDES_DIR, 'rspamd' ] | path_join }}"
 MAILU_RSPAMD_HOST_FILE:               "{{ [ MAILU_RSPAMD_HOST_DIR,'ratelimit.conf' ] | path_join }}"
 MAILU_RSPAMD_LIMITS_DEFAULTS:
   RATE:   "30 / 1min"
