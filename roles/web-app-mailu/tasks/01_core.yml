@@ -3,6 +3,18 @@
 - name: "Disable SMTP to avoid port conflicts"
   include_tasks: "{{ [playbook_dir, 'roles/sys-svc-mail-smtp/tasks/disable.yml' ] | path_join }}"
 
+- name: Ensure Mailu unbound overrides directory exists
+  file:
+    path: "{{ MAILU_UNBOUND_CONF_FILE | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Render Mailu unbound config override
+  template:
+    src: unbound.conf.j2
+    dest: "{{ MAILU_UNBOUND_CONF_FILE }}"
+    mode: "0644"
+
 - name: Ensure Rspamd overrides directory exists (host)
   file:
     path: "{{ MAILU_RSPAMD_HOST_DIR }}"

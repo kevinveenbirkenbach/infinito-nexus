@@ -2,7 +2,7 @@
 - name: "Fetch existing API tokens via curl inside admin container"
   command: >-
     {{ BIN_COMPOSE }} exec -T admin \
-      curl -sS -X GET {{ MAILU_API_SERVICE_BASE_URL }}/token \
+      curl -sS --fail -X GET {{ MAILU_API_SERVICE_BASE_URL }}/token \
         -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
@@ -11,14 +11,13 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   retries: 30
   delay: 2
-  until: mailu_tokens_cli.rc == 0 and mailu_tokens_cli.stdout | length > 0
+  until: mailu_tokens_cli.rc == 0 and mailu_tokens_cli.stdout | trim | length > 0
 
 - name: "Extract existing token info for '{{ mailu_user_key }};{{ mailu_user_name }}'"
   set_fact:
     mailu_user_existing_token: >-
       {{ (
            mailu_tokens_cli.stdout
-           | default('[]')
            | from_json
            | selectattr('comment','equalto', mailu_token_name)
            | list
