@@ -29,6 +29,14 @@ Use this rule when a role needs a Docker image definition.
 
 - Prefer `Dockerfile` over `Dockerfile.j2`; only use `Dockerfile.j2` when build-time templating is genuinely required.
 
+### Image Versions
+
+Use this rule when a role pins container image versions in `roles/web-*/config/main.yml`.
+
+- Keep semver-like image versions current when the upstream image publishes matching newer tags.
+- Use `# nocheck: docker-version` directly above a `version:` key only for intentional exceptions that should not be flagged by the lint check.
+- Prefer explicit version pinning over drifting tags when the role depends on stable, reproducible deploys.
+
 For documentation, comments, semantics, and writing guidance, see [Documentation](../../documentation.md).
 
 For test commands and testing standards, see [Testing and Validation](../../development/testing.md).
