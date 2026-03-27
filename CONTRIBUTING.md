@@ -371,10 +371,10 @@ Follow these principles. Keep the rule column short, imperative, and as [SMART](
 | Choose one obvious way. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Prefer one clear, standard path over multiple equivalent ones. |
 | Make the obvious path obvious. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Shape the code so the recommended approach is the easiest to see. |
 | Act now when action is due. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Do the needed work now instead of deferring it without reason. |
-| Wait rather than rush. | [Zen of Python](https://en.wikipedia.org/wiki/Zen of Python) | Pause when acting immediately would make the result worse. |
-| Keep hard code easy to explain. | [Zen of Python](https://en.wikipedia.org/wiki/Zen of Python) | If the code is hard to explain, rework it before merging. |
-| Keep easy code easy to explain. | [Zen of Python](https://en.wikipedia.org/wiki/Zen of Python) | If the code is easy to explain, it is likely a good idea. |
-| Use namespaces generously. | [Zen of Python](https://en.wikipedia.org/wiki/Zen of Python) | Group names so they do not collide and remain easy to navigate. |
+| Wait rather than rush. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Pause when acting immediately would make the result worse. |
+| Keep hard code easy to explain. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | If the code is hard to explain, rework it before merging. |
+| Keep easy code easy to explain. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | If the code is easy to explain, it is likely a good idea. |
+| Use namespaces generously. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Group names so they do not collide and remain easy to navigate. |
 
 ### Diff Quality
 
