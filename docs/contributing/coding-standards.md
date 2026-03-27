@@ -14,6 +14,7 @@ Follow these principles. Keep the rule column short, imperative, and as [SMART](
 | Leave touched code cleaner than you found it. | [Boy Scout Rule](https://en.wikipedia.org/wiki/Leaving_the_world_a_better_place) | Make small, safe cleanup improvements in the files you touch when they reduce friction without expanding the scope unnecessarily. |
 | Store each shared value once. | [SPOT](https://en.wikipedia.org/wiki/Single_source_of_truth) | Put shared fixed values in one canonical source and reference them everywhere else. |
 | Choose the simplest solution. | [KISS](https://en.wikipedia.org/wiki/KISS_principle) | Prefer the smallest implementation that still satisfies the requirement and remains easy to maintain. |
+| Make prompts SMART. | [SMART](https://en.wikipedia.org/wiki/SMART_criteria) | Write prompts that are specific, measurable, achievable, relevant, and time-bound so the agent can act on them without ambiguity. |
 | Ship the first valuable increment early. | [Agile Manifesto](https://agilemanifesto.org/) | Deliver working software as soon as it is useful and keep delivering value continuously. |
 | Accept useful requirement changes. | [Agile Manifesto](https://agilemanifesto.org/) | Treat late requirement changes as normal when they improve customer value. |
 | Release working software frequently. | [Agile Manifesto](https://agilemanifesto.org/) | Keep iterations short enough that users see working software at regular intervals. |
