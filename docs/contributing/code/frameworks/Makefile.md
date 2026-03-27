@@ -19,7 +19,7 @@ The `Makefile` is the human-facing command surface for the repo. It should expos
 The architecture overview treats `Makefile` and `scripts/` as the supported command entry points. The command groups themselves are documented here:
 
 - [Development Environment Setup](../../setup.md)
-- [Docker and Runtime Commands](../../docker.md)
+- [Docker and Runtime Commands](../../tools/docker.md)
 - [Testing and Validation](../../development/testing.md)
 
 For the broader architecture context, see [Repository Architecture](../../architecture.md).

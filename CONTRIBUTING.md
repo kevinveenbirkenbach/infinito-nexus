@@ -29,10 +29,9 @@ For the supporting topics behind that path, see:
 - [Documentation](docs/contributing/documentation.md)
 - [Code](docs/contributing/code/README.md)
 - [Development](docs/contributing/development/README.md)
-- [Docker and Runtime Commands](docs/contributing/docker.md)
+- [Tools](docs/contributing/tools/README.md)
 - [Architecture](docs/contributing/architecture.md)
 - [Manage Low-Hardware Resources](docs/contributing/resources.md)
-- [AI Guidelines](docs/contributing/artificial_intelligence.md)
 
 ## Platform Guides
 

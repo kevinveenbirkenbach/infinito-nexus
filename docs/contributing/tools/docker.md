@@ -1,4 +1,4 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
 
 # Docker and Runtime Commands
 
@@ -35,4 +35,4 @@ Use these commands from the repository root. They are thin `make` wrappers aroun
 - The commands use the current `INFINITO_DISTRO` setting from the environment.
 - `make down` is destructive because it removes volumes; use `make stop` if you want to preserve state.
 - `make up` may build missing images automatically, so you often do not need a separate build step for a first start.
-- For app-level local deploy flows and end-to-end checks, see [Development](development/README.md).
+- For app-level local deploy flows and end-to-end checks, see [Development](../development/README.md).
