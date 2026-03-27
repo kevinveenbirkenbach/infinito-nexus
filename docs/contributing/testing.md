@@ -29,9 +29,9 @@ Use the following table to choose the right lint, syntax, unit, integration, or 
 
 ## Local Deploy and End-to-End Checks
 
-For local server-role work on a single app, `APP=<role> make test-local-dedicated` is enough on its own.
+For local server-role work on a single app, `APP=<role> make test-local-dedicated` is the preferred rerun path once the inventory already exists.
 
-Use `APP=<role> make test-local-app` and `APP=<role> make test-local-rapid` only when you want a lighter or faster iteration loop.
+Use `APP=<role> make test-local-app` only when you intentionally want to create or refresh the inventory, and use `APP=<role> make test-local-rapid` when you want the fastest repeat against the same inventory.
 
 Use `make test-local-full` only when you explicitly need broader coverage, have plenty of time, and are working on a performant machine.
 
@@ -43,7 +43,7 @@ Use the following table when you need realistic local deployment validation or a
 |---|---|---|---|
 | Local deploy | `APP=web-app-nextcloud make test-local-app` | Creates the needed inventory and deploys one app. | Use this for the first local validation of a single app. |
 | Local deploy | `APP=web-app-nextcloud make test-local-rapid` | Reuses an existing local inventory and redeploys one app quickly. | Use this when you already have a working local setup and want faster iteration. |
-| Local deploy and E2E | `APP=web-app-matomo make test-local-dedicated` | Runs a dedicated local validation flow for one app against the dev stack. | Use this as the preferred final validation step for local server-role work. |
+| Local deploy and E2E | `APP=web-app-matomo make test-local-dedicated` | Runs a dedicated local validation flow for one app against the dev stack, reusing the existing inventory. | Use this as the preferred final validation step for local server-role work. |
 | Full local validation | `make test-local-full` | Builds the broader local deployment flow across apps. | Use this sparingly for wider full-stack validation when you have time and enough machine capacity. |
 | Local reset | `make test-local-reset` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |
 | Local cleanup | `make test-local-cleanup` | Deletes local deploy state and cleanup data. | Use this only when you really want to remove local state. |
