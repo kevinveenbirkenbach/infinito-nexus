@@ -29,6 +29,7 @@ For the supporting topics behind that path, see:
 - [Documentation](docs/contributing/documentation.md)
 - [Docker and Runtime Commands](docs/contributing/docker.md)
 - [Coding Standards](docs/contributing/coding-standards.md)
+- [Architecture](docs/contributing/architecture.md)
 - [Manage Low-Hardware Resources](docs/contributing/resources.md)
 - [CI Failures and Debugging](docs/contributing/debugging.md)
 - [AI Guidelines](docs/contributing/artificial_intelligence.md)
