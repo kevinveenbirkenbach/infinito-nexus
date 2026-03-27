@@ -395,18 +395,35 @@ Use these linting and quality tools where applicable:
 - If you touch a file, refactor it according to these coding standards where practical.
 - If similar logic exists elsewhere in the project, refactor it toward a shared implementation.
 
-### Role Design
+### Ansible
+Use this section for Ansible-specific guidance that applies across the repository.
 
-#### Container Images
+#### Common
+Use these shared rules as the default baseline for role values and path handling.
 
-- Prefer `Dockerfile` over `Dockerfile.j2`; only use `Dockerfile.j2` when build-time templating is genuinely required.
+#### Paths
+
+Build filesystem paths with `path_join` instead of concatenating path segments as strings.
 
 #### Variables and Constants
+These rules keep shared role values explicit, reusable, and easy to read.
 
 - Prefer defining shared fixed role variables once in `vars/main.yml` as the single source of truth instead of recomputing them with `lookup()` or dotted variable composition in `*.j2` or `*.yml`.
 - Variables that are defined once and treated as constants must be uppercase.
 
+#### Role Design
+Use this section for role-structure guidance around images, files, and constants.
+
+##### Container Images
+Use this rule when a role needs a Docker image definition.
+
+- Prefer `Dockerfile` over `Dockerfile.j2`; only use `Dockerfile.j2` when build-time templating is genuinely required.
+
 ### Testing Standards
+Use this section to choose the right validation level for a change.
+
+#### Common
+Treat these rules as the baseline for all validation categories below.
 
 - Write tests in the `tests` folder.
 - Use Python `unittest` for unit, integration, and lint tests.
@@ -414,12 +431,12 @@ Use these linting and quality tools where applicable:
 - Do not write tests only for non-executable files such as `.yml` or `.j2`.
 - Test the behavior that consumes the configuration.
 
-### Unit
+#### Unit
 
 - For touched `*.py` files, add or update unit tests in `tests/unit`.
 - For touched `*.py` files, add or update integration tests in `tests/integration`.
 
-### Playwright
+#### Playwright
 
 - Playwright tests are required for `web-*` roles.
 - Every Playwright test suite must verify login and logout.
