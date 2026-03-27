@@ -1,6 +1,6 @@
 [Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
 
-# AI Best Practices for humans
+# AI Guidelines for humans
 
 AI assistants are welcome, but they must follow the same workflow as humans.
 

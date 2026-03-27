@@ -1,6 +1,6 @@
 [Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
 
-# Low-Resource Development
+# Manage Low-Hardware Resources
 
 Use this guide when you work on a machine with limited CPU, RAM, or disk.
 
