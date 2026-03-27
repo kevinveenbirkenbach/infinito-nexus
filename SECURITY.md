@@ -23,8 +23,9 @@ Send a private report that includes:
 
 For general help and non-security requests, see [SUPPORT.md](SUPPORT.md).
 
-## Related Guides
+## Detailed Secure Use Guides
 
-- [Administrator Security Guidelines](docs/guides/administrator/Security_Guidelines.md)
-- [User Security Guidelines](docs/guides/user/Security_Guidelines.md)
+Detailed guides for secure use are here:
 
+- [User Security Guide](docs/security/user.md)
+- [Administrator Security Guide](docs/security/administrator.md)
