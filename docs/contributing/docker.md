@@ -13,7 +13,7 @@ Use these commands from the repository root. They are thin `make` wrappers aroun
 | No-cache build | `make build-no-cache` | Rebuilds the image without Docker cache. | Use this when cache reuse might hide a change or when you are debugging the build. |
 | No-cache all distros | `make build-no-cache-all` | Rebuilds the no-cache image for every distro in `DISTROS`. | Use this for release-level validation or when you need to verify all distro variants. |
 | Build dependency image | `make build-dependency` | Pulls the `pkgmgr` base image used by the build. | Use this when you want to refresh the base image or debug build inputs. |
-| Cleanup CI images | `make cleanup-ci-images` | Removes Docker images created for CI-style build workflows. | Use this when local disk usage grows or old CI images accumulate. |
+| Cleanup CI images | `make build-cleanup` | Removes Docker images created for CI-style build workflows. | Use this when local disk usage grows or old CI images accumulate. |
 
 ## Compose Stack
 

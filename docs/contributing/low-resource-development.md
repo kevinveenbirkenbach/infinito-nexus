@@ -169,7 +169,7 @@ make down
 make stop
 make clean
 make clean-sudo
-make cleanup-ci-images
+make build-cleanup
 make test-local-cleanup
 make test-local-reset
 ```
@@ -180,7 +180,7 @@ Quick explanation:
 - `make stop` stops the stack but keeps the state
 - `make clean` removes ignored Git files
 - `make clean-sudo` does the same with `sudo`, if root-owned files exist
-- `make cleanup-ci-images` removes old CI images
+- `make build-cleanup` removes old CI images
 - `make test-local-cleanup` cleans local test state
 - `make test-local-reset` resets the local inventory
 
