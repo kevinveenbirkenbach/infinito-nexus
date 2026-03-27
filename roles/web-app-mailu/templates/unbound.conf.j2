@@ -17,8 +17,8 @@ server:
 
   directory: "/etc/unbound"
   username: unbound
-{% if not DOCKER_IN_CONTAINER | bool %}
   auto-trust-anchor-file: trusted-key.key
+{% if not DOCKER_IN_CONTAINER | bool %}
   root-hints: "/etc/unbound/root.hints"
 {% endif %}
   hide-identity: yes
