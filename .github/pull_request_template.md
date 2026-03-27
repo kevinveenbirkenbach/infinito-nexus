@@ -36,5 +36,6 @@ If the buttons do not work in your GitHub client, append one of these query para
 
 💬 If you need support choosing the right template or preparing your pull request:
 
+* [Support and Contact](../SUPPORT.md)
 * Hub: https://hub.infinito.nexus/
 * Matrix: `#public:infinito.nexus`

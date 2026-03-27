@@ -2,7 +2,7 @@
 
 Infinito.Nexus is designed with security in mind. However, while following our guidelines can greatly improve your system’s security, no IT system can be 100% secure. Please report any vulnerabilities as soon as possible.
 
-Additional to the user securitry guidelines administrators have additional responsibilities to secure the entire system:
+In addition to the user security guidelines, administrators have additional responsibilities to secure the entire system:
 
 - **Deploy on an Encrypted Server**  
   It is recommended to install Infinito.Nexus on an encrypted server to prevent hosting providers from accessing end-user data. For a practical guide on setting up an encrypted server, refer to the [Hetzner Arch LUKS repository](https://github.com/kevinveenbirkenbach/hetzner-arch-luks) 🔐. (Learn more about [disk encryption](https://en.wikipedia.org/wiki/Disk_encryption) on Wikipedia.)
@@ -21,7 +21,7 @@ Additional to the user securitry guidelines administrators have additional respo
   Your inventories for running Infinito.Nexus should be managed in a separate repository and secured with tools such as [Ansible Vault](https://en.wikipedia.org/wiki/Encryption) 🔒. Sensitive credentials must never be stored in plaintext; use a password file to secure these details.
 
 - **Reporting Vulnerabilities**  
-  If you discover a security vulnerability in Infinito.Nexus, please report it immediately. We encourage proactive vulnerability reporting so that issues can be addressed as quickly as possible. Contact our security team at [security@infinito.nexus](mailto:security@infinito.nexus) 
+  If you discover a security vulnerability in Infinito.Nexus, please report it immediately through [SECURITY.md](../../../SECURITY.md). We encourage proactive vulnerability reporting so that issues can be addressed as quickly as possible.
   **DO NOT OPEN AN ISSUE.**
 
 ---

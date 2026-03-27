@@ -2,6 +2,8 @@
 
 Infinito.Nexus is designed with security in mind. However, while following our guidelines can greatly improve your system’s security, no IT system can be 100% secure. Please report any vulnerabilities as soon as possible.
 
+If you discover a security vulnerability in Infinito.Nexus, please report it through [SECURITY.md](../../../SECURITY.md). Do not open a public issue for security reports.
+
 For optimal personal security, we **strongly recommend** the following:
 
 - **Use a Password Manager**  
