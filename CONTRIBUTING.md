@@ -320,19 +320,15 @@ This file is the SPOT for contributor workflow, testing, review, and coding stan
 [AGENTS.md](AGENTS.md) is the SPOT for agent-specific execution rules and repository-wide agent behavior.
 
 Additional AI-specific rules:
-
-- Read [AGENTS.md](AGENTS.md) before making changes.
 - Do not invent commands, workflows, or files that do not exist.
-- Keep explanations simple and explicit.
-- State assumptions clearly.
 - Never expose secrets in prompts, code, screenshots, or logs.
 - Treat AI output as a draft that must be reviewed for wrong assumptions, duplicate logic, and security mistakes.
-- Keep agent instructions consistent: [AGENTS.md](AGENTS.md) is the repository-wide source of truth, while [CLAUDE.md](CLAUDE.md) and [GEMINI.md](GEMINI.md) are tool-specific additions.
+- Keep agent instructions consistent: `AGENTS.md` is the repository-wide source of truth, while `CLAUDE.md` and `GEMINI.md` are tool-specific additions.
+- Read [AGENTS.md](AGENTS.md) before making changes.
+- Keep explanations simple and explicit.
+- State assumptions clearly.
 
-More information here:
-
-- [AI best practices](https://s.infinito.nexus/aibestpractice)
-- [Review guide](https://s.infinito.nexus/reviewguide)
+More information [here](https://s.infinito.nexus/aibestpractice).
 
 ## Coding Standards
 
