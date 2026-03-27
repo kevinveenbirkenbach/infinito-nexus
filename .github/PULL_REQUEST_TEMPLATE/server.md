@@ -27,6 +27,16 @@ List the impacted roles and related services.
 * Primary `web-*` role(s):
 * Related `web-svc-*`, `sys-front-*`, `svc-db-*`, auth, mail, proxy, or storage role(s):
 
+## Preferred Integrations
+
+Integrate the change into the following services when possible:
+
+* [ ] Dashboard
+* [ ] Matomo
+* [ ] OIDC
+* [ ] LDAP
+* [ ] Logout
+
 ---
 
 ## Change Type
