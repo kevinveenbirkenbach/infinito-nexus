@@ -78,27 +78,7 @@ Use this as a practical reference when you want to understand how local developm
 
 ### Minimal Hardware Resources
 
-If you work on a machine with limited CPU, RAM, or disk space, keep the local stack minimal and disable optional services you do not currently need.
-This is useful when you focus on one app and do not need Matomo, the dashboard, OIDC, or the logout service during local development.
-
-Example `compose` settings:
-
-```yaml
-compose:
-  services:
-    matomo:
-      enabled: false
-      shared: false
-    dashboard:
-      enabled: false
-      shared: false
-    oidc:
-      enabled: false
-      shared: false
-    logout:
-      enabled: false
-      shared: false
-```
+If you work on a machine with limited CPU, RAM, or disk space, use the guide at [Low-Resource Development](low-resource-development.md).
+The public article with the same topic is [Developing on PCs with Limited Resources](https://s.infinito.nexus/minpcdev).
 
 For local deploy shortcuts and end-to-end checks, see [Testing and Validation](testing.md).
-
