@@ -10,6 +10,9 @@ Use the failure source to decide how to debug:
 
 ## Local Deploy Failures
 
+- Before you redeploy, complete all available inspections first. Check the live local output, local logs, and current browser state so the original failure stays visible.
+- If the website uses locally deployed certificates, run `make trust-ca` before you inspect it in a browser. Otherwise the browser will warn about the local CA and the inspection will not be reliable.
+- After `make trust-ca`, restart the browser so it picks up the updated trust store.
 - On the first local deploy failure, rerun the affected app with `APP=<role> make test-local-dedicated`. For alarm failures, use this retry path because it rebuilds the full `servers.yml` inventory in the dedicated shape.
 - If you need to validate the single-app `servers.yml` path after that, continue with `APP=<role> make test-local-app`.
 - Use `APP=<role> make test-local-rapid` only when you intentionally work from the `${TEST_DEPLOY_TYPE}.yml` inventory flow created by `make test-local-reset` or `make test-local-full`.
