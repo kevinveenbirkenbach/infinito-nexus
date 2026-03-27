@@ -10,7 +10,7 @@ The public article with the same topic is [Developing on PCs with Limited Resour
 ## Quick Checklist
 
 - Keep the local stack minimal and enable only the services you actually need.
-- Prefer `APP=<role> make test-local-dedicated` or `APP=<role> make test-local-rapid`.
+- Prefer `APP=<role> make deploy-fresh-purged-app` or `APP=<role> make deploy-reuse-kept-app`.
 - Avoid full-stack validation unless you really need it.
 - Move Docker data, build cache, and working copies to fast storage when possible.
 - Use a swapfile the same size as RAM on Linux when you want more headroom against spikes.
@@ -97,16 +97,16 @@ On small machines, it helps to limit validation to the one role you are actually
 For Discourse, this is usually the best start:
 
 ```bash
-APP=web-app-discourse make test-local-dedicated
+APP=web-app-discourse make deploy-fresh-purged-app
 ```
 
 If the local inventory and stack are already in place, this is often the faster iteration loop:
 
 ```bash
-APP=web-app-discourse make test-local-rapid
+APP=web-app-discourse make deploy-reuse-kept-app
 ```
 
-I would only use `make test-local-full` on weaker hardware if you truly need broad coverage and you have enough time and resources.
+I would only use `make deploy-fresh-kept-all` on weaker hardware if you truly need broad coverage and you have enough time and resources.
 
 ## Measure Before You Delete
 
@@ -170,8 +170,8 @@ make stop
 make clean
 make clean-sudo
 make build-cleanup
-make test-local-cleanup
-make test-local-reset
+make container-purge-system
+make container-irefresh-inventory
 ```
 
 Quick explanation:
@@ -181,8 +181,8 @@ Quick explanation:
 - `make clean` removes ignored Git files
 - `make clean-sudo` does the same with `sudo`, if root-owned files exist
 - `make build-cleanup` removes old CI images
-- `make test-local-cleanup` cleans local test state
-- `make test-local-reset` resets the local inventory
+- `make container-purge-system` cleans local deploy artifacts
+- `make container-irefresh-inventory` resets the local inventory
 
 If you often switch branches or work on only one role at a time, a disciplined `down` and `clean` routine usually saves more space than trying to recover later with a huge prune.
 

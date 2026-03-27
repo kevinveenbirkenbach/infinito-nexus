@@ -49,7 +49,7 @@
 **Added**
 
 * Introduced *docs/guides/developer/CONTRIBUTION_WORKFLOW.md* with fork-based workflow, mandatory green fork CI before PRs, and merge policy guidance
-* Added *test-local-app* wrapper and related local test documentation
+* Added the single-app local deploy wrapper and related local test documentation
 * Added *min_storage* entries for warned roles
 
 **Changed**
@@ -576,4 +576,3 @@ https://chatgpt.com/share/695be0b8-9154-800f-8c03-2bcf3daab157
 ## [0.1.0] - 2025-12-09
 
 * Added Nix support role
-

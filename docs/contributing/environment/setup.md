@@ -69,7 +69,7 @@ The repository already contains a development helper script at [development.sh](
 | 2 | `make dev-environment-bootstrap` | Prepares the host machine for local development. |
 | 3 | `make up` | Starts the development stack. |
 | 4 | `make test` | Runs the main combined validation flow. |
-| 5 | `APP=web-app-matomo make test-local-dedicated` | Runs a stronger local validation path for one concrete app. |
+| 5 | `APP=web-app-matomo make deploy-fresh-purged-app` | Runs a stronger local validation path for one concrete app. |
 | 6 | `make trust-ca` | Makes the generated local certificates trusted by the host browser. |
 | 7 | `make down` | Stops the running development stack. |
 | 8 | `make dev-environment-teardown` | Cleans up host-side development environment changes. |

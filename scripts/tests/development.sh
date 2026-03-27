@@ -13,7 +13,7 @@ make install
 make dev-environment-bootstrap
 make up
 make test
-make test-local-dedicated APP="${APP}"
+make deploy-fresh-purged-app APP="${APP}"
 make trust-ca
 
 MATOMO_URL="https://matomo.infinito.example"

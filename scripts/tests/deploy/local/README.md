@@ -40,14 +40,14 @@ The biggest practical difference between these "tests" is which inventory filena
 
 | Command | Scope | Uses inventory file | Creates inventory | Deploys | Destructive? |
 |---|---:|---|---:|---:|---:|
-| `make test-local-full` | all apps | `${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml` | ✅ | ✅ | ❌ |
-| `make test-local-reset` | all apps | `${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml` | ✅ | ❌ | ✅ (wipes `INVENTORY_DIR`) |
-| `make test-local-rapid` | 1 app | `${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml` | ❌ | ✅ | ❌ |
-| `make test-local-rapid-fresh` | 1 app | `${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml` | ❌ | ✅ | ⚠️ (purges entity first) |
-| `make test-local-app APP=web-app-nextcloud` | 1 app | `${INVENTORY_DIR}/servers.yml` | ✅ | ✅ | ❌ |
-| `make test-local-dedicated` | 1 app | `${INVENTORY_DIR}/servers.yml` | ✅ | ✅ | ⚠️ (down/up + purges `matomo` entity) |
-| `make test-local-run-all` | all apps | `${INVENTORY_DIR}/servers.yml` | ❌ | ✅ | ❌ |
-| `make test-local-cleanup` | n/a | n/a | n/a | n/a | ✅ (deletes state) |
+| `make deploy-fresh-kept-all` | all apps | `${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml` | ✅ | ✅ | ❌ |
+| `make container-irefresh-inventory` | all apps | `${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml` | ✅ | ❌ | ✅ (wipes `INVENTORY_DIR`) |
+| `make deploy-reuse-kept-all` | all apps | `${INVENTORY_DIR}/servers.yml` | ❌ | ✅ | ❌ |
+| `make deploy-fresh-kept-app APP=web-app-nextcloud` | 1 app | `${INVENTORY_DIR}/servers.yml` | ✅ | ✅ | ❌ |
+| `make deploy-reuse-kept-app APP=web-app-nextcloud` | 1 app | `${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml` | ❌ | ✅ | ❌ |
+| `make deploy-reuse-purged-app APP=web-app-nextcloud` | 1 app | `${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml` | ❌ | ✅ | ⚠️ (purges entity first) |
+| `make deploy-fresh-purged-app APP=web-app-nextcloud` | 1 app | `${INVENTORY_DIR}/servers.yml` | ✅ | ✅ | ⚠️ (down/up + purges `matomo` entity) |
+| `make container-purge-system` | n/a | n/a | n/a | n/a | ✅ (deletes local deploy artifacts) |
 
 ## Quickstart 🚀
 
@@ -56,7 +56,7 @@ The biggest practical difference between these "tests" is which inventory filena
 This is the most convenient "just deploy one app" entry point:
 
 ```bash
-make test-local-app APP=web-app-nextcloud
+make deploy-fresh-kept-app APP=web-app-nextcloud
 ```
 
 Or, without `make`:
