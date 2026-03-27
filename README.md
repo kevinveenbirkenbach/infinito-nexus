@@ -47,8 +47,6 @@
 * **Application Ecosystem** 🚀
   A curated suite of self-hosted apps—from **project management**, **version control**, and **CI/CD** to **chat**, **video conferencing**, **CMS**, **e-learning**, **social networking**, and **e-commerce**—all seamlessly integrated.
 
-More informations about the features you will find [here](docs/overview/Features.md).
-
 ---
 
 ## Get Started 🚀
@@ -57,29 +55,14 @@ More informations about the features you will find [here](docs/overview/Features
 
 Try [Infinito.Nexus](https://infinito.nexus) – sign up in seconds, explore the platform, and discover what our solution can do for you! 🚀🔧✨
 
-### Install locally 💻
-1. **Install Infinito.Nexus** via [Kevin's Package Manager](https://github.com/kevinveenbirkenbach/package-manager)
-2. **Setup Infinito.Nexus** using:
-   ```sh
-   pkgmgr install infinito
-   ```
-3. **Explore Commands** with:
-   ```sh
-   infinito --help
-   ```
----
+## Guides
 
-### Setup with Docker🚢
+- [Installation Guide](docs/guides/installation.md) for local CLI installation, Docker execution, and source builds.
+- [Administration Guide](docs/guides/administration.md) for inventory creation, full deploys, and redeploy flows.
 
-Get Infinito.Nexus up and running inside Docker in just a few steps. For detailed build options and troubleshooting, see the [Docker Guide](docs/Docker.md).
+## Contributing
 
-```bash
-# 1. Build the Docker image: the Docker image:
-docker build -t infinito:latest .
-
-# 2. Run the CLI interactively:
-docker run --rm -it infinito:latest infinito --help
-```
+For the full development setup, contribution workflow, testing, and coding standards, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -89,6 +72,7 @@ Infinito.Nexus is distributed under the **Infinito.Nexus Community License (Non-
 
 ---
 
-## Professional Setup & Support 💼
+## Support and Contact 💼
 
-For expert installation and configuration visit [cybermaster.space](https://cybermaster.space/) or write to us at **[contact@cymais.cloud](mailto:contact@cymais.cloud)**.
+For expert installation, contact details, and project participation, see [SUPPORT.md](SUPPORT.md).
+For security reporting and disclosure, see [SECURITY.md](SECURITY.md).

@@ -14,7 +14,17 @@
     global_install: true
   when: MARIADB_EXPOSE_LOCAL | bool
 
-- block: 
+- name: "Wait until the MariaDB container with hostname '{{ MARIADB_NAME }}' is healthy"
+  community.docker.docker_container_info:
+    name: "{{ MARIADB_NAME }}"
+  register: db_info
+  until:
+    - db_info.container is defined
+    - db_info.container.State.Health.Status == "healthy"
+  retries: 30
+  delay: 5
+
+- block:
 
     - name: "Root password reset | Check login with desired password (inside container)"
       community.docker.docker_container_exec:
@@ -32,16 +42,6 @@
       when: mariadb_login_desired.rc != 0
 
   when: MARIADB_ALLOW_RESET_WITHOUT_PREVIOUS | bool
-
-- name: "Wait until the MariaDB container with hostname '{{ MARIADB_NAME }}' is healthy"
-  community.docker.docker_container_info:
-    name: "{{ MARIADB_NAME }}"
-  register: db_info
-  until:
-    - db_info.container is defined
-    - db_info.container.State.Health.Status == "healthy"
-  retries: 30
-  delay: 5
 
 - name: "Wait until MariaDB accepts root credentials (inside container)"
   community.docker.docker_container_exec:

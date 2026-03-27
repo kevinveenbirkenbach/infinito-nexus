@@ -5,6 +5,9 @@ set -euo pipefail
 : "${GH_TOKEN:?Missing GH_TOKEN}"
 : "${REPOSITORY:?Missing REPOSITORY}"
 : "${CURRENT_RUN_ID:?Missing CURRENT_RUN_ID}"
+PR_HEAD_REF="${PR_HEAD_REF:-}"
+PR_HEAD_SHA="${PR_HEAD_SHA:-}"
+PR_HEAD_REPOSITORY="${PR_HEAD_REPOSITORY:-}"
 
 if ! command -v gh >/dev/null 2>&1; then
 	echo "ERROR: gh CLI not found." >&2
@@ -17,6 +20,9 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 echo "Searching active workflow runs for PR #${PR_NUMBER}"
+if [[ -n "${PR_HEAD_SHA}${PR_HEAD_REF}${PR_HEAD_REPOSITORY}" ]]; then
+	echo "Fallback matching enabled for head.sha=${PR_HEAD_SHA:-<empty>} head.ref=${PR_HEAD_REF:-<empty>} head.repo=${PR_HEAD_REPOSITORY:-<empty>}"
+fi
 
 cancel_runs_by_status() {
 	local status="$1"
@@ -28,13 +34,28 @@ cancel_runs_by_status() {
 			"/repos/${REPOSITORY}/actions/runs?status=${status}&per_page=100" |
 			jq -r \
 				--argjson pr_number "${PR_NUMBER}" \
-				--argjson current_run_id "${CURRENT_RUN_ID}" '
-          .workflow_runs[]
-          | select(.id != $current_run_id)
-          | select(.event == "pull_request" or .event == "pull_request_target")
-          | select(any(.pull_requests[]?; (.number // -1) == $pr_number))
-          | .id
-        ' |
+				--argjson current_run_id "${CURRENT_RUN_ID}" \
+				--arg pr_head_ref "${PR_HEAD_REF}" \
+				--arg pr_head_sha "${PR_HEAD_SHA}" \
+				--arg pr_head_repository "${PR_HEAD_REPOSITORY}" '
+	          .workflow_runs[]
+	          | select(.id != $current_run_id)
+	          | select(.event == "pull_request" or .event == "pull_request_target")
+	          | select(
+	              any(.pull_requests[]?; (.number // -1) == $pr_number)
+	              or ($pr_head_sha != "" and (.head_sha // "") == $pr_head_sha)
+	              or (
+	                $pr_head_ref != ""
+	                and (.head_branch // "") == $pr_head_ref
+	                and (
+	                  $pr_head_repository == ""
+	                  or (.head_repository.full_name // "") == $pr_head_repository
+	                  or (.head_repository.full_name // "") == ""
+	                )
+	              )
+	            )
+	          | .id
+	        ' |
 			sort -u
 	)"
 
