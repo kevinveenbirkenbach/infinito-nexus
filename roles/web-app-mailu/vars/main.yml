@@ -15,6 +15,8 @@ MAILU_OVERRIDES_DIR:                  "{{ [ MAILU_VOLUMES_DIR, 'overrides' ] | p
 
 ## Meta 
 MAILU_WEBSITE:                        "{{ lookup('tls', application_id, 'url.base') }}"
+# Port 8080 is where gunicorn binds inside the admin container (see start.py in ghcr.io/mailu/admin).
+# Calling localhost directly avoids routing through the front nginx proxy, which causes 502s in DinD.
 MAILU_API_SERVICE_BASE_URL:           "http://localhost:8080/api/v1"
 
 ## Domains
@@ -43,6 +45,10 @@ MAILU_DNS_RESOLVER:                   "{{ networks.local['web-app-mailu'].dns_re
 MAILU_IP4_PUBLIC:                     "{{ DOCKER_PUBLIC_BIND_HOST }}"
 MAILU_IP6_PUBLIC:                     "" #Deactivated atm. but cloudflare logic present @todo activate it when it's configured for docker. See https://chatgpt.com/share/68a0acb8-db20-800f-9d2c-b34e38b5cdee
 MAILU_SUBNET:                         "{{ networks.local['web-app-mailu'].subnet }}"
+# Upstream resolvers used by unbound in Docker-in-Container mode (iterative resolution is blocked in DinD).
+MAILU_DNS_FORWARDERS:
+  - "1.1.1.1"
+  - "8.8.8.8"
 
 ## Credentials
 MAILU_SECRET_KEY:                     "{{ lookup('config', application_id, 'credentials.secret_key') }}"

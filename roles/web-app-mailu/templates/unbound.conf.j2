@@ -17,8 +17,10 @@ server:
 
   directory: "/etc/unbound"
   username: unbound
+{% if not DOCKER_IN_CONTAINER | bool %}
   auto-trust-anchor-file: trusted-key.key
   root-hints: "/etc/unbound/root.hints"
+{% endif %}
   hide-identity: yes
   hide-version: yes
   cache-min-ttl: 300
@@ -26,8 +28,9 @@ server:
 
 forward-zone:
   name: "."
-  forward-addr: 1.1.1.1
-  forward-addr: 8.8.8.8
+{% for addr in MAILU_DNS_FORWARDERS %}
+  forward-addr: {{ addr }}
+{% endfor %}
 {% endif %}
 
 remote-control:
