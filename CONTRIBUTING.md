@@ -6,23 +6,23 @@ Keep the detailed guides below in sync with the workflow that the repository act
 
 ## Quick Start
 
-1. [Create a fork and a branch with the right prefix](docs/contributing/workflow.md).
+1. [Create a fork and a branch with the right prefix](docs/contributing/flow/workflow.md).
 2. [Set up your local environment](docs/contributing/setup.md).
-3. [Make a focused change](docs/contributing/workflow.md).
+3. [Make a focused change](docs/contributing/flow/workflow.md).
 4. [Use the development guide](docs/contributing/development/README.md).
-5. [Push to your fork](docs/contributing/workflow.md).
-6. [Open a Pull Request with the right template](docs/contributing/pull-requests.md).
-7. [Request review and address feedback in your fork](docs/contributing/review.md).
+5. [Push to your fork](docs/contributing/flow/workflow.md).
+6. [Open a Pull Request with the right template](docs/contributing/flow/pull-request.md).
+7. [Request review and address feedback in your fork](docs/contributing/flow/review.md).
 
 ## Start Here
 
 If you only read one path, follow this order:
 
 1. [Development Environment Setup](docs/contributing/setup.md)
-2. [Contribution Flow](docs/contributing/workflow.md)
+2. [Contribution Flow](docs/contributing/flow/README.md)
 3. [Development](docs/contributing/development/README.md)
-4. [Pull Request Templates](docs/contributing/pull-requests.md)
-5. [Review Requirements](docs/contributing/review.md)
+4. [Pull Request Templates](docs/contributing/flow/pull-request.md)
+5. [Review Requirements](docs/contributing/flow/review.md)
 
 For the supporting topics behind that path, see:
 
@@ -44,7 +44,7 @@ For the supporting topics behind that path, see:
 
 - [Development Hub](https://s.infinito.nexus/development)
 - [Onboarding Document](https://s.infinito.nexus/onboarding)
-- [Pull Request Templates](docs/contributing/pull-requests.md)
+- [Pull Request Templates](docs/contributing/flow/pull-request.md)
 - [CODEOWNERS](.github/CODEOWNERS)
 
 For repository-wide agent rules, see [AGENTS.md](AGENTS.md); for project help and participation, see [SUPPORT.md](SUPPORT.md); for vulnerability reporting, see [SECURITY.md](SECURITY.md); and for community expectations, see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).

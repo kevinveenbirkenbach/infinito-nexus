@@ -1,4 +1,4 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
 
 # Contribution Flow
 

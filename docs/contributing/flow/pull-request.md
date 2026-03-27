@@ -1,4 +1,4 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
 
 # Pull Request Templates
 
@@ -6,12 +6,12 @@ Pick the template that matches your change. The table below links the actual tem
 
 | Change type | Template |
 |---|---|
-| Server and `web-*` changes | [server.md](../../.github/PULL_REQUEST_TEMPLATE/server.md) |
-| Workstation and `desk-*` changes | [workstation.md](../../.github/PULL_REQUEST_TEMPLATE/workstation.md) |
-| Shared system changes such as `sys-*`, `svc-*`, `dev-*`, `drv-*`, `pkgmgr`, `update-*`, or `user-*` | [system.md](../../.github/PULL_REQUEST_TEMPLATE/system.md) |
-| CI/CD and workflow changes | [pipeline.md](../../.github/PULL_REQUEST_TEMPLATE/pipeline.md) |
-| Documentation-only changes limited to `.md` or `.rst` files outside `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `docs/agents/*` | [documentation.md](../../.github/PULL_REQUEST_TEMPLATE/documentation.md) |
-| Agent-specific changes limited to `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or `docs/agents/*` | [agents.md](../../.github/PULL_REQUEST_TEMPLATE/agents.md) |
+| Server and `web-*` changes | [server.md](../../../.github/PULL_REQUEST_TEMPLATE/server.md) |
+| Workstation and `desk-*` changes | [workstation.md](../../../.github/PULL_REQUEST_TEMPLATE/workstation.md) |
+| Shared system changes such as `sys-*`, `svc-*`, `dev-*`, `drv-*`, `pkgmgr`, `update-*`, or `user-*` | [system.md](../../../.github/PULL_REQUEST_TEMPLATE/system.md) |
+| CI/CD and workflow changes | [pipeline.md](../../../.github/PULL_REQUEST_TEMPLATE/pipeline.md) |
+| Documentation-only changes limited to `.md` or `.rst` files outside `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `docs/agents/*` | [documentation.md](../../../.github/PULL_REQUEST_TEMPLATE/documentation.md) |
+| Agent-specific changes limited to `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or `docs/agents/*` | [agents.md](../../../.github/PULL_REQUEST_TEMPLATE/agents.md) |
 
 ## Pull Request Workflow Scope
 
