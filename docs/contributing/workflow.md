@@ -36,4 +36,6 @@ Use these prefixes for branch names:
 | `agent` | Changes to agent instruction files such as `AGENTS.md` or files in `docs/agents/`. | `agent/debugging-guidance` |
 | `documentation` | Pure documentation-only changes. | `documentation/docker-guide` |
 
+The pull-request workflow validates the branch prefix against the touched file scope and fails the job when they do not match.
+
 More information about the contribution workflow is available [here](https://s.infinito.nexus/forking).

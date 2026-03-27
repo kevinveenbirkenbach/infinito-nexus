@@ -19,9 +19,9 @@ The PR workflow classifies changes by the files that were touched:
 
 | Scope | Matching files | CI behavior |
 |---|---|---|
-| `agents` | Only `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or `docs/agents/*` | Skips `ci-orchestrator` and finishes green through the lightweight scope gate. |
-| `documentation` | Only `.md` or `.rst` files outside the agent paths | Skips `ci-orchestrator` and finishes green through the lightweight scope gate. |
-| `full` | Anything else, or a mix of agent, documentation, and non-documentation files | Runs the full `ci-orchestrator` pipeline. |
+| `agents` | Only `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or `docs/agents/*` | Requires the `agent` branch prefix, skips `ci-orchestrator`, and finishes green through the lightweight scope gate. |
+| `documentation` | Only `.md` or `.rst` files outside the agent paths | Requires the `documentation` branch prefix, skips `ci-orchestrator`, and finishes green through the lightweight scope gate. |
+| `full` | Anything else, or a mix of agent, documentation, and non-documentation files | Requires the `feature` or `fix` branch prefix and runs the full `ci-orchestrator` pipeline. |
 
 ## Pull Request Checklist
 

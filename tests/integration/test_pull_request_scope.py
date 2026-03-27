@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT_PATH = REPO_ROOT / "scripts" / "meta" / "resolve" / "pr_scope.sh"
+SCRIPT_PATH = REPO_ROOT / "scripts" / "meta" / "resolve" / "pr" / "scope.sh"
 
 
 @unittest.skipUnless(
