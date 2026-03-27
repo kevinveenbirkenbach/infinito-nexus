@@ -12,6 +12,7 @@ Use this page as the entry point for code principles, code quality, and framewor
 
 - [Code Principles](principles.md)
 - [Code Quality](quality.md)
+- [Architecture](architecture.md)
 - [Frameworks](frameworks/README.md)
 
 If you need to understand how repository code should be shaped, start here first.

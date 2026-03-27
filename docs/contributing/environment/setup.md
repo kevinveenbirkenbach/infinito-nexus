@@ -1,8 +1,8 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+[Back to Environment](README.md)
 
 # Development Environment Setup
 
-Use the repository's real setup flow. The main source of truth is the [Makefile](../../Makefile).
+Use the repository's real setup flow. The main source of truth is the [Makefile](../../../Makefile).
 
 Important:
 
@@ -59,7 +59,7 @@ make dev-environment-teardown
 
 ### Full Development Flow
 
-The repository already contains a development helper script at [development.sh](../../scripts/tests/development.sh). The commands from that file are explained here as the intended end-to-end flow.
+The repository already contains a development helper script at [development.sh](../../../scripts/tests/development.sh). The commands from that file are explained here as the intended end-to-end flow.
 
 #### Flow Summary
 
@@ -78,7 +78,7 @@ Use this as a practical reference when you want to understand how local developm
 
 ### Minimal Hardware Resources
 
-If you work on a machine with limited CPU, RAM, or disk space, use the guide at [Manage Low-Hardware Resources](resources.md).
+If you work on a machine with limited CPU, RAM, or disk space, use the guide at [Manage Low-Hardware Resources](hardware.md).
 The public article with the same topic is [Developing on PCs with Limited Resources](https://s.infinito.nexus/minpcdev).
 
-For local deploy shortcuts and end-to-end checks, see [Development](development/README.md).
+For local deploy shortcuts and end-to-end checks, see [Development](../development/README.md).

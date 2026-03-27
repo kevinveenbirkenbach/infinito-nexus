@@ -7,7 +7,7 @@ Keep the detailed guides below in sync with the workflow that the repository act
 ## Quick Start
 
 1. [Create a fork and a branch with the right prefix](docs/contributing/flow/workflow.md).
-2. [Set up your local environment](docs/contributing/setup.md).
+2. [Set up your local environment](docs/contributing/environment/setup.md).
 3. [Make a focused change](docs/contributing/flow/workflow.md).
 4. [Use the development guide](docs/contributing/development/README.md).
 5. [Push to your fork](docs/contributing/flow/workflow.md).
@@ -18,7 +18,7 @@ Keep the detailed guides below in sync with the workflow that the repository act
 
 If you only read one path, follow this order:
 
-1. [Development Environment Setup](docs/contributing/setup.md)
+1. [Development Environment](docs/contributing/environment/README.md)
 2. [Contribution Flow](docs/contributing/flow/README.md)
 3. [Development](docs/contributing/development/README.md)
 4. [Pull Request Templates](docs/contributing/flow/pull-request.md)
@@ -28,16 +28,18 @@ For the supporting topics behind that path, see:
 
 - [Documentation](docs/contributing/documentation.md)
 - [Code](docs/contributing/code/README.md)
+- [Environment](docs/contributing/environment/README.md)
+- [Architecture](docs/contributing/code/architecture.md)
 - [Development](docs/contributing/development/README.md)
 - [Tools](docs/contributing/tools/README.md)
-- [Architecture](docs/contributing/architecture.md)
-- [Manage Low-Hardware Resources](docs/contributing/resources.md)
+- [Manage Low-Hardware Resources](docs/contributing/environment/hardware.md)
+- [AI Guidelines](docs/contributing/tools/agents.md)
 
 ## Platform Guides
 
-- [Linux](docs/contributing/platform/linux.md)
-- [macOS](docs/contributing/platform/macos.md)
-- [Windows (WSL2)](docs/contributing/platform/windows-wsl2.md)
+- [Linux](docs/contributing/environment/platform/linux.md)
+- [macOS](docs/contributing/environment/platform/macos.md)
+- [Windows (WSL2)](docs/contributing/environment/platform/windows-wsl2.md)
 
 ## Related References
 

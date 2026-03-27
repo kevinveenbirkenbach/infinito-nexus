@@ -1,4 +1,4 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+[Back to Code](README.md)
 
 # Repository Architecture
 
