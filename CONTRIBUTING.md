@@ -27,6 +27,7 @@ If you only read one path, follow this order:
 For the supporting topics behind that path, see:
 
 - [Documentation](docs/contributing/documentation.md)
+- [Docker and Runtime Commands](docs/contributing/docker.md)
 - [Coding Standards](docs/contributing/coding-standards.md)
 - [CI Failures and Debugging](docs/contributing/ci-debugging.md)
 - [AI Best Practices](docs/contributing/ai-best-practices.md)
