@@ -30,7 +30,7 @@ endif
 	trust-ca \
 	restart up down stop \
 	build build-missing build-no-cache build-no-cache-all build-cleanup \
-	test-act-all test-act-app test-act-workflow \
+	act-all act-app act-workflow \
 	deploy-fresh-kept-app container-irefresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
 	deploy-fresh-purged-app deploy-reuse-kept-app deploy-reuse-purged-app deploy-fresh-kept-all \
 	bootstrap setup-development
@@ -208,13 +208,13 @@ test-integration: install
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
-test-act-all:
+act-all:
 	@bash scripts/tests/deploy/act/all.sh
 
-test-act-app:
+act-app:
 	@bash scripts/tests/deploy/act/app.sh
 
-test-act-workflow:
+act-workflow:
 	@bash scripts/tests/deploy/act/workflow.sh
 
 # Refresh the container inventory without deploying apps.

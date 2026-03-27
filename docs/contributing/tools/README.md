@@ -8,6 +8,7 @@ Use these pages together when you work on the local runtime or on agent-specific
 
 ## Start Here
 
+- [Act Workflow Checks](act.md)
 - [Docker and Runtime Commands](docker.md)
 - [Agent Guidelines](agents.md)
 

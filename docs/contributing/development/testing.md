@@ -55,6 +55,7 @@ Important:
 
 - Some local deploy commands are destructive.
 - Read [scripts/tests/deploy/local/README.md](../../../scripts/tests/deploy/local/README.md) before using reset or cleanup commands.
+- For act-based workflow checks, see [Act Workflow Checks](../tools/act.md).
 - After a successful local deploy, run `make trust-ca` and restart your browser.
 
 ## Playwright
