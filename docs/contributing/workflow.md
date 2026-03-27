@@ -33,7 +33,7 @@ Use these prefixes for branch names:
 |---|---|---|
 | `feature` | New functionality or improvements. | `feature/add-matomo-integration` |
 | `fix` | Bugfixes and other corrective changes. | `fix/login-redirect` |
-| `agents` | Changes to agent instruction files such as `AGENTS.md` or files in `docs/agents/`. | `agents/debugging-guidance` |
+| `agent` | Changes to agent instruction files such as `AGENTS.md` or files in `docs/agents/`. | `agent/debugging-guidance` |
 | `documentation` | Pure documentation-only changes. | `documentation/docker-guide` |
 
 More information about the contribution workflow is available [here](https://s.infinito.nexus/forking).

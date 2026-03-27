@@ -8,14 +8,14 @@ set -euo pipefail
 
 mapfile -t changed_paths < <(
 	gh api --paginate -H "Accept: application/vnd.github+json" \
-		"/repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" \
-		| jq -r '.[] | .filename, (.previous_filename // empty)' \
-		| sed '/^$/d'
+		"/repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" |
+		jq -r '.[] | .filename, (.previous_filename // empty)' |
+		sed '/^$/d'
 )
 
 is_agent_path() {
 	case "$1" in
-	AGENTS.md|CLAUDE.md|GEMINI.md|*/AGENTS.md|*/CLAUDE.md|*/GEMINI.md|docs/agents/*)
+	AGENTS.md | CLAUDE.md | GEMINI.md | */AGENTS.md | */CLAUDE.md | */GEMINI.md | docs/agents/*)
 		return 0
 		;;
 	*)
@@ -26,7 +26,7 @@ is_agent_path() {
 
 is_markdown_or_rst() {
 	case "$1" in
-	*.md|*.rst)
+	*.md | *.rst)
 		return 0
 		;;
 	*)
