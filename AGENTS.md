@@ -4,6 +4,7 @@
 
 - `AGENTS.md` is the single source of truth for repository-wide agent instructions.
 - [CONTRIBUTING.md](CONTRIBUTING.md) is the SPOT for contributor workflow, testing, review, and coding standards, and agents must follow it.
+- Follow the rules in the `Principles` table in [CONTRIBUTING.md](CONTRIBUTING.md); use the `Rule` column as the action to take and the `Details` column for the expanded guidance.
 - Agent-specific files such as `CLAUDE.md` and `GEMINI.md` may extend these rules, but they must not contradict them.
 
 ## Debugging
