@@ -102,10 +102,8 @@ jobs:
 
       - name: Deploy app (same as CI logic)
         shell: bash
-        run: |
-          set -euo pipefail
-          export TEST_DEPLOY_TYPE="${{ needs.discover.outputs.test_deploy_type }}"
-          export DISTROS="${{ needs.discover.outputs.distros }}"
-          export APP="${{ matrix.app }}"
-          export WHITELIST="${{ needs.discover.outputs.whitelist }}"
-          make ci-deploy-app
+        env:
+          TEST_DEPLOY_TYPE: ${{ needs.discover.outputs.test_deploy_type }}
+          DISTROS: ${{ needs.discover.outputs.distros }}
+          APP: ${{ matrix.app }}
+        run: ./scripts/tests/deploy/ci/all_distros.sh

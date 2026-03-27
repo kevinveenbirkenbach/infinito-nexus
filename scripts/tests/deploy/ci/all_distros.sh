@@ -16,16 +16,43 @@ set -euo pipefail
 #
 # Optional env:
 #   PYTHON="python3"
-#   MAX_TOTAL_SECONDS="5400"   # global time budget in seconds (empty/undefined = disabled)
+#   MAX_TOTAL_SECONDS="5400"   # override the script default of 19800 seconds
+#
+# Script-local defaults preserved from the old Make wrapper:
+#   MISSING_ONLY=true
+#   MAX_TOTAL_SECONDS=19800
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+cd "${REPO_ROOT}"
+
+if [[ -f "scripts/meta/env/all.sh" ]]; then
+	# shellcheck source=scripts/meta/env/all.sh
+	source "scripts/meta/env/all.sh"
+else
+	echo "[ERROR] Missing env file: scripts/meta/env/all.sh" >&2
+	exit 2
+fi
 
 : "${APP:?APP is required (e.g. APP=web-app-keycloak)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 : "${DISTROS:?DISTROS is required (e.g. 'arch debian ubuntu fedora centos')}"
 : "${INVENTORY_DIR:?INVENTORY_DIR is required}"
-export INVENTORY_DIR
 
-PYTHON="${PYTHON:-python3}"
-MAX_TOTAL_SECONDS="${MAX_TOTAL_SECONDS:-}"
+case "${TEST_DEPLOY_TYPE}" in
+server | workstation | universal) ;;
+*)
+	echo "[ERROR] Invalid TEST_DEPLOY_TYPE: ${TEST_DEPLOY_TYPE}" >&2
+	exit 2
+	;;
+esac
+
+: "${MISSING_ONLY:=true}"
+if [[ -z "${MAX_TOTAL_SECONDS+x}" ]]; then
+	MAX_TOTAL_SECONDS=19800
+fi
+
+export INVENTORY_DIR MISSING_ONLY MAX_TOTAL_SECONDS
 
 if [[ -n "${MAX_TOTAL_SECONDS}" ]]; then
 	if ! [[ "${MAX_TOTAL_SECONDS}" =~ ^[0-9]+$ ]]; then
@@ -33,10 +60,6 @@ if [[ -n "${MAX_TOTAL_SECONDS}" ]]; then
 		exit 2
 	fi
 fi
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
-cd "${REPO_ROOT}"
 
 read -r -a distro_arr <<<"${DISTROS}"
 mapfile -t distro_arr < <(printf '%s\n' "${distro_arr[@]}" | shuf)
@@ -48,7 +71,7 @@ if [[ -n "${MAX_TOTAL_SECONDS}" ]]; then
 	deadline="$((global_start + MAX_TOTAL_SECONDS))"
 	echo "=== Global time budget enabled: ${MAX_TOTAL_SECONDS}s (deadline epoch=${deadline}) ==="
 else
-	echo "=== Global time budget disabled (set MAX_TOTAL_SECONDS to enable) ==="
+	echo "=== Global time budget disabled (MAX_TOTAL_SECONDS was set empty) ==="
 fi
 
 max_seen=0

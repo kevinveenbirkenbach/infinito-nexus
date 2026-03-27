@@ -91,10 +91,6 @@ jobs:
 
       - name: Deploy app
         shell: bash
-        run: |
-          set -euo pipefail
-          export TEST_DEPLOY_TYPE="universal"
-          export DISTROS="${DISTROS}"
-          export APP="${{ matrix.app }}"
-
-          make ci-deploy-app
+        env:
+          APP: ${{ matrix.app }}
+        run: ./scripts/tests/deploy/ci/all_distros.sh

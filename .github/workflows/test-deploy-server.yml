@@ -95,11 +95,9 @@ jobs:
 
       - name: Deploy app
         shell: bash
-        run: |
-          set -euo pipefail
-          export TEST_DEPLOY_TYPE="server"
-          export APP="${{ matrix.app }}"
-          make ci-deploy-app
+        env:
+          APP: ${{ matrix.app }}
+        run: ./scripts/tests/deploy/ci/all_distros.sh
 
       - name: Upload Playwright artifacts
         if: always()
