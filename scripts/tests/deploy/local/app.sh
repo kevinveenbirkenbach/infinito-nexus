@@ -17,6 +17,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+
+# shellcheck source=scripts/tests/deploy/local/utils/lib.sh
+source "${SCRIPT_DIR}/utils/lib.sh"
+
 cd "${REPO_ROOT}"
 
 if [[ -f "scripts/meta/env/all.sh" ]]; then
@@ -43,17 +47,6 @@ ENV:
 EOF
 }
 
-normalize_bool() {
-	case "${1:-}" in
-	true | True | TRUE | 1) echo "true" ;;
-	false | False | FALSE | 0) echo "false" ;;
-	*)
-		echo "ERROR: invalid boolean value '${1:-}' (expected true|false)" >&2
-		exit 2
-		;;
-	esac
-}
-
 if [[ "${1:-}" == "-h" || "${1:-}" == "--help" || $# -eq 0 ]]; then
 	usage
 	exit 0
@@ -78,7 +71,6 @@ fi
 INFINITO_DISTRO="${INFINITO_DISTRO:-debian}"
 INVENTORY_DIR="${INVENTORY_DIR:-}"
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
-DEBUG="${DEBUG:-true}"
 
 if [[ -z "${INVENTORY_DIR}" ]]; then
 	echo "ERROR: INVENTORY_DIR is empty after loading scripts/meta/env/all.sh" >&2
@@ -93,7 +85,7 @@ arch | debian | ubuntu | fedora | centos) ;;
 	;;
 esac
 
-DEBUG="$(normalize_bool "${DEBUG}")"
+DEBUG="$(normalize_bool_or_default "${DEBUG:-}" true DEBUG)"
 
 echo "=== local app test (no cleanup) ==="
 echo "app_id        = ${APP_ID}"

@@ -16,25 +16,18 @@ set -euo pipefail
 # - This does NOT create the inventory. Run inventory-init-all.sh first.
 # - We recompute the app list to keep behavior deterministic with filters.
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# shellcheck source=scripts/tests/deploy/local/utils/lib.sh
+source "${SCRIPT_DIR}/utils/lib.sh"
+
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
 
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
-DEBUG="${DEBUG:-false}"
 
-normalize_bool() {
-	case "${1:-}" in
-	true | True | TRUE | 1) echo "true" ;;
-	false | False | FALSE | 0 | "") echo "false" ;;
-	*)
-		echo "ERROR: invalid boolean: ${1}" >&2
-		exit 2
-		;;
-	esac
-}
-
-DEBUG="$(normalize_bool "${DEBUG}")"
+DEBUG="$(normalize_bool_or_default "${DEBUG:-}" false DEBUG)"
 
 inv_dir="${INVENTORY_DIR}"
 inv_file="${inv_dir}/servers.yml"
