@@ -25,7 +25,7 @@ Use the following table to choose the right lint, syntax, unit, integration, or 
 | Lint tests | `make test-lint` | Runs the lint test suite inside the development environment. | Use this when you want CI-like lint validation. |
 | Unit tests | `make test-unit` | Runs the unit test suite. | Use this when you changed Python logic or other isolated code paths. |
 | Integration tests | `make test-integration` | Runs the integration test suite. | Use this when your change affects behavior across modules or runtime boundaries. |
-| Combined validation | `make test` | Runs the main combined validation flow. | Use this before opening a Pull Request or when you want the standard all-in-one check. |
+| Combined validation | `make test` | Runs the main combined validation flow. | Use this whenever a change touches at least one file that is not `.md` or `.rst`, or before opening a Pull Request. |
 
 ## Local Deploy and End-to-End Checks
 
