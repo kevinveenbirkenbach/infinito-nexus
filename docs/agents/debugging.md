@@ -11,8 +11,8 @@ Use the failure source to decide how to debug:
 ## Local Deploy Failures
 
 - On the first local deploy failure, rerun the affected app with `APP=<role> make test-local-dedicated`. For alarm failures, use this retry path because it rebuilds the full `servers.yml` inventory in the dedicated shape.
-- If the inventory is already in the right shape and you only need a faster repeat, use `APP=<role> make test-local-rapid`.
-- Do not switch back to `APP=<role> make test-local-app` for the retry if you suspect inventory drift, because that follows the single-app inventory path.
+- If you need to validate the single-app `servers.yml` path after that, continue with `APP=<role> make test-local-app`.
+- Use `APP=<role> make test-local-rapid` only when you intentionally work from the `${TEST_DEPLOY_TYPE}.yml` inventory flow created by `make test-local-reset` or `make test-local-full`.
 - Keep iterating locally until the issue is fixed, unless the user explicitly asks you to switch context.
 
 ## GitHub / CI Logs
