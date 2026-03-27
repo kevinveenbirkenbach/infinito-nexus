@@ -10,6 +10,7 @@ Examples in this folder:
 - `repository/name.sh` resolves the concrete repository name once for callers
 - `repository/owner.sh` resolves the concrete repository owner once for callers
 - `distros.sh` is the SPOT for the canonical distro list used by workflows
+- `pr_scope.sh` resolves whether a Pull Request is agents-only, documentation-only, or full scope
 
 The scope of this folder is value resolution.
 Build, release, and wait-oriented behavior should stay in their dedicated script directories.

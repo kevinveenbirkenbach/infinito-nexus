@@ -10,8 +10,18 @@ Pick the template that matches your change. The table below links the actual tem
 | Workstation and `desk-*` changes | [workstation.md](../../.github/PULL_REQUEST_TEMPLATE/workstation.md) |
 | Shared system changes such as `sys-*`, `svc-*`, `dev-*`, `drv-*`, `pkgmgr`, `update-*`, or `user-*` | [system.md](../../.github/PULL_REQUEST_TEMPLATE/system.md) |
 | CI/CD and workflow changes | [pipeline.md](../../.github/PULL_REQUEST_TEMPLATE/pipeline.md) |
-| Documentation-only changes | [documentation.md](../../.github/PULL_REQUEST_TEMPLATE/documentation.md) |
-| Agent-specific changes | [agents.md](../../.github/PULL_REQUEST_TEMPLATE/agents.md) |
+| Documentation-only changes limited to `.md` or `.rst` files outside `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `docs/agents/*` | [documentation.md](../../.github/PULL_REQUEST_TEMPLATE/documentation.md) |
+| Agent-specific changes limited to `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or `docs/agents/*` | [agents.md](../../.github/PULL_REQUEST_TEMPLATE/agents.md) |
+
+## Pull Request Workflow Scope
+
+The PR workflow classifies changes by the files that were touched:
+
+| Scope | Matching files | CI behavior |
+|---|---|---|
+| `agents` | Only `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or `docs/agents/*` | Skips `ci-orchestrator` and finishes green through the lightweight scope gate. |
+| `documentation` | Only `.md` or `.rst` files outside the agent paths | Skips `ci-orchestrator` and finishes green through the lightweight scope gate. |
+| `full` | Anything else, or a mix of agent, documentation, and non-documentation files | Runs the full `ci-orchestrator` pipeline. |
 
 ## Pull Request Checklist
 
