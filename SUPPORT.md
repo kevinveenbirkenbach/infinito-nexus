@@ -8,6 +8,11 @@ This page collects the places to go when you need help, a professional setup, or
 - [Infinito.Nexus Hub](https://hub.infinito.nexus/) - tutorials, FAQs, and community support.
 - Matrix: `#public:infinito.nexus` - quick chat with the community.
 
+## Documentation
+
+- The full documentation portal is available at [docs.infinito.nexus](https://docs.infinito.nexus/).
+- For installation and deployment walkthroughs, see the [Installation Guide](docs/guides/installation.md) and the [Administration Guide](docs/guides/administration.md).
+
 ## Bug Reports and Feature Requests
 
 - For bug reports and actionable feature requests, see [Issues](https://s.infinito.nexus/issues).
