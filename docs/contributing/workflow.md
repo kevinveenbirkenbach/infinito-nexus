@@ -17,7 +17,7 @@ Why this matters:
 ## Step-by-Step Flow
 
 1. Create or update your fork.
-2. Create a feature branch in your fork.
+2. Create a branch in your fork with the right prefix.
 3. Make one focused change at a time.
 4. Run the relevant local checks.
 5. Push the branch to your fork.
@@ -25,7 +25,15 @@ Why this matters:
 7. Open a Pull Request.
 8. Address review feedback in your fork.
 
-Use the prefix `feature` for feature branches and `fix` for bugfixes and other fixes, for example `feature/my-change` or `fix/login-bug`.
+## Branch Prefixes
+
+Use these prefixes for branch names:
+
+| Prefix | When to use it | Example |
+|---|---|---|
+| `feature` | New functionality or improvements. | `feature/add-matomo-integration` |
+| `fix` | Bugfixes and other corrective changes. | `fix/login-redirect` |
+| `agents` | Changes to agent instruction files such as `AGENTS.md` or files in `docs/agents/`. | `agents/debugging-guidance` |
+| `documentation` | Pure documentation-only changes. | `documentation/docker-guide` |
 
 More information about the contribution workflow is available [here](https://s.infinito.nexus/forking).
-

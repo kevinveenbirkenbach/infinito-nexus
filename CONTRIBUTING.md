@@ -6,7 +6,7 @@ Keep the detailed guides below in sync with the workflow that the repository act
 
 ## Quick Start
 
-1. [Create a fork and a feature branch](docs/contributing/workflow.md).
+1. [Create a fork and a branch with the right prefix](docs/contributing/workflow.md).
 2. [Set up your local environment](docs/contributing/setup.md).
 3. [Make a focused change](docs/contributing/workflow.md).
 4. [Run the relevant checks](docs/contributing/testing.md).
