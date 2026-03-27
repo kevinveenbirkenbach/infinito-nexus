@@ -23,6 +23,7 @@ All project documentation should be reachable at [docs.infinito.nexus](https://d
 
 - Keep code and comments in English.
 - Fix nearby wording and semantic issues when you touch a file, and correct obvious nearby issues proactively in the same pass.
+- Use emojis when they make the text more visually appealing, improve the mood, and increase readability.
 
 ## Documentation Structure
 
