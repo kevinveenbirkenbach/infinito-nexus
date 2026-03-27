@@ -9,7 +9,7 @@ Keep the detailed guides below in sync with the workflow that the repository act
 1. [Create a fork and a branch with the right prefix](docs/contributing/workflow.md).
 2. [Set up your local environment](docs/contributing/setup.md).
 3. [Make a focused change](docs/contributing/workflow.md).
-4. [Run the relevant checks](docs/contributing/testing.md).
+4. [Use the development guide](docs/contributing/development/README.md).
 5. [Push to your fork](docs/contributing/workflow.md).
 6. [Open a Pull Request with the right template](docs/contributing/pull-requests.md).
 7. [Request review and address feedback in your fork](docs/contributing/review.md).
@@ -20,18 +20,18 @@ If you only read one path, follow this order:
 
 1. [Development Environment Setup](docs/contributing/setup.md)
 2. [Contribution Flow](docs/contributing/workflow.md)
-3. [Testing and Validation](docs/contributing/testing.md)
+3. [Development](docs/contributing/development/README.md)
 4. [Pull Request Templates](docs/contributing/pull-requests.md)
 5. [Review Requirements](docs/contributing/review.md)
 
 For the supporting topics behind that path, see:
 
 - [Documentation](docs/contributing/documentation.md)
+- [Code](docs/contributing/code/README.md)
+- [Development](docs/contributing/development/README.md)
 - [Docker and Runtime Commands](docs/contributing/docker.md)
-- [Coding Standards](docs/contributing/coding-standards.md)
 - [Architecture](docs/contributing/architecture.md)
 - [Manage Low-Hardware Resources](docs/contributing/resources.md)
-- [CI Failures and Debugging](docs/contributing/debugging.md)
 - [AI Guidelines](docs/contributing/artificial_intelligence.md)
 
 ## Platform Guides

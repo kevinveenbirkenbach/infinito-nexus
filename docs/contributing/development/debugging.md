@@ -1,4 +1,4 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+[Back to Development](README.md)
 
 # CI Failures and Debugging
 
@@ -18,7 +18,7 @@ Important:
 
 Use targeted manual CI jobs instead of rerunning the full pipeline if you only need one focused check.
 
-Prefer the manual workflow in [entry-manual.yml](../../.github/workflows/entry-manual.yml):
+Prefer the manual workflow in [entry-manual.yml](../../../.github/workflows/entry-manual.yml):
 
 - Select your branch.
 - Use `debian` unless you have a clear reason to use a different distro.
@@ -27,4 +27,3 @@ Prefer the manual workflow in [entry-manual.yml](../../.github/workflows/entry-m
 This gives faster feedback and protects shared CI runners.
 
 More information [here](https://hub.infinito.nexus/t/infinito-nexus-ci-cd-debugging-guide/462).
-

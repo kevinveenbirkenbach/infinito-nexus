@@ -81,4 +81,4 @@ Use this as a practical reference when you want to understand how local developm
 If you work on a machine with limited CPU, RAM, or disk space, use the guide at [Manage Low-Hardware Resources](resources.md).
 The public article with the same topic is [Developing on PCs with Limited Resources](https://s.infinito.nexus/minpcdev).
 
-For local deploy shortcuts and end-to-end checks, see [Testing and Validation](testing.md).
+For local deploy shortcuts and end-to-end checks, see [Development](development/README.md).

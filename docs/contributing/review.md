@@ -6,7 +6,7 @@ Open a Pull Request only when it is ready for real review.
 
 The matching Pull Request template is the SPOT for PR structure, required author input, and review context. Use the guidance in [Pull Request Templates](pull-requests.md) and orient your Pull Request to it.
 
-The [Coding Standards](coding-standards.md) file is the SPOT for repository-wide code quality expectations such as diff quality, maintainability, and conventions.
+The [Code](code/README.md) page is the SPOT for repository-wide code quality expectations such as diff quality, maintainability, and conventions.
 
 In addition to the templates, keep these repository-wide review rules in mind:
 

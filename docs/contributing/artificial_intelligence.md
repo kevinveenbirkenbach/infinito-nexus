@@ -4,7 +4,7 @@
 
 AI assistants are welcome, but they must follow the same workflow as humans.
 
-This page complements [AGENTS.md](../../AGENTS.md). Use it as the AI-focused companion for contributor workflow, testing, review, and coding standards guidance.
+This page complements [AGENTS.md](../../AGENTS.md). Use it as the AI-focused companion for contributor workflow, testing, review, and the code and development guides.
 
 [AGENTS.md](../../AGENTS.md) is the repository-wide source of truth for agent-specific behavior.
 

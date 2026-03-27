@@ -1,8 +1,8 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+[Back to Code](README.md)
 
-# Coding Standards
+# Code Principles
 
-This repository values simple, maintainable, and well-tested changes.
+Use these principles when you change repository code, scripts, or automation.
 
 ## Principles
 
@@ -49,54 +49,5 @@ Follow these principles. Keep the rule column short, imperative, and as [SMART](
 | Keep easy code easy to explain. | Easy-to-explain code is usually sound. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | If the code is easy to explain, it is likely a good idea. |
 | Use namespaces generously. | Namespaces prevent collisions in a large repo. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Group names so they do not collide and remain easy to navigate. |
 
-## Diff Quality
-
-- Keep diffs focused, readable, and easy to review.
-- Avoid duplicate, conflicting, or purely cosmetic churn unless formatting cleanup is part of the task.
-- Prefer semantic improvements that reduce maintenance effort.
-
-## Lint
-
-Use these linting and quality tools where applicable:
-
-- [ruff](https://github.com/astral-sh/ruff)
-- [shellcheck](https://github.com/koalaman/shellcheck)
-- [hadolint](https://github.com/hadolint/hadolint)
-
-## Refactoring
-
-- If you touch a file, refactor it according to these coding standards where practical.
-- If similar logic exists elsewhere in the project, refactor it toward a shared implementation.
-
-## Ansible
-
-Use this section for Ansible-specific guidance that applies across the repository.
-
-### Common
-
-Use these shared rules as the default baseline for role values and path handling.
-
-### Paths
-
-Build filesystem paths with `path_join` instead of concatenating path segments as strings.
-
-### Variables and Constants
-
-These rules keep shared role values explicit, reusable, and easy to read.
-
-- Prefer defining shared fixed role variables once in `vars/main.yml` as the single source of truth instead of recomputing them with `lookup()` or dotted variable composition in `*.j2` or `*.yml`.
-- Variables that are defined once and treated as constants must be uppercase.
-
-### Role Design
-
-Use this section for role-structure guidance around images, files, and constants.
-
-#### Container Images
-
-Use this rule when a role needs a Docker image definition.
-
-- Prefer `Dockerfile` over `Dockerfile.j2`; only use `Dockerfile.j2` when build-time templating is genuinely required.
-
-For documentation, comments, semantics, and writing guidance, see [Documentation](documentation.md).
-
-For test commands and testing standards, see [Testing and Validation](testing.md).
+For code quality rules, see [Code Quality](quality.md).
+For framework-specific guidance, see [Ansible](frameworks/ansible.md) and [Makefile](frameworks/Makefile.md).

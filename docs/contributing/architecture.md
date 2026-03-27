@@ -10,7 +10,7 @@ The short version:
 - Ansible decides what should exist.
 - Docker Compose runs the service layer.
 - Bundles assemble roles into real deployments.
-- Make targets hide repetitive commands.
+- Make targets expose stable, human-facing commands.
 - Docs keep humans and AI agents aligned.
 
 ## What This Repository Actually Is
@@ -77,6 +77,8 @@ The main entry points are:
 - `Makefile`
 - `scripts/`
 - `tests/`
+- `docs/contributing/code/README.md`
+- `docs/contributing/development/README.md`
 - `docs/contributing/`
 
 Those layers keep local development, CI, and production behavior closer together.
@@ -191,6 +193,8 @@ If you are trying to understand a change, start here:
 - `roles/` for behavior
 - `inventories/bundles/` for deployment shapes
 - `Makefile` and `scripts/` for supported commands
+- `docs/contributing/code/README.md` for code and framework rules
+- `docs/contributing/development/README.md` for refactoring, debugging, and testing
 - `docs/contributing/` for workflow and constraints
 - `tests/` for the expected contracts
 

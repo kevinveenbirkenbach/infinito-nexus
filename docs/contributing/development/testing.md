@@ -1,4 +1,4 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+[Back to Development](README.md)
 
 # Testing and Validation
 
@@ -51,7 +51,7 @@ Use the following table when you need realistic local deployment validation or a
 Important:
 
 - Some local deploy commands are destructive.
-- Read [scripts/tests/deploy/local/README.md](../../scripts/tests/deploy/local/README.md) before using reset or cleanup commands.
+- Read [scripts/tests/deploy/local/README.md](../../../scripts/tests/deploy/local/README.md) before using reset or cleanup commands.
 - After a successful local deploy, run `make trust-ca` and restart your browser.
 
 ## Playwright
