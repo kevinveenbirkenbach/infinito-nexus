@@ -113,10 +113,6 @@ jobs:
     steps:
       - run: echo "lint gate passed"
 
-  # Docker image version check (warns about outdated images, never blocks)
-  test-docker-image-versions:
-    uses: ./.github/workflows/test-docker-image-versions.yml
-
   # Build Docker Images 
   build-ci-images:
     needs: fork-prereqs-ready
