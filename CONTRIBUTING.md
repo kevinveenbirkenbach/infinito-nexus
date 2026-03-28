@@ -2,9 +2,9 @@
 
 This hub points to the detailed contributor guides for humans and AI assistants.
 
-Keep the detailed guides below in sync with the workflow that the repository actually uses.
+## 🚀 Quick Start
 
-## Quick Start
+Follow these steps to make your first contribution.
 
 1. [Create a fork and a branch with the right prefix](docs/contributing/flow/workflow.md).
 2. [Set up your local environment](docs/contributing/environment/setup.md).
@@ -14,7 +14,7 @@ Keep the detailed guides below in sync with the workflow that the repository act
 6. [Open a Pull Request with the right template](docs/contributing/flow/pull-request.md).
 7. [Request review and address feedback in your fork](docs/contributing/flow/review.md).
 
-## Start Here
+## 📖 Start Here
 
 If you only read one path, follow this order:
 
@@ -35,17 +35,28 @@ For the supporting topics behind that path, see:
 - [Manage Low-Hardware Resources](docs/contributing/environment/hardware.md)
 - [AI Guidelines](docs/contributing/tools/agents.md)
 
-## Platform Guides
+## 💻 Platform Guides
+
+Platform-specific setup instructions for your operating system.
 
 - [Linux](docs/contributing/environment/platform/linux.md)
 - [macOS](docs/contributing/environment/platform/macos.md)
 - [Windows (WSL2)](docs/contributing/environment/platform/windows-wsl2.md)
 
-## Related References
+## 🔗 Related References
+
+External resources and related documents for contributors.
 
 - [Development Hub](https://s.infinito.nexus/development)
 - [Onboarding Document](https://s.infinito.nexus/onboarding)
 - [Pull Request Templates](docs/contributing/flow/pull-request.md)
-- [CODEOWNERS](.github/CODEOWNERS)
 
-For repository-wide agent rules, see [AGENTS.md](AGENTS.md); for project help and participation, see [SUPPORT.md](SUPPORT.md); for vulnerability reporting, see [SECURITY.md](SECURITY.md); and for community expectations, see [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+## 📋 Repository Files
+
+Essential repository files covering agent rules, support, security, and community standards.
+
+- [AGENTS.md](AGENTS.md)
+- [SUPPORT.md](SUPPORT.md)
+- [SECURITY.md](SECURITY.md)
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- [CODEOWNERS](.github/CODEOWNERS)
