@@ -12,6 +12,12 @@ For repository wiring, inventory keys, and the generated palette contract, see [
 - You MUST prefer token mapping over large selector rewrites so the role keeps its native structure and behavior.
 - Write the result so it feels like one coherent brand theme instead of a collection of unrelated overrides.
 
+## Color Categories
+
+- You MUST use `--color-01-*` as the primary color category. It defines the main brand color and MUST be used for the majority of themed surfaces.
+- You SHOULD prefer colors from category `01` for all standard theming. Other categories (`02`–`07`) MUST only be used to strongly emphasize specific elements such as warnings, errors, or highlights.
+- You MUST NOT use categories `02`–`07` as general surface or brand colors.
+
 ## Replace
 
 - You MUST replace hard-coded visual values that define the role's look and feel: colors, RGB channels, gradients, borders, shadows, overlays, placeholder colors, focus colors, and similar theme tokens.
