@@ -8,9 +8,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-SCRIPT_PATH = (
-    REPO_ROOT / "scripts" / "github" / "cancel_pull_request_runs.sh"
-)
+SCRIPT_PATH = REPO_ROOT / "scripts" / "github" / "cancel_pull_request_runs.sh"
 EMPTY_RUNS_JSON = '{"workflow_runs":[]}\n'
 
 
