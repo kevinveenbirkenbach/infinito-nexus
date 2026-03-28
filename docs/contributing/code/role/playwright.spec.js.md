@@ -11,19 +11,19 @@ For the matching rendered environment contract, see [Contributing `playwright.en
 
 - `test-e2e-playwright` copies `files/playwright.spec.js` into the staged test project as `tests/playwright.spec.js`.
 - The spec consumes the `.env` rendered from `templates/playwright.env.j2`.
-- `package.json` and `playwright.config.js` stay centralized in `roles/test-e2e-playwright/files/`.
+- `package.json` and `playwright.config.js` MUST stay centralized in `roles/test-e2e-playwright/files/`.
 
 ## Requirements
 
-- Every Playwright-enabled role must verify login and logout.
-- Every role with `compose.services.dashboard.enabled` must start the test flow from the dashboard.
-- When the role provides both `biber` and `administrator` scenarios, login and logout for both must be covered.
-- When role-local `javascript.js` or `style.css` is implemented or refactored, the affected user-visible behavior must be added to or updated in the Playwright suite.
-- Assertions must verify real UI states and user-visible outcomes, not only URL transitions or static strings.
-- The suite must finish in a clearly logged-out state.
+- Every Playwright-enabled role MUST verify login and logout.
+- Every role with `compose.services.dashboard.enabled` MUST start the test flow from the dashboard.
+- When the role provides both `biber` and `administrator` scenarios, login and logout for both MUST be covered.
+- When role-local `javascript.js` or `style.css` is implemented or refactored, the affected user-visible behavior MUST be added to or updated in the Playwright suite.
+- Assertions MUST verify real UI states and user-visible outcomes, not only URL transitions or static strings.
+- The suite MUST finish in a clearly logged-out state.
 
 ## Scenario Rules
 
-- Name tests after the real flow they verify, for example dashboard to app login and logout.
-- Keep persona-specific scenarios explicit when the role distinguishes between different user paths.
-- Add extra coverage when relevant, for example OIDC, LDAP, or dashboard-specific navigation.
+- You MUST name tests after the real flow they verify, for example dashboard to app login and logout.
+- You MUST keep persona-specific scenarios explicit when the role distinguishes between different user paths.
+- You SHOULD add extra coverage when relevant, for example OIDC, LDAP, or dashboard-specific navigation.

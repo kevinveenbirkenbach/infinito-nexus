@@ -4,15 +4,15 @@
 
 This repository uses a strict fork-first workflow.
 
-- Do not commit directly to `main`.
-- Do all work in your own fork.
-- Open Pull Requests from your fork back to the main repository.
+- You MUST NOT commit directly to `main`.
+- You MUST do all work in your own fork.
+- You MUST open Pull Requests from your fork back to the main repository.
 
 Why this matters:
 
-- `main` should stay stable.
+- `main` MUST stay stable.
 - Shared CI resources are limited.
-- Broken experimental work should not run in the main repository.
+- Broken experimental work MUST NOT run in the main repository.
 
 ## Step-by-Step Flow
 
@@ -27,7 +27,7 @@ Why this matters:
 
 ## Branch Prefixes
 
-Use these prefixes for branch names:
+You MUST use these prefixes for branch names:
 
 | Prefix | When to use it | Example |
 |---|---|---|

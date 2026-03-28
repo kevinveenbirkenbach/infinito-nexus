@@ -12,11 +12,11 @@ If CI fails, follow a clean debugging workflow:
 
 Important:
 
-- Do not debug from screenshots alone. Use raw logs.
-- Do not commit log files to the repository.
-- If a [Playwright](https://playwright.dev/) job fails, also download the Playwright assets, store them in `/tmp/`, and analyze them together with the logs.
+- You MUST NOT debug from screenshots alone. Use raw logs.
+- You MUST NOT commit log files to the repository.
+- If a [Playwright](https://playwright.dev/) job fails, you MUST also download the Playwright assets, store them in `/tmp/`, and analyze them together with the logs.
 
-Use targeted manual CI jobs instead of rerunning the full pipeline if you only need one focused check.
+You SHOULD use targeted manual CI jobs instead of rerunning the full pipeline if you only need one focused check.
 
 Prefer the manual workflow in [entry-manual.yml](../../../.github/workflows/entry-manual.yml):
 

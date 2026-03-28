@@ -2,7 +2,7 @@
 
 # Pull Request Templates
 
-Pick the template that matches your change. The table below links the actual templates.
+You MUST pick the template that matches your change. The table below links the actual templates.
 
 | Change type | Template |
 |---|---|
@@ -25,7 +25,7 @@ The PR workflow classifies changes by the files that were touched:
 
 ## Pull Request Checklist
 
-Before you open a Pull Request, make sure:
+Before you open a Pull Request, you MUST verify all of the following:
 
 - CI in your fork is green.
 - Your branch is up to date with `main`.

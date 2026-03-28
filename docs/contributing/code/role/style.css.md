@@ -16,12 +16,12 @@ For browser-side validation requirements after visible UI changes, see [Contribu
 
 ## Inventory
 
-- Set `design.css.colors.base` in the inventory as the single base color.
-- Keep `compose.services.css.enabled` enabled in the role configuration or override it in the inventory when CSS injection should run.
-- Add `design.font.import_url` when typography and colors should be controlled together.
+- You MUST set `design.css.colors.base` in the inventory as the single base color.
+- You MUST keep `compose.services.css.enabled` enabled in the role configuration or override it in the inventory when CSS injection should run.
+- You SHOULD add `design.font.import_url` when typography and colors should be controlled together.
 
 ## Color Logic
 
 - The palette is generated from a base color through `colorscheme-generator`.
-- Role-local CSS can use the full generated palette space: all color categories `01` through `07` and all brightness values `00` through `99`.
-- Combine the matching `--color-XX-*` and `--color-XX-rgb-*` tokens in a way that is both meaningful and aesthetically coherent so semantic mappings, surfaces, gradients, borders, and overlays work together as one design system.
+- Role-local CSS MAY use the full generated palette space: all color categories `01` through `07` and all brightness values `00` through `99`.
+- You MUST combine the matching `--color-XX-*` and `--color-XX-rgb-*` tokens in a way that is both meaningful and aesthetically coherent so semantic mappings, surfaces, gradients, borders, and overlays work together as one design system.

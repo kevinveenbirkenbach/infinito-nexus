@@ -19,6 +19,20 @@ All project documentation should be reachable at [docs.infinito.nexus](https://d
 - When keeping an intentionally retained outdated version pin, document the exception at the pin site with a local `TODO` comment in the file's normal comment style (`#todo`, `# TODO`, or similar) and explain why it remains pinned so the root cause stays visible until it can be fixed.
 
 
+## Requirement Keywords (RFC 2119)
+
+You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in documentation and agent instructions to express requirement levels unambiguously:
+
+| Keyword | Meaning |
+|---|---|
+| `MUST` / `REQUIRED` / `SHALL` | Absolute requirement — no deviation allowed. |
+| `MUST NOT` / `SHALL NOT` | Absolute prohibition — never do this. |
+| `SHOULD` / `RECOMMENDED` | Strongly recommended — deviation requires justification. |
+| `SHOULD NOT` / `NOT RECOMMENDED` | Strongly discouraged — allowed only with justification. |
+| `MAY` / `OPTIONAL` | Permitted but not required. |
+
+Apply these keywords in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and all files under `docs/agents/` so that requirement strength is always unambiguous.
+
 ## Semantics and Writing
 
 - Keep code and comments in English.
