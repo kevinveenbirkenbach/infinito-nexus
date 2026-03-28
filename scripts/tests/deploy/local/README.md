@@ -195,6 +195,30 @@ scripts/tests/deploy/local/app.sh web-app-nextcloud
 
 ---
 
+### `inspect.sh`
+
+What it does:
+- Opens an interactive shell in the running infinito container.
+- Optionally runs a one-off command when `INSPECT_CMD` is set.
+- Positional arguments are passed through to `docker exec` as the command argv.
+
+Required ENV:
+- None, the script loads defaults from `scripts/meta/env/all.sh`.
+
+Optional ENV:
+- `INFINITO_DISTRO`
+- `INFINITO_CONTAINER`
+- `INSPECT_CMD`
+
+Examples:
+```bash
+scripts/tests/deploy/local/inspect.sh
+scripts/tests/deploy/local/inspect.sh whoami
+INSPECT_CMD='whoami && id' scripts/tests/deploy/local/inspect.sh
+```
+
+---
+
 ### `dedicated_distro.sh`
 
 What it does:

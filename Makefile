@@ -28,7 +28,7 @@ endif
 	apparmor-teardown apparmor-restore \
 	disable-ipv6 restore-ipv6 \
 	trust-ca \
-	restart up down stop \
+	restart inspect up down stop \
 	build build-missing build-no-cache build-no-cache-all build-cleanup \
 	act-all act-app act-workflow \
 	deploy-fresh-kept-app container-irefresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
@@ -110,6 +110,10 @@ clean-sudo:
 # Restart the development stack.
 restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
+
+# Inspect the running infinito container via scripts/tests/deploy/local/inspect.sh.
+inspect:
+	@bash scripts/tests/deploy/local/inspect.sh
 
 # Start the development stack.
 up: install

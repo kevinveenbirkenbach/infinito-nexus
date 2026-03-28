@@ -10,10 +10,6 @@ Use the failure source to decide how to debug:
 
 ## Local Deploy Failures
 
-### Prerequisites
-
-- Before you redeploy, complete all available inspections first. Check the live local output, local logs, and current browser state so the original failure stays visible.
-
 ### Retry Loop
 - For the shared local retry loop, follow [Iteration](iteration.md).
 

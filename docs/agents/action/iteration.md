@@ -17,3 +17,7 @@ Use this page when you are iterating on a local app deploy during debugging or d
 
 - If the website uses locally deployed certificates, run `make trust-ca` before you inspect it in a browser. Otherwise the browser will warn about the local CA and the inspection will not be reliable.
 - After `make trust-ca`, restart the browser so it picks up the updated trust store.
+
+## Inspect
+
+- Before you redeploy, complete all available inspections first. Check the live local output, local logs, and current browser state so the original state stays visible.

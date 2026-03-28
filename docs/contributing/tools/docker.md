@@ -24,6 +24,12 @@ Use these commands from the repository root. They are thin `make` wrappers aroun
 | Pause services | `make stop` | Stops running services without removing volumes. | Use this when you want a fast stop and plan to start the same state again. |
 | Restart stack | `make restart` | Stops the stack and starts it again. | Use this after configuration changes or when the stack needs a full restart. |
 
+## Container Inspection
+
+| Category | Command | What it does | When to use it |
+|---|---|---|---|
+| Inspect container | `make inspect` | Delegates to `scripts/tests/deploy/local/inspect.sh`, which opens an interactive shell in the running infinito container with `docker exec -it ... sh`. | Use this when you need to inspect live state or run a quick command inside the container. |
+
 ## Support Targets
 
 | Category | Command | What it does | When to use it |
