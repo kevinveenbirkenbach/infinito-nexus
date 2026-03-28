@@ -1,4 +1,4 @@
-[Back to AGENTS hub](../../AGENTS.md)
+[Back to AGENTS hub](../../../AGENTS.md)
 
 # Development
 
@@ -9,8 +9,8 @@
 
 ## New Apps
 
-- Use [CONTRIBUTING.md](../../CONTRIBUTING.md) as the SPOT for the general development workflow, testing, review, and the code and development guides.
-- Treat the matching Pull Request template described in [Pull Request Templates](../../docs/contributing/flow/pull-request.md) and stored in [PULL_REQUEST_TEMPLATE](../../.github/PULL_REQUEST_TEMPLATE) as the SPOT for requirements, file checks, validation expectations, and the Definition of Done.
+- Use [CONTRIBUTING.md](../../../CONTRIBUTING.md) as the SPOT for the general development workflow, testing, review, and the code and development guides.
+- Treat the matching Pull Request template described in [Pull Request Templates](../../contributing/flow/pull-request.md) and stored in [PULL_REQUEST_TEMPLATE](../../../.github/PULL_REQUEST_TEMPLATE) as the SPOT for requirements, file checks, validation expectations, and the Definition of Done.
 - Start from the smallest app-specific change that can be validated locally, then expand only when the requirements or behavior demand it.
 - Keep the implementation, local validation, and PR template in sync so the app can be reviewed without guessing the intent.
 
@@ -28,7 +28,8 @@
 
 ## Debugging
 
-- When a development run fails, switch to [Debugging](../contributing/development/debugging.md) and follow the local-deploy or GitHub-log path that matches the failure source.
+- When a development run fails, switch to [Debugging](debug.md) and follow the local-deploy or GitHub-log path that matches the failure source.
+- For the shared local retry loop during debugging or development, follow [Iteration](iteration.md).
 - Keep long-running runs alive and wait for them to finish unless the user explicitly asks you to steer away from them.
 
 ## Review Focus

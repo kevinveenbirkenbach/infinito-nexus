@@ -1,4 +1,4 @@
-[Back to AGENTS hub](../../AGENTS.md)
+[Back to AGENTS hub](../../../AGENTS.md)
 
 # About AGENTS.md
 
