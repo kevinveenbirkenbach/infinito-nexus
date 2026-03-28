@@ -5,6 +5,7 @@ For executable local deploy flows, use [deploy/README.md](deploy/README.md).
 For inventory reset helpers, use [reset/README.md](reset/README.md).
 For cleanup helpers, use [purge/README.md](purge/README.md).
 For container exec helpers, use [exec/README.md](exec/README.md).
+For the canonical Make target index that invokes these helpers, see [docs/contributing/tools/makefile.md](../../../../docs/contributing/tools/makefile.md).
 
 ## Prerequisites
 

@@ -27,7 +27,7 @@ Run these commands from the repository root:
 
 ```bash
 make bootstrap
-make dev-environment-bootstrap
+make environment-bootstrap
 make up
 make trust-ca
 ```
@@ -37,7 +37,7 @@ make trust-ca
 | Phase | Command | What it does |
 |---|---|---|
 | Initial setup | `make bootstrap` | Installs project dependencies and runs the first repository setup. |
-| Host preparation | `make dev-environment-bootstrap` | Prepares the local development machine for the project workflow. |
+| Host preparation | `make environment-bootstrap` | Prepares the local development machine for the project workflow. |
 | Start stack | `make up` | Starts the local development stack. |
 | Browser trust | `make trust-ca` | Trusts the generated local [CA](https://en.wikipedia.org/wiki/Certificate_authority) so `*.infinito.example` works correctly in your browser. |
 
@@ -47,7 +47,7 @@ When you are done, use these commands to stop the stack and clean up the local e
 
 ```bash
 make down
-make dev-environment-teardown
+make environment-teardown
 ```
 
 #### Teardown Commands
@@ -55,7 +55,7 @@ make dev-environment-teardown
 | Phase | Command | What it does |
 |---|---|---|
 | Stop stack | `make down` | Stops the local development stack. |
-| Host cleanup | `make dev-environment-teardown` | Reverts local development environment changes where supported. |
+| Host cleanup | `make environment-teardown` | Reverts local development environment changes where supported. |
 
 ### Full Development Flow
 
@@ -66,13 +66,13 @@ The repository already contains a development helper script at [development.sh](
 | Step | Command | Purpose in this flow |
 |---|---|---|
 | 1 | `make install` | Installs the dependencies needed before running the local development flow. |
-| 2 | `make dev-environment-bootstrap` | Prepares the host machine for local development. |
+| 2 | `make environment-bootstrap` | Prepares the host machine for local development. |
 | 3 | `make up` | Starts the development stack. |
 | 4 | `make test` | Runs the main combined validation flow. |
 | 5 | `APP=web-app-matomo make deploy-fresh-purged-app` | Runs the baseline validation path for one concrete app. For the retry-loop policy, see [Iteration](../../agents/action/iteration.md). |
 | 6 | `make trust-ca` | Makes the generated local certificates trusted by the host browser. |
 | 7 | `make down` | Stops the running development stack. |
-| 8 | `make dev-environment-teardown` | Cleans up host-side development environment changes. |
+| 8 | `make environment-teardown` | Cleans up host-side development environment changes. |
 
 Use this as a practical reference when you want to understand how local development is expected to work.
 

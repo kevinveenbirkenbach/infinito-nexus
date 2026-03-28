@@ -71,5 +71,5 @@ docker exec "${INFINITO_CONTAINER}" bash -lc "
   fi
 
   echo \">>> Purging entities: \${entities[*]}\"
-  bash /opt/src/infinito/scripts/administration/purge/entity/all.sh \"\${entities[@]}\" || true
+  bash /opt/src/infinito/scripts/container/purge/entity/all.sh \"\${entities[@]}\" || true
 "

@@ -24,7 +24,7 @@ endif
 	list tree mig dockerignore \
 	print-python \
 	dns-setup dns-remove \
-	dev-environment-bootstrap dev-environment-teardown \
+	environment-bootstrap environment-teardown \
 	wsl2-systemd-check wsl2-dns-setup wsl2-trust-windows \
 	apparmor-teardown apparmor-restore \
 	disable-ipv6 restore-ipv6 \
@@ -37,36 +37,36 @@ endif
 	bootstrap setup-development
 
 # Bootstrap the local development environment.
-dev-environment-bootstrap: wsl2-systemd-check install-lint apparmor-teardown dns-setup disable-ipv6
+environment-bootstrap: wsl2-systemd-check install-lint apparmor-teardown dns-setup disable-ipv6
 
 # Tear down the local development environment.
-dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
+environment-teardown: apparmor-restore dns-remove restore-ipv6
 
 # Enable systemd on WSL2.
 wsl2-systemd-check:
-	@bash scripts/administration/systemd/enable/wsl2.sh
+	@bash scripts/system/systemd/enable/wsl2.sh
 
 # Set up DNS on WSL2.
 wsl2-dns-setup:
-	@sudo bash scripts/administration/network/dns/setup/wsl.sh
+	@sudo bash scripts/system/network/dns/setup/wsl.sh
 
 # Trust Windows certificates in WSL2.
 wsl2-trust-windows:
-	@bash scripts/administration/tls/trust/wsl2.sh
+	@bash scripts/system/tls/trust/wsl2.sh
 
 # Configure DNS on Linux.
 dns-setup: wsl2-dns-setup
-	@bash scripts/administration/network/dns/setup/linux.sh
+	@bash scripts/system/network/dns/setup/linux.sh
 
 # Remove the DNS configuration.
 dns-remove:
-	@bash scripts/administration/network/dns/remove.sh
+	@bash scripts/system/network/dns/remove.sh
 
 # Tear down AppArmor for local development.
 apparmor-teardown:
 	@echo "==> AppArmor: full teardown (local dev)"
 	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
-		sudo bash scripts/administration/apparmor/teardown.sh; \
+		sudo bash scripts/system/apparmor/teardown.sh; \
 	else \
 		echo "[apparmor] AppArmor module is not loaded — skipping teardown"; \
 	fi
@@ -75,23 +75,23 @@ apparmor-teardown:
 apparmor-restore:
 	@echo "==> AppArmor: restore profiles"
 	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
-		sudo bash scripts/administration/apparmor/restore.sh; \
+		sudo bash scripts/system/apparmor/restore.sh; \
 	else \
 		echo "[apparmor] AppArmor module is not loaded — skipping restore"; \
 	fi
 
 # Trust the local CA on Linux and WSL2.
 trust-ca:
-	@bash scripts/administration/tls/trust/linux.sh
-	@bash scripts/administration/tls/trust/wsl2.sh
+	@bash scripts/system/tls/trust/linux.sh
+	@bash scripts/system/tls/trust/wsl2.sh
 
 # Disable IPv6 for local development.
 disable-ipv6:
-	@sudo bash scripts/administration/network/ipv6/disable.sh
+	@sudo bash scripts/system/network/ipv6/disable.sh
 
 # Restore IPv6 settings.
 restore-ipv6:
-	@sudo bash scripts/administration/network/ipv6/restore.sh
+	@sudo bash scripts/system/network/ipv6/restore.sh
 
 # Remove ignored files from the working tree.
 clean:
@@ -110,11 +110,11 @@ clean-sudo:
 
 # Run the broad low-hardware cleanup routine.
 purge-system:
-	@bash scripts/purge/system.sh
+	@bash scripts/system/purge/system.sh
 
 # Run the broadest cleanup bundle.
 purge-all:
-	@bash scripts/purge/all.sh
+	@bash scripts/system/purge/all.sh
 
 # Restart the development stack.
 restart:

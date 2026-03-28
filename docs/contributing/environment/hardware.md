@@ -111,7 +111,7 @@ That makes it easier to see whether the real issue is Docker, journald, a packag
 
 ## Cleanup
 
-The cleanup SPOT is [scripts/purge/README.md](../../../scripts/purge/README.md). Use that page for the canonical entry points.
+The cleanup SPOT is [scripts/system/purge/README.md](../../../scripts/system/purge/README.md). Use that page for the canonical entry points.
 
 For the one-time Windows `cleanmgr /sageset:1` setup, set `PURGE_WINDOWS_CLEANMGR_SETUP=true` before you run `make purge-system`.
 

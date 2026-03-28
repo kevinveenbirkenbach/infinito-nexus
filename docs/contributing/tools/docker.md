@@ -2,51 +2,16 @@
 
 # Docker and Runtime Commands
 
-Use these commands from the repository root. They are thin `make` wrappers around the Docker build scripts and the local compose stack helpers.
+Use this page for the Docker/runtime context around the project.
+The canonical `make` command index now lives in [Makefile Commands](makefile.md).
 
-## Image Builds
+## Scope
 
-| Category | Command | What it does | When to use it |
-|---|---|---|---|
-| Build | `make build` | Builds the local image for the active `INFINITO_DISTRO`. | Use this after Dockerfile changes or whenever you want a fresh local image. |
-| Build if missing | `make build-missing` | Builds the image only when it is not already present locally. | Use this for a quick local check when you do not want to rebuild unnecessarily. |
-| No-cache build | `make build-no-cache` | Rebuilds the image without Docker cache. | Use this when cache reuse might hide a change or when you are debugging the build. |
-| No-cache all distros | `make build-no-cache-all` | Rebuilds the no-cache image for every distro in `DISTROS`. | Use this for release-level validation or when you need to verify all distro variants. |
-| Build dependency image | `make build-dependency` | Pulls the `pkgmgr` base image used by the build. | Use this when you want to refresh the base image or debug build inputs. |
-| Cleanup CI images | `make build-cleanup` | Removes Docker images created for CI-style build workflows. | Use this when local disk usage grows or old CI images accumulate. |
-
-## Cleanup
-
-| Category | Command | What it does | When to use it |
-|---|---|---|---|
-| System purge | `make purge-system` | Runs `scripts/purge/system.sh` to clear repository, Docker, journald, package, and language caches. | Use this when disk usage is tight or you want the broad low-hardware cleanup pass. |
-| Full purge | `make purge-all` | Runs `scripts/purge/all.sh`, which chains `make purge-system`, `make build-cleanup`, and `make container-purge-system`. | Use this when you want the broadest local cleanup bundle. |
-| Full purge script | `bash scripts/purge/all.sh` | Runs the broader cleanup bundle directly. | Use this when you want the same behavior without going through `make`. |
-
-## Compose Stack
-
-| Category | Command | What it does | When to use it |
-|---|---|---|---|
-| Start stack | `make up` | Starts the local compose stack and builds the image if it is missing. | Use this to bring the development stack online. |
-| Stop stack | `make down` | Stops the compose stack and removes volumes. | Use this when you want a clean shutdown and disposable local state. |
-| Pause services | `make stop` | Stops running services without removing volumes. | Use this when you want a fast stop and plan to start the same state again. |
-| Restart stack | `make restart` | Stops the stack and starts it again. | Use this after configuration changes or when the stack needs a full restart. |
-
-## Container Inspection
-
-| Category | Command | What it does | When to use it |
-|---|---|---|---|
-| Inspect container | `make exec` | Delegates to `scripts/tests/deploy/local/exec/container.sh`, which opens an interactive shell in the running infinito container with `docker exec -it ... sh`. | Use this when you need to inspect live state or run a quick command inside the container. |
-
-## Support Targets
-
-| Category | Command | What it does | When to use it |
-|---|---|---|---|
-| Docker ignore file | `make dockerignore` | Regenerates `.dockerignore` from `.gitignore`. | Use this only when you need to recreate the generated Docker ignore file. |
+- Use [Makefile Commands](makefile.md) when you want the concrete repository targets.
+- Use [Development](../development/README.md) for app-level local deploy flows and end-to-end checks.
+- Use [Testing and Validation](../development/testing.md) for lint, unit, integration, and Playwright guidance.
 
 ## Notes
 
-- The commands use the current `INFINITO_DISTRO` setting from the environment.
-- `make down` is destructive because it removes volumes; use `make stop` if you want to preserve state.
-- `make up` may build missing images automatically, so you often do not need a separate build step for a first start.
-- For app-level local deploy flows and end-to-end checks, see [Development](../development/README.md).
+- The local runtime is driven from the repository root through Make targets.
+- Keep Docker-specific explanations here and keep the command reference in `makefile.md`.

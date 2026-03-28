@@ -2,6 +2,11 @@
 
 This directory contains automation scripts used across the project.
 
+- [system/](system/) contains host and system-facing helpers.
+- [container/](container/) contains helpers that run inside the local container.
+- [github/](github/) contains GitHub workflow helper scripts.
+- For the canonical Make target index, see [docs/contributing/tools/makefile.md](../docs/contributing/tools/makefile.md).
+
 - 🛠️ Organize operational helpers for development, CI, release, and maintenance
 - 🧭 Separate responsibilities into focused subdirectories with clear scope
 - 📚 Keep script-based workflows discoverable and easier to navigate
