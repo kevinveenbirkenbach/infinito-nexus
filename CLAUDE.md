@@ -12,7 +12,7 @@ You MUST read `AGENTS.md` and follow all instructions in it at the start of ever
 ## Configuration
 
 - Project-level permissions and sandbox rules are defined in [.claude/settings.json](.claude/settings.json).
-- See https://code.claude.com/docs/en/settings for documentation on how to modify it.
+- See [code.claude.com](https://code.claude.com/docs/en/settings) for documentation on how to modify it.
 
 ## Documentation
 
