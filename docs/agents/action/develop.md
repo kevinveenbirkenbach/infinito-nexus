@@ -13,6 +13,8 @@
 - Treat the matching Pull Request template described in [Pull Request Templates](../../contributing/flow/pull-request.md) and stored in [PULL_REQUEST_TEMPLATE](../../../.github/PULL_REQUEST_TEMPLATE) as the SPOT for requirements, file checks, validation expectations, and the Definition of Done.
 - When you implement role-local CSS, check [Role `style.css`](../files/role/style.css.md) first so you can see how CSS should be implemented before you add or rewrite overrides.
 - When you implement role-local JavaScript, check [Role `javascript.js`](../files/role/javascript.js.md) first so you can see how browser-side behavior should be implemented before you add or rewrite injected scripts.
+- When you implement role-local Playwright environment templates, check [Role `playwright.env.j2`](../files/role/playwright.env.j2.md) first so the rendered test inputs match the supported user journey.
+- When you implement or refactor role-local Playwright specs, check [Role `playwright.spec.js`](../files/role/playwright.spec.js.md) first so end-to-end coverage stays aligned with the role behavior.
 - Start from the smallest app-specific change that can be validated locally, then expand only when the requirements or behavior demand it.
 - Keep the implementation, local validation, and PR template in sync so the app can be reviewed without guessing the intent.
 

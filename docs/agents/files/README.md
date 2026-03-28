@@ -9,4 +9,4 @@ Store here how recurring files should be implemented, generated, updated, or rev
 
 ## Read in Order
 
-1. Read [Role Files](role/README.md) when you need guidance for recurring role files such as `style.css` and `javascript.js`.
+1. Read [Role Files](role/README.md) when you need guidance for recurring role files such as `style.css`, `javascript.js`, `playwright.env.j2`, and `playwright.spec.js`.

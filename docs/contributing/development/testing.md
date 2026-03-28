@@ -62,16 +62,19 @@ To enable Playwright for a `web-*` role, provide:
 - `templates/playwright.env.j2`
 - `files/playwright.spec.js`
 
+Use [Contributing `playwright.env.j2`](../code/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../code/role/playwright.spec.js.md) as the SPOT for the file-level contract and scenario requirements.
+
 During the deploy stage, the shared `test-e2e-playwright` role:
 
 - discovers the relevant app roles
 - stages the test project
 - renders the `.env`
+- copies the role-local `playwright.spec.js`
 - injects the shared `package.json` and `playwright.config.js`
 - waits until the app is reachable
 - runs Playwright in Docker
 
-In practice, Playwright coverage is usually exercised through local deploy flows and deploy CI runs. Every `web-*` suite should verify at least login and logout.
+In practice, Playwright coverage is usually exercised through local deploy flows and deploy CI runs.
 
 ## Testing Standards
 
@@ -93,19 +96,16 @@ Treat these rules as the baseline for all validation categories below.
 ### Playwright
 
 - Playwright tests are required for `web-*` roles.
-- Every Playwright test suite must verify login and logout.
+- Use [Contributing `playwright.env.j2`](../code/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../code/role/playwright.spec.js.md) as the SPOT for role-local Playwright file requirements.
 
 ### Development Procedure
 
 - Analyze the code first.
 - Build hypotheses before writing the test.
-- Write the Playwright test.
+- Write or update the role-local Playwright files.
 - Run it against a fresh pure Docker image.
 - Add additional procedures when relevant, for example OIDC or Keycloak.
-- Start from the dashboard.
-- End with a successful logout.
 
 ### Minimum Requirements
 
-- The test must verify that login is possible.
-- The test must verify that logout is possible.
+- Follow the scenario requirements in [Contributing `playwright.spec.js`](../code/role/playwright.spec.js.md).

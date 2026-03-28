@@ -34,4 +34,5 @@ For injector wiring, activation, and repository-wide behavior rules, see [Contri
 - Compare the implemented behavior against the rendered UI so missing hooks, duplicate handlers, broken selectors, and unexpected side effects become visible.
 - At minimum, inspect and compare the start page and the login page because these pages usually expose the most important navigation, authentication, and first-load behavior.
 - Check the browser console for JavaScript errors or repeated side effects after the script is injected.
+- If the change affects user-visible behavior, add or update the matching end-to-end coverage in [Role `playwright.spec.js`](playwright.spec.js.md).
 - Check that the final JavaScript still feels like a small role-local adaptation of the target application, not a forked frontend implementation.

@@ -43,4 +43,5 @@ For repository wiring, inventory keys, and the generated palette contract, see [
 - Check the result with live inspection in the running application, not only by reading the CSS or generated files.
 - Compare the implemented styling against the rendered UI so mismatches between intended tokens and actual browser output become visible.
 - At minimum, inspect and compare the start page and the login page because both usually expose the most important shared surfaces, text colors, forms, and navigation patterns.
+- If the change affects user-visible behavior, add or update the matching end-to-end coverage in [Role `playwright.spec.js`](playwright.spec.js.md).
 - Check that the final CSS still looks like a themed version of the target application, not a forked redesign.

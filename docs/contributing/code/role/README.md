@@ -11,5 +11,7 @@ Use this page as the entry point for rules that apply to recurring role files an
 
 - [`style.css`](style.css.md)
 - [`javascript.js`](javascript.js.md)
+- [`playwright.env.j2`](playwright.env.j2.md)
+- [`playwright.spec.js`](playwright.spec.js.md)
 
 If you are working on recurring role files, start here before you go deeper.

@@ -1,0 +1,38 @@
+[Back to Role Files](README.md)
+
+# playwright.spec.js
+
+This page is the SPOT for automatically generating and updating role-local `playwright.spec.js` files.
+Use this page for scenario design, selector strategy, and live end-to-end review.
+For runner integration and repository-wide scenario requirements, see [Contributing `playwright.spec.js`](../../../contributing/code/role/playwright.spec.js.md).
+For the matching rendered input contract, see [Role `playwright.env.j2`](playwright.env.j2.md).
+
+## Goal
+
+- Verify real user-facing browser flows from the supported entry point through a successful logout.
+- Keep the spec aligned with the role's actual login, navigation, and post-login behavior.
+- Capture user-visible behavior introduced by role-local `style.css`, `javascript.js`, or authentication integrations.
+
+## Implement
+
+- Start from `APP_BASE_URL`, and if the role exposes the dashboard entry path, enter the application from the dashboard.
+- Verify login and logout end to end.
+- When the role covers both `biber` and `administrator`, keep separate scenarios for both personas.
+- When `style.css` or `javascript.js` is implemented or refactored, add or update Playwright assertions for the affected visible behavior.
+- Prefer stable selectors, accessible roles, and visible UI states over brittle DOM assumptions.
+- Use explicit waits for meaningful page state changes instead of fixed sleeps wherever practical.
+
+## Avoid
+
+- Do not stop at URL assertions or static text checks when the real requirement is a user-visible flow.
+- Do not skip the logout path or finish while the session is still authenticated.
+- Do not bypass the dashboard when the role is meant to start there.
+- Do not rely on fragile selectors or timing hacks when more stable hooks exist.
+
+## Review
+
+- Run the spec against the live application, not only against the file contents.
+- Inspect the start page and the login page as part of the end-to-end path.
+- Check the browser console for errors when the flow depends on injected JavaScript.
+- Check that changed CSS or JavaScript behavior is covered by the role-local Playwright suite.
+- Check that the application returns to a clearly logged-out state at the end of the test.
