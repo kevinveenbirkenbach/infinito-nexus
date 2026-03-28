@@ -10,7 +10,7 @@ The public article with the same topic is [Developing on PCs with Limited Resour
 ## Quick Checklist
 
 - Keep the local stack minimal and enable only the services you actually need.
-- Prefer `APP=<role> make deploy-fresh-purged-app` or `APP=<role> make deploy-reuse-kept-app`.
+- Follow the retry-loop policy in [Iteration](../../agents/action/iteration.md).
 - Avoid full-stack validation unless you really need it.
 - Move Docker data, build cache, and working copies to fast storage when possible.
 - Use a swapfile the same size as RAM on Linux when you want more headroom against spikes.

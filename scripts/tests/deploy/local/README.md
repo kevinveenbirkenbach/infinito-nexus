@@ -2,6 +2,8 @@
 
 This folder contains helpers to test deployments locally against the development Docker Compose stack. Use them for quick iteration on a single app, or for larger "deploy everything" smoke tests. 🚀
 
+For the retry-loop policy and when to switch between fresh and reuse paths, see [Iteration](../../../../docs/agents/action/iteration.md).
+
 ⚠️ Safety note: some scripts delete state inside the running container (inventory, app entities, web config, `/var/lib/infinito`). Double-check `INVENTORY_DIR` and `INFINITO_CONTAINER` before running cleanup commands. 🧨
 
 ## Host OS Notes 🧩

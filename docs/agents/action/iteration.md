@@ -6,12 +6,13 @@ Use this page when you are iterating on a local app deploy during debugging or d
 
 ## Loop
 
-- Start with `APP=<role> make deploy-fresh-purged-app`. This gives you a clean baseline by removing stale app data.
-- Then use `APP=<role> make deploy-reuse-kept-app` for the normal fast loop. It reuses the existing inventory and keeps app data, so you can validate small changes quickly.
-- If the same failure keeps reproducing on the reuse path, try `APP=<role> make deploy-reuse-purged-app` once as a targeted purge check. It keeps the inventory but clears the app entity so you can isolate state-related issues.
+- Start once with `APP=<role> make deploy-fresh-purged-app` to establish the baseline inventory and clean app state.
+- After that, use `APP=<role> make deploy-reuse-kept-app` for the default edit-fix-redeploy loop.
+- Do not rerun `APP=<role> make deploy-fresh-purged-app` just because a deploy failed or you changed code. That restarts the stack unnecessarily and burns time.
+- If the same failure still reproduces on the reuse path and you want to test whether app entity state is involved, use `APP=<role> make deploy-reuse-purged-app` once.
 - After that targeted purge check, return to `APP=<role> make deploy-reuse-kept-app`.
-- Only go back to `APP=<role> make deploy-fresh-purged-app` if the issue still reproduces after the reuse and targeted purge paths. That keeps full purges rare and only uses them when necessary.
-- If you need to validate the single-app init/deploy path separately, continue with `APP=<role> make deploy-fresh-kept-app`. It checks the clean single-app setup apart from the faster reuse path.
+- Only go back to `APP=<role> make deploy-fresh-purged-app` if you have concrete evidence that the inventory or host stack is broken, or you intentionally need a fresh single-app baseline again.
+- If you need to validate the single-app init/deploy path separately, use `APP=<role> make deploy-fresh-kept-app`. It checks the clean single-app setup apart from the faster reuse path.
 
 ## Certificate Authority
 

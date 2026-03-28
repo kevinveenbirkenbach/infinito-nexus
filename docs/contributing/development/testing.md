@@ -29,13 +29,8 @@ Use the following table to choose the right lint, syntax, unit, integration, or 
 
 ## Local Deploy and End-to-End Checks
 
-For local server-role work on a single app, `APP=<role> make deploy-fresh-purged-app` is the preferred rerun path when you need a fresh, correctly shaped `servers.yml` inventory.
-
-Use `APP=<role> make deploy-fresh-kept-app` when you intentionally want the single-app `servers.yml` path.
-Use `APP=<role> make deploy-reuse-kept-app` only when you are working from the `${TEST_DEPLOY_TYPE}.yml` inventory created by `make container-irefresh-inventory` or `make deploy-fresh-kept-all`.
-Use `APP=<role> make deploy-reuse-purged-app` when you want the same fast path but need the entity purged first.
-
-Use `make deploy-fresh-kept-all` only when you explicitly need broader coverage, have plenty of time, and are working on a performant machine.
+For the retry-loop policy, use [Iteration](../../agents/action/iteration.md) as the SPOT.
+The table below is a command reference for the supported local deployment paths.
 
 ### Local Validation Commands
 
@@ -43,11 +38,11 @@ Use the following table when you need realistic local deployment validation or a
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
-| Local deploy | `APP=web-app-nextcloud make deploy-fresh-kept-app` | Creates the needed inventory and deploys one app. | Use this for the first local validation of a single app. |
-| Local deploy | `APP=web-app-nextcloud make deploy-reuse-kept-app` | Reuses an existing `${TEST_DEPLOY_TYPE}.yml` inventory and redeploys one app quickly. | Use this when you already have a matching `${TEST_DEPLOY_TYPE}.yml` inventory and want faster iteration. |
-| Local deploy | `APP=web-app-nextcloud make deploy-reuse-purged-app` | Reuses an existing `${TEST_DEPLOY_TYPE}.yml` inventory, purges the entity first, and redeploys one app quickly. | Use this when you want the fast path with a clean entity first. |
-| Local deploy and E2E | `APP=web-app-matomo make deploy-fresh-purged-app` | Runs a dedicated local validation flow for one app against the dev stack, creating and re-initializing the inventory first. | Use this as the preferred final validation step for local server-role work. |
-| Full local validation | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this sparingly for wider full-stack validation when you have time and enough machine capacity. |
+| Local deploy | `APP=web-app-nextcloud make deploy-fresh-kept-app` | Creates the needed inventory and deploys one app. | Single-app `servers.yml` path. |
+| Local deploy | `APP=web-app-nextcloud make deploy-reuse-kept-app` | Reuses an existing `${TEST_DEPLOY_TYPE}.yml` inventory and redeploys one app quickly. | Fast reuse path. |
+| Local deploy | `APP=web-app-nextcloud make deploy-reuse-purged-app` | Reuses an existing `${TEST_DEPLOY_TYPE}.yml` inventory, purges the entity first, and redeploys one app quickly. | Fast reuse path after a state reset. |
+| Local deploy and E2E | `APP=web-app-matomo make deploy-fresh-purged-app` | Runs a dedicated local validation flow for one app against the dev stack, creating and re-initializing the inventory first. | Baseline and recovery path. |
+| Full local validation | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Broad coverage when you explicitly need it. |
 | Local reset | `make container-irefresh-inventory` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |
 | Local cleanup | `make container-purge-system` | Deletes local deploy artifacts and cleanup data. | Use this only when you really want to remove local state. |
 
