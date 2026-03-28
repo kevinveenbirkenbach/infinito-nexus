@@ -15,6 +15,14 @@ Use these commands from the repository root. They are thin `make` wrappers aroun
 | Build dependency image | `make build-dependency` | Pulls the `pkgmgr` base image used by the build. | Use this when you want to refresh the base image or debug build inputs. |
 | Cleanup CI images | `make build-cleanup` | Removes Docker images created for CI-style build workflows. | Use this when local disk usage grows or old CI images accumulate. |
 
+## Cleanup
+
+| Category | Command | What it does | When to use it |
+|---|---|---|---|
+| System purge | `make purge-system` | Runs `scripts/purge/system.sh` to clear repository, Docker, journald, package, and language caches. | Use this when disk usage is tight or you want the broad low-hardware cleanup pass. |
+| Full purge | `make purge-all` | Runs `scripts/purge/all.sh`, which chains `make purge-system`, `make build-cleanup`, and `make container-purge-system`. | Use this when you want the broadest local cleanup bundle. |
+| Full purge script | `bash scripts/purge/all.sh` | Runs the broader cleanup bundle directly. | Use this when you want the same behavior without going through `make`. |
+
 ## Compose Stack
 
 | Category | Command | What it does | When to use it |
