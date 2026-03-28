@@ -334,48 +334,66 @@ async function waitForTopLevelLoginRequirement(
   throw new Error(errorMessage);
 }
 
-test.beforeEach(() => {
-  expect(taigaBaseUrl, "TAIGA_BASE_URL must be set in the Playwright env file").toBeTruthy();
-  expect(loginUsername, "LOGIN_USERNAME must be set in the Playwright env file").toBeTruthy();
-  expect(loginPassword, "LOGIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
-
-  if (taigaOauth2Enabled || taigaOidcEnabled) {
-    expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
-  }
-});
-
-test("dashboard to taiga login and logout", async ({ page }) => {
-  test.skip(
-    !taigaOauth2Enabled && !taigaOidcEnabled,
-    "Taiga auth flow requires oauth2 or oidc to be enabled."
-  );
-
-  const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
+function getTaigaUrls() {
   const expectedTaigaBaseUrl = taigaBaseUrl.replace(/\/$/, "");
-  const taigaOauth2SignOutUrl = `${expectedTaigaBaseUrl}/oauth2/sign_out`;
+  const expectedOidcAuthUrl = oidcIssuerUrl
+    ? `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`
+    : "";
+
+  return {
+    expectedTaigaBaseUrl,
+    expectedOidcAuthUrl,
+    taigaOauth2SignOutUrl: `${expectedTaigaBaseUrl}/oauth2/sign_out`,
+    discoverUrl: `${expectedTaigaBaseUrl}/discover`,
+    projectsUrl: `${expectedTaigaBaseUrl}/projects`,
+    projectUrl: `${expectedTaigaBaseUrl}/project/test-project`,
+    userSettingsUrl: `${expectedTaigaBaseUrl}/user-settings/user-profile`
+  };
+}
+
+async function getComputedStyleValue(locator, propertyName) {
+  return locator.first().evaluate((element, cssProperty) => getComputedStyle(element).getPropertyValue(cssProperty), propertyName);
+}
+
+async function expectGradientBackground(locator, message) {
+  await expect(locator.first()).toBeVisible({ timeout: 60_000 });
+  await expect
+    .poll(
+      async () => getComputedStyleValue(locator, "background-image"),
+      {
+        timeout: 60_000,
+        message
+      }
+    )
+    .toMatch(/gradient/i);
+}
+
+async function loginToTaigaFromDashboard(page) {
+  const taigaUrls = getTaigaUrls();
   const taigaCardLink = page.getByRole("link", { name: "Explore Taiga" });
   const taigaIframe = page.locator("#main iframe");
 
   await page.goto("/");
+  await expect(taigaCardLink).toBeVisible({ timeout: 60_000 });
   await taigaCardLink.click();
 
-  await expect(taigaIframe).toBeVisible();
+  await expect(taigaIframe).toBeVisible({ timeout: 60_000 });
   const taigaFrame = taigaIframe.contentFrame();
 
   if (taigaOauth2Enabled) {
     await waitForFrameUrl(
       taigaIframe,
-      expectedOidcAuthUrl,
+      taigaUrls.expectedOidcAuthUrl,
       60_000,
-      `Expected Taiga iframe to navigate to Keycloak auth via oauth2-proxy: ${expectedOidcAuthUrl}`
+      `Expected Taiga iframe to navigate to Keycloak auth via oauth2-proxy: ${taigaUrls.expectedOidcAuthUrl}`
     );
   } else {
     const initialAuthState = await waitForInitialTaigaAuthState(
       page,
       taigaIframe,
       taigaFrame,
-      expectedTaigaBaseUrl,
-      expectedOidcAuthUrl,
+      taigaUrls.expectedTaigaBaseUrl,
+      taigaUrls.expectedOidcAuthUrl,
       60_000,
       "Expected Taiga iframe to expose either the Taiga OIDC entry point or the Keycloak login page"
     );
@@ -384,9 +402,9 @@ test("dashboard to taiga login and logout", async ({ page }) => {
       await initialAuthState.locator.click();
       await waitForFrameUrl(
         taigaIframe,
-        expectedOidcAuthUrl,
+        taigaUrls.expectedOidcAuthUrl,
         60_000,
-        `Expected Taiga OIDC login to navigate to Keycloak auth: ${expectedOidcAuthUrl}`
+        `Expected Taiga OIDC login to navigate to Keycloak auth: ${taigaUrls.expectedOidcAuthUrl}`
       );
     }
   }
@@ -404,15 +422,15 @@ test("dashboard to taiga login and logout", async ({ page }) => {
 
   await waitForFrameUrl(
     taigaIframe,
-    expectedTaigaBaseUrl,
+    taigaUrls.expectedTaigaBaseUrl,
     60_000,
-    `Expected Taiga iframe to redirect back to Taiga after Keycloak login: ${expectedTaigaBaseUrl}`
+    `Expected Taiga iframe to redirect back to Taiga after Keycloak login: ${taigaUrls.expectedTaigaBaseUrl}`
   );
 
   if (taigaOauth2Enabled) {
     await waitForOauth2ProxyCookie(
       page,
-      expectedTaigaBaseUrl,
+      taigaUrls.expectedTaigaBaseUrl,
       true,
       60_000,
       "Expected Taiga to establish an oauth2-proxy session after the Keycloak login redirect"
@@ -425,28 +443,41 @@ test("dashboard to taiga login and logout", async ({ page }) => {
     "Timed out waiting for a signed-in Taiga shell after the Keycloak login redirect"
   );
 
+  return {
+    ...taigaUrls,
+    taigaFrame,
+    taigaIframe
+  };
+}
+
+async function logoutFromTaigaAndDashboard(page, session) {
   if (taigaOauth2Enabled) {
-    await page.goto(taigaOauth2SignOutUrl);
+    await page.goto(session.taigaOauth2SignOutUrl);
     await waitForOauth2ProxyCookie(
       page,
-      expectedTaigaBaseUrl,
+      session.expectedTaigaBaseUrl,
       false,
       60_000,
       "Expected Taiga oauth2-proxy session cookie to be cleared after /oauth2/sign_out"
     );
   } else {
-    await tryLogoutFromTaiga(page, taigaFrame);
+    await page.goto(session.expectedTaigaBaseUrl);
+    await waitForAuthenticatedTaigaShell(
+      page,
+      60_000,
+      "Timed out waiting for the top-level signed-in Taiga shell before logout"
+    );
+    await tryLogoutFromTaiga(page, page);
   }
 
   await page.goto("/");
   await logoutFromDashboardIfNeeded(page);
-
-  await page.goto(expectedTaigaBaseUrl);
+  await page.goto(session.expectedTaigaBaseUrl);
 
   const loggedOutState = await waitForTopLevelLoginRequirement(
     page,
-    expectedTaigaBaseUrl,
-    expectedOidcAuthUrl,
+    session.expectedTaigaBaseUrl,
+    session.expectedOidcAuthUrl,
     60_000,
     "Expected logged-out access to Taiga to require a fresh login"
   );
@@ -462,14 +493,236 @@ test("dashboard to taiga login and logout", async ({ page }) => {
           message: "Expected top-level Taiga re-entry to stay on the Keycloak login page after logout"
         }
       )
-      .toContain(expectedOidcAuthUrl);
-  } else {
-    expect(["keycloak", "taiga-login-page", "taiga-oidc-entry"]).toContain(loggedOutState.kind);
+      .toContain(session.expectedOidcAuthUrl);
+    return;
+  }
 
-    if (loggedOutState.kind === "keycloak") {
-      await expect(page.locator("input[name='username'], input#username").first()).toBeVisible({ timeout: 60_000 });
-    } else {
-      await expect(loggedOutState.locator).toBeVisible({ timeout: 60_000 });
+  expect(["keycloak", "taiga-login-page", "taiga-oidc-entry"]).toContain(loggedOutState.kind);
+
+  if (loggedOutState.kind === "keycloak") {
+    await expect(page.locator("input[name='username'], input#username").first()).toBeVisible({ timeout: 60_000 });
+    return;
+  }
+
+  await expect(loggedOutState.locator).toBeVisible({ timeout: 60_000 });
+}
+
+async function reachTopLevelTaigaAuthEntry(page, taigaUrls, timeout, errorMessage) {
+  const deadline = Date.now() + timeout;
+  let loginClicked = false;
+
+  while (Date.now() < deadline) {
+    const currentUrl = page.url();
+    const keycloakUsernameField = page.locator("input[name='username'], input#username");
+
+    if (
+      currentUrl.includes(taigaUrls.expectedOidcAuthUrl) &&
+      (await keycloakUsernameField.first().isVisible().catch(() => false))
+    ) {
+      return { kind: "keycloak" };
+    }
+
+    if (currentUrl.includes(taigaUrls.expectedTaigaBaseUrl)) {
+      const oidcEntry = await findFirstVisible(getOidcEntryLocators(page));
+
+      if (oidcEntry) {
+        return { kind: "taiga-oidc-entry", locator: oidcEntry };
+      }
+
+      const loginEntry = await findFirstVisible([
+        page.getByRole("link", { name: /^Login$/i }),
+        page.getByRole("button", { name: /^Login$/i })
+      ]);
+
+      if (loginEntry && !loginClicked) {
+        await loginEntry.click();
+        loginClicked = true;
+        await page.waitForTimeout(500);
+        continue;
+      }
+
+      const visibleLocalLoginField = await findFirstVisible([
+        page.locator("input[name='username'], input#username"),
+        page.locator("input[name='password'], input#password")
+      ]);
+
+      if (visibleLocalLoginField) {
+        await page.waitForTimeout(1_000);
+
+        const persistedLocalLoginField = await findFirstVisible([
+          page.locator("input[name='username'], input#username"),
+          page.locator("input[name='password'], input#password")
+        ]);
+
+        if (persistedLocalLoginField) {
+          return { kind: "taiga-local-login-visible", locator: persistedLocalLoginField };
+        }
+      }
+    }
+
+    await page.waitForTimeout(500);
+  }
+
+  throw new Error(errorMessage);
+}
+
+test.beforeEach(() => {
+  expect(taigaBaseUrl, "TAIGA_BASE_URL must be set in the Playwright env file").toBeTruthy();
+  expect(loginUsername, "LOGIN_USERNAME must be set in the Playwright env file").toBeTruthy();
+  expect(loginPassword, "LOGIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
+
+  if (taigaOauth2Enabled || taigaOidcEnabled) {
+    expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
+  }
+});
+
+test("dashboard to taiga login and logout", async ({ page }) => {
+  test.skip(
+    !taigaOauth2Enabled && !taigaOidcEnabled,
+    "Taiga auth flow requires oauth2 or oidc to be enabled."
+  );
+
+  const session = await loginToTaigaFromDashboard(page);
+  await logoutFromTaigaAndDashboard(page, session);
+});
+
+test("taiga public discover keeps the themed surface and hides local login fields when oidc is active", async ({ page }) => {
+  test.skip(!taigaOidcEnabled, "This scenario only applies when the Taiga OIDC integration is enabled.");
+
+  const taigaUrls = getTaigaUrls();
+
+  await page.goto(taigaUrls.discoverUrl);
+  await expect(page.getByRole("heading", { name: /discover projects/i })).toBeVisible({ timeout: 60_000 });
+  await expectGradientBackground(
+    page.locator("div.master"),
+    "Expected the Taiga discover page to use the themed master background"
+  );
+  await expectGradientBackground(
+    page.locator(".discover-header form"),
+    "Expected the Taiga discover search form to use the themed surface"
+  );
+  await expectGradientBackground(
+    page.locator(".discover-header input[type='text']"),
+    "Expected the Taiga discover search input to use the themed input surface"
+  );
+
+  const authState = await reachTopLevelTaigaAuthEntry(
+    page,
+    taigaUrls,
+    60_000,
+    "Expected Taiga to expose either the OIDC entry point or the Keycloak login page"
+  );
+
+  expect(authState.kind).not.toBe("taiga-local-login-visible");
+
+  if (authState.kind === "taiga-oidc-entry") {
+    await expect(authState.locator).toBeVisible({ timeout: 60_000 });
+    await expect
+      .poll(
+        async () => page.locator("input[name='username'], input#username").first().isVisible().catch(() => false),
+        {
+          timeout: 10_000,
+          message: "Expected the local Taiga username field to stay hidden when OIDC is active"
+        }
+      )
+      .toBe(false);
+    await expect
+      .poll(
+        async () => page.locator("input[name='password'], input#password").first().isVisible().catch(() => false),
+        {
+          timeout: 10_000,
+          message: "Expected the local Taiga password field to stay hidden when OIDC is active"
+        }
+      )
+      .toBe(false);
+    await expect
+      .poll(
+        async () => page.getByText(/^or login with$/i).first().isVisible().catch(() => false),
+        {
+          timeout: 10_000,
+          message: "Expected the legacy Taiga OIDC helper text to stay hidden when OIDC is active"
+        }
+      )
+      .toBe(false);
+    await expect
+      .poll(
+        async () => page.getByText(/^forgot it\?$/i).first().isVisible().catch(() => false),
+        {
+          timeout: 10_000,
+          message: "Expected the legacy Taiga password reset helper text to stay hidden when OIDC is active"
+        }
+      )
+      .toBe(false);
+
+    await authState.locator.click();
+    await expect
+      .poll(
+        async () => page.url(),
+        {
+          timeout: 60_000,
+          message: `Expected the Taiga OIDC entry to navigate to Keycloak: ${taigaUrls.expectedOidcAuthUrl}`
+        }
+      )
+      .toContain(taigaUrls.expectedOidcAuthUrl);
+  }
+
+  await expect(page.locator("input[name='username'], input#username").first()).toBeVisible({ timeout: 60_000 });
+});
+
+test("taiga themed routes stay aligned across discover projects project details and user settings", async ({ page }) => {
+  const session = await loginToTaigaFromDashboard(page);
+
+  const routeChecks = [
+    {
+      url: session.discoverUrl,
+      ready: page.getByRole("heading", { name: /discover projects/i }),
+      surface: page.locator(".discover-header form"),
+      field: page.locator(".discover-header input[type='text']")
+    },
+    {
+      url: session.projectsUrl,
+      ready: page.getByRole("heading", { name: /my projects/i }),
+      surface: page.locator(".project-list-wrapper .list-itemtype-project")
+    },
+    {
+      url: session.projectUrl,
+      ready: page.getByText(/hello world/i).first()
+    },
+    {
+      url: session.userSettingsUrl,
+      ready: page.getByRole("heading", { name: /user settings/i }),
+      surface: page.locator(".menu-secondary")
+    }
+  ];
+
+  for (const routeCheck of routeChecks) {
+    await page.goto(routeCheck.url);
+    await expect(routeCheck.ready).toBeVisible({ timeout: 60_000 });
+    await expectGradientBackground(
+      page.locator("div.master"),
+      `Expected the Taiga master background to stay themed on ${routeCheck.url}`
+    );
+    if (routeCheck.surface) {
+      await expectGradientBackground(
+        routeCheck.surface,
+        `Expected the primary Taiga surface to stay themed on ${routeCheck.url}`
+      );
+    }
+
+    if (routeCheck.field) {
+      await expectGradientBackground(
+        routeCheck.field,
+        `Expected the Taiga input surface to stay themed on ${routeCheck.url}`
+      );
+    }
+
+    if (routeCheck.action) {
+      await expectGradientBackground(
+        routeCheck.action,
+        `Expected the main Taiga action button to stay themed on ${routeCheck.url}`
+      );
     }
   }
+
+  await logoutFromTaigaAndDashboard(page, session);
 });
