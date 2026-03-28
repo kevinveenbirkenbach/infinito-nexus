@@ -7,6 +7,13 @@
     docker_git_repository_address:  "https://github.com/taigaio/taiga-docker"
     docker_git_repository_pull:     true
 
+- name: "copy taiga gateway config with OIDC route"
+  template:
+    src:  "taiga-gateway/taiga.conf.j2"
+    dest: "{{ [docker_repository_path, 'taiga-gateway', 'taiga.conf'] | path_join }}"
+  when:   TAIGA_OIDC_ENABLED | bool
+  notify: compose up
+
 - name: "render Dockerfile.taiga-back for custom auth-enabled backend image"
   template:
     src:  "Dockerfile.back.j2"

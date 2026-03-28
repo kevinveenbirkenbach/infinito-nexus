@@ -109,6 +109,16 @@ async function waitForInitialTaigaAuthState(
       if (oidcEntry) {
         return { kind: "taiga-oidc-entry", locator: oidcEntry };
       }
+
+      const loginEntry = await findFirstVisible([
+        taigaFrame.getByRole("link", { name: /^Login$/i }),
+        taigaFrame.getByRole("button", { name: /^Login$/i })
+      ]);
+
+      if (loginEntry) {
+        await loginEntry.click();
+        await page.waitForTimeout(500);
+      }
     }
 
     await page.waitForTimeout(500);
@@ -133,29 +143,53 @@ async function waitForOauth2ProxyCookie(page, baseUrl, shouldExist, timeout, err
 }
 
 async function logoutFromDashboardIfNeeded(page) {
-  const accountItem = page.locator("nav").getByText("Account", { exact: true });
+  const nav = page.locator("nav");
   const loginItem = page.locator("nav").getByText("Login", { exact: true });
   const logoutItem = page.locator("nav").getByText("Logout", { exact: true });
+  const accountMenuTriggerLocators = [
+    nav.locator("button"),
+    nav.locator("[aria-haspopup='true']"),
+    nav.getByRole("button")
+  ];
 
   await expect
     .poll(
-      async () => (await isVisible(accountItem)) || (await isVisible(loginItem)),
+      async () =>
+        (await isVisible(loginItem)) ||
+        (await isVisible(logoutItem)) ||
+        (await findFirstVisible(accountMenuTriggerLocators).then(Boolean)),
       {
         timeout: 60_000,
-        message: "Expected dashboard to expose either the authenticated Account menu or the Login entry after the Taiga flow"
+        message: "Expected dashboard to expose either the authenticated account menu or the Login entry after the Taiga flow"
       }
     )
     .toBe(true);
 
-  if (await isVisible(accountItem)) {
-    await accountItem.first().click();
+  if (await isVisible(loginItem) && !(await isVisible(logoutItem))) {
+    return;
+  }
+
+  if (await isVisible(logoutItem)) {
+    await logoutItem.first().click();
+    await page.waitForTimeout(1_000);
+  } else {
+    const accountTrigger = await findFirstVisible(accountMenuTriggerLocators);
+
+    if (!accountTrigger) {
+      throw new Error(
+        "Expected dashboard to expose a visible account menu trigger or Logout entry after the Taiga flow"
+      );
+    }
+
+    await accountTrigger.click();
     await expect(logoutItem.first()).toBeVisible({ timeout: 10_000 });
     await logoutItem.first().click();
+    await page.waitForTimeout(1_000);
   }
 
   await expect
     .poll(
-      async () => (await isVisible(loginItem)) && !(await isVisible(accountItem)),
+      async () => (await isVisible(loginItem)) && !(await isVisible(logoutItem)),
       {
         timeout: 60_000,
         message: "Expected dashboard to show the Login entry again after logout"
@@ -164,21 +198,50 @@ async function logoutFromDashboardIfNeeded(page) {
     .toBe(true);
 }
 
+async function activateLocatorClick(locator) {
+  const target = locator.first();
+  const count = await target.count().catch(() => 0);
+
+  if (!count) {
+    return false;
+  }
+
+  try {
+    await target.dispatchEvent("click");
+  } catch {
+    await target.evaluate((el) => el.click());
+  }
+
+  return true;
+}
+
 async function tryLogoutFromTaiga(page, taigaFrame) {
   const directLogoutLocators = [
+    taigaFrame.locator('a[title="Logout"]'),
+    taigaFrame.locator('a[ng-click*="logout"]'),
+    taigaFrame.locator('a[href*="logout"]'),
+    taigaFrame.locator('[tg-nav*="logout"]'),
     taigaFrame.getByRole("link", { name: /log ?out/i }),
     taigaFrame.getByRole("button", { name: /log ?out/i }),
     taigaFrame.locator('[href*="logout"], [ui-sref*="logout"], [ng-click*="logout"]')
   ];
   const menuTriggerLocators = [
     taigaFrame.locator("[aria-haspopup='true']"),
-    taigaFrame.locator(".user-avatar, .avatar, .profile-avatar, .profile-button, [class*='avatar']"),
-    taigaFrame.getByText(loginUsername, { exact: false })
+    taigaFrame.locator("nav button"),
+    taigaFrame.locator(".user-avatar, .avatar, .profile-avatar, .profile-button, [class*='avatar']")
   ];
+
+  for (const directLogoutLocator of directLogoutLocators) {
+    if (await activateLocatorClick(directLogoutLocator)) {
+      await page.waitForTimeout(1_000);
+      return true;
+    }
+  }
 
   const directLogout = await findFirstVisible(directLogoutLocators);
   if (directLogout) {
     await directLogout.click({ timeout: 2_000 }).catch(() => {});
+    await page.waitForTimeout(1_000);
     return true;
   }
 
@@ -195,6 +258,7 @@ async function tryLogoutFromTaiga(page, taigaFrame) {
     const revealedLogout = await findFirstVisible(directLogoutLocators);
     if (revealedLogout) {
       await revealedLogout.click({ timeout: 2_000 }).catch(() => {});
+      await page.waitForTimeout(1_000);
       return true;
     }
   }
@@ -248,6 +312,15 @@ async function waitForTopLevelLoginRequirement(
     }
 
     if (currentUrl.includes(expectedTaigaBaseUrl)) {
+      const loginEntry = await findFirstVisible([
+        page.getByRole("link", { name: /^Login$/i }),
+        page.getByRole("button", { name: /^Login$/i })
+      ]);
+
+      if (loginEntry) {
+        return { kind: "taiga-login-page", locator: loginEntry };
+      }
+
       const oidcEntry = await findFirstVisible(getOidcEntryLocators(page));
 
       if (oidcEntry) {
@@ -391,7 +464,7 @@ test("dashboard to taiga login and logout", async ({ page }) => {
       )
       .toContain(expectedOidcAuthUrl);
   } else {
-    expect(["keycloak", "taiga-oidc-entry"]).toContain(loggedOutState.kind);
+    expect(["keycloak", "taiga-login-page", "taiga-oidc-entry"]).toContain(loggedOutState.kind);
 
     if (loggedOutState.kind === "keycloak") {
       await expect(page.locator("input[name='username'], input#username").first()).toBeVisible({ timeout: 60_000 });

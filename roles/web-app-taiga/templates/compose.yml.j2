@@ -22,11 +22,8 @@ pull_policy: never
 {% if TAIGA_PLUGINS_ENABLED | bool %}
 {{ TAIGA_BACKEND_AUTH_BUILD_PROPS | indent(4, true) }}
     entrypoint: ["/bin/sh", "-c"]
-    command: >
-      if ! grep -qxF '{{ TAIGA_CONFIG_APPEND_MARKER }}' /taiga-back/settings/config.py; then
-        cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py;
-      fi;
-      exec /taiga-back/docker/entrypoint.sh
+    command:
+      - "if ! grep -qF {{ TAIGA_CONFIG_APPEND_MARKER | quote }} /taiga-back/settings/config.py; then cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py; fi; exec /taiga-back/docker/entrypoint.sh"
 {% else %}
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
 {% endif %}
@@ -35,10 +32,10 @@ pull_policy: never
       - static-data:{{ TAIGA_VOLUME_STATIC }}
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
 {% if TAIGA_PLUGINS_ENABLED | bool %}
-      - {{ TAIGA_CONFIG_APPEND_PATH }}:/taiga-back/settings/config.append.py:ro
+      - {{ TAIGA_CONFIG_APPEND_PATH }}:/taiga-back/settings/config.append.py
 {% endif %}
 {% if TAIGA_OIDC_ENABLED | bool %}
-      - {{ TAIGA_URLS_PATH }}:/taiga-back/settings/urls.py:ro
+      - {{ TAIGA_URLS_PATH }}:/taiga-back/settings/urls.py
 {% endif %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
@@ -61,11 +58,8 @@ pull_policy: never
 {% if TAIGA_PLUGINS_ENABLED | bool %}
 {{ TAIGA_BACKEND_AUTH_BUILD_PROPS | indent(4, true) }}
     entrypoint: ["/bin/sh", "-c"]
-    command: >
-      if ! grep -qxF '{{ TAIGA_CONFIG_APPEND_MARKER }}' /taiga-back/settings/config.py; then
-        cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py;
-      fi;
-      exec /taiga-back/docker/async_entrypoint.sh
+    command:
+      - "if ! grep -qF {{ TAIGA_CONFIG_APPEND_MARKER | quote }} /taiga-back/settings/config.py; then cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py; fi; exec /taiga-back/docker/async_entrypoint.sh"
 {% else %}
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
@@ -75,10 +69,10 @@ pull_policy: never
       - static-data:{{ TAIGA_VOLUME_STATIC }}
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
 {% if TAIGA_PLUGINS_ENABLED | bool %}
-      - {{ TAIGA_CONFIG_APPEND_PATH }}:/taiga-back/settings/config.append.py:ro
+      - {{ TAIGA_CONFIG_APPEND_PATH }}:/taiga-back/settings/config.append.py
 {% endif %}
 {% if TAIGA_OIDC_ENABLED | bool %}
-      - {{ TAIGA_URLS_PATH }}:/taiga-back/settings/urls.py:ro
+      - {{ TAIGA_URLS_PATH }}:/taiga-back/settings/urls.py
 {% endif %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
