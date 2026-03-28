@@ -9,7 +9,6 @@ All project documentation MUST be reachable at [docs.infinito.nexus](https://doc
 - You MUST keep core information inside the repository, either in code or in `.md` files.
 - You MUST use `.md` files for commands, workflows, setup, and contributor guidance.
 - You MUST NOT use `.md` files to describe implementation logic that is already visible in the code.
-- You SHOULD prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
 
 ## Comments
 
