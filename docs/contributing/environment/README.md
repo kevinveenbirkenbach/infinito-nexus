@@ -9,6 +9,7 @@ Use these pages together when preparing a machine for local development.
 ## Start Here
 
 - [Development Environment Setup](setup.md)
+- [Environment Variables](variables.md)
 - [Low-Hardware Resources](hardware.md)
 - [Linux](platform/linux.md)
 - [macOS](platform/macos.md)
