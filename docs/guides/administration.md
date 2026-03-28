@@ -12,7 +12,7 @@ Create or refresh the inventory first, then deploy against the generated invento
 
 ```bash
 infinito create inventory /etc/infinito.nexus/inventories/prod \
-  --inventory-file /etc/infinito.nexus/inventories/prod/servers.yml \
+  --inventory-file /etc/infinito.nexus/inventories/prod/devices.yml \
   --host localhost \
   --ssl-disabled \
   --vars-file inventories/dev.yml \
@@ -22,7 +22,7 @@ infinito create inventory /etc/infinito.nexus/inventories/prod \
 ### Run the Deploy
 
 ```bash
-infinito deploy dedicated /etc/infinito.nexus/inventories/prod/servers.yml \
+infinito deploy dedicated /etc/infinito.nexus/inventories/prod/devices.yml \
   --password-file /etc/infinito.nexus/inventories/prod/.password \
   --log /etc/infinito.nexus/logs \
   --diff \

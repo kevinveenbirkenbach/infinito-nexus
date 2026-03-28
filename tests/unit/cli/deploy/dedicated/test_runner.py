@@ -58,7 +58,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "MODE_DEBUG": True,
         }
 
-        inventory_path = "/etc/inventories/github-ci/servers.yml"
+        inventory_path = "/etc/inventories/github-ci/devices.yml"
         limit = "localhost"
         allowed_apps = ["web-app-foo", "web-app-bar"]
         password_file = "/etc/inventories/github-ci/.password"
@@ -167,7 +167,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "MODE_DEBUG": False,
         }
 
-        inventory_path = "/etc/inventories/github-ci/servers.yml"
+        inventory_path = "/etc/inventories/github-ci/devices.yml"
 
         passthrough = [
             "--tags",
@@ -227,7 +227,7 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
                 repo_root=repo_root,
                 playbook_path=playbook_path,
                 inventory_validator_path=inventory_validator_path,
-                inventory="/etc/inventories/github-ci/servers.yml",
+                inventory="/etc/inventories/github-ci/devices.yml",
                 modes=modes,
                 limit=None,
                 allowed_applications=None,

@@ -38,9 +38,9 @@ Use the following table when you need realistic local deployment validation or a
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
-| Local deploy | `APP=web-app-nextcloud make deploy-fresh-kept-app` | Creates the needed inventory and deploys one app. | Single-app `servers.yml` path. |
-| Local deploy | `APP=web-app-nextcloud make deploy-reuse-kept-app` | Reuses an existing `${TEST_DEPLOY_TYPE}.yml` inventory and redeploys one app quickly. | Fast reuse path. |
-| Local deploy | `APP=web-app-nextcloud make deploy-reuse-purged-app` | Reuses an existing `${TEST_DEPLOY_TYPE}.yml` inventory, purges the entity first, and redeploys one app quickly. | Fast reuse path after a state reset. |
+| Local deploy | `APP=web-app-nextcloud make deploy-fresh-kept-app` | Creates the needed inventory and deploys one app. | Single-app `devices.yml` path. |
+| Local deploy | `APP=web-app-nextcloud make deploy-reuse-kept-app` | Reuses an existing `devices.yml` inventory and redeploys one app quickly. | Fast reuse path. |
+| Local deploy | `APP=web-app-nextcloud make deploy-reuse-purged-app` | Reuses an existing `devices.yml` inventory, purges the entity first, and redeploys one app quickly. | Fast reuse path after a state reset. |
 | Local deploy and E2E | `APP=web-app-matomo make deploy-fresh-purged-app` | Runs a dedicated local validation flow for one app against the dev stack, creating and re-initializing the inventory first. | Baseline and recovery path. |
 | Full local validation | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Broad coverage when you explicitly need it. |
 | Local reset | `make container-irefresh-inventory` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |

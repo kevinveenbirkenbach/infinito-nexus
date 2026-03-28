@@ -30,7 +30,7 @@ def _resolve_inventory_file(
 ) -> Path:
     if inventory_file_arg:
         return Path(inventory_file_arg).resolve()
-    return (inventory_dir / "servers.yml").resolve()
+    return (inventory_dir / "devices.yml").resolve()
 
 
 def _resolve_roles_dir(project_root: Path, roles_dir_arg: Optional[str]) -> Path:
@@ -115,7 +115,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--inventory-file",
         default=None,
-        help="Inventory YAML file path (default: <inventory-dir>/servers.yml).",
+        help="Inventory YAML file path (default: <inventory-dir>/devices.yml).",
     )
 
     parser.add_argument(

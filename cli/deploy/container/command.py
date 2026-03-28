@@ -196,7 +196,7 @@ def run_in_container(
     container_name = None
 
     inv_root = str(inventory_dir).rstrip("/")
-    inv_file = f"{inv_root}/servers.yml"
+    inv_file = f"{inv_root}/devices.yml"
     pw_file = f"{inv_root}/.password"
 
     try:

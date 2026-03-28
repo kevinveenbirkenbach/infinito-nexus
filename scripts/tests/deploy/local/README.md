@@ -26,13 +26,13 @@ Pull requests are welcome to make the local development environment work consist
 
 | Entry point | What it does | Key inputs | Notes |
 |---|---|---|---|
-| `make deploy-fresh-kept-all` / `scripts/tests/deploy/local/all.sh` | Starts the dev stack, discovers apps, creates `${TEST_DEPLOY_TYPE}.yml`, and deploys all discovered apps. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Fresh all-app inventory path. |
+| `make deploy-fresh-kept-all` / `scripts/tests/deploy/local/all.sh` | Starts the dev stack, discovers apps, creates `devices.yml`, and deploys all discovered apps. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Fresh all-app inventory path. |
 | `make container-irefresh-inventory` / `scripts/tests/deploy/local/utils/reset.sh` | Recreates the local inventory without deploying apps. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Wipes `INVENTORY_DIR`. |
-| `make deploy-reuse-kept-all` / `scripts/tests/deploy/local/run-all.sh` | Deploys every app from an existing inventory. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Requires `${INVENTORY_DIR}/servers.yml` and `.password`. |
-| `make deploy-fresh-kept-app` / `scripts/tests/deploy/local/app.sh <app-id>` | Creates `servers.yml` for one app and deploys it. | `APP=<app-id>` | Single-app init and deploy path. |
-| `make deploy-reuse-kept-app` / `scripts/tests/deploy/local/rapid.sh` | Runs a targeted `infinito deploy dedicated` for one app. | `APP`, `TEST_DEPLOY_TYPE`, `INFINITO_CONTAINER`, `DEBUG`, `INVENTORY_DIR` | Reuses `${TEST_DEPLOY_TYPE}.yml`. |
+| `make deploy-reuse-kept-all` / `scripts/tests/deploy/local/run-all.sh` | Deploys every app from an existing inventory. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Requires `${INVENTORY_DIR}/devices.yml` and `.password`. |
+| `make deploy-fresh-kept-app` / `scripts/tests/deploy/local/app.sh <app-id>` | Creates `devices.yml` for one app and deploys it. | `APP=<app-id>` | Single-app init and deploy path. |
+| `make deploy-reuse-kept-app` / `scripts/tests/deploy/local/rapid.sh` | Runs a targeted `infinito deploy dedicated` for one app. | `APP`, `TEST_DEPLOY_TYPE`, `INFINITO_CONTAINER`, `DEBUG`, `INVENTORY_DIR` | Reuses `devices.yml`. |
 | `make deploy-reuse-purged-app` | Purges one app entity and then reruns `deploy-reuse-kept-app`. | `APP`, `TEST_DEPLOY_TYPE`, `INFINITO_CONTAINER`, `DEBUG`, `INVENTORY_DIR` | Purge helper plus reuse path. |
-| `make deploy-fresh-purged-app` / `scripts/tests/deploy/local/dedicated_distro.sh` | Recreates `servers.yml` and deploys one app twice with `ASYNC_ENABLED=false` and `ASYNC_ENABLED=true`. | `INFINITO_DISTRO`, `INVENTORY_DIR`, `TEST_DEPLOY_TYPE`, `APP` | Also purges shared entities up front. |
+| `make deploy-fresh-purged-app` / `scripts/tests/deploy/local/dedicated_distro.sh` | Recreates `devices.yml` and deploys one app twice with `ASYNC_ENABLED=false` and `ASYNC_ENABLED=true`. | `INFINITO_DISTRO`, `INVENTORY_DIR`, `TEST_DEPLOY_TYPE`, `APP` | Also purges shared entities up front. |
 | `make container-purge-system` | Deletes local deploy artifacts and cleanup data. | n/a | Destructive cleanup. |
 | `scripts/tests/deploy/local/inspect.sh` | Opens an interactive shell or runs a one-off command in the running container. | Optional `INSPECT_CMD` or positional args | Uses `scripts/meta/env/all.sh` defaults. |
 

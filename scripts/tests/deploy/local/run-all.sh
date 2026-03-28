@@ -30,7 +30,7 @@ LIMIT_HOST="${LIMIT_HOST:-localhost}"
 DEBUG="$(normalize_bool_or_default "${DEBUG:-}" false DEBUG)"
 
 inv_dir="${INVENTORY_DIR}"
-inv_file="${inv_dir}/servers.yml"
+inv_file="${inv_dir}/devices.yml"
 pw_file="${inv_dir}/.password"
 
 if [[ ! -f "${inv_file}" ]]; then

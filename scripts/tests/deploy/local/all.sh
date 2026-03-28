@@ -14,6 +14,7 @@ WHITELIST="${WHITELIST:-}"
 
 # This script always generates inventories for the development compose stack.
 RUNTIME_VARS_JSON='{"RUNTIME":"dev"}'
+inv_file="${INVENTORY_DIR}/devices.yml"
 
 echo "=== local full deploy (development compose stack) ==="
 echo "distro        = ${INFINITO_DISTRO}"
@@ -105,7 +106,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     ./scripts/docker/entry.sh true
 
     inv_dir='${INVENTORY_DIR}'
-    inv_file=\"\${inv_dir}/${TEST_DEPLOY_TYPE}.yml\"
+    inv_file='${inv_file}'
     pw_file=\"\${inv_dir}/.password\"
 
     mkdir -p \"\${inv_dir}\"
@@ -119,7 +120,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     echo \">>> Include apps (${apps_count}): ${apps_csv}\"
 
     infinito create inventory \"\${inv_dir}\" \
-      --inventory-file \${inv_file} \
+      --inventory-file \"\${inv_file}\" \
       --host '${LIMIT_HOST}' \
       --ssl-disabled \
       --vars '${RUNTIME_VARS_JSON}' \

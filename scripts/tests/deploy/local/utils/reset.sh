@@ -14,6 +14,7 @@ set -euo pipefail
 
 # This script always generates inventories for the development compose stack.
 RUNTIME_VARS_JSON='{"RUNTIME":"dev","SYS_SERVICE_RUNNER_RETRIES":1}'
+inv_file="${INVENTORY_DIR}/devices.yml"
 
 echo "=== local inventory init (ALL apps) ==="
 echo "distro        = ${INFINITO_DISTRO}"
@@ -81,11 +82,10 @@ echo ">>> Initializing inventory inside container"
     ./scripts/docker/entry.sh true
 
     inv_dir='${INVENTORY_DIR}'
-    inv_file=\"\${inv_dir}/${TEST_DEPLOY_TYPE}.yml\"
+    inv_file='${inv_file}'
     pw_file=\"\${inv_dir}/.password\"
     echo \">>> Reset inventory dir \${inv_dir}\"
     rm -rf \"\${inv_dir}\"
-    mkdir -p \"\${inv_dir}\"
     mkdir -p \"\${inv_dir}\"
 
     if [[ ! -f \"\${pw_file}\" ]]; then
@@ -95,7 +95,7 @@ echo ">>> Initializing inventory inside container"
 
     echo \">>> Creating inventory at \${inv_file}\"
     infinito create inventory \"\${inv_dir}\" \
-      --inventory-file \${inv_file} \
+      --inventory-file \"\${inv_file}\" \
       --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \
       --ssl-disabled \
@@ -107,4 +107,4 @@ echo ">>> Initializing inventory inside container"
 
 echo
 echo "✅ Local inventory init finished."
-echo "Inventory: ${INVENTORY_DIR}/${TEST_DEPLOY_TYPE}.yml"
+echo "Inventory: ${inv_file}"
