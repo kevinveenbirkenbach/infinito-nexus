@@ -93,4 +93,4 @@ jobs:
         shell: bash
         env:
           APP: ${{ matrix.app }}
-        run: ./scripts/tests/deploy/ci/all_distros.sh
+        run: ./scripts/tests/deploy/ci/all.sh

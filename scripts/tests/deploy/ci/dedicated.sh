@@ -35,7 +35,7 @@ usage() {
 	cat <<'EOF'
 Usage:
   INFINITO_DISTRO=<distro> INVENTORY_DIR=<dir> INFINITO_DOCKER_VOLUME=<abs_path> \
-    scripts/tests/deploy/ci/dedicated_distro.sh \
+    scripts/tests/deploy/ci/dedicated.sh \
     --app <app_id>
 EOF
 }

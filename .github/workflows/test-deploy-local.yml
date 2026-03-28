@@ -106,4 +106,4 @@ jobs:
           TEST_DEPLOY_TYPE: ${{ needs.discover.outputs.test_deploy_type }}
           DISTROS: ${{ needs.discover.outputs.distros }}
           APP: ${{ matrix.app }}
-        run: ./scripts/tests/deploy/ci/all_distros.sh
+        run: ./scripts/tests/deploy/ci/all.sh

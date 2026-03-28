@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# SPOT: Deploy exactly ONE app across ALL distros (serial).
+# SPOT: Deploy exactly ONE app across all distros (serial).
 #
 # Additionally:
 # - Track duration per distro
@@ -80,7 +80,7 @@ ran=0
 failed=0
 durations=() # store "distro=seconds" lines
 
-sync_ci_image_for_distro() {
+sync_ci_image_for_run() {
 	local owner tag repo_name
 
 	if [[ -n "${OWNER:-}" || -n "${GITHUB_REPOSITORY_OWNER:-}" || -n "${GITHUB_REPOSITORY:-}" ]]; then
@@ -130,12 +130,12 @@ for distro in "${distro_arr[@]}"; do
 	fi
 
 	export INFINITO_DISTRO="${distro}"
-	sync_ci_image_for_distro
+	sync_ci_image_for_run
 
 	distro_start="$(date +%s)"
 
 	set +e
-	scripts/tests/deploy/ci/dedicated_distro.sh \
+	scripts/tests/deploy/ci/dedicated.sh \
 		--app "${APP}"
 	rc=$?
 	set -e
@@ -165,7 +165,7 @@ echo
 echo "=== Summary ==="
 echo "app=${APP} type=${TEST_DEPLOY_TYPE}"
 echo "ran=${ran} skipped=${skipped} failed=${failed}"
-echo "total_runtime=${total}s max_seen_distro=${max_seen}s"
+echo "total_runtime=${total}s max_seen_duration=${max_seen}s"
 if [[ -n "${deadline}" ]]; then
 	now="$(date +%s)"
 	remaining="$((deadline - now))"
