@@ -1,21 +1,9 @@
 {
-  // Project-level Claude Code permissions for infinito-nexus.
-  // This file is committed to git and applies to all contributors.
-  // For personal overrides use .claude/settings.local.json (gitignored).
-  //
-  // Rule evaluation order: deny > ask > allow (first match wins).
-
   "permissions": {
-
     "allow": [
-
-      // ─── FILESYSTEM ──────────────────────────────────────────────────────
-
       "Read",
       "Edit",
       "Write",
-
-      // ─── GIT (local only) ────────────────────────────────────────────────
 
       "Bash(git status*)",
       "Bash(git log*)",
@@ -28,11 +16,7 @@
       "Bash(git stash*)",
       "Bash(git -C:*)",
 
-      // ─── MAKE ────────────────────────────────────────────────────────────
-
       "Bash(make*)",
-
-      // ─── PYTHON ──────────────────────────────────────────────────────────
 
       "Bash(python3*)",
       "Bash(python*)",
@@ -40,15 +24,11 @@
       "Bash(pip list*)",
       "Bash(pip install*)",
 
-      // ─── ANSIBLE ─────────────────────────────────────────────────────────
-
       "Bash(ansible-lint*)",
       "Bash(ansible-inventory*)",
       "Bash(ansible --version*)",
       "Bash(ansible-playbook --check*)",
       "Bash(ansible-playbook --syntax-check*)",
-
-      // ─── DOCKER ──────────────────────────────────────────────────────────
 
       "Bash(docker pull*)",
       "Bash(docker build*)",
@@ -61,8 +41,7 @@
       "Bash(docker rm*)",
       "Bash(docker rmi*)",
       "Bash(docker compose*)",
-
-      // ─── STANDARD UNIX TOOLS ─────────────────────────────────────────────
+      "Bash(docker exec*)",
 
       "Bash(grep*)",
       "Bash(find*)",
@@ -77,8 +56,6 @@
       "Bash(cp*)",
       "Bash(mv*)",
       "Bash(jq*)",
-
-      // ─── WEB FETCH ───────────────────────────────────────────────────────
 
       "WebSearch",
       "WebFetch(domain:github.com)",
@@ -100,24 +77,13 @@
       "WebFetch(domain:letsencrypt.org)",
       "WebFetch(domain:hcaptcha.com)",
       "WebFetch(domain:gstatic.com)"
-
     ],
 
-    // ─── ALWAYS ASK ───────────────────────────────────────────────────────────
-
-    // ─── ALWAYS ASK ───────────────────────────────────────────────────────────
-    // docker run: root-equivalent without rootless Docker — ask to prevent
-    //   unintended privileged containers. Note: "make exec" already allows
-    //   shell access inside running containers via the Makefile.
-    // curl: unrestricted network access, can exfiltrate data or pipe remote
-    //   scripts to shell — WebFetch domain whitelist does NOT apply here.
     "ask": [
       "Bash(git push*)",
       "Bash(docker run*)",
       "Bash(curl*)"
     ],
-
-    // ─── ALWAYS DENY ──────────────────────────────────────────────────────────
 
     "deny": [
       "Bash(git push --force*)",
@@ -125,19 +91,14 @@
       "Bash(rm -rf*)",
       "Bash(sudo*)"
     ]
-
   },
-
-  // ─── SANDBOX ────────────────────────────────────────────────────────────────
 
   "sandbox": {
     "filesystem": {
-      // Allow writes within the project and common runtime directories
       "allowWrite": [
         ".",
         "/tmp"
       ],
-      // Protect sensitive paths outside the project
       "denyRead": [
         "~/.ssh",
         "~/.gnupg",
@@ -147,5 +108,4 @@
       ]
     }
   }
-
 }
