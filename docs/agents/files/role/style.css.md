@@ -8,46 +8,40 @@ For repository wiring, inventory keys, and the generated palette contract, see [
 
 ## Goal
 
-- You MUST start from the role's existing CSS and add the smallest possible theming layer on top of it.
-- You MUST prefer token mapping over large selector rewrites so the role keeps its native structure and behavior.
-- Write the result so it feels like one coherent brand theme instead of a collection of unrelated overrides.
+- You MUST add the smallest possible theming layer on top of the role's existing CSS.
+- You MUST prefer token mapping over selector rewrites so the role keeps its native structure.
+- The result MUST feel like one coherent brand theme, not a collection of unrelated overrides.
+- The result MUST be visually appealing and pleasant for humans to look at.
 
 ## Color Categories
 
-- You MUST use `--color-01-*` as the primary color category. It defines the main brand color and MUST be used for the majority of themed surfaces.
-- You SHOULD prefer colors from category `01` for all standard theming. Other categories (`02`–`07`) MUST only be used to strongly emphasize specific elements such as warnings, errors, or highlights.
-- You MUST NOT use categories `02`–`07` as general surface or brand colors.
+- You MUST use `--color-01-*` and `--color-rgb-01-*` as the primary palette. They MUST cover the majority of themed surfaces.
+- Semantic state colors such as warnings, errors, and success indicators SHOULD keep their original application colors. You MUST add a contrast border in `--color-01-00` or `--color-01-99` around them so they remain visually integrated.
+- Categories `02`–`09` MAY be used but are NOT RECOMMENDED. Prefer `--color-01-*` for all surfaces where possible.
+- If the application's primary background is dark or black, you MUST use `--color-01-00` as the default theme color. If it is light or white, you MUST use `--color-01-99`. All other application colors MUST be mapped to one of these two anchors. Colors from categories `02`–`09` MUST be derived from and kept in visual relation to the chosen anchor.
 
 ## Replace
 
-- You MUST replace hard-coded visual values that define the role's look and feel: colors, RGB channels, gradients, borders, shadows, overlays, placeholder colors, focus colors, and similar theme tokens.
-- You MUST replace framework or app-specific theme variables with values derived from the repository's generated palette, typically `--color-01-*` and `--color-01-rgb-*`, when such variables already exist.
-- Replace direct color usage in selectors only when variable mapping is not sufficient to reach the affected surface.
-- You MUST replace related values together. If a surface color changes, also review the matching text color, border color, hover state, active state, disabled state, and transparency values.
-- You MUST replace RGB helper variables together with their solid color counterparts when the target role uses alpha-based effects such as `rgba(...)`, overlays, or translucent backgrounds.
+- You MUST replace hard-coded theme values: colors, RGB channels, gradients, borders, shadows, overlays, placeholder and focus colors.
+- You MUST map `--color-01-*` and `--color-rgb-01-*` onto existing framework or app variables first. Add selector-level overrides only when variable mapping is insufficient.
+- You MUST replace related values together: surface color, text color, border, hover, active, disabled, and alpha variants.
 
 ## Do Not Replace
 
-- Do NOT replace layout, spacing, sizing, positioning, z-index, overflow, animation timing, or component structure unless the visual requirement truly depends on it.
-- Do NOT replace semantic behavior, JavaScript hooks, state logic, or framework-specific class wiring just to apply branding.
-- Do NOT replace existing semantic variables with hard-coded literals when the same effect can be achieved by mapping the variables correctly.
-- Do NOT rewrite large upstream style blocks when a focused override or token remapping is enough.
-- Do NOT introduce app-specific assumptions into this workflow. Inspect the target role first and adapt to its real variable names and component model.
+- You MUST NOT replace layout, spacing, sizing, positioning, z-index, overflow, animation timing, or component structure.
+- You MUST NOT replace semantic behavior, JavaScript hooks, or framework-specific class wiring.
+- You MUST NOT rewrite large upstream style blocks when a focused override or token remapping is enough.
 
 ## Workflow
 
-- You MUST pull in or preserve the role's regular CSS first so the base application styling stays intact.
-- You MUST inspect which variables the target role or framework already exposes, for example semantic tokens, framework palette variables, or role-local custom properties.
-- You MUST map the generated repository palette, typically `--color-01-*` and `--color-01-rgb-*`, onto those existing variables before adding selector-level overrides.
-- Add selector-level overrides only for surfaces that cannot be themed through variables alone.
-- Keep gradients, transparency, text contrast, and surface hierarchy aligned so the themed role still reads as one system.
+1. Preserve the role's base CSS so the application styling stays intact.
+2. Inspect which variables the role or framework already exposes (semantic tokens, palette variables, custom properties).
+3. Map the repository palette onto those variables. Add selector overrides only for surfaces that cannot be reached through variables.
+4. Keep gradients, transparency, text contrast, and surface hierarchy aligned.
 
 ## Review
 
-- You MUST check that primary actions, links, forms, cards, dialogs, navigation, and overlays still belong to the same visual system.
-- You MUST check that readable contrast remains intact for normal, hover, focus, active, and disabled states.
-- You MUST check the result with live inspection in the running application, not only by reading the CSS or generated files.
-- You MUST compare the implemented styling against the rendered UI so mismatches between intended tokens and actual browser output become visible.
-- You MUST at minimum inspect and compare the start page and the login page because both usually expose the most important shared surfaces, text colors, forms, and navigation patterns.
+- You MUST verify that primary actions, links, forms, cards, dialogs, navigation, and overlays still belong to the same visual system.
+- You MUST verify readable contrast for normal, hover, focus, active, and disabled states.
+- You MUST inspect the running application — at minimum the start page and login page.
 - If the change affects user-visible behavior, you MUST add or update the matching end-to-end coverage in [Role `playwright.spec.js`](playwright.spec.js.md).
-- You MUST check that the final CSS still looks like a themed version of the target application, not a forked redesign.

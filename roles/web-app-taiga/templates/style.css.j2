@@ -1,19 +1,19 @@
 :host,
 :root {
   --infinito-taiga-canvas: var(--color-01-08);
-  --infinito-taiga-surface: rgba(var(--color-01-rgb-10), 0.96);
-  --infinito-taiga-surface-strong: rgba(var(--color-01-rgb-14), 0.98);
-  --infinito-taiga-surface-soft: rgba(var(--color-01-rgb-18), 0.94);
-  --infinito-taiga-surface-card: rgba(var(--color-01-rgb-16), 0.9);
-  --infinito-taiga-surface-card-hover: rgba(var(--color-01-rgb-20), 0.94);
-  --infinito-taiga-surface-cool: rgba(var(--color-06-rgb-18), 0.94);
-  --infinito-taiga-surface-cool-strong: rgba(var(--color-06-rgb-24), 0.97);
-  --infinito-taiga-overlay: rgba(var(--color-01-rgb-03), 0.78);
-  --infinito-taiga-border: rgba(var(--color-02-rgb-60), 0.28);
-  --infinito-taiga-border-strong: rgba(var(--color-02-rgb-70), 0.46);
-  --infinito-taiga-line: rgba(var(--color-01-rgb-97), 0.14);
-  --infinito-taiga-shadow: 0 18px 40px rgba(var(--color-01-rgb-01), 0.28);
-  --infinito-taiga-glow: 0 0 0 1px rgba(var(--color-03-rgb-58), 0.08), 0 18px 40px rgba(var(--color-01-rgb-01), 0.24);
+  --infinito-taiga-surface: rgba(var(--color-rgb-01-10), 0.96);
+  --infinito-taiga-surface-strong: rgba(var(--color-rgb-01-14), 0.98);
+  --infinito-taiga-surface-soft: rgba(var(--color-rgb-01-18), 0.94);
+  --infinito-taiga-surface-card: rgba(var(--color-rgb-01-16), 0.9);
+  --infinito-taiga-surface-card-hover: rgba(var(--color-rgb-01-20), 0.94);
+  --infinito-taiga-surface-cool: rgba(var(--color-rgb-06-18), 0.94);
+  --infinito-taiga-surface-cool-strong: rgba(var(--color-rgb-06-24), 0.97);
+  --infinito-taiga-overlay: rgba(var(--color-rgb-01-03), 0.78);
+  --infinito-taiga-border: rgba(var(--color-rgb-02-60), 0.28);
+  --infinito-taiga-border-strong: rgba(var(--color-rgb-02-70), 0.46);
+  --infinito-taiga-line: rgba(var(--color-rgb-01-97), 0.14);
+  --infinito-taiga-shadow: 0 18px 40px rgba(var(--color-rgb-01-01), 0.28);
+  --infinito-taiga-glow: 0 0 0 1px rgba(var(--color-rgb-03-58), 0.08), 0 18px 40px rgba(var(--color-rgb-01-01), 0.24);
   --infinito-taiga-heading: var(--color-01-99);
   --infinito-taiga-text: var(--color-01-95);
   --infinito-taiga-text-soft: var(--color-01-88);
@@ -29,7 +29,7 @@
   --infinito-taiga-danger: var(--color-07-58);
   --infinito-taiga-danger-hover: var(--color-07-66);
   --infinito-taiga-badge: var(--color-03-60);
-  --infinito-taiga-badge-soft: rgba(var(--color-03-rgb-60), 0.16);
+  --infinito-taiga-badge-soft: rgba(var(--color-rgb-03-60), 0.16);
 
   --color-01-solid-primary: var(--infinito-taiga-cool);
   --color-01-link-primary: var(--infinito-taiga-link);
@@ -45,61 +45,18 @@
   --color-01-black: var(--color-01-03);
   --color-01-white: var(--color-01-99);
 
-  /* Alias role-local rgb tokens to the generated shared naming scheme. */
-  --color-01-rgb-01: var(--color-rgb-01-01);
-  --color-01-rgb-03: var(--color-rgb-01-03);
-  --color-01-rgb-08: var(--color-rgb-01-08);
-  --color-01-rgb-10: var(--color-rgb-01-10);
-  --color-01-rgb-12: var(--color-rgb-01-12);
-  --color-01-rgb-14: var(--color-rgb-01-14);
-  --color-01-rgb-16: var(--color-rgb-01-16);
-  --color-01-rgb-18: var(--color-rgb-01-18);
-  --color-01-rgb-20: var(--color-rgb-01-20);
-  --color-01-rgb-24: var(--color-rgb-01-24);
-  --color-01-rgb-90: var(--color-rgb-01-90);
-  --color-01-rgb-95: var(--color-rgb-01-95);
-  --color-01-rgb-97: var(--color-rgb-01-97);
-  --color-01-rgb-99: var(--color-rgb-01-99);
-  --color-02-rgb-42: var(--color-rgb-02-42);
-  --color-02-rgb-52: var(--color-rgb-02-52);
-  --color-02-rgb-56: var(--color-rgb-02-56);
-  --color-02-rgb-58: var(--color-rgb-02-58);
-  --color-02-rgb-60: var(--color-rgb-02-60);
-  --color-02-rgb-70: var(--color-rgb-02-70);
-  --color-03-rgb-36: var(--color-rgb-03-36);
-  --color-03-rgb-56: var(--color-rgb-03-56);
-  --color-03-rgb-58: var(--color-rgb-03-58);
-  --color-03-rgb-60: var(--color-rgb-03-60);
-  --color-04-rgb-58: var(--color-rgb-04-58);
-  --color-04-rgb-60: var(--color-rgb-04-60);
-  --color-04-rgb-62: var(--color-rgb-04-62);
-  --color-05-rgb-54: var(--color-rgb-05-54);
-  --color-05-rgb-60: var(--color-rgb-05-60);
-  --color-06-rgb-16: var(--color-rgb-06-16);
-  --color-06-rgb-18: var(--color-rgb-06-18);
-  --color-06-rgb-20: var(--color-rgb-06-20);
-  --color-06-rgb-24: var(--color-rgb-06-24);
-  --color-06-rgb-26: var(--color-rgb-06-26);
-  --color-06-rgb-30: var(--color-rgb-06-30);
-  --color-06-rgb-32: var(--color-rgb-06-32);
-  --color-06-rgb-34: var(--color-rgb-06-34);
-  --color-06-rgb-40: var(--color-rgb-06-40);
-  --color-06-rgb-42: var(--color-rgb-06-42);
-  --color-06-rgb-50: var(--color-rgb-06-50);
-  --color-07-rgb-48: var(--color-rgb-07-48);
-  --color-07-rgb-58: var(--color-rgb-07-58);
 }
 
 div.master,
 .blocked-project-detail,
 .transfer-project {
   background:
-    radial-gradient(circle at top right, rgba(var(--color-04-rgb-58), 0.1), transparent 30%),
+    radial-gradient(circle at top right, rgba(var(--color-rgb-04-58), 0.1), transparent 30%),
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-01-rgb-08), 0.98),
-      rgba(var(--color-01-rgb-10), 0.97),
-      rgba(var(--color-01-rgb-14), 0.94)
+      rgba(var(--color-rgb-01-08), 0.98),
+      rgba(var(--color-rgb-01-10), 0.97),
+      rgba(var(--color-rgb-01-14), 0.94)
     );
   color: var(--infinito-taiga-text);
 }
@@ -157,9 +114,9 @@ div.master hr,
   background:
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-06-rgb-16), 0.96),
-      rgba(var(--color-06-rgb-20), 0.97),
-      rgba(var(--color-06-rgb-24), 0.98)
+      rgba(var(--color-rgb-06-16), 0.96),
+      rgba(var(--color-rgb-06-20), 0.97),
+      rgba(var(--color-rgb-06-24), 0.98)
     );
   color: var(--infinito-taiga-text-soft);
 }
@@ -167,7 +124,7 @@ div.master hr,
 .menu-secondary,
 .menu-tertiary {
   border-right: 1px solid var(--infinito-taiga-border);
-  box-shadow: inset -1px 0 0 rgba(var(--color-01-rgb-01), 0.18);
+  box-shadow: inset -1px 0 0 rgba(var(--color-rgb-01-01), 0.18);
 }
 
 .menu-secondary li a,
@@ -179,13 +136,13 @@ div.master hr,
 .menu-secondary li:hover a,
 .menu-tertiary ul li:hover,
 .menu-tertiary ul li:hover a {
-  background: rgba(var(--color-04-rgb-58), 0.12);
+  background: rgba(var(--color-rgb-04-58), 0.12);
   color: var(--infinito-taiga-heading);
 }
 
 .menu-secondary li .active,
 .menu-secondary li .active:hover {
-  background: rgba(var(--color-01-rgb-18), 0.98);
+  background: rgba(var(--color-rgb-01-18), 0.98);
   box-shadow: inset 3px 0 0 var(--infinito-taiga-cool);
 }
 
@@ -198,7 +155,7 @@ div.master hr,
 }
 
 .menu-tertiary ul li.active {
-  background: rgba(var(--color-04-rgb-58), 0.14);
+  background: rgba(var(--color-rgb-04-58), 0.14);
 }
 
 .project-list-wrapper .project-list-title,
@@ -209,9 +166,9 @@ div.kanban-header,
   background:
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-02-rgb-42), 0.95),
-      rgba(var(--color-02-rgb-52), 0.98),
-      rgba(var(--color-02-rgb-58), 0.97)
+      rgba(var(--color-rgb-02-42), 0.95),
+      rgba(var(--color-rgb-02-52), 0.98),
+      rgba(var(--color-rgb-02-58), 0.97)
     );
   border: 1px solid var(--infinito-taiga-border);
   box-shadow: var(--infinito-taiga-glow);
@@ -245,9 +202,9 @@ section.kanban h2 {
   background:
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-01-rgb-12), 0.97),
-      rgba(var(--color-01-rgb-16), 0.96),
-      rgba(var(--color-01-rgb-20), 0.94)
+      rgba(var(--color-rgb-01-12), 0.97),
+      rgba(var(--color-rgb-01-16), 0.96),
+      rgba(var(--color-rgb-01-20), 0.94)
     );
   border: 1px solid var(--infinito-taiga-border);
   box-shadow: var(--infinito-taiga-shadow);
@@ -255,11 +212,11 @@ section.kanban h2 {
 }
 
 .dropdown-project-list .navbar-dropdown:after {
-  border-bottom-color: rgba(var(--color-01-rgb-12), 0.97);
+  border-bottom-color: rgba(var(--color-rgb-01-12), 0.97);
 }
 
 .dropdown-project-list .navbar-dropdown:before {
-  border-bottom-color: rgba(var(--color-02-rgb-60), 0.22);
+  border-bottom-color: rgba(var(--color-rgb-02-60), 0.22);
 }
 
 .project-list-wrapper .list-itemtype-project:hover,
@@ -271,12 +228,12 @@ section.kanban h2 {
 .dropdown-project-list .dropdown-project-list-link.active,
 .dropdown-project-list .dropdown-project-list-link:hover,
 .create-project-selector li:hover {
-  background: rgba(var(--color-04-rgb-58), 0.12);
-  border-color: rgba(var(--color-04-rgb-60), 0.34);
+  background: rgba(var(--color-rgb-04-58), 0.12);
+  border-color: rgba(var(--color-rgb-04-60), 0.34);
 }
 
 .project-list-wrapper .gu-transit {
-  background: rgba(var(--color-02-rgb-56), 0.14);
+  background: rgba(var(--color-rgb-02-56), 0.14);
   border: 1px dashed var(--infinito-taiga-border-strong);
 }
 
@@ -311,7 +268,7 @@ section.kanban h2 {
 }
 
 .dropdown-project-list .dropdown-project-list-ul {
-  border-bottom-color: rgba(var(--color-04-rgb-60), 0.32);
+  border-bottom-color: rgba(var(--color-rgb-04-60), 0.32);
 }
 
 .dropdown-project-list .dropdown-project-list-projects,
@@ -332,7 +289,7 @@ section.kanban h2 {
 
 .dropdown-project-list:hover .dropdown-project-list-projects,
 .dropdown-project-list.active .dropdown-project-list-projects {
-  background: rgba(var(--color-04-rgb-58), 0.12);
+  background: rgba(var(--color-rgb-04-58), 0.12);
 }
 
 .dropdown-project-list:hover .dropdown-project-list-projects span,
@@ -366,13 +323,13 @@ div.master textarea,
   background:
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-01-rgb-16), 0.96),
-      rgba(var(--color-01-rgb-20), 0.94),
-      rgba(var(--color-01-rgb-24), 0.92)
+      rgba(var(--color-rgb-01-16), 0.96),
+      rgba(var(--color-rgb-01-20), 0.94),
+      rgba(var(--color-rgb-01-24), 0.92)
     );
   border: 2px solid var(--infinito-taiga-border-strong);
   color: var(--infinito-taiga-text);
-  box-shadow: inset 0 1px 0 rgba(var(--color-01-rgb-99), 0.04);
+  box-shadow: inset 0 1px 0 rgba(var(--color-rgb-01-99), 0.04);
 }
 
 div.master input[type="date"]::-webkit-input-placeholder,
@@ -386,7 +343,7 @@ div.master select::-webkit-input-placeholder,
 div.master textarea::-webkit-input-placeholder,
 input.ng-empty::placeholder,
 .ng-empty::placeholder {
-  color: rgba(var(--color-01-rgb-90), 0.62);
+  color: rgba(var(--color-rgb-01-90), 0.62);
 }
 
 div.master input[type="date"]::-moz-placeholder,
@@ -398,7 +355,7 @@ div.master input[type="text"]::-moz-placeholder,
 div.master input[type="url"]::-moz-placeholder,
 div.master select::-moz-placeholder,
 div.master textarea::-moz-placeholder {
-  color: rgba(var(--color-01-rgb-90), 0.62);
+  color: rgba(var(--color-rgb-01-90), 0.62);
 }
 
 div.master input[type="date"]:focus,
@@ -414,8 +371,8 @@ div.master textarea:focus,
 .lightbox-generic-bulk .bulk-status-selector.active {
   border-color: var(--infinito-taiga-cool);
   box-shadow:
-    inset 0 1px 0 rgba(var(--color-01-rgb-99), 0.04),
-    0 0 0 3px rgba(var(--color-04-rgb-60), 0.18);
+    inset 0 1px 0 rgba(var(--color-rgb-01-99), 0.04),
+    0 0 0 3px rgba(var(--color-rgb-04-60), 0.18);
   outline: 0;
 }
 
@@ -428,7 +385,7 @@ div.master input[type="text"].checksley-error,
 div.master input[type="url"].checksley-error,
 div.master select.checksley-error,
 div.master textarea.checksley-error {
-  border-color: rgba(var(--color-07-rgb-58), 0.42);
+  border-color: rgba(var(--color-rgb-07-58), 0.42);
 }
 
 div.master input[type="date"].checksley-error:focus,
@@ -442,8 +399,8 @@ div.master select.checksley-error:focus,
 div.master textarea.checksley-error:focus {
   border-color: var(--infinito-taiga-danger);
   box-shadow:
-    inset 0 1px 0 rgba(var(--color-01-rgb-99), 0.04),
-    0 0 0 3px rgba(var(--color-07-rgb-58), 0.18);
+    inset 0 1px 0 rgba(var(--color-rgb-01-99), 0.04),
+    0 0 0 3px rgba(var(--color-rgb-07-58), 0.18);
 }
 
 .discover-header .search-button:hover,
@@ -464,7 +421,7 @@ div.master textarea.checksley-error:focus {
 .button-red,
 .button-red-light {
   border: 1px solid transparent;
-  box-shadow: 0 10px 24px rgba(var(--color-01-rgb-01), 0.18);
+  box-shadow: 0 10px 24px rgba(var(--color-rgb-01-01), 0.18);
 }
 
 .btn-big,
@@ -547,11 +504,11 @@ div.master textarea.checksley-error:focus {
   background:
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-06-rgb-24), 0.96),
-      rgba(var(--color-06-rgb-30), 0.97),
-      rgba(var(--color-06-rgb-34), 0.98)
+      rgba(var(--color-rgb-06-24), 0.96),
+      rgba(var(--color-rgb-06-30), 0.97),
+      rgba(var(--color-rgb-06-34), 0.98)
     );
-  border-color: rgba(var(--color-06-rgb-50), 0.34);
+  border-color: rgba(var(--color-rgb-06-50), 0.34);
   color: var(--infinito-taiga-text);
 }
 
@@ -610,9 +567,9 @@ div.master textarea.checksley-error:focus {
 .disabled.button-gray-light,
 .disabled.button-red,
 .disabled.button-red-light {
-  background: rgba(var(--color-06-rgb-26), 0.8);
-  border-color: rgba(var(--color-06-rgb-40), 0.24);
-  color: rgba(var(--color-01-rgb-95), 0.5);
+  background: rgba(var(--color-rgb-06-26), 0.8);
+  border-color: rgba(var(--color-rgb-06-40), 0.24);
+  color: rgba(var(--color-rgb-01-95), 0.5);
   box-shadow: none;
 }
 
@@ -666,19 +623,19 @@ div.master textarea.checksley-error:focus {
 }
 
 .lightbox-generic-bulk .bulk-status-option:hover {
-  background: rgba(var(--color-04-rgb-60), 0.12);
+  background: rgba(var(--color-rgb-04-60), 0.12);
 }
 
 .lightbox-generic-form .existing-or-new-selector input + label,
 .lightbox-relate-to-epic .related-with-selector input + label {
-  background: rgba(var(--color-06-rgb-26), 0.7);
-  border: 1px solid rgba(var(--color-06-rgb-42), 0.3);
+  background: rgba(var(--color-rgb-06-26), 0.7);
+  border: 1px solid rgba(var(--color-rgb-06-42), 0.3);
   color: var(--infinito-taiga-text-soft);
 }
 
 .lightbox-generic-form .existing-or-new-selector input + label:hover,
 .lightbox-relate-to-epic .related-with-selector input + label:hover {
-  background: rgba(var(--color-04-rgb-60), 0.18);
+  background: rgba(var(--color-rgb-04-60), 0.18);
 }
 
 .lightbox-generic-form .existing-or-new-selector input:checked + label,
@@ -691,9 +648,9 @@ div.master textarea.checksley-error:focus {
   background:
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-05-rgb-54), 0.96),
-      rgba(var(--color-05-rgb-60), 0.98),
-      rgba(var(--color-04-rgb-62), 0.96)
+      rgba(var(--color-rgb-05-54), 0.96),
+      rgba(var(--color-rgb-05-60), 0.98),
+      rgba(var(--color-rgb-04-62), 0.96)
     );
   box-shadow: var(--infinito-taiga-shadow);
 }
@@ -710,9 +667,9 @@ div.master textarea.checksley-error:focus {
   background:
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-07-rgb-48), 0.96),
-      rgba(var(--color-07-rgb-58), 0.98),
-      rgba(var(--color-03-rgb-56), 0.95)
+      rgba(var(--color-rgb-07-48), 0.96),
+      rgba(var(--color-rgb-07-58), 0.98),
+      rgba(var(--color-rgb-03-56), 0.95)
     );
 }
 
@@ -726,21 +683,21 @@ div.master textarea.checksley-error:focus {
   background:
     linear-gradient(
       {{ CSS_GRADIENT_ANGLE }}deg,
-      rgba(var(--color-06-rgb-24), 0.96),
-      rgba(var(--color-06-rgb-32), 0.98),
-      rgba(var(--color-03-rgb-36), 0.92)
+      rgba(var(--color-rgb-06-24), 0.96),
+      rgba(var(--color-rgb-06-32), 0.98),
+      rgba(var(--color-rgb-03-36), 0.92)
     );
 }
 
 .project-details .project-details-image .image,
 .single-project .project-logo img,
 .highlighted-project .project-logo img {
-  border: 1px solid rgba(var(--color-01-rgb-99), 0.08);
+  border: 1px solid rgba(var(--color-rgb-01-99), 0.08);
   box-shadow: var(--infinito-taiga-shadow);
 }
 
 .profile-bar .profile-edition {
-  background: rgba(var(--color-01-rgb-03), 0.72);
+  background: rgba(var(--color-rgb-01-03), 0.72);
 }
 
 .profile-bar .flag path,

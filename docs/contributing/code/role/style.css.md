@@ -11,7 +11,7 @@ For browser-side validation requirements after visible UI changes, see [Contribu
 
 - `roles/web-app-taiga/templates/style.css.j2` is the Taiga role override.
 - `sys-front-inj-css` renders it when `compose.services.css.enabled` is enabled.
-- The template maps the generated palette to semantic variables such as `--color-01-solid-primary`, `--color-01-link-primary`, grayscale steps, and `--color-01-rgb-*`.
+- The template maps the generated palette to semantic variables such as `--color-01-solid-primary`, `--color-01-link-primary`, grayscale steps, and `--color-rgb-01-*`.
 - `CSS_GRADIENT_ANGLE` keeps the gradients consistent across surfaces.
 
 ## Inventory
@@ -24,4 +24,4 @@ For browser-side validation requirements after visible UI changes, see [Contribu
 
 - The palette is generated from a base color through `colorscheme-generator`.
 - Role-local CSS MAY use the full generated palette space: all color categories `01` through `07` and all brightness values `00` through `99`.
-- You MUST combine the matching `--color-XX-*` and `--color-XX-rgb-*` tokens in a way that is both meaningful and aesthetically coherent so semantic mappings, surfaces, gradients, borders, and overlays work together as one design system.
+- You MUST combine the matching `--color-XX-*` and `--color-rgb-XX-*` tokens in a way that is both meaningful and aesthetically coherent so semantic mappings, surfaces, gradients, borders, and overlays work together as one design system.
