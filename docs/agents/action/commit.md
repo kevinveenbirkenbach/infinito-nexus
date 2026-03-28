@@ -7,6 +7,7 @@
 - If the failure says `service "infinito" is not running`, restart the stack with [Development Environment Setup](../../contributing/environment/setup.md) and retry the validation.
 - You MUST skip the standard validation only for markdown/reStructuredText-only changes unless you are explicitly instructed to run it.
 - You MUST commit only after all required checks pass.
+- You MUST NOT commit automatically without explicit confirmation from the user. ALWAYS ask before committing.
 
 ## Warnings
 
