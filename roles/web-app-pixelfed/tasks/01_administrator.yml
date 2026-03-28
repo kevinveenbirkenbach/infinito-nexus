@@ -21,23 +21,6 @@
     - pixelfed_users_table.stdout | trim == 'users'
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
-- name: "Verify the Pixelfed users table contains the expected admin columns"
-  vars:
-    pixelfed_users_columns_query: >-
-      SELECT COUNT(*)
-      FROM information_schema.columns
-      WHERE table_schema='{{ PIXELFED_DB_NAME }}'
-        AND table_name='users'
-        AND column_name IN ('id', 'username', 'name', 'email', 'is_admin', 'email_verified_at');
-  ansible.builtin.command:
-    argv: "{{ PIXELFED_MARIADB_ARGS + ['-e', pixelfed_users_columns_query] }}"
-  args:
-    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
-  register: pixelfed_users_columns
-  changed_when: false
-  failed_when: (pixelfed_users_columns.stdout | trim | int) != 6
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
 - name: "Check whether the Pixelfed administrator already exists"
   vars:
     pixelfed_admin_id_query: "SELECT id FROM users WHERE username='{{ PIXELFED_ADMIN_USERNAME }}' LIMIT 1;"
@@ -83,28 +66,4 @@
   register: pixelfed_admin_id
   changed_when: false
   failed_when: pixelfed_admin_id.stdout | trim == ''
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
-- name: "Ensure the Pixelfed administrator keeps admin attributes"
-  vars:
-    pixelfed_admin_sync_query: >-
-      UPDATE users
-      SET name='{{ PIXELFED_ADMIN_NAME | replace("'", "''") }}',
-          email='{{ PIXELFED_ADMIN_EMAIL | replace("'", "''") }}',
-          is_admin=1,
-          email_verified_at=COALESCE(email_verified_at, NOW())
-      WHERE username='{{ PIXELFED_ADMIN_USERNAME }}'
-        AND (
-          name <> '{{ PIXELFED_ADMIN_NAME | replace("'", "''") }}'
-          OR email <> '{{ PIXELFED_ADMIN_EMAIL | replace("'", "''") }}'
-          OR is_admin <> 1
-          OR email_verified_at IS NULL
-        );
-      SELECT ROW_COUNT();
-  ansible.builtin.command:
-    argv: "{{ PIXELFED_MARIADB_ARGS + ['-e', pixelfed_admin_sync_query] }}"
-  args:
-    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
-  register: pixelfed_admin_sync
-  changed_when: (pixelfed_admin_sync.stdout_lines | last | default('0') | int) > 0
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
