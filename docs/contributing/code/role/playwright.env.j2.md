@@ -14,7 +14,7 @@ For the matching scenario requirements, see [Contributing `playwright.spec.js`](
 ## Variable Rules
 
 - `APP_BASE_URL` MUST define the supported start page of the role's test flow.
-- If `compose.services.dashboard.enabled` is enabled, `APP_BASE_URL` SHOULD resolve to the dashboard URL because the test flow must start there.
+- If `compose.services.dashboard.enabled` is enabled, `APP_BASE_URL` SHOULD resolve to the dashboard URL because the test flow MUST start there.
 - You MUST provide additional app-specific URLs, feature flags, issuer URLs, and credentials only when the spec consumes them.
 - You MUST use explicit variable names that match the scenarios in the spec, especially when multiple personas such as `biber` and `administrator` are covered.
 - You MUST quote values with `dotenv_quote` when the rendered value may contain spaces or special characters.
