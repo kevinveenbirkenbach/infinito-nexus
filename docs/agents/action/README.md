@@ -4,11 +4,13 @@
 
 Use this section for operational agent workflows.
 
-## Read in Order
+## MUST Read in Order
 
-1. Read [Commit](commit.md) before you create a commit.
-2. Read [Role Files](../files/role/README.md) when you work on role-local frontend files such as `style.css` or `javascript.js`.
-3. Read [Development](develop.md) when you work on new apps or feature changes.
-4. Read [Iteration](iteration.md) when you are cycling through local deploy retries.
-5. Read [Debugging](debug.md) when you investigate failures.
-6. Read [Pull Requests](pull-request.md) before you write a PR description.
+You MUST read the relevant files below before performing the matching action:
+
+1. Read [Commit](commit.md) BEFORE you create a commit.
+2. Read [Role Files](../files/role/README.md) BEFORE you work on role-local frontend files such as `style.css` or `javascript.js`.
+3. Read [Development](develop.md) BEFORE you work on new apps or feature changes.
+4. Read [Iteration](iteration.md) BEFORE you cycle through local deploy retries.
+5. Read [Debugging](debug.md) BEFORE you investigate failures.
+6. Read [Pull Requests](pull-request.md) BEFORE you write a PR description.

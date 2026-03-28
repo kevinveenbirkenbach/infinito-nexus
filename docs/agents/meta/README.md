@@ -4,7 +4,7 @@
 
 Use this section for repository-wide agent references.
 
-## Read in Order
+## MUST Read in Order
 
 1. Read [Purpose](purpose.md) first.
 2. Read [Help](help.md) when you need project, support, or security contacts.
