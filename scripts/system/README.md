@@ -1,0 +1,13 @@
+# System Scripts
+
+This is the SPOT for system-facing helpers under `scripts/system/`.
+Use the README in each child directory as the canonical entry point for that area.
+For the canonical Make target index that invokes these helpers, see [docs/contributing/tools/makefile.md](../../docs/contributing/tools/makefile.md).
+
+## Areas
+
+- [apparmor/](apparmor/) for AppArmor maintenance helpers
+- [network/](network/) for DNS and IPv6 helpers
+- [purge/](purge/) for host and repository cleanup helpers
+- [systemd/](systemd/) for WSL2 systemd helpers
+- [tls/](tls/) for CA trust helpers

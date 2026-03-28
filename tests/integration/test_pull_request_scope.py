@@ -76,8 +76,8 @@ class TestPullRequestScope(unittest.TestCase):
         files_json = """\
 [
   {"filename":"AGENTS.md"},
-  {"filename":"docs/agents/debugging.md"},
-  {"filename":"docs/agents/development.md"}
+  {"filename":"docs/agents/action/debug.md"},
+  {"filename":"docs/agents/action/develop.md"}
 ]
 """
         _, outputs = self._run_script(files_json=files_json)
@@ -88,7 +88,7 @@ class TestPullRequestScope(unittest.TestCase):
         files_json = """\
 [
   {"filename":"README.md"},
-  {"filename":"docs/contributing/pull-requests.md"},
+  {"filename":"docs/contributing/flow/pull-request.md"},
   {"filename":".github/PULL_REQUEST_TEMPLATE/documentation.md"},
   {"filename":"docs/contributing/setup.rst"}
 ]
@@ -102,7 +102,7 @@ class TestPullRequestScope(unittest.TestCase):
 [
   {
     "status": "renamed",
-    "filename": "docs/contributing/workflow.md",
+    "filename": "docs/contributing/flow/workflow.md",
     "previous_filename": "AGENTS.md"
   }
 ]

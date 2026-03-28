@@ -6,7 +6,7 @@
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "data:/var/www/storage"
-      - "{{ lookup('container', application_id, 'files.env') }}:/var/www/.env"
+      - "{{ PIXELFED_ENV_FILE }}:/var/www/.env"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
@@ -15,9 +15,14 @@
     container_name: {{ PIXELFED_WORKER_CONTAINER }}
     image: "{{ PIXELFED_IMAGE }}:{{ PIXELFED_VERSION }}"
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    environment:
+      AUTORUN_LARAVEL_EVENT_CACHE: "false"
+      AUTORUN_LARAVEL_ROUTE_CACHE: "false"
+      AUTORUN_LARAVEL_VIEW_CACHE: "false"
+      AUTORUN_ENABLED: "false"
     volumes:
       - "data:/var/www/storage"
-      - "{{ lookup('container', application_id, 'files.env') }}:/var/www/.env"
+      - "{{ PIXELFED_ENV_FILE }}:/var/www/.env"
     entrypoint: /worker-entrypoint.sh
     healthcheck:
       test: php artisan horizon:status | grep running

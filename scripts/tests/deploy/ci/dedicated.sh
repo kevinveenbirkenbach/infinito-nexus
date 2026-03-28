@@ -1,0 +1,186 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# SPOT: Deploy exactly ONE app on ONE distro, twice, against the same stack.
+#
+# Flow:
+#   1) Ensure compose stack is up (reuse if already running)
+#   2) PASS 1:
+#        - init inventory with ASYNC_ENABLED=false
+#        - deploy (always with --debug)
+#   3) PASS 2:
+#        - re-init inventory with ASYNC_ENABLED=true
+#        - deploy again (same stack)
+#   4) Always remove stack so the next distro starts fresh
+#
+# Required env:
+#   INFINITO_DISTRO="arch|debian|ubuntu|fedora|centos"
+#   INVENTORY_DIR="/path/to/inventory"
+#
+# Optional env:
+#   PYTHON="python3"
+
+PYTHON="${PYTHON:-python3}"
+
+: "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (e.g. arch)}"
+: "${INVENTORY_DIR:?INVENTORY_DIR must be set}"
+: "${INFINITO_DOCKER_VOLUME:?INFINITO_DOCKER_VOLUME must be set}"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+
+APP=""
+
+usage() {
+	cat <<'EOF'
+Usage:
+  INFINITO_DISTRO=<distro> INVENTORY_DIR=<dir> INFINITO_DOCKER_VOLUME=<abs_path> \
+    scripts/tests/deploy/ci/dedicated.sh \
+    --app <app_id>
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	--app)
+		APP="${2:-}"
+		shift 2
+		;;
+	-h | --help)
+		usage
+		exit 0
+		;;
+	*)
+		echo "[ERROR] Unknown argument: $1" >&2
+		usage
+		exit 2
+		;;
+	esac
+done
+[[ -n "${APP}" ]] || {
+	echo "[ERROR] --app is required" >&2
+	usage
+	exit 2
+}
+
+cd "${REPO_ROOT}"
+
+echo "=== distro=${INFINITO_DISTRO} app=${APP} (debug always on) ==="
+
+cleanup() {
+	rc=$?
+
+	# Copy Playwright reports from the infinito container to the runner filesystem
+	# BEFORE containers/volumes are destroyed, so GitHub Actions can upload them as artifacts.
+	local _container="infinito_nexus_${INFINITO_DISTRO}"
+	local _playwright_host_dir="/tmp/playwright-artifacts/${INFINITO_DISTRO}/${APP}"
+	mkdir -p "${_playwright_host_dir}"
+	echo ">>> Copying Playwright artifacts from ${_container} to ${_playwright_host_dir}"
+	docker cp "${_container}:/var/lib/infinito/logs/test-e2e-playwright/." \
+		"${_playwright_host_dir}" 2>/dev/null || true
+
+	echo ">>> Removing stack for distro ${INFINITO_DISTRO} (fresh start for next distro)"
+	"${PYTHON}" -m cli.deploy.development down --distro "${INFINITO_DISTRO}" || true
+
+	echo ">>> HARD cleanup (containers/volumes/networks/images/build-cache)"
+	echo ">>> Docker disk usage before HARD cleanup"
+	docker system df || true
+
+	# 1) Remove ALL containers (including running ones)
+	mapfile -t ids < <(docker ps -aq || true)
+	if ((${#ids[@]} > 0)); then
+		docker rm -f "${ids[@]}" >/dev/null 2>&1 || true
+	fi
+
+	# 2) Remove networks (except default ones)
+	docker network prune -f >/dev/null 2>&1 || true
+
+	# 3) Remove ALL volumes
+	docker volume prune -f >/dev/null 2>&1 || true
+
+	# 4) Optional: leftover stopped containers (usually redundant after rm -f)
+	docker container prune -f >/dev/null 2>&1 || true
+
+	# 5) Remove ALL images and build cache.
+	# Important for serial multi-distro CI runs on the same runner.
+	docker image prune -af >/dev/null 2>&1 || true
+	docker buildx prune -af >/dev/null 2>&1 || true
+	docker builder prune -af >/dev/null 2>&1 || true
+
+	# 6) Remove host-mounted Docker data dir (CI runner only)
+	# IMPORTANT:
+	# - In CI, Docker/DIND/buildx may create root-owned files under this directory.
+	# - A plain 'rm -rf' can fail with "Permission denied" and poison the next distro run.
+	# - Use sudo for a hard reset, then recreate the directory.
+	if [[ -n "${INFINITO_DOCKER_VOLUME:-}" ]]; then
+		if [[ "${INFINITO_DOCKER_VOLUME}" == /* ]]; then
+			echo ">>> CI cleanup: wiping Docker root: ${INFINITO_DOCKER_VOLUME}"
+
+			echo ">>> Pre-clean ownership/permissions (best-effort)"
+			ls -ld "${INFINITO_DOCKER_VOLUME}" || true
+			sudo ls -ld "${INFINITO_DOCKER_VOLUME}" || true
+
+			echo ">>> Removing host docker volume dir: ${INFINITO_DOCKER_VOLUME}"
+			sudo rm -rf "${INFINITO_DOCKER_VOLUME}" || true
+			sudo mkdir -vp "${INFINITO_DOCKER_VOLUME}" || true
+
+			# Optional: keep it writable for the runner user
+			sudo chown -R "$(id -u):$(id -g)" "${INFINITO_DOCKER_VOLUME}" || true
+
+			echo ">>> Post-clean ownership/permissions (best-effort)"
+			ls -ld "${INFINITO_DOCKER_VOLUME}" || true
+			sudo ls -ld "${INFINITO_DOCKER_VOLUME}" || true
+		else
+			echo "[WARN] INFINITO_DOCKER_VOLUME is not an absolute path: '${INFINITO_DOCKER_VOLUME}' (skipping)"
+		fi
+	fi
+
+	echo ">>> Docker disk usage after HARD cleanup"
+	docker system df || true
+	echo ">>> HARD cleanup finished"
+	return $rc
+}
+trap cleanup EXIT
+
+echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
+# Always reconcile the stack to the requested distro.
+# This avoids reusing a pre-started stack with a different INFINITO_DISTRO.
+"${PYTHON}" -m cli.deploy.development up \
+	--distro "${INFINITO_DISTRO}"
+
+deploy_args=(
+	--distro "${INFINITO_DISTRO}"
+	--app "${APP}"
+	--inventory-dir "${INVENTORY_DIR}"
+	--debug
+)
+
+echo ">>> DISK / DOCKER STATE BEFORE DEPLOY (distro=${INFINITO_DISTRO})"
+df -h || true
+docker system df || true
+echo ">>> END STATE BEFORE DEPLOY"
+
+echo ">>> PASS 1: init inventory (ASYNC_ENABLED=false)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": false}'
+
+echo ">>> PASS 1: deploy"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
+
+echo ">>> PASS 2: re-init inventory (ASYNC_ENABLED=true)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": true}'
+
+echo ">>> PASS 2: deploy (skip wrapper cleanup)"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}" -- --skip-cleanup
+
+echo ">>> DISK / DOCKER STATE AFTER DEPLOY (before cleanup, distro=${INFINITO_DISTRO})"
+df -h || true
+docker system df || true
+echo ">>> END STATE AFTER DEPLOY"

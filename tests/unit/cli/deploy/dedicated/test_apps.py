@@ -8,7 +8,7 @@ from cli.deploy.dedicated import apps
 class TestValidateApplicationIds(unittest.TestCase):
     def test_no_ids_does_nothing(self):
         # Should not raise
-        apps.validate_application_ids("/etc/inventories/github-ci/servers.yml", [])
+        apps.validate_application_ids("/etc/inventories/github-ci/devices.yml", [])
 
     @unittest.mock.patch("utils.valid_deploy_id.ValidDeployId")
     def test_invalid_ids_raise_system_exit(self, mock_vdi_cls):
@@ -20,13 +20,13 @@ class TestValidateApplicationIds(unittest.TestCase):
 
         with self.assertRaises(SystemExit) as ctx:
             apps.validate_application_ids(
-                "/etc/inventories/github-ci/servers.yml",
+                "/etc/inventories/github-ci/devices.yml",
                 ["web-app-foo", "web-app-bar"],
             )
 
         self.assertEqual(ctx.exception.code, 1)
         instance.validate.assert_called_once_with(
-            "/etc/inventories/github-ci/servers.yml",
+            "/etc/inventories/github-ci/devices.yml",
             ["web-app-foo", "web-app-bar"],
         )
 
@@ -37,7 +37,7 @@ class TestValidateApplicationIds(unittest.TestCase):
 
         # Should not exit
         apps.validate_application_ids(
-            "/etc/inventories/github-ci/servers.yml",
+            "/etc/inventories/github-ci/devices.yml",
             ["web-app-foo"],
         )
 

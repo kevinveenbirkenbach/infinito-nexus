@@ -93,9 +93,4 @@ jobs:
         shell: bash
         env:
           APP: ${{ matrix.app }}
-        run: |
-          set -euo pipefail
-          export TEST_DEPLOY_TYPE="workstation"
-          export DISTROS="${DISTROS}"
-          export APP="${APP}"
-          make ci-deploy-app
+        run: ./scripts/tests/deploy/ci/all.sh

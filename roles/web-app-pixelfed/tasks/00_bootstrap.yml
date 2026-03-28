@@ -1,0 +1,65 @@
+---
+# Pixelfed's official Docker setup expects the application bootstrap to run
+# after the containers are up, not implicitly via image startup alone.
+
+- name: "Run Pixelfed migrations"
+  ansible.builtin.command:
+    argv:
+      - container
+      - exec
+      - -u
+      - "{{ PIXELFED_APP_USER }}"
+      - "{{ PIXELFED_CONTAINER }}"
+      - php
+      - artisan
+      - migrate
+      - --force
+      - --isolated
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_migrate
+  changed_when: "'Nothing to migrate' not in (pixelfed_migrate.stdout | default(''))"
+  retries: 60
+  delay: 5
+  until: pixelfed_migrate.rc == 0
+
+- name: "Ensure Pixelfed Passport keys exist"
+  ansible.builtin.command:
+    argv:
+      - container
+      - exec
+      - -u
+      - "{{ PIXELFED_APP_USER }}"
+      - "{{ PIXELFED_CONTAINER }}"
+      - sh
+      - -lc
+      - |
+        if [ ! -f /var/www/storage/oauth-private.key ] || [ ! -f /var/www/storage/oauth-public.key ]; then
+          php artisan passport:keys --force
+        fi
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_passport_keys
+  changed_when: false
+  retries: 20
+  delay: 5
+  until: pixelfed_passport_keys.rc == 0
+
+- name: "Initialize the Pixelfed instance actor"
+  ansible.builtin.command:
+    argv:
+      - container
+      - exec
+      - -u
+      - "{{ PIXELFED_APP_USER }}"
+      - "{{ PIXELFED_CONTAINER }}"
+      - php
+      - artisan
+      - instance:actor
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_instance_actor
+  changed_when: false
+  retries: 20
+  delay: 5
+  until: pixelfed_instance_actor.rc == 0
