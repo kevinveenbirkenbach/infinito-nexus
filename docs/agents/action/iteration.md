@@ -6,7 +6,7 @@ Use this page when you are iterating on a local app deploy during debugging or d
 
 ## Loop
 
-- You MUST start once with `APP=<role> make deploy-fresh-purged-app` to establish the baseline inventory and clean app state.
+- Unless the user explicitly says to reuse the existing setup, you MUST start once with `APP=<role> make deploy-fresh-purged-app` to establish the baseline inventory and clean app state.
 - After that, you MUST use `APP=<role> make deploy-reuse-kept-app` for the default edit-fix-redeploy loop.
 - Do NOT rerun `APP=<role> make deploy-fresh-purged-app` just because a deploy failed or you changed code. That restarts the stack unnecessarily and burns time.
 - If the same failure still reproduces on the reuse path and you want to test whether app entity state is involved, use `APP=<role> make deploy-reuse-purged-app` once.
