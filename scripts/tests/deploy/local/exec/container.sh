@@ -5,8 +5,8 @@ set -euo pipefail
 # one-off command inside it when INSPECT_CMD or positional arguments are set.
 #
 # Usage:
-#   scripts/tests/deploy/local/inspect.sh
-#   scripts/tests/deploy/local/inspect.sh [command...]
+#   scripts/tests/deploy/local/exec/container.sh
+#   scripts/tests/deploy/local/exec/container.sh [command...]
 #
 # Environment:
 #   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
@@ -14,18 +14,18 @@ set -euo pipefail
 #   INSPECT_CMD         One-off shell command to run instead of an interactive shell
 #
 # Examples:
-#   scripts/tests/deploy/local/inspect.sh
-#   scripts/tests/deploy/local/inspect.sh whoami
-#   INSPECT_CMD='whoami && id' scripts/tests/deploy/local/inspect.sh
+#   scripts/tests/deploy/local/exec/container.sh
+#   scripts/tests/deploy/local/exec/container.sh whoami
+#   INSPECT_CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../../" && pwd)"
 
 usage() {
 	cat <<'EOF'
 Usage:
-  scripts/tests/deploy/local/inspect.sh
-  scripts/tests/deploy/local/inspect.sh [command...]
+  scripts/tests/deploy/local/exec/container.sh
+  scripts/tests/deploy/local/exec/container.sh [command...]
 
 Environment:
   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
@@ -33,9 +33,9 @@ Environment:
   INSPECT_CMD         One-off shell command to run instead of an interactive shell
 
 Examples:
-  scripts/tests/deploy/local/inspect.sh
-  scripts/tests/deploy/local/inspect.sh whoami
-  INSPECT_CMD='whoami && id' scripts/tests/deploy/local/inspect.sh
+  scripts/tests/deploy/local/exec/container.sh
+  scripts/tests/deploy/local/exec/container.sh whoami
+  INSPECT_CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh
 EOF
 }
 

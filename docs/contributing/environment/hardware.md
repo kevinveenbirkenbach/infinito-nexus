@@ -171,7 +171,7 @@ make clean
 make clean-sudo
 make build-cleanup
 make container-purge-system
-make container-irefresh-inventory
+make container-refresh-inventory
 ```
 
 Quick explanation:
@@ -182,7 +182,7 @@ Quick explanation:
 - `make clean-sudo` does the same with `sudo`, if root-owned files exist
 - `make build-cleanup` removes old CI images
 - `make container-purge-system` cleans local deploy artifacts
-- `make container-irefresh-inventory` resets the local inventory
+- `make container-refresh-inventory` resets the local inventory
 
 If you often switch branches or work on only one role at a time, a disciplined `down` and `clean` routine usually saves more space than trying to recover later with a huge prune.
 

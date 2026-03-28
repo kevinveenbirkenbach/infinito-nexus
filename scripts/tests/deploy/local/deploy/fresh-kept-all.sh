@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Fresh-kept deploy for all discovered apps.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
+cd "${REPO_ROOT}"
+
 # ---------------------------------------------------------------------------
 # Required environment
 # ---------------------------------------------------------------------------

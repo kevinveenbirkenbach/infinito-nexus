@@ -18,5 +18,5 @@ Use this page for shell-script-specific guidance.
 
 ## Notes
 
-- `scripts/tests/deploy/local/inspect.sh` is a direct-entry shell script example.
+- `scripts/tests/deploy/local/exec/container.sh` is a direct-entry shell script example.
 - For shell entrypoints that are exposed through `make`, prefer a thin target that delegates to the script.

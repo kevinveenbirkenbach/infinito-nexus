@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Run deploy for ALL apps using the already initialized local inventory.
+# Reuse-kept deploy for ALL apps using the already initialized local inventory.
 #
 # Required:
 #   INFINITO_DISTRO   (arch|debian|ubuntu|fedora|centos)
@@ -19,7 +19,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # shellcheck source=scripts/tests/deploy/local/utils/lib.sh
-source "${SCRIPT_DIR}/utils/lib.sh"
+source "${SCRIPT_DIR}/../utils/lib.sh"
+
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
+cd "${REPO_ROOT}"
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"

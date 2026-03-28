@@ -28,7 +28,7 @@ Use these commands from the repository root. They are thin `make` wrappers aroun
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
-| Inspect container | `make inspect` | Delegates to `scripts/tests/deploy/local/inspect.sh`, which opens an interactive shell in the running infinito container with `docker exec -it ... sh`. | Use this when you need to inspect live state or run a quick command inside the container. |
+| Inspect container | `make exec` | Delegates to `scripts/tests/deploy/local/exec/container.sh`, which opens an interactive shell in the running infinito container with `docker exec -it ... sh`. | Use this when you need to inspect live state or run a quick command inside the container. |
 
 ## Support Targets
 

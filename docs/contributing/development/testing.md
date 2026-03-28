@@ -43,13 +43,13 @@ Use the following table when you need realistic local deployment validation or a
 | Local deploy | `APP=web-app-nextcloud make deploy-reuse-purged-app` | Reuses an existing `devices.yml` inventory, purges the entity first, and redeploys one app quickly. | Fast reuse path after a state reset. |
 | Local deploy and E2E | `APP=web-app-matomo make deploy-fresh-purged-app` | Runs a dedicated local validation flow for one app against the dev stack, creating and re-initializing the inventory first. | Baseline and recovery path. |
 | Full local validation | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Broad coverage when you explicitly need it. |
-| Local reset | `make container-irefresh-inventory` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |
+| Local reset | `make container-refresh-inventory` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |
 | Local cleanup | `make container-purge-system` | Deletes local deploy artifacts and cleanup data. | Use this only when you really want to remove local state. |
 
 Important:
 
 - Some local deploy commands are destructive.
-- Read [scripts/tests/deploy/local/README.md](../../../scripts/tests/deploy/local/README.md) before using reset or cleanup commands.
+- Read [reset/README.md](../../../scripts/tests/deploy/local/reset/README.md), [purge/README.md](../../../scripts/tests/deploy/local/purge/README.md), or [exec/README.md](../../../scripts/tests/deploy/local/exec/README.md) before using the matching helper.
 - For act-based workflow checks, see [Act Workflow Checks](../tools/act.md).
 - After a successful local deploy, run `make trust-ca` and restart your browser.
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Local app test without teardown/cleanup.
 # Usage:
-#   scripts/tests/deploy/local/app.sh <app-id>
+#   scripts/tests/deploy/local/deploy/fresh-kept-app.sh <app-id>
 #
 # Environment variables:
 #   INFINITO_DISTRO   arch|debian|ubuntu|fedora|centos (default from scripts/meta/env/all.sh)
@@ -12,14 +12,14 @@ set -euo pipefail
 #   DEBUG             true|false (default: true)
 #
 # Examples:
-#   scripts/tests/deploy/local/app.sh web-app-mailu
-#   INFINITO_DISTRO=arch DEBUG=false scripts/tests/deploy/local/app.sh web-app-nextcloud
+#   scripts/tests/deploy/local/deploy/fresh-kept-app.sh web-app-mailu
+#   INFINITO_DISTRO=arch DEBUG=false scripts/tests/deploy/local/deploy/fresh-kept-app.sh web-app-nextcloud
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 
 # shellcheck source=scripts/tests/deploy/local/utils/lib.sh
-source "${SCRIPT_DIR}/utils/lib.sh"
+source "${SCRIPT_DIR}/../utils/lib.sh"
 
 cd "${REPO_ROOT}"
 
@@ -36,7 +36,7 @@ fi
 usage() {
 	cat <<'EOF'
 Usage:
-  app.sh <app-id>
+  fresh-kept-app.sh <app-id>
 
 ENV:
   INFINITO_DISTRO=<arch|debian|ubuntu|fedora|centos>

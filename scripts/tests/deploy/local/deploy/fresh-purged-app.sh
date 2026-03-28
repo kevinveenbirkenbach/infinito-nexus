@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Local: Deploy exactly ONE app on ONE distro, twice, against the same stack.
+# Fresh-purged deploy: run exactly ONE app on ONE distro, twice, against the same stack.
 # Same logic as CI version, but WITHOUT destructive cleanup.
 #
 # Required env:
@@ -32,7 +32,7 @@ server | workstation | universal) ;;
 esac
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
 echo "=== LOCAL: distro=${INFINITO_DISTRO} type=${TEST_DEPLOY_TYPE} app=${APP} (debug always on) ==="
@@ -49,7 +49,7 @@ echo ">>> Pre-cleanup shared entities (host docker context)"
 target_container="infinito_nexus_${INFINITO_DISTRO}"
 APP='matomo' \
 	INFINITO_CONTAINER="${INFINITO_CONTAINER:-${target_container}}" \
-	scripts/tests/deploy/local/utils/purge/entity.sh
+	scripts/tests/deploy/local/purge/entity.sh
 
 echo ">>> Running entry.sh inside container"
 "${PYTHON}" -m cli.deploy.development exec \

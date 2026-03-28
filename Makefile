@@ -28,10 +28,10 @@ endif
 	apparmor-teardown apparmor-restore \
 	disable-ipv6 restore-ipv6 \
 	trust-ca \
-	restart inspect up down stop \
+	restart exec up down stop \
 	build build-missing build-no-cache build-no-cache-all build-cleanup \
 	act-all act-app act-workflow \
-	deploy-fresh-kept-app container-irefresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
+	deploy-fresh-kept-app container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
 	deploy-fresh-purged-app deploy-reuse-kept-app deploy-reuse-purged-app deploy-fresh-kept-all \
 	bootstrap setup-development
 
@@ -111,9 +111,9 @@ clean-sudo:
 restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
-# Inspect the running infinito container via scripts/tests/deploy/local/inspect.sh.
-inspect:
-	@bash scripts/tests/deploy/local/inspect.sh
+# Run a shell or command in the running container.
+exec:
+	@bash scripts/tests/deploy/local/exec/container.sh
 
 # Start the development stack.
 up: install
@@ -268,41 +268,41 @@ act-workflow:
 	@bash scripts/tests/deploy/act/workflow.sh
 
 # Refresh the container inventory without deploying apps.
-container-irefresh-inventory:
-	@bash scripts/tests/deploy/local/utils/reset.sh
+container-refresh-inventory:
+	@bash scripts/tests/deploy/local/reset/inventory.sh
 
 # Purge one or more app entities from the container.
 container-purge-entity:
-	@bash scripts/tests/deploy/local/utils/purge/entity.sh
+	@bash scripts/tests/deploy/local/purge/entity.sh
 
 # Purge the broader container-level deploy artifacts.
 container-purge-system: container-purge-entity
-	@bash scripts/tests/deploy/local/utils/purge/inventory.sh
-	@bash scripts/tests/deploy/local/utils/purge/web.sh
-	@bash scripts/tests/deploy/local/utils/purge/lib.sh
+	@bash scripts/tests/deploy/local/purge/inventory.sh
+	@bash scripts/tests/deploy/local/purge/web.sh
+	@bash scripts/tests/deploy/local/purge/lib.sh
 
 # Create a fresh inventory and deploy all apps.
 deploy-fresh-kept-all:
 	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
-	@bash scripts/tests/deploy/local/all.sh
+	@bash scripts/tests/deploy/local/deploy/fresh-kept-all.sh
 
 # Create a fresh inventory and deploy one app.
 deploy-fresh-kept-app:
 	@: "$${APP:?APP must be set (e.g. APP=web-app-nextcloud)}"
-	@bash scripts/tests/deploy/local/app.sh "$${APP}"
+	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APP}"
 
 # Recreate the stack and deploy one app with a purged entity.
 deploy-fresh-purged-app: down up
-	@bash scripts/tests/deploy/local/dedicated_distro.sh
+	@bash scripts/tests/deploy/local/deploy/fresh-purged-app.sh
 
 # Redeploy one app on an existing inventory.
 deploy-reuse-kept-app:
 	@DEBUG=true \
-	bash scripts/tests/deploy/local/rapid.sh
+	bash scripts/tests/deploy/local/deploy/reuse-kept-app.sh
 
 # Redeploy all apps on an existing inventory.
 deploy-reuse-kept-all:
-	@bash scripts/tests/deploy/local/run-all.sh
+	@bash scripts/tests/deploy/local/deploy/reuse-kept-all.sh
 
 # Purge one app entity, then redeploy it on existing inventory.
 deploy-reuse-purged-app: container-purge-entity

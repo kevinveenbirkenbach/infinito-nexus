@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Rapid deploy for a single app inside the running infinito container.
+# Reuse-kept deploy for a single app inside the running infinito container.
 # Expects (ALL required):
 #   APP                e.g. web-app-nextcloud
 #   TEST_DEPLOY_TYPE   server|workstation|universal

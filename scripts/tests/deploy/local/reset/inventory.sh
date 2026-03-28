@@ -28,7 +28,7 @@ echo ">>> Starting development compose stack (no build)"
 	--distro "${INFINITO_DISTRO}" \
 	--skip-entry-init
 
-# 2) Discover apps on HOST (same as local/all.sh)
+# 2) Discover apps on HOST (same as local/deploy/fresh-kept-all.sh)
 apps_json="$(
 	TEST_DEPLOY_TYPE="${TEST_DEPLOY_TYPE}" \
 		WHITELIST="${WHITELIST:-}" \
