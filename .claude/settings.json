@@ -1,0 +1,149 @@
+{
+  // Project-level Claude Code permissions for infinito-nexus.
+  // This file is committed to git and applies to all contributors.
+  // For personal overrides use .claude/settings.local.json (gitignored).
+  //
+  // Rule evaluation order: deny > ask > allow (first match wins).
+
+  "permissions": {
+
+    "allow": [
+
+      // ─── FILESYSTEM ──────────────────────────────────────────────────────
+
+      "Read",
+
+      // ─── GIT (local only) ────────────────────────────────────────────────
+
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(git checkout*)",
+      "Bash(git branch*)",
+      "Bash(git fetch*)",
+      "Bash(git stash*)",
+      "Bash(git -C:*)",
+
+      // ─── MAKE ────────────────────────────────────────────────────────────
+
+      "Bash(make*)",
+
+      // ─── PYTHON ──────────────────────────────────────────────────────────
+
+      "Bash(python3*)",
+      "Bash(python*)",
+      "Bash(pip show*)",
+      "Bash(pip list*)",
+      "Bash(pip install*)",
+
+      // ─── ANSIBLE ─────────────────────────────────────────────────────────
+
+      "Bash(ansible-lint*)",
+      "Bash(ansible-inventory*)",
+      "Bash(ansible --version*)",
+      "Bash(ansible-playbook --check*)",
+      "Bash(ansible-playbook --syntax-check*)",
+
+      // ─── DOCKER ──────────────────────────────────────────────────────────
+
+      "Bash(docker pull*)",
+      "Bash(docker build*)",
+      "Bash(docker images*)",
+      "Bash(docker ps*)",
+      "Bash(docker inspect*)",
+      "Bash(docker logs*)",
+      "Bash(docker create*)",
+      "Bash(docker export*)",
+      "Bash(docker rm*)",
+      "Bash(docker rmi*)",
+      "Bash(docker compose*)",
+
+      // ─── STANDARD UNIX TOOLS ─────────────────────────────────────────────
+
+      "Bash(grep*)",
+      "Bash(find*)",
+      "Bash(ls*)",
+      "Bash(cat*)",
+      "Bash(head*)",
+      "Bash(tail*)",
+      "Bash(wc*)",
+      "Bash(sort*)",
+      "Bash(tar*)",
+      "Bash(mkdir*)",
+      "Bash(cp*)",
+      "Bash(mv*)",
+      "Bash(jq*)",
+
+      // ─── WEB FETCH ───────────────────────────────────────────────────────
+
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:docs.ansible.com)",
+      "WebFetch(domain:docs.docker.com)",
+      "WebFetch(domain:docs.gitea.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:infinito.nexus)",
+      "WebFetch(domain:infinito.example)",
+      "WebFetch(domain:docs.infinito.nexus)",
+      "WebFetch(domain:s.infinito.nexus)",
+      "WebFetch(domain:hub.infinito.nexus)",
+      "WebFetch(domain:cybermaster.space)",
+      "WebFetch(domain:community.taiga.io)",
+      "WebFetch(domain:monogramm.io)",
+      "WebFetch(domain:ghcr.io)",
+      "WebFetch(domain:letsencrypt.org)",
+      "WebFetch(domain:hcaptcha.com)",
+      "WebFetch(domain:gstatic.com)"
+
+    ],
+
+    // ─── ALWAYS ASK ───────────────────────────────────────────────────────────
+
+    // ─── ALWAYS ASK ───────────────────────────────────────────────────────────
+    // docker run: root-equivalent without rootless Docker — ask to prevent
+    //   unintended privileged containers. Note: "make exec" already allows
+    //   shell access inside running containers via the Makefile.
+    // curl: unrestricted network access, can exfiltrate data or pipe remote
+    //   scripts to shell — WebFetch domain whitelist does NOT apply here.
+    "ask": [
+      "Bash(git push*)",
+      "Bash(docker run*)",
+      "Bash(curl*)"
+    ],
+
+    // ─── ALWAYS DENY ──────────────────────────────────────────────────────────
+
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Bash(rm -rf*)",
+      "Bash(sudo*)"
+    ]
+
+  },
+
+  // ─── SANDBOX ────────────────────────────────────────────────────────────────
+
+  "sandbox": {
+    "filesystem": {
+      // Allow writes within the project and common runtime directories
+      "allowWrite": [
+        ".",
+        "/tmp"
+      ],
+      // Protect sensitive paths outside the project
+      "denyRead": [
+        "~/.ssh",
+        "~/.gnupg",
+        "~/.kube",
+        "~/.aws",
+        "~/.config/gcloud"
+      ]
+    }
+  }
+
+}
