@@ -1,5 +1,3 @@
-[Back to Role](README.md)
-
 # `playwright.spec.js`
 
 This page is the SPOT for role-local Playwright test specs.

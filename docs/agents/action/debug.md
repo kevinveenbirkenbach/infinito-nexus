@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../../AGENTS.md)
-
 # Debugging
 
 Use the failure source to decide how to debug:

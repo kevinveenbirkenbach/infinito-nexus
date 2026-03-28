@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Contribution Flow
 
 This repository uses a strict fork-first workflow.

@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../../AGENTS.md)
-
 # Meta
 
 Use this section for repository-wide agent references.

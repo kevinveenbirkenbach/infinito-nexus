@@ -1,5 +1,3 @@
-[Back to Code](../README.md)
-
 # Role
 
 This directory is the SPOT for role-specific code guidance.

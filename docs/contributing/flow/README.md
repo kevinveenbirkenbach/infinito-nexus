@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Contribution Flow
 
 This directory is the entry point for the fork-first contribution process.

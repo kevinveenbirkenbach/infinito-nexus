@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../AGENTS.md)
-
 # Agent Instructions
 
 Use this directory as the index for the detailed agent guidance referenced by [AGENTS.md](../../AGENTS.md).

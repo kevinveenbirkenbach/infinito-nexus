@@ -1,5 +1,3 @@
-[Back to Role](README.md)
-
 # `style.css`
 
 This page is the SPOT for role-local CSS and theming.

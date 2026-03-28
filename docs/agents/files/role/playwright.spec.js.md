@@ -1,5 +1,3 @@
-[Back to Role Files](README.md)
-
 # playwright.spec.js
 
 This page is the SPOT for automatically generating and updating role-local `playwright.spec.js` files.

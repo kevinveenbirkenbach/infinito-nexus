@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../../AGENTS.md)
-
 # Development
 
 ## System

@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Review Requirements
 
 You MUST open a Pull Request only when it is ready for real review.

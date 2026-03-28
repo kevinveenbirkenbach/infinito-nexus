@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Development
 
 This directory is the SPOT for development workflow guidance.

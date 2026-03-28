@@ -1,5 +1,3 @@
-[Back to Code](../README.md)
-
 # Languages
 
 This directory is the SPOT for language-specific guidance.

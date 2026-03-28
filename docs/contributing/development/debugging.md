@@ -1,5 +1,3 @@
-[Back to Development](README.md)
-
 # CI Failures and Debugging
 
 If CI fails, follow a clean debugging workflow:

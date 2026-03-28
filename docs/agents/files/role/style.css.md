@@ -1,5 +1,3 @@
-[Back to Role Files](README.md)
-
 # `style.css`
 
 This page is the SPOT for automatically generating and updating role-local `style.css`, `style.css.j2`, and equivalent CSS entry files.

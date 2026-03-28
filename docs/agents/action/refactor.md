@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../../AGENTS.md)
-
 # Refactoring and Optimization
 
 ## After Every Commit

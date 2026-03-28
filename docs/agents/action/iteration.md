@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../../AGENTS.md)
-
 # Iteration
 
 Use this page when you are iterating on a local app deploy during debugging or development.

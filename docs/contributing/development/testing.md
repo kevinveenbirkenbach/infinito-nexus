@@ -1,5 +1,3 @@
-[Back to Development](README.md)
-
 # Testing and Validation
 
 Use the real commands from the repository. Run them from the repository root.

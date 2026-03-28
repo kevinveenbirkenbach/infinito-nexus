@@ -1,5 +1,3 @@
-[Back to Code](../README.md)
-
 # Frameworks
 
 This directory is the SPOT for framework-specific guidance.

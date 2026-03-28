@@ -1,5 +1,3 @@
-[Back to Frameworks](README.md)
-
 # Ansible
 
 Use this section for Ansible-specific guidance that applies across the repository.

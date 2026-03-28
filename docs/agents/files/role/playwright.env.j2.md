@@ -1,5 +1,3 @@
-[Back to Role Files](README.md)
-
 # playwright.env.j2
 
 This page is the SPOT for automatically generating and updating role-local `playwright.env.j2` files.

@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Code
 
 This directory is the SPOT for repository-wide code guidance.

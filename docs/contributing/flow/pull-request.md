@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Pull Request Templates
 
 You MUST pick the template that matches your change. The table below links the actual templates.

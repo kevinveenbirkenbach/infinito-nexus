@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Docker and Runtime Commands
 
 Use this page for the Docker/runtime context around the project.

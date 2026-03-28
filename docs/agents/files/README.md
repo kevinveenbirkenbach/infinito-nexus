@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../../AGENTS.md)
-
 # Files
 
 Use this section for file-specific agent guidance.

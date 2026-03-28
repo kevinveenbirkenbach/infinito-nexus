@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Tools
 
 This directory is the entry point for contributor tooling and agent guidance.

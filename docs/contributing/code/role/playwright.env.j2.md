@@ -1,5 +1,3 @@
-[Back to Role](README.md)
-
 # `playwright.env.j2`
 
 This page is the SPOT for role-local Playwright environment templates.

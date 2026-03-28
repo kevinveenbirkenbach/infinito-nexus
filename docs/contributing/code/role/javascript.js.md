@@ -1,5 +1,3 @@
-[Back to Role](README.md)
-
 # `javascript.js`
 
 This page is the SPOT for role-local JavaScript injection and browser-side integration behavior.

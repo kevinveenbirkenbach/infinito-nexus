@@ -1,5 +1,3 @@
-[Back to Code](README.md)
-
 # Code Principles
 
 Use these principles when you change repository code, scripts, or automation.

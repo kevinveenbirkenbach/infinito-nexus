@@ -1,5 +1,3 @@
-[Back to Files](../README.md)
-
 # Role Files
 
 Use this directory for instructions that describe how specific role files should be handled.

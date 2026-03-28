@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Development Environment
 
 This directory is the entry point for local setup, platform-specific instructions, and low-hardware guidance.

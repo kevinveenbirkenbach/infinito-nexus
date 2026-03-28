@@ -1,5 +1,3 @@
-[Back to Environment](README.md)
-
 # Manage Low-Hardware Resources
 
 Use this guide when you work on a machine with limited CPU, RAM, or disk.

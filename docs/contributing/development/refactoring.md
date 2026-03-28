@@ -1,5 +1,3 @@
-[Back to Development](README.md)
-
 # Refactoring
 
 Use this page when you reshape existing code without changing intended behavior.

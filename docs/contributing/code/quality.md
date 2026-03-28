@@ -1,5 +1,3 @@
-[Back to Code](README.md)
-
 # Code Quality
 
 Use this page for repository-wide guidance on diff shape, readability, cleanup, and linting.

@@ -1,5 +1,3 @@
-[Back to Environment](README.md)
-
 # Development Environment Setup
 
 Use the repository's real setup flow. The main source of truth is the [Makefile](../../../Makefile).

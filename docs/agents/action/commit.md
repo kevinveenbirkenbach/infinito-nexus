@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../../AGENTS.md)
-
 # Committing
 
 - You MUST run `make test` as the standard combined validation from [Testing and Validation](../../contributing/development/testing.md) before every commit whenever the staged change includes at least one file that is not `.md` or `.rst`, unless you are explicitly instructed not to.

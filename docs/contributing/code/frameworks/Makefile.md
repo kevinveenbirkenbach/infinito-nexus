@@ -1,5 +1,3 @@
-[Back to Frameworks](README.md)
-
 # Makefile
 
 Use this page for rules that shape the repository's `Makefile`.

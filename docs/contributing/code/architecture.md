@@ -1,5 +1,3 @@
-[Back to Code](README.md)
-
 # Repository Architecture
 
 This page explains how Infinito.Nexus is put together so contributors know where a change belongs and why the repository is shaped the way it is.

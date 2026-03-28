@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Makefile Commands
 
 Use these commands from the repository root. This is the SPOT for `make` targets in Infinito Nexus.

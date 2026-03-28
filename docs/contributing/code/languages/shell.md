@@ -1,5 +1,3 @@
-[Back to Languages](README.md)
-
 # Shell
 
 Use this page for shell-script-specific guidance.

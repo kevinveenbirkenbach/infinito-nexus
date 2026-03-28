@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Agent Guidelines for humans
 
 AI assistants are welcome, but they MUST follow the same workflow as humans.

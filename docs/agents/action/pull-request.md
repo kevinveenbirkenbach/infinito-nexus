@@ -1,5 +1,3 @@
-[Back to AGENTS hub](../../../AGENTS.md)
-
 # Pull Requests
 
 - You MUST choose the matching Pull Request template before you write a PR description.

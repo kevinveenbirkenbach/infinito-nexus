@@ -1,5 +1,3 @@
-[Back to Role Files](README.md)
-
 # javascript.js
 
 This page is the SPOT for automatically generating and updating role-local `javascript.js`, `javascript.js.j2`, and equivalent injected browser entry files.

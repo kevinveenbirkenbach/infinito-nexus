@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
-
 # Documentation
 
 All project documentation MUST be reachable at [docs.infinito.nexus](https://docs.infinito.nexus/).
