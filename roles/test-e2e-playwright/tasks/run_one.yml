@@ -71,6 +71,16 @@
     msg: "Missing Playwright spec file: {{ _playwright_spec_src }}"
   when: not _spec_stat.stat.exists
 
+- name: Check optional application vars file
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/roles/{{ application_id }}/vars/main.yml"
+  register: _playwright_app_vars_stat
+
+- name: Load optional application vars
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/roles/{{ application_id }}/vars/main.yml"
+  when: _playwright_app_vars_stat.stat.exists
+
 # Clean stage dir for deterministic results
 - name: Recreate staging directory
   ansible.builtin.file:

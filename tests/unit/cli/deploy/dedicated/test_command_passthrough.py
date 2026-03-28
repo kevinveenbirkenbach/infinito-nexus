@@ -25,7 +25,7 @@ class TestDedicatedCommandPassthrough(unittest.TestCase):
         mock_build_modes_from_args.return_value = {}
 
         argv = [
-            "/etc/inventories/github-ci/servers.yml",
+            "/etc/inventories/github-ci/devices.yml",
             "--diff",
             # passthrough args (unknown to wrapper parser)
             "--tags",
@@ -41,14 +41,14 @@ class TestDedicatedCommandPassthrough(unittest.TestCase):
         # validate_application_ids should be called with inventory + ids (empty list here)
         mock_validate_application_ids.assert_called_once()
         called_inventory, called_ids = mock_validate_application_ids.call_args.args
-        self.assertEqual(called_inventory, "/etc/inventories/github-ci/servers.yml")
+        self.assertEqual(called_inventory, "/etc/inventories/github-ci/devices.yml")
         self.assertEqual(called_ids, [])
 
         # run_ansible_playbook must be called once with ansible_args passthrough
         mock_run_ansible_playbook.assert_called_once()
         kwargs = mock_run_ansible_playbook.call_args.kwargs
 
-        self.assertEqual(kwargs["inventory"], "/etc/inventories/github-ci/servers.yml")
+        self.assertEqual(kwargs["inventory"], "/etc/inventories/github-ci/devices.yml")
         self.assertTrue(kwargs["diff"])
 
         self.assertIn("modes", kwargs)

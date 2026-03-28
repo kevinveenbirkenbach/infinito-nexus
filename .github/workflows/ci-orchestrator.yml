@@ -113,10 +113,6 @@ jobs:
     steps:
       - run: echo "lint gate passed"
 
-  # Docker image version check (warns about outdated images, never blocks)
-  test-docker-image-versions:
-    uses: ./.github/workflows/test-docker-image-versions.yml
-
   # Build Docker Images 
   build-ci-images:
     needs: fork-prereqs-ready
@@ -218,6 +214,13 @@ jobs:
     steps:
       - run: echo "Installation is possible via pkgmgr and make"
 
+  # Test Development Environment
+  test-development:
+    uses: ./.github/workflows/test-development.yml
+    needs:
+      - code-quality-gate
+    secrets: inherit
+
   done:
     name: 🏁 Finish pipeline
     needs:
@@ -226,6 +229,7 @@ jobs:
       - test-deploy-workstation
       - test-dev-environment-dashboard
       - test-install-gate
+      - test-development
     runs-on: ubuntu-latest
     steps:
       - name: Done

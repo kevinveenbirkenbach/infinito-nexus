@@ -237,11 +237,14 @@ class Compose:
 
         return cid
 
-    def wait_for_healthy(self, *, timeout_s: int = 200) -> None:
+    def wait_for_healthy(self, *, timeout_s: int | None = None) -> None:
         """
         Wait until infinito container is marked healthy by Docker.
         On timeout: print last 200 log lines for debugging.
         """
+        if timeout_s is None:
+            timeout_s = int(os.environ.get("INFINITO_WAIT_HEALTH_TIMEOUT_S", "200"))
+
         print(">>> Waiting for infinito container to become healthy")
 
         cid = self._get_infinito_container_id()

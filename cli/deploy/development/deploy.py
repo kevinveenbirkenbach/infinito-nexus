@@ -15,7 +15,7 @@ def _run_deploy(
     inventory_dir: str,
 ) -> int:
     inv_root = str(inventory_dir).rstrip("/")
-    inv_file = f"{inv_root}/servers.yml"
+    inv_file = f"{inv_root}/devices.yml"
     pw_file = f"{inv_root}/.password"
 
     cmd = [

@@ -3,11 +3,21 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: false
+    docker_compose_flush_handlers: true
 
 - name: "Ensure Pixelfed .env ownership and permissions for www-data"
   ansible.builtin.file:
-    path: "{{ lookup('container', application_id, 'files.env') }}"
-    owner: "33"
-    group: "33"
+    path: "{{ PIXELFED_ENV_FILE }}"
+    owner: "{{ PIXELFED_APP_USER }}"
+    group: "{{ PIXELFED_APP_USER }}"
     mode: "0660"
+
+- name: "Bootstrap the Pixelfed application"
+  ansible.builtin.import_tasks: 00_bootstrap.yml
+
+- name: "Bootstrap the Pixelfed administrator"
+  ansible.builtin.import_tasks: 01_administrator.yml
+
+- name: "Bootstrap the Pixelfed administrator OIDC mapping"
+  ansible.builtin.import_tasks: 02_oidc_mapping.yml
+  when: PIXELFED_OIDC_ENABLED | bool

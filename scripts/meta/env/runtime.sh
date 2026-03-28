@@ -22,3 +22,10 @@ if [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
 fi
 
 export RUNNING_ON_ACT RUNNING_ON_GITHUB
+
+if grep -qiE "microsoft|wsl" /proc/version 2>/dev/null; then
+	IS_WSL2="true"
+else
+	IS_WSL2="false"
+fi
+export IS_WSL2

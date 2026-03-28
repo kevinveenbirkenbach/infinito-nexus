@@ -25,8 +25,8 @@
       - "{{ MAILU_IP4_PUBLIC }}:993:993"
       - "{{ MAILU_IP4_PUBLIC }}:4190:4190"
     volumes:
-      - "{{ lookup('container', application_id, 'directories.volumes') }}overrides/nginx:/overrides:ro"
-      - "{{ cert_mount_directory }}:/certs:ro"
+      - "{{ [ MAILU_OVERRIDES_DIR, 'nginx' ] | path_join }}:/overrides:ro"
+      - "{{ MAILU_CERT_DIR }}:/certs:ro"
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_incl.yml.j2' %}
       resolver:
         condition: service_started
@@ -66,7 +66,7 @@
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "dovecot_mail:/mail"
-      - "{{ lookup('container', application_id, 'directories.volumes') }}overrides:/overrides:ro"
+      - "{{ MAILU_OVERRIDES_DIR }}:/overrides:ro"
     depends_on:
       - front
       - resolver
@@ -80,7 +80,7 @@
     image: {{ MAILU_DOCKER_FLAVOR }}/postfix:{{ MAILU_VERSION }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
-      - "{{ lookup('container', application_id, 'directories.volumes') }}overrides:/overrides:ro"
+      - "{{ MAILU_OVERRIDES_DIR }}:/overrides:ro"
       - "smtp_queue:/queue"
     depends_on:
       - front
@@ -171,7 +171,7 @@
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     volumes:
       - "webmail_data:/data"
-      - "{{ lookup('container', application_id, 'directories.volumes') }}overrides:/overrides:ro"
+      - "{{ MAILU_OVERRIDES_DIR }}:/overrides:ro"
     depends_on:
       - imap
       - front

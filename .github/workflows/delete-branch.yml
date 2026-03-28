@@ -21,4 +21,4 @@ jobs:
           BRANCH: ${{ github.event.ref }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
-        run: bash scripts/administration/actions/cancel_deleted_branch_runs.sh
+        run: bash scripts/github/cancel_deleted_branch_runs.sh

@@ -20,47 +20,80 @@ endif
 	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python \
 	test lint lint-action lint-ansible lint-python lint-shellcheck test-lint test-unit test-integration test-deploy test-deploy-app \
 	clean clean-sudo down \
+	purge-system purge-all \
 	list tree mig dockerignore \
 	print-python \
 	dns-setup dns-remove \
-	dev-environment-bootstrap dev-environment-teardown \
+	environment-bootstrap environment-teardown \
+	wsl2-systemd-check wsl2-dns-setup wsl2-trust-windows \
 	apparmor-teardown apparmor-restore \
 	disable-ipv6 restore-ipv6 \
 	trust-ca \
-	restart up down stop \
-	build build-missing build-no-cache build-no-cache-all cleanup-ci-images \
-	ci-deploy-app \
-	test-act-all test-act-app test-act-workflow \
-	test-local-app test-local-reset test-local-run-all test-local-cleanup test-local-web-purge \
-	test-local-rapid test-local-rapid-fresh test-local-full \
+	restart exec up down stop \
+	build build-missing build-no-cache build-no-cache-all build-cleanup \
+	act-all act-app act-workflow \
+	deploy-fresh-kept-app container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
+	deploy-fresh-purged-app deploy-reuse-kept-app deploy-reuse-purged-app deploy-fresh-kept-all \
 	bootstrap setup-development
 
-dev-environment-bootstrap: install-lint apparmor-teardown dns-setup disable-ipv6
-dev-environment-teardown: apparmor-restore dns-remove restore-ipv6
+# Bootstrap the local development environment.
+environment-bootstrap: wsl2-systemd-check install-lint apparmor-teardown dns-setup disable-ipv6
 
-dns-setup:
-	@bash scripts/administration/network/dns/setup.sh
+# Tear down the local development environment.
+environment-teardown: apparmor-restore dns-remove restore-ipv6
 
+# Enable systemd on WSL2.
+wsl2-systemd-check:
+	@bash scripts/system/systemd/enable/wsl2.sh
+
+# Set up DNS on WSL2.
+wsl2-dns-setup:
+	@sudo bash scripts/system/network/dns/setup/wsl.sh
+
+# Trust Windows certificates in WSL2.
+wsl2-trust-windows:
+	@bash scripts/system/tls/trust/wsl2.sh
+
+# Configure DNS on Linux.
+dns-setup: wsl2-dns-setup
+	@bash scripts/system/network/dns/setup/linux.sh
+
+# Remove the DNS configuration.
 dns-remove:
-	@bash scripts/administration/network/dns/remove.sh
+	@bash scripts/system/network/dns/remove.sh
 
+# Tear down AppArmor for local development.
 apparmor-teardown:
 	@echo "==> AppArmor: full teardown (local dev)"
-	@sudo bash scripts/administration/apparmor/teardown.sh
+	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
+		sudo bash scripts/system/apparmor/teardown.sh; \
+	else \
+		echo "[apparmor] AppArmor module is not loaded — skipping teardown"; \
+	fi
 
+# Restore AppArmor profiles.
 apparmor-restore:
 	@echo "==> AppArmor: restore profiles"
-	@sudo bash scripts/administration/apparmor/restore.sh
+	@if grep -q '^[Yy1]' /sys/module/apparmor/parameters/enabled 2>/dev/null; then \
+		sudo bash scripts/system/apparmor/restore.sh; \
+	else \
+		echo "[apparmor] AppArmor module is not loaded — skipping restore"; \
+	fi
 
+# Trust the local CA on Linux and WSL2.
 trust-ca:
-	@bash scripts/administration/trust_ca.sh
+	@bash scripts/system/tls/trust/linux.sh
+	@bash scripts/system/tls/trust/wsl2.sh
 
+# Disable IPv6 for local development.
 disable-ipv6:
-	@sudo bash scripts/administration/network/ipv6/disable.sh
+	@sudo bash scripts/system/network/ipv6/disable.sh
 
+# Restore IPv6 settings.
 restore-ipv6:
-	@sudo bash scripts/administration/network/ipv6/restore.sh
+	@sudo bash scripts/system/network/ipv6/restore.sh
 
+# Remove ignored files from the working tree.
 clean:
 	@echo "Removing ignored git files"
 	@if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then \
@@ -70,48 +103,70 @@ clean:
 		echo "WARNING: (cleanup continues)"; \
 	fi
 
+# Remove ignored files from the working tree with sudo.
 clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX;
 
+# Run the broad low-hardware cleanup routine.
+purge-system:
+	@bash scripts/system/purge/system.sh
+
+# Run the broadest cleanup bundle.
+purge-all:
+	@bash scripts/system/purge/all.sh
+
+# Restart the development stack.
 restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
+# Run a shell or command in the running container.
+exec:
+	@bash scripts/tests/deploy/local/exec/container.sh
+
+# Start the development stack.
 up: install
 	@"$${PYTHON}" -m cli.deploy.development up
 
+# Stop the development stack.
 down:
 	@"$${PYTHON}" -m cli.deploy.development down
 
+# Stop the development stack without removing volumes.
 stop:
 	@"$${PYTHON}" -m cli.deploy.development stop
 
+# Print the repository role list.
 list:
 	@echo "Generating the roles list"
 	@"$${PYTHON}" -m cli.build.roles_list
 
+# Print the repository tree.
 tree:
 	@echo "Generating Tree"
 	@"$${PYTHON}" -m cli.build.tree -D 2
 
+# Build the meta graph inputs.
 mig: list tree
 	@echo "Creating meta data for meta infinity graph"
 
-# ------------------------------------------------------------
-# Docker build targets (delegated to scripts/image)
-# ------------------------------------------------------------
+# Build the local image.
 build: dockerignore
 	@bash scripts/image/build.sh
 
+# Build the local image if it is missing.
 build-missing:
 	@bash scripts/image/build.sh --missing
 
+# Pull the build dependency image.
 build-dependency:
 	@docker pull ghcr.io/kevinveenbirkenbach/pkgmgr-$${INFINITO_DISTRO}:stable
 
+# Build the local image without cache.
 build-no-cache: build-dependency
 	@bash scripts/image/build.sh --no-cache
 
+# Build the no-cache image for every distro.
 build-no-cache-all:
 	@set -euo pipefail; \
 	for d in $${DISTROS}; do \
@@ -119,118 +174,145 @@ build-no-cache-all:
 	  INFINITO_DISTRO="$$d" "$(MAKE)" build-no-cache; \
 	done
 
-cleanup-ci-images:
+# Clean up image artifacts.
+build-cleanup:
 	@bash scripts/image/cleanup.sh
 
+# Regenerate .dockerignore from .gitignore.
 dockerignore:
 	@echo "Create dockerignore"
 	cat .gitignore > .dockerignore
 	echo ".git" >> .dockerignore
 
+# Install Ansible dependencies.
 install-ansible:
 	@ANSIBLE_COLLECTIONS_DIR="$(HOME)/.ansible/collections" \
 	bash scripts/install/ansible.sh
 
+# Install lint dependencies.
 install-lint:
 	@bash scripts/install/lint.sh
 
+# Install the system Python prerequisites.
 install-system-python:
 	@bash roles/dev-python/files/install.sh ensure
 
+# Install the virtual environment.
 install-venv: install-system-python
 	@bash scripts/install/venv.sh
 
+# Install Python tooling.
 install-python: install-venv
 	@bash scripts/install/python.sh lint
 
+# Install all runtime dependencies.
 install: install-python install-ansible
 
+# Run the setup step after generating .dockerignore.
 setup: dockerignore
 	@bash scripts/setup.sh
 
+# Create the development setup marker.
 setup-development: dockerignore
 	touch env.development
 
+# Install dependencies and prepare the project.
 bootstrap: install setup
 
+# Run setup after cleaning ignored files.
 setup-clean: clean setup
 	@echo "Full build with cleanup before was executed."
 
-# --- Lint ---
+# Run all lint checks.
 lint: lint-action lint-ansible lint-python lint-shellcheck
 
+# Run the GitHub Actions lint checks.
 lint-action:
 	@bash scripts/lint/action.sh
 
+# Run Ansible lint checks.
 lint-ansible:
 	@bash scripts/lint/ansible.sh
 
+# Run Python lint checks.
 lint-python:
 	@bash scripts/lint/python.sh
 
+# Run shellcheck lint checks.
 lint-shellcheck:
 	@bash scripts/lint/shellcheck.sh
 
-# --- Tests (separated) ---
+# Run the full test suite.
 test: lint test-lint test-unit test-integration test-deploy
 	@echo "✅ Full test (setup + tests) executed."
 
+# Run the lint test suite.
 test-lint: install
 	@TEST_TYPE="lint" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
+# Run the unit test suite.
 test-unit: install
 	@TEST_TYPE="unit" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
+# Run the integration test suite.
 test-integration: install
 	@TEST_TYPE="integration" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 
-ci-deploy-app:
-	@export MISSING_ONLY=true; \
-	export MAX_TOTAL_SECONDS=19800; \
-	./scripts/tests/deploy/ci/all_distros.sh
-
-test-act-all:
+# Run all act-based deploy checks.
+act-all:
 	@bash scripts/tests/deploy/act/all.sh
 
-test-act-app:
+# Run the act-based app deploy check.
+act-app:
 	@bash scripts/tests/deploy/act/app.sh
 
-test-act-workflow:
+# Run the act-based workflow deploy check.
+act-workflow:
 	@bash scripts/tests/deploy/act/workflow.sh
 
-test-local-app:
-	@: "$${APP:?APP must be set (e.g. APP=web-app-nextcloud)}"
-	@bash scripts/tests/deploy/local/app.sh "$${APP}"
+# Refresh the container inventory without deploying apps.
+container-refresh-inventory:
+	@bash scripts/tests/deploy/local/reset/inventory.sh
 
-test-local-reset:
-	@bash scripts/tests/deploy/local/utils/reset.sh
+# Purge one or more app entities from the container.
+container-purge-entity:
+	@bash scripts/tests/deploy/local/purge/entity.sh
 
-test-local-run-all:
-	@bash scripts/tests/deploy/local/run-all.sh
+# Purge the broader container-level deploy artifacts.
+container-purge-system: container-purge-entity
+	@bash scripts/tests/deploy/local/purge/inventory.sh
+	@bash scripts/tests/deploy/local/purge/web.sh
+	@bash scripts/tests/deploy/local/purge/lib.sh
 
-test-local-cleanup-entity:
-	@bash scripts/tests/deploy/local/utils/purge/entity.sh
-
-test-local-cleanup: test-local-cleanup-entity
-	@bash scripts/tests/deploy/local/utils/purge/inventory.sh
-	@bash scripts/tests/deploy/local/utils/purge/web.sh
-	@bash scripts/tests/deploy/local/utils/purge/lib.sh
-
-test-local-dedicated: down up
-	@bash scripts/tests/deploy/local/dedicated_distro.sh
-
-test-local-rapid:
-	@DEBUG=true \
-	bash scripts/tests/deploy/local/rapid.sh
-
-test-local-rapid-fresh: test-local-cleanup-entity test-local-rapid
-
-test-local-full:
+# Create a fresh inventory and deploy all apps.
+deploy-fresh-kept-all:
 	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
-	@bash scripts/tests/deploy/local/all.sh
+	@bash scripts/tests/deploy/local/deploy/fresh-kept-all.sh
+
+# Create a fresh inventory and deploy one app.
+deploy-fresh-kept-app:
+	@: "$${APP:?APP must be set (e.g. APP=web-app-nextcloud)}"
+	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APP}"
+
+# Recreate the stack and deploy one app with a purged entity.
+deploy-fresh-purged-app: down up
+	@bash scripts/tests/deploy/local/deploy/fresh-purged-app.sh
+
+# Redeploy one app on an existing inventory.
+deploy-reuse-kept-app:
+	@DEBUG=true \
+	bash scripts/tests/deploy/local/deploy/reuse-kept-app.sh
+
+# Redeploy all apps on an existing inventory.
+deploy-reuse-kept-all:
+	@bash scripts/tests/deploy/local/deploy/reuse-kept-all.sh
+
+# Purge one app entity, then redeploy it on existing inventory.
+deploy-reuse-purged-app: container-purge-entity
+	@$(MAKE) deploy-reuse-kept-app

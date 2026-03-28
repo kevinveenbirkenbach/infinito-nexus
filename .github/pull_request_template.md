@@ -1,94 +1,41 @@
-## Summary
+## Choose a Pull Request Template
 
-Briefly describe the purpose of this pull request.
+🙏 Thank you for your contribution to [https://Infinito.Nexus](https://Infinito.Nexus).
 
-Example:
+⚠️ Do not submit this chooser as the final pull request description.
 
-* Add new role for application X
-* Fix configuration issue in role Y
-* Improve container startup logic
+👀 Click `View` to render this chooser and make the buttons visible.
+Then select the template that best matches your change:
 
----
+[![Server](https://img.shields.io/badge/Server-web--*-0A7B83?style=for-the-badge)](?quick_pull=1&template=server.md)
+[![Workstation](https://img.shields.io/badge/Workstation-desk--*-2E6F40?style=for-the-badge)](?quick_pull=1&template=workstation.md)
+[![System](https://img.shields.io/badge/System-sys%2Fsvc%2Fdev-8B5E3C?style=for-the-badge)](?quick_pull=1&template=system.md)
 
-## Change Type
+[![Pipeline](https://img.shields.io/badge/Pipeline-CI%2FCD-7A3E9D?style=for-the-badge)](?quick_pull=1&template=pipeline.md)
+[![Agents](https://img.shields.io/badge/Agents-AGENTS%2FCLAUDE%2FGEMINI-9C2F2F?style=for-the-badge)](?quick_pull=1&template=agents.md)
+[![Documentation](https://img.shields.io/badge/Documentation-docs-1F5C99?style=for-the-badge)](?quick_pull=1&template=documentation.md)
 
-Select the semantic version impact of this change:
+### Fallback
 
-* [ ] **Major** – Breaking change (incompatible configuration or behaviour)
-* [ ] **Minor** – New feature or new role (backwards compatible)
-* [ ] **Patch** – Bugfix or internal improvement
+If the buttons do not work in your GitHub client, append one of these query parameters to the current pull request creation URL:
 
----
+* `&template=server.md`
+* `&template=workstation.md`
+* `&template=system.md`
+* `&template=pipeline.md`
+* `&template=agents.md`
+* `&template=documentation.md`
 
-## Impacted Areas
+### Contribution Guide
 
-Select affected components.
+📘 Repository-wide contribution and review expectations:
 
-* [ ] Role implementation
-* [ ] Configuration variables
-* [ ] Documentation
-* [ ] CI/CD
-* [ ] Security
+* [CONTRIBUTING.md](../CONTRIBUTING.md)
 
----
+### Need Help?
 
-## Description of Changes
+💬 If you need support choosing the right template or preparing your pull request:
 
-Explain what was changed and why.
-
-Key points:
-
-* What problem does this solve?
-* Why was this implementation chosen?
-* Are there alternative approaches?
-
----
-
-## Definition of Done (DoD)
-
-Please ensure all items are completed before requesting review.
-
-### Workflow
-
-* [ ] Contributions follow the [collaboration workflow](https://hub.infinito.nexus/t/working-with-folks-in-infinito-nexus/436).
-
-### Code Quality
-
-* [ ] Code follows repository conventions
-* [ ] Code and comments are written in English
-
-### Functionality
-
-* [ ] Feature works as expected
-
-### Testing
-
-* [ ] Changes tested locally
-* [ ] CI pipeline passes
-* [ ] E2E test introduced for web-* roles
-* [ ] Unit test integrated for *.py files
-* [ ] Integration test integrated for *.py files
-
-### Documentation
-
-* [ ] README.md's and other *.md updated
-* [ ] Link from this request to the https://project.infinito.nexus/ workitem and backwards
-* [ ] Workitem in https://project.infinito.nexus/ updated
-* [ ] Attach a **screenshot of the running application** from the local deployment.([📕local environment setup guide](https://hub.infinito.nexus/t/local-test-environment-deploy/435))
-
----
-
-## Checklist for Reviewer
-
-Reviewer should verify:
-
-* [ ] Code is understandable
-* [ ] Changes follow project guidelines
-* [ ] Documentation is adequate
-* [ ] No obvious security issues
-
----
-
-## Additional Notes
-
-Add anything reviewers should know.
+* [Support and Contact](../SUPPORT.md)
+* Hub: https://hub.infinito.nexus/
+* Matrix: `#public:infinito.nexus`

@@ -28,14 +28,68 @@ permissions:
   security-events: write
 
 jobs:
+  detect-pr-scope:
+    name: 🔎 Detect PR scope
+    if: ${{ github.event_name == 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository }}
+    runs-on: ubuntu-latest
+    outputs:
+      scope: ${{ steps.resolve.outputs.scope }}
+      run_ci_orchestrator: ${{ steps.resolve.outputs.run_ci_orchestrator }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Resolve PR scope
+        id: resolve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: ./scripts/meta/resolve/pr/scope.sh
+
+  validate-pr-branch-prefix:
+    name: 🧭 Validate PR branch prefix
+    needs: detect-pr-scope
+    if: ${{ github.event_name == 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate branch prefix for detected scope
+        env:
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          PR_SCOPE: ${{ needs.detect-pr-scope.outputs.scope }}
+        run: ./scripts/meta/resolve/pr/branch_prefix.sh
+
+  pr-scope-gate:
+    name: 🚦 Gate PR scope
+    needs:
+      - detect-pr-scope
+      - validate-pr-branch-prefix
+    if: ${{ needs.detect-pr-scope.outputs.run_ci_orchestrator == 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm lightweight PR scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Lightweight PR scope '${{ needs.detect-pr-scope.outputs.scope }}' passed."
+
   ci-orchestrator:
-    if: ${{ github.event_name == 'pull_request' }}
+    needs:
+      - detect-pr-scope
+      - validate-pr-branch-prefix
+    if: ${{ github.event_name == 'pull_request' && needs.detect-pr-scope.outputs.run_ci_orchestrator == 'true' }}
     uses: ./.github/workflows/ci-orchestrator.yml
     with:
       distros: "arch debian ubuntu fedora centos"
 
   prepare-fork-merge-ref:
-    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository }}
+    needs:
+      - detect-pr-scope
+      - validate-pr-branch-prefix
+    if: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.repo.full_name != github.repository && needs.detect-pr-scope.outputs.run_ci_orchestrator == 'true' }}
     runs-on: ubuntu-latest
     outputs:
       checkout_ref: ${{ steps.out.outputs.checkout_ref }}
@@ -49,7 +103,7 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha || '' }}
-        run: ./scripts/meta/resolve/pr_merge_ref.sh
+        run: ./scripts/meta/resolve/pr/merge_ref.sh
 
   build-ci-images-fork:
     needs: prepare-fork-merge-ref
