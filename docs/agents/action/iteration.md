@@ -20,3 +20,4 @@ Use this page when you are iterating on a local app deploy during debugging or d
 ## Inspect
 
 - Before you redeploy, you MUST complete all available inspections first. Check the live local output, local logs, and current browser state so the original state stays visible.
+- To inspect files or run commands inside a running container, use `make exec` (opens a shell in the Ansible controller container) or `docker exec -it <container> sh` for app-specific containers (e.g. the Taiga front container).
