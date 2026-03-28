@@ -47,7 +47,7 @@
       - "--username={{ PIXELFED_ADMIN_USERNAME }}"
       - "--email={{ PIXELFED_ADMIN_EMAIL }}"
       - "--password={{ PIXELFED_ADMIN_PASSWORD }}"
-      - --is_admin=true
+      - --is_admin=1
       - --confirm_email=1
   args:
     chdir: "{{ PIXELFED_INSTANCE_DIR }}"
