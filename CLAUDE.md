@@ -2,25 +2,18 @@
 
 ## Startup — MUST DO at the Start of Every Conversation
 
-You MUST execute this checklist at the start of every conversation before doing anything else:
+You MUST read `AGENTS.md` and follow all instructions in it at the start of every conversation before doing anything else. Do NOT skip this, even for short or simple requests.
 
-1. Read `AGENTS.md`.
-2. Read `docs/agents/README.md`.
-3. Read all files listed under "Read in Order" in `docs/agents/README.md`, in the given order.
-4. Read all files those files reference under their own "Read in Order" sections, recursively, once per file.
+## Interaction Rules
 
-Do NOT skip this checklist, even for short or simple requests.
+- Questions MUST NOT lead to modifications, manipulation of files, code, or state.
+- Only explicit commands MAY trigger modifications or manipulation.
 
-## Purpose
+## Configuration
 
-- `AGENTS.md` is the single source of truth for repository-wide agent instructions.
-- Use `CLAUDE.md` only for Claude-specific additions or clarifications that are not already covered by `AGENTS.md`.
+- Project-level permissions and sandbox rules are defined in [.claude/settings.json](.claude/settings.json).
+- See https://code.claude.com/docs/en/settings for documentation on how to modify it.
 
-## Current Status
+## Documentation
 
-- No Claude-specific additions are currently defined beyond the startup checklist above.
-
-## Further Information
-
-- https://code.claude.com/docs/en/overview
-- https://s.infinito.nexus/aibestpractice
+See the [Claude Code documentation](https://code.claude.com/docs/en/overview) for further information. For human contributor guidance on working with agents, see [here](docs/contributing/tools/agents.md).

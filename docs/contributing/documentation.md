@@ -33,6 +33,19 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in docu
 
 Apply these keywords in `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and all files under `docs/agents/` so that requirement strength is always unambiguous.
 
+## Links
+
+- You MUST NOT use the full URL as link text. Use the domain name, `here`, or the filename instead — never the full path.
+- For communication links such as Matrix, email, or phone, you MUST show only the value itself as link text, without any protocol prefix or URL wrapper.
+
+| Type | MUST NOT | MUST |
+|---|---|---|
+| Web link | `https://docs.infinito.nexus/setup` | `docs.infinito.nexus`, `here`, a descriptive label, or `setup.md` |
+| File link | `docs/contributing/flow/workflow.md` | `workflow.md` or `Contribution Flow` |
+| Email | `mailto:hello@infinito.nexus` | `hello@infinito.nexus` |
+| Matrix | `https://matrix.to/#/@user:infinito.nexus` | `@user:infinito.nexus` |
+| Phone | `tel:+491234567890` | `+49 123 456 7890` |
+
 ## Semantics and Writing
 
 - Keep code and comments in English.

@@ -1,7 +1,11 @@
 # Agent Instructions
 
-- You MUST treat `AGENTS.md` as the source of truth for agent-specific execution instructions.
-- You MUST read [CONTRIBUTING.md](CONTRIBUTING.md) as the SPOT for general contributor workflow, review, and coding standards, and recursively scan the contributor docs it references once to collect the general rules.
-- You MUST use [docs/agents/README.md](docs/agents/README.md) as the agent index, and recursively scan the agent docs it references once to collect the agent-specific execution flow.
-- You MUST use [docs/contributing/development/testing.md](docs/contributing/development/testing.md) for test execution and validation guidance.
-- You MUST apply [Code Principles](docs/contributing/code/principles.md) and let `CLAUDE.md` and `GEMINI.md` extend these rules without contradiction.
+## Priority and Scope
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) is the SPOT for general contributor workflow, coding standards, testing, and review. You MUST read it and recursively scan all files it references under `docs/contributing/`.
+- This file extends `CONTRIBUTING.md` with agent-specific execution instructions. In case of conflict, the rules in this file take precedence because they are more specific to automated execution.
+- You MUST recursively scan all files referenced under `docs/agents/` to collect the full agent-specific execution flow.
+
+## For Humans
+
+Human contributors working alongside AI agents MUST read [here](docs/contributing/tools/agents.md).
