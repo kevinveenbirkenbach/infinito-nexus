@@ -11,6 +11,8 @@
 
 - Use [CONTRIBUTING.md](../../../CONTRIBUTING.md) as the SPOT for the general development workflow, testing, review, and the code and development guides.
 - Treat the matching Pull Request template described in [Pull Request Templates](../../contributing/flow/pull-request.md) and stored in [PULL_REQUEST_TEMPLATE](../../../.github/PULL_REQUEST_TEMPLATE) as the SPOT for requirements, file checks, validation expectations, and the Definition of Done.
+- When you implement role-local CSS, check [Role `style.css`](../files/role/style.css.md) first so you can see how CSS should be implemented before you add or rewrite overrides.
+- When you implement role-local JavaScript, check [Role `javascript.js`](../files/role/javascript.js.md) first so you can see how browser-side behavior should be implemented before you add or rewrite injected scripts.
 - Start from the smallest app-specific change that can be validated locally, then expand only when the requirements or behavior demand it.
 - Keep the implementation, local validation, and PR template in sync so the app can be reviewed without guessing the intent.
 
