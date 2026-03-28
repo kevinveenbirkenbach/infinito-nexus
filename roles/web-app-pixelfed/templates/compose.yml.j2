@@ -4,8 +4,6 @@
     image: "{{ PIXELFED_IMAGE }}:{{ PIXELFED_VERSION }}"
     container_name: {{ PIXELFED_CONTAINER }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
-    env_file:
-      - "{{ PIXELFED_ENV_FILE }}"
     volumes:
       - "data:/var/www/storage"
       - "{{ PIXELFED_ENV_FILE }}:/var/www/.env"
@@ -22,8 +20,6 @@
       AUTORUN_LARAVEL_ROUTE_CACHE: "false"
       AUTORUN_LARAVEL_VIEW_CACHE: "false"
       AUTORUN_ENABLED: "false"
-    env_file:
-      - "{{ PIXELFED_ENV_FILE }}"
     volumes:
       - "data:/var/www/storage"
       - "{{ PIXELFED_ENV_FILE }}:/var/www/.env"
