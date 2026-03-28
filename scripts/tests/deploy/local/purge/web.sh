@@ -2,6 +2,6 @@
 set -euo pipefail
 
 docker exec "${INFINITO_CONTAINER}" bash -lc "
-  echo \">>> Cleaning up NGinxx configuration files\"
-  bash /opt/src/infinito/scripts/administration/purge_web.sh || true
+  echo \">>> Cleaning up Nginx configuration files\"
+  bash /opt/src/infinito/scripts/administration/purge/web.sh || true
 "
