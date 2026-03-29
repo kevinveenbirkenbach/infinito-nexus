@@ -19,13 +19,6 @@ assert_http_status() {
   echo "[OK] ${url} returned HTTP ${actual}"
 }
 
-# =============================================================================
-# Local test deployment — demonstrates how to deploy and verify Infinito.Nexus
-# locally. The steps below serve as a reference for debugging and manual
-# validation: they show the exact sequence used to bring up a clean environment,
-# deploy individual applications, and confirm they are reachable via HTTPS.
-# =============================================================================
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
@@ -35,10 +28,18 @@ cd "${REPO_ROOT}"
 # Install system-level package prerequisites for the repository toolchain.
 bash "${REPO_ROOT}/scripts/install/package.sh"
 
+# =============================================================================
+# Local test deployment — demonstrates how to deploy and verify Infinito.Nexus
+# locally. The steps below serve as a reference for debugging and manual
+# validation: they show the exact sequence used to bring up a clean environment,
+# deploy individual applications, and confirm they are reachable via HTTPS.
+# =============================================================================
+
 # Purge all local state: container inventory, Docker images, and system caches.
-# Simulates a fully cleaned environment before the install and deploy cycle.
-# Use this to verify that the full flow works from scratch without relying on
-# any cached state from a previous run.
+# Primarily intended for minimal-hardware environments where disk and memory
+# are scarce — frees space before the install and deploy cycle begins.
+# Also simulates a fully clean environment so the full flow is validated
+# without relying on any cached state from a previous run.
 make purge-all
 
 # Install Python tooling, Ansible collections, and all repository dependencies.
