@@ -9,7 +9,6 @@
       "Bash(git log*)",
       "Bash(git diff*)",
       "Bash(git add*)",
-      "Bash(git commit*)",
       "Bash(git checkout*)",
       "Bash(git branch*)",
       "Bash(git fetch*)",
@@ -80,6 +79,7 @@
     ],
 
     "ask": [
+      "Bash(git commit*)",
       "Bash(git push*)",
       "Bash(docker run*)",
       "Bash(curl*)"
