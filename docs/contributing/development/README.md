@@ -6,6 +6,7 @@ Use this page as the entry point for refactoring, testing, and debugging.
 
 ## Start Here
 
+- [Supported Systems](systems.md)
 - [Refactoring](refactoring.md)
 - [Testing and Validation](testing.md)
 - [CI Failures and Debugging](debugging.md)
