@@ -15,19 +15,6 @@ assert_http_status() {
   echo "[OK] ${url} returned HTTP ${actual}"
 }
 
-# Check that a URL does NOT respond with the given HTTP status code.
-# Usage: assert_http_status_not <excluded_code> <url>
-assert_http_status_not() {
-  local excluded="${1}"
-  local url="${2}"
-  local actual
-  actual="$(curl -sS -o /dev/null -w '%{http_code}' "${url}" || true)"
-  if [ "${actual}" = "${excluded}" ]; then
-    echo "[FAIL] ${url} returned HTTP ${actual}, which was not expected" >&2
-    exit 1
-  fi
-  echo "[OK] ${url} returned HTTP ${actual} (not ${excluded})"
-}
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
@@ -71,9 +58,9 @@ make trust-ca
 # Verify the dashboard is reachable (matomo was disabled, not the dashboard itself).
 assert_http_status 200 "${DASHBOARD_URL}"
 
-# Verify matomo is NOT reachable because it was excluded from the inventory.
-# Any non-200 response is acceptable (e.g. 404, 502, 503).
-assert_http_status_not 200 "${MATOMO_URL}"
+# Verify matomo is not reachable because it was excluded from the inventory.
+# The nginx proxy returns 404 when no upstream is configured for this host.
+assert_http_status 404 "${MATOMO_URL}"
 
 # Deploy web-app-matomo on top of the existing inventory so matomo becomes reachable.
 # web-app-matomo is chosen because it has few dependencies and deploys quickly,
