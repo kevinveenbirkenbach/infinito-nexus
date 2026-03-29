@@ -67,6 +67,9 @@ assert_http_status 404 "${MATOMO_URL}"
 # making it ideal for environment validation without excessive resource usage.
 make deploy-fresh-purged-app APPS="web-app-matomo"
 
+# Re-trust the CA after the fresh deploy rebuilt the certificates.
+make trust-ca
+
 # Verify matomo is now reachable after its dedicated deploy.
 assert_http_status 200 "${MATOMO_URL}"
 
