@@ -5,6 +5,10 @@ set -euo pipefail
 # Configuration — apps and URLs used throughout this script.
 # =============================================================================
 
+# web-app-dashboard is chosen as the first deploy target because it is lightweight
+# and has few dependencies, making it fast to deploy in CI and on minimal hardware.
+# web-app-matomo is chosen as the second target because it has few dependencies
+# and deploys quickly, making it ideal for environment validation.
 DASHBOARD_APP="web-app-dashboard"
 MATOMO_APP="web-app-matomo"
 DASHBOARD_URL="https://dashboard.infinito.example"
@@ -67,10 +71,8 @@ make up
 # Run the combined validation suite: lint, unit tests, and integration tests.
 make test
 
-# Deploy web-app-dashboard with matomo disabled to verify that SERVICES_DISABLED
-# correctly suppresses a shared service in the generated inventory.
-# web-app-dashboard is chosen as the host app because it is lightweight and
-# has few dependencies, making it fast to deploy in CI.
+# Deploy dashboard with matomo disabled to verify that SERVICES_DISABLED suppresses
+# the shared service in the generated inventory.
 SERVICES_DISABLED="matomo" make deploy-fresh-purged-app APPS="${DASHBOARD_APP}"
 
 # Trust the local CA certificate so HTTPS endpoints are reachable from the host.
@@ -83,9 +85,7 @@ assert_http_status 200 "${DASHBOARD_URL}"
 # The nginx proxy returns 404 when no upstream is configured for this host.
 assert_http_status 404 "${MATOMO_URL}"
 
-# Deploy web-app-matomo on top of the existing inventory so matomo becomes reachable.
-# web-app-matomo is chosen because it has few dependencies and deploys quickly,
-# making it ideal for environment validation without excessive resource usage.
+# Deploy matomo so it becomes reachable via its dedicated inventory entry.
 make deploy-fresh-purged-app APPS="${MATOMO_APP}"
 
 # Re-trust the CA after the fresh deploy rebuilt the certificates.
