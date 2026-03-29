@@ -1,9 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# web-app-matomo is chosen because it has few dependencies and deploys quickly,
-# making it ideal for environment validation without excessive resource usage.
-APPS="web-app-matomo"
+# Check that a URL responds with the expected HTTP status code.
+# Usage: assert_http_status <expected_code> <url>
+assert_http_status() {
+  local expected="${1}"
+  local url="${2}"
+  local actual
+  actual="$(curl -sS -o /dev/null -w '%{http_code}' "${url}" || true)"
+  if [ "${actual}" != "${expected}" ]; then
+    echo "[FAIL] ${url} returned HTTP ${actual}, expected ${expected}" >&2
+    exit 1
+  fi
+  echo "[OK] ${url} returned HTTP ${actual}"
+}
+
+# Check that a URL does NOT respond with the given HTTP status code.
+# Usage: assert_http_status_not <excluded_code> <url>
+assert_http_status_not() {
+  local excluded="${1}"
+  local url="${2}"
+  local actual
+  actual="$(curl -sS -o /dev/null -w '%{http_code}' "${url}" || true)"
+  if [ "${actual}" = "${excluded}" ]; then
+    echo "[FAIL] ${url} returned HTTP ${actual}, which was not expected" >&2
+    exit 1
+  fi
+  echo "[OK] ${url} returned HTTP ${actual} (not ${excluded})"
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
@@ -31,17 +56,32 @@ make up
 # Run the combined validation suite: lint, unit tests, and integration tests.
 make test
 
-# Create a fresh inventory, purge prior app state, and deploy the target app(s).
-make deploy-fresh-purged-app APPS="${APPS}"
+DASHBOARD_URL="https://dashboard.infinito.example"
+MATOMO_URL="https://matomo.infinito.example"
+
+# Deploy web-app-dashboard with matomo disabled to verify that SERVICES_DISABLED
+# correctly suppresses a shared service in the generated inventory.
+# web-app-dashboard is chosen as the host app because it is lightweight and
+# has few dependencies, making it fast to deploy in CI.
+SERVICES_DISABLED="matomo" make deploy-fresh-purged-app APPS="web-app-dashboard"
 
 # Trust the local CA certificate so HTTPS endpoints are reachable from the host.
 make trust-ca
 
-MATOMO_URL="https://matomo.infinito.example"
+# Verify the dashboard is reachable (matomo was disabled, not the dashboard itself).
+assert_http_status 200 "${DASHBOARD_URL}"
 
-# Verify the deployed app responds with HTTP 200.
-echo "Checking matomo URL: ${MATOMO_URL}"
-curl -sS -o /dev/null -w '%{http_code}\n' "${MATOMO_URL}" | grep -qx '200'
+# Verify matomo is NOT reachable because it was excluded from the inventory.
+# Any non-200 response is acceptable (e.g. 404, 502, 503).
+assert_http_status_not 200 "${MATOMO_URL}"
+
+# Deploy web-app-matomo on top of the existing inventory so matomo becomes reachable.
+# web-app-matomo is chosen because it has few dependencies and deploys quickly,
+# making it ideal for environment validation without excessive resource usage.
+make deploy-fresh-purged-app APPS="web-app-matomo"
+
+# Verify matomo is now reachable after its dedicated deploy.
+assert_http_status 200 "${MATOMO_URL}"
 
 # Stop the compose stack and remove all volumes for a clean teardown.
 make down
