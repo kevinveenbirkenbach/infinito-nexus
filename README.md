@@ -64,15 +64,14 @@ Try [Infinito.Nexus](https://infinito.nexus) – sign up in seconds, explore the
 
 For the full development setup, contribution workflow, testing, and coding standards, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
----
-
 ## License ⚖️
 
 Infinito.Nexus is distributed under the **Infinito.Nexus Community License (Non-Commercial)**. Please see [LICENSE.md](LICENSE.md) for full terms.
 
----
+## 🛡️ Security
+
+For security reporting and disclosure, see [SECURITY.md](SECURITY.md).
 
 ## Support and Contact 💼
 
 For expert installation, contact details, and project participation, see [SUPPORT.md](SUPPORT.md).
-For security reporting and disclosure, see [SECURITY.md](SECURITY.md).

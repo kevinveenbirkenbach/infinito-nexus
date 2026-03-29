@@ -7,4 +7,4 @@ Use this page when you reshape existing code without changing intended behavior.
 - If similar logic exists elsewhere in the project, you SHOULD refactor it toward a shared implementation.
 - You SHOULD separate mechanical cleanup from behavior changes when that lowers risk.
 
-For related expectations, see [Code](../code/README.md).
+For related expectations, see [Code](../code/quality.md).

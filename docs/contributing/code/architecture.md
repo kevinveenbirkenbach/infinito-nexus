@@ -75,8 +75,8 @@ The main entry points are:
 - `Makefile`
 - `scripts/`
 - `tests/`
-- `docs/contributing/code/README.md`
-- `docs/contributing/development/README.md`
+- `docs/contributing/code/quality.md`
+- `docs/contributing/development/testing.md`
 - `docs/contributing/`
 
 Those layers keep local development, CI, and production behavior closer together.
@@ -191,8 +191,8 @@ If you are trying to understand a change, start here:
 - `roles/` for behavior
 - `inventories/bundles/` for deployment shapes
 - `Makefile` and `scripts/` for supported commands
-- `docs/contributing/code/README.md` for code and framework rules
-- `docs/contributing/development/README.md` for refactoring, debugging, and testing
+- `docs/contributing/code/quality.md` for code and framework rules
+- `docs/contributing/development/testing.md` for refactoring, debugging, and testing
 - `docs/contributing/` for workflow and constraints
 - `tests/` for the expected contracts
 

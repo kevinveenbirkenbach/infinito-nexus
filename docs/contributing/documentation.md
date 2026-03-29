@@ -2,12 +2,6 @@
 
 All project documentation MUST be reachable at [docs.infinito.nexus](https://docs.infinito.nexus/).
 
-## Markdown
-
-- You MUST keep core information inside the repository, either in code or in `.md` files.
-- You MUST use `.md` files for commands, workflows, setup, and contributor guidance.
-- You MUST NOT use `.md` files to describe implementation logic that is already visible in the code.
-
 ## Comments
 
 - You SHOULD write code so it is logical and self-explanatory and usually does not need comments.
@@ -50,10 +44,16 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 ## Documentation Structure
 
 ### Markdown
-
 - You SHOULD prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
+- You MUST NOT place `README.md` files under `docs/`.
+  Documentation files MUST be cross-linked to each other directly instead.
+  All content under `docs/` is automatically indexed via the root `index.rst` toctree glob (`docs/**`) — no per-directory index files are needed.
+- You MUST keep core information inside the repository, either in code or in `.md` files.
+- You MUST use `.md` files for commands, workflows, setup, and contributor guidance.
+- You MUST NOT use `.md` files to describe implementation logic that is already visible in the code.
 
 ### Sphinx
 
-- If a documentation directory does not already have a `README.md`, you SHOULD add an `index.rst` where it helps automated docs generation.
-- You MUST keep Sphinx-friendly directory indexes up to date so the published documentation can include new content without extra wiring.
+- The root `index.rst` uses a `:glob:` toctree (`docs/**`) to automatically include every documentation page.
+  You MUST NOT add a separate `index.rst` or `README.md` inside any `docs/` subdirectory.
+- You MUST keep cross-links between `.md` files up to date so readers can navigate between related pages.
