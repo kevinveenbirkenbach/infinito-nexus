@@ -6,7 +6,7 @@ import json
 import os
 from typing import Any, Dict
 
-from .common import make_compose, resolve_deploy_ids_for_app
+from .common import make_compose, resolve_deploy_ids_for_apps
 from .mirrors import generate_ci_mirrors_file, should_use_mirrors_on_ci
 from .storage import detect_storage_constrained
 from ...meta.runtime import detect_runtime
@@ -128,7 +128,7 @@ def handler(args: argparse.Namespace) -> int:
     compose = make_compose(distro=args.distro)
 
     if args.app:
-        include = resolve_deploy_ids_for_app(compose, args.app)
+        include = resolve_deploy_ids_for_apps(compose, args.app)
     else:
         include = [x.strip() for x in (args.include or "").split(",") if x.strip()]
 

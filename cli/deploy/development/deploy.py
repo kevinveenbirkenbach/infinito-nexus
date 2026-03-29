@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from .common import make_compose, resolve_deploy_ids_for_app
+from .common import make_compose, resolve_deploy_ids_for_apps
 
 
 def _run_deploy(
@@ -100,7 +100,7 @@ def handler(args: argparse.Namespace) -> int:
     compose = make_compose(distro=args.distro)
 
     if args.app:
-        deploy_ids = resolve_deploy_ids_for_app(compose, args.app)
+        deploy_ids = resolve_deploy_ids_for_apps(compose, args.app)
     else:
         deploy_ids = list(args.id or [])
 
