@@ -6,7 +6,8 @@ usage() {
 Usage:
   system.sh [--help]
 
-Runs the repository's broad low-hardware cleanup pass used by make purge-system.
+Runs the repository's full cleanup pass used by make system-purge.
+Includes GHCR image cleanup, git state, Docker, host caches, and Windows cleanup.
 
 The routine is best-effort:
 - skips commands that are not available on the current host
@@ -219,8 +220,13 @@ purge_windows() {
 	run_step "Shutting down WSL2" "${windows_system32}/wsl.exe" --shutdown
 }
 
+purge_images() {
+	run_step "Cleaning up GHCR image artifacts" bash scripts/image/cleanup.sh
+}
+
 log "Running low-hardware cleanup from ${REPO_ROOT}"
 
+purge_images
 purge_git_state
 purge_docker
 purge_host_caches

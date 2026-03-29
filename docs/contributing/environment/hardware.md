@@ -93,11 +93,7 @@ Use `make deploy-fresh-kept-all` only when you need broad coverage and have enou
 Before cleaning up, check what is actually consuming space:
 
 ```bash
-docker system df
-docker ps -a
-docker images
-journalctl --disk-usage
-df -h
+make system-disk-usage
 ```
 
 That makes it easier to see whether the real issue is Docker, journald, a package cache, or project state.
@@ -106,7 +102,7 @@ That makes it easier to see whether the real issue is Docker, journald, a packag
 
 The cleanup SPOT is the [purge guide](../../../scripts/system/purge/README.md). Use that page for the canonical entry points.
 
-For the one-time Windows `cleanmgr /sageset:1` setup, set `PURGE_WINDOWS_CLEANMGR_SETUP=true` before you run `make purge-system`.
+For the one-time Windows `cleanmgr /sageset:1` setup, set `PURGE_WINDOWS_CLEANMGR_SETUP=true` before you run `make system-purge`.
 
 For related local helpers, see the [local purge guide](../../../scripts/tests/deploy/local/purge/README.md) and the [local reset guide](../../../scripts/tests/deploy/local/reset/README.md).
 

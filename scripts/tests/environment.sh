@@ -41,14 +41,17 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "${REPO_ROOT}"
 
 # =============================================================================
-# System — install package prerequisites and purge cached state for a clean baseline.
+# System — install package prerequisites and purge cached state.
 # =============================================================================
 
 # Install system-level package prerequisites for the repository toolchain.
 bash "${REPO_ROOT}/scripts/install/package.sh"
 
+# Show current disk and Docker resource usage before purging.
+make system-disk-usage
+
 # Required on minimal-hardware systems to free disk and memory before the deploy.
-make purge-all
+make system-purge
 
 # =============================================================================
 # Bootstrap — install dependencies and prepare the environment for deployment.

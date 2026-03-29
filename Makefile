@@ -20,7 +20,7 @@ endif
 	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python \
 	test lint lint-action lint-ansible lint-python lint-shellcheck test-lint test-unit test-integration test-deploy test-deploy-app \
 	clean clean-sudo down \
-	purge-system purge-all \
+	system-purge system-disk-usage \
 	list tree mig dockerignore \
 	print-python \
 	dns-setup dns-remove \
@@ -108,13 +108,13 @@ clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX;
 
-# Run the broad low-hardware cleanup routine.
-purge-system:
-	@bash scripts/system/purge/system.sh
+# Show disk and Docker resource usage to identify what to clean up.
+system-disk-usage:
+	@bash scripts/system/meta/disk-usage.sh
 
-# Run the broadest cleanup bundle.
-purge-all:
-	@bash scripts/system/purge/all.sh
+# Run the broad low-hardware cleanup routine.
+system-purge:
+	@bash scripts/system/purge/system.sh
 
 # Restart the development stack.
 restart:

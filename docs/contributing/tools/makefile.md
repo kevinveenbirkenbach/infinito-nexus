@@ -40,6 +40,8 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Trust local CA | `make trust-ca` | Trusts the local CA on Linux and WSL2. | Use this after the CA or host entries change. |
 | Disable IPv6 | `make disable-ipv6` | Disables IPv6 for local development. | Use this when a workflow needs IPv6 off. |
 | Restore IPv6 | `make restore-ipv6` | Restores the previous IPv6 settings. | Use this after a temporary IPv6 change. |
+| AppArmor teardown | `make apparmor-teardown` | Disables AppArmor profiles for local development. | Use this when AppArmor interferes with local services. |
+| AppArmor restore | `make apparmor-restore` | Restores AppArmor profiles after a teardown. | Use this after a temporary AppArmor disable. |
 
 ## Repository Setup and Discovery
 
@@ -98,10 +100,10 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
+| Disk usage | `make system-disk-usage` | Shows current disk and Docker resource usage. | Use this before cleaning up to identify what is consuming space. |
 | Remove ignored files | `make clean` | Removes ignored files from the working tree. | Use this when you want to clear generated files without sudo. |
 | Remove ignored files with sudo | `make clean-sudo` | Removes ignored files from the working tree with elevated privileges. | Use this when file ownership prevents a normal clean. |
-| System purge | `make purge-system` | Runs `scripts/system/purge/system.sh` to clear repository, Docker, journald, package, and language caches. | Use this when disk usage is tight or you want the broad low-hardware cleanup pass. |
-| Full purge | `make purge-all` | Runs `scripts/system/purge/all.sh`, which chains `make container-purge-system`, `make build-cleanup`, and `make purge-system`. | Use this when you want the broadest local cleanup bundle. |
+| System purge | `make system-purge` | Runs `scripts/system/purge/system.sh` to clear repository, Docker, journald, package, and language caches. | Use this when disk usage is tight or you want the broad low-hardware cleanup pass. |
 | Refresh inventory | `make container-refresh-inventory` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |
 | Purge app entity | `make container-purge-entity` | Purges one or more app entities inside the running container. | Use this before rerunning a purged app deployment. |
 | Purge container state | `make container-purge-system` | Removes inventory, web config, and lib state in the running container. | Use this when you want a destructive local container reset. |
