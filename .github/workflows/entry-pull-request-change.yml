@@ -108,7 +108,7 @@ jobs:
 
   build-ci-images-fork:
     needs: prepare-fork-merge-ref
-    uses: ./.github/workflows/build-ci-images.yml
+    uses: ./.github/workflows/images-build-ci.yml
     with:
       distros: "arch debian ubuntu fedora centos"
       checkout_ref: ${{ needs.prepare-fork-merge-ref.outputs.checkout_ref }}

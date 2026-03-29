@@ -65,7 +65,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WORKFLOW_FILE: entry-pull-request.yml
+          WORKFLOW_FILE: entry-pull-request-change.yml
           TARGET_EVENT: pull_request_target
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -116,7 +116,7 @@ jobs:
   # Build Docker Images 
   build-ci-images:
     needs: fork-prereqs-ready
-    uses: ./.github/workflows/build-ci-images.yml
+    uses: ./.github/workflows/images-build-ci.yml
     with:
       distros: "arch debian ubuntu fedora centos"
       concurrency_channel: ci-orchestrator-build-consumer
