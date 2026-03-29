@@ -38,9 +38,6 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # pkgmgr images may reset the working directory before invoking this script.
 cd "${REPO_ROOT}"
 
-# Install system-level package prerequisites for the repository toolchain.
-bash "${REPO_ROOT}/scripts/install/package.sh"
-
 # =============================================================================
 # Local test deployment — demonstrates how to deploy and verify Infinito.Nexus
 # locally. The steps below serve as a reference for debugging and manual
@@ -49,8 +46,11 @@ bash "${REPO_ROOT}/scripts/install/package.sh"
 # =============================================================================
 
 # =============================================================================
-# System — purge cached state to free resources and ensure a clean baseline.
+# System — install package prerequisites and purge cached state for a clean baseline.
 # =============================================================================
+
+# Install system-level package prerequisites for the repository toolchain.
+bash "${REPO_ROOT}/scripts/install/package.sh"
 
 # Purge all local state: container inventory, Docker images, and system caches.
 # Primarily intended for minimal-hardware environments where disk and memory
