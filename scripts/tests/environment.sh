@@ -73,6 +73,11 @@ make trust-ca
 # Verify matomo is now reachable after its dedicated deploy.
 assert_http_status 200 "${MATOMO_URL}"
 
+# Verify the dashboard is no longer reachable. deploy-fresh-purged-app purges the
+# previous inventory and containers before deploying, so web-app-dashboard is gone
+# after the matomo-only deploy. nginx returns 404 for unconfigured upstreams.
+assert_http_status 404 "${DASHBOARD_URL}"
+
 # Stop the compose stack and remove all volumes for a clean teardown.
 make down
 
