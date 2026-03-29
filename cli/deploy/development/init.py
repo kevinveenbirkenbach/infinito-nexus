@@ -96,8 +96,8 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument(
-        "--app",
-        help="Application id (will include run_after deps automatically).",
+        "--apps",
+        help="One or more application ids (will include run_after deps automatically).",
     )
     g.add_argument(
         "--include",
@@ -127,8 +127,8 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 def handler(args: argparse.Namespace) -> int:
     compose = make_compose(distro=args.distro)
 
-    if args.app:
-        include = resolve_deploy_ids_for_apps(compose, args.app)
+    if args.apps:
+        include = resolve_deploy_ids_for_apps(compose, args.apps)
     else:
         include = [x.strip() for x in (args.include or "").split(",") if x.strip()]
 

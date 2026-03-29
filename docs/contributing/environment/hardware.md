@@ -82,13 +82,13 @@ On small machines, limit validation to the role you are touching.
 For Discourse, start with:
 
 ```bash
-APP=web-app-discourse make deploy-fresh-purged-app
+APPS=web-app-discourse make deploy-fresh-purged-app
 ```
 
 If the local inventory and stack already exist, reuse them:
 
 ```bash
-APP=web-app-discourse make deploy-reuse-kept-app
+APPS=web-app-discourse make deploy-reuse-kept-app
 ```
 
 Use `make deploy-fresh-kept-all` only when you need broad coverage and have enough time and resources.

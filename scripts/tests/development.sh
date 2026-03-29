@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP="${APP:-web-app-matomo}"
+APPS="${APPS:-web-app-matomo}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
@@ -13,7 +13,7 @@ make install
 make environment-bootstrap
 make up
 make test
-make deploy-fresh-purged-app APP="${APP}"
+make deploy-fresh-purged-app APPS="${APPS}"
 make trust-ca
 
 MATOMO_URL="https://matomo.infinito.example"

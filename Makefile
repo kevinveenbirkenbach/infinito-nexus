@@ -297,8 +297,8 @@ deploy-fresh-kept-all:
 
 # Create a fresh inventory and deploy one app.
 deploy-fresh-kept-app:
-	@: "$${APP:?APP must be set (e.g. APP=web-app-nextcloud)}"
-	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APP}"
+	@: "$${APPS:?APPS must be set (e.g. APPS=web-app-nextcloud)}"
+	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APPS}"
 
 # Recreate the stack and deploy one app with a purged entity.
 deploy-fresh-purged-app: down up

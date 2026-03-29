@@ -3,13 +3,13 @@ set -euo pipefail
 
 # Reuse-kept deploy for a single app inside the running infinito container.
 # Expects (ALL required):
-#   APP                e.g. web-app-nextcloud
+#   APPS               e.g. web-app-nextcloud
 #   TEST_DEPLOY_TYPE   server|workstation|universal
 #   INFINITO_CONTAINER e.g. infinito_nexus_arch
 #   DEBUG              true|false
 #   INVENTORY_DIR      e.g. /etc/inventories/local-full-server
 
-: "${APP:?APP is not set (e.g. APP=web-app-nextcloud)}"
+: "${APPS:?APPS is not set (e.g. APPS=web-app-nextcloud)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is not set (server|workstation|universal)}"
 : "${INFINITO_CONTAINER:?INFINITO_CONTAINER is not set (e.g. infinito_nexus_arch)}"
 : "${DEBUG:?DEBUG is not set (true|false)}"
@@ -35,7 +35,7 @@ true | false) ;;
 	;;
 esac
 
-echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APP} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
+echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APPS} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
 echo "inventory_dir=${INVENTORY_DIR}"
 
 docker exec "${INFINITO_CONTAINER}" bash -c "
@@ -59,7 +59,7 @@ docker exec "${INFINITO_CONTAINER}" bash -c "
   cmd=(infinito deploy dedicated \"${inv_file}\"
     --skip-backup
     --skip-cleanup
-    --id ${APP}
+    --id ${APPS}
     -l localhost
     --diff
     -vv

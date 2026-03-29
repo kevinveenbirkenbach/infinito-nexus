@@ -8,7 +8,7 @@ set -euo pipefail
 #   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
 #   INVENTORY_DIR       /etc/inventories/local-full-server
 #   TEST_DEPLOY_TYPE    server|workstation|universal
-#   APP                 web-app-*
+#   APPS                web-app-*
 #
 # Optional:
 #   PYTHON=python3
@@ -19,7 +19,7 @@ PYTHON="${PYTHON:-python3}"
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (e.g. arch)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
-: "${APP:?APP must be set (e.g. web-app-keycloak)}"
+: "${APPS:?APPS must be set (e.g. web-app-keycloak)}"
 
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
 
@@ -35,7 +35,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
-echo "=== LOCAL: distro=${INFINITO_DISTRO} type=${TEST_DEPLOY_TYPE} app=${APP} (debug always on) ==="
+echo "=== LOCAL: distro=${INFINITO_DISTRO} type=${TEST_DEPLOY_TYPE} app=${APPS} (debug always on) ==="
 echo "limit_host=${LIMIT_HOST}"
 echo "inventory_dir=${INVENTORY_DIR}"
 echo
@@ -47,7 +47,7 @@ echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 
 echo ">>> Pre-cleanup shared entities (host docker context)"
 target_container="infinito_nexus_${INFINITO_DISTRO}"
-APP='matomo' \
+APPS='matomo' \
 	INFINITO_CONTAINER="${INFINITO_CONTAINER:-${target_container}}" \
 	scripts/tests/deploy/local/purge/entity.sh
 
@@ -64,7 +64,7 @@ echo ">>> Running entry.sh inside container"
 
 deploy_args=(
 	--distro "${INFINITO_DISTRO}"
-	--app "${APP}"
+	--apps "${APPS}"
 	--inventory-dir "${INVENTORY_DIR}"
 	--debug
 )
@@ -72,7 +72,7 @@ deploy_args=(
 echo ">>> PASS 1: init inventory (ASYNC_ENABLED=false)"
 "${PYTHON}" -m cli.deploy.development init \
 	--distro "${INFINITO_DISTRO}" \
-	--app "${APP}" \
+	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": false}'
 
@@ -82,7 +82,7 @@ echo ">>> PASS 1: deploy"
 echo ">>> PASS 2: re-init inventory (ASYNC_ENABLED=true)"
 "${PYTHON}" -m cli.deploy.development init \
 	--distro "${INFINITO_DISTRO}" \
-	--app "${APP}" \
+	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": true}'
 

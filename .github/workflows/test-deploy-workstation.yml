@@ -65,7 +65,7 @@ jobs:
           echo "apps_json=$apps"
 
   workstation:
-    name: 🖥️ Deploy ${{ matrix.app }}
+    name: 🖥️ Deploy ${{ matrix.apps }}
     if: needs.discover.outputs.apps != '' && needs.discover.outputs.apps != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -74,7 +74,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: ${{ fromJson(needs.discover.outputs.apps) }}
+        apps: ${{ fromJson(needs.discover.outputs.apps) }}
 
     steps:
       - uses: actions/checkout@v6
@@ -92,5 +92,5 @@ jobs:
       - name: Deploy app
         shell: bash
         env:
-          APP: ${{ matrix.app }}
+          APPS: ${{ matrix.apps }}
         run: ./scripts/tests/deploy/ci/all.sh
