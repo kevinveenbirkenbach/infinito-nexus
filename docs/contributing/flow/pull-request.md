@@ -1,4 +1,6 @@
-# Pull Request Templates
+# Pull Request
+
+## Templates
 
 You MUST pick the template that matches your change. The table below links the actual templates.
 
@@ -11,11 +13,11 @@ You MUST pick the template that matches your change. The table below links the a
 | Documentation-only changes limited to `.md` or `.rst` files outside `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and `docs/agents/*` | [documentation.md](../../../.github/PULL_REQUEST_TEMPLATE/documentation.md) |
 | Agent-specific changes limited to `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, or `docs/agents/*` | [agents.md](../../../.github/PULL_REQUEST_TEMPLATE/agents.md) |
 
-## Pull Request Workflow Scope
+## Branch Naming
 
 Branch names MUST follow the naming conventions defined in [branch.md](branch.md). The branch prefix MUST match the type of change and is used to classify the PR scope and select the CI pipeline.
 
-## Fork CI Requirements Before Ready for Review
+## Forking Flow
 
 Before marking a PR as **ready for review**, CI in your fork MUST be green. The required scope depends on what you changed:
 
@@ -28,7 +30,7 @@ Before marking a PR as **ready for review**, CI in your fork MUST be green. The 
 
 If you are unsure whether other roles are affected, you MUST run the full pipeline.
 
-## Draft Pull Requests
+## Drafts
 
 You SHOULD open a Pull Request as a **draft** while your change is still in progress. CI will not run and no reviewer time is spent until you mark it ready.
 
@@ -36,7 +38,7 @@ You SHOULD open a Pull Request as a **draft** while your change is still in prog
 - If you continue working on the PR after marking it ready, you MUST convert it back to a **draft** before pushing new commits. Otherwise CI triggers on every push to the main repository.
 - You MAY convert it back to a **draft** at any time. Any running CI jobs will be cancelled immediately.
 
-## Pull Request Checklist
+## Checklist
 
 Before you open a Pull Request:
 
