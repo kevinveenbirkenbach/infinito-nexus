@@ -7,9 +7,8 @@ Usage:
   all.sh [--help]
 
 Runs the broader cleanup bundle:
-  1. container-purge-system
-  2. build-cleanup
-  3. purge-system
+  1. build-cleanup
+  2. purge-system
 
 Each step is best-effort. The script exits non-zero if any step fails.
 EOF
@@ -51,7 +50,7 @@ run_make_target() {
 
 overall_rc=0
 
-for target in container-purge-system build-cleanup purge-system; do
+for target in build-cleanup purge-system; do
 	if ! run_make_target "${target}"; then
 		overall_rc=1
 	fi
