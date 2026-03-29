@@ -68,8 +68,16 @@ make environment-bootstrap
 # Start the local compose stack (builds the image if missing).
 make up
 
+# =============================================================================
+# Testing — run the full validation suite before deploying.
+# =============================================================================
+
 # Run the combined validation suite: lint, unit tests, and integration tests.
 make test
+
+# =============================================================================
+# Deploy — create inventories, start applications, and verify reachability.
+# =============================================================================
 
 # Deploy dashboard with matomo disabled to verify that SERVICES_DISABLED suppresses
 # the shared service in the generated inventory.
