@@ -4,6 +4,7 @@ on:
   pull_request_target:
     types:
       - closed
+      - converted_to_draft
 
 permissions:
   actions: write
