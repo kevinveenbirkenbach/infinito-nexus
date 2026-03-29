@@ -4,13 +4,13 @@ Use this page when you are iterating on a local app deploy during debugging or d
 
 ## Loop
 
-- Unless the user explicitly says to reuse the existing setup, you MUST start once with `APPS=<role> make deploy-fresh-purged-app` to establish the baseline inventory and clean app state.
-- After that, you MUST use `APPS=<role> make deploy-reuse-kept-app` for the default edit-fix-redeploy loop.
-- Do NOT rerun `APPS=<role> make deploy-fresh-purged-app` just because a deploy failed or you changed code. That restarts the stack unnecessarily and burns time.
-- If the same failure still reproduces on the reuse path and you want to test whether app entity state is involved, use `APPS=<role> make deploy-reuse-purged-app` once.
-- After that targeted purge check, you MUST return to `APPS=<role> make deploy-reuse-kept-app`.
-- Only go back to `APPS=<role> make deploy-fresh-purged-app` if you have concrete evidence that the inventory or host stack is broken, or you intentionally need a fresh single-app baseline again.
-- If you need to validate the single-app init/deploy path separately, use `APPS=<role> make deploy-fresh-kept-app`. It checks the clean single-app setup apart from the faster reuse path.
+- Unless the user explicitly says to reuse the existing setup, you MUST start once with `APPS=<role> make deploy-fresh-purged-apps` to establish the baseline inventory and clean app state.
+- After that, you MUST use `APPS=<role> make deploy-reuse-kept-apps` for the default edit-fix-redeploy loop.
+- Do NOT rerun `APPS=<role> make deploy-fresh-purged-apps` just because a deploy failed or you changed code. That restarts the stack unnecessarily and burns time.
+- If the same failure still reproduces on the reuse path and you want to test whether app entity state is involved, use `APPS=<role> make deploy-reuse-purged-apps` once.
+- After that targeted purge check, you MUST return to `APPS=<role> make deploy-reuse-kept-apps`.
+- Only go back to `APPS=<role> make deploy-fresh-purged-apps` if you have concrete evidence that the inventory or host stack is broken, or you intentionally need a fresh single-app baseline again.
+- If you need to validate the single-app init/deploy path separately, use `APPS=<role> make deploy-fresh-kept-apps`. It checks the clean single-app setup apart from the faster reuse path.
 
 ## Certificate Authority
 

@@ -79,7 +79,7 @@ make test
 
 # Deploy dashboard with matomo disabled to verify that SERVICES_DISABLED suppresses
 # the shared service in the generated inventory.
-SERVICES_DISABLED="matomo" make deploy-fresh-purged-app APPS="${DASHBOARD_APP}"
+SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}"
 
 # Trust the local CA certificate so HTTPS endpoints are reachable from the host.
 make trust-ca
@@ -96,7 +96,7 @@ assert_http_status 404 "${MATOMO_URL}"
 # =============================================================================
 
 # Deploy matomo so it becomes reachable via its dedicated inventory entry.
-make deploy-fresh-purged-app APPS="${MATOMO_APP}"
+make deploy-fresh-purged-apps APPS="${MATOMO_APP}"
 
 # Re-trust the CA after the fresh deploy rebuilt the certificates.
 make trust-ca
@@ -104,7 +104,7 @@ make trust-ca
 # Verify matomo is now reachable after its dedicated deploy.
 assert_http_status 200 "${MATOMO_URL}"
 
-# Verify the dashboard is no longer reachable. deploy-fresh-purged-app purges the
+# Verify the dashboard is no longer reachable. deploy-fresh-purged-apps purges the
 # previous inventory and containers before deploying, so web-app-dashboard is gone
 # after the matomo-only deploy. nginx returns 404 for unconfigured upstreams.
 assert_http_status 404 "${DASHBOARD_URL}"
@@ -113,7 +113,7 @@ assert_http_status 404 "${DASHBOARD_URL}"
 # Redeploy keeping inventory and apt packages — validates reuse of existing state.
 # =============================================================================
 
-make deploy-reuse-kept-app APPS="${MATOMO_APP}"
+make deploy-reuse-kept-apps APPS="${MATOMO_APP}"
 
 # =============================================================================
 # Teardown — shut down the stack and reverse all environment changes.

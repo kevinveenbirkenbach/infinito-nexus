@@ -112,10 +112,10 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
-| Fresh kept app | `make deploy-fresh-kept-app` | Creates a new inventory and deploys one app. | Use this for the single-app fresh path. |
-| Fresh purged app | `make deploy-fresh-purged-app` | Creates a new inventory, purges the app state, and redeploys one app. | Use this when you want a fresh app after cleanup. |
-| Reuse kept app | `make deploy-reuse-kept-app` | Reuses an existing inventory and redeploys one app quickly. | Use this for the fast reuse path. |
-| Reuse purged app | `make deploy-reuse-purged-app` | Reuses an existing inventory, purges the app state first, and redeploys one app quickly. | Use this when you want a fast reset-and-redeploy path. |
+| Fresh kept apps | `make deploy-fresh-kept-apps` | Creates a new inventory and deploys one or more apps. | Use this for a fresh deploy of a specific app set. |
+| Fresh purged apps | `make deploy-fresh-purged-apps` | Creates a new inventory, purges the app state, and redeploys one or more apps. | Use this when you want a fresh deploy after cleanup. |
+| Reuse kept apps | `make deploy-reuse-kept-apps` | Reuses an existing inventory and redeploys one or more apps quickly. | Use this for the fast reuse path. |
+| Reuse purged apps | `make deploy-reuse-purged-apps` | Reuses an existing inventory, purges the app state first, and redeploys one or more apps quickly. | Use this when you want a fast reset-and-redeploy path. |
 | Fresh kept all | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this when you explicitly need broad coverage. |
 | Reuse kept all | `make deploy-reuse-kept-all` | Reuses the existing inventory and redeploys the broad app set. | Use this for the faster broad reuse path. |
 

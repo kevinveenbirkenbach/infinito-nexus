@@ -32,8 +32,8 @@ endif
 	restart exec up down stop \
 	build build-missing build-no-cache build-no-cache-all build-cleanup \
 	act-all act-app act-workflow \
-	deploy-fresh-kept-app container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
-	deploy-fresh-purged-app deploy-reuse-kept-app deploy-reuse-purged-app deploy-fresh-kept-all \
+	deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
+	deploy-fresh-purged-apps deploy-reuse-kept-apps deploy-reuse-purged-apps deploy-fresh-kept-all \
 	bootstrap setup-development
 
 # Bootstrap the local development environment.
@@ -295,17 +295,17 @@ deploy-fresh-kept-all:
 	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
 	@bash scripts/tests/deploy/local/deploy/fresh-kept-all.sh
 
-# Create a fresh inventory and deploy one app.
-deploy-fresh-kept-app:
+# Create a fresh inventory and deploy one or more apps.
+deploy-fresh-kept-apps:
 	@: "$${APPS:?APPS must be set (e.g. APPS=web-app-nextcloud)}"
 	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APPS}"
 
-# Recreate the stack and deploy one app with a purged entity.
-deploy-fresh-purged-app: down up
+# Recreate the stack and deploy one or more apps with purged entities.
+deploy-fresh-purged-apps: down up
 	@bash scripts/tests/deploy/local/deploy/fresh-purged-app.sh
 
-# Redeploy one app on an existing inventory.
-deploy-reuse-kept-app:
+# Redeploy one or more apps on an existing inventory.
+deploy-reuse-kept-apps:
 	@DEBUG=true \
 	bash scripts/tests/deploy/local/deploy/reuse-kept-app.sh
 
@@ -313,6 +313,6 @@ deploy-reuse-kept-app:
 deploy-reuse-kept-all:
 	@bash scripts/tests/deploy/local/deploy/reuse-kept-all.sh
 
-# Purge one app entity, then redeploy it on existing inventory.
-deploy-reuse-purged-app: container-purge-entity
-	@$(MAKE) deploy-reuse-kept-app
+# Purge one or more app entities, then redeploy them on existing inventory.
+deploy-reuse-purged-apps: container-purge-entity
+	@$(MAKE) deploy-reuse-kept-apps
