@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  actions: read
+  actions: write
   contents: read
   packages: write
   security-events: write
