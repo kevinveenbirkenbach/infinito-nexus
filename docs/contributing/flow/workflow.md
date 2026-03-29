@@ -25,15 +25,6 @@ Why this matters:
 
 ## Branch Prefixes
 
-You MUST use these prefixes for branch names:
+Branch names MUST follow the conventions defined in [branch.md](branch.md).
 
-| Prefix | When to use it | Example |
-|---|---|---|
-| `feature` | New functionality or improvements. | `feature/add-matomo-integration` |
-| `fix` | Bugfixes and other corrective changes. | `fix/login-redirect` |
-| `agent` | Changes to agent instruction files such as `AGENTS.md` or files in `docs/agents/`. | `agent/debugging-guidance` |
-| `documentation` | Pure documentation-only changes. | `documentation/docker-guide` |
-
-The pull-request workflow validates the branch prefix against the touched file scope and fails the job when they do not match.
-
-More information about the contribution workflow is available [here](https://s.infinito.nexus/forking).
+Questions and discussion about the contribution workflow MAY be raised in the [Infinito Nexus Hub](https://hub.infinito.nexus). A dedicated thread on forking and contributing is available [here](https://s.infinito.nexus/forking).
