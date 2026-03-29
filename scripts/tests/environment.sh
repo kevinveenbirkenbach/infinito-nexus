@@ -23,15 +23,15 @@ MATOMO_URL="https://matomo.infinito.example"
 # Check that a URL responds with the expected HTTP status code.
 # Usage: assert_http_status <expected_code> <url>
 assert_http_status() {
-  local expected="${1}"
-  local url="${2}"
-  local actual
-  actual="$(curl -sS -o /dev/null -w '%{http_code}' "${url}" || true)"
-  if [ "${actual}" != "${expected}" ]; then
-    echo "[FAIL] ${url} returned HTTP ${actual}, expected ${expected}" >&2
-    exit 1
-  fi
-  echo "[OK] ${url} returned HTTP ${actual}"
+	local expected="${1}"
+	local url="${2}"
+	local actual
+	actual="$(curl -sS -o /dev/null -w '%{http_code}' "${url}" || true)"
+	if [ "${actual}" != "${expected}" ]; then
+		echo "[FAIL] ${url} returned HTTP ${actual}, expected ${expected}" >&2
+		exit 1
+	fi
+	echo "[OK] ${url} returned HTTP ${actual}"
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
