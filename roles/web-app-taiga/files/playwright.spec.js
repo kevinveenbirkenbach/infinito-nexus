@@ -683,7 +683,7 @@ test("taiga themed routes stay aligned across stable routes", async ({ page }) =
     {
       url: session.projectsUrl,
       ready: page.getByRole("heading", { name: /my projects/i }),
-      surface: page.locator(".project-list-wrapper")
+      surface: page.locator(".project-list-wrapper .project-list-title, .project-list-title, .title-bar")
     },
     {
       url: session.userSettingsUrl,
