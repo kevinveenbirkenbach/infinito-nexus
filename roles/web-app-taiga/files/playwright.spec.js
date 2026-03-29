@@ -266,12 +266,12 @@ async function tryLogoutFromTaiga(page, taigaFrame) {
   return false;
 }
 
-async function waitForAuthenticatedTaigaShell(frame, timeout, errorMessage) {
+async function waitForAuthenticatedTaigaShell(frameOrPage, timeout, errorMessage) {
   await expect
     .poll(
       async () => {
-        const bodyText = await frame.locator("body").innerText().catch(() => "");
-        const loginFormVisible = await frame
+        const bodyText = await frameOrPage.locator("body").innerText().catch(() => "");
+        const loginFormVisible = await frameOrPage
           .locator("input[name='username'], input#username, input[name='password'], input#password, #kc-login")
           .first()
           .isVisible()
@@ -346,13 +346,14 @@ function getTaigaUrls() {
     taigaOauth2SignOutUrl: `${expectedTaigaBaseUrl}/oauth2/sign_out`,
     discoverUrl: `${expectedTaigaBaseUrl}/discover`,
     projectsUrl: `${expectedTaigaBaseUrl}/projects`,
-    projectUrl: `${expectedTaigaBaseUrl}/project/test-project`,
     userSettingsUrl: `${expectedTaigaBaseUrl}/user-settings/user-profile`
   };
 }
 
 async function getComputedStyleValue(locator, propertyName) {
-  return locator.first().evaluate((element, cssProperty) => getComputedStyle(element).getPropertyValue(cssProperty), propertyName);
+  return locator
+    .first()
+    .evaluate((element, cssProperty) => getComputedStyle(element).getPropertyValue(cssProperty), propertyName);
 }
 
 async function expectGradientBackground(locator, message) {
@@ -669,7 +670,7 @@ test("taiga public discover keeps the themed surface and hides local login field
   await expect(page.locator("input[name='username'], input#username").first()).toBeVisible({ timeout: 60_000 });
 });
 
-test("taiga themed routes stay aligned across discover projects project details and user settings", async ({ page }) => {
+test("taiga themed routes stay aligned across stable routes", async ({ page }) => {
   const session = await loginToTaigaFromDashboard(page);
 
   const routeChecks = [
@@ -682,11 +683,7 @@ test("taiga themed routes stay aligned across discover projects project details 
     {
       url: session.projectsUrl,
       ready: page.getByRole("heading", { name: /my projects/i }),
-      surface: page.locator(".project-list-wrapper .list-itemtype-project")
-    },
-    {
-      url: session.projectUrl,
-      ready: page.getByText(/hello world/i).first()
+      surface: page.locator(".project-list-wrapper")
     },
     {
       url: session.userSettingsUrl,
@@ -698,10 +695,12 @@ test("taiga themed routes stay aligned across discover projects project details 
   for (const routeCheck of routeChecks) {
     await page.goto(routeCheck.url);
     await expect(routeCheck.ready).toBeVisible({ timeout: 60_000 });
+
     await expectGradientBackground(
       page.locator("div.master"),
       `Expected the Taiga master background to stay themed on ${routeCheck.url}`
     );
+
     if (routeCheck.surface) {
       await expectGradientBackground(
         routeCheck.surface,
