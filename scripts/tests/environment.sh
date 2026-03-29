@@ -49,7 +49,7 @@ bash "${REPO_ROOT}/scripts/install/package.sh"
 # =============================================================================
 
 # =============================================================================
-# Bootstrap — prepare the environment from scratch before running deployments.
+# System — purge cached state to free resources and ensure a clean baseline.
 # =============================================================================
 
 # Purge all local state: container inventory, Docker images, and system caches.
@@ -58,6 +58,10 @@ bash "${REPO_ROOT}/scripts/install/package.sh"
 # Also simulates a fully clean environment so the full flow is validated
 # without relying on any cached state from a previous run.
 make purge-all
+
+# =============================================================================
+# Bootstrap — install dependencies and prepare the environment for deployment.
+# =============================================================================
 
 # Install Python tooling, Ansible collections, and all repository dependencies.
 make install
