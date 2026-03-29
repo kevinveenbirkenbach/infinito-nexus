@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Validates the full local Infinito.Nexus deploy flow from a clean state.
+# Serves as a reference for how to deploy and debug applications locally.
 set -euo pipefail
 
 # =============================================================================
@@ -39,13 +41,6 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "${REPO_ROOT}"
 
 # =============================================================================
-# Local test deployment — demonstrates how to deploy and verify Infinito.Nexus
-# locally. The steps below serve as a reference for debugging and manual
-# validation: they show the exact sequence used to bring up a clean environment,
-# deploy individual applications, and confirm they are reachable via HTTPS.
-# =============================================================================
-
-# =============================================================================
 # System — install package prerequisites and purge cached state for a clean baseline.
 # =============================================================================
 
@@ -76,7 +71,7 @@ make up
 make test
 
 # =============================================================================
-# Deploy — create inventories, start applications, and verify reachability.
+# Deploy on minimal hardware — disable non-essential services to save resources.
 # =============================================================================
 
 # Deploy dashboard with matomo disabled to verify that SERVICES_DISABLED suppresses
@@ -93,6 +88,10 @@ assert_http_status 200 "${DASHBOARD_URL}"
 # The nginx proxy returns 404 when no upstream is configured for this host.
 assert_http_status 404 "${MATOMO_URL}"
 
+# =============================================================================
+# Deploy on performance hardware — deploy the full set of applications.
+# =============================================================================
+
 # Deploy matomo so it becomes reachable via its dedicated inventory entry.
 make deploy-fresh-purged-app APPS="${MATOMO_APP}"
 
@@ -106,6 +105,12 @@ assert_http_status 200 "${MATOMO_URL}"
 # previous inventory and containers before deploying, so web-app-dashboard is gone
 # after the matomo-only deploy. nginx returns 404 for unconfigured upstreams.
 assert_http_status 404 "${DASHBOARD_URL}"
+
+# =============================================================================
+# Redeploy keeping inventory and apt packages — validates reuse of existing state.
+# =============================================================================
+
+make deploy-reuse-kept-app APPS="${MATOMO_APP}"
 
 # =============================================================================
 # Teardown — shut down the stack and reverse all environment changes.
