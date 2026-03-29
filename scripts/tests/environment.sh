@@ -43,6 +43,8 @@ make up
 # Run the combined validation suite: lint, unit tests, and integration tests.
 make test
 
+DASHBOARD_APP="web-app-dashboard"
+MATOMO_APP="web-app-matomo"
 DASHBOARD_URL="https://dashboard.infinito.example"
 MATOMO_URL="https://matomo.infinito.example"
 
@@ -50,7 +52,7 @@ MATOMO_URL="https://matomo.infinito.example"
 # correctly suppresses a shared service in the generated inventory.
 # web-app-dashboard is chosen as the host app because it is lightweight and
 # has few dependencies, making it fast to deploy in CI.
-SERVICES_DISABLED="matomo" make deploy-fresh-purged-app APPS="web-app-dashboard"
+SERVICES_DISABLED="matomo" make deploy-fresh-purged-app APPS="${DASHBOARD_APP}"
 
 # Trust the local CA certificate so HTTPS endpoints are reachable from the host.
 make trust-ca
@@ -65,7 +67,7 @@ assert_http_status 404 "${MATOMO_URL}"
 # Deploy web-app-matomo on top of the existing inventory so matomo becomes reachable.
 # web-app-matomo is chosen because it has few dependencies and deploys quickly,
 # making it ideal for environment validation without excessive resource usage.
-make deploy-fresh-purged-app APPS="web-app-matomo"
+make deploy-fresh-purged-app APPS="${MATOMO_APP}"
 
 # Re-trust the CA after the fresh deploy rebuilt the certificates.
 make trust-ca
