@@ -52,11 +52,7 @@ cd "${REPO_ROOT}"
 # Install system-level package prerequisites for the repository toolchain.
 bash "${REPO_ROOT}/scripts/install/package.sh"
 
-# Purge all local state: container inventory, Docker images, and system caches.
-# Primarily intended for minimal-hardware environments where disk and memory
-# are scarce — frees space before the install and deploy cycle begins.
-# Also simulates a fully clean environment so the full flow is validated
-# without relying on any cached state from a previous run.
+# Required on minimal-hardware systems to free disk and memory before the deploy.
 make purge-all
 
 # =============================================================================
