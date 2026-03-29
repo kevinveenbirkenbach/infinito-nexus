@@ -121,6 +121,8 @@ restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
 # Run a shell or command in the running container.
+# Usage: make exec           — opens interactive shell
+#        make exec CMD="..." — runs command non-interactively
 exec:
 	@bash scripts/tests/deploy/local/exec/container.sh
 

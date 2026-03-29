@@ -40,6 +40,10 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # pkgmgr images may reset the working directory before invoking this script.
 cd "${REPO_ROOT}"
 
+# Load global environment (sets INVENTORY_DIR, INFINITO_DISTRO, etc.).
+# shellcheck source=scripts/meta/env/all.sh
+source "${REPO_ROOT}/scripts/meta/env/all.sh"
+
 # =============================================================================
 # Install — install package prerequisites and repository dependencies.
 # =============================================================================
@@ -94,6 +98,13 @@ make test
 # Deploy dashboard with matomo disabled to verify that SERVICES_DISABLED suppresses
 # the shared service in the generated inventory.
 SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}"
+
+# Verify that the generated inventory does not contain the disabled service provider.
+if make exec CMD="grep -q '${MATOMO_APP}' ${INVENTORY_DIR}/devices.yml" 2>/dev/null; then
+	echo "[FAIL] ${MATOMO_APP} found in inventory after SERVICES_DISABLED=matomo" >&2
+	exit 1
+fi
+echo "[OK] ${MATOMO_APP} is absent from inventory"
 
 # Trust the local CA certificate so HTTPS endpoints are reachable from the host.
 make trust-ca

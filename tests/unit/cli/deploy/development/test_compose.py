@@ -141,7 +141,11 @@ class TestComposeUpRetries(unittest.TestCase):
         )
         compose.wait_for_healthy.assert_called_once_with()
 
-    @patch.dict(os.environ, {"INFINITO_NO_BUILD": "1", "INFINITO_IMAGE": "test-image/arch"}, clear=False)
+    @patch.dict(
+        os.environ,
+        {"INFINITO_NO_BUILD": "1", "INFINITO_IMAGE": "test-image/arch"},
+        clear=False,
+    )
     def test_up_skips_build_when_no_build_flag_is_enabled(self) -> None:
         compose = self._compose()
         compose._render_coredns_corefile = MagicMock()
