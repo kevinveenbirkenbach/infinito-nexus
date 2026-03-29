@@ -91,6 +91,10 @@ assert_http_status 200 "${MATOMO_URL}"
 # after the matomo-only deploy. nginx returns 404 for unconfigured upstreams.
 assert_http_status 404 "${DASHBOARD_URL}"
 
+# =============================================================================
+# Teardown — shut down the stack and reverse all environment changes.
+# =============================================================================
+
 # Stop the compose stack and remove all volumes for a clean teardown.
 make down
 
