@@ -15,7 +15,8 @@ jobs:
     timeout-minutes: 180
 
     strategy:
-      fail-fast: false
+      # Required so the run fails fast; trade-off: no cross-distro comparison on failure.
+      fail-fast: true
       matrix:
         dev_runtime_image:
           - manjarolinux/base

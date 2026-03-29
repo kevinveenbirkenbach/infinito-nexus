@@ -16,7 +16,8 @@ jobs:
       NIX_CONFIG: |
         access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
     strategy:
-      fail-fast: false
+      # Required so the run fails fast; trade-off: no cross-distro comparison on failure.
+      fail-fast: true
       matrix:
         distro: [arch, debian, ubuntu, fedora, centos]
 

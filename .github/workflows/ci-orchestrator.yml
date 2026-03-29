@@ -204,7 +204,9 @@ jobs:
       - code-quality-gate
   test-install-gate:
     name: 🚦 Gate installation
-    needs: [test-install-make, test-install-pkgmgr]
+    needs:
+      - test-install-make
+      - test-install-pkgmgr
     runs-on: ubuntu-latest
     steps:
       - run: echo "Installation is possible via pkgmgr and make"
