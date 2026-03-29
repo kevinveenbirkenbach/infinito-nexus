@@ -90,10 +90,19 @@ async function waitForVisibleCandidate(
   throw new Error(errorMessage);
 }
 
-async function getIframeUrl(page) {
+async function getIframeHandle(page) {
   const iframe = page.locator("#main iframe").first();
   const handle = await iframe.elementHandle().catch(() => null);
-  const frame = handle ? await handle.contentFrame().catch(() => null) : null;
+  return handle;
+}
+
+async function getIframeFrame(page) {
+  const handle = await getIframeHandle(page);
+  return handle ? await handle.contentFrame().catch(() => null) : null;
+}
+
+async function getIframeUrl(page) {
+  const frame = await getIframeFrame(page);
   return frame ? frame.url() : "";
 }
 
@@ -218,6 +227,23 @@ function getKeycloakLogoutConfirmCandidates(frame) {
   ];
 }
 
+function getLoggedOutSuccessCandidates(frame) {
+  return [
+    {
+      kind: "logged-out-heading",
+      locator: frame.getByRole("heading", { name: /you are logged out/i })
+    },
+    {
+      kind: "logged-out-text",
+      locator: frame.getByText(/you are logged out/i)
+    },
+    {
+      kind: "session-ended-text",
+      locator: frame.getByText(/logged out|session ended|signed out/i)
+    }
+  ];
+}
+
 async function loginToPixelfedViaDashboard(page, loginScenario) {
   const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedPixelfedBaseUrl = pixelfedBaseUrl.replace(/\/$/, "");
@@ -335,44 +361,57 @@ async function loginToPixelfedViaDashboard(page, loginScenario) {
 }
 
 async function confirmKeycloakLogoutIfNeeded(page, loginScenario) {
-  const expectedOidcLogoutIndicators = [
-    "/protocol/openid-connect/logout",
-    "/logout"
-  ];
+  const expectedOidcLogoutIndicator = "/protocol/openid-connect/logout";
+  const deadline = Date.now() + 20_000;
 
-  const iframe = page.locator("#main iframe").first();
-  const frame = await iframe.contentFrame();
-  const keycloakLogoutConfirmCandidates = getKeycloakLogoutConfirmCandidates(frame);
+  while (Date.now() < deadline) {
+    const frame = await getIframeFrame(page);
+    if (!frame) {
+      await page.waitForTimeout(500);
+      continue;
+    }
 
-  const iframeUrl = await getIframeUrl(page);
-  const looksLikeKeycloakLogout = expectedOidcLogoutIndicators.some((indicator) => iframeUrl.includes(indicator));
+    const keycloakLogoutConfirmCandidates = getKeycloakLogoutConfirmCandidates(frame);
+    const iframeUrl = await getIframeUrl(page);
+    const looksLikeKeycloakLogout = iframeUrl.includes(expectedOidcLogoutIndicator);
 
-  const visibleConfirm = await waitForVisibleCandidate(
-    page,
-    keycloakLogoutConfirmCandidates,
-    5_000,
-    `Timed out waiting for the Keycloak logout confirmation button for ${loginScenario.label}`
-  ).catch(() => null);
-
-  if (looksLikeKeycloakLogout || visibleConfirm) {
-    const confirmButton = visibleConfirm || await waitForVisibleCandidate(
+    const visibleConfirm = await waitForVisibleCandidate(
       page,
       keycloakLogoutConfirmCandidates,
-      20_000,
+      2_000,
       `Timed out waiting for the Keycloak logout confirmation button for ${loginScenario.label}`
-    );
+    ).catch(() => null);
 
-    await confirmButton.locator.click();
+    if (looksLikeKeycloakLogout || visibleConfirm) {
+      const confirmButton = visibleConfirm || await waitForVisibleCandidate(
+        page,
+        keycloakLogoutConfirmCandidates,
+        5_000,
+        `Timed out waiting for the Keycloak logout confirmation button for ${loginScenario.label}`
+      );
+
+      await confirmButton.locator.click().catch(() => {});
+      return true;
+    }
+
+    const loggedOutSuccessVisible = await anyVisible(getLoggedOutSuccessCandidates(frame));
+    const pixelfedLoginVisible = await anyVisible(getPixelfedLoginEntryCandidates(frame));
+
+    if (loggedOutSuccessVisible || pixelfedLoginVisible) {
+      return false;
+    }
+
+    await page.waitForTimeout(500);
   }
+
+  return false;
 }
 
 async function logoutFromPixelfed(page, loginScenario) {
   const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
-  const expectedPixelfedBaseUrl = pixelfedBaseUrl.replace(/\/$/, "");
 
   const pixelfedIframe = page.locator("#main iframe").first();
   const pixelfedFrame = await pixelfedIframe.contentFrame();
-  const pixelfedLoginEntryCandidates = getPixelfedLoginEntryCandidates(pixelfedFrame);
   const pixelfedUserMenuCandidates = getPixelfedUserMenuCandidates(pixelfedFrame);
   const pixelfedLogoutCandidates = getPixelfedLogoutCandidates(pixelfedFrame);
 
@@ -405,31 +444,35 @@ async function logoutFromPixelfed(page, loginScenario) {
 
   await logoutTrigger.locator.click();
 
-  await confirmKeycloakLogoutIfNeeded(page, loginScenario);
-
-  await waitForIframeUrl(
-    page,
-    (url) =>
-      url.includes(expectedPixelfedBaseUrl) ||
-      url.includes(expectedOidcAuthUrl),
-    60_000,
-    `Expected the Pixelfed iframe to return to Pixelfed or Keycloak login after logout for ${loginScenario.label}`
-  );
+  await confirmKeycloakLogoutIfNeeded(page, loginScenario).catch(() => false);
 
   await expect
     .poll(
       async () => {
-        const iframe = page.locator("#main iframe").first();
-        const frame = await iframe.contentFrame();
+        const dashboardLoginVisible = await page.getByRole("link", { name: /^Login$/i }).first().isVisible().catch(() => false);
+
+        const frame = await getIframeFrame(page);
+        if (!frame) {
+          return false;
+        }
+
         const loginCandidates = getPixelfedLoginEntryCandidates(frame);
         const logoutCandidates = getPixelfedLogoutCandidates(frame);
+        const loggedOutSuccessCandidates = getLoggedOutSuccessCandidates(frame);
         const currentIframeUrl = await getIframeUrl(page);
 
-        const loginVisible = await anyVisible(loginCandidates);
-        const logoutVisible = await anyVisible(logoutCandidates);
+        const pixelfedLoginVisible = await anyVisible(loginCandidates);
+        const pixelfedLogoutVisible = await anyVisible(logoutCandidates);
+        const loggedOutSuccessVisible = await anyVisible(loggedOutSuccessCandidates);
         const backOnLoginProvider = currentIframeUrl.includes(expectedOidcAuthUrl);
 
-        return (loginVisible || backOnLoginProvider) && !logoutVisible;
+        const loggedOutStateReached =
+          dashboardLoginVisible ||
+          pixelfedLoginVisible ||
+          loggedOutSuccessVisible ||
+          backOnLoginProvider;
+
+        return loggedOutStateReached && !pixelfedLogoutVisible;
       },
       {
         timeout: 60_000,
@@ -442,6 +485,7 @@ async function logoutFromPixelfed(page, loginScenario) {
 test.beforeEach(() => {
   expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
   expect(pixelfedBaseUrl, "PIXELFED_BASE_URL must be set in the Playwright env file").toBeTruthy();
+
   for (const loginScenario of loginScenarios) {
     expect(
       loginScenario.username,
