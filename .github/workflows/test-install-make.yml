@@ -4,6 +4,7 @@ on:
   workflow_call:
 
 permissions:
+  actions: write
   contents: read
   packages: read
 
@@ -16,8 +17,7 @@ jobs:
       NIX_CONFIG: |
         access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
     strategy:
-      # Required so the run fails fast; trade-off: no cross-distro comparison on failure.
-      fail-fast: true
+      fail-fast: false
       matrix:
         distro: [arch, debian, ubuntu, fedora, centos]
 
@@ -40,3 +40,18 @@ jobs:
               source /opt/venvs/infinito/bin/activate
               infinito --help
             '
+
+  cancel-on-failure:
+    name: ❌ Cancel run on failure
+    needs: [test-install-make]
+    if: always() && needs.test-install-make.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.cancelWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            })

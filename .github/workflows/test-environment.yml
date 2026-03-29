@@ -5,6 +5,7 @@ on:
   workflow_call:
 
 permissions:
+  actions: write
   contents: read
   packages: read
 
@@ -15,8 +16,7 @@ jobs:
     timeout-minutes: 180
 
     strategy:
-      # Required so the run fails fast; trade-off: no cross-distro comparison on failure.
-      fail-fast: true
+      fail-fast: false
       matrix:
         dev_runtime_image:
           - manjarolinux/base
@@ -62,3 +62,18 @@ jobs:
             bash -lc '
               bash ./scripts/tests/environment.sh
             '
+
+  cancel-on-failure:
+    name: ❌ Cancel run on failure
+    needs: [test-environment]
+    if: always() && needs.test-environment.result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.actions.cancelWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId
+            })
