@@ -152,11 +152,13 @@ mig: list tree
 
 # Build the local image.
 build: dockerignore
-	@bash scripts/image/build.sh
+	@IMAGE_TAG="$$(bash scripts/meta/resolve/image/local.sh)" \
+		bash scripts/image/build.sh
 
 # Build the local image if it is missing.
 build-missing:
-	@bash scripts/image/build.sh --missing
+	@IMAGE_TAG="$$(bash scripts/meta/resolve/image/local.sh)" \
+		bash scripts/image/build.sh --missing
 
 # Pull the build dependency image.
 build-dependency:
@@ -164,7 +166,8 @@ build-dependency:
 
 # Build the local image without cache.
 build-no-cache: build-dependency
-	@bash scripts/image/build.sh --no-cache
+	@IMAGE_TAG="$$(bash scripts/meta/resolve/image/local.sh)" \
+		bash scripts/image/build.sh --no-cache
 
 # Build the no-cache image for every distro.
 build-no-cache-all:

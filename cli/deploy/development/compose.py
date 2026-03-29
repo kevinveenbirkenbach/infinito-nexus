@@ -22,6 +22,19 @@ class Compose:
     def _base_env(self) -> dict[str, str]:
         env = dict(os.environ)
         env["INFINITO_DISTRO"] = self.distro
+        if not env.get("INFINITO_IMAGE"):
+            local_image_script = (
+                self.repo_root / "scripts" / "meta" / "resolve" / "image" / "local.sh"
+            )
+            result = subprocess.run(
+                [str(local_image_script)],
+                cwd=self.repo_root,
+                env=env,
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            env["INFINITO_IMAGE"] = result.stdout.strip()
         return env
 
     def _is_ci(self) -> bool:

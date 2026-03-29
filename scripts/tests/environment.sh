@@ -41,24 +41,38 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "${REPO_ROOT}"
 
 # =============================================================================
-# System — install package prerequisites and purge cached state.
+# Install — install package prerequisites and repository dependencies.
 # =============================================================================
 
 # Install system-level package prerequisites for the repository toolchain.
 bash "${REPO_ROOT}/scripts/install/package.sh"
 
+# Install Python tooling, Ansible collections, and all repository dependencies.
+make install
+
+# =============================================================================
+# Build — build the local Docker image and verify a clean no-cache build.
+# =============================================================================
+
+# Build the local image using the Docker layer cache.
+make build
+
+# Rebuild the local image from scratch to verify the build without cache reuse.
+make build-no-cache
+
+# =============================================================================
+# System — show disk usage and purge cached state before building.
+# =============================================================================
+
 # Show current disk and Docker resource usage before purging.
 make system-disk-usage
 
-# Required on minimal-hardware systems to free disk and memory before the deploy.
+# Required on minimal-hardware systems to free disk and memory before the build.
 make system-purge
 
 # =============================================================================
 # Bootstrap — install dependencies and prepare the environment for deployment.
 # =============================================================================
-
-# Install Python tooling, Ansible collections, and all repository dependencies.
-make install
 
 # Bootstrap the development environment: DNS, AppArmor, IPv6, and lint tooling.
 make environment-bootstrap
