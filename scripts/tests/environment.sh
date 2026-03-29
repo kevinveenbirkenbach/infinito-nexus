@@ -35,6 +35,10 @@ bash "${REPO_ROOT}/scripts/install/package.sh"
 # deploy individual applications, and confirm they are reachable via HTTPS.
 # =============================================================================
 
+# =============================================================================
+# Bootstrap — prepare the environment from scratch before running deployments.
+# =============================================================================
+
 # Purge all local state: container inventory, Docker images, and system caches.
 # Primarily intended for minimal-hardware environments where disk and memory
 # are scarce — frees space before the install and deploy cycle begins.
