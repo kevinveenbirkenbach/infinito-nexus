@@ -71,7 +71,14 @@ def _create_inventory(
         mirrors_file = generate_ci_mirrors_file(compose, inventory_dir=inv_root)
         cmd += ["--mirror", mirrors_file]
 
-    compose.exec(cmd, check=True, workdir="/opt/src/infinito")
+    extra_env: dict[str, str] = {}
+    services_disabled = os.environ.get("SERVICES_DISABLED", "")
+    if services_disabled:
+        extra_env["SERVICES_DISABLED"] = services_disabled
+
+    compose.exec(
+        cmd, check=True, workdir="/opt/src/infinito", extra_env=extra_env or None
+    )
     _ensure_vault_password_file(compose, inventory_dir=inv_root)
 
 
