@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   test-environment:
-    name: 🧑‍💻 Environment (${{ matrix.dev_runtime_image }})
+    name: 🧑‍💻 Test Environment (${{ matrix.dev_runtime_image }})
     runs-on: ubuntu-latest
     timeout-minutes: 180
 

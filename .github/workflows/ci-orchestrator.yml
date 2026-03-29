@@ -211,7 +211,7 @@ jobs:
 
   # Test Development Environment
   test-development:
-    uses: ./.github/workflows/test-development.yml
+    uses: ./.github/workflows/test-environment.yml
     needs:
       - code-quality-gate
     secrets: inherit
