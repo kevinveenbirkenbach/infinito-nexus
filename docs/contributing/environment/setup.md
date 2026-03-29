@@ -57,7 +57,7 @@ make environment-teardown
 
 ### Full Development Flow
 
-The repository already contains a development helper script at [development.sh](../../../scripts/tests/development.sh). The commands from that file are explained here as the intended end-to-end flow.
+The repository already contains a development helper script at [environment.sh](../../../scripts/tests/environment.sh). The commands from that file are explained here as the intended end-to-end flow.
 
 #### Flow Summary
 
