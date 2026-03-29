@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# =============================================================================
+# Script utilities — internal helpers required by this script only.
+# =============================================================================
+
 # Check that a URL responds with the expected HTTP status code.
 # Usage: assert_http_status <expected_code> <url>
 assert_http_status() {
@@ -15,6 +19,12 @@ assert_http_status() {
   echo "[OK] ${url} returned HTTP ${actual}"
 }
 
+# =============================================================================
+# Local test deployment — demonstrates how to deploy and verify Infinito.Nexus
+# locally. The steps below serve as a reference for debugging and manual
+# validation: they show the exact sequence used to bring up a clean environment,
+# deploy individual applications, and confirm they are reachable via HTTPS.
+# =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
