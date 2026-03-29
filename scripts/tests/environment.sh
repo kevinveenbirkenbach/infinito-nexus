@@ -2,6 +2,15 @@
 set -euo pipefail
 
 # =============================================================================
+# Configuration — apps and URLs used throughout this script.
+# =============================================================================
+
+DASHBOARD_APP="web-app-dashboard"
+MATOMO_APP="web-app-matomo"
+DASHBOARD_URL="https://dashboard.infinito.example"
+MATOMO_URL="https://matomo.infinito.example"
+
+# =============================================================================
 # Script utilities — internal helpers required by this script only.
 # =============================================================================
 
@@ -57,11 +66,6 @@ make up
 
 # Run the combined validation suite: lint, unit tests, and integration tests.
 make test
-
-DASHBOARD_APP="web-app-dashboard"
-MATOMO_APP="web-app-matomo"
-DASHBOARD_URL="https://dashboard.infinito.example"
-MATOMO_URL="https://matomo.infinito.example"
 
 # Deploy web-app-dashboard with matomo disabled to verify that SERVICES_DISABLED
 # correctly suppresses a shared service in the generated inventory.
