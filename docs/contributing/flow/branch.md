@@ -1,4 +1,6 @@
-# Branch Names
+# Branch
+
+## CI Impact
 
 The branch prefix MUST match the type of change. The [PR workflow](pull-request.md) uses it to classify the scope and decide which CI pipeline to run.
 
@@ -9,7 +11,7 @@ The branch prefix MUST match the type of change. The [PR workflow](pull-request.
 | `feature` | New features or enhancements | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `fix` | Bug fixes | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 
-## Branch Naming
+## Naming Conventions
 
 The description MUST use `kebab-case` (lowercase words separated by hyphens) and SHOULD be short enough to read at a glance. 
 
