@@ -22,3 +22,7 @@ if [[ -z "${INVENTORY_DIR:-}" ]]; then
 	)"
 fi
 export INVENTORY_DIR
+
+# SPOT: canonical path to the generated inventory devices file.
+INVENTORY_FILE="${INVENTORY_DIR}/devices.yml"
+export INVENTORY_FILE

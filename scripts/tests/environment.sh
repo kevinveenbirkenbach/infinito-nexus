@@ -43,6 +43,7 @@ cd "${REPO_ROOT}"
 # Load global environment (sets INVENTORY_DIR, INFINITO_DISTRO, etc.).
 # shellcheck source=scripts/meta/env/all.sh
 source "${REPO_ROOT}/scripts/meta/env/all.sh"
+: "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
 
 # =============================================================================
 # Install — install package prerequisites and repository dependencies.
@@ -100,7 +101,7 @@ make test
 SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}"
 
 # Verify that the generated inventory does not contain the disabled service provider.
-if make exec CMD="grep -q '${MATOMO_APP}' ${INVENTORY_DIR}/devices.yml" 2>/dev/null; then
+if grep -q "${MATOMO_APP}" "${INVENTORY_FILE}"; then
 	echo "[FAIL] ${MATOMO_APP} found in inventory after SERVICES_DISABLED=matomo" >&2
 	exit 1
 fi
@@ -139,6 +140,13 @@ assert_http_status 404 "${DASHBOARD_URL}"
 # =============================================================================
 
 make deploy-reuse-kept-apps APPS="${MATOMO_APP}"
+
+# =============================================================================
+# Inspect — print intermediate state for debugging and verification.
+# =============================================================================
+
+# Print the generated inventory to verify which roles were deployed.
+make exec CMD="cat ${INVENTORY_FILE}"
 
 # =============================================================================
 # Teardown — shut down the stack and reverse all environment changes.

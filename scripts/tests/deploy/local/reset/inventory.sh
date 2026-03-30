@@ -11,10 +11,10 @@ set -euo pipefail
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
+: "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
 
 # This script always generates inventories for the development compose stack.
 RUNTIME_VARS_JSON='{"RUNTIME":"dev","SYS_SERVICE_RUNNER_RETRIES":1}'
-inv_file="${INVENTORY_DIR}/devices.yml"
 
 echo "=== local inventory init (ALL apps) ==="
 echo "distro        = ${INFINITO_DISTRO}"
@@ -82,7 +82,7 @@ echo ">>> Initializing inventory inside container"
     ./scripts/docker/entry.sh true
 
     inv_dir='${INVENTORY_DIR}'
-    inv_file='${inv_file}'
+    INVENTORY_FILE='${INVENTORY_FILE}'
     pw_file=\"\${inv_dir}/.password\"
     echo \">>> Reset inventory dir \${inv_dir}\"
     rm -rf \"\${inv_dir}\"
@@ -93,9 +93,9 @@ echo ">>> Initializing inventory inside container"
       chmod 600 \"\${pw_file}\" || true
     fi
 
-    echo \">>> Creating inventory at \${inv_file}\"
+    echo \">>> Creating inventory at \${INVENTORY_FILE}\"
     infinito create inventory \"\${inv_dir}\" \
-      --inventory-file \"\${inv_file}\" \
+      --inventory-file \"\${INVENTORY_FILE}\" \
       --vars '${RUNTIME_VARS_JSON}' \
       --host 'localhost' \
       --ssl-disabled \
@@ -107,4 +107,4 @@ echo ">>> Initializing inventory inside container"
 
 echo
 echo "✅ Local inventory init finished."
-echo "Inventory: ${inv_file}"
+echo "Inventory: ${INVENTORY_FILE}"

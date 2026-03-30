@@ -14,7 +14,7 @@ set -euo pipefail
 : "${INFINITO_CONTAINER:?INFINITO_CONTAINER is not set (e.g. infinito_nexus_arch)}"
 : "${DEBUG:?DEBUG is not set (true|false)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR is not set (e.g. INVENTORY_DIR=/etc/inventories/local-full-server)}"
-inv_file="${INVENTORY_DIR}/devices.yml"
+: "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
 pw_file="${INVENTORY_DIR}/.password"
 
 case "${TEST_DEPLOY_TYPE}" in
@@ -42,8 +42,8 @@ docker exec "${INFINITO_CONTAINER}" bash -c "
   set -euo pipefail
   cd /opt/src/infinito
 
-  if [[ ! -f \"${inv_file}\" ]]; then
-    echo \"ERROR: inventory not found: ${inv_file}\" >&2
+  if [[ ! -f \"${INVENTORY_FILE}\" ]]; then
+    echo \"ERROR: inventory not found: ${INVENTORY_FILE}\" >&2
     exit 2
   fi
 
@@ -56,7 +56,7 @@ docker exec "${INFINITO_CONTAINER}" bash -c "
   ./scripts/docker/entry.sh true
 
   echo \">>> Starting rapid deploy\"
-  cmd=(infinito deploy dedicated \"${inv_file}\"
+  cmd=(infinito deploy dedicated \"${INVENTORY_FILE}\"
     --skip-backup
     --skip-cleanup
     --id ${APPS}
