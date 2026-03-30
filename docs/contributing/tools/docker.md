@@ -6,8 +6,8 @@ The canonical `make` command index now lives in [Makefile Commands](makefile.md)
 ## Scope
 
 - Use [Makefile Commands](makefile.md) when you want the concrete repository targets.
-- Use [Development](../development/testing.md) for app-level local deploy flows and end-to-end checks.
-- Use [Testing and Validation](../development/testing.md) for lint, unit, integration, and Playwright guidance.
+- Use [Development](../flow/testing.md) for app-level local deploy flows and end-to-end checks.
+- Use [Testing and Validation](../flow/testing.md) for lint, unit, integration, and Playwright guidance.
 
 ## Notes
 

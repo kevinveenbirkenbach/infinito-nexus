@@ -2,7 +2,7 @@
 
 This page is the SPOT for automatically generating and updating role-local `playwright.spec.js` files.
 Use this page for scenario design, selector strategy, and live end-to-end review.
-For runner integration and repository-wide scenario requirements, see [Contributing `playwright.spec.js`](../../../contributing/code/role/playwright.spec.js.md).
+For runner integration and repository-wide scenario requirements, see [Playwright Tests](../../../contributing/code/tests/playwright.md).
 For the matching rendered input contract, see [Role `playwright.env.j2`](playwright.env.j2.md).
 
 ## Goal

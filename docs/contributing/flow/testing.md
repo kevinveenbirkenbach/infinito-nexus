@@ -51,59 +51,10 @@ Important:
 - For act-based workflow checks, see [Act Workflow Checks](../tools/act.md).
 - After a successful local deploy, run `make trust-ca` and restart your browser.
 
-## Playwright
-
-[Playwright](https://playwright.dev/) tests are part of deployment and end-to-end validation for `web-*` roles. They are not exposed here as a separate top-level `make` command.
-
-To enable Playwright for a `web-*` role, provide:
-
-- `templates/playwright.env.j2`
-- `files/playwright.spec.js`
-
-Use [Contributing `playwright.env.j2`](../code/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../code/role/playwright.spec.js.md) as the SPOT for the file-level contract and scenario requirements.
-
-During the deploy stage, the shared `test-e2e-playwright` role:
-
-- discovers the relevant app roles
-- stages the test project
-- renders the `.env`
-- copies the role-local `playwright.spec.js`
-- injects the shared `package.json` and `playwright.config.js`
-- waits until the app is reachable
-- runs Playwright in Docker
-
-In practice, Playwright coverage is usually exercised through local deploy flows and deploy CI runs.
-
 ## Testing Standards
 
-### Common
+For test-type-specific requirements, framework, and creation procedures see:
 
-Treat these rules as the baseline for all validation categories below.
-
-- Write tests in the `tests` folder.
-- Use Python `unittest` for unit, integration, and lint tests.
-- Do not write tests that only check whether a file contains a string.
-- Do not write tests only for non-executable files such as `.yml` or `.j2`.
-- Test the behavior that consumes the configuration.
-
-### Unit
-
-- For touched `*.py` files, add or update unit tests in `tests/unit`.
-- For touched `*.py` files, add or update integration tests in `tests/integration`.
-
-### Playwright
-
-- Playwright tests are required for `web-*` roles.
-- Use [Contributing `playwright.env.j2`](../code/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../code/role/playwright.spec.js.md) as the SPOT for role-local Playwright file requirements.
-
-### Development Procedure
-
-- Analyze the code first.
-- Build hypotheses before writing the test.
-- Write or update the role-local Playwright files.
-- Run it against a fresh pure Docker image.
-- Add additional procedures when relevant, for example OIDC or Keycloak.
-
-### Minimum Requirements
-
-- Follow the scenario requirements in [Contributing `playwright.spec.js`](../code/role/playwright.spec.js.md).
+- [Unit Tests](../code/tests/unit.md)
+- [Integration Tests](../code/tests/integration.md)
+- [Playwright Tests](../code/tests/playwright.md)

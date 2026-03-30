@@ -37,4 +37,4 @@ Use this rule when a role pins container image versions in `roles/web-*/config/m
 
 For documentation, comments, semantics, and writing guidance, see [Documentation](../../documentation.md).
 
-For test commands and testing standards, see [Testing and Validation](../../development/testing.md).
+For test commands and testing standards, see [Testing and Validation](../../flow/testing.md).

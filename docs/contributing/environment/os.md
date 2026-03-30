@@ -1,4 +1,4 @@
-# Supported Systems
+# Supported Operation Systems
 
 This page defines which operating systems deployments, scripts, and programs MUST support.
 Following this policy ensures that Infinito Nexus runs reliably across a broad range of server
@@ -7,8 +7,7 @@ environments — from community-managed long-term-support servers to enterprise
 
 ## Deployed Systems
 
-All deployment roles, Ansible tasks, and programs that run inside a deployed system MUST be
-compatible with the following distributions.
+All deployment roles, Ansible tasks, and programs that run inside a deployed system MUST be compatible with the following distributions.
 
 Supporting this set gives operators a choice between stable community servers, enterprise-grade
 Red Hat-compatible systems, and a rolling-release target for early-integration testing.

@@ -122,5 +122,5 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 ## Notes
 
 - The commands use the current `INFINITO_DISTRO` setting from the environment where relevant.
-- For app-level local deploy flows and end-to-end checks, see [Development](../development/testing.md).
-- For validation strategy and Playwright guidance, see [Testing and Validation](../development/testing.md).
+- For app-level local deploy flows and end-to-end checks, see [Development](../flow/testing.md).
+- For validation strategy and Playwright guidance, see [Testing and Validation](../flow/testing.md).

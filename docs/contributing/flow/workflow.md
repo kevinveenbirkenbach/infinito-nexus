@@ -17,7 +17,7 @@ Why this matters:
 1. Create or update your fork.
 2. Create a branch in your fork with the right prefix — see [branch.md](branch.md).
 3. Make one focused change at a time.
-4. Run the relevant local checks — see [testing.md](../development/testing.md).
+4. Run the relevant local checks — see [testing.md](testing.md).
 5. Push the branch to your fork.
 6. Wait until the CI in your fork is green — see [pull-request.md](pull-request.md) for required CI scope.
 7. Open a [Pull Request](pull-request.md).

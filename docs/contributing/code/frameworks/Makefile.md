@@ -18,6 +18,6 @@ The architecture overview treats `Makefile` and `scripts/` as the supported comm
 
 - [Development Environment Setup](../../environment/setup.md)
 - [Docker and Runtime Commands](../../tools/docker.md)
-- [Testing and Validation](../../development/testing.md)
+- [Testing and Validation](../../flow/testing.md)
 
 For the broader architecture context, see [Repository Architecture](../architecture.md).

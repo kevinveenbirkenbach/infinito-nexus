@@ -75,8 +75,8 @@ The main entry points are:
 - [Makefile](../../../Makefile)
 - [scripts/](../../../scripts/)
 - [tests/](../../../tests/)
-- [docs/contributing/code/quality.md](quality.md)
-- [docs/contributing/development/testing.md](../development/testing.md)
+- [docs/contributing/code/tests/lint.md](tests/lint.md)
+- [docs/contributing/flow/testing.md](../flow/testing.md)
 - [docs/contributing/](../../)
 
 Those layers keep local development, CI, and production behavior closer together.
@@ -195,9 +195,9 @@ If you are trying to understand a change, start here:
 - [roles/](../../../roles/) for behavior
 - [inventories/bundles/](../../../inventories/bundles/) for deployment shapes
 - [Makefile](../../../Makefile) and [scripts/](../../../scripts/) for supported commands
-- [docs/contributing/code/quality.md](quality.md) for code and framework rules
+- [docs/contributing/code/tests/lint.md](tests/lint.md) for code and framework rules
 - [docs/contributing/code/services.md](services.md) for service registration, loading, and injection
-- [docs/contributing/development/testing.md](../development/testing.md) for refactoring, debugging, and testing
+- [docs/contributing/flow/testing.md](../flow/testing.md) for refactoring, debugging, and testing
 - [docs/contributing/](../../) for workflow and constraints
 - [tests/](../../../tests/) for the expected contracts
 
