@@ -5,9 +5,13 @@
 #   frontend: loaded by sys-front-inj-all for all deployed apps
 #   backend:  loaded by sys-stk-backend per application
 #
-# Optional field:
+# Optional fields:
 #   role_template: "svc-db-{type}"
 #     The placeholder {type} is substituted from compose.services.<key>.type.
+#   canonical: <key>
+#     Required when multiple keys share the same role. Points to the primary
+#     key so that role-based reverse lookup always returns a deterministic id.
+#     The primary key must have no canonical field. Aliases must set canonical.
 #
 # See: docs/contributing/code/services.md
 
@@ -23,10 +27,12 @@ services:
   css:
     role: web-svc-cdn
     type: frontend
+    canonical: cdn
 
   javascript:
     role: web-svc-cdn
     type: frontend
+    canonical: cdn
 
   logout:
     role: web-svc-logout

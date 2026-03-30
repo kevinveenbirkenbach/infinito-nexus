@@ -78,11 +78,21 @@ def _is_service_needed(
 
 
 def _build_role_to_key(services_map: Dict[str, Any]) -> Dict[str, str]:
-    return {
-        entry["role"]: key
-        for key, entry in services_map.items()
-        if isinstance(entry, dict) and "role" in entry
-    }
+    """Map each role name to its canonical service key.
+
+    When multiple keys share the same role, the canonical key is determined by
+    the 'canonical' field on alias entries.  The primary key (no 'canonical'
+    field) is used as the fallback so that role-based reverse lookup always
+    returns a single, deterministic id.
+    """
+    result: Dict[str, str] = {}
+    for key, entry in services_map.items():
+        if not isinstance(entry, dict) or "role" not in entry:
+            continue
+        role = entry["role"]
+        canonical_key = entry.get("canonical", key)
+        result[role] = canonical_key
+    return result
 
 
 def _resolve_term(
