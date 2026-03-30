@@ -3,6 +3,10 @@
 # Serves as a reference for how to deploy and debug applications locally.
 set -euo pipefail
 
+# Force local runtime context.
+unset GITHUB_ACTIONS
+unset ACT
+
 # =============================================================================
 # Configuration — apps and URLs used throughout this script.
 # =============================================================================
