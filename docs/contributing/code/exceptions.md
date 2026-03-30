@@ -20,8 +20,10 @@ absent from the token store, so the variable arrives empty.
 
 ### Behaviour
 
-When `users.administrator.tokens['web-app-matomo']` is empty, `sys-front-inj-matomo` logs a debug message
-and skips all injection tasks (`inject.yml`). The play continues without error.
+When `users.administrator.tokens['web-app-matomo']` is empty, `sys-front-inj-matomo` sets
+`inj_enabled.matomo = false` for the current domain. This prevents the NGINX template from rendering
+the Matomo body snippet (which would reference `matomo_site_id`) and skips `inject.yml` entirely.
+The play continues without error.
 
 Failing instead of skipping would make the play non-idempotent on first deployment and would block every
 other application from being configured just because Matomo's bootstrap has not completed yet.
