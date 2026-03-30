@@ -24,6 +24,14 @@ MATOMO_URL="https://matomo.infinito.example"
 # Script utilities — internal helpers required by this script only.
 # =============================================================================
 
+# Print the generated inventory and host_vars for debugging and verification.
+inspect() {
+	echo "Printing the generated inventory to verify which roles were deployed."
+	make exec CMD="cat ${INVENTORY_FILE}"
+	echo "Printing host_vars to verify per-host configuration."
+	make exec CMD="cat ${HOST_VARS_FILE}"
+}
+
 # Check that a URL responds with the expected HTTP status code.
 # Usage: assert_http_status <expected_code> <url>
 assert_http_status() {
@@ -101,6 +109,7 @@ make test
 
 echo "Deploying dashboard with matomo disabled to verify SERVICES_DISABLED suppresses the shared service in the inventory."
 SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}"
+inspect
 
 echo "Trusting the local CA certificate so HTTPS endpoints are reachable from the host."
 make trust-ca
@@ -117,6 +126,7 @@ assert_http_status 404 "${MATOMO_URL}"
 
 echo "Deploying matomo so it becomes reachable via its dedicated inventory entry."
 make deploy-fresh-purged-apps APPS="${MATOMO_APP}"
+inspect
 
 echo "Re-trusting the CA after the fresh deploy rebuilt the certificates."
 make trust-ca
@@ -133,13 +143,7 @@ assert_http_status 404 "${DASHBOARD_URL}"
 
 echo "Redeploying matomo while keeping inventory and packages to validate state reuse."
 make deploy-reuse-kept-apps APPS="${MATOMO_APP}"
-
-# =============================================================================
-# Inspect — print intermediate state for debugging and verification.
-# =============================================================================
-
-echo "Printing the generated inventory to verify which roles were deployed."
-make exec CMD="cat ${INVENTORY_FILE}"
+inspect
 
 # =============================================================================
 # Teardown — shut down the stack and reverse all environment changes.

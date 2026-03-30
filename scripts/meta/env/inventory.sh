@@ -26,3 +26,7 @@ export INVENTORY_DIR
 # SPOT: canonical path to the generated inventory devices file.
 INVENTORY_FILE="${INVENTORY_DIR}/devices.yml"
 export INVENTORY_FILE
+
+# SPOT: canonical path to the host_vars file for localhost.
+HOST_VARS_FILE="${INVENTORY_DIR}/host_vars/localhost.yml"
+export HOST_VARS_FILE
