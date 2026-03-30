@@ -18,6 +18,11 @@
     webserver_extra_configuration:     ""
     docker_compose_flush_handlers: true
 
+- name: "Expose CDN vars for '{{ domain }}'"
+  include_role:
+    name: sys-svc-cdn
+    public: true
+
 - name: Reinitialize 'inj_enabled' for '{{ domain }}', after loading the required webservices
   set_fact:
     inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
