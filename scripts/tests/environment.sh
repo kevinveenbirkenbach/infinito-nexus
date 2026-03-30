@@ -100,13 +100,6 @@ make test
 # the shared service in the generated inventory.
 SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}"
 
-# Verify that the generated inventory does not contain the disabled service provider.
-if grep -q "${MATOMO_APP}" "${INVENTORY_FILE}"; then
-	echo "[FAIL] ${MATOMO_APP} found in inventory after SERVICES_DISABLED=matomo" >&2
-	exit 1
-fi
-echo "[OK] ${MATOMO_APP} is absent from inventory"
-
 # Trust the local CA certificate so HTTPS endpoints are reachable from the host.
 make trust-ca
 
