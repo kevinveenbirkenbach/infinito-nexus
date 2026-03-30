@@ -74,7 +74,9 @@ class TestServicesCanonical(unittest.TestCase):
             with self.subTest(key=key):
                 alias_role = entry.get("role")
                 target_entry = self.services.get(canonical, {})
-                target_role = target_entry.get("role") if isinstance(target_entry, dict) else None
+                target_role = (
+                    target_entry.get("role") if isinstance(target_entry, dict) else None
+                )
                 self.assertEqual(
                     alias_role,
                     target_role,
@@ -92,7 +94,11 @@ class TestServicesCanonical(unittest.TestCase):
                 continue
             with self.subTest(key=key):
                 target_entry = self.services.get(canonical, {})
-                target_canonical = target_entry.get("canonical") if isinstance(target_entry, dict) else None
+                target_canonical = (
+                    target_entry.get("canonical")
+                    if isinstance(target_entry, dict)
+                    else None
+                )
                 self.assertIsNone(
                     target_canonical,
                     f"[{key}] canonical: '{canonical}' is itself an alias "
