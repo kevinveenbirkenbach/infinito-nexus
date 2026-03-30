@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Fresh-purged deploy: run exactly ONE app on ONE distro, twice, against the same stack.
+# Fresh-purged deploy: run exactly ONE app on ONE distro against the same stack.
 # Same logic as CI version, but WITHOUT destructive cleanup.
 #
 # Required env:
@@ -11,10 +11,12 @@ set -euo pipefail
 #   APPS                web-app-*
 #
 # Optional:
+#   FULL_CYCLE=false    Default. Deploy only (pass 1). Set to 'true' to also run the update pass (pass 2).
 #   PYTHON=python3
 #   LIMIT_HOST=localhost
 
 PYTHON="${PYTHON:-python3}"
+FULL_CYCLE="${FULL_CYCLE:-false}"
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (e.g. arch)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set}"
@@ -35,7 +37,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
-echo "=== LOCAL: distro=${INFINITO_DISTRO} type=${TEST_DEPLOY_TYPE} app=${APPS} (debug always on) ==="
+echo "=== LOCAL: distro=${INFINITO_DISTRO} type=${TEST_DEPLOY_TYPE} app=${APPS} full_cycle=${FULL_CYCLE} ==="
 echo "limit_host=${LIMIT_HOST}"
 echo "inventory_dir=${INVENTORY_DIR}"
 echo
@@ -69,25 +71,28 @@ deploy_args=(
 	--debug
 )
 
-echo ">>> PASS 1: init inventory (ASYNC_ENABLED=false)"
-"${PYTHON}" -m cli.deploy.development init \
-	--distro "${INFINITO_DISTRO}" \
-	--apps "${APPS}" \
-	--inventory-dir "${INVENTORY_DIR}" \
-	--vars '{"ASYNC_ENABLED": false}'
+run_pass() {
+	local label="$1"
+	local async_enabled="$2"
 
-echo ">>> PASS 1: deploy"
-"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
+	echo ">>> ${label}: init inventory (ASYNC_ENABLED=${async_enabled})"
+	"${PYTHON}" -m cli.deploy.development init \
+		--distro "${INFINITO_DISTRO}" \
+		--apps "${APPS}" \
+		--inventory-dir "${INVENTORY_DIR}" \
+		--vars "{\"ASYNC_ENABLED\": ${async_enabled}}"
 
-echo ">>> PASS 2: re-init inventory (ASYNC_ENABLED=true)"
-"${PYTHON}" -m cli.deploy.development init \
-	--distro "${INFINITO_DISTRO}" \
-	--apps "${APPS}" \
-	--inventory-dir "${INVENTORY_DIR}" \
-	--vars '{"ASYNC_ENABLED": true}'
+	echo ">>> ${label}: deploy"
+	"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
+}
 
-echo ">>> PASS 2: deploy"
-"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
+run_pass "PASS 1" "false"
+
+if [[ "${FULL_CYCLE}" == "true" ]]; then
+	run_pass "PASS 2" "true"
+else
+	echo ">>> PASS 2 skipped (FULL_CYCLE=false)"
+fi
 
 echo
 echo "✅ Done (no deletion)."

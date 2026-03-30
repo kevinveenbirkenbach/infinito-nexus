@@ -113,7 +113,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
 | Fresh kept apps | `make deploy-fresh-kept-apps` | Creates a new inventory and deploys one or more apps. | Use this for a fresh deploy of a specific app set. |
-| Fresh purged apps | `make deploy-fresh-purged-apps` | Creates a new inventory, purges the app state, and redeploys one or more apps. | Use this when you want a fresh deploy after cleanup. |
+| Fresh purged apps | `make deploy-fresh-purged-apps` | Recreates the stack, purges app state, and deploys (pass 1 only by default). Set `FULL_CYCLE=true` to also run the async update pass (pass 2). | Default: deploy only. `FULL_CYCLE=true make deploy-fresh-purged-apps` for the full cycle. |
 | Reuse kept apps | `make deploy-reuse-kept-apps` | Reuses an existing inventory and redeploys one or more apps quickly. | Use this for the fast reuse path. |
 | Reuse purged apps | `make deploy-reuse-purged-apps` | Reuses an existing inventory, purges the app state first, and redeploys one or more apps quickly. | Use this when you want a fast reset-and-redeploy path. |
 | Fresh kept all | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this when you explicitly need broad coverage. |

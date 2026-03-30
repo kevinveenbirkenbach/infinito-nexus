@@ -305,7 +305,7 @@ deploy-fresh-kept-apps:
 	@: "$${APPS:?APPS must be set (e.g. APPS=web-app-nextcloud)}"
 	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APPS}"
 
-# Recreate the stack and deploy one or more apps with purged entities.
+# Deploy one or more apps with purged entities. Set FULL_CYCLE=true to also run the update pass.
 deploy-fresh-purged-apps: down up
 	@bash scripts/tests/deploy/local/deploy/fresh-purged-app.sh
 
