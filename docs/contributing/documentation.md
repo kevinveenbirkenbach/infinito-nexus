@@ -47,7 +47,7 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 - You SHOULD prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
 - You MUST NOT place `README.md` files under `docs/`.
   Documentation files MUST be cross-linked to each other directly instead.
-  All content under `docs/` is automatically indexed via the root `index.rst` toctree glob (`docs/**`) — no per-directory index files are needed.
+  All content under `docs/` is automatically indexed via the root `index.rst` toctree glob (`docs/**`) — per-directory index files are usually not needed.
 - You MUST keep core information inside the repository, either in code or in `.md` files.
 - You MUST use `.md` files for commands, workflows, setup, and contributor guidance.
 - You MUST NOT use `.md` files to describe implementation logic that is already visible in the code.
@@ -55,5 +55,9 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 ### Sphinx
 
 - The root `index.rst` uses a `:glob:` toctree (`docs/**`) to automatically include every documentation page.
-  You MUST NOT add a separate `index.rst` or `README.md` inside any `docs/` subdirectory.
+- Sphinx indexing SHOULD happen automatically through that root `:glob:` toctree.
+- You SHOULD avoid creating or maintaining manual per-directory indexes when automatic indexing already covers the same pages.
+  An additional `index.rst` inside a `docs/` subdirectory is NOT RECOMMENDED because the root index already covers those pages automatically, but it MAY be added when a focused local entry point materially improves navigation.
+  If such a local `index.rst` is added, it SHOULD stay minimal and MUST NOT duplicate a manually curated page inventory that the automatic index already provides.
+  You MUST NOT add a `README.md` inside any `docs/` subdirectory.
 - You MUST keep cross-links between `.md` files up to date so readers can navigate between related pages.

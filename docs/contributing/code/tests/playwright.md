@@ -2,8 +2,8 @@
 
 This page is the SPOT for Playwright end-to-end test requirements, runner integration, and file contracts.
 For implementation guidance when writing or updating role-local files, see
-[Agent `playwright.spec.js`](../../../../agents/files/role/playwright.spec.js.md) and
-[Agent `playwright.env.j2`](../../../../agents/files/role/playwright.env.j2.md).
+[Agent `playwright.spec.js`](../../../agents/files/role/playwright.spec.js.md) and
+[Agent `playwright.env.j2`](../../../agents/files/role/playwright.env.j2.md).
 
 ## Framework
 
@@ -44,8 +44,8 @@ The `test-e2e-playwright` role discovers Playwright-enabled roles through the pr
 
 See the dedicated SPOT pages for authoring rules:
 
-- [`playwright.spec.js`](../../../../agents/files/role/playwright.spec.js.md) — scenario design, selector strategy, and live review
-- [`playwright.env.j2`](../../../../agents/files/role/playwright.env.j2.md) — rendered test input surface, variable naming, and entry-point selection
+- [`playwright.spec.js`](../../../agents/files/role/playwright.spec.js.md) — scenario design, selector strategy, and live review
+- [`playwright.env.j2`](../../../agents/files/role/playwright.env.j2.md) — rendered test input surface, variable naming, and entry-point selection
 
 ## Recording Tests
 
@@ -57,7 +57,7 @@ Playwright ships a built-in code recorder:
 npx playwright codegen https://<app-url>
 ```
 
-This opens the Playwright Inspector alongside a browser. Every interaction is recorded and emitted as a runnable spec. Use the output as a starting draft and clean it up according to the authoring rules in [`playwright.spec.js`](../../../../agents/files/role/playwright.spec.js.md).
+This opens the Playwright Inspector alongside a browser. Every interaction is recorded and emitted as a runnable spec. Use the output as a starting draft and clean it up according to the authoring rules in [`playwright.spec.js`](../../../agents/files/role/playwright.spec.js.md).
 
 ### playwright-recorder (Docker-based)
 
