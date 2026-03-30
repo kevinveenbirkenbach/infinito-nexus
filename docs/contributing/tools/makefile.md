@@ -96,6 +96,9 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Act app workflow | `make act-app` | Runs the app-focused Act checks. | Use this when you are changing app-scoped workflow logic. |
 | Act workflow file | `make act-workflow` | Runs one selected workflow with Act. | Use this when you want to focus on a single workflow file. |
 
+- If you need to constrain a workflow matrix, set `ACT_MATRIX` with Act's `key:value` syntax, not `key=value`.
+- Example: `ACT_WORKFLOW=.github/workflows/test-environment.yml ACT_JOB=test-environment ACT_MATRIX='dev_runtime_image:debian:bookworm' make act-workflow`
+
 ## Cleanup
 
 | Category | Command | What it does | When to use it |
