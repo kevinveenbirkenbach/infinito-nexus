@@ -114,6 +114,14 @@ class TestServicesResolverTransitive(unittest.TestCase):
             got = r.resolve_transitively("web-app-app")
             self.assertEqual(got, ["web-app-keycloak", "web-app-matomo"])
 
+    def test_repo_pixelfed_includes_dashboard(self) -> None:
+        repo_root = Path(__file__).resolve().parents[7]
+        r = ServicesResolver(repo_root / "roles")
+
+        got = r.resolve_transitively("web-app-pixelfed")
+
+        self.assertIn("web-app-dashboard", got)
+
 
 if __name__ == "__main__":
     unittest.main()
