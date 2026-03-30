@@ -99,7 +99,8 @@ class TestCombinedRoleIntrospection(unittest.TestCase):
                 "      enabled: true\n"
                 "      shared: true\n"
                 "    dashboard:\n"
-                "      enabled: true\n",
+                "      enabled: true\n"
+                "      shared: true\n",
             )
 
             # required provider role folders must exist

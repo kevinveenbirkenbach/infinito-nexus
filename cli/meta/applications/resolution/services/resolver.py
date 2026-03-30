@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterable, List, Set, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Set
 
 import yaml
 
 from .errors import ServicesResolutionError
+
+_SERVICES_FILE = Path(__file__).parents[5] / "group_vars" / "all" / "20_services.yml"
 
 
 def _stable_dedup(items: Iterable[str]) -> List[str]:
@@ -28,73 +29,53 @@ def _is_enabled_shared(svc: object) -> bool:
     return svc.get("enabled") is True and svc.get("shared") is True
 
 
-def _is_enabled(svc: object) -> bool:
-    svc = _as_mapping(svc)
-    return svc.get("enabled") is True
+def _load_services_map(services_file: Path = _SERVICES_FILE) -> Dict[str, Any]:
+    if not services_file.exists():
+        raise ServicesResolutionError(f"20_services.yml not found at {services_file}")
+    raw = yaml.safe_load(services_file.read_text(encoding="utf-8")) or {}
+    services = raw.get("services")
+    if not isinstance(services, dict):
+        raise ServicesResolutionError(
+            f"Expected a 'services' mapping in {services_file}"
+        )
+    return services
 
 
-@dataclass(frozen=True)
-class ServiceRule:
-    """
-    One rule:
-      - if predicate(service_cfg) is True -> include mapper(service_cfg)
-    """
-
-    service_name: str
-    predicate: Callable[[object], bool]
-    mapper: Callable[[dict], str]
-
-
-def resolve_direct_service_roles_from_config(config: dict) -> List[str]:
+def resolve_direct_service_roles_from_config(
+    config: dict,
+    services_map: Optional[Dict[str, Any]] = None,
+) -> List[str]:
     """
     Single source of truth for "service -> provider role(s)" mapping.
 
-    Semantics (intentionally specific to Infinito.Nexus):
-      - ldap enabled+shared          => svc-db-openldap
-      - oidc enabled+shared          => web-app-keycloak
-      - matomo enabled+shared        => web-app-matomo
-      - coturn enabled+shared        => web-svc-coturn
-      - onlyoffice enabled+shared    => web-svc-onlyoffice
-      - collabora enabled+shared     => web-svc-collabora
-      - simpleicons enabled+shared   => web-svc-simpleicons
-      - database enabled+shared      => svc-db-<type> (requires database.type)
-      - dashboard enabled              => web-app-dashboard   (shared does NOT matter)
+    Reads the service key → role mapping from services.yml (repo root).
+    Every service requires compose.services.<key>.enabled: true AND shared: true.
+    Entries with role_template substitute {type} from the service config.
     """
+    if services_map is None:
+        services_map = _load_services_map()
+
     cfg = _as_mapping(config)
     services = _as_mapping(_as_mapping(cfg.get("compose")).get("services"))
 
-    def map_database(svc: dict) -> str:
-        db_type = (svc.get("type") or "").strip()
-        if not db_type:
-            raise ServicesResolutionError(
-                "compose.services.database.enabled=true and shared=true "
-                "but compose.services.database.type is missing"
-            )
-        return f"svc-db-{db_type}"
-
-    rules: Tuple[ServiceRule, ...] = (
-        ServiceRule("ldap", _is_enabled_shared, lambda _svc: "svc-db-openldap"),
-        ServiceRule("oidc", _is_enabled_shared, lambda _svc: "web-app-keycloak"),
-        ServiceRule("matomo", _is_enabled_shared, lambda _svc: "web-app-matomo"),
-        ServiceRule("coturn", _is_enabled_shared, lambda _svc: "web-svc-coturn"),
-        ServiceRule(
-            "onlyoffice", _is_enabled_shared, lambda _svc: "web-svc-onlyoffice"
-        ),
-        ServiceRule("collabora", _is_enabled_shared, lambda _svc: "web-svc-collabora"),
-        ServiceRule(
-            "simpleicons",
-            _is_enabled_shared,
-            lambda _svc: "web-svc-simpleicons",
-        ),
-        ServiceRule("database", _is_enabled_shared, map_database),
-        ServiceRule("dashboard", _is_enabled, lambda _svc: "web-app-dashboard"),
-    )
-
     includes: List[str] = []
-    for rule in rules:
-        svc_obj = services.get(rule.service_name)
-        if rule.predicate(svc_obj):
-            includes.append(rule.mapper(_as_mapping(svc_obj)))
+    for key, mapping in services_map.items():
+        svc_obj = services.get(key)
+        if not _is_enabled_shared(svc_obj):
+            continue
+
+        role_template = mapping.get("role_template")
+        if role_template:
+            svc_dict = _as_mapping(svc_obj)
+            db_type = (svc_dict.get("type") or "").strip()
+            if not db_type:
+                raise ServicesResolutionError(
+                    f"compose.services.{key}.enabled=true and shared=true "
+                    f"but compose.services.{key}.type is missing"
+                )
+            includes.append(role_template.format(type=db_type))
+        else:
+            includes.append(mapping["role"])
 
     return _stable_dedup(includes)
 
@@ -108,8 +89,13 @@ class ServicesResolver:
       resolve_direct_service_roles_from_config() logic.
     """
 
-    def __init__(self, roles_root: Path) -> None:
+    def __init__(
+        self,
+        roles_root: Path,
+        services_file: Path = _SERVICES_FILE,
+    ) -> None:
         self.roles_root = roles_root
+        self._services_map = _load_services_map(services_file)
 
     def _role_dir(self, role_name: str) -> Path:
         return self.roles_root / role_name
@@ -135,7 +121,7 @@ class ServicesResolver:
             )
 
     def direct_includes_from_config(self, config: dict) -> List[str]:
-        return resolve_direct_service_roles_from_config(config)
+        return resolve_direct_service_roles_from_config(config, self._services_map)
 
     def resolve_transitively(self, root_role_name: str) -> List[str]:
         """

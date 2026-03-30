@@ -13,7 +13,7 @@
     inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
 
 - name: "Included dependent services"
-  include_tasks: 01_dependencies.yml
+  include_tasks: 01_services.yml
   vars:
     webserver_extra_configuration:     ""
     docker_compose_flush_handlers: true

@@ -1,0 +1,65 @@
+# SPOT: canonical service key → provider role mapping.
+#
+# Each entry requires compose.services.<key>.enabled: true AND shared: true.
+# The 'type' field determines which stack loads the service:
+#   frontend: loaded by sys-front-inj-all for all deployed apps
+#   backend:  loaded by sys-stk-backend per application
+#
+# Optional field:
+#   role_template: "svc-db-{type}"
+#     The placeholder {type} is substituted from compose.services.<key>.type.
+#
+# See: docs/contributing/code/services.md
+
+services:
+  matomo:
+    role: web-app-matomo
+    type: frontend
+
+  oidc:
+    role: web-app-keycloak
+    type: frontend
+
+  cdn:
+    role: web-svc-cdn
+    type: frontend
+
+  logout:
+    role: web-svc-logout
+    type: frontend
+
+  simpleicons:
+    role: web-svc-simpleicons
+    type: frontend
+
+  collabora:
+    role: web-svc-collabora
+    type: frontend
+
+  coturn:
+    role: web-svc-coturn
+    type: frontend
+
+  onlyoffice:
+    role: web-svc-onlyoffice
+    type: frontend
+
+  libretranslate:
+    role: web-svc-libretranslate
+    type: frontend
+
+  dashboard:
+    role: web-app-dashboard
+    type: frontend
+
+  ldap:
+    role: svc-db-openldap
+    type: backend
+
+  ollama:
+    role: svc-ai-ollama
+    type: backend
+
+  database:
+    role_template: "svc-db-{type}"
+    type: backend

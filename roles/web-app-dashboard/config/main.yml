@@ -30,6 +30,9 @@ compose:
     oidc:
       enabled:  true
       shared:   true
+    cdn:
+      enabled:  true
+      shared:   true
     simpleicons:
       enabled:  true
       shared:   true

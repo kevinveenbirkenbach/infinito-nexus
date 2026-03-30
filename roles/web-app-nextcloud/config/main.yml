@@ -126,6 +126,9 @@ compose:
     onlyoffice:
       enabled: true
       shared: true
+    collabora:
+      enabled: false
+      shared: false
     talk_recording:
       name:                 "nextcloud-talk-recording"
       image:                "nextcloud/aio-talk-recording"

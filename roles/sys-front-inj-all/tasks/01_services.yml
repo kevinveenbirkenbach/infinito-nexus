@@ -1,0 +1,17 @@
+# SPOT: central loader for all shared frontend web services.
+# Iterates over all services with type: frontend from group_vars/all/20_services.yml.
+# Keep in mind to don't use inj_enabled.
+#
+
+- name: "Load frontend service (Once): {{ item.key }}"
+  include_tasks: "_load_frontend_service.yml"
+  vars:
+    service_key: "{{ item.key }}"
+    service_role: "{{ item.value.role }}"
+  when:
+    - application_id != item.value.role
+    - lookup('service', item.key).needed | bool
+    - ("run_once_" ~ (item.value.role | replace("-", "_"))) not in vars
+  loop: "{{ services | dict2items | selectattr('value.type', '==', 'frontend') | list }}"
+  loop_control:
+    label: "{{ item.key }}"
