@@ -16,16 +16,16 @@ services:
     role: web-app-matomo
     type: frontend
 
-  oidc:
-    role: web-app-keycloak
-    type: frontend
-
   cdn:
     role: web-svc-cdn
     type: frontend
 
   logout:
     role: web-svc-logout
+    type: frontend
+
+  oidc:
+    role: web-app-keycloak
     type: frontend
 
   simpleicons:

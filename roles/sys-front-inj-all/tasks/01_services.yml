@@ -9,9 +9,11 @@
     service_key: "{{ item.key }}"
     service_role: "{{ item.value.role }}"
   when:
+    - item.value.get('type') == 'frontend'
+    - item.value.role is defined
     - application_id != item.value.role
     - lookup('service', item.key).needed | bool
     - ("run_once_" ~ (item.value.role | replace("-", "_"))) not in vars
-  loop: "{{ services | dict2items | selectattr('value.type', '==', 'frontend') | list }}"
+  loop: "{{ services | dict2items | list }}"
   loop_control:
     label: "{{ item.key }}"
