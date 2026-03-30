@@ -39,5 +39,6 @@ compose:
         size_mb: 100
     css:
       enabled: true
+      shared: true
   volumes:
     data:       "joomla_data"

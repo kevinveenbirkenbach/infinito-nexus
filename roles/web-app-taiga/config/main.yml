@@ -71,8 +71,10 @@ compose:
       pids_limit:      128
     css:
       enabled: true
+      shared: true
     javascript:
       enabled: true
+      shared: true
 server:
   csp:
     flags:

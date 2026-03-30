@@ -27,6 +27,7 @@ compose:
       pids_limit:       2048
     css:
       enabled: true
+      shared: true
   volumes:
     data:           "confluence_data"
 server:

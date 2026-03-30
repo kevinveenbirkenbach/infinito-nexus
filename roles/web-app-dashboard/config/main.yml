@@ -49,5 +49,7 @@ compose:
       min_storage: "1GB"
     css:
       enabled: true
+      shared: true
     javascript:
       enabled: true
+      shared: true

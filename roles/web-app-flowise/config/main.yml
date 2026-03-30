@@ -70,8 +70,10 @@ compose:
       shared: true
     css:
       enabled: true
+      shared: true
     javascript:
       enabled: false
+      shared: true
   volumes: 
     qdrant:     qdrant_data
     flowise:    flowise_data

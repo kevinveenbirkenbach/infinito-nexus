@@ -29,6 +29,7 @@ compose:
       pids_limit:        4096
     css:
       enabled: true
+      shared: true
   volumes:
     data:           "gitlab_data"
     logs:           "gitlab_logs"

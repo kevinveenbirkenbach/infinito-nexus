@@ -31,6 +31,7 @@ compose:
       branch:     "main"
     css:
       enabled: true
+      shared: true
 rbac:
   roles: {}
  

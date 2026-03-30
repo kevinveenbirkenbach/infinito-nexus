@@ -48,5 +48,6 @@ compose:
       version:  "latest"
     css:
       enabled: true
+      shared: true
   volumes:
     pds_data:   "pds_data"

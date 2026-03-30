@@ -49,3 +49,4 @@ compose:
       enabled:  true
     css:
       enabled:  true
+      shared: true

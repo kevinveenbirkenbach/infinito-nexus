@@ -56,6 +56,7 @@ compose:
       pids_limit:       2048  # ffmpeg spawnt Threads/Prozesse
     css:
       enabled: false
+      shared: true
   volumes:
     data: peertube_data
     config: peertube_config

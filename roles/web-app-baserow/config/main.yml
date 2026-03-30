@@ -28,8 +28,10 @@ compose:
       pids_limit:         512
     css:
       enabled: true
+      shared: true
     javascript:
       enabled: true
+      shared: true
   volumes:
     data:                 "baserow_data"
 server:

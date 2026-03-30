@@ -16,3 +16,4 @@ compose:
       shared: true
     css:
       enabled: true
+      shared: true

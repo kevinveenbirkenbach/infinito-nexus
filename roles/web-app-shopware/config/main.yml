@@ -92,5 +92,6 @@ compose:
 
     css:
       enabled: true
+      shared: true
   volumes:
     data: "shopware_data"

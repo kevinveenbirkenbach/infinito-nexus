@@ -16,6 +16,7 @@ compose:
       enabled:  false
     css:
       enabled: true
+      shared: true
 server:
   csp:
     whitelist:

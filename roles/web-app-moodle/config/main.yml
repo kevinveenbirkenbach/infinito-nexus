@@ -47,6 +47,7 @@ compose:
       pids_limit:         512
     css:
       enabled: false
+      shared: true
   volumes:
     data:             moodle_data
     code:             moodle_code

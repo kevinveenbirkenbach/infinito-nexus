@@ -45,5 +45,6 @@ compose:
       name:               "magento-opensearch"
     css:
       enabled: true
+      shared: true
   volumes:
     data:                 "magento_data"

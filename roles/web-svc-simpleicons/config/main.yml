@@ -17,6 +17,7 @@ compose:
       enabled:  false   # Enable the database 
     css:
       enabled: true
+      shared: true
     recaptcha:
       enabled: false
     simpleicons:

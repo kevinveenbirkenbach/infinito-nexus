@@ -141,6 +141,7 @@ compose:
       pids_limit:           1024
     css:
       enabled: false
+      shared: true
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
   enabled:  "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True) }}"   # Activate OIDC for Nextcloud

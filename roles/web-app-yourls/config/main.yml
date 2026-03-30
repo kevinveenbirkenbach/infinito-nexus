@@ -45,3 +45,4 @@ compose:
           - "<< defaults_applications[web-app-yourls].server.locations.admin >>" # Protects the admin area
     css:
       enabled: true
+      shared: true

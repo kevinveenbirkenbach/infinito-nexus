@@ -56,6 +56,7 @@ compose:
       enabled:          true
     css:
       enabled: true
+      shared: true
     recaptcha:
       enabled: "{{ RECAPTCHA_ENABLED | bool }}"
 credentials:

@@ -66,6 +66,7 @@ compose:
       pids_limit:       384
     css:
       enabled: false
+      shared: true
     recaptcha:
       enabled: "{{ RECAPTCHA_ENABLED | bool }}"
   volumes:

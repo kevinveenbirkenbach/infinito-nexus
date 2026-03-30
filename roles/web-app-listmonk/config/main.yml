@@ -40,6 +40,7 @@ compose:
       port:               9000
     css:
       enabled: true
+      shared: true
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
 credentials:

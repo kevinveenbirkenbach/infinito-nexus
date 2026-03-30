@@ -47,6 +47,7 @@ compose:
       enabled: false # Set to true to activate redis for akaunting
     css:
       enabled: true
+      shared: true
   volumes: 
     data: akaunting_data
 credentials: {}

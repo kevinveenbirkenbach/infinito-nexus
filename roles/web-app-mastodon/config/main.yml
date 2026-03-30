@@ -64,5 +64,6 @@ compose:
       pids_limit:         512
     css:
       enabled:            true
+      shared: true
   volumes:
     data:                 "mastodon_data"

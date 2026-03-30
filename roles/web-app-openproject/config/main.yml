@@ -84,5 +84,6 @@ compose:
           - "/oauth/token"        # Necessary for Nextcloud Plugin to work
     css:
       enabled: false
+      shared: true
   volumes:
     data:                 "openproject_data"

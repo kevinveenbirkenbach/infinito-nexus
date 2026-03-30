@@ -38,3 +38,4 @@ compose:
         - "{{ [RBAC.GROUP.NAME, 'web-app-phpmyadmin-administrator'] | path_join }}"
     css:
       enabled: false
+      shared: true

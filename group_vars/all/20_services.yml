@@ -20,6 +20,14 @@ services:
     role: web-svc-cdn
     type: frontend
 
+  css:
+    role: web-svc-cdn
+    type: frontend
+
+  javascript:
+    role: web-svc-cdn
+    type: frontend
+
   logout:
     role: web-svc-logout
     type: frontend

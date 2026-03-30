@@ -64,6 +64,7 @@ compose:
       pids_limit:         512
     css:
       enabled: false
+      shared: true
   volumes: 
     data:                 wordpress_data
 rbac:

@@ -36,6 +36,7 @@ compose:
       pids_limit:         1024
     css:
       enabled: true
+      shared: true
   volumes:
     data:           "xwiki_data"
 server:

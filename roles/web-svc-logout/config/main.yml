@@ -40,5 +40,7 @@ compose:
       shared: true
     css:
       enabled: true
+      shared: true
     javascript:
       enabled: false
+      shared: true

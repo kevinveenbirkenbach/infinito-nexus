@@ -38,6 +38,7 @@ compose:
       enabled: false
     css:
       enabled: false
+      shared: true
 server:
   domains:
     canonical:

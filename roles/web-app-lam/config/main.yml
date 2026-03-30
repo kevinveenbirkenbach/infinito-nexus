@@ -23,6 +23,7 @@ compose:
         - "{{ [RBAC.GROUP.NAME, 'web-app-lam-administrator'] | path_join }}"
     css:
       enabled: true
+      shared: true
 server:
   csp:
     flags:

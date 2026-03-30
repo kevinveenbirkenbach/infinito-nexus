@@ -28,6 +28,7 @@ compose:
       pids_limit:         256
     css:
       enabled:            true
+      shared: true
   volumes:
     data:                 "chess_data"
 server:

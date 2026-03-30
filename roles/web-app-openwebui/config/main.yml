@@ -47,8 +47,10 @@ compose:
       enabled: false
     css:
       enabled: false
+      shared: true
     javascript:
       enabled: false
+      shared: true
     ollama:
       enabled: true
       shared: true

@@ -72,5 +72,6 @@ compose:
       enabled: false
     css:
       enabled: true
+      shared: true
   volumes:
     data:             "gitea_data"

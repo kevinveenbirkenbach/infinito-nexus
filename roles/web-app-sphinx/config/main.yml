@@ -34,3 +34,4 @@ compose:
       name:               "sphinx"
     css:
       enabled: true
+      shared: true

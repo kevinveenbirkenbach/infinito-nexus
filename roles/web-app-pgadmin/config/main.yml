@@ -40,3 +40,4 @@ compose:
         - "{{ [RBAC.GROUP.NAME, 'web-app-pgadmin-administrator'] | path_join }}"
     css:
       enabled: true
+      shared: true

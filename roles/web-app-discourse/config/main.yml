@@ -47,6 +47,7 @@ compose:
       repository:         "https://github.com/discourse/discourse_docker.git"
     css:
       enabled: true
+      shared: true
   volumes: 
     data:   discourse_data
   network:  discourse

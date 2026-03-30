@@ -54,6 +54,7 @@ compose:
           - "/login"
     css:
       enabled: false
+      shared: true
   volumes:
     data:       "snipe-it_data"
     

@@ -49,6 +49,7 @@ compose:
         port:           "80"
     css:
       enabled: false
+      shared: true
   volumes:
     data:       suitecrm_data
 

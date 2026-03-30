@@ -28,6 +28,7 @@ compose:
       pids_limit:       2048
     css:
       enabled: true
+      shared: true
   volumes:
     data:           "jira_data"
 server:

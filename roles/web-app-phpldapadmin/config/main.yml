@@ -28,3 +28,4 @@ compose:
         - "{{ [RBAC.GROUP.NAME, 'web-app-phpldapadmin-administrator'] | path_join }}"
     css:
       enabled: true
+      shared: true
