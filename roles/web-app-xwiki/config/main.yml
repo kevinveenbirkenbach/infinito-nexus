@@ -6,6 +6,7 @@ compose:
       shared: true
     logout:
       enabled: true
+      shared: true
     ldap:
       enabled: false
       shared: false

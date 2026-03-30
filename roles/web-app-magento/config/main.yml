@@ -12,6 +12,7 @@ compose:
       shared: false
     logout:
       enabled: true
+      shared: true
 
     dashboard:
       enabled: true
@@ -35,10 +36,12 @@ compose:
       shared: false
       enabled:            true
       version:            "11.4"
+    # noqa: shared
     redis:
       backup:
         disabled: true
       enabled:            true
+    # noqa: shared
     search:
       enabled:            true
       image:              "opensearchproject/opensearch"

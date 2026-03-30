@@ -48,6 +48,7 @@ compose:
       enabled:  true 
     logout:
       enabled: true
+      shared: true
     ldap:
       enabled: true
       shared: true
@@ -57,6 +58,7 @@ compose:
     matomo:
       enabled: true
       shared: true
+    # noqa: shared
     redis:
       backup:
         disabled: true

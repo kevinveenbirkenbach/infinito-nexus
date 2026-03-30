@@ -20,6 +20,7 @@ compose:
       shared:   true
     logout:
       enabled:  true
+      shared: true
     ldap:
       enabled:  false
     dashboard:
@@ -41,6 +42,7 @@ compose:
       enabled:  true
     greenlight:
       enabled:  true
+      shared: false
     coturn:
       shared:   true
       enabled:  true 

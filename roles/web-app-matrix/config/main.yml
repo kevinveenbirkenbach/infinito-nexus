@@ -5,6 +5,7 @@ compose:
       shared:             true
     logout:
       enabled:            true
+      shared: true
     dashboard:
       enabled:            true
       shared:             true

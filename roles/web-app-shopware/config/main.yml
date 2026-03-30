@@ -19,6 +19,7 @@ compose:
       shared: false
     logout:
       enabled: true
+      shared: true
 
     dashboard:
       enabled: true
@@ -72,6 +73,7 @@ compose:
       mem_reservation: 512m
       mem_limit: 1g
 
+    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -82,6 +84,7 @@ compose:
       mem_reservation: 256m
       mem_limit: 512m
 
+    # noqa: shared
     opensearch:
       enabled: true
       image: "opensearchproject/opensearch"

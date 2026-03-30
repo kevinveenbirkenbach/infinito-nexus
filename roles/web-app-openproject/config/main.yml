@@ -20,6 +20,7 @@ compose:
   services:
     logout:
       enabled: true
+      shared: true
     ldap:
       enabled: true
       shared: true
@@ -75,6 +76,7 @@ compose:
       pids_limit:         256
     oauth2:
       enabled: true
+      shared: true
       origin:
         host:             "proxy"
         port:             "80"

@@ -6,12 +6,14 @@ compose:
       shared: true
     logout:
       enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true
     matomo:
       enabled: true
       shared: true
+    # noqa: shared
     redis:
       backup:
         disabled: true

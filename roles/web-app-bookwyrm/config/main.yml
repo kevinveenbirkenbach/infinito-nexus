@@ -6,6 +6,7 @@ compose:
       shared: false
     logout:
       enabled: true
+      shared: true
 
     dashboard:
       enabled: true
@@ -17,6 +18,7 @@ compose:
       shared: true
       type: "postgres"
       enabled:  true
+    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -26,6 +28,7 @@ compose:
       name:       bookwyrm
       repository: https://github.com/bookwyrm-social/bookwyrm.git
       min_storage: "15GB"
+    # noqa: shared
     worker:
       enabled:  true
     css:

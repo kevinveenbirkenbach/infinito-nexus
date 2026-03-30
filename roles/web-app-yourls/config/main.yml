@@ -19,6 +19,7 @@ compose:
   services:
     logout:
       enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true
@@ -36,6 +37,7 @@ compose:
       min_storage: "1GB"
     oauth2:
       enabled: true
+      shared: true
       origin:
         host: "application"
         port: "80"

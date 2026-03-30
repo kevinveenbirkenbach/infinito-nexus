@@ -22,6 +22,7 @@ compose:
       master_password_required: True              # Master password is required. Recommended True. False is a security risk.
     logout:
       enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true
@@ -34,6 +35,7 @@ compose:
       enabled: true
     oauth2:
       enabled: true
+      shared: true
       origin:
         host: "application"
         port: "80"

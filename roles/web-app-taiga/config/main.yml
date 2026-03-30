@@ -13,6 +13,7 @@ compose:
         port: "80"
     logout:
       enabled: true
+      shared: true
     dashboard:
       enabled: true
       shared: true

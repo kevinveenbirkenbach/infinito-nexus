@@ -19,6 +19,7 @@ compose:
   services:
     logout:
       enabled: true
+      shared: true
     ldap:
       enabled: true
       shared: true
@@ -28,6 +29,7 @@ compose:
     matomo:
       enabled: true
       shared: true
+    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -47,6 +49,7 @@ compose:
       pids_limit:       512
     oauth2:
       enabled: true
+      shared: true
       origin:
         host:   "snipe-it"
         port:   "80"

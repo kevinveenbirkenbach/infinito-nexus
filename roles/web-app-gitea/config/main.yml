@@ -30,6 +30,7 @@ compose:
       shared: false
     logout:
       enabled: true
+      shared: true
     ldap:
       enabled: true
       shared: true

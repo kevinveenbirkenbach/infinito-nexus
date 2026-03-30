@@ -7,6 +7,7 @@ compose:
   services:
     logout:
       enabled: true
+      shared: true
     ldap:
       enabled: true
       shared: true
@@ -22,6 +23,7 @@ compose:
       min_storage: "1GB"
     oauth2:
       enabled: true
+      shared: true
       origin:
         host: application  # Needs to be the same as webinterface
         port: 8080         # application port
