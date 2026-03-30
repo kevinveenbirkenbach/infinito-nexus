@@ -51,7 +51,7 @@ cd "${REPO_ROOT}"
 # Install system-level package prerequisites for the repository toolchain.
 bash "${REPO_ROOT}/scripts/install/package.sh"
 
-# Install Python tooling, Ansible collections, and all repository dependencies.
+echo "Installing Python tooling, Ansible collections, and all repository dependencies."
 make install
 
 # Load global environment (sets INVENTORY_DIR, INFINITO_DISTRO, etc.).
@@ -62,48 +62,47 @@ source "${REPO_ROOT}/scripts/meta/env/all.sh"
 # Build — build the local Docker image and verify a clean no-cache build.
 # =============================================================================
 
-# Build the local image using the Docker layer cache.
+echo "Building the local image using the Docker layer cache."
 make build
 
-# Rebuild the local image from scratch to verify the build without cache reuse.
+echo "Rebuilding the local image from scratch to verify the build without cache reuse."
 make build-no-cache
 
 # =============================================================================
 # System — show disk usage and purge cached state before building.
 # =============================================================================
 
-# Show current disk and Docker resource usage before purging.
+echo "Showing current disk and Docker resource usage before purging."
 make system-disk-usage
 
-# Required on minimal-hardware systems to free disk and memory before the build.
+echo "Freeing disk and memory on minimal-hardware systems before the build."
 make system-purge
 
 # =============================================================================
 # Bootstrap — install dependencies and prepare the environment for deployment.
 # =============================================================================
 
-# Bootstrap the development environment: DNS, AppArmor, IPv6, and lint tooling.
+echo "Bootstrapping the development environment: DNS, AppArmor, IPv6, and lint tooling."
 make environment-bootstrap
 
-# Start the local compose stack (builds the image if missing).
+echo "Starting the local compose stack (builds the image if missing)."
 make up
 
 # =============================================================================
 # Testing — run the full validation suite before deploying.
 # =============================================================================
 
-# Run the combined validation suite: lint, unit tests, and integration tests.
+echo "Running the combined validation suite: lint, unit tests, and integration tests."
 make test
 
 # =============================================================================
 # Deploy on minimal hardware — disable non-essential services to save resources.
 # =============================================================================
 
-# Deploy dashboard with matomo disabled to verify that SERVICES_DISABLED suppresses
-# the shared service in the generated inventory.
+echo "Deploying dashboard with matomo disabled to verify SERVICES_DISABLED suppresses the shared service in the inventory."
 SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}"
 
-# Trust the local CA certificate so HTTPS endpoints are reachable from the host.
+echo "Trusting the local CA certificate so HTTPS endpoints are reachable from the host."
 make trust-ca
 
 # Verify the dashboard is reachable (matomo was disabled, not the dashboard itself).
@@ -117,39 +116,38 @@ assert_http_status 404 "${MATOMO_URL}"
 # Deploy on performance hardware — deploy the full set of applications.
 # =============================================================================
 
-# Deploy matomo so it becomes reachable via its dedicated inventory entry.
+echo "Deploying matomo so it becomes reachable via its dedicated inventory entry."
 make deploy-fresh-purged-apps APPS="${MATOMO_APP}"
 
-# Re-trust the CA after the fresh deploy rebuilt the certificates.
+echo "Re-trusting the CA after the fresh deploy rebuilt the certificates."
 make trust-ca
 
 # Verify matomo is now reachable after its dedicated deploy.
 assert_http_status 200 "${MATOMO_URL}"
 
-# Verify the dashboard is no longer reachable. deploy-fresh-purged-apps purges the
-# previous inventory and containers before deploying, so web-app-dashboard is gone
-# after the matomo-only deploy. nginx returns 404 for unconfigured upstreams.
+# Verify the dashboard is no longer reachable after the matomo-only fresh deploy.
 assert_http_status 404 "${DASHBOARD_URL}"
 
 # =============================================================================
 # Redeploy keeping inventory and apt packages — validates reuse of existing state.
 # =============================================================================
 
+echo "Redeploying matomo while keeping inventory and packages to validate state reuse."
 make deploy-reuse-kept-apps APPS="${MATOMO_APP}"
 
 # =============================================================================
 # Inspect — print intermediate state for debugging and verification.
 # =============================================================================
 
-# Print the generated inventory to verify which roles were deployed.
+echo "Printing the generated inventory to verify which roles were deployed."
 make exec CMD="cat ${INVENTORY_FILE}"
 
 # =============================================================================
 # Teardown — shut down the stack and reverse all environment changes.
 # =============================================================================
 
-# Stop the compose stack and remove all volumes for a clean teardown.
+echo "Stopping the compose stack and removing all volumes for a clean teardown."
 make down
 
-# Reverse the environment bootstrap (DNS, AppArmor, IPv6 settings).
+echo "Reversing the environment bootstrap (DNS, AppArmor, IPv6 settings)."
 make environment-teardown
