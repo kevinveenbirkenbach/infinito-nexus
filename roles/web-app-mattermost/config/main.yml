@@ -23,6 +23,7 @@ compose:
       enabled:                    false
     dashboard:
       enabled:                    true
+      shared: true
     matomo:
       enabled:                    true
       shared:                     true

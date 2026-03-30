@@ -35,6 +35,7 @@ compose:
       pids_limit:       128
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true

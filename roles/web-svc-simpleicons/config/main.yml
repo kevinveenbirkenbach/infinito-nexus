@@ -5,6 +5,7 @@ compose:
       enabled:  false
     dashboard:
       enabled:  true
+      shared: true
     matomo:
       enabled:  false
       shared:   false

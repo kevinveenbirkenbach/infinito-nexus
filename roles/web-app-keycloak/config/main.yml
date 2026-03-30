@@ -33,6 +33,7 @@ compose:
           full:     86400
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
