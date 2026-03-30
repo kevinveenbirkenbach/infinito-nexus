@@ -34,7 +34,7 @@ A role usually owns one capability:
 
 For example, `web-app-nextcloud` owns the Nextcloud deployment, `sys-svc-webserver-https` owns the HTTPS plumbing, and `sys-ctl-cln-docker` handles Docker cleanup.
 
-A role should answer four questions clearly:
+A role MUST be able to answer four questions clearly:
 
 - What does it install or configure?
 - What is optional?
@@ -47,7 +47,7 @@ If a role cannot answer those questions, it is probably doing too much.
 
 Bundles are the assembly layer.
 
-`inventories/bundles/servers/*` describe concrete deployment shapes such as a personal server, a community hub, or a sovereign cloud setup. They decide which roles are active together and which ones stay out.
+[inventories/bundles/servers/](../../../inventories/bundles/servers) describe concrete deployment shapes such as a personal server, a community hub, or a sovereign cloud setup. They decide which roles are active together and which ones stay out.
 
 For example, the repository already has server bundles such as `community-hub`, `personal-nexus`, and `sovereign-cloud`. Each one combines the same building blocks in a different way for a different operating model.
 
@@ -68,16 +68,16 @@ That is why you will find host work in `sys-*` roles and app work in `web-app-*`
 
 ### Entry Points
 
-People and CI should interact with the repo through stable commands, not through improvised command sequences.
+People and CI MUST interact with the repo through stable commands, not through improvised command sequences.
 
 The main entry points are:
 
-- `Makefile`
-- `scripts/`
-- `tests/`
-- `docs/contributing/code/quality.md`
-- `docs/contributing/development/testing.md`
-- `docs/contributing/`
+- [Makefile](../../../Makefile)
+- [scripts/](../../../scripts/)
+- [tests/](../../../tests/)
+- [docs/contributing/code/quality.md](quality.md)
+- [docs/contributing/development/testing.md](../development/testing.md)
+- [docs/contributing/](../../)
 
 Those layers keep local development, CI, and production behavior closer together.
 
@@ -148,7 +148,7 @@ If removing one part breaks everything else, the boundaries are probably too wea
 
 ### Adding A New Application
 
-A new app usually means:
+A new app MUST:
 
 1. create a `web-app-*` role
 2. define its templates and defaults
@@ -158,16 +158,18 @@ A new app usually means:
 
 ### Introducing A Shared Service
 
-A shared service usually means:
+A new shared service MUST:
 
-1. create a `svc-*` role
+1. create role
 2. keep host setup separate from consumer setup
 3. expose only the configuration the dependent roles need
 4. document the service contract and lifecycle
 
+See [services.md](services.md) for the full service registration, loading, and injection model.
+
 ### Changing An Existing Deployment
 
-For a normal change:
+For a normal change, contributors MUST:
 
 1. update the role first
 2. update the bundle only if composition changes
@@ -175,6 +177,8 @@ For a normal change:
 4. update tests if the contract changes
 
 If you skip those steps, the repository becomes harder to understand for the next person.
+
+See [docs/contributing/flow/workflow.md](../flow/workflow.md) for the full contribution flow.
 
 ## What This Architecture Is Not
 
@@ -188,13 +192,14 @@ If you skip those steps, the repository becomes harder to understand for the nex
 
 If you are trying to understand a change, start here:
 
-- `roles/` for behavior
-- `inventories/bundles/` for deployment shapes
-- `Makefile` and `scripts/` for supported commands
-- `docs/contributing/code/quality.md` for code and framework rules
-- `docs/contributing/development/testing.md` for refactoring, debugging, and testing
-- `docs/contributing/` for workflow and constraints
-- `tests/` for the expected contracts
+- [roles/](../../../roles/) for behavior
+- [inventories/bundles/](../../../inventories/bundles/) for deployment shapes
+- [Makefile](../../../Makefile) and [scripts/](../../../scripts/) for supported commands
+- [docs/contributing/code/quality.md](quality.md) for code and framework rules
+- [docs/contributing/code/services.md](services.md) for service registration, loading, and injection
+- [docs/contributing/development/testing.md](../development/testing.md) for refactoring, debugging, and testing
+- [docs/contributing/](../../) for workflow and constraints
+- [tests/](../../../tests/) for the expected contracts
 
 If you can explain a change in those five places, you probably understand the architecture.
 
