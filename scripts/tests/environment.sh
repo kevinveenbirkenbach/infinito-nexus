@@ -67,16 +67,6 @@ make install
 source "${REPO_ROOT}/scripts/meta/env/all.sh"
 
 # =============================================================================
-# Build — build the local Docker image and verify a clean no-cache build.
-# =============================================================================
-
-echo "Building the local image using the Docker layer cache."
-make build
-
-echo "Rebuilding the local image from scratch to verify the build without cache reuse."
-make build-no-cache
-
-# =============================================================================
 # System — show disk usage and purge cached state before building.
 # =============================================================================
 
@@ -85,6 +75,16 @@ make system-disk-usage
 
 echo "Freeing disk and memory on minimal-hardware systems before the build."
 make system-purge
+
+# =============================================================================
+# Build — build the local Docker image and verify a clean no-cache build.
+# =============================================================================
+
+echo "Building the local image using the Docker layer cache."
+make build
+
+echo "Rebuilding the local image from scratch to verify the build without cache reuse."
+make build-no-cache
 
 # =============================================================================
 # Bootstrap — install dependencies and prepare the environment for deployment.
