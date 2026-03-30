@@ -20,6 +20,10 @@ services:
     role: web-app-matomo
     type: frontend
 
+  asset:
+    role: web-svc-asset
+    type: frontend
+
   cdn:
     role: web-svc-cdn
     type: frontend
