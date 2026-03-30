@@ -40,11 +40,6 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # pkgmgr images may reset the working directory before invoking this script.
 cd "${REPO_ROOT}"
 
-# Load global environment (sets INVENTORY_DIR, INFINITO_DISTRO, etc.).
-# shellcheck source=scripts/meta/env/all.sh
-source "${REPO_ROOT}/scripts/meta/env/all.sh"
-: "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
-
 # =============================================================================
 # Install — install package prerequisites and repository dependencies.
 # =============================================================================
@@ -54,6 +49,10 @@ bash "${REPO_ROOT}/scripts/install/package.sh"
 
 # Install Python tooling, Ansible collections, and all repository dependencies.
 make install
+
+# Load global environment (sets INVENTORY_DIR, INFINITO_DISTRO, etc.).
+# shellcheck source=scripts/meta/env/all.sh
+source "${REPO_ROOT}/scripts/meta/env/all.sh"
 
 # =============================================================================
 # Build — build the local Docker image and verify a clean no-cache build.
