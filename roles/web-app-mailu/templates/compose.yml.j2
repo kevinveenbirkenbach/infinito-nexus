@@ -6,6 +6,8 @@
     image: {{ MAILU_DOCKER_FLAVOR }}/unbound:{{ MAILU_VERSION }}
     container_name: {{ MAILU_CONTAINER }}_resolver
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    volumes:
+      - "{{ MAILU_UNBOUND_CONF_FILE }}:/unbound.conf:ro"
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
         ipv4_address: {{ MAILU_DNS_RESOLVER }}
 
