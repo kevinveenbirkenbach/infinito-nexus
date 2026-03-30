@@ -269,11 +269,18 @@ test("mailu: biber sends email to administrator, administrator receives it", asy
   await biberLogoutLink.first().waitFor({ state: "visible", timeout: 10_000 });
   await biberLogoutLink.first().click();
 
-  // Keycloak 18+ shows a logout confirmation page when id_token_hint is absent.
-  // Wait for it, then click through so the SSO session is actually terminated before
-  // the admin login flow begins — otherwise Mailu auto-logs in the next user.
+  // Roundcube's own logout (?_task=logout) ends the Roundcube PHP session but does NOT
+  // terminate the Keycloak SSO session. If the SSO session stays active, Keycloak will
+  // silently re-authenticate the next navigation — causing the wrong user to appear logged in.
+  // Explicitly navigate to the Keycloak logout endpoint to guarantee SSO termination.
   await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
 
+  if (!page.url().includes("openid-connect/logout")) {
+    await page.goto(`${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/logout`);
+    await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+  }
+
+  // Keycloak 18+ shows a logout confirmation page when id_token_hint is absent — click through it.
   if (page.url().includes("openid-connect/logout")) {
     const confirmLogout = page.locator("#kc-logout, button[name='logout'], input[name='logout']")
       .or(page.getByRole("button", { name: /sign out/i }));
