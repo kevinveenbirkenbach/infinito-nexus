@@ -118,7 +118,10 @@ echo "Verifying the dashboard is reachable (matomo was disabled, not the dashboa
 assert_http_status 200 "${DASHBOARD_URL}"
 
 echo "Verifying matomo is not reachable because it was excluded from the inventory."
-assert_http_status 404 "${MATOMO_URL}"
+# curl returns 000 (no HTTP response) instead of 404 because the TLS handshake
+# fails first: matomo's subdomain is not listed as a SAN in the deployed
+# certificate, so curl aborts before any HTTP exchange takes place.
+assert_http_status 000 "${MATOMO_URL}"
 
 # =============================================================================
 # Deploy on performance hardware — deploy the full set of applications.
@@ -135,7 +138,10 @@ echo "Verifying matomo is now reachable after its dedicated deploy."
 assert_http_status 200 "${MATOMO_URL}"
 
 echo "Verifying the dashboard is no longer reachable after the matomo-only fresh deploy."
-assert_http_status 404 "${DASHBOARD_URL}"
+# curl returns 000 (no HTTP response) instead of 404 because the fresh deploy
+# rebuilt the certificate for matomo only, so dashboard's subdomain is no
+# longer a SAN — the TLS handshake fails before any HTTP exchange takes place.
+assert_http_status 000 "${DASHBOARD_URL}"
 
 # =============================================================================
 # Redeploy keeping inventory and apt packages — validates reuse of existing state.
