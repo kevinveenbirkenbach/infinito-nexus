@@ -12,6 +12,14 @@ Use this page when you are iterating on a local app deploy during debugging or d
 - Only go back to `APPS=<role> make deploy-fresh-purged-apps` if you have concrete evidence that the inventory or host stack is broken, or you intentionally need a fresh single-app baseline again.
 - If you need to validate the single-app init/deploy path separately, use `APPS=<role> make deploy-fresh-kept-apps`. It checks the clean single-app setup apart from the faster reuse path.
 
+## Workflow Loop
+
+- When you are developing, optimizing, or debugging GitHub Actions workflows, you SHOULD explicitly propose `make act-workflow` as the default iterative local debug loop.
+- You MUST NOT assume that Act should be used automatically for workflow work. If the user agrees with the proposal, you SHOULD use `make act-workflow` for the iteration loop.
+- After the user agrees to use Act, you SHOULD rerun `make act-workflow` after each focused workflow change and inspect the new output before making further edits.
+- You SHOULD avoid jumping straight to repeated remote CI reruns when `make act-workflow` can validate the workflow locally and the user agreed to use it.
+- You MAY widen the scope to `make act-app` or `make act-all` when the problem spans more than one workflow or `make act-workflow` is too narrow for the failure.
+
 ## Certificate Authority
 
 - If the website uses locally deployed certificates, you MUST run `make trust-ca` before you inspect it in a browser. Otherwise the browser will warn about the local CA and the inspection will not be reliable.
