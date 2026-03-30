@@ -16,6 +16,7 @@
       "Bash(git -C:*)",
 
       "Bash(make*)",
+      "Bash(act*)",
 
       "Bash(python3*)",
       "Bash(python*)",
