@@ -14,6 +14,33 @@ def parse_services_disabled(env_value: str) -> list[str]:
     return [s.strip() for s in env_value.replace(",", " ").split() if s.strip()]
 
 
+def find_roles_with_service(service_name: str, roles_dir: Path) -> set[str]:
+    """
+    Return all role IDs whose config/main.yml defines the given service under
+    compose.services (regardless of whether an image is set).
+    """
+    role_ids: set[str] = set()
+    if not roles_dir.exists():
+        return role_ids
+
+    for role_dir in sorted(roles_dir.iterdir()):
+        if not role_dir.is_dir():
+            continue
+        config_file = role_dir / "config" / "main.yml"
+        if not config_file.exists():
+            continue
+        try:
+            with config_file.open("r", encoding="utf-8") as f:
+                config = yaml.safe_load(f) or {}
+        except Exception:
+            continue
+        compose_services = (config.get("compose") or {}).get("services") or {}
+        if service_name in compose_services:
+            role_ids.add(role_dir.name)
+
+    return role_ids
+
+
 def find_provider_roles(services: list[str], roles_dir: Path) -> dict[str, str]:
     """
     Scan all role configs and return a mapping of service_name -> application_id
@@ -91,15 +118,17 @@ def remove_roles_from_inventory(
 def apply_services_disabled(
     host_vars_file: Path,
     services: list[str],
+    roles_dir: Path,
     inventory_file: Optional[Path] = None,
-    roles_dir: Optional[Path] = None,
 ) -> None:
     """
-    For every application in host_vars applications.<app>.compose.services,
-    set enabled: false and shared: false for each service listed in `services`.
+    For every role under roles_dir whose config/main.yml defines a service listed
+    in `services`, set enabled: false and shared: false in host_vars_file under
+    applications.<app_id>.compose.services.<svc_name>.  Missing application,
+    compose, or services blocks are created as needed.
 
-    If inventory_file and roles_dir are provided, also removes the provider role
-    for each service from the inventory (devices.yml).
+    If inventory_file is provided, also removes the provider role for each service
+    from the inventory (devices.yml).
     """
     if not services:
         return
@@ -122,19 +151,24 @@ def apply_services_disabled(
         return
 
     changed = False
-    for app_id, app_data in applications.items():
-        if not isinstance(app_data, CommentedMap):
-            continue
-        compose = app_data.get("compose")
-        if not isinstance(compose, CommentedMap):
-            continue
-        svc_map = compose.get("services")
-        if not isinstance(svc_map, CommentedMap):
-            continue
-        for svc_name in services:
-            if svc_name not in svc_map:
-                continue
-            svc = svc_map[svc_name]
+    for svc_name in services:
+        for app_id in sorted(find_roles_with_service(svc_name, roles_dir)):
+            app_data = applications.get(app_id)
+            if not isinstance(app_data, CommentedMap):
+                app_data = CommentedMap()
+                applications[app_id] = app_data
+
+            compose = app_data.get("compose")
+            if not isinstance(compose, CommentedMap):
+                compose = CommentedMap()
+                app_data["compose"] = compose
+
+            svc_map = compose.get("services")
+            if not isinstance(svc_map, CommentedMap):
+                svc_map = CommentedMap()
+                compose["services"] = svc_map
+
+            svc = svc_map.get(svc_name)
             if not isinstance(svc, CommentedMap):
                 svc = CommentedMap()
                 svc_map[svc_name] = svc
@@ -151,7 +185,7 @@ def apply_services_disabled(
             yaml_rt.dump(doc, f)
 
     # --- inventory: remove provider roles ---
-    if inventory_file is not None and roles_dir is not None:
+    if inventory_file is not None:
         provider_map = find_provider_roles(services, roles_dir)
         if provider_map:
             print(f"[INFO] SERVICES_DISABLED: provider roles found: {provider_map}")
@@ -164,8 +198,8 @@ def apply_services_disabled(
 
 def apply_services_disabled_from_env(
     host_vars_file: Path,
+    roles_dir: Path,
     inventory_file: Optional[Path] = None,
-    roles_dir: Optional[Path] = None,
 ) -> None:
     """Read SERVICES_DISABLED from the environment and apply to host_vars and inventory."""
     raw = os.environ.get("SERVICES_DISABLED", "").strip()
@@ -174,5 +208,5 @@ def apply_services_disabled_from_env(
     services = parse_services_disabled(raw)
     print(f"[INFO] SERVICES_DISABLED={raw!r} → disabling: {services}")
     apply_services_disabled(
-        host_vars_file, services, inventory_file=inventory_file, roles_dir=roles_dir
+        host_vars_file, services, roles_dir=roles_dir, inventory_file=inventory_file
     )

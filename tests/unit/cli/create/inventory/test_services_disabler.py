@@ -203,6 +203,9 @@ class TestApplyServicesDisabled(unittest.TestCase):
             }
         )
         self._make_role("web-app-matomo", {"matomo": {"image": "matomo"}})
+        self._make_role(
+            "web-app-nextcloud", {"matomo": {"enabled": True, "shared": True}}
+        )
 
         apply_services_disabled(
             self.host_vars,
@@ -237,14 +240,17 @@ class TestApplyServicesDisabled(unittest.TestCase):
                 }
             }
         )
-        apply_services_disabled(self.host_vars, ["oidc"])
+        self._make_role(
+            "web-app-nextcloud", {"oidc": {"enabled": True, "shared": True}}
+        )
+        apply_services_disabled(self.host_vars, ["oidc"], roles_dir=self.roles_dir)
         result = self._read_host_vars()
         svc = result["applications"]["web-app-nextcloud"]["compose"]["services"]
         self.assertFalse(svc["oidc"]["enabled"])
         self.assertFalse(svc["oidc"]["shared"])
         self.assertTrue(svc["database"]["enabled"])
 
-    def test_skips_missing_service(self):
+    def test_creates_missing_service_entry_when_role_defines_it(self):
         self._write_host_vars(
             {
                 "applications": {
@@ -254,21 +260,75 @@ class TestApplyServicesDisabled(unittest.TestCase):
                 }
             }
         )
-        apply_services_disabled(self.host_vars, ["oidc"])
+        # role defines oidc in its config
+        self._make_role("web-app-matomo", {"oidc": {"enabled": True, "shared": True}})
+        apply_services_disabled(self.host_vars, ["oidc"], roles_dir=self.roles_dir)
         result = self._read_host_vars()
+        # existing service untouched
         self.assertTrue(
             result["applications"]["web-app-matomo"]["compose"]["services"]["matomo"][
                 "enabled"
             ]
         )
+        # missing service entry is created with enabled/shared false
+        oidc = result["applications"]["web-app-matomo"]["compose"]["services"]["oidc"]
+        self.assertFalse(oidc["enabled"])
+        self.assertFalse(oidc["shared"])
+
+    def test_skips_app_whose_role_does_not_define_service(self):
+        self._write_host_vars(
+            {
+                "applications": {
+                    "web-app-matomo": {
+                        "compose": {"services": {"matomo": {"enabled": True}}}
+                    }
+                }
+            }
+        )
+        # role does NOT define oidc
+        self._make_role("web-app-matomo", {"matomo": {"image": "matomo"}})
+        apply_services_disabled(self.host_vars, ["oidc"], roles_dir=self.roles_dir)
+        result = self._read_host_vars()
+        self.assertNotIn(
+            "oidc",
+            result["applications"]["web-app-matomo"]["compose"]["services"],
+        )
+
+    def test_creates_compose_section_for_app_without_compose(self):
+        self._write_host_vars(
+            {
+                "applications": {
+                    "web-app-foo": {"credentials": {"password": "secret"}},
+                }
+            }
+        )
+        # role defines matomo — so compose section must be created
+        self._make_role("web-app-foo", {"matomo": {"enabled": True, "shared": True}})
+        apply_services_disabled(self.host_vars, ["matomo"], roles_dir=self.roles_dir)
+        result = self._read_host_vars()
+        svc = result["applications"]["web-app-foo"]["compose"]["services"]["matomo"]
+        self.assertFalse(svc["enabled"])
+        self.assertFalse(svc["shared"])
+
+    def test_creates_app_entry_when_not_in_host_vars(self):
+        self._write_host_vars({"applications": {}})
+        # role defines matomo but app is not yet in host_vars
+        self._make_role("web-app-bar", {"matomo": {"enabled": True, "shared": True}})
+        apply_services_disabled(self.host_vars, ["matomo"], roles_dir=self.roles_dir)
+        result = self._read_host_vars()
+        svc = result["applications"]["web-app-bar"]["compose"]["services"]["matomo"]
+        self.assertFalse(svc["enabled"])
+        self.assertFalse(svc["shared"])
 
     def test_no_op_on_empty_list(self):
         self._write_host_vars({"applications": {}})
-        apply_services_disabled(self.host_vars, [])
+        apply_services_disabled(self.host_vars, [], roles_dir=self.roles_dir)
         self.assertEqual(self._read_host_vars(), {"applications": {}})
 
     def test_no_op_when_file_missing(self):
-        apply_services_disabled(self.root / "nonexistent.yml", ["oidc"])
+        apply_services_disabled(
+            self.root / "nonexistent.yml", ["oidc"], roles_dir=self.roles_dir
+        )
 
     def test_multiple_apps_and_services(self):
         self._write_host_vars(
@@ -287,7 +347,11 @@ class TestApplyServicesDisabled(unittest.TestCase):
                 }
             }
         )
-        apply_services_disabled(self.host_vars, ["oidc", "ldap"])
+        self._make_role("app-a", {"oidc": {"enabled": True, "shared": True}})
+        self._make_role("app-b", {"ldap": {"enabled": True, "shared": True}})
+        apply_services_disabled(
+            self.host_vars, ["oidc", "ldap"], roles_dir=self.roles_dir
+        )
         result = self._read_host_vars()
         self.assertFalse(
             result["applications"]["app-a"]["compose"]["services"]["oidc"]["enabled"]
@@ -305,6 +369,8 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
         self.yaml_rt = YAML(typ="rt")
         self.yaml_rt.preserve_quotes = True
         self.host_vars = self.root / "host_vars.yml"
+        self.roles_dir = self.root / "roles"
+        self.roles_dir.mkdir()
 
     def _write(self, data: dict) -> None:
         with self.host_vars.open("w") as f:
@@ -313,6 +379,14 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
     def _read(self) -> dict:
         with self.host_vars.open("r") as f:
             return self.yaml_rt.load(f)
+
+    def _make_role(self, role_name: str, services: dict) -> None:
+        role_dir = self.roles_dir / role_name
+        (role_dir / "config").mkdir(parents=True)
+        with (role_dir / "config" / "main.yml").open("w") as f:
+            import yaml
+
+            yaml.dump({"compose": {"services": services}}, f)
 
     def test_reads_env_var(self):
         self._write(
@@ -326,8 +400,9 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
                 }
             }
         )
+        self._make_role("web-app-foo", {"oidc": {"enabled": True, "shared": True}})
         with unittest.mock.patch.dict(os.environ, {"SERVICES_DISABLED": "oidc"}):
-            apply_services_disabled_from_env(self.host_vars)
+            apply_services_disabled_from_env(self.host_vars, roles_dir=self.roles_dir)
         result = self._read()
         self.assertFalse(
             result["applications"]["web-app-foo"]["compose"]["services"]["oidc"][
@@ -339,7 +414,7 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
         self._write({"applications": {}})
         env = {k: v for k, v in os.environ.items() if k != "SERVICES_DISABLED"}
         with unittest.mock.patch.dict(os.environ, env, clear=True):
-            apply_services_disabled_from_env(self.host_vars)
+            apply_services_disabled_from_env(self.host_vars, roles_dir=self.roles_dir)
         self.assertEqual(self._read(), {"applications": {}})
 
 
