@@ -105,11 +105,10 @@ SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}"
 echo "Trusting the local CA certificate so HTTPS endpoints are reachable from the host."
 make trust-ca
 
-# Verify the dashboard is reachable (matomo was disabled, not the dashboard itself).
+echo "Verifying the dashboard is reachable (matomo was disabled, not the dashboard itself)."
 assert_http_status 200 "${DASHBOARD_URL}"
 
-# Verify matomo is not reachable because it was excluded from the inventory.
-# The nginx proxy returns 404 when no upstream is configured for this host.
+echo "Verifying matomo is not reachable because it was excluded from the inventory."
 assert_http_status 404 "${MATOMO_URL}"
 
 # =============================================================================
@@ -122,10 +121,10 @@ make deploy-fresh-purged-apps APPS="${MATOMO_APP}"
 echo "Re-trusting the CA after the fresh deploy rebuilt the certificates."
 make trust-ca
 
-# Verify matomo is now reachable after its dedicated deploy.
+echo "Verifying matomo is now reachable after its dedicated deploy."
 assert_http_status 200 "${MATOMO_URL}"
 
-# Verify the dashboard is no longer reachable after the matomo-only fresh deploy.
+echo "Verifying the dashboard is no longer reachable after the matomo-only fresh deploy."
 assert_http_status 404 "${DASHBOARD_URL}"
 
 # =============================================================================
