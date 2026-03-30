@@ -4,6 +4,7 @@ compose:
       enabled: true
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
