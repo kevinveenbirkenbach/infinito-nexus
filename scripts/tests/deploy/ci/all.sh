@@ -47,6 +47,7 @@ server | workstation | universal) ;;
 	;;
 esac
 
+: "${PYTHON:=python3}"
 : "${MISSING_ONLY:=true}"
 if [[ -z "${MAX_TOTAL_SECONDS+x}" ]]; then
 	MAX_TOTAL_SECONDS=19800
@@ -103,6 +104,9 @@ sync_ci_image_for_run() {
 	export INFINITO_IMAGE="ghcr.io/${owner}/${repo_name}/${INFINITO_DISTRO}:${tag}"
 	echo ">>> CI image synced: ${INFINITO_IMAGE}"
 }
+
+echo ">>> Installing CI dependencies"
+"${PYTHON}" -m pip install ruamel.yaml PyYAML
 
 for distro in "${distro_arr[@]}"; do
 	now="$(date +%s)"
