@@ -7,9 +7,10 @@ This page documents how services are defined, mapped, loaded, and injected at de
 A *service* is a shared dependency that one or more applications can opt into via their `compose.services.<key>` configuration.
 Each service has:
 
-- a **key** — the short name used inside `compose.services` (e.g. `cdn`, `logout`, `ldap`)
+- a **key** — the short name used inside `compose.services` (e.g. `cdn`, `css`, `logout`, `ldap`)
 - a **role** — the Ansible role that provisions it (e.g. `web-svc-cdn`, `svc-db-openldap`)
 - a **type** — either `frontend` (loaded by `sys-front-inj-all`) or `backend` (loaded by `sys-stk-backend`)
+- an optional **canonical** — required when multiple keys share the same role (see below)
 
 An application declares it needs a service by setting `compose.services.<key>.enabled: true` in its config.
 A service is considered *shared* (reusable across applications) when it also sets `shared: true`.
@@ -28,6 +29,21 @@ services:
   matomo:
     role: web-app-matomo
     type: frontend
+
+  # Multiple keys can point to the same role.
+  # The primary key has no canonical field; aliases declare canonical: <primary-key>.
+  cdn:
+    role: web-svc-cdn
+    type: frontend
+  css:
+    role: web-svc-cdn
+    type: frontend
+    canonical: cdn        # alias — role-based lookup returns id: cdn
+  javascript:
+    role: web-svc-cdn
+    type: frontend
+    canonical: cdn        # alias — role-based lookup returns id: cdn
+
   ldap:
     role: svc-db-openldap
     type: backend
@@ -35,6 +51,20 @@ services:
     role_template: "svc-db-{type}"   # {type} taken from compose.services.database.type
     type: backend
 ```
+
+### Shared-role entries and the `canonical` field
+
+A role can be shared by multiple service keys (e.g. `cdn`, `css`, and `javascript` all provision `web-svc-cdn`).
+Each service key represents a distinct *feature* that triggers CDN loading when an app enables it,
+but role-based reverse lookup (`lookup('service', 'web-svc-cdn')`) must return a single, deterministic `id`.
+
+Rules:
+- The **primary key** has no `canonical` field — it is the canonical.
+- Every **alias key** that shares the same role MUST declare `canonical: <primary-key>`.
+- The canonical target must exist, share the same role, and must NOT itself be an alias (no chaining).
+- A key whose role is unique (not shared) MUST NOT declare `canonical`.
+
+These rules are enforced by the lint test [`tests/integration/test_services_canonical.py`](../../../tests/integration/test_services_canonical.py).
 
 ## Service Config per Role
 
@@ -132,16 +162,20 @@ File: [`plugins/lookup/service.py`](../../../plugins/lookup/service.py)
 
 ```yaml
 lookup('service', 'matomo')          # look up by service key
-lookup('service', 'web-app-matomo')  # look up by role name (bidirectional)
+lookup('service', 'web-app-matomo')  # look up by role name → returns canonical key
+lookup('service', 'css')             # alias key → returns id: css
+lookup('service', 'web-svc-cdn')     # role lookup → returns id: cdn (canonical)
 ```
 
 - Reads `applications`, `group_names`, and `services` (from `group_vars/all/20_services.yml`) from Ansible variables
-- Accepts either a service **key** (e.g. `matomo`) or a **role name** (e.g. `web-app-matomo`) as the term — both resolve to the same entry
+- Accepts either a service **key** (e.g. `matomo`, `css`) or a **role name** (e.g. `web-app-matomo`, `web-svc-cdn`) as the term
+- When looking up by **key**, returns the entry for that exact key (`id` = the key you passed)
+- When looking up by **role name**, returns the entry for the **canonical key** of that role
 - Returns a dict per term:
 
   | Field     | Type   | Meaning |
   |-----------|--------|---------|
-  | `id`      | string | Canonical service key (e.g. `matomo`) |
+  | `id`      | string | Service key — equals the looked-up key, or the canonical key for role-based lookup |
   | `role`    | string | Provider role name (e.g. `web-app-matomo`) |
   | `enabled` | bool   | Any deployed app has `compose.services.<key>.enabled: true` |
   | `shared`  | bool   | Any deployed app has `compose.services.<key>.shared: true` |
@@ -152,7 +186,7 @@ lookup('service', 'web-app-matomo')  # look up by role name (bidirectional)
   Short keys (e.g. `collabora`) do not chain to `web-svc-collabora` — only the key `web-svc-collabora` would.
 - Does **not** control nginx injection — see `inj_enabled` above
 - Used in: [`roles/sys-front-inj-all/tasks/01_services.yml`](../../../roles/sys-front-inj-all/tasks/01_services.yml)
-- Tests: [`tests/unit/plugins/lookup/test_service.py`](../../../tests/unit/plugins/lookup/test_service.py)
+- Tests: [`tests/unit/plugins/lookup/test_service.py`](../../../tests/unit/plugins/lookup/test_service.py), [`tests/integration/test_services_resolvable.py`](../../../tests/integration/test_services_resolvable.py)
 
 ### `service_should_load` — should this service be loaded for the current app?
 
@@ -195,7 +229,7 @@ dependency graphs.
 
 | File | Purpose |
 |---|---|
-| [`group_vars/all/20_services.yml`](../../../group_vars/all/20_services.yml) | **SPOT** — service key → role mapping with `type: frontend/backend` |
+| [`group_vars/all/20_services.yml`](../../../group_vars/all/20_services.yml) | **SPOT** — service key → role mapping with `type`, optional `canonical` |
 | [`roles/sys-front-inj-all/tasks/01_services.yml`](../../../roles/sys-front-inj-all/tasks/01_services.yml) | **SPOT** — frontend service loading loop |
 | [`roles/sys-front-inj-all/tasks/_load_frontend_service.yml`](../../../roles/sys-front-inj-all/tasks/_load_frontend_service.yml) | Reachability check + conditional load per frontend service |
 | [`roles/sys-front-inj-all/tasks/main.yml`](../../../roles/sys-front-inj-all/tasks/main.yml) | Orchestrates loading + injection for every deployed app |
@@ -203,6 +237,8 @@ dependency graphs.
 | [`tasks/utils/load_app.yml`](../../../tasks/utils/load_app.yml) | Run-once role loader |
 | [`tasks/utils/once/flag.yml`](../../../tasks/utils/once/flag.yml) | Sets `run_once_<role>` fact to prevent duplicate loads |
 | [`plugins/lookup/service.py`](../../../plugins/lookup/service.py) | Resolve service by key or role; returns `{id, role, enabled, shared, needed}` |
+| [`tests/integration/test_services_resolvable.py`](../../../tests/integration/test_services_resolvable.py) | Integration: all keys/roles in `20_services.yml` resolve correctly |
+| [`tests/integration/test_services_canonical.py`](../../../tests/integration/test_services_canonical.py) | Lint: canonical field consistency rules enforced |
 | [`roles/sys-stk-backend/lookup_plugins/service_should_load.py`](../../../roles/sys-stk-backend/lookup_plugins/service_should_load.py) | "Should service load for this app?" lookup |
 | [`cli/meta/applications/resolution/services/resolver.py`](../../../cli/meta/applications/resolution/services/resolver.py) | Python-side service resolver (CLI use) |
 | [`utils/config_utils.py`](../../../utils/config_utils.py) | `get_app_conf()` — hierarchical config accessor |
