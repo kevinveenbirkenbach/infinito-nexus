@@ -196,150 +196,152 @@ test("dashboard to mailu: sso login, open admin interface, logout", async ({ pag
   await page.goto("/");
 });
 
-// Scenario II: biber logs in → sends email to administrator → logs out →
-//              administrator logs in → waits for email → logs out
-test("mailu: biber sends email to administrator, administrator receives it", async ({ page }) => {
+// Scenario II: biber logs in → sends email to administrator → administrator logs in
+//              (separate browser) → waits for email → logs out
+//
+// biber and the administrator are two different people on separate machines.
+// Using isolated browser contexts models this correctly: no shared cookies, no shared
+// Keycloak SSO session. This avoids any logout/session-cleanup race condition entirely.
+test("mailu: biber sends email to administrator, administrator receives it", async ({ browser }) => {
   const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const testSubject         = `Playwright test ${Date.now()}`;
 
-  // --- Part 1: biber logs in and sends email ---
+  // Separate contexts = separate browser profiles (no shared cookies or SSO session)
+  const biberContext = await browser.newContext({ ignoreHTTPSErrors: true });
+  const adminContext = await browser.newContext({ ignoreHTTPSErrors: true });
 
-  await page.goto(mailuBaseUrl);
+  try {
+    // --- Part 1: biber logs in and sends email ---
 
-  // Mailu webmail may show an SSO button or redirect directly to Keycloak
-  const ssoButton = page.getByRole("button", { name: /sso|single sign.?on|login with/i });
-  const ssoButtonVisible = await ssoButton.first().isVisible({ timeout: 5_000 }).catch(() => false);
+    const biberPage = await biberContext.newPage();
 
-  if (ssoButtonVisible) {
-    await ssoButton.first().click();
-  }
+    await biberPage.goto(mailuBaseUrl);
 
-  // Click through Mailu's own /sso/login intermediate page if present
-  await clickThroughMailuSsoPage(page);
+    // Mailu webmail may show an SSO button or redirect directly to Keycloak
+    const ssoButton = biberPage.getByRole("button", { name: /sso|single sign.?on|login with/i });
+    const ssoButtonVisible = await ssoButton.first().isVisible({ timeout: 5_000 }).catch(() => false);
 
-  // Wait for Keycloak OIDC auth page
-  await expect
-    .poll(() => page.url(), {
-      timeout: 30_000,
-      message: `Expected redirect to Keycloak OIDC: ${expectedOidcAuthUrl}`
-    })
-    .toContain(expectedOidcAuthUrl);
-
-  await performOidcLogin(page, biberUsername, biberPassword);
-
-  // Wait for redirect back to Mailu webmail
-  await expect
-    .poll(() => page.url(), {
-      timeout: 60_000,
-      message: "Expected redirect back to Mailu webmail after biber login"
-    })
-    .toContain(mailuBaseUrl.replace(/\/$/, ""));
-
-  // Navigate directly to Roundcube compose URL — clicking the compose button requires
-  // rcmail.js to fully execute, direct navigation is more reliable in Playwright.
-  // Selectors confirmed from rendered DOM: id="_to", id="compose-subject",
-  // id="composebody", button.btn.btn-primary.send inside .formbuttons
-  await page.goto(mailuBaseUrl.replace(/\/$/, "") + "/webmail/?_task=mail&_action=compose");
-  await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
-
-  const toField      = page.locator("#_to, input[name='_to']").first();
-  const subjectField = page.locator("#compose-subject, input[name='_subject']").first();
-  const bodyField    = page.locator("#composebody, textarea[name='_message'], [contenteditable='true']").first();
-  const sendButton   = page.locator(".formbuttons .send, button.send, a.send");
-
-  await toField.waitFor({ state: "visible", timeout: 30_000 });
-  await toField.fill(adminEmail);
-
-  await subjectField.fill(testSubject);
-  await bodyField.click();
-  await bodyField.fill("Hello Administrator, this is an automated Playwright test email.");
-
-  await sendButton.first().waitFor({ state: "visible", timeout: 10_000 });
-  await sendButton.first().click();
-
-  // After send, Roundcube redirects away from _action=compose
-  await expect.poll(() => page.url(), { timeout: 30_000 })
-    .not.toContain("_action=compose");
-
-  // Logout as biber
-  const biberLogoutLink = page.locator("a[href*='logout'], a[href*='signout']")
-    .or(page.getByRole("button", { name: /logout/i }))
-    .or(page.getByRole("link", { name: /logout/i }));
-
-  await biberLogoutLink.first().waitFor({ state: "visible", timeout: 10_000 });
-  await biberLogoutLink.first().click();
-
-  // Wait for the URL to change away from the compose/inbox view — this confirms the logout
-  // navigation has started. Without this, fast runners may reach the next step before
-  // Keycloak has had time to invalidate the SSO session, causing auto-login of the wrong user.
-  await page.waitForURL(/logout|sso\/login|\/$/, { timeout: 20_000 }).catch(() => {});
-
-  // Keycloak 18+ shows a logout confirmation page when id_token_hint is absent.
-  // Wait for it, then click through so the SSO session is actually terminated before
-  // the admin login flow begins — otherwise Mailu auto-logs in the next user.
-  await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => {});
-
-  if (page.url().includes("openid-connect/logout")) {
-    const confirmLogout = page.locator("#kc-logout, button[name='logout'], input[name='logout']")
-      .or(page.getByRole("button", { name: /sign out/i }));
-    if (await confirmLogout.first().isVisible({ timeout: 5_000 }).catch(() => false)) {
-      await confirmLogout.first().click();
-      await page.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+    if (ssoButtonVisible) {
+      await ssoButton.first().click();
     }
+
+    // Click through Mailu's own /sso/login intermediate page if present
+    await clickThroughMailuSsoPage(biberPage);
+
+    // Wait for Keycloak OIDC auth page
+    await expect
+      .poll(() => biberPage.url(), {
+        timeout: 30_000,
+        message: `Expected redirect to Keycloak OIDC: ${expectedOidcAuthUrl}`
+      })
+      .toContain(expectedOidcAuthUrl);
+
+    await performOidcLogin(biberPage, biberUsername, biberPassword);
+
+    // Wait for redirect back to Mailu webmail — require /webmail/ in the URL to confirm
+    // the OIDC callback was fully processed and the PHP session cookie was set.
+    // Matching only mailuBaseUrl would pass prematurely on the callback URL itself
+    // (e.g. /sso/login?code=...) before Mailu finishes the auth-code exchange.
+    await expect
+      .poll(() => biberPage.url(), {
+        timeout: 60_000,
+        message: "Expected redirect back to Mailu webmail after biber login"
+      })
+      .toContain(mailuBaseUrl.replace(/\/$/, "") + "/webmail/");
+
+    // Navigate directly to Roundcube compose URL — clicking the compose button requires
+    // rcmail.js to fully execute, direct navigation is more reliable in Playwright.
+    // Selectors confirmed from rendered DOM: id="_to", id="compose-subject",
+    // id="composebody", button.btn.btn-primary.send inside .formbuttons
+    await biberPage.goto(mailuBaseUrl.replace(/\/$/, "") + "/webmail/?_task=mail&_action=compose");
+    await biberPage.waitForLoadState("networkidle", { timeout: 15_000 }).catch(() => {});
+
+    const toField      = biberPage.locator("#_to, input[name='_to']").first();
+    const subjectField = biberPage.locator("#compose-subject, input[name='_subject']").first();
+    const bodyField    = biberPage.locator("#composebody, textarea[name='_message'], [contenteditable='true']").first();
+    const sendButton   = biberPage.locator(".formbuttons .send, button.send, a.send");
+
+    await toField.waitFor({ state: "visible", timeout: 30_000 });
+    await toField.fill(adminEmail);
+
+    await subjectField.fill(testSubject);
+    await bodyField.click();
+    await bodyField.fill("Hello Administrator, this is an automated Playwright test email.");
+
+    await sendButton.first().waitFor({ state: "visible", timeout: 10_000 });
+    await sendButton.first().click();
+
+    // After send, Roundcube redirects away from _action=compose
+    await expect.poll(() => biberPage.url(), { timeout: 30_000 })
+      .not.toContain("_action=compose");
+
+    // Logout as biber — click the visible Logout button in Roundcube's sidebar
+    const biberLogoutLink = biberPage.locator("a[href*='logout'], a[href*='signout']")
+      .or(biberPage.getByRole("button", { name: /logout/i }))
+      .or(biberPage.getByRole("link", { name: /logout/i }));
+
+    await biberLogoutLink.first().waitFor({ state: "visible", timeout: 10_000 });
+    await biberLogoutLink.first().click();
+
+    // --- Part 2: administrator logs in and checks inbox (fresh browser context) ---
+
+    const adminPage = await adminContext.newPage();
+
+    await adminPage.goto(mailuBaseUrl);
+
+    const ssoButtonAdmin = adminPage.getByRole("button", { name: /sso|single sign.?on|login with/i });
+    const ssoAdminVisible = await ssoButtonAdmin.first().isVisible({ timeout: 5_000 }).catch(() => false);
+
+    if (ssoAdminVisible) {
+      await ssoButtonAdmin.first().click();
+    }
+
+    // Click through Mailu's own /sso/login intermediate page if present
+    await clickThroughMailuSsoPage(adminPage);
+
+    await expect
+      .poll(() => adminPage.url(), {
+        timeout: 30_000,
+        message: `Expected redirect to Keycloak OIDC: ${expectedOidcAuthUrl}`
+      })
+      .toContain(expectedOidcAuthUrl);
+
+    await performOidcLogin(adminPage, adminUsername, adminPassword);
+
+    await expect
+      .poll(() => adminPage.url(), {
+        timeout: 60_000,
+        message: "Expected redirect back to Mailu webmail after admin login"
+      })
+      .toContain(mailuBaseUrl.replace(/\/$/, "") + "/webmail/");
+
+    // Wait for inbox to load
+    const inboxFolder = adminPage.getByRole("link", { name: "Inbox" });
+
+    await inboxFolder.first().waitFor({ state: "visible", timeout: 30_000 });
+    await inboxFolder.first().click();
+
+    // Wait for biber's email to arrive (email delivery may take a few seconds)
+    const emailRow = await waitForEmailInInbox(adminPage, testSubject, 60_000);
+
+    await expect(emailRow).toBeVisible();
+    await emailRow.click();
+
+    // Verify email content is visible (Roundcube shows message body in #messagecontframe iframe or preview pane)
+    await expect(
+      adminPage.locator("#messagecontframe, #mailview-right, .message-part").first()
+    ).toBeVisible({ timeout: 15_000 });
+
+    // Logout as administrator
+    const adminLogoutLink = adminPage.locator("a[href*='logout'], a[href*='signout']")
+      .or(adminPage.getByRole("button", { name: /logout/i }))
+      .or(adminPage.getByRole("link", { name: /logout/i }));
+
+    await adminLogoutLink.first().waitFor({ state: "visible", timeout: 10_000 });
+    await adminLogoutLink.first().click();
+
+  } finally {
+    await biberContext.close().catch(() => {});
+    await adminContext.close().catch(() => {});
   }
-
-  // --- Part 2: administrator logs in and checks inbox ---
-
-  await page.goto(mailuBaseUrl);
-
-  const ssoButtonAdmin = page.getByRole("button", { name: /sso|single sign.?on|login with/i });
-  const ssoAdminVisible = await ssoButtonAdmin.first().isVisible({ timeout: 5_000 }).catch(() => false);
-
-  if (ssoAdminVisible) {
-    await ssoButtonAdmin.first().click();
-  }
-
-  // Click through Mailu's own /sso/login intermediate page if present
-  await clickThroughMailuSsoPage(page);
-
-  await expect
-    .poll(() => page.url(), {
-      timeout: 30_000,
-      message: `Expected redirect to Keycloak OIDC: ${expectedOidcAuthUrl}`
-    })
-    .toContain(expectedOidcAuthUrl);
-
-  await performOidcLogin(page, adminUsername, adminPassword);
-
-  await expect
-    .poll(() => page.url(), {
-      timeout: 60_000,
-      message: "Expected redirect back to Mailu webmail after admin login"
-    })
-    .toContain(mailuBaseUrl.replace(/\/$/, ""));
-
-  // Wait for inbox to load
-  const inboxFolder = page.getByRole("link", { name: "Inbox" });
-
-  await inboxFolder.first().waitFor({ state: "visible", timeout: 30_000 });
-  await inboxFolder.first().click();
-
-  // Wait for biber's email to arrive (email delivery may take a few seconds)
-  const emailRow = await waitForEmailInInbox(page, testSubject, 60_000);
-
-  await expect(emailRow).toBeVisible();
-  await emailRow.click();
-
-  // Verify email content is visible (Roundcube shows message body in #messagecontframe iframe or preview pane)
-  await expect(
-    page.locator("#messagecontframe, #mailview-right, .message-part").first()
-  ).toBeVisible({ timeout: 15_000 });
-
-  // Logout as administrator
-  const adminLogoutLink = page.locator("a[href*='logout'], a[href*='signout']")
-    .or(page.getByRole("button", { name: /logout/i }))
-    .or(page.getByRole("link", { name: /logout/i }));
-
-  await adminLogoutLink.first().waitFor({ state: "visible", timeout: 10_000 });
-  await adminLogoutLink.first().click();
 });
