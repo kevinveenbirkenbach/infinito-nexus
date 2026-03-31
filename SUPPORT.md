@@ -45,3 +45,7 @@ This page collects the places to go when you need help, a professional setup, or
 ## For Contributors 🔨
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) covers the workflow, testing, review, and coding standards.
+
+---
+
+For communication guidelines — including which topics belong in public channels and which must stay internal — see [communication.md](docs/contributing/communication.md).
