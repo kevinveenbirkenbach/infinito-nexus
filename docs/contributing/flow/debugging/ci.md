@@ -1,4 +1,4 @@
-# CI Failures and Debugging
+# CI Failures and Debugging 🐛
 
 If CI fails, follow a clean debugging workflow:
 
@@ -8,15 +8,17 @@ If CI fails, follow a clean debugging workflow:
 4. Fix related failures in the same branch.
 5. Open an issue for unrelated failures instead of mixing them into your branch.
 
-Important:
+## Important 🚨
 
 - You MUST NOT debug from screenshots alone. Use raw logs.
 - You MUST NOT commit log files to the repository.
 - If a [Playwright](https://playwright.dev/) job fails, you MUST also download the Playwright assets, store them in `/tmp/`, and analyze them together with the logs.
 
+## Manual CI Jobs 🎯
+
 You SHOULD use targeted manual CI jobs instead of rerunning the full pipeline if you only need one focused check.
 
-Prefer the manual workflow in [entry-manual.yml](../../../.github/workflows/entry-manual.yml):
+Prefer the manual workflow in [entry-manual.yml](../../../../.github/workflows/entry-manual.yml):
 
 - Select your branch.
 - Use `debian` unless you have a clear reason to use a different distro.
