@@ -87,7 +87,7 @@ trust-ca:
 
 # Disable IPv6 for local development.
 disable-ipv6:
-	@sudo bash scripts/system/network/ipv6/disable.sh
+	@bash scripts/system/network/ipv6/disable_with_stack_refresh.sh
 
 # Restore IPv6 settings.
 restore-ipv6:

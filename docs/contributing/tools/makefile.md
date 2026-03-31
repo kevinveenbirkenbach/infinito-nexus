@@ -38,8 +38,8 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Remove DNS | `make dns-remove` | Removes the DNS configuration. | Use this to clean up the DNS setup. |
 | Trust CA on Windows | `make wsl2-trust-windows` | Imports the local CA and updates hosts entries from WSL2. | Use this when you need Windows trust-store updates from WSL2. |
 | Trust local CA | `make trust-ca` | Trusts the local CA on Linux and WSL2. | Use this after the CA or host entries change. |
-| Disable IPv6 | `make disable-ipv6` | Disables IPv6 for local development. | Use this when a workflow needs IPv6 off. |
-| Restore IPv6 | `make restore-ipv6` | Restores the previous IPv6 settings. | Use this after a temporary IPv6 change. |
+| Disable IPv6 | `make disable-ipv6` | Disables IPv6 for local development, restarts `docker.service`, and recreates the running Infinito dev stack when one is active. | Use this when a workflow needs IPv6 off. |
+| Restore IPv6 | `make restore-ipv6` | Restores the previous IPv6 settings without restarting Docker or recreating the local stack automatically. | Use this after a temporary IPv6 change. |
 | AppArmor teardown | `make apparmor-teardown` | Disables AppArmor profiles for local development. | Use this when AppArmor interferes with local services. |
 | AppArmor restore | `make apparmor-restore` | Restores AppArmor profiles after a teardown. | Use this after a temporary AppArmor disable. |
 

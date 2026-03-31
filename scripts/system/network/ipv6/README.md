@@ -8,4 +8,5 @@ For the canonical Make target index that invokes these helpers, see [docs/contri
 | Script | What it does |
 |---|---|
 | `disable.sh` | Disables IPv6 for local development. |
+| `disable_with_stack_refresh.sh` | Disables IPv6, restarts `docker.service`, and recreates the running Infinito dev stack when one is active. |
 | `restore.sh` | Restores the previous IPv6 settings. |
