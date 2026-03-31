@@ -54,48 +54,8 @@
 - name: "Flush compose handlers"
   meta: flush_handlers
 
-- name: Wait for a known Simple Icons asset before rebuilding dashboard cards
-  uri_retry:
-    url: "{{ lookup('tls', 'web-svc-simpleicons', 'url.base') }}keycloak.svg"
-    status_code: 200
-    validate_certs: false
-  register: simpleicons_http
-  retries: 60
-  delay: 5
-  until: simpleicons_http.status == 200
-  when: DASHBOARD_SIMPLEICONS_ENABLED | bool
-
-- name: Reload docker cards once Simple Icons is reachable
-  set_fact:
-    portfolio_cards: "{{ lookup('docker_cards', 'roles') | add_simpleicon_source(lookup('tls', 'web-svc-simpleicons', 'url.base')) }}"
-  when: DASHBOARD_SIMPLEICONS_ENABLED | bool
-  changed_when: false
-
-- name: Regroup docker cards after Simple Icons refresh
-  set_fact:
-    portfolio_menu_data: "{{ lookup('docker_cards_grouped', portfolio_cards, portfolio_menu_categories) }}"
-  when: DASHBOARD_SIMPLEICONS_ENABLED | bool
-
-- name: Refresh host-specific config.yaml after Simple Icons is reachable
-  template:
-    src: "{{ DASHBOARD_CONFIG_INV_PATH }}"
-    dest: "{{ DASHBOARD_CONFIG_YML_DEST }}"
-  notify: compose up
-  when:
-    - DASHBOARD_SIMPLEICONS_ENABLED | bool
-    - config_file.stat.exists
-
-- name: Refresh default config.yaml after Simple Icons is reachable
-  template:
-    src: "{{ DASHBOARD_CONFIG_YML_SRC_FILE }}"
-    dest: "{{ DASHBOARD_CONFIG_YML_DEST }}"
-  notify: compose up
-  when:
-    - DASHBOARD_SIMPLEICONS_ENABLED | bool
-    - not config_file.stat.exists
-
-- name: Flush compose handlers after Simple Icons refresh
-  meta: flush_handlers
+- name: Refresh dashboard cards after Simple Icons becomes reachable
+  include_tasks: "04_simpleicons_refresh.yml"
   when: DASHBOARD_SIMPLEICONS_ENABLED | bool
 
 - name: Wait for Dashboard HTTP endpoint (required so all logos can be downloaded during initialization)
