@@ -14,7 +14,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def get_requests_verify():
     """Reuse an explicit CA bundle when present, otherwise tolerate the local self-signed CA."""
-    return os.environ.get("REQUESTS_CA_BUNDLE") or os.environ.get("SSL_CERT_FILE") or False
+    return (
+        os.environ.get("REQUESTS_CA_BUNDLE") or os.environ.get("SSL_CERT_FILE") or False
+    )
 
 
 def slugify(name):
@@ -48,7 +50,8 @@ def resolve_simpleicons_base(simpleicons_value, web_protocol="https"):
     """Resolve either a fully rendered base URL or a domain/domain mapping."""
     candidate = (
         simpleicons_value.get("web-svc-simpleicons")
-        if isinstance(simpleicons_value, dict) and "web-svc-simpleicons" in simpleicons_value
+        if isinstance(simpleicons_value, dict)
+        and "web-svc-simpleicons" in simpleicons_value
         else simpleicons_value
     )
     normalized = normalize_domain(candidate)
