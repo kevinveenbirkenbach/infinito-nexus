@@ -19,6 +19,8 @@ For the matching rendered input contract, see [Role `playwright.env.j2`](playwri
 - When `style.css` or `javascript.js` is implemented or refactored, you MUST add or update Playwright assertions for the affected visible behavior.
 - You MUST prefer stable selectors, accessible roles, and visible UI states over brittle DOM assumptions.
 - You MUST use explicit waits for meaningful page state changes instead of fixed sleeps wherever practical.
+- When a flow runs inside an iframe and login or OIDC clicks can trigger iframe reloads, you MUST reacquire the frame and rebuild locators after each transition instead of reusing stale handles.
+- You MUST treat expected iframe reloads as navigation events and wait for the next visible state or iframe URL instead of failing on a stale-frame click by default.
 
 ## Avoid
 
@@ -26,6 +28,7 @@ For the matching rendered input contract, see [Role `playwright.env.j2`](playwri
 - Do NOT skip the logout path or finish while the session is still authenticated.
 - Do NOT bypass the dashboard when the role is meant to start there.
 - Do NOT rely on fragile selectors or timing hacks when more stable hooks exist.
+- Do NOT keep a cached iframe frame or locator across redirects, login submits, or OIDC handoffs when the application can replace the iframe during navigation.
 
 ## Review
 
