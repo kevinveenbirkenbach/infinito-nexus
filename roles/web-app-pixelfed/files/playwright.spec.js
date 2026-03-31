@@ -101,6 +101,16 @@ async function getIframeFrame(page) {
   return handle ? await handle.contentFrame().catch(() => null) : null;
 }
 
+async function getRequiredIframeFrame(page, errorMessage = "Expected the Pixelfed iframe to expose a content frame") {
+  const frame = await getIframeFrame(page);
+
+  if (!frame) {
+    throw new Error(errorMessage);
+  }
+
+  return frame;
+}
+
 async function getIframeUrl(page) {
   const frame = await getIframeFrame(page);
   return frame ? frame.url() : "";
@@ -244,6 +254,25 @@ function getLoggedOutSuccessCandidates(frame) {
   ];
 }
 
+function isIframeReloadError(error) {
+  return error instanceof Error && [
+    "Target page, context or browser has been closed",
+    "Target closed",
+    "Execution context was destroyed",
+    "Frame was detached"
+  ].some((message) => error.message.includes(message));
+}
+
+async function clickAllowingIframeReload(locator) {
+  try {
+    await locator.click();
+  } catch (error) {
+    if (!isIframeReloadError(error)) {
+      throw error;
+    }
+  }
+}
+
 async function loginToPixelfedViaDashboard(page, loginScenario) {
   const expectedOidcAuthUrl = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedPixelfedBaseUrl = pixelfedBaseUrl.replace(/\/$/, "");
@@ -263,15 +292,6 @@ async function loginToPixelfedViaDashboard(page, loginScenario) {
   await pixelfedEntry.click();
 
   const pixelfedIframe = page.locator("#main iframe").first();
-  const pixelfedFrame = await pixelfedIframe.contentFrame();
-  const usernameField = pixelfedFrame.locator('input[name="username"], input#username, input[type="email"]');
-  const passwordField = pixelfedFrame.locator('input[name="password"], input#password, input[type="password"]');
-  const signInButton = pixelfedFrame.locator('button[type="submit"], input[type="submit"]');
-  const rememberMeCheckbox = pixelfedFrame.locator('input[name="rememberMe"], input#rememberMe');
-  const pixelfedLoginEntryCandidates = getPixelfedLoginEntryCandidates(pixelfedFrame);
-  const pixelfedOidcEntryCandidates = getPixelfedOidcEntryCandidates(pixelfedFrame);
-  const pixelfedAuthenticatedCandidates = getPixelfedAuthenticatedCandidates(pixelfedFrame);
-
   await expect(pixelfedIframe).toBeVisible();
 
   await waitForIframeUrl(
@@ -282,31 +302,40 @@ async function loginToPixelfedViaDashboard(page, loginScenario) {
   );
 
   if (!(await getIframeUrl(page)).includes(expectedOidcAuthUrl)) {
-    const pixelfedOidcEntry = await waitForVisibleCandidate(
+    let pixelfedFrame = await getRequiredIframeFrame(
       page,
-      pixelfedOidcEntryCandidates,
+      `Expected the Pixelfed iframe to be available before starting the Pixelfed OIDC flow for ${loginScenario.label}`
+    );
+    let pixelfedOidcEntry = await waitForVisibleCandidate(
+      page,
+      getPixelfedOidcEntryCandidates(pixelfedFrame),
       5_000
     ).catch(() => null);
 
     if (!pixelfedOidcEntry) {
       const pixelfedLoginEntry = await waitForVisibleCandidate(
         page,
-        pixelfedLoginEntryCandidates,
+        getPixelfedLoginEntryCandidates(pixelfedFrame),
         20_000,
         `Timed out waiting for the Pixelfed login entry before starting the OIDC flow for ${loginScenario.label}`
       );
 
-      await pixelfedLoginEntry.locator.click();
+      await clickAllowingIframeReload(pixelfedLoginEntry.locator);
+      pixelfedFrame = await getRequiredIframeFrame(
+        page,
+        `Expected the Pixelfed iframe to reload after opening the Pixelfed login page for ${loginScenario.label}`
+      );
+      pixelfedOidcEntry = null;
     }
 
     const oidcStartEntry = pixelfedOidcEntry || await waitForVisibleCandidate(
       page,
-      pixelfedOidcEntryCandidates,
+      getPixelfedOidcEntryCandidates(pixelfedFrame),
       20_000,
       `Timed out waiting for the Pixelfed OIDC action for ${loginScenario.label}`
     );
 
-    await oidcStartEntry.locator.click();
+    await clickAllowingIframeReload(oidcStartEntry.locator);
 
     await waitForIframeUrl(
       page,
@@ -316,6 +345,14 @@ async function loginToPixelfedViaDashboard(page, loginScenario) {
     );
   }
 
+  const pixelfedFrame = await getRequiredIframeFrame(
+    page,
+    `Expected the Pixelfed iframe to be available on the Keycloak login page for ${loginScenario.label}`
+  );
+  const usernameField = pixelfedFrame.locator('input[name="username"], input#username, input[type="email"]');
+  const passwordField = pixelfedFrame.locator('input[name="password"], input#password, input[type="password"]');
+  const signInButton = pixelfedFrame.locator('button[type="submit"], input[type="submit"]');
+  const rememberMeCheckbox = pixelfedFrame.locator('input[name="rememberMe"], input#rememberMe');
   const visibleUsernameField = await waitForFirstVisible(
     page,
     [usernameField, pixelfedFrame.getByRole("textbox", { name: /username|email/i })],
@@ -341,7 +378,7 @@ async function loginToPixelfedViaDashboard(page, loginScenario) {
     `Timed out waiting for the Keycloak sign-in button in the Pixelfed iframe for ${loginScenario.label}`
   );
 
-  await visibleSignInButton.click();
+  await clickAllowingIframeReload(visibleSignInButton);
 
   await waitForIframeUrl(
     page,
@@ -350,9 +387,13 @@ async function loginToPixelfedViaDashboard(page, loginScenario) {
     `Expected the Pixelfed iframe to redirect back to Pixelfed after Keycloak login for ${loginScenario.label}: ${expectedPixelfedBaseUrl}`
   );
 
+  const authenticatedFrame = await getRequiredIframeFrame(
+    page,
+    `Expected the Pixelfed iframe to be available after the Keycloak login redirect for ${loginScenario.label}`
+  );
   const authenticatedState = await waitForVisibleCandidate(
     page,
-    pixelfedAuthenticatedCandidates,
+    getPixelfedAuthenticatedCandidates(authenticatedFrame),
     60_000,
     `Timed out waiting for an authenticated Pixelfed UI after the Keycloak login redirect for ${loginScenario.label}`
   );
