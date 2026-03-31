@@ -1,7 +1,6 @@
 - name: "Check if {{ service_key }} endpoint is reachable"
-  uri_retry:
+  uri_probe:
     url: "{{ lookup('tls', service_role, 'url.base') }}"
-    method: HEAD
     validate_certs: yes
     status_code: 200
   register: _frontend_service_reachability
