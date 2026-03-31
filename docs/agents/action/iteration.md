@@ -29,6 +29,7 @@ Use this page when you are iterating on a local app deploy during debugging or d
 
 - If the website uses locally deployed certificates, you MUST run `make trust-ca` before you inspect it in a browser. Otherwise the browser will warn about the local CA and the inspection will not be reliable.
 - After `make trust-ca`, you MUST restart the browser so it picks up the updated trust store.
+- If `make trust-ca` fails due to missing root permissions, you MUST use the alternative syntax `curl -k` (or `wget --no-check-certificate`) to skip certificate validation when checking URLs from the command line instead of fixing the trust store.
 
 ## Inspect
 
