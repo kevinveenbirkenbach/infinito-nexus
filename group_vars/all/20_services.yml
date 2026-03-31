@@ -42,6 +42,10 @@ SERVICE_REGISTRY:
     role: web-svc-logout
     type: frontend
 
+  email:
+    role: web-app-mailu
+    type: frontend
+
   oidc:
     role: web-app-keycloak
     type: frontend
@@ -68,10 +72,6 @@ SERVICE_REGISTRY:
 
   dashboard:
     role: web-app-dashboard
-    type: frontend
-
-  email:
-    role: web-app-mailu
     type: frontend
 
   ldap:
