@@ -200,19 +200,85 @@ async function getHeaderNavigation(page) {
   return headerNav;
 }
 
+async function getHeaderAuthControls(page) {
+  const headerNav = await getHeaderNavigation(page);
+  const loginTrigger = headerNav.getByRole("link", { name: /^Login$/ }).first();
+  const accountDropdown = headerNav
+    .locator(".nav-item.dropdown")
+    .filter({ has: headerNav.locator(".dropdown-toggle", { hasText: /^Account$/ }) })
+    .first();
+  const accountTrigger = accountDropdown.locator(".dropdown-toggle", { hasText: /^Account$/ }).first();
+  const accountMenu = accountDropdown.locator(".dropdown-menu").first();
+
+  return { loginTrigger, accountTrigger, accountMenu };
+}
+
+async function expectLoggedOutHeaderAuthState(page) {
+  const controls = await getHeaderAuthControls(page);
+
+  await expect
+    .poll(
+      async () => await isVisible(controls.loginTrigger),
+      {
+        timeout: 60_000,
+        message: "Expected dashboard OIDC JavaScript to expose Login before authentication"
+      }
+    )
+    .toBe(true);
+
+  await expect
+    .poll(
+      async () => await isVisible(controls.accountTrigger),
+      {
+        timeout: 60_000,
+        message: "Expected dashboard OIDC JavaScript to keep Account hidden before authentication"
+      }
+    )
+    .toBe(false);
+
+  return controls;
+}
+
+async function expectLoggedInHeaderAuthState(page) {
+  const controls = await getHeaderAuthControls(page);
+
+  await expect
+    .poll(
+      async () => await isVisible(controls.accountTrigger),
+      {
+        timeout: 60_000,
+        message: "Expected dashboard OIDC JavaScript to automatically switch the header button to Account"
+      }
+    )
+    .toBe(true);
+
+  await expect(controls.accountTrigger).toHaveText(/^Account$/, { timeout: 60_000 });
+
+  await expect
+    .poll(
+      async () => await isVisible(controls.loginTrigger),
+      {
+        timeout: 60_000,
+        message: "Expected dashboard OIDC JavaScript to hide Login after authentication"
+      }
+    )
+    .toBe(false);
+
+  return controls;
+}
+
 async function isDropdownMenuOpen(trigger, menu) {
   const expanded = await trigger.getAttribute("aria-expanded").catch(() => null);
-  const menuOpen = await menu
-    .evaluate((element) => {
-      const style = window.getComputedStyle(element);
-      return (
-        element.classList.contains("show") ||
-        (style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0")
-      );
-    })
+  const menuRoot = menu.first();
+  const menuHasShowClass = await menuRoot.evaluate((element) => element.classList.contains("show")).catch(() => false);
+  const menuVisible = await menuRoot.isVisible().catch(() => false);
+  const interactiveItemVisible = await menuRoot
+    .locator("a, button, [role='menuitem'], [role='link']")
+    .first()
+    .isVisible()
     .catch(() => false);
 
-  return expanded === "true" || menuOpen;
+  return expanded === "true" || (menuVisible && (menuHasShowClass || interactiveItemVisible));
 }
 
 async function waitForDropdownMenuOpen(trigger, menu, label, timeout = 3_000) {
@@ -234,7 +300,9 @@ async function openDropdownMenu(trigger, menu, label) {
 
   const openAttempts = [
     async () => trigger.click(),
+    async () => trigger.hover(),
     async () => trigger.press("Enter"),
+    async () => trigger.press(" "),
     async () => trigger.click({ force: true }),
     async () =>
       trigger.evaluate((element) => {
@@ -256,17 +324,16 @@ async function openDropdownMenu(trigger, menu, label) {
   throw new Error(`Unable to open the ${label} dropdown menu`);
 }
 
-async function clickAccountLogout(page) {
-  const headerNav = await getHeaderNavigation(page);
-  const accountDropdown = headerNav.locator(".nav-item.dropdown").filter({ hasText: "Account" }).first();
-  const accountTrigger = accountDropdown.locator(".dropdown-toggle").first();
-  const accountMenu = accountDropdown.locator(".dropdown-menu").first();
-  const logoutItem = accountMenu.getByRole("link", { name: "Logout" }).first();
-
-  await expect(accountTrigger).toBeVisible({ timeout: 60_000 });
-  await openDropdownMenu(accountTrigger, accountMenu, "Account");
-  await expect(logoutItem).toBeVisible({ timeout: 10_000 });
-  await logoutItem.click();
+async function findAccountLogoutItem(accountMenu) {
+  return waitForFirstVisible(
+    [
+      accountMenu.getByRole("link", { name: /logout/i }),
+      accountMenu.locator("a[href*='logout'], a[href*='signout'], a[href*='sign-out']"),
+      accountMenu.locator("a, button, [role='link']").filter({ hasText: /logout/i })
+    ],
+    10_000,
+    "Timed out waiting for the Account logout entry"
+  );
 }
 
 async function confirmLogoutIfNeeded(page) {
@@ -401,28 +468,15 @@ test("dashboard loads injected css, matomo, logout, javascript, simpleicons, and
   expect(diagnostics.consoleErrors, `Unexpected console errors: ${diagnostics.consoleErrors.join("\n")}`).toEqual([]);
 });
 
-test("dashboard login and logout returns to a clearly logged-out state", async ({ page }) => {
+test("dashboard login automatically switches Login to Account and exposes Logout under Account", async ({ page }) => {
   const diagnostics = attachDiagnostics(page);
 
   await page.goto("/");
   await waitForDashboardReady(page);
   await waitForResourceResponse(diagnostics.responses, `${dashboardJsBaseUrl}/oidc.js`, "dashboard oidc script");
 
-  const headerNav = await getHeaderNavigation(page);
-  const loginEntry = headerNav.getByText("Login", { exact: true }).first();
-  const accountEntry = headerNav.getByText("Account", { exact: true }).first();
-
-  await expect
-    .poll(
-      async () => (await isVisible(loginEntry)) && !(await isVisible(accountEntry)),
-      {
-        timeout: 60_000,
-        message: "Expected dashboard OIDC JavaScript to expose Login and hide Account before authentication"
-      }
-    )
-    .toBe(true);
-
-  await loginEntry.click();
+  const loggedOutControls = await expectLoggedOutHeaderAuthState(page);
+  await loggedOutControls.loginTrigger.click();
 
   const usernameField = page.locator("input[name='username'], input#username").first();
   const passwordField = page.locator("input[name='password'], input#password").first();
@@ -454,17 +508,13 @@ test("dashboard login and logout returns to a clearly logged-out state", async (
     .toBe(true);
 
   await waitForDashboardReady(page);
-  await expect
-    .poll(
-      async () => (await isVisible(accountEntry)) && !(await isVisible(loginEntry)),
-      {
-        timeout: 60_000,
-        message: "Expected dashboard OIDC JavaScript to expose Account and hide Login after authentication"
-      }
-    )
-    .toBe(true);
+  const loggedInControls = await expectLoggedInHeaderAuthState(page);
+  await openDropdownMenu(loggedInControls.accountTrigger, loggedInControls.accountMenu, "Account");
 
-  await clickAccountLogout(page);
+  const logoutEntry = await findAccountLogoutItem(loggedInControls.accountMenu);
+  await expect(logoutEntry).toBeVisible({ timeout: 10_000 });
+  await expect(logoutEntry).toContainText(/logout/i);
+  await logoutEntry.click();
 
   await expect
     .poll(
@@ -482,16 +532,7 @@ test("dashboard login and logout returns to a clearly logged-out state", async (
 
   await page.goto("/");
   await waitForDashboardReady(page);
-
-  await expect
-    .poll(
-      async () => (await isVisible(loginEntry)) && !(await isVisible(accountEntry)),
-      {
-        timeout: 60_000,
-        message: "Expected dashboard to return to the logged-out state after logout"
-      }
-    )
-    .toBe(true);
+  await expectLoggedOutHeaderAuthState(page);
 
   expect(diagnostics.pageErrors, `Unexpected page errors: ${diagnostics.pageErrors.join("\n")}`).toEqual([]);
   expect(diagnostics.consoleErrors, `Unexpected console errors: ${diagnostics.consoleErrors.join("\n")}`).toEqual([]);
