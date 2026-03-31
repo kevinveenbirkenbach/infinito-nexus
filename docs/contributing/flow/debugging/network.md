@@ -10,6 +10,8 @@ If a `docker pull` or general image pull fails, it may be caused by an MTU, netw
 
 Docker defaults to MTU 1500. If the host network uses a smaller MTU (e.g. due to VPN), packets may be dropped or fragmented.
 
+The local development compose stack SHOULD inherit the host Docker MTU automatically from `/etc/docker/daemon.json`. If auto-detection is unavailable or wrong, you MAY override it explicitly with `INFINITO_OUTER_NETWORK_MTU`.
+
 ```bash
 ip link show docker0
 ip link show eth0
@@ -25,6 +27,13 @@ Then restart Docker:
 
 ```bash
 sudo systemctl restart docker
+```
+
+For a one-off local override, export the variable before starting the stack:
+
+```bash
+export INFINITO_OUTER_NETWORK_MTU=1400
+make up
 ```
 
 ### IPv6 🔢

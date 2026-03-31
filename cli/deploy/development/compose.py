@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from .coredns import CoreDNSCorefileRenderer
+from .network import detect_outer_network_mtu
 from .proc import run_streaming
 
 
@@ -22,6 +23,9 @@ class Compose:
     def _base_env(self) -> dict[str, str]:
         env = dict(os.environ)
         env["INFINITO_DISTRO"] = self.distro
+        outer_network_mtu = detect_outer_network_mtu(env)
+        if outer_network_mtu:
+            env["INFINITO_OUTER_NETWORK_MTU"] = outer_network_mtu
         if not env.get("INFINITO_IMAGE"):
             local_image_script = (
                 self.repo_root / "scripts" / "meta" / "resolve" / "image" / "local.sh"
