@@ -138,7 +138,10 @@ html[native-dark-active] button, button{
      background-color: var(--color-01-87);
 }
 
-button:hover, .btn:hover {
+/* Bootstrap stretched-link cards use a full-card overlay; filtering that
+   overlay on hover causes unstable pointer hit-testing on the card. */
+button:hover,
+.btn:not(.stretched-link):hover {
     filter: brightness(0.9);
 }
 

@@ -118,6 +118,55 @@ async function expectDashboardCssEffects(page) {
   throw new Error("Expected a dashboard element that demonstrates the role-local CSS to be present");
 }
 
+async function expectStableCardHover(page, cardTitle) {
+  const card = page
+    .locator(".card")
+    .filter({
+      has: page.locator(".card-title", {
+        hasText: new RegExp(`^${escapeRegex(cardTitle)}$`)
+      })
+    })
+    .first();
+
+  await expect(card, `Expected the ${cardTitle} card to be visible`).toBeVisible({ timeout: 60_000 });
+
+  const stretchedLink = card.locator("a.btn.stretched-link").first();
+  await expect(stretchedLink, `Expected the ${cardTitle} card to expose a stretched-link button`).toBeVisible({
+    timeout: 60_000
+  });
+
+  const cardBox = await card.boundingBox();
+  expect(cardBox, `Expected the ${cardTitle} card to expose a measurable bounding box`).toBeTruthy();
+
+  const hoverPoints = [
+    { x: 0.5, y: 0.2 },
+    { x: 0.5, y: 0.5 },
+    { x: 0.5, y: 0.8 }
+  ];
+
+  for (const point of hoverPoints) {
+    const x = Math.round(cardBox.x + cardBox.width * point.x);
+    const y = Math.round(cardBox.y + cardBox.height * point.y);
+
+    await page.mouse.move(x, y);
+    await expect
+      .poll(
+        () => stretchedLink.evaluate((element) => element.matches(":hover")),
+        {
+          timeout: 2_000,
+          message: `Expected the ${cardTitle} stretched-link overlay to stay hovered across the card`
+        }
+      )
+      .toBe(true);
+  }
+
+  await stretchedLink.hover();
+  const hoverFilter = await getComputedStyleProperty(stretchedLink, "filter");
+  expect(hoverFilter.trim() || "none", `Expected the ${cardTitle} stretched-link hover filter to stay disabled`).toBe(
+    "none"
+  );
+}
+
 async function waitForResourceResponse(records, partialUrl, label) {
   await expect
     .poll(
@@ -320,6 +369,7 @@ test("dashboard loads injected css, matomo, logout, javascript, simpleicons, and
   await expect(
     simpleiconCard.locator(".card-img-top svg, .card-img-top img[src*='/static/cache/']").first()
   ).toBeVisible({ timeout: 60_000 });
+  await expectStableCardHover(page, "Keycloak");
 
   const iframeTargetUrl = `${matomoBaseUrl}/index.php`;
 
