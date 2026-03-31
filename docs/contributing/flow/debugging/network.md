@@ -36,7 +36,19 @@ ip -6 addr show
 curl -6 https://registry-1.docker.io/v2/
 ```
 
-Disable IPv6 in Docker via `/etc/docker/daemon.json`:
+The recommended way to disable IPv6 for local development is via Make:
+
+```bash
+make disable-ipv6
+```
+
+To restore the original IPv6 settings afterwards:
+
+```bash
+make restore-ipv6
+```
+
+Alternatively, disable IPv6 only in Docker via `/etc/docker/daemon.json`:
 
 ```json
 {"ipv6": false}
