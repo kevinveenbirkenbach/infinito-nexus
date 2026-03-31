@@ -51,7 +51,7 @@ The recommended way to disable IPv6 for local development is via Make:
 make disable-ipv6
 ```
 
-This also restarts `docker.service` and recreates the running Infinito development stack when one is active, so the new setting reaches fresh container network namespaces.
+This also restarts `docker.service` and then calls `make refresh`, so the running Infinito development stack is recreated when one is active and the new setting reaches fresh container network namespaces.
 
 To restore the original IPv6 settings afterwards:
 
@@ -59,7 +59,13 @@ To restore the original IPv6 settings afterwards:
 make restore-ipv6
 ```
 
-This restore path does not recreate containers automatically. If already running containers should pick up the restored setting, restart the stack afterwards.
+This restore path also restarts `docker.service` and then calls `make refresh`, so the running Infinito development stack is recreated when one is active and the restored setting reaches fresh container network namespaces.
+
+You can also refresh the running local stack directly after host-level changes:
+
+```bash
+make refresh
+```
 
 Alternatively, disable IPv6 only in Docker via `/etc/docker/daemon.json`:
 

@@ -29,7 +29,7 @@ endif
 	apparmor-teardown apparmor-restore \
 	disable-ipv6 restore-ipv6 \
 	trust-ca \
-	restart exec up down stop \
+	restart refresh exec up down stop \
 	build build-missing build-no-cache build-no-cache-all build-cleanup \
 	act-all act-app act-workflow \
 	deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
@@ -87,11 +87,13 @@ trust-ca:
 
 # Disable IPv6 for local development.
 disable-ipv6:
-	@bash scripts/system/network/ipv6/disable_with_stack_refresh.sh
+	@sudo bash scripts/system/network/ipv6/disable.sh
+	@"$(MAKE)" refresh
 
 # Restore IPv6 settings.
 restore-ipv6:
 	@sudo bash scripts/system/network/ipv6/restore.sh
+	@"$(MAKE)" refresh
 
 # Remove ignored files from the working tree.
 clean:
@@ -119,6 +121,10 @@ system-purge:
 # Restart the development stack.
 restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
+
+# Refresh the running development stack only when it already exists.
+refresh:
+	@bash scripts/system/network/docker/stack_refresh.sh
 
 # Run a shell or command in the running container.
 # Usage: make exec           — opens interactive shell

@@ -108,4 +108,4 @@ disable_existing_interfaces
 restart_docker_service
 
 echo "[ipv6] disabled for all, default, and currently existing interfaces"
-echo "[ipv6] note: make disable-ipv6 recreates a running Infinito dev stack after the docker.service restart"
+echo "[ipv6] note: make disable-ipv6 calls make refresh after the docker.service restart"

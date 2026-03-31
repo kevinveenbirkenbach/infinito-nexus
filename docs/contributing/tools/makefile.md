@@ -38,8 +38,8 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Remove DNS | `make dns-remove` | Removes the DNS configuration. | Use this to clean up the DNS setup. |
 | Trust CA on Windows | `make wsl2-trust-windows` | Imports the local CA and updates hosts entries from WSL2. | Use this when you need Windows trust-store updates from WSL2. |
 | Trust local CA | `make trust-ca` | Trusts the local CA on Linux and WSL2. | Use this after the CA or host entries change. |
-| Disable IPv6 | `make disable-ipv6` | Disables IPv6 for local development, restarts `docker.service`, and recreates the running Infinito dev stack when one is active. | Use this when a workflow needs IPv6 off. |
-| Restore IPv6 | `make restore-ipv6` | Restores the previous IPv6 settings without restarting Docker or recreating the local stack automatically. | Use this after a temporary IPv6 change. |
+| Disable IPv6 | `make disable-ipv6` | Disables IPv6 for local development, restarts `docker.service`, and then calls `make refresh` so a running Infinito dev stack is recreated when one is active. | Use this when a workflow needs IPv6 off. |
+| Restore IPv6 | `make restore-ipv6` | Restores the previous IPv6 settings, restarts `docker.service`, and then calls `make refresh` so a running Infinito dev stack is recreated when one is active. | Use this after a temporary IPv6 change. |
 | AppArmor teardown | `make apparmor-teardown` | Disables AppArmor profiles for local development. | Use this when AppArmor interferes with local services. |
 | AppArmor restore | `make apparmor-restore` | Restores AppArmor profiles after a teardown. | Use this after a temporary AppArmor disable. |
 
@@ -63,6 +63,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Stop stack | `make down` | Stops the compose stack and removes volumes. | Use this when you want a clean shutdown and disposable local state. |
 | Pause services | `make stop` | Stops running services without removing volumes. | Use this when you want a fast stop and plan to start the same state again. |
 | Restart stack | `make restart` | Stops the stack and starts it again. | Use this after configuration changes or when the stack needs a full restart. |
+| Refresh running stack | `make refresh` | Recreates the running Infinito dev stack only when one is already active. | Use this after host-level changes, such as Docker or IPv6 updates, when existing containers should be recreated. |
 | Inspect container | `make exec` | Opens an interactive shell in the running infinito container. | Use this when you need to inspect live state or run a quick command inside the container. |
 
 ## Validation
