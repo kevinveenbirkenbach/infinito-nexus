@@ -37,6 +37,9 @@ compose:
     matomo:
       enabled: true
       shared: true
+    email:
+      enabled: true
+      shared: true
     keycloak:
       image:              "quay.io/keycloak/keycloak"
       version:            "latest"

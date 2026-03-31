@@ -31,6 +31,9 @@ compose:
     matomo:
       enabled: true
       shared: true
+    email:
+      enabled: true
+      shared: true
     # noqa: shared
     redis:
       backup:

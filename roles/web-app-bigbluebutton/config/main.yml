@@ -28,6 +28,9 @@ compose:
     matomo:
       enabled:  true
       shared:   true
+    email:
+      enabled: true
+      shared: true
     bigbluebutton:
       repository:     "https://github.com/bigbluebutton/docker.git"
       version:        "main"

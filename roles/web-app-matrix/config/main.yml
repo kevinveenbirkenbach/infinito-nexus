@@ -12,6 +12,9 @@ compose:
     matomo:
       enabled:            false
       shared:             false
+    email:
+      enabled: true
+      shared: true
     database:
       shared:             true
       type:               "postgres"

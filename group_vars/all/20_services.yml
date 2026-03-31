@@ -70,6 +70,10 @@ SERVICE_REGISTRY:
     role: web-app-dashboard
     type: frontend
 
+  email:
+    role: web-app-mailu
+    type: frontend
+
   ldap:
     role: svc-db-openldap
     type: backend

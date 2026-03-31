@@ -20,6 +20,9 @@ compose:
     matomo:
       enabled: true
       shared: true
+    email:
+      enabled: true
+      shared: true
     php:
       image:              "markoshust/magento-php"
       version:            "8.2-fpm"

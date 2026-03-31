@@ -29,6 +29,9 @@ compose:
     matomo:
       enabled: true
       shared: true
+    email:
+      enabled: true
+      shared: true
     database:
       shared: true
       type: "mariadb"
