@@ -1,19 +1,21 @@
 # SPOT: central loader for all shared frontend web services.
-# Iterates over all services with type: frontend from group_vars/all/20_services.yml.
+# Iterates over all frontend entries from SERVICE_REGISTRY in group_vars/all/20_services.yml.
 # Keep in mind to don't use inj_enabled.
 #
 
-- name: "Load frontend service (Once): {{ item.key }}"
+- name: "Load frontend service (Once)"
   include_tasks: "_load_frontend_service.yml"
   vars:
-    service_key: "{{ item.key }}"
-    service_role: "{{ item.value.role }}"
+    service_key: "{{ service_item.key }}"
+    service_role: "{{ service_item.value.role }}"
+    service_run_once_var: "{{ 'run_once_' ~ (service_item.value.role | replace('-', '_')) }}"
   when:
-    - item.value.get('type') == 'frontend'
-    - item.value.role is defined
-    - application_id != item.value.role
-    - lookup('service', item.key).needed | bool
-    - ("run_once_" ~ (item.value.role | replace("-", "_"))) not in vars
-  loop: "{{ services | dict2items | list }}"
+    - service_item.value.get('type') == 'frontend'
+    - service_item.value.role is defined
+    - application_id != service_item.value.role
+    - lookup('service', service_item.key).needed | bool
+    - lookup('vars', service_run_once_var, default='__missing__') == '__missing__'
+  loop: "{{ SERVICE_REGISTRY | dict2items | list }}"
   loop_control:
-    label: "{{ item.key }}"
+    loop_var: service_item
+    label: "{{ service_item.key }}"

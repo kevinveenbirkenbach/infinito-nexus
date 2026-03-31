@@ -6,8 +6,8 @@ from ansible.errors import AnsibleError
 
 from plugins.lookup.service import LookupModule
 
-# Minimal services map shared across tests.
-_SERVICES = {
+# Minimal service registry shared across tests.
+_SERVICE_REGISTRY = {
     "matomo": {"role": "web-app-matomo", "type": "frontend"},
     "cdn": {"role": "web-svc-cdn", "type": "frontend"},
     "logout": {"role": "web-svc-logout", "type": "frontend"},
@@ -16,13 +16,15 @@ _SERVICES = {
 }
 
 
-def _run(terms, applications, group_names, services=None):
+def _run(terms, applications, group_names, service_registry=None):
     return LookupModule().run(
         terms,
         variables={
             "applications": applications,
             "group_names": group_names,
-            "services": services if services is not None else _SERVICES,
+            "SERVICE_REGISTRY": (
+                service_registry if service_registry is not None else _SERVICE_REGISTRY
+            ),
         },
     )
 
@@ -216,8 +218,8 @@ class TestServiceTransitive(unittest.TestCase):
     def test_short_key_does_not_resolve_transitively(self):
         # Using short key 'collab' instead of 'web-svc-collab' — no match
         # in applications dict, so matomo is NOT found transitively.
-        services = dict(_SERVICES)
-        services["collab"] = {"role": "web-svc-collab", "type": "frontend"}
+        service_registry = dict(_SERVICE_REGISTRY)
+        service_registry["collab"] = {"role": "web-svc-collab", "type": "frontend"}
         applications = {
             "web-app-nextcloud": {
                 "compose": {"services": {"collab": {"enabled": True}}}
@@ -226,7 +228,12 @@ class TestServiceTransitive(unittest.TestCase):
                 "compose": {"services": {"matomo": {"enabled": True, "shared": True}}}
             },
         }
-        r = _run(["matomo"], applications, ["web-app-nextcloud"], services=services)[0]
+        r = _run(
+            ["matomo"],
+            applications,
+            ["web-app-nextcloud"],
+            service_registry=service_registry,
+        )[0]
         self.assertFalse(r["needed"])
 
     def test_transitive_requires_shared_at_target(self):
@@ -251,14 +258,19 @@ class TestServiceCycleGuard(unittest.TestCase):
             "svc-a": {"compose": {"services": {"svc-b": {"enabled": True}}}},
             "svc-b": {"compose": {"services": {"svc-a": {"enabled": True}}}},
         }
-        self.services = {
+        self.service_registry = {
             "svc-a": {"role": "svc-a", "type": "backend"},
             "svc-b": {"role": "svc-b", "type": "backend"},
             "logout": {"role": "web-svc-logout", "type": "frontend"},
         }
 
     def test_cycle_does_not_loop(self):
-        r = _run(["logout"], self.applications, ["svc-a"], services=self.services)[0]
+        r = _run(
+            ["logout"],
+            self.applications,
+            ["svc-a"],
+            service_registry=self.service_registry,
+        )[0]
         self.assertFalse(r["needed"])
 
     def test_cycle_found_if_service_present(self):
@@ -266,7 +278,12 @@ class TestServiceCycleGuard(unittest.TestCase):
             "enabled": True,
             "shared": True,
         }
-        r = _run(["logout"], self.applications, ["svc-b"], services=self.services)[0]
+        r = _run(
+            ["logout"],
+            self.applications,
+            ["svc-b"],
+            service_registry=self.service_registry,
+        )[0]
         self.assertTrue(r["needed"])
 
 
@@ -275,7 +292,10 @@ class TestServiceErrors(unittest.TestCase):
         with self.assertRaises(AnsibleError):
             LookupModule().run(
                 ["matomo"],
-                variables={"group_names": ["web-app-foo"], "services": _SERVICES},
+                variables={
+                    "group_names": ["web-app-foo"],
+                    "SERVICE_REGISTRY": _SERVICE_REGISTRY,
+                },
             )
 
     def test_raises_when_applications_not_mapping(self):
@@ -285,7 +305,7 @@ class TestServiceErrors(unittest.TestCase):
                 variables={
                     "applications": ["not", "a", "dict"],
                     "group_names": [],
-                    "services": _SERVICES,
+                    "SERVICE_REGISTRY": _SERVICE_REGISTRY,
                 },
             )
 
@@ -296,25 +316,25 @@ class TestServiceErrors(unittest.TestCase):
                 variables={
                     "applications": {},
                     "group_names": "not-a-list",
-                    "services": _SERVICES,
+                    "SERVICE_REGISTRY": _SERVICE_REGISTRY,
                 },
             )
 
-    def test_raises_when_services_missing(self):
+    def test_raises_when_service_registry_missing(self):
         with self.assertRaises(AnsibleError):
             LookupModule().run(
                 ["matomo"],
                 variables={"applications": {}, "group_names": []},
             )
 
-    def test_raises_when_services_not_mapping(self):
+    def test_raises_when_service_registry_not_mapping(self):
         with self.assertRaises(AnsibleError):
             LookupModule().run(
                 ["matomo"],
                 variables={
                     "applications": {},
                     "group_names": [],
-                    "services": "not-a-dict",
+                    "SERVICE_REGISTRY": "not-a-dict",
                 },
             )
 

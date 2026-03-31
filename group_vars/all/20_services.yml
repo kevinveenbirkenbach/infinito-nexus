@@ -15,7 +15,7 @@
 #
 # See: docs/contributing/code/services.md
 
-services:
+SERVICE_REGISTRY:
   matomo:
     role: web-app-matomo
     type: frontend

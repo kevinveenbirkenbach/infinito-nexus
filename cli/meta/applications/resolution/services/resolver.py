@@ -29,21 +29,21 @@ def _is_enabled_shared(svc: object) -> bool:
     return svc.get("enabled") is True and svc.get("shared") is True
 
 
-def _load_services_map(services_file: Path = _SERVICES_FILE) -> Dict[str, Any]:
+def _load_service_registry(services_file: Path = _SERVICES_FILE) -> Dict[str, Any]:
     if not services_file.exists():
         raise ServicesResolutionError(f"20_services.yml not found at {services_file}")
     raw = yaml.safe_load(services_file.read_text(encoding="utf-8")) or {}
-    services = raw.get("services")
-    if not isinstance(services, dict):
+    service_registry = raw.get("SERVICE_REGISTRY")
+    if not isinstance(service_registry, dict):
         raise ServicesResolutionError(
-            f"Expected a 'services' mapping in {services_file}"
+            f"Expected a 'SERVICE_REGISTRY' mapping in {services_file}"
         )
-    return services
+    return service_registry
 
 
 def resolve_direct_service_roles_from_config(
     config: dict,
-    services_map: Optional[Dict[str, Any]] = None,
+    service_registry: Optional[Dict[str, Any]] = None,
 ) -> List[str]:
     """
     Single source of truth for "service -> provider role(s)" mapping.
@@ -52,14 +52,14 @@ def resolve_direct_service_roles_from_config(
     Every service requires compose.services.<key>.enabled: true AND shared: true.
     Entries with role_template substitute {type} from the service config.
     """
-    if services_map is None:
-        services_map = _load_services_map()
+    if service_registry is None:
+        service_registry = _load_service_registry()
 
     cfg = _as_mapping(config)
     services = _as_mapping(_as_mapping(cfg.get("compose")).get("services"))
 
     includes: List[str] = []
-    for key, mapping in services_map.items():
+    for key, mapping in service_registry.items():
         svc_obj = services.get(key)
         if not _is_enabled_shared(svc_obj):
             continue
@@ -95,7 +95,7 @@ class ServicesResolver:
         services_file: Path = _SERVICES_FILE,
     ) -> None:
         self.roles_root = roles_root
-        self._services_map = _load_services_map(services_file)
+        self._service_registry = _load_service_registry(services_file)
 
     def _role_dir(self, role_name: str) -> Path:
         return self.roles_root / role_name
@@ -121,7 +121,7 @@ class ServicesResolver:
             )
 
     def direct_includes_from_config(self, config: dict) -> List[str]:
-        return resolve_direct_service_roles_from_config(config, self._services_map)
+        return resolve_direct_service_roles_from_config(config, self._service_registry)
 
     def resolve_transitively(self, root_role_name: str) -> List[str]:
         """

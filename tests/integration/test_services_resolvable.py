@@ -18,8 +18,10 @@ class TestServicesResolvable(unittest.TestCase):
         )
         with open(services_file, encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
-        self.services = data.get("services", {})
-        self.assertGreater(len(self.services), 0, "services map must not be empty")
+        self.service_registry = data.get("SERVICE_REGISTRY", {})
+        self.assertGreater(
+            len(self.service_registry), 0, "service registry must not be empty"
+        )
 
     def _run(self, term):
         return LookupModule().run(
@@ -27,17 +29,17 @@ class TestServicesResolvable(unittest.TestCase):
             variables={
                 "applications": {},
                 "group_names": [],
-                "services": self.services,
+                "SERVICE_REGISTRY": self.service_registry,
             },
         )[0]
 
     def _canonical_for(self, key):
-        entry = self.services[key]
+        entry = self.service_registry[key]
         return entry.get("canonical", key)
 
     def test_all_keys_resolvable(self):
         """Every service key must resolve without error and return itself as id."""
-        for key in self.services:
+        for key in self.service_registry:
             with self.subTest(key=key):
                 result = self._run(key)
                 self.assertEqual(result["id"], key)
@@ -45,7 +47,7 @@ class TestServicesResolvable(unittest.TestCase):
     def test_all_roles_resolve_to_canonical(self):
         """Role-based lookup must return the canonical key for that role."""
         seen_roles = set()
-        for key, entry in self.services.items():
+        for key, entry in self.service_registry.items():
             if not isinstance(entry, dict):
                 continue
             role = entry.get("role")
@@ -60,7 +62,7 @@ class TestServicesResolvable(unittest.TestCase):
 
     def test_key_and_role_produce_identical_result_for_primary_keys(self):
         """For the canonical/primary key of a role, key and role lookups must agree."""
-        for key, entry in self.services.items():
+        for key, entry in self.service_registry.items():
             if not isinstance(entry, dict):
                 continue
             role = entry.get("role")

@@ -13,7 +13,7 @@ from cli.meta.applications.resolution.services.resolver import (
     resolve_direct_service_roles_from_config,
 )
 
-_MINIMAL_SERVICES_MAP = {
+_MINIMAL_SERVICE_REGISTRY = {
     "ldap": {"role": "svc-db-openldap"},
     "oidc": {"role": "web-app-keycloak"},
     "matomo": {"role": "web-app-matomo"},
@@ -35,7 +35,7 @@ class TestServicesResolverDirect(unittest.TestCase):
                 }
             }
         }
-        roles = resolve_direct_service_roles_from_config(cfg, _MINIMAL_SERVICES_MAP)
+        roles = resolve_direct_service_roles_from_config(cfg, _MINIMAL_SERVICE_REGISTRY)
         self.assertEqual(
             roles,
             [
@@ -56,7 +56,7 @@ class TestServicesResolverDirect(unittest.TestCase):
             }
         }
         with self.assertRaises(ServicesResolutionError):
-            resolve_direct_service_roles_from_config(cfg, _MINIMAL_SERVICES_MAP)
+            resolve_direct_service_roles_from_config(cfg, _MINIMAL_SERVICE_REGISTRY)
 
     def test_non_shared_not_included(self) -> None:
         cfg = {
@@ -67,7 +67,7 @@ class TestServicesResolverDirect(unittest.TestCase):
                 }
             }
         }
-        roles = resolve_direct_service_roles_from_config(cfg, _MINIMAL_SERVICES_MAP)
+        roles = resolve_direct_service_roles_from_config(cfg, _MINIMAL_SERVICE_REGISTRY)
         self.assertEqual(roles, [])
 
 
@@ -80,7 +80,7 @@ class TestServicesResolverTransitive(unittest.TestCase):
 
     def _mk_services_file(self, root: Path, mapping: dict) -> Path:
         path = root / "20_services.yml"
-        path.write_text(yaml.dump({"services": mapping}), encoding="utf-8")
+        path.write_text(yaml.dump({"SERVICE_REGISTRY": mapping}), encoding="utf-8")
         return path
 
     def test_transitive_bfs(self) -> None:

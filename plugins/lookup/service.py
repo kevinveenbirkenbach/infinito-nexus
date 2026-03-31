@@ -77,7 +77,7 @@ def _is_service_needed(
     return False
 
 
-def _build_role_to_key(services_map: Dict[str, Any]) -> Dict[str, str]:
+def _build_role_to_key(service_registry: Dict[str, Any]) -> Dict[str, str]:
     """Map each role name to its canonical service key.
 
     When multiple keys share the same role, the canonical key is determined by
@@ -86,7 +86,7 @@ def _build_role_to_key(services_map: Dict[str, Any]) -> Dict[str, str]:
     returns a single, deterministic id.
     """
     result: Dict[str, str] = {}
-    for key, entry in services_map.items():
+    for key, entry in service_registry.items():
         if not isinstance(entry, dict) or "role" not in entry:
             continue
         role = entry["role"]
@@ -97,25 +97,25 @@ def _build_role_to_key(services_map: Dict[str, Any]) -> Dict[str, str]:
 
 def _resolve_term(
     term: str,
-    services_map: Dict[str, Any],
+    service_registry: Dict[str, Any],
     role_to_key: Dict[str, str],
 ) -> Tuple[str, str]:
     """
     Resolve a term (service key or role name) to (service_key, role).
     Raises AnsibleError if the term is not a known key or role.
     """
-    if term in services_map:
-        entry = services_map[term]
+    if term in service_registry:
+        entry = service_registry[term]
         role = entry.get("role") or entry.get("role_template", "")
         return term, str(role)
     if term in role_to_key:
         key = role_to_key[term]
-        entry = services_map[key]
+        entry = service_registry[key]
         role = entry.get("role") or entry.get("role_template", "")
         return key, str(role)
     raise AnsibleError(
         f"service: '{term}' is neither a known service key nor a known role name. "
-        f"Known keys: {sorted(services_map)}. "
+        f"Known keys: {sorted(service_registry)}. "
         f"Known roles: {sorted(role_to_key)}."
     )
 
@@ -149,8 +149,8 @@ class LookupModule(LookupBase):
       lookup('service', 'matomo')
       lookup('service', 'web-app-matomo')   # resolved via reverse mapping
 
-    Reads 'applications', 'group_names', and 'services' from Ansible variables.
-    The 'services' variable is the canonical key → role mapping from
+    Reads 'applications', 'group_names', and 'SERVICE_REGISTRY' from Ansible variables.
+    The 'SERVICE_REGISTRY' variable is the canonical key → role mapping from
     group_vars/all/20_services.yml and is automatically available in all plays.
 
     Returns a dict per term:
@@ -185,14 +185,14 @@ class LookupModule(LookupBase):
                 "service: required variable 'group_names' must be a list"
             )
 
-        services_map = kwargs.get("services", vars_.get("services"))
-        if not isinstance(services_map, dict):
+        service_registry = kwargs.get("service_registry", vars_.get("SERVICE_REGISTRY"))
+        if not isinstance(service_registry, dict):
             raise AnsibleError(
-                "service: required variable 'services' must be a mapping "
+                "service: required variable 'SERVICE_REGISTRY' must be a mapping "
                 "(loaded from group_vars/all/20_services.yml)"
             )
 
-        role_to_key = _build_role_to_key(services_map)
+        role_to_key = _build_role_to_key(service_registry)
 
         results: List[Dict[str, Any]] = []
         for term in terms:
@@ -200,7 +200,7 @@ class LookupModule(LookupBase):
             if not term_str:
                 raise AnsibleError("service: service key/role must not be empty")
 
-            service_key, role = _resolve_term(term_str, services_map, role_to_key)
+            service_key, role = _resolve_term(term_str, service_registry, role_to_key)
             flags = _compute_flags(applications, group_names, service_key)
             results.append({"id": service_key, "role": role, **flags})
 

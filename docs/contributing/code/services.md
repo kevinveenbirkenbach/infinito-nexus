@@ -20,12 +20,12 @@ A service is considered *shared* (reusable across applications) when it also set
 The canonical service key → role mapping lives in [`group_vars/all/20_services.yml`](../../../group_vars/all/20_services.yml).
 This is the **single source of truth** for all service mappings — add a new service here to register it system-wide.
 
-It is an Ansible `group_vars` file, so the `services` variable is automatically available in all plays.
+It is an Ansible `group_vars` file, so the `SERVICE_REGISTRY` variable is automatically available in all plays.
 The Python CLI resolver reads the same file — no hardcoded mappings exist anywhere else.
 
 ```yaml
 # group_vars/all/20_services.yml
-services:
+SERVICE_REGISTRY:
   matomo:
     role: web-app-matomo
     type: frontend
@@ -91,7 +91,7 @@ Decides whether the service container is deployed at all.
 
 [`roles/sys-front-inj-all/tasks/01_services.yml`](../../../roles/sys-front-inj-all/tasks/01_services.yml) is the **SPOT** for all frontend service loading.
 
-It iterates over every entry with `type: frontend` from `20_services.yml` and for each:
+It iterates over every entry with `type: frontend` from `SERVICE_REGISTRY` in `20_services.yml` and for each:
 
 1. Checks `lookup('service', item.key).needed` — is the service needed (enabled AND shared) by any deployed app?
 2. Checks `run_once_*` — has the service already been loaded this run?
@@ -167,7 +167,7 @@ lookup('service', 'css')             # alias key → returns id: css
 lookup('service', 'web-svc-cdn')     # role lookup → returns id: cdn (canonical)
 ```
 
-- Reads `applications`, `group_names`, and `services` (from `group_vars/all/20_services.yml`) from Ansible variables
+- Reads `applications`, `group_names`, and `SERVICE_REGISTRY` (from `group_vars/all/20_services.yml`) from Ansible variables
 - Accepts either a service **key** (e.g. `matomo`, `css`) or a **role name** (e.g. `web-app-matomo`, `web-svc-cdn`) as the term
 - When looking up by **key**, returns the entry for that exact key (`id` = the key you passed)
 - When looking up by **role name**, returns the entry for the **canonical key** of that role
