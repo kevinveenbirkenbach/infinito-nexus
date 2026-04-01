@@ -4,9 +4,11 @@
     image: "{{ PIXELFED_IMAGE }}:{{ PIXELFED_VERSION }}"
     container_name: {{ PIXELFED_CONTAINER }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    entrypoint: "{{ PIXELFED_ENTRYPOINT_DOCKER }}"
     volumes:
       - "data:/var/www/storage"
       - "{{ PIXELFED_ENV_FILE }}:/var/www/.env"
+      - "{{ PIXELFED_ENTRYPOINT_HOST_ABS }}:{{ PIXELFED_ENTRYPOINT_DOCKER }}:ro"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
 {% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}

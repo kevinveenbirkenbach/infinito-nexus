@@ -3,7 +3,14 @@
   include_role:
     name: sys-stk-full
   vars:
-    docker_compose_flush_handlers: true
+    docker_compose_flush_handlers: false
+
+- name: "Deploy '{{ PIXELFED_ENTRYPOINT_HOST_ABS }}'"
+  ansible.builtin.copy:
+    src: "{{ PIXELFED_ENTRYPOINT_FILE }}"
+    dest: "{{ PIXELFED_ENTRYPOINT_HOST_ABS }}"
+    mode: "0755"
+  notify: compose up
 
 - name: "Ensure Pixelfed .env ownership and permissions for www-data"
   ansible.builtin.file:
@@ -11,6 +18,9 @@
     owner: "{{ PIXELFED_APP_USER }}"
     group: "{{ PIXELFED_APP_USER }}"
     mode: "0660"
+
+- name: "Start Pixelfed containers with the repo-managed entrypoint"
+  ansible.builtin.meta: flush_handlers
 
 - name: "Bootstrap the Pixelfed application"
   ansible.builtin.import_tasks: 00_bootstrap.yml
