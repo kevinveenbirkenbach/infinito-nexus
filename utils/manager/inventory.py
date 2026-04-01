@@ -210,25 +210,25 @@ class InventoryManager:
                 and all(k in meta for k in ("description", "algorithm", "validation"))
             ):
                 alg = meta["algorithm"]
-                existing_value = dest.get(key)
 
                 if alg == "plain":
-                    if full_key in self.overrides:
-                        plain = self.overrides[full_key]
-                    elif isinstance(existing_value, str) and existing_value != "":
-                        continue
-                    elif self.allow_empty_plain:
-                        plain = ""
+                    if full_key not in self.overrides:
+                        if self.allow_empty_plain:
+                            plain = ""
+                        else:
+                            print(
+                                f"ERROR: Plain algorithm for '{full_key}' requires override via --set {full_key}=<value>",
+                                file=sys.stderr,
+                            )
+                            sys.exit(1)
                     else:
-                        print(
-                            f"ERROR: Plain algorithm for '{full_key}' requires override via --set {full_key}=<value>",
-                            file=sys.stderr,
-                        )
-                        sys.exit(1)
+                        plain = self.overrides[full_key]
                 else:
                     plain = self.overrides.get(
                         full_key, self.value_generator.generate_value(alg)
                     )
+
+                existing_value = dest.get(key)
 
                 if isinstance(existing_value, dict):
                     print(

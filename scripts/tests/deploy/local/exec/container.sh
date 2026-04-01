@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Open an interactive shell in the running infinito container, or execute a
-# one-off command inside it when CMD or positional arguments are set.
+# one-off command inside it when INSPECT_CMD or positional arguments are set.
 #
 # Usage:
 #   scripts/tests/deploy/local/exec/container.sh
@@ -11,12 +11,12 @@ set -euo pipefail
 # Environment:
 #   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
 #   INFINITO_CONTAINER  Optional explicit container name
-#   CMD                 One-off shell command to run instead of an interactive shell
+#   INSPECT_CMD         One-off shell command to run instead of an interactive shell
 #
 # Examples:
 #   scripts/tests/deploy/local/exec/container.sh
 #   scripts/tests/deploy/local/exec/container.sh whoami
-#   CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh
+#   INSPECT_CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../../" && pwd)"
@@ -30,12 +30,12 @@ Usage:
 Environment:
   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
   INFINITO_CONTAINER  Optional explicit container name
-  CMD                 One-off shell command to run instead of an interactive shell
+  INSPECT_CMD         One-off shell command to run instead of an interactive shell
 
 Examples:
   scripts/tests/deploy/local/exec/container.sh
   scripts/tests/deploy/local/exec/container.sh whoami
-  CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh
+  INSPECT_CMD='whoami && id' scripts/tests/deploy/local/exec/container.sh
 EOF
 }
 
@@ -75,8 +75,8 @@ if [[ $# -gt 0 ]]; then
 	exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" "$@"
 fi
 
-if [[ -n "${CMD:-}" ]]; then
-	exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" sh -lc "${CMD}"
+if [[ -n "${INSPECT_CMD:-}" ]]; then
+	exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" sh -lc "${INSPECT_CMD}"
 fi
 
 exec docker exec "${docker_exec_flags[@]}" -w /opt/src/infinito "${container}" sh

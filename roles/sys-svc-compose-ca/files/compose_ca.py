@@ -4,8 +4,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
-import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -48,91 +46,6 @@ def parse_yaml(text: str, label: str) -> Dict[str, Any]:
     return doc
 
 
-def _is_shell_form(argv: List[str]) -> bool:
-    return (
-        len(argv) >= 2
-        and argv[0] in {"/bin/sh", "sh", "/bin/bash", "bash"}
-        and argv[1] in {"-c", "-lc"}
-    )
-
-
-_SHELL_RAW_TOKENS = {
-    "!",
-    ";",
-    "&&",
-    "||",
-    "|",
-    "|&",
-    "&",
-    "(",
-    ")",
-    "{",
-    "}",
-    "[[",
-    "]]",
-    ">",
-    ">>",
-    ">|",
-    "<",
-    "<<",
-    "<<-",
-    "<<<",
-    "<&",
-    ">&",
-    ";;",
-    ";&",
-    ";;&",
-}
-
-_SHELL_VAR_TOKEN_RE = re.compile(r"^\$[A-Za-z_][A-Za-z0-9_]*$|^\$\{[^}]+\}$")
-
-
-def _join_shell_tokens(tokens: List[str]) -> str:
-    """
-    Rebuild a shell payload from tokenized compose output.
-
-    We keep shell operators raw so syntax like `if ! ...; then` survives, but
-    still quote normal arguments that contain spaces or comment markers.
-    """
-    parts: List[str] = []
-    for token in tokens:
-        if token in _SHELL_RAW_TOKENS or _SHELL_VAR_TOKEN_RE.fullmatch(token):
-            parts.append(token)
-        else:
-            parts.append(shlex.quote(token))
-    return " ".join(parts)
-
-
-def _collapse_shell_form(argv: List[str]) -> List[str]:
-    """
-    Canonicalize tokenized shell-form argv back into a single shell string.
-
-    compose config may flatten shell-form commands/entrypoints into
-    multiple argv items. When we later re-wrap them, /bin/sh -c must receive
-    one shell payload, otherwise the shell sees tokenized words and breaks on
-    characters like # or !.
-    """
-    if len(argv) > 3 and _is_shell_form(argv):
-        return [argv[0], argv[1], _join_shell_tokens(argv[2:])]
-    return argv
-
-
-def _shell_payload(argv: List[str]) -> str:
-    """
-    Convert argv into a single shell payload string.
-
-    If argv is already shell-form, strip the launcher and keep the actual
-    command string. Otherwise join the argv safely for shell consumption.
-    """
-    if _is_shell_form(argv):
-        if len(argv) == 3:
-            return argv[2]
-        return _join_shell_tokens(argv[2:])
-    if len(argv) == 1:
-        return argv[0]
-    return _join_shell_tokens(argv)
-
-
 def normalize_cmd(value: Any) -> List[str]:
     """
     Normalize a compose 'command' value into exec-form list[str].
@@ -145,7 +58,7 @@ def normalize_cmd(value: Any) -> List[str]:
     if value is None:
         return []
     if isinstance(value, list) and all(isinstance(x, str) for x in value):
-        return _collapse_shell_form(value)
+        return value
     if isinstance(value, str) and value.strip():
         return ["/bin/sh", "-lc", value]
     die(f"Unsupported command type in compose config: {type(value)}")
@@ -163,7 +76,7 @@ def normalize_entrypoint(value: Any) -> List[str]:
     if value is None:
         return []
     if isinstance(value, list) and all(isinstance(x, str) for x in value):
-        return _collapse_shell_form(value)
+        return value
     if isinstance(value, str) and value.strip():
         return ["/bin/sh", "-lc", value]
     die(f"Unsupported entrypoint type in compose config: {type(value)}")
@@ -399,12 +312,12 @@ def _compose_base_cmd(*, project: str, parts: List[str], env_file: str) -> List[
 def _compose_cmd_with_profile(base_cmd: List[str], profile: str) -> List[str]:
     """
     Add a --profile <name> (global compose flag) to an existing base cmd.
-    Expected base cmd: ['compose', ...]
+    Expected base cmd: ['docker','compose', ...]
     """
     if len(base_cmd) < 2 or base_cmd[0] != "docker" or base_cmd[1] != "compose":
         die(f"Invalid compose base cmd: {base_cmd}")
 
-    # Insert after the compose wrapper prefix
+    # Insert after 'docker compose'
     return base_cmd[:2] + ["--profile", profile] + base_cmd[2:]
 
 
@@ -487,15 +400,9 @@ def render_override(
                 env=env,
             )
             img_ep, img_cmd = docker_image_inspect(img_name, cwd=cwd, env=env)
-            img_ep = normalize_entrypoint(img_ep)
-            img_cmd = normalize_cmd(img_cmd)
 
         final_ep = svc_ep if svc_ep else img_ep
         final_cmd = svc_cmd if svc_cmd else img_cmd
-
-        if _is_shell_form(final_ep):
-            final_cmd = [_shell_payload(final_cmd)]
-
         effective_cmd = final_ep + final_cmd
 
         if not effective_cmd:

@@ -19,10 +19,8 @@ compose:
   services:
     logout:
       enabled: true
-      shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -37,7 +35,6 @@ compose:
       min_storage: "1GB"
     oauth2:
       enabled: true
-      shared: true
       origin:
         host: "application"
         port: "80"
@@ -48,4 +45,3 @@ compose:
           - "<< defaults_applications[web-app-yourls].server.locations.admin >>" # Protects the admin area
     css:
       enabled: true
-      shared: true

@@ -1,3 +1,5 @@
+[Back to Code](README.md)
+
 # Code Principles
 
 Use these principles when you change repository code, scripts, or automation.
@@ -47,5 +49,5 @@ Follow these principles. Keep the rule column short, imperative, and as [SMART](
 | Keep easy code easy to explain. | Easy-to-explain code is usually sound. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | If the code is easy to explain, it is likely a good idea. |
 | Use namespaces generously. | Namespaces prevent collisions in a large repo. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Group names so they do not collide and remain easy to navigate. |
 
-For code quality rules, see [Lint](tests/lint.md).
+For code quality rules, see [Code Quality](quality.md).
 For framework-specific guidance, see [Ansible](frameworks/ansible.md) and [Makefile](frameworks/Makefile.md).

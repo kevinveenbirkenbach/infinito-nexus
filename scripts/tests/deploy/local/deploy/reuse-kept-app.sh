@@ -3,18 +3,18 @@ set -euo pipefail
 
 # Reuse-kept deploy for a single app inside the running infinito container.
 # Expects (ALL required):
-#   APPS               e.g. web-app-nextcloud
+#   APP                e.g. web-app-nextcloud
 #   TEST_DEPLOY_TYPE   server|workstation|universal
 #   INFINITO_CONTAINER e.g. infinito_nexus_arch
 #   DEBUG              true|false
 #   INVENTORY_DIR      e.g. /etc/inventories/local-full-server
 
-: "${APPS:?APPS is not set (e.g. APPS=web-app-nextcloud)}"
+: "${APP:?APP is not set (e.g. APP=web-app-nextcloud)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is not set (server|workstation|universal)}"
 : "${INFINITO_CONTAINER:?INFINITO_CONTAINER is not set (e.g. infinito_nexus_arch)}"
 : "${DEBUG:?DEBUG is not set (true|false)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR is not set (e.g. INVENTORY_DIR=/etc/inventories/local-full-server)}"
-: "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
+inv_file="${INVENTORY_DIR}/devices.yml"
 pw_file="${INVENTORY_DIR}/.password"
 
 case "${TEST_DEPLOY_TYPE}" in
@@ -35,15 +35,15 @@ true | false) ;;
 	;;
 esac
 
-echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APPS} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
+echo "=== rapid deploy: type=${TEST_DEPLOY_TYPE} app=${APP} container=${INFINITO_CONTAINER} debug=${DEBUG} ==="
 echo "inventory_dir=${INVENTORY_DIR}"
 
 docker exec "${INFINITO_CONTAINER}" bash -c "
   set -euo pipefail
   cd /opt/src/infinito
 
-  if [[ ! -f \"${INVENTORY_FILE}\" ]]; then
-    echo \"ERROR: inventory not found: ${INVENTORY_FILE}\" >&2
+  if [[ ! -f \"${inv_file}\" ]]; then
+    echo \"ERROR: inventory not found: ${inv_file}\" >&2
     exit 2
   fi
 
@@ -56,10 +56,10 @@ docker exec "${INFINITO_CONTAINER}" bash -c "
   ./scripts/docker/entry.sh true
 
   echo \">>> Starting rapid deploy\"
-  cmd=(infinito deploy dedicated \"${INVENTORY_FILE}\"
+  cmd=(infinito deploy dedicated \"${inv_file}\"
     --skip-backup
     --skip-cleanup
-    --id ${APPS}
+    --id ${APP}
     -l localhost
     --diff
     -vv

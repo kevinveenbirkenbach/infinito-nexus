@@ -52,10 +52,10 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" || $# -eq 0 ]]; then
 	exit 0
 fi
 
-APPS="${1:-}"
+APP_ID="${1:-}"
 shift
 
-if [[ -z "${APPS}" ]]; then
+if [[ -z "${APP_ID}" ]]; then
 	echo "ERROR: app-id is required" >&2
 	usage
 	exit 2
@@ -88,7 +88,7 @@ esac
 DEBUG="$(normalize_bool_or_default "${DEBUG:-}" true DEBUG)"
 
 echo "=== local app test (no cleanup) ==="
-echo "app ids       = ${APPS}"
+echo "app_id        = ${APP_ID}"
 echo "distro        = ${INFINITO_DISTRO}"
 echo "inventory_dir = ${INVENTORY_DIR}"
 echo "limit         = ${LIMIT_HOST}"
@@ -105,17 +105,17 @@ echo ">>> Running entry.sh bootstrap inside container"
 	--distro "${INFINITO_DISTRO}" -- \
 	bash -lc "set -euo pipefail; cd /opt/src/infinito; ./scripts/docker/entry.sh true"
 
-echo ">>> Creating inventory for app '${APPS}'"
+echo ">>> Creating inventory for app '${APP_ID}'"
 "${PYTHON}" -m cli.deploy.development init \
 	--distro "${INFINITO_DISTRO}" \
-	--apps "${APPS}" \
+	--app "${APP_ID}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": false}'
 
 deploy_cmd=(
 	"${PYTHON}" -m cli.deploy.development deploy
 	--distro "${INFINITO_DISTRO}"
-	--apps "${APPS}"
+	--app "${APP_ID}"
 	--inventory-dir "${INVENTORY_DIR}"
 )
 
@@ -126,7 +126,7 @@ fi
 # NOTE: --skip-cleanup keeps cleanup routines disabled during this local test run.
 deploy_cmd+=(-- --skip-backup --skip-cleanup --limit "${LIMIT_HOST}")
 
-echo ">>> Deploying app '${APPS}'"
+echo ">>> Deploying app '${APP_ID}'"
 "${deploy_cmd[@]}"
 
 echo

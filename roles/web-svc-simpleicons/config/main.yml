@@ -5,7 +5,6 @@ compose:
       enabled:  false
     dashboard:
       enabled:  true
-      shared: true
     matomo:
       enabled:  false
       shared:   false
@@ -18,7 +17,6 @@ compose:
       enabled:  false   # Enable the database 
     css:
       enabled: true
-      shared: true
     recaptcha:
       enabled: false
     simpleicons:

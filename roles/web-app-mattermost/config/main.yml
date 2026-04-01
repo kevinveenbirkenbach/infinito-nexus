@@ -19,18 +19,13 @@ compose:
       shared:                     true
     logout:
       enabled:                    true
-      shared: true
     ldap:
       enabled:                    false
     dashboard:
       enabled:                    true
-      shared: true
     matomo:
       enabled:                    true
       shared:                     true
-    email:
-      enabled: true
-      shared: true
     database:
       shared:                     true
       type:                       "postgres"
@@ -54,10 +49,8 @@ compose:
       enabled:                    false
     css:
       enabled:                    true
-      shared: true
     javascript:
       enabled:                    true
-      shared: true
   volumes:
     config:                       "mattermost_config"
     data:                         "mattermost_data"

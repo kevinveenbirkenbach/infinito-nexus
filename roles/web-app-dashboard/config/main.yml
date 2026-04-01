@@ -30,18 +30,11 @@ compose:
     oidc:
       enabled:  true
       shared:   true
-    asset:
-      enabled:  true
-      shared:   true
-    cdn:
-      enabled:  true
-      shared:   true
     simpleicons:
       enabled:  true
       shared:   true
     logout:
       enabled:  true
-      shared: true
     matomo:
       enabled:  true
       shared:   true
@@ -49,11 +42,9 @@ compose:
       enabled:  false
       name:     "dashboard"
       image:    "ghcr.io/kevinveenbirkenbach/port-ui"
-      version:  "1.1.0"
+      version:  "1.0.0"
       min_storage: "1GB"
     css:
       enabled: true
-      shared: true
     javascript:
       enabled: true
-      shared: true

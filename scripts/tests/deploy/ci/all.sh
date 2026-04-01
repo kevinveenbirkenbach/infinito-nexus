@@ -9,7 +9,7 @@ set -euo pipefail
 # - Skip a distro if remaining time is smaller than the max duration of any previous distro run
 #
 # Required env:
-#   APPS="web-app-keycloak"
+#   APP="web-app-keycloak"
 #   TEST_DEPLOY_TYPE="server|workstation|universal"
 #   DISTROS="arch debian ubuntu fedora centos"
 #   INVENTORY_DIR="/path/to/inventory"
@@ -34,7 +34,7 @@ else
 	exit 2
 fi
 
-: "${APPS:?APPS is required (e.g. APPS=web-app-keycloak)}"
+: "${APP:?APP is required (e.g. APP=web-app-keycloak)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE is required (server|workstation|universal)}"
 : "${DISTROS:?DISTROS is required (e.g. 'arch debian ubuntu fedora centos')}"
 : "${INVENTORY_DIR:?INVENTORY_DIR is required}"
@@ -47,7 +47,6 @@ server | workstation | universal) ;;
 	;;
 esac
 
-: "${PYTHON:=python3}"
 : "${MISSING_ONLY:=true}"
 if [[ -z "${MAX_TOTAL_SECONDS+x}" ]]; then
 	MAX_TOTAL_SECONDS=19800
@@ -105,9 +104,6 @@ sync_ci_image_for_run() {
 	echo ">>> CI image synced: ${INFINITO_IMAGE}"
 }
 
-echo ">>> Installing CI dependencies"
-"${PYTHON}" -m pip install ruamel.yaml PyYAML
-
 for distro in "${distro_arr[@]}"; do
 	now="$(date +%s)"
 	remaining=""
@@ -128,7 +124,7 @@ for distro in "${distro_arr[@]}"; do
 		fi
 	fi
 
-	echo "=== Running dedicated distro deploy: distro=${distro} app=${APPS} type=${TEST_DEPLOY_TYPE} ==="
+	echo "=== Running dedicated distro deploy: distro=${distro} app=${APP} type=${TEST_DEPLOY_TYPE} ==="
 	if [[ -n "${remaining}" ]]; then
 		echo ">>> Time budget: remaining=${remaining}s max_seen=${max_seen}s"
 	fi
@@ -140,7 +136,7 @@ for distro in "${distro_arr[@]}"; do
 
 	set +e
 	scripts/tests/deploy/ci/dedicated.sh \
-		--apps "${APPS}"
+		--app "${APP}"
 	rc=$?
 	set -e
 
@@ -156,7 +152,7 @@ for distro in "${distro_arr[@]}"; do
 	echo ">>> Duration: distro=${distro} took ${dur}s (max_seen=${max_seen}s)"
 
 	if [[ $rc -ne 0 ]]; then
-		echo "[ERROR] Deploy failed for distro=${distro} app=${APPS} (rc=${rc})" >&2
+		echo "[ERROR] Deploy failed for distro=${distro} app=${APP} (rc=${rc})" >&2
 		failed=$((failed + 1))
 		exit "$rc"
 	fi
@@ -167,7 +163,7 @@ total="$((global_end - global_start))"
 
 echo
 echo "=== Summary ==="
-echo "app=${APPS} type=${TEST_DEPLOY_TYPE}"
+echo "app=${APP} type=${TEST_DEPLOY_TYPE}"
 echo "ran=${ran} skipped=${skipped} failed=${failed}"
 echo "total_runtime=${total}s max_seen_duration=${max_seen}s"
 if [[ -n "${deadline}" ]]; then

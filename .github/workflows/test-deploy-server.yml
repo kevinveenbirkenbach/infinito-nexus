@@ -69,7 +69,7 @@ jobs:
           echo "apps_json=$apps"
 
   server:
-    name: 🌐 Deploy ${{ matrix.apps }}
+    name: 🌐 Deploy ${{ matrix.app }}
     if: needs.discover.outputs.apps != '' && needs.discover.outputs.apps != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -78,7 +78,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        apps: ${{ fromJson(needs.discover.outputs.apps) }}
+        app: ${{ fromJson(needs.discover.outputs.apps) }}
 
     steps:
       - uses: actions/checkout@v6
@@ -96,13 +96,13 @@ jobs:
       - name: Deploy app
         shell: bash
         env:
-          APPS: ${{ matrix.apps }}
+          APP: ${{ matrix.app }}
         run: ./scripts/tests/deploy/ci/all.sh
 
       - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-server-${{ matrix.apps }}
+          name: playwright-server-${{ matrix.app }}
           path: /tmp/playwright-artifacts/
           if-no-files-found: ignore

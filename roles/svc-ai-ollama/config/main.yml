@@ -1,7 +1,6 @@
 compose:
   services:
     ollama:
-      enabled: false
       shared:             true
       backup:
         no_stop_required: true

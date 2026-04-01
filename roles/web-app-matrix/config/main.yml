@@ -5,16 +5,11 @@ compose:
       shared:             true
     logout:
       enabled:            true
-      shared: true
     dashboard:
       enabled:            true
-      shared:             true
     matomo:
       enabled:            false
       shared:             false
-    email:
-      enabled: true
-      shared: true
     database:
       shared:             true
       type:               "postgres"
@@ -31,7 +26,6 @@ compose:
       name:           matrix-element
     css:
       enabled:        true
-      shared: true
   volumes: 
     synapse:          "matrix_synapse_data"
 playbook_tags:        "setup-all,start"                  # For the initial update use: install-all,ensure-matrix-users-created,start

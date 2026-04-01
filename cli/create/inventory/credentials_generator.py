@@ -149,9 +149,7 @@ def generate_credentials_for_roles(
                     continue
 
                 for key, val in creds_snip.items():
-                    if key not in creds_doc or (
-                        creds_doc.get(key) == "" and val not in ("", None)
-                    ):
+                    if key not in creds_doc:
                         creds_doc[key] = val
 
         if (

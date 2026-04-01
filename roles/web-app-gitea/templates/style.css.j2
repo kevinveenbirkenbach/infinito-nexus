@@ -21,7 +21,7 @@
 {% for i in range(1, 10) %}
 {# @see https://chatgpt.com/share/67bcd94e-bb44-800f-bf63-06d1ae0f5096 #}
   {% set alpha = i * 10 %}
-  --color-01-primary-alpha-{{ alpha }}: rgba(var(--color-rgb-01-50), 0.{{ alpha }});
+  --color-01-primary-alpha-{{ alpha }}: rgba(var(--color-01-rgb-50), 0.{{ alpha }});
 {% endfor %}
 
   --color-01-primary-hover:     var(--color-01-primary-dark-1);
@@ -50,7 +50,7 @@
 {% for i in range(1, 10) %}
 {# @see https://chatgpt.com/share/67bcd94e-bb44-800f-bf63-06d1ae0f5096 #}
   {% set alpha = i * 10 %}
-  --color-01-secondary-alpha-{{ alpha }}: rgba(var(--color-rgb-01-80), 0.{{ alpha }});
+  --color-01-secondary-alpha-{{ alpha }}: rgba(var(--color-01-rgb-80), 0.{{ alpha }});
 {% endfor %}
 
   --color-01-secondary-button:  var(--color-01-secondary-dark-4);
@@ -92,7 +92,7 @@
 
   /* Effects */
   --color-01-light: var(--color-01-05);
-  --color-01-light-mimic-enabled: rgba(var(--color-rgb-01-05), calc(6 / 255 * 222 / 255 / 0.55));
+  --color-01-light-mimic-enabled: rgba(var(--color-01-rgb-05), calc(6 / 255 * 222 / 255 / 0.55));
   --color-01-light-border: var(--color-01-05);
   --color-01-hover: var(--color-01-05);
   --color-01-hover-opaque: var(--color-01-95);

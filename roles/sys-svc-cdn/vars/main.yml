@@ -1,14 +1,22 @@
-# CDN structure for the shared web-svc-cdn role (resolved once)
-_cdn_shared: "{{ lookup('cdn', 'web-svc-cdn') }}"
+# Base CDN root (shared across all roles)
+CDN_ROOT:         "{{ lookup('nginx','directories.data.cdn') }}"
 
-# Global CDN dirs (shared subdirs + vendor) — used by run-once setup in tasks/main.yml
-CDN_GLOBAL_DIRS:
-  - "{{ _cdn_shared.shared.root }}"
-  - "{{ _cdn_shared.shared.css }}"
-  - "{{ _cdn_shared.shared.js }}"
-  - "{{ _cdn_shared.shared.img }}"
-  - "{{ _cdn_shared.shared.fonts }}"
-  - "{{ _cdn_shared.vendor }}"
+# Default version identifier: UTC timestamp
+CDN_VERSION:      "latest" # Latest is used atm because timestamp based would just lead to an unneccessary overhead
 
-# Role-specific CDN dirs for the current application
-CDN_ROLE_DIRS: "{{ lookup('cdn', application_id).role | cdn_dirs }}"
+# Base Url to deliver the files
+CDN_BASE_URL:     "{{ lookup('tls', 'web-svc-cdn', 'url.base') }}"
+
+# Role specific CDN paths
+
+## Build CDN path structure (via filter)
+cdn_paths_all:    "{{ CDN_ROOT | cdn_paths(application_id, CDN_VERSION) }}"
+
+## Global CDN dirs
+CDN_DIRS_GLOBAL:  "{{ (cdn_paths_all.shared | cdn_dirs) + [cdn_paths_all.vendor] }}"
+
+## Flatten CDN dict to list of all string paths
+cdn_dirs_role:    "{{ cdn_paths_all.role | cdn_dirs }}"
+
+# Dictionary with all urls
+cdn_urls:         "{{ cdn_paths_all | cdn_urls(CDN_BASE_URL) }}"

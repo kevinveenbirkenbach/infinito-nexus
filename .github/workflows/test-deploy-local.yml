@@ -81,7 +81,7 @@ jobs:
           echo "apps_json=$apps"
 
   deploy:
-    name: 🚀 Deploy ${{ needs.discover.outputs.test_deploy_type }} app (${{ matrix.apps }})
+    name: 🚀 Deploy ${{ needs.discover.outputs.test_deploy_type }} app (${{ matrix.app }})
     if: needs.discover.outputs.apps != '' && needs.discover.outputs.apps != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -91,7 +91,7 @@ jobs:
       fail-fast: false
       max-parallel: 1   # immer linear
       matrix:
-        apps: ${{ fromJson(needs.discover.outputs.apps) }}
+        app: ${{ fromJson(needs.discover.outputs.apps) }}
 
     steps:
       - uses: actions/checkout@v6
@@ -105,5 +105,5 @@ jobs:
         env:
           TEST_DEPLOY_TYPE: ${{ needs.discover.outputs.test_deploy_type }}
           DISTROS: ${{ needs.discover.outputs.distros }}
-          APPS: ${{ matrix.apps }}
+          APP: ${{ matrix.app }}
         run: ./scripts/tests/deploy/ci/all.sh

@@ -6,18 +6,13 @@ compose:
       shared: true
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: false
       shared: false
       trylocal: true # Allows local login if LDAP is down
     dashboard:
       enabled: true
-      shared: true
     matomo:
-      enabled: true
-      shared: true
-    email:
       enabled: true
       shared: true
     redis:
@@ -41,7 +36,6 @@ compose:
       pids_limit:         1024
     css:
       enabled: true
-      shared: true
   volumes:
     data:           "xwiki_data"
 server:

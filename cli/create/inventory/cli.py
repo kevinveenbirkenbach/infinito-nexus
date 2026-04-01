@@ -17,7 +17,6 @@ from .host_vars import (
     apply_vars_overrides_from_file,
 )
 from .mirror_overrides import apply_mirror_overrides
-from .services_disabler import apply_services_disabled_from_env
 from .credentials_generator import generate_credentials_for_roles
 from .passwords import generate_random_password
 
@@ -316,14 +315,6 @@ def main(argv: Optional[List[str]] = None) -> int:
     if mirrors_file is not None:
         print(f"[INFO] Applying mirror overrides from: {mirrors_file}")
         apply_mirror_overrides(host_vars_file=host_vars_file, mirrors_file=mirrors_file)
-
-    # Disable services listed in SERVICES_DISABLED env var (space- or comma-separated).
-    # Also removes the provider roles from the inventory.
-    apply_services_disabled_from_env(
-        host_vars_file=host_vars_file,
-        inventory_file=inventory_file,
-        roles_dir=roles_dir,
-    )
 
     print(
         "[INFO] Done. Inventory and host_vars updated without deleting existing values."

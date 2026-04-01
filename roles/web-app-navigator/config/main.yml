@@ -31,10 +31,8 @@ compose:
       shared: false
     dashboard:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
     css:
       enabled: true
-      shared: true

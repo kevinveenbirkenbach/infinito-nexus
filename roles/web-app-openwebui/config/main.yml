@@ -20,10 +20,8 @@ compose:
       shared: false
     logout:
       enabled: true
-      shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -49,10 +47,8 @@ compose:
       enabled: false
     css:
       enabled: false
-      shared: true
     javascript:
       enabled: false
-      shared: true
     ollama:
       enabled: true
       shared: true

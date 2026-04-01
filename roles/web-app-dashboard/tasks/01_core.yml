@@ -1,4 +1,10 @@
-- include_tasks: utils/once/flag.yml
+- name: "Load brand logos role for '{{ application_id }}'"
+  include_tasks: "utils/load_app.yml"
+  vars: 
+    load_app_id: web-svc-simpleicons
+  when:
+    - run_once_web_svc_simpleicons is not defined
+    - DASHBOARD_SIMPLEICONS_ENABLED | bool
 
 - name: "Validate configuration"
   include_tasks: "02_validate.yml"
@@ -31,7 +37,7 @@
 
 - name: "Load Dashboard Brand logos"
   set_fact:
-    portfolio_cards: "{{ portfolio_cards | add_simpleicon_source(lookup('tls', 'web-svc-simpleicons', 'url.base')) }}"
+    portfolio_cards: "{{ portfolio_cards | add_simpleicon_source(domains, lookup('tls', application_id, 'protocols.web')) }}"
   when: DASHBOARD_SIMPLEICONS_ENABLED | bool
   changed_when: false
 
@@ -56,10 +62,6 @@
 - name: "Flush compose handlers"
   meta: flush_handlers
 
-- name: Refresh dashboard cards after Simple Icons becomes reachable
-  include_tasks: "04_simpleicons_refresh.yml"
-  when: DASHBOARD_SIMPLEICONS_ENABLED | bool
-
 - name: Wait for Dashboard HTTP endpoint (required so all logos can be downloaded during initialization)
   uri_retry:
     url: "http://{{ DOCKER_REACH_HOST }}:{{ http_port }}/"
@@ -68,3 +70,5 @@
   retries: 60
   delay: 5
   until: dashboard_http.status == 200
+
+- include_tasks: utils/once/flag.yml

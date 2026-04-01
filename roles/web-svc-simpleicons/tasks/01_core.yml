@@ -1,5 +1,3 @@
-- include_tasks: utils/once/flag.yml
-
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name: sys-stk-full
@@ -22,3 +20,5 @@
     - compose build
 
 - meta: flush_handlers
+
+- include_tasks: utils/once/flag.yml

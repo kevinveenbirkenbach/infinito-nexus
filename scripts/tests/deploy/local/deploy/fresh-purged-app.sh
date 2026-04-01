@@ -1,27 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Fresh-purged deploy: run exactly ONE app on ONE distro against the same stack.
+# Fresh-purged deploy: run exactly ONE app on ONE distro, twice, against the same stack.
 # Same logic as CI version, but WITHOUT destructive cleanup.
 #
 # Required env:
 #   INFINITO_DISTRO     arch|debian|ubuntu|fedora|centos
 #   INVENTORY_DIR       /etc/inventories/local-full-server
 #   TEST_DEPLOY_TYPE    server|workstation|universal
-#   APPS                web-app-*
+#   APP                 web-app-*
 #
 # Optional:
-#   FULL_CYCLE=false    Default. Deploy only (pass 1). Set to 'true' to also run the update pass (pass 2).
 #   PYTHON=python3
 #   LIMIT_HOST=localhost
 
 PYTHON="${PYTHON:-python3}"
-FULL_CYCLE="${FULL_CYCLE:-false}"
 
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (e.g. arch)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
-: "${APPS:?APPS must be set (e.g. web-app-keycloak)}"
+: "${APP:?APP must be set (e.g. web-app-keycloak)}"
 
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
 
@@ -37,7 +35,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 cd "${REPO_ROOT}"
 
-echo "=== LOCAL: distro=${INFINITO_DISTRO} type=${TEST_DEPLOY_TYPE} app=${APPS} full_cycle=${FULL_CYCLE} ==="
+echo "=== LOCAL: distro=${INFINITO_DISTRO} type=${TEST_DEPLOY_TYPE} app=${APP} (debug always on) ==="
 echo "limit_host=${LIMIT_HOST}"
 echo "inventory_dir=${INVENTORY_DIR}"
 echo
@@ -49,7 +47,7 @@ echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 
 echo ">>> Pre-cleanup shared entities (host docker context)"
 target_container="infinito_nexus_${INFINITO_DISTRO}"
-APPS='matomo' \
+APP='matomo' \
 	INFINITO_CONTAINER="${INFINITO_CONTAINER:-${target_container}}" \
 	scripts/tests/deploy/local/purge/entity.sh
 
@@ -66,33 +64,30 @@ echo ">>> Running entry.sh inside container"
 
 deploy_args=(
 	--distro "${INFINITO_DISTRO}"
-	--apps "${APPS}"
+	--app "${APP}"
 	--inventory-dir "${INVENTORY_DIR}"
 	--debug
 )
 
-run_pass() {
-	local label="$1"
-	local async_enabled="$2"
+echo ">>> PASS 1: init inventory (ASYNC_ENABLED=false)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": false}'
 
-	echo ">>> ${label}: init inventory (ASYNC_ENABLED=${async_enabled})"
-	"${PYTHON}" -m cli.deploy.development init \
-		--distro "${INFINITO_DISTRO}" \
-		--apps "${APPS}" \
-		--inventory-dir "${INVENTORY_DIR}" \
-		--vars "{\"ASYNC_ENABLED\": ${async_enabled}}"
+echo ">>> PASS 1: deploy"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
 
-	echo ">>> ${label}: deploy"
-	"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
-}
+echo ">>> PASS 2: re-init inventory (ASYNC_ENABLED=true)"
+"${PYTHON}" -m cli.deploy.development init \
+	--distro "${INFINITO_DISTRO}" \
+	--app "${APP}" \
+	--inventory-dir "${INVENTORY_DIR}" \
+	--vars '{"ASYNC_ENABLED": true}'
 
-run_pass "PASS 1" "false"
-
-if [[ "${FULL_CYCLE}" == "true" ]]; then
-	run_pass "PASS 2" "true"
-else
-	echo ">>> PASS 2 skipped (FULL_CYCLE=false)"
-fi
+echo ">>> PASS 2: deploy"
+"${PYTHON}" -m cli.deploy.development deploy "${deploy_args[@]}"
 
 echo
 echo "✅ Done (no deletion)."

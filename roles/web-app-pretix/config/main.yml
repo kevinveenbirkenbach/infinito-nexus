@@ -6,17 +6,11 @@ compose:
       shared: true
     logout:
       enabled: true
-      shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
-    email:
-      enabled: true
-      shared: true
-    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -38,7 +32,6 @@ compose:
       pids_limit:         1024
     css:
       enabled: true
-      shared: true
   volumes:
     data:           "pretix_data"
     config:         "pretix_config"
