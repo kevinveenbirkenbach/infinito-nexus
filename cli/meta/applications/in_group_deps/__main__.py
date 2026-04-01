@@ -1,48 +1,62 @@
 #!/usr/bin/env python3
-"""
-CLI wrapper for applications_if_group_and_deps filter.
-"""
+"""CLI wrapper around the shared applications in-group dependency resolver."""
+
+from __future__ import annotations
 
 import argparse
-import sys
 import os
+import sys
+
 import yaml
-from plugins.filter.applications_if_group_and_deps import FilterModule
+
+from utils.applications.in_group_deps import applications_if_group_and_all_deps
+
+__all__ = [
+    "find_role_dirs_by_app_id",
+    "main",
+]
 
 
-def find_role_dirs_by_app_id(app_ids, roles_dir):
+def _project_root() -> str:
+    script_dir = os.path.dirname(__file__)
+    return os.path.abspath(os.path.join(script_dir, "..", "..", "..", ".."))
+
+
+def find_role_dirs_by_app_id(app_ids: list[str], roles_dir: str) -> list[str]:
     """
     Map application_ids to role directory names based on vars/main.yml in each role.
     """
-    mapping = {}
+    mapping: dict[str, str] = {}
     for role in os.listdir(roles_dir):
         role_path = os.path.join(roles_dir, role)
         vars_file = os.path.join(role_path, "vars", "main.yml")
         if not os.path.isfile(vars_file):
             continue
         try:
-            with open(vars_file) as f:
-                data = yaml.safe_load(f) or {}
+            with open(vars_file, encoding="utf-8") as handle:
+                data = yaml.safe_load(handle) or {}
         except Exception:
             continue
         app_id = data.get("application_id")
         if isinstance(app_id, str) and app_id:
             mapping[app_id] = role
-    # Translate each requested app_id to role dir if exists
-    dirs = []
-    for gid in app_ids:
-        if gid in mapping:
-            dirs.append(mapping[gid])
-        else:
-            # keep original if it matches a directory
-            if os.path.isdir(os.path.join(roles_dir, gid)):
-                dirs.append(gid)
+
+    dirs: list[str] = []
+    for group_id in app_ids:
+        if group_id in mapping:
+            dirs.append(mapping[group_id])
+            continue
+        if os.path.isdir(os.path.join(roles_dir, group_id)):
+            dirs.append(group_id)
     return dirs
 
 
-def main():
+def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Filter applications by group names (role dirs or application_ids) and their recursive role dependencies."
+        description=(
+            "Filter applications by group names (role dirs or application_ids), "
+            "meta dependencies, and shared service dependencies."
+        )
     )
     parser.add_argument(
         "-a",
@@ -60,15 +74,13 @@ def main():
     )
     args = parser.parse_args()
 
-    # Load applications
     try:
-        with open(args.applications) as f:
-            data = yaml.safe_load(f)
-    except Exception as e:
-        print(f"Error loading applications file: {e}", file=sys.stderr)
-        sys.exit(1)
+        with open(args.applications, encoding="utf-8") as handle:
+            data = yaml.safe_load(handle)
+    except Exception as exc:
+        print(f"Error loading applications file: {exc}", file=sys.stderr)
+        return 1
 
-    # Unwrap under 'applications' key if present
     if (
         isinstance(data, dict)
         and "applications" in data
@@ -80,37 +92,40 @@ def main():
 
     if not isinstance(applications, dict):
         print(
-            f"Expected applications YAML to contain a mapping (or 'applications' mapping), got {type(applications).__name__}",
+            (
+                "Expected applications YAML to contain a mapping "
+                "(or 'applications' mapping), "
+                f"got {type(applications).__name__}"
+            ),
             file=sys.stderr,
         )
-        sys.exit(1)
+        return 1
 
-    # Determine roles_dir relative to project root
-    script_dir = os.path.dirname(__file__)
-    project_root = os.path.abspath(os.path.join(script_dir, "..", "..", ".."))
+    project_root = _project_root()
     roles_dir = os.path.join(project_root, "roles")
 
-    # Map user-provided groups (which may be application_ids) to role directory names
     group_dirs = find_role_dirs_by_app_id(args.groups, roles_dir)
     if not group_dirs:
         print(
             f"No matching role directories found for groups: {args.groups}",
             file=sys.stderr,
         )
-        sys.exit(1)
+        return 1
 
-    # Run filter using role directory names
     try:
-        filtered = FilterModule().applications_if_group_and_deps(
-            applications, group_dirs
+        filtered = applications_if_group_and_all_deps(
+            applications,
+            group_dirs,
+            project_root=project_root,
+            roles_dir=roles_dir,
         )
-    except Exception as e:
-        print(f"Error running filter: {e}", file=sys.stderr)
-        sys.exit(1)
+    except Exception as exc:
+        print(f"Error running resolver: {exc}", file=sys.stderr)
+        return 1
 
-    # Output result as YAML
     print(yaml.safe_dump(filtered, default_flow_style=False))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
