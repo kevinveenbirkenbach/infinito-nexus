@@ -22,8 +22,10 @@ self-describing.
       `roles/sys-utils-service-loader` runs in the constructor stage and loads all
       services (databases, `web-app-keycloak` via `provides: oidc`, etc.) before
       apps are deployed in the server stage. Apps MUST NOT declare `run_after:`
-      entries for services of a different deploy type, and MUST NOT require the user
-      to list those dependencies explicitly in `APPS`.
+      entries for services of a different deploy type. If a role declares such a
+      cross-type dependency, `roles/sys-utils-service-loader` MUST fail hard with a
+      clear error instead of ignoring it. Apps MUST NOT require the user to list
+      those dependencies explicitly in `APPS`.
 - [ ] The special `role_template: "svc-db-{type}"` database loading logic is removed;
       PostgreSQL and MariaDB are defined as regular services in their own
       `config/main.yml` (same as any other service). Because databases are a different
@@ -68,8 +70,10 @@ self-describing.
       # (svc-db-mariadb is loaded automatically before web-app-* by the service loader)
       ```
 - [ ] `frontend` / `backend` type is auto-detected from the role name prefix
-      (`web-app-*`, `web-svc-*` → frontend; everything else → backend) so the
-      `type:` field in `config/main.yml` becomes optional.
+      (`web-app-*`, `web-svc-*` → frontend; everything else → backend). The
+      `type:` field for this purpose is removed from role `config/main.yml`.
+      No legacy support is kept for role-local service metadata that still declares
+      this `type:` field.
 - [ ] `canonical` aliases are declared under `compose.services.<entity_name>.canonical`
       in the role's `config/main.yml`, where `<entity_name>` is the entity name
       returned by the existing `get_entity_name` function for that role
@@ -94,7 +98,9 @@ self-describing.
       in `config/main.yml`. When present, `roles/sys-utils-service-loader` registers
       the role under that functional name instead of the entity name returned by
       `get_entity_name`. Roles without `provides:` are registered under their entity
-      name by default. Examples:
+      name by default. `provides:` MUST only be declared when the desired functional
+      name differs from the entity name; otherwise the role MUST rely on the default
+      entity name and omit `provides:`. Examples:
       ```yaml
       # web-app-keycloak/config/main.yml
       compose:
