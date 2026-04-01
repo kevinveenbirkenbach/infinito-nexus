@@ -2,21 +2,21 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+import certifi
 import os
-import requests
 import re
-import urllib3
+
+import requests
 from ansible.errors import AnsibleFilterError
 
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
 def get_requests_verify():
-    """Reuse an explicit CA bundle when present, otherwise tolerate the local self-signed CA."""
-    return (
-        os.environ.get("REQUESTS_CA_BUNDLE") or os.environ.get("SSL_CERT_FILE") or False
-    )
+    """Return a CA bundle path for outbound HTTPS verification."""
+    for env_var in ("REQUESTS_CA_BUNDLE", "SSL_CERT_FILE", "CA_TRUST_CERT_HOST"):
+        candidate = os.environ.get(env_var, "").strip()
+        if candidate and os.path.isfile(candidate):
+            return candidate
+    return certifi.where()
 
 
 def slugify(name):
