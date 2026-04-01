@@ -4,6 +4,7 @@ Use this page when you are iterating on a local app deploy during debugging or d
 
 ## Loop
 
+- You MUST run `make test` before every deploy. Only proceed with the deploy if all tests pass.
 - Unless the user explicitly says to reuse the existing setup, you MUST start once with `APPS=<roles> make deploy-fresh-purged-apps` to establish the baseline inventory and clean app state. Set `FULL_CYCLE=true` to also run the async update pass (pass 2).
 - To speed up debugging, you MAY pass multiple apps at once, e.g. `APPS="<roles> <roles>" make deploy-fresh-purged-apps`.
 - After that, you MUST use `APPS=<roles> make deploy-reuse-kept-apps` for the default edit-fix-redeploy loop.
