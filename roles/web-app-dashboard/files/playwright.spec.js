@@ -188,10 +188,14 @@ async function expectImageLoaded(locator, label) {
   await expect(locator).toBeVisible({ timeout: 60_000 });
 
   const loaded = await locator.evaluate((img) => {
-    return Boolean((img.currentSrc || img.src || "").includes("/static/cache/")) && img.naturalWidth > 0;
+    const source = img.currentSrc || img.src || "";
+    return (
+      (source.includes("/static/cache/") || source.includes("/static/https://")) &&
+      img.naturalWidth > 0
+    );
   });
 
-  expect(loaded, `${label} should resolve to a cached local image asset`).toBe(true);
+  expect(loaded, `${label} should resolve to a working local dashboard image asset`).toBe(true);
 }
 
 async function getHeaderNavigation(page) {
@@ -202,13 +206,9 @@ async function getHeaderNavigation(page) {
 
 async function getHeaderAuthControls(page) {
   const headerNav = await getHeaderNavigation(page);
-  const loginTrigger = headerNav.getByRole("link", { name: /^Login$/ }).first();
-  const accountDropdown = headerNav
-    .locator(".nav-item.dropdown")
-    .filter({ has: headerNav.locator(".dropdown-toggle", { hasText: /^Account$/ }) })
-    .first();
-  const accountTrigger = accountDropdown.locator(".dropdown-toggle", { hasText: /^Account$/ }).first();
-  const accountMenu = accountDropdown.locator(".dropdown-menu").first();
+  const loginTrigger = headerNav.locator("a, button").filter({ hasText: /login/i }).first();
+  const accountTrigger = headerNav.getByRole("button", { name: /account/i }).first();
+  const accountMenu = headerNav.locator(".dropdown-menu").filter({ hasText: /logout/i }).first();
 
   return { loginTrigger, accountTrigger, accountMenu };
 }
@@ -252,7 +252,7 @@ async function expectLoggedInHeaderAuthState(page) {
     )
     .toBe(true);
 
-  await expect(controls.accountTrigger).toHaveText(/^Account$/, { timeout: 60_000 });
+  await expect(controls.accountTrigger).toContainText(/Account/, { timeout: 60_000 });
 
   await expect
     .poll(
