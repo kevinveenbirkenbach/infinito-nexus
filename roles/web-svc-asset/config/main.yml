@@ -7,8 +7,12 @@ server:
     aliases: []
 compose:
   services:
+    asset:
+      enabled: false
+      shared: true
     matomo:
       enabled: true
       shared: true
     css:
-      enabled: true
+      enabled: false
+      shared: false

@@ -7,13 +7,47 @@
     docker_git_repository_address:  "https://github.com/taigaio/taiga-docker"
     docker_git_repository_pull:     true
 
-- name: "copy templates {{ TAIGA_SETTING_FILES }} for taiga-contrib-oidc-auth"
+- name: "copy taiga gateway config with OIDC route"
   template:
-    src:  "taiga/{{ item }}.py.j2"
-    dest: "{{ [ lookup('container', application_id, 'directories.config'), 'taiga-' ~ item ~ '.py'] | path_join }}"
-  when:   TAIGA_TAIGAIO_ENABLED | bool
+    src:  "taiga-gateway/taiga.conf.j2"
+    dest: "{{ [docker_repository_path, 'taiga-gateway', 'taiga.conf'] | path_join }}"
+  when:   TAIGA_OIDC_ENABLED | bool
   notify: compose up
-  loop:   "{{ TAIGA_SETTING_FILES }}"
+
+- name: "render Dockerfile.taiga-back for custom auth-enabled backend image"
+  template:
+    src:  "Dockerfile.back.j2"
+    dest: "{{ [docker_repository_path, 'Dockerfile.taiga-back'] | path_join }}"
+  when:   TAIGA_PLUGINS_ENABLED | bool
+  notify: compose up
+
+- name: "render Dockerfile.taiga-front for custom OIDC frontend image"
+  template:
+    src:  "Dockerfile.front.j2"
+    dest: "{{ [docker_repository_path, 'Dockerfile.taiga-front'] | path_join }}"
+  when:   TAIGA_OIDC_ENABLED | bool
+  notify: compose up
+
+- name: "copy taiga config.append.py (OIDC and/or LDAP settings appended to config.py at runtime)"
+  template:
+    src:  "settings/config.append.py.j2"
+    dest: "{{ TAIGA_CONFIG_APPEND_PATH }}"
+  when:   TAIGA_PLUGINS_ENABLED | bool
+  notify: compose up
+
+- name: "copy taiga urls.py (OIDC URL routing)"
+  template:
+    src:  "settings/urls.py.j2"
+    dest: "{{ TAIGA_URLS_PATH }}"
+  when:   TAIGA_OIDC_ENABLED | bool
+  notify: compose up
+
+- name: "copy taiga frontend conf.json (loginFormType / contribPlugins)"
+  template:
+    src:  "settings/conf.json.j2"
+    dest: "{{ TAIGA_FRONTEND_CONF_PATH }}"
+  when:   TAIGA_PLUGINS_ENABLED | bool
+  notify: compose up
 
 - name: "create {{ TAIGA_COMPOSE_INIT_PATH }}"
   template:

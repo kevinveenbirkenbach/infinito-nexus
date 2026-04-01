@@ -6,7 +6,7 @@ import json
 import os
 from typing import Any, Dict
 
-from .common import make_compose, resolve_deploy_ids_for_app
+from .common import make_compose, resolve_deploy_ids_for_apps
 from .mirrors import generate_ci_mirrors_file, should_use_mirrors_on_ci
 from .storage import detect_storage_constrained
 from ...meta.runtime import detect_runtime
@@ -71,7 +71,14 @@ def _create_inventory(
         mirrors_file = generate_ci_mirrors_file(compose, inventory_dir=inv_root)
         cmd += ["--mirror", mirrors_file]
 
-    compose.exec(cmd, check=True, workdir="/opt/src/infinito")
+    extra_env: dict[str, str] = {}
+    services_disabled = os.environ.get("SERVICES_DISABLED", "")
+    if services_disabled:
+        extra_env["SERVICES_DISABLED"] = services_disabled
+
+    compose.exec(
+        cmd, check=True, workdir="/opt/src/infinito", extra_env=extra_env or None
+    )
     _ensure_vault_password_file(compose, inventory_dir=inv_root)
 
 
@@ -96,8 +103,8 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument(
-        "--app",
-        help="Application id (will include run_after deps automatically).",
+        "--apps",
+        help="One or more application ids (will include run_after deps automatically).",
     )
     g.add_argument(
         "--include",
@@ -127,8 +134,8 @@ def add_parser(sub: argparse._SubParsersAction) -> None:
 def handler(args: argparse.Namespace) -> int:
     compose = make_compose(distro=args.distro)
 
-    if args.app:
-        include = resolve_deploy_ids_for_app(compose, args.app)
+    if args.apps:
+        include = resolve_deploy_ids_for_apps(compose, args.apps)
     else:
         include = [x.strip() for x in (args.include or "").split(",") if x.strip()]
 

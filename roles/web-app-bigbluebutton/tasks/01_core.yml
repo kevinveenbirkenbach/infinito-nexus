@@ -67,7 +67,4 @@
 - name: "Setup administrator"
   include_tasks: "03_administrator.yml"
 
-- name: "Load '{{ application_id }}' dependencies"
-  include_tasks: "04_dependencies.yml"
-
 - include_tasks: utils/once/flag.yml

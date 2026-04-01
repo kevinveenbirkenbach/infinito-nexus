@@ -1,5 +1,3 @@
-[Back to Environment](README.md)
-
 # Development Environment Setup
 
 Use the repository's real setup flow. The main source of truth is the [Makefile](../../../Makefile).
@@ -59,7 +57,7 @@ make environment-teardown
 
 ### Full Development Flow
 
-The repository already contains a development helper script at [development.sh](../../../scripts/tests/development.sh). The commands from that file are explained here as the intended end-to-end flow.
+The repository already contains a development helper script at [environment.sh](../../../scripts/tests/environment.sh). The commands from that file are explained here as the intended end-to-end flow.
 
 #### Flow Summary
 
@@ -69,7 +67,7 @@ The repository already contains a development helper script at [development.sh](
 | 2 | `make environment-bootstrap` | Prepares the host machine for local development. |
 | 3 | `make up` | Starts the development stack. |
 | 4 | `make test` | Runs the main combined validation flow. |
-| 5 | `APP=web-app-matomo make deploy-fresh-purged-app` | Runs the baseline validation path for one concrete app. For the retry-loop policy, see [Iteration](../../agents/action/iteration.md). |
+| 5 | `APPS=web-app-matomo make deploy-fresh-purged-apps` | Runs the baseline validation path for one concrete app. For the retry-loop policy, see [Iteration](../../agents/action/iteration.md). |
 | 6 | `make trust-ca` | Makes the generated local certificates trusted by the host browser. |
 | 7 | `make down` | Stops the running development stack. |
 | 8 | `make environment-teardown` | Cleans up host-side development environment changes. |
@@ -81,4 +79,4 @@ Use this as a practical reference when you want to understand how local developm
 If you work on a machine with limited CPU, RAM, or disk space, use the guide at [Manage Low-Hardware Resources](hardware.md).
 The public article with the same topic is [Developing on PCs with Limited Resources](https://s.infinito.nexus/minpcdev).
 
-For local deploy shortcuts and end-to-end checks, see [Development](../development/README.md).
+For local deploy shortcuts and end-to-end checks, see [Development](../flow/testing.md).

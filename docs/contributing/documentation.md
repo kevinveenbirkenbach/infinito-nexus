@@ -1,37 +1,68 @@
-[Back to CONTRIBUTING hub](../../CONTRIBUTING.md)
+# Documentation 📝
 
-# Documentation
+All project documentation MUST be reachable at [docs.infinito.nexus](https://docs.infinito.nexus/).
 
-All project documentation should be reachable at [docs.infinito.nexus](https://docs.infinito.nexus/).
+## Comments 💬
 
-## Markdown
+- You SHOULD write code so it is logical and self-explanatory and usually does not need comments.
+- You MUST add code comments only when an exception, edge case, or surprising decision would otherwise confuse readers.
+- You MUST use comments to explain why something is unusual, not to restate what obvious code already does.
+- When keeping an intentionally retained outdated version pin, you MUST document the exception at the pin site with a local `TODO` comment in the file's normal comment style (`#todo`, `# TODO`, or similar) and explain why it remains pinned so the root cause stays visible until it can be fixed.
 
-- Keep core information inside the repository, either in code or in `.md` files.
-- Use `.md` files for commands, workflows, setup, and contributor guidance.
-- Do not use `.md` files to describe implementation logic that is already visible in the code.
-- Prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
+## Requirement Keywords (RFC 2119) 📋
 
-## Comments
+You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all documentation to express requirement levels unambiguously:
 
-- Write code so it is logical and self-explanatory and usually does not need comments.
-- Add code comments only when an exception, edge case, or surprising decision would otherwise confuse readers.
-- Use comments to explain why something is unusual, not to restate what obvious code already does.
-- When keeping an intentionally retained outdated version pin, document the exception at the pin site with a local `TODO` comment in the file's normal comment style (`#todo`, `# TODO`, or similar) and explain why it remains pinned so the root cause stays visible until it can be fixed.
+| Keyword | Meaning |
+|---|---|
+| `MUST` / `REQUIRED` / `SHALL` | Absolute requirement — no deviation allowed. |
+| `MUST NOT` / `SHALL NOT` | Absolute prohibition — never do this. |
+| `SHOULD` / `RECOMMENDED` | Strongly recommended — deviation requires justification. |
+| `SHOULD NOT` / `NOT RECOMMENDED` | Strongly discouraged — allowed only with justification. |
+| `MAY` / `OPTIONAL` | Permitted but not required. |
 
+## Links 🔗
 
-## Semantics and Writing
+- You MUST NOT use the full URL as link text. Use the domain name, `here`, or the filename instead — never the full path.
+- After `See`, you MUST use the domain name as link text, not `here`. `here` is only acceptable when the surrounding sentence reads naturally with it (e.g. "More information [here](...)").
+- For communication links such as Matrix, email, or phone, you MUST show only the value itself as link text, without any protocol prefix or URL wrapper.
 
-- Keep code and comments in English.
-- Fix nearby wording and semantic issues when you touch a file, and correct obvious nearby issues proactively in the same pass.
-- Use emojis when they make the text more visually appealing, improve the mood, and increase readability.
+| Type | MUST NOT | MUST |
+|---|---|---|
+| Web link | `https://docs.infinito.nexus/setup` | `docs.infinito.nexus`, `here`, a descriptive label, or `setup.md` |
+| File link | `docs/contributing/flow/workflow.md` | `workflow.md` or `Contribution Flow` |
+| Email | `mailto:hello@infinito.nexus` | `hello@infinito.nexus` |
+| Matrix | `https://matrix.to/#/@user:infinito.nexus` | `@user:infinito.nexus` |
+| Phone | `tel:+491234567890` | `+49 123 456 7890` |
 
-## Documentation Structure
+## Semantics and Writing ✍️
+
+- You MUST keep code and comments in English.
+- You MUST fix nearby wording and semantic issues when you touch a file, and correct obvious nearby issues proactively in the same pass.
+- You SHOULD use emojis when they make the text more visually appealing, improve the mood, and increase readability.
+
+## Headlines 🏷️
+
+- You SHOULD place emojis after the headline text to visually highlight headings and improve scannability.
+- You MUST NOT place emojis before the headline text, as this interferes with heading hierarchy rendering in some tools.
+
+## Documentation Structure 🗂️
 
 ### Markdown
-
-- Prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
+- You SHOULD prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
+- You MUST NOT place `README.md` files under `docs/`.
+  Documentation files MUST be cross-linked to each other directly instead.
+  All content under `docs/` is automatically indexed via the root `index.rst` toctree glob (`docs/**`) — per-directory index files are usually not needed.
+- You MUST keep core information inside the repository, either in code or in `.md` files.
+- You MUST use `.md` files for commands, workflows, setup, and contributor guidance.
+- You MUST NOT use `.md` files to describe implementation logic that is already visible in the code.
 
 ### Sphinx
 
-- If a documentation directory does not already have a `README.md`, add an `index.rst` where it helps automated docs generation.
-- Keep Sphinx-friendly directory indexes up to date so the published documentation can include new content without extra wiring.
+- The root `index.rst` uses a `:glob:` toctree (`docs/**`) to automatically include every documentation page.
+- Sphinx indexing SHOULD happen automatically through that root `:glob:` toctree.
+- You SHOULD avoid creating or maintaining manual per-directory indexes when automatic indexing already covers the same pages.
+  An additional `index.rst` inside a `docs/` subdirectory is NOT RECOMMENDED because the root index already covers those pages automatically, but it MAY be added when a focused local entry point materially improves navigation.
+  If such a local `index.rst` is added, it SHOULD stay minimal and MUST NOT duplicate a manually curated page inventory that the automatic index already provides.
+  You MUST NOT add a `README.md` inside any `docs/` subdirectory.
+- You MUST keep cross-links between `.md` files up to date so readers can navigate between related pages.

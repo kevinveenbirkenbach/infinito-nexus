@@ -10,11 +10,13 @@ compose:
       shared: false
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
     css:
       enabled: true
+      shared: true
     roulette-wheel:
       min_storage:        "1GB"
       cpus:               0.5

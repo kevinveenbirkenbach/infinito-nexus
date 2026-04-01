@@ -48,14 +48,20 @@ compose:
       enabled:  true 
     logout:
       enabled: true
+      shared: true
     ldap:
       enabled: true
       shared: true
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
+    email:
+      enabled: true
+      shared: true
+    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -126,6 +132,9 @@ compose:
     onlyoffice:
       enabled: true
       shared: true
+    collabora:
+      enabled: false
+      shared: false
     talk_recording:
       name:                 "nextcloud-talk-recording"
       image:                "nextcloud/aio-talk-recording"
@@ -138,6 +147,7 @@ compose:
       pids_limit:           1024
     css:
       enabled: false
+      shared: true
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
   enabled:  "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True) }}"   # Activate OIDC for Nextcloud

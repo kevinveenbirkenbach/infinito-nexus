@@ -14,6 +14,7 @@ compose:
 
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
@@ -26,10 +27,12 @@ compose:
       enabled:      false   # Enable the database
     css:
       enabled: true
+      shared: true
     recaptcha:
       enabled: false
     javascript:
       enabled: false
+      shared: true
 server:
   csp:
     whitelist:        {}      # URL's which should be whitelisted

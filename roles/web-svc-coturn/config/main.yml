@@ -26,3 +26,4 @@ compose:
       enabled:            false
     css:
       enabled: true
+      shared: true

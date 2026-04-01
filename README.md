@@ -55,24 +55,31 @@
 
 Try [Infinito.Nexus](https://infinito.nexus) – sign up in seconds, explore the platform, and discover what our solution can do for you! 🚀🔧✨
 
-## Guides
+## Guides 📚
 
 - [Installation Guide](docs/guides/installation.md) for local CLI installation, Docker execution, and source builds.
 - [Administration Guide](docs/guides/administration.md) for inventory creation, full deploys, and redeploy flows.
 
-## Contributing
+## Contributing 🔨
 
 For the full development setup, contribution workflow, testing, and coding standards, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
----
+## Invest 💹
 
-## License ⚖️
+We are actively looking for investors to help scale Infinito.Nexus and bring open, self-hosted infrastructure to more organizations worldwide. If you are interested in investing or partnering with us, please reach out via our [Investor Relations](SUPPORT.md#investor-relations) contact.
 
-Infinito.Nexus is distributed under the **Infinito.Nexus Community License (Non-Commercial)**. Please see [LICENSE.md](LICENSE.md) for full terms.
+## Code of Conduct 🕊️
 
----
+We are committed to fostering an open and welcoming environment. Please read our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) to understand the standards we expect from all participants in our community.
+
+## Security 🛡️
+
+For security reporting and disclosure, see [SECURITY.md](SECURITY.md).
 
 ## Support and Contact 💼
 
 For expert installation, contact details, and project participation, see [SUPPORT.md](SUPPORT.md).
-For security reporting and disclosure, see [SECURITY.md](SECURITY.md).
+
+## License ⚖️
+
+Infinito.Nexus is distributed under the **Infinito.Nexus Community License (Non-Commercial)**. Please see [LICENSE.md](LICENSE.md) for full terms.

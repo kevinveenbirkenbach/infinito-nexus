@@ -1,5 +1,13 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 
+{% set TAIGA_BACKEND_AUTH_BUILD_PROPS -%}
+build:
+  context: "{{ docker_repository_path }}"
+  dockerfile: Dockerfile.taiga-back
+image: "{{ TAIGA_DOCKER_IMAGE_BACKEND_AUTH }}"
+pull_policy: never
+{%- endset %}
+
 {% set service_name = TAIGA_SERVICE %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}
@@ -11,14 +19,23 @@
       timeout: 5s
       retries: 5
       start_period: 40s
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+{{ TAIGA_BACKEND_AUTH_BUILD_PROPS | indent(4, true) }}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "if ! grep -qF {{ TAIGA_CONFIG_APPEND_MARKER | quote }} /taiga-back/settings/config.py; then cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py; fi; exec /taiga-back/docker/entrypoint.sh"
+{% else %}
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
+{% endif %}
     volumes:
       # These volumens will be used by taiga-back and taiga-async.
       - static-data:{{ TAIGA_VOLUME_STATIC }}
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
-      # - ./config.py:/taiga-back/settings/config.py
-{% if TAIGA_TAIGAIO_ENABLED | bool %}
-      - {{ [lookup('container', application_id, 'directories.config'),'taiga-local.py' ] | path_join }}:/taiga-back/settings/local.py:ro
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+      - {{ TAIGA_CONFIG_APPEND_PATH }}:/taiga-back/settings/config.append.py
+{% endif %}
+{% if TAIGA_OIDC_ENABLED | bool %}
+      - {{ TAIGA_URLS_PATH }}:/taiga-back/settings/urls.py
 {% endif %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
@@ -27,12 +44,6 @@
         condition: service_started
       {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
         condition: service_started
-{% if TAIGA_TAIGAIO_ENABLED | bool %}
-    command: >
-      /bin/sh -c "
-        pip install taiga-contrib-oidc-auth &&
-        /taiga-back/docker/entrypoint.sh"
-{% endif %}
 
 {% set service_name = TAIGA_ASYNC_SERVICE %}
   {{ service_name }}:
@@ -44,17 +55,24 @@
       timeout: 5s
       retries: 5
       start_period: 60s
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+{{ TAIGA_BACKEND_AUTH_BUILD_PROPS | indent(4, true) }}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - "if ! grep -qF {{ TAIGA_CONFIG_APPEND_MARKER | quote }} /taiga-back/settings/config.py; then cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py; fi; exec /taiga-back/docker/async_entrypoint.sh"
+{% else %}
     image: "{{ TAIGA_DOCKER_IMAGE_BACKEND }}:{{ TAIGA_VERSION }}"
     entrypoint: ["/taiga-back/docker/async_entrypoint.sh"]
+{% endif %}
     volumes:
       # These volumens will be used by backend and async service
       - static-data:{{ TAIGA_VOLUME_STATIC }}
       - media-data:{{ TAIGA_VOLUME_MEDIA }}
-      # - ./config.py:/taiga-back/settings/config.py
-{% if TAIGA_TAIGAIO_ENABLED | bool %}
-{% for item in TAIGA_SETTING_FILES %}
-      - {{ lookup('container', application_id, 'directories.config') }}taiga-{{ item }}.py:/taiga-back/settings/{{ item }}.py:ro
-{% endfor %}
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+      - {{ TAIGA_CONFIG_APPEND_PATH }}:/taiga-back/settings/config.append.py
+{% endif %}
+{% if TAIGA_OIDC_ENABLED | bool %}
+      - {{ TAIGA_URLS_PATH }}:/taiga-back/settings/urls.py
 {% endif %}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
@@ -63,12 +81,6 @@
         condition: service_started
       {{ TAIGA_ASYNC_RABBITMQ_SERVICE }}:
         condition: service_started
-{% if TAIGA_TAIGAIO_ENABLED | bool %}
-    command: >
-      /bin/sh -c "
-        pip install taiga-contrib-oidc-auth &&
-        /taiga-back/docker/entrypoint.sh"
-{% endif %}
 
 {% set service_name = TAIGA_ASYNC_RABBITMQ_SERVICE %}
   {{ service_name }}:
@@ -91,7 +103,15 @@
 {% set container_port = 80 %}
   {{ service_name }}:
     container_name: {{ TAIGA_CONTAINER }}-{{ service_name }}
-    image: "{{TAIGA_DOCKER_IMAGE_FRONTEND}}:{{ TAIGA_VERSION }}"
+{% if TAIGA_OIDC_ENABLED | bool %}
+    build:
+      context: "{{ docker_repository_path }}"
+      dockerfile: Dockerfile.taiga-front
+    image: "{{ TAIGA_DOCKER_IMAGE_FRONTEND_OIDC }}"
+    pull_policy: never
+{% else %}
+    image: "{{ TAIGA_DOCKER_IMAGE_FRONTEND }}:{{ TAIGA_VERSION }}"
+{% endif %}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
 {% filter indent(4) %}
     {% include 'roles/sys-svc-container/templates/healthcheck/http.yml.j2' %}
@@ -99,8 +119,10 @@
 
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
       taiga:
-#    volumes:
-#      - {{ TAIGA_FRONTEND_CONF_PATH }}:/usr/share/nginx/html/conf.json:ro
+{% if TAIGA_PLUGINS_ENABLED | bool %}
+    volumes:
+      - {{ TAIGA_FRONTEND_CONF_PATH }}:/usr/share/nginx/html/conf.json:ro
+{% endif %}
 
 {% set service_name = TAIGA_EVENTS_SERVICE %}
   {{ service_name }}:
@@ -174,7 +196,7 @@
       - {{ TAIGA_EVENTS_SERVICE }}
 {{ applications | compose_volumes(
     application_id,
-    database_volume=lookup('database', application_id, 'volume'),
+    database_volume=TAIGA_DATABASE_VOLUME,
     extra_volumes={'async-rabbitmq-data': {}, 'events-rabbitmq-data': {}, 'media-data': {}, 'static-data': {}}
 ) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

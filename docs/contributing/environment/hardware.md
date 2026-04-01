@@ -1,5 +1,3 @@
-[Back to Environment](README.md)
-
 # Manage Low-Hardware Resources
 
 Use this guide when you work on a machine with limited CPU, RAM, or disk.
@@ -10,12 +8,12 @@ A practical long-term target is:
 
 - 64 GB RAM
 - a swapfile about the same size as RAM
-- an external SSD with more than 500 GB
+- an external SSD with more than 500 GB if your computer does not have sufficient storage space
 - enough room for Docker images, volumes, build cache, and local repositories
 
-If disk space is tight, move Docker data, caches, and your working directory to the SSD.
+If disk space is tight, you SHOULD move Docker data, caches, and your working directory to the SSD.
 
-On Linux, you can move Docker to a different data path:
+On Linux, you MAY move Docker to a different data path:
 
 ```json
 {
@@ -29,94 +27,95 @@ Then restart Docker:
 sudo systemctl restart docker
 ```
 
-Make sure the mount is available before Docker starts. Otherwise the daemon may fall back to the system drive or fail to start cleanly.
+The mount MUST be available before Docker starts. Otherwise the daemon may fall back to the system drive or fail to start cleanly.
 
-On macOS and Windows, use Docker Desktop settings instead of `daemon.json`.
+On macOS and Windows, you MUST use Docker Desktop settings instead of `daemon.json`.
 
-A same-size swapfile helps absorb memory spikes on Linux. On Windows and macOS, keep enough free disk space available for virtual memory and local caches.
+A same-size swapfile helps absorb memory spikes on Linux. On Windows and macOS, you SHOULD keep enough free disk space available for virtual memory and local caches.
 
 ## Load Only What You Need
 
-For a broad stack like the Community Hub, start only the services you actually need. If you are working on Discourse, you do not need Mastodon, Pixelfed, PeerTube, or Friendica in the same session.
+For a broad stack like the Community Hub, you SHOULD start only the services you actually need. If you are working on Discourse, you do not need Mastodon, Pixelfed, PeerTube, or Friendica in the same session.
 
-The main lever is each role's `config/main.yml`, where Compose services are enabled or disabled:
+You MAY set the `SERVICES_DISABLED` environment variable before creating the inventory to disable services automatically across all applications without editing any file:
 
-- use `enabled: true` only for services you actually need
-- set `enabled: false` for optional services
-- for shared services, also set `shared: false` if they are not needed
-
-Example of a slim local Discourse configuration:
-
-```yaml
-compose:
-  services:
-    discourse:
-      enabled: true
-    database:
-      enabled: true
-      shared: true
-      type: "postgres"
-    redis:
-      enabled: true
-    oidc:
-      enabled: false
-      shared: false
-    logout:
-      enabled: false
-    ldap:
-      enabled: false
-      shared: false
-    dashboard:
-      enabled: false
-    matomo:
-      enabled: false
-      shared: false
-    css:
-      enabled: false
+```bash
+SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS=web-app-discourse
 ```
 
-This is a development profile, not a production target. Enable SSO, LDAP, or analytics only when you need them.
+This sets `enabled: false` and `shared: false` for every listed service in the generated inventory. See [variables.md](variables.md) for details.
+
+| Service | Optional | What it provides | Effect of disabling | Safe to disable when |
+|---|---|---|---|---|
+| `matomo` | 🟢 | Analytics tracking | No usage statistics collected — usually no functional impact | You are not testing analytics integration |
+| `oidc` | 🟠 | Single sign-on via Keycloak | App falls back to local login | You are not testing SSO/OIDC flows |
+| `ldap` | 🟠 | Central user directory via OpenLDAP | App uses its own local user store | You are not testing LDAP/user sync |
+| `css` | 🟠 | Custom theming/branding stylesheet | App uses its default upstream theme | You are not testing visual customization |
+| `logout` | 🟠 | Shared logout endpoint across apps | Single sign-out does not propagate | You are not testing cross-app logout |
+| `dashboard` | 🟠 | Central navigation hub | App is not reachable via the dashboard | You access the app directly by URL |
+| `redis` | 🔴 | In-memory cache and session store | Caching and queuing are disabled | The app does not require sessions or queues (rarely safe) |
+| `database` | 🔴 | Shared relational database (MariaDB/Postgres) | App cannot persist data | **Never disable** — required by almost every app |
+
+**Legend:**
+
+- 🟢 Safe to disable — usually no functional impact.
+- 🟠 Optional — can be disabled, reduces functionality.
+- 🔴 Required — MUST NOT be disabled.
+
+This is a development profile, not a production target.
+
+When running Playwright tests, you SHOULD only disable `matomo`. All other services (🟠) are REQUIRED for full end-to-end scenario coverage — disabling them will cause Playwright tests that depend on SSO, LDAP, theming, or logout flows to fail or produce incomplete results.
 
 ## Test Smarter
 
-On small machines, limit validation to the role you are touching.
+On small machines, you SHOULD limit validation to the role you are touching.
 
 For Discourse, start with:
 
 ```bash
-APP=web-app-discourse make deploy-fresh-purged-app
+SERVICES_DISABLED="matomo" APPS=web-app-discourse make deploy-fresh-purged-apps
 ```
 
-If the local inventory and stack already exist, reuse them:
+If the local inventory and stack already exist, you SHOULD reuse them:
 
 ```bash
-APP=web-app-discourse make deploy-reuse-kept-app
+SERVICES_DISABLED="matomo" APPS=web-app-discourse make deploy-reuse-kept-apps
 ```
 
-Use `make deploy-fresh-kept-all` only when you need broad coverage and have enough time and resources.
+You SHOULD use `make deploy-fresh-kept-all` only when you need broad coverage and have enough time and resources.
 
 ## Measure Before You Delete
 
-Before cleaning up, check what is actually consuming space:
+You SHOULD check what is actually consuming space before cleaning up:
 
 ```bash
-docker system df
-docker ps -a
-docker images
-journalctl --disk-usage
-df -h
+make system-disk-usage
 ```
 
 That makes it easier to see whether the real issue is Docker, journald, a package cache, or project state.
 
 ## Cleanup
 
-The cleanup SPOT is [scripts/system/purge/README.md](../../../scripts/system/purge/README.md). Use that page for the canonical entry points.
+Run the full cleanup pass to free disk and memory:
 
-For the one-time Windows `cleanmgr /sageset:1` setup, set `PURGE_WINDOWS_CLEANMGR_SETUP=true` before you run `make purge-system`.
+```bash
+make system-purge
+```
 
-For related local helpers, see [scripts/tests/deploy/local/purge/README.md](../../../scripts/tests/deploy/local/purge/README.md) and [scripts/tests/deploy/local/reset/README.md](../../../scripts/tests/deploy/local/reset/README.md).
+On WSL2 or Windows, you MUST pass the additional flag to also configure and run the Windows Disk Cleanup profile.
+Windows manages its own system caches independently from Linux and Docker:
 
-## Further Reading
+```bash
+PURGE_WINDOWS_CLEANMGR_SETUP=true make system-purge
+```
 
-For the full public article, see [Developing on PCs with Limited Resources](https://s.infinito.nexus/minpcdev).
+### Further Information
+
+- [Purge guide](../../../scripts/system/purge/README.md) — canonical entry points for cleanup
+- [Local purge guide](../../../scripts/tests/deploy/local/purge/README.md) — local deploy cleanup helpers
+- [Local reset guide](../../../scripts/tests/deploy/local/reset/README.md) — local state reset helpers
+- [Makefile commands](../tools/makefile.md) — all available make targets
+
+## Discussion
+
+Discuss this topic in the related [forum article](https://s.infinito.nexus/minpcdev).

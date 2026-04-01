@@ -33,7 +33,11 @@ compose:
           full:     86400
     dashboard:
       enabled: true
+      shared: true
     matomo:
+      enabled: true
+      shared: true
+    email:
       enabled: true
       shared: true
     keycloak:
@@ -56,6 +60,7 @@ compose:
       enabled:          true
     css:
       enabled: true
+      shared: true
     recaptcha:
       enabled: "{{ RECAPTCHA_ENABLED | bool }}"
 credentials:
