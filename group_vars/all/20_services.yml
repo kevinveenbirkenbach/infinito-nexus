@@ -20,6 +20,10 @@ SERVICE_REGISTRY:
     role: web-app-matomo
     type: frontend
 
+  file:
+    role: web-svc-file
+    type: frontend
+
   asset:
     role: web-svc-asset
     type: frontend

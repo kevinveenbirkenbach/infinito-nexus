@@ -9,12 +9,12 @@ defaults_service_provider:
       city:         "Cybertown"
       postal_code:  "00001"
       country:      "Nexusland"
-    logo:           "{{ lookup('tls', 'web-svc-file', 'url.base') ~ 'assets/img/logo.png' }}"
+    logo:           "{{ lookup('config', 'web-svc-asset', 'url') ~ '/img/logo.png' }}"
   platform:    
     titel:          "{{ SOFTWARE_NAME }}"
     subtitel:       "One login. Infinite Solutions."
-    logo:           "{{ lookup('tls', 'web-svc-file', 'url.base') ~ 'assets/img/logo.png' }}"
-    favicon:        "{{ lookup('tls', 'web-svc-file', 'url.base') ~ 'assets/img/favicon.ico' }}"
+    logo:           "{{ lookup('config', 'web-svc-asset', 'url') ~ '/img/logo.png' }}"
+    favicon:        "{{ lookup('config', 'web-svc-asset', 'url') ~ '/img/favicon.ico' }}"
   contact:
     web-app-bluesky: >-
       {{ ('@' ~ users.contact.username ~ '.' ~ domains['web-app-bluesky'].api)

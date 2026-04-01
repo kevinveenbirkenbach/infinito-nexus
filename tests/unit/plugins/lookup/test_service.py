@@ -174,11 +174,8 @@ class TestServiceBidirectionalMapping(unittest.TestCase):
 class TestServiceTransitive(unittest.TestCase):
     """Transitive resolution via enabled service dependencies.
 
-    Transitive resolution requires the service key in compose.services to match
-    an application ID in the applications dict exactly.  Short keys
-    (e.g. 'collab') do NOT resolve transitively because they don't match the
-    application ID 'web-svc-collab'.  Using the full application ID as the
-    service key ('web-svc-collab') enables the recursive path.
+    Transitive resolution follows SERVICE_REGISTRY so short service keys recurse
+    via their provider role ids instead of requiring full application ids.
     """
 
     def setUp(self):
@@ -215,9 +212,7 @@ class TestServiceTransitive(unittest.TestCase):
         r = _run(["logout"], self.applications, ["web-app-nextcloud"])[0]
         self.assertFalse(r["needed"])
 
-    def test_short_key_does_not_resolve_transitively(self):
-        # Using short key 'collab' instead of 'web-svc-collab' — no match
-        # in applications dict, so matomo is NOT found transitively.
+    def test_short_key_resolves_transitively_via_registry_role(self):
         service_registry = dict(_SERVICE_REGISTRY)
         service_registry["collab"] = {"role": "web-svc-collab", "type": "frontend"}
         applications = {
@@ -234,7 +229,27 @@ class TestServiceTransitive(unittest.TestCase):
             ["web-app-nextcloud"],
             service_registry=service_registry,
         )[0]
-        self.assertFalse(r["needed"])
+        self.assertTrue(r["needed"])
+
+    def test_role_template_resolves_transitively_via_service_type(self):
+        applications = {
+            "web-app-nextcloud": {
+                "compose": {
+                    "services": {
+                        "database": {"enabled": True, "type": "mariadb"},
+                    }
+                }
+            },
+            "svc-db-mariadb": {
+                "compose": {
+                    "services": {
+                        "logout": {"enabled": True, "shared": True},
+                    }
+                }
+            },
+        }
+        r = _run(["logout"], applications, ["web-app-nextcloud"])[0]
+        self.assertTrue(r["needed"])
 
     def test_transitive_requires_shared_at_target(self):
         # If matomo is enabled but not shared at web-svc-collab, needed stays False

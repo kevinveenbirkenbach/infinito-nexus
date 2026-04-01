@@ -47,8 +47,47 @@ def _get_enabled_service_keys(
     ]
 
 
+def _resolve_service_provider_app_id(
+    applications: Dict[str, Any],
+    service_registry: Dict[str, Any],
+    app_id: str,
+    service_key: str,
+) -> Optional[str]:
+    """Resolve a service key to the provider role/application id.
+
+    Transitive service recursion must follow SERVICE_REGISTRY so short keys such
+    as ``asset`` recurse into ``web-svc-asset`` instead of requiring callers to
+    use full application ids inside compose.services.
+    """
+    entry = service_registry.get(service_key)
+    if not isinstance(entry, dict):
+        return None
+
+    role = entry.get("role")
+    if isinstance(role, str) and role:
+        return role
+
+    role_template = entry.get("role_template")
+    if not isinstance(role_template, str) or not role_template:
+        return None
+
+    service_type = get_app_conf(
+        applications=applications,
+        application_id=app_id,
+        config_path=f"compose.services.{service_key}.type",
+        strict=False,
+        default="",
+        skip_missing_app=True,
+    )
+    if not isinstance(service_type, str) or not service_type:
+        return None
+
+    return role_template.replace("{type}", service_type)
+
+
 def _is_service_needed(
     applications: Dict[str, Any],
+    service_registry: Dict[str, Any],
     app_id: str,
     service_key: str,
     visited: Set[str],
@@ -70,8 +109,13 @@ def _is_service_needed(
     for svc in _get_enabled_service_keys(applications, app_id):
         if svc == service_key:
             continue
-        if svc in applications:
-            if _is_service_needed(applications, svc, service_key, visited):
+        dep_app_id = _resolve_service_provider_app_id(
+            applications, service_registry, app_id, svc
+        )
+        if dep_app_id and dep_app_id in applications:
+            if _is_service_needed(
+                applications, service_registry, dep_app_id, service_key, visited
+            ):
                 return True
 
     return False
@@ -123,6 +167,7 @@ def _resolve_term(
 def _compute_flags(
     applications: Dict[str, Any],
     group_names: List[str],
+    service_registry: Dict[str, Any],
     service_key: str,
 ) -> Dict[str, bool]:
     deployed = [app_id for app_id in group_names if app_id in applications]
@@ -135,7 +180,7 @@ def _compute_flags(
         for app_id in deployed
     )
     any_needed = any(
-        _is_service_needed(applications, app_id, service_key, set())
+        _is_service_needed(applications, service_registry, app_id, service_key, set())
         for app_id in deployed
     )
     return {"enabled": any_enabled, "shared": any_shared, "needed": any_needed}
@@ -201,7 +246,9 @@ class LookupModule(LookupBase):
                 raise AnsibleError("service: service key/role must not be empty")
 
             service_key, role = _resolve_term(term_str, service_registry, role_to_key)
-            flags = _compute_flags(applications, group_names, service_key)
+            flags = _compute_flags(
+                applications, group_names, service_registry, service_key
+            )
             results.append({"id": service_key, "role": role, **flags})
 
         return results
