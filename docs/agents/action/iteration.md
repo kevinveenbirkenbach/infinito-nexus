@@ -11,6 +11,7 @@ Use this page when you are iterating on a local app deploy during debugging or d
 - If the same failure still reproduces on the reuse path and you want to test whether app entity state is involved, use `APPS=<roles> make deploy-reuse-purged-apps` once.
 - After that targeted purge check, you MUST return to `APPS=<roles> make deploy-reuse-kept-apps`.
 - Only go back to `APPS=<roles> make deploy-fresh-purged-apps` if you have concrete evidence that the inventory or host stack is broken, or you intentionally need a fresh single-app baseline again.
+- Network or DNS failures during a local deploy count as concrete evidence that the host stack is broken. In that case, the next retry MUST be `APPS=<roles> make deploy-fresh-purged-apps` so the container stack is re-initialized.
 - If you need to validate the single-app init/deploy path separately, use `APPS=<roles> make deploy-fresh-kept-apps`. It checks the clean single-app setup apart from the faster reuse path.
 
 ## Workflow Loop
