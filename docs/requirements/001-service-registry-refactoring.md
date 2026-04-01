@@ -151,6 +151,11 @@ self-describing.
       - Correct load order produced by `sys-utils-service-loader`
       - `get_entity_name` derivation for all relevant role name prefixes
       - `run_after:` ordering within the same deploy type
+- [ ] Every file and role that is modified as part of this refactoring MUST also be
+      simplified and refactored where possible, following the principles in
+      [principles.md](../contributing/code/principles.md). Do not limit changes to
+      the minimum required — use the mandatory touch as an opportunity to improve
+      clarity, reduce duplication, and remove dead code in the same pass.
 - [ ] All existing integration and unit tests pass after the refactoring.
 - [ ] Once all other Acceptance Criteria are checked off and the full validation
       app set deploys successfully, `docs/contributing/code/services.md` MUST be
