@@ -13,7 +13,7 @@
       - "{{ PIXELFED_CONTAINER }}"
       - sh
       - -lc
-      - ps -ef | grep -v grep | grep -q "apache2 -DFOREGROUND"
+      - 'ps -ef | grep -v grep | grep -q "apache2 -DFOREGROUND"'
   args:
     chdir: "{{ PIXELFED_INSTANCE_DIR }}"
   register: pixelfed_entrypoint_bootstrap
