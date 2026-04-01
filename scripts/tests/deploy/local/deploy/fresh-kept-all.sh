@@ -13,7 +13,6 @@ cd "${REPO_ROOT}"
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set (arch|debian|ubuntu|fedora|centos)}"
 : "${TEST_DEPLOY_TYPE:?TEST_DEPLOY_TYPE must be set (server|workstation|universal)}"
 : "${INVENTORY_DIR:?INVENTORY_DIR must be set (e.g. /etc/inventories/local-full-server)}"
-: "${INVENTORY_FILE:?INVENTORY_FILE is not set — source scripts/meta/env/inventory.sh first}"
 
 # Optional overrides
 LIMIT_HOST="${LIMIT_HOST:-localhost}"
@@ -21,6 +20,7 @@ WHITELIST="${WHITELIST:-}"
 
 # This script always generates inventories for the development compose stack.
 RUNTIME_VARS_JSON='{"RUNTIME":"dev"}'
+inv_file="${INVENTORY_DIR}/devices.yml"
 
 echo "=== local full deploy (development compose stack) ==="
 echo "distro        = ${INFINITO_DISTRO}"
@@ -112,7 +112,7 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
     ./scripts/docker/entry.sh true
 
     inv_dir='${INVENTORY_DIR}'
-    INVENTORY_FILE='${INVENTORY_FILE}'
+    inv_file='${inv_file}'
     pw_file=\"\${inv_dir}/.password\"
 
     mkdir -p \"\${inv_dir}\"
@@ -122,20 +122,20 @@ echo ">>> Running entry/init + inventory + deploy inside infinito container via 
       chmod 600 \"\${pw_file}\" || true
     fi
 
-    echo \">>> Creating inventory at \${INVENTORY_FILE}\"
+    echo \">>> Creating inventory at \${inv_file}\"
     echo \">>> Include apps (${apps_count}): ${apps_csv}\"
 
     infinito create inventory \"\${inv_dir}\" \
-      --inventory-file \"\${INVENTORY_FILE}\" \
+      --inventory-file \"\${inv_file}\" \
       --host '${LIMIT_HOST}' \
       --ssl-disabled \
       --vars '${RUNTIME_VARS_JSON}' \
       --vars-file inventories/dev.yml \
       --include '${apps_csv}'
 
-    echo \">>> Deploying against \${INVENTORY_FILE}\"
+    echo \">>> Deploying against \${inv_file}\"
 
-    infinito deploy dedicated \"\${INVENTORY_FILE}\" \
+    infinito deploy dedicated \"\${inv_file}\" \
       --skip-backup \
       --debug \
       --log /opt/src/infinito/logs \

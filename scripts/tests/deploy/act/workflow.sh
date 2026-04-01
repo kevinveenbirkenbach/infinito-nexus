@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${ACT_WORKFLOW:?ACT_WORKFLOW is not set (e.g. .github/workflows/test-environment.yml)}"
+: "${ACT_WORKFLOW:?ACT_WORKFLOW is not set (e.g. .github/workflows/test-development.yml)}"
 : "${ACT_EVENT:=workflow_dispatch}"
 : "${ACT_JOB:=}"
 : "${ACT_MATRIX:=}"

@@ -6,8 +6,7 @@ usage() {
 Usage:
   system.sh [--help]
 
-Runs the repository's full cleanup pass used by make system-purge.
-Includes git state, Docker, host caches, and Windows cleanup.
+Runs the repository's broad low-hardware cleanup pass used by make purge-system.
 
 The routine is best-effort:
 - skips commands that are not available on the current host
@@ -108,12 +107,25 @@ run_root_step() {
 }
 
 purge_git_state() {
-	if ! command_exists git || ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-		warn "Repository cleanup skipped: not inside a git repository"
+	if command_exists make && [[ -f "Makefile" ]]; then
+		if command_exists sudo; then
+			run_step "Cleaning ignored Git files with sudo" make clean-sudo
+		else
+			run_step "Cleaning ignored Git files" make clean
+		fi
 		return 0
 	fi
 
-	run_step "Cleaning ignored Git files" git clean -fdX
+	if command_exists git && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+		if [[ "${EUID}" -eq 0 ]] || command_exists sudo; then
+			run_root_step "Cleaning ignored Git files" git clean -fdX
+		else
+			run_step "Cleaning ignored Git files" git clean -fdX
+		fi
+		return 0
+	fi
+
+	warn "Repository cleanup skipped: Makefile or git repository not available"
 }
 
 purge_docker() {
@@ -129,6 +141,7 @@ purge_docker() {
 	run_step "Pruning Docker volumes" docker volume prune -f
 	run_step "Pruning Docker networks" docker network prune -f
 	run_step "Pruning Docker builder cache" docker builder prune -a -f
+	run_step "Pruning Docker contexts" docker context prune -f
 
 	if docker buildx version >/dev/null 2>&1; then
 		run_step "Pruning Docker Buildx cache" docker buildx prune -a -f

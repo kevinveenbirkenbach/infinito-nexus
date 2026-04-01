@@ -16,32 +16,23 @@ server:
     aliases: []
 compose:
   services:
-    asset:
-      enabled: true
-      shared: true
     oidc:
       enabled: true
       shared: true
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: false
       shared:  false
     dashboard:
       enabled: true
-      shared: true
     matomo:
-      enabled: true
-      shared: true
-    email:
       enabled: true
       shared: true
     database:
       shared: true
       type: "postgres"
       enabled: true
-    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -56,7 +47,6 @@ compose:
       repository:         "https://github.com/discourse/discourse_docker.git"
     css:
       enabled: true
-      shared: true
   volumes: 
     data:   discourse_data
   network:  discourse

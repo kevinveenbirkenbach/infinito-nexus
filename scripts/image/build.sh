@@ -11,14 +11,14 @@ VARIANT="full" # full | slim
 
 # Keep --target for advanced usage, but default is derived from VARIANT.
 TARGET=""
-IMAGE_TAG="${IMAGE_TAG:-}" # local image name or base tag (without registry); can be pre-set via env
-PUSH=0                     # if 1 -> use buildx and push (requires docker buildx)
-PUBLISH=0                  # if 1 -> push with semantic tags (latest/version/stable + aliases)
-REGISTRY=""                # e.g. ghcr.io
-OWNER=""                   # e.g. github org/user
-REPO_PREFIX=""             # image repository name
-VERSION=""                 # X.Y.Z (required for --publish)
-IS_STABLE="false"          # "true" -> publish stable tags
+IMAGE_TAG=""      # local image name or base tag (without registry)
+PUSH=0            # if 1 -> use buildx and push (requires docker buildx)
+PUBLISH=0         # if 1 -> push with semantic tags (latest/version/stable + aliases)
+REGISTRY=""       # e.g. ghcr.io
+OWNER=""          # e.g. github org/user
+REPO_PREFIX=""    # image repository name
+VERSION=""        # X.Y.Z (required for --publish)
+IS_STABLE="false" # "true" -> publish stable tags
 DEFAULT_DISTRO="debian"
 
 # Base pkgmgr image selection
@@ -162,14 +162,8 @@ if [[ -z "${REPO_PREFIX}" ]]; then
 	REPO_PREFIX="${INFINITO_IMAGE_REPOSITORY:-}"
 fi
 
-# REPO_PREFIX is only required when IMAGE_TAG is not already provided externally.
-if [[ -z "${REPO_PREFIX}" && -z "${IMAGE_TAG}" ]]; then
-	echo "ERROR: Missing REPO_PREFIX or INFINITO_IMAGE_REPOSITORY (or set IMAGE_TAG directly)" >&2
-	exit 1
-fi
-if [[ -n "${REPO_PREFIX}" ]]; then
-	REPO_PREFIX="${REPO_PREFIX,,}"
-fi
+: "${REPO_PREFIX:?Missing REPO_PREFIX or INFINITO_IMAGE_REPOSITORY}"
+REPO_PREFIX="${REPO_PREFIX,,}"
 
 if [[ -n "${OWNER}" || -n "${GITHUB_REPOSITORY_OWNER:-}" || -n "${GITHUB_REPOSITORY:-}" ]]; then
 	OWNER="$(OWNER="${OWNER}" GITHUB_REPOSITORY_OWNER="${GITHUB_REPOSITORY_OWNER:-}" GITHUB_REPOSITORY="${GITHUB_REPOSITORY:-}" scripts/meta/resolve/repository/owner.sh)"

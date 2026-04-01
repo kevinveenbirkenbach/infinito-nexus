@@ -17,7 +17,6 @@ compose:
       shared: false
     dashboard:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -32,7 +31,6 @@ compose:
       branch:     "main"
     css:
       enabled: true
-      shared: true
 rbac:
   roles: {}
  

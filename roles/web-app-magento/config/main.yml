@@ -12,15 +12,10 @@ compose:
       shared: false
     logout:
       enabled: true
-      shared: true
 
     dashboard:
       enabled: true
-      shared: true
     matomo:
-      enabled: true
-      shared: true
-    email:
       enabled: true
       shared: true
     php:
@@ -39,12 +34,10 @@ compose:
       shared: false
       enabled:            true
       version:            "11.4"
-    # noqa: shared
     redis:
       backup:
         disabled: true
       enabled:            true
-    # noqa: shared
     search:
       enabled:            true
       image:              "opensearchproject/opensearch"
@@ -52,6 +45,5 @@ compose:
       name:               "magento-opensearch"
     css:
       enabled: true
-      shared: true
   volumes:
     data:                 "magento_data"

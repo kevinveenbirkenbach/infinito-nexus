@@ -30,10 +30,8 @@ compose:
       enable_user_creation: true  # Users will be created if not existing
     logout:
       enabled: true
-      shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -41,7 +39,6 @@ compose:
       version:            "2024.06"
       name:               mailu
       min_storage:        "20GB"
-    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -115,4 +112,3 @@ compose:
       pids_limit:         512
     css:
       enabled: false
-      shared: true

@@ -1,4 +1,4 @@
-# Required to be set on the top so global frontend service loading can rely on run_once guards.
+# Required to be set on the top to prevent infinite recursions appearing in roles/sys-front-inj-all/tasks/01_dependencies.yml
 - include_tasks: utils/once/flag.yml
 
 - name: "Matomo | Resolve token from store/config"

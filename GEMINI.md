@@ -2,12 +2,15 @@
 
 ## Purpose
 
-This file extends [AGENTS.md](AGENTS.md) with Gemini-specific additions. You MUST read `AGENTS.md` first as the entry point for all agent instructions.
+- `AGENTS.md` is the single source of truth for repository-wide agent instructions.
+- Read `AGENTS.md` first.
+- Use `GEMINI.md` only for Gemini-specific additions or clarifications.
 
 ## Current Status
 
 - No Gemini-specific additions are currently defined.
 
-## Documentation
+## Further Information
 
-See the [Gemini CLI documentation](https://geminicli.com/docs/cli/gemini-md/). For human contributor guidance on working with agents, see [here](docs/contributing/tools/agents.md).
+- https://geminicli.com/docs/cli/gemini-md/
+- https://s.infinito.nexus/aibestpractice

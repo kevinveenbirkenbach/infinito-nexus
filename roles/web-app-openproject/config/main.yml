@@ -20,17 +20,12 @@ compose:
   services:
     logout:
       enabled: true
-      shared: true
     ldap:
       enabled: true
       shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
-      enabled: true
-      shared: true
-    email:
       enabled: true
       shared: true
     database:
@@ -79,7 +74,6 @@ compose:
       pids_limit:         256
     oauth2:
       enabled: true
-      shared: true
       origin:
         host:             "proxy"
         port:             "80"
@@ -90,6 +84,5 @@ compose:
           - "/oauth/token"        # Necessary for Nextcloud Plugin to work
     css:
       enabled: false
-      shared: true
   volumes:
     data:                 "openproject_data"

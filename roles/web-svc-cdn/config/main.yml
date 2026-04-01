@@ -11,8 +11,4 @@ compose:
       enabled: true
       shared: true
     css:
-      enabled: false
-      shared: true
-    javascript:
-      enabled: false
-      shared: true
+      enabled: true

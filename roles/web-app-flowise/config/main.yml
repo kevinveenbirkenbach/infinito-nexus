@@ -22,10 +22,8 @@ compose:
   services:
     logout:
       enabled: true
-      shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared:  true
@@ -72,10 +70,8 @@ compose:
       shared: true
     css:
       enabled: true
-      shared: true
     javascript:
       enabled: false
-      shared: true
   volumes: 
     qdrant:     qdrant_data
     flowise:    flowise_data

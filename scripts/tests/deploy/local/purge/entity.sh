@@ -4,32 +4,32 @@ set -euo pipefail
 # Cleanup one or multiple app entities in the running infinito container.
 #
 # Expects:
-#   APPS               (required)
+#   APP                (required)
 #     Examples:
-#       APPS=web-app-nextcloud
-#       APPS="web-app-nextcloud web-app-keycloak"
-#       APPS="web-app-nextcloud,web-app-keycloak"
+#       APP=web-app-nextcloud
+#       APP="web-app-nextcloud web-app-keycloak"
+#       APP="web-app-nextcloud,web-app-keycloak"
 #
 #   INFINITO_CONTAINER (required)
 #     Example:
 #       infinito_nexus_arch
 
-: "${APPS:?APPS is not set (e.g. APPS=web-app-nextcloud)}"
+: "${APP:?APP is not set (e.g. APP=web-app-nextcloud)}"
 : "${INFINITO_CONTAINER:?INFINITO_CONTAINER is not set (e.g. infinito_nexus_arch)}"
 
-echo "=== local cleanup: APPS=${APPS} container=${INFINITO_CONTAINER} ==="
+echo "=== local cleanup: APP=${APP} container=${INFINITO_CONTAINER} ==="
 
 docker exec "${INFINITO_CONTAINER}" bash -lc "
   set -euo pipefail
   cd /opt/src/infinito
 
-  # Normalize APPS list: commas -> spaces, then split on whitespace
-  apps_raw=\"${APPS}\"
+  # Normalize APP list: commas -> spaces, then split on whitespace
+  apps_raw=\"${APP}\"
   apps_raw=\"\${apps_raw//,/ }\"
   read -r -a apps <<< \"\${apps_raw}\"
 
   if [[ \"\${#apps[@]}\" -lt 1 ]]; then
-    echo \"!!! WARNING: APPS is empty after parsing — skipping purge\"
+    echo \"!!! WARNING: APP is empty after parsing — skipping purge\"
     exit 0
   fi
 
@@ -49,19 +49,19 @@ docker exec "${INFINITO_CONTAINER}" bash -lc "
     entity=\"\$(\"\${python_bin}\" -c 'from utils.entity_name_utils import get_entity_name; import sys; print(get_entity_name(sys.argv[1]) or \"\")' \"\${app}\")\"
 
     if [[ -z \"\${entity}\" ]]; then
-      echo \"!!! WARNING: could not derive entity from APPS=\${app} — skipping\"
+      echo \"!!! WARNING: could not derive entity from APP=\${app} — skipping\"
       continue
     fi
 
     if [[ ! -d \"/opt/compose/\${entity}\" ]]; then
-      echo \"!!! WARNING: /opt/compose/\${entity} not found for APPS=\${app} — skipping\"
+      echo \"!!! WARNING: /opt/compose/\${entity} not found for APP=\${app} — skipping\"
       continue
     fi
 
     if [[ -z \"\${seen_entities[\${entity}]:-}\" ]]; then
       seen_entities[\${entity}]=1
       entities+=(\"\${entity}\")
-      echo \">>> Derived entity from APPS=\${app}: \${entity}\"
+      echo \">>> Derived entity from APP=\${app}: \${entity}\"
     fi
   done
 

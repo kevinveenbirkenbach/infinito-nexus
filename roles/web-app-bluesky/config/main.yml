@@ -31,20 +31,14 @@ compose:
   services:
     logout:
       enabled: true
-      shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
-      enabled: true
-      shared: true
-    email:
       enabled: true
       shared: true
     database:
       shared: false
       enabled: false
-    # noqa: shared
     web:
       enabled: true  # @see https://github.com/bluesky-social/social-app
     view:
@@ -54,6 +48,5 @@ compose:
       version:  "latest"
     css:
       enabled: true
-      shared: true
   volumes:
     pds_data:   "pds_data"

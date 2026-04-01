@@ -51,10 +51,17 @@ roles/<application_id>/
     files/playwright.spec.js
 ```
 
-For the file-level contract, use [Contributing `playwright.env.j2`](../../docs/contributing/code/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/code/role/playwright.spec.js.md).
-
 `package.json` and `playwright.config.js` are provided centrally by this role from:
 `roles/test-e2e-playwright/files/`.
+
+### `playwright.env.j2`
+
+`templates/playwright.env.j2` is rendered into `.env` and passed to the test container via `--env-file`.
+
+Inside `playwright.env.j2` you can resolve the application domain via:
+
+- `{{ lookup('domain',application_id) }}`
+- Typical for Playwright tests: `APP_BASE_URL={{ lookup('tls', application_id, 'url.base') }}`
 
 ## Included Files
 
@@ -101,7 +108,6 @@ Included files:
 1. Add the two app-specific files:
    - `roles/<application_id>/templates/playwright.env.j2`
    - `roles/<application_id>/files/playwright.spec.js`
-   Follow [Contributing `playwright.env.j2`](../../docs/contributing/code/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/code/role/playwright.spec.js.md) while creating them.
 2. Run deployment and include your app in `allowed_applications` (or leave it empty to run all discovered apps).
 3. Keep `package.json` and `playwright.config.js` centralized in `roles/test-e2e-playwright/files/`.
 

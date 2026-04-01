@@ -15,7 +15,7 @@ on:
 permissions:
   contents: write
   packages: write
-  actions: write
+  actions: read
   security-events: write
 
 jobs:

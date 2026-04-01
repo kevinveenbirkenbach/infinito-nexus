@@ -27,14 +27,9 @@ compose:
       shared: true
     logout:
       enabled: true
-      shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
-      enabled: true
-      shared: true
-    email:
       enabled: true
       shared: true
     database:
@@ -52,7 +47,6 @@ compose:
       pids_limit:         512
     css:
       enabled: false
-      shared: true
   volumes:
     data:             moodle_data
     code:             moodle_code

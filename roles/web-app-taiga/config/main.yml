@@ -1,33 +1,27 @@
+oidc:
+    # Taiga doesn't have a functioning oidc support at the moment
+    # See
+    # - https://community.taiga.io/t/taiga-and-oidc-plugin/4866
+    #
+    # Due to this reason this plutin is deactivated atm
+  flavor:             'taigaio' # Potential flavors: robrotheram, taigaio
 compose:
   services:
     oidc:
-      enabled: true
-      shared: true
-    ldap:
       enabled: false
-      shared: true
-    oauth2:
-      enabled: false
-      origin:
-        host: "gateway"
-        port: "80"
+      shared: false
     logout:
       enabled: true
-      shared: true
     dashboard:
       enabled: true
-      shared: true
     matomo:
-      enabled: true
-      shared: true
-    email:
       enabled: true
       shared: true
     database:
       shared: true
       type: "postgres"
       enabled:        true
-    taiga:
+    taiga: 
       version:        "latest"
       min_storage:    "10GB"
       cpus:            "1.0"
@@ -76,10 +70,8 @@ compose:
       pids_limit:      128
     css:
       enabled: true
-      shared: true
     javascript:
       enabled: true
-      shared: true
 server:
   csp:
     flags:

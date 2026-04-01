@@ -1,3 +1,9 @@
+- name: "load required 'web-svc-cdn' for {{ application_id }}"
+  include_tasks: "utils/load_app.yml"
+  vars:
+    load_app_id: web-svc-cdn
+  when: run_once_web_svc_cdn is not defined
+
 - name: Ensure {{ DASHBOARD_JS_SERVER_DIR }} exists
   file:
     path: "{{ DASHBOARD_JS_SERVER_DIR }}"

@@ -5,7 +5,6 @@ compose:
       shared: false
     dashboard:
       enabled: true
-      shared: true
     matomo:
       enabled: true
       shared: true
@@ -17,7 +16,6 @@ compose:
       enabled:  false
     css:
       enabled: true
-      shared: true
 server:
   csp:
     whitelist:

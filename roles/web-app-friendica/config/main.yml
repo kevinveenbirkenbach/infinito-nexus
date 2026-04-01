@@ -26,19 +26,14 @@ compose:
       shared:   false
     logout:
       enabled:  true
-      shared: true
     ldap:
       enabled:  true
       shared:   true
     dashboard:
       enabled:  true
-      shared:   true
     matomo:
       enabled:  true
       shared:   true
-    email:
-      enabled: true
-      shared: true
     database:
       shared:   true
       type:     "mariadb"
@@ -50,4 +45,3 @@ compose:
       enabled:  false
     css:
       enabled: false
-      shared: true

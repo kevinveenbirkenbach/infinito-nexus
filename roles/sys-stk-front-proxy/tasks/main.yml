@@ -28,12 +28,8 @@
 
 - block:
     - name: "Check if {{ lookup('domain',application_id) }} is reachable (only if config unchanged)"
-      uri_probe:
+      uri_retry:
         url: "{{ lookup('tls', application_id, 'url.base') }}"
-        status_code:
-          - 200
-          - 301
-          - 302
       register: site_check
       failed_when: false
       changed_when: false
