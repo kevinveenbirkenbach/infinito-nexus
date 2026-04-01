@@ -63,13 +63,24 @@
     dashboard_branding_asset_urls: >-
       {{
         [
-          dashboard_platform_logo_source,
-          dashboard_platform_favicon_source,
-          dashboard_company_logo_source
+          (
+            dashboard_platform_logo_source
+            if dashboard_platform_logo_source.startswith(dashboard_asset_url_base)
+            else ''
+          ),
+          (
+            dashboard_platform_favicon_source
+            if dashboard_platform_favicon_source.startswith(dashboard_asset_url_base)
+            else ''
+          ),
+          (
+            dashboard_company_logo_source
+            if dashboard_company_logo_source.startswith(dashboard_asset_url_base)
+            else ''
+          )
         ]
         | select('string')
         | reject('equalto', '')
-        | select('match', '^' ~ (dashboard_asset_url_base | regex_escape))
         | unique
         | list
       }}
