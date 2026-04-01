@@ -5,6 +5,10 @@
 - You MUST capture system-wide development requirements in the root `TODO.md` file so global work stays visible in one place.
 - When a TODO is completed, you MUST remove it from `TODO.md`.
 
+## Requirements
+
+- When the user asks you to implement a requirement, you MUST follow [Requirements](requirements.md) before writing any code.
+
 ## New Apps
 
 - You MUST use [CONTRIBUTING.md](../../../CONTRIBUTING.md) as the SPOT for the general development workflow, testing, review, and the code and development guides.

@@ -19,6 +19,11 @@ Follow these steps to make your first contribution.
 - The full contributor guide is available at [docs.infinito.nexus](https://docs.infinito.nexus/).
 - A repository-local Sphinx entry point is also available at [Contribution Guide Index](docs/contributing/index.rst).
 
+## 📐 Requirements
+
+Functional requirements live under `docs/requirements/` and follow a fixed format with a User Story and checkable Acceptance Criteria.
+See [requirements.md](docs/contributing/requirements.md) for the authoring guide.
+
 ## 📋 Repository Files
 
 Essential repository files covering agent rules, support, security, and community standards.
