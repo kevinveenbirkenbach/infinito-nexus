@@ -11,6 +11,10 @@ The branch prefix MUST match the type of change. The [PR workflow](pull-request.
 | `feature` | New features or enhancements | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `fix` | Bug fixes | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 
+## Enforcement 🔒
+
+All rules in this document are actively enforced on `main` via GitHub branch protection. See [branch.md](security/branch.md) for the full enforcement policy.
+
 ## Naming Conventions
 
 The description MUST use `kebab-case` (lowercase words separated by hyphens) and SHOULD be short enough to read at a glance. 

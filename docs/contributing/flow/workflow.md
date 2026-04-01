@@ -6,6 +6,8 @@ This repository uses a strict fork-first workflow.
 - You MUST do all work in your own fork.
 - You MUST open Pull Requests from your fork back to the main repository.
 
+These rules are enforced via branch protection — see [branch.md](security/branch.md) for the full policy.
+
 Why this matters:
 
 - `main` MUST stay stable.

@@ -17,6 +17,8 @@ You MUST pick the template that matches your change. The table below links the a
 
 Branch names MUST follow the naming conventions defined in [branch.md](branch.md). The branch prefix MUST match the type of change and is used to classify the PR scope and select the CI pipeline.
 
+The protection rules enforced on `main` are documented in [branch.md](security/branch.md).
+
 ## Forking Flow
 
 Before marking a PR as **ready for review**, CI in your fork MUST be green. The required scope depends on what you changed:
