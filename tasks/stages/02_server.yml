@@ -14,6 +14,9 @@
   loop_control:
     loop_var: server_role
 
+- name: "Load shared frontend services"
+  include_tasks: "{{ playbook_dir }}/tasks/utils/load_services.yml"
+
 - name: "Include server roles"
   include_tasks: "./tasks/groups/{{ server_group }}-roles.yml"
   loop:

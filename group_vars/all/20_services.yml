@@ -2,7 +2,7 @@
 #
 # Each entry requires compose.services.<key>.enabled: true AND shared: true.
 # The 'type' field determines which stack loads the service:
-#   frontend: loaded by sys-front-inj-all for all deployed apps
+#   frontend: loaded early in tasks/stages/02_server.yml for all deployed apps
 #   backend:  loaded by sys-stk-backend per application
 #
 # Optional fields:

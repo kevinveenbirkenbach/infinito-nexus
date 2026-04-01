@@ -112,7 +112,6 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
                 + f"\n\nWhy this matters:\n{RECURSION_HINT}"
             )
 
-
     def test_main_yml_loads_core_with_run_once_guard(self):
         violations = []
         for role in unique_roles(self.registry):
@@ -134,7 +133,8 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
             expected_when = f"run_once_{role_slug(role)} is not defined"
             core_task = next(
                 (
-                    t for t in tasks
+                    t
+                    for t in tasks
                     if isinstance(t, dict) and t.get("include_tasks") == "01_core.yml"
                 ),
                 None,

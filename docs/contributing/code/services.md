@@ -9,7 +9,7 @@ Each service has:
 
 - a **key** — the short name used inside `compose.services` (e.g. `cdn`, `css`, `logout`, `ldap`)
 - a **role** — the Ansible role that provisions it (e.g. `web-svc-cdn`, `svc-db-openldap`)
-- a **type** — either `frontend` (loaded by `sys-front-inj-all`) or `backend` (loaded by `sys-stk-backend`)
+- a **type** — either `frontend` (loaded early in the server stage) or `backend` (loaded by `sys-stk-backend`)
 - an optional **canonical** — required when multiple keys share the same role (see below)
 
 An application declares it needs a service by setting `compose.services.<key>.enabled: true` in its config.
@@ -87,17 +87,21 @@ roles/<role-name>/config/main.yml
 
 Decides whether the service container is deployed at all.
 
-#### Frontend services — `sys-front-inj-all`
+#### Frontend services — one early global SPOT
 
-[`roles/sys-front-inj-all/tasks/01_services.yml`](../../../roles/sys-front-inj-all/tasks/01_services.yml) is the **SPOT** for all frontend service loading.
+[`tasks/utils/load_services.yml`](../../../tasks/utils/load_services.yml) is the **SPOT** for shared frontend service loading.
+It is called once from [`tasks/stages/02_server.yml`](../../../tasks/stages/02_server.yml) before `web-svc`
+and `web-app` roles start. It iterates over every `type: frontend` entry from `SERVICE_REGISTRY`.
 
-It iterates over every entry with `type: frontend` from `SERVICE_REGISTRY` in `20_services.yml` and for each:
+For each service it:
 
-1. Checks `lookup('service', item.key).needed` — is the service needed (enabled AND shared) by any deployed app?
+1. Checks `lookup('service', item.key).needed` — is the service needed by any deployed app?
 2. Checks `run_once_*` — has the service already been loaded this run?
-3. Checks `application_id != item.value.role` — don't load a service as its own dependency
-4. Performs a reachability check via [`_load_frontend_service.yml`](../../../roles/sys-front-inj-all/tasks/_load_frontend_service.yml)
-5. Loads the service via `utils/load_app.yml` if the endpoint is not reachable (status ≠ 200)
+3. Performs a reachability check via [`_load_frontend_service.yml`](../../../tasks/utils/_load_frontend_service.yml)
+4. Loads the service via `utils/load_app.yml` if the endpoint is not reachable (status ≠ 200)
+
+Because this happens once before any normal `web-svc` or `web-app` role starts, service order can be controlled
+directly by the order of entries in [`group_vars/all/20_services.yml`](../../../group_vars/all/20_services.yml).
 
 #### Backend services — `sys-stk-backend`
 
@@ -185,7 +189,7 @@ lookup('service', 'web-svc-cdn')     # role lookup → returns id: cdn (canonica
 - **Limitation:** transitive resolution only fires when the service key in `compose.services` equals a full application ID.
   Short keys (e.g. `collabora`) do not chain to `web-svc-collabora` — only the key `web-svc-collabora` would.
 - Does **not** control nginx injection — see `inj_enabled` above
-- Used in: [`roles/sys-front-inj-all/tasks/01_services.yml`](../../../roles/sys-front-inj-all/tasks/01_services.yml)
+- Used in: [`tasks/utils/load_services.yml`](../../../tasks/utils/load_services.yml)
 - Tests: [`tests/unit/plugins/lookup/test_service.py`](../../../tests/unit/plugins/lookup/test_service.py), [`tests/integration/test_services_resolvable.py`](../../../tests/integration/test_services_resolvable.py)
 
 ### `service_should_load` — should this service be loaded for the current app?
@@ -230,9 +234,10 @@ dependency graphs.
 | File | Purpose |
 |---|---|
 | [`group_vars/all/20_services.yml`](../../../group_vars/all/20_services.yml) | **SPOT** — service key → role mapping with `type`, optional `canonical` |
-| [`roles/sys-front-inj-all/tasks/01_services.yml`](../../../roles/sys-front-inj-all/tasks/01_services.yml) | **SPOT** — frontend service loading loop |
-| [`roles/sys-front-inj-all/tasks/_load_frontend_service.yml`](../../../roles/sys-front-inj-all/tasks/_load_frontend_service.yml) | Reachability check + conditional load per frontend service |
-| [`roles/sys-front-inj-all/tasks/main.yml`](../../../roles/sys-front-inj-all/tasks/main.yml) | Orchestrates loading + injection for every deployed app |
+| [`tasks/utils/load_services.yml`](../../../tasks/utils/load_services.yml) | **SPOT** — global frontend service loading loop |
+| [`tasks/stages/02_server.yml`](../../../tasks/stages/02_server.yml) | Calls the global frontend service loader before `web-svc` and `web-app` roles |
+| [`tasks/utils/_load_frontend_service.yml`](../../../tasks/utils/_load_frontend_service.yml) | Reachability check + conditional load per frontend service |
+| [`roles/sys-front-inj-all/tasks/main.yml`](../../../roles/sys-front-inj-all/tasks/main.yml) | Orchestrates injection for every deployed app |
 | [`roles/sys-front-inj-all/filter_plugins/inj_enabled.py`](../../../roles/sys-front-inj-all/filter_plugins/inj_enabled.py) | `inj_enabled` filter — per-app injection flags |
 | [`tasks/utils/load_app.yml`](../../../tasks/utils/load_app.yml) | Run-once role loader |
 | [`tasks/utils/once/flag.yml`](../../../tasks/utils/once/flag.yml) | Sets `run_once_<role>` fact to prevent duplicate loads |
