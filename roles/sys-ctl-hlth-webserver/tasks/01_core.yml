@@ -31,7 +31,7 @@
     system_service_tpl_environment:       "{{ CA_TRUST_SYSTEMD_ENV_SELFSIGNED }}"
     system_service_tpl_exec_start: > 
       {{ system_service_script_exec }}
-      --web-protocol {{ lookup('tls', application_id, 'protocols.web') }}
+      --web-protocol {{ lookup('tls', DOMAIN_PRIMARY, 'protocols.web') }}
       --expectations '{{ applications | web_health_expectations(www_enabled=WWW_REDIRECT_ENABLED | bool, group_names=group_names) | to_json }}'
     system_service_force_flush_final:             true
 
