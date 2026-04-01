@@ -1,3 +1,5 @@
+- include_tasks: utils/once/flag.yml
+
 - name: "Validate configuration"
   include_tasks: "02_validate.yml"
   when: MODE_ASSERT | bool
@@ -66,5 +68,3 @@
   retries: 60
   delay: 5
   until: dashboard_http.status == 200
-
-- include_tasks: utils/once/flag.yml
