@@ -3,6 +3,7 @@
 ## Test Changes
 
 - After every change to a test file, you MUST run the specialized test for that file using `TEST_PATTERN` before continuing with any further action. See [Unit Tests](../../contributing/code/tests/unit.md), [Integration Tests](../../contributing/code/tests/integration.md), and [Lint Tests](../../contributing/code/tests/lint.md) for examples.
+- You MUST NOT run more than one unit test command at the same time. Unit tests MUST be executed serially, never in parallel.
 - If a new test is created or an existing test has been changed since the last test run, you MUST rerun it after every subsequent action until it passes.
 - If the last test run for a test failed, you MUST rerun it after every change until it succeeds.
 
