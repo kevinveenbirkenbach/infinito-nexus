@@ -14,5 +14,5 @@ compose:
       enabled: true
       shared: true
     css:
-      enabled: true
-      shared: true
+      enabled: false
+      shared: false
