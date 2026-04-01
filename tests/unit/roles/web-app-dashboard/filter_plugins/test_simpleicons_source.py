@@ -39,7 +39,9 @@ get_requests_verify = _simpleicons.get_requests_verify
 class TestGetRequestsVerify(unittest.TestCase):
     def test_uses_explicit_requests_ca_bundle_when_present(self):
         with tempfile.NamedTemporaryFile() as handle:
-            with patch.dict(os.environ, {"REQUESTS_CA_BUNDLE": handle.name}, clear=False):
+            with patch.dict(
+                os.environ, {"REQUESTS_CA_BUNDLE": handle.name}, clear=False
+            ):
                 self.assertEqual(get_requests_verify(), handle.name)
 
     def test_falls_back_to_certifi_bundle_when_no_env_ca_exists(self):
