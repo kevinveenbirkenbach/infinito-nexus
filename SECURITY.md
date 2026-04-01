@@ -17,15 +17,22 @@ Send a private report that includes:
 
 ## Security Contacts
 
-- Matrix: `@kevinveenbirkenbach:infinito.nexus`
+- Matrix: [@kevinveenbirkenbach:infinito.nexus](https://matrix.to/#/@kevinveenbirkenbach:infinito.nexus)
 - Email: [kevinveenbirkenbach@infinito.nexus](mailto:kevinveenbirkenbach@infinito.nexus)
-- Phone: `00491781798023`
+- Phone: [+49 178 179 8023](tel:+491781798023)
 
 For general help and non-security requests, see [SUPPORT.md](SUPPORT.md).
 
-## Detailed Secure Use Guides
+## Repository Security Policies 🔐
 
-Detailed guides for secure use are here:
+The security policies enforced on this repository are documented here:
+
+- [Branch Protection](docs/contributing/flow/security/branch.md) — rules enforced on the `main` branch
+- [Repository Settings](docs/contributing/flow/security/repository.md) — repository-wide security configuration
+
+## Detailed Secure Use Guides 🛡️
+
+Detailed guides for secure use are documented here:
 
 - [User Security Guide](docs/security/user.md)
 - [Administrator Security Guide](docs/security/administrator.md)
