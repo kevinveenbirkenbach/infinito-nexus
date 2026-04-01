@@ -1,8 +1,13 @@
 ---
 - name: Detect container environment (systemd-detect-virt)
   ansible.builtin.command: systemd-detect-virt --container
+  register: systemd_detect_virt_container
   changed_when: false
   failed_when: false
+
+- name: Normalize DOCKER_IN_CONTAINER from runtime detection
+  ansible.builtin.set_fact:
+    DOCKER_IN_CONTAINER: "{{ (systemd_detect_virt_container.rc | default(1) | int) == 0 }}"
 
 - name: Display selected initial host vars
   ansible.builtin.debug:
@@ -11,6 +16,7 @@
       {{ group_names | to_nice_yaml(indent=2) }}
       allowed_applications: {{ allowed_applications }}
       RUNTIME: {{ RUNTIME }}
+      DOCKER_IN_CONTAINER: {{ DOCKER_IN_CONTAINER }}
       TLS_ENABLED: {{ TLS_ENABLED }}
       ASYNC_ENABLED: {{ ASYNC_ENABLED }}
       SOFTWARE_NAME: {{ SOFTWARE_NAME }}
