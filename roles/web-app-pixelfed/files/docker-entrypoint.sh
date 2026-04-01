@@ -11,5 +11,6 @@ chown -R www-data:www-data storage/ bootstrap/
 php /wait-for-db.php
 
 echo "++++ Start apache... ++++"
+# shellcheck disable=SC1091
 source /etc/apache2/envvars
 exec dumb-init apache2 -DFOREGROUND
