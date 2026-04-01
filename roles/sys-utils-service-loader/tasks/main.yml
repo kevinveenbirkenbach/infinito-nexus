@@ -4,11 +4,7 @@
 # Service load order is defined by SERVICE_REGISTRY order.
 
 - name: "Load shared frontend service"
-  ansible.builtin.include_tasks: >-
-    {{
-      [playbook_dir, 'tasks', 'utils', '_load_frontend_service.yml']
-      | path_join
-    }}
+  include_tasks: load_frontend_service.yml
   vars:
     service_key: "{{ service_item.key }}"
     service_role: "{{ service_item.value.role }}"
