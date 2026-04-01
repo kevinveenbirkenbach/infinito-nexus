@@ -15,3 +15,12 @@ You MUST apply these repo-wide rules when you add, move, or review files:
 - You SHOULD prefer smaller, more focused folders over dumping many unrelated files into one directory.
 
 For refactoring guidance, see [Refactoring](../../flow/refactoring.md).
+
+## Running Specific Lint Tests
+
+Use `TEST_PATTERN` to scope the lint test run to a single file:
+
+```bash
+# Run lint tests for a specific file
+TEST_PATTERN=test_my_role.py make test-lint
+```

@@ -30,3 +30,15 @@ Run integration tests with `make test-integration`.
 3. Subclass `unittest.TestCase`.
 4. Use realistic inputs. Build hypotheses about cross-component behavior before writing assertions.
 5. Run `make test-integration` and verify all tests pass.
+
+## Running Specific Tests
+
+Use `TEST_PATTERN` to scope the test run to a single file or a glob:
+
+```bash
+# Run a single integration test file
+TEST_PATTERN=test_my_module.py make test-integration
+
+# Run all files matching a prefix
+TEST_PATTERN=test_applications*.py make test-integration
+```

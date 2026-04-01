@@ -26,3 +26,15 @@ Run unit tests with `make test-unit`.
 3. Subclass `unittest.TestCase`.
 4. Write one method per behavior. Build hypotheses before writing assertions.
 5. Run `make test-unit` and verify all tests pass.
+
+## Running Specific Tests
+
+Use `TEST_PATTERN` to scope the test run to a single file or a glob:
+
+```bash
+# Run a single test file
+TEST_PATTERN=test_my_module.py make test-unit
+
+# Run all files matching a prefix
+TEST_PATTERN=test_applications*.py make test-unit
+```
