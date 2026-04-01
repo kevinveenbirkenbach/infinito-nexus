@@ -4,6 +4,8 @@
     image: "{{ PIXELFED_IMAGE }}:{{ PIXELFED_VERSION }}"
     container_name: {{ PIXELFED_CONTAINER }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    # Keep the application on the repo-managed entrypoint so the container is
+    # ready for the Ansible bootstrap before Pixelfed's own first-start logic.
     entrypoint: "{{ PIXELFED_ENTRYPOINT_DOCKER }}"
     volumes:
       - "data:/var/www/storage"

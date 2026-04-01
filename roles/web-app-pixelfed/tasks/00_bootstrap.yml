@@ -2,6 +2,8 @@
 # The application container starts through a repo-managed entrypoint so Apache
 # comes up first and the Ansible bootstrap can run without racing the image's
 # first-start migration logic.
+# Keep this wait at the top of the bootstrap flow. The later artisan commands
+# assume the repo-managed entrypoint has already brought Apache up.
 
 - name: "Wait until the Pixelfed application container finished its entrypoint bootstrap"
   ansible.builtin.command:
@@ -72,6 +74,9 @@
 
 - name: "Choose Pixelfed migration strategy"
   ansible.builtin.set_fact:
+    # Preserve the "no marker + no users" reset path. It is the safety net for
+    # broken first boots where Pixelfed partially initialized and would
+    # otherwise keep failing on later deploys.
     pixelfed_bootstrap_requires_reset: >-
       {{
         (pixelfed_bootstrap_marker_exists.rc | default(1) | int) != 0
@@ -164,6 +169,8 @@
   delay: 5
   until: pixelfed_instance_actor.rc == 0
 
+# The worker uses this marker to skip its own init path. Do not move this above
+# the actor/storage setup or the worker can start against an incomplete app.
 - name: "Mark Pixelfed bootstrap as complete for the worker container"
   ansible.builtin.command:
     argv:
