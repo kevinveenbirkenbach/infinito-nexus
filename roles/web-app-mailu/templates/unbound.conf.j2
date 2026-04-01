@@ -18,20 +18,10 @@ server:
   directory: "/etc/unbound"
   username: unbound
   auto-trust-anchor-file: trusted-key.key
-{% if not DOCKER_IN_CONTAINER | bool %}
   root-hints: "/etc/unbound/root.hints"
-{% endif %}
   hide-identity: yes
   hide-version: yes
   cache-min-ttl: 300
-{% if DOCKER_IN_CONTAINER | bool %}
-
-forward-zone:
-  name: "."
-{% for addr in MAILU_DNS_FORWARDERS %}
-  forward-addr: {{ addr }}
-{% endfor %}
-{% endif %}
 
 remote-control:
   control-enable: yes
