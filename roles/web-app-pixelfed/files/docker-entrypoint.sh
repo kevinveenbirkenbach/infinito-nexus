@@ -5,7 +5,7 @@ if [ -n "${FORCE_HTTPS:-}" ]; then
   sed -i 's#</VirtualHost#SetEnv HTTPS on\n</VirtualHost#' /etc/apache2/sites-enabled/000-default.conf
 fi
 
-cp -r storage.skel/* storage/
+cp -R storage.skel/* storage/
 chown -R www-data:www-data storage/ bootstrap/
 
 php /wait-for-db.php
