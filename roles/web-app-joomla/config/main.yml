@@ -17,10 +17,15 @@ compose:
       shared: false
     logout:
       enabled: true
+      shared: true
 
     dashboard:
       enabled: true
+      shared: true
     matomo:
+      enabled: true
+      shared: true
+    email:
       enabled: true
       shared: true
     database:
@@ -39,5 +44,6 @@ compose:
         size_mb: 100
     css:
       enabled: true
+      shared: true
   volumes:
     data:       "joomla_data"

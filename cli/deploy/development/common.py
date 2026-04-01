@@ -31,3 +31,14 @@ def make_compose(*, distro: str) -> Compose:
 def resolve_deploy_ids_for_app(compose: Compose, app_id: str) -> list[str]:
     deps = resolve_run_after(compose, app_id)
     return apps_with_deps(app_id, deps_role_names=deps)
+
+
+def resolve_deploy_ids_for_apps(compose: Compose, app_spec: str) -> list[str]:
+    """Resolve deploy ids for one or more space- or comma-separated app ids."""
+    app_ids = [a.strip() for a in app_spec.replace(",", " ").split() if a.strip()]
+    result: list[str] = []
+    for app_id in app_ids:
+        for dep in resolve_deploy_ids_for_app(compose, app_id):
+            if dep not in result:
+                result.append(dep)
+    return result

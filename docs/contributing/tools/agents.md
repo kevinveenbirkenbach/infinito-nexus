@@ -1,21 +1,14 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Agent Guidelines for humans
 
-AI assistants are welcome, but they must follow the same workflow as humans.
+AI assistants are welcome, but they MUST follow the same workflow as humans.
 
-This page complements [AGENTS.md](../../../AGENTS.md). Use it as the agent-focused companion for contributor workflow, testing, review, and the code and development guides.
+- You MUST treat [AGENTS.md](../../../AGENTS.md) as the entry point for all agent-specific execution instructions. Tool-specific files such as `CLAUDE.md` and `GEMINI.md` extend `AGENTS.md` and MUST NOT contradict it.
+- You MUST NOT invent commands, workflows, or files that do not exist.
+- You MUST NEVER expose secrets in prompts, code, screenshots, or logs.
+- You MUST treat AI output as a draft that must be reviewed for wrong assumptions, duplicate logic, and security mistakes.
+- You MUST keep explanations simple and explicit.
+- You MUST state assumptions clearly.
 
-[AGENTS.md](../../../AGENTS.md) is the repository-wide source of truth for agent-specific behavior.
+For tool-specific configuration and additional instructions, see [CLAUDE.md](../../../CLAUDE.md) and [GEMINI.md](../../../GEMINI.md).
 
-Additional agent-specific rules:
-
-- Do not invent commands, workflows, or files that do not exist.
-- Never expose secrets in prompts, code, screenshots, or logs.
-- Treat AI output as a draft that must be reviewed for wrong assumptions, duplicate logic, and security mistakes.
-- Keep agent instructions consistent: `AGENTS.md` is the repository-wide source of truth, while `CLAUDE.md` and `GEMINI.md` are tool-specific additions.
-- Read [AGENTS.md](../../../AGENTS.md) before making changes.
-- Keep explanations simple and explicit.
-- State assumptions clearly.
-
-More information [here](https://s.infinito.nexus/aibestpractice).
+For further support, visit the AI forum at [s.infinito.nexus/aihub](https://s.infinito.nexus/aihub) or join the Matrix group [#ai:infinito.nexus](https://matrix.to/#/#ai:infinito.nexus).

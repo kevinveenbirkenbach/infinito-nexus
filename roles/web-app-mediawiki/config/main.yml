@@ -16,9 +16,14 @@ compose:
       shared: true
     logout:
       enabled: true
+      shared: true
     dashboard:
       enabled: true
+      shared: true
     matomo:
+      enabled: true
+      shared: true
+    email:
       enabled: true
       shared: true
     database:
@@ -34,6 +39,7 @@ compose:
       name:     mediawiki
     css:
       enabled: false
+      shared: true
   volumes:
     images:     mediawiki_images
     extensions: mediawiki_extensions

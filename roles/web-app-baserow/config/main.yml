@@ -2,11 +2,17 @@ compose:
   services:
     logout:
       enabled: true
+      shared: true
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
+    email:
+      enabled: true
+      shared: true
+    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -28,8 +34,10 @@ compose:
       pids_limit:         512
     css:
       enabled: true
+      shared: true
     javascript:
       enabled: true
+      shared: true
   volumes:
     data:                 "baserow_data"
 server:

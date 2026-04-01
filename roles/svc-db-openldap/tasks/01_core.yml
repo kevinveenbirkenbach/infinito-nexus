@@ -1,4 +1,6 @@
 ---
+- include_tasks: utils/once/flag.yml
+
 - name: Initialize docker
   include_tasks: 02_docker.yml
 
@@ -163,5 +165,3 @@
 - name: "Add Objects to all users"
   include_tasks: 05_update.yml
   when: OPENLDAP_PROVISION_UPDATE | bool
-
-- include_tasks: utils/once/flag.yml

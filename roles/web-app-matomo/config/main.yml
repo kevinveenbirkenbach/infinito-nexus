@@ -69,5 +69,6 @@ compose:
       enabled: false
     css:
       enabled: false
+      shared: true
   volumes: 
     data: matomo_data

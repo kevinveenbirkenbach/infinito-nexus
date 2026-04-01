@@ -5,6 +5,7 @@ compose:
       shared: false
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
@@ -22,6 +23,7 @@ compose:
       min_storage: "1GB"
     css:
       enabled: true
+      shared: true
 
 server:
   csp:

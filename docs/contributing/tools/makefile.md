@@ -1,5 +1,3 @@
-[Back to CONTRIBUTING hub](../../../CONTRIBUTING.md)
-
 # Makefile Commands
 
 Use these commands from the repository root. This is the SPOT for `make` targets in Infinito Nexus.
@@ -40,8 +38,10 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Remove DNS | `make dns-remove` | Removes the DNS configuration. | Use this to clean up the DNS setup. |
 | Trust CA on Windows | `make wsl2-trust-windows` | Imports the local CA and updates hosts entries from WSL2. | Use this when you need Windows trust-store updates from WSL2. |
 | Trust local CA | `make trust-ca` | Trusts the local CA on Linux and WSL2. | Use this after the CA or host entries change. |
-| Disable IPv6 | `make disable-ipv6` | Disables IPv6 for local development. | Use this when a workflow needs IPv6 off. |
-| Restore IPv6 | `make restore-ipv6` | Restores the previous IPv6 settings. | Use this after a temporary IPv6 change. |
+| Disable IPv6 | `make disable-ipv6` | Disables IPv6 for local development, restarts `docker.service`, and then calls `make refresh` so a running Infinito dev stack is recreated when one is active. | Use this when a workflow needs IPv6 off. |
+| Restore IPv6 | `make restore-ipv6` | Restores the previous IPv6 settings, restarts `docker.service`, and then calls `make refresh` so a running Infinito dev stack is recreated when one is active. | Use this after a temporary IPv6 change. |
+| AppArmor teardown | `make apparmor-teardown` | Disables AppArmor profiles for local development. | Use this when AppArmor interferes with local services. |
+| AppArmor restore | `make apparmor-restore` | Restores AppArmor profiles after a teardown. | Use this after a temporary AppArmor disable. |
 
 ## Repository Setup and Discovery
 
@@ -63,6 +63,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Stop stack | `make down` | Stops the compose stack and removes volumes. | Use this when you want a clean shutdown and disposable local state. |
 | Pause services | `make stop` | Stops running services without removing volumes. | Use this when you want a fast stop and plan to start the same state again. |
 | Restart stack | `make restart` | Stops the stack and starts it again. | Use this after configuration changes or when the stack needs a full restart. |
+| Refresh running stack | `make refresh` | Recreates the running Infinito dev stack only when one is already active. | Use this after host-level changes, such as Docker or IPv6 updates, when existing containers should be recreated. |
 | Inspect container | `make exec` | Opens an interactive shell in the running infinito container. | Use this when you need to inspect live state or run a quick command inside the container. |
 
 ## Validation
@@ -96,14 +97,17 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Act app workflow | `make act-app` | Runs the app-focused Act checks. | Use this when you are changing app-scoped workflow logic. |
 | Act workflow file | `make act-workflow` | Runs one selected workflow with Act. | Use this when you want to focus on a single workflow file. |
 
+- If you need to constrain a workflow matrix, set `ACT_MATRIX` with Act's `key:value` syntax, not `key=value`.
+- Example: `ACT_WORKFLOW=.github/workflows/test-environment.yml ACT_JOB=test-environment ACT_MATRIX='dev_runtime_image:debian:bookworm' make act-workflow`
+
 ## Cleanup
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
+| Disk usage | `make system-disk-usage` | Shows current disk and Docker resource usage. | Use this before cleaning up to identify what is consuming space. |
 | Remove ignored files | `make clean` | Removes ignored files from the working tree. | Use this when you want to clear generated files without sudo. |
 | Remove ignored files with sudo | `make clean-sudo` | Removes ignored files from the working tree with elevated privileges. | Use this when file ownership prevents a normal clean. |
-| System purge | `make purge-system` | Runs `scripts/system/purge/system.sh` to clear repository, Docker, journald, package, and language caches. | Use this when disk usage is tight or you want the broad low-hardware cleanup pass. |
-| Full purge | `make purge-all` | Runs `scripts/system/purge/all.sh`, which chains `make container-purge-system`, `make build-cleanup`, and `make purge-system`. | Use this when you want the broadest local cleanup bundle. |
+| System purge | `make system-purge` | Runs `scripts/system/purge/system.sh` to clear repository, Docker, journald, package, and language caches. | Use this when disk usage is tight or you want the broad low-hardware cleanup pass. |
 | Refresh inventory | `make container-refresh-inventory` | Recreates the local inventory without deploying apps. | Use this when your local inventory is broken or you want a clean reset. |
 | Purge app entity | `make container-purge-entity` | Purges one or more app entities inside the running container. | Use this before rerunning a purged app deployment. |
 | Purge container state | `make container-purge-system` | Removes inventory, web config, and lib state in the running container. | Use this when you want a destructive local container reset. |
@@ -112,15 +116,15 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
-| Fresh kept app | `make deploy-fresh-kept-app` | Creates a new inventory and deploys one app. | Use this for the single-app fresh path. |
-| Fresh purged app | `make deploy-fresh-purged-app` | Creates a new inventory, purges the app state, and redeploys one app. | Use this when you want a fresh app after cleanup. |
-| Reuse kept app | `make deploy-reuse-kept-app` | Reuses an existing inventory and redeploys one app quickly. | Use this for the fast reuse path. |
-| Reuse purged app | `make deploy-reuse-purged-app` | Reuses an existing inventory, purges the app state first, and redeploys one app quickly. | Use this when you want a fast reset-and-redeploy path. |
+| Fresh kept apps | `make deploy-fresh-kept-apps` | Creates a new inventory and deploys one or more apps. | Use this for a fresh deploy of a specific app set. |
+| Fresh purged apps | `make deploy-fresh-purged-apps` | Recreates the stack, purges app state, and deploys (pass 1 only by default). Set `FULL_CYCLE=true` to also run the async update pass (pass 2). | Default: deploy only. `FULL_CYCLE=true make deploy-fresh-purged-apps` for the full cycle. |
+| Reuse kept apps | `make deploy-reuse-kept-apps` | Reuses an existing inventory and redeploys one or more apps quickly. | Use this for the fast reuse path. |
+| Reuse purged apps | `make deploy-reuse-purged-apps` | Reuses an existing inventory, purges the app state first, and redeploys one or more apps quickly. | Use this when you want a fast reset-and-redeploy path. |
 | Fresh kept all | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this when you explicitly need broad coverage. |
 | Reuse kept all | `make deploy-reuse-kept-all` | Reuses the existing inventory and redeploys the broad app set. | Use this for the faster broad reuse path. |
 
 ## Notes
 
 - The commands use the current `INFINITO_DISTRO` setting from the environment where relevant.
-- For app-level local deploy flows and end-to-end checks, see [Development](../development/README.md).
-- For validation strategy and Playwright guidance, see [Testing and Validation](../development/testing.md).
+- For app-level local deploy flows and end-to-end checks, see [Development](../flow/testing.md).
+- For validation strategy and Playwright guidance, see [Testing and Validation](../flow/testing.md).

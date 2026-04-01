@@ -1,6 +1,4 @@
-- block:
-    - name: "load docker, db and proxy for {{ application_id }}"
-      include_role:
-        name: sys-stk-full
-    - include_tasks: utils/once/flag.yml
+- include_tasks: 01_core.yml
   when: run_once_web_svc_libretranslate is not defined
+  vars:
+    application_id: 'web-svc-libretranslate'

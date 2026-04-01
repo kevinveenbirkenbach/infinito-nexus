@@ -20,6 +20,7 @@ compose:
       shared:   true
     logout:
       enabled:  true
+      shared: true
     ldap:
       enabled:  false
     dashboard:
@@ -27,6 +28,9 @@ compose:
     matomo:
       enabled:  true
       shared:   true
+    email:
+      enabled: true
+      shared: true
     bigbluebutton:
       repository:     "https://github.com/bigbluebutton/docker.git"
       version:        "main"
@@ -41,6 +45,7 @@ compose:
       enabled:  true
     greenlight:
       enabled:  true
+      shared: false
     coturn:
       shared:   true
       enabled:  true 
@@ -49,3 +54,4 @@ compose:
       enabled:  true
     css:
       enabled:  true
+      shared: true

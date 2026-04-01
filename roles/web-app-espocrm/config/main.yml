@@ -35,10 +35,14 @@ compose:
       shared: true
     logout:
       enabled: true
+      shared: true
 
     dashboard:
       enabled: false
     matomo:
+      enabled: true
+      shared: true
+    email:
       enabled: true
       shared: true
     database:
@@ -66,6 +70,7 @@ compose:
       pids_limit:       384
     css:
       enabled: false
+      shared: true
     recaptcha:
       enabled: "{{ RECAPTCHA_ENABLED | bool }}"
   volumes:

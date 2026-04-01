@@ -25,9 +25,14 @@ compose:
   services:
     logout:
       enabled: true
+      shared: true
     dashboard:
       enabled: true
+      shared: true
     matomo:
+      enabled: true
+      shared: true
+    email:
       enabled: true
       shared: true
     database:
@@ -47,6 +52,7 @@ compose:
       enabled: false # Set to true to activate redis for akaunting
     css:
       enabled: true
+      shared: true
   volumes: 
     data: akaunting_data
 credentials: {}

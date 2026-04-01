@@ -30,9 +30,11 @@ compose:
       shared: false
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
+    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -55,6 +57,7 @@ compose:
         no_stop_required: true
     css:
       enabled: true
+      shared: true
   volumes:
     data:         onlyoffice_data          # /var/www/onlyoffice/Data
     logs:         onlyoffice_logs          # /var/log/onlyoffice

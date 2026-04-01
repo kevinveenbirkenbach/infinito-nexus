@@ -12,14 +12,22 @@ server:
         unsafe-inline:  true
 compose:
   services:
+    asset:
+      enabled:  true
+      shared:   true
     oidc:
       enabled:  true
       shared:   true
     logout:
       enabled:  true
+      shared: true
     dashboard:
       enabled:  true
+      shared: true
     matomo:
+      enabled:  true
+      shared:   true
+    email:
       enabled:  true
       shared:   true
     database:
@@ -40,6 +48,7 @@ compose:
       port:               9000
     css:
       enabled: true
+      shared: true
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
 credentials:
