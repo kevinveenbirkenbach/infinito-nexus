@@ -1,7 +1,10 @@
 var _paq = window._paq = window._paq || [];
 _paq.push(["setDocumentTitle", document.domain + "/" + document.title]);
-_paq.push(["setCookieDomain", "*.{{base_domain}}"]);
-_paq.push(["setDomains", ["*.{{base_domain}}"]]);
+// Chromium rejects wildcard cookie domains in some embedded/cross-site flows.
+// Use the registrable domain directly so tracking stays cross-subdomain without
+// emitting console errors in OIDC/logout flows.
+_paq.push(["setCookieDomain", ".{{base_domain}}"]);
+_paq.push(["setDomains", [".{{base_domain}}"]]);
 _paq.push(["enableCrossDomainLinking"]);
 _paq.push(["trackPageView"]);
 _paq.push(["trackAllContentImpressions"]);
