@@ -187,15 +187,13 @@ async function getCurrentImageSource(locator) {
 async function expectImageLoaded(locator, label) {
   await expect(locator).toBeVisible({ timeout: 60_000 });
 
-  const loaded = await locator.evaluate((img) => {
-    const source = img.currentSrc || img.src || "";
-    return (
-      (source.includes("/static/cache/") || source.includes("/static/https://")) &&
-      img.naturalWidth > 0
-    );
-  });
+  const loaded = await locator.evaluate((img) => ({
+    source: img.currentSrc || img.src || "",
+    naturalWidth: img.naturalWidth
+  }));
 
-  expect(loaded, `${label} should resolve to a working local dashboard image asset`).toBe(true);
+  expect(loaded.source, `${label} should resolve to a cached local dashboard image asset`).toContain("/static/cache/");
+  expect(loaded.naturalWidth, `${label} should resolve to a non-empty dashboard image asset`).toBeGreaterThan(0);
 }
 
 async function getHeaderNavigation(page) {

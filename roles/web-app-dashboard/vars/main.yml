@@ -9,6 +9,12 @@ webserver_extra_configuration:        "{{ lookup('template', 'nginx/sso.html.con
 
 ## Simpleicons
 DASHBOARD_SIMPLEICONS_ENABLED:      "{{ lookup('config', application_id, 'compose.services.simpleicons.enabled') }}"
+DASHBOARD_SIMPLEICONS_STATIC_SUBDIR: "simpleicons"
+DASHBOARD_SIMPLEICONS_STATIC_DIR_HOST: "{{ [ lookup('container', application_id, 'directories.volumes'), DASHBOARD_SIMPLEICONS_STATIC_SUBDIR ] | path_join }}"
+DASHBOARD_SIMPLEICONS_STATIC_DIR_CONTAINER: "{{ ['/app/static', DASHBOARD_SIMPLEICONS_STATIC_SUBDIR] | path_join }}"
+# Use the direct local service port for sync/checks because the public
+# Simple Icons domain currently redirects through the file service.
+DASHBOARD_SIMPLEICONS_SYNC_URL_BASE: "{{ 'http://' ~ DOCKER_REACH_HOST ~ ':' ~ (ports.localhost.http['web-svc-simpleicons'] | string) ~ '/' }}"
 
 ## Javascript
 DASHBOARD_JS_CDN_URL:               "{{ lookup('tls', 'web-svc-cdn', 'url.base') }}"
