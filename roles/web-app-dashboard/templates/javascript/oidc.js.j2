@@ -17,6 +17,10 @@ const KC_CONFIG = {
 };
 
 const DEBUG = {{ 'true' if MODE_DEBUG else 'false' }};
+// Keycloak's hidden session-status iframe is noisy on newer Chromium builds and
+// collides with dashboard-embedded OIDC flows. We keep explicit init/redirect
+// handling plus token refresh below, so hidden iframe polling can stay off.
+const KEYCLOAK_IFRAME_POLLING_ENABLED = false;
 
 /* ==============================================
    2) Helpers for menu manipulation
@@ -163,7 +167,7 @@ async function initAuthUI() {
       onLoad: onLoadMode,
       pkceMethod: "S256",
       silentCheckSsoRedirectUri: KC_CONFIG.silentCheckSsoRedirectUri,
-      checkLoginIframe: true,
+      checkLoginIframe: KEYCLOAK_IFRAME_POLLING_ENABLED,
       tokenMinValid: 30
     });
   } catch (e) {
@@ -205,6 +209,7 @@ async function initAuthUI() {
     console.log("[oidc] init done", {
       authenticated,
       kcJsUrl,
+      checkLoginIframe: KEYCLOAK_IFRAME_POLLING_ENABLED,
       silentCheckSsoRedirectUri: KC_CONFIG.silentCheckSsoRedirectUri
     });
   }
