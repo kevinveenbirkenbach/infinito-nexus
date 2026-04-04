@@ -1,0 +1,46 @@
+server:
+  csp:
+    flags:
+      script-src-elem:
+        unsafe-inline:            true
+      style-src-attr:
+        unsafe-inline:            true
+    whitelist: {}
+  domains:
+    aliases: []
+    canonical:
+      - prometheus.{{ DOMAIN_PRIMARY }}
+  status_codes:
+    default:                      [200, 302]
+compose:
+  services:
+    oidc:
+      enabled:                    false
+    oauth2:
+      enabled:                    true
+      origin:
+        host:                     "application"
+        port:                     "9090"
+    logout:
+      enabled:                    true
+    dashboard:
+      enabled:                    true
+    matomo:
+      enabled:                    true
+      shared:                     true
+    database:
+      enabled:                    false
+    redis:
+      enabled:                    false
+    css:
+      enabled:                    true
+    prometheus:
+      image:                      "prom/prometheus"
+      version:                    "v3.2.1"
+      name:                       "prometheus"
+      cpus:                       "0.5"
+      mem_reservation:            "256m"
+      mem_limit:                  "512m"
+      pids_limit:                 256
+  volumes:
+    data:                         "prometheus_data"

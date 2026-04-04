@@ -1,0 +1,13 @@
+# General
+application_id:               "web-app-prometheus"
+
+# Docker
+container_port:               "{{ ports.localhost.http[application_id] }}"
+
+# Prometheus
+PROMETHEUS_VERSION:           "{{ lookup('config', application_id, 'compose.services.prometheus.version') }}"
+PROMETHEUS_IMAGE:             "{{ lookup('config', application_id, 'compose.services.prometheus.image') }}"
+PROMETHEUS_CONTAINER:         "{{ lookup('config', application_id, 'compose.services.prometheus.name') }}"
+
+## Volumes
+PROMETHEUS_VOLUME_DATA:       "{{ lookup('config', application_id, 'compose.volumes.data') }}"
