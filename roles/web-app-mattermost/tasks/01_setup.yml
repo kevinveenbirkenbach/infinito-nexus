@@ -26,19 +26,6 @@
   changed_when: mm_create_admin.rc == 0
   failed_when: mm_create_admin.rc != 0 and 'already exists' not in (mm_create_admin.stdout + mm_create_admin.stderr)
 
-- name: "Mattermost | Create biber user"
-  shell: |
-    container exec -i {{ MATTERMOST_CONTAINER }} \
-      /mattermost/bin/mmctl --local user create \
-        --email    "{{ users.biber.email }}" \
-        --username "{{ users.biber.username }}" \
-        --password {{ users.biber.password | quote }}
-  args:
-    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  register: mm_create_biber
-  changed_when: mm_create_biber.rc == 0
-  failed_when: mm_create_biber.rc != 0 and 'already exists' not in (mm_create_biber.stdout + mm_create_biber.stderr)
-
 - name: "Mattermost | Create default team"
   shell: |
     container exec -i {{ MATTERMOST_CONTAINER }} \
@@ -50,6 +37,16 @@
   register: mm_create_team
   changed_when: mm_create_team.rc == 0
   failed_when: mm_create_team.rc != 0 and 'already exists' not in (mm_create_team.stdout + mm_create_team.stderr) and 'existing team' not in (mm_create_team.stdout + mm_create_team.stderr)
+
+- name: "Mattermost | Enable open invite on default team"
+  shell: |
+    container exec -i {{ lookup('database', application_id, 'container') }} \
+      psql -U {{ lookup('database', application_id, 'username') }} \
+           -d {{ lookup('database', application_id, 'name') }} \
+           -c "UPDATE teams SET allowopeninvite = true WHERE name = 'main';"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: false
 
 - name: "Mattermost | Check which users are already in default team"
   shell: |
@@ -69,16 +66,6 @@
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
   when: users.administrator.email not in mm_team_members.stdout
-
-- name: "Mattermost | Add biber to default team"
-  shell: |
-    container exec -i {{ MATTERMOST_CONTAINER }} \
-      /mattermost/bin/mmctl --local team users add \
-        main \
-        "{{ users.biber.email }}"
-  args:
-    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  when: users.biber.email not in mm_team_members.stdout
 
 - name: "Mattermost | Check administrator auth service"
   shell: |
@@ -122,44 +109,3 @@
     - MATTERMOST_OIDC_ENABLED | bool
     - mm_admin_authservice.stdout | trim != 'gitlab'
 
-- name: "Mattermost | Check biber auth service"
-  shell: |
-    container exec -i {{ lookup('database', application_id, 'container') }} \
-      psql -U {{ lookup('database', application_id, 'username') }} \
-           -d {{ lookup('database', application_id, 'name') }} \
-           -t -c "SELECT authservice FROM users WHERE email='{{ users.biber.email }}';"
-  args:
-    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  register: mm_biber_authservice
-  changed_when: false
-  when: MATTERMOST_OIDC_ENABLED | bool
-
-- name: "Mattermost | Get biber uidNumber from LDAP"
-  shell: |
-    container exec -i {{ MATTERMOST_LDAP_CONTAINER }} \
-      ldapsearch -x -H ldap://localhost:389 \
-        -D {{ LDAP.DN.ADMINISTRATOR.DATA | quote }} \
-        -w {{ LDAP.BIND_CREDENTIAL | quote }} \
-        -b {{ LDAP.DN.OU.USERS | quote }} \
-        "(uid={{ users.biber.username }})" uidNumber \
-    | grep '^uidNumber:' | awk '{print $2}'
-  args:
-    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  register: mm_biber_uidnumber
-  changed_when: false
-  failed_when: mm_biber_uidnumber.rc != 0 or mm_biber_uidnumber.stdout | trim == ''
-  when:
-    - MATTERMOST_OIDC_ENABLED | bool
-    - mm_biber_authservice.stdout | trim != 'gitlab'
-
-- name: "Mattermost | Convert biber to gitlab SSO auth"
-  shell: |
-    container exec -i {{ lookup('database', application_id, 'container') }} \
-      psql -U {{ lookup('database', application_id, 'username') }} \
-           -d {{ lookup('database', application_id, 'name') }} \
-           -c "UPDATE users SET authservice='gitlab', authdata='{{ mm_biber_uidnumber.stdout | trim }}', password='' WHERE email='{{ users.biber.email }}';"
-  args:
-    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
-  when:
-    - MATTERMOST_OIDC_ENABLED | bool
-    - mm_biber_authservice.stdout | trim != 'gitlab'

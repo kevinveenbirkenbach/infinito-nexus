@@ -112,15 +112,13 @@ async function waitForMattermostChannelView(frame, timeout = 60_000) {
   return waitForFirstVisible([channelSidebar, townSquare], timeout);
 }
 
-// Log out of Mattermost via the REST API rather than navigating to /logout.
-// The nginx vhost for every app intercepts `location = /logout` and proxies it to the
-// universal-logout service (web-svc-logout), which triggers a multi-domain OIDC logout
-// redirect chain that causes net::ERR_ABORTED in Playwright. Calling the Mattermost
-// API endpoint directly invalidates the session without going through nginx /logout.
+// Log out via the universal logout endpoint.
+// Every app's nginx vhost intercepts `location = /logout` and proxies it to
+// web-svc-logout, which terminates all active sessions across all apps.
+// Using `waitUntil: 'commit'` avoids net::ERR_ABORTED from the multi-domain
+// redirect chain the service triggers after invalidating the session.
 async function mattermostLogout(page, baseUrl) {
-  await page.evaluate(async (apiUrl) => {
-    await fetch(apiUrl, { method: "POST", credentials: "include" }).catch(() => {});
-  }, `${baseUrl.replace(/\/$/, "")}/api/v4/users/logout`);
+  await page.goto(`${baseUrl.replace(/\/$/, "")}/logout`, { waitUntil: "commit" }).catch(() => {});
 }
 
 test.beforeEach(() => {
@@ -182,14 +180,16 @@ test("dashboard to mattermost: sso login, verify channel view, logout", async ({
   // intercept that routes to the universal-logout service.
   await mattermostLogout(page, expectedMattermostBaseUrl);
 
-  // 10. Verify the session is gone — Mattermost should redirect to login for unauthenticated requests.
+  // 10. Verify the session is gone — Mattermost should redirect to login or landing
+  // for unauthenticated requests. In Mattermost v11+ the default unauthenticated
+  // redirect is /landing#/ rather than /login.
   await page.goto(`${expectedMattermostBaseUrl}/`, { waitUntil: "domcontentloaded" });
   await expect
     .poll(() => page.url(), {
       timeout: 15_000,
-      message: "Expected Mattermost to redirect to login after logout"
+      message: "Expected Mattermost to redirect to /login or /landing after logout"
     })
-    .toContain("/login");
+    .toMatch(/\/(login|landing)/);
 
   await page.goto("/");
 });
@@ -237,10 +237,10 @@ test("mattermost: biber sends direct message to administrator, administrator rec
     // Dismiss onboarding popups that appear for new SSO users
     await dismissMattermostPopups(biberPage);
 
-    // Wait for the channel view to load
-    await waitForMattermostChannelView(biberPage, 30_000);
-
     // Open DM with administrator by navigating directly to the DM URL.
+    // On first login biber has no team membership and lands on /select_team —
+    // navigating to /{team}/messages/@{username} auto-joins the open team and
+    // opens the DM in one step, so waitForMattermostChannelView is not needed here.
     // Mattermost v11 supports /{team}/messages/@{username} — more reliable than
     // clicking the sidebar "New DM" button whose aria-label changed across versions.
     await biberPage.goto(`${expectedMattermostBaseUrl}/main/messages/@${adminUsername}`);
