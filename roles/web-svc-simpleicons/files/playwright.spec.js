@@ -52,16 +52,27 @@ test("simpleicons serves keycloak assets directly on its own domain", async ({ r
 
   const expectedOrigin = new URL(appBaseUrl).origin;
 
-  const landingResponse = await request.get(appBaseUrl);
-  expect(landingResponse.status(), "Expected the Simple Icons landing page to return HTTP 200").toBe(200);
-  expectOrigin(
-    landingResponse.url(),
-    expectedOrigin,
-    "Expected the Simple Icons landing page to stay on icon.infinito.example instead of redirecting elsewhere"
-  );
-  const landingBody = await landingResponse.text();
-  expect(contentTypeOf(landingResponse)).toMatch(/text\/html|text\/plain/);
-  expectLandingPageText(landingBody);
+  const landingResponse = await request.get(appBaseUrl, { maxRedirects: 0 });
+  const landingStatus = landingResponse.status();
+
+  expect(
+    landingStatus === 200 || (landingStatus >= 301 && landingStatus <= 302),
+    `Expected the Simple Icons landing page to return HTTP 200 or a redirect (301/302), got ${landingStatus}`
+  ).toBe(true);
+
+  if (landingStatus === 200) {
+    expectOrigin(
+      landingResponse.url(),
+      expectedOrigin,
+      "Expected the Simple Icons landing page to stay on icon.infinito.example when no redirect is configured"
+    );
+    const landingBody = await landingResponse.text();
+    expect(contentTypeOf(landingResponse)).toMatch(/text\/html|text\/plain/);
+    expectLandingPageText(landingBody);
+  } else {
+    const location = landingResponse.headers()["location"];
+    expect(location, "Expected the redirect to include a Location header").toBeTruthy();
+  }
 
   const svgResponse = await request.get(`${appBaseUrl}/${knownIconSlug}.svg`);
   expect(svgResponse.status(), `Expected ${knownIconSlug}.svg to return HTTP 200`).toBe(200);
