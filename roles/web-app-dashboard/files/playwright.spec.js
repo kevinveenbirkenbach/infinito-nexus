@@ -63,7 +63,14 @@ function attachDiagnostics(page) {
 
   page.on("console", (message) => {
     if (message.type() === "error") {
-      consoleErrors.push(message.text());
+      const location = message.location();
+
+      consoleErrors.push({
+        text: message.text(),
+        url: location.url || "",
+        lineNumber: location.lineNumber,
+        columnNumber: location.columnNumber
+      });
     }
   });
 
@@ -80,6 +87,52 @@ function attachDiagnostics(page) {
   });
 
   return { consoleErrors, pageErrors, responses };
+}
+
+function formatConsoleError(record) {
+  if (!record || typeof record === "string") {
+    return String(record || "");
+  }
+
+  if (!record.url) {
+    return record.text;
+  }
+
+  return `${record.text} (${record.url}:${record.lineNumber}:${record.columnNumber})`;
+}
+
+function formatConsoleErrors(records) {
+  return records.map((record) => formatConsoleError(record)).join("\n");
+}
+
+function isMatomoConsoleNoise(record) {
+  if (!record) {
+    return false;
+  }
+
+  const text = typeof record === "string" ? record : record.text || "";
+  const url = typeof record === "string" ? "" : record.url || "";
+
+  return (
+    url.startsWith(matomoBaseUrl) ||
+    /matomo/i.test(text) ||
+    /_pk_(id|ses)\./i.test(text) ||
+    /There was an error setting cookie/i.test(text) ||
+    /Can't write cookie on domain/i.test(text)
+  );
+}
+
+function expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise = false } = {}) {
+  expect(diagnostics.pageErrors, `Unexpected page errors: ${diagnostics.pageErrors.join("\n")}`).toEqual([]);
+
+  const unexpectedConsoleErrors = ignoreMatomoConsoleNoise
+    ? diagnostics.consoleErrors.filter((record) => !isMatomoConsoleNoise(record))
+    : diagnostics.consoleErrors;
+
+  expect(
+    unexpectedConsoleErrors,
+    `Unexpected console errors: ${formatConsoleErrors(unexpectedConsoleErrors)}`
+  ).toEqual([]);
 }
 
 async function waitForDashboardReady(page) {
@@ -378,7 +431,7 @@ test.beforeEach(async ({ page }) => {
   await page.context().clearCookies();
 });
 
-test("dashboard loads injected css, matomo, logout, javascript, simpleicons, and logo assets", async ({ page }) => {
+test("dashboard loads core css, javascript, simpleicons, and logo assets", async ({ page }) => {
   const diagnostics = attachDiagnostics(page);
   const documentResponse = await page.goto("/");
 
@@ -394,7 +447,6 @@ test("dashboard loads injected css, matomo, logout, javascript, simpleicons, and
   await waitForResourceResponse(diagnostics.responses, "/_shared/js/logout.js", "logout injector script");
   await waitForResourceResponse(diagnostics.responses, `${dashboardJsBaseUrl}/iframe.js`, "dashboard iframe sync script");
   await waitForResourceResponse(diagnostics.responses, `${dashboardJsBaseUrl}/oidc.js`, "dashboard oidc script");
-  await waitForResourceResponse(diagnostics.responses, `${matomoBaseUrl}/matomo.js`, "Matomo tracking script");
 
   expect(documentHtml).toContain(sharedCssPrefix);
   expect(documentHtml).toContain(`${sharedCssPrefix}/default.css`);
@@ -405,8 +457,6 @@ test("dashboard loads injected css, matomo, logout, javascript, simpleicons, and
   expect(documentHtml).toContain(dashboardJsBaseUrl);
   expect(documentHtml).toContain('"iframe.js"');
   expect(documentHtml).toContain('"oidc.js"');
-  expect(documentHtml).toContain("matomo.js");
-  expect(documentHtml).toContain("matomo.php?idsite=");
   await expectDashboardCssEffects(page);
 
   const headerLogo = page.locator("header.header img[alt='logo']").first();
@@ -436,7 +486,7 @@ test("dashboard loads injected css, matomo, logout, javascript, simpleicons, and
   ).toBeVisible({ timeout: 60_000 });
   await expectStableCardHover(page, "Keycloak");
 
-  const iframeTargetUrl = `${matomoBaseUrl}/index.php`;
+  const iframeTargetUrl = `${matomoBaseUrl}/?playwright-iframe-sync=1`;
 
   await page.evaluate(({ href, origin }) => {
     const event = new MessageEvent("message", {
@@ -462,8 +512,25 @@ test("dashboard loads injected css, matomo, logout, javascript, simpleicons, and
     })
     .toBe(iframeTargetUrl);
 
-  expect(diagnostics.pageErrors, `Unexpected page errors: ${diagnostics.pageErrors.join("\n")}`).toEqual([]);
-  expect(diagnostics.consoleErrors, `Unexpected console errors: ${diagnostics.consoleErrors.join("\n")}`).toEqual([]);
+  expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
+});
+
+test("dashboard integrates matomo tracking assets", async ({ page }) => {
+  const diagnostics = attachDiagnostics(page);
+  const documentResponse = await page.goto("/");
+
+  expect(documentResponse, "Expected the dashboard document response to exist").toBeTruthy();
+  expect(documentResponse.status(), "Expected the dashboard document response to be successful").toBeLessThan(400);
+
+  const documentHtml = await documentResponse.text();
+
+  await waitForDashboardReady(page);
+  await waitForResourceResponse(diagnostics.responses, `${matomoBaseUrl}/matomo.js`, "Matomo tracking script");
+
+  expect(documentHtml).toContain("matomo.js");
+  expect(documentHtml).toContain("matomo.php?idsite=");
+
+  expectNoUnexpectedDiagnostics(diagnostics);
 });
 
 test("dashboard login automatically switches Login to Account and exposes Logout under Account", async ({ page }) => {
@@ -532,6 +599,5 @@ test("dashboard login automatically switches Login to Account and exposes Logout
   await waitForDashboardReady(page);
   await expectLoggedOutHeaderAuthState(page);
 
-  expect(diagnostics.pageErrors, `Unexpected page errors: ${diagnostics.pageErrors.join("\n")}`).toEqual([]);
-  expect(diagnostics.consoleErrors, `Unexpected console errors: ${diagnostics.consoleErrors.join("\n")}`).toEqual([]);
+  expectNoUnexpectedDiagnostics(diagnostics, { ignoreMatomoConsoleNoise: true });
 });
