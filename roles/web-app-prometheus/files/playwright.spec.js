@@ -28,6 +28,8 @@ const oidcIssuerUrl      = decodeDotenvQuotedValue(process.env.OIDC_ISSUER_URL);
 const prometheusBaseUrl  = decodeDotenvQuotedValue(process.env.PROMETHEUS_BASE_URL);
 const adminUsername      = decodeDotenvQuotedValue(process.env.ADMIN_USERNAME);
 const adminPassword      = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
+const biberUsername      = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
+const biberPassword      = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
 
 // Perform SSO login via Keycloak.
 // Accepts either a Page or a FrameLocator (when Keycloak is inside the dashboard iframe).
@@ -53,14 +55,17 @@ test.beforeEach(() => {
   expect(prometheusBaseUrl, "PROMETHEUS_BASE_URL must be set in the Playwright env file").toBeTruthy();
   expect(adminUsername,     "ADMIN_USERNAME must be set in the Playwright env file").toBeTruthy();
   expect(adminPassword,     "ADMIN_PASSWORD must be set in the Playwright env file").toBeTruthy();
+  expect(biberUsername,     "BIBER_USERNAME must be set in the Playwright env file").toBeTruthy();
+  expect(biberPassword,     "BIBER_PASSWORD must be set in the Playwright env file").toBeTruthy();
 });
 
-// Scenario: dashboard → click Prometheus → SSO login inside iframe → verify Prometheus UI → logout
+// Scenario I: dashboard → click Prometheus → SSO login inside iframe (as admin) → verify Prometheus UI → logout
 //
+// Prometheus is admin-only (allowed_groups: web-app-prometheus-administrator).
 // Clicking the Prometheus link on the dashboard opens it inside a fullscreen iframe.
 // oauth2-proxy redirects unauthenticated requests to Keycloak, which loads inside that iframe.
 // The outer page URL reflects the iframe URL via the `?iframe=` query parameter.
-test("dashboard to prometheus: sso login, verify ui, logout", async ({ page }) => {
+test("dashboard to prometheus: admin sso login, verify ui, logout", async ({ page }) => {
   const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
   const expectedPrometheusBaseUrl = prometheusBaseUrl.replace(/\/$/, "");
 
@@ -77,7 +82,7 @@ test("dashboard to prometheus: sso login, verify ui, logout", async ({ page }) =
     })
     .toContain(encodeURIComponent(expectedOidcAuthUrl));
 
-  // 3. Fill credentials inside the dashboard iframe (Keycloak is rendered inside it)
+  // 3. Fill admin credentials inside the dashboard iframe (Keycloak is rendered inside it)
   const appFrame = page.frameLocator("iframe").first();
   await performOidcLogin(appFrame, adminUsername, adminPassword);
 
@@ -109,4 +114,58 @@ test("dashboard to prometheus: sso login, verify ui, logout", async ({ page }) =
     .toContain(expectedOidcAuthUrl);
 
   await page.goto("/");
+});
+
+// Scenario II: biber (non-admin) navigates directly to Prometheus → SSO login → access denied
+//
+// biber is a regular authenticated user but is NOT in the web-app-prometheus-administrator group.
+// After successfully authenticating with Keycloak, oauth2-proxy checks the groups claim and
+// returns HTTP 403 — biber must never reach the Prometheus UI.
+test("prometheus: biber is denied access after sso login", async ({ browser }) => {
+  const expectedOidcAuthUrl       = `${oidcIssuerUrl.replace(/\/$/, "")}/protocol/openid-connect/auth`;
+  const expectedPrometheusBaseUrl = prometheusBaseUrl.replace(/\/$/, "");
+
+  // Use an isolated browser context so this test has no shared session with other tests.
+  const biberContext = await browser.newContext({ ignoreHTTPSErrors: true });
+
+  try {
+    const biberPage = await biberContext.newPage();
+
+    // Register the callback listener BEFORE goto to guarantee no response is missed.
+    // In fast local environments the entire redirect chain (goto → Keycloak → callback)
+    // can complete before a listener registered after performOidcLogin would start,
+    // causing waitForResponse to catch a 200 sub-resource instead of the real response.
+    //
+    // oauth2-proxy hits /oauth2/callback after the Keycloak login:
+    //   • user NOT in allowed_groups → 403 (biber's expected path)
+    //   • user IS in allowed_groups  → 302 redirect to the app (admin's path)
+    const callbackResponsePromise = biberPage.waitForResponse(
+      (res) => res.url().includes("/oauth2/callback"),
+      { timeout: 60_000 }
+    );
+
+    // 1. Navigate directly to Prometheus — oauth2-proxy redirects to Keycloak
+    await biberPage.goto(`${expectedPrometheusBaseUrl}/`);
+
+    await expect
+      .poll(() => biberPage.url(), {
+        timeout: 30_000,
+        message: `Expected redirect to Keycloak OIDC auth: ${expectedOidcAuthUrl}`
+      })
+      .toContain(expectedOidcAuthUrl);
+
+    // 2. Log in as biber via Keycloak
+    await performOidcLogin(biberPage, biberUsername, biberPassword);
+
+    // 3. Await the callback response — must be 403 (biber is not in prometheus-administrator group)
+    const callbackResponse = await callbackResponsePromise;
+
+    expect(
+      callbackResponse.status(),
+      `Expected oauth2-proxy to deny biber with 403 at /oauth2/callback, got ${callbackResponse.status()}`
+    ).toBe(403);
+
+  } finally {
+    await biberContext.close().catch(() => {});
+  }
 });

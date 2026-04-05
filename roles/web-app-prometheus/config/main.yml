@@ -21,6 +21,8 @@ compose:
       origin:
         host:                     "application"
         port:                     "9090"
+      allowed_groups:
+        - "{{ [RBAC.GROUP.NAME, 'web-app-prometheus-administrator'] | path_join }}"
     logout:
       enabled:                    true
     dashboard:
