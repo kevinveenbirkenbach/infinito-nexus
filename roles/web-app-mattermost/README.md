@@ -1,4 +1,4 @@
-# web-app-mattermost
+# Mattermost
 
 Deploys [Mattermost Team Edition](https://mattermost.com/) — an open-source, self-hosted team messaging platform — as part of the Infinito.Nexus stack.
 
