@@ -5,6 +5,7 @@ Use this page when you are iterating on a local app deploy during debugging or d
 ## Loop
 
 - Unless the user explicitly says to reuse the existing setup, you MUST start once with `APPS=<roles> make deploy-fresh-purged-apps` to establish the baseline inventory and clean app state. Set `FULL_CYCLE=true` to also run the async update pass (pass 2).
+- You MUST NOT run more than one deploy command at the same time. Deployments MUST be executed serially, never in parallel.
 - To speed up debugging, you MAY pass multiple apps at once, e.g. `APPS="<roles> <roles>" make deploy-fresh-purged-apps`.
 - After that, you MUST use `APPS=<roles> make deploy-reuse-kept-apps` for the default edit-fix-redeploy loop.
 - Do NOT rerun `APPS=<roles> make deploy-fresh-purged-apps` just because a deploy failed or you changed code. That restarts the stack unnecessarily and burns time.
