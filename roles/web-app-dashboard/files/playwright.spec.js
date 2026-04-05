@@ -411,6 +411,7 @@ const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
 const cdnBaseUrl = normalizeBaseUrl(process.env.CDN_BASE_URL || "");
 const dashboardJsBaseUrl = normalizeBaseUrl(process.env.DASHBOARD_JS_BASE_URL || "");
 const matomoBaseUrl = normalizeBaseUrl(process.env.MATOMO_BASE_URL || "");
+const matomoEnabled = (process.env.MATOMO_ENABLED || "").toLowerCase() === "true";
 
 const sharedCssPrefix = buildAssetPathPrefix(cdnBaseUrl, "/_shared/css");
 const sharedJsPrefix = buildAssetPathPrefix(cdnBaseUrl, "/_shared/js");
@@ -516,6 +517,8 @@ test("dashboard loads core css, javascript, simpleicons, and logo assets", async
 });
 
 test("dashboard integrates matomo tracking assets", async ({ page }) => {
+  test.skip(!matomoEnabled, "Skipped: Matomo tracking is disabled in this deployment");
+
   const diagnostics = attachDiagnostics(page);
   const documentResponse = await page.goto("/");
 
