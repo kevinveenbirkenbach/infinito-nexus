@@ -1,4 +1,4 @@
-# web-app-fider
+# Fider
 
 Deploys [Fider](https://getfider.com/) — an open-source community feedback and voting platform — as part of the Infinito.Nexus stack.
 
@@ -15,11 +15,12 @@ Deploys [Fider](https://getfider.com/) — an open-source community feedback and
 
 Fider has native OAuth2 support but **no environment variables or CLI** for configuring it — the provider is stored directly in the `oauth_providers` PostgreSQL table.
 
-The setup task (`tasks/01_setup.yml`) handles the full first-deploy bootstrap automatically:
+The setup tasks (`tasks/01_setup_oidc.yml`) handle the full first-deploy bootstrap automatically:
 
-1. **Tenant bootstrap** — calls Fider's `POST /_api/tenants` API to create the initial tenant. Fider creates the tenant with `status=1` (active) but sends a verification email before creating any user record.
-2. **Admin user creation** — since Fider requires at least one user to exist before showing the main page (it shows "pending activation" otherwise), the admin user is inserted directly into the `users` table (`role=3` = Administrator, `status=1` = Active), bypassing email verification. The `email_verifications` record is also marked as verified. Both operations are idempotent (`WHERE NOT EXISTS` / `WHERE verified_at IS NULL`).
-3. **OIDC provider** — inserts the Keycloak provider into `oauth_providers` with `status=2` (enabled) and `is_trusted=true`. Idempotent via `ON CONFLICT (tenant_id, provider) DO UPDATE`.
+1. **Tenant bootstrap** — calls Fider's `POST /_api/tenants` API to create the initial tenant. The API creates the tenant with `status=2` (pending email verification) and does not yet create any user record.
+2. **Admin user creation** — the admin user is inserted directly into the `users` table (`role=3` = Administrator, `status=1` = Active), bypassing email verification. The `email_verifications` record is also marked as verified. Both operations are idempotent (`WHERE NOT EXISTS` / `WHERE verified_at IS NULL`).
+3. **Tenant activation** — sets `status=1` on the tenant row so Fider serves the public page instead of showing a "pending activation" screen.
+4. **OIDC provider** — inserts the Keycloak provider into `oauth_providers` with `status=2` (enabled) and `is_trusted=true`. Idempotent via `ON CONFLICT (tenant_id, provider) DO UPDATE`.
 
 When a user logs in via Keycloak for the first time, Fider matches their email to the existing admin user and links the OIDC provider automatically.
 
