@@ -17,7 +17,7 @@
   known_hosts:
     path: "~/.ssh/known_hosts"
     name: github.com
-    key: "{{ lookup('pipe', 'ssh-keyscan -t ed25519 github.com | grep -v \"^#\"') }}"
+    key: "{{ PKGMGR_GITHUB_HOST_KEY }}"
   become: true
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 

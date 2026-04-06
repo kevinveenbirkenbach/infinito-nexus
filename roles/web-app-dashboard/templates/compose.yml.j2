@@ -7,6 +7,7 @@
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}
     volumes:
       - "{{ DASHBOARD_CONFIG_YML_DEST }}:{{ DASHBOARD_CONFIG_YML_DOCKER_DEST }}:ro"
+      - "{{ DASHBOARD_SIMPLEICONS_STATIC_DIR_HOST }}:{{ DASHBOARD_SIMPLEICONS_STATIC_DIR_CONTAINER }}:ro"
     restart: {{ DOCKER_RESTART_POLICY }}
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 {% include 'roles/sys-svc-container/templates/healthcheck/tcp.yml.j2' %}

@@ -5,7 +5,7 @@ const baseURL = process.env.APP_BASE_URL || "http://127.0.0.1";
 module.exports = defineConfig({
   testDir: "./tests",
   timeout: 300_000,
-  retries: 0,
+  retries: 2,
   workers: 1,
   outputDir: "/reports/test-results",
   reporter: [

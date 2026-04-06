@@ -186,16 +186,19 @@
     users: "{{ users }}"
     applications: "{{ applications }}"
 
-# Optional wait until app is ready (uses domain resolution)
-- name: Wait until application is ready (HTTP 200/302)
+# Optional wait until app is ready (uses domain resolution).
+# Accept any 1xx/2xx/3xx response — anything below 400 means the service is up.
+# follow_redirects:none ensures we check the app itself, not its redirect target.
+- name: Wait until application is ready (any non-error response)
   uri_retry:
     url: "{{ lookup('tls', application_id, 'url.base') }}"
-    status_code: [200, 302]
+    status_code: "{{ range(100, 400) | list }}"
     validate_certs: false
+    follow_redirects: none
   register: _wait_result
   retries: "{{ TEST_E2E_PLAYWRIGHT_WAIT_RETRIES }}"
   delay: "{{ TEST_E2E_PLAYWRIGHT_WAIT_DELAY }}"
-  until: _wait_result.status in [200, 302]
+  until: _wait_result.status is defined and _wait_result.status | int < 400
   when: TEST_E2E_PLAYWRIGHT_WAIT_ENABLED | bool
 
 - name: Ensure reports dir exists

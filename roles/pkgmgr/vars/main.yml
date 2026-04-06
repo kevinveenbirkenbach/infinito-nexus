@@ -12,3 +12,6 @@ PKGMGR_REPOSITORIES_DIR: "/opt/Repositories/"
 
 # The directory where the repository will be cloned
 PKGMGR_INSTALL_PATH:    "{{ [ PKGMGR_REPOSITORIES_DIR, 'github.com/kevinveenbirkenbach/package-manager' ] | path_join }}"
+
+# Known SSH host key for github.com (ed25519) - static to avoid ssh-keyscan at runtime
+PKGMGR_GITHUB_HOST_KEY: "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"

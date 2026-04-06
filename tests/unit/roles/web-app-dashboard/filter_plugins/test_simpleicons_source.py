@@ -3,6 +3,7 @@ import os
 import pathlib
 import tempfile
 import unittest
+from ansible.errors import AnsibleFilterError
 from unittest.mock import patch
 
 import certifi
@@ -34,6 +35,7 @@ def _load_simpleicons_module():
 
 _simpleicons = _load_simpleicons_module()
 get_requests_verify = _simpleicons.get_requests_verify
+add_simpleicon_source = _simpleicons.add_simpleicon_source
 
 
 class TestGetRequestsVerify(unittest.TestCase):
@@ -63,6 +65,49 @@ class TestGetRequestsVerify(unittest.TestCase):
             clear=False,
         ):
             self.assertEqual(get_requests_verify(), certifi.where())
+
+
+class TestAddSimpleiconSource(unittest.TestCase):
+    def test_uses_dashboard_local_static_svg_path_when_icon_exists(self):
+        cards = [{"title": "Keycloak", "icon": {"class": "fa-solid fa-lock"}}]
+
+        with (
+            patch.object(
+                _simpleicons, "get_requests_verify", return_value="/tmp/test-ca.crt"
+            ),
+            patch.object(_simpleicons.requests, "head") as mock_head,
+        ):
+            mock_head.return_value.status_code = 200
+
+            result = add_simpleicon_source(cards, "https://icons.example")
+
+        self.assertEqual(result[0]["icon"]["source"], "simpleicons/keycloak.svg")
+        self.assertEqual(result[0]["icon"]["class"], "fa-solid fa-lock")
+        mock_head.assert_called_once_with(
+            "https://icons.example/keycloak.svg",
+            timeout=2,
+            allow_redirects=True,
+            verify="/tmp/test-ca.crt",
+        )
+
+    def test_keeps_card_without_source_when_icon_does_not_exist(self):
+        cards = [{"title": "Missing", "icon": {"class": "fa-solid fa-circle-question"}}]
+
+        with patch.object(_simpleicons.requests, "head") as mock_head:
+            mock_head.return_value.status_code = 404
+
+            result = add_simpleicon_source(cards, "https://icons.example")
+
+        self.assertNotIn("source", result[0]["icon"])
+        mock_head.assert_called_once()
+
+    def test_rejects_empty_dashboard_local_static_directory(self):
+        with self.assertRaises(AnsibleFilterError):
+            add_simpleicon_source(
+                [{"title": "Keycloak", "icon": {}}],
+                "https://icons.example",
+                local_static_dir="/",
+            )
 
 
 if __name__ == "__main__":

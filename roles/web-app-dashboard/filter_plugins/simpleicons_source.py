@@ -69,17 +69,25 @@ def resolve_simpleicons_base(simpleicons_value, web_protocol="https"):
     return f"{web_protocol}://{normalized}"
 
 
-def add_simpleicon_source(cards, simpleicons_value, web_protocol="https"):
+def add_simpleicon_source(
+    cards, simpleicons_value, web_protocol="https", local_static_dir="simpleicons"
+):
     """
     For each card in portfolio_cards, check if an icon exists in the simpleicons server.
-    If it does, add icon.source with the URL to the card entry.
+    If it does, add icon.source with a dashboard-local static SVG path.
 
     :param cards: List of card dictionaries (portfolio_cards)
     :param simpleicons_value: Fully rendered base URL, domain, or application domain mapping
     :param web_protocol: Protocol to use (https or http)
-    :return: New list of cards with icon.source set when available
+    :param local_static_dir: Dashboard static subdirectory that will contain synced SVG files
+    :return: New list of cards with icon.source set to a local static SVG path when available
     """
     base_url = resolve_simpleicons_base(simpleicons_value, web_protocol)
+    local_static_dir = str(local_static_dir or "simpleicons").strip().strip("/")
+    if not local_static_dir:
+        raise AnsibleFilterError(
+            "Simple Icons local static directory must be non-empty"
+        )
 
     enhanced = []
     for card in cards:
@@ -98,7 +106,7 @@ def add_simpleicon_source(cards, simpleicons_value, web_protocol="https"):
                 verify=get_requests_verify(),
             )
             if resp.status_code == 200:
-                card.setdefault("icon", {})["source"] = icon_url
+                card.setdefault("icon", {})["source"] = f"{local_static_dir}/{slug}.svg"
         except requests.RequestException:
             # Ignore network errors and move on
             pass

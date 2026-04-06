@@ -1,4 +1,17 @@
 ---
+- name: "Mattermost | Wait until mmctl local mode is ready"
+  shell: |
+    container exec -i {{ MATTERMOST_CONTAINER }} \
+      /mattermost/bin/mmctl --local system status
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: mm_ready_wait
+  retries: 60
+  delay: 5
+  until: mm_ready_wait.rc == 0
+  changed_when: false
+  failed_when: mm_ready_wait.rc != 0 and mm_ready_wait.attempts == 61
+
 - name: "Mattermost | Create system administrator user"
   shell: |
     container exec -i {{ MATTERMOST_CONTAINER }} \
@@ -25,7 +38,17 @@
   changed_when: mm_create_team.rc == 0
   failed_when: mm_create_team.rc != 0 and 'already exists' not in (mm_create_team.stdout + mm_create_team.stderr) and 'existing team' not in (mm_create_team.stdout + mm_create_team.stderr)
 
-- name: "Mattermost | Check if administrator is already in default team"
+- name: "Mattermost | Enable open invite on default team"
+  shell: |
+    container exec -i {{ lookup('database', application_id, 'container') }} \
+      psql -U {{ lookup('database', application_id, 'username') }} \
+           -d {{ lookup('database', application_id, 'name') }} \
+           -c "UPDATE teams SET allowopeninvite = true WHERE name = 'main';"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: false
+
+- name: "Mattermost | Check which users are already in default team"
   shell: |
     container exec -i {{ MATTERMOST_CONTAINER }} \
       /mattermost/bin/mmctl --local user list --team main

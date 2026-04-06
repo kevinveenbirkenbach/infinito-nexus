@@ -31,9 +31,16 @@
 
 - name: "Load Dashboard Brand logos"
   set_fact:
-    portfolio_cards: "{{ portfolio_cards | add_simpleicon_source(lookup('tls', 'web-svc-simpleicons', 'url.base')) }}"
+    portfolio_cards: "{{ portfolio_cards | add_simpleicon_source(DASHBOARD_SIMPLEICONS_SYNC_URL_BASE) }}"
   when: DASHBOARD_SIMPLEICONS_ENABLED | bool
   changed_when: false
+
+- name: Ensure dashboard local Simple Icons directory exists
+  file:
+    path: "{{ DASHBOARD_SIMPLEICONS_STATIC_DIR_HOST }}"
+    state: directory
+    mode: '0755'
+  when: DASHBOARD_SIMPLEICONS_ENABLED | bool
 
 - name: Group docker cards
   set_fact:
