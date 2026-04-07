@@ -20,6 +20,7 @@ ports:
       web-app-gitea:            16488
       web-app-snipe-it:         16489
       web-app-suitecrm:         16490
+      web-app-taiga:            16491
     ldap:
       svc-db-openldap: 389
     http:

@@ -3,14 +3,15 @@
   include_role:
     name: "{{ server_role }}"
   loop:
-    - user-administrator
-    - user-root
-    - sys-svc-sshd
-    - sys-svc-journalctl
-    - sys-ctl-hlth-disc-space
-    - sys-ctl-cln-disc-space
-    - sys-ctl-hlth-btrfs
-    - sys-ctl-rpr-btrfs-balancer
+    - user-administrator         # Create the administrator account for local privileged operations
+    - user-root                  # Manage root SSH access and root account hardening
+    - sys-svc-sshd               # Configure the SSH daemon for remote administration
+    - sys-svc-journalctl         # Configure persistent systemd-journald logging
+    - sys-ctl-hlth-disc-space    # Monitor disk usage and alert on low free space
+    - sys-ctl-cln-disc-space     # Reclaim disk space by cleaning temporary system data
+    - sys-ctl-hlth-btrfs         # Check Btrfs filesystem health and error counters
+    - sys-ctl-rpr-btrfs-balancer # Install and configure automatic Btrfs balancing
+    - sys-utils-service-loader   # Preload shared frontend services before web-svc and web-app roles
   loop_control:
     loop_var: server_role
 

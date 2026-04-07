@@ -126,3 +126,70 @@ ansible_become_password: !vault |
             # Should not crash and may or may not call subprocess depending on resolver behavior.
             # With our patch, it SHOULD call it exactly once.
             spr.assert_called_once()
+
+    def test_generate_credentials_replaces_empty_existing_value(self):
+        yaml_rt = YAML(typ="rt")
+        yaml_rt.preserve_quotes = True
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+            project_root = tmp / "repo"
+            project_root.mkdir()
+
+            roles_dir = tmp / "roles"
+            roles_dir.mkdir()
+
+            role_path = roles_dir / "web-app-taiga"
+            (role_path / "schema").mkdir(parents=True)
+            (role_path / "schema" / "main.yml").write_text("x: 1\n", encoding="utf-8")
+
+            host_vars_file = tmp / "host_vars.yml"
+            host_vars_file.write_text(
+                "applications:\n"
+                "  web-app-taiga:\n"
+                "    credentials:\n"
+                '      oauth2_proxy_cookie_secret: ""\n',
+                encoding="utf-8",
+            )
+            vault_pw_file = tmp / ".password"
+            vault_pw_file.write_text("dummy\n", encoding="utf-8")
+
+            snippet = """\
+applications:
+  web-app-taiga:
+    credentials:
+      oauth2_proxy_cookie_secret: regenerated-secret
+"""
+
+            with (
+                patch(
+                    "cli.create.inventory.credentials_generator.resolve_role_path",
+                    return_value=role_path,
+                ),
+                patch(
+                    "cli.create.inventory.credentials_generator.subprocess.run"
+                ) as spr,
+            ):
+                spr.return_value.returncode = 0
+                spr.return_value.stdout = snippet
+                spr.return_value.stderr = ""
+
+                generate_credentials_for_roles(
+                    application_ids=["web-app-taiga"],
+                    roles_dir=roles_dir,
+                    host_vars_file=host_vars_file,
+                    vault_password_file=vault_pw_file,
+                    project_root=project_root,
+                    env={"PYTHONPATH": "x"},
+                    workers=1,
+                )
+
+            with host_vars_file.open("r", encoding="utf-8") as f:
+                doc = yaml_rt.load(f) or {}
+
+            self.assertEqual(
+                doc["applications"]["web-app-taiga"]["credentials"][
+                    "oauth2_proxy_cookie_secret"
+                ],
+                "regenerated-secret",
+            )

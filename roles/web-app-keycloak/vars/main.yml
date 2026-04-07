@@ -2,6 +2,7 @@
 application_id:                   "web-app-keycloak"
 entity_name:                      "{{ application_id | get_entity_name }}"
 domain:                           "{{ lookup('domain',application_id) }}"
+webserver_extra_configuration:    "{{ lookup('template', 'nginx/helper_iframes.conf.j2') }}"
 
 # Keycloak
 

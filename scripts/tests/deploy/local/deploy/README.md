@@ -18,7 +18,7 @@ For the canonical Make target index that invokes these helpers, see [docs/contri
 - `reuse` means the flow uses an already existing inventory.
 - `kept` means the stack and app state stay in place.
 - `purged` means the flow removes the app or stack state before redeploying.
-- `app` means one application, `all` means every discovered application.
+- `apps` means one or more applications, `all` means every discovered application.
 
 ## Entry Points
 
@@ -26,6 +26,6 @@ For the canonical Make target index that invokes these helpers, see [docs/contri
 |---|---|---|---|
 | `fresh-kept-all.sh` | Discovers apps, creates `devices.yml`, and deploys all discovered apps. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Fresh all-app inventory path. |
 | `reuse-kept-all.sh` | Deploys every app from an existing inventory. | `INFINITO_DISTRO`, `TEST_DEPLOY_TYPE`, `INVENTORY_DIR` | Requires `${INVENTORY_DIR}/devices.yml` and `.password`. |
-| `fresh-kept-app.sh <app-id>` | Creates `devices.yml` for one app and deploys it. | `APP=<app-id>` | Single-app init and deploy path. |
-| `reuse-kept-app.sh` | Runs a targeted `infinito deploy dedicated` for one app. | `APP`, `TEST_DEPLOY_TYPE`, `INFINITO_CONTAINER`, `DEBUG`, `INVENTORY_DIR` | Reuses `devices.yml`. |
-| `fresh-purged-app.sh` | Recreates `devices.yml` and deploys one app twice with `ASYNC_ENABLED=false` and `ASYNC_ENABLED=true`. | `INFINITO_DISTRO`, `INVENTORY_DIR`, `TEST_DEPLOY_TYPE`, `APP` | Baseline and recovery path. |
+| `fresh-kept-app.sh <app-id>` | Creates `devices.yml` for one or more apps and deploys them. | `APPS=<app-id>` | Init and deploy path for a specific app set. |
+| `reuse-kept-app.sh` | Runs a targeted `infinito deploy dedicated` for one or more apps. | `APPS`, `TEST_DEPLOY_TYPE`, `INFINITO_CONTAINER`, `DEBUG`, `INVENTORY_DIR` | Reuses `devices.yml`. |
+| `fresh-purged-app.sh` | Recreates `devices.yml` and deploys one or more apps twice with `ASYNC_ENABLED=false` and `ASYNC_ENABLED=true`. | `INFINITO_DISTRO`, `INVENTORY_DIR`, `TEST_DEPLOY_TYPE`, `APPS` | Baseline and recovery path. |

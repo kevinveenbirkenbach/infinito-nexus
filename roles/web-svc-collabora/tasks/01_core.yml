@@ -1,3 +1,5 @@
+- include_tasks: utils/once/flag.yml
+
 - name: "load docker, proxy for '{{ application_id }}'"
   include_role:
     name:   sys-stk-full
@@ -27,5 +29,3 @@
     ('already present' not in (collabora_preview.stdout | default('')))
   async: "{{ ASYNC_TIME if ASYNC_ENABLED | bool else omit }}"
   poll:  "{{ ASYNC_POLL if ASYNC_ENABLED | bool else omit }}"
-
-- include_tasks: utils/once/flag.yml

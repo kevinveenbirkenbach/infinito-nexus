@@ -1,5 +1,3 @@
-[Back to Environment](../README.md)
-
 # macOS
 
 On macOS, use [Lima](https://lima-vm.io/) so the project runs inside a Linux environment instead of directly on the host system.

@@ -1,20 +1,103 @@
 ---
-# Pixelfed's official Docker setup expects the application bootstrap to run
-# after the containers are up, not implicitly via image startup alone.
+# The application container starts through a repo-managed entrypoint so Apache
+# comes up first and the Ansible bootstrap can run without racing the image's
+# first-start migration logic.
+# Keep this wait at the top of the bootstrap flow. The later artisan commands
+# assume the repo-managed entrypoint has already brought Apache up.
 
-- name: "Run Pixelfed migrations"
+- name: "Wait until the Pixelfed application container finished its entrypoint bootstrap"
   ansible.builtin.command:
     argv:
       - container
       - exec
-      - -u
-      - "{{ PIXELFED_APP_USER }}"
       - "{{ PIXELFED_CONTAINER }}"
-      - php
-      - artisan
-      - migrate
-      - --force
-      - --isolated
+      - sh
+      - -lc
+      - 'ps -ef | grep -v grep | grep -q "apache2 -DFOREGROUND"'
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_entrypoint_bootstrap
+  changed_when: false
+  retries: 120
+  delay: 5
+  until: pixelfed_entrypoint_bootstrap.rc == 0
+
+- name: "Check whether the Pixelfed bootstrap marker exists"
+  ansible.builtin.command:
+    argv:
+      - container
+      - exec
+      - "{{ PIXELFED_CONTAINER }}"
+      - sh
+      - -lc
+      - test -e /var/www/storage/.docker.init
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_bootstrap_marker_exists
+  changed_when: false
+  failed_when: false
+
+- name: "Check whether the Pixelfed users table exists"
+  vars:
+    pixelfed_users_table_query: >-
+      SELECT table_name
+      FROM information_schema.tables
+      WHERE table_schema='{{ PIXELFED_DB_NAME }}'
+        AND table_name='users'
+      LIMIT 1;
+  ansible.builtin.command:
+    argv: "{{ PIXELFED_MARIADB_ARGS + ['-e', pixelfed_users_table_query] }}"
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_bootstrap_users_table
+  changed_when: false
+  failed_when: false
+  retries: 20
+  delay: 3
+  until: pixelfed_bootstrap_users_table.rc == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Count existing Pixelfed users when the users table already exists"
+  vars:
+    pixelfed_user_count_query: "SELECT COUNT(*) FROM users;"
+  ansible.builtin.command:
+    argv: "{{ PIXELFED_MARIADB_ARGS + ['-e', pixelfed_user_count_query] }}"
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  when: pixelfed_bootstrap_users_table.stdout | trim == 'users'
+  register: pixelfed_bootstrap_user_count
+  changed_when: false
+  retries: 20
+  delay: 3
+  until: pixelfed_bootstrap_user_count.rc == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Choose Pixelfed migration strategy"
+  ansible.builtin.set_fact:
+    # Preserve the "no marker + no users" reset path. It is the safety net for
+    # broken first boots where Pixelfed partially initialized and would
+    # otherwise keep failing on later deploys.
+    pixelfed_bootstrap_requires_reset: >-
+      {{
+        (pixelfed_bootstrap_marker_exists.rc | default(1) | int) != 0
+        and (pixelfed_bootstrap_user_count.stdout | default('0') | trim | int) == 0
+      }}
+    pixelfed_migrate_argv: >-
+      {{
+        ['container', 'exec', '-u', PIXELFED_APP_USER, PIXELFED_CONTAINER, 'php', 'artisan']
+        + (
+          ['migrate:fresh', '--force']
+          if (
+            (pixelfed_bootstrap_marker_exists.rc | default(1) | int) != 0
+            and (pixelfed_bootstrap_user_count.stdout | default('0') | trim | int) == 0
+          )
+          else ['migrate', '--force', '--isolated']
+        )
+      }}
+
+- name: "Run Pixelfed migrations"
+  ansible.builtin.command:
+    argv: "{{ pixelfed_migrate_argv }}"
   args:
     chdir: "{{ PIXELFED_INSTANCE_DIR }}"
   register: pixelfed_migrate
@@ -45,6 +128,28 @@
   delay: 5
   until: pixelfed_passport_keys.rc == 0
 
+- name: "Ensure the Pixelfed public storage symlink exists"
+  ansible.builtin.command:
+    argv:
+      - container
+      - exec
+      - -u
+      - "{{ PIXELFED_APP_USER }}"
+      - "{{ PIXELFED_CONTAINER }}"
+      - sh
+      - -lc
+      - |
+        if [ ! -L /var/www/public/storage ]; then
+          php artisan storage:link
+        fi
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_storage_link
+  changed_when: false
+  retries: 20
+  delay: 5
+  until: pixelfed_storage_link.rc == 0
+
 - name: "Initialize the Pixelfed instance actor"
   ansible.builtin.command:
     argv:
@@ -63,3 +168,27 @@
   retries: 20
   delay: 5
   until: pixelfed_instance_actor.rc == 0
+
+# The worker uses this marker to skip its own init path. Do not move this above
+# the actor/storage setup or the worker can start against an incomplete app.
+- name: "Mark Pixelfed bootstrap as complete for the worker container"
+  ansible.builtin.command:
+    argv:
+      - container
+      - exec
+      - -u
+      - "{{ PIXELFED_APP_USER }}"
+      - "{{ PIXELFED_CONTAINER }}"
+      - sh
+      - -lc
+      - |
+        if [ ! -e /var/www/storage/.docker.init ]; then
+          touch /var/www/storage/.docker.init
+        fi
+  args:
+    chdir: "{{ PIXELFED_INSTANCE_DIR }}"
+  register: pixelfed_bootstrap_marker
+  changed_when: false
+  retries: 20
+  delay: 5
+  until: pixelfed_bootstrap_marker.rc == 0

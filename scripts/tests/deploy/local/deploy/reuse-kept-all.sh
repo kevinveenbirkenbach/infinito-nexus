@@ -13,7 +13,7 @@ set -euo pipefail
 #   DEBUG              (default: false)
 #
 # Notes:
-# - This does NOT create the inventory. Run APP=<role> make deploy-fresh-kept-app first.
+# - This does NOT create the inventory. Run APPS=<role> make deploy-fresh-kept-apps first.
 # - We recompute the app list to keep behavior deterministic with filters.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -38,7 +38,7 @@ pw_file="${inv_dir}/.password"
 
 if [[ ! -f "${inv_file}" ]]; then
 	echo "ERROR: inventory not found: ${inv_file}" >&2
-	echo "Run: APP=<role> make deploy-fresh-kept-app" >&2
+	echo "Run: APPS=<role> make deploy-fresh-kept-apps" >&2
 	exit 2
 fi
 

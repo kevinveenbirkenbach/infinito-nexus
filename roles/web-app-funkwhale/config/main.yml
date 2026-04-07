@@ -12,14 +12,20 @@ compose:
       version:  "30.1"
     logout:
       enabled: true
+      shared: true
     ldap:
       enabled: true
       shared: true
     dashboard:
       enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
+    email:
+      enabled: true
+      shared: true
+    # noqa: shared
     redis:
       backup:
         disabled: true
@@ -38,6 +44,7 @@ compose:
       enabled: false
     css:
       enabled: false
+      shared: true
 server:
   domains:
     canonical:

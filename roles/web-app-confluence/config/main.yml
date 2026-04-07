@@ -6,10 +6,15 @@ compose:
       shared: false
     logout:
       enabled: true
+      shared: true
 
     dashboard:
       enabled: true
+      shared: true
     matomo:
+      enabled: true
+      shared: true
+    email:
       enabled: true
       shared: true
     database:
@@ -27,6 +32,7 @@ compose:
       pids_limit:       2048
     css:
       enabled: true
+      shared: true
   volumes:
     data:           "confluence_data"
 server:

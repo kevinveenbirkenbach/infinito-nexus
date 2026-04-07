@@ -34,6 +34,13 @@ SYS_SVC_CONTAINER_PING_PACKAGE_BY_OS_FAMILY:
   RedHat: iputils
   Archlinux: iputils
 
+# Arch Linux uses nftables as its default firewall framework instead of iptables.
+# Docker defaults to iptables, which conflicts with nftables rules on Arch, causing
+# broken container networking and port forwarding. Setting the backend to nftables
+# ensures Docker and the system firewall use the same framework and coexist correctly.
+SYS_SVC_CONTAINER_DOCKER_FIREWALL_BACKEND_BY_OS_FAMILY:
+  Archlinux: nftables
+
 SYS_SVC_CONTAINER_PACKAGES_BY_DISTRIBUTION:
   Archlinux:
     - docker

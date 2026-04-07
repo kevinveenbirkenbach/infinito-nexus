@@ -3,8 +3,11 @@ compose:
   services:
     oauth2:
       enabled:  false
+    # Keep Simple Icons standalone; consumers such as the dashboard can depend on it,
+    # but the icon service should not pull the dashboard stack into single-app deploys.
     dashboard:
-      enabled:  true
+      enabled:  false
+      shared:   false
     matomo:
       enabled:  false
       shared:   false
@@ -16,7 +19,8 @@ compose:
       shared:   false
       enabled:  false   # Enable the database 
     css:
-      enabled: true
+      enabled: false
+      shared: false
     recaptcha:
       enabled: false
     simpleicons:
@@ -31,5 +35,5 @@ server:
   csp: {}      
   domains:
     canonical:
-      - "icons.{{ DOMAIN_PRIMARY }}"
+      - "icon.{{ DOMAIN_PRIMARY }}"
     aliases: []

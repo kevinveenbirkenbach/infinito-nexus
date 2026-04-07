@@ -67,7 +67,8 @@ WORKDIR /
 
 COPY scripts/docker/healthcheck.sh /usr/local/bin/healthcheck.sh
 RUN chmod +x /usr/local/bin/healthcheck.sh
-HEALTHCHECK --interval=5s --timeout=5s --start-period=30s --retries=20 \
+# Allow 20s because `infinito --help` can exceed 5s on fresh CI runners.
+HEALTHCHECK --interval=5s --timeout=20s --start-period=30s --retries=20 \
   CMD /usr/local/bin/healthcheck.sh
 
 ENTRYPOINT ["/opt/src/infinito/scripts/docker/entry.sh"]

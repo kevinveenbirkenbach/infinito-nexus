@@ -32,14 +32,53 @@ class TestComposeCaInject(unittest.TestCase):
     def test_normalize_cmd(self):
         self.assertEqual(self.m.normalize_cmd(["a", "b"]), ["a", "b"])
         self.assertEqual(self.m.normalize_cmd("echo hi"), ["/bin/sh", "-lc", "echo hi"])
+        self.assertEqual(
+            self.m.normalize_cmd(["/bin/sh", "-c", "if", "!", "grep", "foo"]),
+            ["/bin/sh", "-c", "if ! grep foo"],
+        )
+        self.assertEqual(
+            self.m.normalize_cmd(
+                [
+                    "/bin/sh",
+                    "-c",
+                    "if",
+                    "!",
+                    "grep",
+                    "-qF",
+                    "INFINITO_TAIGA_AUTH_CONFIG",
+                    "/taiga-back/settings/config.py",
+                    ";",
+                    "then",
+                ]
+            ),
+            [
+                "/bin/sh",
+                "-c",
+                "if ! grep -qF INFINITO_TAIGA_AUTH_CONFIG /taiga-back/settings/config.py ; then",
+            ],
+        )
         self.assertEqual(self.m.normalize_cmd(None), [])
         with self.assertRaises(SystemExit):
             self.m.normalize_cmd(123)
+
+    def test_shell_payload_single_string_preserved(self):
+        self.assertEqual(
+            self.m._shell_payload(
+                [
+                    "if ! grep -qF INFINITO_TAIGA_AUTH_CONFIG /taiga-back/settings/config.py; then cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py; fi; exec /taiga-back/docker/entrypoint.sh"
+                ]
+            ),
+            "if ! grep -qF INFINITO_TAIGA_AUTH_CONFIG /taiga-back/settings/config.py; then cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py; fi; exec /taiga-back/docker/entrypoint.sh",
+        )
 
     def test_normalize_entrypoint(self):
         self.assertEqual(self.m.normalize_entrypoint(["a", "b"]), ["a", "b"])
         self.assertEqual(
             self.m.normalize_entrypoint("echo hi"), ["/bin/sh", "-lc", "echo hi"]
+        )
+        self.assertEqual(
+            self.m.normalize_entrypoint(["/bin/sh", "-c", "echo", "hi"]),
+            ["/bin/sh", "-c", "echo hi"],
         )
         self.assertEqual(self.m.normalize_entrypoint(None), [])
         with self.assertRaises(SystemExit):
@@ -455,6 +494,66 @@ class TestComposeCaInject(unittest.TestCase):
 
         out = doc["services"]["svc"]
         self.assertEqual(out["command"], ["/svc-entry", "svc-run", "x"])
+
+    def test_render_override_collapses_shell_command_when_entrypoint_is_shell(self):
+        """
+        If the composed service already uses a shell entrypoint, the command must stay
+        a single shell payload so /bin/sh -c receives exactly one argument.
+        """
+        shell_tokens = [
+            "if",
+            "!",
+            "grep",
+            "-qF",
+            "INFINITO_TAIGA_AUTH_CONFIG",
+            "/taiga-back/settings/config.py",
+            ";",
+            "then",
+            "cat",
+            "/taiga-back/settings/config.append.py",
+            ">>",
+            "/taiga-back/settings/config.py",
+            ";",
+            "fi",
+            ";",
+            "exec",
+            "/taiga-back/docker/entrypoint.sh",
+        ]
+        services = {
+            "svc": {
+                "image": "img:1",
+                "entrypoint": ["/bin/sh", "-c"],
+                "command": shell_tokens,
+            }
+        }
+        service_to_cmd = {"svc": ["docker", "compose", "-p", "p", "-f", "compose.yml"]}
+
+        with (
+            patch.object(self.m, "ensure_image_available", return_value=None),
+            patch.object(
+                self.m,
+                "docker_image_inspect",
+                return_value=(["/entry"], ["run"]),
+            ),
+            patch.object(self.m, "docker_image_has_bin_sh", return_value=True),
+        ):
+            doc = self.m.render_override(
+                services,
+                service_to_cmd,
+                cwd=Path("/tmp"),
+                env={},
+                ca_host="/host/ca.crt",
+                wrapper_host="/host/with-ca-trust.sh",
+                trust_name="infinito.local",
+            )
+
+        out = doc["services"]["svc"]
+        self.assertEqual(out.get("entrypoint"), ["/tmp/infinito/bin/with-ca-trust.sh"])
+        self.assertEqual(out.get("command")[:2], ["/bin/sh", "-c"])
+        self.assertEqual(
+            out.get("command")[2],
+            "if ! grep -qF INFINITO_TAIGA_AUTH_CONFIG /taiga-back/settings/config.py ; then cat /taiga-back/settings/config.append.py >> /taiga-back/settings/config.py ; fi ; exec /taiga-back/docker/entrypoint.sh",
+        )
 
     def test_render_override_caches_bin_sh_probe_per_image(self):
         """

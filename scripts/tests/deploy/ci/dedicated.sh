@@ -29,21 +29,21 @@ PYTHON="${PYTHON:-python3}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
-APP=""
+APPS=""
 
 usage() {
 	cat <<'EOF'
 Usage:
   INFINITO_DISTRO=<distro> INVENTORY_DIR=<dir> INFINITO_DOCKER_VOLUME=<abs_path> \
     scripts/tests/deploy/ci/dedicated.sh \
-    --app <app_id>
+    --apps <app_ids>
 EOF
 }
 
 while [[ $# -gt 0 ]]; do
 	case "$1" in
-	--app)
-		APP="${2:-}"
+	--apps)
+		APPS="${2:-}"
 		shift 2
 		;;
 	-h | --help)
@@ -57,15 +57,15 @@ while [[ $# -gt 0 ]]; do
 		;;
 	esac
 done
-[[ -n "${APP}" ]] || {
-	echo "[ERROR] --app is required" >&2
+[[ -n "${APPS}" ]] || {
+	echo "[ERROR] --apps is required" >&2
 	usage
 	exit 2
 }
 
 cd "${REPO_ROOT}"
 
-echo "=== distro=${INFINITO_DISTRO} app=${APP} (debug always on) ==="
+echo "=== distro=${INFINITO_DISTRO} app=${APPS} (debug always on) ==="
 
 cleanup() {
 	rc=$?
@@ -73,7 +73,7 @@ cleanup() {
 	# Copy Playwright reports from the infinito container to the runner filesystem
 	# BEFORE containers/volumes are destroyed, so GitHub Actions can upload them as artifacts.
 	local _container="infinito_nexus_${INFINITO_DISTRO}"
-	local _playwright_host_dir="/tmp/playwright-artifacts/${INFINITO_DISTRO}/${APP}"
+	local _playwright_host_dir="/tmp/playwright-artifacts/${INFINITO_DISTRO}/${APPS}"
 	mkdir -p "${_playwright_host_dir}"
 	echo ">>> Copying Playwright artifacts from ${_container} to ${_playwright_host_dir}"
 	docker cp "${_container}:/var/lib/infinito/logs/test-e2e-playwright/." \
@@ -150,7 +150,7 @@ echo ">>> Ensuring stack is up for distro ${INFINITO_DISTRO}"
 
 deploy_args=(
 	--distro "${INFINITO_DISTRO}"
-	--app "${APP}"
+	--apps "${APPS}"
 	--inventory-dir "${INVENTORY_DIR}"
 	--debug
 )
@@ -163,7 +163,7 @@ echo ">>> END STATE BEFORE DEPLOY"
 echo ">>> PASS 1: init inventory (ASYNC_ENABLED=false)"
 "${PYTHON}" -m cli.deploy.development init \
 	--distro "${INFINITO_DISTRO}" \
-	--app "${APP}" \
+	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": false}'
 
@@ -173,7 +173,7 @@ echo ">>> PASS 1: deploy"
 echo ">>> PASS 2: re-init inventory (ASYNC_ENABLED=true)"
 "${PYTHON}" -m cli.deploy.development init \
 	--distro "${INFINITO_DISTRO}" \
-	--app "${APP}" \
+	--apps "${APPS}" \
 	--inventory-dir "${INVENTORY_DIR}" \
 	--vars '{"ASYNC_ENABLED": true}'
 

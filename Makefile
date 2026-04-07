@@ -20,7 +20,7 @@ endif
 	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python \
 	test lint lint-action lint-ansible lint-python lint-shellcheck test-lint test-unit test-integration test-deploy test-deploy-app \
 	clean clean-sudo down \
-	purge-system purge-all \
+	system-purge system-disk-usage \
 	list tree mig dockerignore \
 	print-python \
 	dns-setup dns-remove \
@@ -29,11 +29,11 @@ endif
 	apparmor-teardown apparmor-restore \
 	disable-ipv6 restore-ipv6 \
 	trust-ca \
-	restart exec up down stop \
+	restart refresh exec up down stop \
 	build build-missing build-no-cache build-no-cache-all build-cleanup \
 	act-all act-app act-workflow \
-	deploy-fresh-kept-app container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
-	deploy-fresh-purged-app deploy-reuse-kept-app deploy-reuse-purged-app deploy-fresh-kept-all \
+	deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
+	deploy-fresh-purged-apps deploy-reuse-kept-apps deploy-reuse-purged-apps deploy-fresh-kept-all \
 	bootstrap setup-development
 
 # Bootstrap the local development environment.
@@ -88,10 +88,12 @@ trust-ca:
 # Disable IPv6 for local development.
 disable-ipv6:
 	@sudo bash scripts/system/network/ipv6/disable.sh
+	@"$(MAKE)" refresh
 
 # Restore IPv6 settings.
 restore-ipv6:
 	@sudo bash scripts/system/network/ipv6/restore.sh
+	@"$(MAKE)" refresh
 
 # Remove ignored files from the working tree.
 clean:
@@ -108,19 +110,25 @@ clean-sudo:
 	@echo "Removing ignored git files with sudo"
 	sudo git clean -fdX;
 
-# Run the broad low-hardware cleanup routine.
-purge-system:
-	@bash scripts/system/purge/system.sh
+# Show disk and Docker resource usage to identify what to clean up.
+system-disk-usage:
+	@bash scripts/system/meta/disk-usage.sh
 
-# Run the broadest cleanup bundle.
-purge-all:
-	@bash scripts/system/purge/all.sh
+# Run the broad low-hardware cleanup routine.
+system-purge:
+	@bash scripts/system/purge/system.sh
 
 # Restart the development stack.
 restart:
 	@"$${PYTHON}" -m cli.deploy.development restart --distro "$${INFINITO_DISTRO}"
 
+# Refresh the running development stack only when it already exists.
+refresh:
+	@bash scripts/system/network/docker/stack_refresh.sh
+
 # Run a shell or command in the running container.
+# Usage: make exec           — opens interactive shell
+#        make exec CMD="..." — runs command non-interactively
 exec:
 	@bash scripts/tests/deploy/local/exec/container.sh
 
@@ -152,11 +160,13 @@ mig: list tree
 
 # Build the local image.
 build: dockerignore
-	@bash scripts/image/build.sh
+	@IMAGE_TAG="$$(bash scripts/meta/resolve/image/local.sh)" \
+		bash scripts/image/build.sh
 
 # Build the local image if it is missing.
 build-missing:
-	@bash scripts/image/build.sh --missing
+	@IMAGE_TAG="$$(bash scripts/meta/resolve/image/local.sh)" \
+		bash scripts/image/build.sh --missing
 
 # Pull the build dependency image.
 build-dependency:
@@ -164,7 +174,8 @@ build-dependency:
 
 # Build the local image without cache.
 build-no-cache: build-dependency
-	@bash scripts/image/build.sh --no-cache
+	@IMAGE_TAG="$$(bash scripts/meta/resolve/image/local.sh)" \
+		bash scripts/image/build.sh --no-cache
 
 # Build the no-cache image for every distro.
 build-no-cache-all:
@@ -295,17 +306,17 @@ deploy-fresh-kept-all:
 	@echo "=== local full deploy (type=$${TEST_DEPLOY_TYPE}, distro=$${INFINITO_DISTRO}) ==="
 	@bash scripts/tests/deploy/local/deploy/fresh-kept-all.sh
 
-# Create a fresh inventory and deploy one app.
-deploy-fresh-kept-app:
-	@: "$${APP:?APP must be set (e.g. APP=web-app-nextcloud)}"
-	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APP}"
+# Create a fresh inventory and deploy one or more apps.
+deploy-fresh-kept-apps:
+	@: "$${APPS:?APPS must be set (e.g. APPS=web-app-nextcloud)}"
+	@bash scripts/tests/deploy/local/deploy/fresh-kept-app.sh "$${APPS}"
 
-# Recreate the stack and deploy one app with a purged entity.
-deploy-fresh-purged-app: down up
+# Deploy one or more apps with purged entities. Set FULL_CYCLE=true to also run the update pass.
+deploy-fresh-purged-apps: down up
 	@bash scripts/tests/deploy/local/deploy/fresh-purged-app.sh
 
-# Redeploy one app on an existing inventory.
-deploy-reuse-kept-app:
+# Redeploy one or more apps on an existing inventory.
+deploy-reuse-kept-apps:
 	@DEBUG=true \
 	bash scripts/tests/deploy/local/deploy/reuse-kept-app.sh
 
@@ -313,6 +324,6 @@ deploy-reuse-kept-app:
 deploy-reuse-kept-all:
 	@bash scripts/tests/deploy/local/deploy/reuse-kept-all.sh
 
-# Purge one app entity, then redeploy it on existing inventory.
-deploy-reuse-purged-app: container-purge-entity
-	@$(MAKE) deploy-reuse-kept-app
+# Purge one or more app entities, then redeploy them on existing inventory.
+deploy-reuse-purged-apps: container-purge-entity
+	@$(MAKE) deploy-reuse-kept-apps

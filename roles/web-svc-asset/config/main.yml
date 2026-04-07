@@ -7,8 +7,17 @@ server:
     aliases: []
 compose:
   services:
+    asset:
+      enabled: false
+      shared: true
+    # Assets are published through the shared file host under /assets.
+    # Keep the file dependency here so consumers only depend on web-svc-asset.
+    file:
+      enabled: true
+      shared: true
     matomo:
       enabled: true
       shared: true
     css:
-      enabled: true
+      enabled: false
+      shared: false

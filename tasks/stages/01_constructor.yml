@@ -58,17 +58,7 @@
 
   - name: Merge current play applications
     ansible.builtin.set_fact:
-      CURRENT_PLAY_APPLICATIONS: >-
-        {{
-          applications
-          | applications_if_group_and_deps(group_names)
-          | combine(
-              applications
-              | dict2items
-              | selectattr('key', 'in', WEBSERVER_CORE_APPLICATIONS)
-              | items2dict
-            )
-        }}
+      CURRENT_PLAY_APPLICATIONS: "{{ lookup('applications_current_play') }}"
     no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
   - name: Merge current play domain definitions

@@ -1,9 +1,3 @@
-- block:
-  - name: Include dependencies
-    include_role:
-      name: '{{ item }}'
-    loop:
-    - sys-stk-front-proxy
-    - dev-git
-  - include_tasks: utils/once/flag.yml
+---
+- include_tasks: 01_core.yml
   when: run_once_web_svc_file is not defined

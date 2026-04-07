@@ -1,0 +1,12 @@
+{# Keep Keycloak's hidden OIDC helper endpoints free of global HTML injection.
+   They are loaded in invisible iframes for cookie/session probing and should
+   not run dashboard sync, Matomo, or logout patches. #}
+{% set oauth2_proxy_enabled = false %}
+{% set proxy_lua_enabled = false %}
+{% set http_port = ports.localhost.http[application_id] %}
+
+{% set location = '~ ^/realms/[^/]+/protocol/openid-connect/login-status-iframe\\.html$' %}
+{% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
+
+{% set location = '~ ^/realms/[^/]+/protocol/openid-connect/3p-cookies/' %}
+{% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}

@@ -18,9 +18,14 @@ compose:
       shared: true
     logout:
       enabled: true
+      shared: true
     dashboard:
       enabled: true
+      shared: true
     matomo:
+      enabled: true
+      shared: true
+    email:
       enabled: true
       shared: true
     database:
@@ -34,3 +39,4 @@ compose:
       min_storage:  "5GB"
     css:
       enabled: true
+      shared: true
