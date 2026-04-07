@@ -1,0 +1,19 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ PROMETHEUS_IMAGE }}:{{ PROMETHEUS_VERSION }}"
+    container_name: "{{ PROMETHEUS_CONTAINER }}"
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    volumes:
+      - data:/prometheus
+
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+
+{{ applications | compose_volumes(application_id, extra_volumes={'data': {'name': PROMETHEUS_VOLUME_DATA}}) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}
