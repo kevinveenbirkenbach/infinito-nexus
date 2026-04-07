@@ -18,6 +18,7 @@ compose:
       enabled:                    false
     oauth2:
       enabled:                    true
+      shared:                     true
       origin:
         host:                     "application"
         port:                     "9090"
@@ -25,8 +26,10 @@ compose:
         - "{{ [RBAC.GROUP.NAME, 'web-app-prometheus-administrator'] | path_join }}"
     logout:
       enabled:                    true
+      shared:                     true
     dashboard:
       enabled:                    true
+      shared:                     true
     matomo:
       enabled:                    true
       shared:                     true
@@ -36,6 +39,7 @@ compose:
       enabled:                    false
     css:
       enabled:                    true
+      shared:                     true
     prometheus:
       image:                      "prom/prometheus"
       version:                    "v3.2.1"
