@@ -36,7 +36,9 @@ class TestGHCRProviderSetPublic(unittest.TestCase):
             requests.append(req.full_url)
             return _DummyResponse()
 
-        with patch("cli.mirror.providers.urllib.request.urlopen", side_effect=fake_urlopen):
+        with patch(
+            "cli.mirror.providers.urllib.request.urlopen", side_effect=fake_urlopen
+        ):
             provider._set_public(self.image)
 
         self.assertEqual(
@@ -63,7 +65,9 @@ class TestGHCRProviderSetPublic(unittest.TestCase):
                 )
             return _DummyResponse()
 
-        with patch("cli.mirror.providers.urllib.request.urlopen", side_effect=fake_urlopen):
+        with patch(
+            "cli.mirror.providers.urllib.request.urlopen", side_effect=fake_urlopen
+        ):
             provider._set_public(self.image)
 
         self.assertEqual(
@@ -81,7 +85,6 @@ class TestGHCRProviderSetPublic(unittest.TestCase):
             provider.ensure_public(self.image)
 
         mock_set_public.assert_called_once_with(self.image)
-
 
 
 if __name__ == "__main__":  # pragma: no cover

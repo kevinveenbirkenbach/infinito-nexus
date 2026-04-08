@@ -94,7 +94,10 @@ class GHCRProvider(RegistryProvider):
         """Set the GHCR package visibility to public via GitHub API."""
         token = os.environ.get("GITHUB_TOKEN", "")
         if not token:
-            print("[mirror] WARNING: GITHUB_TOKEN not set, skipping visibility update", flush=True)
+            print(
+                "[mirror] WARNING: GITHUB_TOKEN not set, skipping visibility update",
+                flush=True,
+            )
             return
 
         mapped = image.name.replace("/", "-")
@@ -112,7 +115,9 @@ class GHCRProvider(RegistryProvider):
             f"https://api.github.com/users/{self.namespace}/packages/container/{pkg}",
             f"https://api.github.com/orgs/{self.namespace}/packages/container/{pkg}",
         ]:
-            req = urllib.request.Request(url, data=body, headers=headers, method="PATCH")
+            req = urllib.request.Request(
+                url, data=body, headers=headers, method="PATCH"
+            )
             try:
                 with urllib.request.urlopen(req):
                     return
