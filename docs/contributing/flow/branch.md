@@ -10,6 +10,7 @@ The branch prefix MUST match the type of change. The [PR workflow](pull-request.
 | `documentation` | Documentation-only changes | `**/*.md`, `**/*.rst` (outside agent paths) | Skips [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml), finishes green through the lightweight scope gate. |
 | `feature` | New features or enhancements | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `fix` | Bug fixes | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
+| `dependabot` | Automated dependency updates | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 
 ## Enforcement 🔒
 
@@ -29,5 +30,7 @@ The full branch name MUST follow one of the patterns below, depending on whether
 | Role fix | `fix/<role>/<topic>/<ticket-id>` | `fix/web-app-matomo/login-redirect/taiga-789` |
 | Documentation | `documentation/<topic>` | `documentation/contributing-setup` |
 | Agent | `agent/<topic>` | `agent/improve-commit-instructions` |
+| Dependabot | `dependabot/<ecosystem>/<dependency>` | `dependabot/pip/requests-2.32.0` |
 
 `feature`, `documentation`, and `agent` branches MUST NOT reference a ticket ID.
+`dependabot` branches are created automatically and MUST NOT be renamed.

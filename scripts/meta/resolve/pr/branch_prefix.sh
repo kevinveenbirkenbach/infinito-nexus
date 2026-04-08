@@ -28,7 +28,7 @@ documentation)
 	expected_prefixes=(documentation)
 	;;
 full)
-	expected_prefixes=(feature fix)
+	expected_prefixes=(feature fix dependabot)
 	;;
 *)
 	echo "ERROR: Unsupported PR_SCOPE '${PR_SCOPE}'." >&2
