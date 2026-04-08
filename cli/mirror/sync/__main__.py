@@ -91,9 +91,8 @@ def main() -> int:
         try:
             if args.only_missing:
                 if provider.tag_exists(img):
-                    provider.ensure_public(img)
                     print(
-                        f"[mirror] {label}: destination exists, ensured public visibility ({dest})",
+                        f"[mirror] {label}: destination exists, skipping ({dest})",
                         flush=True,
                     )
                     continue
