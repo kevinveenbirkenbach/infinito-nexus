@@ -48,6 +48,13 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: ./scripts/meta/resolve/pr/scope.sh
 
+      - name: Debug auth mode
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: ./scripts/meta/debug/auth_mode.sh
+
   validate-pr-branch-prefix:
     name: 🧭 Validate PR branch prefix
     needs: detect-pr-scope
