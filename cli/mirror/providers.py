@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 import json
 import os
 import subprocess
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -90,8 +91,14 @@ class GHCRProvider(RegistryProvider):
             or "unauthorized" in s
         )
 
-    def _set_public(self, image: ImageRef) -> None:
-        """Set the GHCR package visibility to public via GitHub API."""
+    def _set_public(
+        self, image: ImageRef, *, retries: int = 5, retry_delay: float = 10.0
+    ) -> None:
+        """Set the GHCR package visibility to public via GitHub API.
+
+        Retries are needed because a freshly pushed package may not be
+        immediately visible in the GitHub Packages API (propagation delay).
+        """
         token = os.environ.get("GITHUB_TOKEN", "")
         if not token:
             print(
@@ -109,24 +116,34 @@ class GHCRProvider(RegistryProvider):
             "Content-Type": "application/json",
         }
         body = json.dumps({"visibility": "public"}).encode()
-
-        errors = []
-        for url in [
+        urls = [
             f"https://api.github.com/users/{self.namespace}/packages/container/{pkg}",
             f"https://api.github.com/orgs/{self.namespace}/packages/container/{pkg}",
-        ]:
-            req = urllib.request.Request(
-                url, data=body, headers=headers, method="PATCH"
-            )
-            try:
-                with urllib.request.urlopen(req):
-                    return
-            except (urllib.error.HTTPError, urllib.error.URLError) as e:
-                errors.append(f"{url}: {e}")
+        ]
+
+        for attempt in range(1, retries + 1):
+            errors = []
+            for url in urls:
+                req = urllib.request.Request(
+                    url, data=body, headers=headers, method="PATCH"
+                )
+                try:
+                    with urllib.request.urlopen(req):
+                        return
+                except (urllib.error.HTTPError, urllib.error.URLError) as e:
+                    errors.append(f"{url}: {e}")
+
+            if attempt < retries:
+                print(
+                    f"[mirror] visibility update for '{pkg}' failed "
+                    f"(attempt {attempt}/{retries}), retrying in {retry_delay}s…",
+                    flush=True,
+                )
+                time.sleep(retry_delay)
 
         raise RuntimeError(
-            f"[mirror] Failed to set package visibility to public for '{pkg}':\n"
-            + "\n".join(errors)
+            f"[mirror] Failed to set package visibility to public for '{pkg}' "
+            f"after {retries} attempts:\n" + "\n".join(errors)
         )
 
     def ensure_public(self, image: ImageRef) -> None:
