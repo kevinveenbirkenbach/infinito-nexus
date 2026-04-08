@@ -5,23 +5,12 @@ updates:
   # Python dependencies (pyproject.toml / pip)
   # ------------------------------------------------------------
   - package-ecosystem: "pip"
-    directory: "/"
+    directories:
+      - "/"
     schedule:
       interval: "daily"
       time: "00:00"
     rebase-strategy: "auto"
-    labels:
-      - "dependencies"
-      - "python"
-
-  # ------------------------------------------------------------
-  # Python dependencies (uv)
-  # ------------------------------------------------------------
-  - package-ecosystem: "uv"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
     labels:
       - "dependencies"
       - "python"
@@ -39,10 +28,41 @@ updates:
       - "ci"
 
   # ------------------------------------------------------------
+  # Docker (Dockerfile)
+  # ------------------------------------------------------------
+  - package-ecosystem: "docker"
+    directories:
+      - "/"
+    schedule:
+      interval: "daily"
+      time: "00:00"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # ------------------------------------------------------------
+  # Docker Compose (compose.yml)
+  # ------------------------------------------------------------
+  - package-ecosystem: "docker-compose"
+    directories:
+      - "/"
+    schedule:
+      interval: "daily"
+      time: "00:00"
+    labels:
+      - "dependencies"
+      - "docker"
+
+  # ------------------------------------------------------------
+  # Additional recursive scans
+  # ------------------------------------------------------------
+
+  # ------------------------------------------------------------
   # Pre-commit hooks (.pre-commit-config.yaml)
   # ------------------------------------------------------------
   - package-ecosystem: "pre-commit"
-    directory: "/"
+    directories:
+      - "/"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -51,46 +71,11 @@ updates:
       - "ci"
 
   # ------------------------------------------------------------
-  # Docker (Dockerfile)
-  # ------------------------------------------------------------
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "docker"
-
-  # ------------------------------------------------------------
-  # Docker Compose (docker-compose.yml)
-  # ------------------------------------------------------------
-  - package-ecosystem: "docker-compose"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "docker"
-
-  # ------------------------------------------------------------
-  # Dev Containers (.devcontainer)
-  # ------------------------------------------------------------
-  - package-ecosystem: "devcontainers"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "docker"
-
-  # ------------------------------------------------------------
   # npm / Node.js (package.json)
   # ------------------------------------------------------------
   - package-ecosystem: "npm"
-    directory: "/"
+    directories:
+      - "/"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -99,58 +84,81 @@ updates:
       - "javascript"
 
   # ------------------------------------------------------------
-  # Bun (bun.lockb)
+  # Disabled — no dependency files found in repository
   # ------------------------------------------------------------
-  - package-ecosystem: "bun"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "javascript"
+
+  # uv: no uv.lock found
+  # - package-ecosystem: "uv"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "python"
+
+  # devcontainers: no .devcontainer found
+  # - package-ecosystem: "devcontainers"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "docker"
+
+  # bun: no bun.lockb found
+  # - package-ecosystem: "bun"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "javascript"
+
+  # terraform: no *.tf files found
+  # - package-ecosystem: "terraform"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "terraform"
+
+  # opentofu: no *.tf files found
+  # - package-ecosystem: "opentofu"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "terraform"
+
+  # helm: no Chart.yaml found
+  # - package-ecosystem: "helm"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "kubernetes"
 
   # ------------------------------------------------------------
-  # Terraform (*.tf)
-  # ------------------------------------------------------------
-  - package-ecosystem: "terraform"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "terraform"
-
-  # ------------------------------------------------------------
-  # OpenTofu (*.tf)
-  # ------------------------------------------------------------
-  - package-ecosystem: "opentofu"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "terraform"
-
-  # ------------------------------------------------------------
-  # Helm charts (Chart.yaml)
-  # ------------------------------------------------------------
-  - package-ecosystem: "helm"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "kubernetes"
-
-  # ------------------------------------------------------------
-  # Bundler / Ruby (Gemfile)
+  # Bundler / Ruby (roles/web-app-openproject/files/Gemfile)
   # ------------------------------------------------------------
   - package-ecosystem: "bundler"
-    directory: "/"
+    directories:
+      - "/"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -158,206 +166,189 @@ updates:
       - "dependencies"
       - "ruby"
 
-  # ------------------------------------------------------------
-  # Cargo / Rust (Cargo.toml)
-  # ------------------------------------------------------------
-  - package-ecosystem: "cargo"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "rust"
+  # cargo: no Cargo.toml found
+  # - package-ecosystem: "cargo"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "rust"
 
-  # ------------------------------------------------------------
-  # Rust toolchain (rust-toolchain.toml)
-  # ------------------------------------------------------------
-  - package-ecosystem: "rust-toolchain"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "rust"
+  # rust-toolchain: no rust-toolchain.toml found
+  # - package-ecosystem: "rust-toolchain"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "rust"
 
-  # ------------------------------------------------------------
-  # Composer / PHP (composer.json)
-  # ------------------------------------------------------------
-  - package-ecosystem: "composer"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "php"
+  # composer: no composer.json found
+  # - package-ecosystem: "composer"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "php"
 
-  # ------------------------------------------------------------
-  # Go modules (go.mod)
-  # ------------------------------------------------------------
-  - package-ecosystem: "gomod"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "go"
+  # gomod: no go.mod found
+  # - package-ecosystem: "gomod"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "go"
 
-  # ------------------------------------------------------------
-  # Maven / Java (pom.xml)
-  # ------------------------------------------------------------
-  - package-ecosystem: "maven"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "java"
+  # maven: no pom.xml found
+  # - package-ecosystem: "maven"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "java"
 
-  # ------------------------------------------------------------
-  # Gradle / Java (build.gradle)
-  # ------------------------------------------------------------
-  - package-ecosystem: "gradle"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "java"
+  # gradle: no build.gradle found
+  # - package-ecosystem: "gradle"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "java"
 
-  # ------------------------------------------------------------
-  # NuGet / .NET (*.csproj)
-  # ------------------------------------------------------------
-  - package-ecosystem: "nuget"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "dotnet"
+  # nuget: no *.csproj found
+  # - package-ecosystem: "nuget"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "dotnet"
 
-  # ------------------------------------------------------------
-  # .NET SDK (global.json)
-  # ------------------------------------------------------------
-  - package-ecosystem: "dotnet-sdk"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "dotnet"
+  # dotnet-sdk: no global.json found
+  # - package-ecosystem: "dotnet-sdk"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "dotnet"
 
-  # ------------------------------------------------------------
-  # Hex / Elixir (mix.exs)
-  # ------------------------------------------------------------
-  - package-ecosystem: "mix"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "elixir"
+  # mix: no mix.exs found
+  # - package-ecosystem: "mix"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "elixir"
 
-  # ------------------------------------------------------------
-  # Swift Package Manager (Package.swift)
-  # ------------------------------------------------------------
-  - package-ecosystem: "swift"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "swift"
+  # swift: no Package.swift found
+  # - package-ecosystem: "swift"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "swift"
 
-  # ------------------------------------------------------------
-  # Pub / Dart & Flutter (pubspec.yaml)
-  # ------------------------------------------------------------
-  - package-ecosystem: "pub"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "dart"
+  # pub: no pubspec.yaml found
+  # - package-ecosystem: "pub"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "dart"
 
-  # ------------------------------------------------------------
-  # Conda (environment.yml)
-  # ------------------------------------------------------------
-  - package-ecosystem: "conda"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "python"
+  # conda: no environment.yml found
+  # - package-ecosystem: "conda"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "python"
 
-  # ------------------------------------------------------------
-  # Julia (Project.toml)
-  # ------------------------------------------------------------
-  - package-ecosystem: "julia"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "julia"
+  # julia: no Project.toml or JuliaProject.toml found
+  # - package-ecosystem: "julia"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "julia"
 
-  # ------------------------------------------------------------
-  # Elm (elm.json)
-  # ------------------------------------------------------------
-  - package-ecosystem: "elm"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "elm"
+  # elm: no elm.json found
+  # - package-ecosystem: "elm"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "elm"
 
-  # ------------------------------------------------------------
-  # Bazel (MODULE.bazel / WORKSPACE)
-  # ------------------------------------------------------------
-  - package-ecosystem: "bazel"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "bazel"
+  # bazel: no MODULE.bazel or WORKSPACE found
+  # - package-ecosystem: "bazel"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "bazel"
 
-  # ------------------------------------------------------------
-  # vcpkg / C++ (vcpkg.json)
-  # ------------------------------------------------------------
-  - package-ecosystem: "vcpkg"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "cpp"
+  # vcpkg: no vcpkg.json found
+  # - package-ecosystem: "vcpkg"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "cpp"
 
-  # ------------------------------------------------------------
-  # Git submodules (.gitmodules)
-  # ------------------------------------------------------------
-  - package-ecosystem: "gitsubmodule"
-    directory: "/"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "submodules"
+  # gitsubmodule: no .gitmodules found
+  # - package-ecosystem: "gitsubmodule"
+  #   directories:
+  #     - "/"
+  #   schedule:
+  #     interval: "daily"
+  #     time: "00:00"
+  #   labels:
+  #     - "dependencies"
+  #     - "submodules"

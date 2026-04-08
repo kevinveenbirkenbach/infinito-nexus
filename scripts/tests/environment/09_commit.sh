@@ -38,7 +38,7 @@ git checkout -b "${TEST_BRANCH}"
 
 # --- Step 1: Create a file that fails lint and verify the hook blocks the commit.
 echo "Creating a Python file with a lint violation (unused import)."
-cat > test_lint_fail.py <<'EOF'
+cat >test_lint_fail.py <<'EOF'
 import os  # noqa: F401 intentionally unused to trigger ruff
 x=1
 EOF
@@ -63,7 +63,7 @@ echo "[OK] Revert succeeded."
 
 # --- Step 4: Create a correct file and commit without --no-verify.
 echo "Creating a clean Python file that passes lint."
-cat > test_lint_pass.py <<'EOF'
+cat >test_lint_pass.py <<'EOF'
 def hello() -> None:
     print("hello")
 EOF

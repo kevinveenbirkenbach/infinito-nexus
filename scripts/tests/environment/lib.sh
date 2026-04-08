@@ -7,6 +7,9 @@ MATOMO_APP="web-app-matomo"
 DASHBOARD_URL="https://dashboard.infinito.example"
 MATOMO_URL="https://matomo.infinito.example"
 
+# These constants are part of the sourced interface consumed by sibling scripts.
+: "${DASHBOARD_APP}" "${MATOMO_APP}" "${DASHBOARD_URL}" "${MATOMO_URL}"
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
