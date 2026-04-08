@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /src
 # Shallow clone the chosen tag/branch
-RUN git clone --depth=1 --branch "{{ BOOKWYRM_VERSION }}" https://github.com/bookwyrm-social/bookwyrm.git .
+ARG BOOKWYRM_VERSION
+RUN git clone --depth=1 --branch "${BOOKWYRM_VERSION}" https://github.com/bookwyrm-social/bookwyrm.git .
 
 # Pre-install Python deps to a wheelhouse for faster final image
 RUN pip install --upgrade pip \

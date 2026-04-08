@@ -9,18 +9,22 @@
 ############################
 # Stage 1: Builder
 ############################
-FROM {{ SHOPWARE_CONTAINER_IMAGE }}:{{ SHOPWARE_CONTAINER_VERSION }} AS builder
+ARG SHOPWARE_CONTAINER_IMAGE
+ARG SHOPWARE_CONTAINER_VERSION
+FROM ${SHOPWARE_CONTAINER_IMAGE}:${SHOPWARE_CONTAINER_VERSION} AS builder
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_NO_INTERACTION=1 \
     COMPOSER_PROCESS_TIMEOUT=900
 
 WORKDIR /app
-ARG SHOPWARE_PROD_VERSION="{{ SHOPWARE_PKG_NAME }}:{{ SHOPWARE_PKG_VERSION }}"
+ARG SHOPWARE_PKG_NAME
+ARG SHOPWARE_PKG_VERSION
+ARG SHOPWARE_COMPOSER_PLATFORM_PHP
 
 # 1) Scaffold project without installing dependencies
 RUN set -eux; \
-    composer create-project "${SHOPWARE_PROD_VERSION}" /app --no-install; \
-    composer config platform.php "{{ SHOPWARE_COMPOSER_PLATFORM_PHP }}"
+    composer create-project "${SHOPWARE_PKG_NAME}:${SHOPWARE_PKG_VERSION}" /app --no-install; \
+    composer config platform.php "${SHOPWARE_COMPOSER_PLATFORM_PHP}"
 
 # 2) Install dependencies (ignoring build-time extension checks) + add Redis transport
 RUN set -eux; \
@@ -46,7 +50,9 @@ RUN set -eux; \
 ############################
 # Stage 2: Runtime
 ############################
-FROM {{ SHOPWARE_PHP_IMAGE }}:{{ SHOPWARE_PHP_VERSION }}
+ARG SHOPWARE_PHP_IMAGE
+ARG SHOPWARE_PHP_VERSION
+FROM ${SHOPWARE_PHP_IMAGE}:${SHOPWARE_PHP_VERSION}
 WORKDIR /var/www/html
 
 # Install required PHP extensions in the Alpine-based runtime

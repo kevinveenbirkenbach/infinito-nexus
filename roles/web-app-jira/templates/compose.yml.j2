@@ -2,6 +2,10 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   jira:
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        JIRA_IMAGE: "{{ JIRA_IMAGE }}"
+        JIRA_VERSION: "{{ JIRA_VERSION }}"
+        JIRA_STORAGE_PATH: "{{ JIRA_STORAGE_PATH }}"
     image: "{{ JIRA_CUSTOM_IMAGE }}"
     container_name: "{{ JIRA_CONTAINER }}"
     hostname: '{{ JIRA_HOSTNAME }}'

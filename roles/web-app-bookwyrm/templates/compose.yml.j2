@@ -10,6 +10,8 @@
         python -m gunicorn bookwyrm.wsgi:application --bind 0.0.0.0:{{ container_port }}
       '
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        BOOKWYRM_VERSION: "{{ BOOKWYRM_VERSION }}"
     image: "{{ BOOKWYRM_CUSTOM_IMAGE }}"
     container_name: "{{ BOOKWYRM_CONTAINER }}"
     hostname: "{{ BOOKWYRM_HOSTNAME }}"

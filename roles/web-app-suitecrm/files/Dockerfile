@@ -1,4 +1,11 @@
-FROM "{{ SUITECRM_BASE_IMAGE }}:{{ SUITECRM_BASE_VERSION }}"
+ARG SUITECRM_BASE_IMAGE
+ARG SUITECRM_BASE_VERSION
+FROM "${SUITECRM_BASE_IMAGE}:${SUITECRM_BASE_VERSION}"
+
+ARG SUITECRM_APP_VERSION
+ARG SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL
+ARG SUITECRM_ENTRYPOINT_SCRIPT_DOCKER
+ARG SUITECRM_LDAP_EXTENSION_DIR
 
 # Install required system packages and PHP extensions
 RUN apt-get update && apt-get install -y \
@@ -47,7 +54,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Download SuiteCRM 8 source from GitHub
 RUN set -eux; \
-    SUITECRM_TAG="v{{ SUITECRM_APP_VERSION }}"; \
+    SUITECRM_TAG="v${SUITECRM_APP_VERSION}"; \
     wget -qO /tmp/suitecrm.tar.gz \
       "https://github.com/SuiteCRM/SuiteCRM-Core/archive/refs/tags/${SUITECRM_TAG}.tar.gz"; \
     tar --strip-components=1 -xzf /tmp/suitecrm.tar.gz -C /var/www/html; \
@@ -87,11 +94,11 @@ RUN set -eux; \
       > public/legacy/themes/suite8/css/Dawn/style.css
 
 # Copy entrypoint
-COPY {{ SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL }} {{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}
-RUN chmod +x {{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}
+COPY ${SUITECRM_ENTRYPOINT_SCRIPT_HOST_REL} ${SUITECRM_ENTRYPOINT_SCRIPT_DOCKER}
+RUN chmod +x ${SUITECRM_ENTRYPOINT_SCRIPT_DOCKER}
 
 # Create LDAP Extension Directory
-RUN mkdir -p "{{ SUITECRM_LDAP_EXTENSION_DIR }}"
+RUN mkdir -p "${SUITECRM_LDAP_EXTENSION_DIR}"
 
-ENTRYPOINT ["{{ SUITECRM_ENTRYPOINT_SCRIPT_DOCKER }}"]
+ENTRYPOINT ["${SUITECRM_ENTRYPOINT_SCRIPT_DOCKER}"]
 CMD ["apache2-foreground"]

@@ -1,6 +1,9 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   application:
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        JOOMLA_IMAGE: "{{ JOOMLA_IMAGE }}"
+        JOOMLA_VERSION: "{{ JOOMLA_VERSION }}"
     image: "{{ JOOMLA_CUSTOM_IMAGE }}"
     container_name: {{ JOOMLA_CONTAINER }}
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
