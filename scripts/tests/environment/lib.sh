@@ -13,6 +13,28 @@ MATOMO_URL="https://matomo.infinito.example"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
+ensure_git_safe_directory() {
+	local git_probe=""
+
+	if ! command -v git >/dev/null 2>&1; then
+		return 0
+	fi
+
+	if git -C "${REPO_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+		return 0
+	fi
+
+	git_probe="$(git -C "${REPO_ROOT}" rev-parse --is-inside-work-tree 2>&1 || true)"
+	if [[ "${git_probe}" != *"detected dubious ownership"* ]]; then
+		return 0
+	fi
+
+	if ! git config --global --get-all safe.directory 2>/dev/null | grep -Fx "${REPO_ROOT}" >/dev/null 2>&1; then
+		echo "Configuring Git safe.directory for the mounted workflow checkout."
+		git config --global --add safe.directory "${REPO_ROOT}"
+	fi
+}
+
 load_repo_env() {
 	local previous_pwd
 	previous_pwd="$(pwd)"
@@ -23,6 +45,7 @@ load_repo_env() {
 }
 
 load_repo_env
+ensure_git_safe_directory
 
 # Print the generated inventory and host_vars for debugging and verification.
 inspect() {
