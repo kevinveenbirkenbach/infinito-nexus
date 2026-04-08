@@ -24,8 +24,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-lint = [
+dev = [
   "ruff",
+  "pre-commit",
 ]
 
 [project.scripts]

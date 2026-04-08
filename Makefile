@@ -34,10 +34,10 @@ endif
 	act-all act-app act-workflow \
 	deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
 	deploy-fresh-purged-apps deploy-reuse-kept-apps deploy-reuse-purged-apps deploy-fresh-kept-all \
-	bootstrap setup-development
+	bootstrap mark-development
 
 # Bootstrap the local development environment.
-environment-bootstrap: wsl2-systemd-check install-lint apparmor-teardown dns-setup disable-ipv6
+environment-bootstrap: wsl2-systemd-check install-python-dev install-lint apparmor-teardown dns-setup disable-ipv6
 
 # Tear down the local development environment.
 environment-teardown: apparmor-restore dns-remove restore-ipv6
@@ -214,7 +214,12 @@ install-venv: install-system-python
 
 # Install Python tooling.
 install-python: install-venv
-	@bash scripts/install/python.sh lint
+	@bash scripts/install/python.sh
+
+# Install Python tooling including lint and dev dependencies.
+install-python-dev: install-python
+	@bash scripts/install/python.sh dev
+	@bash scripts/install/pre-commit.sh
 
 # Install all runtime dependencies.
 install: install-python install-ansible
@@ -224,7 +229,7 @@ setup: dockerignore
 	@bash scripts/setup.sh
 
 # Create the development setup marker.
-setup-development: dockerignore
+mark-development: dockerignore
 	touch env.development
 
 # Install dependencies and prepare the project.

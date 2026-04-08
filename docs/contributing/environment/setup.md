@@ -39,6 +39,20 @@ make trust-ca
 | Start stack | `make up` | Starts the local development stack. |
 | Browser trust | `make trust-ca` | Trusts the generated local [CA](https://en.wikipedia.org/wiki/Certificate_authority) so `*.infinito.example` works correctly in your browser. |
 
+#### Optional Development Marker
+
+If you want to mark this checkout as a development environment, run:
+
+```bash
+make mark-development
+```
+
+This step is optional. It creates an empty `env.development` file in the repository root.
+
+Several tools (e.g. `cli/deploy/development/compose.py`, `scripts/meta/resolve/apps.sh`) pass `env.ci` as the base env-file to Docker Compose and then, when `env.development` exists, append it as a second `--env-file`. Because Docker Compose applies env-files in order, any variable defined in `env.development` overrides the corresponding value from `env.ci`. This lets you customize local settings (ports, image tags, flags) without modifying the shared `env.ci` file.
+
+The `pre-commit` hooks are installed automatically by `make environment-bootstrap` and do not depend on this marker.
+
 ### Teardown
 
 When you are done, use these commands to stop the stack and clean up the local environment:
@@ -57,7 +71,7 @@ make environment-teardown
 
 ### Full Development Flow
 
-The repository already contains a development helper script at [environment.sh](../../../scripts/tests/environment.sh). The commands from that file are explained here as the intended end-to-end flow.
+The repository already contains a modular environment test suite at [scripts/tests/environment/](../../../scripts/tests/environment/README.md). The commands from that suite are explained here as the intended end-to-end flow.
 
 #### Flow Summary
 

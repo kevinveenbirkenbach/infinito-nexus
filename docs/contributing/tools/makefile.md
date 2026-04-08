@@ -22,6 +22,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | System Python prerequisites | `make install-system-python` | Installs the system Python prerequisites. | Use this when the host is missing the Python base packages. |
 | Virtual environment | `make install-venv` | Creates the virtual environment. | Use this when you need the repository Python environment. |
 | Python tooling | `make install-python` | Installs the Python tooling. | Use this when you need the Python toolchain after creating the virtual environment. |
+| Python dev tooling | `make install-python-dev` | Installs Python tooling including lint and dev dependencies, and registers the pre-commit hooks. | Use this when setting up a local development environment. Called automatically by `make environment-bootstrap`. |
 | Ansible dependencies | `make install-ansible` | Installs the Ansible dependencies. | Use this when you changed Ansible-related code or need the Ansible collections. |
 | Lint dependencies | `make install-lint` | Installs lint-related tooling. | Use this when you only need the lint stack. |
 | Full install | `make install` | Installs the repository tooling needed for development and tests. | Use this on a fresh machine or before validation. |
@@ -48,7 +49,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
 | Setup | `make setup` | Runs the repository setup step after generating `.dockerignore`. | Use this when you want the baseline project setup without installing the full dev stack. |
-| Setup development | `make setup-development` | Creates the development setup marker. | Use this when you want to prepare a development-specific setup state. |
+| Setup development | `make mark-development` | Creates the development setup marker. | Use this when you want to prepare a development-specific setup state. |
 | Bootstrap | `make bootstrap` | Installs dependencies and prepares the project. | Use this on a fresh machine or a new checkout. |
 | Setup clean | `make setup-clean` | Cleans ignored files and then runs setup. | Use this when you want a clean setup pass. |
 | List roles | `make list` | Prints the repository role list. | Use this when you need the current role inventory. |

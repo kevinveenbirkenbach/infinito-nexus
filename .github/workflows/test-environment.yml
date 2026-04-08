@@ -60,5 +60,5 @@ jobs:
             -w "${HOST_WORKDIR}" \
             "${DEV_RUNTIME_IMAGE}" \
             bash -lc '
-              bash ./scripts/tests/environment.sh
+              bash ./scripts/tests/environment/00_orchestrator.sh
             '

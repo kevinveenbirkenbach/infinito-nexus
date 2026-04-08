@@ -9,9 +9,9 @@
 
 ## Commits
 
-- You MUST run the full `make test` (which executes lint, unit, integration, and deploy checks) before every commit whenever the staged change includes at least one file that is not `.md` or `.rst`, unless you are explicitly instructed not to.
-- You MUST skip the standard validation only for markdown/reStructuredText-only changes unless you are explicitly instructed to run it.
-- If the standard validation warns about a staged file or its role, you MUST ask whether to fix that warning before you continue.
+- `make test` is enforced automatically by the pre-commit hook before every commit for changes that include at least one file that is not `.md`, `.rst`, or `.txt`. You do NOT need to run it manually.
+- For markdown/reStructuredText/text-only changes, the hook skips `make test` automatically.
+- If the pre-commit hook warns about a staged file or its role, you MUST ask whether to fix that warning before you continue.
 - Keep the follow-up limited to the roles touched by staged files so the change stays focused.
 
 ## On Failure
