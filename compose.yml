@@ -10,7 +10,7 @@ services:
   # CoreDNS (CI only)
   # ------------------------------------------------------------
   coredns:
-    image: coredns/coredns:1.11.1
+    image: coredns/coredns:1.14.2
     container_name: infinito-coredns
     profiles: ["ci"]
     command: ["-conf", "/Corefile"]
