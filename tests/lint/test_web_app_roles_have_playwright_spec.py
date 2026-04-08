@@ -1,26 +1,14 @@
-import os
 import unittest
 from pathlib import Path
 
-
-def _gha_escape(value: str) -> str:
-    return value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+from utils.gha.annotations import warning
 
 
 def _emit_missing_playwright_spec_warning(repo_root: Path, role_path: Path) -> None:
     spec_file = role_path / "files" / "playwright.spec.js"
     relative_spec_path = spec_file.relative_to(repo_root).as_posix()
     message = f"{role_path.name} has no files/playwright.spec.js (non-blocking)"
-
-    if os.environ.get("GITHUB_ACTIONS") != "true":
-        return
-
-    print(
-        "::warning "
-        f"file={_gha_escape(relative_spec_path)},"
-        "title=Missing Playwright Spec::"
-        f"{_gha_escape(message)}"
-    )
+    warning(message, title="Missing Playwright Spec", file=relative_spec_path)
 
 
 class TestWebAppRolesHavePlaywrightSpec(unittest.TestCase):
@@ -44,16 +32,6 @@ class TestWebAppRolesHavePlaywrightSpec(unittest.TestCase):
             if not spec_file.is_file():
                 missing.append(role_path.name)
                 _emit_missing_playwright_spec_warning(repo_root, role_path)
-
-        if missing:
-            if os.environ.get("GITHUB_ACTIONS") == "true":
-                print("Missing Playwright specs (non-blocking): " + ", ".join(missing))
-            else:
-                warning_lines = "\n".join(f"- {role}" for role in missing)
-                print(
-                    "\n[WARNING] The following web-app roles have no files/playwright.spec.js "
-                    "(non-blocking):\n" + warning_lines
-                )
 
         self.assertTrue(True)
 

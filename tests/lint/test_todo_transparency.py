@@ -8,13 +8,14 @@ readable.
 
 from __future__ import annotations
 
-import os
 import re
 import subprocess
 import unittest
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List
+
+from utils.gha.annotations import in_github_actions, warning
 
 
 OPEN_PROJECT_URL_RE = re.compile(
@@ -104,14 +105,6 @@ def should_scan_for_inline_markers(path: Path) -> bool:
     return path.suffix.lower() in SCANNED_SUFFIXES or path.name in SCANNED_FILENAMES
 
 
-def gha_escape(value: str) -> str:
-    return value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
-
-
-def in_github_actions() -> bool:
-    return os.environ.get("GITHUB_ACTIONS", "").lower() == "true"
-
-
 def finding_sort_key(item: TodoFinding) -> tuple[str, int, str]:
     return (item.path.as_posix(), item.line, item.kind)
 
@@ -170,14 +163,12 @@ def scan_inline_markers(path: Path) -> List[TodoFinding]:
 def emit_github_warning(finding: TodoFinding, root: Path) -> None:
     if not in_github_actions():
         return
-
     relative_path = finding.path.relative_to(root).as_posix()
-    print(
-        "::warning "
-        f"file={gha_escape(relative_path)},"
-        f"line={finding.line},"
-        f"title={gha_escape(finding.warning_title())}::"
-        f"{gha_escape(finding.warning_message())}"
+    warning(
+        finding.warning_message(),
+        title=finding.warning_title(),
+        file=relative_path,
+        line=finding.line,
     )
 
 
@@ -221,9 +212,11 @@ class TestTodoTransparency(unittest.TestCase):
         for item in inline_findings:
             emit_github_warning(item, root)
 
-        if not in_github_actions():
-            print_summary("Unlinked TODO.md items", unlinked_todos, root)
-            print_summary("Inline TODO markers in code", inline_findings, root)
+        if in_github_actions():
+            return
+
+        print_summary("Unlinked TODO.md items", unlinked_todos, root)
+        print_summary("Inline TODO markers in code", inline_findings, root)
 
 
 if __name__ == "__main__":

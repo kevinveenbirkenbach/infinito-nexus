@@ -19,6 +19,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from utils.gha.annotations import warning
+
 MAX_ITEMS_PER_FOLDER = 12
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -50,10 +52,6 @@ class FolderFinding:
     @property
     def item_count(self) -> int:
         return len(self.children)
-
-
-def _gha_escape(value: str) -> str:
-    return value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
 
 
 def _tracked_paths(root: Path) -> list[Path]:
@@ -128,11 +126,8 @@ def _emit_ci_warning(finding: FolderFinding) -> None:
         f"modularity."
     )
     if os.environ.get("GITHUB_ACTIONS") == "true":
-        print(
-            "::warning "
-            f"file={_gha_escape(finding.folder.as_posix())},"
-            "title=Folder item limit exceeded::"
-            f"{_gha_escape(message)}"
+        warning(
+            message, title="Folder item limit exceeded", file=finding.folder.as_posix()
         )
 
 

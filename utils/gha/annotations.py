@@ -8,7 +8,12 @@ See: https://docs.github.com/en/actions/writing-workflows/choosing-what-your-wor
 
 from __future__ import annotations
 
+import os
 from typing import Iterable, Optional
+
+
+def in_github_actions() -> bool:
+    return os.environ.get("GITHUB_ACTIONS") == "true"
 
 
 def _emit(
@@ -20,18 +25,24 @@ def _emit(
     line: Optional[int] = None,
     col: Optional[int] = None,
 ) -> None:
-    parts = []
-    if title:
-        parts.append(f"title={title}")
-    if file:
-        parts.append(f"file={file}")
-    if line is not None:
-        parts.append(f"line={line}")
-    if col is not None:
-        parts.append(f"col={col}")
-    props = ",".join(parts)
-    prefix = f"::{level} {props}::" if props else f"::{level}::"
-    print(f"{prefix}{message}", flush=True)
+    if in_github_actions():
+        parts = []
+        if title:
+            parts.append(f"title={title}")
+        if file:
+            parts.append(f"file={file}")
+        if line is not None:
+            parts.append(f"line={line}")
+        if col is not None:
+            parts.append(f"col={col}")
+        props = ",".join(parts)
+        prefix = f"::{level} {props}::" if props else f"::{level}::"
+        print(f"{prefix}{message}", flush=True)
+    else:
+        label = f"[{level.upper()}]"
+        if title:
+            label += f" {title}"
+        print(f"{label}: {message}", flush=True)
 
 
 def warning(

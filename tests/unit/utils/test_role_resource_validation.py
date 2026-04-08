@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import io
 import unittest
-from contextlib import redirect_stderr
+from contextlib import redirect_stdout
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -63,7 +63,7 @@ compose:
 
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
@@ -89,7 +89,7 @@ compose:
 
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
@@ -105,7 +105,7 @@ compose:
     def test_missing_role_directory_emits_absolute_path_warning(self) -> None:
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
@@ -128,7 +128,7 @@ compose:
 
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
@@ -153,7 +153,7 @@ compose:
 
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
@@ -177,7 +177,7 @@ server:
 
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
@@ -195,7 +195,7 @@ server:
 
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
@@ -221,7 +221,7 @@ compose:
 
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value="demo"),
         ):
@@ -256,7 +256,7 @@ compose:
 
         err = io.StringIO()
         with (
-            redirect_stderr(err),
+            redirect_stdout(err),
             patch.object(rrv, "_roles_root", return_value=self.roles_root),
             patch.object(rrv, "get_entity_name", return_value=""),
         ):

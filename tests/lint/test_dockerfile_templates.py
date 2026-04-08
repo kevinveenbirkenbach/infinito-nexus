@@ -10,16 +10,13 @@ Dockerfile itself.
 
 from __future__ import annotations
 
-import os
 import unittest
 from pathlib import Path
 
+from utils.gha.annotations import warning
+
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _ROLES_ROOT = _REPO_ROOT / "roles"
-
-
-def _gha_escape(value: str) -> str:
-    return value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
 
 
 def _collect_templated_dockerfiles() -> list[Path]:
@@ -47,16 +44,7 @@ def _warning_reason() -> str:
 def _emit_warning(dockerfile_j2: Path) -> None:
     relative_path = dockerfile_j2.relative_to(_REPO_ROOT).as_posix()
     message = _warning_message(relative_path)
-
-    if os.environ.get("GITHUB_ACTIONS") != "true":
-        return
-
-    print(
-        "::warning "
-        f"file={_gha_escape(relative_path)},"
-        "title=Templated Dockerfile::"
-        f"{_gha_escape(message)}"
-    )
+    warning(message, title="Templated Dockerfile", file=relative_path)
 
 
 class TestDockerfileTemplates(unittest.TestCase):
@@ -72,27 +60,6 @@ class TestDockerfileTemplates(unittest.TestCase):
         if templated:
             for dockerfile_j2 in templated:
                 _emit_warning(dockerfile_j2)
-
-            if os.environ.get("GITHUB_ACTIONS") == "true":
-                print(
-                    "Templated Dockerfiles detected (non-blocking): "
-                    + ", ".join(
-                        dockerfile_j2.relative_to(_REPO_ROOT).as_posix()
-                        for dockerfile_j2 in templated
-                    )
-                )
-            else:
-                warning_lines = "\n".join(
-                    f"- {dockerfile_j2.relative_to(_REPO_ROOT).as_posix()}"
-                    for dockerfile_j2 in templated
-                )
-                print(
-                    "\n[WARNING] The following templated Dockerfiles should be "
-                    "migrated to files/Dockerfile (non-blocking).\n"
-                    + _warning_reason()
-                    + "\nAffected paths:\n"
-                    + warning_lines
-                )
 
         self.assertTrue(True)
 

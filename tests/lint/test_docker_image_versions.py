@@ -21,13 +21,14 @@ but any non-comment line resets the search):
 from __future__ import annotations
 
 import json
-import os
 import re
 import time
 import unittest
 import urllib.error
 import urllib.request
 from pathlib import Path
+
+from utils.gha.annotations import warning
 from urllib.parse import quote, urlencode
 
 import yaml
@@ -263,8 +264,7 @@ def _emit_annotation(
     latest: str,
 ) -> None:
     msg = f"{role}/{service}: {image} is at {current}, latest semver tag is {latest}"
-    if os.getenv("GITHUB_ACTIONS") == "true":
-        print(f"::warning file={config_path},title=Outdated Docker image::{msg}")
+    warning(msg, title="Outdated Docker image", file=config_path)
 
 
 def _emit_unchecked_annotation(
@@ -274,8 +274,7 @@ def _emit_unchecked_annotation(
         f"{role}/{service}: {image} version could not be checked "
         f"(registry not supported)"
     )
-    if os.getenv("GITHUB_ACTIONS") == "true":
-        print(f"::warning file={config_path},title=🔍 Unchecked Docker image::{msg}")
+    warning(msg, title="🔍 Unchecked Docker image", file=config_path)
 
 
 class TestDockerImageVersions(unittest.TestCase):
