@@ -1,0 +1,32 @@
+# General
+application_id:                   "web-app-decidim"
+
+# Docker
+container_port:                   "{{ ports.localhost.http[application_id] }}"
+
+# Decidim
+DECIDIM_VERSION:                  "{{ lookup('config', application_id, 'compose.services.decidim.version') }}"
+DECIDIM_IMAGE:                    "{{ lookup('config', application_id, 'compose.services.decidim.image') }}"
+DECIDIM_CONTAINER:                "{{ lookup('config', application_id, 'compose.services.decidim.name') }}"
+DECIDIM_SIDEKIQ_CONTAINER:        "{{ lookup('config', application_id, 'compose.services.sidekiq.name') }}"
+
+## Volumes
+DECIDIM_VOLUME_UPLOADS:           "{{ lookup('config', application_id, 'compose.volumes.uploads') }}"
+DECIDIM_VOLUME_LOGS:              "{{ lookup('config', application_id, 'compose.volumes.logs') }}"
+
+## Credentials
+DECIDIM_SECRET_KEY_BASE:          "{{ lookup('config', application_id, 'credentials.secret_key_base') }}"
+DECIDIM_DB_PASSWORD:              "{{ lookup('config', application_id, 'credentials.database_password') }}"
+
+## OIDC
+DECIDIM_OIDC_ENABLED:             "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
+DECIDIM_OIDC_CLIENT_ID:           "{{ OIDC.CLIENT.ID }}"
+DECIDIM_OIDC_CLIENT_SECRET:       "{{ OIDC.CLIENT.SECRET }}"
+DECIDIM_OIDC_ISSUER:              "{{ OIDC.CLIENT.ISSUER }}"
+DECIDIM_OIDC_AUTHORIZE_URL:       "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+DECIDIM_OIDC_TOKEN_URL:           "{{ OIDC.CLIENT.TOKEN_URL }}"
+DECIDIM_OIDC_USER_INFO_URL:       "{{ OIDC.CLIENT.USER_INFO_URL }}"
+
+## Organisation
+DECIDIM_ORGANIZATION_NAME:        "{{ SOFTWARE_NAME }}"
+DECIDIM_ORGANIZATION_HOST:        "{{ lookup('tls', application_id, 'url.base') }}"

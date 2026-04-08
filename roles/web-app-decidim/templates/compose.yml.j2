@@ -1,0 +1,53 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ DECIDIM_IMAGE }}:{{ DECIDIM_VERSION }}"
+    container_name: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec puma -C config/puma.rb
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"
+    volumes:
+      - uploads:/app/public/uploads
+      - logs:/app/log
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:{{ container_port }}/health_check || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+
+  sidekiq:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ DECIDIM_IMAGE }}:{{ DECIDIM_VERSION }}"
+    container_name: "{{ DECIDIM_SIDEKIQ_CONTAINER }}"
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    volumes:
+      - uploads:/app/public/uploads
+      - logs:/app/log
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    healthcheck:
+      test: ["CMD-SHELL", "bundle exec sidekiqmon | grep -q 'busy' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+    extra_volumes={
+      'uploads': {'name': DECIDIM_VOLUME_UPLOADS},
+      'logs':    {'name': DECIDIM_VOLUME_LOGS},
+    }
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

@@ -1,0 +1,10 @@
+---
+- name: "load docker, db and proxy for {{ application_id }}"
+  include_role:
+    name: sys-stk-full
+  vars:
+    docker_compose_flush_handlers: true
+
+- name: "Run Decidim setup routines"
+  include_tasks: 01_setup.yml
+  when: DECIDIM_OIDC_ENABLED | bool

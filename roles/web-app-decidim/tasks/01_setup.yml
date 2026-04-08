@@ -1,0 +1,21 @@
+---
+- name: "Decidim | Run database migrations"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails db:migrate
+    env:
+      RAILS_ENV: production
+  register: decidim_migrate_result
+  changed_when: decidim_migrate_result.stdout != ''
+
+- name: "Decidim | Seed database on first deploy"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails db:seed
+    env:
+      RAILS_ENV: production
+  register: decidim_seed_result
+  changed_when: decidim_seed_result.stdout != ''
+  failed_when:
+    - decidim_seed_result.rc != 0
+    - "'already exists' not in decidim_seed_result.stderr"
