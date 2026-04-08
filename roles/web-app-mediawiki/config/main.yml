@@ -40,6 +40,9 @@ compose:
     css:
       enabled: false
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes:
     images:     mediawiki_images
     extensions: mediawiki_extensions

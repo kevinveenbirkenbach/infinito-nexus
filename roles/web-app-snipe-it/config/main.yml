@@ -62,6 +62,9 @@ compose:
     css:
       enabled: false
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes:
     data:       "snipe-it_data"
     

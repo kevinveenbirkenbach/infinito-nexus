@@ -73,6 +73,9 @@ compose:
       shared: true
     recaptcha:
       enabled: "{{ RECAPTCHA_ENABLED | bool }}"
+    prometheus:
+      enabled: true
+      shared: true
   volumes:
     data:       espocrm_data
 maintenance_mode: false

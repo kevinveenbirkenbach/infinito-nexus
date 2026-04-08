@@ -25,6 +25,9 @@ compose:
       enabled: true
       shared: true
 
+    prometheus:
+      enabled: true
+      shared: true
 server:
   csp:
     whitelist:

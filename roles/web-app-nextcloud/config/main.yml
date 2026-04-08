@@ -150,6 +150,9 @@ compose:
       shared: true
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
+    prometheus:
+      enabled: true
+      shared: true
   enabled:  "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin

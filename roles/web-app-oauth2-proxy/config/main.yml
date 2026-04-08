@@ -22,3 +22,6 @@ compose:
       image:    "quay.io/oauth2-proxy/oauth2-proxy"    
       version:  "latest"
       min_storage: "1GB"
+    prometheus:
+      enabled: true
+      shared: true

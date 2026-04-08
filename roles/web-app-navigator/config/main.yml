@@ -38,3 +38,6 @@ compose:
     css:
       enabled: true
       shared: true
+    prometheus:
+      enabled: true
+      shared: true

@@ -45,5 +45,8 @@ compose:
     css:
       enabled: true
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes:
     data:       "joomla_data"

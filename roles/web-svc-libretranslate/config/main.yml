@@ -33,6 +33,9 @@ compose:
     javascript:
       enabled: false
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
 server:
   csp:
     whitelist:        {}      # URL's which should be whitelisted

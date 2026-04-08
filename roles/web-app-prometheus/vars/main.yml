@@ -11,3 +11,9 @@ PROMETHEUS_CONTAINER:         "{{ lookup('config', application_id, 'compose.serv
 
 ## Volumes
 PROMETHEUS_VOLUME_DATA:       "{{ lookup('config', application_id, 'compose.volumes.data') }}"
+
+## Config
+PROMETHEUS_CONFIG_HOST:       "{{ [ lookup('container', application_id, 'directories.config'), 'prometheus.yml' ] | path_join }}"
+PROMETHEUS_CONFIG_DOCKER:     "/etc/prometheus/prometheus.yml"
+BLACKBOX_CONFIG_HOST:         "{{ [ lookup('container', application_id, 'directories.config'), 'blackbox.yml' ] | path_join }}"
+BLACKBOX_CONFIG_DOCKER:       "/etc/blackbox_exporter/config.yml"

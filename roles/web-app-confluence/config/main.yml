@@ -33,6 +33,9 @@ compose:
     css:
       enabled: true
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes:
     data:           "confluence_data"
 server:

@@ -51,6 +51,9 @@ compose:
       shared: true
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
+    prometheus:
+      enabled: true
+      shared: true
 credentials:
   hcaptcha:
     key:    "{{ CAPTCHA.HCAPTCHA.KEY | default('') }}"
