@@ -106,6 +106,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Debug auth mode
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: ./scripts/meta/debug/auth_mode.sh
+
       - name: Resolve merge ref and image tag
         id: out
         env:
