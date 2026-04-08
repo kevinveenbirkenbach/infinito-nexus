@@ -1,0 +1,41 @@
+from __future__ import annotations
+
+import unittest
+from unittest.mock import patch
+
+from cli.mirror.model import ImageRef
+import cli.mirror.sync.__main__ as sync_main
+
+
+class TestMirrorSync(unittest.TestCase):
+    def test_only_missing_ensures_public_for_existing_destination(self) -> None:
+        image = ImageRef(
+            role="web-app-nextcloud",
+            service="app",
+            name="nextcloud",
+            version="31.0.0",
+            source="library/nextcloud:31.0.0",
+        )
+
+        with (
+            patch("cli.mirror.sync.__main__.iter_role_images", return_value=[image]),
+            patch.object(
+                sync_main.GHCRProvider,
+                "image_base",
+                return_value="ghcr.io/acme/mirror/nextcloud",
+            ),
+            patch.object(sync_main.GHCRProvider, "tag_exists", return_value=True) as mock_tag_exists,
+            patch.object(sync_main.GHCRProvider, "ensure_public") as mock_ensure_public,
+            patch.object(sync_main.GHCRProvider, "mirror") as mock_mirror,
+            patch("sys.argv", ["mirror-sync", "--ghcr-namespace", "acme", "--only-missing"]),
+        ):
+            result = sync_main.main()
+
+        self.assertEqual(result, 0)
+        mock_tag_exists.assert_called_once_with(image)
+        mock_ensure_public.assert_called_once_with(image)
+        mock_mirror.assert_not_called()
+
+
+if __name__ == "__main__":  # pragma: no cover
+    unittest.main()

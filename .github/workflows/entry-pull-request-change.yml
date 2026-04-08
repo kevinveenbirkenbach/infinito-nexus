@@ -86,17 +86,6 @@ jobs:
     with:
       distros: "arch debian ubuntu fedora centos"
 
-  images-mirror-missing:
-    needs:
-      - detect-pr-scope
-      - validate-pr-branch-prefix
-    if: ${{ github.event_name == 'pull_request' && needs.detect-pr-scope.outputs.run_ci_orchestrator == 'true' }}
-    uses: ./.github/workflows/images-mirror-missing.yml
-    with:
-      concurrency_channel: pr-mirror-producer
-      concurrency_key: pr-${{ github.event.pull_request.number }}
-    secrets: inherit
-
   prepare-fork-merge-ref:
     needs:
       - detect-pr-scope

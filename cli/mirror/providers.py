@@ -2,7 +2,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+import json
+import os
 import subprocess
+import urllib.error
+import urllib.parse
+import urllib.request
 from typing import List
 
 from .model import ImageRef
@@ -20,6 +25,10 @@ class RegistryProvider(ABC):
     @abstractmethod
     def tag_exists(self, image: ImageRef) -> bool:
         pass
+
+    def ensure_public(self, image: ImageRef) -> None:
+        """Best-effort hook for registries that support package visibility."""
+        return
 
 
 class GHCRProvider(RegistryProvider):
@@ -81,6 +90,43 @@ class GHCRProvider(RegistryProvider):
             or "unauthorized" in s
         )
 
+    def _set_public(self, image: ImageRef) -> None:
+        """Set the GHCR package visibility to public via GitHub API."""
+        token = os.environ.get("GITHUB_TOKEN", "")
+        if not token:
+            print("[mirror] WARNING: GITHUB_TOKEN not set, skipping visibility update", flush=True)
+            return
+
+        mapped = image.name.replace("/", "-")
+        pkg = urllib.parse.quote(f"{self.prefix}/{mapped}", safe="")
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "Content-Type": "application/json",
+        }
+        body = json.dumps({"visibility": "public"}).encode()
+
+        errors = []
+        for url in [
+            f"https://api.github.com/users/{self.namespace}/packages/container/{pkg}",
+            f"https://api.github.com/orgs/{self.namespace}/packages/container/{pkg}",
+        ]:
+            req = urllib.request.Request(url, data=body, headers=headers, method="PATCH")
+            try:
+                with urllib.request.urlopen(req):
+                    return
+            except (urllib.error.HTTPError, urllib.error.URLError) as e:
+                errors.append(f"{url}: {e}")
+
+        raise RuntimeError(
+            f"[mirror] Failed to set package visibility to public for '{pkg}':\n"
+            + "\n".join(errors)
+        )
+
+    def ensure_public(self, image: ImageRef) -> None:
+        self._set_public(image)
+
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
         src = f"docker://docker.io/{image.source}"
@@ -108,9 +154,12 @@ class GHCRProvider(RegistryProvider):
                         "--dest-force-compress-format",
                     ],
                 )
+                self.ensure_public(image)
                 return
 
             raise
+
+        self.ensure_public(image)
 
 
 class GiteaProvider(RegistryProvider):
