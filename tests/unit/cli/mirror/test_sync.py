@@ -8,9 +8,7 @@ import cli.mirror.sync.__main__ as sync_main
 
 
 class TestMirrorSync(unittest.TestCase):
-    def test_only_missing_skips_existing_destination_without_ensure_public(
-        self,
-    ) -> None:
+    def test_only_missing_skips_existing_destination(self) -> None:
         image = ImageRef(
             role="web-app-nextcloud",
             service="app",
@@ -29,7 +27,6 @@ class TestMirrorSync(unittest.TestCase):
             patch.object(
                 sync_main.GHCRProvider, "tag_exists", return_value=True
             ) as mock_tag_exists,
-            patch.object(sync_main.GHCRProvider, "ensure_public") as mock_ensure_public,
             patch.object(sync_main.GHCRProvider, "mirror") as mock_mirror,
             patch(
                 "sys.argv",
@@ -40,7 +37,6 @@ class TestMirrorSync(unittest.TestCase):
 
         self.assertEqual(result, 0)
         mock_tag_exists.assert_called_once_with(image)
-        mock_ensure_public.assert_not_called()
         mock_mirror.assert_not_called()
 
 

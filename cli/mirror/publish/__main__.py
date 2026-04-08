@@ -1,0 +1,158 @@
+"""
+Ensure all GHCR mirror packages are publicly visible.
+
+Lists every container package under the given namespace that starts with
+the mirror prefix, checks visibility, and sets any non-public package to
+public via the GitHub Packages API.
+
+Usage:
+    python -m cli.mirror.publish --ghcr-namespace <org> [--ghcr-prefix mirror]
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from typing import Iterator
+
+
+def _gh_get(url: str, token: str) -> dict | list:
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read())
+
+
+def _list_packages(namespace: str, token: str) -> Iterator[dict]:
+    """Yield all container packages for the namespace (handles pagination)."""
+    page = 1
+    while True:
+        url = (
+            f"https://api.github.com/orgs/{namespace}/packages"
+            f"?package_type=container&per_page=100&page={page}"
+        )
+        data = _gh_get(url, token)
+        if not data:
+            break
+        yield from data
+        if len(data) < 100:
+            break
+        page += 1
+
+
+def _set_public(
+    namespace: str,
+    pkg_name: str,
+    token: str,
+    *,
+    retries: int = 5,
+    retry_delay: float = 10.0,
+) -> None:
+    encoded = urllib.parse.quote(pkg_name, safe="")
+    url = f"https://api.github.com/orgs/{namespace}/packages/container/{encoded}"
+    body = json.dumps({"visibility": "public"}).encode()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json",
+    }
+
+    for attempt in range(1, retries + 1):
+        req = urllib.request.Request(url, data=body, headers=headers, method="PATCH")
+        try:
+            with urllib.request.urlopen(req):
+                return
+        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+            if attempt < retries:
+                print(
+                    f"[publish] visibility update for '{pkg_name}' failed "
+                    f"(attempt {attempt}/{retries}): {e} — retrying in {retry_delay}s…",
+                    flush=True,
+                )
+                time.sleep(retry_delay)
+            else:
+                raise RuntimeError(
+                    f"[publish] Failed to set '{pkg_name}' to public after {retries} attempts: {e}"
+                ) from e
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Set all GHCR mirror packages to public."
+    )
+    parser.add_argument(
+        "--ghcr-namespace", required=True, help="GitHub org/user namespace"
+    )
+    parser.add_argument(
+        "--ghcr-prefix", default="mirror", help="Package name prefix (default: mirror)"
+    )
+    args = parser.parse_args()
+
+    token = os.environ.get("GITHUB_TOKEN", "")
+    if not token:
+        print("[publish] ERROR: GITHUB_TOKEN not set", file=sys.stderr)
+        return 1
+
+    namespace = args.ghcr_namespace.lower()
+    prefix = args.ghcr_prefix.strip("/")
+
+    failures: list[str] = []
+    updated = 0
+    skipped = 0
+
+    print(
+        f"[publish] Scanning packages for '{namespace}' with prefix '{prefix}/'…",
+        flush=True,
+    )
+
+    for pkg in _list_packages(namespace, token):
+        name: str = pkg.get("name", "")
+        if not name.startswith(f"{prefix}/"):
+            continue
+
+        visibility: str = pkg.get("visibility", "")
+        if visibility == "public":
+            print(f"[publish] {name}: already public, skipping", flush=True)
+            skipped += 1
+            continue
+
+        print(
+            f"[publish] {name}: visibility={visibility!r} → setting public…", flush=True
+        )
+        try:
+            _set_public(namespace, name, token)
+            print(f"[publish] {name}: ✓ set to public", flush=True)
+            updated += 1
+        except RuntimeError as e:
+            print(str(e), file=sys.stderr, flush=True)
+            failures.append(name)
+
+    print(
+        f"\n[publish] Done: {updated} updated, {skipped} already public, {len(failures)} failed.",
+        flush=True,
+    )
+
+    if failures:
+        print("[publish] Failed packages:", file=sys.stderr)
+        for f in failures:
+            print(f"  - {f}", file=sys.stderr)
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

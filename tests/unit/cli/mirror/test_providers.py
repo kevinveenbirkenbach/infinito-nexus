@@ -1,23 +1,12 @@
 from __future__ import annotations
 
-import os
 import unittest
-import urllib.error
-from unittest.mock import patch
 
 from cli.mirror.model import ImageRef
 from cli.mirror.providers import GHCRProvider
 
 
-class _DummyResponse:
-    def __enter__(self) -> "_DummyResponse":
-        return self
-
-    def __exit__(self, exc_type, exc, tb) -> bool:
-        return False
-
-
-class TestGHCRProviderSetPublic(unittest.TestCase):
+class TestGHCRProviderImageBase(unittest.TestCase):
     def setUp(self) -> None:
         self.image = ImageRef(
             role="web-app-nextcloud",
@@ -27,62 +16,30 @@ class TestGHCRProviderSetPublic(unittest.TestCase):
             source="library/nextcloud:31.0.0",
         )
 
-    @patch.dict(os.environ, {"GITHUB_TOKEN": "secret-token"}, clear=False)
-    def test_set_public_uses_user_package_endpoint(self) -> None:
-        provider = GHCRProvider("kevinveenbirkenbach")
-        requests: list[str] = []
-
-        def fake_urlopen(req):
-            requests.append(req.full_url)
-            return _DummyResponse()
-
-        with patch(
-            "cli.mirror.providers.urllib.request.urlopen", side_effect=fake_urlopen
-        ):
-            provider._set_public(self.image)
-
+    def test_image_base_simple(self) -> None:
+        provider = GHCRProvider("acme")
         self.assertEqual(
-            requests,
-            ["https://api.github.com/user/packages/container/mirror%2Fnextcloud"],
+            provider.image_base(self.image),
+            "ghcr.io/acme/mirror/nextcloud",
         )
 
-    @patch.dict(os.environ, {"GITHUB_TOKEN": "secret-token"}, clear=False)
-    def test_set_public_falls_back_to_org_endpoint_after_user_404(self) -> None:
+    def test_image_base_with_slash_in_name(self) -> None:
+        image = ImageRef(
+            role="web-app-foo",
+            service="svc",
+            name="foo/bar",
+            version="1.0",
+            source="foo/bar:1.0",
+        )
         provider = GHCRProvider("acme")
-        requests: list[str] = []
-
-        def fake_urlopen(req):
-            requests.append(req.full_url)
-            if "/user/" in req.full_url and "/orgs/" not in req.full_url:
-                raise urllib.error.HTTPError(
-                    req.full_url,
-                    404,
-                    "Not Found",
-                    hdrs=None,
-                    fp=None,
-                )
-            return _DummyResponse()
-
-        with patch(
-            "cli.mirror.providers.urllib.request.urlopen", side_effect=fake_urlopen
-        ):
-            provider._set_public(self.image)
-
         self.assertEqual(
-            requests,
-            [
-                "https://api.github.com/user/packages/container/mirror%2Fnextcloud",
-                "https://api.github.com/orgs/acme/packages/container/mirror%2Fnextcloud",
-            ],
+            provider.image_base(image),
+            "ghcr.io/acme/mirror/foo-bar",
         )
 
-    def test_ensure_public_delegates_to_set_public(self) -> None:
-        provider = GHCRProvider("acme")
-
-        with patch.object(provider, "_set_public") as mock_set_public:
-            provider.ensure_public(self.image)
-
-        mock_set_public.assert_called_once_with(self.image)
+    def test_namespace_is_lowercased(self) -> None:
+        provider = GHCRProvider("ACME")
+        self.assertEqual(provider.namespace, "acme")
 
 
 if __name__ == "__main__":  # pragma: no cover
