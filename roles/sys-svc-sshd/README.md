@@ -14,12 +14,13 @@ This Ansible role configures the OpenSSH daemon (`sshd`) by deploying a template
 ## Features
 
 - **Templated Configuration**  
-  Delivers a Jinja2-based `sshd_config` with variables for debug logging and PAM support.
+  Delivers a Jinja2-based `sshd_config` with variables for debug logging, PAM support, and password-auth overrides.
 
 - **Security Defaults**  
   - Disables password (`PasswordAuthentication no`) and root login (`PermitRootLogin no`)  
   - Enforces public-key authentication (`PubkeyAuthentication yes`)  
   - Conditionally sets `LogLevel` to `DEBUG3` when `MODE_DEBUG` is true  
+  - Allows controlled exceptions via `SYS_SVC_SSHD_PASSWORD_AUTHENTICATION`
 
 - **Systemd Integration**  
   Handles daemon reload and service restart seamlessly on configuration changes.
@@ -28,6 +29,12 @@ This Ansible role configures the OpenSSH daemon (`sshd`) by deploying a template
   Ensures tasks run only once per play by setting the `run_once_sys_svc_sshd` fact.
 
 ## Further Resources
+
+## Variables
+
+- `SYS_SVC_SSHD_PASSWORD_AUTHENTICATION`
+  Default: `false`
+  Enables password authentication when explicitly required by controlled environments such as local E2E test targets.
 
 - [sshd_config Manual (OpenSSH)](https://man7.org/linux/man-pages/man5/sshd_config.5.html)  
 - [Ansible Template Module](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/template_module.html)  
