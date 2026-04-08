@@ -43,9 +43,7 @@ class TestGHCRProviderSetPublic(unittest.TestCase):
 
         self.assertEqual(
             requests,
-            [
-                "https://api.github.com/users/kevinveenbirkenbach/packages/container/mirror%2Fnextcloud"
-            ],
+            ["https://api.github.com/user/packages/container/mirror%2Fnextcloud"],
         )
 
     @patch.dict(os.environ, {"GITHUB_TOKEN": "secret-token"}, clear=False)
@@ -55,7 +53,7 @@ class TestGHCRProviderSetPublic(unittest.TestCase):
 
         def fake_urlopen(req):
             requests.append(req.full_url)
-            if "/users/" in req.full_url:
+            if "/user/" in req.full_url and "/orgs/" not in req.full_url:
                 raise urllib.error.HTTPError(
                     req.full_url,
                     404,
@@ -73,7 +71,7 @@ class TestGHCRProviderSetPublic(unittest.TestCase):
         self.assertEqual(
             requests,
             [
-                "https://api.github.com/users/acme/packages/container/mirror%2Fnextcloud",
+                "https://api.github.com/user/packages/container/mirror%2Fnextcloud",
                 "https://api.github.com/orgs/acme/packages/container/mirror%2Fnextcloud",
             ],
         )

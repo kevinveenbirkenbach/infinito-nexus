@@ -117,7 +117,7 @@ class GHCRProvider(RegistryProvider):
         }
         body = json.dumps({"visibility": "public"}).encode()
         urls = [
-            f"https://api.github.com/users/{self.namespace}/packages/container/{pkg}",
+            f"https://api.github.com/user/packages/container/{pkg}",
             f"https://api.github.com/orgs/{self.namespace}/packages/container/{pkg}",
         ]
 
