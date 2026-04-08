@@ -26,3 +26,13 @@ server:
 remote-control:
   control-enable: yes
   control-interface: /run/unbound.control.sock
+{% if MAILU_UNBOUND_FORWARD_DNS | bool %}
+
+# WSL2/DinD: iterative resolution via root-hints is not supported in nested
+# Docker. Forward all queries to public resolvers instead.
+# Enable by setting MAILU_UNBOUND_FORWARD_DNS: true in your inventory.
+forward-zone:
+  name: "."
+  forward-addr: 1.1.1.1
+  forward-addr: 8.8.8.8
+{% endif %}
