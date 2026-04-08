@@ -53,6 +53,9 @@ compose:
     css:
       enabled: false
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes:
     data:             moodle_data
     code:             moodle_code

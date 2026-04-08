@@ -34,6 +34,9 @@ compose:
     css:
       enabled:        true
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes: 
     synapse:          "matrix_synapse_data"
 playbook_tags:        "setup-all,start"                  # For the initial update use: install-all,ensure-matrix-users-created,start

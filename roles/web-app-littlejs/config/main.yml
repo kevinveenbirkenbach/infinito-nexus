@@ -47,3 +47,6 @@ compose:
     littlejs:
       image:   nginx
       version: alpine
+    prometheus:
+      enabled: true
+      shared: true

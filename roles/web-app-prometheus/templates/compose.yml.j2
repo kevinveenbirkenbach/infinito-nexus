@@ -7,11 +7,21 @@
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:9090"
     command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--config.file={{ PROMETHEUS_CONFIG_DOCKER }}"
       - "--storage.tsdb.path=/prometheus"
       - "--web.enable-lifecycle"
     volumes:
       - data:/prometheus
+      - {{ PROMETHEUS_CONFIG_HOST }}:{{ PROMETHEUS_CONFIG_DOCKER }}:ro
+
+  blackbox-exporter:
+    image: "prom/blackbox-exporter:latest"
+    container_name: "{{ PROMETHEUS_CONTAINER }}-blackbox"
+    restart: unless-stopped
+    command:
+      - "--config.file={{ BLACKBOX_CONFIG_DOCKER }}"
+    volumes:
+      - {{ BLACKBOX_CONFIG_HOST }}:{{ BLACKBOX_CONFIG_DOCKER }}:ro
 
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 

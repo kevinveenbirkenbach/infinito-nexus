@@ -25,3 +25,6 @@ compose:
       enabled: false
       shared: true
       canonical: cdn
+    prometheus:
+      enabled: true
+      shared: true

@@ -66,6 +66,9 @@ compose:
     css:
       enabled: false
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
   volumes: 
     data:                 wordpress_data
 rbac:

@@ -44,6 +44,9 @@ compose:
     css:
       enabled: false
       shared: true
+    prometheus:
+      enabled: true
+      shared: true
 server:
   domains:
     canonical:
