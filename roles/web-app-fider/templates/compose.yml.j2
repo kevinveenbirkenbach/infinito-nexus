@@ -1,0 +1,23 @@
+{% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
+
+  application:
+{% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    image: "{{ FIDER_IMAGE }}:{{ FIDER_VERSION }}"
+    container_name: "{{ FIDER_CONTAINER }}"
+    ports:
+      - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ FIDER_CONTAINER_PORT }}"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:{{ FIDER_CONTAINER_PORT }}/_health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+{% include 'roles/sys-svc-container/templates/depends_on/dmbs_excl.yml.j2' %}
+
+{{ applications | compose_volumes(
+    application_id,
+    database_volume=lookup('database', application_id, 'volume'),
+) }}
+{% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

@@ -1,0 +1,102 @@
+---
+- name: "Fider | Check if tenant is already initialized"
+  shell: |
+    container exec -i {{ lookup('database', application_id, 'container') }} \
+      psql -U {{ lookup('database', application_id, 'username') }} \
+           -d {{ lookup('database', application_id, 'name') }} \
+           -t -c "SELECT COUNT(*) FROM tenants;" | tr -d ' \n'
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  register: fider_tenant_count
+  changed_when: false
+
+- name: "Fider | Bootstrap initial tenant via API"
+  uri_retry:
+    url: "http://{{ DOCKER_REACH_HOST }}:{{ ports.localhost.http[application_id] }}/_api/tenants"
+    method: POST
+    body_format: json
+    body:
+      tenantName: "{{ SOFTWARE_NAME }}"
+      subdomain: "fider"
+      name: "{{ users.administrator.firstname }} {{ users.administrator.lastname }}"
+      email: "{{ users.administrator.email }}"
+      legalAgreement: true
+      token: ""
+    status_code: [200, 201]
+  when: (fider_tenant_count.stdout | trim | int) == 0
+
+- name: "Fider | Create admin user (bypass email verification)"
+  shell: |
+    container exec -i {{ lookup('database', application_id, 'container') }} \
+      psql -U {{ lookup('database', application_id, 'username') }} \
+           -d {{ lookup('database', application_id, 'name') }} \
+           -c "INSERT INTO users (name, email, created_at, tenant_id, role, status, avatar_type, avatar_bkey)
+               SELECT
+                 '{{ users.administrator.firstname }} {{ users.administrator.lastname }}',
+                 '{{ users.administrator.email }}',
+                 NOW(),
+                 (SELECT id FROM tenants LIMIT 1),
+                 3, 1, 2, ''
+               WHERE NOT EXISTS (
+                 SELECT 1 FROM users
+                 WHERE email = '{{ users.administrator.email }}'
+                   AND tenant_id = (SELECT id FROM tenants LIMIT 1)
+               );
+               UPDATE email_verifications
+                 SET verified_at = NOW(),
+                     user_id = (SELECT id FROM users WHERE email = '{{ users.administrator.email }}' AND tenant_id = (SELECT id FROM tenants LIMIT 1))
+               WHERE email = '{{ users.administrator.email }}' AND verified_at IS NULL;"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: true
+
+- name: "Fider | Activate tenant (set status=1 to bypass email confirmation)"
+  shell: |
+    container exec -i {{ lookup('database', application_id, 'container') }} \
+      psql -U {{ lookup('database', application_id, 'username') }} \
+           -d {{ lookup('database', application_id, 'name') }} \
+           -c "UPDATE tenants SET status = 1 WHERE status != 1;"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: true
+
+- name: "Fider | Configure Keycloak as OIDC provider in database"
+  shell: |
+    container exec -i {{ lookup('database', application_id, 'container') }} \
+      psql -U {{ lookup('database', application_id, 'username') }} \
+           -d {{ lookup('database', application_id, 'name') }} \
+           -c "INSERT INTO oauth_providers (
+                 tenant_id, provider, display_name, status,
+                 client_id, client_secret,
+                 authorize_url, token_url, profile_url,
+                 scope,
+                 json_user_id_path, json_user_name_path, json_user_email_path,
+                 logo_bkey, is_trusted
+               ) VALUES (
+                 (SELECT id FROM tenants LIMIT 1),
+                 '_keycloak',
+                 '{{ SOFTWARE_NAME }} SSO',
+                 2,
+                 '{{ OIDC.CLIENT.ID }}',
+                 '{{ OIDC.CLIENT.SECRET }}',
+                 '{{ OIDC.CLIENT.AUTHORIZE_URL }}',
+                 '{{ OIDC.CLIENT.TOKEN_URL }}',
+                 '{{ OIDC.CLIENT.USER_INFO_URL }}',
+                 'openid profile email',
+                 'sub', 'name', 'email',
+                 '', true
+               )
+               ON CONFLICT (tenant_id, provider) DO UPDATE SET
+                 display_name       = EXCLUDED.display_name,
+                 status             = EXCLUDED.status,
+                 client_id          = EXCLUDED.client_id,
+                 client_secret      = EXCLUDED.client_secret,
+                 authorize_url      = EXCLUDED.authorize_url,
+                 token_url          = EXCLUDED.token_url,
+                 profile_url        = EXCLUDED.profile_url,
+                 scope              = EXCLUDED.scope,
+                 logo_bkey          = EXCLUDED.logo_bkey,
+                 is_trusted         = EXCLUDED.is_trusted;"
+  args:
+    chdir: "{{ lookup('container', application_id, 'directories.instance') }}"
+  changed_when: true
