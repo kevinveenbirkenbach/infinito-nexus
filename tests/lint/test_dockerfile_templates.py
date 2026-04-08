@@ -13,7 +13,7 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from utils.gha.annotations import warning
+from utils.annotations.message import warning
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _ROLES_ROOT = _REPO_ROOT / "roles"

@@ -25,6 +25,14 @@ jobs:
         run: docker version
 
       - name: Run custom lint tests via make
+        shell: bash
         run: |
+          set -euo pipefail
           make up
-          make test-lint
+          make test-lint 2>&1 | tee /tmp/lint-output.txt
+
+      - name: Build step summary from annotations
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: |
+          python3 -m utils.annotations.summarize /tmp/lint-output.txt "Lint Annotation Summary"

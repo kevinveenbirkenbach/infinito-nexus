@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from utils.gha.annotations import warning
+from utils.annotations.message import warning
 
 
 def _emit_missing_playwright_spec_warning(repo_root: Path, role_path: Path) -> None:

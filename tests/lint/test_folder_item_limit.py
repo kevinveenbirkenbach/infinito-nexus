@@ -19,7 +19,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
-from utils.gha.annotations import warning
+from utils.annotations.message import warning
 
 MAX_ITEMS_PER_FOLDER = 12
 

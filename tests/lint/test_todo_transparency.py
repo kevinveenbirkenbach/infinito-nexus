@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import List
 
-from utils.gha.annotations import in_github_actions, warning
+from utils.annotations.message import in_github_actions, warning
 
 
 OPEN_PROJECT_URL_RE = re.compile(

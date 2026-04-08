@@ -28,7 +28,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from utils.gha.annotations import warning
+from utils.annotations.message import warning
 from urllib.parse import quote, urlencode
 
 import yaml

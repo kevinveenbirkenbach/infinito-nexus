@@ -25,6 +25,14 @@ jobs:
         run: docker version
 
       - name: Run integration tests via make
+        shell: bash
         run: |
+          set -euo pipefail
           make up
-          make test-integration
+          make test-integration 2>&1 | tee /tmp/integration-output.txt
+
+      - name: Build step summary from annotations
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: |
+          python3 -m utils.annotations.summarize /tmp/integration-output.txt "Integration Test Annotation Summary"

@@ -6,7 +6,7 @@ import yaml
 
 from humanfriendly import parse_size
 from utils.entity_name_utils import get_entity_name
-from utils.gha.annotations import warning
+from utils.annotations.message import warning
 
 
 def _repo_root() -> Path:

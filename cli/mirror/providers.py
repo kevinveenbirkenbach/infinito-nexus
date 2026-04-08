@@ -11,7 +11,7 @@ import urllib.parse
 import urllib.request
 from typing import List
 
-from utils.gha.annotations import warning
+from utils.annotations.message import warning
 from .model import ImageRef
 
 

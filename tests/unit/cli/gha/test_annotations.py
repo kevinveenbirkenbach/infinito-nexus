@@ -5,7 +5,7 @@ import unittest
 from io import StringIO
 from unittest.mock import patch
 
-from utils.gha.annotations import error, error_each, notice, warning, warning_each
+from utils.annotations.message import error, error_each, notice, warning, warning_each
 
 GHA_ENV = {"GITHUB_ACTIONS": "true"}
 NO_GHA_ENV = {"GITHUB_ACTIONS": ""}
