@@ -36,6 +36,8 @@ See also [branch.md](branch.md) for branch protection rules.
 
 ## Secret Protection
 
+For GHCR authentication secrets (`GHCR_PAT`, `GHCR_USERNAME`) see [ghcr.md](ghcr.md).
+
 ### Secret Scanning ❌
 
 👉 Secrets may accidentally be committed
