@@ -11,6 +11,7 @@ import urllib.parse
 import urllib.request
 from typing import List
 
+from utils.gha.annotations import warning
 from .model import ImageRef
 
 
@@ -140,6 +141,16 @@ class GHCRProvider(RegistryProvider):
                     flush=True,
                 )
                 time.sleep(retry_delay)
+
+        pat_set = os.environ.get("GHCR_PAT_SET", "false").lower() == "true"
+        if not pat_set:
+            warning(
+                f"Could not set public visibility for '{pkg}' "
+                f"— GHCR_PAT secret is not configured (GITHUB_TOKEN lacks write:packages scope). "
+                + " | ".join(errors),
+                title="Mirror visibility skipped",
+            )
+            return
 
         raise RuntimeError(
             f"[mirror] Failed to set package visibility to public for '{pkg}' "
