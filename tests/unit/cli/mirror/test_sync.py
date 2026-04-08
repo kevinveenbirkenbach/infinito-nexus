@@ -8,7 +8,9 @@ import cli.mirror.sync.__main__ as sync_main
 
 
 class TestMirrorSync(unittest.TestCase):
-    def test_only_missing_skips_existing_destination_without_ensure_public(self) -> None:
+    def test_only_missing_skips_existing_destination_without_ensure_public(
+        self,
+    ) -> None:
         image = ImageRef(
             role="web-app-nextcloud",
             service="app",
