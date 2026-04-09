@@ -76,7 +76,8 @@ def _list_packages(namespace: str, token: str, account_type: str) -> Iterator[di
         while True:
             try:
                 data = _gh_get(
-                    f"{base}?package_type=container&per_page=100&page={page}{vis}", token
+                    f"{base}?package_type=container&per_page=100&page={page}{vis}",
+                    token,
                 )
             except urllib.error.HTTPError as e:
                 if e.code in (400, 401, 403) and account_type == "users":
@@ -159,21 +160,22 @@ def main() -> int:
 
     account_type = _resolve_account_type(namespace, token)
 
-
     print(
         f"[publish] Scanning packages for '{namespace}' with prefix '{prefix}/'…",
         flush=True,
     )
 
     try:
-      pkg_iter = list(_list_packages(namespace, token, account_type))
+        pkg_iter = list(_list_packages(namespace, token, account_type))
     except _InsufficientTokenError as e:
         print("", flush=True)
         print("=" * 60, flush=True)
         print("[publish] WARNING: visibility update skipped", flush=True)
         print(f"  Reason : {e}", flush=True)
-        print(  "  Fix    : provide a PAT with 'read:packages' scope as", flush=True)
-        print(  "           GITHUB_TOKEN (or GHCR_PAT) for personal accounts.", flush=True)
+        print("  Fix    : provide a PAT with 'read:packages' scope as", flush=True)
+        print(
+            "           GITHUB_TOKEN (or GHCR_PAT) for personal accounts.", flush=True
+        )
         print("=" * 60, flush=True)
         print("", flush=True)
         return 0
