@@ -18,6 +18,8 @@ compose:
       enabled: true
       shared: true
     roulette-wheel:
+      image:              node
+      version:            "latest"
       min_storage:        "1GB"
       cpus:               0.5
       mem_reservation:    126m

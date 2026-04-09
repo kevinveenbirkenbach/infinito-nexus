@@ -171,9 +171,7 @@ def main() -> int:
     _server = os.environ.get("GITHUB_SERVER_URL", "https://github.com").rstrip("/")
     _repo = os.environ.get("GITHUB_REPOSITORY", "")
     _GHCR_DOC_URL = (
-        f"{_server}/{_repo}/blob/master/{_GHCR_DOC_PATH}"
-        if _repo
-        else _GHCR_DOC_PATH
+        f"{_server}/{_repo}/blob/master/{_GHCR_DOC_PATH}" if _repo else _GHCR_DOC_PATH
     )
     try:
         pkg_iter = list(_list_packages(namespace, token, account_type))

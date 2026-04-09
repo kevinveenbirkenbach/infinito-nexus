@@ -1,4 +1,6 @@
-FROM {{ OPENPROJECT_IMAGE }}:{{ OPENPROJECT_VERSION }}
+ARG OPENPROJECT_IMAGE
+ARG OPENPROJECT_VERSION
+FROM ${OPENPROJECT_IMAGE}:${OPENPROJECT_VERSION}
 
 # If installing a local plugin (using `path:` in the copied `Gemfile.plugins`),
 # you will have to copy the plugin code into the container here and use the

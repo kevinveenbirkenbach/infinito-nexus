@@ -2,6 +2,10 @@
   {{ entity_name }}:
     container_name: {{ entity_name }}
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        ROULETTE_IMAGE:         "{{ ROULETTE_IMAGE }}"
+        ROULETTE_VERSION:       "{{ ROULETTE_VERSION }}"
+        ROULETTE_WHEEL_APP_REL: "{{ ROULETTE_WHEEL_APP_REL }}"
     image: {{ ROULETTE_IMAGE_CUSTOM }}
     ports:
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:8080

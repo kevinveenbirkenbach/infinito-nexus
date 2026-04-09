@@ -1,4 +1,6 @@
-FROM {{ WORDPRESS_IMAGE }}:{{ WORDPRESS_VERSION }}
+ARG WORDPRESS_IMAGE
+ARG WORDPRESS_VERSION
+FROM ${WORDPRESS_IMAGE}:${WORDPRESS_VERSION}
 
 # Install msmtp and update system
 RUN apt-get update && \
@@ -10,5 +12,6 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     chmod +x wp-cli.phar && \
     mv wp-cli.phar /usr/local/bin/wp
 
+ARG WORDPRESS_CONFIG_UPLD_REL
 # Copy PHP upload settings
-COPY {{ WORDPRESS_CONFIG_UPLD_REL }} $PHP_INI_DIR/conf.d/
+COPY ${WORDPRESS_CONFIG_UPLD_REL} $PHP_INI_DIR/conf.d/
