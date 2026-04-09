@@ -5,7 +5,7 @@ from pathlib import Path
 
 class TestDockerComposeTemplates(unittest.TestCase):
     # Search for all roles/*/templates/compose.yml.j2
-    PROJECT_ROOT = Path(__file__).resolve().parents[2]
+    PROJECT_ROOT = Path(__file__).resolve().parents[3]
     TEMPLATE_PATTERN = "roles/*/templates/compose.yml.j2"
 
     # Allowed lines before BASE_INCLUDE

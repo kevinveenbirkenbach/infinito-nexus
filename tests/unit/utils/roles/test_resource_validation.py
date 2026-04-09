@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from utils import role_resource_validation as rrv
+from utils.roles import resource_validation as rrv
 
 
 class TestFilterRolesByMinStorage(unittest.TestCase):

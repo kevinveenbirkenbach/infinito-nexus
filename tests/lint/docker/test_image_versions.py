@@ -33,13 +33,14 @@ from urllib.parse import quote, urlencode
 
 import yaml
 
-from utils.docker_image_ref import (
+from utils.docker.image_discovery import iter_role_images
+from utils.docker.image_ref import (
     DOCKER_HUB_REGISTRIES,
     GHCR_REGISTRY,
     split_registry_and_name,
 )
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
+_REPO_ROOT = Path(__file__).resolve().parents[3]
 _ROLES_ROOT = _REPO_ROOT / "roles"
 
 # Matches: 1 / 1.2 / 1.2.3 / 1.2.3.4 with optional leading "v"
@@ -219,39 +220,36 @@ def _suppressed_services(config_path: Path) -> set[str]:
 
 
 def _collect_entries() -> list[dict]:
-    """Collect (role, service, image, version, config_path) for semver versions."""
+    """Collect (role, service, image, version, config_path) for semver versions in web-* roles."""
     entries: list[dict] = []
-    for config_path in sorted(_ROLES_ROOT.glob("web-*/config/main.yml")):
-        role = config_path.parts[-3]
-        rel_path = str(config_path.relative_to(_REPO_ROOT))
-        try:
-            raw = config_path.read_text(encoding="utf-8")
-            data = yaml.safe_load(raw) or {}
-        except yaml.YAMLError:
+    for ref in iter_role_images(_REPO_ROOT):
+        # Only web-* roles
+        if not ref.role.startswith("web-"):
             continue
-        suppressed = _suppressed_services(config_path)
-        services = (data.get("compose") or {}).get("services") or {}
-        for svc, conf in services.items():
-            if svc in suppressed:
-                continue
-            if not isinstance(conf, dict):
-                continue
-            image = conf.get("image")
-            version = conf.get("version")
-            if not image or version is None:
-                continue
-            version = str(version).strip()
-            if not _is_semver(version):
-                continue
-            entries.append(
-                {
-                    "role": role,
-                    "service": svc,
-                    "image": image,
-                    "version": version,
-                    "config_path": rel_path,
-                }
-            )
+        # Only compose services from config/main.yml, not vars
+        if ref.source_file != "config/main.yml":
+            continue
+        # Only semver versions
+        if not _is_semver(ref.version):
+            continue
+        cfg_path = _ROLES_ROOT / ref.role / "config" / "main.yml"
+        # Check nocheck suppression
+        if ref.service in _suppressed_services(cfg_path):
+            continue
+        # Reconstruct full image reference for registry API calls
+        if ref.registry == "docker.io":
+            image = ref.name
+        else:
+            image = f"{ref.registry}/{ref.name}"
+        entries.append(
+            {
+                "role": ref.role,
+                "service": ref.service,
+                "image": image,
+                "version": ref.version,
+                "config_path": str(cfg_path.relative_to(_REPO_ROOT)),
+            }
+        )
     return entries
 
 

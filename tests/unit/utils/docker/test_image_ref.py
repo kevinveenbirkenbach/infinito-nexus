@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from utils.docker_image_ref import is_valid_image_name, split_registry_and_name
+from utils.docker.image_ref import is_valid_image_name, split_registry_and_name
 
 
 class TestDockerImageRef(unittest.TestCase):

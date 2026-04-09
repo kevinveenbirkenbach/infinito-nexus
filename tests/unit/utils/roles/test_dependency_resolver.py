@@ -9,7 +9,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from utils.role_dependency_resolver import RoleDependencyResolver  # noqa: E402
+from utils.roles.dependency_resolver import RoleDependencyResolver  # noqa: E402
 
 
 def write(path: str, content: str):

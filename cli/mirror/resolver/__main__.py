@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import yaml
 
-from cli.mirror.util import iter_role_images
+from utils.docker.image_discovery import iter_role_images
 from cli.mirror.providers import GHCRProvider
 
 

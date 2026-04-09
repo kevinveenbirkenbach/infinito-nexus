@@ -83,7 +83,10 @@ class GHCRProvider(RegistryProvider):
 
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
-        src = f"docker://docker.io/{image.source}"
+        if image.registry == "docker.io":
+            src = f"docker://docker.io/{image.source}"
+        else:
+            src = f"docker://{image.source}"
 
         try:
             # Fast path
