@@ -52,8 +52,15 @@ def _resolve_account_type(namespace: str, token: str) -> str:
 
 
 def _list_packages(namespace: str, token: str, account_type: str) -> Iterator[dict]:
-    """Yield all container packages for the namespace (handles pagination)."""
-    base = f"https://api.github.com/{account_type}/{namespace}/packages"
+    """Yield all container packages for the namespace (handles pagination).
+
+    For user accounts, uses /user/packages (authenticated user endpoint) because
+    /users/{username}/packages returns 400 with a GITHUB_TOKEN.
+    """
+    if account_type == "orgs":
+        base = f"https://api.github.com/orgs/{namespace}/packages"
+    else:
+        base = "https://api.github.com/user/packages"
     page = 1
     while True:
         data = _gh_get(f"{base}?package_type=container&per_page=100&page={page}", token)
@@ -75,7 +82,10 @@ def _set_public(
     retry_delay: float = 10.0,
 ) -> None:
     encoded = urllib.parse.quote(pkg_name, safe="")
-    url = f"https://api.github.com/{account_type}/{namespace}/packages/container/{encoded}"
+    if account_type == "orgs":
+        url = f"https://api.github.com/orgs/{namespace}/packages/container/{encoded}"
+    else:
+        url = f"https://api.github.com/user/packages/container/{encoded}"
     body = json.dumps({"visibility": "public"}).encode()
     headers = {
         "Authorization": f"Bearer {token}",
