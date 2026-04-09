@@ -1,5 +1,7 @@
 # Build BookWyrm from source (no upstream image available)
-FROM python:3.11-bookworm AS builder
+ARG BOOKWYRM_BASE_IMAGE
+ARG BOOKWYRM_BASE_VERSION
+FROM ${BOOKWYRM_BASE_IMAGE}:${BOOKWYRM_BASE_VERSION} AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git build-essential libpq-dev \
@@ -16,7 +18,7 @@ RUN pip install --upgrade pip \
  && pip wheel --wheel-dir /wheels -r requirements.txt \
  && pip wheel --wheel-dir /wheels gunicorn
 
-FROM python:3.11-bookworm
+FROM ${BOOKWYRM_BASE_IMAGE}:${BOOKWYRM_BASE_VERSION}
 ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
