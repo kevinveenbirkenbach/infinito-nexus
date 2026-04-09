@@ -49,6 +49,11 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 
 ## Documentation Structure 🗂️
 
+### Role README
+
+Every Ansible role MUST contain a `README.md`.
+See [readme.md](code/role/readme.md) for the required structure, section order, and formatting rules.
+
 ### Markdown
 - You SHOULD prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
 - You MUST NOT place `README.md` files under `docs/`.
