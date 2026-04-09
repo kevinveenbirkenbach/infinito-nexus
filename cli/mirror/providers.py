@@ -28,8 +28,7 @@ class GHCRProvider(RegistryProvider):
         self.prefix = prefix.strip("/")
 
     def image_base(self, image: ImageRef) -> str:
-        mapped = image.name.replace("/", "-")
-        return f"ghcr.io/{self.namespace}/{self.prefix}/{mapped}"
+        return f"ghcr.io/{self.namespace}/{self.prefix}/{image.registry}/{image.name}"
 
     def tag_exists(self, image: ImageRef) -> bool:
         """
@@ -83,7 +82,7 @@ class GHCRProvider(RegistryProvider):
 
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
-        src = f"docker://docker.io/{image.source}"
+        src = f"docker://{image.source}"
 
         try:
             # Fast path
@@ -120,8 +119,7 @@ class GiteaProvider(RegistryProvider):
         self.prefix = prefix.strip("/")
 
     def image_base(self, image: ImageRef) -> str:
-        mapped = image.name.replace("/", "-")
-        return f"{self.registry}/{self.namespace}/{self.prefix}/{mapped}"
+        return f"{self.registry}/{self.namespace}/{self.prefix}/{image.registry}/{image.name}"
 
     def tag_exists(self, image: ImageRef) -> bool:
         """
@@ -143,7 +141,7 @@ class GiteaProvider(RegistryProvider):
 
     def mirror(self, image: ImageRef) -> None:
         dest = f"{self.image_base(image)}:{image.version}"
-        src = f"docker://docker.io/{image.source}"
+        src = f"docker://{image.source}"
 
         cmd = [
             "skopeo",

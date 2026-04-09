@@ -8,6 +8,7 @@ class ImageRef:
     service: str  # e.g. postgres
     name: str  # canonical image name, e.g. postgis/postgis or postgres
     version: str  # e.g. 17-3.5
-    source: (
-        str  # docker hub source ref, e.g. postgis/postgis:17-3.5 or library/postgres:16
+    source: str  # full pull ref, e.g. docker.io/library/postgres:16 or quay.io/keycloak/keycloak:latest
+    registry: str = (
+        "docker.io"  # source registry hostname, e.g. docker.io, quay.io, ghcr.io
     )

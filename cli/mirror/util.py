@@ -189,4 +189,5 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 name=canonical_image_name(image),
                 version=version,
                 source=image_source(image, version),
+                registry=_detect_registry(image),
             )

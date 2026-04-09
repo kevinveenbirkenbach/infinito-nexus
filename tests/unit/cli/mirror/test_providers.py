@@ -13,14 +13,15 @@ class TestGHCRProviderImageBase(unittest.TestCase):
             service="app",
             name="nextcloud",
             version="31.0.0",
-            source="library/nextcloud:31.0.0",
+            source="docker.io/library/nextcloud:31.0.0",
+            registry="docker.io",
         )
 
     def test_image_base_simple(self) -> None:
         provider = GHCRProvider("acme")
         self.assertEqual(
             provider.image_base(self.image),
-            "ghcr.io/acme/mirror/nextcloud",
+            "ghcr.io/acme/mirror/docker.io/nextcloud",
         )
 
     def test_image_base_with_slash_in_name(self) -> None:
@@ -29,12 +30,28 @@ class TestGHCRProviderImageBase(unittest.TestCase):
             service="svc",
             name="foo/bar",
             version="1.0",
-            source="foo/bar:1.0",
+            source="docker.io/foo/bar:1.0",
+            registry="docker.io",
         )
         provider = GHCRProvider("acme")
         self.assertEqual(
             provider.image_base(image),
-            "ghcr.io/acme/mirror/foo-bar",
+            "ghcr.io/acme/mirror/docker.io/foo/bar",
+        )
+
+    def test_image_base_quay(self) -> None:
+        image = ImageRef(
+            role="web-app-keycloak",
+            service="app",
+            name="keycloak/keycloak",
+            version="latest",
+            source="quay.io/keycloak/keycloak:latest",
+            registry="quay.io",
+        )
+        provider = GHCRProvider("acme")
+        self.assertEqual(
+            provider.image_base(image),
+            "ghcr.io/acme/mirror/quay.io/keycloak/keycloak",
         )
 
     def test_namespace_is_lowercased(self) -> None:
