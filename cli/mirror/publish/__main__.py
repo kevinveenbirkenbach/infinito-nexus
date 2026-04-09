@@ -21,6 +21,8 @@ import urllib.parse
 import urllib.request
 from typing import Iterator
 
+from utils.annotations.message import warning as gha_warning
+
 
 class _InsufficientTokenError(Exception):
     """Raised when the supplied token cannot access the requested GitHub API endpoint."""
@@ -165,19 +167,17 @@ def main() -> int:
         flush=True,
     )
 
+    _GHCR_DOC = "docs/contributing/flow/security/ghcr.md"
     try:
         pkg_iter = list(_list_packages(namespace, token, account_type))
     except _InsufficientTokenError as e:
-        print("", flush=True)
-        print("=" * 60, flush=True)
-        print("[publish] WARNING: visibility update skipped", flush=True)
-        print(f"  Reason : {e}", flush=True)
-        print("  Fix    : provide a PAT with 'read:packages' scope as", flush=True)
-        print(
-            "           GITHUB_TOKEN (or GHCR_PAT) for personal accounts.", flush=True
+        gha_warning(
+            f"Mirror visibility update skipped — {e}. "
+            "The GITHUB_TOKEN is an installation token and cannot list packages for personal accounts. "
+            "Set the GHCR_PAT secret to a classic PAT with read:packages and write:packages scopes. "
+            f"See {_GHCR_DOC} for setup instructions.",
+            title="GHCR visibility update skipped — GHCR_PAT required",
         )
-        print("=" * 60, flush=True)
-        print("", flush=True)
         return 0
 
     for pkg in pkg_iter:

@@ -61,6 +61,20 @@ Secrets are loaded at job start. After changing a secret you MUST either:
 - Re-run the workflow manually, or
 - Push a new commit to trigger a fresh run
 
+## Mirror Visibility Update — Personal Accounts ⚠️
+
+When the GHCR namespace belongs to a **personal account** (not an organization), the `GITHUB_TOKEN` issued by GitHub Actions is an installation token and MUST NOT be used to list or modify package visibility.
+The `cli.mirror.publish` module will emit a GitHub Actions warning annotation and skip the visibility update if `GHCR_PAT` is not set.
+
+To enable automatic visibility updates for personal accounts you MUST:
+
+1. Create a **classic PAT** (see [Required Configuration](#required-configuration-) above) with at least `read:packages` and `write:packages` scopes.
+2. Store it as the repository (or organization) secret `GHCR_PAT`.
+3. Store the owning GitHub username as the secret `GHCR_USERNAME`.
+
+The workflow automatically prefers `GHCR_PAT` over `GITHUB_TOKEN` when the secret is present.
+If `GHCR_PAT` is absent, mirrored images are pushed successfully but their visibility is NOT automatically set to public.
+
 ## Troubleshooting 🧯
 
 If login fails:
@@ -69,6 +83,7 @@ If login fails:
 2. Ensure `GHCR_USERNAME` matches the account that created the token.
 3. Re-run the workflow after any credential changes.
 4. You MUST NOT use the organization name as the username.
+5. If you see the warning *"GHCR visibility update skipped — GHCR_PAT required"* in the Actions log, `GHCR_PAT` is missing or not passed to the workflow — see [Mirror Visibility Update — Personal Accounts](#mirror-visibility-update--personal-accounts-) above.
 
 ## Best Practice ❤️
 
