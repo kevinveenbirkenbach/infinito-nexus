@@ -2,7 +2,7 @@
 application_id:                   "web-app-decidim"
 
 # Docker
-container_port:                   "{{ ports.localhost.http[application_id] }}"
+container_port:                   "3000"
 
 # Decidim
 DECIDIM_VERSION:                  "{{ lookup('config', application_id, 'compose.services.decidim.version') }}"
@@ -22,11 +22,11 @@ DECIDIM_DB_PASSWORD:              "{{ lookup('config', application_id, 'credenti
 DECIDIM_OIDC_ENABLED:             "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
 DECIDIM_OIDC_CLIENT_ID:           "{{ OIDC.CLIENT.ID }}"
 DECIDIM_OIDC_CLIENT_SECRET:       "{{ OIDC.CLIENT.SECRET }}"
-DECIDIM_OIDC_ISSUER:              "{{ OIDC.CLIENT.ISSUER }}"
+DECIDIM_OIDC_ISSUER:              "{{ OIDC.CLIENT.ISSUER_URL }}"
 DECIDIM_OIDC_AUTHORIZE_URL:       "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
 DECIDIM_OIDC_TOKEN_URL:           "{{ OIDC.CLIENT.TOKEN_URL }}"
 DECIDIM_OIDC_USER_INFO_URL:       "{{ OIDC.CLIENT.USER_INFO_URL }}"
 
 ## Organisation
-DECIDIM_ORGANIZATION_NAME:        "{{ SOFTWARE_NAME }}"
+DECIDIM_ORGANIZATION_NAME:        "{{ defaults_service_provider.platform.titel }}"
 DECIDIM_ORGANIZATION_HOST:        "{{ lookup('tls', application_id, 'url.base') }}"

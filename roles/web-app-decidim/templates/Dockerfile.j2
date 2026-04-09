@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1
+FROM {{ decidim_base_image }}:{{ decidim_base_image_tag }}
+
+USER root
+
+# Generate a new Decidim application
+RUN decidim /app \
+    && cd /app \
+    && bundle install --jobs "$(nproc)" --retry 3
+
+WORKDIR /app
+
+# Allow all hosts (configured via RAILS_HOSTS env var)
+RUN echo 'Rails.application.config.hosts << /.*/' >> config/application.rb
+
+USER decidim
+
+EXPOSE 3000

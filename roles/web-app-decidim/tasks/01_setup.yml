@@ -6,7 +6,7 @@
     env:
       RAILS_ENV: production
   register: decidim_migrate_result
-  changed_when: decidim_migrate_result.stdout != ''
+  changed_when: decidim_migrate_result.stdout_lines | default([]) | length > 0
 
 - name: "Decidim | Seed database on first deploy"
   community.docker.docker_container_exec:
@@ -15,7 +15,7 @@
     env:
       RAILS_ENV: production
   register: decidim_seed_result
-  changed_when: decidim_seed_result.stdout != ''
+  changed_when: decidim_seed_result.stdout_lines | default([]) | length > 0
   failed_when:
     - decidim_seed_result.rc != 0
-    - "'already exists' not in decidim_seed_result.stderr"
+    - "'already exists' not in (decidim_seed_result.stderr | default(''))"

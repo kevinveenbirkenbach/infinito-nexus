@@ -11,7 +11,7 @@ server:
     canonical:
       - decidim.{{ DOMAIN_PRIMARY }}
   status_codes:
-    default:                      [200, 301, 302]
+    default:                      [200]
 compose:
   services:
     oidc:
@@ -34,7 +34,7 @@ compose:
       type:                       "postgres"
       enabled:                    true
     decidim:
-      image:                      "decidim/decidim"
+      image:                      "ghcr.io/decidim/decidim"
       version:                    "0.28.0"
       min_storage:                "10GB"
       name:                       "decidim"
