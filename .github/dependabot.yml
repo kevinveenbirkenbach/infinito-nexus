@@ -76,7 +76,7 @@ updates:
   # ------------------------------------------------------------
   - package-ecosystem: "npm"
     directories:
-      - "**"
+      - "/roles/test-e2e-playwright/files"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -159,7 +159,7 @@ updates:
   # ------------------------------------------------------------
   - package-ecosystem: "bundler"
     directories:
-      - "**"
+      - "/roles/web-app-openproject/files"
     schedule:
       interval: "daily"
       time: "00:00"
