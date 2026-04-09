@@ -1,6 +1,7 @@
 # cli/mirror/providers.py
 from __future__ import annotations
 
+import argparse
 from abc import ABC, abstractmethod
 import subprocess
 from typing import List
@@ -23,12 +24,25 @@ class RegistryProvider(ABC):
 
 
 class GHCRProvider(RegistryProvider):
-    def __init__(self, namespace: str, prefix: str = "mirror") -> None:
+    def __init__(self, namespace: str, repository: str, prefix: str = "mirror") -> None:
         self.namespace = namespace.lower()
+        self.repository = repository.lower()
         self.prefix = prefix.strip("/")
 
+    @classmethod
+    def add_args(cls, parser: argparse.ArgumentParser) -> None:
+        """Register --ghcr-namespace, --ghcr-repository, --ghcr-prefix on *parser*."""
+        parser.add_argument("--ghcr-namespace", required=True)
+        parser.add_argument("--ghcr-repository", required=True)
+        parser.add_argument("--ghcr-prefix", default="mirror")
+
+    @classmethod
+    def from_args(cls, args: argparse.Namespace) -> "GHCRProvider":
+        """Construct a GHCRProvider from parsed CLI args."""
+        return cls(args.ghcr_namespace, args.ghcr_repository, args.ghcr_prefix)
+
     def image_base(self, image: ImageRef) -> str:
-        return f"ghcr.io/{self.namespace}/{self.prefix}/{image.registry}/{image.name}"
+        return f"ghcr.io/{self.namespace}/{self.repository}/{self.prefix}/{image.registry}/{image.name}"
 
     def tag_exists(self, image: ImageRef) -> bool:
         """

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 : "${GHCR_NAMESPACE:?Missing GHCR_NAMESPACE}"
+: "${GHCR_REPOSITORY:?Missing GHCR_REPOSITORY}"
 : "${GHCR_PREFIX:?Missing GHCR_PREFIX}"
 : "${REPO_ROOT:?Missing REPO_ROOT}"
 ghcr_namespace="$(echo "${GHCR_NAMESPACE}" | tr '[:upper:]' '[:lower:]')"
@@ -13,6 +14,7 @@ sleep_seconds="${IMAGE_WAIT_SLEEP_SECONDS}"
 
 mapfile -t mirror_refs < <(
 	GHCR_NAMESPACE="${ghcr_namespace}" \
+		GHCR_REPOSITORY="${GHCR_REPOSITORY}" \
 		GHCR_PREFIX="${GHCR_PREFIX}" \
 		REPO_ROOT="${REPO_ROOT}" \
 		python - <<'PY'
@@ -23,6 +25,7 @@ from utils.docker.image_discovery import iter_role_images
 
 provider = GHCRProvider(
     os.environ["GHCR_NAMESPACE"],
+    os.environ["GHCR_REPOSITORY"],
     os.environ["GHCR_PREFIX"],
 )
 repo_root = Path(os.environ["REPO_ROOT"]).resolve()

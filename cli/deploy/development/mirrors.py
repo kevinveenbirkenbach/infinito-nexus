@@ -42,6 +42,7 @@ def _exec_env() -> Dict[str, str]:
     return {
         "RUNNING_ON_GITHUB": _require_env("RUNNING_ON_GITHUB"),
         "GITHUB_REPOSITORY_OWNER": _require_env("GITHUB_REPOSITORY_OWNER"),
+        "GITHUB_REPOSITORY": _require_env("GITHUB_REPOSITORY"),
         "INFINITO_GHCR_MIRROR_PREFIX": _require_env("INFINITO_GHCR_MIRROR_PREFIX"),
     }
 
@@ -59,6 +60,7 @@ def generate_ci_mirrors_file(compose, *, inventory_dir: str) -> str:
 
     env = _exec_env()
     ghcr_namespace = env["GITHUB_REPOSITORY_OWNER"].lower()
+    ghcr_repository = env["GITHUB_REPOSITORY"].split("/", 1)[-1].lower()
     ghcr_prefix = env["INFINITO_GHCR_MIRROR_PREFIX"].strip().strip("/")
     if not ghcr_prefix:
         raise RuntimeError("INFINITO_GHCR_MIRROR_PREFIX must not be empty")
@@ -74,6 +76,7 @@ def generate_ci_mirrors_file(compose, *, inventory_dir: str) -> str:
         '"${PYTHON:-python3}" -m cli.mirror.resolver '
         f"--repo-root {shlex.quote(repo_root)} "
         f"--ghcr-namespace {shlex.quote(ghcr_namespace)} "
+        f"--ghcr-repository {shlex.quote(ghcr_repository)} "
         f"--ghcr-prefix {shlex.quote(ghcr_prefix)} "
         f"> {shlex.quote(mirrors_path)}; "
         f"echo '[init] mirrors generated:' {shlex.quote(mirrors_path)}; "

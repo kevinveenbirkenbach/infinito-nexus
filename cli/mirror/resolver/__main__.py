@@ -11,12 +11,11 @@ from cli.mirror.providers import GHCRProvider
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default=".")
-    parser.add_argument("--ghcr-namespace", required=True)
-    parser.add_argument("--ghcr-prefix", default="mirror")
+    GHCRProvider.add_args(parser)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
-    provider = GHCRProvider(args.ghcr_namespace, args.ghcr_prefix)
+    provider = GHCRProvider.from_args(args)
     repo_root = Path(args.repo_root).resolve()
 
     applications = {}

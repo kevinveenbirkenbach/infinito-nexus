@@ -18,10 +18,10 @@ class TestGHCRProviderImageBase(unittest.TestCase):
         )
 
     def test_image_base_simple(self) -> None:
-        provider = GHCRProvider("acme")
+        provider = GHCRProvider("acme", "myrepo")
         self.assertEqual(
             provider.image_base(self.image),
-            "ghcr.io/acme/mirror/docker.io/nextcloud",
+            "ghcr.io/acme/myrepo/mirror/docker.io/nextcloud",
         )
 
     def test_image_base_with_slash_in_name(self) -> None:
@@ -33,10 +33,10 @@ class TestGHCRProviderImageBase(unittest.TestCase):
             source="docker.io/foo/bar:1.0",
             registry="docker.io",
         )
-        provider = GHCRProvider("acme")
+        provider = GHCRProvider("acme", "myrepo")
         self.assertEqual(
             provider.image_base(image),
-            "ghcr.io/acme/mirror/docker.io/foo/bar",
+            "ghcr.io/acme/myrepo/mirror/docker.io/foo/bar",
         )
 
     def test_image_base_quay(self) -> None:
@@ -48,15 +48,16 @@ class TestGHCRProviderImageBase(unittest.TestCase):
             source="quay.io/keycloak/keycloak:latest",
             registry="quay.io",
         )
-        provider = GHCRProvider("acme")
+        provider = GHCRProvider("acme", "myrepo")
         self.assertEqual(
             provider.image_base(image),
-            "ghcr.io/acme/mirror/quay.io/keycloak/keycloak",
+            "ghcr.io/acme/myrepo/mirror/quay.io/keycloak/keycloak",
         )
 
-    def test_namespace_is_lowercased(self) -> None:
-        provider = GHCRProvider("ACME")
+    def test_namespace_and_repository_are_lowercased(self) -> None:
+        provider = GHCRProvider("ACME", "MyRepo")
         self.assertEqual(provider.namespace, "acme")
+        self.assertEqual(provider.repository, "myrepo")
 
 
 if __name__ == "__main__":  # pragma: no cover

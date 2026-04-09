@@ -23,7 +23,7 @@ class TestMirrorSync(unittest.TestCase):
             patch.object(
                 sync_main.GHCRProvider,
                 "image_base",
-                return_value="ghcr.io/acme/mirror/nextcloud",
+                return_value="ghcr.io/acme/myrepo/mirror/docker.io/nextcloud",
             ),
             patch.object(
                 sync_main.GHCRProvider, "tag_exists", return_value=True
@@ -31,7 +31,14 @@ class TestMirrorSync(unittest.TestCase):
             patch.object(sync_main.GHCRProvider, "mirror") as mock_mirror,
             patch(
                 "sys.argv",
-                ["mirror-sync", "--ghcr-namespace", "acme", "--only-missing"],
+                [
+                    "mirror-sync",
+                    "--ghcr-namespace",
+                    "acme",
+                    "--ghcr-repository",
+                    "myrepo",
+                    "--only-missing",
+                ],
             ),
         ):
             result = sync_main.main()
