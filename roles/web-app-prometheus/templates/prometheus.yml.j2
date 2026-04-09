@@ -16,7 +16,7 @@ scrape_configs:
 
   # Blackbox HTTP health probes — one target per canonical domain per application.
   # The /healthz endpoint returns 200 from nginx without exposing any application data.
-  - job_name: "blackbox-http"
+  - job_name: "blackbox-healthz"
     metrics_path: /probe
     params:
       module: [http_2xx]
