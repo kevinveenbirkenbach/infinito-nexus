@@ -39,6 +39,14 @@ load_repo_env() {
 	local previous_pwd
 	previous_pwd="$(pwd)"
 	cd "${REPO_ROOT}"
+	unset INFINITO_ENV_LOADED
+	unset INFINITO_ENV_PYTHON_LOADED
+	unset INFINITO_ENV_RUNTIME_LOADED
+	unset INFINITO_ENV_DEFAULTS_LOADED
+	unset INFINITO_ENV_INVENTORY_LOADED
+	unset INFINITO_ENV_GITHUB_LOADED
+	unset PYTHON
+	unset PIP
 	# shellcheck source=scripts/meta/env/all.sh
 	source scripts/meta/env/all.sh
 	cd "${previous_pwd}"

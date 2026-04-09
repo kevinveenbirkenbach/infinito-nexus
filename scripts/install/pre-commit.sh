@@ -5,6 +5,8 @@ set -euo pipefail
 if [[ -n "${VENV:-}" && -x "${VENV}/bin/python" && "${PYTHON:-}" != "${VENV}/bin/python" ]]; then
 	unset INFINITO_ENV_LOADED
 	unset INFINITO_ENV_PYTHON_LOADED
+	unset PYTHON
+	unset PIP
 	# shellcheck source=scripts/meta/env/all.sh
 	source "${ENV_SH:-scripts/meta/env/all.sh}"
 fi
