@@ -22,6 +22,10 @@ import urllib.request
 from typing import Iterator
 
 
+class _InsufficientTokenError(Exception):
+    """Raised when the supplied token cannot access the requested GitHub API endpoint."""
+
+
 def _gh_get(url: str, token: str) -> dict | list:
     req = urllib.request.Request(
         url,
@@ -70,9 +74,16 @@ def _list_packages(namespace: str, token: str, account_type: str) -> Iterator[di
     for base, vis in zip(bases, visibility_params):
         page = 1
         while True:
-            data = _gh_get(
-                f"{base}?package_type=container&per_page=100&page={page}{vis}", token
-            )
+            try:
+                data = _gh_get(
+                    f"{base}?package_type=container&per_page=100&page={page}{vis}", token
+                )
+            except urllib.error.HTTPError as e:
+                if e.code in (400, 401, 403) and account_type == "users":
+                    raise _InsufficientTokenError(
+                        f"HTTP {e.code} when listing user packages"
+                    ) from e
+                raise
             if not data:
                 break
             yield from data
@@ -148,12 +159,26 @@ def main() -> int:
 
     account_type = _resolve_account_type(namespace, token)
 
+
     print(
         f"[publish] Scanning packages for '{namespace}' with prefix '{prefix}/'…",
         flush=True,
     )
 
-    for pkg in _list_packages(namespace, token, account_type):
+    try:
+      pkg_iter = list(_list_packages(namespace, token, account_type))
+    except _InsufficientTokenError as e:
+        print("", flush=True)
+        print("=" * 60, flush=True)
+        print("[publish] WARNING: visibility update skipped", flush=True)
+        print(f"  Reason : {e}", flush=True)
+        print(  "  Fix    : provide a PAT with 'read:packages' scope as", flush=True)
+        print(  "           GITHUB_TOKEN (or GHCR_PAT) for personal accounts.", flush=True)
+        print("=" * 60, flush=True)
+        print("", flush=True)
+        return 0
+
+    for pkg in pkg_iter:
         name: str = pkg.get("name", "")
         if not name.startswith(f"{prefix}/"):
             continue
