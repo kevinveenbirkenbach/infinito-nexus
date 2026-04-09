@@ -6,7 +6,7 @@ updates:
   # ------------------------------------------------------------
   - package-ecosystem: "pip"
     directories:
-      - "/"
+      - "**"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -19,7 +19,8 @@ updates:
   # GitHub Actions workflows
   # ------------------------------------------------------------
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "**"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -32,7 +33,7 @@ updates:
   # ------------------------------------------------------------
   - package-ecosystem: "docker"
     directories:
-      - "/"
+      - "**"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -45,7 +46,7 @@ updates:
   # ------------------------------------------------------------
   - package-ecosystem: "docker-compose"
     directories:
-      - "/"
+      - "**"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -62,7 +63,7 @@ updates:
   # ------------------------------------------------------------
   - package-ecosystem: "pre-commit"
     directories:
-      - "/"
+      - "**"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -75,7 +76,7 @@ updates:
   # ------------------------------------------------------------
   - package-ecosystem: "npm"
     directories:
-      - "/"
+      - "**"
     schedule:
       interval: "daily"
       time: "00:00"
@@ -158,7 +159,7 @@ updates:
   # ------------------------------------------------------------
   - package-ecosystem: "bundler"
     directories:
-      - "/"
+      - "**"
     schedule:
       interval: "daily"
       time: "00:00"
