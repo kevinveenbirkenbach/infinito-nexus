@@ -101,14 +101,23 @@ def _set_public(
     token: str,
     account_type: str,
     *,
+    pkg_url: str = "",
     retries: int = 5,
     retry_delay: float = 10.0,
 ) -> None:
-    encoded = urllib.parse.quote(pkg_name, safe="")
-    if account_type == "orgs":
-        url = f"https://api.github.com/orgs/{namespace}/packages/container/{encoded}"
+    if pkg_url:
+        url = pkg_url
     else:
-        url = f"https://api.github.com/user/packages/container/{encoded}"
+        # Use safe="/" so slashes in namespaced package names (e.g. mirror/keycloak-keycloak)
+        # are kept as literal path segments rather than being encoded as %2F.
+        # GitHub's API router matches {package_name} as a glob that includes slashes.
+        encoded = urllib.parse.quote(pkg_name, safe="/")
+        if account_type == "orgs":
+            url = (
+                f"https://api.github.com/orgs/{namespace}/packages/container/{encoded}"
+            )
+        else:
+            url = f"https://api.github.com/user/packages/container/{encoded}"
     body = json.dumps({"visibility": "public"}).encode()
     headers = {
         "Authorization": f"Bearer {token}",
@@ -122,7 +131,29 @@ def _set_public(
         try:
             with urllib.request.urlopen(req):
                 return
-        except (urllib.error.HTTPError, urllib.error.URLError) as e:
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                raise _InsufficientTokenError(
+                    f"HTTP 404 when setting visibility for '{pkg_name}' — "
+                    "package not found at PATCH endpoint or token lacks write:packages scope"
+                ) from e
+            if e.code in (400, 401, 403):
+                raise RuntimeError(
+                    f"[publish] Failed to set '{pkg_name}' to public: {e}"
+                ) from e
+            # 5xx or unexpected: retry
+            if attempt < retries:
+                print(
+                    f"[publish] visibility update for '{pkg_name}' failed "
+                    f"(attempt {attempt}/{retries}): {e} — retrying in {retry_delay}s…",
+                    flush=True,
+                )
+                time.sleep(retry_delay)
+            else:
+                raise RuntimeError(
+                    f"[publish] Failed to set '{pkg_name}' to public after {retries} attempts: {e}"
+                ) from e
+        except urllib.error.URLError as e:
             if attempt < retries:
                 print(
                     f"[publish] visibility update for '{pkg_name}' failed "
@@ -200,9 +231,20 @@ def main() -> int:
             f"[publish] {name}: visibility={visibility!r} → setting public…", flush=True
         )
         try:
-            _set_public(namespace, name, token, account_type)
+            _set_public(
+                namespace, name, token, account_type, pkg_url=pkg.get("url", "")
+            )
             print(f"[publish] {name}: ✓ set to public", flush=True)
             updated += 1
+        except _InsufficientTokenError as e:
+            gha_warning(
+                f"Mirror visibility update skipped — {e}. "
+                "The token cannot update package visibility for user packages. "
+                "Set the GHCR_PAT secret to a classic PAT with read:packages and write:packages scopes. "
+                f"See {_GHCR_DOC_URL} for setup instructions.",
+                title="GHCR visibility update skipped — GHCR_PAT required",
+            )
+            return 0
         except RuntimeError as e:
             print(str(e), file=sys.stderr, flush=True)
             failures.append(name)
