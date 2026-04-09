@@ -167,7 +167,14 @@ def main() -> int:
         flush=True,
     )
 
-    _GHCR_DOC = "docs/contributing/flow/security/ghcr.md"
+    _GHCR_DOC_PATH = "docs/contributing/flow/security/ghcr.md"
+    _server = os.environ.get("GITHUB_SERVER_URL", "https://github.com").rstrip("/")
+    _repo = os.environ.get("GITHUB_REPOSITORY", "")
+    _GHCR_DOC_URL = (
+        f"{_server}/{_repo}/blob/master/{_GHCR_DOC_PATH}"
+        if _repo
+        else _GHCR_DOC_PATH
+    )
     try:
         pkg_iter = list(_list_packages(namespace, token, account_type))
     except _InsufficientTokenError as e:
@@ -175,7 +182,7 @@ def main() -> int:
             f"Mirror visibility update skipped — {e}. "
             "The GITHUB_TOKEN is an installation token and cannot list packages for personal accounts. "
             "Set the GHCR_PAT secret to a classic PAT with read:packages and write:packages scopes. "
-            f"See {_GHCR_DOC} for setup instructions.",
+            f"See {_GHCR_DOC_URL} for setup instructions.",
             title="GHCR visibility update skipped — GHCR_PAT required",
         )
         return 0
