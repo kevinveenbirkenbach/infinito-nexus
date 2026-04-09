@@ -12,6 +12,25 @@ DOCKER_HUB_PREFIXES = (
     "index.docker.io/",
 )
 
+# All registry hostname prefixes that are stripped when building the canonical name.
+_ALL_REGISTRY_PREFIXES = DOCKER_HUB_PREFIXES + (
+    "quay.io/",
+    "ghcr.io/",
+    "mcr.microsoft.com/",
+)
+
+# Registries whose images should be mirrored to GHCR.
+_MIRRORABLE_REGISTRIES = frozenset(
+    {
+        "docker.io",
+        "registry-1.docker.io",
+        "index.docker.io",
+        "quay.io",
+        "ghcr.io",
+        "mcr.microsoft.com",
+    }
+)
+
 
 def load_yaml(path: Path) -> dict:
     with path.open("r", encoding="utf-8") as f:
@@ -19,32 +38,46 @@ def load_yaml(path: Path) -> dict:
     return obj if isinstance(obj, dict) else {}
 
 
+def _detect_registry(image: str) -> str:
+    """Return the normalised registry hostname for *image*.
+
+    Implicit Docker Hub images (e.g. ``postgres``, ``postgis/postgis``) return
+    ``"docker.io"``.
+    """
+    image = image.strip()
+    first = image.split("/", 1)[0]
+    if first in ("docker.io", "registry-1.docker.io", "index.docker.io"):
+        return "docker.io"
+    if "." in first or ":" in first:
+        return first  # e.g. "quay.io", "ghcr.io", "mcr.microsoft.com"
+    return "docker.io"  # implicit Docker Hub
+
+
+def _strip_registry_prefix(image: str) -> str:
+    """Remove the registry prefix (if any) from *image*, return bare reference."""
+    image = image.strip()
+    for prefix in _ALL_REGISTRY_PREFIXES:
+        if image.startswith(prefix):
+            return image[len(prefix) :]
+    # Implicit Docker Hub — no prefix to strip
+    return image
+
+
 def is_docker_hub_image(image: str) -> bool:
-    """
-    Docker Hub images are either:
-      - implicit: postgres, postgis/postgis
-      - explicit: docker.io/postgis/postgis
-    """
+    """Return True iff *image* is hosted on Docker Hub (kept for backward compat)."""
+    return _detect_registry(image) == "docker.io"
+
+
+def is_mirrorable_image(image: str) -> bool:
+    """Return True for images from any supported public registry that we mirror."""
     image = image.strip()
     if not image:
         return False
-
-    first = image.split("/", 1)[0]
-
-    if first in ("docker.io", "registry-1.docker.io", "index.docker.io"):
-        return True
-
-    # looks like registry host
-    if "." in first or ":" in first:
-        return False
-
-    return True
+    return _detect_registry(image) in _MIRRORABLE_REGISTRIES
 
 
 def normalize_docker_hub(image: str) -> str:
-    """
-    Remove docker hub registry prefix if present.
-    """
+    """Remove Docker Hub registry prefix if present (backward compat)."""
     image = image.strip()
     for prefix in DOCKER_HUB_PREFIXES:
         if image.startswith(prefix):
@@ -74,14 +107,13 @@ def split_name_and_suffix(image: str) -> Tuple[str, str]:
 
 
 def docker_hub_source(image: str, version: str) -> str:
-    """
-    Build canonical docker hub source ref for skopeo.
+    """Build canonical Docker Hub source ref for skopeo (backward compat).
 
     postgres + 16         -> library/postgres:16
     postgis/postgis + 17  -> postgis/postgis:17
     """
     image = normalize_docker_hub(image)
-    base, _suffix = split_name_and_suffix(image)  # drop embedded tag/digest if present
+    base, _suffix = split_name_and_suffix(image)  # drop embedded tag/digest
 
     if "/" not in base:
         base = f"library/{base}"
@@ -89,13 +121,39 @@ def docker_hub_source(image: str, version: str) -> str:
     return f"{base}:{version}"
 
 
+def image_source(image: str, version: str) -> str:
+    """Full pull reference for skopeo (without the ``docker://`` scheme).
+
+    Examples::
+
+        postgres          + 16      -> docker.io/library/postgres:16
+        postgis/postgis   + 17-3.5  -> docker.io/postgis/postgis:17-3.5
+        quay.io/keycloak/keycloak + latest -> quay.io/keycloak/keycloak:latest
+        ghcr.io/mastodon/mastodon + latest -> ghcr.io/mastodon/mastodon:latest
+    """
+    registry = _detect_registry(image)
+    bare = _strip_registry_prefix(image)
+    base, _suffix = split_name_and_suffix(bare)  # drop embedded tag/digest
+
+    if registry == "docker.io" and "/" not in base:
+        base = f"library/{base}"
+
+    return f"{registry}/{base}:{version}"
+
+
 def canonical_image_name(image: str) -> str:
+    """Canonical image name without registry and without tag/digest.
+
+    Strips any known registry prefix so that the name can be used uniformly
+    regardless of the source registry:
+
+        quay.io/keycloak/keycloak -> keycloak/keycloak
+        ghcr.io/mastodon/mastodon -> mastodon/mastodon
+        docker.io/postgres        -> postgres
+        postgres                  -> postgres
     """
-    Canonical image name without registry and without tag/digest.
-    Keeps docker-hub implicit name as-is (without adding 'library/').
-    """
-    image = normalize_docker_hub(image)
-    base, _suffix = split_name_and_suffix(image)
+    bare = _strip_registry_prefix(image)
+    base, _suffix = split_name_and_suffix(bare)
     return base
 
 
@@ -122,7 +180,7 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
             if not image or not version:
                 continue
 
-            if not is_docker_hub_image(image):
+            if not is_mirrorable_image(image):
                 continue
 
             yield ImageRef(
@@ -130,5 +188,5 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 service=str(service_name),
                 name=canonical_image_name(image),
                 version=version,
-                source=docker_hub_source(image, version),
+                source=image_source(image, version),
             )

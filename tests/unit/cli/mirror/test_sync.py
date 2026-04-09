@@ -14,7 +14,7 @@ class TestMirrorSync(unittest.TestCase):
             service="app",
             name="nextcloud",
             version="31.0.0",
-            source="library/nextcloud:31.0.0",
+            source="docker.io/library/nextcloud:31.0.0",
         )
 
         with (
