@@ -133,11 +133,17 @@ def _set_public(
                 return
         except urllib.error.HTTPError as e:
             if e.code == 404:
+                print(
+                    f"[publish] {pkg_name}: 404 — package not found, skipping",
+                    flush=True,
+                )
+                return
+            if e.code in (401, 403):
                 raise _InsufficientTokenError(
-                    f"HTTP 404 when setting visibility for '{pkg_name}' — "
-                    "package not found at PATCH endpoint or token lacks write:packages scope"
+                    f"HTTP {e.code} when setting visibility for '{pkg_name}' — "
+                    "token lacks write:packages scope"
                 ) from e
-            if e.code in (400, 401, 403):
+            if e.code == 400:
                 raise RuntimeError(
                     f"[publish] Failed to set '{pkg_name}' to public: {e}"
                 ) from e
