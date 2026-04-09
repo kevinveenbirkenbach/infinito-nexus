@@ -200,5 +200,4 @@ jobs:
           set -euo pipefail
           python -m cli.mirror.publish \
             --ghcr-namespace "${{ steps.vars.outputs.ghcr_namespace }}" \
-            --ghcr-repository "${{ steps.vars.outputs.ghcr_repository }}" \
             --ghcr-prefix "${{ inputs.ghcr_prefix || 'mirror' }}"
