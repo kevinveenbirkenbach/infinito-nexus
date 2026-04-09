@@ -35,15 +35,28 @@ def _gh_get(url: str, token: str) -> dict | list:
         return json.loads(resp.read())
 
 
-def _list_packages(namespace: str, token: str) -> Iterator[dict]:
+def _resolve_account_type(namespace: str, token: str) -> str:
+    """Return 'orgs' if namespace is a GitHub org, 'users' otherwise."""
+    url = f"https://api.github.com/orgs/{namespace}/packages?package_type=container&per_page=1"
+    try:
+        _gh_get(url, token)
+        return "orgs"
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            print(
+                f"[publish] '{namespace}' is not an org, using user account endpoint…",
+                flush=True,
+            )
+            return "users"
+        raise
+
+
+def _list_packages(namespace: str, token: str, account_type: str) -> Iterator[dict]:
     """Yield all container packages for the namespace (handles pagination)."""
+    base = f"https://api.github.com/{account_type}/{namespace}/packages"
     page = 1
     while True:
-        url = (
-            f"https://api.github.com/orgs/{namespace}/packages"
-            f"?package_type=container&per_page=100&page={page}"
-        )
-        data = _gh_get(url, token)
+        data = _gh_get(f"{base}?package_type=container&per_page=100&page={page}", token)
         if not data:
             break
         yield from data
@@ -56,12 +69,13 @@ def _set_public(
     namespace: str,
     pkg_name: str,
     token: str,
+    account_type: str,
     *,
     retries: int = 5,
     retry_delay: float = 10.0,
 ) -> None:
     encoded = urllib.parse.quote(pkg_name, safe="")
-    url = f"https://api.github.com/orgs/{namespace}/packages/container/{encoded}"
+    url = f"https://api.github.com/{account_type}/{namespace}/packages/container/{encoded}"
     body = json.dumps({"visibility": "public"}).encode()
     headers = {
         "Authorization": f"Bearer {token}",
@@ -113,12 +127,14 @@ def main() -> int:
     updated = 0
     skipped = 0
 
+    account_type = _resolve_account_type(namespace, token)
+
     print(
         f"[publish] Scanning packages for '{namespace}' with prefix '{prefix}/'…",
         flush=True,
     )
 
-    for pkg in _list_packages(namespace, token):
+    for pkg in _list_packages(namespace, token, account_type):
         name: str = pkg.get("name", "")
         if not name.startswith(f"{prefix}/"):
             continue
@@ -133,7 +149,7 @@ def main() -> int:
             f"[publish] {name}: visibility={visibility!r} → setting public…", flush=True
         )
         try:
-            _set_public(namespace, name, token)
+            _set_public(namespace, name, token, account_type)
             print(f"[publish] {name}: ✓ set to public", flush=True)
             updated += 1
         except RuntimeError as e:

@@ -22,6 +22,11 @@ class _DummyResponse:
         return False
 
 
+def _org_probe() -> _DummyResponse:
+    """Simulate a successful org-endpoint probe (account_type resolves to 'orgs')."""
+    return _DummyResponse(b"[]")
+
+
 class TestPublishMain(unittest.TestCase):
     def _make_pkg(self, name: str, visibility: str) -> dict:
         return {"name": name, "visibility": visibility}
@@ -30,6 +35,7 @@ class TestPublishMain(unittest.TestCase):
     def test_already_public_packages_are_skipped(self) -> None:
         packages = [self._make_pkg("mirror/foo", "public")]
         responses = [
+            _org_probe(),
             _DummyResponse(json.dumps(packages).encode()),
             _DummyResponse(b"[]"),
         ]
@@ -61,7 +67,10 @@ class TestPublishMain(unittest.TestCase):
             call_count += 1
             if req.get_method() == "PATCH":
                 return patch_response
-            payload = json.dumps(packages if call_count == 1 else []).encode()
+            # call 1 = org probe, call 2 = list page 1, call 3 = list page 2
+            if call_count == 1:
+                return _DummyResponse(b"[]")
+            payload = json.dumps(packages if call_count == 2 else []).encode()
             return _DummyResponse(payload)
 
         with (
@@ -85,6 +94,7 @@ class TestPublishMain(unittest.TestCase):
     def test_packages_outside_prefix_are_ignored(self) -> None:
         packages = [self._make_pkg("other/foo", "private")]
         responses = [
+            _org_probe(),
             _DummyResponse(json.dumps(packages).encode()),
             _DummyResponse(b"[]"),
         ]
