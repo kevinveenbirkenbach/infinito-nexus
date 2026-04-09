@@ -54,22 +54,31 @@ def _resolve_account_type(namespace: str, token: str) -> str:
 def _list_packages(namespace: str, token: str, account_type: str) -> Iterator[dict]:
     """Yield all container packages for the namespace (handles pagination).
 
-    For user accounts, uses /user/packages (authenticated user endpoint) because
-    /users/{username}/packages returns 400 with a GITHUB_TOKEN.
+    For user accounts, uses /user/packages with an explicit visibility parameter
+    because installation tokens (GITHUB_TOKEN) require it.  We query private and
+    internal visibility separately to find all non-public packages.
+
+    For org accounts, no visibility filter is needed.
     """
     if account_type == "orgs":
-        base = f"https://api.github.com/orgs/{namespace}/packages"
+        bases = [f"https://api.github.com/orgs/{namespace}/packages"]
+        visibility_params = [""]
     else:
-        base = "https://api.github.com/user/packages"
-    page = 1
-    while True:
-        data = _gh_get(f"{base}?package_type=container&per_page=100&page={page}", token)
-        if not data:
-            break
-        yield from data
-        if len(data) < 100:
-            break
-        page += 1
+        bases = ["https://api.github.com/user/packages"] * 2
+        visibility_params = ["&visibility=private", "&visibility=internal"]
+
+    for base, vis in zip(bases, visibility_params):
+        page = 1
+        while True:
+            data = _gh_get(
+                f"{base}?package_type=container&per_page=100&page={page}{vis}", token
+            )
+            if not data:
+                break
+            yield from data
+            if len(data) < 100:
+                break
+            page += 1
 
 
 def _set_public(
