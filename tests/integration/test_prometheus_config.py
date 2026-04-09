@@ -28,7 +28,8 @@ class TestPrometheusServicePresence(unittest.TestCase):
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         pattern = str(roles_dir / "*" / "config" / "main.yml")
         return [
-            p for p in sorted(glob.glob(pattern))
+            p
+            for p in sorted(glob.glob(pattern))
             if (
                 Path(p).parts[-3].startswith(("web-app-", "web-svc-"))
                 and Path(p).parts[-3] != PROMETHEUS_APP_ID

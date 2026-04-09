@@ -21,7 +21,7 @@ scrape_configs:
     params:
       module: [http_2xx]
     static_configs:
-{% for app_id in applications.keys() | sort %}
+{% for app_id in applications | list | sort %}
 {% if app_id != application_id %}
 {% set domains_raw = applications | get_app_conf(app_id, 'server.domains.canonical', false, []) %}
 {% set domains = (domains_raw.values() | list) if (domains_raw is mapping) else (domains_raw | list if (domains_raw is iterable and domains_raw is not string) else []) %}
