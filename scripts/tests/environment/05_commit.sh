@@ -74,24 +74,28 @@ trap 'cleanup "$?"' EXIT
 
 git checkout -b "${TEST_BRANCH}"
 
-# --- Step 1: Create a file that fails lint and verify the hook blocks the commit.
-echo "Creating a Python file with a lint violation (unused import)."
-cat >test_lint_fail.py <<'EOF'
-import os  # noqa: F401 intentionally unused to trigger ruff
-x=1
-EOF
-git add test_lint_fail.py
+# --- Step 1: Create a failing unit test and verify the hook blocks the commit.
+echo "Creating a unit test that fails intentionally."
+cat >tests/unit/test_pre_commit_hook_failure.py <<'EOF'
+import unittest
 
-echo "Attempting to commit the lint-failing file — pre-commit hook must block it."
-if git commit -m "test: lint-failing file (should be blocked)"; then
+
+class TestPreCommitHookFailure(unittest.TestCase):
+    def test_intentional_failure(self) -> None:
+        self.fail("intentional failure to verify pre-commit hook enforcement")
+EOF
+git add tests/unit/test_pre_commit_hook_failure.py
+
+echo "Attempting to commit the failing unit test — pre-commit hook must block it."
+if git commit -m "test: failing unit test (should be blocked)"; then
 	echo "[FAIL] Commit should have been blocked by pre-commit hook." >&2
 	exit 1
 fi
 echo "[OK] Commit correctly blocked by pre-commit hook."
 
 # --- Step 2: Commit with --no-verify to bypass the hook.
-echo "Committing the lint-failing file with --no-verify to bypass the hook."
-git commit --no-verify -m "test: lint-failing file committed with --no-verify"
+echo "Committing the failing unit test with --no-verify to bypass the hook."
+git commit --no-verify -m "test: failing unit test committed with --no-verify"
 echo "[OK] Commit with --no-verify succeeded."
 
 # --- Step 3: Revert the bypass commit.
@@ -99,16 +103,20 @@ echo "Reverting the --no-verify commit."
 git revert --no-edit HEAD
 echo "[OK] Revert succeeded."
 
-# --- Step 4: Create a correct file and commit without --no-verify.
-echo "Creating a clean Python file that passes lint."
-cat >test_lint_pass.py <<'EOF'
-def hello() -> None:
-    print("hello")
-EOF
-git add test_lint_pass.py
+# --- Step 4: Create a passing unit test and commit without --no-verify.
+echo "Creating a clean unit test that passes."
+cat >tests/unit/test_pre_commit_hook_success.py <<'EOF'
+import unittest
 
-echo "Committing the clean file without --no-verify — pre-commit hook must pass."
-git commit -m "test: clean file committed via pre-commit hook"
+
+class TestPreCommitHookSuccess(unittest.TestCase):
+    def test_success(self) -> None:
+        self.assertTrue(True)
+EOF
+git add tests/unit/test_pre_commit_hook_success.py
+
+echo "Committing the passing unit test without --no-verify — pre-commit hook must pass."
+git commit -m "test: passing unit test committed via pre-commit hook"
 echo "[OK] Commit without --no-verify succeeded."
 
 echo "Returning to the original ref and deleting the temporary test branch."
