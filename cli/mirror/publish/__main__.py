@@ -104,14 +104,15 @@ def _set_public(
     pkg_url: str = "",
     retries: int = 5,
     retry_delay: float = 10.0,
-) -> None:
+) -> bool:
+    """Return True if visibility was updated, False if the package was not found."""
     if pkg_url:
         url = pkg_url
     else:
-        # Use safe="/" so slashes in namespaced package names (e.g. mirror/keycloak-keycloak)
-        # are kept as literal path segments rather than being encoded as %2F.
-        # GitHub's API router matches {package_name} as a glob that includes slashes.
-        encoded = urllib.parse.quote(pkg_name, safe="/")
+        # Encode slashes as %2F so the full package name is a single path segment.
+        # Using safe="/" would split the name into multiple path segments, causing
+        # GitHub's API router to match only the first segment as the package name.
+        encoded = urllib.parse.quote(pkg_name, safe="")
         if account_type == "orgs":
             url = (
                 f"https://api.github.com/orgs/{namespace}/packages/container/{encoded}"
@@ -130,14 +131,14 @@ def _set_public(
         req = urllib.request.Request(url, data=body, headers=headers, method="PATCH")
         try:
             with urllib.request.urlopen(req):
-                return
+                return True
         except urllib.error.HTTPError as e:
             if e.code == 404:
                 print(
                     f"[publish] {pkg_name}: 404 — package not found, skipping",
                     flush=True,
                 )
-                return
+                return False
             if e.code in (401, 403):
                 raise _InsufficientTokenError(
                     f"HTTP {e.code} when setting visibility for '{pkg_name}' — "
@@ -237,11 +238,14 @@ def main() -> int:
             f"[publish] {name}: visibility={visibility!r} → setting public…", flush=True
         )
         try:
-            _set_public(
+            changed = _set_public(
                 namespace, name, token, account_type, pkg_url=pkg.get("url", "")
             )
-            print(f"[publish] {name}: ✓ set to public", flush=True)
-            updated += 1
+            if changed:
+                print(f"[publish] {name}: ✓ set to public", flush=True)
+                updated += 1
+            else:
+                skipped += 1
         except _InsufficientTokenError as e:
             gha_warning(
                 f"Mirror visibility update skipped — {e}. "
