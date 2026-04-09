@@ -1,4 +1,4 @@
-# utils/docker_paths_utils.py
+# utils/docker/paths_utils.py
 from __future__ import annotations
 
 from utils.entity_name_utils import get_entity_name

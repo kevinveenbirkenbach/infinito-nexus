@@ -1,9 +1,10 @@
 from __future__ import annotations
+
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Tuple
-import yaml
 
-from .model import ImageRef
+import yaml
 
 
 DOCKER_HUB_PREFIXES = (
@@ -30,6 +31,19 @@ _MIRRORABLE_REGISTRIES = frozenset(
         "mcr.microsoft.com",
     }
 )
+
+
+@dataclass(frozen=True)
+class ImageRef:
+    role: str  # e.g. svc-db-postgres
+    service: str  # e.g. postgres
+    name: str  # canonical image name without registry, e.g. postgis/postgis or postgres
+    version: str  # e.g. 17-3.5
+    source: str  # full pull ref, e.g. docker.io/library/postgres:16 or quay.io/keycloak/keycloak:latest
+    registry: str = (
+        "docker.io"  # source registry hostname, e.g. docker.io, quay.io, ghcr.io
+    )
+    source_file: str = "config/main.yml"  # "config/main.yml" or "vars/main.yml"
 
 
 def load_yaml(path: Path) -> dict:
@@ -59,7 +73,6 @@ def _strip_registry_prefix(image: str) -> str:
     for prefix in _ALL_REGISTRY_PREFIXES:
         if image.startswith(prefix):
             return image[len(prefix) :]
-    # Implicit Docker Hub — no prefix to strip
     return image
 
 
@@ -107,10 +120,10 @@ def split_name_and_suffix(image: str) -> Tuple[str, str]:
 
 
 def docker_hub_source(image: str, version: str) -> str:
-    """Build canonical Docker Hub source ref for skopeo (backward compat).
+    """Build canonical Docker Hub source ref for skopeo.
 
-    postgres + 16         -> library/postgres:16
-    postgis/postgis + 17  -> postgis/postgis:17
+    postgres + 16         -> docker.io/library/postgres:16
+    postgis/postgis + 17  -> docker.io/postgis/postgis:17
     """
     image = normalize_docker_hub(image)
     base, _suffix = split_name_and_suffix(image)  # drop embedded tag/digest
@@ -118,7 +131,7 @@ def docker_hub_source(image: str, version: str) -> str:
     if "/" not in base:
         base = f"library/{base}"
 
-    return f"{base}:{version}"
+    return f"docker.io/{base}:{version}"
 
 
 def image_source(image: str, version: str) -> str:
@@ -158,8 +171,16 @@ def canonical_image_name(image: str) -> str:
 
 
 def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
+    """
+    Yield all ImageRef entries discovered across all roles in *repo_root*.
+
+    Sources:
+      1. roles/**/config/main.yml → compose.services.<svc>.{image,version}
+      2. roles/**/vars/main.yml   → images.<name>.{image,version}
+    """
     roles_dir = repo_root / "roles"
 
+    # 1. Images from config/main.yml → compose.services
     for config_file in roles_dir.glob("**/config/main.yml"):
         role_name = config_file.parent.parent.name
         data = load_yaml(config_file)
@@ -190,4 +211,37 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 version=version,
                 source=image_source(image, version),
                 registry=_detect_registry(image),
+                source_file="config/main.yml",
+            )
+
+    # 2. Non-Docker-Hub images from vars/main.yml → images.<name>.{image,version}
+    for vars_file in roles_dir.glob("**/vars/main.yml"):
+        role_name = vars_file.parent.parent.name
+        data = load_yaml(vars_file)
+
+        images = data.get("images", {})
+        if not isinstance(images, dict):
+            continue
+
+        for service_name, entry in images.items():
+            if not isinstance(entry, dict):
+                continue
+
+            image = (entry.get("image") or "").strip()
+            version = (entry.get("version") or "").strip()
+
+            if not image or not version:
+                continue
+
+            if not is_mirrorable_image(image):
+                continue
+
+            yield ImageRef(
+                role=role_name,
+                service=str(service_name),
+                name=canonical_image_name(image),
+                version=version,
+                source=image_source(image, version),
+                registry=_detect_registry(image),
+                source_file="vars/main.yml",
             )

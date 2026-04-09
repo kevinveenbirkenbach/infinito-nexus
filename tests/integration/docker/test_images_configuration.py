@@ -9,7 +9,7 @@ class TestDockerRoleServicesConfiguration(unittest.TestCase):
         For each web-app-* role, check that:
         - roles/web-app-*/config/main.yml contains 'services' as a dict with keys/values
         """
-        repo_root = Path(__file__).resolve().parent.parent.parent
+        repo_root = Path(__file__).resolve().parent.parent.parent.parent
         roles_dir = repo_root / "roles"
         errors = []
         warnings = []

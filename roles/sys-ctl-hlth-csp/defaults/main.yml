@@ -5,7 +5,7 @@
 HEALTH_CSP_IGNORE_NETWORK_BLOCKS_FROM: []
 
 # Docker image to run
-HEALTH_CSP_IMAGE: "ghcr.io/kevinveenbirkenbach/csp-checker:stable"
+HEALTH_CSP_IMAGE: "{{ images['csp-checker']['image'] }}:{{ images['csp-checker']['version'] }}"
 
 # If true, pull the image on each run (safe but slower)
 HEALTH_CSP_ALWAYS_PULL: false

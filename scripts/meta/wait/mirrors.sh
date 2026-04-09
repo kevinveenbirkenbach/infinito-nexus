@@ -19,7 +19,7 @@ mapfile -t mirror_refs < <(
 import os
 from pathlib import Path
 from cli.mirror.providers import GHCRProvider
-from cli.mirror.util import iter_role_images
+from utils.docker.image_discovery import iter_role_images
 
 provider = GHCRProvider(
     os.environ["GHCR_NAMESPACE"],

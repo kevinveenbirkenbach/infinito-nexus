@@ -24,7 +24,7 @@ from pathlib import Path
 
 from utils.annotations.message import warning
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
+_REPO_ROOT = Path(__file__).resolve().parents[4]
 _ROLES_ROOT = _REPO_ROOT / "roles"
 
 # Matches any Jinja2 control-flow or structural tag: {% ... %}

@@ -1,0 +1,4 @@
+images:
+  playwright:
+    image: mcr.microsoft.com/playwright
+    version: "v1.58.2-noble"

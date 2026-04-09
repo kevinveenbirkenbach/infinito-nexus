@@ -58,7 +58,7 @@
   matrix-chatgpt-bot:
     restart: {{ DOCKER_RESTART_POLICY }}
     container_name: matrix-chatgpt
-    image: ghcr.io/matrixgpt/matrix-chatgpt-bot:latest
+    image: "{{ MATRIX_CHATGPT_BOT_IMAGE }}:{{ MATRIX_CHATGPT_BOT_VERSION }}"
     volumes:
       - chatgpt_data:/storage
     environment:

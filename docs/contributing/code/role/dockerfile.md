@@ -59,6 +59,57 @@ APP_IMAGE:   "{{ lookup('config', application_id, 'compose.services.myapp.image'
 APP_VERSION: "{{ lookup('config', application_id, 'compose.services.myapp.version') }}"
 ```
 
+## Image Declaration
+
+Every Docker image used in a role must be declared in exactly one place — no hardcoded
+image strings anywhere else (tasks, templates, defaults).
+
+### Application roles (have `application_id`)
+
+Declare the image under `config/main.yml` → `compose.services.<service>.{image,version}`:
+
+```yaml
+compose:
+  services:
+    myapp:
+      image:   ghcr.io/vendor/myapp
+      version: "1.0"
+```
+
+Any Ansible variable that references the image MUST read from config via `lookup('config', ...)`:
+
+```yaml
+# vars/main.yml
+MY_APP_IMAGE:   "{{ lookup('config', application_id, 'compose.services.myapp.image') }}"
+MY_APP_VERSION: "{{ lookup('config', application_id, 'compose.services.myapp.version') }}"
+```
+
+### Non-application roles
+
+For roles without `application_id` that need extra images mirrored (e.g. test runners,
+health checkers), declare them under `vars/main.yml` → `images.<name>.{image,version}`:
+
+```yaml
+# vars/main.yml
+images:
+  myimage:
+    image:   mcr.microsoft.com/vendor/myimage
+    version: "v1.2.3"
+```
+
+Any variable that references the image MUST read from this block:
+
+```yaml
+MY_IMAGE: "{{ images['myimage']['image'] }}:{{ images['myimage']['version'] }}"
+```
+
+### Image discovery SPOT
+
+[`utils/docker/image_discovery.py`](../../../../utils/docker/image_discovery.py) is
+the single SPOT that enumerates all role images from both sources above.
+It is used by the mirror pipeline (`cli/mirror/`) and the version-check lint test
+(`tests/lint/docker/test_image_versions.py`).
+
 ## When `Dockerfile.j2` is acceptable
 
 A `templates/Dockerfile.j2` is acceptable when the file contains Jinja2
@@ -80,5 +131,5 @@ The repository lint suite checks for `templates/Dockerfile.j2` files automatical
   The warning signals that the file should be reviewed to see whether the logic
   can be eliminated and the file migrated.
 
-See [test\_dockerfile\_templates.py](../../../../tests/lint/test_dockerfile_templates.py)
+See [test\_templates.py](../../../../tests/lint/docker/dockerfile/test_templates.py)
 for the implementation.

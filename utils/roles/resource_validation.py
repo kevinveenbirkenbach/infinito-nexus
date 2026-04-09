@@ -10,8 +10,8 @@ from utils.annotations.message import warning
 
 
 def _repo_root() -> Path:
-    # utils/role_resource_validation.py -> repo root = parents[1]
-    return Path(__file__).resolve().parents[1]
+    # utils/roles/resource_validation.py -> repo root = parents[2]
+    return Path(__file__).resolve().parents[2]
 
 
 def _roles_root() -> Path:

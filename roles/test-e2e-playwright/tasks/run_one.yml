@@ -136,7 +136,7 @@
       {{
         TEST_E2E_PLAYWRIGHT_IMAGE
         if (TEST_E2E_PLAYWRIGHT_IMAGE | default('') | trim | length > 0)
-        else 'mcr.microsoft.com/playwright:v' ~ _playwright_test_version ~ '-' ~ TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO
+        else images['playwright']['image'] ~ ':v' ~ _playwright_test_version ~ '-' ~ TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO
       }}
 
 - name: Copy central default package.json
@@ -206,6 +206,29 @@
     path: "{{ _playwright_reports_dir }}"
     state: directory
     mode: "0755"
+
+- name: Collect host disk diagnostics before Playwright
+  ansible.builtin.shell: |
+    set -o pipefail
+
+    echo "== findmnt -T /mnt/docker =="
+    findmnt -T /mnt/docker || true
+    echo
+
+    echo "== df -h / /mnt /mnt/docker /var/lib/docker =="
+    df -h / /mnt /mnt/docker /var/lib/docker || true
+    echo
+
+    echo '== container info | grep "Docker Root Dir" =='
+    container info | grep "Docker Root Dir" || true
+    echo
+
+    echo "== du -xhd1 /usr /usr/local /usr/share /opt /mnt /var | sort -h =="
+    du -xhd1 /usr /usr/local /usr/share /opt /mnt /var 2>/dev/null | sort -h || true
+  args:
+    executable: /bin/bash
+  changed_when: false
+  when: MODE_DEBUG | bool
 
 - name: Run Playwright container
   ansible.builtin.command:
