@@ -108,5 +108,35 @@ class TestPrometheusServicePresence(unittest.TestCase):
                 )
 
 
+class TestPrometheusNginxEndpoints(unittest.TestCase):
+    """
+    The shared nginx vhost template must expose both /healthz and /metricz
+    for every application that has prometheus activated.
+    """
+
+    def test_basic_conf_has_healthz_and_metricz(self):
+        """basic.conf.j2 must define location = /healthz and location = /metricz."""
+        conf_path = (
+            Path(__file__).resolve().parent.parent.parent
+            / "roles"
+            / "sys-svc-proxy"
+            / "templates"
+            / "vhost"
+            / "basic.conf.j2"
+        )
+        self.assertTrue(conf_path.exists(), f"Missing: {conf_path}")
+
+        content = conf_path.read_text(encoding="utf-8")
+
+        for endpoint in ("/healthz", "/metricz"):
+            with self.subTest(endpoint=endpoint):
+                self.assertIn(
+                    f"location = {endpoint}",
+                    content,
+                    f"basic.conf.j2 is missing 'location = {endpoint}' — "
+                    f"all prometheus-enabled apps must expose this endpoint via nginx",
+                )
+
+
 if __name__ == "__main__":
     unittest.main()

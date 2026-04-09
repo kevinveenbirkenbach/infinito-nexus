@@ -65,4 +65,12 @@ server
     add_header Content-Type text/plain;
   }
 
+  # Default metrics endpoint — returns an empty Prometheus exposition document for applications
+  # that have no dedicated native metrics support. Safe to expose publicly: no application data.
+  location = /metricz {
+    access_log off;
+    return 200 "# No dedicated metrics available for this application\n";
+    add_header Content-Type "text/plain; version=0.0.4; charset=utf-8";
+  }
+
 }
