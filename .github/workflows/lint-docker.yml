@@ -1,4 +1,4 @@
-name: Docker Linter
+name: 🔍 Lint: Dockerfiles
 
 on:
   workflow_call:

@@ -1,4 +1,4 @@
-name: Python Linter
+name: 🔍 Lint: Python
 
 on:
   workflow_call:

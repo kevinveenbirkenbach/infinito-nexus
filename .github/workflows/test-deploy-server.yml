@@ -1,4 +1,4 @@
-name: Test Infinito.Nexus Deploy (server)
+name: 🧪 Test: Deploy (server)
 
 on:
   workflow_call:

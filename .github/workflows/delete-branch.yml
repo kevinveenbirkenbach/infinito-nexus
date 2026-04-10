@@ -1,4 +1,4 @@
-name: Cancel Runs On Branch Delete
+name: 🚫 Cancel: Runs on Branch Delete
 
 on:
   delete:

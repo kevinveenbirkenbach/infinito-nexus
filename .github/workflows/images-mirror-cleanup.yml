@@ -1,4 +1,4 @@
-name: Mirror cleanup - delete private GHCR packages
+name: 🧹 Images: Cleanup GHCR (Private)
 
 on:
   workflow_dispatch:

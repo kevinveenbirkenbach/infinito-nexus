@@ -1,4 +1,4 @@
-name: Test DNS (CoreDNS + Docker-in-Docker)
+name: 🧪 Test: DNS (CoreDNS + Docker-in-Docker)
 
 on:
   workflow_dispatch:

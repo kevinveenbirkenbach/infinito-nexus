@@ -1,4 +1,4 @@
-name: CI Orchestrator
+name: 🎵 CI: Orchestrator
 on:
   workflow_call:
     inputs:
