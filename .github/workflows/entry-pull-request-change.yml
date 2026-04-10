@@ -51,7 +51,7 @@ jobs:
       - name: Debug auth mode
         env:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
-          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: ./scripts/meta/debug/auth_mode.sh
 
@@ -109,7 +109,7 @@ jobs:
       - name: Debug auth mode
         env:
           GHCR_PAT: ${{ secrets.GHCR_PAT }}
-          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_USERNAME: ${{ vars.GHCR_USERNAME }}
           GITHUB_ACTOR: ${{ github.actor }}
         run: ./scripts/meta/debug/auth_mode.sh
 

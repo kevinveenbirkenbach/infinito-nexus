@@ -37,10 +37,11 @@ Go to `Settings → Secrets and variables → Actions`.
 - **Value:** The PAT created above
 - **Visibility:** Public repositories (adjust as needed)
 
-#### Secret: `GHCR_USERNAME`
+#### Variable: `GHCR_USERNAME`
 
-- **Type:** Secret
+- **Type:** Variable (not a secret — usernames are not sensitive)
 - **Value:** The GitHub username that owns the PAT
+- **Where:** Settings → Secrets and variables → Actions → **Variables** tab
 
 Example:
 
@@ -49,6 +50,7 @@ kevinveenbirkenbach
 ```
 
 You MUST NOT use the organization name, email address, or display name.
+You MUST store this as a **variable**, not a secret. The workflow reads it via `vars.GHCR_USERNAME`.
 
 ## Fork Pull Requests 🚫
 
@@ -70,7 +72,7 @@ To enable automatic visibility updates for personal accounts you MUST:
 
 1. Create a **classic PAT** (see [Required Configuration](#required-configuration-) above) with at least `read:packages` and `write:packages` scopes.
 2. Store it as the repository (or organization) secret `GHCR_PAT`.
-3. Store the owning GitHub username as the secret `GHCR_USERNAME`.
+3. Store the owning GitHub username as the variable `GHCR_USERNAME` (Settings → Actions → Variables).
 
 The workflow automatically prefers `GHCR_PAT` over `GITHUB_TOKEN` when the secret is present.
 If `GHCR_PAT` is absent, mirrored images are pushed successfully but their visibility is NOT automatically set to public.
