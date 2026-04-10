@@ -114,6 +114,84 @@ class TestPublishMain(unittest.TestCase):
         ]
         self.assertEqual(patch_calls, [])
 
+    @patch.dict(os.environ, {"GITHUB_TOKEN": "tok"}, clear=False)
+    def test_404_on_patch_skips_and_continues(self) -> None:
+        """A 404 on PATCH means the package is gone — skip it, do not abort."""
+        import urllib.error
+
+        packages = [
+            self._make_pkg("mirror/old-package", "private"),
+            self._make_pkg("mirror/new-package", "private"),
+        ]
+
+        patch_call_count = 0
+
+        def fake_urlopen(req):
+            nonlocal patch_call_count
+            if req.get_method() == "PATCH":
+                patch_call_count += 1
+                if patch_call_count == 1:
+                    # First package returns 404 (old/deleted package)
+                    raise urllib.error.HTTPError(
+                        req.full_url, 404, "Not Found", {}, None
+                    )
+                return _DummyResponse(b"{}")
+            # GET calls: org probe, page 1, page 2
+            if not hasattr(fake_urlopen, "_get_count"):
+                fake_urlopen._get_count = 0
+            fake_urlopen._get_count += 1
+            if fake_urlopen._get_count == 1:
+                return _DummyResponse(b"[]")  # org probe
+            payload = json.dumps(
+                packages if fake_urlopen._get_count == 2 else []
+            ).encode()
+            return _DummyResponse(payload)
+
+        with (
+            patch(
+                "cli.mirror.publish.__main__.urllib.request.urlopen",
+                side_effect=fake_urlopen,
+            ),
+            patch("sys.argv", ["publish", "--ghcr-namespace", "acme"]),
+        ):
+            result = publish_main.main()
+
+        # 404 on first package must not abort — second package is processed, exits 0
+        self.assertEqual(result, 0)
+        self.assertEqual(patch_call_count, 2)
+
+    @patch.dict(os.environ, {"GITHUB_TOKEN": "tok"}, clear=False)
+    def test_401_on_patch_raises_insufficient_token_error(self) -> None:
+        """A 401 on PATCH indicates a token scope problem — emit warning and return 0."""
+        import urllib.error
+
+        packages = [self._make_pkg("mirror/foo", "private")]
+
+        call_count = 0
+
+        def fake_urlopen(req):
+            nonlocal call_count
+            call_count += 1
+            if req.get_method() == "PATCH":
+                raise urllib.error.HTTPError(
+                    req.full_url, 401, "Unauthorized", {}, None
+                )
+            if call_count == 1:
+                return _DummyResponse(b"[]")  # org probe
+            payload = json.dumps(packages if call_count == 2 else []).encode()
+            return _DummyResponse(payload)
+
+        with (
+            patch(
+                "cli.mirror.publish.__main__.urllib.request.urlopen",
+                side_effect=fake_urlopen,
+            ),
+            patch("sys.argv", ["publish", "--ghcr-namespace", "acme"]),
+        ):
+            result = publish_main.main()
+
+        self.assertEqual(result, 0)
+
 
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

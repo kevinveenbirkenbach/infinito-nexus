@@ -18,19 +18,27 @@ def main() -> int:
     provider = GHCRProvider.from_args(args)
     repo_root = Path(args.repo_root).resolve()
 
-    applications = {}
+    applications: dict = {}
+    images: dict = {}
 
     for img in iter_role_images(repo_root):
+        if img.source_file == "defaults/main.yml":
+            role_images = images.setdefault(img.role, {})
+            role_images[str(img.service)] = {
+                "image": provider.image_base(img),
+                "version": img.version,
+            }
+            continue
+
         app = applications.setdefault(img.role, {})
         docker = app.setdefault("compose", {})
         services = docker.setdefault("services", {})
-
         services[str(img.service)] = {
             "image": provider.image_base(img),
             "version": img.version,
         }
 
-    result = {"applications": applications}
+    result = {"applications": applications, "images": images}
 
     if args.json:
         print(json.dumps(result, indent=2))

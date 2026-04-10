@@ -1,3 +1,8 @@
+images:
+  playwright:
+    image: mcr.microsoft.com/playwright
+    version: "v1.58.2-noble"
+
 # Where we stage per-role Playwright projects on the host
 TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR:    "/tmp/test-e2e-playwright"
 

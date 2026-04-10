@@ -43,7 +43,7 @@ class ImageRef:
     registry: str = (
         "docker.io"  # source registry hostname, e.g. docker.io, quay.io, ghcr.io
     )
-    source_file: str = "config/main.yml"  # "config/main.yml" or "vars/main.yml"
+    source_file: str = "config/main.yml"  # "config/main.yml" or "defaults/main.yml"
 
 
 def load_yaml(path: Path) -> dict:
@@ -175,8 +175,10 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
     Yield all ImageRef entries discovered across all roles in *repo_root*.
 
     Sources:
-      1. roles/**/config/main.yml → compose.services.<svc>.{image,version}
-      2. roles/**/vars/main.yml   → images.<name>.{image,version}
+      1. roles/**/config/main.yml   → compose.services.<svc>.{image,version}
+      2. roles/**/defaults/main.yml → images.<name>.{image,version}
+
+    See docs/contributing/artefact/image.md for the full format reference.
     """
     roles_dir = repo_root / "roles"
 
@@ -214,8 +216,8 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 source_file="config/main.yml",
             )
 
-    # 2. Non-Docker-Hub images from vars/main.yml → images.<name>.{image,version}
-    for vars_file in roles_dir.glob("**/vars/main.yml"):
+    # 2. Images from defaults/main.yml → images.<name>.{image,version}
+    for vars_file in roles_dir.glob("**/defaults/main.yml"):
         role_name = vars_file.parent.parent.name
         data = load_yaml(vars_file)
 
@@ -243,5 +245,5 @@ def iter_role_images(repo_root: Path) -> Iterable[ImageRef]:
                 version=version,
                 source=image_source(image, version),
                 registry=_detect_registry(image),
-                source_file="vars/main.yml",
+                source_file="defaults/main.yml",
             )

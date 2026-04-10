@@ -1,6 +1,1 @@
 system_service_id: sys-ctl-hlth-csp
-
-images:
-  csp-checker:
-    image: ghcr.io/kevinveenbirkenbach/csp-checker
-    version: stable

@@ -136,7 +136,7 @@
       {{
         TEST_E2E_PLAYWRIGHT_IMAGE
         if (TEST_E2E_PLAYWRIGHT_IMAGE | default('') | trim | length > 0)
-        else images['playwright']['image'] ~ ':v' ~ _playwright_test_version ~ '-' ~ TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO
+        else lookup('image', 'playwright', 'image') ~ ':v' ~ _playwright_test_version ~ '-' ~ TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO
       }}
 
 - name: Copy central default package.json

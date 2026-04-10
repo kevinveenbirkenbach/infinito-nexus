@@ -86,22 +86,10 @@ MY_APP_VERSION: "{{ lookup('config', application_id, 'compose.services.myapp.ver
 
 ### Non-application roles
 
-For roles without `application_id` that need extra images mirrored (e.g. test runners,
-health checkers), declare them under `vars/main.yml` → `images.<name>.{image,version}`:
-
-```yaml
-# vars/main.yml
-images:
-  myimage:
-    image:   mcr.microsoft.com/vendor/myimage
-    version: "v1.2.3"
-```
-
-Any variable that references the image MUST read from this block:
-
-```yaml
-MY_IMAGE: "{{ images['myimage']['image'] }}:{{ images['myimage']['version'] }}"
-```
+For roles without `application_id` that need extra mirrored images (e.g. test runners,
+health checkers), use [Contributing `image`](image.md) as the SPOT for declaration and access.
+Those images MUST be declared under `defaults/main.yml` and MUST be consumed via
+`lookup('image', ...)` instead of direct `images[...]` access.
 
 ### Image discovery SPOT
 
