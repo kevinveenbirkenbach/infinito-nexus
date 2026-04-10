@@ -4,7 +4,7 @@
 
 This Ansible role installs **fakeroot** for the current Linux distribution. Fakeroot enables non-privileged users to simulate root-level file manipulations, making it ideal for building packages or performing file operations that normally require root permissions.
 
-Learn more about fakeroot on [Wikipedia](https://en.wikipedia.org/wiki/Fakeroot_(software)) and [fakeroot on Debian](https://packages.debian.org/stable/fakeroot).
+Learn more about fakeroot on the [Debian Wiki](https://wiki.debian.org/FakeRoot) and [fakeroot on Debian](https://packages.debian.org/stable/fakeroot).
 
 ## Overview
 

@@ -2,7 +2,7 @@
 
 ## Description
 
-[msi-perkeyrgb](https://github.com/Nimayer/msi-perkeyrgb) is a tool for setting dynamic per-key RGB keyboard colors on MSI laptops.
+[msi-perkeyrgb](https://github.com/Askannz/msi-perkeyrgb) is a tool for setting dynamic per-key RGB keyboard colors on MSI laptops.
 
 ## Overview
 
