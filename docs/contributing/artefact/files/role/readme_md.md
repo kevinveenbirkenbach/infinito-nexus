@@ -2,7 +2,7 @@
 
 Every Ansible role MUST contain a `README.md` at the role root.
 This page defines the required structure and content rules.
-For general documentation rules (links, writing, emojis, RFC 2119 keywords), see [documentation.md](../../documentation.md).
+For general documentation rules (links, writing, emojis, RFC 2119 keywords), see [documentation.md](../../../documentation.md).
 
 ## Structure 📋
 
@@ -99,4 +99,4 @@ Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s
   Emojis in role READMEs interfere with automated tooling that parses heading text.
 - Body text MAY use emojis where they improve readability.
 - All headings MUST use sentence-case (capitalize only the first word and proper nouns).
-- Link text MUST follow the link rules in [documentation.md](../../documentation.md).
+- Link text MUST follow the link rules in [documentation.md](../../../documentation.md).

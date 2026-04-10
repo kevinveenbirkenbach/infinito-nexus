@@ -8,7 +8,6 @@ Boost your development journey with Gitea, a lightweight and energetic self-host
 
 This role deploys Gitea using Docker. It automates the setup and update processes for your self-hosted Git service, integrating with a central MariaDB for the database. With functionalities for updating, recreating the container, variable management, database access, and shell access to the application container, this role streamlines the management of your Gitea instance.
 
-For detailed administration procedures, please refer to the [Administration.md](./Administration.md) file.
 
 ## Features
 

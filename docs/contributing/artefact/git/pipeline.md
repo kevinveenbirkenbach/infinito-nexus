@@ -70,7 +70,7 @@ The `code-quality-gate` requires linting, code tests, and security checks to all
 ### 8. Image Mirroring 🪞
 
 [images-mirror-missing.yml](../../../../.github/workflows/images-mirror-missing.yml) mirrors any missing upstream images in parallel with the DNS tests.
-See [mirror.md](../../image/mirror.md) for a full explanation of the mirroring architecture and naming convention.
+See [mirror.md](../image/mirror.md) for a full explanation of the mirroring architecture and naming convention.
 Authentication for GHCR is configured via repository secrets. See [authentication.md](../../tools/ghcr/authentication.md).
 
 ### 9. Deploy Tests 🚀

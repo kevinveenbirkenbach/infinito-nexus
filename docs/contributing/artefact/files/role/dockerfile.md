@@ -1,8 +1,8 @@
-# `Dockerfile`
+# `Dockerfile` 🐳
 
 This page is the SPOT for role-local Dockerfiles.
 Use this page for placement rules, variable handling, and build wiring.
-For the agent-side review workflow during development, see [Development](../../../agents/action/develop.md).
+For the agent-side review workflow during development, see [Development](../../../../agents/action/develop.md).
 
 ## Placement 📁
 
@@ -93,7 +93,7 @@ Those images MUST be declared under `defaults/main.yml` and MUST be consumed via
 
 ### Image Discovery SPOT 🔍
 
-[image_discovery.py](../../../../utils/docker/image/discovery.py) is
+[image_discovery.py](../../../../../utils/docker/image/discovery.py) is
 the single SPOT that enumerates all role images from both sources above.
 It is used by the mirror pipeline (`cli/mirror/`) and the version-check lint test
 (`tests/lint/docker/test_image_versions.py`).
@@ -119,5 +119,5 @@ The repository lint suite checks for `templates/Dockerfile.j2` files automatical
   The warning signals that the file should be reviewed to see whether the logic
   can be eliminated and the file migrated.
 
-See [test\_templates.py](../../../../tests/lint/docker/dockerfile/test_templates.py)
+See [test\_templates.py](../../../../../tests/lint/docker/dockerfile/test_templates.py)
 for the implementation.

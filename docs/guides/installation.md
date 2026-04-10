@@ -1,17 +1,17 @@
-# Installation Guide
+# Installation Guide 🚀
 
 Use this guide to install the `infinito` CLI with the method that fits your workflow.
 
-## Run with Docker
+## Run with Docker 🐳
 
-Build the image and run the CLI. For more options, see the [Docker Guide](../Docker.md).
+Build the image and run the CLI. For more options, see [Docker and Runtime Commands](../contributing/tools/docker.md).
 
 ```bash
 docker build -t infinito:latest .
 docker run --rm -it infinito:latest infinito --help
 ```
 
-## Develop from Source
+## Develop from Source 💻
 
 Clone the repository and install the project from the repository root:
 

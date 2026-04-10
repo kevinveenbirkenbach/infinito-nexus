@@ -13,5 +13,5 @@ For the canonical Make target index that invokes these helpers, see [make.md](..
 
 ## Script Map
 
-- [all.sh](all.sh)
+- all.sh
 - [system.sh](system.sh)

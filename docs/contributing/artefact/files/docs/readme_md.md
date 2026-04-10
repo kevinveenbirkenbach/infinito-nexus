@@ -1,7 +1,7 @@
 # Docs README 📄
 
 This page is the SPOT for `README.md` files stored inside `docs/` directories.
-For general documentation rules such as links, writing style, RFC 2119 keywords, and Sphinx behavior, see [documentation.md](../../documentation.md).
+For general documentation rules such as links, writing style, RFC 2119 keywords, and Sphinx behavior, see [documentation.md](../../../documentation.md).
 
 ## Purpose 🎯
 

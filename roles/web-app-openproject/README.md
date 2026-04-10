@@ -40,7 +40,7 @@ The purpose of this role is to reduce the complexity of setting up OpenProject w
 
 ## Developer Notes
 
-See [Development.md](./Development.md) for how to inspect and modify live settings inside the container, including full LDAP and SMTP configuration via the Rails console.
+To inspect and modify live settings inside the container, open a shell and use the Rails console for full LDAP and SMTP configuration.
 
 ## Credits
 

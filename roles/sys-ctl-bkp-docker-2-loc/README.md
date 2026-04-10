@@ -7,7 +7,6 @@ This Ansible role automates the process of backing up Docker volumes to a local 
 ## Overview
 
 Optimized for Archlinux, this role ensures that Docker volume backups are performed reliably with minimal manual intervention. It integrates with several dependent roles to verify backup success and manage related tasks, including:
-- [sys-svc-directory-validator](../sys-svc-directory-validator/) – Validates backup directories.
 - [sys-ctl-cln-faild-bkps](../sys-ctl-cln-faild-bkps/) – Cleans up unsuccessful backup attempts.
 - [sys-timer](../sys-timer/) – Schedules recurring backup tasks.
 - [sys-bkp-provider](../sys-bkp-provider/) – Manages backup sources.
@@ -24,3 +23,10 @@ Backup Docker Volumes to Local is a comprehensive solution that leverages rsync 
 - **Systemd Service Configuration:** Deploys and reloads two systemd service templates to manage backup tasks.
 - **Database Seeding:** Includes tasks to seed and manage a backup database (`databases.csv`) for tracking backup details.
 - **Dependency Integration:** Works in conjunction with the dependent roles listed above to verify and manage backups.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

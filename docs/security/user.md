@@ -1,8 +1,8 @@
-# Security Guidelines
+# Security Guidelines 🛡️
 
 Infinito.Nexus is designed with security in mind. However, while following our guidelines can greatly improve your system's security, no IT system can be 100% secure. Please report any vulnerabilities as soon as possible.
 
-If you discover a security vulnerability in Infinito.Nexus, you MUST report it through [SECURITY.md](../../../SECURITY.md). You MUST NOT open a public issue for security reports.
+If you discover a security vulnerability in Infinito.Nexus, you MUST report it through [SECURITY.md](../../SECURITY.md). You MUST NOT open a public issue for security reports.
 
 For optimal personal security, we RECOMMEND the following:
 
@@ -21,6 +21,4 @@ For optimal personal security, we RECOMMEND the following:
 
 Following these guidelines will significantly enhance your personal security—but remember, no system is completely immune to risk.
 
-A tutorial how to setup secure password management you will find [here](https://blog.veen.world/blog/2025/04/04/%f0%9f%9b%a1%ef%b8%8f-keepassxc-infinito-cloud-the-ultimate-guide-to-cross-device-password-security/)
-
----
+For a tutorial on setting up secure password management, see [here](https://blog.veen.world/blog/2025/04/04/%f0%9f%9b%a1%ef%b8%8f-keepassxc-infinito-cloud-the-ultimate-guide-to-cross-device-password-security/).
