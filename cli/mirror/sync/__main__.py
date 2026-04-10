@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from cli.mirror.providers import GHCRProvider
-from utils.docker.image_discovery import iter_role_images
+from utils.docker.image.discovery import iter_role_images
 
 
 def _validate_positive_int(value: str) -> int:

@@ -11,8 +11,8 @@ from urllib.parse import quote, urlencode
 
 import yaml
 
-from utils.docker.image_discovery import iter_role_images
-from utils.docker.image_ref import (
+from utils.docker.image.discovery import iter_role_images
+from utils.docker.image.ref import (
     DOCKER_HUB_REGISTRIES,
     GHCR_REGISTRY,
     split_registry_and_name,

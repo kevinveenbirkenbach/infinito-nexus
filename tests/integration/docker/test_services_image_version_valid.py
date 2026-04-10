@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 import yaml
 
-from utils.docker.image_ref import is_valid_image_name
+from utils.docker.image.ref import is_valid_image_name
 
 # Docker tag (version)
 TAG_RE = re.compile(r"^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$")

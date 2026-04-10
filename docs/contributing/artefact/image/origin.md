@@ -106,7 +106,7 @@ Images from other registries are ignored by the discovery and mirroring tooling.
 
 ## Discovery 🔍
 
-`utils/docker/image_discovery.py` scans all roles and yields `ImageRef` objects:
+`utils/docker/image/discovery.py` scans all roles and yields `ImageRef` objects:
 
 | Source file | Key path | Used for |
 |---|---|---|

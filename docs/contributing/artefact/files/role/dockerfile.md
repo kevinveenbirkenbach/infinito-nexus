@@ -93,7 +93,7 @@ Those images MUST be declared under `defaults/main.yml` and MUST be consumed via
 
 ### Image Discovery SPOT 🔍
 
-[image_discovery.py](../../../../utils/docker/image_discovery.py) is
+[image_discovery.py](../../../../utils/docker/image/discovery.py) is
 the single SPOT that enumerates all role images from both sources above.
 It is used by the mirror pipeline (`cli/mirror/`) and the version-check lint test
 (`tests/lint/docker/test_image_versions.py`).

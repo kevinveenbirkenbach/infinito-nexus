@@ -32,7 +32,7 @@ Example: `ghcr.io/kevinveenbirkenbach/infinito-nexus-core/mirror/docker.io/nextc
 
 ### Image Discovery 🔍
 
-`utils/docker/image_discovery.py` discovers all role images via `iter_role_images()`. See [origin.md](origin.md) for the declaration format and supported registries.
+`utils/docker/image/discovery.py` discovers all role images via `iter_role_images()`. See [origin.md](origin.md) for the declaration format and supported registries.
 
 ### GHCRProvider 🐳
 

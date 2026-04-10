@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from utils.docker.image_discovery import iter_role_images
+from utils.docker.image.discovery import iter_role_images
 
 
 def _make_fs(files: dict[str, str]) -> dict[Path, str]:
@@ -29,7 +29,7 @@ class TestIterRoleImagesVarsImages(unittest.TestCase):
 
         with (
             patch.object(Path, "glob", fake_glob),
-            patch("utils.docker.image_discovery.load_yaml", side_effect=fake_load),
+            patch("utils.docker.image.discovery.load_yaml", side_effect=fake_load),
         ):
             return list(iter_role_images(Path("/repo")))
 
