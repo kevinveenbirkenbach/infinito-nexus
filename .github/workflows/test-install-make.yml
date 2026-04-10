@@ -1,4 +1,4 @@
-name: "📦 Install: Infinito.Nexus (Make)"
+name: "📥 Test: Install Make"
 
 on:
   workflow_call:

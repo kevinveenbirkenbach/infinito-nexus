@@ -1,4 +1,4 @@
-name: "📦 Install: Infinito.Nexus (Package Manager)"
+name: "📥 Test: Install Package Manager"
 
 on:
   workflow_call:
