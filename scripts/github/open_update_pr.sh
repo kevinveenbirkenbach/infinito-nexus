@@ -16,6 +16,8 @@ if ! command -v gh >/dev/null 2>&1; then
 	exit 1
 fi
 
+REPO="$(git remote get-url origin | sed 's|.*github\.com[:/]||' | sed 's|\.git$||')"
+
 git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"
 git checkout -B "${BRANCH}"
@@ -36,6 +38,7 @@ git push --force-with-lease origin "${BRANCH}"
 
 PR_NUMBER="$(
 	gh pr list \
+		--repo "${REPO}" \
 		--head "${BRANCH}" \
 		--base "${UPDATE_BASE_BRANCH}" \
 		--json number \
@@ -45,11 +48,13 @@ PR_NUMBER="$(
 if [[ -n "${PR_NUMBER}" ]]; then
 	echo "Updating existing PR #${PR_NUMBER} for ${BRANCH}"
 	gh pr edit "${PR_NUMBER}" \
+		--repo "${REPO}" \
 		--title "${UPDATE_PR_TITLE}" \
 		--body "${UPDATE_PR_BODY}"
 else
 	echo "Creating PR for ${BRANCH}"
 	gh pr create \
+		--repo "${REPO}" \
 		--title "${UPDATE_PR_TITLE}" \
 		--body "${UPDATE_PR_BODY}" \
 		--base "${UPDATE_BASE_BRANCH}" \
