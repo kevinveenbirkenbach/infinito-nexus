@@ -1,22 +1,22 @@
-# Playwright Tests
+# Playwright Tests 🎭
 
 This page is the SPOT for Playwright end-to-end test requirements, runner integration, and file contracts.
 For implementation guidance when writing or updating role-local files, see
-[Agent `playwright.spec.js`](../../../agents/files/role/playwright.spec.js.md) and
-[Agent `playwright.env.j2`](../../../agents/files/role/playwright.env.j2.md).
+[Agent `playwright.spec.js`](../../agents/files/role/playwright.spec.js.md) and
+[Agent `playwright.env.j2`](../../agents/files/role/playwright.env.j2.md).
 
-## Framework
+## Framework 🧰
 
 - [Playwright](https://playwright.dev/) runs inside Docker via the shared `test-e2e-playwright` role.
 - There is no standalone `make` target for Playwright. Tests run as part of local deploy flows
   (e.g. `FULL_CYCLE=true APPS=web-app-matomo make deploy-fresh-purged-apps`).
 
-## When to Write
+## When to Write ✍️
 
 - You MUST provide Playwright tests for every `web-*` role.
 - You MUST update the Playwright suite when you add or change role-local `javascript.js` or `style.css`.
 
-## Role-Local Files
+## Role-Local Files 📁
 
 Every Playwright-enabled role MUST provide exactly these two files:
 
@@ -28,7 +28,7 @@ Every Playwright-enabled role MUST provide exactly these two files:
 `package.json` and `playwright.config.js` MUST remain centralized in `roles/test-e2e-playwright/files/`.
 You MUST NOT duplicate or override them per role.
 
-## Runner
+## Runner 🚀
 
 The `test-e2e-playwright` role discovers Playwright-enabled roles through the presence of
 `templates/playwright.env.j2`. For each discovered role it:
@@ -40,16 +40,16 @@ The `test-e2e-playwright` role discovers Playwright-enabled roles through the pr
 5. waits until the app is reachable
 6. runs Playwright in Docker
 
-## File Requirements
+## File Requirements 📄
 
 See the dedicated SPOT pages for authoring rules:
 
-- [`playwright.spec.js`](../../../agents/files/role/playwright.spec.js.md) — scenario design, selector strategy, and live review
-- [`playwright.env.j2`](../../../agents/files/role/playwright.env.j2.md) — rendered test input surface, variable naming, and entry-point selection
+- [`playwright.spec.js`](../../agents/files/role/playwright.spec.js.md): scenario design, selector strategy, and live review
+- [`playwright.env.j2`](../../agents/files/role/playwright.env.j2.md): rendered test input surface, variable naming, and entry-point selection
 
-## Recording Tests
+## Recording Tests 🎬
 
-### Playwright Codegen (built-in)
+### Playwright Codegen (built-in) 🔧
 
 Playwright ships a built-in code recorder:
 
@@ -57,13 +57,13 @@ Playwright ships a built-in code recorder:
 npx playwright codegen https://<app-url>
 ```
 
-This opens the Playwright Inspector alongside a browser. Every interaction is recorded and emitted as a runnable spec. Use the output as a starting draft and clean it up according to the authoring rules in [`playwright.spec.js`](../../../agents/files/role/playwright.spec.js.md).
+This opens the Playwright Inspector alongside a browser. Every interaction is recorded and emitted as a runnable spec. Use the output as a starting draft and clean it up according to the authoring rules in [`playwright.spec.js`](../../agents/files/role/playwright.spec.js.md).
 
-### playwright-recorder (Docker-based)
+### playwright-recorder (Docker-based) 🐳
 
 For infrastructure-heavy setups where Playwright should not live in the main repository, use [playwright-recorder](https://github.com/kevinveenbirkenbach/playwright-recorder). It wraps Playwright codegen in Docker with X11/XWayland forwarding and an ephemeral workspace so no state leaks between recordings.
 
-**Requirements:** Docker, X11 or XWayland, `xhost`
+Requirements: Docker, X11 or XWayland, `xhost`
 
 ```bash
 # Install
@@ -82,7 +82,7 @@ make replay
 
 Generated files are persisted in the local workspace (git-ignored). Copy the relevant parts into `files/playwright.spec.js` and adapt them.
 
-## Development Procedure
+## Development Procedure 📋
 
 1. Analyze the deployed application in a running local stack.
 2. Build hypotheses about the expected user flows before writing tests.

@@ -1,4 +1,4 @@
-# Repository Architecture
+# Repository Architecture 🏗️
 
 This page explains how Infinito.Nexus is put together so contributors know where a change belongs and why the repository is shaped the way it is.
 
@@ -11,15 +11,15 @@ The short version:
 - Make targets expose stable, human-facing commands.
 - Docs keep humans and AI agents aligned.
 
-## What This Repository Actually Is
+## What This Repository Actually Is 🤔
 
 Infinito.Nexus is not one application. It is a repository of building blocks for deploying, operating, and maintaining self-hosted systems.
 
 The architecture is built around one simple idea: keep the parts small, explicit, and reusable, then combine them into a full stack only when a bundle needs them.
 
-## The Building Blocks
+## The Building Blocks 🧱
 
-### Roles
+### Roles 📦
 
 Roles are the smallest meaningful unit.
 
@@ -43,7 +43,7 @@ A role MUST be able to answer four questions clearly:
 
 If a role cannot answer those questions, it is probably doing too much.
 
-### Bundles and Inventories
+### Bundles and Inventories 🗂️
 
 Bundles are the assembly layer.
 
@@ -53,7 +53,7 @@ For example, the repository already has server bundles such as `community-hub`, 
 
 That means the bundle is not where logic lives. It is where the architecture becomes a real deployment.
 
-### Runtime
+### Runtime ⚙️
 
 Most application roles use Docker Compose for the running services.
 
@@ -66,7 +66,7 @@ That separation matters:
 
 That is why you will find host work in `sys-*` roles and app work in `web-app-*` roles instead of one giant deployment script.
 
-### Entry Points
+### Entry Points 🚪
 
 People and CI MUST interact with the repo through stable commands, not through improvised command sequences.
 
@@ -75,15 +75,15 @@ The main entry points are:
 - [Makefile](../../../Makefile)
 - [scripts/](../../../scripts/)
 - [tests/](../../../tests/)
-- [docs/contributing/code/tests/lint.md](tests/lint.md)
-- [docs/contributing/flow/testing.md](../flow/testing.md)
+- [lint.md](../testing/lint.md)
+- [testing.md](../flow/testing.md)
 - [docs/contributing/](../../)
 
 Those layers keep local development, CI, and production behavior closer together.
 
-## Why The Architecture Looks Like This
+## Why The Architecture Looks Like This 🤔
 
-### Composition Over Monolith
+### Composition Over Monolith 🔧
 
 The repository prefers many focused parts over one giant playbook.
 
@@ -95,7 +95,7 @@ Why:
 - more reuse across bundles
 - less accidental coupling
 
-### Integration Over Forced Migration
+### Integration Over Forced Migration 🔗
 
 This platform tries to connect existing services instead of demanding a full rewrite.
 
@@ -110,7 +110,7 @@ That is why the repo has:
 
 The idea is to fit into existing environments instead of replacing everything at once.
 
-### Security By Default
+### Security By Default 🔒
 
 Security is not a separate project here; it is part of normal composition.
 
@@ -124,7 +124,7 @@ The common pieces are:
 
 The point is to make the safe path the natural path.
 
-### Low-Resource Awareness
+### Low-Resource Awareness 💡
 
 A good architecture is still usable on smaller machines.
 
@@ -137,16 +137,16 @@ That is why the repo favors:
 
 This is not an afterthought. It is part of the design.
 
-### Reversible Changes
+### Reversible Changes ↩️
 
 Architectures age well when they make it obvious what can be enabled, disabled, or replaced.
 
 If a service can be removed without rewriting the whole stack, the design is usually healthy.
 If removing one part breaks everything else, the boundaries are probably too weak.
 
-## Concrete Examples
+## Concrete Examples 💡
 
-### Adding A New Application
+### Adding A New Application ➕
 
 A new app MUST:
 
@@ -156,18 +156,18 @@ A new app MUST:
 4. add it to the relevant bundle
 5. document how to deploy, operate, and troubleshoot it
 
-### Introducing A Shared Service
+### Introducing A Shared Service 🔧
 
 A new shared service MUST:
 
-1. create role
+1. create the role
 2. keep host setup separate from consumer setup
 3. expose only the configuration the dependent roles need
 4. document the service contract and lifecycle
 
 See [services.md](services.md) for the full service registration, loading, and injection model.
 
-### Changing An Existing Deployment
+### Changing An Existing Deployment ✏️
 
 For a normal change, contributors MUST:
 
@@ -178,9 +178,9 @@ For a normal change, contributors MUST:
 
 If you skip those steps, the repository becomes harder to understand for the next person.
 
-See [docs/contributing/flow/workflow.md](../flow/workflow.md) for the full contribution flow.
+See [workflow.md](../flow/workflow.md) for the full contribution flow.
 
-## What This Architecture Is Not
+## What This Architecture Is Not 🚫
 
 - not a single monolithic application
 - not a place where one role owns every concern
@@ -188,21 +188,21 @@ See [docs/contributing/flow/workflow.md](../flow/workflow.md) for the full contr
 - not a repo where docs can drift away from behavior
 - not a one-size-fits-all production template
 
-## How To Navigate The Repo
+## How To Navigate The Repo 🗺️
 
 If you are trying to understand a change, start here:
 
 - [roles/](../../../roles/) for behavior
 - [inventories/bundles/](../../../inventories/bundles/) for deployment shapes
 - [Makefile](../../../Makefile) and [scripts/](../../../scripts/) for supported commands
-- [docs/contributing/code/tests/lint.md](tests/lint.md) for code and framework rules
-- [docs/contributing/code/services.md](services.md) for service registration, loading, and injection
-- [docs/contributing/flow/testing.md](../flow/testing.md) for refactoring, debugging, and testing
+- [lint.md](../testing/lint.md) for code and framework rules
+- [services.md](services.md) for service registration, loading, and injection
+- [testing.md](../flow/testing.md) for refactoring, debugging, and testing
 - [docs/contributing/](../../) for workflow and constraints
 - [tests/](../../../tests/) for the expected contracts
 
-If you can explain a change in those five places, you probably understand the architecture.
+If you can explain a change across those areas, you probably understand the architecture.
 
-## The Core Idea
+## The Core Idea 💡
 
 Infinito.Nexus works best when the pieces stay small, the boundaries stay explicit, and the docs stay honest.

@@ -3,7 +3,7 @@ import re
 import unittest
 from collections import defaultdict
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../"))
 ROLES_DIR = os.path.join(PROJECT_ROOT, "roles")
 ROOT_TASKS_DIR = os.path.join(PROJECT_ROOT, "tasks")
 

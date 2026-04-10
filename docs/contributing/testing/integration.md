@@ -1,20 +1,21 @@
-# Integration Tests
+# Integration Tests 🔗
 
 This page is the SPOT for integration testing requirements, framework, and structure.
 Run integration tests with `make test-integration`.
 
-## Framework
+## Framework 🧰
 
 - You MUST use Python `unittest` as the test framework.
-- Tests MUST live under `tests/integration/`.
-- Mirror the source tree structure used for unit tests.
+- Tests that verify real runtime component interactions MUST live under `tests/integration/`.
+- Tests that statically analyze Ansible config or task YAML files without exercising runtime boundaries MUST live under `tests/lint/ansible/` instead.
 
-## When to Write
+## When to Write ✍️
 
 - You MUST add or update integration tests for every `*.py` file you touch when the change affects behavior across module or runtime boundaries.
-- Write an integration test when the behavior you are verifying depends on two or more components working together — for example, a lookup plugin reading from real `group_vars` or a filter interacting with an Ansible variable structure.
+- Write an integration test when the behavior you are verifying depends on two or more components working together at runtime. For example, verify a lookup plugin reading from real `group_vars` or a filter interacting with an Ansible variable structure.
+- Write a lint test under `tests/lint/ansible/` when the check only inspects static YAML structure, config keys, or comment annotations without executing any code.
 
-## Requirements
+## Requirements 📋
 
 - You MUST NOT mock collaborators that are part of the integration boundary being tested. The point is to verify real interaction.
 - You MUST NOT write tests that only assert a file contains a string.
@@ -23,15 +24,16 @@ Run integration tests with `make test-integration`.
 - You SHOULD test realistic inputs that match what Ansible would pass at runtime.
 - You MAY use `unittest.mock` to stub out external services or filesystem state that is genuinely outside the integration scope.
 
-## How to Create
+## How to Create 🛠️
 
 1. Identify the integration boundary (e.g. lookup plugin + `group_vars` variable loading).
-2. Create the matching test file under `tests/integration/` if it does not exist.
-3. Subclass `unittest.TestCase`.
-4. Use realistic inputs. Build hypotheses about cross-component behavior before writing assertions.
-5. Run `make test-integration` and verify all tests pass.
+2. Decide whether the test exercises a real runtime interaction (`tests/integration/`) or only inspects static YAML structure (`tests/lint/ansible/`).
+3. Create the matching test file under the correct directory if it does not exist.
+4. Subclass `unittest.TestCase`.
+5. Use realistic inputs. Build hypotheses about cross-component behavior before writing assertions.
+6. Run `make test-integration` (or `make test-lint` for lint tests) and verify all tests pass.
 
-## Running Specific Tests
+## Running Specific Tests 🏃
 
 Use `TEST_PATTERN` to scope the test run to a single file or a glob:
 

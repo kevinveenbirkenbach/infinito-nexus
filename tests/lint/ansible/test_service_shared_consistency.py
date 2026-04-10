@@ -52,7 +52,7 @@ class TestServiceSharedConsistency(unittest.TestCase):
         return exceptions
 
     def test_service_shared_consistency(self):
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        roles_dir = Path(__file__).resolve().parent.parent.parent.parent / "roles"
         pattern = str(roles_dir / "*" / "config" / "main.yml")
         files = glob.glob(pattern)
         self.assertTrue(
