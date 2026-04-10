@@ -1,4 +1,4 @@
-name: 🪞 Mirror: Docker Hub → GHCR (only missing)
+name: "🪞 Mirror: Docker Hub → GHCR (only missing)"
 
 on:
   workflow_call:

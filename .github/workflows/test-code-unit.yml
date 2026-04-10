@@ -1,4 +1,4 @@
-name: 🧪 Test: Units
+name: "🧪 Test: Units"
 
 on:
   workflow_call:

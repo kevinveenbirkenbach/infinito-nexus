@@ -1,4 +1,4 @@
-name: 🧪 Test: Code (Lint)
+name: "🧪 Test: Code (Lint)"
 
 on:
   workflow_call:

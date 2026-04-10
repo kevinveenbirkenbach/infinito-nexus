@@ -1,4 +1,4 @@
-name: 🔍 Lint: Dockerfiles
+name: "🔍 Lint: Dockerfiles"
 
 on:
   workflow_call:

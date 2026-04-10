@@ -1,4 +1,4 @@
-name: 🔄 Update: Docker Image Versions
+name: "🔄 Update: Docker Image Versions"
 
 on:
   push:

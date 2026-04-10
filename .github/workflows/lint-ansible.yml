@@ -1,4 +1,4 @@
-name: 🔍 Lint: Ansible
+name: "🔍 Lint: Ansible"
 
 on:
   workflow_call:
