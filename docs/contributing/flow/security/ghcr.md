@@ -1,96 +1,54 @@
-# GHCR Authentication Setup 🔐
+# GHCR Authentication
 
-This guide explains how to configure authentication for mirroring Docker images to GitHub Container Registry (GHCR) via GitHub Actions.
+This guide explains how GitHub Container Registry (GHCR) authentication works for mirroring images via GitHub Actions.
 
-## Goal 🎯
+## How Authentication Works
 
-GitHub Actions MUST be able to:
+All workflows use `secrets.GITHUB_TOKEN` to log in to GHCR:
 
-- Push images to `ghcr.io`
-- Modify package visibility (e.g., set to public)
-- Avoid authentication errors like `denied: denied`
-
-## Required Configuration 🧩
-
-### 1. Create a Personal Access Token (PAT)
-
-Go to your [GitHub token settings](https://github.com/settings/tokens) and create a **classic token** with these scopes:
-
-```
-read:packages
-write:packages
+```yaml
+- name: Login to GHCR
+  uses: docker/login-action@...
+  with:
+    registry: ghcr.io
+    username: ${{ github.actor }}
+    password: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-You MAY also add:
+No personal access token (PAT) or additional secrets are required.
 
-```
-delete:packages
-```
+## Why GITHUB_TOKEN Is the Correct Choice
 
-### 2. Store Credentials in the Repository or Organization
+When a workflow runs in a public repository and pushes to GHCR using `GITHUB_TOKEN`, GitHub automatically:
 
-Go to `Settings → Secrets and variables → Actions`.
+1. Links the package to the repository.
+2. Sets the package visibility to match the repository visibility (public → public).
 
-#### Secret: `GHCR_PAT`
+This means mirrored images are published as public packages without any additional configuration.
 
-- **Type:** Secret
-- **Value:** The PAT created above
-- **Visibility:** Public repositories (adjust as needed)
+## Docker Hub Rate Limits
 
-#### Variable: `GHCR_USERNAME`
+To avoid Docker Hub pull rate limits when mirroring images, configure the following optional secrets:
 
-- **Type:** Variable (not a secret — usernames are not sensitive)
-- **Value:** The GitHub username that owns the PAT
-- **Where:** Settings → Secrets and variables → Actions → **Variables** tab
+| Name | Type | Description |
+|---|---|---|
+| `DOCKERHUB_USERNAME` | Secret | Docker Hub username |
+| `DOCKERHUB_TOKEN` | Secret | Docker Hub access token |
 
-Example:
+These are used only for pulling source images from Docker Hub and are not required for GHCR authentication.
 
-```
-kevinveenbirkenbach
-```
+## Fork Pull Requests
 
-You MUST NOT use the organization name, email address, or display name.
-You MUST store this as a **variable**, not a secret. The workflow reads it via `vars.GHCR_USERNAME`.
+Secrets are NOT available in `pull_request` workflows triggered by forks — this is a GitHub security restriction. The mirror workflow handles this transparently:
 
-## Fork Pull Requests 🚫
+- Fork PRs trigger a `pull_request_target` run with the base repository's trusted `GITHUB_TOKEN`.
+- That trusted run mirrors any new images needed by the fork.
+- The fork PR's CI then waits for those images to appear on GHCR before proceeding.
 
-Secrets are NOT available in workflows triggered by `pull_request` events from forks — this is a GitHub security restriction. Workflows using `pull_request_target` DO receive secrets and MAY handle authentication for fork PRs.
+## Troubleshooting
 
-## After Updating Secrets ♻️
+If a push to GHCR fails with `denied: denied`:
 
-Secrets are loaded at job start. After changing a secret you MUST either:
-
-- Re-run the workflow manually, or
-- Push a new commit to trigger a fresh run
-
-## Mirror Visibility Update — Personal Accounts ⚠️
-
-When the GHCR namespace belongs to a **personal account** (not an organization), the `GITHUB_TOKEN` issued by GitHub Actions is an installation token and MUST NOT be used to list or modify package visibility.
-The `cli.mirror.publish` module will emit a GitHub Actions warning annotation and skip the visibility update if `GHCR_PAT` is not set.
-
-To enable automatic visibility updates for personal accounts you MUST:
-
-1. Create a **classic PAT** (see [Required Configuration](#required-configuration-) above) with at least `read:packages` and `write:packages` scopes.
-2. Store it as the repository (or organization) secret `GHCR_PAT`.
-3. Store the owning GitHub username as the variable `GHCR_USERNAME` (Settings → Actions → Variables).
-
-The workflow automatically prefers `GHCR_PAT` over `GITHUB_TOKEN` when the secret is present.
-If `GHCR_PAT` is absent, mirrored images are pushed successfully but their visibility is NOT automatically set to public.
-
-## Troubleshooting 🧯
-
-If login fails:
-
-1. Verify `GHCR_PAT` is the current, valid token.
-2. Ensure `GHCR_USERNAME` matches the account that created the token.
-3. Re-run the workflow after any credential changes.
-4. You MUST NOT use the organization name as the username.
-5. If you see the warning *"GHCR visibility update skipped — GHCR_PAT required"* in the Actions log, `GHCR_PAT` is missing or not passed to the workflow — see [Mirror Visibility Update — Personal Accounts](#mirror-visibility-update--personal-accounts-) above.
-
-## Best Practice ❤️
-
-You SHOULD use a dedicated bot account (e.g., `infinito-nexus-bot`):
-
-- Add it to the organization.
-- Generate the PAT from that account.
-- Store credentials as organization-level secrets/variables.
+1. Verify the workflow has `packages: write` in its `permissions` block.
+2. Confirm the repository is public (private repositories require additional package visibility configuration).
+3. Re-run the workflow after any permission or visibility changes.

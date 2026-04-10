@@ -51,8 +51,6 @@ on:
         required: false
       DOCKERHUB_TOKEN:
         required: false
-      GHCR_PAT:
-        required: false
 
 permissions:
   contents: read
@@ -116,8 +114,8 @@ jobs:
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
-          username: ${{ secrets.GHCR_PAT != '' && vars.GHCR_USERNAME != '' && vars.GHCR_USERNAME || github.actor }}
-          password: ${{ secrets.GHCR_PAT != '' && vars.GHCR_USERNAME != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Mirror images to GHCR (best-effort)
         shell: bash

@@ -62,8 +62,6 @@ on:
         required: false
       DOCKERHUB_TOKEN:
         required: false
-      GHCR_PAT:
-        required: false
 
 permissions:
   contents: read
@@ -139,8 +137,8 @@ jobs:
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
-          username: ${{ secrets.GHCR_PAT != '' && vars.GHCR_USERNAME != '' && vars.GHCR_USERNAME || github.actor }}
-          password: ${{ secrets.GHCR_PAT != '' && vars.GHCR_USERNAME != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Wait for mirrored images (fork PR)
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
@@ -155,9 +153,6 @@ jobs:
 
       - name: Mirror images to GHCR (only missing, best-effort)
         if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
-          GHCR_PAT_SET: ${{ secrets.GHCR_PAT != '' && 'true' || 'false' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -189,13 +184,3 @@ jobs:
 
           echo ">>> Mirror sync finished."
 
-      - name: Publish mirror images (set visibility to public)
-        if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m cli.mirror.publish \
-            --ghcr-namespace "${{ steps.vars.outputs.ghcr_namespace }}" \
-            --ghcr-prefix "${{ steps.vars.outputs.ghcr_repository }}/${{ inputs.ghcr_prefix || 'mirror' }}"
