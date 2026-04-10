@@ -33,6 +33,15 @@ Run external tests with `make test-external`.
 - You SHOULD keep network traffic narrow and query each external dependency only
   as much as needed for a meaningful result.
 
+## Suppression Comments 🚫
+
+Some external checks support local inline suppressions for intentional
+exceptions. You MUST use these only when the check genuinely does not apply.
+
+| Comment | Placement | Affected test | Effect |
+|---|---|---|---|
+| `# nocheck: docker-version` | Line directly above `version:` in `config/main.yml` | [test_image_versions.py](../../../../tests/external/docker/test_image_versions.py) | Skips the live version-update warning for that image |
+
 ## Running 🏃
 
 Use the dedicated make target:
@@ -51,4 +60,5 @@ TEST_PATTERN=test_image_versions.py make test-external
 
 The dedicated workflow lives at `.github/workflows/test-code-external.yml`.
 It MAY be triggered manually and is intentionally separate from the default
-combined validation flow.
+`make test` flow. It is also wired into the orchestrated code-testing gate in
+CI so the live check can run there without changing local default validation.
