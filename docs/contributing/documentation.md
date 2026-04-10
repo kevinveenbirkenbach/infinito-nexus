@@ -50,12 +50,11 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 
 ## Documentation Structure 🗂️
 
-### Role README
+### Role README 📄
 
-Every Ansible role MUST contain a `README.md`.
-See [readme_md.md](artefact/files/role/readme_md.md) for the required structure, section order, and formatting rules.
+See [readme_md.md](artefact/files/role/readme_md.md) for the requirement, required structure, section order, and formatting rules for role `README.md` files.
 
-### Markdown
+### Markdown 📋
 - You SHOULD prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
 - You MUST NOT place `README.md` files under `docs/`.
   Documentation files MUST be cross-linked to each other directly instead.
@@ -64,7 +63,7 @@ See [readme_md.md](artefact/files/role/readme_md.md) for the required structure,
 - You MUST use `.md` files for commands, workflows, setup, and contributor guidance.
 - You MUST NOT use `.md` files to describe implementation logic that is already visible in the code.
 
-### Sphinx
+### Sphinx 📚
 
 - The root `index.rst` uses a `:glob:` toctree (`docs/**`) to automatically include every documentation page.
 - Sphinx indexing SHOULD happen automatically through that root `:glob:` toctree.
