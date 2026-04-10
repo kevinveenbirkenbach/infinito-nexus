@@ -2,7 +2,7 @@
 
 ## Description
 
-[RetroArch](https://www.retroarch.com/) is a frontend for emulators, game engines, and media players powered by the [Libretro](https://www.libretro.com/) framework. It supports multiple UI styles including [XMB](https://en.wikipedia.org/wiki/XrossMediaBar) and [Ozone](https://docs.libretro.com/docs/), and provides a unified interface for retro gaming across platforms.
+[RetroArch](https://www.retroarch.com/) is a frontend for emulators, game engines, and media players powered by the [Libretro](https://www.libretro.com/) framework. It supports multiple UI styles including [XMB](https://en.wikipedia.org/wiki/XrossMediaBar) and [Ozone](https://docs.libretro.com/), and provides a unified interface for retro gaming across platforms.
 
 ## Overview
 
@@ -15,7 +15,7 @@ The purpose of this role is to automate the deployment of a full-featured RetroA
 ## Features
 
 - **Installs RetroArch:** Including the main [RetroArch package](https://archlinux.org/packages/extra/x86_64/retroarch/) and theme assets.
-- **UI Assets Support:** Both [XMB](https://docs.libretro.com/docs/) and [Ozone](https://docs.libretro.com/docs/) menu styles supported out of the box.
+- **UI Assets Support:** Both [XMB](https://docs.libretro.com/) and [Ozone](https://docs.libretro.com/) menu styles supported out of the box.
 
 ## Further Resources
 
@@ -23,7 +23,7 @@ The purpose of this role is to automate the deployment of a full-featured RetroA
 - 🧩 [Libretro - Modular Emulator Framework](https://www.libretro.com/)
 - 📚 [RetroArch on ArchWiki](https://wiki.archlinux.org/title/RetroArch)
 - 🧠 [RetroArch - Wikipedia](https://en.wikipedia.org/wiki/RetroArch)
-- 🎨 [UI Menus: XMB, Ozone, GLUI, RGUI](https://docs.libretro.com/docs/)
+- 🎨 [UI Menus: XMB, Ozone, GLUI, RGUI](https://docs.libretro.com/)
 
 ## Credits
 

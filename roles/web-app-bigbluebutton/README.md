@@ -26,7 +26,7 @@ By default, BigBlueButton is deployed with best-practice hardening, modular secr
 - Functional email system for Greenlight SMTP
 ## Further Resources
 
-- [BigBlueButton Docker Docs](https://docs.bigbluebutton.org/greenlight/gl-overview#setting-bigbluebutton-credentials)
+- [BigBlueButton Docker Docs](https://docs.bigbluebutton.org/greenlight/v3/install/)
 - [Networking Fixes & Issues](https://stackoverflow.com/questions/53347951/web-app-network-not-found)
 ## Credits
 

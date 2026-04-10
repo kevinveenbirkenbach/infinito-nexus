@@ -26,7 +26,6 @@ The primary purpose of this role is to configure WireGuard on a client by settin
 
 - [WireGuard Documentation](https://www.wireguard.com/)
 - [ArchWiki: WireGuard](https://wiki.archlinux.org/index.php/WireGuard)
-- [WireGuard on Raspbian](https://wireguard.how/server/raspbian/)
 - [Subnetting Basics](https://www.scaleuptech.com/de/blog/was-ist-und-wie-funktioniert-subnetting/)
 - [WireGuard Permissions Issue Discussion](https://bodhilinux.boards.net/thread/450/wireguard-rtnetlink-answers-permission-denied)
 - [UFW and SSH via WireGuard](https://unix.stackexchange.com/questions/717172/why-is-ufw-blocking-acces-to-ssh-via-wireguard)
