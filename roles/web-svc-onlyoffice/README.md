@@ -27,6 +27,6 @@ See the role’s `README.md`, task files, and Jinja2 templates in the `roles/web
 
 ## Further Resources
 
-* [Official ONLYOFFICE Document Server Documentation](https://helpcenter.onlyoffice.com/server/document/)
+* [Official ONLYOFFICE Document Server Documentation](https://helpcenter.onlyoffice.com/docs/)
 * [Nextcloud → ONLYOFFICE Integration App](https://apps.nextcloud.com/apps/onlyoffice)
 * [ONLYOFFICE Document Server on Docker Hub](https://hub.docker.com/r/onlyoffice/documentserver)

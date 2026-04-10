@@ -28,8 +28,6 @@ This Ansible role configures the OpenSSH daemon (`sshd`) by deploying a template
 - **Idempotency**  
   Ensures tasks run only once per play by setting the `run_once_sys_svc_sshd` fact.
 
-## Further Resources
-
 ## Variables
 
 - `SYS_SVC_SSHD_PASSWORD_AUTHENTICATION`

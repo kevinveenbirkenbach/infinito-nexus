@@ -51,6 +51,9 @@ MEDIAWIKI_EXT_BRANCH:             "REL{{ (MEDIAWIKI_VERSION | string).split('.')
 MEDIAWIKI_EXT_CFG_BASE:           "{{ [ MEDIAWIKI_CONFIG_DIR, 'mwext', MEDIAWIKI_EXT_BRANCH ] | path_join }}"
 MEDIAWIKI_EXT_LIST:
   - name: "PluggableAuth"
+    # nocheck: url
     url: "{{ [ 'https://codeload.github.com/wikimedia/mediawiki-extensions-PluggableAuth/tar.gz/refs/heads/',MEDIAWIKI_EXT_BRANCH ] | url_join }}"
   - name: "OpenIDConnect"
+    # nocheck: url
     url: "{{ [ 'https://codeload.github.com/wikimedia/mediawiki-extensions-OpenIDConnect/tar.gz/refs/heads/',MEDIAWIKI_EXT_BRANCH ] | url_join }}"
+

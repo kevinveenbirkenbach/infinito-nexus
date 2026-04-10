@@ -6,7 +6,7 @@ server:
   csp:
     whitelist:
       script-src-elem:
-        - https://cdn.matomo.cloud
+        - https://cdn.matomo.cloud  # nocheck: url
       style-src-elem:
         - https://fonts.googleapis.com
     flags:

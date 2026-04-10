@@ -21,10 +21,8 @@ This role deploys Mastodon using Docker, streamlining the installation and confi
 
 - [Mastodon Official Website](https://joinmastodon.org/)
 - [Mastodon Documentation](https://docs.joinmastodon.org/)
-- [Mastodon with Docker & Traefik](https://goneuland.de/mastodon-mit-web-app-und-traefik-installieren/)
 - [Mastodon Configuration Guide](https://gist.github.com/TrillCyborg/84939cd4013ace9960031b803a0590c4)
 - [Check Website Availability](https://www.2daygeek.com/linux-command-check-website-is-up-down-alive/)
-- [Personal Mastodon Setup](https://vitobotta.com/2022/11/07/setting-up-a-personal-mastodon-instance/)
 - [Scaling a Mastodon Server](https://www.digitalocean.com/community/tutorials/how-to-scale-your-mastodon-server)
 - [Mastodon GitHub Issues](https://github.com/mastodon/mastodon/issues/7958)
 

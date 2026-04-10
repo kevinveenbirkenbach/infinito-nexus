@@ -20,6 +20,6 @@ After deploying this role, all common build dependencies will be available on th
 
 ## Further Resources
 
-- [Arch Wiki: base-devel](https://wiki.archlinux.org/title/Development_packages)
+- [Arch Wiki: base-devel](https://wiki.archlinux.org/title/Arch_Linux_package_guidelines)
 - [Debian package: build-essential](https://packages.debian.org/stable/build-essential)
 - [DNF groups: development-tools](https://dnf.readthedocs.io/en/latest/command_ref.html#group-command)

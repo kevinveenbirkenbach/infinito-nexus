@@ -2,7 +2,6 @@
 
 ## Description
 
-This Ansible role automates the detection, revocation and deletion of unused Let's Encrypt certificates. It leverages the [`certreap`](https://github.com/kevinveenbirkenbach/certreap) tool to identify certificates no longer referenced by any active NGINX configuration and removes them automatically.
 
 ## Overview
 
@@ -31,7 +30,6 @@ This Ansible role automates the detection, revocation and deletion of unused Let
 
 ## Further Resources
 
-- [certreap on GitHub](https://github.com/kevinveenbirkenbach/certreap)  
 - [Ansible community.general.pacman module](https://docs.ansible.com/ansible/latest/collections/community/general/pacman_module.html)  
 - [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)  
 - [systemd.unit(5) manual](https://www.freedesktop.org/software/systemd/man/systemd.unit.html)  

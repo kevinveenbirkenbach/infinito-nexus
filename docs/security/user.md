@@ -19,6 +19,7 @@ For optimal personal security, we RECOMMEND the following:
 - **Beware of Phishing and Social Engineering**
   You MUST verify email senders, avoid clicking on unknown links, and MUST NEVER share your passwords or 2FA codes with anyone. (Learn more about [Phishing](https://en.wikipedia.org/wiki/Phishing) and [Social Engineering](https://en.wikipedia.org/wiki/Social_engineering_(security)) on Wikipedia.)
 
-Following these guidelines will significantly enhance your personal security—but remember, no system is completely immune to risk.
+Following these guidelines will significantly enhance your personal security. No system is completely immune to risk.
 
-For a tutorial on setting up secure password management, see [here](https://blog.veen.world/blog/2025/04/04/%f0%9f%9b%a1%ef%b8%8f-keepassxc-infinito-cloud-the-ultimate-guide-to-cross-device-password-security/).
+For a tutorial on setting up secure password management, see [here](https://blog.veen.world/blog/2025/04/04/%f0%9f%9b%a1%ef%b8%8f-keepassxc-cymais-cloud-the-ultimate-guide-to-cross-device-password-security/).
+

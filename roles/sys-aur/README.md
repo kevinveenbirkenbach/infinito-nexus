@@ -21,5 +21,6 @@ The primary purpose of this role is to streamline AUR package management on Arch
 - **User Creation:** Creates a dedicated `aur_builder` user.
 - **Sudo Configuration:** Grants passwordless sudo rights to `aur_builder` for pacman.
 
-## Other Resources
-- https://github.com/kewlfft/ansible-aur
+## Further Resources
+
+- [ansible-aur](https://github.com/kewlfft/ansible-aur)

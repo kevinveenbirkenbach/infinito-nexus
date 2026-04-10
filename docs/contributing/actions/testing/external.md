@@ -37,10 +37,13 @@ Run external tests with `make test-external`.
   public `http://` and `https://` URLs.
 - The URL reachability check skips template placeholders and reserved local or
   example hosts such as `localhost` and `*.example`.
-- The URL reachability check fails on `4xx`, non-`500` `5xx`, and request
-  failures such as DNS or connection errors.
-- The URL reachability check emits a warning annotation for HTTP `500` via
+- The URL reachability check treats HTTP `401`, `403`, and `405` as reachable
+  (auth-gated or method-restricted servers, not dead links).
+- The URL reachability check emits warning annotations for HTTP `429`, `500`,
+  and `503` (rate-limited or temporarily unavailable) via
   [`utils.annotations.message`](../../../../utils/annotations/message.py).
+- The URL reachability check treats read and connect timeouts as warnings.
+- All other `4xx`/`5xx` codes and connection errors (DNS, SSL) fail the test.
 
 ## Suppression Comments 🚫
 
@@ -50,6 +53,8 @@ exceptions. You MUST use these only when the check genuinely does not apply.
 | Comment | Placement | Affected test | Effect |
 |---|---|---|---|
 | `# nocheck: docker-version` | Line directly above `version:` in `config/main.yml` | [test_image_versions.py](../../../../tests/external/docker/test_image_versions.py) | Skips the live version-update warning for that image |
+| `# nocheck: url` | Anywhere on the line containing the URL | [test_urls_reachable.py](../../../../tests/external/repository/test_urls_reachable.py) | Skips probing that URL (use for CDN roots, API base URLs, and runtime config values that return 4xx without a path) |
+| `{# nocheck: url #}` | Anywhere on the line (Jinja2 templates) | [test_urls_reachable.py](../../../../tests/external/repository/test_urls_reachable.py) | Same as above for `.j2` files |
 
 ## Running 🏃
 
