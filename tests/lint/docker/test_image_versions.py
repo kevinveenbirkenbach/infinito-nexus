@@ -266,7 +266,10 @@ def _emit_annotation(
 
 
 def _emit_unchecked_annotation(
-    config_path: str, role: str, service: str, image: str
+    config_path: str,
+    role: str,
+    service: str,
+    image: str,
 ) -> None:
     msg = (
         f"{role}/{service}: {image} version could not be checked "
@@ -349,7 +352,10 @@ class TestDockerImageVersions(unittest.TestCase):
             )
             for o in unchecked:
                 _emit_unchecked_annotation(
-                    o["config_path"], o["role"], o["service"], o["image"]
+                    o["config_path"],
+                    o["role"],
+                    o["service"],
+                    o["image"],
                 )
 
         # Always pass - outdated images are warnings, not hard failures

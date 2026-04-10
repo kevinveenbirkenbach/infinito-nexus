@@ -80,7 +80,10 @@ class TodoFinding:
 
 
 def repo_root() -> Path:
-    return Path(__file__).resolve().parents[2]
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "pyproject.toml").is_file():
+            return candidate
+    raise AssertionError("Repository root not found from test path.")
 
 
 def tracked_files(root: Path) -> List[Path]:

@@ -1,17 +1,23 @@
-import os
 import unittest
+from pathlib import Path
 import yaml
 
 
-SERVICES_FILE = os.path.join(
-    os.path.dirname(__file__), "..", "..", "group_vars", "all", "20_services.yml"
-)
+def repo_root() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "pyproject.toml").is_file():
+            return candidate
+    raise AssertionError("Repository root not found from test path.")
+
+
+REPO_ROOT = repo_root()
+SERVICES_FILE = REPO_ROOT / "group_vars" / "all" / "20_services.yml"
 
 RUN_ONCE_TASK = {"include_tasks": "utils/once/flag.yml"}
 
 
 def load_service_registry():
-    with open(SERVICES_FILE, "r") as f:
+    with SERVICES_FILE.open("r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return data.get("SERVICE_REGISTRY", {})
 
@@ -59,21 +65,19 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
     """
 
     def setUp(self):
-        self.project_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..")
-        )
+        self.project_root = REPO_ROOT
         self.registry = load_service_registry()
 
     def _core_path(self, role):
-        return os.path.join(self.project_root, "roles", role, "tasks", "01_core.yml")
+        return self.project_root / "roles" / role / "tasks" / "01_core.yml"
 
     def _main_path(self, role):
-        return os.path.join(self.project_root, "roles", role, "tasks", "main.yml")
+        return self.project_root / "roles" / role / "tasks" / "main.yml"
 
     def test_01_core_exists(self):
         missing = []
         for role in unique_roles(self.registry):
-            if not os.path.isfile(self._core_path(role)):
+            if not self._core_path(role).is_file():
                 missing.append(role)
         if missing:
             self.fail(
@@ -86,10 +90,10 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
         violations = []
         for role in unique_roles(self.registry):
             path = self._core_path(role)
-            if not os.path.isfile(path):
+            if not path.is_file():
                 continue  # covered by test_01_core_exists
 
-            with open(path, "r") as f:
+            with path.open("r", encoding="utf-8") as f:
                 try:
                     tasks = yaml.safe_load(f)
                 except yaml.YAMLError as e:
@@ -116,11 +120,11 @@ class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
         violations = []
         for role in unique_roles(self.registry):
             main_path = self._main_path(role)
-            if not os.path.isfile(main_path):
+            if not main_path.is_file():
                 violations.append(f"{role}: tasks/main.yml is missing")
                 continue
 
-            with open(main_path, "r") as f:
+            with main_path.open("r", encoding="utf-8") as f:
                 try:
                     tasks = yaml.safe_load(f)
                 except yaml.YAMLError as e:

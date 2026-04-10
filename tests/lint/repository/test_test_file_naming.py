@@ -2,6 +2,13 @@ from pathlib import Path
 import unittest
 
 
+def repo_root() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "pyproject.toml").is_file():
+            return candidate
+    raise AssertionError("Repository root not found from test path.")
+
+
 class TestTestFileNaming(unittest.TestCase):
     """
     Test-linter that enforces all Python files in the tests/
@@ -12,7 +19,7 @@ class TestTestFileNaming(unittest.TestCase):
     """
 
     def test_all_python_files_use_test_prefix(self):
-        tests_root = Path(__file__).resolve().parents[1]
+        tests_root = repo_root() / "tests"
 
         invalid_files = []
 

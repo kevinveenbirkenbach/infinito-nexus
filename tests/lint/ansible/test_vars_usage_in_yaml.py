@@ -5,6 +5,13 @@ from typing import Any, Iterable, Set, List, Dict, Tuple
 import yaml
 
 
+def repo_root() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "pyproject.toml").is_file():
+            return candidate
+    raise AssertionError("Repository root not found from test path.")
+
+
 class TestVarsPassedAreUsed(unittest.TestCase):
     """
     Integration test:
@@ -25,7 +32,7 @@ class TestVarsPassedAreUsed(unittest.TestCase):
       i.e. treat `var_name(` as a function/macro call, not a variable usage.
     """
 
-    REPO_ROOT = Path(__file__).resolve().parents[2]
+    REPO_ROOT = repo_root()
     YAML_EXTENSIONS = {".yml", ".yaml"}
     JINJA_EXTENSIONS = {".j2"}
 

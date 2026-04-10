@@ -1,4 +1,4 @@
-# Testing and Validation
+# Testing and Validation ✅
 
 Use the real commands from the repository. Run them from the repository root.
 
@@ -10,11 +10,11 @@ This repository uses several test and validation types:
 - `Combined validation` runs the standard main verification flow.
 - `Local deploy and E2E validation` checks whether apps and deployment flows work in a realistic local stack.
 
-## Code Quality and Automated Checks
+## Code Quality and Automated Checks 🔎
 
 Use the following table to choose the right lint, syntax, unit, integration, or combined validation command for your change.
 
-### Validation Commands
+### Validation Commands 🛠️
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -25,12 +25,12 @@ Use the following table to choose the right lint, syntax, unit, integration, or 
 | Integration tests | `make test-integration` | Runs the integration test suite. | Use this when your change affects behavior across modules or runtime boundaries. |
 | Combined validation | `make test` | Runs the main combined validation flow. | Use this whenever a change touches at least one file that is not `.md` or `.rst`, or before opening a Pull Request. |
 
-## Local Deploy and End-to-End Checks
+## Local Deploy and End-to-End Checks 🚀
 
 For the retry-loop policy, use [Iteration](../../agents/action/iteration.md) as the SPOT.
 The table below is a command reference for the supported local deployment paths.
 
-### Local Validation Commands
+### Local Validation Commands 🏠
 
 Use the following table when you need realistic local deployment validation or app-level end-to-end checks.
 
@@ -51,7 +51,14 @@ Important:
 - For act-based workflow checks, see [Act Workflow Checks](../tools/act.md).
 - After a successful local deploy, run `make trust-ca` and restart your browser.
 
-## Testing Standards
+## Suite Selection 🎯
+
+- When exactly one test file changes inside one test family, you MAY scope the run with `TEST_PATTERN`.
+- When two or more test files change inside the same test family, you MUST run the matching suite command without `TEST_PATTERN`:
+  `make test-lint`, `make test-unit`, or `make test-integration`.
+- When a change touches multiple test families, you MUST run every affected suite.
+
+## Testing Standards 📋
 
 For test-type-specific requirements, framework, and creation procedures see:
 

@@ -5,13 +5,20 @@ import unittest
 from pathlib import Path
 
 
+def repo_root() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "pyproject.toml").is_file():
+            return candidate
+    raise AssertionError("Repository root not found from test path.")
+
+
 LEGACY_URI_MODULE_PATTERN = re.compile(
     r"^\s*(ansible\.builtin\.uri|uri)\s*:\s*(?:#.*)?$"
 )
 
 
 class TestNoLegacyUriModuleUsage(unittest.TestCase):
-    REPO_ROOT = Path(__file__).resolve().parents[2]
+    REPO_ROOT = repo_root()
     EXCLUDED_DIRS = {
         ".git",
         ".venv",

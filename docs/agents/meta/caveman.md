@@ -1,6 +1,6 @@
-# Caveman — Token Compression
+# Caveman: Token Compression
 
-[Caveman](https://github.com/JuliusBrussee/caveman) is a token-compression plugin installed via `make install-skills`. It reduces output token consumption through progressively terser communication styles. Installation uses `make install-skills` (`scripts/install/skills/install.sh`), which restores all skills from `skills-lock.json` reproducibly. This works universally across all supported agents: Claude Code, Codex, Gemini CLI, Cursor, Copilot, Windsurf, Cline, and more. Skills are kept up to date via the daily `update-skills` CI workflow or manually with `make update-skills`.
+[Caveman](https://github.com/JuliusBrussee/caveman) is a token-compression plugin installed via `make install-skills`. It reduces output token consumption through progressively terser communication styles. Installation uses `make install-skills` (`scripts/install/skills/install.sh`), which restores all skills from `skills-lock.json` reproducibly. This works universally across all supported agents: Claude Code, Codex, Gemini CLI, Cursor, Copilot, Windsurf, Cline, and more. Skills are kept up to date via the daily `update` CI workflow or manually with `make update-skills`.
 
 ## Default Mode
 
@@ -18,7 +18,7 @@ At the **start of every conversation**, before doing any other work, the agent M
 
 | Command | Style | Use when |
 |---|---|---|
-| `/caveman lite` | Professional brevity, grammar intact | Default — balanced readability |
+| `/caveman lite` | Professional brevity, grammar intact | Default: balanced readability |
 | `/caveman full` | Fragment-based, drops articles | Context growing, prefer brevity |
 | `/caveman ultra` | Maximally compressed, telegraphic | Context critical, every token counts |
 | `/caveman wenyan-lite` | Classical Chinese, semi-formal | Alternative compression style |
@@ -26,13 +26,13 @@ At the **start of every conversation**, before doing any other work, the agent M
 | `/caveman wenyan-ultra` | Extreme classical compression | Maximum reduction |
 | `stop caveman` | Normal prose | User explicitly requests full output |
 
-## Tier Progression — Token Budget Guidance
+## Tier Progression: Token Budget Guidance
 
 As the conversation grows, the agent MUST proactively suggest a higher tier. Base the estimate on observable signals: message count, response sizes, and whether context compression has been triggered by the system.
 
 | Approximate token budget consumed | Action |
 |---|---|
-| < 20 % | Stay on current tier — no suggestion needed |
+| < 20 % | Stay on current tier. No suggestion needed. |
 | ≥ 20 % | Recommend upgrading from **lite → full** |
 | ≥ 50 % | Recommend upgrading from **full → ultra** |
 | ≥ 75 % | Strongly recommend **ultra** (or a wenyan variant); warn that context is running low |
@@ -43,4 +43,4 @@ Suggestions MUST be short, inline, and non-blocking. Example:
 [caveman: lite | ~30 % context used → consider /caveman full]
 ```
 
-The agent MUST NOT interrupt work to ask about tier changes — recommendations appear as a single line at the start of the next response after the threshold is crossed.
+The agent MUST NOT interrupt work to ask about tier changes. Recommendations appear as a single line at the start of the next response after the threshold is crossed.

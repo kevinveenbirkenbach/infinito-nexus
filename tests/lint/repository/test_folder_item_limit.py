@@ -23,7 +23,15 @@ from utils.annotations.message import warning
 
 MAX_ITEMS_PER_FOLDER = 12
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+
+def repo_root() -> Path:
+    for candidate in Path(__file__).resolve().parents:
+        if (candidate / "pyproject.toml").is_file():
+            return candidate
+    raise AssertionError("Repository root not found from test path.")
+
+
+REPO_ROOT = repo_root()
 
 # Flat structure folders that intentionally stay one level deep.
 FLAT_STRUCTURE_WHITELIST = {
