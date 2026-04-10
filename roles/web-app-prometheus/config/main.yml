@@ -33,6 +33,11 @@ compose:
     matomo:
       enabled:                    true
       shared:                     true
+    email:
+      enabled:                    true
+      shared:                     true
+    database:
+      enabled:                    false
     redis:
       enabled:                    false
     css:
@@ -46,5 +51,40 @@ compose:
       mem_reservation:            "256m"
       mem_limit:                  "512m"
       pids_limit:                 256
+    alertmanager:
+      image:                      "prom/alertmanager"
+      version:                    "v0.28.1"
+      name:                       "prometheus-alertmanager"
+      cpus:                       "0.25"
+      mem_reservation:            "64m"
+      mem_limit:                  "128m"
+      pids_limit:                 64
+    cadvisor:
+      image:                      "gcr.io/cadvisor/cadvisor"
+      version:                    "v0.52.1"
+      name:                       "prometheus-cadvisor"
+      cpus:                       "0.25"
+      mem_reservation:            "64m"
+      mem_limit:                  "256m"
+      pids_limit:                 64
+    node-exporter:
+      image:                      "prom/node-exporter"
+      version:                    "v1.9.1"
+      name:                       "prometheus-node-exporter"
+      cpus:                       "0.1"
+      mem_reservation:            "32m"
+      mem_limit:                  "128m"
+      pids_limit:                 64
   volumes:
     data:                         "prometheus_data"
+    alertmanager_data:            "prometheus_alertmanager_data"
+alerting:
+  telegram:
+    enabled:                      false
+    bot_token:                    ""    # Sensitive — set in vault-encrypted inventory vars
+    chat_id:                      0     # Telegram chat ID (integer)
+  mattermost:
+    webhook_url:                  ""    # Set in inventory to enable Mattermost alerts
+native_metrics:
+  gitea:
+    token:                        ""    # Set in inventory when GITEA__metrics__ENABLED=true and token auth is configured

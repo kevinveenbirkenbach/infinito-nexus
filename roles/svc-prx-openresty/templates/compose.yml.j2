@@ -1,6 +1,7 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   openresty:
     {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
+    {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
     container_name: {{ OPENRESTY_CONTAINER }}
     image: {{ OPENRESTY_IMAGE }}:{{ OPENRESTY_VERSION }}
     network_mode: "host"
@@ -14,6 +15,10 @@
       - {{ LETSENCRYPT_WEBROOT_PATH }}:{{ LETSENCRYPT_WEBROOT_PATH }}:ro
       - {{ LETSENCRYPT_BASE_PATH }}:{{ LETSENCRYPT_BASE_PATH }}:ro
       - {{ TLS_SELFSIGNED_BASE_PATH }}:{{ TLS_SELFSIGNED_BASE_PATH }}:ro
+      # Docker socket (read-only) — lets the Lua health-polling timer query
+      # container state so /healthz/live can reflect Docker health, not just
+      # HTTP reachability.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     command: ["openresty", "-g", "daemon off;"]
     healthcheck:
       test: ["CMD", "openresty", "-t", "-q"]

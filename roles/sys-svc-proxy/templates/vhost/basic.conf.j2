@@ -1,6 +1,14 @@
+{% set _svc_key = application_id | replace('web-app-', '') | replace('web-svc-', '') %}
 server
 {
   server_name {{ domain }};
+  # Exposes the Ansible role ID as an nginx variable so Lua metrics handlers
+  # can attach the 'app' label required by the monitoring ACs.
+  set $app_id "{{ application_id }}";
+  # Docker container name for this vhost — used by /healthz/live to query the
+  # health_containers shared dict populated by the background Docker-socket timer.
+  # Falls back to "" when the naming convention doesn't match (dict lookup is skipped).
+  set $container_name "{{ lookup('config', application_id, 'compose.services.' + _svc_key + '.name', '') }}";
   {% include 'roles/sys-svc-proxy/templates/headers/buffers.conf.j2' %}
 
   {% if lookup('config',application_id, 'compose.services.oauth2.enabled', False) %}
@@ -57,20 +65,85 @@ server
     {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
   {% endif %}
 
-  # Health probe — returns 200 without authentication; used by Prometheus blackbox-exporter.
-  # Exposes no application data; safe to leave unauthenticated.
-  location = /healthz {
+  # Liveness probe — checks BOTH Docker container health AND HTTP reachability.
+  # 1. Consults the health_containers shared dict (populated every 15 s by the
+  #    background timer in nginx.conf) to detect containers that are "running"
+  #    but whose Docker HEALTHCHECK has flipped to "unhealthy".
+  # 2. Falls back to an HTTP sub-request so that apps without a Docker
+  #    HEALTHCHECK are still probed correctly.
+  # Returns 200 "live" only when both checks pass; 503 "down" otherwise.
+  location = /healthz/live {
     access_log off;
-    return 200 "ok\n";
-    add_header Content-Type text/plain;
+    content_by_lua_block {
+      local alive = true
+
+      -- Step 1: Docker health check via shared dict.
+      -- $container_name is set from the Jinja2 config lookup; empty string
+      -- means no container name is known — skip and rely on HTTP probe only.
+      local cname = ngx.var.container_name
+      if cname and cname ~= "" then
+        local status = ngx.shared.health_containers:get(cname)
+        -- "down" = container is running but Docker HEALTHCHECK says unhealthy.
+        -- nil    = timer hasn't run yet; do not penalise — fall through.
+        if status == "down" then
+          alive = false
+        end
+      end
+
+      -- Step 2: TCP/HTTP reachability — catches crashed or exited containers.
+      if alive then
+        local res = ngx.location.capture("/_live_probe")
+        if not res or res.status >= 500 then
+          alive = false
+        end
+      end
+
+      if alive then
+        ngx.status = ngx.HTTP_OK
+        ngx.header["Content-Type"] = "text/plain"
+        ngx.print("live\n")
+      else
+        ngx.status = ngx.HTTP_SERVICE_UNAVAILABLE
+        ngx.header["Content-Type"] = "text/plain"
+        ngx.print("down\n")
+      end
+    }
   }
 
-  # Default metrics endpoint — returns an empty Prometheus exposition document for applications
-  # that have no dedicated native metrics support. Safe to expose publicly: no application data.
-  location = /metricz {
-    access_log off;
-    return 200 "# No dedicated metrics available for this application\n";
-    add_header Content-Type "text/plain; version=0.0.4; charset=utf-8";
+  # Internal backend probe used by /healthz/live and /metricz.
+  # Not accessible to external clients.
+  location = /_live_probe {
+    internal;
+    proxy_pass              http://127.0.0.1:{{ http_port }}/;
+    proxy_set_header        Host $host;
+    proxy_connect_timeout   2s;
+    proxy_read_timeout      3s;
+    proxy_intercept_errors  off;
   }
+
+  # Readiness probe — proxies to the application backend.
+  # Returns a non-5xx response when the app is up and accepting requests.
+  # Returns 502/503 when the backend is down. Safe to expose publicly.
+  location = /healthz/ready {
+    access_log off;
+    proxy_pass              http://127.0.0.1:{{ http_port }}/;
+    proxy_set_header        Host $host;
+    proxy_connect_timeout   3s;
+    proxy_read_timeout      5s;
+    proxy_intercept_errors  off;
+  }
+
+  {#
+    Include the prometheus nginx metrics location when the role participates in the
+    monitoring stack. Two cases:
+    - Other apps: compose.services.prometheus.enabled = true  (shared integration flag)
+    - web-app-prometheus itself: compose.services.prometheus.name is set (container config,
+      no 'enabled' key) — its domain is the single scrape target for all nginx metrics.
+  #}
+  {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
+      or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
+  {# Prometheus metrics endpoint and per-request collection — owned by the prometheus role. #}
+  {% include 'roles/web-app-prometheus/templates/location.conf.j2' %}
+  {% endif %}
 
 }

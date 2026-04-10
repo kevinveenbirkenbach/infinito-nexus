@@ -6,6 +6,8 @@
     container_name: "{{ PROMETHEUS_CONTAINER }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command:
       - "--config.file={{ PROMETHEUS_CONFIG_DOCKER }}"
       - "--storage.tsdb.path=/prometheus"
@@ -13,7 +15,7 @@
     volumes:
       - data:/prometheus
       - {{ PROMETHEUS_CONFIG_HOST }}:{{ PROMETHEUS_CONFIG_DOCKER }}:ro
-
+{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
   blackbox-exporter:
     image: "prom/blackbox-exporter:latest"
     container_name: "{{ PROMETHEUS_CONTAINER }}-blackbox"
@@ -23,7 +25,46 @@
     volumes:
       - {{ BLACKBOX_CONFIG_HOST }}:{{ BLACKBOX_CONFIG_DOCKER }}:ro
 
-{% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
+  alertmanager:
+    image: "{{ ALERTMANAGER_IMAGE }}:{{ ALERTMANAGER_VERSION }}"
+    container_name: "{{ ALERTMANAGER_CONTAINER }}"
+    restart: unless-stopped
+    command:
+      - "--config.file={{ ALERTMANAGER_CONFIG_DOCKER }}"
+      - "--storage.path=/alertmanager"
+    volumes:
+      - {{ ALERTMANAGER_CONFIG_HOST }}:{{ ALERTMANAGER_CONFIG_DOCKER }}:ro
+      - alertmanager_data:/alertmanager
 
-{{ applications | compose_volumes(application_id, extra_volumes={'data': {'name': PROMETHEUS_VOLUME_DATA}}) }}
+  cadvisor:
+    image: "{{ CADVISOR_IMAGE }}:{{ CADVISOR_VERSION }}"
+    container_name: "{{ CADVISOR_CONTAINER }}"
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
+  node-exporter:
+    image: "{{ NODE_EXPORTER_IMAGE }}:{{ NODE_EXPORTER_VERSION }}"
+    container_name: "{{ NODE_EXPORTER_CONTAINER }}"
+    restart: unless-stopped
+    network_mode: host
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.rootfs=/rootfs"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+
+{{ applications | compose_volumes(application_id, extra_volumes={'data': {'name': PROMETHEUS_VOLUME_DATA}, 'alertmanager_data': {'name': ALERTMANAGER_VOLUME_DATA}}) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

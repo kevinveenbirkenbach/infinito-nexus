@@ -2,12 +2,30 @@
 # DO NOT edit manually; update roles/web-app-prometheus/templates/blackbox.yml.j2
 
 modules:
+  # Used for strict uptime checks — expects exactly 200.
   http_2xx:
     prober: http
     timeout: 10s
     http:
       valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
       valid_status_codes: [200]
+      method: GET
+      follow_redirects: false
+      fail_if_ssl: false
+      fail_if_not_ssl: true
+      tls_config:
+        insecure_skip_verify: false
+      preferred_ip_protocol: "ip4"
+
+  # Used for /healthz/ready probes — accepts any non-5xx response.
+  # The backend being reachable and responding (even with 302/401) means it is ready.
+  # A 502/503 from nginx means the backend container is down.
+  http_ready:
+    prober: http
+    timeout: 10s
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      valid_status_codes: [200, 301, 302, 303, 307, 308, 401, 403]
       method: GET
       follow_redirects: false
       fail_if_ssl: false

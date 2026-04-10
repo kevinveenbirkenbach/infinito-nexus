@@ -52,7 +52,122 @@ http
   gzip_comp_level 4;
   gzip_min_length 256;
   gzip_types application/atom+xml application/javascript application/xml+rss application/x-javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy text/javascript text/xml;
-  types_hash_max_size 4096;  
+
+  types_hash_max_size 4096;
+
+  # Shared memory for Prometheus metrics collection via lua-resty-prometheus.
+  # Must be declared in the http{} block before any lua phase references it.
+  lua_shared_dict prometheus_metrics 16m;
+
+  # Shared dict for Docker container health state, populated by the background
+  # timer below and read by every /healthz/live request.  Keys are container
+  # names (without the leading '/'); values are "up" or "down".  TTL = 60 s so
+  # stale entries expire if a container is removed and the timer misses a cycle.
+  lua_shared_dict health_containers 1m;
+
+  init_worker_by_lua_block {
+    -- lua-resty-prometheus (master) requires init() in init_worker_by_lua_block,
+    -- not init_by_lua_block, so that each worker initialises its own state.
+    prometheus = require("resty.prometheus").init("prometheus_metrics")
+    metric_requests = prometheus:counter(
+      "nginx_http_requests_total",
+      "Total number of HTTP requests",
+      {"host", "app", "method", "status"}
+    )
+    metric_latency = prometheus:histogram(
+      "nginx_http_request_duration_seconds",
+      "HTTP request latency in seconds",
+      {"host", "app"},
+      {0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5}
+    )
+    metric_bytes_sent = prometheus:counter(
+      "nginx_http_bytes_sent_total",
+      "Total number of bytes sent to clients",
+      {"host", "app"}
+    )
+    metric_bytes_received = prometheus:counter(
+      "nginx_http_bytes_received_total",
+      "Total number of bytes received from clients",
+      {"host", "app"}
+    )
+    metric_stack_up = prometheus:gauge(
+      "nginx_stack_up",
+      "Overall stack availability per vhost (1=up, 0=down)",
+      {"host", "app"}
+    )
+    metric_tls_handshakes = prometheus:counter(
+      "nginx_tls_handshakes_total",
+      "Total TLS handshakes by protocol",
+      {"host", "app", "protocol"}
+    )
+
+    -- Docker health polling — worker 0 only to avoid duplicate socket traffic.
+    -- Queries GET /v1.41/containers/json via the Docker Unix socket, then
+    -- stores each container's liveness in health_containers.  /healthz/live
+    -- reads the cache synchronously so Docker state is checked on every probe
+    -- without adding socket-connect latency to the request path.
+    if ngx.worker.id and ngx.worker.id() == 0 then
+      local function poll_docker_health(premature)
+        if premature then return end
+        local cjson  = require("cjson.safe")
+        local health = ngx.shared.health_containers
+        local sock   = ngx.socket.tcp()
+
+        local ok, err = sock:connect("unix:/var/run/docker.sock")
+        if not ok then
+          ngx.log(ngx.WARN, "docker-health: cannot connect to Docker socket: ", err)
+          sock:close()
+          return
+        end
+
+        local bytes, serr = sock:send(
+          "GET /v1.41/containers/json HTTP/1.0\r\nHost: localhost\r\n\r\n"
+        )
+        if not bytes then
+          ngx.log(ngx.WARN, "docker-health: send failed: ", serr)
+          sock:close()
+          return
+        end
+
+        -- Discard HTTP response headers (read until the blank separator line).
+        repeat
+          local line, rerr = sock:receive("*l")
+          if rerr then sock:close() return end
+        until line == ""
+
+        local body = sock:receive("*a")
+        sock:close()
+        if not body then return end
+
+        local containers = cjson.decode(body)
+        if type(containers) ~= "table" then return end
+
+        for _, c in ipairs(containers) do
+          local names = c.Names
+          if type(names) == "table" and names[1] then
+            local name = names[1]:gsub("^/", "")
+            local state      = c.State  or "unknown"
+            local status_str = c.Status or ""
+            -- Docker status examples:
+            --   "Up 3 minutes (healthy)"   → healthy
+            --   "Up 1 minute (unhealthy)"  → unhealthy (report as down)
+            --   "Up 5 hours"               → no healthcheck, treat as up
+            local health_tag = status_str:match("%((.-)%)")
+            local is_up = (state == "running") and (health_tag ~= "unhealthy")
+            -- TTL 60 s — entries expire if the container disappears between polls
+            health:set(name, is_up and "up" or "down", 60)
+          end
+        end
+      end
+
+      -- Seed immediately so the dict is populated before the first request
+      ngx.timer.at(0, poll_docker_health)
+      -- Refresh every 15 s
+      ngx.timer.every(15, poll_docker_health)
+    end
+  }
+
+
   {% for dir in lookup('nginx','directories.configuration.http_includes') %}
   include {{ dir }}*.conf;
   {% endfor %}

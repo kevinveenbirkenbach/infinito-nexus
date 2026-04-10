@@ -7,6 +7,14 @@ global:
   external_labels:
     environment: "{{ DOMAIN_PRIMARY }}"
 
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["{{ ALERTMANAGER_CONTAINER }}:9093"]
+
+rule_files:
+  - "{{ ALERT_RULES_CONFIG_DOCKER }}"
+
 scrape_configs:
 
   # Prometheus self-monitoring
@@ -14,12 +22,60 @@ scrape_configs:
     static_configs:
       - targets: ["localhost:9090"]
 
-  # Blackbox HTTP health probes — one target per canonical domain per application.
-  # The /healthz endpoint returns 200 from nginx without exposing any application data.
+  # Central nginx metrics — scraped ONCE from the prometheus domain.
+  # All app metrics are labeled by host/vhost via lua-resty-prometheus.
+  # No per-app redundancy: one scrape gives metrics for all 70+ apps.
+  - job_name: "nginx-metricz"
+    scheme: https
+    metrics_path: /metricz
+    tls_config:
+      insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
+    static_configs:
+      - targets: ["{{ lookup('domain', application_id) }}"]
+
+  # Container metrics — per-container CPU, memory, network via cAdvisor.
+  - job_name: "cadvisor"
+    static_configs:
+      - targets: ["{{ CADVISOR_CONTAINER }}:8080"]
+
+  # Host metrics — system-level CPU, memory, disk, network via node_exporter.
+  # node-exporter runs with network_mode: host, so it binds on the real host.
+  # host.docker.internal resolves to the host gateway from inside the container.
+  - job_name: "node-exporter"
+    static_configs:
+      - targets: ["host.docker.internal:9100"]
+
+  # ── Native application metrics ────────────────────────────────────────────
+  # Scraped only when the app is deployed (present in 'applications') and has
+  # compose.services.prometheus.enabled = true in its role config.
+  # Apps expose their own runtime metrics (Go, JVM, …) on /metrics; Prometheus
+  # scrapes them via HTTPS so no extra port mapping or shared Docker network is
+  # needed.  A bearer token is optional but recommended for public endpoints.
+
+{% if 'web-app-gitea' in applications and lookup('config', 'web-app-gitea', 'compose.services.prometheus.enabled', False) %}
+  # Gitea — Go runtime + application metrics.
+  # Requires GITEA__metrics__ENABLED = true in the Gitea environment config.
+  # Set native_metrics.gitea.token in the inventory when token auth is enabled.
+  - job_name: "gitea"
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
+{% if PROMETHEUS_GITEA_METRICS_TOKEN %}
+    bearer_token: "{{ PROMETHEUS_GITEA_METRICS_TOKEN }}"
+{% endif %}
+    static_configs:
+      - targets: ["{{ lookup('domain', 'web-app-gitea') }}"]
+        labels:
+          app: "web-app-gitea"
+{% endif %}
+
+  # Blackbox readiness probes — one target per canonical domain per application.
+  # Proxied to the app backend: returns 502/503 when the app is down.
   - job_name: "blackbox-healthz"
     metrics_path: /probe
     params:
-      module: [http_2xx]
+      module: [http_ready]
     static_configs:
 {% for app_id in applications | list | sort %}
 {% if app_id != application_id %}
@@ -28,7 +84,7 @@ scrape_configs:
 {% if domains | length > 0 %}
       - targets:
 {% for domain in domains %}
-          - "https://{{ domain }}/healthz"
+          - "https://{{ domain }}/healthz/ready"
 {% endfor %}
         labels:
           app: "{{ app_id }}"

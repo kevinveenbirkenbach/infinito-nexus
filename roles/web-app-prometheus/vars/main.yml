@@ -11,9 +11,38 @@ PROMETHEUS_CONTAINER:         "{{ lookup('config', application_id, 'compose.serv
 
 ## Volumes
 PROMETHEUS_VOLUME_DATA:       "{{ lookup('config', application_id, 'compose.volumes.data') }}"
+ALERTMANAGER_VOLUME_DATA:     "{{ lookup('config', application_id, 'compose.volumes.alertmanager_data') }}"
 
 ## Config
 PROMETHEUS_CONFIG_HOST:       "{{ [ lookup('container', application_id, 'directories.config'), 'prometheus.yml' ] | path_join }}"
 PROMETHEUS_CONFIG_DOCKER:     "/etc/prometheus/prometheus.yml"
 BLACKBOX_CONFIG_HOST:         "{{ [ lookup('container', application_id, 'directories.config'), 'blackbox.yml' ] | path_join }}"
 BLACKBOX_CONFIG_DOCKER:       "/etc/blackbox_exporter/config.yml"
+
+# Alertmanager
+ALERTMANAGER_VERSION:         "{{ lookup('config', application_id, 'compose.services.alertmanager.version') }}"
+ALERTMANAGER_IMAGE:           "{{ lookup('config', application_id, 'compose.services.alertmanager.image') }}"
+ALERTMANAGER_CONTAINER:       "{{ lookup('config', application_id, 'compose.services.alertmanager.name') }}"
+ALERTMANAGER_CONFIG_HOST:     "{{ [ lookup('container', application_id, 'directories.config'), 'alertmanager.yml' ] | path_join }}"
+ALERTMANAGER_CONFIG_DOCKER:   "/etc/alertmanager/alertmanager.yml"
+ALERT_RULES_CONFIG_HOST:      "{{ [ lookup('container', application_id, 'directories.config'), 'alert_rules.yml' ] | path_join }}"
+ALERT_RULES_CONFIG_DOCKER:    "/etc/prometheus/alert_rules.yml"
+
+# Alertmanager — communication channels
+ALERTMANAGER_TELEGRAM_ENABLED:         "{{ lookup('config', application_id, 'alerting.telegram.enabled', false) }}"
+ALERTMANAGER_TELEGRAM_BOT_TOKEN:       "{{ lookup('config', application_id, 'alerting.telegram.bot_token', '') }}"
+ALERTMANAGER_TELEGRAM_CHAT_ID:         "{{ lookup('config', application_id, 'alerting.telegram.chat_id', 0) }}"
+ALERTMANAGER_MATTERMOST_WEBHOOK_URL:   "{{ lookup('config', application_id, 'alerting.mattermost.webhook_url', '') }}"
+
+# Native application metrics — per-app bearer tokens for Prometheus scraping
+PROMETHEUS_GITEA_METRICS_TOKEN:        "{{ lookup('config', application_id, 'native_metrics.gitea.token', '') }}"
+
+# cAdvisor
+CADVISOR_VERSION:             "{{ lookup('config', application_id, 'compose.services.cadvisor.version') }}"
+CADVISOR_IMAGE:               "{{ lookup('config', application_id, 'compose.services.cadvisor.image') }}"
+CADVISOR_CONTAINER:           "{{ lookup('config', application_id, 'compose.services.cadvisor.name') }}"
+
+# Node Exporter
+NODE_EXPORTER_VERSION:        "{{ lookup('config', application_id, 'compose.services.node-exporter.version') }}"
+NODE_EXPORTER_IMAGE:          "{{ lookup('config', application_id, 'compose.services.node-exporter.image') }}"
+NODE_EXPORTER_CONTAINER:      "{{ lookup('config', application_id, 'compose.services.node-exporter.name') }}"

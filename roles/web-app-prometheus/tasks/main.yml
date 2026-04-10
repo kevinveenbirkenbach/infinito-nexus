@@ -19,6 +19,20 @@
     mode: "0644"
   notify: compose up
 
+- name: "Render alertmanager config to {{ ALERTMANAGER_CONFIG_HOST }}"
+  template:
+    src: alertmanager.yml.j2
+    dest: "{{ ALERTMANAGER_CONFIG_HOST }}"
+    mode: "0644"
+  notify: compose up
+
+- name: "Render alert rules to {{ ALERT_RULES_CONFIG_HOST }}"
+  template:
+    src: alert_rules.yml.j2
+    dest: "{{ ALERT_RULES_CONFIG_HOST }}"
+    mode: "0644"
+  notify: compose up
+
 - name: "flush handlers for '{{ application_id }}'"
   meta: flush_handlers
 
