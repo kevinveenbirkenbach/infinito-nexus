@@ -6,15 +6,15 @@ The branch prefix MUST match the type of change. The [PR workflow](pull-request.
 
 | Branch prefix | Scope | Matching files | CI behavior |
 |---|---|---|---|
-| `agent` | Changes to agent instructions or prompts | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/agents/*` | Skips [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml), finishes green through the lightweight scope gate. |
-| `documentation` | Documentation-only changes | `**/*.md`, `**/*.rst` (outside agent paths) | Skips [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml), finishes green through the lightweight scope gate. |
-| `feature` | New features or enhancements | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
-| `fix` | Bug fixes | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
-| `dependabot` | Automated dependency updates | `*` | Runs the full [ci-orchestrator](../../../.github/workflows/ci-orchestrator.yml) pipeline. |
+| `agent` | Changes to agent instructions or prompts | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `docs/agents/*` | Skips [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml), finishes green through the lightweight scope gate. |
+| `documentation` | Documentation-only changes | `**/*.md`, `**/*.rst` (outside agent paths) | Skips [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml), finishes green through the lightweight scope gate. |
+| `feature` | New features or enhancements | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
+| `fix` | Bug fixes | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
+| `dependabot` | Automated dependency updates | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 
 ## Enforcement 🔒
 
-All rules in this document are actively enforced on `main` via GitHub branch protection. See [branch.md](../tools/github/branch.md) for the full enforcement policy.
+All rules in this document are actively enforced on `main` via GitHub branch protection. See [branch.md](../../tools/github/branch.md) for the full enforcement policy.
 
 ## Naming Conventions 🏷️
 

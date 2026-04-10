@@ -1,4 +1,4 @@
-# Development Environment Setup
+# Development Environment Setup 🛠️
 
 Use the repository's real setup flow. The main source of truth is the [Makefile](../../../Makefile).
 
@@ -9,17 +9,17 @@ Important:
 - Read the setup guides first if you are new to this environment.
 - The local development workflow is mainly tested on Linux.
 
-## Platform-Specific Instructions
+## Platform-Specific Instructions 🖥️
 
 - [Linux](platform/linux.md)
 - [macOS](platform/macos.md)
 - [Windows (WSL2)](platform/windows-wsl2.md)
 
-## Shared Repository Workflow
+## Shared Repository Workflow 🔄
 
 These steps are the shared repository workflow and apply regardless of whether you work on Linux, macOS, or Windows with WSL2.
 
-### Bootstrap
+### Bootstrap 🚀
 
 Run these commands from the repository root:
 
@@ -30,7 +30,7 @@ make up
 make trust-ca
 ```
 
-#### Bootstrap Commands
+#### Bootstrap Commands 📋
 
 | Phase | Command | What it does |
 |---|---|---|
@@ -39,7 +39,7 @@ make trust-ca
 | Start stack | `make up` | Starts the local development stack. |
 | Browser trust | `make trust-ca` | Trusts the generated local [CA](https://en.wikipedia.org/wiki/Certificate_authority) so `*.infinito.example` works correctly in your browser. |
 
-#### Optional Development Marker
+#### Optional Development Marker 🏷️
 
 If you want to mark this checkout as a development environment, run:
 
@@ -53,7 +53,7 @@ Several tools (e.g. `cli/deploy/development/compose.py`, `scripts/meta/resolve/a
 
 The `pre-commit` hooks are installed automatically by `make environment-bootstrap` and do not depend on this marker.
 
-### Teardown
+### Teardown 🧹
 
 When you are done, use these commands to stop the stack and clean up the local environment:
 
@@ -62,18 +62,18 @@ make down
 make environment-teardown
 ```
 
-#### Teardown Commands
+#### Teardown Commands 📋
 
 | Phase | Command | What it does |
 |---|---|---|
 | Stop stack | `make down` | Stops the local development stack. |
 | Host cleanup | `make environment-teardown` | Reverts local development environment changes where supported. |
 
-### Full Development Flow
+### Full Development Flow 🔁
 
 The repository already contains a modular environment test suite at [scripts/tests/environment/](../../../scripts/tests/environment/README.md). The commands from that suite are explained here as the intended end-to-end flow.
 
-#### Flow Summary
+#### Flow Summary 📋
 
 | Step | Command | Purpose in this flow |
 |---|---|---|
@@ -88,9 +88,9 @@ The repository already contains a modular environment test suite at [scripts/tes
 
 Use this as a practical reference when you want to understand how local development is expected to work.
 
-### Minimal Hardware Resources
+### Minimal Hardware Resources 💾
 
-If you work on a machine with limited CPU, RAM, or disk space, use the guide at [Manage Low-Hardware Resources](hardware.md).
-The public article with the same topic is [Developing on PCs with Limited Resources](https://s.infinito.nexus/minpcdev).
+If you work on a machine with limited CPU, RAM, or disk space, use the guide at [hardware.md](hardware.md).
+The public article with the same topic is [here](https://s.infinito.nexus/minpcdev).
 
-For local deploy shortcuts and end-to-end checks, see [Development](../flow/testing.md).
+For local deploy shortcuts and end-to-end checks, see [testing.md](../actions/testing.md).

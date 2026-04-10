@@ -132,5 +132,5 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 ## Notes 📝
 
 - The commands use the current `INFINITO_DISTRO` setting from the environment where relevant.
-- For app-level local deploy flows and end-to-end checks, see [Development](../flow/testing.md).
-- For validation strategy and Playwright guidance, see [Testing and Validation](../flow/testing.md).
+- For app-level local deploy flows and end-to-end checks, see [Development](../actions/testing.md).
+- For validation strategy and Playwright guidance, see [Testing and Validation](../actions/testing.md).

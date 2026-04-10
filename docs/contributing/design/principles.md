@@ -1,8 +1,8 @@
-# Code Principles
+# Code Principles 📐
 
 Use these principles when you change repository code, scripts, or automation.
 
-## Principles
+## Principles 📋
 
 Follow these principles. Keep the rule column short, imperative, and as [SMART](https://en.wikipedia.org/wiki/SMART_criteria) as practical; use the reason column for the rationale, the principle column for the linked source name, and put the expanded wording in the details column.
 
@@ -47,5 +47,5 @@ Follow these principles. Keep the rule column short, imperative, and as [SMART](
 | Keep easy code easy to explain. | Easy-to-explain code is usually sound. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | If the code is easy to explain, it is likely a good idea. |
 | Use namespaces generously. | Namespaces prevent collisions in a large repo. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Group names so they do not collide and remain easy to navigate. |
 
-For code quality rules, see [Lint](tests/lint.md).
+For code quality rules, see [lint.md](../actions/testing/lint.md).
 For framework-specific guidance, see [ansible.md](../tools/ansible.md) and [make.md](../tools/make.md).

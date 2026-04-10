@@ -62,6 +62,6 @@ Important:
 
 For test-type-specific requirements, framework, and creation procedures see:
 
-- [Unit Tests](../testing/unit.md)
-- [Integration Tests](../testing/integration.md)
-- [Playwright Tests](../testing/playwright.md)
+- [Unit Tests](testing/unit.md)
+- [Integration Tests](testing/integration.md)
+- [Playwright Tests](testing/playwright.md)

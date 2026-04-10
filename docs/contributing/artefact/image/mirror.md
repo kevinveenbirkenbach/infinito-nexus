@@ -74,7 +74,7 @@ This file is consumed by the inventory creator to substitute mirror URLs into ho
 
 ## CI Integration 🔄
 
-The mirror workflow runs as stage 8 of the CI pipeline. See [ci.md](../../flow/ci.md). It runs in parallel with the DNS tests and MUST complete before deploy tests start.
+The mirror workflow runs as stage 8 of the CI pipeline. See [ci.md](../git/pipeline.md). It runs in parallel with the DNS tests and MUST complete before deploy tests start.
 
 The mirrors file is generated into the inventory directory. The inventory creator applies mirror image overrides to host variables via `cli/create/inventory/mirror_overrides.py`, which reads both top-level keys from `mirrors.yml` and writes into host vars as follows:
 

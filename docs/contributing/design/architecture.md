@@ -75,8 +75,8 @@ The main entry points are:
 - [Makefile](../../../Makefile)
 - [scripts/](../../../scripts/)
 - [tests/](../../../tests/)
-- [lint.md](../testing/lint.md)
-- [testing.md](../flow/testing.md)
+- [lint.md](../actions/testing/lint.md)
+- [testing.md](../actions/testing.md)
 - [docs/contributing/](../../)
 
 Those layers keep local development, CI, and production behavior closer together.
@@ -178,7 +178,7 @@ For a normal change, contributors MUST:
 
 If you skip those steps, the repository becomes harder to understand for the next person.
 
-See [workflow.md](../flow/workflow.md) for the full contribution flow.
+See [workflow.md](../workflow.md) for the full contribution flow.
 
 ## What This Architecture Is Not 🚫
 
@@ -195,9 +195,9 @@ If you are trying to understand a change, start here:
 - [roles/](../../../roles/) for behavior
 - [inventories/bundles/](../../../inventories/bundles/) for deployment shapes
 - [Makefile](../../../Makefile) and [scripts/](../../../scripts/) for supported commands
-- [lint.md](../testing/lint.md) for code and framework rules
+- [lint.md](../actions/testing/lint.md) for code and framework rules
 - [services.md](services.md) for service registration, loading, and injection
-- [testing.md](../flow/testing.md) for refactoring, debugging, and testing
+- [testing.md](../actions/testing.md) for refactoring, debugging, and testing
 - [docs/contributing/](../../) for workflow and constraints
 - [tests/](../../../tests/) for the expected contracts
 

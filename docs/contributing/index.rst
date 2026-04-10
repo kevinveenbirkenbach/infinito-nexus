@@ -5,7 +5,7 @@ Contribution Guide
    :maxdepth: 1
    :caption: Main Categories
 
-   flow/workflow
+   workflow
    environment/setup
-   code/principles
+   design/principles
    tools/makefile

@@ -13,7 +13,7 @@
 #     key so that role-based reverse lookup always returns a deterministic id.
 #     The primary key must have no canonical field. Aliases must set canonical.
 #
-# See: docs/contributing/code/services.md
+# See: docs/contributing/design/services.md
 
 SERVICE_REGISTRY:
   matomo:

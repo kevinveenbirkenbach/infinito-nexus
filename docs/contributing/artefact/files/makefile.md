@@ -14,4 +14,4 @@ It MUST expose stable targets that people and CI are meant to run directly.
 - You SHOULD prefer targets that compose smaller scripts instead of embedding large shell fragments in the `Makefile`.
 - You MUST keep the command surface small enough that contributors can discover the obvious path quickly.
 
-For the broader architecture context, see [architecture.md](../../code/architecture.md).
+For the broader architecture context, see [architecture.md](../../design/architecture.md).
