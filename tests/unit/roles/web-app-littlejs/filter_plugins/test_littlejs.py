@@ -50,10 +50,8 @@ class TestLittlejsHref(unittest.TestCase):
 
     def test_respects_protocol_and_domain(self):
         example = {"file": "platformer", "is_project": True}
-        href = type(self)._littlejs_href(example, "http", "littlejs.infinito.nexus")
-        self.assertEqual(
-            href, "http://littlejs.infinito.nexus/examples/platformer/"
-        )  # nocheck: url
+        href = type(self)._littlejs_href(example, "http", "littlejs.example.com")
+        self.assertEqual(href, "http://littlejs.example.com/examples/platformer/")
 
 
 if __name__ == "__main__":

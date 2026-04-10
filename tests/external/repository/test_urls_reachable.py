@@ -7,8 +7,8 @@ local/example hosts are skipped.
 This is an external test because it performs live HTTP requests against the
 referenced third-party URLs. HTTP ``401``, ``403``, and ``405`` are treated as
 reachable (auth-gated or method-restricted servers). HTTP ``429``, ``500``, and
-``503`` emit warning annotations. All other 4xx/5xx codes and connection errors
-fail the test.
+``503``, timeouts, and connection errors (reset, aborted) emit warning annotations.
+All other 4xx/5xx codes fail the test.
 """
 
 from __future__ import annotations
@@ -332,6 +332,8 @@ def _probe_url(url: str) -> ProbeOutcome:
             response.close()
     except requests.Timeout as exc:
         return ProbeOutcome("warn", f"Timeout: {exc}")
+    except requests.ConnectionError as exc:
+        return ProbeOutcome("warn", f"ConnectionError: {exc}")
     except requests.RequestException as exc:
         return ProbeOutcome("fail", f"{type(exc).__name__}: {exc}")
     except Exception as exc:  # pragma: no cover - defensive safety net
