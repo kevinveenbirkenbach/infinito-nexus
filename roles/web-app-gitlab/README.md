@@ -12,7 +12,7 @@ This role deploys GitLab using Docker, automating the installation, configuratio
 - [GitLab Official Website](https://about.gitlab.com/)
 - [Running GitLab on Docker](https://ralph.blog.imixs.com/2019/06/09/running-gitlab-on-docker/)
 ## Credits
-Developed and maintained by **Kevin Veen-Birkenbach**.  
+Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
-Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-Licensed under [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

@@ -10,5 +10,9 @@ The primary purpose of this role is to provide a comprehensive solution for auto
 - **Customizable Templates:** Supports tailoring email templates for service failure notifications.
 - **Secure Notifications:** Integrates with systemd to trigger email alerts when services fail.
 - **Suite Integration:** Part of the `sys-ctl-alm-compose` suite, offering a unified approach to service failure notifications.
-## Other Resources
-This role was created with the assistance of ChatGPT.
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

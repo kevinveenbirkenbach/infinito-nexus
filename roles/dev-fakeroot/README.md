@@ -2,9 +2,13 @@
 
 ## Description
 
-This Ansible role installs **fakeroot** for the current Linux distribution. Fakeroot enables non-privileged users to simulate root-level file manipulations—ideal for building packages or performing file operations that normally require root permissions.
+This Ansible role installs **fakeroot** for the current Linux distribution. Fakeroot enables non-privileged users to simulate root-level file manipulations, making it ideal for building packages or performing file operations that normally require root permissions.
 
 Learn more about fakeroot on [Wikipedia](https://en.wikipedia.org/wiki/Fakeroot_(software)).
+
+## Overview
+
+This role automates the installation of fakeroot via the OS package manager, ensuring that users can simulate superuser operations without requiring elevated privileges.
 
 ## Purpose
 
@@ -18,7 +22,7 @@ The purpose of this role is to automate the installation of fakeroot so that use
 
 ## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**.  
-Learn more at [www.veen.world](https://www.veen.world)
-
-License: [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

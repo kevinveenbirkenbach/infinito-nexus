@@ -183,27 +183,27 @@ More stable Matomo installations, leaner base images, and improved CI image life
 * **Stabilized multi-distro CI deploys** with per-distro orchestration, two-pass *ASYNC* testing, hard cleanup between runs, and a global execution time budget
 * **Improved image mirroring workflows** with clearer separation of full and missing-only runs, branch-scoped concurrency, and deploy gating on successful mirroring
 ## [1.0.0] - 2026-02-03
-### 🚀 Release: Infrastructure Hardening, Mirroring & Deterministic Deploys
+### Release: Infrastructure Hardening, Mirroring & Deterministic Deploys 🚀
 This release delivers a major stability and reliability upgrade across the Infinito.Nexus ecosystem. It focuses on **deterministic deployments**, **robust TLS/CA handling**, **mirror-aware inventories**, and **CI/CD resilience**, while standardizing Docker service configuration across roles.
-### ✨ Highlights
-#### 🔐 TLS & Certificate Pipeline
+### Highlights ✨
+#### TLS & Certificate Pipeline 🔐
 * Switched self-signed mode to a **CA-signed certificate chain** with deterministic trust installation
 * Strict SAN planning driven by `CURRENT_PLAY_DOMAINS_ALL`
 * Clean separation of TLS state (`tls`) and cert paths (`cert`)
 * Faster, safer cert deployment (no global sleeps, deterministic container restarts)
 * Improved domain/alias resolution and strict opt-in auto-alias behavior
-#### 🧩 CA Trust Injection (Host & Containers)
+#### CA Trust Injection (Host & Containers) 🧩
 * Unified trust injection via `with-ca-trust.sh`
 * Best-effort CA installation (non-fatal in minimal/unprivileged containers)
 * Env-based trust fallbacks (`SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, …)
 * Support for distroless images, profile-only services, NSS/Chromium
 * Hardened CA override generator and correct execution order
-#### 🐳 Docker Compose Tooling
+#### Docker Compose Tooling 🐳
 * Centralized and hardened compose wrappers (`compose-base`)
 * Strict multi-pass Jinja rendering to prevent leaked templates
 * Correct `--env-file` handling and safe argument escaping
 * Deterministic compose behavior across local, CI, and containerized environments
-#### 🪞 Inventory & Image Mirroring
+#### Inventory & Image Mirroring 🪞
 * New `--mirror` support for inventory generation
 * Per-service `mirror_policy`:
   * `if_missing` (default)
@@ -212,27 +212,27 @@ This release delivers a major stability and reliability upgrade across the Infin
 * Mirrors override **image/version only**, preserving all other service config
 * Robust GHCR mirroring with rate limiting, concurrency protection, and recompress fallback
 * CI workflows fully mirror-aware with strict env validation
-#### 🧱 Standardized Service Configuration
+#### Standardized Service Configuration 🧱
 * Unified Docker image handling via `docker.services.<service>.image/version`
 * Refactored multiple roles (pgAdmin, Friendica, LibreTranslate, oauth2-proxy, Funkwhale, …)
 * Removed misleading/deprecated image/version flags (e.g. Nextcloud)
-#### 🧪 CI & Test Guardrails
+#### CI & Test Guardrails 🧪
 * New integration tests enforcing:
   * valid image/version syntax
   * required image tags for buildable services
 * Improved CI stability (AppArmor handling, deterministic compose execution)
-#### 🛠️ Role Hardening & Idempotency
+#### Role Hardening & Idempotency 🛠️
 * Reliable admin bootstrap for Discourse, Snipe-IT, Taiga, WordPress
 * LDAP/OIDC fixes across multiple services (Nextcloud, Mailu, Snipe-IT, Discourse)
 * Resource limits added to prevent OOM crashes
 * Safer systemd deploy flow with deploy-safe timer handling
 * Improved admin and cleanup tooling
-### 🧠 Why this matters
+### Why this matters 🧠
 * Deployments are now **predictable, repeatable, and debuggable**
 * TLS, CA trust, and Docker behavior are aligned across **local, CI, and production**
 * Image mirroring is **explicit, controlled, and safe by default**
 * Role configuration is **consistent and machine-verifiable**
-### ⚠️ Notes
+### Notes ⚠️
 * Mirroring remains **opt-in** via `--mirror`
 * Strict validation fails fast only where silent misconfiguration would be dangerous
 * Several deprecated config paths/tests were removed as part of the standardization

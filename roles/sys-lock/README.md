@@ -12,5 +12,9 @@ The primary purpose of this role is to safeguard system stability during mainten
 - **Service Locking:** Blocks maintenance tasks until critical services are stopped.
 - **Timeout and Retry Logic:** Configurable wait times and maximum attempts.
 - **Conflict Avoidance:** Prevents interference between maintenance operations and running services.
-## Credits 📝
-Created with ChatGPT.
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

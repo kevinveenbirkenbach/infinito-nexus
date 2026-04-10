@@ -1,14 +1,21 @@
 # MSI Keyboard Driver
-Ansible role to set up dynamic keyboard color change on MSI laptops.
-## Requirements
-- An MSI laptop
-- The `msi-perkeyrgb` tool installed on the system
-- Ansible 2.9 or later
-## Role Variables
-Available variables are listed below, along with their default values:
-```yaml
-vendor_and_product_id: ""
-```
-The `vendor_and_product_id` variable is required and should be set to the vendor and product ID of the MSI laptop.
-## Author
-This role was created by [Kevin Veen-Birkenbach](https://github.com/kevinveenbirkenbach).
+
+## Description
+
+[msi-perkeyrgb](https://github.com/Nimayer/msi-perkeyrgb) is a tool for setting dynamic per-key RGB keyboard colors on MSI laptops.
+
+## Overview
+
+This role sets up dynamic keyboard color change on MSI laptops running Arch Linux. It requires an MSI laptop and the `msi-perkeyrgb` tool installed on the system.
+
+## Features
+
+- **Dynamic Color Control:** Enables per-key RGB color configuration via `msi-perkeyrgb`.
+- **Configurable Hardware ID:** Requires `vendor_and_product_id` to be set to the vendor and product ID of the MSI laptop.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

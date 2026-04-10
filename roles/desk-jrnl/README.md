@@ -1,23 +1,20 @@
-# Jrnl Role for Ansible
+# Jrnl
+
+## Description
+
+[Jrnl](https://jrnl.sh/) is a simple and effective command-line journal application that allows users to create and manage personal journal entries.
+
 ## Overview
-This role automates the installation of Jrnl, a simple and effective command-line journal application. It uses the `community.general.pacman` module for systems that support the Pacman package manager, ensuring that Jrnl is installed and up to date.
-## Requirements
-- Ansible 2.9 or higher.
-- Access to Pacman package manager (commonly available on Arch Linux and derivatives).
-## Role Variables
-No additional role variables are needed for this role as it solely focuses on the installation of Jrnl.
-## Dependencies
-No external dependencies.
-## Example Playbook
-Including this role in your playbook is straightforward. Simply add the role to your playbook's roles section:
-```yaml
-- hosts: all
-  roles:
-    - desk-jrnl
-```
+
+This role automates the installation of Jrnl using the `community.general.pacman` module for systems that support the Pacman package manager, ensuring that Jrnl is installed and up to date.
+
 ## Further Resources
-For more detailed information on Jrnl and its functionalities, visit [Jrnl's official documentation](https://jrnl.sh/).
-## Contributing
-Contributions to this role are welcome. Please adhere to standard coding conventions and best practices.
-## Other Resources
-This role was created as part of a larger playbook.
+
+- [Jrnl official documentation](https://jrnl.sh/)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
