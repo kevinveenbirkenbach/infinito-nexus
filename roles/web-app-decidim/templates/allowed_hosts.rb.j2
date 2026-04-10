@@ -1,0 +1,6 @@
+# frozen_string_literal: true
+# Managed by Ansible - do not edit by hand
+# Allows requests from the configured Decidim domain
+
+Rails.application.config.hosts << "{{ lookup('tls', application_id, 'url.base') | regex_replace('https?://', '') }}"
+Rails.application.config.hosts << /.*\.{{ DOMAIN_PRIMARY | replace('.', '\\.') }}/

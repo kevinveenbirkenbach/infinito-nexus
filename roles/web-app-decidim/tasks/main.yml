@@ -25,6 +25,13 @@
     mode: "0640"
   notify: compose up
 
+- name: "Render allowed_hosts initializer for {{ application_id }}"
+  ansible.builtin.template:
+    src: "allowed_hosts.rb.j2"
+    dest: "{{ lookup('container', application_id, 'directories.instance') }}allowed_hosts.rb"
+    mode: "0644"
+  notify: compose up
+
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full
@@ -33,4 +40,3 @@
 
 - name: "Run Decidim setup routines"
   include_tasks: 01_setup.yml
-

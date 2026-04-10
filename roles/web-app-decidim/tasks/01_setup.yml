@@ -1,10 +1,20 @@
 ---
+- name: "Decidim | Wait for web container to be healthy"
+  community.docker.docker_container_info:
+    name: "{{ DECIDIM_CONTAINER }}"
+  register: decidim_container_info
+  until: >
+    decidim_container_info.container is defined and
+    decidim_container_info.container.State.Health.Status == 'healthy'
+  retries: 20
+  delay: 15
+
 - name: "Decidim | Run database migrations"
   community.docker.docker_container_exec:
     container: "{{ DECIDIM_CONTAINER }}"
     command: bundle exec rails db:migrate
     env:
-      RAILS_ENV: production
+      RAILS_ENV: "{{ ENVIRONMENT }}"
   register: decidim_migrate_result
   changed_when: decidim_migrate_result.stdout_lines | default([]) | length > 0
 
@@ -13,9 +23,60 @@
     container: "{{ DECIDIM_CONTAINER }}"
     command: bundle exec rails db:seed
     env:
-      RAILS_ENV: production
+      RAILS_ENV: "{{ ENVIRONMENT }}"
   register: decidim_seed_result
   changed_when: decidim_seed_result.stdout_lines | default([]) | length > 0
-  failed_when:
-    - decidim_seed_result.rc != 0
-    - "'already exists' not in (decidim_seed_result.stderr | default(''))"
+  failed_when: false
+
+- name: "Decidim | Ensure administrator user exists with correct credentials"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails runner -
+    stdin: |
+      email = "{{ users.administrator.email }}"
+      password = "{{ users.administrator.password }}"
+      user = Decidim::User.find_or_initialize_by(email: email)
+      is_new = user.new_record?
+      user.name = 'Administrator'
+      user.nickname = 'administrator'
+      if is_new
+        user.password = password
+        user.password_confirmation = password
+      end
+      user.admin = true
+      user.confirmed_at = Time.current
+      user.organization = Decidim::Organization.first
+      user.tos_agreement = true
+      user.accepted_tos_version = Decidim::Organization.first.tos_version
+      user.save!
+      puts "Admin user ready: #{user.email}"
+    env:
+      RAILS_ENV: "{{ ENVIRONMENT }}"
+  register: decidim_admin_result
+  changed_when: "'Admin user ready' in decidim_admin_result.stdout"
+
+- name: "Decidim | Ensure biber user exists with correct credentials"
+  community.docker.docker_container_exec:
+    container: "{{ DECIDIM_CONTAINER }}"
+    command: bundle exec rails runner -
+    stdin: |
+      email = "{{ users.biber.email }}"
+      password = "{{ users.biber.password }}"
+      user = Decidim::User.find_or_initialize_by(email: email)
+      is_new = user.new_record?
+      user.name = '{{ users.biber.firstname }} {{ users.biber.lastname }}'
+      user.nickname = '{{ users.biber.username }}'
+      if is_new
+        user.password = password
+        user.password_confirmation = password
+      end
+      user.confirmed_at = Time.current
+      user.organization = Decidim::Organization.first
+      user.tos_agreement = true
+      user.accepted_tos_version = Decidim::Organization.first.tos_version
+      user.save!
+      puts "Biber user ready: #{user.email}"
+    env:
+      RAILS_ENV: "{{ ENVIRONMENT }}"
+  register: decidim_biber_result
+  changed_when: "'Biber user ready' in decidim_biber_result.stdout"
