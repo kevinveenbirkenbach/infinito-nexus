@@ -2,7 +2,7 @@
 
 See also [repository.md](repository.md) for repository-wide security settings.
 
-## Enforcement
+## Enforcement 🔒
 
 * Ruleset is **Enabled (Enforced)**
 
@@ -13,7 +13,7 @@ See also [repository.md](repository.md) for repository-wide security settings.
 
 ---
 
-## Bypass
+## Bypass 🚪
 
 * Organization admins and repository admins can always bypass rules
 
@@ -24,7 +24,7 @@ See also [repository.md](repository.md) for repository-wide security settings.
 
 ---
 
-## Branch Target
+## Branch Target 🎯
 
 * Applies to: **`main` (default branch)**
 
@@ -35,7 +35,7 @@ See also [repository.md](repository.md) for repository-wide security settings.
 
 ---
 
-## Restrictions
+## Restrictions 🚫
 
 ### Restrict Updates ✅
 
@@ -68,7 +68,7 @@ See also [repository.md](repository.md) for repository-wide security settings.
 
 ---
 
-## Pull Request Requirements
+## Pull Request Requirements 📋
 
 ### Require Pull Request ✅
 
@@ -139,9 +139,9 @@ See also [repository.md](repository.md) for repository-wide security settings.
 
 ---
 
-## Merge Strategy
+## Merge Strategy 🔀
 
-### Allowed Merge Method: Merge
+### Allowed Merge Method: Merge ✅
 
 👉 **Contributor impact:**
 
@@ -168,7 +168,7 @@ See also [repository.md](repository.md) for repository-wide security settings.
 
 ---
 
-## Status Checks (CI/CD)
+## Status Checks (CI/CD) ✅
 
 ### Require Status Checks to Pass ✅
 
@@ -199,7 +199,7 @@ See also [repository.md](repository.md) for repository-wide security settings.
 
 ---
 
-## Security
+## Security 🔐
 
 ### Require Signed Commits ✅
 
@@ -219,7 +219,7 @@ See also [repository.md](repository.md) for repository-wide security settings.
 
 ---
 
-## Code Scanning
+## Code Scanning 🔬
 
 ### Require Code Scanning Results ✅
 
@@ -235,7 +235,7 @@ Configured tools:
 
 ---
 
-## Code Quality
+## Code Quality 🏆
 
 ### Require Code Quality Results ✅
 
@@ -247,7 +247,7 @@ Configured tools:
 
 ---
 
-## Copilot Review
+## Copilot Review 🤖
 
 ### Automatically Request Copilot Review ✅
 

@@ -15,15 +15,15 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 
 | Keyword | Meaning |
 |---|---|
-| `MUST` / `REQUIRED` / `SHALL` | Absolute requirement — no deviation allowed. |
-| `MUST NOT` / `SHALL NOT` | Absolute prohibition — never do this. |
-| `SHOULD` / `RECOMMENDED` | Strongly recommended — deviation requires justification. |
-| `SHOULD NOT` / `NOT RECOMMENDED` | Strongly discouraged — allowed only with justification. |
+| `MUST` / `REQUIRED` / `SHALL` | Absolute requirement. No deviation allowed. |
+| `MUST NOT` / `SHALL NOT` | Absolute prohibition. Never do this. |
+| `SHOULD` / `RECOMMENDED` | Strongly recommended. Deviation requires justification. |
+| `SHOULD NOT` / `NOT RECOMMENDED` | Strongly discouraged. Allowed only with justification. |
 | `MAY` / `OPTIONAL` | Permitted but not required. |
 
 ## Links 🔗
 
-- You MUST NOT use the full URL as link text. Use the domain name, `here`, or the filename instead — never the full path.
+- You MUST NOT use the full URL as link text. Use the domain name, `here`, or the filename instead. Never use the full path.
 - After `See`, you MUST use the domain name as link text, not `here`. `here` is only acceptable when the surrounding sentence reads naturally with it (e.g. "More information [here](...)").
 - For communication links such as Matrix, email, or phone, you MUST show only the value itself as link text, without any protocol prefix or URL wrapper.
 
@@ -40,6 +40,7 @@ You MUST use [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) keywords in all 
 - You MUST keep code and comments in English.
 - You MUST fix nearby wording and semantic issues when you touch a file, and correct obvious nearby issues proactively in the same pass.
 - You SHOULD use emojis when they make the text more visually appealing, improve the mood, and increase readability.
+- You MUST NOT use em dashes (—) as thought breaks or clause separators. You SHOULD prefer complete sentences. Hyphens (-) MAY be used for compound words and list items.
 
 ## Headlines 🏷️
 
@@ -58,7 +59,7 @@ See [readme_md.md](artefact/files/role/readme_md.md) for the required structure,
 - You SHOULD prefer `README.md` for directory-level documentation when a human-facing entry point already exists.
 - You MUST NOT place `README.md` files under `docs/`.
   Documentation files MUST be cross-linked to each other directly instead.
-  All content under `docs/` is automatically indexed via the root `index.rst` toctree glob (`docs/**`) — per-directory index files are usually not needed.
+  All content under `docs/` is automatically indexed via the root `index.rst` toctree glob (`docs/**`). Per-directory index files are usually not needed.
 - You MUST keep core information inside the repository, either in code or in `.md` files.
 - You MUST use `.md` files for commands, workflows, setup, and contributor guidance.
 - You MUST NOT use `.md` files to describe implementation logic that is already visible in the code.

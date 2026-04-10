@@ -1,6 +1,6 @@
-# Branch
+# Branch 🌿
 
-## CI Impact
+## CI Impact 🔀
 
 The branch prefix MUST match the type of change. The [PR workflow](pull-request.md) uses it to classify the scope and decide which CI pipeline to run.
 
@@ -14,9 +14,9 @@ The branch prefix MUST match the type of change. The [PR workflow](pull-request.
 
 ## Enforcement 🔒
 
-All rules in this document are actively enforced on `main` via GitHub branch protection. See [branch.md](security/branch.md) for the full enforcement policy.
+All rules in this document are actively enforced on `main` via GitHub branch protection. See [branch.md](../tools/github/branch.md) for the full enforcement policy.
 
-## Naming Conventions
+## Naming Conventions 🏷️
 
 The description MUST use `kebab-case` (lowercase words separated by hyphens) and SHOULD be short enough to read at a glance. 
 

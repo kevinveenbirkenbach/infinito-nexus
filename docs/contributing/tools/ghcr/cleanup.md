@@ -1,17 +1,17 @@
-# Mirror Cleanup — Deleting Private GHCR Packages
+# Mirror Cleanup: Deleting Private GHCR Packages 🗑️
 
 The `cli.mirror.cleanup` module deletes GHCR container packages filtered by
 prefix and visibility. Use it to remove stale private mirror packages that
 were pushed before the repository switched to `GITHUB_TOKEN`-based
 authentication (which now makes packages public automatically).
 
-## Prerequisites
+## Prerequisites 📋
 
 You MUST have a **classic Personal Access Token (PAT)** with the
 `delete:packages` scope. The `gh auth token` and `GITHUB_TOKEN` issued by
 GitHub Actions do NOT include this scope and will fail with HTTP 403.
 
-### Create a classic PAT
+### Create a classic PAT 🔑
 
 1. Go to [github.com/settings/tokens](https://github.com/settings/tokens).
 2. Click **Generate new token → Generate new token (classic)**.
@@ -24,7 +24,7 @@ Export it before running the script:
 export GITHUB_TOKEN=<your-pat>
 ```
 
-## Usage
+## Usage 💻
 
 ```bash
 python -m cli.mirror.cleanup \
@@ -36,7 +36,7 @@ python -m cli.mirror.cleanup \
 
 Remove `--dry-run` to actually delete.
 
-### Arguments
+### Arguments ⚙️
 
 | Argument | Default | Description |
 |---|---|---|
@@ -45,7 +45,7 @@ Remove `--dry-run` to actually delete.
 | `--visibility` | `private` | Delete packages with this visibility (`private`, `public`, `internal`) |
 | `--dry-run` | off | List matching packages without deleting them |
 
-## Example — Delete all private mirror packages for infinito-nexus-core
+## Example: Delete all private mirror packages for infinito-nexus-core 🧹
 
 ```bash
 # Preview (requires a classic PAT with delete:packages)
@@ -62,7 +62,7 @@ GITHUB_TOKEN=<your-pat> python -m cli.mirror.cleanup \
     --visibility     private
 ```
 
-## How It Works
+## How It Works ⚙️
 
 1. Resolves whether the namespace is a GitHub org or personal account.
 2. Lists all container packages with the requested visibility via the

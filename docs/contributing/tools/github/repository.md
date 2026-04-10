@@ -2,7 +2,7 @@
 
 See also [branch.md](branch.md) for branch protection rules.
 
-## Dependency Management
+## Dependency Management 📦
 
 ### Dependency Graph ❌
 
@@ -22,7 +22,7 @@ See also [branch.md](branch.md) for branch protection rules.
 
 ---
 
-## Code Scanning (Global)
+## Code Scanning (Global) 🔬
 
 ### CodeQL ✅
 
@@ -34,9 +34,9 @@ See also [branch.md](branch.md) for branch protection rules.
 
 ---
 
-## Secret Protection
+## Secret Protection 🔐
 
-For GHCR authentication configuration see [ghcr.md](ghcr.md).
+For GHCR authentication configuration see [authentication.md](../ghcr/authentication.md).
 
 ### Secret Scanning ❌
 
@@ -48,7 +48,7 @@ For GHCR authentication configuration see [ghcr.md](ghcr.md).
 
 ---
 
-# Summary for Contributors
+# Summary for Contributors 📋
 
 Once enabled, you MUST:
 

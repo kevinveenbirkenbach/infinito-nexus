@@ -32,8 +32,8 @@ If you additionally want a local override marker for Compose env-file layering, 
 make mark-development
 ```
 
-All available `make` commands are documented in the [Makefile Commands](../contributing/tools/makefile.md) reference.
-For a worked example of how these commands interact — including build, bootstrap, test, deploy, and teardown — see the [environment test suite](../../scripts/tests/environment/README.md).
+All available `make` commands are documented in the [Makefile Commands](../contributing/tools/make.md) reference.
+For a worked example of how these commands interact (including build, bootstrap, test, deploy, and teardown), see the [environment test suite](../../scripts/tests/environment/README.md).
 For further information on setting up a local development environment, see [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 For inventory creation and deployment, continue with the [Administration Guide](administration.md).

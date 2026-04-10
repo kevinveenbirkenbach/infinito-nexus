@@ -2,13 +2,13 @@
 
 This repository uses a strict fork-first workflow. You MUST NOT commit directly to `main`. You MUST do all work in your own fork and MUST open Pull Requests from your fork back to the main repository.
 
-These rules are enforced via branch protection. See [branch.md](security/branch.md) for the full policy.
+These rules are enforced via branch protection. See [branch.md](../tools/github/branch.md) for the full policy.
 
 Why this matters: `main` MUST stay stable, shared CI resources are limited, and broken experimental work MUST NOT run in the main repository.
 
 ## Repository Configuration 🧩
 
-Before running workflows you MUST configure the required secrets and credentials for the repository. This includes GHCR authentication for pushing and publishing container images. See [ghcr.md](security/ghcr.md) for the full setup guide.
+Before running workflows you MUST configure the required secrets and credentials for the repository. This includes GHCR authentication for pushing and publishing container images. See [authentication.md](../tools/ghcr/authentication.md) for the full setup guide.
 
 ## Step-by-Step Flow 🪜
 

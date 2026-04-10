@@ -1,8 +1,8 @@
-# GHCR Authentication
+# GHCR Authentication 🔑
 
 This guide explains how GitHub Container Registry (GHCR) authentication works for mirroring images via GitHub Actions.
 
-## How Authentication Works
+## How Authentication Works 🔑
 
 All workflows use `secrets.GITHUB_TOKEN` to log in to GHCR:
 
@@ -17,7 +17,7 @@ All workflows use `secrets.GITHUB_TOKEN` to log in to GHCR:
 
 No personal access token (PAT) or additional secrets are required.
 
-## Why GITHUB_TOKEN Is the Correct Choice
+## Why GITHUB_TOKEN Is the Correct Choice ✅
 
 When a workflow runs in a public repository and pushes to GHCR using `GITHUB_TOKEN`, GitHub automatically:
 
@@ -26,7 +26,7 @@ When a workflow runs in a public repository and pushes to GHCR using `GITHUB_TOK
 
 This means mirrored images are published as public packages without any additional configuration.
 
-## Docker Hub Rate Limits
+## Docker Hub Rate Limits 🐳
 
 To avoid Docker Hub pull rate limits when mirroring images, configure the following optional secrets:
 
@@ -37,15 +37,15 @@ To avoid Docker Hub pull rate limits when mirroring images, configure the follow
 
 These are used only for pulling source images from Docker Hub and are not required for GHCR authentication.
 
-## Fork Pull Requests
+## Fork Pull Requests 🍴
 
-Secrets are NOT available in `pull_request` workflows triggered by forks — this is a GitHub security restriction. The mirror workflow handles this transparently:
+Secrets are NOT available in `pull_request` workflows triggered by forks. This is a GitHub security restriction. The mirror workflow handles this transparently:
 
 - Fork PRs trigger a `pull_request_target` run with the base repository's trusted `GITHUB_TOKEN`.
 - That trusted run mirrors any new images needed by the fork.
 - The fork PR's CI then waits for those images to appear on GHCR before proceeding.
 
-## Troubleshooting
+## Troubleshooting 🔧
 
 If a push to GHCR fails with `denied: denied`:
 

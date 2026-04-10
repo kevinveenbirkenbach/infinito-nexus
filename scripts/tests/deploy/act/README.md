@@ -3,7 +3,7 @@
 This is the SPOT for executable act deploy flows under `scripts/tests/deploy/act/`.
 
 For local deploy flows, use [../local/README.md](../local/README.md).
-For the canonical Make target index that invokes these helpers, see [docs/contributing/tools/makefile.md](../../../../../docs/contributing/tools/makefile.md).
+For the canonical Make target index that invokes these helpers, see [make.md](../../../../../docs/contributing/tools/make.md).
 
 ## Entry Points
 

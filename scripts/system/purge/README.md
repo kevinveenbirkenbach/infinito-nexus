@@ -2,7 +2,7 @@
 
 This is the SPOT for host and system cleanup helpers under `scripts/system/purge/`.
 For container-local cleanup helpers, see [../../container/purge/README.md](../../container/purge/README.md).
-For the canonical Make target index that invokes these helpers, see [docs/contributing/tools/makefile.md](../../../docs/contributing/tools/makefile.md).
+For the canonical Make target index that invokes these helpers, see [make.md](../../../docs/contributing/tools/make.md).
 
 ## Entry Points
 

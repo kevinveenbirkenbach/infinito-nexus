@@ -2,7 +2,7 @@
 
 This is the SPOT for GitHub workflow helper scripts under `scripts/github/`.
 These helpers are called from `.github/workflows/`.
-For the repository Make target index, see [docs/contributing/tools/makefile.md](../../docs/contributing/tools/makefile.md).
+For the repository Make target index, see [make.md](../../docs/contributing/tools/make.md).
 
 ## Entry Points
 

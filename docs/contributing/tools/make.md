@@ -1,9 +1,11 @@
-# Makefile Commands
+# Makefile Commands 🛠️
 
 Use these commands from the repository root. This is the SPOT for `make` targets in Infinito Nexus.
 Use the dedicated script READMEs for the underlying shell helpers, and use the development/testing guides for deeper workflow details.
 
-## Image Builds
+For rules on how to write and structure the `Makefile` itself, see [makefile.md](../artefact/files/makefile.md).
+
+## Image Builds 🏗️
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -15,7 +17,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Cleanup CI images | `make build-cleanup` | Removes Docker images created for CI-style build workflows. | Use this when local disk usage grows or old CI images accumulate. |
 | Regenerate Docker ignore | `make dockerignore` | Regenerates `.dockerignore` from `.gitignore`. | Use this when the Docker ignore file needs to be refreshed. |
 
-## Install
+## Install 📦
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -25,11 +27,11 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Python dev tooling | `make install-python-dev` | Installs Python tooling including lint and dev dependencies, and registers the pre-commit hooks. | Use this when setting up a local development environment. Called automatically by `make environment-bootstrap`. |
 | Ansible dependencies | `make install-ansible` | Installs the Ansible dependencies. | Use this when you changed Ansible-related code or need the Ansible collections. |
 | Lint dependencies | `make install-lint` | Installs lint-related tooling. | Use this when you only need the lint stack. |
-| Install agent skills | `make install-skills` | Restores all agent skills from `skills-lock.json` via `scripts/install/skills/install.sh`. Works universally for Claude Code, Codex, Gemini CLI, Cursor, Copilot, Windsurf, Cline, and more. Skipped gracefully when `npx` is absent. | Use this when setting up a local AI coding agent environment. Not part of `make environment-bootstrap` — IDE-specific. |
+| Install agent skills | `make install-skills` | Restores all agent skills from `skills-lock.json` via `scripts/install/skills/install.sh`. Works universally for Claude Code, Codex, Gemini CLI, Cursor, Copilot, Windsurf, Cline, and more. Skipped gracefully when `npx` is absent. | Use this when setting up a local AI coding agent environment. Not part of `make environment-bootstrap`. Intended for IDE-specific setup. |
 | Update agent skills | `make update-skills` | Updates all agent skills to their latest versions by re-running `skills add` for each source in `skills-lock.json` via `scripts/install/skills/update.sh`. Requires `npx` and `jq`. | Use this to pull the latest skill versions and refresh `skills-lock.json`. |
 | Full install | `make install` | Installs the repository tooling needed for development and tests. | Use this on a fresh machine or before validation. |
 
-## Environment Setup
+## Environment Setup 🖥️
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -46,7 +48,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | AppArmor teardown | `make apparmor-teardown` | Disables AppArmor profiles for local development. | Use this when AppArmor interferes with local services. |
 | AppArmor restore | `make apparmor-restore` | Restores AppArmor profiles after a teardown. | Use this after a temporary AppArmor disable. |
 
-## Repository Setup and Discovery
+## Repository Setup and Discovery 🔍
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -58,7 +60,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Tree view | `make tree` | Prints the repository tree. | Use this when you want a compact structural overview. |
 | Meta graph inputs | `make mig` | Builds the meta graph inputs from `list` and `tree`. | Use this when you are generating or refreshing meta graph data. |
 
-## Runtime Stack
+## Runtime Stack 🚀
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -69,9 +71,9 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Refresh running stack | `make refresh` | Recreates the running Infinito dev stack only when one is already active. | Use this after host-level changes, such as Docker or IPv6 updates, when existing containers should be recreated. |
 | Inspect container | `make exec` | Opens an interactive shell in the running infinito container. | Use this when you need to inspect live state or run a quick command inside the container. |
 
-## Validation
+## Validation ✅
 
-### Lint
+### Lint 🔎
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -84,7 +86,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Lint Python | `make lint-python` | Runs the Python lint checks. | Use this when you changed Python code. |
 | Lint shell | `make lint-shellcheck` | Runs shellcheck lint checks. | Use this when you changed shell scripts. |
 
-### Test
+### Test 🧪
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -93,7 +95,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Integration tests | `make test-integration` | Runs the integration test suite. | Use this when your change affects behavior across modules or runtime boundaries. |
 | Combined validation | `make test` | Runs the main combined validation flow. | Use this whenever a change touches at least one file that is not `.md` or `.rst`, or before opening a Pull Request. |
 
-### Act
+### Act 🎭
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -104,7 +106,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 - If you need to constrain a workflow matrix, set `ACT_MATRIX` with Act's `key:value` syntax, not `key=value`.
 - Example: `ACT_WORKFLOW=.github/workflows/test-environment.yml ACT_JOB=test-environment ACT_MATRIX='dev_runtime_image:debian:bookworm' make act-workflow`
 
-## Cleanup
+## Cleanup 🗑️
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -116,7 +118,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Purge app entity | `make container-purge-entity` | Purges one or more app entities inside the running container. | Use this before rerunning a purged app deployment. |
 | Purge container state | `make container-purge-system` | Removes inventory, web config, and lib state in the running container. | Use this when you want a destructive local container reset. |
 
-## Local Deploy
+## Local Deploy 🏠
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
@@ -127,7 +129,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Fresh kept all | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this when you explicitly need broad coverage. |
 | Reuse kept all | `make deploy-reuse-kept-all` | Reuses the existing inventory and redeploys the broad app set. | Use this for the faster broad reuse path. |
 
-## Notes
+## Notes 📝
 
 - The commands use the current `INFINITO_DISTRO` setting from the environment where relevant.
 - For app-level local deploy flows and end-to-end checks, see [Development](../flow/testing.md).

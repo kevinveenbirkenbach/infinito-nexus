@@ -17,7 +17,7 @@ You MUST pick the template that matches your change. The table below links the a
 
 Branch names MUST follow the naming conventions defined in [branch.md](branch.md). The branch prefix MUST match the type of change and is used to classify the PR scope and select the CI pipeline.
 
-The protection rules enforced on `main` are documented in [branch.md](security/branch.md).
+The protection rules enforced on `main` are documented in [branch.md](../tools/github/branch.md).
 
 ## Forking Flow
 
@@ -27,8 +27,8 @@ Before marking a PR as **ready for review**, CI in your fork MUST be green. The 
 |---|---|---|
 | Single role | ✅ No dependencies | MAY use [manual CI](../../../.github/workflows/entry-manual.yml) for that role only |
 | Single role | ❌ Has dependencies | MUST run full pipeline |
-| Multiple roles or shared code | — | MUST run full pipeline |
-| CI/CD, tooling, systemic | — | MUST run full pipeline |
+| Multiple roles or shared code | N/A | MUST run full pipeline |
+| CI/CD, tooling, systemic | N/A | MUST run full pipeline |
 
 If you are unsure whether other roles are affected, you MUST run the full pipeline.
 

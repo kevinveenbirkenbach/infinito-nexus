@@ -32,7 +32,7 @@ For fork PRs, CI waits for privileged images to be built by the `pull_request_ta
 
 ### 2. Security 🛡️
 
-- [security-codeql.yml](../../../.github/workflows/security-codeql.yml) — static analysis via GitHub CodeQL.
+- [security-codeql.yml](../../../.github/workflows/security-codeql.yml): Static analysis via GitHub CodeQL.
 
 ### 3. Linting 🧹
 
@@ -71,15 +71,15 @@ The `code-quality-gate` requires linting, code tests, and security checks to all
 
 [images-mirror-missing.yml](../../../.github/workflows/images-mirror-missing.yml) mirrors any missing upstream images in parallel with the DNS tests.
 See [mirror.md](../artefact/image/mirror.md) for a full explanation of the mirroring architecture and naming convention.
-Authentication for GHCR is configured via repository secrets — see [ghcr.md](security/ghcr.md).
+Authentication for GHCR is configured via repository secrets. See [authentication.md](../tools/ghcr/authentication.md).
 
 ### 9. Deploy Tests 🚀
 
 Run in parallel after DNS and mirroring:
 
-- [test-deploy-server.yml](../../../.github/workflows/test-deploy-server.yml) — server and `web-*` roles
-- [test-deploy-universal.yml](../../../.github/workflows/test-deploy-universal.yml) — shared system roles
-- [test-deploy-workstation.yml](../../../.github/workflows/test-deploy-workstation.yml) — workstation and `desk-*` roles
+- [test-deploy-server.yml](../../../.github/workflows/test-deploy-server.yml): Server and `web-*` roles.
+- [test-deploy-universal.yml](../../../.github/workflows/test-deploy-universal.yml): Shared system roles.
+- [test-deploy-workstation.yml](../../../.github/workflows/test-deploy-workstation.yml): Workstation and `desk-*` roles.
 
 ### 10. Installation Tests 📦
 

@@ -6,7 +6,7 @@ This document explains why image mirroring exists, how it works, and what each c
 
 Upstream registries (Docker Hub, quay.io, mcr.microsoft.com, ghcr.io) impose **rate limits** and occasionally have **availability issues**. CI pipelines pulling images directly from upstream are fragile: a rate limit hit or a temporary outage fails an otherwise healthy build.
 
-To solve this, all upstream images used in the project are mirrored to GHCR (`ghcr.io`) under the project namespace before CI deploy tests run. Test jobs pull from the mirror — never from the upstream registry directly.
+To solve this, all upstream images used in the project are mirrored to GHCR (`ghcr.io`) under the project namespace before CI deploy tests run. Test jobs pull from the mirror and never from the upstream registry directly.
 
 This also enables **fork PRs** to pull images without needing upstream credentials, because the mirror is public.
 
@@ -30,17 +30,17 @@ Example: `ghcr.io/kevinveenbirkenbach/infinito-nexus-core/mirror/docker.io/nextc
 
 ## Components 🧩
 
-### Image Discovery
+### Image Discovery 🔍
 
 `utils/docker/image_discovery.py` discovers all role images via `iter_role_images()`. See [origin.md](origin.md) for the declaration format and supported registries.
 
-### GHCRProvider
+### GHCRProvider 🐳
 
-`cli/mirror/providers.py` — the `GHCRProvider` class computes the destination image name via `image_base(img)` and provides `add_args` / `from_args` so all CLI tools share a single argument definition (SPOT).
+`cli/mirror/providers.py` contains the `GHCRProvider` class, which computes the destination image name via `image_base(img)` and provides `add_args` / `from_args` so all CLI tools share a single argument definition (SPOT).
 
-### Resolver
+### Resolver 🗺️
 
-`cli/mirror/resolver/__main__.py` — reads all role images and outputs a `mirrors.yml` file with separate sections for compose images and role-local flat images:
+`cli/mirror/resolver/__main__.py` reads all role images and outputs a `mirrors.yml` file with separate sections for compose images and role-local flat images:
 
 ```yaml
 applications:
@@ -64,24 +64,24 @@ The split matches the source declaration:
 
 This file is consumed by the inventory creator to substitute mirror URLs into host variables.
 
-### Sync
+### Sync 🔄
 
-`cli/mirror/sync/__main__.py` — copies each image from the upstream source to the GHCR mirror destination using `skopeo copy`. Supports `--only-missing` to skip already-mirrored images and `--images-per-hour` for throttling.
+`cli/mirror/sync/__main__.py` copies each image from the upstream source to the GHCR mirror destination using `skopeo copy`. Supports `--only-missing` to skip already-mirrored images and `--images-per-hour` for throttling.
 
-### Wait Script
+### Wait Script ⏳
 
-`scripts/meta/wait/mirrors.sh` — for fork PRs, waits until all required mirror images are available in GHCR before letting the deploy tests proceed. This is necessary because fork PRs cannot push images themselves; the `pull_request_target` event handles that.
+`scripts/meta/wait/mirrors.sh` waits for fork PRs until all required mirror images are available in GHCR before letting the deploy tests proceed. This is necessary because fork PRs cannot push images themselves; the `pull_request_target` event handles that.
 
 ## CI Integration 🔄
 
-The mirror workflow runs as stage 8 of the CI pipeline — see [ci.md](../../flow/ci.md). It runs in parallel with the DNS tests and MUST complete before deploy tests start.
+The mirror workflow runs as stage 8 of the CI pipeline. See [ci.md](../../flow/ci.md). It runs in parallel with the DNS tests and MUST complete before deploy tests start.
 
 The mirrors file is generated into the inventory directory. The inventory creator applies mirror image overrides to host variables via `cli/create/inventory/mirror_overrides.py`, which reads both top-level keys from `mirrors.yml` and writes into host vars as follows:
 
-- `applications.{role}.compose.services.{service}.image` — populated from `mirrors.yml.applications` and still subject to `mirror_policy`
-- `images_overrides.{role}.{service}.image` — populated from `mirrors.yml.images` and consumed by `lookup('image', ...)`
+- `applications.{role}.compose.services.{service}.image`: Populated from `mirrors.yml.applications` and still subject to `mirror_policy`.
+- `images_overrides.{role}.{service}.image`: Populated from `mirrors.yml.images` and consumed by `lookup('image', ...)`.
 
-### Mirror Policy
+### Mirror Policy 📋
 
 Each service in host vars MAY carry a `mirror_policy` field that controls how the override is applied:
 
@@ -94,3 +94,7 @@ Each service in host vars MAY carry a `mirror_policy` field that controls how th
 ## Adding a New Mirrored Image 🆕
 
 No manual registration is needed. Images declared in a role are automatically discovered and included in the next mirror run. See [origin.md](origin.md) for the correct declaration format.
+
+## Cleanup 🗑️
+
+To delete stale private GHCR mirror packages (e.g. packages pushed before `GITHUB_TOKEN` authentication was adopted), see [cleanup.md](../../tools/ghcr/cleanup.md).

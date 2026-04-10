@@ -48,4 +48,4 @@ Follow these principles. Keep the rule column short, imperative, and as [SMART](
 | Use namespaces generously. | Namespaces prevent collisions in a large repo. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Group names so they do not collide and remain easy to navigate. |
 
 For code quality rules, see [Lint](tests/lint.md).
-For framework-specific guidance, see [Ansible](frameworks/ansible.md) and [Makefile](frameworks/Makefile.md).
+For framework-specific guidance, see [ansible.md](../tools/ansible.md) and [make.md](../tools/make.md).
