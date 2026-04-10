@@ -43,7 +43,7 @@ jobs:
           UPDATE_COMMIT_MESSAGE: "chore(images): update Docker image versions"
           UPDATE_PR_TITLE: "chore(images): update Docker image versions"
           UPDATE_PR_BODY: "Automated update of semver-based Docker image versions in `roles/web-*/config/main.yml`."
-          UPDATE_BASE_BRANCH: master
+          UPDATE_BASE_BRANCH: main
         run: bash scripts/github/open_update_pr.sh roles
 
   update-skills:
@@ -73,5 +73,5 @@ jobs:
           UPDATE_COMMIT_MESSAGE: "chore(skills): update skills-lock.json to latest versions"
           UPDATE_PR_TITLE: "chore(skills): update agent skills to latest versions"
           UPDATE_PR_BODY: "Automated daily update of `skills-lock.json` via `npx skills update`."
-          UPDATE_BASE_BRANCH: master
+          UPDATE_BASE_BRANCH: main
         run: bash scripts/github/open_update_pr.sh skills-lock.json
