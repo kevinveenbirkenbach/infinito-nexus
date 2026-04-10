@@ -32,6 +32,14 @@ Run external tests with `make test-external`.
   advisory freshness reporting rather than merge-blocking correctness.
 - You SHOULD keep network traffic narrow and query each external dependency only
   as much as needed for a meaningful result.
+- [test_urls_reachable.py](../../../../tests/external/repository/test_urls_reachable.py)
+  scans git-tracked plus untracked-but-not-ignored text files for literal
+  public `http://` and `https://` URLs.
+- The URL reachability check skips template placeholders and reserved local or
+  example hosts such as `localhost` and `*.example`.
+- The URL reachability check emits warnings for dead links (`404`, `410`,
+  `451`) and transient network or upstream problems so the suite remains
+  usable while the repository backlog is cleaned up.
 
 ## Suppression Comments 🚫
 
