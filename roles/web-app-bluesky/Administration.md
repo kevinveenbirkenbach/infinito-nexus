@@ -20,8 +20,8 @@ compose exec -it pds pdsadmin account create-invite-code
 
 ## Debugging
 
-- Websocket: https://piehost.com/websocket-tester
-- Instance: https://bsky-debug.app
+- Websocket: [piehost.com/websocket-tester](https://piehost.com/websocket-tester)
+- Instance: [bsky-debug.app](https://bsky-debug.app)
 
 
 Initial setup keine top level domain

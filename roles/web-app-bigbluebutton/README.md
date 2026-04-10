@@ -28,3 +28,9 @@ By default, BigBlueButton is deployed with best-practice hardening, modular secr
 
 - [BigBlueButton Docker Docs](https://docs.bigbluebutton.org/greenlight/gl-overview#setting-bigbluebutton-credentials)
 - [Networking Fixes & Issues](https://stackoverflow.com/questions/53347951/web-app-network-not-found)
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

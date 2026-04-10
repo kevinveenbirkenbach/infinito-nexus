@@ -22,7 +22,7 @@ The primary purpose of this role is to configure WireGuard on a client by settin
 - **Administration Support:** For client key creation and further setup, please refer to the [Administration](./Administration.md) file.
 - **Modular Design:** Easily integrates with other WireGuard roles or network configuration roles.
 
-## Other Resources
+## Further Resources
 
 - [WireGuard Documentation](https://www.wireguard.com/)
 - [ArchWiki: WireGuard](https://wiki.archlinux.org/index.php/WireGuard)
@@ -34,3 +34,9 @@ The primary purpose of this role is to configure WireGuard on a client by settin
 - [WireGuard Connection Dies on Ubuntu](https://serverfault.com/questions/1086297/wireguard-connection-dies-on-ubuntu-peer)
 - [SSH Fails with WireGuard IP](https://unix.stackexchange.com/questions/624987/ssh-fails-to-start-when-listenaddress-is-set-to-wireguard-vpn-ip)
 - [WireGuard NAT and Firewall Issues](https://serverfault.com/questions/210408/cannot-ssh-debug1-expecting-ssh2-msg-kex-dh-gex-reply)
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

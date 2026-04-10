@@ -1,6 +1,6 @@
 # Docker Auto Restart
 ## Description
-This role automates the restart process for Docker Compose instances within a specified directory. It deploys a Python script that checks for the presence of compose.yml files and restarts the associated services—using a hard restart for certain directories if needed.
+This role automates the restart process for Docker Compose instances within a specified directory. It deploys a Python script that checks for the presence of compose.yml files and restarts the associated services. A hard restart is applied for certain directories if needed.
 ## Overview
 Optimized for containerized environments, this role:
 - Sets up the necessary directories and scripts for restarting Docker Compose instances.
@@ -20,4 +20,3 @@ Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
 Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
-This role was developed with the assistance of [ChatGPT](https://openai.com/chatgpt).

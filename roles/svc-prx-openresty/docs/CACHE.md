@@ -27,7 +27,7 @@ Cloudflare aggressively caches static content by default. Even after you deploy 
 
 ### Manual Purge via Cloudflare Dashboard
 
-1. Log into your Cloudflare dashboard at [https://dash.cloudflare.com](https://dash.cloudflare.com).
+1. Log into your [Cloudflare dashboard](https://dash.cloudflare.com).
 2. Select your domain.
 3. Go to **Caching** → **Configuration**.
 4. Click **Purge Cache**.
