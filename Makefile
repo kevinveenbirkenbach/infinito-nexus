@@ -17,7 +17,7 @@ $(error Missing env file: $(ENV_SH))
 endif
 
 .PHONY: \
-	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python \
+	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python install-skills update-skills \
 	test lint lint-action lint-ansible lint-python lint-shellcheck autoformat test-lint test-unit test-integration test-deploy test-deploy-app \
 	clean clean-sudo down \
 	system-purge system-disk-usage \
@@ -203,6 +203,14 @@ install-ansible:
 # Install lint dependencies.
 install-lint:
 	@bash scripts/install/lint.sh
+
+# Install agent skills from skills-lock.json.
+install-skills:
+	@bash scripts/install/skills/install.sh
+
+# Update all agent skills to latest versions and refresh skills-lock.json.
+update-skills:
+	@bash scripts/install/skills/update.sh
 
 # Install the system Python prerequisites.
 install-system-python:

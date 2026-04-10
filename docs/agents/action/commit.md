@@ -2,7 +2,7 @@
 
 - You MUST run `make autoformat` before every commit. If `make autoformat` modifies any files that were already staged, you MUST re-stage those files before running the commit.
 - You MUST commit only after all required checks pass.
-- You MUST NOT commit automatically without explicit confirmation from the user. ALWAYS ask before committing.
+- You MUST NOT commit automatically without explicit confirmation from the user. You MUST ask before committing.
 - `make test` is run automatically by pre-commit before every commit when staged changes include at least one file that is not `.md`, `.rst`, or `.txt`. You do NOT need to run it manually — the pre-commit hook enforces it.
 - If the pre-commit hook fails, fix the underlying issue and retry the commit.
 - You MUST NOT use `--no-verify` unless the user gives a direct, unambiguous instruction to bypass the hook (e.g. "skip the hook", "bypass pre-commit").

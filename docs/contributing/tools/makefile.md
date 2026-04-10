@@ -25,6 +25,8 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Python dev tooling | `make install-python-dev` | Installs Python tooling including lint and dev dependencies, and registers the pre-commit hooks. | Use this when setting up a local development environment. Called automatically by `make environment-bootstrap`. |
 | Ansible dependencies | `make install-ansible` | Installs the Ansible dependencies. | Use this when you changed Ansible-related code or need the Ansible collections. |
 | Lint dependencies | `make install-lint` | Installs lint-related tooling. | Use this when you only need the lint stack. |
+| Install agent skills | `make install-skills` | Restores all agent skills from `skills-lock.json` via `scripts/install/skills/install.sh`. Works universally for Claude Code, Codex, Gemini CLI, Cursor, Copilot, Windsurf, Cline, and more. Skipped gracefully when `npx` is absent. | Use this when setting up a local AI coding agent environment. Not part of `make environment-bootstrap` — IDE-specific. |
+| Update agent skills | `make update-skills` | Updates all agent skills to their latest versions by re-running `skills add` for each source in `skills-lock.json` via `scripts/install/skills/update.sh`. Requires `npx` and `jq`. | Use this to pull the latest skill versions and refresh `skills-lock.json`. |
 | Full install | `make install` | Installs the repository tooling needed for development and tests. | Use this on a fresh machine or before validation. |
 
 ## Environment Setup

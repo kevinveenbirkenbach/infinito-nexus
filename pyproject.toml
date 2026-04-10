@@ -51,6 +51,7 @@ packages = { find = { where = ["."], include = [
 include-package-data = true
 
 [tool.ruff]
+respect-gitignore = true
 exclude = [
   "build",
   "dist",
