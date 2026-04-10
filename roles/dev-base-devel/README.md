@@ -18,7 +18,7 @@ This role installs distro-specific equivalents of core build tooling so systems 
 
 ## Further Resources
 
-- [Arch Wiki: base-devel](https://wiki.archlinux.org/title/Arch_Linux_package_guidelines)
+- [Arch Linux: base-devel package](https://archlinux.org/packages/core/any/base-devel/)
 - [Debian package: build-essential](https://packages.debian.org/stable/build-essential)
 - [DNF groups: development-tools](https://dnf.readthedocs.io/en/latest/command_ref.html#group-command)
 
