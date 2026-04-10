@@ -3,6 +3,43 @@
 This page is the SPOT for repository rules that govern GitHub Actions workflow files under `.github/workflows/`.
 For the script placement rule that applies to extracted shell helpers, see [scripst.md](../../scripst.md).
 
+## Naming 🏷️
+
+Every workflow MUST follow the schema `"[Emoji] Category: Subject (Qualifier)"`.
+
+- You MUST quote the `name:` value in double quotes because the colon (`:`) in the name is a reserved YAML character.
+- You MUST place the emoji before the category, never after.
+- You MUST NOT add emojis to `docs/agents/` files, but workflow `name:` fields are not agent files and MUST use emojis.
+- The qualifier in parentheses is OPTIONAL. Use it only when two workflows share the same category and subject.
+
+### Emoji legend 📋
+
+| Emoji | Category | Used for |
+|---|---|---|
+| `🔄` | Update / Sync | Automated version or dependency updates |
+| `🪞` | Mirror | Image mirroring between registries |
+| `🧹` | Images | Image cleanup and pruning |
+| `🐳` | Build | Docker image builds |
+| `🔍` | Lint | Static analysis and linting |
+| `🔒` | Scan | Security scanning |
+| `⚡` | CI | CI entry points (push, pull request, manual) |
+| `🎵` | CI | CI orchestration and coordination workflows |
+| `🚫` | Cancel | Run cancellation on PR close or branch delete |
+| `🧪` | Test | Code tests (unit, integration, lint) |
+| `💻` | Test | Development environment tests |
+| `💬` | Test | DNS and network resolution tests |
+| `📦` | Test | Deployment tests |
+| `📥` | Test | Installation tests |
+| `🚀` | Release | Version release workflows |
+
+### Examples ✅
+
+```yaml
+name: "🧪 Test: Code (Integration)"
+name: "🪞 Mirror: Docker Hub → GHCR (only missing)"
+name: "🚫 Cancel: PR Runs on Close"
+```
+
 ## Shell execution 📜
 
 - Multi-line shell logic in workflow `run:` blocks MUST be extracted into dedicated `.sh` files under `scripts/`.
