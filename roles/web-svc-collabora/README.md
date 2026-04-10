@@ -19,12 +19,6 @@ This Ansible role deploys Collabora Online (CODE) in Docker to enable real-time,
 * Support for SSL termination at the proxy level.
 * Integration hooks to restart NGINX and recreate Docker Compose stacks on changes.
 
-## Documentation
-
-See the role’s `README.md`, task files, and Jinja2 templates in the `roles/web-svc-collabora` directory for usage examples and variable definitions.
-
 ## Further Resources
 
-* [Collabora & Talk Super integration demo](https://www.youtube.com/watch?v=7cRmvTyt1ik)
-* [Collabora configuration examples archive](https://cloud.thesysadminhub.com/s/FNKyP43y35HGDTJ?dir=/&openfile=true)
 * [Official Collabora CODE website](https://www.collaboraoffice.com/code/)

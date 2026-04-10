@@ -40,5 +40,4 @@ Key settings in `config/main.yml`:
 
 ## References
 
-- [Fider Hosting Guide](https://getfider.com/docs/hosting)
 - [Fider GitHub](https://github.com/getfider/fider)

@@ -22,7 +22,6 @@ Roulette Wheel is a Node.js-based front-end application that is containerized us
 ## Further Resources
 
 - [Roulette Wheel on GitHub](https://github.com/p-wojt/roulette-wheel)
-- [Packaging Front-End Projects into Docker Images](https://dev.to/ms314006/how-to-package-front-end-projects-into-web-app-images-and-use-it-with-webpack-go3)
 - [Stack Overflow: Invalid Host Header with Webpack Dev Server](https://stackoverflow.com/questions/43619644/i-am-getting-an-invalid-host-header-message-when-connecting-to-webpack-dev-ser)
 
 ## Credits

@@ -60,4 +60,3 @@ To find your Zone ID, go to the overview page for your domain in the Cloudflare 
 ## Further Reading
 
 * [Cloudflare Purge Cache Documentation](https://developers.cloudflare.com/cache/how-to/purge-cache/)
-* [NGINX/OpenResty Proxy Cache Guide](https://openresty.org/en/using-ngx_lua.html#caching)

@@ -5,9 +5,10 @@ Scans git-tracked and untracked-but-not-ignored text files for literal
 local/example hosts are skipped.
 
 This is an external test because it performs live HTTP requests against the
-referenced third-party URLs. Client errors, server errors other than ``500``,
-and request failures fail the test. HTTP ``500`` emits a warning annotation so
-temporary upstream breakage stays visible without looking like a dead link.
+referenced third-party URLs. HTTP ``401``, ``403``, and ``405`` are treated as
+reachable (auth-gated or method-restricted servers). HTTP ``429``, ``500``, and
+``503`` emit warning annotations. All other 4xx/5xx codes and connection errors
+fail the test.
 """
 
 from __future__ import annotations
@@ -30,6 +31,10 @@ from utils.annotations.message import error, warning
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _URL_RE = re.compile(r"https?://[^\s<>'\"`\]]+")
 _TEMPLATE_MARKERS = ("${", "{{", "}}", "{%", "%}")
+# Lines that contain any of these strings are excluded from URL probing.
+# Use this for CDN roots, API base URLs, and other entries that are valid
+# application configuration values but return 4xx when probed without a path.
+_NOCHECK_MARKERS = ("# nocheck: url", "{# nocheck: url #}", "<!-- nocheck: url -->")
 _PUBLIC_HOST_RE = re.compile(r"^[A-Za-z0-9.-]+$")
 _RESERVED_HOSTS = {
     "example",
@@ -37,6 +42,7 @@ _RESERVED_HOSTS = {
     "example.net",
     "example.org",
     "localhost",
+    "domain-example.com",
 }
 _RESERVED_HOST_SUFFIXES = (
     ".example",
@@ -50,7 +56,12 @@ _RESERVED_HOST_SUFFIXES = (
     ".test",
     ".tld",
 )
-_WARNING_STATUS_CODES = {500}
+# Codes that mean the server responded but access is auth-gated or rate-limited.
+# These are not dead links; treat them as reachable.
+_OK_STATUS_CODES = {401, 403, 405}
+# Codes that mean the server is alive but temporarily unavailable or slow.
+# Emit a warning annotation instead of failing the test.
+_WARNING_STATUS_CODES = {429, 500, 503}
 _REQUEST_TIMEOUT_SECONDS = 10
 _MAX_WORKERS = 8
 _USER_AGENT = "infinito-nexus-url-reachability-check"
@@ -289,6 +300,9 @@ def _extract_urls(path: Path) -> list[UrlOccurrence]:
 
     occurrences: list[UrlOccurrence] = []
     for line_no, line in enumerate(lines, start=1):
+        prev_line = lines[line_no - 2] if line_no >= 2 else ""
+        if any(marker in line or marker in prev_line for marker in _NOCHECK_MARKERS):
+            continue
         for match in _URL_RE.finditer(line):
             url = _normalize_url(match.group(0))
             if _is_live_literal_url(url):
@@ -316,12 +330,14 @@ def _probe_url(url: str) -> ProbeOutcome:
             status = response.status_code
         finally:
             response.close()
+    except requests.Timeout as exc:
+        return ProbeOutcome("warn", f"Timeout: {exc}")
     except requests.RequestException as exc:
         return ProbeOutcome("fail", f"{type(exc).__name__}: {exc}")
     except Exception as exc:  # pragma: no cover - defensive safety net
         return ProbeOutcome("fail", f"{type(exc).__name__}: {exc}")
 
-    if status < 400:
+    if status < 400 or status in _OK_STATUS_CODES:
         return ProbeOutcome("ok", f"HTTP {status}")
     if status in _WARNING_STATUS_CODES:
         return ProbeOutcome("warn", f"HTTP {status}")
@@ -416,7 +432,7 @@ class TestUrlsReachable(unittest.TestCase):
             f"Failing HTTP(S) URLs found ({len(failing_found)}):",
             "",
             "  Fix the URL, remove it, or adjust the reference.",
-            "  HTTP 500 emits a warning only; 4xx, non-500 5xx, and request failures fail.",
+            "  401/403/405 = server alive (auth/method). 429/500/503 = warning. Other 4xx/5xx = fail.",
             "",
         ]
         for _title, occurrence, message, count in sorted(

@@ -23,13 +23,22 @@ class TestProbeUrl(unittest.TestCase):
         self.assertEqual(outcome.detail, "HTTP 404")
 
     @patch.object(sut.requests, "get")
-    def test_probe_returns_fail_for_non_500_server_error(self, mock_get: Mock) -> None:
+    def test_probe_returns_warn_for_http_503(self, mock_get: Mock) -> None:
         mock_get.return_value = self._response(503)
 
         outcome = sut._probe_url("https://example.invalid/path")
 
-        self.assertEqual(outcome.kind, "fail")
+        self.assertEqual(outcome.kind, "warn")
         self.assertEqual(outcome.detail, "HTTP 503")
+
+    @patch.object(sut.requests, "get")
+    def test_probe_returns_fail_for_non_warn_server_error(self, mock_get: Mock) -> None:
+        mock_get.return_value = self._response(502)
+
+        outcome = sut._probe_url("https://example.invalid/path")
+
+        self.assertEqual(outcome.kind, "fail")
+        self.assertEqual(outcome.detail, "HTTP 502")
 
     @patch.object(sut.requests, "get")
     def test_probe_returns_warn_for_http_500(self, mock_get: Mock) -> None:
@@ -41,6 +50,14 @@ class TestProbeUrl(unittest.TestCase):
         self.assertEqual(outcome.detail, "HTTP 500")
 
     @patch.object(sut.requests, "get")
+    def test_probe_returns_ok_for_auth_gated(self, mock_get: Mock) -> None:
+        mock_get.return_value = self._response(401)
+
+        outcome = sut._probe_url("https://example.invalid/path")
+
+        self.assertEqual(outcome.kind, "ok")
+
+    @patch.object(sut.requests, "get")
     def test_probe_returns_fail_for_unreachable_url(self, mock_get: Mock) -> None:
         mock_get.side_effect = sut.requests.ConnectionError("dns failed")
 
@@ -48,6 +65,15 @@ class TestProbeUrl(unittest.TestCase):
 
         self.assertEqual(outcome.kind, "fail")
         self.assertIn("ConnectionError", outcome.detail)
+
+    @patch.object(sut.requests, "get")
+    def test_probe_returns_warn_for_timeout(self, mock_get: Mock) -> None:
+        mock_get.side_effect = sut.requests.Timeout("timed out")
+
+        outcome = sut._probe_url("https://example.invalid/path")
+
+        self.assertEqual(outcome.kind, "warn")
+        self.assertIn("Timeout", outcome.detail)
 
 
 class TestUrlReachabilityTestCase(unittest.TestCase):

@@ -247,7 +247,7 @@ class FilterModule(object):
                 # reCAPTCHA (if enabled via compose.services.recaptcha.enabled) – scripts + frames
                 if self.is_feature_enabled(applications, "recaptcha", application_id):
                     if directive in ("script-src-elem", "frame-src"):
-                        tokens.append("https://www.gstatic.com")
+                        tokens.append("https://www.gstatic.com")  # nocheck: url
                         tokens.append("https://www.google.com")
 
                 # hCaptcha (if enabled via compose.services.hcaptcha.enabled) – scripts + frames

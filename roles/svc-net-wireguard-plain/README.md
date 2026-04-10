@@ -29,7 +29,6 @@ The primary purpose of this role is to configure WireGuard on a client by settin
 - [WireGuard on Raspbian](https://wireguard.how/server/raspbian/)
 - [Subnetting Basics](https://www.scaleuptech.com/de/blog/was-ist-und-wie-funktioniert-subnetting/)
 - [WireGuard Permissions Issue Discussion](https://bodhilinux.boards.net/thread/450/wireguard-rtnetlink-answers-permission-denied)
-- [SSH Issues with WireGuard](https://stackoverflow.com/questions/69140072/unable-to-ssh-into-wireguard-ip-until-i-ping-another-srv-from-inside-the-serv)
 - [UFW and SSH via WireGuard](https://unix.stackexchange.com/questions/717172/why-is-ufw-blocking-acces-to-ssh-via-wireguard)
 - [OpenWrt Forum Discussion on WireGuard](https://forum.openwrt.org/t/cannot-ssh-to-clients-on-lan-when-accessing-router-via-wireguard-client/132709/3)
 - [WireGuard Connection Dies on Ubuntu](https://serverfault.com/questions/1086297/wireguard-connection-dies-on-ubuntu-peer)

@@ -23,6 +23,5 @@ compose exec -it pds pdsadmin account create-invite-code
 - Websocket: https://piehost.com/websocket-tester
 - Instance: https://bsky-debug.app
 
-https://bluesky.veen.world/.well-known/atproto-did
 
 Initial setup keine top level domain

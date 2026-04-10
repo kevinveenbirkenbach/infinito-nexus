@@ -4,7 +4,7 @@
 
 This Ansible role provides a minimal development environment for software engineers on Arch Linux. It installs core tools and editors necessary to begin building, editing, and managing source code projects.
 
-Learn more about development environments on [Visual Studio Code](https://code.visualstudio.com/), the [Arch Wiki - Development Tools](https://wiki.archlinux.org/title/Development_tools), and general [Software Engineering](https://en.wikipedia.org/wiki/Software_engineering) on Wikipedia.
+Learn more about development environments on [Visual Studio Code](https://code.visualstudio.com/), the [Arch Wiki - Development Tools](https://wiki.archlinux.org/title/Category:Development), and general [Software Engineering](https://en.wikipedia.org/wiki/Software_engineering) on Wikipedia.
 
 ## Overview
 

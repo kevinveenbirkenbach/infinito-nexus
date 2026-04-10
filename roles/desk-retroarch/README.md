@@ -6,7 +6,7 @@ This Ansible role installs and configures [RetroArch](https://www.retroarch.com/
 
 ## Overview
 
-Designed for retro gaming enthusiasts, this role sets up RetroArch along with its core assets and themes. It ensures all UI styles ([XMB](https://en.wikipedia.org/wiki/XrossMediaBar), [Ozone](https://docs.libretro.com/guides/ozone-menu/)) are ready and provides a consistent emulator frontend interface powered by the [Libretro](https://www.libretro.com/) framework.
+Designed for retro gaming enthusiasts, this role sets up RetroArch along with its core assets and themes. It ensures all UI styles ([XMB](https://en.wikipedia.org/wiki/XrossMediaBar), [Ozone](https://docs.libretro.com/docs/)) are ready and provides a consistent emulator frontend interface powered by the [Libretro](https://www.libretro.com/) framework.
 
 ## Purpose
 
@@ -14,8 +14,8 @@ The purpose of this role is to automate the deployment of a full-featured RetroA
 
 ## Features
 
-- **Installs RetroArch:** Including the main [RetroArch package](https://archlinux.org/packages/community/x86_64/retroarch/) and theme assets.
-- **UI Assets Support:** Both [XMB](https://docs.libretro.com/guides/xmb-menu/) and [Ozone](https://docs.libretro.com/guides/ozone-menu/) menu styles supported out of the box.
+- **Installs RetroArch:** Including the main [RetroArch package](https://archlinux.org/packages/extra/x86_64/retroarch/) and theme assets.
+- **UI Assets Support:** Both [XMB](https://docs.libretro.com/docs/) and [Ozone](https://docs.libretro.com/docs/) menu styles supported out of the box.
 
 ## ℹ️ Further Reading
 
@@ -23,7 +23,7 @@ The purpose of this role is to automate the deployment of a full-featured RetroA
 - 🧩 [Libretro - Modular Emulator Framework](https://www.libretro.com/)
 - 📚 [RetroArch on ArchWiki](https://wiki.archlinux.org/title/RetroArch)
 - 🧠 [RetroArch - Wikipedia](https://en.wikipedia.org/wiki/RetroArch)
-- 🎨 [UI Menus: XMB, Ozone, GLUI, RGUI](https://docs.libretro.com/guides/)
+- 🎨 [UI Menus: XMB, Ozone, GLUI, RGUI](https://docs.libretro.com/docs/)
 
 ## Credits 📝
 

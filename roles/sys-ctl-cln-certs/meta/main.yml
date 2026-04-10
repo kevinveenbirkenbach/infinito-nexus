@@ -18,7 +18,4 @@ galaxy_info:
   - cleanup
   - automation
   - systemd
-  repository: https://github.com/kevinveenbirkenbach/certreap
-  issue_tracker_url: https://github.com/kevinveenbirkenbach/certreap/issues
-  documentation: https://github.com/kevinveenbirkenbach/certreap#readme
   lifecycle: beta

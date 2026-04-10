@@ -10,7 +10,7 @@ The `main.yml` file in the `desk-zoom` role includes tasks for setting up video 
    - Utilizes the `kewlfft.aur.aur` module with `yay` as the helper to install `zoom`, a popular video conferencing application.
 
 ## Other Resources
-- As noted, the Microsoft Teams client is no longer natively supported on Linux. For more information and potential workarounds, you can visit the [AUR package page for Teams](https://aur.archlinux.org/packages/teams).
+- As noted, the Microsoft Teams client is no longer natively supported on Linux. For more information and potential workarounds, you can visit the [AUR package page for Teams](https://aur.archlinux.org/packages?K=teams).
 
 ## Dependencies
 This role relies on:
