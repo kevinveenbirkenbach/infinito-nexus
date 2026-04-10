@@ -37,9 +37,10 @@ Run external tests with `make test-external`.
   public `http://` and `https://` URLs.
 - The URL reachability check skips template placeholders and reserved local or
   example hosts such as `localhost` and `*.example`.
-- The URL reachability check emits warnings for dead links (`404`, `410`,
-  `451`) and transient network or upstream problems so the suite remains
-  usable while the repository backlog is cleaned up.
+- The URL reachability check fails on `4xx`, non-`500` `5xx`, and request
+  failures such as DNS or connection errors.
+- The URL reachability check emits a warning annotation for HTTP `500` via
+  [`utils.annotations.message`](../../../../utils/annotations/message.py).
 
 ## Suppression Comments 🚫
 

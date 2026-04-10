@@ -5,9 +5,9 @@ Scans git-tracked and untracked-but-not-ignored text files for literal
 local/example hosts are skipped.
 
 This is an external test because it performs live HTTP requests against the
-referenced third-party URLs. Dead-link responses (404/410/451) and transient
-request problems are emitted as warnings so the external suite stays useful
-without being dominated by flaky outages or historical backlog.
+referenced third-party URLs. Client errors, server errors other than ``500``,
+and request failures fail the test. HTTP ``500`` emits a warning annotation so
+temporary upstream breakage stays visible without looking like a dead link.
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 import requests
 
-from utils.annotations.message import warning
+from utils.annotations.message import error, warning
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _URL_RE = re.compile(r"https?://[^\s<>'\"`\]]+")
@@ -50,8 +50,7 @@ _RESERVED_HOST_SUFFIXES = (
     ".test",
     ".tld",
 )
-_DEAD_STATUS_CODES = {404, 410, 451}
-_REACHABLE_STATUS_CODES = {401, 403, 405}
+_WARNING_STATUS_CODES = {500}
 _REQUEST_TIMEOUT_SECONDS = 10
 _MAX_WORKERS = 8
 _USER_AGENT = "infinito-nexus-url-reachability-check"
@@ -305,7 +304,6 @@ def _probe_key(url: str) -> str:
 
 def _probe_url(url: str) -> ProbeOutcome:
     """Probe one URL and classify the result for external-test stability."""
-    parsed = urlsplit(url)
     try:
         response = requests.get(
             url,
@@ -319,17 +317,15 @@ def _probe_url(url: str) -> ProbeOutcome:
         finally:
             response.close()
     except requests.RequestException as exc:
-        return ProbeOutcome("warn", f"{type(exc).__name__}: {exc}")
+        return ProbeOutcome("fail", f"{type(exc).__name__}: {exc}")
     except Exception as exc:  # pragma: no cover - defensive safety net
-        return ProbeOutcome("warn", f"{type(exc).__name__}: {exc}")
+        return ProbeOutcome("fail", f"{type(exc).__name__}: {exc}")
 
-    if status < 400 or status in _REACHABLE_STATUS_CODES:
+    if status < 400:
         return ProbeOutcome("ok", f"HTTP {status}")
-    if status in _DEAD_STATUS_CODES and parsed.path in {"", "/"} and not parsed.query:
-        return ProbeOutcome("ok", f"HTTP {status} at origin")
-    if status in _DEAD_STATUS_CODES:
-        return ProbeOutcome("dead", f"HTTP {status}")
-    return ProbeOutcome("warn", f"HTTP {status}")
+    if status in _WARNING_STATUS_CODES:
+        return ProbeOutcome("warn", f"HTTP {status}")
+    return ProbeOutcome("fail", f"HTTP {status}")
 
 
 def _collect_occurrences(root: Path) -> dict[str, list[UrlOccurrence]]:
@@ -351,6 +347,7 @@ class TestUrlsReachable(unittest.TestCase):
             "No probe-worthy public HTTP(S) URLs found in repository files.",
         )
 
+        failing_found: list[tuple[str, UrlOccurrence, str, int]] = []
         warnings_found: list[tuple[str, UrlOccurrence, str, int]] = []
 
         with concurrent.futures.ThreadPoolExecutor(
@@ -365,10 +362,10 @@ class TestUrlsReachable(unittest.TestCase):
                 outcome = future.result()
                 occurrences = occurrences_by_url[probe_url]
 
-                if outcome.kind == "dead":
-                    warnings_found.append(
+                if outcome.kind == "fail":
+                    failing_found.append(
                         (
-                            "Dead external URL",
+                            "External URL failure",
                             occurrences[0],
                             f"{probe_url} -> {outcome.detail}",
                             len(occurrences),
@@ -387,6 +384,19 @@ class TestUrlsReachable(unittest.TestCase):
                     )
 
         for title, occurrence, message, count in sorted(
+            failing_found,
+            key=lambda item: (item[1].file.as_posix(), item[1].line, item[2]),
+        ):
+            rel = occurrence.file.relative_to(_REPO_ROOT).as_posix()
+            suffix = "" if count == 1 else f" ({count} occurrences)"
+            error(
+                f"{message}{suffix}",
+                title=title,
+                file=rel,
+                line=occurrence.line,
+            )
+
+        for title, occurrence, message, count in sorted(
             warnings_found,
             key=lambda item: (item[1].file.as_posix(), item[1].line, item[2]),
         ):
@@ -398,6 +408,25 @@ class TestUrlsReachable(unittest.TestCase):
                 file=rel,
                 line=occurrence.line,
             )
+
+        if not failing_found:
+            return
+
+        lines = [
+            f"Failing HTTP(S) URLs found ({len(failing_found)}):",
+            "",
+            "  Fix the URL, remove it, or adjust the reference.",
+            "  HTTP 500 emits a warning only; 4xx, non-500 5xx, and request failures fail.",
+            "",
+        ]
+        for _title, occurrence, message, count in sorted(
+            failing_found,
+            key=lambda item: (item[1].file.as_posix(), item[1].line, item[2]),
+        ):
+            rel = occurrence.file.relative_to(_REPO_ROOT).as_posix()
+            suffix = "" if count == 1 else f" ({count} occurrences)"
+            lines.append(f"  {rel}:{occurrence.line}: {message}{suffix}")
+        self.fail("\n".join(lines))
 
 
 if __name__ == "__main__":
