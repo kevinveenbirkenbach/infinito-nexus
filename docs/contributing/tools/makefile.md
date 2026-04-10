@@ -74,6 +74,7 @@ Use the dedicated script READMEs for the underlying shell helpers, and use the d
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
 | Install lint tooling | `make install-lint` | Installs lint-related tooling. | Use this when you only need the lint stack. |
+| Auto-format | `make autoformat` | Runs all available auto-formatters (`ruff`, `shfmt`, `shellcheck`). Skips any tool that is not installed and reports which ones were skipped. | Use this to apply automatic formatting fixes before committing. |
 | Lint | `make lint` | Runs the main lint checks for the repository. | Use this when you want a broad lint pass before pushing. |
 | Lint test suite | `make test-lint` | Runs the lint test suite inside the development environment. | Use this when you want CI-like lint validation. |
 | Lint action | `make lint-action` | Runs the GitHub Actions lint checks. | Use this when you changed workflow files or workflow logic. |

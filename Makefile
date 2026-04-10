@@ -18,7 +18,7 @@ endif
 
 .PHONY: \
 	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python \
-	test lint lint-action lint-ansible lint-python lint-shellcheck test-lint test-unit test-integration test-deploy test-deploy-app \
+	test lint lint-action lint-ansible lint-python lint-shellcheck autoformat test-lint test-unit test-integration test-deploy test-deploy-app \
 	clean clean-sudo down \
 	system-purge system-disk-usage \
 	list tree mig dockerignore \
@@ -257,6 +257,10 @@ lint-python:
 # Run shellcheck lint checks.
 lint-shellcheck:
 	@bash scripts/lint/shellcheck.sh
+
+# Auto-format all source files (skips tools that are not installed).
+autoformat:
+	@bash scripts/lint/autoformat.sh
 
 # Run the full test suite.
 test: lint test-lint test-unit test-integration test-deploy
