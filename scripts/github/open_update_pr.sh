@@ -34,7 +34,7 @@ if git diff --cached --quiet; then
 fi
 
 git commit -m "${UPDATE_COMMIT_MESSAGE}"
-git push --force-with-lease origin "${BRANCH}"
+git push --force origin "${BRANCH}"
 
 PR_NUMBER="$(
 	gh pr list \
