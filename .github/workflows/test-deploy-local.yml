@@ -1,4 +1,4 @@
-name: "🧪 Test: Deploy (local)"
+name: "📦 Test: Deploy (local)"
 
 on:
   workflow_dispatch:

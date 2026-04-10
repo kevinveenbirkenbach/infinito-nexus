@@ -1,4 +1,4 @@
-name: "🧪 Test: Deploy (universal)"
+name: "📦 Test: Deploy (universal)"
 
 on:
   workflow_call:
