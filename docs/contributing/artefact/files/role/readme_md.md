@@ -3,7 +3,7 @@
 Every Ansible role MUST contain a `README.md` at the role root.
 This page defines the required structure and content rules.
 
-## Structure
+## Structure 📋
 
 Role README files MUST follow this section order.
 Optional sections MAY be omitted when they add no value for the role.
@@ -92,7 +92,7 @@ Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
 Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
 ```
 
-## Formatting Rules
+## Formatting Rules 📏
 
 - Role README files MUST NOT use emojis in headings.
   Emojis in role READMEs interfere with automated tooling that parses heading text.

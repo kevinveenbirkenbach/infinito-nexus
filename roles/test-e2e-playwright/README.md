@@ -51,7 +51,7 @@ roles/<application_id>/
     files/playwright.spec.js
 ```
 
-For the file-level contract, use [Contributing `playwright.env.j2`](../../docs/contributing/code/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/code/role/playwright.spec.js.md).
+For the file-level contract, use [Contributing `playwright.env.j2`](../../docs/contributing/artefact/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/artefact/files/role/playwright.spec.js.md).
 
 `package.json` and `playwright.config.js` are provided centrally by this role from:
 `roles/test-e2e-playwright/files/`.
@@ -101,7 +101,7 @@ Included files:
 1. Add the two app-specific files:
    - `roles/<application_id>/templates/playwright.env.j2`
    - `roles/<application_id>/files/playwright.spec.js`
-   Follow [Contributing `playwright.env.j2`](../../docs/contributing/code/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/code/role/playwright.spec.js.md) while creating them.
+   Follow [Contributing `playwright.env.j2`](../../docs/contributing/artefact/files/role/playwright.env.j2.md) and [Contributing `playwright.spec.js`](../../docs/contributing/artefact/files/role/playwright.spec.js.md) while creating them.
 2. Run deployment and include your app in `allowed_applications` (or leave it empty to run all discovered apps).
 3. Keep `package.json` and `playwright.config.js` centralized in `roles/test-e2e-playwright/files/`.
 

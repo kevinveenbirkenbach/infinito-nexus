@@ -1,6 +1,6 @@
 # Image Mirroring 🪞
 
-This document explains why image mirroring exists, how it works, and what each component does. For how images are declared in roles, see [image.md](image.md).
+This document explains why image mirroring exists, how it works, and what each component does. For how images are declared in roles, see [origin.md](origin.md).
 
 ## Why Mirrors Exist 🎯
 
@@ -32,7 +32,7 @@ Example: `ghcr.io/kevinveenbirkenbach/infinito-nexus-core/mirror/docker.io/nextc
 
 ### Image Discovery
 
-`utils/docker/image_discovery.py` discovers all role images via `iter_role_images()`. See [image.md](image.md) for the declaration format and supported registries.
+`utils/docker/image_discovery.py` discovers all role images via `iter_role_images()`. See [origin.md](origin.md) for the declaration format and supported registries.
 
 ### GHCRProvider
 
@@ -68,19 +68,13 @@ This file is consumed by the inventory creator to substitute mirror URLs into ho
 
 `cli/mirror/sync/__main__.py` — copies each image from the upstream source to the GHCR mirror destination using `skopeo copy`. Supports `--only-missing` to skip already-mirrored images and `--images-per-hour` for throttling.
 
-### Publish
-
-`cli/mirror/publish/__main__.py` — lists all packages under the mirror prefix via the GitHub Packages API and sets their visibility to `public`. This is required because newly pushed packages default to private.
-
-Authentication requirements are described in [ghcr.md](../flow/security/ghcr.md).
-
 ### Wait Script
 
 `scripts/meta/wait/mirrors.sh` — for fork PRs, waits until all required mirror images are available in GHCR before letting the deploy tests proceed. This is necessary because fork PRs cannot push images themselves; the `pull_request_target` event handles that.
 
 ## CI Integration 🔄
 
-The mirror workflow runs as stage 8 of the CI pipeline — see [ci.md](../flow/ci.md). It runs in parallel with the DNS tests and MUST complete before deploy tests start.
+The mirror workflow runs as stage 8 of the CI pipeline — see [ci.md](../../flow/ci.md). It runs in parallel with the DNS tests and MUST complete before deploy tests start.
 
 The mirrors file is generated into the inventory directory. The inventory creator applies mirror image overrides to host variables via `cli/create/inventory/mirror_overrides.py`, which reads both top-level keys from `mirrors.yml` and writes into host vars as follows:
 
@@ -99,4 +93,4 @@ Each service in host vars MAY carry a `mirror_policy` field that controls how th
 
 ## Adding a New Mirrored Image 🆕
 
-No manual registration is needed. Images declared in a role are automatically discovered and included in the next mirror run. See [image.md](image.md) for the correct declaration format.
+No manual registration is needed. Images declared in a role are automatically discovered and included in the next mirror run. See [origin.md](origin.md) for the correct declaration format.

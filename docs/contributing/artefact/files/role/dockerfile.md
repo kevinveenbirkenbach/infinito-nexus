@@ -4,7 +4,7 @@ This page is the SPOT for role-local Dockerfiles.
 Use this page for placement rules, variable handling, and build wiring.
 For the agent-side review workflow during development, see [Development](../../../agents/action/develop.md).
 
-## Placement
+## Placement 📁
 
 - You MUST place role-local Dockerfiles at `files/Dockerfile`.
 - You MUST NOT use `templates/Dockerfile.j2` unless the Dockerfile requires Jinja2
@@ -13,7 +13,7 @@ For the agent-side review workflow during development, see [Development](../../.
   `templates/Dockerfile.j2` first and then `files/Dockerfile`.
   Both are rendered through the Ansible `template` module.
 
-## Variables
+## Variables ⚙️
 
 - You MUST NOT hard-code values that come from `config/main.yml` or `vars/main.yml`
   directly in `files/Dockerfile`.
@@ -59,12 +59,12 @@ APP_IMAGE:   "{{ lookup('config', application_id, 'compose.services.myapp.image'
 APP_VERSION: "{{ lookup('config', application_id, 'compose.services.myapp.version') }}"
 ```
 
-## Image Declaration
+## Image Declaration 🐳
 
 Every Docker image used in a role must be declared in exactly one place — no hardcoded
 image strings anywhere else (tasks, templates, defaults).
 
-### Application roles (have `application_id`)
+### Application roles (have `application_id`) 📦
 
 Declare the image under `config/main.yml` → `compose.services.<service>.{image,version}`:
 
@@ -84,21 +84,21 @@ MY_APP_IMAGE:   "{{ lookup('config', application_id, 'compose.services.myapp.ima
 MY_APP_VERSION: "{{ lookup('config', application_id, 'compose.services.myapp.version') }}"
 ```
 
-### Non-application roles
+### Non-application roles 🔧
 
 For roles without `application_id` that need extra mirrored images (e.g. test runners,
-health checkers), use [Contributing `image`](image.md) as the SPOT for declaration and access.
+health checkers), use [origin.md](../../image/origin.md) as the SPOT for declaration and access.
 Those images MUST be declared under `defaults/main.yml` and MUST be consumed via
 `lookup('image', ...)` instead of direct `images[...]` access.
 
-### Image discovery SPOT
+### Image Discovery SPOT 🔍
 
-[`utils/docker/image_discovery.py`](../../../../utils/docker/image_discovery.py) is
+[image_discovery.py](../../../../utils/docker/image_discovery.py) is
 the single SPOT that enumerates all role images from both sources above.
 It is used by the mirror pipeline (`cli/mirror/`) and the version-check lint test
 (`tests/lint/docker/test_image_versions.py`).
 
-## When `Dockerfile.j2` is acceptable
+## When `Dockerfile.j2` Is Acceptable 🤔
 
 A `templates/Dockerfile.j2` is acceptable when the file contains Jinja2
 control-flow logic that cannot be expressed through Docker `ARG` alone — for
@@ -109,7 +109,7 @@ Even in that case, you SHOULD minimize the templated surface: use `{{ variables 
 only where necessary and keep the static parts of the Dockerfile readable without
 rendering it.
 
-## Lint
+## Lint 🔍
 
 The repository lint suite checks for `templates/Dockerfile.j2` files automatically:
 

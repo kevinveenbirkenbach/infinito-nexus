@@ -2,7 +2,7 @@
 
 This page is the SPOT for automatically generating and updating role-local `style.css`, `style.css.j2`, and equivalent CSS entry files.
 Use this page for implementation scope, override strategy, and live review.
-For repository wiring, inventory keys, and the generated palette contract, see [Contributing `style.css`](../../../contributing/code/role/style.css.md).
+For repository wiring, inventory keys, and the generated palette contract, see [Contributing `style.css`](../../../contributing/artefact/files/role/style.css.md).
 
 ## Goal
 
