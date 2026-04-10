@@ -17,6 +17,7 @@ if ! command -v gh >/dev/null 2>&1; then
 fi
 
 REPO="$(git remote get-url origin | sed 's|.*github\.com[:/]||' | sed 's|\.git$||')"
+OWNER="${REPO%/*}"
 
 git config user.name "github-actions[bot]"
 git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -58,5 +59,5 @@ else
 		--title "${UPDATE_PR_TITLE}" \
 		--body "${UPDATE_PR_BODY}" \
 		--base "${UPDATE_BASE_BRANCH}" \
-		--head "${BRANCH}"
+		--head "${OWNER}:${BRANCH}"
 fi
