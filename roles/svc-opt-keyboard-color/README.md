@@ -1,31 +1,21 @@
 # MSI Keyboard Driver
 
-Ansible role to set up dynamic keyboard color change on MSI laptops.
+## Description
 
-## Requirements
+[msi-perkeyrgb](https://github.com/Askannz/msi-perkeyrgb) is a tool for setting dynamic per-key RGB keyboard colors on MSI laptops.
 
-- An MSI laptop
-- The `msi-perkeyrgb` tool installed on the system
-- Ansible 2.9 or later
+## Overview
 
-## Role Variables
+This role sets up dynamic keyboard color change on MSI laptops running Arch Linux. It requires an MSI laptop and the `msi-perkeyrgb` tool installed on the system.
 
-Available variables are listed below, along with their default values:
+## Features
 
-```yaml
-vendor_and_product_id: ""
-```
+- **Dynamic Color Control:** Enables per-key RGB color configuration via `msi-perkeyrgb`.
+- **Configurable Hardware ID:** Requires `vendor_and_product_id` to be set to the vendor and product ID of the MSI laptop.
 
-The `vendor_and_product_id` variable is required and should be set to the vendor and product ID of the MSI laptop.
+## Credits
 
-## Author
-
-This role was created by [Kevin Veen-Birkenbach](https://github.com/kevinveenbirkenbach).
-
-## Chat Conversation
-
-To see how this role was developed, you can refer to the following ChatGPT Conversation that produced this software:
-- https://chat.openai.com/share/1f1dde28-3fb2-4df7-be89-4f7ffe67e5c7
-- https://chat.openai.com/share/41c47fdb-a92d-466d-9e92-5a894fe6bec3
-- https://chat.openai.com/share/e45d186a-f2e1-4c96-9390-36269e274193
-
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

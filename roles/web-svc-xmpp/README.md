@@ -1,7 +1,11 @@
 # XMPP
 This role needs to be implemented
-- https://hub.docker.com/r/ejabberd/ecs/
-- https://docs.ejabberd.im/CONTAINER/
-- https://github.com/processone/web-app-ejabberd
-- https://chatgpt.com/c/67988a80-0764-800f-b1bb-9ae94ad46860
-- https://conversejs.org/
+- [ejabberd on Docker Hub](https://hub.docker.com/r/ejabberd/ecs/)
+- [ejabberd Container Documentation](https://docs.ejabberd.im/CONTAINER/)
+- [Converse.js](https://conversejs.org/)
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

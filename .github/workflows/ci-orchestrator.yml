@@ -129,12 +129,15 @@ jobs:
   test-code-lint:
     uses: ./.github/workflows/test-code-lint.yml
     needs: build-ci-images
+  test-code-external:
+    uses: ./.github/workflows/test-code-external.yml
+    needs: build-ci-images
   test-code-unit:
     uses: ./.github/workflows/test-code-unit.yml 
     needs: build-ci-images
   test-code-gate:
     name: 🚦 Gate code
-    needs: [test-code-integration, test-code-lint, test-code-unit]
+    needs: [test-code-integration, test-code-lint, test-code-external, test-code-unit]
     runs-on: ubuntu-latest
     steps:
       - run: echo "code gate passed"

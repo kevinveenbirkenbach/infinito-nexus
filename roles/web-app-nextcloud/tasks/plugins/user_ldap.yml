@@ -1,6 +1,5 @@
 # @See https://docs.nextcloud.com/server/latest/admin_manual/configuration_user/user_auth_ldap.html
-# @See https://chatgpt.com/c/67aa2d21-cb4c-800f-b1be-8629b6bd3f55
-
+# @See 
 - name: Resolve desired Nextcloud LDAP config ID from plugin configuration
   set_fact:
     nextcloud_ldap_config_id: >-
@@ -16,14 +15,12 @@
         ) | string | trim
       }}
   changed_when: false
-
 - name: Check if desired Nextcloud LDAP config ID exists
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:show-config {{ nextcloud_ldap_config_id }}
   register: nextcloud_ldap_config_probe
   changed_when: false
   failed_when: false
-
 - name: Fail when LDAP config probe failed for unexpected reason
   fail:
     msg: >-
@@ -33,7 +30,6 @@
   when:
     - nextcloud_ldap_config_probe.rc != 0
     - "'Invalid configID' not in ((nextcloud_ldap_config_probe.stdout | default('')) ~ (nextcloud_ldap_config_probe.stderr | default('')))"
-
 - name: Auto-create empty Nextcloud LDAP config when desired config ID is missing
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:create-empty-config
@@ -42,7 +38,6 @@
   when:
     - nextcloud_ldap_config_probe.rc != 0
     - "'Invalid configID' in ((nextcloud_ldap_config_probe.stdout | default('')) ~ (nextcloud_ldap_config_probe.stderr | default('')))"
-
 - name: Re-check desired Nextcloud LDAP config ID after auto-create
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:show-config {{ nextcloud_ldap_config_id }}
@@ -52,7 +47,6 @@
   when:
     - nextcloud_ldap_config_create is defined
     - nextcloud_ldap_config_create is changed
-
 - name: Fail when desired LDAP config ID is still missing after auto-create
   assert:
     that:
@@ -64,16 +58,13 @@
   when:
     - nextcloud_ldap_config_create is defined
     - nextcloud_ldap_config_create is changed
-
 - name: Set Nextcloud LDAP bind password
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:set-config {{ nextcloud_ldap_config_id }} ldapAgentPassword "{{ LDAP.BIND_CREDENTIAL }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
 - name: Activate Nextcloud LDAP configuration
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:set-config {{ nextcloud_ldap_config_id }} ldapConfigurationActive 1
-
 - name: Warm LDAP cache (to guaranty that all LDAP users are present)
   command: >
     {{ NEXTCLOUD_DOCKER_EXEC_OCC }} ldap:search ""

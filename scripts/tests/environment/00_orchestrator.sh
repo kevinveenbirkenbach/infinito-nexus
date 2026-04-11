@@ -8,6 +8,9 @@ unset GITHUB_ACTIONS
 unset ACT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve to an absolute path so the self-exclusion works regardless of whether
+# the script was invoked with a relative path (e.g. bash ./scripts/…/00_orchestrator.sh).
+SELF="${SCRIPT_DIR}/$(basename "${BASH_SOURCE[0]}")"
 # shellcheck source=scripts/tests/environment/lib.sh
 source "${SCRIPT_DIR}/lib.sh"
 
@@ -15,7 +18,7 @@ source "${SCRIPT_DIR}/lib.sh"
 cd "${REPO_ROOT}"
 
 for step in "${SCRIPT_DIR}"/[0-9][0-9]_*.sh; do
-	[[ "${step}" == "${BASH_SOURCE[0]}" ]] && continue
+	[[ "${step}" == "${SELF}" ]] && continue
 	load_repo_env
 	ensure_git_safe_directory
 	echo "============================================================"

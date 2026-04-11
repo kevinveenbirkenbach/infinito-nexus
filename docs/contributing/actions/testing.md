@@ -7,6 +7,7 @@ This repository uses several test and validation types:
 - `Lint and syntax checks` catch style, formatting, and Ansible syntax problems early.
 - `Unit tests` verify isolated logic.
 - `Integration tests` verify behavior across modules and runtime boundaries.
+- `External tests` verify live third-party state such as public registries or services when hermetic checks are insufficient.
 - `Combined validation` runs the standard main verification flow.
 - `Local deploy and E2E validation` checks whether apps and deployment flows work in a realistic local stack.
 
@@ -23,7 +24,8 @@ Use the following table to choose the right lint, syntax, unit, integration, or 
 | Lint tests | `make test-lint` | Runs the lint test suite inside the development environment. | Use this when you want CI-like lint validation. |
 | Unit tests | `make test-unit` | Runs the unit test suite. | Use this when you changed Python logic or other isolated code paths. |
 | Integration tests | `make test-integration` | Runs the integration test suite. | Use this when your change affects behavior across modules or runtime boundaries. |
-| Combined validation | `make test` | Runs the main combined validation flow. | Use this whenever a change touches at least one file that is not `.md` or `.rst`, or before opening a Pull Request. |
+| External tests | `make test-external` | Runs opt-in tests that depend on live third-party systems such as public registries. | Use this when you need live external verification. It is intentionally excluded from `make test`. |
+| Combined validation | `make test` | Runs the main combined validation flow without the opt-in external suite. | Use this whenever a change touches at least one file that is not `.md` or `.rst`, or before opening a Pull Request. |
 
 ## Local Deploy and End-to-End Checks 🚀
 
@@ -55,7 +57,7 @@ Important:
 
 - When exactly one test file changes inside one test family, you MAY scope the run with `TEST_PATTERN`.
 - When two or more test files change inside the same test family, you MUST run the matching suite command without `TEST_PATTERN`:
-  `make test-lint`, `make test-unit`, or `make test-integration`.
+  `make test-lint`, `make test-unit`, `make test-integration`, or `make test-external`.
 - When a change touches multiple test families, you MUST run every affected suite.
 
 ## Testing Standards 📋
@@ -64,4 +66,5 @@ For test-type-specific requirements, framework, and creation procedures see:
 
 - [Unit Tests](testing/unit.md)
 - [Integration Tests](testing/integration.md)
+- [External Tests](testing/external.md)
 - [Playwright Tests](testing/playwright.md)

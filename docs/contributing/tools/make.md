@@ -93,7 +93,8 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Install dependencies | `make install` | Installs the repository tooling needed for development and tests. | Use this before running validation on a fresh machine or environment. |
 | Unit tests | `make test-unit` | Runs the unit test suite. | Use this when you changed Python logic or other isolated code paths. |
 | Integration tests | `make test-integration` | Runs the integration test suite. | Use this when your change affects behavior across modules or runtime boundaries. |
-| Combined validation | `make test` | Runs the main combined validation flow. | Use this whenever a change touches at least one file that is not `.md` or `.rst`, or before opening a Pull Request. |
+| External tests | `make test-external` | Runs the opt-in suite that talks to live third-party dependencies such as public registries. | Use this when you need live external verification without folding it into the default test run. |
+| Combined validation | `make test` | Runs the main combined validation flow without the opt-in external suite. | Use this whenever a change touches at least one file that is not `.md` or `.rst`, or before opening a Pull Request. |
 
 ### Act 🎭
 

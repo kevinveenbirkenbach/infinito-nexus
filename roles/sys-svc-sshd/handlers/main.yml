@@ -16,12 +16,8 @@
   changed_when: false
   listen: sshd restart
 
-- name: Restart detected SSH service
-  ansible.builtin.systemd:
-    name: "{{ sys_svc_sshd_service_unit }}"
-    state: restarted
-    enabled: true
-    daemon_reload: true
+- name: Restart detected SSH service with diagnostics
+  ansible.builtin.include_tasks: restart_ssh_service.yml
   when: sys_svc_sshd_service_unit | length > 0
   listen: sshd restart
 

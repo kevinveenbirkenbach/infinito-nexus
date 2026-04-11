@@ -21,12 +21,15 @@ It automates the setup of the Document Server container, NGINX reverse proxy con
 * Optional JWT signing for secure communication between Nextcloud and Document Server.
 * Integration hooks to restart NGINX and recreate Docker Compose stacks on changes.
 
-## Documentation
-
-See the role’s `README.md`, task files, and Jinja2 templates in the `roles/web-svc-onlyoffice` directory for usage examples and variable definitions.
-
 ## Further Resources
 
-* [Official ONLYOFFICE Document Server Documentation](https://helpcenter.onlyoffice.com/server/document/)
+* [Official ONLYOFFICE Document Server Documentation](https://helpcenter.onlyoffice.com/docs/)
 * [Nextcloud → ONLYOFFICE Integration App](https://apps.nextcloud.com/apps/onlyoffice)
 * [ONLYOFFICE Document Server on Docker Hub](https://hub.docker.com/r/onlyoffice/documentserver)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

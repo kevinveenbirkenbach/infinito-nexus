@@ -1,30 +1,29 @@
 # Fider
 
-Deploys [Fider](https://getfider.com/) — an open-source community feedback and voting platform — as part of the Infinito.Nexus stack.
+## Description
+
+[Fider](https://getfider.com/) is an open-source community feedback and voting platform that allows teams to collect, prioritize, and track feature requests and ideas.
+
+## Overview
+
+This role deploys Fider as part of the Infinito.Nexus stack using a single Docker Compose container backed by PostgreSQL. It configures SSO via Keycloak automatically on first deploy, optional email notifications via Mailu, and HTTPS via NGINX reverse proxy.
+
+The setup tasks handle the full first-deploy bootstrap automatically:
+
+1. **Tenant bootstrap:** calls Fider's `POST /_api/tenants` API to create the initial tenant.
+2. **Admin user creation:** inserts the admin user directly into the `users` table, bypassing email verification. Idempotent via `WHERE NOT EXISTS`.
+3. **Tenant activation:** sets `status=1` on the tenant row so Fider serves the public page.
+4. **OIDC provider:** inserts the Keycloak provider into `oauth_providers`. Idempotent via `ON CONFLICT (tenant_id, provider) DO UPDATE`.
+
+When a user logs in via Keycloak for the first time, Fider matches their email to the existing admin user and links the OIDC provider automatically. To enable SSO, set `compose.services.oidc.enabled: true` (the default) and ensure `OIDC.CLIENT.SECRET` is configured.
 
 ## Features
 
-- Single-container deployment via Docker Compose
-- PostgreSQL database (all data including attachments stored in the database — no extra volumes needed)
-- SSO via Keycloak configured automatically on first deploy
-- Email notifications via Mailu (optional)
-- HTTPS enforced via NGINX reverse proxy
-- Accessible at `https://fider.<your-domain>`
-
-## SSO / Authentication
-
-Fider has native OAuth2 support but **no environment variables or CLI** for configuring it — the provider is stored directly in the `oauth_providers` PostgreSQL table.
-
-The setup tasks (`tasks/01_setup_oidc.yml`) handle the full first-deploy bootstrap automatically:
-
-1. **Tenant bootstrap** — calls Fider's `POST /_api/tenants` API to create the initial tenant. The API creates the tenant with `status=2` (pending email verification) and does not yet create any user record.
-2. **Admin user creation** — the admin user is inserted directly into the `users` table (`role=3` = Administrator, `status=1` = Active), bypassing email verification. The `email_verifications` record is also marked as verified. Both operations are idempotent (`WHERE NOT EXISTS` / `WHERE verified_at IS NULL`).
-3. **Tenant activation** — sets `status=1` on the tenant row so Fider serves the public page instead of showing a "pending activation" screen.
-4. **OIDC provider** — inserts the Keycloak provider into `oauth_providers` with `status=2` (enabled) and `is_trusted=true`. Idempotent via `ON CONFLICT (tenant_id, provider) DO UPDATE`.
-
-When a user logs in via Keycloak for the first time, Fider matches their email to the existing admin user and links the OIDC provider automatically.
-
-To enable SSO, set `compose.services.oidc.enabled: true` (the default) in your inventory and ensure `OIDC.CLIENT.SECRET` is configured.
+- **Single-container deployment** via Docker Compose.
+- **PostgreSQL database:** all data including attachments stored in the database, no extra volumes needed.
+- **SSO via Keycloak:** configured automatically on first deploy.
+- **Email notifications** via Mailu (optional).
+- **HTTPS** enforced via NGINX reverse proxy.
 
 ## Configuration
 
@@ -38,7 +37,13 @@ Key settings in `config/main.yml`:
 | `server.domains.canonical` | `fider.{{ DOMAIN_PRIMARY }}` | Public domain |
 | `server.status_codes.default` | `[200, 301, 302, 405]` | Expected HTTP codes for health check (405 because Fider returns 405 on HEAD requests to `/`) |
 
-## References
+## Further Resources
 
-- [Fider Hosting Guide](https://getfider.com/docs/hosting)
 - [Fider GitHub](https://github.com/getfider/fider)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
