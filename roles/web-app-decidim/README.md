@@ -67,4 +67,4 @@ Environment variables are templated via `templates/playwright.env.j2`.
 
 - [Decidim documentation](https://docs.decidim.org/)
 - [Decidim Docker image](https://hub.docker.com/r/decidim/decidim)
-- [Infinito.Nexus CONTRIBUTING.md](../../../../CONTRIBUTING.md)
+- [Infinito.Nexus CONTRIBUTING.md](../../CONTRIBUTING.md)
