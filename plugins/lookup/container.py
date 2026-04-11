@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
-from utils.docker_paths_utils import get_docker_paths
+from utils.docker.paths_utils import get_docker_paths
 
 
 def _as_str(v: Any) -> str:

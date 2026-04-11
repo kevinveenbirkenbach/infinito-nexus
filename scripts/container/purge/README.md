@@ -2,7 +2,7 @@
 
 This is the SPOT for container-local cleanup helpers under `scripts/container/purge/`.
 These scripts run inside the local infinito container and remove container-local state only.
-For the canonical Make target index that invokes these helpers, see [docs/contributing/tools/makefile.md](../../../docs/contributing/tools/makefile.md).
+For the canonical Make target index that invokes these helpers, see [make.md](../../../docs/contributing/tools/make.md).
 
 ## Entry Points
 

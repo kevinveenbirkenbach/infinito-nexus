@@ -1,4 +1,4 @@
-name: Shell Linter
+name: "🔍 Lint: Shell Scripts"
 
 on:
   workflow_call:

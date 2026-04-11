@@ -1,4 +1,4 @@
-# Security Guidelines
+# Security Guidelines 🛡️
 
 Infinito.Nexus is designed with security in mind. However, while following our guidelines can greatly improve your system's security, no IT system can be 100% secure. Please report any vulnerabilities as soon as possible.
 
@@ -21,9 +21,6 @@ In addition to the user security guidelines, administrators have additional resp
   Your inventories for running Infinito.Nexus MUST be managed in a separate repository and secured with tools such as [Ansible Vault](https://en.wikipedia.org/wiki/Encryption) 🔒. Sensitive credentials MUST NEVER be stored in plaintext; use a password file to secure these details.
 
 - **Reporting Vulnerabilities**
-  If you discover a security vulnerability in Infinito.Nexus, you MUST report it immediately through [SECURITY.md](../../../SECURITY.md). We encourage proactive vulnerability reporting so that issues can be addressed as quickly as possible.
-  **MUST NOT OPEN AN ISSUE.**
+  If you discover a security vulnerability in Infinito.Nexus, you MUST report it immediately through [SECURITY.md](../../SECURITY.md) and MUST NOT open a public issue. We encourage proactive vulnerability reporting so that issues can be addressed as quickly as possible.
 
----
-
-By following these guidelines, both end users and administrators can achieve a high degree of security. Stay vigilant, keep your systems updated, and report any suspicious activity. Remember: while we strive for maximum security, no system is completely infallible.
+By following these guidelines, both end users and administrators can achieve a high degree of security. Stay vigilant, keep your systems updated, and report any suspicious activity. While we strive for maximum security, no system is completely infallible.

@@ -40,24 +40,10 @@ def _get_policy(svc_doc: CommentedMap) -> str:
 
 def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
     """
-    Apply compose image mirror overrides to host_vars.
+    Apply image mirror overrides to host_vars.
 
-    Mirrors file format (YAML or JSON):
-      applications:
-        <app_id>:
-          compose:
-            services:
-              <svc>:
-                image: <new-image-base>
-                version: <tag>
-
-    Behavior / precedence:
-      - By default, manual values in host_vars win.
-      - mirror_policy in host_vars service node controls how mirror applies:
-          - force     -> always overwrite image/version
-          - skip      -> never change image/version
-          - if_missing(default) -> only fill missing/blank image/version
-      - If app/service does not exist in host_vars, it will be created and mirror values applied.
+    See docs/contributing/artefact/mirror.md for the full architecture, format,
+    and mirror_policy documentation.
     """
     if not mirrors_file.exists():
         raise SystemExit(f"Mirrors file not found: {mirrors_file}")
@@ -73,7 +59,10 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
         )
 
     mirrors_apps = mirrors_raw.get("applications", {}) or {}
-    if not isinstance(mirrors_apps, dict) or not mirrors_apps:
+    mirrors_images = mirrors_raw.get("images", {}) or {}
+    has_applications = isinstance(mirrors_apps, dict) and bool(mirrors_apps)
+    has_images = isinstance(mirrors_images, dict) and bool(mirrors_images)
+    if not has_applications and not has_images:
         return  # no-op
 
     yaml_rt = YAML(typ="rt")
@@ -93,60 +82,95 @@ def apply_mirror_overrides(host_vars_file: Path, mirrors_file: Path) -> None:
             tmp[k] = v
         doc = tmp
 
-    apps_doc = _ensure_ruamel_map(doc, "applications")
-    applied = 0
+    changed = False
 
-    for app_id, app_block in mirrors_apps.items():
-        if not isinstance(app_block, dict):
-            continue
-
-        docker = app_block.get("compose") or {}
-        if not isinstance(docker, dict):
-            continue
-
-        services = docker.get("services") or {}
-        if not isinstance(services, dict):
-            continue
-
-        app_doc = _ensure_ruamel_map(apps_doc, str(app_id))
-        docker_doc = _ensure_ruamel_map(app_doc, "compose")
-        services_doc = _ensure_ruamel_map(docker_doc, "services")
-
-        for svc_name, svc_block in services.items():
-            if not isinstance(svc_block, dict):
+    if has_applications:
+        apps_doc = _ensure_ruamel_map(doc, "applications")
+        for app_id, app_block in mirrors_apps.items():
+            if not isinstance(app_block, dict):
                 continue
 
-            image = svc_block.get("image")
-            version = svc_block.get("version")
-
-            if not isinstance(image, str) or _is_blank(image):
-                continue
-            if not isinstance(version, str) or _is_blank(version):
+            docker = app_block.get("compose") or {}
+            if not isinstance(docker, dict):
                 continue
 
-            svc_doc = _ensure_ruamel_map(services_doc, str(svc_name))
-
-            # policy only comes from existing host_vars service node
-            policy = _get_policy(svc_doc)
-
-            if policy == "skip":
+            services = docker.get("services") or {}
+            if not isinstance(services, dict):
                 continue
 
-            if policy == "force":
-                svc_doc["image"] = image.strip()
-                svc_doc["version"] = version.strip()
-                applied += 1
+            app_doc = _ensure_ruamel_map(apps_doc, str(app_id))
+            docker_doc = _ensure_ruamel_map(app_doc, "compose")
+            services_doc = _ensure_ruamel_map(docker_doc, "services")
+
+            for svc_name, svc_block in services.items():
+                if not isinstance(svc_block, dict):
+                    continue
+
+                image = svc_block.get("image")
+                version = svc_block.get("version")
+
+                if not isinstance(image, str) or _is_blank(image):
+                    continue
+                if not isinstance(version, str) or _is_blank(version):
+                    continue
+
+                image = image.strip()
+                version = version.strip()
+
+                svc_doc = _ensure_ruamel_map(services_doc, str(svc_name))
+                policy = _get_policy(svc_doc)
+
+                if policy == "skip":
+                    continue
+
+                if policy == "force":
+                    if svc_doc.get("image") != image:
+                        svc_doc["image"] = image
+                        changed = True
+                    if svc_doc.get("version") != version:
+                        svc_doc["version"] = version
+                        changed = True
+                    continue
+
+                # if_missing (default)
+                if _is_blank(svc_doc.get("image")):
+                    svc_doc["image"] = image
+                    changed = True
+                if _is_blank(svc_doc.get("version")):
+                    svc_doc["version"] = version
+                    changed = True
+
+    if has_images:
+        images_overrides_doc = _ensure_ruamel_map(doc, "images_overrides")
+        for role_id, role_svcs in mirrors_images.items():
+            if not isinstance(role_svcs, dict):
                 continue
 
-            # if_missing (default)
-            if _is_blank(svc_doc.get("image")):
-                svc_doc["image"] = image.strip()
-                applied += 1
-            if _is_blank(svc_doc.get("version")):
-                svc_doc["version"] = version.strip()
-                applied += 1
+            role_images_doc = _ensure_ruamel_map(images_overrides_doc, str(role_id))
+            for svc_name, svc_block in role_svcs.items():
+                if not isinstance(svc_block, dict):
+                    continue
 
-    if applied <= 0:
+                image = svc_block.get("image")
+                version = svc_block.get("version")
+
+                if not isinstance(image, str) or _is_blank(image):
+                    continue
+                if not isinstance(version, str) or _is_blank(version):
+                    continue
+
+                image = image.strip()
+                version = version.strip()
+
+                svc_images_doc = _ensure_ruamel_map(role_images_doc, str(svc_name))
+                if _is_blank(svc_images_doc.get("image")):
+                    svc_images_doc["image"] = image
+                    changed = True
+                if _is_blank(svc_images_doc.get("version")):
+                    svc_images_doc["version"] = version
+                    changed = True
+
+    if not changed:
         return
 
     host_vars_file.parent.mkdir(parents=True, exist_ok=True)

@@ -4,6 +4,9 @@
     container_name:   "{{ MARIADB_NAME }}"
     image:            "{{ MARIADB_CUSTOM_IMAGE }}"
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        MARIADB_IMAGE:   "{{ MARIADB_IMAGE }}"
+        MARIADB_VERSION: "{{ MARIADB_VERSION }}"
     command:
       - "--transaction-isolation=READ-COMMITTED"
       - "--binlog-format=ROW"

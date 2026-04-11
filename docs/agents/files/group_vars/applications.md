@@ -11,8 +11,8 @@ This page is the SPOT for agent handling of `group_vars/all/05_applications.yml`
 
 ## Source Of Truth
 
-- Generator: [cli/setup/applications/__main__.py](/home/kevinveenbirkenbach/Repositories/github.com/kevinveenbirkenbach/infinito-nexus/cli/setup/applications/__main__.py)
-- Generated output path: [05_applications.yml](/home/kevinveenbirkenbach/Repositories/github.com/kevinveenbirkenbach/infinito-nexus/group_vars/all/05_applications.yml)
+- Generator: [__main__.py](../../../../cli/setup/applications/__main__.py)
+- Generated output path: [05_applications.yml](../../../../group_vars/all/05_applications.yml)
 - Primary inputs: role-local `vars/main.yml` and `config/main.yml`
 
 ## Why

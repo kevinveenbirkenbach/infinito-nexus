@@ -8,13 +8,7 @@ Revolutionize your email communications with Mailu, a secure and flexible mail s
 
 Mailu is a complete mail server suite delivered as a Docker-based solution. It supports all essential email protocols, offers intuitive administration through a web interface, and integrates advanced security measures such as TLS encryption and virus scanning. Its modular architecture allows for scalable deployments and easy customization to suit diverse operational requirements.
 
-For further details on installation, configuration, and upgrades, please refer to the following documentation files in this directory:
-- [Installation.md](./Installation.md)
-- [Upgrade.md](./Upgrade.md)
-- [Spam_Issues.md](./Spam_Issues.md)
-- [User_Administration.md](./User_Administration.md)
-
-For more information about this role, visit the GitHub repositories:
+More information about this role is available in these GitHub repositories:
 - [Mailu](https://github.com/infinito-nexus/core/tree/main/roles/web-app-mailu)
 - [Mailu-OIDC](https://github.com/heviat/Mailu-OIDC)
 

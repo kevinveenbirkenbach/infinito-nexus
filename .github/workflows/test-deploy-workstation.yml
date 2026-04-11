@@ -1,4 +1,4 @@
-name: Test Infinito.Nexus Deploy (workstation)
+name: "📦 Test: Deploy (workstation)"
 
 on:
   workflow_call:

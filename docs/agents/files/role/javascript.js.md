@@ -2,7 +2,7 @@
 
 This page is the SPOT for automatically generating and updating role-local `javascript.js`, `javascript.js.j2`, and equivalent injected browser entry files.
 Use this page for implementation scope, DOM strategy, and live review.
-For injector wiring, activation, and repository-wide behavior rules, see [Contributing `javascript.js`](../../../contributing/code/role/javascript.js.md).
+For injector wiring, activation, and repository-wide behavior rules, see [Contributing `javascript.js`](../../../contributing/artefact/files/role/javascript.js.md).
 
 ## Goal
 

@@ -8,7 +8,6 @@ Elevate your website management with [Joomla](https://www.joomla.org/), a powerf
 
 This role deploys Joomla using Docker, automating the installation and configuration of your Joomla instance. It integrates with an external PostgreSQL database and sets up an NGINX reverse proxy for secure access, streamlining website management through container orchestration and customizable Ansible variables.
 
-For detailed administration procedures, please refer to the [Administration.md](./Administration.md) file.
 
 ## Features
 

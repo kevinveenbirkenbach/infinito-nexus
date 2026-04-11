@@ -6,7 +6,7 @@ Empower your knowledge base with MediaWiki, a versatile and collaborative platfo
 
 ## Overview
 
-This role deploys MediaWiki using Docker, automating the setup of your wiki instance along with its underlying MariaDB database. It handles generating the essential configuration file (LocalSettings.php) from a seeded template and integrates with an NGINX reverse proxy for secure, efficient web access. For detailed configuration and operational instructions, please refer to the [Installation.md](./Installation.md) file.
+This role deploys MediaWiki using Docker, automating the setup of your wiki instance along with its underlying MariaDB database. It handles generating the essential configuration file (LocalSettings.php) from a seeded template and integrates with an NGINX reverse proxy for secure, efficient web access.
 
 ## Features
 

@@ -40,3 +40,7 @@ MATRIX_ELEMENT_NAME:                  "{{ lookup('config', application_id, 'comp
 MATRIX_ELEMENT_DOMAIN:                "{{ domains[application_id].element }}"
 MATRIX_ELEMENT_PORT:                  "{{ ports.localhost.http['web-app-matrix_element'] }}"
 MATRIX_ELEMENT_CONFIG_PATH_HOST:      "{{ [ lookup('container', application_id, 'directories.config'), 'element-config.json' ] | path_join }}"
+
+## ChatGPT Bot
+MATRIX_CHATGPT_BOT_VERSION:           "{{ lookup('config', application_id, 'compose.services.matrix-chatgpt-bot.version') }}"
+MATRIX_CHATGPT_BOT_IMAGE:             "{{ lookup('config', application_id, 'compose.services.matrix-chatgpt-bot.image') }}"

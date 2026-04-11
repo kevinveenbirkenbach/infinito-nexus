@@ -1,0 +1,6 @@
+ARG PRETIX_IMAGE
+ARG PRETIX_VERSION
+FROM ${PRETIX_IMAGE}:${PRETIX_VERSION}
+ARG PRETIX_OIDC_PLUGIN_VERSION
+# Install OIDC auth plugin for Pretix
+RUN python -m pip install --no-cache-dir "pretix-oidc==${PRETIX_OIDC_PLUGIN_VERSION}"

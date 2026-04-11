@@ -12,9 +12,9 @@ All scripts map `*.infinito.example` → `127.0.0.1` so that local deployments a
 
 General-purpose DNS setup for Linux systems. Supports multiple strategies depending on the environment:
 
-- **NetworkManager + dnsmasq** — preferred path when NetworkManager is active; configures the NM dnsmasq plugin with a wildcard zone entry.
-- **System dnsmasq** — fallback when NetworkManager is not running; configures a standalone dnsmasq service.
-- **`/etc/hosts` fallback** — used in non-systemd environments (e.g. Docker containers, LXC) where service management is unavailable; writes a managed block of host entries directly into the hosts file.
+- **NetworkManager + dnsmasq**. preferred path when NetworkManager is active; configures the NM dnsmasq plugin with a wildcard zone entry.
+- **System dnsmasq**. fallback when NetworkManager is not running; configures a standalone dnsmasq service.
+- **`/etc/hosts` fallback**. used in non-systemd environments (e.g. Docker containers, LXC) where service management is unavailable; writes a managed block of host entries directly into the hosts file.
 
 Shared helper functions are sourced from [`../common.sh`](../common.sh).
 
@@ -31,6 +31,6 @@ WSL2-specific DNS setup. Only executes when running inside a WSL2 environment (d
 
 ## 🔗 Related
 
-- [Makefile Commands](../../../../../docs/contributing/tools/makefile.md) — canonical Make target index for this area
-- [`../remove.sh`](../remove.sh) — teardown script that undoes the DNS configuration
-- [`../common.sh`](../common.sh) — shared variables and helper functions used by `linux.sh`
+- [Makefile Commands](../../../../../docs/contributing/tools/make.md). canonical Make target index for this area
+- [`../remove.sh`](../remove.sh). teardown script that undoes the DNS configuration
+- [`../common.sh`](../common.sh). shared variables and helper functions used by `linux.sh`

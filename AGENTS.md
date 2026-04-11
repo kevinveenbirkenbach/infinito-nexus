@@ -20,6 +20,14 @@ Individual roles MAY contain an `AGENTS.md` file with role-specific agent instru
 - If it exists, you MUST read it and follow all instructions in it before making any changes to that role.
 - Role-level `AGENTS.md` files MAY contain file-specific sections with rules scoped to individual files within the role.
 
+## Skills
+
+At the start of every conversation, the agent MUST check whether agent skills are installed by verifying that `.agents/skills/` exists and is non-empty. If skills are missing, the agent MUST notify the user once with:
+
+> Agent skills not installed. Run `make install-skills` to enable caveman and other agent skills.
+
+The agent MUST NOT repeat this notice within the same conversation.
+
 ## For Humans
 
 Human contributors working alongside AI agents MUST read [here](docs/contributing/tools/agents.md).
