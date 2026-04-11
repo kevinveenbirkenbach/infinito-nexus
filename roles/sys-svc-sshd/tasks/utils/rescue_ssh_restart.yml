@@ -7,11 +7,9 @@
     system_service_debug_context: |
       ansible_virtualization_type={{ ansible_virtualization_type | default('unknown') }}
       ansible_virtualization_role={{ ansible_virtualization_role | default('unknown') }}
-      failed_task={{ ansible_failed_task.name | default('unknown') }}
-      failed_action={{ ansible_failed_task.action | default('unknown') }}
-      failed_msg={{ ansible_failed_result.msg | default('') }}
-      failed_stderr={{ ansible_failed_result.stderr | default('') }}
-      failed_result={{ ansible_failed_result | to_nice_json }}
+      failed_msg={{ sys_svc_sshd_restart_result.msg | default('') }}
+      failed_stderr={{ sys_svc_sshd_restart_result.stderr | default('') }}
+      failed_result={{ sys_svc_sshd_restart_result | to_nice_json }}
 
 - name: Validate sshd_config after failed restart
   ansible.builtin.command:
