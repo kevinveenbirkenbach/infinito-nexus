@@ -56,7 +56,6 @@ if user
   if user.respond_to?(:role=) && user.respond_to?(:role_id)
     if user.role_id != admin_role.id
       user.role = admin_role
-      changed = true
     end
   end
 
