@@ -28,6 +28,12 @@ Every Playwright-enabled role MUST provide exactly these two files:
 `package.json` and `playwright.config.js` MUST remain centralized in `roles/test-e2e-playwright/files/`.
 You MUST NOT duplicate or override them per role.
 
+## CI Image Source 🪞
+
+The Playwright container image is declared in `roles/test-e2e-playwright/defaults/main.yml` as `mcr.microsoft.com/playwright` with an exact version tag. CI mirrors that image into GHCR through the standard mirror pipeline before deploy tests run, so Playwright jobs do not depend on direct pulls from MCR during the test phase.
+
+The tag MUST stay pinned to an exact Playwright version and distro pair such as `v1.58.2-noble`. You MUST NOT switch this to a mutable tag such as `latest`, because mutable upstream tags are more vulnerable to CDN propagation delays and make flaky CI failures much harder to reason about.
+
 ## Runner 🚀
 
 The `test-e2e-playwright` role discovers Playwright-enabled roles through the presence of
