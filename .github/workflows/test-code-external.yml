@@ -1,0 +1,39 @@
+name: "🧪 Test: Code (External)"
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  test-code-external:
+    name: 🧪 Run external tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NIX_CONFIG: |
+        access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      INFINITO_IMAGE_TAG: ci-${{ github.sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Show Docker version
+        run: docker version
+
+      - name: Run external tests via make
+        shell: bash
+        run: |
+          set -euo pipefail
+          make up
+          make test-external 2>&1 | tee /tmp/external-output.txt
+
+      - name: Build step summary from annotations
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: |
+          python3 -m utils.annotations.summarize /tmp/external-output.txt "External Test Annotation Summary"

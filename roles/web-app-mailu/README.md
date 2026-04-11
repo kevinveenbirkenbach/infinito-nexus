@@ -31,5 +31,10 @@ More information about this role is available in these GitHub repositories:
 - [Mailu issue #2135](https://github.com/Mailu/Mailu/issues/2135)
 - [Mailu issue #2827](https://github.com/Mailu/Mailu/issues/2827)
 - [Mailu GitHub repository](https://github.com/Mailu/Mailu)
-- [Plesk support article on RoundCube connection issue](https://support.plesk.com/hc/en-us/articles/115001264814-Unable-to-log-into-RoundCube-Connection-to-storage-server-failed)
 - [Gist by marienfressinaud](https://gist.github.com/marienfressinaud/f284a59b18aad395eb0de2d22836ae6b)
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

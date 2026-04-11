@@ -32,7 +32,7 @@ Use this rule when a role needs a Docker image definition.
 Use this rule when a role pins container image versions in `roles/web-*/config/main.yml`.
 
 - You MUST keep semver-like image versions current when the upstream image publishes matching newer tags.
-- You MUST use `# nocheck: docker-version` directly above a `version:` key only for intentional exceptions that should not be flagged by the lint check.
+- You MUST use `# nocheck: docker-version` directly above a `version:` key only for intentional exceptions that should not be flagged by the external image-version check.
 - You SHOULD prefer explicit version pinning over drifting tags when the role depends on stable, reproducible deploys.
 
 For documentation, comments, semantics, and writing guidance, see [documentation.md](../documentation.md).

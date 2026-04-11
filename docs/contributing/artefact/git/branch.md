@@ -11,6 +11,7 @@ The branch prefix MUST match the type of change. The [PR workflow](pull-request.
 | `feature` | New features or enhancements | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `fix` | Bug fixes | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `update` | Automated or maintenance updates | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
+| `alert-autofix` | Automated alert-triggered fixes | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 | `dependabot` | Automated dependency updates | `*` | Runs the full [ci-orchestrator](../../../../.github/workflows/ci-orchestrator.yml) pipeline. |
 
 ## Enforcement 🔒
@@ -30,9 +31,11 @@ The full branch name MUST follow one of the patterns below, depending on whether
 | General fix | `fix/<topic>/<ticket-id>` | `fix/dns-resolution/taiga-123` |
 | Role fix | `fix/<role>/<topic>/<ticket-id>` | `fix/web-app-matomo/login-redirect/taiga-789` |
 | General update | `update/<topic>` | `update/docker-image-versions` |
+| Alert autofix | `alert-autofix-<alert-id>` | `alert-autofix-261` |
 | Documentation | `documentation/<topic>` | `documentation/contributing-setup` |
 | Agent | `agent/<topic>` | `agent/improve-commit-instructions` |
 | Dependabot | `dependabot/<ecosystem>/<dependency>` | `dependabot/pip/requests-2.32.0` |
 
 `feature`, `update`, `documentation`, and `agent` branches MUST NOT reference a ticket ID.
+`alert-autofix` branches reference the alert ID instead of a ticket ID.
 `dependabot` branches are created automatically and MUST NOT be renamed.

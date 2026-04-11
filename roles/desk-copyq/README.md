@@ -1,22 +1,21 @@
 # CopyQ
 
-## Overview
-This role installs the CopyQ clipboard manager on Pacman-based systems (e.g. Arch Linux) and ensures it is started automatically for the current user.
+## Description
 
-## Requirements
-- Ansible 2.9 or higher
-- Pacman package manager (Arch Linux or derivative)
-- X11/Wayland desktop environment (for GUI)
+[CopyQ](https://hluk.github.io/CopyQ/) is a clipboard manager with advanced features such as editing clipboard history, creating custom actions, and scripting support.
+
+## Overview
+
+This role installs the CopyQ clipboard manager on Pacman-based systems (e.g. Arch Linux) and ensures it is started automatically for the current user.
 
 ## Further Resources
 
 - [CopyQ official site](https://hluk.github.io/CopyQ/)
 - [Arch Wiki: Clipboard](https://wiki.archlinux.org/title/Clipboard)
 
-## Contributing
+## Credits
 
-Contributions are welcome. Please follow best practices.
-
-## Other Resources
-
-This role was created as part of a larger playbook. For more context on this role, you can refer to the related ChatGPT conversation [here](https://chat.openai.com/share/ae168ca0-5191-4bec-96a0-ffcfabca0024).
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

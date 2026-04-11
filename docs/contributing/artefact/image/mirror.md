@@ -4,9 +4,9 @@ This document explains why image mirroring exists, how it works, and what each c
 
 ## Why Mirrors Exist 🎯
 
-Upstream registries (Docker Hub, quay.io, mcr.microsoft.com, ghcr.io) impose **rate limits** and occasionally have **availability issues**. CI pipelines pulling images directly from upstream are fragile: a rate limit hit or a temporary outage fails an otherwise healthy build.
+Upstream registries (Docker Hub, quay.io, mcr.microsoft.com, ghcr.io) impose **rate limits** and occasionally have **availability issues**. CI on GitHub-hosted runners also sees **IP-range- and geo-dependent failures**, plus transient `403`, `429`, and `5xx` responses when many jobs pull the same image directly from upstream. This is especially visible with Playwright images sourced from `mcr.microsoft.com`.
 
-To solve this, all upstream images used in the project are mirrored to GHCR (`ghcr.io`) under the project namespace before CI deploy tests run. Test jobs pull from the mirror and never from the upstream registry directly.
+To solve this, CI mirrors all upstream images used in the project to GHCR (`ghcr.io`) under the project namespace before deploy tests run. Deploy jobs then pull from the GHCR mirror instead of the upstream registry, so a temporary upstream rate limit, outage, or geo-block does not fail an otherwise healthy change.
 
 This also enables **fork PRs** to pull images without needing upstream credentials, because the mirror is public.
 
@@ -76,6 +76,14 @@ This file is consumed by the inventory creator to substitute mirror URLs into ho
 
 The mirror workflow runs as stage 8 of the CI pipeline. See [ci.md](../git/pipeline.md). It runs in parallel with the DNS tests and MUST complete before deploy tests start.
 
+### CI Flow 📋
+
+1. Image discovery scans role declarations in `config/main.yml` and `defaults/main.yml`.
+2. [images-mirror-missing.yml](../../../../.github/workflows/images-mirror-missing.yml) copies only missing upstream refs into GHCR via `cli.mirror.sync --only-missing`. Optional Docker Hub credentials reduce source-side rate limits during that sync.
+3. Fork PRs cannot publish packages themselves, so their untrusted `pull_request` runs wait in `scripts/meta/wait/mirrors.sh` until a trusted producer run has published the required refs.
+4. Inventory generation writes the resulting mirror refs from `mirrors.yml` back into host vars.
+5. Deploy and test jobs resolve images from `ghcr.io/{namespace}/{repository}/mirror/...` instead of pulling directly from Docker Hub, MCR, or other upstream registries.
+
 The mirrors file is generated into the inventory directory. The inventory creator applies mirror image overrides to host variables via `cli/create/inventory/mirror_overrides.py`, which reads both top-level keys from `mirrors.yml` and writes into host vars as follows:
 
 - `applications.{role}.compose.services.{service}.image`: Populated from `mirrors.yml.applications` and still subject to `mirror_policy`.
@@ -94,6 +102,8 @@ Each service in host vars MAY carry a `mirror_policy` field that controls how th
 ## Adding a New Mirrored Image 🆕
 
 No manual registration is needed. Images declared in a role are automatically discovered and included in the next mirror run. See [origin.md](origin.md) for the correct declaration format.
+
+For CI-critical images, you SHOULD pin an exact upstream tag instead of using mutable tags such as `latest`. This is especially important for Playwright images mirrored from `mcr.microsoft.com`, where exact tags avoid CDN propagation races and make flaky upstream releases easier to diagnose.
 
 ## Cleanup 🗑️
 

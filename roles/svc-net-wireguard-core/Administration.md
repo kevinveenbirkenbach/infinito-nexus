@@ -27,8 +27,6 @@
   systemctl status wg-quick@wg0.service
 ```
 
-## Other Resources
-- https://golb.hplar.ch/2019/01/expose-srv-vpn.html
-- https://wiki.archlinux.org/index.php/WireGuard
-- https://wireguard.how/server/raspbian/
-- https://www.scaleuptech.com/de/blog/was-ist-und-wie-funktioniert-subnetting/
+## Further Resources
+- [ArchWiki: WireGuard](https://wiki.archlinux.org/index.php/WireGuard)
+- [Subnetting Basics](https://www.scaleuptech.com/de/blog/was-ist-und-wie-funktioniert-subnetting/)

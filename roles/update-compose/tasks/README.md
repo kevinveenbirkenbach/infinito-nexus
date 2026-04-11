@@ -12,7 +12,7 @@ This role performs the following tasks:
   - Uses [pacman](https://wiki.archlinux.org/title/Pacman) for Arch Linux.
   - Uses [apt](https://en.wikipedia.org/wiki/APT_(software)) for Debian-based systems.
 - Invokes the Docker update role if Docker Compose instances are found.
-- Checks for the presence of the [yay](https://wiki.archlinux.org/title/Yay) AUR helper and, if installed, triggers an update for AUR packages.
+- Checks for the presence of the [yay](https://github.com/Jguer/yay) AUR helper and, if installed, triggers an update for AUR packages.
 
 ## Purpose
 
