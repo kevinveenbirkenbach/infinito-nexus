@@ -18,52 +18,13 @@
 
 - name: Restart detected SSH service with diagnostics
   block:
-    - name: Restart detected SSH service
-      ansible.builtin.systemd:
+    - ansible.builtin.systemd:
         name: "{{ sys_svc_sshd_service_unit }}"
         state: restarted
         enabled: true
         daemon_reload: true
   rescue:
-    - name: Show shared diagnostics for failed SSH restart
-      ansible.builtin.include_role:
-        name: sys-service
-        tasks_from: utils/debug.yml
-      vars:
-        system_service_debug_unit: "{{ sys_svc_sshd_service_unit }}"
-        system_service_debug_context: |
-          ansible_virtualization_type={{ ansible_virtualization_type | default('unknown') }}
-          ansible_virtualization_role={{ ansible_virtualization_role | default('unknown') }}
-          failed_task={{ ansible_failed_task.name | default('unknown') }}
-          failed_action={{ ansible_failed_task.action | default('unknown') }}
-          failed_msg={{ ansible_failed_result.msg | default('') }}
-          failed_stderr={{ ansible_failed_result.stderr | default('') }}
-          failed_result={{ ansible_failed_result | to_nice_json }}
-
-    - name: Validate sshd_config after failed restart
-      ansible.builtin.command:
-        argv:
-          - sshd
-          - -t
-          - -f
-          - /etc/ssh/sshd_config
-      register: sys_svc_sshd_config_check
-      changed_when: false
-      failed_when: false
-
-    - name: Show sshd_config validation after failed restart
-      ansible.builtin.debug:
-        msg: |
-          === sshd -t -f /etc/ssh/sshd_config ===
-          rc={{ sys_svc_sshd_config_check.rc | default('n/a') }}
-          {{ sys_svc_sshd_config_check.stdout | default('') }}
-          {{ sys_svc_sshd_config_check.stderr | default('') }}
-
-    - name: Fail SSH restart with diagnostics
-      ansible.builtin.fail:
-        msg: >-
-          Restart of {{ sys_svc_sshd_service_unit }} failed.
-          See shared service diagnostics above and sshd_config validation output.
+    - ansible.builtin.include_tasks: "{{ role_path }}/tasks/utils/rescue_ssh_restart.yml"
   when: sys_svc_sshd_service_unit | length > 0
   listen: sshd restart
 
