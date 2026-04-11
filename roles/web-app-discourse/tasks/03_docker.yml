@@ -1,9 +1,8 @@
-# Necessary for building: https://chat.openai.com/share/99d258cc-294b-4924-8eef-02fe419bb838
+# which is necessary for building
 - name: install which
   package:
     name: which
     state: present
-
 - name: "load docker, db and proxy for {{ application_id }}"
   include_role:
     name: sys-stk-full
@@ -11,7 +10,6 @@
     docker_compose_flush_handlers:  true
     webserver_vhost_flavour:        "basic"
     application_id:                 "web-app-discourse"
-
 - name: Pull Discourse docker repository
   git:
     repo:    "{{ DISCOURSE_REPOSITORY_URL }}"
@@ -25,20 +23,17 @@
   until: discourse_repo_pull is succeeded
   notify: recreate discourse
   become: true
-
 - name: set chmod 700 for '{{ DISCOURSE_CONTAINERS_DIR }}'
   ansible.builtin.file:
     path: "{{ DISCOURSE_CONTAINERS_DIR }}"
     mode: '700'
     state: directory
-
 - name: "copy configuration to '{{ DISCOURSE_APPLICATION_YML_DEST }}'"
   template:
     src: config.yml.j2
     dest: "{{ DISCOURSE_APPLICATION_YML_DEST }}"
     mode: '0640'
   notify: recreate discourse
-
 - name: "Verify that '{{ DISCOURSE_CONTAINER }}' is running"
   ansible.builtin.command:
     argv:
@@ -54,14 +49,11 @@
   changed_when: docker_ps.stdout.strip() == ""
   failed_when: docker_ps.rc != 0
   notify: recreate discourse
-
 - name: Load discourse handlers explicitly
   # In the CI somehow, the postgres application id was used,
   # local it behaved normal. I hope this solves the anomaly.
   include_tasks: utils/load_handlers.yml
   vars:
     handler_role_name: "web-app-discourse"
-
-
 - name: flush, to recreate discourse app
   meta: flush_handlers

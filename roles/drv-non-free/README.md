@@ -22,4 +22,12 @@ This Ansible role installs non-free GPU drivers on Arch Linux systems by invokin
   Single-task role with minimal overhead.
 
 ## Further Resources
-- [Arch Linux mhwd Package](https://archlinux.org/packages/community/x86_64/manjaro-tools-mhwd/)
+
+- [Arch Linux mhwd Package](https://archlinux.org/packages/?q=manjaro)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

@@ -69,9 +69,11 @@ The `code-quality-gate` requires linting, code tests, and security checks to all
 
 ### 8. Image Mirroring 🪞
 
-[images-mirror-missing.yml](../../../../.github/workflows/images-mirror-missing.yml) mirrors any missing upstream images in parallel with the DNS tests.
-See [mirror.md](../image/mirror.md) for a full explanation of the mirroring architecture and naming convention.
-Authentication for GHCR is configured via repository secrets. See [authentication.md](../../tools/ghcr/authentication.md).
+[images-mirror-missing.yml](../../../../.github/workflows/images-mirror-missing.yml) mirrors any missing upstream images in parallel with the DNS tests so later deploy jobs pull from GHCR instead of Docker Hub, MCR, or other external registries. This shields CI from upstream rate limits, geo-blocking, and transient registry outages.
+
+Fork PRs cannot publish mirror packages directly, so their untrusted runs wait for the trusted mirror producer before continuing. See [mirror.md](../image/mirror.md) for the mirroring architecture and naming convention.
+
+GHCR publication uses the workflow `GITHUB_TOKEN`; optional Docker Hub secrets are used only to reduce source-side Docker Hub rate limits while mirroring. See [authentication.md](../../tools/ghcr/authentication.md).
 
 ### 9. Deploy Tests 🚀
 

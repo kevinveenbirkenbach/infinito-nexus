@@ -259,6 +259,8 @@ class TestVariableDefinitions(unittest.TestCase):
                                 "ansible_distribution_release",
                                 "ansible_distribution",
                                 "ansible_os_family",
+                                "ansible_virtualization_type",
+                                "ansible_virtualization_role",
                             ):
                                 continue
 
@@ -301,6 +303,8 @@ class TestVariableDefinitions(unittest.TestCase):
                                     "ansible_distribution_release",
                                     "ansible_distribution",
                                     "ansible_os_family",
+                                    "ansible_virtualization_type",
+                                    "ansible_virtualization_role",
                                     "not",
                                     "and",
                                     "or",

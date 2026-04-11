@@ -18,7 +18,7 @@ endif
 
 .PHONY: \
 	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python install-skills update-skills \
-	test lint lint-action lint-ansible lint-python lint-shellcheck autoformat test-lint test-unit test-integration test-deploy test-deploy-app \
+	test lint lint-action lint-ansible lint-python lint-shellcheck autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app \
 	clean clean-sudo down \
 	system-purge system-disk-usage \
 	list tree mig dockerignore \
@@ -289,6 +289,12 @@ test-unit: install
 # Run the integration test suite.
 test-integration: install
 	@TEST_TYPE="integration" \
+	INFINITO_COMPILE=0 \
+	bash scripts/tests/code.sh
+
+# Run the external test suite.
+test-external: install
+	@TEST_TYPE="external" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 

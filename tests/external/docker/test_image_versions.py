@@ -4,7 +4,9 @@ For each service with a semver-compatible version tag the latest available
 tag on Docker Hub is fetched and compared. Outdated versions are reported as
 GitHub Actions ``::warning::`` annotations or plain stdout warnings.
 
-The test always passes so that CI is not blocked. Developers are notified of
+This is an opt-in external test because it depends on live third-party
+registries. The test always passes so normal validation stays stable even when
+registries are slow or temporarily unavailable. Developers are notified of
 available updates via the warning output.
 
 Semver-compatible version formats checked:
@@ -279,7 +281,7 @@ def _emit_unchecked_annotation(
 
 
 class TestDockerImageVersions(unittest.TestCase):
-    """Warn about outdated Docker image versions in roles/web-*/config/main.yml."""
+    """Warn about outdated live Docker image versions in roles/web-*/config/main.yml."""
 
     def test_image_versions_are_current(self) -> None:
         entries = _collect_entries()

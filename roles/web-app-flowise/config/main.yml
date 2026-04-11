@@ -10,13 +10,13 @@ server:
         unsafe-eval: true
     whitelist:
       font-src:
-        - https://fonts.gstatic.com
+        - https://fonts.gstatic.com  # nocheck: url
       style-src-elem:
-        - https://fonts.googleapis.com
+        - https://fonts.googleapis.com  # nocheck: url
       script-src-elem:
-        - https://fonts.googleapis.com
-        - https://fonts.gstatic.com
-        - https://r.wdfl.co
+        - https://fonts.googleapis.com  # nocheck: url
+        - https://fonts.gstatic.com  # nocheck: url
+        - https://r.wdfl.co  # nocheck: url
       connect-src: []
 compose:
   services:

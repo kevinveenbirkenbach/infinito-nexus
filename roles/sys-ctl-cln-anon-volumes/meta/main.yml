@@ -19,7 +19,4 @@ galaxy_info:
   - maintenance
   - volumes
   - pkgmgr
-  repository: https://github.com/kevinveenbirkenbach/web-app-volume-cleaner
-  issue_tracker_url: https://github.com/kevinveenbirkenbach/web-app-volume-cleaner/issues
-  documentation: https://github.com/kevinveenbirkenbach/web-app-volume-cleaner
   lifecycle: beta
