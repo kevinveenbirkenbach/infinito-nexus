@@ -11,7 +11,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT))
 
-from utils.role_resource_validation import filter_roles_by_min_storage  # noqa: E402
+from utils.roles.resource_validation import filter_roles_by_min_storage  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:

@@ -1,4 +1,4 @@
-name: Mirror Docker Hub images to GHCR (only missing)
+name: "🪞 Mirror: Docker Hub → GHCR (only missing)"
 
 on:
   workflow_call:
@@ -62,10 +62,6 @@ on:
         required: false
       DOCKERHUB_TOKEN:
         required: false
-      GHCR_PAT:
-        required: false
-      GHCR_USERNAME:
-        required: false
 
 permissions:
   contents: read
@@ -91,7 +87,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Resolve GHCR namespace
+      - name: Resolve GHCR namespace and repository
         id: vars
         shell: bash
         run: |
@@ -102,7 +98,9 @@ jobs:
           else
             ghcr_namespace="$(scripts/meta/resolve/repository/owner.sh)"
           fi
+          ghcr_repository="$(scripts/meta/resolve/repository/name.sh)"
           echo "ghcr_namespace=${ghcr_namespace}" >> "$GITHUB_OUTPUT"
+          echo "ghcr_repository=${ghcr_repository}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout source repo for scan (optional)
         if: ${{ inputs.source_repository != '' && inputs.source_ref != '' }}
@@ -139,13 +137,14 @@ jobs:
         uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
-          username: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_USERNAME != '' && secrets.GHCR_USERNAME || github.actor }}
-          password: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_USERNAME != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Wait for mirrored images (fork PR)
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         env:
           GHCR_NAMESPACE: ${{ steps.vars.outputs.ghcr_namespace }}
+          GHCR_REPOSITORY: ${{ steps.vars.outputs.ghcr_repository }}
           GHCR_PREFIX: ${{ inputs.ghcr_prefix || 'mirror' }}
           REPO_ROOT: ${{ inputs.repo_root || '.' }}
           IMAGE_WAIT_ATTEMPTS: ${{ inputs.image_wait_attempts }}
@@ -154,22 +153,21 @@ jobs:
 
       - name: Mirror images to GHCR (only missing, best-effort)
         if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
-          GHCR_PAT_SET: ${{ secrets.GHCR_PAT != '' && 'true' || 'false' }}
         shell: bash
         run: |
           set -euo pipefail
 
           GHCR_NAMESPACE="${{ steps.vars.outputs.ghcr_namespace }}"
+          GHCR_REPOSITORY="${{ steps.vars.outputs.ghcr_repository }}"
           GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
           REPO_ROOT="${{ inputs.repo_root || '.' }}"
 
-          echo ">>> Mirror namespace: ${GHCR_NAMESPACE}"
-          echo ">>> Mirror prefix:    ${GHCR_PREFIX}"
-          echo ">>> Repo root:        ${REPO_ROOT}"
-          echo ">>> Mode:             only-missing"
-          echo ">>> Throttle:         ${IMAGES_PER_HOUR:-<disabled>} images/hour"
+          echo ">>> Mirror namespace:  ${GHCR_NAMESPACE}"
+          echo ">>> Mirror repository: ${GHCR_REPOSITORY}"
+          echo ">>> Mirror prefix:     ${GHCR_PREFIX}"
+          echo ">>> Repo root:         ${REPO_ROOT}"
+          echo ">>> Mode:              only-missing"
+          echo ">>> Throttle:          ${IMAGES_PER_HOUR:-<disabled>} images/hour"
 
           EXTRA_ARGS=()
           if [ -n "${IMAGES_PER_HOUR:-}" ]; then
@@ -179,8 +177,10 @@ jobs:
           python -m cli.mirror.sync \
             --repo-root "${REPO_ROOT}" \
             --ghcr-namespace "${GHCR_NAMESPACE}" \
+            --ghcr-repository "${GHCR_REPOSITORY}" \
             --ghcr-prefix "${GHCR_PREFIX}" \
             --only-missing \
             "${EXTRA_ARGS[@]}"
 
           echo ">>> Mirror sync finished."
+

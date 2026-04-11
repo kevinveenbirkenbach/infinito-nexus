@@ -91,23 +91,8 @@
 
 - name: Aggressively prune Docker data (keep networks + keep in-use images)
   become: true
-  ansible.builtin.shell: |
-    set -euo pipefail
-
-    echo "Docker disk usage before cleanup:"
-    container system df || true
-
-    container container prune -f || true
-    container image prune -af || true
-    container volume prune -f || true
-
-    container buildx prune -af || true
-    container builder prune -af || true
-
-    echo "Docker disk usage after cleanup:"
-    container system df || true
-  args:
-    executable: /bin/bash
+  ansible.builtin.script:
+    cmd: prune.sh
   changed_when: true
   when: STORAGE_CONSTRAINED | bool
   listen:

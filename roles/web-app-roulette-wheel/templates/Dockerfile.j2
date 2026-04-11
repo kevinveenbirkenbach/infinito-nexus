@@ -1,7 +1,0 @@
-FROM node:latest
-WORKDIR /app
-COPY ./{{ ROULETTE_WHEEL_APP_REL }}/package.json ./
-RUN npm install
-COPY ./{{ ROULETTE_WHEEL_APP_REL }}/ ./
-RUN npm run build
-CMD ["npm", "run", "start"]

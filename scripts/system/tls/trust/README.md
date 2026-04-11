@@ -1,7 +1,7 @@
 # 🔐 CA Trust Scripts
 
 This directory contains platform-specific scripts for trusting the Infinito Root CA certificate on the developer's machine.
-For the canonical Make target index that invokes these helpers, see [docs/contributing/tools/makefile.md](../../../../docs/contributing/tools/makefile.md).
+For the canonical Make target index that invokes these helpers, see [make.md](../../../../docs/contributing/tools/make.md).
 
 All scripts extract the Root CA from a running Infinito container and install it into the appropriate system trust store, so that browsers and tools accept `*.infinito.example` TLS certificates without warnings.
 
@@ -32,5 +32,5 @@ Trusts the Infinito Root CA on **Windows** from inside a WSL2 environment. Only 
 
 ## 🔗 Related
 
-- [`../`](../) — TLS administration scripts
-- `roles/sys-ca-selfsigned/` — generates the self-signed Root CA inside the container
+- [`../`](../). TLS administration scripts
+- `roles/sys-ca-selfsigned/`. generates the self-signed Root CA inside the container

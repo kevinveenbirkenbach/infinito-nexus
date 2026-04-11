@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from cli.mirror.providers import GHCRProvider
-from cli.mirror.util import iter_role_images
+from utils.docker.image.discovery import iter_role_images
 
 
 def _validate_positive_int(value: str) -> int:
@@ -53,8 +53,7 @@ def _throttle_before_next_copy(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default=".")
-    parser.add_argument("--ghcr-namespace", required=True)
-    parser.add_argument("--ghcr-prefix", default="mirror")
+    GHCRProvider.add_args(parser)
     parser.add_argument(
         "--only-missing",
         action="store_true",
@@ -68,7 +67,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    provider = GHCRProvider(args.ghcr_namespace, args.ghcr_prefix)
+    provider = GHCRProvider.from_args(args)
     repo_root = Path(args.repo_root).resolve()
 
     failures: List[str] = []
@@ -84,7 +83,7 @@ def main() -> int:
         )
 
         total += 1
-        src = f"docker://docker.io/{img.source}"
+        src = f"docker://{img.source}"
         dest = f"docker://{provider.image_base(img)}:{img.version}"
         label = f"{img.role}:{img.service} ({img.name}:{img.version})"
 

@@ -27,8 +27,8 @@ For general help and non-security requests, see [SUPPORT.md](SUPPORT.md).
 
 The security policies enforced on this repository are documented here:
 
-- [Branch Protection](docs/contributing/flow/security/branch.md) — rules enforced on the `main` branch
-- [Repository Settings](docs/contributing/flow/security/repository.md) — repository-wide security configuration
+- [Branch Protection](docs/contributing/tools/github/branch.md): Rules enforced on the `main` branch.
+- [Repository Settings](docs/contributing/tools/github/repository.md): Repository-wide security configuration.
 
 ## Detailed Secure Use Guides 🛡️
 

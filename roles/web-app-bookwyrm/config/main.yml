@@ -31,6 +31,8 @@ compose:
       name:       bookwyrm
       repository: https://github.com/bookwyrm-social/bookwyrm.git
       min_storage: "15GB"
+      base_image:   python
+      base_version: "3.11-bookworm"
     # noqa: shared
     worker:
       enabled:  true

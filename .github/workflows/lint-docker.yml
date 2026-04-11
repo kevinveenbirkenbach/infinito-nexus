@@ -1,4 +1,4 @@
-name: Docker Linter
+name: "🔍 Lint: Dockerfiles"
 
 on:
   workflow_call:
@@ -36,4 +36,4 @@ jobs:
 
       - name: Fail if SARIF contains warnings/errors
         if: always()
-        run: python3 utils/check_hadolint_sarif.py hadolint-results.sarif
+        run: python3 utils/docker/hadolint.py hadolint-results.sarif

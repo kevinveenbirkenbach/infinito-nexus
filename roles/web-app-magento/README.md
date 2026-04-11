@@ -14,12 +14,6 @@ This role deploys **Magento 2** via Docker Compose. It is aligned with the Infin
 - Health checks, volumes, and environment templating
 - SMTP wired via platform's `SYSTEM_EMAIL` settings
 
-For setup & operations, see:
-- [Installation.md](./Installation.md)
-- [Administration.md](./Administration.md)
-- [Upgrade.md](./Upgrade.md)
-- [User_Administration.md](./User_Administration.md)
-
 ## Features
 
 - **Modern search:** OpenSearch out of the box (single-node).
@@ -30,14 +24,13 @@ For setup & operations, see:
 
 ## Further Resources
 
-- Magento Open Source: https://magento.com/
-- DevDocs: https://developer.adobe.com/commerce/
-- OpenSearch: https://opensearch.org/
+- [Magento Open Source](https://magento.com/)
+- [Adobe Commerce DevDocs](https://developer.adobe.com/commerce/)
+- [OpenSearch](https://opensearch.org/)
 
-## License / Credits
+## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**.  
+Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
-
-Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-Licensed under [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

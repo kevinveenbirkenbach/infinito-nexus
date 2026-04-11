@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: make-test
+        name: Run make test
+        entry: make test
+        language: system
+        pass_filenames: false
+        exclude: \.(md|rst|txt)$

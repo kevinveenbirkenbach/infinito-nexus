@@ -2,6 +2,9 @@
   {{ entity_name }}:
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        MEDIAWIKI_IMAGE: "{{ MEDIAWIKI_IMAGE }}"
+        MEDIAWIKI_VERSION: "{{ MEDIAWIKI_VERSION }}"
     container_name: "{{ MEDIAWIKI_CONTAINER }}"
     image: "{{ MEDIAWIKI_CUSTOM_IMAGE }}"
     volumes:
