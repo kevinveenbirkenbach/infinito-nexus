@@ -107,13 +107,47 @@ class TestPrometheusServicePresence(unittest.TestCase):
                     f"web-app-prometheus: compose.services.prometheus.{key} must not be empty",
                 )
 
+    def test_blackbox_exporter_image_is_pinned(self):
+        """web-app-prometheus compose must use a pinned blackbox-exporter image, not :latest."""
+        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        compose_path = roles_dir / PROMETHEUS_APP_ID / "templates" / "compose.yml.j2"
+        content = compose_path.read_text(encoding="utf-8")
+        self.assertNotIn(
+            "prom/blackbox-exporter:latest",
+            content,
+            "compose.yml.j2 must not use :latest for blackbox-exporter — pin to a version "
+            "via config/main.yml (compose.services.blackbox-exporter.version)",
+        )
+        self.assertIn(
+            "BLACKBOX_VERSION",
+            content,
+            "compose.yml.j2 must reference BLACKBOX_VERSION for a reproducible image tag",
+        )
+
+    def test_alert_rules_mounted_in_prometheus_container(self):
+        """compose.yml.j2 must bind-mount the alert rules file into the Prometheus container."""
+        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        compose_path = roles_dir / PROMETHEUS_APP_ID / "templates" / "compose.yml.j2"
+        content = compose_path.read_text(encoding="utf-8")
+        self.assertIn(
+            "ALERT_RULES_CONFIG_HOST",
+            content,
+            "compose.yml.j2 must mount ALERT_RULES_CONFIG_HOST into the Prometheus container "
+            "otherwise alert_rules.yml.j2 is rendered on disk but never loaded — all alerts are dead",
+        )
+
 
 class TestPrometheusNginxEndpoints(unittest.TestCase):
     """
     The shared nginx vhost template must expose /healthz/live and /healthz/ready.
-    The /metricz endpoint and log_by_lua_block live in the prometheus role's own
-    location.conf.j2 (included conditionally when prometheus is enabled), following
-    KISS and SRP principles per Kevin's review of PR #144.
+
+    Two prometheus templates are conditionally included per Kevin's SRP/KISS review of PR #144:
+    - location.conf.j2  — log_by_lua_block for per-request metrics; on every app vhost
+                          with compose.services.prometheus.enabled = true
+    - metricz.conf.j2   — location = /metricz scrape endpoint; ONLY on the prometheus
+                          domain (compose.services.prometheus.name is set)
+                          Restricting /metricz to one domain prevents leaking the full
+                          metrics payload from every app's public hostname.
     """
 
     def _basic_conf_path(self):
@@ -133,6 +167,15 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             / "web-app-prometheus"
             / "templates"
             / "location.conf.j2"
+        )
+
+    def _metricz_conf_path(self):
+        return (
+            Path(__file__).resolve().parent.parent.parent
+            / "roles"
+            / "web-app-prometheus"
+            / "templates"
+            / "metricz.conf.j2"
         )
 
     def test_basic_conf_has_health_endpoints(self):
@@ -163,63 +206,95 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "/healthz/live must NOT be a static return 200 — it must check backend health",
         )
 
-    def test_basic_conf_includes_prometheus_location_template(self):
-        """basic.conf.j2 must conditionally include the prometheus location template.
+    def test_basic_conf_includes_location_conf_for_all_prometheus_apps(self):
+        """basic.conf.j2 must include location.conf.j2 for all prometheus-enabled app vhosts.
 
         The condition covers two cases:
-          - Regular apps:           compose.services.prometheus.enabled = true
+          - Regular apps:              compose.services.prometheus.enabled = true
           - web-app-prometheus itself: compose.services.prometheus.name is set
-            (its domain is the central /metricz scrape target; there is no 'enabled'
-            flag because the 'prometheus' key describes the container, not the integration).
         """
         content = self._basic_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "roles/web-app-prometheus/templates/location.conf.j2",
             content,
-            "basic.conf.j2 must include roles/web-app-prometheus/templates/location.conf.j2 "
-            "for prometheus-enabled apps (SRP — per Kevin's review of PR #144)",
+            "basic.conf.j2 must include location.conf.j2 for prometheus-enabled apps "
+            "(SRP — per Kevin's review of PR #144)",
         )
         self.assertIn(
             "compose.services.prometheus.name",
             content,
-            "basic.conf.j2 condition must also check compose.services.prometheus.name "
-            "so that the prometheus app's own domain gets location = /metricz",
+            "basic.conf.j2 condition must check compose.services.prometheus.name "
+            "so that the prometheus app's own domain also gets the log_by_lua_block",
         )
 
-    def test_location_conf_has_metricz_endpoint(self):
-        """/metricz must be defined in the prometheus role's location.conf.j2, not basic.conf.j2."""
-        loc_path = self._location_conf_path()
-        self.assertTrue(loc_path.exists(), f"Missing: {loc_path}")
-        content = loc_path.read_text(encoding="utf-8")
+    def test_basic_conf_includes_metricz_only_on_prometheus_domain(self):
+        """basic.conf.j2 must include metricz.conf.j2 ONLY when compose.services.prometheus.name is set.
+
+        /metricz must not be exposed on every app vhost — that would leak the full
+        metrics payload from 60+ public hostnames. Only the prometheus domain serves it.
+        """
+        content = self._basic_conf_path().read_text(encoding="utf-8")
+        self.assertIn(
+            "roles/web-app-prometheus/templates/metricz.conf.j2",
+            content,
+            "basic.conf.j2 must include metricz.conf.j2 for the prometheus domain "
+            "(location = /metricz must not appear on every app vhost)",
+        )
+        # The metricz include must be a SEPARATE block guarded by .name alone
+        # (not the same block as location.conf.j2 which uses .enabled OR .name).
+        # Verify by checking that the file has TWO distinct {% if %} blocks that
+        # reference prometheus.name — one for location.conf.j2 (OR condition) and
+        # one for metricz.conf.j2 (standalone .name check).
+        prometheus_name_occurrences = content.count("compose.services.prometheus.name")
+        self.assertGreaterEqual(
+            prometheus_name_occurrences,
+            2,
+            "basic.conf.j2 must reference compose.services.prometheus.name in at least two "
+            "places: once in the location.conf.j2 OR-condition and once as the sole guard "
+            "for metricz.conf.j2 (so /metricz only appears on the prometheus domain)",
+        )
+
+    def test_metricz_conf_has_metricz_endpoint(self):
+        """/metricz must be defined in metricz.conf.j2, not in location.conf.j2 or basic.conf.j2."""
+        metricz_path = self._metricz_conf_path()
+        self.assertTrue(metricz_path.exists(), f"Missing: {metricz_path}")
+        content = metricz_path.read_text(encoding="utf-8")
         self.assertIn(
             "location = /metricz",
             content,
-            "location.conf.j2 must define 'location = /metricz'",
+            "metricz.conf.j2 must define 'location = /metricz'",
+        )
+        # Verify it is NOT in location.conf.j2 (that would put it on every vhost)
+        loc_content = self._location_conf_path().read_text(encoding="utf-8")
+        self.assertNotIn(
+            "location = /metricz",
+            loc_content,
+            "location = /metricz must NOT be in location.conf.j2 — it belongs only in "
+            "metricz.conf.j2 (included only on the prometheus domain)",
         )
 
-    def test_location_conf_metricz_exposes_stack_up_gauge(self):
+    def test_metricz_conf_exposes_stack_up_gauge(self):
         """/metricz must update the stack_up gauge before collecting metrics."""
-        content = self._location_conf_path().read_text(encoding="utf-8")
+        content = self._metricz_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "metric_stack_up",
             content,
-            "/metricz in location.conf.j2 must set metric_stack_up gauge "
+            "/metricz in metricz.conf.j2 must set metric_stack_up gauge "
             "(per Kevin's review: 'if healthy then up otherwise not')",
         )
 
-    def test_location_conf_metricz_stack_up_checks_docker_health(self):
+    def test_metricz_conf_stack_up_checks_docker_health(self):
         """/metricz stack_up gauge must reflect Docker HEALTHCHECK, not just HTTP reachability.
 
         Kevin's review: 'if healthy then up otherwise not' — the gauge must use the
-        same Docker-socket-backed health_containers dict as /healthz/live so that a
-        container with a failing HEALTHCHECK shows nginx_stack_up = 0 in Prometheus.
+        same Docker-socket-backed health_containers dict as /healthz/live.
         """
-        content = self._location_conf_path().read_text(encoding="utf-8")
+        content = self._metricz_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "health_containers",
             content,
-            "/metricz in location.conf.j2 must check health_containers shared dict "
-            "so metric_stack_up reflects Docker HEALTHCHECK state, not just HTTP reachability "
+            "/metricz in metricz.conf.j2 must check health_containers shared dict "
+            "so metric_stack_up reflects Docker HEALTHCHECK state "
             "(Kevin's review: 'if healthy then up otherwise not')",
         )
 
@@ -296,6 +371,51 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "ALERTMANAGER_MATTERMOST_WEBHOOK_URL",
             content,
             "alertmanager.yml.j2 must include Mattermost webhook config (task AC: Mattermost notification)",
+        )
+
+    def test_alert_rules_has_communication_channel_rule(self):
+        """alert_rules.yml.j2 must have a rule targeting communication-channel apps specifically.
+
+        The task AC requires alert rules for communication channels (Mattermost, Matrix, Mailu).
+        Generic AppDown alone is insufficient — a dedicated rule makes intent explicit and allows
+        different routing/escalation for communication-critical apps.
+        """
+        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        content = (
+            roles_dir / PROMETHEUS_APP_ID / "templates" / "alert_rules.yml.j2"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "CommunicationChannelDown",
+            content,
+            "alert_rules.yml.j2 must define a CommunicationChannelDown alert rule "
+            "(task AC: alert rules for communication channels — Mattermost, Matrix, Mailu)",
+        )
+        self.assertIn(
+            "web-app-mattermost",
+            content,
+            "CommunicationChannelDown rule must target web-app-mattermost",
+        )
+
+    def test_blackbox_tls_is_templated(self):
+        """blackbox.yml.j2 must use TLS_ENABLED to set insecure_skip_verify, not hardcode false.
+
+        Hardcoding insecure_skip_verify: false breaks all blackbox probes in
+        development/staging environments that use self-signed TLS certificates.
+        """
+        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        content = (
+            roles_dir / PROMETHEUS_APP_ID / "templates" / "blackbox.yml.j2"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "TLS_ENABLED",
+            content,
+            "blackbox.yml.j2 must template insecure_skip_verify from TLS_ENABLED "
+            "(hardcoding false breaks self-signed TLS environments)",
+        )
+        self.assertNotIn(
+            "insecure_skip_verify: false",
+            content,
+            "blackbox.yml.j2 must not hardcode insecure_skip_verify: false",
         )
 
 
@@ -407,6 +527,8 @@ class TestNativeAppMetrics(unittest.TestCase):
     """
     Applications that provide native Prometheus metrics MUST have a scrape job
     in prometheus.yml.j2 (task AC: expose /metrics for apps that support it).
+    The jobs are guarded by native_metrics.enabled in each app's own config
+    (NOT by compose.services.prometheus.enabled which is the nginx integration flag).
     """
 
     def _prometheus_yml_path(self):
@@ -428,6 +550,61 @@ class TestNativeAppMetrics(unittest.TestCase):
             "(task AC: apps that support metrics MUST expose /metrics)",
         )
 
+    def test_prometheus_yml_has_mattermost_native_metrics_job(self):
+        """prometheus.yml.j2 must include a Mattermost native metrics scrape job."""
+        content = self._prometheus_yml_path().read_text(encoding="utf-8")
+        self.assertIn(
+            'job_name: "mattermost"',
+            content,
+            "prometheus.yml.j2 must define a 'mattermost' scrape job "
+            "(task AC: Mattermost supports Prometheus metrics via MM_METRICSSETTINGS_ENABLE=true)",
+        )
+
+    def test_prometheus_yml_has_synapse_native_metrics_job(self):
+        """prometheus.yml.j2 must include a Matrix Synapse native metrics scrape job."""
+        content = self._prometheus_yml_path().read_text(encoding="utf-8")
+        self.assertIn(
+            'job_name: "matrix-synapse"',
+            content,
+            "prometheus.yml.j2 must define a 'matrix-synapse' scrape job "
+            "(task AC: Matrix/Synapse supports Prometheus metrics via enable_metrics: true)",
+        )
+
+    def test_native_metrics_guard_uses_native_metrics_flag(self):
+        """Native metrics scrape jobs must be guarded by native_metrics.enabled, not the nginx integration flag.
+
+        compose.services.prometheus.enabled is the nginx monitoring integration flag —
+        it controls whether log_by_lua_block is added to the vhost. It must NOT be used
+        as the guard for native /metrics scrape jobs: that would add a scrape target for
+        every deployed app even when the app's native metrics endpoint is disabled,
+        causing all those targets to show as DOWN in Prometheus.
+        """
+        content = self._prometheus_yml_path().read_text(encoding="utf-8")
+        self.assertIn(
+            "native_metrics.enabled",
+            content,
+            "prometheus.yml.j2 native metrics jobs must be guarded by native_metrics.enabled "
+            "from each app's own config, not by compose.services.prometheus.enabled",
+        )
+
+    def test_native_metrics_apps_have_enabled_flag_in_config(self):
+        """Apps with native metrics support must have native_metrics.enabled in their config."""
+        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        for app_id in ("web-app-gitea", "web-app-mattermost", "web-app-matrix"):
+            with self.subTest(app_id=app_id):
+                cfg = _load_config(str(roles_dir / app_id / "config" / "main.yml"))
+                self.assertIn(
+                    "native_metrics",
+                    cfg,
+                    f"{app_id}/config/main.yml must have a native_metrics section "
+                    f"(guards the Prometheus scrape job; set enabled: true in inventory to activate)",
+                )
+                self.assertIn(
+                    "enabled",
+                    cfg.get("native_metrics", {}),
+                    f"{app_id}/config/main.yml native_metrics must have an 'enabled' key",
+                )
+
     def test_prometheus_gitea_job_uses_metrics_path(self):
         """The Gitea scrape job must use metrics_path: /metrics."""
         content = self._prometheus_yml_path().read_text(encoding="utf-8")
@@ -435,6 +612,15 @@ class TestNativeAppMetrics(unittest.TestCase):
             "metrics_path: /metrics",
             content,
             "prometheus.yml.j2 Gitea job must set metrics_path: /metrics",
+        )
+
+    def test_prometheus_synapse_job_uses_synapse_metrics_path(self):
+        """The Synapse scrape job must use the correct /_synapse/metrics path."""
+        content = self._prometheus_yml_path().read_text(encoding="utf-8")
+        self.assertIn(
+            "metrics_path: /_synapse/metrics",
+            content,
+            "prometheus.yml.j2 Synapse job must set metrics_path: /_synapse/metrics",
         )
 
 

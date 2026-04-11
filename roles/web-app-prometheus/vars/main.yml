@@ -35,7 +35,12 @@ ALERTMANAGER_TELEGRAM_CHAT_ID:         "{{ lookup('config', application_id, 'ale
 ALERTMANAGER_MATTERMOST_WEBHOOK_URL:   "{{ lookup('config', application_id, 'alerting.mattermost.webhook_url', '') }}"
 
 # Native application metrics — per-app bearer tokens for Prometheus scraping
-PROMETHEUS_GITEA_METRICS_TOKEN:        "{{ lookup('config', application_id, 'native_metrics.gitea.token', '') }}"
+PROMETHEUS_GITEA_METRICS_TOKEN:        "{{ lookup('config', 'web-app-gitea', 'native_metrics.token', '') }}"
+
+# Blackbox Exporter
+BLACKBOX_VERSION:             "{{ lookup('config', application_id, 'compose.services.blackbox-exporter.version') }}"
+BLACKBOX_IMAGE:               "{{ lookup('config', application_id, 'compose.services.blackbox-exporter.image') }}"
+BLACKBOX_CONTAINER:           "{{ lookup('config', application_id, 'compose.services.blackbox-exporter.name') }}"
 
 # cAdvisor
 CADVISOR_VERSION:             "{{ lookup('config', application_id, 'compose.services.cadvisor.version') }}"

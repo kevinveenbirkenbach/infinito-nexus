@@ -1,0 +1,34 @@
+  # Central nginx metrics endpoint — scraped ONCE by Prometheus from this domain.
+  # Exposes HTTP request counts, latency histograms, bytes in/out, TLS handshakes,
+  # and stack_up gauge for all vhosts via lua-resty-prometheus shared memory.
+  # All metrics carry 'host' and 'app' labels so one scrape covers all 70+ apps.
+  # NOT included in other app vhosts — only the prometheus domain exposes this.
+  location = /metricz {
+    access_log off;
+    content_by_lua_block {
+      -- Mirror the /healthz/live logic: a container is "up" only when BOTH
+      -- Docker says it is healthy AND the HTTP backend is reachable.
+      -- Kevin's requirement: "if healthy then up otherwise not".
+      local up = 1
+
+      -- Step 1: Docker HEALTHCHECK state (same source as /healthz/live).
+      local cname = ngx.var.container_name
+      if cname and cname ~= "" then
+        local status = ngx.shared.health_containers:get(cname)
+        if status == "down" then
+          up = 0
+        end
+      end
+
+      -- Step 2: HTTP reachability.
+      if up == 1 then
+        local res = ngx.location.capture("/_live_probe")
+        if not res or res.status >= 500 then
+          up = 0
+        end
+      end
+
+      metric_stack_up:set(up, {ngx.var.host, ngx.var.app_id})
+      prometheus:collect()
+    }
+  }

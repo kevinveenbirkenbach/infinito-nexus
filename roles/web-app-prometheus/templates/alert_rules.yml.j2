@@ -25,9 +25,10 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High latency on {{ '{{' }} $labels.host {{ '}}' }}"
+          summary: "High latency on {{ '{{' }} $labels.app {{ '}}' }} ({{ '{{' }} $labels.host {{ '}}' }})"
           description: >
-            95th percentile request latency on {{ '{{' }} $labels.host {{ '}}' }} exceeds 2s
+            95th percentile request latency on {{ '{{' }} $labels.host {{ '}}' }}
+            (app: {{ '{{' }} $labels.app {{ '}}' }}) exceeds 2s
             (current: {{ '{{' }} $value | humanizeDuration {{ '}}' }}).
 
       - alert: AppHighErrorRate
@@ -39,10 +40,31 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: "High 5xx error rate on {{ '{{' }} $labels.host {{ '}}' }}"
+          summary: "High 5xx error rate on {{ '{{' }} $labels.app {{ '}}' }} ({{ '{{' }} $labels.host {{ '}}' }})"
           description: >
-            More than 5% of requests on {{ '{{' }} $labels.host {{ '}}' }} are returning 5xx errors
+            More than 5% of requests on {{ '{{' }} $labels.host {{ '}}' }}
+            (app: {{ '{{' }} $labels.app {{ '}}' }}) are returning 5xx errors
             (current: {{ '{{' }} $value | humanizePercentage {{ '}}' }}).
+
+  - name: communication_channels
+    rules:
+      # Alert when any communication-channel app is unreachable for more than 2 minutes.
+      # These apps are critical infrastructure; alerting on them specifically (rather than
+      # relying solely on the generic AppDown rule) satisfies the task AC for communication
+      # channel monitoring.
+      - alert: CommunicationChannelDown
+        expr: >
+          probe_success{job="blackbox-healthz",
+            app=~"web-app-mattermost|web-app-matrix|web-app-mailu"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Communication channel {{ '{{' }} $labels.app {{ '}}' }} is down"
+          description: >
+            {{ '{{' }} $labels.instance {{ '}}' }} ({{ '{{' }} $labels.app {{ '}}' }})
+            has been unreachable for more than 2 minutes.
+            This is a communication-critical application.
 
   - name: prometheus_health
     rules:

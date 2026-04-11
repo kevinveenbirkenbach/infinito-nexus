@@ -15,10 +15,11 @@
     volumes:
       - data:/prometheus
       - {{ PROMETHEUS_CONFIG_HOST }}:{{ PROMETHEUS_CONFIG_DOCKER }}:ro
+      - {{ ALERT_RULES_CONFIG_HOST }}:{{ ALERT_RULES_CONFIG_DOCKER }}:ro
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
   blackbox-exporter:
-    image: "prom/blackbox-exporter:latest"
-    container_name: "{{ PROMETHEUS_CONTAINER }}-blackbox"
+    image: "{{ BLACKBOX_IMAGE }}:{{ BLACKBOX_VERSION }}"
+    container_name: "{{ BLACKBOX_CONTAINER }}"
     restart: unless-stopped
     command:
       - "--config.file={{ BLACKBOX_CONFIG_DOCKER }}"

@@ -66,3 +66,5 @@ compose:
     logs:                         "mattermost_logs"
     plugins:                      "mattermost_plugins"
     client-plugins:               "mattermost_client_plugins"
+native_metrics:
+  enabled:          false    # Set true in inventory after enabling MM_METRICSSETTINGS_ENABLE=true

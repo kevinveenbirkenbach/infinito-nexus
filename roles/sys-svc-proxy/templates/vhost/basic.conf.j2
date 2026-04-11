@@ -134,16 +134,25 @@ server
   }
 
   {#
-    Include the prometheus nginx metrics location when the role participates in the
-    monitoring stack. Two cases:
-    - Other apps: compose.services.prometheus.enabled = true  (shared integration flag)
-    - web-app-prometheus itself: compose.services.prometheus.name is set (container config,
-      no 'enabled' key) — its domain is the single scrape target for all nginx metrics.
+    Prometheus integration — two separate templates:
+
+    1. location.conf.j2 (log_by_lua_block) — included in every app vhost that
+       participates in monitoring (compose.services.prometheus.enabled = true).
+       Records per-request metrics into the shared lua dict on every request.
+
+    2. metricz.conf.j2 (location = /metricz) — included ONLY on the prometheus
+       domain (compose.services.prometheus.name is set). This is the single scrape
+       endpoint; exposing it on every app vhost would leak the full metrics payload
+       and duplicate the /metricz surface needlessly.
   #}
   {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
       or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
-  {# Prometheus metrics endpoint and per-request collection — owned by the prometheus role. #}
+  {# Per-request metrics collection — runs on every vhost in the monitoring stack. #}
   {% include 'roles/web-app-prometheus/templates/location.conf.j2' %}
+  {% endif %}
+  {% if lookup('config', application_id, 'compose.services.prometheus.name', '') %}
+  {# Scrape endpoint — only on the prometheus domain itself. #}
+  {% include 'roles/web-app-prometheus/templates/metricz.conf.j2' %}
   {% endif %}
 
 }

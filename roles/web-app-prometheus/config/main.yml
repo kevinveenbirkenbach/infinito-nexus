@@ -59,6 +59,10 @@ compose:
       mem_reservation:            "64m"
       mem_limit:                  "128m"
       pids_limit:                 64
+    blackbox-exporter:
+      image:                      "prom/blackbox-exporter"
+      version:                    "v0.25.0"
+      name:                       "prometheus-blackbox"
     cadvisor:
       image:                      "gcr.io/cadvisor/cadvisor"
       version:                    "v0.52.1"
@@ -85,6 +89,6 @@ alerting:
     chat_id:                      0     # Telegram chat ID (integer)
   mattermost:
     webhook_url:                  ""    # Set in inventory to enable Mattermost alerts
-native_metrics:
-  gitea:
-    token:                        ""    # Set in inventory when GITEA__metrics__ENABLED=true and token auth is configured
+# native_metrics tokens are read from each app's own config, not from here.
+# To enable a scrape job, set native_metrics.enabled: true in the relevant
+# app's inventory vars, and (for Gitea) native_metrics.token: "<token>".

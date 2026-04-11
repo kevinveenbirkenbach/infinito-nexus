@@ -82,3 +82,6 @@ compose:
       shared: true
   volumes:
     data:             "gitea_data"
+native_metrics:
+  enabled:          false    # Set true in inventory after enabling GITEA__metrics__ENABLED=true
+  token:            ""       # Optional bearer token — set in vault if Gitea token auth is enabled

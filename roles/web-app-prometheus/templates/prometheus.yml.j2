@@ -46,16 +46,17 @@ scrape_configs:
       - targets: ["host.docker.internal:9100"]
 
   # ── Native application metrics ────────────────────────────────────────────
-  # Scraped only when the app is deployed (present in 'applications') and has
-  # compose.services.prometheus.enabled = true in its role config.
-  # Apps expose their own runtime metrics (Go, JVM, …) on /metrics; Prometheus
-  # scrapes them via HTTPS so no extra port mapping or shared Docker network is
-  # needed.  A bearer token is optional but recommended for public endpoints.
+  # Scraped only when the app is deployed AND has native_metrics.enabled: true
+  # set in the app's own role config (default: false).  This is separate from
+  # compose.services.prometheus.enabled which controls the nginx integration only.
+  # Enable per-app in inventory after activating the app's own metrics endpoint.
+  # Apps are scraped via HTTPS — no extra port mapping or shared network needed.
 
-{% if 'web-app-gitea' in applications and lookup('config', 'web-app-gitea', 'compose.services.prometheus.enabled', False) %}
+{% if 'web-app-gitea' in applications and lookup('config', 'web-app-gitea', 'native_metrics.enabled', False) %}
   # Gitea — Go runtime + application metrics.
   # Requires GITEA__metrics__ENABLED = true in the Gitea environment config.
-  # Set native_metrics.gitea.token in the inventory when token auth is enabled.
+  # Enable via native_metrics.enabled: true in inventory.
+  # Set native_metrics.gitea.token when token auth is configured in Gitea.
   - job_name: "gitea"
     scheme: https
     metrics_path: /metrics
@@ -68,6 +69,36 @@ scrape_configs:
       - targets: ["{{ lookup('domain', 'web-app-gitea') }}"]
         labels:
           app: "web-app-gitea"
+{% endif %}
+
+{% if 'web-app-mattermost' in applications and lookup('config', 'web-app-mattermost', 'native_metrics.enabled', False) %}
+  # Mattermost — application and Go runtime metrics.
+  # Requires MM_METRICSSETTINGS_ENABLE=true in the Mattermost environment config.
+  # Enable via native_metrics.enabled: true in inventory.
+  - job_name: "mattermost"
+    scheme: https
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
+    static_configs:
+      - targets: ["{{ lookup('domain', 'web-app-mattermost') }}"]
+        labels:
+          app: "web-app-mattermost"
+{% endif %}
+
+{% if 'web-app-matrix' in applications and lookup('config', 'web-app-matrix', 'native_metrics.enabled', False) %}
+  # Matrix Synapse — server and federation metrics.
+  # Requires enable_metrics: true in homeserver.yaml.
+  # Enable via native_metrics.enabled: true in inventory.
+  - job_name: "matrix-synapse"
+    scheme: https
+    metrics_path: /_synapse/metrics
+    tls_config:
+      insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
+    static_configs:
+      - targets: ["{{ lookup('domain', 'web-app-matrix') }}"]
+        labels:
+          app: "web-app-matrix"
 {% endif %}
 
   # Blackbox readiness probes — one target per canonical domain per application.

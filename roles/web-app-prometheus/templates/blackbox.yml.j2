@@ -12,9 +12,9 @@ modules:
       method: GET
       follow_redirects: false
       fail_if_ssl: false
-      fail_if_not_ssl: true
+      fail_if_not_ssl: {{ TLS_ENABLED | bool | lower }}
       tls_config:
-        insecure_skip_verify: false
+        insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
       preferred_ip_protocol: "ip4"
 
   # Used for /healthz/ready probes — accepts any non-5xx response.
@@ -29,7 +29,7 @@ modules:
       method: GET
       follow_redirects: false
       fail_if_ssl: false
-      fail_if_not_ssl: true
+      fail_if_not_ssl: {{ TLS_ENABLED | bool | lower }}
       tls_config:
-        insecure_skip_verify: false
+        insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
       preferred_ip_protocol: "ip4"
