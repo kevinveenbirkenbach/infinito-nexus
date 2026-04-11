@@ -1,4 +1,4 @@
-name: Test Infinito.Nexus Code
+name: "🧪 Test: Code (Integration)"
 
 on:
   workflow_call:

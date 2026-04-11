@@ -24,8 +24,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-lint = [
+dev = [
   "ruff",
+  "pre-commit",
 ]
 
 [project.scripts]
@@ -50,6 +51,7 @@ packages = { find = { where = ["."], include = [
 include-package-data = true
 
 [tool.ruff]
+respect-gitignore = true
 exclude = [
   "build",
   "dist",

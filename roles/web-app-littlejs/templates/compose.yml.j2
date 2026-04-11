@@ -3,6 +3,12 @@
   {{ LITTLEJS_SERVICE }}:
     container_name: {{ LITTLEJS_CONTAINER }}
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        LITTLEJS_IMAGE:          "{{ LITTLEJS_IMAGE }}"
+        LITTLEJS_VERSION:        "{{ LITTLEJS_VERSION }}"
+        LITTLEJS_APP_REL:        "{{ LITTLEJS_APP_REL }}"
+        LITTLEJS_INDEX_HOST_REL: "{{ LITTLEJS_INDEX_HOST_REL }}"
+        LITTLEJS_RUN_HOST_REL:   "{{ LITTLEJS_RUN_HOST_REL }}"
     image: {{ LITTLEJS_IMAGE_CUSTOM }}
     ports:
       - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80

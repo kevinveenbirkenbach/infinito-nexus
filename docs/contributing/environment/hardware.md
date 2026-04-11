@@ -47,24 +47,24 @@ This sets `enabled: false` and `shared: false` for every listed service in the g
 
 | Service | Optional | What it provides | Effect of disabling | Safe to disable when |
 |---|---|---|---|---|
-| `matomo` | 🟢 | Analytics tracking | No usage statistics collected — usually no functional impact | You are not testing analytics integration |
+| `matomo` | 🟢 | Analytics tracking | No usage statistics collected. Usually no functional impact. | You are not testing analytics integration |
 | `oidc` | 🟠 | Single sign-on via Keycloak | App falls back to local login | You are not testing SSO/OIDC flows |
 | `ldap` | 🟠 | Central user directory via OpenLDAP | App uses its own local user store | You are not testing LDAP/user sync |
 | `css` | 🟠 | Custom theming/branding stylesheet | App uses its default upstream theme | You are not testing visual customization |
 | `logout` | 🟠 | Shared logout endpoint across apps | Single sign-out does not propagate | You are not testing cross-app logout |
 | `dashboard` | 🟠 | Central navigation hub | App is not reachable via the dashboard | You access the app directly by URL |
 | `redis` | 🔴 | In-memory cache and session store | Caching and queuing are disabled | The app does not require sessions or queues (rarely safe) |
-| `database` | 🔴 | Shared relational database (MariaDB/Postgres) | App cannot persist data | **Never disable** — required by almost every app |
+| `database` | 🔴 | Shared relational database (MariaDB/Postgres) | App cannot persist data | **Never disable.** Required by almost every app. |
 
 **Legend:**
 
-- 🟢 Safe to disable — usually no functional impact.
-- 🟠 Optional — can be disabled, reduces functionality.
-- 🔴 Required — MUST NOT be disabled.
+- 🟢 Safe to disable. Usually no functional impact.
+- 🟠 Optional. Can be disabled, but reduces functionality.
+- 🔴 Required. MUST NOT be disabled.
 
 This is a development profile, not a production target.
 
-When running Playwright tests, you SHOULD only disable `matomo`. All other services (🟠) are REQUIRED for full end-to-end scenario coverage — disabling them will cause Playwright tests that depend on SSO, LDAP, theming, or logout flows to fail or produce incomplete results.
+When running Playwright tests, you SHOULD only disable `matomo`. All other services (🟠) are REQUIRED for full end-to-end scenario coverage. Disabling them will cause Playwright tests that depend on SSO, LDAP, theming, or logout flows to fail or produce incomplete results.
 
 ## Test Smarter
 
@@ -111,10 +111,10 @@ PURGE_WINDOWS_CLEANMGR_SETUP=true make system-purge
 
 ### Further Information
 
-- [Purge guide](../../../scripts/system/purge/README.md) — canonical entry points for cleanup
-- [Local purge guide](../../../scripts/tests/deploy/local/purge/README.md) — local deploy cleanup helpers
-- [Local reset guide](../../../scripts/tests/deploy/local/reset/README.md) — local state reset helpers
-- [Makefile commands](../tools/makefile.md) — all available make targets
+- [Purge guide](../../../scripts/system/purge/README.md): Canonical entry points for cleanup.
+- [Local purge guide](../../../scripts/tests/deploy/local/purge/README.md): Local deploy cleanup helpers.
+- [Local reset guide](../../../scripts/tests/deploy/local/reset/README.md): Local state reset helpers.
+- [Makefile commands](../tools/make.md): All available make targets.
 
 ## Discussion
 

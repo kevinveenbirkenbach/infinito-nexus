@@ -1,4 +1,4 @@
-name: Release Version Logic
+name: "🚀 Release: Version Logic"
 
 on:
   workflow_call:

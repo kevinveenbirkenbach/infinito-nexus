@@ -13,7 +13,9 @@ roles/list.json
 *.egg-info
 build/*
 .ruff_cache
+.agents
 collections/
 env.development
 logs/
 job-logs.txt
+.claude/skills

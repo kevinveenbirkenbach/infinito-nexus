@@ -25,10 +25,13 @@ compose:
       name:               matrix-synapse
       backup:
         no_stop_required: true
-    element: 
-      version:        latest 
+    element:
+      version:        latest
       image:          vectorim/element-web
       name:           matrix-element
+    matrix-chatgpt-bot:
+      version:        latest
+      image:          ghcr.io/matrixgpt/matrix-chatgpt-bot
     css:
       enabled:        true
       shared: true

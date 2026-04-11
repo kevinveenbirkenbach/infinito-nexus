@@ -20,7 +20,7 @@
 #
 # IMPORTANT (your requested change):
 # - This lookup NO LONGER reads variables['compose'].
-# - It ALWAYS builds compose paths via utils.docker_paths_utils.get_docker_paths()
+# - It ALWAYS builds compose paths via utils.docker.paths_utils.get_docker_paths()
 #   using DIR_COMPOSITIONS.
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
 
-from utils.docker_paths_utils import get_docker_paths
+from utils.docker.paths_utils import get_docker_paths
 from utils.jinja_strict import render_strict
 
 

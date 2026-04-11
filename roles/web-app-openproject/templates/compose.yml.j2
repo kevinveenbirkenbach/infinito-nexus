@@ -1,9 +1,12 @@
-# @todo Test which containers can be removed crom cental_database networks
+# @todo Test which containers can be removed from central_database networks
 x-op-app: &app
   logging:
     driver: journald
   image: {{ OPENPROJECT_CUSTOM_IMAGE }}
   {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(2) }}
+    args:
+      OPENPROJECT_IMAGE:   "{{ OPENPROJECT_IMAGE }}"
+      OPENPROJECT_VERSION: "{{ OPENPROJECT_VERSION }}"
 
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
 

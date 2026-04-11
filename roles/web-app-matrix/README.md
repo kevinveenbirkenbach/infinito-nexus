@@ -8,9 +8,6 @@ Step into the future of communication with Matrix, a dynamic and decentralized p
 
 This role deploys a Matrix homeserver using Docker Compose, setting up the Synapse server along with essential components such as bridges and the Element web client. Matrix is built to support secure, decentralized communications with high performance and scalability.
 
-For detailed configuration and operational instructions, please refer to the following files in this directory:
-- [Installation.md](./Installation.md)
-- [Administration.md](./Administration.md)
 
 ## Features
 

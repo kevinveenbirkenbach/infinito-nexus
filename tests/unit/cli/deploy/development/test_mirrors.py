@@ -12,6 +12,7 @@ class TestGenerateCiMirrorsFile(unittest.TestCase):
         {
             "RUNNING_ON_GITHUB": "true",
             "GITHUB_REPOSITORY_OWNER": "kevinveenbirkenbach",
+            "GITHUB_REPOSITORY": "kevinveenbirkenbach/infinito-nexus",
             "INFINITO_GHCR_MIRROR_PREFIX": "mirror",
         },
         clear=False,

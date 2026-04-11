@@ -1,4 +1,4 @@
-name: CI Orchestrator
+name: "🎵 CI: Orchestrator"
 on:
   workflow_call:
     inputs:
@@ -215,6 +215,7 @@ jobs:
   test-development:
     uses: ./.github/workflows/test-environment.yml
     needs:
+      - images-mirror-missing
       - code-quality-gate
     secrets: inherit
 
