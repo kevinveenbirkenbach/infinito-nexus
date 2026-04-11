@@ -1,0 +1,38 @@
+- name: sys-service | Assert service debug unit is defined
+  ansible.builtin.assert:
+    that:
+      - system_service_debug_unit is defined
+      - system_service_debug_unit | string | length > 0
+    fail_msg: >-
+      system_service_debug_unit must be defined for shared service diagnostics.
+  changed_when: false
+
+- name: sys-service | Run shared service debug script
+  ansible.builtin.script: "{{ role_path }}/files/debug.sh"
+  become: true
+  environment:
+    SYSTEM_SERVICE_DEBUG_UNIT: "{{ system_service_debug_unit }}"
+    SYSTEM_SERVICE_DEBUG_CONTEXT: >-
+      {{
+        system_service_debug_context
+        | default((system_service_debug_context_lines | default([])) | join('\n'))
+      }}
+    SYSTEM_SERVICE_DEBUG_JOURNAL_LINES: "{{ (system_service_debug_journal_lines | default(200)) | string }}"
+  register: system_service_debug_result
+  changed_when: false
+  failed_when: false
+
+- name: sys-service | Show shared service diagnostics
+  ansible.builtin.debug:
+    msg: |
+      {{ system_service_debug_result.stdout | default('') }}
+      {{ system_service_debug_result.stderr | default('') }}
+
+- name: sys-service | Fail after shared service diagnostics
+  ansible.builtin.fail:
+    msg: >-
+      {{
+        system_service_debug_fail_message
+        | default('Service ' ~ system_service_debug_unit ~ ' failed. See shared service diagnostics above.')
+      }}
+  when: system_service_debug_fail | default(false) | bool

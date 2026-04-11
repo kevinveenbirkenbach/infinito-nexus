@@ -1,20 +1,20 @@
 # Infinito.Nexus 🚀
 
-**🔐 One login. ♾️ Infinite application** 
+**🔐 One login. ♾️ Infinite applications** 
 
 ![Infinito.Nexus Logo](assets/img/logo.png)
 ---
 
 ## What is Infinito.Nexus? 📌
 
-**Infinito.Nexus** is an **automated, modular infrastructure framework** built on **Docker**, **Linux**, and **Ansible**, equally suited for cloud services, local server management, and desktop workstations. At its core lies a **web-based desktop with single sign-on**—backed by an **LDAP directory** and **OIDC**—granting **seamless access** to an almost limitless portfolio of self-hosted applications. It fully supports **ActivityPub applications** and is **Fediverse-compatible**, while integrated **monitoring**, **alerting**, **cleanup**, **self-healing**, **automated updates**, and **backup solutions** provide everything an organization needs to run at scale.
+**Infinito.Nexus** is an **automated, modular infrastructure framework** built on **Docker**, **Linux**, and **Ansible**, equally suited for cloud services, local server management, and desktop workstations. At its core lies a **web-based desktop with single sign-on**, backed by an **LDAP directory** and **OIDC**, granting **seamless access** to an almost limitless portfolio of self-hosted applications. It fully supports **ActivityPub applications** and is **Fediverse-compatible**, while integrated **monitoring**, **alerting**, **cleanup**, **self-healing**, **automated updates**, and **backup solutions** provide everything an organization needs to run at scale.
 
 | 📚 | 🔗 |
 |---|---|
 | 🌐 Try It Live | [![Infinito.Nexus](https://img.shields.io/badge/Infinito.Nexus-%2ECloud-000000?labelColor=004B8D&style=flat&borderRadius=8)](https://infinito.nexus) |
 | 🔧 Request Your Setup       | [![CyberMaster.Space](https://img.shields.io/badge/CyberMaster-%2ESpace-000000?labelColor=004B8D&style=flat&borderRadius=8)](https://cybermaster.space) |
 | 📖 About This Project  | [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-blue?logo=github)](https://github.com/sponsors/kevinveenbirkenbach) [![View Source](https://img.shields.io/badge/View_Source-Repository-000000?logo=github&labelColor=004B8D&style=flat&borderRadius=8)](https://s.infinito.nexus/code) |
-| ☕️ Support Us               |  [![Patreon](https://img.shields.io/badge/Support-Patreon-orange?logo=patreon)](https://www.patreon.com/c/kevinveenbirkenbach) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20Coffee-Funding-yellow?logo=buymeacoffee)](https://buymeacoffee.com/kevinveenbirkenbach) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://s.veen.world/paypaldonate) [![Sponsor Infinito.Nexus](https://img.shields.io/badge/Donate–Infinito.Nexus-000000?style=flat&labelColor=004B8D&logo=github-sponsors&logoColor=white&borderRadius=8)](https://github.com/sponsors/kevinveenbirkenbach) |
+| ☕️ Support Us               |  [![Patreon](https://img.shields.io/badge/Support-Patreon-orange?logo=patreon)](https://www.patreon.com/kevinveenbirkenbach) [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20Coffee-Funding-yellow?logo=buymeacoffee)](https://buymeacoffee.com/kevinveenbirkenbach) [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue?logo=paypal)](https://s.veen.world/paypaldonate) [![Sponsor Infinito.Nexus](https://img.shields.io/badge/Donate–Infinito.Nexus-000000?style=flat&labelColor=004B8D&logo=github-sponsors&logoColor=white&borderRadius=8)](https://github.com/sponsors/kevinveenbirkenbach) |
 
 ---
 
@@ -45,7 +45,7 @@
   Automatic patching and version upgrades across the stack.
 
 * **Application Ecosystem** 🚀
-  A curated suite of self-hosted apps—from **project management**, **version control**, and **CI/CD** to **chat**, **video conferencing**, **CMS**, **e-learning**, **social networking**, and **e-commerce**—all seamlessly integrated.
+  A curated suite of self-hosted apps, from **project management**, **version control**, and **CI/CD** to **chat**, **video conferencing**, **CMS**, **e-learning**, **social networking**, and **e-commerce**, all seamlessly integrated.
 
 ---
 

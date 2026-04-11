@@ -77,17 +77,9 @@ jobs:
       - name: Resolve GHCR namespace and repository
         id: vars
         shell: bash
-        run: |
-          set -euo pipefail
-          ghcr_namespace="${{ inputs.ghcr_namespace || '' }}"
-          if [[ -n "${ghcr_namespace}" ]]; then
-            ghcr_namespace="${ghcr_namespace,,}"
-          else
-            ghcr_namespace="$(scripts/meta/resolve/repository/owner.sh)"
-          fi
-          ghcr_repository="$(scripts/meta/resolve/repository/name.sh)"
-          echo "ghcr_namespace=${ghcr_namespace}" >> "$GITHUB_OUTPUT"
-          echo "ghcr_repository=${ghcr_repository}" >> "$GITHUB_OUTPUT"
+        env:
+          GHCR_NAMESPACE_INPUT: ${{ inputs.ghcr_namespace || '' }}
+        run: bash scripts/meta/resolve/ghcr/namespace_and_repository.sh
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -119,33 +111,9 @@ jobs:
 
       - name: Mirror images to GHCR (best-effort)
         shell: bash
-        run: |
-          set -euo pipefail
-
-          # Defaults:
-          # - Namespace defaults to repo owner (user/org), works for schedule & normal runs
-          # - Prefix defaults to "mirror"
-          # - Repo root defaults to "."
-          GHCR_NAMESPACE="${{ steps.vars.outputs.ghcr_namespace }}"
-          GHCR_REPOSITORY="${{ steps.vars.outputs.ghcr_repository }}"
-          GHCR_PREFIX="${{ inputs.ghcr_prefix || 'mirror' }}"
-          REPO_ROOT="${{ inputs.repo_root || '.' }}"
-
-          echo ">>> Mirror namespace:  ${GHCR_NAMESPACE}"
-          echo ">>> Mirror repository: ${GHCR_REPOSITORY}"
-          echo ">>> Mirror prefix:     ${GHCR_PREFIX}"
-          echo ">>> Repo root:         ${REPO_ROOT}"
-
-          EXTRA_ARGS=()
-          if [ -n "${IMAGES_PER_HOUR}" ]; then
-            EXTRA_ARGS+=( --images-per-hour "${IMAGES_PER_HOUR}" )
-          fi
-
-          python -m cli.mirror.sync \
-            --repo-root "${REPO_ROOT}" \
-            --ghcr-namespace "${GHCR_NAMESPACE}" \
-            --ghcr-repository "${GHCR_REPOSITORY}" \
-            --ghcr-prefix "${GHCR_PREFIX}" \
-            "${EXTRA_ARGS[@]}"
-
-          echo ">>> Mirror sync finished."
+        env:
+          GHCR_NAMESPACE: ${{ steps.vars.outputs.ghcr_namespace }}
+          GHCR_REPOSITORY: ${{ steps.vars.outputs.ghcr_repository }}
+          GHCR_PREFIX: ${{ inputs.ghcr_prefix || 'mirror' }}
+          REPO_ROOT: ${{ inputs.repo_root || '.' }}
+        run: bash scripts/meta/mirror/sync_all.sh

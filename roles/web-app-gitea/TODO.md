@@ -1,2 +1,2 @@
 # Todos
-- Implement [OIDC](https://www.talkingquickly.co.uk/gitea-sso-with-keycloak-openldap-openid-connect), see [Chat GPT Conversation](https://chatgpt.com/share/67f61a49-a790-800f-81b3-439181dbf555)
+- Implement [OIDC](https://www.talkingquickly.co.uk/gitea-sso-with-keycloak-openldap-openid-connect)

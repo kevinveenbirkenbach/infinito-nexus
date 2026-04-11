@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "============================================================"
-echo ">>> Running UNIT tests in ${INFINITO_DISTRO:-<unset>} container (compose stack)"
-echo "============================================================"
-
 : "${INFINITO_DISTRO:?INFINITO_DISTRO must be set}"
 : "${TEST_PATTERN:?TEST_PATTERN must be set}"
 : "${TEST_TYPE:?TEST_TYPE must be set}"
+
+echo "============================================================"
+echo ">>> Running ${TEST_TYPE^^} tests in ${INFINITO_DISTRO:-<unset>} container (compose stack)"
+echo "============================================================"
 
 # Execute directly inside the already running infinito container
 INFINITO_DISTRO="${INFINITO_DISTRO}" \
