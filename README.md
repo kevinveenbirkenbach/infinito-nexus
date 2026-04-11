@@ -1,6 +1,6 @@
 # Infinito.Nexus 🚀
 
-**🔐 One login. ♾️ Infinite application** 
+**🔐 One login. ♾️ Infinite applications** 
 
 ![Infinito.Nexus Logo](assets/img/logo.png)
 ---
