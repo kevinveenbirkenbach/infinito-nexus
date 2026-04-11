@@ -1,8 +1,10 @@
-- block:
-    - ansible.builtin.systemd:
-        name: "{{ sys_svc_sshd_service_unit }}"
-        state: restarted
-        enabled: true
-        daemon_reload: true
-  rescue:
-    - ansible.builtin.include_tasks: "{{ role_path }}/tasks/utils/rescue_ssh_restart.yml"
+- ansible.builtin.systemd:
+    name: "{{ sys_svc_sshd_service_unit }}"
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  register: sys_svc_sshd_restart_result
+  failed_when: false
+
+- ansible.builtin.include_tasks: "{{ role_path }}/tasks/utils/rescue_ssh_restart.yml"
+  when: sys_svc_sshd_restart_result is failed
