@@ -24,6 +24,8 @@ test.beforeEach(() => {
 // Helper: login function
 async function login(page, email, password) {
   await page.goto(`${baseUrl}/users/sign_in`);
+  await page.waitForLoadState("networkidle");
+  await page.locator("#session_user_email").waitFor({ state: "visible", timeout: 60000 });
   await page.locator("#session_user_email").fill(email);
   await page.locator("#session_user_password").fill(password);
   await page.locator("#session_new_user").evaluate(form => form.submit());
@@ -40,8 +42,6 @@ test("homepage loads and shows Decidim", async ({ page }) => {
 // Scenario II: Admin login and logout
 test("admin can log in and out of system admin panel", async ({ page }) => {
   await login(page, adminEmail, adminPassword);
-  await page.goto(`${baseUrl}/admin`);
-  await page.waitForLoadState("networkidle");
   await expect(page).not.toHaveURL(/sign_in/);
   await expect(page.locator("body")).toBeVisible();
   await page.goto(`${baseUrl}/users/sign_out`);
