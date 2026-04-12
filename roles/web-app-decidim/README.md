@@ -1,4 +1,4 @@
-# web-app-decidim
+# Decidim
 
 Ansible role that deploys [Decidim](https://decidim.org/) as a fully managed
 Infinito.Nexus web application.
