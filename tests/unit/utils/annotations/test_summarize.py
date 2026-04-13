@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import os
+import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 from utils.annotations.summarize import (
     Annotation,
+    main,
     parse_log,
     parse_props,
     render_markdown,
@@ -151,16 +154,13 @@ class TestMain(unittest.TestCase):
         ) as summary:
             summary_path = summary.name
 
-        import utils.annotations.summarize as mod
-        import sys
-
         old_argv = sys.argv
         try:
             sys.argv = ["summarize", log_path, "Test Title"]
             with unittest.mock.patch.dict(
                 os.environ, {"GITHUB_STEP_SUMMARY": summary_path}
             ):
-                mod.main()
+                main()
         finally:
             sys.argv = old_argv
 
@@ -169,20 +169,15 @@ class TestMain(unittest.TestCase):
         self.assertIn("msg", content)
 
     def test_exits_without_args(self) -> None:
-        import sys
-        import utils.annotations.summarize as mod
-
         old_argv = sys.argv
         sys.argv = ["summarize"]
         try:
             with self.assertRaises(SystemExit) as cm:
-                mod.main()
+                main()
             self.assertEqual(cm.exception.code, 1)
         finally:
             sys.argv = old_argv
 
-
-import unittest.mock  # noqa: E402 – needed for TestMain
 
 if __name__ == "__main__":
     unittest.main()
