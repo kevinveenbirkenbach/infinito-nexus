@@ -25,6 +25,15 @@ test.beforeEach(() => {
 async function login(page, email, password) {
   await page.goto(`${baseUrl}/users/sign_in`);
   await page.waitForLoadState("networkidle");
+  // Dismiss cookie consent banner if present
+  const cookieBanner = page.locator("#dc-dialog-wrapper, .cookies__container, [data-cookie-consent]");
+  if (await cookieBanner.isVisible().catch(() => false)) {
+    const acceptBtn = page.locator("button[data-dc-accept], button.cookies__accept, button:has-text('Accept')").first();
+    if (await acceptBtn.isVisible().catch(() => false)) {
+      await acceptBtn.click();
+      await page.waitForLoadState("networkidle");
+    }
+  }
   await page.locator("#session_user_email").waitFor({ state: "visible", timeout: 60000 });
   await page.locator("#session_user_email").fill(email);
   await page.locator("#session_user_password").fill(password);
