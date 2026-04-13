@@ -11,6 +11,10 @@
 #
 name: "🔒 Scan: CodeQL (Advanced)"
 
+concurrency:
+  group: codeql-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   workflow_call:
   push:
