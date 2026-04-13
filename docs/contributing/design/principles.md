@@ -1,6 +1,7 @@
 # Code Principles 📐
 
 Use these principles when you change repository code, scripts, or automation.
+For organisational and team-process principles, see [principles.md](../organisation/principles.md).
 
 ## Principles 📋
 
@@ -12,19 +13,8 @@ Follow these principles. Keep the rule column short, imperative, and as [SMART](
 | Leave touched code cleaner than you found it. | Small cleanup reduces future friction. | [Boy Scout Rule](https://en.wikipedia.org/wiki/Leaving_the_world_a_better_place) | Make small, safe cleanup improvements in the files you touch when they reduce friction without expanding the scope unnecessarily. |
 | Store each shared value once. | Shared values drift when copied. | [SPOT](https://en.wikipedia.org/wiki/Single_source_of_truth) | Put shared fixed values in one canonical source and reference them everywhere else. |
 | Choose the simplest solution. | Simple code is easier to change. | [KISS](https://en.wikipedia.org/wiki/KISS_principle) | Prefer the smallest implementation that still satisfies the requirement and remains easy to maintain. |
+| Give each module one reason to change. | Focused modules are easier to test and replace. | [SRP](https://en.wikipedia.org/wiki/Single-responsibility_principle) | Each module, class, or function MUST have exactly one responsibility so that changes to one concern do not ripple into unrelated code. |
 | Make prompts SMART. | Clear prompts reduce ambiguity. | [SMART](https://en.wikipedia.org/wiki/SMART_criteria) | Write prompts that are specific, measurable, achievable, relevant, and time-bound so the agent can act on them without ambiguity. |
-| Ship the first valuable increment early. | Early value shortens feedback loops. | [Agile Manifesto](https://agilemanifesto.org/) | Deliver working software as soon as it is useful and keep delivering value continuously. |
-| Accept useful requirement changes. | Better ideas can arrive late. | [Agile Manifesto](https://agilemanifesto.org/) | Treat late requirement changes as normal when they improve customer value. |
-| Release working software frequently. | Frequent delivery surfaces issues sooner. | [Agile Manifesto](https://agilemanifesto.org/) | Keep iterations short enough that users see working software at regular intervals. |
-| Work with business daily. | Daily contact keeps intent aligned. | [Agile Manifesto](https://agilemanifesto.org/) | Keep business and development in daily contact for decisions and feedback. |
-| Trust motivated people. | Engaged people take better ownership. | [Agile Manifesto](https://agilemanifesto.org/) | Build around engaged people and give them ownership of the work. |
-| Use direct conversation for blocking topics. | Direct talk resolves blockers faster. | [Agile Manifesto](https://agilemanifesto.org/) | Prefer face-to-face or synchronous discussion when the decision is urgent or complex. |
-| Measure progress with working software. | Working software shows real progress. | [Agile Manifesto](https://agilemanifesto.org/) | Use running software, not documents alone, as the main progress signal. |
-| Keep a sustainable pace. | Sustainable pace avoids burnout. | [Agile Manifesto](https://agilemanifesto.org/) | Set a pace the team can maintain for the long term. |
-| Improve technical quality continuously. | Quality debt compounds if ignored. | [Agile Manifesto](https://agilemanifesto.org/) | Invest in design and code quality on every change. |
-| Remove unnecessary work. | Removing work leaves room for value. | [Agile Manifesto](https://agilemanifesto.org/) | Choose the smallest solution that achieves the goal. |
-| Let teams shape their own design. | Local teams know the best design. | [Agile Manifesto](https://agilemanifesto.org/) | Let self-organizing teams own architecture, requirements, and implementation. |
-| Inspect and adapt regularly. | Regular review catches process drift. | [Agile Manifesto](https://agilemanifesto.org/) | Review the process at regular intervals and change it when it is not working. |
 | Write the failing test first. | Failing tests confirm requirements first. | [TDD](https://en.wikipedia.org/wiki/Test-driven_development) | Start with a failing test, implement the minimum code, and refactor with confidence. |
 | Prefer beautiful code. | Readable code is easier to trust. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Choose code that is clean, coherent, and pleasant to read instead of code that is only clever. |
 | Prefer explicit behavior. | Explicit behavior is easier to reason about. | [Zen of Python](https://en.wikipedia.org/wiki/Zen_of_Python) | Make behavior visible in the code instead of relying on hidden assumptions. |
