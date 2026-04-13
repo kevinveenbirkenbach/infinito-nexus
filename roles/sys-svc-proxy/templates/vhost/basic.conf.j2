@@ -65,73 +65,17 @@ server
     {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
   {% endif %}
 
-  # Liveness probe — checks BOTH Docker container health AND HTTP reachability.
-  # 1. Consults the health_containers shared dict (populated every 15 s by the
-  #    background timer in nginx.conf) to detect containers that are "running"
-  #    but whose Docker HEALTHCHECK has flipped to "unhealthy".
-  # 2. Falls back to an HTTP sub-request so that apps without a Docker
-  #    HEALTHCHECK are still probed correctly.
-  # Returns 200 "live" only when both checks pass; 503 "down" otherwise.
-  location = /healthz/live {
-    access_log off;
-    content_by_lua_block {
-      local alive = true
-
-      -- Step 1: Docker health check via shared dict.
-      -- $container_name is set from the Jinja2 config lookup; empty string
-      -- means no container name is known — skip and rely on HTTP probe only.
-      local cname = ngx.var.container_name
-      if cname and cname ~= "" then
-        local status = ngx.shared.health_containers:get(cname)
-        -- "down" = container is running but Docker HEALTHCHECK says unhealthy.
-        -- nil    = timer hasn't run yet; do not penalise — fall through.
-        if status == "down" then
-          alive = false
-        end
-      end
-
-      -- Step 2: TCP/HTTP reachability — catches crashed or exited containers.
-      if alive then
-        local res = ngx.location.capture("/_live_probe")
-        if not res or res.status >= 500 then
-          alive = false
-        end
-      end
-
-      if alive then
-        ngx.status = ngx.HTTP_OK
-        ngx.header["Content-Type"] = "text/plain"
-        ngx.print("live\n")
-      else
-        ngx.status = ngx.HTTP_SERVICE_UNAVAILABLE
-        ngx.header["Content-Type"] = "text/plain"
-        ngx.print("down\n")
-      end
-    }
-  }
-
-  # Internal backend probe used by /healthz/live and /metricz.
-  # Not accessible to external clients.
-  location = /_live_probe {
-    internal;
-    proxy_pass              http://127.0.0.1:{{ http_port }}/;
-    proxy_set_header        Host $host;
-    proxy_connect_timeout   2s;
-    proxy_read_timeout      3s;
-    proxy_intercept_errors  off;
-  }
-
-  # Readiness probe — proxies to the application backend.
-  # Returns a non-5xx response when the app is up and accepting requests.
-  # Returns 502/503 when the backend is down. Safe to expose publicly.
-  location = /healthz/ready {
-    access_log off;
-    proxy_pass              http://127.0.0.1:{{ http_port }}/;
-    proxy_set_header        Host $host;
-    proxy_connect_timeout   3s;
-    proxy_read_timeout      5s;
-    proxy_intercept_errors  off;
-  }
+  {#
+    Health check endpoints — included only when prometheus is active for this app.
+    Defined in healthz.conf.j2 to keep this generic vhost template free of
+    monitoring-specific concerns (SRP). The Lua dual-check relies on lua_shared_dict
+    and init_worker blocks provided by prometheus.conf, so the two templates are
+    intentionally co-activated by the same flag.
+  #}
+  {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
+      or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
+  {% include 'roles/sys-svc-proxy/templates/location/healthz.conf.j2' %}
+  {% endif %}
 
   {#
     Prometheus integration — two separate templates:

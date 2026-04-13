@@ -2,8 +2,15 @@
   openresty:
     {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        OPENRESTY_IMAGE:              "{{ OPENRESTY_IMAGE }}"
+        OPENRESTY_VERSION:            "{{ OPENRESTY_VERSION }}"
+        PROMETHEUS_ENABLED:           "{{ OPENRESTY_PROMETHEUS_ENABLED }}"
+        LUA_PROMETHEUS_URL_MAIN:      "{{ OPENRESTY_LUA_PROMETHEUS_URL_MAIN }}"
+        LUA_PROMETHEUS_URL_COUNTER:   "{{ OPENRESTY_LUA_PROMETHEUS_URL_COUNTER }}"
+        LUA_PROMETHEUS_URL_KEYS:      "{{ OPENRESTY_LUA_PROMETHEUS_URL_KEYS }}"
     container_name: {{ OPENRESTY_CONTAINER }}
-    image: {{ OPENRESTY_IMAGE }}:{{ OPENRESTY_VERSION }}
+    image: {{ OPENRESTY_CUSTOM_IMAGE }}:{{ OPENRESTY_CUSTOM_VERSION }}
     network_mode: "host"
     volumes:
       - {{ lookup('nginx','files.configuration') }}:/usr/local/openresty/nginx/conf/nginx.conf:ro

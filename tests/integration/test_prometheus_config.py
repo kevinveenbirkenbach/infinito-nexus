@@ -141,7 +141,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
     """
     The shared nginx vhost template must expose /healthz/live and /healthz/ready.
 
-    Two prometheus templates are conditionally included per Kevin's SRP/KISS review of PR #144:
+    Two prometheus templates are conditionally included to follow SRP:
     - location.conf.j2  — log_by_lua_block for per-request metrics; on every app vhost
                           with compose.services.prometheus.enabled = true
     - metricz.conf.j2   — location = /metricz scrape endpoint; ONLY on the prometheus
@@ -178,9 +178,21 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             / "metricz.conf.j2"
         )
 
+    def _healthz_conf_path(self):
+        # Health-check locations were extracted from basic.conf.j2 into healthz.conf.j2
+        # to keep the generic vhost template free of monitoring-specific location blocks.
+        return (
+            Path(__file__).resolve().parent.parent.parent
+            / "roles"
+            / "sys-svc-proxy"
+            / "templates"
+            / "location"
+            / "healthz.conf.j2"
+        )
+
     def test_basic_conf_has_health_endpoints(self):
-        """basic.conf.j2 must define /healthz/live and /healthz/ready."""
-        conf_path = self._basic_conf_path()
+        """healthz.conf.j2 must define /healthz/live and /healthz/ready (included by basic.conf.j2)."""
+        conf_path = self._healthz_conf_path()
         self.assertTrue(conf_path.exists(), f"Missing: {conf_path}")
         content = conf_path.read_text(encoding="utf-8")
 
@@ -189,12 +201,12 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
                 self.assertIn(
                     f"location = {endpoint}",
                     content,
-                    f"basic.conf.j2 is missing 'location = {endpoint}'",
+                    f"healthz.conf.j2 is missing 'location = {endpoint}'",
                 )
 
     def test_basic_conf_live_probe_uses_lua(self):
-        """basic.conf.j2 /healthz/live must use Lua to check backend health, not a static return."""
-        content = self._basic_conf_path().read_text(encoding="utf-8")
+        """healthz.conf.j2 /healthz/live must use Lua to check backend health, not a static return."""
+        content = self._healthz_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "content_by_lua_block",
             content,
@@ -217,8 +229,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         self.assertIn(
             "roles/web-app-prometheus/templates/location.conf.j2",
             content,
-            "basic.conf.j2 must include location.conf.j2 for prometheus-enabled apps "
-            "(SRP — per Kevin's review of PR #144)",
+            "basic.conf.j2 must include location.conf.j2 for prometheus-enabled apps",
         )
         self.assertIn(
             "compose.services.prometheus.name",
@@ -279,23 +290,17 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         self.assertIn(
             "metric_stack_up",
             content,
-            "/metricz in metricz.conf.j2 must set metric_stack_up gauge "
-            "(per Kevin's review: 'if healthy then up otherwise not')",
+            "/metricz in metricz.conf.j2 must set metric_stack_up gauge",
         )
 
     def test_metricz_conf_stack_up_checks_docker_health(self):
-        """/metricz stack_up gauge must reflect Docker HEALTHCHECK, not just HTTP reachability.
-
-        Kevin's review: 'if healthy then up otherwise not' — the gauge must use the
-        same Docker-socket-backed health_containers dict as /healthz/live.
-        """
+        """/metricz stack_up gauge must reflect Docker HEALTHCHECK, not just HTTP reachability."""
         content = self._metricz_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "health_containers",
             content,
             "/metricz in metricz.conf.j2 must check health_containers shared dict "
-            "so metric_stack_up reflects Docker HEALTHCHECK state "
-            "(Kevin's review: 'if healthy then up otherwise not')",
+            "so metric_stack_up reflects Docker HEALTHCHECK state",
         )
 
     def test_location_conf_has_lua_metrics_collection(self):
@@ -422,17 +427,20 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
 class TestDockerHealthCheck(unittest.TestCase):
     """
     /healthz/live must check Docker container health in addition to HTTP reachability.
-    Kevin's review: HTTP-reachability alone is insufficient — a container can be
-    "running" in Docker while its HEALTHCHECK has flipped to "unhealthy".
+    HTTP-reachability alone is insufficient — a container can be "running" in Docker
+    while its HEALTHCHECK has flipped to "unhealthy".
     """
 
     def _nginx_conf_path(self):
+        # Prometheus Lua blocks (lua_shared_dict, init_worker, Docker health timer)
+        # live in prometheus.conf.j2, not nginx.conf.j2 — the http{} block should
+        # not contain monitoring-specific code (SRP).
         return (
             Path(__file__).resolve().parent.parent.parent
             / "roles"
             / "sys-svc-webserver-core"
             / "templates"
-            / "nginx.conf.j2"
+            / "prometheus.conf.j2"
         )
 
     def _basic_conf_path(self):
@@ -445,6 +453,18 @@ class TestDockerHealthCheck(unittest.TestCase):
             / "basic.conf.j2"
         )
 
+    def _healthz_conf_path(self):
+        # Health-check locations were extracted from basic.conf.j2 into healthz.conf.j2
+        # to keep the generic vhost template free of monitoring-specific location blocks.
+        return (
+            Path(__file__).resolve().parent.parent.parent
+            / "roles"
+            / "sys-svc-proxy"
+            / "templates"
+            / "location"
+            / "healthz.conf.j2"
+        )
+
     def _openresty_compose_path(self):
         return (
             Path(__file__).resolve().parent.parent.parent
@@ -455,41 +475,41 @@ class TestDockerHealthCheck(unittest.TestCase):
         )
 
     def test_nginx_conf_has_health_containers_dict(self):
-        """nginx.conf.j2 must declare lua_shared_dict health_containers for Docker state caching."""
+        """prometheus.conf.j2 must declare lua_shared_dict health_containers for Docker state caching."""
         content = self._nginx_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "lua_shared_dict health_containers",
             content,
-            "nginx.conf.j2 must declare lua_shared_dict health_containers "
+            "prometheus.conf.j2 must declare lua_shared_dict health_containers "
             "(used by /healthz/live to cache Docker container health state)",
         )
 
     def test_nginx_conf_polls_docker_socket(self):
-        """nginx.conf.j2 must poll the Docker Unix socket to populate health_containers."""
+        """prometheus.conf.j2 must poll the Docker Unix socket to populate health_containers."""
         content = self._nginx_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "docker.sock",
             content,
-            "nginx.conf.j2 must connect to /var/run/docker.sock to query container health",
+            "prometheus.conf.j2 must connect to /var/run/docker.sock to query container health",
         )
         self.assertIn(
             "poll_docker_health",
             content,
-            "nginx.conf.j2 must define a poll_docker_health timer function",
+            "prometheus.conf.j2 must define a poll_docker_health timer function",
         )
 
     def test_nginx_conf_timer_runs_at_startup_and_periodically(self):
-        """nginx.conf.j2 must seed the dict immediately (timer.at) and refresh periodically (timer.every)."""
+        """prometheus.conf.j2 must seed the dict immediately (timer.at) and refresh periodically (timer.every)."""
         content = self._nginx_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "ngx.timer.at",
             content,
-            "nginx.conf.j2 must use ngx.timer.at(0, ...) to seed health_containers at startup",
+            "prometheus.conf.j2 must use ngx.timer.at(0, ...) to seed health_containers at startup",
         )
         self.assertIn(
             "ngx.timer.every",
             content,
-            "nginx.conf.j2 must use ngx.timer.every to refresh health_containers periodically",
+            "prometheus.conf.j2 must use ngx.timer.every to refresh health_containers periodically",
         )
 
     def test_basic_conf_has_container_name_variable(self):
@@ -504,12 +524,14 @@ class TestDockerHealthCheck(unittest.TestCase):
 
     def test_basic_conf_live_probe_checks_docker_health(self):
         """/healthz/live must consult health_containers before the HTTP sub-request."""
-        content = self._basic_conf_path().read_text(encoding="utf-8")
+        # Health-check locations live in healthz.conf.j2 (extracted from basic.conf.j2);
+        # basic.conf.j2 includes it conditionally.
+        content = self._healthz_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "health_containers",
             content,
-            "/healthz/live in basic.conf.j2 must read health_containers shared dict "
-            "(Docker health check per Kevin's review — HTTP-only is insufficient)",
+            "/healthz/live in healthz.conf.j2 must read health_containers shared dict "
+            "(Docker health alone is insufficient — HTTP sub-request is also required)",
         )
 
     def test_openresty_compose_mounts_docker_socket(self):

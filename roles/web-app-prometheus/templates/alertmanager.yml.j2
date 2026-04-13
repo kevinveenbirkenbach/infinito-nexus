@@ -7,7 +7,7 @@ global:
   smtp_require_tls: {{ SYSTEM_EMAIL_TLS | bool | lower }}
 {% if SYSTEM_EMAIL_AUTH | bool %}
   smtp_auth_username: "{{ SYSTEM_EMAIL_USERNAME }}"
-  smtp_auth_password: "{{ SYSTEM_EMAIL_PASSWORD | default('') }}"
+  smtp_auth_password: "{{ SYSTEM_EMAIL_PASSWORD }}"
 {% endif %}
   resolve_timeout: 5m
 
@@ -37,8 +37,12 @@ receivers:
         send_resolved: true
         parse_mode: "HTML"
 {% endif %}
-{% if ALERTMANAGER_MATTERMOST_WEBHOOK_URL %}
+{% if 'web-app-mattermost' in applications
+      and lookup('config', 'web-app-mattermost', 'compose.services.prometheus.enabled', False)
+      and ALERTMANAGER_MATTERMOST_WEBHOOK_URL %}
     # Mattermost incoming webhook (Slack-compatible format).
+    # Gated on Mattermost being deployed with prometheus enabled so alertmanager
+    # does not reference a non-existent endpoint when Mattermost is not in the stack.
     # Configure the incoming webhook URL in the inventory under
     # alerting.mattermost.webhook_url to enable channel notifications.
     slack_configs:

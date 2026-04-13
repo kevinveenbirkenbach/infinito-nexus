@@ -22,6 +22,7 @@ log_config:                     "{{ MATRIX_SYNAPSE_LOG_PATH_CONTAINER }}"
 media_store_path:               "/data/media_store"
 registration_shared_secret:     "{{ MATRIX_REGISTRATION_SHARED_SECRET }}"
 report_stats:                   true
+enable_metrics:                 {{ lookup('config', application_id, 'native_metrics.enabled', False) | bool | lower }}
 macaroon_secret_key:            "{{ lookup('config', application_id, 'credentials.macaroon_secret_key') }}"
 form_secret:                    "{{ lookup('config', application_id, 'credentials.form_secret') }}"
 signing_key_path:               "/data/{{ MATRIX_SYNAPSE_DOMAIN }}.signing.key"

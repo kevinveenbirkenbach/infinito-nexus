@@ -5,6 +5,13 @@
   vars:
     docker_compose_flush_handlers: false
 
+- name: "Deploy prometheus nginx http-block config to {{ lookup('nginx','directories.configuration.global') }}prometheus.conf"
+  template:
+    src: "roles/sys-svc-webserver-core/templates/prometheus.conf.j2"
+    dest: "{{ [ lookup('nginx','directories.configuration.global'), 'prometheus.conf' ] | path_join }}"
+    mode: "0644"
+  notify: restart openresty
+
 - name: "Render prometheus scrape config to {{ PROMETHEUS_CONFIG_HOST }}"
   template:
     src: prometheus.yml.j2

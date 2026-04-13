@@ -26,7 +26,7 @@ scrape_configs:
   # All app metrics are labeled by host/vhost via lua-resty-prometheus.
   # No per-app redundancy: one scrape gives metrics for all 70+ apps.
   - job_name: "nginx-metricz"
-    scheme: https
+    scheme: {{ lookup('tls', application_id, 'protocols.web') }}
     metrics_path: /metricz
     tls_config:
       insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
@@ -58,7 +58,7 @@ scrape_configs:
   # Enable via native_metrics.enabled: true in inventory.
   # Set native_metrics.gitea.token when token auth is configured in Gitea.
   - job_name: "gitea"
-    scheme: https
+    scheme: {{ lookup('tls', application_id, 'protocols.web') }}
     metrics_path: /metrics
     tls_config:
       insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
@@ -76,7 +76,7 @@ scrape_configs:
   # Requires MM_METRICSSETTINGS_ENABLE=true in the Mattermost environment config.
   # Enable via native_metrics.enabled: true in inventory.
   - job_name: "mattermost"
-    scheme: https
+    scheme: {{ lookup('tls', application_id, 'protocols.web') }}
     metrics_path: /metrics
     tls_config:
       insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
@@ -91,7 +91,7 @@ scrape_configs:
   # Requires enable_metrics: true in homeserver.yaml.
   # Enable via native_metrics.enabled: true in inventory.
   - job_name: "matrix-synapse"
-    scheme: https
+    scheme: {{ lookup('tls', application_id, 'protocols.web') }}
     metrics_path: /_synapse/metrics
     tls_config:
       insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
@@ -115,7 +115,7 @@ scrape_configs:
 {% if domains | length > 0 %}
       - targets:
 {% for domain in domains %}
-          - "https://{{ domain }}/healthz/ready"
+          - "{{ lookup('tls', application_id, 'protocols.web') }}://{{ domain }}/healthz/ready"
 {% endfor %}
         labels:
           app: "{{ app_id }}"

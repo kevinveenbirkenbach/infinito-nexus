@@ -8,7 +8,7 @@
     content_by_lua_block {
       -- Mirror the /healthz/live logic: a container is "up" only when BOTH
       -- Docker says it is healthy AND the HTTP backend is reachable.
-      -- Kevin's requirement: "if healthy then up otherwise not".
+      -- Stack is up only when both Docker health and HTTP probe pass.
       local up = 1
 
       -- Step 1: Docker HEALTHCHECK state (same source as /healthz/live).
