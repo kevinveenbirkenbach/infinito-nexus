@@ -5,33 +5,15 @@
     name: "sys-hostname"
   when: not (run_once_sys_hostname | default(false) | bool)
 
-- block:
-  - name: "Check if Mail Host is reachable"
-    uri_probe:
-      url: "{{ lookup('tls', 'web-app-mailu', 'url.base') }}"
-      validate_certs: yes
-      status_code: "{{ mailu_valid_status_codes }}"
-    register: mail_host_reachability
-    failed_when: false
-    changed_when: false
-    when:
-      - run_once_web_app_mailu is not defined
-
-  - name: "Load Mailu Routines for '{{ role_name }}'"
-    include_tasks: 02_mailu.yml
-    when:
-      - >
-          (
-            mail_host_reachability is defined and
-            (mail_host_reachability.status | default(0) | int)
-              not in mailu_valid_status_codes
-          )
-          or
-          (
-            (users['no-reply'].tokens | default({})).get('web-app-mailu', '') | length == 0
-          )
-  vars:
-    mailu_valid_status_codes: "{{ lookup('config','web-app-mailu', 'server.status_codes.default') }}"
+- name: "Assert Mailu was preloaded before configuring external mail"
+  ansible.builtin.assert:
+    that:
+      - run_once_web_app_mailu is defined
+      - (users['no-reply'].tokens | default({})).get('web-app-mailu', '') | length > 0
+    fail_msg: >-
+      Mailu must be preloaded by sys-utils-service-loader before sys-svc-mail runs.
+      Missing run_once_web_app_mailu or missing users['no-reply'].tokens['web-app-mailu']
+      indicates that a service was loaded outside the constructor service-loader path.
   when:
     - "'web-app-mailu' in group_names"
 

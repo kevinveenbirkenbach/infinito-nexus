@@ -17,10 +17,9 @@ compose:
       backup:
         disabled: true
       enabled:            true
-    database:
+    postgres:
+      enabled: true
       shared: true
-      type: "postgres"
-      enabled:            true
     baserow:  
       backup:
         no_stop_required: true

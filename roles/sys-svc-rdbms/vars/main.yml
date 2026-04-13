@@ -1,2 +1,0 @@
-# Docker
-SYS_SVC_RDBMS_CENTRAL_DB_ENABLED: "{{ lookup('database', application_id, 'shared') }}"

@@ -8,11 +8,11 @@ self-describing.
 
 ## Acceptance Criteria
 
-- [ ] `group_vars/all/20_services.yml` is deleted; no role or plugin reads from it.
-- [ ] Every service role declares its service metadata in its own `config/main.yml`
+- [x] `group_vars/all/20_services.yml` is deleted; no role or plugin reads from it.
+- [x] Every service role declares its service metadata in its own `config/main.yml`
       under `compose.services.<entity_name>` (with optional `provides:`, `canonical:`)
       instead of in the central registry.
-- [ ] Load order *within* the same deploy type (universal, workstation, server) is
+- [x] Load order *within* the same deploy type (universal, workstation, server) is
       declared via a custom `run_after:` list in the role's `meta/main.yml`. Each
       entry is a role name (e.g. `web-svc-cdn`). `roles/sys-utils-service-loader`
       MUST read this field and load the listed roles before the declaring role within
@@ -26,7 +26,7 @@ self-describing.
       cross-type dependency, `roles/sys-utils-service-loader` MUST fail hard with a
       clear error instead of ignoring it. Apps MUST NOT require the user to list
       those dependencies explicitly in `APPS`.
-- [ ] The special `role_template: "svc-db-{type}"` database loading logic is removed;
+- [x] The special `role_template: "svc-db-{type}"` database loading logic is removed;
       PostgreSQL and MariaDB are defined as regular services in their own
       `config/main.yml` (same as any other service). Because databases are a different
       deploy type from apps, they are loaded automatically before apps by
@@ -69,12 +69,12 @@ self-describing.
       # web-app-matomo/config/main.yml  — no database.type needed for service loading
       # (svc-db-mariadb is loaded automatically before web-app-* by the service loader)
       ```
-- [ ] `frontend` / `backend` type is auto-detected from the role name prefix
+- [x] `frontend` / `backend` type is auto-detected from the role name prefix
       (`web-app-*`, `web-svc-*` → frontend; everything else → backend). The
       `type:` field for this purpose is removed from role `config/main.yml`.
       No legacy support is kept for role-local service metadata that still declares
       this `type:` field.
-- [ ] `canonical` aliases are declared under `compose.services.<entity_name>.canonical`
+- [x] `canonical` aliases are declared under `compose.services.<entity_name>.canonical`
       in the role's `config/main.yml`, where `<entity_name>` is the entity name
       returned by the existing `get_entity_name` function for that role
       (e.g. `web-svc-cdn` exposes the primary entity `cdn` plus the alias
@@ -94,7 +94,7 @@ self-describing.
             enabled: true
             canonical: cdn
       ```
-- [ ] A role MAY declare an optional `provides:` field under its primary service entry
+- [x] A role MAY declare an optional `provides:` field under its primary service entry
       in `config/main.yml`. When present, `roles/sys-utils-service-loader` registers
       the role under that functional name instead of the entity name returned by
       `get_entity_name`. Roles without `provides:` are registered under their entity
@@ -129,24 +129,24 @@ self-describing.
       All consumers (templates, lookups, `run_after:` lists) continue to reference
       the functional name (e.g. `oidc`, `email`, `ldap`) — no consumer changes are
       required for roles that already use these names.
-- [ ] `roles/sys-utils-service-loader` is the single place that loads all services.
+- [x] `roles/sys-utils-service-loader` is the single place that loads all services.
       It MUST use the existing function that determines which roles are universal,
       workstation, or server to derive the load order: universal roles first,
       then `web-svc-*`, then `web-app-*`.
-- [ ] `roles/sys-utils-service-loader` is invoked from the constructor stage
+- [x] `roles/sys-utils-service-loader` is invoked from the constructor stage
       (`tasks/stages/01_constructor.yml`) instead of the server block
       (`tasks/stages/02_server.yml`).
-- [ ] All service dependencies — including databases (e.g. `svc-db-mariadb`,
+- [x] All service dependencies — including databases (e.g. `svc-db-mariadb`,
       `svc-db-postgres`) and shared services (e.g. `web-app-keycloak`) — are loaded
       automatically by `roles/sys-utils-service-loader` in the constructor stage.
       No service dependency MUST ever require the user to list it explicitly in `APPS`.
-- [ ] Every file that currently reads from `SERVICE_REGISTRY` or `20_services.yml`
+- [x] Every file that currently reads from `SERVICE_REGISTRY` or `20_services.yml`
       MUST be updated to discover service metadata from role `config/main.yml` files
       instead. This includes at minimum:
       - `plugins/lookup/service.py`
       - `plugins/lookup/applications_current_play.py`
       - any filter plugin, task, or template that references `SERVICE_REGISTRY`
-- [ ] New unit and integration tests MUST be written for the service discovery
+- [x] New unit and integration tests MUST be written for the service discovery
       mechanism that replaces `SERVICE_REGISTRY`. Follow the rules in
       [testing.md](../agents/action/testing.md),
       [unit.md](../contributing/code/tests/unit.md), and
@@ -157,13 +157,13 @@ self-describing.
       - Correct load order produced by `sys-utils-service-loader`
       - `get_entity_name` derivation for all relevant role name prefixes
       - `run_after:` ordering within the same deploy type
-- [ ] Every file and role that is modified as part of this refactoring MUST also be
+- [x] Every file and role that is modified as part of this refactoring MUST also be
       simplified and refactored where possible, following the principles in
       [principles.md](../contributing/code/principles.md). Do not limit changes to
       the minimum required — use the mandatory touch as an opportunity to improve
       clarity, reduce duplication, and remove dead code in the same pass.
-- [ ] All existing integration and unit tests pass after the refactoring.
-- [ ] Once all other Acceptance Criteria are checked off and the full validation
+- [x] All existing integration and unit tests pass after the refactoring.
+- [x] Once all other Acceptance Criteria are checked off and the full validation
       app set deploys successfully, `docs/contributing/code/services.md` MUST be
       updated to reflect the new role-local configuration model. The update MUST
       follow the documentation guidelines in
@@ -227,3 +227,22 @@ that app. Do not carry over assumptions from the previous app.
 6. Check off the relevant Acceptance Criteria above if fully covered by this app.
 
 Repeat the full cycle from `web-app-nextcloud` down to `web-svc-file` until every criterion is checked.
+
+## Out-of-Scope Changes (Stashed)
+
+The following changes in `roles/web-app-nextcloud/` were identified as unrelated to this requirement and were unstaged and stashed for later handling:
+
+- `tasks/_plugin_a_routines.yml` — tarball-based plugin install (DinD IPv6 workaround)
+- `tasks/_plugin_install_from_tarball.yml` *(new)* — tarball install task file
+- `tasks/main.yml` — Nextcloud appstore metadata fetch for plugin compatibility
+- `templates/config/apps_paths.config.php.j2` *(new)* — `custom_apps` path registration
+
+**Stash name:** `nextcloud: tarball plugin install (unrelated to req-001)`  
+**Machine:** `msi-stealth-gs66`
+
+### `roles/web-svc-coturn/`
+
+- `templates/compose.yml.j2` — Coturn 4.9 fix: collapse IPv4/IPv6 `--external-ip` flags into one and replace `turnutils_stunclient` healthcheck with `pgrep`
+
+**Stash name:** `coturn: fix external-ip IPv4/IPv6 and healthcheck (unrelated to req-001)`  
+**Machine:** `msi-stealth-gs66`

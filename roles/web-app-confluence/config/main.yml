@@ -17,10 +17,9 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
+    postgres:
+      enabled: true
       shared: true
-      type: "postgres"
-      enabled:      true
     confluence:
       image:            atlassian/confluence
       version:          latest

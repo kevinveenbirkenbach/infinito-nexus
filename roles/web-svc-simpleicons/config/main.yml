@@ -15,15 +15,14 @@ compose:
       backup:
         disabled:   true
       enabled:      false   # Enable Redis 
-    database:
-      shared:   false
-      enabled:  false   # Enable the database 
     css:
       enabled: false
       shared: false
     recaptcha:
       enabled: false
     simpleicons:
+      enabled:            false
+      shared:             true
       image:              node
       version:            latest
       min_storage:        "1GB"

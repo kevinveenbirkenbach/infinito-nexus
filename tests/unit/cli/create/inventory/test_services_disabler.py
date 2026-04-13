@@ -233,7 +233,7 @@ class TestApplyServicesDisabled(unittest.TestCase):
                         "compose": {
                             "services": {
                                 "oidc": {"enabled": True, "shared": True},
-                                "database": {"enabled": True, "shared": True},
+                                "mariadb": {"enabled": True, "shared": True},
                             }
                         }
                     }
@@ -248,7 +248,7 @@ class TestApplyServicesDisabled(unittest.TestCase):
         svc = result["applications"]["web-app-nextcloud"]["compose"]["services"]
         self.assertFalse(svc["oidc"]["enabled"])
         self.assertFalse(svc["oidc"]["shared"])
-        self.assertTrue(svc["database"]["enabled"])
+        self.assertTrue(svc["mariadb"]["enabled"])
 
     def test_creates_missing_service_entry_when_role_defines_it(self):
         self._write_host_vars(

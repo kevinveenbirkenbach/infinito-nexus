@@ -1,20 +1,29 @@
-# SPOT: global loader for shared frontend web services.
+# SPOT: global loader for all shared services.
 #
-# Called once from tasks/stages/02_server.yml before web-svc and web-app roles.
-# Service load order is defined by SERVICE_REGISTRY order.
+# Called from tasks/stages/01_constructor.yml before the normal server app pass.
 
-- name: "Load shared frontend service"
-  include_tasks: load_frontend_service.yml
+- name: "Discover ordered shared services"
+  ansible.builtin.set_fact:
+    _ordered_services: >-
+      {{
+        query(
+          'service_registry',
+          'ordered',
+          applications=applications,
+          roles_dir=([ playbook_dir, 'roles' ] | path_join)
+        ) | first
+      }}
+
+- name: "Load shared service"
+  include_tasks: load_service.yml
   vars:
-    service_key: "{{ service_item.key }}"
-    service_role: "{{ service_item.value.role }}"
-    service_run_once_var: "{{ 'run_once_' ~ (service_item.value.role | replace('-', '_')) }}"
+    service_key: "{{ service_item.id }}"
+    service_role: "{{ service_item.role }}"
+    service_run_once_var: "{{ 'run_once_' ~ (service_item.role | replace('-', '_')) }}"
   when:
-    - service_item.value.get('type') == 'frontend'
-    - service_item.value.role is defined
     - lookup('vars', service_run_once_var, default='__missing__') == '__missing__'
-    - lookup('service', service_item.key).needed | bool
-  loop: "{{ SERVICE_REGISTRY | dict2items | list }}"
+    - lookup('service', service_item.id).needed | bool
+  loop: "{{ _ordered_services }}"
   loop_control:
     loop_var: service_item
-    label: "{{ service_item.key }}"
+    label: "{{ service_item.id }}"

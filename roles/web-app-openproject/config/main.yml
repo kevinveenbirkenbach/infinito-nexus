@@ -33,10 +33,9 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
-      shared: true
-      type: "postgres"
+    postgres:
       enabled: true
+      shared: true
     web:
       name:               openproject-web
       image:              openproject/openproject

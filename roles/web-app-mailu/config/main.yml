@@ -38,6 +38,9 @@ compose:
       enabled: true
       shared: true
     mailu:
+      enabled:            false
+      shared:             true
+      provides:           email
       version:            "2024.06"
       name:               mailu
       min_storage:        "20GB"
@@ -50,10 +53,9 @@ compose:
       mem_reservation:    "256m"
       mem_limit:          "512m"
       pids_limit:         256
-    database:
-      shared: true
-      type: "mariadb"
+    mariadb:
       enabled:            true
+      shared:             true
       cpus:               "0.8"
       mem_reservation:    "1g"
       mem_limit:          "2g"

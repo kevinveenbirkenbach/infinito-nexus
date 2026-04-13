@@ -30,10 +30,9 @@ compose:
       backup:
         disabled: true
       enabled: true
-    database:
-      shared: true
-      type: "postgres"
+    postgres:
       enabled: true
+      shared: true
     oauth2:
       origin:
         host: "front"

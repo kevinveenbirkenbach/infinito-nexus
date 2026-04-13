@@ -1,6 +1,8 @@
 compose:
   services:
     postgres:
+      enabled:            false
+      shared:             true
       # Postgis is necessary for mobilizon
       image:              postgis/postgis
       name:               postgres
@@ -14,10 +16,6 @@ compose:
       mem_reservation:    "4g"
       mem_limit:          "6g"
       pids_limit:         1024
-    database:
-      shared:   true
-      enabled:  true
-      type:     "postgres"
   volumes:
     data:   "postgres_data"
   network:  "postgres"

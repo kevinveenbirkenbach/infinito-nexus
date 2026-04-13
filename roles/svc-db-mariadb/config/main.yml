@@ -1,6 +1,8 @@
 compose:
   services:
     mariadb:
+      enabled:            false
+      shared:             true
       version:            "latest"
       image:              "mariadb"
       name:               "mariadb"
@@ -12,10 +14,6 @@ compose:
       mem_reservation:    "2g"
       mem_limit:          "4g"
       pids_limit:         1024
-    database:
-      shared:             true
-      enabled:            true
-      type:               "mariadb"
   network:                "mariadb"
   volumes:
     data:                 "mariadb_data"

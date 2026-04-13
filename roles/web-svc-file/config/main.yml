@@ -5,6 +5,9 @@ server:
     aliases: []
 compose:
   services:
+    file:
+      enabled: false
+      shared: true
     dashboard:
       enabled: true
       shared: true

@@ -13,8 +13,6 @@ compose:
       enabled: false
       backup:
         disabled: true
-    database:
-      enabled: false
     mig:
       image:   "ghcr.io/kevinveenbirkenbach/infinito-mig"
       version: "latest"

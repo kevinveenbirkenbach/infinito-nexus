@@ -45,10 +45,9 @@ compose:
       mem_reservation: "256m"
       mem_limit: "512m"
       pids_limit: 512
-    database: 
-      shared: true
-      type: "postgres"
+    postgres:
       enabled: true
+      shared: true
     peertube: 
       name:             "peertube"
       version:          "production-bookworm"
