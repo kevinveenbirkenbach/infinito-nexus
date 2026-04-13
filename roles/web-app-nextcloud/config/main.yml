@@ -44,8 +44,11 @@ compose:
       enabled: true
       shared: true
     coturn:
+      # Keep dedicated TURN provider statically discoverable so normal inventory
+      # generation and local iteration always pull in web-svc-coturn.
+      # Actual Talk TURN usage stays gated by plugins.spreed.enabled below.
+      enabled:  true
       shared:   true
-      enabled:  true 
     logout:
       enabled: true
       shared: true
@@ -106,14 +109,16 @@ compose:
       mem_limit:            "512m"
       pids_limit:           256
     talk:
+      enabled:              "{{ lookup('config', 'web-app-nextcloud', 'plugins.spreed.enabled') }}"
       name:                 "nextcloud-talk"
       image:                "nextcloud/aio-talk"
       version:              "latest"
       backup:
         no_stop_required:   false
       turn_server:
-        onboard_enabled:    true
-        standalone_enabled: false
+        # Use dedicated web-svc-coturn by default. HPB onboard TURN stays available as an explicit fallback only.
+        onboard_enabled:    false
+        standalone_enabled: true
       network_mode:         bridge
       cpus:                 "2.0"
       mem_reservation:      "1g"
@@ -150,7 +155,7 @@ compose:
       shared: true
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
-  enabled:  "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True) }}"   # Activate OIDC for Nextcloud
+  enabled:  "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.enabled', False) }}"   # Activate OIDC for Nextcloud
   # floavor decides which OICD plugin should be used. 
   # Available options: oidc_login, sociallogin
   # @see https://apps.nextcloud.com/apps/oidc_login
@@ -354,13 +359,13 @@ plugins:
   #  enabled: false
   twofactor_nextcloud_notification:
     # Nextcloud two-factor notification: sends notifications for two-factor authentication events (https://apps.nextcloud.com/apps/twofactor_nextcloud_notification)
-    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True)) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not (lookup('config', 'web-app-nextcloud', 'compose.services.oidc.enabled', False)) }}" # Deactivate 2FA if oidc is active
   twofactor_totp:
     # Nextcloud two-factor TOTP: provides time-based one-time password authentication (https://apps.nextcloud.com/apps/twofactor_totp)
-    enabled: "{{ not (applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.oidc.enabled', False, True, True)) }}" # Deactivate 2FA if oidc is active
+    enabled: "{{ not (lookup('config', 'web-app-nextcloud', 'compose.services.oidc.enabled', False)) }}" # Deactivate 2FA if oidc is active
   user_ldap:
     # Nextcloud user LDAP: integrates LDAP for user management and authentication
-    enabled: "{{ applications | default({}, true) | get_app_conf('web-app-nextcloud', 'compose.services.ldap.enabled', False, True, True) }}"
+    enabled: "{{ lookup('config', 'web-app-nextcloud', 'compose.services.ldap.enabled', False) }}"
     user_directory:
       enabled:  true # Enables the LDAP User Directory Search
   user_oidc:
