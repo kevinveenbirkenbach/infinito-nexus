@@ -11,7 +11,7 @@ matches_expected_prefix() {
 	local prefix
 	for prefix in "$@"; do
 		case "${head_ref}" in
-		"${prefix}" | "${prefix}"/*)
+		"${prefix}" | "${prefix}"/* | "${prefix}"-*)
 			return 0
 			;;
 		esac
@@ -28,7 +28,7 @@ documentation)
 	expected_prefixes=(documentation)
 	;;
 full)
-	expected_prefixes=(feature fix)
+	expected_prefixes=(feature fix dependabot alert-autofix)
 	;;
 *)
 	echo "ERROR: Unsupported PR_SCOPE '${PR_SCOPE}'." >&2

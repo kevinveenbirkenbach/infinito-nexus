@@ -1,4 +1,4 @@
-name: Test Infinito.Nexus Deploy (workstation)
+name: "📦 Test: Deploy (workstation)"
 
 on:
   workflow_call:
@@ -56,13 +56,7 @@ jobs:
         shell: bash
         env:
           WHITELIST: ${{ inputs.whitelist }}
-        run: |
-          set -euo pipefail
-          apps="$(./scripts/meta/resolve/apps.sh)"
-          [[ -n "$apps" ]] || apps='[]'
-          echo "apps=$apps" >> "$GITHUB_OUTPUT"
-          echo "apps_json=$apps" >> "$GITHUB_OUTPUT"
-          echo "apps_json=$apps"
+        run: ./scripts/github/output_apps.sh
 
   workstation:
     name: 🖥️ Deploy ${{ matrix.apps }}

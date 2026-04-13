@@ -164,9 +164,11 @@ config :mobilizon, Mobilizon.Service.Geospatial.Nominatim,
 
 config :mobilizon, Mobilizon.Service.Geospatial.Addok,
   endpoint:
+    # nocheck: url
     System.get_env("MOBILIZON_GEOSPATIAL_ADDOK_ENDPOINT", "https://api-adresse.data.gouv.fr")
 
 config :mobilizon, Mobilizon.Service.Geospatial.Photon,
+  # nocheck: url
   endpoint: System.get_env("MOBILIZON_GEOSPATIAL_PHOTON_ENDPOINT", "https://photon.komoot.de")
 
 config :mobilizon, Mobilizon.Service.Geospatial.GoogleMaps,

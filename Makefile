@@ -17,8 +17,8 @@ $(error Missing env file: $(ENV_SH))
 endif
 
 .PHONY: \
-	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python \
-	test lint lint-action lint-ansible lint-python lint-shellcheck test-lint test-unit test-integration test-deploy test-deploy-app \
+	setup setup-clean install install-ansible install-lint install-venv install-python install-system-python install-skills update-skills \
+	test lint lint-action lint-ansible lint-python lint-shellcheck autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app \
 	clean clean-sudo down \
 	system-purge system-disk-usage \
 	list tree mig dockerignore \
@@ -34,10 +34,10 @@ endif
 	act-all act-app act-workflow \
 	deploy-fresh-kept-apps container-refresh-inventory deploy-reuse-kept-all container-purge-entity container-purge-system \
 	deploy-fresh-purged-apps deploy-reuse-kept-apps deploy-reuse-purged-apps deploy-fresh-kept-all \
-	bootstrap setup-development
+	bootstrap mark-development
 
 # Bootstrap the local development environment.
-environment-bootstrap: wsl2-systemd-check install-lint apparmor-teardown dns-setup disable-ipv6
+environment-bootstrap: wsl2-systemd-check install-python-dev install-lint apparmor-teardown dns-setup disable-ipv6
 
 # Tear down the local development environment.
 environment-teardown: apparmor-restore dns-remove restore-ipv6
@@ -204,6 +204,14 @@ install-ansible:
 install-lint:
 	@bash scripts/install/lint.sh
 
+# Install agent skills from skills-lock.json.
+install-skills:
+	@bash scripts/install/skills/install.sh
+
+# Update all agent skills to latest versions and refresh skills-lock.json.
+update-skills:
+	@bash scripts/install/skills/update.sh
+
 # Install the system Python prerequisites.
 install-system-python:
 	@bash roles/dev-python/files/install.sh ensure
@@ -214,7 +222,12 @@ install-venv: install-system-python
 
 # Install Python tooling.
 install-python: install-venv
-	@bash scripts/install/python.sh lint
+	@bash scripts/install/python.sh
+
+# Install Python tooling including lint and dev dependencies.
+install-python-dev: install-python
+	@bash scripts/install/python.sh dev
+	@bash scripts/install/pre-commit.sh
 
 # Install all runtime dependencies.
 install: install-python install-ansible
@@ -224,7 +237,7 @@ setup: dockerignore
 	@bash scripts/setup.sh
 
 # Create the development setup marker.
-setup-development: dockerignore
+mark-development: dockerignore
 	touch env.development
 
 # Install dependencies and prepare the project.
@@ -253,6 +266,10 @@ lint-python:
 lint-shellcheck:
 	@bash scripts/lint/shellcheck.sh
 
+# Auto-format all source files (skips tools that are not installed).
+autoformat:
+	@bash scripts/lint/autoformat.sh
+
 # Run the full test suite.
 test: lint test-lint test-unit test-integration test-deploy
 	@echo "✅ Full test (setup + tests) executed."
@@ -272,6 +289,12 @@ test-unit: install
 # Run the integration test suite.
 test-integration: install
 	@TEST_TYPE="integration" \
+	INFINITO_COMPILE=0 \
+	bash scripts/tests/code.sh
+
+# Run the external test suite.
+test-external: install
+	@TEST_TYPE="external" \
 	INFINITO_COMPILE=0 \
 	bash scripts/tests/code.sh
 

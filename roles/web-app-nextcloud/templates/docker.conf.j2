@@ -1,19 +1,12 @@
 # Internal configuration file for nextcloud
 # Verify time by time, that this rules are valid:
 # https://docs.nextcloud.com/server/latest/admin_manual/installation/nginx.html
-
 worker_processes {{ WEBSERVER_WORKER_PROCESSES }};
-
-# @see https://chatgpt.com/share/67aa3ce9-eea0-800f-85e8-ac54a3810b13
 error_log   /proc/self/fd/2 {% if MODE_DEBUG | bool %}debug{% else %}warn{% endif %};
 pid        /var/run/nginx.pid;
-
-
 events {
     worker_connections {{ WEBSERVER_WORKER_CONNECTIONS }};
 }
-
-
 http {
     include       /etc/nginx/mime.types;
     default_type  application/octet-stream;
@@ -25,26 +18,19 @@ http {
     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
-
     access_log /proc/self/fd/1 main;
-
     sendfile        on;
     #tcp_nopush     on;
-
     keepalive_timeout     65;
     fastcgi_send_timeout  900s;
     fastcgi_read_timeout  900s;
     proxy_buffering       off;
-
     #gzip  on;
-
     upstream php-handler {
         server {{ NEXTCLOUD_SERVICE }}:9000;
     }
-
     server {
         listen 80;
-
         # HSTS settings
         # WARNING: Only add the preload option once you read about
         # the consequences in https://hstspreload.org/. This option
@@ -54,11 +40,9 @@ http {
         {% if lookup('tls', application_id, 'enabled') | bool %}
         add_header Strict-Transport-Security "max-age=15768000; includeSubDomains; preload;" always;
         {% endif %}
-
         # set max upload size
         client_max_body_size 512M;
         fastcgi_buffers 64 4K;
-
         # Enable gzip but do not remove ETag headers
         gzip on;
         gzip_vary on;
@@ -66,11 +50,9 @@ http {
         gzip_min_length 256;
         gzip_proxied expired no-cache no-store private no_last_modified no_etag auth;
         gzip_types application/atom+xml application/javascript application/json application/ld+json application/manifest+json application/rss+xml application/vnd.geo+json application/vnd.ms-fontobject application/x-font-ttf application/x-web-app-app-manifest+json application/xhtml+xml application/xml font/opentype image/bmp image/svg+xml image/x-icon text/cache-manifest text/css text/plain text/vcard text/vnd.rim.location.xloc text/vtt text/x-component text/x-cross-domain-policy;
-
         # Pagespeed is not supported by Nextcloud, so if your server is built
         # with the `ngx_pagespeed` module, uncomment this line to disable it.
         #pagespeed off;
-
         # HTTP response headers borrowed from Nextcloud `.htaccess`
         add_header Referrer-Policy                      "no-referrer"           always;
         add_header X-Content-Type-Options               "nosniff"               always;
@@ -79,13 +61,10 @@ http {
         add_header X-Robots-Tag                         "noindex, nofollow"     always;
         add_header X-XSS-Protection                     "1; mode=block"         always;
         add_header X-Frame-Options "SAMEORIGIN" always;
-
         # Remove X-Powered-By, which is an information leak
         fastcgi_hide_header X-Powered-By;
-        
         # Path to the root of your installation
         root {{ NEXTCLOUD_DOCKER_WORK_DIRECTORY }};
-
         # Specify how to handle directories -- specifying `/index.php$request_uri`
         # here as the fallback means that Nginx always exhibits the desired behaviour
         # when a client requests a path that corresponds to a directory that exists
@@ -97,20 +76,17 @@ http {
         # `try_files $uri $uri/ /index.php$request_uri`
         # always provides the desired behaviour.
         index index.php index.html /index.php$request_uri;
-
         # Rule borrowed from `.htaccess` to handle Microsoft DAV clients
         location = / {
             if ( $http_user_agent ~ ^DavClnt ) {
                 return 302 /remote.php/webdav/$is_args$args;
             }
         }
-
         location = /robots.txt {
             allow all;
             log_not_found off;
             access_log off;
         }
-
         # Make a regex exception for `/.well-known` so that clients can still
         # access it despite the existence of the regex rule
         # `location ~ /(\.|autotest|...)` which would otherwise handle requests
@@ -118,24 +94,19 @@ http {
         location ^~ /.well-known {
             # The rules in this block are an adaptation of the rules
             # in `.htaccess` that concern `/.well-known`.
-
             location = /.well-known/carddav { return 301 /remote.php/dav/; }
             location = /.well-known/caldav  { return 301 /remote.php/dav/; }
             location = /.well-known/webfinger { return 301 /index.php/.well-known/webfinger; }
             location = /.well-known/nodeinfo  { return 301 /index.php/.well-known/nodeinfo; }
-
             location /.well-known/acme-challenge    { try_files $uri $uri/ =404; }
             location /.well-known/pki-validation    { try_files $uri $uri/ =404; }
-
             # Let Nextcloud's API for `/.well-known` URIs handle all other
             # requests by passing them to the front-end controller.
             return 301 /index.php$request_uri;
         }
-
         # Rules borrowed from `.htaccess` to hide certain paths from clients
         location ~ ^/(?:build|tests|config|lib|3rdparty|templates|data)(?:$|/)  { return 404; }
         location ~ ^/(?:\.|autotest|occ|issue|indie|db_|console)                { return 404; }
-
         # Ensure this block, which passes PHP files to the PHP process, is above the blocks
         # which handle static assets (as seen below). If this block is not declared first,
         # then Nginx will encounter an infinite rewriting loop when it prepends `/index.php`
@@ -144,46 +115,36 @@ http {
             # Required for legacy support
             # Added due to this error: https://help.nextcloud.com/t/ldap-ad-authnetication-500-error-on-ajax-request/107168/3
             rewrite ^/(?!index|remote|public|cron|core\/ajax\/update|status|ocs\/v[12]|updater\/.+|ocs-provider\/.+|.+\/richdocumentscode(_arm64)?\/proxy) /index.php$request_uri;
-
             fastcgi_split_path_info ^(.+?\.php)(/.*)$;
             set $path_info $fastcgi_path_info;
-
             try_files $fastcgi_script_name =404;
-
             include fastcgi_params;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
             fastcgi_param PATH_INFO $path_info;
             #fastcgi_param HTTPS on;
-
             fastcgi_param modHeadersAvailable true;         # Avoid sending the security headers twice
             fastcgi_param front_controller_active true;     # Enable pretty urls
             fastcgi_pass php-handler;
-
             fastcgi_intercept_errors on;
             fastcgi_request_buffering off;
         }
-
         location ~ \.(?:css|js|mjs|svg|gif|ico|jpg|png|webp|wasm|tflite|map|ogg|flac)$ {
             try_files $uri /index.php$request_uri;
             expires 6M;         # Cache-Control policy borrowed from `.htaccess`
             access_log off;     # Optional: Don't log access to assets
         }
-
         location ~ \.(otf|woff2?)$ {
             try_files $uri /index.php$request_uri;
             expires 7d;         # Cache-Control policy borrowed from `.htaccess`
             access_log off;     # Optional: Don't log access to assets
         }
-
         # Rule borrowed from `.htaccess`
         location /remote {
             return 301 /remote.php$request_uri;
         }
-
         location / {
             try_files $uri $uri/ /index.php$request_uri;
         }
-
         location {{ NEXTCLOUD_WHITEBOARD_LOCATION }} {
             proxy_pass         http://whiteboard:{{ NEXTCLOUD_WHITEBOARD_PORT_INTERNAL }}/;
             proxy_http_version 1.1;
@@ -193,7 +154,6 @@ http {
             proxy_set_header   Connection        "upgrade";
             proxy_read_timeout 3600;
         }
-
 {% if NEXTCLOUD_HPB_SIGNALING_ENABLED | bool %}
         location {{ NEXTCLOUD_HPB_SIGNALING_LOCATION }} {
 {% if NEXTCLOUD_HPB_NETWORK_MODE == 'host' %}
@@ -210,6 +170,5 @@ http {
             proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
         }
 {% endif %}
-
     }
 }

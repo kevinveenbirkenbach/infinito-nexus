@@ -37,7 +37,7 @@ class TestApplyMirrorOverrides(unittest.TestCase):
     def test_default_policy_manual_override_wins(self) -> None:
         """
         Default policy is 'if_missing' -> if host_vars already has image/version,
-        mirror must NOT overwrite them.
+        mirror must NOT overwrite them in applications.
         """
         host_vars_data = {
             "applications": {
@@ -77,8 +77,11 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         out = self._read_yaml(self.host_vars)
         svc = out["applications"]["web-app-nextcloud"]["compose"]["services"]["app"]
 
+        # applications: manual values win
         self.assertEqual(svc["image"], "docker.io/library/nextcloud")
         self.assertEqual(svc["version"], "30.0.0")
+
+        self.assertNotIn("images_overrides", out)
 
     def test_force_policy_overwrites_image_and_version(self) -> None:
         """
@@ -125,18 +128,17 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         out = self._read_yaml(self.host_vars)
         svc = out["applications"]["web-app-nextcloud"]["compose"]["services"]["app"]
 
-        # overwritten keys
         self.assertEqual(svc["image"], "ghcr.io/acme/mirror/nextcloud")
         self.assertEqual(svc["version"], "30.0.1")
-
-        # preserved keys
         self.assertEqual(svc["env"], {"FOO": "bar"})
         self.assertEqual(svc["replicas"], 2)
         self.assertEqual(svc["mirror_policy"], "force")
 
+        self.assertNotIn("images_overrides", out)
+
     def test_skip_policy_never_overwrites(self) -> None:
         """
-        mirror_policy: skip -> mirror never touches the service.
+        mirror_policy: skip -> mirror never touches applications service.
         """
         host_vars_data = {
             "applications": {
@@ -181,9 +183,11 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         self.assertEqual(svc["version"], "30.0.0")
         self.assertEqual(svc["mirror_policy"], "skip")
 
+        self.assertNotIn("images_overrides", out)
+
     def test_if_missing_fills_only_missing_keys(self) -> None:
         """
-        Default policy: if_missing -> fill missing image/version only.
+        Default policy: if_missing -> fill missing image/version only in applications.
         """
         host_vars_data = {
             "applications": {
@@ -191,7 +195,6 @@ class TestApplyMirrorOverrides(unittest.TestCase):
                     "compose": {
                         "services": {
                             "ollama": {
-                                # image missing, version missing
                                 "env": {"A": "b"},
                             }
                         }
@@ -202,7 +205,6 @@ class TestApplyMirrorOverrides(unittest.TestCase):
                         "services": {
                             "app": {
                                 "image": "docker.io/library/nextcloud",
-                                # version missing
                             }
                         }
                     }
@@ -250,14 +252,14 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         self.assertEqual(svc_ollama["env"], {"A": "b"})
 
         svc_nc = out["applications"]["web-app-nextcloud"]["compose"]["services"]["app"]
-        # image should NOT be overwritten (manual wins)
         self.assertEqual(svc_nc["image"], "docker.io/library/nextcloud")
-        # but version should be filled
         self.assertEqual(svc_nc["version"], "30.0.1")
+
+        self.assertNotIn("images_overrides", out)
 
     def test_creates_missing_app_and_service(self) -> None:
         """
-        If host_vars lacks the app/service, mirror can create it (because missing).
+        If host_vars lacks the app/service, mirror creates it.
         """
         host_vars_data = {"TLS_ENABLED": True}
 
@@ -287,6 +289,8 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         svc = out["applications"]["svc-db-postgres"]["compose"]["services"]["postgres"]
         self.assertEqual(svc["image"], "ghcr.io/acme/mirror/postgres")
         self.assertEqual(svc["version"], "16")
+
+        self.assertNotIn("images_overrides", out)
 
     def test_ignores_entries_without_image_or_version(self) -> None:
         host_vars_data = {
@@ -335,13 +339,13 @@ class TestApplyMirrorOverrides(unittest.TestCase):
 
         self.assertNotIn("web-app-wordpress", out.get("applications", {}))
 
-    def test_noop_when_mirrors_has_no_applications(self) -> None:
+    def test_noop_when_mirrors_has_no_applications_or_images(self) -> None:
         host_vars_data = {
             "applications": {
                 "a": {"compose": {"services": {"s": {"image": "i", "version": "v"}}}}
             }
         }
-        mirrors_data = {"not_applications": {"x": 1}}
+        mirrors_data = {"not_applications_or_images": {"x": 1}}
 
         self._write_yaml(self.host_vars, host_vars_data)
         self._write_yaml(self.mirrors, mirrors_data)
@@ -404,6 +408,81 @@ class TestApplyMirrorOverrides(unittest.TestCase):
         self.assertEqual(svc["image"], "ghcr.io/acme/mirror/nextcloud")
         self.assertEqual(svc["version"], "30.0.1")
         self.assertEqual(svc["env"], {"FOO": "bar"})
+
+        self.assertNotIn("images_overrides", out)
+
+    def test_images_entries_merge_into_images_overrides_only(self) -> None:
+        host_vars_data = {
+            "applications": {
+                "web-app-nextcloud": {
+                    "compose": {
+                        "services": {
+                            "app": {
+                                "image": "docker.io/library/nextcloud",
+                                "version": "30.0.0",
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        mirrors_data = {
+            "images": {
+                "test-e2e-playwright": {
+                    "playwright": {
+                        "image": "ghcr.io/acme/mirror/mcr.microsoft.com/playwright",
+                        "version": "v1.58.2-noble",
+                    }
+                }
+            }
+        }
+
+        self._write_yaml(self.host_vars, host_vars_data)
+        self._write_yaml(self.mirrors, mirrors_data)
+
+        apply_mirror_overrides(self.host_vars, self.mirrors)
+
+        out = self._read_yaml(self.host_vars)
+        svc = out["applications"]["web-app-nextcloud"]["compose"]["services"]["app"]
+        self.assertEqual(svc["image"], "docker.io/library/nextcloud")
+        self.assertEqual(svc["version"], "30.0.0")
+
+        img = out["images_overrides"]["test-e2e-playwright"]["playwright"]
+        self.assertEqual(
+            img["image"], "ghcr.io/acme/mirror/mcr.microsoft.com/playwright"
+        )
+        self.assertEqual(img["version"], "v1.58.2-noble")
+
+    def test_images_entries_fill_only_missing_override_fields(self) -> None:
+        host_vars_data = {
+            "images_overrides": {
+                "test-e2e-playwright": {
+                    "playwright": {
+                        "image": "ghcr.io/custom/playwright",
+                    }
+                }
+            }
+        }
+        mirrors_data = {
+            "images": {
+                "test-e2e-playwright": {
+                    "playwright": {
+                        "image": "ghcr.io/acme/mirror/mcr.microsoft.com/playwright",
+                        "version": "v1.58.2-noble",
+                    }
+                }
+            }
+        }
+
+        self._write_yaml(self.host_vars, host_vars_data)
+        self._write_yaml(self.mirrors, mirrors_data)
+
+        apply_mirror_overrides(self.host_vars, self.mirrors)
+
+        out = self._read_yaml(self.host_vars)
+        img = out["images_overrides"]["test-e2e-playwright"]["playwright"]
+        self.assertEqual(img["image"], "ghcr.io/custom/playwright")
+        self.assertEqual(img["version"], "v1.58.2-noble")
 
 
 if __name__ == "__main__":

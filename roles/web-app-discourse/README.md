@@ -8,8 +8,6 @@ Discourse is a popular open-source discussion platform designed to foster commun
 
 This role deploys Discourse using Docker, automating tasks such as container orchestration, service configuration, and routine administrative operations. It integrates key components like Redis and PostgreSQL, sets up domain routing with NGINX, and ensures streamlined updates for a reliable forum experience.
 
-For detailed usage and configuration, please refer to the following files in this directory:
-- [Administration.md](./Administration.md)
 
 ## Features
 

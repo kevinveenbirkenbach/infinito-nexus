@@ -1,7 +1,7 @@
 from ansible.errors import AnsibleFilterError
 import os
 from utils.entity_name_utils import get_entity_name
-from utils.role_dependency_resolver import RoleDependencyResolver
+from utils.roles.dependency_resolver import RoleDependencyResolver
 from typing import Iterable
 
 

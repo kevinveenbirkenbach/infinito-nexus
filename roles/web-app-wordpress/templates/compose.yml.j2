@@ -4,6 +4,10 @@
     image: {{ WORDPRESS_CUSTOM_IMAGE }}
     container_name: {{ WORDPRESS_CONTAINER }}
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        WORDPRESS_IMAGE:           "{{ WORDPRESS_IMAGE }}"
+        WORDPRESS_VERSION:         "{{ WORDPRESS_VERSION }}"
+        WORDPRESS_CONFIG_UPLD_REL: "{{ WORDPRESS_CONFIG_UPLD_REL }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:80"
     volumes:

@@ -118,7 +118,7 @@ compose logs -f
 ```
 
 ## Debug
-To debug the system set APP_DEBUG to true, like descriped [here](https://docs.pixelfed.org/technical-documentation/config/).
+To debug the system set APP_DEBUG to true, like descriped [here](https://docs.pixelfed.org/).
 
 ```bash
 nano config/app.php

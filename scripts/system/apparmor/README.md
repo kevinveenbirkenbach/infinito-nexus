@@ -13,4 +13,4 @@ When changing anything in this area, prefer behavior that is:
 
 In short: these files exist to help development move quickly without teaching the project to be careless around host security controls. ⚙️
 
-For the canonical Make target index that invokes these helpers, see [docs/contributing/tools/makefile.md](../../../docs/contributing/tools/makefile.md).
+For the canonical Make target index that invokes these helpers, see [make.md](../../../docs/contributing/tools/make.md).

@@ -53,7 +53,7 @@ class TestComposeFArgs(unittest.TestCase):
         }
 
     def _stub_get_docker_paths(self, application_id: str, base_dir: str) -> dict:
-        # Keep structure identical to utils.docker_paths_utils.get_docker_paths()
+        # Keep structure identical to utils.docker.paths_utils.get_docker_paths()
         # but stable for unit tests.
         self.assertEqual(application_id, "web-app-a")
         self.assertEqual(base_dir, "/x/")

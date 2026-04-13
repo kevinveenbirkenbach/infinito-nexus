@@ -1,4 +1,4 @@
-name: CI Orchestrator
+name: "🎵 CI: Orchestrator"
 on:
   workflow_call:
     inputs:
@@ -54,7 +54,7 @@ jobs:
 
       - name: Login to GHCR for CI image checks
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4.0.0
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -129,12 +129,15 @@ jobs:
   test-code-lint:
     uses: ./.github/workflows/test-code-lint.yml
     needs: build-ci-images
+  test-code-external:
+    uses: ./.github/workflows/test-code-external.yml
+    needs: build-ci-images
   test-code-unit:
     uses: ./.github/workflows/test-code-unit.yml 
     needs: build-ci-images
   test-code-gate:
     name: 🚦 Gate code
-    needs: [test-code-integration, test-code-lint, test-code-unit]
+    needs: [test-code-integration, test-code-lint, test-code-external, test-code-unit]
     runs-on: ubuntu-latest
     steps:
       - run: echo "code gate passed"
@@ -215,6 +218,7 @@ jobs:
   test-development:
     uses: ./.github/workflows/test-environment.yml
     needs:
+      - images-mirror-missing
       - code-quality-gate
     secrets: inherit
 

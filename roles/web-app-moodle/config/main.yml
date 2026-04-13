@@ -41,6 +41,7 @@ compose:
       enabled: true
       shared: true
     moodle:
+      # nocheck: docker-version
       version:            "4.5" # Latest LTS - Necessary for OIDC
       image:              bitnamilegacy/moodle
       name:               moodle

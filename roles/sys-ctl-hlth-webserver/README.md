@@ -1,21 +1,28 @@
-# sys-ctl-hlth-webserver
+# Webserver Health Check
 
 ## Description
-Verifies that each of your NGINX‐served domains returns an expected HTTP status (200, 301, etc.) and alerts on deviations.
+
+This role verifies that each NGINX-served domain returns an expected HTTP status code (200, 301, etc.) and alerts on deviations.
+
+## Overview
+
+The role scans NGINX server block `.conf` files for domains, HEAD-requests each domain, compares the response against per-domain expected codes, and reports mismatches via `sys-ctl-alm-compose`. It is scheduled via a systemd timer for periodic health sweeps. Include this role and define `on_calendar_health_NGINX`. The role installs `requests` via `pip` automatically.
 
 ## Features
-- Scans your `NGINX` server block `.conf` files for domains.
-- HEAD-requests each domain and compares against per-domain expected codes.
-- Reports any mismatches via `sys-ctl-alm-compose`.
-- Scheduled via a systemd timer for periodic health sweeps.
 
-## Usage
-Include this role and define `on_calendar_health_NGINX`.
-The role installs `requests` via `pip` automatically.
+- **Domain Detection:** Scans NGINX server block `.conf` files for configured domains.
+- **HTTP Status Verification:** HEAD-requests each domain and compares the response against per-domain expected codes.
+- **Alerting:** Reports mismatches via `sys-ctl-alm-compose`.
+- **Scheduled Execution:** Integrates with a systemd timer for periodic health sweeps.
 
 ## Further Resources
-- For more details on NGINX configurations, visit [NGINX documentation](https://NGINX.org/en/docs/).
-- Learn more about Ansible's `uri_module` [here](https://docs.ansible.com/ansible/latest/modules/uri_module.html).
 
-## Contributions
-This role was created with the assistance of ChatGPT. The conversation can be found [here](https://chat.openai.com/share/4033be29-12a6-40a3-bf3c-fc5d57dba8cb) and [here](https://chat.openai.com/share/7f3766d1-9db7-4976-8fe9-68d1142c0a78).
+- [NGINX documentation](https://nginx.org/en/docs/)
+- [Ansible uri_module](https://docs.ansible.com/ansible/latest/modules/uri_module.html)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

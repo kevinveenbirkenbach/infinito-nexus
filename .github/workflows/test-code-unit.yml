@@ -1,4 +1,4 @@
-name: Test Units
+name: "🧪 Test: Code (Units)"
 
 on:
   workflow_call:
@@ -21,6 +21,14 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run unit tests via make
+        shell: bash
         run: |
-          make up 
-          make test-unit
+          set -euo pipefail
+          make up
+          make test-unit 2>&1 | tee /tmp/unit-output.txt
+
+      - name: Build step summary from annotations
+        if: always()
+        working-directory: ${{ github.workspace }}
+        run: |
+          python3 -m utils.annotations.summarize /tmp/unit-output.txt "Unit Test Annotation Summary"

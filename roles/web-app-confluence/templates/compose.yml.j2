@@ -1,6 +1,10 @@
 {% include 'roles/sys-svc-compose/templates/base.yml.j2' %}
   confluence:
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        CONFLUENCE_IMAGE: "{{ CONFLUENCE_IMAGE }}"
+        CONFLUENCE_VERSION: "{{ CONFLUENCE_VERSION }}"
+        CONFLUENCE_HOME: "{{ CONFLUENCE_HOME }}"
     image: "{{ CONFLUENCE_CUSTOM_IMAGE }}"
     container_name: "{{ CONFLUENCE_CONTAINER }}"
     hostname: '{{ CONFLUENCE_HOSTNAME}}'

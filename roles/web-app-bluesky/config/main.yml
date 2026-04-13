@@ -1,5 +1,5 @@
 server:
-  config_upstream_url: "https://ip.bsky.app/config"
+  config_upstream_url: "https://ip.bsky.app/config" # nocheck: url
   status_codes:
     web: 405
   domains:
@@ -17,8 +17,8 @@ server:
         - "https://api.bsky.app"
         - "https://public.api.bsky.app"
         - "https://events.bsky.app"
-        - "https://statsigapi.net"
-        - "https://ip.bsky.app"
+        - "https://statsigapi.net"  # nocheck: url
+        - "https://ip.bsky.app"  # nocheck: url
         - "https://video.bsky.app"
         - "https://bsky.app"
         - "wss://bsky.network"

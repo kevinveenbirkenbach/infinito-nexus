@@ -4,34 +4,41 @@ import json
 from pathlib import Path
 import yaml
 
-from cli.mirror.util import iter_role_images
+from utils.docker.image.discovery import iter_role_images
 from cli.mirror.providers import GHCRProvider
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", default=".")
-    parser.add_argument("--ghcr-namespace", required=True)
-    parser.add_argument("--ghcr-prefix", default="mirror")
+    GHCRProvider.add_args(parser)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
-    provider = GHCRProvider(args.ghcr_namespace, args.ghcr_prefix)
+    provider = GHCRProvider.from_args(args)
     repo_root = Path(args.repo_root).resolve()
 
-    applications = {}
+    applications: dict = {}
+    images: dict = {}
 
     for img in iter_role_images(repo_root):
+        if img.source_file == "defaults/main.yml":
+            role_images = images.setdefault(img.role, {})
+            role_images[str(img.service)] = {
+                "image": provider.image_base(img),
+                "version": img.version,
+            }
+            continue
+
         app = applications.setdefault(img.role, {})
         docker = app.setdefault("compose", {})
         services = docker.setdefault("services", {})
-
         services[str(img.service)] = {
             "image": provider.image_base(img),
             "version": img.version,
         }
 
-    result = {"applications": applications}
+    result = {"applications": applications, "images": images}
 
     if args.json:
         print(json.dumps(result, indent=2))

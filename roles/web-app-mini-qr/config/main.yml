@@ -1,5 +1,8 @@
 compose:
   services:
+    mini-qr:
+      image:   ghcr.io/lyqht/mini-qr
+      version: latest
     logout:
       enabled: false
       shared: false

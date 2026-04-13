@@ -1,15 +1,14 @@
-# Docker and Runtime Commands
+# Docker and Runtime Commands 🐳
 
 Use this page for the Docker/runtime context around the project.
-The canonical `make` command index now lives in [Makefile Commands](makefile.md).
+The canonical `make` command index now lives in [Makefile Commands](../artefact/files/makefile.md).
 
-## Scope
+## Scope 🎯
 
-- Use [Makefile Commands](makefile.md) when you want the concrete repository targets.
-- Use [Development](../flow/testing.md) for app-level local deploy flows and end-to-end checks.
-- Use [Testing and Validation](../flow/testing.md) for lint, unit, integration, and Playwright guidance.
+- Use [Makefile Commands](../artefact/files/makefile.md) when you want the concrete repository targets.
+- Use [testing.md](../actions/testing.md) for local deploy flows, lint, unit, integration, and Playwright guidance.
 
-## Notes
+## Notes 📝
 
 - The local runtime is driven from the repository root through Make targets.
-- Keep Docker-specific explanations here and keep the command reference in `makefile.md`.
+- Keep Docker-specific explanations here and keep the command reference in `../artefact/files/makefile.md`.

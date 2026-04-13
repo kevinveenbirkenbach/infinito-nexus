@@ -1,14 +1,12 @@
-# dev-base-devel Role
-
-This Ansible role installs a base development toolchain across the default Infinito distros.
+# Base Development Toolchain
 
 ## Description
 
-The role installs distro-specific equivalents of core build tooling so systems are ready for compiling software from source.
+Base development toolchains provide the core build tools (compilers, linkers, make, etc.) required to compile software from source. Common examples include `base-devel` on Arch Linux, `build-essential` on Debian/Ubuntu, and `@development-tools` on Fedora/CentOS.
 
-## Usage
+## Overview
 
-After deploying this role, all common build dependencies will be available on the system, allowing you to compile and install software packages that require development tools.
+This role installs distro-specific equivalents of core build tooling so systems are ready for compiling software from source. After deploying this role, all common build dependencies are available on the system.
 
 ## Features
 
@@ -20,6 +18,13 @@ After deploying this role, all common build dependencies will be available on th
 
 ## Further Resources
 
-- [Arch Wiki: base-devel](https://wiki.archlinux.org/title/Development_packages)
+- [Arch Linux: base-devel package](https://archlinux.org/packages/core/any/base-devel/)
 - [Debian package: build-essential](https://packages.debian.org/stable/build-essential)
 - [DNF groups: development-tools](https://dnf.readthedocs.io/en/latest/command_ref.html#group-command)
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

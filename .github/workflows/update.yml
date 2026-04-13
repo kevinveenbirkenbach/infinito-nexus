@@ -1,0 +1,77 @@
+name: "🔄 Update: Versions"
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-docker-image-versions:
+    name: 🐳 Update Docker image versions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install update dependencies
+        run: bash scripts/github/install_update_python.sh
+
+      - name: Update Docker image versions
+        run: bash scripts/github/update_docker_image_versions.sh
+
+      - name: Check for changes
+        id: diff
+        run: bash scripts/github/check_git_changes.sh roles
+
+      - name: Open PR if Docker image versions changed
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATE_BRANCH_PREFIX: chore/update-docker-image-versions
+          UPDATE_COMMIT_MESSAGE: "chore(images): update Docker image versions"
+          UPDATE_PR_TITLE: "chore(images): update Docker image versions"
+          UPDATE_PR_BODY: "Automated update of semver-based Docker image versions in `roles/web-*/config/main.yml`."
+          UPDATE_BASE_BRANCH: main
+        run: bash scripts/github/open_update_pr.sh roles
+
+  update-skills:
+    name: 🧠 Update skills-lock.json
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+
+      - name: Update skills
+        run: bash scripts/install/skills/update.sh
+
+      - name: Check for changes
+        id: diff
+        run: bash scripts/github/check_git_changes.sh skills-lock.json
+
+      - name: Open PR if skills-lock.json changed
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATE_BRANCH_PREFIX: chore/update-skills
+          UPDATE_COMMIT_MESSAGE: "chore(skills): update skills-lock.json to latest versions"
+          UPDATE_PR_TITLE: "chore(skills): update agent skills to latest versions"
+          UPDATE_PR_BODY: "Automated daily update of `skills-lock.json` via `npx skills update`."
+          UPDATE_BASE_BRANCH: main
+        run: bash scripts/github/open_update_pr.sh skills-lock.json

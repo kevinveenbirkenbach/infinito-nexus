@@ -8,13 +8,7 @@ Revolutionize your email communications with Mailu, a secure and flexible mail s
 
 Mailu is a complete mail server suite delivered as a Docker-based solution. It supports all essential email protocols, offers intuitive administration through a web interface, and integrates advanced security measures such as TLS encryption and virus scanning. Its modular architecture allows for scalable deployments and easy customization to suit diverse operational requirements.
 
-For further details on installation, configuration, and upgrades, please refer to the following documentation files in this directory:
-- [Installation.md](./Installation.md)
-- [Upgrade.md](./Upgrade.md)
-- [Spam_Issues.md](./Spam_Issues.md)
-- [User_Administration.md](./User_Administration.md)
-
-For more information about this role, visit the GitHub repositories:
+More information about this role is available in these GitHub repositories:
 - [Mailu](https://github.com/infinito-nexus/core/tree/main/roles/web-app-mailu)
 - [Mailu-OIDC](https://github.com/heviat/Mailu-OIDC)
 
@@ -37,5 +31,10 @@ For more information about this role, visit the GitHub repositories:
 - [Mailu issue #2135](https://github.com/Mailu/Mailu/issues/2135)
 - [Mailu issue #2827](https://github.com/Mailu/Mailu/issues/2827)
 - [Mailu GitHub repository](https://github.com/Mailu/Mailu)
-- [Plesk support article on RoundCube connection issue](https://support.plesk.com/hc/en-us/articles/115001264814-Unable-to-log-into-RoundCube-Connection-to-storage-server-failed)
 - [Gist by marienfressinaud](https://gist.github.com/marienfressinaud/f284a59b18aad395eb0de2d22836ae6b)
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

@@ -2,7 +2,7 @@
 
 ## Description
 
-This role pulls backups from a remote server and stores them locally using rsync with retry logic. It is designed to retrieve remote backup data and integrate with your overall backup scheme.
+This role pulls backups from a remote server and stores them locally using rsync with retry logic. It retrieves remote backup data and integrates with your overall backup scheme.
 
 ## Overview
 
@@ -10,7 +10,7 @@ Optimized for Archlinux, this role is a key component of a comprehensive backup 
 
 ## Purpose
 
-Backup Remote to Local is a robust solution for retrieving backup data from remote servers. By leveraging rsync, it creates incremental backups that support both file and database recovery. This ensures the integrity and security of your backup data across distributed environments.
+Backup Remote to Local provides a robust solution for retrieving backup data from remote servers. By leveraging rsync, it creates incremental backups that support both file and database recovery. This ensures the integrity and security of your backup data across distributed environments.
 
 ## Features
 
@@ -18,14 +18,14 @@ Backup Remote to Local is a robust solution for retrieving backup data from remo
 - **Incremental Backup with rsync:** Uses rsync with options for archive, backup, and hard linking to efficiently manage changes.
 - **Retry Logic:** Implements a retry mechanism to handle transient network issues or remote errors.
 - **Integration with Other Roles:** Works alongside roles like sys-svc-directory-validator, sys-ctl-cln-faild-bkps, sys-timer, sys-bkp-provider, and sys-lock.
-- **Administrative Debugging:** Detailed debug instructions and administrative tasks are provided in a separate file.
 
-## Other Resources
+## Further Resources
 
-- **Backup Scheme:**  
-  ![backup scheme](https://blog.veen.world/wp-content/uploads/2020/12/srv-backup-768x567.jpg)  
-  More details can be found in [this blog post](https://blog.veen.world/2020/12/26/how-i-backup-dedicated-root-servers/).
+- [How I backup dedicated root servers](https://blog.veen.world/2020/12/26/how-i-backup-dedicated-root-servers/)
 
-## Administration & Debugging
+## Credits
 
-For detailed debug instructions and administrative tasks, please refer to the [Administration Tasks](Administration.md) file.
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

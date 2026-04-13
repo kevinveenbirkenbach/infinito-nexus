@@ -16,9 +16,9 @@
     state: directory
     mode: '0755'
 
-- name: "Transfering Gemfile.plugins to {{ OPENPROJECT_PLUGINS_FOLDER }}"
+- name: "Transferring Gemfile to {{ OPENPROJECT_PLUGINS_FOLDER }} as Gemfile.plugins"
   copy:
-    src: Gemfile.plugins
+    src: Gemfile
     dest: "{{ [OPENPROJECT_PLUGINS_FOLDER,'Gemfile.plugins'] | path_join }}"
   notify:
     - compose up

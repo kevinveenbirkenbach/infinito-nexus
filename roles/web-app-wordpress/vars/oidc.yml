@@ -1,5 +1,4 @@
 # Defines OIDC settings for the OpenID Connect Generic plugin, with explanatory comments.
-# @see https://github.com/oidc-wp/openid-connect-generic/blob/develop/includes/openid-connect-dev-option-settings.php
 
 oidc_settings:
   client_id:                "{{ OIDC.CLIENT.ID }}"                                                # The client ID that identifies WordPress as the OIDC client.

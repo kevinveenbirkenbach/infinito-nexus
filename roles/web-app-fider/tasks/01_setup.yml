@@ -1,0 +1,4 @@
+---
+- name: "Fider | OIDC setup"
+  include_tasks: 01_setup_oidc.yml
+  when: FIDER_OIDC_ENABLED | bool

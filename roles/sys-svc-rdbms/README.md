@@ -7,7 +7,7 @@ This Ansible role provisions a centralized database system in your Docker Compos
 ## Overview
 
 Tailored for environments that require a central data repository, this role:
-- Loads necessary database variables defined in [vars/database.yml](./vars/database.yml).
+- Loads necessary database variables defined in vars/database.yml.
 - Generates an environment file based on the chosen database engine.
 - Integrates seamlessly with Docker Compose to deploy a centralized database container (if enabled).
 
@@ -22,9 +22,9 @@ The role's purpose is to automate the provisioning and configuration of a centra
 - **Docker Compose Integration:** Automates container setup and configuration.
 - **Simplified Variable Management:** Preconfigured templates minimize manual intervention.
 
-## Credits 📝
+## Credits
 
-Developed and maintained by **Kevin Veen-Birkenbach**.  
-Learn more at [www.veen.world](https://www.veen.world)  
-Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-License: [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license)
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

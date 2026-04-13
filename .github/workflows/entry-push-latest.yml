@@ -1,4 +1,4 @@
-name: CI (Push)
+name: "⚡ CI: Push"
 
 concurrency:
   group: global-ci-${{ github.repository }}-${{ github.ref_name }}
@@ -11,6 +11,7 @@ on:
       - "feature/**"
       - "hotfix/**"
       - "fix/**"
+      - "alert-autofix-*"
 
 permissions:
   contents: write

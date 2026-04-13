@@ -1,4 +1,4 @@
-name: Install Infinito.Nexus with Package Manager (pkgmgr)
+name: "📥 Test: Install Package Manager"
 
 on:
   workflow_call:

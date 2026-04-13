@@ -1,4 +1,4 @@
-name: Cancel PR Runs On Close
+name: "🚫 Cancel: PR Runs on Close"
 
 on:
   pull_request_target:

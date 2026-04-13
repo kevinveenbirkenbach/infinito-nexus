@@ -1,13 +1,20 @@
-name: Cancel Runs On Branch Delete
+name: "🚫 Cancel: Runs on Branch Delete"
 
 on:
   delete:
+
+# Enters the same concurrency group as entry-push-latest.yml for the deleted
+# branch, which cancels that run and all its child workflow_call runs.
+concurrency:
+  group: global-ci-${{ github.repository }}-${{ github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   actions: write
   contents: read
 
 jobs:
+  # Fallback: cancel any remaining active runs via the GitHub API.
   cancel-branch-runs:
     if: ${{ github.event.ref_type == 'branch' }}
     runs-on: ubuntu-latest

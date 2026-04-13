@@ -38,6 +38,14 @@ x-environment: &shopware
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
     <<: *shopware
     {{ lookup('template', 'roles/sys-svc-container/templates/build.yml.j2') | indent(4) }}
+      args:
+        SHOPWARE_CONTAINER_IMAGE: "{{ SHOPWARE_CONTAINER_IMAGE }}"
+        SHOPWARE_CONTAINER_VERSION: "{{ SHOPWARE_CONTAINER_VERSION }}"
+        SHOPWARE_PKG_NAME: "{{ SHOPWARE_PKG_NAME }}"
+        SHOPWARE_PKG_VERSION: "{{ SHOPWARE_PKG_VERSION }}"
+        SHOPWARE_COMPOSER_PLATFORM_PHP: "{{ SHOPWARE_COMPOSER_PLATFORM_PHP }}"
+        SHOPWARE_PHP_IMAGE: "{{ SHOPWARE_PHP_IMAGE }}"
+        SHOPWARE_PHP_VERSION: "{{ SHOPWARE_PHP_VERSION }}"
     container_name: "{{ SHOPWARE_WEB_CONTAINER }}"
     ports:
       - "{{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}"

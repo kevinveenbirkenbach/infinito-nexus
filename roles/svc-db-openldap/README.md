@@ -8,10 +8,6 @@ Unleash the potential of centralized identity management with OpenLDAP. This pow
 
 Deploy OpenLDAP in a Docker environment with support for TLS-secured communication via an NGINX stream proxy. OpenLDAP offers advanced directory management capabilities, including flexible schema definitions, dynamic configuration overlays, and comprehensive query support with LDAP search utilities.
 
-For further setup instructions and advanced configuration details, please refer to the following resources available in this directory:
-- [Administration.md](docs/Administration.md)
-- [Installation.md](docs/Installation.md)
-- [Change_DN.md](docs/Change_DN.md)
 
 ## Features
 
@@ -50,4 +46,4 @@ Developed and maintained by **Kevin Veen-Birkenbach**.
 Learn more at [veen.world](https://www.veen.world).
 
 Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code)  
-Licensed under [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
