@@ -1,7 +1,10 @@
 images:
   playwright:
     image: mcr.microsoft.com/playwright
-    version: "v1.58.2-noble"
+    version: "v1.59.1-noble"
+
+# Derived from images.playwright.version — strip leading "v" and distro suffix.
+TEST_E2E_PLAYWRIGHT_VERSION: "{{ images.playwright.version | image_version }}"
 
 # Where we stage per-role Playwright projects on the host
 TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR:    "/tmp/test-e2e-playwright"

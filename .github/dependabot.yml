@@ -74,15 +74,15 @@ updates:
   # ------------------------------------------------------------
   # npm / Node.js (package.json)
   # ------------------------------------------------------------
-  - package-ecosystem: "npm"
-    directories:
-      - "/roles/test-e2e-playwright/files"
-    schedule:
-      interval: "daily"
-      time: "00:00"
-    labels:
-      - "dependencies"
-      - "javascript"
+  #- package-ecosystem: "npm"
+  #  directories:
+  #    - "/roles/test-e2e-playwright/files"
+  #  schedule:
+  #    interval: "daily"
+  #    time: "00:00"
+  #  labels:
+  #    - "dependencies"
+  #    - "javascript"
 
   # ------------------------------------------------------------
   # Disabled — no dependency files found in repository
