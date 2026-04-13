@@ -84,6 +84,7 @@ jobs:
       # Reclaim runner space before Docker pulls start. Server deploy tests pull
       # large CI and application images and can otherwise exhaust / on
       # GitHub-hosted runners.
+      # Option rationale: docs/contributing/artefact/files/github/workflow.md
       - name: Free disk space
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
         with:
@@ -91,9 +92,9 @@ jobs:
           android: true
           dotnet: true
           haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
+          large-packages: false
+          docker-images: false
+          swap-storage: false
 
       - uses: actions/checkout@v6
 
