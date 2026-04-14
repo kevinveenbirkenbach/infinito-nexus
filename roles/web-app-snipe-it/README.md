@@ -27,8 +27,7 @@ This Docker deployment uses Ansible automation to set up Snipe‑IT along with n
 
 ## Other Resources
 
-- [Snipe‑IT Official Documentation](https://snipe-it.readme.io/docs/ldap-sync-login)
-- [SAML Setup Instructions](https://snipe-it.readme.io/docs/saml)
+- [Snipe‑IT Official Documentation](https://snipe-it.readme.io/)
 - [Mattermost SSO Integration Guide](https://docs.mattermost.com/onboard/sso-saml-keycloak.html)
 - [Additional GitHub Issues and Discussions](https://github.com/snipe/snipe-it/issues)
 

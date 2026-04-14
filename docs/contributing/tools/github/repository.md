@@ -1,6 +1,6 @@
 # Repository Settings 🔧
 
-See also [branch.md](branch.md) for branch protection rules.
+See also [branch.md](branch/security.md) for branch protection rules.
 
 ## Dependency Management 📦
 
