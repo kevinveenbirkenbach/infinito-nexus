@@ -40,7 +40,7 @@ Examples of topics that MUST stay internal:
 ### Bugs and Issues 🐛
 
 - Bugs and actionable issues MUST be reported at [s.infinito.nexus/issues](https://s.infinito.nexus/issues).
-- Security vulnerabilities MUST NOT be reported there — see [SECURITY.md](../../SECURITY.md) instead.
+- Security vulnerabilities MUST NOT be reported there — see [SECURITY.md](../../../SECURITY.md) instead.
 
 ### Features and Work Items 🗂️
 
@@ -67,4 +67,4 @@ In all communication and when handling data, you MUST respect the [Hacker Ethics
 
 ## Conduct 🕊️
 
-All communication MUST follow the project [Code of Conduct](../../CODE_OF_CONDUCT.md).
+All communication MUST follow the project [Code of Conduct](../../../CODE_OF_CONDUCT.md).

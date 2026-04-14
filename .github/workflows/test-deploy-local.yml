@@ -72,13 +72,7 @@ jobs:
         shell: bash
         env:
           WHITELIST: ${{ inputs.whitelist }}
-        run: |
-          set -euo pipefail
-          apps="$(./scripts/meta/resolve/apps.sh)"
-          [[ -n "$apps" ]] || apps='[]'
-          echo "apps=$apps" >> "$GITHUB_OUTPUT"
-          echo "apps_json=$apps" >> "$GITHUB_OUTPUT"
-          echo "apps_json=$apps"
+        run: ./scripts/github/output_apps.sh
 
   deploy:
     name: 🚀 Deploy ${{ needs.discover.outputs.test_deploy_type }} app (${{ matrix.apps }})
