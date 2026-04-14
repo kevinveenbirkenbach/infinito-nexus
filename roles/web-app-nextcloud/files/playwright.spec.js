@@ -419,17 +419,15 @@ test("dashboard to nextcloud login", async ({ page }) => {
       async () => {
         const iframeHandle = await nextcloudIframe.elementHandle();
         const iframeFrame = iframeHandle ? await iframeHandle.contentFrame() : null;
-
-        return iframeFrame ? iframeFrame.url() : "";
+        const currentUrl = iframeFrame ? iframeFrame.url() : "";
+        return currentUrl.includes(expectedOidcAuthUrl) || currentUrl.startsWith(expectedNextcloudBaseUrl);
       },
       {
         timeout: 60_000,
         message: `Expected Nextcloud iframe to load either the Keycloak OIDC login or the standalone Nextcloud login page`
       }
     )
-    .toSatisfy((currentUrl) => {
-      return currentUrl.includes(expectedOidcAuthUrl) || currentUrl.startsWith(expectedNextcloudBaseUrl);
-    });
+    .toBe(true);
 
   await enterNextcloudLoginThroughVisibleEntryPoint(
     page,
