@@ -15,11 +15,16 @@
       -- means no container name is known — skip and rely on HTTP probe only.
       local cname = ngx.var.container_name
       if cname and cname ~= "" then
-        local status = ngx.shared.health_containers:get(cname)
-        -- "down" = container is running but Docker HEALTHCHECK says unhealthy.
-        -- nil    = timer hasn't run yet; do not penalise — fall through.
-        if status == "down" then
-          alive = false
+        -- health_containers is only declared when web-app-prometheus is deployed.
+        -- Skip the dict check gracefully when it is absent (e.g. yourls-only deploy).
+        local dict = ngx.shared.health_containers
+        if dict then
+          local status = dict:get(cname)
+          -- "down" = container is running but Docker HEALTHCHECK says unhealthy.
+          -- nil    = timer hasn't run yet; do not penalise — fall through.
+          if status == "down" then
+            alive = false
+          end
         end
       end
 
