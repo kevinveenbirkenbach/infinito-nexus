@@ -6,23 +6,32 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.config_utils import get_app_conf
+from utils.service_registry import (
+    build_role_to_primary_service_key,
+    build_service_registry_from_applications,
+    canonical_service_key,
+    equivalent_service_keys,
+)
 
 
 def _get_service_flag(
     applications: Dict[str, Any],
     app_id: str,
-    service_key: str,
+    service_keys: List[str],
     flag: str,
 ) -> bool:
-    return bool(
-        get_app_conf(
-            applications=applications,
-            application_id=app_id,
-            config_path=f"compose.services.{service_key}.{flag}",
-            strict=False,
-            default=False,
-            skip_missing_app=True,
+    return any(
+        bool(
+            get_app_conf(
+                applications=applications,
+                application_id=app_id,
+                config_path=f"compose.services.{service_key}.{flag}",
+                strict=False,
+                default=False,
+                skip_missing_app=True,
+            )
         )
+        for service_key in service_keys
     )
 
 
@@ -50,15 +59,8 @@ def _get_enabled_service_keys(
 def _resolve_service_provider_app_id(
     applications: Dict[str, Any],
     service_registry: Dict[str, Any],
-    app_id: str,
     service_key: str,
 ) -> Optional[str]:
-    """Resolve a service key to the provider role/application id.
-
-    Transitive service recursion must follow SERVICE_REGISTRY so short keys such
-    as ``asset`` recurse into ``web-svc-asset`` instead of requiring callers to
-    use full application ids inside compose.services.
-    """
     entry = service_registry.get(service_key)
     if not isinstance(entry, dict):
         return None
@@ -66,23 +68,7 @@ def _resolve_service_provider_app_id(
     role = entry.get("role")
     if isinstance(role, str) and role:
         return role
-
-    role_template = entry.get("role_template")
-    if not isinstance(role_template, str) or not role_template:
-        return None
-
-    service_type = get_app_conf(
-        applications=applications,
-        application_id=app_id,
-        config_path=f"compose.services.{service_key}.type",
-        strict=False,
-        default="",
-        skip_missing_app=True,
-    )
-    if not isinstance(service_type, str) or not service_type:
-        return None
-
-    return role_template.replace("{type}", service_type)
+    return None
 
 
 def _is_service_needed(
@@ -101,8 +87,9 @@ def _is_service_needed(
         return False
     visited.add(app_id)
 
-    enabled = _get_service_flag(applications, app_id, service_key, "enabled")
-    shared = _get_service_flag(applications, app_id, service_key, "shared")
+    service_keys = equivalent_service_keys(service_registry, service_key)
+    enabled = _get_service_flag(applications, app_id, service_keys, "enabled")
+    shared = _get_service_flag(applications, app_id, service_keys, "shared")
     if enabled and shared:
         return True
 
@@ -110,7 +97,7 @@ def _is_service_needed(
         if svc == service_key:
             continue
         dep_app_id = _resolve_service_provider_app_id(
-            applications, service_registry, app_id, svc
+            applications, service_registry, svc
         )
         if dep_app_id and dep_app_id in applications:
             if _is_service_needed(
@@ -122,21 +109,7 @@ def _is_service_needed(
 
 
 def _build_role_to_key(service_registry: Dict[str, Any]) -> Dict[str, str]:
-    """Map each role name to its canonical service key.
-
-    When multiple keys share the same role, the canonical key is determined by
-    the 'canonical' field on alias entries.  The primary key (no 'canonical'
-    field) is used as the fallback so that role-based reverse lookup always
-    returns a single, deterministic id.
-    """
-    result: Dict[str, str] = {}
-    for key, entry in service_registry.items():
-        if not isinstance(entry, dict) or "role" not in entry:
-            continue
-        role = entry["role"]
-        canonical_key = entry.get("canonical", key)
-        result[role] = canonical_key
-    return result
+    return build_role_to_primary_service_key(service_registry)
 
 
 def _resolve_term(
@@ -150,12 +123,12 @@ def _resolve_term(
     """
     if term in service_registry:
         entry = service_registry[term]
-        role = entry.get("role") or entry.get("role_template", "")
+        role = entry.get("role", "")
         return term, str(role)
     if term in role_to_key:
         key = role_to_key[term]
         entry = service_registry[key]
-        role = entry.get("role") or entry.get("role_template", "")
+        role = entry.get("role", "")
         return key, str(role)
     raise AnsibleError(
         f"service: '{term}' is neither a known service key nor a known role name. "
@@ -171,16 +144,18 @@ def _compute_flags(
     service_key: str,
 ) -> Dict[str, bool]:
     deployed = [app_id for app_id in group_names if app_id in applications]
+    equivalent_keys = equivalent_service_keys(service_registry, service_key)
     any_enabled = any(
-        _get_service_flag(applications, app_id, service_key, "enabled")
+        _get_service_flag(applications, app_id, equivalent_keys, "enabled")
         for app_id in deployed
     )
     any_shared = any(
-        _get_service_flag(applications, app_id, service_key, "shared")
+        _get_service_flag(applications, app_id, equivalent_keys, "shared")
         for app_id in deployed
     )
+    primary_key = canonical_service_key(service_registry, service_key)
     any_needed = any(
-        _is_service_needed(applications, service_registry, app_id, service_key, set())
+        _is_service_needed(applications, service_registry, app_id, primary_key, set())
         for app_id in deployed
     )
     return {"enabled": any_enabled, "shared": any_shared, "needed": any_needed}
@@ -194,9 +169,8 @@ class LookupModule(LookupBase):
       lookup('service', 'matomo')
       lookup('service', 'web-app-matomo')   # resolved via reverse mapping
 
-    Reads 'applications', 'group_names', and 'SERVICE_REGISTRY' from Ansible variables.
-    The 'SERVICE_REGISTRY' variable is the canonical key → role mapping from
-    group_vars/all/20_services.yml and is automatically available in all plays.
+    Reads 'applications' and 'group_names' from Ansible variables and discovers
+    service providers from the role-local compose.services metadata.
 
     Returns a dict per term:
       id      — canonical service key  (e.g. 'matomo')
@@ -230,12 +204,11 @@ class LookupModule(LookupBase):
                 "service: required variable 'group_names' must be a list"
             )
 
-        service_registry = kwargs.get("service_registry", vars_.get("SERVICE_REGISTRY"))
+        service_registry = kwargs.get("service_registry")
+        if service_registry is None:
+            service_registry = build_service_registry_from_applications(applications)
         if not isinstance(service_registry, dict):
-            raise AnsibleError(
-                "service: required variable 'SERVICE_REGISTRY' must be a mapping "
-                "(loaded from group_vars/all/20_services.yml)"
-            )
+            raise AnsibleError("service: 'service_registry' must be a mapping")
 
         role_to_key = _build_role_to_key(service_registry)
 

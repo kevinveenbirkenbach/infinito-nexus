@@ -35,8 +35,9 @@ compose:
       name:               "magento-nginx"
       backup:
         no_stop_required: true
-    database:
-      shared: false
+    # noqa: shared
+    mariadb:
+      shared:             false
       enabled:            true
       version:            "11.4"
     # noqa: shared

@@ -36,14 +36,9 @@ compose:
       mem_reservation:    "256m"
       mem_limit:          "512m"
       pids_limit:         256
-    database: 
-      shared:             true
-      type:               "postgres"
-      enabled:            true
-      cpus:               "1.0"
-      mem_reservation:    "2g"
-      mem_limit:          "3g"
-      pids_limit:         512
+    postgres:
+      enabled: true
+      shared: true
     mastodon: 
       image:              "ghcr.io/mastodon/mastodon"
       version:            latest

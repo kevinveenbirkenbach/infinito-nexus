@@ -2,6 +2,8 @@ import unittest
 from pathlib import Path
 import yaml
 
+from utils.service_registry import build_service_registry_from_roles_dir
+
 
 def repo_root() -> Path:
     for candidate in Path(__file__).resolve().parents:
@@ -11,24 +13,19 @@ def repo_root() -> Path:
 
 
 REPO_ROOT = repo_root()
-SERVICES_FILE = REPO_ROOT / "group_vars" / "all" / "20_services.yml"
 
 RUN_ONCE_TASK = {"include_tasks": "utils/once/flag.yml"}
 
 
 def load_service_registry():
-    with SERVICES_FILE.open("r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-    return data.get("SERVICE_REGISTRY", {})
+    return build_service_registry_from_roles_dir(REPO_ROOT / "roles")
 
 
 def unique_roles(registry):
-    """
-    Return unique role names from the registry.
-    Skips entries that only have role_template (no fixed role).
-    """
     seen = set()
     for entry in registry.values():
+        if "canonical" in entry:
+            continue
         role = entry.get("role")
         if role and role not in seen:
             seen.add(role)
@@ -36,7 +33,8 @@ def unique_roles(registry):
 
 
 RECURSION_HINT = (
-    "Service roles registered in SERVICE_REGISTRY are loaded dynamically via "
+    "Service roles discovered from role-local compose.services metadata are loaded "
+    "dynamically via "
     "load_app.yml, which checks the run_once_<role> flag before loading a role. "
     "If tasks/01_core.yml does not set this flag as its very first task, the flag "
     "may be absent when a second load attempt is evaluated, causing load_app.yml to "
@@ -58,7 +56,7 @@ def role_slug(role):
 
 class TestServiceCoreFirstTaskRunOnce(unittest.TestCase):
     """
-    For every role referenced in SERVICE_REGISTRY (group_vars/all/20_services.yml):
+    For every discovered shared service role:
       1. roles/<role>/tasks/01_core.yml must exist.
       2. Its first task must be: - include_tasks: utils/once/flag.yml
       3. tasks/main.yml must include 01_core.yml with the correct run_once when-guard.

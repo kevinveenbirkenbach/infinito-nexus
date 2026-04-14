@@ -12,7 +12,9 @@ from ruamel.yaml import YAML
 from cli.create.inventory.services_disabler import (
     apply_services_disabled,
     apply_services_disabled_from_env,
+    assert_services_disabled_inventory_consistency_from_env,
     find_provider_roles,
+    find_services_disabled_conflicts,
     parse_services_disabled,
     remove_roles_from_inventory,
 )
@@ -175,10 +177,15 @@ class TestApplyServicesDisabled(unittest.TestCase):
     def _make_role(self, role_name: str, services: dict) -> None:
         role_dir = self.roles_dir / role_name
         (role_dir / "config").mkdir(parents=True)
+        (role_dir / "vars").mkdir(parents=True)
         with (role_dir / "config" / "main.yml").open("w") as f:
             import yaml
 
             yaml.dump({"compose": {"services": services}}, f)
+        with (role_dir / "vars" / "main.yml").open("w") as f:
+            import yaml
+
+            yaml.dump({"application_id": role_name}, f)
 
     def test_disables_service_in_host_vars_and_removes_from_inventory(self):
         self._write_host_vars(
@@ -233,7 +240,7 @@ class TestApplyServicesDisabled(unittest.TestCase):
                         "compose": {
                             "services": {
                                 "oidc": {"enabled": True, "shared": True},
-                                "database": {"enabled": True, "shared": True},
+                                "mariadb": {"enabled": True, "shared": True},
                             }
                         }
                     }
@@ -248,7 +255,7 @@ class TestApplyServicesDisabled(unittest.TestCase):
         svc = result["applications"]["web-app-nextcloud"]["compose"]["services"]
         self.assertFalse(svc["oidc"]["enabled"])
         self.assertFalse(svc["oidc"]["shared"])
-        self.assertTrue(svc["database"]["enabled"])
+        self.assertTrue(svc["mariadb"]["enabled"])
 
     def test_creates_missing_service_entry_when_role_defines_it(self):
         self._write_host_vars(
@@ -383,10 +390,15 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
     def _make_role(self, role_name: str, services: dict) -> None:
         role_dir = self.roles_dir / role_name
         (role_dir / "config").mkdir(parents=True)
+        (role_dir / "vars").mkdir(parents=True)
         with (role_dir / "config" / "main.yml").open("w") as f:
             import yaml
 
             yaml.dump({"compose": {"services": services}}, f)
+        with (role_dir / "vars" / "main.yml").open("w") as f:
+            import yaml
+
+            yaml.dump({"application_id": role_name}, f)
 
     def test_reads_env_var(self):
         self._write(
@@ -416,6 +428,139 @@ class TestApplyServicesDisabledFromEnv(unittest.TestCase):
         with unittest.mock.patch.dict(os.environ, env, clear=True):
             apply_services_disabled_from_env(self.host_vars, roles_dir=self.roles_dir)
         self.assertEqual(self._read(), {"applications": {}})
+
+
+class TestServicesDisabledConflicts(unittest.TestCase):
+    def setUp(self):
+        self.tmp = TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.roles_dir = self.root / "roles"
+        self.roles_dir.mkdir()
+        self.inventory_dir = self.root / "inventory"
+        self.inventory_dir.mkdir()
+        self.inventory_file = self.inventory_dir / "devices.yml"
+        self.host_vars_dir = self.inventory_dir / "host_vars"
+        self.host_vars_dir.mkdir()
+        self.host_vars_file = self.host_vars_dir / "localhost.yml"
+        self.yaml_rt = YAML(typ="rt")
+        self.yaml_rt.preserve_quotes = True
+
+    def _make_role(self, role_name: str, services: dict) -> None:
+        role_dir = self.roles_dir / role_name
+        (role_dir / "config").mkdir(parents=True)
+        (role_dir / "vars").mkdir(parents=True)
+        with (role_dir / "config" / "main.yml").open("w") as f:
+            import yaml
+
+            yaml.dump({"compose": {"services": services}}, f)
+        with (role_dir / "vars" / "main.yml").open("w") as f:
+            import yaml
+
+            yaml.dump({"application_id": role_name}, f)
+
+    def _write_inventory(self, data: dict) -> None:
+        with self.inventory_file.open("w") as f:
+            self.yaml_rt.dump(data, f)
+
+    def _write_host_vars(self, data: dict) -> None:
+        with self.host_vars_file.open("w") as f:
+            self.yaml_rt.dump(data, f)
+
+    def test_reports_provider_role_conflict_for_provides_alias(self):
+        self._make_role(
+            "web-app-mailu",
+            {"mailu": {"image": "mailu", "provides": "email", "shared": True}},
+        )
+        self._make_role(
+            "web-app-fider",
+            {"email": {"enabled": False, "shared": False}},
+        )
+        self._write_inventory(
+            {
+                "all": {
+                    "children": {
+                        "web-app-mailu": {"hosts": {"localhost": {}}},
+                        "web-app-fider": {"hosts": {"localhost": {}}},
+                    }
+                }
+            }
+        )
+        self._write_host_vars(
+            {
+                "applications": {
+                    "web-app-fider": {
+                        "compose": {
+                            "services": {"email": {"enabled": False, "shared": False}}
+                        }
+                    }
+                }
+            }
+        )
+
+        conflicts = find_services_disabled_conflicts(
+            inventory_dir=self.inventory_dir,
+            services=["email"],
+            roles_dir=self.roles_dir,
+        )
+
+        self.assertEqual(len(conflicts), 1)
+        self.assertIn("provider role 'web-app-mailu'", conflicts[0])
+
+    def test_reports_enabled_service_conflict_for_deployed_app(self):
+        self._make_role(
+            "web-app-fider",
+            {"email": {"enabled": True, "shared": True}},
+        )
+        self._write_inventory(
+            {"all": {"children": {"web-app-fider": {"hosts": {"localhost": {}}}}}}
+        )
+        self._write_host_vars(
+            {
+                "applications": {
+                    "web-app-fider": {
+                        "compose": {
+                            "services": {"email": {"enabled": True, "shared": True}}
+                        }
+                    }
+                }
+            }
+        )
+
+        conflicts = find_services_disabled_conflicts(
+            inventory_dir=self.inventory_dir,
+            services=["email"],
+            roles_dir=self.roles_dir,
+        )
+
+        self.assertEqual(len(conflicts), 1)
+        self.assertIn("enabled=True, shared=True", conflicts[0])
+
+    def test_assert_from_env_noops_when_inventory_is_consistent(self):
+        self._make_role(
+            "web-app-fider",
+            {"email": {"enabled": False, "shared": False}},
+        )
+        self._write_inventory(
+            {"all": {"children": {"web-app-fider": {"hosts": {"localhost": {}}}}}}
+        )
+        self._write_host_vars(
+            {
+                "applications": {
+                    "web-app-fider": {
+                        "compose": {
+                            "services": {"email": {"enabled": False, "shared": False}}
+                        }
+                    }
+                }
+            }
+        )
+
+        with unittest.mock.patch.dict(os.environ, {"SERVICES_DISABLED": "email"}):
+            assert_services_disabled_inventory_consistency_from_env(
+                inventory_dir=self.inventory_dir,
+                roles_dir=self.roles_dir,
+            )
 
 
 if __name__ == "__main__":

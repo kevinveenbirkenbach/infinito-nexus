@@ -4,40 +4,55 @@ import unittest
 
 from plugins.lookup.applications_current_play import LookupModule
 
-SERVICE_REGISTRY = {
-    "matomo": {"role": "web-app-matomo", "type": "frontend"},
-    "asset": {"role": "web-svc-asset", "type": "frontend"},
-    "ldap": {"role": "svc-db-openldap", "type": "backend"},
-    "database": {"role_template": "svc-db-{type}", "type": "backend"},
-}
 
 SAMPLE_APPS = {
     "web-svc-html": {},
     "web-svc-legal": {},
-    "web-svc-file": {},
-    "web-svc-asset": {},
-    "web-app-dashboard": {},
-    "web-app-matomo": {},
-    "svc-db-openldap": {},
-    "svc-db-mariadb": {},
+    "web-svc-file": {
+        "compose": {"services": {"file": {"enabled": False, "shared": True}}}
+    },
+    "web-svc-asset": {
+        "compose": {
+            "services": {
+                "asset": {"enabled": False, "shared": True},
+                "file": {"enabled": True, "shared": True},
+            }
+        }
+    },
+    "web-app-dashboard": {
+        "compose": {"services": {"dashboard": {"enabled": False, "shared": True}}}
+    },
+    "web-app-matomo": {
+        "compose": {"services": {"matomo": {"enabled": False, "shared": True}}}
+    },
+    "svc-db-openldap": {
+        "compose": {
+            "services": {
+                "openldap": {"enabled": False, "shared": True, "provides": "ldap"}
+            }
+        }
+    },
+    "svc-db-mariadb": {
+        "compose": {"services": {"mariadb": {"enabled": False, "shared": True}}}
+    },
 }
 
 
 def _run(group_names, applications=None, meta_deps_map=None, service_registry=None):
     lm = LookupModule()
-    lm._load_service_registry = lambda project_root: (
-        service_registry if service_registry is not None else SERVICE_REGISTRY
-    )
     lm._meta_deps = lambda role, roles_dir: (meta_deps_map or {}).get(role, [])
+    kwargs = {}
+    if service_registry is not None:
+        kwargs["service_registry"] = service_registry
     apps = applications if applications is not None else SAMPLE_APPS
-    return lm.run([], variables={"applications": apps, "group_names": group_names})[0]
+    return lm.run(
+        [],
+        variables={"applications": apps, "group_names": group_names},
+        **kwargs,
+    )[0]
 
 
 class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
-    # ------------------------------------------------------------------
-    # Basic group filtering
-    # ------------------------------------------------------------------
-
     def test_direct_group_only(self):
         result = _run(["web-svc-html"])
         self.assertIn("web-svc-html", result)
@@ -49,20 +64,18 @@ class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
     def test_empty_group_names_returns_empty(self):
         self.assertEqual(_run([]), {})
 
-    # ------------------------------------------------------------------
-    # Meta dependency traversal
-    # ------------------------------------------------------------------
-
     def test_meta_dep_included(self):
         result = _run(
-            ["web-svc-legal"], meta_deps_map={"web-svc-legal": ["web-svc-html"]}
+            ["web-svc-legal"],
+            meta_deps_map={"web-svc-legal": ["web-svc-html"]},
         )
         self.assertIn("web-svc-legal", result)
         self.assertIn("web-svc-html", result)
 
     def test_meta_dep_not_in_applications_ignored(self):
         result = _run(
-            ["web-svc-legal"], meta_deps_map={"web-svc-legal": ["some-unknown-role"]}
+            ["web-svc-legal"],
+            meta_deps_map={"web-svc-legal": ["some-unknown-role"]},
         )
         self.assertIn("web-svc-legal", result)
         self.assertNotIn("some-unknown-role", result)
@@ -90,10 +103,6 @@ class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
         self.assertIn("web-svc-html", result)
         self.assertIn("web-svc-legal", result)
 
-    # ------------------------------------------------------------------
-    # Compose service dependency traversal
-    # ------------------------------------------------------------------
-
     def test_service_dep_enabled_and_shared(self):
         apps = dict(SAMPLE_APPS)
         apps["web-svc-legal"] = {
@@ -117,7 +126,7 @@ class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
         }
         self.assertNotIn("web-app-matomo", _run(["web-svc-legal"], applications=apps))
 
-    def test_service_not_in_registry_ignored(self):
+    def test_service_not_in_registry_is_ignored(self):
         apps = dict(SAMPLE_APPS)
         apps["web-svc-legal"] = {
             "compose": {"services": {"unknown-svc": {"enabled": True, "shared": True}}}
@@ -125,28 +134,21 @@ class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
         result = _run(["web-svc-legal"], applications=apps)
         self.assertIn("web-svc-legal", result)
 
-    def test_service_role_template_resolved(self):
+    def test_service_dep_with_provides_is_resolved(self):
         apps = dict(SAMPLE_APPS)
         apps["web-svc-legal"] = {
-            "compose": {
-                "services": {
-                    "database": {"enabled": True, "shared": True, "type": "mariadb"}
-                }
-            }
-        }
-        self.assertIn("svc-db-mariadb", _run(["web-svc-legal"], applications=apps))
-
-    def test_service_role_template_without_type_ignored(self):
-        apps = dict(SAMPLE_APPS)
-        apps["web-svc-legal"] = {
-            "compose": {"services": {"database": {"enabled": True, "shared": True}}}
+            "compose": {"services": {"ldap": {"enabled": True, "shared": True}}}
         }
         result = _run(["web-svc-legal"], applications=apps)
-        self.assertFalse(any(k.startswith("svc-db-") for k in result))
+        self.assertIn("svc-db-openldap", result)
 
-    # ------------------------------------------------------------------
-    # Mixed meta + service recursion
-    # ------------------------------------------------------------------
+    def test_service_dep_for_database_role_uses_direct_service_name(self):
+        apps = dict(SAMPLE_APPS)
+        apps["web-svc-legal"] = {
+            "compose": {"services": {"mariadb": {"enabled": True, "shared": True}}}
+        }
+        result = _run(["web-svc-legal"], applications=apps)
+        self.assertIn("svc-db-mariadb", result)
 
     def test_mixed_meta_and_service_deps(self):
         apps = dict(SAMPLE_APPS)
@@ -163,7 +165,6 @@ class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
         self.assertIn("web-app-matomo", result)
 
     def test_transitive_service_dep(self):
-        # web-svc-legal -meta-> web-svc-asset -service(ldap)-> svc-db-openldap
         apps = dict(SAMPLE_APPS)
         apps["web-svc-asset"] = {
             "compose": {"services": {"ldap": {"enabled": True, "shared": True}}}
@@ -177,10 +178,6 @@ class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
         self.assertIn("web-svc-asset", result)
         self.assertIn("svc-db-openldap", result)
 
-    # ------------------------------------------------------------------
-    # Return value completeness
-    # ------------------------------------------------------------------
-
     def test_returns_full_config_not_just_ids(self):
         apps = {
             "web-svc-legal": {"some_key": "some_value"},
@@ -190,24 +187,19 @@ class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
             ["web-svc-legal"],
             applications=apps,
             meta_deps_map={"web-svc-legal": ["web-svc-html"]},
+            service_registry={},
         )
         self.assertEqual(result["web-svc-legal"], {"some_key": "some_value"})
         self.assertEqual(result["web-svc-html"], {"other_key": 42})
 
-    # ------------------------------------------------------------------
-    # Input validation
-    # ------------------------------------------------------------------
-
     def test_missing_applications_raises(self):
         lm = LookupModule()
-        lm._load_service_registry = lambda p: {}
         lm._meta_deps = lambda r, d: []
         with self.assertRaises(Exception):
             lm.run([], variables={"group_names": []})
 
     def test_invalid_group_names_raises(self):
         lm = LookupModule()
-        lm._load_service_registry = lambda p: {}
         lm._meta_deps = lambda r, d: []
         with self.assertRaises(Exception):
             lm.run(

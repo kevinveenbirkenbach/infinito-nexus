@@ -30,11 +30,9 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
-      shared: true
-      type: "mariadb"
+    mariadb:
       enabled: true
-
+      shared: true
     init:
       name: "shopware-init"
       cpus: 1.0

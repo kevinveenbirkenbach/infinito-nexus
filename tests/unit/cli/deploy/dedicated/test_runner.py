@@ -4,6 +4,7 @@ import subprocess
 import unittest
 from typing import Any, Dict, List, Tuple
 
+from cli.create.inventory.services_disabler import ServicesDisabledConflictError
 from cli.deploy.dedicated import runner
 
 
@@ -63,20 +64,25 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
         allowed_apps = ["web-app-foo", "web-app-bar"]
         password_file = "/etc/inventories/github-ci/.password"
 
-        runner.run_ansible_playbook(
-            repo_root=repo_root,
-            playbook_path=playbook_path,
-            inventory_validator_path=inventory_validator_path,
-            inventory=inventory_path,
-            modes=modes,
-            limit=limit,
-            allowed_applications=allowed_apps,
-            password_file=password_file,
-            verbose=1,
-            skip_build=False,
-            diff=True,
-            ansible_args=None,
-        )
+        with unittest.mock.patch(
+            "cli.deploy.dedicated.runner.assert_services_disabled_inventory_consistency_from_env"
+        ) as mock_services_disabled_guard:
+            runner.run_ansible_playbook(
+                repo_root=repo_root,
+                playbook_path=playbook_path,
+                inventory_validator_path=inventory_validator_path,
+                inventory=inventory_path,
+                modes=modes,
+                limit=limit,
+                allowed_applications=allowed_apps,
+                password_file=password_file,
+                verbose=1,
+                skip_build=False,
+                diff=True,
+                ansible_args=None,
+            )
+
+        mock_services_disabled_guard.assert_called_once()
 
         def was_called(cmd: List[str]) -> bool:
             return any(call_cmd == cmd for call_cmd, _kw in calls)
@@ -178,20 +184,23 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "MODE_DEBUG=true",
         ]
 
-        runner.run_ansible_playbook(
-            repo_root=repo_root,
-            playbook_path=playbook_path,
-            inventory_validator_path=inventory_validator_path,
-            inventory=inventory_path,
-            modes=modes,
-            limit=None,
-            allowed_applications=["web-app-foo"],
-            password_file=None,
-            verbose=0,
-            skip_build=True,
-            diff=False,
-            ansible_args=passthrough,
-        )
+        with unittest.mock.patch(
+            "cli.deploy.dedicated.runner.assert_services_disabled_inventory_consistency_from_env"
+        ):
+            runner.run_ansible_playbook(
+                repo_root=repo_root,
+                playbook_path=playbook_path,
+                inventory_validator_path=inventory_validator_path,
+                inventory=inventory_path,
+                modes=modes,
+                limit=None,
+                allowed_applications=["web-app-foo"],
+                password_file=None,
+                verbose=0,
+                skip_build=True,
+                diff=False,
+                ansible_args=passthrough,
+            )
 
         last_cmd, _last_kw = calls[-1]
         self.assertEqual(last_cmd[0], "ansible-playbook")
@@ -222,21 +231,24 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
             "MODE_DEBUG": False,
         }
 
-        with self.assertRaises(SystemExit) as ctx:
-            runner.run_ansible_playbook(
-                repo_root=repo_root,
-                playbook_path=playbook_path,
-                inventory_validator_path=inventory_validator_path,
-                inventory="/etc/inventories/github-ci/devices.yml",
-                modes=modes,
-                limit=None,
-                allowed_applications=None,
-                password_file=None,
-                verbose=0,
-                skip_build=True,
-                diff=False,
-                ansible_args=None,
-            )
+        with unittest.mock.patch(
+            "cli.deploy.dedicated.runner.assert_services_disabled_inventory_consistency_from_env"
+        ):
+            with self.assertRaises(SystemExit) as ctx:
+                runner.run_ansible_playbook(
+                    repo_root=repo_root,
+                    playbook_path=playbook_path,
+                    inventory_validator_path=inventory_validator_path,
+                    inventory="/etc/inventories/github-ci/devices.yml",
+                    modes=modes,
+                    limit=None,
+                    allowed_applications=None,
+                    password_file=None,
+                    verbose=0,
+                    skip_build=True,
+                    diff=False,
+                    ansible_args=None,
+                )
 
         self.assertEqual(ctx.exception.code, 4)
 
@@ -258,6 +270,42 @@ class TestRunAnsiblePlaybook(unittest.TestCase):
                 for call_cmd, _kw in calls
             ),
             "Inventory validation should be skipped when MODE_ASSERT is False",
+        )
+
+    @unittest.mock.patch("subprocess.run")
+    def test_run_ansible_playbook_fails_early_on_services_disabled_conflict(
+        self, mock_run
+    ):
+        calls: List[Tuple[List[str], Dict[str, Any]]] = []
+        mock_run.side_effect = self._fake_run_side_effect(calls, ansible_rc=0)
+
+        with unittest.mock.patch(
+            "cli.deploy.dedicated.runner.assert_services_disabled_inventory_consistency_from_env",
+            side_effect=ServicesDisabledConflictError("boom"),
+        ):
+            with self.assertRaises(SystemExit) as ctx:
+                runner.run_ansible_playbook(
+                    repo_root="/repo",
+                    playbook_path="/repo/playbook.yml",
+                    inventory_validator_path="/repo/cli/validate/inventory/__main__.py",
+                    inventory="/etc/inventories/github-ci/devices.yml",
+                    modes={
+                        "MODE_CLEANUP": False,
+                        "MODE_ASSERT": True,
+                        "MODE_DEBUG": False,
+                    },
+                    limit=None,
+                    allowed_applications=None,
+                    password_file=None,
+                    verbose=0,
+                    skip_build=True,
+                    diff=False,
+                    ansible_args=None,
+                )
+
+        self.assertEqual(ctx.exception.code, 1)
+        self.assertFalse(
+            any(call_cmd and call_cmd[0] == "ansible-playbook" for call_cmd, _ in calls)
         )
 
 

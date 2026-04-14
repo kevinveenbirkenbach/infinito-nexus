@@ -45,10 +45,9 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
+    mariadb:
+      enabled: true
       shared: true
-      type: "mariadb"
-      enabled: true              
     espocrm:
       image:            "espocrm/espocrm"
       version:          "latest"

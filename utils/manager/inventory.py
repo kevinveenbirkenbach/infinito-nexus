@@ -6,7 +6,12 @@ from typing import Dict, List, Set
 
 from utils.handler.yaml import YamlHandler
 from utils.handler.vault import VaultHandler, VaultScalar
+from utils.database_service import resolve_database_service_key
 from utils.manager.value_generator import ValueGenerator
+from utils.service_registry import (
+    build_service_registry_from_roles_dir,
+    resolve_service_dependency_roles_from_config,
+)
 
 
 class InventoryManager:
@@ -51,8 +56,7 @@ class InventoryManager:
     def load_role_schema(self, role_name: str) -> dict:
         schema_path = self.roles_root / role_name / "schema" / "main.yml"
         if not schema_path.exists():
-            print(f"ERROR: schema not found: {schema_path}", file=sys.stderr)
-            sys.exit(1)
+            return {}
         return YamlHandler.load_yaml(schema_path) or {}
 
     def load_role_config_by_path(self, role_path: Path) -> dict:
@@ -73,40 +77,8 @@ class InventoryManager:
         """
         Extract shared-provider dependencies from a single role config.
         """
-        services = (config.get("compose") or {}).get("services") or {}
-        includes: List[str] = []
-
-        ldap = services.get("ldap") or {}
-        if ldap.get("enabled") is True and ldap.get("shared") is True:
-            includes.append("svc-db-openldap")
-
-        oidc = services.get("oidc") or {}
-        if oidc.get("enabled") is True and oidc.get("shared") is True:
-            includes.append("web-app-keycloak")
-
-        matomo = services.get("matomo") or {}
-        if matomo.get("enabled") is True and matomo.get("shared") is True:
-            includes.append("web-app-matomo")
-
-        db = services.get("database") or {}
-        if db.get("enabled") is True and db.get("shared") is True:
-            db_type = (db.get("type") or "").strip()
-            if not db_type:
-                print(
-                    "ERROR: compose.services.database.enabled=true and shared=true but compose.services.database.type is missing",
-                    file=sys.stderr,
-                )
-                sys.exit(1)
-            includes.append(f"svc-db-{db_type}")
-
-        # stable order, dedup
-        out: List[str] = []
-        seen: Set[str] = set()
-        for r in includes:
-            if r not in seen:
-                out.append(r)
-                seen.add(r)
-        return out
+        service_registry = build_service_registry_from_roles_dir(self.roles_root)
+        return resolve_service_dependency_roles_from_config(config, service_registry)
 
     def resolve_schema_includes_recursive(self, root_role_name: str) -> List[str]:
         """
@@ -144,6 +116,8 @@ class InventoryManager:
         role_path = self.roles_root / role_name
         app_id = self.load_application_id(role_path)
         schema = self.load_role_schema(role_name)
+        if not schema:
+            return
 
         apps = self.inventory.setdefault("applications", {})
         target = apps.setdefault(app_id, {})
@@ -157,19 +131,20 @@ class InventoryManager:
         app_id = self.load_application_id(role_path)
         cfg = self.load_role_config_by_path(role_path)
 
-        apps = self.inventory.setdefault("applications", {})
-        target = apps.setdefault(app_id, {})
-
         services = (cfg.get("compose") or {}).get("services") or {}
-        database = services.get("database") or {}
         oauth2 = services.get("oauth2") or {}
-
-        if database.get("enabled") is True and database.get("shared") is True:
+        oidc = services.get("oidc") or {}
+        has_database_service = bool(resolve_database_service_key({app_id: cfg}, app_id))
+        if has_database_service:
+            apps = self.inventory.setdefault("applications", {})
+            target = apps.setdefault(app_id, {})
             target.setdefault("credentials", {})["database_password"] = (
                 self.value_generator.generate_value("alphanumeric")
             )
 
-        if oauth2.get("enabled") is True:
+        if oauth2.get("enabled") is True or oidc.get("enabled") is True:
+            apps = self.inventory.setdefault("applications", {})
+            target = apps.setdefault(app_id, {})
             target.setdefault("credentials", {})["oauth2_proxy_cookie_secret"] = (
                 self.value_generator.generate_value("random_hex_16")
             )

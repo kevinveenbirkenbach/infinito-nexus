@@ -7,6 +7,10 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.config_utils import get_app_conf
+from utils.database_service import (
+    get_database_service_config,
+    resolve_database_service_key,
+)
 from utils.entity_name_utils import get_entity_name
 
 
@@ -56,35 +60,17 @@ class LookupModule(LookupBase):
 
         consumer_entity = get_entity_name(consumer_id)
 
-        enabled = bool(
-            get_app_conf(
-                applications,
-                consumer_id,
-                "compose.services.database.enabled",
-                strict=False,
-                default=False,
-            )
-        )
-        shared = bool(
-            get_app_conf(
-                applications,
-                consumer_id,
-                "compose.services.database.shared",
-                strict=False,
-                default=False,
-            )
-        )
+        try:
+            dbtype = resolve_database_service_key(applications, consumer_id)
+        except ValueError as exc:
+            raise AnsibleError(f"database: {exc}") from exc
 
-        dbtype = get_app_conf(
-            applications,
-            consumer_id,
-            "compose.services.database.type",
-            strict=False,
-            default="",
-        )
-        dbtype = (str(dbtype) if dbtype is not None else "").strip()
+        database_service = get_database_service_config(applications, consumer_id)
+        enabled = bool(database_service.get("enabled", False))
+        shared = bool(database_service.get("shared", False))
 
-        # If no dbtype configured: keep behavior similar to your vars (mostly empty)
+        # If no direct database service is configured: keep behavior similar to the
+        # historical empty-value lookup payload.
         if not dbtype:
             resolved = {
                 "id": "",
@@ -154,7 +140,7 @@ class LookupModule(LookupBase):
         version = get_app_conf(
             applications,
             consumer_id,
-            "compose.services.database.version",
+            f"compose.services.{dbtype}.version",
             strict=False,
             default=default_version,
         )

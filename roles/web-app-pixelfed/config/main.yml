@@ -41,10 +41,9 @@ compose:
       enabled: true
       mem_reservation: 0.1g
       mem_limit:       0.2g
-    database: 
-      shared: true
-      type: "mariadb"
+    mariadb:
       enabled: true
+      shared: true
     pixelfed:
       image:            "zknt/pixelfed"
       version:          "latest"
