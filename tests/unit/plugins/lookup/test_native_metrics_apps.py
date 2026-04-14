@@ -46,7 +46,6 @@ def _make_roles(tmp: Path, specs: dict) -> dict:
 
 
 class TestNativeMetricsApps(unittest.TestCase):
-
     def setUp(self):
         self._tmpdir = tempfile.TemporaryDirectory()
         self.roles_dir = Path(self._tmpdir.name)
@@ -57,50 +56,82 @@ class TestNativeMetricsApps(unittest.TestCase):
     # ── basic inclusion ────────────────────────────────────────────────────
 
     def test_returns_app_with_enabled_and_fragment(self):
-        apps = _make_roles(self.roles_dir, {
-            "web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True},
-        })
+        apps = _make_roles(
+            self.roles_dir,
+            {
+                "web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True},
+            },
+        )
         self.assertEqual(_run(apps, self.roles_dir), ["web-app-gitea"])
 
     def test_excludes_app_without_native_metrics_enabled(self):
-        apps = _make_roles(self.roles_dir, {
-            "web-app-foo": {"native_metrics_enabled": False, "has_fragment": True},
-        })
+        apps = _make_roles(
+            self.roles_dir,
+            {
+                "web-app-foo": {"native_metrics_enabled": False, "has_fragment": True},
+            },
+        )
         self.assertEqual(_run(apps, self.roles_dir), [])
 
     def test_excludes_app_without_scrape_fragment(self):
-        apps = _make_roles(self.roles_dir, {
-            "web-app-bar": {"native_metrics_enabled": True, "has_fragment": False},
-        })
+        apps = _make_roles(
+            self.roles_dir,
+            {
+                "web-app-bar": {"native_metrics_enabled": True, "has_fragment": False},
+            },
+        )
         self.assertEqual(_run(apps, self.roles_dir), [])
 
     def test_excludes_app_not_in_applications(self):
         """Apps with a fragment but not deployed must be excluded."""
-        _make_roles(self.roles_dir, {
-            "web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True},
-        })
+        _make_roles(
+            self.roles_dir,
+            {
+                "web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True},
+            },
+        )
         self.assertEqual(_run({}, self.roles_dir), [])
 
     # ── ordering ───────────────────────────────────────────────────────────
 
     def test_result_is_sorted(self):
-        apps = _make_roles(self.roles_dir, {
-            "web-app-zzz": {"native_metrics_enabled": True, "has_fragment": True},
-            "web-app-aaa": {"native_metrics_enabled": True, "has_fragment": True},
-            "web-app-mmm": {"native_metrics_enabled": True, "has_fragment": True},
-        })
-        self.assertEqual(_run(apps, self.roles_dir), ["web-app-aaa", "web-app-mmm", "web-app-zzz"])
+        apps = _make_roles(
+            self.roles_dir,
+            {
+                "web-app-zzz": {"native_metrics_enabled": True, "has_fragment": True},
+                "web-app-aaa": {"native_metrics_enabled": True, "has_fragment": True},
+                "web-app-mmm": {"native_metrics_enabled": True, "has_fragment": True},
+            },
+        )
+        self.assertEqual(
+            _run(apps, self.roles_dir), ["web-app-aaa", "web-app-mmm", "web-app-zzz"]
+        )
 
     # ── multiple apps mixed ────────────────────────────────────────────────
 
     def test_returns_only_qualifying_apps(self):
-        apps = _make_roles(self.roles_dir, {
-            "web-app-gitea":      {"native_metrics_enabled": True,  "has_fragment": True},
-            "web-app-mattermost": {"native_metrics_enabled": True,  "has_fragment": True},
-            "web-app-matrix":     {"native_metrics_enabled": True,  "has_fragment": True},
-            "web-app-nofrag":     {"native_metrics_enabled": True,  "has_fragment": False},
-            "web-app-disabled":   {"native_metrics_enabled": False, "has_fragment": True},
-        })
+        apps = _make_roles(
+            self.roles_dir,
+            {
+                "web-app-gitea": {"native_metrics_enabled": True, "has_fragment": True},
+                "web-app-mattermost": {
+                    "native_metrics_enabled": True,
+                    "has_fragment": True,
+                },
+                "web-app-matrix": {
+                    "native_metrics_enabled": True,
+                    "has_fragment": True,
+                },
+                "web-app-nofrag": {
+                    "native_metrics_enabled": True,
+                    "has_fragment": False,
+                },
+                "web-app-disabled": {
+                    "native_metrics_enabled": False,
+                    "has_fragment": True,
+                },
+            },
+        )
         self.assertEqual(
             _run(apps, self.roles_dir),
             ["web-app-gitea", "web-app-matrix", "web-app-mattermost"],
@@ -110,11 +141,13 @@ class TestNativeMetricsApps(unittest.TestCase):
 
     def test_raises_when_applications_missing(self):
         from ansible.errors import AnsibleError
+
         with self.assertRaises(AnsibleError):
             LookupModule().run([], variables={})
 
     def test_raises_when_applications_not_a_dict(self):
         from ansible.errors import AnsibleError
+
         with self.assertRaises(AnsibleError):
             LookupModule().run([], variables={"applications": ["not", "a", "dict"]})
 

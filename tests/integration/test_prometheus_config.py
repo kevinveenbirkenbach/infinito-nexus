@@ -620,7 +620,7 @@ class TestNativeAppMetrics(unittest.TestCase):
         self.assertIn(
             'job_name: "gitea"',
             content,
-            "web-app-gitea/templates/prometheus_scrape.yml.j2 must define job_name: \"gitea\"",
+            'web-app-gitea/templates/prometheus_scrape.yml.j2 must define job_name: "gitea"',
         )
 
     def test_mattermost_has_scrape_fragment(self):
@@ -635,7 +635,7 @@ class TestNativeAppMetrics(unittest.TestCase):
         self.assertIn(
             'job_name: "mattermost"',
             content,
-            "web-app-mattermost/templates/prometheus_scrape.yml.j2 must define job_name: \"mattermost\"",
+            'web-app-mattermost/templates/prometheus_scrape.yml.j2 must define job_name: "mattermost"',
         )
 
     def test_matrix_has_scrape_fragment(self):
@@ -650,7 +650,7 @@ class TestNativeAppMetrics(unittest.TestCase):
         self.assertIn(
             'job_name: "matrix-synapse"',
             content,
-            "web-app-matrix/templates/prometheus_scrape.yml.j2 must define job_name: \"matrix-synapse\"",
+            'web-app-matrix/templates/prometheus_scrape.yml.j2 must define job_name: "matrix-synapse"',
         )
 
     def test_native_metrics_guard_uses_native_metrics_flag(self):
@@ -663,7 +663,9 @@ class TestNativeAppMetrics(unittest.TestCase):
         """
         plugin_path = (
             Path(__file__).resolve().parent.parent.parent
-            / "plugins" / "lookup" / "native_metrics_apps.py"
+            / "plugins"
+            / "lookup"
+            / "native_metrics_apps.py"
         )
         content = plugin_path.read_text(encoding="utf-8")
         self.assertIn(
@@ -693,7 +695,9 @@ class TestNativeAppMetrics(unittest.TestCase):
 
     def test_gitea_scrape_fragment_uses_metrics_path(self):
         """The Gitea scrape fragment must use metrics_path: /metrics."""
-        content = self._scrape_fragment_path("web-app-gitea").read_text(encoding="utf-8")
+        content = self._scrape_fragment_path("web-app-gitea").read_text(
+            encoding="utf-8"
+        )
         self.assertIn(
             "metrics_path: /metrics",
             content,
@@ -702,7 +706,9 @@ class TestNativeAppMetrics(unittest.TestCase):
 
     def test_matrix_scrape_fragment_uses_synapse_metrics_path(self):
         """The Synapse scrape fragment must use the correct /_synapse/metrics path."""
-        content = self._scrape_fragment_path("web-app-matrix").read_text(encoding="utf-8")
+        content = self._scrape_fragment_path("web-app-matrix").read_text(
+            encoding="utf-8"
+        )
         self.assertIn(
             "metrics_path: /_synapse/metrics",
             content,

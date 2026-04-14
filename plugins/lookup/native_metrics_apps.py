@@ -54,7 +54,9 @@ class LookupModule(LookupBase):
             if not enabled:
                 continue
 
-            scrape_template = roles_dir / app_id / "templates" / "prometheus_scrape.yml.j2"
+            scrape_template = (
+                roles_dir / app_id / "templates" / "prometheus_scrape.yml.j2"
+            )
             if scrape_template.exists():
                 result.append(app_id)
 
@@ -68,6 +70,4 @@ class LookupModule(LookupBase):
         for candidate in candidates:
             if candidate.is_dir():
                 return candidate
-        raise AnsibleError(
-            "native_metrics_apps: cannot locate roles/ directory"
-        )
+        raise AnsibleError("native_metrics_apps: cannot locate roles/ directory")
