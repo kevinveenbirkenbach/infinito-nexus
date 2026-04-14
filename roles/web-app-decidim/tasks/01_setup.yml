@@ -39,17 +39,17 @@
       is_new = user.new_record?
       user.name = 'Administrator'
       user.nickname = 'administrator'
-      if is_new
-        user.password = password
-        user.password_confirmation = password
-      end
       user.admin = true
       user.confirmed_at = Time.current
       user.organization = Decidim::Organization.first
       user.tos_agreement = true
       user.accepted_tos_version = Decidim::Organization.first.tos_version
+      if is_new || !user.valid_password?(password)
+        user.password = password
+        user.password_confirmation = password
+      end
       user.save!
-      puts "Admin user ready: #{user.email}"
+      puts "Admin user ready: #{user.email}" 
     env:
       RAILS_ENV: "{{ ENVIRONMENT }}"
   register: decidim_admin_result
@@ -66,16 +66,16 @@
       is_new = user.new_record?
       user.name = '{{ users.biber.firstname }} {{ users.biber.lastname }}'
       user.nickname = '{{ users.biber.username }}'
-      if is_new
-        user.password = password
-        user.password_confirmation = password
-      end
       user.confirmed_at = Time.current
       user.organization = Decidim::Organization.first
       user.tos_agreement = true
       user.accepted_tos_version = Decidim::Organization.first.tos_version
+      if is_new || !user.valid_password?(password)
+        user.password = password
+        user.password_confirmation = password
+      end
       user.save!
-      puts "Biber user ready: #{user.email}"
+      puts "Biber user ready: #{user.email}" 
     env:
       RAILS_ENV: "{{ ENVIRONMENT }}"
   register: decidim_biber_result

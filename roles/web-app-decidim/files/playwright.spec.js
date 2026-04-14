@@ -5,12 +5,23 @@ test.use({
   ignoreHTTPSErrors: true
 });
 
-const baseUrl       = process.env.DECIDIM_BASE_URL;
-const adminEmail    = process.env.ADMIN_EMAIL;
-const adminPassword = process.env.ADMIN_PASSWORD;
-const biberUsername = process.env.BIBER_USERNAME;
-const biberPassword = process.env.BIBER_PASSWORD;
-const biberEmail    = process.env.BIBER_EMAIL;
+function decodeDotenvQuotedValue(value) {
+  if (typeof value !== "string" || value.length < 2) return value;
+  if (!(value.startsWith('"') && value.endsWith('"'))) return value;
+  const encoded = value.slice(1, -1);
+  try {
+    return JSON.parse(`"${encoded}"`).replace(/\$\$/g, "$");
+  } catch {
+    return encoded.replace(/\$\$/g, "$");
+  }
+}
+
+const baseUrl       = decodeDotenvQuotedValue(process.env.DECIDIM_BASE_URL || process.env.APP_BASE_URL);
+const adminEmail    = decodeDotenvQuotedValue(process.env.ADMIN_EMAIL);
+const adminPassword = decodeDotenvQuotedValue(process.env.ADMIN_PASSWORD);
+const biberUsername = decodeDotenvQuotedValue(process.env.BIBER_USERNAME);
+const biberPassword = decodeDotenvQuotedValue(process.env.BIBER_PASSWORD);
+const biberEmail    = decodeDotenvQuotedValue(process.env.BIBER_EMAIL);
 
 test.beforeEach(() => {
   expect(baseUrl,       "DECIDIM_BASE_URL must be set in the Playwright env file").toBeTruthy();
