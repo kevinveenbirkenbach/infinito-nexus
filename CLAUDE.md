@@ -24,4 +24,4 @@ You MUST read `AGENTS.md` and follow all instructions in it at the start of ever
 
 ## Documentation
 
-See the [Claude Code documentation](https://code.claude.com/docs/en/overview) for further information. For human contributor guidance on working with agents, see [here](docs/contributing/tools/agents.md).
+See the [Claude Code documentation](https://code.claude.com/docs/en/overview) for further information. For human contributor guidance on working with agents, see [here](docs/contributing/tools/agents/common.md).
