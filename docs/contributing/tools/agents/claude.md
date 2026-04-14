@@ -57,6 +57,7 @@ Claude Code evaluates each tool call against three ordered lists:
 | `make*` | Running any target defined in the repository `Makefile`. | Make is the primary command surface covering install, test, lint, build, deploy, and cleanup. | The full wildcard is broad. The `Makefile` MUST NOT expose targets that run privileged or destructive operations without explicit guards. New make targets SHOULD be reviewed before merging. |
 | `act*` | Running GitHub Actions workflows locally via Act. | Used by `make act-*` targets for local CI simulation. | Act pulls Docker images and executes workflow steps locally. Workflows MUST NOT contain untrusted third-party actions before running. |
 | `bash -n*` | Syntax-checking shell scripts before executing them. | `bash -n` is a dry-run parse that catches syntax errors safely. | No code is executed. Side-effect-free. |
+| `wait*` | Waiting for background tasks (started via `run_in_background`) to complete. | The agent starts long-running commands in the background and MUST be able to block on their completion without operator approval. | Shell built-in. No file or network side-effects on its own; only observes child process state. |
 
 ### Python 🐍
 

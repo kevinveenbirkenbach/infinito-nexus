@@ -24,6 +24,7 @@
       "Bash(make*)",
       "Bash(act*)",
       "Bash(bash -n*)",
+      "Bash(wait*)",
 
       "Bash(python3*)",
       "Bash(python*)",
