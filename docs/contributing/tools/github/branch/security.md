@@ -1,6 +1,6 @@
 # Branch Protection 🔒
 
-See also [repository.md](repository.md) for repository-wide security settings.
+See also [repository.md](../repository.md) for repository-wide security settings.
 
 ## Enforcement 🔒
 
