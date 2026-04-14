@@ -64,9 +64,6 @@ compose:
       backup:
         disabled: true
       enabled: false
-    database:
-      shared: false
-      enabled: false
     ollama:
       enabled: true
       shared: true

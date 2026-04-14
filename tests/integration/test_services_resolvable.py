@@ -1,80 +1,66 @@
-import os
 import unittest
-import yaml
+from pathlib import Path
 
 from plugins.lookup.service import LookupModule
+from utils.service_registry import (
+    build_service_registry_from_roles_dir,
+    load_applications_from_roles_dir,
+)
 
 
 class TestServicesResolvable(unittest.TestCase):
-    """Every entry in group_vars/all/20_services.yml must be resolvable
-    via the service lookup plugin both by service key and by role name."""
+    """Discovered service keys and provider roles must resolve via the service lookup."""
 
     def setUp(self):
-        self.repo_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..")
-        )
-        services_file = os.path.join(
-            self.repo_root, "group_vars", "all", "20_services.yml"
-        )
-        with open(services_file, encoding="utf-8") as f:
-            data = yaml.safe_load(f) or {}
-        self.service_registry = data.get("SERVICE_REGISTRY", {})
+        self.repo_root = Path(__file__).resolve().parents[2]
+        self.roles_dir = self.repo_root / "roles"
+        self.applications = load_applications_from_roles_dir(self.roles_dir)
+        self.service_registry = build_service_registry_from_roles_dir(self.roles_dir)
         self.assertGreater(
-            len(self.service_registry), 0, "service registry must not be empty"
+            len(self.service_registry),
+            0,
+            "discovered service registry must not be empty",
         )
 
     def _run(self, term):
         return LookupModule().run(
             [term],
             variables={
-                "applications": {},
+                "applications": self.applications,
                 "group_names": [],
-                "SERVICE_REGISTRY": self.service_registry,
             },
+            service_registry=self.service_registry,
         )[0]
 
-    def _canonical_for(self, key):
-        entry = self.service_registry[key]
-        return entry.get("canonical", key)
-
     def test_all_keys_resolvable(self):
-        """Every service key must resolve without error and return itself as id."""
         for key in self.service_registry:
             with self.subTest(key=key):
                 result = self._run(key)
                 self.assertEqual(result["id"], key)
 
-    def test_all_roles_resolve_to_canonical(self):
-        """Role-based lookup must return the canonical key for that role."""
+    def test_all_primary_roles_resolve_to_primary_key(self):
         seen_roles = set()
         for key, entry in self.service_registry.items():
-            if not isinstance(entry, dict):
+            if "canonical" in entry:
                 continue
             role = entry.get("role")
             if not role or role in seen_roles:
                 continue
             seen_roles.add(role)
-            canonical = self._canonical_for(key)
-            with self.subTest(role=role, expected_canonical=canonical):
+            with self.subTest(role=role, expected_key=key):
                 result = self._run(role)
                 self.assertEqual(result["role"], role)
-                self.assertEqual(result["id"], canonical)
+                self.assertEqual(result["id"], key)
 
     def test_key_and_role_produce_identical_result_for_primary_keys(self):
-        """For the canonical/primary key of a role, key and role lookups must agree."""
         for key, entry in self.service_registry.items():
-            if not isinstance(entry, dict):
+            if "canonical" in entry:
                 continue
             role = entry.get("role")
             if not role:
                 continue
-            # Only test primary keys (no canonical field = this key IS canonical)
-            if "canonical" in entry:
-                continue
             with self.subTest(key=key):
-                by_key = self._run(key)
-                by_role = self._run(role)
-                self.assertEqual(by_key, by_role)
+                self.assertEqual(self._run(key), self._run(role))
 
 
 if __name__ == "__main__":

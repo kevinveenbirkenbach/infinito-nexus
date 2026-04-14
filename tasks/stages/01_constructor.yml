@@ -180,6 +180,10 @@
     - MODE_CLEANUP | bool
     - DOCKER_IN_CONTAINER | bool
 
+- name: Preload shared services
+  ansible.builtin.include_role:
+    name: sys-utils-service-loader
+
 - name: "Load base roles"
   ansible.builtin.include_tasks: "./tasks/groups/{{ role_group }}-roles.yml"
   loop:

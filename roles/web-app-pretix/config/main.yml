@@ -21,10 +21,9 @@ compose:
       backup:
         disabled: true
       enabled:      true
-    database:
+    postgres:
+      enabled: true
       shared: true
-      type: "postgres"
-      enabled:      true
     pretix:
       image:        pretix/standalone
       version:      stable

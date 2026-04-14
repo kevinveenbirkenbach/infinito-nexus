@@ -35,10 +35,9 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
-      shared: true
-      type: "mariadb"
+    mariadb:
       enabled: true
+      shared: true
     akaunting:
       backup:
         no_stop_required: true

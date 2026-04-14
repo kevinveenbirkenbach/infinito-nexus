@@ -46,5 +46,6 @@
   loop:
     - sys-ctl-hlth-webserver
     - sys-ctl-hlth-csp
+  when: not (_service_loader_preloading | default(false) | bool)
 
 - include_tasks: utils/once/flag.yml

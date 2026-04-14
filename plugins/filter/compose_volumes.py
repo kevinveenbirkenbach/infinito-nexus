@@ -12,11 +12,19 @@ try:
     )
     from plugins.filter.get_app_conf import get_app_conf
     from plugins.filter.get_entity_name import get_entity_name
+    from utils.database_service import (
+        get_database_service_config,
+        resolve_database_service_key,
+    )
 except ModuleNotFoundError:
     # Fallback when loaded by Ansible plugin loader from filter_plugins path.
     from docker_service_enabled import FilterModule as _DockerServiceEnabledFilter
     from get_app_conf import get_app_conf
     from get_entity_name import get_entity_name
+    from utils.database_service import (
+        get_database_service_config,
+        resolve_database_service_key,
+    )
 
 
 def _to_plain(obj: Any) -> Any:
@@ -65,8 +73,8 @@ def compose_volumes(
     Logic is identical to roles/sys-svc-compose/templates/volumes.yml.j2:
 
       - database volume if:
-          is_docker_service_enabled(database)
-          and not compose.services.database.shared
+          a direct mariadb/postgres service is enabled
+          and that service is not shared
 
         name: database_volume   (no fallback!)
 
@@ -100,17 +108,10 @@ def compose_volumes(
     # ------------------------------------------------------------------
     # Database volume (same condition as Jinja2)
     # ------------------------------------------------------------------
-    database_needed = _DockerServiceEnabledFilter.is_docker_service_enabled(
-        applications, application_id, "database"
-    ) and not bool(
-        get_app_conf(
-            applications=applications,
-            application_id=application_id,
-            config_path="compose.services.database.shared",
-            strict=False,
-            default=False,
-            skip_missing_app=True,
-        )
+    database_service_key = resolve_database_service_key(applications, application_id)
+    database_service = get_database_service_config(applications, application_id)
+    database_needed = bool(database_service_key) and not bool(
+        database_service.get("shared", False)
     )
 
     if database_needed:

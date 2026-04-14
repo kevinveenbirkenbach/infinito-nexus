@@ -16,8 +16,6 @@ compose:
       backup:
         disabled: true
       enabled:  false
-    database:
-      enabled:  false
     css:
       enabled: true
       shared: true

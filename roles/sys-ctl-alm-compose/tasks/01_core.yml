@@ -39,3 +39,6 @@
       state: started
   when:
     - MODE_ASSERT | bool
+    # Shared-service preloading happens before Mailu exposes its final TLS SMTP
+    # listener, so the notifier self-test must wait for the normal app phase.
+    - not (_service_loader_preloading | default(false) | bool)

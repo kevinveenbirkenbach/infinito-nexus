@@ -1,40 +1,38 @@
 # run_once_sys_stk_backend: disabled
 
+- name: "Resolve backend context for '{{ application_id }}'"
+  ansible.builtin.set_fact:
+    _sys_stk_backend_database_consumer_id: >-
+      {{ database_consumer_id | default(application_id) }}
+    _sys_stk_backend_database_enabled: >-
+      {{ lookup('database', application_id, 'enabled') | bool }}
+    _sys_stk_backend_oauth2_enabled: >-
+      {{ lookup('config', application_id, 'compose.services.oauth2.enabled', False) }}
+  changed_when: false
+
 - name: "DEBUG | SYS-STK-BACKEND | Application context"
   ansible.builtin.debug:
     msg:
       - "application_id={{ application_id }}"
-      - "database_enabled={{ SYS_STK_BACKEND_DATABASE_ENABLED }}"
-      - "oauth2_enabled={{ SYS_STK_BACKEND_OAUTH2_ENABLED }}"
+      - "database_consumer_id={{ _sys_stk_backend_database_consumer_id }}"
+      - "database_enabled={{ _sys_stk_backend_database_enabled }}"
+      - "oauth2_enabled={{ _sys_stk_backend_oauth2_enabled }}"
   when: MODE_DEBUG | bool
-
-- name: "SYS-STK-BACKEND | Load optional dependencies (once)"
-  ansible.builtin.include_tasks: "_load_service.yml"
-  loop:
-    - id: "svc-db-openldap"
-      name: "ldap"
-
-    - id: "svc-ai-ollama"
-      name: "ollama"
-  loop_control:
-    loop_var: service
-    label: "{{ service.id }}"
-  vars:
-    service_id: "{{ service.id }}"
-    service_name: "{{ service.name }}"
 
 - name: "For '{{ application_id }}': Load central RDBMS"
   include_role:
     name: sys-svc-rdbms
     public: false
-  when: SYS_STK_BACKEND_DATABASE_ENABLED | bool
+  vars:
+    database_consumer_id: "{{ _sys_stk_backend_database_consumer_id }}"
+  when: _sys_stk_backend_database_enabled | bool
 
 - name: "For '{{ application_id }}': Load sys-svc-compose"
   include_role:
     name: sys-svc-compose
   vars:
     docker_compose_flush_handlers:  false
-    database_consumer_id:           "{{ database_consumer_id_passed }}"
+    database_consumer_id:           "{{ _sys_stk_backend_database_consumer_id }}"
 
 - block:
     - name: "set oauth2_proxy_application_id (Needed due to lazzy loading issue)"
@@ -42,7 +40,7 @@
         oauth2_proxy_application_id: "{{ application_id }}"
     - name: "load role web-app-oauth2-proxy"
       include_tasks: "{{ playbook_dir }}/roles/web-app-oauth2-proxy/tasks/main.yml"
-  when: SYS_STK_BACKEND_OAUTH2_ENABLED | bool
+  when: _sys_stk_backend_oauth2_enabled | bool
 
 - name: "flush compose and oauth2 proxy'"
   meta: flush_handlers

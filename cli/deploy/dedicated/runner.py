@@ -4,7 +4,13 @@ import datetime
 import os
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from cli.create.inventory.services_disabler import (
+    ServicesDisabledConflictError,
+    assert_services_disabled_inventory_consistency_from_env,
+)
 
 from .proc import run, run_make
 
@@ -47,7 +53,19 @@ def run_ansible_playbook(
         print("\n🛠️  Build skipped (--skip-build)\n")
 
     # ---------------------------------------------------------
-    # 3) Inventory Validation Phase
+    # 3) SERVICES_DISABLED consistency guard
+    # ---------------------------------------------------------
+    try:
+        assert_services_disabled_inventory_consistency_from_env(
+            inventory_dir=Path(inventory).resolve().parent,
+            roles_dir=Path(repo_root).resolve() / "roles",
+        )
+    except ServicesDisabledConflictError as exc:
+        print(f"\n[ERROR] {exc}\n", file=sys.stderr)
+        sys.exit(1)
+
+    # ---------------------------------------------------------
+    # 4) Inventory Validation Phase
     # ---------------------------------------------------------
     if modes.get("MODE_ASSERT", None) is False:
         print("\n🔍 Inventory assertion explicitly disabled (MODE_ASSERT=false)\n")
@@ -67,7 +85,7 @@ def run_ansible_playbook(
             sys.exit(1)
 
     # ---------------------------------------------------------
-    # 4) Build ansible-playbook command
+    # 5) Build ansible-playbook command
     # ---------------------------------------------------------
     cmd: List[str] = ["ansible-playbook", "-i", inventory, playbook_path]
 

@@ -28,7 +28,7 @@ Key settings in `config/main.yml`:
 | Key | Default | Description |
 |-----|---------|-------------|
 | `compose.services.oidc.enabled` | `true` | Enable Keycloak SSO via GitLab OAuth2 |
-| `compose.services.database.type` | `postgres` | Database engine (postgres only) |
+| `compose.services.postgres.shared` | `true` | Use the shared PostgreSQL service instead of a role-local one |
 | `compose.services.mattermost.version` | `latest` | Docker image tag |
 | `server.domains.canonical` | `mattermost.{{ DOMAIN_PRIMARY }}` | Public domain |
 

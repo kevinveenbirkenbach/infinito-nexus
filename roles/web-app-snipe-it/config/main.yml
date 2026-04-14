@@ -37,10 +37,9 @@ compose:
       backup:
         disabled: true
       enabled: true
-    database: 
-      shared: true
-      type: "mariadb"
+    mariadb:
       enabled: true
+      shared: true
     snipe-it:
       version:          "latest-alpine"
       name:             "snipe-it"

@@ -17,10 +17,10 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
+    # noqa: shared
+    postgres:
+      enabled: true
       shared: true
-      type: "postgres"
-      enabled:  true
     # noqa: shared
     redis:
       backup:

@@ -21,9 +21,6 @@ compose:
     matomo:
       enabled: true
       shared: true
-    database:
-      shared: false
-      enabled:    false
     application:
       image:      "python"
       version:    "3.12-bookworm"
