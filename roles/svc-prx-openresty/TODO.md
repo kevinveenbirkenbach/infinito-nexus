@@ -1,44 +1,54 @@
 # TODO — svc-prx-openresty
 
-## Harden lua-resty-prometheus supply chain
+## lua-resty-prometheus — ongoing maintenance and security
 
 **Context:**
 The three Lua files that enable Prometheus metrics inside OpenResty
 (`prometheus.lua`, `prometheus_resty_counter.lua`, `prometheus_keys.lua`)
-are downloaded at Docker build time from:
+are downloaded at Docker build time from the infinito-nexus org fork:
 
-  https://github.com/knyar/nginx-lua-prometheus
+  https://github.com/infinito-nexus/nginx-lua-prometheus
 
-This is a third-party Prometheus exporter for Nginx written in Lua, compatible
-with OpenResty via lua-nginx-module. It is not an official OpenResty project.
-It is distributed via GitHub and OPM (OpenResty Package Manager) and used in
-community and production OpenResty deployments as a reference implementation
-for Prometheus instrumentation. There is no formal upstream endorsement by
-OpenResty or CNCF — trust is based on open-source adoption, usage in community
-examples, and long-term public availability.
-See `vars/main.yml` for the full trust rationale.
+Forked from https://github.com/knyar/nginx-lua-prometheus — a third-party
+Prometheus exporter for Nginx written in Lua, compatible with OpenResty via
+lua-nginx-module. Not an official OpenResty project, but distributed via GitHub
+and OPM and used as a reference implementation in community and production
+OpenResty deployments.
 
-**Current risk:**
-The URLs point to the `master` branch, which is mutable — a different commit
-could be served between two Docker builds without any visible change in the
-Ansible config.
+Using the org fork means only infinito-nexus org members can push to it —
+the supply chain trust concern (dependency on an individual's account) is resolved.
 
-**Task:**
-Decide on and implement one of the following hardening strategies:
+---
 
-1. **Pin to a release tag** — change `master` to a specific tag (e.g. `0.20240525`)
-   in `vars/main.yml` and add SHA-256 checksum verification in the Dockerfile
-   `RUN` step. Update deliberately when a new release is needed.
-   Simple. No automation required. Same pattern as pinning Docker image versions.
+### Task 1 — Keep fork in sync with upstream
 
-2. **Vendor the files** — copy the three `.lua` files into
-   `roles/svc-prx-openresty/files/lua/` and `COPY` them in the Dockerfile
-   instead of downloading at build time. No internet required at build time.
-   Requires a manual update process or Renovate custom datasource.
+Periodically check upstream for new releases and merge them into the fork
+**after reviewing the diff for any breaking changes or vulnerabilities**.
 
-3. **Renovate automation** — configure Renovate with a custom regex datasource
-   watching `knyar/nginx-lua-prometheus` GitHub releases to open automatic
-   update PRs when a new tag appears (works with either option 1 or 2).
+Upstream releases: https://github.com/knyar/nginx-lua-prometheus/releases
 
-**Recommendation:** Start with option 1 (tag pin + checksum) as it requires
-no tooling changes. Add option 3 later if Renovate is adopted project-wide.
+---
+
+### Task 2 — Security scan the Lua code
+
+Even though the fork is under org control, the Lua code itself may contain
+vulnerabilities (logic bugs, unsafe string handling, etc.). The files are small
+enough for a manual review, but automated scanning should also be considered.
+
+Options:
+- **`luacheck`** — static analyser for Lua. Catches undefined globals, unused
+  variables, and common bugs. Does not do security-specific analysis but is a
+  good baseline. Run: `luacheck roles/svc-prx-openresty/` (requires luacheck installed).
+- **Manual review** — the three files are short (~300 lines total). A one-time
+  read-through when pulling upstream changes is feasible and recommended.
+- **GitHub Dependabot / security advisories** — watch the upstream repo
+  (https://github.com/knyar/nginx-lua-prometheus) for any reported CVEs or
+  security advisories and merge fixes into the fork promptly.
+
+---
+
+### Task 3 — Consider pinning to a tag inside the fork
+
+Currently the URLs point to `master` of the fork. Since the org controls the
+fork this is safe, but pinning to a specific commit or tag inside the fork
+makes it explicit which version is running and simplifies auditing.
