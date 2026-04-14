@@ -1,0 +1,23 @@
+compose:
+  services:
+    pihole:
+      enabled:          false
+      shared:           false
+      backup:
+        no_stop_required: true
+      image:            "pihole/pihole"
+      version:          "latest"
+      name:             "pihole"
+      min_storage:      "1GB"
+      port:             8053
+      cpus:             "0.5"
+      mem_reservation:  "128m"
+      mem_limit:        "256m"
+      pids_limit:       512
+  volumes:
+    data:     "pihole_data"
+    dnsmasq:  "pihole_dnsmasq"
+  network:    "pihole"
+pihole:
+  upstream_dns:   "1.1.1.1;1.0.0.1"
+  timezone:       "Europe/Berlin"
