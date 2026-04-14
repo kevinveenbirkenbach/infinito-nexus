@@ -16,6 +16,17 @@ OPENRESTY_CUSTOM_VERSION: "{{ OPENRESTY_VERSION }}"
 
 # Lua file download URLs — passed as Dockerfile build args so the mirror system
 # can substitute them without touching the Dockerfile itself.
+#
+# Source: https://github.com/knyar/nginx-lua-prometheus
+# This is a third-party Prometheus exporter for Nginx written in Lua.
+# Compatible with OpenResty via lua-nginx-module but not an official OpenResty project.
+# Distributed via GitHub and OPM (OpenResty Package Manager).
+# Used in community and production OpenResty deployments as a reference implementation
+# for Prometheus instrumentation.
+# No formal upstream endorsement by OpenResty or CNCF — trust is based on open-source
+# adoption, usage in community examples, and long-term public availability.
+# Risk: individual maintainer (not an org), currently pulled from master (mutable).
+# See: roles/svc-prx-openresty/TODO.md for the planned hardening task.
 OPENRESTY_PROMETHEUS_ENABLED:       "{{ ('web-app-prometheus' in applications) | lower }}"
 OPENRESTY_LUA_PROMETHEUS_URL_MAIN:    "https://raw.githubusercontent.com/knyar/nginx-lua-prometheus/master/prometheus.lua"
 OPENRESTY_LUA_PROMETHEUS_URL_COUNTER: "https://raw.githubusercontent.com/knyar/nginx-lua-prometheus/master/prometheus_resty_counter.lua"

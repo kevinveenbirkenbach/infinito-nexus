@@ -1,4 +1,4 @@
-{% set _svc_key = application_id | replace('web-app-', '') | replace('web-svc-', '') %}
+{% set _svc_key = application_id | get_entity_name %}
 server
 {
   server_name {{ domain }};
@@ -65,38 +65,6 @@ server
     {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
   {% endif %}
 
-  {#
-    Health check endpoints — included only when prometheus is active for this app.
-    Defined in healthz.conf.j2 to keep this generic vhost template free of
-    monitoring-specific concerns (SRP). The Lua dual-check relies on lua_shared_dict
-    and init_worker blocks provided by prometheus.conf, so the two templates are
-    intentionally co-activated by the same flag.
-  #}
-  {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
-      or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
-  {% include 'roles/sys-svc-proxy/templates/location/healthz.conf.j2' %}
-  {% endif %}
-
-  {#
-    Prometheus integration — two separate templates:
-
-    1. location.conf.j2 (log_by_lua_block) — included in every app vhost that
-       participates in monitoring (compose.services.prometheus.enabled = true).
-       Records per-request metrics into the shared lua dict on every request.
-
-    2. metricz.conf.j2 (location = /metricz) — included ONLY on the prometheus
-       domain (compose.services.prometheus.name is set). This is the single scrape
-       endpoint; exposing it on every app vhost would leak the full metrics payload
-       and duplicate the /metricz surface needlessly.
-  #}
-  {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
-      or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
-  {# Per-request metrics collection — runs on every vhost in the monitoring stack. #}
-  {% include 'roles/web-app-prometheus/templates/location.conf.j2' %}
-  {% endif %}
-  {% if lookup('config', application_id, 'compose.services.prometheus.name', '') %}
-  {# Scrape endpoint — only on the prometheus domain itself. #}
-  {% include 'roles/web-app-prometheus/templates/metricz.conf.j2' %}
-  {% endif %}
+  {% include 'roles/sys-svc-proxy/templates/location/prometheus.conf.j2' %}
 
 }

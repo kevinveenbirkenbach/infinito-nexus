@@ -35,7 +35,7 @@
       - "--storage.path=/alertmanager"
     volumes:
       - {{ ALERTMANAGER_CONFIG_HOST }}:{{ ALERTMANAGER_CONFIG_DOCKER }}:ro
-      - alertmanager_data:/alertmanager
+      - {{ ALERTMANAGER_VOLUME_KEY }}:/alertmanager
 
   cadvisor:
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
@@ -61,6 +61,8 @@
     # pid: host — required to collect accurate per-process CPU and memory metrics.
     # Security trade-off: removes Docker network isolation for this read-only
     # monitoring container, which is the standard accepted practice for node-exporter.
+    # Port note: node-exporter binds on host port 9100. Ensure nothing else on the
+    # host uses port 9100 to avoid a conflict at startup.
     network_mode: host
     pid: host
     volumes:

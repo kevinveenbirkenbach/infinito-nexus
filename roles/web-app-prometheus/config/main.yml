@@ -63,6 +63,10 @@ compose:
       image:                      "prom/blackbox-exporter"
       version:                    "v0.25.0"
       name:                       "prometheus-blackbox"
+      cpus:                       "0.1"
+      mem_reservation:            "32m"
+      mem_limit:                  "64m"
+      pids_limit:                 64
     cadvisor:
       image:                      "gcr.io/cadvisor/cadvisor"
       version:                    "v0.52.1"

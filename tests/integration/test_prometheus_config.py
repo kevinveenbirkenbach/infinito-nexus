@@ -218,50 +218,72 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "/healthz/live must NOT be a static return 200 — it must check backend health",
         )
 
-    def test_basic_conf_includes_location_conf_for_all_prometheus_apps(self):
-        """basic.conf.j2 must include location.conf.j2 for all prometheus-enabled app vhosts.
+    def _prometheus_conf_path(self):
+        # Prometheus monitoring integration — single SPOT for all vhosts.
+        # basic.conf.j2 and synapse.conf.j2 both delegate to this shared include.
+        return (
+            Path(__file__).resolve().parent.parent.parent
+            / "roles"
+            / "sys-svc-proxy"
+            / "templates"
+            / "location"
+            / "prometheus.conf.j2"
+        )
+
+    def test_basic_conf_delegates_prometheus_to_shared_include(self):
+        """basic.conf.j2 must include prometheus.conf.j2 (the shared monitoring SPOT).
+
+        All prometheus-related includes (healthz, location, metricz) live in
+        prometheus.conf.j2 to eliminate duplication across vhost templates (DRY/SRP).
+        """
+        content = self._basic_conf_path().read_text(encoding="utf-8")
+        self.assertIn(
+            "roles/sys-svc-proxy/templates/location/prometheus.conf.j2",
+            content,
+            "basic.conf.j2 must delegate prometheus monitoring to the shared "
+            "roles/sys-svc-proxy/templates/location/prometheus.conf.j2 include",
+        )
+
+    def test_prometheus_conf_includes_location_conf_for_all_prometheus_apps(self):
+        """prometheus.conf.j2 must include location.conf.j2 for all prometheus-enabled vhosts.
 
         The condition covers two cases:
           - Regular apps:              compose.services.prometheus.enabled = true
           - web-app-prometheus itself: compose.services.prometheus.name is set
         """
-        content = self._basic_conf_path().read_text(encoding="utf-8")
+        content = self._prometheus_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "roles/web-app-prometheus/templates/location.conf.j2",
             content,
-            "basic.conf.j2 must include location.conf.j2 for prometheus-enabled apps",
+            "prometheus.conf.j2 must include location.conf.j2 for prometheus-enabled apps",
         )
         self.assertIn(
             "compose.services.prometheus.name",
             content,
-            "basic.conf.j2 condition must check compose.services.prometheus.name "
+            "prometheus.conf.j2 condition must check compose.services.prometheus.name "
             "so that the prometheus app's own domain also gets the log_by_lua_block",
         )
 
-    def test_basic_conf_includes_metricz_only_on_prometheus_domain(self):
-        """basic.conf.j2 must include metricz.conf.j2 ONLY when compose.services.prometheus.name is set.
+    def test_prometheus_conf_includes_metricz_only_on_prometheus_domain(self):
+        """prometheus.conf.j2 must include metricz.conf.j2 ONLY when compose.services.prometheus.name is set.
 
         /metricz must not be exposed on every app vhost — that would leak the full
         metrics payload from 60+ public hostnames. Only the prometheus domain serves it.
         """
-        content = self._basic_conf_path().read_text(encoding="utf-8")
+        content = self._prometheus_conf_path().read_text(encoding="utf-8")
         self.assertIn(
             "roles/web-app-prometheus/templates/metricz.conf.j2",
             content,
-            "basic.conf.j2 must include metricz.conf.j2 for the prometheus domain "
+            "prometheus.conf.j2 must include metricz.conf.j2 for the prometheus domain "
             "(location = /metricz must not appear on every app vhost)",
         )
-        # The metricz include must be a SEPARATE block guarded by .name alone
-        # (not the same block as location.conf.j2 which uses .enabled OR .name).
-        # Verify by checking that the file has TWO distinct {% if %} blocks that
-        # reference prometheus.name — one for location.conf.j2 (OR condition) and
-        # one for metricz.conf.j2 (standalone .name check).
+        # metricz must be in a SEPARATE block guarded by .name alone (not the OR-condition).
         prometheus_name_occurrences = content.count("compose.services.prometheus.name")
         self.assertGreaterEqual(
             prometheus_name_occurrences,
             2,
-            "basic.conf.j2 must reference compose.services.prometheus.name in at least two "
-            "places: once in the location.conf.j2 OR-condition and once as the sole guard "
+            "prometheus.conf.j2 must reference compose.services.prometheus.name in at least "
+            "two places: once in the location.conf.j2 OR-condition and once as the sole guard "
             "for metricz.conf.j2 (so /metricz only appears on the prometheus domain)",
         )
 
@@ -562,51 +584,93 @@ class TestNativeAppMetrics(unittest.TestCase):
             / "prometheus.yml.j2"
         )
 
-    def test_prometheus_yml_has_gitea_native_metrics_job(self):
-        """prometheus.yml.j2 must include a Gitea native metrics scrape job."""
-        content = self._prometheus_yml_path().read_text(encoding="utf-8")
-        self.assertIn(
-            'job_name: "gitea"',
-            content,
-            "prometheus.yml.j2 must define a 'gitea' scrape job for native Go/app metrics "
-            "(task AC: apps that support metrics MUST expose /metrics)",
+    def _scrape_fragment_path(self, app_id: str) -> "Path":
+        return (
+            Path(__file__).resolve().parent.parent.parent
+            / "roles"
+            / app_id
+            / "templates"
+            / "prometheus_scrape.yml.j2"
         )
 
-    def test_prometheus_yml_has_mattermost_native_metrics_job(self):
-        """prometheus.yml.j2 must include a Mattermost native metrics scrape job."""
-        content = self._prometheus_yml_path().read_text(encoding="utf-8")
-        self.assertIn(
-            'job_name: "mattermost"',
-            content,
-            "prometheus.yml.j2 must define a 'mattermost' scrape job "
-            "(task AC: Mattermost supports Prometheus metrics via MM_METRICSSETTINGS_ENABLE=true)",
-        )
+    def test_prometheus_yml_uses_native_metrics_apps_lookup(self):
+        """prometheus.yml.j2 must use the native_metrics_apps lookup to auto-discover scrape targets.
 
-    def test_prometheus_yml_has_synapse_native_metrics_job(self):
-        """prometheus.yml.j2 must include a Matrix Synapse native metrics scrape job."""
-        content = self._prometheus_yml_path().read_text(encoding="utf-8")
-        self.assertIn(
-            'job_name: "matrix-synapse"',
-            content,
-            "prometheus.yml.j2 must define a 'matrix-synapse' scrape job "
-            "(task AC: Matrix/Synapse supports Prometheus metrics via enable_metrics: true)",
-        )
-
-    def test_native_metrics_guard_uses_native_metrics_flag(self):
-        """Native metrics scrape jobs must be guarded by native_metrics.enabled, not the nginx integration flag.
-
-        compose.services.prometheus.enabled is the nginx monitoring integration flag —
-        it controls whether log_by_lua_block is added to the vhost. It must NOT be used
-        as the guard for native /metrics scrape jobs: that would add a scrape target for
-        every deployed app even when the app's native metrics endpoint is disabled,
-        causing all those targets to show as DOWN in Prometheus.
+        Hardcoding per-app {% if %} blocks in prometheus.yml.j2 violates DRY —
+        every new app requires editing the prometheus role. The factory pattern
+        uses native_metrics_apps lookup + per-app prometheus_scrape.yml.j2 fragments.
         """
         content = self._prometheus_yml_path().read_text(encoding="utf-8")
         self.assertIn(
+            "native_metrics_apps",
+            content,
+            "prometheus.yml.j2 must use the native_metrics_apps lookup plugin "
+            "to auto-discover apps with native metrics (no hardcoded per-app blocks)",
+        )
+
+    def test_gitea_has_scrape_fragment(self):
+        """web-app-gitea must have a prometheus_scrape.yml.j2 fragment with a 'gitea' job."""
+        path = self._scrape_fragment_path("web-app-gitea")
+        self.assertTrue(
+            path.exists(),
+            "web-app-gitea must have roles/web-app-gitea/templates/prometheus_scrape.yml.j2 "
+            "(task AC: apps that support metrics MUST expose /metrics)",
+        )
+        content = path.read_text(encoding="utf-8")
+        self.assertIn(
+            'job_name: "gitea"',
+            content,
+            "web-app-gitea/templates/prometheus_scrape.yml.j2 must define job_name: \"gitea\"",
+        )
+
+    def test_mattermost_has_scrape_fragment(self):
+        """web-app-mattermost must have a prometheus_scrape.yml.j2 fragment with a 'mattermost' job."""
+        path = self._scrape_fragment_path("web-app-mattermost")
+        self.assertTrue(
+            path.exists(),
+            "web-app-mattermost must have roles/web-app-mattermost/templates/prometheus_scrape.yml.j2 "
+            "(task AC: Mattermost supports Prometheus metrics via MM_METRICSSETTINGS_ENABLE=true)",
+        )
+        content = path.read_text(encoding="utf-8")
+        self.assertIn(
+            'job_name: "mattermost"',
+            content,
+            "web-app-mattermost/templates/prometheus_scrape.yml.j2 must define job_name: \"mattermost\"",
+        )
+
+    def test_matrix_has_scrape_fragment(self):
+        """web-app-matrix must have a prometheus_scrape.yml.j2 fragment with a 'matrix-synapse' job."""
+        path = self._scrape_fragment_path("web-app-matrix")
+        self.assertTrue(
+            path.exists(),
+            "web-app-matrix must have roles/web-app-matrix/templates/prometheus_scrape.yml.j2 "
+            "(task AC: Matrix/Synapse supports Prometheus metrics via enable_metrics: true)",
+        )
+        content = path.read_text(encoding="utf-8")
+        self.assertIn(
+            'job_name: "matrix-synapse"',
+            content,
+            "web-app-matrix/templates/prometheus_scrape.yml.j2 must define job_name: \"matrix-synapse\"",
+        )
+
+    def test_native_metrics_guard_uses_native_metrics_flag(self):
+        """native_metrics_apps lookup must filter by native_metrics.enabled, not the nginx integration flag.
+
+        compose.services.prometheus.enabled is the nginx monitoring integration flag —
+        it controls whether log_by_lua_block is added to the vhost. The lookup plugin
+        must use native_metrics.enabled so only apps with an active metrics endpoint
+        get a scrape job (otherwise all 70+ apps appear as DOWN targets in Prometheus).
+        """
+        plugin_path = (
+            Path(__file__).resolve().parent.parent.parent
+            / "plugins" / "lookup" / "native_metrics_apps.py"
+        )
+        content = plugin_path.read_text(encoding="utf-8")
+        self.assertIn(
             "native_metrics.enabled",
             content,
-            "prometheus.yml.j2 native metrics jobs must be guarded by native_metrics.enabled "
-            "from each app's own config, not by compose.services.prometheus.enabled",
+            "native_metrics_apps lookup plugin must filter on native_metrics.enabled "
+            "from each app's own config, not on compose.services.prometheus.enabled",
         )
 
     def test_native_metrics_apps_have_enabled_flag_in_config(self):
@@ -627,22 +691,22 @@ class TestNativeAppMetrics(unittest.TestCase):
                     f"{app_id}/config/main.yml native_metrics must have an 'enabled' key",
                 )
 
-    def test_prometheus_gitea_job_uses_metrics_path(self):
-        """The Gitea scrape job must use metrics_path: /metrics."""
-        content = self._prometheus_yml_path().read_text(encoding="utf-8")
+    def test_gitea_scrape_fragment_uses_metrics_path(self):
+        """The Gitea scrape fragment must use metrics_path: /metrics."""
+        content = self._scrape_fragment_path("web-app-gitea").read_text(encoding="utf-8")
         self.assertIn(
             "metrics_path: /metrics",
             content,
-            "prometheus.yml.j2 Gitea job must set metrics_path: /metrics",
+            "web-app-gitea/templates/prometheus_scrape.yml.j2 must set metrics_path: /metrics",
         )
 
-    def test_prometheus_synapse_job_uses_synapse_metrics_path(self):
-        """The Synapse scrape job must use the correct /_synapse/metrics path."""
-        content = self._prometheus_yml_path().read_text(encoding="utf-8")
+    def test_matrix_scrape_fragment_uses_synapse_metrics_path(self):
+        """The Synapse scrape fragment must use the correct /_synapse/metrics path."""
+        content = self._scrape_fragment_path("web-app-matrix").read_text(encoding="utf-8")
         self.assertIn(
             "metrics_path: /_synapse/metrics",
             content,
-            "prometheus.yml.j2 Synapse job must set metrics_path: /_synapse/metrics",
+            "web-app-matrix/templates/prometheus_scrape.yml.j2 must set metrics_path: /_synapse/metrics",
         )
 
 

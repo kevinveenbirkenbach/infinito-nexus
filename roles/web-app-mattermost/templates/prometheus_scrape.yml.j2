@@ -1,0 +1,12 @@
+  # Mattermost — application and Go runtime metrics.
+  # Requires MM_METRICSSETTINGS_ENABLE=true in the Mattermost environment config.
+  # Enable via native_metrics.enabled: true in inventory.
+  - job_name: "mattermost"
+    scheme: {{ lookup('tls', application_id, 'protocols.web') }}
+    metrics_path: /metrics
+    tls_config:
+      insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
+    static_configs:
+      - targets: ["{{ lookup('domain', 'web-app-mattermost') }}"]
+        labels:
+          app: "web-app-mattermost"

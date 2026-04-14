@@ -1,0 +1,12 @@
+  # Matrix Synapse — server and federation metrics.
+  # Requires enable_metrics: true in homeserver.yaml.
+  # Enable via native_metrics.enabled: true in inventory.
+  - job_name: "matrix-synapse"
+    scheme: {{ lookup('tls', application_id, 'protocols.web') }}
+    metrics_path: /_synapse/metrics
+    tls_config:
+      insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
+    static_configs:
+      - targets: ["{{ lookup('domain', 'web-app-matrix') }}"]
+        labels:
+          app: "web-app-matrix"
