@@ -50,13 +50,12 @@ if user
     changed = true
   end
 
-  changed ||= ensure_attr!(user, :provider, "greenlight")
-  changed ||= ensure_attr!(user, :language, "en")
+  ensure_attr!(user, :provider, "greenlight")
+  ensure_attr!(user, :language, "en")
 
   if user.respond_to?(:role=) && user.respond_to?(:role_id)
     if user.role_id != admin_role.id
       user.role = admin_role
-      changed = true
     end
   end
 
