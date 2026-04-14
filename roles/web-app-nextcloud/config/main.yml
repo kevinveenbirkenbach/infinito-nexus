@@ -109,7 +109,7 @@ compose:
       mem_limit:            "512m"
       pids_limit:           256
     talk:
-      enabled:              "{{ lookup('config', 'web-app-nextcloud', 'plugins.spreed.enabled') }}"
+      enabled:              "{{ lookup('config', 'web-app-nextcloud', 'plugins.spreed.enabled', False) }}"
       name:                 "nextcloud-talk"
       image:                "nextcloud/aio-talk"
       version:              "latest"
