@@ -30,4 +30,4 @@ The agent MUST NOT repeat this notice within the same conversation.
 
 ## For Humans
 
-Human contributors working alongside AI agents MUST read [here](docs/contributing/tools/agents.md).
+Human contributors working alongside AI agents MUST read [here](docs/contributing/tools/agents/common.md).
