@@ -3,21 +3,28 @@
     Included from basic.conf.j2, synapse.conf.j2, and any other custom vhost
     that participates in the monitoring stack.
 
-    Sets $container_name for Docker health monitoring.  Custom vhosts that use
-    a non-default service key (e.g. synapse.conf.j2 → 'synapse') must add an
-    explicit set $container_name directive AFTER this include to override it.
+    $app_id          — Ansible role ID attached as Lua metrics label (all vhosts).
+    $container_name  — Docker container name for /healthz/live polling.
+                       Callers may set {% set _container_name = "..." %} before
+                       this include to override the default (derived from the
+                       canonical service key via get_entity_name).
 
     healthz.conf.j2     — /healthz/live + /healthz/ready + /_live_probe (all vhosts)
     location.conf.j2    — log_by_lua_block per-request metrics collection (prometheus-enabled only)
     metricz.conf.j2     — /metricz scrape endpoint (prometheus domain only)
   #}
+  {# Expose the Ansible role ID so Lua metrics handlers can attach the 'app' label. #}
+  set $app_id "{{ application_id }}";
   {# Docker container name for this vhost — used by /healthz/live to query the
      health_containers shared dict populated by the background Docker-socket timer.
      Falls back to "" when the naming convention doesn't match (dict lookup is skipped).
-     Custom vhosts (e.g. synapse.conf.j2) may add a second set $container_name directive
-     placed after this include to override with their specific service key. #}
+     Callers set _container_name before the include to supply a non-default service key. #}
+  {% if _container_name is defined %}
+  set $container_name "{{ _container_name }}";
+  {% else %}
   {% set _svc_key = application_id | get_entity_name %}
   set $container_name "{{ lookup('config', application_id, 'compose.services.' + _svc_key + '.name', '') }}";
+  {% endif %}
   {# Always expose /healthz/live and /healthz/ready — every vhost needs them. #}
   {% include 'roles/web-app-prometheus/templates/nginx/healthz.conf.j2' %}
   {# Per-request metrics collection requires prometheus Lua globals — only when deployed. #}

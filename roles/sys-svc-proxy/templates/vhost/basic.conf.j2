@@ -1,9 +1,6 @@
 server
 {
   server_name {{ domain }};
-  # Exposes the Ansible role ID as an nginx variable so Lua metrics handlers
-  # can attach the 'app' label required by the monitoring ACs.
-  set $app_id "{{ application_id }}";
   {% include 'roles/sys-svc-proxy/templates/headers/buffers.conf.j2' %}
 
   {% if lookup('config',application_id, 'compose.services.oauth2.enabled', False) %}

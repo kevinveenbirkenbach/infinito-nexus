@@ -55,7 +55,7 @@ groups:
       - alert: CommunicationChannelDown
         expr: >
           probe_success{job="blackbox-healthz",
-            app=~"web-app-mattermost|web-app-matrix|web-app-mailu"} == 0
+            app=~"{{ lookup('config', 'web-app-prometheus', 'alerting.communication_channels', []) | join('|') }}"} == 0
         for: 2m
         labels:
           severity: critical
