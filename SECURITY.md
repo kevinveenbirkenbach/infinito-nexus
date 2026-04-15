@@ -17,7 +17,7 @@ Send a private report that includes:
 
 ## Security Contacts
 
-- Matrix: [@kevinveenbirkenbach:infinito.nexus](https://matrix.to/#/@kevinveenbirkenbach:infinito.nexus)
+- Matrix: @kevinveenbirkenbach:infinito.nexus
 - Email: [kevinveenbirkenbach@infinito.nexus](mailto:kevinveenbirkenbach@infinito.nexus)
 - Phone: [+49 178 179 8023](tel:+491781798023)
 
