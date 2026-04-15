@@ -12,6 +12,7 @@ You MUST read `AGENTS.md` and follow all instructions in it at the start of ever
 
 ## Code Execution
 
+- You MUST always prefer `make` targets over running underlying scripts, `docker`, `docker compose`, `ansible-playbook`, `python`, or shell invocations directly, whenever an equivalent target exists in the [`Makefile`](Makefile). Inspect the `Makefile` first and only fall back to the raw command when no target covers the operation.
 - You SHOULD run permitted commands (listed in [.claude/settings.json](.claude/settings.json)) directly on the host.
 - For commands that are NOT permitted on the host, you MUST run them inside the application containers instead. Use `make up` (or the appropriate Make target) to start the stack, then use `make exec` to open a shell inside the container.
 - The repository is mounted into the container at `/opt/src/infinito` (see [compose.yml](compose.yml)), so code changes are immediately available there.
