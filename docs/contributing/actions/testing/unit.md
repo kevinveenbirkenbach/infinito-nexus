@@ -33,8 +33,8 @@ Use `TEST_PATTERN` to scope the test run to a single file or a glob:
 
 ```bash
 # Run a single test file
-TEST_PATTERN=test_my_module.py make test-unit
+make test-unit TEST_PATTERN=test_my_module.py
 
 # Run all files matching a prefix
-TEST_PATTERN=test_applications*.py make test-unit
+make test-unit TEST_PATTERN=test_applications*.py
 ```
