@@ -45,11 +45,10 @@ async function login(page, email, password) {
       await page.waitForLoadState("networkidle");
     }
   }
-  const emailInput = page.getByLabel(/email/i).first();
-  await emailInput.waitFor({ state: 'visible', timeout: 60000 });
-  await emailInput.fill(email);
-  await page.locator("input[type='password']").first().fill(password);
-  await page.getByRole('button', { name: /log in|sign in/i }).first().click();
+  await page.locator("#session_user_email").waitFor({ state: "attached", timeout: 60000 });
+  await page.locator("#session_user_email").fill(email);
+  await page.locator("#session_user_password").fill(password);
+  await page.locator("#session_new_user").evaluate(form => form.submit());
   await page.waitForLoadState("networkidle");
 }
 
