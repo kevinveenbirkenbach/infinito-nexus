@@ -67,21 +67,11 @@ command -v docker >/dev/null || {
 mkdir -p "$stage_dir/tests" "$stage_dir/volume" "$reports_dir"
 cp "$spec_src" "$stage_dir/tests/playwright.spec.js"
 
-ca_env=()
-if [[ "${TLS_MODE:-}" == "self_signed" ]]; then
-	for var in CA_TRUST_CERT_HOST CA_TRUST_WRAPPER_HOST CA_TRUST_NAME; do
-		if [[ -n "${!var:-}" ]]; then
-			ca_env+=(-e "$var=${!var}")
-		fi
-	done
-fi
-
 cmd="${TEST_E2E_PLAYWRIGHT_COMMAND:-npm install --no-fund --no-audit && npx playwright test${*:+ $*}}"
 
 exec docker run --rm \
 	--ipc=host --shm-size=1g \
 	--env-file "$env_file" \
-	"${ca_env[@]}" \
 	-v "$stage_dir:/e2e" \
 	-v "$stage_dir/volume:/volume" \
 	-v "$reports_dir:/reports" \
