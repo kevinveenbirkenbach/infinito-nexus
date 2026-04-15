@@ -388,8 +388,56 @@ async function loginToStandaloneNextcloud(adminPage) {
 //
 // Open a fresh page in the given context, SSO-login, navigate to the Talk
 // admin settings URL, and assert the deployed HPB / STUN / TURN values are
-// present while the known legacy onboard values are absent.
+// present while the known legacy onboard values are absent. Then click every
+// "Test server" / "Test this server" button and fail if any of the known
+// spreed error strings show up (Cannot connect, No working ICE, etc.).
 // ---------------------------------------------------------------------------
+
+// Error strings emitted by the spreed admin UI when a signaling / STUN / TURN
+// test button reports a failure. Kept in one place so the list stays easy to
+// audit against the spreed source.
+const talkTestServerErrorPatterns = [
+  /Error:\s*Cannot connect to server/i,
+  /Error:\s*No working ICE candidates returned by the TURN server/i,
+  /Error:\s*Server seems to be a Signaling server/i,
+  /Testing server seems to be broken/i
+];
+
+async function clickAllTalkTestServerButtonsAndVerify(page) {
+  // Spreed labels its signaling-server button "Test server" and the
+  // STUN/TURN entries "Test this server". Match both.
+  const testButtons = page.getByRole("button", { name: /^test( this)? server$/i });
+  const total = await testButtons.count();
+
+  const clicked = [];
+  for (let i = 0; i < total; i += 1) {
+    const button = testButtons.nth(i);
+    if (!(await button.isVisible().catch(() => false))) {
+      continue;
+    }
+    await button.scrollIntoViewIfNeeded().catch(() => {});
+    await button.click({ timeout: 5_000 }).catch(() => {});
+    clicked.push(i);
+  }
+
+  expect(
+    clicked.length,
+    "Expected at least one Talk 'Test server' / 'Test this server' button on the admin page"
+  ).toBeGreaterThan(0);
+
+  // Server-side reachability checks (WebSocket handshake for HPB, STUN binding,
+  // TURN allocation) need time to round-trip. Give them a fixed window before
+  // scanning for error markers.
+  await page.waitForTimeout(10_000);
+
+  const bodyText = await page.locator("body").innerText().catch(() => "");
+  for (const pattern of talkTestServerErrorPatterns) {
+    expect(
+      bodyText,
+      `Talk admin page reported an error after clicking the Test server buttons (pattern ${pattern})`
+    ).not.toMatch(pattern);
+  }
+}
 
 async function verifyNextcloudTalkAdminSettings(browserContext) {
   if (!nextcloudTalkSettingsCheckEnabled) {
@@ -437,6 +485,8 @@ async function verifyNextcloudTalkAdminSettings(browserContext) {
     if (nextcloudTalkUnexpectedTurnServer) {
       await expectNextcloudSettingAbsent(adminPage, nextcloudTalkUnexpectedTurnServer, "legacy Talk TURN server");
     }
+
+    await clickAllTalkTestServerButtonsAndVerify(adminPage);
   } finally {
     await adminPage.close().catch(() => {});
   }
