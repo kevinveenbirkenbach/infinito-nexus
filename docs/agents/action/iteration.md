@@ -17,6 +17,17 @@ Use this page when you are iterating on a local app deploy during debugging or d
 - Network or DNS failures during a local deploy count as concrete evidence that the host stack is broken. In that case, the next retry MUST be `make deploy-fresh-purged-apps APPS=<roles>` so the container stack is re-initialized.
 - If you need to validate the single-app init/deploy path separately, use `make deploy-fresh-kept-apps APPS=<roles>`. It checks the clean single-app setup apart from the faster reuse path.
 
+## Playwright Spec Loop
+
+- After the first successful deploy has brought the app stack up, you MUST iterate role-local `files/playwright.spec.js` directly against the live running container instead of redeploying between every spec edit.
+- For that inner loop you MUST use the [Playwright spec rerunner](../../../scripts/tests/e2e/rerun-spec.sh) (e.g. `scripts/tests/e2e/rerun-spec.sh <role>`, optionally followed by `--grep <pattern>` or other `npx playwright test` arguments). The script reuses the staging dir and rendered `.env` from the last deploy and reruns Playwright in the same container image the deploy-time runner uses.
+- The staged Playwright project lives at `TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR/<application_id>` (default `/tmp/test-e2e-playwright/<application_id>`) with the rendered `.env` already in place. The script overwrites `tests/playwright.spec.js` from the repo before each run; you MUST NOT hand-edit the staged copy.
+- You MUST keep iterating the spec in this inner loop until the test passes. Only spec-only changes belong in this loop.
+- If the change touches anything **outside** `files/playwright.spec.js` (role tasks, templates, vars, config, `javascript.js`, `style.css`, or any other role asset that the deploy materializes), you MUST redeploy. Inner-loop spec runs do NOT pick up role changes.
+- Prefer `make deploy-reuse-kept-apps APPS=<role>` for that redeploy. Fall back to `make deploy-fresh-purged-apps APPS=<role>` only when the reuse path has concrete evidence of broken inventory or host stack, per the rules in [Role Loop](#role-loop).
+- You MUST still meet the live-application and logout-state requirements from [Agent `playwright.spec.js`](../files/role/playwright.spec.js.md) at the end of the inner loop.
+- Once the spec passes in the inner loop, you MUST run one final pass through the [Role Loop](#role-loop) with `make deploy-fresh-purged-apps APPS=<role>` to confirm the spec still passes against a freshly provisioned stack, not only against the cached staging project.
+
 ## Workflow Loop
 
 - When you are developing, optimizing, or debugging GitHub Actions workflows, you SHOULD explicitly propose `make act-workflow` as the default iterative local debug loop.
