@@ -35,7 +35,7 @@ def _make_roles(tmp: Path, specs: dict) -> dict:
         if cfg.get("has_fragment"):
             tpl_dir = tmp / app_id / "templates"
             tpl_dir.mkdir(parents=True)
-            (tpl_dir / "prometheus_scrape.yml.j2").write_text(
+            (tpl_dir / "prometheus.yml.j2").write_text(
                 f'  - job_name: "{app_id}"\n'
             )
         # applications dict: mirrors what Ansible populates from role config defaults.

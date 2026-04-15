@@ -1,0 +1,31 @@
+  {#
+    Prometheus monitoring integration — single SPOT for all nginx vhosts.
+    Included from basic.conf.j2, synapse.conf.j2, and any other custom vhost
+    that participates in the monitoring stack.
+
+    Sets $container_name for Docker health monitoring.  Custom vhosts that use
+    a non-default service key (e.g. synapse.conf.j2 → 'synapse') must add an
+    explicit set $container_name directive AFTER this include to override it.
+
+    healthz.conf.j2     — /healthz/live + /healthz/ready + /_live_probe (all vhosts)
+    location.conf.j2    — log_by_lua_block per-request metrics collection (prometheus-enabled only)
+    metricz.conf.j2     — /metricz scrape endpoint (prometheus domain only)
+  #}
+  {# Docker container name for this vhost — used by /healthz/live to query the
+     health_containers shared dict populated by the background Docker-socket timer.
+     Falls back to "" when the naming convention doesn't match (dict lookup is skipped).
+     Custom vhosts (e.g. synapse.conf.j2) may add a second set $container_name directive
+     placed after this include to override with their specific service key. #}
+  {% set _svc_key = application_id | get_entity_name %}
+  set $container_name "{{ lookup('config', application_id, 'compose.services.' + _svc_key + '.name', '') }}";
+  {# Always expose /healthz/live and /healthz/ready — every vhost needs them. #}
+  {% include 'roles/web-app-prometheus/templates/nginx/healthz.conf.j2' %}
+  {# Per-request metrics collection requires prometheus Lua globals — only when deployed. #}
+  {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
+      or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
+  {% include 'roles/web-app-prometheus/templates/nginx/location.conf.j2' %}
+  {% endif %}
+  {% if lookup('config', application_id, 'compose.services.prometheus.name', '') %}
+  {# Scrape endpoint — only on the prometheus domain itself. #}
+  {% include 'roles/web-app-prometheus/templates/nginx/metricz.conf.j2' %}
+  {% endif %}

@@ -14,14 +14,14 @@ class LookupModule(LookupBase):
     """
     Return a sorted list of deployed application IDs that satisfy both:
       1. native_metrics.enabled: true in their role config
-      2. a prometheus_scrape.yml.j2 template at roles/<app_id>/templates/
+      2. a prometheus.yml.j2 template at roles/<app_id>/templates/
 
-    Used by web-app-prometheus/templates/prometheus.yml.j2 to auto-discover apps
+    Used by web-app-prometheus/templates/configuration/prometheus.yml.j2 to auto-discover apps
     that expose a native /metrics endpoint without hardcoding each app name.
 
     Usage in a template:
       {% for app_id in lookup('native_metrics_apps') %}
-      {% include 'roles/' + app_id + '/templates/prometheus_scrape.yml.j2' %}
+      {% include 'roles/' + app_id + '/templates/prometheus.yml.j2' %}
       {% endfor %}
     """
 
@@ -55,7 +55,7 @@ class LookupModule(LookupBase):
                 continue
 
             scrape_template = (
-                roles_dir / app_id / "templates" / "prometheus_scrape.yml.j2"
+                roles_dir / app_id / "templates" / "prometheus.yml.j2"
             )
             if scrape_template.exists():
                 result.append(app_id)

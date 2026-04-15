@@ -7,35 +7,35 @@
 
 - name: "Deploy prometheus nginx http-block config to {{ lookup('nginx','directories.configuration.global') }}prometheus.conf"
   template:
-    src: "roles/sys-svc-webserver-core/templates/prometheus.conf.j2"
+    src: "roles/web-app-prometheus/templates/nginx/prometheus.conf.j2"
     dest: "{{ [ lookup('nginx','directories.configuration.global'), 'prometheus.conf' ] | path_join }}"
     mode: "0644"
   notify: restart openresty
 
 - name: "Render prometheus scrape config to {{ PROMETHEUS_CONFIG_HOST }}"
   template:
-    src: prometheus.yml.j2
+    src: configuration/prometheus.yml.j2
     dest: "{{ PROMETHEUS_CONFIG_HOST }}"
     mode: "0644"
   notify: compose up
 
 - name: "Render blackbox exporter config to {{ BLACKBOX_CONFIG_HOST }}"
   template:
-    src: blackbox.yml.j2
+    src: configuration/blackbox.yml.j2
     dest: "{{ BLACKBOX_CONFIG_HOST }}"
     mode: "0644"
   notify: compose up
 
 - name: "Render alertmanager config to {{ ALERTMANAGER_CONFIG_HOST }}"
   template:
-    src: alertmanager.yml.j2
+    src: configuration/alertmanager.yml.j2
     dest: "{{ ALERTMANAGER_CONFIG_HOST }}"
     mode: "0644"
   notify: compose up
 
 - name: "Render alert rules to {{ ALERT_RULES_CONFIG_HOST }}"
   template:
-    src: alert_rules.yml.j2
+    src: configuration/alert_rules.yml.j2
     dest: "{{ ALERT_RULES_CONFIG_HOST }}"
     mode: "0644"
   notify: compose up

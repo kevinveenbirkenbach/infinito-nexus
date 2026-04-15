@@ -166,6 +166,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             / "roles"
             / "web-app-prometheus"
             / "templates"
+            / "nginx"
             / "location.conf.j2"
         )
 
@@ -175,18 +176,19 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             / "roles"
             / "web-app-prometheus"
             / "templates"
+            / "nginx"
             / "metricz.conf.j2"
         )
 
     def _healthz_conf_path(self):
-        # Health-check locations were extracted from basic.conf.j2 into healthz.conf.j2
-        # to keep the generic vhost template free of monitoring-specific location blocks.
+        # Health-check locations live in web-app-prometheus/templates/nginx/healthz.conf.j2
+        # — moved from sys-svc-proxy so all monitoring templates belong in one role (SRP).
         return (
             Path(__file__).resolve().parent.parent.parent
             / "roles"
-            / "sys-svc-proxy"
+            / "web-app-prometheus"
             / "templates"
-            / "location"
+            / "nginx"
             / "healthz.conf.j2"
         )
 
@@ -219,15 +221,17 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         )
 
     def _prometheus_conf_path(self):
-        # Prometheus monitoring integration — single SPOT for all vhosts.
+        # locations.conf.j2 is the single SPOT for all prometheus-related nginx includes.
         # basic.conf.j2 and synapse.conf.j2 both delegate to this shared include.
+        # Moved from sys-svc-proxy to web-app-prometheus so all monitoring templates
+        # are co-located in the monitoring role (SRP).
         return (
             Path(__file__).resolve().parent.parent.parent
             / "roles"
-            / "sys-svc-proxy"
+            / "web-app-prometheus"
             / "templates"
-            / "location"
-            / "prometheus.conf.j2"
+            / "nginx"
+            / "locations.conf.j2"
         )
 
     def test_basic_conf_delegates_prometheus_to_shared_include(self):
@@ -238,10 +242,10 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """
         content = self._basic_conf_path().read_text(encoding="utf-8")
         self.assertIn(
-            "roles/sys-svc-proxy/templates/location/prometheus.conf.j2",
+            "roles/web-app-prometheus/templates/nginx/locations.conf.j2",
             content,
             "basic.conf.j2 must delegate prometheus monitoring to the shared "
-            "roles/sys-svc-proxy/templates/location/prometheus.conf.j2 include",
+            "roles/web-app-prometheus/templates/nginx/locations.conf.j2 include",
         )
 
     def test_prometheus_conf_includes_location_conf_for_all_prometheus_apps(self):
@@ -253,14 +257,14 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """
         content = self._prometheus_conf_path().read_text(encoding="utf-8")
         self.assertIn(
-            "roles/web-app-prometheus/templates/location.conf.j2",
+            "roles/web-app-prometheus/templates/nginx/location.conf.j2",
             content,
-            "prometheus.conf.j2 must include location.conf.j2 for prometheus-enabled apps",
+            "locations.conf.j2 must include nginx/location.conf.j2 for prometheus-enabled apps",
         )
         self.assertIn(
             "compose.services.prometheus.name",
             content,
-            "prometheus.conf.j2 condition must check compose.services.prometheus.name "
+            "locations.conf.j2 condition must check compose.services.prometheus.name "
             "so that the prometheus app's own domain also gets the log_by_lua_block",
         )
 
@@ -272,9 +276,9 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """
         content = self._prometheus_conf_path().read_text(encoding="utf-8")
         self.assertIn(
-            "roles/web-app-prometheus/templates/metricz.conf.j2",
+            "roles/web-app-prometheus/templates/nginx/metricz.conf.j2",
             content,
-            "prometheus.conf.j2 must include metricz.conf.j2 for the prometheus domain "
+            "locations.conf.j2 must include nginx/metricz.conf.j2 for the prometheus domain "
             "(location = /metricz must not appear on every app vhost)",
         )
         # metricz must be in a SEPARATE block guarded by .name alone (not the OR-condition).
@@ -369,7 +373,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         for template in ("alertmanager.yml.j2", "alert_rules.yml.j2"):
             with self.subTest(template=template):
-                path = roles_dir / PROMETHEUS_APP_ID / "templates" / template
+                path = roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / template
                 self.assertTrue(
                     path.exists(),
                     f"Missing alertmanager template: {path}",
@@ -379,7 +383,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """alertmanager.yml.j2 must support Telegram notifications (task AC: communication channels)."""
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
-            roles_dir / PROMETHEUS_APP_ID / "templates" / "alertmanager.yml.j2"
+            roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / "alertmanager.yml.j2"
         ).read_text(encoding="utf-8")
         self.assertIn(
             "telegram_configs",
@@ -392,7 +396,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """alertmanager.yml.j2 must support Mattermost webhook notifications (task AC: communication channels)."""
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
-            roles_dir / PROMETHEUS_APP_ID / "templates" / "alertmanager.yml.j2"
+            roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / "alertmanager.yml.j2"
         ).read_text(encoding="utf-8")
         self.assertIn(
             "ALERTMANAGER_MATTERMOST_WEBHOOK_URL",
@@ -409,7 +413,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
-            roles_dir / PROMETHEUS_APP_ID / "templates" / "alert_rules.yml.j2"
+            roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / "alert_rules.yml.j2"
         ).read_text(encoding="utf-8")
         self.assertIn(
             "CommunicationChannelDown",
@@ -431,7 +435,7 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
-            roles_dir / PROMETHEUS_APP_ID / "templates" / "blackbox.yml.j2"
+            roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / "blackbox.yml.j2"
         ).read_text(encoding="utf-8")
         self.assertIn(
             "TLS_ENABLED",
@@ -455,13 +459,14 @@ class TestDockerHealthCheck(unittest.TestCase):
 
     def _nginx_conf_path(self):
         # Prometheus Lua blocks (lua_shared_dict, init_worker, Docker health timer)
-        # live in prometheus.conf.j2, not nginx.conf.j2 — the http{} block should
-        # not contain monitoring-specific code (SRP).
+        # live in web-app-prometheus/templates/nginx/prometheus.conf.j2 — monitoring
+        # config belongs in the monitoring role, not in sys-svc-webserver-core (SRP).
         return (
             Path(__file__).resolve().parent.parent.parent
             / "roles"
-            / "sys-svc-webserver-core"
+            / "web-app-prometheus"
             / "templates"
+            / "nginx"
             / "prometheus.conf.j2"
         )
 
@@ -476,14 +481,14 @@ class TestDockerHealthCheck(unittest.TestCase):
         )
 
     def _healthz_conf_path(self):
-        # Health-check locations were extracted from basic.conf.j2 into healthz.conf.j2
-        # to keep the generic vhost template free of monitoring-specific location blocks.
+        # Health-check locations live in web-app-prometheus/templates/nginx/healthz.conf.j2
+        # — moved from sys-svc-proxy so all monitoring templates belong in one role (SRP).
         return (
             Path(__file__).resolve().parent.parent.parent
             / "roles"
-            / "sys-svc-proxy"
+            / "web-app-prometheus"
             / "templates"
-            / "location"
+            / "nginx"
             / "healthz.conf.j2"
         )
 
@@ -535,12 +540,22 @@ class TestDockerHealthCheck(unittest.TestCase):
         )
 
     def test_basic_conf_has_container_name_variable(self):
-        """basic.conf.j2 must set $container_name so /healthz/live can look up Docker state."""
-        content = self._basic_conf_path().read_text(encoding="utf-8")
+        """locations.conf.j2 must set $container_name so /healthz/live can look up Docker state."""
+        # $container_name was moved from basic.conf.j2 into locations.conf.j2 so every
+        # custom vhost template (synapse.conf.j2, etc.) gets it automatically.
+        locations_path = (
+            Path(__file__).resolve().parent.parent.parent
+            / "roles"
+            / "web-app-prometheus"
+            / "templates"
+            / "nginx"
+            / "locations.conf.j2"
+        )
+        content = locations_path.read_text(encoding="utf-8")
         self.assertIn(
             "$container_name",
             content,
-            "basic.conf.j2 must set the $container_name nginx variable "
+            "locations.conf.j2 must set the $container_name nginx variable "
             "(used by /healthz/live to consult the health_containers shared dict)",
         )
 
@@ -581,6 +596,7 @@ class TestNativeAppMetrics(unittest.TestCase):
             / "roles"
             / "web-app-prometheus"
             / "templates"
+            / "configuration"
             / "prometheus.yml.j2"
         )
 
@@ -590,7 +606,7 @@ class TestNativeAppMetrics(unittest.TestCase):
             / "roles"
             / app_id
             / "templates"
-            / "prometheus_scrape.yml.j2"
+            / "prometheus.yml.j2"
         )
 
     def test_prometheus_yml_uses_native_metrics_apps_lookup(self):
@@ -598,7 +614,7 @@ class TestNativeAppMetrics(unittest.TestCase):
 
         Hardcoding per-app {% if %} blocks in prometheus.yml.j2 violates DRY —
         every new app requires editing the prometheus role. The factory pattern
-        uses native_metrics_apps lookup + per-app prometheus_scrape.yml.j2 fragments.
+        uses native_metrics_apps lookup + per-app prometheus.yml.j2 fragments.
         """
         content = self._prometheus_yml_path().read_text(encoding="utf-8")
         self.assertIn(
@@ -609,48 +625,48 @@ class TestNativeAppMetrics(unittest.TestCase):
         )
 
     def test_gitea_has_scrape_fragment(self):
-        """web-app-gitea must have a prometheus_scrape.yml.j2 fragment with a 'gitea' job."""
+        """web-app-gitea must have a prometheus.yml.j2 fragment with a 'gitea' job."""
         path = self._scrape_fragment_path("web-app-gitea")
         self.assertTrue(
             path.exists(),
-            "web-app-gitea must have roles/web-app-gitea/templates/prometheus_scrape.yml.j2 "
+            "web-app-gitea must have roles/web-app-gitea/templates/prometheus.yml.j2 "
             "(task AC: apps that support metrics MUST expose /metrics)",
         )
         content = path.read_text(encoding="utf-8")
         self.assertIn(
             'job_name: "gitea"',
             content,
-            'web-app-gitea/templates/prometheus_scrape.yml.j2 must define job_name: "gitea"',
+            'web-app-gitea/templates/prometheus.yml.j2 must define job_name: "gitea"',
         )
 
     def test_mattermost_has_scrape_fragment(self):
-        """web-app-mattermost must have a prometheus_scrape.yml.j2 fragment with a 'mattermost' job."""
+        """web-app-mattermost must have a prometheus.yml.j2 fragment with a 'mattermost' job."""
         path = self._scrape_fragment_path("web-app-mattermost")
         self.assertTrue(
             path.exists(),
-            "web-app-mattermost must have roles/web-app-mattermost/templates/prometheus_scrape.yml.j2 "
+            "web-app-mattermost must have roles/web-app-mattermost/templates/prometheus.yml.j2 "
             "(task AC: Mattermost supports Prometheus metrics via MM_METRICSSETTINGS_ENABLE=true)",
         )
         content = path.read_text(encoding="utf-8")
         self.assertIn(
             'job_name: "mattermost"',
             content,
-            'web-app-mattermost/templates/prometheus_scrape.yml.j2 must define job_name: "mattermost"',
+            'web-app-mattermost/templates/prometheus.yml.j2 must define job_name: "mattermost"',
         )
 
     def test_matrix_has_scrape_fragment(self):
-        """web-app-matrix must have a prometheus_scrape.yml.j2 fragment with a 'matrix-synapse' job."""
+        """web-app-matrix must have a prometheus.yml.j2 fragment with a 'matrix-synapse' job."""
         path = self._scrape_fragment_path("web-app-matrix")
         self.assertTrue(
             path.exists(),
-            "web-app-matrix must have roles/web-app-matrix/templates/prometheus_scrape.yml.j2 "
+            "web-app-matrix must have roles/web-app-matrix/templates/prometheus.yml.j2 "
             "(task AC: Matrix/Synapse supports Prometheus metrics via enable_metrics: true)",
         )
         content = path.read_text(encoding="utf-8")
         self.assertIn(
             'job_name: "matrix-synapse"',
             content,
-            'web-app-matrix/templates/prometheus_scrape.yml.j2 must define job_name: "matrix-synapse"',
+            'web-app-matrix/templates/prometheus.yml.j2 must define job_name: "matrix-synapse"',
         )
 
     def test_native_metrics_guard_uses_native_metrics_flag(self):
@@ -701,7 +717,7 @@ class TestNativeAppMetrics(unittest.TestCase):
         self.assertIn(
             "metrics_path: /metrics",
             content,
-            "web-app-gitea/templates/prometheus_scrape.yml.j2 must set metrics_path: /metrics",
+            "web-app-gitea/templates/prometheus.yml.j2 must set metrics_path: /metrics",
         )
 
     def test_matrix_scrape_fragment_uses_synapse_metrics_path(self):
@@ -712,7 +728,7 @@ class TestNativeAppMetrics(unittest.TestCase):
         self.assertIn(
             "metrics_path: /_synapse/metrics",
             content,
-            "web-app-matrix/templates/prometheus_scrape.yml.j2 must set metrics_path: /_synapse/metrics",
+            "web-app-matrix/templates/prometheus.yml.j2 must set metrics_path: /_synapse/metrics",
         )
 
 

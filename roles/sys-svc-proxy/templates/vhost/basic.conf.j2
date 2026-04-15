@@ -1,14 +1,9 @@
-{% set _svc_key = application_id | get_entity_name %}
 server
 {
   server_name {{ domain }};
   # Exposes the Ansible role ID as an nginx variable so Lua metrics handlers
   # can attach the 'app' label required by the monitoring ACs.
   set $app_id "{{ application_id }}";
-  # Docker container name for this vhost — used by /healthz/live to query the
-  # health_containers shared dict populated by the background Docker-socket timer.
-  # Falls back to "" when the naming convention doesn't match (dict lookup is skipped).
-  set $container_name "{{ lookup('config', application_id, 'compose.services.' + _svc_key + '.name', '') }}";
   {% include 'roles/sys-svc-proxy/templates/headers/buffers.conf.j2' %}
 
   {% if lookup('config',application_id, 'compose.services.oauth2.enabled', False) %}
@@ -65,6 +60,6 @@ server
     {% include 'roles/sys-svc-proxy/templates/location/html.conf.j2' %}
   {% endif %}
 
-  {% include 'roles/sys-svc-proxy/templates/location/prometheus.conf.j2' %}
+  {% include 'roles/web-app-prometheus/templates/nginx/locations.conf.j2' %}
 
 }
