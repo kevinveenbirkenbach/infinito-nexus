@@ -4,8 +4,8 @@
 WEBSERVER_CPUS_EFFECTIVE: >-
   {{
     [
-      (applications | resource_filter('svc-prx-openresty',  'cpus', service_name | default(''), RESOURCE_CPUS)) | float,
-      (applications | resource_filter(application_id,       'cpus', service_name | default(''), RESOURCE_CPUS)) | float
+      (lookup('applications') | resource_filter('svc-prx-openresty',  'cpus', service_name | default(''), RESOURCE_CPUS)) | float,
+      (lookup('applications') | resource_filter(application_id,       'cpus', service_name | default(''), RESOURCE_CPUS)) | float
     ] | min
   }}
 
@@ -22,8 +22,8 @@ WEBSERVER_WORKER_PROCESSES: >-
 WEBSERVER_WORKER_CONNECTIONS: >-
   {{
     [
-      (applications | resource_filter('svc-prx-openresty', 'pids_limit', service_name | default(''), RESOURCE_PIDS_LIMIT)) | int,
-      (applications | resource_filter(application_id,      'pids_limit', service_name | default(''), RESOURCE_PIDS_LIMIT)) | int
+      (lookup('applications') | resource_filter('svc-prx-openresty', 'pids_limit', service_name | default(''), RESOURCE_PIDS_LIMIT)) | int,
+      (lookup('applications') | resource_filter(application_id,      'pids_limit', service_name | default(''), RESOURCE_PIDS_LIMIT)) | int
     ] | min
   }}
 

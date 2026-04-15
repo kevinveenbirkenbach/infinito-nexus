@@ -11,7 +11,7 @@ rates {
   }
 
   {# Per-user limits: require both .limits.rate and .limits.burst #}
-  {% for uname, u in users.items() %}
+  {% for uname, u in lookup('users').items() %}
     {% if (u.limits.rate | default(false) and u.limits.burst | default(false)) %}
   "user={{ u.email }}" = {
     bucket = [{

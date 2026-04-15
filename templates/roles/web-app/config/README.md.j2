@@ -1,6 +1,6 @@
 # Config
 
-The domains defined here can be customized by the system administrator. By default, they’re loaded from `../../group_vars/all/05_applications.yml`, but you can override them per application in your repository:
+The domains defined here can be customized by the system administrator. By default, they’re resolved from the `applications` lookup, but you can override them per application in your repository:
 
 ```yaml
 applications:
@@ -12,12 +12,12 @@ applications:
 
 ## Placeholder Logic with `<< >>`
 
-You can reference values from the generated `defaults_applications` dictionary at build time by embedding `<< ... >>` placeholders inside your template. For example:
+You can reference values from the aggregated `applications` dictionary at build time by embedding `<< ... >>` placeholders inside your template. For example:
 
 ```yaml
-url: "{{ lookup('tls', application_id, 'protocols.web') }}://<< defaults_applications.web-svc-file.domains.canonical[0] >>/assets"
+url: "{{ lookup('tls', application_id, 'protocols.web') }}://<< applications.web-svc-file.server.domains.canonical[0] >>/assets"
 ```
 
 - The `<< ... >>` placeholders are resolved by the [`DictRenderer`](../../../utils/dict_renderer.py) helper class.
-- The CLI uses the [`DefaultsGenerator`](../../../cli/setup/applications/__main__.py) class to merge all role configurations into a single YAML and then calls the renderer to substitute each `<< ... >>` occurrence.
+- The applications lookup aggregates role configurations in memory and then calls the renderer to substitute each `<< ... >>` occurrence.
 - Use the `--verbose` flag on the CLI script to log every replacement step, and rely on the built‑in timeout (default: 10 seconds) to prevent infinite loops.

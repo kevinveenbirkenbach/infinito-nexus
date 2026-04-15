@@ -8,7 +8,7 @@
   command: >-
     certbot certonly 
     --agree-tos 
-    --email {{ users.administrator.email }}
+    --email {{ lookup('users', 'administrator').email }}
     --non-interactive 
     {% if CERTBOT_ACME_CHALLENGE_METHOD != "webroot" %}
     --dns-{{ CERTBOT_ACME_CHALLENGE_METHOD }}

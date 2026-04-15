@@ -7,7 +7,6 @@
           service_id,
           application_id=application_id,
           service_name=service_name,
-          applications=applications,
           default=False
         ) | first
       }}

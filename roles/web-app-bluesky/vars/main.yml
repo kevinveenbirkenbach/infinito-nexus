@@ -43,8 +43,8 @@ BLUESKY_JWT_SECRET:             "{{ lookup('config', application_id, 'credential
 BLUESKY_ROTATION_KEY:           "{{ lookup('config', application_id, 'credentials.plc_rotation_key_k256_private_key_hex') }}"
 
 ## Admin
-BLUESKY_ADMIN_EMAIL:            "{{ users.administrator.email }}"
-BLUESKY_ADMIN_PASSWORD:         "{{ users.administrator.password }}"
+BLUESKY_ADMIN_EMAIL:            "{{ lookup('users', 'administrator').email }}"
+BLUESKY_ADMIN_PASSWORD:         "{{ lookup('users', 'administrator').password }}"
 
 # Front proxy
 BLUESKY_FRONT_PROXY_CONTENT:    "{{ lookup('template', 'extra_locations.conf.j2') }}"

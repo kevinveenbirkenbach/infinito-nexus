@@ -1,2 +1,2 @@
-auto_start_directory: /home/{{ users[WORKSTATION_USER].username }}/.config/autostart/
+auto_start_directory: /home/{{ lookup('users', WORKSTATION_USER).username }}/.config/autostart/
 application_id: desk-gnome-caffeine

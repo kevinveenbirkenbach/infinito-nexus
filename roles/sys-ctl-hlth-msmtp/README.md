@@ -18,4 +18,4 @@ The **sys-ctl-hlth-msmtp** role ensures that your mail transport system stays av
 - **Systemd Service & Timer:** Provides `.service` and `.timer` units to run the check and schedule it automatically.  
 - **Failure Notifications:** Leverages **sys-ctl-alm-telegram** to push alerts when the script exits with an error.  
 - **Configurable Schedule:** Define your desired check frequency using the `on_calendar_health_msmtp` variable.  
-- **Email Destination:** Specify the recipient via the `users.administrator.email` variable.
+- **Email Destination:** Specify the recipient via the `lookup('users', 'administrator').email` variable.

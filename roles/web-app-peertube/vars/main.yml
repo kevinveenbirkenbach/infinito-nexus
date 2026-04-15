@@ -15,6 +15,6 @@ PEERTUBE_OIDC_ENABLED:            "{{ lookup('config', application_id, 'compose.
 
 # Performance
 PEERTUBE_CPUS:                    "{{ lookup('config', application_id, 'compose.services.peertube.cpus') | float }}"
-PEERTUBE_MAX_OLD_SPACE_SIZE:      "{{ applications | node_max_old_space_size(application_id, entity_name) }}"
+PEERTUBE_MAX_OLD_SPACE_SIZE:      "{{ lookup('applications') | node_max_old_space_size(application_id, entity_name) }}"
 _peertube_concurrency_candidate:  "{{ ((PEERTUBE_CPUS | float) * 0.5) | round(0, 'floor') | int }}"
 PEERTUBE_TRANSCODING_CONCURRENCY: "{{ [ ( [ (_peertube_concurrency_candidate | int), 1 ] | max ), 8 ] | min }}"

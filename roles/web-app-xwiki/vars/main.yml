@@ -29,7 +29,7 @@ XWIKI_OIDC_ENABLED:                   "{{ lookup('config', application_id, 'comp
 XWIKI_SSO_ENABLED:                    "{{ (XWIKI_OIDC_ENABLED | bool) or (XWIKI_LDAP_ENABLED | bool) }}"
 
 # Admin credentials (must be provided via inventory/vault)
-XWIKI_ADMIN_USER:                     "{{ users.administrator.username }}"
+XWIKI_ADMIN_USER:                     "{{ lookup('users', 'administrator').username }}"
 XWIKI_ADMIN_GROUP:                    "{{ application_id }}-administrator"
 
 # Superadministrator

@@ -6,6 +6,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.config_utils import get_app_conf
+from utils.runtime_lookup_data import get_merged_applications
 
 
 def _require_non_empty(value: Any, name: str) -> str:
@@ -62,7 +63,12 @@ class LookupModule(LookupBase):
             return []
 
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
-        applications = kwargs.get("applications", vars_.get("applications"))
+        applications = kwargs.get("applications")
+        if applications is None:
+            applications = get_merged_applications(
+                variables=vars_,
+                templar=self._templar,
+            )
         if not isinstance(applications, dict):
             raise AnsibleError(
                 "service_should_load: required variable 'applications' must be a mapping"

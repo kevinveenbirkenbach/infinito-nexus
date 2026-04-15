@@ -60,7 +60,7 @@ discourse_settings:
   #  value: true
   #- name: discourse_publish
   #  key: publish-failure-email
-  #  value: "{{ users.administrator.email }}"
+  #  value: "{{ lookup('users', 'administrator').email }}"
   #- name: discourse_publish
   #  key: auto-track
   #  value: true

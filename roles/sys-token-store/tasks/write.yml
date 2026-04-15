@@ -49,24 +49,3 @@
   when: sys_token_store_users_merged != sys_token_store_users
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   become: true
-
-- name: "Inject token into users (runtime)"
-  ansible.builtin.set_fact:
-    users: >-
-      {{
-        (users | default({}))
-        | combine({
-            sys_token_store_user_key: (
-              (users | default({})).get(sys_token_store_user_key, {})
-              | combine({
-                  'tokens': (
-                    (users | default({})).get(sys_token_store_user_key, {}).get('tokens', {})
-                    | combine({ sys_token_store_app: sys_token_store_token_effective })
-                  )
-                }, recursive=True
-              )
-            )
-          }, recursive=True)
-      }}
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-

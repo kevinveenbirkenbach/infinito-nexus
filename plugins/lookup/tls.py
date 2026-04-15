@@ -23,6 +23,7 @@ from utils.tls_common import (
     uniq_preserve,
     want_get,
 )
+from utils.runtime_lookup_data import get_merged_applications
 
 
 class LookupModule(LookupBase):
@@ -43,7 +44,11 @@ class LookupModule(LookupBase):
         want = as_str(terms[1]).strip() if len(terms) == 2 else ""
 
         domains = require(variables, "domains", dict)
-        applications = require(variables, "applications", dict)
+        applications = get_merged_applications(
+            variables=variables,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
         enabled_default = require(variables, "TLS_ENABLED", (bool, int))
         mode_default = as_str(require(variables, "TLS_MODE", str))
 

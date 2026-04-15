@@ -20,12 +20,11 @@ SYSTEM_EMAIL_START_TLS:       false
 SYSTEM_EMAIL_SMTP:            true
 
 # Credentials
-_SYSTEM_EMAIL_USER:           "{{ users.get('no-reply', {}) }}"
 SYSTEM_EMAIL_FROM: >-
   {{
-    _SYSTEM_EMAIL_USER.get('email')
+    lookup('users', 'no-reply').get('email')
     if (SYSTEM_EMAIL_EXTERNAL | bool)
     else ('root@' ~ inventory_hostname ~ '.localdomain')
   }}
 SYSTEM_EMAIL_USERNAME:        "{{ SYSTEM_EMAIL_FROM }}"
-SYSTEM_EMAIL_PASSWORD:        "{{ _SYSTEM_EMAIL_USER.get('tokens',{}).get('web-app-mailu', '') }}"
+SYSTEM_EMAIL_PASSWORD:        "{{ lookup('users', 'no-reply').get('tokens', {}).get('web-app-mailu', '') }}"

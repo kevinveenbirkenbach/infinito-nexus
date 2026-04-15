@@ -4,7 +4,6 @@ import yaml
 import tempfile
 import shutil
 import unittest
-from unittest.mock import patch
 
 # Module under test
 import cli.validate.inventory as inventory_mod
@@ -12,15 +11,8 @@ import cli.validate.inventory as inventory_mod
 
 class TestValidateHostKeys(unittest.TestCase):
     def setUp(self):
-        # Create a temporary directory for devices.yml
         self.test_dir = tempfile.mkdtemp()
-        # Patch find_application_ids to a fixed set
         self.valid_ids = {"valid-service", "another-service"}
-        patcher = patch.object(
-            inventory_mod, "find_application_ids", return_value=self.valid_ids
-        )
-        self.mock_find_ids = patcher.start()
-        self.addCleanup(patcher.stop)
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)

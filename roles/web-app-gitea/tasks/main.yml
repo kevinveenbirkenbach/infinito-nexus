@@ -29,9 +29,9 @@
     container exec -i --user {{ GITEA_USER }} {{ GITEA_CONTAINER }} \
       /app/gitea/gitea admin user create \
         --admin \
-        --username "{{ users.administrator.username }}" \
-        --password {{ users.administrator.password | quote }} \
-        --email    "{{ users.administrator.email }}" \
+        --username "{{ lookup('users', 'administrator').username }}" \
+        --password {{ lookup('users', 'administrator').password | quote }} \
+        --email    "{{ lookup('users', 'administrator').email }}" \
         -c {{ GITEA_CONFIG }}
   args:
     chdir: "{{ lookup('container', application_id, 'directories.instance') }}"

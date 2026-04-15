@@ -8,6 +8,7 @@ from pathlib import Path
 import yaml  # requires PyYAML
 from plugins.filter.get_role import get_role
 from plugins.filter.get_app_conf import get_app_conf, ConfigEntryNotSetError
+from utils.runtime_lookup_data import get_application_defaults, get_user_defaults
 
 
 class TestGetAppConfPaths(unittest.TestCase):
@@ -16,24 +17,14 @@ class TestGetAppConfPaths(unittest.TestCase):
         # Setup paths
         root = Path(__file__).resolve().parents[2]
         cls.root = root
-        cls.app_config_path = root / "group_vars" / "all" / "05_applications.yml"
-        cls.user_config_path = root / "group_vars" / "all" / "04_users.yml"
-
-        # Load application defaults
-        with cls.app_config_path.open(encoding="utf-8") as f:
-            app_cfg = yaml.safe_load(f) or {}
-        cls.defaults_app = app_cfg.get("defaults_applications", {})
-
-        # Load default users
-        with cls.user_config_path.open(encoding="utf-8") as f:
-            user_cfg = yaml.safe_load(f) or {}
-        cls.defaults_users = user_cfg.get("default_users", {})
+        cls.application_defaults = get_application_defaults(roles_dir=root / "roles")
+        cls.user_defaults = get_user_defaults(roles_dir=root / "roles")
 
         # Preload role schemas: map application_id -> schema dict
         cls.role_schemas = {}
         cls.role_for_app = {}
         roles_path = str(root / "roles")
-        for app_id in cls.defaults_app:
+        for app_id in cls.application_defaults:
             try:
                 role = get_role(app_id, roles_path)
                 cls.role_for_app[app_id] = role
@@ -116,14 +107,19 @@ class TestGetAppConfPaths(unittest.TestCase):
             with self.subTest(app=app_id):
                 self.assertIn(
                     app_id,
-                    self.defaults_app,
-                    f"App '{app_id}' missing in defaults_applications",
+                    self.application_defaults,
+                    f"App '{app_id}' missing in application defaults",
                 )
                 for dotted, occs in paths.items():
                     with self.subTest(path=dotted):
                         try:
                             # will raise ConfigEntryNotSetError if defined in schema but not set
-                            get_app_conf(self.defaults_app, app_id, dotted, strict=True)
+                            get_app_conf(
+                                self.application_defaults,
+                                app_id,
+                                dotted,
+                                strict=True,
+                            )
                         except ConfigEntryNotSetError:
                             # defined in schema but not set: acceptable
                             continue
@@ -146,11 +142,11 @@ class TestGetAppConfPaths(unittest.TestCase):
                     continue
 
                 # Wildcard‑prefix: if the path ends with '.', treat it as a prefix
-                # and check for nested dicts in defaults_applications
+                # and check for nested dicts in application defaults
                 if dotted.endswith("."):
                     prefix = dotted.rstrip(".")
                     parts = prefix.split(".")
-                    for cfg in self.defaults_app.values():
+                    for cfg in self.application_defaults.values():
                         cur = cfg
                         ok = True
                         for p in parts:
@@ -165,11 +161,11 @@ class TestGetAppConfPaths(unittest.TestCase):
                     if found:
                         continue
 
-                # credentials.*: zuerst in defaults_applications prüfen, dann im Schema
+                # credentials.*: first inspect application defaults, then schema
                 if dotted.startswith("credentials."):
                     key = dotted.split(".", 1)[1]
-                    # 1) defaults_applications[app_id].credentials
-                    for aid, cfg in self.defaults_app.items():
+                    # 1) application_defaults[app_id].credentials
+                    for aid, cfg in self.application_defaults.items():
                         creds = cfg.get("credentials", {})
                         if isinstance(creds, dict) and key in creds:
                             found = True
@@ -188,21 +184,21 @@ class TestGetAppConfPaths(unittest.TestCase):
                 if dotted.startswith("images."):
                     if any(
                         isinstance(cfg.get("images"), dict)
-                        for cfg in self.defaults_app.values()
+                        for cfg in self.application_defaults.values()
                     ):
                         continue
-                # users.*: default_users fallback
+                # users.*: user defaults fallback
                 if dotted.startswith("users."):
                     subpath = dotted.split(".", 1)[1]
                     try:
                         # this will raise if the nested key doesn’t exist
-                        self.assertNested(self.defaults_users, subpath, "default_users")
+                        self.assertNested(self.user_defaults, subpath, "user_defaults")
                         continue
                     except AssertionError:
-                        # It's expected that subpath may not exist in default_users; continue.
+                        # It's expected that subpath may not exist in user defaults; continue.
                         pass
                 # application defaults
-                for aid, cfg in self.defaults_app.items():
+                for aid, cfg in self.application_defaults.items():
                     try:
                         self.assertNested(cfg, dotted, aid)
                         found = True
@@ -219,7 +215,7 @@ class TestGetAppConfPaths(unittest.TestCase):
 
     def _validate(self, app_id, dotted, occs):
         # try app defaults
-        cfg = self.defaults_app.get(app_id, {})
+        cfg = self.application_defaults.get(app_id, {})
         try:
             self.assertNested(cfg, dotted, app_id)
             return
@@ -228,12 +224,12 @@ class TestGetAppConfPaths(unittest.TestCase):
         # users.* fallback
         if dotted.startswith("users."):
             sub = dotted.split(".", 1)[1]
-            if sub in self.defaults_users:
+            if sub in self.user_defaults:
                 return
-        # credentials.* fallback: defaults_applications, dann Schema
+        # credentials.* fallback: application defaults, then schema
         if dotted.startswith("credentials."):
             key = dotted.split(".", 1)[1]
-            # 1) defaults_applications[app_id].credentials
+            # 1) application_defaults[app_id].credentials
             creds_cfg = cfg.get("credentials", {})
             if isinstance(creds_cfg, dict) and key in creds_cfg:
                 return

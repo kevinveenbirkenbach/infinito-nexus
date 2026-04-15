@@ -1,38 +1,3 @@
-- name: "Validate users.backup.authorized_keys is defined (SPOT-only, can be empty)"
-  ansible.builtin.fail:
-    msg: >-
-      Missing SSH key configuration for user 'backup'.
-      Define users.backup.authorized_keys (can be empty).
-  when: >-
-    users is not defined
-    or users.backup is not defined
-    or users.backup.authorized_keys is not defined
-
-- name: "Set users.backup.authorized_keys to wrapped lines (list)"
-  ansible.builtin.set_fact:
-    users: >-
-      {{
-        (users | default({}))
-        | combine(
-            {
-              'backup': (
-                (users.backup | default({}))
-                | combine(
-                    {
-                      'authorized_keys': (
-                        users.backup.authorized_keys
-                        | map('regex_replace', '^', 'command="' ~ USER_BACKUP_WRAPPER_DST ~ '" ')
-                        | list
-                      )
-                    },
-                    recursive=True
-                  )
-              )
-            },
-            recursive=True
-          )
-      }}
-
 - name: "Ensure backup home directory exists"
   ansible.builtin.file:
     path: "{{ USER_BACKUP_HOME }}"
@@ -53,4 +18,19 @@
   ansible.builtin.include_role:
     name: user
   vars:
-     user_key: "backup"
+    user_key: "backup"
+    user_config: >-
+      {{
+        lookup('users', 'backup', {})
+        | combine(
+            {
+              'authorized_keys': (
+                lookup('users', 'backup', {}).authorized_keys
+                | default([])
+                | map('regex_replace', '^', 'command="' ~ USER_BACKUP_WRAPPER_DST ~ '" ')
+                | list
+              )
+            },
+            recursive=True
+          )
+      }}

@@ -23,6 +23,6 @@ BASEROW_MANAGE_PY:             "/baserow/backend/src/baserow/manage.py"
 BASEROW_SERVICE_NAME:          "application"
 
 # Optional bootstrap admin user (Django superuser)
-BASEROW_BOOTSTRAP_ADMIN_USERNAME: "{{ users.administrator.username }}"
-BASEROW_BOOTSTRAP_ADMIN_EMAIL:    "{{ users.administrator.email }}"
-BASEROW_BOOTSTRAP_ADMIN_PASSWORD: "{{ users.administrator.password }}"
+BASEROW_BOOTSTRAP_ADMIN_USERNAME: "{{ lookup('users', 'administrator').username }}"
+BASEROW_BOOTSTRAP_ADMIN_EMAIL:    "{{ lookup('users', 'administrator').email }}"
+BASEROW_BOOTSTRAP_ADMIN_PASSWORD: "{{ lookup('users', 'administrator').password }}"

@@ -114,7 +114,7 @@ Decides whether a service is referenced inside an individual application's nginx
 Controlled by `inj_enabled`, computed in [`roles/sys-front-inj-all/tasks/main.yml`](../../../roles/sys-front-inj-all/tasks/main.yml):
 
 ```yaml
-inj_enabled: "{{ applications | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
+inj_enabled: "{{ lookup('applications') | inj_enabled(application_id, SRV_WEB_INJ_COMP_FEATURES_ALL) }}"
 ```
 
 The `inj_enabled` filter ([`roles/sys-front-inj-all/filter_plugins/inj_enabled.py`](../../../roles/sys-front-inj-all/filter_plugins/inj_enabled.py))
@@ -210,7 +210,7 @@ query('service_should_load', service_id, application_id=application_id, service_
 File: [`roles/sys-front-inj-all/filter_plugins/inj_enabled.py`](../../../roles/sys-front-inj-all/filter_plugins/inj_enabled.py)
 
 ```yaml
-applications | inj_enabled(application_id, feature_list)
+lookup('applications') | inj_enabled(application_id, feature_list)
 ```
 
 - Reads `compose.services.<feature>.enabled` for the current `application_id`

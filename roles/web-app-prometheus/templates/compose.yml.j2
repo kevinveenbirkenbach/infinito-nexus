@@ -15,5 +15,5 @@
 
 {% include 'roles/sys-svc-container/templates/networks.yml.j2' %}
 
-{{ applications | compose_volumes(application_id, extra_volumes={'data': {'name': PROMETHEUS_VOLUME_DATA}}) }}
+{{ lookup('applications') | compose_volumes(application_id, extra_volumes={'data': {'name': PROMETHEUS_VOLUME_DATA}}) }}
 {% include 'roles/sys-svc-compose/templates/networks.yml.j2' %}

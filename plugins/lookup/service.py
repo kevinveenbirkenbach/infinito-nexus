@@ -6,6 +6,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.config_utils import get_app_conf
+from utils.runtime_lookup_data import get_merged_applications
 
 
 def _get_service_flag(
@@ -218,7 +219,13 @@ class LookupModule(LookupBase):
 
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = kwargs.get("applications", vars_.get("applications"))
+        applications = kwargs.get("applications")
+        if applications is None:
+            applications = get_merged_applications(
+                variables=vars_,
+                roles_dir=kwargs.get("roles_dir"),
+                templar=getattr(self, "_templar", None),
+            )
         if not isinstance(applications, dict):
             raise AnsibleError(
                 "service: required variable 'applications' must be a mapping"

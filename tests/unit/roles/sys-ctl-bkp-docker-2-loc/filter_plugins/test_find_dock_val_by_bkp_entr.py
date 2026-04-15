@@ -62,39 +62,28 @@ class TestFindDockValByBkpEntr(unittest.TestCase):
         }
 
     def test_finds_services_with_enabled_backup_name(self):
-        # Sucht alle service-namen, wo backup.enabled truthy ist
+        # All service names where backup.enabled is truthy (sorted)
         result = find_dock_val_by_bkp_entr(self.applications, "enabled", "name")
-        self.assertIn("svc1", result)
-        self.assertIn("svcA", result)
-        self.assertNotIn("svc2", result)
-        self.assertNotIn("svc3", result)
-        self.assertEqual(set(result), {"svc1", "svcA"})
+        self.assertEqual(result, ["svc1", "svcA"])
 
     def test_finds_services_with_enabled_backup_image(self):
-        # Sucht alle image, wo backup.enabled truthy ist
+        # All images where backup.enabled is truthy (sorted)
         result = find_dock_val_by_bkp_entr(self.applications, "enabled", "image")
-        self.assertIn("nginx:latest", result)
-        self.assertIn("alpine:latest", result)
-        self.assertNotIn("redis:alpine", result)
-        self.assertNotIn("postgres:alpine", result)
-        self.assertEqual(set(result), {"nginx:latest", "alpine:latest"})
+        self.assertEqual(result, ["alpine:latest", "nginx:latest"])
 
     def test_finds_services_with_enabled_backup_custom_field(self):
-        # Sucht alle custom_field, wo backup.enabled truthy ist
+        # All custom_field values where backup.enabled is truthy
         result = find_dock_val_by_bkp_entr(self.applications, "enabled", "custom_field")
-        self.assertIn("foo", result)
-        # svcA hat kein custom_field -> sollte nicht im Resultat sein
+        # svcA has no custom_field -> must not appear in the result
         self.assertEqual(result, ["foo"])
 
     def test_finds_other_backup_keys(self):
-        # Sucht nach services, wo backup.mode gesetzt ist
+        # Services where backup.mode is set (sorted)
         result = find_dock_val_by_bkp_entr(self.applications, "mode", "name")
-        self.assertIn("svc1", result)
-        self.assertIn("svcA", result)
-        self.assertEqual(set(result), {"svc1", "svcA"})
+        self.assertEqual(result, ["svc1", "svcA"])
 
     def test_returns_empty_list_when_no_match(self):
-        # Sucht nach services, wo backup.xyz nicht gesetzt ist
+        # Services where backup.xyz is not set
         result = find_dock_val_by_bkp_entr(self.applications, "doesnotexist", "name")
         self.assertEqual(result, [])
 
@@ -109,13 +98,13 @@ class TestFindDockValByBkpEntr(unittest.TestCase):
             find_dock_val_by_bkp_entr([], "enabled", "name")
 
     def test_works_with_missing_field(self):
-        # mapped_entry fehlt -> kein Eintrag im Ergebnis
+        # mapped_entry missing -> no entry in result
         apps = {"a": {"compose": {"services": {"x": {"backup": {"enabled": True}}}}}}
         result = find_dock_val_by_bkp_entr(apps, "enabled", "foo")
         self.assertEqual(result, [])
 
     def test_works_with_multiple_matches(self):
-        # Zwei Treffer, beide mit enabled, mit custom Rückgabefeld
+        # Two matches, both with enabled, using a custom return field
         apps = {
             "a": {
                 "compose": {
@@ -127,7 +116,23 @@ class TestFindDockValByBkpEntr(unittest.TestCase):
             }
         }
         result = find_dock_val_by_bkp_entr(apps, "enabled", "any")
-        self.assertEqual(set(result), {"n1", "n2"})
+        self.assertEqual(result, ["n1", "n2"])
+
+    def test_result_is_sorted(self):
+        # Results must be sorted lexicographically
+        apps = {
+            "a": {
+                "compose": {
+                    "services": {
+                        "x": {"backup": {"enabled": True}, "name": "zeta"},
+                        "y": {"backup": {"enabled": True}, "name": "alpha"},
+                        "z": {"backup": {"enabled": True}, "name": "mike"},
+                    }
+                }
+            }
+        }
+        result = find_dock_val_by_bkp_entr(apps, "enabled", "name")
+        self.assertEqual(result, ["alpha", "mike", "zeta"])
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 #!/bin/bash
 {
-  echo "To: {{ users.administrator.email if (SYSTEM_EMAIL_EXTERNAL | bool) else users.administrator.username }}"
+  echo "To: {{ lookup('users', 'administrator').email if (SYSTEM_EMAIL_EXTERNAL | bool) else lookup('users', 'administrator').username }}"
   echo "Subject: $(hostname) is alive"
   echo
   echo "Host $(hostname) reports at $(date): I'm alive."

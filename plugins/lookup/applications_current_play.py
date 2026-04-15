@@ -8,6 +8,7 @@ from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
+from utils.runtime_lookup_data import get_merged_applications
 
 
 class LookupModule(LookupBase):
@@ -24,7 +25,13 @@ class LookupModule(LookupBase):
     ) -> List[Dict[str, Any]]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = kwargs.get("applications", vars_.get("applications"))
+        applications = kwargs.get("applications")
+        if applications is None:
+            applications = get_merged_applications(
+                variables=vars_,
+                roles_dir=kwargs.get("roles_dir"),
+                templar=getattr(self, "_templar", None),
+            )
         group_names = kwargs.get("group_names", vars_.get("group_names", []))
 
         project_root = self._get_project_root()

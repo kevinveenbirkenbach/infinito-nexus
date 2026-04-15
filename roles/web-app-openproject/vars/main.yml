@@ -17,9 +17,9 @@ OPENPROJECT_PROXY_CONTAINER:    "{{ lookup('config', application_id, 'compose.se
 OPENPROJECT_WORKER_CONTAINER:   "{{ lookup('config', application_id, 'compose.services.worker.name') }}"
 
 ## Admin
-OPENPROJECT_ADMINISTRATOR_USERNAME: "{{ users.administrator.username }}"
-OPENPROJECT_ADMINISTRATOR_PASSWORD: "{{ users.administrator.password }}"
-OPENPROJECT_ADMINISTRATOR_EMAIL:    "{{ users.administrator.email }}"
+OPENPROJECT_ADMINISTRATOR_USERNAME: "{{ lookup('users', 'administrator').username }}"
+OPENPROJECT_ADMINISTRATOR_PASSWORD: "{{ lookup('users', 'administrator').password }}"
+OPENPROJECT_ADMINISTRATOR_EMAIL:    "{{ lookup('users', 'administrator').email }}"
 
 # Open Project Cache
 OPENPROJECT_CACHE_CONTAINER:    "{{ lookup('config', application_id, 'compose.services.cache.name') }}"
@@ -37,8 +37,8 @@ OPENPROJECT_RAILS_SETTINGS:
   email_delivery_method:      "smtp"
   smtp_address:               "{{ SYSTEM_EMAIL_HOST }}"
   smtp_domain:                "{{ SYSTEM_EMAIL_DOMAIN }}"
-  smtp_user_name:             "{{ users['no-reply'].email }}"
-  smtp_password:              "{{ users['no-reply'].tokens['web-app-mailu'] }}"
+  smtp_user_name:             "{{ lookup('users', 'no-reply').email }}"
+  smtp_password:              "{{ lookup('users', 'no-reply').tokens['web-app-mailu'] }}"
   smtp_ssl:                   false
 
 ## LDAP

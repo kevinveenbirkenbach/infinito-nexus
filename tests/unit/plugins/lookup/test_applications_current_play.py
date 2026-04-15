@@ -191,19 +191,18 @@ class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):
             applications=apps,
             meta_deps_map={"web-svc-legal": ["web-svc-html"]},
         )
-        self.assertEqual(result["web-svc-legal"], {"some_key": "some_value"})
-        self.assertEqual(result["web-svc-html"], {"other_key": 42})
+        self.assertEqual(result["web-svc-legal"]["some_key"], "some_value")
+        self.assertEqual(result["web-svc-html"]["other_key"], 42)
 
     # ------------------------------------------------------------------
     # Input validation
     # ------------------------------------------------------------------
 
-    def test_missing_applications_raises(self):
+    def test_missing_applications_falls_back_to_lookup(self):
         lm = LookupModule()
         lm._load_service_registry = lambda p: {}
         lm._meta_deps = lambda r, d: []
-        with self.assertRaises(Exception):
-            lm.run([], variables={"group_names": []})
+        self.assertEqual(lm.run([], variables={"group_names": []})[0], {})
 
     def test_invalid_group_names_raises(self):
         lm = LookupModule()

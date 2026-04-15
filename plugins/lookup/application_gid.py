@@ -3,7 +3,6 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 import os
-import yaml
 
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
@@ -18,22 +17,15 @@ class LookupModule(LookupBase):
         if not os.path.isdir(roles_dir):
             raise AnsibleError(f"Roles directory '{roles_dir}' not found")
 
-        matched_roles = []
-
-        for root, dirs, files in os.walk(roles_dir):
-            if os.path.basename(root) == "vars" and "main.yml" in files:
-                vars_path = os.path.join(root, "main.yml")
-                try:
-                    with open(vars_path, "r") as f:
-                        data = yaml.safe_load(f) or {}
-                        app_id = data.get("application_id")
-                        if app_id:
-                            matched_roles.append((app_id, vars_path))
-                except Exception as e:
-                    raise AnsibleError(f"Error parsing {vars_path}: {e}")
-
-        # sort alphabetically by application_id
-        sorted_ids = sorted(app_id for app_id, _ in matched_roles)
+        sorted_ids = sorted(
+            os.path.basename(os.path.dirname(os.path.dirname(path)))
+            for path in (
+                os.path.join(root, file_name)
+                for root, _dirs, files in os.walk(roles_dir)
+                for file_name in files
+                if file_name == "main.yml" and os.path.basename(root) == "config"
+            )
+        )
 
         try:
             index = sorted_ids.index(application_id)

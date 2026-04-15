@@ -17,15 +17,15 @@ _SERVICE_REGISTRY = {
 
 
 def _run(terms, applications, group_names, service_registry=None):
+    registry = service_registry if service_registry is not None else _SERVICE_REGISTRY
     return LookupModule().run(
         terms,
         variables={
-            "applications": applications,
             "group_names": group_names,
-            "SERVICE_REGISTRY": (
-                service_registry if service_registry is not None else _SERVICE_REGISTRY
-            ),
+            "SERVICE_REGISTRY": registry,
         },
+        applications=applications,
+        service_registry=registry,
     )
 
 
@@ -303,27 +303,6 @@ class TestServiceCycleGuard(unittest.TestCase):
 
 
 class TestServiceErrors(unittest.TestCase):
-    def test_raises_when_applications_missing(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run(
-                ["matomo"],
-                variables={
-                    "group_names": ["web-app-foo"],
-                    "SERVICE_REGISTRY": _SERVICE_REGISTRY,
-                },
-            )
-
-    def test_raises_when_applications_not_mapping(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run(
-                ["matomo"],
-                variables={
-                    "applications": ["not", "a", "dict"],
-                    "group_names": [],
-                    "SERVICE_REGISTRY": _SERVICE_REGISTRY,
-                },
-            )
-
     def test_raises_when_group_names_not_list(self):
         with self.assertRaises(AnsibleError):
             LookupModule().run(

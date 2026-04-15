@@ -7,6 +7,7 @@ import re
 from typing import Any, Optional
 
 from ansible.errors import AnsibleError
+from utils.manager.value_generator import ValueGenerator
 
 # Match the "lookup('env','NAME')" head (without caring about trailing filters)
 _RE_LOOKUP_ENV_HEAD = re.compile(
@@ -17,6 +18,8 @@ _RE_LOOKUP_ENV_HEAD = re.compile(
 _RE_ANY_LOOKUP = re.compile(r"""\blookup\s*\(""", re.IGNORECASE)
 
 _RE_VARPATH = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)*$")
+_RE_INT_LITERAL = re.compile(r"^-?\d+$")
+_RE_FLOAT_LITERAL = re.compile(r"^-?\d+\.\d+$")
 _RE_JINJA_BLOCK = re.compile(r"\{\{\s*(.*?)\s*\}\}", re.DOTALL)
 
 
@@ -132,6 +135,13 @@ def _apply_filter(value: Any, filt: str) -> Any:
         parts = [str(x) for x in value if str(x) != ""]
         return posixpath.join(*parts) if parts else ""
 
+    if f == "strong_password":
+        try:
+            length = int(value)
+        except (TypeError, ValueError):
+            length = 32
+        return ValueGenerator().generate_strong_password(length)
+
     # default('x', true) -> treat None/"" as default
     if f.startswith("default(") and f.endswith(")"):
         inner = f[len("default(") : -1].strip()
@@ -180,6 +190,10 @@ def _fallback_eval_expr(expr: str, variables: dict) -> str:
         # Allow minimal list literals (needed for patterns like: [ DIR_BIN, 'x' ] | path_join)
         if head.startswith("[") and head.endswith("]"):
             val = _eval_list_literal(head, variables)
+        elif _RE_INT_LITERAL.match(head):
+            val = int(head)
+        elif _RE_FLOAT_LITERAL.match(head):
+            val = float(head)
         else:
             if not _RE_VARPATH.match(head):
                 raise ValueError(f"unsupported expression: {head}")

@@ -13,28 +13,66 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Create API token for '{{ mailu_user_key }};{{ mailu_user_name }}' if no local token defined"
-  command: >-
-    {{ BIN_COMPOSE }} exec -T admin
-    curl -sS -f -X POST {{ MAILU_API_SERVICE_BASE_URL }}/token
-      -H "Authorization: Bearer {{ MAILU_API_TOKEN }}"
-      -H "Content-Type: application/json"
-      -d '{{ {
+  ansible.builtin.command:
+    argv:
+      - "{{ BIN_COMPOSE }}"
+      - exec
+      - -T
+      - admin
+      - curl
+      - -sS
+      - -f
+      - -o
+      - "/tmp/mailu-token-{{ mailu_user_key }}.json"
+      - -X
+      - POST
+      - "{{ MAILU_API_SERVICE_BASE_URL }}/token"
+      - -H
+      - "Authorization: Bearer {{ MAILU_API_TOKEN }}"
+      - -H
+      - "Content-Type: application/json"
+      - -d
+      - >-
+        {{
+          {
             "comment": mailu_token_name,
-            "email": users[mailu_user_key].email,
+            "email": lookup("users", mailu_user_key).email,
             "ip": mailu_token_ip
-          } | to_json }}'
+          } | to_json
+        }}
   args:
     chdir: "{{ MAILU_DOCKER_DIR }}"
-  register: mailu_token_creation
-  # If curl sees 4xx/5xx it returns non-zero due to -f → fail the task.
-  failed_when:
-    - mailu_token_creation.rc != 0
-    # Fallback: if some gateway returns 200 but embeds an error JSON.
-    - mailu_token_creation.rc == 0 and
-      (mailu_token_creation.stdout is search('"code"\\s*:\\s*4\\d\\d') or
-      mailu_token_creation.stdout is search('cannot be found'))
-  # Only mark changed when a token is actually present in the JSON.
-  changed_when: mailu_token_creation.stdout is search('"token"\\s*:')
+  register: mailu_token_creation_request
+  failed_when: mailu_token_creation_request.rc != 0
+  changed_when: mailu_token_creation_request.rc == 0
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Read created API token response for '{{ mailu_user_key }};{{ mailu_user_name }}'"
+  ansible.builtin.command:
+    argv:
+      - "{{ BIN_COMPOSE }}"
+      - exec
+      - -T
+      - admin
+      - cat
+      - "/tmp/mailu-token-{{ mailu_user_key }}.json"
+  args:
+    chdir: "{{ MAILU_DOCKER_DIR }}"
+  register: mailu_token_creation_response
+  changed_when: false
+  failed_when: mailu_token_creation_response.stdout | trim == ""
+  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Extract created API token for '{{ mailu_user_key }};{{ mailu_user_name }}'"
+  ansible.builtin.set_fact:
+    mailu_created_token: >-
+      {{
+        (
+          mailu_token_creation_response.stdout
+          | from_json
+        ).token | default('')
+      }}
+  failed_when: mailu_created_token | trim == ""
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
 
 - name: "Persist + inject Mailu API token via sys-token-store"
@@ -44,5 +82,5 @@
   vars:
     sys_token_store_user_key: "{{ mailu_user_key }}"
     sys_token_store_app: "{{ application_id }}"
-    sys_token_store_token: "{{ (mailu_token_creation.stdout | from_json).token }}"
+    sys_token_store_token: "{{ mailu_created_token }}"
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

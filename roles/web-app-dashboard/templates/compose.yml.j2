@@ -4,7 +4,7 @@
     image: {{ DASHBOARD_IMAGE }}:{{ DASHBOARD_VERSION }}
     container_name: {{ DASHBOARD_CONTAINER }}
     ports:
-      - {{ DOCKER_BIND_HOST }}:{{ ports.localhost.http[application_id] }}:{{ container_port }}
+      - {{ DOCKER_BIND_HOST }}:{{ http_port }}:{{ container_port }}
     volumes:
       - "{{ DASHBOARD_CONFIG_YML_DEST }}:{{ DASHBOARD_CONFIG_YML_DOCKER_DEST }}:ro"
       - "{{ DASHBOARD_SIMPLEICONS_STATIC_DIR_HOST }}:{{ DASHBOARD_SIMPLEICONS_STATIC_DIR_CONTAINER }}:ro"

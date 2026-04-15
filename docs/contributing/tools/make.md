@@ -52,10 +52,10 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
-| Setup | `make setup` | Runs the repository setup step after generating `.dockerignore`. | Use this when you want the baseline project setup without installing the full dev stack. |
+| Setup | `make setup` | Runs the repository setup step after generating `.dockerignore`, currently refreshing generated role include files under `tasks/groups/`. | Use this when you want the baseline project setup without installing the full dev stack. |
 | Setup development | `make mark-development` | Creates the development setup marker. | Use this when you want to prepare a development-specific setup state. |
 | Bootstrap | `make bootstrap` | Installs dependencies and prepares the project. | Use this on a fresh machine or a new checkout. |
-| Setup clean | `make setup-clean` | Cleans ignored files and then runs setup. | Use this when you want a clean setup pass. |
+| Setup clean | `make setup-clean` | Cleans ignored files and then runs setup. | Use this when you want a clean setup pass, including regenerated role include files. |
 | Mark scripts executable | `make chmod-scripts` | Marks all `.sh` files under `scripts/` as executable. | Use this after cloning or when a script loses its executable bit. |
 | List roles | `make list` | Prints the repository role list. | Use this when you need the current role inventory. |
 | Tree view | `make tree` | Prints the repository tree. | Use this when you want a compact structural overview. |

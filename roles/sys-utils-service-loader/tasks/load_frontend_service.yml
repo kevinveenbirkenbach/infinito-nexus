@@ -1,7 +1,24 @@
+- name: "Resolve {{ service_key }} probe URL"
+  ansible.builtin.set_fact:
+    _frontend_service_probe_url: >-
+      {{
+        (
+          ('https:' ~ _frontend_service_config_url)
+          if _frontend_service_config_url.startswith('//')
+          else _frontend_service_config_url
+        )
+        if (_frontend_service_config_url | length > 0)
+        else lookup('tls', service_role, 'url.base')
+      }}
+  vars:
+    _frontend_service_config_url: "{{ lookup('config', service_role, 'url', '') | string | trim }}"
+  changed_when: false
+
 - name: "Check if {{ service_key }} endpoint is reachable"
   uri_probe:
-    url: "{{ lookup('tls', service_role, 'url.base') }}"
+    url: "{{ _frontend_service_probe_url }}"
     validate_certs: yes
+    follow_redirects: none
     status_code: 200
   register: _frontend_service_reachability
   failed_when: false

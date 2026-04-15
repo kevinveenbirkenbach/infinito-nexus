@@ -122,9 +122,19 @@
 - name: "Flush compose handlers"
   meta: flush_handlers
 
-- name: Refresh dashboard cards after Simple Icons becomes reachable
-  include_tasks: "04_simpleicons_refresh.yml"
+- name: "Ensure Simple Icons is reachable and refresh dashboard cards"
   when: DASHBOARD_SIMPLEICONS_ENABLED | bool
+  block:
+    - name: Ensure shared Simple Icons service is loaded before refresh
+      include_tasks: utils/load_app.yml
+      vars:
+        load_app_id: web-svc-simpleicons
+
+    - name: Flush handlers after loading shared Simple Icons service
+      meta: flush_handlers
+
+    - name: Refresh dashboard cards after Simple Icons becomes reachable
+      include_tasks: "04_simpleicons_refresh.yml"
 
 - name: Wait for Dashboard HTTP endpoint (required so all logos can be downloaded during initialization)
   uri_retry:

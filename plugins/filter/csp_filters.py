@@ -49,7 +49,29 @@ class FilterModule(object):
     def filters(self):
         return {
             "build_csp_header": self.build_csp_header,
+            "add_csp_hash": self.add_csp_hash,
         }
+
+    @staticmethod
+    def add_csp_hash(current, application_id, directive, snippet):
+        """
+        Return a new ``webserver_csp_hashes_extra_by_app``-shaped dict with
+        ``snippet`` appended (deduplicated) to ``<application_id>.<directive>``.
+
+        Replaces the verbose inline ``combine(..., recursive=True)`` pattern
+        previously duplicated across sys-front-inj-* roles.
+        """
+        try:
+            result = dict(current or {})
+            app_entry = dict(result.get(application_id, {}) or {})
+            existing = list(app_entry.get(directive, []) or [])
+            if snippet not in existing:
+                existing.append(snippet)
+            app_entry[directive] = existing
+            result[application_id] = app_entry
+            return result
+        except Exception as exc:
+            raise AnsibleFilterError(f"add_csp_hash failed: {exc}")
 
     # -------------------------------
     # Helpers
@@ -148,6 +170,15 @@ class FilterModule(object):
         except Exception as exc:
             raise AnsibleFilterError(f"get_csp_hash failed: {exc}")
 
+    @staticmethod
+    def get_extra_values(extra_mapping, directive):
+        values = (extra_mapping or {}).get(directive, [])
+        if isinstance(values, list):
+            return values
+        if values:
+            return [values]
+        return []
+
     # -------------------------------
     # Main builder
     # -------------------------------
@@ -158,6 +189,8 @@ class FilterModule(object):
         application_id,
         domains,
         web_protocol,
+        extra_whitelist=None,
+        extra_hashes=None,
     ):
         """
         Builds the Content-Security-Policy header value dynamically based on application settings.
@@ -184,6 +217,8 @@ class FilterModule(object):
               * frame-ancestors extended for dashboard/logout/keycloak if enabled
         """
         try:
+            extra_whitelist = extra_whitelist or {}
+            extra_hashes = extra_hashes or {}
             directives = [
                 "default-src",
                 "connect-src",
@@ -281,12 +316,15 @@ class FilterModule(object):
                 tokens += self.get_csp_whitelist(
                     applications, application_id, directive
                 )
+                tokens += self.get_extra_values(extra_whitelist, directive)
 
                 # Inline hashes (only if this directive does NOT include 'unsafe-inline')
                 if "'unsafe-inline'" not in tokens:
                     for snippet in self.get_csp_inline_content(
                         applications, application_id, directive
                     ):
+                        tokens.append(self.get_csp_hash(snippet))
+                    for snippet in self.get_extra_values(extra_hashes, directive):
                         tokens.append(self.get_csp_hash(snippet))
 
                 tokens_by_dir[directive] = _dedup_preserve(tokens)

@@ -72,7 +72,7 @@
       {{ ESPOCRM_SERVICE }}:
         condition: service_healthy
 
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'data': {'name': ESPOCRM_DATA_VOLUME}}

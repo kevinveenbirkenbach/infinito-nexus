@@ -63,6 +63,19 @@ class TestFrontendServiceSpot(unittest.TestCase):
         )
         self.assertNotIn("01_services.yml", content)
 
+    def test_front_proxy_falls_back_to_canonical_port_and_domain(self):
+        content = pathlib.Path("roles/sys-stk-front-proxy/tasks/main.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "default((ports.localhost.http | default({})).get(application_id))",
+            content,
+        )
+        self.assertIn(
+            "domain | default(lookup('domain', application_id))",
+            content,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

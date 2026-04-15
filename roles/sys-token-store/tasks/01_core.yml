@@ -21,9 +21,4 @@
 - name: "Load existing store"
   ansible.builtin.import_tasks: 02_load.yml
 
-- name: "Hydrate users tokens from store (users wins if non-empty)"
-  ansible.builtin.set_fact:
-    users: "{{ users | default({}) | hydrate_users_tokens(sys_token_store_users | default({})) }}"
-  no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
-
 - include_tasks: utils/once/flag.yml

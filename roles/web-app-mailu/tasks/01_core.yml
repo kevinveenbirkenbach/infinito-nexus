@@ -63,7 +63,7 @@
     mailu_token_ip:       "{{ user_item.value.ip | default(networks.internet.ip4) }}"
     mailu_token_name:     "{{ SOFTWARE_NAME ~ ' Token for ' ~ user_item.value.username }}"
     mailu_user_roles:     "{{ user_item.value.roles | default([]) }}"
-  loop: "{{ users | dict2items }}"
+  loop: "{{ lookup('users') | dict2items }}"
   loop_control:
     loop_var: user_item
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"

@@ -1,27 +1,19 @@
 import unittest
-import yaml
-import subprocess
 from pathlib import Path
 from collections import defaultdict
+
+from utils.runtime_lookup_data import get_application_defaults
 
 
 class TestDomainUniqueness(unittest.TestCase):
     def test_no_duplicate_domains(self):
         """
-        Load the applications YAML (generating it via `make build` if missing),
+        Build application defaults directly from roles,
         collect all entries under domains.canonical and domains.aliases across all applications,
         and assert that no domain appears more than once.
         """
         repo_root = Path(__file__).resolve().parents[2]
-        yaml_file = repo_root / "group_vars" / "all" / "05_applications.yml"
-
-        # Generate the file if it doesn't exist
-        if not yaml_file.exists():
-            subprocess.run(["make", "build"], cwd=repo_root, check=True)
-
-        # Load the applications configuration
-        cfg = yaml.safe_load(yaml_file.read_text(encoding="utf-8")) or {}
-        apps = cfg.get("defaults_applications", {})
+        apps = get_application_defaults(roles_dir=repo_root / "roles")
 
         domain_to_apps = defaultdict(set)
 

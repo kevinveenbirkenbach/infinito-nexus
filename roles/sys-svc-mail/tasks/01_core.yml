@@ -28,7 +28,7 @@
           )
           or
           (
-            (users['no-reply'].tokens | default({})).get('web-app-mailu', '') | length == 0
+            (lookup('users', 'no-reply').tokens | default({})).get('web-app-mailu', '') | length == 0
           )
   vars:
     mailu_valid_status_codes: "{{ lookup('config','web-app-mailu', 'server.status_codes.default') }}"

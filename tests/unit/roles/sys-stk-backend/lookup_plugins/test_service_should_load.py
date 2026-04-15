@@ -94,12 +94,17 @@ class TestServiceShouldLoadLookup(unittest.TestCase):
                 },
             )
 
-    def test_raises_when_applications_missing(self):
-        with self.assertRaises(AnsibleError):
-            self.mod.LookupModule().run(
+    def test_resolves_via_lookup_when_applications_missing(self):
+        original = self.mod.get_merged_applications
+        self.mod.get_merged_applications = lambda **kwargs: self.applications
+        try:
+            result = self.mod.LookupModule().run(
                 ["svc-db-openldap"],
                 variables={"application_id": "web-app-test", "service_name": "ldap"},
             )
+        finally:
+            self.mod.get_merged_applications = original
+        self.assertEqual(result, [True])
 
 
 if __name__ == "__main__":

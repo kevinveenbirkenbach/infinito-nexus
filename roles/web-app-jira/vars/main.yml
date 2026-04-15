@@ -35,5 +35,5 @@ JIRA_DATA_VOLUME:             "{{ lookup('config', application_id, 'compose.volu
 JIRA_CUSTOM_IMAGE:            "{{ entity_name }}_custom:{{ JIRA_VERSION }}"
 
 ## Performance (derive from container limits in config/main.yml)
-JIRA_JVM_MAX:                 "{{ applications | jvm_max_mb(application_id) }}m"
-JIRA_JVM_MIN:                 "{{ applications | jvm_min_mb(application_id) }}m"
+JIRA_JVM_MAX:                 "{{ lookup('applications') | jvm_max_mb(application_id) }}m"
+JIRA_JVM_MIN:                 "{{ lookup('applications') | jvm_min_mb(application_id) }}m"

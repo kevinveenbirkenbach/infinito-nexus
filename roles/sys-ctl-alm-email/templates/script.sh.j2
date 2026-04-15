@@ -27,8 +27,8 @@ mail_tmp="$(mktemp)"
 trap 'rm -f "$mail_tmp"' EXIT
 
 cat > "$mail_tmp" <<ERRMAIL
-To: {{ users.administrator.email }}
-From: systemd <{{ users['no-reply'].email }}>
+To: {{ lookup('users', 'administrator').email }}
+From: systemd <{{ lookup('users', 'no-reply').email }}>
 Subject: ${friendly}
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain; charset=UTF-8

@@ -23,13 +23,13 @@
       - exec
       - -T
       - -e
-      - "TARGET_NAME={{ users.administrator.username | upper }}"
+      - "TARGET_NAME={{ lookup('users', 'administrator').username | upper }}"
       - -e
-      - "NEW_NAME={{ users.administrator.username | upper }}"
+      - "NEW_NAME={{ lookup('users', 'administrator').username | upper }}"
       - -e
-      - "NEW_EMAIL={{ users.administrator.email }}"
+      - "NEW_EMAIL={{ lookup('users', 'administrator').email }}"
       - -e
-      - "NEW_PASSWORD_B64={{ users.administrator.password | b64encode }}"
+      - "NEW_PASSWORD_B64={{ lookup('users', 'administrator').password | b64encode }}"
       - greenlight
       - bash
       - -lc

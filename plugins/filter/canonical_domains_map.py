@@ -1,6 +1,7 @@
 from ansible.errors import AnsibleFilterError
 import os
 from utils.entity_name_utils import get_entity_name
+from utils.domains.list import render_domain_value
 from utils.roles.dependency_resolver import RoleDependencyResolver
 from typing import Iterable
 
@@ -72,7 +73,11 @@ class FilterModule(object):
                 self._add_default_domain(app_id, domain_primary, seen_domains, result)
                 continue
 
-            canonical_domains = domains_cfg["canonical"]
+            canonical_domains = render_domain_value(
+                domains_cfg["canonical"],
+                {"DOMAIN_PRIMARY": domain_primary},
+                f"{app_id}.server.domains.canonical",
+            )
             self._process_canonical_domains(
                 app_id, canonical_domains, seen_domains, result
             )

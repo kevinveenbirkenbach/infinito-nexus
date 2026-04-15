@@ -70,7 +70,7 @@ compose:
     oauth2:
       origin:
         host:             "application"
-        port:             "<< defaults_applications[web-app-gitea].compose.services.gitea.port >>"
+        port:             "<< applications[web-app-gitea].compose.services.gitea.port >>"
       acl:
         blacklist:
           - "/user/login"

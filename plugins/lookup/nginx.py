@@ -28,7 +28,8 @@ from ansible.plugins.lookup import LookupBase
 from ansible.plugins.loader import lookup_loader
 
 from utils.config_utils import get_app_conf
-from utils.tls_common import as_str, require, want_get
+from utils.runtime_lookup_data import get_merged_applications
+from utils.tls_common import as_str, want_get
 
 
 def _join(*parts: Any) -> str:
@@ -95,7 +96,11 @@ class LookupModule(LookupBase):
 
         domain = as_str(terms[1]).strip() if len(terms) == 2 else ""
 
-        applications = require(variables, "applications", dict)
+        applications = get_merged_applications(
+            variables=variables,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
 
         proxy_app_id = as_str(kwargs.get("proxy_app_id", "svc-prx-openresty")).strip()
         if not proxy_app_id:

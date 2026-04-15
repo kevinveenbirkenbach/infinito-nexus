@@ -9,7 +9,7 @@
 - name: "Disable Matomo in inj_enabled for '{{ domain }}' — token not yet available"
   ansible.builtin.set_fact:
     inj_enabled: "{{ inj_enabled | combine({'matomo': false}) }}"
-  when: (users.administrator.tokens['web-app-matomo'] | default('') | string | trim) == ""
+  when: (lookup('users', 'administrator').tokens['web-app-matomo'] | default('') | string | trim) == ""
 
 - name: "Inject Matomo tracking for '{{ domain }}'"
   include_tasks: inject.yml

@@ -18,12 +18,6 @@ fi
 
 ROLES_DIR="./roles"
 
-APPLICATIONS_OUT="./group_vars/all/05_applications.yml"
-APPLICATIONS_SCRIPT="./cli/setup/applications/__main__.py"
-
-USERS_SCRIPT="./cli/setup/users/__main__.py"
-USERS_OUT="./group_vars/all/04_users.yml"
-
 INCLUDES_SCRIPT="./cli/build/role_include/__main__.py"
 INCLUDES_OUT_DIR="./tasks/groups"
 
@@ -55,8 +49,6 @@ require_cmd() {
 
 require_cmd "${PYTHON}"
 require_dir "${ROLES_DIR}"
-require_file "${APPLICATIONS_SCRIPT}"
-require_file "${USERS_SCRIPT}"
 require_file "${INCLUDES_SCRIPT}"
 
 # ------------------------------------------------------------
@@ -68,42 +60,6 @@ log_section() {
 	echo "$1"
 	echo "------------------------------------------------------------"
 }
-
-compute_reserved_usernames() {
-	find "${ROLES_DIR}" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' |
-		sed -E 's/.*-//' |
-		grep -E -x '[a-z0-9]+' |
-		sort -u |
-		paste -sd, -
-}
-
-# ------------------------------------------------------------
-# Reserved usernames
-# ------------------------------------------------------------
-log_section "👤 Reserved usernames"
-RESERVED_USERNAMES="$(compute_reserved_usernames)"
-echo "Reserved usernames: ${RESERVED_USERNAMES:-<none>}"
-
-# ------------------------------------------------------------
-# Users defaults
-# ------------------------------------------------------------
-log_section "👥 Generating users defaults → ${USERS_OUT}"
-"${PYTHON}" "${USERS_SCRIPT}" \
-	--roles-dir "${ROLES_DIR}" \
-	--output "${USERS_OUT}" \
-	--reserved-usernames "${RESERVED_USERNAMES}"
-
-echo "✅ Users defaults written to ${USERS_OUT}"
-
-# ------------------------------------------------------------
-# Applications defaults
-# ------------------------------------------------------------
-log_section "📦 Generating applications defaults → ${APPLICATIONS_OUT}"
-"${PYTHON}" "${APPLICATIONS_SCRIPT}" \
-	--roles-dir "${ROLES_DIR}" \
-	--output-file "${APPLICATIONS_OUT}"
-
-echo "✅ Applications defaults written to ${APPLICATIONS_OUT}"
 
 # ------------------------------------------------------------
 # Role include files

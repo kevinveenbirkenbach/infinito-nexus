@@ -1,13 +1,11 @@
-- name: Validate users.<user_key>.authorized_keys is a list when defined
+- name: Validate user authorized_keys is a list when defined
   ansible.builtin.fail:
     msg: >-
       Invalid SSH key configuration for user key '{{ user_key }}'.
-      If defined, users.{{ user_key }}.authorized_keys must be a LIST of SSH public keys.
+      If defined, lookup('users', '{{ user_key }}').authorized_keys must be a LIST of SSH public keys.
   when:
-    - users is defined
-    - users[user_key] is defined
-    - users[user_key].authorized_keys is defined
-    - users[user_key].authorized_keys is string or users[user_key].authorized_keys is not iterable
+    - user_config_effective.authorized_keys is defined
+    - user_config_effective.authorized_keys is string or user_config_effective.authorized_keys is not iterable
 
 - name: Ensure SSH directory exists for '{{ user_username }}'
   ansible.builtin.file:
@@ -17,16 +15,14 @@
     group: "{{ user_group }}"
     mode: "0700"
   when:
-    - users is defined
-    - users[user_key] is defined
-    - users[user_key].authorized_keys is defined
+    - user_config_effective.authorized_keys is defined
 
 - name: Write authorized_keys for '{{ user_username }}'
   ansible.builtin.copy:
     dest: "{{ user_home }}/.ssh/authorized_keys"
     content: |
       {{
-        users[user_key].authorized_keys
+        user_config_effective.authorized_keys
         | default([])
         | map('regex_replace', '\\\\n$', '')
         | map('regex_replace', '\\s+$', '')
@@ -36,6 +32,4 @@
     group: "{{ user_group }}"
     mode: "0600"
   when:
-    - users is defined
-    - users[user_key] is defined
-    - users[user_key].authorized_keys is defined
+    - user_config_effective.authorized_keys is defined

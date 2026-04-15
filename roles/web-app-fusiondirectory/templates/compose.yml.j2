@@ -23,7 +23,7 @@
       - fusiondirectory_data:/assets/fusiondirectory
     restart: always
 
-{{ applications | compose_volumes(
+{{ lookup('applications') | compose_volumes(
     application_id,
     database_volume=lookup('database', application_id, 'volume'),
     extra_volumes={'fusiondirectory_data': {}}

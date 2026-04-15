@@ -6,12 +6,12 @@ and explains the conditions under which the skipped work will be completed on a 
 ## Matomo Token Not Yet Available ⚠️
 
 **Role:** [`roles/sys-front-inj-matomo`](../../../roles/sys-front-inj-matomo/)
-**Variable:** `users.administrator.tokens['web-app-matomo']`
+**Variable:** `lookup('users', 'administrator').tokens['web-app-matomo']`
 
 ### Cause 🔍
 
 The Matomo API token is generated during the Matomo bootstrap and persisted to disk by `sys-token-store`.
-It is loaded into the `users` runtime variable at play start.
+It is then resolved through `lookup('users')`, which hydrates tokens from the store at runtime.
 
 On the **first deployment**, or after a factory reset, the token does not yet exist because the bootstrap
 has not run yet. A second common cause is that [`roles/sys-utils-service-loader/tasks/load_frontend_service.yml`](../../../roles/sys-utils-service-loader/tasks/load_frontend_service.yml)
@@ -21,7 +21,7 @@ absent from the token store, so the variable arrives empty.
 
 ### Behaviour ⚙️
 
-When `users.administrator.tokens['web-app-matomo']` is empty, `sys-front-inj-matomo` sets
+When `lookup('users', 'administrator').tokens['web-app-matomo']` is empty, `sys-front-inj-matomo` sets
 `inj_enabled.matomo = false` for the current domain. This prevents the NGINX template from rendering
 the Matomo body snippet (which would reference `matomo_site_id`) and skips `inject.yml` entirely.
 The play continues without error.
@@ -33,7 +33,7 @@ Matomo tracking is a best-effort enhancement, not a hard runtime dependency of t
 ### Resolution ✅
 
 Once the Matomo bootstrap has run, either later in the same play or on the next Ansible invocation,
-`sys-token-store` writes the token to disk. On the **next play run** the token is loaded at startup,
+`sys-token-store` writes the token to disk. On the **next play run** the token is resolved from the store,
 the condition evaluates to false, and `inject.yml` executes normally: registering the site at Matomo
 and injecting the tracking code into the target application.
 

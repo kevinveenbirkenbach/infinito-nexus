@@ -15,7 +15,7 @@ GITLAB_OIDC_ISSUER:         "{{ OIDC.CLIENT.ISSUER_URL }}"
 GITLAB_OIDC_REDIRECT_URI:   "{{ GITLAB_URL }}/users/auth/openid_connect/callback"
 
 ## Docker
-GITLAB_INIT_ROOT_PASSWORD:  "{{ users.administrator.password }}"
+GITLAB_INIT_ROOT_PASSWORD:  "{{ lookup('users', 'administrator').password }}"
 GITLAB_VERSION:             "{{ lookup('config', application_id, 'compose.services.gitlab.version') }}"
 GITLAB_IMAGE:               "{{ lookup('config', application_id, 'compose.services.gitlab.image') }}"
 GITLAB_CONTAINER:           "{{ lookup('config', application_id, 'compose.services.gitlab.name') }}"
