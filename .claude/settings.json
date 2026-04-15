@@ -23,6 +23,8 @@
       "Bash(bash -n*)",
       "Bash(bash scripts/*)",
       "Bash(source scripts/*)",
+      "Bash(scripts/*)",
+      "Bash(chmod +x scripts/*)",
       "Bash(wait*)",
       "Bash(python3*)",
       "Bash(python*)",
