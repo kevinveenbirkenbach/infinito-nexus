@@ -359,12 +359,20 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         )
 
     def test_basic_conf_sets_app_id_variable(self):
-        """basic.conf.j2 must set $app_id so Lua blocks can attach the 'app' label."""
-        content = self._basic_conf_path().read_text(encoding="utf-8")
+        """locations.conf.j2 must set $app_id so Lua blocks can attach the 'app' label.
+
+        $app_id was moved from basic.conf.j2 into locations.conf.j2 so that it is set
+        in a single place for all vhosts that include the prometheus monitoring block.
+        """
+        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        locations_conf = (
+            roles_dir / PROMETHEUS_APP_ID / "templates" / "nginx" / "locations.conf.j2"
+        )
+        content = locations_conf.read_text(encoding="utf-8")
         self.assertIn(
             "$app_id",
             content,
-            "basic.conf.j2 must set the $app_id nginx variable (used by location.conf.j2 "
+            "locations.conf.j2 must set the $app_id nginx variable (used by location.conf.j2 "
             "to attach the 'app' label to all metrics)",
         )
 
@@ -439,11 +447,25 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "alert_rules.yml.j2 must define a CommunicationChannelDown alert rule "
             "(task AC: alert rules for communication channels — Mattermost, Matrix, Mailu)",
         )
+        # App names are auto-generated from alerting.communication_channels in config/main.yml.
+        # Verify the template uses the config lookup rather than hardcoding app names.
         self.assertIn(
-            "web-app-mattermost",
+            "communication_channels",
             content,
-            "CommunicationChannelDown rule must target web-app-mattermost",
+            "CommunicationChannelDown expr must be generated from alerting.communication_channels "
+            "(not hardcoded) — use lookup('config', ..., 'alerting.communication_channels', [])",
         )
+        # Verify the required apps are declared in the config that drives the template.
+        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
+        cfg = _load_config(str(roles_dir / PROMETHEUS_APP_ID / "config" / "main.yml"))
+        channels = cfg.get("alerting", {}).get("communication_channels", [])
+        for app_id in ("web-app-mattermost", "web-app-matrix", "web-app-mailu"):
+            with self.subTest(app_id=app_id):
+                self.assertIn(
+                    app_id,
+                    channels,
+                    f"alerting.communication_channels in config/main.yml must include {app_id}",
+                )
 
     def test_blackbox_tls_is_templated(self):
         """blackbox.yml.j2 must use TLS_ENABLED to set insecure_skip_verify, not hardcode false.
