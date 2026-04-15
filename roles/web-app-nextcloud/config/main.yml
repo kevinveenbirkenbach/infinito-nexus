@@ -70,10 +70,9 @@ compose:
       mem_reservation:      "1g"
       mem_limit:            "8g"
       pids_limit:           512
-    database:
-      shared: true
-      type: "mariadb"
+    mariadb:
       enabled:              true
+      shared:               true
       cpus:                 "0.75"
       mem_reservation:      "512m"
       mem_limit:            "1.5g"

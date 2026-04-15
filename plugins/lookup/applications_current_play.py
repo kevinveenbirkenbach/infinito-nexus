@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import os
-import yaml
 from typing import Any, Dict, List, Optional
 
+import yaml
 from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
 
 from utils.applications.in_group_deps import applications_if_group_and_all_deps
 from utils.runtime_lookup_data import get_merged_applications
+from utils.service_registry import build_service_registry_from_applications
 
 
 class LookupModule(LookupBase):
@@ -33,10 +34,16 @@ class LookupModule(LookupBase):
                 templar=getattr(self, "_templar", None),
             )
         group_names = kwargs.get("group_names", vars_.get("group_names", []))
+        if not isinstance(applications, dict):
+            raise AnsibleError(
+                "applications_current_play: required variable 'applications' must be a mapping"
+            )
 
         project_root = self._get_project_root()
         roles_dir = os.path.join(project_root, "roles")
-        service_registry = self._load_service_registry(project_root)
+        service_registry = kwargs.get("service_registry")
+        if service_registry is None:
+            service_registry = build_service_registry_from_applications(applications)
 
         try:
             result = applications_if_group_and_all_deps(
@@ -59,17 +66,6 @@ class LookupModule(LookupBase):
     def _get_project_root(self) -> str:
         plugin_dir = os.path.dirname(__file__)
         return os.path.abspath(os.path.join(plugin_dir, "..", ".."))
-
-    def _load_service_registry(self, project_root: str) -> Dict[str, Any]:
-        path = os.path.join(project_root, "group_vars", "all", "20_services.yml")
-        if not os.path.isfile(path):
-            return {}
-        try:
-            with open(path, encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
-            return data.get("SERVICE_REGISTRY", {})
-        except Exception:
-            return {}
 
     def _meta_deps(self, role: str, roles_dir: str) -> List[str]:
         meta_file = os.path.join(roles_dir, role, "meta", "main.yml")

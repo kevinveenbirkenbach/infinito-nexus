@@ -5,10 +5,10 @@ network:
 
 compose:
   services:
-    ldap:
-      enabled: true
-      shared: true
     openldap:
+      enabled:          false
+      shared:           true
+      provides:         ldap
       image:            "debian"
       version:          "bookworm-slim"
       name:             "openldap"

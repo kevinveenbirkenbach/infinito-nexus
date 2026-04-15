@@ -41,9 +41,6 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
-      shared: false
-      enabled: false
     # noqa: shared
     web:
       enabled: true  # @see https://github.com/bluesky-social/social-app

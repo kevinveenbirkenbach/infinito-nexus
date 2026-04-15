@@ -6,8 +6,12 @@ from typing import Any, Dict, Iterable, List, Optional, Set
 import yaml
 
 from .errors import ServicesResolutionError
+from utils.service_registry import (
+    build_service_registry_from_roles_dir,
+    resolve_service_dependency_roles_from_config,
+)
 
-_SERVICES_FILE = Path(__file__).parents[5] / "group_vars" / "all" / "20_services.yml"
+_ROLES_ROOT = Path(__file__).parents[5] / "roles"
 
 
 def _stable_dedup(items: Iterable[str]) -> List[str]:
@@ -29,16 +33,13 @@ def _is_enabled_shared(svc: object) -> bool:
     return svc.get("enabled") is True and svc.get("shared") is True
 
 
-def _load_service_registry(services_file: Path = _SERVICES_FILE) -> Dict[str, Any]:
-    if not services_file.exists():
-        raise ServicesResolutionError(f"20_services.yml not found at {services_file}")
-    raw = yaml.safe_load(services_file.read_text(encoding="utf-8")) or {}
-    service_registry = raw.get("SERVICE_REGISTRY")
-    if not isinstance(service_registry, dict):
+def _load_service_registry(roles_root: Path = _ROLES_ROOT) -> Dict[str, Any]:
+    try:
+        return build_service_registry_from_roles_dir(roles_root)
+    except Exception as exc:
         raise ServicesResolutionError(
-            f"Expected a 'SERVICE_REGISTRY' mapping in {services_file}"
-        )
-    return service_registry
+            f"Failed to discover services from role configs in {roles_root}: {exc}"
+        ) from exc
 
 
 def resolve_direct_service_roles_from_config(
@@ -47,37 +48,18 @@ def resolve_direct_service_roles_from_config(
 ) -> List[str]:
     """
     Single source of truth for "service -> provider role(s)" mapping.
-
-    Reads the service key → role mapping from services.yml (repo root).
-    Every service requires compose.services.<key>.enabled: true AND shared: true.
-    Entries with role_template substitute {type} from the service config.
     """
     if service_registry is None:
         service_registry = _load_service_registry()
-
-    cfg = _as_mapping(config)
-    services = _as_mapping(_as_mapping(cfg.get("compose")).get("services"))
-
-    includes: List[str] = []
-    for key, mapping in service_registry.items():
-        svc_obj = services.get(key)
-        if not _is_enabled_shared(svc_obj):
-            continue
-
-        role_template = mapping.get("role_template")
-        if role_template:
-            svc_dict = _as_mapping(svc_obj)
-            db_type = (svc_dict.get("type") or "").strip()
-            if not db_type:
-                raise ServicesResolutionError(
-                    f"compose.services.{key}.enabled=true and shared=true "
-                    f"but compose.services.{key}.type is missing"
-                )
-            includes.append(role_template.format(type=db_type))
-        else:
-            includes.append(mapping["role"])
-
-    return _stable_dedup(includes)
+    try:
+        return _stable_dedup(
+            resolve_service_dependency_roles_from_config(
+                _as_mapping(config),
+                service_registry,
+            )
+        )
+    except Exception as exc:
+        raise ServicesResolutionError(str(exc)) from exc
 
 
 class ServicesResolver:
@@ -92,10 +74,12 @@ class ServicesResolver:
     def __init__(
         self,
         roles_root: Path,
-        services_file: Path = _SERVICES_FILE,
+        services_file: Path | None = None,
     ) -> None:
         self.roles_root = roles_root
-        self._service_registry = _load_service_registry(services_file)
+        self._service_registry = _load_service_registry(
+            services_file or self.roles_root
+        )
 
     def _role_dir(self, role_name: str) -> Path:
         return self.roles_root / role_name

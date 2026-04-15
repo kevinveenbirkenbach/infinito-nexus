@@ -31,10 +31,9 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
-      shared:                     true
-      type:                       "postgres"
-      enabled:                    true
+    postgres:
+      enabled: true
+      shared: true
     mattermost:
       image:                      "mattermost/mattermost-team-edition"
       version:                    "11.6.0"

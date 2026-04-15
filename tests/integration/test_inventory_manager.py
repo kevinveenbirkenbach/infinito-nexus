@@ -64,7 +64,11 @@ class TestInventoryManagerIntegration(TestCase):
             )
 
             (provider_role / "config" / "main.yml").write_text(
-                "compose:\n  services: {}\n",
+                "compose:\n"
+                "  services:\n"
+                "    mariadb:\n"
+                "      enabled: false\n"
+                "      shared: true\n",
                 encoding="utf-8",
             )
 
@@ -100,11 +104,10 @@ class TestInventoryManagerIntegration(TestCase):
             (role_path / "config" / "main.yml").write_text(
                 "compose:\n"
                 "  services:\n"
-                "    database:\n"
+                "    mariadb:\n"
                 "      enabled: true\n"
                 "      shared: true\n"
-                "      type: mariadb\n"
-                "    oauth2:\n"
+                "    oidc:\n"
                 "      enabled: true\n",
                 encoding="utf-8",
             )
@@ -195,6 +198,83 @@ class TestInventoryManagerIntegration(TestCase):
 
             self.assertNotIn("database_password", called_keys)
             self.assertNotIn("oauth2_proxy_cookie_secret", called_keys)
+
+    def test_apply_schema_skips_schema_less_transitive_provider_role(self):
+        """
+        Shared provider roles without schema/main.yml must be ignored gracefully.
+        This matters for roles like web-svc-asset that participate in dependency
+        discovery but do not define credentials.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp = Path(tmpdir)
+
+            roles_root = tmp / "roles"
+            roles_root.mkdir(parents=True, exist_ok=True)
+
+            provider_role = roles_root / "web-svc-asset"
+            (provider_role / "vars").mkdir(parents=True, exist_ok=True)
+            (provider_role / "config").mkdir(parents=True, exist_ok=True)
+
+            (provider_role / "vars" / "main.yml").write_text(
+                'application_id: "web-svc-asset"\n',
+                encoding="utf-8",
+            )
+            (provider_role / "config" / "main.yml").write_text(
+                "compose:\n"
+                "  services:\n"
+                "    asset:\n"
+                "      enabled: false\n"
+                "      shared: true\n",
+                encoding="utf-8",
+            )
+
+            role_path = roles_root / "web-app-demo"
+            (role_path / "schema").mkdir(parents=True, exist_ok=True)
+            (role_path / "vars").mkdir(parents=True, exist_ok=True)
+            (role_path / "config").mkdir(parents=True, exist_ok=True)
+
+            inv_path = tmp / "inventory.yml"
+            inv_path.write_text("applications: {}\n", encoding="utf-8")
+
+            (role_path / "vars" / "main.yml").write_text(
+                'application_id: "web-app-demo"\n',
+                encoding="utf-8",
+            )
+            (role_path / "config" / "main.yml").write_text(
+                "compose:\n"
+                "  services:\n"
+                "    asset:\n"
+                "      enabled: true\n"
+                "      shared: true\n",
+                encoding="utf-8",
+            )
+            (role_path / "schema" / "main.yml").write_text(
+                "credentials:\n"
+                "  api_key:\n"
+                "    description: API key\n"
+                "    algorithm: random_hex_16\n"
+                "    validation: {}\n",
+                encoding="utf-8",
+            )
+
+            fake_vault = _FakeVaultHandler("pw")
+            with patch(
+                "utils.manager.inventory.VaultHandler",
+                side_effect=lambda pw: fake_vault,
+            ):
+                mgr = InventoryManager(
+                    role_path=role_path,
+                    inventory_path=inv_path,
+                    vault_pw="pw",
+                    overrides={},
+                    allow_empty_plain=False,
+                )
+                inv = mgr.apply_schema()
+
+            apps = inv.get("applications", {})
+            self.assertIn("web-app-demo", apps)
+            self.assertIn("api_key", apps["web-app-demo"]["credentials"])
+            self.assertNotIn("web-svc-asset", apps)
 
 
 if __name__ == "__main__":

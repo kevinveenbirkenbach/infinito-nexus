@@ -23,10 +23,9 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
+    postgres:
+      enabled: true
       shared: true
-      type: "postgres"
-      enabled:        true
     taiga:
       version:        "latest"
       min_storage:    "10GB"

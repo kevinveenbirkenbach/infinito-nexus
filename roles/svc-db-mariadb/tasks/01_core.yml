@@ -1,3 +1,5 @@
+- include_tasks: utils/once/flag.yml
+
 - name: "Setup container network for {{ application_id }}"
   include_tasks: "{{ [playbook_dir, 'roles/sys-svc-compose/tasks/utils/network.yml' ] | path_join }}"
   vars:
@@ -79,5 +81,3 @@
   until: mariadb_ready is succeeded
   changed_when: false
   when: MARIADB_EXPOSE_LOCAL | bool
-
-- include_tasks: utils/once/flag.yml

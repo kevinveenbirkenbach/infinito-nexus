@@ -20,10 +20,9 @@ compose:
       backup:
         disabled: true
       enabled:      true
-    database: 
+    postgres:
+      enabled: true
       shared: true
-      type: "postgres"
-      enabled:      true
     gitlab:
       image:            "gitlab/gitlab-ee"
       version:          "latest"

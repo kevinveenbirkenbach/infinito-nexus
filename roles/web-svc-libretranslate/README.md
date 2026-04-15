@@ -44,7 +44,6 @@ All configuration is handled via `config/main.yml`.
 Key sections include:
 - `compose.services.libretranslate`: image and version
 - `compose.services.redis`: enable Redis backend
-- `compose.services.database`: enable database backend
 - `compose.services.matomo`: enable analytics
 - `server.domains`: canonical and alias domains
 - `server.csp`:

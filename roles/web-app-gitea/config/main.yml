@@ -43,10 +43,9 @@ compose:
     email:
       enabled: true
       shared: true
-    database:
-      shared: true
-      type: "mariadb"
+    mariadb:
       enabled: true
+      shared: true
     gitea:                          
       image:            "gitea/gitea"
       version:          "latest"

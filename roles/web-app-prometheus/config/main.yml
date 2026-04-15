@@ -33,8 +33,6 @@ compose:
     matomo:
       enabled:                    true
       shared:                     true
-    database:
-      enabled:                    false
     redis:
       enabled:                    false
     css:

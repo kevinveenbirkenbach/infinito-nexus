@@ -5,6 +5,7 @@ Use this page when you are iterating on a local app deploy during debugging or d
 ## Role Loop
 
 - Before starting the loop, you MUST propose disabling all non-necessary services via `SERVICES_DISABLED` to reduce resource usage. In the typical case, this means keeping only the database and disabling everything else. Only proceed without this proposal if the user has already confirmed a full-stack setup.
+- You MUST run `make test` before every deploy. Only proceed with the deploy if all tests pass.
 - Unless the user explicitly says to reuse the existing setup, you MUST start once with `APPS=<roles> make deploy-fresh-purged-apps` to establish the baseline inventory and clean app state. Set `FULL_CYCLE=true` to also run the async update pass (pass 2).
 - You MUST NOT run more than one deploy command at the same time. Deployments MUST be executed serially, never in parallel.
 - To speed up debugging, you MAY pass multiple apps at once, e.g. `APPS="<roles> <roles>" make deploy-fresh-purged-apps`.
