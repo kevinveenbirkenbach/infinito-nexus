@@ -5,10 +5,13 @@ Scans git-tracked and untracked-but-not-ignored text files for literal
 local/example hosts are skipped.
 
 This is an external test because it performs live HTTP requests against the
-referenced third-party URLs. HTTP ``401``, ``403``, and ``405`` are treated as
-reachable (auth-gated or method-restricted servers). HTTP ``429``, ``500``, and
-``503``, timeouts, and connection errors (reset, aborted) emit warning annotations.
-All other 4xx/5xx codes fail the test.
+referenced third-party URLs. HTTP ``401`` (Unauthorized), ``403`` (Forbidden),
+and ``405`` (Method Not Allowed) are treated as reachable (server is alive but
+auth-gated or method-restricted). HTTP ``418`` (I'm a teapot), ``429`` (Too
+Many Requests), ``451`` (Unavailable For Legal Reasons), ``500`` (Internal
+Server Error), and ``503`` (Service Unavailable), plus timeouts and connection
+errors (reset, aborted) emit warning annotations. All other 4xx/5xx codes fail
+the test.
 """
 
 from __future__ import annotations
@@ -56,12 +59,22 @@ _RESERVED_HOST_SUFFIXES = (
     ".test",
     ".tld",
 )
-# Codes that mean the server responded but access is auth-gated or rate-limited.
+# Codes that mean the server responded but access is auth-gated or method-gated.
 # These are not dead links; treat them as reachable.
-_OK_STATUS_CODES = {401, 403, 405}
-# Codes that mean the server is alive but temporarily unavailable or slow.
+_OK_STATUS_CODES = {
+    401,  # Unauthorized: credentials required, server is alive.
+    403,  # Forbidden: server is alive, resource intentionally gated.
+    405,  # Method Not Allowed: server is alive, HEAD/GET rejected by design.
+}
+# Codes that mean the server is alive but the resource is not reliably probeable.
 # Emit a warning annotation instead of failing the test.
-_WARNING_STATUS_CODES = {429, 500, 503}
+_WARNING_STATUS_CODES = {
+    418,  # I'm a teapot: playful/custom response; server is alive.
+    429,  # Too Many Requests: client rate-limited, transient.
+    451,  # Unavailable For Legal Reasons: jurisdiction-specific block.
+    500,  # Internal Server Error: transient server issue.
+    503,  # Service Unavailable: transient overload or maintenance.
+}
 _REQUEST_TIMEOUT_SECONDS = 10
 _MAX_WORKERS = 8
 _USER_AGENT = "infinito-nexus-url-reachability-check"
@@ -434,7 +447,7 @@ class TestUrlsReachable(unittest.TestCase):
             f"Failing HTTP(S) URLs found ({len(failing_found)}):",
             "",
             "  Fix the URL, remove it, or adjust the reference.",
-            "  401/403/405 = server alive (auth/method). 429/500/503 = warning. Other 4xx/5xx = fail.",
+            "  401/403/405 = server alive (auth/method). 418/429/451/500/503 = warning. Other 4xx/5xx = fail.",
             "",
         ]
         for _title, occurrence, message, count in sorted(
