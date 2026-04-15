@@ -54,9 +54,7 @@ class LookupModule(LookupBase):
             if not enabled:
                 continue
 
-            scrape_template = (
-                roles_dir / app_id / "templates" / "prometheus.yml.j2"
-            )
+            scrape_template = roles_dir / app_id / "templates" / "prometheus.yml.j2"
             if scrape_template.exists():
                 result.append(app_id)
 

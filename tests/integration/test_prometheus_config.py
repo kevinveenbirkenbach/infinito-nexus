@@ -373,7 +373,13 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         for template in ("alertmanager.yml.j2", "alert_rules.yml.j2"):
             with self.subTest(template=template):
-                path = roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / template
+                path = (
+                    roles_dir
+                    / PROMETHEUS_APP_ID
+                    / "templates"
+                    / "configuration"
+                    / template
+                )
                 self.assertTrue(
                     path.exists(),
                     f"Missing alertmanager template: {path}",
@@ -383,7 +389,11 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """alertmanager.yml.j2 must support Telegram notifications (task AC: communication channels)."""
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
-            roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / "alertmanager.yml.j2"
+            roles_dir
+            / PROMETHEUS_APP_ID
+            / "templates"
+            / "configuration"
+            / "alertmanager.yml.j2"
         ).read_text(encoding="utf-8")
         self.assertIn(
             "telegram_configs",
@@ -396,7 +406,11 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """alertmanager.yml.j2 must support Mattermost webhook notifications (task AC: communication channels)."""
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
-            roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / "alertmanager.yml.j2"
+            roles_dir
+            / PROMETHEUS_APP_ID
+            / "templates"
+            / "configuration"
+            / "alertmanager.yml.j2"
         ).read_text(encoding="utf-8")
         self.assertIn(
             "ALERTMANAGER_MATTERMOST_WEBHOOK_URL",
@@ -413,7 +427,11 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
-            roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / "alert_rules.yml.j2"
+            roles_dir
+            / PROMETHEUS_APP_ID
+            / "templates"
+            / "configuration"
+            / "alert_rules.yml.j2"
         ).read_text(encoding="utf-8")
         self.assertIn(
             "CommunicationChannelDown",
@@ -435,7 +453,11 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         """
         roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
         content = (
-            roles_dir / PROMETHEUS_APP_ID / "templates" / "configuration" / "blackbox.yml.j2"
+            roles_dir
+            / PROMETHEUS_APP_ID
+            / "templates"
+            / "configuration"
+            / "blackbox.yml.j2"
         ).read_text(encoding="utf-8")
         self.assertIn(
             "TLS_ENABLED",
