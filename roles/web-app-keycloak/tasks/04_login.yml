@@ -32,6 +32,9 @@
         '
       register: kc_login_bootstrap
       changed_when: false
+      retries: 30
+      delay: 5
+      until: kc_login_bootstrap.rc == 0
 
     - name: Ensure permanent admin user exists (create if missing)
       shell: |
