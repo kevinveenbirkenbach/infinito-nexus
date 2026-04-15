@@ -1,0 +1,5 @@
+compose:
+  services:
+    legal:
+      enabled: false
+      shared: false

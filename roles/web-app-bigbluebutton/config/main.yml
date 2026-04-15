@@ -39,9 +39,9 @@ compose:
         cleanup:      true  # Auto-Cleanup Recordings
         max_age_days: 30    # Cleanup recording after this amount of days
       min_storage:    50GB
-    database:
+    # noqa: shared
+    postgres:
       shared:   false
-      # This is set to true to pass integration test, doesn't have any other function
       enabled:  true
     greenlight:
       enabled:  true

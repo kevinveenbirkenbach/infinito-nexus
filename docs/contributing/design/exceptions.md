@@ -14,7 +14,7 @@ The Matomo API token is generated during the Matomo bootstrap and persisted to d
 It is loaded into the `users` runtime variable at play start.
 
 On the **first deployment**, or after a factory reset, the token does not yet exist because the bootstrap
-has not run yet. A second common cause is that [`roles/sys-utils-service-loader/tasks/load_frontend_service.yml`](../../../roles/sys-utils-service-loader/tasks/load_frontend_service.yml)
+has not run yet. A second common cause is that [`roles/sys-utils-service-loader/tasks/load_service.yml`](../../../roles/sys-utils-service-loader/tasks/load_service.yml)
 skips `load_app.yml` when the
 Matomo container is already reachable. In that case the container is healthy but the token file is still
 absent from the token store, so the variable arrives empty.

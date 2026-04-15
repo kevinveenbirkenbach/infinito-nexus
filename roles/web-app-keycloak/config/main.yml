@@ -41,6 +41,9 @@ compose:
       enabled: true
       shared: true
     keycloak:
+      enabled:            false
+      shared:             true
+      provides:           oidc
       image:              "quay.io/keycloak/keycloak"
       version:            "latest"
       name:               "keycloak"
@@ -54,10 +57,9 @@ compose:
         totp_enabled:         True
       users:
         emails_verified: True
-    database:
-      shared:           true
-      type:             "postgres"
+    postgres:
       enabled:          true
+      shared:           true
     css:
       enabled: true
       shared: true

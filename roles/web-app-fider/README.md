@@ -32,12 +32,13 @@ Key settings in `config/main.yml`:
 | Key | Default | Description |
 |-----|---------|-------------|
 | `compose.services.oidc.enabled` | `true` | Automate Keycloak OIDC setup |
-| `compose.services.database.type` | `postgres` | Database engine (postgres only) |
+| `compose.services.postgres.enabled` | `true` | Enable PostgreSQL for Fider |
+| `compose.services.postgres.shared` | `true` | Reuse the shared PostgreSQL provider |
 | `compose.services.fider.version` | `stable` | Docker image tag |
 | `server.domains.canonical` | `fider.{{ DOMAIN_PRIMARY }}` | Public domain |
 | `server.status_codes.default` | `[200, 301, 302, 405]` | Expected HTTP codes for health check (405 because Fider returns 405 on HEAD requests to `/`) |
 
-## Further Resources
+## Further resources
 
 - [Fider GitHub](https://github.com/getfider/fider)
 

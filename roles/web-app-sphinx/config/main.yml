@@ -23,8 +23,6 @@ compose:
     matomo:
       enabled: true
       shared: true
-    database:
-      enabled:            false
     sphinx:
       image:            "ghcr.io/kevinveenbirkenbach/infinito-sphinx"
       version:          "latest"

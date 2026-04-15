@@ -7,12 +7,17 @@ compose:
   services:
     dashboard:
       enabled: false
+    cdn:
+      enabled: false
+      shared: true
     matomo:
       enabled: true
       shared: true
     css:
       enabled: false
       shared: true
+      canonical: cdn
     javascript:
       enabled: false
       shared: true
+      canonical: cdn

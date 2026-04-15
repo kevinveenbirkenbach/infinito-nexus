@@ -9,6 +9,8 @@ compose:
       enabled: true
       shared: true
     coturn:
+      enabled:            false
+      shared:             true
       image:              "coturn/coturn"
       version:            "latest"
       min_storage:        "1GB"
@@ -21,8 +23,6 @@ compose:
     redis:
       backup:
         disabled: true
-      enabled:            false
-    database: 
       enabled:            false
     css:
       enabled: true

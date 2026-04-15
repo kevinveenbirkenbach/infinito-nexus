@@ -9,14 +9,22 @@
       "Bash(git log*)",
       "Bash(git diff*)",
       "Bash(git add*)",
+      "Bash(git mv*)",
+      "Bash(git rm*)",
       "Bash(git checkout*)",
       "Bash(git branch*)",
       "Bash(git fetch*)",
       "Bash(git stash*)",
+      "Bash(git cherry-pick*)",
+      "Bash(git apply*)",
       "Bash(git -C:*)",
+
+      "Bash(gh run*)",
 
       "Bash(make*)",
       "Bash(act*)",
+      "Bash(bash -n*)",
+      "Bash(wait*)",
 
       "Bash(python3*)",
       "Bash(python*)",
@@ -83,7 +91,8 @@
       "Bash(git commit*)",
       "Bash(git push*)",
       "Bash(docker run*)",
-      "Bash(curl*)"
+      "Bash(curl*)",
+      "Bash(gh api*)"
     ],
 
     "deny": [

@@ -9,11 +9,12 @@ from unittest.mock import patch
 from cli.meta.applications.in_group_deps import __main__ as mod
 from utils.applications import in_group_deps as deps_mod
 
+
 SERVICE_REGISTRY = {
-    "matomo": {"role": "web-app-matomo", "type": "frontend"},
-    "asset": {"role": "web-svc-asset", "type": "frontend"},
-    "ldap": {"role": "svc-db-openldap", "type": "backend"},
-    "database": {"role_template": "svc-db-{type}", "type": "backend"},
+    "matomo": {"role": "web-app-matomo"},
+    "asset": {"role": "web-svc-asset"},
+    "ldap": {"role": "svc-db-openldap"},
+    "mariadb": {"role": "svc-db-mariadb"},
 }
 
 SAMPLE_APPS = {
@@ -72,14 +73,10 @@ class TestInGroupDepsResolver(unittest.TestCase):
         self.assertIn("web-svc-legal", result)
         self.assertIn("web-app-matomo", result)
 
-    def test_role_template_is_resolved(self) -> None:
+    def test_direct_database_service_name_is_resolved(self) -> None:
         apps = dict(SAMPLE_APPS)
         apps["web-svc-legal"] = {
-            "compose": {
-                "services": {
-                    "database": {"enabled": True, "shared": True, "type": "mariadb"}
-                }
-            }
+            "compose": {"services": {"mariadb": {"enabled": True, "shared": True}}}
         }
 
         result = self._run_helper(["web-svc-legal"], applications=apps)
