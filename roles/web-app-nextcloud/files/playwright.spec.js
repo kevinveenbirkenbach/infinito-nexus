@@ -1,8 +1,28 @@
+// End-to-end tests for the Nextcloud role.
+//
+// Two scenarios:
+//   1. "nextcloud talk admin settings" — SSO-login as admin, navigate to the
+//      Talk admin page, and assert the configured HPB / STUN / TURN values
+//      are rendered (and that legacy onboard values are absent).
+//   2. "dashboard to nextcloud login"  — enter Nextcloud through the
+//      portal dashboard iframe, complete the OIDC handoff via Keycloak,
+//      reuse the authenticated context for the Talk check, then log out.
+//
+// All authentication goes through Keycloak (OIDC). Local Nextcloud login
+// is intentionally NOT exercised: `oidc_login_hide_password_form` keeps the
+// native form hidden in this deployment.
 const { test, expect } = require("@playwright/test");
 
+// `ignoreHTTPSErrors` is needed because the local stack typically uses the
+// self-signed CA set up by `make trust-ca`, which the Playwright container
+// does not trust by default.
 test.use({
   ignoreHTTPSErrors: true
 });
+
+// ---------------------------------------------------------------------------
+// Env decoding
+// ---------------------------------------------------------------------------
 
 function decodeDotenvQuotedValue(value) {
   if (typeof value !== "string" || value.length < 2) {
@@ -24,6 +44,13 @@ function decodeDotenvQuotedValue(value) {
 
 // `docker --env-file` preserves the quotes emitted by `dotenv_quote`,
 // so normalize these values before building URLs or typing credentials.
+// ---------------------------------------------------------------------------
+// Env-driven config
+//
+// All values originate from the rendered `.env` under the staging dir. The
+// Talk-related values are optional and gate the first test via
+// `nextcloudTalkSettingsCheckEnabled`.
+// ---------------------------------------------------------------------------
 const loginUsername = decodeDotenvQuotedValue(process.env.LOGIN_USERNAME);
 const loginPassword = decodeDotenvQuotedValue(process.env.LOGIN_PASSWORD);
 const nextcloudDirectLoginPassword = decodeDotenvQuotedValue(process.env.NEXTCLOUD_DIRECT_LOGIN_PASSWORD) || loginPassword;
@@ -38,6 +65,31 @@ const nextcloudTalkUnexpectedStunServer = decodeDotenvQuotedValue(process.env.NE
 const nextcloudTalkUnexpectedTurnServer = decodeDotenvQuotedValue(process.env.NEXTCLOUD_TALK_UNEXPECTED_TURN_SERVER);
 const nextcloudUsernameFieldPattern = /account name or email|username or email/i;
 const nextcloudCredentialSubmitPattern = /sign in|log in/i;
+
+// ---------------------------------------------------------------------------
+// Locator helpers
+//
+// Nextcloud renders different "shell" containers depending on the app (Vue
+// vs. legacy) and version. The selectors below match any of them so the
+// tests work across NC 28+ without hard-coding one layout.
+// ---------------------------------------------------------------------------
+
+function getNextcloudShellCandidates(target) {
+  return [
+    {
+      kind: "shell",
+      // #app-content-vue: dashboard and Vue-based apps.
+      // #app-navigation-vue: Vue sidebar (files etc.).
+      // #app-content: legacy app container.
+      // #header-start__appmenu: always present in layout.user.php <nav>.
+      locator: target.locator("#app-content-vue, #app-navigation-vue, #app-content, #header-start__appmenu")
+    },
+    {
+      kind: "shell",
+      locator: target.locator('a[href*="/apps/files"], a[href*="/apps/dashboard"]')
+    }
+  ];
+}
 
 async function waitForFirstVisible(page, locators, timeout = 60_000) {
   const deadline = Date.now() + timeout;
@@ -87,6 +139,15 @@ async function waitForVisibleCandidate(
 
   throw new Error(errorMessage);
 }
+
+// ---------------------------------------------------------------------------
+// Modal / user-menu helpers
+//
+// Fresh Nextcloud accounts see stacked onboarding dialogs (first-run wizard,
+// "What's new", recommended apps). They intercept pointer events and break
+// any follow-up click (e.g. on the user menu), so dismiss them aggressively
+// and retry the user-menu click if the overlay reappears.
+// ---------------------------------------------------------------------------
 
 async function dismissBlockingNextcloudModals(page, nextcloudFrame, maxDismissals = 4) {
   const modalOverlay = nextcloudFrame.locator(
@@ -154,6 +215,15 @@ async function clickUserMenuWithModalRetry(page, nextcloudFrame, userMenuLocator
   }
 }
 
+// ---------------------------------------------------------------------------
+// Settings-page assertions
+//
+// Talk admin settings are partly rendered as plain text and partly as
+// `<input value="...">` fields. `innerText()` alone would miss the input
+// values, so collect both text and form values before asserting presence or
+// absence of configured / legacy endpoints.
+// ---------------------------------------------------------------------------
+
 async function collectNextcloudSettingsText(target) {
   const bodyText = await target.locator("body").innerText().catch(() => "");
   const formValues = await target.locator("input, textarea, select").evaluateAll((elements) => {
@@ -201,6 +271,14 @@ async function expectNextcloudSettingAbsent(page, unexpectedValue, label) {
     .not.toContain(unexpectedValue);
 }
 
+// ---------------------------------------------------------------------------
+// Social-login entry points
+//
+// Some NC login layouts show an explicit "Log in with <provider>" button
+// before the credential form. Detect it so the dashboard flow can click
+// through to the Keycloak form regardless of which variant renders.
+// ---------------------------------------------------------------------------
+
 function getNextcloudSocialLoginCandidates(target) {
   return [
     {
@@ -247,51 +325,71 @@ async function enterNextcloudLoginThroughVisibleEntryPoint(page, target, usernam
   }
 }
 
+// ---------------------------------------------------------------------------
+// SSO login flow (standalone page, no dashboard iframe)
+//
+// `oidc_login_auto_redirect=true` together with `oidc_login_hide_password_form=true`
+// means visiting `/login` immediately bounces to Keycloak and never renders
+// the native NC credential form. So this helper:
+//   - goes to `/login`,
+//   - accepts either the Keycloak credential form OR an already-signed-in
+//     NC shell (for reused browser contexts),
+//   - fills Keycloak creds and waits for the NC shell to reappear.
+// ---------------------------------------------------------------------------
+
 async function loginToStandaloneNextcloud(adminPage) {
-  const directLoginUrl = new URL("login?direct=1", nextcloudBaseUrl).toString();
+  const loginUrl = new URL("login", nextcloudBaseUrl).toString();
   const usernameField = adminPage.getByRole("textbox", { name: nextcloudUsernameFieldPattern });
-  const passwordField = adminPage.locator('input[name="password"]');
-  const rememberMeCheckbox = adminPage.getByRole("checkbox", { name: /remember me/i });
+  const passwordField = adminPage.locator('input[name="password"], input[type="password"]').first();
   const signInButton = adminPage.getByRole("button", { name: nextcloudCredentialSubmitPattern });
-  const nextcloudAppShell = adminPage.locator(
-    "#app-content-vue, #app-navigation-vue, #app-content, #header-start__appmenu"
-  );
-  const nextcloudPrimaryNavigation = adminPage.locator(
-    'a[href*="/apps/files"], a[href*="/apps/dashboard"]'
+  const standaloneShellCandidates = getNextcloudShellCandidates(adminPage);
+
+  await adminPage.goto(loginUrl, {
+    waitUntil: "commit",
+    timeout: 60_000
+  }).catch(() => {});
+
+  const initialState = await waitForVisibleCandidate(
+    adminPage,
+    [
+      { kind: "credentials", locator: usernameField },
+      { kind: "credentials", locator: signInButton },
+      ...standaloneShellCandidates
+    ],
+    60_000,
+    "Timed out waiting for the Keycloak login form or an already-authenticated Nextcloud shell"
   );
 
-  await adminPage.goto(directLoginUrl, {
-    waitUntil: "domcontentloaded",
-    timeout: 60_000
-  });
+  if (initialState.kind === "shell") {
+    await dismissBlockingNextcloudModals(adminPage, adminPage);
+    return;
+  }
 
   await expect(usernameField).toBeVisible();
   await usernameField.click();
   await usernameField.fill(loginUsername);
   await usernameField.press("Tab");
-  await passwordField.fill(nextcloudDirectLoginPassword);
-
-  if (await rememberMeCheckbox.first().isVisible().catch(() => false)) {
-    await rememberMeCheckbox.check();
-  } else {
-    await adminPage.getByText("Remember me").click({ timeout: 2_000 }).catch(() => {});
-  }
-
+  await passwordField.fill(loginPassword);
   await signInButton.click();
 
   const postLoginState = await waitForVisibleCandidate(
     adminPage,
-    [
-      { kind: "shell", locator: nextcloudAppShell },
-      { kind: "shell", locator: nextcloudPrimaryNavigation }
-    ],
+    standaloneShellCandidates,
     60_000,
-    "Timed out waiting for a signed-in standalone Nextcloud shell after the Keycloak login redirect"
+    "Timed out waiting for a signed-in Nextcloud shell after the Keycloak login redirect"
   );
 
   await expect(postLoginState.locator).toBeVisible();
   await dismissBlockingNextcloudModals(adminPage, adminPage);
 }
+
+// ---------------------------------------------------------------------------
+// Talk admin verification
+//
+// Open a fresh page in the given context, SSO-login, navigate to the Talk
+// admin settings URL, and assert the deployed HPB / STUN / TURN values are
+// present while the known legacy onboard values are absent.
+// ---------------------------------------------------------------------------
 
 async function verifyNextcloudTalkAdminSettings(browserContext) {
   if (!nextcloudTalkSettingsCheckEnabled) {
@@ -344,6 +442,12 @@ async function verifyNextcloudTalkAdminSettings(browserContext) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Test cases
+// ---------------------------------------------------------------------------
+
+// Fail fast with a clear message if the rendered `.env` is missing any of
+// the values the tests rely on, instead of timing out mid-flow.
 test.beforeEach(() => {
   expect(oidcIssuerUrl, "OIDC_ISSUER_URL must be set in the Playwright env file").toBeTruthy();
   expect(nextcloudBaseUrl, "NEXTCLOUD_BASE_URL must be set in the Playwright env file").toBeTruthy();
@@ -391,16 +495,6 @@ test("dashboard to nextcloud login", async ({ page }) => {
   const rememberMeCheckbox = nextcloudFrame.getByRole("checkbox", { name: "Remember me" });
   const signInButton = nextcloudFrame.getByRole("button", { name: nextcloudCredentialSubmitPattern });
   const userMenuTriggerInMount = nextcloudFrame.locator("#user-menu button");
-  // #app-content-vue: dashboard app (index.php mounts <div id="app-content-vue">)
-  // #app-navigation-vue: Vue-based apps (files etc.)
-  // #app-content: legacy app content container
-  // #header-start__appmenu: always present in layout.user.php <nav>
-  const nextcloudAppShell = nextcloudFrame.locator(
-    "#app-content-vue, #app-navigation-vue, #app-content, #header-start__appmenu"
-  );
-  const nextcloudPrimaryNavigation = nextcloudFrame.locator(
-    'a[href*="/apps/files"], a[href*="/apps/dashboard"]'
-  );
   const logoutLinkByName = nextcloudFrame.getByRole("link", { name: "Log out" });
   const logoutLinkByHref = nextcloudFrame.locator('a[href*="logout"]');
   const logoutConfirmButton = nextcloudFrame.getByRole("button", { name: "Logout" });
@@ -409,8 +503,7 @@ test("dashboard to nextcloud login", async ({ page }) => {
   ];
   const postLoginCandidates = [
     ...userMenuCandidates,
-    { kind: "shell", locator: nextcloudAppShell },
-    { kind: "shell", locator: nextcloudPrimaryNavigation }
+    ...getNextcloudShellCandidates(nextcloudFrame)
   ];
 
   await expect(nextcloudIframe).toBeVisible();

@@ -160,7 +160,7 @@ compose:
     hcaptcha:
       enabled: "{{ HCAPTCHA_ENABLED | bool }}"
 default_quota:                 '1000000000'                                     # Quota to assign if no quota is specified in the OIDC response (bytes)
-legacy_login_mask:   
+legacy_login_mask:
   enabled:                      False                                           # If true, then legacy  login mask is shown. Otherwise just SSO
                            
 performance:
@@ -310,7 +310,7 @@ plugins:
     enabled: true
   oidc_login:
     # Nextcloud User OIDC: integrates OpenID Connect for user authentication (https://apps.nextcloud.com/apps/oidc_login)
-    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor') == 'oidc_login' }}"
+    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor', 'oidc_login') == 'oidc_login' }}"
     incompatible_plugins:  
       - user_oidc   # Will be disabled
       - sociallogin # Will be disabled
@@ -337,7 +337,7 @@ plugins:
       - fileslibreofficeedit
   sociallogin:
     # Nextcloud social login: allows authentication using social networks (https://apps.nextcloud.com/apps/sociallogin)
-    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor') == 'sociallogin' }}"
+    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor', 'oidc_login') == 'sociallogin' }}"
     incompatible_plugins:  
       - user_oidc   # Will be disabled
       - oidc_login  # Will be disabled
@@ -361,12 +361,12 @@ plugins:
     enabled: "{{ not (lookup('config', 'web-app-nextcloud', 'compose.services.oidc.enabled', False)) }}" # Deactivate 2FA if oidc is active
   user_ldap:
     # Nextcloud user LDAP: integrates LDAP for user management and authentication
-    enabled: "{{ lookup('config', 'web-app-nextcloud', 'compose.services.ldap.enabled', False) }}"
+    enabled: "{{ lookup('config', 'web-app-nextcloud', 'compose.services.ldap.enabled', True) }}"
     user_directory:
       enabled:  true # Enables the LDAP User Directory Search
   user_oidc:
     # Nextcloud User OIDC: integrates OpenID Connect for user authentication (https://apps.nextcloud.com/apps/user_oidc)
-    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor') == 'user_oidc' }}"
+    enabled:    "{{ lookup('config', 'web-app-nextcloud', 'compose.services.oidc.flavor', 'oidc_login') == 'user_oidc' }}"
     incompatible_plugins:  
       - oidc_login
       - sociallogin
