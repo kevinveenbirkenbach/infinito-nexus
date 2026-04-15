@@ -19,3 +19,10 @@ The **sys-ctl-hlth-msmtp** role ensures that your mail transport system stays av
 - **Failure Notifications:** Leverages **sys-ctl-alm-telegram** to push alerts when the script exits with an error.  
 - **Configurable Schedule:** Define your desired check frequency using the `on_calendar_health_msmtp` variable.  
 - **Email Destination:** Specify the recipient via the `lookup('users', 'administrator').email` variable.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

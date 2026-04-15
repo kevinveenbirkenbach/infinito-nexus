@@ -47,7 +47,7 @@ users:
   administrator:
     tokens:
       web-app-matomo: "46e50b0eb52d0d141a7d6cf9b3d0b3e2"
-````
+```
 
 Default location:
 
@@ -127,7 +127,9 @@ It is a **generic infrastructure helper**.
 
 ---
 
-## License
+## Credits
 
-Part of the **Infinito.Nexus Project**
-Licensed under the *Infinito.Nexus Community License (Non-Commercial)*.
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

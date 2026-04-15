@@ -24,3 +24,10 @@ Resolution rules:
 - `lookup('users', user_key).username` (defaults to `user_key`)
 - `lookup('users', user_key).authorized_keys` (list; may be empty)
 - optional include-role var `user_config` to override the lookup result for the current call
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).

@@ -27,3 +27,10 @@ Requiring at least one SSH public key ensures that the administrator account is 
 - **SSH Authorized Keys:** Deploys keys from `lookup('users', 'administrator').authorized_keys` (**SPOT-only, must contain at least one key**).
 - **Sudo Privileges:** Deploys a dedicated sudoers configuration to grant the administrator user [sudo](https://en.wikipedia.org/wiki/Sudo) rights with password prompt.
 - **Modular Integration:** Integrates with common routines and roles to further enhance system security.
+
+## Credits
+
+Developed and maintained by **Kevin Veen-Birkenbach**.
+Learn more at [veen.world](https://www.veen.world).
+Part of the [Infinito.Nexus Project](https://s.infinito.nexus/code).
+Licensed under the [Infinito.Nexus Community License (Non-Commercial)](https://s.infinito.nexus/license).
