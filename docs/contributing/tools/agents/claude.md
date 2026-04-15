@@ -100,6 +100,13 @@ Claude Code evaluates each tool call against three ordered lists:
 | `awk*` | Pattern-based text extraction and transformation during inspection, script output parsing, and make target post-processing. | Standard pipeline utility. Narrow per-invocation wildcards proved impractical — every unique command line (pattern + path) would require its own allowlist entry. | Not strictly read-only: awk's `system()` and `"cmd" \| getline` can execute arbitrary shell commands and reach the network, equivalent in risk class to the already-allowed `find -exec` and `tar --checkpoint-action=exec`. The sandbox `allowWrite` scope, `denyRead` credential paths, and the `rm -rf*` / `sudo*` deny rules still bound the blast radius. Review awk scripts before piping untrusted input into them. |
 | `tar*` | Archiving files during build or export tasks. | Required by build and packaging scripts. | Can overwrite files when extracting. The sandbox `allowWrite` limits the blast radius to `.` and `/tmp`. |
 | `mkdir*`, `cp*`, `mv*` | Creating directories and moving or copying files during setup and build tasks. | Required by install scripts and build targets. | `mv` and `cp` can overwrite files silently. Bounded by the sandbox `allowWrite` constraint. |
+| `pkill -f *` | Aborting stuck background commands (e.g. interrupting a running pre-commit hook, `make test`, or `git commit`) without a manual approval prompt each time. | Arbitrary kill patterns proved necessary during iteration — pre-approving only specific patterns required repeated allowlist edits for every new scenario. | High-risk: `pkill -f` accepts any regex, so a broad pattern (e.g. `.`) terminates every process the user owns, including desktop sessions, browsers, SSH, and the agent itself. SIGKILL can cause data loss in unsaved work. Consciously accepted trade-off: reliance on agent judgment and the Anthropic usage policy instead of a narrow per-pattern allowlist. Agents MUST use the narrowest possible pattern and prefer `wait`/background completion over killing. |
+
+### Process Management 🔪
+
+| Permission | When | Why | Security |
+|---|---|---|---|
+| `Read(~/.cache/pre-commit/**)` | Reading pre-commit's stashed patch files to restore unstaged changes after a manually aborted hook run. | When a long-running pre-commit hook (e.g. `make test`) is killed mid-run, pre-commit leaves unstaged changes in its patch cache; reading them is required to reapply via `git apply`. | Read-only access to a local cache directory containing repo diffs. No credentials are stored there. |
 
 ### Web Access 🌐
 
