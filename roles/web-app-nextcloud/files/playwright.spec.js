@@ -403,6 +403,22 @@ const talkTestServerErrorPatterns = [
   /Testing server seems to be broken/i
 ];
 
+// Positive success markers emitted by the spreed admin UI. The HPB signaling
+// server and the recording backend both auto-run their reachability check on
+// mount (HTTPS/WebSocket handshake) and render "OK: Running version: X" once
+// it succeeds. TURN/STUN require WebRTC-level UDP connectivity from the
+// browser to the coturn host, which is not guaranteed from a Playwright
+// container in a separate docker network, so those are only covered by the
+// error-absence assertion below, not by a positive marker here. The
+// "OK: Running version:" pattern is expected to appear at least twice
+// (signaling + recording) on a fully configured stack.
+const talkTestServerRequiredSuccessPatterns = [
+  {
+    label: "HPB signaling and recording backend versions",
+    pattern: /OK:\s*Running version:\s*\S+[\s\S]*?OK:\s*Running version:\s*\S+/i
+  }
+];
+
 async function clickAllTalkTestServerButtonsAndVerify(page) {
   // Spreed labels its signaling-server button "Test server" and the
   // STUN/TURN entries "Test this server". Match both.
@@ -425,12 +441,23 @@ async function clickAllTalkTestServerButtonsAndVerify(page) {
     "Expected at least one Talk 'Test server' / 'Test this server' button on the admin page"
   ).toBeGreaterThan(0);
 
-  // Server-side reachability checks (WebSocket handshake for HPB, STUN binding,
-  // TURN allocation) need time to round-trip. Give them a fixed window before
-  // scanning for error markers.
-  await page.waitForTimeout(10_000);
+  // Poll until every required success marker has rendered somewhere in the
+  // Talk admin panel. `page.evaluate(() => document.body.innerText)` is used
+  // instead of `page.locator("body").innerText()` because the latter triggers
+  // visibility checks that return empty on this admin layout.
+  const readBodyText = async () =>
+    page.evaluate(() => document.body ? document.body.innerText : "").catch(() => "");
 
-  const bodyText = await page.locator("body").innerText().catch(() => "");
+  for (const { label, pattern } of talkTestServerRequiredSuccessPatterns) {
+    await expect
+      .poll(readBodyText, {
+        timeout: 30_000,
+        message: `Expected Talk admin page to report ${label} test success after clicking its Test button`
+      })
+      .toMatch(pattern);
+  }
+
+  const bodyText = await readBodyText();
   for (const pattern of talkTestServerErrorPatterns) {
     expect(
       bodyText,
