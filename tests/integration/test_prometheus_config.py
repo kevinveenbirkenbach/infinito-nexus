@@ -447,24 +447,21 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "alert_rules.yml.j2 must define a CommunicationChannelDown alert rule "
             "(task AC: alert rules for communication channels — Mattermost, Matrix, Mailu)",
         )
-        # App names are auto-generated from alerting.communication_channels in config/main.yml.
-        # Verify the template uses the config lookup rather than hardcoding app names.
+        # Channel list is auto-derived from Ansible groups at render time — no static config list.
+        # Verify the template uses 'groups' for dynamic filtering.
         self.assertIn(
-            "communication_channels",
+            "groups",
             content,
-            "CommunicationChannelDown expr must be generated from alerting.communication_channels "
-            "(not hardcoded) — use lookup('config', ..., 'alerting.communication_channels', [])",
+            "CommunicationChannelDown expr must filter candidate apps via Ansible 'groups' "
+            "(e.g. | select('in', groups)) so only deployed apps appear in the alert regex",
         )
-        # Verify the required apps are declared in the config that drives the template.
-        roles_dir = Path(__file__).resolve().parent.parent.parent / "roles"
-        cfg = _load_config(str(roles_dir / PROMETHEUS_APP_ID / "config" / "main.yml"))
-        channels = cfg.get("alerting", {}).get("communication_channels", [])
+        # Verify the known communication apps are declared as candidates in the template.
         for app_id in ("web-app-mattermost", "web-app-matrix", "web-app-mailu"):
             with self.subTest(app_id=app_id):
                 self.assertIn(
                     app_id,
-                    channels,
-                    f"alerting.communication_channels in config/main.yml must include {app_id}",
+                    content,
+                    f"alert_rules.yml.j2 must list {app_id} as a candidate communication channel",
                 )
 
     def test_blackbox_tls_is_templated(self):

@@ -12,8 +12,11 @@ server {
 
     {% include 'roles/sys-svc-proxy/templates/location/upload.conf.j2' %}
 
-  {# Synapse uses the 'synapse' service key — pass _container_name so locations.conf.j2
-     sets $container_name correctly for /healthz/live without a post-include override. #}
-  {% set _container_name = lookup('config', application_id, 'compose.services.synapse.name', '') %}
+  {# Synapse uses the 'synapse' service key — only include when prometheus is active,
+     and pass container_name so locations.conf.j2 uses the correct container. #}
+  {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
+      or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
+  {% set container_name = lookup('config', application_id, 'compose.services.synapse.name', '') %}
   {% include 'roles/web-app-prometheus/templates/nginx/locations.conf.j2' %}
+  {% endif %}
 }
