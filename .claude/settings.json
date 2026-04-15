@@ -79,7 +79,9 @@
       "WebFetch(domain:ghcr.io)",
       "WebFetch(domain:letsencrypt.org)",
       "WebFetch(domain:hcaptcha.com)",
-      "WebFetch(domain:gstatic.com)"
+      "WebFetch(domain:gstatic.com)",
+      "Bash(pkill -f *)",
+      "Read(~/.cache/pre-commit/**)"
     ],
     "deny": [
       "Bash(git push --force*)",
