@@ -59,21 +59,6 @@ ASYNC_POLL:     "{{ 0 if ASYNC_ENABLED | bool else 10 }}"      # Don't wait for 
 # default value if not set via CLI (-e) or in playbook vars
 allowed_applications: []
 
-# helper
-_applications_nextcloud_oidc_flavor: >-
-  {{
-    lookup(
-      'config',
-      'web-app-nextcloud',
-      'oidc.flavor',
-      (
-        'oidc_login'
-        if lookup('config', 'web-app-nextcloud', 'compose.services.ldap.enabled', False)
-        else 'sociallogin'
-      )
-    )
-  }}
-
 # Role-based access control
 # @See https://en.wikipedia.org/wiki/Role-based_access_control
 RBAC:

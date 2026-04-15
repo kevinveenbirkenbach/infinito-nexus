@@ -1,7 +1,7 @@
 <?php
-# Implementing OICD configuration
+# Implementing OIDC configuration
 
-{% if lookup('config',application_id, 'oidc.flavor') == "oidc_login" %}
+{% if lookup('config',application_id, 'compose.services.oidc.flavor') == "oidc_login" %}
 
 # Check out: https://github.com/pulsejet/nextcloud-oidc-login
 
