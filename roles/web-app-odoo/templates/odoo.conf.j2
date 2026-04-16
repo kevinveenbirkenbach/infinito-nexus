@@ -1,0 +1,55 @@
+[options]
+; Database settings
+db_host = {{ ODOO_DB_HOST }}
+db_port = {{ ODOO_DB_PORT }}
+db_user = {{ ODOO_DB_USER }}
+db_password = {{ ODOO_DB_PASSWORD }}
+db_name = {{ ODOO_DB_NAME }}
+db_sslmode = prefer
+db_maxconn = 64
+db_template = template0
+
+; Admin settings
+admin_passwd = {{ ODOO_MASTER_PASSWORD }}
+list_db = False
+
+; Paths
+data_dir = /var/lib/odoo
+addons_path = /mnt/extra-addons,/mnt/custom-addons,/usr/lib/python3/dist-packages/odoo/addons
+
+; Logging
+log_level = info
+logfile = /var/log/odoo/odoo-server.log
+log_handler = :INFO
+
+; Server settings
+http_interface = 0.0.0.0
+http_port = 8069
+longpolling_port = 8072
+proxy_mode = True
+workers = 4
+max_cron_threads = 2
+limit_memory_hard = 2684354560
+limit_memory_soft = 2147483648
+limit_time_cpu = 600
+limit_time_real = 1200
+limit_time_real_cron = 600
+
+; SMTP settings
+smtp_server = {{ ODOO_SMTP_HOST }}
+smtp_port = {{ ODOO_SMTP_PORT }}
+smtp_user = {{ ODOO_SMTP_USER }}
+smtp_password = {{ ODOO_SMTP_PASSWORD }}
+smtp_ssl = {{ ODOO_SMTP_SSL | lower }}
+email_from = {{ users['no-reply'].email }}
+
+{% if ODOO_REDIS_ENABLED | bool %}
+; Redis session store
+session_store_redis = True
+session_store_redis_host = redis
+session_store_redis_port = 6379
+session_store_redis_prefix = odoo_session
+{% endif %}
+
+; Security
+server_wide_modules = base,web
