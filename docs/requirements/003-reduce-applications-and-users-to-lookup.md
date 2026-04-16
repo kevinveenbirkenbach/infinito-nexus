@@ -40,3 +40,23 @@ As a contributor, I want all access to application and user configuration to go 
 - [x] Unit tests cover the users lookup for the full-dict case, the single-entry case, the override case, the strict missing-entry case, and the non-strict missing-entry case.
 - [x] Before iterating on [.github/workflows/test-environment.yml](../../.github/workflows/test-environment.yml), the implementation is first iterated locally for `web-svc-dashboard` using the Role Loop defined in [iteration.md](../agents/action/iteration.md) until `web-svc-dashboard` deploys successfully at least once without errors.
 - [x] The implementation is iterated locally on [.github/workflows/test-environment.yml](../../.github/workflows/test-environment.yml) using the Workflow Loop defined in [iteration.md](../agents/action/iteration.md) (`ACT_WORKFLOW=.github/workflows/test-environment.yml ACT_JOB=test-environment ACT_MATRIX='dev_runtime_image:debian:bookworm' make act-workflow`) until the workflow passes end to end at least once without errors.
+
+## Verification
+
+- [ ] Playwright end-to-end tests exist for the following five `web-app-*` roles, each living in the role's own `files/playwright.spec.js` and wired through the existing [test-e2e-playwright](../../roles/test-e2e-playwright) role so that merged `applications` and `users` data is exercised through a real browser session. Each spec MUST follow the baseline rules in [playwright.md](../contributing/actions/testing/playwright.md) (file layout, runner integration, `when to write` scope) and SHOULD fulfill the authoring rules in [playwright.spec.js.md](../agents/files/role/playwright.spec.js.md) and [playwright.env.j2.md](../agents/files/role/playwright.env.j2.md) wherever the application under test allows it:
+  - [ ] [web-app-keycloak](../../roles/web-app-keycloak)
+  - [ ] [web-app-dashboard](../../roles/web-app-dashboard)
+  - [ ] [web-app-matomo](../../roles/web-app-matomo)
+  - [ ] [web-app-openwebui](../../roles/web-app-openwebui)
+  - [ ] [web-app-discourse](../../roles/web-app-discourse)
+- [ ] Each of those Playwright specs MUST exercise the lookup pathway end to end by covering:
+  - [ ] a login flow that authenticates as a user sourced from `lookup('users')`, proving that merged user data reaches the rendered UI.
+  - [ ] an OIDC flow from [web-app-dashboard](../../roles/web-app-dashboard) through [web-app-keycloak](../../roles/web-app-keycloak) into the application under test (where the app supports OIDC), proving that `lookup('applications')` drives cross-app integration.
+  - [ ] at least one DOM assertion that a value originating from `applications['<application_id>']` is rendered in the UI (for example the canonical domain, display title, or a feature flag reflected in the DOM).
+- [ ] Each of those Playwright specs MUST assert the effective Content Security Policy of the rendered application, and MUST fail when the policy regresses or is missing. The assertions MUST cover:
+  - [ ] the `Content-Security-Policy` response header values for `default-src`, `script-src`, `style-src`, `img-src`, `connect-src`, `frame-src`, `frame-ancestors`, `form-action`, `base-uri`, `object-src`, `worker-src`, `font-src`, and `media-src`.
+  - [ ] any `<meta http-equiv="Content-Security-Policy">` tag present in the rendered document, with both sources checked for parity when the application emits both.
+  - [ ] that the policy is enforced, not `Content-Security-Policy-Report-Only`.
+  - [ ] zero `securitypolicyviolation` events observed on `page` during the full test flow, captured via Playwright's `page.on('console')` and `page.on('pageerror')` listeners plus an explicit `window.addEventListener('securitypolicyviolation', ...)` hook.
+- [ ] Each of those Playwright specs MUST end in a logged-out state, MUST NOT contain `test.only` or `test.skip` in committed code, and MUST emit Playwright traces, screenshots, and video for failed runs so CI artifacts can be used for triage.
+- [ ] The five Playwright specs MUST run in the CI gate (for example as a matrix job in [.github/workflows/test-environment.yml](../../.github/workflows/test-environment.yml) or an equivalent gating workflow), MUST upload their failure artifacts to the CI run, and MUST block the merge when any of them fails.
