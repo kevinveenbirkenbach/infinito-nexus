@@ -1,0 +1,83 @@
+# General
+application_id:                     "web-app-odoo"
+entity_name:                        "{{ application_id | get_entity_name }}"
+
+# Database
+
+# Webserver
+webserver_client_max_body_size:     "100m"
+webserver_vhost_flavour:            "ws_generic"
+webserver_websocket_location:       "/websocket"
+websocket_port:                     "{{ ports.localhost.websocket[application_id] }}"
+
+# Odoo
+
+## Container
+ODOO_VERSION:                       "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~'.version') }}"
+ODOO_IMAGE:                         "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~'.image') }}"
+ODOO_CUSTOM_IMAGE:                  "{{ entity_name }}_custom:{{ ODOO_VERSION }}"
+ODOO_CONTAINER:                     "{{ lookup('config', application_id, 'compose.services.' ~ entity_name ~'.name') }}"
+ODOO_SERVICE:                       "{{ entity_name }}"
+
+## Volumes
+ODOO_DATA_VOLUME:                   "{{ lookup('config', application_id, 'compose.volumes.data') }}"
+ODOO_ADDONS_VOLUME:                 "{{ lookup('config', application_id, 'compose.volumes.addons') }}"
+ODOO_CONFIG_VOLUME:                 "{{ lookup('config', application_id, 'compose.volumes.config') }}"
+
+## Configuration Paths
+ODOO_CONF_FILE_HOST:                "{{ lookup('container', application_id, 'directories.volumes') }}odoo.conf"
+ODOO_ADDONS_HOST:                   "{{ lookup('container', application_id, 'directories.volumes') }}addons/"
+
+## URLs
+ODOO_URL:                           "{{ lookup('tls', application_id, 'url.base') }}"
+
+## Feature Flags
+ODOO_OIDC_ENABLED:                  "{{ lookup('config', application_id, 'compose.services.oidc.enabled') }}"
+ODOO_LDAP_ENABLED:                  "{{ lookup('config', application_id, 'compose.services.ldap.enabled') }}"
+ODOO_REDIS_ENABLED:                 "{{ lookup('config', application_id, 'compose.services.redis.enabled') }}"
+
+## Admin
+ODOO_ADMINISTRATOR_USERNAME:        "{{ users.administrator.username }}"
+ODOO_ADMINISTRATOR_PASSWORD:        "{{ users.administrator.password }}"
+ODOO_ADMINISTRATOR_EMAIL:           "{{ users.administrator.email }}"
+
+## Master Password
+ODOO_MASTER_PASSWORD:               "{{ lookup('config', application_id, 'credentials.master_password') }}"
+
+## Modules
+ODOO_MODULES_CORE:                  "{{ lookup('config', application_id, 'modules.core') }}"
+ODOO_MODULES_OPTIONAL:              "{{ lookup('config', application_id, 'modules.optional') }}"
+
+## Database Settings
+ODOO_DB_HOST:                       "{{ lookup('database', application_id, 'host') }}"
+ODOO_DB_NAME:                       "{{ lookup('database', application_id, 'name') }}"
+ODOO_DB_USER:                       "{{ lookup('database', application_id, 'username') }}"
+ODOO_DB_PASSWORD:                   "{{ lookup('database', application_id, 'password') }}"
+ODOO_DB_PORT:                       "{{ lookup('database', application_id, 'port') }}"
+
+## Email Settings
+ODOO_SMTP_HOST:                     "{{ SYSTEM_EMAIL_HOST }}"
+ODOO_SMTP_PORT:                     "{{ SYSTEM_EMAIL_PORT | default(587) }}"
+ODOO_SMTP_USER:                     "{{ users['no-reply'].email }}"
+ODOO_SMTP_PASSWORD:                 "{{ users['no-reply'].tokens['web-app-mailu'] }}"
+ODOO_SMTP_SSL:                      "{{ lookup('tls', application_id, 'enabled') }}"
+
+## LDAP Settings
+ODOO_LDAP_SERVER:                   "{{ LDAP.SERVER.REACH_DOMAIN }}"
+ODOO_LDAP_PORT:                     "{{ LDAP.SERVER.PORT }}"
+ODOO_LDAP_BASE_DN:                  "{{ LDAP.DN.OU.USERS }}"
+ODOO_LDAP_BIND_DN:                  "{{ LDAP.USERS.SERVICE_ACCOUNT.DN }}"
+ODOO_LDAP_BIND_PASSWORD:            "{{ LDAP.USERS.SERVICE_ACCOUNT.PASSWORD }}"
+ODOO_LDAP_FILTER:                   "(uid=%s)"
+ODOO_LDAP_USER_ATTR:                "uid"
+ODOO_LDAP_CREATE_USER:              true
+ODOO_LDAP_TLS:                      "{{ LDAP.SERVER.SSL }}"
+
+## OIDC Settings
+ODOO_OIDC_CLIENT_ID:                "{{ OIDC.CLIENT.ID }}"
+ODOO_OIDC_CLIENT_SECRET:            "{{ OIDC.CLIENT.SECRET }}"
+ODOO_OIDC_ISSUER_URL:               "{{ OIDC.CLIENT.ISSUER_URL }}"
+ODOO_OIDC_AUTHORIZE_URL:            "{{ OIDC.CLIENT.AUTHORIZE_URL }}"
+ODOO_OIDC_TOKEN_URL:                "{{ OIDC.CLIENT.TOKEN_URL }}"
+ODOO_OIDC_USERINFO_URL:             "{{ OIDC.CLIENT.USER_INFO_URL }}"
+ODOO_OIDC_JWKS_URI:                 "{{ OIDC.CLIENT.CERTS }}"
