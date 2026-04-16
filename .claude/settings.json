@@ -26,7 +26,6 @@
       "Bash(git commit*)",
       "Bash(git push*)",
       "Bash(docker run*)",
-      "Bash(curl*)",
       "Bash(gh api*)",
       "Bash(gh workflow run*)"
     ]

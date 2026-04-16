@@ -63,7 +63,6 @@ These operations pause and require explicit operator approval before executing, 
 | `git commit*` | Creating a permanent history entry. | The operator MUST review the staged diff and message before committing. | Commits are persistent and visible to all contributors after push. |
 | `git push*` | Publishing changes to the remote. | Cannot be undone without a force-push. | Exposes changes to all repository collaborators and CI. |
 | `docker run*` | Starting a standalone container outside the compose stack. | Each invocation carries a unique risk profile depending on flags. | Can mount host paths, expose ports, and run privileged containers. |
-| `curl*` | Making HTTP requests to arbitrary URLs from the shell. | Distinct from `WebFetch`: `curl` can transmit local data, post bodies, and use credentials. | Risk depends entirely on the URL and flags used. Every invocation MUST be reviewed. |
 | `gh api*` | Making direct GitHub REST or GraphQL API calls. | Can modify branch protection, secrets, webhooks, collaborators, and workflow triggers. | Supports arbitrary HTTP methods (`-X POST/PATCH/DELETE`). Each invocation MUST be reviewed individually. |
 | `gh workflow run*` | Triggering a CI workflow run on the remote. | Consumes runner minutes, executes with workflow secrets, and produces remotely-visible results. Equivalent in effect to `git push` for triggered runs. | Each invocation MUST be reviewed to confirm the target workflow and inputs. |
 
