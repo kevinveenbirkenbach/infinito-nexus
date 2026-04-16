@@ -29,6 +29,7 @@ Present the summary once per session. Do not repeat it unless the operator expli
 - You SHOULD run sandbox-confined commands directly on the host. The sandbox bounds what they can read, write, and reach — see [sandbox.md](docs/contributing/tools/agents/claude/sandbox.md).
 - For commands that legitimately cannot run inside the sandbox (e.g. operations needing access to `~/.ssh` or `~/.gnupg`), use `make up` to start the stack and `make exec` to drop into a container shell. The repository is mounted at `/opt/src/infinito` (see [compose.yml](compose.yml)), so code changes are immediately available there.
 - Commands listed under `permissions.ask` in [.claude/settings.json](.claude/settings.json) (e.g. `git commit`, `git push`, `curl`, `gh api`) still pause for explicit operator confirmation regardless of sandbox state.
+- You MUST prefer single-command forms over shell control structures when the task can be expressed either way. For scanning multiple files for patterns, use one `grep` invocation with multiple file arguments (e.g. `grep -nE 'pattern' file1 file2 file3`) or the built-in Grep tool — do NOT wrap per-file `grep` calls inside `for`/`while` loops. Avoid `for`/`while` loops, nested pipes, and multi-statement `;`/`&&` chains for operations that have a native single-command equivalent. Reason: shell control structures frequently fall outside the sandbox auto-allow heuristic and trigger unnecessary approval prompts, even when every subcommand would individually auto-allow.
 
 ## Configuration 🛠️
 
