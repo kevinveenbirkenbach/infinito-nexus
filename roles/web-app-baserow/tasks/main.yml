@@ -26,3 +26,9 @@
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
   changed_when: "'created' in (baserow_bootstrap_admin_result.stdout | default(''))"
   failed_when: baserow_bootstrap_admin_result.rc != 0
+  # Retry while Baserow's container entrypoint is still running Django
+  # migrations on a fresh DB. Without this the very first deploy races the
+  # auth_user table creation and fails with UndefinedTable.
+  retries: 60
+  delay: 5
+  until: baserow_bootstrap_admin_result.rc == 0
