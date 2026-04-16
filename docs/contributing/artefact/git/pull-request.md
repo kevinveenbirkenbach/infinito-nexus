@@ -17,7 +17,7 @@ You MUST pick the template that matches your change. The table below links the a
 
 Branch names MUST follow the naming conventions defined in [branch.md](branch.md). The branch prefix MUST match the type of change and is used to classify the PR scope and select the CI pipeline.
 
-The protection rules enforced on `main` are documented in [branch.md](../../tools/github/branch.md).
+The protection rules enforced on `main` are documented in [branch.md](../../tools/github/branch/security.md).
 
 ## Forking Flow 🍴
 

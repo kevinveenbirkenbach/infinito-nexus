@@ -71,11 +71,7 @@ class DatabaseLookupTests(unittest.TestCase):
     def test_no_dbtype_configured_returns_empty_like_vars_logic(self):
         applications = {
             "web-app-foo": {
-                "compose": {
-                    "services": {
-                        "database": {"type": "", "enabled": False, "shared": False}
-                    }
-                },
+                "compose": {"services": {}},
                 "credentials": {"database_password": "pw"},
             }
         }
@@ -127,17 +123,11 @@ class DatabaseLookupTests(unittest.TestCase):
             )
 
     def test_postgres_dedicated_matches_helper_variables_definition(self):
-        # Consumer config: database.type=postgres, shared=false
+        # Consumer config: postgres enabled locally (shared=false)
         applications = {
             "web-app-foo": {
                 "compose": {
-                    "services": {
-                        "database": {
-                            "type": "postgres",
-                            "enabled": True,
-                            "shared": False,
-                        }
-                    }
+                    "services": {"postgres": {"enabled": True, "shared": False}}
                 },
                 "credentials": {"database_password": "pw"},
             },
@@ -209,13 +199,7 @@ class DatabaseLookupTests(unittest.TestCase):
         applications = {
             "web-app-foo": {
                 "compose": {
-                    "services": {
-                        "database": {
-                            "type": "postgres",
-                            "enabled": True,
-                            "shared": True,
-                        }
-                    }
+                    "services": {"postgres": {"enabled": True, "shared": True}}
                 },
                 "credentials": {"database_password": "pw"},
             },
@@ -268,13 +252,7 @@ class DatabaseLookupTests(unittest.TestCase):
         applications = {
             "web-app-foo": {
                 "compose": {
-                    "services": {
-                        "database": {
-                            "type": "mariadb",
-                            "enabled": True,
-                            "shared": False,
-                        }
-                    }
+                    "services": {"mariadb": {"enabled": True, "shared": False}}
                 },
                 "credentials": {"database_password": "pw"},
             },
@@ -320,8 +298,7 @@ class DatabaseLookupTests(unittest.TestCase):
             "web-app-foo": {
                 "compose": {
                     "services": {
-                        "database": {
-                            "type": "postgres",
+                        "postgres": {
                             "enabled": True,
                             "shared": False,
                             "version": "15",
@@ -363,6 +340,28 @@ class DatabaseLookupTests(unittest.TestCase):
 
         # consumer override should win:
         self.assertEqual(out["version"], "15")
+
+    def test_multiple_database_services_raise(self):
+        applications = {
+            "web-app-foo": {
+                "compose": {
+                    "services": {
+                        "mariadb": {"enabled": True, "shared": False},
+                        "postgres": {"enabled": True, "shared": False},
+                    }
+                }
+            }
+        }
+        vars_ = {
+            "applications": applications,
+            "ports": {"localhost": {"database": {}}},
+            "DIR_COMPOSITIONS": "/opt/compose/",
+        }
+
+        lookup = self._make_lookup(vars_)
+
+        with self.assertRaises(AnsibleError):
+            lookup.run(["web-app-foo"], variables=vars_)
 
 
 if __name__ == "__main__":

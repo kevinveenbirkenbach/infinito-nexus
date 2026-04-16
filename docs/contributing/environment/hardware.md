@@ -40,7 +40,7 @@ For a broad stack like the Community Hub, you SHOULD start only the services you
 You MAY set the `SERVICES_DISABLED` environment variable before creating the inventory to disable services automatically across all applications without editing any file:
 
 ```bash
-SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS=web-app-discourse
+make deploy-fresh-purged-apps APPS=web-app-discourse SERVICES_DISABLED="matomo"
 ```
 
 This sets `enabled: false` and `shared: false` for every listed service in the generated inventory. See [variables.md](variables.md) for details.
@@ -73,13 +73,13 @@ On small machines, you SHOULD limit validation to the role you are touching.
 For Discourse, start with:
 
 ```bash
-SERVICES_DISABLED="matomo" APPS=web-app-discourse make deploy-fresh-purged-apps
+make deploy-fresh-purged-apps APPS=web-app-discourse SERVICES_DISABLED="matomo"
 ```
 
 If the local inventory and stack already exist, you SHOULD reuse them:
 
 ```bash
-SERVICES_DISABLED="matomo" APPS=web-app-discourse make deploy-reuse-kept-apps
+make deploy-reuse-kept-apps APPS=web-app-discourse SERVICES_DISABLED="matomo"
 ```
 
 You SHOULD use `make deploy-fresh-kept-all` only when you need broad coverage and have enough time and resources.
@@ -106,7 +106,7 @@ On WSL2 or Windows, you MUST pass the additional flag to also configure and run 
 Windows manages its own system caches independently from Linux and Docker:
 
 ```bash
-PURGE_WINDOWS_CLEANMGR_SETUP=true make system-purge
+make system-purge PURGE_WINDOWS_CLEANMGR_SETUP=true
 ```
 
 ### Further Information

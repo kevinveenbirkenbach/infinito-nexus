@@ -16,7 +16,7 @@ The branch prefix MUST match the type of change. The [PR workflow](pull-request.
 
 ## Enforcement 🔒
 
-All rules in this document are actively enforced on `main` via GitHub branch protection. See [branch.md](../../tools/github/branch.md) for the full enforcement policy.
+All rules in this document are actively enforced on `main` via GitHub branch protection. See [branch.md](../../tools/github/branch/security.md) for the full enforcement policy.
 
 ## Naming Conventions 🏷️
 

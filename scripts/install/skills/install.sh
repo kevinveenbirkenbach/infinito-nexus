@@ -21,3 +21,24 @@ cd "${REPO_ROOT}"
 log "skills: restoring from skills-lock.json..."
 npx --yes skills experimental_install
 log "skills: installation complete."
+
+# Claude Code discovers project skills in .claude/skills/, but `skills experimental_install`
+# writes to .agents/skills/. Symlink .claude/skills -> .agents/skills so Claude Code picks them up.
+skills_src="${REPO_ROOT}/.agents/skills"
+skills_link="${REPO_ROOT}/.claude/skills"
+
+if [[ ! -d "${skills_src}" ]]; then
+	warn "skills: ${skills_src} not found — skipping .claude/skills symlink."
+	exit 0
+fi
+
+mkdir -p "${REPO_ROOT}/.claude"
+
+if [[ -L "${skills_link}" ]]; then
+	ln -sfn "../.agents/skills" "${skills_link}"
+elif [[ -e "${skills_link}" ]]; then
+	warn "skills: ${skills_link} exists and is not a symlink — skipping."
+else
+	ln -s "../.agents/skills" "${skills_link}"
+fi
+log "skills: linked .claude/skills -> ../.agents/skills. Restart Claude Code to load new skills."

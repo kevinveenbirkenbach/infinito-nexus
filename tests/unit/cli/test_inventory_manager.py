@@ -62,13 +62,11 @@ class TestInventoryManager(unittest.TestCase):
             return {"application_id": "testapp"}
 
         # Return docker service flags for config/main.yml
-        # NOTE: "type" is intentionally omitted; this test stubs out
-        # resolve_schema_includes_recursive() to avoid provider resolution.
         if path.match("*/config/main.yml"):
             return {
                 "compose": {
                     "services": {
-                        "database": {"enabled": True, "shared": True},
+                        "mariadb": {"enabled": True, "shared": True},
                     }
                 }
             }
@@ -161,8 +159,7 @@ class TestInventoryManager(unittest.TestCase):
         mgr = InventoryManager(role_dir, inv_file, "pw", overrides=overrides)
 
         # IMPORTANT:
-        # This unit test is NOT about transitive "shared provider" resolution.
-        # Stub it out so missing database.type in config does not trigger sys.exit(1).
+        # This unit test is NOT about transitive shared-provider resolution.
         with patch.object(
             InventoryManager, "resolve_schema_includes_recursive", return_value=[]
         ):

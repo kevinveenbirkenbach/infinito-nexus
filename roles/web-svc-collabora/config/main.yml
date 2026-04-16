@@ -25,9 +25,9 @@ compose:
       backup:
         disabled: true
       enabled: false
-    database: 
-      enabled: false
     collabora:
+      enabled:          false
+      shared:           true
       image:            collabora/code
       version:          latest
       name:             collabora

@@ -19,4 +19,5 @@ galaxy_info:
     versions:
     - all
   lifecycle: beta
-
+  run_after:
+  - web-svc-file

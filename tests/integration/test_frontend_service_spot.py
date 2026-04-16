@@ -1,67 +1,47 @@
-import pathlib
 import unittest
+from pathlib import Path
 
-import yaml
+from utils.service_registry import (
+    build_service_registry_from_roles_dir,
+    load_applications_from_roles_dir,
+    ordered_primary_service_entries,
+)
 
 
 class TestFrontendServiceSpot(unittest.TestCase):
-    def test_service_registry_does_not_use_load_phase(self):
-        service_registry = yaml.safe_load(
-            pathlib.Path("group_vars/all/20_services.yml").read_text(encoding="utf-8")
-        )["SERVICE_REGISTRY"]
-
-        for key, entry in service_registry.items():
-            with self.subTest(service=key):
-                self.assertNotIn("load_phase", entry)
-
-    def test_server_stage_loads_frontend_services_before_server_groups(self):
-        tasks = yaml.safe_load(
-            pathlib.Path("tasks/stages/02_server.yml").read_text(encoding="utf-8")
+    def setUp(self):
+        self.repo_root = Path(__file__).resolve().parents[2]
+        self.roles_dir = self.repo_root / "roles"
+        self.applications = load_applications_from_roles_dir(self.roles_dir)
+        self.service_registry = build_service_registry_from_roles_dir(self.roles_dir)
+        self.ordered = ordered_primary_service_entries(
+            self.service_registry,
+            self.roles_dir,
         )
 
-        setup_server_base = next(
-            (
-                task
-                for task in tasks
-                if isinstance(task, dict) and task.get("name") == "Setup server base"
-            ),
-            None,
-        )
-        server_roles_index = next(
-            (
-                idx
-                for idx, task in enumerate(tasks)
-                if isinstance(task, dict) and task.get("name") == "Include server roles"
-            ),
-            None,
-        )
+    def _index(self, role_name: str) -> int:
+        for index, entry in enumerate(self.ordered):
+            if entry["role"] == role_name:
+                return index
+        self.fail(f"Role {role_name} not found in ordered service registry")
 
-        self.assertIsNotNone(setup_server_base)
-        self.assertIsNotNone(server_roles_index)
-        self.assertIn(
-            "sys-utils-service-loader",
-            setup_server_base.get("loop", []),
-        )
+    def test_bucket_order_is_monotonic(self):
+        bucket_order = {
+            "universal": 0,
+            "workstation": 1,
+            "server": 2,
+            "web-svc": 3,
+            "web-app": 4,
+        }
+        actual = [bucket_order[entry["bucket"]] for entry in self.ordered]
+        self.assertEqual(actual, sorted(actual))
 
-    def test_load_app_does_not_load_frontend_services(self):
-        content = pathlib.Path("tasks/utils/load_app.yml").read_text(encoding="utf-8")
-        self.assertNotIn("load_services", content)
+    def test_dashboard_is_loaded_after_matomo(self):
+        self.assertLess(self._index("web-app-matomo"), self._index("web-app-dashboard"))
 
-    def test_frontend_service_loader_lives_in_role(self):
-        self.assertTrue(
-            pathlib.Path("roles/sys-utils-service-loader/tasks/main.yml").is_file()
-        )
-        self.assertTrue(
-            pathlib.Path(
-                "roles/sys-utils-service-loader/tasks/load_frontend_service.yml"
-            ).is_file()
-        )
-
-    def test_sys_front_inj_all_no_longer_loads_services(self):
-        content = pathlib.Path("roles/sys-front-inj-all/tasks/main.yml").read_text(
-            encoding="utf-8"
-        )
-        self.assertNotIn("01_services.yml", content)
+    def test_keycloak_respects_run_after_dependencies(self):
+        self.assertLess(self._index("web-app-matomo"), self._index("web-app-keycloak"))
+        self.assertLess(self._index("web-app-mailu"), self._index("web-app-keycloak"))
 
 
 if __name__ == "__main__":

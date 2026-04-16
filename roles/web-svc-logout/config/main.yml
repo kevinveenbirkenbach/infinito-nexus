@@ -24,7 +24,7 @@ compose:
   services:
     logout:
       enabled:          false
-      shared:           false
+      shared:           true
       image:            "ghcr.io/kevinveenbirkenbach/universal-logout"
       version:          "latest"
       name:             "logout"

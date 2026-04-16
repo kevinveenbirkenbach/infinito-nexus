@@ -1,5 +1,5 @@
-import os
 import unittest
+from pathlib import Path
 
 import yaml
 
@@ -8,17 +8,7 @@ from plugins.lookup.service import LookupModule
 
 class TestServiceTransitiveDependencies(unittest.TestCase):
     def setUp(self):
-        self.repo_root = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..")
-        )
-
-        service_registry_file = os.path.join(
-            self.repo_root, "group_vars", "all", "20_services.yml"
-        )
-        with open(service_registry_file, encoding="utf-8") as handle:
-            data = yaml.safe_load(handle) or {}
-        self.service_registry = data.get("SERVICE_REGISTRY", {})
-
+        self.repo_root = Path(__file__).resolve().parents[2]
         self.applications = {
             "web-app-dashboard": self._load_yaml(
                 "roles", "web-app-dashboard", "config", "main.yml"
@@ -32,9 +22,8 @@ class TestServiceTransitiveDependencies(unittest.TestCase):
         }
 
     def _load_yaml(self, *parts):
-        path = os.path.join(self.repo_root, *parts)
-        with open(path, encoding="utf-8") as handle:
-            return yaml.safe_load(handle) or {}
+        path = self.repo_root.joinpath(*parts)
+        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
     def test_dashboard_needs_file_transitively_via_asset_service(self):
         result = LookupModule().run(
@@ -42,7 +31,6 @@ class TestServiceTransitiveDependencies(unittest.TestCase):
             variables={
                 "applications": self.applications,
                 "group_names": ["web-app-dashboard"],
-                "SERVICE_REGISTRY": self.service_registry,
             },
         )[0]
 

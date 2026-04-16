@@ -42,4 +42,6 @@
     - sys-ctl-rpr-container-hard
   loop_control:
     loop_var: service_role
-  when: COMPOSE_LOAD_SERVICES | bool
+  when:
+    - COMPOSE_LOAD_SERVICES | bool
+    - not (_service_loader_preloading | default(false) | bool)

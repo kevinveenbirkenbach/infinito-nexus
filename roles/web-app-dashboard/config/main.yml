@@ -47,6 +47,7 @@ compose:
       shared:   true
     dashboard:
       enabled:  false
+      shared:   true
       name:     "dashboard"
       image:    "ghcr.io/kevinveenbirkenbach/port-ui"
       version:  "1.1.0"

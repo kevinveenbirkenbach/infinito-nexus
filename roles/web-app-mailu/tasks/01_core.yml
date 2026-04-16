@@ -35,11 +35,6 @@
     webserver_vhost_flavour:        "basic"
     domain:                         "{{ MAILU_HOSTNAME }}"
 
-- name: "Include Cert deploy service for '{{ role_name }}'"
-  include_role:
-    name: sys-ctl-mtn-cert-deploy
-  when: lookup('tls', application_id, 'enabled') | bool
-
 - name: "Flush Docker Compose handlers"
   meta: flush_handlers
 
@@ -67,6 +62,13 @@
   loop_control:
     loop_var: user_item
   no_log: "{{ MASK_CREDENTIALS_IN_LOGS | bool }}"
+
+- name: "Include Cert deploy service for '{{ role_name }}'"
+  include_role:
+    name: sys-ctl-mtn-cert-deploy
+  when: lookup('tls', application_id, 'enabled') | bool
+  # Alarm mail setup reaches sys-svc-mail and therefore requires the Mailu
+  # API token that is created in 03_manage_user.yml.
 
 - name: Generate DKIM public key
   include_tasks: 04_generate-and-read-dkim.yml

@@ -39,11 +39,12 @@ compose:
       backup:
         disabled: true
       enabled: true
-    database:
-      shared: true
-      type: "postgres"
+    postgres:
       enabled: true
+      shared: true
     onlyoffice:
+      enabled:          false
+      shared:           true
       image:            "onlyoffice/documentserver"
       version:          "latest"
       name:             "onlyoffice"

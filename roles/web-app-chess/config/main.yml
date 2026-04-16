@@ -12,10 +12,9 @@ compose:
     matomo:
       enabled: true
       shared: true
-    database:
-      shared:   true
-      type:     "postgres"
-      enabled:  true
+    postgres:
+      enabled: true
+      shared: true
     chess:
       image:              "ghcr.io/kevinveenbirkenbach/fedi-chess"
       version:            "v1.0.1"

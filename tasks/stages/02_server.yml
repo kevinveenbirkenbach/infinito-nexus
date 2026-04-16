@@ -11,7 +11,6 @@
     - sys-ctl-cln-disc-space     # Reclaim disk space by cleaning temporary system data
     - sys-ctl-hlth-btrfs         # Check Btrfs filesystem health and error counters
     - sys-ctl-rpr-btrfs-balancer # Install and configure automatic Btrfs balancing
-    - sys-utils-service-loader   # Preload shared frontend services before web-svc and web-app roles
   loop_control:
     loop_var: server_role
 

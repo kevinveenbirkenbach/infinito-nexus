@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/lib.sh"
 
 echo "Deploying dashboard with matomo disabled to verify SERVICES_DISABLED suppresses the shared service in the inventory."
-SERVICES_DISABLED="matomo" make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}"
+make deploy-fresh-purged-apps APPS="${DASHBOARD_APP}" SERVICES_DISABLED="matomo"
 inspect
 
 echo "Trusting the local CA certificate so HTTPS endpoints are reachable from the host."

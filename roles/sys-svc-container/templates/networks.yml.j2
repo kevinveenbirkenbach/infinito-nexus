@@ -1,27 +1,44 @@
 {# This template needs to be included in compose.yml containers #}
+{% set _db_provider_role = application_id if application_id in ['svc-db-mariadb', 'svc-db-postgres'] else '' %}
+{% set _db_role_id = _db_provider_role or lookup('database', application_id, 'id') %}
+{% set _db_network_name = lookup('config', _db_role_id, 'compose.network', False) if _db_role_id else '' %}
+{% set _db_network_alias = (application_id | get_entity_name) if _db_provider_role else lookup('database', application_id, 'type') %}
+{% set _service_registry = query('service_registry') | first %}
+{% set _ldap_provider_role = _service_registry.get('ldap', {}).get('role', '') %}
+{% set _ldap_network_name = lookup('config', _ldap_provider_role, 'compose.network', False) if _ldap_provider_role else '' %}
+{% set _ldap_shared = application_id == _ldap_provider_role or (
+  lookup('config', application_id, 'compose.services.ldap.enabled', False)
+  and lookup('config', application_id, 'compose.services.ldap.shared', False)
+) %}
+{% set _ollama_provider_role = _service_registry.get('ollama', {}).get('role', '') %}
+{% set _ollama_network_name = lookup('config', _ollama_provider_role, 'compose.network', False) if _ollama_provider_role else '' %}
+{% set _ollama_shared = application_id == _ollama_provider_role or (
+  lookup('config', application_id, 'compose.services.ollama.enabled', False)
+  and lookup('config', application_id, 'compose.services.ollama.shared', False)
+) %}
     networks:
 {# Central RDMS-Database Network #}
 {% if 
   (
-    lookup('config',application_id, 'compose.services.database.enabled', False) and 
+    lookup('database', application_id, 'enabled') and
     lookup('database', application_id, 'shared')
   )
   or
   application_id in ['svc-db-mariadb','svc-db-postgres']
 %}
-      {{ lookup('config', lookup('database', application_id, 'id'), 'compose.network') }}:
+      {{ _db_network_name }}:
 {% if application_id in ['svc-db-mariadb','svc-db-postgres'] %}
           aliases:
-            - {{ lookup('database', application_id, 'type') }}
+            - {{ _db_network_alias }}
 {% endif %}
 {% endif %}
 {# Central LDAP Network #}
-{% if lookup('config',application_id, 'compose.services.ldap.shared', False) and lookup('config','svc-db-openldap', 'network.compose') %}
-      {{ lookup('config','svc-db-openldap', 'compose.network') }}:
+{% if _ldap_shared and _ldap_network_name %}
+      {{ _ldap_network_name }}:
 {% endif %}
 {# Central AI Network #}
-{% if lookup('config',application_id, 'compose.services.ollama.shared', False) %}
-      {{ lookup('config','svc-ai-ollama', 'compose.network') }}:
+{% if _ollama_shared and _ollama_network_name %}
+      {{ _ollama_network_name }}:
 {% endif %}
 {% if not application_id.startswith('svc-db-') and not application_id.startswith('svc-ai-') %}
       default:

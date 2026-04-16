@@ -21,7 +21,7 @@ endif
 	test lint lint-action lint-ansible lint-python lint-shellcheck autoformat test-lint test-unit test-integration test-external test-deploy test-deploy-app \
 	clean clean-sudo down \
 	system-purge system-disk-usage \
-	list tree mig dockerignore \
+	list tree mig dockerignore chmod-scripts \
 	print-python \
 	dns-setup dns-remove \
 	environment-bootstrap environment-teardown \
@@ -143,6 +143,10 @@ down:
 # Stop the development stack without removing volumes.
 stop:
 	@"$${PYTHON}" -m cli.deploy.development stop
+
+# Mark all shell scripts under scripts/ as executable.
+chmod-scripts:
+	@find scripts/ -name "*.sh" -exec chmod +x {} \;
 
 # Print the repository role list.
 list:

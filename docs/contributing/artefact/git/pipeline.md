@@ -104,6 +104,12 @@ The final `done` job aggregates all deploy, install, and development gates. CI i
 
 - PR pipelines use `cancel-in-progress: true` so only the newest run per PR and event type is active.
 - The orchestrator uses `cancel-in-progress: false` to avoid interrupting long-running deploy tests mid-flight.
+- The push entry workflow (`entry-push-latest.yml`) defaults to `cancel-in-progress: true` but respects the
+  repository variable `CI_CANCEL_IN_PROGRESS`. Set it to `false` under
+  **Settings → Secrets and variables → Actions → Variables** to prevent in-progress runs from being cancelled
+  on the `main` / feature branches. Any other value (or no value) keeps the default cancel behaviour.
+
+See [configuration.md](../../tools/github/branch/configuration.md) for all repository variables that control CI behaviour.
 
 ## Fork PRs 🍴
 

@@ -1,7 +1,7 @@
 {# Base template for all compose.yml.j2 #}
 services:
 {# Load Database #}
-{% if applications | is_docker_service_enabled(application_id, 'database') %}
+{% if lookup('database', application_id, 'enabled') %}
 {% include 'roles/sys-svc-rdbms/templates/services/main.yml.j2' %}
 {% endif %}
 {# Load Redis #}

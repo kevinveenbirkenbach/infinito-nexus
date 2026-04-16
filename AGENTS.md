@@ -12,6 +12,23 @@ If agent instructions change during a conversation, the agent MAY not pick up th
 
 > "Re-read AGENTS.md and apply all updated instructions."
 
+## Permission Model
+
+The project defines a single, tool-independent permission policy in [`.claude/settings.json`](.claude/settings.json). Although the file lives under `.claude/`, its `permissions` section (`allow`, `ask`, `deny`) is the SPOT for what automated agents MAY do in this repository, regardless of the underlying agent (Claude Code, Codex, Gemini, or any other).
+
+Every agent MUST:
+
+- Read [`.claude/settings.json`](.claude/settings.json) at the start of each conversation and treat its `permissions` object as binding policy.
+- Match commands against the patterns exactly as Claude Code does: the command-line prefix is compared literally, `*` is a wildcard, and `deny` overrides `allow`.
+- Treat `deny` entries as unconditional blocks. Agents MUST NOT execute any command matching a `deny` pattern, even if their native tooling would otherwise permit it.
+- Treat `ask` entries as requiring an explicit, per-invocation operator confirmation in the current conversation before executing. A prior confirmation in another conversation MUST NOT be reused.
+- Treat `allow` entries as the only pre-authorized commands. Any command that does not match an `allow` pattern MUST be treated as `ask` by default.
+- Respect the `sandbox.filesystem` section: `allowWrite` bounds the write scope, and paths listed under `denyRead` MUST NOT be read.
+
+Agents that cannot technically enforce these rules (e.g. because their native runtime does not consult `.claude/settings.json`) MUST still follow the policy procedurally: before running a command, check it against the rules above and stop for confirmation when required.
+
+Changes to the permission policy MUST be made by editing [`.claude/settings.json`](.claude/settings.json) so that all agents share the same source of truth. The rationale for each entry is documented in [docs/contributing/tools/agents/claude.md](docs/contributing/tools/agents/claude.md).
+
 ## Role-Specific Instructions
 
 Individual roles MAY contain an `AGENTS.md` file with role-specific agent instructions.
@@ -30,4 +47,4 @@ The agent MUST NOT repeat this notice within the same conversation.
 
 ## For Humans
 
-Human contributors working alongside AI agents MUST read [here](docs/contributing/tools/agents.md).
+Human contributors working alongside AI agents MUST read [here](docs/contributing/tools/agents/common.md).

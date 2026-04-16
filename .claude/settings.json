@@ -4,32 +4,38 @@
       "Read",
       "Edit",
       "Write",
-
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
       "Bash(git add*)",
+      "Bash(git mv*)",
+      "Bash(git rm*)",
       "Bash(git checkout*)",
       "Bash(git branch*)",
       "Bash(git fetch*)",
       "Bash(git stash*)",
+      "Bash(git cherry-pick*)",
+      "Bash(git apply*)",
       "Bash(git -C:*)",
-
+      "Bash(gh run*)",
       "Bash(make*)",
       "Bash(act*)",
-
+      "Bash(bash -n*)",
+      "Bash(bash scripts/*)",
+      "Bash(source scripts/*)",
+      "Bash(scripts/*)",
+      "Bash(chmod +x scripts/*)",
+      "Bash(wait*)",
       "Bash(python3*)",
       "Bash(python*)",
       "Bash(pip show*)",
       "Bash(pip list*)",
       "Bash(pip install*)",
-
       "Bash(ansible-lint*)",
       "Bash(ansible-inventory*)",
       "Bash(ansible --version*)",
       "Bash(ansible-playbook --check*)",
       "Bash(ansible-playbook --syntax-check*)",
-
       "Bash(docker pull*)",
       "Bash(docker build*)",
       "Bash(docker images*)",
@@ -42,7 +48,6 @@
       "Bash(docker rmi*)",
       "Bash(docker compose*)",
       "Bash(docker exec*)",
-
       "Bash(grep*)",
       "Bash(find*)",
       "Bash(ls*)",
@@ -56,7 +61,7 @@
       "Bash(cp*)",
       "Bash(mv*)",
       "Bash(jq*)",
-
+      "Bash(awk*)",
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
@@ -76,24 +81,24 @@
       "WebFetch(domain:ghcr.io)",
       "WebFetch(domain:letsencrypt.org)",
       "WebFetch(domain:hcaptcha.com)",
-      "WebFetch(domain:gstatic.com)"
+      "WebFetch(domain:gstatic.com)",
+      "Bash(pkill -f *)",
+      "Read(~/.cache/pre-commit/**)"
     ],
-
-    "ask": [
-      "Bash(git commit*)",
-      "Bash(git push*)",
-      "Bash(docker run*)",
-      "Bash(curl*)"
-    ],
-
     "deny": [
       "Bash(git push --force*)",
       "Bash(git reset --hard*)",
       "Bash(rm -rf*)",
       "Bash(sudo*)"
+    ],
+    "ask": [
+      "Bash(git commit*)",
+      "Bash(git push*)",
+      "Bash(docker run*)",
+      "Bash(curl*)",
+      "Bash(gh api*)"
     ]
   },
-
   "sandbox": {
     "filesystem": {
       "allowWrite": [

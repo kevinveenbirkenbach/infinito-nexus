@@ -53,7 +53,7 @@ class LookupModule(LookupBase):
             config_path=config_path,
             strict=strict,
             default=default_value,
-            skip_missing_app=False,
+            skip_missing_app=not strict,
         )
 
         # lookup plugins must return a list

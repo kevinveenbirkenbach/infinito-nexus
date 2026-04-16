@@ -56,6 +56,7 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Setup development | `make mark-development` | Creates the development setup marker. | Use this when you want to prepare a development-specific setup state. |
 | Bootstrap | `make bootstrap` | Installs dependencies and prepares the project. | Use this on a fresh machine or a new checkout. |
 | Setup clean | `make setup-clean` | Cleans ignored files and then runs setup. | Use this when you want a clean setup pass. |
+| Mark scripts executable | `make chmod-scripts` | Marks all `.sh` files under `scripts/` as executable. | Use this after cloning or when a script loses its executable bit. |
 | List roles | `make list` | Prints the repository role list. | Use this when you need the current role inventory. |
 | Tree view | `make tree` | Prints the repository tree. | Use this when you want a compact structural overview. |
 | Meta graph inputs | `make mig` | Builds the meta graph inputs from `list` and `tree`. | Use this when you are generating or refreshing meta graph data. |
@@ -105,7 +106,7 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Act workflow file | `make act-workflow` | Runs one selected workflow with Act. | Use this when you want to focus on a single workflow file. |
 
 - If you need to constrain a workflow matrix, set `ACT_MATRIX` with Act's `key:value` syntax, not `key=value`.
-- Example: `ACT_WORKFLOW=.github/workflows/test-environment.yml ACT_JOB=test-environment ACT_MATRIX='dev_runtime_image:debian:bookworm' make act-workflow`
+- Example: `make act-workflow ACT_WORKFLOW=.github/workflows/test-environment.yml ACT_JOB=test-environment ACT_MATRIX='dev_runtime_image:debian:bookworm'`
 
 ## Cleanup 🗑️
 
@@ -124,7 +125,7 @@ For rules on how to write and structure the `Makefile` itself, see [makefile.md]
 | Category | Command | What it does | When to use it |
 |---|---|---|---|
 | Fresh kept apps | `make deploy-fresh-kept-apps` | Creates a new inventory and deploys one or more apps. | Use this for a fresh deploy of a specific app set. |
-| Fresh purged apps | `make deploy-fresh-purged-apps` | Recreates the stack, purges app state, and deploys (pass 1 only by default). Set `FULL_CYCLE=true` to also run the async update pass (pass 2). | Default: deploy only. `FULL_CYCLE=true make deploy-fresh-purged-apps` for the full cycle. |
+| Fresh purged apps | `make deploy-fresh-purged-apps` | Recreates the stack, purges app state, and deploys (pass 1 only by default). Set `FULL_CYCLE=true` to also run the async update pass (pass 2). | Default: deploy only. `make deploy-fresh-purged-apps FULL_CYCLE=true` for the full cycle. |
 | Reuse kept apps | `make deploy-reuse-kept-apps` | Reuses an existing inventory and redeploys one or more apps quickly. | Use this for the fast reuse path. |
 | Reuse purged apps | `make deploy-reuse-purged-apps` | Reuses an existing inventory, purges the app state first, and redeploys one or more apps quickly. | Use this when you want a fast reset-and-redeploy path. |
 | Fresh kept all | `make deploy-fresh-kept-all` | Builds the broader local deployment flow across apps. | Use this when you explicitly need broad coverage. |

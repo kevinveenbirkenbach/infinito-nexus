@@ -24,10 +24,9 @@ compose:
       enabled:            false
       backup:
         disabled:         true
-    database:
-      shared:             true
-      enabled:            true
-      type:               postgres
+    postgres:
+      enabled: true
+      shared: true
     xwiki:
       image:              xwiki
       version:            lts-postgres-tomcat
