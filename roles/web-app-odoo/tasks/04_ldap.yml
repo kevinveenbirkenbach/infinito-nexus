@@ -1,0 +1,79 @@
+---
+# Configure LDAP authentication for Odoo
+
+- name: "Load LDAP configuration variables"
+  set_fact:
+    ODOO_LDAP_CONFIG:
+      name: "OpenLDAP"
+      sequence: 1
+      company_id: 1
+      ldap_server: "{{ ODOO_LDAP_SERVER }}"
+      ldap_server_port: "{{ ODOO_LDAP_PORT }}"
+      ldap_binddn: "{{ ODOO_LDAP_BIND_DN }}"
+      ldap_password: "{{ ODOO_LDAP_BIND_PASSWORD }}"
+      ldap_base: "{{ ODOO_LDAP_BASE_DN }}"
+      ldap_filter: "{{ ODOO_LDAP_FILTER }}"
+      user: "{{ ODOO_LDAP_USER_ATTR }}"
+      create_user: "{{ ODOO_LDAP_CREATE_USER | lower }}"
+      ldap_tls: "{{ ODOO_LDAP_TLS | lower }}"
+
+- name: "Check if LDAP configuration exists"
+  community.postgresql.postgresql_query:
+    db: "{{ ODOO_DB_NAME }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: "SELECT id FROM res_company_ldap WHERE ldap_server = '{{ ODOO_LDAP_CONFIG.ldap_server }}' LIMIT 1;"
+  register: ldap_check
+
+- name: "Update existing LDAP configuration"
+  community.postgresql.postgresql_query:
+    db: "{{ ODOO_DB_NAME }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: >
+      UPDATE res_company_ldap SET
+        sequence = {{ ODOO_LDAP_CONFIG.sequence }},
+        company_id = {{ ODOO_LDAP_CONFIG.company_id }},
+        ldap_server_port = {{ ODOO_LDAP_CONFIG.ldap_server_port }},
+        ldap_binddn = '{{ ODOO_LDAP_CONFIG.ldap_binddn }}',
+        ldap_password = '{{ ODOO_LDAP_CONFIG.ldap_password }}',
+        ldap_base = '{{ ODOO_LDAP_CONFIG.ldap_base }}',
+        ldap_filter = '{{ ODOO_LDAP_CONFIG.ldap_filter }}',
+        "user" = '{{ ODOO_LDAP_CONFIG.user }}',
+        create_user = {{ ODOO_LDAP_CONFIG.create_user }},
+        ldap_tls = {{ ODOO_LDAP_CONFIG.ldap_tls }},
+        write_date = NOW()
+      WHERE ldap_server = '{{ ODOO_LDAP_CONFIG.ldap_server }}';
+  when: ldap_check.query_result | length > 0
+
+- name: "Create new LDAP configuration"
+  community.postgresql.postgresql_query:
+    db: "{{ ODOO_DB_NAME }}"
+    login_user: "{{ lookup('database', application_id, 'username') }}"
+    login_password: "{{ lookup('database', application_id, 'password') }}"
+    login_host: "{{ lookup('database', application_id, 'reach_host') }}"
+    login_port: "{{ lookup('database', application_id, 'port') }}"
+    query: >
+      INSERT INTO res_company_ldap
+      (sequence, company_id, ldap_server, ldap_server_port, ldap_binddn, ldap_password,
+       ldap_base, ldap_filter, "user", create_user, ldap_tls, create_date, write_date)
+      VALUES (
+        {{ ODOO_LDAP_CONFIG.sequence }},
+        {{ ODOO_LDAP_CONFIG.company_id }},
+        '{{ ODOO_LDAP_CONFIG.ldap_server }}',
+        {{ ODOO_LDAP_CONFIG.ldap_server_port }},
+        '{{ ODOO_LDAP_CONFIG.ldap_binddn }}',
+        '{{ ODOO_LDAP_CONFIG.ldap_password }}',
+        '{{ ODOO_LDAP_CONFIG.ldap_base }}',
+        '{{ ODOO_LDAP_CONFIG.ldap_filter }}',
+        '{{ ODOO_LDAP_CONFIG.user }}',
+        {{ ODOO_LDAP_CONFIG.create_user }},
+        {{ ODOO_LDAP_CONFIG.ldap_tls }},
+        NOW(),
+        NOW()
+      );
+  when: ldap_check.query_result | length == 0
