@@ -38,10 +38,6 @@ KEYCLOAK_REALM_TOTP_ENABLED:        "{{ lookup('config', application_id, 'compos
 ### Bootstrap
 KEYCLOAK_BOOTSTRAP_ADMIN_USERNAME:  "{{ lookup('config', application_id, 'accounts.bootstrap.username') }}"
 KEYCLOAK_BOOTSTRAP_ADMIN_PASSWORD:  "{{ lookup('config', application_id, 'credentials.administrator_password') }}"
-# In the reduced local non-LDAP loop we seed a dedicated realm-local
-# administrator with a fixed, policy-compliant password. This keeps dashboard
-# login tests independent from inventory-specific user password conventions.
-KEYCLOAK_LOCAL_REALM_ADMIN_PASSWORD: "administrator-local-oidc!42A"
 
 ### Permanent
 KEYCLOAK_PERMANENT_ADMIN_USERNAME:  "{{ lookup('config', application_id, 'accounts.system.username') }}"

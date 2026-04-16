@@ -9,7 +9,6 @@
         query(
           'service_registry',
           'ordered',
-          applications=applications,
           roles_dir=([ playbook_dir, 'roles' ] | path_join)
         ) | first
       }}

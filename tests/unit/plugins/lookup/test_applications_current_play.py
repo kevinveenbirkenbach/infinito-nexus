@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 from plugins.lookup.applications_current_play import LookupModule
 
@@ -41,15 +42,30 @@ SAMPLE_APPS = {
 def _run(group_names, applications=None, meta_deps_map=None, service_registry=None):
     lm = LookupModule()
     lm._meta_deps = lambda role, roles_dir: (meta_deps_map or {}).get(role, [])
-    kwargs = {}
-    if service_registry is not None:
-        kwargs["service_registry"] = service_registry
     apps = applications if applications is not None else SAMPLE_APPS
-    return lm.run(
-        [],
-        variables={"applications": apps, "group_names": group_names},
-        **kwargs,
-    )[0]
+    patches = [
+        patch(
+            "plugins.lookup.applications_current_play.get_merged_applications",
+            return_value=apps,
+        )
+    ]
+    if service_registry is not None:
+        patches.append(
+            patch(
+                "plugins.lookup.applications_current_play.build_service_registry_from_applications",
+                return_value=service_registry,
+            )
+        )
+    for p in patches:
+        p.start()
+    try:
+        return lm.run(
+            [],
+            variables={"group_names": group_names},
+        )[0]
+    finally:
+        for p in reversed(patches):
+            p.stop()
 
 
 class TestApplicationsIfGroupAndAllDeps(unittest.TestCase):

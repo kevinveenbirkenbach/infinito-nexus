@@ -35,8 +35,6 @@ DASHBOARD_CONFIG_YML_DOCKER_DEST:   "/app/config.yaml"
 
 ## OIDC
 DASHBOARD_APP_BASE_URL:            "{{ lookup('tls', DASHBOARD_APPLICATION_ID, 'url.base') | regex_replace('/+$', '') }}/"
-# Keep in sync with KEYCLOAK_LOCAL_REALM_ADMIN_PASSWORD from web-app-keycloak.
-DASHBOARD_KEYCLOAK_TEST_LOGIN_PASSWORD: "administrator-local-oidc!42A"
 DASHBOARD_KEYCLOAK_LOGIN_URL: >-
   {{ OIDC.CLIENT.AUTHORIZE_URL
      ~ '?client_id=' ~ OIDC.CLIENT.ID

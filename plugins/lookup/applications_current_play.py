@@ -26,32 +26,24 @@ class LookupModule(LookupBase):
     ) -> List[Dict[str, Any]]:
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = kwargs.get("applications")
-        if applications is None:
-            applications = get_merged_applications(
-                variables=vars_,
-                roles_dir=kwargs.get("roles_dir"),
-                templar=getattr(self, "_templar", None),
-            )
-        group_names = kwargs.get("group_names", vars_.get("group_names", []))
-        if not isinstance(applications, dict):
-            raise AnsibleError(
-                "applications_current_play: required variable 'applications' must be a mapping"
-            )
+        applications = get_merged_applications(
+            variables=vars_,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
+        group_names = vars_.get("group_names", [])
 
         project_root = self._get_project_root()
-        roles_dir = os.path.join(project_root, "roles")
-        service_registry = kwargs.get("service_registry")
-        if service_registry is None:
-            service_registry = build_service_registry_from_applications(applications)
+        roles_dir = kwargs.get("roles_dir") or os.path.join(project_root, "roles")
+        service_registry = build_service_registry_from_applications(applications)
 
         try:
             result = applications_if_group_and_all_deps(
                 applications,
                 group_names,
                 project_root=project_root,
-                roles_dir=kwargs.get("roles_dir", roles_dir),
-                service_registry=kwargs.get("service_registry", service_registry),
+                roles_dir=roles_dir,
+                service_registry=service_registry,
                 meta_deps_resolver=self._meta_deps,
             )
         except ValueError as exc:

@@ -14,7 +14,7 @@
     KEYCLOAK_KCADM: "{{ KEYCLOAK_KCADM }}"
     KEYCLOAK_REALM: "{{ KEYCLOAK_REALM }}"
     KEYCLOAK_USERNAME: "{{ lookup('users', 'administrator').username }}"
-    KEYCLOAK_PASSWORD: "{{ KEYCLOAK_LOCAL_REALM_ADMIN_PASSWORD }}"
+    KEYCLOAK_PASSWORD: "{{ lookup('users', 'administrator').password }}"
     KEYCLOAK_EMAIL: "{{ lookup('users', 'administrator').email }}"
     KEYCLOAK_FIRSTNAME: "{{ lookup('users', 'administrator').firstname }}"
     KEYCLOAK_LASTNAME: "{{ lookup('users', 'administrator').lastname }}"

@@ -22,13 +22,9 @@ class TestDashboardOidcSpot(unittest.TestCase):
         content = pathlib.Path(
             "roles/web-app-dashboard/templates/playwright.env.j2"
         ).read_text(encoding="utf-8")
-        vars_content = pathlib.Path("roles/web-app-dashboard/vars/main.yml").read_text(
-            encoding="utf-8"
-        )
 
-        self.assertIn("DASHBOARD_KEYCLOAK_TEST_LOGIN_PASSWORD", vars_content)
         self.assertIn(
-            "LOGIN_PASSWORD={{ DASHBOARD_KEYCLOAK_TEST_LOGIN_PASSWORD", content
+            "LOGIN_PASSWORD={{ lookup('users', 'administrator').password", content
         )
         self.assertIn(
             "MATOMO_ENABLED={{ lookup('config', application_id, 'compose.services.matomo.enabled') }}",

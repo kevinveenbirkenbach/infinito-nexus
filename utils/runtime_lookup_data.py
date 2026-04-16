@@ -15,6 +15,34 @@ from plugins.lookup.application_gid import LookupModule as ApplicationGidLookup
 from utils.dict_renderer import DictRenderer
 from utils.templating import _templar_render_best_effort
 
+try:
+    from ansible.parsing.vault import EncryptedString as _AnsibleEncryptedString
+except Exception:
+    _AnsibleEncryptedString = None
+
+
+def _decrypt_ansible_encrypted_strings(value: Any) -> Any:
+    """Recursively convert Ansible EncryptedString values to plaintext str.
+
+    Ansible 2.19+ refuses to store EncryptedString as an intermediate variable
+    during task arg finalization, so decrypt at the lookup boundary.
+    """
+    if _AnsibleEncryptedString is not None and isinstance(
+        value, _AnsibleEncryptedString
+    ):
+        try:
+            return str(value)
+        except Exception:
+            return value
+    if isinstance(value, Mapping):
+        return {k: _decrypt_ansible_encrypted_strings(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_decrypt_ansible_encrypted_strings(v) for v in value]
+    if isinstance(value, tuple):
+        return tuple(_decrypt_ansible_encrypted_strings(v) for v in value)
+    return value
+
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 ROLES_DIR = PROJECT_ROOT / "roles"
 DEFAULT_TOKENS_FILE = Path("/var/lib/infinito/secrets/tokens.yml")
@@ -345,19 +373,41 @@ def _materialize_builtin_user_aliases(
 def _resolve_override_mapping(
     variables: Optional[Mapping[str, Any]],
     key: str,
+    templar: Any = None,
 ) -> dict[str, Any]:
     """Return runtime override mappings defensively.
 
     Nested `lookup('template', ...)` renders sometimes expose top-level lookup
     inputs like `applications`/`users` as non-mapping placeholder values instead
-    of the original inventory overrides. In that situation we want runtime
-    lookups to fall back to aggregated defaults rather than fail hard.
+    of the original inventory overrides. Try to coerce via templar before
+    falling back to aggregated defaults.
     """
 
     variables = variables or {}
     value = variables.get(key, {})
     if value is None:
-        return {}
+        value = {}
+    if not isinstance(value, Mapping) and templar is not None:
+        try:
+            rendered = templar.template(value, fail_on_undefined=False)
+        except TypeError:
+            try:
+                rendered = templar.template(value)
+            except Exception:
+                rendered = value
+        except Exception:
+            rendered = value
+        if isinstance(rendered, Mapping):
+            value = rendered
+    if not isinstance(value, Mapping):
+        raw_key = {
+            "applications": "_INFINITO_APPLICATIONS_RAW",
+            "users": "_INFINITO_USERS_RAW",
+        }.get(key)
+        if raw_key:
+            raw = variables.get(raw_key)
+            if isinstance(raw, Mapping):
+                value = raw
     if isinstance(value, Mapping):
         return dict(value)
     return {}
@@ -427,7 +477,7 @@ def _render_with_templar(
         if hasattr(templar, "available_variables"):
             templar.available_variables = previous_available
 
-    return data
+    return _decrypt_ansible_encrypted_strings(data)
 
 
 def _build_application_defaults(roles_dir: Path) -> dict[str, Any]:
@@ -502,7 +552,7 @@ def get_merged_applications(
 ) -> dict[str, Any]:
     variables = variables or {}
     defaults = get_application_defaults(roles_dir=roles_dir)
-    overrides = _resolve_override_mapping(variables, "applications")
+    overrides = _resolve_override_mapping(variables, "applications", templar=templar)
 
     merged = merge_with_defaults(defaults, overrides)
     raw_users = get_merged_users(
@@ -529,7 +579,7 @@ def get_merged_users(
     if not variables.get("DOMAIN_PRIMARY") and variables.get("SYSTEM_EMAIL_DOMAIN"):
         variables["DOMAIN_PRIMARY"] = variables["SYSTEM_EMAIL_DOMAIN"]
     defaults = get_user_defaults(roles_dir=roles_dir)
-    overrides = _resolve_override_mapping(variables, "users")
+    overrides = _resolve_override_mapping(variables, "users", templar=templar)
 
     merged = _merge_users(defaults, overrides)
     hydrated = _hydrate_users_tokens(

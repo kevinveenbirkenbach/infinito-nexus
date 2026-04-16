@@ -57,7 +57,7 @@ class TestKeycloakImportFlowSpot(unittest.TestCase):
         self.assertIn("include_tasks: update/08_users_realm.yml", core_content)
         self.assertIn("when: not KEYCLOAK_LDAP_ENABLED | bool", core_content)
         self.assertIn("lookup('users', 'administrator').username", user_sync_content)
-        self.assertIn("KEYCLOAK_LOCAL_REALM_ADMIN_PASSWORD", user_sync_content)
+        self.assertIn("lookup('users', 'administrator').password", user_sync_content)
         self.assertIn('PASSWORD="$2"', script_content)
         self.assertIn('"${KEYCLOAK_PASSWORD}"', script_content)
 

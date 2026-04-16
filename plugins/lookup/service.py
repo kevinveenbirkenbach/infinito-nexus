@@ -193,29 +193,19 @@ class LookupModule(LookupBase):
 
         vars_ = variables or getattr(self._templar, "available_variables", {}) or {}
 
-        applications = kwargs.get("applications")
-        if applications is None:
-            applications = get_merged_applications(
-                variables=vars_,
-                roles_dir=kwargs.get("roles_dir"),
-                templar=getattr(self, "_templar", None),
-            )
-        if not isinstance(applications, dict):
-            raise AnsibleError(
-                "service: required variable 'applications' must be a mapping"
-            )
+        applications = get_merged_applications(
+            variables=vars_,
+            roles_dir=kwargs.get("roles_dir"),
+            templar=getattr(self, "_templar", None),
+        )
 
-        group_names = kwargs.get("group_names", vars_.get("group_names", []))
+        group_names = vars_.get("group_names", [])
         if not isinstance(group_names, list):
             raise AnsibleError(
                 "service: required variable 'group_names' must be a list"
             )
 
-        service_registry = kwargs.get("service_registry")
-        if service_registry is None:
-            service_registry = build_service_registry_from_applications(applications)
-        if not isinstance(service_registry, dict):
-            raise AnsibleError("service: 'service_registry' must be a mapping")
+        service_registry = build_service_registry_from_applications(applications)
 
         role_to_key = _build_role_to_key(service_registry)
 

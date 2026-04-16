@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import patch
 
 from ansible.errors import AnsibleError
 
@@ -17,14 +18,29 @@ _SERVICE_REGISTRY = {
 
 
 def _run(terms, applications, group_names, service_registry=None):
-    kwargs = {"applications": applications}
+    patches = [
+        patch(
+            "plugins.lookup.service.get_merged_applications",
+            return_value=applications,
+        )
+    ]
     if service_registry is not None:
-        kwargs["service_registry"] = service_registry
-    return LookupModule().run(
-        terms,
-        variables={"group_names": group_names},
-        **kwargs,
-    )
+        patches.append(
+            patch(
+                "plugins.lookup.service.build_service_registry_from_applications",
+                return_value=service_registry,
+            )
+        )
+    for p in patches:
+        p.start()
+    try:
+        return LookupModule().run(
+            terms,
+            variables={"group_names": group_names},
+        )
+    finally:
+        for p in reversed(patches):
+            p.stop()
 
 
 class TestServiceDirect(unittest.TestCase):
@@ -262,19 +278,12 @@ class TestServiceCycleGuard(unittest.TestCase):
 
 class TestServiceErrors(unittest.TestCase):
     def test_raises_when_group_names_not_list(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run(
-                ["matomo"],
-                variables={"applications": {}, "group_names": "not-a-list"},
-            )
-
-    def test_raises_when_service_registry_not_mapping(self):
-        with self.assertRaises(AnsibleError):
-            LookupModule().run(
-                ["matomo"],
-                variables={"applications": {}, "group_names": []},
-                service_registry="not-a-dict",
-            )
+        with patch("plugins.lookup.service.get_merged_applications", return_value={}):
+            with self.assertRaises(AnsibleError):
+                LookupModule().run(
+                    ["matomo"],
+                    variables={"group_names": "not-a-list"},
+                )
 
     def test_raises_when_term_empty(self):
         with self.assertRaises(AnsibleError):
