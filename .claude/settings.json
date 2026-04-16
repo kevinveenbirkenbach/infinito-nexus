@@ -4,6 +4,7 @@
       "Read",
       "Edit",
       "Write",
+
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
@@ -17,7 +18,11 @@
       "Bash(git cherry-pick*)",
       "Bash(git apply*)",
       "Bash(git -C:*)",
+
       "Bash(gh run*)",
+      "Bash(gh workflow list*)",
+      "Bash(gh workflow view*)",
+
       "Bash(make*)",
       "Bash(act*)",
       "Bash(bash -n*)",
@@ -26,28 +31,33 @@
       "Bash(scripts/*)",
       "Bash(chmod +x scripts/*)",
       "Bash(wait*)",
+      "Bash(break)",
+
       "Bash(python3*)",
       "Bash(python*)",
       "Bash(pip show*)",
       "Bash(pip list*)",
       "Bash(pip install*)",
+
       "Bash(ansible-lint*)",
       "Bash(ansible-inventory*)",
       "Bash(ansible --version*)",
       "Bash(ansible-playbook --check*)",
       "Bash(ansible-playbook --syntax-check*)",
-      "Bash(docker pull*)",
-      "Bash(docker build*)",
+
       "Bash(docker images*)",
       "Bash(docker ps*)",
       "Bash(docker inspect*)",
       "Bash(docker logs*)",
+      "Bash(docker pull*)",
+      "Bash(docker build*)",
       "Bash(docker create*)",
       "Bash(docker export*)",
       "Bash(docker rm*)",
       "Bash(docker rmi*)",
       "Bash(docker compose*)",
       "Bash(docker exec*)",
+
       "Bash(grep*)",
       "Bash(find*)",
       "Bash(ls*)",
@@ -56,12 +66,16 @@
       "Bash(tail*)",
       "Bash(wc*)",
       "Bash(sort*)",
+      "Bash(jq*)",
+      "Bash(awk*)",
       "Bash(tar*)",
       "Bash(mkdir*)",
       "Bash(cp*)",
       "Bash(mv*)",
-      "Bash(jq*)",
-      "Bash(awk*)",
+      "Bash(pkill -f *)",
+
+      "Read(~/.cache/pre-commit/**)",
+
       "WebSearch",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
@@ -81,22 +95,23 @@
       "WebFetch(domain:ghcr.io)",
       "WebFetch(domain:letsencrypt.org)",
       "WebFetch(domain:hcaptcha.com)",
-      "WebFetch(domain:gstatic.com)",
-      "Bash(pkill -f *)",
-      "Read(~/.cache/pre-commit/**)"
-    ],
-    "deny": [
-      "Bash(git push --force*)",
-      "Bash(git reset --hard*)",
-      "Bash(rm -rf*)",
-      "Bash(sudo*)"
+      "WebFetch(domain:gstatic.com)"
     ],
     "ask": [
       "Bash(git commit*)",
       "Bash(git push*)",
       "Bash(docker run*)",
       "Bash(curl*)",
-      "Bash(gh api*)"
+      "Bash(gh api*)",
+      "Bash(gh workflow run*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Bash(rm -rf*)",
+      "Bash(sudo*)",
+      "Bash(gh workflow enable*)",
+      "Bash(gh workflow disable*)"
     ]
   },
   "sandbox": {

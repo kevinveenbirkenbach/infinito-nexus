@@ -49,6 +49,8 @@ Claude Code evaluates each tool call against three ordered lists:
 | Permission | When | Why | Security |
 |---|---|---|---|
 | `gh run*` | Inspecting CI pipeline runs, viewing logs, or listing workflow run status. | Allows the agent to check whether a workflow passed without browser access. | Primarily read-only. Subcommands such as `gh run rerun` and `gh run cancel` are write operations covered by this wildcard. Operators SHOULD verify the subcommand when approving tasks. |
+| `gh workflow list*` | Listing the workflows defined in the repository. | Read-only inventory of CI workflows. Required to find workflow IDs before inspecting runs. | No side-effects. Safe to allow unconditionally. |
+| `gh workflow view*` | Inspecting a workflow definition or its run history. | Read-only view needed to understand workflow structure and recent results. | No side-effects. Safe to allow unconditionally. `gh workflow run`, `enable`, and `disable` are intentionally NOT covered by this entry — they are routed to `ask` and `deny` respectively. |
 
 ### Build and Scripts 🛠️
 
@@ -62,6 +64,7 @@ Claude Code evaluates each tool call against three ordered lists:
 | `scripts/*` | Directly executing repository helper scripts by path (e.g. `scripts/tests/e2e/rerun-spec.sh <role>`). | Some scripts are meant to be invoked directly (shebang-based) rather than through `bash <path>`; required for inner-loop workflows such as the Playwright spec rerunner. | Equivalent in blast radius to `bash scripts/*` — the executed script runs with the agent's full permissions. Scoped to the repository `scripts/` tree. Script contents MUST be reviewed before merging. |
 | `chmod +x scripts/*` | Making repository helper scripts executable when they are newly added or lose their executable bit. | Needed so that shebang-based invocation via `scripts/<path>` works without falling back to `bash <path>`. | Modifies file mode bits inside the repo only. Bounded by the sandbox `allowWrite` constraint and the `scripts/` path prefix. Does not escalate privileges. |
 | `wait*` | Waiting for background tasks (started via `run_in_background`) to complete. | The agent starts long-running commands in the background and MUST be able to block on their completion without operator approval. | Shell built-in. No file or network side-effects on its own; only observes child process state. |
+| `break` | Exiting `until`/`while` polling loops the agent constructs around long-running checks (e.g. waiting for a file to appear). | Shell built-in required inside loop bodies; without this entry every loop construct prompts for approval. | Bare built-in with no arguments. No file, network, or process side-effects. |
 
 ### Python 🐍
 
@@ -142,6 +145,7 @@ These operations pause and require explicit operator approval before executing.
 | `docker run*` | Starting a standalone container outside the compose stack. | Each invocation carries a unique risk profile depending on flags. | Can mount host paths, expose ports, and run privileged containers. |
 | `curl*` | Making HTTP requests to arbitrary URLs. | Can transmit environment variables and credentials to external endpoints. | Risk depends entirely on the URL and flags used. Every invocation MUST be reviewed. |
 | `gh api*` | Making direct GitHub REST or GraphQL API calls. | Can modify branch protection, secrets, webhooks, collaborators, and workflow triggers. | Supports arbitrary HTTP methods (`-X POST/PATCH/DELETE`). Each invocation MUST be reviewed individually. |
+| `gh workflow run*` | Triggering a CI workflow run on the remote. | Consumes runner minutes, executes with workflow secrets, and produces remotely-visible results. Equivalent in effect to `git push` for triggered runs. | Each invocation MUST be reviewed to confirm the target workflow and inputs. |
 
 ## Deny Rules 🚫
 
@@ -153,12 +157,14 @@ These operations are unconditionally blocked, regardless of any `allow` entry.
 | `git reset --hard*` | Discards all uncommitted local changes without any recovery path. |
 | `rm -rf*` | Recursive force-delete with no confirmation and no undo. |
 | `sudo*` | Prevents privilege escalation to root on the host system. |
+| `gh workflow enable*` | Re-enabling a workflow can silently restart paused CI (e.g. security scans deliberately disabled during incident response) without operator review. |
+| `gh workflow disable*` | Disabling a workflow can silently turn off security-critical CI (CodeQL, security-review, lint gates). Must never be done autonomously. |
 
 ## Sandbox 🏖️
 
 ### Write Scope
 
-The agent MAY write to `.` (the repository root) and `/tmp`. All other paths are read-only by default.
+The agent MAY write to `.` (the repository root) and `/tmp`. All other paths are read-only by default. `/tmp` is the **only** location outside the repository where transient agent output (downloaded logs, scratch files, intermediate artefacts) MAY be written; see the *Temporary Files* rule in [`AGENTS.md`](../../../../AGENTS.md).
 
 ### Read Restrictions
 

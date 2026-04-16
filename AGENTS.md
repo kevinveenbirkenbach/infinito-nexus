@@ -37,6 +37,10 @@ Individual roles MAY contain an `AGENTS.md` file with role-specific agent instru
 - If it exists, you MUST read it and follow all instructions in it before making any changes to that role.
 - Role-level `AGENTS.md` files MAY contain file-specific sections with rules scoped to individual files within the role.
 
+## Temporary Files
+
+Agents MUST write all transient files (downloaded logs, intermediate output, scratch artefacts) under `/tmp` — never inside the repository working tree. The sandbox grants write access to `/tmp` (see [.claude/settings.json](.claude/settings.json) `sandbox.filesystem.allowWrite`); no other location outside the repo is permitted for agent-generated temp data. This keeps the working tree clean, avoids accidental commits of throwaway data, and confines agent side-effects to a single, easily-purged path.
+
 ## Skills
 
 At the start of every conversation, the agent MUST check whether agent skills are installed by verifying that `.agents/skills/` exists and is non-empty. If skills are missing, the agent MUST notify the user once with:
