@@ -19,3 +19,4 @@ env.development
 logs/
 job-logs.txt
 .claude/skills
+*.lock

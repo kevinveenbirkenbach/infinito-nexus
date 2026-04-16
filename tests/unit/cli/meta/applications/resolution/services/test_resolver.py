@@ -133,6 +133,14 @@ class TestServicesResolverTransitive(unittest.TestCase):
 
         self.assertIn("web-app-dashboard", got)
 
+    def test_repo_nextcloud_includes_coturn(self) -> None:
+        repo_root = Path(__file__).resolve().parents[7]
+        r = ServicesResolver(repo_root / "roles")
+
+        got = r.resolve_transitively("web-app-nextcloud")
+
+        self.assertIn("web-svc-coturn", got)
+
 
 if __name__ == "__main__":
     unittest.main()
