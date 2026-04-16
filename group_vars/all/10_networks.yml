@@ -31,6 +31,8 @@ defaults_networks:
       subnet: 192.168.101.144/28
     web-app-keycloak:
       subnet: 192.168.101.160/28
+    web-app-decidim:
+      subnet: 192.168.104.176/28
     web-app-wordpress:
       subnet: 192.168.101.176/28
     web-app-listmonk:

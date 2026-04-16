@@ -29,9 +29,8 @@ compose:
     email:
       enabled:                    true
       shared:                     true
-    database:
+    postgres:
       shared:                     true
-      type:                       "postgres"
       enabled:                    true
     decidim:
       image:                      "ghcr.io/decidim/decidim"
