@@ -8,10 +8,10 @@ This is an external test because it performs live HTTP requests against the
 referenced third-party URLs. HTTP ``401`` (Unauthorized), ``403`` (Forbidden),
 and ``405`` (Method Not Allowed) are treated as reachable (server is alive but
 auth-gated or method-restricted). HTTP ``418`` (I'm a teapot), ``429`` (Too
-Many Requests), ``451`` (Unavailable For Legal Reasons), ``500`` (Internal
-Server Error), and ``503`` (Service Unavailable), plus timeouts and connection
-errors (reset, aborted) emit warning annotations. All other 4xx/5xx codes fail
-the test.
+Many Requests), ``451`` (Unavailable For Legal Reasons), every ``5xx`` server
+response, plus timeouts and connection errors (reset, aborted) emit warning
+annotations rather than failing the test — these signal an upstream issue
+outside this repository's control. All other ``4xx`` codes fail the test.
 """
 
 from __future__ import annotations
@@ -66,14 +66,14 @@ _OK_STATUS_CODES = {
     403,  # Forbidden: server is alive, resource intentionally gated.
     405,  # Method Not Allowed: server is alive, HEAD/GET rejected by design.
 }
-# Codes that mean the server is alive but the resource is not reliably probeable.
-# Emit a warning annotation instead of failing the test.
+# 4xx codes that mean the server is alive but the resource is not reliably
+# probeable. Emit a warning annotation instead of failing the test. All 5xx
+# responses are treated as warnings unconditionally (see _probe), since they
+# signal an upstream-side problem rather than a stale link in this repo.
 _WARNING_STATUS_CODES = {
     418,  # I'm a teapot: playful/custom response; server is alive.
     429,  # Too Many Requests: client rate-limited, transient.
     451,  # Unavailable For Legal Reasons: jurisdiction-specific block.
-    500,  # Internal Server Error: transient server issue.
-    503,  # Service Unavailable: transient overload or maintenance.
 }
 _REQUEST_TIMEOUT_SECONDS = 10
 _MAX_WORKERS = 8
@@ -354,7 +354,7 @@ def _probe_url(url: str) -> ProbeOutcome:
 
     if status < 400 or status in _OK_STATUS_CODES:
         return ProbeOutcome("ok", f"HTTP {status}")
-    if status in _WARNING_STATUS_CODES:
+    if status in _WARNING_STATUS_CODES or status >= 500:
         return ProbeOutcome("warn", f"HTTP {status}")
     return ProbeOutcome("fail", f"HTTP {status}")
 
@@ -447,7 +447,7 @@ class TestUrlsReachable(unittest.TestCase):
             f"Failing HTTP(S) URLs found ({len(failing_found)}):",
             "",
             "  Fix the URL, remove it, or adjust the reference.",
-            "  401/403/405 = server alive (auth/method). 418/429/451/500/503 = warning. Other 4xx/5xx = fail.",
+            "  401/403/405 = server alive (auth/method). 418/429/451 + all 5xx = warning. Other 4xx = fail.",
             "",
         ]
         for _title, occurrence, message, count in sorted(

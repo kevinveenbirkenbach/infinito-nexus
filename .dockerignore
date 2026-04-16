@@ -19,5 +19,20 @@ env.development
 logs/
 job-logs.txt
 .claude/skills
+.claude/agents
+.claude/commands
 *.lock
+
+# Host shell / editor / tooling state accidentally surfaced inside this working copy
+.bash_profile
+.bashrc
+.gitconfig
+.gitmodules
+.idea
+.mcp.json
+.profile
+.ripgreprc
+.vscode
+.zprofile
+.zshrc
 .git
