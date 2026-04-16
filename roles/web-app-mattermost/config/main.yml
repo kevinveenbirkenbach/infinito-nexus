@@ -67,4 +67,4 @@ compose:
     plugins:                      "mattermost_plugins"
     client-plugins:               "mattermost_client_plugins"
 native_metrics:
-  enabled:          true
+  enabled:          false   # deferred — needs internal-port scraping, not public domain

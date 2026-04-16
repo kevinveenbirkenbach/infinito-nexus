@@ -249,10 +249,12 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
         )
 
     def test_prometheus_conf_includes_location_conf_for_all_prometheus_apps(self):
-        """locations.conf.j2 must include location.conf.j2 and guard on group_names.
+        """locations.conf.j2 must include location.conf.j2 and guard via group_names.
 
-        The outer guard uses 'web-app-prometheus' in group_names so the block is
-        only emitted on hosts where the prometheus role is actually deployed.
+        The outer guard uses 'web-app-prometheus' in group_names so the block is only
+        emitted on hosts where prometheus is deployed. The service lookup cannot be used
+        because web-app-prometheus is not a registered shared-service provider in the
+        service registry.
         """
         content = self._prometheus_conf_path().read_text(encoding="utf-8")
         self.assertIn(
@@ -261,15 +263,14 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "locations.conf.j2 must include nginx/location.conf.j2 for prometheus-enabled apps",
         )
         self.assertIn(
-            "group_names",
+            "'web-app-prometheus' in group_names",
             content,
-            "locations.conf.j2 outer condition must use group_names "
-            "('web-app-prometheus' in group_names) so the block is only emitted "
-            "when prometheus is deployed on this host",
+            "locations.conf.j2 outer condition must use group_names to check if "
+            "prometheus is deployed on this host",
         )
 
     def test_prometheus_conf_includes_metricz_only_on_prometheus_domain(self):
-        """prometheus.conf.j2 must include metricz.conf.j2 ONLY when compose.services.prometheus.name is set.
+        """locations.conf.j2 must include metricz.conf.j2 ONLY on the prometheus domain.
 
         /metricz must not be exposed on every app vhost — that would leak the full
         metrics payload from 60+ public hostnames. Only the prometheus domain serves it.
@@ -281,12 +282,12 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "locations.conf.j2 must include nginx/metricz.conf.j2 for the prometheus domain "
             "(location = /metricz must not appear on every app vhost)",
         )
-        # metricz must be guarded by compose.services.prometheus.name so it only
+        # metricz is guarded by application_id == 'web-app-prometheus' so it only
         # appears on the prometheus domain vhost, not on every app vhost.
         self.assertIn(
-            "compose.services.prometheus.name",
+            "application_id == 'web-app-prometheus'",
             content,
-            "locations.conf.j2 must guard metricz.conf.j2 with compose.services.prometheus.name "
+            "locations.conf.j2 must guard metricz.conf.j2 with application_id == 'web-app-prometheus' "
             "so /metricz only appears on the prometheus domain vhost",
         )
 
@@ -454,61 +455,17 @@ class TestPrometheusNginxEndpoints(unittest.TestCase):
             "CommunicationChannelDown expr must use the active_alertmanager_channels "
             "lookup plugin — it filters by group_names and configured receivers",
         )
-        # Verify the required apps are declared in config/main.yml.
-        cfg = _load_config(str(roles_dir / PROMETHEUS_APP_ID / "config" / "main.yml"))
-        channels = cfg.get("alerting", {}).get("communication_channels", [])
-        for app_id in ("web-app-mattermost", "web-app-matrix", "web-app-mailu"):
+        # Channel list is derived from the plugin's RECEIVER_CONFIG — not from config.
+        # Verify the plugin itself knows about the required apps.
+        from plugins.lookup.active_alertmanager_channels import RECEIVER_CONFIG
+
+        for app_id in ("web-app-mattermost", "web-app-mailu"):
             with self.subTest(app_id=app_id):
                 self.assertIn(
                     app_id,
-                    channels,
-                    f"alerting.communication_channels in config/main.yml must include {app_id}",
+                    RECEIVER_CONFIG,
+                    f"active_alertmanager_channels plugin must map {app_id} in RECEIVER_CONFIG",
                 )
-
-    def test_active_alertmanager_channels_plugin_exists(self):
-        """active_alertmanager_channels lookup plugin must exist and reference web-app-mailu as always-active."""
-        plugin_path = (
-            Path(__file__).resolve().parent.parent.parent
-            / "plugins"
-            / "lookup"
-            / "active_alertmanager_channels.py"
-        )
-        self.assertTrue(
-            plugin_path.exists(),
-            "plugins/lookup/active_alertmanager_channels.py must exist — "
-            "filters communication_channels to only apps with a configured alertmanager receiver",
-        )
-        content = plugin_path.read_text(encoding="utf-8")
-        # email (mailu) must always be active
-        self.assertIn(
-            "web-app-mailu",
-            content,
-            "active_alertmanager_channels plugin must treat web-app-mailu as always-active "
-            "(email receiver is unconditional)",
-        )
-        # Matrix has no receiver yet — must be excluded
-        self.assertIn(
-            "_NO_RECEIVER",
-            content,
-            "active_alertmanager_channels plugin must define _NO_RECEIVER to exclude "
-            "channels that have no alertmanager receiver implemented yet",
-        )
-        # alert_rules template must use the plugin, not the raw config lookup
-        alert_rules_path = (
-            Path(__file__).resolve().parent.parent.parent
-            / "roles"
-            / "web-app-prometheus"
-            / "templates"
-            / "configuration"
-            / "alert_rules.yml.j2"
-        )
-        rules_content = alert_rules_path.read_text(encoding="utf-8")
-        self.assertIn(
-            "active_alertmanager_channels",
-            rules_content,
-            "alert_rules.yml.j2 CommunicationChannelDown expr must use the "
-            "active_alertmanager_channels lookup to filter unconfigured channels",
-        )
 
     def test_blackbox_tls_is_templated(self):
         """blackbox.yml.j2 must use TLS_ENABLED to set insecure_skip_verify, not hardcode false.

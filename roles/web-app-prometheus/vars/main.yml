@@ -12,7 +12,6 @@ PROMETHEUS_CONTAINER:         "{{ lookup('config', application_id, 'compose.serv
 ## Volumes
 PROMETHEUS_VOLUME_DATA:       "{{ lookup('config', application_id, 'compose.volumes.data') }}"
 ALERTMANAGER_VOLUME_DATA:     "{{ lookup('config', application_id, 'compose.volumes.alertmanager_data') }}"
-ALERTMANAGER_VOLUME_KEY:      "alertmanager_data"
 
 ## Config
 PROMETHEUS_CONFIG_HOST:       "{{ [ lookup('container', application_id, 'directories.config'), 'prometheus.yml' ] | path_join }}"
@@ -30,10 +29,9 @@ ALERT_RULES_CONFIG_HOST:      "{{ [ lookup('container', application_id, 'directo
 ALERT_RULES_CONFIG_DOCKER:    "/etc/prometheus/alert_rules.yml"
 
 # Alertmanager — communication channels
-ALERTMANAGER_TELEGRAM_ENABLED:         "{{ lookup('config', application_id, 'alerting.telegram.enabled', false) }}"
-ALERTMANAGER_TELEGRAM_BOT_TOKEN:       "{{ lookup('config', application_id, 'alerting.telegram.bot_token', '') }}"
-ALERTMANAGER_TELEGRAM_CHAT_ID:         "{{ lookup('config', application_id, 'alerting.telegram.chat_id', 0) }}"
-ALERTMANAGER_MATTERMOST_WEBHOOK_URL:   "{{ lookup('config', application_id, 'alerting.mattermost.webhook_url', '') }}"
+ALERTMANAGER_TELEGRAM_BOT_TOKEN:       "{{ lookup('config', application_id, 'alerting.telegram.bot_token') }}"
+ALERTMANAGER_TELEGRAM_CHAT_ID:         "{{ lookup('config', application_id, 'alerting.telegram.chat_id') }}"
+ALERTMANAGER_MATTERMOST_WEBHOOK_URL:   "{{ lookup('config', application_id, 'alerting.mattermost.webhook_url') }}"
 
 # Blackbox Exporter
 BLACKBOX_VERSION:             "{{ lookup('config', application_id, 'compose.services.blackbox-exporter.version') }}"

@@ -55,10 +55,12 @@ scrape_configs:
 
 {% for app_id in lookup('native_metrics_apps') %}
 {% include 'roles/' + app_id + '/templates/prometheus.yml.j2' %}
+
 {% endfor %}
 
   # Blackbox readiness probes — one target per canonical domain per application.
   # Proxied to the app backend: returns 502/503 when the app is down.
+{% set canonical_map = applications | canonical_domains_map(DOMAIN_PRIMARY) %}
   - job_name: "blackbox-healthz"
     metrics_path: /probe
     params:
@@ -66,8 +68,8 @@ scrape_configs:
     static_configs:
 {% for app_id in applications | list | sort %}
 {% if app_id != application_id %}
-{% set domains_raw = applications | get_app_conf(app_id, 'server.domains.canonical', false, []) %}
-{% set domains = (domains_raw.values() | list) if (domains_raw is mapping) else (domains_raw | list if (domains_raw is iterable and domains_raw is not string) else []) %}
+{% set domains_raw = canonical_map.get(app_id, []) %}
+{% set domains = (domains_raw.values() | list) if (domains_raw is mapping) else domains_raw %}
 {% if domains | length > 0 %}
       - targets:
 {% for domain in domains %}
@@ -84,4 +86,4 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: "blackbox-exporter:9115"
+        replacement: "{{ BLACKBOX_CONTAINER }}:9115"

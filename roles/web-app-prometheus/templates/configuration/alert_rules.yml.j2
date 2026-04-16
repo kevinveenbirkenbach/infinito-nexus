@@ -48,6 +48,8 @@ groups:
 
   - name: communication_channels
     rules:
+{% set comm_channels = lookup('active_alertmanager_channels') %}
+{% if comm_channels %}
       # Alert when any communication-channel app is unreachable for more than 2 minutes.
       # These apps are critical infrastructure; alerting on them specifically (rather than
       # relying solely on the generic AppDown rule) satisfies the task AC for communication
@@ -55,7 +57,7 @@ groups:
       - alert: CommunicationChannelDown
         expr: >
           probe_success{job="blackbox-healthz",
-            app=~"{{ lookup('active_alertmanager_channels') | join('|') }}"} == 0
+            app=~"{{ comm_channels | join('|') }}"} == 0
         for: 2m
         labels:
           severity: critical
@@ -65,6 +67,7 @@ groups:
             {{ '{{' }} $labels.instance {{ '}}' }} ({{ '{{' }} $labels.app {{ '}}' }})
             has been unreachable for more than 2 minutes.
             This is a communication-critical application.
+{% endif %}
 
   - name: prometheus_health
     rules:

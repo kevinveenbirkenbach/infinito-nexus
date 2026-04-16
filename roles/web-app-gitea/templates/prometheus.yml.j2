@@ -3,15 +3,15 @@
   # Enable via native_metrics.enabled: true in inventory.
   # Set native_metrics.token in inventory when Gitea token auth is configured.
   - job_name: "gitea"
-    scheme: {{ lookup('tls', application_id, 'protocols.web') }}
+    scheme: {{ lookup('tls', app_id, 'protocols.web') }}
     metrics_path: /metrics
     tls_config:
       insecure_skip_verify: {{ not (TLS_ENABLED | bool) }}
-{% set _token = lookup('config', 'web-app-gitea', 'native_metrics.token', '') %}
-{% if _token %}
-    bearer_token: "{{ _token }}"
+{% set token = lookup('config', app_id, 'native_metrics.token') %}
+{% if token %}
+    bearer_token: "{{ token }}"
 {% endif %}
     static_configs:
-      - targets: ["{{ lookup('domain', 'web-app-gitea') }}"]
+      - targets: ["{{ lookup('domain', app_id) }}"]
         labels:
-          app: "web-app-gitea"
+          app: "{{ app_id }}"

@@ -7,32 +7,34 @@ from ansible.plugins.lookup import LookupBase
 
 from utils.config_utils import get_app_conf
 
+# Role that owns the alerting configuration (webhook URLs, credentials).
+PROMETHEUS_APP_ID: str = "web-app-prometheus"
+
 # Maps each communication-channel app to the config path (relative to
-# web-app-prometheus) whose value must be non-empty for the alertmanager
+# PROMETHEUS_APP_ID) whose value must be non-empty for the alertmanager
 # receiver to be considered active.
 # - None  → always active (email via mailu is unconditional)
 # - str   → config path; receiver is active iff the resolved value is truthy
 # Add new entries here when a new alertmanager receiver is implemented.
-_RECEIVER_CONFIG: Dict[str, Optional[str]] = {
+# Remove an app from this dict to exclude it until its receiver is ready.
+RECEIVER_CONFIG: Dict[str, Optional[str]] = {
     "web-app-mailu": None,  # email — always active
     "web-app-mattermost": "alerting.mattermost.webhook_url",
-    "web-app-matrix": None,  # placeholder — no native receiver yet; excluded via _NO_RECEIVER
 }
-
-# Channels with no alertmanager receiver implemented yet — excluded unconditionally
-# until a receiver is added. Remove from here and update _RECEIVER_CONFIG when ready.
-_NO_RECEIVER: frozenset = frozenset({"web-app-matrix"})
 
 
 class LookupModule(LookupBase):
     """
-    Return the subset of alerting.communication_channels (from web-app-prometheus
-    config) that are both deployed on this host AND have a configured alertmanager
-    receiver.
+    Return the subset of communication-channel apps that are both deployed on this
+    host AND have a configured alertmanager receiver.
 
     Deployment check : app ID must appear in group_names (the current host's groups).
-    Receiver check   : config path in _RECEIVER_CONFIG must resolve to a non-empty value.
+    Receiver check   : config path in RECEIVER_CONFIG must resolve to a non-empty value.
                        Both checks read from config (SPOT) — no dependency on derived vars.
+
+    Candidate list   : derived from RECEIVER_CONFIG keys.
+                       To add a new channel, add it to RECEIVER_CONFIG.
+                       To defer a channel, simply omit it until its receiver is ready.
 
     Usage in a template:
       {{ lookup('active_alertmanager_channels') | join('|') }}
@@ -54,17 +56,8 @@ class LookupModule(LookupBase):
 
         group_names: List[str] = vars_.get("group_names", [])
 
-        candidates: List[str] = (
-            get_app_conf(
-                applications=applications,
-                application_id="web-app-prometheus",
-                config_path="alerting.communication_channels",
-                strict=False,
-                default=[],
-                skip_missing_app=True,
-            )
-            or []
-        )
+        # Candidate list is derived from RECEIVER_CONFIG — the plugin is the SPOT.
+        candidates: List[str] = list(RECEIVER_CONFIG)
 
         result: List[str] = []
         for app_id in candidates:
@@ -72,11 +65,7 @@ class LookupModule(LookupBase):
             if app_id not in group_names:
                 continue
 
-            # 2. No receiver implemented yet — skip entirely.
-            if app_id in _NO_RECEIVER:
-                continue
-
-            config_path = _RECEIVER_CONFIG.get(app_id)
+            config_path = RECEIVER_CONFIG[app_id]
             if config_path is None:
                 # Unconditionally active (e.g. web-app-mailu — email always works).
                 result.append(app_id)
@@ -84,7 +73,7 @@ class LookupModule(LookupBase):
                 # Active only when the config value is set and non-empty.
                 value = get_app_conf(
                     applications=applications,
-                    application_id="web-app-prometheus",
+                    application_id=PROMETHEUS_APP_ID,
                     config_path=config_path,
                     strict=False,
                     default="",

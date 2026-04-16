@@ -14,9 +14,12 @@
       -- Step 1: Docker HEALTHCHECK state (same source as /healthz/live).
       local cname = ngx.var.container_name
       if cname and cname ~= "" then
-        local status = ngx.shared.health_containers:get(cname)
-        if status == "down" then
-          up = 0
+        local dict = ngx.shared.health_containers
+        if dict then
+          local status = dict:get(cname)
+          if status == "down" then
+            up = 0
+          end
         end
       end
 

@@ -29,7 +29,7 @@ receivers:
         send_resolved: true
         headers:
           Subject: "[{{ '{{' }} .Status | toUpper {{ '}}' }}] {{ '{{' }} .CommonAnnotations.summary {{ '}}' }}"
-{% if ALERTMANAGER_TELEGRAM_ENABLED | bool and ALERTMANAGER_TELEGRAM_BOT_TOKEN and ALERTMANAGER_TELEGRAM_CHAT_ID | int > 0 %}
+{% if ALERTMANAGER_TELEGRAM_BOT_TOKEN and ALERTMANAGER_TELEGRAM_CHAT_ID | int > 0 %}
     telegram_configs:
       - api_url: "https://api.telegram.org"
         bot_token: "{{ ALERTMANAGER_TELEGRAM_BOT_TOKEN }}"
@@ -37,14 +37,9 @@ receivers:
         send_resolved: true
         parse_mode: "HTML"
 {% endif %}
-{% if 'web-app-mattermost' in applications
-      and lookup('config', 'web-app-mattermost', 'compose.services.prometheus.enabled', False)
-      and ALERTMANAGER_MATTERMOST_WEBHOOK_URL %}
+{% if ALERTMANAGER_MATTERMOST_WEBHOOK_URL %}
     # Mattermost incoming webhook (Slack-compatible format).
-    # Gated on Mattermost being deployed with prometheus enabled so alertmanager
-    # does not reference a non-existent endpoint when Mattermost is not in the stack.
-    # Configure the incoming webhook URL in the inventory under
-    # alerting.mattermost.webhook_url to enable channel notifications.
+    # Active only when alerting.mattermost.webhook_url is set in inventory.
     slack_configs:
       - api_url: "{{ ALERTMANAGER_MATTERMOST_WEBHOOK_URL }}"
         send_resolved: true

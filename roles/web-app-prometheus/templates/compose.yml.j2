@@ -35,7 +35,7 @@
       - "--storage.path=/alertmanager"
     volumes:
       - {{ ALERTMANAGER_CONFIG_HOST }}:{{ ALERTMANAGER_CONFIG_DOCKER }}:ro
-      - {{ ALERTMANAGER_VOLUME_KEY }}:/alertmanager
+      - alertmanager_data:/alertmanager
 
   cadvisor:
 {% include 'roles/sys-svc-container/templates/base.yml.j2' %}
