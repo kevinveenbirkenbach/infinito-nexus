@@ -1,7 +1,9 @@
 import fnmatch
 import os
+import subprocess
 import unittest
 from pathlib import Path
+from typing import Iterable
 
 import yaml
 
@@ -28,6 +30,8 @@ SCANNED_HIDDEN_DIRS = {
 
 # File suffixes that indicate generated/template files, not real dependency files
 SKIP_SUFFIXES = (".j2",)
+
+GITIGNORE_PATH = REPO_ROOT / ".gitignore"
 
 # Mapping: Dependabot ecosystem name → indicator filename patterns (fnmatch-style)
 ECOSYSTEM_FILENAME_INDICATORS: dict[str, list[str]] = {
@@ -140,6 +144,86 @@ def _matching_ecosystems(rel_file: str, filename: str) -> set[str]:
     return matched
 
 
+def _list_candidate_files() -> Iterable[str]:
+    """Yield repo-relative file paths to inspect for ecosystem coverage.
+
+    Prefers `git ls-files` (only tracked files, matches Dependabot's view of
+    the repo). Falls back to os.walk with an explicit untracked-skip list when
+    git is unavailable or REPO_ROOT is not a git checkout (e.g. inside the
+    test-integration container where /opt/src/infinito is a bind mount of the
+    source tree without .git/).
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(REPO_ROOT), "ls-files", "-z"],
+            check=True,
+            capture_output=True,
+        )
+        return [p for p in result.stdout.decode().split("\0") if p]
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return _walk_fallback()
+
+
+def _load_gitignore_patterns() -> list[str]:
+    """Return non-comment, non-blank, non-negated lines from the repo .gitignore.
+
+    The fallback walker uses these as fnmatch patterns to mimic git's view of
+    which files are tracked. We deliberately ignore negation (`!`) — the repo
+    .gitignore contains none, and supporting it would require a real
+    pathspec implementation.
+    """
+    if not GITIGNORE_PATH.is_file():
+        return []
+    patterns: list[str] = []
+    for raw in GITIGNORE_PATH.read_text().splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or line.startswith("!"):
+            continue
+        patterns.append(line.rstrip("/"))
+    return patterns
+
+
+def _is_gitignored(rel_file: str, filename: str, patterns: Iterable[str]) -> bool:
+    """Best-effort fnmatch-based check that mirrors a tracked-file filter.
+
+    A pattern matches if it equals (or fnmatch-matches) either the basename or
+    the repo-relative path. Sufficient for the simple patterns this repo ships
+    in .gitignore (filenames, `*.ext` globs, and short directory names).
+    """
+    for pattern in patterns:
+        if fnmatch.fnmatch(filename, pattern) or fnmatch.fnmatch(rel_file, pattern):
+            return True
+    return False
+
+
+def _walk_fallback() -> list[str]:
+    patterns = _load_gitignore_patterns()
+    files: list[str] = []
+    for root, dirs, filenames in os.walk(REPO_ROOT):
+        rel_root = os.path.relpath(root, REPO_ROOT)
+        top_segment = "" if rel_root == "." else rel_root.split(os.sep, 1)[0]
+
+        dirs[:] = [
+            d
+            for d in dirs
+            if d not in SKIP_DIRS
+            and not (d.startswith(".") and d not in SCANNED_HIDDEN_DIRS)
+            and not _is_gitignored(
+                d if rel_root == "." else os.path.join(rel_root, d), d, patterns
+            )
+        ]
+
+        if top_segment in SKIP_DIRS:
+            continue
+
+        for filename in filenames:
+            rel_file = filename if rel_root == "." else os.path.join(rel_root, filename)
+            if _is_gitignored(rel_file, filename, patterns):
+                continue
+            files.append(rel_file)
+    return files
+
+
 class TestDependabotCoverage(unittest.TestCase):
     def test_all_dependency_files_are_covered(self):
         """Every dependency file found in the repository must be covered by an
@@ -157,42 +241,51 @@ class TestDependabotCoverage(unittest.TestCase):
 
         uncovered: list[str] = []
 
-        for dirpath, dirnames, filenames in os.walk(REPO_ROOT):
-            # Prune directories we never want to scan
-            dirnames[:] = [
-                d
-                for d in dirnames
-                if d not in SKIP_DIRS
-                and (not d.startswith(".") or d in SCANNED_HIDDEN_DIRS)
-            ]
+        # Only scan files actually tracked by git. Dependabot operates on the
+        # committed tree, so untracked working-copy artefacts (stray host config,
+        # editor scratch files, etc.) must not influence coverage. Containerised
+        # test runs bind-mount the source tree without .git/, so git may be
+        # unavailable — fall back to os.walk plus an explicit untracked skip
+        # list when that happens.
+        candidate_files = _list_candidate_files()
 
-            rel_dir = os.path.relpath(dirpath, REPO_ROOT)
-            rel_dir = "" if rel_dir == "." else rel_dir
+        for rel_file in candidate_files:
+            if not rel_file:
+                continue
 
-            for filename in filenames:
-                # Skip Jinja2 templates and other generated files
-                if any(filename.endswith(s) for s in SKIP_SUFFIXES):
-                    continue
+            filename = os.path.basename(rel_file)
+            rel_dir = os.path.dirname(rel_file)
 
-                rel_file = os.path.join(rel_dir, filename) if rel_dir else filename
+            top_segment = rel_file.split("/", 1)[0]
+            if top_segment in SKIP_DIRS:
+                continue
+            if (
+                top_segment.startswith(".")
+                and top_segment not in SCANNED_HIDDEN_DIRS
+                and top_segment != filename
+            ):
+                continue
 
-                for ecosystem in sorted(_matching_ecosystems(rel_file, filename)):
-                    # Collect all ecosystem names that are equivalent for this file
-                    candidates: set[str] = {ecosystem}
-                    for group in EQUIVALENT_ECOSYSTEMS:
-                        if ecosystem in group:
-                            candidates |= group
+            if any(filename.endswith(s) for s in SKIP_SUFFIXES):
+                continue
 
-                    covered = any(
-                        any(
-                            _dir_covers(dep_dir, rel_dir)
-                            for dep_dir in ecosystem_dirs.get(eco, [])
-                        )
-                        for eco in candidates
+            for ecosystem in sorted(_matching_ecosystems(rel_file, filename)):
+                # Collect all ecosystem names that are equivalent for this file
+                candidates: set[str] = {ecosystem}
+                for group in EQUIVALENT_ECOSYSTEMS:
+                    if ecosystem in group:
+                        candidates |= group
+
+                covered = any(
+                    any(
+                        _dir_covers(dep_dir, rel_dir)
+                        for dep_dir in ecosystem_dirs.get(eco, [])
                     )
+                    for eco in candidates
+                )
 
-                    if not covered:
-                        uncovered.append(f"{rel_file}  →  ecosystem: {ecosystem}")
+                if not covered:
+                    uncovered.append(f"{rel_file}  →  ecosystem: {ecosystem}")
 
         if uncovered:
             self.fail(

@@ -5,7 +5,7 @@
     _playwright_stage_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}"
     _playwright_stage_tests_dir: "{{ TEST_E2E_PLAYWRIGHT_STAGE_BASE_DIR }}/{{ application_id }}/tests"
     _playwright_reports_dir: "{{ TEST_E2E_PLAYWRIGHT_REPORTS_BASE_DIR }}/{{ application_id }}"
-    _playwright_default_package_json: "{{ playbook_dir }}/roles/test-e2e-playwright/files/package.json"
+    _playwright_default_package_template: "{{ playbook_dir }}/roles/test-e2e-playwright/templates/package.json.j2"
     _playwright_default_config_js: "{{ playbook_dir }}/roles/test-e2e-playwright/files/playwright.config.js"
     _playwright_ca_required: "{{ (TLS_MODE | default('') | lower) == 'self_signed' }}"
     _playwright_ca_cert_host: "{{ (CA_TRUST | default({})).cert_host | default('') }}"
@@ -99,36 +99,15 @@
     state: directory
     mode: "0755"
 
-- name: Check central default package.json
+- name: Check central default package.json template
   ansible.builtin.stat:
-    path: "{{ _playwright_default_package_json }}"
+    path: "{{ _playwright_default_package_template }}"
   register: _default_package_stat
 
-- name: Fail when central default package.json is missing
+- name: Fail when central default package.json template is missing
   ansible.builtin.fail:
-    msg: "Missing central Playwright package.json: {{ _playwright_default_package_json }}"
+    msg: "Missing central Playwright package.json template: {{ _playwright_default_package_template }}"
   when: not _default_package_stat.stat.exists
-
-- name: Read central default package.json
-  ansible.builtin.slurp:
-    src: "{{ _playwright_default_package_json }}"
-  register: _default_package_json_slurp
-
-- name: Derive Playwright version from central package.json
-  ansible.builtin.set_fact:
-    _playwright_test_version: >-
-      {{
-        (
-          ((_default_package_json_slurp.content | b64decode | from_json).devDependencies['@playwright/test'])
-          | string
-          | regex_replace('^[^0-9]*', '')
-        )
-      }}
-
-- name: Fail when @playwright/test version is missing in central package.json
-  ansible.builtin.fail:
-    msg: "Missing @playwright/test devDependency in {{ _playwright_default_package_json }}"
-  when: _playwright_test_version | length == 0
 
 - name: Resolve Playwright image
   ansible.builtin.set_fact:
@@ -136,12 +115,12 @@
       {{
         TEST_E2E_PLAYWRIGHT_IMAGE
         if (TEST_E2E_PLAYWRIGHT_IMAGE | default('') | trim | length > 0)
-        else lookup('image', 'playwright', 'image') ~ ':v' ~ _playwright_test_version ~ '-' ~ TEST_E2E_PLAYWRIGHT_IMAGE_DISTRO
+        else lookup('image', 'playwright', 'ref')
       }}
 
-- name: Copy central default package.json
-  ansible.builtin.copy:
-    src: "{{ _playwright_default_package_json }}"
+- name: Render package.json from template
+  ansible.builtin.template:
+    src: "{{ _playwright_default_package_template }}"
     dest: "{{ _playwright_stage_dir }}/package.json"
     mode: "0644"
 
