@@ -14,7 +14,7 @@
     "caveman-compress": {
       "source": "JuliusBrussee/caveman",
       "sourceType": "github",
-      "computedHash": "ed0f21f26011a8e8faa64cb49ac43b6533c64e0ec626b07cce4d4eca6c40a428"
+      "computedHash": "300fb8578258161e1752a2a4142a7e9ff178c960bcb83b84422e2987421f33bf"
     },
     "caveman-help": {
       "source": "JuliusBrussee/caveman",
@@ -29,7 +29,7 @@
     "compress": {
       "source": "JuliusBrussee/caveman",
       "sourceType": "github",
-      "computedHash": "2fb5ecec2f71badbd51cdc0ad4a5a4887fd98c2bb36c24f1adcbbeb57f9f1851"
+      "computedHash": "05c97bc3120108acd0b80bdef7fb4fa7c224ba83c8d384ccbc97f92e8a065918"
     }
   }
 }
