@@ -10,7 +10,9 @@
       "Read",
       "WebFetch(domain:*)",
       "WebSearch",
-      "Write"
+      "Write",
+      "Bash(XDG_CACHE_HOME=/tmp/* gh run view *)",
+      "Bash(wc -l *)"
     ],
     "deny": [
       "Bash(gh api * --method DELETE *)",
