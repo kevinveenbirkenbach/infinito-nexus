@@ -87,6 +87,10 @@ compose:
     data:                         "prometheus_data"
     alertmanager_data:            "prometheus_alertmanager_data"
 alerting:
+  communication_channels:
+    - web-app-mattermost
+    - web-app-matrix
+    - web-app-mailu
   telegram:
     enabled:                      false
     bot_token:                    ""    # Sensitive — set in vault-encrypted inventory vars

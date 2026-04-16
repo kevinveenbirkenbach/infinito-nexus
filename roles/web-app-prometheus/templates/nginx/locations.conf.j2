@@ -3,9 +3,8 @@
     Included from basic.conf.j2, synapse.conf.j2, and any other custom vhost
     that participates in the monitoring stack.
 
-    The entire block is guarded: nothing is emitted unless prometheus is active
-    for this application_id (compose.services.prometheus.enabled = true, or the
-    prometheus domain itself has compose.services.prometheus.name set).
+    The entire block is guarded: nothing is emitted unless the prometheus role
+    is deployed on this host ('web-app-prometheus' in group_names).
 
     $app_id          — Ansible role ID attached as Lua metrics label.
     $container_name  — Docker container name for /healthz/live polling.
@@ -17,8 +16,7 @@
     location.conf.j2    — log_by_lua_block per-request metrics collection
     metricz.conf.j2     — /metricz scrape endpoint (prometheus domain only)
   #}
-  {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
-      or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
+  {% if 'web-app-prometheus' in group_names %}
   {# Expose the Ansible role ID so Lua metrics handlers can attach the 'app' label. #}
   set $app_id "{{ application_id }}";
   {# Docker container name for this vhost — used by /healthz/live to query the

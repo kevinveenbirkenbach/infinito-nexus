@@ -55,7 +55,7 @@ groups:
       - alert: CommunicationChannelDown
         expr: >
           probe_success{job="blackbox-healthz",
-            app=~"{{ ['web-app-mattermost', 'web-app-matrix', 'web-app-mailu'] | select('in', groups) | join('|') }}"} == 0
+            app=~"{{ lookup('active_alertmanager_channels') | join('|') }}"} == 0
         for: 2m
         labels:
           severity: critical

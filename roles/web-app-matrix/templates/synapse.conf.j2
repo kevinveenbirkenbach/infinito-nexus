@@ -12,10 +12,9 @@ server {
 
     {% include 'roles/sys-svc-proxy/templates/location/upload.conf.j2' %}
 
-  {# Synapse uses the 'synapse' service key — only include when prometheus is active,
+  {# Synapse uses the 'synapse' service key — only include when prometheus is deployed,
      and pass container_name so locations.conf.j2 uses the correct container. #}
-  {% if lookup('config', application_id, 'compose.services.prometheus.enabled', False)
-      or lookup('config', application_id, 'compose.services.prometheus.name', '') %}
+  {% if 'web-app-prometheus' in group_names %}
   {% set container_name = lookup('config', application_id, 'compose.services.synapse.name', '') %}
   {% include 'roles/web-app-prometheus/templates/nginx/locations.conf.j2' %}
   {% endif %}
