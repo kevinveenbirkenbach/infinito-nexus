@@ -10,6 +10,7 @@ import yaml
 from ansible.plugins.lookup import LookupBase
 from ansible.errors import AnsibleError
 from utils.config_utils import get_app_conf
+from utils.runtime_lookup_data import get_merged_applications
 from ansible.plugins.loader import lookup_loader
 
 
@@ -38,6 +39,16 @@ class LookupModule(LookupBase):
 
         # Retrieve group_names from variables (used to filter roles)
         group_names = variables.get("group_names", [])
+
+        # Always re-derive applications from inventory + role defaults.
+        # The raw `applications` variable may be an unrendered placeholder
+        # inside nested template lookups, which silently makes
+        # get_app_conf(..., strict=False, default=False) return False.
+        applications = get_merged_applications(
+            variables=variables,
+            roles_dir=roles_dir,
+            templar=getattr(self, "_templar", None),
+        )
 
         # Search for all roles starting with "web-app-"
         pattern = os.path.join(roles_dir, "web-app-*")
@@ -105,9 +116,8 @@ class LookupModule(LookupBase):
             except Exception as e:
                 raise AnsibleError(f"Error reading '{meta_path}': {e}")
 
-            # Retrieve domains and applications from the variables
+            # Retrieve domains from variables; applications already merged above.
             domains = variables.get("domains", {})
-            applications = variables.get("applications", {})
             domain_url = domains.get(application_id, "")
 
             if isinstance(domain_url, list):
